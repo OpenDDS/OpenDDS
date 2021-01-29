@@ -24,16 +24,28 @@ namespace XTypes {
 typedef std::pair<const MinimalStructMember*, const MinimalStructMember*> MemberPair;
 typedef OPENDDS_VECTOR(MemberPair) MatchedSet;
 
+// Attributes of the reader's TypeConsistencyEnforcementQosPolicy
+struct TypeConsistencyAttributes {
+  bool ignore_sequence_bounds;
+  bool ignore_string_bounds;
+  bool ignore_member_names;
+  bool prevent_type_widening;
+};
+
 class OpenDDS_Dcps_Export TypeAssignability {
 public:
-  explicit TypeAssignability(TypeLookupService_rch tls, bool ignore_member_names = false)
+  explicit TypeAssignability(TypeLookupService_rch tls, TypeConsistencyAttributes type_consistency)
     : tl_service_(tls)
-    , ignore_member_names_(ignore_member_names) {}
+    , type_consistency_(type_consistency) {}
 
+  // Check whether ta is-assignable-from tb
   bool assignable(const TypeObject& ta, const TypeObject& tb) const;
   bool assignable(const TypeObject& ta, const TypeIdentifier& tb) const;
   bool assignable(const TypeIdentifier& ta, const TypeIdentifier& tb) const;
   bool assignable(const TypeIdentifier& ta, const TypeObject& tb) const;
+
+  // Check whether two types are equivalent, i.e., the same
+  bool equivalent(const TypeIdentifier& ta, const TypeIdentifier& tb);
 
   void insert_entry(const TypeIdentifier& ti, const TypeObject& tobj)
   {
@@ -99,10 +111,10 @@ private:
 
   XTypes::TypeLookupService_rch tl_service_;
 
-  // ignore_member_names boolean from TypeConsistencyEnforcementQosPolicy.
-  // In the future, we may need to consider other booleans as well:
+  // For now, type assignability only considers ignore_member_names_.
+  // In the future, we may need to consider other attibutes as well:
   // prevent_type_widening, ignore_sequence_bounds, ignore_string_bounds.
-  bool ignore_member_names_;
+  TypeConsistencyAttributes type_consistency_;
 };
 
 } // namepace XTypes

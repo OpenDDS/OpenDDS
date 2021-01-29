@@ -326,7 +326,8 @@ namespace OpenDDS {
       void type_lookup_init(ReactorInterceptor_rch reactor_interceptor)
       {
         if (!type_lookup_reply_deadline_processor_) {
-          type_lookup_reply_deadline_processor_ = DCPS::make_rch<EndpointManagerSporadic>(reactor_interceptor, ref(*this), &EndpointManager::remove_expired_endpoints);
+          type_lookup_reply_deadline_processor_ =
+            DCPS::make_rch<EndpointManagerSporadic>(reactor_interceptor, ref(*this), &EndpointManager::remove_expired_endpoints);
         }
       }
 
@@ -656,7 +657,9 @@ namespace OpenDDS {
         if (iter != local_publications_.end()) {
           if (DCPS_debug_level > 3) {
             const GuidConverter conv(publicationId);
-            ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) EndpointManager::update_publication_locators updating locators for %C\n"), OPENDDS_STRING(conv).c_str()));
+            ACE_DEBUG((LM_INFO,
+              ACE_TEXT("(%P|%t) EndpointManager::update_publication_locators updating locators for %C\n"),
+              OPENDDS_STRING(conv).c_str()));
           }
           iter->second.trans_info_ = transInfo;
           write_publication_data(publicationId, iter->second);
@@ -837,7 +840,9 @@ namespace OpenDDS {
         if (iter != local_subscriptions_.end()) {
           if (DCPS_debug_level > 3) {
             const GuidConverter conv(subscriptionId);
-            ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) EndpointManager::update_subscription_locators updating locators for %C\n"), OPENDDS_STRING(conv).c_str()));
+            ACE_DEBUG((LM_INFO,
+              ACE_TEXT("(%P|%t) EndpointManager::update_subscription_locators updating locators for %C\n"),
+              OPENDDS_STRING(conv).c_str()));
           }
           iter->second.trans_info_ = transInfo;
           write_subscription_data(subscriptionId, iter->second);
@@ -1430,7 +1435,9 @@ namespace OpenDDS {
           tempDrQos.reader_data_lifecycle =
             TheServiceParticipant->initial_ReaderDataLifecycleQosPolicy();
           tempDrQos.representation = bit.representation;
+          tempDrQos.type_consistency = bit.type_consistency;
           drQos = &tempDrQos;
+
           tempSubQos.presentation = bit.presentation;
           tempSubQos.partition = bit.partition;
           tempSubQos.group_data = bit.group_data;
@@ -1455,9 +1462,7 @@ namespace OpenDDS {
         } else {
           const XTypes::TypeIdentifier& writer_type_id = writer_type_info->minimal.typeid_with_size.type_id;
           const XTypes::TypeIdentifier& reader_type_id = reader_type_info->minimal.typeid_with_size.type_id;
-          if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE) {
-            XTypes::TypeAssignability ta(type_lookup_service_);
-
+          if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE) {            
             const DDS::DataRepresentationIdSeq repIds =
               get_effective_data_rep_qos(writer_local ? tempDrQos.representation.value : tempDwQos.representation.value);
             for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
@@ -1477,22 +1482,38 @@ namespace OpenDDS {
               }
             }
 
-            consistent = ta.assignable(writer_type_id, reader_type_id);
+            TypeConsistencyAttributes type_consistency;
+            type_consistency.ignore_sequence_bounds = drQos->type_consistency.ignore_sequence_bounds;
+            type_consistency.ignore_string_bounds = drQos->type_consistency.ignore_string_bounds;
+            type_consistency.ignore_member_names = drQos->type_consistency.ignore_member_names;
+            type_consistency.prevent_type_widening = drQos->type_consistency.prevent_type_widening;
+            XTypes::TypeAssignability ta(type_lookup_service_, type_consistency);
+
+            if (drQos->type_consistency == DDS::ALLOW_TYPE_COERCION) {
+              consistent = ta.assignable(reader_type_id, writer_type_id);
+            } else { // DDS::DISALLOW_TYPE_COERCION
+              consistent = ta.equivalent(reader_type_id, writer_type_id);
+            }
           } else {
-            //check remote and local type names match
-            OPENDDS_STRING writer_type_name;
-            OPENDDS_STRING reader_type_name;
-            if (writer_local) { //local local
-              writer_type_name = td_iter->second.local_data_type_name();
+            if (drQos->type_consistency.force_type_validation) {
+              // Cannot do type validation since not both TypeObjects are available
+              consistent = false;
             } else {
-              writer_type_name = dpi->second.get_type_name();
+              // Fall back to matching type names
+              OPENDDS_STRING writer_type_name;
+              OPENDDS_STRING reader_type_name;
+              if (writer_local) {
+                writer_type_name = td_iter->second.local_data_type_name();
+              } else {
+                writer_type_name = dpi->second.get_type_name();
+              }
+              if (reader_local) {
+                reader_type_name = td_iter->second.local_data_type_name();
+              } else {
+                reader_type_name = dsi->second.get_type_name();
+              }
+              consistent = writer_type_name == reader_type_name;
             }
-            if (reader_local) {
-              reader_type_name = td_iter->second.local_data_type_name();
-            } else {
-              reader_type_name = dsi->second.get_type_name();
-            }
-            consistent = writer_type_name == reader_type_name;
           }
 
           if (!consistent) {
@@ -2443,8 +2464,10 @@ namespace OpenDDS {
         sub->get_default_datareader_qos(dr_qos);
         dr_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
 
-        dr_qos.reader_data_lifecycle.autopurge_nowriter_samples_delay = TheServiceParticipant->bit_autopurge_nowriter_samples_delay();
-        dr_qos.reader_data_lifecycle.autopurge_disposed_samples_delay = TheServiceParticipant->bit_autopurge_disposed_samples_delay();
+        dr_qos.reader_data_lifecycle.autopurge_nowriter_samples_delay =
+          TheServiceParticipant->bit_autopurge_nowriter_samples_delay();
+        dr_qos.reader_data_lifecycle.autopurge_disposed_samples_delay =
+          TheServiceParticipant->bit_autopurge_disposed_samples_delay();
 
         DDS::TopicDescription_var bit_part_topic =
           participant->lookup_topicdescription(BUILT_IN_PARTICIPANT_TOPIC);

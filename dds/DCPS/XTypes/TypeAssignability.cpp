@@ -203,6 +203,11 @@ bool TypeAssignability::assignable(const TypeIdentifier& ta,
   return false;
 }
 
+bool TypeAssignability::equivalent(const TypeIdentifier&, const TypeIdentifier&)
+{
+  // TODO: implement this
+}
+
 /**
  * @brief At least one input type object must be TK_ALIAS
  */
