@@ -14,5 +14,9 @@
 /NamespacesC.inl
 /NamespacesS.h
 /NamespacesTypeSupport.idl
+/NamespacesTypeSupportC.cpp
+/NamespacesTypeSupportC.h
+/NamespacesTypeSupportC.inl
 /NamespacesTypeSupportImpl.cpp
 /NamespacesTypeSupportImpl.h
+/NamespacesTypeSupportS.h
