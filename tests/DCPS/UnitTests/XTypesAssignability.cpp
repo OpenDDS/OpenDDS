@@ -2852,6 +2852,13 @@ TEST(StructTypeTest, Assignable)
   a.struct_flags = IS_MUTABLE;
   b.struct_flags = a.struct_flags;
 
+  // Test cases when ignore_member_names is true
+  TypeAssignability test_imn(make_rch<TypeLookupService>());
+  test_imn.set_ignore_member_names(true);
+  MinimalStructType a_imn, b_imn;
+  a_imn.struct_flags = IS_MUTABLE;
+  b_imn.struct_flags = a_imn.struct_flags;
+
   // Primitive members
   MinimalStructMember ma1(CommonStructMember(1, IS_KEY, TypeIdentifier(TK_UINT8)),
                           MinimalMemberDetail("m1"));
@@ -2861,6 +2868,15 @@ TEST(StructTypeTest, Assignable)
   b.member_seq.append(mb1);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
 
+  MinimalStructMember ma1_imn(CommonStructMember(1, IS_KEY, TypeIdentifier(TK_UINT8)),
+                              MinimalMemberDetail("m1"));
+  MinimalStructMember mb1_imn(CommonStructMember(1, StructMemberFlag(), TypeIdentifier(TK_UINT8)),
+                              MinimalMemberDetail("not_m1"));
+  a_imn.member_seq.append(ma1_imn);
+  b_imn.member_seq.append(mb1_imn);
+  EXPECT_TRUE(test_imn.assignable(TypeObject(MinimalTypeObject(a_imn)),
+                                  TypeObject(MinimalTypeObject(b_imn))));
+
   // Struct key members
   MinimalStructType inner_a, inner_b;
   inner_a.struct_flags = IS_FINAL;
@@ -2869,13 +2885,13 @@ TEST(StructTypeTest, Assignable)
                                                 MinimalMemberDetail("inner_m1")));
   inner_a.member_seq.append(MinimalStructMember(CommonStructMember(2, StructMemberFlag(),
                                                                    makeString(false,
-                                                                                              StringSTypeDefn(100))),
+                                                                              StringSTypeDefn(100))),
                                                 MinimalMemberDetail("inner_m2")));
   inner_b.member_seq.append(MinimalStructMember(CommonStructMember(1, IS_KEY, TypeIdentifier(TK_FLOAT128)),
                                                 MinimalMemberDetail("inner_m1")));
   inner_b.member_seq.append(MinimalStructMember(CommonStructMember(2, StructMemberFlag(),
                                                                    makeString(false,
-                                                                                              StringLTypeDefn(50))),
+                                                                              StringLTypeDefn(50))),
                                                 MinimalMemberDetail("inner_m2")));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(inner_a)),
                               TypeObject(MinimalTypeObject(inner_b))));

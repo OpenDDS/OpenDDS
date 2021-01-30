@@ -1524,8 +1524,9 @@ namespace OpenDDS {
 
             if (drQos->type_consistency == DDS::ALLOW_TYPE_COERCION) {
               consistent = ta.assignable(reader_type_id, writer_type_id);
-            } else { // DDS::DISALLOW_TYPE_COERCION
-              consistent = ta.equivalent(reader_type_id, writer_type_id);
+            } else {
+              // The two types must be equivalent for DISALLOW_TYPE_COERCION
+              consistent = reader_type_id == writer_type_id;
             }
           } else {
             if (drQos->type_consistency.force_type_validation) {

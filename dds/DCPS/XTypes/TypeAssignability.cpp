@@ -203,12 +203,6 @@ bool TypeAssignability::assignable(const TypeIdentifier& ta,
   return false;
 }
 
-bool TypeAssignability::equivalent(const TypeIdentifier&, const TypeIdentifier&) const
-{
-  // TODO: implement this
-  
-}
-
 /**
  * @brief At least one input type object must be TK_ALIAS
  */
@@ -370,7 +364,7 @@ bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
       const NameHash& h_b = tb.struct_type.member_seq[j].detail.name_hash;
       ACE_CDR::ULong name_b = (h_b[0] << 24) | (h_b[1] << 16) | (h_b[2] << 8) | (h_b[3]);
 
-      if (!ignore_member_names_) {
+      if (!type_consistency_.ignore_member_names) {
         if ((name_a == name_b && id_a != id_b) || (id_a == id_b && name_a != name_b)) {
           return false;
         } else if (name_a == name_b && id_a == id_b) {
@@ -734,7 +728,7 @@ bool TypeAssignability::assignable_union(const MinimalTypeObject& ta,
   }
 
   // Members with the same ID must have the same name, and vice versa
-  if (!ignore_member_names_) {
+  if (!type_consistency_.ignore_member_names) {
     OPENDDS_MAP(MemberId, ACE_CDR::ULong) id_to_name_a;
     OPENDDS_MAP(ACE_CDR::ULong, MemberId) name_to_id_a;
     for (unsigned i = 0; i < ta.union_type.member_seq.length(); ++i) {
