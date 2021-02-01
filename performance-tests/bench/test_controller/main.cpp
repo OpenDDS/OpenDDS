@@ -1,7 +1,6 @@
 #include "ScenarioOverrides.h"
 #include "ScenarioManager.h"
 
-#include <PropertyStatBlock.h>
 #include <util.h>
 #include <json_conversion.h>
 
@@ -33,8 +32,6 @@
 #include <iostream>
 #include <fstream>
 #include <map>
-#include <unordered_map>
-#include <unordered_set>
 
 using namespace Bench;
 using namespace Bench::NodeController;
@@ -49,49 +46,6 @@ namespace {
 int handle_report(const Bench::TestController::Report& report,
   const std::unordered_set<std::string>& tags,
   std::ostringstream& result_out);
-
-void update_stats_for_tags(std::unordered_map<std::string, uint64_t>& stats,
-  const Builder::StringSeq& reported_tags,
-  const std::unordered_set<std::string>& input_tags,
-  const Builder::ConstPropertyIndex& prop)
-{
-  for (CORBA::ULong i = 0; i < reported_tags.length(); ++i) {
-    const std::string tag(reported_tags[i]);
-    if (input_tags.find(tag) != input_tags.end()) {
-      if (stats.find(tag) == stats.end()) {
-        stats[tag] = prop->value.ull_prop();
-      } else {
-        stats[tag] += prop->value.ull_prop();
-      }
-    }
-  }
-}
-
-void update_details_for_tags(std::unordered_map<std::string, std::string>& details,
-  const Builder::StringSeq& reported_tags,
-  const std::unordered_set<std::string>& input_tags,
-  const std::string& detail)
-{
-  for (CORBA::ULong i = 0; i < reported_tags.length(); ++i) {
-    const std::string tag(reported_tags[i]);
-    if (input_tags.find(tag) != input_tags.end()) {
-      details[tag] += detail;
-    }
-  }
-}
-
-void consolidate_tagged_stats(std::unordered_map<std::string, Bench::SimpleStatBlock>& stats,
-  const Builder::StringSeq& reported_tags,
-  const std::unordered_set<std::string>& input_tags,
-  const Bench::ConstPropertyStatBlock& data)
-{
-  for (CORBA::ULong i = 0; i < reported_tags.length(); ++i) {
-    const std::string tag(reported_tags[i]);
-    if (input_tags.find(tag) != input_tags.end()) {
-      stats[tag] = consolidate(stats[tag], data.to_simple_stat_block());
-    }
-  }
-}
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
@@ -785,11 +739,11 @@ int handle_report(const Bench::TestController::Report& report,
   }
 
   if (total_undermatched_readers ||
-      total_undermatched_writers ||
-      total_out_of_order_data_count ||
-      total_duplicate_data_count ||
-      total_missing_data_count ||
-      missing_durable_data) {
+    total_undermatched_writers ||
+    total_out_of_order_data_count ||
+    total_duplicate_data_count ||
+    total_missing_data_count ||
+    missing_durable_data) {
     result = EXIT_FAILURE;
   }
   return result;

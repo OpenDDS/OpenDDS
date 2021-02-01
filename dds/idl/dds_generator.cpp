@@ -260,15 +260,12 @@ string type_to_default_array(const std::string& indent, AST_Type* type, const st
       n = n.substr(0, n.rfind("::") + 2) + "AnonymousType_" + type->local_name()->get_string();
       n = (fld_cls == AST_Decl::NT_sequence) ? (n + "_seq") : n;
     }
-    string v = n;
-    size_t index = 0;
-    while (true) {
+    string v = n.find(" ::") == 0 ? n.substr(3) : n;
+    for (size_t index = 0; true; ++index) {
       index = v.find("::", index);
       if (index == string::npos) break;
       v.replace(index, 2, "_");
-      index += 1;
     }
-    string pre;
     val += indent + "set_default(IDL::DistinctType<" + n + ", " + v + "_tag>(" +
       (is_union ? "tmp" : name) + "));\n";
   } else {

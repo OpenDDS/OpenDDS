@@ -1363,7 +1363,8 @@ void WriteDataContainer::wait_pending(const MonotonicTimePoint& deadline)
     }
   }
 
-  while (pending_data()) {
+  bool loop = true;
+  while (loop && pending_data()) {
     switch (empty_condition_.wait_until(deadline)) {
     case CvStatus_NoTimeout:
       break;
@@ -1376,13 +1377,15 @@ void WriteDataContainer::wait_pending(const MonotonicTimePoint& deadline)
           log_send_state_lists("WriteDataContainer::wait_pending - wait timedout: ");
         }
       }
+      loop = false;
       break;
 
     case CvStatus_Error:
       if (DCPS_debug_level) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: WriteDataContainer::wait_ack_of_seq: "
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: WriteDataContainer::wait_pending: "
           "error in wait_until\n"));
       }
+      loop = false;
       break;
     }
   }

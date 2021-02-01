@@ -137,4 +137,46 @@ uint32_t one_at_a_time_hash(const uint8_t* key, size_t length)
   return hash;
 }
 
+void update_stats_for_tags(std::unordered_map<std::string, uint64_t>& stats,
+  const Builder::StringSeq& reported_tags,
+  const std::unordered_set<std::string>& input_tags,
+  const Builder::ConstPropertyIndex& prop)
+{
+  for (CORBA::ULong i = 0; i < reported_tags.length(); ++i) {
+    const std::string tag(reported_tags[i]);
+    if (input_tags.find(tag) != input_tags.end()) {
+      if (stats.find(tag) == stats.end()) {
+        stats[tag] = prop->value.ull_prop();
+      } else {
+        stats[tag] += prop->value.ull_prop();
+      }
+    }
+  }
+}
+
+void update_details_for_tags(std::unordered_map<std::string, std::string>& details,
+  const Builder::StringSeq& reported_tags,
+  const std::unordered_set<std::string>& input_tags,
+  const std::string& detail)
+{
+  for (CORBA::ULong i = 0; i < reported_tags.length(); ++i) {
+    const std::string tag(reported_tags[i]);
+    if (input_tags.find(tag) != input_tags.end()) {
+      details[tag] += detail;
+    }
+  }
+}
+
+void consolidate_tagged_stats(std::unordered_map<std::string, Bench::SimpleStatBlock>& stats,
+  const Builder::StringSeq& reported_tags,
+  const std::unordered_set<std::string>& input_tags,
+  const Bench::ConstPropertyStatBlock& data)
+{
+  for (CORBA::ULong i = 0; i < reported_tags.length(); ++i) {
+    const std::string tag(reported_tags[i]);
+    if (input_tags.find(tag) != input_tags.end()) {
+      stats[tag] = consolidate(stats[tag], data.to_simple_stat_block());
+    }
+  }
+}
 }

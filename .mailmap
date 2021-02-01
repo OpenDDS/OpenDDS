@@ -2,6 +2,10 @@
 # the gernation of the AUTHORS file
 #
 # See https://git-scm.com/docs/git-check-mailmap for how this works
+#
+# To fix GitHub noreply email addresses, match the real name and email to
+# what's printed by:
+#   git shortlog --summary --numbered --email
 
 Justin Wilson <wilsonj@objectcomputing.com> <jrw972@gmail.com>
 Justin Wilson <wilsonj@objectcomputing.com> Justin R. Wilson
@@ -36,3 +40,10 @@ Chad Elliott <elliottc@objectcomputing.com> <elliott_c@ociweb.com>
 Chad Elliott <elliottc@objectcomputing.com> ocielliottc
 
 Gary Wilson <wilsong@objectcomputing.com> wilsongOCI
+
+Clayton Calabrese <calabresec@objectcomputing.com> ClaytonCalabrese
+Clayton Calabrese <calabresec@objectcomputing.com> <calabreseclayton@gmail.com>
+
+Mark Pollack <pollackm@objectcomputing.com> <mpollack360@gmail.com>
+
+Tim Pollock <pollockt@objectcomputing.com> pollocktoci <70289169+pollocktoci@users.noreply.github.com>

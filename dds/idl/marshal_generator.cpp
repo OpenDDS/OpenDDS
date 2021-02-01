@@ -33,6 +33,8 @@ namespace {
     return length;
   }
 
+  const string RtpsNamespace = " ::OpenDDS::RTPS::", DdsNamespace = " ::DDS::";
+
   typedef bool (*is_special_case)(const string& cxx);
   typedef bool (*gen_special_case)(const string& cxx);
 
@@ -170,7 +172,7 @@ bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
     insertion.addArg("strm", "Serializer&");
     insertion.addArg("enumval", "const " + cxx + "&");
     insertion.endArgs();
-    if (cxx != "DDS::ReliabilityQosPolicyKind") {
+    if (cxx != DdsNamespace + "ReliabilityQosPolicyKind") {
       // DDS::ReliabilityQosPolicyKind needs to be able to stream values
       // that are not valid enum values (see ParameterListConverter::to_param_list())
       be_global->impl_ <<
@@ -190,7 +192,7 @@ bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
     be_global->impl_ <<
       "  CORBA::ULong temp = 0;\n"
       "  if (strm >> temp) {\n";
-    if (cxx != "DDS::ReliabilityQosPolicyKind") {
+    if (cxx != DdsNamespace + "ReliabilityQosPolicyKind") {
       // DDS::ReliabilityQosPolicyKind needs to be able to stream values
       // that are not valid enum values (see ParameterListConverter::to_param_list())
       be_global->impl_ <<
@@ -640,7 +642,7 @@ namespace {
 
   bool isRtpsSpecialSequence(const string& cxx)
   {
-    return cxx == "OpenDDS::RTPS::ParameterList";
+    return cxx == RtpsNamespace + "ParameterList";
   }
 
   bool genRtpsSpecialSequence(const string& cxx)
@@ -697,8 +699,8 @@ namespace {
 
   bool isPropertySpecialSequence(const string& cxx)
   {
-    return cxx == "DDS::PropertySeq"
-      || cxx == "DDS::BinaryPropertySeq";
+    return cxx == DdsNamespace + "PropertySeq"
+      || cxx == DdsNamespace + "BinaryPropertySeq";
   }
 
   bool genPropertySpecialSequence(const string& cxx)
@@ -2040,7 +2042,7 @@ namespace {
 
   bool isBinaryProperty_t(const string& cxx)
   {
-    return cxx == "DDS::BinaryProperty_t";
+    return cxx == DdsNamespace + "BinaryProperty_t";
   }
 
   bool genBinaryProperty_t(const string& cxx)
@@ -2083,7 +2085,7 @@ namespace {
 
   bool isProperty_t(const string& cxx)
   {
-    return cxx == "DDS::Property_t";
+    return cxx == DdsNamespace + "Property_t";
   }
 
   bool genProperty_t(const string& cxx)
@@ -2127,7 +2129,7 @@ namespace {
 
   bool isPropertyQosPolicy(const string& cxx)
   {
-    return cxx == "DDS::PropertyQosPolicy";
+    return cxx == DdsNamespace + "PropertyQosPolicy";
   }
 
   bool genPropertyQosPolicy(const string& cxx)
@@ -2170,7 +2172,7 @@ namespace {
 
   bool isSecuritySubmessage(const string& cxx)
   {
-    return cxx == "OpenDDS::RTPS::SecuritySubmessage";
+    return cxx == RtpsNamespace + "SecuritySubmessage";
   }
 
   bool genSecuritySubmessage(const string& cxx)
@@ -2215,8 +2217,8 @@ namespace {
 
   bool isRtpsSpecialStruct(const string& cxx)
   {
-    return cxx == "OpenDDS::RTPS::SequenceNumberSet"
-      || cxx == "OpenDDS::RTPS::FragmentNumberSet";
+    return cxx == RtpsNamespace + "SequenceNumberSet"
+      || cxx == RtpsNamespace + "FragmentNumberSet";
   }
 
   bool genRtpsSpecialStruct(const string& cxx)
@@ -2229,7 +2231,7 @@ namespace {
       serialized_size.endArgs();
       be_global->impl_ <<
         "  size += "
-        << ((cxx == "OpenDDS::RTPS::SequenceNumberSet") ? "12" : "8")
+        << ((cxx == RtpsNamespace + "SequenceNumberSet") ? "12" : "8")
         << " + 4 * ((stru.numBits + 31) / 32); // RTPS Custom\n";
     }
     {
@@ -2280,24 +2282,24 @@ namespace {
 
     explicit RtpsFieldCustomizer(const string& cxx)
     {
-      if (cxx == "OpenDDS::RTPS::DataSubmessage") {
+      if (cxx == RtpsNamespace + "DataSubmessage") {
         cst_["inlineQos"] = "stru.smHeader.flags & 2";
         iQosOffset_ = "16";
 
-      } else if (cxx == "OpenDDS::RTPS::DataFragSubmessage") {
+      } else if (cxx == RtpsNamespace + "DataFragSubmessage") {
         cst_["inlineQos"] = "stru.smHeader.flags & 2";
         iQosOffset_ = "28";
 
-      } else if (cxx == "OpenDDS::RTPS::InfoReplySubmessage") {
+      } else if (cxx == RtpsNamespace + "InfoReplySubmessage") {
         cst_["multicastLocatorList"] = "stru.smHeader.flags & 2";
 
-      } else if (cxx == "OpenDDS::RTPS::InfoTimestampSubmessage") {
+      } else if (cxx == RtpsNamespace + "InfoTimestampSubmessage") {
         cst_["timestamp"] = "!(stru.smHeader.flags & 2)";
 
-      } else if (cxx == "OpenDDS::RTPS::InfoReplyIp4Submessage") {
+      } else if (cxx == RtpsNamespace + "InfoReplyIp4Submessage") {
         cst_["multicastLocator"] = "stru.smHeader.flags & 2";
 
-      } else if (cxx == "OpenDDS::RTPS::SubmessageHeader") {
+      } else if (cxx == RtpsNamespace + "SubmessageHeader") {
         intro_.insert("strm.swap_bytes(ACE_CDR_BYTE_ORDER != (stru.flags & 1));");
       }
     }
@@ -3594,14 +3596,14 @@ namespace {
 
   bool isRtpsSpecialUnion(const string& cxx)
   {
-    return cxx == "OpenDDS::RTPS::Parameter"
-      || cxx == "OpenDDS::RTPS::Submessage";
+    return cxx == RtpsNamespace + "Parameter"
+      || cxx == RtpsNamespace + "Submessage";
   }
 
   bool genRtpsParameter(AST_Union* u, AST_Type* discriminator,
                         const std::vector<AST_UnionBranch*>& branches)
   {
-    const string cxx = "OpenDDS::RTPS::Parameter";
+    const string cxx = RtpsNamespace + "Parameter";
     {
       Function serialized_size("serialized_size", "void");
       serialized_size.addArg("encoding", "const Encoding&");
@@ -3715,7 +3717,7 @@ namespace {
   bool genRtpsSubmessage(AST_Union* u, AST_Type* discriminator,
                          const std::vector<AST_UnionBranch*>& branches)
   {
-    const string cxx = "OpenDDS::RTPS::Submessage";
+    const string cxx = RtpsNamespace + "Submessage";
     {
       Function serialized_size("serialized_size", "void");
       serialized_size.addArg("encoding", "const Encoding&");
@@ -3746,9 +3748,9 @@ namespace {
   bool genRtpsSpecialUnion(const string& cxx, AST_Union* u, AST_Type* discriminator,
                            const std::vector<AST_UnionBranch*>& branches)
   {
-    if (cxx == "OpenDDS::RTPS::Parameter") {
+    if (cxx == RtpsNamespace + "Parameter") {
       return genRtpsParameter(u, discriminator, branches);
-    } else if (cxx == "OpenDDS::RTPS::Submessage") {
+    } else if (cxx == RtpsNamespace + "Submessage") {
       return genRtpsSubmessage(u, discriminator, branches);
     } else {
       return false;
