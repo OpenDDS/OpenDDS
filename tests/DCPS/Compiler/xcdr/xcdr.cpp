@@ -1,5 +1,5 @@
 #include "xcdrTypeSupportImpl.h"
-#include "mutabletypesTypeSupportImpl.h"
+#include "mutable_typesTypeSupportImpl.h"
 
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
