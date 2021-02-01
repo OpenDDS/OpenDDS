@@ -173,15 +173,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       }
     } else if (arg == ACE_TEXT("--expect_to_fail")) {
       expect_to_match = false;
-    } else if (arg == ACE_TEXT("--enable_security")) {
-      security_requested = true;
     } else {
       ACE_ERROR((LM_ERROR, "ERROR: Invalid argument: %s\n", argv[i]));
       return 1;
     }
   }
 
-  if (security_requested) {
+  if (TheServiceParticipant->get_security()) {
+    security_requested = true;
 #if !defined(OPENDDS_SECURITY)
     ACE_DEBUG((LM_DEBUG, "Security requested, but not enabled\n"));
     return 0;
