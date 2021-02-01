@@ -76,7 +76,7 @@ public:
   Worker& operator=(const Worker&) = delete;
   Worker& operator=(Worker&&) = delete;
 
-  Worker(const std::string node_name, const NodeId& node_id, const WorkerConfig& config)
+  Worker(const std::string& node_name, const NodeId& node_id, const WorkerConfig& config)
   : node_name_(node_name), node_id_(node_id)
   , worker_id_(config.worker_id)
   {
@@ -194,7 +194,7 @@ using ProcessStatsCollectorPtr = std::shared_ptr<ProcessStatsCollector>;
 class WorkerManager : public ACE_Event_Handler {
 public:
 
-  explicit WorkerManager(const std::string node_name, const NodeId& node_id, ACE_Process_Manager& process_manager)
+  explicit WorkerManager(const std::string& node_name, const NodeId& node_id, ACE_Process_Manager& process_manager)
   : node_name_(node_name), node_id_(node_id)
   , process_manager_(process_manager)
   {
