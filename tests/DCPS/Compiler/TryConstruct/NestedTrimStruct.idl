@@ -1,6 +1,6 @@
 #include <TryConstructBaseTypes.idl>
 
-//nested struct for use in struct, union, and sequence
+// nested struct for use in struct, union, and sequence
 struct NestedStruct2 {
   @try_construct(USE_DEFAULT) wstr64 wstr64_ud;
   @try_construct(USE_DEFAULT) ShortSeqUnbound psu_ud;
@@ -33,7 +33,7 @@ struct NestedStruct2 {
   @try_construct(TRIM) str64 str64_t;
 };
 
-//nested struct for use in struct, union, and sequence
+// nested struct for use in struct, union, and sequence
 struct NestedStruct3 {
   @try_construct(USE_DEFAULT) wstr64 wstr64_ud;
   @try_construct(USE_DEFAULT) ShortSeqUnbound psu_ud;
@@ -69,12 +69,12 @@ struct NestedStruct3 {
 module TryCon {
 
   @mutable
-  struct NestedStructTest1{
+  struct NestedStructTest1 {
     NestedStruct2 ns;
   };
 
   @mutable
-  struct NestedStructTest2{
+  struct NestedStructTest2 {
     @try_construct(USE_DEFAULT) NestedStruct3 ns;
   };
 
@@ -120,10 +120,10 @@ module TryCon {
     @try_construct(TRIM) StructSeqBoundTrim ssb_t;
     @try_construct(TRIM) ShortArraySeqUnbound sasu_t;
     @try_construct(TRIM) ShortArraySeqBound sasb_t;
-    //unbounded so no trim
+    // unbounded so no trim
     SeqShortSeqUnboundUnbound sssuu_t;
     @try_construct(TRIM) SeqShortSeqUnboundBound sssub_t;
-    //unbounded so no trim
+    // unbounded so no trim
     SeqShortSeqBoundUnbound sssbu_t;
     @try_construct(TRIM) SeqShortSeqBoundBound sssbb_t;
   };

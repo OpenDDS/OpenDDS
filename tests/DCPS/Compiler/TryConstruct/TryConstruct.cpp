@@ -5,8 +5,8 @@
  * OR YOU WILL BREAK THE TEST
  ***/
 #include "TryConstructTypeSupportImpl.h"
-#include "TryConstruct2TypeSupportImpl.h"
-#include "TryConstruct3TypeSupportImpl.h"
+#include "AnonTypesTypeSupportImpl.h"
+#include "NestedTrimStructTypeSupportImpl.h"
 
 #include <dds/DCPS/XTypes/TypeObject.h>
 #include <gtest/gtest.h>

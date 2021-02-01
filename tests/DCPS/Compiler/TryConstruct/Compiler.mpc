@@ -7,7 +7,7 @@ project(*TryConstruct): dcps_test, googletest, msvc_bigobj{
   TypeSupport_Files {
     TryConstructBaseTypes.idl
     TryConstruct.idl
-    TryConstruct2.idl
-    TryConstruct3.idl
+    AnonTypes.idl
+    NestedTrimStruct.idl
   }
 }
