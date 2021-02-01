@@ -646,6 +646,9 @@ public:
   TimeDuration get_thread_status_interval();
   void set_thread_status_interval(TimeDuration interval);
 
+  /// getter for tm_lock_ used to block get_minimal_type_map_private
+  ACE_Thread_Mutex& get_tm_lock();
+
   ThreadStatus* get_thread_statuses();
 
   /// Pointer to the monitor factory that is used to create
@@ -718,6 +721,9 @@ private:
   TimeDuration thread_status_interval_;
 
   ThreadStatus thread_status_;
+
+  /// Thread mutex used to grab type map
+  ACE_Thread_Mutex tm_lock_;
 
   /// Enable Monitor functionality
   bool monitor_enabled_;

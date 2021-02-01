@@ -108,6 +108,7 @@ void MessageTracker::wait_messages_pending(const char* caller, const MonotonicTi
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: MessageTracker::wait_messages_pending: "
           "error in wait_until\n"));
       }
+      loop = false;
       return;
     }
   }
