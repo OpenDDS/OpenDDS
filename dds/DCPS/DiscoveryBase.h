@@ -1522,7 +1522,7 @@ namespace OpenDDS {
             type_consistency.prevent_type_widening = drQos->type_consistency.prevent_type_widening;
             XTypes::TypeAssignability ta(type_lookup_service_, type_consistency);
 
-            if (drQos->type_consistency == DDS::ALLOW_TYPE_COERCION) {
+            if (drQos->type_consistency.kind == DDS::ALLOW_TYPE_COERCION) {
               consistent = ta.assignable(reader_type_id, writer_type_id);
             } else {
               // The two types must be equivalent for DISALLOW_TYPE_COERCION
