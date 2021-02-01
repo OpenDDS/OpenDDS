@@ -93,6 +93,6 @@ void create_participant(const DomainParticipantFactory_var& dpf, DomainParticipa
   }
 #endif
 
-  dp = dpf->create_participant(0, PARTICIPANT_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
+  dp = dpf->create_participant(0, part_qos, 0, DEFAULT_STATUS_MASK);
 }
 #endif

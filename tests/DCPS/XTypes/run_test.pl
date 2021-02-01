@@ -11,9 +11,11 @@ use strict;
 my $test = new PerlDDS::TestFramework();
 $test->enable_console_logging();
 
+my $secure = 0;
 my $verbose = 0;
 my $test_name = "";
 GetOptions(
+  "secure" => \$secure,
   "verbose" => \$verbose,
   "test|t=s" => \$test_name,
 );
@@ -23,7 +25,9 @@ if ($verbose) {
   push(@common_args, "--verbose");
 }
 
-my %params = (
+my %params;
+if ($secure) {
+%params = (
   "FinalStructMatch_s"        => {reader_type => "FinalStructSub", writer_type => "FinalStructPub", expect_to_fail => 0, reg_type => "PD_OL_OA_OM_OD", key_val => 2,
                                 r_ini => "rtps_disc_security.ini", w_ini => "rtps_disc_security.ini"},
   "AppendableMatch_s"         => {reader_type => "AppendableStruct", writer_type => "AdditionalPostfixFieldStruct", expect_to_fail => 0, reg_type => "PD_OL_OA_OM_OD", key_val => 4,
@@ -32,7 +36,9 @@ my %params = (
                                 r_ini => "rtps_disc_security.ini", w_ini => "rtps_disc_security.ini"},
   "Dependency_s"              => {reader_type => "AppendableStruct", writer_type => "AppendableStructWithDependency", expect_to_fail => 0, reg_type => "PD_OL_OA_OM_OD", key_val => 14,
                                 r_ini => "rtps_disc_security.ini", w_ini => "rtps_disc_security.ini"},
-
+);
+} else {
+%params = (
   "PlainCdr"                => {reader_type => "PlainCdrStruct", writer_type => "PlainCdrStruct", expect_to_fail => 0, key_val => 1,
                                 r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini"},
   "FinalStructMatch"        => {reader_type => "FinalStructSub", writer_type => "FinalStructPub", expect_to_fail => 0, reg_type => "FinalStructT", key_val => 2,
@@ -73,6 +79,7 @@ my %params = (
   "Match_no_xtypes_ny"      => {reader_type => "AppendableStructNoXTypes", writer_type => "AppendableStructNoXTypes", expect_to_fail => 0, reg_type => "AppendableStructT_no_xtypes_ny",
                                 key_val => 4, r_ini => "rtps_disc.ini", w_ini => "rtps_disc_no_xtypes.ini"},
 );
+}
 
 my $status = 0;
 
@@ -114,8 +121,7 @@ if ($test_name eq '') {
   while (my ($k, $v) = each %params) {
     run_test ($v, $k);
   }
-}
-else {
+} else {
   run_test ($params{$test_name}, $test_name);
 }
 

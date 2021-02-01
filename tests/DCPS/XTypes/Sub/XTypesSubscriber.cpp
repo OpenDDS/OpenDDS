@@ -225,13 +225,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   }
 
-  if (TheServiceParticipant->get_security()) {
-#if !defined(OPENDDS_SECURITY)
-    ACE_DEBUG((LM_DEBUG, "Security requested, but not enabled\n"));
-    return 0;
-#endif
-  }
-
   DomainParticipant_var dp;
   create_participant(dpf, dp);
   if (!dp) {
