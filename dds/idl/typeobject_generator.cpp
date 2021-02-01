@@ -1117,6 +1117,8 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
   case AST_ConcreteType::NT_wstring:
   case AST_ConcreteType::NT_pre_defined:
   case AST_ConcreteType::NT_fixed:
+  case AST_ConcreteType::NT_interface:
+  case AST_ConcreteType::NT_interface_fwd:
       break;
 
   case AST_ConcreteType::NT_struct_fwd:
@@ -1146,8 +1148,6 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
   case AST_ConcreteType::NT_annotation_member:
   case AST_ConcreteType::NT_module:
   case AST_ConcreteType::NT_root:
-  case AST_ConcreteType::NT_interface:
-  case AST_ConcreteType::NT_interface_fwd:
   case AST_ConcreteType::NT_valuetype:
   case AST_ConcreteType::NT_valuetype_fwd:
   case AST_ConcreteType::NT_const:
@@ -1638,6 +1638,12 @@ typeobject_generator::generate_minimal_type_identifier(AST_Type* type, bool forc
     break;
   }
 
+  case AST_ConcreteType::NT_interface:
+  case AST_ConcreteType::NT_interface_fwd: {
+    minimal_type_identifier_map_[type] = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_NONE);
+    break;
+  }
+
   case AST_ConcreteType::NT_struct_fwd:
   case AST_ConcreteType::NT_union_fwd:
   case AST_ConcreteType::NT_native:
@@ -1665,8 +1671,6 @@ typeobject_generator::generate_minimal_type_identifier(AST_Type* type, bool forc
   case AST_ConcreteType::NT_annotation_member:
   case AST_ConcreteType::NT_module:
   case AST_ConcreteType::NT_root:
-  case AST_ConcreteType::NT_interface:
-  case AST_ConcreteType::NT_interface_fwd:
   case AST_ConcreteType::NT_valuetype:
   case AST_ConcreteType::NT_valuetype_fwd:
   case AST_ConcreteType::NT_const:
