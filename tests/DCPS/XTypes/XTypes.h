@@ -19,8 +19,6 @@ bool expect_to_match = true;
 
 int key_value = -1;
 
-bool security_requested = false;
-
 enum AdditionalFieldValue {
   FINAL_STRUCT_AF,
   APPENDABLE_STRUCT_AF,
@@ -81,21 +79,19 @@ void create_participant(const DomainParticipantFactory_var& dpf, DomainParticipa
   DDS::DomainParticipantQos part_qos;
   dpf->get_default_participant_qos(part_qos);
 
-  if (security_requested) {
 #if defined(OPENDDS_SECURITY)
-    if (TheServiceParticipant->get_security()) {
-      using namespace DDS::Security::Properties;
-      DDS::PropertySeq& props = part_qos.property.value;
+  if (TheServiceParticipant->get_security()) {
+    using namespace DDS::Security::Properties;
+    DDS::PropertySeq& props = part_qos.property.value;
 
-      append(props, AuthIdentityCA, "file:../../security/certs/identity/identity_ca_cert.pem");
-      append(props, AuthIdentityCertificate, "file:../../security/certs/identity/test_participant_02_cert.pem");
-      append(props, AuthPrivateKey, "file:../../security/certs/identity/test_participant_02_private_key.pem");
-      append(props, AccessPermissionsCA, "file:../../security/certs/permissions/permissions_ca_cert.pem");
-      append(props, AccessGovernance, "file:../../security/attributes/governance/governance_AU_UA_ND_NL_NR_signed.p7s");
-      append(props, AccessPermissions, "file:../../security/attributes/permissions/permissions_test_participant_02_allowall_signed.p7s");
-    }
-#endif
+    append(props, AuthIdentityCA, "file:../../security/certs/identity/identity_ca_cert.pem");
+    append(props, AuthIdentityCertificate, "file:../../security/certs/identity/test_participant_02_cert.pem");
+    append(props, AuthPrivateKey, "file:../../security/certs/identity/test_participant_02_private_key.pem");
+    append(props, AccessPermissionsCA, "file:../../security/certs/permissions/permissions_ca_cert.pem");
+    append(props, AccessGovernance, "file:../../security/attributes/governance/governance_AU_UA_ND_NL_NR_signed.p7s");
+    append(props, AccessPermissions, "file:../../security/attributes/permissions/permissions_test_participant_02_allowall_signed.p7s");
   }
+#endif
 
   dp = dpf->create_participant(0, PARTICIPANT_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
 }

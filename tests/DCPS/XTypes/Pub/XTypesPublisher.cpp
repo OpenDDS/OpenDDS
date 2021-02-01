@@ -180,7 +180,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   if (TheServiceParticipant->get_security()) {
-    security_requested = true;
 #if !defined(OPENDDS_SECURITY)
     ACE_DEBUG((LM_DEBUG, "Security requested, but not enabled\n"));
     return 0;
