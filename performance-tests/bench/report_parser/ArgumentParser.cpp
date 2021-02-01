@@ -20,13 +20,16 @@ bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
     try {
       for (int i = 1; i < argc; i++) {
         const ACE_TCHAR* argument = argv[i];
-        std::string option_argument = get_option_argument(i, argc, argv);
 
         if (!ACE_OS::strcmp(argument, ACE_TEXT("--help"))
           || !ACE_OS::strcmp(argument, ACE_TEXT("-h"))) {
           show_usage();
           return false;
-        } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--input-file"))) {
+        }
+
+        std::string option_argument = get_option_argument(i, argc, argv);
+
+        if (!ACE_OS::strcmp(argument, ACE_TEXT("--input-file"))) {
           input_file_path = option_argument;
         } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--output-file"))) {
           output_file_path = option_argument;
