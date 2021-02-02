@@ -130,7 +130,7 @@ namespace {
     } else if (c & CL_STRING) {
       be_global->impl_ <<
         indent << "{\n" <<
-        indent << ((c & CL_WIDE) ? "std::wstring" : "std::string") << " x;\n" <<
+        indent << ((c & CL_WIDE) ? "WString" : "String") << " x;\n" <<
         indent << "if (!value_reader.read_" << ((c & CL_WIDE) ? "w" : "") << "string(x)) return false;\n" <<
         indent << expression << accessor << " = x" << (use_cxx11 ? "" : ".c_str()") <<  ";\n" <<
         indent << "}\n";

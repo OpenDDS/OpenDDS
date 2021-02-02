@@ -154,8 +154,8 @@ struct ValueReader {
   virtual bool read_fixed(OpenDDS::FaceTypes::Fixed& value) = 0;
   virtual bool read_char8(ACE_CDR::Char& value) = 0;
   virtual bool read_char16(ACE_CDR::WChar& value) = 0;
-  virtual bool read_string(std::string& value) = 0;
-  virtual bool read_wstring(std::wstring& value) = 0;
+  virtual bool read_string(String& value) = 0;
+  virtual bool read_wstring(WString& value) = 0;
 
   virtual bool read_long_enum(ACE_CDR::Long& value, const EnumHelper& helper) = 0;
   template <typename T>
