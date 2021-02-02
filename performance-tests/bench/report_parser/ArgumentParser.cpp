@@ -22,7 +22,7 @@ bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
         const ACE_TCHAR* argument = argv[i];
 
         if (!ACE_OS::strcmp(argument, ACE_TEXT("--help"))
-          || !ACE_OS::strcmp(argument, ACE_TEXT("-h"))) {
+            || !ACE_OS::strcmp(argument, ACE_TEXT("-h"))) {
           show_usage();
           return false;
         }
@@ -121,7 +121,8 @@ void ArgumentParser::show_option_argument_error(std::string option_argument)
   show_usage_prompt();
 }
 
-void ArgumentParser::show_usage() {
+void ArgumentParser::show_usage()
+{
   std::cout
     << "usage: report_parser [-h|--help] | [OPTIONS...]" << std::endl
     << "OPTIONS:" << std::endl

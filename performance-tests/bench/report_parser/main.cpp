@@ -3,7 +3,8 @@
 #include "TimeSeriesRawFormatter.h"
 
 int parse_time_series(OutputFormat output_format, Report& report,
-  std::ofstream& output_file_stream) {
+  std::ofstream& output_file_stream)
+{
   switch (output_format) {
   case OutputFormat::Gnuplot:
     TimeSeriesGnuPlotFormatter timeSeriesGnuPlotFormatter;
@@ -18,7 +19,8 @@ int parse_time_series(OutputFormat output_format, Report& report,
 }
 
 int parse_report(OutputType output_type, OutputFormat output_format,
-  Report& report, std::ofstream& output_file_stream) {
+  Report& report, std::ofstream& output_file_stream)
+{
   switch (output_type) {
   case OutputType::TimeSeries:
     return parse_time_series(output_format, report, output_file_stream);
@@ -30,7 +32,8 @@ int parse_report(OutputType output_type, OutputFormat output_format,
   return EXIT_FAILURE;
 }
 
-int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
+{
   OutputType output_type = OutputType::None;
   OutputFormat output_format = OutputFormat::None;
   Report report{};
@@ -39,13 +42,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   ArgumentParser argumentParser;
 
   if (!argumentParser.parse(argc, argv, output_type, output_format,
-    report, output_file_stream)) {
+      report, output_file_stream)) {
     return EXIT_FAILURE;
   }
 
-  if (!parse_report(output_type, output_format, report, output_file_stream)) {
-    return EXIT_SUCCESS;
-  }
-
-  return EXIT_SUCCESS;
+  return parse_report(output_type, output_format, report, output_file_stream);
 }
