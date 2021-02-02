@@ -77,6 +77,7 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , secure_participant_user_data_(false)
   , max_type_lookup_service_reply_period_(5, 0)
   , use_xtypes_(true)
+  , sedp_heartbeat_period_(1)
 {}
 
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
