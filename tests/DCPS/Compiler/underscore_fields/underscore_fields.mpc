@@ -1,0 +1,8 @@
+project: opendds_cxx11 {
+  idlflags += -Cw -aw
+  dcps_ts_flags += -Cw -aw
+
+  TypeSupport_Files {
+    test.idl
+  }
+}
