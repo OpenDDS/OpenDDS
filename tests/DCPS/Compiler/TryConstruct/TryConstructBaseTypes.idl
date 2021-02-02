@@ -14,51 +14,51 @@ typedef wstring<20> wstr20;
 typedef string<64> str64;
 typedef wstring<64> wstr64;
 
-typedef sequence <@try_construct(USE_DEFAULT) str20> BoundStringSeq_ud;
-typedef sequence <@try_construct(TRIM) str20> BoundStringSeq_t;
-typedef sequence <@try_construct(DISCARD) str20> BoundStringSeq_d;
-typedef sequence <@try_construct(USE_DEFAULT) wstr20> BoundWStringSeq_ud;
-typedef sequence <@try_construct(TRIM) wstr20> BoundWStringSeq_t;
-typedef sequence <@try_construct(DISCARD) wstr20> BoundWStringSeq_d;
+typedef sequence<@try_construct(USE_DEFAULT) str20> BoundStringSeq_ud;
+typedef sequence<@try_construct(TRIM) str20> BoundStringSeq_t;
+typedef sequence<@try_construct(DISCARD) str20> BoundStringSeq_d;
+typedef sequence<@try_construct(USE_DEFAULT) wstr20> BoundWStringSeq_ud;
+typedef sequence<@try_construct(TRIM) wstr20> BoundWStringSeq_t;
+typedef sequence<@try_construct(DISCARD) wstr20> BoundWStringSeq_d;
 
 // array for use in struct, union, and sequence
 typedef short ShortArray[15];
 typedef str64 str64Array[10];
 typedef str20 str20Array[10];
-typedef str20 str20ArrayTrim @try_construct(TRIM) [10];
+typedef str20 str20ArrayTrim @try_construct(TRIM)[10];
 
 // sequences
 // enum
-typedef sequence <EnumType> EnumSeqUnbound;
-typedef sequence <EnumType, 2> EnumSeqBound;
-typedef sequence <EnumType, 3> EnumSeqBound2;
+typedef sequence<EnumType> EnumSeqUnbound;
+typedef sequence<EnumType, 2> EnumSeqBound;
+typedef sequence<EnumType, 3> EnumSeqBound2;
 // primitives
-typedef sequence <short> ShortSeqUnbound;
-typedef sequence <short, 2> ShortSeqBound;
-typedef sequence <short, 3> ShortSeqBound2;
-typedef sequence <unsigned short> UnsignedShortSeqUnbound;
-typedef sequence <unsigned short, 2> UnsignedShortSeqBound;
-typedef sequence <unsigned short, 3> UnsignedShortSeqBound2;
+typedef sequence<short> ShortSeqUnbound;
+typedef sequence<short, 2> ShortSeqBound;
+typedef sequence<short, 3> ShortSeqBound2;
+typedef sequence<unsigned short> UnsignedShortSeqUnbound;
+typedef sequence<unsigned short, 2> UnsignedShortSeqBound;
+typedef sequence<unsigned short, 3> UnsignedShortSeqBound2;
 // string
-typedef sequence <str64> StringSeqUnbound;
-typedef sequence <str64, 2> StringSeqBound;
-typedef sequence <str64, 3> StringSeqBound2;
+typedef sequence<str64> StringSeqUnbound;
+typedef sequence<str64, 2> StringSeqBound;
+typedef sequence<str64, 3> StringSeqBound2;
 // wstring
-typedef sequence <wstr64> WideStringSeqUnbound;
-typedef sequence <wstr64, 2> WideStringSeqBound;
-typedef sequence <wstr64, 3> WideStringSeqBound2;
+typedef sequence<wstr64> WideStringSeqUnbound;
+typedef sequence<wstr64, 2> WideStringSeqBound;
+typedef sequence<wstr64, 3> WideStringSeqBound2;
 // array
-typedef sequence <ShortArray> ShortArraySeqUnbound;
-typedef sequence <ShortArray, 2> ShortArraySeqBound;
-typedef sequence <ShortArray, 3> ShortArraySeqBound2;
+typedef sequence<ShortArray> ShortArraySeqUnbound;
+typedef sequence<ShortArray, 2> ShortArraySeqBound;
+typedef sequence<ShortArray, 3> ShortArraySeqBound2;
 // sequence
-typedef sequence <ShortSeqUnbound> SeqShortSeqUnboundUnbound;
-typedef sequence <ShortSeqUnbound, 2> SeqShortSeqUnboundBound;
-typedef sequence <ShortSeqUnbound, 3> SeqShortSeqUnboundBound2;
-typedef sequence <@try_construct(TRIM) ShortSeqBound> SeqShortSeqBoundUnbound;
-typedef sequence <ShortSeqBound2> SeqShortSeqBoundUnbound2;
-typedef sequence <@try_construct(TRIM) ShortSeqBound, 2> SeqShortSeqBoundBound;
-typedef sequence <ShortSeqBound2, 3> SeqShortSeqBoundBound2;
+typedef sequence<ShortSeqUnbound> SeqShortSeqUnboundUnbound;
+typedef sequence<ShortSeqUnbound, 2> SeqShortSeqUnboundBound;
+typedef sequence<ShortSeqUnbound, 3> SeqShortSeqUnboundBound2;
+typedef sequence<@try_construct(TRIM) ShortSeqBound> SeqShortSeqBoundUnbound;
+typedef sequence<ShortSeqBound2> SeqShortSeqBoundUnbound2;
+typedef sequence<@try_construct(TRIM) ShortSeqBound, 2> SeqShortSeqBoundBound;
+typedef sequence<ShortSeqBound2, 3> SeqShortSeqBoundBound2;
 
 // arrays
 // enum
@@ -80,36 +80,36 @@ typedef ShortSeqBound ArrSeqBound[3];
 // anon seq
 // enum
 struct AnonSeqStruct {
-  sequence <EnumType> AnonEnumSeqUnbound;
-  sequence <EnumType, 2> AnonEnumSeqBound;
-  sequence <EnumType, 3> AnonEnumSeqBound2;
+  sequence<EnumType> AnonEnumSeqUnbound;
+  sequence<EnumType, 2> AnonEnumSeqBound;
+  sequence<EnumType, 3> AnonEnumSeqBound2;
   // primitives
-  sequence <short> AnonShortSeqUnbound;
-  sequence <short, 2> AnonShortSeqBound;
-  sequence <short, 3> AnonShortSeqBound2;
-  sequence <unsigned short> AnonUnsignedShortSeqUnbound;
-  sequence <unsigned short, 2> AnonUnsignedShortSeqBound;
-  sequence <unsigned short, 3> AnonUnsignedShortSeqBound2;
+  sequence<short> AnonShortSeqUnbound;
+  sequence<short, 2> AnonShortSeqBound;
+  sequence<short, 3> AnonShortSeqBound2;
+  sequence<unsigned short> AnonUnsignedShortSeqUnbound;
+  sequence<unsigned short, 2> AnonUnsignedShortSeqBound;
+  sequence<unsigned short, 3> AnonUnsignedShortSeqBound2;
   // string
-  sequence <str64> AnonStringSeqUnbound;
-  sequence <str64, 2> AnonStringSeqBound;
-  sequence <str64, 3> AnonStringSeqBound2;
+  sequence<str64> AnonStringSeqUnbound;
+  sequence<str64, 2> AnonStringSeqBound;
+  sequence<str64, 3> AnonStringSeqBound2;
   // wstring
-  sequence <wstr64> AnonWideStringSeqUnbound;
-  sequence <wstr64, 2> AnonWideStringSeqBound;
-  sequence <wstr64, 3> AnonWideStringSeqBound2;
+  sequence<wstr64> AnonWideStringSeqUnbound;
+  sequence<wstr64, 2> AnonWideStringSeqBound;
+  sequence<wstr64, 3> AnonWideStringSeqBound2;
   // array
-  sequence <ShortArray> AnonShortArraySeqUnbound;
-  sequence <ShortArray, 2> AnonShortArraySeqBound;
-  sequence <ShortArray, 3> AnonShortArraySeqBound2;
+  sequence<ShortArray> AnonShortArraySeqUnbound;
+  sequence<ShortArray, 2> AnonShortArraySeqBound;
+  sequence<ShortArray, 3> AnonShortArraySeqBound2;
   // sequence
-  sequence <ShortSeqUnbound> AnonSeqShortSeqUnboundUnbound;
-  sequence <ShortSeqUnbound, 2> AnonSeqShortSeqUnboundBound;
-  sequence <ShortSeqUnbound, 3> AnonSeqShortSeqUnboundBound2;
-  sequence <ShortSeqBound> AnonSeqShortSeqBoundUnbound;
-  sequence <ShortSeqBound2> AnonSeqShortSeqBoundUnbound2;
-  sequence <ShortSeqBound, 2> AnonSeqShortSeqBoundBound;
-  sequence <ShortSeqBound2, 3> AnonSeqShortSeqBoundBound2;
+  sequence<ShortSeqUnbound> AnonSeqShortSeqUnboundUnbound;
+  sequence<ShortSeqUnbound, 2> AnonSeqShortSeqUnboundBound;
+  sequence<ShortSeqUnbound, 3> AnonSeqShortSeqUnboundBound2;
+  sequence<ShortSeqBound> AnonSeqShortSeqBoundUnbound;
+  sequence<ShortSeqBound2> AnonSeqShortSeqBoundUnbound2;
+  sequence<ShortSeqBound, 2> AnonSeqShortSeqBoundBound;
+  sequence<ShortSeqBound2, 3> AnonSeqShortSeqBoundBound2;
 };
 
 // anon arr
@@ -147,8 +147,8 @@ struct NestedStructTrim {
 };
 
 // struct
-typedef sequence <NestedStruct> StructSeqUnbound;
-typedef sequence <NestedStructTrim> StructSeqUnboundTrim;
-typedef sequence <NestedStruct, 2> StructSeqBound;
-typedef sequence <NestedStructTrim, 2> StructSeqBoundTrim;
-typedef sequence <NestedStruct, 3> StructSeqBound2;
+typedef sequence<NestedStruct> StructSeqUnbound;
+typedef sequence<NestedStructTrim> StructSeqUnboundTrim;
+typedef sequence<NestedStruct, 2> StructSeqBound;
+typedef sequence<NestedStructTrim, 2> StructSeqBoundTrim;
+typedef sequence<NestedStruct, 3> StructSeqBound2;

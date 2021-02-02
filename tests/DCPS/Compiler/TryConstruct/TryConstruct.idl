@@ -86,8 +86,8 @@ module TryCon {
     str20Array sa;
   };
 
-  typedef sequence <str64> ss_64;
-  typedef sequence <str20> ss_20;
+  typedef sequence<str64> ss_64;
+  typedef sequence<str20> ss_20;
 
   @mutable
   struct DiscardStructSequence1 {
@@ -111,12 +111,12 @@ module TryCon {
 
   @mutable
   struct DiscardStructSequenceAnon1 {
-    sequence <str64> ssa64;
+    sequence<str64> ssa64;
   };
 
   @mutable
   struct DiscardStructSequenceAnon2 {
-    sequence <str20> ssa20;
+    sequence<str20> ssa20;
   };
 
   @topic

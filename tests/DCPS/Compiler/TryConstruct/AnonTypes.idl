@@ -5,61 +5,61 @@ module TryCon {
   @topic
   @mutable
   struct AnonSeqStruct {
-    sequence <EnumType, 3> AnonEnumSeqBound;
+    sequence<EnumType, 3> AnonEnumSeqBound;
     // primitives
-    sequence <short, 3> AnonShortSeqBound;
-    sequence <unsigned short, 3> AnonUnsignedShortSeqBound;
+    sequence<short, 3> AnonShortSeqBound;
+    sequence<unsigned short, 3> AnonUnsignedShortSeqBound;
     // string
-    sequence <str64, 3> AnonStringSeqBound;
+    sequence<str64, 3> AnonStringSeqBound;
     // wstring
-    sequence <wstr64, 3> AnonWideStringSeqBound;
+    sequence<wstr64, 3> AnonWideStringSeqBound;
     // array
-    sequence <ShortArray, 3> AnonShortArraySeqBound;
+    sequence<ShortArray, 3> AnonShortArraySeqBound;
     // sequence
-    sequence <ShortSeqUnbound> AnonShortSeqUnboundUnbound;
-    sequence <ShortSeqUnbound, 3> AnonSeqShortSeqUnboundBound;
-    sequence <ShortSeqBound2> AnonSeqShortSeqBoundUnbound;
-    sequence <ShortSeqBound2, 3> AnonSeqShortSeqBoundBound;
+    sequence<ShortSeqUnbound> AnonShortSeqUnboundUnbound;
+    sequence<ShortSeqUnbound, 3> AnonSeqShortSeqUnboundBound;
+    sequence<ShortSeqBound2> AnonSeqShortSeqBoundUnbound;
+    sequence<ShortSeqBound2, 3> AnonSeqShortSeqBoundBound;
   };
 
   @topic
   @mutable
   struct AnonSeqStructTrim {
-    @try_construct(TRIM) sequence <EnumType, 2> AnonEnumSeqBound;
+    @try_construct(TRIM) sequence<EnumType, 2> AnonEnumSeqBound;
     // primitives
-    @try_construct(TRIM) sequence <short, 2> AnonShortSeqBound;
-    @try_construct(TRIM) sequence <unsigned short, 2> AnonUnsignedShortSeqBound;
+    @try_construct(TRIM) sequence<short, 2> AnonShortSeqBound;
+    @try_construct(TRIM) sequence<unsigned short, 2> AnonUnsignedShortSeqBound;
     // string
-    @try_construct(TRIM) sequence <@try_construct(TRIM) str20, 2> AnonStringSeqBound;
+    @try_construct(TRIM) sequence<@try_construct(TRIM) str20, 2> AnonStringSeqBound;
     // wstring
-    @try_construct(TRIM) sequence <@try_construct(TRIM) wstr20, 2> AnonWideStringSeqBound;
+    @try_construct(TRIM) sequence<@try_construct(TRIM) wstr20, 2> AnonWideStringSeqBound;
     // array
-    @try_construct(TRIM) sequence <ShortArray, 2> AnonShortArraySeqBound;
+    @try_construct(TRIM) sequence<ShortArray, 2> AnonShortArraySeqBound;
     // sequence
-    @try_construct(TRIM) sequence <ShortSeqUnbound> AnonShortSeqUnboundUnbound;
-    @try_construct(TRIM) sequence <ShortSeqUnbound, 2> AnonSeqShortSeqUnboundBound;
-    @try_construct(TRIM) sequence <@try_construct(TRIM) ShortSeqBound> AnonSeqShortSeqBoundUnbound;
-    @try_construct(TRIM) sequence <@try_construct(TRIM) ShortSeqBound, 2> AnonSeqShortSeqBoundBound;
+    @try_construct(TRIM) sequence<ShortSeqUnbound> AnonShortSeqUnboundUnbound;
+    @try_construct(TRIM) sequence<ShortSeqUnbound, 2> AnonSeqShortSeqUnboundBound;
+    @try_construct(TRIM) sequence<@try_construct(TRIM) ShortSeqBound> AnonSeqShortSeqBoundUnbound;
+    @try_construct(TRIM) sequence<@try_construct(TRIM) ShortSeqBound, 2> AnonSeqShortSeqBoundBound;
   };
 
   @topic
   @mutable
   struct AnonSeqStructDefault {
-    @try_construct(USE_DEFAULT) sequence < EnumType, 2> AnonEnumSeqBound;
+    @try_construct(USE_DEFAULT) sequence<EnumType, 2> AnonEnumSeqBound;
     // primitives
-    @try_construct(USE_DEFAULT) sequence <short, 2> AnonShortSeqBound;
-    @try_construct(USE_DEFAULT) sequence <unsigned short, 2> AnonUnsignedShortSeqBound;
+    @try_construct(USE_DEFAULT) sequence<short, 2> AnonShortSeqBound;
+    @try_construct(USE_DEFAULT) sequence<unsigned short, 2> AnonUnsignedShortSeqBound;
     // string
-    @try_construct(USE_DEFAULT) sequence <str20, 2> AnonStringSeqBound;
+    @try_construct(USE_DEFAULT) sequence<str20, 2> AnonStringSeqBound;
     // wstring
-    @try_construct(USE_DEFAULT) sequence <wstr20, 2> AnonWideStringSeqBound;
+    @try_construct(USE_DEFAULT) sequence<wstr20, 2> AnonWideStringSeqBound;
     // array
-    @try_construct(USE_DEFAULT) sequence <ShortArray, 2> AnonShortArraySeqBound;
+    @try_construct(USE_DEFAULT) sequence<ShortArray, 2> AnonShortArraySeqBound;
     // sequence
-    @try_construct(USE_DEFAULT) sequence <ShortSeqUnbound> AnonShortSeqUnboundUnbound;
-    @try_construct(USE_DEFAULT) sequence <ShortSeqUnbound, 2> AnonSeqShortSeqUnboundBound;
-    @try_construct(USE_DEFAULT) sequence <ShortSeqBound> AnonSeqShortSeqBoundUnbound;
-    @try_construct(USE_DEFAULT) sequence <ShortSeqBound, 2> AnonSeqShortSeqBoundBound;
+    @try_construct(USE_DEFAULT) sequence<ShortSeqUnbound> AnonShortSeqUnboundUnbound;
+    @try_construct(USE_DEFAULT) sequence<ShortSeqUnbound, 2> AnonSeqShortSeqUnboundBound;
+    @try_construct(USE_DEFAULT) sequence<ShortSeqBound> AnonSeqShortSeqBoundUnbound;
+    @try_construct(USE_DEFAULT) sequence<ShortSeqBound, 2> AnonSeqShortSeqBoundBound;
   };
 
   @topic
@@ -79,26 +79,26 @@ module TryCon {
   @mutable
   struct AnonArrStructTrim {
     // string
-    str20 AnonStringArr @try_construct(TRIM) [3];
+    str20 AnonStringArr @try_construct(TRIM)[3];
     // wstring
-    wstr20 AnonWideStringArr @try_construct(TRIM) [3];
+    wstr20 AnonWideStringArr @try_construct(TRIM)[3];
     // array
-    str20ArrayTrim AnonArrayArr [3];
+    str20ArrayTrim AnonArrayArr[3];
     // sequence
-    ShortSeqBound AnonArrShortSeqBound @try_construct(TRIM) [3];
+    ShortSeqBound AnonArrShortSeqBound @try_construct(TRIM)[3];
   };
 
   @topic
   @mutable
   struct AnonArrStructUseDefault {
     // string
-    str20 AnonStringArr @try_construct(USE_DEFAULT) [3];
+    str20 AnonStringArr @try_construct(USE_DEFAULT)[3];
     // wstring
-    wstr20 AnonWideStringArr @try_construct(USE_DEFAULT) [3];
+    wstr20 AnonWideStringArr @try_construct(USE_DEFAULT)[3];
     // array
-    str20Array AnonArrayArr @try_construct(USE_DEFAULT) [3];
+    str20Array AnonArrayArr @try_construct(USE_DEFAULT)[3];
     // sequence
-    ShortSeqBound AnonArrShortSeqBound @try_construct(USE_DEFAULT) [3];
+    ShortSeqBound AnonArrShortSeqBound @try_construct(USE_DEFAULT)[3];
   };
 
 };
