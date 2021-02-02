@@ -74,7 +74,7 @@ jobs:
           echo "TRIGGERING_COMMIT=$TRIGGERING_COMMIT" >> $GITHUB_ENV
 
       - name: 'Publish Unit Test Results'
-        uses: simpsont-oci/action-junit-report@v1.2.1
+        uses: simpsont-oci/action-junit-report@v2.1.1
         if: always()
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
