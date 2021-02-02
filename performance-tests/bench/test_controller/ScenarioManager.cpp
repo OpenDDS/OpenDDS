@@ -381,6 +381,7 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
           ss << std::endl;
           std::cerr << ss.str() << std::flush;
         }
+        node_report.node_name = reports[r].node_name;
         node_report.node_id = reports[r].node_id;
         node_report.properties = reports[r].properties;
       }
