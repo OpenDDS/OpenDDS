@@ -1,3 +1,7 @@
+#include <tao/ShortSeq.pidl>
+#include <tao/UShortSeq.pidl>
+#include <tao/StringSeq.pidl>
+#include <tao/WStringSeq.pidl>
 
 // Mutable Tests =============================================================
 
