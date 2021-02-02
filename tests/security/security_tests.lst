@@ -70,3 +70,4 @@ tests/DCPS/ParticipantLocationTopic/run_test.pl noice ipv6: !DCPS_MIN CXX11 RTPS
 tests/DCPS/Restart/run_test.pl --secure: !GH_ACTIONS
 tests/DCPS/LargeSample/run_test.pl rtps_disc_sec: !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS
 tests/DCPS/XTypes/run_test.pl --secure
+tests/DCPS/SingleParticipantWithSecurity/run_test.pl
