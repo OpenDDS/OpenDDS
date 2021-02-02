@@ -96,5 +96,6 @@ for my $dir (@dirs) {
         chdir($build_dir) or die "ERROR: '$!': failed to switch to $build_dir";
       }
     }
+    run_command("@build_cmd --target clean");
   }
 }
