@@ -36,7 +36,13 @@ class OpenDDS_Dcps_Export TypeAssignability {
 public:
   explicit TypeAssignability(TypeLookupService_rch tls)
     : tl_service_(tls)
-    , type_consistency_({false, true, true, false}) {}
+  {
+    // Use default type consistency values
+    type_consistency_.prevent_type_widening = false;
+    type_consistency_.ignore_sequence_bounds = true;
+    type_consistency_.ignore_string_bounds = true;
+    type_consistency_.ignore_member_names = false;
+  }
 
   explicit TypeAssignability(TypeLookupService_rch tls,
                              TypeConsistencyAttributes type_consistency)

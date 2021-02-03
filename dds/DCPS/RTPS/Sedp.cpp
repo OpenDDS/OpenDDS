@@ -4818,11 +4818,13 @@ Sedp::populate_discovered_reader_msg(
   const CORBA::ULong added_len = sub.remote_expectant_opendds_associations_.size();
   drd.readerProxy.associatedWriters.length(len + added_len);
 
+  CORBA::ULong i = 0;
   for (DCPS::RepoIdSet::const_iterator writer =
-         sub.remote_expectant_opendds_associations_.begin(), CORBA::ULong i = 0;
+         sub.remote_expectant_opendds_associations_.begin();
        writer != sub.remote_expectant_opendds_associations_.end();
-       ++writer, ++i) {
+       ++writer) {
     drd.readerProxy.associatedWriters[len + i] = *writer;
+    ++i;
   }
 }
 
