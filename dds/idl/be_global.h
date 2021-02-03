@@ -10,6 +10,8 @@
 
 #include "annotations.h"
 
+#include <dds/DCPS/XTypes/TypeObject.h>
+
 #include <utl_scoped_name.h>
 #include <idl_defines.h>
 #ifndef TAO_IDL_HAS_ANNOTATIONS
@@ -228,7 +230,8 @@ public:
 
   OpenDDS::DataRepresentation data_representations(AST_Decl* node) const;
 
-  ACE_CDR::ULong get_id(AST_Field* field, AutoidKind auto_id, ACE_CDR::ULong& member_id) const;
+  OpenDDS::XTypes::MemberId compute_id(AST_Field* field, AutoidKind auto_id, OpenDDS::XTypes::MemberId& member_id);
+  OpenDDS::XTypes::MemberId get_id(AST_Field* field);
 
   bool is_nested(AST_Decl* node);
 
@@ -256,6 +259,8 @@ private:
   AutoidKind root_default_autoid_;
   TryConstructFailAction default_try_construct_;
   std::set<std::string> platforms_;
+  typedef std::map<AST_Field*, OpenDDS::XTypes::MemberId> MemberIdMap;
+  MemberIdMap member_id_map_;
 
   bool is_default_nested(UTL_Scope* scope);
   AutoidKind scoped_autoid(UTL_Scope* scope) const;

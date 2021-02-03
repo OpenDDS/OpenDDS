@@ -688,7 +688,7 @@ typedef std::string (*CommonFn)(
 inline
 void generateCaseBody(
   CommonFn commonFn, CommonFn commonFn2,
-  AST_UnionBranch* branch, AutoidKind auto_id, ACE_CDR::ULong& member_id,
+  AST_UnionBranch* branch,
   const char* statementPrefix, const char* namePrefix, const char* uni, bool generateBreaks, bool parens,
   bool printing = false)
 {
@@ -787,7 +787,7 @@ void generateCaseBody(
     Intro intro;
     std::ostringstream contents;
     if (commonFn2) {
-      const unsigned id = be_global->get_id(branch, auto_id, member_id);
+      const OpenDDS::XTypes::MemberId id = be_global->get_id(branch);
       contents
         << commonFn2(indent, name + (parens ? "()" : ""), branch->field_type(), "uni", false, intro, "", false)
         << indent << "if (!strm.write_parameter_id(" << id << ", size)) {\n"
@@ -810,16 +810,13 @@ void generateCaseBody(
 }
 
 inline
-bool generateSwitchBody(AST_Union* u, CommonFn commonFn,
+bool generateSwitchBody(AST_Union*, CommonFn commonFn,
                         const std::vector<AST_UnionBranch*>& branches,
                         AST_Type* discriminator, const char* statementPrefix,
                         const char* namePrefix = "", const char* uni = "",
                         bool forceDisableDefault = false, bool parens = true,
                         bool breaks = true, CommonFn commonFn2 = 0)
 {
-  const AutoidKind auto_id = be_global->autoid(u);
-  ACE_CDR::ULong member_id = 0;
-
   size_t n_labels = 0;
   bool has_default = false;
   for (size_t i = 0; i < branches.size(); ++i) {
@@ -837,7 +834,7 @@ bool generateSwitchBody(AST_Union* u, CommonFn commonFn,
       }
     }
     generateBranchLabels(branch, discriminator, n_labels, has_default);
-    generateCaseBody(commonFn, commonFn2, branch, auto_id, member_id, statementPrefix, namePrefix,
+    generateCaseBody(commonFn, commonFn2, branch, statementPrefix, namePrefix,
                      uni, breaks, parens, false);
     be_global->impl_ <<
       "  }\n";
@@ -891,19 +888,16 @@ bool generateSwitchForUnion(AST_Union* u, const char* switchExpr, CommonFn commo
         "  {\n";
     }
 
-    const AutoidKind auto_id = be_global->autoid(u);
-    ACE_CDR::ULong member_id = 0;
-
     if (true_branch || default_branch) {
       generateCaseBody(commonFn, commonFn2, true_branch ? true_branch : default_branch,
-                       auto_id, member_id, statementPrefix, namePrefix, uni, false, parens);
+                       statementPrefix, namePrefix, uni, false, parens);
     }
 
     if (false_branch || (default_branch && true_branch)) {
       be_global->impl_ <<
         "  } else {\n";
       generateCaseBody(commonFn, commonFn2, false_branch ? false_branch : default_branch,
-                       auto_id, member_id, statementPrefix, namePrefix, uni, false, parens);
+                       statementPrefix, namePrefix, uni, false, parens);
     }
 
     be_global->impl_ <<

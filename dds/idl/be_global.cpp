@@ -986,21 +986,40 @@ OpenDDS::DataRepresentation BE_GlobalData::data_representations(
   return value;
 }
 
-ACE_CDR::ULong BE_GlobalData::get_id(AST_Field* field, AutoidKind auto_id, ACE_CDR::ULong& member_id) const
+OpenDDS::XTypes::MemberId BE_GlobalData::compute_id(AST_Field* field, AutoidKind auto_id, OpenDDS::XTypes::MemberId& member_id)
 {
+  const MemberIdMap::const_iterator pos = member_id_map_.find(field);
+  if (pos != member_id_map_.end()) {
+    return pos->second;
+  }
+
   using OpenDDS::XTypes::hash_member_name_to_id;
   const std::string field_name = field->local_name()->get_string();
   std::string hash_id;
+  OpenDDS::XTypes::MemberId mid;
   if (id(field, member_id)) {
     // @id
-    return member_id++;
+    mid = member_id++;
   } else if (hashid(field, hash_id)) {
     // @hashid
-    return hash_member_name_to_id(hash_id.empty() ? field_name : hash_id);
+    mid = hash_member_name_to_id(hash_id.empty() ? field_name : hash_id);
   } else if (auto_id == autoidkind_hash) {
-    return hash_member_name_to_id(field_name);
+    mid = hash_member_name_to_id(field_name);
   } else {
     // auto_id == autoidkind_sequential
-    return member_id++;
+    mid = member_id++;
   }
+
+  member_id_map_[field] = mid;
+  return mid;
+}
+
+OpenDDS::XTypes::MemberId BE_GlobalData::get_id(AST_Field* field)
+{
+  const MemberIdMap::const_iterator pos = member_id_map_.find(field);
+  if (pos != member_id_map_.end()) {
+    return pos->second;
+  }
+  be_util::misc_error_and_abort("Could not get member id for field");
+  return -1;
 }

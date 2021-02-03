@@ -1052,11 +1052,11 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
       consider(v, discriminator, v.name + ".d");
 
       const AutoidKind auto_id = be_global->autoid(n);
-      ACE_CDR::ULong member_id = 0;
+      OpenDDS::XTypes::MemberId member_id = 0;
 
       for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
         AST_UnionBranch* ub = dynamic_cast<AST_UnionBranch*>(*i);
-        const ACE_CDR::ULong id = be_global->get_id(ub, auto_id, member_id);
+        const OpenDDS::XTypes::MemberId id = be_global->compute_id(ub, auto_id, member_id);
         consider(v, ub->field_type(), v.name + "." + OpenDDS::DCPS::to_dds_string(id));
       }
 
@@ -1074,11 +1074,11 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
       const Fields::Iterator fields_end = fields.end();
 
       const AutoidKind auto_id = be_global->autoid(n);
-      ACE_CDR::ULong member_id = 0;
+      OpenDDS::XTypes::MemberId member_id = 0;
 
       for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
         AST_Field* field = *i;
-        const ACE_CDR::ULong id = be_global->get_id(field, auto_id, member_id);
+        const OpenDDS::XTypes::MemberId id = be_global->compute_id(field, auto_id, member_id);
         consider(v, field->field_type(), v.name + "." + OpenDDS::DCPS::to_dds_string(id));
       }
 
@@ -1122,6 +1122,8 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
   case AST_ConcreteType::NT_wstring:
   case AST_ConcreteType::NT_pre_defined:
   case AST_ConcreteType::NT_fixed:
+  case AST_ConcreteType::NT_interface:
+  case AST_ConcreteType::NT_interface_fwd:
       break;
 
   case AST_ConcreteType::NT_struct_fwd:
@@ -1151,8 +1153,6 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
   case AST_ConcreteType::NT_annotation_member:
   case AST_ConcreteType::NT_module:
   case AST_ConcreteType::NT_root:
-  case AST_ConcreteType::NT_interface:
-  case AST_ConcreteType::NT_interface_fwd:
   case AST_ConcreteType::NT_valuetype:
   case AST_ConcreteType::NT_valuetype_fwd:
   case AST_ConcreteType::NT_const:
@@ -1268,8 +1268,6 @@ typeobject_generator::generate_minimal_type_identifier(AST_Type* type, bool forc
       }
       to.minimal.union_type.discriminator.common.type_id = get_minimal_type_identifier(discriminator);
 
-      ACE_CDR::ULong member_id = 0;
-
       for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
         AST_UnionBranch* branch = dynamic_cast<AST_UnionBranch*>(*i);
         const TryConstructFailAction trycon = be_global->try_construct(branch);
@@ -1285,7 +1283,7 @@ typeobject_generator::generate_minimal_type_identifier(AST_Type* type, bool forc
 
         OpenDDS::XTypes::MinimalUnionMember member;
 
-        member.common.member_id = be_global->get_id(branch, auto_id, member_id);
+        member.common.member_id = be_global->get_id(branch);
 
         member.common.member_flags = try_construct_to_member_flag(trycon);
 
@@ -1350,15 +1348,13 @@ typeobject_generator::generate_minimal_type_identifier(AST_Type* type, bool forc
       to.minimal.struct_type.header.base_type = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_NONE);
       // to.minimal.struct_type.header.detail is not used.
 
-      ACE_CDR::ULong member_id = 0;
-
       for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
         AST_Field* field = *i;
         const TryConstructFailAction trycon = be_global->try_construct(field);
 
         OpenDDS::XTypes::MinimalStructMember member;
 
-        member.common.member_id = be_global->get_id(field, auto_id, member_id);
+        member.common.member_id = be_global->get_id(field);
 
         member.common.member_flags = try_construct_to_member_flag(trycon);
 
@@ -1647,6 +1643,12 @@ typeobject_generator::generate_minimal_type_identifier(AST_Type* type, bool forc
     break;
   }
 
+  case AST_ConcreteType::NT_interface:
+  case AST_ConcreteType::NT_interface_fwd: {
+    minimal_type_identifier_map_[type] = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_NONE);
+    break;
+  }
+
   case AST_ConcreteType::NT_struct_fwd:
   case AST_ConcreteType::NT_union_fwd:
   case AST_ConcreteType::NT_native:
@@ -1674,8 +1676,6 @@ typeobject_generator::generate_minimal_type_identifier(AST_Type* type, bool forc
   case AST_ConcreteType::NT_annotation_member:
   case AST_ConcreteType::NT_module:
   case AST_ConcreteType::NT_root:
-  case AST_ConcreteType::NT_interface:
-  case AST_ConcreteType::NT_interface_fwd:
   case AST_ConcreteType::NT_valuetype:
   case AST_ConcreteType::NT_valuetype_fwd:
   case AST_ConcreteType::NT_const:
@@ -1746,6 +1746,10 @@ bool
 typeobject_generator::generate(AST_Type* node, UTL_ScopedName* name)
 {
   strong_connect(node, "");
+
+  if (!produce_output_) {
+    return true;
+  }
 
   NamespaceGuard ng;
   const string clazz = tag_type(name);

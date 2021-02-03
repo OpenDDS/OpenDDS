@@ -18,7 +18,7 @@ require File::Temp;
 use File::Temp ();
 use FileHandle;
 use Cwd;
-use POSIX;
+use POSIX qw(strftime);
 use strict;
 use warnings;
 
@@ -345,6 +345,11 @@ sub parseArgs {
   }
 
   for my $opt (@default) {
+    if ($opt eq 'rapidjson' && $opts->{'safety-profile'}) {
+      print("Although it's a default, rapidjson is not compatible with Safety ".
+            "Profile so it will not be enabled\n") if $opts->{'verbose'};
+      next;
+    }
     if (!exists $opts->{$opt} && !exists $opts->{"no-$opt"}) {
       $opts->{$opt} = '';
       $defaulted->{$opt} = 1;

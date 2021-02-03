@@ -142,10 +142,10 @@ namespace {
                             bool)
   {
     be_global->impl_ <<
-      "    value_writer.begin_field(\"" << field_name << "\");\n";
+      "    value_writer.begin_union_member(\"" << field_name << "\");\n";
     generate_write("value." + field_name + "()", type, "i", 2);
     be_global->impl_ <<
-      "    value_writer.end_field();\n";
+      "    value_writer.end_union_member();\n";
     return "";
   }
 }
@@ -221,10 +221,10 @@ bool value_writer_generator::gen_struct(AST_Structure*,
       AST_Field* const field = *pos;
       const std::string field_name = field->local_name()->get_string();
       be_global->impl_ <<
-        "  value_writer.begin_field(\"" << field_name << "\");\n";
+        "  value_writer.begin_struct_member(\"" << field_name << "\");\n";
       generate_write("value." + field_name + accessor_suffix, field->field_type(), "i");
       be_global->impl_ <<
-        "  value_writer.end_field();\n";
+        "  value_writer.end_struct_member();\n";
     }
     be_global->impl_ <<
       "  value_writer.end_struct();\n";

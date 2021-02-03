@@ -153,3 +153,17 @@ project(*GuidUtils): dcps_test, googletest {
     GuidUtils.cpp
   }
 }
+
+project(*JsonValueWriter): dcps_test, googletest, rapidjson {
+  exename = *
+  Source_Files {
+    JsonValueWriter.cpp
+  }
+}
+
+project(*JsonValueReader): dcps_test, googletest, rapidjson {
+  exename = *
+  Source_Files {
+    JsonValueReader.cpp
+  }
+}

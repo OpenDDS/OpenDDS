@@ -16,6 +16,7 @@
 #include <rapidjson/istreamwrapper.h>
 #include <rapidjson/ostreamwrapper.h>
 #include <rapidjson/writer.h>
+#include <rapidjson/reader.h>
 #include <rapidjson/prettywriter.h>
 #ifdef __GNUC__
 #  pragma GCC diagnostic pop

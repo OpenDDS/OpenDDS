@@ -14,7 +14,8 @@
 class typeobject_generator : public dds_generator {
 public:
   typeobject_generator()
-    : index_(0)
+    : produce_output_(false)
+    , index_(0)
   {}
 
   void gen_prologue();
@@ -35,6 +36,11 @@ public:
                  AST_Type* type, const char* repoid);
 
   static std::string tag_type(UTL_ScopedName* name);
+
+  void produce_output(bool flag)
+  {
+    produce_output_ = flag;
+  }
 
 private:
 
@@ -60,6 +66,7 @@ private:
   MinimalTypeIdentifierMap minimal_type_identifier_map_;
   OpenDDS::XTypes::TypeMap minimal_type_map_;
 
+  bool produce_output_;
   size_t index_;
   typedef std::vector<AST_Type*> Stack;
   Stack stack_;

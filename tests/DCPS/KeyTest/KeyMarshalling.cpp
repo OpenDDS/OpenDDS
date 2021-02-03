@@ -145,8 +145,10 @@ void run_test(const Encoding& encoding)
     message.octet_field = 12;
     message.enum_field = Messenger4::SECOND;
     message.string_field = "cromulent";
+#ifndef OPENDDS_SAFETY_PROFILE
     const CORBA::WChar wstring_value[4] = { 'X', 'Y', 'Z', 0 };
     message.wstring_field = wstring_value;
+#endif
 
     // Use Key-Only marshalling (only the key fields should be equal)
     KeyOnly<const Messenger4::Message> ko_message(message);
@@ -186,7 +188,9 @@ void run_test(const Encoding& encoding)
     TEST_CHECK(message.octet_field == dm_message.octet_field);
     TEST_CHECK(message.enum_field == dm_message.enum_field);
     TEST_CHECK(strcmp(message.string_field, dm_message.string_field) == 0);
+#ifndef OPENDDS_SAFETY_PROFILE
     TEST_CHECK(ACE_OS::strcmp(message.wstring_field, dm_message.wstring_field) == 0);
+#endif
   }
 
   {
@@ -206,8 +210,10 @@ void run_test(const Encoding& encoding)
     message.mess.octet_field = 12;
     message.mess.enum_field = Messenger4::SECOND;
     message.mess.string_field = "cromulent";
+#ifndef OPENDDS_SAFETY_PROFILE
     const CORBA::WChar wstring_value[4] = { 'X', 'Y', 'Z', 0 };
     message.mess.wstring_field = wstring_value;
+#endif
 
     // Use Key-Only marshalling (only the key fields should be equal)
     KeyOnly<const Messenger4::NestedMessage> ko_message(message);
@@ -247,7 +253,9 @@ void run_test(const Encoding& encoding)
     TEST_CHECK(message.mess.octet_field == dm_message.mess.octet_field);
     TEST_CHECK(message.mess.enum_field == dm_message.mess.enum_field);
     TEST_CHECK(strcmp(message.mess.string_field, dm_message.mess.string_field) == 0);
+#ifndef OPENDDS_SAFETY_PROFILE
     TEST_CHECK(ACE_OS::strcmp(message.mess.wstring_field, dm_message.mess.wstring_field) == 0);
+#endif
   }
 
   {
@@ -344,14 +352,17 @@ void run_test(const Encoding& encoding)
   {
     std::cout << "Messenger4::Message" << std::endl;
     Messenger4::Message message;  // Keys of many types, length = 0, bounded = false
+    message.enum_field = Messenger4::FIRST;
     key_hash_test(message);
   }
 
+#ifndef OPENDDS_SAFETY_PROFILE
   {
     std::cout << "Messenger5::Message" << std::endl;
     Messenger5::Message message;  // Wide string Key, length = 0, bounded = false
     key_hash_test(message);
   }
+#endif
 
   {
     std::cout << "Messenger6::Message" << std::endl;
