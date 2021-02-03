@@ -5,7 +5,7 @@
 using namespace Bench;
 
 int TimeSeriesGnuPlotFormatter::format(const Report& report, std::ofstream& output_file_stream,
-    const ParseParameters& parseParameters)
+  const ParseParameters& parse_parameters)
 {
   if (report.node_reports.length() > 0) {
     output_header(report, output_file_stream);

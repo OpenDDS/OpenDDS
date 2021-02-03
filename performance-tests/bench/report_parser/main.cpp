@@ -8,16 +8,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   OutputFormat output_format = OutputFormat::None;
   Report report{};
   std::ofstream output_file_stream;
-  ParseParameters parseParameters;
-  ArgumentParser argumentParser;
+  ParseParameters parse_parameters;
+  ArgumentParser argument_parser;
 
-  if (!argumentParser.parse(argc, argv, output_type, output_format,
-      report, output_file_stream, parseParameters)) {
+  if (!argument_parser.parse(argc, argv, output_type, output_format,
+      report, output_file_stream, parse_parameters)) {
       return EXIT_FAILURE;
   }
 
-  ReportParser reportParser;
+  ReportParser report_parser;
 
-  return reportParser.parse(output_type, output_format, report, output_file_stream,
-    parseParameters);
+  return report_parser.parse(output_type, output_format, report, output_file_stream,
+    parse_parameters);
 }

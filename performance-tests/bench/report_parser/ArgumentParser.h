@@ -13,7 +13,7 @@ class ArgumentParser {
 public:
   bool parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
     OutputFormat& output_format, Report& report, std::ofstream& output_file_stream,
-    ParseParameters& parseParameters);
+    ParseParameters& parse_parameters);
 private:
   void show_usage_prompt();
   void show_option_error(std::string option);

@@ -3,12 +3,12 @@
 #include "TimeSeriesRawFormatter.h"
 
 int ReportParser::parse(const OutputType output_type, const OutputFormat output_format,
-    const Report& report, std::ofstream& output_file_stream, const ParseParameters& parseParameters)
+    const Report& report, std::ofstream& output_file_stream, const ParseParameters& parse_parameters)
 {
   switch (output_type) {
   case OutputType::TimeSeries:
     return parse_time_series(output_format, report, output_file_stream,
-      parseParameters);
+      parse_parameters);
     break;
   default:
     break;
@@ -18,13 +18,13 @@ int ReportParser::parse(const OutputType output_type, const OutputFormat output_
 }
 
 int ReportParser::parse_time_series(const OutputFormat output_format, const Report& report,
-    std::ofstream& output_file_stream, const ParseParameters& parseParameters)
+    std::ofstream& output_file_stream, const ParseParameters& parse_parameters)
 {
   switch (output_format) {
   case OutputFormat::Gnuplot:
     TimeSeriesGnuPlotFormatter timeSeriesGnuPlotFormatter;
     return timeSeriesGnuPlotFormatter.format(report, output_file_stream,
-      parseParameters);
+      parse_parameters);
     break;
   default:
     break;

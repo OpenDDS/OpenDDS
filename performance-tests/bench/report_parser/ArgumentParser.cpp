@@ -10,7 +10,7 @@ using namespace Bench;
 
 bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
     OutputFormat& output_format, Report& report, std::ofstream& output_file_stream,
-    ParseParameters& parseParameters)
+    ParseParameters& parse_parameters)
 {
   std::string input_file_path;
   std::string output_file_path;
@@ -63,7 +63,7 @@ bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
             return false;
           }
         } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--tags"))) {
-          if (!parseParameters.tags.empty()) {
+          if (!parse_parameters.tags.empty()) {
             continue;
           }
 
@@ -73,18 +73,18 @@ bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
               if (option[0] == '-') {
                 break;
               } else {
-                parseParameters.tags.push_back(option);
+                parse_parameters.tags.push_back(option);
                 i++;
               }
             }
           }
 
-          if (parseParameters.tags.empty()) {
+          if (parse_parameters.tags.empty()) {
             std::cout << "Missing tag types";
             return false;
           }
         } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--stats"))) {
-          if (!parseParameters.stats.empty()) {
+          if (!parse_parameters.stats.empty()) {
             continue;
           }
 
@@ -94,18 +94,18 @@ bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
               if (option[0] == '-') {
                 break;
               } else {
-                parseParameters.stats.push_back(option);
+                parse_parameters.stats.push_back(option);
                 i++;
               }
             }
           }
 
-          if (parseParameters.stats.empty()) {
+          if (parse_parameters.stats.empty()) {
             std::cout << "Missing stat types";
             return false;
           }
         } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--values"))) {
-          if (!parseParameters.values.empty()) {
+          if (!parse_parameters.values.empty()) {
             continue;
           }
 
@@ -115,13 +115,13 @@ bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
               if (option[0] == '-') {
                 break;
               } else {
-                parseParameters.values.push_back(option);
+                parse_parameters.values.push_back(option);
                 i++;
               }
             }
           }
 
-          if (parseParameters.values.empty()) {
+          if (parse_parameters.values.empty()) {
             std::cout << "Missing value types";
             return false;
           }
