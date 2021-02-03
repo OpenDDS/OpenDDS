@@ -358,8 +358,8 @@ TransportRegistry::load_transport_templates(ACE_Configuration_Heap& cf)
       // This is not an error if the configuration file does not have
       // any domain range (sub)section.
       ACE_DEBUG((LM_NOTICE,
-                 ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_transport_template_configuration ")
-                 ACE_TEXT("failed to open [%s] section.\n"),
+                 ACE_TEXT("(%P|%t) NOTICE: TransportRegistry::load_transport_templates(): ")
+                 ACE_TEXT("config does not have a [%s] section.\n"),
                  TRANSPORT_TEMPLATE_SECTION_NAME));
     }
 
@@ -368,7 +368,7 @@ TransportRegistry::load_transport_templates(ACE_Configuration_Heap& cf)
   } else {
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_NOTICE,
-                   ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_transport_templates ")
+                   ACE_TEXT("(%P|%t) NOTICE: TransportRegistry::load_transport_templates(): ")
                    ACE_TEXT("config has %s sections.\n"),
                    TRANSPORT_TEMPLATE_SECTION_NAME));
     }
@@ -376,18 +376,20 @@ TransportRegistry::load_transport_templates(ACE_Configuration_Heap& cf)
     // Ensure there are no properties in this section
     ValueMap vm;
     if (pullValues(cf, transport_sect, vm) > 0) {
-      // There are values inside [domain]
+      // There are values inside [transport_template]
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) Service_Participant::load_transport_template_configuration(): ")
-                        ACE_TEXT("domain sections must have a subsection name\n")),
-                       -1);
+                        ACE_TEXT("(%P|%t) ERROR: TransportRegistry::load_transport_templates(): ")
+                        ACE_TEXT("%s sections must have a subsection name\n"),
+                        TRANSPORT_TEMPLATE_SECTION_NAME),
+                     -1);
     }
     // Process the subsections of this section (the individual domains)
     KeyList keys;
     if (processSections(cf, transport_sect, keys) != 0) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) Service_Participant::load_transport_template_configuration(): ")
-                        ACE_TEXT("too many nesting layers in the [transport_template] section.\n")),
+                        ACE_TEXT("(%P|%t) ERROR: TransportRegistry::load_transport_templates(): ")
+                        ACE_TEXT("too many nesting layers in the [%s] section.\n"),
+                        TRANSPORT_TEMPLATE_SECTION_NAME),
                        -1);
     }
 
@@ -399,8 +401,9 @@ TransportRegistry::load_transport_templates(ACE_Configuration_Heap& cf)
 
       if (DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) [transport_template/%C]\n"),
-                   element.transport_template_name.c_str()));
+                   ACE_TEXT("(%P|%t) TransportRegistry::load_transport_templates(): ")
+                   ACE_TEXT("processing [%s/%C]\n"),
+                   TRANSPORT_TEMPLATE_SECTION_NAME, element.transport_template_name.c_str()));
       }
 
       ValueMap values;
@@ -418,15 +421,17 @@ TransportRegistry::load_transport_templates(ACE_Configuration_Heap& cf)
           if (DCPS_debug_level > 0) {
             OPENDDS_STRING flag = element.instantiate_per_participant ? "true" : "false";
             ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT("(%P|%t) [transport_template/%C]: instantiantion rule == %C\n"),
-                       element.transport_template_name.c_str(), flag.c_str()));
+                       ACE_TEXT("(%P|%t) TransportRegistry::load_transport_templates(): ")
+                       ACE_TEXT("[%s/%C]: instantiantion rule == %C\n"),
+                       TRANSPORT_TEMPLATE_SECTION_NAME, element.transport_template_name.c_str(), flag.c_str()));
           }
         } else if (name == ACE_TEXT_ALWAYS_CHAR(CUSTOMIZATION_SECTION_NAME)) {
           customization = it->second;
           if (DCPS_debug_level > 0) {
             ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT("(%P|%t) [transport_template/%C]: customization == %C\n"),
-                       element.transport_template_name.c_str(), customization.c_str()));
+                       ACE_TEXT("(%P|%t) TransportRegistry::load_transport_templates(): ")
+                       ACE_TEXT("[%s/%C]: customization == %C\n"),
+                       TRANSPORT_TEMPLATE_SECTION_NAME, element.transport_template_name.c_str(), customization.c_str()));
           }
 
           ACE_Configuration_Section_Key custom_sect;
@@ -435,8 +440,9 @@ TransportRegistry::load_transport_templates(ACE_Configuration_Heap& cf)
 
             if (pullValues(cf, custom_sect, vcm) > 0) {
               ACE_ERROR_RETURN((LM_ERROR,
-                                ACE_TEXT("(%P|%t) TransportRegistry::load_transport_templates(): ")
-                                ACE_TEXT("Customization sections must have a subsection name\n")),
+                                ACE_TEXT("(%P|%t) ERROR: TransportRegistry::load_transport_templates(): ")
+                                ACE_TEXT("%s sections must have a subsection name\n"),
+                                CUSTOMIZATION_SECTION_NAME),
                                 -1);
             }
 
@@ -445,7 +451,8 @@ TransportRegistry::load_transport_templates(ACE_Configuration_Heap& cf)
             if (processSections(cf, custom_sect, keys) != 0) {
               ACE_ERROR_RETURN((LM_ERROR,
                                 ACE_TEXT("(%P|%t) TransportRegistry::load_transport_templates(): ")
-                                ACE_TEXT("too many nesting layers in the [Customization] section.\n")),
+                                ACE_TEXT("too many nesting layers in the [%s] section.\n"),
+                                CUSTOMIZATION_SECTION_NAME),
                                 -1);
               }
 

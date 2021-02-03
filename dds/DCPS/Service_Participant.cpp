@@ -1888,7 +1888,7 @@ Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf,
       // This is not an error if the configuration file does not have
       // any domain (sub)section. The code default configuration will be used.
       ACE_DEBUG((LM_NOTICE,
-                 ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_domain_configuration ")
+                 ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_domain_configuration(): ")
                  ACE_TEXT("failed to open [%s] section - using code default.\n"),
                  DOMAIN_SECTION_NAME));
     }
@@ -2027,8 +2027,8 @@ Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
       // This is not an error if the configuration file does not have
       // any domain range (sub)section.
       ACE_DEBUG((LM_NOTICE,
-                 ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_domain_range_configuration ")
-                 ACE_TEXT("failed to open [%s] section.\n"),
+                 ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_domain_ranges(): ")
+                 ACE_TEXT("config does not have a [%s] section.\n"),
                  DOMAIN_RANGE_SECTION_NAME));
     }
 
@@ -2037,7 +2037,7 @@ Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
   } else {
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_NOTICE,
-                   ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_domain_ranges ")
+                   ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_domain_ranges(): ")
                    ACE_TEXT("config has %s sections.\n"),
                    DOMAIN_RANGE_SECTION_NAME));
     }
@@ -2047,8 +2047,9 @@ Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
     if (pullValues(cf, domain_range_sect, vm) > 0) {
       // There are values inside [DomainRange]
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) Service_Participant::load_domain_range_configuration(): ")
-                        ACE_TEXT("[DomainRange] sections must have a subsection range\n")),
+                        ACE_TEXT("(%P|%t) Service_Participant::load_domain_ranges(): ")
+                        ACE_TEXT("[%s] sections must have a subsection range\n"),
+                        DOMAIN_RANGE_SECTION_NAME),
                        -1);
     }
 
@@ -2056,8 +2057,9 @@ Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
     KeyList keys;
     if (processSections(cf, domain_range_sect, keys) != 0) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) Service_Participant::load_domain_range_configuration(): ")
-                        ACE_TEXT("too many nesting layers in the [DomainRange] section.\n")),
+                        ACE_TEXT("(%P|%t) Service_Participant::load_domain_ranges(): ")
+                        ACE_TEXT("too many nesting layers in the [%s] section.\n"),
+                        DOMAIN_RANGE_SECTION_NAME),
                        -1);
     }
 
@@ -2072,8 +2074,9 @@ Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
 
       if (parse_domain_range(domain_range, range_start, range_end) != 0) {
           ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) Service_Participant::load_domain_range_configuration(): ")
-                            ACE_TEXT("Error parsing [DomainRange/%C] section.\n"),
+                            ACE_TEXT("(%P|%t) Service_Participant::load_domain_ranges(): ")
+                            ACE_TEXT("Error parsing [%s/%C] section.\n"),
+                            DOMAIN_RANGE_SECTION_NAME,
                             domain_range.c_str()),
                            -1);
       }
@@ -2091,8 +2094,8 @@ Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
             dt_name = it->second;
             if (DCPS_debug_level > 0) {
               ACE_DEBUG((LM_DEBUG,
-                         ACE_TEXT("(%P|%t) [DomainRange/%C]: DiscoveryTemplate name == %C\n"),
-                         domain_range.c_str(), dt_name.c_str()));
+                         ACE_TEXT("(%P|%t) [%s/%C]: DiscoveryTemplate name == %C\n"),
+                         DOMAIN_RANGE_SECTION_NAME, domain_range.c_str(), dt_name.c_str()));
             }
             range_element.discovery_template_name = dt_name;
           } else if (name == "DefaultTransportConfig") {
@@ -2144,7 +2147,7 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) Service_Participant::")
-                     ACE_TEXT("configure_domain_range_instance adding %C=%C\n"),
+                     ACE_TEXT("configure_domain_range_instance(): adding %C=%C\n"),
                      it->first.c_str(), it->second.c_str()));
         }
       }
@@ -2160,14 +2163,14 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
           if (DCPS_debug_level > 0) {
             ACE_DEBUG((LM_DEBUG,
                        ACE_TEXT("(%P|%t) Service_Participant::")
-                       ACE_TEXT("configure_domain_range_instance setting DefaultTransportConfig=%C\n"),
+                       ACE_TEXT("configure_domain_range_instance(): setting DefaultTransportConfig=%C\n"),
                        config_instance_name.c_str()));
           }
         }
       } else {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
-                          ACE_TEXT("configure_domain_range_instance ")
+                          ACE_TEXT("configure_domain_range_instance(): ")
                           ACE_TEXT("transport config not found for domain %d\n"),
                           domainId),
                          -1);
@@ -2191,7 +2194,7 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
 
       if (status != 0) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_domain_range_instance ")
+                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_domain_range_instance(): ")
                           ACE_TEXT("load_discovery_configuration() returned %d\n"),
                           status),
                          -1);
@@ -2202,7 +2205,7 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
 
       if (status != 0) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_domain_range_instance ")
+                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_domain_range_instance(): ")
                           ACE_TEXT("load_domain_configuration() returned %d\n"),
                           status),
                          -1);
@@ -2210,7 +2213,7 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
 
       if (DCPS_debug_level > 4) {
         ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) Service_Participant::configure_domain_range_instance: ")
+                 ACE_TEXT("(%P|%t) Service_Participant::configure_domain_range_instance(): ")
                  ACE_TEXT("configure domain %d.\n"),
                  domainId));
       }
@@ -2220,7 +2223,7 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
     // > 9 to limit number of messages.
     if (DCPS_debug_level > 9) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) Service_Participant::configure_domain_range_instance: ")
+                 ACE_TEXT("(%P|%t) Service_Participant::configure_domain_range_instance(): ")
                  ACE_TEXT("domain %d already configured.\n"),
                  domainId));
     }
@@ -2281,7 +2284,7 @@ Service_Participant::load_discovery_configuration(ACE_Configuration_Heap& cf,
       // No discovery code can be loaded, report an error
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
-                        ACE_TEXT("load_discovery_configuration ")
+                        ACE_TEXT("load_discovery_configuration(): ")
                         ACE_TEXT("Unable to load libraries for %s\n"),
                         section_name),
                        -1);
@@ -2312,7 +2315,7 @@ Service_Participant::configure_discovery_template(DDS::DomainId_t domainId, cons
         dcf.set_string_value(sub_sect, ACE_TEXT_CHAR_TO_TCHAR(ds_it->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(ds_it->second.c_str()));
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) Service_Participant::configure_discovery_template ")
+                     ACE_TEXT("(%P|%t) Service_Participant::configure_discovery_template(): ")
                      ACE_TEXT("setting %C = %C\n"),
                      ds_it->first.c_str(), ds_it->second.c_str()));
         }
@@ -2323,7 +2326,7 @@ Service_Participant::configure_discovery_template(DDS::DomainId_t domainId, cons
 
       if (status != 0) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_discovery_template ")
+                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_discovery_template(): ")
                           ACE_TEXT("load_discovery_configuration() returned %d\n"),
                           status),
                          -1);
@@ -2339,7 +2342,7 @@ Service_Participant::configure_discovery_template(DDS::DomainId_t domainId, cons
     }
   } else {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_discovery_template ")
+                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_discovery_template(): ")
                       ACE_TEXT("process_customizations() returned false\n")),
                      -1);
   }
@@ -2388,8 +2391,9 @@ Service_Participant::load_discovery_templates(ACE_Configuration_Heap& cf)
             OPENDDS_STRING customization = it->second;
             if (DCPS_debug_level > 0) {
               ACE_DEBUG((LM_DEBUG,
-                         ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates ")
-                         ACE_TEXT("loading customizations [Customization/%C]\n"),
+                         ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates(): ")
+                         ACE_TEXT("loading customizations [%s/%C]\n"),
+                         CUSTOMIZATION_SECTION_NAME,
                          customization.c_str()));
             }
 
@@ -2399,7 +2403,8 @@ Service_Participant::load_discovery_templates(ACE_Configuration_Heap& cf)
               if (pullValues(cf, custom_sect, vcm) > 0) {
                 ACE_ERROR_RETURN((LM_ERROR,
                                   ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates(): ")
-                                  ACE_TEXT("Customization sections must have a subsection name\n")),
+                                  ACE_TEXT("%s sections must have a subsection name\n"),
+                                  CUSTOMIZATION_SECTION_NAME),
                                  -1);
               }
 
@@ -2408,7 +2413,8 @@ Service_Participant::load_discovery_templates(ACE_Configuration_Heap& cf)
               if (processSections(cf, custom_sect, keys) != 0) {
                 ACE_ERROR_RETURN((LM_ERROR,
                                   ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates(): ")
-                                  ACE_TEXT("too many nesting layers in the [Customization] section.\n")),
+                                  ACE_TEXT("too many nesting layers in the [%s] section.\n"),
+                                  CUSTOMIZATION_SECTION_NAME),
                                  -1);
               }
 
@@ -2444,8 +2450,8 @@ int Service_Participant::parse_domain_range(const OPENDDS_STRING& range, int& st
     start = end = -1;
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) Service_Participant::parse_domain_range(): ")
-                      ACE_TEXT("DomainRange missing '-' in [DomainRange/%C] section.\n"),
-                      range.c_str()),
+                      ACE_TEXT("%s missing '-' in [%s/%C] section.\n"),
+                      DOMAIN_RANGE_SECTION_NAME, DOMAIN_RANGE_SECTION_NAME, range.c_str()),
                      -1);
   }
 
@@ -2453,37 +2459,40 @@ int Service_Participant::parse_domain_range(const OPENDDS_STRING& range, int& st
     start = end = -1;
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) Service_Participant::parse_domain_range(): ")
-                      ACE_TEXT("Illegal integer value for start DomainRange (%C) in [DomainRange/%C] section.\n"),
-                      range.substr(0, dash_pos).c_str(), range.c_str()),
+                      ACE_TEXT("Illegal integer value for start %s (%C) in [%s/%C] section.\n"),
+                      DOMAIN_RANGE_SECTION_NAME, range.substr(0, dash_pos).c_str(),
+                      DOMAIN_RANGE_SECTION_NAME, range.c_str()),
                      -1);
   }
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Service_Participant::parse_domain_range(): ")
-               ACE_TEXT("(%P|%t) [DomainRange/%C]: range_start == %d\n"),
+               ACE_TEXT("(%P|%t) [%s/%C]: range_start == %d\n"),
+               DOMAIN_RANGE_SECTION_NAME,
                range.c_str(), start));
   }
 
   if (!convertToInteger(range.substr(dash_pos + 1), end)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) Service_Participant::parse_domain_range(): ")
-                      ACE_TEXT("Illegal integer value for end DomainRange (%C) in [DomainRange/%C] section.\n"),
-                      range.substr(0, dash_pos).c_str(), range.c_str()),
+                      ACE_TEXT("Illegal integer value for end %s (%C) in [%s/%C] section.\n"),
+                      DOMAIN_RANGE_SECTION_NAME, range.substr(0, dash_pos).c_str(),
+                      DOMAIN_RANGE_SECTION_NAME, range.c_str()),
                      -1);
   }
 
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Service_Participant::parse_domain_range(): ")
-               ACE_TEXT("(%P|%t) [DomainRange/%C]: range_end == %d\n"),
-               range.c_str(), end));
+               ACE_TEXT("(%P|%t) [%s/%C]: range_end == %d\n"),
+               DOMAIN_RANGE_SECTION_NAME, range.c_str(), end));
   }
 
   if (end < start) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) Service_Participant::parse_domain_range(): ")
-                      ACE_TEXT("Range End %d is less than range start %d in [DomainRange/%C] section.\n"),
-                      end, start, range.c_str()),
+                      ACE_TEXT("Range End %d is less than range start %d in [%s/%C] section.\n"),
+                      end, start, DOMAIN_RANGE_SECTION_NAME, range.c_str()),
                      -1);
   }
 
@@ -2511,9 +2520,9 @@ Service_Participant::get_domain_range_info(const DDS::DomainId_t id, DomainRange
 
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) Service_Participant::get_discovery: ")
-                     ACE_TEXT("Domain %d is in [DomainRange/%d-%d]\n"),
-                     id, it->range_start, it->range_end));
+                     ACE_TEXT("(%P|%t) Service_Participant::get_domain_range_info(): ")
+                     ACE_TEXT("Domain %d is in [%s/%d-%d]\n"),
+                     id, DOMAIN_RANGE_SECTION_NAME, it->range_start, it->range_end));
         }
 
         return true;
@@ -2541,7 +2550,7 @@ Service_Participant::process_customizations(DDS::DomainId_t id, const OPENDDS_ST
       if (DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) Service_Participant::")
-                   ACE_TEXT("process_customizations adding config %C=%C\n"),
+                   ACE_TEXT("process_customizations(): adding config %C=%C\n"),
                    i->first.c_str(), i->second.c_str()));
       }
     }
@@ -2557,7 +2566,7 @@ Service_Participant::process_customizations(DDS::DomainId_t id, const OPENDDS_ST
           if (!convertToInteger(custom, val)) {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
-                              ACE_TEXT("process_Customizations ")
+                              ACE_TEXT("process_customizations(): ")
                               ACE_TEXT("could not convert %C to integer\n"),
                               custom.c_str()),
                              false);
@@ -2568,7 +2577,7 @@ Service_Participant::process_customizations(DDS::DomainId_t id, const OPENDDS_ST
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
-                            ACE_TEXT("configure_domain_range_instance ")
+                            ACE_TEXT("process_customizations(): ")
                             ACE_TEXT("could not AddDomainId for %s\n"),
                             customs["InteropMulticastOverride"].c_str()),
                            false);
