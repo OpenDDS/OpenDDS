@@ -9,7 +9,8 @@
 using namespace Bench;
 
 bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
-  OutputFormat& output_format, Report& report, std::ofstream& output_file_stream)
+    OutputFormat& output_format, Report& report, std::ofstream& output_file_stream,
+    ParseParameters& parseParameters)
 {
   std::string input_file_path;
   std::string output_file_path;
@@ -27,13 +28,14 @@ bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
           return false;
         }
 
-        std::string option_argument = get_option_argument(i, argc, argv);
-
         if (!ACE_OS::strcmp(argument, ACE_TEXT("--input-file"))) {
+          std::string option_argument = get_option_argument(i, argc, argv);
           input_file_path = option_argument;
         } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--output-file"))) {
+          std::string option_argument = get_option_argument(i, argc, argv);
           output_file_path = option_argument;
         } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--output-type"))) {
+          std::string option_argument = get_option_argument(i, argc, argv);
           static std::unordered_map<std::string, OutputType> const table = {
             { "time-series", OutputType::TimeSeries }
           };
@@ -47,6 +49,7 @@ bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
             return false;
           }
         } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--output-format"))) {
+          std::string option_argument = get_option_argument(i, argc, argv);
           static std::unordered_map<std::string, OutputFormat> const table = {
             { "gnuplot", OutputFormat::Gnuplot }
           };
@@ -57,6 +60,69 @@ bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
             output_format = it->second;
           } else {
             show_option_argument_error(option_argument);
+            return false;
+          }
+        } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--tags"))) {
+          if (!parseParameters.tags.empty()) {
+            continue;
+          }
+
+          if (i + 1 < argc) {
+            for (int index = i + 1; index < argc; index++) {
+              std::string option = ACE_TEXT_ALWAYS_CHAR(argv[index]);
+              if (option[0] == '-') {
+                break;
+              } else {
+                parseParameters.tags.push_back(option);
+                i++;
+              }
+            }
+          }
+
+          if (parseParameters.tags.empty()) {
+            std::cout << "Missing tag types";
+            return false;
+          }
+        } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--stats"))) {
+          if (!parseParameters.stats.empty()) {
+            continue;
+          }
+
+          if (i + 1 < argc) {
+            for (int index = i + 1; index < argc; index++) {
+              std::string option = ACE_TEXT_ALWAYS_CHAR(argv[index]);
+              if (option[0] == '-') {
+                break;
+              } else {
+                parseParameters.stats.push_back(option);
+                i++;
+              }
+            }
+          }
+
+          if (parseParameters.stats.empty()) {
+            std::cout << "Missing stat types";
+            return false;
+          }
+        } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--values"))) {
+          if (!parseParameters.values.empty()) {
+            continue;
+          }
+
+          if (i + 1 < argc) {
+            for (int index = i + 1; index < argc; index++) {
+              std::string option = ACE_TEXT_ALWAYS_CHAR(argv[index]);
+              if (option[0] == '-') {
+                break;
+              } else {
+                parseParameters.values.push_back(option);
+                i++;
+              }
+            }
+          }
+
+          if (parseParameters.values.empty()) {
+            std::cout << "Missing value types";
             return false;
           }
         } else {
@@ -126,12 +192,15 @@ void ArgumentParser::show_usage()
   std::cout
     << "usage: report_parser [-h|--help] | [OPTIONS...]" << std::endl
     << "OPTIONS:" << std::endl
-    << "--input-file <filename>      The report file to read" << std::endl
+    << "--input-file  <filename>     The report file to read" << std::endl
     << "--output-file <filename>     The parsed file to generate" << std::endl
     << "--output-type <type>         Specifies type of data to parse." << std::endl
     << "     Options:" << std::endl
     << "            time-series:     Parses out time-series data" << std::endl
     << "--output-format <format>     Specifies format of output." << std::endl
     << "     Options:" << std::endl
-    << "            gnuplot:         Formats output for plotting with gnuplot" << std::endl;
+    << "            gnuplot:         Formats output for plotting with gnuplot" << std::endl
+    << "--tags   <list of tags>      Specifies the status block types to output." << std::endl
+    << "--stats  <list of stats>     Specifies the status block value types to output." << std::endl
+    << "--values <list of values>    Specifies the status block values to output." << std::endl;
 }

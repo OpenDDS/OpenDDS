@@ -4,7 +4,8 @@
 
 using namespace Bench;
 
-int TimeSeriesGnuPlotFormatter::format(const Report& report, std::ofstream& output_file_stream)
+int TimeSeriesGnuPlotFormatter::format(const Report& report, std::ofstream& output_file_stream,
+    ParseParameters& parseParameters)
 {
   if (report.node_reports.length() > 0) {
     output_header(report, output_file_stream);
@@ -33,7 +34,6 @@ void TimeSeriesGnuPlotFormatter::output_header(const Report& report, std::ofstre
     output_file_stream << " mem_percent_timestamp" << (show_postfix ? std::to_string(node_index + 1) : "");
     output_file_stream << " virtual_mem_percent_median" << (show_postfix ? std::to_string(node_index + 1) : "");
     output_file_stream << " virtual_mem_percent_timestamp" << (show_postfix ? std::to_string(node_index + 1) : "");
-
   }
 
   output_file_stream << std::endl;
