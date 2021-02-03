@@ -8,7 +8,5 @@ project(SingleParticipantWithSecurity): dcpsexe, dcps_test, dcps_transports_for_
 
   Source_Files {
     pubsub.cpp
-    Writer.cpp
-	DataReaderListener.cpp
   }
 }

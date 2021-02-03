@@ -14,8 +14,12 @@
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/WaitSet.h>
 
 #include "dds/DCPS/StaticIncludes.h"
+
+#include "SingleParticipantWithSecurityC.h"
+#include "SingleParticipantWithSecurityTypeSupportImpl.h"
 
 #ifdef ACE_AS_STATIC_LIBS
 # ifndef OPENDDS_SAFETY_PROFILE
@@ -23,21 +27,13 @@
 #include <dds/DCPS/transport/multicast/Multicast.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/transport/shmem/Shmem.h>
-#  ifdef OPENDDS_SECURITY
-#  include "dds/DCPS/security/BuiltInPlugins.h"
-#  endif
+#include "dds/DCPS/security/BuiltInPlugins.h"
 # endif
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
 #include <cstdlib>
 
-#include "SingleParticipantWithSecurityTypeSupportImpl.h"
-#include "Writer.h"
-#include "SingleParticipantWithSecurity.h"
-#include "DataReaderListener.h"
-
-#ifdef OPENDDS_SECURITY
 #include <dds/DCPS/security/framework/Properties.h>
 
 const char auth_ca_file_from_tests[] = "security/certs/identity/identity_ca_cert.pem";
@@ -46,12 +42,6 @@ const char id_cert_file_from_tests[] = "security/certs/identity/test_participant
 const char id_key_file_from_tests[] = "security/certs/identity/test_participant_01_private_key.pem";
 const char governance_file[] = "file:./governance_signed.p7s";
 const char permissions_file[] = "file:./permissions_1_signed.p7s";
-#endif
-
-bool dw_reliable() {
-  OpenDDS::DCPS::TransportConfig_rch gc = TheTransportRegistry->global_config();
-  return !(gc->instances_[0]->transport_type_ == "udp");
-}
 
 void append(DDS::PropertySeq& props, const char* name, const char* value, bool propagate = false)
 {
@@ -59,6 +49,102 @@ void append(DDS::PropertySeq& props, const char* name, const char* value, bool p
   const unsigned int len = props.length();
   props.length(len + 1);
   props[len] = prop;
+}
+
+void read(DDS::DataReader_ptr reader)
+{
+  try {
+    SingleParticipantWithSecurity::MessageDataReader_var message_dr =
+      SingleParticipantWithSecurity::MessageDataReader::_narrow(reader);
+
+    if (!message_dr) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("%N:%l: read()")
+        ACE_TEXT(" ERROR: _narrow failed!\n")));
+      return;
+    }
+
+    DDS::ReadCondition_var dr_rc = reader->create_readcondition(DDS::NOT_READ_SAMPLE_STATE,
+      DDS::ANY_VIEW_STATE,
+      DDS::ALIVE_INSTANCE_STATE);
+    DDS::WaitSet_var ws = new DDS::WaitSet;
+    ws->attach_condition(dr_rc);
+    std::set<int> instances;
+
+    DDS::ConditionSeq active;
+    const DDS::Duration_t max_wait = { 10, 0 };
+    DDS::ReturnCode_t ret = ws->wait(active, max_wait);
+
+    if (ret == DDS::RETCODE_TIMEOUT) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("%N:%l: read()")
+        ACE_TEXT(" ERROR: reader timedout\n")));
+      return;
+    } else if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("%N:%l: read()")
+        ACE_TEXT(" ERROR: Reader: wait returned %d\n"), ret));
+      return;
+    }
+
+    ws->detach_condition(dr_rc);
+    reader->delete_readcondition(dr_rc);
+
+    SingleParticipantWithSecurity::Message message;
+    DDS::SampleInfo si;
+
+    const DDS::ReturnCode_t status = message_dr->take_next_sample(message, si);
+
+    if (status != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("%N:%l: read()")
+        ACE_TEXT(" ERROR: unexpected status: %d\n"),
+        status));
+      return;
+    }
+
+    std::cout << "SampleInfo.sample_rank = " << si.sample_rank << std::endl;
+    std::cout << "SampleInfo.instance_state = " << OpenDDS::DCPS::InstanceState::instance_state_string(si.instance_state) << std::endl;
+
+    if (si.valid_data) {
+
+      std::cout << "Message: subject    = " << message.subject.in() << std::endl
+        << "         subject_id = " << message.subject_id << std::endl
+        << "         from       = " << message.from.in() << std::endl
+        << "         count      = " << message.count << std::endl
+        << "         text       = " << message.text.in() << std::endl;
+
+      if (std::string("Comic Book Guy") != message.from.in() &&
+        std::string("OpenDDS-Java") != message.from.in()) {
+        std::cout << "ERROR: Invalid message.from" << std::endl;
+      }
+      if (std::string("Review") != message.subject.in()) {
+        std::cout << "ERROR: Invalid message.subject" << std::endl;
+      }
+      if (std::string("Worst. Movie. Ever.") != message.text.in()) {
+        std::cout << "ERROR: Invalid message.text" << std::endl;
+      }
+      if (message.subject_id != 99) {
+        std::cout << "ERROR: Invalid message.subject_id" << std::endl;
+      }
+    } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
+    } else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is unregistered\n")));
+    } else {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("%N:%l: read()")
+        ACE_TEXT(" ERROR: unknown instance state: %d\n"),
+        si.instance_state));
+    }
+
+    return;
+  }
+  catch (const CORBA::Exception& e) {
+    e._tao_print_exception("Exception caught in on_data_available():");
+    ACE_OS::exit(EXIT_FAILURE);
+    return;
+  }
 }
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
@@ -81,7 +167,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       DDS::PropertySeq& props = part_qos.property.value;
 
-#ifdef OPENDDS_SECURITY
       // Determine the path to the keys
       OPENDDS_STRING path_to_tests;
       const char* dds_root = ACE_OS::getenv("DDS_ROOT");
@@ -104,7 +189,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         append(props, DDS::Security::Properties::AccessGovernance, governance_file);
         append(props, DDS::Security::Properties::AccessPermissions, permissions_file);
       }
-#endif
 
       // Create DomainParticipant
       participant = dpf->create_participant(4,
@@ -161,11 +245,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       DDS::DataWriterQos qos;
       pub->get_default_datawriter_qos(qos);
-      if (dw_reliable()) {
-        std::cout << "Reliable DataWriter" << std::endl;
-        qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
-        qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-      }
+      qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+      qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
       // Create DataWriter
       DDS::DataWriter_var dw =
@@ -195,20 +276,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       // Create DataReader
-      DataReaderListenerImpl* const listener_servant = new DataReaderListenerImpl;
-      DDS::DataReaderListener_var listener(listener_servant);
-
       DDS::DataReaderQos dr_qos;
       sub->get_default_datareader_qos(dr_qos);
-      if (DataReaderListenerImpl::is_reliable()) {
-        std::cout << "Reliable DataReader" << std::endl;
-        dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-      }
+      dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
       DDS::DataReader_var reader =
         sub->create_datareader(topic.in(),
           dr_qos,
-          listener.in(),
+          0,
           OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       if (!reader) {
@@ -218,35 +293,37 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           EXIT_FAILURE);
       }
 
-      // Start writing threads
-      std::cout << "Creating Writer" << std::endl;
-      Writer* writer = new Writer(dw.in());
-      std::cout << "Starting Writer" << std::endl;
-      writer->start();
+      // Wait for the writer to match the reader
+      DDS::StatusCondition_var condition = dw->get_statuscondition();
+      condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
+      DDS::WaitSet_var ws = new DDS::WaitSet;
+      ws->attach_condition(condition);
 
-      while (!writer->is_finished()) {
-        ACE_Time_Value small_time(0, 250000);
-        ACE_OS::sleep(small_time);
+      DDS::ConditionSeq conditions;
+      DDS::Duration_t timeout = { 10, 0 };
+      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR,
+          ACE_TEXT("%N:%l: main()")
+          ACE_TEXT(" ERROR: PUBLICATION_MATCHED_STATUS condition wait failed\n")),
+          EXIT_FAILURE);
       }
 
-      std::cout << "Writer finished " << std::endl;
-      writer->end();
+      ws->detach_condition(condition);
 
-      if (dw_reliable()) {
-        std::cout << "Writer wait for ACKS" << std::endl;
+      // Write the sample
+      SingleParticipantWithSecurity::Message message;
+      message.from = "Comic Book Guy";
+      message.subject = "Review";
+      message.text = "Worst. Movie. Ever.";
+      message.count = 0;
+      message.subject_id = 99;
 
-        DDS::Duration_t timeout =
-          { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-        dw->wait_for_acknowledgments(timeout);
-      } else {
-        // let any missed multicast/rtps messages get re-delivered
-        std::cout << "Writer wait small time" << std::endl;
-        ACE_Time_Value small_time(0, 250000);
-        ACE_OS::sleep(small_time);
-      }
+      SingleParticipantWithSecurity::MessageDataWriter_var message_dw
+        = SingleParticipantWithSecurity::MessageDataWriter::_narrow(dw);
+      message_dw->write(message, DDS::HANDLE_NIL);
 
-      std::cerr << "deleting DW" << std::endl;
-      delete writer;
+      // Read the sample
+      read(reader);
     }
 
     // Clean-up!
