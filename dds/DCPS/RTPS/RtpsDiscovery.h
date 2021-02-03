@@ -493,6 +493,17 @@ public:
     use_xtypes_ = use_xtypes;
   }
 
+  DCPS::TimeDuration sedp_heartbeat_period() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::TimeDuration());
+    return sedp_heartbeat_period_;
+  }
+  void sedp_heartbeat_period(const DCPS::TimeDuration& period)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    sedp_heartbeat_period_ = period;
+  }
+
 private:
   mutable ACE_Thread_Mutex lock_;
   DCPS::TimeDuration resend_period_;
@@ -530,6 +541,7 @@ private:
   bool secure_participant_user_data_;
   DCPS::TimeDuration max_type_lookup_service_reply_period_;
   bool use_xtypes_;
+  DCPS::TimeDuration sedp_heartbeat_period_;
 };
 
 typedef OpenDDS::DCPS::RcHandle<RtpsDiscoveryConfig> RtpsDiscoveryConfig_rch;

@@ -76,8 +76,8 @@ public:
   Worker& operator=(const Worker&) = delete;
   Worker& operator=(Worker&&) = delete;
 
-  Worker(const NodeId& node_id, const WorkerConfig& config)
-  : node_id_(node_id)
+  Worker(const std::string& node_name, const NodeId& node_id, const WorkerConfig& config)
+  : node_name_(node_name), node_id_(node_id)
   , worker_id_(config.worker_id)
   {
     std::stringstream ss;
@@ -176,6 +176,7 @@ public:
   }
 
 private:
+  std::string node_name_;
   NodeId node_id_;
   WorkerId worker_id_;
   bool running_ = false;
@@ -193,8 +194,8 @@ using ProcessStatsCollectorPtr = std::shared_ptr<ProcessStatsCollector>;
 class WorkerManager : public ACE_Event_Handler {
 public:
 
-  explicit WorkerManager(const NodeId& node_id, ACE_Process_Manager& process_manager)
-  : node_id_(node_id)
+  explicit WorkerManager(const std::string& node_name, const NodeId& node_id, ACE_Process_Manager& process_manager)
+  : node_name_(node_name), node_id_(node_id)
   , process_manager_(process_manager)
   {
     process_manager.register_handler(this);
@@ -229,7 +230,7 @@ public:
       std::cerr << "Received the same worker id twice: " << config.worker_id << std::endl;
       return true;
     }
-    all_workers_[config.worker_id] = std::make_shared<Worker>(node_id_, config);
+    all_workers_[config.worker_id] = std::make_shared<Worker>(node_name_, node_id_, config);
     remaining_worker_count_++;
     return false;
   }
@@ -284,6 +285,7 @@ public:
     auto mem_block = std::make_shared<Bench::PropertyStatBlock>(report.properties, "mem_percent", max_stat_buffer_size, true);
     auto virtual_mem_block = std::make_shared<Bench::PropertyStatBlock>(report.properties, "virtual_mem_percent", max_stat_buffer_size, true);
     CORBA::ULong pos = 0;
+    report.node_name = node_name_.c_str();
     report.node_id = node_id_;
 
     bool running = true;
@@ -358,7 +360,11 @@ public:
       return false;
     }
 
-    std::cout << "Writing report for node " << node_id_ << std::endl;
+    if (node_name_.length() > 0) {
+      std::cout << "Writing report for node '" << node_name_ << "', id: " << node_id_ << std::endl;
+    } else {
+      std::cout << "Writing report for node " << node_id_ << std::endl;
+    }
     if (report_writer_impl->write(report, DDS::HANDLE_NIL)) {
       std::cerr << "Write report failed" << std::endl;
     }
@@ -422,6 +428,7 @@ private:
   std::map<pid_t, WorkerId> pid_to_worker_id_;
   std::map<pid_t, ProcessStatsCollectorPtr> worker_process_stat_collectors_;
   std::list<WorkerPtr> finished_workers_;
+  std::string node_name_;
   NodeId node_id_;
   ACE_Process_Manager& process_manager_;
   std::atomic_bool scenario_timedout_{false};
@@ -773,7 +780,7 @@ int run_cycle(
   wait_for_full_scenario(name, this_node_id, status_writer_impl, allocated_scenario_reader_impl, scenario);
 
   // This constructor traps signals, wait until we really need it.
-  auto worker_manager = std::make_shared<WorkerManager>(this_node_id, process_manager);
+  auto worker_manager = std::make_shared<WorkerManager>(name, this_node_id, process_manager);
 
   Bench::NodeController::Configs& configs = scenario.configs;
   for (CORBA::ULong node = 0; node < configs.length(); ++node) {
