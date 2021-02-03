@@ -2,8 +2,8 @@
 #include "TimeSeriesGnuPlotFormatter.h"
 #include "TimeSeriesRawFormatter.h"
 
-int ReportParser::parse(OutputType output_type, OutputFormat output_format,
-    Report& report, std::ofstream& output_file_stream, ParseParameters& parseParameters)
+int ReportParser::parse(const OutputType output_type, const OutputFormat output_format,
+    const Report& report, std::ofstream& output_file_stream, const ParseParameters& parseParameters)
 {
   switch (output_type) {
   case OutputType::TimeSeries:
@@ -17,8 +17,8 @@ int ReportParser::parse(OutputType output_type, OutputFormat output_format,
   return EXIT_FAILURE;
 }
 
-int ReportParser::parse_time_series(OutputFormat output_format, Report& report,
-  std::ofstream& output_file_stream, ParseParameters& parseParameters)
+int ReportParser::parse_time_series(const OutputFormat output_format, const Report& report,
+    std::ofstream& output_file_stream, const ParseParameters& parseParameters)
 {
   switch (output_format) {
   case OutputFormat::Gnuplot:

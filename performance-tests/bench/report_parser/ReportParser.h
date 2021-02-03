@@ -9,11 +9,11 @@ using namespace Bench::TestController;
 
 class ReportParser {
 public:
-  int parse(OutputType output_type, OutputFormat output_format,
-    Report& report, std::ofstream& output_file_stream, ParseParameters& parseParameters);
+  int parse(const OutputType output_type, const OutputFormat output_format,
+    const Report& report, std::ofstream& output_file_stream, const ParseParameters& parseParameters);
 private:
-  int parse_time_series(OutputFormat output_format, Report& report,
-    std::ofstream& output_file_stream, ParseParameters& parseParameters);
+  int parse_time_series(const OutputFormat output_format, const Report& report,
+    std::ofstream& output_file_stream, const ParseParameters& parseParameters);
 };
 
 #endif
