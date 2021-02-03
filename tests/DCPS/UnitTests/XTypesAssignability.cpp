@@ -3629,7 +3629,7 @@ TEST(UnionTypeTest, Assignable)
   a.union_flags = IS_FINAL;
   b.union_flags = a.union_flags;
   a_imn.union_flags = IS_APPENDABLE;
-  b_imn_union_flags = a_imn.union_flags;
+  b_imn.union_flags = a_imn.union_flags;
 
   // Discriminator type must be strongly assignable
   a.discriminator.common.type_id = TypeIdentifier(TK_UINT16);
