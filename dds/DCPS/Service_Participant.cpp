@@ -743,6 +743,13 @@ Service_Participant::initialize()
   initial_ReaderDataLifecycleQosPolicy_.autopurge_disposed_samples_delay.sec = DDS::DURATION_INFINITE_SEC;
   initial_ReaderDataLifecycleQosPolicy_.autopurge_disposed_samples_delay.nanosec = DDS::DURATION_INFINITE_NSEC;
 
+  initial_TypeConsistencyEnforcementQosPolicy_.kind = DDS::ALLOW_TYPE_COERCION;
+  initial_TypeConsistencyEnforcementQosPolicy_.prevent_type_widening = false;
+  initial_TypeConsistencyEnforcementQosPolicy_.ignore_sequence_bounds = true;
+  initial_TypeConsistencyEnforcementQosPolicy_.ignore_string_bounds = true;
+  initial_TypeConsistencyEnforcementQosPolicy_.ignore_member_names = false;
+  initial_TypeConsistencyEnforcementQosPolicy_.force_type_validation = false;
+
   initial_DomainParticipantQos_.user_data = initial_UserDataQosPolicy_;
   initial_DomainParticipantQos_.entity_factory = initial_EntityFactoryQosPolicy_;
   initial_DomainParticipantFactoryQos_.entity_factory = initial_EntityFactoryQosPolicy_;
@@ -804,18 +811,12 @@ Service_Participant::initialize()
   initial_DataReaderQos_.ownership = initial_OwnershipQosPolicy_;
   initial_DataReaderQos_.reader_data_lifecycle = initial_ReaderDataLifecycleQosPolicy_;
   initial_DataReaderQos_.representation = initial_DataRepresentationQosPolicy_;
+  initial_DataReaderQos_.type_consistency = initial_TypeConsistencyEnforcementQosPolicy_;
 
   initial_SubscriberQos_.presentation = initial_PresentationQosPolicy_;
   initial_SubscriberQos_.partition = initial_PartitionQosPolicy_;
   initial_SubscriberQos_.group_data = initial_GroupDataQosPolicy_;
   initial_SubscriberQos_.entity_factory = initial_EntityFactoryQosPolicy_;
-
-  initial_TypeConsistencyEnforcementQosPolicy_.kind = DDS::ALLOW_TYPE_COERCION;
-  initial_TypeConsistencyEnforcementQosPolicy_.prevent_type_widening = false;
-  initial_TypeConsistencyEnforcementQosPolicy_.ignore_sequence_bounds = true;
-  initial_TypeConsistencyEnforcementQosPolicy_.ignore_string_bounds = true;
-  initial_TypeConsistencyEnforcementQosPolicy_.ignore_member_names = false;
-  initial_TypeConsistencyEnforcementQosPolicy_.force_type_validation = false;
 
   bit_autopurge_nowriter_samples_delay_.sec = DDS::DURATION_INFINITE_SEC;
   bit_autopurge_nowriter_samples_delay_.nanosec = DDS::DURATION_INFINITE_NSEC;

@@ -47,6 +47,11 @@ bool get_topic(T ts, const DomainParticipant_var dp, const std::string& topic_na
 
   topic = dp->create_topic(topic_name.c_str(), type_name,
     TOPIC_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
+  if (!topic) {
+    ACE_ERROR((LM_ERROR, "ERROR: create_topic failed\n"));
+    return false;
+  }
+
   return true;
 }
 

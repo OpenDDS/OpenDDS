@@ -1524,14 +1524,18 @@ namespace OpenDDS {
 
             if (drQos->type_consistency.kind == DDS::ALLOW_TYPE_COERCION) {
               consistent = ta.assignable(reader_type_id, writer_type_id);
+              ACE_DEBUG((LM_DEBUG, "DEBUG: Assignability returns %C\n",
+                         consistent ? "true" : "false"));
             } else {
               // The two types must be equivalent for DISALLOW_TYPE_COERCION
               consistent = reader_type_id == writer_type_id;
+              ACE_DEBUG((LM_DEBUG, "DEBUG: Two types are not equivalent\n"));
             }
           } else {
             if (drQos->type_consistency.force_type_validation) {
               // Cannot do type validation since not both TypeObjects are available
               consistent = false;
+              ACE_DEBUG((LM_DEBUG, "DEBUG: force_type_validation is true\n"));
             } else {
               // Fall back to matching type names
               OPENDDS_STRING writer_type_name;
@@ -1547,6 +1551,8 @@ namespace OpenDDS {
                 reader_type_name = dsi->second.get_type_name();
               }
               consistent = writer_type_name == reader_type_name;
+              ACE_DEBUG((LM_DEBUG, "DEBUG: Two type names are %C\n",
+                         consistent ? "the same" : "NOT the same"));
             }
           }
 

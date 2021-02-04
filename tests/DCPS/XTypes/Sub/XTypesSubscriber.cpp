@@ -190,12 +190,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
+  // Default properties of type consistency enforcement Qos currently supported
+  bool disallow_type_coercion = false;
+  bool ignore_member_names = false;
+  bool force_type_validation = false;
+
   for (int i = 1; i < argc; ++i) {
     ACE_TString arg(argv[i]);
     if (arg == ACE_TEXT("--verbose")) {
       verbose = true;
-    } else if (arg == ACE_TEXT("--writer")) {
-    } else if (arg == ACE_TEXT("--reader")) {
     } else if (arg == ACE_TEXT("--type")) {
       if (i + 1 < argc) {
         type = ACE_TEXT_ALWAYS_CHAR(argv[++i]);
@@ -219,6 +222,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       }
     } else if (arg == ACE_TEXT("--expect_to_fail")) {
       expect_to_match = false;
+    } else if (arg == ACE_TEXT("--disallow_type_coercion")) {
+      disallow_type_coercion =  true;
+    } else if (arg == ACE_TEXT("--ignore_member_names")) {
+      ignore_member_names = true;
+    } else if (arg == ACE_TEXT("--force_type_validation")) {
+      force_type_validation = true;
     } else {
       ACE_ERROR((LM_ERROR, "ERROR: Invalid argument: %s\n", argv[i]));
       return 1;
@@ -260,6 +269,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   } else if (type == "Trim20Struct") {
     Trim20StructTypeSupport_var ts = new Trim20StructTypeSupportImpl;
     failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+  } else if (type.empty()) {
+    ACE_ERROR((LM_ERROR, "ERROR: Must specify a type name\n"));
+    return 1;
   } else {
     ACE_ERROR((LM_ERROR, "ERROR: Type %C is not supported\n", type.c_str()));
     return 1;
@@ -273,13 +285,28 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   Subscriber_var sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
     DEFAULT_STATUS_MASK);
+  if (!sub) {
+    ACE_ERROR((LM_ERROR, "ERROR: create_subscriber failed\n"));
+    return 1;
+  }
+
   DataReaderQos dr_qos;
   sub->get_default_datareader_qos(dr_qos);
   dr_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
   dr_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
 
+  if (disallow_type_coercion) {
+    dr_qos.type_consistency.kind = DISALLOW_TYPE_COERCION;
+  }
+  dr_qos.type_consistency.ignore_member_names = ignore_member_names;
+  dr_qos.type_consistency.force_type_validation = force_type_validation;
+
   DataReader_var dr = sub->create_datareader(topic, dr_qos, 0,
     DEFAULT_STATUS_MASK);
+  if (!dr) {
+    ACE_ERROR((LM_ERROR, "ERROR: create_datareader failed\n"));
+    return 1;
+  }
 
   DDS::StatusCondition_var condition = expect_to_match ? dr->get_statuscondition() : topic->get_statuscondition();
   condition->set_enabled_statuses(expect_to_match ? DDS::SUBSCRIPTION_MATCHED_STATUS : DDS::INCONSISTENT_TOPIC_STATUS);
@@ -291,7 +318,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: %C condition wait failed for type %C\n",
       expect_to_match ? "SUBSCRIPTION_MATCHED_STATUS" : "INCONSISTENT_TOPIC_STATUS", type.c_str()));
-    failed = 1;
+    failed = true;
   }
 
   ws->detach_condition(condition);

@@ -148,8 +148,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ACE_TString arg(argv[i]);
     if (arg == ACE_TEXT("--verbose")) {
       verbose = true;
-    } else if (arg == ACE_TEXT("--writer")) {
-    } else if (arg == ACE_TEXT("--reader")) {
     } else if (arg == ACE_TEXT("--type")) {
       if (i + 1 < argc) {
         type = ACE_TEXT_ALWAYS_CHAR(argv[++i]);
@@ -182,7 +180,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DomainParticipant_var dp;
   create_participant(dpf, dp);
   if (!dp) {
-    ACE_ERROR((LM_ERROR, "ERROR: create_participant() failed"));
+    ACE_ERROR((LM_ERROR, "ERROR: create_participant failed"));
     return 1;
   }
 
@@ -241,6 +239,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   } else if (type == "AppendableStructWithDependency") {
     AppendableStructWithDependencyTypeSupport_var ts = new AppendableStructWithDependencyTypeSupportImpl;
     failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+  } else if (type.empty()) {
+    ACE_ERROR((LM_ERROR, "ERROR: Must specify a type name\n"));
+    return 1;
   } else {
     ACE_ERROR((LM_ERROR, "ERROR: Type %C is not supported\n", type.c_str()));
     return 1;
@@ -254,12 +255,21 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   Publisher_var pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
     DEFAULT_STATUS_MASK);
+  if (!pub) {
+    ACE_ERROR((LM_ERROR, "ERROR: create_publisher failed\n"));
+    return 1;
+  }
+
   DataWriterQos dw_qos;
   pub->get_default_datawriter_qos(dw_qos);
   dw_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
 
   DataWriter_var dw = pub->create_datawriter(topic, dw_qos, 0,
     DEFAULT_STATUS_MASK);
+  if (!dw) {
+    ACE_ERROR((LM_ERROR, "ERROR: create_datawriter failed\n"));
+    return 1;
+  }
 
   DDS::StatusCondition_var condition = expect_to_match ? dw->get_statuscondition() : topic->get_statuscondition();
   condition->set_enabled_statuses(expect_to_match ? DDS::PUBLICATION_MATCHED_STATUS : DDS::INCONSISTENT_TOPIC_STATUS);
@@ -271,7 +281,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: %C condition wait failed for type %C\n",
       expect_to_match ? "PUBLICATION_MATCHED_STATUS" : "INCONSISTENT_TOPIC_STATUS", type.c_str()));
-    failed = 1;
+    failed = true;
   }
 
   ws->detach_condition(condition);
