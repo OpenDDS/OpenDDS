@@ -12,6 +12,8 @@
 #include <dds/DCPS/SequenceNumber.h>
 #include <dds/DCPS/TypeSupportImpl.h>
 
+#include <ace/Thread_Mutex.h>
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -56,6 +58,8 @@ private:
   // For dependencies of local types
   typedef OPENDDS_MAP(TypeIdentifier, TypeIdentifierWithSizeSeq) TypeIdentifierWithSizeSeqMap;
   TypeIdentifierWithSizeSeqMap type_dependencies_map_;
+
+  mutable ACE_Thread_Mutex mutex_;
 
   TypeObject to_empty_;
 };
