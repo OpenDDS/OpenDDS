@@ -10,6 +10,7 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/transport/framework/TransportExceptions.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 
 #include "dds/DCPS/StaticIncludes.h"
@@ -104,7 +105,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   int status = EXIT_SUCCESS;
 
   try {
-
 
     std::cout << "Starting publisher" << std::endl;
 
@@ -410,6 +410,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
+    status = EXIT_FAILURE;
+  } catch (const OpenDDS::DCPS::Transport::Exception& ex) {
+    ACE_UNUSED_ARG(ex);
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("%N:%l main()")
+               ACE_TEXT(" ERROR: Transport Exception\n")));
     status = EXIT_FAILURE;
   }
 
