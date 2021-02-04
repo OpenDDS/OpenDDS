@@ -5,34 +5,31 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include <ace/Get_Opt.h>
-#include <ace/Log_Msg.h>
-#include <ace/OS_NS_stdlib.h>
-#include <ace/OS_NS_unistd.h>
+#include <tests/DCPS/ConsolidatedMessengerIdl/MessengerTypeSupportC.h>
+#include <tests/DCPS/ConsolidatedMessengerIdl/MessengerTypeSupportImpl.h>
 
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/WaitSet.h>
-
-#include "dds/DCPS/StaticIncludes.h"
-
-#include <tests/DCPS/ConsolidatedMessengerIdl/MessengerTypeSupportC.h>
-#include <tests/DCPS/ConsolidatedMessengerIdl/MessengerTypeSupportImpl.h>
-
+#include <dds/DCPS/security/framework/Properties.h>
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #endif
+
+#include <ace/Get_Opt.h>
+#include <ace/Log_Msg.h>
+#include <ace/OS_NS_stdlib.h>
+#include <ace/OS_NS_unistd.h>
 
 #include <cstdlib>
 
-#include <dds/DCPS/security/framework/Properties.h>
-
-const char auth_ca_file_from_tests[] = "security/certs/identity/identity_ca_cert.pem";
-const char perm_ca_file_from_tests[] = "security/certs/permissions/permissions_ca_cert.pem";
-const char id_cert_file_from_tests[] = "security/certs/identity/test_participant_01_cert.pem";
-const char id_key_file_from_tests[] = "security/certs/identity/test_participant_01_private_key.pem";
+const char auth_ca_file_from_tests[] = "certs/identity/identity_ca_cert.pem";
+const char perm_ca_file_from_tests[] = "certs/permissions/permissions_ca_cert.pem";
+const char id_cert_file_from_tests[] = "certs/identity/test_participant_01_cert.pem";
+const char id_key_file_from_tests[] = "certs/identity/test_participant_01_private_key.pem";
 const char governance_file[] = "file:./governance_signed.p7s";
 const char permissions_file[] = "file:./permissions_1_signed.p7s";
 
@@ -161,15 +158,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       DDS::PropertySeq& props = part_qos.property.value;
 
       // Determine the path to the keys
-      OPENDDS_STRING path_to_tests;
-      const char* dds_root = ACE_OS::getenv("DDS_ROOT");
-      if (dds_root && dds_root[0]) {
-        // Use DDS_ROOT in case we are one of the CMake tests
-        path_to_tests = OPENDDS_STRING("file:") + dds_root + "/tests/";
-      } else {
-        // Else if DDS_ROOT isn't defined try to do it relative to the traditional location
-        path_to_tests = "file:../../";
-      }
+      const OpenDDS::DCPS::String path_to_tests = "file:../";
+
       const OPENDDS_STRING auth_ca_file = path_to_tests + auth_ca_file_from_tests;
       const OPENDDS_STRING perm_ca_file = path_to_tests + perm_ca_file_from_tests;
       const OPENDDS_STRING id_cert_file = path_to_tests + id_cert_file_from_tests;

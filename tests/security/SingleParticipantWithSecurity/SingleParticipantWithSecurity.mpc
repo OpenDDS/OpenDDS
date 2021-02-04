@@ -1,4 +1,4 @@
-project(SingleParticipantWithSecurity): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, opendds_optional_security {
+project: dcps_cm, dcps_rtps_udp, opendds_optional_security {
 
   exename   = SingleParticipantWithSecurity
 
