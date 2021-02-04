@@ -1,4 +1,4 @@
-project: dcps_cm, dcps_rtps_udp, opendds_optional_security {
+project: dcps_cm, dcps_rtps_udp, opendds_security {
 
   exename   = SingleParticipantWithSecurity
 
