@@ -1,20 +1,19 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
-
-#include <ace/Log_Msg.h>
-#include <ace/OS_NS_stdlib.h>
-
-#include <dds/DdsDcpsSubscriptionC.h>
-#include <dds/DCPS/Service_Participant.h>
 
 #include "Args.h"
 #include "DataReaderListener.h"
 #include "MessengerTypeSupportC.h"
 #include "MessengerTypeSupportImpl.h"
+
+#include <dds/DCPS/Service_Participant.h>
+
+#include <dds/DdsDcpsSubscriptionC.h>
+
+#include <ace/Log_Msg.h>
+#include <ace/OS_NS_stdlib.h>
 
 #include <iostream>
 #include <cstdlib>
@@ -31,8 +30,7 @@ DataReaderListenerImpl::~DataReaderListenerImpl()
 {
 }
 
-bool
-DataReaderListenerImpl::is_reliable()
+bool DataReaderListenerImpl::is_reliable()
 {
   OpenDDS::DCPS::TransportConfig_rch gc = TheTransportRegistry->global_config();
   return !(gc->instances_[0]->transport_type_ == "udp");

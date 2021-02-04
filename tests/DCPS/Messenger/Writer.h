@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -8,8 +6,9 @@
 #ifndef WRITER_H
 #define WRITER_H
 
-#include <ace/Task.h>
 #include <dds/DdsDcpsPublicationC.h>
+
+#include <ace/Task.h>
 
 class Writer : public ACE_Task_Base {
 public:

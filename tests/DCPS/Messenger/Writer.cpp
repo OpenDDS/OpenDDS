@@ -1,22 +1,21 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
+
+#include "Args.h"
+#include "MessengerTypeSupportC.h"
+#include "Writer.h"
+
+#include <dds/DCPS/WaitSet.h>
+
+#include <dds/DdsDcpsPublicationC.h>
 
 #include <ace/Log_Msg.h>
 #include <ace/OS_NS_stdlib.h>
 #include <ace/OS_NS_unistd.h>
 
-#include <dds/DdsDcpsPublicationC.h>
-#include <dds/DCPS/WaitSet.h>
-
 #include <cstdlib>
-
-#include "Args.h"
-#include "MessengerTypeSupportC.h"
-#include "Writer.h"
 
 const int num_instances_per_writer = 1;
 bool reliable = false;
@@ -27,8 +26,7 @@ Writer::Writer(DDS::DataWriter_ptr writer)
 {
 }
 
-void
-Writer::start()
+void Writer::start()
 {
   // Lanuch num_instances_per_writer threads. Each thread writes one
   // instance which uses the thread id as the key value.
@@ -40,17 +38,13 @@ Writer::start()
   }
 }
 
-void
-Writer::end()
+void Writer::end()
 {
   wait();
 }
 
-int
-Writer::svc()
+int Writer::svc()
 {
-  DDS::InstanceHandleSeq handles;
-
   try {
     // Block until Subscriber is available
     DDS::StatusCondition_var condition = writer_->get_statuscondition();
@@ -59,7 +53,7 @@ Writer::svc()
     DDS::WaitSet_var ws = new DDS::WaitSet;
     ws->attach_condition(condition);
 
-    DDS::Duration_t timeout =
+    const DDS::Duration_t timeout =
       { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
 
     DDS::ConditionSeq conditions;
@@ -87,8 +81,7 @@ Writer::svc()
     // Write samples
     Messenger::MessageDataWriter_var message_dw
       = Messenger::MessageDataWriter::_narrow(writer_.in());
-
-    if (CORBA::is_nil(message_dw.in())) {
+    if (!message_dw) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("%N:%l: svc()")
                  ACE_TEXT(" ERROR: _narrow failed!\n")));
@@ -98,12 +91,12 @@ Writer::svc()
     Messenger::Message message;
     message.subject_id = 99;
 
-    DDS::InstanceHandle_t handle = message_dw->register_instance(message);
+    const DDS::InstanceHandle_t handle = message_dw->register_instance(message);
 
-    message.from         = "Comic Book Guy";
-    message.subject      = "Review";
-    message.text         = "Worst. Movie. Ever.";
-    message.count        = 0;
+    message.from = "Comic Book Guy";
+    message.subject = "Review";
+    message.text = "Worst. Movie. Ever.";
+    message.count = 0;
 
     for (size_t i = 0; i < num_messages; i++) {
       DDS::ReturnCode_t error;
@@ -129,8 +122,7 @@ Writer::svc()
   return 0;
 }
 
-bool
-Writer::is_finished() const
+bool Writer::is_finished() const
 {
   return finished_instances_ == num_instances_per_writer;
 }
