@@ -18,17 +18,10 @@
 
 #include "dds/DCPS/StaticIncludes.h"
 
-#include "SingleParticipantWithSecurityC.h"
-#include "SingleParticipantWithSecurityTypeSupportImpl.h"
+#include <tests/DCPS/ConsolidatedMessengerIdl/MessengerTypeSupportC.h>
+#include <tests/DCPS/ConsolidatedMessengerIdl/MessengerTypeSupportImpl.h>
 
 #ifdef ACE_AS_STATIC_LIBS
-# ifndef OPENDDS_SAFETY_PROFILE
-#include <dds/DCPS/transport/udp/Udp.h>
-#include <dds/DCPS/transport/multicast/Multicast.h>
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
-#include <dds/DCPS/transport/shmem/Shmem.h>
-#include "dds/DCPS/security/BuiltInPlugins.h"
-# endif
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
@@ -54,8 +47,8 @@ void append(DDS::PropertySeq& props, const char* name, const char* value, bool p
 void read(DDS::DataReader_ptr reader)
 {
   try {
-    SingleParticipantWithSecurity::MessageDataReader_var message_dr =
-      SingleParticipantWithSecurity::MessageDataReader::_narrow(reader);
+    Messenger::MessageDataReader_var message_dr =
+      Messenger::MessageDataReader::_narrow(reader);
 
     if (!message_dr) {
       ACE_ERROR((LM_ERROR,
@@ -90,7 +83,7 @@ void read(DDS::DataReader_ptr reader)
     ws->detach_condition(dr_rc);
     reader->delete_readcondition(dr_rc);
 
-    SingleParticipantWithSecurity::Message message;
+    Messenger::Message message;
     DDS::SampleInfo si;
 
     const DDS::ReturnCode_t status = message_dr->take_next_sample(message, si);
@@ -204,8 +197,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       // Register TypeSupport (SingleParticipantWithSecurity::Message)
-      SingleParticipantWithSecurity::MessageTypeSupport_var mts =
-        new SingleParticipantWithSecurity::MessageTypeSupportImpl();
+      Messenger::MessageTypeSupport_var mts =
+        new Messenger::MessageTypeSupportImpl();
 
       if (mts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -311,15 +304,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ws->detach_condition(condition);
 
       // Write the sample
-      SingleParticipantWithSecurity::Message message;
+      Messenger::Message message;
       message.from = "Comic Book Guy";
       message.subject = "Review";
       message.text = "Worst. Movie. Ever.";
       message.count = 0;
       message.subject_id = 99;
 
-      SingleParticipantWithSecurity::MessageDataWriter_var message_dw
-        = SingleParticipantWithSecurity::MessageDataWriter::_narrow(dw);
+      Messenger::MessageDataWriter_var message_dw
+        = Messenger::MessageDataWriter::_narrow(dw);
       message_dw->write(message, DDS::HANDLE_NIL);
 
       // Read the sample

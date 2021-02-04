@@ -9,6 +9,8 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
+PerlDDS::add_lib_path('../../DCPS/ConsolidatedMessengerIdl');
+
 my $test = new PerlDDS::TestFramework();
 
 $test->{dcps_debug_level} = 4;

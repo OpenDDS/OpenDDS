@@ -1,12 +1,8 @@
-project(SingleParticipantWithSecurity): dcpsexe, dcps_test, dcps_transports_for_test, opendds_optional_security {
+project(SingleParticipantWithSecurity): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, opendds_optional_security {
 
   exename   = SingleParticipantWithSecurity
 
-  TypeSupport_Files {
-    SingleParticipantWithSecurity.idl
-  }
-
   Source_Files {
-    pubsub.cpp
+    SingleParticipantWithSecurity.cpp
   }
 }
