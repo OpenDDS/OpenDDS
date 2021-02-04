@@ -4,20 +4,18 @@ use strict;
 use FileHandle;
 use File::Basename;
 
-sub file_header {
-  my $filename = basename(shift);
-  '=' x 16 . " $filename " . '=' x 16;
-}
-
 sub show_file {
   my $filename = shift;
   my $callback = shift;
   return unless -r $filename;
-  print file_header($filename), "\n";
+  my $basename = basename($filename);
+  my $title = ($basename eq 'Version.h') ? "ACE Version" : $basename;
+  print '=' x 16 . " $title " . '=' x 16 . "\n";
   my $f = new FileHandle($filename);
   while (<$f>) {
-    print;
+    print if $basename ne 'Version.h' || /ACE_VERSION /;
     &$callback($_) if $callback;
+    last if $basename eq 'VERSION.txt';
   }
   close $f;
 }
@@ -49,9 +47,9 @@ elsif (-r 'setenv.cmd') {
   show_config('setenv.cmd');
 }
 elsif (-r 'build/host/setenv.sh') {
-  print "Host Build:\n";
+  print '>' x 16 . ' Host Build ' . '<' x 16 . "\n";
   show_config('build/host/setenv.sh');
-  print "Target Build:\n";
+  print '>' x 16 . ' Target Build ' . '<' x 16 . "\n";
   show_config('build/target/setenv.sh');
 }
 else {

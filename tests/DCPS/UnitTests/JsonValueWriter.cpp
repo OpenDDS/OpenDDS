@@ -259,7 +259,7 @@ TEST(JsonValueWriter, write_int32)
 {
   {
     JsonValueWriter<> jvw;
-    jvw.write_int32(-2147483648);
+    jvw.write_int32(-2147483647 - 1);
     EXPECT_STREQ(jvw.buffer().GetString(), "-2147483648");
   }
   {
@@ -324,7 +324,7 @@ TEST(JsonValueWriter, write_uint64)
 TEST(JsonValueWriter, write_float32)
 {
   JsonValueWriter<> jvw;
-  jvw.write_float32(1.2);
+  jvw.write_float32(1.2f);
   EXPECT_STREQ(jvw.buffer().GetString(), "1.2000000476837159");
 }
 

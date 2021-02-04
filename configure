@@ -345,7 +345,7 @@ sub parseArgs {
   }
 
   for my $opt (@default) {
-    if ($opt eq 'rapidjson' && $opts->{'safety-profile'}) {
+    if ($opt eq 'rapidjson' && defined $opts->{'safety-profile'}) {
       print("Although it's a default, rapidjson is not compatible with Safety ".
             "Profile so it will not be enabled\n") if $opts->{'verbose'};
       next;
@@ -1756,6 +1756,9 @@ if (exists $opts{'qt'}) {
       $qt_lib = join($slash, $targetEnv{'QTDIR'}, "debug", "lib");
       $qt_path = join($slash, $targetEnv{'QTDIR'}, "debug",
         ($is_windows ? 'bin' : 'lib'));
+    }
+    else {
+      $qt_lib = join($slash, $targetEnv{'QTDIR'}, 'lib');
     }
   }
 
