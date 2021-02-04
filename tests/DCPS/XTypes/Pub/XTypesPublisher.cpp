@@ -277,7 +277,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   } else if (registered_type_name.empty()) {
     registered_type_name = topic_name;
   }
-  
+
   if (type == "PlainCdrStruct") {
     PlainCdrStructTypeSupport_var ts = new PlainCdrStructTypeSupportImpl;
     failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
