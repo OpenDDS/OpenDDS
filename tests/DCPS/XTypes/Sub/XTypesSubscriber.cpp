@@ -1,6 +1,8 @@
 #include "XTypes.h"
 #include "XTypesSubTypeSupportImpl.h"
 
+#include <dds/DCPS/DCPS_Utils.h>
+
 template<typename T1>
 ReturnCode_t check_additional_field_value(const T1& data, AdditionalFieldValue expected_additional_field_value)
 {
@@ -30,11 +32,13 @@ ReturnCode_t read_i(const DataReader_var& dr, const T1& pdr, T2& data)
   if (ret == RETCODE_TIMEOUT) {
     ACE_ERROR((LM_ERROR, "ERROR: reader timedout\n"));
   } else if (ret != RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: Reader: wait returned %d\n", ret));
+    ACE_ERROR((LM_ERROR, "ERROR: Reader: wait returned %C\n",
+               OpenDDS::DCPS::retcode_to_string(ret)));
   } else {
     SampleInfoSeq info;
     if ((ret = pdr->take_w_condition(data, info, LENGTH_UNLIMITED, dr_rc)) != RETCODE_OK) {
-      ACE_ERROR((LM_ERROR, "ERROR: Reader: take_w_condition returned %d\n", ret));
+      ACE_ERROR((LM_ERROR, "ERROR: Reader: take_w_condition returned %C\n",
+                 OpenDDS::DCPS::retcode_to_string(ret)));
     }
   }
 
@@ -59,7 +63,8 @@ ReturnCode_t read_tryconstruct_struct(const DataReader_var& dr, const T1& pdr, T
       ACE_ERROR((LM_DEBUG, "reader: %C\n", data[0].trim_string.in()));
     }
   } else {
-    ACE_ERROR((LM_ERROR, "ERROR: Reader: read_i returned %d\n", ret));
+    ACE_ERROR((LM_ERROR, "ERROR: Reader: read_i returned %C\n",
+               OpenDDS::DCPS::retcode_to_string(ret)));
   }
 
   return ret;
@@ -80,7 +85,8 @@ ReturnCode_t read_struct(const DataReader_var& dr, const T1& pdr, T2& data)
       ACE_DEBUG((LM_DEBUG, "reader: %d\n", data[0].key));
     }
   } else {
-    ACE_ERROR((LM_ERROR, "ERROR: Reader: read_i returned %d\n", ret));
+    ACE_ERROR((LM_ERROR, "ERROR: Reader: read_i returned %C\n",
+               OpenDDS::DCPS::retcode_to_string(ret)));
   }
 
   return ret;
@@ -121,7 +127,8 @@ ReturnCode_t read_union(const DataReader_var& dr, const T1& pdr, T2& data)
       }
     }
   } else {
-    ACE_ERROR((LM_ERROR, "ERROR: Reader: read_i returned %d\n", ret));
+    ACE_ERROR((LM_ERROR, "ERROR: Reader: read_i returned %C\n",
+               OpenDDS::DCPS::retcode_to_string(ret)));
   }
 
   return ret;
@@ -186,15 +193,17 @@ ReturnCode_t read_trim20_struct(const DataReader_var& dr)
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   std::string type;
+  std::string topic_name = "";
   std::string registered_type_name = "";
-
-  DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
   // Default properties of type consistency enforcement Qos currently supported
   bool disallow_type_coercion = false;
   bool ignore_member_names = false;
   bool force_type_validation = false;
 
+  DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
+
+  // Arguments "--type" and "--expect_to_fail" must be specified
   for (int i = 1; i < argc; ++i) {
     ACE_TString arg(argv[i]);
     if (arg == ACE_TEXT("--verbose")) {
@@ -206,7 +215,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         ACE_ERROR((LM_ERROR, "ERROR: Invalid type argument"));
         return 1;
       }
-    } else if (arg == ACE_TEXT("--type_r")) {
+    } else if (arg == ACE_TEXT("--topic")) {
+      if (i + 1 < argc) {
+        topic_name = ACE_TEXT_ALWAYS_CHAR(argv[++i]);
+      } else {
+        ACE_ERROR((LM_ERROR, "ERROR: Invalid topic name argument"));
+        return 1;
+      }
+    } else if (arg == ACE_TEXT("--reg_type")) {
       if (i + 1 < argc) {
         registered_type_name = ACE_TEXT_ALWAYS_CHAR(argv[++i]);
       } else {
@@ -245,8 +261,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   Topic_var topic;
 
-  const std::string topic_name =
-    !registered_type_name.empty() ? registered_type_name : type;
+  if (topic_name.empty()) {
+    topic_name = !registered_type_name.empty() ? registered_type_name : type;
+  } else if (registered_type_name.empty()) {
+    registered_type_name = topic_name;
+  }
 
   if (type == "PlainCdrStruct") {
     PlainCdrStructTypeSupport_var ts = new PlainCdrStructTypeSupportImpl;

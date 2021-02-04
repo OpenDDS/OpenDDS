@@ -1,6 +1,8 @@
 #include "XTypes.h"
 #include "XTypesPubTypeSupportImpl.h"
 
+#include <dds/DCPS/DCPS_Utils.h>
+
 void write_plain_cdr_struct(const DataWriter_var& dw)
 {
   PlainCdrStructDataWriter_var pdw = PlainCdrStructDataWriter::_narrow(dw);
@@ -8,12 +10,16 @@ void write_plain_cdr_struct(const DataWriter_var& dw)
   PlainCdrStruct pcs;
   pcs.key = key_value;
   pcs.value = 1;
-  pdw->write(pcs, HANDLE_NIL);
+
+  ReturnCode_t ret = pdw->write(pcs, HANDLE_NIL);
+  if (ret != RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: write_plain_cdr_struct returned %C\n",
+               OpenDDS::DCPS::retcode_to_string(ret)));
+  }
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: PlainCdrStruct\n"));
   }
 }
-
 
 void write_final_struct(const DataWriter_var& dw)
 {
@@ -21,12 +27,16 @@ void write_final_struct(const DataWriter_var& dw)
 
   FinalStructPub fs;
   fs.key = key_value;
-  pdw->write(fs, HANDLE_NIL);
+
+  ReturnCode_t ret = pdw->write(fs, HANDLE_NIL);
+  if (ret != RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: write_final_struct returned %C\n",
+               OpenDDS::DCPS::retcode_to_string(ret)));
+  }
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: FinalStructPub\n"));
   }
 }
-
 
 void write_modified_final_struct(const DataWriter_var& dw)
 {
@@ -35,12 +45,16 @@ void write_modified_final_struct(const DataWriter_var& dw)
   ModifiedFinalStruct mfs;
   mfs.key = key_value;
   mfs.additional_field = FINAL_STRUCT_AF;
-  pdw->write(mfs, HANDLE_NIL);
+
+  ReturnCode_t ret = pdw->write(mfs, HANDLE_NIL);
+  if (ret != RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: write_modified_final_struct returned %C\n",
+               OpenDDS::DCPS::retcode_to_string(ret)));
+  }
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: ModifiedFinalStruct\n"));
   }
 }
-
 
 void write_appendable_struct_no_xtypes(const DataWriter_var& dw)
 {
@@ -48,12 +62,16 @@ void write_appendable_struct_no_xtypes(const DataWriter_var& dw)
 
   AppendableStructNoXTypes as;
   as.key = key_value;
-  typed_dw->write(as, HANDLE_NIL);
+
+  ReturnCode_t ret = typed_dw->write(as, HANDLE_NIL);
+  if (ret != RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: write_appendable_struct_no_xtypes returned %C\n",
+               OpenDDS::DCPS::retcode_to_string(ret)));
+  }
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: AppendableStructNoXTypes\n"));
   }
 }
-
 
 void write_additional_prefix_field_struct(const DataWriter_var& dw)
 {
@@ -62,12 +80,16 @@ void write_additional_prefix_field_struct(const DataWriter_var& dw)
   AdditionalPrefixFieldStruct apfs;
   apfs.key = key_value;
   apfs.additional_field = APPENDABLE_STRUCT_AF;
-  typed_dw->write(apfs, HANDLE_NIL);
+
+  ReturnCode_t ret = typed_dw->write(apfs, HANDLE_NIL);
+  if (ret != RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: write_additional_prefix_field_struct returned %C\n",
+               OpenDDS::DCPS::retcode_to_string(ret)));
+  }
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: AdditionalPrefixFieldStruct\n"));
   }
 }
-
 
 void write_additional_postfix_field_struct(const DataWriter_var& dw)
 {
@@ -76,12 +98,16 @@ void write_additional_postfix_field_struct(const DataWriter_var& dw)
   AdditionalPostfixFieldStruct apfs;
   apfs.key = key_value;
   apfs.additional_field = APPENDABLE_STRUCT_AF;
-  typed_dw->write(apfs, HANDLE_NIL);
+
+  ReturnCode_t ret = typed_dw->write(apfs, HANDLE_NIL);
+  if (ret != RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: write_additional_postfix_field_struct returned %C\n",
+               OpenDDS::DCPS::retcode_to_string(ret)));
+  }
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: AdditionalPostfixFieldStruct\n"));
   }
 }
-
 
 void write_modified_mutable_struct(const DataWriter_var& dw)
 {
@@ -90,12 +116,16 @@ void write_modified_mutable_struct(const DataWriter_var& dw)
   ModifiedMutableStruct ams;
   ams.key = key_value;
   ams.additional_field = MUTABLE_STRUCT_AF;
-  typed_dw->write(ams, HANDLE_NIL);
+
+  ReturnCode_t ret = typed_dw->write(ams, HANDLE_NIL);
+  if (ret != RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: write_modified_mutable_struct returned %C\n",
+               OpenDDS::DCPS::retcode_to_string(ret)));
+  }
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: ModifiedMutableStruct\n"));
   }
 }
-
 
 void write_modified_mutable_union(const DataWriter_var& dw)
 {
@@ -103,12 +133,16 @@ void write_modified_mutable_union(const DataWriter_var& dw)
 
   ModifiedMutableUnion mmu;
   mmu.key(key_value);
-  typed_dw->write(mmu, HANDLE_NIL);
+
+  ReturnCode_t ret = typed_dw->write(mmu, HANDLE_NIL);
+  if (ret != RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: write_modified_mutable_union returned %C\n",
+               OpenDDS::DCPS::retcode_to_string(ret)));
+  }
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: ModifiedMutableUnion\n"));
   }
 }
-
 
 void write_trim64_struct(const DataWriter_var& dw)
 {
@@ -116,12 +150,16 @@ void write_trim64_struct(const DataWriter_var& dw)
 
   Trim64Struct tcs;
   tcs.trim_string = STRING_26.c_str();
-  typed_dw->write(tcs, HANDLE_NIL);
+
+  ReturnCode_t ret = typed_dw->write(tcs, HANDLE_NIL);
+  if (ret != RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: write_trim64_struct returned %C\n",
+               OpenDDS::DCPS::retcode_to_string(ret)));
+  }
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: Trim64Struct\n"));
   }
 }
-
 
 void write_appendable_struct_with_dependency(const DataWriter_var& dw)
 {
@@ -130,20 +168,59 @@ void write_appendable_struct_with_dependency(const DataWriter_var& dw)
   AppendableStructWithDependency as;
   as.key = key_value;
   as.additional_nested_struct.additional_field = NESTED_STRUCT_AF;
-  typed_dw->write(as, HANDLE_NIL);
+
+  ReturnCode_t ret = typed_dw->write(as, HANDLE_NIL);
+  if (ret != RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: write_appendable_struct_with_dependency returned %C\n",
+               OpenDDS::DCPS::retcode_to_string(ret)));
+  }
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: AppendableStructWithDependency\n"));
   }
 }
 
+void write_modified_name_mutable_struct(const DataWriter_var& dw)
+{
+  ModifiedNameMutableStructDataWriter_var typed_dw = ModifiedNameMutableStructDataWriter::_narrow(dw);
+  ModifiedNameMutableStruct sample;
+  sample.key_modified = key_value;
+  sample.additional_field_modified = MUTABLE_STRUCT_AF;
+
+  ReturnCode_t ret = typed_dw->write(sample, HANDLE_NIL);
+  if (ret != RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: write_modified_name_mutable_struct returned %C\n",
+               OpenDDS::DCPS::retcode_to_string(ret)));
+  }
+  if (verbose) {
+    ACE_DEBUG((LM_DEBUG, "writer: ModifiedNameMutableStruct\n"));
+  }
+}
+
+void write_modified_name_mutable_union(const DataWriter_var& dw)
+{
+  ModifiedNameMutableUnionDataWriter_var typed_dw = ModifiedNameMutableUnionDataWriter::_narrow(dw);
+  ModifiedNameMutableUnion sample;
+  sample.key_modified(key_value);
+
+  ReturnCode_t ret = typed_dw->write(sample, HANDLE_NIL);
+  if (ret != RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: write_modified_name_mutable_union returned %C\n",
+               OpenDDS::DCPS::retcode_to_string(ret)));
+  }
+  if (verbose) {
+    ACE_DEBUG((LM_DEBUG, "writer: ModifiedNameMutableUnion\n"));
+  }
+}
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   std::string type;
+  std::string topic_name = "";
   std::string registered_type_name = "";
 
   DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
+  // Arguments "--type" and "--expect_to_fail" must be specified
   for (int i = 1; i < argc; ++i) {
     ACE_TString arg(argv[i]);
     if (arg == ACE_TEXT("--verbose")) {
@@ -155,7 +232,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         ACE_ERROR((LM_ERROR, "ERROR: Invalid type argument"));
         return 1;
       }
-    } else if (arg == ACE_TEXT("--type_r")) {
+    } else if (arg == ACE_TEXT("--topic")) {
+      if (i + 1 < argc) {
+        topic_name = ACE_TEXT_ALWAYS_CHAR(argv[++i]);
+      } else {
+        ACE_ERROR((LM_ERROR, "ERROR: Invalid topic name argument"));
+        return 1;
+      }
+    } else if (arg == ACE_TEXT("--reg_type")) {
       if (i + 1 < argc) {
         registered_type_name = ACE_TEXT_ALWAYS_CHAR(argv[++i]);
       } else {
@@ -188,9 +272,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   Topic_var topic;
 
-  const std::string topic_name =
-    !registered_type_name.empty() ? registered_type_name : type;
-
+  if (topic_name.empty()) {
+    topic_name = !registered_type_name.empty() ? registered_type_name : type;
+  } else if (registered_type_name.empty()) {
+    registered_type_name = topic_name;
+  }
+  
   if (type == "PlainCdrStruct") {
     PlainCdrStructTypeSupport_var ts = new PlainCdrStructTypeSupportImpl;
     failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
@@ -313,6 +400,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       write_trim64_struct(dw);
     } else if (type == "AppendableStructWithDependency") {
       write_appendable_struct_with_dependency(dw);
+    } else if (type == "ModifiedNameMutableStruct") {
+      write_modified_name_mutable_struct(dw);
+    } else if (type == "ModifiedNameMutableUnion") {
+      write_modified_name_mutable_union(dw);
     }
   }
 
