@@ -5,7 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> //Only the _pch include should start with DCPS/
+
 #include "debug.h"
 #include "SubscriberImpl.h"
 #include "FeatureDisabledQosCheck.h"
@@ -17,7 +18,6 @@
 #include "MonitorFactory.h"
 #include "DataReaderImpl.h"
 #include "Service_Participant.h"
-#include "dds/DdsDcpsTypeSupportExtC.h"
 #include "TopicDescriptionImpl.h"
 #include "Marked_Default_Qos.h"
 #include "Transient_Kludge.h"
@@ -30,11 +30,9 @@
 #include "transport/framework/DataLinkSet.h"
 #include "DCPS_Utils.h"
 
-#include "tao/debug.h"
+#include <dds/DdsDcpsTypeSupportExtC.h>
 
-#include "ace/Auto_Ptr.h"
-#include "ace/Vector_T.h"
-
+#include <vector>
 #include <stdexcept>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -255,31 +253,31 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
   DataReaderImpl_rch dr_servant = rchandle_from(dynamic_cast<DataReaderImpl*>(a_datareader));
 
   if (dr_servant) { // for MultiTopic this will be false
-    const ACE_TCHAR* reason = ACE_TEXT(" (unknown reason)");
+    const char* reason = " (ERROR: unknown reason)";
     DDS::ReturnCode_t rc = DDS::RETCODE_OK;
     DDS::Subscriber_var dr_subscriber(dr_servant->get_subscriber());
     if (dr_subscriber.in() != this) {
-      reason = ACE_TEXT("doesn't belong to this subscriber.");
+      reason = "doesn't belong to this subscriber.";
       rc = DDS::RETCODE_PRECONDITION_NOT_MET;
     } else if (dr_servant->has_zero_copies()) {
-      reason = ACE_TEXT("has outstanding zero-copy samples loaned out.");
+      reason = "has outstanding zero-copy samples loaned out.";
       rc = DDS::RETCODE_PRECONDITION_NOT_MET;
     } else if (!dr_servant->read_conditions_.empty()) {
-      reason = ACE_TEXT("has read conditions attached.");
+      reason = "has read conditions attached.";
       rc = DDS::RETCODE_PRECONDITION_NOT_MET;
     }
     if (rc != DDS::RETCODE_OK) {
       if (DCPS_debug_level) {
-        GuidConverter converter(dr_servant->get_repo_id());
-        ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) SubscriberImpl::delete_datareader(%C): ")
-          ACE_TEXT("will return \"%C\" because datareader %s\n"),
-          OPENDDS_STRING(converter).c_str(), retcode_to_string(rc),
-          reason));
+        DDS::TopicDescription_var topic = a_datareader->get_topicdescription();
+        CORBA::String_var topic_name = topic->get_name();
+        ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING SubscriberImpl::delete_datareader: "
+          "on reader %C (topic \"%C\") will return \"%C\" because it %C\n",
+          LogGuid(dr_servant->get_repo_id()).c_str(), topic_name.in(),
+          retcode_to_string(rc), reason));
       }
       return rc;
     }
-  }
-  if (dr_servant) {
+
     // marks entity as deleted and stops future associating
     dr_servant->prepare_to_delete();
   }
@@ -382,7 +380,7 @@ SubscriberImpl::delete_contained_entities()
   // mark that the entity is being deleted
   set_deleted(true);
 
-  ACE_Vector<DDS::DataReader_ptr> drs;
+  std::vector<DDS::DataReader*> drs;
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
   {
@@ -549,7 +547,7 @@ SubscriberImpl::notify_datareaders()
   for (it = datareader_map_.begin(); it != datareader_map_.end(); ++it) {
     if (it->second->have_sample_states(DDS::NOT_READ_SAMPLE_STATE)) {
       DDS::DataReaderListener_var listener = it->second->get_listener();
-      if (!CORBA::is_nil (listener)) {
+      if (listener) {
         listener->on_data_available(it->second.in());
       }
 
