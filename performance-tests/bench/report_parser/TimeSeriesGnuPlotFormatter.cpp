@@ -1,21 +1,27 @@
 #include "TimeSeriesGnuPlotFormatter.h"
 
 #include <PropertyStatBlock.h>
+#include <util.h>
+
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 using namespace Bench;
 
 int TimeSeriesGnuPlotFormatter::format(const Report& report, std::ofstream& output_file_stream,
-  const ParseParameters& parse_parameters)
+    const ParseParameters& parse_parameters)
 {
   if (report.node_reports.length() > 0) {
-    output_header(report, output_file_stream);
-    output_data(report, output_file_stream);
+    output_header(report, output_file_stream, parse_parameters);
+    output_data(report, output_file_stream, parse_parameters);
     return EXIT_SUCCESS;
   }
   return EXIT_FAILURE;
 }
 
-void TimeSeriesGnuPlotFormatter::output_header(const Report& report, std::ofstream& output_file_stream)
+void TimeSeriesGnuPlotFormatter::output_header(const Report& report, std::ofstream& output_file_stream,
+  const ParseParameters& parse_parameters)
 {
   const bool show_postfix = report.node_reports.length() > 1;
 
@@ -24,22 +30,56 @@ void TimeSeriesGnuPlotFormatter::output_header(const Report& report, std::ofstre
 
   // Write header line.
   std::cerr << "Writing header..." << std::endl;
-  for (unsigned int node_index = 0; node_index < report.node_reports.length(); node_index++) {
-    if (node_index > 0) {
+  for (unsigned int ni = 0; ni < report.node_reports.length(); ni++) {
+    if (ni > 0) {
       output_file_stream << " ";
     }
-    output_file_stream << "cpu_percent_median" << (show_postfix ? std::to_string(node_index + 1) : "");
-    output_file_stream << " cpu_percent_timestamp" << (show_postfix ? std::to_string(node_index + 1) : "");
-    output_file_stream << " mem_percent_median" << (show_postfix ? std::to_string(node_index + 1) : "");
-    output_file_stream << " mem_percent_timestamp" << (show_postfix ? std::to_string(node_index + 1) : "");
-    output_file_stream << " virtual_mem_percent_median" << (show_postfix ? std::to_string(node_index + 1) : "");
-    output_file_stream << " virtual_mem_percent_timestamp" << (show_postfix ? std::to_string(node_index + 1) : "");
+    output_file_stream << "cpu_percent_median" << (show_postfix ? std::to_string(ni + 1) : "");
+    output_file_stream << " cpu_percent_timestamp" << (show_postfix ? std::to_string(ni + 1) : "");
+    output_file_stream << " mem_percent_median" << (show_postfix ? std::to_string(ni + 1) : "");
+    output_file_stream << " mem_percent_timestamp" << (show_postfix ? std::to_string(ni + 1) : "");
+    output_file_stream << " virtual_mem_percent_median" << (show_postfix ? std::to_string(ni + 1) : "");
+    output_file_stream << " virtual_mem_percent_timestamp" << (show_postfix ? std::to_string(ni + 1) : "");
+    
+    std::unordered_set<std::string> tags;
+
+    for (unsigned int wi = 0; wi < report.node_reports[ni].worker_reports.length(); wi++) {
+      for (unsigned int pi = 0; pi < report.node_reports[ni].worker_reports[wi].process_report.participants.length(); pi++) {
+        for (unsigned int si = 0; si < report.node_reports[ni].worker_reports[wi].process_report.participants[pi].subscribers.length(); si++) {
+          for (unsigned int di = 0; di < report.node_reports[ni].worker_reports[wi].process_report.participants[pi].subscribers[si].datareaders.length(); di++) {
+            for (unsigned int ti = 0; ti < report.node_reports[ni].worker_reports[wi].process_report.participants[pi].subscribers[si].datareaders[di].tags.length(); ti++) {
+              const Builder::DataReaderReport& dr_report = report.node_reports[ni].worker_reports[wi].process_report.participants[pi].subscribers[si].datareaders[di];
+              std::string tag = dr_report.tags[ti];
+              if (std::find(parse_parameters.tags.begin(), parse_parameters.tags.end(), tag) != parse_parameters.tags.end()) {
+                for (unsigned int property_index = 0; property_index < dr_report.properties.length(); property_index++) {
+                  Builder::Property prop = dr_report.properties[property_index];
+                  const Builder::PropertyValueKind prop_kind = prop.value._d();
+                  if (prop_kind == Builder::PropertyValueKind::PVK_DOUBLE || prop_kind == Builder::PropertyValueKind::PVK_ULL) {
+                    std::string prop_name = prop.name.in();
+                    if (std::find(parse_parameters.values.begin(), parse_parameters.values.end(), prop_name) != parse_parameters.values.end()) {
+                      std::string tagged_property = tag + "_" + prop_name;
+                      tags.insert(tagged_property);
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    for (std::unordered_set<std::string>::iterator it = tags.begin(); it != tags.end(); ++it) {
+      output_file_stream << " " << *it << (show_postfix ? std::to_string(ni + 1) : "");
+    }
   }
+  
 
   output_file_stream << std::endl;
 }
 
-void TimeSeriesGnuPlotFormatter::output_data(const Report& report, std::ofstream& output_file_stream)
+void TimeSeriesGnuPlotFormatter::output_data(const Report& report, std::ofstream& output_file_stream,
+  const ParseParameters& parse_parameters)
 {
   std::vector<Bench::SimpleStatBlock> cpu_percent_stats;
   std::vector<Bench::SimpleStatBlock> mem_percent_stats;
@@ -124,6 +164,62 @@ void TimeSeriesGnuPlotFormatter::output_data(const Report& report, std::ofstream
         output_file_stream << virtual_mem_percent_stats[node_index].timestamp_buffer_[index];
       } else {
         output_file_stream << "-";
+      }
+
+      if (index == 0) {
+        std::unordered_map<std::string, std::unordered_map<std::string, uint64_t>> prop_maps;
+
+        for (unsigned int wi = 0; wi < report.node_reports[node_index].worker_reports.length(); wi++) {
+          for (unsigned int pi = 0; pi < report.node_reports[node_index].worker_reports[wi].process_report.participants.length(); pi++) {
+            for (unsigned int si = 0; si < report.node_reports[node_index].worker_reports[wi].process_report.participants[pi].subscribers.length(); si++) {
+              for (unsigned int di = 0; di < report.node_reports[node_index].worker_reports[wi].process_report.participants[pi].subscribers[si].datareaders.length(); di++) {
+                for (unsigned int ti = 0; ti < report.node_reports[node_index].worker_reports[wi].process_report.participants[pi].subscribers[si].datareaders[di].tags.length(); ti++) {
+                  const Builder::DataReaderReport& dr_report = report.node_reports[node_index].worker_reports[wi].process_report.participants[pi].subscribers[si].datareaders[di];
+                  std::string tag = dr_report.tags[ti];
+                  if (std::find(parse_parameters.tags.begin(), parse_parameters.tags.end(), tag) != parse_parameters.tags.end()) {
+                    for (unsigned int property_index = 0; property_index < dr_report.properties.length(); property_index++) {
+                      Builder::Property prop = dr_report.properties[property_index];
+                      const Builder::PropertyValueKind prop_kind = prop.value._d();
+                      if (prop_kind == Builder::PropertyValueKind::PVK_DOUBLE || prop_kind == Builder::PropertyValueKind::PVK_ULL) {
+                        std::string prop_name = prop.name.in();
+                        if (std::find(parse_parameters.values.begin(), parse_parameters.values.end(), prop_name) != parse_parameters.values.end()) {
+                          std::unordered_map<std::string, uint64_t> prop_values;
+                          const Builder::ConstPropertyIndex prop_index = get_property(dr_report.properties, prop_name, prop_kind);
+                          if (prop_index) {
+                            std::unordered_map<std::string, std::unordered_map<std::string, uint64_t>>::const_iterator it = prop_maps.find(prop_name);
+                            if (it != prop_maps.end()) {
+                              std::unordered_map<std::string, uint64_t> map = it->second;
+                              update_stats_for_tags(map, dr_report.tags, parse_parameters.tags, prop_index);
+                            }
+                            else {
+                              std::unordered_map<std::string, uint64_t> map;
+                              update_stats_for_tags(map, dr_report.tags, parse_parameters.tags, prop_index);
+                              prop_maps.insert(std::pair<std::string, std::unordered_map<std::string, uint64_t>>(prop_name, map));
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        for (std::unordered_set<std::string>::const_iterator tag_it = parse_parameters.tags.begin(); tag_it != parse_parameters.tags.end(); tag_it++) {
+          std::string tag = *tag_it;
+          for (std::unordered_set<std::string>::const_iterator value_it = parse_parameters.values.begin(); value_it != parse_parameters.values.end(); value_it++) {
+            std::string value = *value_it;
+            for (std::unordered_map<std::string, std::unordered_map<std::string, uint64_t>>::const_iterator it = prop_maps.begin(); it != prop_maps.end(); it++) {
+              if (it->first == value) {
+                std::unordered_map<std::string, uint64_t> prop_map = it->second;
+                output_file_stream << prop_map[tag] << " ";
+                break;
+              }
+            }
+          }
+        }
       }
 
       if (node_index + 1 < report.node_reports.length())

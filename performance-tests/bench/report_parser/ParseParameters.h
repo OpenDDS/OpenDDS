@@ -2,13 +2,13 @@
 #define PARSE_PARAMETERS_HEADER
 
 #include <string>
-#include <vector>
+#include <unordered_set>
 
 struct ParseParameters
 {
-  std::vector<std::string> tags;
-  std::vector<std::string> stats;
-  std::vector<std::string> values;
+  std::unordered_set<std::string> tags;
+  std::unordered_set<std::string> stats;
+  std::unordered_set<std::string> values;
 };
 
 #endif

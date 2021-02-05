@@ -73,7 +73,7 @@ bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
               if (option[0] == '-') {
                 break;
               } else {
-                parse_parameters.tags.push_back(option);
+                parse_parameters.tags.insert(option);
                 i++;
               }
             }
@@ -94,7 +94,7 @@ bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
               if (option[0] == '-') {
                 break;
               } else {
-                parse_parameters.stats.push_back(option);
+                parse_parameters.stats.insert(option);
                 i++;
               }
             }
@@ -115,7 +115,7 @@ bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
               if (option[0] == '-') {
                 break;
               } else {
-                parse_parameters.values.push_back(option);
+                parse_parameters.values.insert(option);
                 i++;
               }
             }
