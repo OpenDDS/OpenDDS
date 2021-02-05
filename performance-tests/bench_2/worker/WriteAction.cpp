@@ -160,7 +160,7 @@ bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder
   return true;
 }
 
-void WriteAction::start()
+void WriteAction::test_start()
 {
   std::unique_lock<std::mutex> lock(mutex_);
   if (!started_) {
@@ -176,15 +176,17 @@ void WriteAction::start()
   }
 }
 
-void WriteAction::stop()
+void WriteAction::test_stop()
 {
   std::unique_lock<std::mutex> lock(mutex_);
   if (started_ && !stopped_) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) WriteAction::test_stop() - begin\n"));
     stopped_ = true;
     proactor_.cancel_timer(*handler_);
-    data_dw_->wait_for_acknowledgments(final_wait_for_ack_);
+    //data_dw_->wait_for_acknowledgments(final_wait_for_ack_);
     data_dw_->unregister_instance(data_, instance_);
-    data_dw_->wait_for_acknowledgments(final_wait_for_ack_);
+    //data_dw_->wait_for_acknowledgments(final_wait_for_ack_);
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) WriteAction::test_stop() - end\n"));
   }
 }
 

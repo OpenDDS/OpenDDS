@@ -247,6 +247,13 @@ public:
     for (auto worker_i : all_workers_) {
       auto& worker = worker_i.second;
       if (worker->running()) {
+#ifndef ACE_WIN32
+        if (process_manager_.terminate(worker->get_pid(), SIGABRT)) {
+          if (process_manager_.wait(worker->get_pid(), ACE_Time_Value(0, ACE_ONE_SECOND_IN_USECS / 10))) {
+            continue;
+          }
+        }
+#endif
         if (process_manager_.terminate(worker->get_pid())) {
           process_manager_.wait(worker->get_pid(), ACE_Time_Value(0, ACE_ONE_SECOND_IN_USECS / 10));
         }

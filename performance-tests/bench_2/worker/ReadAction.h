@@ -18,8 +18,10 @@ public:
   bool init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers,
     Builder::WriterMap& writers, const Builder::ContentFilteredTopicMap& cft_map) override;
 
-  void start() override;
-  void stop() override;
+  void action_start() override;
+  void test_start() override;
+  void test_stop() override;
+  void action_stop() override;
 
   void do_read();
 

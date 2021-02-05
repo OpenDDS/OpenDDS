@@ -11,8 +11,10 @@ public:
   virtual bool init(const Bench::ActionConfig& config, Bench::ActionReport& report,
     Builder::ReaderMap& readers, Builder::WriterMap& writers, const Builder::ContentFilteredTopicMap& cft_map);
 
-  virtual void start() = 0;
-  virtual void stop() = 0;
+  virtual void action_start() {};
+  virtual void test_start() = 0;
+  virtual void test_stop() = 0;
+  virtual void action_stop() {};
 
 protected:
   const Bench::ActionConfig* config_{0};
