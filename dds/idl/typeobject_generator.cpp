@@ -939,7 +939,7 @@ typeobject_generator::gen_epilogue()
     "const XTypes::TypeMap& get_minimal_type_map()\n"
     "{\n"
     "  static XTypes::TypeMap tm;\n"
-    "  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, TheServiceParticipant->get_tm_lock(), tm);\n"
+    "  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, TheServiceParticipant->get_static_xtypes_lock(), tm);\n"
     "  if (tm.empty()) {\n"
     "    tm = get_minimal_type_map_private();\n"
     "  }\n"
@@ -1762,7 +1762,11 @@ typeobject_generator::generate(AST_Type* node, UTL_ScopedName* name)
     gti.endArgs();
     const OpenDDS::XTypes::TypeIdentifier ti = get_minimal_type_identifier(node);
     be_global->impl_ <<
-      "  static const XTypes::TypeIdentifier ti = " << ti << ";\n"
+      "  static XTypes::TypeIdentifier ti;\n"
+      "  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, TheServiceParticipant->get_static_xtypes_lock(), ti);\n"
+      "  if (ti.kind() == XTypes::TK_NONE) {\n"
+      "    ti = " << ti << ";\n"
+      "  }\n"
       "  return ti;\n";
   }
   {
