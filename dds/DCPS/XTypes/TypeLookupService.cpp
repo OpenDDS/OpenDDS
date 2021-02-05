@@ -36,6 +36,11 @@ void TypeLookupService::get_type_objects(const TypeIdentifierSeq& type_ids,
 const TypeObject& TypeLookupService::get_type_objects(const TypeIdentifier& type_id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, to_empty_);
+  return get_type_objects_i(type_id);
+}
+
+const TypeObject& TypeLookupService::get_type_objects_i(const TypeIdentifier& type_id) const
+{
   const TypeMap::const_iterator it_object = minimal_type_map_.find(type_id);
   if (it_object != minimal_type_map_.end()) {
     return it_object->second;
@@ -55,10 +60,9 @@ bool TypeLookupService::get_type_dependencies(const TypeIdentifier& type_id,
   return false;
 }
 
-void TypeLookupService::get_type_dependencies(const TypeIdentifierSeq& type_ids,
+void TypeLookupService::get_type_dependencies_i(const TypeIdentifierSeq& type_ids,
   TypeIdentifierWithSizeSeq& dependencies) const
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   OPENDDS_SET(TypeIdentifier) tmp;
   for (unsigned i = 0; i < type_ids.length(); ++i) {
     const TypeIdentifierWithSizeSeqMap::const_iterator it = type_dependencies_map_.find(type_ids[i]);
@@ -80,6 +84,13 @@ void TypeLookupService::get_type_dependencies(const TypeIdentifierSeq& type_ids,
       dependencies[i].typeobject_serialized_size = static_cast<unsigned>(sz);
     }
   }
+}
+
+void TypeLookupService::get_type_dependencies(const TypeIdentifierSeq& type_ids,
+  TypeIdentifierWithSizeSeq& dependencies) const
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  get_type_dependencies_i(type_ids, dependencies);
 }
 
 void TypeLookupService::add_type_objects_to_cache(const TypeIdentifierTypeObjectPairSeq& types)
@@ -130,7 +141,7 @@ bool TypeLookupService::extensibility(TypeFlag extensibility_mask, const TypeIde
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
   bool result = false;
-  TypeObject to = get_type_objects(type_id);
+  TypeObject to = get_type_objects_i(type_id);
 
   if (TK_UNION == to.minimal.kind) {
     result = to.minimal.union_type.union_flags & extensibility_mask;
@@ -145,10 +156,10 @@ bool TypeLookupService::extensibility(TypeFlag extensibility_mask, const TypeIde
   TypeIdentifierWithSizeSeq dependencies;
   TypeIdentifierSeq type_ids;
   type_ids.append(type_id);
-  get_type_dependencies(type_ids, dependencies);
+  get_type_dependencies_i(type_ids, dependencies);
 
   for (unsigned i = 0; i < dependencies.length(); ++i) {
-    TypeObject dep_to = get_type_objects(dependencies[i].type_id);
+    TypeObject dep_to = get_type_objects_i(dependencies[i].type_id);
     if (TK_UNION == dep_to.minimal.kind) {
       result = dep_to.minimal.union_type.union_flags & extensibility_mask;
     } else if (TK_STRUCTURE == dep_to.minimal.kind) {

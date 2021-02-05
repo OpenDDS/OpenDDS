@@ -52,6 +52,10 @@ public:
   bool extensibility(TypeFlag extensibility_mask, const TypeIdentifier& ti) const;
 
 private:
+  const TypeObject& get_type_objects_i(const TypeIdentifier& type_id) const;
+  void get_type_dependencies_i(const TypeIdentifierSeq& type_ids,
+    TypeIdentifierWithSizeSeq& dependencies) const;
+
   // Only minimal Type Objects for now
   TypeMap minimal_type_map_;
 
