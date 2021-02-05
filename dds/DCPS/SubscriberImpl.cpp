@@ -29,10 +29,10 @@
 #include "transport/framework/TransportImpl.h"
 #include "transport/framework/DataLinkSet.h"
 #include "DCPS_Utils.h"
+#include "PoolAllocator.h"
 
 #include <dds/DdsDcpsTypeSupportExtC.h>
 
-#include <vector>
 #include <stdexcept>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -302,8 +302,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
       DDS::TopicDescription_var td = a_datareader->get_topicdescription();
       CORBA::String_var topic_name = td->get_name();
 #ifndef OPENDDS_NO_MULTI_TOPIC
-      OPENDDS_MAP(OPENDDS_STRING, DDS::DataReader_var)::iterator mt_iter =
-        multitopic_reader_map_.find(topic_name.in());
+      MultitopicReaderMap::iterator mt_iter = multitopic_reader_map_.find(topic_name.in());
       if (mt_iter != multitopic_reader_map_.end()) {
         DDS::DataReader_ptr ptr = mt_iter->second;
         MultiTopicDataReaderBase* mtdrb = dynamic_cast<MultiTopicDataReaderBase*>(ptr);
@@ -380,7 +379,7 @@ SubscriberImpl::delete_contained_entities()
   // mark that the entity is being deleted
   set_deleted(true);
 
-  std::vector<DDS::DataReader*> drs;
+  OPENDDS_VECTOR(DDS::DataReader*) drs;
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
   {
@@ -388,8 +387,7 @@ SubscriberImpl::delete_contained_entities()
                      guard,
                      this->si_lock_,
                      DDS::RETCODE_ERROR);
-    for (OPENDDS_MAP(OPENDDS_STRING, DDS::DataReader_var)::iterator mt_iter =
-           multitopic_reader_map_.begin();
+    for (MultitopicReaderMap::iterator mt_iter = multitopic_reader_map_.begin();
          mt_iter != multitopic_reader_map_.end(); ++mt_iter) {
       drs.push_back(mt_iter->second);
     }
@@ -459,8 +457,7 @@ SubscriberImpl::lookup_datareader(
 
   if (it == datareader_map_.end()) {
 #ifndef OPENDDS_NO_MULTI_TOPIC
-    OPENDDS_MAP(OPENDDS_STRING, DDS::DataReader_var)::iterator mt_iter =
-      multitopic_reader_map_.find(topic_name);
+    MultitopicReaderMap::iterator mt_iter = multitopic_reader_map_.find(topic_name);
     if (mt_iter != multitopic_reader_map_.end()) {
       return DDS::DataReader::_duplicate(mt_iter->second);
     }
@@ -556,9 +553,8 @@ SubscriberImpl::notify_datareaders()
   }
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
-  for (OPENDDS_MAP(OPENDDS_STRING, DDS::DataReader_var)::iterator it =
-         multitopic_reader_map_.begin(); it != multitopic_reader_map_.end();
-       ++it) {
+  for (MultitopicReaderMap::iterator it = multitopic_reader_map_.begin();
+      it != multitopic_reader_map_.end(); ++it) {
     MultiTopicDataReaderBase* dri =
       dynamic_cast<MultiTopicDataReaderBase*>(it->second.in());
 
