@@ -13,7 +13,7 @@ use strict;
 
 my $status = 0;
 my $debug = '0';
-my $vmargs;
+my $vmargs = "-ea";
 
 my $pub_sub_ini = "rtps.ini";
 my $opt = "";
@@ -22,50 +22,52 @@ foreach my $i (@ARGV) {
     if ($i eq '-debug') {
         $debug = '10';
     }
-    elsif ($i eq '-noXcheck')
+    elsif ($i eq '-xcheck')
     {
       # disable -Xcheck:jni warnings
-      $vmargs = "-ea";
+      $vmargs = "";
     }
     elsif ($i eq '-noice' || $i eq 'noice')
     {
       $pub_sub_ini = 'rtps_no_ice.ini';
       $opt = "-n";
     }
+    elsif ($i eq '-security' || $i eq 'security')
+    {
+      $opt = "-s";
+    }
 }
 
 my $debug_opt = ($debug eq '0') ? ''
     : "-ORBDebugLevel $debug -DCPSDebugLevel $debug";
 
-my $pub_test_opts = "$opt $debug_opt -ORBLogFile pubtest.log -DCPSConfigFile $pub_sub_ini";
-my $sub_test_opts = "$opt $debug_opt -ORBLogFile subtest.log -DCPSConfigFile $pub_sub_ini";
+my $test_opts = "$opt $debug_opt -ORBLogFile partLocTest.log -DCPSConfigFile $pub_sub_ini";
+
+my $relay_security_opts = "-IdentityCA ../../../tests/security/certs/identity/identity_ca_cert.pem" .
+  " -PermissionsCA ../../../tests/security/certs/permissions/permissions_ca_cert.pem" .
+  " -IdentityCertificate ../../../tests/security/certs/identity/test_participant_01_cert.pem" .
+  " -IdentityKey ../../../tests/security/certs/identity/test_participant_01_private_key.pem" .
+  " -Governance governance_signed.p7s -Permissions permissions_relay_signed.p7s -DCPSSecurity 1";
 
 PerlACE::add_lib_path ("$DDS_ROOT/java/tests/messenger/messenger_idl");
 
 my $relay = new PerlDDS::TestFramework();
-$relay->process("relay", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay.ini -ApplicationDomain 42 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444 ");
+$relay->process("relay", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay.ini -ApplicationDomain 42 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444 $relay_security_opts");
 
-my $PubTest = new PerlDDS::Process_Java ("ParticipantLocationPublisher", $pub_test_opts,
+my $psTest = new PerlDDS::Process_Java ("ParticipantLocationTest", $test_opts,
     ["$DDS_ROOT/java/tests/messenger/messenger_idl/messenger_idl_test.jar"], $vmargs);
 
-my $SubTest = new PerlDDS::Process_Java ("ParticipantLocationSubscriber", $sub_test_opts,
-    ["$DDS_ROOT/java/tests/messenger/messenger_idl/messenger_idl_test.jar"], $vmargs);
+use Data::Dumper;
+print Dumper($psTest);
 
 $relay->start_process("relay");
 sleep(1);
-$SubTest->Spawn();
-sleep(1);
-$PubTest->Spawn();
+$psTest->Spawn();
 
-my $PubTestResult = $PubTest->WaitKill (20);
-if ($PubTestResult != 0) {
-    print STDERR "ERROR: test publisher returned $PubTestResult\n";
-    $status = 1;
-}
+my $psTestResult = $psTest->WaitKill (30);
 
-my $SubTestResult = $SubTest->WaitKill (10);
-if ($SubTestResult != 0) {
-    print STDERR "ERROR: test subscriber returned $SubTestResult\n";
+if ($psTestResult != 0) {
+    print STDERR "ERROR: test publisher returned $psTestResult\n";
     $status = 1;
 }
 
