@@ -40,7 +40,7 @@ void TimeSeriesGnuPlotFormatter::output_header(const Report& report, std::ofstre
     output_file_stream << " mem_percent_timestamp" << (show_postfix ? std::to_string(ni + 1) : "");
     output_file_stream << " virtual_mem_percent_median" << (show_postfix ? std::to_string(ni + 1) : "");
     output_file_stream << " virtual_mem_percent_timestamp" << (show_postfix ? std::to_string(ni + 1) : "");
-    
+
     std::unordered_set<std::string> tags;
 
     for (unsigned int wi = 0; wi < report.node_reports[ni].worker_reports.length(); wi++) {
@@ -73,7 +73,6 @@ void TimeSeriesGnuPlotFormatter::output_header(const Report& report, std::ofstre
       output_file_stream << " " << *it << (show_postfix ? std::to_string(ni + 1) : "");
     }
   }
-  
 
   output_file_stream << std::endl;
 }
