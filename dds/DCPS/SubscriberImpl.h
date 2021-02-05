@@ -9,13 +9,15 @@
 #define OPENDDS_DCPS_SUBSCRIBERIMPL_H
 
 #include "DataReaderCallbacks.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
 #include "EntityImpl.h"
 #include "Definitions.h"
 #include "DataCollector_T.h"
 #include "DataReaderImpl.h"
-#include "ace/Recursive_Thread_Mutex.h"
 #include "PoolAllocator.h"
+
+#include <dds/DdsDcpsInfoUtilsC.h>
+
+#include <ace/Recursive_Thread_Mutex.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -187,7 +189,8 @@ private:
   DataReaderSet                datareader_set_;
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
-  OPENDDS_MAP(OPENDDS_STRING, DDS::DataReader_var) multitopic_reader_map_;
+  typedef OPENDDS_MAP(String, DDS::DataReader_var) MultitopicReaderMap;
+  MultitopicReaderMap multitopic_reader_map_;
 #endif
 
   WeakRcHandle<DomainParticipantImpl> participant_;
