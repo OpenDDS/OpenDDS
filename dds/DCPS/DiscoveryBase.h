@@ -1482,7 +1482,7 @@ namespace OpenDDS {
           return; // Possible and ok, since lock is released
         }
 
-        // 3. Perform type consistency check
+        // 3. Perform type consistency check (XTypes 1.3, Section 7.6.3.4.2)
         bool consistent = false;
 
         typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator td_iter = topics_.find(topic_name);
@@ -1524,18 +1524,14 @@ namespace OpenDDS {
 
             if (drQos->type_consistency.kind == DDS::ALLOW_TYPE_COERCION) {
               consistent = ta.assignable(reader_type_id, writer_type_id);
-              ACE_DEBUG((LM_DEBUG, "DEBUG: Assignability returns %C\n",
-                         consistent ? "true" : "false"));
             } else {
               // The two types must be equivalent for DISALLOW_TYPE_COERCION
               consistent = reader_type_id == writer_type_id;
-              ACE_DEBUG((LM_DEBUG, "DEBUG: Two types are not equivalent\n"));
             }
           } else {
             if (drQos->type_consistency.force_type_validation) {
               // Cannot do type validation since not both TypeObjects are available
               consistent = false;
-              ACE_DEBUG((LM_DEBUG, "DEBUG: force_type_validation is true\n"));
             } else {
               // Fall back to matching type names
               OPENDDS_STRING writer_type_name;
@@ -1551,8 +1547,6 @@ namespace OpenDDS {
                 reader_type_name = dsi->second.get_type_name();
               }
               consistent = writer_type_name == reader_type_name;
-              ACE_DEBUG((LM_DEBUG, "DEBUG: Two type names are %C\n",
-                         consistent ? "the same" : "NOT the same"));
             }
           }
 
