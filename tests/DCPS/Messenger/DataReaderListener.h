@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -8,7 +6,11 @@
 #ifndef DATAREADER_LISTENER_IMPL
 #define DATAREADER_LISTENER_IMPL
 
+#include <dds/DCPS/LocalObject.h>
+
 #include <dds/DdsDcpsSubscriptionC.h>
+
+#include <set>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -48,7 +50,8 @@ public:
     DDS::DataReader_ptr reader,
     const DDS::SampleLostStatus& status);
 
-  long num_reads() const {
+  long num_reads() const
+  {
     return num_reads_;
   }
 
@@ -60,10 +63,10 @@ private:
   typedef std::set<CORBA::ULong> Counts;
 
   DDS::DataReader_var reader_;
-  long                num_reads_;
-  Counts              counts_;
-  bool                valid_;
-  const bool          reliable_;
+  long num_reads_;
+  Counts counts_;
+  bool valid_;
+  const bool reliable_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */
