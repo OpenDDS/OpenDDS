@@ -33,7 +33,7 @@ DataReaderListenerImpl::~DataReaderListenerImpl()
 bool DataReaderListenerImpl::is_reliable()
 {
   OpenDDS::DCPS::TransportConfig_rch gc = TheTransportRegistry->global_config();
-  return !(gc->instances_[0]->transport_type_ == "udp");
+  return gc->instances_[0]->transport_type_ != "udp";
 }
 
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
@@ -43,8 +43,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
   try {
     Messenger::MessageDataReader_var message_dr =
       Messenger::MessageDataReader::_narrow(reader);
-
-    if (CORBA::is_nil(message_dr.in())) {
+    if (!message_dr) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("%N:%l: on_data_available()")
                  ACE_TEXT(" ERROR: _narrow failed!\n")));
@@ -54,11 +53,12 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     Messenger::Message message;
     DDS::SampleInfo si;
 
-    const DDS::ReturnCode_t status = message_dr->take_next_sample(message, si) ;
+    const DDS::ReturnCode_t status = message_dr->take_next_sample(message, si);
 
     if (status == DDS::RETCODE_OK) {
       std::cout << "SampleInfo.sample_rank = " << si.sample_rank << std::endl;
-      std::cout << "SampleInfo.instance_state = " << OpenDDS::DCPS::InstanceState::instance_state_string(si.instance_state) << std::endl;
+      std::cout << "SampleInfo.instance_state = " <<
+        OpenDDS::DCPS::InstanceState::instance_state_string(si.instance_state) << std::endl;
 
       if (si.valid_data) {
         if (!counts_.insert(message.count).second) {
@@ -181,8 +181,7 @@ bool DataReaderListenerImpl::is_valid() const
           valid_count = false;
           continue;
         }
-      }
-      else {
+      } else {
         bool multi = false;
         while (++count != counts_.end() && *count < expected) {
           multi = true;
@@ -201,11 +200,10 @@ bool DataReaderListenerImpl::is_valid() const
   if (count != counts_.end()) {
     std::cout << "ERROR: received messages with count higher than expected values" << std::endl;
     valid_count = false;
-  }
-  // if didn't receive all the messages (for reliable transport) or didn't receive even get 1/4, then report error
-  else if (counts_.size() < num_messages &&
-           (reliable_ || (counts_.size() * 4) < num_messages)) {
-    std::cout << "ERROR: received " << counts_.size() << " messages, but expected " << num_messages << std::endl;
+  } else if (counts_.size() < num_messages &&
+      (reliable_ || (counts_.size() * 4) < num_messages)) {
+    std::cout << "ERROR: received " << counts_.size() << " messages, but expected " <<
+      num_messages << std::endl;
     valid_count = false;
   }
 
