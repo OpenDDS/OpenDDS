@@ -838,7 +838,18 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
   // For interoperability, always write the reliability info
   {
     Parameter param;
-    param.reliability(writer_data.ddsPublicationData.reliability);
+    // Interoperability note:
+    // Spec creators for RTPS have reliability indexed at 1
+    DDS::ReliabilityQosPolicy reliability_copy =
+        writer_data.ddsPublicationData.reliability;
+
+    if (reliability_copy.kind == DDS::BEST_EFFORT_RELIABILITY_QOS) {
+      reliability_copy.kind = (DDS::ReliabilityQosPolicyKind)(RTPS::BEST_EFFORT);
+    } else { // default to RELIABLE for writers
+      reliability_copy.kind = (DDS::ReliabilityQosPolicyKind)(RTPS::RELIABLE);
+    }
+
+    param.reliability(reliability_copy);
     add_param(param_list, param);
   }
 
@@ -1025,6 +1036,16 @@ bool from_param_list(const ParameterList& param_list,
         break;
       case PID_RELIABILITY:
         writer_data.ddsPublicationData.reliability = param.reliability();
+        // Interoperability note:
+        // Spec creators for RTPS have reliability indexed at 1
+        {
+          const CORBA::Short rtpsKind = static_cast<CORBA::Short>(param.reliability().kind);
+          if (rtpsKind == RTPS::BEST_EFFORT) {
+            writer_data.ddsPublicationData.reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
+          } else { // default to RELIABLE for writers
+            writer_data.ddsPublicationData.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+          }
+        }
         normalize(writer_data.ddsPublicationData.reliability.max_blocking_time);
         break;
       case PID_LIFESPAN:
@@ -1160,7 +1181,18 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
   // if (not_default(reader_data.ddsSubscriptionData.reliability, false))
   {
     Parameter param;
-    param.reliability(reader_data.ddsSubscriptionData.reliability);
+    // Interoperability note:
+    // Spec creators for RTPS have reliability indexed at 1
+    DDS::ReliabilityQosPolicy reliability_copy =
+        reader_data.ddsSubscriptionData.reliability;
+
+    if (reliability_copy.kind == DDS::RELIABLE_RELIABILITY_QOS) {
+      reliability_copy.kind = (DDS::ReliabilityQosPolicyKind)(RTPS::RELIABLE);
+    } else { // default to BEST_EFFORT for readers
+      reliability_copy.kind = (DDS::ReliabilityQosPolicyKind)(RTPS::BEST_EFFORT);
+    }
+
+    param.reliability(reliability_copy);
     add_param(param_list, param);
   }
 
@@ -1352,6 +1384,17 @@ bool from_param_list(const ParameterList& param_list,
         break;
       case PID_RELIABILITY:
         reader_data.ddsSubscriptionData.reliability = param.reliability();
+        // Interoperability note:
+        // Spec creators for RTPS have reliability indexed at 1
+        {
+          const CORBA::Short rtpsKind = static_cast<CORBA::Short>(param.reliability().kind);
+          const CORBA::Short OLD_RELIABLE_VALUE = 3;
+          if (rtpsKind == RTPS::RELIABLE || rtpsKind == OLD_RELIABLE_VALUE) {
+            reader_data.ddsSubscriptionData.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+          } else { // default to BEST_EFFORT for readers
+            reader_data.ddsSubscriptionData.reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
+          }
+        }
         break;
       case PID_USER_DATA:
         reader_data.ddsSubscriptionData.user_data = param.user_data();
