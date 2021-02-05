@@ -61,12 +61,12 @@ If you encounter any problems with this release please fill out the
 it when posting to the [mailing list](http://opendds.org/support.html) or
 creating a [GitHub Issue](https://github.com/objectcomputing/OpenDDS/issues).
 
-For commercial support please see http://opendds.org/support.html.
+For commercial support please see https://opendds.org/support.html.
 
 ## Features
 
 This release of OpenDDS is based on the DDS Specification [formal/2015-04-10
-(version 1.4)](http://www.omg.org/spec/DDS/1.4).  It features the following
+(version 1.4)](https://www.omg.org/spec/DDS/1.4).  It features the following
 transport protocols:
 
 * TCP/IP
@@ -75,7 +75,7 @@ transport protocols:
 * RTPS over UDP/IP (unicast and multicast)
 
 RTPS (Interoperability) features are based on the [DDS-RTPS Specification
-formal/2019-04-03 (version 2.3)](http://www.omg.org/spec/DDSI-RTPS/2.3).  See
+formal/2019-04-03 (version 2.3)](https://www.omg.org/spec/DDSI-RTPS/2.3).  See
 the OpenDDS Developer's Guide and the file [docs/design/RTPS](docs/design/RTPS)
 for more details on RTPS.
 
@@ -165,7 +165,7 @@ Others:
 Embedded/Mobile/IoT:
 * LynxOS-178 (OpenDDS Safety Profile)
 * VxWorks 6.9 and 7 (see below)
-* [Linux on Raspberry Pi](http://opendds.org/quickstart/GettingStartedPi.html)
+* [Linux on Raspberry Pi](https://opendds.org/quickstart/GettingStartedPi.html)
 * [Android 9.0 "Pie" (API Level 28) NDK r18b](docs/android.md)
 
 We have built OpenDDS for VxWorks 6.9 and 7 and have run basic
