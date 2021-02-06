@@ -12,31 +12,39 @@ use PerlDDS::Process_Java;
 use strict;
 
 my $status = 0;
-my $debug = '0';
+my $debug = '1';
 my $vmargs = "-ea";
 
+my $security = "-s";
+my $noice = "";
+my $ipv6 = "";
+
 my $pub_sub_ini = "rtps.ini";
-my $opt = "";
+my $opt = $security;
 
 foreach my $i (@ARGV) {
-    if ($i eq '-debug') {
-        $debug = '10';
-    }
-    elsif ($i eq '-xcheck')
-    {
-      # disable -Xcheck:jni warnings
-      $vmargs = "";
-    }
-    elsif ($i eq '-noice' || $i eq 'noice')
-    {
-      $pub_sub_ini = 'rtps_no_ice.ini';
-      $opt = "-n";
-    }
-    elsif ($i eq '-security' || $i eq 'security')
-    {
-      $opt = "-s";
-    }
+  if ($i eq '-debug') {
+    $debug = '10';
+  } elsif ($i eq 'nosecurity' || $i eq '-nosecurity') {
+    $security = "";
+  } elsif ($i eq 'noice' || $i eq '-noice') {
+    $noice = "-n";
+  } elsif ($i eq 'noice' || $i eq '-noice') {
+    $noice = "-n";
+  } elsif ($i eq 'ipv6' || $i eq '-ipv6') {
+    $ipv6 = "-6";
+  }
 }
+
+if ($noice && $ipv6) {
+    $pub_sub_ini = 'rtps_no_ice_ipv6.ini';
+} elsif ($noice) {
+    $pub_sub_ini = 'rtps_no_ice.ini';
+} elsif ($ipv6) {
+    $pub_sub_ini = 'rtps_ipv6.ini';
+}
+
+$opt = "$security $noice $ipv6";
 
 my $debug_opt = ($debug eq '0') ? ''
     : "-ORBDebugLevel $debug -DCPSDebugLevel $debug";
@@ -52,13 +60,14 @@ my $relay_security_opts = "-IdentityCA ../../../tests/security/certs/identity/id
 PerlACE::add_lib_path ("$DDS_ROOT/java/tests/messenger/messenger_idl");
 
 my $relay = new PerlDDS::TestFramework();
-$relay->process("relay", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay.ini -ApplicationDomain 42 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444 $relay_security_opts");
+if ($ipv6) {
+    $relay->process("relay", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay_ipv6.ini -ApplicationDomain 42 -VerticalAddress [::]:4444 -HorizontalAddress [::1]:11444 $relay_security_opts");
+} else {
+    $relay->process("relay", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay.ini -ApplicationDomain 42 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444 $relay_security_opts");
+}
 
 my $psTest = new PerlDDS::Process_Java ("ParticipantLocationTest", $test_opts,
     ["$DDS_ROOT/java/tests/messenger/messenger_idl/messenger_idl_test.jar"], $vmargs);
-
-use Data::Dumper;
-print Dumper($psTest);
 
 $relay->start_process("relay");
 sleep(1);
