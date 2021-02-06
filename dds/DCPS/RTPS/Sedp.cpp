@@ -4815,7 +4815,7 @@ Sedp::populate_discovered_reader_msg(
   drd.contentFilterProperty.expressionParameters = sub.filterProperties.expressionParameters;
 
   const CORBA::ULong len = drd.readerProxy.associatedWriters.length();
-  const CORBA::ULong added_len = sub.remote_expectant_opendds_associations_.size();
+  const CORBA::ULong added_len = static_cast<CORBA::ULong>(sub.remote_expectant_opendds_associations_.size());
   drd.readerProxy.associatedWriters.length(len + added_len);
 
   CORBA::ULong i = 0;

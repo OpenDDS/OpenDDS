@@ -14,12 +14,10 @@ $test->enable_console_logging();
 my $secure = 0;
 my $verbose = 0;
 my $test_name = "";
-my $type_consistency = 0;
 GetOptions(
   "secure" => \$secure,
   "verbose" => \$verbose,
   "test|t=s" => \$test_name,
-  "type-consistency" => \$type_consistency
 );
 
 my @common_args = ('-ORBDebugLevel 1 -DCPSDebugLevel 6');
@@ -41,7 +39,7 @@ if ($secure) {
                                   r_ini => "rtps_disc_security.ini", w_ini => "rtps_disc_security.ini"},
     "Dependency_s"            => {reader_type => "AppendableStruct", writer_type => "AppendableStructWithDependency",
                                   expect_to_fail => 0, topic => "PD_OL_OA_OM_OD", key_val => 14,
-                                  r_ini => "rtps_disc_security.ini", w_ini => "rtps_disc_security.ini"},
+                                  r_ini => "rtps_disc_security.ini", w_ini => "rtps_disc_security.ini"}
   );
 
 } else {
@@ -101,12 +99,8 @@ if ($secure) {
     "Match_no_xtypes_ny"      => {reader_type => "AppendableStructNoXTypes", writer_type => "AppendableStructNoXTypes",
                                   expect_to_fail => 0, topic => "AppendableStructT_no_xtypes_ny",
                                   key_val => 4, r_ini => "rtps_disc.ini", w_ini => "rtps_disc_no_xtypes.ini"},
-  );
-}
 
-my %type_consistency_params;
-if ($type_consistency) {
-  %type_consistency_params = (
+    # Type consistency enforcement Qos policy tests
     "IgnoreMemberNames_MutableStructMatch" => {reader_type => "MutableStruct", writer_type => "ModifiedNameMutableStruct",
                                                expect_to_fail => 0, topic => "MutableStruct_IMN", key_val => 1,
                                                r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini",
@@ -225,17 +219,8 @@ if ($test_name eq '') {
   while (my ($k, $v) = each %params) {
     run_test($v, $k);
   }
-
-  while (my ($k, $v) = each %type_consistency_params) {
-    run_test($v, $k);
-  }
 } else {
-  if ($params{$test_name}) {
-      run_test($params{$test_name}, $test_name);
-  }
-  if ($type_consistency_params{$test_name}) {
-      run_test($type_consistency_params{$test_name}, $test_name);
-  }
+  run_test($params{$test_name}, $test_name);
 }
 
 if ($status) {

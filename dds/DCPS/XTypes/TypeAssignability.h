@@ -44,8 +44,8 @@ public:
     type_consistency_.ignore_member_names = false;
   }
 
-  explicit TypeAssignability(TypeLookupService_rch tls,
-                             TypeConsistencyAttributes type_consistency)
+  TypeAssignability(TypeLookupService_rch tls,
+                    TypeConsistencyAttributes type_consistency)
     : tl_service_(tls)
     , type_consistency_(type_consistency) {}
 

@@ -54,7 +54,7 @@ ReturnCode_t read_tryconstruct_struct(const DataReader_var& dr, const T1& pdr, T
   ReturnCode_t ret = RETCODE_OK;
   if ((ret = read_i(dr, pdr, data)) == RETCODE_OK) {
     if (data.length() != 1) {
-      ACE_ERROR((LM_ERROR, "ERROR: reader: unexpected data length: %d", data.length()));
+      ACE_ERROR((LM_ERROR, "ERROR: reader: unexpected data length: %d\n", data.length()));
       ret = RETCODE_ERROR;
     } else if (ACE_OS::strcmp(data[0].trim_string, expected_value.c_str()) != 0) {
       ACE_ERROR((LM_ERROR, "ERROR: reader: expected key value: %C, received: %C\n", expected_value.c_str(), data[0].trim_string.in()));
@@ -76,7 +76,7 @@ ReturnCode_t read_struct(const DataReader_var& dr, const T1& pdr, T2& data)
   ReturnCode_t ret = RETCODE_OK;
   if ((ret = read_i(dr, pdr, data)) == RETCODE_OK) {
     if (data.length() != 1) {
-      ACE_ERROR((LM_ERROR, "reader: unexpected data length: %d", data.length()));
+      ACE_ERROR((LM_ERROR, "reader: unexpected data length: %d\n", data.length()));
       ret = RETCODE_ERROR;
     } else if (data[0].key != key_value) {
       ACE_ERROR((LM_ERROR, "reader: expected key value: %d, received: %d\n", key_value, data[0].key));
@@ -98,7 +98,7 @@ ReturnCode_t read_union(const DataReader_var& dr, const T1& pdr, T2& data)
   ReturnCode_t ret = RETCODE_OK;
   if ((ret = read_i(dr, pdr, data)) == RETCODE_OK) {
     if (data.length() != 1) {
-      ACE_ERROR((LM_ERROR, "reader: unexpected data length: %d", data.length()));
+      ACE_ERROR((LM_ERROR, "reader: unexpected data length: %d\n", data.length()));
       ret = RETCODE_ERROR;
     } else {
       switch (data[0]._d()) {
@@ -212,28 +212,28 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       if (i + 1 < argc) {
         type = ACE_TEXT_ALWAYS_CHAR(argv[++i]);
       } else {
-        ACE_ERROR((LM_ERROR, "ERROR: Invalid type argument"));
+        ACE_ERROR((LM_ERROR, "ERROR: Invalid type argument\n"));
         return 1;
       }
     } else if (arg == ACE_TEXT("--topic")) {
       if (i + 1 < argc) {
         topic_name = ACE_TEXT_ALWAYS_CHAR(argv[++i]);
       } else {
-        ACE_ERROR((LM_ERROR, "ERROR: Invalid topic name argument"));
+        ACE_ERROR((LM_ERROR, "ERROR: Invalid topic name argument\n"));
         return 1;
       }
     } else if (arg == ACE_TEXT("--reg_type")) {
       if (i + 1 < argc) {
         registered_type_name = ACE_TEXT_ALWAYS_CHAR(argv[++i]);
       } else {
-        ACE_ERROR((LM_ERROR, "ERROR: Invalid registered type argument"));
+        ACE_ERROR((LM_ERROR, "ERROR: Invalid registered type argument\n"));
         return 1;
       }
     } else if (arg == ACE_TEXT("--key_val")) {
       if (i + 1 < argc) {
         key_value = ACE_OS::atoi(argv[++i]);
       } else {
-        ACE_ERROR((LM_ERROR, "ERROR: Invalid key value argument"));
+        ACE_ERROR((LM_ERROR, "ERROR: Invalid key value argument\n"));
         return 1;
       }
     } else if (arg == ACE_TEXT("--expect_to_fail")) {
@@ -253,7 +253,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DomainParticipant_var dp;
   create_participant(dpf, dp);
   if (!dp) {
-    ACE_ERROR((LM_ERROR, "ERROR: create_participant() failed"));
+    ACE_ERROR((LM_ERROR, "ERROR: create_participant failed\n"));
     return 1;
   }
 
