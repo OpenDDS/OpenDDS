@@ -111,7 +111,7 @@ bool SetCftParametersAction::init(const ActionConfig& config, ActionReport& repo
   return true;
 }
 
-void SetCftParametersAction::start()
+void SetCftParametersAction::test_start()
 {
   std::unique_lock<std::mutex> lock(mutex_);
   if (!started_) {
@@ -120,7 +120,7 @@ void SetCftParametersAction::start()
   }
 }
 
-void SetCftParametersAction::stop()
+void SetCftParametersAction::test_stop()
 {
   std::unique_lock<std::mutex> lock(mutex_);
   if (started_ && !stopped_) {

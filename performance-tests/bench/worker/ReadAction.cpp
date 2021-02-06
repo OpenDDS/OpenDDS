@@ -69,7 +69,7 @@ bool ReadAction::init(const ActionConfig& config, ActionReport& report, Builder:
   return true;
 }
 
-void ReadAction::start()
+void ReadAction::test_start()
 {
   std::unique_lock<std::mutex> lock(mutex_);
   if (!started_) {
@@ -82,7 +82,11 @@ void ReadAction::start()
   }
 }
 
-void ReadAction::stop()
+void ReadAction::test_stop()
+{
+}
+
+void ReadAction::action_stop()
 {
   std::unique_lock<std::mutex> lock(mutex_);
   if (started_ && !stopped_) {

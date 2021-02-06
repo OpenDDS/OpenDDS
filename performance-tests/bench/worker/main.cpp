@@ -380,12 +380,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       Log::log() << "Discovery of expected entities took " << process_stop_discovery_time - process_start_discovery_time << " seconds." << std::endl << std::endl;
     }
 
+    Log::log() << "Initializing process actions." << std::endl;
+
+    am.action_start();
+
     do_wait(config.start_time, "start");
 
-    Log::log() << "Starting process tests." << std::endl;
+    Log::log() << "Starting process actions." << std::endl;
 
     process_start_begin_time = Builder::get_hr_time();
-    am.start();
+    am.test_start();
     process_start_end_time = Builder::get_hr_time();
 
     Log::log() << "Process tests started." << std::endl << std::endl;
@@ -395,10 +399,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     Log::log() << "Stopping process tests." << std::endl;
 
     process_stop_begin_time = Builder::get_hr_time();
-    am.stop();
+    am.test_stop();
     process_stop_end_time = Builder::get_hr_time();
 
     Log::log() << "Process tests stopped." << std::endl << std::endl;
+
+    do_wait(config.destruction_time, "destruction");
+
+    Log::log() << "Stopping process actions." << std::endl;
+
+    am.action_stop();
 
     proactor->proactor_end_event_loop();
     for (size_t i = 0; i < thread_pool_size; ++i) {
@@ -406,7 +416,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     }
     thread_pool.clear();
 
-    do_wait(config.destruction_time, "destruction");
+    Log::log() << "Detaching Listeners." << std::endl;
 
     process.detach_listeners();
 
