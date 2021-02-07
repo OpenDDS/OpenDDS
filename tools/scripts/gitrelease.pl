@@ -283,6 +283,8 @@ sub run_command ($;$) {
 }
 
 sub yes_no {
+  my $message = shift;
+  print("$message [y/n] ");
   while (<STDIN>) {
     chomp;
     if ($_ eq "n") {
@@ -556,11 +558,10 @@ sub remedy_git_status_clean {
   my $post_release = shift() || 0;
   my $version = $settings->{version};
 
-  if (!run_command("git diff")) {
+  if (!run_command("git --no-pager diff HEAD")) {
     return 0;
   }
-  print "Would you like to add and commit these changes [y/n]? ";
-  return 0 if (!yes_no());
+  return 0 if (!yes_no("Would you like to add and commit these changes?"));
   if (!$post_release) {
     system("git add docs/history/ChangeLog-$version") == 0
       or die "Could not execute: git add docs/history/ChangeLog-$version";
@@ -2082,7 +2083,7 @@ if ($print_list_all) {
 }
 
 if ($micro) {
-  if (!$print_list && !$branch) {
+  if (!$print_list && $branch eq $default_branch) {
     die "For micro releases, you must define the branch you want to use with --branch.\nStopped";
   }
   $skip_devguide = 1;
@@ -2106,22 +2107,24 @@ my $base_name = "";
 my $release_branch = "";
 if (%parsed_version) {
   $version = $parsed_version{string};
+  print("Version to release is $version\n");
   $base_name = "${base_name_prefix}${version}";
   if (!$micro) {
     $release_branch =
       "${release_branch_prefix}${git_name_prefix}$parsed_version{series_string}";
     if ($parsed_version{micro} != 0) {
-      print STDERR "WARNING: " .
-        "version looks like a micro release, but --micro wasn't passed!\n";
+      exit(0) if (!yes_no(
+        "Version looks like a micro release, but --micro wasn't passed! Continue?"));
     }
   }
   elsif ($parsed_version{micro} == 0) {
-    print STDERR "WARNING: " .
-      "version looks like a major or minor release, but --micro was passed!\n";
+    exit(0) if (!yes_no(
+      "Version looks like a major or minor release, but --micro was passed! Continue?"));
   }
   if (!$next_version) {
-    $next_version = sprintf("%s.%d",
-      $parsed_version{major}, int($parsed_version{minor}) + 1);
+    my $next_minor = int($parsed_version{minor}) + ($micro ? 0 : 1);
+    my $next_micro = $micro ? (int($parsed_version{micro}) + 1) : 0;
+    $next_version = sprintf("%s.%d.%d", $parsed_version{major}, $next_minor, $next_micro);
   }
   $next_version .= "-${metadata}";
   %parsed_next_version = parse_version($next_version);
@@ -2129,6 +2132,7 @@ if (%parsed_version) {
     die "Invalid next version: $next_version\nStopped";
   }
   $next_version = $parsed_next_version{string_with_metadata};
+  print("Next after this version is going to be $next_version\n");
 }
 elsif (!$print_help) {
   die "Invalid version: $version\nStopped";
@@ -2468,7 +2472,8 @@ my @release_steps  = (
     name    => 'Email DDS-Release-Announce list',
     verify  => sub{verify_email_list(@_)},
     message => sub{message_email_dds_release_announce(@_)},
-    remedy  => sub{remedy_email_dds_release_announce(@_)}
+    remedy  => sub{remedy_email_dds_release_announce(@_)},
+    post_release => 1,
   },
 );
 
@@ -2520,8 +2525,7 @@ sub run_step {
 
   return if (
     !$settings->{list_all} && ($step->{skip} || $step->{verified} ||
-    ($settings->{release_flag_file_exists} && !$step->{post_release}) ||
-    ($settings->{micro} && $step->{post_release})));
+    ($settings->{release_flag_file_exists} && !$step->{post_release})));
   print "$step_count: $title\n";
   return if $settings->{list};
 
