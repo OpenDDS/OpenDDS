@@ -12,6 +12,7 @@ on:
       - '!README.md'
       - '!INSTALL.md'
       - '!NEWS.md'
+      - '!tools/scripts/**'
   pull_request:
     branches:
       - master
@@ -22,6 +23,7 @@ on:
       - '!README.md'
       - '!INSTALL.md'
       - '!NEWS.md'
+      - '!tools/scripts/**'
 
 env:
   TRIGGERING_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
