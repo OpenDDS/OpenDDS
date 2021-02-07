@@ -33,7 +33,7 @@ foreach my $i (@ARGV) {
     $debug = '10';
   } elsif ($i eq 'nosecurity' || $i eq '-nosecurity') {
     $security = "";
-    $relay_security_opts = "-DCPSSecurity 1";
+    $relay_security_opts = "";
   } elsif ($i eq 'noice' || $i eq '-noice') {
     $noice = "-n";
   } elsif ($i eq 'ipv6' || $i eq '-ipv6') {

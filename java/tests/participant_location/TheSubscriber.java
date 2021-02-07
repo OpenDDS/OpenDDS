@@ -104,6 +104,7 @@ class TheSubscriber implements Callable<Boolean> {
     dr.delete_readcondition(rc);
 
     // wait for location messages
+    System.out.println("Subscriber waiting for location messages.");
     latch.await();
 
     System.out.println("Stop Subscriber");

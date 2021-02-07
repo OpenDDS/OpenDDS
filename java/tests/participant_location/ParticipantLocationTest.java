@@ -113,6 +113,8 @@ public class ParticipantLocationTest {
       subProps[4] = new Property_t("dds.sec.access.permissions_ca", permCaFile, false);
       subProps[5] = new Property_t("dds.sec.access.governance", governanceFile, false);
       subProps[6] = new Property_t("dds.sec.access.permissions", subPermissionsFile, false);
+    } else {
+      System.out.println("Running test without security");
     }
 
     pubQosHolder.value.property.value = pubProps;
@@ -227,13 +229,14 @@ public class ParticipantLocationTest {
     Duration_t forever = new Duration_t(DURATION_INFINITE_SEC.value, DURATION_INFINITE_NSEC.value);
     pubDw.wait_for_acknowledgments(forever);
 
-    System.out.println("Stop Publisher");
-
     // wait for location messages
+    System.out.println("Publisher waiting for location messages.");
     latch.await();
 
     // this could block until Subscriber returns
     boolean success = pubLocationListener.check() && subSuccess.get();
+
+    System.out.println("Stop Publisher");
 
     // cleanup
     executor.shutdown();
