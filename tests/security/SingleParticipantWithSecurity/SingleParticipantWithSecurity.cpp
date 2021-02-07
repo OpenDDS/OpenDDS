@@ -13,6 +13,7 @@
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/WaitSet.h>
+#include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/security/framework/Properties.h>
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
@@ -73,7 +74,7 @@ void read(DDS::DataReader_ptr reader)
     } else if (ret != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("%N:%l: read()")
-        ACE_TEXT(" ERROR: Reader: wait returned %d\n"), ret));
+        ACE_TEXT(" ERROR: Reader: wait returned %C\n"), OpenDDS::DCPS::retcode_to_string(ret)));
       return;
     }
 
@@ -83,13 +84,12 @@ void read(DDS::DataReader_ptr reader)
     Messenger::Message message;
     DDS::SampleInfo si;
 
-    const DDS::ReturnCode_t status = message_dr->take_next_sample(message, si);
+    ret = message_dr->take_next_sample(message, si);
 
-    if (status != DDS::RETCODE_OK) {
+    if (ret != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("%N:%l: read()")
-        ACE_TEXT(" ERROR: unexpected status: %d\n"),
-        status));
+        ACE_TEXT(" ERROR: unexpected status:%C\n"), OpenDDS::DCPS::retcode_to_string(ret)));
       return;
     }
 
@@ -175,9 +175,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       // Create DomainParticipant
       participant = dpf->create_participant(4,
-                                part_qos,
-                                DDS::DomainParticipantListener::_nil(),
-                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+        part_qos,
+        DDS::DomainParticipantListener::_nil(),
+        OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       if (!participant) {
         ACE_ERROR_RETURN((LM_ERROR,
