@@ -163,10 +163,21 @@ module DDS {
                 RELIABLE_RELIABILITY_QOS
                 };
 
+    enum ReliabilityQosPolicyKindRtps {
+                NOT_USED_RELIABILITY_QOS_RTPS,
+                BEST_EFFORT_RELIABILITY_QOS_RTPS,
+                RELIABLE_RELIABILITY_QOS_RTPS
+                };
+
     // This is for when we support XCDR1.
     // @appendable
     struct ReliabilityQosPolicy {
                 ReliabilityQosPolicyKind kind;
+                Duration_t max_blocking_time;
+                };
+
+    struct ReliabilityQosPolicyRtps {
+                ReliabilityQosPolicyKindRtps kind;
                 Duration_t max_blocking_time;
                 };
 

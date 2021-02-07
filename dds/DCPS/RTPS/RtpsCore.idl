@@ -331,7 +331,7 @@ module OpenDDS {
     const ParameterId_t PID_OPENDDS_ICE_GENERAL       = PID_OPENDDS_BASE + 3;
     const ParameterId_t PID_OPENDDS_ICE_CANDIDATE     = PID_OPENDDS_BASE + 4;
     const ParameterId_t PID_OPENDDS_PARTICIPANT_FLAGS = PID_OPENDDS_BASE + 5;
-
+    const ParameterId_t PID_OPENDDS_RELIABILITY       = PID_OPENDDS_BASE + 6;
 
     /* Always used inside a ParameterList */
     /* custom de/serializer implemented in opendds_idl */
@@ -358,7 +358,9 @@ module OpenDDS {
       case PID_LIVELINESS:
         DDS::LivelinessQosPolicy liveliness;
       case PID_RELIABILITY:
-        DDS::ReliabilityQosPolicy reliability;
+        DDS::ReliabilityQosPolicyRtps reliability;
+      case PID_OPENDDS_RELIABILITY:
+        DDS::ReliabilityQosPolicy opendds_reliability;
       case PID_LIFESPAN:
         DDS::LifespanQosPolicy lifespan;
       case PID_DESTINATION_ORDER:

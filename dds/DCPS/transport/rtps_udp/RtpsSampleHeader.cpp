@@ -570,7 +570,21 @@ RtpsSampleHeader::populate_inline_qos(
   PROCESS_INLINE_QOS(ownership_strength, default_dw_qos, qos_data.dw_qos);
 #endif
   PROCESS_INLINE_QOS(liveliness, default_dw_qos, qos_data.dw_qos);
-  PROCESS_INLINE_QOS(reliability, default_dw_qos, qos_data.dw_qos);
+  if (qos_data.dw_qos.reliability != default_dw_qos.reliability) {
+    const int qos_len = plist.length();
+    plist.length(qos_len + 1);
+
+    DDS::ReliabilityQosPolicyRtps reliability;
+    reliability.max_blocking_time = qos_data.dw_qos.reliability.max_blocking_time;
+
+    if (qos_data.dw_qos.reliability.kind == DDS::BEST_EFFORT_RELIABILITY_QOS) {
+      reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS_RTPS;
+    } else { // default to RELIABLE for writers
+      reliability.kind = DDS::RELIABLE_RELIABILITY_QOS_RTPS;
+    }
+
+    plist[qos_len].reliability(reliability);
+  }
   PROCESS_INLINE_QOS(transport_priority, default_dw_qos, qos_data.dw_qos);
   PROCESS_INLINE_QOS(lifespan, default_dw_qos, qos_data.dw_qos);
   PROCESS_INLINE_QOS(destination_order, default_dw_qos, qos_data.dw_qos);
