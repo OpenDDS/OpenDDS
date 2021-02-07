@@ -16,19 +16,24 @@ my $debug = '1';
 my $vmargs = "-ea";
 
 my $security = "-s";
-my $noice = "";
-my $ipv6 = "";
+my $noice;
+my $ipv6;
 
 my $pub_sub_ini = "rtps.ini";
-my $opt = $security;
+my $opt;
+
+my $relay_security_opts = "-IdentityCA ../../../tests/security/certs/identity/identity_ca_cert.pem" .
+  " -PermissionsCA ../../../tests/security/certs/permissions/permissions_ca_cert.pem" .
+  " -IdentityCertificate ../../../tests/security/certs/identity/test_participant_01_cert.pem" .
+  " -IdentityKey ../../../tests/security/certs/identity/test_participant_01_private_key.pem" .
+  " -Governance governance_signed.p7s -Permissions permissions_relay_signed.p7s -DCPSSecurity 1";
 
 foreach my $i (@ARGV) {
   if ($i eq '-debug') {
     $debug = '10';
   } elsif ($i eq 'nosecurity' || $i eq '-nosecurity') {
     $security = "";
-  } elsif ($i eq 'noice' || $i eq '-noice') {
-    $noice = "-n";
+    $relay_security_opts = "-DCPSSecurity 1";
   } elsif ($i eq 'noice' || $i eq '-noice') {
     $noice = "-n";
   } elsif ($i eq 'ipv6' || $i eq '-ipv6') {
@@ -51,12 +56,6 @@ my $debug_opt = ($debug eq '0') ? ''
 
 my $test_opts = "$opt $debug_opt -ORBLogFile partLocTest.log -DCPSConfigFile $pub_sub_ini";
 
-my $relay_security_opts = "-IdentityCA ../../../tests/security/certs/identity/identity_ca_cert.pem" .
-  " -PermissionsCA ../../../tests/security/certs/permissions/permissions_ca_cert.pem" .
-  " -IdentityCertificate ../../../tests/security/certs/identity/test_participant_01_cert.pem" .
-  " -IdentityKey ../../../tests/security/certs/identity/test_participant_01_private_key.pem" .
-  " -Governance governance_signed.p7s -Permissions permissions_relay_signed.p7s -DCPSSecurity 1";
-
 PerlACE::add_lib_path ("$DDS_ROOT/java/tests/messenger/messenger_idl");
 
 my $relay = new PerlDDS::TestFramework();
@@ -71,9 +70,8 @@ my $psTest = new PerlDDS::Process_Java ("ParticipantLocationTest", $test_opts,
 
 $relay->start_process("relay");
 sleep(1);
-$psTest->Spawn();
 
-my $psTestResult = $psTest->WaitKill (30);
+my $psTestResult = $psTest->SpawnWaitKill(30);
 
 if ($psTestResult != 0) {
     print STDERR "ERROR: test publisher returned $psTestResult\n";

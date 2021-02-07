@@ -11,6 +11,11 @@ import OpenDDS.DCPS.transport.*;
 import org.omg.CORBA.StringSeqHolder;
 import Messenger.*;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 public class ParticipantLocationTest {
   private static final int N_MSGS = 20;
   private static final int DOMAIN_ID = 42;
@@ -19,7 +24,7 @@ public class ParticipantLocationTest {
   private static DomainParticipant pubParticipant;
   private static DomainParticipant subParticipant;
 
-  private static boolean noIce = true;
+  private static boolean noIce = false;
   private static boolean security = false;
   private static boolean ipv6 = false;
 
@@ -136,7 +141,8 @@ public class ParticipantLocationTest {
       return;
     }
 
-    ParticipantLocationListener pubLocationListener = new ParticipantLocationListener("Publisher");
+    CountDownLatch latch = new CountDownLatch(1);
+    ParticipantLocationListener pubLocationListener = new ParticipantLocationListener("Publisher", noIce, latch);
     assert (pubLocationListener != null);
 
     int ret = pubDr.set_listener(pubLocationListener, OpenDDS.DCPS.DEFAULT_STATUS_MASK.value);
@@ -163,93 +169,12 @@ public class ParticipantLocationTest {
     PublicationMatchedStatusHolder matched = new PublicationMatchedStatusHolder(new PublicationMatchedStatus());
     Duration_t timeout = new Duration_t(DURATION_INFINITE_SEC.value, DURATION_INFINITE_NSEC.value);
 
-    // setup subscriber
+    // setup and start subscriber
     subParticipant = dpf.create_participant(DOMAIN_ID, pubQosHolder.value, null, DEFAULT_STATUS_MASK.value);
+    Callable<Boolean> theSubscriber = new TheSubscriber(subParticipant, N_MSGS, noIce);
 
-Thread subThread = new Thread(()-> {
-    MessageTypeSupport subTypeSupport = new MessageTypeSupportImpl();
-    if (subTypeSupport.register_type(subParticipant, "Messenger::Message") != RETCODE_OK.value) {
-      throw new IllegalStateException("Unable to register type!");
-    }
-
-    Topic subTopic = subParticipant.create_topic("Movie Discussion List", subTypeSupport.get_type_name(), TOPIC_QOS_DEFAULT.get(),
-        null, DEFAULT_STATUS_MASK.value);
-
-    Subscriber subBuiltinSubscriber = subParticipant.get_builtin_subscriber();
-    if (subBuiltinSubscriber == null) {
-      System.err.println("ERROR: subscriber could not get built-in subscriber");
-      return;
-    }
-
-    DataReader subDr = subBuiltinSubscriber.lookup_datareader(BuiltinTopicUtils.BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
-    if (subDr == null) {
-      System.err.println("ERROR: subscriber could not lookup datareader");
-      return;
-    }
-
-    ParticipantLocationListener subLocationListener = new ParticipantLocationListener("Subscriber");
-    assert (subLocationListener != null);
-
-    int sret = subDr.set_listener(subLocationListener, OpenDDS.DCPS.DEFAULT_STATUS_MASK.value);
-    assert (sret == DDS.RETCODE_OK.value);
-
-    Subscriber sub = subParticipant.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
-    if (sub == null) {
-      System.err.println("ERROR: Subscriber creation failed");
-      return;
-    }
-
-    TheTransportRegistry.bind_config("subscriber_config", sub);
-
-    DataReader subReader = sub.create_datareader(subTopic, DATAREADER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
-    if (subReader == null) {
-      System.err.println("ERROR: Subscriber DataReader creation failed");
-      return;
-    }
-
-    WaitSet sws = new WaitSet();
-
-    Message msg = new Message();
-    MessageDataReader mdr = MessageDataReaderHelper.narrow(subReader);
-    ReadCondition rc = subReader.create_readcondition(ANY_SAMPLE_STATE.value, ANY_VIEW_STATE.value,
-        ALIVE_INSTANCE_STATE.value);
-    sws.attach_condition(rc);
-
-    Duration_t stimeout = new Duration_t(DURATION_INFINITE_SEC.value,
-                                            DURATION_INFINITE_NSEC.value);
-
-    while (true) {
-      ConditionSeqHolder cond = new ConditionSeqHolder(new Condition[] {});
-      if (sws.wait(cond, stimeout) != RETCODE_OK.value) {
-        System.err.println("ERROR: DataReader wait() failed.");
-        return;
-      }
-      MessageHolder mholder = new MessageHolder(msg);
-      SampleInfoHolder infoholder = new SampleInfoHolder(new SampleInfo());
-      infoholder.value.source_timestamp = new Time_t();
-      if (mdr.take_next_sample(mholder, infoholder) != RETCODE_OK.value) {
-        System.err.println("ERROR: take_next_sample");
-        return;
-      }
-      else {
-        System.out.println("Got msg " + msg.count + ". '" + msg.text + "'");
-      }
-
-      if (msg.count == N_MSGS - 1) {
-        System.out.println("Got last expected message.");
-        break;
-      }
-    }
-    sws.detach_condition(rc);
-    subDr.delete_readcondition(rc);
-
-    System.out.println("Stop Subscriber");
-  });
-
-    subThread.start();
-
-    //Thread.sleep(5000);
-    //boolean success = locationListener.check(noIce);
+    ExecutorService executor = Executors.newSingleThreadExecutor();
+    Future<Boolean> subSuccess = executor.submit(theSubscriber);
 
     // publisher wait for match
     while (true) {
@@ -304,10 +229,15 @@ Thread subThread = new Thread(()-> {
 
     System.out.println("Stop Publisher");
 
-    Thread.sleep(5000);
-    boolean success = pubLocationListener.check(noIce);
+    // wait for location messages
+    latch.await();
+
+    // this could block until Subscriber returns
+    boolean success = pubLocationListener.check() && subSuccess.get();
 
     // cleanup
+    executor.shutdown();
+
     subParticipant.delete_contained_entities();
     dpf.delete_participant(subParticipant);
 
