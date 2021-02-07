@@ -25,6 +25,7 @@ public class ParticipantLocationTest {
   private static DomainParticipant subParticipant;
 
   private static boolean noIce = false;
+  private static boolean noRelay = false;
   private static boolean security = false;
   private static boolean ipv6 = false;
 
@@ -33,6 +34,9 @@ public class ParticipantLocationTest {
     for (String s: args) {
       if (s.equals("-n")) {
         noIce = true;
+      }
+      else if (s.equals("-r")) {
+        noRelay = true;
       }
       else if (s.equals("-6")) {
         ipv6 = true;
@@ -144,7 +148,7 @@ public class ParticipantLocationTest {
     }
 
     CountDownLatch latch = new CountDownLatch(1);
-    ParticipantLocationListener pubLocationListener = new ParticipantLocationListener("Publisher", noIce, latch);
+    ParticipantLocationListener pubLocationListener = new ParticipantLocationListener("Publisher", noIce, noRelay, latch);
     assert (pubLocationListener != null);
 
     int ret = pubDr.set_listener(pubLocationListener, OpenDDS.DCPS.DEFAULT_STATUS_MASK.value);
@@ -173,7 +177,7 @@ public class ParticipantLocationTest {
 
     // setup and start subscriber
     subParticipant = dpf.create_participant(DOMAIN_ID, pubQosHolder.value, null, DEFAULT_STATUS_MASK.value);
-    Callable<Boolean> theSubscriber = new TheSubscriber(subParticipant, N_MSGS, noIce);
+    Callable<Boolean> theSubscriber = new TheSubscriber(subParticipant, N_MSGS, noIce, noRelay);
 
     ExecutorService executor = Executors.newSingleThreadExecutor();
     Future<Boolean> subSuccess = executor.submit(theSubscriber);

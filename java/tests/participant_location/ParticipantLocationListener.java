@@ -15,6 +15,7 @@ class ParticipantLocationListener extends DDS._DataReaderListenerLocalBase {
 
   private String id;
   private boolean noIce;
+  private boolean noRelay;
   private Map<String, Integer> map = new HashMap<String, Integer>();
 
   private CountDownLatch latch;
@@ -30,9 +31,10 @@ class ParticipantLocationListener extends DDS._DataReaderListenerLocalBase {
     return g.toString();
   }
 
-  public ParticipantLocationListener(String id, boolean noIce, CountDownLatch latch) {
+  public ParticipantLocationListener(String id, boolean noIce, boolean noRelay, CountDownLatch latch) {
     this.id = id;
     this.noIce = noIce;
+    this.noRelay = noRelay;
     this.latch = latch;
   }
 
@@ -42,7 +44,6 @@ class ParticipantLocationListener extends DDS._DataReaderListenerLocalBase {
 
     if (bitDataReader == null) {
       System.err.println("ParticipantLocationListener on_data_available: narrow failed.");
-      ;
       System.exit(1);
     }
 
@@ -139,7 +140,7 @@ class ParticipantLocationListener extends DDS._DataReaderListenerLocalBase {
 
   public boolean check(boolean print) {
     int expected = OpenDDS.DCPS.LOCATION_LOCAL.value | (!noIce ? OpenDDS.DCPS.LOCATION_ICE.value : 0)
-                   | OpenDDS.DCPS.LOCATION_RELAY.value;
+                   | (!noRelay ? OpenDDS.DCPS.LOCATION_RELAY.value : 0);
 
     if (print) {
       System.out.println(id + " expecting " + ((expected & OpenDDS.DCPS.LOCATION_LOCAL.value) != 0 ? " LOCAL" : "")

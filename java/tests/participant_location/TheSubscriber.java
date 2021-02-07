@@ -17,11 +17,13 @@ class TheSubscriber implements Callable<Boolean> {
   private final DomainParticipant participant;
   private final int numMsgs;
   private final boolean noIce;
+  private final boolean noRelay;
 
-  TheSubscriber(DomainParticipant part, int num, boolean noIce) {
+  TheSubscriber(DomainParticipant part, int num, boolean noIce, boolean noRelay) {
     participant = part;
     numMsgs = num;
     this.noIce = noIce;
+    this.noRelay = noRelay;
   }
 
   @Override
@@ -47,7 +49,7 @@ class TheSubscriber implements Callable<Boolean> {
     }
 
     CountDownLatch latch = new CountDownLatch(1);
-    ParticipantLocationListener locationListener = new ParticipantLocationListener("Subscriber", noIce, latch);
+    ParticipantLocationListener locationListener = new ParticipantLocationListener("Subscriber", noIce, noRelay, latch);
     assert (locationListener != null);
 
     int ret = dr.set_listener(locationListener, OpenDDS.DCPS.DEFAULT_STATUS_MASK.value);

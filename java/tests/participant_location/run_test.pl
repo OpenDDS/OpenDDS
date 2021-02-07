@@ -17,6 +17,7 @@ my $vmargs = "-ea";
 
 my $security = "-s";
 my $noice;
+my $norelay;
 my $ipv6;
 
 my $pub_sub_ini = "rtps.ini";
@@ -36,6 +37,8 @@ foreach my $i (@ARGV) {
     $relay_security_opts = "";
   } elsif ($i eq 'noice' || $i eq '-noice') {
     $noice = "-n";
+  } elsif ($i eq 'norelay' || $i eq '-norelay') {
+    $norelay = "-r";
   } elsif ($i eq 'ipv6' || $i eq '-ipv6') {
     $ipv6 = "-6";
   }
@@ -49,7 +52,7 @@ if ($noice && $ipv6) {
     $pub_sub_ini = 'rtps_ipv6.ini';
 }
 
-$opt = "$security $noice $ipv6";
+$opt = "$security $noice $norelay $ipv6";
 
 my $debug_opt = ($debug eq '0') ? ''
     : "-ORBDebugLevel $debug -DCPSDebugLevel $debug";
@@ -68,7 +71,7 @@ if ($ipv6) {
 my $psTest = new PerlDDS::Process_Java ("ParticipantLocationTest", $test_opts,
     ["$DDS_ROOT/java/tests/messenger/messenger_idl/messenger_idl_test.jar"], $vmargs);
 
-$relay->start_process("relay");
+$relay->start_process("relay") if $norelay ne "-r";
 sleep(1);
 
 my $psTestResult = $psTest->SpawnWaitKill(30);
@@ -78,7 +81,7 @@ if ($psTestResult != 0) {
     $status = 1;
 }
 
-$relay->kill_process(5, "relay");
+$relay->kill_process(5, "relay") if $norelay ne "-r";
 
 if ($status == 0) {
   print "test PASSED.\n";
