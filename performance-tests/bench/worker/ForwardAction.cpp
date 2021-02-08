@@ -99,7 +99,7 @@ bool ForwardAction::init(const ActionConfig& config, ActionReport& report,
   return true;
 }
 
-void ForwardAction::start()
+void ForwardAction::action_start()
 {
   std::unique_lock<std::mutex> lock(mutex_);
   if (!started_) {
@@ -107,7 +107,15 @@ void ForwardAction::start()
   }
 }
 
-void ForwardAction::stop()
+void ForwardAction::test_start()
+{
+}
+
+void ForwardAction::test_stop()
+{
+}
+
+void ForwardAction::action_stop()
 {
   std::unique_lock<std::mutex> lock(mutex_);
   if (started_ && !stopped_) {
