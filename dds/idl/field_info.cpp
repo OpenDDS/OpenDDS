@@ -8,7 +8,7 @@
 #include "field_info.h"
 
 #include <sstream>
-#include <iostream>
+
 using namespace AstTypeClassification;
 
 FieldInfo::EleLen::EleLen(const FieldInfo& af)
@@ -58,7 +58,7 @@ std::string FieldInfo::underscore(const std::string& scoped)
 
 std::string FieldInfo::ref(const std::string& scoped, const std::string& underscored, const std::string& const_s)
 {
-  return "IDL::DistinctType<" + const_s + scoped + ", " + dds_generator::get_tag_name(scoped, false) + ">";
+  return "IDL::DistinctType<" + const_s + scoped + ", " + dds_generator::get_tag_name(scoped) + ">";
 }
 
 FieldInfo::FieldInfo(AST_Field& field)

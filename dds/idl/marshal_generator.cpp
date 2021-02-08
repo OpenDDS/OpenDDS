@@ -274,12 +274,6 @@ namespace {
       type_class & (CL_SEQUENCE | CL_ARRAY);
   }
 
-  bool cxx_escape(const std::string& s, size_t i)
-  {
-    const std::string cxx = "_cxx_";
-    return s.substr(i, cxx.size()) == cxx;
-  }
-
   const char* const shift_out = "<< ";
   const char* const shift_in = ">> ";
 
@@ -3538,7 +3532,7 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
         post = "_forany";
       } else if (use_cxx11 && (fld_cls & (CL_ARRAY | CL_SEQUENCE))) {
         pre = "IDL::DistinctType<";
-        post = ", " + dds_generator::get_tag_name(scoped(field->field_type()->name()), false) + ">";
+        post = ", " + dds_generator::get_tag_name(scoped(field->field_type()->name())) + ">";
       }
       const std::string ptr = field->field_type()->anonymous() ?
         FieldInfo(*field).ptr_ : (pre + scoped(field->field_type()->name()) + post + '*');

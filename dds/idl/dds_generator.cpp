@@ -23,6 +23,7 @@ bool dds_generator::cxx_escape(const std::string& s, size_t i)
 std::string dds_generator::valid_var_name(const std::string& str)
 {
   // Replace invalid characters with a single underscore
+  // Replace existing "_" with "_9" to prevent collision
   const std::string invalid_chars("<>()[]*.: ");
   std::string s;
   char last_char = '\0';
@@ -44,6 +45,9 @@ std::string dds_generator::valid_var_name(const std::string& str)
     if (!cxx_escape(s, 0)) {
       s.erase(0, 1);
     }
+  }
+  if (s.size() > 1 && s[s.size() - 1] == '_') {
+    s.erase(s.size() - 1, 1);
   }
   return s;
 }
@@ -299,7 +303,7 @@ string type_to_default_array(const std::string& indent, AST_Type* type, const st
       n = n.substr(0, n.rfind("::") + 2) + "AnonymousType_" + type->local_name()->get_string();
       n = (fld_cls == AST_Decl::NT_sequence) ? (n + "_seq") : n;
     }
-    val += indent + "set_default(IDL::DistinctType<" + n + ", " + dds_generator::get_tag_name(n, false) + ">(" +
+    val += indent + "set_default(IDL::DistinctType<" + n + ", " + dds_generator::get_tag_name(n) + ">(" +
       (is_union ? "tmp" : name) + "));\n";
   } else {
     string n = scoped(type->name());

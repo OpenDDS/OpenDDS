@@ -731,7 +731,7 @@ void generateCaseBody(
       rhs = use_cxx11 ? "tmp" : "tmp.out()";
     } else if (use_cxx11 && (br_cls & (CL_ARRAY | CL_SEQUENCE))) {  //array or seq C++11
       rhs = "IDL::DistinctType<" + brType + ", "
-        + dds_generator::get_tag_name(dds_generator::scoped_helper(branch->field_type()->name(), "_"), false)
+        + dds_generator::get_tag_name(dds_generator::scoped_helper(branch->field_type()->name(), "_"))
         + ">(tmp)";
     } else if (br_cls & CL_ARRAY) { //array classic
       forany = "    " + brType + "_forany fa = tmp;\n";

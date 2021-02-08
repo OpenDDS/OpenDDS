@@ -5,7 +5,7 @@
 #ifndef __unique_identifier_msgs__msg__uuid__idl__
 #define __unique_identifier_msgs__msg__uuid__idl__
 
-module unique_identifier_msgs {
+module unique_identifier_msgs_ {
   module msg_ {
     module dds_ {
       typedef octet td_oa[16];
