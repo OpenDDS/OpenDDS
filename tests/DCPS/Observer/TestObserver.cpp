@@ -144,9 +144,11 @@ void TestObserver::on_disassociated(DDS::DataReader_ptr r, const OpenDDS::DCPS::
 }
 
 #ifndef OPENDDS_RAPIDJSON
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS { namespace DCPS {
   const char* to_json(const Observer::Sample&) { return ""; }
 } }
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 #endif
 
 // ========== ========== ========== ========== ========== ========== ==========
