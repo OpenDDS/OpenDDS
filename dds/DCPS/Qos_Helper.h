@@ -257,8 +257,8 @@ bool operator==(const DDS::UserDataQosPolicy& qos1,
                 const DDS::UserDataQosPolicy& qos2);
 
 ACE_INLINE OpenDDS_Dcps_Export
-bool operator==(const DDS::TopicDataQosPolicy & qos1,
-                const DDS::TopicDataQosPolicy & qos2);
+bool operator==(const DDS::TopicDataQosPolicy& qos1,
+                const DDS::TopicDataQosPolicy& qos2);
 
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator==(const DDS::GroupDataQosPolicy& qos1,
@@ -368,18 +368,21 @@ ACE_INLINE OpenDDS_Dcps_Export
 bool operator==(const DDS::DomainParticipantFactoryQos& qos1,
                 const DDS::DomainParticipantFactoryQos& qos2);
 
-OpenDDS_Dcps_Export
-bool operator==(
-  const DDS::DataRepresentationQosPolicy& qos1,
-  const DDS::DataRepresentationQosPolicy& qos2);
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::DataRepresentationQosPolicy& qos1,
+                const DDS::DataRepresentationQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::TypeConsistencyEnforcementQosPolicy& qos1,
+                const DDS::TypeConsistencyEnforcementQosPolicy& qos2);
 
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator!=(const DDS::UserDataQosPolicy& qos1,
                 const DDS::UserDataQosPolicy& qos2);
 
 ACE_INLINE OpenDDS_Dcps_Export
-bool operator!=(const DDS::TopicDataQosPolicy & qos1,
-                const DDS::TopicDataQosPolicy & qos2);
+bool operator!=(const DDS::TopicDataQosPolicy& qos1,
+                const DDS::TopicDataQosPolicy& qos2);
 
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator!=(const DDS::GroupDataQosPolicy& qos1,
@@ -493,10 +496,13 @@ ACE_INLINE OpenDDS_Dcps_Export
 bool operator!=(const DDS::DomainParticipantFactoryQos& qos1,
                 const DDS::DomainParticipantFactoryQos& qos2);
 
-OpenDDS_Dcps_Export
-bool operator!=(
-  const DDS::DataRepresentationQosPolicy& qos1,
-  const DDS::DataRepresentationQosPolicy& qos2);
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::DataRepresentationQosPolicy& qos1,
+                const DDS::DataRepresentationQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::TypeConsistencyEnforcementQosPolicy& qos1,
+                const DDS::TypeConsistencyEnforcementQosPolicy& qos2);
 #endif
 
 } // namespace DCPS
