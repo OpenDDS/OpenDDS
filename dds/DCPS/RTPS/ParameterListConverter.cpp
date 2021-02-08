@@ -942,11 +942,10 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
                    ACE_TEXT("(%P|%t) to_param_list(dwd) - ")
                    ACE_TEXT("Multicast transport with RTPS ")
                    ACE_TEXT("discovery has known issues")));
-
-        Parameter param;
-        param.opendds_reliability(writer_data.ddsPublicationData.reliability);
-        add_param(param_list, param);
       }
+      Parameter param;
+      param.opendds_reliability(writer_data.ddsPublicationData.reliability);
+      add_param(param_list, param);
     }
   }
 
@@ -1289,11 +1288,10 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
                    ACE_TEXT("(%P|%t) to_param_list(drd) - ")
                    ACE_TEXT("Multicast transport with RTPS ")
                    ACE_TEXT("discovery has known issues")));
-
-        Parameter param;
-        param.opendds_reliability(reader_data.ddsSubscriptionData.reliability);
-        add_param(param_list, param);
       }
+      Parameter param;
+      param.opendds_reliability(reader_data.ddsSubscriptionData.reliability);
+      add_param(param_list, param);
     }
   }
 
