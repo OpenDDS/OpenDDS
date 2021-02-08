@@ -88,7 +88,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   const std::string file = "file:";
 #endif
 
-  ACE_Argv_Type_Converter atc(argc, argv);
+  int argc_copy = argc;
+  ACE_Argv_Type_Converter atc(argc_copy, argv);
   ACE_Arg_Shifter_T<char> args(atc.get_argc(), atc.get_ASCII_argv());
   while (args.is_anything_left()) {
     const char* arg = nullptr;
