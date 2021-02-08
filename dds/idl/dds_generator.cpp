@@ -45,7 +45,6 @@ std::string dds_generator::valid_var_name(const std::string& str)
       s.erase(0, 1);
     }
   }
-
   return s;
 }
 
