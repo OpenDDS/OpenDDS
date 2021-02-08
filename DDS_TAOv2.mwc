@@ -6,7 +6,6 @@ workspace {
   tools
   java
   DevGuideExamples
-  performance-tests/bench
 
   exclude {
     java/jms
