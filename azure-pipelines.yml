@@ -281,7 +281,7 @@ jobs:
         ConfigOpts: --compiler=g++-6 --xerces --features=uses_wchar=1 --no-debug
         PackageDeps: libxerces-c-dev g++-6
       GCC8:
-        ConfigOpts: --compiler=g++-8 --xerces --no-inline --java=$(JAVA_HOME_12_X64)
+        ConfigOpts: --compiler=g++-8 --xerces --no-inline --no-rapidjson --java=$(JAVA_HOME_12_X64)
         TEST_JAVA_MESSENGER: true
         PackageDeps: libxerces-c-dev g++-8
       GCC10:

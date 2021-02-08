@@ -319,7 +319,8 @@ std::string to_json(const DDS::TopicDescription_ptr topic,
   jvw.write_string(topic_name);
   jvw.end_struct_member();
   jvw.begin_struct_member("type_name");
-  jvw.write_string(topic->get_type_name());
+  CORBA::String_var type_name = topic->get_type_name();
+  jvw.write_string(type_name);
   jvw.end_struct_member();
   jvw.end_struct();
   jvw.end_struct_member();

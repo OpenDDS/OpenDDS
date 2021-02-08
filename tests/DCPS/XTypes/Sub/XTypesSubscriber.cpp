@@ -1,6 +1,8 @@
 #include "XTypes.h"
 #include "XTypesSubTypeSupportImpl.h"
 
+#include <dds/DCPS/DCPS_Utils.h>
+
 template<typename T1>
 ReturnCode_t check_additional_field_value(const T1& data, AdditionalFieldValue expected_additional_field_value)
 {
@@ -30,11 +32,13 @@ ReturnCode_t read_i(const DataReader_var& dr, const T1& pdr, T2& data)
   if (ret == RETCODE_TIMEOUT) {
     ACE_ERROR((LM_ERROR, "ERROR: reader timedout\n"));
   } else if (ret != RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: Reader: wait returned %d\n", ret));
+    ACE_ERROR((LM_ERROR, "ERROR: Reader: wait returned %C\n",
+               OpenDDS::DCPS::retcode_to_string(ret)));
   } else {
     SampleInfoSeq info;
     if ((ret = pdr->take_w_condition(data, info, LENGTH_UNLIMITED, dr_rc)) != RETCODE_OK) {
-      ACE_ERROR((LM_ERROR, "ERROR: Reader: take_w_condition returned %d\n", ret));
+      ACE_ERROR((LM_ERROR, "ERROR: Reader: take_w_condition returned %C\n",
+                 OpenDDS::DCPS::retcode_to_string(ret)));
     }
   }
 
@@ -50,7 +54,7 @@ ReturnCode_t read_tryconstruct_struct(const DataReader_var& dr, const T1& pdr, T
   ReturnCode_t ret = RETCODE_OK;
   if ((ret = read_i(dr, pdr, data)) == RETCODE_OK) {
     if (data.length() != 1) {
-      ACE_ERROR((LM_ERROR, "ERROR: reader: unexpected data length: %d", data.length()));
+      ACE_ERROR((LM_ERROR, "ERROR: reader: unexpected data length: %d\n", data.length()));
       ret = RETCODE_ERROR;
     } else if (ACE_OS::strcmp(data[0].trim_string, expected_value.c_str()) != 0) {
       ACE_ERROR((LM_ERROR, "ERROR: reader: expected key value: %C, received: %C\n", expected_value.c_str(), data[0].trim_string.in()));
@@ -59,7 +63,8 @@ ReturnCode_t read_tryconstruct_struct(const DataReader_var& dr, const T1& pdr, T
       ACE_ERROR((LM_DEBUG, "reader: %C\n", data[0].trim_string.in()));
     }
   } else {
-    ACE_ERROR((LM_ERROR, "ERROR: Reader: read_i returned %d\n", ret));
+    ACE_ERROR((LM_ERROR, "ERROR: Reader: read_i returned %C\n",
+               OpenDDS::DCPS::retcode_to_string(ret)));
   }
 
   return ret;
@@ -71,7 +76,7 @@ ReturnCode_t read_struct(const DataReader_var& dr, const T1& pdr, T2& data)
   ReturnCode_t ret = RETCODE_OK;
   if ((ret = read_i(dr, pdr, data)) == RETCODE_OK) {
     if (data.length() != 1) {
-      ACE_ERROR((LM_ERROR, "reader: unexpected data length: %d", data.length()));
+      ACE_ERROR((LM_ERROR, "reader: unexpected data length: %d\n", data.length()));
       ret = RETCODE_ERROR;
     } else if (data[0].key != key_value) {
       ACE_ERROR((LM_ERROR, "reader: expected key value: %d, received: %d\n", key_value, data[0].key));
@@ -80,7 +85,8 @@ ReturnCode_t read_struct(const DataReader_var& dr, const T1& pdr, T2& data)
       ACE_DEBUG((LM_DEBUG, "reader: %d\n", data[0].key));
     }
   } else {
-    ACE_ERROR((LM_ERROR, "ERROR: Reader: read_i returned %d\n", ret));
+    ACE_ERROR((LM_ERROR, "ERROR: Reader: read_i returned %C\n",
+               OpenDDS::DCPS::retcode_to_string(ret)));
   }
 
   return ret;
@@ -92,7 +98,7 @@ ReturnCode_t read_union(const DataReader_var& dr, const T1& pdr, T2& data)
   ReturnCode_t ret = RETCODE_OK;
   if ((ret = read_i(dr, pdr, data)) == RETCODE_OK) {
     if (data.length() != 1) {
-      ACE_ERROR((LM_ERROR, "reader: unexpected data length: %d", data.length()));
+      ACE_ERROR((LM_ERROR, "reader: unexpected data length: %d\n", data.length()));
       ret = RETCODE_ERROR;
     } else {
       switch (data[0]._d()) {
@@ -121,7 +127,8 @@ ReturnCode_t read_union(const DataReader_var& dr, const T1& pdr, T2& data)
       }
     }
   } else {
-    ACE_ERROR((LM_ERROR, "ERROR: Reader: read_i returned %d\n", ret));
+    ACE_ERROR((LM_ERROR, "ERROR: Reader: read_i returned %C\n",
+               OpenDDS::DCPS::retcode_to_string(ret)));
   }
 
   return ret;
@@ -186,39 +193,57 @@ ReturnCode_t read_trim20_struct(const DataReader_var& dr)
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   std::string type;
+  std::string topic_name = "";
   std::string registered_type_name = "";
+
+  // Default properties of type consistency enforcement Qos currently supported
+  bool disallow_type_coercion = false;
+  bool ignore_member_names = false;
+  bool force_type_validation = false;
 
   DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
+  // Arguments "--type" and "--expect_to_fail" must be specified
   for (int i = 1; i < argc; ++i) {
     ACE_TString arg(argv[i]);
     if (arg == ACE_TEXT("--verbose")) {
       verbose = true;
-    } else if (arg == ACE_TEXT("--writer")) {
-    } else if (arg == ACE_TEXT("--reader")) {
     } else if (arg == ACE_TEXT("--type")) {
       if (i + 1 < argc) {
         type = ACE_TEXT_ALWAYS_CHAR(argv[++i]);
       } else {
-        ACE_ERROR((LM_ERROR, "ERROR: Invalid type argument"));
+        ACE_ERROR((LM_ERROR, "ERROR: Invalid type argument\n"));
         return 1;
       }
-    } else if (arg == ACE_TEXT("--type_r")) {
+    } else if (arg == ACE_TEXT("--topic")) {
+      if (i + 1 < argc) {
+        topic_name = ACE_TEXT_ALWAYS_CHAR(argv[++i]);
+      } else {
+        ACE_ERROR((LM_ERROR, "ERROR: Invalid topic name argument\n"));
+        return 1;
+      }
+    } else if (arg == ACE_TEXT("--reg_type")) {
       if (i + 1 < argc) {
         registered_type_name = ACE_TEXT_ALWAYS_CHAR(argv[++i]);
       } else {
-        ACE_ERROR((LM_ERROR, "ERROR: Invalid registered type argument"));
+        ACE_ERROR((LM_ERROR, "ERROR: Invalid registered type argument\n"));
         return 1;
       }
     } else if (arg == ACE_TEXT("--key_val")) {
       if (i + 1 < argc) {
         key_value = ACE_OS::atoi(argv[++i]);
       } else {
-        ACE_ERROR((LM_ERROR, "ERROR: Invalid key value argument"));
+        ACE_ERROR((LM_ERROR, "ERROR: Invalid key value argument\n"));
         return 1;
       }
     } else if (arg == ACE_TEXT("--expect_to_fail")) {
       expect_to_match = false;
+    } else if (arg == ACE_TEXT("--disallow_type_coercion")) {
+      disallow_type_coercion =  true;
+    } else if (arg == ACE_TEXT("--ignore_member_names")) {
+      ignore_member_names = true;
+    } else if (arg == ACE_TEXT("--force_type_validation")) {
+      force_type_validation = true;
     } else {
       ACE_ERROR((LM_ERROR, "ERROR: Invalid argument: %s\n", argv[i]));
       return 1;
@@ -228,7 +253,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DomainParticipant_var dp;
   create_participant(dpf, dp);
   if (!dp) {
-    ACE_ERROR((LM_ERROR, "ERROR: create_participant() failed"));
+    ACE_ERROR((LM_ERROR, "ERROR: create_participant failed\n"));
     return 1;
   }
 
@@ -236,8 +261,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   Topic_var topic;
 
-  const std::string topic_name =
-    !registered_type_name.empty() ? registered_type_name : type;
+  if (topic_name.empty()) {
+    topic_name = !registered_type_name.empty() ? registered_type_name : type;
+  } else if (registered_type_name.empty()) {
+    registered_type_name = topic_name;
+  }
 
   if (type == "PlainCdrStruct") {
     PlainCdrStructTypeSupport_var ts = new PlainCdrStructTypeSupportImpl;
@@ -260,6 +288,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   } else if (type == "Trim20Struct") {
     Trim20StructTypeSupport_var ts = new Trim20StructTypeSupportImpl;
     failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+  } else if (type.empty()) {
+    ACE_ERROR((LM_ERROR, "ERROR: Must specify a type name\n"));
+    return 1;
   } else {
     ACE_ERROR((LM_ERROR, "ERROR: Type %C is not supported\n", type.c_str()));
     return 1;
@@ -273,13 +304,28 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   Subscriber_var sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
     DEFAULT_STATUS_MASK);
+  if (!sub) {
+    ACE_ERROR((LM_ERROR, "ERROR: create_subscriber failed\n"));
+    return 1;
+  }
+
   DataReaderQos dr_qos;
   sub->get_default_datareader_qos(dr_qos);
   dr_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
   dr_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
 
+  if (disallow_type_coercion) {
+    dr_qos.type_consistency.kind = DISALLOW_TYPE_COERCION;
+  }
+  dr_qos.type_consistency.ignore_member_names = ignore_member_names;
+  dr_qos.type_consistency.force_type_validation = force_type_validation;
+
   DataReader_var dr = sub->create_datareader(topic, dr_qos, 0,
     DEFAULT_STATUS_MASK);
+  if (!dr) {
+    ACE_ERROR((LM_ERROR, "ERROR: create_datareader failed\n"));
+    return 1;
+  }
 
   DDS::StatusCondition_var condition = expect_to_match ? dr->get_statuscondition() : topic->get_statuscondition();
   condition->set_enabled_statuses(expect_to_match ? DDS::SUBSCRIPTION_MATCHED_STATUS : DDS::INCONSISTENT_TOPIC_STATUS);
@@ -291,7 +337,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: %C condition wait failed for type %C\n",
       expect_to_match ? "SUBSCRIPTION_MATCHED_STATUS" : "INCONSISTENT_TOPIC_STATUS", type.c_str()));
-    failed = 1;
+    failed = true;
   }
 
   ws->detach_condition(condition);

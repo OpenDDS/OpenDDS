@@ -2852,6 +2852,13 @@ TEST(StructTypeTest, Assignable)
   a.struct_flags = IS_MUTABLE;
   b.struct_flags = a.struct_flags;
 
+  // Test cases for ignore_member_names
+  TypeAssignability test_imn(make_rch<TypeLookupService>());
+  test_imn.set_ignore_member_names(true);
+  MinimalStructType a_imn, b_imn;
+  a_imn.struct_flags = IS_MUTABLE;
+  b_imn.struct_flags = a_imn.struct_flags;
+
   // Primitive members
   MinimalStructMember ma1(CommonStructMember(1, IS_KEY, TypeIdentifier(TK_UINT8)),
                           MinimalMemberDetail("m1"));
@@ -2861,6 +2868,14 @@ TEST(StructTypeTest, Assignable)
   b.member_seq.append(mb1);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
 
+  // Primitive members with ignore_member_names is true
+  MinimalStructMember mb1_imn(CommonStructMember(1, StructMemberFlag(), TypeIdentifier(TK_UINT8)),
+                              MinimalMemberDetail("not_m1"));
+  a_imn.member_seq.append(ma1); // Reuse ma1
+  b_imn.member_seq.append(mb1_imn);
+  EXPECT_TRUE(test_imn.assignable(TypeObject(MinimalTypeObject(a_imn)),
+                                  TypeObject(MinimalTypeObject(b_imn))));
+
   // Struct key members
   MinimalStructType inner_a, inner_b;
   inner_a.struct_flags = IS_FINAL;
@@ -2869,13 +2884,13 @@ TEST(StructTypeTest, Assignable)
                                                 MinimalMemberDetail("inner_m1")));
   inner_a.member_seq.append(MinimalStructMember(CommonStructMember(2, StructMemberFlag(),
                                                                    makeString(false,
-                                                                                              StringSTypeDefn(100))),
+                                                                              StringSTypeDefn(100))),
                                                 MinimalMemberDetail("inner_m2")));
   inner_b.member_seq.append(MinimalStructMember(CommonStructMember(1, IS_KEY, TypeIdentifier(TK_FLOAT128)),
                                                 MinimalMemberDetail("inner_m1")));
   inner_b.member_seq.append(MinimalStructMember(CommonStructMember(2, StructMemberFlag(),
                                                                    makeString(false,
-                                                                                              StringLTypeDefn(50))),
+                                                                              StringLTypeDefn(50))),
                                                 MinimalMemberDetail("inner_m2")));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(inner_a)),
                               TypeObject(MinimalTypeObject(inner_b))));
@@ -2901,6 +2916,28 @@ TEST(StructTypeTest, Assignable)
   b.member_seq.append(mb2);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
 
+  // Struct key members with ignore_member_names is true
+  MinimalStructType inner_b_imn;
+  inner_b_imn.struct_flags = inner_a.struct_flags; // Reuse inner_a
+  inner_b_imn.member_seq.append(MinimalStructMember(CommonStructMember(1, IS_KEY, TypeIdentifier(TK_FLOAT128)),
+                                                    MinimalMemberDetail("not_inner_m1")));
+  inner_b_imn.member_seq.append(MinimalStructMember(CommonStructMember(2, StructMemberFlag(),
+                                                                       makeString(false,
+                                                                                  StringLTypeDefn(50))),
+                                                    MinimalMemberDetail("not_inner_m2")));
+  EXPECT_TRUE(test_imn.assignable(TypeObject(MinimalTypeObject(inner_a)),
+                                  TypeObject(MinimalTypeObject(inner_b_imn))));
+
+  test_imn.insert_entry(ma2.common.member_type_id, TypeObject(MinimalTypeObject(inner_a)));
+  get_equivalence_hash(hash);
+  MinimalStructMember mb2_imn(CommonStructMember(2, IS_KEY, make(EK_MINIMAL, hash)),
+                              MinimalMemberDetail("not_m2"));
+  test_imn.insert_entry(mb2_imn.common.member_type_id, TypeObject(MinimalTypeObject(inner_b_imn)));
+  a_imn.member_seq.append(ma2);
+  b_imn.member_seq.append(mb2_imn);
+  EXPECT_TRUE(test_imn.assignable(TypeObject(MinimalTypeObject(a_imn)),
+                                  TypeObject(MinimalTypeObject(b_imn))));
+
   // Members for which both optional is false and must_understand is true in either
   // T1 or T2 appear in both T1 and T2
   a.member_seq.members[1].common.member_flags &= ~IS_OPTIONAL;
@@ -2908,6 +2945,13 @@ TEST(StructTypeTest, Assignable)
   b.member_seq.members[0].common.member_flags &= ~IS_OPTIONAL;
   b.member_seq.members[0].common.member_flags |= IS_MUST_UNDERSTAND;
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
+
+  a_imn.member_seq.members[1].common.member_flags &= ~IS_OPTIONAL;
+  a_imn.member_seq.members[1].common.member_flags |= IS_MUST_UNDERSTAND;
+  b_imn.member_seq.members[0].common.member_flags &= ~IS_OPTIONAL;
+  b_imn.member_seq.members[0].common.member_flags |= IS_MUST_UNDERSTAND;
+  EXPECT_TRUE(test_imn.assignable(TypeObject(MinimalTypeObject(a_imn)),
+                                  TypeObject(MinimalTypeObject(b_imn))));
 
   // String key members
   MinimalStructMember ma3(CommonStructMember(3, StructMemberFlag(),
@@ -2918,6 +2962,14 @@ TEST(StructTypeTest, Assignable)
   a.member_seq.append(ma3);
   b.member_seq.append(mb3);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
+
+  // String key members with ignore_member_names is true
+  MinimalStructMember mb3_imn(CommonStructMember(3, IS_KEY, makeString(true, StringLTypeDefn(100))),
+                              MinimalMemberDetail("not_m3"));
+  a_imn.member_seq.append(ma3);
+  b_imn.member_seq.append(mb3_imn);
+  EXPECT_TRUE(test_imn.assignable(TypeObject(MinimalTypeObject(a_imn)),
+                                  TypeObject(MinimalTypeObject(b_imn))));
 
   // Enumerated key members
   MinimalEnumeratedLiteralSeq literal_seq_a, literal_seq_b;
@@ -2949,6 +3001,17 @@ TEST(StructTypeTest, Assignable)
   b.member_seq.append(mb4);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
 
+  // Enumerated key members with ignore_member_names is true
+  test_imn.insert_entry(ma4.common.member_type_id, TypeObject(MinimalTypeObject(enum_a)));
+  get_equivalence_hash(hash);
+  MinimalStructMember mb4_imn(CommonStructMember(4, IS_KEY, make(EK_MINIMAL, hash)),
+                              MinimalMemberDetail("not_m4"));
+  test_imn.insert_entry(mb4_imn.common.member_type_id, TypeObject(MinimalTypeObject(enum_b)));
+  a_imn.member_seq.append(ma4);
+  b_imn.member_seq.append(mb4_imn);
+  EXPECT_TRUE(test_imn.assignable(TypeObject(MinimalTypeObject(a_imn)),
+                                  TypeObject(MinimalTypeObject(b_imn))));
+
   // Sequence key members
   MinimalSequenceType seq_a, seq_b;
   seq_a.header.common.bound = 100;
@@ -2967,6 +3030,17 @@ TEST(StructTypeTest, Assignable)
   b.member_seq.append(mb5);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
 
+  // Sequence key members with ignore_member_names is true
+  test_imn.insert_entry(ma5.common.member_type_id, TypeObject(MinimalTypeObject(seq_a)));
+  get_equivalence_hash(hash);
+  MinimalStructMember mb5_imn(CommonStructMember(5, IS_KEY, make(EK_MINIMAL, hash)),
+                              MinimalMemberDetail("not_m5"));
+  test_imn.insert_entry(mb5_imn.common.member_type_id, TypeObject(MinimalTypeObject(seq_b)));
+  a_imn.member_seq.append(ma5);
+  b_imn.member_seq.append(mb5_imn);
+  EXPECT_TRUE(test_imn.assignable(TypeObject(MinimalTypeObject(a_imn)),
+                                  TypeObject(MinimalTypeObject(b_imn))));
+
   // Plain sequence key members
   MinimalSequenceType seq_a2;
   seq_a2.header.common.bound = 120;
@@ -2982,6 +3056,17 @@ TEST(StructTypeTest, Assignable)
   a.member_seq.append(ma6);
   b.member_seq.append(mb6);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
+
+  // Plain sequence key members with ignore_member_names is true
+  test_imn.insert_entry(ma6.common.member_type_id, TypeObject(MinimalTypeObject(seq_a2)));
+  MinimalStructMember mb6_imn(CommonStructMember(6, IS_KEY,
+                                                 makePlainSequence(TypeIdentifier(TK_UINT64),
+                                                                   static_cast<SBound>(80))),
+                              MinimalMemberDetail("not_m6"));
+  a_imn.member_seq.append(ma6);
+  b_imn.member_seq.append(mb6_imn);
+  EXPECT_TRUE(test_imn.assignable(TypeObject(MinimalTypeObject(a_imn)),
+                                  TypeObject(MinimalTypeObject(b_imn))));
 
   // Map key members
   MinimalMapType map_a, map_b;
@@ -3003,6 +3088,17 @@ TEST(StructTypeTest, Assignable)
   b.member_seq.append(mb7);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
 
+  // Map key members with ingnore_member_names is true
+  test_imn.insert_entry(ma7.common.member_type_id, TypeObject(MinimalTypeObject(map_a)));
+  get_equivalence_hash(hash);
+  MinimalStructMember mb7_imn(CommonStructMember(7, IS_KEY, make(EK_MINIMAL, hash)),
+                              MinimalMemberDetail("not_m7"));
+  test_imn.insert_entry(mb7_imn.common.member_type_id, TypeObject(MinimalTypeObject(map_b)));
+  a_imn.member_seq.append(ma7);
+  b_imn.member_seq.append(mb7_imn);
+  EXPECT_TRUE(test_imn.assignable(TypeObject(MinimalTypeObject(a_imn)),
+                                  TypeObject(MinimalTypeObject(b_imn))));
+
   // Plain map key members
   MinimalMapType map_a2;
   map_a2.header.common.bound = 200;
@@ -3012,7 +3108,7 @@ TEST(StructTypeTest, Assignable)
   MinimalStructMember ma8(CommonStructMember(8, StructMemberFlag(), make(EK_MINIMAL, hash)),
                           MinimalMemberDetail("m8"));
   test.insert_entry(ma8.common.member_type_id, TypeObject(MinimalTypeObject(map_a2)));
-  PlainMapLTypeDefn plain_map(PlainCollectionHeader(EK_MINIMAL, CollectionElementFlag()), 160,
+  PlainMapLTypeDefn plain_map(PlainCollectionHeader(EK_BOTH, CollectionElementFlag()), 160,
                               TypeIdentifier(TK_FLOAT32), CollectionElementFlag(),
                               TypeIdentifier(TK_INT32));
   MinimalStructMember mb8(CommonStructMember(8, IS_KEY, make(TI_PLAIN_MAP_LARGE, plain_map)),
@@ -3020,6 +3116,15 @@ TEST(StructTypeTest, Assignable)
   a.member_seq.append(ma8);
   b.member_seq.append(mb8);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
+
+  // Plain map key members with ignore_member_names is true
+  test_imn.insert_entry(ma8.common.member_type_id, TypeObject(MinimalTypeObject(map_a2)));
+  MinimalStructMember mb8_imn(CommonStructMember(8, IS_KEY, make(TI_PLAIN_MAP_LARGE, plain_map)),
+                              MinimalMemberDetail("not_m8"));
+  a_imn.member_seq.append(ma8);
+  b_imn.member_seq.append(mb8_imn);
+  EXPECT_TRUE(test_imn.assignable(TypeObject(MinimalTypeObject(a_imn)),
+                                  TypeObject(MinimalTypeObject(b_imn))));
 
   // Union key members
   MinimalUnionType uni_a, uni_b;
@@ -3058,6 +3163,17 @@ TEST(StructTypeTest, Assignable)
   a.member_seq.append(ma9);
   b.member_seq.append(mb9);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
+
+  // Union key members with ignore_member_names is true
+  test_imn.insert_entry(ma9.common.member_type_id, TypeObject(MinimalTypeObject(uni_a)));
+  get_equivalence_hash(hash);
+  MinimalStructMember mb9_imn(CommonStructMember(9, IS_KEY, make(EK_MINIMAL, hash)),
+                              MinimalMemberDetail("not_m9"));
+  test_imn.insert_entry(mb9_imn.common.member_type_id, TypeObject(MinimalTypeObject(uni_b)));
+  a_imn.member_seq.append(ma9);
+  b_imn.member_seq.append(mb9_imn);
+  EXPECT_TRUE(test_imn.assignable(TypeObject(MinimalTypeObject(a_imn)),
+                                  TypeObject(MinimalTypeObject(b_imn))));
 }
 
 void expect_false_different_extensibilities()
@@ -3504,17 +3620,28 @@ TEST(UnionTypeTest, Assignable)
   TypeAssignability test(make_rch<TypeLookupService>());
   MinimalUnionType a, b;
 
+  // Test cases for ignore_member_names
+  TypeAssignability test_imn(make_rch<TypeLookupService>());
+  test_imn.set_ignore_member_names(true);
+  MinimalUnionType a_imn, b_imn;
+
   // Extensibility
   a.union_flags = IS_FINAL;
   b.union_flags = a.union_flags;
+  a_imn.union_flags = IS_APPENDABLE;
+  b_imn.union_flags = a_imn.union_flags;
 
   // Discriminator type must be strongly assignable
   a.discriminator.common.type_id = TypeIdentifier(TK_UINT16);
   b.discriminator.common.type_id = TypeIdentifier(TK_UINT16);
+  a_imn.discriminator.common.type_id = TypeIdentifier(TK_UINT8);
+  b_imn.discriminator.common.type_id = TypeIdentifier(TK_UINT8);
 
   // Either the discriminators of both are keys or neither are keys
   a.discriminator.common.member_flags = IS_KEY;
   b.discriminator.common.member_flags = IS_KEY;
+  a_imn.discriminator.common.member_flags = IS_KEY;
+  b_imn.discriminator.common.member_flags = IS_KEY;
 
   // Members that have the same ID also have the same name and vice versa
   MinimalUnionMember ma1(CommonUnionMember(1, UnionMemberFlag(), TypeIdentifier(TK_INT32),
@@ -3532,6 +3659,18 @@ TEST(UnionTypeTest, Assignable)
   a.member_seq.append(ma1).append(ma2);
   b.member_seq.append(mb1).append(mb2);
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
+
+  // Ignore member names
+  MinimalUnionMember ma1_imn(CommonUnionMember(1, UnionMemberFlag(), TypeIdentifier(TK_INT32),
+                                               UnionCaseLabelSeq().append(10).append(20)),
+                             MinimalMemberDetail("not_m1"));
+  MinimalUnionMember ma2_imn(CommonUnionMember(2, IS_DEFAULT, TypeIdentifier(TK_INT32),
+                                               UnionCaseLabelSeq().append(30)),
+                             MinimalMemberDetail("not_m2"));
+  a_imn.member_seq.append(ma1_imn).append(ma2_imn);
+  b_imn.member_seq.append(mb1).append(mb2);
+  EXPECT_TRUE(test_imn.assignable(TypeObject(MinimalTypeObject(a_imn)),
+                                  TypeObject(MinimalTypeObject(b_imn))));
 
   // Non-default labels in T2 that select some member in T1
   MinimalUnionType a2, b2;

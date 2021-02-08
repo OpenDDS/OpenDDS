@@ -2,8 +2,6 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
     & eval 'exec perl -S $0 $argv:q'
     if 0;
 
-# -*- perl -*-
-
 my @original_ARGV = @ARGV;
 
 use Env (DDS_ROOT);
@@ -145,5 +143,4 @@ $test->start_process("publisher");
 
 # ignore this issue that is already being tracked in redmine
 $test->ignore_error("(Redmine Issue# 1446)");
-# start killing processes in 300 seconds
 exit $test->finish(120);

@@ -12,3 +12,16 @@
 /xcdrTypeSupportS.cpp
 /xcdrTypeSupportS.h
 /xcdr
+/mutable_typesC.cpp
+/mutable_typesC.h
+/mutable_typesC.inl
+/mutable_typesS.cpp
+/mutable_typesS.h
+/mutable_typesTypeSupport.idl
+/mutable_typesTypeSupportC.cpp
+/mutable_typesTypeSupportC.h
+/mutable_typesTypeSupportC.inl
+/mutable_typesTypeSupportImpl.cpp
+/mutable_typesTypeSupportImpl.h
+/mutable_typesTypeSupportS.cpp
+/mutable_typesTypeSupportS.h

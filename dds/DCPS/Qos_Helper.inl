@@ -24,8 +24,8 @@ bool operator==(const DDS::UserDataQosPolicy& qos1,
 }
 
 ACE_INLINE
-bool operator==(const DDS::TopicDataQosPolicy & qos1,
-                const DDS::TopicDataQosPolicy & qos2)
+bool operator==(const DDS::TopicDataQosPolicy& qos1,
+                const DDS::TopicDataQosPolicy& qos2)
 {
   return qos1.value == qos2.value;
 }
@@ -61,8 +61,8 @@ operator==(const DDS::DurabilityQosPolicy& qos1,
 
 ACE_INLINE
 bool
-operator==(DDS::DurabilityServiceQosPolicy const & qos1,
-           DDS::DurabilityServiceQosPolicy const & qos2)
+operator==(const DDS::DurabilityServiceQosPolicy& qos1,
+           const DDS::DurabilityServiceQosPolicy& qos2)
 {
   return
     qos1.service_cleanup_delay == qos2.service_cleanup_delay
@@ -206,7 +206,6 @@ bool operator==(const DDS::ReaderDataLifecycleQosPolicy& qos1,
   return
     (qos1.autopurge_nowriter_samples_delay == qos2.autopurge_nowriter_samples_delay)
     && (qos1.autopurge_disposed_samples_delay == qos2.autopurge_disposed_samples_delay);
-
 }
 
 template <typename T>
@@ -337,9 +336,8 @@ bool operator==(const DDS::DomainParticipantFactoryQos& qos1,
 }
 
 ACE_INLINE
-bool operator==(
-  const DDS::DataRepresentationQosPolicy& qos1,
-  const DDS::DataRepresentationQosPolicy& qos2)
+bool operator==(const DDS::DataRepresentationQosPolicy& qos1,
+                const DDS::DataRepresentationQosPolicy& qos2)
 {
   const CORBA::ULong count = qos1.value.length();
   const CORBA::ULong count2 = qos2.value.length();
@@ -355,6 +353,18 @@ bool operator==(
 }
 
 ACE_INLINE
+bool operator==(const DDS::TypeConsistencyEnforcementQosPolicy& qos1,
+                const DDS::TypeConsistencyEnforcementQosPolicy& qos2)
+{
+  return qos1.kind == qos2.kind
+    && qos1.ignore_sequence_bounds == qos2.ignore_sequence_bounds
+    && qos1.ignore_string_bounds == qos2.ignore_string_bounds
+    && qos1.ignore_member_names == qos2.ignore_member_names
+    && qos1.prevent_type_widening == qos2.prevent_type_widening
+    && qos1.force_type_validation == qos2.force_type_validation;
+}
+
+ACE_INLINE
 bool operator!=(const DDS::UserDataQosPolicy& qos1,
                 const DDS::UserDataQosPolicy& qos2)
 {
@@ -362,8 +372,8 @@ bool operator!=(const DDS::UserDataQosPolicy& qos1,
 }
 
 ACE_INLINE
-bool operator!=(const DDS::TopicDataQosPolicy & qos1,
-                const DDS::TopicDataQosPolicy & qos2)
+bool operator!=(const DDS::TopicDataQosPolicy& qos1,
+                const DDS::TopicDataQosPolicy& qos2)
 {
   return !(qos1 == qos2);
 }
@@ -567,9 +577,15 @@ bool operator!=(const DDS::DomainParticipantFactoryQos& qos1,
 }
 
 ACE_INLINE
-bool operator!=(
-  const DDS::DataRepresentationQosPolicy& qos1,
-  const DDS::DataRepresentationQosPolicy& qos2)
+bool operator!=(const DDS::DataRepresentationQosPolicy& qos1,
+                const DDS::DataRepresentationQosPolicy& qos2)
+{
+  return !(qos1 == qos2);
+}
+
+ACE_INLINE
+bool operator!=(const DDS::TypeConsistencyEnforcementQosPolicy& qos1,
+                const DDS::TypeConsistencyEnforcementQosPolicy& qos2)
 {
   return !(qos1 == qos2);
 }

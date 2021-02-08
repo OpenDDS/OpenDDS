@@ -31,17 +31,20 @@ using DCPS::operator!=;
 
 namespace {
 
-  void add_param(ParameterList& param_list, const Parameter& param) {
+  void add_param(ParameterList& param_list, const Parameter& param)
+  {
     const CORBA::ULong length = param_list.length();
     param_list.length(length + 1);
     param_list[length] = param;
   }
 
-  void extract_type_info_param(const Parameter& param, XTypes::TypeInformation& type_info) {
+  void extract_type_info_param(const Parameter& param, XTypes::TypeInformation& type_info)
+  {
     XTypes::deserialize_type_info(type_info, param.type_information());
   }
 
-  void add_type_info_param(ParameterList& param_list, const XTypes::TypeInformation& type_info) {
+  void add_type_info_param(ParameterList& param_list, const XTypes::TypeInformation& type_info)
+  {
     Parameter param;
     DDS::OctetSeq seq;
     XTypes::serialize_type_info(type_info, seq);
@@ -51,7 +54,8 @@ namespace {
 
   void add_param_locator_seq(ParameterList& param_list,
                              const DCPS::LocatorSeq& locator_seq,
-                             const ParameterId_t pid) {
+                             const ParameterId_t pid)
+  {
     const CORBA::ULong length = locator_seq.length();
     for (CORBA::ULong i = 0; i < length; ++i) {
       Parameter param;
@@ -63,7 +67,8 @@ namespace {
 
   void add_param_rtps_locator(ParameterList& param_list,
                               const DCPS::TransportLocator& dcps_locator,
-                              bool map /*map IPV4 to IPV6 addr*/) {
+                              bool map /*map IPV4 to IPV6 addr*/)
+  {
     // Convert the tls blob to an RTPS locator seq
     DCPS::LocatorSeq locators;
     DDS::ReturnCode_t result = blob_to_locators(dcps_locator.data, locators);
@@ -91,30 +96,32 @@ namespace {
   }
 
   void add_param_dcps_locator(ParameterList& param_list,
-                      const DCPS::TransportLocator& dcps_locator) {
+                              const DCPS::TransportLocator& dcps_locator)
+  {
     Parameter param;
     param.opendds_locator(dcps_locator);
     param._d(PID_OPENDDS_LOCATOR);
     add_param(param_list, param);
   }
 
-  void append_locator(DCPS::LocatorSeq& list, const DCPS::Locator_t& locator) {
+  void append_locator(DCPS::LocatorSeq& list, const DCPS::Locator_t& locator)
+  {
     const CORBA::ULong length = list.length();
     list.length(length + 1);
     list[length] = locator;
   }
 
-  void append_locator(
-      DCPS::TransportLocatorSeq& list,
-      const DCPS::TransportLocator& locator) {
+  void append_locator(DCPS::TransportLocatorSeq& list,
+                      const DCPS::TransportLocator& locator)
+  {
     const CORBA::ULong length = list.length();
     list.length(length + 1);
     list[length] = locator;
   }
 
-  void append_locators_if_present(
-      DCPS::TransportLocatorSeq& list,
-      const DCPS::LocatorSeq& rtps_udp_locators) {
+  void append_locators_if_present(DCPS::TransportLocatorSeq& list,
+                                  const DCPS::LocatorSeq& rtps_udp_locators)
+  {
     if (rtps_udp_locators.length()) {
       const CORBA::ULong length = list.length();
       list.length(length + 1);
@@ -122,6 +129,7 @@ namespace {
       locators_to_blob(rtps_udp_locators, list[length].data);
     }
   }
+
   enum LocatorState {
     locator_undefined,
     locator_complete,
@@ -136,83 +144,119 @@ namespace {
     reader_data.readerProxy.associatedWriters.length(len + 1);
     reader_data.readerProxy.associatedWriters[len] = param.guid();
   }
-  bool not_default(const DDS::UserDataQosPolicy& qos) {
+
+  bool not_default(const DDS::UserDataQosPolicy& qos)
+  {
     DDS::UserDataQosPolicy def_qos =
-        TheServiceParticipant->initial_UserDataQosPolicy();
+      TheServiceParticipant->initial_UserDataQosPolicy();
     return qos != def_qos;
   }
-  bool not_default(const DDS::GroupDataQosPolicy& qos) {
+
+  bool not_default(const DDS::GroupDataQosPolicy& qos)
+  {
     DDS::GroupDataQosPolicy def_qos =
-        TheServiceParticipant->initial_GroupDataQosPolicy();
+      TheServiceParticipant->initial_GroupDataQosPolicy();
     return qos != def_qos;
   }
-  bool not_default(const DDS::TopicDataQosPolicy& qos) {
+
+  bool not_default(const DDS::TopicDataQosPolicy& qos)
+  {
     DDS::TopicDataQosPolicy def_qos =
-        TheServiceParticipant->initial_TopicDataQosPolicy();
+      TheServiceParticipant->initial_TopicDataQosPolicy();
     return qos != def_qos;
   }
-  bool not_default(const DDS::DurabilityQosPolicy& qos) {
+
+  bool not_default(const DDS::DurabilityQosPolicy& qos)
+  {
     DDS::DurabilityQosPolicy def_qos =
-        TheServiceParticipant->initial_DurabilityQosPolicy();
+      TheServiceParticipant->initial_DurabilityQosPolicy();
     return qos != def_qos;
   }
-  bool not_default(const DDS::DurabilityServiceQosPolicy& qos) {
+
+  bool not_default(const DDS::DurabilityServiceQosPolicy& qos)
+  {
     DDS::DurabilityServiceQosPolicy def_qos =
-        TheServiceParticipant->initial_DurabilityServiceQosPolicy();
+      TheServiceParticipant->initial_DurabilityServiceQosPolicy();
     return qos != def_qos;
   }
-  bool not_default(const DDS::LifespanQosPolicy& qos) {
+
+  bool not_default(const DDS::LifespanQosPolicy& qos)
+  {
     DDS::LifespanQosPolicy def_qos =
-        TheServiceParticipant->initial_LifespanQosPolicy();
+      TheServiceParticipant->initial_LifespanQosPolicy();
     return qos != def_qos;
   }
-  bool not_default(const DDS::DeadlineQosPolicy& qos) {
+
+  bool not_default(const DDS::DeadlineQosPolicy& qos)
+  {
     DDS::DeadlineQosPolicy def_qos =
-        TheServiceParticipant->initial_DeadlineQosPolicy();
+      TheServiceParticipant->initial_DeadlineQosPolicy();
     return qos != def_qos;
   }
-  bool not_default(const DDS::LatencyBudgetQosPolicy& qos) {
+
+  bool not_default(const DDS::LatencyBudgetQosPolicy& qos)
+  {
     DDS::LatencyBudgetQosPolicy def_qos =
-        TheServiceParticipant->initial_LatencyBudgetQosPolicy();
+      TheServiceParticipant->initial_LatencyBudgetQosPolicy();
     return qos != def_qos;
   }
-  bool not_default(const DDS::LivelinessQosPolicy& qos) {
+
+  bool not_default(const DDS::LivelinessQosPolicy& qos)
+  {
     DDS::LivelinessQosPolicy def_qos =
-        TheServiceParticipant->initial_LivelinessQosPolicy();
+      TheServiceParticipant->initial_LivelinessQosPolicy();
     return qos != def_qos;
   }
-  bool not_default(const DDS::OwnershipQosPolicy& qos) {
+
+  bool not_default(const DDS::OwnershipQosPolicy& qos)
+  {
     DDS::OwnershipQosPolicy def_qos =
-        TheServiceParticipant->initial_OwnershipQosPolicy();
+      TheServiceParticipant->initial_OwnershipQosPolicy();
     return qos != def_qos;
   }
-  bool not_default(const DDS::OwnershipStrengthQosPolicy& qos) {
+
+  bool not_default(const DDS::OwnershipStrengthQosPolicy& qos)
+  {
 #ifdef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
     ACE_UNUSED_ARG(qos);
     return false;
 #else
     DDS::OwnershipStrengthQosPolicy def_qos =
-        TheServiceParticipant->initial_OwnershipStrengthQosPolicy();
+      TheServiceParticipant->initial_OwnershipStrengthQosPolicy();
     return qos != def_qos;
 #endif
   }
-  bool not_default(const DDS::DestinationOrderQosPolicy& qos) {
+
+  bool not_default(const DDS::DestinationOrderQosPolicy& qos)
+  {
     DDS::DestinationOrderQosPolicy def_qos =
-        TheServiceParticipant->initial_DestinationOrderQosPolicy();
-    return qos != def_qos;
-  }
-  bool not_default(const DDS::PresentationQosPolicy& qos) {
-    DDS::PresentationQosPolicy def_qos =
-        TheServiceParticipant->initial_PresentationQosPolicy();
-    return qos != def_qos;
-  }
-  bool not_default(const DDS::PartitionQosPolicy& qos) {
-    DDS::PartitionQosPolicy def_qos =
-        TheServiceParticipant->initial_PartitionQosPolicy();
+      TheServiceParticipant->initial_DestinationOrderQosPolicy();
     return qos != def_qos;
   }
 
-  bool not_default(const DDS::PropertyQosPolicy& qos) {
+  bool not_default(const DDS::PresentationQosPolicy& qos)
+  {
+    DDS::PresentationQosPolicy def_qos =
+      TheServiceParticipant->initial_PresentationQosPolicy();
+    return qos != def_qos;
+  }
+
+  bool not_default(const DDS::PartitionQosPolicy& qos)
+  {
+    DDS::PartitionQosPolicy def_qos =
+      TheServiceParticipant->initial_PartitionQosPolicy();
+    return qos != def_qos;
+  }
+
+  bool not_default(const DDS::TypeConsistencyEnforcementQosPolicy& qos)
+  {
+    DDS::TypeConsistencyEnforcementQosPolicy def_qos =
+      TheServiceParticipant->initial_TypeConsistencyEnforcementQosPolicy();
+    return qos != def_qos;
+  }
+
+  bool not_default(const DDS::PropertyQosPolicy& qos)
+  {
     for (unsigned int i = 0; i < qos.value.length(); ++i) {
       if (qos.value[i].propagate) {
         return true;
@@ -642,8 +686,7 @@ bool to_param_list(const Duration_t& duration,
                    ParameterList& param_list)
 {
   if ((duration.seconds != 100) ||
-      (duration.fraction != 0))
-  {
+      (duration.fraction != 0)) {
     Parameter ld_param;
     ld_param.duration(duration);
     add_param(param_list, ld_param);
@@ -714,9 +757,7 @@ bool to_param_list(const OpenDDS::Security::SPDPdiscoveredParticipantData& parti
     to_param_list(participant_data.ddsParticipantDataSecure.base, param_list);
 
   } else {
-
     to_param_list(participant_data.ddsParticipantDataSecure.base.base, param_list);
-
   }
 
   to_param_list(participant_data.participantProxy, param_list);
@@ -732,17 +773,14 @@ bool from_param_list(const ParameterList& param_list,
 
   participant_data.dataKind = find_data_kind(param_list);
   switch (participant_data.dataKind) {
-
     case OpenDDS::Security::DPDK_SECURE: {
       result = from_param_list(param_list, participant_data.ddsParticipantDataSecure);
       break;
     }
-
     case OpenDDS::Security::DPDK_ENHANCED: {
       result = from_param_list(param_list, participant_data.ddsParticipantDataSecure.base);
       break;
     }
-
     default: {
       result = from_param_list(param_list, participant_data.ddsParticipantDataSecure.base.base);
       break;
@@ -799,99 +837,85 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
     add_param(param_list, param);
   }
 
-  if (not_default(writer_data.ddsPublicationData.durability))
-  {
+  if (not_default(writer_data.ddsPublicationData.durability)) {
     Parameter param;
     param.durability(writer_data.ddsPublicationData.durability);
     add_param(param_list, param);
   }
 
-  if (not_default(writer_data.ddsPublicationData.durability_service))
-  {
+  if (not_default(writer_data.ddsPublicationData.durability_service)) {
     Parameter param;
     param.durability_service(writer_data.ddsPublicationData.durability_service);
     add_param(param_list, param);
   }
 
-  if (not_default(writer_data.ddsPublicationData.deadline))
-  {
+  if (not_default(writer_data.ddsPublicationData.deadline)) {
     Parameter param;
     param.deadline(writer_data.ddsPublicationData.deadline);
     add_param(param_list, param);
   }
 
-  if (not_default(writer_data.ddsPublicationData.latency_budget))
-  {
+  if (not_default(writer_data.ddsPublicationData.latency_budget)) {
     Parameter param;
     param.latency_budget(writer_data.ddsPublicationData.latency_budget);
     add_param(param_list, param);
   }
 
-  if (not_default(writer_data.ddsPublicationData.liveliness))
-  {
+  if (not_default(writer_data.ddsPublicationData.liveliness)) {
     Parameter param;
     param.liveliness(writer_data.ddsPublicationData.liveliness);
     add_param(param_list, param);
   }
 
-  if (not_default(writer_data.ddsPublicationData.lifespan))
-  {
+  if (not_default(writer_data.ddsPublicationData.lifespan)) {
     Parameter param;
     param.lifespan(writer_data.ddsPublicationData.lifespan);
     add_param(param_list, param);
   }
 
-  if (not_default(writer_data.ddsPublicationData.user_data))
-  {
+  if (not_default(writer_data.ddsPublicationData.user_data)) {
     Parameter param;
     param.user_data(writer_data.ddsPublicationData.user_data);
     add_param(param_list, param);
   }
 
-  if (not_default(writer_data.ddsPublicationData.ownership))
-  {
+  if (not_default(writer_data.ddsPublicationData.ownership)) {
     Parameter param;
     param.ownership(writer_data.ddsPublicationData.ownership);
     add_param(param_list, param);
   }
 
-  if (not_default(writer_data.ddsPublicationData.ownership_strength))
-  {
+  if (not_default(writer_data.ddsPublicationData.ownership_strength)) {
     Parameter param;
     param.ownership_strength(writer_data.ddsPublicationData.ownership_strength);
     add_param(param_list, param);
   }
 
-  if (not_default(writer_data.ddsPublicationData.destination_order))
-  {
+  if (not_default(writer_data.ddsPublicationData.destination_order)) {
     Parameter param;
     param.destination_order(writer_data.ddsPublicationData.destination_order);
     add_param(param_list, param);
   }
 
-  if (not_default(writer_data.ddsPublicationData.presentation))
-  {
+  if (not_default(writer_data.ddsPublicationData.presentation)) {
     Parameter param;
     param.presentation(writer_data.ddsPublicationData.presentation);
     add_param(param_list, param);
   }
 
-  if (not_default(writer_data.ddsPublicationData.partition))
-  {
+  if (not_default(writer_data.ddsPublicationData.partition)) {
     Parameter param;
     param.partition(writer_data.ddsPublicationData.partition);
     add_param(param_list, param);
   }
 
-  if (not_default(writer_data.ddsPublicationData.topic_data))
-  {
+  if (not_default(writer_data.ddsPublicationData.topic_data)) {
     Parameter param;
     param.topic_data(writer_data.ddsPublicationData.topic_data);
     add_param(param_list, param);
   }
 
-  if (not_default(writer_data.ddsPublicationData.group_data))
-  {
+  if (not_default(writer_data.ddsPublicationData.group_data)) {
     Parameter param;
     param.group_data(writer_data.ddsPublicationData.group_data);
     add_param(param_list, param);
@@ -933,7 +957,7 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
       param.reliability(reliability);
       add_param(param_list, param);
 
-    // Otherwise, this is an OpenDDS, custom transport
+      // Otherwise, this is an OpenDDS, custom transport
     } else {
       // Append the blob and a custom PID
       add_param_dcps_locator(param_list, tl);
@@ -964,39 +988,39 @@ bool from_param_list(const ParameterList& param_list,
   writer_data.ddsPublicationData.topic_name = "";
   writer_data.ddsPublicationData.type_name  = "";
   writer_data.ddsPublicationData.durability =
-      TheServiceParticipant->initial_DurabilityQosPolicy();
+    TheServiceParticipant->initial_DurabilityQosPolicy();
   writer_data.ddsPublicationData.durability_service =
-      TheServiceParticipant->initial_DurabilityServiceQosPolicy();
+    TheServiceParticipant->initial_DurabilityServiceQosPolicy();
   writer_data.ddsPublicationData.deadline =
-      TheServiceParticipant->initial_DeadlineQosPolicy();
+    TheServiceParticipant->initial_DeadlineQosPolicy();
   writer_data.ddsPublicationData.latency_budget =
-      TheServiceParticipant->initial_LatencyBudgetQosPolicy();
+    TheServiceParticipant->initial_LatencyBudgetQosPolicy();
   writer_data.ddsPublicationData.liveliness =
-      TheServiceParticipant->initial_LivelinessQosPolicy();
+    TheServiceParticipant->initial_LivelinessQosPolicy();
   writer_data.ddsPublicationData.reliability =
-      TheServiceParticipant->initial_DataWriterQos().reliability;
+    TheServiceParticipant->initial_DataWriterQos().reliability;
   writer_data.ddsPublicationData.lifespan =
-      TheServiceParticipant->initial_LifespanQosPolicy();
+    TheServiceParticipant->initial_LifespanQosPolicy();
   writer_data.ddsPublicationData.user_data =
-      TheServiceParticipant->initial_UserDataQosPolicy();
+    TheServiceParticipant->initial_UserDataQosPolicy();
   writer_data.ddsPublicationData.ownership =
-      TheServiceParticipant->initial_OwnershipQosPolicy();
+    TheServiceParticipant->initial_OwnershipQosPolicy();
 #ifdef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   writer_data.ddsPublicationData.ownership_strength.value = 0;
 #else
   writer_data.ddsPublicationData.ownership_strength =
-      TheServiceParticipant->initial_OwnershipStrengthQosPolicy();
+    TheServiceParticipant->initial_OwnershipStrengthQosPolicy();
 #endif
   writer_data.ddsPublicationData.destination_order =
-      TheServiceParticipant->initial_DestinationOrderQosPolicy();
+    TheServiceParticipant->initial_DestinationOrderQosPolicy();
   writer_data.ddsPublicationData.presentation =
-      TheServiceParticipant->initial_PresentationQosPolicy();
+    TheServiceParticipant->initial_PresentationQosPolicy();
   writer_data.ddsPublicationData.partition =
-      TheServiceParticipant->initial_PartitionQosPolicy();
+    TheServiceParticipant->initial_PartitionQosPolicy();
   writer_data.ddsPublicationData.topic_data =
-      TheServiceParticipant->initial_TopicDataQosPolicy();
+    TheServiceParticipant->initial_TopicDataQosPolicy();
   writer_data.ddsPublicationData.group_data =
-      TheServiceParticipant->initial_GroupDataQosPolicy();
+    TheServiceParticipant->initial_GroupDataQosPolicy();
   writer_data.ddsPublicationData.representation.value.length(1);
   writer_data.ddsPublicationData.representation.value[0] = DDS::XCDR_DATA_REPRESENTATION;
 
@@ -1015,7 +1039,7 @@ bool from_param_list(const ParameterList& param_list,
         break;
       case PID_DURABILITY_SERVICE:
         writer_data.ddsPublicationData.durability_service =
-             param.durability_service();
+          param.durability_service();
         // Interoperability note: calling normalize() shouldn't be required
         normalize(writer_data.ddsPublicationData.durability_service.service_cleanup_delay);
         break;
@@ -1147,87 +1171,83 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
     add_param(param_list, param);
   }
 
-  if (not_default(reader_data.ddsSubscriptionData.durability))
-  {
+  if (not_default(reader_data.ddsSubscriptionData.durability)) {
     Parameter param;
     param.durability(reader_data.ddsSubscriptionData.durability);
     add_param(param_list, param);
   }
 
-  if (not_default(reader_data.ddsSubscriptionData.deadline))
-  {
+  if (not_default(reader_data.ddsSubscriptionData.deadline)) {
     Parameter param;
     param.deadline(reader_data.ddsSubscriptionData.deadline);
     add_param(param_list, param);
   }
 
-  if (not_default(reader_data.ddsSubscriptionData.latency_budget))
-  {
+  if (not_default(reader_data.ddsSubscriptionData.latency_budget)) {
     Parameter param;
     param.latency_budget(reader_data.ddsSubscriptionData.latency_budget);
     add_param(param_list, param);
   }
 
-  if (not_default(reader_data.ddsSubscriptionData.liveliness))
-  {
+  if (not_default(reader_data.ddsSubscriptionData.liveliness)) {
     Parameter param;
     param.liveliness(reader_data.ddsSubscriptionData.liveliness);
     add_param(param_list, param);
   }
 
-  if (not_default(reader_data.ddsSubscriptionData.user_data))
-  {
-    Parameter param;
-    param.user_data(reader_data.ddsSubscriptionData.user_data);
-    add_param(param_list, param);
-  }
-
-  if (not_default(reader_data.ddsSubscriptionData.ownership))
-  {
+  if (not_default(reader_data.ddsSubscriptionData.ownership)) {
     Parameter param;
     param.ownership(reader_data.ddsSubscriptionData.ownership);
     add_param(param_list, param);
   }
 
-  if (not_default(reader_data.ddsSubscriptionData.destination_order))
-  {
+  if (not_default(reader_data.ddsSubscriptionData.destination_order)) {
     Parameter param;
     param.destination_order(reader_data.ddsSubscriptionData.destination_order);
     add_param(param_list, param);
   }
 
-  if (not_default(reader_data.ddsSubscriptionData.time_based_filter))
-  {
+  if (not_default(reader_data.ddsSubscriptionData.user_data)) {
+    Parameter param;
+    param.user_data(reader_data.ddsSubscriptionData.user_data);
+    add_param(param_list, param);
+  }
+
+  if (not_default(reader_data.ddsSubscriptionData.time_based_filter)) {
     Parameter param;
     param.time_based_filter(reader_data.ddsSubscriptionData.time_based_filter);
     add_param(param_list, param);
   }
 
-  if (not_default(reader_data.ddsSubscriptionData.presentation))
-  {
+  if (not_default(reader_data.ddsSubscriptionData.presentation)) {
     Parameter param;
     param.presentation(reader_data.ddsSubscriptionData.presentation);
     add_param(param_list, param);
   }
 
-  if (not_default(reader_data.ddsSubscriptionData.partition))
-  {
+  if (not_default(reader_data.ddsSubscriptionData.partition)) {
     Parameter param;
     param.partition(reader_data.ddsSubscriptionData.partition);
     add_param(param_list, param);
   }
 
-  if (not_default(reader_data.ddsSubscriptionData.topic_data))
-  {
+  if (not_default(reader_data.ddsSubscriptionData.topic_data)) {
     Parameter param;
     param.topic_data(reader_data.ddsSubscriptionData.topic_data);
     add_param(param_list, param);
   }
 
-  if (not_default(reader_data.ddsSubscriptionData.group_data))
-  {
+  if (not_default(reader_data.ddsSubscriptionData.group_data)) {
     Parameter param;
     param.group_data(reader_data.ddsSubscriptionData.group_data);
+    add_param(param_list, param);
+  }
+
+  add_DataRepresentationQos(param_list, reader_data.ddsSubscriptionData.representation.value, true);
+
+  if (not_default(reader_data.ddsSubscriptionData.type_consistency)) {
+    Parameter param;
+    param.type_consistency(reader_data.ddsSubscriptionData.type_consistency);
     add_param(param_list, param);
   }
 
@@ -1238,8 +1258,7 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
     add_param(param_list, param);
   }
 
-  if (not_default(reader_data.contentFilterProperty))
-  {
+  if (not_default(reader_data.contentFilterProperty)) {
     Parameter param;
     DCPS::ContentFilterProperty_t cfprop_copy = reader_data.contentFilterProperty;
     if (!std::strlen(cfprop_copy.filterClassName)) {
@@ -1248,8 +1267,6 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
     param.content_filter_property(cfprop_copy);
     add_param(param_list, param);
   }
-
-  add_DataRepresentationQos(param_list, reader_data.ddsSubscriptionData.representation.value, true);
 
   CORBA::ULong i;
   CORBA::ULong locator_len = reader_data.readerProxy.allLocators.length();
@@ -1279,7 +1296,7 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
       param.reliability(reliability);
       add_param(param_list, param);
 
-    // Otherwise, this is an OpenDDS, custom transport
+      // Otherwise, this is an OpenDDS, custom transport
     } else {
       // Append the blob and a custom PID
       add_param_dcps_locator(param_list, tl);
@@ -1296,7 +1313,7 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
   }
 
   CORBA::ULong num_associations =
-      reader_data.readerProxy.associatedWriters.length();
+    reader_data.readerProxy.associatedWriters.length();
   for (i = 0; i < num_associations; ++i) {
     Parameter param;
     param.guid(reader_data.readerProxy.associatedWriters[i]);
@@ -1318,39 +1335,41 @@ bool from_param_list(const ParameterList& param_list,
   reader_data.ddsSubscriptionData.topic_name = "";
   reader_data.ddsSubscriptionData.type_name  = "";
   reader_data.ddsSubscriptionData.durability =
-      TheServiceParticipant->initial_DurabilityQosPolicy();
+    TheServiceParticipant->initial_DurabilityQosPolicy();
   reader_data.ddsSubscriptionData.deadline =
-      TheServiceParticipant->initial_DeadlineQosPolicy();
+    TheServiceParticipant->initial_DeadlineQosPolicy();
   reader_data.ddsSubscriptionData.latency_budget =
-      TheServiceParticipant->initial_LatencyBudgetQosPolicy();
+    TheServiceParticipant->initial_LatencyBudgetQosPolicy();
   reader_data.ddsSubscriptionData.liveliness =
-      TheServiceParticipant->initial_LivelinessQosPolicy();
+    TheServiceParticipant->initial_LivelinessQosPolicy();
   reader_data.ddsSubscriptionData.reliability =
-      TheServiceParticipant->initial_DataReaderQos().reliability;
+    TheServiceParticipant->initial_DataReaderQos().reliability;
   reader_data.ddsSubscriptionData.ownership =
-      TheServiceParticipant->initial_OwnershipQosPolicy();
+    TheServiceParticipant->initial_OwnershipQosPolicy();
   reader_data.ddsSubscriptionData.destination_order =
-      TheServiceParticipant->initial_DestinationOrderQosPolicy();
+    TheServiceParticipant->initial_DestinationOrderQosPolicy();
   reader_data.ddsSubscriptionData.user_data =
-      TheServiceParticipant->initial_UserDataQosPolicy();
+    TheServiceParticipant->initial_UserDataQosPolicy();
   reader_data.ddsSubscriptionData.time_based_filter =
-      TheServiceParticipant->initial_TimeBasedFilterQosPolicy();
+    TheServiceParticipant->initial_TimeBasedFilterQosPolicy();
   reader_data.ddsSubscriptionData.presentation =
-      TheServiceParticipant->initial_PresentationQosPolicy();
+    TheServiceParticipant->initial_PresentationQosPolicy();
   reader_data.ddsSubscriptionData.partition =
-      TheServiceParticipant->initial_PartitionQosPolicy();
+    TheServiceParticipant->initial_PartitionQosPolicy();
   reader_data.ddsSubscriptionData.topic_data =
-      TheServiceParticipant->initial_TopicDataQosPolicy();
+    TheServiceParticipant->initial_TopicDataQosPolicy();
   reader_data.ddsSubscriptionData.group_data =
-      TheServiceParticipant->initial_GroupDataQosPolicy();
+    TheServiceParticipant->initial_GroupDataQosPolicy();
+  reader_data.ddsSubscriptionData.representation.value.length(1);
+  reader_data.ddsSubscriptionData.representation.value[0] = DDS::XCDR_DATA_REPRESENTATION;
+  reader_data.ddsSubscriptionData.type_consistency =
+    TheServiceParticipant->initial_TypeConsistencyEnforcementQosPolicy();
   reader_data.readerProxy.expectsInlineQos = false;
   reader_data.contentFilterProperty.contentFilteredTopicName = "";
   reader_data.contentFilterProperty.relatedTopicName = "";
   reader_data.contentFilterProperty.filterClassName = "";
   reader_data.contentFilterProperty.filterExpression = "";
   reader_data.contentFilterProperty.expressionParameters.length(0);
-  reader_data.ddsSubscriptionData.representation.value.length(1);
-  reader_data.ddsSubscriptionData.representation.value[0] = DDS::XCDR_DATA_REPRESENTATION;
 
   CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
@@ -1427,6 +1446,9 @@ bool from_param_list(const ParameterList& param_list,
         if (param.representation().value.length() != 0) {
           reader_data.ddsSubscriptionData.representation = param.representation();
         }
+        break;
+      case PID_XTYPES_TYPE_CONSISTENCY:
+        reader_data.ddsSubscriptionData.type_consistency = param.type_consistency();
         break;
       case PID_ENDPOINT_GUID:
         reader_data.readerProxy.remoteReaderGuid = param.guid();

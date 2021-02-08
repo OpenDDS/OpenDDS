@@ -1,33 +1,30 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
-
-#include <dds/DdsDcpsInfrastructureC.h>
-#include <dds/DCPS/Marked_Default_Qos.h>
-#include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/SubscriberImpl.h>
-#include <dds/DCPS/WaitSet.h>
-
-#include "dds/DCPS/StaticIncludes.h"
-#if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
-#include <dds/DCPS/transport/udp/Udp.h>
-#include <dds/DCPS/transport/multicast/Multicast.h>
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
-#endif
-
-#include <cstdlib>
 
 #include "DataReaderListener.h"
 #include "MessengerTypeSupportImpl.h"
 #include "Args.h"
 
+#include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/SubscriberImpl.h>
+#include <dds/DCPS/WaitSet.h>
+#include <dds/DCPS/StaticIncludes.h>
+#if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
+#  include <dds/DCPS/transport/udp/Udp.h>
+#  include <dds/DCPS/transport/multicast/Multicast.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#endif
+
+#include <dds/DdsDcpsInfrastructureC.h>
+
+#include <cstdlib>
+
 bool reliable = false;
 
-int
-ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   int status = EXIT_SUCCESS;
 
@@ -46,8 +43,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                               PARTICIPANT_QOS_DEFAULT,
                               DDS::DomainParticipantListener::_nil(),
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil(participant.in())) {
+    if (!participant) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_participant() failed!\n")),
@@ -57,7 +53,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Register Type (Messenger::Message)
     Messenger::MessageTypeSupport_var ts =
       new Messenger::MessageTypeSupportImpl();
-
     if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
@@ -72,8 +67,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                 TOPIC_QOS_DEFAULT,
                                 DDS::TopicListener::_nil(),
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil(topic.in())) {
+    if (!topic) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_topic() failed!\n")),
@@ -85,8 +79,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
                                      DDS::SubscriberListener::_nil(),
                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil(sub.in())) {
+    if (!sub) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_subscriber() failed!\n")),
@@ -101,8 +94,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                              DATAREADER_QOS_DEFAULT,
                              &listener,
                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil(reader.in())) {
+    if (!reader) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_datareader() failed!\n")),
@@ -116,7 +108,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::WaitSet_var ws = new DDS::WaitSet;
     ws->attach_condition(condition);
 
-    DDS::Duration_t timeout =
+    const DDS::Duration_t timeout =
       { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
 
     DDS::ConditionSeq conditions;

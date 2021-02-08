@@ -1,0 +1,131 @@
+#include <TryConstructBaseTypes.idl>
+
+// nested struct for use in struct, union, and sequence
+struct NestedStruct2 {
+  @try_construct(USE_DEFAULT) wstr64 wstr64_ud;
+  @try_construct(USE_DEFAULT) ShortSeqUnbound psu_ud;
+  @try_construct(USE_DEFAULT) ShortSeqBound psb_ud;
+  @try_construct(USE_DEFAULT) UnsignedShortSeqUnbound upsu_ud;
+  @try_construct(USE_DEFAULT) UnsignedShortSeqBound upsb_ud;
+  @try_construct(USE_DEFAULT) EnumSeqUnbound esu_ud;
+  @try_construct(USE_DEFAULT) EnumSeqBound esb_ud;
+  @try_construct(USE_DEFAULT) StringSeqUnbound strsu_ud;
+  @try_construct(USE_DEFAULT) StringSeqBound strsb_ud;
+  @try_construct(USE_DEFAULT) WideStringSeqUnbound wstrsu_ud;
+  @try_construct(USE_DEFAULT) WideStringSeqBound wstrsb_ud;
+  @try_construct(USE_DEFAULT) StructSeqUnbound ssu_ud;
+  @try_construct(USE_DEFAULT) StructSeqBound ssb_ud;
+  @try_construct(USE_DEFAULT) ShortArraySeqUnbound sasu_ud;
+  @try_construct(USE_DEFAULT) ShortArraySeqBound sasb_ud;
+  @try_construct(USE_DEFAULT) SeqShortSeqUnboundUnbound sssuu_ud;
+  @try_construct(USE_DEFAULT) SeqShortSeqUnboundBound sssub_ud;
+  @try_construct(USE_DEFAULT) SeqShortSeqBoundUnbound sssbu_ud;
+  @try_construct(USE_DEFAULT) SeqShortSeqBoundBound sssbb_ud;
+  @try_construct(USE_DEFAULT) NestedStruct ns_ud;
+  @try_construct(USE_DEFAULT) ShortArray sa_mud;
+  @try_construct(USE_DEFAULT) EnumType e_ud;
+  @try_construct(USE_DEFAULT) octet by_ud;
+  @try_construct(USE_DEFAULT) boolean bo_ud;
+  @try_construct(USE_DEFAULT) short s_ud;
+  @try_construct(USE_DEFAULT) unsigned short us_ud;
+  @try_construct(DISCARD) str64 str64_d;
+  @try_construct(USE_DEFAULT) str64 str64_ud;
+  @try_construct(TRIM) str64 str64_t;
+};
+
+// nested struct for use in struct, union, and sequence
+struct NestedStruct3 {
+  @try_construct(USE_DEFAULT) wstr64 wstr64_ud;
+  @try_construct(USE_DEFAULT) ShortSeqUnbound psu_ud;
+  @try_construct(USE_DEFAULT) ShortSeqBound psb_ud;
+  @try_construct(USE_DEFAULT) UnsignedShortSeqUnbound upsu_ud;
+  @try_construct(USE_DEFAULT) UnsignedShortSeqBound upsb_ud;
+  @try_construct(USE_DEFAULT) EnumSeqUnbound esu_ud;
+  @try_construct(USE_DEFAULT) EnumSeqBound esb_ud;
+  @try_construct(USE_DEFAULT) StringSeqUnbound strsu_ud;
+  @try_construct(USE_DEFAULT) StringSeqBound strsb_ud;
+  @try_construct(USE_DEFAULT) WideStringSeqUnbound wstrsu_ud;
+  @try_construct(USE_DEFAULT) WideStringSeqBound wstrsb_ud;
+  @try_construct(USE_DEFAULT) StructSeqUnbound ssu_ud;
+  @try_construct(USE_DEFAULT) StructSeqBound ssb_ud;
+  @try_construct(USE_DEFAULT) ShortArraySeqUnbound sasu_ud;
+  @try_construct(USE_DEFAULT) ShortArraySeqBound sasb_ud;
+  @try_construct(USE_DEFAULT) SeqShortSeqUnboundUnbound sssuu_ud;
+  @try_construct(USE_DEFAULT) SeqShortSeqUnboundBound sssub_ud;
+  @try_construct(USE_DEFAULT) SeqShortSeqBoundUnbound sssbu_ud;
+  @try_construct(USE_DEFAULT) SeqShortSeqBoundBound sssbb_ud;
+  @try_construct(USE_DEFAULT) NestedStruct ns_ud;
+  @try_construct(USE_DEFAULT) ShortArray sa_mud;
+  @try_construct(USE_DEFAULT) EnumType e_ud;
+  @try_construct(USE_DEFAULT) octet by_ud;
+  @try_construct(USE_DEFAULT) boolean bo_ud;
+  @try_construct(USE_DEFAULT) short s_ud;
+  @try_construct(USE_DEFAULT) unsigned short us_ud;
+  @try_construct(DISCARD) str20 str20_d;
+  @try_construct(USE_DEFAULT) str20 str20_ud;
+  @try_construct(TRIM) str20 str20_t;
+};
+
+module TryCon {
+
+  @mutable
+  struct NestedStructTest1 {
+    NestedStruct2 ns;
+  };
+
+  @mutable
+  struct NestedStructTest2 {
+    @try_construct(USE_DEFAULT) NestedStruct3 ns;
+  };
+
+  @mutable
+  struct TrimStruct1 {
+    str64 str64_t;
+    wstr64 wstr64_t;
+    ShortSeqUnbound psu_t;
+    ShortSeqBound2 psb_t;
+    UnsignedShortSeqUnbound upsu_t;
+    UnsignedShortSeqBound2 upsb_t;
+    EnumSeqUnbound esu_t;
+    EnumSeqBound2 esb_t;
+    StringSeqUnbound strsu_t;
+    StringSeqBound2 strsb_t;
+    WideStringSeqUnbound wstrsu_t;
+    WideStringSeqBound2 wstrsb_t;
+    StructSeqUnbound ssu_t;
+    StructSeqBound2 ssb_t;
+    ShortArraySeqUnbound sasu_t;
+    ShortArraySeqBound2 sasb_t;
+    SeqShortSeqUnboundUnbound sssuu_t;
+    SeqShortSeqUnboundBound2 sssub_t;
+    SeqShortSeqBoundUnbound2 sssbu_t;
+    SeqShortSeqBoundBound2 sssbb_t;
+  };
+
+  @mutable
+  struct TrimStruct2 {
+    @try_construct(TRIM) str20 str20_t;
+    @try_construct(TRIM) wstr20 wstr20_t;
+    @try_construct(TRIM) ShortSeqUnbound psu_t;
+    @try_construct(TRIM) ShortSeqBound psb_t;
+    @try_construct(TRIM) UnsignedShortSeqUnbound upsu_t;
+    @try_construct(TRIM) UnsignedShortSeqBound upsb_t;
+    @try_construct(TRIM) EnumSeqUnbound esu_t;
+    @try_construct(TRIM) EnumSeqBound esb_t;
+    @try_construct(TRIM) StringSeqUnbound strsu_t;
+    @try_construct(TRIM) StringSeqBound strsb_t;
+    @try_construct(TRIM) WideStringSeqUnbound wstrsu_t;
+    @try_construct(TRIM) WideStringSeqBound wstrsb_t;
+    @try_construct(TRIM) StructSeqUnboundTrim ssu_t;
+    @try_construct(TRIM) StructSeqBoundTrim ssb_t;
+    @try_construct(TRIM) ShortArraySeqUnbound sasu_t;
+    @try_construct(TRIM) ShortArraySeqBound sasb_t;
+    // unbounded so no trim
+    SeqShortSeqUnboundUnbound sssuu_t;
+    @try_construct(TRIM) SeqShortSeqUnboundBound sssub_t;
+    // unbounded so no trim
+    SeqShortSeqBoundUnbound sssbu_t;
+    @try_construct(TRIM) SeqShortSeqBoundBound sssbb_t;
+  };
+
+};

@@ -295,15 +295,15 @@ module OpenDDS {
     const ParameterId_t PID_ORIGINAL_WRITER_INFO = 0x0061;
     const ParameterId_t PID_DATA_REPRESENTATION = 0x0073;
 
-    // ParameterId Bitmask values (Table 9.11)
-    const ParameterId_t PIDMASK_VENDOR_SPECIFIC = 0x8000;
-    const ParameterId_t PIDMASK_INCOMPATIBLE = 0x4000;
-
     // Type Consistency Enforcement QoS Policy 7.6.3.4 XTypes Spec
-    const ParameterId_t PID_XYTPES_TYPE_CONSISTENCY = 0x0074;
+    const ParameterId_t PID_XTYPES_TYPE_CONSISTENCY = 0x0074;
 
     // TypeInformation for XTypes 7.6.3.2.2 XTypes Spec
     const ParameterId_t PID_XTYPES_TYPE_INFORMATION = 0x0075;
+
+    // ParameterId Bitmask values (Table 9.11)
+    const ParameterId_t PIDMASK_VENDOR_SPECIFIC = 0x8000;
+    const ParameterId_t PIDMASK_INCOMPATIBLE = 0x4000;
 
     const ParameterId_t PID_DOMAIN_ID = 0x000f;
     const ParameterId_t PID_DOMAIN_TAG = 0x4014;
@@ -499,7 +499,7 @@ module OpenDDS {
       case PID_DATA_REPRESENTATION:
         DDS::DataRepresentationQosPolicy representation;
 
-      case PID_XYTPES_TYPE_CONSISTENCY:
+      case PID_XTYPES_TYPE_CONSISTENCY:
         DDS::TypeConsistencyEnforcementQosPolicy type_consistency;
 
       default:

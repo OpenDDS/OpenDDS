@@ -4740,9 +4740,9 @@ void Sedp::TypeLookupReplyReader::data_received_i(
 
 void
 Sedp::populate_discovered_writer_msg(
-    DCPS::DiscoveredWriterData& dwd,
-    const RepoId& publication_id,
-    const LocalPublication& pub)
+  DCPS::DiscoveredWriterData& dwd,
+  const RepoId& publication_id,
+  const LocalPublication& pub)
 {
   // Ignored on the wire dwd.ddsPublicationData.key
   // Ignored on the wire dwd.ddsPublicationData.participant_key
@@ -4766,6 +4766,7 @@ Sedp::populate_discovered_writer_msg(
   dwd.ddsPublicationData.partition = pub.publisher_qos_.partition;
   dwd.ddsPublicationData.topic_data = topic_details.local_qos().topic_data;
   dwd.ddsPublicationData.group_data = pub.publisher_qos_.group_data;
+
   dwd.writerProxy.remoteWriterGuid = publication_id;
   // Ignore dwd.writerProxy.unicastLocatorList;
   // Ignore dwd.writerProxy.multicastLocatorList;
@@ -4774,9 +4775,9 @@ Sedp::populate_discovered_writer_msg(
 
 void
 Sedp::populate_discovered_reader_msg(
-    DCPS::DiscoveredReaderData& drd,
-    const RepoId& subscription_id,
-    const LocalSubscription& sub)
+  DCPS::DiscoveredReaderData& drd,
+  const RepoId& subscription_id,
+  const LocalSubscription& sub)
 {
   // Ignored on the wire drd.ddsSubscription.key
   // Ignored on the wire drd.ddsSubscription.participant_key
@@ -4798,24 +4799,32 @@ Sedp::populate_discovered_reader_msg(
   drd.ddsSubscriptionData.partition = sub.subscriber_qos_.partition;
   drd.ddsSubscriptionData.topic_data = topic_details.local_qos().topic_data;
   drd.ddsSubscriptionData.group_data = sub.subscriber_qos_.group_data;
+  drd.ddsSubscriptionData.type_consistency = sub.qos_.type_consistency;
+
   drd.readerProxy.remoteReaderGuid = subscription_id;
   drd.readerProxy.expectsInlineQos = false;  // We never expect inline qos
   // Ignore drd.readerProxy.unicastLocatorList;
   // Ignore drd.readerProxy.multicastLocatorList;
   drd.readerProxy.allLocators = sub.trans_info_;
+
   drd.contentFilterProperty.contentFilteredTopicName =
     OPENDDS_STRING(DCPS::GuidConverter(subscription_id)).c_str();
   drd.contentFilterProperty.relatedTopicName = topic_name.c_str();
   drd.contentFilterProperty.filterClassName = ""; // PLConverter adds default
   drd.contentFilterProperty.filterExpression = sub.filterProperties.filterExpression;
   drd.contentFilterProperty.expressionParameters = sub.filterProperties.expressionParameters;
+
+  const CORBA::ULong len = drd.readerProxy.associatedWriters.length();
+  const CORBA::ULong added_len = static_cast<CORBA::ULong>(sub.remote_expectant_opendds_associations_.size());
+  drd.readerProxy.associatedWriters.length(len + added_len);
+
+  CORBA::ULong i = 0;
   for (DCPS::RepoIdSet::const_iterator writer =
-        sub.remote_expectant_opendds_associations_.begin();
+         sub.remote_expectant_opendds_associations_.begin();
        writer != sub.remote_expectant_opendds_associations_.end();
        ++writer) {
-    CORBA::ULong len = drd.readerProxy.associatedWriters.length();
-    drd.readerProxy.associatedWriters.length(len + 1);
-    drd.readerProxy.associatedWriters[len] = *writer;
+    drd.readerProxy.associatedWriters[len + i] = *writer;
+    ++i;
   }
 }
 
@@ -4993,9 +5002,9 @@ Sedp::add_publication_i(const DCPS::RepoId& rid,
 
 DDS::ReturnCode_t
 Sedp::write_publication_data(
-    const RepoId& rid,
-    LocalPublication& lp,
-    const RepoId& reader)
+  const RepoId& rid,
+  LocalPublication& lp,
+  const RepoId& reader)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
@@ -5017,9 +5026,9 @@ Sedp::write_publication_data(
 
 DDS::ReturnCode_t
 Sedp::write_publication_data_unsecure(
-    const RepoId& rid,
-    LocalPublication& lp,
-    const RepoId& reader)
+  const RepoId& rid,
+  LocalPublication& lp,
+  const RepoId& reader)
 {
   if (!(spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER)) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
@@ -5059,7 +5068,7 @@ Sedp::write_publication_data_unsecure(
     }
   } else if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_publication_data - ")
-                        ACE_TEXT("not currently associated, dropping msg.\n")));
+               ACE_TEXT("not currently associated, dropping msg.\n")));
   }
   return result;
 }
@@ -5067,9 +5076,9 @@ Sedp::write_publication_data_unsecure(
 #ifdef OPENDDS_SECURITY
 DDS::ReturnCode_t
 Sedp::write_publication_data_secure(
-    const RepoId& rid,
-    LocalPublication& lp,
-    const RepoId& reader)
+  const RepoId& rid,
+  LocalPublication& lp,
+  const RepoId& reader)
 {
   if (!(spdp_.available_builtin_endpoints() & DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER)) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
@@ -5113,7 +5122,7 @@ Sedp::write_publication_data_secure(
     }
   } else if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_publication_data_secure - ")
-                        ACE_TEXT("not currently associated, dropping msg.\n")));
+               ACE_TEXT("not currently associated, dropping msg.\n")));
   }
   return result;
 }
@@ -5144,9 +5153,9 @@ Sedp::add_subscription_i(const DCPS::RepoId& rid,
 
 DDS::ReturnCode_t
 Sedp::write_subscription_data(
-    const RepoId& rid,
-    LocalSubscription& ls,
-    const RepoId& reader)
+  const RepoId& rid,
+  LocalSubscription& ls,
+  const RepoId& reader)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
 
@@ -5168,9 +5177,9 @@ Sedp::write_subscription_data(
 
 DDS::ReturnCode_t
 Sedp::write_subscription_data_unsecure(
-    const RepoId& rid,
-    LocalSubscription& ls,
-    const RepoId& reader)
+  const RepoId& rid,
+  LocalSubscription& ls,
+  const RepoId& reader)
 {
   if (!(spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER)) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
@@ -5192,13 +5201,6 @@ Sedp::write_subscription_data_unsecure(
       result = DDS::RETCODE_ERROR;
     }
 
-    DDS::TypeConsistencyEnforcementQosPolicy tceqp = TheServiceParticipant->initial_TypeConsistencyEnforcementQosPolicy();
-    Parameter param;
-    param.type_consistency(tceqp);
-    const CORBA::ULong length = plist.length();
-    plist.length(length + 1);
-    plist[length] = param;
-
 #ifdef OPENDDS_SECURITY
     if (ls.have_ice_agent_info) {
       ICE::AgentInfoMap ai_map;
@@ -5217,7 +5219,7 @@ Sedp::write_subscription_data_unsecure(
     }
   } else if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_subscription_data_unsecure - ")
-                        ACE_TEXT("not currently associated, dropping msg.\n")));
+               ACE_TEXT("not currently associated, dropping msg.\n")));
   }
   return result;
 }
@@ -5225,9 +5227,9 @@ Sedp::write_subscription_data_unsecure(
 #ifdef OPENDDS_SECURITY
 DDS::ReturnCode_t
 Sedp::write_subscription_data_secure(
-    const RepoId& rid,
-    LocalSubscription& ls,
-    const RepoId& reader)
+  const RepoId& rid,
+  LocalSubscription& ls,
+  const RepoId& reader)
 {
   if (!(spdp_.available_builtin_endpoints() & DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER)) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
@@ -5279,9 +5281,9 @@ Sedp::write_subscription_data_secure(
 
 DDS::ReturnCode_t
 Sedp::write_participant_message_data(
-    const RepoId& rid,
-    LocalParticipantMessage& pm,
-    const RepoId& reader)
+  const RepoId& rid,
+  LocalParticipantMessage& pm,
+  const RepoId& reader)
 {
   if (!(spdp_.available_builtin_endpoints() & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER)) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
@@ -5303,9 +5305,9 @@ Sedp::write_participant_message_data(
 #ifdef OPENDDS_SECURITY
 DDS::ReturnCode_t
 Sedp::write_participant_message_data_secure(
-    const RepoId& rid,
-    LocalParticipantMessage& pm,
-    const RepoId& reader)
+  const RepoId& rid,
+  LocalParticipantMessage& pm,
+  const RepoId& reader)
 {
   if (!(spdp_.available_builtin_endpoints() & DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER)) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;

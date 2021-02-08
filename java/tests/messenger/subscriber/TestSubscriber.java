@@ -91,6 +91,10 @@ public class TestSubscriber {
         dr_qos.reader_data_lifecycle.autopurge_disposed_samples_delay = new Duration_t();
         dr_qos.representation = new DataRepresentationQosPolicy();
         dr_qos.representation.value = new short[0];
+        dr_qos.type_consistency = new TypeConsistencyEnforcementQosPolicy();
+        dr_qos.type_consistency.kind = 2;
+        dr_qos.type_consistency.ignore_member_names = false;
+        dr_qos.type_consistency.force_type_validation = false;
 
         DataReaderQosHolder qosh = new DataReaderQosHolder(dr_qos);
         sub.get_default_datareader_qos(qosh);

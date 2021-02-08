@@ -646,8 +646,8 @@ public:
   TimeDuration get_thread_status_interval();
   void set_thread_status_interval(TimeDuration interval);
 
-  /// getter for tm_lock_ used to block get_minimal_type_map_private
-  ACE_Thread_Mutex& get_tm_lock();
+  /// getter for lock that protects the static initialization of XTypes related data structures
+  ACE_Thread_Mutex& get_static_xtypes_lock();
 
   ThreadStatus* get_thread_statuses();
 
@@ -722,8 +722,8 @@ private:
 
   ThreadStatus thread_status_;
 
-  /// Thread mutex used to grab type map
-  ACE_Thread_Mutex tm_lock_;
+  /// Thread mutex used to protect the static initialization of XTypes data structures
+  ACE_Thread_Mutex xtypes_lock_;
 
   /// Enable Monitor functionality
   bool monitor_enabled_;

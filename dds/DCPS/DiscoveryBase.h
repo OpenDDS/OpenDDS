@@ -326,7 +326,8 @@ namespace OpenDDS {
       void type_lookup_init(ReactorInterceptor_rch reactor_interceptor)
       {
         if (!type_lookup_reply_deadline_processor_) {
-          type_lookup_reply_deadline_processor_ = DCPS::make_rch<EndpointManagerSporadic>(reactor_interceptor, ref(*this), &EndpointManager::remove_expired_endpoints);
+          type_lookup_reply_deadline_processor_ =
+            DCPS::make_rch<EndpointManagerSporadic>(reactor_interceptor, ref(*this), &EndpointManager::remove_expired_endpoints);
         }
       }
 
@@ -656,7 +657,9 @@ namespace OpenDDS {
         if (iter != local_publications_.end()) {
           if (DCPS_debug_level > 3) {
             const GuidConverter conv(publicationId);
-            ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) EndpointManager::update_publication_locators updating locators for %C\n"), OPENDDS_STRING(conv).c_str()));
+            ACE_DEBUG((LM_INFO,
+              ACE_TEXT("(%P|%t) EndpointManager::update_publication_locators updating locators for %C\n"),
+              OPENDDS_STRING(conv).c_str()));
           }
           iter->second.trans_info_ = transInfo;
           write_publication_data(publicationId, iter->second);
@@ -837,7 +840,9 @@ namespace OpenDDS {
         if (iter != local_subscriptions_.end()) {
           if (DCPS_debug_level > 3) {
             const GuidConverter conv(subscriptionId);
-            ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) EndpointManager::update_subscription_locators updating locators for %C\n"), OPENDDS_STRING(conv).c_str()));
+            ACE_DEBUG((LM_INFO,
+              ACE_TEXT("(%P|%t) EndpointManager::update_subscription_locators updating locators for %C\n"),
+              OPENDDS_STRING(conv).c_str()));
           }
           iter->second.trans_info_ = transInfo;
           write_subscription_data(subscriptionId, iter->second);
@@ -1345,7 +1350,14 @@ namespace OpenDDS {
         DDS::SubscriberQos tempSubQos;
         ContentFilterProperty_t tempCfp;
 
-        // 1. collect details about the writer, which may be local or discovered
+        DiscoveredPublicationIter dpi = discovered_publications_.find(writer);
+        DiscoveredSubscriptionIter dsi = discovered_subscriptions_.find(reader);
+        if (dpi != discovered_publications_.end() && dsi != discovered_subscriptions_.end()) {
+          // This is a discovered/discovered match, nothing for us to do
+          return;
+        }
+
+        // 1. Collect details about the writer, which may be local or discovered
         const DDS::DataWriterQos* dwQos = 0;
         const DDS::PublisherQos* pubQos = 0;
         TransportLocatorSeq* wTls = 0;
@@ -1354,7 +1366,6 @@ namespace OpenDDS {
         OPENDDS_STRING topic_name;
 
         const LocalPublicationIter lpi = local_publications_.find(writer);
-        DiscoveredPublicationIter dpi;
         bool writer_local = false, already_matched = false;
         if (lpi != local_publications_.end()) {
           writer_local = true;
@@ -1366,150 +1377,12 @@ namespace OpenDDS {
           writer_type_info = &lpi->second.type_info_;
           topic_name = topic_names_[lpi->second.topic_id_];
 
-        } else if ((dpi = discovered_publications_.find(writer))
-                   != discovered_publications_.end()) {
+        } else if (dpi != discovered_publications_.end()) {
           wTls = &dpi->second.writer_data_.writerProxy.allLocators;
           wTransportContext = dpi->second.transport_context_;
           writer_type_info = &dpi->second.type_info_;
           topic_name = dpi->second.get_topic_name();
-        } else {
-          return; // Possible and ok, since lock is released
-        }
 
-        // 2. collect details about the reader, which may be local or discovered
-        const DDS::DataReaderQos* drQos = 0;
-        const DDS::SubscriberQos* subQos = 0;
-        TransportLocatorSeq* rTls = 0;
-        ACE_CDR::ULong rTransportContext = 0;
-        const ContentFilterProperty_t* cfProp = 0;
-        XTypes::TypeInformation* reader_type_info = 0;
-
-        const LocalSubscriptionIter lsi = local_subscriptions_.find(reader);
-        DiscoveredSubscriptionIter dsi;
-        bool reader_local = false;
-        if (lsi != local_subscriptions_.end()) {
-          reader_local = true;
-          drQos = &lsi->second.qos_;
-          subQos = &lsi->second.subscriber_qos_;
-          rTls = &lsi->second.trans_info_;
-          rTransportContext = lsi->second.transport_context_;
-          reader_type_info = &lsi->second.type_info_;
-          if (lsi->second.filterProperties.filterExpression[0] != 0) {
-            tempCfp.filterExpression = lsi->second.filterProperties.filterExpression;
-            tempCfp.expressionParameters = lsi->second.filterProperties.expressionParameters;
-          }
-          cfProp = &tempCfp;
-          if (!already_matched) {
-            already_matched = lsi->second.matched_endpoints_.count(writer);
-          }
-        } else if ((dsi = discovered_subscriptions_.find(reader))
-                   != discovered_subscriptions_.end()) {
-          if (!writer_local) {
-            // this is a discovered/discovered match, nothing for us to do
-            return;
-          }
-          rTls = &dsi->second.reader_data_.readerProxy.allLocators;
-
-          populate_transport_locator_sequence(rTls, dsi, reader);
-          rTransportContext = dsi->second.transport_context_;
-
-          const DDS::SubscriptionBuiltinTopicData& bit =
-            dsi->second.reader_data_.ddsSubscriptionData;
-          tempDrQos.durability = bit.durability;
-          tempDrQos.deadline = bit.deadline;
-          tempDrQos.latency_budget = bit.latency_budget;
-          tempDrQos.liveliness = bit.liveliness;
-          tempDrQos.reliability = bit.reliability;
-          tempDrQos.destination_order = bit.destination_order;
-          tempDrQos.history = TheServiceParticipant->initial_HistoryQosPolicy();
-          tempDrQos.resource_limits =
-            TheServiceParticipant->initial_ResourceLimitsQosPolicy();
-          tempDrQos.user_data = bit.user_data;
-          tempDrQos.ownership = bit.ownership;
-          tempDrQos.time_based_filter = bit.time_based_filter;
-          tempDrQos.reader_data_lifecycle =
-            TheServiceParticipant->initial_ReaderDataLifecycleQosPolicy();
-          tempDrQos.representation = bit.representation;
-          drQos = &tempDrQos;
-          tempSubQos.presentation = bit.presentation;
-          tempSubQos.partition = bit.partition;
-          tempSubQos.group_data = bit.group_data;
-          tempSubQos.entity_factory =
-            TheServiceParticipant->initial_EntityFactoryQosPolicy();
-          subQos = &tempSubQos;
-          cfProp = &dsi->second.reader_data_.contentFilterProperty;
-          reader_type_info = &dsi->second.type_info_;
-        } else {
-          return; // Possible and ok, since lock is released
-        }
-
-        // check consistency
-        bool consistent = false;
-
-        typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator td_iter = topics_.find(topic_name);
-        if (td_iter == topics_.end()) {
-          ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) EndpointManager::match_continue - ERROR ")
-                    ACE_TEXT("Didn't find topic for consistency check\n")));
-          return;
-        } else {
-          const XTypes::TypeIdentifier& writer_type_id = writer_type_info->minimal.typeid_with_size.type_id;
-          const XTypes::TypeIdentifier& reader_type_id = reader_type_info->minimal.typeid_with_size.type_id;
-          if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE) {
-            XTypes::TypeAssignability ta(type_lookup_service_);
-
-            const DDS::DataRepresentationIdSeq repIds =
-              get_effective_data_rep_qos(writer_local ? tempDrQos.representation.value : tempDwQos.representation.value);
-            for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
-              Encoding::Kind encoding_kind;
-              if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
-                if (encoding_kind == Encoding::KIND_XCDR1) {
-                  const XTypes::TypeFlag extensibility_mask = XTypes::IS_APPENDABLE;
-
-                  if (type_lookup_service_->extensibility(extensibility_mask, writer_local ? reader_type_id : writer_type_id)) {
-                    if (::OpenDDS::DCPS::DCPS_debug_level) {
-                      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
-                        ACE_TEXT("EndpointManager::match_continue: ")
-                        ACE_TEXT("Encountered unsupported combination of XCDR1 encoding and appendable extensibility\n")));
-                    }
-                  }
-                }
-              }
-            }
-
-            consistent = ta.assignable(writer_type_id, reader_type_id);
-          } else {
-            //check remote and local type names match
-            OPENDDS_STRING writer_type_name;
-            OPENDDS_STRING reader_type_name;
-            if (writer_local) { //local local
-              writer_type_name = td_iter->second.local_data_type_name();
-            } else {
-              writer_type_name = dpi->second.get_type_name();
-            }
-            if (reader_local) {
-              reader_type_name = td_iter->second.local_data_type_name();
-            } else {
-              reader_type_name = dsi->second.get_type_name();
-            }
-            consistent = writer_type_name == reader_type_name;
-          }
-
-          if (!consistent) {
-            td_iter->second.increment_inconsistent();
-            if (DCPS::DCPS_debug_level) {
-              ACE_DEBUG((LM_WARNING,
-                        ACE_TEXT("(%P|%t) EndpointManager::match_continue - WARNING ")
-                        ACE_TEXT("topic %C does not match data types (inconsistent)\n"),
-                        topic_name.c_str()));
-            }
-            return;
-          }
-        }
-
-        // This is really part of step 1, but we're doing it here just in case we
-        // are in the discovered/discovered match and we don't need the QoS data.
-        if (!writer_local) {
           const DDS::PublicationBuiltinTopicData& bit =
             dpi->second.writer_data_.ddsPublicationData;
           tempDwQos.durability = bit.durability;
@@ -1532,6 +1405,7 @@ namespace OpenDDS {
             TheServiceParticipant->initial_WriterDataLifecycleQosPolicy();
           tempDwQos.representation = bit.representation;
           dwQos = &tempDwQos;
+
           tempPubQos.presentation = bit.presentation;
           tempPubQos.partition = bit.partition;
           tempPubQos.group_data = bit.group_data;
@@ -1540,6 +1414,152 @@ namespace OpenDDS {
           pubQos = &tempPubQos;
 
           populate_transport_locator_sequence(wTls, dpi, writer);
+        } else {
+          return; // Possible and ok, since lock is released
+        }
+
+        // 2. Collect details about the reader, which may be local or discovered
+        const DDS::DataReaderQos* drQos = 0;
+        const DDS::SubscriberQos* subQos = 0;
+        TransportLocatorSeq* rTls = 0;
+        ACE_CDR::ULong rTransportContext = 0;
+        const ContentFilterProperty_t* cfProp = 0;
+        XTypes::TypeInformation* reader_type_info = 0;
+
+        const LocalSubscriptionIter lsi = local_subscriptions_.find(reader);
+        bool reader_local = false;
+        if (lsi != local_subscriptions_.end()) {
+          reader_local = true;
+          drQos = &lsi->second.qos_;
+          subQos = &lsi->second.subscriber_qos_;
+          rTls = &lsi->second.trans_info_;
+          rTransportContext = lsi->second.transport_context_;
+          reader_type_info = &lsi->second.type_info_;
+          if (lsi->second.filterProperties.filterExpression[0] != 0) {
+            tempCfp.filterExpression = lsi->second.filterProperties.filterExpression;
+            tempCfp.expressionParameters = lsi->second.filterProperties.expressionParameters;
+          }
+          cfProp = &tempCfp;
+          if (!already_matched) {
+            already_matched = lsi->second.matched_endpoints_.count(writer);
+          }
+        } else if (dsi != discovered_subscriptions_.end()) {
+          rTls = &dsi->second.reader_data_.readerProxy.allLocators;
+
+          populate_transport_locator_sequence(rTls, dsi, reader);
+          rTransportContext = dsi->second.transport_context_;
+
+          const DDS::SubscriptionBuiltinTopicData& bit =
+            dsi->second.reader_data_.ddsSubscriptionData;
+          tempDrQos.durability = bit.durability;
+          tempDrQos.deadline = bit.deadline;
+          tempDrQos.latency_budget = bit.latency_budget;
+          tempDrQos.liveliness = bit.liveliness;
+          tempDrQos.reliability = bit.reliability;
+          tempDrQos.destination_order = bit.destination_order;
+          tempDrQos.history = TheServiceParticipant->initial_HistoryQosPolicy();
+          tempDrQos.resource_limits =
+            TheServiceParticipant->initial_ResourceLimitsQosPolicy();
+          tempDrQos.user_data = bit.user_data;
+          tempDrQos.ownership = bit.ownership;
+          tempDrQos.time_based_filter = bit.time_based_filter;
+          tempDrQos.reader_data_lifecycle =
+            TheServiceParticipant->initial_ReaderDataLifecycleQosPolicy();
+          tempDrQos.representation = bit.representation;
+          tempDrQos.type_consistency = bit.type_consistency;
+          drQos = &tempDrQos;
+
+          tempSubQos.presentation = bit.presentation;
+          tempSubQos.partition = bit.partition;
+          tempSubQos.group_data = bit.group_data;
+          tempSubQos.entity_factory =
+            TheServiceParticipant->initial_EntityFactoryQosPolicy();
+          subQos = &tempSubQos;
+
+          cfProp = &dsi->second.reader_data_.contentFilterProperty;
+          reader_type_info = &dsi->second.type_info_;
+        } else {
+          return; // Possible and ok, since lock is released
+        }
+
+        // 3. Perform type consistency check (XTypes 1.3, Section 7.6.3.4.2)
+        bool consistent = false;
+
+        typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator td_iter = topics_.find(topic_name);
+        if (td_iter == topics_.end()) {
+          ACE_ERROR((LM_ERROR,
+                    ACE_TEXT("(%P|%t) EndpointManager::match_continue - ERROR ")
+                    ACE_TEXT("Didn't find topic for consistency check\n")));
+          return;
+        } else {
+          const XTypes::TypeIdentifier& writer_type_id = writer_type_info->minimal.typeid_with_size.type_id;
+          const XTypes::TypeIdentifier& reader_type_id = reader_type_info->minimal.typeid_with_size.type_id;
+          if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE) {
+            if (!writer_local || !reader_local) {
+              const DDS::DataRepresentationIdSeq repIds =
+                get_effective_data_rep_qos(writer_local ? tempDrQos.representation.value : tempDwQos.representation.value);
+              for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
+                Encoding::Kind encoding_kind;
+                if (repr_to_encoding_kind(repIds[i], encoding_kind) && encoding_kind == Encoding::KIND_XCDR1) {
+                  const XTypes::TypeFlag extensibility_mask = XTypes::IS_APPENDABLE;
+
+                  if (type_lookup_service_->extensibility(extensibility_mask,
+                                                          writer_local ? reader_type_id : writer_type_id)) {
+                    if (OpenDDS::DCPS::DCPS_debug_level) {
+                      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
+                        ACE_TEXT("EndpointManager::match_continue: ")
+                        ACE_TEXT("Encountered unsupported combination of XCDR1 encoding and appendable extensibility\n")));
+                    }
+                  }
+                }
+              }
+            }
+
+            XTypes::TypeConsistencyAttributes type_consistency;
+            type_consistency.ignore_sequence_bounds = drQos->type_consistency.ignore_sequence_bounds;
+            type_consistency.ignore_string_bounds = drQos->type_consistency.ignore_string_bounds;
+            type_consistency.ignore_member_names = drQos->type_consistency.ignore_member_names;
+            type_consistency.prevent_type_widening = drQos->type_consistency.prevent_type_widening;
+            XTypes::TypeAssignability ta(type_lookup_service_, type_consistency);
+
+            if (drQos->type_consistency.kind == DDS::ALLOW_TYPE_COERCION) {
+              consistent = ta.assignable(reader_type_id, writer_type_id);
+            } else {
+              // The two types must be equivalent for DISALLOW_TYPE_COERCION
+              consistent = reader_type_id == writer_type_id;
+            }
+          } else {
+            if (drQos->type_consistency.force_type_validation) {
+              // Cannot do type validation since not both TypeObjects are available
+              consistent = false;
+            } else {
+              // Fall back to matching type names
+              OPENDDS_STRING writer_type_name;
+              OPENDDS_STRING reader_type_name;
+              if (writer_local) {
+                writer_type_name = td_iter->second.local_data_type_name();
+              } else {
+                writer_type_name = dpi->second.get_type_name();
+              }
+              if (reader_local) {
+                reader_type_name = td_iter->second.local_data_type_name();
+              } else {
+                reader_type_name = dsi->second.get_type_name();
+              }
+              consistent = writer_type_name == reader_type_name;
+            }
+          }
+
+          if (!consistent) {
+            td_iter->second.increment_inconsistent();
+            if (DCPS::DCPS_debug_level) {
+              ACE_DEBUG((LM_WARNING,
+                        ACE_TEXT("(%P|%t) EndpointManager::match_continue - WARNING ")
+                        ACE_TEXT("Data types of topic %C does not match (inconsistent)\n"),
+                        topic_name.c_str()));
+            }
+            return;
+          }
         }
 
         // Need to release lock, below, for callbacks into DCPS which could
@@ -1547,7 +1567,7 @@ namespace OpenDDS {
         // an ACE object which will be used below for unlocking.
         ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
 
-        // 3. check transport and QoS compatibility
+        // 4. Check transport and QoS compatibility
 
         // Copy entries from local publication and local subscription maps
         // prior to releasing lock
@@ -2443,8 +2463,10 @@ namespace OpenDDS {
         sub->get_default_datareader_qos(dr_qos);
         dr_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
 
-        dr_qos.reader_data_lifecycle.autopurge_nowriter_samples_delay = TheServiceParticipant->bit_autopurge_nowriter_samples_delay();
-        dr_qos.reader_data_lifecycle.autopurge_disposed_samples_delay = TheServiceParticipant->bit_autopurge_disposed_samples_delay();
+        dr_qos.reader_data_lifecycle.autopurge_nowriter_samples_delay =
+          TheServiceParticipant->bit_autopurge_nowriter_samples_delay();
+        dr_qos.reader_data_lifecycle.autopurge_disposed_samples_delay =
+          TheServiceParticipant->bit_autopurge_disposed_samples_delay();
 
         DDS::TopicDescription_var bit_part_topic =
           participant->lookup_topicdescription(BUILT_IN_PARTICIPANT_TOPIC);
