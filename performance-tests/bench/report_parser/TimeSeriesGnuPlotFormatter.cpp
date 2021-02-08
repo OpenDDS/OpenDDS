@@ -49,7 +49,7 @@ void TimeSeriesGnuPlotFormatter::output_header(const Report& report, std::ofstre
           for (unsigned int di = 0; di < report.node_reports[ni].worker_reports[wi].process_report.participants[pi].subscribers[si].datareaders.length(); di++) {
             for (unsigned int ti = 0; ti < report.node_reports[ni].worker_reports[wi].process_report.participants[pi].subscribers[si].datareaders[di].tags.length(); ti++) {
               const Builder::DataReaderReport& dr_report = report.node_reports[ni].worker_reports[wi].process_report.participants[pi].subscribers[si].datareaders[di];
-              std::string tag = dr_report.tags[ti];
+              std::string tag = dr_report.tags[ti].in();
               if (std::find(parse_parameters.tags.begin(), parse_parameters.tags.end(), tag) != parse_parameters.tags.end()) {
                 for (unsigned int property_index = 0; property_index < dr_report.properties.length(); property_index++) {
                   Builder::Property prop = dr_report.properties[property_index];
@@ -174,7 +174,7 @@ void TimeSeriesGnuPlotFormatter::output_data(const Report& report, std::ofstream
               for (unsigned int di = 0; di < report.node_reports[node_index].worker_reports[wi].process_report.participants[pi].subscribers[si].datareaders.length(); di++) {
                 for (unsigned int ti = 0; ti < report.node_reports[node_index].worker_reports[wi].process_report.participants[pi].subscribers[si].datareaders[di].tags.length(); ti++) {
                   const Builder::DataReaderReport& dr_report = report.node_reports[node_index].worker_reports[wi].process_report.participants[pi].subscribers[si].datareaders[di];
-                  std::string tag = dr_report.tags[ti];
+                  std::string tag = dr_report.tags[ti].in();
                   if (std::find(parse_parameters.tags.begin(), parse_parameters.tags.end(), tag) != parse_parameters.tags.end()) {
                     for (unsigned int property_index = 0; property_index < dr_report.properties.length(); property_index++) {
                       Builder::Property prop = dr_report.properties[property_index];
