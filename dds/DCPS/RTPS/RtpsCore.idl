@@ -140,6 +140,11 @@ module OpenDDS {
     const short BEST_EFFORT = 1;
     const short RELIABLE = 2;
 
+    struct ReliabilityQosPolicyRtps {
+      ReliabilityKind_t kind;
+      DDS::Duration_t max_blocking_time;
+    };
+
     struct KeyHash_t {
       DCPS::OctetArray16 value;
     };
@@ -358,7 +363,7 @@ module OpenDDS {
       case PID_LIVELINESS:
         DDS::LivelinessQosPolicy liveliness;
       case PID_RELIABILITY:
-        DDS::ReliabilityQosPolicy reliability;
+        ReliabilityQosPolicyRtps reliability;
       case PID_LIFESPAN:
         DDS::LifespanQosPolicy lifespan;
       case PID_DESTINATION_ORDER:
