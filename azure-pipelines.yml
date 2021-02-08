@@ -256,9 +256,9 @@ jobs:
         TEST_GITIGNORE: true
       SecurityWithoutFeatures:
         ConfigOpts: >
-          --security --no-inline --no-debug
+          --security --no-inline --no-debug --features=versioned_namespace=1
           --no-built-in-topics --no-content-subscription --no-ownership-profile
-          --no-object-model-profile --no-persistence-profile
+          --no-object-model-profile --no-persistence-profile --no-rapidjson
         TEST_MESSENGER: false
         PackageDeps: libxerces-c-dev libssl-dev cmake
       WChar:
