@@ -1581,11 +1581,21 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                   writer_data_out.ddsPublicationData.liveliness.lease_duration.nanosec);
     }
     { // Should encode writer reliability
+      Locator_t locators[1];
+      locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+        1234,
+        127, 0, 0, 1);
+
       DiscoveredWriterData writer_data = Factory::writer_data(
-          NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-          KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
-          AUTOMATIC_LIVELINESS_QOS, 0, 0,
-          RELIABLE_RELIABILITY_QOS, 8, 100);
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        RELIABLE_RELIABILITY_QOS, 8, 100, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 0,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
+        NULL, 0, locators, 1);
+
       ParameterList param_list;
       OpenDDS::XTypes::TypeInformation type_info;
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
@@ -1595,18 +1605,27 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       TEST_ASSERT(to_param_list(writer_data, param_list, true, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_RELIABILITY));
       Parameter param = get(param_list, PID_RELIABILITY);
-      const int reliable_interop = static_cast<int>(RELIABLE_RELIABILITY_QOS) + 1;
-      TEST_ASSERT(static_cast<int>(param.reliability().kind) == reliable_interop);
+      TEST_ASSERT(static_cast<int>(param.reliability().kind) == static_cast<int>(RELIABLE_RELIABILITY_QOS_RTPS));
       TEST_ASSERT(param.reliability().max_blocking_time.sec == 8);
       TEST_ASSERT(param.reliability().max_blocking_time.nanosec == 100);
     }
 
     { // Should decode writer reliability
+      Locator_t locators[1];
+      locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+        1234,
+        127, 0, 0, 1);
+
       DiscoveredWriterData writer_data = Factory::writer_data(
-          NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
-          KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
-          AUTOMATIC_LIVELINESS_QOS, 0, 0,
-          RELIABLE_RELIABILITY_QOS, 8, 100);
+        NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+        KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
+        AUTOMATIC_LIVELINESS_QOS, 0, 0,
+        RELIABLE_RELIABILITY_QOS, 8, 100, 0, 0, NULL, 0,
+        SHARED_OWNERSHIP_QOS, 0,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
+        NULL, 0, locators, 1);
+
       ParameterList param_list;
       OpenDDS::XTypes::TypeInformation type_info;
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
@@ -2589,10 +2608,20 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
 
     { // Should encode reader reliability
+      Locator_t locators[1];
+      locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+        1234,
+        127, 0, 0, 1);
+
       DiscoveredReaderData reader_data = Factory::reader_data(
           NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
           AUTOMATIC_LIVELINESS_QOS, 0, 0,
-          RELIABLE_RELIABILITY_QOS, 8, 100);
+          RELIABLE_RELIABILITY_QOS, 8, 100, NULL, 0,
+          SHARED_OWNERSHIP_QOS,
+          BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+          INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
+          locators, 2);
+
       ParameterList param_list;
       OpenDDS::XTypes::TypeInformation type_info;
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
@@ -2602,17 +2631,26 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       TEST_ASSERT(to_param_list(reader_data, param_list, true, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_RELIABILITY));
       Parameter param = get(param_list, PID_RELIABILITY);
-      const int reliable_interop = static_cast<int>(RELIABLE_RELIABILITY_QOS) + 1;
-      TEST_ASSERT(static_cast<int>(param.reliability().kind) == reliable_interop);
+      TEST_ASSERT(static_cast<int>(param.reliability().kind) == static_cast<int>(RELIABLE_RELIABILITY_QOS_RTPS));
       TEST_ASSERT(param.reliability().max_blocking_time.sec == 8);
       TEST_ASSERT(param.reliability().max_blocking_time.nanosec == 100);
     }
 
     { // Should decode reader reliability
+      Locator_t locators[1];
+      locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+        1234,
+        127, 0, 0, 1);
+
       DiscoveredReaderData reader_data = Factory::reader_data(
           NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
           AUTOMATIC_LIVELINESS_QOS, 0, 0,
-          RELIABLE_RELIABILITY_QOS, 8, 100);
+          RELIABLE_RELIABILITY_QOS, 8, 100, NULL, 0,
+        SHARED_OWNERSHIP_QOS,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
+        INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
+        locators, 2);
+
       ParameterList param_list;
       OpenDDS::XTypes::TypeInformation type_info;
       type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
