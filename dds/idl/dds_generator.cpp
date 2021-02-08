@@ -14,6 +14,46 @@ using namespace AstTypeClassification;
 
 dds_generator::~dds_generator() {}
 
+bool dds_generator::cxx_escape(const std::string& s, size_t i)
+{
+  const std::string cxx = "_cxx_";
+  return s.substr(i, cxx.size()) == cxx;
+}
+
+std::string dds_generator::valid_var_name(const std::string& str)
+{
+  // Replace invalid characters with a single underscore
+  const std::string invalid_chars("<>()[]*.: ");
+  std::string s;
+  char last_char = '\0';
+  for (size_t i = 0; i < str.size(); ++i) {
+    const char c = str[i];
+    if (invalid_chars.find(c) == std::string::npos) {
+      s.push_back(c);
+      last_char = c;
+      if (c == '_') {
+        s.push_back('9');
+        last_char = '9';
+      }
+    } else if (last_char != '_') {
+      s.push_back('_');
+      last_char = '_';
+    }
+  }
+  if (s.size() > 1 && s[0] == '_') {
+    if (!cxx_escape(s, 0)) {
+      s.erase(0, 1);
+    }
+  }
+
+  return s;
+}
+
+std::string dds_generator::get_tag_name(const std::string& base_name, bool nested_key_only)
+{
+  return valid_var_name(base_name) + (nested_key_only ? "_nested_key_only" : "") + "_tag";
+}
+
 string dds_generator::to_string(Identifier* id)
 {
   const string str = id->get_string();
@@ -260,13 +300,7 @@ string type_to_default_array(const std::string& indent, AST_Type* type, const st
       n = n.substr(0, n.rfind("::") + 2) + "AnonymousType_" + type->local_name()->get_string();
       n = (fld_cls == AST_Decl::NT_sequence) ? (n + "_seq") : n;
     }
-    string v = n.find(" ::") == 0 ? n.substr(3) : n;
-    for (size_t index = 0; true; ++index) {
-      index = v.find("::", index);
-      if (index == string::npos) break;
-      v.replace(index, 2, "_");
-    }
-    val += indent + "set_default(IDL::DistinctType<" + n + ", " + v + "_tag>(" +
+    val += indent + "set_default(IDL::DistinctType<" + n + ", " + dds_generator::get_tag_name(n, false) + ">(" +
       (is_union ? "tmp" : name) + "));\n";
   } else {
     string n = scoped(type->name());
