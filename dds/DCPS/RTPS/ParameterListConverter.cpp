@@ -1201,7 +1201,7 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
     ReliabilityQosPolicyRtps reliability;
     reliability.max_blocking_time = reader_data.ddsSubscriptionData.reliability.max_blocking_time;
 
-    if (reader_data.ddsSubscriptionData.reliability.kind == DDS::BEST_EFFORT_RELIABILITY_QOS) {
+    if (reader_data.ddsSubscriptionData.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS) {
       reliability.kind.value = RTPS::RELIABLE;
     } else { // default to BEST_EFFORT for readers
       reliability.kind.value = RTPS::BEST_EFFORT;
