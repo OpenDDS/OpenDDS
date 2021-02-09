@@ -1595,7 +1595,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       TEST_ASSERT(to_param_list(writer_data, param_list, true, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_RELIABILITY));
       Parameter param = get(param_list, PID_RELIABILITY);
-      TEST_ASSERT(static_cast<int>(param.reliability().kind.value) == RELIABLE);
+      TEST_ASSERT(param.reliability().kind.value == RELIABLE);
       TEST_ASSERT(param.reliability().max_blocking_time.sec == 8);
       TEST_ASSERT(param.reliability().max_blocking_time.nanosec == 100);
     }
@@ -2601,7 +2601,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       TEST_ASSERT(to_param_list(reader_data, param_list, true, type_info, map));
       TEST_ASSERT(is_present(param_list, PID_RELIABILITY));
       Parameter param = get(param_list, PID_RELIABILITY);
-      TEST_ASSERT(static_cast<int>(param.reliability().kind.value) == RELIABLE);
+      TEST_ASSERT(param.reliability().kind.value == RELIABLE);
       TEST_ASSERT(param.reliability().max_blocking_time.sec == 8);
       TEST_ASSERT(param.reliability().max_blocking_time.nanosec == 100);
     }
