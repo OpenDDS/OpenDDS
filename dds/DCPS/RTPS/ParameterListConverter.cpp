@@ -871,18 +871,16 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
   // For interoperability, always write the reliability info
   {
     Parameter param;
-    // Interoperability note:
-    // Spec creators for RTPS have reliability indexed at 1
-    DDS::ReliabilityQosPolicy reliability_copy =
-        writer_data.ddsPublicationData.reliability;
+    ReliabilityQosPolicyRtps reliability;
+    reliability.max_blocking_time = writer_data.ddsPublicationData.reliability.max_blocking_time;
 
-    if (reliability_copy.kind == DDS::BEST_EFFORT_RELIABILITY_QOS) {
-      reliability_copy.kind = (DDS::ReliabilityQosPolicyKind)(RTPS::BEST_EFFORT);
+    if (writer_data.ddsPublicationData.reliability.kind == DDS::BEST_EFFORT_RELIABILITY_QOS) {
+      reliability.kind.value = RTPS::BEST_EFFORT;
     } else { // default to RELIABLE for writers
-      reliability_copy.kind = (DDS::ReliabilityQosPolicyKind)(RTPS::RELIABLE);
+      reliability.kind.value = RTPS::RELIABLE;
     }
 
-    param.reliability(reliability_copy);
+    param.reliability(reliability);
     add_param(param_list, param);
   }
 
@@ -1059,12 +1057,11 @@ bool from_param_list(const ParameterList& param_list,
         normalize(writer_data.ddsPublicationData.liveliness.lease_duration);
         break;
       case PID_RELIABILITY:
-        writer_data.ddsPublicationData.reliability = param.reliability();
+        writer_data.ddsPublicationData.reliability.max_blocking_time = param.reliability().max_blocking_time;
         // Interoperability note:
         // Spec creators for RTPS have reliability indexed at 1
         {
-          const CORBA::Short rtpsKind = static_cast<CORBA::Short>(param.reliability().kind);
-          if (rtpsKind == RTPS::BEST_EFFORT) {
+          if (param.reliability().kind.value == RTPS::BEST_EFFORT) {
             writer_data.ddsPublicationData.reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
           } else { // default to RELIABLE for writers
             writer_data.ddsPublicationData.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
@@ -1201,18 +1198,16 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
   // if (not_default(reader_data.ddsSubscriptionData.reliability, false))
   {
     Parameter param;
-    // Interoperability note:
-    // Spec creators for RTPS have reliability indexed at 1
-    DDS::ReliabilityQosPolicy reliability_copy =
-      reader_data.ddsSubscriptionData.reliability;
+    ReliabilityQosPolicyRtps reliability;
+    reliability.max_blocking_time = reader_data.ddsSubscriptionData.reliability.max_blocking_time;
 
-    if (reliability_copy.kind == DDS::RELIABLE_RELIABILITY_QOS) {
-      reliability_copy.kind = (DDS::ReliabilityQosPolicyKind)(RTPS::RELIABLE);
+    if (reader_data.ddsSubscriptionData.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS) {
+      reliability.kind.value = RTPS::RELIABLE;
     } else { // default to BEST_EFFORT for readers
-      reliability_copy.kind = (DDS::ReliabilityQosPolicyKind)(RTPS::BEST_EFFORT);
+      reliability.kind.value = RTPS::BEST_EFFORT;
     }
 
-    param.reliability(reliability_copy);
+    param.reliability(reliability);
     add_param(param_list, param);
   }
 
@@ -1402,11 +1397,11 @@ bool from_param_list(const ParameterList& param_list,
         normalize(reader_data.ddsSubscriptionData.liveliness.lease_duration);
         break;
       case PID_RELIABILITY:
-        reader_data.ddsSubscriptionData.reliability = param.reliability();
+        reader_data.ddsSubscriptionData.reliability.max_blocking_time = param.reliability().max_blocking_time;
         // Interoperability note:
         // Spec creators for RTPS have reliability indexed at 1
         {
-          const CORBA::Short rtpsKind = static_cast<CORBA::Short>(param.reliability().kind);
+          const CORBA::Short rtpsKind = param.reliability().kind.value;
           const CORBA::Short OLD_RELIABLE_VALUE = 3;
           if (rtpsKind == RTPS::RELIABLE || rtpsKind == OLD_RELIABLE_VALUE) {
             reader_data.ddsSubscriptionData.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
