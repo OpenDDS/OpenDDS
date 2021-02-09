@@ -39,8 +39,15 @@ public:
   size_t max_message_size_;
   size_t nak_depth_;
   double quick_reply_ratio_;
-  TimeDuration nak_response_delay_, heartbeat_period_,
-    heartbeat_response_delay_, handshake_timeout_, durable_data_timeout_;
+  double heartbeat_backoff_factor_;
+  double heartbeat_safety_factor_;
+  TimeDuration nak_response_delay_;
+  TimeDuration heartbeat_period_;
+  TimeDuration heartbeat_period_minimum_;
+  TimeDuration heartbeat_period_maximum_;
+  TimeDuration heartbeat_response_delay_;
+  TimeDuration handshake_timeout_;
+  TimeDuration durable_data_timeout_;
 
   virtual int load(ACE_Configuration_Heap& cf,
                    ACE_Configuration_Section_Key& sect);
