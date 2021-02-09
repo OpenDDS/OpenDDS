@@ -12,64 +12,76 @@ use PerlDDS::Process_Java;
 use strict;
 
 my $status = 0;
-my $debug = '0';
-my $vmargs;
+my $debug = '1';
+my $vmargs = "-ea";
+
+my $security = "-s";
+my $noice;
+my $norelay;
+my $ipv6;
 
 my $pub_sub_ini = "rtps.ini";
-my $opt = "";
+my $opt;
+
+my $relay_security_opts = "-IdentityCA ../../../tests/security/certs/identity/identity_ca_cert.pem" .
+  " -PermissionsCA ../../../tests/security/certs/permissions/permissions_ca_cert.pem" .
+  " -IdentityCertificate ../../../tests/security/certs/identity/test_participant_01_cert.pem" .
+  " -IdentityKey ../../../tests/security/certs/identity/test_participant_01_private_key.pem" .
+  " -Governance governance_signed.p7s -Permissions permissions_relay_signed.p7s -DCPSSecurity 1";
 
 foreach my $i (@ARGV) {
-    if ($i eq '-debug') {
-        $debug = '10';
-    }
-    elsif ($i eq '-noXcheck')
-    {
-      # disable -Xcheck:jni warnings
-      $vmargs = "-ea";
-    }
-    elsif ($i eq '-noice' || $i eq 'noice')
-    {
-      $pub_sub_ini = 'rtps_no_ice.ini';
-      $opt = "-n";
-    }
+  if ($i eq '-debug') {
+    $debug = '10';
+  } elsif ($i eq 'nosecurity' || $i eq '-nosecurity') {
+    $security = "";
+    $relay_security_opts = "";
+  } elsif ($i eq 'noice' || $i eq '-noice') {
+    $noice = "-n";
+  } elsif ($i eq 'norelay' || $i eq '-norelay') {
+    $norelay = "-r";
+  } elsif ($i eq 'ipv6' || $i eq '-ipv6') {
+    $ipv6 = "-6";
+  }
 }
+
+if ($noice && $ipv6) {
+    $pub_sub_ini = 'rtps_no_ice_ipv6.ini';
+} elsif ($noice) {
+    $pub_sub_ini = 'rtps_no_ice.ini';
+} elsif ($ipv6) {
+    $pub_sub_ini = 'rtps_ipv6.ini';
+}
+
+$opt = "$security $noice $norelay $ipv6";
 
 my $debug_opt = ($debug eq '0') ? ''
     : "-ORBDebugLevel $debug -DCPSDebugLevel $debug";
 
-my $pub_test_opts = "$opt $debug_opt -ORBLogFile pubtest.log -DCPSConfigFile $pub_sub_ini";
-my $sub_test_opts = "$opt $debug_opt -ORBLogFile subtest.log -DCPSConfigFile $pub_sub_ini";
+my $test_opts = "$opt $debug_opt -ORBLogFile partLocTest.log -DCPSConfigFile $pub_sub_ini";
 
 PerlACE::add_lib_path ("$DDS_ROOT/java/tests/messenger/messenger_idl");
 
 my $relay = new PerlDDS::TestFramework();
-$relay->process("relay", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay.ini -ApplicationDomain 42 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444 ");
+if ($ipv6) {
+    $relay->process("relay", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay_ipv6.ini -ApplicationDomain 42 -VerticalAddress [::]:4444 -HorizontalAddress [::1]:11444 $relay_security_opts");
+} else {
+    $relay->process("relay", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay.ini -ApplicationDomain 42 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444 $relay_security_opts");
+}
 
-my $PubTest = new PerlDDS::Process_Java ("ParticipantLocationPublisher", $pub_test_opts,
+my $psTest = new PerlDDS::Process_Java ("ParticipantLocationTest", $test_opts,
     ["$DDS_ROOT/java/tests/messenger/messenger_idl/messenger_idl_test.jar"], $vmargs);
 
-my $SubTest = new PerlDDS::Process_Java ("ParticipantLocationSubscriber", $sub_test_opts,
-    ["$DDS_ROOT/java/tests/messenger/messenger_idl/messenger_idl_test.jar"], $vmargs);
-
-$relay->start_process("relay");
+$relay->start_process("relay") if $norelay ne "-r";
 sleep(1);
-$SubTest->Spawn();
-sleep(1);
-$PubTest->Spawn();
 
-my $PubTestResult = $PubTest->WaitKill (20);
-if ($PubTestResult != 0) {
-    print STDERR "ERROR: test publisher returned $PubTestResult\n";
+my $psTestResult = $psTest->SpawnWaitKill(30);
+
+if ($psTestResult != 0) {
+    print STDERR "ERROR: test publisher returned $psTestResult\n";
     $status = 1;
 }
 
-my $SubTestResult = $SubTest->WaitKill (10);
-if ($SubTestResult != 0) {
-    print STDERR "ERROR: test subscriber returned $SubTestResult\n";
-    $status = 1;
-}
-
-$relay->kill_process(5, "relay");
+$relay->kill_process(5, "relay") if $norelay ne "-r";
 
 if ($status == 0) {
   print "test PASSED.\n";
