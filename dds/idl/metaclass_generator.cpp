@@ -659,7 +659,7 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
         post = "_forany";
       } else if (use_cxx11 && (elem_cls & (CL_ARRAY | CL_SEQUENCE))) {
         pre = "IDL::DistinctType<";
-        post = ", " + dds_generator::get_tag_name(clazz) + ">";
+        post = ", " + dds_generator::get_tag_name(scoped_helper(elem_orig->name(), "::")) + ">";
       }
       be_global->impl_ <<
         "    if (!gen_skip_over(ser, static_cast<" << pre << cxx_elem << post
@@ -703,7 +703,7 @@ func(const std::string&, const std::string&, AST_Type* br_type, const std::strin
       post = "_forany";
     } else if (use_cxx11 && (br_cls & (CL_ARRAY | CL_SEQUENCE))) {
       pre = "IDL::DistinctType<";
-      post = ", " + dds_generator::get_tag_name(dds_generator::scoped_helper(br_type->name(), "_")) + ">";
+      post = ", " + dds_generator::get_tag_name(dds_generator::scoped_helper(br_type->name(), "::")) + ">";
     }
     ss <<
       "    if (!gen_skip_over(ser, static_cast<" << pre
