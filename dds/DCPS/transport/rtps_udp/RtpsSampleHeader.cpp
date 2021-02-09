@@ -584,7 +584,7 @@ RtpsSampleHeader::populate_inline_qos(
     }
 
     plist[qos_len].reliability(reliability);
-  }  
+  }
   PROCESS_INLINE_QOS(transport_priority, default_dw_qos, qos_data.dw_qos);
   PROCESS_INLINE_QOS(lifespan, default_dw_qos, qos_data.dw_qos);
   PROCESS_INLINE_QOS(destination_order, default_dw_qos, qos_data.dw_qos);
