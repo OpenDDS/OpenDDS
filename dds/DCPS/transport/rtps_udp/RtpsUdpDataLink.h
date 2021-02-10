@@ -192,6 +192,9 @@ public:
 
   RtpsUdpTransport& transport();
 
+  void enable_response_queue();
+  void disable_response_queue();
+
 private:
   void join_multicast_group(const DCPS::NetworkInterface& nic,
                             bool all_interfaces = false);
@@ -477,7 +480,7 @@ private:
     SequenceNumber hb_last_;
     OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumber_t) frags_;
     bool first_activity_, first_valid_hb_;
-    CORBA::Long heartbeat_recvd_count_, hb_frag_recvd_count_, nackfrag_count_;
+    CORBA::Long heartbeat_recvd_count_, hb_frag_recvd_count_;
     ACE_CDR::ULong participant_flags_;
 
     WriterInfo(const RepoId& id, ACE_CDR::ULong participant_flags)
@@ -487,7 +490,6 @@ private:
       , first_valid_hb_(true)
       , heartbeat_recvd_count_(0)
       , hb_frag_recvd_count_(0)
-      , nackfrag_count_(0)
       , participant_flags_(participant_flags)
     { }
 
@@ -500,12 +502,13 @@ private:
 
   class RtpsReader : public RcObject {
   public:
-    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable, CORBA::Long an_start)
+    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable, CORBA::Long an_start, CORBA::Long nf_start)
       : link_(link)
       , id_(id)
       , durable_(durable)
       , stopping_(false)
       , acknack_count_(an_start)
+      , nackfrag_count_(nf_start)
     {}
 
     bool add_writer(const WriterInfo_rch& info);
@@ -560,6 +563,7 @@ private:
     WriterInfoSet preassociation_writers_;
     bool stopping_;
     CORBA::Long acknack_count_;
+    CORBA::Long nackfrag_count_;
   };
   typedef RcHandle<RtpsReader> RtpsReader_rch;
 
@@ -571,9 +575,9 @@ private:
   typedef OPENDDS_MAP_CMP(EntityId_t, CountSet, EntityId_tKeyLessThan) IdCountSet;
 
   struct CountKeeper {
-    IdCountSet heartbeat_counts_;
+    OPENDDS_MAP(size_t, IdCountSet) heartbeat_counts_;
     IdCountSet acknack_counts_;
-    IdCountSet nack_frag_counts_;
+    IdCountSet nackfrag_counts_;
   };
 
   void build_meta_submessage_map(MetaSubmessageVec& meta_submessages, AddrDestMetaSubmessageMap& adr_map);
@@ -584,7 +588,16 @@ private:
     OPENDDS_VECTOR(AddrSet)& meta_submessage_bundle_addrs,
                                OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes,
                                CountKeeper& counts);
-  void send_bundled_submessages(MetaSubmessageVec& meta_submessages);
+
+  void queue_or_send_submessages(MetaSubmessageVec& meta_submessages);
+  void bundle_and_send_submessages(MetaSubmessageVec& meta_submessages);
+
+  struct SubmessageQueue: public RcObject, public MetaSubmessageVec {
+  };
+  typedef RcHandle<SubmessageQueue> SubmessageQueue_rch;
+
+  typedef OPENDDS_MAP(ACE_thread_t, SubmessageQueue_rch) ThreadSendQueueMap;
+  ThreadSendQueueMap thread_send_queues_;
 
   RepoIdSet pending_reliable_readers_;
 
@@ -603,9 +616,11 @@ private:
   ///   along with anything else that fits the 'writers side activity' of the datalink
   /// - locators_lock_ protects locators_ (and therefore calls to get_addresses_i())
   ///   for both remote writers and remote readers
+  /// - send_queues_lock protects thread_send_queues_
   mutable ACE_Thread_Mutex readers_lock_;
   mutable ACE_Thread_Mutex writers_lock_;
   mutable ACE_Thread_Mutex locators_lock_;
+  mutable ACE_Thread_Mutex send_queues_lock_;
 
   /// Extend the FragmentNumberSet to cover the fragments that are
   /// missing from our last known fragment to the extent
@@ -647,7 +662,7 @@ private:
       RtpsWriter& writer = **it;
       (writer.*func)(submessage, src, meta_submessages);
     }
-    send_bundled_submessages(meta_submessages);
+    queue_or_send_submessages(meta_submessages);
   }
 
   template<typename T, typename FN>
@@ -684,7 +699,7 @@ private:
       RtpsReader& reader = **it;
       schedule_timer |= (reader.*func)(submessage, src, directed, meta_submessages);
     }
-    send_bundled_submessages(meta_submessages);
+    queue_or_send_submessages(meta_submessages);
     if (schedule_timer) {
       heartbeat_reply_.enable(normal_heartbeat_response_delay_);
     }
@@ -773,6 +788,7 @@ private:
   typedef OPENDDS_MAP_CMP(EntityId_t, CORBA::Long, DCPS::EntityId_tKeyLessThan) CountMapType;
   CountMapType heartbeat_counts_;
   CountMapType acknack_counts_;
+  CountMapType nackfrag_counts_;
 
   struct InterestingAckNack {
     RepoId writerid;
