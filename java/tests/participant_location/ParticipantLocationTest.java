@@ -177,7 +177,7 @@ public class ParticipantLocationTest {
 
     // setup and start subscriber
     subParticipant = dpf.create_participant(DOMAIN_ID, pubQosHolder.value, null, DEFAULT_STATUS_MASK.value);
-    Callable<Boolean> theSubscriber = new TheSubscriber(subParticipant, N_MSGS, noIce, noRelay);
+    Callable<Boolean> theSubscriber = new ParticipantLocationSubscriber(subParticipant, N_MSGS, noIce, noRelay);
 
     ExecutorService executor = Executors.newSingleThreadExecutor();
     Future<Boolean> subSuccess = executor.submit(theSubscriber);
