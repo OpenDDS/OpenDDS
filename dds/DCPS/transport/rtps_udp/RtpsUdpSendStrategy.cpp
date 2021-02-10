@@ -151,9 +151,10 @@ RtpsUdpSendStrategy::marshal_transport_header(ACE_Message_Block* mb)
 
 namespace {
   struct AMB_Continuation {
-    AMB_Continuation(ACE_Message_Block& head, ACE_Message_Block& tail)
-      : head_(head) { head_.cont(&tail); }
+    AMB_Continuation(ACE_Thread_Mutex& mutex, ACE_Message_Block& head, ACE_Message_Block& tail)
+      : lock_(mutex), head_(head) { head_.cont(&tail); }
     ~AMB_Continuation() { head_.cont(0); }
+    ACE_Guard<ACE_Thread_Mutex> lock_;
     ACE_Message_Block& head_;
   };
 }
@@ -162,7 +163,7 @@ void
 RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
                                        const ACE_INET_Addr& addr)
 {
-  const AMB_Continuation cont(rtps_header_mb_, submessages);
+  const AMB_Continuation cont(rtps_header_mb_lock_, rtps_header_mb_, submessages);
 
 #ifdef OPENDDS_SECURITY
   const Message_Block_Ptr alternate(pre_send_packet(&rtps_header_mb_));
@@ -190,7 +191,7 @@ void
 RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
                                        const OPENDDS_SET(ACE_INET_Addr)& addrs)
 {
-  const AMB_Continuation cont(rtps_header_mb_, submessages);
+  const AMB_Continuation cont(rtps_header_mb_lock_, rtps_header_mb_, submessages);
 
 #ifdef OPENDDS_SECURITY
   const Message_Block_Ptr alternate(pre_send_packet(&rtps_header_mb_));
