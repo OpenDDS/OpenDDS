@@ -37,7 +37,7 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , nak_depth_(0)
   , quick_reply_ratio_(0.1)
   , heartbeat_backoff_factor_(2.0)
-  , heartbeat_safety_factor_(1.1)
+  , heartbeat_safety_factor_(2.0)
   , nak_response_delay_(0, 200*1000 /*microseconds*/) // default from RTPS
   , heartbeat_period_(1) // no default in RTPS spec
   , heartbeat_period_minimum_(0, 10000)

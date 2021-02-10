@@ -80,8 +80,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
   , job_queue_(DCPS::make_rch<DCPS::JobQueue>(reactor_task->get_reactor()))
   , multi_buff_(this, config.nak_depth_)
   , best_effort_heartbeat_count_(0)
-  , nack_reply_(this, &RtpsUdpDataLink::send_nack_replies,
-                config.nak_response_delay_)
+  , nack_reply_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::send_nack_replies)
   , expected_acks_(0)
   , heartbeat_period_(config.heartbeat_period_)
   , heartbeat_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::send_heartbeats)
@@ -2892,50 +2891,15 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     reader->requests_.insert(ack, acknack.readerSNState.numBits, acknack.readerSNState.bitmap.get_buffer());
   }
 
-  DisjointSequence gaps;
-  bool send_heartbeat = false;
-
-  if (!reader->requests_.empty() && !reader->durable_data_.empty()) {
-    const SequenceNumber dd_first = reader->durable_data_.begin()->first;
-    const SequenceNumber dd_last = reader->durable_data_.rbegin()->first;
-
-    if (reader->requests_.high() < dd_first) {
-      gaps.insert(SequenceRange(reader->requests_.low(), dd_first.previous()));
-      reader->requests_.reset();
-      send_heartbeat = true;
-    } else {
-      const OPENDDS_VECTOR(SequenceRange) psr = reader->requests_.present_sequence_ranges();
-      for (OPENDDS_VECTOR(SequenceRange)::const_iterator pos = psr.begin(), limit = psr.end();
-           pos != limit && pos->first <= dd_last; ++pos) {
-        for (SequenceNumber s = pos->first; s <= pos->second; ++s) {
-          if (s <= dd_last) {
-            const OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator dd_iter = reader->durable_data_.find(s);
-            if (dd_iter != reader->durable_data_.end()) {
-              link->durability_resend(dd_iter->second);
-              send_heartbeat = true;
-            } else {
-              gaps.insert(s);
-              send_heartbeat = true;
-            }
-            reader->requests_.erase(s);
-          }
-        }
-      }
-    }
-  }
-
-  gather_gaps_i(reader, gaps, meta_submessages);
-
-  if (send_heartbeat) {
-    MetaSubmessage meta_submessage(id_, GUID_UNKNOWN);
-    initialize_heartbeat(meta_submessage);
-    gather_directed_heartbeat_i(meta_submessages, meta_submessage, reader);
-  }
+  bool schedule_heartbeat = false;
+  bool schedule_nack_reply = false;
 
   if (!reader->requests_.empty()) {
     readers_expecting_data_.insert(reader);
+    schedule_nack_reply = true;
   } else if (!is_final) {
     readers_expecting_heartbeat_.insert(reader);
+    schedule_heartbeat = true;
   } else {
     readers_expecting_data_.erase(reader);
     readers_expecting_heartbeat_.erase(reader);
@@ -2970,9 +2934,12 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   }
 #endif
 
-  if (!is_final) {
+  if (schedule_heartbeat) {
     link->heartbeat_.schedule(link->heartbeat_period());
-    link->nack_reply_.schedule(); // timer will invoke send_nack_replies()
+  }
+
+  if (schedule_nack_reply) {
+    link->nack_reply_.schedule(link->heartbeat_period());
   }
 
   g.release();
@@ -2999,7 +2966,7 @@ RtpsUdpDataLink::received(const RTPS::NackFragSubmessage& nackfrag,
 
 void RtpsUdpDataLink::RtpsWriter::process_nackfrag(const RTPS::NackFragSubmessage& nackfrag,
                                                    const RepoId& src,
-                                                   MetaSubmessageVec& meta_submessages)
+                                                   MetaSubmessageVec& /*meta_submessages*/)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
@@ -3032,29 +2999,10 @@ void RtpsUdpDataLink::RtpsWriter::process_nackfrag(const RTPS::NackFragSubmessag
   }
 
   const SequenceNumber seq = to_opendds_seqnum(nackfrag.writerSN);
-  bool send_heartbeat = false;
-
-  const OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator dd_iter = reader->durable_data_.find(seq);
-  if (dd_iter != reader->durable_data_.end()) {
-    link->durability_resend(dd_iter->second, nackfrag.fragmentNumberState);
-    send_heartbeat = true;
-  } else if ((!reader->durable_data_.empty() && seq < reader->durable_data_.begin()->first) ||
-             (!reader->expecting_durable_data() && send_buff_ && !send_buff_->empty() && seq < send_buff_->low())) {
-    DisjointSequence gaps;
-    gaps.insert(seq);
-    gather_gaps_i(reader, gaps, meta_submessages);
-    send_heartbeat = true;
-  } else {
-    reader->requested_frags_[seq] = nackfrag.fragmentNumberState;
-    readers_expecting_data_.insert(reader);
-    link->nack_reply_.schedule(); // timer will invoke send_nack_replies()
-  }
-
-  if (send_heartbeat) {
-    MetaSubmessage meta_submessage(id_, GUID_UNKNOWN);
-    initialize_heartbeat(meta_submessage);
-    gather_directed_heartbeat_i(meta_submessages, meta_submessage, reader);
-  }
+  reader->requested_frags_[seq] = nackfrag.fragmentNumberState;
+  readers_expecting_data_.insert(reader);
+  readers_expecting_heartbeat_.erase(reader);
+  link->nack_reply_.schedule(link->heartbeat_period());
 }
 
 void
@@ -3091,6 +3039,59 @@ RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies(MetaSubmessageVec& met
     DisjointSequence gaps;
 
     if (reader->expecting_durable_data()) {
+
+      bool send_heartbeat = false;
+
+      if (!reader->requests_.empty() && !reader->durable_data_.empty()) {
+        const SequenceNumber dd_first = reader->durable_data_.begin()->first;
+        const SequenceNumber dd_last = reader->durable_data_.rbegin()->first;
+
+        if (reader->requests_.high() < dd_first) {
+          gaps.insert(SequenceRange(reader->requests_.low(), dd_first.previous()));
+          reader->requests_.reset();
+          send_heartbeat = true;
+        } else {
+          const OPENDDS_VECTOR(SequenceRange) psr = reader->requests_.present_sequence_ranges();
+          for (OPENDDS_VECTOR(SequenceRange)::const_iterator pos = psr.begin(), limit = psr.end();
+               pos != limit && pos->first <= dd_last; ++pos) {
+            for (SequenceNumber s = pos->first; s <= pos->second; ++s) {
+              if (s <= dd_last) {
+                const OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator dd_iter = reader->durable_data_.find(s);
+                if (dd_iter != reader->durable_data_.end()) {
+                  link->durability_resend(dd_iter->second);
+                  send_heartbeat = true;
+                } else {
+                  gaps.insert(s);
+                  send_heartbeat = true;
+                }
+                reader->requests_.erase(s);
+              }
+            }
+          }
+        }
+      }
+
+      typedef OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumberSet)::const_iterator rf_iter;
+      for (rf_iter rf = reader->requested_frags_.begin(), limit = reader->requested_frags_.end(); rf != limit; ++rf) {
+
+        const OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator dd_iter = reader->durable_data_.find(rf->first);
+        if (dd_iter != reader->durable_data_.end()) {
+          link->durability_resend(dd_iter->second, rf->second);
+          send_heartbeat = true;
+        } else if ((!reader->durable_data_.empty() && rf->first < reader->durable_data_.begin()->first)) {
+          gaps.insert(rf->first);
+          send_heartbeat = true;
+        }
+      }
+
+      gather_gaps_i(reader, gaps, meta_submessages);
+
+      if (send_heartbeat) {
+        MetaSubmessage meta_submessage(id_, GUID_UNKNOWN);
+        initialize_heartbeat(meta_submessage);
+        gather_directed_heartbeat_i(meta_submessages, meta_submessage, reader);
+      }
+
       // The writer may not be done replaying durable data.
       // Do not send a gap.
       // TODO: If we have all of the durable data, adjust the request so that we can answer the non-durable part.
@@ -3239,7 +3240,7 @@ RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies(MetaSubmessageVec& met
 }
 
 void
-RtpsUdpDataLink::send_nack_replies()
+RtpsUdpDataLink::send_nack_replies(const DCPS::MonotonicTimePoint& /*now*/)
 {
   RtpsWriterMap writers;
   {
@@ -4021,40 +4022,6 @@ RtpsUdpDataLink::RtpsWriter::add_elem_awaiting_ack(TransportQueueElement* elemen
 {
   ACE_GUARD(ACE_Thread_Mutex, g, elems_not_acked_mutex_);
   elems_not_acked_.insert(SnToTqeMap::value_type(element->sequence(), element));
-}
-
-
-// Implementing TimedDelay and HeartBeat nested classes (for ACE timers)
-
-void
-RtpsUdpDataLink::TimedDelay::schedule(const TimeDuration& timeout)
-{
-  const TimeDuration& next_to = (!timeout.is_zero() && timeout < timeout_) ? timeout : timeout_;
-  const MonotonicTimePoint next_to_point(MonotonicTimePoint::now() + next_to);
-
-  if (!scheduled_.is_zero() && (next_to_point < scheduled_)) {
-    cancel();
-  }
-
-  if (scheduled_.is_zero()) {
-    const long timer = outer_->get_reactor()->schedule_timer(this, 0, next_to.value());
-
-    if (timer == -1) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::TimedDelay::schedule "
-        "failed to schedule timer %p\n", ACE_TEXT("")));
-    } else {
-      scheduled_ = next_to_point;
-    }
-  }
-}
-
-void
-RtpsUdpDataLink::TimedDelay::cancel()
-{
-  if (!scheduled_.is_zero()) {
-    outer_->get_reactor()->cancel_timer(this);
-    scheduled_ = MonotonicTimePoint::zero_value;
-  }
 }
 
 void

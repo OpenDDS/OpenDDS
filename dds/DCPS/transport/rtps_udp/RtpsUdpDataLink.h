@@ -693,7 +693,7 @@ private:
     }
   }
 
-  void send_nack_replies();
+  void send_nack_replies(const DCPS::MonotonicTimePoint& now);
   void send_heartbeats(const DCPS::MonotonicTimePoint& now);
   void send_heartbeat_replies(const DCPS::MonotonicTimePoint& now);
   void check_heartbeats(const DCPS::MonotonicTimePoint& now);
@@ -702,33 +702,10 @@ private:
 
   typedef void (RtpsUdpDataLink::*PMF)();
 
-  struct TimedDelay : ACE_Event_Handler {
-
-    TimedDelay(RtpsUdpDataLink* outer, PMF function,
-               const TimeDuration& timeout)
-      : outer_(outer)
-      , function_(function)
-      , timeout_(timeout)
-    {}
-
-    void schedule(const TimeDuration& timeout = TimeDuration::zero_value);
-    void cancel();
-
-    int handle_timeout(const ACE_Time_Value&, const void*)
-    {
-      scheduled_ = MonotonicTimePoint::zero_value;
-      (outer_->*function_)();
-      return 0;
-    }
-
-    RtpsUdpDataLink* outer_;
-    PMF function_;
-    TimeDuration timeout_;
-    MonotonicTimePoint scheduled_;
-
-  } nack_reply_;
-
   typedef PmfSporadicTask<RtpsUdpDataLink> Sporadic;
+
+  Sporadic nack_reply_;
+
   mutable ACE_Thread_Mutex heartbeat_mutex_;
   size_t expected_acks_;
   MonotonicTimePoint last_heartbeat_;
