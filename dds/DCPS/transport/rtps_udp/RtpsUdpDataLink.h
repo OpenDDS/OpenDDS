@@ -729,11 +729,28 @@ private:
   } nack_reply_;
 
   typedef PmfSporadicTask<RtpsUdpDataLink> Sporadic;
+  mutable ACE_Thread_Mutex heartbeat_mutex_;
   size_t expected_acks_;
   MonotonicTimePoint last_heartbeat_;
   MonotonicTimePoint last_ack_;
   TimeDuration heartbeat_period_;
+  // End heartbeat_mutex_ scope.
   Sporadic heartbeat_;
+
+  TimeDuration heartbeat_period() const {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, heartbeat_mutex_, heartbeat_period_);
+    return heartbeat_period_;
+  }
+
+  void received_expected_ack() {
+    ACE_GUARD(ACE_Thread_Mutex, g, heartbeat_mutex_);
+    --expected_acks_;
+    last_ack_ = MonotonicTimePoint::now();
+    if (expected_acks_ == 0) {
+      heartbeat_.cancel();
+      heartbeat_.schedule(TimeDuration::zero_value);
+    }
+  }
 
   typedef PmfMultiTask<RtpsUdpDataLink> Multi;
   Multi heartbeat_reply_;
