@@ -174,7 +174,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           if (!DCPS::convertToDouble(value, ratio)) {
             ACE_ERROR_RETURN((LM_ERROR,
               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-              ACE_TEXT("Invalid entry (%C) for  in ")
+              ACE_TEXT("Invalid entry (%C) for SedpHeartbeatBackoffFactor in ")
               ACE_TEXT("[rtps_discovery/%C] section.\n"),
               value.c_str(), rtps_name.c_str()), -1);
           }
@@ -185,7 +185,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           if (!DCPS::convertToDouble(value, ratio)) {
             ACE_ERROR_RETURN((LM_ERROR,
               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-              ACE_TEXT("Invalid entry (%C) for  in ")
+              ACE_TEXT("Invalid entry (%C) for SedpHeartbeatSafetyFactor in ")
               ACE_TEXT("[rtps_discovery/%C] section.\n"),
               value.c_str(), rtps_name.c_str()), -1);
           }
