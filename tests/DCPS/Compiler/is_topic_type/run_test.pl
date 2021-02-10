@@ -28,6 +28,9 @@ my %expected = (
   "NonAnnotatedModule/NestedStruct"                => {not_found => 1, dn => 0, no_dn => 0},
   "NonAnnotatedModule/NestedTrueStruct"            => {not_found => 1, dn => 0, no_dn => 0},
   "NonAnnotatedModule/NestedFalseStruct"           => {not_found => 1, dn => 1, no_dn => 1},
+);
+
+my %expected2 = (
   "DefaultNestedModule/NonAnnotatedStruct"         => {not_found => 1, dn => 0, no_dn => 0},
   "DefaultNestedModule/TopicStruct"                => {not_found => 1, dn => 1, no_dn => 1},
   "DefaultNestedModule/NestedStruct"               => {not_found => 1, dn => 0, no_dn => 0},
@@ -76,13 +79,39 @@ sub subtest {
       $status = 1;
     }
   }
-  # Make sure we found everything in %expected
-  while (my ($k, $v) = each %expected) {
-    if ($v->{not_found}) {
-      print STDERR "ERROR in $mode: $k was not found in ITL\n";
+  return $status;
+}
+
+sub subtest2 {
+  my $status = 0;
+  my $mode = shift;
+
+  my $itl_file = "$mode/more_is_topic_type.itl";
+  open my $f, '<', $itl_file or die "Can't open itl file $itl_file: $!";
+  local $/;
+  my $itl_text = <$f>;
+  close $f;
+
+  # Check the Types in the ITL
+  my $itl = decode_json($itl_text);
+  my @types = @{$itl->{'types'}};
+  foreach my $type (@types) {
+    die "There's a type with no name" unless exists $type->{'name'};
+    $type->{'name'} =~ /IDL:(.*):.*/;
+    my $name = $1;
+    die "Type \"$name\" was not expected at all" unless exists $expected2{$name};
+    die "Type \"$name\" does not have \"note\"" unless exists $type->{'note'};
+    die "Type \"$name\" does not have \"is_dcps_data_type\"" unless exists $type->{'note'}->{'is_dcps_data_type'};
+
+    $expected2{$name}{not_found} = 0;
+    my $expected_value = $expected2{$name}{$mode};
+    my $itl_value = $type->{'note'}->{'is_dcps_data_type'} ? 1 : 0;
+    if ($expected_value != $itl_value) {
+      my $exp = $expected_value ? "NOT " : "";
+      my $act = $itl_value ? " NOT" : "";
+      print STDERR "ERROR in $mode: Expected2 \"$name\" ${exp}to be a topic type but it was${act}.\n";
       $status = 1;
     }
-    $v->{not_found} = 1;
   }
   return $status;
 }
@@ -90,5 +119,7 @@ sub subtest {
 my $status = 0;
 $status |= subtest('dn');
 $status |= subtest('no_dn');
+$status |= subtest2('dn');
+$status |= subtest2('no_dn');
 
 exit $status;
