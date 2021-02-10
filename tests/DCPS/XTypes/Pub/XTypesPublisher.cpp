@@ -365,7 +365,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DDS::ConditionSeq conditions;
   DDS::Duration_t timeout = { 20, 0 };
-  ReturnCode_t ret = ws->wait(conditions, timeout);
+  const ReturnCode_t ret = ws->wait(conditions, timeout);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: %C condition wait failed for type %C: %C\n",
       expect_to_match ? "PUBLICATION_MATCHED_STATUS" : "INCONSISTENT_TOPIC_STATUS", type.c_str(),
