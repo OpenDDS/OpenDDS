@@ -81,7 +81,7 @@ sub subtest {
   while (my ($k, $v) = each %expected) {
     if ($v->{not_found} && $v->{f} eq $fname) {
       print STDERR "ERROR in $mode: $k was not found in ITL\n";
-      $status = 1
+      $status = 1;
     }
     $v->{not_found} = 1;
   }
