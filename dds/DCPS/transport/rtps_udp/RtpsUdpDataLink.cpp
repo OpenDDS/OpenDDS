@@ -671,7 +671,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
         }
         CountMapType::iterator nfc_it = nackfrag_counts_.find(local_id.entityId);
         if (nfc_it != nackfrag_counts_.end()) {
-          an_start = nfc_it->second;
+          nf_start = nfc_it->second;
           nackfrag_counts_.erase(nfc_it);
         }
         RtpsReader_rch reader = make_rch<RtpsReader>(link, local_id, local_durable, an_start, nf_start);

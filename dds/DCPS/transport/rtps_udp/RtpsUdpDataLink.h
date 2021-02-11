@@ -592,7 +592,7 @@ private:
   void queue_or_send_submessages(MetaSubmessageVec& meta_submessages);
   void bundle_and_send_submessages(MetaSubmessageVec& meta_submessages);
 
-  struct SubmessageQueue: public RcObject, public MetaSubmessageVec {
+  struct SubmessageQueue: RcObject, MetaSubmessageVec {
   };
   typedef RcHandle<SubmessageQueue> SubmessageQueue_rch;
 
