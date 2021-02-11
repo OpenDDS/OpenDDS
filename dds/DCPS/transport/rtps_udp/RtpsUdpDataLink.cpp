@@ -2394,7 +2394,7 @@ RtpsUdpDataLink::disable_response_queue()
   SubmessageQueue_rch queue;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, send_queues_lock_);
-    ThreadSendQueueMap::const_iterator it = thread_send_queues_.find(ACE_Thread::self());
+    ThreadSendQueueMap::iterator it = thread_send_queues_.find(ACE_Thread::self());
     if (it != thread_send_queues_.end()) {
       queue = it->second;
       thread_send_queues_.erase(it);
