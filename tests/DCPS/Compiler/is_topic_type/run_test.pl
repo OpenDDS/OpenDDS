@@ -14,42 +14,43 @@ if ($@) {
 # dn and no_dn refers to running opendds_idl with --default-nested and
 # --no-default-nested respectively
 my %expected = (
-  "NonAnnotatedStruct"                             => {not_found => 1, dn => 0, no_dn => 1},
-  "TopicStruct"                                    => {not_found => 1, dn => 1, no_dn => 1},
-  "TopicStarStruct"                                => {not_found => 1, dn => 1, no_dn => 1},
-  "TopicDdsStruct"                                 => {not_found => 1, dn => 1, no_dn => 1},
-  "TopicOpenDdsStruct"                             => {not_found => 1, dn => 1, no_dn => 1},
-  "TopicInvalidStruct"                             => {not_found => 1, dn => 0, no_dn => 1},
-  "NestedStruct"                                   => {not_found => 1, dn => 0, no_dn => 0},
-  "NestedTrueStruct"                               => {not_found => 1, dn => 0, no_dn => 0},
-  "NestedFalseStruct"                              => {not_found => 1, dn => 1, no_dn => 1},
-  "NonAnnotatedModule/NonAnnotatedStruct"          => {not_found => 1, dn => 0, no_dn => 1},
-  "NonAnnotatedModule/TopicStruct"                 => {not_found => 1, dn => 1, no_dn => 1},
-  "NonAnnotatedModule/NestedStruct"                => {not_found => 1, dn => 0, no_dn => 0},
-  "NonAnnotatedModule/NestedTrueStruct"            => {not_found => 1, dn => 0, no_dn => 0},
-  "NonAnnotatedModule/NestedFalseStruct"           => {not_found => 1, dn => 1, no_dn => 1},
-  "DefaultNestedModule/NonAnnotatedStruct"         => {not_found => 1, dn => 0, no_dn => 0},
-  "DefaultNestedModule/TopicStruct"                => {not_found => 1, dn => 1, no_dn => 1},
-  "DefaultNestedModule/NestedStruct"               => {not_found => 1, dn => 0, no_dn => 0},
-  "DefaultNestedModule/NestedTrueStruct"           => {not_found => 1, dn => 0, no_dn => 0},
-  "DefaultNestedModule/NestedFalseStruct"          => {not_found => 1, dn => 1, no_dn => 1},
-  "DefaultNestedTrueModule/NonAnnotatedStruct"     => {not_found => 1, dn => 0, no_dn => 0},
-  "DefaultNestedTrueModule/TopicStruct"            => {not_found => 1, dn => 1, no_dn => 1},
-  "DefaultNestedTrueModule/NestedStruct"           => {not_found => 1, dn => 0, no_dn => 0},
-  "DefaultNestedTrueModule/NestedTrueStruct"       => {not_found => 1, dn => 0, no_dn => 0},
-  "DefaultNestedTrueModule/NestedFalseStruct"      => {not_found => 1, dn => 1, no_dn => 1},
-  "DefaultNestedFalseModule/NonAnnotatedStruct"    => {not_found => 1, dn => 1, no_dn => 1},
-  "DefaultNestedFalseModule/TopicStruct"           => {not_found => 1, dn => 1, no_dn => 1},
-  "DefaultNestedFalseModule/NestedStruct"          => {not_found => 1, dn => 0, no_dn => 0},
-  "DefaultNestedFalseModule/NestedTrueStruct"      => {not_found => 1, dn => 0, no_dn => 0},
-  "DefaultNestedFalseModule/NestedFalseStruct"     => {not_found => 1, dn => 1, no_dn => 1},
+  "NonAnnotatedStruct"                             => {not_found => 1, dn => 0, no_dn => 1, f => 'is_topic_type'},
+  "TopicStruct"                                    => {not_found => 1, dn => 1, no_dn => 1, f => 'is_topic_type'},
+  "TopicStarStruct"                                => {not_found => 1, dn => 1, no_dn => 1, f => 'is_topic_type'},
+  "TopicDdsStruct"                                 => {not_found => 1, dn => 1, no_dn => 1, f => 'is_topic_type'},
+  "TopicOpenDdsStruct"                             => {not_found => 1, dn => 1, no_dn => 1, f => 'is_topic_type'},
+  "TopicInvalidStruct"                             => {not_found => 1, dn => 0, no_dn => 1, f => 'is_topic_type'},
+  "NestedStruct"                                   => {not_found => 1, dn => 0, no_dn => 0, f => 'is_topic_type'},
+  "NestedTrueStruct"                               => {not_found => 1, dn => 0, no_dn => 0, f => 'is_topic_type'},
+  "NestedFalseStruct"                              => {not_found => 1, dn => 1, no_dn => 1, f => 'is_topic_type'},
+  "NonAnnotatedModule/NonAnnotatedStruct"          => {not_found => 1, dn => 0, no_dn => 1, f => 'is_topic_type'},
+  "NonAnnotatedModule/TopicStruct"                 => {not_found => 1, dn => 1, no_dn => 1, f => 'is_topic_type'},
+  "NonAnnotatedModule/NestedStruct"                => {not_found => 1, dn => 0, no_dn => 0, f => 'is_topic_type'},
+  "NonAnnotatedModule/NestedTrueStruct"            => {not_found => 1, dn => 0, no_dn => 0, f => 'is_topic_type'},
+  "NonAnnotatedModule/NestedFalseStruct"           => {not_found => 1, dn => 1, no_dn => 1, f => 'is_topic_type'},
+  "DefaultNestedModule/NonAnnotatedStruct"         => {not_found => 1, dn => 0, no_dn => 0, f => 'default_nested_is_topic_type'},
+  "DefaultNestedModule/TopicStruct"                => {not_found => 1, dn => 1, no_dn => 1, f => 'default_nested_is_topic_type'},
+  "DefaultNestedModule/NestedStruct"               => {not_found => 1, dn => 0, no_dn => 0, f => 'default_nested_is_topic_type'},
+  "DefaultNestedModule/NestedTrueStruct"           => {not_found => 1, dn => 0, no_dn => 0, f => 'default_nested_is_topic_type'},
+  "DefaultNestedModule/NestedFalseStruct"          => {not_found => 1, dn => 1, no_dn => 1, f => 'default_nested_is_topic_type'},
+  "DefaultNestedTrueModule/NonAnnotatedStruct"     => {not_found => 1, dn => 0, no_dn => 0, f => 'default_nested_is_topic_type'},
+  "DefaultNestedTrueModule/TopicStruct"            => {not_found => 1, dn => 1, no_dn => 1, f => 'default_nested_is_topic_type'},
+  "DefaultNestedTrueModule/NestedStruct"           => {not_found => 1, dn => 0, no_dn => 0, f => 'default_nested_is_topic_type'},
+  "DefaultNestedTrueModule/NestedTrueStruct"       => {not_found => 1, dn => 0, no_dn => 0, f => 'default_nested_is_topic_type'},
+  "DefaultNestedTrueModule/NestedFalseStruct"      => {not_found => 1, dn => 1, no_dn => 1, f => 'default_nested_is_topic_type'},
+  "DefaultNestedFalseModule/NonAnnotatedStruct"    => {not_found => 1, dn => 1, no_dn => 1, f => 'default_nested_is_topic_type'},
+  "DefaultNestedFalseModule/TopicStruct"           => {not_found => 1, dn => 1, no_dn => 1, f => 'default_nested_is_topic_type'},
+  "DefaultNestedFalseModule/NestedStruct"          => {not_found => 1, dn => 0, no_dn => 0, f => 'default_nested_is_topic_type'},
+  "DefaultNestedFalseModule/NestedTrueStruct"      => {not_found => 1, dn => 0, no_dn => 0, f => 'default_nested_is_topic_type'},
+  "DefaultNestedFalseModule/NestedFalseStruct"     => {not_found => 1, dn => 1, no_dn => 1, f => 'default_nested_is_topic_type'},
 );
 
 sub subtest {
   my $status = 0;
   my $mode = shift;
+  my $fname = shift;
 
-  my $itl_file = "$mode/is_topic_type.itl";
+  my $itl_file = "$mode/$fname.itl";
   open my $f, '<', $itl_file or die "Can't open itl file $itl_file: $!";
   local $/;
   my $itl_text = <$f>;
@@ -78,7 +79,7 @@ sub subtest {
   }
   # Make sure we found everything in %expected
   while (my ($k, $v) = each %expected) {
-    if ($v->{not_found}) {
+    if ($v->{not_found} && $v->{f} eq $fname) {
       print STDERR "ERROR in $mode: $k was not found in ITL\n";
       $status = 1;
     }
@@ -88,7 +89,9 @@ sub subtest {
 }
 
 my $status = 0;
-$status |= subtest('dn');
-$status |= subtest('no_dn');
+$status |= subtest('dn', 'is_topic_type');
+$status |= subtest('no_dn', 'is_topic_type');
+$status |= subtest('dn', 'default_nested_is_topic_type');
+$status |= subtest('no_dn', 'default_nested_is_topic_type');
 
 exit $status;
