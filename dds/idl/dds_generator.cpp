@@ -41,6 +41,8 @@ std::string dds_generator::valid_var_name(const std::string& str)
       last_char = '_';
     }
   }
+
+  // Remove underscores at start and end
   if (s.size() > 1 && s[0] == '_') {
     if (!cxx_escape(s, 0)) {
       s.erase(0, 1);
@@ -49,6 +51,7 @@ std::string dds_generator::valid_var_name(const std::string& str)
   if (s.size() > 1 && s[s.size() - 1] == '_') {
     s.erase(s.size() - 1, 1);
   }
+
   return s;
 }
 
