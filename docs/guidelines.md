@@ -48,7 +48,7 @@ Pull requests will be tested automatically and full CI builds of the master
 branch can be found at
 [http://scoreboard.ociweb.com/oci-dds.html](http://scoreboard.ociweb.com/oci-dds.html).
 
-All tests listed in `DDS_ROOT/bin/dcps_tests.lst` are part of the automated
+All tests listed in `DDS_ROOT/tests/dcps_tests.lst` are part of the automated
 test suite.
 
 ## Doxygen
