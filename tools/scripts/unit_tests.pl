@@ -3,7 +3,7 @@
 use Cwd;
 use strict;
 
-my @lists = ('bin/dcps_tests.lst');
+my @lists = ('tests/dcps_tests.lst');
 push @lists, 'tests/security/security_tests.lst' if has_security();
 
 my @lines;
@@ -20,7 +20,7 @@ for my $list (@lists) {
 
 print "$0 running " . scalar @lines . " unit test programs\n";
 my $start_time = time();
-open my $f, "|$^X $ENV{'DDS_ROOT'}/bin/auto_run_tests.pl -x -l -"
+open my $f, "|$^X $ENV{'DDS_ROOT'}/tests/auto_run_tests.pl -x -l -"
     or die "Failed to launch auto_run_tests";
 print $f @lines;
 my $status = close($f) ? 0 : $?;
