@@ -136,7 +136,7 @@ foreach my $test_lst (@file_list) {
             if ($result != 0) {
                 print "Error: $test returned with status $result\n";
                 if ($opt_x) {
-                    exit($result);
+                    exit($result >> 8);
                 }
             }
 
