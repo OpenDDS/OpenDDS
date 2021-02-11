@@ -3599,8 +3599,8 @@ RtpsUdpDataLink::send_heartbeats(const DCPS::MonotonicTimePoint& now)
     } else if (last_ack_ != MonotonicTimePoint::zero_value && last_heartbeat_ != MonotonicTimePoint::zero_value) {
       heartbeat_period_ = (last_ack_ - last_heartbeat_) * cfg.heartbeat_safety_factor_;
     }
-    heartbeat_period_ = std::min(heartbeat_period_, cfg.heartbeat_period_maximum_);
-    heartbeat_period_ = std::max(heartbeat_period_, cfg.heartbeat_period_minimum_);
+    heartbeat_period_ = std::min(heartbeat_period_, std::max(cfg.heartbeat_period_maximum_, cfg.heartbeat_period_minimum_));
+    heartbeat_period_ = std::max(heartbeat_period_, std::min(cfg.heartbeat_period_maximum_, cfg.heartbeat_period_minimum_));
     expected_acks_ = 0;
   }
 
@@ -3790,7 +3790,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
       const ReaderInfo_rch& reader = *pos;
       gather_preassociation_heartbeat_i(meta_submessages, meta_submessage, reader);
       reader->expecting_ack_ = true;
-      ++link->expected_acks_;
+      link->expect_ack();
     }
   }
 
@@ -3812,7 +3812,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
         expire_durable_data(pos->second, cfg, now, pendingCallbacks);
         meta_submessage.to_guids_.insert(pos->first);
         pos->second->expecting_ack_ = true;
-        ++link->expected_acks_;
+        link->expect_ack();
       }
       meta_submessages.push_back(meta_submessage);
       meta_submessage.reset_destination();
@@ -3827,7 +3827,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
           expire_durable_data(reader, cfg, now, pendingCallbacks);
           gather_directed_heartbeat_i(meta_submessages, meta_submessage, reader);
           reader->expecting_ack_ = true;
-          ++link->expected_acks_;
+          link->expect_ack();
         }
       }
     }

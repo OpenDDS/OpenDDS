@@ -719,6 +719,11 @@ private:
     return heartbeat_period_;
   }
 
+  void expect_ack() {
+    ACE_GUARD(ACE_Thread_Mutex, g, heartbeat_mutex_);
+    ++expected_acks_;
+  }
+
   void received_expected_ack() {
     ACE_GUARD(ACE_Thread_Mutex, g, heartbeat_mutex_);
     --expected_acks_;
