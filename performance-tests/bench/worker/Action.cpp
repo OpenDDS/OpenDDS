@@ -2,6 +2,14 @@
 
 namespace Bench {
 
+void Action::action_start()
+{
+}
+
+void Action::action_stop()
+{
+}
+
 bool Action::init(const Bench::ActionConfig& config, Bench::ActionReport& report,
   Builder::ReaderMap& reader_map, Builder::WriterMap& writer_map, const Builder::ContentFilteredTopicMap&)
 {

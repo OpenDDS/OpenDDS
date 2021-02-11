@@ -5,10 +5,13 @@ project: dcps_test_idl_only_lib, msvc_bigobj {
 
   TypeSupport_Files {
     ../is_topic_type.idl
+    ../default_nested_is_topic_type.idl
   }
 
   IDL_Files {
     ../is_topic_type.idl
     is_topic_typeTypeSupport.idl
+    ../default_nested_is_topic_type.idl
+    default_nested_is_topic_typeTypeSupport.idl
   }
 }

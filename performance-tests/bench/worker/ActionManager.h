@@ -11,8 +11,10 @@ public:
   explicit ActionManager(const ActionConfigSeq& configs, ActionReportSeq& reports,
     Builder::ReaderMap& reader_map, Builder::WriterMap& writer_map, Builder::ContentFilteredTopicMap& cft_map);
 
-  void start();
-  void stop();
+  void action_start();
+  void test_start();
+  void test_stop();
+  void action_stop();
 
   using action_factory = std::function<std::shared_ptr<Action>()>;
   using action_factory_map = std::map<std::string, action_factory>;

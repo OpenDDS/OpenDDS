@@ -172,15 +172,11 @@ bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
     insertion.addArg("strm", "Serializer&");
     insertion.addArg("enumval", "const " + cxx + "&");
     insertion.endArgs();
-    if (cxx != DdsNamespace + "ReliabilityQosPolicyKind") {
-      // DDS::ReliabilityQosPolicyKind needs to be able to stream values
-      // that are not valid enum values (see ParameterListConverter::to_param_list())
-      be_global->impl_ <<
-        "    if (CORBA::ULong(enumval) >= " << vals.size() << ") {\n"
-        "      ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) Invalid enumerated value for " << cxx << " (%u)\\n\"), enumval));\n"
-        "      return false;\n"
-        "    }\n";
-    }
+    be_global->impl_ <<
+      "    if (CORBA::ULong(enumval) >= " << vals.size() << ") {\n"
+      "      ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) Invalid enumerated value for " << cxx << " (%u)\\n\"), enumval));\n"
+      "      return false;\n"
+      "    }\n";
     be_global->impl_ <<
       "  return strm << static_cast<CORBA::ULong>(enumval);\n";
   }
@@ -192,15 +188,11 @@ bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
     be_global->impl_ <<
       "  CORBA::ULong temp = 0;\n"
       "  if (strm >> temp) {\n";
-    if (cxx != DdsNamespace + "ReliabilityQosPolicyKind") {
-      // DDS::ReliabilityQosPolicyKind needs to be able to stream values
-      // that are not valid enum values (see ParameterListConverter::to_param_list())
-      be_global->impl_ <<
-        "    if (temp >= " << vals.size() << ") {\n"
-        "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
-        "      return false;\n"
-        "    }\n";
-    }
+    be_global->impl_ <<
+      "    if (temp >= " << vals.size() << ") {\n"
+      "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+      "      return false;\n"
+      "    }\n";
     be_global->impl_ <<
       "    enumval = static_cast<" << cxx << ">(temp);\n"
       "    return true;\n"

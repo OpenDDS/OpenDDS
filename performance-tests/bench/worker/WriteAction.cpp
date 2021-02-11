@@ -160,7 +160,7 @@ bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder
   return true;
 }
 
-void WriteAction::start()
+void WriteAction::test_start()
 {
   std::unique_lock<std::mutex> lock(mutex_);
   if (!started_) {
@@ -176,7 +176,7 @@ void WriteAction::start()
   }
 }
 
-void WriteAction::stop()
+void WriteAction::test_stop()
 {
   std::unique_lock<std::mutex> lock(mutex_);
   if (started_ && !stopped_) {

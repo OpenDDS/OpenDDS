@@ -204,6 +204,7 @@ double ProcessStatsCollector::get_cpu_usage() noexcept
 #elif defined ACE_LINUX
   size_t time, sys_time, user_time;
   if (read_total_cpu_usage(time) &&
+      time > last_time_ &&
       read_process_cpu_usage(process_id_, user_time, sys_time)) {
 
     percent = 100.0 * static_cast<double>((sys_time - last_sys_time_) + (user_time - last_user_time_));

@@ -437,7 +437,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       }
     }
   } catch (const std::runtime_error& e) {
-    std::cerr << "Error: " << e.what() << std::endl;
+    std::cerr << "Error: " << e.what() << std::endl << "Exiting" << std::endl;
+    return EXIT_FAILURE;
+  } catch (...) {
+    std::cerr << "Error: Caught Unknown Exception" << std::endl << "Exiting" << std::endl;
     return EXIT_FAILURE;
   }
 

@@ -21,17 +21,31 @@ ActionManager::ActionManager(const Bench::ActionConfigSeq& configs, Bench::Actio
   }
 }
 
-void ActionManager::start()
+void ActionManager::action_start()
 {
   for (auto it = actions_.begin(); it != actions_.end(); ++it) {
-    (*it)->start();
+    (*it)->action_start();
   }
 }
 
-void ActionManager::stop()
+void ActionManager::test_start()
 {
   for (auto it = actions_.begin(); it != actions_.end(); ++it) {
-    (*it)->stop();
+    (*it)->test_start();
+  }
+}
+
+void ActionManager::test_stop()
+{
+  for (auto it = actions_.begin(); it != actions_.end(); ++it) {
+    (*it)->test_stop();
+  }
+}
+
+void ActionManager::action_stop()
+{
+  for (auto it = actions_.begin(); it != actions_.end(); ++it) {
+    (*it)->action_stop();
   }
 }
 
