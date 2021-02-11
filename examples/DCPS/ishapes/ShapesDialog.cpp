@@ -52,7 +52,7 @@ static const std::string triangleTopicName("Triangle");
 
 
 ShapesDialog::ShapesDialog(DDS::DomainParticipant_var participant,
-                           const std::string& partition,
+                           const QosConfig& qosConfig,
                            int defaultSize)
   :   timer(this),
       participant_(participant),
@@ -69,7 +69,7 @@ ShapesDialog::ShapesDialog(DDS::DomainParticipant_var participant,
 
   CORBA::String_var type_name = "ShapeType";
   if (ts->register_type(participant, type_name) != DDS::RETCODE_OK) {
-      std::cerr << "Could not register type " << std::endl;
+    std::cerr << "Could not register type " << std::endl;
   }
 
   circleTopic_ =
@@ -79,7 +79,7 @@ ShapesDialog::ShapesDialog(DDS::DomainParticipant_var participant,
                               0,
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!circleTopic_) {
-      std::cerr << "Could not create topic " << circleTopicName << std::endl;
+    std::cerr << "Could not create topic " << circleTopicName << std::endl;
   }
 
   squareTopic_ =
@@ -89,7 +89,7 @@ ShapesDialog::ShapesDialog(DDS::DomainParticipant_var participant,
                               0,
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!squareTopic_) {
-      std::cerr << "Could not create topic " << squareTopicName << std::endl;
+    std::cerr << "Could not create topic " << squareTopicName << std::endl;
   }
 
   triangleTopic_ =
@@ -99,15 +99,16 @@ ShapesDialog::ShapesDialog(DDS::DomainParticipant_var participant,
                               0,
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!triangleTopic_) {
-      std::cerr << "Could not create topic " << triangleTopicName << std::endl;
+    std::cerr << "Could not create topic " << triangleTopicName << std::endl;
   }
 
   DDS::PublisherQos pub_qos;
   participant->get_default_publisher_qos(pub_qos);
-  if (!partition.empty()) {
+  if (!qosConfig.partition_.empty()) {
     pub_qos.partition.name.length(1);
-    pub_qos.partition.name[0] = partition.c_str();
+    pub_qos.partition.name[0] = qosConfig.partition_.c_str();
   }
+
   // Create Publisher
   publisher_ =
     participant->create_publisher(pub_qos,
@@ -115,16 +116,25 @@ ShapesDialog::ShapesDialog(DDS::DomainParticipant_var participant,
                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   if (!publisher_) {
-      std::cerr << "Could not create publisher " << std::endl;
+    std::cerr << "Could not create publisher " << std::endl;
   }
   writerQos_.setPublisher(publisher_);
 
+  if (qosConfig.xcdr1_) {
+    DDS::DataWriterQos default_dw_qos;
+    publisher_->get_default_datawriter_qos(default_dw_qos);
+    default_dw_qos.representation.value.length(1);
+    default_dw_qos.representation.value[0] = DDS::XCDR_DATA_REPRESENTATION;
+    publisher_->set_default_datawriter_qos(default_dw_qos);
+  }
+
+
   DDS::SubscriberQos sub_qos;
   participant->get_default_subscriber_qos(sub_qos);
-  if (!partition.empty()) {
-    sub_qos.partition.name.length(1);
-    sub_qos.partition.name[0] = partition.c_str();
+  if (pub_qos.partition.name.length()) {
+    sub_qos.partition.name = pub_qos.partition.name;
   }
+
   // Create Subscriber
   subscriber_ =
     participant->create_subscriber(sub_qos,
@@ -132,7 +142,7 @@ ShapesDialog::ShapesDialog(DDS::DomainParticipant_var participant,
                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   if (!subscriber_) {
-      std::cerr << "Could not create subscriber " << std::endl;
+    std::cerr << "Could not create subscriber " << std::endl;
   }
 
   readerQos_.setSubscriber(subscriber_);
@@ -163,9 +173,9 @@ ShapesDialog::ShapesDialog(DDS::DomainParticipant_var participant,
 
   timer.start(40);
 
-  if (partition.length()) {
+  if (!qosConfig.partition_.empty()) {
     QString title = this->windowTitle();
-    title += (" PARTITION: " + partition).c_str();
+    title += (" PARTITION: " + qosConfig.partition_).c_str();
     this->setWindowTitle(title);
   }
 }
