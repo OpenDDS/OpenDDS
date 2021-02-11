@@ -3,6 +3,7 @@
 #include "utility.h"
 
 #include <dds/DdsDcpsCoreTypeSupportImpl.h>
+#include <dds/DCPS/JsonValueWriter.h>
 
 namespace RtpsRelay {
 
@@ -59,7 +60,7 @@ void ParticipantListener::write_sample(const DDS::ParticipantBuiltinTopicData& d
 
   const ParticipantEntry entry(guid, data.user_data);
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: ParticipantListener::write_sample add local participant %C\n"), guid_to_string(repoid).c_str()));
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: ParticipantListener::write_sample add local participant %C %C\n"), guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str()));
   DDS::ReturnCode_t ret = writer_->write(entry, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ParticipantListener::write_sample failed to write\n")));
