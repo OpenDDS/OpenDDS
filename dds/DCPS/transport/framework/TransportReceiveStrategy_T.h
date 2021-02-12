@@ -77,6 +77,12 @@ protected:
   /// Check the data sample header for suitability.
   virtual bool check_header(const DSH& header);
 
+  /// Begin Current Transport Header Processing
+  virtual void begin_transport_header_processing() {}
+
+  /// End Current Transport Header Processing
+  virtual void end_transport_header_processing() {}
+
   /// Called when there is a ReceivedDataSample to be delivered.
   virtual void deliver_sample(ReceivedDataSample&  sample,
                               const ACE_INET_Addr& remote_address) = 0;

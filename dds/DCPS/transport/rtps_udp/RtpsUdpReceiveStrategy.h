@@ -78,6 +78,9 @@ public:
                                       RtpsUdpTransport& tport,
                                       bool& stop);
 
+  virtual void begin_transport_header_processing();
+  virtual void end_transport_header_processing();
+
 private:
   bool getDirectedWriteReaders(RepoIdSet& directedWriteReaders, const RTPS::DataSubmessage& ds) const;
 
