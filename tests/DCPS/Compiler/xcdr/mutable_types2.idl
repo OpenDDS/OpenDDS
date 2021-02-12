@@ -1,9 +1,12 @@
+
+#include <mutable_types.idl>
+#include <xcdrbasetypes.idl>
+
 #include <tao/LongSeq.pidl>
 #include <tao/ShortSeq.pidl>
 #include <tao/OctetSeq.pidl>
 #include <tao/StringSeq.pidl>
 
-#include <mutable_types.idl>
 
 typedef sequence<long long, 3> LongLong3S;
 typedef sequence<short, 3> Short3S;
@@ -51,4 +54,26 @@ struct ModifiedMixedMutableStruct {
   @id(3) NestedUnion union_nested;
   @id(4) StringSeq sequence_field2;
   @id(1) MutableStructWithExplicitIDs struct_nested;
+};
+
+@mutable
+union MutableUnionWithExplicitIDs switch (UnionDisc) {
+case E_SHORT_FIELD:
+  @id(4) short short_field;
+case E_LONG_FIELD:
+  @id(6) long long_field;
+case E_OCTET_FIELD:
+  @id(8) octet octet_field;
+case E_LONG_LONG_FIELD:
+  @id(10) long long long_long_field;
+};
+
+@mutable
+union ModifiedMutableUnion switch (UnionDisc) {
+case E_LONG_FIELD:
+  @id(6) long long_field;
+case E_SHORT_FIELD:
+  @id(4) short short_field;
+case E_ADDITIONAL_FIELD:
+  @id(12) long additional_field;
 };

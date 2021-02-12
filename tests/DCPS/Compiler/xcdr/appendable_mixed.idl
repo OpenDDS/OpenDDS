@@ -46,30 +46,6 @@ case E_ADDITIONAL_FIELD:
 };
 
 
-// Mutable Tests =============================================================
-
-@mutable
-union MutableUnionWithExplicitIDs switch (UnionDisc) {
-case E_SHORT_FIELD:
-  @id(4) short short_field;
-case E_LONG_FIELD:
-  @id(6) long long_field;
-case E_OCTET_FIELD:
-  @id(8) octet octet_field;
-case E_LONG_LONG_FIELD:
-  @id(10) long long long_long_field;
-};
-
-@mutable
-union ModifiedMutableUnion switch (UnionDisc) {
-case E_LONG_FIELD:
-  @id(6) long long_field;
-case E_SHORT_FIELD:
-  @id(4) short short_field;
-case E_ADDITIONAL_FIELD:
-  @id(12) long additional_field;
-};
-
 // Mixed Extensibility Tests =================================================
 
 @final

@@ -1,5 +1,5 @@
 #include "xcdrbasetypesTypeSupportImpl.h"
-#include "xcdrTypeSupportImpl.h"
+#include "appendable_mixedTypeSupportImpl.h"
 #include "mutable_typesTypeSupportImpl.h"
 #include "mutable_types2TypeSupportImpl.h"
 #include "keyonlyTypeSupportImpl.h"
