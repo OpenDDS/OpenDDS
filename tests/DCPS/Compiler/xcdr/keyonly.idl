@@ -1,9 +1,9 @@
+#include "xcdrbasetypes.idl"
+
 #include <tao/LongSeq.pidl>
 #include <tao/ShortSeq.pidl>
 #include <tao/OctetSeq.pidl>
 #include <tao/StringSeq.pidl>
-
-#include <xcdrbasetypes.idl>
 
 // KeyOnly Serialization ======================================================
 
