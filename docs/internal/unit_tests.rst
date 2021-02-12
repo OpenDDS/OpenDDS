@@ -1,9 +1,10 @@
-============
- Unit Tests
-============
+##########
+Unit Tests
+##########
 
+*************************
 The Goals of Unit Testing
-=========================
+*************************
 
 The primary goal of a unit test is to provide informal evidence that a piece of code performs correctly.
 An alternative to unit testing is writing formal proofs.
@@ -48,8 +49,9 @@ The following metrics can be generated to measure the utility of the unit tests:
 * Test code size vs. code size
 * Defect rate vs. code coverage (Are bugs appearing is code that is not tested as well?)
 
+**********************
 Unit Test Organization
-======================
+**********************
 
 The most basic unit when testing is the *test case*.
 A test case typically has four phases.
@@ -64,16 +66,17 @@ Test cases are grouped into a *test suite*.
 Test suites are organized into *a test plan*.
 
 We adopt file boundaries for organizing the unit tests for OpenDDS.
-That is, the unit tests for a file group `dds/DCPS/SomeFile.(h|cpp)` will be located in `unit-tests/dds/DCPS/SomeFile.cpp`.
-The file `unit-tests/dds/DCPS/SomeFile.cpp` is a test suite containing all of the test cases for `dds/DCPS/SomeFile.(h|cpp)`.
-The test plan for OpenDDS will execute all of the test suites under `unit-tests`.
+That is, the unit tests for a file group `dds/DCPS/SomeFile.(h|cpp)` will be located in `tests/unit-tests/dds/DCPS/SomeFile.cpp`.
+The file `tests/unit-tests/dds/DCPS/SomeFile.cpp` is a test suite containing all of the test cases for `dds/DCPS/SomeFile.(h|cpp)`.
+The test plan for OpenDDS will execute all of the test suites under `tests/unit-tests`.
 When the complete test plan takes too much time to execute, it will be sub-divided along module boundaries.
 
-In regards to coverage, the coverage of `dds/DCPS/SomeFile.(h|cpp)` is measured by executing the tests in its test suite `unit-tests/dds/DCPS/SomeFile.cpp`.
+In regards to coverage, the coverage of `dds/DCPS/SomeFile.(h|cpp)` is measured by executing the tests in its test suite `tests/unit-tests/dds/DCPS/SomeFile.cpp`.
 The purpose of this is to avoid indirect testing where a piece of code may get full coverage without ever being intentionally tested.
 
+***************
 Unit Test Scope
-===============
+***************
 
 A unit test should be completely deterministic with respect to the code paths that it exercises.
 This means the test code must have control over all relevant inputs, i.e., inputs that influence the code paths.
@@ -100,8 +103,9 @@ A stress test executes the same code over and over hoping that non-determism res
 Performance tests may or may not admit non-determinism and focuses on aggregate behavior as opposed to code-level correctness.
 Unit tests should focus on code-level correctness.
 
+**********************
 Isolating Dependencies
-======================
+**********************
 
 More often than not, the code under test will have dependencies on other objects.
 For each dependency, the test can either pass in a real object or a stand-in.
@@ -120,7 +124,8 @@ However, there are cases when a test stand-in is justified:
 
 The use of a mock assumes that an interface exists for the stand-in.
 
+**********
 Final Word
-==========
+**********
 
 Ignore anything in this document that prevents you from writing unit tests.
