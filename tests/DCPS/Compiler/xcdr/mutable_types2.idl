@@ -1,12 +1,10 @@
-
-#include <mutable_types.idl>
-#include <xcdrbasetypes.idl>
-
 #include <tao/LongSeq.pidl>
 #include <tao/ShortSeq.pidl>
 #include <tao/OctetSeq.pidl>
 #include <tao/StringSeq.pidl>
 
+#include <mutable_types.idl>
+#include <xcdrbasetypes.idl>
 
 typedef sequence<long long, 3> LongLong3S;
 typedef sequence<short, 3> Short3S;
