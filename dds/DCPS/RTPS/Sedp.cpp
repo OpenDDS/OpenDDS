@@ -3314,6 +3314,10 @@ Sedp::association_complete_i(const RepoId& localId,
     spdp_.send_participant_crypto_tokens(remoteId);
     send_builtin_crypto_tokens(remoteId);
     resend_user_crypto_tokens(remoteId);
+  } else if (remoteId.entityId == ENTITYID_TL_SVC_REQ_READER_SECURE) {
+    type_lookup_request_secure_writer_->send_deferred_samples(remoteId);
+  } else if (remoteId.entityId == ENTITYID_TL_SVC_REPLY_READER_SECURE) {
+    type_lookup_reply_secure_writer_->send_deferred_samples(remoteId);
   } else
 #endif
   if (remoteId.entityId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER) {
@@ -3322,17 +3326,9 @@ Sedp::association_complete_i(const RepoId& localId,
     write_durable_subscription_data(remoteId, false);
   } else if (remoteId.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER) {
     write_durable_participant_message_data(remoteId);
-  } else if (remoteId.entityId == ENTITYID_TL_SVC_REQ_READER
-#ifdef OPENDDS_SECURITY
-      || remoteId.entityId == ENTITYID_TL_SVC_REQ_READER_SECURE
-#endif
-      ) {
+  } else if (remoteId.entityId == ENTITYID_TL_SVC_REQ_READER) {
     type_lookup_request_writer_->send_deferred_samples(remoteId);
-  } else if (remoteId.entityId == ENTITYID_TL_SVC_REPLY_READER
-#ifdef OPENDDS_SECURITY
-      || remoteId.entityId == ENTITYID_TL_SVC_REPLY_READER_SECURE
-#endif
-      ) {
+  } else if (remoteId.entityId == ENTITYID_TL_SVC_REPLY_READER) {
     type_lookup_reply_writer_->send_deferred_samples(remoteId);
   }
 }
