@@ -45,7 +45,6 @@ case E_ADDITIONAL_FIELD:
   long additional_field;
 };
 
-
 // Mixed Extensibility Tests =================================================
 
 @final
