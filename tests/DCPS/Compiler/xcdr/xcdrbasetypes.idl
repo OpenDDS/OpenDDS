@@ -1,0 +1,48 @@
+#define COMMON_FIELDS \
+  short short_field; \
+  long long_field; \
+  octet octet_field; \
+  long long long_long_field;
+
+#define COMMON_BRANCHES \
+  case E_SHORT_FIELD: \
+    short short_field; \
+  case E_LONG_FIELD: \
+    long long_field; \
+  case E_OCTET_FIELD: \
+    octet octet_field; \
+  case E_LONG_LONG_FIELD: \
+    long long long_long_field;
+
+@final
+struct FinalStruct {
+  COMMON_FIELDS
+};
+
+@appendable
+struct AppendableStruct {
+  COMMON_FIELDS
+};
+
+@mutable
+struct MutableStruct {
+  COMMON_FIELDS
+};
+
+enum UnionDisc {
+  E_SHORT_FIELD,
+  E_LONG_FIELD,
+  E_OCTET_FIELD,
+  E_LONG_LONG_FIELD,
+  E_ADDITIONAL_FIELD
+};
+
+@mutable
+union MutableUnion switch (UnionDisc) {
+  COMMON_BRANCHES
+};
+
+@final
+union FinalUnion switch(UnionDisc) {
+  COMMON_BRANCHES
+};
