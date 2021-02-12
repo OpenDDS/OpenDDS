@@ -552,7 +552,7 @@ metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
               post = "_forany";
             } else if (use_cxx11 && (elem_cls & (CL_ARRAY | CL_SEQUENCE))) {
               pre = "IDL::DistinctType<";
-              post = ", " + dds_generator::scoped_helper(elem_orig->name(), "_") + "_tag>";
+              post = ", " + dds_generator::get_tag_name(dds_generator::scoped_helper(elem_orig->name(), "_")) + ">";
             }
             be_global->impl_ <<
               "    if (!gen_skip_over(ser, static_cast<" << pre << cxx_elem << post
@@ -591,13 +591,13 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
   }
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
 
-  const std::string clazz = scoped(name), clazz_underscores = scoped_helper(name, "_");
+  const std::string clazz = scoped(name);
   ContentSubscriptionGuard csg;
   NamespaceGuard ng;
   Function f("gen_skip_over", "bool");
   f.addArg("ser", "Serializer&");
   if (use_cxx11) {
-    f.addArg("", "IDL::DistinctType<" + clazz + ", " + clazz_underscores + "_tag>*");
+    f.addArg("", "IDL::DistinctType<" + clazz + ", " + dds_generator::get_tag_name(clazz) +">*");
   } else {
     f.addArg("", clazz + (arr ? "_forany*" : "*"));
   }
@@ -657,7 +657,7 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
         post = "_forany";
       } else if (use_cxx11 && (elem_cls & (CL_ARRAY | CL_SEQUENCE))) {
         pre = "IDL::DistinctType<";
-        post = ", " + dds_generator::scoped_helper(elem_orig->name(), "_") + "_tag>";
+        post = ", " + dds_generator::get_tag_name(scoped_helper(elem_orig->name(), "::")) + ">";
       }
       be_global->impl_ <<
         "    if (!gen_skip_over(ser, static_cast<" << pre << cxx_elem << post
@@ -701,7 +701,7 @@ func(const std::string&, const std::string&, AST_Type* br_type, const std::strin
       post = "_forany";
     } else if (use_cxx11 && (br_cls & (CL_ARRAY | CL_SEQUENCE))) {
       pre = "IDL::DistinctType<";
-      post = ", " + dds_generator::scoped_helper(br_type->name(), "_") + "_tag>";
+      post = ", " + dds_generator::get_tag_name(dds_generator::scoped_helper(br_type->name(), "::")) + ">";
     }
     ss <<
       "    if (!gen_skip_over(ser, static_cast<" << pre

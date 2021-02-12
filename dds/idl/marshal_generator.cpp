@@ -266,42 +266,6 @@ namespace {
       type_class & (CL_SEQUENCE | CL_ARRAY);
   }
 
-  bool cxx_escape(const std::string& s, size_t i)
-  {
-    const std::string cxx = "_cxx_";
-    return s.substr(i, cxx.size()) == cxx;
-  }
-
-  std::string valid_var_name(const std::string& str)
-  {
-    // Replace invalid characters with a single underscore
-    const std::string invalid_chars("<>()[]*.: ");
-    std::string s;
-    char last_char = '\0';
-    for (size_t i = 0; i < str.size(); ++i) {
-      const char c = str[i];
-      if (invalid_chars.find(c) == std::string::npos) {
-        s.push_back(c);
-        last_char = c;
-      } else if (last_char != '_') {
-        s.push_back('_');
-        last_char = '_';
-      }
-    }
-
-    // Remove underscores at start and end
-    if (s.size() > 1 && s[0] == '_') {
-      if (!cxx_escape(s, 0)) {
-        s.erase(0, 1);
-      }
-    }
-    if (s.size() > 1 && s[s.size() - 1] == '_') {
-      s.erase(s.size() - 1, 1);
-    }
-
-    return s;
-  }
-
   const char* const shift_out = "<< ";
   const char* const shift_in = ">> ";
 
@@ -374,14 +338,9 @@ namespace {
     {
     }
 
-    static std::string get_tag_name(const std::string& base_name, bool nested_key_only)
-    {
-      return valid_var_name(base_name) + (nested_key_only ? "_nested_key_only" : "") + "_tag";
-    }
-
     std::string get_tag_name()
     {
-      return get_tag_name(type_name_, nested_key_only_);
+      return dds_generator::get_tag_name(type_name_, nested_key_only_);
     }
 
     void generate_tag()
@@ -416,14 +375,14 @@ namespace {
       if (forany) {
         const std::string forany_type = type_name_ + "_forany";
         if (classic_array_copy_) {
-          const std::string var_name = valid_var_name(ref_) + "_tmp_var";
+          const std::string var_name = dds_generator::valid_var_name(ref_) + "_tmp_var";
           classic_array_copy_var_ = var_name;
           if (intro) {
             intro->insert(type_name_ + "_var " + var_name + "= " + type_name_ + "_alloc();");
           }
           ref_ = var_name;
         }
-        const std::string var_name = valid_var_name(ref_) + "_forany";
+        const std::string var_name = dds_generator::valid_var_name(ref_) + "_forany";
         wrapped_type_name_ = forany_type;
         if (intro) {
           std::string line = forany_type + " " + var_name;
@@ -445,7 +404,7 @@ namespace {
         if (is_const_) {
           ref_ = wrapped_type_name_ + nko_arg;
         } else {
-          ref_ = valid_var_name(ref_) + "_nested_key_only";
+          ref_ = dds_generator::valid_var_name(ref_) + "_nested_key_only";
           if (intro) {
             intro->insert(wrapped_type_name_ + " " + ref_ + nko_arg + ";");
           }
@@ -462,7 +421,7 @@ namespace {
         if (is_const_) {
           ref_ = wrapped_type_name_ + idt_arg;
         } else {
-          ref_ = valid_var_name(ref_) + "_distinct_type";
+          ref_ = dds_generator::valid_var_name(ref_) + "_distinct_type";
           if (intro) {
             intro->insert(wrapped_type_name_ + " " + ref_ + idt_arg + ";");
           }
@@ -3559,7 +3518,7 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
         post = "_forany";
       } else if (use_cxx11 && (fld_cls & (CL_ARRAY | CL_SEQUENCE))) {
         pre = "IDL::DistinctType<";
-        post = ", " + dds_generator::scoped_helper(field->field_type()->name(), "_") + "_tag>";
+        post = ", " + dds_generator::get_tag_name(scoped(field->field_type()->name())) + ">";
       }
       const std::string ptr = field->field_type()->anonymous() ?
         FieldInfo(*field).ptr_ : (pre + scoped(field->field_type()->name()) + post + '*');

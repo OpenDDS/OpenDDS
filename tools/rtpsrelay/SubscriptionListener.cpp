@@ -2,6 +2,8 @@
 
 #include "utility.h"
 
+#include <dds/DCPS/JsonValueWriter.h>
+
 namespace RtpsRelay {
 
 SubscriptionListener::SubscriptionListener(OpenDDS::DCPS::DomainParticipantImpl* participant,
@@ -85,7 +87,7 @@ void SubscriptionListener::write_sample(const DDS::SubscriptionBuiltinTopicData&
     subscriber_qos,
   };
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SubscriptionListener::write_sample add local reader %C\n"), guid_to_string(repoid).c_str()));
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SubscriptionListener::write_sample add local reader %C %C\n"), guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str()));
   DDS::ReturnCode_t ret = writer_->write(entry, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SubscriptionListener::write_sample failed to write\n")));
