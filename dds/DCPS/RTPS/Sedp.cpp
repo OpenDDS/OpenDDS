@@ -528,8 +528,7 @@ DDS::ReturnCode_t Sedp::init_security(DDS::Security::IdentityHandle /* id_handle
   CryptoKeyExchange_var key_exchange = spdp_.get_security_config()->get_crypto_key_exchange();
   AccessControl_var acl = spdp_.get_security_config()->get_access_control();
   Authentication_var auth = spdp_.get_security_config()->get_authentication();
-  HandleRegistry_rch handle_registry = make_rch<HandleRegistry>();
-  spdp_.get_security_config()->insert_handle_registry(participant_id_, handle_registry);
+  HandleRegistry_rch handle_registry = spdp_.get_security_config()->get_handle_registry(participant_id_);
 
   set_permissions_handle(perm_handle);
   set_access_control(acl);
