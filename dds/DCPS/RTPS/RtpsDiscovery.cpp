@@ -79,7 +79,7 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , secure_participant_user_data_(false)
   , max_type_lookup_service_reply_period_(5, 0)
   , use_xtypes_(true)
-  , sedp_heartbeat_period_(1)
+  , sedp_heartbeat_period_(0, 100000)
   , sedp_heartbeat_period_minimum_(0, 10000)
   , sedp_heartbeat_period_maximum_(10, 0)
 {}
