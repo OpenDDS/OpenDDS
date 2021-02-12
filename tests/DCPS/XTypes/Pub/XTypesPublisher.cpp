@@ -364,7 +364,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   ws->attach_condition(condition);
 
   DDS::ConditionSeq conditions;
-  DDS::Duration_t timeout = { 20, 0 };
+  DDS::Duration_t timeout = { 10, 0 };
   const ReturnCode_t ret = ws->wait(conditions, timeout);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: %C condition wait failed for type %C: %C\n",
