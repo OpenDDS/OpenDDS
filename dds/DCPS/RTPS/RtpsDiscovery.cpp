@@ -81,7 +81,7 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , use_xtypes_(true)
   , sedp_heartbeat_period_(0, 100000)
   , sedp_heartbeat_period_minimum_(0, 10000)
-  , sedp_heartbeat_period_maximum_(10, 0)
+  , sedp_heartbeat_period_maximum_(1, 0)
 {}
 
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)

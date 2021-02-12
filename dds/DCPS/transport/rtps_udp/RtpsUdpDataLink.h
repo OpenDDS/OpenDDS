@@ -368,8 +368,6 @@ private:
     SNRIS lagging_readers_;
     // These reader have acked everything they are supposed to have acked.
     SNRIS leading_readers_;
-    // These readers have sent a non-final acknack that will be answered with a final heartbeat.
-    ReaderInfoSet readers_expecting_heartbeat_;
     // These readers have sent a nack and are expecting data.
     ReaderInfoSet readers_expecting_data_;
     RcHandle<SingleSendBuffer> send_buff_;
@@ -428,6 +426,14 @@ private:
     void gather_directed_heartbeat_i(MetaSubmessageVec& meta_submessages,
                                      MetaSubmessage& meta_submessage,
                                      const ReaderInfo_rch& reader);
+    void set_heartbeat_final_flag(CORBA::Octet& flags, const ReaderInfo_rch& reader) const
+    {
+      if (is_lagging(reader)) {
+        flags &= (~RTPS::FLAG_F);
+      } else {
+        flags |= RTPS::FLAG_F;
+      }
+    }
 
   public:
     RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable,
@@ -708,7 +714,6 @@ private:
     }
   }
 
-  void send_nack_replies(const DCPS::MonotonicTimePoint& now);
   void send_heartbeats(const DCPS::MonotonicTimePoint& now);
   void send_heartbeat_replies(const DCPS::MonotonicTimePoint& now);
   void check_heartbeats(const DCPS::MonotonicTimePoint& now);
@@ -718,8 +723,6 @@ private:
   typedef void (RtpsUdpDataLink::*PMF)();
 
   typedef PmfSporadicTask<RtpsUdpDataLink> Sporadic;
-
-  Sporadic nack_reply_;
 
   mutable ACE_Thread_Mutex heartbeat_mutex_;
   size_t expected_acks_;

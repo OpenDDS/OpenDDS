@@ -41,7 +41,7 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , nak_response_delay_(0, 200*1000 /*microseconds*/) // default from RTPS
   , heartbeat_period_(0, 100000) // no default in RTPS spec
   , heartbeat_period_minimum_(0, 10000)
-  , heartbeat_period_maximum_(10, 0)
+  , heartbeat_period_maximum_(1, 0)
   , heartbeat_response_delay_(0, 500*1000 /*microseconds*/) // default from RTPS
   , handshake_timeout_(30) // default syn_timeout in OpenDDS_Multicast
   , durable_data_timeout_(60)
