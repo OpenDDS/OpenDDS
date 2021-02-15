@@ -3573,27 +3573,7 @@ RtpsUdpDataLink::send_heartbeats(const DCPS::MonotonicTimePoint& now)
   typedef OPENDDS_MAP_CMP(RepoId, RepoIdSet, GUID_tKeyLessThan) WtaMap;
   WtaMap writers_to_advertise;
 
-  ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_);
-
   RtpsUdpInst& cfg = config();
-
-  const MonotonicTimePoint tv = now - 10 * cfg.heartbeat_period_;
-  const MonotonicTimePoint tv3 = now - 3 * cfg.heartbeat_period_;
-
-  for (InterestingRemoteMapType::iterator pos = interesting_readers_.begin(),
-         limit = interesting_readers_.end();
-       pos != limit;
-       ++pos) {
-    if (pos->second.status == InterestingRemote::DOES_NOT_EXIST ||
-        (pos->second.status == InterestingRemote::EXISTS && pos->second.last_activity < tv3)) {
-      writers_to_advertise[pos->second.localid].insert(pos->first);
-    }
-    if (pos->second.status == InterestingRemote::EXISTS && pos->second.last_activity < tv) {
-      CallbackType callback(pos->first, pos->second);
-      readerDoesNotExistCallbacks.push_back(callback);
-      pos->second.status = InterestingRemote::DOES_NOT_EXIST;
-    }
-  }
 
   {
     ACE_GUARD(ACE_Thread_Mutex, g2, heartbeat_mutex_);
@@ -3608,44 +3588,73 @@ RtpsUdpDataLink::send_heartbeats(const DCPS::MonotonicTimePoint& now)
     expected_acks_ = 0;
   }
 
-  using namespace OpenDDS::RTPS;
-
   MetaSubmessageVec meta_submessages;
+  bool keep_going;
+  RtpsWriterMap writers;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_);
 
-  bool keep_going = !interesting_readers_.empty();
-  typedef RtpsWriterMap::iterator rw_iter;
-  for (rw_iter rw = writers_.begin(); rw != writers_.end(); ++rw) {
-    rw->second->send_and_gather_nack_replies(meta_submessages);
-    WtaMap::iterator it = writers_to_advertise.find(rw->first);
-    if (it == writers_to_advertise.end()) {
-      keep_going |= rw->second->gather_heartbeats(pendingCallbacks, RepoIdSet(), meta_submessages);
-    } else {
-      keep_going |= rw->second->gather_heartbeats(pendingCallbacks, it->second, meta_submessages);
-      writers_to_advertise.erase(it);
+    const MonotonicTimePoint tv = now - 10 * cfg.heartbeat_period_;
+    const MonotonicTimePoint tv3 = now - 3 * cfg.heartbeat_period_;
+
+    for (InterestingRemoteMapType::iterator pos = interesting_readers_.begin(),
+           limit = interesting_readers_.end();
+         pos != limit;
+         ++pos) {
+      if (pos->second.status == InterestingRemote::DOES_NOT_EXIST ||
+          (pos->second.status == InterestingRemote::EXISTS && pos->second.last_activity < tv3)) {
+        writers_to_advertise[pos->second.localid].insert(pos->first);
+      }
+      if (pos->second.status == InterestingRemote::EXISTS && pos->second.last_activity < tv) {
+        CallbackType callback(pos->first, pos->second);
+        readerDoesNotExistCallbacks.push_back(callback);
+        pos->second.status = InterestingRemote::DOES_NOT_EXIST;
+      }
     }
+
+
+    using namespace OpenDDS::RTPS;
+
+    keep_going = !interesting_readers_.empty();
+    typedef RtpsWriterMap::iterator rw_iter;
+    for (rw_iter rw = writers_.begin(); rw != writers_.end(); ++rw) {
+      WtaMap::iterator it = writers_to_advertise.find(rw->first);
+      if (it == writers_to_advertise.end()) {
+        keep_going |= rw->second->gather_heartbeats(pendingCallbacks, RepoIdSet(), meta_submessages);
+      } else {
+        keep_going |= rw->second->gather_heartbeats(pendingCallbacks, it->second, meta_submessages);
+        writers_to_advertise.erase(it);
+      }
+    }
+
+    for (WtaMap::const_iterator pos = writers_to_advertise.begin(),
+           limit = writers_to_advertise.end();
+         pos != limit;
+         ++pos) {
+      const rw_iter rw = writers_.find(pos->first);
+      const int count = rw == writers_.end() ? ++heartbeat_counts_[pos->first.entityId] : rw->second->inc_heartbeat_count();
+      const HeartBeatSubmessage hb = {
+        {HEARTBEAT, FLAG_E, HEARTBEAT_SZ},
+        ENTITYID_UNKNOWN, // any matched reader may be interested in this
+        pos->first.entityId,
+        to_rtps_seqnum(SequenceNumber(1)),
+        to_rtps_seqnum(SequenceNumber::ZERO()),
+        {count}
+      };
+
+      MetaSubmessage meta_submessage(pos->first, GUID_UNKNOWN, pos->second);
+      meta_submessage.sm_.heartbeat_sm(hb);
+
+      meta_submessages.push_back(meta_submessage);
+    }
+
+    writers = writers_;
   }
 
-  for (WtaMap::const_iterator pos = writers_to_advertise.begin(),
-         limit = writers_to_advertise.end();
-       pos != limit;
-       ++pos) {
-    const rw_iter rw = writers_.find(pos->first);
-    const int count = rw == writers_.end() ? ++heartbeat_counts_[pos->first.entityId] : rw->second->inc_heartbeat_count();
-    const HeartBeatSubmessage hb = {
-      {HEARTBEAT, FLAG_E, HEARTBEAT_SZ},
-      ENTITYID_UNKNOWN, // any matched reader may be interested in this
-      pos->first.entityId,
-      to_rtps_seqnum(SequenceNumber(1)),
-      to_rtps_seqnum(SequenceNumber::ZERO()),
-      {count}
-    };
-
-    MetaSubmessage meta_submessage(pos->first, GUID_UNKNOWN, pos->second);
-    meta_submessage.sm_.heartbeat_sm(hb);
-
-    meta_submessages.push_back(meta_submessage);
+  typedef RtpsWriterMap::const_iterator rw_iter;
+  for (rw_iter rw = writers.begin(); rw != writers.end(); ++rw) {
+    rw->second->send_and_gather_nack_replies(meta_submessages);
   }
-  g.release();
 
   queue_or_send_submessages(meta_submessages);
 
@@ -3659,15 +3668,17 @@ RtpsUdpDataLink::send_heartbeats(const DCPS::MonotonicTimePoint& now)
     pendingCallbacks[i]->data_dropped();
   }
 
-  ACE_GUARD(ACE_Thread_Mutex, g2, heartbeat_mutex_);
-  if (keep_going) {
-    heartbeat_.cancel();
-    heartbeat_.schedule(heartbeat_period_);
-    last_heartbeat_ = now;
-  } else {
-    last_heartbeat_ = MonotonicTimePoint::zero_value;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g2, heartbeat_mutex_);
+    if (keep_going) {
+      heartbeat_.cancel();
+      heartbeat_.schedule(heartbeat_period_);
+      last_heartbeat_ = now;
+    } else {
+      last_heartbeat_ = MonotonicTimePoint::zero_value;
+    }
+    last_ack_ = MonotonicTimePoint::zero_value;
   }
-  last_ack_ = MonotonicTimePoint::zero_value;
 }
 
 void
