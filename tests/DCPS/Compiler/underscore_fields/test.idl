@@ -2,9 +2,6 @@
 // containing trailing underscores failing and colliding
 // with each other
 
-#ifndef __unique_identifier_msgs__msg__uuid__idl__
-#define __unique_identifier_msgs__msg__uuid__idl__
-
 module unique_identifier_msgs_ {
   module msg_ {
     module dds_ {
@@ -52,4 +49,3 @@ module unique_identifier_msgs_ {
     };  // module dds_
   };  // module msg_
 };  // module unique_identifier_msgs_
-#endif  // __unique_identifier_msgs__msg__uuid__idl__

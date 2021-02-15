@@ -30,6 +30,7 @@
 #  pragma once
 #endif
 #include <ace/Synch_Traits.h>
+#include <ace/Thread_Mutex.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -84,30 +85,32 @@ class OpenDDS_Dcps_Export SecurityConfig : public DCPS::RcObject {
     return utility_plugin_;
   }
 
-  void insert_handle_registry(const DCPS::RepoId& participant_id,
-                              const HandleRegistry_rch& handle_registry)
-  {
-    handle_registry_map_[participant_id] = handle_registry;
-
-    if (DCPS::security_debug.bookkeeping) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
-                 ACE_TEXT("SecurityConfig::insert_handle_registry handle_registry_map_ (total %B)\n"),
-                 handle_registry_map_.size()));
-    }
-  }
-
   HandleRegistry_rch get_handle_registry(const DCPS::RepoId& participant_id)
   {
+    HandleRegistry_rch handle_registry;
+
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, handle_registry);
+
     HandleRegistryMap::const_iterator pos = handle_registry_map_.find(participant_id);
     if (pos != handle_registry_map_.end()) {
-      return pos->second;
+      handle_registry = pos->second;
+    } else {
+      handle_registry = DCPS::make_rch<HandleRegistry>();
+      handle_registry_map_[participant_id] = handle_registry;
+
+      if (DCPS::security_debug.bookkeeping) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                   ACE_TEXT("SecurityConfig::get_handle_registry handle_registry_map_ (total %B)\n"),
+                   handle_registry_map_.size()));
+      }
     }
 
-    return HandleRegistry_rch();
+    return handle_registry;
   }
 
   void erase_handle_registry(const DCPS::RepoId& participant_id)
   {
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
     handle_registry_map_.erase(participant_id);
 
     if (DCPS::security_debug.bookkeeping) {
@@ -153,6 +156,7 @@ class OpenDDS_Dcps_Export SecurityConfig : public DCPS::RcObject {
   Utility* utility_plugin_;
   typedef OPENDDS_MAP_CMP(DCPS::RepoId, HandleRegistry_rch, DCPS::GUID_tKeyLessThan) HandleRegistryMap;
   HandleRegistryMap handle_registry_map_;
+  mutable ACE_Thread_Mutex mutex_;
 #endif
 
   ConfigPropertyList properties_;
