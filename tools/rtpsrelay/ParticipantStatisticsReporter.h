@@ -63,11 +63,9 @@ public:
 
     participant_statistics_.interval(time_diff_to_duration(d));
 
-#ifdef OPENDDS_RAPIDJSON
     if (config->log_relay_statistics()) {
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name.in(), OpenDDS::DCPS::to_json(participant_statistics_).c_str()));
     }
-#endif
 
     if (config->publish_relay_statistics()) {
       const auto ret = writer->write(participant_statistics_, DDS::HANDLE_NIL);

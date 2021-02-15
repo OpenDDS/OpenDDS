@@ -80,11 +80,9 @@ private:
 
     domain_statistics_.interval(time_diff_to_duration(d));
 
-#ifdef OPENDDS_RAPIDJSON
     if (config_.log_relay_statistics()) {
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name_.in(), OpenDDS::DCPS::to_json(domain_statistics_).c_str()));
     }
-#endif
 
     if (config_.publish_relay_statistics()) {
       const auto ret = writer_->write(domain_statistics_, DDS::HANDLE_NIL);
