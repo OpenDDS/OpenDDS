@@ -141,6 +141,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       } else if ((ACE_OS::strcmp(ACE_TEXT("-xcdr1"), argv[curr]) == 0)) {
         qosConfig.xcdr1_ = true;
         std::cout << "XCDR1 encoding" << std::endl;
+      } else if ((ACE_OS::strcmp(ACE_TEXT("-no-xtypes"), argv[curr]) == 0)) {
+        disc->use_xtypes(false);
+        std::cout << "XTypes disabled in discovery" << std::endl;
       } else {
         std::cout << "Ignoring unknown param: " <<
           ACE_TEXT_ALWAYS_CHAR(argv[curr]) << std::endl;
