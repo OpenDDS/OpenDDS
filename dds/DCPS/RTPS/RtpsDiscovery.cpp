@@ -45,6 +45,8 @@ using DCPS::TimeDuration;
 RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   : resend_period_(30 /*seconds*/) // see RTPS v2.1 9.6.1.4.2
   , quick_resend_ratio_(0.1)
+  , sedp_heartbeat_backoff_factor_(2.0)
+  , sedp_heartbeat_safety_factor_(1.1)
   , min_resend_delay_(TimeDuration::from_msec(100))
   , lease_duration_(300)
   , pb_(7400) // see RTPS v2.1 9.6.1.3 for PB, DG, PG, D0, D1 defaults
@@ -77,7 +79,9 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , secure_participant_user_data_(false)
   , max_type_lookup_service_reply_period_(5, 0)
   , use_xtypes_(true)
-  , sedp_heartbeat_period_(1)
+  , sedp_heartbeat_period_(0, 100000)
+  , sedp_heartbeat_period_minimum_(0, 10000)
+  , sedp_heartbeat_period_maximum_(1, 0)
 {}
 
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
@@ -164,6 +168,28 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
               value.c_str(), rtps_name.c_str()), -1);
           }
           config->quick_resend_ratio(ratio);
+        } else if (name == "SedpHeartbeatBackoffFactor") {
+          const OPENDDS_STRING& value = it->second;
+          double ratio;
+          if (!DCPS::convertToDouble(value, ratio)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+              ACE_TEXT("Invalid entry (%C) for SedpHeartbeatBackoffFactor in ")
+              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->sedp_heartbeat_backoff_factor(ratio);
+        } else if (name == "SedpHeartbeatSafetyFactor") {
+          const OPENDDS_STRING& value = it->second;
+          double ratio;
+          if (!DCPS::convertToDouble(value, ratio)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+              ACE_TEXT("Invalid entry (%C) for SedpHeartbeatSafetyFactor in ")
+              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->sedp_heartbeat_safety_factor(ratio);
         } else if (name == "MinResendDelay") {
           const OPENDDS_STRING& value = it->second;
           int delay;
@@ -592,6 +618,30 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
                               ACE_TEXT("Invalid entry (%C) for SedpHeartbeatPeriod in ")
+                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                              string_value.c_str(), rtps_name.c_str()), -1);
+          }
+        } else if (name == "SedpHeartbeatPeriodMinimum") {
+          const OPENDDS_STRING& string_value = it->second;
+          int value;
+          if (DCPS::convertToInteger(string_value, value)) {
+            config->sedp_heartbeat_period_minimum(TimeDuration::from_msec(value));
+          } else {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+                              ACE_TEXT("Invalid entry (%C) for SedpHeartbeatPeriodMinimum in ")
+                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                              string_value.c_str(), rtps_name.c_str()), -1);
+          }
+        } else if (name == "SedpHeartbeatPeriodMaximum") {
+          const OPENDDS_STRING& string_value = it->second;
+          int value;
+          if (DCPS::convertToInteger(string_value, value)) {
+            config->sedp_heartbeat_period_maximum(TimeDuration::from_msec(value));
+          } else {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+                              ACE_TEXT("Invalid entry (%C) for SedpHeartbeatPeriodMaximum in ")
                               ACE_TEXT("[rtps_discovery/%C] section.\n"),
                               string_value.c_str(), rtps_name.c_str()), -1);
           }

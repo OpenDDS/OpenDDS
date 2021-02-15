@@ -60,6 +60,28 @@ public:
     quick_resend_ratio_ = ratio;
   }
 
+  double sedp_heartbeat_backoff_factor() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> g(lock_);
+    return sedp_heartbeat_backoff_factor_;
+  }
+  void sedp_heartbeat_backoff_factor(double ratio)
+  {
+    ACE_Guard<ACE_Thread_Mutex> g(lock_);
+    sedp_heartbeat_backoff_factor_ = ratio;
+  }
+
+  double sedp_heartbeat_safety_factor() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> g(lock_);
+    return sedp_heartbeat_safety_factor_;
+  }
+  void sedp_heartbeat_safety_factor(double ratio)
+  {
+    ACE_Guard<ACE_Thread_Mutex> g(lock_);
+    sedp_heartbeat_safety_factor_ = ratio;
+  }
+
   DCPS::TimeDuration min_resend_delay() const
   {
     ACE_Guard<ACE_Thread_Mutex> g(lock_);
@@ -504,10 +526,34 @@ public:
     sedp_heartbeat_period_ = period;
   }
 
+  DCPS::TimeDuration sedp_heartbeat_period_minimum() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::TimeDuration());
+    return sedp_heartbeat_period_minimum_;
+  }
+  void sedp_heartbeat_period_minimum(const DCPS::TimeDuration& period_minimum)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    sedp_heartbeat_period_minimum_ = period_minimum;
+  }
+
+  DCPS::TimeDuration sedp_heartbeat_period_maximum() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::TimeDuration());
+    return sedp_heartbeat_period_maximum_;
+  }
+  void sedp_heartbeat_period_maximum(const DCPS::TimeDuration& period_maximum)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    sedp_heartbeat_period_maximum_ = period_maximum;
+  }
+
 private:
   mutable ACE_Thread_Mutex lock_;
   DCPS::TimeDuration resend_period_;
   double quick_resend_ratio_;
+  double sedp_heartbeat_backoff_factor_;
+  double sedp_heartbeat_safety_factor_;
   DCPS::TimeDuration min_resend_delay_;
   DCPS::TimeDuration lease_duration_;
   u_short pb_, dg_, pg_, d0_, d1_, dx_;
@@ -542,6 +588,8 @@ private:
   DCPS::TimeDuration max_type_lookup_service_reply_period_;
   bool use_xtypes_;
   DCPS::TimeDuration sedp_heartbeat_period_;
+  DCPS::TimeDuration sedp_heartbeat_period_minimum_;
+  DCPS::TimeDuration sedp_heartbeat_period_maximum_;
 };
 
 typedef OpenDDS::DCPS::RcHandle<RtpsDiscoveryConfig> RtpsDiscoveryConfig_rch;

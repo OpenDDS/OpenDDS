@@ -364,6 +364,10 @@ Sedp::init(const RepoId& guid,
   rtps_inst->handshake_timeout_ = disco.resend_period() * HANDSHAKE_MULTIPLIER;
   rtps_inst->max_message_size_ = disco.config()->sedp_max_message_size();
   rtps_inst->heartbeat_period_ = disco.config()->sedp_heartbeat_period();
+  rtps_inst->heartbeat_period_minimum_ = disco.config()->sedp_heartbeat_period_minimum();
+  rtps_inst->heartbeat_period_maximum_ = disco.config()->sedp_heartbeat_period_maximum();
+  rtps_inst->heartbeat_backoff_factor_ = disco.config()->sedp_heartbeat_backoff_factor();
+  rtps_inst->heartbeat_safety_factor_ = disco.config()->sedp_heartbeat_safety_factor();
 
   if (disco.sedp_multicast()) {
     // Bind to a specific multicast group
