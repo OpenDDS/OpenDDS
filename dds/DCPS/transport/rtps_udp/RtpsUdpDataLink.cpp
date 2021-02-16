@@ -821,14 +821,14 @@ void RtpsUdpDataLink::client_stop(const RepoId& localId)
 }
 
 void
-RtpsUdpDataLink::RtpsWriter::pre_stop_helper(OPENDDS_VECTOR(TransportQueueElement*)& to_drop)
+RtpsUdpDataLink::RtpsWriter::pre_stop_helper(OPENDDS_VECTOR(TransportQueueElement*)& to_drop, bool true_stop)
 {
   typedef SnToTqeMap::iterator iter_t;
 
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   ACE_GUARD(ACE_Thread_Mutex, g2, elems_not_acked_mutex_);
 
-  stopping_ = true;
+  stopping_ = true_stop;
 
   if (!elems_not_acked_.empty()) {
     OPENDDS_SET(SequenceNumber) sns_to_release;
@@ -859,7 +859,7 @@ RtpsUdpDataLink::pre_stop_i()
     RtpsWriterMap::iterator iter = writers_.begin();
     while (iter != writers_.end()) {
       RtpsWriter_rch writer = iter->second;
-      writer->pre_stop_helper(to_drop);
+      writer->pre_stop_helper(to_drop, true);
       RtpsWriterMap::iterator last = iter;
       ++iter;
       heartbeat_counts_.erase(last->first.entityId);
@@ -902,7 +902,7 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
       g.release();
       writer->remove_reader(remote_id);
       if (writer->reader_count() == 0) {
-        writer->pre_stop_helper(to_drop);
+        writer->pre_stop_helper(to_drop, false);
       }
       writer->process_acked_by_all();
     }
