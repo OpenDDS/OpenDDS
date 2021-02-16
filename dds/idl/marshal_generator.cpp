@@ -3849,6 +3849,9 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     be_global->impl_ << "  uni._d(temp);\n";
     AST_Type* disc_type = resolveActualType(discriminator);
     Classification disc_cls = classify(disc_type);
+    if (!disc_type->in_main_file() && disc_type->node_type() != AST_Decl::NT_pre_defined) {
+      be_global->add_referenced(disc_type->file_name().c_str());
+    }
     ACE_CDR::ULong default_enum_val = 0;
     if (disc_cls & CL_ENUM) {
       AST_Enum* enu = dynamic_cast<AST_Enum*>(disc_type);
