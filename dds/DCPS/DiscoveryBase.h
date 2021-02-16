@@ -1684,12 +1684,16 @@ namespace OpenDDS {
           if (writer_local) {
             lpi->second.matched_endpoints_.erase(reader);
             lpi->second.remote_expectant_opendds_associations_.erase(reader);
-            dsi->second.matched_endpoints_.erase(writer);
+            if (dsi != discovered_subscriptions_.end()) {
+              dsi->second.matched_endpoints_.erase(writer);
+            }
           }
           if (reader_local) {
             lsi->second.matched_endpoints_.erase(writer);
             lsi->second.remote_expectant_opendds_associations_.erase(writer);
-            dpi->second.matched_endpoints_.erase(reader);
+            if (dpi != discovered_publications_.end()) {
+              dpi->second.matched_endpoints_.erase(reader);
+            }
           }
           if (writer_local && !reader_local) {
             remove_assoc_i(writer, lpi->second, reader);
