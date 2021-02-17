@@ -14,7 +14,7 @@ class Writer : public ACE_Task_Base
 {
 public:
 
-  Writer (::DDS::DataWriter_ptr writer, const std::string name);
+  Writer (::DDS::DataWriter_ptr writer, const OPENDDS_STRING& name);
 
   void start ();
 

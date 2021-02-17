@@ -16,7 +16,7 @@ using namespace std;
 static int const num_instances_per_writer = 1;
 static int const num_messages = 10;
 
-Writer::Writer(::DDS::DataWriter_ptr writer, const std::string name)
+Writer::Writer(::DDS::DataWriter_ptr writer, const OPENDDS_STRING& name)
 : writer_ (::DDS::DataWriter::_duplicate (writer)), name_(name)
 {
 }
@@ -66,7 +66,7 @@ Writer::svc ()
     message.subject_id = 99;
     ::DDS::InstanceHandle_t handle = message_dw->register_instance(message);
 
-    message.from       = CORBA::string_dup(from.c_str());
+    message.from       = from.c_str();
     message.subject    = CORBA::string_dup("Review");
     message.text       = CORBA::string_dup("Worst. Movie. Ever.");
     message.count      = 0;

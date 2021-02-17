@@ -11,7 +11,7 @@
 using namespace Messenger;
 using namespace std;
 
-DataReaderListenerImpl::DataReaderListenerImpl (const std::string name)
+DataReaderListenerImpl::DataReaderListenerImpl (const OPENDDS_STRING& name)
   : num_reads_(0), name_(name)
 {
 }
