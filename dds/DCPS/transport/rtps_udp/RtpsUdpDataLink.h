@@ -378,6 +378,7 @@ private:
     WeakRcHandle<RtpsUdpDataLink> link_;
     const RepoId id_;
     const bool durable_;
+    bool stopping_;
     CORBA::Long heartbeat_count_;
 #ifdef OPENDDS_SECURITY
     const bool is_pvs_writer_; // Participant Volatile Secure writer
@@ -452,7 +453,7 @@ private:
     size_t reader_count() const;
     CORBA::Long inc_heartbeat_count();
 
-    void pre_stop_helper(OPENDDS_VECTOR(TransportQueueElement*)& to_drop);
+    void pre_stop_helper(OPENDDS_VECTOR(TransportQueueElement*)& to_drop, bool true_stop);
     TransportQueueElement* customize_queue_element_helper(TransportQueueElement* element,
                                                           bool requires_inline_qos,
                                                           MetaSubmessageVec& meta_submessages,
