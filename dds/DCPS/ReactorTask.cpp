@@ -247,7 +247,7 @@ bool ThreadStatus::update(const String& thread_key)
   map[thread_key] = Thread(now);
   if (DCPS_debug_level >= 4) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) ThreadStatus::update: "
-      "update for thread \"%C\" @ %d",
+      "update for thread \"%C\" @ %d\n",
       thread_key.c_str(), now.value().sec()));
   }
   return true;
