@@ -185,7 +185,7 @@ public:
 
   private:
     SingleSendBuffer& ssb_;
-    Proxy(Proxy&);
+    OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(Proxy)
   };
 
 private:
