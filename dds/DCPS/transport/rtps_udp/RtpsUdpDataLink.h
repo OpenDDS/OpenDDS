@@ -416,15 +416,23 @@ private:
     bool is_pvs_writer() const { return false; }
 #endif
 
-    SequenceNumber non_durable_first_sn() const
+    SequenceNumber non_durable_first_sn(const SingleSendBuffer::Proxy& proxy) const
     {
-      return (send_buff_ && !send_buff_->empty()) ? send_buff_->low() : (max_sn_ + 1);
+      if (!proxy.empty()) {
+        return proxy.low();
+      }
+      if (!proxy.pre_empty()) {
+        return proxy.pre_low();
+      }
+      return max_sn_ + 1;
     }
-    void initialize_heartbeat(MetaSubmessage& meta_submessage);
+    void initialize_heartbeat(const SingleSendBuffer::Proxy& proxy,
+                              MetaSubmessage& meta_submessage);
     void gather_preassociation_heartbeat_i(MetaSubmessageVec& meta_submessages,
                                            MetaSubmessage& meta_submessage,
                                            const ReaderInfo_rch& reader);
-    void gather_directed_heartbeat_i(MetaSubmessageVec& meta_submessages,
+    void gather_directed_heartbeat_i(const SingleSendBuffer::Proxy& proxy,
+                                     MetaSubmessageVec& meta_submessages,
                                      MetaSubmessage& meta_submessage,
                                      const ReaderInfo_rch& reader);
     void set_heartbeat_final_flag(CORBA::Octet& flags, const ReaderInfo_rch& reader) const
@@ -440,7 +448,8 @@ private:
     RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable,
                SequenceNumber max_sn, CORBA::Long heartbeat_count, size_t capacity);
     ~RtpsWriter();
-    SequenceNumber heartbeat_high(const ReaderInfo_rch&) const;
+    SequenceNumber max_data_seq(const SingleSendBuffer::Proxy& proxy,
+                                const ReaderInfo_rch&) const;
     void update_max_sn(const RepoId& reader, SequenceNumber seq);
     void add_elem_awaiting_ack(TransportQueueElement* element);
 
