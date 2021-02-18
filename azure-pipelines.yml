@@ -363,6 +363,15 @@ jobs:
   - script: |
       set -e
       source install_setenv.sh
+      cd tests/DCPS/common
+      git clean -dfx
+      $ACE_ROOT/bin/mwc.pl -type gnuace
+      make
+    displayName: Build common test lib Using Installed OpenDDS
+    condition: and(succeeded(), ne(variables['DoMakeInstall'], ''))
+  - script: |
+      set -e
+      source install_setenv.sh
       cd tests/cmake_integration/Messenger/Messenger_1
       rm -fr build
       mkdir build

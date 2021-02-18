@@ -1,0 +1,9 @@
+feature(!no_rapidjson): rapidjson {
+  verbatim(gnuace, macros, 1) {
+    RAPIDJSON_ROOT ?= $(DDS_ROOT)/tools/rapidjson
+  }
+  verbatim(gnuace, postinstall, 1) {
+"	@$(MKDIR) $(DESTDIR)$(INSTALL_PREFIX)/include/rapidjson"
+"	cp -R $(RAPIDJSON_ROOT)/include/rapidjson $(DESTDIR)$(INSTALL_PREFIX)/include"
+  }
+}
