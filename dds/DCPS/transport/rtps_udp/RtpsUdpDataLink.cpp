@@ -673,8 +673,8 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
       }
       RtpsReader_rch reader = rr->second;
       readers_of_writer_.insert(RtpsReaderMultiMap::value_type(remote_id, rr->second));
-      add_on_start_callback(client, remote_id);
       g.release();
+      add_on_start_callback(client, remote_id);
       reader->add_writer(make_rch<WriterInfo>(remote_id, remote_context));
       associated = false;
       enable_replies = true;
