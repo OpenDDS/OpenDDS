@@ -4,6 +4,7 @@
 #ifndef DATAREADER_LISTENER_IMPL
 #define DATAREADER_LISTENER_IMPL
 
+#include "dds/DCPS/PoolAllocator.h"
 #include <dds/DdsDcpsSubscriptionExtC.h>
 #include <dds/DCPS/LocalObject.h>
 
@@ -15,7 +16,7 @@ class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataReaderListener>
 {
 public:
-  DataReaderListenerImpl ();
+  DataReaderListenerImpl (const OPENDDS_STRING& name);
 
   virtual void on_requested_deadline_missed (
     DDS::DataReader_ptr reader,
@@ -71,7 +72,8 @@ protected:
 private:
 
   DDS::DataReader_var reader_;
-  long                  num_reads_;
+  long num_reads_;
+  const OPENDDS_STRING name_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */
