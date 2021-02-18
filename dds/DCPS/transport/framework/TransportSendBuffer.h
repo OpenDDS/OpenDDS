@@ -87,20 +87,6 @@ public:
 
   bool resend(const SequenceRange& range, DisjointSequence* gaps = 0);
 
-  // caller must already have the send strategy lock
-  bool resend_i(const SequenceRange& range, DisjointSequence* gaps = 0);
-  bool resend_i(const SequenceRange& range, DisjointSequence* gaps,
-                const RepoId& destination);
-
-  void resend_fragments_i(const SequenceNumber& sequence,
-                          const DisjointSequence& fragments);
-
-  SequenceNumber low() const;
-  SequenceNumber high() const;
-  bool empty() const;
-  bool contains(const SequenceNumber& seq) const;
-  bool contains(const SequenceNumber& seq, RepoId& destination) const;
-
   void retain_all(const RepoId& pub_id);
   void insert(SequenceNumber sequence,
               TransportSendStrategy::QueueType* queue,
@@ -109,6 +95,98 @@ public:
                        SequenceNumber fragment,
                        TransportSendStrategy::QueueType* queue,
                        ACE_Message_Block* chain);
+
+  void pre_insert(SequenceNumber sequence);
+
+  class Proxy {
+  public:
+    Proxy(SingleSendBuffer& ssb)
+      : ssb_(ssb)
+    {
+      ssb_.mutex_.acquire();
+    }
+
+    ~Proxy()
+    {
+      ssb_.mutex_.release();
+    }
+
+    SequenceNumber low() const
+    {
+      if (ssb_.buffers_.empty()) throw std::exception();
+      return ssb_.buffers_.begin()->first;
+    }
+
+    SequenceNumber high() const
+    {
+      if (ssb_.buffers_.empty()) throw std::exception();
+      return ssb_.buffers_.rbegin()->first;
+    }
+
+    bool empty() const
+    {
+      return ssb_.buffers_.empty();
+    }
+
+    bool contains(SequenceNumber seq) const
+    {
+      return ssb_.buffers_.count(seq);
+    }
+
+    bool contains(SequenceNumber seq, RepoId& destination) const
+    {
+      if (ssb_.buffers_.count(seq)) {
+        DestinationMap::const_iterator pos = ssb_.destinations_.find(seq);
+        destination = pos == ssb_.destinations_.end() ? GUID_UNKNOWN : pos->second;
+        return true;
+      }
+      return false;
+    }
+
+    SequenceNumber pre_low() const
+    {
+      if (ssb_.pre_seq_.empty()) throw std::exception();
+      return *ssb_.pre_seq_.begin();
+    }
+
+    SequenceNumber pre_high() const
+    {
+      if (ssb_.pre_seq_.empty()) throw std::exception();
+      return *ssb_.pre_seq_.rbegin();
+    }
+
+    bool pre_empty() const
+    {
+      return ssb_.pre_seq_.empty();
+    }
+
+    bool pre_contains(SequenceNumber sequence) const
+    {
+      return ssb_.pre_seq_.count(sequence);
+    }
+
+    // caller must already have the send strategy lock
+    bool resend_i(const SequenceRange& range, DisjointSequence* gaps = 0)
+    {
+      return ssb_.resend_i(range, gaps);
+    }
+
+    bool resend_i(const SequenceRange& range, DisjointSequence* gaps,
+                  const RepoId& destination)
+    {
+      return ssb_.resend_i(range, gaps, destination);
+    }
+
+    void resend_fragments_i(SequenceNumber sequence,
+                            const DisjointSequence& fragments)
+    {
+      ssb_.resend_fragments_i(sequence, fragments);
+    }
+
+  private:
+    SingleSendBuffer& ssb_;
+    OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(Proxy)
+  };
 
 private:
   void check_capacity_i(BufferVec& removed);
@@ -119,6 +197,13 @@ private:
   void insert_buffer(BufferType& buffer,
                      TransportSendStrategy::QueueType* queue,
                      ACE_Message_Block* chain);
+
+  // caller must already have the send strategy lock
+  bool resend_i(const SequenceRange& range, DisjointSequence* gaps = 0);
+  bool resend_i(const SequenceRange& range, DisjointSequence* gaps,
+                const RepoId& destination);
+  void resend_fragments_i(SequenceNumber sequence,
+                          const DisjointSequence& fragments);
 
   size_t n_chunks_;
 
@@ -135,7 +220,10 @@ private:
   typedef OPENDDS_MAP(SequenceNumber, RepoId) DestinationMap;
   DestinationMap destinations_;
 
-  ACE_Thread_Mutex mutex_;
+  typedef OPENDDS_SET(SequenceNumber) SequenceNumberSet;
+  SequenceNumberSet pre_seq_;
+
+  mutable ACE_Thread_Mutex mutex_;
 };
 
 } // namespace DCPS

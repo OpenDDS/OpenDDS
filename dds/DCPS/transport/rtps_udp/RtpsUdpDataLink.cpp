@@ -1137,6 +1137,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
     durable = dsle->get_header().historic_sample_;
 
   } else {
+    send_buff_->pre_insert(seq);
     return element;
   }
 
@@ -1175,6 +1176,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
     }
   }
 
+  send_buff_->pre_insert(seq);
   return rtps;
 }
 
@@ -1836,7 +1838,8 @@ RtpsUdpDataLink::RtpsWriter::add_reader(const ReaderInfo_rch& reader)
 
     MetaSubmessageVec meta_submessages;
     MetaSubmessage meta_submessage(id_, GUID_UNKNOWN);
-    initialize_heartbeat(meta_submessage);
+    const SingleSendBuffer::Proxy proxy(*send_buff_);
+    initialize_heartbeat(proxy, meta_submessage);
     gather_preassociation_heartbeat_i(meta_submessages, meta_submessage, reader);
     RtpsUdpDataLink_rch link = link_.lock();
     if (link) {
@@ -2925,37 +2928,38 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   }
 
   // Process the nack.
-
   reader->requests_.reset();
-  if ((acknack.readerSNState.numBits == 0 ||
-       (acknack.readerSNState.numBits == 1 && !(acknack.readerSNState.bitmap[0] & 1)))
-      && ack == heartbeat_high(reader)) {
-    // Since there is an entry in requested_changes_, the DR must have
-    // sent a non-final AckNack.  If the base value is the high end of
-    // the heartbeat range, treat it as a request for that seq#.
-    if ((!send_buff_.is_nil() && send_buff_->contains(ack)) ||
-        reader->durable_data_.count(ack)) {
-      reader->requests_.insert(ack);
-    }
-  } else {
-    reader->requests_.insert(ack, acknack.readerSNState.numBits, acknack.readerSNState.bitmap.get_buffer());
-  }
-
   bool schedule_nack_reply = false;
-  if (!reader->requests_.empty()) {
-    readers_expecting_data_.insert(reader);
-    schedule_nack_reply = true;
-  } else {
-    readers_expecting_data_.erase(reader);
-    if (preassociation_readers_.count(reader) != 0) {
-      MetaSubmessage meta_submessage(id_, GUID_UNKNOWN);
-      initialize_heartbeat(meta_submessage);
-      gather_preassociation_heartbeat_i(meta_submessages, meta_submessage, reader);
-    } else if (!is_final) {
-      MetaSubmessage meta_submessage(id_, GUID_UNKNOWN);
-      initialize_heartbeat(meta_submessage);
-      set_heartbeat_final_flag(meta_submessage.sm_.heartbeat_sm().smHeader.flags, reader);
-      gather_directed_heartbeat_i(meta_submessages, meta_submessage, reader);
+  {
+    const SingleSendBuffer::Proxy proxy(*send_buff_);
+    if ((acknack.readerSNState.numBits == 0 ||
+         (acknack.readerSNState.numBits == 1 && !(acknack.readerSNState.bitmap[0] & 1)))
+        && ack == max_data_seq(proxy, reader)) {
+      // Since there is an entry in requested_changes_, the DR must have
+      // sent a non-final AckNack.  If the base value is the high end of
+      // the heartbeat range, treat it as a request for that seq#.
+      if (reader->durable_data_.count(ack) || proxy.contains(ack) || proxy.pre_contains(ack)) {
+        reader->requests_.insert(ack);
+      }
+    } else {
+      reader->requests_.insert(ack, acknack.readerSNState.numBits, acknack.readerSNState.bitmap.get_buffer());
+    }
+
+    if (!reader->requests_.empty()) {
+      readers_expecting_data_.insert(reader);
+      schedule_nack_reply = true;
+    } else {
+      readers_expecting_data_.erase(reader);
+      if (preassociation_readers_.count(reader) != 0) {
+        MetaSubmessage meta_submessage(id_, GUID_UNKNOWN);
+        initialize_heartbeat(proxy, meta_submessage);
+        gather_preassociation_heartbeat_i(meta_submessages, meta_submessage, reader);
+      } else if (!is_final) {
+        MetaSubmessage meta_submessage(id_, GUID_UNKNOWN);
+        initialize_heartbeat(proxy, meta_submessage);
+        set_heartbeat_final_flag(meta_submessage.sm_.heartbeat_sm().smHeader.flags, reader);
+        gather_directed_heartbeat_i(proxy, meta_submessages, meta_submessage, reader);
+      }
     }
   }
 
@@ -3079,6 +3083,9 @@ RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies(MetaSubmessageVec& met
   FragmentInfo consolidated_fragment_requests;
   DisjointSequence consolidated_gaps;
 
+  ACE_GUARD(TransportSendBuffer::LockType, guard, send_buff_->strategy_lock());
+  SingleSendBuffer::Proxy proxy(*send_buff_);
+
   for (ReaderInfoSet::const_iterator pos = readers_expecting_data_.begin(), limit = readers_expecting_data_.end();
        pos != limit; ++pos) {
 
@@ -3137,12 +3144,11 @@ RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies(MetaSubmessageVec& met
     }
 
     if (!reader->requests_.empty() &&
-        send_buff_ &&
-        !send_buff_->empty() &&
-        reader->requests_.high() < send_buff_->low()) {
+        !proxy.empty() &&
+        reader->requests_.high() < proxy.low()) {
       // The reader is not going to get any data.
       // Send a gap that is going to to catch them up.
-      gaps.insert(SequenceRange(reader->requests_.low(), send_buff_->low().previous()));
+      gaps.insert(SequenceRange(reader->requests_.low(), proxy.low().previous()));
       reader->requests_.reset();
     }
 
@@ -3151,7 +3157,7 @@ RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies(MetaSubmessageVec& met
          pos != limit; ++pos) {
       for (SequenceNumber seq = pos->first; seq <= pos->second; ++seq) {
         RepoId destination;
-        if (send_buff_ && send_buff_->contains(seq, destination)) {
+        if (proxy.contains(seq, destination)) {
           if (destination == GUID_UNKNOWN) {
             // Not directed.
             consolidated_recipients.insert(addrs.begin(), addrs.end());
@@ -3163,12 +3169,14 @@ RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies(MetaSubmessageVec& met
             continue;
           } else {
             // Directed at the reader.
-            ACE_GUARD(TransportSendBuffer::LockType, guard, send_buff_->strategy_lock());
             const RtpsUdpSendStrategy::OverrideToken ot =
               link->send_strategy()->override_destinations(addrs);
-            send_buff_->resend_i(SequenceRange(seq, seq), 0, reader->id_);
+            proxy.resend_i(SequenceRange(seq, seq), 0, reader->id_);
             continue;
           }
+        } else if (proxy.pre_contains(seq)) {
+          // Can't answer, don't gap.
+          continue;
         }
 
         if (durable_ || is_pvs_writer()) {
@@ -3189,7 +3197,7 @@ RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies(MetaSubmessageVec& met
     for (rf_iter rf = reader->requested_frags_.begin(); rf != rf_end; ++rf) {
       const SequenceNumber& seq = rf->first;
       RepoId destination;
-      if (send_buff_ && send_buff_->contains(seq, destination)) {
+      if (proxy.contains(seq, destination)) {
         if (destination == GUID_UNKNOWN) {
           consolidated_recipients.insert(addrs.begin(), addrs.end());
           consolidated_fragment_requests[seq].insert(rf->second.bitmapBase.value, rf->second.numBits,
@@ -3201,15 +3209,17 @@ RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies(MetaSubmessageVec& met
           continue;
         } else {
           // Directed at the reader.
-          ACE_GUARD(TransportSendBuffer::LockType, guard, send_buff_->strategy_lock());
-          const RtpsUdpSendStrategy::OverrideToken ot =
-            link->send_strategy()->override_destinations(addrs);
           DisjointSequence x;
           x.insert(rf->second.bitmapBase.value, rf->second.numBits,
                    rf->second.bitmap.get_buffer());
-          send_buff_->resend_fragments_i(seq, x);
+          const RtpsUdpSendStrategy::OverrideToken ot =
+            link->send_strategy()->override_destinations(addrs);
+          proxy.resend_fragments_i(seq, x);
           continue;
         }
+      } else if (proxy.pre_contains(seq)) {
+        // Can't answer, don't gap.
+        continue;
       }
 
       if (durable_ || is_pvs_writer()) {
@@ -3230,10 +3240,10 @@ RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies(MetaSubmessageVec& met
 
   {
     // Send the consolidated requests.
-    const OPENDDS_VECTOR(SequenceRange) ranges = consolidated_requests.present_sequence_ranges();
-    ACE_GUARD(TransportSendBuffer::LockType, guard, send_buff_->strategy_lock());
     const RtpsUdpSendStrategy::OverrideToken ot =
       link->send_strategy()->override_destinations(consolidated_recipients);
+
+    const OPENDDS_VECTOR(SequenceRange) ranges = consolidated_requests.present_sequence_ranges();
     for (OPENDDS_VECTOR(SequenceRange)::const_iterator pos = ranges.begin(), limit = ranges.end();
          pos != limit; ++pos) {
       if (Transport_debug_level > 5) {
@@ -3241,12 +3251,12 @@ RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies(MetaSubmessageVec& met
                    "resend data %q-%q\n", pos->first.getValue(),
                    pos->second.getValue()));
       }
-      send_buff_->resend_i(*pos);
+      proxy.resend_i(*pos);
     }
 
     for (FragmentInfo::const_iterator pos = consolidated_fragment_requests.begin(),
            limit = consolidated_fragment_requests.end(); pos != limit; ++pos) {
-      send_buff_->resend_fragments_i(pos->first, pos->second);
+      proxy.resend_fragments_i(pos->first, pos->second);
     }
   }
 
@@ -3707,12 +3717,13 @@ RtpsUdpDataLink::RtpsWriter::expire_durable_data(const ReaderInfo_rch& reader,
 }
 
 void
-RtpsUdpDataLink::RtpsWriter::initialize_heartbeat(MetaSubmessage& meta_submessage)
+RtpsUdpDataLink::RtpsWriter::initialize_heartbeat(const SingleSendBuffer::Proxy& proxy,
+                                                  MetaSubmessage& meta_submessage)
 {
   using namespace OpenDDS::RTPS;
 
   // Assume no samples are available.
-  const SequenceNumber nonDurableFirstSN = non_durable_first_sn();
+  const SequenceNumber nonDurableFirstSN = non_durable_first_sn(proxy);
   const SequenceNumber firstSN = durable_ ? 1 : nonDurableFirstSN;
 
   const HeartBeatSubmessage hb = {
@@ -3747,11 +3758,12 @@ RtpsUdpDataLink::RtpsWriter::gather_preassociation_heartbeat_i(MetaSubmessageVec
 }
 
 void
-RtpsUdpDataLink::RtpsWriter::gather_directed_heartbeat_i(MetaSubmessageVec& meta_submessages,
+RtpsUdpDataLink::RtpsWriter::gather_directed_heartbeat_i(const SingleSendBuffer::Proxy& proxy,
+                                                         MetaSubmessageVec& meta_submessages,
                                                          MetaSubmessage& meta_submessage,
                                                          const ReaderInfo_rch& reader)
 {
-  const SequenceNumber first_sn = reader->durable_ ? 1 : non_durable_first_sn();
+  const SequenceNumber first_sn = reader->durable_ ? 1 : non_durable_first_sn(proxy);
   const SequenceNumber last_sn = expected_max_sn(reader);
   meta_submessage.dst_guid_ = reader->id_;
   meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
@@ -3785,13 +3797,15 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
 
   using namespace OpenDDS::RTPS;
 
+  const SingleSendBuffer::Proxy proxy(*send_buff_);
+
   // Assume no samples are available.
-  const SequenceNumber nonDurableFirstSN = non_durable_first_sn();
+  const SequenceNumber nonDurableFirstSN = non_durable_first_sn(proxy);
   const SequenceNumber firstSN = durable_ ? 1 : nonDurableFirstSN;
   const SequenceNumber lastSN = max_sn_;
 
   MetaSubmessage meta_submessage(id_, GUID_UNKNOWN);
-  initialize_heartbeat(meta_submessage);
+  initialize_heartbeat(proxy, meta_submessage);
 
   if (!additional_guids.empty()) {
     // Non-directed, non-final.
@@ -3843,7 +3857,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
           const ReaderInfo_rch& reader = *pos;
           // TODO: This should be factored out in a sporadic task.
           expire_durable_data(reader, cfg, now, pendingCallbacks);
-          gather_directed_heartbeat_i(meta_submessages, meta_submessage, reader);
+          gather_directed_heartbeat_i(proxy, meta_submessages, meta_submessage, reader);
           reader->expecting_ack_ = true;
           link->expect_ack();
         }
@@ -3916,8 +3930,8 @@ RtpsUdpDataLink::RtpsWriter::send_heartbeats_manual_i(MetaSubmessageVec& meta_su
     return;
   }
 
-  const bool has_data = send_buff_ && !send_buff_->empty();
-  const SequenceNumber firstSN = durable_ ? 1 : has_data ? send_buff_->low() : (max_sn_ + 1);
+  const SingleSendBuffer::Proxy proxy(*send_buff_);
+  const SequenceNumber firstSN = durable_ ? 1 : non_durable_first_sn(proxy);
   const SequenceNumber lastSN = max_sn_;
   const int counter = ++heartbeat_count_;
 
@@ -4002,13 +4016,13 @@ CORBA::Long RtpsUdpDataLink::RtpsWriter::inc_heartbeat_count()
 }
 
 SequenceNumber
-RtpsUdpDataLink::RtpsWriter::heartbeat_high(const ReaderInfo_rch& ri) const
+RtpsUdpDataLink::RtpsWriter::max_data_seq(const SingleSendBuffer::Proxy& proxy,
+                                          const ReaderInfo_rch& ri) const
 {
-  const SequenceNumber durable_max =
-    ri->durable_data_.empty() ? 0 : ri->durable_data_.rbegin()->first;
-  const SequenceNumber data_max =
-    send_buff_.is_nil() ? 0 : (send_buff_->empty() ? 0 : send_buff_->high());
-  return std::max(durable_max, data_max);
+  const SequenceNumber durable_max = ri->durable_data_.empty() ? 0 : ri->durable_data_.rbegin()->first;
+  const SequenceNumber pre_max = proxy.pre_empty() ? 0 : proxy.pre_high();
+  const SequenceNumber data_max = proxy.empty() ? 0 : proxy.high();
+  return std::max(durable_max, std::max(pre_max, data_max));
 }
 
 void
