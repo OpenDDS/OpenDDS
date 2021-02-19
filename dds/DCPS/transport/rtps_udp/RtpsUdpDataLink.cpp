@@ -3602,7 +3602,20 @@ RtpsUdpDataLink::send_heartbeats(const DCPS::MonotonicTimePoint& now)
 
   MetaSubmessageVec meta_submessages;
   bool keep_going;
-  RtpsWriterMap writers;
+
+  {
+    RtpsWriterMap writers;
+    {
+      ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_);
+      writers = writers_;
+    }
+
+    typedef RtpsWriterMap::const_iterator rw_iter;
+    for (rw_iter rw = writers.begin(); rw != writers.end(); ++rw) {
+      rw->second->send_and_gather_nack_replies(meta_submessages);
+    }
+  }
+
   {
     ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_);
 
@@ -3659,13 +3672,6 @@ RtpsUdpDataLink::send_heartbeats(const DCPS::MonotonicTimePoint& now)
 
       meta_submessages.push_back(meta_submessage);
     }
-
-    writers = writers_;
-  }
-
-  typedef RtpsWriterMap::const_iterator rw_iter;
-  for (rw_iter rw = writers.begin(); rw != writers.end(); ++rw) {
-    rw->second->send_and_gather_nack_replies(meta_submessages);
   }
 
   queue_or_send_submessages(meta_submessages);
