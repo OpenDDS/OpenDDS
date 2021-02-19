@@ -3578,9 +3578,6 @@ RtpsUdpDataLink::send_heartbeats(const DCPS::MonotonicTimePoint& now)
   OPENDDS_VECTOR(CallbackType) readerDoesNotExistCallbacks;
   OPENDDS_VECTOR(TransportQueueElement*) pendingCallbacks;
 
-  typedef OPENDDS_MAP_CMP(RepoId, RepoIdSet, GUID_tKeyLessThan) WtaMap;
-  WtaMap writers_to_advertise;
-
   RtpsUdpInst& cfg = config();
 
   {
@@ -3597,13 +3594,17 @@ RtpsUdpDataLink::send_heartbeats(const DCPS::MonotonicTimePoint& now)
   }
 
   MetaSubmessageVec meta_submessages;
-  bool keep_going;
+  bool use_adaptive_period = false;
+  bool use_fixed_period = false;
   RtpsWriterMap writers;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_);
 
     const MonotonicTimePoint tv = now - 10 * cfg.heartbeat_period_;
     const MonotonicTimePoint tv3 = now - 3 * cfg.heartbeat_period_;
+
+    typedef OPENDDS_MAP_CMP(RepoId, RepoIdSet, GUID_tKeyLessThan) WtaMap;
+    WtaMap writers_to_advertise;
 
     for (InterestingRemoteMapType::iterator pos = interesting_readers_.begin(),
            limit = interesting_readers_.end();
@@ -3620,17 +3621,16 @@ RtpsUdpDataLink::send_heartbeats(const DCPS::MonotonicTimePoint& now)
       }
     }
 
-
     using namespace OpenDDS::RTPS;
 
-    keep_going = !interesting_readers_.empty();
     typedef RtpsWriterMap::iterator rw_iter;
     for (rw_iter rw = writers_.begin(); rw != writers_.end(); ++rw) {
       WtaMap::iterator it = writers_to_advertise.find(rw->first);
       if (it == writers_to_advertise.end()) {
-        keep_going |= rw->second->gather_heartbeats(pendingCallbacks, RepoIdSet(), meta_submessages);
+        use_adaptive_period |= rw->second->gather_heartbeats(pendingCallbacks, RepoIdSet(), meta_submessages);
       } else {
-        keep_going |= rw->second->gather_heartbeats(pendingCallbacks, it->second, meta_submessages);
+        use_adaptive_period |= rw->second->gather_heartbeats(pendingCallbacks, it->second, meta_submessages);
+        use_fixed_period = true;
         writers_to_advertise.erase(it);
       }
     }
@@ -3639,8 +3639,8 @@ RtpsUdpDataLink::send_heartbeats(const DCPS::MonotonicTimePoint& now)
            limit = writers_to_advertise.end();
          pos != limit;
          ++pos) {
-      const rw_iter rw = writers_.find(pos->first);
-      const int count = rw == writers_.end() ? ++heartbeat_counts_[pos->first.entityId] : rw->second->inc_heartbeat_count();
+      OPENDDS_ASSERT(writers_.find(pos->first) == writers_.end());
+      const int count = ++heartbeat_counts_[pos->first.entityId];
       const HeartBeatSubmessage hb = {
         {HEARTBEAT, FLAG_E, HEARTBEAT_SZ},
         ENTITYID_UNKNOWN, // any matched reader may be interested in this
@@ -3655,6 +3655,8 @@ RtpsUdpDataLink::send_heartbeats(const DCPS::MonotonicTimePoint& now)
 
       meta_submessages.push_back(meta_submessage);
     }
+
+    use_fixed_period |= !writers_to_advertise.empty();
 
     writers = writers_;
   }
@@ -3678,9 +3680,9 @@ RtpsUdpDataLink::send_heartbeats(const DCPS::MonotonicTimePoint& now)
 
   {
     ACE_GUARD(ACE_Thread_Mutex, g2, heartbeat_mutex_);
-    if (keep_going) {
+    if (use_adaptive_period || use_fixed_period) {
       heartbeat_.cancel();
-      heartbeat_.schedule(heartbeat_period_);
+      heartbeat_.schedule(use_adaptive_period ? heartbeat_period_ : cfg.heartbeat_period_);
       last_heartbeat_ = now;
     } else {
       last_heartbeat_ = MonotonicTimePoint::zero_value;
@@ -3866,7 +3868,8 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
     for (ReaderInfoSet::const_iterator pos = readers_expecting_data_.begin(), limit = readers_expecting_data_.end();
          pos != limit; ++pos) {
       const ReaderInfo_rch& reader = *pos;
-      if (preassociation_readers_.count(reader) == 0 &&
+      if (additional_guids.count(reader->id_) == 0 &&
+          preassociation_readers_.count(reader) == 0 &&
           !is_lagging(reader)) {
         gather_directed_heartbeat_i(proxy, meta_submessages, meta_submessage, reader);
       }
@@ -3874,7 +3877,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
     readers_expecting_heartbeat_.clear();
   }
 
-  return !additional_guids.empty() || !preassociation_readers_.empty() || !lagging_readers_.empty();
+  return !preassociation_readers_.empty() || !lagging_readers_.empty();
 }
 
 void
