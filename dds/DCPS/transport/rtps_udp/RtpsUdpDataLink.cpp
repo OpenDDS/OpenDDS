@@ -1874,6 +1874,7 @@ RtpsUdpDataLink::RtpsWriter::remove_reader(const RepoId& id)
       const SequenceNumber acked_sn = reader->acked_sn();
       const SequenceNumber max_sn = expected_max_sn(reader);
       readers_expecting_data_.erase(reader);
+      readers_expecting_heartbeat_.erase(reader);
       snris_erase(acked_sn == max_sn ? leading_readers_ : lagging_readers_, acked_sn, reader);
       check_leader_lagger();
       remote_readers_.erase(it);
@@ -2801,7 +2802,7 @@ RtpsUdpDataLink::RtpsWriter::gather_gaps_i(const ReaderInfo_rch& reader,
 void
 RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& acknack,
                                              const RepoId& src_prefix,
-                                             MetaSubmessageVec& meta_submessages)
+                                             MetaSubmessageVec& /*meta_submessages*/)
 {
   const RepoId remote = make_id(src_prefix, acknack.readerId);
 
@@ -2950,17 +2951,12 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
       schedule_nack_reply = true;
     } else {
       readers_expecting_data_.erase(reader);
-      if (preassociation_readers_.count(reader) != 0) {
-        MetaSubmessage meta_submessage(id_, GUID_UNKNOWN);
-        initialize_heartbeat(proxy, meta_submessage);
-        gather_preassociation_heartbeat_i(meta_submessages, meta_submessage, reader);
-      } else if (!is_final) {
-        MetaSubmessage meta_submessage(id_, GUID_UNKNOWN);
-        initialize_heartbeat(proxy, meta_submessage);
-        set_heartbeat_final_flag(meta_submessage.sm_.heartbeat_sm().smHeader.flags, reader);
-        gather_directed_heartbeat_i(proxy, meta_submessages, meta_submessage, reader);
-      }
     }
+  }
+
+  if (!is_final) {
+    readers_expecting_heartbeat_.insert(reader);
+    schedule_nack_reply = true;
   }
 
   if (preassociation_readers_.count(reader) == 0) {
@@ -3781,7 +3777,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
 
-  if (additional_guids.empty() && preassociation_readers_.empty() && lagging_readers_.empty()) {
+  if (additional_guids.empty() && preassociation_readers_.empty() && lagging_readers_.empty() && readers_expecting_heartbeat_.empty()) {
     return false;
   }
 
@@ -3827,7 +3823,6 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
   }
 
   if (!lagging_readers_.empty()) {
-
     if (leading_readers_.empty() && remote_readers_.size() > 1
 #ifdef OPENDDS_SECURITY
         && !is_pvs_writer_
@@ -3865,7 +3860,21 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
     }
   }
 
-  return true;
+  // Directed, final.
+  if (!readers_expecting_heartbeat_.empty()) {
+    meta_submessage.sm_.heartbeat_sm().smHeader.flags |= RTPS::FLAG_F;
+    for (ReaderInfoSet::const_iterator pos = readers_expecting_data_.begin(), limit = readers_expecting_data_.end();
+         pos != limit; ++pos) {
+      const ReaderInfo_rch& reader = *pos;
+      if (preassociation_readers_.count(reader) == 0 &&
+          !is_lagging(reader)) {
+        gather_directed_heartbeat_i(proxy, meta_submessages, meta_submessage, reader);
+      }
+    }
+    readers_expecting_heartbeat_.clear();
+  }
+
+  return !additional_guids.empty() || !preassociation_readers_.empty() || !lagging_readers_.empty();
 }
 
 void

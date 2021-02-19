@@ -370,6 +370,8 @@ private:
     SNRIS leading_readers_;
     // These readers have sent a nack and are expecting data.
     ReaderInfoSet readers_expecting_data_;
+    // These readers have sent a non-final ack are are expecting a heartbeat.
+    ReaderInfoSet readers_expecting_heartbeat_;
     RcHandle<SingleSendBuffer> send_buff_;
     SequenceNumber max_sn_;
     typedef OPENDDS_SET(TransportQueueElement*) TqeSet;
@@ -435,14 +437,6 @@ private:
                                      MetaSubmessageVec& meta_submessages,
                                      MetaSubmessage& meta_submessage,
                                      const ReaderInfo_rch& reader);
-    void set_heartbeat_final_flag(CORBA::Octet& flags, const ReaderInfo_rch& reader) const
-    {
-      if (is_lagging(reader)) {
-        flags &= (~RTPS::FLAG_F);
-      } else {
-        flags |= RTPS::FLAG_F;
-      }
-    }
 
   public:
     RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable,
