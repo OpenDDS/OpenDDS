@@ -306,10 +306,6 @@ DataReaderImpl::add_association(const RepoId& yourId,
     }
   }
 
-  //get message block from octet seq then deser to a type info
-  XTypes::TypeInformation ti;
-  XTypes::deserialize_type_info(ti, writer.serializedTypeInfo);
-
   // Propagate the add_associations processing down into the Transport
   // layer here.  This will establish the transport support and reserve
   // usage of an existing connection or initiate creation of a new
