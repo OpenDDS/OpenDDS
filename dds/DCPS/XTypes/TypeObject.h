@@ -1833,7 +1833,7 @@ namespace XTypes {
     DCPS::MessageBlockHelper<T> helper(seq);
     DCPS::Serializer serializer(helper, XTypes::get_typeobject_encoding());
     if (!(serializer << type_info)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) serialize_type_info ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: serialize_type_info ")
                  ACE_TEXT("serialization of type information failed.\n")));
     }
   }
@@ -1844,7 +1844,7 @@ namespace XTypes {
     DCPS::MessageBlockHelper<T> helper(seq);
     DCPS::Serializer serializer(helper, XTypes::get_typeobject_encoding());
     if (!(serializer >> type_info)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) deserialize_type_info ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: deserialize_type_info ")
                  ACE_TEXT("deserialization of type information failed.\n")));
     }
   }
