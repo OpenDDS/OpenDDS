@@ -2437,7 +2437,7 @@ jobs:
         key: ${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
     - name: install openssl-windows & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse openssl-windows xerces-c
@@ -2491,7 +2491,7 @@ jobs:
 
     steps:
     - name: install openssl-windows & xerces-c
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse openssl-windows xerces-c
@@ -2566,7 +2566,7 @@ jobs:
 
     steps:
     - name: install openssl-windows & xerces-c
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse openssl-windows xerces-c
@@ -2678,7 +2678,7 @@ jobs:
 
     steps:
     - name: install xerces-c
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse xerces-c
@@ -2753,7 +2753,7 @@ jobs:
 
     steps:
     - name: install xerces-c
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse xerces-c
@@ -2889,7 +2889,7 @@ jobs:
 #        key: ${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
 #    - name: install openssl-windows & xerces-c
 #      if: steps.cache-artifact.outputs.cache-hit != 'true'
-#      uses: lukka/run-vcpkg@v6
+#      uses: lukka/run-vcpkg@v7
 #      with:
 #        vcpkgGitCommitId: ec6fe06
 #        vcpkgArguments: --recurse openssl-windows xerces-c
@@ -2943,7 +2943,7 @@ jobs:
 #
 #    steps:
 #    - name: install openssl-windows & xerces-c
-#      uses: lukka/run-vcpkg@v6
+#      uses: lukka/run-vcpkg@v7
 #      with:
 #        vcpkgGitCommitId: ec6fe06
 #        vcpkgArguments: --recurse openssl-windows xerces-c
@@ -3018,7 +3018,7 @@ jobs:
 #
 #    steps:
 #    - name: install openssl-windows & xerces-c
-#      uses: lukka/run-vcpkg@v6
+#      uses: lukka/run-vcpkg@v7
 #      with:
 #        vcpkgGitCommitId: ec6fe06
 #        vcpkgArguments: --recurse openssl-windows xerces-c
@@ -3130,7 +3130,7 @@ jobs:
 #
 #    steps:
 #    - name: install xerces-c
-#      uses: lukka/run-vcpkg@v6
+#      uses: lukka/run-vcpkg@v7
 #      with:
 #        vcpkgGitCommitId: ec6fe06
 #        vcpkgArguments: --recurse xerces-c
@@ -3205,7 +3205,7 @@ jobs:
 #
 #    steps:
 #    - name: install xerces-c
-#      uses: lukka/run-vcpkg@v6
+#      uses: lukka/run-vcpkg@v7
 #      with:
 #        vcpkgGitCommitId: ec6fe06
 #        vcpkgArguments: --recurse xerces-c
@@ -3341,7 +3341,7 @@ jobs:
 #        key: ${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
 #    - name: install openssl-windows & xerces-c
 #      if: steps.cache-artifact.outputs.cache-hit != 'true'
-#      uses: lukka/run-vcpkg@v6
+#      uses: lukka/run-vcpkg@v7
 #      with:
 #        vcpkgGitCommitId: ec6fe06
 #        vcpkgArguments: --recurse openssl-windows xerces-c
@@ -3395,7 +3395,7 @@ jobs:
 #
 #    steps:
 #    - name: install openssl-windows & xerces-c
-#      uses: lukka/run-vcpkg@v6
+#      uses: lukka/run-vcpkg@v7
 #      with:
 #        vcpkgGitCommitId: ec6fe06
 #        vcpkgArguments: --recurse openssl-windows xerces-c
@@ -3476,7 +3476,7 @@ jobs:
 #
 #    steps:
 #    - name: install openssl-windows & xerces-c
-#      uses: lukka/run-vcpkg@v6
+#      uses: lukka/run-vcpkg@v7
 #      with:
 #        vcpkgGitCommitId: ec6fe06
 #        vcpkgArguments: --recurse openssl-windows xerces-c
@@ -3588,7 +3588,7 @@ jobs:
 #
 #    steps:
 #    - name: install xerces-c
-#      uses: lukka/run-vcpkg@v6
+#      uses: lukka/run-vcpkg@v7
 #      with:
 #        vcpkgGitCommitId: ec6fe06
 #        vcpkgArguments: --recurse xerces-c
@@ -3669,7 +3669,7 @@ jobs:
 #
 #    steps:
 #    - name: install xerces-c
-#      uses: lukka/run-vcpkg@v6
+#      uses: lukka/run-vcpkg@v7
 #      with:
 #        vcpkgGitCommitId: ec6fe06
 #        vcpkgArguments: --recurse xerces-c
@@ -3806,7 +3806,7 @@ jobs:
         key: ${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
     - name: install openssl-windows & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse openssl-windows xerces-c
@@ -3862,7 +3862,7 @@ jobs:
 
     steps:
     - name: install openssl-windows & xerces-c
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse openssl-windows xerces-c
@@ -3945,7 +3945,7 @@ jobs:
 
     steps:
     - name: install openssl-windows & xerces-c
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse openssl-windows xerces-c
@@ -4063,7 +4063,7 @@ jobs:
 
     steps:
     - name: install xerces-c
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse xerces-c
@@ -4146,7 +4146,7 @@ jobs:
 
     steps:
     - name: install xerces-c
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
         vcpkgGitCommitId: ec6fe06
         vcpkgArguments: --recurse xerces-c
@@ -4288,7 +4288,7 @@ jobs:
 #        key: ${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
 #    - name: install openssl-windows & xerces-c
 #      if: steps.cache-artifact.outputs.cache-hit != 'true'
-#      uses: lukka/run-vcpkg@v6
+#      uses: lukka/run-vcpkg@v7
 #      with:
 #        vcpkgGitCommitId: ec6fe06
 #        vcpkgArguments: --recurse openssl-windows xerces-c
@@ -4342,7 +4342,7 @@ jobs:
 #
 #    steps:
 #    - name: install openssl-windows & xerces-c
-#      uses: lukka/run-vcpkg@v6
+#      uses: lukka/run-vcpkg@v7
 #      with:
 #        vcpkgGitCommitId: ec6fe06
 #        vcpkgArguments: --recurse openssl-windows xerces-c
@@ -4423,7 +4423,7 @@ jobs:
 #
 #    steps:
 #    - name: install openssl-windows & xerces-c
-#      uses: lukka/run-vcpkg@v6
+#      uses: lukka/run-vcpkg@v7
 #      with:
 #        vcpkgGitCommitId: ec6fe06
 #        vcpkgArguments: --recurse openssl-windows xerces-c
@@ -4536,7 +4536,7 @@ jobs:
 #
 #    steps:
 #    - name: install xerces-c
-#      uses: lukka/run-vcpkg@v6
+#      uses: lukka/run-vcpkg@v7
 #      with:
 #        vcpkgGitCommitId: ec6fe06
 #        vcpkgArguments: --recurse xerces-c
@@ -4617,7 +4617,7 @@ jobs:
 #
 #    steps:
 #    - name: install xerces-c
-#      uses: lukka/run-vcpkg@v6
+#      uses: lukka/run-vcpkg@v7
 #      with:
 #        vcpkgGitCommitId: ec6fe06
 #        vcpkgArguments: --recurse xerces-c
