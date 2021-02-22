@@ -3618,6 +3618,7 @@ RtpsUdpDataLink::send_heartbeats(const DCPS::MonotonicTimePoint& now)
     typedef OPENDDS_MAP_CMP(RepoId, RepoIdSet, GUID_tKeyLessThan) WtaMap;
     WtaMap writers_to_advertise;
 
+    use_fixed_period |= !interesting_readers_.empty();
     for (InterestingRemoteMapType::iterator pos = interesting_readers_.begin(),
            limit = interesting_readers_.end();
          pos != limit;
@@ -3870,7 +3871,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
   // Directed, final.
   if (!readers_expecting_heartbeat_.empty()) {
     meta_submessage.sm_.heartbeat_sm().smHeader.flags |= RTPS::FLAG_F;
-    for (ReaderInfoSet::const_iterator pos = readers_expecting_data_.begin(), limit = readers_expecting_data_.end();
+    for (ReaderInfoSet::const_iterator pos = readers_expecting_heartbeat_.begin(), limit = readers_expecting_heartbeat_.end();
          pos != limit; ++pos) {
       const ReaderInfo_rch& reader = *pos;
       if (additional_guids.count(reader->id_) == 0 &&
