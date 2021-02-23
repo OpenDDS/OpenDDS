@@ -174,8 +174,6 @@ public:
 
   virtual void pre_stop_i();
 
-  virtual void send_final_acks(const RepoId& readerid);
-
   virtual ICE::Endpoint* get_ice_endpoint() const;
 
 #ifdef OPENDDS_SECURITY
@@ -515,14 +513,18 @@ private:
 
   class RtpsReader : public RcObject {
   public:
-    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable, CORBA::Long an_start, CORBA::Long nf_start)
+    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable, CORBA::Long /*an_start*/, CORBA::Long /*nf_start*/)
       : link_(link)
       , id_(id)
       , durable_(durable)
       , stopping_(false)
-      , acknack_count_(an_start)
-      , nackfrag_count_(nf_start)
+      , nackfrag_count_(0)
+      , preassociation_task_(link->reactor_task_->interceptor(), *this, &RtpsReader::send_preassociation_acknacks)
     {}
+
+    ~RtpsReader() {
+      preassociation_task_.cancel_and_wait();
+    }
 
     bool add_writer(const WriterInfo_rch& info);
     bool has_writer(const RepoId& id) const;
@@ -550,13 +552,12 @@ private:
                                   MetaSubmessageVec& meta_submessages);
     void deliver_held_data(const RepoId& src);
 
-    void gather_preassociation_ack_nacks(MetaSubmessageVec& meta_submessages);
     const RepoId& id() const { return id_; }
 
   private:
-    void gather_preassociation_ack_nacks_i(MetaSubmessageVec& meta_submessages);
-    void gather_preassociation_ack_nack_i(MetaSubmessageVec& meta_submessages,
-                                          const WriterInfo_rch& writer);
+    void send_preassociation_acknacks(const DCPS::MonotonicTimePoint& now);
+    void gather_preassociation_acknack_i(MetaSubmessageVec& meta_submessages,
+                                         const WriterInfo_rch& writer);
 
     void gather_ack_nacks_i(const WriterInfo_rch& writer,
                             const RtpsUdpDataLink_rch& link,
@@ -577,6 +578,8 @@ private:
     bool stopping_;
     CORBA::Long acknack_count_;
     CORBA::Long nackfrag_count_;
+    typedef PmfSporadicTask<RtpsReader> Sporadic;
+    Sporadic preassociation_task_;
   };
   typedef RcHandle<RtpsReader> RtpsReader_rch;
 

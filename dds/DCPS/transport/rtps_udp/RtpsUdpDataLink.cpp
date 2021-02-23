@@ -1747,6 +1747,8 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
   const WriterInfo_rch& writer = wi->second;
 
   if (!compare_and_update_counts(heartbeat.count.value, writer->heartbeat_recvd_count_)) {
+    VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::process_heartbeat_i "
+          "WARNING Count indicates duplicate, dropping\n"));
     return false;
   }
 
@@ -1789,7 +1791,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
       writer->hb_last_ = std::max(writer->hb_last_, hb_last);
       gather_ack_nacks_i(writer, link, !(heartbeat.smHeader.flags & RTPS::FLAG_F), meta_submessages);
     } else {
-      gather_preassociation_ack_nack_i(meta_submessages, writer);
+      gather_preassociation_acknack_i(meta_submessages, writer);
     }
   }
 
@@ -1905,10 +1907,11 @@ RtpsUdpDataLink::RtpsReader::add_writer(const WriterInfo_rch& writer)
     preassociation_writers_.insert(writer);
 
     MetaSubmessageVec meta_submessages;
-    gather_preassociation_ack_nack_i(meta_submessages, writer);
+    gather_preassociation_acknack_i(meta_submessages, writer);
     RtpsUdpDataLink_rch link = link_.lock();
     if (link) {
       link->queue_or_send_submessages(meta_submessages);
+      preassociation_task_.schedule(link->config().heartbeat_period_);
     }
 
     return true;
@@ -1963,40 +1966,37 @@ RtpsUdpDataLink::RtpsReader::should_nack_fragments(const RcHandle<RtpsUdpDataLin
 }
 
 void
-RtpsUdpDataLink::RtpsReader::gather_preassociation_ack_nacks(MetaSubmessageVec& meta_submessages)
+RtpsUdpDataLink::RtpsReader::send_preassociation_acknacks(const DCPS::MonotonicTimePoint& /*now*/)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  gather_preassociation_ack_nacks_i(meta_submessages);
-}
-
-void
-RtpsUdpDataLink::RtpsReader::gather_preassociation_ack_nacks_i(MetaSubmessageVec& meta_submessages)
-{
-  if (preassociation_writers_.empty()) {
-    return;
-  }
-
   RtpsUdpDataLink_rch link = link_.lock();
-
   if (!link) {
     return;
   }
 
-  GuardType guard(link->strategy_lock_);
-  if (link->receive_strategy() == 0) {
-    return;
+  MetaSubmessageVec meta_submessages;
+
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+
+    if (preassociation_writers_.empty()) {
+      return;
+    }
+
+    // We want a heartbeat from these writers.
+    for (WriterInfoSet::const_iterator pos = preassociation_writers_.begin(), limit = preassociation_writers_.end();
+         pos != limit; ++pos) {
+      gather_preassociation_acknack_i(meta_submessages, *pos);
+    }
   }
 
-  // We want a heartbeat from these writers.
-  for (WriterInfoSet::const_iterator pos = preassociation_writers_.begin(), limit = preassociation_writers_.end();
-       pos != limit; ++pos) {
-    gather_preassociation_ack_nack_i(meta_submessages, *pos);
-  }
+  link->queue_or_send_submessages(meta_submessages);
+
+  preassociation_task_.schedule(link->config().heartbeat_period_);
 }
 
 void
-RtpsUdpDataLink::RtpsReader::gather_preassociation_ack_nack_i(MetaSubmessageVec& meta_submessages,
-                                                              const WriterInfo_rch& writer)
+RtpsUdpDataLink::RtpsReader::gather_preassociation_acknack_i(MetaSubmessageVec& meta_submessages,
+                                                             const WriterInfo_rch& writer)
 {
   using namespace OpenDDS::RTPS;
 
@@ -2502,7 +2502,6 @@ RtpsUdpDataLink::send_heartbeat_replies(const DCPS::MonotonicTimePoint& /*now*/)
   using namespace OpenDDS::RTPS;
 
   MetaSubmessageVec meta_submessages;
-  RtpsReaderMap readers;
 
   {
     ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
@@ -2537,12 +2536,6 @@ RtpsUdpDataLink::send_heartbeat_replies(const DCPS::MonotonicTimePoint& /*now*/)
       meta_submessages.push_back(meta_submessage);
     }
     interesting_ack_nacks_.clear();
-
-    readers = readers_;
-  }
-
-  for (RtpsReaderMap::iterator rr = readers.begin(); rr != readers.end(); ++rr) {
-    rr->second->gather_preassociation_ack_nacks(meta_submessages);
   }
 
   queue_or_send_submessages(meta_submessages);
@@ -2690,6 +2683,8 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_frag_i(const RTPS::HeartBeatFragS
   const WriterInfo_rch& writer = wi->second;
 
   if (!compare_and_update_counts(hb_frag.count.value, writer->hb_frag_recvd_count_)) {
+    VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::process_heartbeat_frag_i "
+          "WARNING Count indicates duplicate, dropping\n"));
     return false;
   }
 
@@ -2830,15 +2825,21 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
 
   const ReaderInfo_rch& reader = ri->second;
 
-  if (!compare_and_update_counts(acknack.count.value, reader->acknack_recvd_count_)) {
-    VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
-      "WARNING Count indicates duplicate, dropping\n"));
-    return;
-  }
+  SequenceNumber previous_acked_sn = reader->acked_sn();
+  const SequenceNumber ack = to_opendds_seqnum(acknack.readerSNState.bitmapBase);
+  const bool reset = acknack.count.value == 0 && ack <= reader->cur_cumulative_ack_;
 
-  if (reader->expecting_ack_) {
-    reader->expecting_ack_ = false;
-    link->received_expected_ack();
+  if (!reset) {
+    if (!compare_and_update_counts(acknack.count.value, reader->acknack_recvd_count_)) {
+      VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
+            "WARNING Count indicates duplicate, dropping\n"));
+      return;
+    }
+
+    if (reader->expecting_ack_) {
+      reader->expecting_ack_ = false;
+      link->received_expected_ack();
+    }
   }
 
   const bool is_final = acknack.smHeader.flags & RTPS::FLAG_F;
@@ -2862,10 +2863,6 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
 
   OPENDDS_MAP(SequenceNumber, TransportQueueElement*) pendingCallbacks;
 
-  // Process the ack.
-  SequenceNumber previous_acked_sn = reader->acked_sn();
-  const SequenceNumber ack = to_opendds_seqnum(acknack.readerSNState.bitmapBase);
-
   if (Transport_debug_level > 5) {
     GuidConverter local_conv(id_), remote_conv(remote);
     ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
@@ -2873,6 +2870,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
                OPENDDS_STRING(remote_conv).c_str(), ack.getValue()));
   }
 
+  // Process the ack.
   if (ack != SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
     if (ack >= reader->cur_cumulative_ack_) {
       reader->cur_cumulative_ack_ = ack;
@@ -4058,25 +4056,6 @@ RtpsUdpDataLink::RtpsWriter::add_elem_awaiting_ack(TransportQueueElement* elemen
 {
   ACE_GUARD(ACE_Thread_Mutex, g, elems_not_acked_mutex_);
   elems_not_acked_.insert(SnToTqeMap::value_type(element->sequence(), element));
-}
-
-void
-RtpsUdpDataLink::send_final_acks(const RepoId& readerid)
-{
-  RtpsReader_rch reader;
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
-    RtpsReaderMap::iterator rr = readers_.find(readerid);
-    if (rr != readers_.end()) {
-      reader = rr->second;
-    }
-  }
-
-  if (reader) {
-    MetaSubmessageVec meta_submessages;
-    reader->gather_preassociation_ack_nacks(meta_submessages);
-    queue_or_send_submessages(meta_submessages);
-  }
 }
 
 void
