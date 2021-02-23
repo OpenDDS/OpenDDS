@@ -594,7 +594,7 @@ bool
 RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
                             bool local_reliable, bool remote_reliable,
                             bool local_durable, bool remote_durable,
-                            ACE_CDR::ULong remote_context,
+                            ACE_CDR::ULong participant_flags,
                             SequenceNumber max_sn,
                             const TransportClient_rch& client)
 {
@@ -635,7 +635,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
       RtpsWriter_rch writer = rw->second;
       g.release();
       writer->update_max_sn(remote_id, max_sn);
-      writer->add_reader(make_rch<ReaderInfo>(remote_id, remote_durable, remote_context));
+      writer->add_reader(make_rch<ReaderInfo>(remote_id, remote_durable, participant_flags));
     }
     invoke_on_start_callbacks(local_id, remote_id, true);
   } else if (conv.isReader()) {
@@ -658,7 +658,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
       readers_of_writer_.insert(RtpsReaderMultiMap::value_type(remote_id, rr->second));
       g.release();
       add_on_start_callback(client, remote_id);
-      reader->add_writer(make_rch<WriterInfo>(remote_id, remote_context));
+      reader->add_writer(make_rch<WriterInfo>(remote_id, participant_flags));
       associated = false;
     } else {
       invoke_on_start_callbacks(local_id, remote_id, true);
@@ -2314,10 +2314,6 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(
             break;
           }
           case ACKNACK: {
-            const EntityId_t readerid = res.sm_.acknack_sm().readerId;
-            const EntityId_t writerid = res.sm_.acknack_sm().writerId;
-            unique = counts.acknack_counts_[readerid][writerid].insert(res.sm_.acknack_sm().count.value).second;
-            OPENDDS_ASSERT(unique);
             result = helper.add_to_bundle(res.sm_.acknack_sm());
             break;
           }
@@ -2453,13 +2449,6 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVec& meta_submessages
           CountSet& set = counts.heartbeat_counts_[i][res.sm_.heartbeat_sm().writerId];
           OPENDDS_ASSERT(!set.empty());
           res.sm_.heartbeat_sm().count.value = *set.begin();
-          set.erase(set.begin());
-          break;
-        }
-        case ACKNACK: {
-          CountSet& set = counts.acknack_counts_[res.sm_.acknack_sm().readerId][res.sm_.acknack_sm().writerId];
-          OPENDDS_ASSERT(!set.empty());
-          res.sm_.acknack_sm().count.value = *set.begin();
           set.erase(set.begin());
           break;
         }
@@ -3941,7 +3930,7 @@ RtpsUdpDataLink::ReaderInfo::expecting_durable_data() const
 bool
 RtpsUdpDataLink::ReaderInfo::reflects_heartbeat_count() const
 {
-  return participant_flags_ & RTPS::PFLAGS_REFLECTS_HEARTBEAT_COUNT;
+  return participant_flags_ & RTPS::PFLAGS_REFLECT_HEARTBEAT_COUNT;
 }
 
 RtpsUdpDataLink::RtpsWriter::RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id,

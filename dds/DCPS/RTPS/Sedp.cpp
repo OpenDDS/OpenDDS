@@ -4980,7 +4980,7 @@ DDS::ReturnCode_t
 Sedp::add_publication_i(const DCPS::RepoId& rid,
                         LocalPublication& pub)
 {
-  pub.transport_context_ = PFLAGS_THIS_VERSION;
+  pub.transport_context_ = spdp_.config()->participant_flags();
 #ifdef OPENDDS_SECURITY
   DCPS::DataWriterCallbacks_rch pl = pub.publication_.lock();
   if (pl) {
@@ -5131,7 +5131,7 @@ DDS::ReturnCode_t
 Sedp::add_subscription_i(const DCPS::RepoId& rid,
                          LocalSubscription& sub)
 {
-  sub.transport_context_ = PFLAGS_THIS_VERSION;
+  sub.transport_context_ = spdp_.config()->participant_flags();
 #ifdef OPENDDS_SECURITY
   DCPS::DataReaderCallbacks_rch sl = sub.subscription_.lock();
   if (sl) {

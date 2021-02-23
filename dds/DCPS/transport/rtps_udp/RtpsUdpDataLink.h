@@ -147,7 +147,7 @@ public:
   bool associated(const RepoId& local, const RepoId& remote,
                   bool local_reliable, bool remote_reliable,
                   bool local_durable, bool remote_durable,
-                  ACE_CDR::ULong remote_context,
+                  ACE_CDR::ULong participant_flags,
                   SequenceNumber max_sn,
                   const TransportClient_rch& client);
 
@@ -589,10 +589,10 @@ private:
   typedef OPENDDS_VECTOR(MetaSubmessageIterVec) MetaSubmessageIterVecVec;
   typedef OPENDDS_SET(CORBA::Long) CountSet;
   typedef OPENDDS_MAP_CMP(EntityId_t, CountSet, EntityId_tKeyLessThan) IdCountSet;
+  typedef OPENDDS_MAP(size_t, IdCountSet) HeartbeatCounts;
 
   struct CountKeeper {
-    OPENDDS_MAP(size_t, IdCountSet) heartbeat_counts_;
-    OPENDDS_MAP_CMP(EntityId_t, IdCountSet, EntityId_tKeyLessThan) acknack_counts_;
+    HeartbeatCounts heartbeat_counts_;
     IdCountSet nackfrag_counts_;
   };
 

@@ -157,6 +157,10 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
       enable_endpoint_announcements = prop_to_bool(prop);
     } else if (std::strcmp(RTPS_DISCOVERY_TYPE_LOOKUP_SERVICE, prop.name.in()) == 0) {
       enable_type_lookup_service = prop_to_bool(prop);
+    } else if (std::strcmp(RTPS_REFLECT_HEARTBEAT_COUNT, prop.name.in()) == 0) {
+      const CORBA::ULong old_flags = config_->participant_flags();
+      const CORBA::ULong new_flags = prop_to_bool(prop) ? (old_flags | PFLAGS_REFLECT_HEARTBEAT_COUNT) : (old_flags & ~PFLAGS_REFLECT_HEARTBEAT_COUNT);
+      config_->participant_flags(new_flags);
     }
   }
 
@@ -2100,7 +2104,7 @@ ParticipantData_t Spdp::build_local_pdata(
       , nonEmptyList /*defaultUnicastLocatorList*/
       , {0 /*manualLivelinessCount*/}   //FUTURE: implement manual liveliness
       , qos_.property
-      , {PFLAGS_THIS_VERSION} // opendds_participant_flags
+      , {config_->participant_flags()} // opendds_participant_flags
 #ifdef OPENDDS_SECURITY
       , available_extended_builtin_endpoints_
 #endif
