@@ -25,7 +25,6 @@
 #include "dds/DCPS/ReactorTask_rch.h"
 #include "dds/DCPS/PeriodicTask.h"
 #include "dds/DCPS/SporadicTask.h"
-#include "dds/DCPS/MultiTask.h"
 #include "dds/DCPS/transport/framework/TransportSendBuffer.h"
 #include "dds/DCPS/NetworkConfigMonitor.h"
 
@@ -513,7 +512,7 @@ private:
 
   class RtpsReader : public RcObject {
   public:
-    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable, CORBA::Long /*an_start*/, CORBA::Long /*nf_start*/)
+    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable)
       : link_(link)
       , id_(id)
       , durable_(durable)
@@ -530,23 +529,22 @@ private:
     bool has_writer(const RepoId& id) const;
     bool remove_writer(const RepoId& id);
     size_t writer_count() const;
-    CORBA::Long inc_acknack_count();
 
     bool should_nack_fragments(const RcHandle<RtpsUdpDataLink>& link,
                                const WriterInfo_rch& info);
 
     void pre_stop_helper();
 
-    bool process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat,
+    void process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat,
                              const RepoId& src,
                              bool directed,
                              MetaSubmessageVec& meta_submessages);
     bool process_data_i(const RTPS::DataSubmessage& data, const RepoId& src, MetaSubmessageVec& meta_submessages);
-    bool process_gap_i(const RTPS::GapSubmessage& gap,
+    void process_gap_i(const RTPS::GapSubmessage& gap,
                        const RepoId& src,
                        bool directed,
                        MetaSubmessageVec& meta_submessages);
-    bool process_heartbeat_frag_i(const RTPS::HeartBeatFragSubmessage& hb_frag,
+    void process_heartbeat_frag_i(const RTPS::HeartBeatFragSubmessage& hb_frag,
                                   const RepoId& src,
                                   bool directed,
                                   MetaSubmessageVec& meta_submessages);
@@ -576,7 +574,6 @@ private:
     WriterInfoMap remote_writers_;
     WriterInfoSet preassociation_writers_;
     bool stopping_;
-    CORBA::Long acknack_count_;
     CORBA::Long nackfrag_count_;
     typedef PmfSporadicTask<RtpsReader> Sporadic;
     Sporadic preassociation_task_;
@@ -693,7 +690,6 @@ private:
     std::memcpy(src.guidPrefix, src_prefix, sizeof(GuidPrefix_t));
     src.entityId = submessage.writerId;
 
-    bool schedule_timer = false;
     OPENDDS_VECTOR(RtpsReader_rch) to_call;
     {
       ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
@@ -713,16 +709,12 @@ private:
     MetaSubmessageVec meta_submessages;
     for (OPENDDS_VECTOR(RtpsReader_rch)::const_iterator it = to_call.begin(); it < to_call.end(); ++it) {
       RtpsReader& reader = **it;
-      schedule_timer |= (reader.*func)(submessage, src, directed, meta_submessages);
+      (reader.*func)(submessage, src, directed, meta_submessages);
     }
     queue_or_send_submessages(meta_submessages);
-    if (schedule_timer) {
-      heartbeat_reply_.enable(normal_heartbeat_response_delay_);
-    }
   }
 
   void send_heartbeats(const DCPS::MonotonicTimePoint& now);
-  void send_heartbeat_replies(const DCPS::MonotonicTimePoint& now);
   void check_heartbeats(const DCPS::MonotonicTimePoint& now);
 
   CORBA::Long best_effort_heartbeat_count_;
@@ -758,9 +750,6 @@ private:
       heartbeat_.schedule(TimeDuration::zero_value);
     }
   }
-
-  typedef PmfMultiTask<RtpsUdpDataLink> Multi;
-  Multi heartbeat_reply_;
 
   typedef PmfPeriodicTask<RtpsUdpDataLink> Periodic;
   Periodic heartbeatchecker_;
@@ -806,36 +795,8 @@ private:
 
   typedef OPENDDS_MAP_CMP(EntityId_t, CORBA::Long, DCPS::EntityId_tKeyLessThan) CountMapType;
   CountMapType heartbeat_counts_;
-  CountMapType acknack_counts_;
-  CountMapType nackfrag_counts_;
-
-  struct InterestingAckNack {
-    RepoId writerid;
-    RepoId readerid;
-    ACE_INET_Addr writer_address;
-
-    InterestingAckNack() { }
-    InterestingAckNack(const RepoId& w, const RepoId& r, const ACE_INET_Addr& wa)
-      : writerid(w)
-      , readerid(r)
-      , writer_address(wa)
-    { }
-
-    bool operator<(const InterestingAckNack& other) const {
-      if (writerid != other.writerid) {
-        return DCPS::GUID_tKeyLessThan() (writerid, other.writerid);
-      }
-      return DCPS::GUID_tKeyLessThan() (readerid, other.readerid);
-    }
-  };
-
-  typedef OPENDDS_SET(InterestingAckNack) InterestingAckNackSetType;
-  InterestingAckNackSetType interesting_ack_nacks_;
 
   const size_t max_bundle_size_;
-  TimeDuration quick_heartbeat_delay_;
-  TimeDuration normal_heartbeat_response_delay_;
-  TimeDuration quick_heartbeat_response_delay_;
 
   class DeliverHeldData {
   public:
@@ -887,6 +848,11 @@ private:
     NetworkInterface nic_;
     CmgAction action_;
   };
+
+  void send_interesting_ack_nack(const RepoId& writerid,
+                                 const RepoId& readerid,
+                                 CORBA::Long count,
+                                 MetaSubmessageVec meta_submessages);
 };
 
 } // namespace DCPS
