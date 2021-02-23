@@ -34,7 +34,7 @@ namespace OpenDDS {
 namespace DCPS {
 
   class OpenDDS_XML_QOS_Handler_Export QOS_XML_MemBuf_Handler :
-    virtual public QOS_XML_Handler
+    public QOS_XML_Handler
   {
   public:
     QOS_XML_MemBuf_Handler(void);
@@ -62,7 +62,7 @@ namespace DCPS {
      */
     void
     add_search_path(const ACE_TCHAR *environment,
-                      const ACE_TCHAR *relpath);
+      const ACE_TCHAR *relpath);
 
   private:
     // Schema resolver

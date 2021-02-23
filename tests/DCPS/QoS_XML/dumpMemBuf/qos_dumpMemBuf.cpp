@@ -9,9 +9,9 @@ int ACE_TMAIN (int, ACE_TCHAR *[])
   try
   {
     // File name and profile name in respective file
-    const char * fileName = "qos.xml";
-    const char * profileName = "TestProfile";
-    const char * topicName = "TopicName";
+    const ACE_TCHAR * fileName = ACE_TEXT("qos.xml");
+    const ACE_TCHAR * profileName = ACE_TEXT("TestProfile");
+    const ACE_TCHAR * topicName = ACE_TEXT("TopicName");
 
     // read file and create string
     std::ifstream ifs(fileName);

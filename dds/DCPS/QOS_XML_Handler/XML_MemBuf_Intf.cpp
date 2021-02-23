@@ -1,7 +1,5 @@
 
 #include "XML_MemBuf_Intf.h"
-//#include "ace/XML_Utils/XML_Typedefs.h"
-//#include "ace/XML_Utils/XMLSchema/id_map.hpp"
 #include "xercesc/util/XercesDefs.hpp"
 #include "xercesc/framework/MemBufInputSource.hpp"
 #include "xercesc/parsers/XercesDOMParser.hpp"
@@ -17,7 +15,9 @@ namespace DCPS {
   QOS_XML_MemBuf_Handler::QOS_XML_MemBuf_Handler(void) :
     QOS_XML_Handler(),
     res_(new XML::XML_Schema_Resolver<XML::Environment_Resolver>()),
-    eh_(new XML::XML_Error_Handler())
+    eh_(new XML::XML_Error_Handler()),
+    parser_(0),
+    finalDoc_(0)
   {
     try
     {
@@ -97,7 +97,7 @@ namespace DCPS {
       // restriction checking are controlled by this option.
       parser_->setValidationSchemaFullChecking (true);
       // The parser_ will treat validation error as fatal and will exit.
-      //parser_->setValidationConstraintFatal (true);
+      parser_->setValidationConstraintFatal (true);
 
       // Set resolver using auxiliary XML_Schema_Resolver
       parser_->setEntityResolver(res_);
@@ -146,22 +146,13 @@ namespace DCPS {
       }
       ACE::debug(false);
 
-      //// Check for errors
-      //if (eh_->getErrors())
-      //{
-      //  std::cout << "Parse errors found" << std::endl;
-      //  return DDS::RETCODE_ERROR;
-      //}
-      //else
-      //  std::cout << "Nenhum error achado" << std::endl;
-
       DOMDocument * initialDoc = parser_->getDocument();
       if (initialDoc == 0)
       {
         if (DCPS_debug_level > 1)
         {
           ACE_ERROR ((LM_ERROR,
-                ACE_TEXT ("QOS_XML_Stream_Handler::init - ")
+                ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
                 ACE_TEXT ("Failed to parse string\n")
                 ));
         }
@@ -197,7 +188,7 @@ namespace DCPS {
     catch (const CORBA::Exception &ex)
     {
       ACE_ERROR ((LM_ERROR,
-            ACE_TEXT ("QOS_XML_Stream_Handler::init - ")
+            ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
             ACE_TEXT ("Caught CORBA exception whilst parsing XML\n"),
             ex._info ().c_str ()));
       retcode = DDS::RETCODE_ERROR;
@@ -205,7 +196,7 @@ namespace DCPS {
     catch (...)
     {
       ACE_ERROR ((LM_ERROR,
-            ACE_TEXT ("QOS_XML_Stream_Handler::init - ")
+            ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
             ACE_TEXT ("Unexpected exception whilst parsing XML.\n")
             ));
       retcode = DDS::RETCODE_ERROR;
