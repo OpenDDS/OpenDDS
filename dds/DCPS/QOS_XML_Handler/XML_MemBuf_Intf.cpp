@@ -4,6 +4,7 @@
 #include "xercesc/framework/MemBufInputSource.hpp"
 #include "xercesc/parsers/XercesDOMParser.hpp"
 #include "xercesc/sax/SAXParseException.hpp"
+#include "xercesc/util/TransService.hpp"
 #include "ace/XML_Utils/XML_Typedefs.h"
 #include "ace/XML_Utils/XML_Schema_Resolver.h"
 #include "ace/XML_Utils/XML_Error_Handler.h"
@@ -71,7 +72,8 @@ namespace DCPS {
     try
     {
       // Create a InputSource to be used in parser with XML string
-      MemBufInputSource xmlBuf((const XMLByte*) membuf, (XMLSize_t) strlen(membuf) ,"stream (in memory)");
+      TranscodeToStr xmlTranscoded(XMLString::transcode(membuf),"utf-8");
+      MemBufInputSource xmlBuf(xmlTranscoded.str(), xmlTranscoded.length() ,"xml (in memory)");
 
       ///////////////////
       // Configure Parser
