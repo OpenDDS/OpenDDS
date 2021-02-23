@@ -592,7 +592,7 @@ private:
 
   struct CountKeeper {
     OPENDDS_MAP(size_t, IdCountSet) heartbeat_counts_;
-    IdCountSet acknack_counts_;
+    OPENDDS_MAP_CMP(EntityId_t, IdCountSet, EntityId_tKeyLessThan) acknack_counts_;
     IdCountSet nackfrag_counts_;
   };
 

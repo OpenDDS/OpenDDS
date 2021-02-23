@@ -2314,8 +2314,9 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(
             break;
           }
           case ACKNACK: {
-            const EntityId_t id = res.sm_.acknack_sm().readerId;
-            unique = counts.acknack_counts_[id].insert(res.sm_.acknack_sm().count.value).second;
+            const EntityId_t readerid = res.sm_.acknack_sm().readerId;
+            const EntityId_t writerid = res.sm_.acknack_sm().writerId;
+            unique = counts.acknack_counts_[readerid][writerid].insert(res.sm_.acknack_sm().count.value).second;
             OPENDDS_ASSERT(unique);
             result = helper.add_to_bundle(res.sm_.acknack_sm());
             break;
@@ -2456,7 +2457,7 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVec& meta_submessages
           break;
         }
         case ACKNACK: {
-          CountSet& set = counts.acknack_counts_[res.sm_.acknack_sm().readerId];
+          CountSet& set = counts.acknack_counts_[res.sm_.acknack_sm().readerId][res.sm_.acknack_sm().writerId];
           OPENDDS_ASSERT(!set.empty());
           res.sm_.acknack_sm().count.value = *set.begin();
           set.erase(set.begin());
