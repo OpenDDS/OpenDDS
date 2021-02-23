@@ -1630,7 +1630,7 @@ void
 RtpsUdpDataLink::send_interesting_ack_nack(const RepoId& writerid,
                                            const RepoId& readerid,
                                            CORBA::Long count,
-                                           MetaSubmessageVec meta_submessages)
+                                           MetaSubmessageVec& meta_submessages)
 {
   using namespace OpenDDS::RTPS;
 
