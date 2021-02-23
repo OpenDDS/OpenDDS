@@ -32,7 +32,9 @@ project(OpenDDS_QOS_XML_XSC_Handler): install, ace_xml_utils, dcpslib {
 
   Source_Files {
     dds_qos.cpp
+    XML_Intf.cpp
     XML_File_Intf.cpp
+    XML_MemBuf_Intf.cpp
     QOS_XML_Loader.cpp
     DataWriterQos_Handler.cpp
     DataReaderQos_Handler.cpp
@@ -47,6 +49,9 @@ project(OpenDDS_QOS_XML_XSC_Handler): install, ace_xml_utils, dcpslib {
     OpenDDS_XML_QOS_Handler_Export.h
     dds_qos.hpp
     QOS_Common.h
+    XML_Intf.h
+    XML_File_Intf.h
+    XML_MemBuf_Intf.h
     DataWriterQos_Handler.h
     DataReaderQos_Handler.h
     TopicQos_Handler.h
