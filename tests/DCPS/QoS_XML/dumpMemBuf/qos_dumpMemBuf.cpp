@@ -22,7 +22,7 @@ int ACE_TMAIN (int, ACE_TCHAR *[])
     // Add env variable and path to search schemas
     xml_membuf.add_search_path(ACE_TEXT("DDS_ROOT"),ACE_TEXT("/docs/schema/"));
     // initialize and parse XML
-    DDS::ReturnCode_t const retcode = xml_membuf.init(ACE_TEXT(buffer.str().c_str()));
+    DDS::ReturnCode_t const retcode = xml_membuf.init(ACE_TEXT_CHAR_TO_TCHAR (buffer.str().c_str()));
 
     if (retcode == DDS::RETCODE_OK)
     {

@@ -72,9 +72,8 @@ namespace DCPS {
     try
     {
       // Create a InputSource to be used in parser with XML string
-      //TranscodeToStr xmlTranscoded(XMLString::transcode(membuf),"utf-8");
-      const XMLCh * tmp = reinterpret_cast<const XMLCh*>(membuf);
-      TranscodeToStr xmlTranscoded(tmp,"utf-8");
+      const XMLCh * conv = XMLString::transcode(ACE_TEXT_ALWAYS_CHAR (membuf));
+      TranscodeToStr xmlTranscoded(conv,"utf-8");
       MemBufInputSource xmlBuf(xmlTranscoded.str(), xmlTranscoded.length() ,"xml (in memory)");
 
       ///////////////////
