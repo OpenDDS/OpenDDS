@@ -9,7 +9,7 @@ int ACE_TMAIN (int, ACE_TCHAR *[])
   try
   {
     // File name and profile name in respective file
-    const ACE_TCHAR * fileName = ACE_TEXT("qos.xml");
+    const char * fileName = "qos.xml";
     const ACE_TCHAR * profileName = ACE_TEXT("TestProfile");
     const ACE_TCHAR * topicName = ACE_TEXT("TopicName");
 
