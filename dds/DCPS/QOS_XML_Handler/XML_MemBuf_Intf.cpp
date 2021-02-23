@@ -4,6 +4,10 @@
 #include "xercesc/framework/MemBufInputSource.hpp"
 #include "xercesc/parsers/XercesDOMParser.hpp"
 #include "xercesc/sax/SAXParseException.hpp"
+#include "ace/XML_Utils/XML_Typedefs.h"
+#include "ace/XML_Utils/XML_Schema_Resolver.h"
+#include "ace/XML_Utils/XML_Error_Handler.h"
+
 
 #include "dds/DCPS/debug.h"
 
@@ -30,7 +34,7 @@ namespace DCPS {
 
       // Create a DomImplementation
       DOMImplementation * domImpl = DOMImplementationRegistry::getDOMImplementation(XMLString::transcode("XML 1.0"));
-    
+
       // Create a temporary document with a generic element
       // it shall be replaced in future with final version
       finalDoc_ = domImpl->createDocument(
@@ -202,7 +206,7 @@ namespace DCPS {
       retcode = DDS::RETCODE_ERROR;
     }
     return retcode;
-    
+
   }
 
 

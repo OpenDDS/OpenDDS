@@ -19,11 +19,6 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "OpenDDS_XML_QOS_Handler_Export.h"
 
-namespace XML
-{
-  class XML_Typedef;
-}
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {

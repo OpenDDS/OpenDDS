@@ -19,14 +19,19 @@
 #include "XML_Intf.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "OpenDDS_XML_QOS_Handler_Export.h"
-#include "ace/XML_Utils/XML_Typedefs.h"
-#include "ace/XML_Utils/XML_Schema_Resolver.h"
-#include "ace/XML_Utils/XML_Error_Handler.h"
 
 namespace XML
 {
-  class XML_Typedef;
+  class Environment_Resolver;
+  template <typename Resolver>
+  class XML_Schema_Resolver;
+  class XML_Error_Handler;
 }
+
+XERCES_CPP_NAMESPACE_BEGIN
+  class XercesDOMParser;
+  class DOMDocument;
+XERCES_CPP_NAMESPACE_END
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -72,11 +77,11 @@ namespace DCPS {
     XML::XML_Error_Handler * eh_;
 
     // Parser
-    XercesDOMParser * parser_;
+    XERCES_CPP_NAMESPACE::XercesDOMParser * parser_;
 
     // Final DOMDocument that should be passed to
     // dds::reader::dds method
-    DOMDocument * finalDoc_;
+    XERCES_CPP_NAMESPACE::DOMDocument * finalDoc_;
 
   };
 }
