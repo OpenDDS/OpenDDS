@@ -58,7 +58,7 @@ public:
   }
 
 
-  RcHandle<WriterInfo> remove_info(WriterInfo* const info);
+  RcHandle<WriterInfo> remove_info(WriterInfo* info);
 private:
   ~RemoveAssociationSweeper();
 
@@ -156,7 +156,7 @@ RemoveAssociationSweeper<T>::cancel_timer(const PublicationId& writer_id)
 }
 
 template <typename T>
-RcHandle<WriterInfo> RemoveAssociationSweeper<T>::remove_info(WriterInfo* const info)
+RcHandle<WriterInfo> RemoveAssociationSweeper<T>::remove_info(WriterInfo* info)
 {
   RcHandle<WriterInfo> result;
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
