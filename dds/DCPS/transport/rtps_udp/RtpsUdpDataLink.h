@@ -297,6 +297,7 @@ private:
     SequenceNumber cur_cumulative_ack_;
     bool expecting_ack_;
     const bool durable_;
+    const ACE_CDR::ULong participant_flags_;
     OPENDDS_MAP(SequenceNumber, TransportQueueElement*) durable_data_;
     MonotonicTimePoint durable_timestamp_;
 #ifdef OPENDDS_SECURITY
@@ -304,7 +305,7 @@ private:
     DisjointSequence pvs_outstanding_;
 #endif
 
-    ReaderInfo(const RepoId& id, bool durable)
+    ReaderInfo(const RepoId& id, bool durable, ACE_CDR::ULong participant_flags)
       : id_(id)
       , preassociation_heartbeat_last_(SequenceNumber::ZERO())
       , acknack_recvd_count_(0)
@@ -312,6 +313,7 @@ private:
       , cur_cumulative_ack_(SequenceNumber::ZERO()) // Starting at zero instead of unknown makes the logic cleaner.
       , expecting_ack_(false)
       , durable_(durable)
+      , participant_flags_(participant_flags)
 #ifdef OPENDDS_SECURITY
       , max_pvs_sn_(SequenceNumber::ZERO())
 #endif
@@ -321,6 +323,7 @@ private:
     void expire_durable_data();
     bool expecting_durable_data() const;
     SequenceNumber acked_sn() const { return cur_cumulative_ack_.previous(); }
+    bool reflects_heartbeat_count() const;
   };
 
   typedef RcHandle<ReaderInfo> ReaderInfo_rch;
@@ -491,7 +494,7 @@ private:
     OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumber_t) frags_;
     bool first_activity_, first_valid_hb_;
     CORBA::Long heartbeat_recvd_count_, hb_frag_recvd_count_;
-    ACE_CDR::ULong participant_flags_;
+    const ACE_CDR::ULong participant_flags_;
 
     WriterInfo(const RepoId& id, ACE_CDR::ULong participant_flags)
       : id_(id)

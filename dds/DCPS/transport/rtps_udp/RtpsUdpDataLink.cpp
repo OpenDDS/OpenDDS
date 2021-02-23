@@ -635,7 +635,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
       RtpsWriter_rch writer = rw->second;
       g.release();
       writer->update_max_sn(remote_id, max_sn);
-      writer->add_reader(make_rch<ReaderInfo>(remote_id, remote_durable));
+      writer->add_reader(make_rch<ReaderInfo>(remote_id, remote_durable, remote_context));
     }
     invoke_on_start_callbacks(local_id, remote_id, true);
   } else if (conv.isReader()) {
@@ -2773,6 +2773,10 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
       return;
     }
 
+    if (reader->reflects_heartbeat_count() && acknack.count.value != heartbeat_count_) {
+      return;
+    }
+
     if (reader->expecting_ack_) {
       reader->expecting_ack_ = false;
       link->received_expected_ack();
@@ -3931,6 +3935,12 @@ RtpsUdpDataLink::ReaderInfo::expecting_durable_data() const
   return durable_ &&
     (durable_timestamp_.is_zero() // DW hasn't resent yet
      || !durable_data_.empty()); // DW resent, not sent to reader
+}
+
+bool
+RtpsUdpDataLink::ReaderInfo::reflects_heartbeat_count() const
+{
+  return participant_flags_ & RTPS::PFLAGS_REFLECTS_HEARTBEAT_COUNT;
 }
 
 RtpsUdpDataLink::RtpsWriter::RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id,

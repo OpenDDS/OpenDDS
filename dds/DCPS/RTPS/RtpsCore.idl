@@ -319,7 +319,8 @@ module OpenDDS {
     const OpenDDSParticipantFlagsBits_t PFLAGS_EMPTY = 0x0;
     const OpenDDSParticipantFlagsBits_t PFLAGS_NO_ASSOCIATED_WRITERS = 0x1;
     const OpenDDSParticipantFlagsBits_t PFLAGS_DIRECTED_HEARTBEAT = 0x2;
-    const OpenDDSParticipantFlagsBits_t PFLAGS_THIS_VERSION = PFLAGS_DIRECTED_HEARTBEAT | PFLAGS_NO_ASSOCIATED_WRITERS;
+    const OpenDDSParticipantFlagsBits_t PFLAGS_REFLECTS_HEARTBEAT_COUNT = 0x4;
+    const OpenDDSParticipantFlagsBits_t PFLAGS_THIS_VERSION = PFLAGS_DIRECTED_HEARTBEAT | PFLAGS_NO_ASSOCIATED_WRITERS | PFLAGS_REFLECTS_HEARTBEAT_COUNT;
 
     struct OpenDDSParticipantFlags_t {
       OpenDDSParticipantFlagsBits_t bits;
