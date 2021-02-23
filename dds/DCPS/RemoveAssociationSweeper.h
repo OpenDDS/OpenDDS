@@ -225,8 +225,6 @@ void RemoveAssociationSweeper<T>::ScheduleCommand::execute()
 
   RcHandle<WriterInfo>& info = this->info_;
 
-  const void* arg = new TimerArg(sweeper, info);
-
   {
     ACE_Guard<ACE_Thread_Mutex> guard(sweeper->mutex_);
     sweeper->info_set_.push_back(info);
@@ -234,7 +232,7 @@ void RemoveAssociationSweeper<T>::ScheduleCommand::execute()
 
   info->remove_association_timer_ =
     sweeper->reactor()->schedule_timer(
-      sweeper.get(), arg,
+      sweeper.get(), new TimerArg(sweeper, info),
       (info->removal_deadline_ - MonotonicTimePoint::now()).value());
   if (DCPS_debug_level) {
     ACE_DEBUG((LM_INFO,
@@ -258,9 +256,7 @@ void RemoveAssociationSweeper<T>::CancelCommand::execute()
     const void *arg = 0;
     sweeper->reactor()->cancel_timer(info->remove_association_timer_, &arg);
     const TimerArg* ta = reinterpret_cast<const TimerArg*>(arg);
-    if (ta) {
-      delete ta;
-    }
+    delete ta;
     if (DCPS_debug_level) {
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RemoveAssociationSweeper::CancelCommand::execute() - ")
         ACE_TEXT("Unscheduled sweeper %d\n"),
