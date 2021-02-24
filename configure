@@ -2024,27 +2024,27 @@ EOT
             $existing_macros{$key} = $value;
           }
         }
-      }
-      my %requested_macros;
-      for my $f (@platformmacros, @{$opts{'macros'}}) {
-        my ($key, $value) = split(/=/, $f);
-        $value = "1" unless defined $value;
-        $requested_macros{$key} = $value;
-      }
-      for my $key (@ace_macros) {
-        if (exists $opts{$key}) {
-          my $macro = ($key eq 'static') ? 'static_libs_only' : $key;
-          $requested_macros{$macro} = $opts{$key};
+        my %requested_macros;
+        for my $f (@platformmacros, @{$opts{'macros'}}) {
+          my ($key, $value) = split(/=/, $f);
+          $value = "1" unless defined $value;
+          $requested_macros{$key} = $value;
         }
-      }
-      for my $f (@ace_macros) {
-        if (defined $requested_macros{$f}) {
-          if (!defined $existing_macros{$f}) {
-            die "ERROR: Requested macro $f not defined for ACE/TAO";
+        for my $key (@ace_macros) {
+          if (exists $opts{$key}) {
+            my $macro = ($key eq 'static') ? 'static_libs_only' : $key;
+            $requested_macros{$macro} = $opts{$key};
           }
-          elsif ($requested_macros{$f} != $existing_macros{$f}) {
-            die "ERROR: Macro $f set to $requested_macros{$f} but has " .
-              "value $existing_macros{$f} in ACE/TAO";
+        }
+        for my $f (@ace_macros) {
+          if (defined $requested_macros{$f}) {
+            if (!defined $existing_macros{$f}) {
+              die "ERROR: Requested macro $f not defined for ACE/TAO";
+            }
+            elsif ($requested_macros{$f} != $existing_macros{$f}) {
+              die "ERROR: Macro $f set to $requested_macros{$f} but has " .
+                "value $existing_macros{$f} in ACE/TAO";
+            }
           }
         }
       }

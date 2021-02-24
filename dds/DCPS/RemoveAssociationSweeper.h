@@ -58,7 +58,7 @@ public:
   }
 
 
-  int remove_info(WriterInfo* const info);
+  RcHandle<WriterInfo> remove_info(WriterInfo* info);
 private:
   ~RemoveAssociationSweeper();
 
@@ -66,22 +66,28 @@ private:
   WeakRcHandle<T> reader_;
   OPENDDS_VECTOR(RcHandle<WriterInfo>) info_set_;
 
-  class CommandBase : public Command {
-  public:
-    CommandBase(RemoveAssociationSweeper<T>* sweeper,
-                RcHandle<WriterInfo> info)
-      : sweeper_ (sweeper)
+  struct TimerArg {
+    TimerArg(RcHandle<RemoveAssociationSweeper<T> > sweeper,
+             RcHandle<WriterInfo> info)
+      : sweeper_(sweeper)
       , info_(info)
     { }
 
-  protected:
-    RemoveAssociationSweeper<T>* sweeper_;
+    WeakRcHandle<RemoveAssociationSweeper<T> > sweeper_;
     RcHandle<WriterInfo> info_;
+  };
+
+  class CommandBase : public Command, public TimerArg {
+  public:
+    CommandBase(RcHandle<RemoveAssociationSweeper<T> > sweeper,
+                RcHandle<WriterInfo> info)
+      : TimerArg(sweeper, info)
+    { }
   };
 
   class ScheduleCommand : public CommandBase {
   public:
-    ScheduleCommand(RemoveAssociationSweeper<T>* sweeper,
+    ScheduleCommand(RcHandle<RemoveAssociationSweeper<T> > sweeper,
                     RcHandle<WriterInfo> info)
       : CommandBase(sweeper, info)
     { }
@@ -90,7 +96,7 @@ private:
 
   class CancelCommand : public CommandBase {
   public:
-    CancelCommand(RemoveAssociationSweeper<T>* sweeper,
+    CancelCommand(RcHandle<RemoveAssociationSweeper<T> > sweeper,
                   RcHandle<WriterInfo> info)
       : CommandBase(sweeper, info)
     { }
@@ -120,7 +126,7 @@ void RemoveAssociationSweeper<T>::schedule_timer(RcHandle<WriterInfo>& info, boo
   info->notify_lost_ = callback;
   info->removal_deadline_ = MonotonicTimePoint(MonotonicTimePoint::now() +
     std::min(info->activity_wait_period(), TimeDuration(10)));
-  execute_or_enqueue(new ScheduleCommand(this, info));
+  execute_or_enqueue(new ScheduleCommand(rchandle_from(this), info));
 }
 
 template <typename T>
@@ -129,24 +135,33 @@ RemoveAssociationSweeper<T>::cancel_timer(RcHandle<WriterInfo>& info)
 {
   info->scheduled_for_removal_ = false;
   info->removal_deadline_ = MonotonicTimePoint::zero_value;
-  return execute_or_enqueue(new CancelCommand(this, info));
+  return execute_or_enqueue(new CancelCommand(rchandle_from(this), info));
 }
 
 template <typename T>
 void
 RemoveAssociationSweeper<T>::cancel_timer(const PublicationId& writer_id)
 {
-  OPENDDS_VECTOR(RcHandle<WriterInfo>)::iterator pos = std::find_if(info_set_.begin(), info_set_.end(), Predicate(writer_id));
-  if (pos != info_set_.end()) {
-    cancel_timer(*pos);
+  RcHandle<WriterInfo> info;
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    OPENDDS_VECTOR(RcHandle<WriterInfo>)::iterator pos = std::find_if(info_set_.begin(), info_set_.end(), Predicate(writer_id));
+    if (pos != info_set_.end()) {
+      info = *pos;
+    }
+  }
+  if (info) {
+    cancel_timer(info);
   }
 }
 
 template <typename T>
-int RemoveAssociationSweeper<T>::remove_info(WriterInfo* const info)
+RcHandle<WriterInfo> RemoveAssociationSweeper<T>::remove_info(WriterInfo* info)
 {
+  RcHandle<WriterInfo> result;
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   OPENDDS_VECTOR(RcHandle<WriterInfo>)::iterator itr, last = --info_set_.end();
-  // find the RcHandle holds the pointer info in this->info_set_
+  // find the RcHandle holds the pointer info in info_set_
   // and then swap the found element with the last element in the
   // info_set_ vector so  we can delete it.
   for (itr = info_set_.begin(); itr != info_set_.end(); ++itr){
@@ -154,11 +169,12 @@ int RemoveAssociationSweeper<T>::remove_info(WriterInfo* const info)
       if (itr != last) {
         std::swap(*itr, info_set_.back());
       }
+      result = info_set_.back();
       info_set_.pop_back();
-      return 0;
+      return result;
     }
   }
-  return -1;
+  return result;
 }
 
 template <typename T>
@@ -166,15 +182,14 @@ int RemoveAssociationSweeper<T>::handle_timeout(
     const ACE_Time_Value& ,
     const void* arg)
 {
-  WriterInfo* const info =
-    const_cast<WriterInfo*>(reinterpret_cast<const WriterInfo*>(arg));
+  unique_ptr<const TimerArg> ta(reinterpret_cast<const TimerArg*>(arg));
+  if (!ta) {
+    return 0;
+  }
 
-  {
-    // info may be destroyed at this moment, we can only access it
-    // if it is in the info_set_. This could happen when cancel_timer() handle it first.
-    ACE_Guard<ACE_Thread_Mutex> guard(this->mutex_);
-    if (this->remove_info(info) == -1)
-      return 0;
+  RcHandle<WriterInfo> info = remove_info(ta->info_.get());
+  if (!info) {
+    return 0;
   }
 
   info->remove_association_timer_ = WriterInfo::NO_TIMER;
@@ -203,33 +218,52 @@ void RemoveAssociationSweeper<T>::ScheduleCommand::execute()
    * Pass pointer to writer info for timer to use, must decrease ref count when
    * canceling timer
    */
-  const void* arg = reinterpret_cast<const void*>(this->info_.in());
-  this->sweeper_->info_set_.push_back(this->info_);
+  RcHandle<RemoveAssociationSweeper<T> > sweeper = this->sweeper_.lock();
+  if (!sweeper) {
+    return;
+  }
 
-  this->info_->remove_association_timer_ =
-    this->sweeper_->reactor()->schedule_timer(
-      this->sweeper_, arg,
-      (this->info_->removal_deadline_ - MonotonicTimePoint::now()).value());
+  RcHandle<WriterInfo>& info = this->info_;
+
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(sweeper->mutex_);
+    sweeper->info_set_.push_back(info);
+  }
+
+  info->remove_association_timer_ =
+    sweeper->reactor()->schedule_timer(
+      sweeper.get(), new TimerArg(sweeper, info),
+      (info->removal_deadline_ - MonotonicTimePoint::now()).value());
   if (DCPS_debug_level) {
     ACE_DEBUG((LM_INFO,
       ACE_TEXT("(%P|%t) RemoveAssociationSweeper::ScheduleCommand::execute() - ")
       ACE_TEXT("Scheduled sweeper %d\n"),
-      this->info_->remove_association_timer_));
+      info->remove_association_timer_));
   }
 }
 
 template <typename T>
 void RemoveAssociationSweeper<T>::CancelCommand::execute()
 {
-  if (this->info_->remove_association_timer_ != WriterInfo::NO_TIMER) {
-    this->sweeper_->reactor()->cancel_timer(this->info_->remove_association_timer_);
+  RcHandle<RemoveAssociationSweeper<T> > sweeper = this->sweeper_.lock();
+  if (!sweeper) {
+    return;
+  }
+
+  RcHandle<WriterInfo>& info = this->info_;
+
+  if (info->remove_association_timer_ != WriterInfo::NO_TIMER) {
+    const void *arg = 0;
+    sweeper->reactor()->cancel_timer(info->remove_association_timer_, &arg);
+    const TimerArg* ta = reinterpret_cast<const TimerArg*>(arg);
+    delete ta;
     if (DCPS_debug_level) {
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RemoveAssociationSweeper::CancelCommand::execute() - ")
         ACE_TEXT("Unscheduled sweeper %d\n"),
-        this->info_->remove_association_timer_));
+        info->remove_association_timer_));
     }
-    this->info_->remove_association_timer_ = WriterInfo::NO_TIMER;
-    this->sweeper_->remove_info(this->info_.in());
+    info->remove_association_timer_ = WriterInfo::NO_TIMER;
+    sweeper->remove_info(info.in());
   }
 }
 //End RemoveAssociationSweeper
