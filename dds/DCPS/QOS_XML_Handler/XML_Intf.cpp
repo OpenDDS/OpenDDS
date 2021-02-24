@@ -62,8 +62,8 @@ namespace DCPS {
 
   DDS::ReturnCode_t
   QOS_XML_Handler::get_datawriter_qos(::DDS::DataWriterQos& dw_qos,
-                                            const ACE_TCHAR * profile_name,
-                                            const ACE_TCHAR * topic_name)
+                                      const ACE_TCHAR * profile_name,
+                                      const ACE_TCHAR * topic_name)
   {
     ACE_UNUSED_ARG(topic_name);
 
@@ -100,8 +100,8 @@ namespace DCPS {
 
   DDS::ReturnCode_t
   QOS_XML_Handler::get_datareader_qos(::DDS::DataReaderQos& dr_qos,
-                                            const ACE_TCHAR * profile_name,
-                                            const ACE_TCHAR * topic_name)
+                                      const ACE_TCHAR * profile_name,
+                                      const ACE_TCHAR * topic_name)
   {
     ACE_UNUSED_ARG(topic_name);
 
@@ -138,8 +138,8 @@ namespace DCPS {
 
   DDS::ReturnCode_t
   QOS_XML_Handler::get_topic_qos(::DDS::TopicQos& tp_qos,
-                                        const ACE_TCHAR * profile_name,
-                                        const ACE_TCHAR * topic_name)
+                                 const ACE_TCHAR * profile_name,
+                                 const ACE_TCHAR * topic_name)
   {
     ACE_UNUSED_ARG(topic_name);
 
@@ -176,7 +176,7 @@ namespace DCPS {
 
   DDS::ReturnCode_t
   QOS_XML_Handler::get_publisher_qos(::DDS::PublisherQos& pub_qos,
-                                            const ACE_TCHAR * profile_name)
+                                     const ACE_TCHAR * profile_name)
   {
     DDS::ReturnCode_t retcode = DDS::RETCODE_ERROR;
     try
@@ -211,7 +211,7 @@ namespace DCPS {
 
   DDS::ReturnCode_t
   QOS_XML_Handler::get_subscriber_qos(::DDS::SubscriberQos& sub_qos,
-                                            const ACE_TCHAR * profile_name)
+                                      const ACE_TCHAR * profile_name)
   {
     DDS::ReturnCode_t retcode = DDS::RETCODE_ERROR;
     try
@@ -246,7 +246,7 @@ namespace DCPS {
 
   DDS::ReturnCode_t
   QOS_XML_Handler::get_participant_qos(::DDS::DomainParticipantQos& sub_qos,
-                                            const ACE_TCHAR * profile_name)
+                                       const ACE_TCHAR * profile_name)
   {
     DDS::ReturnCode_t retcode = DDS::RETCODE_ERROR;
     try

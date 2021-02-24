@@ -39,17 +39,17 @@ namespace DCPS {
       // Create a temporary document with a generic element
       // it shall be replaced in future with final version
       finalDoc_ = domImpl->createDocument(
-          XMLString::transcode(""),
-          XMLString::transcode("temp"),
-          NULL);
+        XMLString::transcode(""),
+        XMLString::transcode("temp"),
+        NULL);
 
     } catch (const XMLException& toCatch) {
 
       char* message = XMLString::transcode(toCatch.getMessage());
       ACE_ERROR ((LM_ERROR,
-            ACE_TEXT ("QOS_XML_MemBuf_Handler::QOS_XML_MemBuf_Handler - ")
-            ACE_TEXT ("Error during XML initialization! :\n<%C>\n"),
-            message));
+        ACE_TEXT ("QOS_XML_MemBuf_Handler::QOS_XML_MemBuf_Handler - ")
+        ACE_TEXT ("Error during XML initialization! :\n<%C>\n"),
+        message));
       XMLString::release(&message);
     }
   }
@@ -120,35 +120,39 @@ namespace DCPS {
       catch (const SAXParseException& toCatch) {
         char* message = XMLString::transcode(toCatch.getMessage());
         ACE_ERROR ((LM_ERROR,
-              ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
-              ACE_TEXT ("Exception message is: <%C>\n"),
-              message));
+          ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
+          ACE_TEXT ("Exception message is: <%C>\n"),
+          message));
         XMLString::release(&message);
+        ACE::debug(false);
         return DDS::RETCODE_ERROR;
       }
       catch (const XMLException& toCatch) {
         char* message = XMLString::transcode(toCatch.getMessage());
         ACE_ERROR ((LM_ERROR,
-              ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
-              ACE_TEXT ("Exception message is: <%C>\n"),
-              message));
+          ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
+          ACE_TEXT ("Exception message is: <%C>\n"),
+          message));
         XMLString::release(&message);
+        ACE::debug(false);
         return DDS::RETCODE_ERROR;
       }
       catch (const DOMException& toCatch) {
         char* message = XMLString::transcode(toCatch.getMessage());
         ACE_ERROR ((LM_ERROR,
-              ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
-              ACE_TEXT ("Exception message is: <%C>\n"),
-              message));
+          ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
+          ACE_TEXT ("Exception message is: <%C>\n"),
+          message));
         XMLString::release(&message);
+        ACE::debug(false);
         return DDS::RETCODE_ERROR;
       }
       catch (...) {
         ACE_ERROR ((LM_ERROR,
-              ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
-              ACE_TEXT ("Unexpected exception\n")
-              ));
+          ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
+          ACE_TEXT ("Unexpected exception\n")
+          ));
+        ACE::debug(false);
         return DDS::RETCODE_ERROR;
       }
       ACE::debug(false);
@@ -159,9 +163,9 @@ namespace DCPS {
         if (DCPS_debug_level > 1)
         {
           ACE_ERROR ((LM_ERROR,
-                ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
-                ACE_TEXT ("Failed to parse string\n")
-                ));
+            ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
+            ACE_TEXT ("Failed to parse string\n")
+            ));
         }
         return DDS::RETCODE_ERROR;
       }
@@ -169,19 +173,45 @@ namespace DCPS {
       // Find "dds" node using the opendds namespace
       DOMNodeList * ddsNodeList = initialDoc->getElementsByTagNameNS(XMLString::transcode("http://www.omg.org/dds"),XMLString::transcode("dds"));
 
+      // Check if it could find tag and namespace
+      if (ddsNodeList->getLength() == 0)
+      {
+        if (DCPS_debug_level > 1)
+          {
+            ACE_ERROR ((LM_ERROR,
+              ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
+              ACE_TEXT ("Could not find tag in namespace\n")
+              ));
+          }
+        return DDS::RETCODE_ERROR;
+      }
+
       // Get the first node. It is expected to have only one
       DOMNode * ddsNode = ddsNodeList->item(0);
       if (DCPS_debug_level > 1)
       {
         char* message = XMLString::transcode(ddsNode->getNodeName());
         ACE_ERROR ((LM_INFO,
-              ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
-              ACE_TEXT ("Node name: <%C>\n"),
-              message));
+          ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
+          ACE_TEXT ("Node name: <%C>\n"),
+          message));
         XMLString::release(&message);
       }
 
       DOMNode * clone = finalDoc_->importNode(ddsNode, true);
+
+      // Check if import was successful
+      if (clone == 0)
+      {
+        if (DCPS_debug_level > 1)
+        {
+          ACE_ERROR ((LM_ERROR,
+            ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
+            ACE_TEXT ("Failed to get pointer of imported node\n")
+            ));
+        }
+        return DDS::RETCODE_ERROR;
+      }
       // Replace root element by the cloned one. Thus the root element
       // shall be "dds" as required by dds::reader::dds function
       finalDoc_->replaceChild(clone,finalDoc_->getDocumentElement());
@@ -195,17 +225,17 @@ namespace DCPS {
     catch (const CORBA::Exception &ex)
     {
       ACE_ERROR ((LM_ERROR,
-            ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
-            ACE_TEXT ("Caught CORBA exception whilst parsing XML\n"),
-            ex._info ().c_str ()));
+        ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
+        ACE_TEXT ("Caught CORBA exception whilst parsing XML\n"),
+        ex._info ().c_str ()));
       retcode = DDS::RETCODE_ERROR;
     }
     catch (...)
     {
       ACE_ERROR ((LM_ERROR,
-            ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
-            ACE_TEXT ("Unexpected exception whilst parsing XML.\n")
-            ));
+        ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
+        ACE_TEXT ("Unexpected exception whilst parsing XML.\n")
+        ));
       retcode = DDS::RETCODE_ERROR;
     }
     return retcode;

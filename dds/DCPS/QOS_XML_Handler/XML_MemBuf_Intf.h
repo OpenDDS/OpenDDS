@@ -67,7 +67,7 @@ namespace DCPS {
      */
     void
     add_search_path(const ACE_TCHAR *environment,
-      const ACE_TCHAR *relpath);
+                    const ACE_TCHAR *relpath);
 
   private:
     // Schema resolver

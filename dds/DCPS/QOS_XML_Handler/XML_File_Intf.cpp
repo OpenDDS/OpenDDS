@@ -91,7 +91,7 @@ namespace DCPS {
 
   void
   QOS_XML_File_Handler::add_search_path(const ACE_TCHAR *environment,
-                                          const ACE_TCHAR *relpath)
+                                        const ACE_TCHAR *relpath)
   {
     XML_Helper_type::XML_HELPER.get_resolver().get_resolver().add_path(environment, relpath);
   }
