@@ -276,7 +276,7 @@ bool
 RtpsUdpTransport::use_datalink(const RepoId& local_id,
                                const RepoId& remote_id,
                                const TransportBLOB& remote_data,
-                               ACE_CDR::ULong remote_context,
+                               ACE_CDR::ULong participant_flags,
                                bool local_reliable, bool remote_reliable,
                                bool local_durable, bool remote_durable,
                                SequenceNumber max_sn,
@@ -291,7 +291,7 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
     link_->add_locators(remote_id, addrs.first, addrs.second, requires_inline_qos);
 
     return link_->associated(local_id, remote_id, local_reliable, remote_reliable,
-                             local_durable, remote_durable, remote_context, max_sn, client);
+                             local_durable, remote_durable, participant_flags, max_sn, client);
   }
 
   return true;

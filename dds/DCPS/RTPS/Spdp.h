@@ -200,6 +200,8 @@ public:
 #endif
   );
 
+  DCPS::RcHandle<RtpsDiscoveryConfig> config() const { return config_; }
+
 protected:
   Sedp& endpoint_manager() { return *sedp_; }
   void remove_discovered_participant_i(DiscoveredParticipantIter iter);

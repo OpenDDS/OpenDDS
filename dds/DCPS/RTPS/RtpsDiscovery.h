@@ -31,6 +31,7 @@ namespace RTPS {
 
 const char RTPS_DISCOVERY_ENDPOINT_ANNOUNCEMENTS[] = "OpenDDS.RtpsDiscovery.EndpointAnnouncements";
 const char RTPS_DISCOVERY_TYPE_LOOKUP_SERVICE[] = "OpenDDS.RtpsDiscovery.TypeLookupService";
+const char RTPS_REFLECT_HEARTBEAT_COUNT[] = "OpenDDS.Rtps.ReflectHeartbeatCount";
 
 class OpenDDS_Rtps_Export RtpsDiscoveryConfig : public OpenDDS::DCPS::RcObject {
 public:
@@ -548,6 +549,17 @@ public:
     sedp_heartbeat_period_maximum_ = period_maximum;
   }
 
+  CORBA::ULong participant_flags() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, 0);
+    return participant_flags_;
+  }
+  void participant_flags(const CORBA::ULong& participant_flags)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    participant_flags_ = participant_flags;
+  }
+
 private:
   mutable ACE_Thread_Mutex lock_;
   DCPS::TimeDuration resend_period_;
@@ -590,6 +602,7 @@ private:
   DCPS::TimeDuration sedp_heartbeat_period_;
   DCPS::TimeDuration sedp_heartbeat_period_minimum_;
   DCPS::TimeDuration sedp_heartbeat_period_maximum_;
+  CORBA::ULong participant_flags_;
 };
 
 typedef OpenDDS::DCPS::RcHandle<RtpsDiscoveryConfig> RtpsDiscoveryConfig_rch;
