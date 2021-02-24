@@ -178,9 +178,9 @@ namespace DCPS {
       {
         if (DCPS_debug_level > 1)
           {
-            ACE_ERROR ((LM_ERROR,
+            ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
-              ACE_TEXT ("Could not find tag in namespace\n")
+              ACE_TEXT ("Could not find tag(dds) in namespace(http://www.omg.org/dds)\n")
               ));
           }
         return DDS::RETCODE_ERROR;
@@ -191,7 +191,7 @@ namespace DCPS {
       if (DCPS_debug_level > 1)
       {
         char* message = XMLString::transcode(ddsNode->getNodeName());
-        ACE_ERROR ((LM_INFO,
+        ACE_DEBUG ((LM_INFO,
           ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
           ACE_TEXT ("Node name: <%C>\n"),
           message));
