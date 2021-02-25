@@ -290,7 +290,6 @@ private:
 
   struct ReaderInfo : public RcObject {
     const RepoId id_;
-    SequenceNumber preassociation_heartbeat_last_;
     CORBA::Long acknack_recvd_count_, nackfrag_recvd_count_;
     DisjointSequence requests_;
     OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumberSet) requested_frags_;
@@ -307,7 +306,6 @@ private:
 
     ReaderInfo(const RepoId& id, bool durable, ACE_CDR::ULong participant_flags)
       : id_(id)
-      , preassociation_heartbeat_last_(SequenceNumber::ZERO())
       , acknack_recvd_count_(0)
       , nackfrag_recvd_count_(0)
       , cur_cumulative_ack_(SequenceNumber::ZERO()) // Starting at zero instead of unknown makes the logic cleaner.
@@ -430,9 +428,6 @@ private:
     }
     void initialize_heartbeat(const SingleSendBuffer::Proxy& proxy,
                               MetaSubmessage& meta_submessage);
-    void gather_preassociation_heartbeat_i(MetaSubmessageVec& meta_submessages,
-                                           MetaSubmessage& meta_submessage,
-                                           const ReaderInfo_rch& reader);
     void gather_directed_heartbeat_i(const SingleSendBuffer::Proxy& proxy,
                                      MetaSubmessageVec& meta_submessages,
                                      MetaSubmessage& meta_submessage,
@@ -492,15 +487,12 @@ private:
     HeldMap held_;
     SequenceNumber hb_last_;
     OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumber_t) frags_;
-    bool first_activity_, first_valid_hb_;
     CORBA::Long heartbeat_recvd_count_, hb_frag_recvd_count_;
     const ACE_CDR::ULong participant_flags_;
 
     WriterInfo(const RepoId& id, ACE_CDR::ULong participant_flags)
       : id_(id)
       , hb_last_(SequenceNumber::ZERO())
-      , first_activity_(true)
-      , first_valid_hb_(true)
       , heartbeat_recvd_count_(0)
       , hb_frag_recvd_count_(0)
       , participant_flags_(participant_flags)
@@ -515,10 +507,9 @@ private:
 
   class RtpsReader : public RcObject {
   public:
-    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable)
+    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id)
       : link_(link)
       , id_(id)
-      , durable_(durable)
       , stopping_(false)
       , nackfrag_count_(0)
       , preassociation_task_(link->reactor_task_->interceptor(), *this, &RtpsReader::send_preassociation_acknacks)
@@ -573,7 +564,6 @@ private:
     mutable ACE_Thread_Mutex mutex_;
     WeakRcHandle<RtpsUdpDataLink> link_;
     const RepoId id_;
-    const bool durable_;
     WriterInfoMap remote_writers_;
     WriterInfoSet preassociation_writers_;
     bool stopping_;
