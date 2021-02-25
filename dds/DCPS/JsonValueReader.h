@@ -12,13 +12,12 @@
 #ifndef OPENDDS_SAFETY_PROFILE
 
 #include "dcps_export.h"
-
 #include "ValueReader.h"
 #include "RapidJsonWrapper.h"
+#include "TypeSupportImpl.h"
 
 #include <iosfwd>
 #include <sstream>
-#include <vector>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
