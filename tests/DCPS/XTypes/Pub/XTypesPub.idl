@@ -1,6 +1,11 @@
 #include <tao/OctetSeq.pidl>
 
 @topic
+struct ControlStruct {
+  @key long key;
+};
+
+@topic
 struct PlainCdrStruct {
   @key long key;
   long value;

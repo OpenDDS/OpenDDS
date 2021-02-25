@@ -6,6 +6,8 @@
 #include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/transport/framework/TransportSendStrategy.h>
 #include <dds/DCPS/security/framework/Properties.h>
+#include <dds/DCPS/BuiltInTopicUtils.h>
+
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
@@ -100,4 +102,38 @@ void create_participant(const DomainParticipantFactory_var& dpf, DomainParticipa
 
   dp = dpf->create_participant(0, part_qos, 0, DEFAULT_STATUS_MASK);
 }
+
+template<typename T1, typename T2>
+ReturnCode_t read_i(const DataReader_var& dr, const T1& pdr, T2& data)
+{
+  ReadCondition_var dr_rc = dr->create_readcondition(NOT_READ_SAMPLE_STATE,
+    ANY_VIEW_STATE,
+    ALIVE_INSTANCE_STATE);
+  WaitSet_var ws = new WaitSet;
+  ws->attach_condition(dr_rc);
+  std::set<int> instances;
+
+  ConditionSeq active;
+  const Duration_t max_wait = { 10, 0 };
+  ReturnCode_t ret = ws->wait(active, max_wait);
+
+  if (ret == RETCODE_TIMEOUT) {
+    ACE_ERROR((LM_ERROR, "ERROR: reader timedout\n"));
+  } else if (ret != RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: Reader: wait returned %C\n",
+      OpenDDS::DCPS::retcode_to_string(ret)));
+  } else {
+    SampleInfoSeq info;
+    if ((ret = pdr->take_w_condition(data, info, LENGTH_UNLIMITED, dr_rc)) != RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "ERROR: Reader: take_w_condition returned %C\n",
+        OpenDDS::DCPS::retcode_to_string(ret)));
+    }
+  }
+
+  ws->detach_condition(dr_rc);
+  dr->delete_readcondition(dr_rc);
+
+  return ret;
+}
+
 #endif
