@@ -14,14 +14,18 @@
 
 #include <string>
 #include <vector>
+#include <set>
+#include <map>
 
 typedef void (*callback_t)(bool);
 
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
-  DataReaderListenerImpl(const std::string& id, const std::vector<std::string>& writers, const int total_writers, const int expected_samples, callback_t done_callback, DDS::Subscriber_ptr subscriber, bool check_bits)
+  DataReaderListenerImpl(const std::string& id, bool reliable, bool durable, const std::vector<std::string>& writers, const int total_writers, const int expected_samples, callback_t done_callback, DDS::Subscriber_ptr subscriber, bool check_bits)
     : id_(id)
+    , reliable_(reliable)
+    , durable_(durable)
     , writers_(writers)
     , total_writers_(total_writers)
     , expected_samples_(expected_samples)
@@ -78,10 +82,15 @@ public:
 
 private:
   std::string id_;
+  bool reliable_;
+  bool durable_;
   const std::vector<std::string>& writers_;
   const int total_writers_;
   const int expected_samples_;
   int received_samples_;
+  typedef std::set<int> SampleSet;
+  typedef std::map<int, SampleSet> SampleSetMap;
+  SampleSetMap ph_received_samples_;
   callback_t done_callback_;
   bool builtin_read_error_;
 #ifndef DDS_HAS_MINIMUM_BIT

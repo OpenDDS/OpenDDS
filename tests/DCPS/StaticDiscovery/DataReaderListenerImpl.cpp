@@ -70,22 +70,33 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
   DDS::ReturnCode_t error = reader_i->take_next_sample(message, info);
 
-  if (error == DDS::RETCODE_OK) {
+  while (error == DDS::RETCODE_OK) {
     if (info.valid_data) {
-      if (++received_samples_ == expected_samples_) {
-        done_callback_(builtin_read_error_);
-      } else {
-        if (static_cast<int>(writers_.size()) == total_writers_) {
-          ACE_DEBUG((LM_INFO, "(%P|%t) Reader %C got message %d (#%d from known writer %C)\n", id_.data(), received_samples_, message.value, writers_[message.src].data()));
-        } else {
-          ACE_DEBUG((LM_INFO, "(%P|%t) Reader %C got message %d (#%d from (ambiguous) writer #%d)\n", id_.data(), received_samples_, message.value, message.src));
+      SampleSetMap::iterator it = ph_received_samples_.find(info.publication_handle);
+      if (it == ph_received_samples_.end()) {
+        it = ph_received_samples_.insert(SampleSetMap::value_type(info.publication_handle, std::set<int>())).first;
+        if (durable_) {
+          it->second.insert(0);
         }
       }
+      if (reliable_ && !it->second.empty()) {
+        int expected = *(it->second.rbegin()) + 1;
+        if (message.value != expected) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) Missing Data Detected Between Reliable Endpoints: expected message %d but got %d\n", expected, message.value));
+        }
+        OPENDDS_ASSERT(message.value == expected);
+      }
+      it->second.insert(message.value);
+      if (static_cast<int>(writers_.size()) == total_writers_) {
+        ACE_DEBUG((LM_INFO, "(%P|%t) Reader %C got message %d (#%d from known writer %C)\n", id_.data(), received_samples_, message.value, writers_[message.src].data()));
+      } else {
+        ACE_DEBUG((LM_INFO, "(%P|%t) Reader %C got message %d (#%d from (ambiguous (PH = %d)) writer #%d)\n", id_.data(), received_samples_, message.value, info.publication_handle, message.src));
+      }
+      if (++received_samples_ == expected_samples_) {
+        done_callback_(builtin_read_error_);
+      }
     }
-  } else {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("ERROR: %N:%l: on_data_available() -")
-               ACE_TEXT(" take_next_sample failed!\n")));
+    error = reader_i->take_next_sample(message, info);
   }
 }
 
