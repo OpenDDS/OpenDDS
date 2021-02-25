@@ -83,6 +83,14 @@ protected:
   /// End Current Transport Header Processing
   virtual void end_transport_header_processing() {}
 
+  class ScopedHeaderProcessing {
+  public:
+    ScopedHeaderProcessing(TransportReceiveStrategy& trs) : trs_(trs) { trs_.begin_transport_header_processing(); }
+    ~ScopedHeaderProcessing() { trs_.end_transport_header_processing(); }
+  private:
+    TransportReceiveStrategy& trs_;
+  };
+
   /// Called when there is a ReceivedDataSample to be delivered.
   virtual void deliver_sample(ReceivedDataSample&  sample,
                               const ACE_INET_Addr& remote_address) = 0;

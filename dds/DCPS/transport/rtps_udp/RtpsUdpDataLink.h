@@ -285,6 +285,7 @@ private:
     }
   };
   typedef OPENDDS_VECTOR(MetaSubmessage) MetaSubmessageVec;
+  typedef OPENDDS_VECTOR(MetaSubmessageVec) MetaSubmessageVecVec;
 
   // RTPS reliability support for local writers:
 
@@ -596,7 +597,7 @@ private:
     IdCountSet nackfrag_counts_;
   };
 
-  void build_meta_submessage_map(MetaSubmessageVec& meta_submessages, AddrDestMetaSubmessageMap& adr_map);
+  void build_meta_submessage_map(MetaSubmessageVecVec& meta_submessages, AddrDestMetaSubmessageMap& adr_map);
   void bundle_mapped_meta_submessages(
     const Encoding& encoding,
     AddrDestMetaSubmessageMap& adr_map,
@@ -606,9 +607,9 @@ private:
                                CountKeeper& counts);
 
   void queue_or_send_submessages(MetaSubmessageVec& meta_submessages);
-  void bundle_and_send_submessages(MetaSubmessageVec& meta_submessages);
+  void bundle_and_send_submessages(MetaSubmessageVecVec& meta_submessages);
 
-  struct SubmessageQueue: RcObject, MetaSubmessageVec {
+  struct SubmessageQueue: RcObject, MetaSubmessageVecVec {
   };
   typedef RcHandle<SubmessageQueue> SubmessageQueue_rch;
 
