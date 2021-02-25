@@ -85,7 +85,7 @@ protected:
 
   class ScopedHeaderProcessing {
   public:
-    ScopedHeaderProcessing(TransportReceiveStrategy& trs) : trs_(trs) { trs_.begin_transport_header_processing(); }
+    explicit ScopedHeaderProcessing(TransportReceiveStrategy& trs) : trs_(trs) { trs_.begin_transport_header_processing(); }
     ~ScopedHeaderProcessing() { trs_.end_transport_header_processing(); }
   private:
     TransportReceiveStrategy& trs_;

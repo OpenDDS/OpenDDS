@@ -1484,13 +1484,11 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
 
     } else if (writer->recvd_.contains(seq)) {
       if (Transport_debug_level > 5) {
-        GuidConverter wc(src);
-        GuidConverter rc(id_);
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) -")
                              ACE_TEXT(" data seq: %q from %C being DROPPED from %C because it's ALREADY received\n"),
                              seq.getValue(),
-                             OPENDDS_STRING(wc).c_str(),
-                             OPENDDS_STRING(rc).c_str()));
+                             LogGuid(src).c_str(),
+                             LogGuid(id_).c_str()));
       }
       link->receive_strategy()->withhold_data_from(id_);
 
@@ -1506,13 +1504,11 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
 
     } else if (writer->recvd_.disjoint() || writer->recvd_.cumulative_ack() != seq.previous()) {
       if (Transport_debug_level > 5) {
-        GuidConverter wc(src);
-        GuidConverter rc(id_);
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) -")
                              ACE_TEXT(" data seq: %q from %C being WITHHELD from %C because it's EXPECTING more data\n"),
                              seq.getValue(),
-                             OPENDDS_STRING(wc).c_str(),
-                             OPENDDS_STRING(rc).c_str()));
+                             LogGuid(src).c_str(),
+                             LogGuid(id_).c_str()));
       }
       const ReceivedDataSample* sample =
         link->receive_strategy()->withhold_data_from(id_);
@@ -1521,13 +1517,11 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
 
     } else {
       if (Transport_debug_level > 5) {
-        GuidConverter wc(src);
-        GuidConverter rc(id_);
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) -")
                              ACE_TEXT(" data seq: %q from %C to %C OK to deliver\n"),
                              seq.getValue(),
-                             OPENDDS_STRING(wc).c_str(),
-                             OPENDDS_STRING(rc).c_str()));
+                             LogGuid(src).c_str(),
+                             LogGuid(id_).c_str()));
       }
       writer->recvd_.insert(seq);
       link->receive_strategy()->do_not_withhold_data_from(id_);
@@ -1535,13 +1529,11 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
 
   } else {
     if (Transport_debug_level > 5) {
-      GuidConverter wc(src);
-      GuidConverter rc(id_);
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) -")
                            ACE_TEXT(" data seq: %q from %C to %C dropped because of unknown writer\n"),
                            to_opendds_seqnum(data.writerSN).getValue(),
-                           OPENDDS_STRING(wc).c_str(),
-                           OPENDDS_STRING(rc).c_str()));
+                           LogGuid(src).c_str(),
+                           LogGuid(id_).c_str()));
     }
     link->receive_strategy()->withhold_data_from(id_);
   }
@@ -2409,7 +2401,7 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVecVec& meta_submessa
 
   bool has_data = false;
   for (MetaSubmessageVecVec::const_iterator it = meta_submessages.begin(); !has_data && it != meta_submessages.end(); ++it) {
-    has_data |= !it->empty();
+    has_data = !it->empty();
   }
 
   if (!has_data) {
