@@ -1,5 +1,8 @@
-#include "xcdrTypeSupportImpl.h"
+#include "xcdrbasetypesTypeSupportImpl.h"
+#include "appendable_mixedTypeSupportImpl.h"
 #include "mutable_typesTypeSupportImpl.h"
+#include "mutable_types2TypeSupportImpl.h"
+#include "keyonlyTypeSupportImpl.h"
 
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/SafetyProfileStreams.h>

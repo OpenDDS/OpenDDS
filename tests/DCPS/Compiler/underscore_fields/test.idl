@@ -1,0 +1,51 @@
+// This test was made to catch problems with names
+// containing trailing underscores failing and colliding
+// with each other
+
+module unique_identifier_msgs_ {
+  module msg_ {
+    module dds_ {
+      typedef octet td_oa[16];
+      typedef octet td_oa_[16];
+      typedef octet td_oa__[16];
+      typedef sequence<octet, 16> td_oseq;
+      typedef sequence<octet, 16> td_oseq_;
+      typedef sequence<octet, 16> td_oseq__;
+
+      struct str {
+        string s;
+        string s_;
+        string s__;
+        long l;
+        long l_;
+        long l__;
+        long l_laa[16];
+        long l_laa_[16];
+        long l_laa__[16];
+        td_oseq td_seq;
+        td_oseq td_seq_;
+        td_oseq td_seq__;
+        td_oa td_a;
+        td_oa td_a_;
+        td_oa td_a__;
+        octet oa[16];
+        octet oa_[16];
+        octet oa__[16];
+        sequence <long> l_lssa;
+        sequence <long, 16> l_lssa_;
+        sequence <long, 16> l_lssa__;
+      };
+
+      struct stru {
+        str nested_struct;
+        str nested_struct_;
+        str nested_struct__;
+      };
+
+      union union_final switch(long) {
+        case 0: long A;
+        case 1: long A_;
+      };
+    };  // module dds_
+  };  // module msg_
+};  // module unique_identifier_msgs_

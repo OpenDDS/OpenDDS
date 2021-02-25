@@ -120,11 +120,9 @@ private:
     relay_statistics_.output_processing_time(time_diff_to_duration(output_processing_time_));
     relay_statistics_.max_queue_latency(time_diff_to_duration(max_queue_latency_));
 
-#ifdef OPENDDS_RAPIDJSON
     if (config_.log_relay_statistics()) {
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name_.in(), OpenDDS::DCPS::to_json(relay_statistics_).c_str()));
     }
-#endif
 
     if (config_.publish_relay_statistics()) {
       const auto ret = writer_->write(relay_statistics_, DDS::HANDLE_NIL);

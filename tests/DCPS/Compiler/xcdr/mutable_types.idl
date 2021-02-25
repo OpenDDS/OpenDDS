@@ -1,8 +1,3 @@
-#include <tao/LongSeq.pidl>
-#include <tao/ShortSeq.pidl>
-#include <tao/OctetSeq.pidl>
-#include <tao/StringSeq.pidl>
-
 // Mutable Tests =============================================================
 
 @mutable
@@ -87,52 +82,4 @@ struct LengthCodeStruct { //LC Size
   @id(14) string<4> str4; // 3  4+4
   @key
   @id(15) string<5> str5; // 4  4+5
-};
-
-typedef sequence<long long, 3> LongLong3S;
-typedef sequence<short, 3> Short3S;
-
-@mutable
-struct LC567Struct {            //LC Size
-  @id(0) sequence<octet, 3> o3; // 5    3
-  @id(1) sequence<long, 3> l3;  // 6  4x3
-  @id(2) LongLong3S ll3;        // 7  8x3
-  @id(3) Short3S s3;            // 3    4 (2 elements)
-  @id(4) string<4> str4;        // 3    4
-  @id(5) string<5> str5;        // 5    5
-  @id(6) sequence<long> ls;     // 6  4x2 (2 elements)
-  @key
-  @id(7) string<7> str7;        // 5    7
-};
-
-
-typedef sequence<long> LongSeq;
-
-@mutable
-union NestedUnion switch(short) {
-case 1:
-  @id(1) short short_field;
-case 2:
-  @id(2) LongSeq sequence_field;
-default:
-  @id(3) string string_field;
-};
-
-// DHEADER is not generated for anonymous sequence of string,
-// so make a name for it here
-typedef sequence<string> StringSeq;
-
-@mutable
-struct MixedMutableStruct {
-  @id(1) MutableStructWithExplicitIDs struct_nested;
-  @id(2) sequence<short> sequence_field;
-  @id(3) NestedUnion union_nested;
-  @id(4) StringSeq sequence_field2;
-};
-
-@mutable
-struct ModifiedMixedMutableStruct {
-  @id(3) NestedUnion union_nested;
-  @id(4) StringSeq sequence_field2;
-  @id(1) MutableStructWithExplicitIDs struct_nested;
 };

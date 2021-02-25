@@ -630,7 +630,7 @@ struct TestParticipant: ACE_Event_Handler {
       }
     }
     // pretend #2 was lost
-    if (do_nack_ && hb.firstSN.low <= 2 && hb.lastSN.low >= 2) {
+    if (!recvd_.contains(2) && hb.firstSN.low <= 2 && hb.lastSN.low >= 2) {
       SequenceNumber_t nack = {0, 2};
       ACE_DEBUG((LM_INFO, "recv_hb() requesting retransmit of #2\n"));
       if (!send_an(hb.writerId, nack, peer)) {

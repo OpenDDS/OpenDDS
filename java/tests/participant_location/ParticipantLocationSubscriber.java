@@ -13,13 +13,13 @@ import Messenger.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 
-class TheSubscriber implements Callable<Boolean> {
+class ParticipantLocationSubscriber implements Callable<Boolean> {
   private final DomainParticipant participant;
   private final int numMsgs;
   private final boolean noIce;
   private final boolean noRelay;
 
-  TheSubscriber(DomainParticipant part, int num, boolean noIce, boolean noRelay) {
+  ParticipantLocationSubscriber(DomainParticipant part, int num, boolean noIce, boolean noRelay) {
     participant = part;
     numMsgs = num;
     this.noIce = noIce;

@@ -28,6 +28,7 @@ who are just curious!
   :maxdepth: 2
 
   Development Guidelines <guidelines>
+  Unit Testing Guidelines <internal/unit_tests>
   Bench 2 <internal/bench2>
 
 ******************

@@ -23,6 +23,8 @@ my $ipv6;
 my $pub_sub_ini = "rtps.ini";
 my $opt;
 
+my $use_relay = 1;
+
 my $relay_security_opts = "-IdentityCA ../../../tests/security/certs/identity/identity_ca_cert.pem" .
   " -PermissionsCA ../../../tests/security/certs/permissions/permissions_ca_cert.pem" .
   " -IdentityCertificate ../../../tests/security/certs/identity/test_participant_01_cert.pem" .
@@ -39,6 +41,7 @@ foreach my $i (@ARGV) {
     $noice = "-n";
   } elsif ($i eq 'norelay' || $i eq '-norelay') {
     $norelay = "-r";
+    undef $use_relay;
   } elsif ($i eq 'ipv6' || $i eq '-ipv6') {
     $ipv6 = "-6";
   }
@@ -61,18 +64,22 @@ my $test_opts = "$opt $debug_opt -ORBLogFile partLocTest.log -DCPSConfigFile $pu
 
 PerlACE::add_lib_path ("$DDS_ROOT/java/tests/messenger/messenger_idl");
 
-my $relay = new PerlDDS::TestFramework();
-if ($ipv6) {
+my $relay;
+
+if ($use_relay) {
+  $relay = new PerlDDS::TestFramework();
+  if ($ipv6) {
     $relay->process("relay", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay_ipv6.ini -ApplicationDomain 42 -VerticalAddress [::]:4444 -HorizontalAddress [::1]:11444 $relay_security_opts");
-} else {
+  } else {
     $relay->process("relay", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay.ini -ApplicationDomain 42 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444 $relay_security_opts");
+  }
+
+  $relay->start_process("relay");
+  sleep(1);
 }
 
 my $psTest = new PerlDDS::Process_Java ("ParticipantLocationTest", $test_opts,
     ["$DDS_ROOT/java/tests/messenger/messenger_idl/messenger_idl_test.jar"], $vmargs);
-
-$relay->start_process("relay") if $norelay ne "-r";
-sleep(1);
 
 my $psTestResult = $psTest->SpawnWaitKill(30);
 
@@ -81,7 +88,9 @@ if ($psTestResult != 0) {
     $status = 1;
 }
 
-$relay->kill_process(5, "relay") if $norelay ne "-r";
+if ($use_relay) {
+  $relay->kill_process(5, "relay");
+}
 
 if ($status == 0) {
   print "test PASSED.\n";

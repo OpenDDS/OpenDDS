@@ -545,7 +545,10 @@ ReliableSession::nak_received(const Message_Block_Ptr& control)
   // Broadcast a MULTICAST_NAKACK control sample before resending to suppress
   // repair requests for unrecoverable samples by providing a
   // new low-water mark for affected peers:
-  if (!send_buffer->empty() && send_buffer->low() > ranges.begin()->first) {
+  SequenceNumber sn = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+  {
+    const SingleSendBuffer::Proxy proxy(*send_buffer);
+    if (!proxy.empty() && proxy.low() > ranges.begin()->first) {
       if (OpenDDS::DCPS::DCPS_debug_level > 0) {
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT ("(%P|%t) ReliableSession::nak_received")
@@ -554,9 +557,13 @@ ReliableSession::nak_received(const Message_Block_Ptr& control)
                     (unsigned int) this->link()->local_peer(),
                     (unsigned int)(this->remote_peer_ >> 32),
                     (unsigned int) this->remote_peer_,
-                    send_buffer->low().getValue()));
+                    proxy.low().getValue()));
       }
-    send_nakack(send_buffer->low());
+      sn = proxy.low();
+    }
+  }
+  if (sn != SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
+    send_nakack(sn);
   }
 
   for (CORBA::ULong i = 0; i < size; ++i) {

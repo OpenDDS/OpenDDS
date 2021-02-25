@@ -33,6 +33,12 @@ class dds_generator {
 public:
   virtual ~dds_generator() = 0;
 
+  static std::string get_tag_name(const std::string& base_name, bool nested_key_only = false);
+
+  static bool cxx_escape(const std::string& s, size_t i);
+
+  static std::string valid_var_name(const std::string& str);
+
   virtual bool do_included_files() const { return false; }
 
   virtual void gen_prologue() {}
@@ -725,8 +731,8 @@ void generateCaseBody(
       rhs = use_cxx11 ? "tmp" : "tmp.out()";
     } else if (use_cxx11 && (br_cls & (CL_ARRAY | CL_SEQUENCE))) {  //array or seq C++11
       rhs = "IDL::DistinctType<" + brType + ", "
-        + dds_generator::scoped_helper(branch->field_type()->name(), "_")
-        + "_tag>(tmp)";
+        + dds_generator::get_tag_name(dds_generator::scoped_helper(branch->field_type()->name(), "::"))
+        + ">(tmp)";
     } else if (br_cls & CL_ARRAY) { //array classic
       forany = "    " + brType + "_forany fa = tmp;\n";
       rhs = getWrapper("fa", br, WD_INPUT);

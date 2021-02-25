@@ -2,6 +2,8 @@
 
 #include "utility.h"
 
+#include <dds/DCPS/JsonValueWriter.h>
+
 namespace RtpsRelay {
 
 PublicationListener::PublicationListener(OpenDDS::DCPS::DomainParticipantImpl* participant,
@@ -88,7 +90,7 @@ void PublicationListener::write_sample(const DDS::PublicationBuiltinTopicData& d
     publisher_qos,
   };
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: PublicationLister::write_sample add local writer %C\n"), guid_to_string(repoid).c_str()));
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: PublicationLister::write_sample add local writer %C %C\n"), guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str()));
   DDS::ReturnCode_t ret = writer_->write(entry, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: PublicationListener::write_sample failed to write\n")));

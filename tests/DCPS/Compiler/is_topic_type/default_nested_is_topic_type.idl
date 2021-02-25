@@ -1,0 +1,80 @@
+@default_nested
+module DefaultNestedModule {
+  struct NonAnnotatedStruct {
+    long value;
+  };
+
+  @topic
+  struct TopicStruct {
+    long value;
+  };
+
+  @nested
+  struct NestedStruct {
+    long value;
+  };
+
+  @nested(TRUE)
+  struct NestedTrueStruct {
+    long value;
+  };
+
+  @nested(FALSE)
+  struct NestedFalseStruct {
+    long value;
+  };
+};
+
+@default_nested(TRUE)
+module DefaultNestedTrueModule {
+  struct NonAnnotatedStruct {
+    long value;
+  };
+
+  @topic
+  struct TopicStruct {
+    long value;
+  };
+
+  @nested
+  struct NestedStruct {
+    long value;
+  };
+
+  @nested(TRUE)
+  struct NestedTrueStruct {
+    long value;
+  };
+
+  @nested(FALSE)
+  struct NestedFalseStruct {
+    long value;
+  };
+};
+
+@default_nested(FALSE)
+module DefaultNestedFalseModule {
+  struct NonAnnotatedStruct {
+    long value;
+  };
+
+  @topic
+  struct TopicStruct {
+    long value;
+  };
+
+  @nested
+  struct NestedStruct {
+    long value;
+  };
+
+  @nested(TRUE)
+  struct NestedTrueStruct {
+    long value;
+  };
+
+  @nested(FALSE)
+  struct NestedFalseStruct {
+    long value;
+  };
+};

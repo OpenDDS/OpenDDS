@@ -36,8 +36,12 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , max_message_size_(RtpsUdpSendStrategy::UDP_MAX_MESSAGE_SIZE)
   , nak_depth_(0)
   , quick_reply_ratio_(0.1)
+  , heartbeat_backoff_factor_(2.0)
+  , heartbeat_safety_factor_(2.0)
   , nak_response_delay_(0, 200*1000 /*microseconds*/) // default from RTPS
-  , heartbeat_period_(1) // no default in RTPS spec
+  , heartbeat_period_(0, 100000) // no default in RTPS spec
+  , heartbeat_period_minimum_(0, 10000)
+  , heartbeat_period_maximum_(1, 0)
   , heartbeat_response_delay_(0, 500*1000 /*microseconds*/) // default from RTPS
   , handshake_timeout_(30) // default syn_timeout in OpenDDS_Multicast
   , durable_data_timeout_(60)
@@ -99,6 +103,8 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("nak_depth"), nak_depth_, size_t);
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("quick_reply_ratio"), quick_reply_ratio_, double);
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("heartbeat_backoff_factor"), heartbeat_backoff_factor_, double);
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("heartbeat_safety_factor"), heartbeat_safety_factor_, double);
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("ttl"), ttl_, unsigned char);
 
@@ -106,6 +112,10 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
                         nak_response_delay_);
   GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("heartbeat_period"),
                         heartbeat_period_);
+  GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("heartbeat_period_minimum"),
+                        heartbeat_period_minimum_);
+  GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("heartbeat_period_maximum"),
+                        heartbeat_period_maximum_);
   GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("heartbeat_response_delay"),
                         heartbeat_response_delay_);
   GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("handshake_timeout"),

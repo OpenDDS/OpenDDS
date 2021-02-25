@@ -35,7 +35,7 @@
   </xsl:variable>
   <xsl:text>project(</xsl:text>
   <xsl:value-of select="concat($modelname, ') : dcps, all_dcps_transports, msvc_bigobj, ', $modelname, '_paths')"/>
-  
+
   <xsl:if test="string-length($model-refs) &gt; 0">
     <xsl:value-of select="concat(', ', $model-refs)"/>
   </xsl:if>
@@ -63,7 +63,7 @@
   dcps_ts_flags += -Wb,export_macro=</xsl:text>
   <xsl:value-of select="$normalized-modelname"/>
   <xsl:text>_Export
-  prebuild      += perl $(DDS_ROOT)/bin/expfile.pl </xsl:text>
+  prebuild      += perl $(DDS_ROOT)/tools/scripts/expfile.pl </xsl:text>
   <xsl:value-of select="concat($modelname, $newline, $newline)"/>
   <xsl:text>
   TypeSupport_Files {
@@ -104,4 +104,3 @@
 <!-- End of main processing template. -->
 
 </xsl:stylesheet>
-

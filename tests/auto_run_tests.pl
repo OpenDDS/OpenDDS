@@ -40,7 +40,7 @@ if (!GetOptions('h' => \$opt_h,
     print "    -l listfile Run the tests specified in list file\n";
     print "\n";
     my $dcps_config_list = new PerlACE::ConfigList;
-    $dcps_config_list->load($DDS_ROOT . "/bin/dcps_tests.lst");
+    $dcps_config_list->load($DDS_ROOT . "/tests/dcps_tests.lst");
     print "DCPS Test Configs: " . $dcps_config_list->list_configs() . "\n";
     exit 1;
 }
@@ -48,7 +48,7 @@ if (!GetOptions('h' => \$opt_h,
 my @file_list;
 
 if ($opt_a || !scalar @opt_l) {
-    push(@file_list, "$DDS_ROOT/bin/dcps_tests.lst");
+    push(@file_list, "$DDS_ROOT/tests/dcps_tests.lst");
 }
 
 if (scalar @opt_l) {
@@ -136,7 +136,7 @@ foreach my $test_lst (@file_list) {
             if ($result != 0) {
                 print "Error: $test returned with status $result\n";
                 if ($opt_x) {
-                    exit($result);
+                    exit($result >> 8);
                 }
             }
 

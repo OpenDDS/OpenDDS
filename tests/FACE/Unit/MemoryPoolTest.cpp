@@ -1051,9 +1051,6 @@ private:
     }
     TEST_CHECK((unsigned char*)alloc == pool_end);
 
-    // Temp
-    ACE_DEBUG((LM_INFO, "comparing allocted bytes %u to expected %u\n",
-              allocated_bytes, expected_allocated_bytes));
     TEST_CHECK(allocated_bytes == expected_allocated_bytes);
     TEST_CHECK(allocated_bytes + free_bytes + oh_bytes == pool.pool_size_);
 

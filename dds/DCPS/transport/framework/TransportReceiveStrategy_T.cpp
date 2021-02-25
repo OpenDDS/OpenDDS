@@ -177,11 +177,13 @@ TransportReceiveStrategy<TH, DSH>::handle_simple_dds_input(ACE_HANDLE fd)
     return 0;
   }
 
+  begin_transport_header_processing();
   while (bytes_remaining > 0) {
     data_sample_header_.pdu_remaining(bytes_remaining);
     data_sample_header_ = *cur_rb;
     bytes_remaining -= data_sample_header_.get_serialized_size();
     if (!check_header(data_sample_header_)) {
+      end_transport_header_processing();
       return 0;
     }
     const size_t dsh_ml = data_sample_header_.message_length();
@@ -220,7 +222,7 @@ TransportReceiveStrategy<TH, DSH>::handle_simple_dds_input(ACE_HANDLE fd)
     // applies to the first DataSampleHeader in the TransportHeader
     receive_transport_header_.last_fragment(false);
   }
-
+  end_transport_header_processing();
 
   if (cur_rb->data_block()->reference_count() > 1) {
     ACE_DES_FREE(

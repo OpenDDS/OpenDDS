@@ -1,4 +1,4 @@
-project: dcps_rtps_udp, opendds_cxx11, rtps_relay_lib, opendds_security {
+project: dcps_rtps_udp, opendds_cxx11, rtps_relay_lib, opendds_security, rapidjson {
 
   exeout = $(DDS_ROOT)/bin
   requires += built_in_topics

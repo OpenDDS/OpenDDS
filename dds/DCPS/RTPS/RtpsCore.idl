@@ -319,6 +319,8 @@ module OpenDDS {
     const OpenDDSParticipantFlagsBits_t PFLAGS_EMPTY = 0x0;
     const OpenDDSParticipantFlagsBits_t PFLAGS_NO_ASSOCIATED_WRITERS = 0x1;
     const OpenDDSParticipantFlagsBits_t PFLAGS_DIRECTED_HEARTBEAT = 0x2;
+    // Causes reliable RTPS Readers to use the heartbeat count as the acknack count.
+    const OpenDDSParticipantFlagsBits_t PFLAGS_REFLECT_HEARTBEAT_COUNT = 0x4;
     const OpenDDSParticipantFlagsBits_t PFLAGS_THIS_VERSION = PFLAGS_DIRECTED_HEARTBEAT | PFLAGS_NO_ASSOCIATED_WRITERS;
 
     struct OpenDDSParticipantFlags_t {

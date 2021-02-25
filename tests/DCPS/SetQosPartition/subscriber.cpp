@@ -112,7 +112,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
       // Create first DataReader with listener.
-      DDS::DataReaderListener_var listener1 (new DataReaderListenerImpl);
+      DDS::DataReaderListener_var listener1 (new DataReaderListenerImpl("Subscriber_1"));
       if (CORBA::is_nil (listener1.in ()))
       {
         cerr << "ERROR: listener1 is nil." << endl;
@@ -126,7 +126,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       // Create second DataReader with listener.
-      DDS::DataReaderListener_var listener2 (new DataReaderListenerImpl);
+      DDS::DataReaderListener_var listener2 (new DataReaderListenerImpl("Subscriber_2"));
       if (CORBA::is_nil (listener2.in ()))
       {
         cerr << "ERROR: listener2 is nil." << endl;
