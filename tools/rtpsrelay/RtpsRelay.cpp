@@ -209,6 +209,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   // Set up the relay participant.
   DDS::DomainParticipantQos participant_qos;
   factory->get_default_participant_qos(participant_qos);
+  DDS::PropertySeq& relay_properties = participant_qos.property.value;
+  append(relay_properties, OpenDDS::RTPS::RTPS_REFLECT_HEARTBEAT_COUNT, "true");
+
   DDS::DomainParticipant_var relay_participant = factory->create_participant(relay_domain, participant_qos, nullptr,
                                                                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!relay_participant) {
@@ -479,19 +482,19 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   participant_qos.user_data.value.length(static_cast<CORBA::ULong>(user_data.length()));
   std::memcpy(participant_qos.user_data.value.get_buffer(), user_data.data(), user_data.length());
 
-  DDS::PropertySeq& properties = participant_qos.property.value;
-  append(properties, OpenDDS::RTPS::RTPS_DISCOVERY_ENDPOINT_ANNOUNCEMENTS, "false");
-  append(properties, OpenDDS::RTPS::RTPS_DISCOVERY_TYPE_LOOKUP_SERVICE, "false");
-  append(properties, OpenDDS::RTPS::RTPS_REFLECT_HEARTBEAT_COUNT, "true");
+  DDS::PropertySeq& application_properties = participant_qos.property.value;
+  append(application_properties, OpenDDS::RTPS::RTPS_DISCOVERY_ENDPOINT_ANNOUNCEMENTS, "false");
+  append(application_properties, OpenDDS::RTPS::RTPS_DISCOVERY_TYPE_LOOKUP_SERVICE, "false");
+  append(application_properties, OpenDDS::RTPS::RTPS_REFLECT_HEARTBEAT_COUNT, "true");
 
 #ifdef OPENDDS_SECURITY
   if (secure) {
-    append(properties, DDS::Security::Properties::AuthIdentityCA, identity_ca_file);
-    append(properties, DDS::Security::Properties::AccessPermissionsCA, permissions_ca_file);
-    append(properties, DDS::Security::Properties::AuthIdentityCertificate, identity_certificate_file);
-    append(properties, DDS::Security::Properties::AuthPrivateKey, identity_key_file);
-    append(properties, DDS::Security::Properties::AccessGovernance, governance_file);
-    append(properties, DDS::Security::Properties::AccessPermissions, permissions_file);
+    append(application_properties, DDS::Security::Properties::AuthIdentityCA, identity_ca_file);
+    append(application_properties, DDS::Security::Properties::AccessPermissionsCA, permissions_ca_file);
+    append(application_properties, DDS::Security::Properties::AuthIdentityCertificate, identity_certificate_file);
+    append(application_properties, DDS::Security::Properties::AuthPrivateKey, identity_key_file);
+    append(application_properties, DDS::Security::Properties::AccessGovernance, governance_file);
+    append(application_properties, DDS::Security::Properties::AccessPermissions, permissions_file);
   }
 #endif
 
