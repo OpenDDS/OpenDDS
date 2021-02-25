@@ -556,6 +556,7 @@ bool JsonValueReader<InputStream>::read_long_enum(ACE_CDR::Long& value, const En
 template<typename T, typename InputStream>
 bool from_json(T& value, InputStream& sample)
 {
+  set_default(value);
   JsonValueReader<InputStream> jvr(sample);
   return vread(jvr, value);
 }
