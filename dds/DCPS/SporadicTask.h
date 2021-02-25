@@ -21,7 +21,7 @@ public:
   explicit SporadicTask(RcHandle<ReactorInterceptor> interceptor)
     : interceptor_(interceptor)
     , scheduled_(false)
-    , last_command_(NONE)
+    , last_command_(SPORADIC_TASK_NONE)
   {
     reactor(interceptor->reactor());
   }
@@ -73,9 +73,9 @@ private:
   WeakRcHandle<ReactorInterceptor> interceptor_;
   bool scheduled_;
   enum {
-    NONE,
-    SCHEDULE,
-    CANCEL
+    SPORADIC_TASK_NONE,
+    SPORADIC_TASK_SCHEDULE,
+    SPORADIC_TASK_CANCEL
   } last_command_;
 
   struct ScheduleCommand : public ReactorInterceptor::Command {
@@ -85,12 +85,12 @@ private:
 
     virtual bool should_execute() const
     {
-      return sporadic_task_->last_command_ != SCHEDULE;
+      return sporadic_task_->last_command_ != SPORADIC_TASK_SCHEDULE;
     }
 
     virtual void will_execute()
     {
-      sporadic_task_->last_command_ = SCHEDULE;
+      sporadic_task_->last_command_ = SPORADIC_TASK_SCHEDULE;
     }
 
     virtual void execute()
@@ -100,7 +100,7 @@ private:
 
     virtual void queue_flushed()
     {
-      sporadic_task_->last_command_ = NONE;
+      sporadic_task_->last_command_ = SPORADIC_TASK_NONE;
     }
 
     SporadicTask* const sporadic_task_;
@@ -114,12 +114,12 @@ private:
 
     virtual bool should_execute() const
     {
-      return sporadic_task_->last_command_ != CANCEL;
+      return sporadic_task_->last_command_ != SPORADIC_TASK_CANCEL;
     }
 
     virtual void will_execute()
     {
-      sporadic_task_->last_command_ = CANCEL;
+      sporadic_task_->last_command_ = SPORADIC_TASK_CANCEL;
     }
 
     virtual void execute()
@@ -129,7 +129,7 @@ private:
 
     virtual void queue_flushed()
     {
-      sporadic_task_->last_command_ = NONE;
+      sporadic_task_->last_command_ = SPORADIC_TASK_NONE;
     }
 
     SporadicTask* const sporadic_task_;
