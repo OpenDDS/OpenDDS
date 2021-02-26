@@ -5482,8 +5482,6 @@ jobs:
       run: |
         cd vcpkg
         rm -rf buildtrees downloads
-        ls -l
-
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
       with:
