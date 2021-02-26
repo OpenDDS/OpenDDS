@@ -600,7 +600,7 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   DDS::StringSeq params(2);
   params.length(2);
   params[0] = "2";
-  params[1] = CORBA::string_dup(params1_value);
+  params[1] = params1_value;
   dr_qc = dr->create_querycondition(ANY_SAMPLE_STATE,
     ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "key = %0 AND name = %1", params);
   if (!dr_qc) {
