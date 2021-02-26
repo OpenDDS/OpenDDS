@@ -1478,13 +1478,11 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
 
     } else if (writer->recvd_.contains(seq)) {
       if (Transport_debug_level > 5) {
-        GuidConverter writer(src);
-        GuidConverter reader(id_);
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) -")
                              ACE_TEXT(" data seq: %q from %C being DROPPED from %C because it's ALREADY received\n"),
                              seq.getValue(),
-                             OPENDDS_STRING(writer).c_str(),
-                             OPENDDS_STRING(reader).c_str()));
+                             LogGuid(src).c_str(),
+                             LogGuid(id_).c_str()));
       }
       link->receive_strategy()->withhold_data_from(id_);
 
@@ -1492,7 +1490,7 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
       const ReceivedDataSample* sample =
         link->receive_strategy()->withhold_data_from(id_);
       if (Transport_debug_level > 5) {
-        ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::process_data_i WITHHOLD %q\n", seq.getValue()));
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) WITHHOLD %q\n", seq.getValue()));
         writer->recvd_.dump();
       }
       writer->held_.insert(std::make_pair(seq, *sample));
@@ -1500,13 +1498,11 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
 
     } else if (writer->recvd_.disjoint() || writer->recvd_.cumulative_ack() != seq.previous()) {
       if (Transport_debug_level > 5) {
-        GuidConverter writer(src);
-        GuidConverter reader(id_);
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) -")
                              ACE_TEXT(" data seq: %q from %C being WITHHELD from %C because it's EXPECTING more data\n"),
                              seq.getValue(),
-                             OPENDDS_STRING(writer).c_str(),
-                             OPENDDS_STRING(reader).c_str()));
+                             LogGuid(src).c_str(),
+                             LogGuid(id_).c_str()));
       }
       const ReceivedDataSample* sample =
         link->receive_strategy()->withhold_data_from(id_);
@@ -1515,13 +1511,11 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
 
     } else {
       if (Transport_debug_level > 5) {
-        GuidConverter writer(src);
-        GuidConverter reader(id_);
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) -")
                              ACE_TEXT(" data seq: %q from %C to %C OK to deliver\n"),
                              seq.getValue(),
-                             OPENDDS_STRING(writer).c_str(),
-                             OPENDDS_STRING(reader).c_str()));
+                             LogGuid(src).c_str(),
+                             LogGuid(id_).c_str()));
       }
       writer->recvd_.insert(seq);
       link->receive_strategy()->do_not_withhold_data_from(id_);
@@ -1529,13 +1523,11 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
 
   } else {
     if (Transport_debug_level > 5) {
-      GuidConverter writer(src);
-      GuidConverter reader(id_);
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) -")
                            ACE_TEXT(" data seq: %q from %C to %C dropped because of unknown writer\n"),
                            to_opendds_seqnum(data.writerSN).getValue(),
-                           OPENDDS_STRING(writer).c_str(),
-                           OPENDDS_STRING(reader).c_str()));
+                           LogGuid(src).c_str(),
+                           LogGuid(id_).c_str()));
     }
     link->receive_strategy()->withhold_data_from(id_);
   }
@@ -2118,37 +2110,39 @@ namespace {
 #endif
 
 void
-RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVec& meta_submessages, AddrDestMetaSubmessageMap& adr_map)
+RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVecVec& meta_submessages, AddrDestMetaSubmessageMap& adr_map)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
   AddrSet addrs;
   // Sort meta_submessages by address set and destination
-  for (MetaSubmessageVec::iterator it = meta_submessages.begin(); it != meta_submessages.end(); ++it) {
-    const bool directed = it->dst_guid_ != GUID_UNKNOWN;
-    if (directed) {
-      accumulate_addresses(it->from_guid_, it->dst_guid_, addrs, true);
-    } else {
-      addrs = get_addresses_i(it->from_guid_); // This will overwrite, but addrs should always be empty here
-    }
-    for (RepoIdSet::iterator it2 = it->to_guids_.begin(); it2 != it->to_guids_.end(); ++it2) {
-      accumulate_addresses(it->from_guid_, *it2, addrs, directed);
-    }
-    if (addrs.empty()) {
-      continue;
-    }
+  for (MetaSubmessageVecVec::iterator vit = meta_submessages.begin(); vit != meta_submessages.end(); ++vit) {
+    for (MetaSubmessageVec::iterator it = vit->begin(); it != vit->end(); ++it) {
+      const bool directed = it->dst_guid_ != GUID_UNKNOWN;
+      if (directed) {
+        accumulate_addresses(it->from_guid_, it->dst_guid_, addrs, true);
+      } else {
+        addrs = get_addresses_i(it->from_guid_); // This will overwrite, but addrs should always be empty here
+      }
+      for (RepoIdSet::iterator it2 = it->to_guids_.begin(); it2 != it->to_guids_.end(); ++it2) {
+        accumulate_addresses(it->from_guid_, *it2, addrs, directed);
+      }
+      if (addrs.empty()) {
+        continue;
+      }
 
 #ifdef OPENDDS_SECURITY
-    if (local_crypto_handle() != DDS::HANDLE_NIL && separate_message(it->from_guid_.entityId)) {
-      addrs.insert(BUNDLING_PLACEHOLDER); // removed in bundle_mapped_meta_submessages
-    }
+      if (local_crypto_handle() != DDS::HANDLE_NIL && separate_message(it->from_guid_.entityId)) {
+        addrs.insert(BUNDLING_PLACEHOLDER); // removed in bundle_mapped_meta_submessages
+      }
 #endif
 
-    if (std::memcmp(&(it->dst_guid_.guidPrefix), &GUIDPREFIX_UNKNOWN, sizeof(GuidPrefix_t)) != 0) {
-      adr_map[addrs][make_unknown_guid(it->dst_guid_.guidPrefix)].push_back(it);
-    } else {
-      adr_map[addrs][GUID_UNKNOWN].push_back(it);
+      if (std::memcmp(&(it->dst_guid_.guidPrefix), &GUIDPREFIX_UNKNOWN, sizeof(GuidPrefix_t)) != 0) {
+        adr_map[addrs][make_unknown_guid(it->dst_guid_.guidPrefix)].push_back(it);
+      } else {
+        adr_map[addrs][GUID_UNKNOWN].push_back(it);
+      }
+      addrs.clear();
     }
-    addrs.clear();
   }
 }
 
@@ -2359,30 +2353,34 @@ RtpsUdpDataLink::disable_response_queue()
 void
 RtpsUdpDataLink::queue_or_send_submessages(MetaSubmessageVec& in)
 {
-  MetaSubmessageVec* send = 0;
-
   {
     ACE_GUARD(ACE_Thread_Mutex, g, send_queues_lock_);
 
     ThreadSendQueueMap::iterator it = thread_send_queues_.find(ACE_Thread::self());
     if (it != thread_send_queues_.end()) {
-      it->second->insert(it->second->end(), in.begin(), in.end());
-    } else {
-      send = &in;
+      it->second->push_back(MetaSubmessageVec());
+      it->second->back().swap(in);
+      return;
     }
   }
 
-  if (send) {
-    bundle_and_send_submessages(*send);
-  }
+  MetaSubmessageVecVec temp;
+  temp.push_back(MetaSubmessageVec());
+  temp.back().swap(in);
+  bundle_and_send_submessages(temp);
 }
 
 void
-RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVec& meta_submessages)
+RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVecVec& meta_submessages)
 {
   using namespace RTPS;
 
-  if (meta_submessages.empty()) {
+  bool has_data = false;
+  for (MetaSubmessageVecVec::const_iterator it = meta_submessages.begin(); !has_data && it != meta_submessages.end(); ++it) {
+    has_data = !it->empty();
+  }
+
+  if (!has_data) {
     return;
   }
 
