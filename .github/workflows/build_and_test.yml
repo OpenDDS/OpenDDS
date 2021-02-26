@@ -1276,7 +1276,7 @@ jobs:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: install clang++
-      run: | 
+      run: |
         sudo apt-get install -y clang-5.0
         sudo update-alternatives \
           --install /usr/bin/clang++ clang++ /usr/bin/clang++-5.0 100
@@ -1348,7 +1348,7 @@ jobs:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: install clang++
-      run: | 
+      run: |
         sudo apt-get install -y clang-5.0
         sudo update-alternatives \
           --install /usr/bin/clang++ clang++ /usr/bin/clang++-5.0 100
@@ -1696,7 +1696,7 @@ jobs:
 
     steps:
     - name: install gcc
-      run: | 
+      run: |
         sudo apt-get install -y gcc-6
         sudo update-alternatives \
           --install /usr/bin/gcc gcc /usr/bin/gcc-6 100 \
@@ -1773,7 +1773,7 @@ jobs:
 
     steps:
     - name: install gcc
-      run: | 
+      run: |
         sudo apt-get install -y gcc-6
         sudo update-alternatives \
           --install /usr/bin/gcc gcc /usr/bin/gcc-6 100 \
@@ -1848,7 +1848,7 @@ jobs:
 
     steps:
     - name: install gcc
-      run: | 
+      run: |
         sudo apt-get install -y gcc-6
         sudo update-alternatives \
           --install /usr/bin/gcc gcc /usr/bin/gcc-6 100 \
@@ -1953,7 +1953,7 @@ jobs:
 
     steps:
     - name: install gcc
-      run: | 
+      run: |
         sudo apt-get install -y gcc-8
         sudo update-alternatives \
           --install /usr/bin/gcc gcc /usr/bin/gcc-8 100 \
@@ -2030,7 +2030,7 @@ jobs:
 
     steps:
     - name: install gcc
-      run: | 
+      run: |
         sudo apt-get install -y gcc-8
         sudo update-alternatives \
           --install /usr/bin/gcc gcc /usr/bin/gcc-8 100 \
@@ -2105,7 +2105,7 @@ jobs:
 
     steps:
     - name: install gcc
-      run: | 
+      run: |
         sudo apt-get install -y gcc-8
         sudo update-alternatives \
           --install /usr/bin/gcc gcc /usr/bin/gcc-8 100 \
@@ -2210,7 +2210,7 @@ jobs:
 
     steps:
     - name: install gcc
-      run: | 
+      run: |
         sudo apt-get install -y gcc-10
         sudo update-alternatives \
           --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 \
@@ -2284,7 +2284,7 @@ jobs:
 
     steps:
     - name: install gcc
-      run: | 
+      run: |
         sudo apt-get install -y gcc-10
         sudo update-alternatives \
           --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 \
@@ -2357,7 +2357,7 @@ jobs:
 
     steps:
     - name: install gcc
-      run: | 
+      run: |
         sudo apt-get install -y gcc-10
         sudo update-alternatives \
           --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 \
@@ -2460,7 +2460,7 @@ jobs:
 
     steps:
     - name: install gcc
-      run: | 
+      run: |
         sudo apt-get install -y gcc-10
         sudo update-alternatives \
           --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 \
@@ -2537,7 +2537,7 @@ jobs:
 
     steps:
     - name: install gcc
-      run: | 
+      run: |
         sudo apt-get install -y gcc-10
         sudo update-alternatives \
           --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 \
@@ -2612,7 +2612,7 @@ jobs:
 
     steps:
     - name: install gcc
-      run: | 
+      run: |
         sudo apt-get install -y gcc-10
         sudo update-alternatives \
           --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 \
@@ -5481,7 +5481,7 @@ jobs:
       shell: bash
       run: |
         cd vcpkg
-        rm -rf buildtrees downloads 
+        rm -rf buildtrees downloads
         ls -l
 
     - name: checkout MPC
