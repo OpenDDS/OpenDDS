@@ -1222,7 +1222,7 @@ namespace {
       Wrapper wrapper(base_wrapper);
       wrapper.is_const_ = false;
       wrapper.done();
-      Function set_default("set_default", "void");
+      Function set_default("set_default", "void", "");
       set_default.addArg("arr", wrapper.wrapped_type_name());
       set_default.endArgs();
       string indent = "  ";
@@ -3126,7 +3126,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
 
   {
-    Function set_default("set_default", "void");
+    Function set_default("set_default", "void", "");
     set_default.addArg("stru", cxx + "&");
     set_default.endArgs();
     std::ostringstream contents;
@@ -3841,7 +3841,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
   const bool not_final = exten != extensibilitykind_final;
 
   {
-    Function set_default("set_default", "void");
+    Function set_default("set_default", "void", "");
     set_default.addArg("uni", cxx + "&");
     set_default.endArgs();
     be_global->impl_ << "  " << scoped(discriminator->name()) << " temp;\n";

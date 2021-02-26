@@ -12,13 +12,12 @@
 #ifndef OPENDDS_SAFETY_PROFILE
 
 #include "dcps_export.h"
-
 #include "ValueReader.h"
 #include "RapidJsonWrapper.h"
+#include "TypeSupportImpl.h"
 
 #include <iosfwd>
 #include <sstream>
-#include <vector>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -467,13 +466,25 @@ bool JsonValueReader<InputStream>::read_float128(ACE_CDR::LongDouble& value)
     ACE_CDR_LONG_DOUBLE_ASSIGNMENT(value, double_value_);
     return consume(kDouble);
   case kUint64:
+#ifdef ACE_WIN32
+#  pragma warning(disable:4244)
+#endif
     ACE_CDR_LONG_DOUBLE_ASSIGNMENT(value, uint64_value_);
+#ifdef ACE_WIN32
+#  pragma warning(default:4244)
+#endif
     return consume(kUint64);
   case kUint:
     ACE_CDR_LONG_DOUBLE_ASSIGNMENT(value, uint_value_);
     return consume(kUint);
   case kInt64:
+#ifdef ACE_WIN32
+#  pragma warning(disable:4244)
+#endif
     ACE_CDR_LONG_DOUBLE_ASSIGNMENT(value, int64_value_);
+#ifdef ACE_WIN32
+#  pragma warning(default:4244)
+#endif
     return consume(kInt64);
   case kInt:
     ACE_CDR_LONG_DOUBLE_ASSIGNMENT(value, int_value_);
@@ -556,6 +567,7 @@ bool JsonValueReader<InputStream>::read_long_enum(ACE_CDR::Long& value, const En
 template<typename T, typename InputStream>
 bool from_json(T& value, InputStream& sample)
 {
+  set_default(value);
   JsonValueReader<InputStream> jvr(sample);
   return vread(jvr, value);
 }
