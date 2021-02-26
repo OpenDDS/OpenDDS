@@ -80,6 +80,10 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
   , reactor_task_(reactor_task)
   , job_queue_(DCPS::make_rch<DCPS::JobQueue>(reactor_task->get_reactor()))
   , multi_buff_(this, config.nak_depth_)
+#ifdef ACE_HAS_CPP11
+  , bundled_send_queue_(make_rch<SubmessageQueue>())
+  , bundled_send_thread_(std::bind(&RtpsUdpDataLink::bundled_send_thread_loop, this))
+#endif
   , best_effort_heartbeat_count_(0)
   , expected_acks_(0)
   , heartbeat_period_(config.heartbeat_period_)
@@ -855,6 +859,10 @@ RtpsUdpDataLink::pre_stop_i()
       ++iter;
     }
   }
+#ifdef ACE_HAS_CPP11
+  stop_bundled_send_thread();
+  bundled_send_thread_.join();
+#endif
 }
 
 void
@@ -2355,7 +2363,16 @@ RtpsUdpDataLink::disable_response_queue()
     }
   }
   if (queue && !queue->empty()) {
+#ifdef ACE_HAS_CPP11
+    std::unique_lock<std::mutex> lock(bundled_send_mutex_);
+    for (auto it = queue->begin(); it != queue->end(); ++it) {
+      bundled_send_queue_->push_back(MetaSubmessageVec());
+      bundled_send_queue_->back().swap(*it);
+    }
+    bundled_send_cv_.notify_one();
+#else
     bundle_and_send_submessages(*queue);
+#endif
   }
 }
 
@@ -2373,10 +2390,17 @@ RtpsUdpDataLink::queue_or_send_submessages(MetaSubmessageVec& in)
     }
   }
 
+#ifdef ACE_HAS_CPP11
+  std::unique_lock<std::mutex> lock(bundled_send_mutex_);
+  bundled_send_queue_->push_back(MetaSubmessageVec());
+  bundled_send_queue_->back().swap(in);
+  bundled_send_cv_.notify_one();
+#else
   MetaSubmessageVecVec temp;
   temp.push_back(MetaSubmessageVec());
   temp.back().swap(in);
   bundle_and_send_submessages(temp);
+#endif
 }
 
 void
