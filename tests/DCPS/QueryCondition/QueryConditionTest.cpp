@@ -569,6 +569,7 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
   Message sample;
   sample.key = 3;
+  sample.name = "data_B";
   sample.nest.value = A;
   ReturnCode_t ret = mdw->write(sample, HANDLE_NIL);
   if (ret != RETCODE_OK) return false;
@@ -595,10 +596,11 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
     return false;
   }
 
+  const char* params1_value = "'data_B'";
   DDS::StringSeq params(2);
   params.length(2);
   params[0] = "2";
-  params[1] = "data_B";
+  params[1] = CORBA::string_dup(params1_value);
   dr_qc = dr->create_querycondition(ANY_SAMPLE_STATE,
     ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "key = %0 AND name = %1", params);
   if (!dr_qc) {
@@ -618,7 +620,7 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   if (ret != RETCODE_OK) {
     cerr << "ERROR: get_query_parameters() failed " << endl;
     return false;
-  } else if (params.length() != 2 || std::string(params[0]) != "2" || std::string(params[1]) != "data_B") {
+  } else if (params.length() != 2 || std::string(params[0]) != "2" || std::string(params[1]) != params1_value) {
     cerr << "ERROR: get_query_parameters() query parameters doesn't match " << endl;
     return false;
   }
@@ -656,7 +658,7 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   params = DDS::StringSeq(2);
   params.length(2);
   params[0] = "3";
-  params[1] = "data_B";
+  params[1] = CORBA::string_dup(params1_value);
   ret = query_cond->set_query_parameters(params);
 
   params = DDS::StringSeq();
@@ -664,7 +666,7 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   if (ret != RETCODE_OK) {
     cerr << "ERROR: get_query_parameters() failed " << endl;
     return false;
-  } else if (params.length() != 2 || std::string(params[0]) != "3" || std::string(params[1]) != "data_B") {
+  } else if (params.length() != 2 || std::string(params[0]) != "3" || std::string(params[1]) != params1_value) {
     cerr << "ERROR: get_query_parameters() query parameters doesn't match " << endl;
     return false;
   }
@@ -674,6 +676,17 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   if (ret != RETCODE_OK) {
     cerr << "ERROR: wait(qc) should not time out" << endl;
     return false;
+  } else {
+    for (CORBA::ULong i(0); i < data.length(); ++i) {
+      cout << "Info:\tinstance_handle = " << infoseq[i].instance_handle <<
+        "\tsample_rank = " << infoseq[i].sample_rank << '\n';
+      if (infoseq[i].valid_data) {
+        cout << "Data:\tkey = " << data[i].key <<
+          " \tname = " << data[i].name <<
+          "\tnest.value = " << data[i].nest.value <<
+          '\n';
+      }
+    }
   }
   ws->detach_condition(dr_qc);
 
