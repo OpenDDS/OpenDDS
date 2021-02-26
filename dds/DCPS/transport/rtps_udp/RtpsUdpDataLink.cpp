@@ -2372,9 +2372,6 @@ RtpsUdpDataLink::disable_response_queue()
 void
 RtpsUdpDataLink::queue_or_send_submessages(MetaSubmessageVec& in)
 {
-  MetaSubmessageVecVec temp;
-  MetaSubmessageVecVec* send = 0;
-
   {
     ACE_GUARD(ACE_Thread_Mutex, g, send_queues_lock_);
 
@@ -2382,16 +2379,14 @@ RtpsUdpDataLink::queue_or_send_submessages(MetaSubmessageVec& in)
     if (it != thread_send_queues_.end()) {
       it->second->push_back(MetaSubmessageVec());
       it->second->back().swap(in);
-    } else {
-      temp.push_back(MetaSubmessageVec());
-      temp.back().swap(in);
-      send = &temp;
+      return;
     }
   }
 
-  if (send) {
-    bundle_and_send_submessages(*send);
-  }
+  MetaSubmessageVecVec temp;
+  temp.push_back(MetaSubmessageVec());
+  temp.back().swap(in);
+  bundle_and_send_submessages(temp);
 }
 
 void
