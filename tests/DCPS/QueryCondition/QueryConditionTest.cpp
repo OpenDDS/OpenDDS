@@ -646,7 +646,7 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   }
 
   if (query_cond->set_query_parameters(params_empty) != RETCODE_ERROR) {
-    cerr << "ERROR: Setting 0 parameters for query condition with 2 token should have failed " << endl;
+    cerr << "ERROR: Setting 0 parameters for query condition with 2 tokens should have failed " << endl;
     return false;
   }
 
