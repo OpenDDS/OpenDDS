@@ -596,7 +596,7 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
     return false;
   }
 
-  const char* params1_value = "'data_B'";
+  const char* params1_value = "data_B";
   DDS::StringSeq params(2);
   params.length(2);
   params[0] = "2";
