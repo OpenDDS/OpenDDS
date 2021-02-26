@@ -579,26 +579,28 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   ReadCondition_var dr_qc = dr->create_querycondition(ANY_SAMPLE_STATE,
     ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "key = %0", params_empty);
   if (dr_qc) {
-    cerr << "ERROR: Creating QueryCondition with 1 token and 0 parameters should have failed " << endl;
+    cerr << "ERROR: Creating QueryCondition with 1 token and 0 parameters should have failed" << endl;
     return false;
   }
 
-  DDS::StringSeq params_two(2);
-  params_two.length(2);
-  params_two[0] = "2";
-  params_two[1] = "2";
+  DDS::StringSeq params_three(3);
+  params_three.length(3);
+  params_three[0] = "2";
+  params_three[1] = "2";
+  params_three[2] = "2";
   dr_qc = dr->create_querycondition(ANY_SAMPLE_STATE,
-    ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "key = %0", params_two);
+    ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "key = %0", params_three);
   if (dr_qc) {
-    cerr << "ERROR: Creating QueryCondition with 1 token and 2 parameters should have failed " << endl;
+    cerr << "ERROR: Creating QueryCondition with 1 token and 3 parameters should have failed" << endl;
     return false;
   }
 
-  DDS::StringSeq params(1);
-  params.length(1);
+  DDS::StringSeq params(2);
+  params.length(2);
   params[0] = "2";
+  params[1] = "data_B";
   dr_qc = dr->create_querycondition(ANY_SAMPLE_STATE,
-    ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "key = %0", params);
+    ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "key = %0 AND name = %1", params);
   if (!dr_qc) {
     cerr << "ERROR: failed to create QueryCondition" << endl;
     return false;
@@ -606,7 +608,7 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
 
   QueryCondition_var query_cond = QueryCondition::_narrow(dr_qc);
   CORBA::String_var expr = query_cond->get_query_expression();
-  if (std::string("key = %0") != expr.in()) {
+  if (std::string("key = %0 AND name = %1") != expr.in()) {
     cerr << "ERROR: get_query_expression() query expression should match " << endl;
     return false;
   }
@@ -616,7 +618,7 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   if (ret != RETCODE_OK) {
     cerr << "ERROR: get_query_parameters() failed " << endl;
     return false;
-  } else if (params.length() != 1 || std::string(params[0]) != "2") {
+  } else if (params.length() != 2 || std::string(params[0]) != "2" || std::string(params[1]) != "data_B") {
     cerr << "ERROR: get_query_parameters() query parameters doesn't match " << endl;
     return false;
   }
@@ -642,18 +644,19 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   }
 
   if (query_cond->set_query_parameters(params_empty) != RETCODE_ERROR) {
-    cerr << "ERROR: Setting 0 parameters for query condition with 1 token should have failed " << endl;
+    cerr << "ERROR: Setting 0 parameters for query condition with 2 token should have failed " << endl;
     return false;
   }
 
-  if (query_cond->set_query_parameters(params_two) != RETCODE_ERROR) {
-    cerr << "ERROR: Setting 2 parameters for query condition with 1 token should have failed " << endl;
+  if (query_cond->set_query_parameters(params_three) != RETCODE_ERROR) {
+    cerr << "ERROR: Setting 3 parameters for query condition with 2 token should have failed " << endl;
     return false;
   }
 
-  params = DDS::StringSeq(1);
-  params.length(1);
+  params = DDS::StringSeq(2);
+  params.length(2);
   params[0] = "3";
+  params[1] = "data_B";
   ret = query_cond->set_query_parameters(params);
 
   params = DDS::StringSeq();
@@ -661,7 +664,7 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   if (ret != RETCODE_OK) {
     cerr << "ERROR: get_query_parameters() failed " << endl;
     return false;
-  } else if (params.length() != 1 || std::string(params[0]) != "3") {
+  } else if (params.length() != 2 || std::string(params[0]) != "3" || std::string(params[1]) != "data_B") {
     cerr << "ERROR: get_query_parameters() query parameters doesn't match " << endl;
     return false;
   }
