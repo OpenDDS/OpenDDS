@@ -45,6 +45,12 @@
 #include "dds/DCPS/RTPS/ICE/Ice.h"
 #endif
 
+#ifdef ACE_HAS_CPP11
+#include <mutex>
+#include <condition_variable>
+#include <thread>
+#endif
+
 class DDS_TEST;
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -628,6 +634,42 @@ private:
 
   typedef OPENDDS_MAP(ACE_thread_t, SubmessageQueue_rch) ThreadSendQueueMap;
   ThreadSendQueueMap thread_send_queues_;
+
+#ifdef ACE_HAS_CPP11
+  SubmessageQueue_rch bundled_send_queue_;
+  std::mutex bundled_send_mutex_;
+  std::condition_variable bundled_send_cv_;
+  std::thread bundled_send_thread_;
+
+  bool check_bundled_send_thread_continue() {
+    std::unique_lock<std::mutex> lock(bundled_send_mutex_);
+    return bundled_send_queue_;
+  }
+
+  void stop_bundled_send_thread() {
+    std::unique_lock<std::mutex> lock(bundled_send_mutex_);
+    bundled_send_queue_.reset();
+    bundled_send_cv_.notify_one();
+  }
+
+  void swap_bundled_submessage_queue(MetaSubmessageVecVec& msvv) {
+    std::unique_lock<std::mutex> lock(bundled_send_mutex_);
+    while (bundled_send_queue_ && bundled_send_queue_->empty()) {
+      bundled_send_cv_.wait(lock);
+    }
+    if (bundled_send_queue_ && !bundled_send_queue_->empty()) {
+      msvv.swap(*bundled_send_queue_);
+    }
+  }
+
+  void bundled_send_thread_loop() {
+    while (check_bundled_send_thread_continue()) {
+      MetaSubmessageVecVec temp;
+      swap_bundled_submessage_queue(temp);
+      bundle_and_send_submessages(temp);
+    }
+  }
+#endif
 
   RepoIdSet pending_reliable_readers_;
 
