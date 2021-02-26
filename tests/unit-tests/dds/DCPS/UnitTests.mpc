@@ -1,0 +1,22 @@
+project(*DataSampleHeader): dcps_test, googletest {
+  exename = *
+  Source_Files {
+    DataSampleHeader.cpp
+  }
+}
+
+project(*SafetyProfilePool) : dcps, opendds_face, dcps_test {
+  avoids      += no_opendds_safety_profile
+  Source_Files {
+    SafetyProfilePoolTest.cpp
+  }
+}
+
+project(AccessControlTest): dcpsexe, dcps_test, opendds_security, googlemock {
+  requires += no_opendds_safety_profile
+  exename = OpenDDS_AccessControlTest
+
+  Source_Files {
+    AccessControlTest.cpp
+  }
+}
