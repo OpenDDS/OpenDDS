@@ -658,7 +658,7 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   params = DDS::StringSeq(2);
   params.length(2);
   params[0] = "3";
-  params[1] = CORBA::string_dup(params1_value);
+  params[1] = params1_value;
   ret = query_cond->set_query_parameters(params);
 
   params = DDS::StringSeq();
