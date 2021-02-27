@@ -1,29 +1,35 @@
 name: "Build & Test"
 
-on:
-  push:
+opendds_common:
+  on: &opendds_common_on
     branches:
       - master
       - branch-DDS-3.*
       - gh_wf_*
     paths:
       - '**'
+      - '!AUTHORS'
+      - '!PROBLEM-REPORT-FORM'
+      - '!LICENSE'
+      - '!azure-pipelines.yml'
+      - '!.travis.yml'
+      - '!Dockerfile**'
+      - '!.dockerignore'
+      - '!.mailmap'
+      - '!etc/**'
       - '!docs/**'
-      - '!README.md'
-      - '!INSTALL.md'
-      - '!NEWS.md'
+      - '!hooks/**'
       - '!tools/scripts/**'
-  pull_request:
-    branches:
-      - master
-      - branch-DDS-3.*
-    paths:
-      - '**'
-      - '!docs/**'
-      - '!README.md'
-      - '!INSTALL.md'
-      - '!NEWS.md'
-      - '!tools/scripts/**'
+      - '!**.md'
+      - '!**.rst'
+      - '!**.txt'
+      - '!**/.gitignore'
+      - '!**/.lint_config'
+      - '!**/README*'
+
+on:
+  push: &opendds_common_on
+  pull_request: &opendds_common_on
 
 env:
   TRIGGERING_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}

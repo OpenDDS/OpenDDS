@@ -1,46 +1,69 @@
+# configure script (not made by MPC)
+/setenv.*
+/host_tools.mwc*
+/OpenDDS_custom.mwc*
+/ACE_wrappers/
+/ACE_TAO/
+*.tar.gz
+*.zip
+
+# gnuace
 .depend.*
 GNUmakefile*
-*.vcxproj*
-*.tlog
-*.log
-*.obj
-*.ilk
-*.exe
-*.dll
-*.lib
-*.exp
-*.[ip]db
-*.ior
+/user_macros.GNU*
 .obj/
 .shobj/
-lib*.a
-lib*.so*
-lib*.dylib
-*~
+
+# CMake
+build/
+compile_commands.json
+
+# Visual Studio
+*.vcxproj*
+*.obj
+*.ilk
+*.exp
+*.[ip]db
 *.opensdf
 *.sdf
 *.sln
 *.pch
 *.suo
-.*.swp
 *.res
 *.VC.db
 *.VC.opendb
 .vs/
+/ipch
+
+# Other IDE and Editors
 .vscode/
 .idea/
-
-/setenv.sh
-/setenv.cmd
-/setenv.*
 /.cproject
 /.project
 /.settings/
-/user_macros.GNU*
-/build
-/ipch
-/ACE_wrappers
-/ACE_TAO
+*~
+.*.swp
 /tags
-/host_tools.mwc*
-/OpenDDS_custom.mwc*
+
+# Binaries
+*.exe
+*.dll
+*.lib
+lib*.a
+lib*.so*
+lib*.dylib
+
+# Debug
+core
+core.*
+callgrind.out
+callgrind.out.*
+cachegrind.out
+cachegrind.out.*
+massif.out
+massif.out.*
+
+# Misc
+*.tlog
+*.log
+*.ior
