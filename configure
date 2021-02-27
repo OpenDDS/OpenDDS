@@ -2570,10 +2570,10 @@ sub generate_configured_tests {
   # Check Options That Are Relevant to auto_run_tests
   my %opts_to_check = (
     'security' => {
-      'files' => ['--security'],
+      'files' => ['security'],
     },
     'java' => {
-      'files' => ['--java'],
+      'files' => ['java'],
     },
     'rapidjson' => {
       'includes' => ['RAPIDJSON'],
