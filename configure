@@ -59,6 +59,9 @@ my %platforminfo =
    'macosx' => {
                 'compilers' => ['clang++'],
                 'libpath' => 'DYLD_LIBRARY_PATH',
+                'auto_run_tests' => {
+                  'includes' => ['NO_SHMEM', 'DDS_NO_ORBSVCS']
+                },
                },
    'solaris' => {
                  'compilers' => ['CC', 'g++'],
@@ -261,9 +264,16 @@ sub iterate {
     for my $n (1 .. (scalar @{$group} / 2)) {
       my $opt = ${$group}[$n * 2 - 1];
       my $descr = ${$group}[$n * 2];
-      $opt =~ /(\<\w+\>)?([\w-]+)/;
-      my $optkey = (defined $1 ? $1 : "") . $2;
-      &$callback(${$group}[0], $opt, $descr, $optkey, @_);
+      $opt =~ s/^(?:\<(\w+)\>)?([\w-]+)(.*)$/$2$3/;
+      my $suffix = defined($3) ? $3 : '';
+      my $keyword = defined($1) ? $1 : '';
+      my $optkey = $2;
+      my $defaulted_string_option = $keyword eq 'default';
+      my $enabled_by_default = ($opt =~ /!$/ && $descr =~ / \(yes\)/) ||
+        $defaulted_string_option;
+      &$callback(${$group}[0], $opt, $descr, $optkey,
+        $enabled_by_default, $defaulted_string_option,
+        @_);
     }
   }
 }
@@ -293,20 +303,19 @@ cases, specify the option as --opt without an = to enable the corresponding
 feature in OpenDDS and use the default installation location.
 EOT
   iterate(sub {
-            my ($group, $opt, $descr, $optkey) = @_;
-            if (!defined $current || $group ne $current) {
-              $current = $group;
-              print "\n$group\n";
-            }
-            $optkey .= '=VAL' if $opt =~ /=s/;
-            $optkey .= '[=VAL]' if $opt =~ /:s/;
-            $optkey = "[no-]$optkey" if ($opt =~ /!$/ && $descr =~ / \(yes\)/);
-            $optkey =~ s/^\<default\>(.*)$/\[no-\]$1/g;
-            $optkey .= '...' if $opt =~ /s\@$/;
-            my $pad = $argPadding - length $optkey;
-            print "--$optkey" . ' ' x (($pad > 0) ? $pad : 0) . " $descr\n";
-          }
-         );
+    my ($group, $opt, $descr, $optkey,
+      $enabled_by_default, $defaulted_string_option) = @_;
+    if (!defined $current || $group ne $current) {
+      $current = $group;
+      print "\n$group\n";
+    }
+    $optkey .= '=VAL' if $opt =~ /=s/;
+    $optkey .= '[=VAL]' if $opt =~ /:s/;
+    $optkey = "[no-]$optkey" if $enabled_by_default;
+    $optkey .= '...' if $opt =~ /s\@$/;
+    my $pad = $argPadding - length $optkey;
+    print "--$optkey" . ' ' x (($pad > 0) ? $pad : 0) . " $descr\n";
+  });
   exit $status;
 }
 
@@ -316,18 +325,14 @@ sub parseArgs {
   my @getopts = ();
   my @default = ();
   iterate(sub {
-            my ($group, $opt, $descr, $optkey) = @_;
-            if ($opt =~ /^<default>(.*)$/) {
-              push @getopts, $1;
-              $optkey =~ /^<default>(.*)$/;
-              push @getopts, "no-$1";
-              push @default, $1;
-            }
-            else  {
-              push @getopts, $opt;
-            }
-          }
-         );
+    my ($group, $opt, $descr, $optkey,
+      $enabled_by_default, $defaulted_string_option) = @_;
+    push @getopts, $opt;
+    if ($defaulted_string_option) {
+      push @default, $optkey;
+      push @getopts, "no-$opt";
+    }
+  });
 
   if (! -r 'rules.dds.GNU') {
     print "ERROR: this script must be run from its own directory\n";
@@ -345,11 +350,6 @@ sub parseArgs {
   }
 
   for my $opt (@default) {
-    if ($opt eq 'rapidjson' && defined $opts->{'safety-profile'}) {
-      print("Although it's a default, rapidjson is not compatible with Safety ".
-            "Profile so it will not be enabled\n") if $opts->{'verbose'};
-      next;
-    }
     if (!exists $opts->{$opt} && !exists $opts->{"no-$opt"}) {
       $opts->{$opt} = '';
       $defaulted->{$opt} = 1;
@@ -676,6 +676,15 @@ EOF
       push(@{$opts{'features'}}, 'no_cxx11=0');
       print "Compiler has C++11 support\n" if $opts{'verbose'};
     }
+  }
+}
+
+my $cxx11 = 0;
+my $cxx11_is_set = 0;
+for my $feature (@{$opts{'features'}}) {
+  if ($feature =~ /no_cxx11=(\d)/) {
+    $cxx11 = $1 eq '0';
+    $cxx11_is_set = 1;
   }
 }
 
@@ -1300,10 +1309,16 @@ sub system_default_install_dir {
 }
 
 my $build_gtest = 0;
-if (exists $opts{'gtest'} || $tests) {
+my $explicit_gtest = exists $opts{'gtest'};
+if ($explicit_gtest || $tests) {
+  if (!$explicit_gtest) {
+    print "--tests implies --gtest\n" if $opts{'verbose'};
+  }
+
   my $gtest_sanity = 'include/gtest/gtest.h';
 
-  if ($opts{'gtest'}) {
+  if ($explicit_gtest) {
+    print "Using explicitly supplied Google Test at $opts{'gtest'}\n" if $opts{'verbose'};
     die "ERROR: '$gtest_sanity' not found in supplied gtest directory '$opts{'gtest'}'"
       if ! -f File::Spec->catfile($opts{'gtest'}, $gtest_sanity);
 
@@ -1317,12 +1332,19 @@ if (exists $opts{'gtest'} || $tests) {
                               $is_windows ? 'googletest-distribution' : ''));
 
     if (-f File::Spec->catfile($sm_src, $gtest_sanity)) {
+      print "Google Test not explicitly supplied, using submodule.\n"
+        if $opts{'verbose'};
+
       # Check for existing build
       $build_gtest = ! -d File::Spec->catdir($sm_dir, 'build/install');
       $opts{'gtest'} = $sm_dir;
       # No need to set env. variable with submodule.
+      # env_from_opt('gtest', 'GTEST_ROOT');
     }
     elsif (-f File::Spec->catfile($sys_dir, $gtest_sanity)) {
+      print "Google Test not explicitly supplied, using system one found at " .
+        "$sys_dir\n" if $opts{'verbose'};
+
       $opts{'gtest'} = $sys_dir;
       env_from_opt('gtest', 'GTEST_ROOT');
     }
@@ -1456,7 +1478,6 @@ sub has_feature {
   return 0;
 }
 
-my @features;
 if ($opts{'java'}) {
   my $feat = 'java_pre_jpms';
   unless (has_feature($feat)) {
@@ -1466,7 +1487,7 @@ if ($opts{'java'}) {
       if (/javac (\d+)/) {
         print "Found javac major version $1\n" if $opts{'verbose'};
         if ($1 > 1) {
-          push(@features, "$feat=0");
+          push(@{$opts{'features'}}, "$feat=0");
           print "Feature $feat=0 due to Java version\n" if $opts{'verbose'};
         }
         last;
@@ -1511,6 +1532,7 @@ if (exists $opts{'boost'} && exists $opts{'boost-version'}) {
 
 # Enable MPC features and populate expected environment variables
 # for all required "optional" dependencies.
+my @features;
 for my $key (keys %optdep) {
   if (exists $opts{$key}) {
     print "Enabling $key\n" if $opts{'verbose'};
@@ -1879,15 +1901,10 @@ sub generate_workspace {
     # We can't detect C++11 compatibility in cross compilers at the moment,
     # but all the NDKs we officially support are C++11+ by default, so enable
     # C++11 features unless an explicit 'no_cxx11' feature already is set.
-    my $set = 1;
-    for my $feature (@{$opts{'features'}}) {
-      if ($feature =~ /no_cxx11/) {
-        $set = 0;
-      }
-    }
-    disable_feature(\@features, 'no_cxx11') if ($set);
-    if ($opts{'verbose'}) {
-      print "Setting no_cxx11=0 for Android: $set\n";
+    if (!$cxx11_is_set) {
+      print "Setting no_cxx11=0 for Android\n" if ($opts{'verbose'});
+      disable_feature(\@features, 'no_cxx11');
+      $cxx11_is_set = 1;
     }
 
     # Disable including $JAVA_HOME/include on Android. Android NDK includes a
@@ -2357,6 +2374,13 @@ else { # does not require cloned builds
   configure_build(\%targetEnv);
 }
 
+# Tries to generate auto_run_tests arguments for running all the configured
+# tests and writes this to a file that will be read by tests/run_tests.pl
+#
+# Right now it probably won't be able to do this for cross-compiled builds, but
+# it probably could be made to.
+generate_configured_tests() if ($tests && !$cross_compile);
+
 print "Completed configuring OpenDDS, next ";
 if (!$is_windows || ($cross_compile && !$cloned_build)) {
   print "run '", (($^O eq 'solaris' || $^O eq 'freebsd') ? 'g' : ''), "make'";
@@ -2483,4 +2507,154 @@ ${\( generate_cmake_options() )}
 FIND_OPENDDS_CMAKE_CONFIG
 
   dump_and_unlink($CM) if $opts{'dry-run'};
+}
+
+# Tries to generate auto_run_tests arguments for running all the configured
+# tests.
+#
+# Currently does not try to use the following configuration flags from the test
+# files either because none of the active scoreboard builds use them or because
+# they are ACE/TAO settings that are harder to get.
+#   DCPS_MIN
+#   TARGET
+#   NO_MCAST
+#   MIN_CORBA
+#   CORBA_E_COMPACT
+#   CORBA_E_MICRO
+#   QNX
+#   LYNXOS
+#   WCHAR
+sub generate_configured_tests {
+  sub get_path {
+    return join($slash, "$specific{'refpre'}DDS_ROOT$specific{'refpost'}", @_);
+  }
+
+  my @files = ();
+  my @includes = ('RTPS');
+  my @excludes = ();
+
+  my $process_hash = sub {
+    my $hash = shift;
+    my $positive = shift;
+
+    my $process_key = sub {
+      my $key = shift;
+      my $result = shift;
+      my $value = $hash->{$key};
+      if (defined($value)) {
+        push(@{$result}, @{$value});
+      }
+    };
+
+    if ($positive) {
+      $process_key->('files', \@files);
+      $process_key->('includes', \@includes);
+      $process_key->('positive_excludes', \@excludes);
+    }
+    else {
+      $process_key->('excludes', \@excludes);
+      $process_key->('negative_includes', \@includes);
+    }
+  };
+
+  if ($cxx11) {
+    push(@includes, 'CXX11');
+  }
+
+  # Check Platform
+  my $platform_hash = $platforminfo{$opts{'target'}};
+  if (exists($platform_hash->{'auto_run_tests'})) {
+    $process_hash->($platform_hash->{'auto_run_tests'}, 1);
+  }
+
+  # Check Options That Are Relevant to auto_run_tests
+  my %opts_to_check = (
+    'security' => {
+      'files' => ['--security'],
+    },
+    'java' => {
+      'files' => ['--java'],
+    },
+    'rapidjson' => {
+      'includes' => ['RAPIDJSON'],
+    },
+    'xerces3' => {
+      'includes' => ['XERCES3'],
+    },
+    'ipv6' => {
+      'includes' => ['IPV6'],
+    },
+    'content-filtered-topic' => {
+      'negative_includes' => ['DDS_NO_CONTENT_FILTERED_TOPIC'],
+    },
+    'content-subscription' => {
+      'negative_includes' => ['DDS_NO_CONTENT_SUBSCRIPTION'],
+    },
+    'multi-topic' => {
+      'negative_includes' => ['DDS_NO_MULTI_TOPIC'],
+    },
+    'object-model-profile' => {
+      'negative_includes' => ['DDS_NO_OBJECT_MODEL_PROFILE'],
+    },
+    'ownership-kind-exclusive' => {
+      'negative_includes' => ['DDS_NO_OWNERSHIP_KIND_EXCLUSIVE'],
+    },
+    'ownership-profile' => {
+      'negative_includes' => ['DDS_NO_OWNERSHIP_PROFILE'],
+    },
+    'persistence-profile' => {
+      'negative_includes' => ['DDS_NO_PERSISTENCE_PROFILE'],
+    },
+    'query-condition' => {
+      'negative_includes' => ['DDS_NO_QUERY_CONDITION'],
+    },
+    'safety-profile' => {
+      'includes' => ['OPENDDS_SAFETY_PROFILE'],
+    },
+    'built-in-topics' => {
+      'negative_includes' => ['NO_BUILT_IN_TOPICS'],
+    },
+    'static' => {
+      'includes' => ['STATIC'],
+    },
+  );
+  for my $opt (values(%opts_to_check)) {
+    $opt->{checked} = 0;
+  }
+  iterate(sub {
+    my ($group, $opt, $descr, $optkey,
+      $enabled_by_default, $defaulted_string_option) = @_;
+    if (exists($opts_to_check{$optkey})) {
+      my $enabled = 0;
+      if (exists($opts{$optkey})) {
+        $enabled = $opts{$optkey};
+      } elsif ($defaulted_string_option) {
+        $enabled = exists($defaulted->{$optkey});
+      } elsif ($enabled_by_default) {
+        $enabled = 1;
+      }
+      $process_hash->($opts_to_check{$optkey}, $enabled);
+      $opts_to_check{$optkey}->{'checked'} = 1;
+    }
+  });
+  for my $opt (keys(%opts_to_check)) {
+    die ("\"$opt\" in %opts_to_check isn't valid as it wasn't checked")
+      if (!$opts_to_check{$opt}->{'checked'});
+  }
+
+  my $fh = backup_and_open("tests${slash}configured_tests.pm");
+  my $lists = join(' ', @files);
+  my $includes = join(' ', @includes);
+  my $excludes = join(' ', @excludes);
+  my $configured_tests = <<"EOF";
+package configured_tests;
+\@lists = qw/$lists/;
+\@includes = qw/$includes/;
+\@excludes = qw/$excludes/;
+1;
+EOF
+  print($configured_tests) if ($opts{'verbose'});
+  print $fh $configured_tests;
+  close($fh);
+  dump_and_unlink($fh) if $opts{'dry-run'};
 }
