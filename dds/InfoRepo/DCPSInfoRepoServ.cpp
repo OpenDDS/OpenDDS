@@ -304,6 +304,9 @@ InfoRepo::init()
   CORBA::String_var objref_str =
     orb_->object_to_string(info_repo);
 
+  // RTPS discovery is the default, change it to InfoRepo
+  TheServiceParticipant->set_default_discovery(OpenDDS::DCPS::Discovery::DEFAULT_REPO);
+
   // Initialize the DomainParticipantFactory
   DDS::DomainParticipantFactory_var dpf =
     TheParticipantFactoryWithArgs(argc, args.argv());

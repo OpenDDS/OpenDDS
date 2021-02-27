@@ -150,13 +150,6 @@ static bool got_pending_timeout = false;
 static bool got_persistent_data_dir = false;
 #endif
 static bool got_default_discovery = false;
-#ifndef DDS_DEFAULT_DISCOVERY_METHOD
-# ifdef OPENDDS_SAFETY_PROFILE
-#  define DDS_DEFAULT_DISCOVERY_METHOD Discovery::DEFAULT_RTPS
-# else
-#  define DDS_DEFAULT_DISCOVERY_METHOD Discovery::DEFAULT_REPO
-# endif
-#endif
 static bool got_log_fname = false;
 static bool got_log_verbose = false;
 static bool got_default_address = false;
@@ -170,7 +163,7 @@ Service_Participant::Service_Participant()
     ORB_argv_(false /*substitute_env_args*/),
 #endif
     reactor_task_(false),
-    defaultDiscovery_(DDS_DEFAULT_DISCOVERY_METHOD),
+    defaultDiscovery_(Discovery::DEFAULT_RTPS),
     n_chunks_(DEFAULT_NUM_CHUNKS),
     association_chunk_multiplier_(DEFAULT_CHUNK_MULTIPLIER),
     liveliness_factor_(80),

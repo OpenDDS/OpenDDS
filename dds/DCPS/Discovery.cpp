@@ -5,18 +5,20 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> //Only the _pch include should start with DCPS/
+
 #include "Discovery.h"
+
 #include "Service_Participant.h"
 #include "BuiltInTopicUtils.h"
 #include "Registered_Data_Types.h"
-#include "DdsDcpsCoreC.h"
 #include "Marked_Default_Qos.h"
 #include "SafetyProfileStreams.h"
 #include "DCPS_Utils.h"
 
+#include <dds/DdsDcpsCoreC.h>
 #ifndef DDS_HAS_MINIMUM_BIT
-#include "DdsDcpsCoreTypeSupportImpl.h"
+#  include <dds/DdsDcpsCoreTypeSupportImpl.h>
 #endif /* DDS_HAS_MINIMUM_BIT */
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -24,9 +26,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-const char* Discovery::DEFAULT_REPO = "DEFAULT_REPO";
-const char* Discovery::DEFAULT_RTPS = "DEFAULT_RTPS";
-const char* Discovery::DEFAULT_STATIC = "DEFAULT_STATIC";
+const char* const Discovery::DEFAULT_REPO = "DEFAULT_REPO";
+const char* const Discovery::DEFAULT_RTPS = "DEFAULT_RTPS";
+const char* const Discovery::DEFAULT_STATIC = "DEFAULT_STATIC";
 
 DDS::ReturnCode_t
 Discovery::create_bit_topics(DomainParticipantImpl* participant)

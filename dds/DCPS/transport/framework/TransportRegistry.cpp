@@ -5,23 +5,24 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> //Only the _pch include should start with DCPS/
+
 #include "TransportRegistry.h"
 #include "TransportDebug.h"
 #include "TransportInst.h"
 #include "TransportExceptions.h"
 #include "TransportType.h"
-#include "dds/DCPS/GuidConverter.h"
-#include "dds/DCPS/Util.h"
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/EntityImpl.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
+
+#include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/Util.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/EntityImpl.h>
+#include <dds/DCPS/SafetyProfileStreams.h>
 #include <dds/DdsDcpsInfrastructureC.h>
 
-
-#include "ace/Singleton.h"
-#include "ace/OS_NS_strings.h"
-#include "ace/Service_Config.h"
+#include <ace/Singleton.h>
+#include <ace/OS_NS_strings.h>
+#include <ace/Service_Config.h>
 
 #if !defined (__ACE_INLINE__)
 #include "TransportRegistry.inl"
@@ -35,13 +36,6 @@ namespace {
   {
     return lhs->name() < rhs->name();
   }
-
-  // transport type to try loading if none are loaded when DCPS attempts to use
-#ifdef OPENDDS_SAFETY_PROFILE
-  const char FALLBACK_TYPE[] = "rtps_udp";
-#else
-  const char FALLBACK_TYPE[] = "tcp";
-#endif
 }
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -714,7 +708,7 @@ TransportRegistry::fix_empty_default()
   }
   TransportConfig_rch global_config = global_config_;
 #if !defined(ACE_AS_STATIC_LIBS)
-  load_transport_lib_i(FALLBACK_TYPE);
+  load_transport_lib_i("rtps_udp");
 #endif
   return global_config;
 }
