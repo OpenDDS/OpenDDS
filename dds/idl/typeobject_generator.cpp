@@ -1753,6 +1753,7 @@ typeobject_generator::generate(AST_Type* node, UTL_ScopedName* name)
 
   NamespaceGuard ng;
   const string clazz = tag_type(name);
+  be_global->set_type_tag(node, clazz);
 
   be_global->header_ << "struct " << clazz << " {};\n";
 

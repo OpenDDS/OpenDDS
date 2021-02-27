@@ -12,6 +12,7 @@
 #include "MessageTypes.h"
 #include "ParameterListConverter.h"
 #include "RtpsDiscovery.h"
+#include "Logging.h"
 #ifdef OPENDDS_SECURITY
 #  include "SecurityHelpers.h"
 #endif
@@ -22,6 +23,7 @@
 #include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/ConnectionRecords.h>
+#include <dds/DCPS/transport/framework/TransportDebug.h>
 #ifdef OPENDDS_SECURITY
 #  include <dds/DCPS/security/framework/SecurityRegistry.h>
 #endif
@@ -2608,6 +2610,10 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
 void
 Spdp::SpdpTransport::send(WriteFlags flags)
 {
+  if (DCPS::transport_debug.log_messages) {
+    RTPS::log_message(ACE_TEXT("(%P|%t) {transport_debug.log_messages} %C\n"), hdr_.guidPrefix, true, wbuff_);
+  }
+
   if ((flags & SEND_TO_LOCAL) && !outer_->config_->rtps_relay_only()) {
     typedef OPENDDS_SET(ACE_INET_Addr)::const_iterator iter_t;
     for (iter_t iter = send_addrs_.begin(); iter != send_addrs_.end(); ++iter) {
@@ -2732,6 +2738,10 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
                  ACE_TEXT("failed to deserialize RTPS header for SPDP\n")));
       return 0;
+    }
+
+    if (!DCPS::GuidPrefixEqual()(hdr_.guidPrefix, header.guidPrefix) && DCPS::transport_debug.log_messages) {
+      RTPS::log_message(ACE_TEXT("(%P|%t) {transport_debug.log_messages} %C\n"), hdr_.guidPrefix, false, buff_);
     }
 
     while (buff_.length() > 3) {

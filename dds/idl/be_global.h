@@ -28,6 +28,7 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+class AST_Type;
 class AST_Generator;
 class AST_Decl;
 class UTL_Scope;
@@ -230,6 +231,9 @@ public:
 
   OpenDDS::DataRepresentation data_representations(AST_Decl* node) const;
 
+  void set_type_tag(AST_Type* node, const std::string& tag_type);
+  std::string get_type_tag(AST_Type* node);
+
   OpenDDS::XTypes::MemberId compute_id(AST_Field* field, AutoidKind auto_id, OpenDDS::XTypes::MemberId& member_id);
   OpenDDS::XTypes::MemberId get_id(AST_Field* field);
 
@@ -259,6 +263,9 @@ private:
   AutoidKind root_default_autoid_;
   TryConstructFailAction default_try_construct_;
   std::set<std::string> platforms_;
+  typedef std::map<AST_Type*, std::string> TagMap;
+  TagMap tag_map_;
+
   typedef std::map<AST_Field*, OpenDDS::XTypes::MemberId> MemberIdMap;
   MemberIdMap member_id_map_;
 

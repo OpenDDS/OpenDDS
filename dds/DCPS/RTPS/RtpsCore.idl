@@ -885,6 +885,168 @@ module OpenDDS {
     struct DiscoveredTopicData {
       DDS::TopicBuiltinTopicData ddsTopicData;
     };
+
+    struct AckNackSubmessageX {
+        // F = smHeader.flags & 2 (FinalFlag)
+      DCPS::EntityId_t readerId;
+      DCPS::EntityId_t writerId;
+      SequenceNumberSet readerSNState;
+      Count_t count;
+    };
+
+    struct GapSubmessageX {
+      DCPS::EntityId_t readerId;
+      DCPS::EntityId_t writerId;
+      SequenceNumber_t gapStart;
+      SequenceNumberSet gapList;
+    };
+
+    struct InfoReplySubmessageX {
+        // M = smHeader.flags & 2 (MulticastFlag)
+      LocatorList unicastLocatorList;
+      LocatorList multicastLocatorList; // if M
+    };
+
+    struct NackFragSubmessageX {
+      DCPS::EntityId_t readerId;
+      DCPS::EntityId_t writerId;
+      SequenceNumber_t writerSN;
+      FragmentNumberSet fragmentNumberState;
+      Count_t count;
+    };
+
+    struct DataSubmessageX {
+      unsigned short extraFlags;
+      unsigned short octetsToInlineQos; // used by serializer
+      DCPS::EntityId_t readerId;
+      DCPS::EntityId_t writerId;
+      SequenceNumber_t writerSN;
+      // TODO ParameterList inlineQos; // if Q
+      // SerializedPayload payload; // if D|K
+      //   These Submessages correspond to the OpenDDS::DCPS::DataSampleHeader,
+      //   so they do not contain any payload data.
+    };
+
+    struct DataFragSubmessageX {
+      unsigned short extraFlags;
+      unsigned short octetsToInlineQos; // used by serializer
+      DCPS::EntityId_t readerId;
+      DCPS::EntityId_t writerId;
+      SequenceNumber_t writerSN;
+      FragmentNumber_t fragmentStartingNum;
+      unsigned short fragmentsInSubmessage;
+      unsigned short fragmentSize;
+      unsigned long sampleSize;
+      // TODO ParameterList inlineQos; // if Q
+      // SerializedPayload payload;  // unconditional
+      //   These Submessages correspond to the OpenDDS::DCPS::DataSampleHeader,
+      //   so they do not contain any payload data.
+    };
+
+    struct HeartBeatSubmessageX {
+        // F = smHeader.flags & 2 (FinalFlag)
+        // L = smHeader.flags & 4 (LivelinessFlag)
+      DCPS::EntityId_t readerId;
+      DCPS::EntityId_t writerId;
+      SequenceNumber_t firstSN;
+      SequenceNumber_t lastSN;
+      Count_t count;
+    };
+
+    struct HeartBeatFragSubmessageX {
+      DCPS::EntityId_t readerId;
+      DCPS::EntityId_t writerId;
+      SequenceNumber_t writerSN;
+      FragmentNumber_t lastFragmentNum;
+      Count_t count;
+    };
+
+    struct InfoDestinationSubmessageX {
+      DCPS::GuidPrefix_t guidPrefix;
+    };
+
+    struct InfoSourceSubmessageX {
+      long unused;
+      ProtocolVersion_t version;
+      VendorId_t vendorId;
+      DCPS::GuidPrefix_t guidPrefix;
+    };
+
+    struct InfoTimestampSubmessageX {
+      Timestamp_t timestamp; // if !I (watch the negation)
+    };
+
+    struct PadSubmessageX {
+      octet x;
+    };
+
+    struct InfoReplyIp4SubmessageX {
+      LocatorUDPv4_t unicastLocator;
+      LocatorUDPv4_t multicastLocator; // if M
+    };
+
+    struct SecuritySubmessageX {
+      DDS::OctetSeq content;
+    };
+
+    union SubmessageX switch (SubmessageKind) {
+      case PAD:
+        PadSubmessageX pad_sm;
+
+      case ACKNACK:
+        AckNackSubmessageX acknack_sm;
+
+      case HEARTBEAT:
+        HeartBeatSubmessageX heartbeat_sm;
+
+      case GAP:
+        GapSubmessageX gap_sm;
+
+      case INFO_TS:
+        InfoTimestampSubmessageX info_ts_sm;
+
+      case INFO_SRC:
+        InfoSourceSubmessageX info_src_sm;
+
+      case INFO_REPLY_IP4:
+        InfoReplyIp4SubmessageX info_reply_ipv4_sm;
+
+      case INFO_DST:
+        InfoDestinationSubmessageX info_dst_sm;
+
+      case INFO_REPLY:
+        InfoReplySubmessageX info_reply_sm;
+
+      case NACK_FRAG:
+        NackFragSubmessageX nack_frag_sm;
+
+      case HEARTBEAT_FRAG:
+        HeartBeatFragSubmessageX hb_frag_sm;
+
+      case DATA:
+        DataSubmessageX data_sm;
+
+      case DATA_FRAG:
+        DataFragSubmessageX data_frag_sm;
+
+      case SEC_BODY:
+      case SEC_PREFIX:
+      case SEC_POSTFIX:
+      case SRTPS_PREFIX:
+      case SRTPS_POSTFIX:
+        PadSubmessageX security_sm;
+    };
+
+    struct Envelope {
+      SubmessageHeader header;
+      SubmessageX submessage;
+    };
+
+    typedef sequence<Envelope> EnvelopeSeq;
+    struct Message {
+      Header rtpsHeader;
+      EnvelopeSeq  envelopes;
+    };
   };
 };
 

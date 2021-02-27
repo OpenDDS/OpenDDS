@@ -42,10 +42,13 @@ public:
     reader_.IterativeParseInit();
   }
 
-  bool begin_struct();
-  bool end_struct();
-  bool begin_struct_member(XTypes::MemberId& member_id, const MemberHelper& helper);
-  bool end_struct_member();
+  bool begin_struct(const XTypes::TypeIdentifier& type_identifier);
+  bool end_struct(const XTypes::TypeIdentifier& type_identifier);
+  bool begin_struct_member(const XTypes::TypeIdentifier& type_identifier,
+                           XTypes::MemberId& member_id,
+                           const MemberHelper& helper);
+  bool end_struct_member(const XTypes::TypeIdentifier& type_identifier,
+                         XTypes::MemberId member_id);
 
   bool begin_union();
   bool end_union();
@@ -56,11 +59,14 @@ public:
 
   bool begin_array();
   bool end_array();
-  bool begin_sequence();
+  bool begin_array_element();
+  bool end_array_element();
+
+  bool begin_sequence(const XTypes::TypeIdentifier& type_identifier);
   bool elements_remaining();
-  bool end_sequence();
-  bool begin_element();
-  bool end_element();
+  bool end_sequence(const XTypes::TypeIdentifier& type_identifier);
+  bool begin_sequence_element(const XTypes::TypeIdentifier& sequence_type_identifier);
+  bool end_sequence_element(const XTypes::TypeIdentifier& sequence_type_identifier);
 
   bool read_boolean(ACE_CDR::Boolean& value);
   bool read_byte(ACE_CDR::Octet& value);
@@ -159,21 +165,23 @@ private:
 };
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::begin_struct()
+bool JsonValueReader<InputStream>::begin_struct(const XTypes::TypeIdentifier& /* type_identifier */)
 {
   peek();
   return consume(kStartObject);
 }
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::end_struct()
+bool JsonValueReader<InputStream>::end_struct(const XTypes::TypeIdentifier& /* type_identifier */)
 {
   peek();
   return consume(kEndObject);
 }
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::begin_struct_member(XTypes::MemberId& member_id, const MemberHelper& helper)
+bool JsonValueReader<InputStream>::begin_struct_member(const XTypes::TypeIdentifier& /* type_identifier */,
+                                                       XTypes::MemberId& member_id,
+                                                       const MemberHelper& helper)
 {
   if (peek() == kKey && helper.get_value(member_id, key_value_.c_str())) {
     return consume(kKey);
@@ -182,7 +190,8 @@ bool JsonValueReader<InputStream>::begin_struct_member(XTypes::MemberId& member_
 }
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::end_struct_member()
+bool JsonValueReader<InputStream>::end_struct_member(const XTypes::TypeIdentifier& type_identifier,
+                                                     XTypes::MemberId member_id)
 {
   return true;
 }
@@ -246,7 +255,19 @@ bool JsonValueReader<InputStream>::end_array()
 }
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::begin_sequence()
+bool JsonValueReader<InputStream>::begin_array_element()
+{
+  return true;
+}
+
+template <typename InputStream>
+bool JsonValueReader<InputStream>::end_array_element()
+{
+  return true;
+}
+
+template <typename InputStream>
+bool JsonValueReader<InputStream>::begin_sequence(const XTypes::TypeIdentifier& /* type_identifier */)
 {
   peek();
   return consume(kStartArray);
@@ -260,20 +281,20 @@ bool JsonValueReader<InputStream>::elements_remaining()
 }
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::end_sequence()
+bool JsonValueReader<InputStream>::end_sequence(const XTypes::TypeIdentifier& /* type_identifier */)
 {
   peek();
   return consume(kEndArray);
 }
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::begin_element()
+bool JsonValueReader<InputStream>::begin_sequence_element(const XTypes::TypeIdentifier& /* sequence_type_identifier */)
 {
   return true;
 }
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::end_element()
+bool JsonValueReader<InputStream>::end_sequence_element(const XTypes::TypeIdentifier& /* sequence_type_identifier */)
 {
   return true;
 }

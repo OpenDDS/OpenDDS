@@ -37,6 +37,9 @@ public:
   virtual ~MemberHelper() {}
   virtual bool get_value(XTypes::MemberId& value,
                          const char* name) const = 0;
+  virtual bool get_value(XTypes::MemberId& value,
+                         size_t idx) const = 0;
+  virtual const char* get_name(const XTypes::MemberId id) const = 0;
 };
 
 class ListMemberHelper : public MemberHelper {
@@ -46,8 +49,9 @@ public:
     XTypes::MemberId value;
   };
 
-  ListMemberHelper(const Pair* pairs)
+  ListMemberHelper(const Pair* pairs, size_t size)
     : pairs_(pairs)
+    , size_(size)
   {}
 
   bool get_value(XTypes::MemberId& value,
@@ -63,8 +67,30 @@ public:
     return false;
   }
 
+  bool get_value(XTypes::MemberId& value,
+                 size_t idx) const
+  {
+    if (idx < size_) {
+      value = pairs_[idx].value;
+      return true;
+    }
+    return false;
+  }
+
+  const char* get_name(const XTypes::MemberId id) const
+  {
+    for (const Pair* ptr = pairs_; ptr->name; ++ptr) {
+      if (ptr->value == id) {
+        return ptr->name;
+      }
+    }
+
+    return 0;
+  }
+
 private:
   const Pair* pairs_;
+  const size_t size_;
 };
 
 class EnumHelper {
@@ -105,10 +131,13 @@ private:
 struct ValueReader {
   virtual ~ValueReader() {}
 
-  virtual bool begin_struct() = 0;
-  virtual bool end_struct() = 0;
-  virtual bool begin_struct_member(XTypes::MemberId& member_id, const MemberHelper& helper) = 0;
-  virtual bool end_struct_member() = 0;
+  virtual bool begin_struct(const XTypes::TypeIdentifier& type_identifier) = 0;
+  virtual bool end_struct(const XTypes::TypeIdentifier& type_identifier) = 0;
+  virtual bool begin_struct_member(const XTypes::TypeIdentifier& type_identifier,
+                                   XTypes::MemberId& member_id,
+                                   const MemberHelper& helper) = 0;
+  virtual bool end_struct_member(const XTypes::TypeIdentifier& type_identifier,
+                                 XTypes::MemberId member_id) = 0;
 
   virtual bool begin_union() = 0;
   virtual bool end_union() = 0;
@@ -119,11 +148,14 @@ struct ValueReader {
 
   virtual bool begin_array() = 0;
   virtual bool end_array() = 0;
-  virtual bool begin_sequence() = 0;
+  virtual bool begin_array_element() = 0;
+  virtual bool end_array_element() = 0;
+
+  virtual bool begin_sequence(const XTypes::TypeIdentifier& type_identifier) = 0;
   virtual bool elements_remaining() = 0;
-  virtual bool end_sequence() = 0;
-  virtual bool begin_element() = 0;
-  virtual bool end_element() = 0;
+  virtual bool end_sequence(const XTypes::TypeIdentifier& type_identifier) = 0;
+  virtual bool begin_sequence_element(const XTypes::TypeIdentifier& sequence_type_identifier) = 0;
+  virtual bool end_sequence_element(const XTypes::TypeIdentifier& sequence_type_identifier) = 0;
 
   virtual bool read_boolean(ACE_CDR::Boolean& value) = 0;
   virtual bool read_byte(ACE_CDR::Octet& value) = 0;

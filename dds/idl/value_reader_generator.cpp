@@ -33,10 +33,10 @@ namespace {
         indent << "if (!value_reader.begin_array()) return false;\n" <<
         indent << "for (" << (use_cxx11 ? "size_t " : "unsigned int ") << idx << " = 0; "
         << idx << " != " << dim << "; ++" << idx << ") {\n" <<
-        indent << "  if (!value_reader.begin_element()) return false;\n";
+        indent << "  if (!value_reader.begin_array_element()) return false;\n";
       array_helper(expression + "[" + idx + "]", array, dim_idx + 1, idx + "i", level + 1);
       be_global->impl_ <<
-        indent << "  if (!value_reader.end_element()) return false;\n" <<
+        indent << "  if (!value_reader.end_array_element()) return false;\n" <<
         indent << "}\n" <<
         indent << "if (!value_reader.end_array()) return false;\n";
     } else {
@@ -79,13 +79,22 @@ namespace {
   }
 
   void sequence_helper(const std::string& expression, AST_Sequence* sequence,
+                       const std::string& tag_name,
                        const std::string& idx, int level)
   {
     // TODO: Take advantage of the size.
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const std::string indent(level * 2, ' ');
+    if (tag_name.empty()) {
+      be_global->impl_ <<
+        indent << "const XTypes::TypeIdentifier type_identifier;\n";
+    } else {
+      be_global->impl_ <<
+        indent << "const XTypes::TypeIdentifier& type_identifier = getMinimalTypeIdentifier<" << tag_name << ">();\n";
+    }
+
     be_global->impl_ <<
-      indent << "if (!value_reader.begin_sequence()) return false;\n" <<
+      indent << "if (!value_reader.begin_sequence(type_identifier)) return false;\n" <<
       indent << "for (" << (use_cxx11 ? "size_t " : "unsigned int ") << idx << " = 0; " <<
       indent << "value_reader.elements_remaining(); ++ " << idx << ") {\n";
     if (use_cxx11) {
@@ -94,12 +103,12 @@ namespace {
       be_global->impl_ << indent << "  " << expression << ".length(" << expression << ".length() + 1);\n";
     }
     be_global->impl_ <<
-      indent << "  if (!value_reader.begin_element()) return false;\n";
+      indent << "  if (!value_reader.begin_sequence_element(type_identifier)) return false;\n";
     generate_read(expression + "[" + idx + "]", "", sequence->base_type(), idx + "i", level + 1);
     be_global->impl_ <<
-      indent << "  if (!value_reader.end_element()) return false;\n" <<
+      indent << "  if (!value_reader.end_sequence_element(type_identifier)) return false;\n" <<
       indent << "}\n" <<
-      indent << "if (!value_reader.end_sequence()) return false;\n";
+      indent << "if (!value_reader.end_sequence(type_identifier)) return false;\n";
   }
 
   void generate_read(const std::string& expression, const std::string& accessor,
@@ -107,12 +116,14 @@ namespace {
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const std::string indent(level * 2, ' ');
+    const std::string tag_name = be_global->get_type_tag(type);
+
     AST_Type* const actual = resolveActualType(type);
 
     const Classification c = classify(actual);
     if (c & CL_SEQUENCE) {
       AST_Sequence* const sequence = dynamic_cast<AST_Sequence*>(actual);
-      sequence_helper(expression + accessor, sequence, idx, level);
+      sequence_helper(expression + accessor, sequence, tag_name, idx, level);
       return;
 
     } else if (c & CL_ARRAY) {
@@ -228,7 +239,7 @@ bool value_reader_generator::gen_typedef(AST_Typedef*,
   return true;
 }
 
-bool value_reader_generator::gen_struct(AST_Structure*,
+bool value_reader_generator::gen_struct(AST_Structure* node,
                                         UTL_ScopedName* name,
                                         const std::vector<AST_Field*>& fields,
                                         AST_Type::SIZE_TYPE,
@@ -237,6 +248,7 @@ bool value_reader_generator::gen_struct(AST_Structure*,
   be_global->add_include("dds/DCPS/ValueReader.h", BE_GlobalData::STREAM_H);
 
   const std::string type_name = scoped(name);
+  const std::string tag_name = be_global->get_type_tag(node);
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
   const std::string accessor = use_cxx11 ? "()" : "";
 
@@ -261,12 +273,13 @@ bool value_reader_generator::gen_struct(AST_Structure*,
 
     be_global->impl_ <<
       ",{0,0}};\n"
-      "  ListMemberHelper helper(pairs);\n";
+      "  ListMemberHelper helper(pairs, " << fields.size() << ");\n";
 
     be_global->impl_ <<
-      "  if (!value_reader.begin_struct()) return false;\n"
+      "  const XTypes::TypeIdentifier& type_identifier = getMinimalTypeIdentifier<" << tag_name << ">();\n"
+      "  if (!value_reader.begin_struct(type_identifier)) return false;\n"
       "  XTypes::MemberId member_id;\n"
-      "  while (value_reader.begin_struct_member(member_id, helper)) {\n"
+      "  while (value_reader.begin_struct_member(type_identifier, member_id, helper)) {\n"
       "    switch (member_id) {\n";
 
     for (std::vector<AST_Field*>::const_iterator pos = fields.begin(), limit = fields.end();
@@ -283,9 +296,9 @@ bool value_reader_generator::gen_struct(AST_Structure*,
 
     be_global->impl_ <<
       "    }\n"
-      "    if (!value_reader.end_struct_member()) return false;\n"
+      "    if (!value_reader.end_struct_member(type_identifier, member_id)) return false;\n"
       "  }\n"
-      "  if (!value_reader.end_struct()) return false;\n"
+      "  if (!value_reader.end_struct(type_identifier)) return false;\n"
       "  return true;\n";
   }
 

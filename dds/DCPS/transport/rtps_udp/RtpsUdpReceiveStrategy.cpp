@@ -13,8 +13,10 @@
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
+#include "dds/DCPS/RTPS/Logging.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/Util.h"
+#include "dds/DCPS/transport/framework/TransportDebug.h"
 
 #include "ace/Reactor.h"
 
@@ -160,6 +162,23 @@ RtpsUdpReceiveStrategy::choose_recv_socket(ACE_HANDLE fd) const
   return link_->unicast_socket();
 }
 
+namespace {
+  void log_rtps_message(const GuidPrefix_t& prefix,
+                        iovec iov[],
+                        int n,
+                        ssize_t bytes)
+  {
+    if (!transport_debug.log_messages || n == 0 || bytes <= 0) {
+      return;
+    }
+
+    ACE_Message_Block mb(static_cast<const char*>(iov[0].iov_base));
+    mb.length(bytes);
+
+    RTPS::log_message(ACE_TEXT("(%P|%t) {transport_debug.log_messages} %C\n"), prefix, false, mb);
+  }
+}
+
 ssize_t
 RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
                                       int n,
@@ -224,6 +243,7 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
     }
 
     if (encoded[RTPS::RTPSHDR_SZ] != RTPS::SRTPS_PREFIX) {
+      log_rtps_message(link_->local_prefix(), iov, n, ret);
       return ret;
     }
 
@@ -274,10 +294,12 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
     }
 
     encoded_rtps_ = true;
+    log_rtps_message(link_->local_prefix(), iov, n, plainLen);
     return plainLen;
   }
 #endif
 
+  log_rtps_message(link_->local_prefix(), iov, n, ret);
   return ret;
 }
 

@@ -986,6 +986,20 @@ OpenDDS::DataRepresentation BE_GlobalData::data_representations(
   return value;
 }
 
+void BE_GlobalData::set_type_tag(AST_Type* node, const std::string& tag_type)
+{
+  tag_map_[node] = tag_type;
+}
+
+std::string BE_GlobalData::get_type_tag(AST_Type* node)
+{
+  TagMap::const_iterator pos = tag_map_.find(node);
+  if (pos != tag_map_.end()) {
+    return pos->second;
+  }
+  return "";
+}
+
 OpenDDS::XTypes::MemberId BE_GlobalData::compute_id(AST_Field* field, AutoidKind auto_id, OpenDDS::XTypes::MemberId& member_id)
 {
   const MemberIdMap::const_iterator pos = member_id_map_.find(field);

@@ -16,6 +16,7 @@
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 #include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
+#include "dds/DCPS/RTPS/Logging.h"
 
 #include "dds/DCPS/Serializer.h"
 
@@ -386,6 +387,10 @@ RtpsUdpSendStrategy::encode_payload(const RepoId& pub_id,
 ACE_Message_Block*
 RtpsUdpSendStrategy::pre_send_packet(const ACE_Message_Block* plain)
 {
+  if (transport_debug.log_messages) {
+    RTPS::log_message(ACE_TEXT("(%P|%t) {transport_debug.log_messages} %C\n"), rtps_header_.guidPrefix, true, *plain);
+  }
+
   const DDS::Security::CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
   if (!crypto) {
     return plain->duplicate();
