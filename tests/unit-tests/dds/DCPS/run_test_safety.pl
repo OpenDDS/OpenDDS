@@ -16,7 +16,7 @@ $test->enable_console_logging();
 
 if ($test->flag('safetyprofilepool')) {
   $test->process('Test', 'SafetyProfilePoolTest');
-} 
+}
 
 $test->start_process('Test');
 
