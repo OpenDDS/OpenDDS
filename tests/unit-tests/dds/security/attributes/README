@@ -1,0 +1,31 @@
+Attributes Test:
+The goal of this test suite is to allow easy testing of various combinations of securtiy attributes for both publishers
+(writers) and subscribers (readers). In order to accomplish this, every possible permutation of attributes has been generated
+for a single domain (in this case, domain "0") within the governance files found in the governance directory. This includes
+both the global security attributes (which will determine the goverance file name) and the topic attributes (which will
+determine the topic name within the governance file). See naming sections below for help in determining the mapping between
+names and attribute values. In order to support the testing of various security configuration combinations, the publisher
+and subscriber test processes allow for many of the security-related QoS configuration settings to be specified from the
+command line, and as a result the "run_test" perl script also supports a variety of these configuration options. Most notably,
+several "scenarios" have been defined to test specific configuration combinations, all of which can be run by passing the --scenario
+flag to the run script along with the scenario name.
+
+Naming for Governance files:
+AU / PU                  : Allow Unauthenticated / Prohibit Unauthenticated
+UA / PA                  : Unprotected Access / Protected Access
+ND / SD / ED / SOD / EOD : Not protected / Signed / Encrypted / Signed with Origin authentication / Encrypted with Origin authentication Discovery
+NL / SL / EL / SOL / EOL : Not protected / Signed / Encrypted / Signed with Origin authentication / Encrypted with Origin authentication Liveliness
+NR / SR / ER / SOR / EOR : Not protected / Signed / Encrypted / Signed with Origin authentication / Encrypted with Origin authentication RTPS
+
+Naming for Topics:
+OD / PD                  : Open / Protected Discovery
+OL / PL                  : Open / Protected Liveliness
+OA / RA / WA / RWA       : Open / Read / Write / ReadWrite Access
+OM / SM / EM / SOM / EOM : Open / Signed / Encrypted / Signed with Origin authentication / Encrypted with Origin authentication Meta-data
+OD / SD / ED             : Open / Signed / Encrypted Data
+
+Note:
+Governance files in the governance directory have been automatically generated using "governance/gov_gen.cpp".
+
+In the unlikely event you need to build gov_gen, you should be able to simply run g++ to build it:
+g++ -o gov_gen gov_gen.cpp -Wall -pedantic -std=c++11

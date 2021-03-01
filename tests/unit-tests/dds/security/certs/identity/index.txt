@@ -1,0 +1,4 @@
+V	280610041316Z		01	unknown	/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd/CN=Ozzie Ozmann
+V	280610041420Z		02	unknown	/C=US/ST=California/O=Super Swanky Ski and Snow Shop/CN=Tahoe Joe
+V	280610041700Z		03	unknown	/C=GB/ST=JQ/O=Bob's Magical Widget Factory/CN=Roberto Gonzales/emailAddress=bob@magicalwidgets.com
+V	280610041844Z		04	unknown	/C=CA/ST=Nunavut/O=House of Fuppy/OU=The Upper Room/CN=Fuppy Fuppington III/emailAddress=fuppy@mail.fuphouse.ca

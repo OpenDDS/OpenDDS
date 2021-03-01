@@ -1,0 +1,23 @@
+/*
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#include <dds/DdsDcpsCore.idl>
+
+module SecurityAttributes {
+
+#pragma DCPS_DATA_TYPE "SecurityAttributes::Message"
+#pragma DCPS_DATA_KEY "SecurityAttributes::Message subject_id"
+
+  struct Message {
+    long subject_id;
+    long count;
+    string subject;
+    string from;
+    string text;
+    DDS::OctetSeq extra_space;
+  };
+};

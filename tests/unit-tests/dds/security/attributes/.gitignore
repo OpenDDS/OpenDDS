@@ -1,0 +1,13 @@
+/publisher
+/SecurityAttributesMessageC.cpp
+/SecurityAttributesMessageC.h
+/SecurityAttributesMessageC.inl
+/SecurityAttributesMessageS.h
+/SecurityAttributesMessageTypeSupport.idl
+/SecurityAttributesMessageTypeSupportC.cpp
+/SecurityAttributesMessageTypeSupportC.h
+/SecurityAttributesMessageTypeSupportC.inl
+/SecurityAttributesMessageTypeSupportImpl.cpp
+/SecurityAttributesMessageTypeSupportImpl.h
+/SecurityAttributesMessageTypeSupportS.h
+/subscriber
