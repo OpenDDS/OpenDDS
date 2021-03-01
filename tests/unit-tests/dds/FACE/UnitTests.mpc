@@ -1,6 +1,0 @@
-project(*SafetyProfilePool) : dcps, opendds_face, dcps_test {
-  avoids      += no_opendds_safety_profile
-  Source_Files {
-    SafetyProfilePoolTest.cpp
-  }
-}
