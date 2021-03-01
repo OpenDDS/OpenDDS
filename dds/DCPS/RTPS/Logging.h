@@ -26,6 +26,7 @@ namespace OpenDDS {
 namespace RTPS {
 
 /// Log a serialized RTPS message.
+OpenDDS_Rtps_Export
 void log_message(const char* format,
                  const DCPS::GuidPrefix_t& prefix,
                  bool send,
