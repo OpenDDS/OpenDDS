@@ -13,8 +13,10 @@
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
+#include "dds/DCPS/RTPS/Logging.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/Util.h"
+#include "dds/DCPS/transport/framework/TransportDebug.h"
 
 #include "ace/Reactor.h"
 
@@ -332,6 +334,10 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
 
   const RtpsSampleHeader& rsh = received_sample_header();
 
+  if (transport_debug.log_messages) {
+    append_submessage(message_, rsh.submessage_);
+  }
+
 #ifdef OPENDDS_SECURITY
   const SubmessageKind kind = rsh.submessage_._d();
 
@@ -348,6 +354,14 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
 #endif
 
   deliver_sample_i(sample, rsh.submessage_);
+}
+
+void
+RtpsUdpReceiveStrategy::finish_message()
+{
+  if (transport_debug.log_messages) {
+    RTPS::log_message(ACE_TEXT("(%P|%t) {transport_debug.log_messages} %C\n"), receiver_.local_, false, message_);
+  }
 }
 
 void
@@ -626,11 +640,21 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
         if (reassemble_i(plain_sample, rsh)) {
           VDBG((LM_DEBUG, "(%P|%t) DBG:   Reassembled complete message from decoded\n"));
           encoded_submsg_ = true;
+          if (transport_debug.log_messages) {
+            // Pop the secure envelop.
+            message_.submessages.length(message_.submessages.length() - 3);
+            append_submessage(message_, rsh.submessage_);
+          }
           deliver_sample_i(plain_sample, rsh.submessage_);
           return;
         }
       }
       encoded_submsg_ = true;
+      if (transport_debug.log_messages) {
+        // Pop the secure envelop.
+        message_.submessages.length(message_.submessages.length() - 3);
+        append_submessage(message_, rsh.submessage_);
+      }
       deliver_sample_i(plain_sample, rsh.submessage_);
     }
   }
@@ -816,6 +840,10 @@ bool
 RtpsUdpReceiveStrategy::check_header(const RtpsTransportHeader& header)
 {
   receiver_.reset(remote_address_, header.header_);
+  if (transport_debug.log_messages) {
+    message_.submessages.length(0);
+    message_.hdr = header.header_;
+  }
 
 #ifdef OPENDDS_SECURITY
   secure_prefix_.smHeader.submessageId = SUBMESSAGE_NONE;

@@ -222,6 +222,36 @@ inline RTPS::SequenceNumber_t to_rtps_seqnum(const DCPS::SequenceNumber& opendds
   return rtps_seqnum;
 }
 
+inline void append_submessage(RTPS::Message& message, const RTPS::Submessage& submessage) {
+  ACE_CDR::ULong idx = message.submessages.length();
+  message.submessages.length(idx + 1);
+  message.submessages[idx] = submessage;
+}
+
+inline void append_submessage(RTPS::Message& message, const RTPS::InfoDestinationSubmessage& submessage) {
+  ACE_CDR::ULong idx = message.submessages.length();
+  message.submessages.length(idx + 1);
+  message.submessages[idx].info_dst_sm(submessage);
+}
+
+inline void append_submessage(RTPS::Message& message, const RTPS::InfoTimestampSubmessage& submessage) {
+  ACE_CDR::ULong idx = message.submessages.length();
+  message.submessages.length(idx + 1);
+  message.submessages[idx].info_ts_sm(submessage);
+}
+
+inline void append_submessage(RTPS::Message& message, const RTPS::DataSubmessage& submessage) {
+  ACE_CDR::ULong idx = message.submessages.length();
+  message.submessages.length(idx + 1);
+  message.submessages[idx].data_sm(submessage);
+}
+
+inline void append_submessage(RTPS::Message& message, const RTPS::DataFragSubmessage& submessage) {
+  ACE_CDR::ULong idx = message.submessages.length();
+  message.submessages.length(idx + 1);
+  message.submessages[idx].data_frag_sm(submessage);
+}
+
 } // namespace RTPS
 } // namespace OpenDDS
 

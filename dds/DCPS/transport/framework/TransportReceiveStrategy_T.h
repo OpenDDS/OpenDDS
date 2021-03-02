@@ -95,6 +95,8 @@ protected:
   virtual void deliver_sample(ReceivedDataSample&  sample,
                               const ACE_INET_Addr& remote_address) = 0;
 
+  virtual void finish_message() {}
+
   /// Let the subclass start.
   virtual int start_i() = 0;
 
