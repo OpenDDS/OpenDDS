@@ -335,7 +335,7 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
   const RtpsSampleHeader& rsh = received_sample_header();
 
   if (transport_debug.log_messages) {
-    append_submessage(message_, rsh.submessage_);
+    DCPS::push_back(message_.submessages, rsh.submessage_);
   }
 
 #ifdef OPENDDS_SECURITY
@@ -360,7 +360,7 @@ void
 RtpsUdpReceiveStrategy::finish_message()
 {
   if (transport_debug.log_messages) {
-    RTPS::log_message(ACE_TEXT("(%P|%t) {transport_debug.log_messages} %C\n"), receiver_.local_, false, message_);
+    RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", receiver_.local_, false, message_);
   }
 }
 
@@ -641,9 +641,9 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
           VDBG((LM_DEBUG, "(%P|%t) DBG:   Reassembled complete message from decoded\n"));
           encoded_submsg_ = true;
           if (transport_debug.log_messages) {
-            // Pop the secure envelop.
+            // Pop the secure envelope.
             message_.submessages.length(message_.submessages.length() - 3);
-            append_submessage(message_, rsh.submessage_);
+            DCPS::push_back(message_.submessages, rsh.submessage_);
           }
           deliver_sample_i(plain_sample, rsh.submessage_);
           return;
@@ -651,9 +651,9 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
       }
       encoded_submsg_ = true;
       if (transport_debug.log_messages) {
-        // Pop the secure envelop.
+        // Pop the secure envelope.
         message_.submessages.length(message_.submessages.length() - 3);
-        append_submessage(message_, rsh.submessage_);
+        DCPS::push_back(message_.submessages, rsh.submessage_);
       }
       deliver_sample_i(plain_sample, rsh.submessage_);
     }

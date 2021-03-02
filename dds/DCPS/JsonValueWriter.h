@@ -11,7 +11,7 @@
 #ifdef OPENDDS_RAPIDJSON
 #ifndef OPENDDS_SAFETY_PROFILE
 
-#define OPENDDS_HAVE_JSON_VALUE_WRITER 1
+#define OPENDDS_HAS_JSON_VALUE_WRITER 1
 
 #include "dcps_export.h"
 

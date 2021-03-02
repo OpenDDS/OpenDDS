@@ -147,7 +147,7 @@ RtpsUdpSendStrategy::marshal_transport_header(ACE_Message_Block* mb)
 {
   if (transport_debug.log_messages) {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, rtps_message_mutex_, false);
-    RTPS::log_message(ACE_TEXT("(%P|%t) {transport_debug.log_messages} %C\n"), rtps_message_.hdr.guidPrefix, true, rtps_message_);
+    RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", rtps_message_.hdr.guidPrefix, true, rtps_message_);
     rtps_message_.submessages.length(0);
   }
 
@@ -239,7 +239,7 @@ RtpsUdpSendStrategy::append_submessages(const RTPS::SubmessageSeq& submessages)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, rtps_message_mutex_);
   for (ACE_CDR::ULong idx = 0; idx != submessages.length(); ++idx) {
-    RTPS::append_submessage(rtps_message_, submessages[idx]);
+    DCPS::push_back(rtps_message_.submessages, submessages[idx]);
   }
 }
 

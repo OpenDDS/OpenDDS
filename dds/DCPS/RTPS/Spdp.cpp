@@ -2410,7 +2410,7 @@ Spdp::SpdpTransport::dispose_unregister()
     RTPS::Message message;
     message.hdr = hdr_;
     append_submessage(message, data_);
-    RTPS::log_message(ACE_TEXT("(%P|%t) {transport_debug.log_messages} %C\n"), hdr_.guidPrefix, true, message);
+    RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", hdr_.guidPrefix, true, message);
   }
 
   send(SEND_TO_LOCAL | SEND_TO_RELAY);
@@ -2551,7 +2551,7 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
     RTPS::Message message;
     message.hdr = hdr_;
     append_submessage(message, data_);
-    RTPS::log_message(ACE_TEXT("(%P|%t) {transport_debug.log_messages} %C\n"), hdr_.guidPrefix, true, message);
+    RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", hdr_.guidPrefix, true, message);
   }
 
   send(flags);
@@ -2623,7 +2623,7 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
     message.hdr = hdr_;
     append_submessage(message, info_dst);
     append_submessage(message, data_);
-    RTPS::log_message(ACE_TEXT("(%P|%t) {transport_debug.log_messages} %C\n"), hdr_.guidPrefix, true, message);
+    RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", hdr_.guidPrefix, true, message);
   }
 
   send(flags);
@@ -2833,6 +2833,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
           break;
         }
       }
+      // fallthrough
       default:
         SubmessageHeader smHeader;
         if (!(ser >> smHeader)) {
@@ -2860,8 +2861,8 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
       }
     }
 
-    if (!DCPS::GuidPrefixEqual()(hdr_.guidPrefix, header.guidPrefix) && DCPS::transport_debug.log_messages) {
-      RTPS::log_message(ACE_TEXT("(%P|%t) {transport_debug.log_messages} %C\n"), hdr_.guidPrefix, false, message);
+    if (DCPS::transport_debug.log_messages && !DCPS::GuidPrefixEqual()(hdr_.guidPrefix, header.guidPrefix)) {
+      RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", hdr_.guidPrefix, false, message);
     }
 
   } else if ((buff_.size() >= 4) && (ACE_OS::memcmp(buff_.rd_ptr(), "RTPX", 4) == 0)) {

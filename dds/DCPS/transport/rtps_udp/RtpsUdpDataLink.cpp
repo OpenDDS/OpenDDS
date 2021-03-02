@@ -2457,13 +2457,13 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVecVec& meta_submessa
       }
       ser << res.sm_;
       if (transport_debug.log_messages) {
-        append_submessage(rtps_message, res.sm_);
+        DCPS::push_back(rtps_message.submessages, res.sm_);
       }
       prev_dst = dst;
     }
     send_strategy()->send_rtps_control(rtps_message, mb_bundle, meta_submessage_bundle_addrs[i]);
     if (transport_debug.log_messages) {
-      RTPS::log_message(ACE_TEXT("(%P|%t) {transport_debug.log_messages} %C\n"), rtps_message.hdr.guidPrefix, true, rtps_message);
+      RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", rtps_message.hdr.guidPrefix, true, rtps_message);
     }
   }
 }
@@ -3476,69 +3476,8 @@ void RtpsUdpDataLink::durability_resend(TransportQueueElement* element,
       RTPS::Message message;
       send_strategy()->send_rtps_control(message, *const_cast<ACE_Message_Block*>((*i)->msg()), addrs);
       if (transport_debug.log_messages) {
-        DCPS::Message_Block_Ptr buff(const_cast<ACE_Message_Block*>((*i)->msg())->duplicate());
-        const Encoding encoding_plain_native(Encoding::KIND_XCDR1);
-        DCPS::Serializer ser(buff.get(), encoding_plain_native);
-        while (buff->length() > 3) {
-          const char subm = buff->rd_ptr()[0], flags = buff->rd_ptr()[1];
-          ser.swap_bytes((flags & RTPS::FLAG_E) != ACE_CDR_BYTE_ORDER);
-          const size_t start = buff->length();
-          CORBA::UShort submessageLength = 0;
-          switch (subm) {
-          case RTPS::INFO_DST: {
-            RTPS::InfoDestinationSubmessage sm;
-            ser >> sm;
-            submessageLength = sm.smHeader.submessageLength;
-            append_submessage(message, sm);
-            break;
-          }
-          case RTPS::INFO_TS: {
-            RTPS::InfoTimestampSubmessage sm;
-            ser >> sm;
-            submessageLength = sm.smHeader.submessageLength;
-            append_submessage(message, sm);
-            break;
-          }
-          case RTPS::DATA: {
-            RTPS::DataSubmessage sm;
-            ser >> sm;
-            submessageLength = sm.smHeader.submessageLength;
-            append_submessage(message, sm);
-            break;
-          }
-          case RTPS::DATA_FRAG: {
-            RTPS::DataFragSubmessage sm;
-            ser >> sm;
-            submessageLength = sm.smHeader.submessageLength;
-            append_submessage(message, sm);
-            break;
-          }
-          default:
-            RTPS::SubmessageHeader smHeader;
-            if (!(ser >> smHeader)) {
-              ACE_ERROR((LM_ERROR,
-                         ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::durability_resend() - ")
-                         ACE_TEXT("failed to deserialize SubmessageHeader\n")));
-            }
-            submessageLength = smHeader.submessageLength;
-            break;
-          }
-          if (submessageLength && buff->length()) {
-            const size_t read = start - buff->length();
-            if (read < static_cast<size_t>(submessageLength + RTPS::SMHDR_SZ)) {
-              if (!ser.skip(static_cast<CORBA::UShort>(submessageLength + RTPS::SMHDR_SZ
-                                                       - read))) {
-                ACE_ERROR((LM_ERROR,
-                           ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::durability_resend() - ")
-                           ACE_TEXT("failed to skip sub message length\n")));
-              }
-            }
-          } else if (!submessageLength) {
-            break; // submessageLength of 0 indicates the last submessage
-          }
-
-        }
-        RTPS::log_message(ACE_TEXT("(%P|%t) {transport_debug.log_messages} %C\n"), message.hdr.guidPrefix, true, message);
+        parse_submessages(message, const_cast<ACE_Message_Block*>((*i)->msg())->duplicate());
+        RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", message.hdr.guidPrefix, true, message);
       }
     }
 
