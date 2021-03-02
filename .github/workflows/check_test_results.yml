@@ -32,6 +32,7 @@ jobs:
             for (var i = 0; i < matchArtifacts.length; i++) {
               result[i] = matchArtifacts[i].name.substring( 0, matchArtifacts[i].name.indexOf( "_autobuild_output"));
             }
+            console.log(result);
             return result;
 
   download_and_publish:
@@ -74,7 +75,7 @@ jobs:
           echo "TRIGGERING_COMMIT=$TRIGGERING_COMMIT" >> $GITHUB_ENV
 
       - name: 'Publish Unit Test Results'
-        uses: simpsont-oci/action-junit-report@v2.1.1
+        uses: simpsont-oci/action-junit-report@v2.2.0
         if: always()
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
