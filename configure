@@ -350,6 +350,11 @@ sub parseArgs {
   }
 
   for my $opt (@default) {
+    if ($opt eq 'rapidjson' && defined $opts->{'safety-profile'}) {
+      print("Although it's a default, rapidjson is not compatible with Safety ".
+            "Profile so it will not be enabled\n") if $opts->{'verbose'};
+      next;
+    }
     if (!exists $opts->{$opt} && !exists $opts->{"no-$opt"}) {
       $opts->{$opt} = '';
       $defaulted->{$opt} = 1;
@@ -676,15 +681,6 @@ EOF
       push(@{$opts{'features'}}, 'no_cxx11=0');
       print "Compiler has C++11 support\n" if $opts{'verbose'};
     }
-  }
-}
-
-my $cxx11 = 0;
-my $cxx11_is_set = 0;
-for my $feature (@{$opts{'features'}}) {
-  if ($feature =~ /no_cxx11=(\d)/) {
-    $cxx11 = $1 eq '0';
-    $cxx11_is_set = 1;
   }
 }
 
@@ -1050,6 +1046,20 @@ sub write_default_features {
   }
   elsif ($opts{'java'}) {
     push(@feat, 'java=1');
+  }
+
+  if ($buildEnv{'build'} eq 'target' && $opts{'target'} eq 'android') {
+    # We can't detect C++11 compatibility in cross compilers at the moment,
+    # but all the NDKs we officially support are C++11+ by default, so enable
+    # C++11 features unless the 'no_cxx11' feature already is set.
+    my $no_cxx11_set = 0;
+    for my $feature (@{$opts{'features'}}) {
+      $no_cxx11_set = 1 if ($feature =~ /^no_cxx11/);
+    }
+    if (!$no_cxx11_set) {
+      print("Setting no_cxx11=0 for Android\n") if ($opts{'verbose'});
+      push(@feat, 'no_cxx11=0');
+    }
   }
 
   if (@feat) {
@@ -1478,6 +1488,10 @@ sub has_feature {
   return 0;
 }
 
+# Features that will be passed directly to MPC, not written to default.features
+# like --features. This means this should only contain OpenDDS related
+# features.
+my @features;
 if ($opts{'java'}) {
   my $feat = 'java_pre_jpms';
   unless (has_feature($feat)) {
@@ -1487,7 +1501,7 @@ if ($opts{'java'}) {
       if (/javac (\d+)/) {
         print "Found javac major version $1\n" if $opts{'verbose'};
         if ($1 > 1) {
-          push(@{$opts{'features'}}, "$feat=0");
+          push(@features, "$feat=0");
           print "Feature $feat=0 due to Java version\n" if $opts{'verbose'};
         }
         last;
@@ -1532,7 +1546,6 @@ if (exists $opts{'boost'} && exists $opts{'boost-version'}) {
 
 # Enable MPC features and populate expected environment variables
 # for all required "optional" dependencies.
-my @features;
 for my $key (keys %optdep) {
   if (exists $opts{$key}) {
     print "Enabling $key\n" if $opts{'verbose'};
@@ -1866,6 +1879,47 @@ sub disable_feature {
   push(@{$featureArray}, "$feature=0");
 }
 
+sub get_default_features {
+  my $buildEnv = shift;
+
+  my %default_features;
+  my $file = "$buildEnv->{ACE_ROOT}/bin/MakeProjectCreator/config/default.features";
+  if (-e $file) {
+    open(my $fh, '<', $file) or die "ERROR: Could not open $file: $!";
+    while (my $row = <$fh>) {
+      chomp $row;
+      $row =~ s/\/\/.*//;
+      $row =~ s/^\s+//;
+      $row =~ s/\s+$//;
+      next if $row eq '';
+      my ($key, $value) = split(/=/, $row);
+      $default_features{$key} = $value;
+    }
+  }
+  return %default_features;
+}
+
+sub get_requested_features {
+  my %requested_features;
+  for my $f (@features) {
+    my ($key, $value) = split(/=/, $f);
+    $value = "1" unless defined $value;
+    $requested_features{$key} = $value;
+  }
+  return %requested_features;
+}
+
+sub get_features {
+  my $buildEnv = shift;
+
+  my %features = get_default_features($buildEnv);
+  my %requested_features = get_requested_features();
+  for my $key (keys(%requested_features)) {
+    $features{$key} = $requested_features{$key};
+  }
+  return %features;
+}
+
 my $buildtao;
 sub generate_workspace {
   my $buildEnv = shift;
@@ -1898,15 +1952,6 @@ sub generate_workspace {
   }
 
   if ($is_target && $opts{'target'} eq 'android') {
-    # We can't detect C++11 compatibility in cross compilers at the moment,
-    # but all the NDKs we officially support are C++11+ by default, so enable
-    # C++11 features unless an explicit 'no_cxx11' feature already is set.
-    if (!$cxx11_is_set) {
-      print "Setting no_cxx11=0 for Android\n" if ($opts{'verbose'});
-      disable_feature(\@features, 'no_cxx11');
-      $cxx11_is_set = 1;
-    }
-
     # Disable including $JAVA_HOME/include on Android. Android NDK includes a
     # jni.h
     disable_feature(\@features, 'jni_include')
@@ -1996,27 +2041,8 @@ EOT
     if (!$buildtao && !defined $opts{'safety-profile'}) {
       # Check for compatibility between the requested features/macros
       # and the pre-built ACE/TAO.
-      my $file = $buildEnv->{'ACE_ROOT'} .
-        '/bin/MakeProjectCreator/config/default.features';
-      my %existing_features;
-      if (-e $file) {
-        open(my $fh, '<', $file) or die "ERROR: Could not open $file: $!";
-        while (my $row = <$fh>) {
-          chomp $row;
-          $row =~ s/\/\/.*//;
-          $row =~ s/^\s+//;
-          $row =~ s/\s+$//;
-          next if $row eq '';
-          my ($key, $value) = split(/=/, $row);
-          $existing_features{$key} = $value;
-        }
-      }
-      my %requested_features;
-      for my $f (@features) {
-        my ($key, $value) = split(/=/, $f);
-        $value = "1" unless defined $value;
-        $requested_features{$key} = $value;
-      }
+      my %existing_features = get_default_features($buildEnv);
+      my %requested_features = get_requested_features();
       for my $f (@ace_features) {
         if (defined $requested_features{$f}) {
           if (!defined $existing_features{$f}) {
@@ -2029,7 +2055,7 @@ EOT
         }
       }
 
-      $file = "$buildEnv->{'ACE_ROOT'}/include/makeinclude/platform_macros.GNU";
+      my $file = "$buildEnv->{'ACE_ROOT'}/include/makeinclude/platform_macros.GNU";
       my %existing_macros;
       if (-e $file) {
         open(my $fh, '<', $file) or die "ERROR: Could not open $file: $!";
@@ -2225,7 +2251,10 @@ sub configure_build {
   generate_workspace($buildEnvRef);
   write_environment($buildEnvRef, $buildEnvRef->{'DDS_ROOT'});
 
-  write_cmake_file($buildEnvRef, $buildEnvRef->{'DDS_ROOT'});
+  if ($buildEnvRef->{'build'} eq 'target') {
+    write_cmake_file($buildEnvRef);
+    generate_configured_tests($buildEnvRef) if $tests;
+  }
 }
 
 sub write_cross_compile_makefile {
@@ -2374,13 +2403,6 @@ else { # does not require cloned builds
   configure_build(\%targetEnv);
 }
 
-# Tries to generate auto_run_tests arguments for running all the configured
-# tests and writes this to a file that will be read by tests/run_tests.pl
-#
-# Right now it probably won't be able to do this for cross-compiled builds, but
-# it probably could be made to.
-generate_configured_tests() if ($tests && !$cross_compile);
-
 print "Completed configuring OpenDDS, next ";
 if (!$is_windows || ($cross_compile && !$cloned_build)) {
   print "run '", (($^O eq 'solaris' || $^O eq 'freebsd') ? 'g' : ''), "make'";
@@ -2411,9 +2433,8 @@ if ($is_windows && !$cross_compile) {
 
 sub write_cmake_file {
   my %buildEnv = %{shift()};
-  my $dir = shift;
-  my $module_dir = $dir . '/cmake';
 
+  my $module_dir = "$buildEnv{'DDS_ROOT'}/cmake";
   mkpath($module_dir) unless -d $module_dir;
   my $CM = backup_and_open($module_dir . '/config.cmake');
 
@@ -2509,30 +2530,19 @@ FIND_OPENDDS_CMAKE_CONFIG
   dump_and_unlink($CM) if $opts{'dry-run'};
 }
 
-# Tries to generate auto_run_tests arguments for running all the configured
-# tests.
-#
-# Currently does not try to use the following configuration flags from the test
-# files either because none of the active scoreboard builds use them or because
-# they are ACE/TAO settings that are harder to get.
-#   DCPS_MIN
-#   TARGET
-#   NO_MCAST
-#   MIN_CORBA
-#   CORBA_E_COMPACT
-#   CORBA_E_MICRO
-#   QNX
-#   LYNXOS
-#   WCHAR
+# Tries to configure auto_run_tests for running all the configured tests.
 sub generate_configured_tests {
-  sub get_path {
-    return join($slash, "$specific{'refpre'}DDS_ROOT$specific{'refpost'}", @_);
-  }
+  my $buildEnv = shift;
 
   my @files = ();
-  my @includes = ('RTPS');
-  my @excludes = ();
+  my @includes = ('RTPS'); # -Config
+  my @excludes = (); # -Exclude
 
+  # Takes a hash of auto_run_test info and a boolean of if that info is the
+  # "positive" case or not.
+  # Which keys the hash should use and which value the positive argument takes
+  # depends on if the option or feature is enabled and the relationship of the
+  # option or feature to auto_run_test.pl configurations.
   my $process_hash = sub {
     my $hash = shift;
     my $positive = shift;
@@ -2556,10 +2566,6 @@ sub generate_configured_tests {
       $process_key->('negative_includes', \@includes);
     }
   };
-
-  if ($cxx11) {
-    push(@includes, 'CXX11');
-  }
 
   # Check Platform
   my $platform_hash = $platforminfo{$opts{'target'}};
@@ -2628,9 +2634,11 @@ sub generate_configured_tests {
       my $enabled = 0;
       if (exists($opts{$optkey})) {
         $enabled = $opts{$optkey};
-      } elsif ($defaulted_string_option) {
+      }
+      elsif ($defaulted_string_option) {
         $enabled = exists($defaulted->{$optkey});
-      } elsif ($enabled_by_default) {
+      }
+      elsif ($enabled_by_default) {
         $enabled = 1;
       }
       $process_hash->($opts_to_check{$optkey}, $enabled);
@@ -2642,6 +2650,23 @@ sub generate_configured_tests {
       if (!$opts_to_check{$opt}->{'checked'});
   }
 
+  # Check Features
+  my %features_to_check = (
+    'use_wchar' => {
+      'includes' => ['WCHAR'],
+    },
+    'no_cxx11' => {
+      'negative_includes' => ['CXX11'],
+    },
+  );
+  my %features = get_features($buildEnv);
+  for my $feature (keys(%features)) {
+    if (exists($features_to_check{$feature})) {
+      $process_hash->($features_to_check{$feature}, $features{$feature} eq "1");
+    }
+  }
+
+  # Write the File that auto_run_test.pl uses
   my $fh = backup_and_open("tests${slash}configured_tests.pm");
   my $lists = join(' ', @files);
   my $includes = join(' ', @includes);
