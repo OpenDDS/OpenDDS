@@ -2577,18 +2577,13 @@ sub generate_configured_tests {
   my %opts_to_check = (
     'security' => {
       'files' => ['security'],
+      'includes' => ['OPENDDS_SECURITY'],
     },
     'java' => {
       'files' => ['java'],
     },
     'rapidjson' => {
       'includes' => ['RAPIDJSON'],
-    },
-    'xerces3' => {
-      'includes' => ['XERCES3'],
-    },
-    'ipv6' => {
-      'includes' => ['IPV6'],
     },
     'content-filtered-topic' => {
       'negative_includes' => ['DDS_NO_CONTENT_FILTERED_TOPIC'],
@@ -2652,11 +2647,17 @@ sub generate_configured_tests {
 
   # Check Features
   my %features_to_check = (
-    'use_wchar' => {
+    'uses_wchar' => {
       'includes' => ['WCHAR'],
     },
     'no_cxx11' => {
       'negative_includes' => ['CXX11'],
+    },
+    'ipv6' => {
+      'includes' => ['IPV6'],
+    },
+    'xerces3' => {
+      'includes' => ['XERCES3'],
     },
   );
   my %features = get_features($buildEnv);
@@ -2693,23 +2694,23 @@ sub generate_configured_tests {
         'files' => ['java'],
       },
       'windows-2019_defaults_security_build' => {
-        'includes' => ['RTPS', 'WIN32', 'XERCES3', 'OPENDDS_SECURITY', 'CXX11', 'RAPIDJSON'],
+        'includes' => ['RTPS', 'XERCES3', 'OPENDDS_SECURITY', 'CXX11', 'RAPIDJSON'],
         'files' => ['security'],
       },
       'windows-2019_defaults_java_no-bit_build' => {
-        'includes' => ['RTPS', 'WIN32', 'XERCES3', 'CXX11', 'RAPIDJSON', 'NO_BUILT_IN_TOPICS'],
-        'files' => [],
+        'includes' => ['RTPS', 'XERCES3', 'CXX11', 'RAPIDJSON', 'NO_BUILT_IN_TOPICS'],
+        'files' => ['java'],
       },
       'windows-2016_x86_no-debug_no-inline_security_build' => {
-        'includes' => ['RTPS', 'WIN32', 'XERCES3', 'OPENDDS_SECURITY', 'CXX11', 'RAPIDJSON'],
+        'includes' => ['RTPS', 'XERCES3', 'OPENDDS_SECURITY', 'CXX11', 'RAPIDJSON'],
         'files' => ['security'],
       },
       'windows-2016_x86_no-debug_no-inline_java_no-bit_build' => {
-        'includes' => ['RTPS', 'WIN32', 'XERCES3', 'CXX11', 'RAPIDJSON', 'NO_BUILT_IN_TOPICS'],
-        'files' => [],
+        'includes' => ['RTPS', 'XERCES3', 'CXX11', 'RAPIDJSON', 'NO_BUILT_IN_TOPICS'],
+        'files' => ['java'],
       },
       'macos-10_15_defaults_security_build' => {
-        'includes' => ['RTPS', 'OSX', 'XERCES3', 'OPENDDS_SECURITY', 'CXX11', 'RAPIDJSON', 'NO_SHMEM', 'DDS_NO_ORBSVCS'],
+        'includes' => ['RTPS', 'XERCES3', 'OPENDDS_SECURITY', 'CXX11', 'RAPIDJSON', 'NO_SHMEM', 'DDS_NO_ORBSVCS'],
         'files' => ['security'],
       },
       'macos-10_15_defaults_java_no-bit_build' => {
