@@ -16,19 +16,11 @@ use PerlDDS::Run_Test;
 use FindBin;
 use lib "$FindBin::Bin";
 eval {require configured_tests;};
-if ($@) {
-  # TODO: Handle this
-  die("Could not load configured_tests.pm. OpenDDS might not be configured be with --tests")
-}
-
-print("Configured lists:" . join(',', @configured_tests::lists) . "\n");
-print("Configured configs: " . join(',', @configured_tests::includes) . "\n");
-print("Configured excludes:" . join(',', @configured_tests::excludes) . "\n");
-push(@PerlACE::ConfigList::Configs, @configured_tests::includes);
-push(@PerlACE::ConfigList::Excludes, @configured_tests::excludes);
+my $have_configured_tests = $@ ? 0 : 1;
 
 use Getopt::Long;
 use Cwd;
+use POSIX qw(SIGINT);
 
 sub run_command {
     my $test = shift;
@@ -46,6 +38,7 @@ sub run_command {
                 $error_message = "failed to run: $!";
             }
             elsif ($signal) {
+                die("auto_run_tests: test interrupted") if ($signal == SIGINT);
                 $error_message = sprintf("exited on signal %d", ($signal));
                 $error_message .= " and created coredump" if ($coredump);
             }
@@ -65,30 +58,19 @@ my @builtin_test_lists = (
         default => 1,
     },
     {
-        name => 'java',
-        file => "java/tests/dcps_java_tests.lst",
-    },
-    {
         name => 'security',
         file => "tests/security/security_tests.lst",
+    },
+    {
+        name => 'java',
+        file => "java/tests/dcps_java_tests.lst",
     },
     {
         name => 'modeling',
         file => "tools/modeling/tests/modeling_tests.lst",
     },
 );
-foreach my $list_name (@configured_tests::lists) {
-    my $done = 0;
-    foreach my $list (@builtin_test_lists) {
-        if ($list->{name} eq $list_name) {
-            $list->{enabled} = 1;
-            $done = 1;
-            last;
-        }
-    }
-    die "Invalid list_name \"$list_name\" from configured_tests::lists"
-        if (!$done);
-}
+my %builtin_test_lists_hash = map { $_->{name} => $_ } @builtin_test_lists;
 
 sub print_help {
     my $fd = shift;
@@ -115,12 +97,17 @@ sub print_help {
     }
 
     print $fd
-        "    -l <list_file>           Include the tests from <list_file>\n" .
-
         "    --sandbox | -s <sandbox> Runs each program using a sandbox program\n" .
-        "    --dry-run | -z           Just print the commands that would be ran\n" .
-        "    --show-configs           Just print possible values for -Config\n" .
+        "    --dry-run | -z           Do everything except run the tests\n" .
+        "    --show-configs           Print possible values for -Config and -Excludes\n" .
+        "                             broken down by list file\n" .
+        "    --list-configs           Print combined set of the configs from the list\n" .
+        "                             files\n" .
+        "    --list-tests             List all the tests that would run\n" .
         "    --stop-on-fail | -x      Stop on any failure\n" .
+        "    --no-auto-cfg            Don't automatically decide on test configurations,\n" .
+        "                             which is done by default. If this is passed then\n" .
+        "                             configurations must be set mannually\n" .
 
         # These two are processed by PerlACE/ConfigList.pm
         "    -Config <cfg>            Include tests with <cfg> configuration\n" .
@@ -130,23 +117,25 @@ sub print_help {
         "    -ExeSubDir <dir>         Subdirectory for finding the executables\n";
 }
 
-################################################################################
-
 # Parse Options
 my $help = 0;
-my @l_options = ();
 my $sandbox = '';
 my $dry_run = 0;
 my $show_configs = 0;
+my $list_configs = 0;
+my $list_tests = 0;
 my $stop_on_fail = 0;
+my $auto_cfg = 1;
 Getopt::Long::Configure('bundling', 'no_auto_abbrev');
 my %opts = (
     'help|h' => \$help,
-    'l=s' => \@l_options,
     'sandbox|s=s' => \$sandbox,
     'dry-run|z' => \$dry_run,
     'show-configs' => \$show_configs,
+    'list-configs' => \$list_configs,
+    'list-tests' => \$list_tests,
     'stop-on-fail|x' => \$stop_on_fail,
+    'auto-cfg!' => \$auto_cfg,
 );
 foreach my $list (@builtin_test_lists) {
     if (!exists($list->{default})) {
@@ -162,13 +151,47 @@ if ($invalid_arguments || $help) {
     print_help($invalid_arguments ? *STDERR : *STDOUT);
     exit($invalid_arguments ? 1 : 0);
 }
+my $query = $show_configs || $list_configs || $list_tests;
+
+if ($auto_cfg) {
+    if (($ENV{GITHUB_ACTIONS} || "") eq "true") {
+        push(@PerlACE::ConfigList::Configs, 'GH_ACTIONS');
+
+        if ($builtin_test_lists_hash{java}->{enabled}) {
+            $builtin_test_lists_hash{modeling}->{enabled} = 1;
+        }
+    }
+
+    if ($have_configured_tests) {
+        print("Configured lists: " . join(',', @configured_tests::lists) . "\n")
+          if (!$query);
+        foreach my $list_name (@configured_tests::lists) {
+            my $done = 0;
+            foreach my $list (@builtin_test_lists) {
+                if ($list->{name} eq $list_name) {
+                    $list->{enabled} = 1;
+                    $done = 1;
+                    last;
+                }
+            }
+            die "Invalid list_name \"$list_name\" from configured_tests::lists"
+                if (!$done);
+        }
+        print("Configured configs: " . join(',', @configured_tests::includes) . "\n")
+          if (!$query);
+        push(@PerlACE::ConfigList::Configs, @configured_tests::includes);
+        print("Configured excludes: " . join(',', @configured_tests::excludes) . "\n")
+          if (!$query);
+        push(@PerlACE::ConfigList::Excludes, @configured_tests::excludes)
+    }
+}
 
 # Determine what test list files to use
 my @file_list = ();
 foreach my $list (@builtin_test_lists) {
-    push(@file_list, "$DDS_ROOT/$list->{file}") if ($list->{enabled});
+    push(@file_list, "$DDS_ROOT/$list->{file}")
+      if ($query || $list->{enabled});
 }
-push(@file_list, @l_options);
 push(@file_list, @ARGV);
 
 if ($show_configs) {
@@ -176,6 +199,21 @@ if ($show_configs) {
         my $config_list = new PerlACE::ConfigList;
         $config_list->load($test_list);
         print "$test_list: " . $config_list->list_configs() . "\n";
+    }
+    exit(0);
+}
+
+if ($list_configs) {
+    my %configs = ();
+    foreach my $test_list (@file_list) {
+        my $config_list = new PerlACE::ConfigList;
+        $config_list->load($test_list);
+        for my $config (split(/ /, $config_list->list_configs())) {
+            $configs{$config} = 1;
+        }
+    }
+    for my $config (sort(keys(%configs))) {
+        print("$config\n");
     }
     exit(0);
 }
@@ -189,6 +227,11 @@ foreach my $test_lst (@file_list) {
     $PATH .= $Config::Config{path_sep} . '.';
 
     foreach my $test ($config_list->valid_entries()) {
+        if ($list_tests) {
+            print("$test\n");
+            next;
+        }
+
         my $directory = ".";
         my $program = ".";
 
