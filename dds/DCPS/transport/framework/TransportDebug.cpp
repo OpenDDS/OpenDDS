@@ -18,7 +18,7 @@ TransportDebug::TransportDebug()
   : log_messages(false)
 {}
 
-TransportDebug transport_debug;
+OpenDDS_Dcps_Export TransportDebug transport_debug;
 
 } // namespace DCPS
 } // namespace OpenDDS
