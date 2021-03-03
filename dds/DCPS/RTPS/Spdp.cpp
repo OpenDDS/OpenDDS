@@ -2541,6 +2541,12 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
   send(flags);
 }
 
+void
+Spdp::send_to_relay()
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  tport_->write_i(SpdpTransport::SEND_TO_RELAY);
+}
 
 void
 Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
