@@ -75,7 +75,7 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       SampleSetMap::iterator it = ph_received_samples_.find(info.publication_handle);
       if (it == ph_received_samples_.end()) {
         it = ph_received_samples_.insert(SampleSetMap::value_type(info.publication_handle, std::set<int>())).first;
-        if (durable_) {
+        if (expect_all_samples_) {
           it->second.insert(0);
         }
       }
@@ -105,6 +105,10 @@ DataReaderListenerImpl::on_subscription_matched(
   DDS::DataReader_ptr /*reader*/,
   const DDS::SubscriptionMatchedStatus& status)
 {
+  OPENDDS_ASSERT(status.current_count >= 0);
+  OPENDDS_ASSERT(status.current_count <= total_writers_);
+  OPENDDS_ASSERT(previous_count_ + status.current_count_change == status.current_count);
+  previous_count_ = status.current_count;
 #ifndef DDS_HAS_MINIMUM_BIT
   if (check_bits_ && status.current_count_change > 0) {
     DDS::PublicationBuiltinTopicDataDataReader_var rdr =
@@ -121,12 +125,11 @@ DataReaderListenerImpl::on_subscription_matched(
       return;
     }
 
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) Successfully read publication BITs\n"));
-
-    if (OpenDDS::DCPS::DCPS_debug_level > 4) {
-      for (CORBA::ULong i = 0; i < data.length(); ++i) {
-        if (infos[i].valid_data) {
-
+    bool found_valid = false;
+    for (CORBA::ULong i = 0; i < data.length(); ++i) {
+      if (infos[i].valid_data) {
+        found_valid = true;
+        if (OpenDDS::DCPS::DCPS_debug_level > 4) {
           ACE_DEBUG((LM_DEBUG,
                      "(%P|%t) Read Publication BIT with key: %x %x %x and handle %d\n"
                      "\tTopic: %C\tType: %C\n",
@@ -134,10 +137,14 @@ DataReaderListenerImpl::on_subscription_matched(
                      data[i].key.value[2], infos[i].instance_handle,
                      data[i].topic_name.in(),
                      data[i].type_name.in()));
-
         }
       }
     }
+
+    if (found_valid) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Successfully read publication BITs\n"));
+    }
+
   }
 #else
 ACE_UNUSED_ARG(status);

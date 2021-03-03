@@ -22,13 +22,14 @@ typedef void (*callback_t)(bool);
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
-  DataReaderListenerImpl(const std::string& id, bool reliable, bool durable, const std::vector<std::string>& writers, const int total_writers, const int expected_samples, callback_t done_callback, DDS::Subscriber_ptr subscriber, bool check_bits)
+  DataReaderListenerImpl(const std::string& id, bool reliable, bool expect_all_samples, const std::vector<std::string>& writers, const int total_writers, const int expected_samples, callback_t done_callback, DDS::Subscriber_ptr subscriber, bool check_bits)
     : id_(id)
     , reliable_(reliable)
-    , durable_(durable)
+    , expect_all_samples_(expect_all_samples)
     , writers_(writers)
     , total_writers_(total_writers)
     , expected_samples_(expected_samples)
+    , previous_count_(0)
     , received_samples_(0)
     , done_callback_(done_callback)
     , builtin_read_error_(false)
@@ -83,10 +84,11 @@ public:
 private:
   std::string id_;
   bool reliable_;
-  bool durable_;
+  bool expect_all_samples_;
   const std::vector<std::string>& writers_;
   const int total_writers_;
   const int expected_samples_;
+  int previous_count_;
   int received_samples_;
   typedef std::set<int> SampleSet;
   typedef std::map<int, SampleSet> SampleSetMap;
