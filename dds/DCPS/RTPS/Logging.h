@@ -34,7 +34,7 @@ void log_message(const char* format,
 
 OpenDDS_Rtps_Export
 void parse_submessages(Message& message,
-                       ACE_Message_Block* mb);
+                       const ACE_Message_Block& mb);
 
 } // namespace RTPS
 } // namespace OpenDDS

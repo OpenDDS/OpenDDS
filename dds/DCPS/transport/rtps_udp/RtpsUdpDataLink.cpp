@@ -3476,7 +3476,7 @@ void RtpsUdpDataLink::durability_resend(TransportQueueElement* element,
       RTPS::Message message;
       send_strategy()->send_rtps_control(message, *const_cast<ACE_Message_Block*>((*i)->msg()), addrs);
       if (transport_debug.log_messages) {
-        parse_submessages(message, const_cast<ACE_Message_Block*>((*i)->msg())->duplicate());
+        parse_submessages(message, *const_cast<ACE_Message_Block*>((*i)->msg()));
         RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", message.hdr.guidPrefix, true, message);
       }
     }

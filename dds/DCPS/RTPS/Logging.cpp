@@ -60,69 +60,44 @@ void log_message(const char* format,
 }
 
 void parse_submessages(Message& message,
-                       ACE_Message_Block* mb)
+                       const ACE_Message_Block& mb)
 {
-  DCPS::Message_Block_Ptr buff(mb);
-  const DCPS::Encoding encoding_plain_native(DCPS::Encoding::KIND_XCDR1);
-  DCPS::Serializer ser(buff.get(), encoding_plain_native);
-  while (buff->length() > 3) {
-    const char subm = buff->rd_ptr()[0], flags = buff->rd_ptr()[1];
-    ser.swap_bytes((flags & RTPS::FLAG_E) != ACE_CDR_BYTE_ORDER);
-    const size_t start = buff->length();
-    CORBA::UShort submessageLength = 0;
-    switch (subm) {
+  MessageParser mp(mb);
+  DCPS::Serializer& ser = mp.serializer();
+
+  while (mp.parseSubmessageHeader()) {
+    switch (mp.submessageHeader().submessageId) {
     case RTPS::INFO_DST: {
       RTPS::InfoDestinationSubmessage sm;
       ser >> sm;
-      submessageLength = sm.smHeader.submessageLength;
       append_submessage(message, sm);
       break;
     }
     case RTPS::INFO_TS: {
       RTPS::InfoTimestampSubmessage sm;
       ser >> sm;
-      submessageLength = sm.smHeader.submessageLength;
       append_submessage(message, sm);
       break;
     }
     case RTPS::DATA: {
       RTPS::DataSubmessage sm;
       ser >> sm;
-      submessageLength = sm.smHeader.submessageLength;
       append_submessage(message, sm);
       break;
     }
     case RTPS::DATA_FRAG: {
       RTPS::DataFragSubmessage sm;
       ser >> sm;
-      submessageLength = sm.smHeader.submessageLength;
       append_submessage(message, sm);
       break;
     }
     default:
-      RTPS::SubmessageHeader smHeader;
-      if (!(ser >> smHeader)) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::durability_resend() - ")
-                   ACE_TEXT("failed to deserialize SubmessageHeader\n")));
-      }
-      submessageLength = smHeader.submessageLength;
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: parse_submessages() - ")
+                 ACE_TEXT("unhandle submessageId %d\n"), mp.submessageHeader().submessageId));
       break;
     }
-    if (submessageLength && buff->length()) {
-      const size_t read = start - buff->length();
-      if (read < static_cast<size_t>(submessageLength + RTPS::SMHDR_SZ)) {
-        if (!ser.skip(static_cast<CORBA::UShort>(submessageLength + RTPS::SMHDR_SZ
-                                                 - read))) {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::durability_resend() - ")
-                     ACE_TEXT("failed to skip sub message length\n")));
-        }
-      }
-    } else if (!submessageLength) {
-      break; // submessageLength of 0 indicates the last submessage
-    }
-
+    mp.skipToNextSubmessage();
   }
 }
 
