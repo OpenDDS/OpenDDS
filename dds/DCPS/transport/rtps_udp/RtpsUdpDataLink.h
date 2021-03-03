@@ -388,6 +388,18 @@ private:
     mutable ACE_Thread_Mutex mutex_;
     mutable ACE_Thread_Mutex elems_not_acked_mutex_;
 
+    typedef PmfSporadicTask<RtpsWriter> Sporadic;
+
+    mutable ACE_Thread_Mutex heartbeat_mutex_;
+    size_t expected_acks_;
+    MonotonicTimePoint last_heartbeat_;
+    MonotonicTimePoint last_ack_;
+    TimeDuration heartbeat_period_;
+    // End heartbeat_mutex_ scope.
+    Sporadic heartbeat_;
+
+    void send_heartbeats(const DCPS::MonotonicTimePoint& now);
+
     void add_gap_submsg_i(RTPS::SubmessageSeq& msg,
                           SequenceNumber gap_start);
     void end_historic_samples_i(const DataSampleHeader& header,
@@ -467,7 +479,8 @@ private:
     void process_acked_by_all();
     void send_and_gather_nack_replies(MetaSubmessageVec& meta_submessages);
     bool gather_heartbeats(OPENDDS_VECTOR(TransportQueueElement*)& pendingCallbacks,
-                           const RepoIdSet& additional_guids,
+                           MetaSubmessageVec& meta_submessages);
+    void gather_heartbeats(const RepoIdSet& additional_guids,
                            MetaSubmessageVec& meta_submessages);
     typedef OPENDDS_MAP_CMP(RepoId, SequenceNumber, GUID_tKeyLessThan) ExpectedMap;
 
@@ -713,39 +726,8 @@ private:
 
   CORBA::Long best_effort_heartbeat_count_;
 
-  typedef void (RtpsUdpDataLink::*PMF)();
-
-  typedef PmfSporadicTask<RtpsUdpDataLink> Sporadic;
-
-  mutable ACE_Thread_Mutex heartbeat_mutex_;
-  size_t expected_acks_;
-  MonotonicTimePoint last_heartbeat_;
-  MonotonicTimePoint last_ack_;
-  TimeDuration heartbeat_period_;
-  // End heartbeat_mutex_ scope.
-  Sporadic heartbeat_;
-
-  TimeDuration heartbeat_period() const {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, heartbeat_mutex_, heartbeat_period_);
-    return heartbeat_period_;
-  }
-
-  void expect_ack() {
-    ACE_GUARD(ACE_Thread_Mutex, g, heartbeat_mutex_);
-    ++expected_acks_;
-  }
-
-  void received_expected_ack() {
-    ACE_GUARD(ACE_Thread_Mutex, g, heartbeat_mutex_);
-    --expected_acks_;
-    last_ack_ = MonotonicTimePoint::now();
-    if (expected_acks_ == 0) {
-      heartbeat_.cancel();
-      heartbeat_.schedule(TimeDuration::zero_value);
-    }
-  }
-
   typedef PmfPeriodicTask<RtpsUdpDataLink> Periodic;
+  Periodic heartbeat_;
   Periodic heartbeatchecker_;
 
   /// Data structure representing an "interesting" remote entity for static discovery.
