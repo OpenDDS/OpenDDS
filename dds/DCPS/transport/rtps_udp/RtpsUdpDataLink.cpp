@@ -785,8 +785,16 @@ void RtpsUdpDataLink::client_stop(const RepoId& localId)
     }
 
   } else {
-    ACE_GUARD(ACE_Thread_Mutex, gw, writers_lock_);
-    writers_.erase(localId);
+    RtpsWriter_rch writer;
+    {
+      // Don't hold the writers lock when destroying a writer.
+      ACE_GUARD(ACE_Thread_Mutex, gw, writers_lock_);
+      RtpsWriterMap::iterator pos = writers_.find(localId);
+      if (pos != writers_.end()) {
+        writer = pos->second;
+        writers_.erase(pos);
+      }
+    }
   }
 }
 
@@ -3924,6 +3932,8 @@ RtpsUdpDataLink::RtpsWriter::~RtpsWriter()
       ACE_TEXT("deleting with %d elements left not fully acknowledged\n"),
       elems_not_acked_.size()));
   }
+
+  heartbeat_.cancel_and_wait();
 }
 
 CORBA::Long RtpsUdpDataLink::RtpsWriter::inc_heartbeat_count()
