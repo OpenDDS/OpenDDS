@@ -1,8 +1,0 @@
-project(AccessControlTest): dcpsexe, dcps_test, opendds_security, googlemock {
-  requires += no_opendds_safety_profile
-  exename = OpenDDS_AccessControlTest
-
-  Source_Files {
-    AccessControlTest.cpp
-  }
-}

@@ -52,11 +52,7 @@ sub run_unit_tests {
           $executable = $1;
           # each process runs to completion before the next starts
           my $LONE_PROCESS = 1;
-          if ($executable eq "UnitTests_BIT_DataReader") {
-            $test->process("$executable", "$executable", "-DCPSConfigFile rtps.ini", $LONE_PROCESS);
-          } else {
-            $test->process("$executable", "$executable", "", $LONE_PROCESS);
-          }
+          $test->process("$executable", "$executable", "", $LONE_PROCESS);
         }
         else {
           next;
@@ -78,6 +74,7 @@ run_unit_tests();
 
 unless ($something_ran == 1) {
   print STDERR "ERROR: no test was run\n";
+  exit 1;
 }
 
 exit $status;
