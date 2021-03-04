@@ -49,6 +49,7 @@ sub generateConfig {
             print $fh "[transport/Rtps$entity]\n";
             print $fh "transport_type=rtps_udp\n";
             print $fh "use_multicast=0\n";
+            print $fh "heartbeat_period=1000\n";
             print $fh "local_address=127.0.0.1:", 21074 + $entity, "\n\n";
             print $fh "[config/Config$entity]\n";
             print $fh "transports=Rtps$entity\n\n";
@@ -73,6 +74,7 @@ sub generateConfig {
             print $fh "[transport/Rtps$entity]\n";
             print $fh "transport_type=rtps_udp\n";
             print $fh "use_multicast=0\n";
+            print $fh "heartbeat_period=1000\n";
             print $fh "local_address=127.0.0.1:", 21074 + $entity, "\n\n";
             print $fh "[config/Config$entity]\n";
             print $fh "transports=Rtps$entity\n\n";
@@ -115,11 +117,13 @@ sub runTest {
     print $fh "[datawriterqos/ReliableWriter]\n";
     print $fh "reliability.kind=RELIABLE\n";
     print $fh "reliability.max_blocking_time.sec=DURATION_INFINITE_SEC\n";
+    print $fh "reliability.max_blocking_time.nanosec=DURATION_INFINITE_NANOSEC\n";
     #print $fh "resource_limits.max_instances=10\n";
-    #print $fh "history.depth=10\n";
+    print $fh "history.depth=1\n";
     print $fh "\n";
     print $fh "[datareaderqos/ReliableReader]\n";
     print $fh "reliability.kind=RELIABLE\n";
+    print $fh "history.depth=1\n";
     print $fh "\n";
     print $fh "[datawriterqos/BestEffortWriter]\n";
     print $fh "reliability.kind=BEST_EFFORT\n";
@@ -145,7 +149,7 @@ sub runTest {
     print "Spawning $alpha_count alphas\n";
 
     for (my $i = 0; $i != $alpha_count; ++$i) {
-        $test->process("alpha$i", 'StaticDiscoveryTest', "-DCPSConfigFile config.ini -reliable $reliable $alpha_participant_array[$i] @{$alpha_reader_array[$i]} @{$alpha_writer_array[$i]} -total_readers $readers -total_writers $writers");
+        $test->process("alpha$i", 'StaticDiscoveryTest', "-ORBVerboseLogging 1 -ORBLogFile alpha_$i.log -DCPSConfigFile config.ini -reliable $reliable $alpha_participant_array[$i] @{$alpha_reader_array[$i]} @{$alpha_writer_array[$i]} -total_readers $readers -total_writers $writers");
         $test->start_process("alpha$i");
     }
 
@@ -154,7 +158,7 @@ sub runTest {
     print "Spawning $beta_count betas\n";
 
     for (my $i = 0; $i != $beta_count; ++$i) {
-        $test->process("beta$i", 'StaticDiscoveryTest', "-DCPSConfigFile config.ini -reliable $reliable $beta_participant_array[$i] @{$beta_reader_array[$i]} @{$beta_writer_array[$i]} -total_readers $readers -total_writers $writers");
+        $test->process("beta$i", 'StaticDiscoveryTest', "-ORBVerboseLogging 1 -ORBLogFile beta_$i.log -DCPSConfigFile config.ini -reliable $reliable $beta_participant_array[$i] @{$beta_reader_array[$i]} @{$beta_writer_array[$i]} -total_readers $readers -total_writers $writers");
         $test->start_process("beta$i");
     }
 
@@ -195,6 +199,10 @@ if ($test->flag('mp')) {
   # mw
   # 1 process with 25 readers and 25 writers
   runTest(1, 25, 25, 0, 0, 0, 0, 512000000);
+} elsif ($test->flag('mini')) {
+  # mpmrmw
+  # 5 processes with 2 readers and 2 writers
+  runTest(2, 2, 2, 0, 0, 0, 0, 85000000);
 } elsif ($test->flag('mpmrmw')) {
   # mpmrmw
   # 5 processes with 5 readers and 5 writers
