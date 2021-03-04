@@ -124,6 +124,59 @@ However, there are cases when a test stand-in is justified:
 
 The use of a mock assumes that an interface exists for the stand-in.
 
+***********************
+Writing a New Unit Test
+***********************
+
+1. Add the test to tests/unit-tests/dds/DCPS or tests/unit-tests/dds/DCPS/security.
+2. Name the test after the code it is meant to cover. For example, the AccessControlBuiltInImpl covers the AccessControlBuiltInImpl file.
+3. Add the test to the MPC file in its location.
+4. If the test is a safety test, you will need to add it to the run_test_safety.pl located in tests/unit-tests/dds/DCPS
+5. Add the test to the .gitignore in its directory
+6. Add the path to the test in either tests/dcps_tests.lst or tests/security/security_tests.lst
+
+
+***********
+Using GTest
+***********
+
+To use GTest in a test, add “#include "gtest/gtest.h". This provides you with many helpful tools to simplify the writing of tests.
+When creating your test, the first step is to create a normal main function, with argc and argv. Inside the function we need to initialize
+google tests, then we set the return value as “RUN_ALL_TESTS();”.
+
+int main(int argc, char* argv[])
+{
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}
+
+This return value will automatically run all test modules and output a series of values corresponding to each test.
+Speaking of test modules, you can create an individual test module with the following declaration
+
+TEST(TestModule, TestSubmodule)
+{
+}
+
+Each of these tests contains some evaluator.  The most common evaluators are EXPECT_TRUE, EXPECT_FALSE, and EXPECT_EQ.
+EXPECT_TRUE and EXPECT_FALSE are similar to if statements with a boolean return.
+
+EXPECT_TRUE(X == 2);
+
+This returns true if X equals 2 and returns false otherwise.
+
+EXPECT_FALSE(X == 2);
+
+This returns false if X equals 2 and returns true otherwise.
+
+EXPECT_EQ(X,Y)
+EXPECT_EQ(X,Z)
+
+This will return false if either X does not equal Y, or X does not equal Z. Unlike EXPECT_TRUE and EXPECT_FALSE, EXPECT_EQ
+does not stop execution if it the expectation fails.  This means that if you have multiple EXPECT_EQ, they will all always run.
+
+There are more EXPECTS and ASSERTS, but these are the most common ones.
+
+
 **********
 Final Word
 **********
