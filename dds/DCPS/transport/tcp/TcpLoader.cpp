@@ -6,14 +6,15 @@
  */
 
 #include "Tcp_pch.h"
+
 #include "TcpLoader.h"
 #include "TcpInst.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include "dds/DCPS/transport/framework/TransportType.h"
+#include "dds/DCPS/transport/framework/EntryExit.h"
 
-#include <dds/DCPS/transport/framework/TransportRegistry.h>
-#include <dds/DCPS/transport/framework/TransportType.h>
-#include <dds/DCPS/transport/framework/EntryExit.h>
-
-#include <ace/OS_NS_strings.h>
+#include "tao/debug.h"
+#include "ace/OS_NS_strings.h"
 
 namespace {
   const char TCP_NAME[] = "tcp";

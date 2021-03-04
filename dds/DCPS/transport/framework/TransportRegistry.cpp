@@ -5,24 +5,23 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include <DCPS/DdsDcps_pch.h> //Only the _pch include should start with DCPS/
-
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "TransportRegistry.h"
 #include "TransportDebug.h"
 #include "TransportInst.h"
 #include "TransportExceptions.h"
 #include "TransportType.h"
-
-#include <dds/DCPS/GuidConverter.h>
-#include <dds/DCPS/Util.h>
-#include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/EntityImpl.h>
-#include <dds/DCPS/SafetyProfileStreams.h>
+#include "dds/DCPS/GuidConverter.h"
+#include "dds/DCPS/Util.h"
+#include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/EntityImpl.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 #include <dds/DdsDcpsInfrastructureC.h>
 
-#include <ace/Singleton.h>
-#include <ace/OS_NS_strings.h>
-#include <ace/Service_Config.h>
+
+#include "ace/Singleton.h"
+#include "ace/OS_NS_strings.h"
+#include "ace/Service_Config.h"
 
 #if !defined (__ACE_INLINE__)
 #include "TransportRegistry.inl"

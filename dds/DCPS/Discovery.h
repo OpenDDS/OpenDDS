@@ -8,26 +8,28 @@
 #ifndef OPENDDS_DCPS_DISCOVERY_H
 #define OPENDDS_DCPS_DISCOVERY_H
 
+#include "dds/DdsDcpsInfoUtilsC.h"
 #include "RcObject.h"
 #include "RcHandle_T.h"
 #include "unique_ptr.h"
 #include "XTypes/TypeObject.h"
 #include "XTypes/TypeLookupService.h"
+
 #include "DataReaderCallbacks.h"
 #include "DataWriterCallbacks.h"
 #include "TopicCallbacks.h"
+#include "dds/DdsDcpsSubscriptionC.h"
+
 #include "PoolAllocator.h"
 #include "PoolAllocationBase.h"
 
-#include <dds/DdsDcpsSubscriptionC.h>
-#include <dds/DdsDcpsInfoUtilsC.h>
 #ifdef OPENDDS_SECURITY
-#  include <dds/DdsSecurityCoreC.h>
+#include "dds/DdsSecurityCoreC.h"
 #endif
 
-#ifndef ACE_LACKS_PRAGMA_ONCE
-#  pragma once
-#endif
+#if !defined (ACE_LACKS_PRAGMA_ONCE)
+#pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Configuration_Heap;
@@ -55,14 +57,14 @@ class OpenDDS_Dcps_Export Discovery : public RcObject {
 public:
   /// Key type for storing discovery objects.
   /// Probably should just be Discovery::Key
-  typedef String RepoKey;
+  typedef OPENDDS_STRING RepoKey;
 
   explicit Discovery(const RepoKey& key) : key_(key) { }
 
-  // Possible values for key
-  static const char* const DEFAULT_REPO;
-  static const char* const DEFAULT_RTPS;
-  static const char* const DEFAULT_STATIC;
+  /// Key value for the default repository IOR.
+  static const char* DEFAULT_REPO;
+  static const char* DEFAULT_RTPS;
+  static const char* DEFAULT_STATIC;
 
   // TODO: NEED TO REMOVE THIS once Service_Participant::repository_lost has been refactored
   virtual bool active() { return true; }
@@ -262,7 +264,7 @@ protected:
   DDS::ReturnCode_t create_bit_topics(DomainParticipantImpl* participant);
 
 private:
-  RepoKey key_;
+  RepoKey        key_;
 
 };
 
