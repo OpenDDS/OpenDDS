@@ -157,16 +157,16 @@ TEST(TestModule, TestSubmodule)
 {
 }
 
-Each of these tests contains some evaluator.  The most common evaluators are EXPECT_TRUE, EXPECT_FALSE, and EXPECT_EQ.
+Each of these tests contain evaluators.  The most common evaluators are EXPECT_TRUE, EXPECT_FALSE, and EXPECT_EQ.
 EXPECT_TRUE and EXPECT_FALSE are similar to if statements with a boolean return.
 
 EXPECT_TRUE(X == 2);
 
-This returns true if X equals 2 and returns false otherwise.
+This continues if X equals 2, but exits and returns false otherwise.
 
 EXPECT_FALSE(X == 2);
 
-This returns false if X equals 2 and returns true otherwise.
+This continues if X equals 2, but exits and returns true otherwise.
 
 EXPECT_EQ(X,Y)
 EXPECT_EQ(X,Z)
