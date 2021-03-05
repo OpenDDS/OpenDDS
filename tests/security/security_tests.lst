@@ -1,6 +1,6 @@
 tests/security/IDL_Serialization/run_test.pl
 tests/security/SSL/run_test.pl
-tests/security/unit_tests/run_test.pl OpenDDS_AccessControlTest
+tests/unit-tests/dds/DCPS/security/run_test.pl AccessControlBuiltInImpl
 tests/security/unit_tests/run_test.pl OpenDDS_AuthenticationTest
 tests/security/unit_tests/run_test.pl OpenDDS_CryptoKeyFactoryTest
 tests/security/unit_tests/run_test.pl OpenDDS_CryptoKeyExchangeTest
