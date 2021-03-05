@@ -128,12 +128,17 @@ The use of a mock assumes that an interface exists for the stand-in.
 Writing a New Unit Test
 ***********************
 
-1. Add the test to tests/unit-tests/dds/DCPS or the folder under it.
+1. Add the test to ``tests/unit-tests/dds/DCPS`` or the folder under it.
+
 2. Name the test after the code it is meant to cover.
-For example, the ``AccessControlBuiltInImpl`` unit test covers the ``AccessControlBuiltInImpl.cpp`` file.
+   For example, the ``AccessControlBuiltInImpl`` unit test covers the ``AccessControlBuiltInImpl.cpp`` file.
+
 3. Add the test to the MPC file in its location.
+
 4. If the test is a safety test, you will need to add it to the ``run_test_safety.pl`` located in ``tests/unit-tests/dds/DCPS``.
+
 5. Add the test to the ``.gitignore`` in its directory.
+
 6. Add the path to the test in either ``tests/dcps_tests.lst`` or ``tests/security/security_tests.lst``.
 
 
@@ -144,7 +149,7 @@ Using GTest
 To use GTest in a test, add ``#include <gtest/gtest.h>``.
 Then add the ``googletest`` dependency to the MPC project for your test.
 This provides you with many helpful tools to simplify the writing of tests.
-When creating your test, the first step is to create a normal main function, with argc and argv.
+When creating your test, the first step is to create a normal ``int main`` function.
 Inside the function we need to initialize google tests, then we set the return value as ``RUN_ALL_TESTS();``.
 
 .. code-block:: cpp
@@ -165,34 +170,32 @@ Speaking of test modules, you can create an individual test module with the foll
   }
 
 Each of these tests contain evaluators.
-The most common evaluators are EXPECT_EQ, EXPECT_TRUE, EXPECT_FALSE.
+The most common evaluators are ``EXPECT_EQ``, ``EXPECT_TRUE``, ``EXPECT_FALSE``.
 
 .. code-block:: cpp
 
-  EXPECT_EQ(X,2)
-  EXPECT_EQ(Y,3)
+  EXPECT_EQ(X, 2)
+  EXPECT_EQ(Y, 3)
 
-This will return false if either X does not equal 2, or Y does not equal 3.
-Unlike EXPECT_TRUE and EXPECT_FALSE, EXPECT_EQ does not stop execution if it the expectation fails.
-This means that if you have multiple EXPECT_EQ, they will all always run.
+This will evaluate to false if either ``X`` does not equal 2, or ``Y`` does not equal 3.
 
-EXPECT_TRUE and EXPECT_FALSE are similar to if statements with a boolean return.
+``EXPECT_TRUE`` and ``EXPECT_FALSE`` are similar to if statements with a boolean return.
 
 .. code-block:: cpp
 
   EXPECT_TRUE(X.is_even());
 
-This continues if X.is_even() returns true, but exits and returns false otherwise.
+This continues if ``X.is_even()`` returns true, but marks a test failure otherwise.
 
 .. code-block:: cpp
 
   EXPECT_FALSE(X.is_even());
 
-This continues if X.is_even() returns false, but exits and returns false otherwise.
+This continues if ``X.is_even()`` returns false, but marks a test failure otherwise.
 
-There are more EXPECTS and ASSERTS, but these are the most common ones.
-
+There are more EXPECT_* and ASSERT_*, but these are the most common ones.
 The difference between EXPECT and ASSERT is that ASSERTS will cease the test upon failure, whereas EXPECTS continue to run.
+For example if you have multiple ``EXPECT_EQ``, they will all always run.
 
 For more information, visit the google test documentation: https://github.com/google/googletest/blob/master/docs/primer.md.
 
