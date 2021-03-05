@@ -429,9 +429,9 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
       if (DCPS_debug_level > 0) {
         String version_string = OPENDDS_VERSION;
-        const char* const version_metadata = OPENDDS_VERSION_METADATA;
-        if (version_metadata[0] != '\0') {
-          version_string += "-" OPENDDS_VERSION_METADATA;
+        const char* const version_metadata = "-" OPENDDS_VERSION_METADATA;
+        if (version_metadata[1] != '\0') {
+          version_string += version_metadata;
         }
         ACE_DEBUG((LM_NOTICE,
                    ACE_TEXT("(%P|%t) NOTICE: Service_Participant::get_domain_participant_factory - ")
