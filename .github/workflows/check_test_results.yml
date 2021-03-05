@@ -20,11 +20,24 @@ jobs:
         uses: actions/github-script@v3.1.0
         with:
           script: |
-            var artifacts = await github.actions.listWorkflowRunArtifacts({
-               owner: context.repo.owner,
-               repo: context.repo.repo,
-               run_id: ${{ github.event.workflow_run.id }},
-            });
+            var page = 1;
+            var artifacts;
+            var temp_artifacts;
+            while (page == 1 || page * 100 <= temp_artifacts.data.total_count) {
+              temp_artifacts = await github.actions.listWorkflowRunArtifacts({
+                 owner: context.repo.owner,
+                 repo: context.repo.repo,
+                 run_id: ${{ github.event.workflow_run.id }},
+                 per_page: 100,
+                 page: page,
+              });
+              if (page == 1) {
+                artifacts = temp_artifacts;
+              } else {
+                artifacts.data.artifacts.concat(temp_artifacts.data.artifacts);
+              }
+              page++;
+            }
             var matchArtifacts = artifacts.data.artifacts.filter((artifact) => {
               return artifact.name.indexOf("_autobuild_output") > -1;
             });
@@ -47,11 +60,24 @@ jobs:
         uses: actions/github-script@v3.1.0
         with:
           script: |
-            var artifacts = await github.actions.listWorkflowRunArtifacts({
-               owner: context.repo.owner,
-               repo: context.repo.repo,
-               run_id: ${{ github.event.workflow_run.id }},
-            });
+            var page = 1;
+            var artifacts;
+            var temp_artifacts;
+            while (page == 1 || page * 100 <= temp_artifacts.data.total_count) {
+              temp_artifacts = await github.actions.listWorkflowRunArtifacts({
+                 owner: context.repo.owner,
+                 repo: context.repo.repo,
+                 run_id: ${{ github.event.workflow_run.id }},
+                 per_page: 100,
+                 page: page,
+              });
+              if (page == 1) {
+                artifacts = temp_artifacts;
+              } else {
+                artifacts.data.artifacts.concat(temp_artifacts.data.artifacts);
+              }
+              page++;
+            }
             var matchArtifact = artifacts.data.artifacts.filter((artifact) => {
               return artifact.name.indexOf('${{ matrix.name }}') > -1;
             })[0];
