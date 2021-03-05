@@ -128,7 +128,7 @@ namespace OpenDDS {
                 {
                   expire = MonotonicTimePoint::now() + interval_;
                   if (status_) {
-                    if (DCPS_debug_level > 4) {
+                    if (DCPS_debug_level >= 4) {
                       ACE_DEBUG((LM_DEBUG,
                                  "(%P|%t) DcpsUpcalls::svc. Updating thread status.\n"));
                     }
@@ -174,7 +174,7 @@ namespace OpenDDS {
         wait(); // ACE_Task_Base::wait does not accept a timeout
 
         if (status_ && has_timeout() && MonotonicTimePoint::now() > expire) {
-          if (DCPS_debug_level > 4) {
+          if (DCPS_debug_level >= 4) {
             ACE_DEBUG((LM_DEBUG,
                        "(%P|%t) DcpsUpcalls::writer_done. Updating thread status.\n"));
           }
