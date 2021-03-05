@@ -177,7 +177,7 @@ The most common evaluators are ``EXPECT_EQ``, ``EXPECT_TRUE``, ``EXPECT_FALSE``.
   EXPECT_EQ(X, 2)
   EXPECT_EQ(Y, 3)
 
-This will evaluate to false if either ``X`` does not equal 2, or ``Y`` does not equal 3.
+This will mark the test as a failure if either ``X`` does not equal 2, or ``Y`` does not equal 3.
 
 ``EXPECT_TRUE`` and ``EXPECT_FALSE`` are similar to if statements with a boolean return.
 
@@ -185,16 +185,16 @@ This will evaluate to false if either ``X`` does not equal 2, or ``Y`` does not 
 
   EXPECT_TRUE(X.is_even());
 
-This continues if ``X.is_even()`` returns true, but marks a test failure otherwise.
+This will mark the test as a failure if ``X.is_even()`` returns false.
 
 .. code-block:: cpp
 
   EXPECT_FALSE(X.is_even());
 
-This continues if ``X.is_even()`` returns false, but marks a test failure otherwise.
+This will mark the test as a failure if ``X.is_even()`` returns true.
 
 There are more EXPECT_* and ASSERT_*, but these are the most common ones.
-The difference between EXPECT and ASSERT is that ASSERTS will cease the test upon failure, whereas EXPECTS continue to run.
+The difference between EXPECT and ASSERT is that an ASSERT will cease the test upon failure, whereas EXPECTS continue to run.
 For example if you have multiple ``EXPECT_EQ``, they will all always run.
 
 For more information, visit the google test documentation: https://github.com/google/googletest/blob/master/docs/primer.md.
