@@ -179,19 +179,20 @@ The most common evaluators are ``EXPECT_EQ``, ``EXPECT_TRUE``, ``EXPECT_FALSE``.
 
 This will mark the test as a failure if either ``X`` does not equal 2, or ``Y`` does not equal 3.
 
-``EXPECT_TRUE`` and ``EXPECT_FALSE`` are similar to if statements with a boolean return.
+``EXPECT_TRUE`` and ``EXPECT_FALSE`` are equivalence checks to a boolean value.
+In the following examples we pass ``X`` to a function ``is_even`` that returns true if the passed value is an even number and returns false otherwise.
 
 .. code-block:: cpp
 
-  EXPECT_TRUE(X.is_even());
+  EXPECT_TRUE(is_even(X));
 
-This will mark the test as a failure if ``X.is_even()`` returns false.
+This will mark the test as a failure if ``is_even(X)`` returns false.
 
 .. code-block:: cpp
 
-  EXPECT_FALSE(X.is_even());
+  EXPECT_FALSE(is_even(X));
 
-This will mark the test as a failure if ``X.is_even()`` returns true.
+This will mark the test as a failure if ``is_even(X)`` returns true.
 
 There are more EXPECT_* and ASSERT_*, but these are the most common ones.
 The difference between EXPECT and ASSERT is that an ASSERT will cease the test upon failure, whereas EXPECTS continue to run.
