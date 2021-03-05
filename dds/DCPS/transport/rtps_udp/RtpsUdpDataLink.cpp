@@ -21,6 +21,7 @@
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
+#include "dds/DCPS/RTPS/Logging.h"
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DCPS/RTPS/SecurityHelpers.h"
@@ -1119,6 +1120,10 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
   }
 #endif
 
+  if (transport_debug.log_messages) {
+    link->send_strategy()->append_submessages(subm);
+  }
+
   Message_Block_Ptr hdr(submsgs_to_msgblock(subm));
   hdr->cont(data.release());
   RtpsCustomizedElement* rtps =
@@ -1217,6 +1222,10 @@ RtpsUdpDataLink::customize_queue_element_non_reliable_i(
     }
   }
 #endif
+
+  if (transport_debug.log_messages) {
+    send_strategy()->append_submessages(subm);
+  }
 
   Message_Block_Ptr hdr(submsgs_to_msgblock(subm));
   hdr->cont(data.release());
@@ -2412,6 +2421,7 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVecVec& meta_submessa
   // Allocate buffers, seralize, and send bundles
   RepoId prev_dst; // used to determine when we need to write a new info_dst
   for (size_t i = 0; i < meta_submessage_bundles.size(); ++i) {
+    RTPS::Message rtps_message;
     prev_dst = GUID_UNKNOWN;
     ACE_Message_Block mb_bundle(meta_submessage_bundle_sizes[i]); //FUTURE: allocators?
     Serializer ser(&mb_bundle, encoding);
@@ -2422,6 +2432,9 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVecVec& meta_submessa
       if (dst != prev_dst) {
         assign(idst.guidPrefix, dst.guidPrefix);
         ser << idst;
+        if (transport_debug.log_messages) {
+          append_submessage(rtps_message, idst);
+        }
       }
       switch (res.sm_._d()) {
         case HEARTBEAT: {
@@ -2443,9 +2456,15 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVecVec& meta_submessa
         }
       }
       ser << res.sm_;
+      if (transport_debug.log_messages) {
+        DCPS::push_back(rtps_message.submessages, res.sm_);
+      }
       prev_dst = dst;
     }
-    send_strategy()->send_rtps_control(mb_bundle, meta_submessage_bundle_addrs[i]);
+    send_strategy()->send_rtps_control(rtps_message, mb_bundle, meta_submessage_bundle_addrs[i]);
+    if (transport_debug.log_messages) {
+      RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", rtps_message.hdr.guidPrefix, true, rtps_message);
+    }
   }
 }
 
@@ -3454,7 +3473,12 @@ void RtpsUdpDataLink::durability_resend(TransportQueueElement* element,
   const TqeVector::iterator end = to_send.end();
   for (TqeVector::iterator i = to_send.begin(); i != end; ++i) {
     if (fragments.empty() || include_fragment(**i, fragments, lastFragment)) {
-      send_strategy()->send_rtps_control(*const_cast<ACE_Message_Block*>((*i)->msg()), addrs);
+      RTPS::Message message;
+      send_strategy()->send_rtps_control(message, *const_cast<ACE_Message_Block*>((*i)->msg()), addrs);
+      if (transport_debug.log_messages) {
+        parse_submessages(message, *const_cast<ACE_Message_Block*>((*i)->msg()));
+        RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", message.hdr.guidPrefix, true, message);
+      }
     }
 
     (*i)->data_delivered();

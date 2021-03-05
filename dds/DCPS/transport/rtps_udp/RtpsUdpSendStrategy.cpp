@@ -16,6 +16,7 @@
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 #include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
+#include "dds/DCPS/RTPS/Logging.h"
 
 #include "dds/DCPS/Serializer.h"
 
@@ -52,14 +53,14 @@ RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link,
     rtps_header_mb_(&rtps_header_db_, ACE_Message_Block::DONT_DELETE),
     network_is_unreachable_(false)
 {
-  std::memcpy(rtps_header_.prefix, RTPS::PROTOCOL_RTPS, sizeof RTPS::PROTOCOL_RTPS);
-  rtps_header_.version = OpenDDS::RTPS::PROTOCOLVERSION;
-  rtps_header_.vendorId = OpenDDS::RTPS::VENDORID_OPENDDS;
-  std::memcpy(rtps_header_.guidPrefix, local_prefix,
+  std::memcpy(rtps_message_.hdr.prefix, RTPS::PROTOCOL_RTPS, sizeof RTPS::PROTOCOL_RTPS);
+  rtps_message_.hdr.version = OpenDDS::RTPS::PROTOCOLVERSION;
+  rtps_message_.hdr.vendorId = OpenDDS::RTPS::VENDORID_OPENDDS;
+  std::memcpy(rtps_message_.hdr.guidPrefix, local_prefix,
               sizeof(GuidPrefix_t));
   Serializer writer(&rtps_header_mb_, encoding_unaligned_native);
   // byte order doesn't matter for the RTPS Header
-  writer << rtps_header_;
+  writer << rtps_message_.hdr;
 }
 
 namespace {
@@ -144,6 +145,12 @@ RtpsUdpSendStrategy::OverrideToken::~OverrideToken()
 bool
 RtpsUdpSendStrategy::marshal_transport_header(ACE_Message_Block* mb)
 {
+  if (transport_debug.log_messages) {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, rtps_message_mutex_, false);
+    RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", rtps_message_.hdr.guidPrefix, true, rtps_message_);
+    rtps_message_.submessages.length(0);
+  }
+
   Serializer writer(mb, encoding_unaligned_native); // byte order doesn't matter for the RTPS Header
   return writer.write_octet_array(reinterpret_cast<ACE_CDR::Octet*>(rtps_header_data_),
     RTPS::RTPSHDR_SZ);
@@ -160,9 +167,15 @@ namespace {
 }
 
 void
-RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
+RtpsUdpSendStrategy::send_rtps_control(RTPS::Message& message,
+                                       ACE_Message_Block& submessages,
                                        const ACE_INET_Addr& addr)
 {
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, rtps_message_mutex_);
+    message.hdr = rtps_message_.hdr;
+  }
+
   const AMB_Continuation cont(rtps_header_mb_lock_, rtps_header_mb_, submessages);
 
 #ifdef OPENDDS_SECURITY
@@ -188,9 +201,15 @@ RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
 }
 
 void
-RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
+RtpsUdpSendStrategy::send_rtps_control(RTPS::Message& message,
+                                       ACE_Message_Block& submessages,
                                        const OPENDDS_SET(ACE_INET_Addr)& addrs)
 {
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, rtps_message_mutex_);
+    message.hdr = rtps_message_.hdr;
+  }
+
   const AMB_Continuation cont(rtps_header_mb_lock_, rtps_header_mb_, submessages);
 
 #ifdef OPENDDS_SECURITY
@@ -212,6 +231,15 @@ RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
     const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
     ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control() - "
       "failed to send RTPS control message\n"));
+  }
+}
+
+void
+RtpsUdpSendStrategy::append_submessages(const RTPS::SubmessageSeq& submessages)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, rtps_message_mutex_);
+  for (ACE_CDR::ULong idx = 0; idx != submessages.length(); ++idx) {
+    DCPS::push_back(rtps_message_.submessages, submessages[idx]);
   }
 }
 
