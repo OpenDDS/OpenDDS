@@ -390,12 +390,10 @@ private:
 
     typedef PmfSporadicTask<RtpsWriter> Sporadic;
 
-    mutable ACE_Thread_Mutex heartbeat_mutex_;
     size_t expected_acks_;
     MonotonicTimePoint last_heartbeat_;
     MonotonicTimePoint last_ack_;
     TimeDuration heartbeat_period_;
-    // End heartbeat_mutex_ scope.
     Sporadic heartbeat_;
 
     void send_heartbeats(const DCPS::MonotonicTimePoint& now);
@@ -477,9 +475,9 @@ private:
                           const RepoId& src,
                           MetaSubmessageVec& meta_submessages);
     void process_acked_by_all();
-    void send_and_gather_nack_replies(MetaSubmessageVec& meta_submessages);
-    bool gather_heartbeats(OPENDDS_VECTOR(TransportQueueElement*)& pendingCallbacks,
-                           MetaSubmessageVec& meta_submessages);
+    void send_and_gather_nack_replies_i(MetaSubmessageVec& meta_submessages);
+    void gather_heartbeats_i(OPENDDS_VECTOR(TransportQueueElement*)& pendingCallbacks,
+                             MetaSubmessageVec& meta_submessages);
     void gather_heartbeats(const RepoIdSet& additional_guids,
                            MetaSubmessageVec& meta_submessages);
     typedef OPENDDS_MAP_CMP(RepoId, SequenceNumber, GUID_tKeyLessThan) ExpectedMap;

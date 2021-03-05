@@ -1342,8 +1342,9 @@ RtpsUdpDataLink::RtpsWriter::send_heartbeats(const DCPS::MonotonicTimePoint& now
 
   RtpsUdpInst& cfg = link->config();
 
+  MetaSubmessageVec meta_submessages;
   {
-    ACE_GUARD(ACE_Thread_Mutex, g2, heartbeat_mutex_);
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
     if (expected_acks_) {
       // One more readers did not ack since the last heartbeat.
       heartbeat_period_ *= cfg.heartbeat_backoff_factor_;
@@ -1353,27 +1354,23 @@ RtpsUdpDataLink::RtpsWriter::send_heartbeats(const DCPS::MonotonicTimePoint& now
     heartbeat_period_ = std::min(heartbeat_period_, std::max(cfg.heartbeat_period_maximum_, cfg.heartbeat_period_minimum_));
     heartbeat_period_ = std::max(heartbeat_period_, std::min(cfg.heartbeat_period_maximum_, cfg.heartbeat_period_minimum_));
     expected_acks_ = 0;
-  }
 
-  MetaSubmessageVec meta_submessages;
-  send_and_gather_nack_replies(meta_submessages);
-  const bool keep_going = gather_heartbeats(pendingCallbacks, meta_submessages);
-  link->queue_or_send_submessages(meta_submessages);
+    send_and_gather_nack_replies_i(meta_submessages);
+    gather_heartbeats_i(pendingCallbacks, meta_submessages);
 
-  for (size_t i = 0; i < pendingCallbacks.size(); ++i) {
-    pendingCallbacks[i]->data_dropped();
-  }
-
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g2, heartbeat_mutex_);
-    if (keep_going) {
-      heartbeat_.cancel();
+    if (!preassociation_readers_.empty() || !lagging_readers_.empty()) {
       heartbeat_.schedule(heartbeat_period_);
       last_heartbeat_ = now;
     } else {
       last_heartbeat_ = MonotonicTimePoint::zero_value;
     }
     last_ack_ = MonotonicTimePoint::zero_value;
+  }
+
+  link->queue_or_send_submessages(meta_submessages);
+
+  for (size_t i = 0; i < pendingCallbacks.size(); ++i) {
+    pendingCallbacks[i]->data_dropped();
   }
 }
 
@@ -3020,10 +3017,8 @@ void RtpsUdpDataLink::RtpsWriter::process_nackfrag(const RTPS::NackFragSubmessag
 }
 
 void
-RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies(MetaSubmessageVec& meta_submessages)
+RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies_i(MetaSubmessageVec& meta_submessages)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-
   RtpsUdpDataLink_rch link = link_.lock();
 
   if (!link) {
@@ -3661,21 +3656,19 @@ RtpsUdpDataLink::RtpsWriter::gather_directed_heartbeat_i(const SingleSendBuffer:
   meta_submessage.reset_destination();
 }
 
-bool
-RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElement*)& pendingCallbacks,
-                                               MetaSubmessageVec& meta_submessages)
+void
+RtpsUdpDataLink::RtpsWriter::gather_heartbeats_i(OPENDDS_VECTOR(TransportQueueElement*)& pendingCallbacks,
+                                                 MetaSubmessageVec& meta_submessages)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
-
   if (preassociation_readers_.empty() && lagging_readers_.empty() && readers_expecting_heartbeat_.empty()) {
-    return false;
+    return;
   }
 
   check_leader_lagger();
 
   RtpsUdpDataLink_rch link = link_.lock();
   if (!link) {
-    return false;
+    return;
   }
 
   const MonotonicTimePoint now = MonotonicTimePoint::now();
@@ -3755,8 +3748,6 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(OPENDDS_VECTOR(TransportQueueElem
     }
     readers_expecting_heartbeat_.clear();
   }
-
-  return !preassociation_readers_.empty() || !lagging_readers_.empty();
 }
 
 void
