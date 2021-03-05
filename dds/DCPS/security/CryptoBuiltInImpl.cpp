@@ -2049,7 +2049,10 @@ bool CryptoBuiltInImpl::decode_submessage(
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   const KeyTable_t::const_iterator keys_iter = keys_.find(sender_handle);
-  OPENDDS_ASSERT(keys_iter != keys_.end());
+  if (keys_iter == keys_.end()) {
+    return CommonUtilities::set_security_error(ex, -2, 3, "Crypto Key not found");
+  }
+
   const KeySeq& keyseq = keys_iter->second;
   for (unsigned int i = 0; i < keyseq.length(); ++i) {
     if (matches(keyseq[i], ch)) {

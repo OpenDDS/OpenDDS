@@ -9,4 +9,20 @@
 
 #include "TransportDebug.h"
 
-OpenDDS_Dcps_Export unsigned int OpenDDS::DCPS::Transport_debug_level = 0;
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
+namespace OpenDDS {
+namespace DCPS {
+
+OpenDDS_Dcps_Export unsigned int Transport_debug_level = 0;
+
+TransportDebug::TransportDebug()
+  : log_messages(false)
+{}
+
+OpenDDS_Dcps_Export TransportDebug transport_debug;
+
+} // namespace DCPS
+} // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

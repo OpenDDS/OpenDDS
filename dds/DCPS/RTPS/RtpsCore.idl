@@ -885,6 +885,11 @@ module OpenDDS {
     struct DiscoveredTopicData {
       DDS::TopicBuiltinTopicData ddsTopicData;
     };
+
+    struct Message {
+      Header hdr;
+      SubmessageSeq submessages;
+    };
   };
 };
 

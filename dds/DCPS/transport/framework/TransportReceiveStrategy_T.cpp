@@ -224,6 +224,8 @@ TransportReceiveStrategy<TH, DSH>::handle_simple_dds_input(ACE_HANDLE fd)
     }
   }
 
+  finish_message();
+
   if (cur_rb->data_block()->reference_count() > 1) {
     ACE_DES_FREE(
       cur_rb,

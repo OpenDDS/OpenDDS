@@ -12,6 +12,7 @@
 #include "MessageTypes.h"
 #include "ParameterListConverter.h"
 #include "RtpsDiscovery.h"
+#include "Logging.h"
 #ifdef OPENDDS_SECURITY
 #  include "SecurityHelpers.h"
 #endif
@@ -22,6 +23,7 @@
 #include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/ConnectionRecords.h>
+#include <dds/DCPS/transport/framework/TransportDebug.h>
 #ifdef OPENDDS_SECURITY
 #  include <dds/DCPS/security/framework/SecurityRegistry.h>
 #endif
@@ -2404,6 +2406,13 @@ Spdp::SpdpTransport::dispose_unregister()
     return;
   }
 
+  if (DCPS::transport_debug.log_messages) {
+    RTPS::Message message;
+    message.hdr = hdr_;
+    append_submessage(message, data_);
+    RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", hdr_.guidPrefix, true, message);
+  }
+
   send(SEND_TO_LOCAL | SEND_TO_RELAY);
 }
 
@@ -2538,9 +2547,22 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
     return;
   }
 
+  if (DCPS::transport_debug.log_messages) {
+    RTPS::Message message;
+    message.hdr = hdr_;
+    append_submessage(message, data_);
+    RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", hdr_.guidPrefix, true, message);
+  }
+
   send(flags);
 }
 
+void
+Spdp::send_to_relay()
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  tport_->write_i(SpdpTransport::SEND_TO_RELAY);
+}
 
 void
 Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
@@ -2600,6 +2622,14 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
       ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write() - ")
       ACE_TEXT("failed to serialize headers for SPDP\n")));
     return;
+  }
+
+  if (DCPS::transport_debug.log_messages) {
+    RTPS::Message message;
+    message.hdr = hdr_;
+    append_submessage(message, info_dst);
+    append_submessage(message, data_);
+    RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", hdr_.guidPrefix, true, message);
   }
 
   send(flags);
@@ -2725,6 +2755,8 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
   }
 
   if ((buff_.size() >= 4) && ACE_OS::memcmp(buff_.rd_ptr(), "RTPS", 4) == 0) {
+    RTPS::Message message;
+
     DCPS::Serializer ser(&buff_, encoding_plain_native);
     Header header;
     if (!(ser >> header)) {
@@ -2732,6 +2764,10 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
                  ACE_TEXT("failed to deserialize RTPS header for SPDP\n")));
       return 0;
+    }
+
+    if (DCPS::transport_debug.log_messages) {
+      message.hdr = header;
     }
 
     while (buff_.length() > 3) {
@@ -2749,6 +2785,10 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
           return 0;
         }
         submessageLength = data.smHeader.submessageLength;
+
+        if (DCPS::transport_debug.log_messages) {
+          append_submessage(message, data);
+        }
 
         if (data.writerId != ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER) {
           // Not our message: this could be the same multicast group used
@@ -2785,6 +2825,21 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
         outer_->data_received(data, plist, remote);
         break;
       }
+      case INFO_DST: {
+        if (DCPS::transport_debug.log_messages) {
+          InfoDestinationSubmessage sm;
+          if (!(ser >> sm)) {
+            ACE_ERROR((LM_ERROR,
+                       ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
+                       ACE_TEXT("failed to deserialize INFO_DST header for SPDP\n")));
+            return 0;
+          }
+          submessageLength = sm.smHeader.submessageLength;
+          append_submessage(message, sm);
+          break;
+        }
+      }
+      // fallthrough
       default:
         SubmessageHeader smHeader;
         if (!(ser >> smHeader)) {
@@ -2811,6 +2866,11 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
         break; // submessageLength of 0 indicates the last submessage
       }
     }
+
+    if (DCPS::transport_debug.log_messages && !DCPS::GuidPrefixEqual()(hdr_.guidPrefix, header.guidPrefix)) {
+      RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", hdr_.guidPrefix, false, message);
+    }
+
   } else if ((buff_.size() >= 4) && (ACE_OS::memcmp(buff_.rd_ptr(), "RTPX", 4) == 0)) {
     // Handle some RTI protocol multicast to the same address
     return 0; // Ignore

@@ -201,6 +201,7 @@ public:
   );
 
   DCPS::RcHandle<RtpsDiscoveryConfig> config() const { return config_; }
+  void send_to_relay();
 
 protected:
   Sedp& endpoint_manager() { return *sedp_; }
