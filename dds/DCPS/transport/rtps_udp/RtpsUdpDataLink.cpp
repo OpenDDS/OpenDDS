@@ -3915,9 +3915,6 @@ RtpsUdpDataLink::RtpsWriter::RtpsWriter(RcHandle<RtpsUdpDataLink> link, const Re
 
 RtpsUdpDataLink::RtpsWriter::~RtpsWriter()
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  ACE_GUARD(ACE_Thread_Mutex, g2, elems_not_acked_mutex_);
-
   if (!elems_not_acked_.empty()) {
     ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: RtpsWriter::~RtpsWriter - ")
       ACE_TEXT("deleting with %d elements left not fully acknowledged\n"),
