@@ -1889,7 +1889,6 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
   "  jclass clazz = jni->GetObjectClass (source);\n" <<
   "  jmethodID mid_disc = jni->GetMethodID (clazz, \"discriminator\", \"()"
   << disc_sig << "\");\n"
-  "  jni->DeleteLocalRef(clazz);\n"
   "  " << disc_ty << " disc = jni->Call" << disc_meth << "Method (source, "
   "mid_disc);\n" <<
   extra_enum1 <<
@@ -1897,6 +1896,7 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
   "    {\n" <<
   branchesToCxx <<
   "    }\n"
+  "  jni->DeleteLocalRef(clazz);\n"
   "  target._d (" << extra_enum2 << ");\n" //in case the Java side had one of
   "}\n\n" <<                               //the "alternate" labels for 1 br.
   c.sigToJava << "\n"
