@@ -124,6 +124,82 @@ However, there are cases when a test stand-in is justified:
 
 The use of a mock assumes that an interface exists for the stand-in.
 
+***********************
+Writing a New Unit Test
+***********************
+
+1. Add the test to ``tests/unit-tests/dds/DCPS`` or the folder under it.
+
+2. Name the test after the code it is meant to cover.
+   For example, the ``AccessControlBuiltInImpl`` unit test covers the ``AccessControlBuiltInImpl.cpp`` file.
+
+3. Add the test to the MPC file in its location.
+
+4. If the test is a safety test, you will need to add it to the ``run_test_safety.pl`` located in ``tests/unit-tests/dds/DCPS``.
+
+5. Add the test to the ``.gitignore`` in its directory.
+
+6. Add the path to the test in either ``tests/dcps_tests.lst`` or ``tests/security/security_tests.lst``.
+
+
+***********
+Using GTest
+***********
+
+To use GTest in a test, add ``#include <gtest/gtest.h>``.
+Then add the ``googletest`` dependency to the MPC project for your test.
+This provides you with many helpful tools to simplify the writing of tests.
+When creating your test, the first step is to create a normal ``int main`` function.
+Inside the function we need to initialize google tests, then we set the return value as ``RUN_ALL_TESTS();``.
+
+.. code-block:: cpp
+
+  int main(int argc, char* argv[])
+  {
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+  }
+
+This return value will automatically run all test modules and output a series of values corresponding to each test.
+Speaking of test modules, you can create an individual test module with the following declaration
+
+.. code-block:: cpp
+
+  TEST(TestModule, TestSubmodule)
+  {
+  }
+
+Each of these tests contain evaluators.
+The most common evaluators are ``EXPECT_EQ``, ``EXPECT_TRUE``, ``EXPECT_FALSE``.
+
+.. code-block:: cpp
+
+  EXPECT_EQ(X, 2)
+  EXPECT_EQ(Y, 3)
+
+This will mark the test as a failure if either ``X`` does not equal 2, or ``Y`` does not equal 3.
+
+``EXPECT_TRUE`` and ``EXPECT_FALSE`` are equivalence checks to a boolean value.
+In the following examples we pass ``X`` to a function ``is_even`` that returns true if the passed value is an even number and returns false otherwise.
+
+.. code-block:: cpp
+
+  EXPECT_TRUE(is_even(X));
+
+This will mark the test as a failure if ``is_even(X)`` returns false.
+
+.. code-block:: cpp
+
+  EXPECT_FALSE(is_even(X));
+
+This will mark the test as a failure if ``is_even(X)`` returns true.
+
+There are more EXPECT_* and ASSERT_*, but these are the most common ones.
+The difference between EXPECT and ASSERT is that an ASSERT will cease the test upon failure, whereas EXPECTS continue to run.
+For example if you have multiple ``EXPECT_EQ``, they will all always run.
+
+For more information, visit the google test documentation: https://github.com/google/googletest/blob/master/docs/primer.md.
+
 **********
 Final Word
 **********

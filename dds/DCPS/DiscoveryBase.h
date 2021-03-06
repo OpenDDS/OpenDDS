@@ -1216,6 +1216,10 @@ namespace OpenDDS {
           return; // Possible and ok, since lock is released
         }
 
+        if (!writer_local && !reader_local) {
+          return;
+        }
+
         MatchingData md;
 
         // if the type object is not in cache, send RPC request
@@ -1254,13 +1258,6 @@ namespace OpenDDS {
                 reader_type_info, md, MatchingPair(writer, reader), reader, is_discovery_protected);
               return;
             }
-          }
-
-          MatchingDataIter md_it = matching_data_buffer_.find(MatchingPair(writer, reader));
-          if (md_it != matching_data_buffer_.end()) {
-            md_it->second = md;
-          } else {
-            matching_data_buffer_.insert(std::make_pair(MatchingPair(writer, reader), md));
           }
         }
 

@@ -95,6 +95,8 @@ private:
   virtual void deliver_sample(ReceivedDataSample& sample,
                               const ACE_INET_Addr& remote_address);
 
+  virtual void finish_message();
+
   void deliver_sample_i(ReceivedDataSample& sample,
                         const RTPS::Submessage& submessage);
 
@@ -159,6 +161,7 @@ private:
 
   MessageReceiver receiver_;
   ACE_INET_Addr remote_address_;
+  RTPS::Message message_;
 
 #ifdef OPENDDS_SECURITY
   RTPS::SecuritySubmessage secure_prefix_;

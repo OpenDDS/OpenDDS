@@ -119,13 +119,6 @@ project(*MultiTask): dcpsexe, dcps_test {
   }
 }
 
-project(*DataSampleHeader): dcps_test, googletest {
-  exename = *
-  Source_Files {
-    DataSampleHeader.cpp
-  }
-}
-
 project(*NetworkConfig): dcps_test, googletest {
   exename = *
   Source_Files {

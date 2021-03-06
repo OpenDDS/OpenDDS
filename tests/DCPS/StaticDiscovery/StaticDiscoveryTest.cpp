@@ -104,13 +104,11 @@ public:
 
     if (reliable_) {
       qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-      qos.reliability.max_blocking_time.sec = 5;
-      qos.reliability.max_blocking_time.nanosec = 0;
+      qos.reliability.max_blocking_time.sec = DDS::DURATION_INFINITE_SEC;
+      qos.reliability.max_blocking_time.nanosec = DDS::DURATION_INFINITE_NSEC;
     } else {
       qos.reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
     }
-    qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
-    qos.history.depth = MSGS_PER_WRITER;
 
     // Create DataWriter
     DDS::DataWriter_var writer =
@@ -156,6 +154,9 @@ public:
 
     DDS::Duration_t duration = {DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};
     writer->wait_for_acknowledgments(duration);
+
+    // Block until Subscriber is gone
+    Utils::wait_match(writer, 0);
 
     publisher->delete_datawriter(writer);
 
@@ -311,7 +312,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
          pos != limit;
          ++pos) {
       pos->resize(6);
-      DDS::DataReaderListener_var listener(new DataReaderListenerImpl(*pos, writers, total_writers, n_msgs, reader_done_callback, subscriber.in(), check_bits));
+      DDS::DataReaderListener_var listener(new DataReaderListenerImpl(*pos, reliable, true, writers, total_writers, n_msgs, reader_done_callback, subscriber.in(), check_bits));
 
 #ifndef DDS_HAS_MINIMUM_BIT
       DataReaderListenerImpl* listener_servant =
@@ -343,8 +344,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       qos.user_data.value[1] = fromhex(*pos, 1);
       qos.user_data.value[2] = fromhex(*pos, 2);
       qos.reliability.kind = reliable ? DDS::RELIABLE_RELIABILITY_QOS : DDS::BEST_EFFORT_RELIABILITY_QOS;
-      qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
-      qos.history.depth = MSGS_PER_WRITER;
 
 
       DDS::DataReader_var reader =
@@ -383,11 +382,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         readers_done_cond.wait();
     }
 
-    task.wait();
-
-    for (size_t i = 0; i < datareaders.size(); ++i) {
-      Utils::wait_match(datareaders[i], 0);
+    for (std::vector<DDS::DataReader_var>::iterator it = datareaders.begin(), limit = datareaders.end(); it != limit; ++it) {
+      subscriber->delete_datareader(*it);
     }
+    datareaders.clear();
+
+    task.wait();
 
     if (built_in_read_errors) {
       ACE_ERROR_RETURN((LM_ERROR,

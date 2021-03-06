@@ -946,7 +946,24 @@ RtpsDiscovery::get_ipv6_sedp_port(DDS::DomainId_t domain,
 void
 RtpsDiscovery::spdp_rtps_relay_address(const ACE_INET_Addr& address)
 {
+  const ACE_INET_Addr prev = config_->spdp_rtps_relay_address();
+  if (prev == address) {
+    return;
+  }
+
   config_->spdp_rtps_relay_address(address);
+
+  if (address == ACE_INET_Addr()) {
+    return;
+  }
+
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
+       dom_pos != dom_limit; ++dom_pos) {
+    for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
+      part_pos->second->send_to_relay();
+    }
+  }
 }
 
 void
