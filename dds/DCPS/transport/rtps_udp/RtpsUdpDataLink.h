@@ -295,9 +295,9 @@ private:
     DisjointSequence requests_;
     OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumberSet) requested_frags_;
     SequenceNumber cur_cumulative_ack_;
-    bool expecting_ack_;
     const bool durable_;
     const ACE_CDR::ULong participant_flags_;
+    ACE_CDR::Long required_acknack_count_;
     OPENDDS_MAP(SequenceNumber, TransportQueueElement*) durable_data_;
     MonotonicTimePoint durable_timestamp_;
 #ifdef OPENDDS_SECURITY
@@ -310,9 +310,9 @@ private:
       , acknack_recvd_count_(0)
       , nackfrag_recvd_count_(0)
       , cur_cumulative_ack_(SequenceNumber::ZERO()) // Starting at zero instead of unknown makes the logic cleaner.
-      , expecting_ack_(false)
       , durable_(durable)
       , participant_flags_(participant_flags)
+      , required_acknack_count_(0)
 #ifdef OPENDDS_SECURITY
       , max_pvs_sn_(SequenceNumber::ZERO())
 #endif
@@ -390,20 +390,16 @@ private:
 
     typedef PmfSporadicTask<RtpsWriter> Sporadic;
 
-    size_t expected_acks_;
-    MonotonicTimePoint last_heartbeat_;
-    MonotonicTimePoint last_ack_;
-    TimeDuration heartbeat_period_;
     Sporadic heartbeat_;
+    Sporadic nack_response_;
 
     void send_heartbeats(const DCPS::MonotonicTimePoint& now);
-
+    void send_nack_responses(const DCPS::MonotonicTimePoint& now);
     void add_gap_submsg_i(RTPS::SubmessageSeq& msg,
                           SequenceNumber gap_start);
     void end_historic_samples_i(const DataSampleHeader& header,
                                 ACE_Message_Block* body);
     void send_heartbeats_manual_i(MetaSubmessageVec& meta_submessages);
-
     void gather_gaps_i(const ReaderInfo_rch& reader,
                        const DisjointSequence& gaps,
                        MetaSubmessageVec& meta_submessages);
@@ -475,7 +471,7 @@ private:
                           const RepoId& src,
                           MetaSubmessageVec& meta_submessages);
     void process_acked_by_all();
-    void send_and_gather_nack_replies_i(MetaSubmessageVec& meta_submessages);
+    void gather_nack_replies_i(MetaSubmessageVec& meta_submessages);
     void gather_heartbeats_i(OPENDDS_VECTOR(TransportQueueElement*)& pendingCallbacks,
                              MetaSubmessageVec& meta_submessages);
     void gather_heartbeats(const RepoIdSet& additional_guids,
