@@ -45,6 +45,7 @@ void set_base_values_union(Type& value, UnionDisc disc)
     value.long_long_field(0x7fffffffffffffff);
     break;
   default:
+    value._d(disc);
     break;
   }
 }
@@ -1148,6 +1149,19 @@ const unsigned char MutableUnionExpectedXcdr2LongBE::expected[] = {
 };
 const unsigned MutableUnionExpectedXcdr2LongBE::layout[] = {4,4,4,4,4};
 
+struct MutableUnionExpectedXcdr2AdditionalBE {
+  STREAM_DATA
+};
+
+const unsigned char MutableUnionExpectedXcdr2AdditionalBE::expected[] = {
+  // Delimiter
+  0x00, 0x00, 0x00, 0x08, // +4 = 4
+  // Discriminator
+  0x20, 0x00, 0x00, 0x00, // +4 EMHEADER1 = 8
+  0x00, 0x00, 0x00, 0x04, // +4 value = 12
+};
+const unsigned MutableUnionExpectedXcdr2AdditionalBE::layout[] = {4,4,4};
+
 struct MutableUnionExpectedXcdr2OctetBE {
   STREAM_DATA
 };
@@ -1230,6 +1244,8 @@ TEST(MutableTests, FromMutableUnion)
     xcdr2, MutableUnionExpectedXcdr2ShortBE::expected, E_SHORT_FIELD);
   amalgam_serializer_test_union<MutableUnionWithExplicitIDs, ModifiedMutableUnion>(
     xcdr2, MutableUnionExpectedXcdr2LongBE::expected, E_LONG_FIELD);
+  serializer_test_union<MutableUnionWithExplicitIDs>(
+    xcdr2, MutableUnionExpectedXcdr2AdditionalBE::expected, E_ADDITIONAL_FIELD);
 }
 
 TEST(MutableTests, FromMutableUnionLE)
@@ -1238,6 +1254,8 @@ TEST(MutableTests, FromMutableUnionLE)
                            MutableUnionExpectedXcdr2ShortBE>(E_SHORT_FIELD);
   test_little_endian_union<MutableUnionWithExplicitIDs, ModifiedMutableUnion,
                            MutableUnionExpectedXcdr2LongBE>(E_LONG_FIELD);
+  test_little_endian_union<MutableUnionWithExplicitIDs,
+                           MutableUnionExpectedXcdr2AdditionalBE>(E_ADDITIONAL_FIELD);
 }
 
 // ---------- ModifiedMutableUnion
