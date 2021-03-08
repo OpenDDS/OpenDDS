@@ -84,9 +84,9 @@ Writer::svc ()
       {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t) ERROR: Writer::svc, ")
-                    ACE_TEXT ("%dth write() returned %d.\n"),
+                    ACE_TEXT("%dth write() returned %d.\n"),
                     i,
-                    -1));
+                    ret));
       }
 
       // Sleep for half a second between writes to allow some deadline
@@ -102,7 +102,7 @@ Writer::svc ()
       {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t) ERROR: Writer::svc, ")
-                    ACE_TEXT ("wait_for_acknowledgments returned %d.\n"),
+                    ACE_TEXT("wait_for_acknowledgments returned %d.\n"),
                     ret));
       }
   }

@@ -78,7 +78,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
              false,     // is_loopback
              false)     // is_active
   , reactor_task_(reactor_task)
-  , job_queue_(DCPS::make_rch<DCPS::JobQueue>(reactor_task->get_reactor()))
+  , job_queue_(make_rch<JobQueue>(reactor_task->get_reactor()))
   , multi_buff_(this, config.nak_depth_)
   , best_effort_heartbeat_count_(0)
   , heartbeat_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::send_heartbeats)
@@ -296,7 +296,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
   }
 
   if (cfg.use_multicast_) {
-    if (!OpenDDS::DCPS::set_socket_multicast_ttl(unicast_socket_, cfg.ttl_)) {
+    if (!set_socket_multicast_ttl(unicast_socket_, cfg.ttl_)) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
                         ACE_TEXT("RtpsUdpDataLink::open: ")
@@ -305,7 +305,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
                        false);
     }
 #ifdef ACE_HAS_IPV6
-    if (!OpenDDS::DCPS::set_socket_multicast_ttl(ipv6_unicast_socket_, cfg.ttl_)) {
+    if (!set_socket_multicast_ttl(ipv6_unicast_socket_, cfg.ttl_)) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
                         ACE_TEXT("RtpsUdpDataLink::open: ")
@@ -397,7 +397,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
 }
 
 void
-RtpsUdpDataLink::add_address(const DCPS::NetworkInterface& nic,
+RtpsUdpDataLink::add_address(const NetworkInterface& nic,
                              const ACE_INET_Addr&)
 {
   job_queue_->enqueue(make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,
@@ -405,7 +405,7 @@ RtpsUdpDataLink::add_address(const DCPS::NetworkInterface& nic,
 }
 
 void
-RtpsUdpDataLink::remove_address(const DCPS::NetworkInterface& nic,
+RtpsUdpDataLink::remove_address(const NetworkInterface& nic,
                                 const ACE_INET_Addr&)
 {
   job_queue_->enqueue(make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,
@@ -413,7 +413,7 @@ RtpsUdpDataLink::remove_address(const DCPS::NetworkInterface& nic,
 }
 
 void
-RtpsUdpDataLink::join_multicast_group(const DCPS::NetworkInterface& nic,
+RtpsUdpDataLink::join_multicast_group(const NetworkInterface& nic,
                                       bool all_interfaces)
 {
   network_change();
@@ -427,7 +427,7 @@ RtpsUdpDataLink::join_multicast_group(const DCPS::NetworkInterface& nic,
   }
 
   if (joined_interfaces_.count(nic.name()) == 0 && nic.has_ipv4()) {
-    if (DCPS::DCPS_debug_level > 3) {
+    if (DCPS_debug_level > 3) {
       ACE_TCHAR buff[256];
       config().multicast_group_address().addr_to_string(buff, 256);
       ACE_DEBUG((LM_INFO,
@@ -454,7 +454,7 @@ RtpsUdpDataLink::join_multicast_group(const DCPS::NetworkInterface& nic,
 
 #ifdef ACE_HAS_IPV6
   if (ipv6_joined_interfaces_.count(nic.name()) == 0 && nic.has_ipv6()) {
-    if (DCPS::DCPS_debug_level > 3) {
+    if (DCPS_debug_level > 3) {
       ACE_TCHAR buff[256];
       config().ipv6_multicast_group_address().addr_to_string(buff, 256);
 
@@ -483,10 +483,10 @@ RtpsUdpDataLink::join_multicast_group(const DCPS::NetworkInterface& nic,
 }
 
 void
-RtpsUdpDataLink::leave_multicast_group(const DCPS::NetworkInterface& nic)
+RtpsUdpDataLink::leave_multicast_group(const NetworkInterface& nic)
 {
   if (joined_interfaces_.count(nic.name()) != 0 && !nic.has_ipv4()) {
-    if (DCPS::DCPS_debug_level > 3) {
+    if (DCPS_debug_level > 3) {
       ACE_TCHAR buff[256];
       config().multicast_group_address().addr_to_string(buff, 256);
       ACE_DEBUG((LM_INFO,
@@ -507,7 +507,7 @@ RtpsUdpDataLink::leave_multicast_group(const DCPS::NetworkInterface& nic)
 
 #ifdef ACE_HAS_IPV6
   if (ipv6_joined_interfaces_.count(nic.name()) != 0 && !nic.has_ipv6()) {
-    if (DCPS::DCPS_debug_level > 3) {
+    if (DCPS_debug_level > 3) {
       ACE_TCHAR buff[256];
       config().multicast_group_address().addr_to_string(buff, 256);
       ACE_DEBUG((LM_INFO,
@@ -547,7 +547,7 @@ RtpsUdpDataLink::add_locators(const RepoId& remote_id,
   ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
   locators_[remote_id] = RemoteInfo(narrow_address, wide_address, requires_inline_qos);
 
-  if (DCPS::DCPS_debug_level > 3) {
+  if (DCPS_debug_level > 3) {
     ACE_TCHAR narrow_addr_buff[256] = {};
     narrow_address.addr_to_string(narrow_addr_buff, 256);
     ACE_TCHAR wide_addr_buff[256] = {};
@@ -620,7 +620,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
       // Insert count if not already there.
       RtpsWriterMap::iterator rw = writers_.find(local_id);
       if (rw == writers_.end()) {
-        RtpsUdpDataLink_rch link(this, OpenDDS::DCPS::inc_count());
+        RtpsUdpDataLink_rch link(this, inc_count());
         CORBA::Long hb_start = 0;
         CountMapType::iterator hbc_it = heartbeat_counts_.find(local_id.entityId);
         if (hbc_it != heartbeat_counts_.end()) {
@@ -649,7 +649,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
       RtpsReaderMap::iterator rr = readers_.find(local_id);
       if (rr == readers_.end()) {
         pending_reliable_readers_.erase(local_id);
-        RtpsUdpDataLink_rch link(this, OpenDDS::DCPS::inc_count());
+        RtpsUdpDataLink_rch link(this, inc_count());
         RtpsReader_rch reader = make_rch<RtpsReader>(link, local_id);
         rr = readers_.insert(RtpsReaderMap::value_type(local_id, reader)).first;
       }
@@ -678,7 +678,7 @@ void
 RtpsUdpDataLink::register_for_reader(const RepoId& writerid,
                                      const RepoId& readerid,
                                      const ACE_INET_Addr& address,
-                                     OpenDDS::DCPS::DiscoveryListener* listener)
+                                     DiscoveryListener* listener)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_);
   const bool enableheartbeat = interesting_readers_.empty();
@@ -716,7 +716,7 @@ void
 RtpsUdpDataLink::register_for_writer(const RepoId& readerid,
                                      const RepoId& writerid,
                                      const ACE_INET_Addr& address,
-                                     OpenDDS::DCPS::DiscoveryListener* listener)
+                                     DiscoveryListener* listener)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
   bool enableheartbeatchecker = interesting_writers_.empty();
@@ -1340,7 +1340,7 @@ bool RtpsUdpDataLink::requires_inline_qos(const GUIDSeq_var& peers)
 bool RtpsUdpDataLink::force_inline_qos_ = false;
 
 void
-RtpsUdpDataLink::RtpsWriter::send_heartbeats(const DCPS::MonotonicTimePoint& /*now*/)
+RtpsUdpDataLink::RtpsWriter::send_heartbeats(const MonotonicTimePoint& /*now*/)
 {
   OPENDDS_VECTOR(TransportQueueElement*) pendingCallbacks;
 
@@ -1368,7 +1368,7 @@ RtpsUdpDataLink::RtpsWriter::send_heartbeats(const DCPS::MonotonicTimePoint& /*n
 }
 
 void
-RtpsUdpDataLink::RtpsWriter::send_nack_responses(const DCPS::MonotonicTimePoint& /*now*/)
+RtpsUdpDataLink::RtpsWriter::send_nack_responses(const MonotonicTimePoint& /*now*/)
 {
   RtpsUdpDataLink_rch link = link_.lock();
   if (!link) {
@@ -1985,7 +1985,7 @@ RtpsUdpDataLink::RtpsReader::should_nack_fragments(const RcHandle<RtpsUdpDataLin
 }
 
 void
-RtpsUdpDataLink::RtpsReader::send_preassociation_acknacks(const DCPS::MonotonicTimePoint& /*now*/)
+RtpsUdpDataLink::RtpsReader::send_preassociation_acknacks(const MonotonicTimePoint& /*now*/)
 {
   RtpsUdpDataLink_rch link = link_.lock();
   if (!link) {
@@ -2510,7 +2510,7 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVecVec& meta_submessa
       }
       ser << res.sm_;
       if (transport_debug.log_messages) {
-        DCPS::push_back(rtps_message.submessages, res.sm_);
+        push_back(rtps_message.submessages, res.sm_);
       }
       prev_dst = dst;
     }
@@ -3228,7 +3228,7 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
     for (OPENDDS_VECTOR(SequenceRange)::const_iterator pos = ranges.begin(), limit = ranges.end();
          pos != limit; ++pos) {
       if (Transport_debug_level > 5) {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies: "
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i: "
                    "resend data %q-%q\n", pos->first.getValue(),
                    pos->second.getValue()));
       }
@@ -3245,12 +3245,12 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
   if (!consolidated_gaps.empty()) {
     if (Transport_debug_level > 5) {
       ACE_DEBUG((LM_DEBUG,
-        "(%P|%t) RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies: GAPs:\n"));
+        "(%P|%t) RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i: GAPs:\n"));
       consolidated_gaps.dump();
     }
     gather_gaps_i(ReaderInfo_rch(), consolidated_gaps, meta_submessages);
   } else if (Transport_debug_level > 5) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::RtpsWriter::send_and_gather_nack_replies: "
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i: "
       "no GAPs to send\n"));
   }
 
@@ -3576,7 +3576,7 @@ bool RtpsUdpDataLink::include_fragment(const TransportQueueElement& element,
 }
 
 void
-RtpsUdpDataLink::send_heartbeats(const DCPS::MonotonicTimePoint& now)
+RtpsUdpDataLink::send_heartbeats(const MonotonicTimePoint& now)
 {
   OPENDDS_VECTOR(CallbackType) readerDoesNotExistCallbacks;
 
@@ -3808,7 +3808,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(const RepoIdSet& additional_guids
 }
 
 void
-RtpsUdpDataLink::check_heartbeats(const DCPS::MonotonicTimePoint& now)
+RtpsUdpDataLink::check_heartbeats(const MonotonicTimePoint& now)
 {
   OPENDDS_VECTOR(CallbackType) writerDoesNotExistCallbacks;
 

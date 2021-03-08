@@ -156,7 +156,7 @@ public:
   void register_for_reader(const RepoId& writerid,
                            const RepoId& readerid,
                            const ACE_INET_Addr& address,
-                           OpenDDS::DCPS::DiscoveryListener* listener);
+                           DiscoveryListener* listener);
 
   void unregister_for_reader(const RepoId& writerid,
                              const RepoId& readerid);
@@ -164,7 +164,7 @@ public:
   void register_for_writer(const RepoId& readerid,
                            const RepoId& writerid,
                            const ACE_INET_Addr& address,
-                           OpenDDS::DCPS::DiscoveryListener* listener);
+                           DiscoveryListener* listener);
 
   void unregister_for_writer(const RepoId& readerid,
                              const RepoId& writerid);
@@ -194,12 +194,12 @@ public:
   void disable_response_queue();
 
 private:
-  void join_multicast_group(const DCPS::NetworkInterface& nic,
+  void join_multicast_group(const NetworkInterface& nic,
                             bool all_interfaces = false);
-  void leave_multicast_group(const DCPS::NetworkInterface& nic);
-  void add_address(const DCPS::NetworkInterface& interface,
+  void leave_multicast_group(const NetworkInterface& nic);
+  void add_address(const NetworkInterface& interface,
                    const ACE_INET_Addr& address);
-  void remove_address(const DCPS::NetworkInterface& interface,
+  void remove_address(const NetworkInterface& interface,
                       const ACE_INET_Addr& address);
 
   // Internal non-locking versions of the above
@@ -223,7 +223,7 @@ private:
   typedef OPENDDS_MAP_CMP(RepoId, OPENDDS_VECTOR(RepoId),GUID_tKeyLessThan) DestToEntityMap;
 
   ReactorTask_rch reactor_task_;
-  RcHandle<DCPS::JobQueue> job_queue_;
+  RcHandle<JobQueue> job_queue_;
 
   RtpsUdpSendStrategy* send_strategy();
   RtpsUdpReceiveStrategy* receive_strategy();
@@ -393,8 +393,8 @@ private:
     Sporadic heartbeat_;
     Sporadic nack_response_;
 
-    void send_heartbeats(const DCPS::MonotonicTimePoint& now);
-    void send_nack_responses(const DCPS::MonotonicTimePoint& now);
+    void send_heartbeats(const MonotonicTimePoint& now);
+    void send_nack_responses(const MonotonicTimePoint& now);
     void add_gap_submsg_i(RTPS::SubmessageSeq& msg,
                           SequenceNumber gap_start);
     void end_historic_samples_i(const DataSampleHeader& header,
@@ -555,7 +555,7 @@ private:
     const RepoId& id() const { return id_; }
 
   private:
-    void send_preassociation_acknacks(const DCPS::MonotonicTimePoint& now);
+    void send_preassociation_acknacks(const MonotonicTimePoint& now);
     void gather_preassociation_acknack_i(MetaSubmessageVec& meta_submessages,
                                          const WriterInfo_rch& writer);
 
@@ -715,8 +715,8 @@ private:
     queue_or_send_submessages(meta_submessages);
   }
 
-  void send_heartbeats(const DCPS::MonotonicTimePoint& now);
-  void check_heartbeats(const DCPS::MonotonicTimePoint& now);
+  void send_heartbeats(const MonotonicTimePoint& now);
+  void check_heartbeats(const MonotonicTimePoint& now);
 
   CORBA::Long best_effort_heartbeat_count_;
 
@@ -748,7 +748,7 @@ private:
       , status(DOES_NOT_EXIST)
     { }
   };
-  typedef OPENDDS_MULTIMAP_CMP(RepoId, InterestingRemote, DCPS::GUID_tKeyLessThan) InterestingRemoteMapType;
+  typedef OPENDDS_MULTIMAP_CMP(RepoId, InterestingRemote, GUID_tKeyLessThan) InterestingRemoteMapType;
   InterestingRemoteMapType interesting_readers_;
   InterestingRemoteMapType interesting_writers_;
 
@@ -763,7 +763,7 @@ private:
   void send_heartbeats_manual_i(const TransportSendControlElement* tsce,
                                 MetaSubmessageVec& meta_submessages);
 
-  typedef OPENDDS_MAP_CMP(EntityId_t, CORBA::Long, DCPS::EntityId_tKeyLessThan) CountMapType;
+  typedef OPENDDS_MAP_CMP(EntityId_t, CORBA::Long, EntityId_tKeyLessThan) CountMapType;
   CountMapType heartbeat_counts_;
 
   const size_t max_bundle_size_;
