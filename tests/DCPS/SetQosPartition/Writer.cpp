@@ -95,6 +95,16 @@ Writer::svc ()
       // deadline period.
       ACE_OS::sleep (ACE_Time_Value (0, 500000));
     }
+
+    DDS::Duration_t d = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+    ::DDS::ReturnCode_t const ret = writer_->wait_for_acknowledgments(d);
+    if (ret != DDS::RETCODE_OK)
+      {
+        ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) ERROR: Writer::svc, ")
+                    ACE_TEXT ("wait_for_acknowledgments returned %d.\n"),
+                    ret));
+      }
   }
   catch (CORBA::Exception& e)
   {

@@ -3953,6 +3953,7 @@ RtpsUdpDataLink::RtpsWriter::~RtpsWriter()
   }
 
   heartbeat_.cancel_and_wait();
+  nack_response_.cancel_and_wait();
 }
 
 CORBA::Long RtpsUdpDataLink::RtpsWriter::inc_heartbeat_count()
