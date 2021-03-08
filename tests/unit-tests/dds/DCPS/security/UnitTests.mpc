@@ -1,0 +1,8 @@
+project(AccessControlBuiltInImpl): dcpsexe, dcps_test, opendds_security, googlemock {
+  requires += no_opendds_safety_profile
+  exename = AccessControlBuiltInImpl
+
+  Source_Files {
+    AccessControlBuiltInImpl.cpp
+  }
+}

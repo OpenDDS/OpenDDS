@@ -739,6 +739,10 @@ void generateCaseBody(
     } else { // anything else
       rhs = getWrapper("tmp", br, WD_INPUT);
     }
+
+    if (*statementPrefix) {
+      be_global->impl_ << statementPrefix;
+    }
     be_global->impl_ <<
       "    " << brType << " tmp;\n" << forany <<
       "    if (strm >> " << rhs << ") {\n"

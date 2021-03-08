@@ -119,6 +119,7 @@ void copyToCxx(JNIEnv *jni, CORBA::String_var &target, jobject source)
   JStringMgr jsm(jni, str);
   const char *c_str = jsm.c_str();
   target = c_str;
+
 }
 
 void copyToJava(JNIEnv *jni, jobject &target, const char *source, bool)
@@ -152,7 +153,10 @@ jobject currentThread(JNIEnv *jni)
   jclass cls = jni->FindClass("java/lang/Thread");
   jmethodID mid = jni->GetStaticMethodID(cls,
     "currentThread", "()Ljava/lang/Thread;");
-  return jni->CallStaticObjectMethod(cls, mid);
+
+  jobject thread = jni->CallStaticObjectMethod(cls, mid);
+  jni->DeleteLocalRef(cls);
+  return thread;
 }
 
 jobject getContextClassLoader(JNIEnv *jni)
@@ -161,7 +165,11 @@ jobject getContextClassLoader(JNIEnv *jni)
   jclass cls = jni->GetObjectClass(thread);
   jmethodID mid = jni->GetMethodID(cls,
     "getContextClassLoader", "()Ljava/lang/ClassLoader;");
-  return jni->CallObjectMethod(thread, mid);
+  jobject ctx = jni->CallObjectMethod(thread, mid);
+  jni->DeleteLocalRef(cls);
+  jni->DeleteLocalRef(thread);
+
+  return ctx;
 }
 
 void setContextClassLoader(JNIEnv *jni, jobject cl)
@@ -171,6 +179,9 @@ void setContextClassLoader(JNIEnv *jni, jobject cl)
   jmethodID mid = jni->GetMethodID(cls,
     "setContextClassLoader", "(Ljava/lang/ClassLoader;)V");
   jni->CallVoidMethod(thread, mid, cl);
+
+  jni->DeleteLocalRef(cls);
+  jni->DeleteLocalRef(thread);
 }
 
 jclass findClass(JNIEnv *jni, const char *desc)
@@ -182,8 +193,15 @@ jclass findClass(JNIEnv *jni, const char *desc)
   jclass cls = jni->GetObjectClass(cl);
   jmethodID mid = jni->GetMethodID(cls,
     "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
-  return reinterpret_cast<jclass>
+
+  jni->DeleteLocalRef(cls);
+
+  cls = reinterpret_cast<jclass>
          (jni->CallObjectMethod(cl, mid, binary_name(jni, desc)));
+
+  jni->DeleteLocalRef(cl);
+
+  return cls;
 }
 
 #define HOLDER_PRIMITIVE(JNI_T, JNIFN, SIG)                                   \
@@ -191,12 +209,14 @@ jclass findClass(JNIEnv *jni, const char *desc)
     jclass holderClazz = jni->GetObjectClass (holder);                        \
     jfieldID fid = jni->GetFieldID (holderClazz, "value", #SIG);              \
     jni->Set##JNIFN##Field (holder, fid, value);                              \
+    jni->DeleteLocalRef(holderClazz);                                         \
   }                                                                           \
   void holderize (JNIEnv *jni, jobject holder, JNI_T##Array value,            \
                   const char *) {                                             \
     jclass holderClazz = jni->GetObjectClass (holder);                        \
     jfieldID fid = jni->GetFieldID (holderClazz, "value", "[" #SIG);          \
     jni->SetObjectField (holder, fid, value);                                 \
+    jni->DeleteLocalRef(holderClazz);                                         \
   }
 HOLDER_PRIMITIVE(jboolean, Boolean, Z)
 HOLDER_PRIMITIVE(jchar, Char, C)
@@ -212,6 +232,7 @@ void holderize(JNIEnv *jni, jobject holder, jobject value, const char *sig)
   jclass holderClazz = jni->GetObjectClass(holder);
   jfieldID fid = jni->GetFieldID(holderClazz, "value", sig);
   jni->SetObjectField(holder, fid, value);
+  jni->DeleteLocalRef(holderClazz);
 }
 
 #define DEHOLDER_PRIMITIVE(JNI_T, JNIFN, SIG)                                 \
@@ -220,6 +241,7 @@ void holderize(JNIEnv *jni, jobject holder, jobject value, const char *sig)
   {                                                                           \
     jclass holderClazz = jni->GetObjectClass(holder);                         \
     jfieldID fid = jni->GetFieldID(holderClazz, "value", #SIG);               \
+    jni->DeleteLocalRef(holderClazz);                                         \
     return jni->Get##JNIFN##Field(holder, fid);                               \
   }                                                                           \
   template <>                                                                 \
@@ -227,6 +249,7 @@ void holderize(JNIEnv *jni, jobject holder, jobject value, const char *sig)
   {                                                                           \
     jclass holderClazz = jni->GetObjectClass(holder);                         \
     jfieldID fid = jni->GetFieldID(holderClazz, "value", "[" #SIG);           \
+    jni->DeleteLocalRef(holderClazz);                                         \
     return static_cast<JNI_T##Array>(jni->GetObjectField (holder, fid));      \
   }
 DEHOLDER_PRIMITIVE(jboolean, Boolean, Z)
@@ -243,6 +266,7 @@ jobject deholderize(JNIEnv *jni, jobject holder, const char *sig)
 {
   jclass holderClazz = jni->GetObjectClass(holder);
   jfieldID fid = jni->GetFieldID(holderClazz, "value", sig);
+  jni->DeleteLocalRef(holderClazz);
   return jni->GetObjectField(holder, fid);
 }
 
@@ -251,6 +275,7 @@ jobjectArray deholderize(JNIEnv *jni, jobject holder, const char *sig)
 {
   jclass holderClazz = jni->GetObjectClass(holder);
   jfieldID fid = jni->GetFieldID(holderClazz, "value", sig);
+  jni->DeleteLocalRef(holderClazz);
   return static_cast<jobjectArray>(jni->GetObjectField(holder, fid));
 }
 
