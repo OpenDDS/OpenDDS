@@ -143,7 +143,7 @@ void DataReaderListenerImpl::on_subscription_matched(
   // For the reverse lease test, the DataReader will rediscover the DataWriter.
   // The DataWriter may have some unacknowledged samples that it will send again.
   // Reset the count to avoid interpretting these as duplicates.
-  if (status.current_count == 0) {
+  if (status.current_count_change > 0) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_subscription_matched() - resetting counts\n")));
     counts_.clear();
   }
