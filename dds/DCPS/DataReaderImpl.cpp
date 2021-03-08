@@ -1305,7 +1305,7 @@ DataReaderImpl::enable()
             type_info);
     if (subscription_id_ == GUID_UNKNOWN) {
       if (DCPS_debug_level >= 1) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataReaderImpl::enable: "
+        ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: DataReaderImpl::enable: "
           "add_subscription failed\n"));
       }
       return DDS::RETCODE_ERROR;

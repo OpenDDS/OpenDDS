@@ -1487,7 +1487,7 @@ DataWriterImpl::enable()
                            type_info);
   if (publication_id_ == GUID_UNKNOWN) {
     if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::enable: "
+      ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: DataWriterImpl::enable: "
         "add_publication failed\n"));
     }
     data_container_->shutdown_ = true;
