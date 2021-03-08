@@ -4024,149 +4024,168 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
-  # ACE_TAO_u18_stat_qt_ws_sec:
+  ACE_TAO_c_u18_stat_qt_ws_sec:
+
+    runs-on: ubuntu-18.04
+
+    steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v2.3.4
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2.3.4
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: OpenDDS/ACE_TAO
+    - name: get ACE_TAO commit
+      shell: bash
+      run: |
+        cd OpenDDS/ACE_TAO
+        export ACE_COMMIT=$(git rev-parse HEAD)
+        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
+    - name: Cache Artifact
+      id: cache-artifact
+      uses: actions/cache@v2.1.4
+      with:
+        path: ${{ github.job }}.tar.xz
+        key: ${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
+    - name: install xerces
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      run: sudo apt-get -y install libxerces-c-dev
+    - name: checkout MPC
+      uses: actions/checkout@v2.3.4
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: configure OpenDDS
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      run: |
+        cd OpenDDS
+        ./configure --static --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+    - name: build ACE and TAO
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd ACE_TAO/ACE
+        make -j4
+        cd ../TAO
+        make -j4
+    - name: create ACE_TAO tar.xz artifact
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        cd OpenDDS/ACE_TAO
+        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
+        find . -iname "*\.o" | xargs rm
+        tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
+        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
+        xz -3 ../../${{ github.job }}.tar
+    - name: upload ACE_TAO artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_artifact
+        path: ${{ github.job }}.tar.xz
+
+  build_c_u18_stat_qt_ws_sec:
+
+    runs-on: ubuntu-18.04
+
+    needs: ACE_TAO_c_u18_stat_qt_ws_sec
+
+    steps:
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - name: install wireshark
+      run: sudo apt-get -y install wireshark-dev
+    - name: install qt
+      run: sudo apt-get -y install qtbase5-dev
+    - name: checkout MPC
+      uses: actions/checkout@v2.3.4
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2.3.4
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: ACE_TAO
+    - name: download ACE_TAO artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: ACE_TAO_c_u18_stat_qt_ws_sec_artifact
+        path: ACE_TAO
+    - name: extract ACE_TAO artifact
+      shell: bash
+      run: |
+        cd ACE_TAO
+        tar xvfJ ACE_TAO_c_u18_stat_qt_ws_sec.tar.xz
+    - name: checkout OpenDDS
+      uses: actions/checkout@v2.3.4
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: configure OpenDDS
+      run: |
+        cd OpenDDS
+        ./configure --static --qt --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+    - name: check build configuration
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        tools/scripts/show_build_config.pl
+    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - name: build OpenDDS
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        make -j4
+    - name: set up Dev Guide tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        mwc.pl -type gnuace -workers 4 $DDS_ROOT/DevGuideExamples/DCPS/Messenger
+    - name: build Dev Guide tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        make -j4 dir=$DDS_ROOT/DevGuideExamples/DCPS/Messenger
+    - name: run Dev Guide tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd DevGuideExamples/DCPS/Messenger
+        perl run_test.pl
+    - name: create OpenDDS tar.xz artifact
+      shell: bash
+      run: |
+        cd OpenDDS
+        rm -rf ACE_TAO
+        find . -iname "*\.o" | xargs rm
+        tar cvf ../${{ github.job }}.tar setenv.sh
+        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
+        xz -3 ../${{ github.job }}.tar
+    - name: upload OpenDDS artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_artifact
+        path: ${{ github.job }}.tar.xz
+
+  # test_c_u18_stat_qt_ws_sec:
 
   #   runs-on: ubuntu-18.04
 
-  #   steps:
-  #   - name: checkout OpenDDS
-  #     uses: actions/checkout@v2.3.4
-  #     with:
-  #       path: OpenDDS
-  #       submodules: true
-  #   - name: checkout ACE_TAO
-  #     uses: actions/checkout@v2.3.4
-  #     with:
-  #       repository: DOCGroup/ACE_TAO
-  #       ref: ace6tao2
-  #       path: OpenDDS/ACE_TAO
-  #   - name: get ACE_TAO commit
-  #     shell: bash
-  #     run: |
-  #       cd OpenDDS/ACE_TAO
-  #       export ACE_COMMIT=$(git rev-parse HEAD)
-  #       echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-  #   - name: Cache Artifact
-  #     id: cache-artifact
-  #     uses: actions/cache@v2.1.4
-  #     with:
-  #       path: ${{ github.job }}.tar.xz
-  #       key: ${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
-  #   - name: install xerces
-  #     if: steps.cache-artifact.outputs.cache-hit != 'true'
-  #     run: sudo apt-get -y install libxerces-c-dev
-  #   - name: checkout MPC
-  #     uses: actions/checkout@v2.3.4
-  #     if: steps.cache-artifact.outputs.cache-hit != 'true'
-  #     with:
-  #       repository: DOCGroup/MPC
-  #       path: MPC
-  #   - name: configure OpenDDS
-  #     if: steps.cache-artifact.outputs.cache-hit != 'true'
-  #     run: |
-  #       cd OpenDDS
-  #       ./configure --static --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
-  #   - name: build ACE and TAO
-  #     if: steps.cache-artifact.outputs.cache-hit != 'true'
-  #     run: |
-  #       cd OpenDDS
-  #       . setenv.sh
-  #       cd ACE_TAO/ACE
-  #       make -j4
-  #       cd ../TAO
-  #       make -j4
-  #   - name: create ACE_TAO tar.xz artifact
-  #     if: steps.cache-artifact.outputs.cache-hit != 'true'
-  #     shell: bash
-  #     run: |
-  #       cd OpenDDS/ACE_TAO
-  #       perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
-  #       find . -iname "*\.o" | xargs rm
-  #       tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
-  #       git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
-  #       xz -3 ../../${{ github.job }}.tar
-  #   - name: upload ACE_TAO artifact
-  #     uses: actions/upload-artifact@v2
-  #     with:
-  #       name: ${{ github.job }}_artifact
-  #       path: ${{ github.job }}.tar.xz
-
-  # build_u18_stat_qt_ws_sec:
-
-  #   runs-on: ubuntu-18.04
-
-  #   needs: ACE_TAO_u18_stat_qt_ws_sec
-
-  #   steps:
-  #   - name: install xerces
-  #     run: sudo apt-get -y install libxerces-c-dev
-  #   - name: install wireshark
-  #     run: sudo apt-get -y install wireshark-dev
-  #   - name: install qt
-  #     run: sudo apt-get -y install qtbase5-dev
-  #   - name: checkout MPC
-  #     uses: actions/checkout@v2.3.4
-  #     with:
-  #       repository: DOCGroup/MPC
-  #       path: MPC
-  #   - name: checkout ACE_TAO
-  #     uses: actions/checkout@v2.3.4
-  #     with:
-  #       repository: DOCGroup/ACE_TAO
-  #       ref: ace6tao2
-  #       path: ACE_TAO
-  #   - name: download ACE_TAO artifact
-  #     uses: actions/download-artifact@v2
-  #     with:
-  #       name: ACE_TAO_u18_stat_qt_ws_sec_artifact
-  #       path: ACE_TAO
-  #   - name: extract ACE_TAO artifact
-  #     shell: bash
-  #     run: |
-  #       cd ACE_TAO
-  #       tar xvfJ ACE_TAO_u18_stat_qt_ws_sec.tar.xz
-  #   - name: checkout OpenDDS
-  #     uses: actions/checkout@v2.3.4
-  #     with:
-  #       path: OpenDDS
-  #       submodules: true
-  #   - name: configure OpenDDS
-  #     run: |
-  #       cd OpenDDS
-  #       ./configure --static --qt --wireshark --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
-  #   - name: check build configuration
-  #     shell: bash
-  #     run: |
-  #       cd OpenDDS
-  #       . setenv.sh
-  #       tools/scripts/show_build_config.pl
-  #   - uses: ammaraskar/gcc-problem-matcher@0.1
-  #   - name: build OpenDDS
-  #     shell: bash
-  #     run: |
-  #       cd OpenDDS
-  #       . setenv.sh
-  #       make -j4
-  #   - name: create OpenDDS tar.xz artifact
-  #     shell: bash
-  #     run: |
-  #       cd OpenDDS
-  #       rm -rf ACE_TAO
-  #       find . -iname "*\.o" | xargs rm
-  #       tar cvf ../${{ github.job }}.tar setenv.sh
-  #       git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
-  #       xz -3 ../${{ github.job }}.tar
-  #   - name: upload OpenDDS artifact
-  #     uses: actions/upload-artifact@v2
-  #     with:
-  #       name: ${{ github.job }}_artifact
-  #       path: ${{ github.job }}.tar.xz
-
-  # test_u18_stat_qt_ws_sec:
-
-  #   runs-on: ubuntu-18.04
-
-  #   needs: build_u18_stat_qt_ws_sec
+  #   needs: build_c_u18_stat_qt_ws_sec
 
   #   steps:
   #   - name: install xerces
@@ -4190,13 +4209,13 @@ jobs:
   #   - name: download ACE_TAO artifact
   #     uses: actions/download-artifact@v2
   #     with:
-  #       name: ACE_TAO_u18_stat_qt_ws_sec_artifact
+  #       name: ACE_TAO_c_u18_stat_qt_ws_sec_artifact
   #       path: ACE_TAO
   #   - name: extract ACE_TAO artifact
   #     shell: bash
   #     run: |
   #       cd ACE_TAO
-  #       tar xvfJ ACE_TAO_u18_stat_qt_ws_sec.tar.xz
+  #       tar xvfJ ACE_TAO_c_u18_stat_qt_ws_sec.tar.xz
   #   - name: checkout OpenDDS
   #     uses: actions/checkout@v2.3.4
   #     with:
@@ -4205,13 +4224,13 @@ jobs:
   #   - name: download OpenDDS artifact
   #     uses: actions/download-artifact@v2
   #     with:
-  #       name: build_u18_stat_qt_ws_sec_artifact
+  #       name: build_c_u18_stat_qt_ws_sec_artifact
   #       path: OpenDDS
   #   - name: extract OpenDDS artifact
   #     shell: bash
   #     run: |
   #       cd OpenDDS
-  #       tar xvfJ build_u18_stat_qt_ws_sec.tar.xz
+  #       tar xvfJ build_c_u18_stat_qt_ws_sec.tar.xz
   #   - name: check build configuration
   #     shell: bash
   #     run: |
@@ -4521,180 +4540,187 @@ jobs:
   #       cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
   #       if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
-  # ACE_TAO_w19_p1_stat_js0:
+  ACE_TAO_c_w19_p1_stat_js0:
+
+    runs-on: windows-2019
+
+    steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v2.3.4
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2.3.4
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: OpenDDS/ACE_TAO
+    - name: get ACE_TAO commit
+      shell: bash
+      run: |
+        cd OpenDDS/ACE_TAO
+        export ACE_COMMIT=$(git rev-parse HEAD)
+        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
+    - name: Cache Artifact
+      id: cache-artifact
+      uses: actions/cache@v2.1.4
+      with:
+        path: ${{ github.job }}.tar.xz
+        key: ${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
+    - name: install openssl-windows & xerces-c
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: lukka/run-vcpkg@v6
+      with:
+        vcpkgGitCommitId: ec6fe06
+        vcpkgArguments: --recurse openssl-windows xerces-c
+        vcpkgTriplet: x64-windows
+    - name: checkout MPC
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: actions/checkout@v2.3.4
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: set up msvc env
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: ilammy/msvc-dev-cmd@v1.5.0
+    - name: configure OpenDDS
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: cmd
+      run: |
+        cd OpenDDS
+        configure --ipv6 --static --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
+    - name: build ACE & TAO
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: cmd
+      run: |
+        cd OpenDDS
+        call setenv.cmd
+        cd ACE_TAO\ACE
+        msbuild -p:Configuration=Debug,Platform=x64 -m ace.sln
+        cd ..\TAO
+        msbuild -p:Configuration=Debug,Platform=x64 -m tao.sln
+    - name: create ACE_TAO tar.xz artifact
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        cd OpenDDS/ACE_TAO
+        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
+        find . -iname "*\.obj" | xargs rm
+        tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
+        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
+        xz -3 ../../${{ github.job }}.tar
+    - name: upload ACE_TAO artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_artifact
+        path: ${{ github.job }}.tar.xz
+
+  build_c_w19_p1_stat_js0:
+
+    runs-on: windows-2019
+
+    needs: ACE_TAO_c_w19_p1_stat_js0
+
+    steps:
+    - name: install openssl-windows & xerces-c
+      uses: lukka/run-vcpkg@v6
+      with:
+        vcpkgGitCommitId: ec6fe06
+        vcpkgArguments: --recurse openssl-windows xerces-c
+        vcpkgTriplet: x64-windows
+    - name: checkout MPC
+      uses: actions/checkout@v2.3.4
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: checkout OpenDDS
+      uses: actions/checkout@v2.3.4
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2.3.4
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: OpenDDS/ACE_TAO
+    - name: download ACE_TAO artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: ACE_TAO_c_w19_p1_stat_js0_artifact
+        path: OpenDDS/ACE_TAO
+    - name: extract ACE_TAO artifact
+      shell: bash
+      run: |
+        cd OpenDDS/ACE_TAO
+        tar xvfJ ACE_TAO_c_w19_p1_stat_js0.tar.xz
+        rm -f ACE_TAO_c_w19_p1_stat_js0.tar.xz
+    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - name: set up msvc env
+      uses: ilammy/msvc-dev-cmd@v1.5.0
+    - name: configure OpenDDS
+      shell: cmd
+      run: |
+        cd OpenDDS
+        configure --ipv6 --static --no-rapidjson --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
+    - name: check build configuration
+      shell: cmd
+      run: |
+        cd OpenDDS
+        call setenv.cmd
+        perl tools\scripts\show_build_config.pl
+    - name: build OpenDDS
+      shell: cmd
+      run: |
+        cd OpenDDS
+        call setenv.cmd
+        msbuild -p:Configuration=Debug,Platform=x64 -m DDS_no_tests.sln
+    - name: run Dev Guide tests
+      shell: cmd
+      run: |
+        cd OpenDDS
+        call setenv.cmd
+        cd DevGuideExamples\DCPS\Messenger
+        perl run_test.pl -ExeSubDir Static_Debug
+    - name: build CMake
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/cmake_integration/Messenger/Messenger_1
+        rm -fr build
+        mkdir build
+        cd build
+        cmake -DCMAKE_PREFIX_PATH=$OPENDDS_INSTALL_PREFIX ..
+        cmake --build .
+    - name: run CMake test
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/cmake_integration/Messenger/Messenger_1/build
+        perl run_test.pl rtps
+    - name: create OpenDDS tar.xz artifact
+      shell: bash
+      run: |
+        cd OpenDDS
+        rm -rf ACE_TAO
+        find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
+        tar cvf ../${{ github.job }}.tar setenv.cmd
+        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
+        xz -3 ../${{ github.job }}.tar
+    - name: upload OpenDDS artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_artifact
+        path: ${{ github.job }}.tar.xz
+
+  # test_c_w19_p1_stat_js0:
 
   #   runs-on: windows-2019
 
-  #   steps:
-  #   - name: checkout OpenDDS
-  #     uses: actions/checkout@v2.3.4
-  #     with:
-  #       path: OpenDDS
-  #       submodules: true
-  #   - name: checkout ACE_TAO
-  #     uses: actions/checkout@v2.3.4
-  #     with:
-  #       repository: DOCGroup/ACE_TAO
-  #       ref: ace6tao2
-  #       path: OpenDDS/ACE_TAO
-  #   - name: get ACE_TAO commit
-  #     shell: bash
-  #     run: |
-  #       cd OpenDDS/ACE_TAO
-  #       export ACE_COMMIT=$(git rev-parse HEAD)
-  #       echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-  #   - name: Cache Artifact
-  #     id: cache-artifact
-  #     uses: actions/cache@v2.1.4
-  #     with:
-  #       path: ${{ github.job }}.tar.xz
-  #       key: ${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
-  #   - name: install openssl-windows & xerces-c
-  #     if: steps.cache-artifact.outputs.cache-hit != 'true'
-  #     uses: lukka/run-vcpkg@v6
-  #     with:
-  #       vcpkgGitCommitId: ec6fe06
-  #       vcpkgArguments: --recurse openssl-windows xerces-c
-  #       vcpkgTriplet: x64-windows
-  #   - name: checkout MPC
-  #     if: steps.cache-artifact.outputs.cache-hit != 'true'
-  #     uses: actions/checkout@v2.3.4
-  #     with:
-  #       repository: DOCGroup/MPC
-  #       path: MPC
-  #   - name: set up msvc env
-  #     if: steps.cache-artifact.outputs.cache-hit != 'true'
-  #     uses: ilammy/msvc-dev-cmd@v1.5.0
-  #   - name: configure OpenDDS
-  #     if: steps.cache-artifact.outputs.cache-hit != 'true'
-  #     shell: cmd
-  #     run: |
-  #       cd OpenDDS
-  #       configure --ipv6 --static --tests --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
-  #   - name: build ACE & TAO
-  #     if: steps.cache-artifact.outputs.cache-hit != 'true'
-  #     shell: cmd
-  #     run: |
-  #       cd OpenDDS
-  #       call setenv.cmd
-  #       cd ACE_TAO\ACE
-  #       msbuild -p:Configuration=Debug,Platform=x64 -m ace.sln
-  #       cd ..\TAO
-  #       msbuild -p:Configuration=Debug,Platform=x64 -m tao.sln
-  #   - name: create ACE_TAO tar.xz artifact
-  #     if: steps.cache-artifact.outputs.cache-hit != 'true'
-  #     shell: bash
-  #     run: |
-  #       cd OpenDDS/ACE_TAO
-  #       perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
-  #       find . -iname "*\.obj" | xargs rm
-  #       tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
-  #       git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
-  #       xz -3 ../../${{ github.job }}.tar
-  #   - name: upload ACE_TAO artifact
-  #     uses: actions/upload-artifact@v2
-  #     with:
-  #       name: ${{ github.job }}_artifact
-  #       path: ${{ github.job }}.tar.xz
-
-  # build_w19_p1_stat_js0:
-
-  #   runs-on: windows-2019
-
-  #   needs: ACE_TAO_w19_p1_stat_js0
-
-  #   steps:
-  #   - name: install openssl-windows & xerces-c
-  #     uses: lukka/run-vcpkg@v6
-  #     with:
-  #       vcpkgGitCommitId: ec6fe06
-  #       vcpkgArguments: --recurse openssl-windows xerces-c
-  #       vcpkgTriplet: x64-windows
-  #   - name: checkout MPC
-  #     uses: actions/checkout@v2.3.4
-  #     with:
-  #       repository: DOCGroup/MPC
-  #       path: MPC
-  #   - name: checkout OpenDDS
-  #     uses: actions/checkout@v2.3.4
-  #     with:
-  #       path: OpenDDS
-  #       submodules: true
-  #   - name: checkout ACE_TAO
-  #     uses: actions/checkout@v2.3.4
-  #     with:
-  #       repository: DOCGroup/ACE_TAO
-  #       ref: ace6tao2
-  #       path: OpenDDS/ACE_TAO
-  #   - name: download ACE_TAO artifact
-  #     uses: actions/download-artifact@v2
-  #     with:
-  #       name: ACE_TAO_w19_p1_stat_js0_artifact
-  #       path: OpenDDS/ACE_TAO
-  #   - name: extract ACE_TAO artifact
-  #     shell: bash
-  #     run: |
-  #       cd OpenDDS/ACE_TAO
-  #       tar xvfJ ACE_TAO_w19_p1_stat_js0.tar.xz
-  #       rm -f ACE_TAO_w19_p1_stat_js0.tar.xz
-  #   - uses: ammaraskar/msvc-problem-matcher@0.1
-  #   - name: set up msvc env
-  #     uses: ilammy/msvc-dev-cmd@v1.5.0
-  #   - name: configure OpenDDS
-  #     shell: cmd
-  #     run: |
-  #       cd OpenDDS
-  #       configure --ipv6 --static --tests --no-rapidjson --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
-  #   - name: check build configuration
-  #     shell: cmd
-  #     run: |
-  #       cd OpenDDS
-  #       call setenv.cmd
-  #       perl tools\scripts\show_build_config.pl
-  #   - name: build OpenDDS
-  #     shell: cmd
-  #     run: |
-  #       cd OpenDDS
-  #       call setenv.cmd
-  #       msbuild -p:Configuration=Debug,Platform=x64 -m DDS.sln
-  #   - name: build CMake
-  #     shell: bash
-  #     run: |
-  #       cd OpenDDS
-  #       . setenv.sh
-  #       cd tests/cmake_integration/Messenger/Messenger_1
-  #       rm -fr build
-  #       mkdir build
-  #       cd build
-  #       cmake -DCMAKE_PREFIX_PATH=$OPENDDS_INSTALL_PREFIX ..
-  #       cmake --build .
-  #   - name: run CMake test
-  #     shell: bash
-  #     run: |
-  #       cd OpenDDS
-  #       . setenv.sh
-  #       cd tests/cmake_integration/Messenger/Messenger_1/build
-  #       perl run_test.pl rtps
-  #   - name: create OpenDDS tar.xz artifact
-  #     shell: bash
-  #     run: |
-  #       cd OpenDDS
-  #       rm -rf ACE_TAO
-  #       find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
-  #       tar cvf ../${{ github.job }}.tar setenv.cmd
-  #       git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
-  #       xz -3 ../${{ github.job }}.tar
-  #   - name: upload OpenDDS artifact
-  #     uses: actions/upload-artifact@v2
-  #     with:
-  #       name: ${{ github.job }}_artifact
-  #       path: ${{ github.job }}.tar.xz
-
-  # test_w19_p1_stat_js0:
-
-  #   runs-on: windows-2019
-
-  #   needs: build_w19_p1_stat_js0
+  #   needs: build_c_w19_p1_stat_js0
 
   #   steps:
   #   - name: install openssl-windows & xerces-c
@@ -4727,25 +4753,25 @@ jobs:
   #   - name: download ACE_TAO artifact
   #     uses: actions/download-artifact@v2
   #     with:
-  #       name: ACE_TAO_w19_p1_stat_js0_artifact
+  #       name: ACE_TAO_c_w19_p1_stat_js0_artifact
   #       path: OpenDDS/ACE_TAO
   #   - name: extract ACE_TAO artifact
   #     shell: bash
   #     run: |
   #       cd OpenDDS/ACE_TAO
-  #       tar xvfJ ACE_TAO_w19_p1_stat_js0.tar.xz
-  #       rm -f ACE_TAO_w19_p1_stat_js0.tar.xz
+  #       tar xvfJ ACE_TAO_c_w19_p1_stat_js0.tar.xz
+  #       rm -f ACE_TAO_c_w19_p1_stat_js0.tar.xz
   #   - name: download OpenDDS artifact
   #     uses: actions/download-artifact@v2
   #     with:
-  #       name: build_w19_p1_stat_js0_artifact
+  #       name: build_c_w19_p1_stat_js0_artifact
   #       path: OpenDDS
   #   - name: extract OpenDDS artifact
   #     shell: bash
   #     run: |
   #       cd OpenDDS
-  #       tar xvfJ build_w19_p1_stat_js0.tar.xz
-  #       rm -f build_w19_p1_stat_js0.tar.xz
+  #       tar xvfJ build_c_w19_p1_stat_js0.tar.xz
+  #       rm -f build_c_w19_p1_stat_js0.tar.xz
   #   - name: check build configuration
   #     shell: cmd
   #     run: |
@@ -4802,156 +4828,163 @@ jobs:
   #       cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
   #       if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
-  # ACE_TAO_w19_p1_cpp03_stat_FM-08:
+  ACE_TAO_w19_p1_cpp03_stat_FM-08:
 
-  #   runs-on: windows-2019
+    runs-on: windows-2019
 
-  #   steps:
-  #   - name: checkout OpenDDS
-  #     uses: actions/checkout@v2.3.4
-  #     with:
-  #       path: OpenDDS
-  #       submodules: true
-  #   - name: checkout ACE_TAO
-  #     uses: actions/checkout@v2.3.4
-  #     with:
-  #       repository: DOCGroup/ACE_TAO
-  #       ref: ace6tao2
-  #       path: OpenDDS/ACE_TAO
-  #   - name: get ACE_TAO commit
-  #     shell: bash
-  #     run: |
-  #       cd OpenDDS/ACE_TAO
-  #       export ACE_COMMIT=$(git rev-parse HEAD)
-  #       echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-  #   - name: Cache Artifact
-  #     id: cache-artifact
-  #     uses: actions/cache@v2.1.4
-  #     with:
-  #       path: ${{ github.job }}.tar.xz
-  #       key: ${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
-  #   - name: install openssl-windows & xerces-c
-  #     if: steps.cache-artifact.outputs.cache-hit != 'true'
-  #     uses: lukka/run-vcpkg@v6
-  #     with:
-  #       vcpkgGitCommitId: ec6fe06
-  #       vcpkgArguments: --recurse openssl-windows xerces-c
-  #       vcpkgTriplet: x64-windows
-  #   - name: checkout MPC
-  #     if: steps.cache-artifact.outputs.cache-hit != 'true'
-  #     uses: actions/checkout@v2.3.4
-  #     with:
-  #       repository: DOCGroup/MPC
-  #       path: MPC
-  #   - name: set up msvc env
-  #     if: steps.cache-artifact.outputs.cache-hit != 'true'
-  #     uses: ilammy/msvc-dev-cmd@v1.5.0
-  #   - name: configure OpenDDS
-  #     if: steps.cache-artifact.outputs.cache-hit != 'true'
-  #     shell: cmd
-  #     run: |
-  #       cd OpenDDS
-  #       configure --ipv6 --std=c++03 --static --tests --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
-  #   - name: build ACE & TAO
-  #     if: steps.cache-artifact.outputs.cache-hit != 'true'
-  #     shell: cmd
-  #     run: |
-  #       cd OpenDDS
-  #       call setenv.cmd
-  #       cd ACE_TAO\ACE
-  #       msbuild -p:Configuration=Release,Platform=x64 -m ace.sln
-  #       cd ..\TAO
-  #       msbuild -p:Configuration=Release,Platform=x64 -m tao.sln
-  #   - name: create ACE_TAO tar.xz artifact
-  #     if: steps.cache-artifact.outputs.cache-hit != 'true'
-  #     shell: bash
-  #     run: |
-  #       cd OpenDDS/ACE_TAO
-  #       perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
-  #       find . -iname "*\.obj" | xargs rm
-  #       tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
-  #       git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
-  #       xz -3 ../../${{ github.job }}.tar
-  #   - name: upload ACE_TAO artifact
-  #     uses: actions/upload-artifact@v2
-  #     with:
-  #       name: ${{ github.job }}_artifact
-  #       path: ${{ github.job }}.tar.xz
+    steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v2.3.4
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2.3.4
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: OpenDDS/ACE_TAO
+    - name: get ACE_TAO commit
+      shell: bash
+      run: |
+        cd OpenDDS/ACE_TAO
+        export ACE_COMMIT=$(git rev-parse HEAD)
+        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
+    - name: Cache Artifact
+      id: cache-artifact
+      uses: actions/cache@v2.1.4
+      with:
+        path: ${{ github.job }}.tar.xz
+        key: ${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
+    - name: install openssl-windows & xerces-c
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: lukka/run-vcpkg@v6
+      with:
+        vcpkgGitCommitId: ec6fe06
+        vcpkgArguments: --recurse openssl-windows xerces-c
+        vcpkgTriplet: x64-windows
+    - name: checkout MPC
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: actions/checkout@v2.3.4
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: set up msvc env
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: ilammy/msvc-dev-cmd@v1.5.0
+    - name: configure OpenDDS
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: cmd
+      run: |
+        cd OpenDDS
+        configure --ipv6 --std=c++03 --static --rapidjson --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
+    - name: build ACE & TAO
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: cmd
+      run: |
+        cd OpenDDS
+        call setenv.cmd
+        cd ACE_TAO\ACE
+        msbuild -p:Configuration=Debug,Platform=x64 -m ace.sln
+        cd ..\TAO
+        msbuild -p:Configuration=Debug,Platform=x64 -m tao.sln
+    - name: create ACE_TAO tar.xz artifact
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        cd OpenDDS/ACE_TAO
+        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
+        find . -iname "*\.obj" | xargs rm
+        tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
+        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
+        xz -3 ../../${{ github.job }}.tar
+    - name: upload ACE_TAO artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_artifact
+        path: ${{ github.job }}.tar.xz
 
-  # build_w19_p1_cpp03_stat_FM-08:
+  build_w19_p1_cpp03_stat_FM-08:
 
-  #   runs-on: windows-2019
+    runs-on: windows-2019
 
-  #   needs: ACE_TAO_w19_p1_cpp03_stat_FM-08
+    needs: ACE_TAO_w19_p1_cpp03_stat_FM-08
 
-  #   steps:
-  #   - name: install openssl-windows & xerces-c
-  #     uses: lukka/run-vcpkg@v6
-  #     with:
-  #       vcpkgGitCommitId: ec6fe06
-  #       vcpkgArguments: --recurse openssl-windows xerces-c
-  #       vcpkgTriplet: x64-windows
-  #   - name: checkout MPC
-  #     uses: actions/checkout@v2.3.4
-  #     with:
-  #       repository: DOCGroup/MPC
-  #       path: MPC
-  #   - name: checkout OpenDDS
-  #     uses: actions/checkout@v2.3.4
-  #     with:
-  #       path: OpenDDS
-  #       submodules: true
-  #   - name: checkout ACE_TAO
-  #     uses: actions/checkout@v2.3.4
-  #     with:
-  #       repository: DOCGroup/ACE_TAO
-  #       ref: ace6tao2
-  #       path: OpenDDS/ACE_TAO
-  #   - name: download ACE_TAO artifact
-  #     uses: actions/download-artifact@v2
-  #     with:
-  #       name: ACE_TAO_w19_p1_cpp03_stat_FM-08_artifact
-  #       path: OpenDDS/ACE_TAO
-  #   - name: extract ACE_TAO artifact
-  #     shell: bash
-  #     run: |
-  #       cd OpenDDS/ACE_TAO
-  #       tar xvfJ ACE_TAO_w19_p1_cpp03_stat_FM-08.tar.xz
-  #       rm -f ACE_TAO_w19_p1_cpp03_stat_FM-08.tar.xz
-  #   - uses: ammaraskar/msvc-problem-matcher@0.1
-  #   - name: set up msvc env
-  #     uses: ilammy/msvc-dev-cmd@v1.5.0
-  #   - name: configure OpenDDS
-  #     shell: cmd
-  #     run: |
-  #       cd OpenDDS
-  #       configure --ipv6 --std=c++03 --static --tests --rapidjson --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
-  #   - name: check build configuration
-  #     shell: cmd
-  #     run: |
-  #       cd OpenDDS
-  #       call setenv.cmd
-  #       perl tools\scripts\show_build_config.pl
-  #   - name: build OpenDDS
-  #     shell: cmd
-  #     run: |
-  #       cd OpenDDS
-  #       call setenv.cmd
-  #       msbuild -p:Configuration=Release,Platform=x64 -m DDS.sln
-  #   - name: create OpenDDS tar.xz artifact
-  #     shell: bash
-  #     run: |
-  #       cd OpenDDS
-  #       rm -rf ACE_TAO
-  #       find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
-  #       tar cvf ../${{ github.job }}.tar setenv.cmd
-  #       git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
-  #       xz -3 ../${{ github.job }}.tar
-  #   - name: upload OpenDDS artifact
-  #     uses: actions/upload-artifact@v2
-  #     with:
-  #       name: ${{ github.job }}_artifact
-  #       path: ${{ github.job }}.tar.xz
+    steps:
+    - name: install openssl-windows & xerces-c
+      uses: lukka/run-vcpkg@v6
+      with:
+        vcpkgGitCommitId: ec6fe06
+        vcpkgArguments: --recurse openssl-windows xerces-c
+        vcpkgTriplet: x64-windows
+    - name: checkout MPC
+      uses: actions/checkout@v2.3.4
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: checkout OpenDDS
+      uses: actions/checkout@v2.3.4
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2.3.4
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: OpenDDS/ACE_TAO
+    - name: download ACE_TAO artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: ACE_TAO_w19_p1_cpp03_stat_FM-08_artifact
+        path: OpenDDS/ACE_TAO
+    - name: extract ACE_TAO artifact
+      shell: bash
+      run: |
+        cd OpenDDS/ACE_TAO
+        tar xvfJ ACE_TAO_w19_p1_cpp03_stat_FM-08.tar.xz
+        rm -f ACE_TAO_w19_p1_cpp03_stat_FM-08.tar.xz
+    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - name: set up msvc env
+      uses: ilammy/msvc-dev-cmd@v1.5.0
+    - name: configure OpenDDS
+      shell: cmd
+      run: |
+        cd OpenDDS
+        configure --ipv6 --std=c++03 --static --rapidjson --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
+    - name: check build configuration
+      shell: cmd
+      run: |
+        cd OpenDDS
+        call setenv.cmd
+        perl tools\scripts\show_build_config.pl
+    - name: build OpenDDS
+      shell: cmd
+      run: |
+        cd OpenDDS
+        call setenv.cmd
+        msbuild -p:Configuration=Debug,Platform=x64 -m DDS.sln
+    - name: run Dev Guide tests
+      shell: cmd
+      run: |
+        cd OpenDDS
+        call setenv.cmd
+        cd DevGuideExamples\DCPS\Messenger
+        perl run_test.pl -ExeSubDir Static_Debug
+    - name: create OpenDDS tar.xz artifact
+      shell: bash
+      run: |
+        cd OpenDDS
+        rm -rf ACE_TAO
+        find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
+        tar cvf ../${{ github.job }}.tar setenv.cmd
+        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
+        xz -3 ../${{ github.job }}.tar
+    - name: upload OpenDDS artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_artifact
+        path: ${{ github.job }}.tar.xz
 
   # test_w19_p1_cpp03_stat_FM-08:
 
