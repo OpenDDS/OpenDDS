@@ -46,93 +46,97 @@ sub perlOS_to_java_platform {
 
 my $targetUsageIndent = "\t\t";
 
-my %platforminfo =
-  ('win32' => {
-               'compilers' => ['cl'],
-               'libpath' => 'PATH',
-               'cl_versions' => {13.1 => 'vc71', 14 => 'vc8', 15 => 'vc9',
-                                 16 => 'vc10', 17 => 'vc11', 18 => 'vc12',
-                                 19 => 'vc14', 19.1 => 'vs2017',
-                                 19.2 => 'vs2019'},
-               'cl_archs' => {'x64' => 1, 'Win32' => 1, 'ARM64' => 0, 'ARM' => 0}, # 1 if supported
-              },
-   'macosx' => {
-                'compilers' => ['clang++'],
-                'libpath' => 'DYLD_LIBRARY_PATH',
-                'auto_run_tests' => {
-                  'includes' => ['NO_SHMEM', 'DDS_NO_ORBSVCS']
-                },
-               },
-   'solaris' => {
-                 'compilers' => ['CC', 'g++'],
-                 'libpath' => 'LD_LIBRARY_PATH',
-                 'aceplatform' => 'sunos5_$COMP', # $COMP = sunc++ or g++
-                 'aceconfig' => 'sunos$UNAMER', # $UNAMER = `uname -r`
-                },
-   'linux' => {
-               'compilers' => ['g++', 'clang', 'clang++'],
-               'libpath' => 'LD_LIBRARY_PATH',
-               'aceplatform' => 'linux_$NONSTDCOMP', # $NONSTDCOMP = clang
-              },
-   'linux-cross' => {
-                     'libpath' => 'LD_LIBRARY_PATH',
-                     'aceplatform' => 'linux',
-                     'aceconfig' => 'linux',
-                     'no_host' => 1,
-                     'usage' => ['Use --target-compiler to specify the ' .
-                                 'cross-compiler binary',
-                                ],
-                    },
-   'freebsd' => {
-                    'compilers' => ['clang++'],
-                    'libpath' => 'LD_LIBRARY_PATH',
-                },
-   'lynxos-178' => {
-                    'libpath' => 'LD_LIBRARY_PATH',
-                    'no_host' => 1,
-                    'aceplatform' => 'lynxos',
-                    'compiler_root_env' => 'ENV_PREFIX',
-                    'usage' => ['Set up the cross-compile using '.
-                                'the script from LynxOS',
-                               ],
-                   },
-   'vxworks' => {
-                 'libpath' => 'LD_LIBRARY_PATH',
-                 'no_host' => 1,
-                 'usage' => ['Use the wrenv script before running configure',
-                             'Specify the VSB with --macros=VSB_DIR=<dir>',
-                            ],
-                },
-   'android' => {
-                  'libpath' => 'LD_LIBRARY_PATH',
-                  'aceplatform' => 'android',
-                  'aceconfig' => 'android',
-                  'no_host' => 1,
-                  'usage' => [
-                      "Use --macros=ANDROID_ABI=<ARCH> to specify the",
-                      "target architecture.",
-                      "Defaults to armeabi-v7a which is 32-bit ARMv7.",
-                      "Use --macros=android_sdk=<SDK_PATH> and",
-                      "--macros=android_target_api=<API_NUMBER> to specify",
-                      "where to find android.jar.",
-                      "See docs/android.md for details.",
-                    ],
-                  'needs_i2jrt_corba' => 1,
-                  'java_platform' => 'android',
-                },
-    'ios' => {
-                'compilers' => ['clang++'],
-                'libpath' => 'DYLD_LIBRARY_PATH',
-                'no_host' => 1,
-                'aceconfig' => 'macosx-iOS',
-                'aceplatform' => 'macosx_iOS',
-                'usage' => [
-                    "Use --macros=IPHONE_TARGET=SIMULATOR or",
-                    "--macros=IPHONE_TARGET=HARDWARE",
-                    "to specify the target architecture."
-                  ],
-              }
-  );
+my %platforminfo = (
+  'win32' => {
+    'compilers' => ['cl'],
+    'libpath' => 'PATH',
+    'cl_versions' => {
+      13.1 => 'vc71', 14 => 'vc8', 15 => 'vc9',
+      16 => 'vc10', 17 => 'vc11', 18 => 'vc12',
+      19 => 'vc14', 19.1 => 'vs2017',
+      19.2 => 'vs2019'
+    },
+    'cl_archs' => {'x64' => 1, 'Win32' => 1, 'ARM64' => 0, 'ARM' => 0}, # 1 if supported
+  },
+  'macosx' => {
+    'compilers' => ['clang++'],
+    'libpath' => 'DYLD_LIBRARY_PATH',
+    'auto_run_tests' => {
+      'includes' => ['NO_SHMEM', 'DDS_NO_ORBSVCS'],
+      'platform_config_name' => 'OSX',
+    },
+  },
+  'solaris' => {
+    'compilers' => ['CC', 'g++'],
+    'libpath' => 'LD_LIBRARY_PATH',
+    'aceplatform' => 'sunos5_$COMP', # $COMP = sunc++ or g++
+    'aceconfig' => 'sunos$UNAMER', # $UNAMER = `uname -r`
+  },
+  'linux' => {
+    'compilers' => ['g++', 'clang', 'clang++'],
+    'libpath' => 'LD_LIBRARY_PATH',
+    'aceplatform' => 'linux_$NONSTDCOMP', # $NONSTDCOMP = clang
+  },
+  'linux-cross' => {
+    'libpath' => 'LD_LIBRARY_PATH',
+    'aceplatform' => 'linux',
+    'aceconfig' => 'linux',
+    'no_host' => 1,
+    'usage' => [
+      'Use --target-compiler to specify the cross-compiler binary',
+    ],
+  },
+  'freebsd' => {
+    'compilers' => ['clang++'],
+    'libpath' => 'LD_LIBRARY_PATH',
+  },
+  'lynxos-178' => {
+    'libpath' => 'LD_LIBRARY_PATH',
+    'no_host' => 1,
+    'aceplatform' => 'lynxos',
+    'compiler_root_env' => 'ENV_PREFIX',
+    'usage' => [
+      'Set up the cross-compile using the script from LynxOS',
+    ],
+  },
+  'vxworks' => {
+    'libpath' => 'LD_LIBRARY_PATH',
+    'no_host' => 1,
+    'usage' => [
+      'Use the wrenv script before running configure',
+      'Specify the VSB with --macros=VSB_DIR=<dir>',
+    ],
+  },
+  'android' => {
+    'libpath' => 'LD_LIBRARY_PATH',
+    'aceplatform' => 'android',
+    'aceconfig' => 'android',
+    'no_host' => 1,
+    'usage' => [
+      "Use --macros=ANDROID_ABI=<ARCH> to specify the",
+      "target architecture.",
+      "Defaults to armeabi-v7a which is 32-bit ARMv7.",
+      "Use --macros=android_sdk=<SDK_PATH> and",
+      "--macros=android_target_api=<API_NUMBER> to specify",
+      "where to find android.jar.",
+      "See docs/android.md for details.",
+    ],
+    'needs_i2jrt_corba' => 1,
+    'java_platform' => 'android',
+  },
+  'ios' => {
+    'compilers' => ['clang++'],
+    'libpath' => 'DYLD_LIBRARY_PATH',
+    'no_host' => 1,
+    'aceconfig' => 'macosx-iOS',
+    'aceplatform' => 'macosx_iOS',
+    'usage' => [
+      "Use --macros=IPHONE_TARGET=SIMULATOR or",
+      "--macros=IPHONE_TARGET=HARDWARE",
+      "to specify the target architecture."
+    ],
+  },
+);
 
 sub targetUsage {
   my $status = shift;
@@ -2535,7 +2539,7 @@ sub generate_configured_tests {
   my $buildEnv = shift;
 
   my @files = ();
-  my @includes = ('RTPS'); # -Config
+  my @includes = (); # -Config
   my @excludes = (); # -Exclude
 
   # Takes a hash of auto_run_test info and a boolean of if that info is the
@@ -2569,9 +2573,14 @@ sub generate_configured_tests {
 
   # Check Platform
   my $platform_hash = $platforminfo{$opts{'target'}};
+  my $platform_config_name = uc($opts{'target'});
   if (exists($platform_hash->{'auto_run_tests'})) {
     $process_hash->($platform_hash->{'auto_run_tests'}, 1);
+    if (exists($platform_hash->{'auto_run_tests'}->{'platform_config_name'})) {
+      $platform_config_name = $platform_hash->{'auto_run_tests'}->{'platform_config_name'};
+    }
   }
+  push(@includes, $platform_config_name);
 
   # Check Options That Are Relevant to auto_run_tests
   my %opts_to_check = (
@@ -2669,14 +2678,12 @@ sub generate_configured_tests {
 
   # Write the File that auto_run_test.pl uses
   my $fh = backup_and_open("tests${slash}configured_tests.pm");
-  my $lists = join(' ', @files);
-  my $includes = join(' ', @includes);
-  my $excludes = join(' ', @excludes);
+  sub to_list {'(' . join(', ', map {"'$_'"} @_) . ')'};
   my $configured_tests = <<"EOF";
 package configured_tests;
-\@lists = qw/$lists/;
-\@includes = qw/$includes/;
-\@excludes = qw/$excludes/;
+\@lists = ${\to_list(@files)};
+\@includes = ${\to_list(@includes)};
+\@excludes = ${\to_list(@excludes)};
 1;
 EOF
   print($configured_tests) if ($opts{'verbose'});
