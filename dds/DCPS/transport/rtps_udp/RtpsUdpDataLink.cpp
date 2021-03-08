@@ -2016,8 +2016,7 @@ RtpsUdpDataLink::RtpsReader::gather_preassociation_acknack_i(MetaSubmessageVec& 
 {
   using namespace OpenDDS::RTPS;
 
-  const DisjointSequence& recvd = writer->recvd_;
-  OPENDDS_ASSERT(recvd.empty());
+  OPENDDS_ASSERT(writer->recvd_.empty());
   const CORBA::ULong num_bits = 0;
   const LongSeq8 bitmap;
   const EntityId_t reader_id = id_.entityId;
