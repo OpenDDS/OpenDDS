@@ -1025,6 +1025,11 @@ namespace OpenDDS {
           }
         }
 
+        // Remote/remote matches are a waste of time
+        if (!equal_guid_prefixes(repoId, participant_id_)) {
+          return;
+        }
+
         for (RepoIdSet::const_iterator iter = discovered_endpoints.begin();
              iter != discovered_endpoints.end(); ++iter) {
           // check to make sure it's a Reader/Writer or Writer/Reader match
