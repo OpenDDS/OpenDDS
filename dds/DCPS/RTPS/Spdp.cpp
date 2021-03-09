@@ -1861,9 +1861,11 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
                OPENDDS_STRING(DCPS::GuidConverter(guid)).c_str()));
   }
 
-  log_progress("authentication", guid_, guid,
-               MonotonicTimePoint::now() - iter->second.discovered_at_,
-               iter->second.auth_messages_sent_, iter->second.auth_messages_received_);
+  if (DCPS::transport_debug.log_progress) {
+    log_progress("authentication", guid_, guid,
+                 MonotonicTimePoint::now() - iter->second.discovered_at_,
+                 iter->second.auth_messages_sent_, iter->second.auth_messages_received_);
+  }
 
   DDS::Security::ParticipantCryptoHandle dp_crypto_handle =
     sedp_->get_handle_registry()->get_remote_participant_crypto_handle(iter->first);

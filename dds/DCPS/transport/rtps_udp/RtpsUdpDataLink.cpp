@@ -1796,10 +1796,11 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
     if (writer->recvd_.empty() && (directed || !writer->sends_directed_hb())) {
       OPENDDS_ASSERT(preassociation_writers_.count(writer));
       preassociation_writers_.erase(writer);
-      DCPS::log_progress("RTPS reader/writer association", id_, writer->id_,
-                         MonotonicTimePoint::now() - writer->discovered_at_,
-                         writer->sent_to_, writer->recv_from_);
-
+      if (transport_debug.log_progress) {
+        DCPS::log_progress("RTPS reader/writer association", id_, writer->id_,
+                           MonotonicTimePoint::now() - writer->discovered_at_,
+                           writer->sent_to_, writer->recv_from_);
+      }
 
       const SequenceRange sr(zero, hb_first.previous());
       writer->recvd_.insert(sr);
@@ -2849,9 +2850,11 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   if (preassociation_readers_.count(reader)) {
     if (is_postassociation) {
       preassociation_readers_.erase(reader);
-      DCPS::log_progress("RTPS writer/reader association", id_, reader->id_,
-                         MonotonicTimePoint::now() - reader->discovered_at_,
-                         reader->sent_to_, reader->recv_from_);
+      if (transport_debug.log_progress) {
+        DCPS::log_progress("RTPS writer/reader association", id_, reader->id_,
+                           MonotonicTimePoint::now() - reader->discovered_at_,
+                           reader->sent_to_, reader->recv_from_);
+      }
 
       const SequenceNumber max_sn = expected_max_sn(reader);
       const SequenceNumber acked_sn = reader->acked_sn();
@@ -2910,7 +2913,9 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
                    ack.getValue(), dd_last.getValue()));
       }
       if (ack > dd_last) {
-        log_progress("durable delivered", id_, reader->id_, MonotonicTimePoint::now() - reader->discovered_at_, reader->sent_to_, reader->recv_from_);
+        if (transport_debug.log_progress) {
+          log_progress("durable delivered", id_, reader->id_, MonotonicTimePoint::now() - reader->discovered_at_, reader->sent_to_, reader->recv_from_);
+        }
         // Reader acknowledges durable data, we no longer need to store it
         if (Transport_debug_level > 5) {
           ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
