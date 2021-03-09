@@ -5,7 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
 
 #include "DataReaderImpl.h"
 
@@ -33,12 +33,13 @@
 #include "XTypes/TypeObject.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
-#include <dds/DdsDcpsCoreTypeSupportC.h>
+#endif
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
+#  include <dds/DdsDcpsCoreTypeSupportC.h>
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 #include <dds/DdsDcpsCoreC.h>
 #include <dds/DdsDcpsGuidTypeSupportImpl.h>
-
-#include <tao/ORB_Core.h>
 
 #include <ace/Reactor.h>
 #include <ace/Auto_Ptr.h>
@@ -1302,12 +1303,19 @@ DataReaderImpl::enable()
             filterExpression,
             exprParams,
             type_info);
-
-    if (this->subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN) {
-      ACE_ERROR((LM_WARNING,
-          ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::enable, ")
-          ACE_TEXT("add_subscription returned invalid id.\n")));
+    if (subscription_id_ == GUID_UNKNOWN) {
+      if (DCPS_debug_level >= 1) {
+        ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: DataReaderImpl::enable: "
+          "add_subscription failed\n"));
+      }
       return DDS::RETCODE_ERROR;
+    }
+
+    if (DCPS_debug_level >= 2) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReaderImpl::enable: "
+        "got GUID %C, subscribed to topic name \"%C\" type \"%C\"\n",
+        LogGuid(subscription_id_).c_str(),
+        topic_servant_->topic_name(), topic_servant_->type_name()));
     }
   }
 

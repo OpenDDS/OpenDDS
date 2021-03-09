@@ -2322,7 +2322,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
   TimeDuration interval = TheServiceParticipant->get_thread_status_interval();
 
   if (interval > TimeDuration(0)) {
-    if (DCPS::DCPS_debug_level > 4) {
+    if (DCPS::DCPS_debug_level >= 4) {
       ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) Thread status monitoring is active. ")
                 ACE_TEXT("Status interval = %u.\n"), interval.value().sec()));
@@ -3928,7 +3928,7 @@ Spdp::SpdpTransport::process_lease_expirations(const DCPS::MonotonicTimePoint& n
 void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*now*/)
 {
 #ifndef DDS_HAS_MINIMUM_BIT
-  if (DCPS::DCPS_debug_level > 4) {
+  if (DCPS::DCPS_debug_level >= 4) {
     ACE_DEBUG((LM_DEBUG,
                "(%P|%t) Spdp::SpdpTransport::thread_status_task(): Updating internal thread status BIT.\n"));
   }
@@ -3947,7 +3947,7 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
 
         bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE, i->second.timestamp);
       }
-    } else {
+    } else if (DCPS::DCPS_debug_level >= 2) {
       // Not necessarily an error. App could be shutting down.
       ACE_DEBUG((LM_DEBUG,
                  "(%P|%t) Spdp::ThreadStatusHandler: Could not get thread data reader.\n"));
