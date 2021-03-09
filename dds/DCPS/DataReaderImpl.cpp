@@ -1315,7 +1315,7 @@ DataReaderImpl::enable()
       ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReaderImpl::enable: "
         "got GUID %C, subscribed to topic name \"%C\" type \"%C\"\n",
         LogGuid(subscription_id_).c_str(),
-        topic_servant_->get_name(), topic_servant_->get_type_name()));
+        topic_servant_->topic_name(), topic_servant_->type_name()));
     }
   }
 

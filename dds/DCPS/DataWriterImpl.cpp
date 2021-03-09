@@ -1498,7 +1498,7 @@ DataWriterImpl::enable()
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriterImpl::enable: "
       "got GUID %C, publishing to topic name \"%C\" type \"%C\"\n",
       LogGuid(publication_id_).c_str(),
-      topic_servant_->get_name(), topic_servant_->get_type_name()));
+      topic_servant_->topic_name(), topic_servant_->type_name()));
   }
 
   this->data_container_->publication_id_ = this->publication_id_;
