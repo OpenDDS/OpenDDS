@@ -1009,6 +1009,10 @@ namespace OpenDDS {
           discovered_endpoints = td.discovered_subscriptions();
         }
 
+        if (local_endpoints.empty()) {
+          return;
+        }
+
         for (RepoIdSet::const_iterator iter = local_endpoints.begin();
              iter != local_endpoints.end(); ++iter) {
           // check to make sure it's a Reader/Writer or Writer/Reader match
@@ -1019,11 +1023,6 @@ namespace OpenDDS {
               match(reader ? *iter : repoId, reader ? repoId : *iter);
             }
           }
-        }
-
-        // Remote/remote matches are a waste of time
-        if (!guid_prefixes_equal(repoId, participant_id_)) {
-          return;
         }
 
         for (RepoIdSet::const_iterator iter = discovered_endpoints.begin();
