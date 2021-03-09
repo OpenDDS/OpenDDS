@@ -1902,6 +1902,14 @@ namespace {
     }
   }
 
+  string findSizeMutableUnion(const string& indent, const string& name, AST_Type* type,
+                              const string& prefix, bool wrap_nested_key_only, Intro& intro,
+                              const string & = "", bool = false) // same sig as streamCommon
+  {
+    return indent + "serialized_size_parameter_id(encoding, size, mutable_running_total);\n"
+      + findSizeCommon(indent, name, type, prefix, wrap_nested_key_only, intro);
+  }
+
   std::string generate_field_serialized_size(
     const std::string& indent, AST_Field* field, const std::string& prefix,
     bool wrap_nested_key_only, Intro& intro)
@@ -3644,7 +3652,7 @@ namespace {
         "  Serializer strm(&param, encoding);\n"
         "  switch (disc) {\n";
       generateSwitchBody(u, streamCommon, branches, discriminator,
-                         "return", ">> ", cxx.c_str(), true);
+                         "", ">> ", cxx.c_str(), true);
       be_global->impl_ <<
         "  default:\n"
         "    {\n"
@@ -3926,13 +3934,9 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         "  primitive_serialized_size(encoding, size, " << wrap_out << ");\n";
     }
 
-    if (exten == extensibilitykind_mutable) {
-      be_global->impl_ <<
-        "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
-    }
-
-    generateSwitchForUnion(node, "uni._d()", findSizeCommon, branches, discriminator,
-                           "", "", cxx.c_str());
+    generateSwitchForUnion(node, "uni._d()",
+                           exten == extensibilitykind_mutable ? findSizeMutableUnion : findSizeCommon,
+                           branches, discriminator, "", "", cxx.c_str());
 
     if (exten == extensibilitykind_mutable) {
       // TODO: XTypes B will need to edit this code to add the pid for the end of mutable unions.
@@ -4036,13 +4040,14 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       be_global->impl_ <<
         "  member_id = 0;\n"
         "  field_size = 0;\n"
-        "  must_understand = false;\n"
-        "  if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
-        "    return false;\n"
-        "  }\n";
+        "  must_understand = false;\n";
 
+      const char prefix[] =
+        "    if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
+        "      return false;\n"
+        "    }\n";
       if (generateSwitchForUnion(node, "disc", streamCommon, branches,
-        discriminator, "if", ">> ", cxx.c_str(), false, true, true, 0)) {
+                                 discriminator, prefix, ">> ", cxx.c_str())) {
         be_global->impl_ <<
           "  return true;\n";
       }
@@ -4051,7 +4056,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         "  " << scoped(discriminator->name()) << " disc;\n" <<
         streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT));
       if (generateSwitchForUnion(node, "disc", streamCommon, branches,
-          discriminator, "if", ">> ", cxx.c_str())) {
+          discriminator, "", ">> ", cxx.c_str())) {
         be_global->impl_ <<
           "  return true;\n";
       }

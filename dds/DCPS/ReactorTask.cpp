@@ -167,7 +167,7 @@ int ReactorTask::svc()
         ACE_Time_Value t = timeout_.value();
         reactor_->run_reactor_event_loop(t, 0);
         if (thread_status_) {
-          if (DCPS_debug_level > 4) {
+          if (DCPS_debug_level >= 4) {
             ACE_DEBUG((LM_DEBUG,
                        "(%P|%t) ReactorTask::svc. Updating thread status.\n"));
           }
