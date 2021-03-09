@@ -18,6 +18,7 @@ OpenDDS_Dcps_Export unsigned int Transport_debug_level = 0;
 
 TransportDebug::TransportDebug()
   : log_messages(false)
+  , log_progress(false)
 {}
 
 OpenDDS_Dcps_Export TransportDebug transport_debug;

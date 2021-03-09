@@ -50,6 +50,7 @@ public:
   TransportDebug();
 
   bool log_messages;
+  bool log_progress;
 };
 extern OpenDDS_Dcps_Export TransportDebug transport_debug;
 

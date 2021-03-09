@@ -21,6 +21,7 @@
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/Logging.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/ConnectionRecords.h>
 #include <dds/DCPS/transport/framework/TransportDebug.h>
@@ -657,6 +658,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     // add a new participant
     std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq)));
     iter = p.first;
+    iter->second.discovered_at_ = now;
     update_lease_expiration_i(iter, now);
 
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -704,6 +706,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         iter->second.extended_builtin_endpoints_ = pdata.ddsParticipantDataSecure.base.extended_builtin_endpoints;
 
         // The remote needs to see our SPDP before attempting authentication.
+        ++iter->second.auth_messages_sent_;
         tport_->write_i(guid, from_relay ? SpdpTransport::SEND_TO_RELAY : SpdpTransport::SEND_TO_LOCAL);
 
         attempt_authentication(iter, true);
@@ -996,6 +999,7 @@ Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
   DiscoveredParticipantMap::iterator iter = participants_.find(guid);
 
   if (iter != participants_.end()) {
+    ++iter->second.auth_messages_received_;
     if (msg.message_identity.sequence_number <= iter->second.auth_req_sequence_number_) {
       if (DCPS::security_debug.auth_debug) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Spdp::handle_auth_request() - ")
@@ -1187,6 +1191,7 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
     dp.auth_req_msg_.message_data[0] = dp.local_auth_request_token_;
     // Send the auth req immediately to reset the remote if they are
     // still authenticated with us.
+    ++dp.auth_messages_sent_;
     if (sedp_->write_stateless_message(dp.auth_req_msg_, make_id(guid, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER)) != DDS::RETCODE_OK) {
       if (DCPS::security_debug.auth_debug) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::attempt_authentication() - ")
@@ -1302,6 +1307,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   }
 
   DiscoveredParticipant& dp = iter->second;
+  ++dp.auth_messages_received_;
 
   if (DCPS::security_debug.auth_debug) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) {auth_debug} DEBUG: Spdp::handle_handshake_message() - "
@@ -1317,6 +1323,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   if (dp.handshake_state_ == DCPS::HANDSHAKE_STATE_DONE && !dp.is_requester_) {
     // Remote is still sending a reply, so resend the final.
     const RepoId reader = make_id(iter->first, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER);
+    ++dp.auth_messages_sent_;
     if (sedp_->write_stateless_message(dp.handshake_msg_, reader) != DDS::RETCODE_OK) {
       if (DCPS::security_debug.auth_debug) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::handle_handshake_message() - ")
@@ -1618,6 +1625,7 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
       if (pit->second.have_auth_req_msg_) {
         // Send the SPDP announcement in case it got lost.
         tport_->write_i(pit->first, SpdpTransport::SEND_TO_RELAY | SpdpTransport::SEND_TO_LOCAL);
+        ++pit->second.auth_messages_sent_;
         if (sedp_->write_stateless_message(pit->second.auth_req_msg_, reader) != DDS::RETCODE_OK) {
           if (DCPS::security_debug.auth_debug) {
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::process_handshake_resends() - ")
@@ -1632,6 +1640,7 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
         }
       }
       if (pit->second.have_handshake_msg_) {
+        ++pit->second.auth_messages_sent_;
         if (sedp_->write_stateless_message(pit->second.handshake_msg_, reader) != DDS::RETCODE_OK) {
           if (DCPS::security_debug.auth_debug) {
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::process_handshake_resends() - ")
@@ -1723,6 +1732,7 @@ Spdp::send_handshake_message(const DCPS::RepoId& guid,
   dp.handshake_msg_.message_identity.sequence_number = (++stateless_sequence_number_).getValue();
 
   const DCPS::RepoId reader = make_id(guid, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER);
+  ++dp.auth_messages_sent_;
   const DDS::ReturnCode_t retval = sedp_->write_stateless_message(dp.handshake_msg_, reader);
   dp.have_handshake_msg_ = true;
   dp.stateless_msg_deadline_ = schedule_handshake_resend(config_->auth_resend_period(), guid);
@@ -1849,6 +1859,12 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::match_authenticated - ")
                ACE_TEXT("auth and access control complete for peer %C\n"),
                OPENDDS_STRING(DCPS::GuidConverter(guid)).c_str()));
+  }
+
+  if (DCPS::transport_debug.log_progress) {
+    log_progress("authentication", guid_, guid,
+                 MonotonicTimePoint::now() - iter->second.discovered_at_,
+                 iter->second.auth_messages_sent_, iter->second.auth_messages_received_);
   }
 
   DDS::Security::ParticipantCryptoHandle dp_crypto_handle =
