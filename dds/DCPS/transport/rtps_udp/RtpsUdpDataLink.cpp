@@ -1300,6 +1300,9 @@ RtpsUdpDataLink::RtpsWriter::end_historic_samples_i(const DataSampleHeader& head
            iter != remote_readers_.end(); ++iter) {
         if (iter->second->durable_) {
           iter->second->durable_timestamp_ = now;
+          if (transport_debug.log_progress) {
+            log_progress("durable data queued", id_, iter->first, MonotonicTimePoint::now() - iter->second->discovered_at_, 0, 0);
+          }
         }
       }
     } else {
@@ -1307,6 +1310,9 @@ RtpsUdpDataLink::RtpsWriter::end_historic_samples_i(const DataSampleHeader& head
       if (iter != remote_readers_.end()) {
         if (iter->second->durable_) {
           iter->second->durable_timestamp_ = now;
+          if (transport_debug.log_progress) {
+            log_progress("durable data queued", id_, iter->first, MonotonicTimePoint::now() - iter->second->discovered_at_, 0, 0);
+          }
           if (Transport_debug_level > 3) {
             const GuidConverter conv(id_), sub_conv(sub);
             ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::end_historic_samples"
