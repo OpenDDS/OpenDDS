@@ -1021,6 +1021,11 @@ namespace OpenDDS {
           }
         }
 
+        // Remote/remote matches are a waste of time
+        if (!guid_prefixes_equal(repoId, participant_id_)) {
+          return;
+        }
+
         for (RepoIdSet::const_iterator iter = discovered_endpoints.begin();
              iter != discovered_endpoints.end(); ++iter) {
           // check to make sure it's a Reader/Writer or Writer/Reader match
@@ -1214,10 +1219,6 @@ namespace OpenDDS {
             ACE_DEBUG((LM_DEBUG, "(%P|%t) EndpointManager::match: Undiscovered Reader\n"));
           }
           return; // Possible and ok, since lock is released
-        }
-
-        if (!writer_local && !reader_local) {
-          return;
         }
 
         MatchingData md;
