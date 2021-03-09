@@ -149,22 +149,6 @@ bool equal_guid_prefixes(const GUID_t& lhs, const GUID_t& rhs)
   return equal_guid_prefixes(lhs.guidPrefix, rhs.guidPrefix);
 }
 
-struct GuidPrefixEqual {
-
-  bool
-  operator() (const GuidPrefix_t& lhs, const GuidPrefix_t& rhs) const
-  {
-    return equal_guid_prefixes(lhs, rhs);
-  }
-
-  bool
-  operator() (const GUID_t& lhs, const GUID_t& rhs) const
-  {
-    return equal_guid_prefixes(lhs, rhs);
-  }
-
-};
-
 #ifndef OPENDDS_SAFETY_PROFILE
 inline bool
 operator==(const EntityId_t& lhs, const EntityId_t& rhs)

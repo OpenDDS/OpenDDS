@@ -239,13 +239,12 @@ HandleRegistry::get_remote_datareader_security_attributes(const DCPS::RepoId& id
 HandleRegistry::DatareaderCryptoHandleList
 HandleRegistry::get_all_remote_datareaders(const DCPS::RepoId& prefix) const
 {
-  const DCPS::GuidPrefixEqual guid_prefix_equal = DCPS::GuidPrefixEqual();
   DatareaderCryptoHandleList retval;
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, retval);
   for (DatareaderCryptoHandleMap::const_iterator pos =
          remote_datareader_crypto_handles_.lower_bound(DCPS::make_id(prefix, DCPS::ENTITYID_UNKNOWN)),
          limit = remote_datareader_crypto_handles_.end();
-       pos != limit && guid_prefix_equal(pos->first, prefix); ++pos) {
+       pos != limit && DCPS::equal_guid_prefixes(pos->first, prefix); ++pos) {
     retval.push_back(std::make_pair(pos->first, pos->second.first));
   }
   return retval;
@@ -310,13 +309,12 @@ HandleRegistry::get_remote_datawriter_security_attributes(const DCPS::RepoId& id
 HandleRegistry::DatawriterCryptoHandleList
 HandleRegistry::get_all_remote_datawriters(const DCPS::RepoId& prefix) const
 {
-  const DCPS::GuidPrefixEqual guid_prefix_equal = DCPS::GuidPrefixEqual();
   DatawriterCryptoHandleList retval;
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, retval);
   for (DatawriterCryptoHandleMap::const_iterator pos =
          remote_datawriter_crypto_handles_.lower_bound(DCPS::make_id(prefix, DCPS::ENTITYID_UNKNOWN)),
          limit = remote_datawriter_crypto_handles_.end();
-       pos != limit && guid_prefix_equal(pos->first, prefix); ++pos) {
+       pos != limit && DCPS::equal_guid_prefixes(pos->first, prefix); ++pos) {
     retval.push_back(std::make_pair(pos->first, pos->second.first));
   }
   return retval;
