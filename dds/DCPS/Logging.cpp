@@ -22,7 +22,7 @@ void OpenDDS_Dcps_Export log_progress(const char* activity,
                                       size_t messages_sent,
                                       size_t messages_received)
 {
-  ACE_DEBUG((LM_INFO, "(%P|%t) INFO local: %C remote: %C time(ms): %u msg_sent: %B msg_recv: %B activity: %C\n",
+  ACE_DEBUG((LM_INFO, "(%P|%t) INFO local: %C remote: %C time(ms): %Lu msg_sent: %B msg_recv: %B activity: %C\n",
              DCPS::LogGuid(local).c_str(), DCPS::LogGuid(remote).c_str(),
              duration.value().msec(),
              messages_sent, messages_received, activity));
