@@ -1009,7 +1009,9 @@ namespace OpenDDS {
           discovered_endpoints = td.discovered_subscriptions();
         }
 
-        if (local_endpoints.empty()) {
+        const bool is_remote = !equal_guid_prefixes(repoId, participant_id_);
+        if (is_remote && local_endpoints.empty()) {
+          // Nothing to match.
           return;
         }
 
@@ -1026,7 +1028,7 @@ namespace OpenDDS {
         }
 
         // Remote/remote matches are a waste of time
-        if (!equal_guid_prefixes(repoId, participant_id_)) {
+        if (is_remote) {
           return;
         }
 
