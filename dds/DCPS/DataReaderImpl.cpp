@@ -491,6 +491,7 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
 
       for (CORBA::ULong i = 0; i < wr_len; i++) {
         PublicationId writer_id = writers[i];
+        statistics_.erase(writer_id);
 
         WriterMapType::iterator it = this->writers_.find(writer_id);
         if (it != this->writers_.end() &&
