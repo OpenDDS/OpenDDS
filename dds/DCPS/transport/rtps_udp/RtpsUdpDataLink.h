@@ -291,6 +291,9 @@ private:
 
   struct ReaderInfo : public RcObject {
     const RepoId id_;
+    const MonotonicTimePoint discovered_at_;
+    size_t sent_to_;
+    size_t recv_from_;
     CORBA::Long acknack_recvd_count_, nackfrag_recvd_count_;
     DisjointSequence requests_;
     OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumberSet) requested_frags_;
@@ -307,6 +310,9 @@ private:
 
     ReaderInfo(const RepoId& id, bool durable, ACE_CDR::ULong participant_flags)
       : id_(id)
+      , discovered_at_(MonotonicTimePoint::now())
+      , sent_to_(0)
+      , recv_from_(0)
       , acknack_recvd_count_(0)
       , nackfrag_recvd_count_(0)
       , cur_cumulative_ack_(SequenceNumber::ZERO()) // Starting at zero instead of unknown makes the logic cleaner.
@@ -494,6 +500,9 @@ private:
 
   struct WriterInfo : RcObject {
     const RepoId id_;
+    const MonotonicTimePoint discovered_at_;
+    size_t sent_to_;
+    size_t recv_from_;
     DisjointSequence recvd_;
     typedef OPENDDS_MAP(SequenceNumber, ReceivedDataSample) HeldMap;
     HeldMap held_;
@@ -504,6 +513,9 @@ private:
 
     WriterInfo(const RepoId& id, ACE_CDR::ULong participant_flags)
       : id_(id)
+      , discovered_at_(MonotonicTimePoint::now())
+      , sent_to_(0)
+      , recv_from_(0)
       , hb_last_(SequenceNumber::ZERO())
       , heartbeat_recvd_count_(0)
       , hb_frag_recvd_count_(0)

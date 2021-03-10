@@ -2200,6 +2200,8 @@ namespace OpenDDS {
         , is_requester_(false)
         , auth_req_sequence_number_(0)
         , handshake_sequence_number_(0)
+        , auth_messages_sent_(0)
+        , auth_messages_received_(0)
         , identity_handle_(DDS::HANDLE_NIL)
         , handshake_handle_(DDS::HANDLE_NIL)
         , permissions_handle_(DDS::HANDLE_NIL)
@@ -2230,6 +2232,8 @@ namespace OpenDDS {
         , is_requester_(false)
         , auth_req_sequence_number_(0)
         , handshake_sequence_number_(0)
+        , auth_messages_sent_(0)
+        , auth_messages_received_(0)
         , identity_handle_(DDS::HANDLE_NIL)
         , handshake_handle_(DDS::HANDLE_NIL)
         , permissions_handle_(DDS::HANDLE_NIL)
@@ -2275,6 +2279,7 @@ namespace OpenDDS {
         ParticipantLocationBuiltinTopicData location_data_;
         DDS::InstanceHandle_t location_ih_;
 
+        MonotonicTimePoint discovered_at_;
         MonotonicTimePoint lease_expiration_;
         DDS::InstanceHandle_t bit_ih_;
         SequenceNumber last_seq_;
@@ -2296,6 +2301,8 @@ namespace OpenDDS {
         bool is_requester_;
         CORBA::LongLong auth_req_sequence_number_;
         CORBA::LongLong handshake_sequence_number_;
+        size_t auth_messages_sent_;
+        size_t auth_messages_received_;
 
         DDS::Security::IdentityToken identity_token_;
         DDS::Security::PermissionsToken permissions_token_;
