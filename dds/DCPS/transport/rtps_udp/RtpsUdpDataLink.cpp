@@ -1545,6 +1545,9 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
       writer->held_.insert(std::make_pair(seq, *sample));
 
     } else if (writer->recvd_.contains(seq)) {
+      if (transport_debug.log_dropped_messages) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::RtpsReader::process_data_i - %C -> %C duplicate sample\n", LogGuid(writer->id_).c_str(), LogGuid(id_).c_str()));
+      }
       if (Transport_debug_level > 5) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) -")
                              ACE_TEXT(" data seq: %q from %C being DROPPED from %C because it's ALREADY received\n"),
@@ -1590,6 +1593,9 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
     }
 
   } else {
+    if (transport_debug.log_dropped_messages) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::RtpsReader::process_data_i - %C -> %C unknown remote writer\n", LogGuid(src).c_str(), LogGuid(id_).c_str()));
+    }
     if (Transport_debug_level > 5) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_data_i(DataSubmessage) -")
                            ACE_TEXT(" data seq: %q from %C to %C dropped because of unknown writer\n"),
@@ -1636,6 +1642,9 @@ RtpsUdpDataLink::RtpsReader::process_gap_i(const RTPS::GapSubmessage& gap,
 
   const WriterInfoMap::iterator wi = remote_writers_.find(src);
   if (wi == remote_writers_.end()) {
+    if (transport_debug.log_dropped_messages) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::RtpsReader::process_gap_i - %C -> %C unknown remote writer\n", LogGuid(src).c_str(), LogGuid(id_).c_str()));
+    }
     return;
   }
 
@@ -1644,6 +1653,9 @@ RtpsUdpDataLink::RtpsReader::process_gap_i(const RTPS::GapSubmessage& gap,
   ++writer->recv_from_;
 
   if (writer->recvd_.empty()) {
+    if (transport_debug.log_dropped_messages) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::RtpsReader::process_gap_i - %C -> %C preassociation writer\n", LogGuid(writer->id_).c_str(), LogGuid(id_).c_str()));
+    }
     return;
   }
 
@@ -1779,6 +1791,9 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
 
   const WriterInfoMap::iterator wi = remote_writers_.find(src);
   if (wi == remote_writers_.end()) {
+    if (transport_debug.log_dropped_messages) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::RtpsReader::process_heartbeat_i - %C -> %C unknown remote writer\n", LogGuid(src).c_str(), LogGuid(id_).c_str()));
+    }
     return;
   }
 
@@ -1787,6 +1802,9 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
   ++writer->recv_from_;
 
   if (!compare_and_update_counts(heartbeat.count.value, writer->heartbeat_recvd_count_)) {
+    if (transport_debug.log_dropped_messages) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::RtpsReader::process_heartbeat_i - %C -> %C stale/duplicate message\n", LogGuid(writer->id_).c_str(), LogGuid(id_).c_str()));
+    }
     VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::process_heartbeat_i "
           "WARNING Count indicates duplicate, dropping\n"));
     return;
@@ -1829,6 +1847,8 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
     } else {
       gather_preassociation_acknack_i(meta_submessages, writer);
     }
+  } else {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpDataLink::RtpsReader::process_heartbeat_i - %C -> %C invalid heartbeat\n", LogGuid(writer->id_).c_str(), LogGuid(id_).c_str()));
   }
 
   guard.release();
@@ -2674,6 +2694,9 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_frag_i(const RTPS::HeartBeatFragS
   const WriterInfoMap::iterator wi = remote_writers_.find(src);
   if (wi == remote_writers_.end()) {
     // we may not be associated yet, even if the writer thinks we are
+    if (transport_debug.log_dropped_messages) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::RtpsReader::process_heartbeat_frag_i - %C -> %C unknown remote writer\n", LogGuid(src).c_str(), LogGuid(id_).c_str()));
+    }
     return;
   }
 
@@ -2682,6 +2705,9 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_frag_i(const RTPS::HeartBeatFragS
   ++writer->recv_from_;
 
   if (!compare_and_update_counts(hb_frag.count.value, writer->hb_frag_recvd_count_)) {
+    if (transport_debug.log_dropped_messages) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::RtpsReader::process_heartbeat_frag_i - %C -> %C stale/duplicate message\n", LogGuid(writer->id_).c_str(), LogGuid(id_).c_str()));
+    }
     VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::process_heartbeat_frag_i "
           "WARNING Count indicates duplicate, dropping\n"));
     return;
@@ -2793,11 +2819,9 @@ RtpsUdpDataLink::RtpsWriter::gather_gaps_i(const ReaderInfo_rch& reader,
 
 void
 RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& acknack,
-                                             const RepoId& src_prefix,
+                                             const RepoId& src,
                                              MetaSubmessageVec& meta_submessages)
 {
-  const RepoId remote = make_id(src_prefix, acknack.readerId);
-
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
   RtpsUdpDataLink_rch link = link_.lock();
@@ -2807,14 +2831,17 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   }
 
   if (Transport_debug_level > 5) {
-    GuidConverter local_conv(id_), remote_conv(remote);
+    GuidConverter local_conv(id_), remote_conv(src);
     ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
       "local %C remote %C\n", OPENDDS_STRING(local_conv).c_str(),
       OPENDDS_STRING(remote_conv).c_str()));
   }
 
-  ReaderInfoMap::iterator ri = remote_readers_.find(remote);
+  ReaderInfoMap::iterator ri = remote_readers_.find(src);
   if (ri == remote_readers_.end()) {
+    if (transport_debug.log_dropped_messages) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::RtpsWriter::process_acknack - %C -> %C unknown remote reader\n", LogGuid(src).c_str(), LogGuid(id_).c_str()));
+    }
     VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
       "WARNING ReaderInfo not found\n"));
     return;
@@ -2831,6 +2858,9 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   if (!reset) {
     if (!compare_and_update_counts(acknack.count.value, reader->acknack_recvd_count_) &&
         (!reader->reflects_heartbeat_count() || acknack.count.value != 0 || reader->acknack_recvd_count_ != 0)) {
+      if (transport_debug.log_dropped_messages) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::RtpsWriter::process_acknack - %C -> %C stale/duplicate message\n", LogGuid(id_).c_str(), LogGuid(reader->id_).c_str()));
+      }
       VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
             "WARNING Count indicates duplicate, dropping\n"));
       return;
@@ -2838,6 +2868,9 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
 
     if (reader->reflects_heartbeat_count()) {
       if (acknack.count.value < reader->required_acknack_count_) {
+        if (transport_debug.log_dropped_messages) {
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::RtpsWriter::process_acknack - %C -> %C stale/duplicate message (reflect)\n", LogGuid(id_).c_str(), LogGuid(reader->id_).c_str()));
+        }
         return;
       } else {
         reader->required_acknack_count_ = heartbeat_count_;
@@ -2876,7 +2909,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   OPENDDS_MAP(SequenceNumber, TransportQueueElement*) pendingCallbacks;
 
   if (Transport_debug_level > 5) {
-    GuidConverter local_conv(id_), remote_conv(remote);
+    GuidConverter local_conv(id_), remote_conv(src);
     ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
                "local %C remote %C ack %q\n", OPENDDS_STRING(local_conv).c_str(),
                OPENDDS_STRING(remote_conv).c_str(), ack.getValue()));
@@ -2902,14 +2935,14 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
         if (Transport_debug_level > 5) {
           ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received: Enqueuing ReplayDurableData\n"));
         }
-        link->job_queue_->enqueue(make_rch<ReplayDurableData>(link_, id_, remote));
+        link->job_queue_->enqueue(make_rch<ReplayDurableData>(link_, id_, src));
         reader->durable_timestamp_ = MonotonicTimePoint::zero_value;
       }
     }
 
     if (!reader->durable_data_.empty()) {
       if (Transport_debug_level > 5) {
-        const GuidConverter local_conv(id_), remote_conv(remote);
+        const GuidConverter local_conv(id_), remote_conv(src);
         ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
                    "local %C has durable for remote %C\n",
                    OPENDDS_STRING(local_conv).c_str(),
@@ -2939,6 +2972,8 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
         }
       }
     }
+  } else {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpDataLink::RtpsWriter::process_acknack_i - %C -> %C invalid acknack\n", LogGuid(id_).c_str(), LogGuid(reader->id_).c_str()));
   }
 
   // Process the nack.
@@ -3049,6 +3084,9 @@ void RtpsUdpDataLink::RtpsWriter::process_nackfrag(const RTPS::NackFragSubmessag
 
   const ReaderInfoMap::iterator ri = remote_readers_.find(src);
   if (ri == remote_readers_.end()) {
+    if (transport_debug.log_dropped_messages) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::RtpsWriter::process_nackfrag - %C -> %C unknown remote reader\n", LogGuid(id_).c_str(), LogGuid(src).c_str()));
+    }
     VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::received(NACK_FRAG) "
       "WARNING ReaderInfo not found\n"));
     return;
@@ -3059,6 +3097,9 @@ void RtpsUdpDataLink::RtpsWriter::process_nackfrag(const RTPS::NackFragSubmessag
   ++reader->recv_from_;
 
   if (!compare_and_update_counts(nackfrag.count.value, reader->nackfrag_recvd_count_)) {
+    if (transport_debug.log_dropped_messages) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::RtpsWriter::process_nackfrag - %C -> %C stale/duplicate message\n", LogGuid(id_).c_str(), LogGuid(reader->id_).c_str()));
+    }
     VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::received(NACK_FRAG) "
       "WARNING Count indicates duplicate, dropping\n"));
     return;

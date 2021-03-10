@@ -234,6 +234,9 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
     peer.entityId = RTPS::ENTITYID_PARTICIPANT;
     const ParticipantCryptoHandle sender = link_->handle_registry()->get_remote_participant_crypto_handle(peer);
     if (sender == DDS::HANDLE_NIL) {
+      if (transport_debug.log_dropped_messages) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpReceiveStrategy::receive_bytes - decode error from %C\n", LogGuid(peer).c_str()));
+      }
       if (security_debug.encdec_warn) {
         ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy::receive_bytes: ")
                    ACE_TEXT("decode_rtps_message no remote participant crypto handle for %C, dropping\n"),
@@ -246,6 +249,9 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
     DDS::OctetSeq plain;
     SecurityException ex = {"", 0, 0};
     if (!crypto->decode_rtps_message(plain, encoded, receiver, sender, ex)) {
+      if (transport_debug.log_dropped_messages) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpReceiveStrategy::receive_bytes - decode error from %C\n", LogGuid(peer).c_str()));
+      }
       if (security_debug.encdec_warn) {
         ACE_ERROR((LM_WARNING, "(%P|%t) {encdec_warn} decode_rtps_message SecurityException [%d.%d]: %C\n",
                    ex.code, ex.minor_code, ex.message.in()));
@@ -329,6 +335,9 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
   if (std::memcmp(receiver_.dest_guid_prefix_, link_->local_prefix(),
                   sizeof(GuidPrefix_t))) {
     // Not our message, we may be on multicast listening to all the others.
+    if (transport_debug.log_dropped_messages) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpReceiveStrategy::deliver_sample - not destination\n"));
+    }
     return;
   }
 
@@ -385,11 +394,17 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     receiver_.fill_header(sample.header_);
     const DataSubmessage& data = submessage.data_sm();
     if (!check_encoded(data.writerId)) {
+      if (transport_debug.log_dropped_messages) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpReceiveStrategy::deliver_sample_i - decode error\n"));
+      }
       break;
     }
 
 #ifdef OPENDDS_SECURITY
     if (!decode_payload(sample, data)) {
+      if (transport_debug.log_dropped_messages) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpReceiveStrategy::deliver_sample_i - decode error\n"));
+      }
       break;
     }
 #endif
@@ -486,6 +501,9 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
   }
   case GAP:
     if (!check_encoded(submessage.gap_sm().writerId)) {
+      if (transport_debug.log_dropped_messages) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpReceiveStrategy::deliver_sample_i - decode error\n"));
+      }
       break;
     }
     link_->received(submessage.gap_sm(), receiver_.source_guid_prefix_, receiver_.directed_);
@@ -493,6 +511,9 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
 
   case HEARTBEAT:
     if (!check_encoded(submessage.heartbeat_sm().writerId)) {
+      if (transport_debug.log_dropped_messages) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpReceiveStrategy::deliver_sample_i - decode error\n"));
+      }
       break;
     }
     link_->received(submessage.heartbeat_sm(), receiver_.source_guid_prefix_, receiver_.directed_);
@@ -507,6 +528,9 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
 
   case ACKNACK:
     if (!check_encoded(submessage.acknack_sm().readerId)) {
+      if (transport_debug.log_dropped_messages) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpReceiveStrategy::deliver_sample_i - decode error\n"));
+      }
       break;
     }
     link_->received(submessage.acknack_sm(),
@@ -515,6 +539,9 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
 
   case HEARTBEAT_FRAG:
     if (!check_encoded(submessage.hb_frag_sm().writerId)) {
+      if (transport_debug.log_dropped_messages) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpReceiveStrategy::deliver_sample_i - decode error\n"));
+      }
       break;
     }
     link_->received(submessage.hb_frag_sm(), receiver_.source_guid_prefix_, receiver_.directed_);
@@ -522,6 +549,9 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
 
   case NACK_FRAG:
     if (!check_encoded(submessage.nack_frag_sm().readerId)) {
+      if (transport_debug.log_dropped_messages) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpReceiveStrategy::deliver_sample_i - decode error\n"));
+      }
       break;
     }
     link_->received(submessage.nack_frag_sm(),

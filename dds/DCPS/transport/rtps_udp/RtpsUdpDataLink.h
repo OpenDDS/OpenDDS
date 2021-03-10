@@ -669,16 +669,16 @@ private:
                            const FN& func)
   {
     const RepoId local = make_id(local_prefix_, submessage.writerId);
-
-    RepoId src;
-    std::memcpy(src.guidPrefix, src_prefix, sizeof(GuidPrefix_t));
-    src.entityId = submessage.readerId;
+    const RepoId src = make_id(src_prefix, submessage.readerId);
 
     OPENDDS_VECTOR(RtpsWriter_rch) to_call;
     {
       ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_);
       const RtpsWriterMap::iterator rw = writers_.find(local);
       if (rw == writers_.end()) {
+        if (transport_debug.log_dropped_messages) {
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::RtpsWriter::process_nackfrag - %C -> %C unknown local writer\n", LogGuid(local).c_str(), LogGuid(src).c_str()));
+        }
         return;
       }
       to_call.push_back(rw->second);
@@ -698,10 +698,7 @@ private:
                            const FN& func)
   {
     const RepoId local = make_id(local_prefix_, submessage.readerId);
-
-    RepoId src;
-    std::memcpy(src.guidPrefix, src_prefix, sizeof(GuidPrefix_t));
-    src.entityId = submessage.writerId;
+    const RepoId src = make_id(src_prefix, submessage.writerId);
 
     OPENDDS_VECTOR(RtpsReader_rch) to_call;
     {
@@ -711,9 +708,18 @@ private:
         for (RRMM_IterRange iters = readers_of_writer_.equal_range(src); iters.first != iters.second; ++iters.first) {
           to_call.push_back(iters.first->second);
         }
+        if (to_call.empty()) {
+          if (transport_debug.log_dropped_messages) {
+            ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::RtpsWriter::process_nackfrag - %C -> X no local readers\n", LogGuid(src).c_str()));
+          }
+          return;
+        }
       } else {
         const RtpsReaderMap::iterator rr = readers_.find(local);
         if (rr == readers_.end()) {
+          if (transport_debug.log_dropped_messages) {
+            ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::RtpsWriter::process_nackfrag - %C -> %C unknown local reader\n", LogGuid(src).c_str(), LogGuid(local).c_str()));
+          }
           return;
         }
         to_call.push_back(rr->second);
