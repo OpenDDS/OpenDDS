@@ -2828,10 +2828,9 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   const SequenceNumber ack = to_opendds_seqnum(acknack.readerSNState.bitmapBase);
   const bool reset = acknack.count.value == 0 && ack <= reader->cur_cumulative_ack_;
 
-  // TODO: Add filtering logic.
-
   if (!reset) {
-    if (!compare_and_update_counts(acknack.count.value, reader->acknack_recvd_count_)) {
+    if (!compare_and_update_counts(acknack.count.value, reader->acknack_recvd_count_) &&
+        (!reader->reflects_heartbeat_count() || acknack.count.value != 0 || reader->acknack_recvd_count_ != 0)) {
       VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
             "WARNING Count indicates duplicate, dropping\n"));
       return;
