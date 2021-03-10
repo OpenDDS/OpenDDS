@@ -358,11 +358,12 @@ Spdp::Spdp(DDS::DomainId_t domain,
 }
 #endif
 
-Spdp::~Spdp()
+void
+Spdp::shutdown()
 {
-  shutdown_flag_ = true;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    shutdown_flag_ = true;
     if (DCPS::DCPS_debug_level > 3) {
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) Spdp::~Spdp ")
@@ -426,6 +427,10 @@ Spdp::~Spdp()
       shutdown_cond_.wait();
     }
   }
+}
+
+Spdp::~Spdp()
+{
 }
 
 #ifdef OPENDDS_SECURITY
@@ -2370,7 +2375,7 @@ Spdp::SpdpTransport::~SpdpTransport()
     ACE_GUARD(ACE_Thread_Mutex, g, outer_->lock_);
     outer_->eh_shutdown_ = true;
   }
-  outer_->shutdown_cond_.notify_one();
+  outer_->shutdown_cond_.notify_all();
 
   unicast_socket_.close();
   multicast_socket_.close();
@@ -2822,7 +2827,12 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
           plist[0]._d(PID_PARTICIPANT_GUID);
         }
 
-        outer_->data_received(data, plist, remote);
+        DCPS::WeakRcHandle<Spdp> wh(*outer_);
+        DCPS::RcHandle<Spdp> outer = wh.lock();
+
+        if (outer) {
+          outer->data_received(data, plist, remote);
+        }
         break;
       }
       case INFO_DST: {

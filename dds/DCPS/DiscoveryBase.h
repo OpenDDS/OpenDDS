@@ -2551,6 +2551,7 @@ namespace OpenDDS {
           participants_.erase(domain);
         }
 
+        participant->shutdown();
         return true;
       }
 

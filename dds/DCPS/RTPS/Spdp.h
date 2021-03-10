@@ -98,6 +98,8 @@ public:
   // Managing reader/writer associations
   void signal_liveliness(DDS::LivelinessQosPolicyKind kind);
 
+  void shutdown();
+
   // Is Spdp shutting down?
   bool shutting_down()
   {
