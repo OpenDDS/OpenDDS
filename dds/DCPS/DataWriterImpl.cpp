@@ -5,7 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
 
 #include "DataWriterImpl.h"
 
@@ -35,6 +35,9 @@
 #include "transport/framework/TransportRegistry.h"
 #ifndef DDS_HAS_MINIMUM_BIT
 #  include "BuiltInTopicUtils.h"
+#endif
+
+#ifndef DDS_HAS_MINIMUM_BIT
 #  include <dds/DdsDcpsCoreTypeSupportC.h>
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 #include <dds/DdsDcpsCoreC.h>
@@ -1482,14 +1485,20 @@ DataWriterImpl::enable()
                            trans_conf_info,
                            pub_qos,
                            type_info);
-
-
-  if (!publisher || this->publication_id_ == GUID_UNKNOWN) {
-    ACE_DEBUG((LM_WARNING,
-               ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::enable, ")
-               ACE_TEXT("add_publication returned invalid id.\n")));
+  if (publication_id_ == GUID_UNKNOWN) {
+    if (DCPS_debug_level >= 1) {
+      ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: DataWriterImpl::enable: "
+        "add_publication failed\n"));
+    }
     data_container_->shutdown_ = true;
     return DDS::RETCODE_ERROR;
+  }
+
+  if (DCPS_debug_level >= 2) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriterImpl::enable: "
+      "got GUID %C, publishing to topic name \"%C\" type \"%C\"\n",
+      LogGuid(publication_id_).c_str(),
+      topic_servant_->topic_name(), topic_servant_->type_name()));
   }
 
   this->data_container_->publication_id_ = this->publication_id_;

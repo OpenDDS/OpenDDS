@@ -128,7 +128,7 @@ namespace OpenDDS {
                 {
                   expire = MonotonicTimePoint::now() + interval_;
                   if (status_) {
-                    if (DCPS_debug_level > 4) {
+                    if (DCPS_debug_level >= 4) {
                       ACE_DEBUG((LM_DEBUG,
                                  "(%P|%t) DcpsUpcalls::svc. Updating thread status.\n"));
                     }
@@ -174,7 +174,7 @@ namespace OpenDDS {
         wait(); // ACE_Task_Base::wait does not accept a timeout
 
         if (status_ && has_timeout() && MonotonicTimePoint::now() > expire) {
-          if (DCPS_debug_level > 4) {
+          if (DCPS_debug_level >= 4) {
             ACE_DEBUG((LM_DEBUG,
                        "(%P|%t) DcpsUpcalls::writer_done. Updating thread status.\n"));
           }
@@ -2200,6 +2200,8 @@ namespace OpenDDS {
         , is_requester_(false)
         , auth_req_sequence_number_(0)
         , handshake_sequence_number_(0)
+        , auth_messages_sent_(0)
+        , auth_messages_received_(0)
         , identity_handle_(DDS::HANDLE_NIL)
         , handshake_handle_(DDS::HANDLE_NIL)
         , permissions_handle_(DDS::HANDLE_NIL)
@@ -2230,6 +2232,8 @@ namespace OpenDDS {
         , is_requester_(false)
         , auth_req_sequence_number_(0)
         , handshake_sequence_number_(0)
+        , auth_messages_sent_(0)
+        , auth_messages_received_(0)
         , identity_handle_(DDS::HANDLE_NIL)
         , handshake_handle_(DDS::HANDLE_NIL)
         , permissions_handle_(DDS::HANDLE_NIL)
@@ -2275,6 +2279,7 @@ namespace OpenDDS {
         ParticipantLocationBuiltinTopicData location_data_;
         DDS::InstanceHandle_t location_ih_;
 
+        MonotonicTimePoint discovered_at_;
         MonotonicTimePoint lease_expiration_;
         DDS::InstanceHandle_t bit_ih_;
         SequenceNumber last_seq_;
@@ -2296,6 +2301,8 @@ namespace OpenDDS {
         bool is_requester_;
         CORBA::LongLong auth_req_sequence_number_;
         CORBA::LongLong handshake_sequence_number_;
+        size_t auth_messages_sent_;
+        size_t auth_messages_received_;
 
         DDS::Security::IdentityToken identity_token_;
         DDS::Security::PermissionsToken permissions_token_;
