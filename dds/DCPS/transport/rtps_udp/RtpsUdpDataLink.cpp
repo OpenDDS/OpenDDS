@@ -1844,7 +1844,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
     if (!writer->recvd_.empty()) {
       writer->hb_last_ = std::max(writer->hb_last_, hb_last);
       gather_ack_nacks_i(writer, link, !(heartbeat.smHeader.flags & RTPS::FLAG_F), meta_submessages);
-    } else {
+    } else if (link->config().responsive_mode_) {
       gather_preassociation_acknack_i(meta_submessages, writer);
     }
   } else {
@@ -1893,16 +1893,20 @@ RtpsUdpDataLink::RtpsWriter::add_reader(const ReaderInfo_rch& reader)
     remote_readers_.insert(ReaderInfoMap::value_type(reader->id_, reader));
     preassociation_readers_.insert(reader);
 
-    MetaSubmessageVec meta_submessages;
-    MetaSubmessage meta_submessage(id_, GUID_UNKNOWN);
-    const SingleSendBuffer::Proxy proxy(*send_buff_);
-    initialize_heartbeat(proxy, meta_submessage);
-    gather_directed_heartbeat_i(proxy, meta_submessages, meta_submessage, reader);
     RtpsUdpDataLink_rch link = link_.lock();
-    if (link) {
+    if (!link) {
+      return false;
+    }
+
+    heartbeat_.schedule(link->config().heartbeat_period_);
+    if (link->config().responsive_mode_) {
+      MetaSubmessageVec meta_submessages;
+      MetaSubmessage meta_submessage(id_, GUID_UNKNOWN);
+      const SingleSendBuffer::Proxy proxy(*send_buff_);
+      initialize_heartbeat(proxy, meta_submessage);
+      gather_directed_heartbeat_i(proxy, meta_submessages, meta_submessage, reader);
       link->queue_or_send_submessages(meta_submessages);
     }
-    heartbeat_.schedule(link->config().heartbeat_period_);
 
     return true;
   }
@@ -1961,12 +1965,17 @@ RtpsUdpDataLink::RtpsReader::add_writer(const WriterInfo_rch& writer)
     remote_writers_[writer->id_] = writer;
     preassociation_writers_.insert(writer);
 
-    MetaSubmessageVec meta_submessages;
-    gather_preassociation_acknack_i(meta_submessages, writer);
     RtpsUdpDataLink_rch link = link_.lock();
-    if (link) {
+    if (!link) {
+      return false;
+    }
+
+    preassociation_task_.schedule(link->config().heartbeat_period_);
+    if (link->config().responsive_mode_) {
+      MetaSubmessageVec meta_submessages;
+      gather_preassociation_acknack_i(meta_submessages, writer);
+      RtpsUdpDataLink_rch link = link_.lock();
       link->queue_or_send_submessages(meta_submessages);
-      preassociation_task_.schedule(link->config().heartbeat_period_);
     }
 
     return true;
@@ -2899,11 +2908,13 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
       check_leader_lagger();
       // Heartbeat is already scheduled.
     }
-    // Send a heartbeat immediately so the reader can request data.
-    const SingleSendBuffer::Proxy proxy(*send_buff_);
-    MetaSubmessage meta_submessage(id_, GUID_UNKNOWN);
-    initialize_heartbeat(proxy, meta_submessage);
-    gather_directed_heartbeat_i(proxy, meta_submessages, meta_submessage, reader);
+    if (link->config().responsive_mode_) {
+      // Send a heartbeat immediately so the reader can request data.
+      const SingleSendBuffer::Proxy proxy(*send_buff_);
+      MetaSubmessage meta_submessage(id_, GUID_UNKNOWN);
+      initialize_heartbeat(proxy, meta_submessage);
+      gather_directed_heartbeat_i(proxy, meta_submessages, meta_submessage, reader);
+    }
   }
 
   OPENDDS_MAP(SequenceNumber, TransportQueueElement*) pendingCallbacks;
@@ -2996,7 +3007,9 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
 
     if (!reader->requests_.empty()) {
       readers_expecting_data_.insert(reader);
-      readers_expecting_heartbeat_.insert(reader);
+      if (link->config().responsive_mode_) {
+        readers_expecting_heartbeat_.insert(reader);
+      }
       schedule_nack_response = true;
     } else {
       readers_expecting_data_.erase(reader);
@@ -3108,7 +3121,9 @@ void RtpsUdpDataLink::RtpsWriter::process_nackfrag(const RTPS::NackFragSubmessag
   const SequenceNumber seq = to_opendds_seqnum(nackfrag.writerSN);
   reader->requested_frags_[seq] = nackfrag.fragmentNumberState;
   readers_expecting_data_.insert(reader);
-  readers_expecting_heartbeat_.insert(reader);
+  if (link->config().responsive_mode_) {
+    readers_expecting_heartbeat_.insert(reader);
+  }
   nack_response_.schedule(link->config().nak_response_delay_);
 }
 

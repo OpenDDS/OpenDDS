@@ -48,6 +48,7 @@ public:
   TimeDuration heartbeat_response_delay_;
   TimeDuration handshake_timeout_;
   TimeDuration durable_data_timeout_;
+  bool responsive_mode_;
 
   virtual int load(ACE_Configuration_Heap& cf,
                    ACE_Configuration_Section_Key& sect);
