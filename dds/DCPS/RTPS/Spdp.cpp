@@ -2831,6 +2831,9 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
           plist[0]._d(PID_PARTICIPANT_GUID);
         }
 
+        // Creating a WeakRcHandle from a dereferenced object pointer is only valid when we know the object is still valid
+        // The current design of Spdp doesn't permit the reactor thread (which calls this method) to run when the object is invalid
+        // While this assumption is true, creating the WeakRcHandle this way is safe
         DCPS::WeakRcHandle<Spdp> wh(*outer_);
         DCPS::RcHandle<Spdp> outer = wh.lock();
 
