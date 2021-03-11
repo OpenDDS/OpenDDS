@@ -549,6 +549,17 @@ public:
     sedp_heartbeat_period_maximum_ = period_maximum;
   }
 
+  DCPS::TimeDuration sedp_nak_response_delay() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::TimeDuration());
+    return sedp_nak_response_delay_;
+  }
+  void sedp_nak_response_delay(const DCPS::TimeDuration& period)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    sedp_nak_response_delay_ = period;
+  }
+
   CORBA::ULong participant_flags() const
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, 0);
@@ -613,6 +624,7 @@ private:
   DCPS::TimeDuration sedp_heartbeat_period_;
   DCPS::TimeDuration sedp_heartbeat_period_minimum_;
   DCPS::TimeDuration sedp_heartbeat_period_maximum_;
+  DCPS::TimeDuration sedp_nak_response_delay_;
   CORBA::ULong participant_flags_;
   bool responsive_mode_;
 };
