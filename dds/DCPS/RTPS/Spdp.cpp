@@ -475,11 +475,11 @@ Spdp::enqueue_location_update_i(DiscoveredParticipantIter iter,
   iter->second.location_updates_.push_back(DiscoveredParticipant::LocationUpdate(mask, from, DCPS::SystemTimePoint::now()));
 }
 
-void Spdp::process_location_updates_i(DiscoveredParticipantIter iter, bool force_publish)
+void Spdp::process_location_updates_i(DiscoveredParticipantIter& iter, bool force_publish)
 {
   // We have the global lock.
 
-  if (iter->second.bit_ih_ == DDS::HANDLE_NIL) {
+  if (iter == participants_.end() || iter->second.bit_ih_ == DDS::HANDLE_NIL) {
     // Do not process updates until the participant exists in the built-in topics.
     return;
   }
@@ -489,7 +489,7 @@ void Spdp::process_location_updates_i(DiscoveredParticipantIter iter, bool force
 
   bool published = false;
   for (DiscoveredParticipant::LocationUpdateList::const_iterator pos = location_updates.begin(),
-         limit = location_updates.end(); pos != limit; ++pos) {
+         limit = location_updates.end(); iter != participants_.end() && pos != limit; ++pos) {
     DCPS::ParticipantLocationBuiltinTopicData& location_data = iter->second.location_data_;
 
     OPENDDS_STRING addr = "";
@@ -580,7 +580,7 @@ void Spdp::process_location_updates_i(DiscoveredParticipantIter iter, bool force
 }
 
 void
-Spdp::publish_location_update_i(DiscoveredParticipantIter iter)
+Spdp::publish_location_update_i(DiscoveredParticipantIter& iter)
 {
   DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* locbit = part_loc_bit();
   if (locbit) {
@@ -774,7 +774,9 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #ifndef DDS_HAS_MINIMUM_BIT
       process_location_updates_i(iter);
 #endif
-      remove_discovered_participant(iter);
+      if (iter != participants_.end()) {
+        remove_discovered_participant(iter);
+      }
       return;
     }
 
@@ -843,7 +845,9 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #ifndef DDS_HAS_MINIMUM_BIT
       process_location_updates_i(iter);
 #endif
-      remove_discovered_participant(iter);
+      if (iter != participants_.end()) {
+        remove_discovered_participant(iter);
+      }
       return;
     }
   }
@@ -1925,7 +1929,7 @@ void Spdp::remove_agent_info(const DCPS::RepoId&)
 #endif
 
 void
-Spdp::remove_discovered_participant_i(DiscoveredParticipantIter iter)
+Spdp::remove_discovered_participant_i(DiscoveredParticipantIter& iter)
 {
 
   remove_lease_expiration_i(iter);
