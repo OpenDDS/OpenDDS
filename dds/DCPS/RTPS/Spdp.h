@@ -164,10 +164,10 @@ public:
                                const ParticipantData_t& pdata,
                                const DCPS::RepoId& guid);
 
+#endif
+
   const ParticipantData_t& get_participant_data(const DCPS::RepoId& guid) const;
   ParticipantData_t& get_participant_data(const DCPS::RepoId& guid);
-
-#endif
 
   u_short get_spdp_port() const { return tport_ ? tport_->uni_port_ : 0; }
 

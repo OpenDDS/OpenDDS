@@ -4078,6 +4078,8 @@ void Spdp::process_participant_ice(const ParameterList& plist,
   }
 }
 
+#endif
+
 const ParticipantData_t& Spdp::get_participant_data(const DCPS::RepoId& guid) const
 {
   DiscoveredParticipantConstIter iter = participants_.find(make_part_guid(guid));
@@ -4089,8 +4091,6 @@ ParticipantData_t& Spdp::get_participant_data(const DCPS::RepoId& guid)
   DiscoveredParticipantIter iter = participants_.find(make_part_guid(guid));
   return iter->second.pdata_;
 }
-
-#endif
 
 void
 Spdp::rtps_relay_only_now(bool f)
