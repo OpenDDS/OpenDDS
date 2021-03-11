@@ -4683,23 +4683,13 @@ jobs:
         call setenv.cmd
         cd DevGuideExamples\DCPS\Messenger
         perl run_test.pl -ExeSubDir Static_Debug
-    - name: build CMake
+    - name: build and run CMake tests
       shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
-        cd tests/cmake_integration/Messenger/Messenger_1
-        mkdir build
-        cd build
-        cmake -DCMAKE_PREFIX_PATH=$OPENDDS_INSTALL_PREFIX ..
-        cmake --build .
-    - name: run CMake test
-      shell: cmd
-      run: |
-        cd OpenDDS
-        call setenv.cmd
-        cd tests/cmake_integration/Messenger/Messenger_1/build
-        perl ../../../../DCPS/Messenger/run_test.pl -ExeSubDir Debug rtps
+        cd tests/cmake_integration/
+        perl run_ci_tests.pl --no-shared
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
