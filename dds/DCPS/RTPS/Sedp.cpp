@@ -946,6 +946,7 @@ create_association_data_proto(DCPS::AssociationData& proto,
   proto.remote_reliable_ = true;
   proto.remote_durable_ = true;
   DCPS::assign(proto.remote_id_.guidPrefix, pdata.participantProxy.guidPrefix);
+  proto.remote_transport_context_ = pdata.participantProxy.opendds_participant_flags.bits;
   populate_locators(proto.remote_data_, pdata);
 }
 

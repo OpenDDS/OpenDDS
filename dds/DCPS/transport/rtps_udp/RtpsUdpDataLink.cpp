@@ -3787,7 +3787,7 @@ void
 RtpsUdpDataLink::RtpsWriter::gather_heartbeats_i(OPENDDS_VECTOR(TransportQueueElement*)& pendingCallbacks,
                                                  MetaSubmessageVec& meta_submessages)
 {
-  if (preassociation_readers_.empty() && lagging_readers_.empty() && readers_expecting_heartbeat_.empty()) {
+  if (preassociation_readers_.empty() && lagging_readers_.empty()) {
     return;
   }
 
