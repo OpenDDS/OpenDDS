@@ -1009,6 +1009,12 @@ namespace OpenDDS {
           discovered_endpoints = td.discovered_subscriptions();
         }
 
+        const bool is_remote = !equal_guid_prefixes(repoId, participant_id_);
+        if (is_remote && local_endpoints.empty()) {
+          // Nothing to match.
+          return;
+        }
+
         for (RepoIdSet::const_iterator iter = local_endpoints.begin();
              iter != local_endpoints.end(); ++iter) {
           // check to make sure it's a Reader/Writer or Writer/Reader match
@@ -1019,6 +1025,11 @@ namespace OpenDDS {
               match(reader ? *iter : repoId, reader ? repoId : *iter);
             }
           }
+        }
+
+        // Remote/remote matches are a waste of time
+        if (is_remote) {
+          return;
         }
 
         for (RepoIdSet::const_iterator iter = discovered_endpoints.begin();
@@ -1214,10 +1225,6 @@ namespace OpenDDS {
             ACE_DEBUG((LM_DEBUG, "(%P|%t) EndpointManager::match: Undiscovered Reader\n"));
           }
           return; // Possible and ok, since lock is released
-        }
-
-        if (!writer_local && !reader_local) {
-          return;
         }
 
         MatchingData md;
