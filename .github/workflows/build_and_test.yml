@@ -175,24 +175,13 @@ jobs:
         cd OpenDDS
         . setenv.sh
         make -j4
-    - name: build CMake
+    - name: build and run CMake tests
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
-        cd tests/cmake_integration/Messenger/Messenger_1
-        rm -fr build
-        mkdir build
-        cd build
-        cmake -DCMAKE_PREFIX_PATH=$OPENDDS_INSTALL_PREFIX ..
-        cmake --build .
-    - name: run CMake test
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/cmake_integration/Messenger/Messenger_1/build
-        perl run_test.pl rtps
+        cd tests/cmake_integration
+        perl run_ci_tests.pl
     - name: gitclean
       shell: bash
       run: |
@@ -426,24 +415,13 @@ jobs:
         cd OpenDDS
         . setenv.sh
         make -j4
-    - name: build CMake
+    - name: build and run CMake tests
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
-        cd tests/cmake_integration/Messenger/Messenger_1
-        rm -fr build
-        mkdir build
-        cd build
-        cmake -DCMAKE_PREFIX_PATH=$OPENDDS_INSTALL_PREFIX ..
-        cmake --build .
-    - name: run CMake test
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/cmake_integration/Messenger/Messenger_1/build
-        perl run_test.pl rtps
+        cd tests/cmake_integration
+        perl run_ci_tests.pl
     - name: gitclean
       shell: bash
       run: |
@@ -682,24 +660,13 @@ jobs:
   #       cd OpenDDS/build/target
   #       . setenv.sh
   #       make -j4
-  #   - name: build CMake
+  #   - name: build and run CMake tests
   #     shell: bash
   #     run: |
   #       cd OpenDDS
   #       . setenv.sh
-  #       cd tests/cmake_integration/Messenger/Messenger_1
-  #       rm -fr build
-  #       mkdir build
-  #       cd build
-  #       cmake -DCMAKE_PREFIX_PATH=$OPENDDS_INSTALL_PREFIX ..
-  #       cmake --build .
-  #   - name: run CMake test
-  #     shell: bash
-  #     run: |
-  #       cd OpenDDS
-  #       . setenv.sh
-  #       cd tests/cmake_integration/Messenger/Messenger_1/build
-  #       perl run_test.pl rtps
+  #       cd tests/cmake_integration
+  #       perl run_ci_tests.pl
   #   - name: create OpenDDS tar.xz artifact
   #     shell: bash
   #     run: |
@@ -933,24 +900,13 @@ jobs:
   #       cd OpenDDS/build/target
   #       . setenv.sh
   #       make -j4
-  #   - name: build CMake
+  #   - name: build and run CMake tests
   #     shell: bash
   #     run: |
   #       cd OpenDDS
   #       . setenv.sh
-  #       cd tests/cmake_integration/Messenger/Messenger_1
-  #       rm -fr build
-  #       mkdir build
-  #       cd build
-  #       cmake -DCMAKE_PREFIX_PATH=$OPENDDS_INSTALL_PREFIX ..
-  #       cmake --build .
-  #   - name: run CMake test
-  #     shell: bash
-  #     run: |
-  #       cd OpenDDS
-  #       . setenv.sh
-  #       cd tests/cmake_integration/Messenger/Messenger_1/build
-  #       perl run_test.pl rtps
+  #       cd tests/cmake_integration
+  #       perl run_ci_tests.pl
   #   - name: create OpenDDS tar.xz artifact
   #     shell: bash
   #     run: |
@@ -1427,24 +1383,13 @@ jobs:
         cd OpenDDS
         . setenv.sh
         make -j4
-    - name: build CMake
+    - name: build and run CMake tests
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
-        cd tests/cmake_integration/Messenger/Messenger_1
-        rm -fr build
-        mkdir build
-        cd build
-        cmake -DCMAKE_PREFIX_PATH=$OPENDDS_INSTALL_PREFIX ..
-        cmake --build .
-    - name: run CMake test
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/cmake_integration/Messenger/Messenger_1/build
-        perl run_test.pl rtps
+        cd tests/cmake_integration
+        perl run_ci_tests.pl
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -1693,24 +1638,13 @@ jobs:
         cd OpenDDS
         . setenv.sh
         make -j4
-    - name: build CMake
+    - name: build and run CMake tests
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
-        cd tests/cmake_integration/Messenger/Messenger_1
-        rm -fr build
-        mkdir build
-        cd build
-        cmake -DCMAKE_PREFIX_PATH=$OPENDDS_INSTALL_PREFIX ..
-        cmake --build .
-    - name: run CMake test
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/cmake_integration/Messenger/Messenger_1/build
-        perl run_test.pl rtps
+        cd tests/cmake_integration
+        perl run_ci_tests.pl
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -1965,24 +1899,13 @@ jobs:
         cd OpenDDS
         . setenv.sh
         make -j4
-    - name: build CMake
+    - name: build and run CMake tests
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
-        cd tests/cmake_integration/Messenger/Messenger_1
-        rm -fr build
-        mkdir build
-        cd build
-        cmake -DCMAKE_PREFIX_PATH=$OPENDDS_INSTALL_PREFIX ..
-        cmake --build .
-    - name: run CMake test
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/cmake_integration/Messenger/Messenger_1/build
-        perl run_test.pl rtps
+        cd tests/cmake_integration
+        perl run_ci_tests.pl
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -2240,24 +2163,13 @@ jobs:
         cd OpenDDS
         . setenv.sh
         make -j4
-    - name: build CMake
+    - name: build and run CMake tests
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
-        cd tests/cmake_integration/Messenger/Messenger_1
-        rm -fr build
-        mkdir build
-        cd build
-        cmake -DCMAKE_PREFIX_PATH=$OPENDDS_INSTALL_PREFIX ..
-        cmake --build .
-    - name: run CMake test
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/cmake_integration/Messenger/Messenger_1/build
-        perl run_test.pl rtps
+        cd tests/cmake_integration
+        perl run_ci_tests.pl
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -2510,24 +2422,13 @@ jobs:
         cd OpenDDS
         . setenv.sh
         make -j4
-    - name: build CMake
+    - name: build and run CMake tests
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
-        cd tests/cmake_integration/Messenger/Messenger_1
-        rm -fr build
-        mkdir build
-        cd build
-        cmake -DCMAKE_PREFIX_PATH=$OPENDDS_INSTALL_PREFIX ..
-        cmake --build .
-    - name: run CMake test
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/cmake_integration/Messenger/Messenger_1/build
-        perl run_test.pl rtps
+        cd tests/cmake_integration
+        perl run_ci_tests.pl
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
