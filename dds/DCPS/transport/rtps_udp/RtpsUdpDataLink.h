@@ -677,7 +677,7 @@ private:
       const RtpsWriterMap::iterator rw = writers_.find(local);
       if (rw == writers_.end()) {
         if (transport_debug.log_dropped_messages) {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::RtpsWriter::process_nackfrag - %C -> %C unknown local writer\n", LogGuid(local).c_str(), LogGuid(src).c_str()));
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::datawriter_dispatch - %C -> %C unknown local writer\n", LogGuid(local).c_str(), LogGuid(src).c_str()));
         }
         return;
       }
@@ -710,7 +710,7 @@ private:
         }
         if (to_call.empty()) {
           if (transport_debug.log_dropped_messages) {
-            ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::RtpsWriter::process_nackfrag - %C -> X no local readers\n", LogGuid(src).c_str()));
+            ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::datawreader_dispatch - %C -> X no local readers\n", LogGuid(src).c_str()));
           }
           return;
         }
