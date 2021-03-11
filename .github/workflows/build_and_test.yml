@@ -1905,7 +1905,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/cmake_integration
-        perl run_ci_tests.pl
+        perl run_ci_tests.pl --skip-cxx11
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -4590,7 +4590,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests/cmake_integration/
-        perl run_ci_tests.pl --no-shared
+        perl run_ci_tests.pl --no-shared --build-config=Debug
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
