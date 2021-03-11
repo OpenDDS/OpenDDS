@@ -15,6 +15,8 @@ use Cwd;
 use Env qw(DDS_ROOT PATH);
 use strict;
 
+push(@PerlACE::ConfigList::Configs, 'NO_INFO_REPO');
+
 ################################################################################
 
 my ($opt_h, $opt_d, $opt_a, $opt_x, $opt_s, @opt_l);
