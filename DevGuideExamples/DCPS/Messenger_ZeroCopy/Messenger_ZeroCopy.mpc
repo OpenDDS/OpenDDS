@@ -10,7 +10,7 @@ project(*idl): dcps_test_idl_only_lib {
   }
 }
 
-project(*publisher) : dcpsexe, dcps_tcp {
+project(*publisher) : dcps_rtps_udp {
   requires += no_opendds_safety_profile
   exename   = publisher
   after    += *idl
@@ -24,7 +24,7 @@ project(*publisher) : dcpsexe, dcps_tcp {
   }
 }
 
-project(*subscriber) : dcpsexe, dcps_tcp {
+project(*subscriber) : dcps_rtps_udp {
   requires += no_opendds_safety_profile
   exename   = subscriber
   after    += *idl

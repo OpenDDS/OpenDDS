@@ -26,6 +26,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
   // passes the arguments to the ORB initialization first, then strips
   // the DCPS arguments.
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T INFO: initializing the monitor.\n")));
+  TheServiceParticipant->set_default_discovery(OpenDDS::DCPS::Discovery::DEFAULT_REPO);
   ::DDS::DomainParticipantFactory_var factory = TheParticipantFactoryWithArgs( argc, argv);
 
   this->subscriberParticipant_.resize(

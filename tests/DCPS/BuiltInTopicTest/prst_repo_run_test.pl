@@ -70,6 +70,7 @@ my $repo_args = "$common_args"
   . " -o $dcpsrepo_ior"
   . " -ORBSvcConf mySvc.conf"
   . " -orbendpoint iiop://$orb_address:$SRV_PORT"
+  . " -DCPSConfigFile info_repo.ini"
 ;
 
 my $repo1_log = 'repo1.log';

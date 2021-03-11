@@ -7,7 +7,7 @@ project(*idl): dcps {
   custom_only = 1
 }
 
-project(*publisher) : dcpsexe, dcps_tcp, dcps_rtps_udp {
+project(*publisher) : dcps, dcps_rtps_udp, dcps_inforepodiscovery {
   requires += no_opendds_safety_profile
   exename   = publisher
   after    += *idl
@@ -21,7 +21,7 @@ project(*publisher) : dcpsexe, dcps_tcp, dcps_rtps_udp {
   }
 }
 
-project(*subscriber) : dcpsexe, dcps_tcp, dcps_rtps_udp {
+project(*subscriber) : dcps, dcps_rtps_udp, dcps_inforepodiscovery {
   requires += no_opendds_safety_profile
   exename   = subscriber
   after    += *publisher

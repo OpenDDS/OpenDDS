@@ -7,7 +7,7 @@ project(*idl): dcps {
   custom_only = 1
 }
 
-project(*publisher) : dcpsexe, dcps_tcp, dds_model {
+project(*publisher) : dcps, dcps_rtps_udp, dds_model {
   requires += no_opendds_safety_profile
   exename   = publisher
   after    += *idl
@@ -22,7 +22,7 @@ project(*publisher) : dcpsexe, dcps_tcp, dds_model {
   }
 }
 
-project(*subscriber) : dcpsexe, dcps_tcp, dds_model {
+project(*subscriber) : dcps, dcps_rtps_udp, dds_model {
   requires += no_opendds_safety_profile
   exename   = subscriber
   after    += *publisher

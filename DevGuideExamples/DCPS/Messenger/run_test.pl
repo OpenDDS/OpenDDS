@@ -16,12 +16,12 @@ use strict;
 
 my $status = 0;
 
-my $rtps = 0;
+my $info_repo = 0;
 my $help = 0;
 
-my $help_message = "usage: run_test.pl [-h|--help] [--rtps]\n";
+my $help_message = "usage: run_test.pl [-h|--help] [--info-repo]\n";
 if (not GetOptions(
-  "rtps" => \$rtps,
+  "info-repo" => \$info_repo,
   "help|h" => \$help
 )) {
   print STDERR ("Invalid Command Line Argument(s)\n$help_message");
@@ -36,8 +36,8 @@ unlink "publisher.log";
 
 my $common_opts = "-ORBDebugLevel 10 -DCPSDebugLevel 10";
 
-if ($rtps) {
-  $common_opts .= " -DCPSConfigFile rtps.ini";
+if ($info_repo) {
+  $common_opts .= " -DCPSConfigFile info-repo.ini";
 }
 
 my $pub_opts = "$common_opts -ORBLogFile publisher.log";
@@ -64,7 +64,7 @@ if (!(-e $subdir.$filename) && !(-e $subdir.$filename_exe)) {
 my $Subscriber = PerlDDS::create_process("subscriber", " $sub_opts");
 my $Publisher = PerlDDS::create_process("publisher", " $pub_opts");
 
-if (not $rtps) {
+if ($info_repo) {
   unlink $dcpsrepo_ior;
 
   $DCPSREPO = PerlDDS::create_process(
@@ -100,7 +100,7 @@ if ($SubscriberResult != 0) {
   $status = 1;
 }
 
-if (not $rtps) {
+if ($info_repo) {
   my $ir = $DCPSREPO->TerminateWaitKill(5);
   if ($ir != 0) {
     print STDERR "ERROR: DCPSInfoRepo returned $ir\n";

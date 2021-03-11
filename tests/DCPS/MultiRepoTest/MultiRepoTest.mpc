@@ -1,4 +1,4 @@
-project(*Monitor): dcpsexe, dcps_test, dcps_transports_for_test {
+project(*Monitor): dcps_test, dcps_inforepodiscovery, dcps_transports_for_test {
   exename   = monitor
   libpaths += ../FooType5
   libs     +=  DcpsFooType5
@@ -13,7 +13,7 @@ project(*Monitor): dcpsexe, dcps_test, dcps_transports_for_test {
   }
 }
 
-project(*System): dcpsexe, dcps_test, dcps_transports_for_test {
+project(*System): dcps_test, dcps_inforepodiscovery, dcps_transports_for_test {
   exename   = system
   libpaths += ../FooType5
   libs     +=  DcpsFooType5

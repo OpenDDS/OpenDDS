@@ -1,5 +1,2 @@
-feature(!no_opendds_safety_profile) : dcps_rtps {
-}
-
-feature(no_opendds_safety_profile) : dcps_inforepodiscovery, dcps_tcp {
+project: dcps_rtps {
 }

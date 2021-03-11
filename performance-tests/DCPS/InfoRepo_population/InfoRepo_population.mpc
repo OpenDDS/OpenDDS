@@ -30,7 +30,7 @@ project(*SyncServer) : taoexe, portableserver, iortable, coverage_optional, dds_
   }
 }
 
-project(*Publisher) : dcpsexe, dcps_test, dcps_tcp {
+project(*Publisher) : dcps_test, dcps_inforepodiscovery, dcps_tcp {
   requires += no_opendds_safety_profile
   exename   = publisher
   libs     += SyncClient
@@ -50,7 +50,7 @@ project(*Publisher) : dcpsexe, dcps_test, dcps_tcp {
   }
 }
 
-project(*Subscriber) : dcpsexe, dcps_test, dcps_tcp {
+project(*Subscriber) : dcps_test, dcps_inforepodiscovery, dcps_tcp {
   requires += no_opendds_safety_profile
   exename   = subscriber
   libs     += SyncClient

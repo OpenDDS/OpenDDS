@@ -321,7 +321,7 @@ sub new {
   $self->{info_repo}->{file} = "repo.ior";
   $self->{processes}->{process} = {};
   $self->{processes}->{order} = [];
-  $self->{discovery} = "info_repo";
+  $self->{discovery} = "rtps";
   $self->{test_verbose} = 0;
   $self->{add_transport_config} = 1;
   $self->{nobits} = 0;

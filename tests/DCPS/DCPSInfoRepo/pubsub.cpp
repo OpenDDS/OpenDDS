@@ -417,6 +417,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         rtpsDisc->sedp_multicast(false);
         disc = rtpsDisc;
       } else {
+        TheServiceParticipant->set_default_discovery(OpenDDS::DCPS::Discovery::DEFAULT_REPO);
+
         CORBA::Object_var tmp =
           orb->string_to_object (ACE_TEXT_ALWAYS_CHAR(ior));
         OpenDDS::DCPS::DCPSInfo_var info =

@@ -25,7 +25,6 @@ my $sub_opts = "$dbg_lvl";
 my $repo_bit_opt = "";
 my $stack_based = 0;
 my $is_rtps_disc = 0;
-my $DCPSREPO;
 
 my $thread_per_connection = "";
 if ($test->flag('thread_per')) {
@@ -131,8 +130,7 @@ $test->report_unused_flags(!$flag_found);
 
 $pub_opts .= $thread_per_connection;
 
-$test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log " .
-                       "$repo_bit_opt") unless $is_rtps_disc;
+$test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log $repo_bit_opt");
 
 $test->process("publisher", "publisher", $pub_opts);
 my $sub_exe = ($stack_based ? 'stack_' : '') . "subscriber";

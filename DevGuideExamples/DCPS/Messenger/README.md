@@ -4,9 +4,9 @@ A very basic OpenDDS example, covered in the OpenDDS Developer's Guide.
 
 If you just want to build and run this, it will be built along with OpenDDS and
 can be run using `perl run_test.pl` assuming the `setenv` file has been sourced
-(see [INSTALL.md](../../../INSTALL.md) for details). To have it use the DDS
-standard RTPS discovery and transport instead of the OpenDDS specific InfoRepo
-discovery and TCP transports, run `perl run_test.pl --rtps` instead.
+(see [INSTALL.md](../../../INSTALL.md) for details). To have it use the
+OpenDDS-specific InfoRepo discovery instead of the DDS standard RTPS discovery,
+run `perl run_test.pl --info-repo` instead.
 
 ## CMake
 
@@ -23,5 +23,4 @@ these are the recommend steps:
    "out-of-source" build.
  - Run `cmake ..` to generate the build and `cmake --build .` to build.
  - To run the example you can copy `run_test.pl` to the `build` directory and
-   use that or run `./publisher -DCPSConfigFile ../rtps.ini` and `./subscriber
-   -DCPSConfigFile ../rtps.ini` at the same time.
+   use that or run `./publisher` and `./subscriber` at the same time.

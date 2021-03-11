@@ -31,6 +31,7 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
   // passes the arguments to the ORB initialization first, then strips
   // the DCPS arguments.
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %T INFO: initializing the service.%d\n"), this->config_.infoRepoIorSize()));
+  TheServiceParticipant->set_default_discovery(OpenDDS::DCPS::Discovery::DEFAULT_REPO);
   ::DDS::DomainParticipantFactory_var factory = TheParticipantFactoryWithArgs( argc, argv);
 
   // We only need to do loading and binding if we receive InfoRepo IOR
