@@ -19,5 +19,6 @@ workspace {
     tools/modeling/tests
 
     dds/InfoRepo
+    tools/dcpsinfo_dump
   }
 }
