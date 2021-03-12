@@ -1731,6 +1731,11 @@ Sedp::disassociate(ParticipantData_t& pdata)
     result = true;
   }
 
+  BuiltinEndpointSet_t associated_endpoints = pdata.associated_endpoints;
+#ifdef OPENDDS_SECURITY
+  DDS::Security::ExtendedBuiltinEndpointSet_t extended_associated_endpoints = pdata.extended_associated_endpoints;
+#endif
+
   for (OPENDDS_VECTOR(DiscoveredPublication)::iterator it = pubs_to_remove_from_bit.begin(); it != pubs_to_remove_from_bit.end(); ++it) {
     remove_from_bit_i(*it);
   }
@@ -1738,11 +1743,6 @@ Sedp::disassociate(ParticipantData_t& pdata)
   for (OPENDDS_VECTOR(DiscoveredSubscription)::iterator it = subs_to_remove_from_bit.begin(); it != subs_to_remove_from_bit.end(); ++it) {
     remove_from_bit_i(*it);
   }
-
-  BuiltinEndpointSet_t associated_endpoints = pdata.associated_endpoints;
-#ifdef OPENDDS_SECURITY
-  DDS::Security::ExtendedBuiltinEndpointSet_t extended_associated_endpoints = pdata.extended_associated_endpoints;
-#endif
 
   { // Release lock, so we can call into transport
     ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
