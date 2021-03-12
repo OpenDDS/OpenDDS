@@ -3090,7 +3090,7 @@ Sedp::data_received(DCPS::MessageId /*message_id*/,
     const DCPS::RepoIdSet::const_iterator pos =
       sub_pos->second.matched_endpoints_.lower_bound(prefix);
     if (pos != sub_pos->second.matched_endpoints_.end() &&
-        DCPS::GuidPrefixEqual()(pos->guidPrefix, prefix.guidPrefix)) {
+        DCPS::equal_guid_prefixes(*pos, prefix)) {
       DCPS::DataReaderCallbacks_rch sl = sub_pos->second.subscription_.lock();
       if (sl) {
         sl->signal_liveliness(guid_participant);
@@ -3128,7 +3128,7 @@ Sedp::received_participant_message_data_secure(DCPS::MessageId /*message_id*/,
   for (i = local_subscriptions_.begin(), n = local_subscriptions_.end(); i != n; ++i) {
     const DCPS::RepoIdSet::const_iterator pos = i->second.matched_endpoints_.lower_bound(prefix);
 
-    if (pos != i->second.matched_endpoints_.end() && DCPS::GuidPrefixEqual()(pos->guidPrefix, prefix.guidPrefix)) {
+    if (pos != i->second.matched_endpoints_.end() && DCPS::equal_guid_prefixes(*pos, prefix)) {
       DCPS::DataReaderCallbacks_rch sl = i->second.subscription_.lock();
       if (sl) {
         sl->signal_liveliness(guid_participant);
@@ -5740,7 +5740,7 @@ void Sedp::resend_user_crypto_tokens(const RepoId& id)
     for (DCPS::RepoIdSet::const_iterator writer_pos = reader_pos->second.matched_endpoints_.begin(),
            writer_limit = reader_pos->second.matched_endpoints_.end();
          writer_pos != writer_limit; ++writer_pos) {
-      if (!DCPS::GuidPrefixEqual()(writer_pos->guidPrefix, remote_participant.guidPrefix)) {
+      if (!DCPS::equal_guid_prefixes(*writer_pos, remote_participant)) {
         continue;
       }
       const DDS::Security::DatawriterCryptoHandle dwch =
@@ -5770,7 +5770,7 @@ void Sedp::resend_user_crypto_tokens(const RepoId& id)
     for (DCPS::RepoIdSet::const_iterator reader_pos = writer_pos->second.matched_endpoints_.begin(),
            reader_limit = writer_pos->second.matched_endpoints_.end();
          reader_pos != reader_limit; ++reader_pos) {
-      if (!DCPS::GuidPrefixEqual()(reader_pos->guidPrefix, remote_participant.guidPrefix)) {
+      if (!DCPS::equal_guid_prefixes(*reader_pos, remote_participant)) {
         continue;
       }
       const DDS::Security::DatareaderCryptoHandle drch =

@@ -113,7 +113,7 @@ RtpsUdpTransport::use_ice_now(bool after)
 RtpsUdpDataLink_rch
 RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 {
-  OPENDDS_ASSERT(!GuidPrefixEqual()(local_prefix, GUIDPREFIX_UNKNOWN));
+  OPENDDS_ASSERT(!equal_guid_prefixes(local_prefix, GUIDPREFIX_UNKNOWN));
 
   assign(local_prefix_, local_prefix);
 #ifdef OPENDDS_SECURITY
@@ -833,7 +833,7 @@ RtpsUdpTransport::relay_stun_task(const DCPS::MonotonicTimePoint& /*now*/)
 
   process_relay_sra(relay_srsm_.send(stun_server_address, ICE::Configuration::instance()->server_reflexive_indication_count(), local_prefix_));
 
-  if (!GuidPrefixEqual()(local_prefix_, GUIDPREFIX_UNKNOWN) && stun_server_address != ACE_INET_Addr()) {
+  if (!equal_guid_prefixes(local_prefix_, GUIDPREFIX_UNKNOWN) && stun_server_address != ACE_INET_Addr()) {
     ice_endpoint_.send(stun_server_address, relay_srsm_.message());
   }
 }

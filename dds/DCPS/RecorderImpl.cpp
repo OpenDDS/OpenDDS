@@ -805,7 +805,7 @@ RecorderImpl::signal_liveliness(const RepoId& remote_participant)
     ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
     for (WriterMapType::iterator pos = writers_.lower_bound(prefix),
            limit = writers_.end();
-         pos != limit && GuidPrefixEqual() (pos->first.guidPrefix, prefix.guidPrefix);
+         pos != limit && equal_guid_prefixes(pos->first, prefix);
          ++pos) {
       writers.push_back(std::make_pair(pos->first, pos->second));
     }

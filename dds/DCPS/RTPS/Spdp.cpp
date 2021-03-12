@@ -2883,7 +2883,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
       }
     }
 
-    if (DCPS::transport_debug.log_messages && !DCPS::GuidPrefixEqual()(hdr_.guidPrefix, header.guidPrefix)) {
+    if (DCPS::transport_debug.log_messages && !DCPS::equal_guid_prefixes(hdr_.guidPrefix, header.guidPrefix)) {
       RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", hdr_.guidPrefix, false, message);
     }
 

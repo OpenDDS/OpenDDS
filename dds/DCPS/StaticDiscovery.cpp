@@ -98,7 +98,7 @@ void StaticEndpointManager::init_bit()
     const RepoId& remoteid = pos->first;
     const EndpointRegistry::Writer& writer = pos->second;
 
-    if (!GuidPrefixEqual()(participant_id_.guidPrefix, remoteid.guidPrefix)) {
+    if (!equal_guid_prefixes(participant_id_, remoteid)) {
       const DDS::BuiltinTopicKey_t key = repo_id_to_bit_key(remoteid);
 
       // pos represents a remote.
@@ -144,7 +144,7 @@ void StaticEndpointManager::init_bit()
     const RepoId& remoteid = pos->first;
     const EndpointRegistry::Reader& reader = pos->second;
 
-    if (!GuidPrefixEqual()(participant_id_.guidPrefix, remoteid.guidPrefix)) {
+    if (!equal_guid_prefixes(participant_id_, remoteid)) {
       const DDS::BuiltinTopicKey_t key = repo_id_to_bit_key(remoteid);
 
       // pos represents a remote.

@@ -491,6 +491,7 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
 
       for (CORBA::ULong i = 0; i < wr_len; i++) {
         PublicationId writer_id = writers[i];
+        statistics_.erase(writer_id);
 
         WriterMapType::iterator it = this->writers_.find(writer_id);
         if (it != this->writers_.end() &&
@@ -755,7 +756,7 @@ DataReaderImpl::signal_liveliness(const RepoId& remote_participant)
     ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
     for (WriterMapType::iterator pos = writers_.lower_bound(prefix),
            limit = writers_.end();
-         pos != limit && GuidPrefixEqual() (pos->first.guidPrefix, prefix.guidPrefix);
+         pos != limit && equal_guid_prefixes(pos->first, prefix);
          ++pos) {
       writers.push_back(std::make_pair(pos->first, pos->second));
     }

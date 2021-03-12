@@ -137,21 +137,17 @@ operator<(const GUID_t& lhs, const GUID_t& rhs)
   return GUID_tKeyLessThan()(lhs, rhs);
 }
 
-struct GuidPrefixEqual {
+OpenDDS_Dcps_Export inline
+bool equal_guid_prefixes(const GuidPrefix_t& lhs, const GuidPrefix_t& rhs)
+{
+  return std::memcmp(&lhs, &rhs, sizeof(GuidPrefix_t)) == 0;
+}
 
-  bool
-  operator() (const GuidPrefix_t& lhs, const GuidPrefix_t& rhs) const
-  {
-    return std::memcmp(&lhs, &rhs, sizeof(GuidPrefix_t)) == 0;
-  }
-
-  bool
-  operator() (const GUID_t& lhs, const GUID_t& rhs) const
-  {
-    return std::memcmp(&lhs.guidPrefix, &rhs.guidPrefix, sizeof(GuidPrefix_t)) == 0;
-  }
-
-};
+OpenDDS_Dcps_Export inline
+bool equal_guid_prefixes(const GUID_t& lhs, const GUID_t& rhs)
+{
+  return equal_guid_prefixes(lhs.guidPrefix, rhs.guidPrefix);
+}
 
 #ifndef OPENDDS_SAFETY_PROFILE
 inline bool
