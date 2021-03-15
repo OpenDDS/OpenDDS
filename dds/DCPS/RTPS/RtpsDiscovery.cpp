@@ -722,13 +722,13 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
               value.c_str(), rtps_name.c_str()), -1);
           }
           config->use_xtypes(bool(smInt));
-        } else if (name == "ResponsiveMode") {
+        } else if (name == "SedpResponsiveMode") {
           const OPENDDS_STRING& value = it->second;
           int smInt;
           if (!DCPS::convertToInteger(value, smInt)) {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
-                              ACE_TEXT("Invalid entry (%C) for ResponsiveMode in ")
+                              ACE_TEXT("Invalid entry (%C) for SedpResponsiveMode in ")
                               ACE_TEXT("[rtps_discovery/%C] section.\n"),
                               value.c_str(), rtps_name.c_str()), -1);
           }

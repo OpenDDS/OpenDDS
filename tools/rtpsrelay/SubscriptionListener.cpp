@@ -6,10 +6,12 @@
 
 namespace RtpsRelay {
 
-SubscriptionListener::SubscriptionListener(OpenDDS::DCPS::DomainParticipantImpl* participant,
+SubscriptionListener::SubscriptionListener(const Config& config,
+                                           OpenDDS::DCPS::DomainParticipantImpl* participant,
                                            ReaderEntryDataWriter_var writer,
                                            DomainStatisticsReporter& stats_reporter)
-  : participant_(participant)
+  : config_(config)
+  , participant_(participant)
   , writer_(writer)
   , stats_reporter_(stats_reporter)
 {}
@@ -87,7 +89,9 @@ void SubscriptionListener::write_sample(const DDS::SubscriptionBuiltinTopicData&
     subscriber_qos,
   };
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SubscriptionListener::write_sample add local reader %C %C\n"), guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str()));
+  if (config_.log_discovery()) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SubscriptionListener::write_sample add local reader %C %C\n"), guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str()));
+  }
   DDS::ReturnCode_t ret = writer_->write(entry, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SubscriptionListener::write_sample failed to write\n")));
@@ -103,7 +107,9 @@ void SubscriptionListener::unregister_instance(const DDS::SampleInfo& info)
   ReaderEntry entry;
   entry.guid(guid);
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SubscriptionListener::unregister_instance remove local reader %C\n"), guid_to_string(repoid).c_str()));
+  if (config_.log_discovery()) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SubscriptionListener::unregister_instance remove local reader %C\n"), guid_to_string(repoid).c_str()));
+  }
   DDS::ReturnCode_t ret = writer_->unregister_instance(entry, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SubscriptionListener::unregister_instance failed to unregister_instance\n")));

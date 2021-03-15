@@ -11,7 +11,8 @@ namespace RtpsRelay {
 
 class SubscriptionListener : public ListenerBase {
 public:
-  SubscriptionListener(OpenDDS::DCPS::DomainParticipantImpl* participant,
+  SubscriptionListener(const Config& config,
+                       OpenDDS::DCPS::DomainParticipantImpl* participant,
                        ReaderEntryDataWriter_var writer,
                        DomainStatisticsReporter& stats_reporter);
 private:
@@ -20,6 +21,7 @@ private:
                     const DDS::SampleInfo& info);
   void unregister_instance(const DDS::SampleInfo& info);
 
+  const Config& config_;
   OpenDDS::DCPS::DomainParticipantImpl* participant_;
   ReaderEntryDataWriter_var writer_;
   DomainStatisticsReporter& stats_reporter_;

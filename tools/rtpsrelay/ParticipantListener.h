@@ -10,7 +10,8 @@ namespace RtpsRelay {
 
 class ParticipantListener : public ListenerBase {
 public:
-  ParticipantListener(OpenDDS::DCPS::DomainParticipantImpl* participant,
+  ParticipantListener(const Config& config,
+                      OpenDDS::DCPS::DomainParticipantImpl* participant,
                       DomainStatisticsReporter& stats_reporter,
                       ParticipantEntryDataWriter_var participant_writer);
 private:
@@ -19,6 +20,7 @@ private:
                     const DDS::SampleInfo& info);
   void unregister_instance(const DDS::SampleInfo& info);
 
+  const Config& config_;
   OpenDDS::DCPS::DomainParticipantImpl* participant_;
   DomainStatisticsReporter& stats_reporter_;
   ParticipantEntryDataWriter_var writer_;
