@@ -797,13 +797,12 @@ void RtpsUdpDataLink::client_stop(const RepoId& localId)
         writers_.erase(pos);
       }
     }
-    if (writer)
-    {
-      OPENDDS_VECTOR(TransportQueueElement*) to_drop;
+
+    if (writer) {
+      TqeVector to_drop;
       writer->pre_stop_helper(to_drop, true);
 
-      typedef OPENDDS_VECTOR(TransportQueueElement*)::iterator tqe_iter;
-      tqe_iter drop_it = to_drop.begin();
+      TqeVector::iterator drop_it = to_drop.begin();
       while (drop_it != to_drop.end()) {
         (*drop_it)->data_dropped(true);
         ++drop_it;
@@ -813,7 +812,7 @@ void RtpsUdpDataLink::client_stop(const RepoId& localId)
 }
 
 void
-RtpsUdpDataLink::RtpsWriter::pre_stop_helper(OPENDDS_VECTOR(TransportQueueElement*)& to_drop, bool true_stop)
+RtpsUdpDataLink::RtpsWriter::pre_stop_helper(TqeVector& to_drop, bool true_stop)
 {
   typedef SnToTqeMap::iterator iter_t;
 
@@ -851,7 +850,7 @@ RtpsUdpDataLink::pre_stop_i()
 {
   DBG_ENTRY_LVL("RtpsUdpDataLink","pre_stop_i",6);
   DataLink::pre_stop_i();
-  OPENDDS_VECTOR(TransportQueueElement*) to_drop;
+  TqeVector to_drop;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_);
 
@@ -865,8 +864,7 @@ RtpsUdpDataLink::pre_stop_i()
       writers_.erase(last);
     }
   }
-  typedef OPENDDS_VECTOR(TransportQueueElement*)::iterator tqe_iter;
-  tqe_iter drop_it = to_drop.begin();
+  TqeVector::iterator drop_it = to_drop.begin();
   while (drop_it != to_drop.end()) {
     (*drop_it)->data_dropped(true);
     ++drop_it;
@@ -887,7 +885,7 @@ void
 RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
                                         const RepoId& local_id)
 {
-  OPENDDS_VECTOR(TransportQueueElement*) to_drop;
+  TqeVector to_drop;
   using std::pair;
   const GuidConverter conv(local_id);
   if (conv.isWriter()) {
@@ -938,8 +936,7 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
     }
   }
 
-  typedef OPENDDS_VECTOR(TransportQueueElement*)::iterator tqe_iter;
-  for (tqe_iter drop_it = to_drop.begin(); drop_it != to_drop.end(); ++drop_it) {
+  for (TqeVector::iterator drop_it = to_drop.begin(); drop_it != to_drop.end(); ++drop_it) {
     (*drop_it)->data_dropped(true);
   }
 }
@@ -1383,7 +1380,7 @@ RtpsUdpDataLink::RtpsWriter::send_heartbeats(const DCPS::MonotonicTimePoint& now
   RtpsUdpInst& cfg = link->config();
 
   MetaSubmessageVec meta_submessages;
-  OPENDDS_VECTOR(TransportQueueElement*) pendingCallbacks;
+  TqeVector pendingCallbacks;
 
   if (expected_acks_) {
     // One more readers did not ack since the last heartbeat.
@@ -3695,7 +3692,7 @@ void
 RtpsUdpDataLink::RtpsWriter::expire_durable_data(const ReaderInfo_rch& reader,
                                                  const RtpsUdpInst& cfg,
                                                  const MonotonicTimePoint& now,
-                                                 OPENDDS_VECTOR(TransportQueueElement*)& pendingCallbacks)
+                                                 TqeVector& pendingCallbacks)
 {
   if (!reader->durable_data_.empty()) {
     const MonotonicTimePoint expiration = reader->durable_timestamp_ + cfg.durable_data_timeout_;
@@ -3758,7 +3755,7 @@ RtpsUdpDataLink::RtpsWriter::gather_directed_heartbeat_i(const SingleSendBuffer:
 }
 
 void
-RtpsUdpDataLink::RtpsWriter::gather_heartbeats_i(OPENDDS_VECTOR(TransportQueueElement*)& pendingCallbacks,
+RtpsUdpDataLink::RtpsWriter::gather_heartbeats_i(TqeVector& pendingCallbacks,
                                                  MetaSubmessageVec& meta_submessages)
 {
   if (preassociation_readers_.empty() && lagging_readers_.empty() && readers_expecting_heartbeat_.empty()) {
