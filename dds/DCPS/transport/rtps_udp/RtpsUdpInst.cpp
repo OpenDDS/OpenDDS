@@ -148,6 +148,8 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
   }
 #endif
 
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("ResponsiveMode"), responsive_mode_, bool);
+
   return 0;
 }
 
