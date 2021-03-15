@@ -234,7 +234,7 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
     peer.entityId = RTPS::ENTITYID_PARTICIPANT;
     const ParticipantCryptoHandle sender = link_->handle_registry()->get_remote_participant_crypto_handle(peer);
     if (sender == DDS::HANDLE_NIL) {
-      if (transport_debug.log_dropped_messages && !GuidPrefixEqual()(peer.guidPrefix, receiver_.local_)) {
+      if (transport_debug.log_dropped_messages && !equal_guid_prefixes(peer.guidPrefix, receiver_.local_)) {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpReceiveStrategy::receive_bytes - decode error from %C\n", LogGuid(peer).c_str()));
       }
       if (security_debug.encdec_warn) {
@@ -249,7 +249,7 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
     DDS::OctetSeq plain;
     SecurityException ex = {"", 0, 0};
     if (!crypto->decode_rtps_message(plain, encoded, receiver, sender, ex)) {
-      if (transport_debug.log_dropped_messages && !GuidPrefixEqual()(peer.guidPrefix, receiver_.local_)) {
+      if (transport_debug.log_dropped_messages && !equal_guid_prefixes(peer.guidPrefix, receiver_.local_)) {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpReceiveStrategy::receive_bytes - decode error from %C\n", LogGuid(peer).c_str()));
       }
       if (security_debug.encdec_warn) {
