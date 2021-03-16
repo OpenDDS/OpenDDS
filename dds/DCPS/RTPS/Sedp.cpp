@@ -1731,6 +1731,11 @@ Sedp::disassociate(ParticipantData_t& pdata)
     result = true;
   }
 
+  BuiltinEndpointSet_t associated_endpoints = pdata.associated_endpoints;
+#ifdef OPENDDS_SECURITY
+  DDS::Security::ExtendedBuiltinEndpointSet_t extended_associated_endpoints = pdata.extended_associated_endpoints;
+#endif
+
   for (OPENDDS_VECTOR(DiscoveredPublication)::iterator it = pubs_to_remove_from_bit.begin(); it != pubs_to_remove_from_bit.end(); ++it) {
     remove_from_bit_i(*it);
   }
@@ -1743,53 +1748,53 @@ Sedp::disassociate(ParticipantData_t& pdata)
     ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
     ACE_GUARD_RETURN(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock, false);
 
-    disassociate_helper(pdata.associated_endpoints,
+    disassociate_helper(associated_endpoints,
                         DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER,
                         part,
                         ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER,
                         *publications_writer_);
-    disassociate_helper(pdata.associated_endpoints,
+    disassociate_helper(associated_endpoints,
                         DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR,
                         part,
                         ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER,
                         *publications_reader_);
-    disassociate_helper(pdata.associated_endpoints,
+    disassociate_helper(associated_endpoints,
                         DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER,
                         part,
                         ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER,
                         *subscriptions_writer_);
-    disassociate_helper(pdata.associated_endpoints,
+    disassociate_helper(associated_endpoints,
                         DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR,
                         part,
                         ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER,
                         *subscriptions_reader_);
-    disassociate_helper(pdata.associated_endpoints,
+    disassociate_helper(associated_endpoints,
                         BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER,
                         part,
                         ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER,
                         *participant_message_writer_);
-    disassociate_helper(pdata.associated_endpoints,
+    disassociate_helper(associated_endpoints,
                         BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER,
                         part,
                         ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER,
                         *participant_message_reader_);
 
-    disassociate_helper(pdata.associated_endpoints,
+    disassociate_helper(associated_endpoints,
                         BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER,
                         part,
                         ENTITYID_TL_SVC_REQ_READER,
                         *type_lookup_request_writer_);
-    disassociate_helper(pdata.associated_endpoints,
+    disassociate_helper(associated_endpoints,
                         BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER,
                         part,
                         ENTITYID_TL_SVC_REQ_WRITER,
                         *type_lookup_request_reader_);
-    disassociate_helper(pdata.associated_endpoints,
+    disassociate_helper(associated_endpoints,
                         BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER,
                         part,
                         ENTITYID_TL_SVC_REPLY_READER,
                         *type_lookup_reply_writer_);
-    disassociate_helper(pdata.associated_endpoints,
+    disassociate_helper(associated_endpoints,
                         BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER,
                         part,
                         ENTITYID_TL_SVC_REPLY_WRITER,
@@ -1798,7 +1803,16 @@ Sedp::disassociate(ParticipantData_t& pdata)
     //FUTURE: if/when topic propagation is supported, add it here
 
 #ifdef OPENDDS_SECURITY
-    disassociate_security_builtins(pdata);
+    disassociate_security_builtins(part, associated_endpoints, extended_associated_endpoints);
+#endif
+  }
+
+  // Since we've reverse locked, we can't trust the old pdata anymore
+  if (spdp_.has_discovered_participant(part)) {
+    ParticipantData_t& safe_pdata = spdp_.get_participant_data(part);
+    safe_pdata.associated_endpoints = associated_endpoints;
+#ifdef OPENDDS_SECURITY
+    safe_pdata.extended_associated_endpoints = extended_associated_endpoints;
 #endif
   }
 
@@ -1806,89 +1820,88 @@ Sedp::disassociate(ParticipantData_t& pdata)
 }
 
 #ifdef OPENDDS_SECURITY
-void Sedp::disassociate_security_builtins(ParticipantData_t& pdata)
+void Sedp::disassociate_security_builtins(const DCPS::RepoId& part, BuiltinEndpointSet_t& associated_endpoints,
+  DDS::Security::ExtendedBuiltinEndpointSet_t& extended_associated_endpoints)
 {
   using namespace DDS::Security;
 
-  const RepoId part = make_id(pdata.participantProxy.guidPrefix, ENTITYID_PARTICIPANT);
-
-  disassociate_helper(pdata.associated_endpoints,
+  disassociate_helper(associated_endpoints,
                       SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER,
                       part,
                       ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER,
                       *publications_secure_writer_);
-  disassociate_helper(pdata.associated_endpoints,
+  disassociate_helper(associated_endpoints,
                       SEDP_BUILTIN_PUBLICATIONS_SECURE_READER,
                       part,
                       ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER,
                       *publications_secure_reader_);
-  disassociate_helper(pdata.associated_endpoints,
+  disassociate_helper(associated_endpoints,
                       SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER,
                       part,
                       ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER,
                       *subscriptions_secure_writer_);
-  disassociate_helper(pdata.associated_endpoints,
+  disassociate_helper(associated_endpoints,
                       SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER,
                       part,
                       ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER,
                       *subscriptions_secure_reader_);
-  disassociate_helper(pdata.associated_endpoints,
+  disassociate_helper(associated_endpoints,
                       BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER,
                       part,
                       ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER,
                       *participant_message_secure_writer_);
-  disassociate_helper(pdata.associated_endpoints,
+  disassociate_helper(associated_endpoints,
                       BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER,
                       part,
                       ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER,
                       *participant_message_secure_reader_);
-  disassociate_helper(pdata.associated_endpoints,
+  disassociate_helper(associated_endpoints,
                       BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER,
                       part,
                       ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER,
                       *participant_stateless_message_writer_);
-  disassociate_helper(pdata.associated_endpoints,
+  disassociate_helper(associated_endpoints,
                       BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER,
                       part,
                       ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER,
                       *participant_stateless_message_reader_);
-  disassociate_helper(pdata.associated_endpoints,
+  disassociate_helper(associated_endpoints,
                       BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER,
                       part,
                       ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER,
                       *participant_volatile_message_secure_writer_);
-  disassociate_helper(pdata.associated_endpoints,
+  disassociate_helper(associated_endpoints,
                       BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER,
                       part,
                       ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER,
                       *participant_volatile_message_secure_reader_);
-  disassociate_helper(pdata.associated_endpoints,
+  disassociate_helper(associated_endpoints,
                       SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER,
                       part,
                       ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER,
                       *dcps_participant_secure_writer_);
-  disassociate_helper(pdata.associated_endpoints,
+  disassociate_helper(associated_endpoints,
                       SPDP_BUILTIN_PARTICIPANT_SECURE_READER,
                       part,
                       ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER,
                       *dcps_participant_secure_reader_);
 
-  disassociate_helper(pdata.extended_associated_endpoints,
+  disassociate_helper(extended_associated_endpoints,
                       TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE,
                       part,
                       ENTITYID_TL_SVC_REQ_READER_SECURE,
                       *type_lookup_request_secure_writer_);
-  disassociate_helper(pdata.extended_associated_endpoints,
+  disassociate_helper(extended_associated_endpoints,
                       TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE,
                       part,
                       ENTITYID_TL_SVC_REQ_WRITER_SECURE,
                       *type_lookup_request_secure_reader_);
-  disassociate_helper(pdata.extended_associated_endpoints,
+  disassociate_helper(extended_associated_endpoints,
                       TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE,
                       part,
                       ENTITYID_TL_SVC_REPLY_READER_SECURE,
                       *type_lookup_reply_secure_writer_);
-  disassociate_helper(pdata.extended_associated_endpoints,
+  disassociate_helper(extended_associated_endpoints,
                       TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE,
                       part,
                       ENTITYID_TL_SVC_REPLY_WRITER_SECURE,
