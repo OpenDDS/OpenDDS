@@ -61,9 +61,26 @@ env:
   TRIGGERING_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
+
+  wait_cancel_previous:
+
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: convictional/trigger-workflow-and-wait@v1.3.0
+      with:
+        owner: ${{ github.repository_owner }}
+        repo: OpenDDS
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        workflow_file_name: cancel_previous_runs.yml
+        ref: ${{ env.TRIGGERING_COMMIT }}
+        trigger_workflow: false
+
   ACE_TAO_u18_i0_xer0_js0_j12:
 
     runs-on: ubuntu-18.04
+
+    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -304,6 +321,8 @@ jobs:
   ACE_TAO_u18_o1d0v1_xer0_j12_2:
 
     runs-on: ubuntu-18.04
+
+    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -1025,6 +1044,8 @@ jobs:
 
     runs-on: ubuntu-18.04
 
+    needs: wait_cancel_previous
+
     steps:
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
@@ -1257,6 +1278,8 @@ jobs:
   ACE_TAO_u18_clang5_i0w1_sec:
 
     runs-on: ubuntu-18.04
+
+    needs: wait_cancel_previous
 
     steps:
     - name: install clang++
@@ -1513,6 +1536,8 @@ jobs:
 
     runs-on: ubuntu-18.04
 
+    needs: wait_cancel_previous
+
     steps:
     - name: install clang++
       run: |
@@ -1767,6 +1792,8 @@ jobs:
   ACE_TAO_u18_gcc6_d0w1_cpp03:
 
     runs-on: ubuntu-18.04
+
+    needs: wait_cancel_previous
 
     steps:
     - name: install gcc
@@ -2032,6 +2059,8 @@ jobs:
 
     runs-on: ubuntu-18.04
 
+    needs: wait_cancel_previous
+
     steps:
     - name: install gcc
       run: |
@@ -2295,6 +2324,8 @@ jobs:
   ACE_TAO_u18_gcc10_i0w1_xer0:
 
     runs-on: ubuntu-18.04
+
+    needs: wait_cancel_previous
 
     steps:
     - name: install gcc
@@ -2810,6 +2841,8 @@ jobs:
 
     runs-on: ubuntu-20.04
 
+    needs: wait_cancel_previous
+
     steps:
 
     - name: checkout OpenDDS
@@ -3074,6 +3107,8 @@ jobs:
   ACE_TAO_u20_p1:
 
     runs-on: ubuntu-20.04
+
+    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -3502,6 +3537,8 @@ jobs:
   ACE_TAO_u18_w1:
 
     runs-on: ubuntu-18.04
+
+    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -4184,6 +4221,8 @@ jobs:
   ACE_TAO_u18_j_cft0_FM-37:
 
     runs-on: ubuntu-18.04
+
+    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -5262,6 +5301,8 @@ jobs:
 
     runs-on: windows-2019
 
+    needs: wait_cancel_previous
+
     steps:
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
@@ -5524,6 +5565,9 @@ jobs:
   ACE_TAO_w16_x86_d0i0:
 
     runs-on: windows-2016
+
+    needs: wait_cancel_previous
+
     steps:
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
@@ -6444,6 +6488,8 @@ jobs:
 
     runs-on: macos-10.15
 
+    needs: wait_cancel_previous
+
     steps:
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
@@ -6679,6 +6725,8 @@ jobs:
   ACE_TAO_m10_oi0_j_FM-1f:
 
     runs-on: macos-10.15
+
+    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
