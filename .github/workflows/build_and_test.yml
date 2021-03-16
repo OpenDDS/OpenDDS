@@ -2844,7 +2844,6 @@ jobs:
     needs: wait_cancel_previous
 
     steps:
-
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
       with:
@@ -3966,6 +3965,8 @@ jobs:
 
     runs-on: ubuntu-18.04
 
+    needs: wait_cancel_previous
+
     steps:
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
@@ -4484,6 +4485,8 @@ jobs:
 
     runs-on: windows-2019
 
+    needs: wait_cancel_previous
+
     steps:
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
@@ -4760,6 +4763,8 @@ jobs:
   ACE_TAO_w19_p1_cpp03_stat_FM-08_2:
 
     runs-on: windows-2019
+
+    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
