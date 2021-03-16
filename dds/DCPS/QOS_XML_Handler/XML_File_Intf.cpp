@@ -98,6 +98,14 @@ namespace DCPS {
   ::dds::qosProfile *
   QOS_XML_File_Handler::get_profile(const ACE_TCHAR * profile_name)
   {
+    if (!profile_name || ACE_OS::strlen(profile_name) == 0)
+      {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: QOS_XML_File_Handler::get_profile - ")
+          ACE_TEXT("No profile specified\n")));
+        return 0;
+      }
+
     for (::dds::qosProfile_seq::qos_profile_const_iterator it = this->profiles_.begin_qos_profile();
         it != this->profiles_.end_qos_profile();
         ++it)
@@ -114,19 +122,12 @@ namespace DCPS {
             return it->get();
           }
       }
-    if (ACE_OS::strlen(profile_name) == 0)
-      {
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: QOS_XML_File_Handler::get_profile - ")
-          ACE_TEXT("No profile specified\n")));
-      }
-    else
-      {
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: QOS_XML_File_Handler::get_profile - ")
-          ACE_TEXT("Did not find profile <%s>\n"),
-          profile_name));
-      }
+
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: QOS_XML_File_Handler::get_profile - ")
+      ACE_TEXT("Did not find profile <%s>\n"),
+      profile_name));
+
     return 0;
   }
 
