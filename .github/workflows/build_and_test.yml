@@ -3213,7 +3213,7 @@ jobs:
         cd OpenDDS
         ./configure --compiler=clang++ --std=c++11 --ipv6 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
         echo "FLAGS_C_CC += -O1 -fsanitize=address -fno-omit-frame-pointer" >> ACE_TAO/ACE/include/makeinclude/platform_macros.GNU
-        echo "LDFLAGS += -fsanitize=address" >> OpenDDS/ACE_TAO/ACE/include/makeinclude/platform_macros.GNU
+        echo "LDFLAGS += -fsanitize=address" >> ACE_TAO/ACE/include/makeinclude/platform_macros.GNU
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
