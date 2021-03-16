@@ -797,11 +797,22 @@ void RtpsUdpDataLink::client_stop(const RepoId& localId)
         writers_.erase(pos);
       }
     }
+
+    if (writer) {
+      TqeVector to_drop;
+      writer->pre_stop_helper(to_drop, true);
+
+      TqeVector::iterator drop_it = to_drop.begin();
+      while (drop_it != to_drop.end()) {
+        (*drop_it)->data_dropped(true);
+        ++drop_it;
+      }
+    }
   }
 }
 
 void
-RtpsUdpDataLink::RtpsWriter::pre_stop_helper(OPENDDS_VECTOR(TransportQueueElement*)& to_drop, bool true_stop)
+RtpsUdpDataLink::RtpsWriter::pre_stop_helper(TqeVector& to_drop, bool true_stop)
 {
   typedef SnToTqeMap::iterator iter_t;
 
@@ -825,6 +836,13 @@ RtpsUdpDataLink::RtpsWriter::pre_stop_helper(OPENDDS_VECTOR(TransportQueueElemen
       ++sns_it;
     }
   }
+
+  g2.release();
+  g.release();
+
+  if (stopping_) {
+    heartbeat_.cancel_and_wait();
+  }
 }
 
 void
@@ -832,7 +850,7 @@ RtpsUdpDataLink::pre_stop_i()
 {
   DBG_ENTRY_LVL("RtpsUdpDataLink","pre_stop_i",6);
   DataLink::pre_stop_i();
-  OPENDDS_VECTOR(TransportQueueElement*) to_drop;
+  TqeVector to_drop;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_);
 
@@ -846,8 +864,7 @@ RtpsUdpDataLink::pre_stop_i()
       writers_.erase(last);
     }
   }
-  typedef OPENDDS_VECTOR(TransportQueueElement*)::iterator tqe_iter;
-  tqe_iter drop_it = to_drop.begin();
+  TqeVector::iterator drop_it = to_drop.begin();
   while (drop_it != to_drop.end()) {
     (*drop_it)->data_dropped(true);
     ++drop_it;
@@ -868,7 +885,7 @@ void
 RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
                                         const RepoId& local_id)
 {
-  OPENDDS_VECTOR(TransportQueueElement*) to_drop;
+  TqeVector to_drop;
   using std::pair;
   const GuidConverter conv(local_id);
   if (conv.isWriter()) {
@@ -919,8 +936,7 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
     }
   }
 
-  typedef OPENDDS_VECTOR(TransportQueueElement*)::iterator tqe_iter;
-  for (tqe_iter drop_it = to_drop.begin(); drop_it != to_drop.end(); ++drop_it) {
+  for (TqeVector::iterator drop_it = to_drop.begin(); drop_it != to_drop.end(); ++drop_it) {
     (*drop_it)->data_dropped(true);
   }
 }
@@ -1349,9 +1365,14 @@ bool RtpsUdpDataLink::force_inline_qos_ = false;
 void
 RtpsUdpDataLink::RtpsWriter::send_heartbeats(const DCPS::MonotonicTimePoint& now)
 {
-  OPENDDS_VECTOR(TransportQueueElement*) pendingCallbacks;
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+
+  if (stopping_) {
+    return;
+  }
 
   RtpsUdpDataLink_rch link = link_.lock();
+
   if (!link) {
     return;
   }
@@ -1359,29 +1380,30 @@ RtpsUdpDataLink::RtpsWriter::send_heartbeats(const DCPS::MonotonicTimePoint& now
   RtpsUdpInst& cfg = link->config();
 
   MetaSubmessageVec meta_submessages;
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-    if (expected_acks_) {
-      // One more readers did not ack since the last heartbeat.
-      heartbeat_period_ *= cfg.heartbeat_backoff_factor_;
-    } else if (last_ack_ != MonotonicTimePoint::zero_value && last_heartbeat_ != MonotonicTimePoint::zero_value) {
-      heartbeat_period_ = (last_ack_ - last_heartbeat_) * cfg.heartbeat_safety_factor_;
-    }
-    heartbeat_period_ = std::min(heartbeat_period_, std::max(cfg.heartbeat_period_maximum_, cfg.heartbeat_period_minimum_));
-    heartbeat_period_ = std::max(heartbeat_period_, std::min(cfg.heartbeat_period_maximum_, cfg.heartbeat_period_minimum_));
-    expected_acks_ = 0;
+  TqeVector pendingCallbacks;
 
-    send_and_gather_nack_replies_i(meta_submessages);
-    gather_heartbeats_i(pendingCallbacks, meta_submessages);
-
-    if (!preassociation_readers_.empty() || !lagging_readers_.empty()) {
-      heartbeat_.schedule(heartbeat_period_);
-      last_heartbeat_ = now;
-    } else {
-      last_heartbeat_ = MonotonicTimePoint::zero_value;
-    }
-    last_ack_ = MonotonicTimePoint::zero_value;
+  if (expected_acks_) {
+    // One more readers did not ack since the last heartbeat.
+    heartbeat_period_ *= cfg.heartbeat_backoff_factor_;
+  } else if (last_ack_ != MonotonicTimePoint::zero_value && last_heartbeat_ != MonotonicTimePoint::zero_value) {
+    heartbeat_period_ = (last_ack_ - last_heartbeat_) * cfg.heartbeat_safety_factor_;
   }
+  heartbeat_period_ = std::min(heartbeat_period_, std::max(cfg.heartbeat_period_maximum_, cfg.heartbeat_period_minimum_));
+  heartbeat_period_ = std::max(heartbeat_period_, std::min(cfg.heartbeat_period_maximum_, cfg.heartbeat_period_minimum_));
+  expected_acks_ = 0;
+
+  send_and_gather_nack_replies_i(meta_submessages);
+  gather_heartbeats_i(pendingCallbacks, meta_submessages);
+
+  if (!preassociation_readers_.empty() || !lagging_readers_.empty()) {
+    heartbeat_.schedule(heartbeat_period_);
+    last_heartbeat_ = now;
+  } else {
+    last_heartbeat_ = MonotonicTimePoint::zero_value;
+  }
+  last_ack_ = MonotonicTimePoint::zero_value;
+
+  g.release();
 
   link->queue_or_send_submessages(meta_submessages);
 
@@ -1862,6 +1884,11 @@ bool
 RtpsUdpDataLink::RtpsWriter::add_reader(const ReaderInfo_rch& reader)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
+
+  if (stopping_) {
+    return false;
+  }
+
   ReaderInfoMap::const_iterator iter = remote_readers_.find(reader->id_);
   if (iter == remote_readers_.end()) {
 #ifdef OPENDDS_SECURITY
@@ -2797,6 +2824,10 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
 
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
+  if (stopping_) {
+    return;
+  }
+
   RtpsUdpDataLink_rch link = link_.lock();
 
   if (!link) {
@@ -3029,6 +3060,10 @@ void RtpsUdpDataLink::RtpsWriter::process_nackfrag(const RTPS::NackFragSubmessag
                                                    MetaSubmessageVec& /*meta_submessages*/)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+
+  if (stopping_) {
+    return;
+  }
 
   RtpsUdpDataLink_rch link = link_.lock();
 
@@ -3330,6 +3365,10 @@ RtpsUdpDataLink::RtpsWriter::make_leader_lagger(const RepoId& reader_id,
                                                 SequenceNumber previous_max_sn)
 {
   ACE_UNUSED_ARG(reader_id);
+
+  if (stopping_) {
+    return;
+  }
 
 #ifdef OPENDDS_SECURITY
     if (!is_pvs_writer_) {
@@ -3653,7 +3692,7 @@ void
 RtpsUdpDataLink::RtpsWriter::expire_durable_data(const ReaderInfo_rch& reader,
                                                  const RtpsUdpInst& cfg,
                                                  const MonotonicTimePoint& now,
-                                                 OPENDDS_VECTOR(TransportQueueElement*)& pendingCallbacks)
+                                                 TqeVector& pendingCallbacks)
 {
   if (!reader->durable_data_.empty()) {
     const MonotonicTimePoint expiration = reader->durable_timestamp_ + cfg.durable_data_timeout_;
@@ -3716,7 +3755,7 @@ RtpsUdpDataLink::RtpsWriter::gather_directed_heartbeat_i(const SingleSendBuffer:
 }
 
 void
-RtpsUdpDataLink::RtpsWriter::gather_heartbeats_i(OPENDDS_VECTOR(TransportQueueElement*)& pendingCallbacks,
+RtpsUdpDataLink::RtpsWriter::gather_heartbeats_i(TqeVector& pendingCallbacks,
                                                  MetaSubmessageVec& meta_submessages)
 {
   if (preassociation_readers_.empty() && lagging_readers_.empty() && readers_expecting_heartbeat_.empty()) {
@@ -3981,8 +4020,6 @@ RtpsUdpDataLink::RtpsWriter::~RtpsWriter()
       ACE_TEXT("deleting with %d elements left not fully acknowledged\n"),
       elems_not_acked_.size()));
   }
-
-  heartbeat_.cancel_and_wait();
 }
 
 CORBA::Long RtpsUdpDataLink::RtpsWriter::inc_heartbeat_count()
