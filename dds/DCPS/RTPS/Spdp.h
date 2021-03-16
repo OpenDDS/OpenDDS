@@ -355,6 +355,7 @@ private:
     DCPS::RcHandle<SpdpPeriodic> relay_stun_task_;
     ICE::ServerReflexiveStateMachine relay_srsm_;
     void process_relay_sra(ICE::ServerReflexiveStateMachine::StateChange);
+    void disable_relay_stun_task();
 #endif
     bool network_is_unreachable_;
     bool ice_endpoint_added_;

@@ -2770,6 +2770,12 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
     return 0;
   }
 
+  // Ignore messages from the relay when not using it.
+  if (remote == outer_->config_->spdp_rtps_relay_address() &&
+      !(outer_->config_->rtps_relay_only() || outer_->config_->use_rtps_relay())) {
+    return 0;
+  }
+
   if ((buff_.size() >= 4) && ACE_OS::memcmp(buff_.rd_ptr(), "RTPS", 4) == 0) {
     RTPS::Message message;
 
@@ -3875,6 +3881,10 @@ void Spdp::SpdpTransport::relay_stun_task(const MonotonicTimePoint& /*now*/)
 void Spdp::SpdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::StateChange sc)
 {
 #ifndef DDS_HAS_MINIMUM_BIT
+  if (!relay_stun_task_->enabled()) {
+    return;
+  }
+
   DCPS::ConnectionRecord connection_record;
   std::memset(connection_record.guid, 0, sizeof(connection_record.guid));
   connection_record.protocol = DCPS::RTPS_RELAY_STUN_PROTOCOL;
@@ -3899,6 +3909,25 @@ void Spdp::SpdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::St
   }
 #else
   ACE_UNUSED_ARG(sc);
+#endif
+}
+
+void Spdp::SpdpTransport::disable_relay_stun_task()
+{
+#ifndef DDS_HAS_MINIMUM_BIT
+  relay_stun_task_->disable();
+
+  DCPS::ConnectionRecord connection_record;
+  std::memset(connection_record.guid, 0, sizeof(connection_record.guid));
+  connection_record.protocol = DCPS::RTPS_RELAY_STUN_PROTOCOL;
+
+  DCPS::ConnectionRecordDataReaderImpl* dr = outer_->connection_record_bit();
+  if (dr && relay_srsm_.stun_server_address() != ACE_INET_Addr())  {
+    connection_record.address = DCPS::to_dds_string(relay_srsm_.stun_server_address()).c_str();
+    outer_->sedp_->job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer_->bit_subscriber_, false, connection_record));
+  }
+
+  relay_srsm_ = ICE::ServerReflexiveStateMachine();
 #endif
 }
 
@@ -4105,8 +4134,6 @@ Spdp::rtps_relay_only_now(bool f)
   if (f) {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-    DCPS::ReactorTask_rch reactor_task = sedp_->reactor_task();
-
     tport_->relay_sender_->enable(false, config_->spdp_rtps_relay_send_period());
     tport_->relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
 
@@ -4135,7 +4162,7 @@ Spdp::rtps_relay_only_now(bool f)
         tport_->relay_sender_->disable();
       }
       if (tport_->relay_stun_task_) {
-        tport_->relay_stun_task_->disable();
+        tport_->disable_relay_stun_task();
       }
     }
   }
@@ -4150,13 +4177,22 @@ Spdp::use_rtps_relay_now(bool f)
 #ifdef OPENDDS_SECURITY
   sedp_->use_rtps_relay_now(f);
 
-  if (!f) {
+  if (f) {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-
-    DCPS::ReactorTask_rch reactor_task = sedp_->reactor_task();
-
     tport_->relay_sender_->enable(false, config_->spdp_rtps_relay_send_period());
     tport_->relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
+
+  } else {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+    if (!config_->rtps_relay_only()) {
+      if (tport_->relay_sender_) {
+        tport_->relay_sender_->disable();
+      }
+      if (tport_->relay_stun_task_) {
+        tport_->disable_relay_stun_task();
+      }
+    }
 
 #ifndef DDS_HAS_MINIMUM_BIT
     const DCPS::ParticipantLocation mask =
@@ -4175,15 +4211,7 @@ Spdp::use_rtps_relay_now(bool f)
       }
     }
 #endif
-  } else {
-    if (!config_->rtps_relay_only()) {
-      if (tport_->relay_sender_) {
-        tport_->relay_sender_->disable();
-      }
-      if (tport_->relay_stun_task_) {
-        tport_->relay_stun_task_->disable();
-      }
-    }
+
   }
 #endif
 }

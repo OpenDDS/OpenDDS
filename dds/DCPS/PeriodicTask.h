@@ -29,23 +29,43 @@ public:
 
   void enable(bool reenable, const TimeDuration& period)
   {
+    {
+      ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+      user_enabled_ = true;
+    }
     interceptor_->execute_or_enqueue(new ScheduleEnableCommand(this, reenable, period));
   }
 
   void disable()
   {
+    {
+      ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+      user_enabled_ = false;
+    }
     interceptor_->execute_or_enqueue(new ScheduleDisableCommand(this));
   }
 
   void disable_and_wait()
   {
+    {
+      ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+      user_enabled_ = false;
+    }
     ReactorInterceptor::CommandPtr command = interceptor_->execute_or_enqueue(new ScheduleDisableCommand(this));
     command->wait();
+  }
+
+  bool enabled() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
+    return user_enabled_;
   }
 
   virtual void execute(const MonotonicTimePoint& now) = 0;
 
 private:
+  mutable ACE_Thread_Mutex mutex_;
+  bool user_enabled_;
   RcHandle<ReactorInterceptor> interceptor_;
   bool enabled_;
 

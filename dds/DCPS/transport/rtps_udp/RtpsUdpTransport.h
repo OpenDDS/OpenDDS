@@ -41,6 +41,7 @@ public:
 #ifdef OPENDDS_SECURITY
   ICE::ServerReflexiveStateMachine& relay_srsm() { return relay_srsm_; }
   void process_relay_sra(ICE::ServerReflexiveStateMachine::StateChange);
+  void disable_relay_stun_task();
 #endif
 
   virtual void update_locators(const RepoId& /*remote*/,
