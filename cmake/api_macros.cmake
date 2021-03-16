@@ -86,6 +86,20 @@ macro(_OPENDDS_GENERATE_EXPORT_MACRO_COMMAND  target  output)
   set(${output} ${_output_file})
 endmacro()
 
+macro(OPENDDS_MARK_AS_GENERATED target)
+
+  if (NOT TARGET ${target})
+    message(FATAL_ERROR "Invalid target '${target}' passed into OPENDDS_MARK_AS_GENERATED")
+  endif()
+  set(arglist ${ARGN})
+  foreach (curarg ${arglist})
+    get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+    foreach(dir ${dirs})
+      set_source_files_properties("${dir}/${curarg}_export.h" PROPERTIES GENERATED TRUE)
+    endforeach()
+  endforeach()
+endmacro()
+
 macro(OPENDDS_TARGET_SOURCES target)
 
   if (NOT TARGET ${target})

@@ -1,0 +1,15 @@
+/*
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+module Messenger {
+  @topic
+  struct Message {
+    string from;
+    string subject;
+    @key long subject_id;
+    string text;
+    unsigned long count;
+  };
+};
