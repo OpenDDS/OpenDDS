@@ -421,7 +421,7 @@ private:
     void expire_durable_data(const ReaderInfo_rch& reader,
                              const RtpsUdpInst& cfg,
                              const MonotonicTimePoint& now,
-                             OPENDDS_VECTOR(TransportQueueElement*)& pendingCallbacks);
+                             TqeVector& pendingCallbacks);
 
 #ifdef OPENDDS_SECURITY
     bool is_pvs_writer() const { return is_pvs_writer_; }
@@ -464,7 +464,7 @@ private:
     size_t reader_count() const;
     CORBA::Long inc_heartbeat_count();
 
-    void pre_stop_helper(OPENDDS_VECTOR(TransportQueueElement*)& to_drop, bool true_stop);
+    void pre_stop_helper(TqeVector& to_drop, bool true_stop);
     TransportQueueElement* customize_queue_element_helper(TransportQueueElement* element,
                                                           bool requires_inline_qos,
                                                           MetaSubmessageVec& meta_submessages,
@@ -478,7 +478,7 @@ private:
                           MetaSubmessageVec& meta_submessages);
     void process_acked_by_all();
     void gather_nack_replies_i(MetaSubmessageVec& meta_submessages);
-    void gather_heartbeats_i(OPENDDS_VECTOR(TransportQueueElement*)& pendingCallbacks,
+    void gather_heartbeats_i(TqeVector& pendingCallbacks,
                              MetaSubmessageVec& meta_submessages);
     void gather_heartbeats(const RepoIdSet& additional_guids,
                            MetaSubmessageVec& meta_submessages);

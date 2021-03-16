@@ -30,7 +30,7 @@ set(the_ecu "ecu")
 
 add_executable(${the_ecu} "ecu.cpp")
 
-add_library(ecu_lib SHARED)
+add_library(ecu_lib)
 
 OPENDDS_TARGET_SOURCES(ecu_lib ecu.idl
   ./engine/engine_specs.idl
