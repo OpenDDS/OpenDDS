@@ -546,6 +546,8 @@ jobs:
 
     runs-on: ubuntu-18.04
 
+    needs: wait_cancel_previous
+
     steps:
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
@@ -608,6 +610,17 @@ jobs:
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/config.xml"
+    - name: upload autobuild output
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_autobuild_output
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: check results
+      shell: bash
+      run: |
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+
 
 
   # build_u18_esafe_js0:
@@ -787,6 +800,8 @@ jobs:
 
     runs-on: ubuntu-18.04
 
+    needs: wait_cancel_previous
+
     steps:
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
@@ -849,6 +864,17 @@ jobs:
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/config.xml"
+    - name: upload autobuild output
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_autobuild_output
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: check results
+      shell: bash
+      run: |
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+
 
   # build_u18_bsafe_js0_FM-1f:
 
@@ -2556,6 +2582,8 @@ jobs:
 
     runs-on: ubuntu-20.04
 
+    needs: wait_cancel_previous
+
     steps:
     - name: install gcc
       run: |
@@ -2626,6 +2654,17 @@ jobs:
         </autobuild>
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/config.xml"
+    - name: upload autobuild output
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_autobuild_output
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: check results
+      shell: bash
+      run: |
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+
 
 
   # build_u20_gcc10_bsafe_js0_FM-2c:
