@@ -4,7 +4,7 @@
 # This file is setup the way it is for testing purposes. For a cleaner example
 # see DevGuideExamples/DCPS/Messenger/CMakeLists.txt
 
-project(OpenDDS_Messenger3_cmake CXX)
+project(opendds_generated_property CXX)
 cmake_minimum_required(VERSION 3.8.2)
 
 find_package(OpenDDS REQUIRED)
@@ -42,7 +42,7 @@ set_target_properties(${publisher}
   PROPERTIES OUTPUT_NAME publisher
 )
 
-OPENDDS_MARK_AS_GENERATED(${publisher} ${messenger} OpenDDS::OpenDDS)
+#OPENDDS_MARK_AS_GENERATED(${publisher} ${messenger} OpenDDS::OpenDDS)
 get_source_file_property(prop "${CMAKE_CURRENT_BINARY_DIR}/../idl/${messenger}_export.h" GENERATED)
 message("GENERATED = ${prop}")
 target_link_libraries(${publisher} ${messenger} OpenDDS::OpenDDS)

@@ -4,7 +4,7 @@
 # This file is setup the way it is for testing purposes. For a cleaner example
 # see DevGuideExamples/DCPS/Messenger/CMakeLists.txt
 
-project(OpenDDS_Messenger3_cmake CXX)
+project(opendds_generated_property CXX)
 cmake_minimum_required(VERSION 3.8.2)
 
 find_package(OpenDDS REQUIRED)
