@@ -44,6 +44,7 @@ CORBA::ORB_ptr recoverTaoORB(JNIEnv *jni, jobject source)
   jclass clazz = findClass(jni, "i2jrt/ORB");
   jfieldID fid = jni->GetFieldID(clazz, "_jni_ptr", "J");
   jlong _jni_ptr = jni->GetLongField(source, fid);
+  jni->DeleteLocalRef(clazz);
   return reinterpret_cast<CORBA::ORB_ptr>(_jni_ptr);
 }
 
@@ -78,6 +79,7 @@ jobject JNICALL Java_i2jrt_ORB_string_1to_1object(JNIEnv *jni, jobject jThis,
       recoverTaoORB(jni, jThis)->string_to_object(jsm.c_str());
     jclass clazz = findClass(jni, "i2jrt/TAOObject");
     jmethodID ctor = jni->GetMethodID(clazz, "<init>", "(J)V");
+    jni->DeleteLocalRef(clazz);
     return jni->NewObject(clazz, ctor, reinterpret_cast<jlong>(tao_obj));
 
   } catch (const CORBA::SystemException &se) {

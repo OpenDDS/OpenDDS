@@ -270,8 +270,12 @@ jobject constructTransportInst(JNIEnv *jni,
       throw_java_exception(jni, OpenDDS::DCPS::Transport::UnableToCreate());
     }
     jmethodID ctor = jni->GetMethodID(instClazz, "<init>", "(J)V");
-    return jni->NewObject(instClazz, ctor,
+
+    jobject obj = jni->NewObject(instClazz, ctor,
                           reinterpret_cast<jlong>(inst._retn()));
+    jni->DeleteLocalRef(instClazz);
+
+    return obj;
 }
 
 // TheTransportRegistry
@@ -346,8 +350,12 @@ jobject JNICALL Java_OpenDDS_DCPS_transport_TheTransportRegistry_create_1config
     jclass configClazz =
       findClass(jni, "OpenDDS/DCPS/transport/TransportConfig");
     jmethodID ctor = jni->GetMethodID(configClazz, "<init>", "(J)V");
-    return jni->NewObject(configClazz, ctor,
+
+    jobject obj = jni->NewObject(configClazz, ctor,
                           reinterpret_cast<jlong>(config._retn()));
+    jni->DeleteLocalRef(configClazz);
+
+    return obj;
 
   } catch (const CORBA::SystemException &se) {
     throw_java_exception(jni, se);
@@ -371,8 +379,12 @@ jobject JNICALL Java_OpenDDS_DCPS_transport_TheTransportRegistry_get_1config
     jclass configClazz =
       findClass(jni, "OpenDDS/DCPS/transport/TransportConfig");
     jmethodID ctor = jni->GetMethodID(configClazz, "<init>", "(J)V");
-    return jni->NewObject(configClazz, ctor,
+
+    jobject obj = jni->NewObject(configClazz, ctor,
                           reinterpret_cast<jlong>(config._retn()));
+    jni->DeleteLocalRef(configClazz);
+
+    return obj;
 
   } catch (const CORBA::SystemException &se) {
     throw_java_exception(jni, se);
