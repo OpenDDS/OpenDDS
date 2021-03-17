@@ -34,4 +34,3 @@ set_target_properties(${messenger}
 )
 OPENDDS_TARGET_SOURCES(${messenger} "${dst}/Messenger.idl")
 target_link_libraries(${messenger} OpenDDS::Dcps)
-
