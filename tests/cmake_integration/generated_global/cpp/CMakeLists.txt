@@ -22,7 +22,7 @@ set(messenger "idl_messenger")
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/../idl)
 link_directories(${CMAKE_CURRENT_BINARY_DIR}/../idl)
 
-set(src "${CMAKE_CURRENT_SOURCE_DIR}")
+set(src "${CMAKE_CURRENT_SOURCE_DIR}/../../../DCPS/Messenger")
 set(dst ${CMAKE_CURRENT_BINARY_DIR})
 set(all_targets ${publisher})
 
