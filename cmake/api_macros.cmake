@@ -75,29 +75,14 @@ macro(_OPENDDS_GENERATE_EXPORT_MACRO_COMMAND  target  output)
     message(FATAL_ERROR "Failed to find required script 'generate_export_file.pl'")
   endif()
 
-  add_custom_command(
-    OUTPUT ${_output_file}
-    DEPENDS perl
-    COMMAND ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}" "TAO_ROOT=${TAO_ROOT}"
-      $<TARGET_FILE:perl> ${_gen_script} ${target} $<ANGLE-R> ${_output_file}
-    VERBATIM
-  )
+  execute_process(COMMAND ls ${_output_file} RESULT_VARIABLE result OUTPUT_QUIET ERROR_QUIET)
+  if (result)
+    message("CREATED EXPORT")
+    execute_process(COMMAND ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}" "TAO_ROOT=${TAO_ROOT}"
+      perl ${_gen_script} ${target} OUTPUT_FILE ${_output_file})
+  endif()
 
   set(${output} ${_output_file})
-endmacro()
-
-macro(OPENDDS_MARK_AS_GENERATED target)
-
-  if (NOT TARGET ${target})
-    message(FATAL_ERROR "Invalid target '${target}' passed into OPENDDS_MARK_AS_GENERATED")
-  endif()
-  set(arglist ${ARGN})
-  foreach (curarg ${arglist})
-    get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-    foreach(dir ${dirs})
-      set_source_files_properties("${dir}/${curarg}_export.h" PROPERTIES GENERATED TRUE)
-    endforeach()
-  endforeach()
 endmacro()
 
 macro(OPENDDS_TARGET_SOURCES target)

@@ -15,9 +15,9 @@ if (NOT OPENDDS_OWNERSHIP_PROFILE)
   message(FATAL_ERROR "These tests require OpenDDS to be built with Ownership Profile enabled")
 endif()
 
-set(target_prefix "cpp_")
+set(target_prefix "opendds_cmake_generate_")
 set(publisher "${target_prefix}publisher")
-set(messenger "idl_messenger")
+set(messenger "${target_prefix}messenger")
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/../idl)
 link_directories(${CMAKE_CURRENT_BINARY_DIR}/../idl)
@@ -42,7 +42,6 @@ set_target_properties(${publisher}
   PROPERTIES OUTPUT_NAME publisher
 )
 
-#OPENDDS_MARK_AS_GENERATED(${publisher} ${messenger} OpenDDS::OpenDDS)
 get_source_file_property(prop "${CMAKE_CURRENT_BINARY_DIR}/../idl/${messenger}_export.h" GENERATED)
 message("GENERATED = ${prop}")
 target_link_libraries(${publisher} ${messenger} OpenDDS::OpenDDS)
