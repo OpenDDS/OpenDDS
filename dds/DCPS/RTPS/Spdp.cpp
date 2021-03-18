@@ -2791,9 +2791,12 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
     return 0;
   }
 
-  // Ignore messages from the relay when not using it.
-  if (remote == outer_->config_->spdp_rtps_relay_address() &&
-      !(outer_->config_->rtps_relay_only() || outer_->config_->use_rtps_relay())) {
+  DCPS::RcHandle<Spdp> outer = outer_.lock();
+
+    // Ignore messages from the relay when not using it.
+  if (outer &&
+      remote == outer->config_->spdp_rtps_relay_address() &&
+      !(outer->config_->rtps_relay_only() || outer->config_->use_rtps_relay())) {
     return 0;
   }
 
@@ -3978,16 +3981,19 @@ void Spdp::SpdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::St
 void Spdp::SpdpTransport::disable_relay_stun_task()
 {
 #ifndef DDS_HAS_MINIMUM_BIT
+  DCPS::RcHandle<Spdp> outer = outer_.lock();
+  if (!outer) return;
+
   relay_stun_task_->disable();
 
   DCPS::ConnectionRecord connection_record;
   std::memset(connection_record.guid, 0, sizeof(connection_record.guid));
   connection_record.protocol = DCPS::RTPS_RELAY_STUN_PROTOCOL;
 
-  DCPS::ConnectionRecordDataReaderImpl* dr = outer_->connection_record_bit();
+  DCPS::ConnectionRecordDataReaderImpl* dr = outer->connection_record_bit();
   if (dr && relay_srsm_.stun_server_address() != ACE_INET_Addr())  {
     connection_record.address = DCPS::to_dds_string(relay_srsm_.stun_server_address()).c_str();
-    outer_->sedp_->job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer_->bit_subscriber_, false, connection_record));
+    outer->sedp_->job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer->bit_subscriber_, false, connection_record));
   }
 
   relay_srsm_ = ICE::ServerReflexiveStateMachine();
