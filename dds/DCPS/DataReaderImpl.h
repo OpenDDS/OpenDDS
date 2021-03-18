@@ -435,6 +435,9 @@ public:
   /// Release the instance with the handle.
   void release_instance(DDS::InstanceHandle_t handle);
 
+  /// Release all instances held by the reader.
+  virtual void release_all_instances() = 0;
+
   // Reset time interval for each instance.
   void reschedule_deadline();
 
