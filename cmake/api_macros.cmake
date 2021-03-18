@@ -77,7 +77,6 @@ macro(_OPENDDS_GENERATE_EXPORT_MACRO_COMMAND  target  output)
 
   execute_process(COMMAND ls ${_output_file} RESULT_VARIABLE result OUTPUT_QUIET ERROR_QUIET)
   if (result)
-    message("CREATED EXPORT")
     execute_process(COMMAND ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}" "TAO_ROOT=${TAO_ROOT}"
       perl ${_gen_script} ${target} OUTPUT_FILE ${_output_file})
   endif()
