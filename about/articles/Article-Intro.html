@@ -252,25 +252,22 @@ without making any code changes.</p>
 #include "orbsvcs/TimeBase.idl"
 module StockQuoter
 {
-#pragma DCPS_DATA_TYPE "StockQuoter::Quote"
-#pragma DCPS_DATA_KEY "StockQuoter::Quote ticker"
+  @topic  
   struct Quote {
-    string ticker;
+    @key string ticker;
     string exchange;
     string full_name;
     double value;
     TimeBase::TimeT timestamp;
   };
 
-#pragma DCPS_DATA_TYPE "StockQuoter::ExchangeEvent"
-#pragma DCPS_DATA_KEY "StockQuoter::ExchangeEvent exchange"
-
   enum ExchangeEventType { TRADING_OPENED,
                            TRADING_CLOSED,
                            TRADING_SUSPENDED,
                            TRADING_RESUMED };
+  @topic
   struct ExchangeEvent {
-    string exchange;
+    @key string exchange;
     ExchangeEventType event;
     TimeBase::TimeT timestamp;
   };
@@ -279,8 +276,8 @@ module StockQuoter
 <p>We publish two data types: a <em>Quote</em> type for each
 stock quote, and an <em>ExchangeEvent</em> type to indicate when
 the stock exchange is opened, closed, and when trading is suspended or
-resumed. The <code>DCPS_DATA_TYPE</code> pragma marks a type for use with DDS. The
-<code>DCPS_DATA_KEY</code> defined for each type is a unique identifier for each
+resumed. The <code>@topic</code> annotation marks a type for use with DDS. The
+<code>@key</code> annocaton defined for each type is a unique identifier for each
 <em>instance</em> of the data type. Our Quote type's key is the ticker
 symbol of the stock.
 Throughout the day, we would expect to publish many values, or samples,
@@ -452,7 +449,7 @@ type of data writer for the topic.
     if (DDS::RETCODE_OK !=
           quote_servant->register_type(participant.in (),
                                        QUOTER_QUOTE_TYPE))
-             {
+    {
       cerr << "register_type for " << QUOTER_QUOTE_TYPE
            << " failed." << endl;
       ACE_OS::exit(1);
@@ -609,8 +606,7 @@ We have two Quote instances, for tickers symbols "SPY" (S&amp;P
 Depository Receipts, i.e. the S&amp;P 500) and "MDY" (S&amp;P Midcap
 Depository Receipts, i.e. the S&amp;P Midcap 400), and one
 ExchangeEvent instance, for the "Test Stock Exchange". We register each
-instance with the appropriate data writer. The registration method is
-actually called <code>_cxx_register</code> because <code>register</code> is a reserved word in C++.
+instance with the appropriate data writer.
 </p>
 {% highlight C++ %}
     // Register the Exchange Event and the two
@@ -620,17 +616,17 @@ actually called <code>_cxx_register</code> because <code>register</code> is a re
     StockQuoter::Quote spy;
     spy.ticker = CORBA::string_dup("SPY");
     DDS::InstanceHandle_t spy_handle =
-      quote_dw->_cxx_register(spy);
+      quote_dw->register_instance(spy);
 
     StockQuoter::Quote mdy;
     mdy.ticker = CORBA::string_dup("MDY");
     DDS::InstanceHandle_t mdy_handle =
-      quote_dw->_cxx_register(mdy);
+      quote_dw->register_instance(mdy);
 
     StockQuoter::ExchangeEvent ex_evt;
     ex_evt.exchange = STOCK_EXCHANGE_NAME;
     DDS::InstanceHandle_t exchange_handle =
-      exchange_evt_dw->_cxx_register(ex_evt);
+      exchange_evt_dw->register_instance(ex_evt);
 {% endhighlight %}
 <p>
 Finally, we publish. First, we publish a <code>TRADING_OPENED</code> event on the "Stock Exchange Event" topic.
@@ -1131,7 +1127,6 @@ public:
   // DDS calls on_data_available on the listener for each
   // received Quote sample.
   virtual void on_data_available(DDS::DataReader_ptr reader)
-    throw (CORBA::SystemException)
   {
     try
     {
@@ -1250,7 +1245,6 @@ DDS calls <code>on_data_available</code> on the listener for each received Excha
 </p>
 {% highlight C++ %}
   virtual void on_data_available(DDS::DataReader_ptr reader)
-    throw (CORBA::SystemException)
   {
     try
     {
