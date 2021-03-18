@@ -1604,25 +1604,22 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         foo.key = key2;
         foo_dw->write(foo, DDS::HANDLE_NIL);
 
-        // Sleep until we got both of the instances
-        bool got1 = false;
-        bool got2 = false;
-        for (unsigned spin = 0; spin < 20; ++spin) {
-          if (!got1) {
+        // Sleep until we got both of the instances up to about 5 seconds
+        DDS::InstanceHandle_t inst1 = DDS::HANDLE_NIL;
+        DDS::InstanceHandle_t inst2 = DDS::HANDLE_NIL;
+        for (unsigned spin = 0;
+            spin < 25 && (inst1 == DDS::HANDLE_NIL || inst2 == DDS::HANDLE_NIL); ++spin) {
+          if (inst1 == DDS::HANDLE_NIL) {
             foo.key = key1;
-            got1 = foo_dr->lookup_instance(foo) != DDS::HANDLE_NIL;
+            inst1 = foo_dr->lookup_instance(foo);
           }
-          if (!got2) {
+          if (inst2 == DDS::HANDLE_NIL) {
             foo.key = key2;
-            got2 = foo_dr->lookup_instance(foo) != DDS::HANDLE_NIL;
+            inst2 = foo_dr->lookup_instance(foo);
           }
-
-          if (got1 && got2) {
-            break;
-          }
-          ACE_OS::sleep(ACE_Time_Value(0, 100000));
+          ACE_OS::sleep(ACE_Time_Value(0, 200000)); // 1/5 sec
         }
-        if (!got1 || !got2) {
+        if (inst1 == DDS::HANDLE_NIL || inst2 == DDS::HANDLE_NIL) {
           ACE_ERROR((LM_ERROR, "ERROR: sequence reuse test: Timedout waiting for instances\n"));
           throw TestException();
         }
@@ -1631,9 +1628,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         {
           Test::SimpleSeq data;
           DDS::SampleInfoSeq info;
-          foo.key = key2;
-          const DDS::InstanceHandle_t handle = foo_dr->lookup_instance(foo);
-          const DDS::ReturnCode_t rc = foo_dr->read_instance(data, info, 1, handle,
+          const DDS::ReturnCode_t rc = foo_dr->read_instance(data, info, 1, inst2,
             DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
           if (rc != DDS::RETCODE_OK) {
             ACE_ERROR((LM_ERROR, "ERROR: sequence reuse test: read_instance Failed: %C\n",
@@ -1679,10 +1674,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
 
         // Don't mess up the next test.
-        foo.key = key1;
-        dr_impl->release_instance(foo_dr->lookup_instance(foo));
-        foo.key = key2;
-        dr_impl->release_instance(foo_dr->lookup_instance(foo));
+        dr_impl->release_instance(inst1);
+        dr_impl->release_instance(inst2);
       }
 
       {
