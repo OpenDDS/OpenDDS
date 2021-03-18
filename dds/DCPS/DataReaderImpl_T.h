@@ -1048,6 +1048,19 @@ namespace OpenDDS {
     return marshal_skip_serialize_;
   }
 
+  void release_all_instances()
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+
+    const typename InstanceMap::iterator end = instance_map_.end();
+    typename InstanceMap::iterator it = instance_map_.begin();
+    while (it != end) {
+      const DDS::InstanceHandle_t handle = it->second;
+      ++it; // it will be invalid, so iterate now.
+      release_instance(handle);
+    }
+  }
+
 protected:
 
   virtual RcHandle<MessageHolder> dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample& sample,
