@@ -4217,14 +4217,14 @@ Spdp::use_rtps_relay_now(bool f)
 }
 
 void
-Spdp::use_ice_now(bool f)
+Spdp::use_ice_now(bool flag)
 {
-  ACE_UNUSED_ARG(f);
+  ACE_UNUSED_ARG(flag);
 
 #ifdef OPENDDS_SECURITY
-  sedp_->use_ice_now(f);
+  sedp_->use_ice_now(flag);
 
-  if (f) {
+  if (flag) {
     ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
     ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
 

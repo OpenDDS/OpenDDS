@@ -19,7 +19,8 @@ namespace DCPS {
 class PeriodicTask : public RcEventHandler {
 public:
   explicit PeriodicTask(RcHandle<ReactorInterceptor> interceptor)
-    : interceptor_(interceptor)
+    : user_enabled_(false)
+    , interceptor_(interceptor)
     , enabled_(false)
   {
     reactor(interceptor->reactor());
