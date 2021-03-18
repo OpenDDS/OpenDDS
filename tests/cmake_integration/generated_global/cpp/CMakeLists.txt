@@ -43,5 +43,5 @@ set_target_properties(${publisher}
 )
 
 get_source_file_property(prop "${CMAKE_CURRENT_BINARY_DIR}/../idl/${messenger}_export.h" GENERATED)
-message("GENERATED = ${prop}")
+message("${messenger}_export.h GENERATED = ${prop}")
 target_link_libraries(${publisher} ${messenger} OpenDDS::OpenDDS)
