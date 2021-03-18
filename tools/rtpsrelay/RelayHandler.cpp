@@ -351,7 +351,9 @@ VerticalHandler::record_activity(const ACE_INET_Addr& remote_address,
     const auto before = guid_addr_set_map_.size();
     const auto res = guid_addr_set_map_[src_guid].addr_set.insert(remote_address);
     if (res.second) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: VerticalHandler::record_activity %C %C is at %C\n"), name_.c_str(), guid_to_string(src_guid).c_str(), addr_to_string(remote_address).c_str()));
+      if (config_.log_activity()) {
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: VerticalHandler::record_activity %C %C is at %C\n"), name_.c_str(), guid_to_string(src_guid).c_str(), addr_to_string(remote_address).c_str()));
+      }
       stats_reporter_.new_address(now);
       const auto after = guid_addr_set_map_.size();
       if (before != after) {
@@ -394,11 +396,15 @@ VerticalHandler::record_activity(const ACE_INET_Addr& remote_address,
 
   // Process expirations.
   for (auto pos = expiration_guid_addr_map_.begin(), limit = expiration_guid_addr_map_.end(); pos != limit && pos->first < now;) {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: VerticalHandler::record_activity %C %C %C expired at %d.%d now=%d.%d\n"), name_.c_str(), guid_to_string(pos->second.guid).c_str(), addr_to_string(pos->second.address).c_str(), pos->first.value().sec(), pos->first.value().usec(), now.value().sec(), now.value().usec()));
+    if (config_.log_activity()) {
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: VerticalHandler::record_activity %C %C %C expired at %d.%d now=%d.%d\n"), name_.c_str(), guid_to_string(pos->second.guid).c_str(), addr_to_string(pos->second.address).c_str(), pos->first.value().sec(), pos->first.value().usec(), now.value().sec(), now.value().usec()));
+    }
     stats_reporter_.expired_address(now);
     guid_addr_set_map_[pos->second.guid].addr_set.erase(pos->second.address);
     if (guid_addr_set_map_[pos->second.guid].addr_set.empty()) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: VerticalHandler::record_activity %C %C removed\n"), name_.c_str(), guid_to_string(pos->second.guid).c_str()));
+      if (config_.log_activity()) {
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: VerticalHandler::record_activity %C %C removed\n"), name_.c_str(), guid_to_string(pos->second.guid).c_str()));
+      }
       guid_addr_set_map_[pos->second.guid].stats_reporter.report(now, true);
       guid_addr_set_map_.erase(pos->second.guid);
       stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
@@ -659,7 +665,9 @@ void VerticalHandler::write_address(const OpenDDS::DCPS::RepoId& guid,
   gna.name(name_);
   gna.address(horizontal_address_str_);
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: VerticalHandler::write_address %C claiming %C\n"), name_.c_str(), guid_to_string(guid).c_str()));
+  if (config_.log_activity()) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: VerticalHandler::write_address %C claiming %C\n"), name_.c_str(), guid_to_string(guid).c_str()));
+  }
   stats_reporter_.claim(now);
   const auto ret = responsible_relay_writer_->write(gna, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
@@ -674,7 +682,9 @@ void VerticalHandler::unregister_address(const OpenDDS::DCPS::RepoId& guid,
   assign(gna.guid(), guid);
   gna.name(name_);
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: VerticalHandler::unregister_address %C disclaiming %C\n"), name_.c_str(), guid_to_string(guid).c_str()));
+  if (config_.log_activity()) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: VerticalHandler::unregister_address %C disclaiming %C\n"), name_.c_str(), guid_to_string(guid).c_str()));
+  }
   stats_reporter_.disclaim(now);
   const auto ret = responsible_relay_writer_->unregister_instance(gna, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
