@@ -2029,7 +2029,7 @@ namespace OpenDDS {
         ACE_GUARD(ACE_Thread_Mutex, g, lock_);
         endpoint_manager().ignore(ignoreId);
 
-        const DiscoveredParticipantIter iter = participants_.find(ignoreId);
+        DiscoveredParticipantIter iter = participants_.find(ignoreId);
         if (iter != participants_.end()) {
           remove_discovered_participant(iter);
         }
@@ -2341,8 +2341,11 @@ namespace OpenDDS {
 
       virtual EndpointManagerType& endpoint_manager() = 0;
 
-      void remove_discovered_participant(DiscoveredParticipantIter iter)
+      void remove_discovered_participant(DiscoveredParticipantIter& iter)
       {
+        if (iter == participants_.end()) {
+          return;
+        }
         RepoId part_id = iter->first;
         bool removed = endpoint_manager().disassociate(iter->second.pdata_);
         iter = participants_.find(part_id); // refresh iter after disassociate, which can unlock
@@ -2389,7 +2392,7 @@ namespace OpenDDS {
         }
       }
 
-      virtual void remove_discovered_participant_i(DiscoveredParticipantIter) {}
+      virtual void remove_discovered_participant_i(DiscoveredParticipantIter&) {}
 
 #ifndef DDS_HAS_MINIMUM_BIT
     DCPS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit()
@@ -2565,6 +2568,7 @@ namespace OpenDDS {
           participants_.erase(domain);
         }
 
+        participant->shutdown();
         return true;
       }
 

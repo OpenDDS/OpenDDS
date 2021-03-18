@@ -472,7 +472,7 @@ bool idl_mapping_jni::gen_enum(UTL_ScopedName *name,
   "  jfieldID fid = jni->GetFieldID (clazz, \"_value\", \"I\");\n"
   "  target = static_cast<" << c.cxx
   << "> (jni->GetIntField (source, fid));\n"
-  "  jni->DeleteLocalRef(clazz);\n"
+  "  jni->DeleteLocalRef (clazz);\n"
   "}\n\n" <<
   c.sigToJava << "\n"
   "{\n"
@@ -481,7 +481,7 @@ bool idl_mapping_jni::gen_enum(UTL_ScopedName *name,
   "  jmethodID factory = jni->GetStaticMethodID (clazz, \"from_int\", "
   "\"(I)L" << enumJVMsig << ";\");\n"
   "  target = jni->CallStaticObjectMethod (clazz, factory, source);\n"
-  "  jni->DeleteLocalRef(clazz);\n"
+  "  jni->DeleteLocalRef (clazz);\n"
   "}\n\n";
   return true;
 }
@@ -567,6 +567,7 @@ bool idl_mapping_jni::gen_struct(UTL_ScopedName *name,
   "{\n"
   "  jclass clazz = jni->GetObjectClass (source);\n" <<
   fieldsToCxx <<
+  "  jni->DeleteLocalRef (clazz);\n"
   "}\n\n" <<
   c.sigToJava << "\n"
   "{\n"
@@ -582,10 +583,7 @@ bool idl_mapping_jni::gen_struct(UTL_ScopedName *name,
   "      clazz = jni->GetObjectClass (target);\n"
   "    }\n" <<
   fieldsToJava <<
-  "  if (createNewObject)\n"
-  "    {\n"
-  "      jni->DeleteLocalRef(clazz);\n"
-  "    }\n"
+  "  jni->DeleteLocalRef (clazz);\n"
   "}\n\n";
   return true;
 }
@@ -651,7 +649,7 @@ bool idl_mapping_jni::gen_jarray_copies(UTL_ScopedName *name,
 {
   commonSetup c(name, jniArrayType.c_str(), false, !sequence);
   string preLoop, postLoopCxx, postLoopJava, preNewArray, newArrayExtra,
-  loopCxx, loopJava, actualJniType = jniType,
+  postNewArray, loopCxx, loopJava, actualJniType = jniType,
                                      resizeCxx = sequence ? "  target.length (len);\n" : "";
 
   if (jvmSig.size() == 1) { //primitive type
@@ -760,6 +758,11 @@ bool idl_mapping_jni::gen_jarray_copies(UTL_ScopedName *name,
       "      jni->DeleteLocalRef (obj);\n";
   }
 
+  postNewArray = "      jni->DeleteLocalRef (clazz);\n";
+  if (preNewArray.find("jclass clazz") == string::npos) {
+    postNewArray = "";
+  }
+
   ostringstream toJavaBody;
   toJavaBody <<
   "  jsize len = " << length << ";\n"
@@ -770,6 +773,7 @@ bool idl_mapping_jni::gen_jarray_copies(UTL_ScopedName *name,
   "    {\n"
   << preNewArray <<
   "      arr = jni->New" << jniFn << "Array (len" << newArrayExtra << ");\n"
+  << postNewArray <<
   "    }\n"
   "  else\n"
   "    {\n"
@@ -980,7 +984,7 @@ string arg_conversion(const char *name, AST_Type *type,
       + ", \"<init>\", \"()V\");\n"
       "  jobject _j_" + name + " = _jni->NewObject (_hc_" + name
       + ", _hm_" + name + ");\n"
-      "  _jni->DeleteLocalRef(_hc_" + string(name) + ");\n"
+      "  _jni->DeleteLocalRef (_hc_" + string(name) + ");\n"
       "  holderize (_jni, _j_" + name + ", _n_" + name + ", \"" + jvmSig
       + "\");\n";
 
@@ -999,7 +1003,7 @@ string arg_conversion(const char *name, AST_Type *type,
       + ", \"<init>\", \"()V\");\n"
       "  jobject _j_" + name + " = _jni->NewObject (_hc_" + name
       + ", _hm_" + name + ");\n"
-      "  _jni->DeleteLocalRef(_hc_" + string(name) + ");\n";
+      "  _jni->DeleteLocalRef (_hc_" + string(name) + ");\n";
     tao_argconv_out +=
       "  " + jni + " _o_" + name + " = deholderize<" + jni + "> (_jni, _j_"
       + name + ", \"" + jvmSig + "\");\n"
@@ -1127,7 +1131,7 @@ void write_native_attribute_r(UTL_ScopedName *name, const char *javaStub,
     "  " << tao_retval << array_cast << "_jni->Call" << jniFn
     << "Method (globalCallback_, _mid" << java_args
     << ((array_cast == "") ? "" : ")") << ");\n"
-    "  _jni->DeleteLocalRef(_clazz);\n"
+    "  _jni->DeleteLocalRef (_clazz);\n"
     "  jthrowable _excep = _jni->ExceptionOccurred ();\n"
     "  if (_excep) throw_cxx_exception (_jni, _excep);\n"
     << tao_argconv_out
@@ -1221,7 +1225,7 @@ void write_native_attribute_w(UTL_ScopedName *name, const char *javaStub,
     "  " << tao_retval << array_cast << "_jni->Call" << jniFn
     << "Method (globalCallback_, _mid" << java_args
     << ((array_cast == "") ? "" : ")") << ");\n"
-    "  _jni->DeleteLocalRef(_clazz);\n"
+    "  _jni->DeleteLocalRef (_clazz);\n"
     "  jthrowable _excep = _jni->ExceptionOccurred ();\n"
     "  if (_excep) throw_cxx_exception (_jni, _excep);\n"
     << tao_argconv_out
@@ -1376,7 +1380,7 @@ void write_native_operation(UTL_ScopedName *name, const char *javaStub,
     "  " << tao_retval << array_cast << "_jni->Call" << jniFn
     << "Method (globalCallback_, _mid" << java_args
     << ((array_cast == "") ? "" : ")") << ");\n"
-    "  _jni->DeleteLocalRef(_clazz);\n"
+    "  _jni->DeleteLocalRef (_clazz);\n"
     "  jthrowable _excep = _jni->ExceptionOccurred ();\n"
     "  if (_excep) throw_cxx_exception (_jni, _excep);\n"
     << tao_argconv_out
@@ -1453,7 +1457,7 @@ bool idl_mapping_jni::gen_interf(UTL_ScopedName *name, bool local,
     "    {\n"
     "      target = new " << name_underscores << "JavaPeer (jni, source);\n"
     "    }\n"
-    "  jni->DeleteLocalRef(taoObjClazz);\n"
+    "  jni->DeleteLocalRef (taoObjClazz);\n"
     "}\n\n";
 
   else /*!local*/ c.cppfile <<
@@ -1477,7 +1481,7 @@ bool idl_mapping_jni::gen_interf(UTL_ScopedName *name, bool local,
   "  jmethodID ctor = jni->GetMethodID (stubClazz, \"<init>\", \"(J)V\");\n"
   "  target = jni->NewObject (stubClazz, ctor, reinterpret_cast<jlong> (\n"
   "    CORBA::Object::_duplicate (source.in ())));\n"
-  "  jni->DeleteLocalRef(stubClazz);\n"
+  "  jni->DeleteLocalRef (stubClazz);\n"
   "}\n\n";
 
   // implement native_unarrow native method for the Helper class
@@ -1850,7 +1854,7 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
       "\"(I)" + disc_sig + "\");\n"
       "  jobject jdisc = jni->CallStaticObjectMethod (dclazz, from_int, "
       "static_cast<jint> (source._d ()));\n"
-      "  jni->DeleteLocalRef(dclazz);\n";
+      "  jni->DeleteLocalRef (dclazz);\n";
     explicitDiscCleanup =
       "  jni->DeleteLocalRef (jdisc);\n";
 
@@ -1896,7 +1900,7 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
   "    {\n" <<
   branchesToCxx <<
   "    }\n"
-  "  jni->DeleteLocalRef(clazz);\n"
+  "  jni->DeleteLocalRef (clazz);\n"
   "  target._d (" << extra_enum2 << ");\n" //in case the Java side had one of
   "}\n\n" <<                               //the "alternate" labels for 1 br.
   c.sigToJava << "\n"
