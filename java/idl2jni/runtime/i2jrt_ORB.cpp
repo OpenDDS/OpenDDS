@@ -79,8 +79,9 @@ jobject JNICALL Java_i2jrt_ORB_string_1to_1object(JNIEnv *jni, jobject jThis,
       recoverTaoORB(jni, jThis)->string_to_object(jsm.c_str());
     jclass clazz = findClass(jni, "i2jrt/TAOObject");
     jmethodID ctor = jni->GetMethodID(clazz, "<init>", "(J)V");
+    jobject obj = jni->NewObject(clazz, ctor, reinterpret_cast<jlong>(tao_obj));
     jni->DeleteLocalRef(clazz);
-    return jni->NewObject(clazz, ctor, reinterpret_cast<jlong>(tao_obj));
+    return obj;
 
   } catch (const CORBA::SystemException &se) {
     throw_java_exception(jni, se);
