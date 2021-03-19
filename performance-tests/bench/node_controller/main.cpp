@@ -150,14 +150,14 @@ public:
       }
     } else {
       std::string command(spawned_process_command_);
-      string_replace(command, "\%ds\%", ACE_DIRECTORY_SEPARATOR_STR_A);
-      string_replace(command, "\%bench_root\%", bench_root);
-      string_replace(command, "\%executable_full_path\%", join_path(bench_root, executable_name_));
-      string_replace(command, "\%executable\%", executable_name_);
-      string_replace(command, "\%config\%", allocated_scenario_filename_);
-      string_replace(command, "\%report\%", report_filename_);
-      if (command.find("\%log\%") != std::string::npos) {
-        string_replace(command, "\%log\%", log_filename_);
+      string_replace(command, "%ds%", ACE_DIRECTORY_SEPARATOR_STR_A);
+      string_replace(command, "%bench_root%", bench_root);
+      string_replace(command, "%executable_full_path%", join_path(bench_root, executable_name_));
+      string_replace(command, "%executable%", executable_name_);
+      string_replace(command, "%config%", allocated_scenario_filename_);
+      string_replace(command, "%report%", report_filename_);
+      if (command.find("%log%") != std::string::npos) {
+        string_replace(command, "%log%", log_filename_);
       } else {
         ACE_HANDLE log_handle = ACE_OS::open(log_filename_.c_str(), O_WRONLY | O_CREAT);
         proc_opts->set_handles(ACE_INVALID_HANDLE, log_handle, log_handle);
