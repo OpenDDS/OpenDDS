@@ -2448,7 +2448,9 @@ sub write_cmake_file {
       my $var = uc "OPENDDS_${k}";
       $var =~ s/-/_/g;
       my $val = $opts_{$k};
-
+      if($var eq "OPENDDS_COMPILER" && $val eq "cl") {
+        $val = "\${CMAKE_CXX_COMPILER}";
+      }
       if ($make_absolute_path{$k}) {
         $val = Cwd::abs_path($val);
       }
