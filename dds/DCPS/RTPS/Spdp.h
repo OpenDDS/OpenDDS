@@ -361,16 +361,17 @@ private:
 #endif
     bool network_is_unreachable_;
     bool ice_endpoint_added_;
-  } *tport_;
+  };
+
+  DCPS::RcHandle<SpdpTransport> tport_;
 
   struct ChangeMulticastGroup : public DCPS::JobQueue::Job {
     enum CmgAction {CMG_JOIN, CMG_LEAVE};
 
-    ChangeMulticastGroup(const ACE_Event_Handler_var& eh,
+    ChangeMulticastGroup(const DCPS::RcHandle<SpdpTransport>& tport,
                          const DCPS::NetworkInterface& nic, CmgAction action,
                          bool all_interfaces = false)
-      : eh_(eh)
-      , tport_(dynamic_cast<SpdpTransport*>(eh_.handler()))
+      : tport_(tport)
       , nic_(nic)
       , action_(action)
       , all_interfaces_(all_interfaces)
@@ -378,15 +379,19 @@ private:
 
     void execute()
     {
+      DCPS::RcHandle<SpdpTransport> tport = tport_.lock();
+      if (!tport) {
+        return;
+      }
+
       if (action_ == CMG_JOIN) {
-        tport_->join_multicast_group(nic_, all_interfaces_);
+        tport->join_multicast_group(nic_, all_interfaces_);
       } else {
-        tport_->leave_multicast_group(nic_);
+        tport->leave_multicast_group(nic_);
       }
     }
 
-    ACE_Event_Handler_var eh_;
-    SpdpTransport* tport_;
+    DCPS::WeakRcHandle<SpdpTransport> tport_;
     DCPS::NetworkInterface nic_;
     CmgAction action_;
     bool all_interfaces_;
@@ -395,18 +400,16 @@ private:
 #ifdef OPENDDS_SECURITY
   class SendStun : public DCPS::JobQueue::Job {
   public:
-    SendStun(const ACE_Event_Handler_var& eh,
+    SendStun(const DCPS::RcHandle<SpdpTransport>& tport,
              const ACE_INET_Addr& address,
              const STUN::Message& message)
-      : eh_(eh)
-      , tport_(dynamic_cast<SpdpTransport*>(eh_.handler()))
+      : tport_(tport)
       , address_(address)
       , message_(message)
     {}
     void execute();
   private:
-    ACE_Event_Handler_var eh_;
-    SpdpTransport* tport_;
+    DCPS::WeakRcHandle<SpdpTransport> tport_;
     ACE_INET_Addr address_;
     STUN::Message message_;
   };
@@ -433,7 +436,6 @@ private:
 #endif /* DDS_HAS_MINIMUM_BIT */
 #endif
 
-  ACE_Event_Handler_var eh_; // manages our refcount on tport_
   bool eh_shutdown_;
   DCPS::ConditionVariable<ACE_Thread_Mutex> shutdown_cond_;
 #ifdef ACE_HAS_CPP11

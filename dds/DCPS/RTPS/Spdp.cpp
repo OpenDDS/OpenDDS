@@ -244,8 +244,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , config_(disco_->config())
   , domain_(domain)
   , guid_(guid)
-  , tport_(new SpdpTransport(rchandle_from(this)))
-  , eh_(tport_)
+  , tport_(DCPS::make_rch<SpdpTransport>(rchandle_from(this)))
   , eh_shutdown_(false)
   , shutdown_cond_(lock_)
   , shutdown_flag_(false)
@@ -284,8 +283,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , config_(disco_->config())
   , domain_(domain)
   , guid_(guid)
-  , tport_(new SpdpTransport(rchandle_from(this)))
-  , eh_(tport_)
+  , tport_(DCPS::make_rch<SpdpTransport>(rchandle_from(this)))
   , eh_shutdown_(false)
   , shutdown_cond_(lock_)
   , shutdown_flag_(false)
@@ -421,7 +419,7 @@ Spdp::shutdown()
 
   // release lock for reset of event handler, which may delete transport
   tport_->close(sedp_->reactor_task());
-  eh_.reset();
+  tport_.reset();
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     while (!eh_shutdown_) {
@@ -2371,7 +2369,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
     DCPS::NetworkInterface nic(0, multicast_interface_, true);
     nic.add_default_addrs();
     const bool all = multicast_interface_.empty();
-    outer->sedp_->job_queue()->enqueue(DCPS::make_rch<ChangeMulticastGroup>(outer->eh_, nic,
+    outer->sedp_->job_queue()->enqueue(DCPS::make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,
                                                                             ChangeMulticastGroup::CMG_JOIN, all));
   }
 }
@@ -3019,29 +3017,32 @@ Spdp::SpdpTransport::send(const ACE_INET_Addr& address, const STUN::Message& mes
 
   DCPS::RcHandle<DCPS::JobQueue> job_queue = outer->sedp_->job_queue();
   if (job_queue) {
-    job_queue->enqueue(DCPS::make_rch<SendStun>(this, address, message));
+    job_queue->enqueue(DCPS::make_rch<SendStun>(rchandle_from(this), address, message));
   }
 }
 
 void
 Spdp::SendStun::execute()
 {
-  DCPS::RcHandle<Spdp> outer = tport_->outer_.lock();
+  DCPS::RcHandle<SpdpTransport> tport = tport_.lock();
+  if (!tport) return;
+
+  DCPS::RcHandle<Spdp> outer = tport->outer_.lock();
   if (!outer) return;
 
   ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
-  tport_->wbuff_.reset();
-  Serializer serializer(&tport_->wbuff_, STUN::encoding);
-  const_cast<STUN::Message&>(message_).block = &tport_->wbuff_;
+  tport->wbuff_.reset();
+  Serializer serializer(&tport->wbuff_, STUN::encoding);
+  const_cast<STUN::Message&>(message_).block = &tport->wbuff_;
   serializer << message_;
 
   ssize_t res;
-  const ACE_SOCK_Dgram& socket = tport_->choose_send_socket(address_);
-  res = socket.send(tport_->wbuff_.rd_ptr(), tport_->wbuff_.length(), address_);
+  const ACE_SOCK_Dgram& socket = tport->choose_send_socket(address_);
+  res = socket.send(tport->wbuff_.rd_ptr(), tport->wbuff_.length(), address_);
 
   if (res < 0) {
     const int err = errno;
-    if (err != ENETUNREACH || !tport_->network_is_unreachable_) {
+    if (err != ENETUNREACH || !tport->network_is_unreachable_) {
       ACE_TCHAR addr_buff[256] = {};
       address_.addr_to_string(addr_buff, 256);
       errno = err;
@@ -3050,10 +3051,10 @@ Spdp::SendStun::execute()
                  ACE_TEXT("destination %s failed send: %m\n"), addr_buff));
     }
     if (err == ENETUNREACH) {
-      tport_->network_is_unreachable_ = true;
+      tport->network_is_unreachable_ = true;
     }
   } else {
-    tport_->network_is_unreachable_ = false;
+    tport->network_is_unreachable_ = false;
   }
 }
 
@@ -3388,7 +3389,7 @@ Spdp::SpdpTransport::add_address(const DCPS::NetworkInterface& nic,
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
-  outer->sedp_->job_queue()->enqueue(DCPS::make_rch<ChangeMulticastGroup>(outer->eh_, nic,
+  outer->sedp_->job_queue()->enqueue(DCPS::make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,
                                                                           ChangeMulticastGroup::CMG_JOIN));
 }
 
@@ -3398,7 +3399,7 @@ void Spdp::SpdpTransport::remove_address(const DCPS::NetworkInterface& nic,
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
-  outer->sedp_->job_queue()->enqueue(DCPS::make_rch<ChangeMulticastGroup>(outer->eh_, nic,
+  outer->sedp_->job_queue()->enqueue(DCPS::make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,
                                                                           ChangeMulticastGroup::CMG_LEAVE));
 }
 
@@ -4319,7 +4320,7 @@ Spdp::use_ice_now(bool flag)
       const RepoId l = make_id(guid_, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER);
       ICE::Agent::instance()->add_local_agent_info_listener(sedp_endpoint, l, this);
     }
-    ICE::Agent::instance()->add_endpoint(tport_);
+    ICE::Agent::instance()->add_endpoint(tport_.get());
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     tport_->ice_endpoint_added_ = true;
     if (spdp_endpoint) {
@@ -4337,7 +4338,7 @@ Spdp::use_ice_now(bool flag)
       }
     }
   } else {
-    ICE::Agent::instance()->remove_endpoint(tport_);
+    ICE::Agent::instance()->remove_endpoint(tport_.get());
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     tport_->ice_endpoint_added_ = false;
 
