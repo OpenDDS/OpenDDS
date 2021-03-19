@@ -4212,14 +4212,14 @@ ParticipantData_t& Spdp::get_participant_data(const DCPS::RepoId& guid)
 }
 
 void
-Spdp::rtps_relay_only_now(bool f)
+Spdp::rtps_relay_only_now(bool flag)
 {
-  ACE_UNUSED_ARG(f);
+  ACE_UNUSED_ARG(flag);
 
 #ifdef OPENDDS_SECURITY
-  sedp_->rtps_relay_only_now(f);
+  sedp_->rtps_relay_only_now(flag);
 
-  if (f) {
+  if (flag) {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
     tport_->relay_sender_->enable(false, config_->spdp_rtps_relay_send_period());
