@@ -9,7 +9,20 @@
 #include <ace/OS_NS_string.h> // For ACE_OS::strcpy
 #include <ace/OS_NS_sys_stat.h> // For ACE_OS::mkdir and ACE_OS::stat
 #include <ace/OS_NS_stdlib.h> // For ACE_OS::mktemp
+#ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  if defined(__has_warning)
+#    if __has_warning("-Wdeprecated-declarations")
+#      pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#    endif
+#  elif __GNUC__ > 7
+#    pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#  endif
+#endif
 #include <ace/OS_NS_dirent.h> // For ACE_OS::opendir and friends
+#ifdef __GNUC__
+#  pragma GCC diagnostic pop
+#endif
 
 namespace Bench {
 
@@ -47,7 +60,18 @@ unsigned get_option_argument_uint(int& i, int argc, ACE_TCHAR* argv[])
   return value;
 }
 
-std::string join_path(const std::string& arg) {
+std::string& string_replace(std::string& input, const std::string& oldstr, const std::string& newstr)
+{
+  size_t pos = input.find(oldstr);
+  while (pos != std::string::npos) {
+    input.replace(pos, oldstr.size(), newstr);
+    pos = input.find(oldstr);
+  }
+  return input;
+}
+
+std::string join_path(const std::string& arg)
+{
   return arg;
 }
 

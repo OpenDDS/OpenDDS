@@ -250,6 +250,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     try {
       unsigned long max_value = 0;
       for (const std::string& i : get_dir_contents(results_path)) {
+        if (i.find_first_not_of("0123456789") != std::string::npos)
+          continue;
         try {
           max_value = std::max(std::stoul(i), max_value);
         } catch (const std::exception&) {
@@ -406,20 +408,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       for (CORBA::ULong i = 0; i < report.node_reports.length(); ++i) {
         total_worker_reports += report.node_reports[i].worker_reports.length();
         if (show_worker_logs) {
-          for (CORBA::ULong j = 0; j < report.node_reports[i].worker_logs.length(); ++j) {
+          for (CORBA::ULong j = 0; j < report.node_reports[i].spawned_process_logs.length(); ++j) {
             std::stringstream header;
-            header << "=== Showing Log for Node " << report.node_reports[i].node_id << " Worker #" << report.node_reports[i].worker_ids[j] << " ===" << std::endl;
+            header << "=== Showing Log for Node " << report.node_reports[i].node_id << " Spawned Process #" << report.node_reports[i].spawned_process_ids[j] << " ===" << std::endl;
             result_file << header.str();
-            result_file << report.node_reports[i].worker_logs[j] << std::endl << std::endl;
+            result_file << report.node_reports[i].spawned_process_logs[j] << std::endl << std::endl;
             std::cout << header.str();
-            std::cout << report.node_reports[i].worker_logs[j] << std::endl << std::endl;
+            std::cout << report.node_reports[i].spawned_process_logs[j] << std::endl << std::endl;
           }
         }
       }
 
-      if (total_worker_reports != allocated_scenario.expected_reports) {
+      if (total_worker_reports != allocated_scenario.expected_worker_reports) {
         std::string log_msg = "ERROR: Only received " + std::to_string(total_worker_reports) +
-          " out of " + std::to_string(allocated_scenario.expected_reports) + " valid reports!\n";
+          " out of " + std::to_string(allocated_scenario.expected_worker_reports) + " valid reports!\n";
         result_file << log_msg;
         std::cerr << log_msg;
         result = EXIT_FAILURE;
@@ -438,6 +440,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   } catch (const std::runtime_error& e) {
     std::cerr << "Error: " << e.what() << std::endl << "Exiting" << std::endl;
+    return EXIT_FAILURE;
+  } catch (const CORBA::Exception& e) {
+    e._tao_print_exception("Exception caught in main():");
     return EXIT_FAILURE;
   } catch (...) {
     std::cerr << "Error: Caught Unknown Exception" << std::endl << "Exiting" << std::endl;

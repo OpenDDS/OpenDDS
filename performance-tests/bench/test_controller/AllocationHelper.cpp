@@ -37,9 +37,9 @@ void AllocationHelper::alloc_exclusive_node_configs(AllocatedScenario& allocated
             allocated_scenario.configs.length(old_len + 1);
             allocated_scenario.configs[old_len].node_id = top.id;
             allocated_scenario.configs[old_len].timeout = scenario_prototype.timeout;
-            allocated_scenario.configs[old_len].workers.length(0);
-            allocated_scenario.expected_reports += add_protoworkers_to_node(
-              nodeproto.workers, worker_configs, allocated_scenario.configs[old_len]);
+            allocated_scenario.configs[old_len].spawned_processes.length(0);
+            add_protoworkers_to_node(nodeproto.workers, worker_configs, allocated_scenario.configs[old_len],
+              allocated_scenario.expected_process_reports, allocated_scenario.expected_worker_reports);
 
             my_queue.pop();
             break;
@@ -77,7 +77,7 @@ void AllocationHelper::alloc_nonexclusive_node_configs(AllocatedScenario& alloca
             allocated_scenario.configs.length(next_idx + 1);
             allocated_scenario.configs[next_idx].node_id = id;
             allocated_scenario.configs[next_idx].timeout = scenario_prototype.timeout;
-            allocated_scenario.configs[next_idx].workers.length(0);
+            allocated_scenario.configs[next_idx].spawned_processes.length(0);
             my_ncs.insert(std::make_pair(id, next_idx));
             nonexclusive_ncs.insert(std::make_pair(id, next_idx));
           }
@@ -95,8 +95,8 @@ void AllocationHelper::alloc_nonexclusive_node_configs(AllocatedScenario& alloca
 
       ConfigIndexMap::const_iterator it = my_ncs.begin();
       for (uint32_t j = 0; j < nodeproto.count; ++j) {
-        allocated_scenario.expected_reports += add_protoworkers_to_node(
-          nodeproto.workers, worker_configs, allocated_scenario.configs[it->second]);
+        add_protoworkers_to_node(nodeproto.workers, worker_configs, allocated_scenario.configs[it->second],
+          allocated_scenario.expected_process_reports, allocated_scenario.expected_worker_reports);
         if (++it == my_ncs.end()) {
           it = my_ncs.begin();
         }
@@ -124,13 +124,16 @@ void AllocationHelper::alloc_anynode_workers(AllocatedScenario& allocated_scenar
     for (uint32_t i = 0; i < node_count; ++i) {
       allocated_scenario.configs[start_id + i].node_id = any_ncs[i];
       allocated_scenario.configs[start_id + i].timeout = scenario_prototype.timeout;
-      allocated_scenario.configs[start_id + i].workers.length(0);
+      allocated_scenario.configs[start_id + i].spawned_processes.length(0);
     }
 
     uint32_t running_id = start_id;
     for (uint32_t i = 0; i < scenario_prototype.any_node.length(); ++i) {
       const WorkerPrototype& workerproto = scenario_prototype.any_node[i];
-      allocated_scenario.expected_reports += workerproto.count;
+      if (!workerproto.no_report) {
+        allocated_scenario.expected_worker_reports += workerproto.count;
+      }
+      allocated_scenario.expected_process_reports += workerproto.count;
       for (uint32_t j = 0; j < workerproto.count; ++j) {
         add_single_worker_to_node(workerproto, worker_configs,
           allocated_scenario.configs[running_id++]);
@@ -143,7 +146,10 @@ void AllocationHelper::alloc_anynode_workers(AllocatedScenario& allocated_scenar
     ConfigIndexMap::const_iterator it = nonexclusive_ncs.begin();
     for (uint32_t i = 0; i < scenario_prototype.any_node.length(); ++i) {
       const WorkerPrototype& workerproto = scenario_prototype.any_node[i];
-      allocated_scenario.expected_reports += workerproto.count;
+      if (!workerproto.no_report) {
+        allocated_scenario.expected_worker_reports += workerproto.count;
+      }
+      allocated_scenario.expected_process_reports += workerproto.count;
       for (uint32_t j = 0; j < workerproto.count; ++j) {
         add_single_worker_to_node(workerproto, worker_configs,
           allocated_scenario.configs[it->second]);
@@ -176,7 +182,7 @@ void AllocationHelper::read_protoworker_configs(const std::string& test_context,
 {
   for (unsigned i = 0; i < protoworkers.length(); i++) {
     const std::string filename = protoworkers[i].config.in();
-    if (!worker_configs.count(filename)) {
+    if (!filename.empty() && !worker_configs.count(filename)) {
       worker_configs[filename] = debug_alloc ?
         filename : read_file(join_path(test_context, "config", "worker", filename));
     }
@@ -187,36 +193,44 @@ void AllocationHelper::add_single_worker_to_node(const WorkerPrototype& protowor
   const std::map<std::string, std::string>& worker_configs,
   NodeController::Config& node)
 {
-  unsigned worker_i = node.workers.length();
-  NodeController::WorkerId worker_id = worker_i ? (node.workers[worker_i - 1].worker_id + node.workers[worker_i - 1].count) : 1;
-  node.workers.length(node.workers.length() + 1);
-  auto& worker = node.workers[worker_i];
-  worker.config = worker_configs.find(protoworker.config.in())->second.c_str();
-  worker.count = 1;
-  worker.worker_id = worker_id;
+  unsigned worker_i = node.spawned_processes.length();
+  NodeController::SpawnedProcessId spawned_process_id = worker_i ? (node.spawned_processes[worker_i - 1].spawned_process_id + node.spawned_processes[worker_i - 1].count) : 1;
+  node.spawned_processes.length(node.spawned_processes.length() + 1);
+  auto& process = node.spawned_processes[worker_i];
+  process.executable = protoworker.executable.in();
+  process.command = protoworker.command.in();
+  process.config = worker_configs.find(protoworker.config.in())->second.c_str();
+  process.count = 1;
+  process.spawned_process_id = spawned_process_id;
+  process.expect_worker_report = !protoworker.no_report;
 }
 
-unsigned AllocationHelper::add_protoworkers_to_node(const WorkerPrototypes& protoworkers,
+void AllocationHelper::add_protoworkers_to_node(const WorkerPrototypes& protoworkers,
   const std::map<std::string, std::string>& worker_configs,
-  NodeController::Config& node)
+  NodeController::Config& node, unsigned& expected_process_reports, unsigned& expected_worker_reports)
 {
-  unsigned new_worker_total = 0;
-  for (unsigned i = 0; i < protoworkers.length(); i++) {
-    new_worker_total += protoworkers[i].count;
-  }
-
-  unsigned worker_i = node.workers.length();
-  NodeController::WorkerId worker_id = worker_i ? (node.workers[worker_i - 1].worker_id + node.workers[worker_i - 1].count) : 1;
-  node.workers.length(node.workers.length() + protoworkers.length());
   for (unsigned i = 0; i < protoworkers.length(); i++) {
     auto& protoworker = protoworkers[i];
-    auto& worker = node.workers[worker_i];
-    worker.config = worker_configs.find(protoworker.config.in())->second.c_str();
-    worker.count = protoworker.count;
-    worker.worker_id = worker_id;
-    worker_id += protoworker.count;
-    worker_i++;
+
+    if (!protoworker.no_report) {
+      expected_worker_reports += protoworkers[i].count;
+    }
+    expected_process_reports += protoworkers[i].count;
   }
 
-  return new_worker_total;
+  unsigned worker_i = node.spawned_processes.length();
+  NodeController::SpawnedProcessId spawned_process_id = worker_i ? (node.spawned_processes[worker_i - 1].spawned_process_id + node.spawned_processes[worker_i - 1].count) : 1;
+  node.spawned_processes.length(node.spawned_processes.length() + protoworkers.length());
+  for (unsigned i = 0; i < protoworkers.length(); i++) {
+    auto& protoworker = protoworkers[i];
+    auto& process = node.spawned_processes[worker_i];
+    process.executable = protoworker.executable.in();
+    process.expect_worker_report = !protoworker.no_report;
+    process.command = protoworker.command.in();
+    process.config = worker_configs.find(protoworker.config.in())->second.c_str();
+    process.count = protoworker.count;
+    process.spawned_process_id = spawned_process_id;
+    spawned_process_id += protoworker.count;
+    worker_i++;
+  }
 }
