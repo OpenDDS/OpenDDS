@@ -15,7 +15,7 @@ if (NOT OPENDDS_OWNERSHIP_PROFILE)
   message(FATAL_ERROR "These tests require OpenDDS to be built with Ownership Profile enabled")
 endif()
 
-set(target_prefix "opendds_cmake_generate_")
+set(target_prefix "opendds_cmake_generated_global_")
 set(publisher "${target_prefix}publisher")
 set(messenger "${target_prefix}messenger")
 
