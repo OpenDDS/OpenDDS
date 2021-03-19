@@ -16,6 +16,7 @@
 
 #include <ace/Process_Manager.h>
 #include <ace/OS_NS_stdlib.h>
+#include <ace/OS_NS_fcntl.h>
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsPublicationC.h>
