@@ -192,11 +192,8 @@ macro(OPENDDS_TARGET_SOURCES target)
   endif()
 
   if(NOT ${OPENDDS_COMPILER} STREQUAL "cl" AND ${OPENDDS_HOST} STREQUAL "win32")
-    message("CMAKE_CXX_COMPILER is ${CMAKE_CXX_COMPILER}")
     list(APPEND _opendds_options "-Yp,${CMAKE_CXX_COMPILER}")
-    message("${_opendds_options}")
     list(APPEND _tao_options "-Yp,${CMAKE_CXX_COMPILER}")
-    message("${_tao_options}")
   endif()
 
   foreach(scope PUBLIC PRIVATE INTERFACE)
