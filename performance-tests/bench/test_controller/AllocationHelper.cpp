@@ -199,7 +199,10 @@ void AllocationHelper::add_single_worker_to_node(const WorkerPrototype& protowor
   auto& process = node.spawned_processes[worker_i];
   process.executable = protoworker.executable.in();
   process.command = protoworker.command.in();
-  process.config = worker_configs.find(protoworker.config.in())->second.c_str();
+  auto config_iter = worker_configs.find(protoworker.config.in());
+  if (config_iter != worker_configs.end()) {
+    process.config = config_iter->second.c_str();
+  }
   process.count = 1;
   process.spawned_process_id = spawned_process_id;
   process.expect_worker_report = !protoworker.no_report;
@@ -227,7 +230,10 @@ void AllocationHelper::add_protoworkers_to_node(const WorkerPrototypes& protowor
     process.executable = protoworker.executable.in();
     process.expect_worker_report = !protoworker.no_report;
     process.command = protoworker.command.in();
-    process.config = worker_configs.find(protoworker.config.in())->second.c_str();
+    auto config_iter = worker_configs.find(protoworker.config.in());
+    if (config_iter != worker_configs.end()) {
+      process.config = config_iter->second.c_str();
+    }
     process.count = protoworker.count;
     process.spawned_process_id = spawned_process_id;
     spawned_process_id += protoworker.count;
