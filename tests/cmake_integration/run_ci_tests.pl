@@ -48,7 +48,7 @@ exit 1 if !GetOptions(
     "no-shared" => \$no_shared,
     );
 
-my @dirs = ('../Nested_IDL', 'Messenger_1', 'Messenger_2');
+my @dirs = ('../Nested_IDL', 'Messenger_1', 'Messenger_2', '../generated_global');
 push @dirs, 'C++11_Messenger' unless $skip_cxx11;
 
 my %builds_lib = ('Messenger_2' => 1, 'C++11_Messenger' => 1);
@@ -84,7 +84,7 @@ for my $dir (@dirs) {
     run_command("@generate_cmd $lib_opt ..");
     run_command("@build_cmd");
 
-    if (! $skip_run_test) {
+    if (! $skip_run_test && $dir ne '../generated_global') {
       if ($build_config ne "" && $runtest_in_config_dir{$dir}) {
         my $run_dir = getcwd() . "/$build_config";
         print "Switching to '$run_dir' to run tests\n";

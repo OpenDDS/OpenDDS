@@ -75,13 +75,13 @@ macro(_OPENDDS_GENERATE_EXPORT_MACRO_COMMAND  target  output)
     message(FATAL_ERROR "Failed to find required script 'generate_export_file.pl'")
   endif()
 
-  add_custom_command(
-    OUTPUT ${_output_file}
-    DEPENDS perl
-    COMMAND ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}" "TAO_ROOT=${TAO_ROOT}"
-      $<TARGET_FILE:perl> ${_gen_script} ${target} $<ANGLE-R> ${_output_file}
-    VERBATIM
-  )
+  if (NOT EXISTS ${_output_file})
+    execute_process(COMMAND ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}" "TAO_ROOT=${TAO_ROOT}"
+      perl ${_gen_script} ${target} OUTPUT_FILE ${_output_file} RESULT_VARIABLE _export_script_exit_status)
+    if(NOT _export_script_exit_status EQUAL "0")
+      message(FATAL_ERROR "Export header script for ${target} exited with ${_export_script_status}")
+    endif()
+  endif()
 
   set(${output} ${_output_file})
 endmacro()

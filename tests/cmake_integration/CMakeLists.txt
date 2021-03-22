@@ -4,3 +4,4 @@ project(opendds_cmake_tests_root_project)
 
 add_subdirectory(Messenger)
 add_subdirectory(Nested_IDL)
+add_subdirectory(generated_global)
