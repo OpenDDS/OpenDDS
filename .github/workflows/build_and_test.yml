@@ -5739,9 +5739,8 @@ jobs:
     - name: configure OpenDDS
       shell: cmd
       run: |
-        mkdir wsbuild\run\Debug
         cd OpenDDS
-        configure --tests --java --no-built-in-topics --rapidjson --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --wireshark-cmake=%GITHUB_WORKSPACE%\wireshark --wireshark-build=%GITHUB_WORKSPACE%\wsbuild --wireshark-lib=run\Debug --glib=%GITHUB_WORKSPACE%\wireshark-win64-libs-3.4\vcpkg-export-20190318-win64ws\installed\x64-windows
+        configure --tests --java --no-built-in-topics --rapidjson --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --wireshark-cmake=%GITHUB_WORKSPACE%\wireshark --wireshark-build=%GITHUB_WORKSPACE%\wsbuild --wireshark-lib=run --glib=%GITHUB_WORKSPACE%\wireshark-win64-libs-3.4\vcpkg-export-20190318-win64ws\installed\x64-windows
     - name: check build configuration
       shell: cmd
       run: |
