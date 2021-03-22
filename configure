@@ -1528,6 +1528,8 @@ for my $key (keys %optdep) {
             push(@features, $s->{$alt}) if defined $s->{$alt};
             last;
           }
+          print "Didn't find $key at $targetEnv{$e} using alternative $alt\n"
+            if $opts{'verbose'};
         }
         unless ($ok) {
           die "ERROR: Can't find $key at $targetEnv{$e}.\nStopped";
