@@ -60,6 +60,12 @@ public:
     report(now);
   }
 
+  void total_participants(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    domain_statistics_.total_participants(static_cast<uint32_t>(count));
+    report(now);
+  }
+
   void total_writers(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     domain_statistics_.total_writers(static_cast<uint32_t>(count));
@@ -80,7 +86,7 @@ private:
 
     domain_statistics_.interval(time_diff_to_duration(d));
 
-    if (config_.log_relay_statistics()) {
+    if (config_.log_domain_statistics()) {
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name_.in(), OpenDDS::DCPS::to_json(domain_statistics_).c_str()));
     }
 

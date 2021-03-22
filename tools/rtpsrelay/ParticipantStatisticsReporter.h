@@ -63,7 +63,7 @@ public:
 
     participant_statistics_.interval(time_diff_to_duration(d));
 
-    if (config->log_relay_statistics()) {
+    if (config->log_participant_statistics()) {
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name.in(), OpenDDS::DCPS::to_json(participant_statistics_).c_str()));
     }
 

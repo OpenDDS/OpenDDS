@@ -79,10 +79,12 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , secure_participant_user_data_(false)
   , max_type_lookup_service_reply_period_(5, 0)
   , use_xtypes_(true)
-  , sedp_heartbeat_period_(0, 100000)
+  , sedp_heartbeat_period_(1)
   , sedp_heartbeat_period_minimum_(0, 10000)
   , sedp_heartbeat_period_maximum_(1, 0)
+  , sedp_nak_response_delay_(0, 200*1000 /*microseconds*/) // default from RTPS
   , participant_flags_(PFLAGS_THIS_VERSION)
+  , responsive_mode_(false)
 {}
 
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
@@ -622,6 +624,18 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                               ACE_TEXT("[rtps_discovery/%C] section.\n"),
                               string_value.c_str(), rtps_name.c_str()), -1);
           }
+        } else if (name == "SedpNakResponseDelay") {
+          const OPENDDS_STRING& string_value = it->second;
+          int value;
+          if (DCPS::convertToInteger(string_value, value)) {
+            config->sedp_nak_response_delay(TimeDuration::from_msec(value));
+          } else {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+                              ACE_TEXT("Invalid entry (%C) for SedpNakResponseDelay in ")
+                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                              string_value.c_str(), rtps_name.c_str()), -1);
+          }
         } else if (name == "SedpHeartbeatPeriodMinimum") {
           const OPENDDS_STRING& string_value = it->second;
           int value;
@@ -708,6 +722,17 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
               value.c_str(), rtps_name.c_str()), -1);
           }
           config->use_xtypes(bool(smInt));
+        } else if (name == "SedpResponsiveMode") {
+          const OPENDDS_STRING& value = it->second;
+          int smInt;
+          if (!DCPS::convertToInteger(value, smInt)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
+                              ACE_TEXT("Invalid entry (%C) for SedpResponsiveMode in ")
+                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->responsive_mode(bool(smInt));
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")

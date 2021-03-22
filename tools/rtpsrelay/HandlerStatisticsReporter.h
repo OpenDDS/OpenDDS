@@ -142,7 +142,7 @@ private:
     handler_statistics_.output_processing_time(time_diff_to_duration(output_processing_time_));
     handler_statistics_.max_queue_latency(time_diff_to_duration(max_queue_latency_));
 
-    if (config_.log_relay_statistics()) {
+    if (config_.log_handler_statistics()) {
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name_.in(), OpenDDS::DCPS::to_json(handler_statistics_).c_str()));
     }
 

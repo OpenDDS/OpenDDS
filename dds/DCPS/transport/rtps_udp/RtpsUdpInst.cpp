@@ -39,12 +39,13 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , heartbeat_backoff_factor_(2.0)
   , heartbeat_safety_factor_(2.0)
   , nak_response_delay_(0, 200*1000 /*microseconds*/) // default from RTPS
-  , heartbeat_period_(0, 100000) // no default in RTPS spec
+  , heartbeat_period_(1) // no default in RTPS spec
   , heartbeat_period_minimum_(0, 10000)
   , heartbeat_period_maximum_(1, 0)
   , heartbeat_response_delay_(0, 500*1000 /*microseconds*/) // default from RTPS
   , handshake_timeout_(30) // default syn_timeout in OpenDDS_Multicast
   , durable_data_timeout_(60)
+  , responsive_mode_(false)
   , opendds_discovery_guid_(GUID_UNKNOWN)
   , multicast_group_address_(7401, "239.255.0.2")
   , local_address_(u_short(0), "0.0.0.0")
@@ -146,6 +147,8 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Security must be enabled (-DCPSSecurity 1) when using ICE (UseIce)\n")), -1);
   }
 #endif
+
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("ResponsiveMode"), responsive_mode_, bool);
 
   return 0;
 }
