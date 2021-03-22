@@ -6,7 +6,7 @@ commonmark==0.9.1
 docutils==0.16
 idna==2.10
 imagesize==1.2.0
-Jinja2==2.11.2
+Jinja2==2.11.3
 MarkupSafe==1.1.1
 packaging==20.4
 Pygments==2.5.2
