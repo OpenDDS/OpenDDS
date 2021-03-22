@@ -191,8 +191,11 @@ macro(OPENDDS_TARGET_SOURCES target)
     list(APPEND _tao_options "-SS")
   endif()
 
-  if(NOT ${OPENDDS_COMPILER} STREQUAL "cl" AND ${OPENDDS_HOST} STREQUAL "win32")
+  if(NOT "${_opendds_options}" MATCHES "-Yp")
     list(APPEND _opendds_options "-Yp,${CMAKE_CXX_COMPILER}")
+  endif()
+
+  if(NOT "${_tao_options}" MATCHES "-Yp")
     list(APPEND _tao_options "-Yp,${CMAKE_CXX_COMPILER}")
   endif()
 
