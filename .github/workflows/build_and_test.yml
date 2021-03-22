@@ -5562,7 +5562,8 @@ jobs:
           wsbuild
           wireshark-win64-libs*
           vcpkg-qt/installed
-        key: c01_${{ github.job }}_${{ env.WIRESHARK_COMMIT }}
+          ${{ github.job }}.tar.xz
+        key: c02_${{ github.job }}_${{ env.WIRESHARK_COMMIT }}
     - name: install vcpkg packages
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       id: runvcpkg
@@ -5602,14 +5603,19 @@ jobs:
         buildDirectory: ${{ github.workspace }}/wsbuild
         cmakeAppendedArgs: '-GNinja -DLEX_EXECUTABLE=${{ github.workspace }}\winflexbison\bin\Debug\win_flex.exe -DYACC_EXECUTABLE=${{ github.workspace }}\winflexbison\bin\Debug\win_bison.exe'
         buildWithCMakeArgs: '-t epan'
+    - name: create Wireshark artifact
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        find -iname "*\.obj" -delete
+        tar cvf ${{ github.job }}.tar wireshark wsbuild wireshark-win64-libs-3.4
+        xz -3 ${{ github.job }}.tar
     - name: upload Wireshark artifact
       uses: actions/upload-artifact@v2
       with:
         name: ${{ github.job }}_artifact
-        path: |
-          wireshark
-          wsbuild
-          wireshark-win64-libs-3.4
+        path: ${{ github.job }}.tar.xz
+
 
   ACE_TAO_w19-release_j_FM-1f:
 
@@ -5700,6 +5706,11 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: wireshark_w19-release_j_FM-1f_artifact
+    - name: extract Wireshark artifact
+      shell: bash
+      run: |
+        tar xvJf wireshark_w19-release_j_FM-1f.tar.xz
+        rm -f wireshark_w19-release_j_FM-1f.tar.xz
     - name: install xerces-c
       uses: lukka/run-vcpkg@v6
       with:
