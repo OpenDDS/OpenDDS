@@ -5608,7 +5608,7 @@ jobs:
       shell: bash
       run: |
         find -iname "*\.obj" -delete
-        tar cvf ${{ github.job }}.tar wireshark wsbuild wireshark-win64-libs-3.4
+        tar cvhf ${{ github.job }}.tar wireshark wsbuild wireshark-win64-libs-3.4
         xz -3 ${{ github.job }}.tar
     - name: upload Wireshark artifact
       uses: actions/upload-artifact@v2
