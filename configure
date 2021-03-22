@@ -1165,7 +1165,8 @@ my %optdep =
                   ['WIRESHARK_BUILD', 'config.h'],
    'wireshark-lib' =>
                   ['WIRESHARK_LIB'],
-   'glib' =>      ['GLIB_ROOT',       'include/glib-2.0/glib.h'],
+   'glib' =>      ['GLIB_ROOT',       {'include/glib-2.0/glib.h' => undef,
+                                       'include/glib.h' => 'glib_versioned_includes=0'}],
    'rapidjson' => ['RAPIDJSON_ROOT',  'include/rapidjson/rapidjson.h', 'no_rapidjson=0'],
    'qt' =>        ['QTDIR',           '',                              'qt5'],
    'boost' =>     ['BOOST_ROOT',      'include/boost/version.hpp',     'boost'],
@@ -1517,7 +1518,22 @@ for my $key (keys %optdep) {
     my ($e, $s, $m) = @{$optdep{$key}};
     if ($opts{$key} ne 'skip_version_check') {
       env_from_opt($key, $e) if defined $e;
-      if ($s && !-r $targetEnv{$e} . '/' . $s) {
+      if (ref $s eq 'HASH') {
+        my $ok = 0;
+        for my $alt (keys %{$s}) {
+          if (-r $targetEnv{$e} . '/' . $alt) {
+            print "Found $key at $targetEnv{$e} using alternative $alt\n"
+              if $opts{'verbose'};
+            $ok = 1;
+            push(@features, $s->{$alt}) if defined $s->{$alt};
+            last;
+          }
+        }
+        unless ($ok) {
+          die "ERROR: Can't find $key at $targetEnv{$e}.\nStopped";
+        }
+      }
+      elsif ($s && !-r $targetEnv{$e} . '/' . $s) {
         die "ERROR: Can't find $key at $targetEnv{$e} (using $s).\nStopped";
       }
     }
