@@ -19,9 +19,6 @@ set(target_prefix "opendds_cmake_generated_global_")
 set(publisher "${target_prefix}publisher")
 set(messenger "${target_prefix}messenger")
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/../idl)
-link_directories(${CMAKE_CURRENT_BINARY_DIR}/../idl)
-
 set(src "${CMAKE_CURRENT_SOURCE_DIR}/../../../DCPS/Messenger")
 set(dst ${CMAKE_CURRENT_BINARY_DIR})
 set(all_targets ${publisher})
@@ -42,6 +39,4 @@ set_target_properties(${publisher}
   PROPERTIES OUTPUT_NAME publisher
 )
 
-get_source_file_property(prop "${CMAKE_CURRENT_BINARY_DIR}/../idl/${messenger}_export.h" GENERATED)
-message("${messenger}_export.h GENERATED = ${prop}")
 target_link_libraries(${publisher} ${messenger} OpenDDS::OpenDDS)
