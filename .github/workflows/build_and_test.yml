@@ -5733,7 +5733,8 @@ jobs:
         cd OpenDDS/ACE_TAO
         tar xvfJ ACE_TAO_w19-release_j_FM-1f.tar.xz
         rm -f ACE_TAO_w19-release_j_FM-1f.tar.xz
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - name: set up MSVC problem matcher
+      uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.6.0
     - name: configure OpenDDS
