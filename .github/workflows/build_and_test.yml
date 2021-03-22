@@ -61,9 +61,26 @@ env:
   TRIGGERING_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
+
+  wait_cancel_previous:
+
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: convictional/trigger-workflow-and-wait@v1.3.0
+      with:
+        owner: ${{ github.repository_owner }}
+        repo: OpenDDS
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        workflow_file_name: cancel_previous_runs.yml
+        ref: ${{ env.TRIGGERING_COMMIT }}
+        trigger_workflow: false
+
   ACE_TAO_u18_i0_xer0_js0_j12:
 
     runs-on: ubuntu-18.04
+
+    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -304,6 +321,8 @@ jobs:
   ACE_TAO_u18_o1d0v1_xer0_j12_2:
 
     runs-on: ubuntu-18.04
+
+    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -716,6 +735,8 @@ jobs:
 
     runs-on: ubuntu-18.04
 
+    needs: wait_cancel_previous
+
     steps:
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
@@ -948,6 +969,8 @@ jobs:
   ACE_TAO_u18_clang5_i0w1_sec:
 
     runs-on: ubuntu-18.04
+
+    needs: wait_cancel_previous
 
     steps:
     - name: install clang++
@@ -1204,6 +1227,8 @@ jobs:
 
     runs-on: ubuntu-18.04
 
+    needs: wait_cancel_previous
+
     steps:
     - name: install clang++
       run: |
@@ -1458,6 +1483,8 @@ jobs:
   ACE_TAO_u18_gcc6_d0w1_cpp03:
 
     runs-on: ubuntu-18.04
+
+    needs: wait_cancel_previous
 
     steps:
     - name: install gcc
@@ -1722,6 +1749,8 @@ jobs:
   ACE_TAO_u18_gcc8_i0_js0_j:
 
     runs-on: ubuntu-18.04
+
+    needs: wait_cancel_previous
 
     steps:
     - name: install gcc
@@ -2295,8 +2324,9 @@ jobs:
 
     runs-on: ubuntu-20.04
 
-    steps:
+    needs: wait_cancel_previous
 
+    steps:
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
       with:
@@ -2556,9 +2586,251 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
+  ACE_TAO_u20_p1_asan:
+
+    runs-on: ubuntu-20.04
+
+    needs: wait_cancel_previous
+
+    steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v2.3.4
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2.3.4
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: OpenDDS/ACE_TAO
+    - name: get ACE_TAO commit
+      shell: bash
+      run: |
+        cd OpenDDS/ACE_TAO
+        export ACE_COMMIT=$(git rev-parse HEAD)
+        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
+    - name: Cache Artifact
+      id: cache-artifact
+      uses: actions/cache@v2.1.4
+      with:
+        path: ${{ github.job }}.tar.xz
+        key: ${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
+    - name: install xerces
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      run: sudo apt-get -y install libxerces-c-dev
+    - name: checkout MPC
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: actions/checkout@v2.3.4
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: configure OpenDDS
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      run: |
+        cd OpenDDS
+        ./configure --compiler=clang++ --std=c++11 --ipv6 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        echo "FLAGS_C_CC += -O1 -fsanitize=address -fno-omit-frame-pointer" >> ACE_TAO/ACE/include/makeinclude/platform_macros.GNU
+        echo "LDFLAGS += -fsanitize=address" >> ACE_TAO/ACE/include/makeinclude/platform_macros.GNU
+    - name: build ACE and TAO
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        export ASAN_OPTIONS=detect_leaks=0
+        cd ACE_TAO/ACE
+        make -j4
+        cd ../TAO
+        make -j4
+    - name: create ACE_TAO tar.xz artifact
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        cd OpenDDS/ACE_TAO
+        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
+        find . -iname "*\.o" | xargs rm
+        tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
+        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
+        xz -3 ../../${{ github.job }}.tar
+    - name: upload ACE_TAO artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_artifact
+        path: ${{ github.job }}.tar.xz
+
+  build_u20_p1_asan_sec:
+
+    runs-on: ubuntu-20.04
+
+    needs: ACE_TAO_u20_p1_asan
+
+    steps:
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - name: checkout MPC
+      uses: actions/checkout@v2.3.4
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2.3.4
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: ACE_TAO
+    - name: download ACE_TAO artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: ACE_TAO_u20_p1_asan_artifact
+        path: ACE_TAO
+    - name: extract ACE_TAO artifact
+      shell: bash
+      run: |
+        cd ACE_TAO
+        tar xvfJ ACE_TAO_u20_p1_asan.tar.xz
+    - name: checkout OpenDDS
+      uses: actions/checkout@v2.3.4
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: configure OpenDDS
+      run: |
+        cd OpenDDS
+        ./configure --compiler=clang++ --std=c++11 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+    - name: check build configuration
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        tools/scripts/show_build_config.pl
+    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - name: build OpenDDS
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        export ASAN_OPTIONS=detect_leaks=0
+        make -j4
+    - name: create OpenDDS tar.xz artifact
+      shell: bash
+      run: |
+        cd OpenDDS
+        rm -rf ACE_TAO
+        find . -iname "*\.o" | xargs rm
+        tar cvf ../${{ github.job }}.tar setenv.sh
+        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
+        xz -3 ../${{ github.job }}.tar
+    - name: upload OpenDDS artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_artifact
+        path: ${{ github.job }}.tar.xz
+
+  test_u20_p1_asan_sec:
+
+    runs-on: ubuntu-20.04
+
+    needs: build_u20_p1_asan_sec
+
+    steps:
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - name: checkout MPC
+      uses: actions/checkout@v2.3.4
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: checkout autobuild
+      uses: actions/checkout@v2.3.4
+      with:
+        repository: DOCGroup/autobuild
+        path: autobuild
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2.3.4
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: ACE_TAO
+    - name: download ACE_TAO artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: ACE_TAO_u20_p1_asan_artifact
+        path: ACE_TAO
+    - name: extract ACE_TAO artifact
+      shell: bash
+      run: |
+        cd ACE_TAO
+        tar xvfJ ACE_TAO_u20_p1_asan.tar.xz
+    - name: checkout OpenDDS
+      uses: actions/checkout@v2.3.4
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: download OpenDDS artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: build_u20_p1_asan_sec_artifact
+        path: OpenDDS
+    - name: extract OpenDDS artifact
+      shell: bash
+      run: |
+        cd OpenDDS
+        tar xvfJ build_u20_p1_asan_sec.tar.xz
+    - name: check build configuration
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        tools/scripts/show_build_config.pl
+    - name: run OpenDDS tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        mkdir ${{ github.job }}_autobuild_workspace
+        cd ${{ github.job }}_autobuild_workspace
+        echo using commit $TRIGGERING_COMMIT for SHA
+        echo $TRIGGERING_COMMIT >> ./SHA
+        cat > config.xml <<EOF
+        <autobuild>
+        <configuration>
+        <variable name="log_file" value="output.log"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="project_root" value="$DDS_ROOT"/>
+        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="junit_xml_output" value="Tests"/>
+        </configuration>
+        <command name="log" options="on"/>
+        <command name="print_os_version"/>
+        <command name="print_env_vars"/>
+        <command name="print_ace_config"/>
+        <command name="print_make_version"/>
+        <command name="check_compiler" options="gcc"/>
+        <command name="print_perl_version"/>
+        <command name="print_autobuild_config"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS -a -l tests/security/security_tests.lst"/>
+        <command name="log" options="off"/>
+        <command name="process_logs" options="prettify"/>
+        </autobuild>
+        EOF
+        export ASAN_OPTIONS=detect_leaks=1
+        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
+    - name: upload autobuild output
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_autobuild_output
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: check results
+      shell: bash
+      run: |
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+
   ACE_TAO_u20_p1:
 
     runs-on: ubuntu-20.04
+
+    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -2988,6 +3260,8 @@ jobs:
 
     runs-on: ubuntu-18.04
 
+    needs: wait_cancel_previous
+
     steps:
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
@@ -3414,6 +3688,8 @@ jobs:
 
     runs-on: ubuntu-18.04
 
+    needs: wait_cancel_previous
+
     steps:
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
@@ -3669,6 +3945,8 @@ jobs:
   ACE_TAO_u18_j_cft0_FM-37:
 
     runs-on: ubuntu-18.04
+
+    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -3929,6 +4207,8 @@ jobs:
   ACE_TAO_w19_p1_stat_js0_2:
 
     runs-on: windows-2019
+
+    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -4206,6 +4486,8 @@ jobs:
   ACE_TAO_w19_p1_cpp03_stat_FM-08_2:
 
     runs-on: windows-2019
+
+    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -4747,6 +5029,8 @@ jobs:
 
     runs-on: windows-2019
 
+    needs: wait_cancel_previous
+
     steps:
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
@@ -5009,6 +5293,9 @@ jobs:
   ACE_TAO_w16_x86_d0i0:
 
     runs-on: windows-2016
+
+    needs: wait_cancel_previous
+
     steps:
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
@@ -5929,6 +6216,8 @@ jobs:
 
     runs-on: macos-10.15
 
+    needs: wait_cancel_previous
+
     steps:
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
@@ -6164,6 +6453,8 @@ jobs:
   ACE_TAO_m10_oi0_j_FM-1f:
 
     runs-on: macos-10.15
+
+    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS

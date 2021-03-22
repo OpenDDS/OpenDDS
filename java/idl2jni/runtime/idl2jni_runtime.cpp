@@ -196,10 +196,13 @@ jclass findClass(JNIEnv *jni, const char *desc)
 
   jni->DeleteLocalRef(cls);
 
+  jstring bin_name = binary_name(jni, desc);
+
   cls = reinterpret_cast<jclass>
-         (jni->CallObjectMethod(cl, mid, binary_name(jni, desc)));
+         (jni->CallObjectMethod(cl, mid, bin_name));
 
   jni->DeleteLocalRef(cl);
+  jni->DeleteLocalRef(bin_name);
 
   return cls;
 }

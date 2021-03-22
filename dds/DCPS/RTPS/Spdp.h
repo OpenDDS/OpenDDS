@@ -98,6 +98,8 @@ public:
   // Managing reader/writer associations
   void signal_liveliness(DDS::LivelinessQosPolicyKind kind);
 
+  void shutdown();
+
   // Is Spdp shutting down?
   bool shutting_down()
   {
@@ -162,10 +164,10 @@ public:
                                const ParticipantData_t& pdata,
                                const DCPS::RepoId& guid);
 
+#endif
+
   const ParticipantData_t& get_participant_data(const DCPS::RepoId& guid) const;
   ParticipantData_t& get_participant_data(const DCPS::RepoId& guid);
-
-#endif
 
   u_short get_spdp_port() const { return tport_ ? tport_->uni_port_ : 0; }
 
@@ -205,12 +207,12 @@ public:
 
 protected:
   Sedp& endpoint_manager() { return *sedp_; }
-  void remove_discovered_participant_i(DiscoveredParticipantIter iter);
+  void remove_discovered_participant_i(DiscoveredParticipantIter& iter);
 
 #ifndef DDS_HAS_MINIMUM_BIT
   void enqueue_location_update_i(DiscoveredParticipantIter iter, DCPS::ParticipantLocation mask, const ACE_INET_Addr& from);
-  void process_location_updates_i(DiscoveredParticipantIter iter, bool force_publish = false);
-  void publish_location_update_i(DiscoveredParticipantIter iter);
+  void process_location_updates_i(DiscoveredParticipantIter& iter, bool force_publish = false);
+  void publish_location_update_i(DiscoveredParticipantIter& iter);
 #endif
 
   bool announce_domain_participant_qos();
@@ -266,7 +268,7 @@ private:
     static const WriteFlags SEND_TO_LOCAL = (1 << 0);
     static const WriteFlags SEND_TO_RELAY = (1 << 1);
 
-    explicit SpdpTransport(Spdp* outer);
+    explicit SpdpTransport(DCPS::RcHandle<Spdp> outer);
     ~SpdpTransport();
 
     const ACE_SOCK_Dgram& choose_recv_socket(ACE_HANDLE h) const;
@@ -309,7 +311,7 @@ private:
   #endif
 #endif
 
-    Spdp* outer_;
+    DCPS::WeakRcHandle<Spdp> outer_;
     Header hdr_;
     DataSubmessage data_;
     DCPS::SequenceNumber seq_;
@@ -363,10 +365,11 @@ private:
   struct ChangeMulticastGroup : public DCPS::JobQueue::Job {
     enum CmgAction {CMG_JOIN, CMG_LEAVE};
 
-    ChangeMulticastGroup(DCPS::RcHandle<SpdpTransport> tport,
+    ChangeMulticastGroup(const ACE_Event_Handler_var& eh,
                          const DCPS::NetworkInterface& nic, CmgAction action,
                          bool all_interfaces = false)
-      : tport_(tport)
+      : eh_(eh)
+      , tport_(dynamic_cast<SpdpTransport*>(eh_.handler()))
       , nic_(nic)
       , action_(action)
       , all_interfaces_(all_interfaces)
@@ -381,7 +384,8 @@ private:
       }
     }
 
-    DCPS::RcHandle<SpdpTransport> tport_;
+    ACE_Event_Handler_var eh_;
+    SpdpTransport* tport_;
     DCPS::NetworkInterface nic_;
     CmgAction action_;
     bool all_interfaces_;
@@ -390,16 +394,18 @@ private:
 #ifdef OPENDDS_SECURITY
   class SendStun : public DCPS::JobQueue::Job {
   public:
-    SendStun(DCPS::RcHandle<SpdpTransport> tport,
+    SendStun(const ACE_Event_Handler_var& eh,
              const ACE_INET_Addr& address,
              const STUN::Message& message)
-      : tport_(tport)
+      : eh_(eh)
+      , tport_(dynamic_cast<SpdpTransport*>(eh_.handler()))
       , address_(address)
       , message_(message)
     {}
     void execute();
   private:
-    DCPS::RcHandle<SpdpTransport> tport_;
+    ACE_Event_Handler_var eh_;
+    SpdpTransport* tport_;
     ACE_INET_Addr address_;
     STUN::Message message_;
   };
