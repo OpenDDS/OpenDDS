@@ -1,16 +1,16 @@
 #include "util.h"
 
-#include <iostream>
-#include <exception>
-#include <sstream>
-#include <ctime>
+#include <dds/DCPS/DirentWrapper.h>
 
 #include <ace/Lib_Find.h> // For ACE::get_temp_dir
 #include <ace/OS_NS_string.h> // For ACE_OS::strcpy
 #include <ace/OS_NS_sys_stat.h> // For ACE_OS::mkdir and ACE_OS::stat
 #include <ace/OS_NS_stdlib.h> // For ACE_OS::mktemp
 
-#include "dds/DCPS/DirentWrapper.h"
+#include <iostream>
+#include <exception>
+#include <sstream>
+#include <ctime>
 
 namespace Bench {
 
