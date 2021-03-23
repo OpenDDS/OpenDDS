@@ -191,12 +191,19 @@ macro(OPENDDS_TARGET_SOURCES target)
     list(APPEND _tao_options "-SS")
   endif()
 
-  if(NOT "${_opendds_options}" MATCHES "-Yp")
-    list(APPEND _opendds_options "-Yp,${CMAKE_CXX_COMPILER}")
-  endif()
+  list(LENGTH ${CMAKE_CXX_COMPILER} cxx_compiler_length)
 
-  if(NOT "${_tao_options}" MATCHES "-Yp")
-    list(APPEND _tao_options "-Yp,${CMAKE_CXX_COMPILER}")
+  if(${cxx_compiler_length} LESS 1)
+    if(NOT "${_opendds_options}" MATCHES "-Yp")
+      list(APPEND _opendds_options "-Yp,${CMAKE_CXX_COMPILER}")
+    endif()
+
+    if(NOT "${_tao_options}" MATCHES "-Yp")
+      list(APPEND _tao_options "-Yp,${CMAKE_CXX_COMPILER}")
+    endif()
+
+  else()
+    message(FATAL_ERROR "Unable to use the default CMake CXX compiler, please add it to the path.")
   endif()
 
   foreach(scope PUBLIC PRIVATE INTERFACE)
