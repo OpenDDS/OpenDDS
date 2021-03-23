@@ -11,7 +11,7 @@
 
 #include "FileSystemStorage.h"
 
-#include <dds/DCPS/DirentWrapper.h>
+#include "DirentWrapper.h"
 
 #include <ace/Vector_T.h>
 #include <ace/OS_NS_sys_stat.h>
