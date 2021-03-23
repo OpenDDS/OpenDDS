@@ -250,8 +250,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     try {
       unsigned long max_value = 0;
       for (const std::string& i : get_dir_contents(results_path)) {
-        if (i.find_first_not_of("0123456789") != std::string::npos)
+        if (i.find_first_not_of("0123456789") != std::string::npos) {
           continue;
+        }
         try {
           max_value = std::max(std::stoul(i), max_value);
         } catch (const std::exception&) {
