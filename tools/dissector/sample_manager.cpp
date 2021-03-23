@@ -8,12 +8,13 @@
 #include "sample_manager.h"
 #include "ws_common.h"
 
+#include <dds/DCPS/DirentWrapper.h>
+
 #include <ace/Basic_Types.h>
 #include <ace/CDR_Base.h>
 #include <ace/Message_Block.h>
 #include <ace/Log_Msg.h>
 #include <ace/ACE.h>
-#include <ace/Dirent.h>
 #include <ace/Configuration.h>
 #include <ace/Configuration_Import_Export.h>
 
