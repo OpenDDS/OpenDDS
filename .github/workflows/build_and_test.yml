@@ -3466,7 +3466,7 @@ jobs:
         make -j4
     - name: Setup tmate session
       if: ${{ failure() }}
-      uses: mxschmitt/actions-tmate@v3
+      uses: mxschmitt/action-tmate@v3
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
