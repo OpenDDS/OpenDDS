@@ -591,7 +591,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --tests --safety-profile --no-rapidjson --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --tests --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install --safety-profile --no-rapidjson --mpc=$GITHUB_WORKSPACE/MPC
     - name: build everything
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -676,7 +676,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --tests --safety-profile=base --no-rapidjson --no-built-in-topics --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --tests --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install --safety-profile=base --no-rapidjson --no-built-in-topics --mpc=$GITHUB_WORKSPACE/MPC
     - name: build everything
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
