@@ -28,7 +28,7 @@ foreach(file
 endforeach()
 
 # Messenger library
-add_library(${messenger} SHARED)
+add_library(${messenger})
 set_target_properties(${messenger}
   PROPERTIES OUTPUT_NAME messenger
 )
