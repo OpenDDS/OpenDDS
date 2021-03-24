@@ -191,9 +191,9 @@ macro(OPENDDS_TARGET_SOURCES target)
     list(APPEND _tao_options "-SS")
   endif()
 
-  list(LENGTH ${CMAKE_CXX_COMPILER} cxx_compiler_length)
+  list(LENGTH CMAKE_CXX_COMPILER cxx_compiler_length)
 
-  if(${cxx_compiler_length} LESS 1)
+  if(${cxx_compiler_length} EQUAL 1)
     if(NOT "${_opendds_options}" MATCHES "-Yp")
       list(APPEND _opendds_options "-Yp,${CMAKE_CXX_COMPILER}")
     endif()
@@ -203,7 +203,7 @@ macro(OPENDDS_TARGET_SOURCES target)
     endif()
 
   else()
-    message(FATAL_ERROR "Unable to use the default CMake CXX compiler, please add it to the path.")
+    message(FATAL_ERROR "OpenDDS does not support argument items in CMAKE_CXX_COMPILER.")
   endif()
 
   foreach(scope PUBLIC PRIVATE INTERFACE)
