@@ -7,7 +7,9 @@
 project(OpenDDS_Messenger1_cmake CXX)
 cmake_minimum_required(VERSION 3.8.2)
 
-find_package(OpenDDS REQUIRED)
+if(NOT OpenDDS_FOUND)
+  find_package(OpenDDS REQUIRED)
+endif()
 
 set(CMAKE_CXX_COMPILER ${OPENDDS_COMPILER})
 
