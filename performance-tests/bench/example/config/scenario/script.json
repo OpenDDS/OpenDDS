@@ -1,0 +1,23 @@
+{
+  "name": "Mixing worker processes with arbitrary executables",
+  "desc": "This is an example of how to call arbitrary scripts from the node_controller alongside worker processes",
+  "any_node": [
+    {
+      "config": "script.json",
+      "count": 3
+    },
+    {
+      "executable": "redirect_to_log.pl",
+      "command" : "%executable_full_path% %log% %bench_root%%ds%echo_host_and_pid.pl",
+      "no_report": true,
+      "count": 2
+    },
+    {
+      "executable": "read_files.pl",
+      "command" : "%executable_full_path%",
+      "no_report": true,
+      "count": 1
+    }
+  ],
+  "timeout": 120
+}

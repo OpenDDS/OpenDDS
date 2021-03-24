@@ -48,6 +48,10 @@ if ($test->flag('disco')) {
   $tc_opts .= " ci_disco";
   $is_rtps_disc = 1;
 }
+elsif ($test->flag('script')) {
+  $tc_opts .= " script";
+  $is_rtps_disc = 1;
+}
 elsif ($test->flag('fan')) {
   $tc_opts .= " ci_fan";
   $is_rtps_disc = 1;
@@ -104,6 +108,14 @@ elsif ($test->flag('tag')) {
   $tc_opts .= " simple_tags --tag continuous --tag control --tag processed --tag unknown";
   $is_rtps_disc = 1;
   $test->process("node_controller2", "node_controller/node_controller", $nc_opts);
+}
+elsif ($test->flag('script')) {
+  $tc_opts .= " script";
+  $is_rtps_disc = 1;
+}
+elsif ($test->flag('valgrind')) {
+  $tc_opts .= " valgrind";
+  $is_rtps_disc = 1;
 }
 else {
   $flag_found = 0;

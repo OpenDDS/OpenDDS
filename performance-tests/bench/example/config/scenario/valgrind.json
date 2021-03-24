@@ -1,0 +1,17 @@
+{
+  "name": "Having the Node Controller Launch Workers In Valgrind",
+  "desc": "This is an example of being able to call the worker with a modified command line and still get a report. The log is intentionally unspecified to capture full stdout / stderr",
+  "any_node": [
+    {
+      "command": "valgrind -v %bench_root%%ds%worker%ds%worker %config% --report %report%",
+      "config": "ci_echo_client.json",
+      "count": 1
+    },
+    {
+      "command": "valgrind -v %bench_root%%ds%worker%ds%worker %config% --report %report%",
+      "config": "ci_echo_server.json",
+      "count": 1
+    }
+  ],
+  "timeout": 120
+}

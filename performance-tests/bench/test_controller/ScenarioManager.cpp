@@ -202,10 +202,8 @@ AllocatedScenario ScenarioManager::allocate_scenario(const ScenarioPrototype& sc
   AllocationHelper::read_protoworker_configs(test_context_, scenario_prototype.any_node,
     worker_configs, debug_alloc);
 
-  AllocatedScenario allocated_scenario;
-  allocated_scenario.expected_reports = 0;
+  AllocatedScenario allocated_scenario{};
   allocated_scenario.timeout = scenario_prototype.timeout;
-  allocated_scenario.configs.length(0);
 
   // Node controllers allocated to exclusive nodes
   std::set<NodeController::NodeId, OpenDDS::DCPS::GUID_tKeyLessThan> exclusive_ncs;
@@ -285,7 +283,7 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
   wait_set->attach_condition(guard_condition);
 
   // Timeout Thread
-  size_t reports_left = allocated_scenario.expected_reports;
+  size_t reports_left = allocated_scenario.expected_process_reports;
   std::mutex reports_left_mutex;
   std::condition_variable timeout_cv;
   const std::chrono::seconds timeout(allocated_scenario.timeout);
@@ -300,7 +298,8 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
   }
 
   // Wait for reports
-  size_t parsed_report_count = 0;
+  size_t process_report_count = 0;
+  size_t parsed_worker_report_count = 0;
   size_t parse_failures = 0;
   size_t worker_failures = 0;
   while (true) {
@@ -342,38 +341,43 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
       if (info[r].valid_data) {
         report.node_reports.length(report.node_reports.length() + 1);
         Bench::TestController::NodeReport& node_report = report.node_reports[report.node_reports.length() - 1];
-        const NodeController::WorkerReports& worker_reports = reports[r].worker_reports;
-        for (CORBA::ULong wr = 0; wr < worker_reports.length(); wr++) {
-          if (worker_reports[wr].failed) {
+        const NodeController::SpawnedProcessReports& spawned_process_reports = reports[r].spawned_process_reports;
+        for (CORBA::ULong wr = 0; wr < spawned_process_reports.length(); wr++) {
+          ++process_report_count;
+          node_report.spawned_process_ids.length(node_report.spawned_process_ids.length() + 1);
+          node_report.spawned_process_ids[node_report.spawned_process_ids.length() - 1] = spawned_process_reports[wr].spawned_process_id;
+          if (spawned_process_reports[wr].failed) {
             ++worker_failures;
             std::stringstream ss;
-            ss << "Worker " << worker_reports[wr].worker_id << " of node "
+            ss << "Worker " << spawned_process_reports[wr].spawned_process_id << " of node "
               << reports[r].node_id << " failed with log:\n===\n"
-              << std::string(worker_reports[wr].log.in()) + "\n===\n";
+              << std::string(spawned_process_reports[wr].log.in()) + "\n===\n";
             std::cerr << ss.str() << std::flush;
           } else {
             WorkerReport worker_report{};
             std::stringstream ss;
-            ss << worker_reports[wr].details << std::flush;
-            if (json_2_idl(ss, worker_report)) {
-              node_report.worker_reports.length(node_report.worker_reports.length() + 1);
-              node_report.worker_reports[node_report.worker_reports.length() - 1] = worker_report;
-              node_report.worker_logs.length(node_report.worker_logs.length() + 1);
-              node_report.worker_logs[node_report.worker_logs.length() - 1] = worker_reports[wr].log;
-              node_report.worker_ids.length(node_report.worker_ids.length() + 1);
-              node_report.worker_ids[node_report.worker_ids.length() - 1] = worker_reports[wr].worker_id;
-              ++parsed_report_count;
-            } else {
-              ++parse_failures;
-              std::stringstream ess;
-              ess << "Error parsing report details from Worker " << worker_reports[wr].worker_id
-                << " of node " << reports[r].node_id;
-              std::cerr << ess.str() + "\n" << std::flush;
+            ss << spawned_process_reports[wr].details << std::flush;
+            if (!ss.str().empty()) {
+              if (json_2_idl(ss, worker_report)) {
+                node_report.worker_reports.length(node_report.worker_reports.length() + 1);
+                node_report.worker_reports[node_report.worker_reports.length() - 1] = worker_report;
+                ++parsed_worker_report_count;
+              } else {
+                ++parse_failures;
+                std::stringstream ess;
+                ess << "Error parsing report details from Worker " << spawned_process_reports[wr].spawned_process_id
+                  << " of node " << reports[r].node_id;
+                std::cerr << ess.str() + "\n" << std::flush;
+              }
+            }
+            if (spawned_process_reports[wr].log.in() && spawned_process_reports[wr].log.in()[0]) {
+              node_report.spawned_process_logs.length(node_report.spawned_process_logs.length() + 1);
+              node_report.spawned_process_logs[node_report.spawned_process_logs.length() - 1] = spawned_process_reports[wr].log;
             }
           }
           std::stringstream ss;
-          ss << "Got " << parsed_report_count << " out of "
-            << allocated_scenario.expected_reports << " expected reports";
+          ss << "Got " << process_report_count << " out of "
+            << allocated_scenario.expected_process_reports << " expected reports";
           if (worker_failures != 0 || parse_failures != 0) {
             ss << " (with " << worker_failures << " worker failures and "
               << parse_failures << " parse failures)";
@@ -388,7 +392,7 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
     }
     {
       std::lock_guard<std::mutex> guard(reports_left_mutex);
-      reports_left = static_cast<size_t>(allocated_scenario.expected_reports) - parsed_report_count - worker_failures - parse_failures;
+      reports_left = static_cast<size_t>(allocated_scenario.expected_process_reports) - process_report_count;
       if (reports_left == 0) {
         break;
       }
