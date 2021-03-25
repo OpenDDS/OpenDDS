@@ -5837,6 +5837,8 @@ jobs:
         cd OpenDDS
         tar xvfJ build_w19-release_j_ws_FM-1f.tar.xz
         rm -f build_w19-release_j_ws_FM-1f.tar.xz
+    - name: set up msvc env
+      uses: ilammy/msvc-dev-cmd@v1.7.0
     - name: check build configuration
       shell: cmd
       run: |
@@ -6123,6 +6125,8 @@ jobs:
         cd OpenDDS
         tar xvfJ build_w16_x86_doi0_sec.tar.xz
         rm -f build_w16_x86_doi0_sec.tar.xz
+    - name: set up msvc env
+      uses: ilammy/msvc-dev-cmd@v1.7.0
     - name: check build configuration
       shell: cmd
       run: |
