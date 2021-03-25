@@ -587,6 +587,16 @@ jobs:
       with:
         repository: DOCGroup/MPC
         path: MPC
+    - name: setup gtest
+      run: |
+        cd OpenDDS/tests/googletest
+        git submodule init
+        git submodule update
+        mkdir build
+        cd build
+        mkdir install
+        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+        cmake --build . --target install
     - name: configure OpenDDS
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -672,6 +682,16 @@ jobs:
       with:
         repository: DOCGroup/MPC
         path: MPC
+    - name: setup gtest
+      run: |
+        cd OpenDDS/tests/googletest
+        git submodule init
+        git submodule update
+        mkdir build
+        cd build
+        mkdir install
+        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+        cmake --build . --target install
     - name: configure OpenDDS
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
