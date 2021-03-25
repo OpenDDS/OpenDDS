@@ -227,6 +227,7 @@ namespace OpenDDS {
         RepoIdSet matched_endpoints_;
         DiscoveredReaderData reader_data_;
         DDS::InstanceHandle_t bit_ih_;
+        MonotonicTime_t participant_discovered_at_;
         ACE_CDR::ULong transport_context_;
         XTypes::TypeInformation type_info_;
 
@@ -275,6 +276,7 @@ namespace OpenDDS {
         RepoIdSet matched_endpoints_;
         DiscoveredWriterData writer_data_;
         DDS::InstanceHandle_t bit_ih_;
+        MonotonicTime_t participant_discovered_at_;
         ACE_CDR::ULong transport_context_;
         XTypes::TypeInformation type_info_;
 
@@ -882,6 +884,7 @@ namespace OpenDDS {
 
         RepoId topic_id_;
         TransportLocatorSeq trans_info_;
+        MonotonicTime_t participant_discovered_at_;
         ACE_CDR::ULong transport_context_;
         RepoIdSet matched_endpoints_;
         SequenceNumber sequence_;
@@ -1368,6 +1371,7 @@ namespace OpenDDS {
         ACE_CDR::ULong wTransportContext = 0;
         XTypes::TypeInformation* writer_type_info = 0;
         OPENDDS_STRING topic_name;
+        MonotonicTime_t writer_participant_discovered_at;
 
         const LocalPublicationIter lpi = local_publications_.find(writer);
         bool writer_local = false, already_matched = false;
@@ -1380,12 +1384,13 @@ namespace OpenDDS {
           already_matched = lpi->second.matched_endpoints_.count(reader);
           writer_type_info = &lpi->second.type_info_;
           topic_name = topic_names_[lpi->second.topic_id_];
-
+          writer_participant_discovered_at = lpi->second.participant_discovered_at_;
         } else if (dpi != discovered_publications_.end()) {
           wTls = &dpi->second.writer_data_.writerProxy.allLocators;
           wTransportContext = dpi->second.transport_context_;
           writer_type_info = &dpi->second.type_info_;
           topic_name = dpi->second.get_topic_name();
+          writer_participant_discovered_at = dpi->second.participant_discovered_at_;
 
           const DDS::PublicationBuiltinTopicData& bit =
             dpi->second.writer_data_.ddsPublicationData;
@@ -1429,6 +1434,7 @@ namespace OpenDDS {
         ACE_CDR::ULong rTransportContext = 0;
         const ContentFilterProperty_t* cfProp = 0;
         XTypes::TypeInformation* reader_type_info = 0;
+        MonotonicTime_t reader_participant_discovered_at;
 
         const LocalSubscriptionIter lsi = local_subscriptions_.find(reader);
         bool reader_local = false;
@@ -1447,6 +1453,7 @@ namespace OpenDDS {
           if (!already_matched) {
             already_matched = lsi->second.matched_endpoints_.count(writer);
           }
+          reader_participant_discovered_at = lsi->second.participant_discovered_at_;
         } else if (dsi != discovered_subscriptions_.end()) {
           rTls = &dsi->second.reader_data_.readerProxy.allLocators;
 
@@ -1482,6 +1489,7 @@ namespace OpenDDS {
 
           cfProp = &dsi->second.reader_data_.contentFilterProperty;
           reader_type_info = &dsi->second.type_info_;
+          reader_participant_discovered_at = dsi->second.participant_discovered_at_;
         } else {
           return; // Possible and ok, since lock is released
         }
@@ -1639,14 +1647,16 @@ namespace OpenDDS {
             "", "",
 #endif
             cfProp->expressionParameters,
-            octet_seq_type_info_reader
+            octet_seq_type_info_reader,
+            reader_participant_discovered_at
           };
 
           DDS::OctetSeq octet_seq_type_info_writer;
           XTypes::serialize_type_info(*writer_type_info, octet_seq_type_info_writer);
           const WriterAssociation wa = {
             *wTls, wTransportContext, writer, *pubQos, *dwQos,
-            octet_seq_type_info_writer
+            octet_seq_type_info_writer,
+            writer_participant_discovered_at
           };
 
           ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
@@ -2207,8 +2217,6 @@ namespace OpenDDS {
         , is_requester_(false)
         , auth_req_sequence_number_(0)
         , handshake_sequence_number_(0)
-        , auth_messages_sent_(0)
-        , auth_messages_received_(0)
         , identity_handle_(DDS::HANDLE_NIL)
         , handshake_handle_(DDS::HANDLE_NIL)
         , permissions_handle_(DDS::HANDLE_NIL)
@@ -2239,8 +2247,6 @@ namespace OpenDDS {
         , is_requester_(false)
         , auth_req_sequence_number_(0)
         , handshake_sequence_number_(0)
-        , auth_messages_sent_(0)
-        , auth_messages_received_(0)
         , identity_handle_(DDS::HANDLE_NIL)
         , handshake_handle_(DDS::HANDLE_NIL)
         , permissions_handle_(DDS::HANDLE_NIL)
@@ -2286,7 +2292,7 @@ namespace OpenDDS {
         ParticipantLocationBuiltinTopicData location_data_;
         DDS::InstanceHandle_t location_ih_;
 
-        MonotonicTimePoint discovered_at_;
+        MonotonicTime_t discovered_at_;
         MonotonicTimePoint lease_expiration_;
         DDS::InstanceHandle_t bit_ih_;
         SequenceNumber last_seq_;
@@ -2308,8 +2314,6 @@ namespace OpenDDS {
         bool is_requester_;
         CORBA::LongLong auth_req_sequence_number_;
         CORBA::LongLong handshake_sequence_number_;
-        size_t auth_messages_sent_;
-        size_t auth_messages_received_;
 
         DDS::Security::IdentityToken identity_token_;
         DDS::Security::PermissionsToken permissions_token_;

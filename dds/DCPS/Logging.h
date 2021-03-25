@@ -10,9 +10,9 @@
 
 #include "dcps_export.h"
 
-#include "TimeDuration.h"
+#include "TimeTypes.h"
 
-#include <dds/DdsDcpsGuidC.h>
+#include "GuidUtils.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -26,9 +26,8 @@ namespace DCPS {
 extern void OpenDDS_Dcps_Export log_progress(const char* activity,
                                              const GUID_t& local,
                                              const GUID_t& remote,
-                                             const TimeDuration& duration,
-                                             size_t messages_sent,
-                                             size_t messages_received);
+                                             const MonotonicTime_t& start_time,
+                                             const GUID_t& reference = GUID_UNKNOWN);
 
 } // namespace OpenDDS
 } // namespace DCPS

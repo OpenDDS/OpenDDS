@@ -141,6 +141,7 @@ public:
   struct RemoteTransport {
     RepoId repo_id_;
     TransportBLOB blob_;
+    MonotonicTime_t participant_discovered_at_;
     ACE_CDR::ULong context_;
     Priority publication_transport_priority_;
     bool reliable_, durable_;

@@ -327,7 +327,7 @@ StaticEndpointManager::add_publication_i(const RepoId& writerid,
     ra.exprParams = 0;
 #else
     const ReaderAssociation ra =
-      {reader.trans_info, 0, readerid, reader.subscriber_qos, reader.qos, "", "", 0, 0};
+      {reader.trans_info, 0, readerid, reader.subscriber_qos, reader.qos, "", "", 0, 0, {0, 0}};
 #endif
     DataWriterCallbacks_rch pl = pub.publication_.lock();
     if (pl) {
@@ -399,7 +399,7 @@ StaticEndpointManager::add_subscription_i(const RepoId& readerid,
 
     DDS::OctetSeq type_info;
     const WriterAssociation wa = {
-      writer.trans_info, 0, writerid, writer.publisher_qos, writer.qos, type_info
+      writer.trans_info, 0, writerid, writer.publisher_qos, writer.qos, type_info, {0, 0}
     };
     DataReaderCallbacks_rch sl = sub.subscription_.lock();
     if (sl) {
@@ -495,7 +495,7 @@ StaticEndpointManager::reader_exists(const RepoId& readerid, const RepoId& write
     if (dwr) {
       const ReaderAssociation ra =
         {reader_pos->second.trans_info, 0, readerid, reader_pos->second.subscriber_qos, reader_pos->second.qos,
-         "", "", DDS::StringSeq(), DDS::OctetSeq()};
+         "", "", DDS::StringSeq(), DDS::OctetSeq(), {0, 0}};
       dwr->add_association(writerid, ra, true);
     }
   }
@@ -530,7 +530,7 @@ StaticEndpointManager::writer_exists(const RepoId& writerid, const RepoId& reade
     DataReaderCallbacks_rch drr = ls_pos->second.subscription_.lock();
     if (drr) {
       const WriterAssociation wa =
-        {writer_pos->second.trans_info, 0, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos, DDS::OctetSeq()};
+        {writer_pos->second.trans_info, 0, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos, DDS::OctetSeq(), {0,0}};
       drr->add_association(readerid, wa, false);
     }
   }

@@ -64,6 +64,7 @@ module OpenDDS
       ::DDS::PublisherQos pubQos;
       ::DDS::DataWriterQos writerQos;
       ::DDS::OctetSeq serializedTypeInfo;
+      MonotonicTime_t participantDiscoveredAt;
     };
 
     struct ReaderAssociation {
@@ -76,6 +77,7 @@ module OpenDDS
       string filterExpression;
       ::DDS::StringSeq exprParams;
       ::DDS::OctetSeq serializedTypeInfo;
+      MonotonicTime_t participantDiscoveredAt;
     };
 
     typedef sequence<RepoId> WriterIdSeq;
