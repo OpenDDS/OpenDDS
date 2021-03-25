@@ -191,6 +191,21 @@ macro(OPENDDS_TARGET_SOURCES target)
     list(APPEND _tao_options "-SS")
   endif()
 
+  list(LENGTH CMAKE_CXX_COMPILER cxx_compiler_length)
+
+  if(${cxx_compiler_length} EQUAL 1)
+    if(NOT "${_opendds_options}" MATCHES "-Yp")
+      list(APPEND _opendds_options "-Yp,${CMAKE_CXX_COMPILER}")
+    endif()
+
+    if(NOT "${_tao_options}" MATCHES "-Yp")
+      list(APPEND _tao_options "-Yp,${CMAKE_CXX_COMPILER}")
+    endif()
+
+  else()
+    message(FATAL_ERROR "OpenDDS does not support argument items in CMAKE_CXX_COMPILER.")
+  endif()
+
   foreach(scope PUBLIC PRIVATE INTERFACE)
     if(_idl_sources_${scope})
       opendds_target_idl_sources(${target}
