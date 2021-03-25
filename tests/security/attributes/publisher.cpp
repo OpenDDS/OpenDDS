@@ -162,7 +162,6 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
       pub->get_default_datawriter_qos(qos);
       if (dw_reliable()) {
         std::cerr << "Reliable DataWriter" << std::endl;
-        qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
         qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
       }
 
