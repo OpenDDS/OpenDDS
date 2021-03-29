@@ -396,7 +396,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        rm -rf install_temp install_prefix install_setenv
+        rm -rf install_temp install_prefix install_setenv.sh
     - name: gitclean
       shell: bash
       run: |
