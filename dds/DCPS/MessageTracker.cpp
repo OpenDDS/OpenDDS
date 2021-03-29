@@ -83,7 +83,8 @@ void MessageTracker::wait_messages_pending(const char* caller, const MonotonicTi
     } else {
       ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) MessageTracker::wait_messages_pending ")
-                ACE_TEXT("from source=%C will wait with no timeout.\n")));
+                ACE_TEXT("from source=%C will wait with no timeout.\n"),
+                msg_src_.c_str()));
     }
   }
   bool loop = true;

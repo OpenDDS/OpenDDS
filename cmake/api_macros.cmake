@@ -75,13 +75,13 @@ macro(_OPENDDS_GENERATE_EXPORT_MACRO_COMMAND  target  output)
     message(FATAL_ERROR "Failed to find required script 'generate_export_file.pl'")
   endif()
 
-  add_custom_command(
-    OUTPUT ${_output_file}
-    DEPENDS perl
-    COMMAND ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}" "TAO_ROOT=${TAO_ROOT}"
-      $<TARGET_FILE:perl> ${_gen_script} ${target} $<ANGLE-R> ${_output_file}
-    VERBATIM
-  )
+  if (NOT EXISTS ${_output_file})
+    execute_process(COMMAND ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}" "TAO_ROOT=${TAO_ROOT}"
+      perl ${_gen_script} ${target} OUTPUT_FILE ${_output_file} RESULT_VARIABLE _export_script_exit_status)
+    if(NOT _export_script_exit_status EQUAL "0")
+      message(FATAL_ERROR "Export header script for ${target} exited with ${_export_script_status}")
+    endif()
+  endif()
 
   set(${output} ${_output_file})
 endmacro()
@@ -189,6 +189,21 @@ macro(OPENDDS_TARGET_SOURCES target)
 
   if(NOT "${_tao_options}" MATCHES "-SS")
     list(APPEND _tao_options "-SS")
+  endif()
+
+  list(LENGTH CMAKE_CXX_COMPILER cxx_compiler_length)
+
+  if(${cxx_compiler_length} EQUAL 1)
+    if(NOT "${_opendds_options}" MATCHES "-Yp")
+      list(APPEND _opendds_options "-Yp,${CMAKE_CXX_COMPILER}")
+    endif()
+
+    if(NOT "${_tao_options}" MATCHES "-Yp")
+      list(APPEND _tao_options "-Yp,${CMAKE_CXX_COMPILER}")
+    endif()
+
+  else()
+    message(FATAL_ERROR "OpenDDS does not support argument items in CMAKE_CXX_COMPILER.")
   endif()
 
   foreach(scope PUBLIC PRIVATE INTERFACE)

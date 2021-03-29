@@ -6,10 +6,12 @@
 
 namespace RtpsRelay {
 
-PublicationListener::PublicationListener(OpenDDS::DCPS::DomainParticipantImpl* participant,
+PublicationListener::PublicationListener(const Config& config,
+                                         OpenDDS::DCPS::DomainParticipantImpl* participant,
                                          WriterEntryDataWriter_var writer,
                                          DomainStatisticsReporter& stats_reporter)
-  : participant_(participant)
+  : config_(config)
+  , participant_(participant)
   , writer_(writer)
   , stats_reporter_(stats_reporter)
 {}
@@ -90,7 +92,9 @@ void PublicationListener::write_sample(const DDS::PublicationBuiltinTopicData& d
     publisher_qos,
   };
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: PublicationLister::write_sample add local writer %C %C\n"), guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str()));
+  if (config_.log_discovery()) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: PublicationLister::write_sample add local writer %C %C\n"), guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str()));
+  }
   DDS::ReturnCode_t ret = writer_->write(entry, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: PublicationListener::write_sample failed to write\n")));
@@ -106,7 +110,9 @@ void PublicationListener::unregister_instance(const DDS::SampleInfo& info)
   WriterEntry entry;
   entry.guid(guid);
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: PublicationListener::unregister_instance remove local writer %C\n"), guid_to_string(repoid).c_str()));
+  if (config_.log_discovery()) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: PublicationListener::unregister_instance remove local writer %C\n"), guid_to_string(repoid).c_str()));
+  }
   DDS::ReturnCode_t ret = writer_->unregister_instance(entry, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: PublicationListener::unregister_instance failed to unregister_instance\n")));

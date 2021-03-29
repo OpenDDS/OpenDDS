@@ -157,6 +157,7 @@ module RtpsRelay {
     unsigned long local_participants;
     unsigned long local_writers;
     unsigned long local_readers;
+    unsigned long total_participants;
     unsigned long total_writers;
     unsigned long total_readers;
   };

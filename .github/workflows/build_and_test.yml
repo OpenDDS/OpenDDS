@@ -4258,7 +4258,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06
+        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
         vcpkgArguments: --recurse openssl-windows xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -4269,7 +4269,7 @@ jobs:
         path: MPC
     - name: set up msvc env
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: ilammy/msvc-dev-cmd@v1.5.0
+      uses: ilammy/msvc-dev-cmd@v1.7.0
     - name: configure OpenDDS
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -4312,7 +4312,7 @@ jobs:
     - name: install openssl-windows & xerces-c
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06
+        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
         vcpkgArguments: --recurse openssl-windows xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -4344,7 +4344,7 @@ jobs:
         rm -f ACE_TAO_w19_p1_stat_js0_2.tar.xz
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.5.0
+      uses: ilammy/msvc-dev-cmd@v1.7.0
     - name: configure OpenDDS
       shell: cmd
       run: |
@@ -4401,7 +4401,7 @@ jobs:
   #   - name: install openssl-windows & xerces-c
   #     uses: lukka/run-vcpkg@v6
   #     with:
-  #       vcpkgGitCommitId: ec6fe06
+  #       vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
   #       vcpkgArguments: --recurse openssl-windows xerces-c
   #       vcpkgTriplet: x64-windows
   #   - name: checkout MPC
@@ -4537,7 +4537,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06
+        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
         vcpkgArguments: --recurse openssl-windows xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -4548,7 +4548,7 @@ jobs:
         path: MPC
     - name: set up msvc env
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: ilammy/msvc-dev-cmd@v1.5.0
+      uses: ilammy/msvc-dev-cmd@v1.7.0
     - name: configure OpenDDS
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -4591,7 +4591,7 @@ jobs:
     - name: install openssl-windows & xerces-c
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06
+        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
         vcpkgArguments: --recurse openssl-windows xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -4623,7 +4623,7 @@ jobs:
         rm -f ACE_TAO_w19_p1_cpp03_stat_FM-08_2.tar.xz
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.5.0
+      uses: ilammy/msvc-dev-cmd@v1.7.0
     - name: configure OpenDDS
       shell: cmd
       run: |
@@ -4673,7 +4673,7 @@ jobs:
   #   - name: install openssl-windows & xerces-c
   #     uses: lukka/run-vcpkg@v6
   #     with:
-  #       vcpkgGitCommitId: ec6fe06
+  #       vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
   #       vcpkgArguments: --recurse openssl-windows xerces-c
   #       vcpkgTriplet: x64-windows
   #   - name: checkout MPC
@@ -4807,7 +4807,7 @@ jobs:
   #     if: steps.cache-artifact.outputs.cache-hit != 'true'
   #     uses: lukka/run-vcpkg@v6
   #     with:
-  #       vcpkgGitCommitId: ec6fe06
+  #       vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
   #       vcpkgArguments: --recurse openssl-windows xerces-c
   #       vcpkgTriplet: x64-windows
   #   - name: checkout MPC
@@ -4818,7 +4818,7 @@ jobs:
   #       path: MPC
   #   - name: set up msvc env
   #     if: steps.cache-artifact.outputs.cache-hit != 'true'
-  #     uses: ilammy/msvc-dev-cmd@v1.6.0
+  #     uses: ilammy/msvc-dev-cmd@v1.7.0
   #   - name: configure OpenDDS
   #     if: steps.cache-artifact.outputs.cache-hit != 'true'
   #     shell: cmd
@@ -4861,7 +4861,7 @@ jobs:
   #   - name: install openssl-windows & xerces-c
   #     uses: lukka/run-vcpkg@v6
   #     with:
-  #       vcpkgGitCommitId: ec6fe06
+  #       vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
   #       vcpkgArguments: --recurse openssl-windows xerces-c
   #       vcpkgTriplet: x64-windows
   #   - name: checkout MPC
@@ -4893,7 +4893,7 @@ jobs:
   #       rm -f ACE_TAO_w19-release_o1p1_sec.tar.xz
   #   - uses: ammaraskar/msvc-problem-matcher@0.1
   #   - name: set up msvc env
-  #     uses: ilammy/msvc-dev-cmd@v1.6.0
+  #     uses: ilammy/msvc-dev-cmd@v1.7.0
   #   - name: configure OpenDDS
   #     shell: cmd
   #     run: |
@@ -4943,7 +4943,7 @@ jobs:
   #   - name: install openssl-windows & xerces-c
   #     uses: lukka/run-vcpkg@v6
   #     with:
-  #       vcpkgGitCommitId: ec6fe06
+  #       vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
   #       vcpkgArguments: --recurse openssl-windows xerces-c
   #       vcpkgTriplet: x64-windows
   #   - name: checkout MPC
@@ -5045,6 +5045,82 @@ jobs:
   #       cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
   #       if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
+  wireshark_w19-release:
+
+    runs-on: windows-2019
+    needs: wait_cancel_previous
+
+    steps:
+    - name: checkout Wireshark
+      shell: cmd
+      run: |
+        git clone -q -b release-3.4 --depth=1 https://gitlab.com/wireshark/wireshark.git
+        cd wireshark
+        for /f %%x in ('git rev-parse HEAD') do @echo WIRESHARK_COMMIT=%%x>> %GITHUB_ENV%
+    - name: Cache Artifact
+      id: cache-artifact
+      uses: actions/cache@v2.1.4
+      with:
+        path: |
+          winflexbison/bin/Debug
+          wsbuild
+          wireshark-win64-libs*
+          vcpkg-qt/installed
+          ${{ github.job }}.tar.xz
+        key: c01_${{ github.job }}_${{ env.WIRESHARK_COMMIT }}
+    - name: install vcpkg packages
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      id: runvcpkg
+      uses: lukka/run-vcpkg@v6
+      with:
+        vcpkgDirectory: '${{ github.workspace }}/vcpkg-qt'
+        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
+        vcpkgArguments: --recurse qt5-winextras qt5-tools qt5-svg qt5-multimedia qt5-declarative
+        vcpkgTriplet: x64-windows
+    - name: checkout WinFlexBison
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: actions/checkout@v2.3.4
+      with:
+        repository: lexxmark/winflexbison
+        path: winflexbison
+    - name: set up msvc env
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: ilammy/msvc-dev-cmd@v1.6.0
+    - name: build WinFlexBison
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: lukka/run-cmake@v3
+      with:
+        cmakeListsTxtPath: winflexbison/CMakeLists.txt
+    - name: set Wireshark environment
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: cmd
+      run: |
+        echo WIRESHARK_LIB_DIR=%CD%\wireshark-win64-libs-3.4>> %GITHUB_ENV%
+        echo QT5_BASE_DIR=${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_ROOT_OUT }}\installed\x64-windows>> %GITHUB_ENV%
+        type %GITHUB_ENV%
+    - name: build Wireshark
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: lukka/run-cmake@v3
+      with:
+        cmakeListsTxtPath: wireshark/CMakeLists.txt
+        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+        buildDirectory: ${{ github.workspace }}/wsbuild
+        cmakeAppendedArgs: '-GNinja -DLEX_EXECUTABLE=${{ github.workspace }}\winflexbison\bin\Debug\win_flex.exe -DYACC_EXECUTABLE=${{ github.workspace }}\winflexbison\bin\Debug\win_bison.exe'
+        buildWithCMakeArgs: '-t epan'
+    - name: create Wireshark artifact
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        find -iname "*\.obj" -delete
+        tar cvhf ${{ github.job }}.tar wireshark wsbuild wireshark-win64-libs-3.4
+        xz -3 ${{ github.job }}.tar
+    - name: upload Wireshark artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_artifact
+        path: ${{ github.job }}.tar.xz
+
+
   ACE_TAO_w19-release_j_FM-1f:
 
     runs-on: windows-2019
@@ -5079,7 +5155,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06
+        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
         vcpkgArguments: --recurse openssl-windows xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -5090,7 +5166,7 @@ jobs:
         path: MPC
     - name: set up msvc env
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: ilammy/msvc-dev-cmd@v1.6.0
+      uses: ilammy/msvc-dev-cmd@v1.7.0
     - name: configure OpenDDS
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -5123,17 +5199,26 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_w19-release_j_FM-1f:
+  build_w19-release_j_ws_FM-1f:
 
     runs-on: windows-2019
 
-    needs: ACE_TAO_w19-release_j_FM-1f
+    needs: [ACE_TAO_w19-release_j_FM-1f, wireshark_w19-release]
 
     steps:
+    - name: download Wireshark artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: wireshark_w19-release_artifact
+    - name: extract Wireshark artifact
+      shell: bash
+      run: |
+        tar xvJf wireshark_w19-release.tar.xz
+        rm -f wireshark_w19-release.tar.xz
     - name: install xerces-c
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06
+        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
         vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -5163,14 +5248,15 @@ jobs:
         cd OpenDDS/ACE_TAO
         tar xvfJ ACE_TAO_w19-release_j_FM-1f.tar.xz
         rm -f ACE_TAO_w19-release_j_FM-1f.tar.xz
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - name: set up MSVC problem matcher
+      uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.6.0
+      uses: ilammy/msvc-dev-cmd@v1.7.0
     - name: configure OpenDDS
       shell: cmd
       run: |
         cd OpenDDS
-        configure --tests --java --no-built-in-topics --rapidjson --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows
+        configure --tests --java --no-built-in-topics --rapidjson --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --wireshark-cmake=%GITHUB_WORKSPACE%\wireshark --wireshark-build=%GITHUB_WORKSPACE%\wsbuild --wireshark-lib=run --glib=%GITHUB_WORKSPACE%\wireshark-win64-libs-3.4\vcpkg-export-20190318-win64ws\installed\x64-windows
     - name: check build configuration
       shell: cmd
       run: |
@@ -5198,17 +5284,17 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_w19-release_j_FM-1f:
+  test_w19-release_j_ws_FM-1f:
 
     runs-on: windows-2019
 
-    needs: build_w19-release_j_FM-1f
+    needs: build_w19-release_j_ws_FM-1f
 
     steps:
     - name: install xerces-c
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06
+        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
         vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -5246,14 +5332,16 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
-        name: build_w19-release_j_FM-1f_artifact
+        name: build_w19-release_j_ws_FM-1f_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19-release_j_FM-1f.tar.xz
-        rm -f build_w19-release_j_FM-1f.tar.xz
+        tar xvfJ build_w19-release_j_ws_FM-1f.tar.xz
+        rm -f build_w19-release_j_ws_FM-1f.tar.xz
+    - name: set up msvc env
+      uses: ilammy/msvc-dev-cmd@v1.7.0
     - name: check build configuration
       shell: cmd
       run: |
@@ -5344,7 +5432,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06
+        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
         vcpkgArguments: --recurse openssl-windows xerces-c
         vcpkgTriplet: x86-windows
     - name: checkout MPC
@@ -5355,7 +5443,7 @@ jobs:
         path: MPC
     - name: set up msvc env
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: ilammy/msvc-dev-cmd@v1.6.0
+      uses: ilammy/msvc-dev-cmd@v1.7.0
       with:
         arch: x86
     - name: configure OpenDDS
@@ -5400,7 +5488,7 @@ jobs:
     - name: install openssl-windows & xerces-c
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06
+        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
         vcpkgArguments: --recurse openssl-windows xerces-c
         vcpkgTriplet: x86-windows
     - name: ls
@@ -5443,7 +5531,7 @@ jobs:
         mv MPC /c/
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.6.0
+      uses: ilammy/msvc-dev-cmd@v1.7.0
       with:
         arch: x86
     - name: configure OpenDDS
@@ -5488,7 +5576,7 @@ jobs:
     - name: install openssl-windows & xerces-c
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06
+        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
         vcpkgArguments: --recurse openssl-windows xerces-c
         vcpkgTriplet: x86-windows
     - name: checkout MPC
@@ -5540,6 +5628,8 @@ jobs:
         cd OpenDDS
         tar xvfJ build_w16_x86_doi0_sec.tar.xz
         rm -f build_w16_x86_doi0_sec.tar.xz
+    - name: set up msvc env
+      uses: ilammy/msvc-dev-cmd@v1.7.0
     - name: check build configuration
       shell: cmd
       run: |
@@ -5606,7 +5696,7 @@ jobs:
     - name: install xerces-c
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06
+        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
         vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x86-windows
     - name: checkout MPC
@@ -5644,7 +5734,7 @@ jobs:
         mv MPC /c/
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.6.0
+      uses: ilammy/msvc-dev-cmd@v1.7.0
       with:
         arch: x86
     - name: configure OpenDDS
@@ -5689,7 +5779,7 @@ jobs:
   #   - name: install xerces-c
   #     uses: lukka/run-vcpkg@v6
   #     with:
-  #       vcpkgGitCommitId: ec6fe06
+  #       vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
   #       vcpkgArguments: --recurse xerces-c
   #       vcpkgTriplet: x86-windows
   #   - name: checkout MPC

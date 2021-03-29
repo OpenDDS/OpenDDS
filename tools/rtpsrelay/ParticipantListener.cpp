@@ -7,10 +7,12 @@
 
 namespace RtpsRelay {
 
-ParticipantListener::ParticipantListener(OpenDDS::DCPS::DomainParticipantImpl* participant,
+ParticipantListener::ParticipantListener(const Config& config,
+                                         OpenDDS::DCPS::DomainParticipantImpl* participant,
                                          DomainStatisticsReporter& stats_reporter,
                                          ParticipantEntryDataWriter_var participant_writer)
-  : participant_(participant)
+  : config_(config)
+  , participant_(participant)
   , stats_reporter_(stats_reporter)
   , writer_(participant_writer)
 {}
@@ -60,7 +62,9 @@ void ParticipantListener::write_sample(const DDS::ParticipantBuiltinTopicData& d
 
   const ParticipantEntry entry(guid, data.user_data);
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: ParticipantListener::write_sample add local participant %C %C\n"), guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str()));
+  if (config_.log_discovery()) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: ParticipantListener::write_sample add local participant %C %C\n"), guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str()));
+  }
   DDS::ReturnCode_t ret = writer_->write(entry, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ParticipantListener::write_sample failed to write\n")));
@@ -76,7 +80,9 @@ void ParticipantListener::unregister_instance(const DDS::SampleInfo& info)
   ParticipantEntry entry;
   entry.guid(guid);
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: ParticipantListener::unregister_instance remove local participant %C\n"), guid_to_string(repoid).c_str()));
+  if (config_.log_discovery()) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: ParticipantListener::unregister_instance remove local participant %C\n"), guid_to_string(repoid).c_str()));
+  }
   DDS::ReturnCode_t ret = writer_->unregister_instance(entry, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ParticipantListener::unregister_instance failed to unregister_instance\n")));

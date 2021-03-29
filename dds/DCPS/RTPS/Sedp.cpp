@@ -368,6 +368,8 @@ Sedp::init(const RepoId& guid,
   rtps_inst->heartbeat_period_maximum_ = disco.config()->sedp_heartbeat_period_maximum();
   rtps_inst->heartbeat_backoff_factor_ = disco.config()->sedp_heartbeat_backoff_factor();
   rtps_inst->heartbeat_safety_factor_ = disco.config()->sedp_heartbeat_safety_factor();
+  rtps_inst->nak_response_delay_ = disco.config()->sedp_nak_response_delay();
+  rtps_inst->responsive_mode_ = disco.config()->responsive_mode();
 
   if (disco.sedp_multicast()) {
     // Bind to a specific multicast group
@@ -946,6 +948,7 @@ create_association_data_proto(DCPS::AssociationData& proto,
   proto.remote_reliable_ = true;
   proto.remote_durable_ = true;
   DCPS::assign(proto.remote_id_.guidPrefix, pdata.participantProxy.guidPrefix);
+  proto.remote_transport_context_ = pdata.participantProxy.opendds_participant_flags.bits;
   populate_locators(proto.remote_data_, pdata);
 }
 

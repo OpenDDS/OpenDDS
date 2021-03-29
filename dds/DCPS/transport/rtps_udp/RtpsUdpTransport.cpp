@@ -71,7 +71,7 @@ RtpsUdpTransport::rtps_relay_only_now(bool flag)
     relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
   } else {
     if (!config().use_rtps_relay()) {
-      relay_stun_task_->disable();
+      disable_relay_stun_task();
     }
   }
 #endif
@@ -87,7 +87,7 @@ RtpsUdpTransport::use_rtps_relay_now(bool flag)
     relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
   } else {
     if (!config().rtps_relay_only()) {
-      relay_stun_task_->disable();
+      disable_relay_stun_task();
     }
   }
 #endif
@@ -871,6 +871,32 @@ RtpsUdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::StateChang
 
 #else
   ACE_UNUSED_ARG(sc);
+#endif
+}
+
+void
+RtpsUdpTransport::disable_relay_stun_task()
+{
+#ifndef DDS_HAS_MINIMUM_BIT
+  relay_stun_task_->disable();
+
+  DCPS::ConnectionRecord connection_record;
+  std::memset(connection_record.guid, 0, sizeof(connection_record.guid));
+  connection_record.protocol = RTPS_RELAY_STUN_PROTOCOL;
+
+  if (relay_srsm_.stun_server_address() != ACE_INET_Addr()) {
+    connection_record.address = to_dds_string(relay_srsm_.stun_server_address()).c_str();
+    deferred_connection_records_.push_back(std::make_pair(false, connection_record));
+  }
+
+  if (!bit_sub_) {
+    return;
+  }
+
+  job_queue_->enqueue(DCPS::make_rch<WriteConnectionRecords>(bit_sub_, deferred_connection_records_));
+  deferred_connection_records_.clear();
+
+  relay_srsm_ = ICE::ServerReflexiveStateMachine();
 #endif
 }
 

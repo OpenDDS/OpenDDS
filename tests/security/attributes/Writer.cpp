@@ -125,6 +125,7 @@ Writer::svc()
       }
 
       message.count++;
+      message.subject_id--;
     }
 
   } catch (const CORBA::Exception& e) {

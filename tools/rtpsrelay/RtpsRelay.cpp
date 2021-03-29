@@ -6,6 +6,7 @@
  */
 
 #include "DomainStatisticsReporter.h"
+#include "ParticipantEntryListener.h"
 #include "ParticipantListener.h"
 #include "ParticipantStatisticsReporter.h"
 #include "PublicationListener.h"
@@ -117,8 +118,26 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-PublishStatistics"))) {
       config.publish_relay_statistics(ACE_OS::atoi(arg));
       args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-ReportStatistics"))) {
+    } else if ((arg = args.get_the_parameter("-LogEntries"))) {
+      config.log_entries(ACE_OS::atoi(arg));
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-LogDiscovery"))) {
+      config.log_discovery(ACE_OS::atoi(arg));
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-LogActivity"))) {
+      config.log_activity(ACE_OS::atoi(arg));
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-LogRelayStatistics"))) {
       config.log_relay_statistics(ACE_OS::atoi(arg));
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-LogHandlerStatistics"))) {
+      config.log_handler_statistics(ACE_OS::atoi(arg));
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-LogParticipantStatistics"))) {
+      config.log_participant_statistics(ACE_OS::atoi(arg));
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-LogDomainStatistics"))) {
+      config.log_domain_statistics(ACE_OS::atoi(arg));
       args.consume_arg();
 #ifdef OPENDDS_SECURITY
     } else if ((arg = args.get_the_parameter("-IdentityCA"))) {
@@ -606,12 +625,23 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DDS::DataReader_var participant_reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC);
   DomainStatisticsReporter domain_statistics_reporter(config, domain_statistics_writer);
 
-  DDS::DataReaderListener_var participant_listener = new ParticipantListener(application_participant_impl,
+  DDS::DataReaderListener_var participant_listener = new ParticipantListener(config,
+                                                                             application_participant_impl,
                                                                              domain_statistics_reporter,
                                                                              participant_entry_writer);
   DDS::ReturnCode_t ret = participant_reader->set_listener(participant_listener, DDS::DATA_AVAILABLE_STATUS);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Failed to set listener on ParticipantBuiltinTopicDataDataReader\n")));
+    return EXIT_FAILURE;
+  }
+
+  DDS::DataReaderListener_var participant_entry_listener =
+    new ParticipantEntryListener(config, domain_statistics_reporter);
+  DDS::DataReader_var participant_entry_reader = relay_subscriber->create_datareader(participant_entry_topic, reader_qos,
+                                                                                     participant_entry_listener,
+                                                                                     DDS::DATA_AVAILABLE_STATUS);
+  if (!participant_entry_reader) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Participant data reader\n")));
     return EXIT_FAILURE;
   }
 
@@ -632,7 +662,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   DDS::DataReaderListener_var reader_listener =
-    new ReaderListener(association_table, spdp_vertical_handler, domain_statistics_reporter);
+    new ReaderListener(config, association_table, spdp_vertical_handler, domain_statistics_reporter);
   DDS::DataReader_var reader_reader_var = relay_subscriber->create_datareader(readers_topic, reader_qos,
                                                                               reader_listener,
                                                                               DDS::DATA_AVAILABLE_STATUS);
@@ -645,7 +675,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   // Setup a subscription listener to feed the reader writer.
   DDS::DataReader_var subscription_reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
   DDS::DataReaderListener_var subscription_listener =
-    new SubscriptionListener(application_participant_impl, reader_writer, domain_statistics_reporter);
+    new SubscriptionListener(config, application_participant_impl, reader_writer, domain_statistics_reporter);
   ret = subscription_reader->set_listener(subscription_listener, DDS::DATA_AVAILABLE_STATUS);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Failed to set listener on SubscriptionBuiltinTopicDataDataReader\n")));
@@ -669,7 +699,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   DDS::DataReaderListener_var writer_listener =
-    new WriterListener(association_table, spdp_vertical_handler, domain_statistics_reporter);
+    new WriterListener(config, association_table, spdp_vertical_handler, domain_statistics_reporter);
   DDS::DataReader_var writer_reader = relay_subscriber->create_datareader(writers_topic, reader_qos,
                                                                           writer_listener,
                                                                           DDS::DATA_AVAILABLE_STATUS);
@@ -678,9 +708,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  // Setup a publiation listener to feed the writer writer.
+  // Setup a publication listener to feed the writer writer.
   DDS::DataReader_var publication_reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC);
-  DDS::DataReaderListener_var publication_listener(new PublicationListener(application_participant_impl,
+  DDS::DataReaderListener_var publication_listener(new PublicationListener(config,
+                                                                           application_participant_impl,
                                                                            writer_writer,
                                                                            domain_statistics_reporter));
   ret = publication_reader->set_listener(publication_listener, DDS::DATA_AVAILABLE_STATUS);
