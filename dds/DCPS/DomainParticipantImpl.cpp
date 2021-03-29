@@ -1518,10 +1518,7 @@ DDS::ReturnCode_t
 DomainParticipantImpl::get_discovered_participants(
   DDS::InstanceHandleSeq & participant_handles)
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->handle_protector_,
-                   DDS::RETCODE_ERROR);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, DDS::RETCODE_ERROR);
 
   HandleMap::const_iterator itEnd = this->handles_.end();
 
@@ -1551,10 +1548,7 @@ DomainParticipantImpl::get_discovered_participant_data(
   DDS::InstanceHandle_t participant_handle)
 {
   {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     guard,
-                     this->handle_protector_,
-                     DDS::RETCODE_ERROR);
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, DDS::RETCODE_ERROR);
 
     bool found = false;
     HandleMap::const_iterator itEnd = this->handles_.end();
@@ -1603,10 +1597,7 @@ DDS::ReturnCode_t
 DomainParticipantImpl::get_discovered_topics(
   DDS::InstanceHandleSeq & topic_handles)
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->handle_protector_,
-                   DDS::RETCODE_ERROR);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, DDS::RETCODE_ERROR);
 
   HandleMap::const_iterator itEnd = this->handles_.end();
 
@@ -1635,10 +1626,7 @@ DomainParticipantImpl::get_discovered_topic_data(
   DDS::InstanceHandle_t topic_handle)
 {
   {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     guard,
-                     this->handle_protector_,
-                     DDS::RETCODE_ERROR);
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, DDS::RETCODE_ERROR);
 
     bool found = false;
     HandleMap::const_iterator itEnd = this->handles_.end();
@@ -1920,10 +1908,7 @@ DomainParticipantImpl::id_to_handle(const RepoId& id)
     return this->participant_handles_.next();
   }
 
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->handle_protector_,
-                   HANDLE_UNKNOWN);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, DDS::HANDLE_NIL);
 
   HandleMap::const_iterator location = this->handles_.find(id);
   DDS::InstanceHandle_t result;
@@ -1944,10 +1929,7 @@ RepoId
 DomainParticipantImpl::get_repoid(const DDS::InstanceHandle_t& handle)
 {
   RepoId result = GUID_UNKNOWN;
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->handle_protector_,
-                   GUID_UNKNOWN);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, result);
   RepoIdMap::const_iterator location = this->repoIds_.find(handle);
   if (location != this->repoIds_.end()) {
     result = location->second;

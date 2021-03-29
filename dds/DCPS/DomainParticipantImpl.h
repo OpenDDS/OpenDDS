@@ -476,7 +476,7 @@ private:
   /// Protect the topic collection.
   ACE_Recursive_Thread_Mutex topics_protector_;
   /// Protect the handle collection.
-  ACE_Recursive_Thread_Mutex handle_protector_;
+  ACE_Thread_Mutex handle_protector_;
   /// Protect the shutdown.
   ACE_Thread_Mutex shutdown_mutex_;
   ConditionVariable<ACE_Thread_Mutex> shutdown_condition_;
