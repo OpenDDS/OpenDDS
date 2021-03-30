@@ -2578,7 +2578,6 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
                             wdata.ddsPublicationData)) { // update existing
 
 #ifndef DDS_HAS_MINIMUM_BIT
-        // Iter no longer valid once lock released
         DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
         if (bit) { // bit may be null if the DomainParticipant is shutting down
           wdata_copy = iter->second.writer_data_;
@@ -2909,7 +2908,6 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
       if (checkAndAssignQos(iter->second.reader_data_.ddsSubscriptionData,
                             rdata.ddsSubscriptionData)) {
 #ifndef DDS_HAS_MINIMUM_BIT
-        // Iter no longer valid once lock released
         DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
         if (bit) { // bit may be null if the DomainParticipant is shutting down
           rdata_copy = iter->second.reader_data_;
