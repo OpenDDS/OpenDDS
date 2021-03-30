@@ -4227,7 +4227,7 @@ DCPS::MonotonicTime_t Spdp::get_participant_discovered_at() const
 
 DCPS::MonotonicTime_t Spdp::get_participant_discovered_at(const DCPS::RepoId& guid) const
 {
-  DiscoveredParticipantConstIter iter = participants_.find(make_part_guid(guid));
+  const DiscoveredParticipantConstIter iter = participants_.find(make_part_guid(guid));
   return iter->second.discovered_at_;
 }
 
