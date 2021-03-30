@@ -2485,7 +2485,7 @@ jobs:
         cd tools/modeling/tests
         ./setup.pl
         cd -
-        mwc.pl -type gnuace -workers 4 tools/modeling/tests/modeling_tests.mwc
+        mwc.pl -type gnuace -workers 4 -features no_opendds_security=0 tools/modeling/tests/modeling_tests.mwc
     - name: build Modeling tests
       shell: bash
       run: |
