@@ -2541,10 +2541,10 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
         wdata_copy = pub.writer_data_;
       }
 
+      DDS::InstanceHandle_t instance_handle = DDS::HANDLE_NIL;
 #ifndef DDS_HAS_MINIMUM_BIT
       // Iter no longer valid once lock released
       iter = discovered_publications_.end();
-      DDS::InstanceHandle_t instance_handle = DDS::HANDLE_NIL;
       {
         // Release lock for call into pub_bit
         DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
@@ -2872,10 +2872,10 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
         rdata_copy = sub.reader_data_;
       }
 
+      DDS::InstanceHandle_t instance_handle = DDS::HANDLE_NIL;
 #ifndef DDS_HAS_MINIMUM_BIT
       // Iter no longer valid once lock released
       iter = discovered_subscriptions_.end();
-      DDS::InstanceHandle_t instance_handle = DDS::HANDLE_NIL;
       {
         // Release lock for call into sub_bit
         DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
