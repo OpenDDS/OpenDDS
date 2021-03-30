@@ -45,7 +45,7 @@ tests/security/attributes/run_test.pl Partitions_Subset
 tests/security/attributes/run_test.pl secure-part-user-data: !NO_BUILT_IN_TOPICS
 tests/security/attributes/run_test.pl unsecure-part-user-data: !NO_BUILT_IN_TOPICS !GH_ACTIONS
 tests/security/TopicWithoutPermissions/run_test.pl
-tests/security/SingleParticipantWithSecurity/run_test.pl
+tests/security/SingleParticipantWithSecurity/run_test.pl: !DDS_NO_OWNERSHIP_PROFILE
 
 tests/DCPS/RtpsRelay/Unit/run_test.pl: !DCPS_MIN CXX11 !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/RtpsRelay/Smoke/run_test.pl: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE RAPIDJSON
