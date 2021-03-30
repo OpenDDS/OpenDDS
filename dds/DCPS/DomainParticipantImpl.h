@@ -123,7 +123,6 @@ public:
 
   typedef OPENDDS_MAP(OPENDDS_STRING, DDS::TopicDescription_var) TopicDescriptionMap;
 
-  typedef OPENDDS_MAP_CMP(RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan) HandleMap;
   typedef OPENDDS_MAP(DDS::InstanceHandle_t, RepoId) RepoIdMap;
 
   DomainParticipantImpl(InstanceHandleGenerator&           handle_generator,
@@ -292,15 +291,33 @@ public:
   OPENDDS_STRING get_unique_id();
 
   /**
-   * Obtain a local handle representing a GUID.
+   * Assign an instance handle, optionally representing a GUID.
+   * If a GUID is provided (not GUID_UNKNOWN), other calls to assign_handle
+   * for this GUID will return the same handle, as will subsequent calls to
+   * lookup_handle.
+   *
+   * If this method returns a valid (non-HANDLE_NIL) handle, it must be
+   * returned by calling return_handle.
    */
-  DDS::InstanceHandle_t id_to_handle(const RepoId& id);
+  DDS::InstanceHandle_t assign_handle(const GUID_t& id = GUID_UNKNOWN);
+
+  /**
+   * Get a handle that was previously mapped to a GUID or HANDLE_NIL if none exists.
+   *
+   * Handles returned from this method should not be passed to return_handle.
+   */
+  DDS::InstanceHandle_t lookup_handle(const GUID_t& id) const;
+
+  /**
+   * Return a previously-assigned handle.
+   */
+  void return_handle(DDS::InstanceHandle_t handle);
 
   /**
    * Obtain a GUID representing a local hande.
    * @return GUID_UNKNOWN if not found.
    */
-  RepoId get_repoid(const DDS::InstanceHandle_t& id);
+  GUID_t get_repoid(DDS::InstanceHandle_t id) const;
 
   /**
    *  Check if the topic is used by any datareader or datawriter.
@@ -462,9 +479,17 @@ private:
   /// Collection of TopicDescriptions which are not also Topics
   TopicDescriptionMap topic_descrs_;
 #endif
+
+
+  typedef std::pair<DDS::InstanceHandle_t, unsigned int> HandleWithCounter;
+  typedef OPENDDS_MAP_CMP(GUID_t, HandleWithCounter, GUID_tKeyLessThan) CountedHandleMap;
+
   /// Bidirectional collection of handles <--> RepoIds.
-  HandleMap handles_;
+  CountedHandleMap handles_;
   RepoIdMap repoIds_;
+
+  typedef OPENDDS_MAP_CMP(GUID_t, DDS::InstanceHandle_t, GUID_tKeyLessThan) HandleMap;
+
   /// Collection of ignored participants.
   HandleMap ignored_participants_;
   /// Collection of ignored topics.
@@ -476,7 +501,7 @@ private:
   /// Protect the topic collection.
   ACE_Recursive_Thread_Mutex topics_protector_;
   /// Protect the handle collection.
-  ACE_Thread_Mutex handle_protector_;
+  mutable ACE_Thread_Mutex handle_protector_;
   /// Protect the shutdown.
   ACE_Thread_Mutex shutdown_mutex_;
   ConditionVariable<ACE_Thread_Mutex> shutdown_condition_;

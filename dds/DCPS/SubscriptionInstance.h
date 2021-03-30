@@ -8,17 +8,13 @@
 #ifndef OPENDDS_DCPS_SUBSCRIPTION_INSTANCE_H
 #define OPENDDS_DCPS_SUBSCRIPTION_INSTANCE_H
 
-#include "ace/OS_Memory.h"
-
-#include "dds/DdsDcpsInfrastructureC.h"
-
 #include "dcps_export.h"
 #include "ReceivedDataElementList.h"
 #include "ReceivedDataStrategy.h"
 #include "InstanceState.h"
-#include "PoolAllocationBase.h"
 #include "RcObject.h"
-#include "ace/Synch_Traits.h"
+
+#include "dds/DdsDcpsInfrastructureC.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -37,34 +33,15 @@ class DataReaderImpl;
   * @brief Struct that has information about an instance and the instance
   *        sample list.
   */
-class SubscriptionInstance : public RcObject {
+class OpenDDS_Dcps_Export SubscriptionInstance : public RcObject {
 public:
-  SubscriptionInstance(DataReaderImpl *reader,
+  SubscriptionInstance(DataReaderImpl* reader,
                        const DDS::DataReaderQos& qos,
                        ACE_Recursive_Thread_Mutex& lock,
-                       DDS::InstanceHandle_t handle)
-    : instance_state_(make_rch<InstanceState>(reader, ref(lock), handle)),
-      last_sequence_(),
-      rcvd_samples_(instance_state_),
-      instance_handle_(handle),
-      deadline_timer_id_(-1)
-  {
-    switch (qos.destination_order.kind) {
-    case DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS:
-      this->rcvd_strategy_.reset(new ReceptionDataStrategy(this->rcvd_samples_));
-      break;
+                       DDS::InstanceHandle_t handle,
+                       bool owns_handle);
 
-    case DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS:
-      this->rcvd_strategy_.reset(new SourceDataStrategy(this->rcvd_samples_));
-      break;
-    }
-
-    if (!this->rcvd_strategy_) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: SubscriptionInstance: ")
-                 ACE_TEXT(" unable to allocate ReceiveDataStrategy!\n")));
-    }
-  }
+  ~SubscriptionInstance();
 
   /// Instance state for this instance
   InstanceState_rch instance_state_;
@@ -80,6 +57,8 @@ public:
 
   /// The instance handle for the registered object
   DDS::InstanceHandle_t instance_handle_;
+
+  bool owns_handle_;
 
   MonotonicTimePoint last_sample_tv_;
 

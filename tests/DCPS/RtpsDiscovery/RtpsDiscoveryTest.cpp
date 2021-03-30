@@ -646,7 +646,7 @@ bool check_discovered_participants(DomainParticipant_var& dp,
       }
 
       OpenDDS::DCPS::RepoId repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data.key);
-      if (dp_impl->id_to_handle(repo_id) != part_handles[0]) {
+      if (dp_impl->lookup_handle(repo_id) != part_handles[0]) {
         ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %P discovered participant ")
                                     ACE_TEXT("BIT key could not be converted ")
                                     ACE_TEXT("to repo id, then handle\n")),
