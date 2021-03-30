@@ -387,8 +387,10 @@ Sedp::init(const RepoId& guid,
   }
 
   rtps_inst->local_address_ = disco.config()->sedp_local_address();
+  rtps_inst->advertised_address_ = disco.config()->sedp_advertised_address();
 #ifdef ACE_HAS_IPV6
   rtps_inst->ipv6_local_address_ = disco.config()->ipv6_sedp_local_address();
+  rtps_inst->ipv6_advertised_address_ = disco.config()->sedp_ipv6_advertised_address();
 #endif
 
   rtps_relay_address(disco.config()->sedp_rtps_relay_address());

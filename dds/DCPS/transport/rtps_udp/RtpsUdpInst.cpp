@@ -78,6 +78,32 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
     local_address(addr);
   }
 
+  ACE_TString advertised_address_s;
+  GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("advertised_address"),
+                           advertised_address_s);
+  if (!advertised_address_s.is_empty()) {
+    ACE_INET_Addr addr(advertised_address_s.c_str());
+    advertised_address(addr);
+  }
+
+#ifdef ACE_HAS_IPV6
+  ACE_TString ipv6_local_address_s;
+  GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("ipv6_local_address"),
+                           ipv6_local_address_s);
+  if (!ipv6_local_address_s.is_empty()) {
+    ACE_INET_Addr addr(ipv6_local_address_s.c_str());
+    ipv6_local_address(addr);
+  }
+
+  ACE_TString ipv6_advertised_address_s;
+  GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("ipv6_advertised_address"),
+                           ipv6_advertised_address_s);
+  if (!ipv6_advertised_address_s.is_empty()) {
+    ACE_INET_Addr addr(ipv6_advertised_address_s.c_str());
+    ipv6_advertised_address(addr);
+  }
+#endif
+
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("send_buffer_size"), this->send_buffer_size_, ACE_UINT32);
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("rcv_buffer_size"), this->rcv_buffer_size_, ACE_UINT32);
@@ -225,7 +251,18 @@ RtpsUdpInst::populate_locator(TransportLocator& info, ConnectionInfoFlags flags)
 
   if (flags & CONNINFO_UNICAST) {
     if (local_address() != ACE_INET_Addr()) {
-      if (local_address().is_any()) {
+      if (advertised_address() != ACE_INET_Addr()) {
+        idx = locators.length();
+        locators.length(idx + 1);
+        locators[idx].kind = address_to_kind(advertised_address());
+        if (advertised_address().get_port_number()) {
+          locators[idx].port = advertised_address().get_port_number();
+        } else {
+          locators[idx].port = local_address().get_port_number();
+        }
+        RTPS::address_to_bytes(locators[idx].address,
+                               advertised_address());
+      } else if (local_address().is_any()) {
         typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
         AddrVector addrs;
         get_interface_addrs(addrs);
@@ -249,7 +286,18 @@ RtpsUdpInst::populate_locator(TransportLocator& info, ConnectionInfoFlags flags)
     }
 #ifdef ACE_HAS_IPV6
     if (ipv6_local_address() != ACE_INET_Addr()) {
-      if (ipv6_local_address().is_any()) {
+      if (ipv6_advertised_address() != ACE_INET_Addr()) {
+        idx = locators.length();
+        locators.length(idx + 1);
+        locators[idx].kind = address_to_kind(ipv6_advertised_address());
+        if (ipv6_advertised_address().get_port_number()) {
+          locators[idx].port = ipv6_advertised_address().get_port_number();
+        } else {
+          locators[idx].port = ipv6_local_address().get_port_number();
+        }
+        RTPS::address_to_bytes(locators[idx].address,
+                               ipv6_advertised_address());
+      } else if (ipv6_local_address().is_any()) {
         typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
         AddrVector addrs;
         get_interface_addrs(addrs);
