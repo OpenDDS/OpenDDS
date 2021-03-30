@@ -4170,7 +4170,7 @@ bool Sedp::TypeLookupReplyReader::process_type_lookup_reply(
       seq_num.getValue()));
   }
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, sedp_.lock_, DDS::RETCODE_ERROR);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, sedp_.lock_, false);
   const OrigSeqNumberMap::const_iterator seq_num_it = sedp_.orig_seq_numbers_.find(seq_num);
   if (seq_num_it == sedp_.orig_seq_numbers_.end()) {
     ACE_DEBUG((LM_WARNING,
