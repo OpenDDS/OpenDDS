@@ -322,6 +322,8 @@ jobs:
 
     runs-on: ubuntu-18.04
 
+    needs: wait_cancel_previous
+
     steps:
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
@@ -353,7 +355,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        cat setenv.sh
         . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.1
@@ -404,20 +405,6 @@ jobs:
         cd OpenDDS
         git clean -nd -e ext | tee ../output.txt
         if [ -s ../output.txt ]; then exit 1; fi
-    - name: create OpenDDS tar.xz artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        rm -rf ACE_TAO
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../${{ github.job }}.tar setenv.sh
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
-        xz -3 ../${{ github.job }}.tar
-    - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
 
   # ACE_TAO_u18_esafe_js0:
 
