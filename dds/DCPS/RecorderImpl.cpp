@@ -445,8 +445,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
   //
   if (!is_bit_) {
 
-    DDS::InstanceHandle_t handle =
-      this->participant_servant_->assign_handle(writer.writerId);
+    const DDS::InstanceHandle_t handle = participant_servant_->assign_handle(writer.writerId);
 
     //
     // We acquire the publication_handle_lock_ for the remainder of our

@@ -1735,7 +1735,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
     DDS::BuiltinTopicKey_t key = OpenDDS::DCPS::keyFromSample(static_cast<MessageType*>(instance_data.get()));
     bool owns_handle = false;
     if (handle == DDS::HANDLE_NIL) {
-      handle = this->get_next_handle(key);
+      handle = get_next_handle(key);
       owns_handle = true;
     }
     OpenDDS::DCPS::SubscriptionInstance_rch instance =

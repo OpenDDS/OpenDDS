@@ -373,7 +373,7 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
   // We no longer hold the publication_handle_lock_.
 
 
-  RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
+  const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
 
   if (!participant)
     return;

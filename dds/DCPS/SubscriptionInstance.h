@@ -44,21 +44,21 @@ public:
   ~SubscriptionInstance();
 
   /// Instance state for this instance
-  InstanceState_rch instance_state_;
+  const InstanceState_rch instance_state_;
 
   /// Sequence number of the move recent data sample received
-  SequenceNumber last_sequence_ ;
+  SequenceNumber last_sequence_;
 
   /// Data sample(s) in this instance
-  ReceivedDataElementList rcvd_samples_ ;
+  ReceivedDataElementList rcvd_samples_;
 
   /// ReceivedDataElementList strategy
   unique_ptr<ReceivedDataStrategy> rcvd_strategy_;
 
   /// The instance handle for the registered object
-  DDS::InstanceHandle_t instance_handle_;
+  const DDS::InstanceHandle_t instance_handle_;
 
-  bool owns_handle_;
+  const bool owns_handle_;
 
   MonotonicTimePoint last_sample_tv_;
 
