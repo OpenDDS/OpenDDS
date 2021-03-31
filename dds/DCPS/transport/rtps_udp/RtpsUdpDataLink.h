@@ -190,9 +190,6 @@ public:
 
   RtpsUdpTransport& transport();
 
-  void enable_response_queue();
-  void disable_response_queue();
-
 private:
   void join_multicast_group(const NetworkInterface& nic,
                             bool all_interfaces = false);
@@ -618,12 +615,11 @@ private:
   void queue_or_send_submessages(MetaSubmessageVec& meta_submessages);
   void bundle_and_send_submessages(MetaSubmessageVecVec& meta_submessages);
 
-  struct SubmessageQueue: RcObject, MetaSubmessageVecVec {
-  };
-  typedef RcHandle<SubmessageQueue> SubmessageQueue_rch;
-
-  typedef OPENDDS_MAP(ACE_thread_t, SubmessageQueue_rch) ThreadSendQueueMap;
-  ThreadSendQueueMap thread_send_queues_;
+  MetaSubmessageVecVec send_queue_;
+  size_t total_submessage_count_;
+  typedef PmfSporadicTask<RtpsUdpDataLink> Sporadic;
+  Sporadic flush_send_queue_task_;
+  void flush_send_queue(const MonotonicTimePoint& now);
 
   RepoIdSet pending_reliable_readers_;
 
@@ -642,11 +638,11 @@ private:
   ///   along with anything else that fits the 'writers side activity' of the datalink
   /// - locators_lock_ protects locators_ (and therefore calls to get_addresses_i())
   ///   for both remote writers and remote readers
-  /// - send_queues_lock protects thread_send_queues_
+  /// - send_queues_lock protects send_queue_
   mutable ACE_Thread_Mutex readers_lock_;
   mutable ACE_Thread_Mutex writers_lock_;
   mutable ACE_Thread_Mutex locators_lock_;
-  mutable ACE_Thread_Mutex send_queues_lock_;
+  mutable ACE_Thread_Mutex send_queue_lock_;
 
   /// Extend the FragmentNumberSet to cover the fragments that are
   /// missing from our last known fragment to the extent

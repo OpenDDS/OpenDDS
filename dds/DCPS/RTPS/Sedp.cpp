@@ -356,20 +356,11 @@ Sedp::init(const RepoId& guid,
   // Use a static cast to avoid dependency on the RtpsUdp library
   DCPS::RtpsUdpInst_rch rtps_inst =
       DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  // The SEDP endpoints may need to wait at least one resend period before
-  // the handshake completes (allows time for our SPDP multicast to be
-  // received by the other side).  Arbitrary constant of 5 to account for
-  // possible network lossiness.
-  static const double HANDSHAKE_MULTIPLIER = 5;
-  rtps_inst->handshake_timeout_ = disco.resend_period() * HANDSHAKE_MULTIPLIER;
   rtps_inst->max_message_size_ = disco.config()->sedp_max_message_size();
   rtps_inst->heartbeat_period_ = disco.config()->sedp_heartbeat_period();
-  rtps_inst->heartbeat_period_minimum_ = disco.config()->sedp_heartbeat_period_minimum();
-  rtps_inst->heartbeat_period_maximum_ = disco.config()->sedp_heartbeat_period_maximum();
-  rtps_inst->heartbeat_backoff_factor_ = disco.config()->sedp_heartbeat_backoff_factor();
-  rtps_inst->heartbeat_safety_factor_ = disco.config()->sedp_heartbeat_safety_factor();
   rtps_inst->nak_response_delay_ = disco.config()->sedp_nak_response_delay();
-  rtps_inst->responsive_mode_ = disco.config()->responsive_mode();
+  rtps_inst->responsive_mode_ = disco.config()->sedp_responsive_mode();
+  rtps_inst->send_delay_ = disco.config()->sedp_send_delay();
 
   if (disco.sedp_multicast()) {
     // Bind to a specific multicast group

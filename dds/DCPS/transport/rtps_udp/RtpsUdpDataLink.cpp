@@ -81,6 +81,8 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
   , reactor_task_(reactor_task)
   , job_queue_(make_rch<JobQueue>(reactor_task->get_reactor()))
   , multi_buff_(this, config.nak_depth_)
+  , total_submessage_count_(0)
+  , flush_send_queue_task_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::flush_send_queue)
   , best_effort_heartbeat_count_(0)
   , heartbeat_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::send_heartbeats)
   , heartbeatchecker_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::check_heartbeats)
@@ -2462,50 +2464,49 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(
 }
 
 void
-RtpsUdpDataLink::enable_response_queue()
+RtpsUdpDataLink::flush_send_queue(const MonotonicTimePoint& /*now*/)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, send_queues_lock_);
-  ThreadSendQueueMap::iterator it = thread_send_queues_.find(ACE_Thread::self());
-  if (it == thread_send_queues_.end()) {
-    thread_send_queues_[ACE_Thread::self()] = make_rch<SubmessageQueue>();
-  }
-}
+  MetaSubmessageVecVec temp;
 
-void
-RtpsUdpDataLink::disable_response_queue()
-{
-  SubmessageQueue_rch queue;
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, send_queues_lock_);
-    ThreadSendQueueMap::iterator it = thread_send_queues_.find(ACE_Thread::self());
-    if (it != thread_send_queues_.end()) {
-      queue = it->second;
-      thread_send_queues_.erase(it);
-    }
+    ACE_GUARD(ACE_Thread_Mutex, g, send_queue_lock_);
+    temp.swap(send_queue_);
+    total_submessage_count_ = 0;
   }
-  if (queue && !queue->empty()) {
-    bundle_and_send_submessages(*queue);
-  }
+
+  bundle_and_send_submessages(temp);
 }
 
 void
 RtpsUdpDataLink::queue_or_send_submessages(MetaSubmessageVec& in)
 {
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, send_queues_lock_);
-
-    ThreadSendQueueMap::iterator it = thread_send_queues_.find(ACE_Thread::self());
-    if (it != thread_send_queues_.end()) {
-      it->second->push_back(MetaSubmessageVec());
-      it->second->back().swap(in);
-      return;
-    }
+  if (in.empty()) {
+    return;
   }
 
   MetaSubmessageVecVec temp;
-  temp.push_back(MetaSubmessageVec());
-  temp.back().swap(in);
-  bundle_and_send_submessages(temp);
+
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, send_queue_lock_);
+
+    send_queue_.push_back(MetaSubmessageVec());
+    send_queue_.back().swap(in);
+    total_submessage_count_ += send_queue_.back().size();
+
+    // Heartbeats and Acknacks are around 8 longs.
+    // If the submessages will fill up half of a maximum message, send them.
+    const size_t max_submessage_count = config().max_message_size_ / (8 * 4 * 2);
+    if (total_submessage_count_ > max_submessage_count) {
+      temp.swap(send_queue_);
+      total_submessage_count_ = 0;
+    }
+  }
+
+  if (temp.empty()) {
+    flush_send_queue_task_.schedule(config().send_delay_);
+  } else {
+    bundle_and_send_submessages(temp);
+  }
 }
 
 void
