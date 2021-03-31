@@ -210,11 +210,8 @@ void DataReaderImpl::init(
 DDS::InstanceHandle_t
 DataReaderImpl::get_instance_handle()
 {
-  using namespace OpenDDS::DCPS;
-  RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
-  if (participant)
-    return participant->lookup_handle(subscription_id_);
-  return DDS::HANDLE_NIL;
+  const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+  return get_entity_instance_handle(subscription_id_, participant.get());
 }
 
 void

@@ -174,7 +174,7 @@ TopicImpl::get_id() const
 DDS::InstanceHandle_t
 TopicImpl::get_instance_handle()
 {
-  return participant_->lookup_handle(id_);
+  return get_entity_instance_handle(id_, participant_);
 }
 
 const char*

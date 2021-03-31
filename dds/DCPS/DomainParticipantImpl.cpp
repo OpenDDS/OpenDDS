@@ -1887,7 +1887,7 @@ DomainParticipantImpl::get_unique_id()
 DDS::InstanceHandle_t
 DomainParticipantImpl::get_instance_handle()
 {
-  return lookup_handle(dp_id_);
+  return get_entity_instance_handle(dp_id_, this);
 }
 
 DDS::InstanceHandle_t DomainParticipantImpl::assign_handle(const GUID_t& id)

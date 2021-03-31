@@ -1046,7 +1046,7 @@ ReplayerImpl::need_sequence_repair() const
 DDS::InstanceHandle_t
 ReplayerImpl::get_instance_handle()
 {
-  return this->participant_servant_->lookup_handle(publication_id_);
+  return get_entity_instance_handle(publication_id_, participant_servant_);
 }
 
 DDS::ReturnCode_t

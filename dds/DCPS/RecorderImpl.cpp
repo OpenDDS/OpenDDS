@@ -1017,7 +1017,7 @@ RecorderImpl::enable()
 DDS::InstanceHandle_t
 RecorderImpl::get_instance_handle()
 {
-  return this->participant_servant_->lookup_handle(subscription_id_);
+  return get_entity_instance_handle(subscription_id_, participant_servant_);
 }
 
 void

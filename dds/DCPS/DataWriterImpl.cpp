@@ -165,11 +165,8 @@ DataWriterImpl::init(
 DDS::InstanceHandle_t
 DataWriterImpl::get_instance_handle()
 {
-  RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
-  if (participant) {
-    return participant->lookup_handle(publication_id_);
-  }
-  return DDS::HANDLE_NIL;
+  const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+  return get_entity_instance_handle(publication_id_, participant.get());
 }
 
 DDS::InstanceHandle_t
