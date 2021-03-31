@@ -1894,7 +1894,10 @@ DDS::InstanceHandle_t DomainParticipantImpl::assign_handle(const GUID_t& id)
 {
   if (id == GUID_UNKNOWN) {
     const DDS::InstanceHandle_t ih = participant_handles_.next();
-    ACE_DEBUG((LM_DEBUG, "New unmapped IH %d\n", ih));
+    if (DCPS_debug_level > 5) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DomainParticipantImpl::assign_handle: "
+                 "New unmapped InstanceHandle %d\n", ih));
+    }
     return ih;
   }
 
@@ -1903,7 +1906,11 @@ DDS::InstanceHandle_t DomainParticipantImpl::assign_handle(const GUID_t& id)
   const CountedHandleMap::iterator location = handles_.find(id);
   if (location == handles_.end()) {
     const DDS::InstanceHandle_t handle = participant_handles_.next();
-    ACE_DEBUG((LM_DEBUG, "New mapped IH %d for %C\n", handle, LogGuid(id).c_str()));
+    if (DCPS_debug_level > 5) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DomainParticipantImpl::assign_handle: "
+                 "New mapped InstanceHandle %d for %C\n",
+                 handle, LogGuid(id).c_str()));
+    }
     handles_[id] = std::make_pair(handle, 1);
     repoIds_[handle] = id;
     return handle;
@@ -1911,7 +1918,11 @@ DDS::InstanceHandle_t DomainParticipantImpl::assign_handle(const GUID_t& id)
 
   HandleWithCounter& mapped = location->second;
   ++mapped.second;
-  ACE_DEBUG((LM_DEBUG, "Incremented mapped IH %d to %d\n", mapped.first, mapped.second));
+  if (DCPS_debug_level > 5) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DomainParticipantImpl::assign_handle: "
+               "Incremented refcount for InstanceHandle %d to %d\n",
+               mapped.first, mapped.second));
+  }
   return mapped.first;
 }
 
@@ -1919,7 +1930,6 @@ DDS::InstanceHandle_t DomainParticipantImpl::lookup_handle(const GUID_t& id) con
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, DDS::HANDLE_NIL);
   const CountedHandleMap::const_iterator iter = handles_.find(id);
-  OPENDDS_ASSERT(id == GUID_UNKNOWN || iter != handles_.end());
   return iter == handles_.end() ? DDS::HANDLE_NIL : iter->second.first;
 }
 
@@ -1928,7 +1938,10 @@ void DomainParticipantImpl::return_handle(DDS::InstanceHandle_t handle)
   ACE_GUARD(ACE_Thread_Mutex, guard, handle_protector_);
   const RepoIdMap::iterator r_iter = repoIds_.find(handle);
   if (r_iter == repoIds_.end()) {
-    ACE_DEBUG((LM_DEBUG, "Returned unmapped IH %d\n", handle));
+    if (DCPS_debug_level > 5) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DomainParticipantImpl::return_handle: "
+                 "Returned unmapped InstanceHandle %d\n", handle));
+    }
     return;
   }
 
@@ -1937,7 +1950,11 @@ void DomainParticipantImpl::return_handle(DDS::InstanceHandle_t handle)
     return;
   }
 
-  ACE_DEBUG((LM_DEBUG, "Returned mapped IH %d RC %d\n", handle, h_iter->second.second));
+  if (DCPS_debug_level > 5) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DomainParticipantImpl::return_handle: "
+               "Returned mapped InstanceHandle %d refcount %d\n",
+               handle, h_iter->second.second));
+  }
 
   HandleWithCounter& mapped = h_iter->second;
   if (--mapped.second == 0) {

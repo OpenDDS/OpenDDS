@@ -480,7 +480,6 @@ private:
   TopicDescriptionMap topic_descrs_;
 #endif
 
-
   typedef std::pair<DDS::InstanceHandle_t, unsigned int> HandleWithCounter;
   typedef OPENDDS_MAP_CMP(GUID_t, HandleWithCounter, GUID_tKeyLessThan) CountedHandleMap;
 
