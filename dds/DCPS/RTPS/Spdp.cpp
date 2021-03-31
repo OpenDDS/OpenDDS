@@ -663,6 +663,9 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     iter = p.first;
     iter->second.discovered_at_ = now;
     update_lease_expiration_i(iter, now);
+    if (!from_relay && from != ACE_INET_Addr()) {
+      iter->second.local_address_ = from;
+    }
 
 #ifndef DDS_HAS_MINIMUM_BIT
     if (!from_sedp) {
@@ -680,8 +683,8 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     // Since we've just seen a new participant, let's send out our
     // own announcement, so they don't have to wait.
     if (from != ACE_INET_Addr()) {
-      if (from_relay) {
-        tport_->write_i(guid, SpdpTransport::SEND_TO_RELAY);
+      if (!from_relay && from_relay) {
+        tport_->write_i(guid, iter->second.local_address_, SpdpTransport::SEND_RELAY);
       } else {
         tport_->shorten_local_sender_delay_i();
       }
@@ -710,7 +713,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
         // The remote needs to see our SPDP before attempting authentication.
         ++iter->second.auth_messages_sent_;
-        tport_->write_i(guid, from_relay ? SpdpTransport::SEND_TO_RELAY : SpdpTransport::SEND_TO_LOCAL);
+        tport_->write_i(guid, iter->second.local_address_, from_relay ? SpdpTransport::SEND_RELAY : SpdpTransport::SEND_DIRECT);
 
         attempt_authentication(iter, true);
 
@@ -752,6 +755,9 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     // are otherwise ignored. Non-secure dispose messages are ignored completely.
     if (is_security_enabled() && iter->second.auth_state_ == DCPS::AUTH_STATE_AUTHENTICATED && !from_sedp) {
       update_lease_expiration_i(iter, now);
+      if (!from_relay && from != ACE_INET_Addr()) {
+        iter->second.local_address_ = from;
+      }
 #ifndef DDS_HAS_MINIMUM_BIT
       process_location_updates_i(iter);
 #endif
@@ -828,6 +834,9 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #endif
         iter->second.pdata_ = pdata;
         update_lease_expiration_i(iter, now);
+        if (!from_relay && from != ACE_INET_Addr()) {
+          iter->second.local_address_ = from;
+        }
 
 #ifndef DDS_HAS_MINIMUM_BIT
         /*
@@ -1631,7 +1640,7 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
       // Send the auth req first to reset the remote if necessary.
       if (pit->second.have_auth_req_msg_) {
         // Send the SPDP announcement in case it got lost.
-        tport_->write_i(pit->first, SpdpTransport::SEND_TO_RELAY | SpdpTransport::SEND_TO_LOCAL);
+        tport_->write_i(pit->first, pit->second.local_address_, SpdpTransport::SEND_RELAY | SpdpTransport::SEND_DIRECT);
         ++pit->second.auth_messages_sent_;
         if (sedp_->write_stateless_message(pit->second.auth_req_msg_, reader) != DDS::RETCODE_OK) {
           if (DCPS::security_debug.auth_debug) {
@@ -2161,8 +2170,9 @@ bool Spdp::announce_domain_participant_qos()
 }
 
 #if !defined _MSC_VER || _MSC_VER > 1700
-const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_TO_LOCAL;
-const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_TO_RELAY;
+const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_MULTICAST;
+const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_RELAY;
+ const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_DIRECT;
 #endif
 
 Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
@@ -2433,7 +2443,7 @@ Spdp::SpdpTransport::dispose_unregister()
     RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", hdr_.guidPrefix, true, message);
   }
 
-  send(SEND_TO_LOCAL | SEND_TO_RELAY);
+  send(SEND_MULTICAST | SEND_RELAY);
 }
 
 void
@@ -2590,11 +2600,11 @@ void
 Spdp::send_to_relay()
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  tport_->write_i(SpdpTransport::SEND_TO_RELAY);
+  tport_->write_i(SpdpTransport::SEND_RELAY);
 }
 
 void
-Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
+Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, const ACE_INET_Addr& local_address, WriteFlags flags)
 {
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
@@ -2664,24 +2674,29 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
     RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", hdr_.guidPrefix, true, message);
   }
 
-  send(flags);
+  send(flags, local_address);
 }
 
 void
-Spdp::SpdpTransport::send(WriteFlags flags)
+Spdp::SpdpTransport::send(WriteFlags flags, const ACE_INET_Addr& local_address)
 {
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
-  if ((flags & SEND_TO_LOCAL) && !outer->config_->rtps_relay_only()) {
+  if ((flags & SEND_MULTICAST) && !outer->config_->rtps_relay_only()) {
     typedef OPENDDS_SET(ACE_INET_Addr)::const_iterator iter_t;
     for (iter_t iter = send_addrs_.begin(); iter != send_addrs_.end(); ++iter) {
       send(*iter);
     }
   }
 
+  if (((flags & SEND_DIRECT) || !outer->config_->rtps_relay_only()) &&
+      local_address != ACE_INET_Addr()) {
+    send(local_address);
+  }
+
   const ACE_INET_Addr relay_address = outer->config_->spdp_rtps_relay_address();
-  if (((flags & SEND_TO_RELAY) || outer->config_->rtps_relay_only()) &&
+  if (((flags & SEND_RELAY) || outer->config_->rtps_relay_only()) &&
       relay_address != ACE_INET_Addr()) {
     send(relay_address);
   }
@@ -3271,7 +3286,7 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
         return;
       }
 
-      write_i(SEND_TO_LOCAL);
+      write_i(SEND_MULTICAST);
     } else {
       ACE_TCHAR buff[256];
       multicast_address_.addr_to_string(buff, 256);
@@ -3308,7 +3323,7 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
         return;
       }
 
-      write_i(SEND_TO_LOCAL);
+      write_i(SEND_MULTICAST);
     } else {
       ACE_TCHAR buff[256];
       multicast_ipv6_address_.addr_to_string(buff, 256);
@@ -4007,14 +4022,14 @@ void Spdp::SpdpTransport::send_relay(const DCPS::MonotonicTimePoint& /*now*/)
   if (!outer) return;
 
   if ((outer->config_->use_rtps_relay() || outer->config_->rtps_relay_only()) && outer->config_->spdp_rtps_relay_address() != ACE_INET_Addr()) {
-    write(SEND_TO_RELAY);
+    write(SEND_RELAY);
   }
 }
 #endif
 
 void Spdp::SpdpTransport::send_local(const DCPS::MonotonicTimePoint& /*now*/)
 {
-  write(SEND_TO_LOCAL);
+  write(SEND_MULTICAST);
 }
 
 void Spdp::SpdpTransport::send_directed(const DCPS::MonotonicTimePoint& /*now*/)
@@ -4033,7 +4048,7 @@ void Spdp::SpdpTransport::send_directed(const DCPS::MonotonicTimePoint& /*now*/)
       continue;
     }
 
-    write_i(id, SEND_TO_LOCAL | SEND_TO_RELAY);
+    write_i(id, pos->second.local_address_, SEND_DIRECT | SEND_RELAY);
     directed_guids_.push_back(id);
     directed_sender_->schedule(outer->config_->resend_period() * (1.0 / directed_guids_.size()));
     break;

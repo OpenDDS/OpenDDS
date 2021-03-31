@@ -265,8 +265,9 @@ private:
 #endif
   {
     typedef size_t WriteFlags;
-    static const WriteFlags SEND_TO_LOCAL = (1 << 0);
-    static const WriteFlags SEND_TO_RELAY = (1 << 1);
+    static const WriteFlags SEND_MULTICAST = (1 << 0);
+    static const WriteFlags SEND_RELAY = (1 << 1);
+    static const WriteFlags SEND_DIRECT = (1 << 2);
 
     explicit SpdpTransport(DCPS::RcHandle<Spdp> outer);
     ~SpdpTransport();
@@ -280,8 +281,8 @@ private:
     void shorten_local_sender_delay_i();
     void write(WriteFlags flags);
     void write_i(WriteFlags flags);
-    void write_i(const DCPS::RepoId& guid, WriteFlags flags);
-    void send(WriteFlags flags);
+    void write_i(const DCPS::RepoId& guid, const ACE_INET_Addr& local_address, WriteFlags flags);
+    void send(WriteFlags flags, const ACE_INET_Addr& local_address = ACE_INET_Addr());
     const ACE_SOCK_Dgram& choose_send_socket(const ACE_INET_Addr& addr) const;
     void send(const ACE_INET_Addr& addr);
     void close(const DCPS::ReactorTask_rch& reactor_task);
