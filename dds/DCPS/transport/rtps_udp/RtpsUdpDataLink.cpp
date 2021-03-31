@@ -2889,6 +2889,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   SequenceNumber previous_acked_sn = reader->acked_sn();
   const SequenceNumber ack = to_opendds_seqnum(acknack.readerSNState.bitmapBase);
   const bool reset = acknack.count.value == 0 && ack <= reader->cur_cumulative_ack_;
+  bool dont_schedule_nack_response = false;
 
   if (!reset) {
     if (!compare_and_update_counts(acknack.count.value, reader->acknack_recvd_count_) &&
@@ -2904,9 +2905,9 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     if (reader->reflects_heartbeat_count()) {
       if (acknack.count.value < reader->required_acknack_count_) {
         if (transport_debug.log_dropped_messages) {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::RtpsWriter::process_acknack - %C -> %C stale/duplicate message (reflect)\n", LogGuid(id_).c_str(), LogGuid(reader->id_).c_str()));
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::RtpsWriter::process_acknack - %C -> %C stale message (reflect %d < %d)\n", LogGuid(id_).c_str(), LogGuid(reader->id_).c_str(), acknack.count.value, reader->required_acknack_count_));
         }
-        return;
+        dont_schedule_nack_response = true;
       } else {
         reader->required_acknack_count_ = heartbeat_count_;
       }
@@ -3074,7 +3075,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   }
 #endif
 
-  if (schedule_nack_response) {
+  if (!dont_schedule_nack_response && schedule_nack_response) {
     nack_response_.schedule(link->config().nak_response_delay_);
   }
 
