@@ -372,15 +372,15 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
   }
   // We no longer hold the publication_handle_lock_.
 
+
+  RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
+
+  if (!participant)
+    return;
+
+  const DDS::InstanceHandle_t handle = participant->assign_handle(remote_id);
+
   if (!is_bit_) {
-
-    RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
-
-    if (!participant)
-      return;
-
-    const DDS::InstanceHandle_t handle = participant->assign_handle(remote_id);
-
     // We acquire the publication_handle_lock_ for the remainder of our
     // processing.
     {
