@@ -1838,7 +1838,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --compiler=g++ --no-debug --features=uses_wchar=1 --std=c++03 --tests --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=gcc --no-debug --features=uses_wchar=1 --std=c++03 --tests --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -1910,7 +1910,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --compiler=g++ --no-debug --features=uses_wchar=1 --std=c++03 --tests --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=gcc --no-debug --features=uses_wchar=1 --std=c++03 --tests --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -2104,7 +2104,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --compiler=g++ --no-inline --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=gcc --no-inline --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -2176,7 +2176,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --compiler=g++ --no-inline --no-rapidjson --tests --java --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=gcc --no-inline --no-rapidjson --tests --java --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -2367,7 +2367,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --compiler=g++ --no-inline --features=uses_wchar=1 --tests --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=gcc --no-inline --features=uses_wchar=1 --tests --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -2437,7 +2437,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --compiler=g++ --no-inline --features=uses_wchar=1 --tests --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=gcc --no-inline --features=uses_wchar=1 --tests --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
