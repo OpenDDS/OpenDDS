@@ -1,7 +1,9 @@
 project(OpenDDS_C++11_Messenger CXX)
 cmake_minimum_required(VERSION 3.8.2)
 
-find_package(OpenDDS REQUIRED)
+if(NOT OpenDDS_FOUND)
+  find_package(OpenDDS REQUIRED)
+endif()
 
 set(CMAKE_CXX_COMPILER ${OPENDDS_COMPILER})
 set(target_prefix "opendds_cmake_cpp11_messenger_")

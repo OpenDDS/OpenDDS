@@ -4075,14 +4075,6 @@ bool Sedp::TypeLookupReplyWriter::send_type_lookup_reply(
 bool Sedp::TypeLookupRequestReader::process_type_lookup_request(
   Serializer& ser, XTypes::TypeLookup_Reply& type_lookup_reply)
 {
-  if (DCPS::DCPS_debug_level >= 8) {
-    const DDS::SampleIdentity id = type_lookup_reply.header.related_request_id;
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyWriter::process_type_lookup_request: "
-      "from %C seq: %q\n",
-      DCPS::LogGuid(id.writer_guid).c_str(),
-      to_opendds_seqnum(id.sequence_number).getValue()));
-  }
-
   XTypes::TypeLookup_Request type_lookup_request;
   if (!(ser >> type_lookup_request)) {
     if (DCPS::DCPS_debug_level) {
@@ -4090,6 +4082,14 @@ bool Sedp::TypeLookupRequestReader::process_type_lookup_request(
                  ACE_TEXT("failed to deserialize type lookup request\n")));
     }
     return false;
+  }
+
+  if (DCPS::DCPS_debug_level >= 8) {
+    const DDS::SampleIdentity& request_id = type_lookup_request.header.request_id;
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyWriter::process_type_lookup_request: "
+      "from %C seq: %q\n",
+      DCPS::LogGuid(request_id.writer_guid).c_str(),
+      to_opendds_seqnum(request_id.sequence_number).getValue()));
   }
 
   if (OPENDDS_STRING(type_lookup_request.header.instance_name) != instance_name_) {
@@ -4186,13 +4186,16 @@ bool Sedp::TypeLookupReplyReader::process_type_lookup_reply(
     return false;
   }
 
-  const DCPS::SequenceNumber seq_num =
-    to_opendds_seqnum(type_lookup_reply.header.related_request_id.sequence_number);
-  if (DCPS::DCPS_debug_level > 8) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyReader::process_type_lookup_reply: %q\n", seq_num.getValue()));
+  const DDS::SampleIdentity& request_id = type_lookup_reply.header.related_request_id;
+  const DCPS::SequenceNumber seq_num = to_opendds_seqnum(request_id.sequence_number);
+  if (DCPS::DCPS_debug_level >= 8) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyReader::process_type_lookup_reply: "
+      "from %C seq %q\n",
+      DCPS::LogGuid(request_id.writer_guid).c_str(),
+      seq_num.getValue()));
   }
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, sedp_.lock_, DDS::RETCODE_ERROR);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, sedp_.lock_, false);
   if (DCPS::transport_debug.log_progress) {
     log_progress("receive type lookup reply", get_repo_id(), sample.header_.publication_id_, sedp_.spdp_.get_participant_discovered_at(sample.header_.publication_id_));
   }
@@ -4200,7 +4203,9 @@ bool Sedp::TypeLookupReplyReader::process_type_lookup_reply(
   if (seq_num_it == sedp_.orig_seq_numbers_.end()) {
     ACE_DEBUG((LM_WARNING,
                ACE_TEXT("(%P|%t) WARNING: Sedp::TypeLookupReplyReader::process_type_lookup_reply - ")
-               ACE_TEXT("could not find request corresponding to the reply\n")));
+               ACE_TEXT("could not find request corresponding to the reply from %C seq %q\n"),
+               DCPS::LogGuid(request_id.writer_guid).c_str(),
+               seq_num.getValue()));
     return false;
   }
 
