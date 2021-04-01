@@ -357,20 +357,11 @@ Sedp::init(const RepoId& guid,
   // Use a static cast to avoid dependency on the RtpsUdp library
   DCPS::RtpsUdpInst_rch rtps_inst =
       DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  // The SEDP endpoints may need to wait at least one resend period before
-  // the handshake completes (allows time for our SPDP multicast to be
-  // received by the other side).  Arbitrary constant of 5 to account for
-  // possible network lossiness.
-  static const double HANDSHAKE_MULTIPLIER = 5;
-  rtps_inst->handshake_timeout_ = disco.resend_period() * HANDSHAKE_MULTIPLIER;
   rtps_inst->max_message_size_ = disco.config()->sedp_max_message_size();
   rtps_inst->heartbeat_period_ = disco.config()->sedp_heartbeat_period();
-  rtps_inst->heartbeat_period_minimum_ = disco.config()->sedp_heartbeat_period_minimum();
-  rtps_inst->heartbeat_period_maximum_ = disco.config()->sedp_heartbeat_period_maximum();
-  rtps_inst->heartbeat_backoff_factor_ = disco.config()->sedp_heartbeat_backoff_factor();
-  rtps_inst->heartbeat_safety_factor_ = disco.config()->sedp_heartbeat_safety_factor();
   rtps_inst->nak_response_delay_ = disco.config()->sedp_nak_response_delay();
-  rtps_inst->responsive_mode_ = disco.config()->responsive_mode();
+  rtps_inst->responsive_mode_ = disco.config()->sedp_responsive_mode();
+  rtps_inst->send_delay_ = disco.config()->sedp_send_delay();
 
   if (disco.sedp_multicast()) {
     // Bind to a specific multicast group
@@ -4075,14 +4066,6 @@ bool Sedp::TypeLookupReplyWriter::send_type_lookup_reply(
 bool Sedp::TypeLookupRequestReader::process_type_lookup_request(
   Serializer& ser, XTypes::TypeLookup_Reply& type_lookup_reply)
 {
-  if (DCPS::DCPS_debug_level >= 8) {
-    const DDS::SampleIdentity id = type_lookup_reply.header.related_request_id;
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyWriter::process_type_lookup_request: "
-      "from %C seq: %q\n",
-      DCPS::LogGuid(id.writer_guid).c_str(),
-      to_opendds_seqnum(id.sequence_number).getValue()));
-  }
-
   XTypes::TypeLookup_Request type_lookup_request;
   if (!(ser >> type_lookup_request)) {
     if (DCPS::DCPS_debug_level) {
@@ -4090,6 +4073,14 @@ bool Sedp::TypeLookupRequestReader::process_type_lookup_request(
                  ACE_TEXT("failed to deserialize type lookup request\n")));
     }
     return false;
+  }
+
+  if (DCPS::DCPS_debug_level >= 8) {
+    const DDS::SampleIdentity& request_id = type_lookup_request.header.request_id;
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyWriter::process_type_lookup_request: "
+      "from %C seq: %q\n",
+      DCPS::LogGuid(request_id.writer_guid).c_str(),
+      to_opendds_seqnum(request_id.sequence_number).getValue()));
   }
 
   if (OPENDDS_STRING(type_lookup_request.header.instance_name) != instance_name_) {
@@ -4186,13 +4177,16 @@ bool Sedp::TypeLookupReplyReader::process_type_lookup_reply(
     return false;
   }
 
-  const DCPS::SequenceNumber seq_num =
-    to_opendds_seqnum(type_lookup_reply.header.related_request_id.sequence_number);
-  if (DCPS::DCPS_debug_level > 8) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyReader::process_type_lookup_reply: %q\n", seq_num.getValue()));
+  const DDS::SampleIdentity& request_id = type_lookup_reply.header.related_request_id;
+  const DCPS::SequenceNumber seq_num = to_opendds_seqnum(request_id.sequence_number);
+  if (DCPS::DCPS_debug_level >= 8) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyReader::process_type_lookup_reply: "
+      "from %C seq %q\n",
+      DCPS::LogGuid(request_id.writer_guid).c_str(),
+      seq_num.getValue()));
   }
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, sedp_.lock_, DDS::RETCODE_ERROR);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, sedp_.lock_, false);
   if (DCPS::transport_debug.log_progress) {
     log_progress("receive type lookup reply", get_repo_id(), sample.header_.publication_id_, sedp_.spdp_.get_participant_discovered_at(sample.header_.publication_id_));
   }
@@ -4200,7 +4194,9 @@ bool Sedp::TypeLookupReplyReader::process_type_lookup_reply(
   if (seq_num_it == sedp_.orig_seq_numbers_.end()) {
     ACE_DEBUG((LM_WARNING,
                ACE_TEXT("(%P|%t) WARNING: Sedp::TypeLookupReplyReader::process_type_lookup_reply - ")
-               ACE_TEXT("could not find request corresponding to the reply\n")));
+               ACE_TEXT("could not find request corresponding to the reply from %C seq %q\n"),
+               DCPS::LogGuid(request_id.writer_guid).c_str(),
+               seq_num.getValue()));
     return false;
   }
 

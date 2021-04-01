@@ -2036,6 +2036,8 @@ jobs:
 
     runs-on: ubuntu-18.04
 
+    needs: wait_cancel_previous
+
     steps:
     - name: install gcc
       run: |
@@ -5061,12 +5063,7 @@ jobs:
       id: cache-artifact
       uses: actions/cache@v2.1.4
       with:
-        path: |
-          winflexbison/bin/Debug
-          wsbuild
-          wireshark-win64-libs*
-          vcpkg-qt/installed
-          ${{ github.job }}.tar.xz
+        path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_${{ env.WIRESHARK_COMMIT }}
     - name: install vcpkg packages
       if: steps.cache-artifact.outputs.cache-hit != 'true'

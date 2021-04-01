@@ -905,16 +905,6 @@ RtpsUdpReceiveStrategy::check_header(const RtpsSampleHeader& header)
   return header.valid();
 }
 
-void
-RtpsUdpReceiveStrategy::begin_transport_header_processing() {
-  link_->enable_response_queue();
-}
-
-void
-RtpsUdpReceiveStrategy::end_transport_header_processing() {
-  link_->disable_response_queue();
-}
-
 const ReceivedDataSample*
 RtpsUdpReceiveStrategy::withhold_data_from(const RepoId& sub_id)
 {
