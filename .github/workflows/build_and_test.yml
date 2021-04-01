@@ -994,8 +994,6 @@ jobs:
     - name: install clang++
       run: |
         sudo apt-get install -y clang-5.0
-        sudo update-alternatives \
-          --install /usr/bin/clang++ clang++ /usr/bin/clang++-5.0 100
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
       with:
@@ -1032,7 +1030,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --compiler=clang++ --no-inline --features=uses_wchar=1 --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=/usr/bin/clang++-5.0 --no-inline --features=uses_wchar=1 --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -1101,7 +1099,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --compiler=clang++ --no-inline --features=uses_wchar=1 --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --rapidjson --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=/usr/bin/clang++-5.0 --no-inline --features=uses_wchar=1 --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --rapidjson --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -1121,7 +1119,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/cmake_integration
-        perl run_ci_tests.pl --compiler=clang++
+        perl run_ci_tests.pl --compiler=/usr/bin/clang++-5.0
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -1251,8 +1249,6 @@ jobs:
     - name: install clang++
       run: |
         sudo apt-get install -y clang-10
-        sudo update-alternatives \
-          --install /usr/bin/clang++ clang++ /usr/bin/clang++-10 100
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
       with:
@@ -1289,7 +1285,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --compiler=clang++ --std=c++11 --tests --security --no-rapidjson --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=/usr/bin/clang++-10 --std=c++11 --tests --security --no-rapidjson --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -1325,8 +1321,6 @@ jobs:
     - name: install clang++
       run: |
         sudo apt-get install -y clang-10
-        sudo update-alternatives \
-          --install /usr/bin/clang++ clang++ /usr/bin/clang++-10 100
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -1358,7 +1352,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --compiler=clang++ --std=c++11 --tests --security --no-rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=/usr/bin/clang++-10 --std=c++11 --tests --security --no-rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -1378,7 +1372,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/cmake_integration
-        perl run_ci_tests.pl --compiler=clang++
+        perl run_ci_tests.pl --compiler=/usr/bin/clang++-10
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -1508,7 +1502,6 @@ jobs:
     - name: install gcc and g++
       run: |
         sudo apt-get install gcc-6 g++-6
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 100 --slave /usr/bin/g++ g++ /usr/bin/g++-6
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
       with:
@@ -1545,7 +1538,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --no-debug --features=uses_wchar=1 --std=c++03 --tests --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=/usr/bin/g++-6 --no-debug --features=uses_wchar=1 --std=c++03 --tests --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -1613,7 +1606,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --no-debug --features=uses_wchar=1 --std=c++03 --tests --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=/usr/bin/g++-6 --no-debug --features=uses_wchar=1 --std=c++03 --tests --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -1633,7 +1626,21 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/cmake_integration
-        perl run_ci_tests.pl --skip-cxx11
+        perl run_ci_tests.pl --skip-cxx11 --compiler=/usr/bin/g++-6
+    - name: create OpenDDS tar.xz artifact
+      shell: bash
+      run: |
+        cd OpenDDS
+        rm -rf ACE_TAO
+        find . -iname "*\.o" | xargs rm
+        tar cvf ../${{ github.job }}.tar setenv.sh
+        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
+        xz -3 ../${{ github.job }}.tar
+    - name: upload OpenDDS artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_artifact
+        path: ${{ github.job }}.tar.xz
 
   # test_u18_gcc6_d0w1_cpp03_2:
 
@@ -1753,7 +1760,6 @@ jobs:
     - name: install gcc and g++
       run: |
         sudo apt-get install gcc-8 g++-8
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 100 --slave /usr/bin/g++ g++ /usr/bin/g++-8
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
       with:
@@ -1790,7 +1796,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --no-inline --no-rapidjson --tests --java --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=/usr/bin/g++-8 --no-inline --no-rapidjson --tests --java --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -1826,7 +1832,6 @@ jobs:
     - name: install gcc and g++
       run: |
         sudo apt-get install gcc-8 g++-8
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 100 --slave /usr/bin/g++ g++ /usr/bin/g++-8
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -1858,7 +1863,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --no-inline --no-rapidjson --tests --java --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=/usr/bin/g++-8 --no-inline --no-rapidjson --tests --java --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -1878,7 +1883,21 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/cmake_integration
-        perl run_ci_tests.pl
+        perl run_ci_tests.pl --compiler=/usr/bin/g++-8
+    - name: create OpenDDS tar.xz artifact
+      shell: bash
+      run: |
+        cd OpenDDS
+        rm -rf ACE_TAO
+        find . -iname "*\.o" | xargs rm
+        tar cvf ../${{ github.job }}.tar setenv.sh
+        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
+        xz -3 ../${{ github.job }}.tar
+    - name: upload OpenDDS artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_artifact
+        path: ${{ github.job }}.tar.xz
 
   # test_u18_gcc8_i0_js0_j_2:
 
@@ -1997,7 +2016,6 @@ jobs:
     - name: install gcc and g++
       run: |
         sudo apt-get install gcc-10 g++-10
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
       with:
@@ -2031,7 +2049,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --no-inline --features=uses_wchar=1 --tests --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=/usr/bin/g++-10 --no-inline --features=uses_wchar=1 --tests --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -2100,7 +2118,7 @@ jobs:
         cd OpenDDS
         gcc --version
         g++ --version
-        ./configure --no-inline --features=uses_wchar=1 --tests --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=/usr/bin/g++-10 --no-inline --features=uses_wchar=1 --tests --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -2120,7 +2138,21 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/cmake_integration
-        perl run_ci_tests.pl
+        perl run_ci_tests.pl --compiler=/usr/bin/g++-10
+    - name: create OpenDDS tar.xz artifact
+      shell: bash
+      run: |
+        cd OpenDDS
+        rm -rf ACE_TAO
+        find . -iname "*\.o" | xargs rm
+        tar cvf ../${{ github.job }}.tar setenv.sh
+        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
+        xz -3 ../${{ github.job }}.tar
+    - name: upload OpenDDS artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_artifact
+        path: ${{ github.job }}.tar.xz
 
   # test_u18_gcc10_i0w1_xer0_2:
 
@@ -2238,7 +2270,6 @@ jobs:
       run: |
         echo $PATH
         sudo apt-get install gcc-10 g++-10
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
       with:
@@ -2262,7 +2293,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --safety-profile=base --tests --no-rapidjson --no-content-subscription --no-object-model-profile --no-persistence-profile --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=/usr/bin/g++-10 --safety-profile=base --tests --no-rapidjson --no-content-subscription --no-object-model-profile --no-persistence-profile --mpc=$GITHUB_WORKSPACE/MPC
     - name: build everything
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
