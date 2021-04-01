@@ -66,10 +66,10 @@ for my $dir (@dirs) {
     "-D", "CMAKE_PREFIX_PATH=$ENV{'DDS_ROOT'}",
     "-D", "CMAKE_VERBOSE_MAKEFILE:BOOL=ON",
   );
-  
   if($compiler ne "") {
     push @generate_cmd, "-DCMAKE_CXX_COMPILER=$compiler";
   }
+
   my @build_cmd = ("cmake", "--build", ".");
 
   if ($generator ne "") {
