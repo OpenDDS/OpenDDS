@@ -12,7 +12,7 @@ java/tests/hello/run_test.pl
 java/idl2jni/tests/union/run_test.pl
 java/tests/builtintopics/run_test.pl: !NO_BUILT_IN_TOPICS
 java/tests/complex_idl/run_test.pl
-java/tests/multirepo/run_test.pl: !GH_ACTIONS
+java/tests/multirepo/run_test.pl:
 java/tests/transport_config/run_test.pl
 
 #
@@ -27,7 +27,7 @@ java/tests/messenger/publisher/run_test.pl rtps_disc: !NO_MCAST RTPS !NO_BUILT_I
 java/tests/messenger/publisher/run_test.pl rtps_disc_tcp: !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
 
 java/tests/messenger/subscriber/run_test.pl tcp
-java/tests/messenger/subscriber/run_test.pl udp: !GH_ACTIONS
+java/tests/messenger/subscriber/run_test.pl udp:
 java/tests/messenger/subscriber/run_test.pl multicast: !NO_MCAST
 java/tests/messenger/subscriber/run_test.pl rtps: !NO_MCAST RTPS
 java/tests/messenger/subscriber/run_test.pl rtps_uni: RTPS
