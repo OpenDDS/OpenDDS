@@ -2541,10 +2541,11 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
         wdata_copy = pub.writer_data_;
       }
 
-      DDS::InstanceHandle_t instance_handle = DDS::HANDLE_NIL;
-#ifndef DDS_HAS_MINIMUM_BIT
       // Iter no longer valid once lock released
       iter = discovered_publications_.end();
+
+      DDS::InstanceHandle_t instance_handle = DDS::HANDLE_NIL;
+#ifndef DDS_HAS_MINIMUM_BIT
       {
         // Release lock for call into pub_bit
         DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
@@ -2556,10 +2557,10 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
         }
       }
       if (spdp_.shutting_down()) { return; }
-      iter = discovered_publications_.find(guid);
 #endif /* DDS_HAS_MINIMUM_BIT */
 
       // Publication may have been removed while lock released
+      iter = discovered_publications_.find(guid);
       if (iter != discovered_publications_.end()) {
         iter->second.bit_ih_ = instance_handle;
         OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
@@ -2587,24 +2588,21 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
                                     DDS::NOT_NEW_VIEW_STATE);
         }
         if (spdp_.shutting_down()) { return; }
-        iter = discovered_publications_.find(guid);
 #endif /* DDS_HAS_MINIMUM_BIT */
 
         // Match/unmatch local subscription(s)
-        if (iter != discovered_publications_.end()) {
-          topic_name = iter->second.get_topic_name();
-          OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
-            topics_.find(topic_name);
-          if (top_it != topics_.end()) {
-            if (DCPS::DCPS_debug_level > 3) {
-              ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(dwd) - ")
-                         ACE_TEXT("calling match_endpoints update\n")));
-            }
-            match_endpoints(guid, top_it->second);
-            iter = discovered_publications_.find(guid);
-            if (iter == discovered_publications_.end()) {
-              return;
-            }
+        topic_name = iter->second.get_topic_name();
+        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
+          topics_.find(topic_name);
+        if (top_it != topics_.end()) {
+          if (DCPS::DCPS_debug_level > 3) {
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(dwd) - ")
+                       ACE_TEXT("calling match_endpoints update\n")));
+          }
+          match_endpoints(guid, top_it->second);
+          iter = discovered_publications_.find(guid);
+          if (iter == discovered_publications_.end()) {
+            return;
           }
         }
       }
@@ -2872,10 +2870,11 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
         rdata_copy = sub.reader_data_;
       }
 
-      DDS::InstanceHandle_t instance_handle = DDS::HANDLE_NIL;
-#ifndef DDS_HAS_MINIMUM_BIT
       // Iter no longer valid once lock released
       iter = discovered_subscriptions_.end();
+
+      DDS::InstanceHandle_t instance_handle = DDS::HANDLE_NIL;
+#ifndef DDS_HAS_MINIMUM_BIT
       {
         // Release lock for call into sub_bit
         DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
@@ -2887,10 +2886,10 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
         }
       }
       if (spdp_.shutting_down()) { return; }
-      iter = discovered_subscriptions_.find(guid);
 #endif /* DDS_HAS_MINIMUM_BIT */
 
       // Subscription may have been removed while lock released
+      iter = discovered_subscriptions_.find(guid);
       if (iter != discovered_subscriptions_.end()) {
         iter->second.bit_ih_ = instance_handle;
         OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
@@ -2917,24 +2916,21 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
                                     DDS::NOT_NEW_VIEW_STATE);
         }
         if (spdp_.shutting_down()) { return; }
-        iter = discovered_subscriptions_.find(guid);
 #endif /* DDS_HAS_MINIMUM_BIT */
 
         // Match/unmatch local publication(s)
-        if (iter != discovered_subscriptions_.end()) {
-          topic_name = iter->second.get_topic_name();
-          OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
-              topics_.find(topic_name);
-          if (top_it != topics_.end()) {
-            if (DCPS::DCPS_debug_level > 3) {
-              ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(drd) - ")
-                                   ACE_TEXT("calling match_endpoints update\n")));
-            }
-            match_endpoints(guid, top_it->second);
-            iter = discovered_subscriptions_.find(guid);
-            if (iter == discovered_subscriptions_.end()) {
-              return;
-            }
+        topic_name = iter->second.get_topic_name();
+        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
+            topics_.find(topic_name);
+        if (top_it != topics_.end()) {
+          if (DCPS::DCPS_debug_level > 3) {
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(drd) - ")
+                                 ACE_TEXT("calling match_endpoints update\n")));
+          }
+          match_endpoints(guid, top_it->second);
+          iter = discovered_subscriptions_.find(guid);
+          if (iter == discovered_subscriptions_.end()) {
+            return;
           }
         }
       }
