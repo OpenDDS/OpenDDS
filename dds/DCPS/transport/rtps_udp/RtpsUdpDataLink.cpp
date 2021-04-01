@@ -1920,7 +1920,9 @@ RtpsUdpDataLink::RtpsWriter::add_reader(const ReaderInfo_rch& reader)
   ReaderInfoMap::const_iterator iter = remote_readers_.find(reader->id_);
   if (iter == remote_readers_.end()) {
 #ifdef OPENDDS_SECURITY
-    reader->max_pvs_sn_ = max_sn_;
+    if (is_pvs_writer_) {
+      reader->max_pvs_sn_ = max_sn_;
+    }
 #endif
     remote_readers_.insert(ReaderInfoMap::value_type(reader->id_, reader));
     preassociation_readers_.insert(reader);
@@ -2961,11 +2963,16 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
       reader->cur_cumulative_ack_ = ack;
     } else {
       // Count increased but ack decreased.  Reset.
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING RtpsUdpDataLink::RtpsWriter::process_acknack: "
+                 "%C -> %C reset detected reset %d count %d ack %q < %q\n",
+                 LogGuid(id_).c_str(), LogGuid(reader->id_).c_str(),
+                 reset, acknack.count.value, ack.getValue(), reader->cur_cumulative_ack_.getValue()));
       const SequenceNumber max_sn = expected_max_sn(reader);
       snris_erase(previous_acked_sn == max_sn ? leading_readers_ : lagging_readers_, previous_acked_sn, reader);
       reader->cur_cumulative_ack_ = ack;
-      snris_insert(lagging_readers_, reader);
-      previous_acked_sn = reader->acked_sn();
+      const SequenceNumber acked_sn = reader->acked_sn();
+      snris_insert(acked_sn == max_sn ? leading_readers_ : lagging_readers_, reader);
+      previous_acked_sn = acked_sn;
       check_leader_lagger();
       heartbeat_.schedule(link->config().heartbeat_period_);
 
@@ -2973,7 +2980,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
         // TODO: Consider how this works if the durable data has not been acked.
         // Or better, yet, just re-enqueue data as done above.
         if (Transport_debug_level > 5) {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received: Enqueuing ReplayDurableData\n"));
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::RtpsWriter::process_acknack: enqueuing ReplayDurableData\n"));
         }
         link->job_queue_->enqueue(make_rch<ReplayDurableData>(link_, id_, src));
         reader->durable_timestamp_ = MonotonicTimePoint::zero_value;
@@ -2983,14 +2990,14 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     if (!reader->durable_data_.empty()) {
       if (Transport_debug_level > 5) {
         const GuidConverter local_conv(id_), remote_conv(src);
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::RtpsWriter::process_acknack: "
                    "local %C has durable for remote %C\n",
                    OPENDDS_STRING(local_conv).c_str(),
                    OPENDDS_STRING(remote_conv).c_str()));
       }
       const SequenceNumber& dd_last = reader->durable_data_.rbegin()->first;
       if (Transport_debug_level > 5) {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::RtpsWriter::process_acknack: "
                    "check base %q against last durable %q\n",
                    ack.getValue(), dd_last.getValue()));
       }
@@ -3000,7 +3007,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
         }
         // Reader acknowledges durable data, we no longer need to store it
         if (Transport_debug_level > 5) {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::RtpsWriter::process_acknack: "
                      "durable data acked\n"));
         }
         reader->durable_data_.swap(pendingCallbacks);
@@ -3013,7 +3020,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
       }
     }
   } else {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpDataLink::RtpsWriter::process_acknack_i - %C -> %C invalid acknack\n", LogGuid(id_).c_str(), LogGuid(reader->id_).c_str()));
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpDataLink::RtpsWriter::process_acknack: - %C -> %C invalid acknack\n", LogGuid(id_).c_str(), LogGuid(reader->id_).c_str()));
   }
 
   // Process the nack.
@@ -3471,6 +3478,11 @@ RtpsUdpDataLink::RtpsWriter::make_leader_lagger(const RepoId& reader_id,
       const ReaderInfo_rch& reader = iter->second;
       previous_max_sn = reader->max_pvs_sn_;
       reader->max_pvs_sn_ = max_sn_;
+      if (preassociation_readers_.count(reader)) {
+        // Will be inserted once association is complete.
+        return;
+      }
+
       const SequenceNumber acked_sn = reader->acked_sn();
       if (acked_sn == previous_max_sn && previous_max_sn != max_sn_) {
         snris_erase(leading_readers_, acked_sn, reader);
@@ -3819,12 +3831,21 @@ RtpsUdpDataLink::RtpsWriter::gather_directed_heartbeat_i(const SingleSendBuffer:
                                                          const ReaderInfo_rch& reader)
 {
   const SequenceNumber first_sn = reader->durable_ ? 1 : non_durable_first_sn(proxy);
-  const SequenceNumber last_sn = expected_max_sn(reader);
+  SequenceNumber last_sn = expected_max_sn(reader);
+#ifdef OPENDDS_SECURITY
+  if (is_pvs_writer_ && last_sn < first_sn.previous()) {
+    // This can happen if the reader get's reset.
+    // Adjust the heartbeat to be valid.
+    // Make lagger_leader will eventually correct the problem.
+    last_sn = first_sn.previous();
+  }
+#endif
   meta_submessage.dst_guid_ = reader->id_;
   meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
   meta_submessage.sm_.heartbeat_sm().readerId = reader->id_.entityId;
   meta_submessage.sm_.heartbeat_sm().firstSN = to_rtps_seqnum(first_sn);
   meta_submessage.sm_.heartbeat_sm().lastSN = to_rtps_seqnum(last_sn);
+  OPENDDS_ASSERT(!(first_sn < 1 || last_sn < 0 || last_sn < first_sn.previous()));
   meta_submessages.push_back(meta_submessage);
   meta_submessage.reset_destination();
 }
