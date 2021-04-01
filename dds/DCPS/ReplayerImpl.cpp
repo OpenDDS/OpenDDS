@@ -503,8 +503,7 @@ ReplayerImpl::association_complete_i(const RepoId& remote_id)
 
   if (!is_bit_) {
 
-    DDS::InstanceHandle_t handle =
-      this->participant_servant_->id_to_handle(remote_id);
+    const DDS::InstanceHandle_t handle = participant_servant_->assign_handle(remote_id);
 
     {
       // protect publication_match_status_ and status changed flags.
@@ -678,6 +677,10 @@ ReplayerImpl::remove_associations(const ReaderIdSeq & readers,
   // subscription lost.
   if (notify_lost && handles.length() > 0) {
     this->notify_publication_lost(handles);
+  }
+
+  for (unsigned int i = 0; i < handles.length(); ++i) {
+    participant_servant_->return_handle(handles[i]);
   }
 }
 
@@ -1024,7 +1027,7 @@ ReplayerImpl::lookup_instance_handles(const ReaderIdSeq&       ids,
   hdls.length(num_rds);
 
   for (CORBA::ULong i = 0; i < num_rds; ++i) {
-    hdls[i] = this->participant_servant_->id_to_handle(ids[i]);
+    hdls[i] = participant_servant_->lookup_handle(ids[i]);
   }
 }
 
@@ -1043,7 +1046,7 @@ ReplayerImpl::need_sequence_repair() const
 DDS::InstanceHandle_t
 ReplayerImpl::get_instance_handle()
 {
-  return this->participant_servant_->id_to_handle(publication_id_);
+  return get_entity_instance_handle(publication_id_, participant_servant_);
 }
 
 DDS::ReturnCode_t

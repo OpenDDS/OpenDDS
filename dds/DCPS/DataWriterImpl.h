@@ -573,6 +573,8 @@ private:
 
   void association_complete_i(const RepoId& remote_id);
 
+  void return_handle(DDS::InstanceHandle_t handle);
+
   friend class ::DDS_TEST; // allows tests to get at privates
 
 

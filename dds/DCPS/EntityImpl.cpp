@@ -5,7 +5,10 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
 #include "EntityImpl.h"
+
+#include "DomainParticipantImpl.h"
 #include "StatusConditionImpl.h"
 #include "transport/framework/TransportConfig.h"
 
@@ -21,11 +24,16 @@ EntityImpl::EntityImpl()
   , status_condition_(new StatusConditionImpl(this))
   , observer_()
   , events_(Observer::e_NONE)
+  , instance_handle_(DDS::HANDLE_NIL)
 {
 }
 
 EntityImpl::~EntityImpl()
 {
+  const RcHandle<DomainParticipantImpl> participant = participant_for_instance_handle_.lock();
+  if (participant) {
+    participant->return_handle(instance_handle_);
+  }
 }
 
 DDS::ReturnCode_t
@@ -128,6 +136,23 @@ void EntityImpl::set_observer(Observer_rch observer, Observer::Event e)
 {
   observer_ = observer;
   events_ = e;
+}
+
+DDS::InstanceHandle_t EntityImpl::get_entity_instance_handle(const GUID_t& id,
+                                                             DomainParticipantImpl* participant)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DDS::HANDLE_NIL);
+
+  if (instance_handle_ != DDS::HANDLE_NIL) {
+    return instance_handle_;
+  }
+
+  if (!participant) {
+    return DDS::HANDLE_NIL;
+  }
+
+  participant_for_instance_handle_ = *participant;
+  return instance_handle_ = participant->assign_handle(id);
 }
 
 } // namespace DCPS
