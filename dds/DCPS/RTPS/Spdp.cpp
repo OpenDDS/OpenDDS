@@ -2181,7 +2181,7 @@ bool Spdp::announce_domain_participant_qos()
 #if !defined _MSC_VER || _MSC_VER > 1700
 const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_MULTICAST;
 const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_RELAY;
- const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_DIRECT;
+const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_DIRECT;
 #endif
 
 Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
@@ -2699,7 +2699,7 @@ Spdp::SpdpTransport::send(WriteFlags flags, const ACE_INET_Addr& local_address)
     }
   }
 
-  if (((flags & SEND_DIRECT) || !outer->config_->rtps_relay_only()) &&
+  if (((flags & SEND_DIRECT) && !outer->config_->rtps_relay_only()) &&
       local_address != ACE_INET_Addr()) {
     send(local_address);
   }

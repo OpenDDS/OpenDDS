@@ -2294,6 +2294,7 @@ namespace OpenDDS {
 
         MonotonicTime_t discovered_at_;
         ACE_INET_Addr local_address_;
+        MonotonicTimePoint discovered_at_;
         MonotonicTimePoint lease_expiration_;
         DDS::InstanceHandle_t bit_ih_;
         SequenceNumber last_seq_;
