@@ -2292,6 +2292,7 @@ namespace OpenDDS {
         ParticipantLocationBuiltinTopicData location_data_;
         DDS::InstanceHandle_t location_ih_;
 
+        ACE_INET_Addr local_address_;
         MonotonicTime_t discovered_at_;
         MonotonicTimePoint lease_expiration_;
         DDS::InstanceHandle_t bit_ih_;
