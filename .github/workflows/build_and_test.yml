@@ -4587,7 +4587,7 @@ jobs:
 
     runs-on: windows-2019
 
-    needs: [wait_cancel_previous, ACE_TAO_w19_p1_cpp03_stat_FM-08_3]
+    needs: ACE_TAO_w19_p1_cpp03_stat_FM-08_3
 
     steps:
     - name: install openssl-windows & xerces-c
@@ -4859,7 +4859,7 @@ jobs:
 
     runs-on: windows-2019
 
-    needs: [wait_cancel_previous, ACE_TAO_w19-release_o1p1_sec_2]
+    needs: ACE_TAO_w19-release_o1p1_sec_2
 
     steps:
     - name: install openssl-windows & xerces-c
@@ -5278,7 +5278,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-	  - name: set up msvc env
+    - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.7.0
     - name: build OpenDDS
       shell: cmd
