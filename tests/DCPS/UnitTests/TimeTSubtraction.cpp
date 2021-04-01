@@ -22,8 +22,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   {
     DDS::Time_t tt1 = {3,1};
     DDS::Time_t tt2 = {1,3};
-    DDS::Time_t result1 = tt2 - tt1;
-    DDS::Time_t result2 = tt1 - tt2;
+    DDS::Duration_t result1 = tt2 - tt1;
+    DDS::Duration_t result2 = tt1 - tt2;
     // std::cout << "tt2 - tt1 : " << result1.sec << " : " << result1.nanosec  << std::endl;
     // std::cout << "tt1 - tt2 : " << result2.sec << " : " << result2.nanosec << std::endl;
     TEST_CHECK (result1.sec == -2 && result1.nanosec == 2);

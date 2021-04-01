@@ -197,6 +197,21 @@ public:
     }
   }
 
+  ACE_INET_Addr sedp_advertised_address() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
+    return sedp_advertised_address_;
+  }
+  void sedp_advertised_address(const ACE_INET_Addr& mi)
+  {
+    if (mi.get_type() == AF_INET) {
+      ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+      sedp_advertised_address_ = mi;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsDiscoveryConfig::sedp_local_address set failed because address family is not AF_INET\n")));
+    }
+  }
+
   ACE_INET_Addr spdp_local_address() const
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
@@ -277,6 +292,21 @@ public:
       ipv6_sedp_local_address_ = mi;
     } else {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsDiscoveryConfig::ipv6_sedp_local_address set failed because address family is not AF_INET6\n")));
+    }
+  }
+
+  ACE_INET_Addr ipv6_sedp_advertised_address() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
+    return ipv6_sedp_advertised_address_;
+  }
+  void ipv6_sedp_advertised_address(const ACE_INET_Addr& mi)
+  {
+    if (mi.get_type() == AF_INET6) {
+      ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+      ipv6_sedp_advertised_address_ = mi;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsDiscoveryConfig::ipv6_sedp_advertised_address set failed because address family is not AF_INET6\n")));
     }
   }
 
@@ -594,10 +624,10 @@ private:
   unsigned char ttl_;
   bool sedp_multicast_;
   OPENDDS_STRING multicast_interface_;
-  ACE_INET_Addr sedp_local_address_, spdp_local_address_;
+  ACE_INET_Addr sedp_local_address_, sedp_advertised_address_, spdp_local_address_;
   ACE_INET_Addr default_multicast_group_;  /// FUTURE: handle > 1 group.
 #ifdef ACE_HAS_IPV6
-  ACE_INET_Addr ipv6_sedp_local_address_, ipv6_spdp_local_address_;
+  ACE_INET_Addr ipv6_sedp_local_address_, ipv6_sedp_advertised_address_, ipv6_spdp_local_address_;
   ACE_INET_Addr ipv6_default_multicast_group_;
 #endif
   OPENDDS_STRING guid_interface_;

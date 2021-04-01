@@ -147,6 +147,7 @@ public:
   bool associated(const RepoId& local, const RepoId& remote,
                   bool local_reliable, bool remote_reliable,
                   bool local_durable, bool remote_durable,
+                  const MonotonicTime_t& participant_discovered_at,
                   ACE_CDR::ULong participant_flags,
                   SequenceNumber max_sn,
                   const TransportClient_rch& client);
@@ -291,9 +292,7 @@ private:
 
   struct ReaderInfo : public RcObject {
     const RepoId id_;
-    const MonotonicTimePoint discovered_at_;
-    size_t sent_to_;
-    size_t recv_from_;
+    const MonotonicTime_t participant_discovered_at_;
     CORBA::Long acknack_recvd_count_, nackfrag_recvd_count_;
     DisjointSequence requests_;
     OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumberSet) requested_frags_;
@@ -308,11 +307,12 @@ private:
     DisjointSequence pvs_outstanding_;
 #endif
 
-    ReaderInfo(const RepoId& id, bool durable, ACE_CDR::ULong participant_flags)
+    ReaderInfo(const RepoId& id,
+               bool durable,
+               const MonotonicTime_t& participant_discovered_at,
+               ACE_CDR::ULong participant_flags)
       : id_(id)
-      , discovered_at_(MonotonicTimePoint::now())
-      , sent_to_(0)
-      , recv_from_(0)
+      , participant_discovered_at_(participant_discovered_at)
       , acknack_recvd_count_(0)
       , nackfrag_recvd_count_(0)
       , cur_cumulative_ack_(SequenceNumber::ZERO()) // Starting at zero instead of unknown makes the logic cleaner.
@@ -496,9 +496,7 @@ private:
 
   struct WriterInfo : RcObject {
     const RepoId id_;
-    const MonotonicTimePoint discovered_at_;
-    size_t sent_to_;
-    size_t recv_from_;
+    const MonotonicTime_t participant_discovered_at_;
     DisjointSequence recvd_;
     typedef OPENDDS_MAP(SequenceNumber, ReceivedDataSample) HeldMap;
     HeldMap held_;
@@ -507,11 +505,11 @@ private:
     CORBA::Long heartbeat_recvd_count_, hb_frag_recvd_count_;
     const ACE_CDR::ULong participant_flags_;
 
-    WriterInfo(const RepoId& id, ACE_CDR::ULong participant_flags)
+    WriterInfo(const RepoId& id,
+               const MonotonicTime_t& participant_discovered_at,
+               ACE_CDR::ULong participant_flags)
       : id_(id)
-      , discovered_at_(MonotonicTimePoint::now())
-      , sent_to_(0)
-      , recv_from_(0)
+      , participant_discovered_at_(participant_discovered_at)
       , hb_last_(SequenceNumber::ZERO())
       , heartbeat_recvd_count_(0)
       , hb_frag_recvd_count_(0)

@@ -168,6 +168,8 @@ public:
 
   const ParticipantData_t& get_participant_data(const DCPS::RepoId& guid) const;
   ParticipantData_t& get_participant_data(const DCPS::RepoId& guid);
+  DCPS::MonotonicTime_t get_participant_discovered_at() const;
+  DCPS::MonotonicTime_t get_participant_discovered_at(const DCPS::RepoId& guid) const;
 
   u_short get_spdp_port() const { return tport_ ? tport_->uni_port_ : 0; }
 
@@ -230,6 +232,7 @@ private:
   // Participant:
   const DDS::DomainId_t domain_;
   DCPS::RepoId guid_;
+  const DCPS::MonotonicTime_t participant_discovered_at_;
 
   void data_received(const DataSubmessage& data, const ParameterList& plist, const ACE_INET_Addr& from);
 

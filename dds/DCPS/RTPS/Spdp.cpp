@@ -244,6 +244,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , config_(disco_->config())
   , domain_(domain)
   , guid_(guid)
+  , participant_discovered_at_(MonotonicTimePoint::now().to_monotonic_time())
   , tport_(DCPS::make_rch<SpdpTransport>(rchandle_from(this)))
   , eh_shutdown_(false)
   , shutdown_cond_(lock_)
@@ -283,6 +284,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , config_(disco_->config())
   , domain_(domain)
   , guid_(guid)
+  , participant_discovered_at_(MonotonicTimePoint::now().to_monotonic_time())
   , tport_(DCPS::make_rch<SpdpTransport>(rchandle_from(this)))
   , eh_shutdown_(false)
   , shutdown_cond_(lock_)
@@ -661,10 +663,15 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     // add a new participant
     std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq)));
     iter = p.first;
-    iter->second.discovered_at_ = now;
+    iter->second.discovered_at_ = DCPS::time_value_to_monotonic_time(now.value());
     update_lease_expiration_i(iter, now);
     if (!from_relay && from != ACE_INET_Addr()) {
       iter->second.local_address_ = from;
+    }
+
+    if (DCPS::transport_debug.log_progress) {
+      log_progress("participant discovery", guid_, guid, iter->second.discovered_at_);
+
     }
 
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -712,7 +719,6 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         iter->second.extended_builtin_endpoints_ = pdata.ddsParticipantDataSecure.base.extended_builtin_endpoints;
 
         // The remote needs to see our SPDP before attempting authentication.
-        ++iter->second.auth_messages_sent_;
         tport_->write_i(guid, iter->second.local_address_, from_relay ? SpdpTransport::SEND_RELAY : SpdpTransport::SEND_DIRECT);
 
         attempt_authentication(iter, true);
@@ -745,6 +751,10 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #endif
 
   } else { // Existing Participant
+    if (from_sedp && DCPS::transport_debug.log_progress) {
+      log_progress("secure participant discovery", guid_, guid, iter->second.discovered_at_);
+    }
+
 #ifndef DDS_HAS_MINIMUM_BIT
     if (!from_sedp) {
       enqueue_location_update_i(iter, location_mask, from);
@@ -832,7 +842,9 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #ifdef OPENDDS_SECURITY
         pdata.extended_associated_endpoints = iter->second.pdata_.extended_associated_endpoints;
 #endif
+        const DCPS::MonotonicTime_t da = iter->second.pdata_.discoveredAt;
         iter->second.pdata_ = pdata;
+        iter->second.pdata_.discoveredAt = da;
         update_lease_expiration_i(iter, now);
         if (!from_relay && from != ACE_INET_Addr()) {
           iter->second.local_address_ = from;
@@ -897,6 +909,7 @@ Spdp::data_received(const DataSubmessage& data,
 
   pdata.participantProxy.domainId = domain_;
   pdata.associated_endpoints = 0;
+  pdata.discoveredAt = MonotonicTimePoint::now().to_monotonic_time();
 #ifdef OPENDDS_SECURITY
   pdata.extended_associated_endpoints = 0;
 #endif
@@ -1015,7 +1028,6 @@ Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
   DiscoveredParticipantMap::iterator iter = participants_.find(guid);
 
   if (iter != participants_.end()) {
-    ++iter->second.auth_messages_received_;
     if (msg.message_identity.sequence_number <= iter->second.auth_req_sequence_number_) {
       if (DCPS::security_debug.auth_debug) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Spdp::handle_auth_request() - ")
@@ -1207,7 +1219,6 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
     dp.auth_req_msg_.message_data[0] = dp.local_auth_request_token_;
     // Send the auth req immediately to reset the remote if they are
     // still authenticated with us.
-    ++dp.auth_messages_sent_;
     if (sedp_->write_stateless_message(dp.auth_req_msg_, make_id(guid, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER)) != DDS::RETCODE_OK) {
       if (DCPS::security_debug.auth_debug) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::attempt_authentication() - ")
@@ -1323,7 +1334,6 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   }
 
   DiscoveredParticipant& dp = iter->second;
-  ++dp.auth_messages_received_;
 
   if (DCPS::security_debug.auth_debug) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) {auth_debug} DEBUG: Spdp::handle_handshake_message() - "
@@ -1339,7 +1349,6 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   if (dp.handshake_state_ == DCPS::HANDSHAKE_STATE_DONE && !dp.is_requester_) {
     // Remote is still sending a reply, so resend the final.
     const RepoId reader = make_id(iter->first, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER);
-    ++dp.auth_messages_sent_;
     if (sedp_->write_stateless_message(dp.handshake_msg_, reader) != DDS::RETCODE_OK) {
       if (DCPS::security_debug.auth_debug) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::handle_handshake_message() - ")
@@ -1641,7 +1650,6 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
       if (pit->second.have_auth_req_msg_) {
         // Send the SPDP announcement in case it got lost.
         tport_->write_i(pit->first, pit->second.local_address_, SpdpTransport::SEND_RELAY | SpdpTransport::SEND_DIRECT);
-        ++pit->second.auth_messages_sent_;
         if (sedp_->write_stateless_message(pit->second.auth_req_msg_, reader) != DDS::RETCODE_OK) {
           if (DCPS::security_debug.auth_debug) {
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::process_handshake_resends() - ")
@@ -1656,7 +1664,6 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
         }
       }
       if (pit->second.have_handshake_msg_) {
-        ++pit->second.auth_messages_sent_;
         if (sedp_->write_stateless_message(pit->second.handshake_msg_, reader) != DDS::RETCODE_OK) {
           if (DCPS::security_debug.auth_debug) {
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::process_handshake_resends() - ")
@@ -1720,6 +1727,10 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
     return false;
   }
 
+  if (DCPS::transport_debug.log_progress) {
+    log_progress("participant crypto token", guid_, src_participant, iter->second.discovered_at_);
+  }
+
   const DDS::Security::ParticipantCryptoTokenSeq& inboundTokens =
     reinterpret_cast<const DDS::Security::ParticipantCryptoTokenSeq&>(msg.message_data);
   const DDS::Security::ParticipantCryptoHandle dp_crypto_handle =
@@ -1748,7 +1759,6 @@ Spdp::send_handshake_message(const DCPS::RepoId& guid,
   dp.handshake_msg_.message_identity.sequence_number = (++stateless_sequence_number_).getValue();
 
   const DCPS::RepoId reader = make_id(guid, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER);
-  ++dp.auth_messages_sent_;
   const DDS::ReturnCode_t retval = sedp_->write_stateless_message(dp.handshake_msg_, reader);
   dp.have_handshake_msg_ = true;
   dp.stateless_msg_deadline_ = schedule_handshake_resend(config_->auth_resend_period(), guid);
@@ -1878,9 +1888,7 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
   }
 
   if (DCPS::transport_debug.log_progress) {
-    log_progress("authentication", guid_, guid,
-                 MonotonicTimePoint::now() - iter->second.discovered_at_,
-                 iter->second.auth_messages_sent_, iter->second.auth_messages_received_);
+    log_progress("authentication", guid_, guid, iter->second.discovered_at_);
   }
 
   DDS::Security::ParticipantCryptoHandle dp_crypto_handle =
@@ -2146,7 +2154,8 @@ ParticipantData_t Spdp::build_local_pdata(
     { // Duration_t (leaseDuration)
       static_cast<CORBA::Long>(config_->lease_duration().value().sec()),
       0 // we are not supporting fractional seconds in the lease duration
-    }
+    },
+    participant_discovered_at_
     , 0 // associated_endpoints
 #ifdef OPENDDS_SECURITY
     , 0 // extended_associated_endpoints
@@ -4224,6 +4233,17 @@ ParticipantData_t& Spdp::get_participant_data(const DCPS::RepoId& guid)
 {
   DiscoveredParticipantIter iter = participants_.find(make_part_guid(guid));
   return iter->second.pdata_;
+}
+
+DCPS::MonotonicTime_t Spdp::get_participant_discovered_at() const
+{
+  return participant_discovered_at_;
+}
+
+DCPS::MonotonicTime_t Spdp::get_participant_discovered_at(const DCPS::RepoId& guid) const
+{
+  const DiscoveredParticipantConstIter iter = participants_.find(make_part_guid(guid));
+  return iter->second.discovered_at_;
 }
 
 void
