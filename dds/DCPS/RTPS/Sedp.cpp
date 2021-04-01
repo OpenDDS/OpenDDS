@@ -2588,9 +2588,10 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
 #ifndef DDS_HAS_MINIMUM_BIT
         DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
         if (bit) { // bit may be null if the DomainParticipant is shutting down
+          wdata_copy = iter->second.writer_data_;
           ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
           ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
-          bit->store_synthetic_data(iter->second.writer_data_.ddsPublicationData,
+          bit->store_synthetic_data(wdata_copy.ddsPublicationData,
                                     DDS::NOT_NEW_VIEW_STATE);
         }
         if (spdp_.shutting_down()) { return; }
@@ -2925,11 +2926,11 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
 #ifndef DDS_HAS_MINIMUM_BIT
         DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
         if (bit) { // bit may be null if the DomainParticipant is shutting down
+          rdata_copy = iter->second.reader_data_;
           ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
           ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
-          bit->store_synthetic_data(
-                iter->second.reader_data_.ddsSubscriptionData,
-                DDS::NOT_NEW_VIEW_STATE);
+          bit->store_synthetic_data(rdata_copy.ddsSubscriptionData,
+                                    DDS::NOT_NEW_VIEW_STATE);
         }
         if (spdp_.shutting_down()) { return; }
 #endif /* DDS_HAS_MINIMUM_BIT */
