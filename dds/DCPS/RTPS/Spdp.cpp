@@ -690,7 +690,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     // Since we've just seen a new participant, let's send out our
     // own announcement, so they don't have to wait.
     if (from != ACE_INET_Addr()) {
-      if (!from_relay && from_relay) {
+      if (from_relay) {
         tport_->write_i(guid, iter->second.local_address_, SpdpTransport::SEND_RELAY);
       } else {
         tport_->shorten_local_sender_delay_i();
