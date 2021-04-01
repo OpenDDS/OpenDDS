@@ -70,6 +70,8 @@ Writer_Base::svc()
 
     pre_loop();
 
+    ACE_OS::sleep(ACE_Time_Value(1));
+
     for (int i = 0; i < num_messages; ++i) {
       if (!liveliness_lost_test || i == 0 || i == num_messages - 1) {
         in_loop(i);

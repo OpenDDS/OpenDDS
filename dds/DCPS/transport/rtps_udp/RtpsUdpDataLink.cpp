@@ -1144,6 +1144,10 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
   }
 #endif
 
+  if (stopping_) {
+    return 0;
+  }
+
   if (transport_debug.log_messages) {
     link->send_strategy()->append_submessages(subm);
   }
