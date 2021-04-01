@@ -77,6 +77,16 @@ public:
     }
   }
 
+  ACE_INET_Addr advertised_address() const { return advertised_address_; }
+  void advertised_address(const ACE_INET_Addr& addr)
+  {
+    if (addr.get_type() == AF_INET) {
+      advertised_address_ = addr;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpInst::advertised_address set failed because address family is not AF_INET\n")));
+    }
+  }
+
 #ifdef ACE_HAS_IPV6
   ACE_INET_Addr ipv6_multicast_group_address() const { return ipv6_multicast_group_address_; }
   void ipv6_multicast_group_address(const ACE_INET_Addr& addr)
@@ -95,6 +105,16 @@ public:
       ipv6_local_address_ = addr;
     } else {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpInst::ipv6_local_address set failed because address family is not AF_INET6\n")));
+    }
+  }
+
+  ACE_INET_Addr ipv6_advertised_address() const { return ipv6_advertised_address_; }
+  void ipv6_advertised_address(const ACE_INET_Addr& addr)
+  {
+    if (addr.get_type() == AF_INET6) {
+      ipv6_advertised_address_ = addr;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpInst::ipv6_advertised_address set failed because address family is not AF_INET6\n")));
     }
   }
 #endif
@@ -131,9 +151,11 @@ private:
 
   ACE_INET_Addr multicast_group_address_;
   ACE_INET_Addr local_address_;
+  ACE_INET_Addr advertised_address_;
 #ifdef ACE_HAS_IPV6
   ACE_INET_Addr ipv6_multicast_group_address_;
   ACE_INET_Addr ipv6_local_address_;
+  ACE_INET_Addr ipv6_advertised_address_;
 #endif
 
   mutable ACE_SYNCH_MUTEX config_lock_;
