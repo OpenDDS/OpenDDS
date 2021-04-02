@@ -318,11 +318,9 @@ jobs:
   #       cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
   #       if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
-  ACE_TAO_u18_o1d0v1_xer0_j12:
+  ACE_TAO_u18_o1d0v1_xer0_j12_2:
 
     runs-on: ubuntu-18.04
-
-    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -330,6 +328,24 @@ jobs:
       with:
         path: OpenDDS
         submodules: true
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2.3.4
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: OpenDDS/ACE_TAO
+    - name: get ACE_TAO commit
+      shell: bash
+      run: |
+        cd OpenDDS/ACE_TAO
+        export ACE_COMMIT=$(git rev-parse HEAD)
+        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
+    - name: Cache Artifact
+      id: cache-artifact
+      uses: actions/cache@v2.1.4
+      with:
+        path: ${{ github.job }}.tar.xz
+        key: ${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
     - name: checkout autobuild
       uses: actions/checkout@v2.3.4
       with:
@@ -345,12 +361,73 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --doc-group --optimize --no-debug --features=versioned_namespace=1 --tests --java=/usr/lib/jvm/adoptopenjdk-12-hotspot-amd64 --rapidjson --mpc=$GITHUB_WORKSPACE/MPC
-    - name: build everything
+        ./configure --optimize --no-debug --features=versioned_namespace=1 --tests --java=/usr/lib/jvm/adoptopenjdk-12-hotspot-amd64 --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --rapidjson --mpc=$GITHUB_WORKSPACE/MPC
+    - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
+        . setenv.sh
+        cd ACE_TAO/ACE
         make -j4
+        cd ../TAO
+        make -j4
+    - name: create ACE_TAO tar.xz artifact
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        cd OpenDDS/ACE_TAO
+        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
+        find . -iname "*\.o" | xargs rm
+        tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
+        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
+        xz -3 ../../${{ github.job }}.tar
+    - name: upload ACE_TAO artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_artifact
+        path: ${{ github.job }}.tar.xz
+
+  build_u18_o1d0v1_xer0_j12_2:
+
+    runs-on: ubuntu-18.04
+
+    needs: ACE_TAO_u18_o1d0v1_xer0_j12_2
+
+    steps:
+    - name: checkout MPC
+      uses: actions/checkout@v2.3.4
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2.3.4
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: ACE_TAO
+    - name: download ACE_TAO artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: ACE_TAO_u18_o1d0v1_xer0_j12_2_artifact
+        path: ACE_TAO
+    - name: extract ACE_TAO artifact
+      shell: bash
+      run: |
+        cd ACE_TAO
+        tar xvfJ ACE_TAO_u18_o1d0v1_xer0_j12_2.tar.xz
+    - name: checkout OpenDDS
+      uses: actions/checkout@v2.3.4
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: configure OpenDDS
+      run: |
+        cd OpenDDS
+        ./configure --optimize --no-debug --features=versioned_namespace=1 --tests --java=/usr/lib/jvm/adoptopenjdk-12-hotspot-amd64 --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+    - name: make OpenDDS
+      run: |
+        cd OpenDDS
+        make -j6
     - name: check build configuration
       shell: bash
       run: |
@@ -366,9 +443,9 @@ jobs:
         export DESTDIR=$(realpath install_temp)
         export INSTALL_PREFIX=$(realpath install_prefix)
         . setenv.sh
-        cd $GITHUB_WORKSPACE/OpenDDS/ACE_wrappers/ace
+        cd $ACE_ROOT
         make install
-        cd $GITHUB_WORKSPACE/OpenDDS/ACE_wrappers/TAO
+        cd $TAO_ROOT
         make install
         cd $GITHUB_WORKSPACE/OpenDDS
         make install
@@ -381,12 +458,13 @@ jobs:
         export PATH="\$OPENDDS_INSTALL_PREFIX/bin:\$PATH"
         export LD_LIBRARY_PATH="\$OPENDDS_INSTALL_PREFIX/lib:\$LD_LIBRARY_PATH"
         export MPC_ROOT=$GITHUB_WORKSPACE/MPC
-        export PERL5LIB=$(realpath bin):$(realpath $GITHUB_WORKSPACE/OpenDDS/ACE_wrappers/bin)
+        export PERL5LIB=$(realpath bin):$(realpath $ACE_ROOT/bin)
         EOF
     - name: test make install
       shell: bash
       run: |
         cd OpenDDS
+        cat install_setenv.sh
         . install_setenv.sh
         cd tests/DCPS/Messenger
         git clean -dfx .
