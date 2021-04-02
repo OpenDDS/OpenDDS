@@ -35,6 +35,7 @@ die "ERROR: ACE_ROOT must be set" if !$ENV{'ACE_ROOT'};
 my $build_config = "";
 my $generator = "";
 my $arch = "";
+my $compiler = "";
 my $skip_run_test;
 my $skip_cxx11;
 my $no_shared;
@@ -43,6 +44,7 @@ exit 1 if !GetOptions(
     "build-config=s" => \$build_config,
     "generator=s" => \$generator,
     "arch=s" => \$arch,
+    "compiler=s" => \$compiler,
     "skip-run-test" => \$skip_run_test,
     "skip-cxx11" => \$skip_cxx11,
     "no-shared" => \$no_shared,
@@ -64,6 +66,10 @@ for my $dir (@dirs) {
     "-D", "CMAKE_PREFIX_PATH=$ENV{'DDS_ROOT'}",
     "-D", "CMAKE_VERBOSE_MAKEFILE:BOOL=ON",
   );
+  if ($compiler ne "") {
+    push @generate_cmd, "-DCMAKE_CXX_COMPILER=$compiler";
+  }
+
   my @build_cmd = ("cmake", "--build", ".");
 
   if ($generator ne "") {
