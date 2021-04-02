@@ -81,6 +81,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
   , reactor_task_(reactor_task)
   , job_queue_(make_rch<JobQueue>(reactor_task->get_reactor()))
   , multi_buff_(this, config.nak_depth_)
+  , flush_send_queue_task_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::flush_send_queue)
   , best_effort_heartbeat_count_(0)
   , heartbeat_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::send_heartbeats)
   , heartbeatchecker_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::check_heartbeats)
@@ -1289,7 +1290,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     guard.release();
   }
 
-  queue_or_send_submessages(meta_submessages);
+  queue_submessages(meta_submessages);
 
   if (deliver_after_send) {
     element->data_delivered();
@@ -1392,7 +1393,7 @@ RtpsUdpDataLink::RtpsWriter::send_heartbeats(const MonotonicTimePoint& /*now*/)
 
   g.release();
 
-  link->queue_or_send_submessages(meta_submessages);
+  link->queue_submessages(meta_submessages);
 
   for (size_t i = 0; i < pendingCallbacks.size(); ++i) {
     pendingCallbacks[i]->data_dropped();
@@ -1414,7 +1415,7 @@ RtpsUdpDataLink::RtpsWriter::send_nack_responses(const MonotonicTimePoint& /*now
     gather_nack_replies_i(meta_submessages);
   }
 
-  link->queue_or_send_submessages(meta_submessages);
+  link->queue_submessages(meta_submessages);
 }
 
 void
@@ -1497,7 +1498,7 @@ RtpsUdpDataLink::received(const RTPS::DataSubmessage& data,
   for (OPENDDS_VECTOR(RtpsReader_rch)::const_iterator it = to_call.begin(); it < to_call.end(); ++it) {
     (*it)->process_data_i(data, src, meta_submessages);
   }
-  queue_or_send_submessages(meta_submessages);
+  queue_submessages(meta_submessages);
 }
 
 void
@@ -1785,7 +1786,7 @@ RtpsUdpDataLink::received(const RTPS::HeartBeatSubmessage& heartbeat,
       }
     }
   }
-  queue_or_send_submessages(meta_submessages);
+  queue_submessages(meta_submessages);
 
   for (size_t i = 0; i < callbacks.size(); ++i) {
     callbacks[i].listener->writer_exists(src, callbacks[i].localid);
@@ -1935,7 +1936,7 @@ RtpsUdpDataLink::RtpsWriter::add_reader(const ReaderInfo_rch& reader)
       const SingleSendBuffer::Proxy proxy(*send_buff_);
       initialize_heartbeat(proxy, meta_submessage);
       gather_directed_heartbeat_i(proxy, meta_submessages, meta_submessage, reader);
-      link->queue_or_send_submessages(meta_submessages);
+      link->queue_submessages(meta_submessages);
     }
 
     return true;
@@ -2005,7 +2006,7 @@ RtpsUdpDataLink::RtpsReader::add_writer(const WriterInfo_rch& writer)
       MetaSubmessageVec meta_submessages;
       gather_preassociation_acknack_i(meta_submessages, writer);
       RtpsUdpDataLink_rch link = link_.lock();
-      link->queue_or_send_submessages(meta_submessages);
+      link->queue_submessages(meta_submessages);
     }
 
     return true;
@@ -2083,7 +2084,7 @@ RtpsUdpDataLink::RtpsReader::send_preassociation_acknacks(const MonotonicTimePoi
     }
   }
 
-  link->queue_or_send_submessages(meta_submessages);
+  link->queue_submessages(meta_submessages);
 
   preassociation_task_.schedule(link->config().heartbeat_period_);
 }
@@ -2248,38 +2249,40 @@ namespace {
 #endif
 
 void
-RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVecVec& meta_submessages, AddrDestMetaSubmessageMap& adr_map)
+RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVecVecVec& meta_submessages, AddrDestMetaSubmessageMap& adr_map)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
   AddrSet addrs;
   // Sort meta_submessages by address set and destination
-  for (MetaSubmessageVecVec::iterator vit = meta_submessages.begin(); vit != meta_submessages.end(); ++vit) {
-    for (MetaSubmessageVec::iterator it = vit->begin(); it != vit->end(); ++it) {
-      const bool directed = it->dst_guid_ != GUID_UNKNOWN;
-      if (directed) {
-        accumulate_addresses(it->from_guid_, it->dst_guid_, addrs, true);
-      } else {
-        addrs = get_addresses_i(it->from_guid_); // This will overwrite, but addrs should always be empty here
-      }
-      for (RepoIdSet::iterator it2 = it->to_guids_.begin(); it2 != it->to_guids_.end(); ++it2) {
-        accumulate_addresses(it->from_guid_, *it2, addrs, directed);
-      }
-      if (addrs.empty()) {
-        continue;
-      }
+  for (MetaSubmessageVecVecVec::iterator vvit = meta_submessages.begin(); vvit != meta_submessages.end(); ++vvit) {
+    for (MetaSubmessageVecVec::iterator vit = vvit->begin(); vit != vvit->end(); ++vit) {
+      for (MetaSubmessageVec::iterator it = vit->begin(); it != vit->end(); ++it) {
+        const bool directed = it->dst_guid_ != GUID_UNKNOWN;
+        if (directed) {
+          accumulate_addresses(it->from_guid_, it->dst_guid_, addrs, true);
+        } else {
+          addrs = get_addresses_i(it->from_guid_); // This will overwrite, but addrs should always be empty here
+        }
+        for (RepoIdSet::iterator it2 = it->to_guids_.begin(); it2 != it->to_guids_.end(); ++it2) {
+          accumulate_addresses(it->from_guid_, *it2, addrs, directed);
+        }
+        if (addrs.empty()) {
+          continue;
+        }
 
 #ifdef OPENDDS_SECURITY
-      if (local_crypto_handle() != DDS::HANDLE_NIL && separate_message(it->from_guid_.entityId)) {
-        addrs.insert(BUNDLING_PLACEHOLDER); // removed in bundle_mapped_meta_submessages
-      }
+        if (local_crypto_handle() != DDS::HANDLE_NIL && separate_message(it->from_guid_.entityId)) {
+          addrs.insert(BUNDLING_PLACEHOLDER); // removed in bundle_mapped_meta_submessages
+        }
 #endif
 
-      if (std::memcmp(&(it->dst_guid_.guidPrefix), &GUIDPREFIX_UNKNOWN, sizeof(GuidPrefix_t)) != 0) {
-        adr_map[addrs][make_unknown_guid(it->dst_guid_.guidPrefix)].push_back(it);
-      } else {
-        adr_map[addrs][GUID_UNKNOWN].push_back(it);
+        if (std::memcmp(&(it->dst_guid_.guidPrefix), &GUIDPREFIX_UNKNOWN, sizeof(GuidPrefix_t)) != 0) {
+          adr_map[addrs][make_unknown_guid(it->dst_guid_.guidPrefix)].push_back(it);
+        } else {
+          adr_map[addrs][GUID_UNKNOWN].push_back(it);
+        }
+        addrs.clear();
       }
-      addrs.clear();
     }
   }
 }
@@ -2462,65 +2465,84 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(
 }
 
 void
+RtpsUdpDataLink::flush_send_queue(const MonotonicTimePoint& /*now*/)
+{
+  MetaSubmessageVecVecVec temp;
+
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, send_queues_lock_);
+    temp.swap(send_queue_);
+  }
+
+  bundle_and_send_submessages(temp);
+}
+
+void
 RtpsUdpDataLink::enable_response_queue()
 {
   ACE_GUARD(ACE_Thread_Mutex, g, send_queues_lock_);
   ThreadSendQueueMap::iterator it = thread_send_queues_.find(ACE_Thread::self());
   if (it == thread_send_queues_.end()) {
-    thread_send_queues_[ACE_Thread::self()] = make_rch<SubmessageQueue>();
+    thread_send_queues_.insert(ThreadSendQueueMap::value_type(ACE_Thread::self(), MetaSubmessageVecVec()));
   }
 }
 
 void
 RtpsUdpDataLink::disable_response_queue()
 {
-  SubmessageQueue_rch queue;
+  bool schedule = false;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, send_queues_lock_);
     ThreadSendQueueMap::iterator it = thread_send_queues_.find(ACE_Thread::self());
     if (it != thread_send_queues_.end()) {
-      queue = it->second;
+      if (!it->second.empty()) {
+        send_queue_.push_back(MetaSubmessageVecVec());
+        send_queue_.back().swap(it->second);
+        schedule = true;
+      }
       thread_send_queues_.erase(it);
     }
   }
-  if (queue && !queue->empty()) {
-    bundle_and_send_submessages(*queue);
+
+  if (schedule) {
+    flush_send_queue_task_.schedule(config().send_delay_);
   }
 }
 
 void
-RtpsUdpDataLink::queue_or_send_submessages(MetaSubmessageVec& in)
+RtpsUdpDataLink::queue_submessages(MetaSubmessageVec& in)
 {
+  if (in.empty()) {
+    return;
+  }
+
+  bool schedule = false;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, send_queues_lock_);
 
     ThreadSendQueueMap::iterator it = thread_send_queues_.find(ACE_Thread::self());
     if (it != thread_send_queues_.end()) {
-      it->second->push_back(MetaSubmessageVec());
-      it->second->back().swap(in);
-      return;
+      it->second.push_back(MetaSubmessageVec());
+      it->second.back().swap(in);
+    } else {
+      MetaSubmessageVecVec vv;
+      vv.push_back(MetaSubmessageVec());
+      vv.back().swap(in);
+      send_queue_.push_back(MetaSubmessageVecVec());
+      send_queue_.back().swap(vv);
+      schedule = true;
     }
   }
 
-  MetaSubmessageVecVec temp;
-  temp.push_back(MetaSubmessageVec());
-  temp.back().swap(in);
-  bundle_and_send_submessages(temp);
+  if (schedule) {
+    flush_send_queue_task_.schedule(config().send_delay_);
+  }
 }
 
 void
-RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVecVec& meta_submessages)
+RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVecVecVec& meta_submessages)
 {
   using namespace RTPS;
-
-  bool has_data = false;
-  for (MetaSubmessageVecVec::const_iterator it = meta_submessages.begin(); !has_data && it != meta_submessages.end(); ++it) {
-    has_data = !it->empty();
-  }
-
-  if (!has_data) {
-    return;
-  }
 
   // Sort meta_submessages based on both locator IPs and INFO_DST GUID destination/s
   AddrDestMetaSubmessageMap adr_map;
@@ -3765,7 +3787,7 @@ RtpsUdpDataLink::send_heartbeats(const MonotonicTimePoint& now)
     }
   }
 
-  queue_or_send_submessages(meta_submessages);
+  queue_submessages(meta_submessages);
 
   for (OPENDDS_VECTOR(CallbackType)::iterator iter = readerDoesNotExistCallbacks.begin();
        iter != readerDoesNotExistCallbacks.end(); ++iter) {
