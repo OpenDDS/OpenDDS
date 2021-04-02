@@ -1513,6 +1513,10 @@ RtpsUdpDataLink::RtpsReader::pre_stop_helper()
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
+  if (stopping_) {
+    return;
+  }
+
   stopping_ = true;
 
   preassociation_writers_.clear();
@@ -1531,6 +1535,8 @@ RtpsUdpDataLink::RtpsReader::pre_stop_helper()
   for (WriterInfoMap::iterator it = remote_writers_.begin(); it != remote_writers_.end(); ++it) {
     it->second->held_.clear();
   }
+
+  g.release();
 
   preassociation_task_.cancel_and_wait();
 }
