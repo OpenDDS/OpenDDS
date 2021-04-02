@@ -604,7 +604,8 @@ private:
     IdCountSet nackfrag_counts_;
   };
 
-  void build_meta_submessage_map(MetaSubmessageVecVec& meta_submessages, AddrDestMetaSubmessageMap& adr_map);
+  typedef OPENDDS_VECTOR(MetaSubmessageVecVec) MetaSubmessageVecVecVec;
+  void build_meta_submessage_map(MetaSubmessageVecVecVec& meta_submessages, AddrDestMetaSubmessageMap& adr_map);
   void bundle_mapped_meta_submessages(
     const Encoding& encoding,
     AddrDestMetaSubmessageMap& adr_map,
@@ -613,15 +614,15 @@ private:
                                OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes,
                                CountKeeper& counts);
 
-  void queue_or_send_submessages(MetaSubmessageVec& meta_submessages);
-  void bundle_and_send_submessages(MetaSubmessageVecVec& meta_submessages);
+  void queue_submessages(MetaSubmessageVec& meta_submessages);
+  void bundle_and_send_submessages(MetaSubmessageVecVecVec& meta_submessages);
 
-  struct SubmessageQueue: RcObject, MetaSubmessageVecVec {
-  };
-  typedef RcHandle<SubmessageQueue> SubmessageQueue_rch;
-
-  typedef OPENDDS_MAP(ACE_thread_t, SubmessageQueue_rch) ThreadSendQueueMap;
+  typedef OPENDDS_MAP(ACE_thread_t, MetaSubmessageVecVec) ThreadSendQueueMap;
   ThreadSendQueueMap thread_send_queues_;
+  MetaSubmessageVecVecVec send_queue_;
+  typedef PmfSporadicTask<RtpsUdpDataLink> Sporadic;
+  Sporadic flush_send_queue_task_;
+  void flush_send_queue(const MonotonicTimePoint& now);
 
   RepoIdSet pending_reliable_readers_;
 
@@ -686,7 +687,7 @@ private:
       RtpsWriter& writer = **it;
       (writer.*func)(submessage, src, meta_submessages);
     }
-    queue_or_send_submessages(meta_submessages);
+    queue_submessages(meta_submessages);
   }
 
   template<typename T, typename FN>
@@ -728,7 +729,7 @@ private:
       RtpsReader& reader = **it;
       (reader.*func)(submessage, src, directed, meta_submessages);
     }
-    queue_or_send_submessages(meta_submessages);
+    queue_submessages(meta_submessages);
   }
 
   void send_heartbeats(const MonotonicTimePoint& now);
