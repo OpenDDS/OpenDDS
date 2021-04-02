@@ -533,9 +533,7 @@ private:
       , preassociation_task_(link->reactor_task_->interceptor(), *this, &RtpsReader::send_preassociation_acknacks)
     {}
 
-    ~RtpsReader() {
-      preassociation_task_.cancel_and_wait();
-    }
+    ~RtpsReader();
 
     bool add_writer(const WriterInfo_rch& info);
     bool has_writer(const RepoId& id) const;

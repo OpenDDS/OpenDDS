@@ -1514,7 +1514,13 @@ RtpsUdpDataLink::RtpsReader::pre_stop_helper()
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
+  if (stopping_) {
+    return;
+  }
+
   stopping_ = true;
+
+  preassociation_writers_.clear();
 
   RtpsUdpDataLink_rch link = link_.lock();
 
@@ -1530,6 +1536,14 @@ RtpsUdpDataLink::RtpsReader::pre_stop_helper()
   for (WriterInfoMap::iterator it = remote_writers_.begin(); it != remote_writers_.end(); ++it) {
     it->second->held_.clear();
   }
+
+  g.release();
+
+  preassociation_task_.cancel_and_wait();
+}
+
+RtpsUdpDataLink::RtpsReader::~RtpsReader()
+{
 }
 
 bool
@@ -2077,7 +2091,7 @@ RtpsUdpDataLink::RtpsReader::send_preassociation_acknacks(const MonotonicTimePoi
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
-    if (preassociation_writers_.empty()) {
+    if (stopping_ || preassociation_writers_.empty()) {
       return;
     }
 
