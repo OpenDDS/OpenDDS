@@ -3814,10 +3814,20 @@ jobs:
       with:
         path: OpenDDS
         submodules: true
+    - name: setup gtest
+      run: |
+        cd OpenDDS/tests/googletest
+        git submodule init
+        git submodule update
+        mkdir build
+        cd build
+        mkdir install
+        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+        cmake --build . --target install
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --static --qt --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --static --qt --security --rapidjson --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -3850,6 +3860,47 @@ jobs:
         . setenv.sh
         cd DevGuideExamples/DCPS/Messenger
         perl run_test.pl
+    - name: build and run CMake tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/cmake_integration/
+        perl run_ci_tests.pl --no-shared --build-config=Debug
+    - name: build messenger tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/DCPS/Messenger
+        mwc.pl -type vs2019 -static
+    - name: make messenger tests
+        cd OpenDDS
+        . setenv.sh
+        cd tests/DCPS/Messenger
+        make
+    - name: build compiler tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/DCPS/Compiler
+        mwc.pl -type vs2019 -static
+    - name: make compiler tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/DCPS/Compiler
+        dir
+        make
+    - name: run Static CI tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests
+        perl auto_run_tests.pl -l static_ci_tests.lst -Config -ExeSubDir Static_Debug -Config CXX11 -Config STATIC -Config IPV6 -Config RTPS -Config GH_ACTIONS
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -4226,7 +4277,7 @@ jobs:
   #       cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
   #       if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
-  ACE_TAO_w19_p1_stat_js0_2:
+  ACE_TAO_w19_p1_stat_js0_3:
 
     runs-on: windows-2019
 
@@ -4277,7 +4328,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
+        configure --ipv6 --static --no-rapidjson --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -4304,11 +4355,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_w19_p1_stat_js0_2:
+  build_w19_p1_stat_js0_3:
 
     runs-on: windows-2019
 
-    needs: ACE_TAO_w19_p1_stat_js0_2
+    needs: ACE_TAO_w19_p1_stat_js0_3
 
     steps:
     - name: install openssl-windows & xerces-c
@@ -4336,22 +4387,33 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ACE_TAO_w19_p1_stat_js0_2_artifact
+        name: ACE_TAO_w19_p1_stat_js0_3_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_p1_stat_js0_2.tar.xz
-        rm -f ACE_TAO_w19_p1_stat_js0_2.tar.xz
+        tar xvfJ ACE_TAO_w19_p1_stat_js0_3.tar.xz
+        rm -f ACE_TAO_w19_p1_stat_js0_3.tar.xz
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.7.0
+    - name: setup gtest
+      shell: cmd
+      run: |
+        cd OpenDDS/tests/googletest
+        git submodule init
+        git submodule update
+        mkdir build
+        cd build
+        mkdir install
+        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+        cmake --build . --target install
     - name: configure OpenDDS
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --no-rapidjson --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
+        configure --ipv6 --static --no-rapidjson --gtest=%GITHUB_WORKSPACE%/OpenDDS/tests/googletest/build/install --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
     - name: check build configuration
       shell: cmd
       run: |
@@ -4378,6 +4440,40 @@ jobs:
         call setenv.cmd
         cd tests/cmake_integration/
         perl run_ci_tests.pl --no-shared --build-config=Debug
+    - name: build messenger tests
+      shell: cmd
+      run: |
+        cd OpenDDS
+        call setenv.cmd
+        cd tests\DCPS\Messenger
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static
+    - name: make messenger tests
+        cd OpenDDS
+        call setenv.cmd
+        cd tests\DCPS\Messenger
+        msbuild -p:Configuration=Debug,Platform=x64 -m Messenger.sln
+    - name: build compiler tests
+      shell: cmd
+      run: |
+        cd OpenDDS
+        call setenv.cmd
+        cd tests\DCPS\Compiler
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static
+    - name: make compiler tests
+      shell: cmd
+      run: |
+        cd OpenDDS
+        call setenv.cmd
+        cd tests\DCPS\Compiler
+        dir
+        msbuild -p:Configuration=Debug,Platform=x64 -m Compiler.sln
+    - name: run Static CI tests
+      shell: cmd
+      run: |
+        cd OpenDDS
+        call setenv.cmd
+        cd tests
+        perl auto_run_tests.pl -l static_ci_tests.lst -Config -ExeSubDir Static_Debug -Config CXX11 -Config STATIC -Config IPV6 -Config RTPS -Config GH_ACTIONS
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -4505,7 +4601,7 @@ jobs:
   #       cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
   #       if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
-  ACE_TAO_w19_p1_cpp03_stat_FM-08_2:
+  ACE_TAO_w19_p1_cpp03_stat_FM-08_3:
 
     runs-on: windows-2019
 
@@ -4583,11 +4679,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_w19_p1_cpp03_stat_FM-08_2:
+  build_w19_p1_cpp03_stat_FM-08_3:
 
     runs-on: windows-2019
 
-    needs: ACE_TAO_w19_p1_cpp03_stat_FM-08_2
+    needs: ACE_TAO_w19_p1_cpp03_stat_FM-08_3
 
     steps:
     - name: install openssl-windows & xerces-c
@@ -4615,22 +4711,33 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ACE_TAO_w19_p1_cpp03_stat_FM-08_2_artifact
+        name: ACE_TAO_w19_p1_cpp03_stat_FM-08_3_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_p1_cpp03_stat_FM-08_2.tar.xz
-        rm -f ACE_TAO_w19_p1_cpp03_stat_FM-08_2.tar.xz
+        tar xvfJ ACE_TAO_w19_p1_cpp03_stat_FM-08_3.tar.xz
+        rm -f ACE_TAO_w19_p1_cpp03_stat_FM-08_3.tar.xz
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.7.0
+    - name: setup gtest
+      shell: cmd
+      run: |
+        cd OpenDDS/tests/googletest
+        git submodule init
+        git submodule update
+        mkdir build
+        cd build
+        mkdir install
+        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+        cmake --build . --target install
     - name: configure OpenDDS
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --std=c++03 --static --rapidjson --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
+        configure --ipv6 --std=c++03 --static --rapidjson --gtest=%GITHUB_WORKSPACE%/OpenDDS/tests/googletest/build/install --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
     - name: check build configuration
       shell: cmd
       run: |
@@ -4650,6 +4757,40 @@ jobs:
         call setenv.cmd
         cd DevGuideExamples\DCPS\Messenger
         perl run_test.pl -ExeSubDir Static_Debug
+    - name: build messenger tests
+      shell: cmd
+      run: |
+        cd OpenDDS
+        call setenv.cmd
+        cd tests\DCPS\Messenger
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static
+    - name: make messenger tests
+        cd OpenDDS
+        call setenv.cmd
+        cd tests\DCPS\Messenger
+        msbuild -p:Configuration=Debug,Platform=x64 -m Messenger.sln
+    - name: build compiler tests
+      shell: cmd
+      run: |
+        cd OpenDDS
+        call setenv.cmd
+        cd tests\DCPS\Compiler
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static
+    - name: make compiler tests
+      shell: cmd
+      run: |
+        cd OpenDDS
+        call setenv.cmd
+        cd tests\DCPS\Compiler
+        dir
+        msbuild -p:Configuration=Debug,Platform=x64 -m Compiler.sln
+    - name: run Static CI tests
+      shell: cmd
+      run: |
+        cd OpenDDS
+        call setenv.cmd
+        cd tests
+        perl auto_run_tests.pl -l static_ci_tests.lst -Config -ExeSubDir Static_Debug -Config STATIC -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config RTPS -Config OPENDDS_SECURITY -Config RAPIDJSON -Config GH_ACTIONS
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -4665,11 +4806,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  # test_w19_p1_cpp03_stat_FM-08_2:
+  # test_w19_p1_cpp03_stat_FM-08_3:
 
   #   runs-on: windows-2019
 
-  #   needs: build_w19_p1_cpp03_stat_FM-08_2
+  #   needs: build_w19_p1_cpp03_stat_FM-08_3
 
   #   steps:
   #   - name: install openssl-windows & xerces-c
@@ -4702,25 +4843,25 @@ jobs:
   #   - name: download ACE_TAO artifact
   #     uses: actions/download-artifact@v2
   #     with:
-  #       name: ACE_TAO_w19_p1_cpp03_stat_FM-08_2_artifact
+  #       name: ACE_TAO_w19_p1_cpp03_stat_FM-08_3_artifact
   #       path: OpenDDS/ACE_TAO
   #   - name: extract ACE_TAO artifact
   #     shell: bash
   #     run: |
   #       cd OpenDDS/ACE_TAO
-  #       tar xvfJ ACE_TAO_w19_p1_cpp03_stat_FM-08_2.tar.xz
-  #       rm -f ACE_TAO_w19_p1_cpp03_stat_FM-08_2.tar.xz
+  #       tar xvfJ ACE_TAO_w19_p1_cpp03_stat_FM-08_3.tar.xz
+  #       rm -f ACE_TAO_w19_p1_cpp03_stat_FM-08_3.tar.xz
   #   - name: download OpenDDS artifact
   #     uses: actions/download-artifact@v2
   #     with:
-  #       name: build_w19_p1_cpp03_stat_FM-08_2_artifact
+  #       name: build_w19_p1_cpp03_stat_FM-08_3_artifact
   #       path: OpenDDS
   #   - name: extract OpenDDS artifact
   #     shell: bash
   #     run: |
   #       cd OpenDDS
-  #       tar xvfJ build_w19_p1_cpp03_stat_FM-08_2.tar.xz
-  #       rm -f build_w19_p1_cpp03_stat_FM-08_2.tar.xz
+  #       tar xvfJ build_w19_p1_cpp03_stat_FM-08_3.tar.xz
+  #       rm -f build_w19_p1_cpp03_stat_FM-08_3.tar.xz
   #   - name: check build configuration
   #     shell: cmd
   #     run: |
