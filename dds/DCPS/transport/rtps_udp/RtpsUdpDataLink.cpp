@@ -2894,10 +2894,11 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
 
   SequenceNumber previous_acked_sn = reader->acked_sn();
   const SequenceNumber ack = to_opendds_seqnum(acknack.readerSNState.bitmapBase);
-  const bool reset = acknack.count.value == 0 && ack <= reader->cur_cumulative_ack_;
+  const bool count_is_not_zero = acknack.count.value != 0;
+  const CORBA::Long previous_count = reader->acknack_recvd_count_;
   bool dont_schedule_nack_response = false;
 
-  if (!reset) {
+  if (count_is_not_zero) {
     if (!compare_and_update_counts(acknack.count.value, reader->acknack_recvd_count_) &&
         (!reader->reflects_heartbeat_count() || acknack.count.value != 0 || reader->acknack_recvd_count_ != 0)) {
       if (transport_debug.log_dropped_messages) {
@@ -2921,10 +2922,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   }
 
   const bool is_final = acknack.smHeader.flags & RTPS::FLAG_F;
-  const bool is_postassociation =
-    is_final ||
-    bitmapNonEmpty(acknack.readerSNState) ||
-    ack != 1;
+  const bool is_postassociation = count_is_not_zero && (is_final || bitmapNonEmpty(acknack.readerSNState) || ack != 1);
 
   if (preassociation_readers_.count(reader)) {
     if (is_postassociation) {
@@ -2961,12 +2959,12 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   if (ack != SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
     if (ack >= reader->cur_cumulative_ack_) {
       reader->cur_cumulative_ack_ = ack;
-    } else {
+    } else if (count_is_not_zero) {
       // Count increased but ack decreased.  Reset.
       ACE_ERROR((LM_WARNING, "(%P|%t) WARNING RtpsUdpDataLink::RtpsWriter::process_acknack: "
-                 "%C -> %C reset detected reset %d count %d ack %q < %q\n",
+                 "%C -> %C reset detected count %d > %d ack %q < %q\n",
                  LogGuid(id_).c_str(), LogGuid(reader->id_).c_str(),
-                 reset, acknack.count.value, ack.getValue(), reader->cur_cumulative_ack_.getValue()));
+                 acknack.count.value, previous_count, ack.getValue(), reader->cur_cumulative_ack_.getValue()));
       const SequenceNumber max_sn = expected_max_sn(reader);
       snris_erase(previous_acked_sn == max_sn ? leading_readers_ : lagging_readers_, previous_acked_sn, reader);
       reader->cur_cumulative_ack_ = ack;
@@ -2976,12 +2974,11 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
       check_leader_lagger();
       heartbeat_.schedule(link->config().heartbeat_period_);
 
-      if (reader->durable_ && !reader->expecting_durable_data()) {
-        // TODO: Consider how this works if the durable data has not been acked.
-        // Or better, yet, just re-enqueue data as done above.
+      if (reader->durable_) {
         if (Transport_debug_level > 5) {
           ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::RtpsWriter::process_acknack: enqueuing ReplayDurableData\n"));
         }
+        reader->durable_data_.swap(pendingCallbacks);
         link->job_queue_->enqueue(make_rch<ReplayDurableData>(link_, id_, src));
         reader->durable_timestamp_ = MonotonicTimePoint::zero_value;
       }
@@ -3024,31 +3021,33 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   }
 
   // Process the nack.
-  reader->requests_.reset();
   bool schedule_nack_response = false;
-  {
-    const SingleSendBuffer::Proxy proxy(*send_buff_);
-    if ((acknack.readerSNState.numBits == 0 ||
-         (acknack.readerSNState.numBits == 1 && !(acknack.readerSNState.bitmap[0] & 1)))
-        && ack == max_data_seq(proxy, reader)) {
-      // Since there is an entry in requested_changes_, the DR must have
-      // sent a non-final AckNack.  If the base value is the high end of
-      // the heartbeat range, treat it as a request for that seq#.
-      if (reader->durable_data_.count(ack) || proxy.contains(ack) || proxy.pre_contains(ack)) {
-        reader->requests_.insert(ack);
+  if (count_is_not_zero) {
+    reader->requests_.reset();
+    {
+      const SingleSendBuffer::Proxy proxy(*send_buff_);
+      if ((acknack.readerSNState.numBits == 0 ||
+           (acknack.readerSNState.numBits == 1 && !(acknack.readerSNState.bitmap[0] & 1)))
+          && ack == max_data_seq(proxy, reader)) {
+        // Since there is an entry in requested_changes_, the DR must have
+        // sent a non-final AckNack.  If the base value is the high end of
+        // the heartbeat range, treat it as a request for that seq#.
+        if (reader->durable_data_.count(ack) || proxy.contains(ack) || proxy.pre_contains(ack)) {
+          reader->requests_.insert(ack);
+        }
+      } else {
+        reader->requests_.insert(ack, acknack.readerSNState.numBits, acknack.readerSNState.bitmap.get_buffer());
       }
-    } else {
-      reader->requests_.insert(ack, acknack.readerSNState.numBits, acknack.readerSNState.bitmap.get_buffer());
-    }
 
-    if (!reader->requests_.empty()) {
-      readers_expecting_data_.insert(reader);
-      if (link->config().responsive_mode_) {
-        readers_expecting_heartbeat_.insert(reader);
+      if (!reader->requests_.empty()) {
+        readers_expecting_data_.insert(reader);
+        if (link->config().responsive_mode_) {
+          readers_expecting_heartbeat_.insert(reader);
+        }
+        schedule_nack_response = true;
+      } else {
+        readers_expecting_data_.erase(reader);
       }
-      schedule_nack_response = true;
-    } else {
-      readers_expecting_data_.erase(reader);
     }
   }
 
