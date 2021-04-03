@@ -101,6 +101,11 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
   assign(local_prefix_, local_prefix);
 }
 
+RtpsUdpDataLink::~RtpsUdpDataLink()
+{
+  flush_send_queue_task_.cancel_and_wait();
+}
+
 RtpsUdpInst&
 RtpsUdpDataLink::config() const
 {
