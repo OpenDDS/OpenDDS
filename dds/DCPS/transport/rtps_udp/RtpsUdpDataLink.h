@@ -80,6 +80,8 @@ public:
                   const RtpsUdpInst& config,
                   const ReactorTask_rch& reactor_task);
 
+  ~RtpsUdpDataLink();
+
   bool add_delayed_notification(TransportQueueElement* element);
 
   RemoveResult remove_sample(const DataSampleElement* sample);
