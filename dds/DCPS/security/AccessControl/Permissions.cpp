@@ -83,9 +83,9 @@ int Permissions::load(const SSL::SignedDocument& doc)
 
   // Successfully parsed the permissions file
 
-  xercesc::DOMDocument* xmlDoc = parser->getDocument();
+  const xercesc::DOMDocument* xmlDoc = parser->getDocument();
 
-  xercesc::DOMElement* elementRoot = xmlDoc->getDocumentElement();
+  const xercesc::DOMElement* elementRoot = xmlDoc->getDocumentElement();
   if (!elementRoot) {
     ACE_ERROR((LM_ERROR, ACE_TEXT(
         "(%P|%t) AccessControlBuiltInImpl::load_permissions_file: Empty XML document\n")));
@@ -93,7 +93,7 @@ int Permissions::load(const SSL::SignedDocument& doc)
   }
 
   // Find the validity rules
-  xercesc::DOMNodeList* grantRules = xmlDoc->getElementsByTagName(XStr(ACE_TEXT("grant")));
+  const xercesc::DOMNodeList* grantRules = xmlDoc->getElementsByTagName(XStr(ACE_TEXT("grant")));
 
   for (XMLSize_t r = 0, r_len = grantRules->getLength(); r < r_len; ++r) {
     Grant_rch grant = DCPS::make_rch<Grant>();
@@ -105,7 +105,7 @@ int Permissions::load(const SSL::SignedDocument& doc)
     grant->name = toString(rattrs->item(0)->getTextContent());
 
     // Pull out subject name, validity, and default
-    xercesc::DOMNodeList* grantNodes = grantRule->getChildNodes();
+    const xercesc::DOMNodeList* grantNodes = grantRule->getChildNodes();
 
     bool valid_subject = false, valid_default = false;
     for (XMLSize_t gn = 0, gn_len = grantNodes->getLength(); gn < gn_len; ++gn) {
@@ -117,7 +117,7 @@ int Permissions::load(const SSL::SignedDocument& doc)
       if (g_tag == ACE_TEXT("subject_name")) {
         valid_subject = (grant->subject.parse(toString(grantNode->getTextContent())) == 0);
       } else if (g_tag == ACE_TEXT("validity")) {
-        xercesc::DOMNodeList* validityNodes = grantNode->getChildNodes();
+        const xercesc::DOMNodeList* validityNodes = grantNode->getChildNodes();
 
         for (XMLSize_t vn = 0, vn_len = validityNodes->getLength(); vn < vn_len; ++vn) {
 
@@ -153,7 +153,7 @@ int Permissions::load(const SSL::SignedDocument& doc)
     }
 
     // Pull out allow/deny rules
-    xercesc::DOMNodeList* adGrantNodes = grantRule->getChildNodes();
+    const xercesc::DOMNodeList* adGrantNodes = grantRule->getChildNodes();
 
     for (XMLSize_t gn = 0, gn_len = adGrantNodes->getLength(); gn < gn_len; ++gn) {
 
@@ -166,7 +166,7 @@ int Permissions::load(const SSL::SignedDocument& doc)
 
         rule.ad_type = (g_tag == ACE_TEXT("allow_rule")) ? ALLOW : DENY;
 
-        xercesc::DOMNodeList* adNodeChildren = adGrantNode->getChildNodes();
+        const xercesc::DOMNodeList* adNodeChildren = adGrantNode->getChildNodes();
 
         for (XMLSize_t anc = 0, anc_len = adNodeChildren->getLength(); anc < anc_len; ++anc) {
 
@@ -175,7 +175,7 @@ int Permissions::load(const SSL::SignedDocument& doc)
           const XStr anc_tag = adNodeChild->getNodeName();
 
           if (anc_tag == ACE_TEXT("domains")) {   //domain list
-            xercesc::DOMNodeList* domainIdNodes = adNodeChild->getChildNodes();
+            const xercesc::DOMNodeList* domainIdNodes = adNodeChild->getChildNodes();
 
             for (XMLSize_t did = 0, did_len = domainIdNodes->getLength(); did < did_len; ++did) {
 
@@ -186,7 +186,7 @@ int Permissions::load(const SSL::SignedDocument& doc)
               } else if (ACE_TEXT("id_range") == XStr(domainIdNode->getNodeName())) {
                 int min_value = 0;
                 int max_value = 0;
-                xercesc::DOMNodeList* domRangeIdNodes = domainIdNode->getChildNodes();
+                const xercesc::DOMNodeList* domRangeIdNodes = domainIdNode->getChildNodes();
 
                 for (XMLSize_t drid = 0, drid_len = domRangeIdNodes->getLength(); drid < drid_len; ++drid) {
 
@@ -215,14 +215,14 @@ int Permissions::load(const SSL::SignedDocument& doc)
             Action action;
 
             action.ps_type = (anc_tag == ACE_TEXT("publish")) ? PUBLISH : SUBSCRIBE;
-            xercesc::DOMNodeList* topicListNodes = adNodeChild->getChildNodes();
+            const xercesc::DOMNodeList* topicListNodes = adNodeChild->getChildNodes();
 
             for (XMLSize_t tln = 0, tln_len = topicListNodes->getLength(); tln < tln_len; ++tln) {
 
               const xercesc::DOMNode* topicListNode = topicListNodes->item(tln);
 
               if (ACE_TEXT("topics") == XStr(topicListNode->getNodeName())) {
-                xercesc::DOMNodeList* topicNodes = topicListNode->getChildNodes();
+                const xercesc::DOMNodeList* topicNodes = topicListNode->getChildNodes();
 
                 for (XMLSize_t tn = 0, tn_len = topicNodes->getLength(); tn < tn_len; ++tn) {
 
@@ -234,7 +234,7 @@ int Permissions::load(const SSL::SignedDocument& doc)
                 }
 
               } else if (ACE_TEXT("partitions") == XStr(topicListNode->getNodeName())) {
-                xercesc::DOMNodeList* partitionNodes = topicListNode->getChildNodes();
+                const xercesc::DOMNodeList* partitionNodes = topicListNode->getChildNodes();
 
                 for (XMLSize_t pn = 0, pn_len = partitionNodes->getLength(); pn < pn_len; ++pn) {
 
