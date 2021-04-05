@@ -106,7 +106,7 @@ bool SignedDocument::load(const std::string& uri, DDS::Security::SecurityExcepti
 void SignedDocument::get_original(std::string& dst) const
 {
   dst.resize(original_.length());
-  std::memcpy(&dst[0], &original_[0], original_.length());
+  std::memcpy(&dst[0], original_.get_buffer(), original_.length());
 }
 
 bool SignedDocument::get_original_minus_smime(std::string& dst) const
@@ -237,10 +237,7 @@ int SignedDocument::deserialize(const std::string& src)
   }
 
   original_.length(src.length() + 1);
-  std::memcpy(&original_[0], src.c_str(), src.length());
-
-  // To appease the other DDS security implementations
-  original_[src.length()] = 0u;
+  std::memcpy(original_.get_buffer(), src.c_str(), src.length() + 1);
 
   if (0 < original_.length()) {
     PKCS7_from_data(original_);
@@ -297,13 +294,22 @@ PKCS7* SignedDocument::PKCS7_from_SMIME_file(const std::string& path)
 
 #else
   std::ifstream in(path.c_str(), std::ios::binary);
+
+  if (!in) {
+    ACE_ERROR((LM_WARNING,
+               "(%P|%t) SignedDocument::PKCS7_from_SMIME_file:"
+               "WARNING: Failed to load file '%C'; '%m'\n",
+               path.c_str()));
+    return NULL;
+  }
+
   const std::ifstream::pos_type begin = in.tellg();
   in.seekg(0, std::ios::end);
   const std::ifstream::pos_type end = in.tellg();
   in.seekg(0, std::ios::beg);
 
   original_.length(end - begin + 1);
-  in.read(reinterpret_cast<char*>(&original_[0]), end - begin);
+  in.read(reinterpret_cast<char*>(original_.get_buffer()), end - begin);
 
   if (!in) {
     ACE_ERROR((LM_WARNING,

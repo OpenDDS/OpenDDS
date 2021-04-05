@@ -84,10 +84,9 @@ bool LocalAuthCredentialData::load_access_permissions(const DDS::Security::Permi
     return false;
   }
 
-  size_t len = std::strlen(cperm);
-  access_permissions_.length(len + 1);
-  std::memcpy(&access_permissions_[0], cperm, len);
-  access_permissions_[len] = 0u;
+  const size_t len = std::strlen(cperm);
+  access_permissions_.length(static_cast<CORBA::ULong>(len + 1));
+  std::memcpy(&access_permissions_[0], cperm, len + 1); // copies the NULL
 
   return true;
 }
