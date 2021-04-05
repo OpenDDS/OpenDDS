@@ -346,7 +346,7 @@ jobs:
       uses: actions/cache@v2.1.4
       with:
         path: ${{ github.job }}.tar.xz
-        key: ${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
+        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
     - name: checkout autobuild
       uses: actions/checkout@v2.3.4
       with:
