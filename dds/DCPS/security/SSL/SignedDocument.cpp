@@ -308,7 +308,7 @@ PKCS7* SignedDocument::PKCS7_from_SMIME_file(const std::string& path)
   const std::ifstream::pos_type end = in.tellg();
   in.seekg(0, std::ios::beg);
 
-  original_.length(end - begin + 1);
+  original_.length(static_cast<CORBA::ULong>(end - begin + 1));
   in.read(reinterpret_cast<char*>(original_.get_buffer()), end - begin);
 
   if (!in) {
