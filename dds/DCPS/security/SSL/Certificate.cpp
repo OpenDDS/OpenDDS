@@ -5,7 +5,6 @@
 
 #include "Certificate.h"
 #include "dds/DCPS/security/CommonUtilities.h"
-#include "dds/DCPS/SequenceIterator.h"
 #include "Err.h"
 #include <algorithm>
 #include <cstring>
@@ -435,6 +434,13 @@ void Certificate::load_cert_bytes(const std::string& path)
 
 #else
   std::ifstream in(path.c_str(), std::ios::binary);
+  const std::ifstream::pos_type begin = in.tellg();
+  in.seekg(0, std::ios::end);
+  const std::ifstream::pos_type end = in.tellg();
+  in.seekg(0, std::ios::beg);
+
+  original_bytes_.length(end - begin + 1);
+  in.read(reinterpret_cast<char*>(&original_bytes_[0]), end - begin);
 
   if (!in) {
     ACE_ERROR((LM_WARNING,
@@ -444,15 +450,9 @@ void Certificate::load_cert_bytes(const std::string& path)
     return;
   }
 
-  DCPS::SequenceBackInsertIterator<DDS::OctetSeq> back_inserter(original_bytes_);
-
-  std::copy((std::istreambuf_iterator<char>(in)),
-            std::istreambuf_iterator<char>(),
-            back_inserter);
-
   // To appease the other DDS security implementations which
   // append a null byte at the end of the cert.
-  *back_inserter = 0u;
+  original_bytes_[end - begin] = 0u;
 #endif
 }
 
@@ -546,9 +546,7 @@ X509* Certificate::x509_from_pem(const DDS::OctetSeq& bytes,
 
 int Certificate::serialize(DDS::OctetSeq& dst) const
 {
-  std::copy(DCPS::const_sequence_begin(original_bytes_),
-            DCPS::const_sequence_end(original_bytes_),
-            DCPS::back_inserter(dst));
+  dst = original_bytes_;
 
   if (dst.length() == original_bytes_.length()) {
     return 0;

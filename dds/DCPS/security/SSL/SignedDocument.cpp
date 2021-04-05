@@ -5,7 +5,6 @@
 
 #include "SignedDocument.h"
 #include "dds/DCPS/security/CommonUtilities.h"
-#include "dds/DCPS/SequenceIterator.h"
 #include "Err.h"
 #include <openssl/pem.h>
 #include <cstring>
@@ -106,11 +105,8 @@ bool SignedDocument::load(const std::string& uri, DDS::Security::SecurityExcepti
 
 void SignedDocument::get_original(std::string& dst) const
 {
-  dst = "";
-
-  std::copy(DCPS::const_sequence_begin(original_),
-            DCPS::const_sequence_end(original_),
-            std::back_inserter(dst));
+  dst.resize(original_.length());
+  std::memcpy(&dst[0], &original_[0], original_.length());
 }
 
 bool SignedDocument::get_original_minus_smime(std::string& dst) const
@@ -211,10 +207,7 @@ int SignedDocument::verify_signature(const Certificate& ca) const
 
 int SignedDocument::serialize(DDS::OctetSeq& dst) const
 {
-  std::copy(DCPS::const_sequence_begin(original_),
-            DCPS::const_sequence_end(original_),
-            DCPS::back_inserter(dst));
-
+  dst = original_;
   return dst.length() == original_.length() ? 0 : 1;
 }
 
@@ -227,9 +220,7 @@ int SignedDocument::deserialize(const DDS::OctetSeq& src)
 
   // Assume the trailing null is already set
 
-  std::copy(DCPS::const_sequence_begin(src),
-            DCPS::const_sequence_end(src),
-            DCPS::back_inserter(original_));
+  original_ = src;
 
   if (0 < original_.length()) {
     PKCS7_from_data(original_);
@@ -245,11 +236,11 @@ int SignedDocument::deserialize(const std::string& src)
     return 1;
   }
 
-  DCPS::SequenceBackInsertIterator<DDS::OctetSeq> back_inserter(original_);
-  std::copy(src.begin(), src.end(), back_inserter);
+  original_.length(src.length() + 1);
+  std::memcpy(&original_[0], src.c_str(), src.length());
 
   // To appease the other DDS security implementations
-  *back_inserter = 0u;
+  original_[src.length()] = 0u;
 
   if (0 < original_.length()) {
     PKCS7_from_data(original_);
@@ -306,12 +297,13 @@ PKCS7* SignedDocument::PKCS7_from_SMIME_file(const std::string& path)
 
 #else
   std::ifstream in(path.c_str(), std::ios::binary);
+  const std::ifstream::pos_type begin = in.tellg();
+  in.seekg(0, std::ios::end);
+  const std::ifstream::pos_type end = in.tellg();
+  in.seekg(0, std::ios::beg);
 
-  DCPS::SequenceBackInsertIterator<DDS::OctetSeq> back_inserter(original_);
-
-  std::copy(std::istreambuf_iterator<char>(in),
-            std::istreambuf_iterator<char>(),
-            back_inserter);
+  original_.length(end - begin + 1);
+  in.read(reinterpret_cast<char*>(&original_[0]), end - begin);
 
   if (!in) {
     ACE_ERROR((LM_WARNING,
@@ -322,7 +314,7 @@ PKCS7* SignedDocument::PKCS7_from_SMIME_file(const std::string& path)
   }
 
   // To appease the other DDS security implementations
-  *back_inserter = 0u;
+  original_[end - begin] = 0u;
 #endif
 
   return original_.length() ? PKCS7_from_data(original_) : 0;

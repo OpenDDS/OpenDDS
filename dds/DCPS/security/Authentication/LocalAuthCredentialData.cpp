@@ -84,10 +84,11 @@ bool LocalAuthCredentialData::load_access_permissions(const DDS::Security::Permi
     return false;
   }
 
-  DCPS::SequenceBackInsertIterator<DDS::OctetSeq> back_inserter(access_permissions_);
-  std::copy(cperm, cperm + std::strlen(cperm), back_inserter);
+  size_t len = std::strlen(cperm);
+  access_permissions_.length(len + 1);
+  std::memcpy(&access_permissions_[0], cperm, len);
+  access_permissions_[len] = 0u;
 
-  *back_inserter = 0u;
   return true;
 }
 
