@@ -830,22 +830,16 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   ::DDS::Security::HandshakeHandle handshake_handle,
   ::DDS::Security::SecurityException & ex)
 {
-  // - SecurityException is populated if VALIDATION_FAILED
-  DDS::Security::ValidationResult_t result = DDS::Security::VALIDATION_OK;
+  const std::string incoming_class_ext = get_extension(handshake_message_in.class_id);
 
-  // Handle differently based on which direction this handshake is going
-  std::string incoming_class_ext = get_extension(handshake_message_in.class_id);
+  if (Handshake_Reply_Class_Ext == incoming_class_ext) {
+    return process_handshake_reply(handshake_message_out, handshake_message_in, handshake_handle, ex);
 
-  if (0 == Handshake_Reply_Class_Ext.compare(incoming_class_ext))
-  {
-    result = process_handshake_reply(handshake_message_out, handshake_message_in, handshake_handle, ex);
-  }
-  else if (0 == Handshake_Final_Class_Ext.compare(incoming_class_ext))
-  {
-    result = process_final_handshake(handshake_message_in, handshake_handle, ex);
+  } else if (Handshake_Final_Class_Ext == incoming_class_ext) {
+    return process_final_handshake(handshake_message_in, handshake_handle, ex);
   }
 
-  return result;
+  return DDS::Security::VALIDATION_PENDING_RETRY;
 }
 
 ::DDS::Security::SharedSecretHandle* AuthenticationBuiltInImpl::get_shared_secret(
