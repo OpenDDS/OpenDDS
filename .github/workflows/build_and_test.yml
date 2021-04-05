@@ -322,6 +322,7 @@ jobs:
 
     runs-on: ubuntu-18.04
 
+    needs: wait_cancel_previous
     steps:
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
@@ -464,9 +465,18 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        cat install_setenv.sh
         . install_setenv.sh
         cd tests/DCPS/Messenger
+        git clean -dfx .
+        $ACE_ROOT/bin/mwc.pl -type gnuace .
+        make
+        perl run_test.pl rtps
+    - name: test make install java
+      shell: bash
+      run: |
+        cd OpenDDS
+        . install_setenv.sh
+        cd java/tests/messenger
         git clean -dfx .
         $ACE_ROOT/bin/mwc.pl -type gnuace .
         make
