@@ -78,10 +78,10 @@ DisjointSequence::insert_i(const SequenceRange& range,
       }
     }
 
-    sequences_.erase(range_below, range_above);
+    sequences_.ranges_.erase(range_below, range_above);
   }
 
-  sequences_.insert(newRange);
+  sequences_.ranges_.insert(newRange);
   return true;
 }
 
@@ -171,7 +171,7 @@ DisjointSequence::insert_bitmap_range(RangeSet::iterator& iter,
 
   if (iter == sequences_.end() || iter->first > next) {
     // can't combine on either side, insert a new range
-    iter = sequences_.insert(iter, range);
+    iter = sequences_.ranges_.insert(iter, range);
     return true;
   }
 
@@ -192,9 +192,9 @@ DisjointSequence::insert_bitmap_range(RangeSet::iterator& iter,
   }
 
   const SequenceNumber low = std::min(iter->first, range.first);
-  sequences_.erase(iter, right);
+  sequences_.ranges_.erase(iter, right);
 
-  iter = sequences_.insert(SequenceRange(low, high)).first;
+  iter = sequences_.ranges_.insert(SequenceRange(low, high)).first;
   return true;
 }
 
@@ -347,21 +347,21 @@ DisjointSequence::erase(const SequenceNumber value)
   if (iter != sequences_.end()) {
     if (iter->first == value &&
         iter->second == value) {
-      sequences_.erase(iter);
+      sequences_.ranges_.erase(iter);
     } else if (iter->first == value) {
       SequenceRange x(value + 1, iter->second);
-      sequences_.erase(iter);
-      sequences_.insert(x);
+      sequences_.ranges_.erase(iter);
+      sequences_.ranges_.insert(x);
     } else if (iter->second == value) {
       SequenceRange x(iter->first, value.previous());
-      sequences_.erase(iter);
-      sequences_.insert(x);
+      sequences_.ranges_.erase(iter);
+      sequences_.ranges_.insert(x);
     } else {
       SequenceRange x(iter->first, value.previous());
       SequenceRange y(value + 1, iter->second);
-      sequences_.erase(iter);
-      sequences_.insert(x);
-      sequences_.insert(y);
+      sequences_.ranges_.erase(iter);
+      sequences_.ranges_.insert(x);
+      sequences_.ranges_.insert(y);
     }
   }
 }
