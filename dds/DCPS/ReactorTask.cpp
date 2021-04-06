@@ -75,7 +75,7 @@ int ReactorTask::open_reactor_task(void*, TimeDuration timeout,
 
   // Set our reactor and proactor pointers to a new reactor/proactor objects.
 #if defined (ACE_WIN32) && defined (ACE_HAS_WIN32_OVERLAPPED_IO)
-  if (use_async_send_ && !reactor) {
+  if (use_async_send_ && !reactor_) {
     reactor_ = new ACE_Reactor(new ACE_WFMO_Reactor, 1);
 
     ACE_WIN32_Proactor* proactor_impl = new ACE_WIN32_Proactor(0, 1);
