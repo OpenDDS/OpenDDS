@@ -478,7 +478,7 @@ jobs:
         . install_setenv.sh
         cd java/tests/messenger
         git clean -dfx .
-        $ACE_ROOT/bin/mwc.pl -type gnuace .
+        $ACE_ROOT/bin/mwc.pl -type gnuace  -language java .
         make
         perl run_test.pl rtps
     - name: remove install clutter
