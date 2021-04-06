@@ -273,6 +273,13 @@ bool is_infinite(const DDS::Duration_t& value)
     value.nanosec == DDS::DURATION_INFINITE_NSEC;
 }
 
+ACE_INLINE OpenDDS_Dcps_Export
+const MonotonicTime_t& monotonic_time_zero()
+{
+  static const MonotonicTime_t zero = { 0, 0 };
+  return zero;
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

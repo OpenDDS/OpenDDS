@@ -28,7 +28,7 @@ struct AssociationData {
 
   AssociationData()
     : remote_id_(GUID_UNKNOWN)
-    , participant_discovered_at_({ 0, 0})
+    , participant_discovered_at_(monotonic_time_zero())
     , remote_transport_context_(0)
     , publication_transport_priority_(0)
     , remote_reliable_(false)
