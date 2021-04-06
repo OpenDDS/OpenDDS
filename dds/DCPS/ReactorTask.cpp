@@ -42,8 +42,7 @@ ReactorTask::~ReactorTask()
   cleanup();
 }
 
-void
-ReactorTask::cleanup()
+void ReactorTask::cleanup()
 {
 #if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
   if (proactor_) {
@@ -75,26 +74,18 @@ int ReactorTask::open_reactor_task(void*, TimeDuration timeout,
   name_ = name;
 
   // Set our reactor and proactor pointers to a new reactor/proactor objects.
-  if (use_async_send_) {
 #if defined (ACE_WIN32) && defined (ACE_HAS_WIN32_OVERLAPPED_IO)
-    if (!reactor_) {
-      reactor_ = new ACE_Reactor(new ACE_WFMO_Reactor, 1);
+  if (use_async_send_ && !reactor) {
+    reactor_ = new ACE_Reactor(new ACE_WFMO_Reactor, 1);
 
-      ACE_WIN32_Proactor* proactor_impl = new ACE_WIN32_Proactor(0, 1);
-      proactor_ = new ACE_Proactor(proactor_impl, 1);
-      reactor_->register_handler(proactor_impl, proactor_impl->get_handle());
-    }
-#else
-    if (!reactor_) {
-      reactor_ = new ACE_Reactor(new ACE_Select_Reactor, true);
-      proactor_ = 0;
-    }
+    ACE_WIN32_Proactor* proactor_impl = new ACE_WIN32_Proactor(0, 1);
+    proactor_ = new ACE_Proactor(proactor_impl, 1);
+    reactor_->register_handler(proactor_impl, proactor_impl->get_handle());
+  } else
 #endif
-  } else {
-    if (!reactor_) {
-      reactor_ = new ACE_Reactor(new ACE_Select_Reactor, true);
-      proactor_ = 0;
-    }
+  if (!reactor_) {
+    reactor_ = new ACE_Reactor(new ACE_Select_Reactor, true);
+    proactor_ = 0;
   }
 
   if (!timer_queue_) {
