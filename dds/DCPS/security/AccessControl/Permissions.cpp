@@ -190,7 +190,7 @@ int Permissions::load(const SSL::SignedDocument& doc)
 
                 for (XMLSize_t drid = 0, drid_len = domRangeIdNodes->getLength(); drid < drid_len; ++drid) {
 
-                  const xercesc::DOMNode* domRangeIdNode = domRangeIdNodes->item(did);
+                  const xercesc::DOMNode* domRangeIdNode = domRangeIdNodes->item(drid);
 
                   if (ACE_TEXT("min") == XStr(domRangeIdNode->getNodeName())) {
                     min_value = toInt(domRangeIdNode->getTextContent());
