@@ -2607,9 +2607,9 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --compiler=clang++ --std=c++11 --ipv6 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
-        echo "FLAGS_C_CC += -O1 -fsanitize=address -fno-omit-frame-pointer" >> ACE_TAO/ACE/include/makeinclude/platform_macros.GNU
-        echo "LDFLAGS += -fsanitize=address" >> ACE_TAO/ACE/include/makeinclude/platform_macros.GNU
+        ./configure --std=c++11 --ipv6 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        echo "CPPFLAGS += -ggdb -O1 -fsanitize=address -fno-omit-frame-pointer" >> ACE_TAO/ACE/include/makeinclude/platform_macros.GNU
+        echo "LDFLAGS += -ggdb -fsanitize=address" >> ACE_TAO/ACE/include/makeinclude/platform_macros.GNU
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -2674,7 +2674,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --compiler=clang++ --std=c++11 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --std=c++11 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -2791,6 +2791,9 @@ jobs:
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
+        echo "leak:convert_hostent_to_gaih_addrtuple" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        echo "leak:send_graceful_disconnect_message" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        export LSAN_OPTIONS=suppressions=$GITHUB_WORKSPACE/OpenDDS/suppr.txt
         export ASAN_OPTIONS=detect_leaks=1
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
