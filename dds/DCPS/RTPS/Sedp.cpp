@@ -399,14 +399,18 @@ Sedp::init(const RepoId& guid,
   transport_cfg_ = TheTransportRegistry->create_config(config_name.c_str());
   transport_cfg_->instances_.push_back(transport_inst_);
 
+  rtps_inst->opendds_discovery_default_listener_ = publications_reader_;
+  rtps_inst->opendds_discovery_guid_ = guid;
+
   reactor_task_ = transport_inst_->reactor_task();
+  // One should assume that the transport is configured after this
+  // point.  Changes to transport_inst_ or rtps_inst after this line
+  // may not be reflected.
   ACE_Reactor* reactor = reactor_task_->get_reactor();
   job_queue_ = DCPS::make_rch<DCPS::JobQueue>(reactor);
   type_lookup_init(reactor_task_->interceptor());
 
   // Configure and enable each reader/writer
-  rtps_inst->opendds_discovery_default_listener_ = publications_reader_;
-  rtps_inst->opendds_discovery_guid_ = guid;
   const bool reliable = true, durable = true;
 
 #ifdef OPENDDS_SECURITY
