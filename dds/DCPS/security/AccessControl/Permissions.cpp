@@ -121,7 +121,7 @@ int Permissions::load(const SSL::SignedDocument& doc)
 
         for (XMLSize_t vn = 0, vn_len = validityNodes->getLength(); vn < vn_len; ++vn) {
 
-          const xercesc::DOMNode* validityNode = validityNodes->item(gn);
+          const xercesc::DOMNode* validityNode = validityNodes->item(vn);
 
           const XStr v_tag = validityNode->getNodeName();
 
