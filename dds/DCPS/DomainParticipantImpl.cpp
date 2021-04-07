@@ -1931,7 +1931,6 @@ DDS::InstanceHandle_t DomainParticipantImpl::lookup_handle(const GUID_t& id) con
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, DDS::HANDLE_NIL);
   const CountedHandleMap::const_iterator iter = handles_.find(id);
-//  OPENDDS_ASSERT(id == GUID_UNKNOWN || iter != handles_.end());
   return iter == handles_.end() ? DDS::HANDLE_NIL : iter->second.first;
 }
 
