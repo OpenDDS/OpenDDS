@@ -461,7 +461,7 @@ void Certificate::load_cert_bytes(const std::string& path)
 
   // To appease the other DDS security implementations which
   // append a null byte at the end of the cert.
-  original_bytes_[end - begin] = 0u;
+  original_bytes_[original_bytes_.length() - 1] = 0u;
 #endif
 }
 

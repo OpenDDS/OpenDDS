@@ -236,7 +236,7 @@ int SignedDocument::deserialize(const std::string& src)
     return 1;
   }
 
-  original_.length(src.length() + 1);
+  original_.length(static_cast<unsigned int>(src.length() + 1));
   std::memcpy(original_.get_buffer(), src.c_str(), src.length() + 1);
 
   if (0 < original_.length()) {
@@ -320,7 +320,7 @@ PKCS7* SignedDocument::PKCS7_from_SMIME_file(const std::string& path)
   }
 
   // To appease the other DDS security implementations
-  original_[end - begin] = 0u;
+  original_[original_.length() - 1] = 0u;
 #endif
 
   return original_.length() ? PKCS7_from_data(original_) : 0;
