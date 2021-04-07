@@ -30,11 +30,14 @@ ReactorTask::ReactorTask(bool useAsyncSend)
   , reactor_(0)
   , reactor_owner_(ACE_OS::NULL_thread)
   , proactor_(0)
+#ifdef OPENDDS_REACTOR_TASK_ASYNC
   , use_async_send_(useAsyncSend)
+#endif
   , timer_queue_(0)
   , thread_status_(0)
   , timeout_(TimeDuration(0))
 {
+  ACE_UNUSED_ARG(useAsyncSend);
 }
 
 ReactorTask::~ReactorTask()
@@ -74,7 +77,7 @@ int ReactorTask::open_reactor_task(void*, TimeDuration timeout,
   name_ = name;
 
   // Set our reactor and proactor pointers to a new reactor/proactor objects.
-#if defined (ACE_WIN32) && defined (ACE_HAS_WIN32_OVERLAPPED_IO)
+#ifdef OPENDDS_REACTOR_TASK_ASYNC
   if (use_async_send_ && !reactor_) {
     reactor_ = new ACE_Reactor(new ACE_WFMO_Reactor, 1);
 

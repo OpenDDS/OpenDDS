@@ -130,7 +130,12 @@ private:
   ACE_Reactor*  reactor_;
   ACE_thread_t  reactor_owner_;
   ACE_Proactor* proactor_;
-  bool          use_async_send_;
+
+#if defined ACE_WIN32 && defined ACE_HAS_WIN32_OVERLAPPED_IO
+#define OPENDDS_REACTOR_TASK_ASYNC
+  bool use_async_send_;
+#endif
+
   TimerQueueType* timer_queue_;
 
   // thread status reporting
