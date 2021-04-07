@@ -39,7 +39,7 @@ if ($test->flag('no-suffix')) {
 }
 
 if ($test->flag('json')) {
-  # This will result in an additional results file being written out in json format
+  # This will result in an additional results file being written in json format
   $tc_opts .= " --json";
 }
 
