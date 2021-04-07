@@ -126,9 +126,9 @@ public:
   template <typename T>
   class OrderedRanges {
   public:
-    typedef typename std::pair<T, T> TPair;
-    typedef typename bool (*Compare)(const TPair&, const TPair&);
-    typedef typename OPENDDS_SET_CMP(TPair, Compare) Container;
+    typedef std::pair<T, T> TPair;
+    typedef bool (*Compare)(const TPair&, const TPair&);
+    typedef OPENDDS_SET_CMP(TPair, Compare) Container;
     typedef typename Container::size_type size_type;
     typedef typename Container::const_iterator const_iterator;
     typedef const_iterator iterator;
