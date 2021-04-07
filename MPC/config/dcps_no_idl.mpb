@@ -1,4 +1,4 @@
-project: dds_taolib, dds_macros, dcps_optional_bidir_giop, dds_any_support, coverage_optional, dds_vc_warnings {
+project: dds_macros, dds_taolib, dcps_optional_bidir_giop, dds_any_support, coverage_optional, dds_vc_warnings {
   libs        += OpenDDS_Dcps
   after       += OpenDDS_Dcps
   libpaths    += $(DDS_ROOT)/lib

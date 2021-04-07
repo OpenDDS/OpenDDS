@@ -10,7 +10,7 @@ project(*idl) : dcps_test {
   custom_only = 1
 }
 
-project(*SyncServer) : taoexe, portableserver, iortable, coverage_optional, dds_macros {
+project(*SyncServer) : dds_macros, taoexe, portableserver, iortable, coverage_optional {
   requires += no_opendds_safety_profile
   exename   = syncServer
   includes += ../Sync

@@ -1,5 +1,5 @@
 project(OpenDDS_Dcps): core, coverage_optional, \
-        dcps_optional_features, dcps_optional_safety, dds_macros, \
+        dds_macros, dcps_optional_features, dcps_optional_safety, \
         dds_suppress_any_support, dds_taolib, gen_ostream, install, valgrind, \
         dds_vc_warnings, dds_versioning_idl_defaults, msvc_bigobj, dcps_optional_rapidjson {
   sharedname   = OpenDDS_Dcps

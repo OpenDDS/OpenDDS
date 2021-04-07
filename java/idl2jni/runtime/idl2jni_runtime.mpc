@@ -1,4 +1,4 @@
-project: taolib, java, javah, optional_jni_check, dds_macros, i2jrt_optional, install {
+project: dds_macros, taolib, java, javah, optional_jni_check, i2jrt_optional, install {
 
   // make sure this can't be built as a static lib
   sharedname   = idl2jni_runtime

@@ -10,7 +10,7 @@ project(DDS*idl): dcps_idl_only_lib {
   }
 }
 
-project(DDS*Aggregator) : portableserver, orbsvcsexe, iormanip, ftorb, dds_macros {
+project(DDS*Aggregator) : dds_macros, portableserver, orbsvcsexe, iormanip, ftorb {
   exename = Aggregator
   requires += tao_orbsvcs
   requires += no_opendds_safety_profile

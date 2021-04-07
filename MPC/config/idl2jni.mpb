@@ -2,7 +2,7 @@ feature(!java_pre_jpms) : java {
   javacflags += -classpath $(DDS_ROOT)/lib/i2jrt_corba.jar
 }
 
-project: taolib_with_idl, portableserver, java, dds_macros {
+project: dds_macros, taolib_with_idl, portableserver, java {
 
   includes   += $(DDS_ROOT)/java/idl2jni/runtime
   libpaths   += $(DDS_ROOT)/lib
