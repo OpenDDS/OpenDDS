@@ -1892,8 +1892,10 @@ DomainParticipantImpl::get_instance_handle()
 
 DDS::InstanceHandle_t DomainParticipantImpl::assign_handle(const GUID_t& id)
 {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, DDS::HANDLE_NIL);
   if (id == GUID_UNKNOWN) {
-    const DDS::InstanceHandle_t ih = participant_handles_.next();
+    const DDS::InstanceHandle_t ih =
+      reusable_handles_.empty() ? participant_handles_.next() : reusable_handles_.pop_front();
     if (DCPS_debug_level > 5) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) DomainParticipantImpl::assign_handle: "
                  "New unmapped InstanceHandle %d\n", ih));
@@ -1901,11 +1903,10 @@ DDS::InstanceHandle_t DomainParticipantImpl::assign_handle(const GUID_t& id)
     return ih;
   }
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, DDS::HANDLE_NIL);
-
   const CountedHandleMap::iterator location = handles_.find(id);
   if (location == handles_.end()) {
-    const DDS::InstanceHandle_t handle = participant_handles_.next();
+    const DDS::InstanceHandle_t handle =
+      reusable_handles_.empty() ? participant_handles_.next() : reusable_handles_.pop_front();
     if (DCPS_debug_level > 5) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) DomainParticipantImpl::assign_handle: "
                  "New mapped InstanceHandle %d for %C\n",
@@ -1930,6 +1931,7 @@ DDS::InstanceHandle_t DomainParticipantImpl::lookup_handle(const GUID_t& id) con
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, DDS::HANDLE_NIL);
   const CountedHandleMap::const_iterator iter = handles_.find(id);
+//  OPENDDS_ASSERT(id == GUID_UNKNOWN || iter != handles_.end());
   return iter == handles_.end() ? DDS::HANDLE_NIL : iter->second.first;
 }
 
@@ -1938,6 +1940,7 @@ void DomainParticipantImpl::return_handle(DDS::InstanceHandle_t handle)
   ACE_GUARD(ACE_Thread_Mutex, guard, handle_protector_);
   const RepoIdMap::iterator r_iter = repoIds_.find(handle);
   if (r_iter == repoIds_.end()) {
+    reusable_handles_.add(handle);
     if (DCPS_debug_level > 5) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) DomainParticipantImpl::return_handle: "
                  "Returned unmapped InstanceHandle %d\n", handle));
@@ -1960,6 +1963,7 @@ void DomainParticipantImpl::return_handle(DDS::InstanceHandle_t handle)
   if (--mapped.second == 0) {
     handles_.erase(h_iter);
     repoIds_.erase(r_iter);
+    reusable_handles_.add(handle);
   }
 }
 

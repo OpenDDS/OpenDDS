@@ -121,7 +121,7 @@ public:
   /// Common non-mutating operations on the underlying set are public members of this class.
   /// Note that due to this design, size() is the number of contiguous ranges, not individual values.
   /// Some mutating operations on the underlying set that can't violate the invariants are also provided (like clear).
-  /// Type T needs to support value-initialization, construction from int, copying, 
+  /// Type T needs to support value-initialization, construction from int, copying,
   /// addition, subtraction, and comparison using == and <.
   template <typename T>
   class OrderedRanges {
