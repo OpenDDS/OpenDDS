@@ -115,10 +115,12 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 {
   OPENDDS_ASSERT(!equal_guid_prefixes(local_prefix, GUIDPREFIX_UNKNOWN));
 
-  assign(local_prefix_, local_prefix);
+  if (equal_guid_prefixes(local_prefix_, GUIDPREFIX_UNKNOWN)) {
+    assign(local_prefix_, local_prefix);
 #ifdef OPENDDS_SECURITY
-  relay_stun_task(DCPS::MonotonicTimePoint::now());
+    relay_stun_task(DCPS::MonotonicTimePoint::now());
 #endif
+  }
 
   RtpsUdpDataLink_rch link = make_rch<RtpsUdpDataLink>(ref(*this), local_prefix, config(), reactor_task());
 
@@ -559,7 +561,7 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
 #endif
 
   if (config.opendds_discovery_default_listener_) {
-    link_= make_datalink(config.opendds_discovery_guid_.guidPrefix);
+    link_ = make_datalink(config.opendds_discovery_guid_.guidPrefix);
     link_->default_listener(*config.opendds_discovery_default_listener_);
   }
 
@@ -827,6 +829,8 @@ RtpsUdpTransport::stop_ice()
 void
 RtpsUdpTransport::relay_stun_task(const DCPS::MonotonicTimePoint& /*now*/)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, relay_stun_mutex_);
+
   if (!(config().use_rtps_relay() ||
         config().rtps_relay_only())) {
     return;
