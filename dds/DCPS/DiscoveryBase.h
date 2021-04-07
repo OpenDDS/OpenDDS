@@ -207,6 +207,7 @@ namespace OpenDDS {
       struct DiscoveredSubscription : PoolAllocationBase {
         DiscoveredSubscription()
         : bit_ih_(DDS::HANDLE_NIL)
+        , participant_discovered_at_(monotonic_time_zero())
         , transport_context_(0)
 #ifdef OPENDDS_SECURITY
         , have_ice_agent_info_(false)
@@ -217,6 +218,7 @@ namespace OpenDDS {
         explicit DiscoveredSubscription(const DiscoveredReaderData& r)
         : reader_data_(r)
         , bit_ih_(DDS::HANDLE_NIL)
+        , participant_discovered_at_(monotonic_time_zero())
         , transport_context_(0)
 #ifdef OPENDDS_SECURITY
         , have_ice_agent_info_(false)
@@ -256,6 +258,7 @@ namespace OpenDDS {
       struct DiscoveredPublication : PoolAllocationBase {
         DiscoveredPublication()
         : bit_ih_(DDS::HANDLE_NIL)
+        , participant_discovered_at_(monotonic_time_zero())
         , transport_context_(0)
 #ifdef OPENDDS_SECURITY
         , have_ice_agent_info_(false)
@@ -266,6 +269,7 @@ namespace OpenDDS {
         explicit DiscoveredPublication(const DiscoveredWriterData& w)
         : writer_data_(w)
         , bit_ih_(DDS::HANDLE_NIL)
+        , participant_discovered_at_(monotonic_time_zero())
         , transport_context_(0)
 #ifdef OPENDDS_SECURITY
         , have_ice_agent_info_(false)
@@ -864,6 +868,7 @@ namespace OpenDDS {
       struct LocalEndpoint {
         LocalEndpoint()
           : topic_id_(GUID_UNKNOWN)
+          , participant_discovered_at_(monotonic_time_zero())
           , transport_context_(0)
           , sequence_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
 #ifdef OPENDDS_SECURITY
@@ -2205,6 +2210,7 @@ namespace OpenDDS {
 
         DiscoveredParticipant()
         : location_ih_(DDS::HANDLE_NIL)
+        , discovered_at_(monotonic_time_zero())
         , bit_ih_(DDS::HANDLE_NIL)
         , seq_reset_count_(0)
 #ifdef OPENDDS_SECURITY
@@ -2234,6 +2240,7 @@ namespace OpenDDS {
           const SequenceNumber& seq)
         : pdata_(p)
         , location_ih_(DDS::HANDLE_NIL)
+        , discovered_at_(monotonic_time_zero())
         , bit_ih_(DDS::HANDLE_NIL)
         , last_seq_(seq)
         , seq_reset_count_(0)

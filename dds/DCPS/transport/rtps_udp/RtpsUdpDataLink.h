@@ -717,7 +717,7 @@ private:
         const RtpsReaderMap::iterator rr = readers_.find(local);
         if (rr == readers_.end()) {
           if (transport_debug.log_dropped_messages) {
-            ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::RtpsWriter::process_nackfrag - %C -> %C unknown local reader\n", LogGuid(src).c_str(), LogGuid(local).c_str()));
+            ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::datareader_dispatch - %C -> %C unknown local reader\n", LogGuid(src).c_str(), LogGuid(local).c_str()));
           }
           return;
         }
