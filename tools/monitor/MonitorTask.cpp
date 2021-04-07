@@ -868,7 +868,7 @@ Monitor::MonitorTask::readBuiltinTopicData(
   // Find the instance to read.
   OpenDDS::DCPS::DomainParticipantImpl* dpi =
     dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(this->participant_.in());
-  const DDS::InstanceHandle_t instance = dpi->lookup_handle(id);
+  DDS::InstanceHandle_t instance = dpi->id_to_handle(id);
 
   if (this->options_.verbose()) {
     OpenDDS::DCPS::GuidConverter converter(id);

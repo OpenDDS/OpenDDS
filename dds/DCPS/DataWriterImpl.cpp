@@ -165,26 +165,21 @@ DataWriterImpl::init(
 DDS::InstanceHandle_t
 DataWriterImpl::get_instance_handle()
 {
-  const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
-  return get_entity_instance_handle(publication_id_, participant.get());
+  using namespace OpenDDS::DCPS;
+  RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
+  if (participant)
+    return participant->id_to_handle(publication_id_);
+  return DDS::HANDLE_NIL;
 }
 
 DDS::InstanceHandle_t
 DataWriterImpl::get_next_handle()
 {
+  using namespace OpenDDS::DCPS;
   RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
-  if (participant) {
-    return participant->assign_handle();
-  }
+  if (participant)
+    return participant->id_to_handle(GUID_UNKNOWN);
   return DDS::HANDLE_NIL;
-}
-
-void DataWriterImpl::return_handle(DDS::InstanceHandle_t handle)
-{
-  const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
-  if (participant) {
-    participant->return_handle(handle);
-  }
 }
 
 DDS::Subscriber_var
@@ -422,7 +417,8 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
     if (!participant)
       return;
 
-    const DDS::InstanceHandle_t handle = participant->assign_handle(remote_id);
+    DDS::InstanceHandle_t handle =
+      participant->id_to_handle(remote_id);
 
     {
       // protect publication_match_status_ and status changed flags.
@@ -670,11 +666,6 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
   // subscription lost.
   if (notify_lost && handles.length() > 0) {
     this->notify_publication_lost(handles);
-  }
-
-  const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
-  for (unsigned int i = 0; i < handles.length(); ++i) {
-    participant->return_handle(handles[i]);
   }
 }
 
@@ -2679,7 +2670,7 @@ DataWriterImpl::lookup_instance_handles(const ReaderIdSeq& ids,
   hdls.length(num_rds);
 
   for (CORBA::ULong i = 0; i < num_rds; ++i) {
-    hdls[i] = participant->lookup_handle(ids[i]);
+    hdls[i] = participant->id_to_handle(ids[i]);
   }
 }
 

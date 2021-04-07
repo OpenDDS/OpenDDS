@@ -445,7 +445,8 @@ RecorderImpl::add_association(const RepoId&            yourId,
   //
   if (!is_bit_) {
 
-    const DDS::InstanceHandle_t handle = participant_servant_->assign_handle(writer.writerId);
+    DDS::InstanceHandle_t handle =
+      this->participant_servant_->id_to_handle(writer.writerId);
 
     //
     // We acquire the publication_handle_lock_ for the remainder of our
@@ -706,10 +707,6 @@ RecorderImpl::remove_associations_i(const WriterIdSeq& writers,
   // if (this->monitor_) {
   //   this->monitor_->report();
   // }
-
-  for (unsigned int i = 0; i < handles.length(); ++i) {
-    participant_servant_->return_handle(handles[i]);
-  }
 }
 
 void
@@ -931,7 +928,7 @@ RecorderImpl::lookup_instance_handles(const WriterIdSeq&       ids,
   hdls.length(num_wrts);
 
   for (CORBA::ULong i = 0; i < num_wrts; ++i) {
-    hdls[i] = participant_servant_->lookup_handle(ids[i]);
+    hdls[i] = this->participant_servant_->id_to_handle(ids[i]);
   }
 }
 
@@ -1016,7 +1013,7 @@ RecorderImpl::enable()
 DDS::InstanceHandle_t
 RecorderImpl::get_instance_handle()
 {
-  return get_entity_instance_handle(subscription_id_, participant_servant_);
+  return this->participant_servant_->id_to_handle(subscription_id_);
 }
 
 void
@@ -1039,10 +1036,10 @@ RecorderImpl::unregister_for_writer(const RepoId& participant,
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 DDS::ReturnCode_t
-RecorderImpl::repoid_to_bit_key(const GUID_t& id,
+RecorderImpl::repoid_to_bit_key(const DCPS::RepoId&     id,
                                 DDS::BuiltinTopicKey_t& key)
 {
-  const DDS::InstanceHandle_t publication_handle = participant_servant_->lookup_handle(id);
+  DDS::InstanceHandle_t const publication_handle = this->participant_servant_->id_to_handle(id);
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,

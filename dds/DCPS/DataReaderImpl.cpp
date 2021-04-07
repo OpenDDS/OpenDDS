@@ -210,8 +210,11 @@ void DataReaderImpl::init(
 DDS::InstanceHandle_t
 DataReaderImpl::get_instance_handle()
 {
-  const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
-  return get_entity_instance_handle(subscription_id_, participant.get());
+  using namespace OpenDDS::DCPS;
+  RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
+  if (participant)
+    return participant->id_to_handle(subscription_id_);
+  return DDS::HANDLE_NIL;
 }
 
 void
@@ -373,15 +376,15 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
   }
   // We no longer hold the publication_handle_lock_.
 
-
-  const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
-
-  if (!participant)
-    return;
-
-  const DDS::InstanceHandle_t handle = participant->assign_handle(remote_id);
-
   if (!is_bit_) {
+
+    RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
+
+    if (!participant)
+      return;
+
+    const DDS::InstanceHandle_t handle = participant->id_to_handle(remote_id);
+
     // We acquire the publication_handle_lock_ for the remainder of our
     // processing.
     {
@@ -2483,18 +2486,10 @@ DataReaderImpl::get_next_handle(const DDS::BuiltinTopicKey_t& key)
 
   if (is_bit()) {
     const RepoId id = bit_key_to_repo_id(key);
-    return participant->assign_handle(id);
+    return participant->id_to_handle(id);
 
   } else {
-    return participant->assign_handle();
-  }
-}
-
-void DataReaderImpl::return_handle(DDS::InstanceHandle_t handle)
-{
-  const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
-  if (participant) {
-    participant->return_handle(handle);
+    return participant->id_to_handle(GUID_UNKNOWN);
   }
 }
 
@@ -2614,7 +2609,7 @@ DataReaderImpl::lookup_instance_handles(const WriterIdSeq& ids,
   RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
   if (participant) {
     for (CORBA::ULong i = 0; i < num_wrts; ++i) {
-      hdls[i] = participant->lookup_handle(ids[i]);
+      hdls[i] = participant->id_to_handle(ids[i]);
     }
   }
 }

@@ -1234,7 +1234,6 @@ WriteDataContainer::unregister_all()
     // Get the next iterator before erase the instance handle.
     PublicationInstanceMapType::iterator it_next = it;
     ++it_next;
-    writer_->return_handle(it->first);
     // Remove the instance from the instance list.
     unbind(instances_, it->first);
     it = it_next;
