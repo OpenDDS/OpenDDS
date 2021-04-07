@@ -10,6 +10,7 @@
 
 #include "EntityImpl.h"
 #include "Definitions.h"
+#include "DisjointSequence.h"
 #include "TopicImpl.h"
 #include "InstanceHandle.h"
 #include "OwnershipManager.h"
@@ -122,8 +123,6 @@ public:
   typedef OPENDDS_MAP(OPENDDS_STRING, RefCounted_Topic) TopicMap;
 
   typedef OPENDDS_MAP(OPENDDS_STRING, DDS::TopicDescription_var) TopicDescriptionMap;
-
-  typedef OPENDDS_MAP(DDS::InstanceHandle_t, RepoId) RepoIdMap;
 
   DomainParticipantImpl(InstanceHandleGenerator&           handle_generator,
                         const DDS::DomainId_t&             domain_id,
@@ -482,9 +481,11 @@ private:
 
   typedef std::pair<DDS::InstanceHandle_t, unsigned int> HandleWithCounter;
   typedef OPENDDS_MAP_CMP(GUID_t, HandleWithCounter, GUID_tKeyLessThan) CountedHandleMap;
+  typedef OPENDDS_MAP(DDS::InstanceHandle_t, RepoId) RepoIdMap;
 
-  /// Bidirectional collection of handles <--> RepoIds.
+  /// Instance handles assigned which are mapped to GUIDs (use handle_protector_)
   CountedHandleMap handles_;
+  /// By-handle lookup of instance handles assigned to GUIDs (use handle_protector_)
   RepoIdMap repoIds_;
 
   typedef OPENDDS_MAP_CMP(GUID_t, DDS::InstanceHandle_t, GUID_tKeyLessThan) HandleMap;
@@ -510,9 +511,11 @@ private:
   /// The built in topic subscriber.
   DDS::Subscriber_var bit_subscriber_;
 
-  /// Instance handle generators for non-repo backed entities
-  /// (i.e. subscribers and publishers).
+  /// Get instances handles from DomainParticipantFactory (use handle_protector_)
   InstanceHandleGenerator& participant_handles_;
+
+  /// Keep track of handles that can be reused (use handle_protector_)
+  DisjointSequence::OrderedRanges<DDS::InstanceHandle_t> reusable_handles_;
 
   unique_ptr<Monitor> monitor_;
 
@@ -522,7 +525,6 @@ private:
 
   /// Publisher ID generator.
   RepoIdSequence pub_id_gen_;
-  RepoId nextPubId();
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   ACE_Thread_Mutex filter_cache_lock_;

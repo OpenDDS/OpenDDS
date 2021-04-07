@@ -17,8 +17,7 @@ using namespace OpenDDS::DCPS;
 
 int ACE_TMAIN(int, ACE_TCHAR*[])
 {
-  try
-  {
+  try {
     // Construction (default)
     {
       DisjointSequence sequence;
@@ -945,9 +944,75 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
         }
       }
     }
-  }
-  catch (std::runtime_error& err)
-  {
+    typedef DisjointSequence::OrderedRanges<int> IntRanges;
+    {
+      IntRanges ir;
+      ir.add(1);
+      TEST_CHECK(ir.has(1));
+      TEST_CHECK(!ir.has(2));
+
+      TEST_CHECK(ir.pop_front() == 1);
+      TEST_CHECK(ir.empty());
+
+      ir.add(3);
+      TEST_CHECK(ir.has(3));
+      ir.remove(3);
+      TEST_CHECK(ir.empty());
+
+      ir.add(3);
+      ir.add(5);
+      TEST_CHECK(ir.has(3));
+      TEST_CHECK(ir.has(5));
+      TEST_CHECK(ir.size() == 2);
+      ir.add(4);
+      TEST_CHECK(ir.has(4));
+      TEST_CHECK(ir.size() == 1);
+      ir.clear();
+      TEST_CHECK(ir.size() == 0);
+
+      ir.add(1);
+      ir.add(2);
+      TEST_CHECK(ir.has(1));
+      TEST_CHECK(ir.has(2));
+      TEST_CHECK(ir.size() == 1);
+      ir.clear();
+      TEST_CHECK(ir.size() == 0);
+
+      ir.add(2);
+      ir.add(1);
+      TEST_CHECK(ir.has(1));
+      TEST_CHECK(ir.has(2));
+      TEST_CHECK(ir.size() == 1);
+      ir.add(3);
+      TEST_CHECK(ir.has(1));
+      TEST_CHECK(ir.has(2));
+      TEST_CHECK(ir.has(3));
+      TEST_CHECK(ir.size() == 1);
+      ir.add(4);
+      TEST_CHECK(ir.has(1));
+      TEST_CHECK(ir.has(2));
+      TEST_CHECK(ir.has(3));
+      TEST_CHECK(ir.has(4));
+      TEST_CHECK(ir.size() == 1);
+      ir.add(7);
+      ir.add(8);
+      TEST_CHECK(ir.has(1));
+      TEST_CHECK(ir.has(2));
+      TEST_CHECK(ir.has(3));
+      TEST_CHECK(ir.has(4));
+      TEST_CHECK(ir.has(7));
+      TEST_CHECK(ir.has(8));
+      TEST_CHECK(ir.size() == 2);
+      TEST_CHECK(ir.pop_front() == 1);
+      TEST_CHECK(ir.size() == 2);
+      TEST_CHECK(!ir.has(1));
+      TEST_CHECK(ir.has(2));
+      TEST_CHECK(ir.has(3));
+      TEST_CHECK(ir.has(4));
+      TEST_CHECK(ir.has(7));
+      TEST_CHECK(ir.has(8));
+    }
+  } catch (const std::runtime_error& err) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %C\n"),
       err.what()), -1);
   }
