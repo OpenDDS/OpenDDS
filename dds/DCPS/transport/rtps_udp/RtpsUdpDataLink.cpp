@@ -1932,6 +1932,7 @@ bool
 RtpsUdpDataLink::RtpsWriter::add_reader(const ReaderInfo_rch& reader)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
+  OPENDDS_ASSERT(!reader->durable_ || durable_);
 
   if (stopping_) {
     return false;
