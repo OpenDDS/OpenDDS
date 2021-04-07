@@ -2791,10 +2791,10 @@ jobs:
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
-        echo "leak:convert_hostent_to_gaih_addrtuple" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        echo "leak:getaddrinfo" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
         echo "leak:send_graceful_disconnect_message" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
         export LSAN_OPTIONS=suppressions=$GITHUB_WORKSPACE/OpenDDS/suppr.txt
-        export ASAN_OPTIONS=detect_leaks=1
+        export ASAN_OPTIONS=detect_leaks=1:fast_unwind_on_malloc=0
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v2
