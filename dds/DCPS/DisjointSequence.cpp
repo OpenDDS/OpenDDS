@@ -30,7 +30,9 @@ DisjointSequence::insert_i(const SequenceRange& range,
 {
   validate(range);
 
-  RangeSet::iterator range_above = sequences_.lower_bound(range);
+  typedef RangeSet::Container::iterator iter_t;
+
+  iter_t range_above = sequences_.lower_bound(range);
   if (range_above != sequences_.end()
       && range_above->first <= range.first) {
     return false; // already have this range, nothing to insert
@@ -48,7 +50,7 @@ DisjointSequence::insert_i(const SequenceRange& range,
   const SequenceNumber::Value previous = range.first.getValue() - 1;
   // find the lower_bound for the SequenceNumber just before this range
   // to see if any ranges need to combine
-  const RangeSet::iterator range_below =
+  const iter_t range_below =
     sequences_.lower_bound(SequenceRange(1 /*ignored*/,
                                          (previous > 0) ? previous
                                          : SequenceNumber::ZERO()));
@@ -60,7 +62,7 @@ DisjointSequence::insert_i(const SequenceRange& range,
     }
 
     if (gaps) {
-      RangeSet::iterator gap_iter = range_below;
+      iter_t gap_iter = range_below;
       if (range.first < gap_iter->second) {
         gaps->push_back(SequenceRange(range.first,
                                       gap_iter->second.previous()));
@@ -90,7 +92,7 @@ DisjointSequence::insert(SequenceNumber value, ACE_CDR::ULong num_bits,
                          const ACE_CDR::Long bits[])
 {
   bool inserted = false;
-  RangeSet::iterator iter = sequences_.end();
+  RangeSet::Container::iterator iter = sequences_.end();
   bool range_start_is_valid = false;
   SequenceNumber::Value range_start = 0;
   const SequenceNumber::Value val = value.getValue();
@@ -150,7 +152,7 @@ DisjointSequence::insert(SequenceNumber value, ACE_CDR::ULong num_bits,
 }
 
 bool
-DisjointSequence::insert_bitmap_range(RangeSet::iterator& iter,
+DisjointSequence::insert_bitmap_range(RangeSet::Container::iterator& iter,
                                       const SequenceRange& range)
 {
   // This is similar to insert_i(), except it doesn't need an O(log(n)) search
@@ -181,7 +183,7 @@ DisjointSequence::insert_bitmap_range(RangeSet::iterator& iter,
   }
 
   // find the right-most (highest) range we can use
-  RangeSet::iterator right = iter;
+  RangeSet::Container::iterator right = iter;
   for (; right != sequences_.end() && right->second < next; ++right) ;
 
   SequenceNumber high = range.second;
@@ -342,8 +344,8 @@ DisjointSequence::bitmap_num_longs(const SequenceNumber& low, const SequenceNumb
 void
 DisjointSequence::erase(const SequenceNumber value)
 {
-  RangeSet::iterator iter =
-    sequences_.lower_bound(SequenceRange(0 /*ignored*/, value));
+  RangeSet::Container::iterator iter =
+    sequences_.ranges_.lower_bound(SequenceRange(0 /*ignored*/, value));
   if (iter != sequences_.end()) {
     if (iter->first == value &&
         iter->second == value) {
