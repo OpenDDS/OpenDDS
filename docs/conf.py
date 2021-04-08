@@ -39,21 +39,26 @@ author = 'Object Computing, Inc.'
 with open('../dds/Version.h') as f:
     version_file = f.read()
 
-def get_version_prop(macro, is_int=True):
-    regex = r'#define ' + macro + ' ' + ('(\d+)' if is_int else '"(.*)"')
-    m = re.search(regex, version_file)
+def get_version_prop(kind, macro):
+    if kind is bool:
+        regex = r'([01])'
+        cast = lambda v: bool(int(v))
+    elif kind is int:
+        regex = r'(\d+)'
+        cast = lambda v: int(v)
+    elif kind is str:
+        regex = r'"(.*)"'
+        cast = lambda v: v
+    else:
+        raise RuntimeError('Unexpected kind: ' + repr(kind))
+    m = re.search(r'^#\s*define {} {}'.format(macro, regex), version_file)
     if m:
-        return m[1]
-    raise RuntimeError('Could find ' + macro)
+        return cast(m[1])
+    raise RuntimeError('Could not find ' + macro)
 
-metadata = get_version_prop('OPENDDS_VERSION_METADATA', False)
-if metadata:
-    metadata = '-' + metadata
-version = get_version_prop('OPENDDS_MAJOR_VERSION') \
-    + '.' + get_version_prop('OPENDDS_MINOR_VERSION') \
-    + '.' + get_version_prop('OPENDDS_MICRO_VERSION') + metadata
+version = get_version_prop(str, 'OPENDDS_VERSION')
 release = version
-is_release = bool(int(get_version_prop('OPENDDS_IS_RELEASE')))
+is_release = get_version_prop(bool, 'OPENDDS_IS_RELEASE')
 
 
 # -- General configuration ---------------------------------------------------

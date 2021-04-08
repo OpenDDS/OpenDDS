@@ -126,7 +126,7 @@ sub usage {
     "                         options. (default perform check)\n" .
     "  --list-all             Same as --list, but show every step regardless of\n" .
     "                         options.\n" .
-    "  --steps                Optional, Steps to perform, default is all\n" .
+    "  --steps STEPS          Optional, Steps to perform, default is all\n" .
     "                         See \"Step Expressions\" Below for what it accepts.\n" .
     "  --remedy               Remediate problems where possible\n" .
     "  --force                Keep going if possible\n" .
@@ -396,18 +396,15 @@ sub parse_version {
     my $metadata_maybe = $result{metadata} ? "-$result{metadata}" : "";
 
     $result{series_string} = "$result{major}.$result{minor}";
-    $result{series_string_with_metadata} = "$result{series_string}$metadata_maybe";
     $result{release_string} = "$result{series_string}.$result{micro}";
-    $result{release_string_with_metadata} = "$result{release_string}$metadata_maybe";
+    $result{string} = "$result{release_string}$metadata_maybe";
     if ($result{micro} eq "0") {
-      $result{string} = $result{series_string};
+      $result{tag_string} = $result{series_string};
     } else {
-      $result{string} = $result{release_string};
+      $result{tag_string} = $result{release_string};
     }
-    $result{string_with_metadata} = "$result{string}$metadata_maybe";
 
     # For Version Comparison
-    $result{full_string} = $result{release_string_with_metadata};
     my @metadata_fields = split(/\./, $result{metadata});
     $result{metadata_fields} = \@metadata_fields;
   }
@@ -475,7 +472,7 @@ sub version_greater_equal {
 sub version_not_equal {
   my $left = shift();
   my $right = shift();
-  return $left->{full_string} ne $right->{full_string};
+  return $left->{string} ne $right->{string};
 }
 
 sub version_greater {
@@ -532,7 +529,6 @@ sub override_git_remote {
 ############################################################################
 sub verify_git_status_clean {
   my ($settings, $strict) = @_;
-  my $version = $settings->{version};
   my $clean = 1;
   my $status = open(GITSTATUS, 'git status -s|');
   my $modified = $settings->{modified};
@@ -2161,7 +2157,7 @@ my %global_settings = (
     next_version => $next_version,
     parsed_next_version => \%parsed_next_version,
     base_name    => $base_name,
-    git_tag      => "${git_name_prefix}${version}",
+    git_tag      => "${git_name_prefix}$parsed_version{tag_string}",
     clone_dir    => join("/", $workspace, ${base_name}),
     tar_src      => "${base_name}.tar",
     tgz_src      => "${base_name}.tar.gz",
