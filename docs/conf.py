@@ -45,13 +45,13 @@ def get_version_prop(kind, macro):
         cast = lambda v: bool(int(v))
     elif kind is int:
         regex = r'(\d+)'
-        cast = lambda v: int(v)
+        cast = int
     elif kind is str:
         regex = r'"(.*)"'
         cast = lambda v: v
     else:
         raise RuntimeError('Unexpected kind: ' + repr(kind))
-    m = re.search(r'^#\s*define {} {}'.format(macro, regex), version_file)
+    m = re.search(r'#define {} {}'.format(macro, regex), version_file)
     if m:
         return cast(m[1])
     raise RuntimeError('Could not find ' + macro)
@@ -93,6 +93,7 @@ exclude_patterns = [
     'multirepo.md',
     'qt.md',
     'OpenDDS.docset/**',
+    '.venv',
 ]
 
 source_suffix = {
