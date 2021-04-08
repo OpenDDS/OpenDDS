@@ -16,6 +16,9 @@
           },
           { "name": "DCPSDebugLevel",
             "value": "0"
+          },
+          { "name": "DCPSPendingTimeout",
+            "value": "3"
           }
         ]
       }
