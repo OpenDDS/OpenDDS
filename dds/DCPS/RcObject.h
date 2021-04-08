@@ -153,7 +153,7 @@ namespace DCPS {
 
     WeakRcHandle(const RcHandle<T>& rch)
       : weak_object_(rch.in() ? rch.in()->_get_weak_object() : 0)
-      , cached_(rch.in() ? rch.in() : 0)
+      , cached_(rch.in())
     {
     }
 
@@ -171,7 +171,6 @@ namespace DCPS {
       if (weak_object_) {
         weak_object_->_remove_ref();
       }
-      cached_ = 0;
     }
 
     WeakRcHandle& operator=(const WeakRcHandle& other)
@@ -194,7 +193,7 @@ namespace DCPS {
     {
       WeakRcHandle tmp(obj);
       std::swap(weak_object_, tmp.weak_object_);
-       std::swap(cached_, tmp.cached_);
+      std::swap(cached_, tmp.cached_);
       return *this;
     }
 
