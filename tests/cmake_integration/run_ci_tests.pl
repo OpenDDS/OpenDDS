@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 #
 # Script to build and run the CMake integration tests. This is primarily for
-# continuous integration services (travis-ci, azure-pipelines) but it can also
+# continuous integration services (Github Actions) but it can also
 # be used to build and run the tests locally as long as DDS_ROOT and ACE_ROOT
 # are set.
 #
