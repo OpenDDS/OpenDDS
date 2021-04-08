@@ -205,7 +205,7 @@ public:
     T pop_front()
     {
       const T value = begin()->first;
-      remove_i(begin(), value);
+      remove_i(ranges_.begin(), value);
       return value;
     }
 
@@ -261,7 +261,7 @@ private:
   bool insert_i(const SequenceRange& range,
                 OPENDDS_VECTOR(SequenceRange)* gaps = 0);
 
-  bool insert_bitmap_range(RangeSet::iterator& iter, const SequenceRange& sr);
+  bool insert_bitmap_range(RangeSet::Container::iterator& iter, const SequenceRange& sr);
 
 public:
   /// Set the bits in range [low, high] in the bitmap, updating num_bits.
