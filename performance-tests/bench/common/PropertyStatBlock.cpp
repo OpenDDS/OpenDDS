@@ -74,6 +74,13 @@ SimpleStatBlock consolidate(const SimpleStatBlock& sb1, const SimpleStatBlock& s
   }
   result.var_x_sample_count_ = sb1.var_x_sample_count_ + sb2.var_x_sample_count_;
 
+  OPENDDS_ASSERT(sb1.median_sample_count_ <= sb1.median_buffer_.size());
+  OPENDDS_ASSERT(sb1.timestamp_buffer_.size() == 0 || sb1.median_sample_count_ <= sb1.timestamp_buffer_.size());
+  OPENDDS_ASSERT(sb1.timestamp_buffer_.size() == 0 || sb1.median_buffer_.size() == sb1.timestamp_buffer_.size());
+  OPENDDS_ASSERT(sb2.median_sample_count_ <= sb2.median_buffer_.size());
+  OPENDDS_ASSERT(sb2.timestamp_buffer_.size() == 0 || sb2.median_sample_count_ <= sb2.timestamp_buffer_.size());
+  OPENDDS_ASSERT(sb2.timestamp_buffer_.size() == 0 || sb2.median_buffer_.size() == sb2.timestamp_buffer_.size());
+
   // Consolidate median buffers (no need to include unused / invalid values beyond median sample count)
   result.median_sample_count_ = sb1.median_sample_count_ + sb2.median_sample_count_;
   result.median_buffer_.resize(result.median_sample_count_);
@@ -86,8 +93,8 @@ SimpleStatBlock consolidate(const SimpleStatBlock& sb1, const SimpleStatBlock& s
   result.median_sample_overflow_ = result.sample_count_ - result.median_sample_count_;
 
   // Consolidate timestamp buffers
-  size_t sb1_timestamp_buffer_count = sb1.timestamp_buffer_.size();
-  size_t sb2_timestamp_buffer_count = sb2.timestamp_buffer_.size();
+  size_t sb1_timestamp_buffer_count = sb1.timestamp_buffer_.size() ? sb1.median_sample_count_ : 0;
+  size_t sb2_timestamp_buffer_count = sb2.timestamp_buffer_.size() ? sb2.median_sample_count_ : 0;
   result.timestamp_buffer_.resize(sb1_timestamp_buffer_count + sb2_timestamp_buffer_count);
   for (size_t i = 0; i < sb1_timestamp_buffer_count; ++i) {
     result.timestamp_buffer_[i] = sb1.timestamp_buffer_[i];
@@ -167,10 +174,10 @@ void PropertyStatBlock::update(double value, const Builder::TimeStamp& time)
 
   size_t next_median_buffer_index = static_cast<size_t>(sample_count_->value.ull_prop() % median_buffer_.size());
 
-  sample_count_->value.ull_prop(sample_count_->value.ull_prop() + 1);
   if (sample_count_->value.ull_prop() < median_buffer_.size()) {
     median_sample_count_->value.ull_prop(median_sample_count_->value.ull_prop() + 1);
   }
+  sample_count_->value.ull_prop(sample_count_->value.ull_prop() + 1);
 
   if (value < min_->value.double_prop()) {
     min_->value.double_prop(value);
@@ -288,7 +295,7 @@ ConstPropertyStatBlock::ConstPropertyStatBlock(const Builder::PropertySeq& seq, 
   Builder::ConstPropertyIndex timestamp_buffer = get_property(seq, prefix + "_median_timestamp_buffer", Builder::PVK_TIME_SEQ);
 
   if (timestamp_buffer) {
-    timestamp_buffer_.resize(timestamp_buffer->value.double_seq_prop().length());
+    timestamp_buffer_.resize(timestamp_buffer->value.time_seq_prop().length());
     for (size_t i = 0; i < timestamp_buffer_.size(); ++i) {
       timestamp_buffer_[i] = timestamp_buffer->value.time_seq_prop()[static_cast<CORBA::ULong>(i)];
     }
