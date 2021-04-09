@@ -129,7 +129,7 @@ DisjointSequence::insert(SequenceNumber value, ACE_CDR::ULong num_bits,
       range_start = 0;
       range_start_is_valid = false;
 
-      if (iter != sequences_.end() && iter->second.getValue() != to_insert) {
+      if (iter != sequences_.ranges_.end() && iter->second.getValue() != to_insert) {
         // skip ahead: next gap in sequence must be past iter->second
         ACE_CDR::ULong next_i = ACE_CDR::ULong(iter->second.getValue() - val);
         bit = next_i % 32;
@@ -167,7 +167,7 @@ DisjointSequence::insert_bitmap_range(RangeSet::Container::iterator& iter,
       iter = sequences_.ranges_.lower_bound(SequenceRange(0 /*ignored*/, previous));
     } else {
       // start where we left off last time and get the lower_bound(previous)
-      for (; iter != sequences_.end() && iter->second < previous; ++iter) ;
+      for (; iter != sequences_.ranges_.end() && iter->second < previous; ++iter) ;
     }
   }
 
@@ -346,7 +346,7 @@ DisjointSequence::erase(const SequenceNumber value)
 {
   RangeSet::Container::iterator iter =
     sequences_.ranges_.lower_bound(SequenceRange(0 /*ignored*/, value));
-  if (iter != sequences_.end()) {
+  if (iter != sequences_.ranges_.end()) {
     if (iter->first == value &&
         iter->second == value) {
       sequences_.ranges_.erase(iter);
