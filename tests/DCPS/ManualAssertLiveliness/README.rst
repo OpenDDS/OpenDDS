@@ -5,7 +5,7 @@ ManualAssertLiveliness Test
 This test is to test the MANUAL_BY_PARTICIPANT_LIVELINESS_QOS and
 MANUAL_BY_TOPIC_LIVELINESS_QOS support.
 
-The test creates 4 writers that associte with 1 reader.  Two writers
+The test creates 4 writers that associate with 1 reader.  Two writers
 are created with MANUAL_BY_PARTICIPANT_LIVELINESS_QOS and two are
 created with MANUAL_BY_TOPIC_LIVELINESS_QOS.  They have the same lease
 duration. The first MANUAL_BY_PARTICIPANT_LIVELINESS_QOS writer

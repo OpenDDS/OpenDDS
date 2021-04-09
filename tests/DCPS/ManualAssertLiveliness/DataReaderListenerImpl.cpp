@@ -16,10 +16,9 @@
 using namespace Messenger;
 using namespace std;
 
-extern int sub_total_num_messages;
 extern int sub_num_liveliness_change_callbacks;
 
-DataReaderListenerImpl::DataReaderListenerImpl(DistributedConditionSetHandle dcs)
+DataReaderListenerImpl::DataReaderListenerImpl(DistributedConditionSet_rch dcs)
   : dcs_(dcs)
   , num_reads_(0)
   , num_liveliness_change_callbacks_(0)
@@ -31,9 +30,6 @@ DataReaderListenerImpl::~DataReaderListenerImpl()
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
   ++num_reads_;
-  if (num_reads_ == sub_total_num_messages) {
-    dcs_->post("subscriber", "messages_done");
-  }
 
   ::Messenger::MessageDataReader_var message_dr = ::Messenger::MessageDataReader::_narrow(reader);
 
@@ -75,7 +71,7 @@ void DataReaderListenerImpl::on_liveliness_changed(DDS::DataReader_ptr reader,
 {
   ++num_liveliness_change_callbacks_;
   if (num_liveliness_change_callbacks_ == sub_num_liveliness_change_callbacks) {
-    dcs_->post("subscriber", "callbacks_done");
+    dcs_->post(SUBSCRIBER_ACTOR, CALLBACKS_DONE_CONDITION);
   }
 
   DDS::Subscriber_var subscriber = reader->get_subscriber();

@@ -19,6 +19,7 @@ public:
 protected:
   virtual void pre_loop() {}
   virtual void in_loop(int i) = 0;
+  virtual void post_loop() {}
 
   ::DDS::DataWriter_var writer_;
   const char* name_;
@@ -35,6 +36,7 @@ public:
 private:
   void pre_loop();
   void in_loop(int i);
+  void post_loop();
 
   Messenger::MessageDataWriter_var message_dw_;
   Messenger::Message message_;

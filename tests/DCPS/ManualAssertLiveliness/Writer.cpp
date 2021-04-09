@@ -74,6 +74,8 @@ Writer_Base::svc()
     ACE_OS::sleep(pub_assert_liveliness_period);
   }
 
+  post_loop();
+
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer_Base::svc() %C finished\n"), name_));
 
   return 0;
@@ -116,6 +118,21 @@ Write_Samples::in_loop(int i)
   }
 
   ++message_.count;
+}
+
+void
+Write_Samples::post_loop()
+{
+  message_dw_ = MessageDataWriter::_narrow(writer_);
+
+  const DDS::Duration_t timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+  const DDS::ReturnCode_t ret =  message_dw_->wait_for_acknowledgments(timeout);
+  if (ret != ::DDS::RETCODE_OK) {
+    ACE_ERROR ((LM_ERROR,
+                ACE_TEXT("(%P|%t) ERROR: wait_for_acknowledgements: ")
+                ACE_TEXT("%C returned %d\n"),
+                name_, ret));
+  }
 }
 
 Assert_Participant_Liveliness::Assert_Participant_Liveliness(

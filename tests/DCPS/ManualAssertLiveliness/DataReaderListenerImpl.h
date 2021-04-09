@@ -12,11 +12,14 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+const std::string SUBSCRIBER_ACTOR = "subscriber";
+const std::string CALLBACKS_DONE_CONDITION = "callbacks_done";
+
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
 {
 public:
-  DataReaderListenerImpl(DistributedConditionSetHandle dcs);
+  DataReaderListenerImpl(DistributedConditionSet_rch dcs);
 
   virtual ~DataReaderListenerImpl(void);
 
@@ -49,7 +52,7 @@ public:
   }
 
 private:
-  DistributedConditionSetHandle dcs_;
+  DistributedConditionSet_rch dcs_;
   DDS::DataReader_var reader_;
   int num_reads_;
   int num_liveliness_change_callbacks_;

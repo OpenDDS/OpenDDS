@@ -94,7 +94,7 @@ parse_args (int argc, ACE_TCHAR *argv[])
 
 int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
   int status = 0;
-  DistributedConditionSetHandle dcs = OpenDDS::DCPS::make_rch<InMemoryDistributedConditionSet>();
+  DistributedConditionSet_rch dcs = OpenDDS::DCPS::make_rch<InMemoryDistributedConditionSet>();
 
   const int DOMAIN = 111;
 
@@ -257,14 +257,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
     writer3.start();
     writer4.start();
 
-    dcs->wait_for("driver", "subscriber", "messages_done");
-
     writer1.end();
     writer2.end();
     writer3.end();
     writer4.end();
 
-    dcs->wait_for("driver", "subscriber", "callbacks_done");
+    dcs->wait_for("driver", SUBSCRIBER_ACTOR, CALLBACKS_DONE_CONDITION);
   }
 
   ACE_DEBUG((LM_INFO,
@@ -272,6 +270,13 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
              "and %d of %d callbacks\n",
              (int) sub_drl_servant->num_reads(), sub_total_num_messages,
              sub_drl_servant->num_liveliness_change_callbacks(), sub_num_liveliness_change_callbacks));
+
+  if (sub_drl_servant->num_reads() != sub_total_num_messages) {
+    ACE_ERROR((LM_ERROR,
+               "(%P|%t) ERROR: subscriber did not receive expected number of messages. %d/%d\n",
+               sub_drl_servant->num_reads(), sub_total_num_messages));
+    status = 1;
+  }
 
   const unsigned long actual = pub1_dwl1_servant->num_liveliness_lost_callbacks() +
     pub2_dwl2_servant->num_liveliness_lost_callbacks() +
