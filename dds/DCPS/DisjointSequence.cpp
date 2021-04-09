@@ -32,14 +32,14 @@ DisjointSequence::insert_i(const SequenceRange& range,
 
   typedef RangeSet::Container::iterator iter_t;
 
-  iter_t range_above = sequences_.lower_bound(range);
-  if (range_above != sequences_.end()
+  iter_t range_above = sequences_.ranges_.lower_bound(range);
+  if (range_above != sequences_.ranges_.end()
       && range_above->first <= range.first) {
     return false; // already have this range, nothing to insert
   }
 
   SequenceRange newRange = range;
-  if (range_above != sequences_.end()
+  if (range_above != sequences_.ranges_.end()
       && ++SequenceNumber(newRange.second) >= range_above->first) {
     // newRange overlaps range_above, replace range_above with modified newRange
     newRange.second = range_above->second;
@@ -51,10 +51,10 @@ DisjointSequence::insert_i(const SequenceRange& range,
   // find the lower_bound for the SequenceNumber just before this range
   // to see if any ranges need to combine
   const iter_t range_below =
-    sequences_.lower_bound(SequenceRange(1 /*ignored*/,
-                                         (previous > 0) ? previous
-                                         : SequenceNumber::ZERO()));
-  if (range_below != sequences_.end()) {
+    sequences_.ranges_.lower_bound(SequenceRange(1 /*ignored*/,
+                                                 (previous > 0) ? previous
+                                                 : SequenceNumber::ZERO()));
+  if (range_below != sequences_.ranges_.end()) {
     // if low end falls inside of the range_below range
     // then combine
     if (newRange.first > range_below->first) {
@@ -92,7 +92,7 @@ DisjointSequence::insert(SequenceNumber value, ACE_CDR::ULong num_bits,
                          const ACE_CDR::Long bits[])
 {
   bool inserted = false;
-  RangeSet::Container::iterator iter = sequences_.end();
+  RangeSet::Container::iterator iter = sequences_.ranges_.end();
   bool range_start_is_valid = false;
   SequenceNumber::Value range_start = 0;
   const SequenceNumber::Value val = value.getValue();
@@ -129,7 +129,7 @@ DisjointSequence::insert(SequenceNumber value, ACE_CDR::ULong num_bits,
       range_start = 0;
       range_start_is_valid = false;
 
-      if (iter != sequences_.end() && iter->second.getValue() != to_insert) {
+      if (iter != sequences_.ranges_.end() && iter->second.getValue() != to_insert) {
         // skip ahead: next gap in sequence must be past iter->second
         ACE_CDR::ULong next_i = ACE_CDR::ULong(iter->second.getValue() - val);
         bit = next_i % 32;
@@ -163,15 +163,15 @@ DisjointSequence::insert_bitmap_range(RangeSet::Container::iterator& iter,
     next = range.second.getValue() + 1;
 
   if (!sequences_.empty()) {
-    if (iter == sequences_.end()) {
-      iter = sequences_.lower_bound(SequenceRange(0 /*ignored*/, previous));
+    if (iter == sequences_.ranges_.end()) {
+      iter = sequences_.ranges_.lower_bound(SequenceRange(0 /*ignored*/, previous));
     } else {
       // start where we left off last time and get the lower_bound(previous)
-      for (; iter != sequences_.end() && iter->second < previous; ++iter) ;
+      for (; iter != sequences_.ranges_.end() && iter->second < previous; ++iter) ;
     }
   }
 
-  if (iter == sequences_.end() || iter->first > next) {
+  if (iter == sequences_.ranges_.end() || iter->first > next) {
     // can't combine on either side, insert a new range
     iter = sequences_.ranges_.insert(iter, range);
     return true;
@@ -184,10 +184,10 @@ DisjointSequence::insert_bitmap_range(RangeSet::Container::iterator& iter,
 
   // find the right-most (highest) range we can use
   RangeSet::Container::iterator right = iter;
-  for (; right != sequences_.end() && right->second < next; ++right) ;
+  for (; right != sequences_.ranges_.end() && right->second < next; ++right) ;
 
   SequenceNumber high = range.second;
-  if (right != sequences_.end()
+  if (right != sequences_.ranges_.end()
       && right->first <= next && right->first > range.first) {
     high = right->second;
     ++right;
@@ -346,7 +346,7 @@ DisjointSequence::erase(const SequenceNumber value)
 {
   RangeSet::Container::iterator iter =
     sequences_.ranges_.lower_bound(SequenceRange(0 /*ignored*/, value));
-  if (iter != sequences_.end()) {
+  if (iter != sequences_.ranges_.end()) {
     if (iter->first == value &&
         iter->second == value) {
       sequences_.ranges_.erase(iter);
