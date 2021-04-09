@@ -132,7 +132,7 @@ public:
                                const ACE_INET_Addr& from,
                                bool from_sedp);
 
-  static bool validateSequenceNumber(const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter);
+  bool validateSequenceNumber(const DCPS::MonotonicTimePoint& now, const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter);
 
 #ifdef OPENDDS_SECURITY
   void process_handshake_deadlines(const DCPS::MonotonicTimePoint& tv);
