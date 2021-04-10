@@ -262,7 +262,8 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-   - name: build and run CMake tests
+    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - name: build and run CMake tests
       shell: bash
       run: |
         cd OpenDDS
