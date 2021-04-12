@@ -164,11 +164,11 @@ public:
     {
       typedef typename Container::iterator iter_t; // underlying iterator type, not const_iterator
       const iter_t iter = ranges_.lower_bound(TPair(T() /*ignored*/, value));
-      if (iter != end() && !(value < iter->first)) {
+      if (iter != ranges_.end() && !(value < iter->first)) {
         return;
       }
 
-      if (iter != begin() && iter == end()) {
+      if (iter != ranges_.begin() && iter == ranges_.end()) {
         const iter_t last = --ranges_.end();
         if (last->second + T(1) == value) {
           const T first = last->first;
@@ -179,7 +179,7 @@ public:
       } else if (!empty() && value + T(1) == iter->first) {
         const T second = iter->second;
         iter_t prev(iter);
-        const bool combine_left = iter != begin() && (--prev)->second + T(1) == value;
+        const bool combine_left = iter != ranges_.begin() && (--prev)->second + T(1) == value;
         ranges_.erase(iter);
         if (combine_left) {
           const TPair combined(prev->first, second);
