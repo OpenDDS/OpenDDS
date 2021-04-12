@@ -266,7 +266,7 @@ bool ThreadStatusManager::update(const String& thread_key, ThreadStatus status)
   const SystemTimePoint now = SystemTimePoint::now();
   if (DCPS_debug_level >= 4) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) ThreadStatus::update: "
-      "update for thread \"%C\" %C @ %d \n",
+      "update for thread \"%C\" %C @ %d\n",
       thread_key.c_str(), status_to_string(status), now.value().sec()));
   }
   switch (status) {
