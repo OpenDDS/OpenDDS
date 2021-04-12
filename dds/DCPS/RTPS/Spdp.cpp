@@ -663,15 +663,14 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     // add a new participant
     std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq)));
     iter = p.first;
-    iter->second.discovered_at_ = DCPS::time_value_to_monotonic_time(now.value());
+    iter->second.discovered_at_ = now;
     update_lease_expiration_i(iter, now);
     if (!from_relay && from != ACE_INET_Addr()) {
       iter->second.local_address_ = from;
     }
 
     if (DCPS::transport_debug.log_progress) {
-      log_progress("participant discovery", guid_, guid, iter->second.discovered_at_);
-
+      log_progress("participant discovery", guid_, guid, iter->second.discovered_at_.to_monotonic_time());
     }
 
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -752,7 +751,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
   } else { // Existing Participant
     if (from_sedp && DCPS::transport_debug.log_progress) {
-      log_progress("secure participant discovery", guid_, guid, iter->second.discovered_at_);
+      log_progress("secure participant discovery", guid_, guid, iter->second.discovered_at_.to_monotonic_time());
     }
 
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -798,7 +797,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     }
 
     // Check if sequence numbers are increasing
-    if (validateSequenceNumber(seq, iter)) {
+    if (validateSequenceNumber(now, seq, iter)) {
       // Must unlock when calling into part_bit() as it may call back into us
       ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
 
@@ -882,11 +881,14 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 }
 
 bool
-Spdp::validateSequenceNumber(const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter)
+Spdp::validateSequenceNumber(const DCPS::MonotonicTimePoint& now, const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter)
 {
   if (seq.getValue() != 0 && iter->second.last_seq_ != DCPS::SequenceNumber::MAX_VALUE) {
     if (seq < iter->second.last_seq_) {
-      ++iter->second.seq_reset_count_;
+      const bool honeymoon_period = now < iter->second.discovered_at_ + config_->min_resend_delay();
+      if (!honeymoon_period) {
+        ++iter->second.seq_reset_count_;
+      }
       return false;
     } else if (iter->second.seq_reset_count_ > 0) {
       --iter->second.seq_reset_count_;
@@ -1728,7 +1730,7 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
   }
 
   if (DCPS::transport_debug.log_progress) {
-    log_progress("participant crypto token", guid_, src_participant, iter->second.discovered_at_);
+    log_progress("participant crypto token", guid_, src_participant, iter->second.discovered_at_.to_monotonic_time());
   }
 
   const DDS::Security::ParticipantCryptoTokenSeq& inboundTokens =
@@ -1888,7 +1890,7 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
   }
 
   if (DCPS::transport_debug.log_progress) {
-    log_progress("authentication", guid_, guid, iter->second.discovered_at_);
+    log_progress("authentication", guid_, guid, iter->second.discovered_at_.to_monotonic_time());
   }
 
   DDS::Security::ParticipantCryptoHandle dp_crypto_handle =
@@ -2339,8 +2341,9 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
   }
 #endif
 
+
   local_sender_ = DCPS::make_rch<SpdpMulti>(reactor_task->interceptor(), outer->config_->resend_period(), ref(*this), &SpdpTransport::send_local);
-  local_sender_->enable(outer->config_->resend_period());
+  local_sender_->enable(TimeDuration::zero_value);
 
   if (outer->config_->periodic_directed_spdp()) {
     directed_sender_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::send_directed);
@@ -3295,7 +3298,7 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
         return;
       }
 
-      write_i(SEND_MULTICAST);
+      shorten_local_sender_delay_i();
     } else {
       ACE_TCHAR buff[256];
       multicast_address_.addr_to_string(buff, 256);
@@ -3332,7 +3335,7 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
         return;
       }
 
-      write_i(SEND_MULTICAST);
+      shorten_local_sender_delay_i();
     } else {
       ACE_TCHAR buff[256];
       multicast_ipv6_address_.addr_to_string(buff, 256);
@@ -4243,7 +4246,7 @@ DCPS::MonotonicTime_t Spdp::get_participant_discovered_at() const
 DCPS::MonotonicTime_t Spdp::get_participant_discovered_at(const DCPS::RepoId& guid) const
 {
   const DiscoveredParticipantConstIter iter = participants_.find(make_part_guid(guid));
-  return iter->second.discovered_at_;
+  return iter->second.discovered_at_.to_monotonic_time();
 }
 
 void

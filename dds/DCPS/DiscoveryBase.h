@@ -2210,7 +2210,6 @@ namespace OpenDDS {
 
         DiscoveredParticipant()
         : location_ih_(DDS::HANDLE_NIL)
-        , discovered_at_(monotonic_time_zero())
         , bit_ih_(DDS::HANDLE_NIL)
         , seq_reset_count_(0)
 #ifdef OPENDDS_SECURITY
@@ -2240,7 +2239,6 @@ namespace OpenDDS {
           const SequenceNumber& seq)
         : pdata_(p)
         , location_ih_(DDS::HANDLE_NIL)
-        , discovered_at_(monotonic_time_zero())
         , bit_ih_(DDS::HANDLE_NIL)
         , last_seq_(seq)
         , seq_reset_count_(0)
@@ -2300,7 +2298,7 @@ namespace OpenDDS {
         DDS::InstanceHandle_t location_ih_;
 
         ACE_INET_Addr local_address_;
-        MonotonicTime_t discovered_at_;
+        MonotonicTimePoint discovered_at_;
         MonotonicTimePoint lease_expiration_;
         DDS::InstanceHandle_t bit_ih_;
         SequenceNumber last_seq_;
