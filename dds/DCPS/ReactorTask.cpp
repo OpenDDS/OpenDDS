@@ -241,16 +241,54 @@ void ReactorTask::stop()
   }
 }
 
+const char* ThreadStatusManager::status_to_string(ThreadStatus status)
+{
+  switch (status) {
+  case ThreadStatus_Running:
+    return "Running";
+
+  case ThreadStatus_Finished:
+    return "Finished";
+
+  default:
+    if (DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ThreadStatusManager::status_to_string: ")
+        ACE_TEXT("%d is either invalid or not recognized.\n"),
+        status));
+    }
+    return "<Invalid thread status>";
+  }
+}
+
 bool ThreadStatusManager::update(const String& thread_key, ThreadStatus status)
 {
-  ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, lock, false);
+  ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
   const SystemTimePoint now = SystemTimePoint::now();
-  map[thread_key] = Thread(now, status);
   if (DCPS_debug_level >= 4) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) ThreadStatus::update: "
-      "update for thread \"%C\" @ %d\n",
-      thread_key.c_str(), now.value().sec()));
+      "update for thread \"%C\" %C @ %d \n",
+      thread_key.c_str(), status_to_string(status), now.value().sec()));
   }
+  switch (status) {
+  case ThreadStatus_Finished:
+    {
+      Map::iterator it = map_.find(thread_key);
+      if (it == map_.end()) {
+        if (DCPS_debug_level) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ThreadStatus::update: "
+            "Trying to remove \"%C\", but it's not an existing thread!\n",
+            thread_key.c_str()));
+        }
+        return false;
+      }
+      map_.erase(it);
+    }
+    break;
+
+  default:
+    map_[thread_key] = Thread(now, status);
+  }
+
   return true;
 }
 
@@ -283,6 +321,31 @@ String ThreadStatusManager::get_key(const char* safety_profile_tid, const String
   }
 
   return key;
+}
+
+bool ThreadStatusManager::sync_with_parent(ThreadStatusManager& parent,
+  ThreadStatusManager::Map& running, ThreadStatusManager::Map& finished)
+{
+  ACE_READ_GUARD_RETURN(ACE_Thread_Mutex, g1, parent.lock_, false);
+  ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g2, lock_, false);
+
+  // Check for finished threads
+  for (Map::iterator i = map_.begin(); i != map_.end(); /* Do in loop to support erase */) {
+    if (parent.map_.count(i->first) == 0) {
+      finished[i->first] = i->second;
+      map_.erase(i++);
+    } else {
+      ++i;
+    }
+  }
+
+  // Update running threads
+  for (Map::iterator i = parent.map_.begin(); i != parent.map_.end(); ++i) {
+    running[i->first] = i->second;
+    map_[i->first] = i->second;
+  }
+
+  return true;
 }
 
 } // namespace DCPS

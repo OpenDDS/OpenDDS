@@ -2247,7 +2247,7 @@ Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
 
   u_short participantId = 0;
 
-  thread_status_manager_ = 0;
+  global_thread_status_manager_ = 0;
 
 #ifdef OPENDDS_SAFETY_PROFILE
   const u_short startingParticipantId = participantId;
@@ -2372,7 +2372,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
                 ACE_TEXT("Status interval = %u.\n"), interval.value().sec()));
     }
 
-    thread_status_manager_ = TheServiceParticipant->get_thread_status_manager();
+    global_thread_status_manager_ = TheServiceParticipant->get_thread_status_manager();
     thread_status_sender_ = DCPS::make_rch<SpdpPeriodic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::thread_status_task);
     thread_status_sender_->enable(false, interval);
   }
@@ -4084,28 +4084,30 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
   const DCPS::RepoId guid = outer->guid();
   DCPS::InternalThreadBuiltinTopicDataDataReaderImpl* bit = outer->internal_thread_bit();
 
-  if (thread_status_manager_) {
+  if (global_thread_status_manager_) {
+    typedef DCPS::ThreadStatusManager::Map StatusMap;
+    StatusMap running;
+    StatusMap removed;
+    if (!local_thread_status_manager_.sync_with_parent(
+          *global_thread_status_manager_, running, removed) &&
+        DCPS::DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Spdp::SpdpTransport::thread_status_task: "
+        "syncing with global thread status manager failed\n"));
+      return;
+    }
     if (bit) {
-      ACE_READ_GUARD(ACE_Thread_Mutex, g, thread_status_manager_->lock);
-      for (DCPS::ThreadStatusManager::Map::const_iterator i = thread_status_manager_->map.begin();
-          i != thread_status_manager_->map.end(); /* Iterate in loop so we can remove threads */) {
+      for (StatusMap::const_iterator i = removed.begin(); i != removed.end(); ++i) {
         DCPS::InternalThreadBuiltinTopicData data;
         assign(data.participant_guid, guid);
         data.thread_id = i->first.c_str();
+        bit->set_instance_state(bit->lookup_instance(data), DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+      }
 
-        switch (i->second.status) {
-        case DCPS::ThreadStatus_Running:
-          bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE, i->second.timestamp);
-          break;
-
-        case DCPS::ThreadStatus_Finished:
-          bit->set_instance_state(
-            bit->lookup_instance(data), DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE,
-            i->second.timestamp);
-          thread_status_manager_->map.erase(i++);
-          continue;
-        }
-        ++i;
+      for (StatusMap::const_iterator i = running.begin(); i != running.end(); ++i) {
+        DCPS::InternalThreadBuiltinTopicData data;
+        assign(data.participant_guid, guid);
+        data.thread_id = i->first.c_str();
+        bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE, i->second.timestamp);
       }
     } else if (DCPS::DCPS_debug_level >= 2) {
       // Not necessarily an error. App could be shutting down.

@@ -32,7 +32,7 @@ namespace DCPS {
 
 enum ThreadStatus {
   ThreadStatus_Running,
-  ThreadStatus_Finished,
+  ThreadStatus_Finished
 };
 
 struct OpenDDS_Dcps_Export ThreadStatusManager {
@@ -48,8 +48,7 @@ struct OpenDDS_Dcps_Export ThreadStatusManager {
   };
   typedef OPENDDS_MAP(String, Thread) Map;
 
-  ACE_Thread_Mutex lock;
-  Map map;
+  static const char* status_to_string(ThreadStatus status);
 
   /// Get key for map and update.
   /// safety_profile_tid is the thread id under safety profile, otherwise unused.
@@ -60,12 +59,21 @@ struct OpenDDS_Dcps_Export ThreadStatusManager {
   /// given time. Returns false if failed.
   bool update(const String& key, ThreadStatus status = ThreadStatus_Running);
 
+  /// To support multiple readers determining that a thread finished without
+  /// having to do something more complicated to cleanup that fact, have a
+  /// Manager for each reader use this to get the information the readers need.
+  bool sync_with_parent(ThreadStatusManager& parent, Map& running, Map& finished);
+
 #ifdef ACE_HAS_GETTID
   static inline pid_t gettid()
   {
     return syscall(SYS_gettid);
   }
 #endif
+
+private:
+  ACE_Thread_Mutex lock_;
+  Map map_;
 };
 
 class OpenDDS_Dcps_Export ReactorTask : public virtual ACE_Task_Base,
