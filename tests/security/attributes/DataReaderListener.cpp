@@ -54,7 +54,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 #else
     if (reader == part_reader_) {
       DDS::ParticipantBuiltinTopicDataDataReader_var part_reader_impl =
-        DDS::ParticipantBuiltinTopicDataDataReader::_narrow(part_reader_);
+        DDS::ParticipantBuiltinTopicDataDataReader::_narrow(reader);
       if (!part_reader_impl) {
         std::cerr << "ERROR: Failed to get particpant builtin topic reader\n";
         return;
