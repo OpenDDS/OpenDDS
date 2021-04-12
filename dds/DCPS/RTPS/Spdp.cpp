@@ -2247,7 +2247,7 @@ Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
 
   u_short participantId = 0;
 
-  thread_status_ = 0;
+  thread_status_manager_ = 0;
 
 #ifdef OPENDDS_SAFETY_PROFILE
   const u_short startingParticipantId = participantId;
@@ -2362,24 +2362,21 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
   }
 #endif
 
-#ifndef ACE_HAS_MINIMUM_BIT
+#ifndef DDS_HAS_MINIMUM_BIT
   // internal thread bit reporting
   TimeDuration interval = TheServiceParticipant->get_thread_status_interval();
-
-  if (interval > TimeDuration(0)) {
+  if (!interval.is_zero()) {
     if (DCPS::DCPS_debug_level >= 4) {
       ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) Thread status monitoring is active. ")
                 ACE_TEXT("Status interval = %u.\n"), interval.value().sec()));
     }
 
-    thread_status_ = TheServiceParticipant->get_thread_statuses();
-
+    thread_status_manager_ = TheServiceParticipant->get_thread_status_manager();
     thread_status_sender_ = DCPS::make_rch<SpdpPeriodic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::thread_status_task);
-
     thread_status_sender_->enable(false, interval);
   }
-#endif /* ACE_HAS_MINIMUM_BIT */
+#endif /* DDS_HAS_MINIMUM_BIT */
 
   DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
   if (outer->config_->use_ncm() && ncm) {
@@ -4087,21 +4084,33 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
   const DCPS::RepoId guid = outer->guid();
   DCPS::InternalThreadBuiltinTopicDataDataReaderImpl* bit = outer->internal_thread_bit();
 
-  if (TheServiceParticipant->get_thread_status_interval() > TimeDuration(0)) {
-    if (thread_status_ && bit) {
-      ACE_READ_GUARD(ACE_Thread_Mutex, g, thread_status_->lock);
-      for (DCPS::ThreadStatus::Map::const_iterator i = thread_status_->map.begin();
-          i != thread_status_->map.end(); ++i) {
+  if (thread_status_manager_) {
+    if (bit) {
+      ACE_READ_GUARD(ACE_Thread_Mutex, g, thread_status_manager_->lock);
+      for (DCPS::ThreadStatusManager::Map::const_iterator i = thread_status_manager_->map.begin();
+          i != thread_status_manager_->map.end(); /* Iterate in loop so we can remove threads */) {
         DCPS::InternalThreadBuiltinTopicData data;
         assign(data.participant_guid, guid);
         data.thread_id = i->first.c_str();
 
-        bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE, i->second.timestamp);
+        switch (i->second.status) {
+        case DCPS::ThreadStatus_Running:
+          bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE, i->second.timestamp);
+          break;
+
+        case DCPS::ThreadStatus_Finished:
+          bit->set_instance_state(
+            bit->lookup_instance(data), DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE,
+            i->second.timestamp);
+          thread_status_manager_->map.erase(i++);
+          continue;
+        }
+        ++i;
       }
     } else if (DCPS::DCPS_debug_level >= 2) {
       // Not necessarily an error. App could be shutting down.
-      ACE_DEBUG((LM_DEBUG,
-                 "(%P|%t) Spdp::ThreadStatusHandler: Could not get thread data reader.\n"));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Spdp::SpdpTransport::thread_status_task(): "
+        "Could not get thread data reader.\n"));
     }
   }
 #endif /* DDS_HAS_MINIMUM_BIT */

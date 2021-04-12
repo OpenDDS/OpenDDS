@@ -5,7 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
+
 #include "ReactorTask.h"
 
 #if !defined (__ACE_INLINE__)
@@ -34,7 +35,7 @@ ReactorTask::ReactorTask(bool useAsyncSend)
   , use_async_send_(useAsyncSend)
 #endif
   , timer_queue_(0)
-  , thread_status_(0)
+  , thread_status_manager_(0)
   , timeout_(TimeDuration(0))
 {
   ACE_UNUSED_ARG(useAsyncSend);
@@ -64,7 +65,7 @@ void ReactorTask::cleanup()
 }
 
 int ReactorTask::open_reactor_task(void*, TimeDuration timeout,
-  ThreadStatus* thread_stat, const String& name)
+  ThreadStatusManager* thread_status_manager, const String& name)
 {
   GuardType guard(lock_);
 
@@ -73,7 +74,7 @@ int ReactorTask::open_reactor_task(void*, TimeDuration timeout,
 
   // thread status reporting support
   timeout_ = timeout;
-  thread_status_ = thread_stat;
+  thread_status_manager_ = thread_status_manager;
   name_ = name;
 
   // Set our reactor and proactor pointers to a new reactor/proactor objects.
@@ -145,26 +146,26 @@ int ReactorTask::svc()
     condition_.notify_all();
   }
 
+  const bool update_thread_status = thread_status_manager_ && !timeout_.is_zero();
+  const String thread_key = ThreadStatusManager::get_key("ReactorTask", name_);
+
   try {
     // Tell the reactor to handle events.
-    if (timeout_ == TimeDuration(0)) {
-      reactor_->run_reactor_event_loop();
-    } else {
-      const String thread_key = ThreadStatus::get_key("ReactorTask", name_);
-
+    if (update_thread_status) {
       while (state_ == STATE_RUNNING) {
         ACE_Time_Value t = timeout_.value();
         reactor_->run_reactor_event_loop(t, 0);
-        if (thread_status_) {
-          if (DCPS_debug_level >= 4) {
-            ACE_DEBUG((LM_DEBUG,
-                       "(%P|%t) ReactorTask::svc. Updating thread status.\n"));
-          }
-          if (!thread_status_->update(thread_key) && DCPS_debug_level) {
-            ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ReactorTask::svc: updated failed\n"));
-          }
+        if (DCPS_debug_level >= 4) {
+          ACE_DEBUG((LM_DEBUG,
+                     "(%P|%t) ReactorTask::svc. Updating thread status.\n"));
+        }
+        if (!thread_status_manager_->update(thread_key) && DCPS_debug_level) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ReactorTask::svc: updated failed\n"));
         }
       }
+
+    } else {
+      reactor_->run_reactor_event_loop();
     }
   } catch (const std::exception& e) {
     ACE_ERROR((LM_ERROR,
@@ -174,6 +175,18 @@ int ReactorTask::svc()
     ACE_ERROR((LM_ERROR,
                "(%P|%t) ERROR: ReactorTask::svc caught exception.\n"));
   }
+
+  if (update_thread_status) {
+    if (DCPS_debug_level >= 4) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) ReactorTask::svc: "
+        "Updating thread status for the last time\n"));
+    }
+    if (!thread_status_manager_->update(thread_key, ThreadStatus_Finished) &&
+        DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ReactorTask::svc: final updated failed\n"));
+    }
+  }
+
   return 0;
 }
 
@@ -228,11 +241,11 @@ void ReactorTask::stop()
   }
 }
 
-bool ThreadStatus::update(const String& thread_key)
+bool ThreadStatusManager::update(const String& thread_key, ThreadStatus status)
 {
   ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, lock, false);
   const SystemTimePoint now = SystemTimePoint::now();
-  map[thread_key] = Thread(now);
+  map[thread_key] = Thread(now, status);
   if (DCPS_debug_level >= 4) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) ThreadStatus::update: "
       "update for thread \"%C\" @ %d\n",
@@ -241,7 +254,7 @@ bool ThreadStatus::update(const String& thread_key)
   return true;
 }
 
-String ThreadStatus::get_key(const char* safety_profile_tid, const String& name)
+String ThreadStatusManager::get_key(const char* safety_profile_tid, const String& name)
 {
   String key;
 #ifdef OPENDDS_SAFETY_PROFILE

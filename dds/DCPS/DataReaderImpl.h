@@ -530,7 +530,8 @@ public:
     DDS::InstanceStateMask instance_states) = 0;
 
   virtual void set_instance_state(DDS::InstanceHandle_t instance,
-                                  DDS::InstanceStateKind state) = 0;
+                                  DDS::InstanceStateKind state,
+                                  const SystemTimePoint& timestamp = SystemTimePoint::now()) = 0;
 
 #endif
 

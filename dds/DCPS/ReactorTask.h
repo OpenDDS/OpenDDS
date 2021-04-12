@@ -30,13 +30,20 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-struct OpenDDS_Dcps_Export ThreadStatus {
+enum ThreadStatus {
+  ThreadStatus_Running,
+  ThreadStatus_Finished,
+};
+
+struct OpenDDS_Dcps_Export ThreadStatusManager {
   struct Thread {
     Thread() {}
-    explicit Thread(const SystemTimePoint& time)
+    Thread(const SystemTimePoint& time, ThreadStatus status)
       : timestamp(time)
+      , status(status)
     {}
     SystemTimePoint timestamp;
+    ThreadStatus status;
     // TODO(iguessthislldo): Add Participant GUID
   };
   typedef OPENDDS_MAP(String, Thread) Map;
@@ -51,7 +58,7 @@ struct OpenDDS_Dcps_Export ThreadStatus {
 
   /// Update the status of a thread to indicate it was able to check in at the
   /// given time. Returns false if failed.
-  bool update(const String& key);
+  bool update(const String& key, ThreadStatus status = ThreadStatus_Running);
 
 #ifdef ACE_HAS_GETTID
   static inline pid_t gettid()
@@ -71,7 +78,7 @@ public:
 
 public:
   int open_reactor_task(void*, TimeDuration timeout = TimeDuration(0),
-    ThreadStatus* thread_stat = 0, const String& name = "");
+    ThreadStatusManager* thread_status_manager = 0, const String& name = "");
   virtual int open(void* ptr) {
     return open_reactor_task(ptr);
   }
@@ -139,7 +146,7 @@ private:
   TimerQueueType* timer_queue_;
 
   // thread status reporting
-  ThreadStatus* thread_status_;
+  ThreadStatusManager* thread_status_manager_;
   TimeDuration timeout_;
   String name_;
 
