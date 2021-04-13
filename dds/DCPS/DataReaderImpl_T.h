@@ -913,14 +913,18 @@ namespace OpenDDS {
   }
 
   void set_instance_state(DDS::InstanceHandle_t instance,
-                          DDS::InstanceStateKind state)
+                          DDS::InstanceStateKind state,
+                          const SystemTimePoint& timestamp = SystemTimePoint::now())
   {
     using namespace OpenDDS::DCPS;
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
 
     SubscriptionInstance_rch si = get_handle_instance(instance);
     if (si && state != DDS::ALIVE_INSTANCE_STATE) {
+      const DDS::Time_t now = timestamp.to_dds_time();
       DataSampleHeader header;
+      header.source_timestamp_sec_ = now.sec;
+      header.source_timestamp_nanosec_ = now.nanosec;
       const int msg = (state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
         ? DISPOSE_INSTANCE : UNREGISTER_INSTANCE;
       header.message_id_ = static_cast<char>(msg);

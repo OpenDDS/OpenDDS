@@ -112,8 +112,10 @@ public:
     thr_id_ = ACE_OS::thr_self();
 
     const TimeDuration interval = TheServiceParticipant->get_thread_status_interval();
-    ThreadStatus* const status = TheServiceParticipant->get_thread_statuses();
-    const String thread_key = ThreadStatus::get_key("QueueTaskBase", name_);
+    ThreadStatusManager* const thread_status_manager =
+      TheServiceParticipant->get_thread_status_manager();
+    const bool update_thread_status = thread_status_manager && !interval.is_zero();
+    const String thread_key = ThreadStatusManager::get_key("QueueTaskBase", name_);
 
     // Start the "GetWork-And-PerformWork" loop for the current worker thread.
     while (!this->shutdown_initiated_) {
@@ -122,7 +124,7 @@ public:
         GuardType guard(this->lock_);
 
         if (this->queue_.is_empty() && !shutdown_initiated_) {
-          if (interval > TimeDuration(0)) {
+          if (update_thread_status) {
             MonotonicTimePoint expire = MonotonicTimePoint::now() + interval;
 
             do {
@@ -131,15 +133,13 @@ public:
               MonotonicTimePoint now = MonotonicTimePoint::now();
               if (now > expire) {
                 expire = now + interval;
-                if (status) {
-                  if (DCPS_debug_level >= 4) {
-                    ACE_DEBUG((LM_DEBUG,
-                               "(%P|%t) QueueTaskBase::svc. Updating thread status.\n"));
-                  }
-                  if (!status->update(thread_key) && DCPS_debug_level) {
-                    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: QueueTaskBase::svc: "
-                      "thread update failed\n"));
-                  }
+                if (DCPS_debug_level >= 4) {
+                  ACE_DEBUG((LM_DEBUG,
+                             "(%P|%t) QueueTaskBase::svc. Updating thread status.\n"));
+                }
+                if (!thread_status_manager->update(thread_key) && DCPS_debug_level) {
+                  ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: QueueTaskBase::svc: "
+                    "thread update failed\n"));
                 }
               }
             } while (this->queue_.is_empty() && !shutdown_initiated_);
@@ -165,6 +165,17 @@ public:
       }
 
       this->execute(req);
+    }
+
+    if (update_thread_status) {
+      if (DCPS_debug_level >= 4) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) QueueTaskBase::svc: "
+          "Updating thread status for the last time\n"));
+      }
+      if (!thread_status_manager->update(thread_key, ThreadStatus_Finished) &&
+          DCPS_debug_level) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) QueueTaskBase::svc: final update failed\n"));
+      }
     }
 
     // This will never get executed.
