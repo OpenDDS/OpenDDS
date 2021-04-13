@@ -762,9 +762,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   // Write a sample about the relay.
   DDS::DataWriter_var relay_instance_writer_var = relay_publisher->create_datawriter(relay_instances_topic, writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (!relay_instance_writer_var) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Instance data writer\n")));
-      return EXIT_FAILURE;
+  if (!relay_instance_writer_var) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Instance data writer\n")));
+    return EXIT_FAILURE;
   }
 
   RelayInstanceDataWriter_var relay_instance_writer = RelayInstanceDataWriter::_narrow(relay_instance_writer_var);
@@ -781,6 +781,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   ret = relay_instance_writer->write(relay_instance, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to write Relay Instance\n")));
+    return EXIT_FAILURE;
   }
 
   reactor->run_reactor_event_loop();

@@ -16,14 +16,6 @@ public:
     , log_entries_(false)
     , log_discovery_(false)
     , log_activity_(false)
-    , log_relay_statistics_()
-    , log_handler_statistics_()
-    , log_participant_statistics_()
-    , log_domain_statistics_()
-    , publish_relay_statistics_()
-    , publish_handler_statistics_()
-    , publish_participant_statistics_()
-    , publish_domain_statistics_()
   {}
 
   void application_participant_guid(const OpenDDS::DCPS::RepoId& value)
