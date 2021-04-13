@@ -183,7 +183,7 @@ int ReactorTask::svc()
     }
     if (!thread_status_manager_->update(thread_key, ThreadStatus_Finished) &&
         DCPS_debug_level) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ReactorTask::svc: final updated failed\n"));
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ReactorTask::svc: final update failed\n"));
     }
   }
 
@@ -326,24 +326,35 @@ String ThreadStatusManager::get_key(const char* safety_profile_tid, const String
 bool ThreadStatusManager::sync_with_parent(ThreadStatusManager& parent,
   ThreadStatusManager::Map& running, ThreadStatusManager::Map& finished)
 {
-  ACE_READ_GUARD_RETURN(ACE_Thread_Mutex, g1, parent.lock_, false);
-  ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g2, lock_, false);
+  ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g1, lock_, false);
 
-  // Check for finished threads
-  for (Map::iterator i = map_.begin(); i != map_.end(); /* Do in loop to support erase */) {
-    if (parent.map_.count(i->first) == 0) {
-      finished[i->first] = i->second;
-      map_.erase(i++);
-    } else {
-      ++i;
+  {
+    ACE_READ_GUARD_RETURN(ACE_Thread_Mutex, g2, parent.lock_, false);
+
+    // Compare threads to see if if threads were added or removed.
+    Map::iterator ci = map_.begin();
+    Map::iterator pi = parent.map_.begin();
+    bool got_child = ci != map_.end();
+    bool got_parent = pi != parent.map_.end();
+    while (got_child || got_parent) {
+      const int cmp = got_child && got_parent ?
+        std::strcmp(ci->first.c_str(), pi->first.c_str()) : got_parent ? 1 : -1;
+      if (cmp < 0) { // We're behind, this thread was removed
+        finished.insert(*ci);
+        map_.erase(ci++);
+      } else if (cmp > 0) { // We're ahead, this thread was added
+        map_.insert(*pi);
+        ++pi;
+      } else { // Same Thread
+        ++ci;
+        ++pi;
+      }
+      got_parent = pi != parent.map_.end();
+      got_child = ci != map_.end();
     }
   }
 
-  // Update running threads
-  for (Map::iterator i = parent.map_.begin(); i != parent.map_.end(); ++i) {
-    running[i->first] = i->second;
-    map_[i->first] = i->second;
-  }
+  running = map_;
 
   return true;
 }

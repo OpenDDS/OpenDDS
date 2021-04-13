@@ -174,7 +174,7 @@ public:
       }
       if (!thread_status_manager->update(thread_key, ThreadStatus_Finished) &&
           DCPS_debug_level) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) QueueTaskBase::svc: final updated failed\n"));
+        ACE_ERROR((LM_ERROR, "(%P|%t) QueueTaskBase::svc: final update failed\n"));
       }
     }
 
