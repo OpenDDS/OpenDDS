@@ -13,11 +13,12 @@
 
 #include <ace/streams.h>
 
-#include <string>
-
 // Implementation skeleton constructor
-InternalThreadStatusListenerImpl::InternalThreadStatusListenerImpl(OpenDDS::DCPS::String id) :
-  id_(id), count_(0), disposes_(0)
+InternalThreadStatusListenerImpl::InternalThreadStatusListenerImpl(
+  const OpenDDS::DCPS::String& id)
+: id_(id)
+, count_(0)
+, disposes_(0)
 {
 }
 

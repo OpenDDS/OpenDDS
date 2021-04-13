@@ -8,9 +8,10 @@
 #ifndef INTERNAL_THREAD_STATUS_LISTENER_IMPL
 #define INTERNAL_THREAD_STATUS_LISTENER_IMPL
 
-#include <dds/DdsDcpsSubscriptionC.h>
 #include <dds/DCPS/LocalObject.h>
 #include <dds/DCPS/GuidUtils.h>
+
+#include <dds/DdsDcpsSubscriptionC.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -23,7 +24,7 @@ class InternalThreadStatusListenerImpl
 {
 public:
   //Constructor
-  explicit InternalThreadStatusListenerImpl(OpenDDS::DCPS::String id);
+  explicit InternalThreadStatusListenerImpl(const OpenDDS::DCPS::String& id);
 
   //Destructor
   virtual ~InternalThreadStatusListenerImpl();
@@ -55,7 +56,6 @@ private:
   OpenDDS::DCPS::String id_;
   int count_;
   size_t disposes_;
-
 };
 
 #endif /* INTERNAL_THREAD_STATUS_LISTENER_IMPL  */

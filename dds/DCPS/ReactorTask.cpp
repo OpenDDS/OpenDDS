@@ -20,6 +20,9 @@
 #include <ace/WIN32_Proactor.h>
 #include <ace/OS_NS_Thread.h>
 
+#include <exception>
+#include <cstring>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -262,7 +265,7 @@ const char* ThreadStatusManager::status_to_string(ThreadStatus status)
 
 bool ThreadStatusManager::update(const String& thread_key, ThreadStatus status)
 {
-  ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
   const SystemTimePoint now = SystemTimePoint::now();
   if (DCPS_debug_level >= 4) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) ThreadStatus::update: "
@@ -326,18 +329,17 @@ String ThreadStatusManager::get_key(const char* safety_profile_tid, const String
 bool ThreadStatusManager::sync_with_parent(ThreadStatusManager& parent,
   ThreadStatusManager::Map& running, ThreadStatusManager::Map& finished)
 {
-  ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g1, lock_, false);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g1, lock_, false);
 
   {
-    ACE_READ_GUARD_RETURN(ACE_Thread_Mutex, g2, parent.lock_, false);
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g2, parent.lock_, false);
 
     Map::iterator ci = map_.begin();
     Map::iterator pi = parent.map_.begin();
-    bool got_child = ci != map_.end();
-    bool got_parent = pi != parent.map_.end();
-    while (got_child || got_parent) {
-      const int cmp = got_child && got_parent ?
-        std::strcmp(ci->first.c_str(), pi->first.c_str()) : got_parent ? 1 : -1;
+    while (ci != map_.end() || pi != parent.map_.end()) {
+      const int cmp = ci != map_.end() && pi != parent.map_.end() ?
+        std::strcmp(ci->first.c_str(), pi->first.c_str()) :
+        pi != parent.map_.end() ? 1 : -1;
       if (cmp < 0) { // We're behind, this thread was removed
         finished.insert(*ci);
         ++ci;
@@ -349,8 +351,6 @@ bool ThreadStatusManager::sync_with_parent(ThreadStatusManager& parent,
         ++ci;
         ++pi;
       }
-      got_parent = pi != parent.map_.end();
-      got_child = ci != map_.end();
     }
   }
 
