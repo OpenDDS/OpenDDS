@@ -224,6 +224,7 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
   guid = guid_; // may have changed in SpdpTransport constructor
   sedp_->ignore(guid);
   sedp_->init(guid_, *disco, domain_);
+  tport_->open(sedp_->reactor_task());
 
 #ifdef OPENDDS_SECURITY
   ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
@@ -2041,7 +2042,6 @@ void
 Spdp::init_bit(const DDS::Subscriber_var& bit_subscriber)
 {
   bit_subscriber_ = bit_subscriber;
-  tport_->open(sedp_->reactor_task());
 }
 
 class Noop : public DCPS::ReactorInterceptor::Command {
