@@ -318,7 +318,7 @@ jobs:
   #       cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
   #       if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
-  ACE_TAO_u18_o1d0v1_xer0_j12_2:
+  ACE_TAO_u18_o1d0v1_xer0_j12:
 
     runs-on: ubuntu-18.04
 
@@ -347,11 +347,6 @@ jobs:
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
-    - name: checkout autobuild
-      uses: actions/checkout@v2.3.4
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2.3.4
@@ -388,11 +383,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_u18_o1d0v1_xer0_j12_2:
+  build_u18_o1d0v1_xer0_j12:
 
     runs-on: ubuntu-18.04
 
-    needs: ACE_TAO_u18_o1d0v1_xer0_j12_2
+    needs: ACE_TAO_u18_o1d0v1_xer0_j12
 
     steps:
     - name: checkout MPC
@@ -409,13 +404,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ACE_TAO_u18_o1d0v1_xer0_j12_2_artifact
+        name: ACE_TAO_u18_o1d0v1_xer0_j12_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u18_o1d0v1_xer0_j12_2.tar.xz
+        tar xvfJ ACE_TAO_u18_o1d0v1_xer0_j12.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
       with:
@@ -456,12 +451,14 @@ jobs:
         source \$OPENDDS_INSTALL_PREFIX/share/ace/ace-devel.sh
         source \$OPENDDS_INSTALL_PREFIX/share/tao/tao-devel.sh
         source \$OPENDDS_INSTALL_PREFIX/share/dds/dds-devel.sh
+        export JAVA_HOME=/usr/lib/jvm/adoptopenjdk-12-hotspot-amd64
+        export JAVA_PLATFORM=linux
         export PATH="\$OPENDDS_INSTALL_PREFIX/bin:\$PATH"
         export LD_LIBRARY_PATH="\$OPENDDS_INSTALL_PREFIX/lib:\$LD_LIBRARY_PATH"
         export MPC_ROOT=$GITHUB_WORKSPACE/MPC
         export PERL5LIB=$(realpath bin):$(realpath $ACE_ROOT/bin)
         EOF
-    - name: test make install
+    - name: make install build messenger
       shell: bash
       run: |
         cd OpenDDS
@@ -470,8 +467,18 @@ jobs:
         git clean -dfx .
         $ACE_ROOT/bin/mwc.pl -type gnuace .
         make
-        perl run_test.pl rtps
-    - name: test make install java
+    - name: make install build cmake
+      shell: bash
+      run: |
+        cd OpenDDS
+        . install_setenv.sh
+        cd tests/cmake_integration/Messenger/Messenger_1
+        git clean -dfx .
+        mkdir build
+        cd build
+        cmake -DCMAKE_PREFIX_PATH=$DDS_ROOT ..
+        cmake --build .
+    - name: make install build java
       shell: bash
       run: |
         cd OpenDDS
@@ -480,11 +487,136 @@ jobs:
         git clean -dfx .
         $ACE_ROOT/bin/mwc.pl -type gnuace  -language java .
         make
+    - name: create OpenDDS tar.xz artifact
+      shell: bash
+      run: |
+        cd OpenDDS
+        rm -rf ACE_TAO
+        find . -iname "*\.o" | xargs rm
+        tar cvf ../${{ github.job }}.tar setenv.sh
+        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
+        xz -3 ../${{ github.job }}.tar
+    - name: upload OpenDDS artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_artifact
+        path: ${{ github.job }}.tar.xz
+
+  test_u18_o1d0v1_xer0_j12:
+
+    runs-on: ubuntu-18.04
+
+    needs: build_u18_o1d0v1_xer0_j12
+
+    steps:
+    - name: checkout MPC
+      uses: actions/checkout@v2.3.4
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: checkout autobuild
+      uses: actions/checkout@v2.3.4
+      with:
+        repository: DOCGroup/autobuild
+        path: autobuild
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2.3.4
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: ACE_TAO
+    - name: download ACE_TAO artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: ACE_TAO_u18_o1d0v1_xer0_j12_artifact
+        path: ACE_TAO
+    - name: extract ACE_TAO artifact
+      shell: bash
+      run: |
+        cd ACE_TAO
+        tar xvfJ ACE_TAO_u18_o1d0v1_xer0_j12.tar.xz
+    - name: checkout OpenDDS
+      uses: actions/checkout@v2.3.4
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: download OpenDDS artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: build_u18_o1d0v1_xer0_j12_artifact
+        path: OpenDDS
+    - name: extract OpenDDS artifact
+      shell: bash
+      run: |
+        cd OpenDDS
+        tar xvfJ build_u18_o1d0v1_xer0_j12.tar.xz
+    - name: check build configuration
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        tools/scripts/show_build_config.pl
+    # - name: run OpenDDS tests
+    #   shell: bash
+    #   run: |
+    #     cd OpenDDS
+    #     . setenv.sh
+    #     mkdir ${{ github.job }}_autobuild_workspace
+    #     cd ${{ github.job }}_autobuild_workspace
+    #     echo using commit $TRIGGERING_COMMIT for SHA
+    #     echo $TRIGGERING_COMMIT >> ./SHA
+    #     cat > config.xml <<EOF
+    #     <autobuild>
+    #     <configuration>
+    #     <variable name="log_file" value="output.log"/>
+    #     <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+    #     <variable name="project_root" value="$DDS_ROOT"/>
+    #     <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+    #     <variable name="junit_xml_output" value="Tests"/>
+    #     </configuration>
+    #     <command name="log" options="on"/>
+    #     <command name="print_os_version"/>
+    #     <command name="print_env_vars"/>
+    #     <command name="print_ace_config"/>
+    #     <command name="print_make_version"/>
+    #     <command name="check_compiler" options="gcc"/>
+    #     <command name="print_perl_version"/>
+    #     <command name="print_autobuild_config"/>
+    #     <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config LINUX -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS -a -l java/tests/dcps_java_tests.lst"/>
+    #     <command name="log" options="off"/>
+    #     <command name="process_logs" options="prettify"/>
+    #     </autobuild>
+    #     EOF
+    #     $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
+    # - name: upload autobuild output
+    #   uses: actions/upload-artifact@v2
+    #   with:
+    #     name: ${{ github.job }}_autobuild_output
+    #     path: OpenDDS/${{ github.job }}_autobuild_workspace
+    # - name: check results
+    #   shell: bash
+    #   run: |
+    #     cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+    #     if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+    - name: test make install messenger
+      shell: bash
+      run: |
+        cd OpenDDS
+        . install_setenv.sh
+        cd tests/DCPS/Messenger
         perl run_test.pl rtps
+    - name: test make install cmake
+      shell: bash
+      run: |
+        cd OpenDDS
+        . install_setenv.sh
+        cd tests/cmake_integration/Messenger/Messenger_1/build
+        perl run_test.pl
     - name: remove install clutter
       shell: bash
       run: |
         cd OpenDDS
+        rm build_u18_o1d0v1_xer0_j12.tar.xz
         rm -rf install_temp install_prefix install_setenv.sh
     - name: gitclean
       shell: bash
@@ -493,6 +625,7 @@ jobs:
         cd OpenDDS
         git clean -nd -e ext | tee ../output.txt
         if [ -s ../output.txt ]; then exit 1; fi
+
 
   # ACE_TAO_u18_esafe_js0:
 
