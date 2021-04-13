@@ -392,7 +392,6 @@ jobs:
         export DESTDIR=$(realpath install_temp)
         export INSTALL_PREFIX=$(realpath install_prefix)
         . setenv.sh
-<<<<<<< HEAD
         cd $ACE_ROOT
         make install
         cd $TAO_ROOT
@@ -422,10 +421,6 @@ jobs:
         $ACE_ROOT/bin/mwc.pl -type gnuace .
         make
     - name: make install build cmake
-=======
-        make -j4
-    - name: gitclean
->>>>>>> upstream/master
       shell: bash
       run: |
         cd OpenDDS
