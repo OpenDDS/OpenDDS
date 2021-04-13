@@ -329,28 +329,28 @@ String ThreadStatusManager::get_key(const char* safety_profile_tid, const String
 bool ThreadStatusManager::sync_with_parent(ThreadStatusManager& parent,
   ThreadStatusManager::Map& running, ThreadStatusManager::Map& finished)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g1, lock_, false);
-
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g2, parent.lock_, false);
+    running = parent.map_;
+  }
 
-    Map::iterator ci = map_.begin();
-    Map::iterator pi = parent.map_.begin();
-    while (ci != map_.end() || pi != parent.map_.end()) {
-      const int cmp = ci != map_.end() && pi != parent.map_.end() ?
-        std::strcmp(ci->first.c_str(), pi->first.c_str()) :
-        pi != parent.map_.end() ? 1 : -1;
-      if (cmp < 0) { // We're behind, this thread was removed
-        finished.insert(*ci);
-        ++ci;
-      } else if (cmp > 0) { // We're ahead, this thread was added
-        running.insert(*pi);
-        ++pi;
-      } else { // Same Thread, Update
-        running.insert(*pi);
-        ++ci;
-        ++pi;
-      }
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g1, lock_, false);
+
+  // Figure out what threads were removed from parent.map_
+  Map::iterator mi = map_.begin();
+  Map::iterator ri = running.begin();
+  while (mi != map_.end() || ri != running.end()) {
+    const int cmp = mi != map_.end() && ri != running.end() ?
+      std::strcmp(mi->first.c_str(), ri->first.c_str()) :
+      ri != running.end() ? 1 : -1;
+    if (cmp < 0) { // We're behind, this thread was removed
+      finished.insert(*mi);
+      ++mi;
+    } else if (cmp > 0) { // We're ahead, this thread was added
+      ++ri;
+    } else { // Same thread, continue
+      ++mi;
+      ++ri;
     }
   }
 
