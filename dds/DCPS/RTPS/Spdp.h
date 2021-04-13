@@ -132,7 +132,7 @@ public:
                                const ACE_INET_Addr& from,
                                bool from_sedp);
 
-  static bool validateSequenceNumber(const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter);
+  bool validateSequenceNumber(const DCPS::MonotonicTimePoint& now, const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter);
 
 #ifdef OPENDDS_SECURITY
   void process_handshake_deadlines(const DCPS::MonotonicTimePoint& tv);
@@ -168,6 +168,8 @@ public:
 
   const ParticipantData_t& get_participant_data(const DCPS::RepoId& guid) const;
   ParticipantData_t& get_participant_data(const DCPS::RepoId& guid);
+  DCPS::MonotonicTime_t get_participant_discovered_at() const;
+  DCPS::MonotonicTime_t get_participant_discovered_at(const DCPS::RepoId& guid) const;
 
   u_short get_spdp_port() const { return tport_ ? tport_->uni_port_ : 0; }
 
@@ -230,6 +232,7 @@ private:
   // Participant:
   const DDS::DomainId_t domain_;
   DCPS::RepoId guid_;
+  const DCPS::MonotonicTime_t participant_discovered_at_;
 
   void data_received(const DataSubmessage& data, const ParameterList& plist, const ACE_INET_Addr& from);
 
@@ -265,8 +268,9 @@ private:
 #endif
   {
     typedef size_t WriteFlags;
-    static const WriteFlags SEND_TO_LOCAL = (1 << 0);
-    static const WriteFlags SEND_TO_RELAY = (1 << 1);
+    static const WriteFlags SEND_MULTICAST = (1 << 0);
+    static const WriteFlags SEND_RELAY = (1 << 1);
+    static const WriteFlags SEND_DIRECT = (1 << 2);
 
     explicit SpdpTransport(DCPS::RcHandle<Spdp> outer);
     ~SpdpTransport();
@@ -280,8 +284,8 @@ private:
     void shorten_local_sender_delay_i();
     void write(WriteFlags flags);
     void write_i(WriteFlags flags);
-    void write_i(const DCPS::RepoId& guid, WriteFlags flags);
-    void send(WriteFlags flags);
+    void write_i(const DCPS::RepoId& guid, const ACE_INET_Addr& local_address, WriteFlags flags);
+    void send(WriteFlags flags, const ACE_INET_Addr& local_address = ACE_INET_Addr());
     const ACE_SOCK_Dgram& choose_send_socket(const ACE_INET_Addr& addr) const;
     void send(const ACE_INET_Addr& addr);
     void close(const DCPS::ReactorTask_rch& reactor_task);

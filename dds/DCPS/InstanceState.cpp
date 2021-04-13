@@ -74,7 +74,7 @@ void InstanceState::sample_info(DDS::SampleInfo& si, const ReceivedDataElement* 
   RcHandle<DataReaderImpl> reader = reader_.lock();
   if (reader) {
     RcHandle<DomainParticipantImpl> participant = reader->participant_servant_.lock();
-    si.publication_handle = participant ? participant->id_to_handle(de->pub_) : DDS::HANDLE_NIL;
+    si.publication_handle = participant ? participant->lookup_handle(de->pub_) : DDS::HANDLE_NIL;
   } else {
     si.publication_handle = DDS::HANDLE_NIL;
   }

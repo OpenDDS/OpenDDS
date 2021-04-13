@@ -150,9 +150,14 @@ DomainParticipantImpl::create_publisher(
   if (! this->validate_publisher_qos(pub_qos))
     return DDS::Publisher::_nil();
 
+  // Although Publisher entities have GUIDs assigned (see pub_id_gen_),
+  // these are not GUIDs from the RTPS spec and
+  // so the handle doesn't need to correlate to the GUID.
+  const DDS::InstanceHandle_t handle = assign_handle();
+
   PublisherImpl* pub = 0;
   ACE_NEW_RETURN(pub,
-                 PublisherImpl(participant_handles_.next(),
+                 PublisherImpl(handle,
                                pub_id_gen_.next(),
                                pub_qos,
                                a_listener,
@@ -249,9 +254,11 @@ DomainParticipantImpl::create_subscriber(
     return DDS::Subscriber::_nil();
   }
 
+  const DDS::InstanceHandle_t handle = assign_handle();
+
   SubscriberImpl* sub = 0;
   ACE_NEW_RETURN(sub,
-                 SubscriberImpl(participant_handles_.next(),
+                 SubscriberImpl(handle,
                                 sub_qos,
                                 a_listener,
                                 mask,
@@ -1515,30 +1522,21 @@ DomainParticipantImpl::get_current_time(DDS::Time_t& current_time)
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
 DDS::ReturnCode_t
-DomainParticipantImpl::get_discovered_participants(
-  DDS::InstanceHandleSeq & participant_handles)
+DomainParticipantImpl::get_discovered_participants(DDS::InstanceHandleSeq& participant_handles)
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->handle_protector_,
-                   DDS::RETCODE_ERROR);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, DDS::RETCODE_ERROR);
 
-  HandleMap::const_iterator itEnd = this->handles_.end();
-
-  for (HandleMap::const_iterator iter = this->handles_.begin();
-       iter != itEnd; ++iter) {
+  const CountedHandleMap::const_iterator itEnd = handles_.end();
+  for (CountedHandleMap::const_iterator iter = handles_.begin(); iter != itEnd; ++iter) {
     GuidConverter converter(iter->first);
 
-    if (converter.entityKind() == KIND_PARTICIPANT)
-    {
+    if (converter.entityKind() == KIND_PARTICIPANT) {
       // skip itself and the ignored participant
-      if (iter->first == this->dp_id_
-      || (this->ignored_participants_.find(iter->first)
-        != this->ignored_participants_.end ())) {
+      if (iter->first == dp_id_ || ignored_participants_.count(iter->first)) {
         continue;
       }
 
-      push_back(participant_handles, iter->second);
+      push_back(participant_handles, iter->second.first);
     }
   }
 
@@ -1551,19 +1549,14 @@ DomainParticipantImpl::get_discovered_participant_data(
   DDS::InstanceHandle_t participant_handle)
 {
   {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     guard,
-                     this->handle_protector_,
-                     DDS::RETCODE_ERROR);
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, DDS::RETCODE_ERROR);
 
     bool found = false;
-    HandleMap::const_iterator itEnd = this->handles_.end();
-
-    for (HandleMap::const_iterator iter = this->handles_.begin();
-         iter != itEnd; ++iter) {
+    const CountedHandleMap::const_iterator itEnd = handles_.end();
+    for (CountedHandleMap::const_iterator iter = handles_.begin(); iter != itEnd; ++iter) {
       GuidConverter converter(iter->first);
 
-      if (participant_handle == iter->second
+      if (participant_handle == iter->second.first
           && converter.entityKind() == KIND_PARTICIPANT) {
         found = true;
         break;
@@ -1600,29 +1593,19 @@ DomainParticipantImpl::get_discovered_participant_data(
 }
 
 DDS::ReturnCode_t
-DomainParticipantImpl::get_discovered_topics(
-  DDS::InstanceHandleSeq & topic_handles)
+DomainParticipantImpl::get_discovered_topics(DDS::InstanceHandleSeq& topic_handles)
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->handle_protector_,
-                   DDS::RETCODE_ERROR);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, DDS::RETCODE_ERROR);
 
-  HandleMap::const_iterator itEnd = this->handles_.end();
-
-  for (HandleMap::const_iterator iter = this->handles_.begin();
-       iter != itEnd; ++iter) {
+  const CountedHandleMap::const_iterator itEnd = handles_.end();
+  for (CountedHandleMap::const_iterator iter = handles_.begin(); iter != itEnd; ++iter) {
     GuidConverter converter(iter->first);
-
     if (converter.isTopic()) {
-
-      // skip the ignored topic
-      if (this->ignored_topics_.find(iter->first)
-          != this->ignored_topics_.end ()) {
+      if (ignored_topics_.count(iter->first)) {
         continue;
       }
 
-      push_back(topic_handles, iter->second);
+      push_back(topic_handles, iter->second.first);
     }
   }
 
@@ -1635,19 +1618,13 @@ DomainParticipantImpl::get_discovered_topic_data(
   DDS::InstanceHandle_t topic_handle)
 {
   {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     guard,
-                     this->handle_protector_,
-                     DDS::RETCODE_ERROR);
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, DDS::RETCODE_ERROR);
 
     bool found = false;
-    HandleMap::const_iterator itEnd = this->handles_.end();
-
-    for (HandleMap::const_iterator iter = this->handles_.begin();
-         iter != itEnd; ++iter) {
+    const CountedHandleMap::const_iterator itEnd = handles_.end();
+    for (CountedHandleMap::const_iterator iter = handles_.begin(); iter != itEnd; ++iter) {
       GuidConverter converter(iter->first);
-
-      if (topic_handle == iter->second && converter.isTopic()) {
+      if (topic_handle == iter->second.first && converter.isTopic()) {
         found = true;
         break;
       }
@@ -1910,49 +1887,90 @@ DomainParticipantImpl::get_unique_id()
 DDS::InstanceHandle_t
 DomainParticipantImpl::get_instance_handle()
 {
-  return this->id_to_handle(this->dp_id_);
+  return get_entity_instance_handle(dp_id_, this);
 }
 
-DDS::InstanceHandle_t
-DomainParticipantImpl::id_to_handle(const RepoId& id)
+DDS::InstanceHandle_t DomainParticipantImpl::assign_handle(const GUID_t& id)
 {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, DDS::HANDLE_NIL);
   if (id == GUID_UNKNOWN) {
-    return this->participant_handles_.next();
+    const DDS::InstanceHandle_t ih =
+      reusable_handles_.empty() ? participant_handles_.next() : reusable_handles_.pop_front();
+    if (DCPS_debug_level > 5) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DomainParticipantImpl::assign_handle: "
+                 "New unmapped InstanceHandle %d\n", ih));
+    }
+    return ih;
   }
 
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->handle_protector_,
-                   HANDLE_UNKNOWN);
-
-  HandleMap::const_iterator location = this->handles_.find(id);
-  DDS::InstanceHandle_t result;
-
-  if (location == this->handles_.end()) {
-    // Map new handle in both directions
-    result = this->participant_handles_.next();
-    this->handles_[id] = result;
-    this->repoIds_[result] = id;
-  } else {
-    result = location->second;
+  const CountedHandleMap::iterator location = handles_.find(id);
+  if (location == handles_.end()) {
+    const DDS::InstanceHandle_t handle =
+      reusable_handles_.empty() ? participant_handles_.next() : reusable_handles_.pop_front();
+    if (DCPS_debug_level > 5) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DomainParticipantImpl::assign_handle: "
+                 "New mapped InstanceHandle %d for %C\n",
+                 handle, LogGuid(id).c_str()));
+    }
+    handles_[id] = std::make_pair(handle, 1);
+    repoIds_[handle] = id;
+    return handle;
   }
 
-  return result;
+  HandleWithCounter& mapped = location->second;
+  ++mapped.second;
+  if (DCPS_debug_level > 5) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DomainParticipantImpl::assign_handle: "
+               "Incremented refcount for InstanceHandle %d to %d\n",
+               mapped.first, mapped.second));
+  }
+  return mapped.first;
 }
 
-RepoId
-DomainParticipantImpl::get_repoid(const DDS::InstanceHandle_t& handle)
+DDS::InstanceHandle_t DomainParticipantImpl::lookup_handle(const GUID_t& id) const
 {
-  RepoId result = GUID_UNKNOWN;
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->handle_protector_,
-                   GUID_UNKNOWN);
-  RepoIdMap::const_iterator location = this->repoIds_.find(handle);
-  if (location != this->repoIds_.end()) {
-    result = location->second;
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, DDS::HANDLE_NIL);
+  const CountedHandleMap::const_iterator iter = handles_.find(id);
+  return iter == handles_.end() ? DDS::HANDLE_NIL : iter->second.first;
+}
+
+void DomainParticipantImpl::return_handle(DDS::InstanceHandle_t handle)
+{
+  ACE_GUARD(ACE_Thread_Mutex, guard, handle_protector_);
+  const RepoIdMap::iterator r_iter = repoIds_.find(handle);
+  if (r_iter == repoIds_.end()) {
+    reusable_handles_.add(handle);
+    if (DCPS_debug_level > 5) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DomainParticipantImpl::return_handle: "
+                 "Returned unmapped InstanceHandle %d\n", handle));
+    }
+    return;
   }
-  return result;
+
+  const CountedHandleMap::iterator h_iter = handles_.find(r_iter->second);
+  if (h_iter == handles_.end()) {
+    return;
+  }
+
+  if (DCPS_debug_level > 5) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DomainParticipantImpl::return_handle: "
+               "Returned mapped InstanceHandle %d refcount %d\n",
+               handle, h_iter->second.second));
+  }
+
+  HandleWithCounter& mapped = h_iter->second;
+  if (--mapped.second == 0) {
+    handles_.erase(h_iter);
+    repoIds_.erase(r_iter);
+    reusable_handles_.add(handle);
+  }
+}
+
+GUID_t DomainParticipantImpl::get_repoid(DDS::InstanceHandle_t handle) const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, GUID_UNKNOWN);
+  const RepoIdMap::const_iterator location = repoIds_.find(handle);
+  return location == repoIds_.end() ? GUID_UNKNOWN : location->second;
 }
 
 DDS::Topic_ptr

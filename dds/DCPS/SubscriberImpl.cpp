@@ -63,6 +63,11 @@ SubscriberImpl::SubscriberImpl(DDS::InstanceHandle_t       handle,
 
 SubscriberImpl::~SubscriberImpl()
 {
+  const RcHandle<DomainParticipantImpl> participant = participant_.lock();
+  if (participant) {
+    participant->return_handle(handle_);
+  }
+
   // The datareaders should be deleted already before calling delete
   // subscriber.
   if (!is_clean()) {

@@ -28,6 +28,9 @@ ACE_INLINE OpenDDS_Dcps_Export
 DDS::Time_t time_value_to_time(const ACE_Time_Value& tv);
 
 ACE_INLINE OpenDDS_Dcps_Export
+MonotonicTime_t time_value_to_monotonic_time(const ACE_Time_Value& tv);
+
+ACE_INLINE OpenDDS_Dcps_Export
 ACE_Time_Value duration_to_time_value(const DDS::Duration_t& t);
 
 ACE_INLINE OpenDDS_Dcps_Export
@@ -94,7 +97,10 @@ ACE_INLINE OpenDDS_Dcps_Export
 bool operator>=(const DDS::Time_t& t1, const DDS::Time_t& t2);
 
 ACE_INLINE OpenDDS_Dcps_Export
-DDS::Time_t operator-(const DDS::Time_t& t1, const DDS::Time_t& t2);
+DDS::Duration_t operator-(const DDS::Time_t& t1, const DDS::Time_t& t2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+DDS::Duration_t operator-(const MonotonicTime_t& t1, const MonotonicTime_t& t2);
 
 ACE_INLINE OpenDDS_Dcps_Export
 ACE_UINT32 uint32_fractional_seconds_to_nanoseconds(ACE_UINT32 fraction);
@@ -110,6 +116,9 @@ ACE_UINT32 microseconds_to_uint32_fractional_seconds(ACE_UINT32 fraction);
 
 ACE_INLINE OpenDDS_Dcps_Export
 bool is_infinite(const DDS::Duration_t& value);
+
+ACE_INLINE OpenDDS_Dcps_Export
+const MonotonicTime_t& monotonic_time_zero();
 
 } // namespace DCPS
 } // namespace OpenDDS

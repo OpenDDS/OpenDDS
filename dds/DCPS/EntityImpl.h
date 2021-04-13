@@ -28,6 +28,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+class DomainParticipantImpl;
+
 /**
 * @class EntityImpl
 *
@@ -79,6 +81,8 @@ protected:
 
   bool get_deleted();
 
+  DDS::InstanceHandle_t get_entity_instance_handle(const GUID_t& id, DomainParticipantImpl* participant);
+
 #ifdef ACE_HAS_CPP11
   /// The flag indicates the entity is enabled.
   std::atomic<bool>       enabled_;
@@ -108,6 +112,9 @@ private:
   Observer::Event events_;
 
   mutable ACE_Thread_Mutex lock_;
+
+  DDS::InstanceHandle_t instance_handle_;
+  WeakRcHandle<DomainParticipantImpl> participant_for_instance_handle_;
 };
 
 } // namespace DCPS

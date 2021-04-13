@@ -122,6 +122,9 @@
 /LatencyStatisticsHolder.java
 /LatencyStatisticsSeqHelper.java
 /LatencyStatisticsSeqHolder.java
+/MonotonicTime_t.java
+/MonotonicTime_tHelper.java
+/MonotonicTime_tHolder.java
 /NO_STATUS_MASK.java
 /OctetGuidArray16Helper.java
 /OctetGuidArray16Holder.java

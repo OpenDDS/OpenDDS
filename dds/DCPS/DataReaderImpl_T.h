@@ -1733,16 +1733,17 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
 
     just_registered = true;
     DDS::BuiltinTopicKey_t key = OpenDDS::DCPS::keyFromSample(static_cast<MessageType*>(instance_data.get()));
-    handle = handle == DDS::HANDLE_NIL ? this->get_next_handle( key) : handle;
+    bool owns_handle = false;
+    if (handle == DDS::HANDLE_NIL) {
+      handle = get_next_handle(key);
+      owns_handle = true;
+    }
     OpenDDS::DCPS::SubscriptionInstance_rch instance =
       OpenDDS::DCPS::make_rch<OpenDDS::DCPS::SubscriptionInstance>(
         this,
         this->qos_,
         ref(this->instances_lock_),
-        handle);
-
-    instance->instance_handle_ = handle;
-
+        handle, owns_handle);
     {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
       int ret = OpenDDS::DCPS::bind(instances_, handle, instance);

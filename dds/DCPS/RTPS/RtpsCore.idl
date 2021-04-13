@@ -616,6 +616,7 @@ module OpenDDS {
       DDS::ParticipantBuiltinTopicData ddsParticipantData;
       ParticipantProxy_t participantProxy;
       Duration_t leaseDuration;
+      DCPS::MonotonicTime_t discoveredAt;
       BuiltinEndpointSet_t associated_endpoints;
     };
 

@@ -100,6 +100,7 @@ private:
   bool use_datalink(const RepoId& local_id,
                     const RepoId& remote_id,
                     const TransportBLOB& remote_data,
+                    const MonotonicTime_t& participant_discovered_at,
                     ACE_CDR::ULong participant_flags,
                     bool local_reliable, bool remote_reliable,
                     bool local_durable, bool remote_durable,
@@ -175,6 +176,7 @@ private:
   ICE::ServerReflexiveStateMachine relay_srsm_;
   typedef PmfPeriodicTask<RtpsUdpTransport> Periodic;
   RcHandle<Periodic> relay_stun_task_;
+  mutable ACE_Thread_Mutex relay_stun_mutex_;
   void relay_stun_task(const DCPS::MonotonicTimePoint& now);
 
   void start_ice();

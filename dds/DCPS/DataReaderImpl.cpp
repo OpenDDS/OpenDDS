@@ -210,11 +210,8 @@ void DataReaderImpl::init(
 DDS::InstanceHandle_t
 DataReaderImpl::get_instance_handle()
 {
-  using namespace OpenDDS::DCPS;
-  RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
-  if (participant)
-    return participant->id_to_handle(subscription_id_);
-  return DDS::HANDLE_NIL;
+  const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+  return get_entity_instance_handle(subscription_id_, participant.get());
 }
 
 void
@@ -314,6 +311,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
   AssociationData data;
   data.remote_id_ = writer.writerId;
   data.remote_data_ = writer.writerTransInfo;
+  data.participant_discovered_at_ = writer.participantDiscoveredAt;
   data.remote_transport_context_ = writer.transportContext;
   data.publication_transport_priority_ =
       writer.writerQos.transport_priority.value;
@@ -375,15 +373,15 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
   }
   // We no longer hold the publication_handle_lock_.
 
+
+  const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+
+  if (!participant)
+    return;
+
+  const DDS::InstanceHandle_t handle = participant->assign_handle(remote_id);
+
   if (!is_bit_) {
-
-    RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
-
-    if (!participant)
-      return;
-
-    const DDS::InstanceHandle_t handle = participant->id_to_handle(remote_id);
-
     // We acquire the publication_handle_lock_ for the remainder of our
     // processing.
     {
@@ -2485,10 +2483,18 @@ DataReaderImpl::get_next_handle(const DDS::BuiltinTopicKey_t& key)
 
   if (is_bit()) {
     const RepoId id = bit_key_to_repo_id(key);
-    return participant->id_to_handle(id);
+    return participant->assign_handle(id);
 
   } else {
-    return participant->id_to_handle(GUID_UNKNOWN);
+    return participant->assign_handle();
+  }
+}
+
+void DataReaderImpl::return_handle(DDS::InstanceHandle_t handle)
+{
+  const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+  if (participant) {
+    participant->return_handle(handle);
   }
 }
 
@@ -2608,7 +2614,7 @@ DataReaderImpl::lookup_instance_handles(const WriterIdSeq& ids,
   RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
   if (participant) {
     for (CORBA::ULong i = 0; i < num_wrts; ++i) {
-      hdls[i] = participant->id_to_handle(ids[i]);
+      hdls[i] = participant->lookup_handle(ids[i]);
     }
   }
 }

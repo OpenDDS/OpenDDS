@@ -581,6 +581,8 @@ public:
 
   const RepoId& get_repo_id() const { return this->subscription_id_; }
 
+  void return_handle(DDS::InstanceHandle_t handle);
+
 protected:
   virtual void remove_associations_i(const WriterIdSeq& writers, bool callback);
   void remove_publication(const PublicationId& pub_id);

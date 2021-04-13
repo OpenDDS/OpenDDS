@@ -11,8 +11,6 @@ if(NOT OpenDDS_FOUND)
   find_package(OpenDDS REQUIRED)
 endif()
 
-set(CMAKE_CXX_COMPILER ${OPENDDS_COMPILER})
-
 if (OPENDDS_STATIC)
   message(FATAL_ERROR "This test cannot be run on static builds.")
 endif()

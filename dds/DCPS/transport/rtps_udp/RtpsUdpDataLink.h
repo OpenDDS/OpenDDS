@@ -80,6 +80,8 @@ public:
                   const RtpsUdpInst& config,
                   const ReactorTask_rch& reactor_task);
 
+  ~RtpsUdpDataLink();
+
   bool add_delayed_notification(TransportQueueElement* element);
 
   RemoveResult remove_sample(const DataSampleElement* sample);
@@ -147,6 +149,7 @@ public:
   bool associated(const RepoId& local, const RepoId& remote,
                   bool local_reliable, bool remote_reliable,
                   bool local_durable, bool remote_durable,
+                  const MonotonicTime_t& participant_discovered_at,
                   ACE_CDR::ULong participant_flags,
                   SequenceNumber max_sn,
                   const TransportClient_rch& client);
@@ -291,9 +294,7 @@ private:
 
   struct ReaderInfo : public RcObject {
     const RepoId id_;
-    const MonotonicTimePoint discovered_at_;
-    size_t sent_to_;
-    size_t recv_from_;
+    const MonotonicTime_t participant_discovered_at_;
     CORBA::Long acknack_recvd_count_, nackfrag_recvd_count_;
     DisjointSequence requests_;
     OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumberSet) requested_frags_;
@@ -308,11 +309,12 @@ private:
     DisjointSequence pvs_outstanding_;
 #endif
 
-    ReaderInfo(const RepoId& id, bool durable, ACE_CDR::ULong participant_flags)
+    ReaderInfo(const RepoId& id,
+               bool durable,
+               const MonotonicTime_t& participant_discovered_at,
+               ACE_CDR::ULong participant_flags)
       : id_(id)
-      , discovered_at_(MonotonicTimePoint::now())
-      , sent_to_(0)
-      , recv_from_(0)
+      , participant_discovered_at_(participant_discovered_at)
       , acknack_recvd_count_(0)
       , nackfrag_recvd_count_(0)
       , cur_cumulative_ack_(SequenceNumber::ZERO()) // Starting at zero instead of unknown makes the logic cleaner.
@@ -496,9 +498,7 @@ private:
 
   struct WriterInfo : RcObject {
     const RepoId id_;
-    const MonotonicTimePoint discovered_at_;
-    size_t sent_to_;
-    size_t recv_from_;
+    const MonotonicTime_t participant_discovered_at_;
     DisjointSequence recvd_;
     typedef OPENDDS_MAP(SequenceNumber, ReceivedDataSample) HeldMap;
     HeldMap held_;
@@ -507,11 +507,11 @@ private:
     CORBA::Long heartbeat_recvd_count_, hb_frag_recvd_count_;
     const ACE_CDR::ULong participant_flags_;
 
-    WriterInfo(const RepoId& id, ACE_CDR::ULong participant_flags)
+    WriterInfo(const RepoId& id,
+               const MonotonicTime_t& participant_discovered_at,
+               ACE_CDR::ULong participant_flags)
       : id_(id)
-      , discovered_at_(MonotonicTimePoint::now())
-      , sent_to_(0)
-      , recv_from_(0)
+      , participant_discovered_at_(participant_discovered_at)
       , hb_last_(SequenceNumber::ZERO())
       , heartbeat_recvd_count_(0)
       , hb_frag_recvd_count_(0)
@@ -535,9 +535,7 @@ private:
       , preassociation_task_(link->reactor_task_->interceptor(), *this, &RtpsReader::send_preassociation_acknacks)
     {}
 
-    ~RtpsReader() {
-      preassociation_task_.cancel_and_wait();
-    }
+    ~RtpsReader();
 
     bool add_writer(const WriterInfo_rch& info);
     bool has_writer(const RepoId& id) const;
@@ -606,7 +604,8 @@ private:
     IdCountSet nackfrag_counts_;
   };
 
-  void build_meta_submessage_map(MetaSubmessageVecVec& meta_submessages, AddrDestMetaSubmessageMap& adr_map);
+  typedef OPENDDS_VECTOR(MetaSubmessageVecVec) MetaSubmessageVecVecVec;
+  void build_meta_submessage_map(MetaSubmessageVecVecVec& meta_submessages, AddrDestMetaSubmessageMap& adr_map);
   void bundle_mapped_meta_submessages(
     const Encoding& encoding,
     AddrDestMetaSubmessageMap& adr_map,
@@ -615,15 +614,15 @@ private:
                                OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes,
                                CountKeeper& counts);
 
-  void queue_or_send_submessages(MetaSubmessageVec& meta_submessages);
-  void bundle_and_send_submessages(MetaSubmessageVecVec& meta_submessages);
+  void queue_submessages(MetaSubmessageVec& meta_submessages);
+  void bundle_and_send_submessages(MetaSubmessageVecVecVec& meta_submessages);
 
-  struct SubmessageQueue: RcObject, MetaSubmessageVecVec {
-  };
-  typedef RcHandle<SubmessageQueue> SubmessageQueue_rch;
-
-  typedef OPENDDS_MAP(ACE_thread_t, SubmessageQueue_rch) ThreadSendQueueMap;
+  typedef OPENDDS_MAP(ACE_thread_t, MetaSubmessageVecVec) ThreadSendQueueMap;
   ThreadSendQueueMap thread_send_queues_;
+  MetaSubmessageVecVecVec send_queue_;
+  typedef PmfSporadicTask<RtpsUdpDataLink> Sporadic;
+  Sporadic flush_send_queue_task_;
+  void flush_send_queue(const MonotonicTimePoint& now);
 
   RepoIdSet pending_reliable_readers_;
 
@@ -688,7 +687,7 @@ private:
       RtpsWriter& writer = **it;
       (writer.*func)(submessage, src, meta_submessages);
     }
-    queue_or_send_submessages(meta_submessages);
+    queue_submessages(meta_submessages);
   }
 
   template<typename T, typename FN>
@@ -718,7 +717,7 @@ private:
         const RtpsReaderMap::iterator rr = readers_.find(local);
         if (rr == readers_.end()) {
           if (transport_debug.log_dropped_messages) {
-            ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::RtpsWriter::process_nackfrag - %C -> %C unknown local reader\n", LogGuid(src).c_str(), LogGuid(local).c_str()));
+            ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::datareader_dispatch - %C -> %C unknown local reader\n", LogGuid(src).c_str(), LogGuid(local).c_str()));
           }
           return;
         }
@@ -730,7 +729,7 @@ private:
       RtpsReader& reader = **it;
       (reader.*func)(submessage, src, directed, meta_submessages);
     }
-    queue_or_send_submessages(meta_submessages);
+    queue_submessages(meta_submessages);
   }
 
   void send_heartbeats(const MonotonicTimePoint& now);

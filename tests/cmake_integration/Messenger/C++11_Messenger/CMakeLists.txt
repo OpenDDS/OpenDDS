@@ -5,7 +5,6 @@ if(NOT OpenDDS_FOUND)
   find_package(OpenDDS REQUIRED)
 endif()
 
-set(CMAKE_CXX_COMPILER ${OPENDDS_COMPILER})
 set(target_prefix "opendds_cmake_cpp11_messenger_")
 set(src "${CMAKE_CURRENT_SOURCE_DIR}/../../../DCPS/C++11/Messenger")
 set(dst ${CMAKE_CURRENT_BINARY_DIR})

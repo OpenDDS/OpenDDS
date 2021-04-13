@@ -115,10 +115,12 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 {
   OPENDDS_ASSERT(!equal_guid_prefixes(local_prefix, GUIDPREFIX_UNKNOWN));
 
-  assign(local_prefix_, local_prefix);
+  if (equal_guid_prefixes(local_prefix_, GUIDPREFIX_UNKNOWN)) {
+    assign(local_prefix_, local_prefix);
 #ifdef OPENDDS_SECURITY
-  relay_stun_task(DCPS::MonotonicTimePoint::now());
+    relay_stun_task(DCPS::MonotonicTimePoint::now());
 #endif
+  }
 
   RtpsUdpDataLink_rch link = make_rch<RtpsUdpDataLink>(ref(*this), local_prefix, config(), reactor_task());
 
@@ -199,7 +201,8 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
 
   RtpsUdpDataLink_rch link = link_;
 
-  if (use_datalink(attribs.local_id_, remote.repo_id_, remote.blob_, remote.context_,
+  if (use_datalink(attribs.local_id_, remote.repo_id_, remote.blob_, remote.participant_discovered_at_,
+                   remote.context_,
                    attribs.local_reliable_, remote.reliable_,
                    attribs.local_durable_, remote.durable_, attribs.max_sn_, client)) {
     return AcceptConnectResult(link);
@@ -232,7 +235,8 @@ RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
   }
   RtpsUdpDataLink_rch link = link_;
 
-  if (use_datalink(attribs.local_id_, remote.repo_id_, remote.blob_, remote.context_,
+  if (use_datalink(attribs.local_id_, remote.repo_id_, remote.blob_, remote.participant_discovered_at_,
+                   remote.context_,
                    attribs.local_reliable_, remote.reliable_,
                    attribs.local_durable_, remote.durable_, attribs.max_sn_, client)) {
     return AcceptConnectResult(link);
@@ -276,6 +280,7 @@ bool
 RtpsUdpTransport::use_datalink(const RepoId& local_id,
                                const RepoId& remote_id,
                                const TransportBLOB& remote_data,
+                               const MonotonicTime_t& participant_discovered_at,
                                ACE_CDR::ULong participant_flags,
                                bool local_reliable, bool remote_reliable,
                                bool local_durable, bool remote_durable,
@@ -291,7 +296,7 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
     link_->add_locators(remote_id, addrs.first, addrs.second, requires_inline_qos);
 
     return link_->associated(local_id, remote_id, local_reliable, remote_reliable,
-                             local_durable, remote_durable, participant_flags, max_sn, client);
+                             local_durable, remote_durable, participant_discovered_at, participant_flags, max_sn, client);
   }
 
   return true;
@@ -556,7 +561,7 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
 #endif
 
   if (config.opendds_discovery_default_listener_) {
-    link_= make_datalink(config.opendds_discovery_guid_.guidPrefix);
+    link_ = make_datalink(config.opendds_discovery_guid_.guidPrefix);
     link_->default_listener(*config.opendds_discovery_default_listener_);
   }
 
@@ -824,6 +829,8 @@ RtpsUdpTransport::stop_ice()
 void
 RtpsUdpTransport::relay_stun_task(const DCPS::MonotonicTimePoint& /*now*/)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, relay_stun_mutex_);
+
   if (!(config().use_rtps_relay() ||
         config().rtps_relay_only())) {
     return;

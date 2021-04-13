@@ -244,6 +244,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , config_(disco_->config())
   , domain_(domain)
   , guid_(guid)
+  , participant_discovered_at_(MonotonicTimePoint::now().to_monotonic_time())
   , tport_(DCPS::make_rch<SpdpTransport>(rchandle_from(this)))
   , eh_shutdown_(false)
   , shutdown_cond_(lock_)
@@ -283,6 +284,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , config_(disco_->config())
   , domain_(domain)
   , guid_(guid)
+  , participant_discovered_at_(MonotonicTimePoint::now().to_monotonic_time())
   , tport_(DCPS::make_rch<SpdpTransport>(rchandle_from(this)))
   , eh_shutdown_(false)
   , shutdown_cond_(lock_)
@@ -663,6 +665,13 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     iter = p.first;
     iter->second.discovered_at_ = now;
     update_lease_expiration_i(iter, now);
+    if (!from_relay && from != ACE_INET_Addr()) {
+      iter->second.local_address_ = from;
+    }
+
+    if (DCPS::transport_debug.log_progress) {
+      log_progress("participant discovery", guid_, guid, iter->second.discovered_at_.to_monotonic_time());
+    }
 
 #ifndef DDS_HAS_MINIMUM_BIT
     if (!from_sedp) {
@@ -681,7 +690,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     // own announcement, so they don't have to wait.
     if (from != ACE_INET_Addr()) {
       if (from_relay) {
-        tport_->write_i(guid, SpdpTransport::SEND_TO_RELAY);
+        tport_->write_i(guid, iter->second.local_address_, SpdpTransport::SEND_RELAY);
       } else {
         tport_->shorten_local_sender_delay_i();
       }
@@ -709,8 +718,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         iter->second.extended_builtin_endpoints_ = pdata.ddsParticipantDataSecure.base.extended_builtin_endpoints;
 
         // The remote needs to see our SPDP before attempting authentication.
-        ++iter->second.auth_messages_sent_;
-        tport_->write_i(guid, from_relay ? SpdpTransport::SEND_TO_RELAY : SpdpTransport::SEND_TO_LOCAL);
+        tport_->write_i(guid, iter->second.local_address_, from_relay ? SpdpTransport::SEND_RELAY : SpdpTransport::SEND_DIRECT);
 
         attempt_authentication(iter, true);
 
@@ -742,6 +750,10 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #endif
 
   } else { // Existing Participant
+    if (from_sedp && DCPS::transport_debug.log_progress) {
+      log_progress("secure participant discovery", guid_, guid, iter->second.discovered_at_.to_monotonic_time());
+    }
+
 #ifndef DDS_HAS_MINIMUM_BIT
     if (!from_sedp) {
       enqueue_location_update_i(iter, location_mask, from);
@@ -752,6 +764,9 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     // are otherwise ignored. Non-secure dispose messages are ignored completely.
     if (is_security_enabled() && iter->second.auth_state_ == DCPS::AUTH_STATE_AUTHENTICATED && !from_sedp) {
       update_lease_expiration_i(iter, now);
+      if (!from_relay && from != ACE_INET_Addr()) {
+        iter->second.local_address_ = from;
+      }
 #ifndef DDS_HAS_MINIMUM_BIT
       process_location_updates_i(iter);
 #endif
@@ -782,7 +797,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     }
 
     // Check if sequence numbers are increasing
-    if (validateSequenceNumber(seq, iter)) {
+    if (validateSequenceNumber(now, seq, iter)) {
       // Must unlock when calling into part_bit() as it may call back into us
       ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
 
@@ -826,8 +841,13 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #ifdef OPENDDS_SECURITY
         pdata.extended_associated_endpoints = iter->second.pdata_.extended_associated_endpoints;
 #endif
+        const DCPS::MonotonicTime_t da = iter->second.pdata_.discoveredAt;
         iter->second.pdata_ = pdata;
+        iter->second.pdata_.discoveredAt = da;
         update_lease_expiration_i(iter, now);
+        if (!from_relay && from != ACE_INET_Addr()) {
+          iter->second.local_address_ = from;
+        }
 
 #ifndef DDS_HAS_MINIMUM_BIT
         /*
@@ -861,11 +881,14 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 }
 
 bool
-Spdp::validateSequenceNumber(const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter)
+Spdp::validateSequenceNumber(const DCPS::MonotonicTimePoint& now, const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter)
 {
   if (seq.getValue() != 0 && iter->second.last_seq_ != DCPS::SequenceNumber::MAX_VALUE) {
     if (seq < iter->second.last_seq_) {
-      ++iter->second.seq_reset_count_;
+      const bool honeymoon_period = now < iter->second.discovered_at_ + config_->min_resend_delay();
+      if (!honeymoon_period) {
+        ++iter->second.seq_reset_count_;
+      }
       return false;
     } else if (iter->second.seq_reset_count_ > 0) {
       --iter->second.seq_reset_count_;
@@ -888,6 +911,7 @@ Spdp::data_received(const DataSubmessage& data,
 
   pdata.participantProxy.domainId = domain_;
   pdata.associated_endpoints = 0;
+  pdata.discoveredAt = MonotonicTimePoint::now().to_monotonic_time();
 #ifdef OPENDDS_SECURITY
   pdata.extended_associated_endpoints = 0;
 #endif
@@ -1006,7 +1030,6 @@ Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
   DiscoveredParticipantMap::iterator iter = participants_.find(guid);
 
   if (iter != participants_.end()) {
-    ++iter->second.auth_messages_received_;
     if (msg.message_identity.sequence_number <= iter->second.auth_req_sequence_number_) {
       if (DCPS::security_debug.auth_debug) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Spdp::handle_auth_request() - ")
@@ -1198,7 +1221,6 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
     dp.auth_req_msg_.message_data[0] = dp.local_auth_request_token_;
     // Send the auth req immediately to reset the remote if they are
     // still authenticated with us.
-    ++dp.auth_messages_sent_;
     if (sedp_->write_stateless_message(dp.auth_req_msg_, make_id(guid, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER)) != DDS::RETCODE_OK) {
       if (DCPS::security_debug.auth_debug) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::attempt_authentication() - ")
@@ -1314,7 +1336,6 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   }
 
   DiscoveredParticipant& dp = iter->second;
-  ++dp.auth_messages_received_;
 
   if (DCPS::security_debug.auth_debug) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) {auth_debug} DEBUG: Spdp::handle_handshake_message() - "
@@ -1330,7 +1351,6 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   if (dp.handshake_state_ == DCPS::HANDSHAKE_STATE_DONE && !dp.is_requester_) {
     // Remote is still sending a reply, so resend the final.
     const RepoId reader = make_id(iter->first, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER);
-    ++dp.auth_messages_sent_;
     if (sedp_->write_stateless_message(dp.handshake_msg_, reader) != DDS::RETCODE_OK) {
       if (DCPS::security_debug.auth_debug) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::handle_handshake_message() - ")
@@ -1631,8 +1651,7 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
       // Send the auth req first to reset the remote if necessary.
       if (pit->second.have_auth_req_msg_) {
         // Send the SPDP announcement in case it got lost.
-        tport_->write_i(pit->first, SpdpTransport::SEND_TO_RELAY | SpdpTransport::SEND_TO_LOCAL);
-        ++pit->second.auth_messages_sent_;
+        tport_->write_i(pit->first, pit->second.local_address_, SpdpTransport::SEND_RELAY | SpdpTransport::SEND_DIRECT);
         if (sedp_->write_stateless_message(pit->second.auth_req_msg_, reader) != DDS::RETCODE_OK) {
           if (DCPS::security_debug.auth_debug) {
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::process_handshake_resends() - ")
@@ -1647,7 +1666,6 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
         }
       }
       if (pit->second.have_handshake_msg_) {
-        ++pit->second.auth_messages_sent_;
         if (sedp_->write_stateless_message(pit->second.handshake_msg_, reader) != DDS::RETCODE_OK) {
           if (DCPS::security_debug.auth_debug) {
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::process_handshake_resends() - ")
@@ -1711,6 +1729,10 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
     return false;
   }
 
+  if (DCPS::transport_debug.log_progress) {
+    log_progress("participant crypto token", guid_, src_participant, iter->second.discovered_at_.to_monotonic_time());
+  }
+
   const DDS::Security::ParticipantCryptoTokenSeq& inboundTokens =
     reinterpret_cast<const DDS::Security::ParticipantCryptoTokenSeq&>(msg.message_data);
   const DDS::Security::ParticipantCryptoHandle dp_crypto_handle =
@@ -1739,7 +1761,6 @@ Spdp::send_handshake_message(const DCPS::RepoId& guid,
   dp.handshake_msg_.message_identity.sequence_number = (++stateless_sequence_number_).getValue();
 
   const DCPS::RepoId reader = make_id(guid, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER);
-  ++dp.auth_messages_sent_;
   const DDS::ReturnCode_t retval = sedp_->write_stateless_message(dp.handshake_msg_, reader);
   dp.have_handshake_msg_ = true;
   dp.stateless_msg_deadline_ = schedule_handshake_resend(config_->auth_resend_period(), guid);
@@ -1869,9 +1890,7 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
   }
 
   if (DCPS::transport_debug.log_progress) {
-    log_progress("authentication", guid_, guid,
-                 MonotonicTimePoint::now() - iter->second.discovered_at_,
-                 iter->second.auth_messages_sent_, iter->second.auth_messages_received_);
+    log_progress("authentication", guid_, guid, iter->second.discovered_at_.to_monotonic_time());
   }
 
   DDS::Security::ParticipantCryptoHandle dp_crypto_handle =
@@ -2137,7 +2156,8 @@ ParticipantData_t Spdp::build_local_pdata(
     { // Duration_t (leaseDuration)
       static_cast<CORBA::Long>(config_->lease_duration().value().sec()),
       0 // we are not supporting fractional seconds in the lease duration
-    }
+    },
+    participant_discovered_at_
     , 0 // associated_endpoints
 #ifdef OPENDDS_SECURITY
     , 0 // extended_associated_endpoints
@@ -2161,8 +2181,9 @@ bool Spdp::announce_domain_participant_qos()
 }
 
 #if !defined _MSC_VER || _MSC_VER > 1700
-const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_TO_LOCAL;
-const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_TO_RELAY;
+const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_MULTICAST;
+const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_RELAY;
+const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_DIRECT;
 #endif
 
 Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
@@ -2320,8 +2341,9 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
   }
 #endif
 
+
   local_sender_ = DCPS::make_rch<SpdpMulti>(reactor_task->interceptor(), outer->config_->resend_period(), ref(*this), &SpdpTransport::send_local);
-  local_sender_->enable(outer->config_->resend_period());
+  local_sender_->enable(TimeDuration::zero_value);
 
   if (outer->config_->periodic_directed_spdp()) {
     directed_sender_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::send_directed);
@@ -2433,7 +2455,7 @@ Spdp::SpdpTransport::dispose_unregister()
     RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", hdr_.guidPrefix, true, message);
   }
 
-  send(SEND_TO_LOCAL | SEND_TO_RELAY);
+  send(SEND_MULTICAST | SEND_RELAY);
 }
 
 void
@@ -2590,11 +2612,11 @@ void
 Spdp::send_to_relay()
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  tport_->write_i(SpdpTransport::SEND_TO_RELAY);
+  tport_->write_i(SpdpTransport::SEND_RELAY);
 }
 
 void
-Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
+Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, const ACE_INET_Addr& local_address, WriteFlags flags)
 {
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
@@ -2664,24 +2686,29 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, WriteFlags flags)
     RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", hdr_.guidPrefix, true, message);
   }
 
-  send(flags);
+  send(flags, local_address);
 }
 
 void
-Spdp::SpdpTransport::send(WriteFlags flags)
+Spdp::SpdpTransport::send(WriteFlags flags, const ACE_INET_Addr& local_address)
 {
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
-  if ((flags & SEND_TO_LOCAL) && !outer->config_->rtps_relay_only()) {
+  if ((flags & SEND_MULTICAST) && !outer->config_->rtps_relay_only()) {
     typedef OPENDDS_SET(ACE_INET_Addr)::const_iterator iter_t;
     for (iter_t iter = send_addrs_.begin(); iter != send_addrs_.end(); ++iter) {
       send(*iter);
     }
   }
 
+  if (((flags & SEND_DIRECT) && !outer->config_->rtps_relay_only()) &&
+      local_address != ACE_INET_Addr()) {
+    send(local_address);
+  }
+
   const ACE_INET_Addr relay_address = outer->config_->spdp_rtps_relay_address();
-  if (((flags & SEND_TO_RELAY) || outer->config_->rtps_relay_only()) &&
+  if (((flags & SEND_RELAY) || outer->config_->rtps_relay_only()) &&
       relay_address != ACE_INET_Addr()) {
     send(relay_address);
   }
@@ -3271,7 +3298,7 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
         return;
       }
 
-      write_i(SEND_TO_LOCAL);
+      shorten_local_sender_delay_i();
     } else {
       ACE_TCHAR buff[256];
       multicast_address_.addr_to_string(buff, 256);
@@ -3308,7 +3335,7 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
         return;
       }
 
-      write_i(SEND_TO_LOCAL);
+      shorten_local_sender_delay_i();
     } else {
       ACE_TCHAR buff[256];
       multicast_ipv6_address_.addr_to_string(buff, 256);
@@ -4007,14 +4034,14 @@ void Spdp::SpdpTransport::send_relay(const DCPS::MonotonicTimePoint& /*now*/)
   if (!outer) return;
 
   if ((outer->config_->use_rtps_relay() || outer->config_->rtps_relay_only()) && outer->config_->spdp_rtps_relay_address() != ACE_INET_Addr()) {
-    write(SEND_TO_RELAY);
+    write(SEND_RELAY);
   }
 }
 #endif
 
 void Spdp::SpdpTransport::send_local(const DCPS::MonotonicTimePoint& /*now*/)
 {
-  write(SEND_TO_LOCAL);
+  write(SEND_MULTICAST);
 }
 
 void Spdp::SpdpTransport::send_directed(const DCPS::MonotonicTimePoint& /*now*/)
@@ -4033,7 +4060,7 @@ void Spdp::SpdpTransport::send_directed(const DCPS::MonotonicTimePoint& /*now*/)
       continue;
     }
 
-    write_i(id, SEND_TO_LOCAL | SEND_TO_RELAY);
+    write_i(id, pos->second.local_address_, SEND_DIRECT | SEND_RELAY);
     directed_guids_.push_back(id);
     directed_sender_->schedule(outer->config_->resend_period() * (1.0 / directed_guids_.size()));
     break;
@@ -4209,6 +4236,17 @@ ParticipantData_t& Spdp::get_participant_data(const DCPS::RepoId& guid)
 {
   DiscoveredParticipantIter iter = participants_.find(make_part_guid(guid));
   return iter->second.pdata_;
+}
+
+DCPS::MonotonicTime_t Spdp::get_participant_discovered_at() const
+{
+  return participant_discovered_at_;
+}
+
+DCPS::MonotonicTime_t Spdp::get_participant_discovered_at(const DCPS::RepoId& guid) const
+{
+  const DiscoveredParticipantConstIter iter = participants_.find(make_part_guid(guid));
+  return iter->second.discovered_at_.to_monotonic_time();
 }
 
 void

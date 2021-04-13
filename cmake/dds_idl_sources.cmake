@@ -67,7 +67,7 @@ function(opendds_target_idl_sources target)
   get_property(language_mappings TARGET ${target}
     PROPERTY "OPENDDS_LANGUAGE_MAPPINGS")
   # Make sure OPENDDS_LANGUAGE_MAPPINGS is exported if supported
-  if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
+  if(NOT ${CMAKE_VERSION} VERSION_LESS "3.12.0")
     get_property(target_export_properties TARGET ${target}
       PROPERTY "EXPORT_PROPERTIES")
     if(NOT ("OPENDDS_LANGUAGE_MAPPINGS" IN_LIST target_export_properties))

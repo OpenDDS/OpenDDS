@@ -38,17 +38,12 @@ public:
 
   size_t max_message_size_;
   size_t nak_depth_;
-  double quick_reply_ratio_;
-  double heartbeat_backoff_factor_;
-  double heartbeat_safety_factor_;
   TimeDuration nak_response_delay_;
   TimeDuration heartbeat_period_;
-  TimeDuration heartbeat_period_minimum_;
-  TimeDuration heartbeat_period_maximum_;
   TimeDuration heartbeat_response_delay_;
-  TimeDuration handshake_timeout_;
   TimeDuration durable_data_timeout_;
   bool responsive_mode_;
+  TimeDuration send_delay_;
 
   virtual int load(ACE_Configuration_Heap& cf,
                    ACE_Configuration_Section_Key& sect);
@@ -82,6 +77,16 @@ public:
     }
   }
 
+  ACE_INET_Addr advertised_address() const { return advertised_address_; }
+  void advertised_address(const ACE_INET_Addr& addr)
+  {
+    if (addr.get_type() == AF_INET) {
+      advertised_address_ = addr;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpInst::advertised_address set failed because address family is not AF_INET\n")));
+    }
+  }
+
 #ifdef ACE_HAS_IPV6
   ACE_INET_Addr ipv6_multicast_group_address() const { return ipv6_multicast_group_address_; }
   void ipv6_multicast_group_address(const ACE_INET_Addr& addr)
@@ -100,6 +105,16 @@ public:
       ipv6_local_address_ = addr;
     } else {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpInst::ipv6_local_address set failed because address family is not AF_INET6\n")));
+    }
+  }
+
+  ACE_INET_Addr ipv6_advertised_address() const { return ipv6_advertised_address_; }
+  void ipv6_advertised_address(const ACE_INET_Addr& addr)
+  {
+    if (addr.get_type() == AF_INET6) {
+      ipv6_advertised_address_ = addr;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpInst::ipv6_advertised_address set failed because address family is not AF_INET6\n")));
     }
   }
 #endif
@@ -136,9 +151,11 @@ private:
 
   ACE_INET_Addr multicast_group_address_;
   ACE_INET_Addr local_address_;
+  ACE_INET_Addr advertised_address_;
 #ifdef ACE_HAS_IPV6
   ACE_INET_Addr ipv6_multicast_group_address_;
   ACE_INET_Addr ipv6_local_address_;
+  ACE_INET_Addr ipv6_advertised_address_;
 #endif
 
   mutable ACE_SYNCH_MUTEX config_lock_;

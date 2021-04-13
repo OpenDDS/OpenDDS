@@ -10,6 +10,7 @@
 
 #include "EntityImpl.h"
 #include "Definitions.h"
+#include "DisjointSequence.h"
 #include "TopicImpl.h"
 #include "InstanceHandle.h"
 #include "OwnershipManager.h"
@@ -122,9 +123,6 @@ public:
   typedef OPENDDS_MAP(OPENDDS_STRING, RefCounted_Topic) TopicMap;
 
   typedef OPENDDS_MAP(OPENDDS_STRING, DDS::TopicDescription_var) TopicDescriptionMap;
-
-  typedef OPENDDS_MAP_CMP(RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan) HandleMap;
-  typedef OPENDDS_MAP(DDS::InstanceHandle_t, RepoId) RepoIdMap;
 
   DomainParticipantImpl(InstanceHandleGenerator&           handle_generator,
                         const DDS::DomainId_t&             domain_id,
@@ -292,15 +290,33 @@ public:
   OPENDDS_STRING get_unique_id();
 
   /**
-   * Obtain a local handle representing a GUID.
+   * Assign an instance handle, optionally representing a GUID.
+   * If a GUID is provided (not GUID_UNKNOWN), other calls to assign_handle
+   * for this GUID will return the same handle, as will subsequent calls to
+   * lookup_handle.
+   *
+   * If this method returns a valid (non-HANDLE_NIL) handle, it must be
+   * returned by calling return_handle.
    */
-  DDS::InstanceHandle_t id_to_handle(const RepoId& id);
+  DDS::InstanceHandle_t assign_handle(const GUID_t& id = GUID_UNKNOWN);
+
+  /**
+   * Get a handle that was previously mapped to a GUID or HANDLE_NIL if none exists.
+   *
+   * Handles returned from this method should not be passed to return_handle.
+   */
+  DDS::InstanceHandle_t lookup_handle(const GUID_t& id) const;
+
+  /**
+   * Return a previously-assigned handle.
+   */
+  void return_handle(DDS::InstanceHandle_t handle);
 
   /**
    * Obtain a GUID representing a local hande.
    * @return GUID_UNKNOWN if not found.
    */
-  RepoId get_repoid(const DDS::InstanceHandle_t& id);
+  GUID_t get_repoid(DDS::InstanceHandle_t id) const;
 
   /**
    *  Check if the topic is used by any datareader or datawriter.
@@ -391,10 +407,11 @@ private:
   /** The implementation of create_topic.
    */
 
-  enum {
-    TOPIC_TYPE_HAS_KEYS =1,
-    TOPIC_TYPELESS = 2
-  } TopicTypeMask;
+  ///{@
+  /// constants for the topic_mask argument to create_topic_i
+  static const int TOPIC_TYPE_HAS_KEYS = 1;
+  static const int TOPIC_TYPELESS = 2;
+  ///@}
 
   DDS::Topic_ptr create_topic_i(
     const char *           topic_name,
@@ -462,9 +479,18 @@ private:
   /// Collection of TopicDescriptions which are not also Topics
   TopicDescriptionMap topic_descrs_;
 #endif
-  /// Bidirectional collection of handles <--> RepoIds.
-  HandleMap handles_;
+
+  typedef std::pair<DDS::InstanceHandle_t, unsigned int> HandleWithCounter;
+  typedef OPENDDS_MAP_CMP(GUID_t, HandleWithCounter, GUID_tKeyLessThan) CountedHandleMap;
+  typedef OPENDDS_MAP(DDS::InstanceHandle_t, RepoId) RepoIdMap;
+
+  /// Instance handles assigned which are mapped to GUIDs (use handle_protector_)
+  CountedHandleMap handles_;
+  /// By-handle lookup of instance handles assigned to GUIDs (use handle_protector_)
   RepoIdMap repoIds_;
+
+  typedef OPENDDS_MAP_CMP(GUID_t, DDS::InstanceHandle_t, GUID_tKeyLessThan) HandleMap;
+
   /// Collection of ignored participants.
   HandleMap ignored_participants_;
   /// Collection of ignored topics.
@@ -476,7 +502,7 @@ private:
   /// Protect the topic collection.
   ACE_Recursive_Thread_Mutex topics_protector_;
   /// Protect the handle collection.
-  ACE_Recursive_Thread_Mutex handle_protector_;
+  mutable ACE_Thread_Mutex handle_protector_;
   /// Protect the shutdown.
   ACE_Thread_Mutex shutdown_mutex_;
   ConditionVariable<ACE_Thread_Mutex> shutdown_condition_;
@@ -486,9 +512,11 @@ private:
   /// The built in topic subscriber.
   DDS::Subscriber_var bit_subscriber_;
 
-  /// Instance handle generators for non-repo backed entities
-  /// (i.e. subscribers and publishers).
+  /// Get instances handles from DomainParticipantFactory (use handle_protector_)
   InstanceHandleGenerator& participant_handles_;
+
+  /// Keep track of handles that can be reused (use handle_protector_)
+  DisjointSequence::OrderedRanges<DDS::InstanceHandle_t> reusable_handles_;
 
   unique_ptr<Monitor> monitor_;
 
@@ -498,7 +526,6 @@ private:
 
   /// Publisher ID generator.
   RepoIdSequence pub_id_gen_;
-  RepoId nextPubId();
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   ACE_Thread_Mutex filter_cache_lock_;

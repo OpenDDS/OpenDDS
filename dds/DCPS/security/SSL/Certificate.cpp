@@ -5,7 +5,6 @@
 
 #include "Certificate.h"
 #include "dds/DCPS/security/CommonUtilities.h"
-#include "dds/DCPS/SequenceIterator.h"
 #include "Err.h"
 #include <algorithm>
 #include <cstring>
@@ -444,30 +443,35 @@ void Certificate::load_cert_bytes(const std::string& path)
     return;
   }
 
-  DCPS::SequenceBackInsertIterator<DDS::OctetSeq> back_inserter(original_bytes_);
+  const std::ifstream::pos_type begin = in.tellg();
+  in.seekg(0, std::ios::end);
+  const std::ifstream::pos_type end = in.tellg();
+  in.seekg(0, std::ios::beg);
 
-  std::copy((std::istreambuf_iterator<char>(in)),
-            std::istreambuf_iterator<char>(),
-            back_inserter);
+  original_bytes_.length(static_cast<CORBA::ULong>(end - begin + 1));
+  in.read(reinterpret_cast<char*>(original_bytes_.get_buffer()), end - begin);
+
+  if (!in) {
+    ACE_ERROR((LM_WARNING,
+               "(%P|%t) Certificate::load_cert_bytes:"
+               "WARNING: Failed to load file '%C'; '%m'\n",
+               path.c_str()));
+    return;
+  }
 
   // To appease the other DDS security implementations which
   // append a null byte at the end of the cert.
-  *back_inserter = 0u;
+  original_bytes_[original_bytes_.length() - 1] = 0u;
 #endif
 }
 
 void Certificate::load_cert_data_bytes(const std::string& data)
 {
-  // The minus 1 is because path contains a comma in element 0 and that
-  // comma is not included in the cert string
-  original_bytes_.length(static_cast<unsigned int>(data.size() - 1));
-  std::memcpy(original_bytes_.get_buffer(), &data[1],
-              original_bytes_.length());
-
-  // To appease the other DDS security implementations which
-  // append a null byte at the end of the cert.
-  original_bytes_.length(original_bytes_.length() + 1);
-  original_bytes_[original_bytes_.length() - 1] = 0;
+  // Start at position 1 because path contains a comma in element 0
+  // and that comma is not included in the cert string
+  // copy the full length to get the terminating null
+  original_bytes_.length(static_cast<unsigned int>(data.size()));
+  std::memcpy(original_bytes_.get_buffer(), data.c_str() + 1, data.size());
 }
 
 X509* Certificate::x509_from_pem(const std::string& path,
@@ -546,9 +550,7 @@ X509* Certificate::x509_from_pem(const DDS::OctetSeq& bytes,
 
 int Certificate::serialize(DDS::OctetSeq& dst) const
 {
-  std::copy(DCPS::const_sequence_begin(original_bytes_),
-            DCPS::const_sequence_end(original_bytes_),
-            DCPS::back_inserter(dst));
+  dst = original_bytes_;
 
   if (dst.length() == original_bytes_.length()) {
     return 0;

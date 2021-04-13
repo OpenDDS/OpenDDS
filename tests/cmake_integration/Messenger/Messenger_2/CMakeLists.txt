@@ -11,8 +11,6 @@ if(NOT OpenDDS_FOUND)
   find_package(OpenDDS REQUIRED)
 endif()
 
-set(CMAKE_CXX_COMPILER ${OPENDDS_COMPILER})
-
 if (NOT OPENDDS_OWNERSHIP_PROFILE)
   message(FATAL_ERROR "These tests require OpenDDS to be built with Ownership Profile enabled")
 endif()

@@ -16,7 +16,6 @@
 #include "ConditionVariable.h"
 
 #include <ace/Task.h>
-#include <ace/Barrier.h>
 #include <ace/Synch_Traits.h>
 #include <ace/Timer_Heap_T.h>
 #include <ace/Event_Handler_Handle_Timeout_Upcall.h>
@@ -89,7 +88,7 @@ public:
   ACE_Proactor* get_proactor();
   const ACE_Proactor* get_proactor() const;
 
-  void wait_for_startup() { barrier_.wait(); }
+  void wait_for_startup() { while (state_ != STATE_RUNNING) { condition_.wait(); } }
 
   bool is_shut_down() const { return state_ == STATE_NOT_RUNNING; }
 
@@ -98,6 +97,8 @@ public:
   OPENDDS_POOL_ALLOCATION_FWD
 
 private:
+
+  void cleanup();
 
   typedef ACE_SYNCH_MUTEX LockType;
   typedef ACE_Guard<LockType> GuardType;
@@ -123,14 +124,18 @@ private:
     DCPS::ReactorTask* const task_;
   };
 
-  ACE_Barrier   barrier_;
   LockType      lock_;
   State         state_;
   ConditionVariableType condition_;
   ACE_Reactor*  reactor_;
   ACE_thread_t  reactor_owner_;
   ACE_Proactor* proactor_;
-  bool          use_async_send_;
+
+#if defined ACE_WIN32 && defined ACE_HAS_WIN32_OVERLAPPED_IO
+#define OPENDDS_REACTOR_TASK_ASYNC
+  bool use_async_send_;
+#endif
+
   TimerQueueType* timer_queue_;
 
   // thread status reporting
