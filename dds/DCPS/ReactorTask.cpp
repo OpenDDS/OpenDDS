@@ -331,7 +331,6 @@ bool ThreadStatusManager::sync_with_parent(ThreadStatusManager& parent,
   {
     ACE_READ_GUARD_RETURN(ACE_Thread_Mutex, g2, parent.lock_, false);
 
-    // Compare threads to see if if threads were added or removed.
     Map::iterator ci = map_.begin();
     Map::iterator pi = parent.map_.begin();
     bool got_child = ci != map_.end();

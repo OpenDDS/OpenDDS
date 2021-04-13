@@ -16,8 +16,8 @@
 #include <string>
 
 // Implementation skeleton constructor
-InternalThreadStatusListenerImpl::InternalThreadStatusListenerImpl(OPENDDS_STRING id) :
-  id_(id), count_(0)
+InternalThreadStatusListenerImpl::InternalThreadStatusListenerImpl(OpenDDS::DCPS::String id) :
+  id_(id), count_(0), disposes_(0)
 {
 }
 
@@ -30,12 +30,11 @@ void InternalThreadStatusListenerImpl::on_data_available(DDS::DataReader_ptr rea
 {
   OpenDDS::DCPS::InternalThreadBuiltinTopicDataDataReader_var builtin_dr =
     OpenDDS::DCPS::InternalThreadBuiltinTopicDataDataReader::_narrow(reader);
-  if (0 == builtin_dr)
-    {
-      std::cerr << "InternalThreadStatusListenerImpl::"
-                << "on_data_available: _narrow failed." << std::endl;
-      ACE_OS::exit(1);
-    }
+  if (!builtin_dr) {
+    std::cerr << "InternalThreadStatusListenerImpl::"
+              << "on_data_available: _narrow failed." << std::endl;
+    ACE_OS::exit(1);
+  }
 
   OpenDDS::DCPS::InternalThreadBuiltinTopicData thread_info;
   DDS::SampleInfo si;
@@ -44,17 +43,21 @@ void InternalThreadStatusListenerImpl::on_data_available(DDS::DataReader_ptr rea
        status == DDS::RETCODE_OK;
        status = builtin_dr->read_next_sample(thread_info, si)) {
 
-    // copy octet[] to guid
-    OpenDDS::DCPS::RepoId guid;
-    std::memcpy(&guid, &thread_info.participant_guid, sizeof(guid));
-
     std::cout << "== " << id_ << " Thread Info ==" << std::endl;
+
+    if (si.valid_data) {
+      OpenDDS::DCPS::RepoId guid;
+      std::memcpy(&guid, &thread_info.participant_guid, sizeof(guid));
+      std::cout << " guid: " << guid << std::endl;
+      ++count_;
+    } else if (si.instance_state & DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
+      std::cout << " DISPOSE" << std::endl;
+      ++disposes_;
+    }
+
     std::cout
-      << " guid: " << guid << std::endl
       << "  tid: " << thread_info.thread_id << std::endl
       << " time: " << si.source_timestamp.sec << std::endl;
-
-    ++count_;
   }
 }
 
@@ -109,4 +112,9 @@ void InternalThreadStatusListenerImpl::on_sample_lost(
 int InternalThreadStatusListenerImpl::get_count() const
 {
   return count_;
+}
+
+size_t InternalThreadStatusListenerImpl::disposes() const
+{
+  return disposes_;
 }
