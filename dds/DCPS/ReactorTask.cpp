@@ -341,11 +341,12 @@ bool ThreadStatusManager::sync_with_parent(ThreadStatusManager& parent,
         std::strcmp(ci->first.c_str(), pi->first.c_str()) : got_parent ? 1 : -1;
       if (cmp < 0) { // We're behind, this thread was removed
         finished.insert(*ci);
-        map_.erase(ci++);
+        ++ci;
       } else if (cmp > 0) { // We're ahead, this thread was added
-        map_.insert(*pi);
+        running.insert(*pi);
         ++pi;
-      } else { // Same Thread
+      } else { // Same Thread, Update
+        running.insert(*pi);
         ++ci;
         ++pi;
       }
@@ -354,7 +355,7 @@ bool ThreadStatusManager::sync_with_parent(ThreadStatusManager& parent,
     }
   }
 
-  running = map_;
+  map_ = running;
 
   return true;
 }
