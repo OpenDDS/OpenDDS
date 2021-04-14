@@ -213,6 +213,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_i0_xer0_js0_j12
+    timeout-minutes: 150
 
     steps:
     - name: checkout MPC
@@ -414,6 +415,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_o1d0v1_xer0_j12
+    timeout-minutes: 150
 
     steps:
     - name: checkout MPC
@@ -511,6 +513,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_o1d0v1_xer0_j12
+    timeout-minutes: 150
 
     steps:
     - name: checkout MPC
@@ -899,6 +902,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_d0i0v1_sec_js0_FM-06
+    timeout-minutes: 150
 
     steps:
     - name: install xerces
@@ -1140,6 +1144,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_clang5_i0w1_sec
+    timeout-minutes: 150
 
     steps:
     - name: install clang++
@@ -1349,6 +1354,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_clang10_sec_js0
+    timeout-minutes: 150
 
     steps:
     - name: install clang++
@@ -1559,6 +1565,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_gcc6_d0w1_cpp03
+    timeout-minutes: 150
 
     steps:
     - name: install gcc and g++
@@ -1768,6 +1775,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_gcc8_i0_js0_j
+    timeout-minutes: 150
 
     steps:
     - name: install gcc and g++
@@ -1972,6 +1980,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_gcc10_i0w1_xer0
+    timeout-minutes: 150
 
     steps:
     - name: install gcc and g++
@@ -2250,6 +2259,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     needs: build_u20_j_qt_ws_sec
+    timeout-minutes: 150
 
     steps:
     - name: install xerces
@@ -2489,6 +2499,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     needs: build_u20_p1_asan_sec
+    timeout-minutes: 150
 
     steps:
     - name: install xerces
@@ -2728,6 +2739,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     needs: build_u20_p1_sec
+    timeout-minutes: 150
 
     steps:
     - name: install xerces
@@ -2921,6 +2933,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     needs: build_u20_p1_j8_FM-1f
+    timeout-minutes: 150
 
     steps:
     - name: install xerces
@@ -3158,6 +3171,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_w1_sec
+    timeout-minutes: 150
 
     steps:
     - name: install xerces
@@ -3351,6 +3365,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_w1_j_FM-2f
+    timeout-minutes: 150
 
     steps:
     - name: install xerces
@@ -3597,11 +3612,12 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_u18_stat_qt_ws_sec:
+  devguide_u18_stat_qt_ws_sec:
 
     runs-on: ubuntu-18.04
 
     needs: build_u18_stat_qt_ws_sec
+    timeout-minutes: 150
 
     steps:
     - name: install xerces
@@ -3871,6 +3887,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_j_cft0_FM-37
+    timeout-minutes: 150
 
     steps:
     - name: install xerces
@@ -4123,6 +4140,7 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_p1_stat_js0
+    timeout-minutes: 150
 
     steps:
     - name: install openssl-windows & xerces-c
@@ -4348,11 +4366,12 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_w19_re_p1_cpp03_stat_FM-08:
+  devguide_w19_re_p1_cpp03_stat_FM-08:
 
     runs-on: windows-2019
 
     needs: build_w19_re_p1_cpp03_stat_FM-08
+    timeout-minutes: 150
 
     steps:
     - name: install openssl-windows & xerces-c
@@ -4627,11 +4646,12 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_w19_re_o1p1_sec:
+  devguide_w19_re_o1p1_sec:
 
     runs-on: windows-2019
 
     needs: build_w19_re_o1p1_sec
+    timeout-minutes: 150
 
     steps:
     - name: install openssl-windows & xerces-c
@@ -4982,11 +5002,12 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_w19_re_j_ws_FM-1f:
+  devguide_w19_re_j_ws_FM-1f:
 
     runs-on: windows-2019
 
     needs: build_w19_re_j_ws_FM-1f
+    timeout-minutes: 150
 
     steps:
     - name: install xerces-c
@@ -5276,6 +5297,7 @@ jobs:
     runs-on: windows-2016
 
     needs: build_w16_x86_doi0_sec
+    timeout-minutes: 150
 
     steps:
     - name: install openssl-windows & xerces-c
@@ -6052,6 +6074,7 @@ jobs:
     runs-on: macos-10.15
 
     needs: build_m10_o1d0_sec
+    timeout-minutes: 150
 
     steps:
     - name: install xerces-c
@@ -6318,6 +6341,7 @@ jobs:
     runs-on: macos-10.15
 
     needs: build_m10_i0_j_FM-1f
+    timeout-minutes: 150
 
     steps:
     - name: install xerces-c
