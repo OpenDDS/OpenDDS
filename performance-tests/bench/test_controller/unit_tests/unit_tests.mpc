@@ -1,4 +1,7 @@
 project (*ScenarioAllocationTest): ../../bench_exe, googletest {
+
+  after += test_controller
+
   Source_Files {
     ../ScenarioManager.cpp
     ../DdsEntities.cpp

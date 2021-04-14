@@ -83,9 +83,9 @@ int Permissions::load(const SSL::SignedDocument& doc)
 
   // Successfully parsed the permissions file
 
-  xercesc::DOMDocument* xmlDoc = parser->getDocument();
+  const xercesc::DOMDocument* xmlDoc = parser->getDocument();
 
-  xercesc::DOMElement* elementRoot = xmlDoc->getDocumentElement();
+  const xercesc::DOMElement* elementRoot = xmlDoc->getDocumentElement();
   if (!elementRoot) {
     ACE_ERROR((LM_ERROR, ACE_TEXT(
         "(%P|%t) AccessControlBuiltInImpl::load_permissions_file: Empty XML document\n")));
@@ -93,38 +93,46 @@ int Permissions::load(const SSL::SignedDocument& doc)
   }
 
   // Find the validity rules
-  xercesc::DOMNodeList* grantRules = xmlDoc->getElementsByTagName(XStr(ACE_TEXT("grant")));
+  const xercesc::DOMNodeList* grantRules = xmlDoc->getElementsByTagName(XStr(ACE_TEXT("grant")));
 
-  for (XMLSize_t r = 0; r < grantRules->getLength(); ++r) {
+  for (XMLSize_t r = 0, r_len = grantRules->getLength(); r < r_len; ++r) {
     Grant_rch grant = DCPS::make_rch<Grant>();
 
+    const xercesc::DOMNode* grantRule = grantRules->item(r);
+
     // Pull out the grant name for this grant
-    xercesc::DOMNamedNodeMap* rattrs = grantRules->item(r)->getAttributes();
+    xercesc::DOMNamedNodeMap* rattrs = grantRule->getAttributes();
     grant->name = toString(rattrs->item(0)->getTextContent());
 
     // Pull out subject name, validity, and default
-    xercesc::DOMNodeList* grantNodes = grantRules->item(r)->getChildNodes();
+    const xercesc::DOMNodeList* grantNodes = grantRule->getChildNodes();
 
     bool valid_subject = false, valid_default = false;
-    for (XMLSize_t gn = 0; gn < grantNodes->getLength(); ++gn) {
-      const XStr g_tag = grantNodes->item(gn)->getNodeName();
+    for (XMLSize_t gn = 0, gn_len = grantNodes->getLength(); gn < gn_len; ++gn) {
+
+      const xercesc::DOMNode* grantNode = grantNodes->item(gn);
+
+      const XStr g_tag = grantNode->getNodeName();
 
       if (g_tag == ACE_TEXT("subject_name")) {
-        valid_subject = (grant->subject.parse(toString(grantNodes->item(gn)->getTextContent())) == 0);
+        valid_subject = (grant->subject.parse(toString(grantNode->getTextContent())) == 0);
       } else if (g_tag == ACE_TEXT("validity")) {
-        xercesc::DOMNodeList* validityNodes = grantNodes->item(gn)->getChildNodes();
+        const xercesc::DOMNodeList* validityNodes = grantNode->getChildNodes();
 
-        for (XMLSize_t vn = 0; vn < validityNodes->getLength(); ++vn) {
-          const XStr v_tag = validityNodes->item(vn)->getNodeName();
+        for (XMLSize_t vn = 0, vn_len = validityNodes->getLength(); vn < vn_len; ++vn) {
+
+          const xercesc::DOMNode* validityNode = validityNodes->item(vn);
+
+          const XStr v_tag = validityNode->getNodeName();
 
           if (v_tag == ACE_TEXT("not_before")) {
-            grant->validity.not_before = toString((validityNodes->item(vn)->getTextContent()));
+            grant->validity.not_before = toString((validityNode->getTextContent()));
           } else if (v_tag == ACE_TEXT("not_after")) {
-            grant->validity.not_after = toString((validityNodes->item(vn)->getTextContent()));
+            grant->validity.not_after = toString((validityNode->getTextContent()));
           }
         }
       } else if (g_tag == ACE_TEXT("default")) {
-        const std::string def = toString(grantNodes->item(gn)->getTextContent());
+        const std::string def = toString(grantNode->getTextContent());
         valid_default = true;
         if (def == "ALLOW") {
           grant->default_permission = ALLOW;
@@ -145,37 +153,49 @@ int Permissions::load(const SSL::SignedDocument& doc)
     }
 
     // Pull out allow/deny rules
-    xercesc::DOMNodeList* adGrantNodes = grantRules->item(r)->getChildNodes();
+    const xercesc::DOMNodeList* adGrantNodes = grantRule->getChildNodes();
 
-    for (XMLSize_t gn = 0; gn < adGrantNodes->getLength(); ++gn) {
-      const XStr g_tag = adGrantNodes->item(gn)->getNodeName();
+    for (XMLSize_t gn = 0, gn_len = adGrantNodes->getLength(); gn < gn_len; ++gn) {
+
+      const xercesc::DOMNode* adGrantNode = adGrantNodes->item(gn);
+
+      const XStr g_tag = adGrantNode->getNodeName();
 
       if (g_tag == ACE_TEXT("allow_rule") || g_tag == ACE_TEXT("deny_rule")) {
         Rule rule;
 
         rule.ad_type = (g_tag == ACE_TEXT("allow_rule")) ? ALLOW : DENY;
 
-        xercesc::DOMNodeList* adNodeChildren = adGrantNodes->item(gn)->getChildNodes();
+        const xercesc::DOMNodeList* adNodeChildren = adGrantNode->getChildNodes();
 
-        for (XMLSize_t anc = 0; anc < adNodeChildren->getLength(); ++anc) {
-          const XStr anc_tag = adNodeChildren->item(anc)->getNodeName();
+        for (XMLSize_t anc = 0, anc_len = adNodeChildren->getLength(); anc < anc_len; ++anc) {
+
+          const xercesc::DOMNode* adNodeChild = adNodeChildren->item(anc);
+
+          const XStr anc_tag = adNodeChild->getNodeName();
 
           if (anc_tag == ACE_TEXT("domains")) {   //domain list
-            xercesc::DOMNodeList* domainIdNodes = adNodeChildren->item(anc)->getChildNodes();
+            const xercesc::DOMNodeList* domainIdNodes = adNodeChild->getChildNodes();
 
-            for (XMLSize_t did = 0; did < domainIdNodes->getLength(); ++did) {
-              if (ACE_TEXT("id") == XStr(domainIdNodes->item(did)->getNodeName())) {
-                rule.domains.insert(toInt(domainIdNodes->item(did)->getTextContent()));
-              } else if (ACE_TEXT("id_range") == XStr(domainIdNodes->item(did)->getNodeName())) {
+            for (XMLSize_t did = 0, did_len = domainIdNodes->getLength(); did < did_len; ++did) {
+
+              const xercesc::DOMNode* domainIdNode = domainIdNodes->item(did);
+
+              if (ACE_TEXT("id") == XStr(domainIdNode->getNodeName())) {
+                rule.domains.insert(toInt(domainIdNode->getTextContent()));
+              } else if (ACE_TEXT("id_range") == XStr(domainIdNode->getNodeName())) {
                 int min_value = 0;
                 int max_value = 0;
-                xercesc::DOMNodeList* domRangeIdNodes = domainIdNodes->item(did)->getChildNodes();
+                const xercesc::DOMNodeList* domRangeIdNodes = domainIdNode->getChildNodes();
 
-                for (XMLSize_t drid = 0; drid < domRangeIdNodes->getLength(); ++drid) {
-                  if (ACE_TEXT("min") == XStr(domRangeIdNodes->item(drid)->getNodeName())) {
-                    min_value = toInt(domRangeIdNodes->item(drid)->getTextContent());
-                  } else if (ACE_TEXT("max") == XStr(domRangeIdNodes->item(drid)->getNodeName())) {
-                    max_value = toInt(domRangeIdNodes->item(drid)->getTextContent());
+                for (XMLSize_t drid = 0, drid_len = domRangeIdNodes->getLength(); drid < drid_len; ++drid) {
+
+                  const xercesc::DOMNode* domRangeIdNode = domRangeIdNodes->item(drid);
+
+                  if (ACE_TEXT("min") == XStr(domRangeIdNode->getNodeName())) {
+                    min_value = toInt(domRangeIdNode->getTextContent());
+                  } else if (ACE_TEXT("max") == XStr(domRangeIdNode->getNodeName())) {
+                    max_value = toInt(domRangeIdNode->getTextContent());
 
                     if (min_value > max_value) {
                       ACE_ERROR((LM_ERROR, ACE_TEXT(
@@ -195,24 +215,33 @@ int Permissions::load(const SSL::SignedDocument& doc)
             Action action;
 
             action.ps_type = (anc_tag == ACE_TEXT("publish")) ? PUBLISH : SUBSCRIBE;
-            xercesc::DOMNodeList* topicListNodes = adNodeChildren->item(anc)->getChildNodes();
+            const xercesc::DOMNodeList* topicListNodes = adNodeChild->getChildNodes();
 
-            for (XMLSize_t tln = 0; tln < topicListNodes->getLength(); ++tln) {
-              if (ACE_TEXT("topics") == XStr(topicListNodes->item(tln)->getNodeName())) {
-                xercesc::DOMNodeList* topicNodes = topicListNodes->item(tln)->getChildNodes();
+            for (XMLSize_t tln = 0, tln_len = topicListNodes->getLength(); tln < tln_len; ++tln) {
 
-                for (XMLSize_t tn = 0; tn < topicNodes->getLength(); ++tn) {
-                  if (ACE_TEXT("topic") == XStr(topicNodes->item(tn)->getNodeName())) {
-                    action.topics.push_back(toString(topicNodes->item(tn)->getTextContent()));
+              const xercesc::DOMNode* topicListNode = topicListNodes->item(tln);
+
+              if (ACE_TEXT("topics") == XStr(topicListNode->getNodeName())) {
+                const xercesc::DOMNodeList* topicNodes = topicListNode->getChildNodes();
+
+                for (XMLSize_t tn = 0, tn_len = topicNodes->getLength(); tn < tn_len; ++tn) {
+
+                  const xercesc::DOMNode* topicNode = topicNodes->item(tn);
+
+                  if (ACE_TEXT("topic") == XStr(topicNode->getNodeName())) {
+                    action.topics.push_back(toString(topicNode->getTextContent()));
                   }
                 }
 
-              } else if (ACE_TEXT("partitions") == XStr(topicListNodes->item(tln)->getNodeName())) {
-                xercesc::DOMNodeList* partitionNodes = topicListNodes->item(tln)->getChildNodes();
+              } else if (ACE_TEXT("partitions") == XStr(topicListNode->getNodeName())) {
+                const xercesc::DOMNodeList* partitionNodes = topicListNode->getChildNodes();
 
-                for (XMLSize_t pn = 0; pn < partitionNodes->getLength(); ++pn) {
-                  if (ACE_TEXT("partition") == XStr(partitionNodes->item(pn)->getNodeName())) {
-                    action.partitions.push_back(toString(partitionNodes->item(pn)->getTextContent()));
+                for (XMLSize_t pn = 0, pn_len = partitionNodes->getLength(); pn < pn_len; ++pn) {
+
+                  const xercesc::DOMNode* partitionNode = partitionNodes->item(pn);
+
+                  if (ACE_TEXT("partition") == XStr(partitionNode->getNodeName())) {
+                    action.partitions.push_back(toString(partitionNode->getTextContent()));
                   }
                 }
               }

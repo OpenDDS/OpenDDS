@@ -112,12 +112,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-UserData"))) {
       user_data = arg;
       args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-StatisticsInterval"))) {
-      config.statistics_interval(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-PublishStatistics"))) {
-      config.publish_relay_statistics(ACE_OS::atoi(arg));
-      args.consume_arg();
     } else if ((arg = args.get_the_parameter("-LogEntries"))) {
       config.log_entries(ACE_OS::atoi(arg));
       args.consume_arg();
@@ -128,16 +122,28 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       config.log_activity(ACE_OS::atoi(arg));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-LogRelayStatistics"))) {
-      config.log_relay_statistics(ACE_OS::atoi(arg));
+      config.log_relay_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-LogHandlerStatistics"))) {
-      config.log_handler_statistics(ACE_OS::atoi(arg));
+      config.log_handler_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-LogParticipantStatistics"))) {
-      config.log_participant_statistics(ACE_OS::atoi(arg));
+      config.log_participant_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-LogDomainStatistics"))) {
-      config.log_domain_statistics(ACE_OS::atoi(arg));
+      config.log_domain_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-PublishRelayStatistics"))) {
+      config.publish_relay_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-PublishHandlerStatistics"))) {
+      config.publish_handler_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-PublishParticipantStatistics"))) {
+      config.publish_participant_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-PublishDomainStatistics"))) {
+      config.publish_domain_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
 #ifdef OPENDDS_SECURITY
     } else if ((arg = args.get_the_parameter("-IdentityCA"))) {
@@ -288,6 +294,24 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   if (!responsible_relay_topic) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Responsible Relay topic\n")));
+    return EXIT_FAILURE;
+  }
+
+  RelayInstanceTypeSupport_var relay_instance_ts = new RelayInstanceTypeSupportImpl;
+  if (relay_instance_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to register RelayInstance type\n")));
+    return EXIT_FAILURE;
+  }
+  CORBA::String_var relay_instance_type_name = relay_instance_ts->get_type_name();
+
+  DDS::Topic_var relay_instances_topic =
+    relay_participant->create_topic(RtpsRelay::RELAY_INSTANCES_TOPIC_NAME.c_str(),
+                                    relay_instance_type_name,
+                                    TOPIC_QOS_DEFAULT, nullptr,
+                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+  if (!relay_instances_topic) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Instances topic\n")));
     return EXIT_FAILURE;
   }
 
@@ -735,6 +759,30 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SPDP Vertical listening on %C\n"), addr_to_string(spdp_vertical_addr).c_str()));
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SEDP Vertical listening on %C\n"), addr_to_string(sedp_vertical_addr).c_str()));
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: Data Vertical listening on %C\n"), addr_to_string(data_vertical_addr).c_str()));
+
+  // Write a sample about the relay.
+  DDS::DataWriter_var relay_instance_writer_var = relay_publisher->create_datawriter(relay_instances_topic, writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  if (!relay_instance_writer_var) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Instance data writer\n")));
+    return EXIT_FAILURE;
+  }
+
+  RelayInstanceDataWriter_var relay_instance_writer = RelayInstanceDataWriter::_narrow(relay_instance_writer_var);
+  if (!relay_instance_writer) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to narrow Relay Instance data writer\n")));
+    return EXIT_FAILURE;
+  }
+
+  RelayInstance relay_instance;
+  relay_instance.application_participant_guid(repoid_to_guid(config.application_participant_guid()));
+  relay_instance.application_participant_user_data().value.length(static_cast<CORBA::ULong>(user_data.length()));
+  std::memcpy(relay_instance.application_participant_user_data().value.get_buffer(), user_data.data(), user_data.length());
+
+  ret = relay_instance_writer->write(relay_instance, DDS::HANDLE_NIL);
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to write Relay Instance\n")));
+    return EXIT_FAILURE;
+  }
 
   reactor->run_reactor_event_loop();
 

@@ -452,7 +452,8 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
       dp_factory_servant_ = make_rch<DomainParticipantFactoryImpl>();
 
-      reactor_task_.open_reactor_task(0, thread_status_interval_, &thread_status_, "Service_Participant");
+      reactor_task_.open_reactor_task(
+        0, thread_status_interval_, &thread_status_manager_, "Service_Participant");
 
       if (this->monitor_enabled_) {
 #if !defined(ACE_AS_STATIC_LIBS)
@@ -2796,10 +2797,9 @@ Service_Participant::set_thread_status_interval(TimeDuration interval)
   thread_status_interval_ = interval;
 }
 
-ThreadStatus*
-Service_Participant::get_thread_statuses()
+ThreadStatusManager* Service_Participant::get_thread_status_manager()
 {
-  return &thread_status_;
+  return &thread_status_manager_;
 }
 
 ACE_Thread_Mutex& Service_Participant::get_static_xtypes_lock()

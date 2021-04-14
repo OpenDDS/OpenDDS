@@ -1219,22 +1219,6 @@ void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setHeartbeatResponseDelay
   inst->heartbeat_response_delay_ = OpenDDS::DCPS::TimeDuration::from_msec(val);
 }
 
-// RtpsUdpInst::getHandshakeTimeout
-jlong JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getHandshakeTimeout
-(JNIEnv * jni, jobject jthis)
-{
-  OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  return inst->handshake_timeout_.value().msec();
-}
-
-// RtpsUdpInst::setHandshakeTimeout
-void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setHandshakeTimeout
-(JNIEnv * jni, jobject jthis, jlong val)
-{
-  OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  inst->handshake_timeout_ = OpenDDS::DCPS::TimeDuration::from_msec(val);
-}
-
 // WaitSet and GuardCondition
 
 jlong JNICALL Java_DDS_WaitSet__1jni_1init(JNIEnv *, jclass)

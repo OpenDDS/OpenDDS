@@ -143,9 +143,9 @@ if ($scenario) {
     $sub_expect = "~27";
   } elsif ($scenario eq "SC1_sec_on_bad_cert_failure") {
     # SC1 (join controlled domain) : secure participants with wrong credentials fail to authenticate
-    $pub_key_file = \
+    $pub_key_file =
       "../certs/identity/test_participant_02_private_key.pem"; # This won't match cert (01)
-    $sub_key_file = \
+    $sub_key_file =
       "../certs/identity/test_participant_01_private_key.pem"; # This won't match cert (02)
     @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");

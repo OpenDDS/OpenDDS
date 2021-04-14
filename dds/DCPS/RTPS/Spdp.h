@@ -132,7 +132,7 @@ public:
                                const ACE_INET_Addr& from,
                                bool from_sedp);
 
-  static bool validateSequenceNumber(const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter);
+  bool validateSequenceNumber(const DCPS::MonotonicTimePoint& now, const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter);
 
 #ifdef OPENDDS_SECURITY
   void process_handshake_deadlines(const DCPS::MonotonicTimePoint& tv);
@@ -347,7 +347,8 @@ private:
     OPENDDS_LIST(DCPS::RepoId) directed_guids_;
     void process_lease_expirations(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpSporadic> lease_expiration_processor_;
-    DCPS::ThreadStatus* thread_status_;
+    DCPS::ThreadStatusManager* global_thread_status_manager_;
+    DCPS::ThreadStatusManager local_thread_status_manager_;
     void thread_status_task(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpPeriodic> thread_status_sender_;
 #ifdef OPENDDS_SECURITY

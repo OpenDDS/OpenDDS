@@ -176,6 +176,7 @@ private:
   ICE::ServerReflexiveStateMachine relay_srsm_;
   typedef PmfPeriodicTask<RtpsUdpTransport> Periodic;
   RcHandle<Periodic> relay_stun_task_;
+  mutable ACE_Thread_Mutex relay_stun_mutex_;
   void relay_stun_task(const DCPS::MonotonicTimePoint& now);
 
   void start_ice();

@@ -357,20 +357,11 @@ Sedp::init(const RepoId& guid,
   // Use a static cast to avoid dependency on the RtpsUdp library
   DCPS::RtpsUdpInst_rch rtps_inst =
       DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  // The SEDP endpoints may need to wait at least one resend period before
-  // the handshake completes (allows time for our SPDP multicast to be
-  // received by the other side).  Arbitrary constant of 5 to account for
-  // possible network lossiness.
-  static const double HANDSHAKE_MULTIPLIER = 5;
-  rtps_inst->handshake_timeout_ = disco.resend_period() * HANDSHAKE_MULTIPLIER;
   rtps_inst->max_message_size_ = disco.config()->sedp_max_message_size();
   rtps_inst->heartbeat_period_ = disco.config()->sedp_heartbeat_period();
-  rtps_inst->heartbeat_period_minimum_ = disco.config()->sedp_heartbeat_period_minimum();
-  rtps_inst->heartbeat_period_maximum_ = disco.config()->sedp_heartbeat_period_maximum();
-  rtps_inst->heartbeat_backoff_factor_ = disco.config()->sedp_heartbeat_backoff_factor();
-  rtps_inst->heartbeat_safety_factor_ = disco.config()->sedp_heartbeat_safety_factor();
   rtps_inst->nak_response_delay_ = disco.config()->sedp_nak_response_delay();
-  rtps_inst->responsive_mode_ = disco.config()->responsive_mode();
+  rtps_inst->responsive_mode_ = disco.config()->sedp_responsive_mode();
+  rtps_inst->send_delay_ = disco.config()->sedp_send_delay();
 
   if (disco.sedp_multicast()) {
     // Bind to a specific multicast group
@@ -408,18 +399,24 @@ Sedp::init(const RepoId& guid,
   transport_cfg_ = TheTransportRegistry->create_config(config_name.c_str());
   transport_cfg_->instances_.push_back(transport_inst_);
 
+  rtps_inst->opendds_discovery_default_listener_ = publications_reader_;
+  rtps_inst->opendds_discovery_guid_ = guid;
+
   reactor_task_ = transport_inst_->reactor_task();
+  // One should assume that the transport is configured after this
+  // point.  Changes to transport_inst_ or rtps_inst after this line
+  // may not be reflected.
   ACE_Reactor* reactor = reactor_task_->get_reactor();
   job_queue_ = DCPS::make_rch<DCPS::JobQueue>(reactor);
   type_lookup_init(reactor_task_->interceptor());
 
   // Configure and enable each reader/writer
-  rtps_inst->opendds_discovery_default_listener_ = publications_reader_;
-  rtps_inst->opendds_discovery_guid_ = guid;
-  const bool reliable = true, durable = true;
+  const bool reliable = true;
+  const bool durable = true;
+  const bool nondurable = false;
 
 #ifdef OPENDDS_SECURITY
-  const bool besteffort = false, nondurable = false;
+  const bool besteffort = false;
 #endif
 
   const BuiltinEndpointSet_t bep = spdp_.available_builtin_endpoints();
@@ -484,36 +481,36 @@ Sedp::init(const RepoId& guid,
 #endif
 
   if (bep & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER) {
-    type_lookup_request_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
+    type_lookup_request_writer_->enable_transport_using_config(reliable, nondurable, transport_cfg_);
   }
   if (bep & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER) {
-    type_lookup_request_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
+    type_lookup_request_reader_->enable_transport_using_config(reliable, nondurable, transport_cfg_);
   }
 
   if (bep & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER) {
-    type_lookup_reply_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
+    type_lookup_reply_writer_->enable_transport_using_config(reliable, nondurable, transport_cfg_);
   }
   if (bep & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER) {
-    type_lookup_reply_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
+    type_lookup_reply_reader_->enable_transport_using_config(reliable, nondurable, transport_cfg_);
   }
 
 #ifdef OPENDDS_SECURITY
   if (xbep & DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE) {
     type_lookup_request_secure_writer_->set_crypto_handles(spdp_.crypto_handle());
-    type_lookup_request_secure_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
+    type_lookup_request_secure_writer_->enable_transport_using_config(reliable, nondurable, transport_cfg_);
   }
   if (xbep & DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE) {
     type_lookup_request_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
-    type_lookup_request_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
+    type_lookup_request_secure_reader_->enable_transport_using_config(reliable, nondurable, transport_cfg_);
   }
 
   if (xbep & DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE) {
     type_lookup_reply_secure_writer_->set_crypto_handles(spdp_.crypto_handle());
-    type_lookup_reply_secure_writer_->enable_transport_using_config(reliable, durable, transport_cfg_);
+    type_lookup_reply_secure_writer_->enable_transport_using_config(reliable, nondurable, transport_cfg_);
   }
   if (xbep & DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE) {
     type_lookup_reply_secure_reader_->set_crypto_handles(spdp_.crypto_handle());
-    type_lookup_reply_secure_reader_->enable_transport_using_config(reliable, durable, transport_cfg_);
+    type_lookup_reply_secure_reader_->enable_transport_using_config(reliable, nondurable, transport_cfg_);
   }
 #endif
 
@@ -1032,6 +1029,7 @@ Sedp::associate(ParticipantData_t& pdata)
   if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER &&
       (pdata.associated_endpoints & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER) == 0) {
     DCPS::AssociationData peer = proto;
+    peer.remote_durable_ = false;
     peer.remote_id_.entityId = ENTITYID_TL_SVC_REQ_WRITER;
     type_lookup_request_reader_->assoc(peer);
     pdata.associated_endpoints |= BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER;
@@ -1039,6 +1037,7 @@ Sedp::associate(ParticipantData_t& pdata)
   if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER &&
       (pdata.associated_endpoints & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER) == 0) {
     DCPS::AssociationData peer = proto;
+    peer.remote_durable_ = false;
     peer.remote_id_.entityId = ENTITYID_TL_SVC_REQ_READER;
     type_lookup_request_writer_->assoc(peer);
     pdata.associated_endpoints |= BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER;
@@ -1046,6 +1045,7 @@ Sedp::associate(ParticipantData_t& pdata)
   if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER &&
       (pdata.associated_endpoints & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER) == 0) {
     DCPS::AssociationData peer = proto;
+    peer.remote_durable_ = false;
     peer.remote_id_.entityId = ENTITYID_TL_SVC_REPLY_WRITER;
     type_lookup_reply_reader_->assoc(peer);
     pdata.associated_endpoints |= BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER;
@@ -1053,6 +1053,7 @@ Sedp::associate(ParticipantData_t& pdata)
   if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER &&
       (pdata.associated_endpoints & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER) == 0) {
     DCPS::AssociationData peer = proto;
+    peer.remote_durable_ = false;
     peer.remote_id_.entityId = ENTITYID_TL_SVC_REPLY_READER;
     type_lookup_reply_writer_->assoc(peer);
     pdata.associated_endpoints |= BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER;
@@ -1220,6 +1221,7 @@ void Sedp::associate_secure_endpoints(Security::SPDPdiscoveredParticipantData& p
       avail_extended & TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE &&
       (pdata.extended_associated_endpoints & TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE) == 0) {
     DCPS::AssociationData peer = proto;
+    peer.remote_durable_ = false;
     peer.remote_id_.entityId = ENTITYID_TL_SVC_REQ_WRITER_SECURE;
     type_lookup_request_secure_reader_->assoc(peer);
     pdata.extended_associated_endpoints |= TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE;
@@ -1228,6 +1230,7 @@ void Sedp::associate_secure_endpoints(Security::SPDPdiscoveredParticipantData& p
       avail_extended & TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE &&
       (pdata.extended_associated_endpoints & TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE) == 0) {
     DCPS::AssociationData peer = proto;
+    peer.remote_durable_ = false;
     peer.remote_id_.entityId = ENTITYID_TL_SVC_REQ_READER_SECURE;
     type_lookup_request_secure_writer_->assoc(peer);
     pdata.extended_associated_endpoints |= TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE;
@@ -1236,6 +1239,7 @@ void Sedp::associate_secure_endpoints(Security::SPDPdiscoveredParticipantData& p
       avail_extended & TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE &&
       (pdata.extended_associated_endpoints & TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE) == 0) {
     DCPS::AssociationData peer = proto;
+    peer.remote_durable_ = false;
     peer.remote_id_.entityId = ENTITYID_TL_SVC_REPLY_WRITER_SECURE;
     type_lookup_reply_secure_reader_->assoc(peer);
     pdata.extended_associated_endpoints |= TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE;
@@ -1244,6 +1248,7 @@ void Sedp::associate_secure_endpoints(Security::SPDPdiscoveredParticipantData& p
       avail_extended & TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE &&
       (pdata.extended_associated_endpoints & TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE) == 0) {
     DCPS::AssociationData peer = proto;
+    peer.remote_durable_ = false;
     peer.remote_id_.entityId = ENTITYID_TL_SVC_REPLY_READER_SECURE;
     type_lookup_reply_secure_writer_->assoc(peer);
     pdata.extended_associated_endpoints |= TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE;
@@ -1469,12 +1474,14 @@ void Sedp::associate_secure_reader_to_writer(const RepoId& remote_writer)
   if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE &&
       remote_writer.entityId == ENTITYID_TL_SVC_REQ_WRITER_SECURE &&
       (pdata.extended_associated_endpoints & TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE) == 0) {
+    peer.remote_durable_ = false;
     type_lookup_request_secure_reader_->assoc(peer);
     pdata.extended_associated_endpoints |= TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE;
   }
   if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE &&
       remote_writer.entityId == ENTITYID_TL_SVC_REPLY_WRITER_SECURE &&
       (pdata.extended_associated_endpoints & TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE) == 0) {
+    peer.remote_durable_ = false;
     type_lookup_reply_secure_reader_->assoc(peer);
     pdata.extended_associated_endpoints |= TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE;
   }
@@ -1526,12 +1533,14 @@ void Sedp::associate_secure_writer_to_reader(const RepoId& remote_reader)
   if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE &&
       (pdata.extended_associated_endpoints & TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE) == 0 &&
       remote_reader.entityId == ENTITYID_TL_SVC_REQ_READER_SECURE) {
+    peer.remote_durable_ = false;
     type_lookup_request_secure_writer_->assoc(peer);
     pdata.extended_associated_endpoints |= TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE;
   }
   if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE &&
       (pdata.extended_associated_endpoints & TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE) == 0 &&
       remote_reader.entityId == ENTITYID_TL_SVC_REPLY_READER_SECURE) {
+    peer.remote_durable_ = false;
     type_lookup_reply_secure_writer_->assoc(peer);
     pdata.extended_associated_endpoints |= TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE;
   }

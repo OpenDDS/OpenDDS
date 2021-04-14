@@ -148,15 +148,12 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
     }
 
     // Create DataReaderListener
-    DDS::DataReader_var part_reader =
-#ifdef DDS_HAS_MINIMUM_BIT
-      0;
-#else
-      participant->get_builtin_subscriber()->lookup_datareader(
-        OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC);
+    DDS::DataReader_var part_reader;
+#ifndef DDS_HAS_MINIMUM_BIT
+    DDS::Subscriber_var bit_subscriber = participant->get_builtin_subscriber();
+    part_reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC);
 #endif
-    DataReaderListenerImpl* const listener_servant =
-      new DataReaderListenerImpl(my_args, part_reader.in());
+    DataReaderListenerImpl* const listener_servant = new DataReaderListenerImpl(my_args, part_reader.in());
     DDS::DataReaderListener_var listener(listener_servant);
 #ifndef DDS_HAS_MINIMUM_BIT
     part_reader->set_listener(listener.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -231,6 +228,13 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
     ws->detach_condition(condition);
 
     // Clean-up!
+
+#ifndef DDS_HAS_MINIMUM_BIT
+    part_reader->set_listener(0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    part_reader = 0;
+    bit_subscriber = 0;
+#endif
+
     std::cerr << "deleting contained entities" << std::endl;
     participant->delete_contained_entities();
     std::cerr << "deleting participant" << std::endl;

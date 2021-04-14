@@ -663,15 +663,14 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     // add a new participant
     std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq)));
     iter = p.first;
-    iter->second.discovered_at_ = DCPS::time_value_to_monotonic_time(now.value());
+    iter->second.discovered_at_ = now;
     update_lease_expiration_i(iter, now);
     if (!from_relay && from != ACE_INET_Addr()) {
       iter->second.local_address_ = from;
     }
 
     if (DCPS::transport_debug.log_progress) {
-      log_progress("participant discovery", guid_, guid, iter->second.discovered_at_);
-
+      log_progress("participant discovery", guid_, guid, iter->second.discovered_at_.to_monotonic_time());
     }
 
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -752,7 +751,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
   } else { // Existing Participant
     if (from_sedp && DCPS::transport_debug.log_progress) {
-      log_progress("secure participant discovery", guid_, guid, iter->second.discovered_at_);
+      log_progress("secure participant discovery", guid_, guid, iter->second.discovered_at_.to_monotonic_time());
     }
 
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -798,7 +797,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     }
 
     // Check if sequence numbers are increasing
-    if (validateSequenceNumber(seq, iter)) {
+    if (validateSequenceNumber(now, seq, iter)) {
       // Must unlock when calling into part_bit() as it may call back into us
       ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
 
@@ -882,11 +881,14 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 }
 
 bool
-Spdp::validateSequenceNumber(const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter)
+Spdp::validateSequenceNumber(const DCPS::MonotonicTimePoint& now, const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter)
 {
   if (seq.getValue() != 0 && iter->second.last_seq_ != DCPS::SequenceNumber::MAX_VALUE) {
     if (seq < iter->second.last_seq_) {
-      ++iter->second.seq_reset_count_;
+      const bool honeymoon_period = now < iter->second.discovered_at_ + config_->min_resend_delay();
+      if (!honeymoon_period) {
+        ++iter->second.seq_reset_count_;
+      }
       return false;
     } else if (iter->second.seq_reset_count_ > 0) {
       --iter->second.seq_reset_count_;
@@ -1728,7 +1730,7 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
   }
 
   if (DCPS::transport_debug.log_progress) {
-    log_progress("participant crypto token", guid_, src_participant, iter->second.discovered_at_);
+    log_progress("participant crypto token", guid_, src_participant, iter->second.discovered_at_.to_monotonic_time());
   }
 
   const DDS::Security::ParticipantCryptoTokenSeq& inboundTokens =
@@ -1888,7 +1890,7 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
   }
 
   if (DCPS::transport_debug.log_progress) {
-    log_progress("authentication", guid_, guid, iter->second.discovered_at_);
+    log_progress("authentication", guid_, guid, iter->second.discovered_at_.to_monotonic_time());
   }
 
   DDS::Security::ParticipantCryptoHandle dp_crypto_handle =
@@ -2247,7 +2249,7 @@ Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
 
   u_short participantId = 0;
 
-  thread_status_ = 0;
+  global_thread_status_manager_ = 0;
 
 #ifdef OPENDDS_SAFETY_PROFILE
   const u_short startingParticipantId = participantId;
@@ -2339,8 +2341,9 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
   }
 #endif
 
+
   local_sender_ = DCPS::make_rch<SpdpMulti>(reactor_task->interceptor(), outer->config_->resend_period(), ref(*this), &SpdpTransport::send_local);
-  local_sender_->enable(outer->config_->resend_period());
+  local_sender_->enable(TimeDuration::zero_value);
 
   if (outer->config_->periodic_directed_spdp()) {
     directed_sender_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::send_directed);
@@ -2362,24 +2365,21 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
   }
 #endif
 
-#ifndef ACE_HAS_MINIMUM_BIT
+#ifndef DDS_HAS_MINIMUM_BIT
   // internal thread bit reporting
   TimeDuration interval = TheServiceParticipant->get_thread_status_interval();
-
-  if (interval > TimeDuration(0)) {
+  if (!interval.is_zero()) {
     if (DCPS::DCPS_debug_level >= 4) {
       ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) Thread status monitoring is active. ")
                 ACE_TEXT("Status interval = %u.\n"), interval.value().sec()));
     }
 
-    thread_status_ = TheServiceParticipant->get_thread_statuses();
-
+    global_thread_status_manager_ = TheServiceParticipant->get_thread_status_manager();
     thread_status_sender_ = DCPS::make_rch<SpdpPeriodic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::thread_status_task);
-
     thread_status_sender_->enable(false, interval);
   }
-#endif /* ACE_HAS_MINIMUM_BIT */
+#endif /* DDS_HAS_MINIMUM_BIT */
 
   DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
   if (outer->config_->use_ncm() && ncm) {
@@ -3295,7 +3295,7 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
         return;
       }
 
-      write_i(SEND_MULTICAST);
+      shorten_local_sender_delay_i();
     } else {
       ACE_TCHAR buff[256];
       multicast_address_.addr_to_string(buff, 256);
@@ -3332,7 +3332,7 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
         return;
       }
 
-      write_i(SEND_MULTICAST);
+      shorten_local_sender_delay_i();
     } else {
       ACE_TCHAR buff[256];
       multicast_ipv6_address_.addr_to_string(buff, 256);
@@ -4087,21 +4087,35 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
   const DCPS::RepoId guid = outer->guid();
   DCPS::InternalThreadBuiltinTopicDataDataReaderImpl* bit = outer->internal_thread_bit();
 
-  if (TheServiceParticipant->get_thread_status_interval() > TimeDuration(0)) {
-    if (thread_status_ && bit) {
-      ACE_READ_GUARD(ACE_Thread_Mutex, g, thread_status_->lock);
-      for (DCPS::ThreadStatus::Map::const_iterator i = thread_status_->map.begin();
-          i != thread_status_->map.end(); ++i) {
+  if (global_thread_status_manager_) {
+    typedef DCPS::ThreadStatusManager::Map StatusMap;
+    StatusMap running;
+    StatusMap removed;
+    if (!local_thread_status_manager_.sync_with_parent(
+          *global_thread_status_manager_, running, removed) &&
+        DCPS::DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Spdp::SpdpTransport::thread_status_task: "
+        "syncing with global thread status manager failed\n"));
+      return;
+    }
+    if (bit) {
+      for (StatusMap::const_iterator i = removed.begin(); i != removed.end(); ++i) {
         DCPS::InternalThreadBuiltinTopicData data;
         assign(data.participant_guid, guid);
         data.thread_id = i->first.c_str();
+        bit->set_instance_state(bit->lookup_instance(data), DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+      }
 
+      for (StatusMap::const_iterator i = running.begin(); i != running.end(); ++i) {
+        DCPS::InternalThreadBuiltinTopicData data;
+        assign(data.participant_guid, guid);
+        data.thread_id = i->first.c_str();
         bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE, i->second.timestamp);
       }
     } else if (DCPS::DCPS_debug_level >= 2) {
       // Not necessarily an error. App could be shutting down.
-      ACE_DEBUG((LM_DEBUG,
-                 "(%P|%t) Spdp::ThreadStatusHandler: Could not get thread data reader.\n"));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Spdp::SpdpTransport::thread_status_task(): "
+        "Could not get thread data reader.\n"));
     }
   }
 #endif /* DDS_HAS_MINIMUM_BIT */
@@ -4243,7 +4257,7 @@ DCPS::MonotonicTime_t Spdp::get_participant_discovered_at() const
 DCPS::MonotonicTime_t Spdp::get_participant_discovered_at(const DCPS::RepoId& guid) const
 {
   const DiscoveredParticipantConstIter iter = participants_.find(make_part_guid(guid));
-  return iter->second.discovered_at_;
+  return iter->second.discovered_at_.to_monotonic_time();
 }
 
 void

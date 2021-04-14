@@ -117,6 +117,9 @@ ACE_UINT32 microseconds_to_uint32_fractional_seconds(ACE_UINT32 fraction);
 ACE_INLINE OpenDDS_Dcps_Export
 bool is_infinite(const DDS::Duration_t& value);
 
+ACE_INLINE OpenDDS_Dcps_Export
+const MonotonicTime_t& monotonic_time_zero();
+
 } // namespace DCPS
 } // namespace OpenDDS
 

@@ -35,7 +35,4 @@ public class RtpsUdpInst extends TransportInst {
 
     public native long getHeartbeatResponseDelay();
     public native void setHeartbeatResponseDelay(long hrd);
-
-    public native long getHandshakeTimeout();
-    public native void setHandshakeTimeout(long ht);
 }

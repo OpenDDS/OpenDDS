@@ -600,7 +600,7 @@ namespace {
         0 == ACE_OS::strcasecmp(idl.c_str() + len - 5, ".pidl")) {
       base_name.assign(idl.c_str(), len - 5);
       size_t slash = base_name.find_last_of("/\\");
-      if (slash != std::string::npos && slash > 3 && base_name.size() > 3
+      if (slash != std::string::npos && slash >= 3 && base_name.size() > 3
           && base_name.substr(slash - 3, 3) == "tao"
           && base_name.substr(base_name.size() - 3) == "Seq") {
         base_name = "dds/CorbaSeq/" + base_name.substr(slash + 1);

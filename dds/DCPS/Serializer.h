@@ -340,7 +340,7 @@ public:
   static const ACE_CDR::UShort pid_must_understand = 0x4000;
 
   // EMHEADER must understand flag
-  static const ACE_CDR::ULong emheader_must_understand = 1 << 31;
+  static const ACE_CDR::ULong emheader_must_understand = 1U << 31U;
 
   /**
    * Constructor with a message block chain.  This installs the
