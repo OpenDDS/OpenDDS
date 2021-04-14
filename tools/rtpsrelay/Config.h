@@ -10,29 +10,13 @@ namespace RtpsRelay {
 class Config {
 public:
   Config()
-    : statistics_interval_(60) // 1 minute
-    , application_participant_guid_(OpenDDS::DCPS::GUID_UNKNOWN)
+    : application_participant_guid_(OpenDDS::DCPS::GUID_UNKNOWN)
     , lifespan_(60) // 1 minute
     , application_domain_(1)
-    , publish_relay_statistics_(true)
     , log_entries_(false)
     , log_discovery_(false)
     , log_activity_(false)
-    , log_relay_statistics_(false)
-    , log_handler_statistics_(false)
-    , log_participant_statistics_(false)
-    , log_domain_statistics_(false)
   {}
-
-  void statistics_interval(const OpenDDS::DCPS::TimeDuration& value)
-  {
-    statistics_interval_ = value;
-  }
-
-  const OpenDDS::DCPS::TimeDuration& statistics_interval() const
-  {
-    return statistics_interval_;
-  }
 
   void application_participant_guid(const OpenDDS::DCPS::RepoId& value)
   {
@@ -62,16 +46,6 @@ public:
   DDS::DomainId_t application_domain() const
   {
     return application_domain_;
-  }
-
-  void publish_relay_statistics(bool flag)
-  {
-    publish_relay_statistics_ = flag;
-  }
-
-  bool publish_relay_statistics() const
-  {
-    return publish_relay_statistics_;
   }
 
   void log_entries(bool flag)
@@ -104,59 +78,101 @@ public:
     return log_activity_;
   }
 
-  void log_relay_statistics(bool flag)
+  void log_relay_statistics(OpenDDS::DCPS::TimeDuration value)
   {
-    log_relay_statistics_ = flag;
+    log_relay_statistics_ = value;
   }
 
-  bool log_relay_statistics() const
+  OpenDDS::DCPS::TimeDuration log_relay_statistics() const
   {
     return log_relay_statistics_;
   }
 
-  void log_handler_statistics(bool flag)
+  void log_handler_statistics(OpenDDS::DCPS::TimeDuration value)
   {
-    log_handler_statistics_ = flag;
+    log_handler_statistics_ = value;
   }
 
-  bool log_handler_statistics() const
+  OpenDDS::DCPS::TimeDuration log_handler_statistics() const
   {
     return log_handler_statistics_;
   }
 
-  void log_participant_statistics(bool flag)
+  void log_participant_statistics(OpenDDS::DCPS::TimeDuration value)
   {
-    log_participant_statistics_ = flag;
+    log_participant_statistics_ = value;
   }
 
-  bool log_participant_statistics() const
+  OpenDDS::DCPS::TimeDuration log_participant_statistics() const
   {
     return log_participant_statistics_;
   }
 
-  void log_domain_statistics(bool flag)
+  void log_domain_statistics(OpenDDS::DCPS::TimeDuration value)
   {
-    log_domain_statistics_ = flag;
+    log_domain_statistics_ = value;
   }
 
-  bool log_domain_statistics() const
+  OpenDDS::DCPS::TimeDuration log_domain_statistics() const
   {
     return log_domain_statistics_;
   }
 
+  void publish_relay_statistics(OpenDDS::DCPS::TimeDuration value)
+  {
+    publish_relay_statistics_ = value;
+  }
+
+  OpenDDS::DCPS::TimeDuration publish_relay_statistics() const
+  {
+    return publish_relay_statistics_;
+  }
+
+  void publish_handler_statistics(OpenDDS::DCPS::TimeDuration value)
+  {
+    publish_handler_statistics_ = value;
+  }
+
+  OpenDDS::DCPS::TimeDuration publish_handler_statistics() const
+  {
+    return publish_handler_statistics_;
+  }
+
+  void publish_participant_statistics(OpenDDS::DCPS::TimeDuration value)
+  {
+    publish_participant_statistics_ = value;
+  }
+
+  OpenDDS::DCPS::TimeDuration publish_participant_statistics() const
+  {
+    return publish_participant_statistics_;
+  }
+
+  void publish_domain_statistics(OpenDDS::DCPS::TimeDuration value)
+  {
+    publish_domain_statistics_ = value;
+  }
+
+  OpenDDS::DCPS::TimeDuration publish_domain_statistics() const
+  {
+    return publish_domain_statistics_;
+  }
+
 private:
-  OpenDDS::DCPS::TimeDuration statistics_interval_;
   OpenDDS::DCPS::RepoId application_participant_guid_;
   OpenDDS::DCPS::TimeDuration lifespan_;
   DDS::DomainId_t application_domain_;
-  bool publish_relay_statistics_;
   bool log_entries_;
   bool log_discovery_;
   bool log_activity_;
-  bool log_relay_statistics_;
-  bool log_handler_statistics_;
-  bool log_participant_statistics_;
-  bool log_domain_statistics_;
+  OpenDDS::DCPS::TimeDuration log_relay_statistics_;
+  OpenDDS::DCPS::TimeDuration log_handler_statistics_;
+  OpenDDS::DCPS::TimeDuration log_participant_statistics_;
+  OpenDDS::DCPS::TimeDuration log_domain_statistics_;
+  OpenDDS::DCPS::TimeDuration publish_relay_statistics_;
+  OpenDDS::DCPS::TimeDuration publish_handler_statistics_;
+  OpenDDS::DCPS::TimeDuration publish_participant_statistics_;
+  OpenDDS::DCPS::TimeDuration publish_domain_statistics_;
 };
 
 }

@@ -27,7 +27,7 @@ void ParticipantListener::on_data_available(DDS::DataReader_ptr reader)
 
   DDS::ParticipantBuiltinTopicDataSeq data;
   DDS::SampleInfoSeq infos;
-  DDS::ReturnCode_t ret = dr->read(data,
+  DDS::ReturnCode_t ret = dr->take(data,
                                    infos,
                                    DDS::LENGTH_UNLIMITED,
                                    DDS::NOT_READ_SAMPLE_STATE,
