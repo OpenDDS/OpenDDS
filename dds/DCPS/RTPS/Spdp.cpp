@@ -233,6 +233,7 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
     ICE::Agent::instance()->add_local_agent_info_listener(sedp_endpoint, l, this);
   }
 #endif
+  initialized_flag_ = true;
 }
 
 Spdp::Spdp(DDS::DomainId_t domain,
@@ -247,6 +248,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , guid_(guid)
   , participant_discovered_at_(MonotonicTimePoint::now().to_monotonic_time())
   , tport_(DCPS::make_rch<SpdpTransport>(rchandle_from(this)))
+  , initialized_flag_(false)
   , eh_shutdown_(false)
   , shutdown_cond_(lock_)
   , shutdown_flag_(false)
@@ -287,6 +289,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , guid_(guid)
   , participant_discovered_at_(MonotonicTimePoint::now().to_monotonic_time())
   , tport_(DCPS::make_rch<SpdpTransport>(rchandle_from(this)))
+  , initialized_flag_(false)
   , eh_shutdown_(false)
   , shutdown_cond_(lock_)
   , shutdown_flag_(false)
@@ -904,7 +907,7 @@ Spdp::data_received(const DataSubmessage& data,
                     const ParameterList& plist,
                     const ACE_INET_Addr& from)
 {
-  if (shutdown_flag_ == true) {
+  if (initialized_flag_ == false || shutdown_flag_ == true) {
     return;
   }
 
