@@ -39,6 +39,7 @@ my $compiler = "";
 my $skip_run_test;
 my $skip_cxx11;
 my $no_shared;
+my $no_suppress_anys;
 
 exit 1 if !GetOptions(
     "build-config=s" => \$build_config,
@@ -48,11 +49,12 @@ exit 1 if !GetOptions(
     "skip-run-test" => \$skip_run_test,
     "skip-cxx11" => \$skip_cxx11,
     "no-shared" => \$no_shared,
+    "no-suppress-anys" => \$no_suppress_anys,
     );
 
 my @dirs = ('../Nested_IDL', 'Messenger_1', 'Messenger_2');
 push @dirs, '../generated_global' unless $no_shared;
-push @dirs, 'C++11_Messenger' unless $skip_cxx11;
+push @dirs, 'C++11_Messenger' unless ($skip_cxx11 or $no_suppress_anys);
 
 my %builds_lib = ('Messenger_2' => 1, 'C++11_Messenger' => 1);
 my %runtest_in_config_dir = ('Messenger_1' => 1, 'Messenger_2' => 1);
