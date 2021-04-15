@@ -2678,7 +2678,7 @@ void
 Sedp::data_received(DCPS::MessageId message_id,
                     const DiscoveredPublication& dpub)
 {
-  if (spdp_.shutting_down()) { return; }
+  if (!spdp_.initialized() || spdp_.shutting_down()) { return; }
 
   const DCPS::DiscoveredWriterData& wdata = dpub.writer_data_;
   const RepoId& guid = wdata.writerProxy.remoteWriterGuid;
@@ -2714,7 +2714,7 @@ Sedp::data_received(DCPS::MessageId message_id,
 void Sedp::data_received(DCPS::MessageId message_id,
                          const DiscoveredPublication_SecurityWrapper& wrapper)
 {
-  if (spdp_.shutting_down()) { return; }
+  if (!spdp_.initialized() || spdp_.shutting_down()) { return; }
 
   const RepoId& guid = wrapper.data.writerProxy.remoteWriterGuid;
   const RepoId guid_participant = make_part_guid(guid);
@@ -3054,7 +3054,7 @@ void
 Sedp::data_received(DCPS::MessageId message_id,
                     const DiscoveredSubscription& dsub)
 {
-  if (spdp_.shutting_down()) { return; }
+  if (!spdp_.initialized() || spdp_.shutting_down()) { return; }
 
   const DCPS::DiscoveredReaderData& rdata = dsub.reader_data_;
   const GUID_t& guid = rdata.readerProxy.remoteReaderGuid;
@@ -3089,7 +3089,7 @@ Sedp::data_received(DCPS::MessageId message_id,
 void Sedp::data_received(DCPS::MessageId message_id,
                          const DiscoveredSubscription_SecurityWrapper& wrapper)
 {
-  if (spdp_.shutting_down()) { return; }
+  if (!spdp_.initialized() || spdp_.shutting_down()) { return; }
 
   const RepoId& guid = wrapper.data.readerProxy.remoteReaderGuid;
   RepoId guid_participant = guid;
@@ -3111,7 +3111,7 @@ void
 Sedp::data_received(DCPS::MessageId /*message_id*/,
                     const ParticipantMessageData& data)
 {
-  if (spdp_.shutting_down()) { return; }
+  if (!spdp_.initialized() || spdp_.shutting_down()) { return; }
 
   const RepoId& guid = data.participantGuid;
   RepoId guid_participant = guid;

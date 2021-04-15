@@ -98,6 +98,16 @@ public:
   // Managing reader/writer associations
   void signal_liveliness(DDS::LivelinessQosPolicyKind kind);
 
+  // Is Spdp fully initialized?
+  bool initialized()
+  {
+#ifdef ACE_HAS_CPP11
+    return initialized_flag_;
+#else
+    return initialized_flag_.value();
+#endif
+  }
+
   void shutdown();
 
   // Is Spdp shutting down?
@@ -280,6 +290,7 @@ private:
     virtual int handle_input(ACE_HANDLE h);
 
     void open(const DCPS::ReactorTask_rch&);
+    void enable_local();
 
     void shorten_local_sender_delay_i();
     void write(WriteFlags flags);
@@ -441,6 +452,12 @@ private:
 #endif /* DDS_HAS_MINIMUM_BIT */
 #endif
 
+#ifdef ACE_HAS_CPP11
+  std::atomic<bool> initialized_flag_; // Spdp initialized
+#else
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> initialized_flag_; // Spdp initialized
+#endif
+
   bool eh_shutdown_;
   DCPS::ConditionVariable<ACE_Thread_Mutex> shutdown_cond_;
 #ifdef ACE_HAS_CPP11
@@ -452,7 +469,7 @@ private:
   void get_discovered_participant_ids(DCPS::RepoIdSet& results) const;
 
   BuiltinEndpointSet_t available_builtin_endpoints_;
-  DCPS::RcHandle<Sedp>  sedp_;
+  DCPS::RcHandle<Sedp> sedp_;
 
   typedef OPENDDS_MULTIMAP(DCPS::MonotonicTimePoint, DCPS::RepoId) TimeQueue;
 

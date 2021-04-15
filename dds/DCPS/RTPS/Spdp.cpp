@@ -224,6 +224,7 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
   guid = guid_; // may have changed in SpdpTransport constructor
   sedp_->ignore(guid);
   sedp_->init(guid_, *disco, domain_);
+  tport_->open(sedp_->reactor_task());
 
 #ifdef OPENDDS_SECURITY
   ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
@@ -232,6 +233,8 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
     ICE::Agent::instance()->add_local_agent_info_listener(sedp_endpoint, l, this);
   }
 #endif
+  initialized_flag_ = true;
+  tport_->enable_local();
 }
 
 Spdp::Spdp(DDS::DomainId_t domain,
@@ -246,6 +249,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , guid_(guid)
   , participant_discovered_at_(MonotonicTimePoint::now().to_monotonic_time())
   , tport_(DCPS::make_rch<SpdpTransport>(rchandle_from(this)))
+  , initialized_flag_(false)
   , eh_shutdown_(false)
   , shutdown_cond_(lock_)
   , shutdown_flag_(false)
@@ -286,6 +290,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , guid_(guid)
   , participant_discovered_at_(MonotonicTimePoint::now().to_monotonic_time())
   , tport_(DCPS::make_rch<SpdpTransport>(rchandle_from(this)))
+  , initialized_flag_(false)
   , eh_shutdown_(false)
   , shutdown_cond_(lock_)
   , shutdown_flag_(false)
@@ -903,7 +908,7 @@ Spdp::data_received(const DataSubmessage& data,
                     const ParameterList& plist,
                     const ACE_INET_Addr& from)
 {
-  if (shutdown_flag_ == true) {
+  if (initialized_flag_ == false || shutdown_flag_ == true) {
     return;
   }
 
@@ -2041,7 +2046,6 @@ void
 Spdp::init_bit(const DDS::Subscriber_var& bit_subscriber)
 {
   bit_subscriber_ = bit_subscriber;
-  tport_->open(sedp_->reactor_task());
 }
 
 class Noop : public DCPS::ReactorInterceptor::Command {
@@ -2343,7 +2347,6 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
 
 
   local_sender_ = DCPS::make_rch<SpdpMulti>(reactor_task->interceptor(), outer->config_->resend_period(), ref(*this), &SpdpTransport::send_local);
-  local_sender_->enable(TimeDuration::zero_value);
 
   if (outer->config_->periodic_directed_spdp()) {
     directed_sender_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::send_directed);
@@ -2414,6 +2417,14 @@ Spdp::SpdpTransport::~SpdpTransport()
   unicast_ipv6_socket_.close();
   multicast_ipv6_socket_.close();
 #endif
+}
+
+void
+Spdp::SpdpTransport::enable_local()
+{
+  if (local_sender_) {
+    local_sender_->enable(TimeDuration::zero_value);
+  }
 }
 
 void
