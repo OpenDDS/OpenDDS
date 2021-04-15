@@ -234,6 +234,7 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
   }
 #endif
   initialized_flag_ = true;
+  tport_->enable_local();
 }
 
 Spdp::Spdp(DDS::DomainId_t domain,
@@ -2346,7 +2347,6 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
 
 
   local_sender_ = DCPS::make_rch<SpdpMulti>(reactor_task->interceptor(), outer->config_->resend_period(), ref(*this), &SpdpTransport::send_local);
-  local_sender_->enable(TimeDuration::zero_value);
 
   if (outer->config_->periodic_directed_spdp()) {
     directed_sender_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::send_directed);
@@ -2420,6 +2420,14 @@ Spdp::SpdpTransport::~SpdpTransport()
   unicast_ipv6_socket_.close();
   multicast_ipv6_socket_.close();
 #endif
+}
+
+void
+Spdp::SpdpTransport::enable_local()
+{
+  if (local_sender_) {
+    local_sender_->enable(TimeDuration::zero_value);
+  }
 }
 
 void
