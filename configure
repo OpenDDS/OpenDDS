@@ -248,7 +248,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'object-model-profile!', 'Object Model Profile (yes)',
     'persistence-profile!', 'Persistence Profile (yes)',
     'safety-profile:s', 'Safety Profile: base or extended (none)',
-    'suppress-anys!', 'Suppress Anys (yes))',
+    'suppress-anys!', 'Suppress Anys (yes)',
     'tests!', 'Build tests, examples, and performance tests (no)' .
       $argIndent . 'Requires --gtest if missing git submodule',
     'security!', 'DDS Security plugin (no) Implies --openssl and' .
