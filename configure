@@ -248,7 +248,6 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'object-model-profile!', 'Object Model Profile (yes)',
     'persistence-profile!', 'Persistence Profile (yes)',
     'safety-profile:s', 'Safety Profile: base or extended (none)',
-    'suppress-anys!', 'Suppress Anys (yes)',
     'tests!', 'Build tests, examples, and performance tests (no)' .
       $argIndent . 'Requires --gtest if missing git submodule',
     'security!', 'DDS Security plugin (no) Implies --openssl and' .
@@ -2470,6 +2469,15 @@ sub write_cmake_file {
 
       if ($make_absolute_path{$k}) {
         $val = Cwd::abs_path($val);
+      }
+
+      if ($k eq 'suppress-anys') {
+        my @feature_list = @{$opts{'features'}};
+        for my $f (@feature_list) {
+          if ($f eq 'dds_suppress_anys=0') {
+            $val = 0;
+          }
+        }
       }
 
       $result .= "\n";
