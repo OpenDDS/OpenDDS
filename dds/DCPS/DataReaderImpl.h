@@ -585,6 +585,10 @@ public:
   void return_handle(DDS::InstanceHandle_t handle);
 
 protected:
+
+  // Perform cast to get extended version of listener (otherwise nil)
+  virtual DataReaderListener_ptr get_ext_listener();
+
   virtual void remove_associations_i(const WriterIdSeq& writers, bool callback);
   void remove_publication(const PublicationId& pub_id);
 
@@ -748,6 +752,7 @@ private:
   friend class ::DDS_TEST; //allows tests to get at private data
 
   DDS::TopicDescription_var    topic_desc_;
+  ACE_Thread_Mutex             listener_mutex_;
   DDS::StatusMask              listener_mask_;
   DDS::DataReaderListener_var  listener_;
   DDS::DomainId_t              domain_id_;
