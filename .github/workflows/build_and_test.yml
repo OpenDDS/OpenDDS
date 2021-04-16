@@ -3765,7 +3765,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/DCPS/Messenger
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features ipv6=1 -features no_opendds_security=0
+        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features ipv6=1 -features no_opendds_security=0 -features no_cxx11=0
     - name: make messenger tests
       shell: bash
       run: |
@@ -4642,7 +4642,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Messenger
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features ssl=1
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
     - name: make messenger tests
       shell: cmd
       run: |
@@ -4983,7 +4983,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
-  ACE_TAO_w19_re_p1_cpp03_stat_FM-08:
+  ACE_TAO_w19_re_p1_stat_FM-08:
 
     runs-on: windows-2019
 
@@ -5034,7 +5034,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --std=c++03 --static --rapidjson --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
+        configure --ipv6 --static --rapidjson --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -5061,11 +5061,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_w19_re_p1_cpp03_stat_FM-08:
+  build_w19_re_p1_stat_FM-08:
 
     runs-on: windows-2019
 
-    needs: ACE_TAO_w19_re_p1_cpp03_stat_FM-08
+    needs: ACE_TAO_w19_re_p1_stat_FM-08
 
     steps:
     - name: install openssl-windows & xerces-c
@@ -5093,14 +5093,14 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ACE_TAO_w19_re_p1_cpp03_stat_FM-08_artifact
+        name: ACE_TAO_w19_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_p1_cpp03_stat_FM-08.tar.xz
-        rm -f ACE_TAO_w19_re_p1_cpp03_stat_FM-08.tar.xz
+        tar xvfJ ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
+        rm -f ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.7.0
@@ -5119,7 +5119,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --std=c++03 --static --rapidjson --gtest=%GITHUB_WORKSPACE%/OpenDDS/tests/googletest/build/install --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
+        configure --ipv6 --static --rapidjson --gtest=%GITHUB_WORKSPACE%/OpenDDS/tests/googletest/build/install --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
     - name: check build configuration
       shell: cmd
       run: |
@@ -5147,11 +5147,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  messenger_w19_re_p1_cpp03_stat_FM-08:
+  messenger_w19_re_p1_stat_FM-08:
 
     runs-on: windows-2019
 
-    needs: build_w19_re_p1_cpp03_stat_FM-08
+    needs: build_w19_re_p1_stat_FM-08
     timeout-minutes: 150
 
     steps:
@@ -5185,25 +5185,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ACE_TAO_w19_re_p1_cpp03_stat_FM-08_artifact
+        name: ACE_TAO_w19_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_p1_cpp03_stat_FM-08.tar.xz
-        rm -f ACE_TAO_w19_re_p1_cpp03_stat_FM-08.tar.xz
+        tar xvfJ ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
+        rm -f ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
-        name: build_w19_re_p1_cpp03_stat_FM-08_artifact
+        name: build_w19_re_p1_stat_FM-08_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_p1_cpp03_stat_FM-08.tar.xz
-        rm -f build_w19_re_p1_cpp03_stat_FM-08.tar.xz
+        tar xvfJ build_w19_re_p1_stat_FM-08.tar.xz
+        rm -f build_w19_re_p1_stat_FM-08.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.7.0
     - name: setup gtest
@@ -5263,7 +5263,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Static_Release -Config STATIC -Config STATIC_MESSENGER -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config RTPS -Config OPENDDS_SECURITY -Config RAPIDJSON -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Static_Release -Config STATIC -Config STATIC_MESSENGER -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config RTPS -Config CXX11 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -5287,11 +5287,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
-  compiler_w19_re_p1_cpp03_stat_FM-08:
+  compiler_w19_re_p1_stat_FM-08:
 
     runs-on: windows-2019
 
-    needs: build_w19_re_p1_cpp03_stat_FM-08
+    needs: build_w19_re_p1_stat_FM-08
     timeout-minutes: 150
 
     steps:
@@ -5325,25 +5325,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ACE_TAO_w19_re_p1_cpp03_stat_FM-08_artifact
+        name: ACE_TAO_w19_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_p1_cpp03_stat_FM-08.tar.xz
-        rm -f ACE_TAO_w19_re_p1_cpp03_stat_FM-08.tar.xz
+        tar xvfJ ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
+        rm -f ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
-        name: build_w19_re_p1_cpp03_stat_FM-08_artifact
+        name: build_w19_re_p1_stat_FM-08_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_p1_cpp03_stat_FM-08.tar.xz
-        rm -f build_w19_re_p1_cpp03_stat_FM-08.tar.xz
+        tar xvfJ build_w19_re_p1_stat_FM-08.tar.xz
+        rm -f build_w19_re_p1_stat_FM-08.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.7.0
     - name: setup gtest
@@ -5403,7 +5403,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Static_Release -Config STATIC_COMPILER -Config STATIC -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config RTPS -Config OPENDDS_SECURITY -Config RAPIDJSON -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Static_Release -Config STATIC_COMPILER -Config STATIC -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config RTPS -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -5427,11 +5427,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
-  unit_w19_re_p1_cpp03_stat_FM-08:
+  unit_w19_re_p1_stat_FM-08:
 
     runs-on: windows-2019
 
-    needs: build_w19_re_p1_cpp03_stat_FM-08
+    needs: build_w19_re_p1_stat_FM-08
     timeout-minutes: 150
 
     steps:
@@ -5465,25 +5465,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ACE_TAO_w19_re_p1_cpp03_stat_FM-08_artifact
+        name: ACE_TAO_w19_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_p1_cpp03_stat_FM-08.tar.xz
-        rm -f ACE_TAO_w19_re_p1_cpp03_stat_FM-08.tar.xz
+        tar xvfJ ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
+        rm -f ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
-        name: build_w19_re_p1_cpp03_stat_FM-08_artifact
+        name: build_w19_re_p1_stat_FM-08_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_p1_cpp03_stat_FM-08.tar.xz
-        rm -f build_w19_re_p1_cpp03_stat_FM-08.tar.xz
+        tar xvfJ build_w19_re_p1_stat_FM-08.tar.xz
+        rm -f build_w19_re_p1_stat_FM-08.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.7.0
     - name: setup gtest
@@ -5543,7 +5543,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Static_Release -Config STATIC_UNIT -Config STATIC -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config RTPS -Config OPENDDS_SECURITY -Config RAPIDJSON -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Static_Release -Config STATIC_UNIT -Config STATIC -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config RTPS -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
