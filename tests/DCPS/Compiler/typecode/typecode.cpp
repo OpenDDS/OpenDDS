@@ -9,7 +9,7 @@
 using namespace OpenDDS::DCPS;
 
 TEST(TestAny, flags_match)
-{      
+{
   typecode::my_struct struct_in;
   struct_in.my_long = 42;
   typecode::my_struct * struct_out_ptr;
