@@ -2471,15 +2471,6 @@ sub write_cmake_file {
         $val = Cwd::abs_path($val);
       }
 
-      if ($k eq 'suppress-anys') {
-        my @feature_list = @{$opts{'features'}};
-        for my $f (@feature_list) {
-          if ($f eq 'dds_suppress_anys=0') {
-            $val = 0;
-          }
-        }
-      }
-
       $result .= "\n";
       if (ref($val) eq 'ARRAY') {
         $result .= qq{set($var "${\( to_cmake_list($val))}")};

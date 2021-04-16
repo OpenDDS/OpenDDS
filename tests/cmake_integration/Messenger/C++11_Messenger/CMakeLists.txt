@@ -5,10 +5,6 @@ if(NOT OpenDDS_FOUND)
   find_package(OpenDDS REQUIRED)
 endif()
 
-if(NOT OPENDDS_SUPPRESS_ANYS)
-  message(FATAL_ERROR "This test requires OpenDDS to be built with anys suppressed")
-endif()
-
 set(target_prefix "opendds_cmake_cpp11_messenger_")
 set(src "${CMAKE_CURRENT_SOURCE_DIR}/../../../DCPS/C++11/Messenger")
 set(dst ${CMAKE_CURRENT_BINARY_DIR})
