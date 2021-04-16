@@ -587,7 +587,7 @@ public:
 protected:
 
   // Perform cast to get extended version of listener (otherwise nil)
-  virtual DataReaderListener_ptr get_ext_listener();
+  DataReaderListener_ptr get_ext_listener();
 
   virtual void remove_associations_i(const WriterIdSeq& writers, bool callback);
   void remove_publication(const PublicationId& pub_id);
