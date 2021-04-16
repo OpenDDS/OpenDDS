@@ -429,9 +429,8 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
       if (DCPS_debug_level > 0) {
         ACE_DEBUG((LM_NOTICE,
-                   ACE_TEXT("(%P|%t) NOTICE: Service_Participant::get_domain_participant_factory - ")
-                   ACE_TEXT("This is OpenDDS %C using ACE %C.\n"),
-                   OPENDDS_VERSION, ACE_VERSION));
+                   "(%P|%t) NOTICE: Service_Participant::get_domain_participant_factory - "
+                   "This is OpenDDS " OPENDDS_VERSION " using ACE " ACE_VERSION "\n"));
       }
 
       // Establish the default scheduling mechanism and
