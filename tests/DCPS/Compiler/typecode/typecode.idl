@@ -1,0 +1,12 @@
+/*
+*
+*
+* Distributed under the OpenDDS License.
+* See: http://www.opendds.org/license.html
+*/
+
+module typecode {
+  struct my_struct{
+    long my_long;
+  };
+};

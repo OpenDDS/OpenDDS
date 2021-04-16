@@ -1,0 +1,9 @@
+project(Compiler_Typecode): dcps_test, googletest, msvc_bigobj{
+  exename = *
+  Source_Files {
+    typecode.cpp
+  }
+  TypeSupport_Files {
+    typecode.idl
+  }
+}
