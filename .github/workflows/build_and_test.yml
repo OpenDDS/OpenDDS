@@ -483,7 +483,6 @@ jobs:
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
-        <command name="log" options="off"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -492,7 +491,6 @@ jobs:
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config LINUX -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS -a -l java/tests/dcps_java_tests.lst"/>
-        <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
@@ -972,7 +970,6 @@ jobs:
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
-        <command name="log" options="off"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -981,7 +978,6 @@ jobs:
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config LINUX -Config XERCES3 -Config WCHAR -Config CXX11 -Config OPENDDS_SECURITY -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GH_ACTIONS  -a -l tests/security/security_tests.lst"/>
-        <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
@@ -2329,7 +2325,6 @@ jobs:
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
-        <command name="log" options="off"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -2338,7 +2333,6 @@ jobs:
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS -a -l java/tests/dcps_java_tests.lst -l tools/modeling/tests/modeling_tests.lst"/>
-        <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
@@ -2569,7 +2563,6 @@ jobs:
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
-        <command name="log" options="off"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -2578,7 +2571,6 @@ jobs:
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS -a -l tests/security/security_tests.lst"/>
-        <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
@@ -2809,7 +2801,6 @@ jobs:
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
-        <command name="log" options="off"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -2818,7 +2809,6 @@ jobs:
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS -a -l tests/security/security_tests.lst"/>
-        <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
@@ -3003,7 +2993,6 @@ jobs:
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
-        <command name="log" options="off"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -3012,7 +3001,6 @@ jobs:
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config RTPS -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS -l tools/modeling/tests/modeling_tests.lst"/>
-        <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
@@ -3241,7 +3229,6 @@ jobs:
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
-        <command name="log" options="off"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -3250,7 +3237,6 @@ jobs:
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config WCHAR -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS -a -l tests/security/security_tests.lst"/>
-        <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
@@ -3435,7 +3421,6 @@ jobs:
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
-        <command name="log" options="off"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -3444,7 +3429,6 @@ jobs:
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config WCHAR -Config RTPS -Config CXX11 -Config RAPIDJSON -Config DDS_NO_CONTENT_SUBSCRIPTION -Config GH_ACTIONS -a -l java/tests/dcps_java_tests.lst -l tools/modeling/tests/modeling_tests.lst"/>
-        <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
@@ -3957,7 +3941,6 @@ jobs:
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
-        <command name="log" options="off"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -3966,7 +3949,6 @@ jobs:
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config RAPIDJSON -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config GH_ACTIONS -l tools/modeling/tests/modeling_tests.lst"/>
-        <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
