@@ -483,7 +483,7 @@ jobs:
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
-        <command name="log" options="on"/>
+        <command name="log" options="off"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -496,7 +496,7 @@ jobs:
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
+        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml" | tee ${{ github.job }}_autobuild_workspace/output.log
     - name: upload autobuild output
       uses: actions/upload-artifact@v2
       with:
@@ -972,7 +972,7 @@ jobs:
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
-        <command name="log" options="on"/>
+        <command name="log" options="off"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -985,7 +985,7 @@ jobs:
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
+        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml" | tee ${{ github.job }}_autobuild_workspace/output.log
     - name: upload autobuild output
       uses: actions/upload-artifact@v2
       with:
@@ -2329,7 +2329,7 @@ jobs:
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
-        <command name="log" options="on"/>
+        <command name="log" options="off"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -2342,7 +2342,7 @@ jobs:
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
+        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml" | tee ${{ github.job }}_autobuild_workspace/output.log
     - name: upload autobuild output
       uses: actions/upload-artifact@v2
       with:
@@ -2569,7 +2569,7 @@ jobs:
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
-        <command name="log" options="on"/>
+        <command name="log" options="off"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -2586,7 +2586,7 @@ jobs:
         echo "leak:send_graceful_disconnect_message" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
         export LSAN_OPTIONS=suppressions=$GITHUB_WORKSPACE/OpenDDS/suppr.txt
         export ASAN_OPTIONS=detect_leaks=1:fast_unwind_on_malloc=0
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
+        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml" | tee ${{ github.job }}_autobuild_workspace/output.log
     - name: upload autobuild output
       uses: actions/upload-artifact@v2
       with:
@@ -2809,7 +2809,7 @@ jobs:
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
-        <command name="log" options="on"/>
+        <command name="log" options="off"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -2822,7 +2822,7 @@ jobs:
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
+        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml" | tee ${{ github.job }}_autobuild_workspace/output.log
     - name: upload autobuild output
       uses: actions/upload-artifact@v2
       with:
@@ -3003,7 +3003,7 @@ jobs:
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
-        <command name="log" options="on"/>
+        <command name="log" options="off"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -3016,7 +3016,7 @@ jobs:
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
+        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml" | tee ${{ github.job }}_autobuild_workspace/output.log
     - name: upload autobuild output
       uses: actions/upload-artifact@v2
       with:
@@ -3241,7 +3241,7 @@ jobs:
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
-        <command name="log" options="on"/>
+        <command name="log" options="off"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -3254,7 +3254,7 @@ jobs:
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
+        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml" | tee ${{ github.job }}_autobuild_workspace/output.log
     - name: upload autobuild output
       uses: actions/upload-artifact@v2
       with:
@@ -3435,7 +3435,7 @@ jobs:
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
-        <command name="log" options="on"/>
+        <command name="log" options="off"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -3448,7 +3448,7 @@ jobs:
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
+        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml" | tee ${{ github.job }}_autobuild_workspace/output.log
     - name: upload autobuild output
       uses: actions/upload-artifact@v2
       with:
@@ -3957,7 +3957,7 @@ jobs:
         <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
-        <command name="log" options="on"/>
+        <command name="log" options="off"/>
         <command name="print_os_version"/>
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
@@ -3970,7 +3970,7 @@ jobs:
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
+        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml" | tee ${{ github.job }}_autobuild_workspace/output.log
     - name: upload autobuild output
       uses: actions/upload-artifact@v2
       with:
