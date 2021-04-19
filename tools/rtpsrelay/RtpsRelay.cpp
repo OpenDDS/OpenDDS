@@ -621,19 +621,26 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   RelayStatisticsReporter relay_statistics_reporter(config, relay_statistics_writer);
+  relay_statistics_reporter.report();
 
   HandlerStatisticsReporter spdp_vertical_reporter(config, "VSPDP", handler_statistics_writer, relay_statistics_reporter);
+  spdp_vertical_reporter.report();
   SpdpHandler spdp_vertical_handler(config, "VSPDP", spdp_horizontal_addr, reactor, association_table, responsible_relay_writer, responsible_relay_reader, rtps_discovery, crypto, spdp, spdp_vertical_reporter);
   HandlerStatisticsReporter sedp_vertical_reporter(config, "VSEDP", handler_statistics_writer, relay_statistics_reporter);
+  sedp_vertical_reporter.report();
   SedpHandler sedp_vertical_handler(config, "VSEDP", sedp_horizontal_addr, reactor, association_table, responsible_relay_writer, responsible_relay_reader, rtps_discovery, crypto, sedp, sedp_vertical_reporter);
   HandlerStatisticsReporter data_vertical_reporter(config, "VDATA", handler_statistics_writer, relay_statistics_reporter);
+  data_vertical_reporter.report();
   DataHandler data_vertical_handler(config, "VDATA", data_horizontal_addr, reactor, association_table, responsible_relay_writer, responsible_relay_reader, rtps_discovery, crypto, data_vertical_reporter);
 
   HandlerStatisticsReporter spdp_horizontal_reporter(config, "HSPDP", handler_statistics_writer, relay_statistics_reporter);
+  spdp_horizontal_reporter.report();
   HorizontalHandler spdp_horizontal_handler(config, "HSPDP", reactor, spdp_horizontal_reporter);
   HandlerStatisticsReporter sedp_horizontal_reporter(config, "HSEDP", handler_statistics_writer, relay_statistics_reporter);
+  sedp_horizontal_reporter.report();
   HorizontalHandler sedp_horizontal_handler(config, "HSEDP", reactor, sedp_horizontal_reporter);
   HandlerStatisticsReporter data_horizontal_reporter(config, "HDATA", handler_statistics_writer, relay_statistics_reporter);
+  data_horizontal_reporter.report();
   HorizontalHandler data_horizontal_handler(config, "HDATA", reactor, data_horizontal_reporter);
 
   spdp_horizontal_handler.vertical_handler(&spdp_vertical_handler);
@@ -648,6 +655,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DDS::DataReader_var participant_reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC);
   DomainStatisticsReporter domain_statistics_reporter(config, domain_statistics_writer);
+  domain_statistics_reporter.report();
 
   DDS::DataReaderListener_var participant_listener = new ParticipantListener(config,
                                                                              application_participant_impl,
