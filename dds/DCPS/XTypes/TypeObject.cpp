@@ -337,13 +337,6 @@ void compute_dependencies(const TypeMap& type_map,
                           OPENDDS_SET(TypeIdentifier)& dependencies);
 */
 
-void compute_dependencies(const TypeMap&,
-                          const MinimalAliasHeader&,
-                          OPENDDS_SET(TypeIdentifier)&)
-{
-  // Do nothing.
-}
-
 void compute_dependencies(const TypeMap& type_map,
                           const CommonAliasBody& type,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
@@ -362,7 +355,6 @@ void compute_dependencies(const TypeMap& type_map,
                           const MinimalAliasType& type,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
-  compute_dependencies(type_map, type.header, dependencies);
   compute_dependencies(type_map, type.body, dependencies);
 }
 
@@ -457,19 +449,11 @@ void compute_dependencies(const TypeMap& type_map,
   compute_dependencies(type_map, type.member_seq, dependencies);
 }
 
-void compute_dependencies(const TypeMap&,
-                          const MinimalTypeDetail&,
-                          OPENDDS_SET(TypeIdentifier)&)
-{
-  // Do nothing.
-}
-
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalStructHeader& type,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.base_type, dependencies);
-  compute_dependencies(type_map, type.detail, dependencies);
 }
 
 void compute_dependencies(const TypeMap& type_map,
@@ -479,19 +463,11 @@ void compute_dependencies(const TypeMap& type_map,
   compute_dependencies(type_map, type.member_type_id, dependencies);
 }
 
-void compute_dependencies(const TypeMap&,
-                          const MinimalMemberDetail&,
-                          OPENDDS_SET(TypeIdentifier)&)
-{
-  // Do nothing.
-}
-
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalStructMember& type,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.common, dependencies);
-  compute_dependencies(type_map, type.detail, dependencies);
 }
 
 void compute_dependencies(const TypeMap& type_map,
@@ -534,13 +510,6 @@ void compute_dependencies(const TypeMap& type_map,
 }
 
 void compute_dependencies(const TypeMap& type_map,
-                          const MinimalUnionHeader& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.detail, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
                           const CommonDiscriminatorMember& type,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
@@ -566,14 +535,12 @@ void compute_dependencies(const TypeMap& type_map,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, type.common, dependencies);
-  compute_dependencies(type_map, type.detail, dependencies);
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const MinimalUnionType& type,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
-  compute_dependencies(type_map, type.header, dependencies);
   compute_dependencies(type_map, type.discriminator, dependencies);
   compute_dependencies(type_map, type.member_seq, dependencies);
 }
@@ -586,6 +553,22 @@ void compute_dependencies(const TypeMap& type_map,
 }
 
 void compute_dependencies(const TypeMap& type_map,
+                          const CompleteDiscriminatorMember& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.common, dependencies);
+  compute_dependencies(type_map, type.ann_custom, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteUnionMember& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.common, dependencies);
+  compute_dependencies(type_map, type.detail, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
                           const CompleteUnionType& type,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
@@ -594,50 +577,180 @@ void compute_dependencies(const TypeMap& type_map,
   compute_dependencies(type_map, type.member_seq, dependencies);
 }
 
+void compute_dependencies(const TypeMap&,
+                          const MinimalBitsetType&,
+                          OPENDDS_SET(TypeIdentifier)&)
+{
+  // Doesn't have any dependencies.
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteBitsetHeader& header,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, header.detail, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteBitfield& field,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, field.detail, dependencies);
+}
+
 void compute_dependencies(const TypeMap& type_map,
                           const CompleteBitsetType& type,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
-  // TODO(sonndinh)
+  compute_dependencies(type_map, type.header, dependencies);
+  compute_dependencies(type_map, type.field_seq, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CommonCollectionElement& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.type, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalCollectionElement& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.common, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalSequenceType& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.element, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteCollectionHeader& header,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  if (header.detail.present) {
+    compute_dependencies(type_map, header.detail.value, dependencies);
+  }
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteElementDetail& detail,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, detail.ann_custom, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteCollectionElement& element,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, element.common, dependencies);
+  compute_dependencies(type_map, element.detail, dependencies);
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const CompleteSequenceType& type,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
-  // TODO(sonndinh)
+  compute_dependencies(type_map, type.header, dependencies);
+  compute_dependencies(type_map, type.element, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalArrayType& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.element, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteArrayHeader& header,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, header.detail, dependencies);
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const CompleteArrayType& type,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
-  // TODO(sonndinh)
+  compute_dependencies(type_map, type.header, dependencies);
+  compute_dependencies(type_map, type.element, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalMapType& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, type.key, dependencies);
+  compute_dependencies(type_map, type.element, dependencies);
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const CompleteMapType& type,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
-  // TODO(sonndinh)
+  compute_dependencies(type_map, type.header, dependencies);
+  compute_dependencies(type_map, type.key, dependencies);
+  compute_dependencies(type_map, type.element, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const MinimalEnumeratedType& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  // Doesn't have any dependencies.
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteEnumeratedHeader& header,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, header.detail, dependencies);
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteEnumeratedLiteral& literal,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, literal.detail, dependencies);
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const CompleteEnumeratedType& type,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
-  // TODO(sonndinh)
+  compute_dependencies(type_map, type.header, dependencies);
+  compute_dependencies(type_map, type.literal_seq, dependencies);
+}
+
+void compute_dependencies(const TypeMap&,
+                          const MinimalBitmaskType&,
+                          OPENDDS_SET(TypeIdentifier)&)
+{
+  // Doesn't have any dependencies.
+}
+
+void compute_dependencies(const TypeMap& type_map,
+                          const CompleteBitflag& bitflag,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  compute_dependencies(type_map, bitflag.detail, dependencies);
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const CompleteBitmaskType& type,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
-  // TODO(sonndinh)
+  compute_dependencies(type_map, type.header, dependencies);
+  compute_dependencies(type_map, type.flag_seq, dependencies);
 }
 
 void compute_dependencies(const TypeMap& type_map,
-                          const CompleteTypeObject& type_object,
+                          const MinimalTypeObject& type_object,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   switch (type_object.kind) {
@@ -674,124 +787,8 @@ void compute_dependencies(const TypeMap& type_map,
   }
 }
 
-void compute_dependencies(const TypeMap&,
-                          const MinimalBitsetType&,
-                          OPENDDS_SET(TypeIdentifier)&)
-{
-  // TODO: Implement this.
-}
-
-void compute_dependencies(const TypeMap&,
-                          const CommonCollectionHeader&,
-                          OPENDDS_SET(TypeIdentifier)&)
-{
-  // Do nothing.
-}
-
 void compute_dependencies(const TypeMap& type_map,
-                          const MinimalCollectionHeader& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.common, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CommonCollectionElement& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.type, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalCollectionElement& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.common, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalSequenceType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.header, dependencies);
-  compute_dependencies(type_map, type.element, dependencies);
-}
-
-void compute_dependencies(const TypeMap&,
-                          const CommonArrayHeader&,
-                          OPENDDS_SET(TypeIdentifier)&)
-{
-  // Do nothing.
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalArrayHeader& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.common, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalArrayType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.header, dependencies);
-  compute_dependencies(type_map, type.element, dependencies);
-}
-
-void compute_dependencies(const TypeMap&,
-                          const MinimalMapType&,
-                          OPENDDS_SET(TypeIdentifier)&)
-{
-  // TODO: Implement this.
-}
-
-void compute_dependencies(const TypeMap&,
-                          const CommonEnumeratedHeader&,
-                          OPENDDS_SET(TypeIdentifier)&)
-{
-  // Do nothing.
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalEnumeratedHeader& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.common, dependencies);
-}
-
-void compute_dependencies(const TypeMap&,
-                          const CommonEnumeratedLiteral&,
-                          OPENDDS_SET(TypeIdentifier)&)
-{
-  // Do nothing.
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalEnumeratedLiteral& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.common, dependencies);
-  compute_dependencies(type_map, type.detail, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalEnumeratedType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.header, dependencies);
-  compute_dependencies(type_map, type.literal_seq, dependencies);
-}
-
-void compute_dependencies(const TypeMap&,
-                          const MinimalBitmaskType&,
-                          OPENDDS_SET(TypeIdentifier)&)
-{
-  // TODO: Implement this.
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalTypeObject& type_object,
+                          const CompleteTypeObject& type_object,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   switch (type_object.kind) {
