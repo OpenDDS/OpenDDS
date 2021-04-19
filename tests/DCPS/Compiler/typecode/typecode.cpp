@@ -16,7 +16,7 @@ TEST(TestAny, flags_match)
   CORBA::Any my_any;
   my_any <<= struct_in;
   my_any >>= struct_out_ptr;
-  
+
   EXPECT_EQ(struct_out_ptr->my_long, 42);
 }
 
