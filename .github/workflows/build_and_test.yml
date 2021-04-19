@@ -4029,7 +4029,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/DCPS/UnitTests
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features ipv6=1 -features no_opendds_security=0
+        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features ipv6=1 -features no_opendds_security=0
     - name: make unit tests
       shell: bash
       run: |
