@@ -213,7 +213,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_i0_xer0_js0_j12
-    timeout-minutes: 150
+    timeout-minutes: 15
 
     steps:
     - name: checkout MPC
@@ -513,7 +513,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_o1d0v1_xer0_j12
-    timeout-minutes: 150
+    timeout-minutes: 15
 
     steps:
     - name: checkout MPC
@@ -1144,7 +1144,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_clang5_i0w1_sec
-    timeout-minutes: 150
+    timeout-minutes: 15
 
     steps:
     - name: install clang++
@@ -1354,7 +1354,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_clang10_sec_js0
-    timeout-minutes: 150
+    timeout-minutes: 15
 
     steps:
     - name: install clang++
@@ -1565,7 +1565,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_gcc6_d0w1_cpp03
-    timeout-minutes: 150
+    timeout-minutes: 15
 
     steps:
     - name: install gcc and g++
@@ -1775,7 +1775,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_gcc8_i0_js0_j
-    timeout-minutes: 150
+    timeout-minutes: 15
 
     steps:
     - name: install gcc and g++
@@ -1980,7 +1980,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_gcc10_i0w1_xer0
-    timeout-minutes: 150
+    timeout-minutes: 15
 
     steps:
     - name: install gcc and g++
@@ -3616,7 +3616,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_stat_qt_ws_sec
-    timeout-minutes: 150
+    timeout-minutes: 15
 
     steps:
     - name: install xerces
@@ -3695,7 +3695,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_stat_qt_ws_sec
-    timeout-minutes: 150
+    timeout-minutes: 40
 
     steps:
     - name: install xerces
@@ -3837,7 +3837,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_stat_qt_ws_sec
-    timeout-minutes: 150
+    timeout-minutes: 30
 
     steps:
     - name: install xerces
@@ -3961,7 +3961,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_stat_qt_ws_sec
-    timeout-minutes: 150
+    timeout-minutes: 15
 
     steps:
     - name: install xerces
@@ -4512,7 +4512,7 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_p1_stat_js0
-    timeout-minutes: 150
+    timeout-minutes: 15
 
     steps:
     - name: install openssl-windows & xerces-c
@@ -4583,7 +4583,7 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_p1_stat_js0
-    timeout-minutes: 150
+    timeout-minutes: 40
 
     steps:
     - name: install openssl-windows & xerces-c
@@ -4737,7 +4737,7 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_p1_stat_js0
-    timeout-minutes: 150
+    timeout-minutes: 30
 
     steps:
     - name: install openssl-windows & xerces-c
@@ -4878,7 +4878,7 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_p1_stat_js0
-    timeout-minutes: 150
+    timeout-minutes: 15
 
     steps:
     - name: install openssl-windows & xerces-c
@@ -5182,7 +5182,7 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_p1_stat_FM-08
-    timeout-minutes: 150
+    timeout-minutes: 40
 
     steps:
     - name: install openssl-windows & xerces-c
@@ -5336,7 +5336,7 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_p1_stat_FM-08
-    timeout-minutes: 150
+    timeout-minutes: 30
 
     steps:
     - name: install openssl-windows & xerces-c
@@ -5476,7 +5476,7 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_p1_stat_FM-08
-    timeout-minutes: 150
+    timeout-minutes: 15
 
     steps:
     - name: install openssl-windows & xerces-c
@@ -5787,7 +5787,7 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_o1p1_sec
-    timeout-minutes: 150
+    timeout-minutes: 40
 
     steps:
     - name: install openssl-windows & xerces-c
@@ -5941,7 +5941,7 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_o1p1_sec
-    timeout-minutes: 150
+    timeout-minutes: 30
 
     steps:
     - name: install openssl-windows & xerces-c
@@ -6081,7 +6081,7 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_o1p1_sec
-    timeout-minutes: 150
+    timeout-minutes: 15
 
     steps:
     - name: install openssl-windows & xerces-c
@@ -6469,7 +6469,7 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_j_ws_FM-1f
-    timeout-minutes: 150
+    timeout-minutes: 40
 
     steps:
     - name: install xerces-c
@@ -6623,7 +6623,7 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_j_ws_FM-1f
-    timeout-minutes: 150
+    timeout-minutes: 30
 
     steps:
     - name: install xerces-c
@@ -6763,7 +6763,7 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_j_ws_FM-1f
-    timeout-minutes: 150
+    timeout-minutes: 15
 
     steps:
     - name: install xerces-c
