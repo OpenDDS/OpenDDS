@@ -224,6 +224,7 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
   guid = guid_; // may have changed in SpdpTransport constructor
   sedp_->ignore(guid);
   sedp_->init(guid_, *disco, domain_);
+  tport_->open(sedp_->reactor_task());
 
 #ifdef OPENDDS_SECURITY
   ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
@@ -232,6 +233,8 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
     ICE::Agent::instance()->add_local_agent_info_listener(sedp_endpoint, l, this);
   }
 #endif
+  initialized_flag_ = true;
+  tport_->enable_local();
 }
 
 Spdp::Spdp(DDS::DomainId_t domain,
@@ -246,6 +249,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , guid_(guid)
   , participant_discovered_at_(MonotonicTimePoint::now().to_monotonic_time())
   , tport_(DCPS::make_rch<SpdpTransport>(rchandle_from(this)))
+  , initialized_flag_(false)
   , eh_shutdown_(false)
   , shutdown_cond_(lock_)
   , shutdown_flag_(false)
@@ -286,6 +290,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , guid_(guid)
   , participant_discovered_at_(MonotonicTimePoint::now().to_monotonic_time())
   , tport_(DCPS::make_rch<SpdpTransport>(rchandle_from(this)))
+  , initialized_flag_(false)
   , eh_shutdown_(false)
   , shutdown_cond_(lock_)
   , shutdown_flag_(false)
@@ -903,7 +908,7 @@ Spdp::data_received(const DataSubmessage& data,
                     const ParameterList& plist,
                     const ACE_INET_Addr& from)
 {
-  if (shutdown_flag_ == true) {
+  if (initialized_flag_ == false || shutdown_flag_ == true) {
     return;
   }
 
@@ -2041,7 +2046,6 @@ void
 Spdp::init_bit(const DDS::Subscriber_var& bit_subscriber)
 {
   bit_subscriber_ = bit_subscriber;
-  tport_->open(sedp_->reactor_task());
 }
 
 class Noop : public DCPS::ReactorInterceptor::Command {
@@ -2249,7 +2253,7 @@ Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
 
   u_short participantId = 0;
 
-  thread_status_ = 0;
+  global_thread_status_manager_ = 0;
 
 #ifdef OPENDDS_SAFETY_PROFILE
   const u_short startingParticipantId = participantId;
@@ -2343,7 +2347,6 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
 
 
   local_sender_ = DCPS::make_rch<SpdpMulti>(reactor_task->interceptor(), outer->config_->resend_period(), ref(*this), &SpdpTransport::send_local);
-  local_sender_->enable(TimeDuration::zero_value);
 
   if (outer->config_->periodic_directed_spdp()) {
     directed_sender_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::send_directed);
@@ -2365,24 +2368,21 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
   }
 #endif
 
-#ifndef ACE_HAS_MINIMUM_BIT
+#ifndef DDS_HAS_MINIMUM_BIT
   // internal thread bit reporting
   TimeDuration interval = TheServiceParticipant->get_thread_status_interval();
-
-  if (interval > TimeDuration(0)) {
+  if (!interval.is_zero()) {
     if (DCPS::DCPS_debug_level >= 4) {
       ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) Thread status monitoring is active. ")
                 ACE_TEXT("Status interval = %u.\n"), interval.value().sec()));
     }
 
-    thread_status_ = TheServiceParticipant->get_thread_statuses();
-
+    global_thread_status_manager_ = TheServiceParticipant->get_thread_status_manager();
     thread_status_sender_ = DCPS::make_rch<SpdpPeriodic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::thread_status_task);
-
     thread_status_sender_->enable(false, interval);
   }
-#endif /* ACE_HAS_MINIMUM_BIT */
+#endif /* DDS_HAS_MINIMUM_BIT */
 
   DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
   if (outer->config_->use_ncm() && ncm) {
@@ -2417,6 +2417,14 @@ Spdp::SpdpTransport::~SpdpTransport()
   unicast_ipv6_socket_.close();
   multicast_ipv6_socket_.close();
 #endif
+}
+
+void
+Spdp::SpdpTransport::enable_local()
+{
+  if (local_sender_) {
+    local_sender_->enable(TimeDuration::zero_value);
+  }
 }
 
 void
@@ -4090,21 +4098,35 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
   const DCPS::RepoId guid = outer->guid();
   DCPS::InternalThreadBuiltinTopicDataDataReaderImpl* bit = outer->internal_thread_bit();
 
-  if (TheServiceParticipant->get_thread_status_interval() > TimeDuration(0)) {
-    if (thread_status_ && bit) {
-      ACE_READ_GUARD(ACE_Thread_Mutex, g, thread_status_->lock);
-      for (DCPS::ThreadStatus::Map::const_iterator i = thread_status_->map.begin();
-          i != thread_status_->map.end(); ++i) {
+  if (global_thread_status_manager_) {
+    typedef DCPS::ThreadStatusManager::Map StatusMap;
+    StatusMap running;
+    StatusMap removed;
+    if (!local_thread_status_manager_.sync_with_parent(
+          *global_thread_status_manager_, running, removed) &&
+        DCPS::DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Spdp::SpdpTransport::thread_status_task: "
+        "syncing with global thread status manager failed\n"));
+      return;
+    }
+    if (bit) {
+      for (StatusMap::const_iterator i = removed.begin(); i != removed.end(); ++i) {
         DCPS::InternalThreadBuiltinTopicData data;
         assign(data.participant_guid, guid);
         data.thread_id = i->first.c_str();
+        bit->set_instance_state(bit->lookup_instance(data), DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+      }
 
+      for (StatusMap::const_iterator i = running.begin(); i != running.end(); ++i) {
+        DCPS::InternalThreadBuiltinTopicData data;
+        assign(data.participant_guid, guid);
+        data.thread_id = i->first.c_str();
         bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE, i->second.timestamp);
       }
     } else if (DCPS::DCPS_debug_level >= 2) {
       // Not necessarily an error. App could be shutting down.
-      ACE_DEBUG((LM_DEBUG,
-                 "(%P|%t) Spdp::ThreadStatusHandler: Could not get thread data reader.\n"));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Spdp::SpdpTransport::thread_status_task(): "
+        "Could not get thread data reader.\n"));
     }
   }
 #endif /* DDS_HAS_MINIMUM_BIT */

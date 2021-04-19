@@ -14,9 +14,8 @@
 void
 BE_version()
 {
-  const char* const version_metadata = "-" OPENDDS_VERSION_METADATA;
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("OpenDDS version ") ACE_TEXT(OPENDDS_VERSION)
-             ACE_TEXT("%C\n"), version_metadata[1] ? version_metadata : ""));
+             ACE_TEXT("\n")));
 }
 
 int

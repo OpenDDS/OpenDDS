@@ -70,6 +70,13 @@ module RtpsRelay {
     string address;
   };
 
+  const string RELAY_INSTANCES_TOPIC_NAME = "Relay Instances";
+  @topic
+  struct RelayInstance {
+    @key GUID_t application_participant_guid;
+    DDS::UserDataQosPolicy application_participant_user_data;
+  };
+
   typedef sequence<GUID_t> GuidSequence;
 
   struct RelayHeader {
