@@ -127,22 +127,29 @@ public:
     report(now);
   }
 
-private:
-
-  void report(const OpenDDS::DCPS::MonotonicTimePoint& now)
+  void report()
   {
-    log_report(now);
-    publish_report(now);
+    report(OpenDDS::DCPS::MonotonicTimePoint::now(), true);
   }
 
-  void log_report(const OpenDDS::DCPS::MonotonicTimePoint& now)
+private:
+
+  void report(const OpenDDS::DCPS::MonotonicTimePoint& now,
+              bool force = false)
+  {
+    log_report(now, force);
+    publish_report(now, force);
+  }
+
+  void log_report(const OpenDDS::DCPS::MonotonicTimePoint& now,
+                  bool force)
   {
     if (config_.log_relay_statistics().is_zero()) {
       return;
     }
 
     const auto d = now - log_last_report_;
-    if (d < config_.log_relay_statistics()) {
+    if (!force && d < config_.log_relay_statistics()) {
       return;
     }
 
@@ -174,14 +181,15 @@ private:
     log_max_queue_latency_ = OpenDDS::DCPS::TimeDuration::zero_value;
   }
 
-  void publish_report(const OpenDDS::DCPS::MonotonicTimePoint& now)
+  void publish_report(const OpenDDS::DCPS::MonotonicTimePoint& now,
+                      bool force)
   {
     if (config_.publish_relay_statistics().is_zero()) {
       return;
     }
 
     const auto d = now - publish_last_report_;
-    if (d < config_.publish_relay_statistics()) {
+    if (!force && d < config_.publish_relay_statistics()) {
       return;
     }
 
