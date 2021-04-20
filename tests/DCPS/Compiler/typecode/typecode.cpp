@@ -8,16 +8,13 @@
 
 using namespace OpenDDS::DCPS;
 
-TEST(TestAny, flags_match)
+TEST(TestTypecodes, can_allocate)
 {
-  typecode::my_struct struct_in;
-  struct_in.my_long = 42;
-  typecode::my_struct * struct_out_ptr;
-  CORBA::Any my_any;
-  my_any <<= struct_in;
-  my_any >>= struct_out_ptr;
-
-  EXPECT_EQ(struct_out_ptr->my_long, 42);
+  my_module::_tc_my_struct;
+  my_module::_tc_my_union;
+  my_module::_tc_my_long_seq_bound;
+  my_module::_tc_my_long_seq_unbound;
+  my_module::_tc_my_long_array;
 }
 
 int main(int argc, char* argv[])
