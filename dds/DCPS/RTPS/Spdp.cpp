@@ -234,7 +234,7 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
   }
 #endif
   initialized_flag_ = true;
-  tport_->enable_local();
+  tport_->enable_periodic_tasks();
 }
 
 Spdp::Spdp(DDS::DomainId_t domain,
@@ -2360,12 +2360,6 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
 
   relay_sender_ = DCPS::make_rch<SpdpPeriodic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::send_relay);
   relay_stun_task_ = DCPS::make_rch<SpdpPeriodic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::relay_stun_task);
-
-  if (outer->config_->use_rtps_relay() ||
-      outer->config_->rtps_relay_only()) {
-    relay_sender_->enable(false, outer->config_->spdp_rtps_relay_send_period());
-    relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
-  }
 #endif
 
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -2380,7 +2374,6 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
 
     global_thread_status_manager_ = TheServiceParticipant->get_thread_status_manager();
     thread_status_sender_ = DCPS::make_rch<SpdpPeriodic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::thread_status_task);
-    thread_status_sender_->enable(false, interval);
   }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
@@ -2420,11 +2413,29 @@ Spdp::SpdpTransport::~SpdpTransport()
 }
 
 void
-Spdp::SpdpTransport::enable_local()
+Spdp::SpdpTransport::enable_periodic_tasks()
 {
   if (local_sender_) {
     local_sender_->enable(TimeDuration::zero_value);
   }
+
+#ifdef OPENDDS_SECURITY
+  DCPS::RcHandle<Spdp> outer = outer_.lock();
+  if (!outer) return;
+
+  if (outer->config_->use_rtps_relay() ||
+      outer->config_->rtps_relay_only()) {
+    relay_sender_->enable(false, outer->config_->spdp_rtps_relay_send_period());
+    relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
+  }
+#endif
+
+#ifndef DDS_HAS_MINIMUM_BIT
+  TimeDuration thread_status_interval = TheServiceParticipant->get_thread_status_interval();
+  if (!thread_status_interval.is_zero()) {
+    thread_status_sender_->enable(false, thread_status_interval);
+  }
+#endif /* DDS_HAS_MINIMUM_BIT */
 }
 
 void
@@ -2959,7 +2970,11 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
     return 0; // Ignore
   }
 
+#ifdef OPENDDS_SECURITY
   // Assume STUN
+  if (!outer->initialized() || outer->shutting_down()) {
+    return 0;
+  }
 
 #ifndef ACE_RECVPKTINFO
   ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() ")
@@ -2969,7 +2984,6 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
   ACE_NOTSUP_RETURN(0);
 #else
 
-#ifdef OPENDDS_SECURITY
   DCPS::Serializer serializer(&buff_, STUN::encoding);
   STUN::Message message;
   message.block = &buff_;
