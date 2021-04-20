@@ -372,7 +372,7 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_u18_o1d0v1_xer0_j12:
+  inst_u18_o1d0v1_xer0_j12:
 
     runs-on: ubuntu-18.04
 
