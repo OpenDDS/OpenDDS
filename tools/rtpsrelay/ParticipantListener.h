@@ -15,6 +15,8 @@ public:
                       OpenDDS::DCPS::DomainParticipantImpl* participant,
                       DomainStatisticsReporter& stats_reporter,
                       ParticipantEntryDataWriter_var participant_writer);
+  void enable();
+  void disable();
 
 private:
   void on_data_available(DDS::DataReader_ptr reader) override;
@@ -26,7 +28,8 @@ private:
   class Unregister : public OpenDDS::DCPS::RcObject {
   public:
     Unregister(ParticipantListener& listener);
-    ~Unregister();
+    void enable();
+    void disable();
 
   private:
     void execute(const OpenDDS::DCPS::MonotonicTimePoint& now);

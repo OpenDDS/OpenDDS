@@ -244,7 +244,7 @@ VerticalHandler::VerticalHandler(const Config& config,
   this->reactor()->schedule_timer(this, 0, ACE_Time_Value(1), ACE_Time_Value(1));
 }
 
-VerticalHandler::~VerticalHandler()
+void VerticalHandler::stop()
 {
   reactor()->cancel_timer(this);
 }

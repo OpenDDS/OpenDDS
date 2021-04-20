@@ -97,7 +97,7 @@ public:
                   const CRYPTO_TYPE& crypto,
                   const ACE_INET_Addr& application_participant_addr,
                   HandlerStatisticsReporter& stats_reporter);
-  ~VerticalHandler();
+  void stop();
 
   void horizontal_handler(HorizontalHandler* horizontal_handler) { horizontal_handler_ = horizontal_handler; }
 

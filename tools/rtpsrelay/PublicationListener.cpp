@@ -17,6 +17,16 @@ PublicationListener::PublicationListener(const Config& config,
   , unregister_(OpenDDS::DCPS::make_rch<Unregister>(OpenDDS::DCPS::ref(*this)))
 {}
 
+void PublicationListener::enable()
+{
+  unregister_->enable();
+}
+
+void PublicationListener::disable()
+{
+  unregister_->disable();
+}
+
 void PublicationListener::on_data_available(DDS::DataReader_ptr reader)
 {
   DDS::PublicationBuiltinTopicDataDataReader_var dr = DDS::PublicationBuiltinTopicDataDataReader::_narrow(reader);
@@ -136,11 +146,14 @@ void PublicationListener::unregister()
 PublicationListener::Unregister::Unregister(PublicationListener& listener)
   : listener_(listener)
   , unregister_task_(TheServiceParticipant->interceptor(), *this, &PublicationListener::Unregister::execute)
+{}
+
+void PublicationListener::Unregister::enable()
 {
   unregister_task_.enable(false, OpenDDS::DCPS::TimeDuration(1));
 }
 
-PublicationListener::Unregister::~Unregister()
+void PublicationListener::Unregister::disable()
 {
   unregister_task_.disable_and_wait();
 }

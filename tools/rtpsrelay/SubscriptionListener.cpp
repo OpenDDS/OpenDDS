@@ -17,6 +17,16 @@ SubscriptionListener::SubscriptionListener(const Config& config,
   , unregister_(OpenDDS::DCPS::make_rch<Unregister>(OpenDDS::DCPS::ref(*this)))
 {}
 
+void SubscriptionListener::enable()
+{
+  unregister_->enable();
+}
+
+void SubscriptionListener::disable()
+{
+  unregister_->disable();
+}
+
 void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
 {
   DDS::SubscriptionBuiltinTopicDataDataReader_var dr = DDS::SubscriptionBuiltinTopicDataDataReader::_narrow(reader);
@@ -133,11 +143,14 @@ void SubscriptionListener::unregister()
 SubscriptionListener::Unregister::Unregister(SubscriptionListener& listener)
   : listener_(listener)
   , unregister_task_(TheServiceParticipant->interceptor(), *this, &SubscriptionListener::Unregister::execute)
+{}
+
+void SubscriptionListener::Unregister::enable()
 {
   unregister_task_.enable(false, OpenDDS::DCPS::TimeDuration(1));
 }
 
-SubscriptionListener::Unregister::~Unregister()
+void SubscriptionListener::Unregister::disable()
 {
   unregister_task_.disable_and_wait();
 }
