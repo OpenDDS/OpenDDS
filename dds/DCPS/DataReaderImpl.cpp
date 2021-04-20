@@ -189,8 +189,7 @@ void DataReaderImpl::init(
   is_exclusive_ownership_ = this->qos_.ownership.kind == ::DDS::EXCLUSIVE_OWNERSHIP_QOS;
 #endif
 
-  listener_ = DDS::DataReaderListener::_duplicate(a_listener);
-  listener_mask_ = mask;
+  set_listener(a_listener, mask);
 
   // Only store the participant pointer, since it is our "grand"
   // parent, we will exist as long as it does
@@ -941,6 +940,7 @@ DDS::ReturnCode_t DataReaderImpl::set_listener(
     DDS::DataReaderListener_ptr a_listener,
     DDS::StatusMask mask)
 {
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
   listener_ = DDS::DataReaderListener::_duplicate(a_listener);
@@ -949,7 +949,14 @@ DDS::ReturnCode_t DataReaderImpl::set_listener(
 
 DDS::DataReaderListener_ptr DataReaderImpl::get_listener()
 {
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   return DDS::DataReaderListener::_duplicate(listener_.in());
+}
+
+DataReaderListener_ptr DataReaderImpl::get_ext_listener()
+{
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
+  return DataReaderListener::_narrow(listener_.in());
 }
 
 DDS::TopicDescription_ptr DataReaderImpl::get_topicdescription()
@@ -1833,7 +1840,9 @@ DataReaderImpl::listener_for(DDS::StatusKind kind)
   // use this entities factory if listener is mask not enabled
   // for this kind.
   RcHandle<SubscriberImpl> subscriber = get_subscriber_servant();
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   if (subscriber && (CORBA::is_nil(listener_.in()) || (listener_mask_ & kind) == 0)) {
+    g.release();
     return subscriber->listener_for(kind);
 
   } else {
@@ -2376,8 +2385,7 @@ void DataReaderImpl::notify_latency(PublicationId writer)
 {
   // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
   // is given to this DataReader then narrow() fails.
-  DataReaderListener_var listener
-  = DataReaderListener::_narrow(this->listener_.in());
+  DataReaderListener_var listener = get_ext_listener();
 
   if (!CORBA::is_nil(listener.in())) {
     WriterIdSeq writerIds;
@@ -2505,8 +2513,7 @@ DataReaderImpl::notify_subscription_disconnected(const WriterIdSeq& pubids)
 
   // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
   // is given to this DataReader then narrow() fails.
-  DataReaderListener_var the_listener
-  = DataReaderListener::_narrow(this->listener_.in());
+  DataReaderListener_var the_listener = get_ext_listener();
 
   if (!CORBA::is_nil(the_listener.in())) {
     SubscriptionLostStatus status;
@@ -2526,8 +2533,7 @@ DataReaderImpl::notify_subscription_reconnected(const WriterIdSeq& pubids)
   if (!this->is_bit_) {
     // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
     // is given to this DataReader then narrow() fails.
-    DataReaderListener_var the_listener
-    = DataReaderListener::_narrow(this->listener_.in());
+    DataReaderListener_var the_listener = get_ext_listener();
 
     if (!CORBA::is_nil(the_listener.in())) {
       SubscriptionLostStatus status;
@@ -2548,8 +2554,7 @@ DataReaderImpl::notify_subscription_lost(const DDS::InstanceHandleSeq& handles)
   if (!this->is_bit_) {
     // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
     // is given to this DataReader then narrow() fails.
-    DataReaderListener_var the_listener
-    = DataReaderListener::_narrow(this->listener_.in());
+    DataReaderListener_var the_listener = get_ext_listener();
 
     if (!CORBA::is_nil(the_listener.in())) {
       SubscriptionLostStatus status;
@@ -2573,8 +2578,7 @@ DataReaderImpl::notify_subscription_lost(const WriterIdSeq& pubids)
 
   // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
   // is given to this DataReader then narrow() fails.
-  DataReaderListener_var the_listener
-  = DataReaderListener::_narrow(this->listener_.in());
+  DataReaderListener_var the_listener = get_ext_listener();
 
   if (!CORBA::is_nil(the_listener.in())) {
     SubscriptionLostStatus status;
@@ -2811,6 +2815,7 @@ void DataReaderImpl::notify_liveliness_change()
   notify_status_condition();
 
   if (DCPS_debug_level > 9) {
+    ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
     OPENDDS_STRING output_str;
     output_str += "subscription ";
     output_str += OPENDDS_STRING(GuidConverter(subscription_id_));

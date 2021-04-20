@@ -172,6 +172,10 @@ void EndpointManager::change_username()
 
 void EndpointManager::change_password(bool password_only)
 {
+  if (password_only && guid_pair_to_checklist_.empty()) {
+    return;
+  }
+
   unsigned char password[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
   TheSecurityRegistry->builtin_config()->get_utility()->generate_random_bytes(password, sizeof(password));
   agent_info_.password = OpenDDS::DCPS::to_hex_dds_string(password, 16, 0, 0);
