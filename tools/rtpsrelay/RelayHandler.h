@@ -130,6 +130,8 @@ protected:
   void process_message(const ACE_INET_Addr& remote,
                        const OpenDDS::DCPS::MonotonicTimePoint& now,
                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) override;
+  bool ignore(const OpenDDS::DCPS::GUID_t& guid,
+              const OpenDDS::DCPS::MonotonicTimePoint& now);
   ParticipantStatisticsReporter& record_activity(const ACE_INET_Addr& remote_address,
                                                  const OpenDDS::DCPS::MonotonicTimePoint& now,
                                                  const OpenDDS::DCPS::RepoId& src_guid,
@@ -180,6 +182,7 @@ private:
   const DDS::Security::CryptoTransform_var crypto_;
   const DDS::Security::ParticipantCryptoHandle application_participant_crypto_handle_;
 #endif
+  std::list<OpenDDS::DCPS::MonotonicTimePoint> new_guids_;
 };
 
 // Sends to and receives from other relays.
