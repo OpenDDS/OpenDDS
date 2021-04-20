@@ -97,6 +97,7 @@ public:
                   const CRYPTO_TYPE& crypto,
                   const ACE_INET_Addr& application_participant_addr,
                   HandlerStatisticsReporter& stats_reporter);
+  ~VerticalHandler();
 
   void horizontal_handler(HorizontalHandler* horizontal_handler) { horizontal_handler_ = horizontal_handler; }
 
@@ -171,9 +172,11 @@ private:
   ACE_INET_Addr read_address(const OpenDDS::DCPS::RepoId& guid, const OpenDDS::DCPS::MonotonicTimePoint& now) const;
   void write_address(const OpenDDS::DCPS::RepoId& guid, const OpenDDS::DCPS::MonotonicTimePoint& now);
   void unregister_address(const OpenDDS::DCPS::RepoId& guid, const OpenDDS::DCPS::MonotonicTimePoint& now);
+  int handle_timeout(const ACE_Time_Value& now, const void* act) override;
 
   const ACE_INET_Addr horizontal_address_;
   const std::string horizontal_address_str_;
+  std::list<OpenDDS::DCPS::GUID_t> unregister_queue_;
 
   OpenDDS::RTPS::RtpsDiscovery_rch rtps_discovery_;
 #ifdef OPENDDS_SECURITY

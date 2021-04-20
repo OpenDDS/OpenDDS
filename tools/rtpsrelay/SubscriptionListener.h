@@ -6,6 +6,7 @@
 #include "DomainStatisticsReporter.h"
 
 #include <dds/DCPS/DomainParticipantImpl.h>
+#include <dds/DCPS/PeriodicTask.h>
 
 namespace RtpsRelay {
 
@@ -20,11 +21,27 @@ private:
   void write_sample(const DDS::SubscriptionBuiltinTopicData& data,
                     const DDS::SampleInfo& info);
   void unregister_instance(const DDS::SampleInfo& info);
+  void unregister();
+
+  class Unregister : public OpenDDS::DCPS::RcObject {
+  public:
+    Unregister(SubscriptionListener& listener);
+    ~Unregister();
+
+  private:
+    void execute(const OpenDDS::DCPS::MonotonicTimePoint& now);
+    typedef OpenDDS::DCPS::PmfPeriodicTask<Unregister> PeriodicTask;
+    SubscriptionListener& listener_;
+    PeriodicTask unregister_task_;
+  };
 
   const Config& config_;
   OpenDDS::DCPS::DomainParticipantImpl* participant_;
   ReaderEntryDataWriter_var writer_;
   DomainStatisticsReporter& stats_reporter_;
+  OpenDDS::DCPS::RcHandle<Unregister> unregister_;
+  ACE_Thread_Mutex mutex_;
+  std::list<OpenDDS::DCPS::GUID_t> unregister_queue_;
 };
 
 }

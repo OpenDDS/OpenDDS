@@ -14,6 +14,7 @@ PublicationListener::PublicationListener(const Config& config,
   , participant_(participant)
   , writer_(writer)
   , stats_reporter_(stats_reporter)
+  , unregister_(OpenDDS::DCPS::make_rch<Unregister>(OpenDDS::DCPS::ref(*this)))
 {}
 
 void PublicationListener::on_data_available(DDS::DataReader_ptr reader)
@@ -104,6 +105,19 @@ void PublicationListener::write_sample(const DDS::PublicationBuiltinTopicData& d
 void PublicationListener::unregister_instance(const DDS::SampleInfo& info)
 {
   const auto repoid = participant_->get_repoid(info.instance_handle);
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  unregister_queue_.push_back(repoid);
+}
+
+void PublicationListener::unregister()
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+
+  if (unregister_queue_.empty()) {
+    return;
+  }
+
+  const auto repoid = unregister_queue_.front();
   GUID_t guid;
   assign(guid, repoid);
 
@@ -111,12 +125,29 @@ void PublicationListener::unregister_instance(const DDS::SampleInfo& info)
   entry.guid(guid);
 
   if (config_.log_discovery()) {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: PublicationListener::unregister_instance remove local writer %C\n"), guid_to_string(repoid).c_str()));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: PublicationListener::unregister remove local writer %C\n"), guid_to_string(repoid).c_str()));
   }
   DDS::ReturnCode_t ret = writer_->unregister_instance(entry, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: PublicationListener::unregister_instance failed to unregister_instance\n")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: PublicationListener::unregister failed to unregister_instance\n")));
   }
+}
+
+PublicationListener::Unregister::Unregister(PublicationListener& listener)
+  : listener_(listener)
+  , unregister_task_(TheServiceParticipant->interceptor(), *this, &PublicationListener::Unregister::execute)
+{
+  unregister_task_.enable(false, OpenDDS::DCPS::TimeDuration(1));
+}
+
+PublicationListener::Unregister::~Unregister()
+{
+  unregister_task_.disable_and_wait();
+}
+
+void PublicationListener::Unregister::execute(const OpenDDS::DCPS::MonotonicTimePoint&)
+{
+  listener_.unregister();
 }
 
 }
