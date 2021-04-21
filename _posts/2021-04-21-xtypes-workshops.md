@@ -1,4 +1,4 @@
- ---
+---
 layout: post
 title: "Learn How to Use DDS XTypes in Upcoming Workshops"
 categories: news
