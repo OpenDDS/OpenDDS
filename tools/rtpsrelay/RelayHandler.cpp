@@ -241,6 +241,12 @@ VerticalHandler::VerticalHandler(const Config& config,
 #endif
 {
   ACE_UNUSED_ARG(crypto);
+  this->reactor()->schedule_timer(this, 0, ACE_Time_Value(1), ACE_Time_Value(1));
+}
+
+void VerticalHandler::stop()
+{
+  reactor()->cancel_timer(this);
 }
 
 void VerticalHandler::venqueue_message(const ACE_INET_Addr& addr,
@@ -676,20 +682,34 @@ void VerticalHandler::write_address(const OpenDDS::DCPS::RepoId& guid,
 }
 
 void VerticalHandler::unregister_address(const OpenDDS::DCPS::RepoId& guid,
-                                         const OpenDDS::DCPS::MonotonicTimePoint& now)
+                                         const OpenDDS::DCPS::MonotonicTimePoint&)
 {
+  unregister_queue_.push_back(guid);
+}
+
+int VerticalHandler::handle_timeout(const ACE_Time_Value& n, const void*)
+{
+  if (unregister_queue_.empty()) {
+    return 0;
+  }
+
+  const OpenDDS::DCPS::GUID_t guid = unregister_queue_.front();
+  unregister_queue_.pop_front();
   GuidNameAddress gna;
   assign(gna.guid(), guid);
   gna.name(name_);
 
   if (config_.log_activity()) {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: VerticalHandler::unregister_address %C disclaiming %C\n"), name_.c_str(), guid_to_string(guid).c_str()));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: VerticalHandler::handle_timeout %C disclaiming %C\n"), name_.c_str(), guid_to_string(guid).c_str()));
   }
+  const OpenDDS::DCPS::MonotonicTimePoint now(n);
   stats_reporter_.disclaim(now);
   const auto ret = responsible_relay_writer_->unregister_instance(gna, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
-    HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: VerticalHandler::unregister_address %C failed to unregister_instance for %C\n"), name_.c_str(), guid_to_string(guid).c_str()));
+    HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: VerticalHandler::handle_timeout %C failed to unregister_instance for %C\n"), name_.c_str(), guid_to_string(guid).c_str()));
   }
+
+  return 0;
 }
 
 HorizontalHandler::HorizontalHandler(const Config& config,
