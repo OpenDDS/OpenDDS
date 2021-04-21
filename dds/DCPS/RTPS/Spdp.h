@@ -290,7 +290,7 @@ private:
     virtual int handle_input(ACE_HANDLE h);
 
     void open(const DCPS::ReactorTask_rch&);
-    void enable_local();
+    void enable_periodic_tasks();
 
     void shorten_local_sender_delay_i();
     void write(WriteFlags flags);
