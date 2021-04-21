@@ -1,4 +1,4 @@
-project(Compiler_Typecode): dcps_test, googletest, msvc_bigobj{
+project(Compiler_Typecode): dcps_test, googletest, msvc_bigobj, dds_no_suppress_anys{
   exename = *
   Source_Files {
     typecode.cpp
