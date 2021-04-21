@@ -486,7 +486,8 @@ StaticEndpointManager::populate_transport_locator_sequence(TransportLocatorSeq*&
 void
 StaticEndpointManager::reader_exists(const RepoId& readerid, const RepoId& writerid)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
   LocalPublicationMap::const_iterator lp_pos = local_publications_.find(writerid);
   EndpointRegistry::ReaderMapType::const_iterator reader_pos = registry_.reader_map.find(readerid);
   if (lp_pos != local_publications_.end() &&
@@ -504,7 +505,8 @@ StaticEndpointManager::reader_exists(const RepoId& readerid, const RepoId& write
 void
 StaticEndpointManager::reader_does_not_exist(const RepoId& readerid, const RepoId& writerid)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
   LocalPublicationMap::const_iterator lp_pos = local_publications_.find(writerid);
   EndpointRegistry::ReaderMapType::const_iterator reader_pos = registry_.reader_map.find(readerid);
   if (lp_pos != local_publications_.end() &&
@@ -522,7 +524,8 @@ StaticEndpointManager::reader_does_not_exist(const RepoId& readerid, const RepoI
 void
 StaticEndpointManager::writer_exists(const RepoId& writerid, const RepoId& readerid)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
   LocalSubscriptionMap::const_iterator ls_pos = local_subscriptions_.find(readerid);
   EndpointRegistry::WriterMapType::const_iterator writer_pos = registry_.writer_map.find(writerid);
   if (ls_pos != local_subscriptions_.end() &&
@@ -539,7 +542,8 @@ StaticEndpointManager::writer_exists(const RepoId& writerid, const RepoId& reade
 void
 StaticEndpointManager::writer_does_not_exist(const RepoId& writerid, const RepoId& readerid)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
   LocalSubscriptionMap::const_iterator ls_pos = local_subscriptions_.find(readerid);
   EndpointRegistry::WriterMapType::const_iterator writer_pos = registry_.writer_map.find(writerid);
   if (ls_pos != local_subscriptions_.end() &&

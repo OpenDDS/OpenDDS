@@ -11,6 +11,8 @@
 #include "dcps_export.h"
 #include "ace/ace_wchar.h"
 
+#include "ace/Log_Msg.h"
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -107,8 +109,31 @@ public:
 extern OpenDDS_Dcps_Export SecurityDebug security_debug;
 #endif
 
+struct TraceCall {
+  TraceCall(const char* file, int line, const char* func)
+    : file_(file)
+    , line_(line)
+    , func_(func)
+  {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) TRACE %C:%d %C enter\n", file_, line_, func_));
+  }
+
+  ~TraceCall()
+  {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) TRACE %C:%d %C exit\n", file_, line_, func_));
+  }
+
+  const char* const file_;
+  const int line_;
+  const char* const func_;
+};
+
 } // namespace OpenDDS
 } // namespace DCPS
+
+
+#define TRACE_CALL(x) OpenDDS::DCPS::TraceCall x(__FILE__, __LINE__, __func__)
+
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 

@@ -264,8 +264,8 @@ namespace {
   const Encoding type_lookup_encoding(Encoding::KIND_XCDR2, DCPS::ENDIAN_NATIVE);
 }
 
-Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
-  : DCPS::EndpointManager<ParticipantData_t>(participant_id, lock)
+Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& jlock)
+  : DCPS::EndpointManager<ParticipantData_t>(participant_id, jlock)
   , spdp_(owner)
   , publications_writer_(make_rch<DiscoveryWriter>(
       make_id(participant_id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER), ref(*this)))
@@ -1761,7 +1761,8 @@ Sedp::disassociate(ParticipantData_t& pdata)
   }
 
   { // Release lock, so we can call into transport
-    ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+    TRACE_CALL(tc);
+    ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(jlock_);
     ACE_GUARD_RETURN(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock, false);
 
     disassociate_helper(associated_endpoints,
@@ -2123,7 +2124,8 @@ void
 Sedp::remove_from_bit_i(const DiscoveredPublication& pub)
 {
 #ifndef DDS_HAS_MINIMUM_BIT
-  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+  TRACE_CALL(tc);
+  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(jlock_);
   ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
 
   DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
@@ -2141,7 +2143,8 @@ void
 Sedp::remove_from_bit_i(const DiscoveredSubscription& sub)
 {
 #ifndef DDS_HAS_MINIMUM_BIT
-  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+  TRACE_CALL(tc);
+  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(jlock_);
   ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
 
   DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
@@ -2197,7 +2200,8 @@ Sedp::sub_bit()
 bool
 Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
+  TRACE_CALL(tc);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, jlock_, false);
   OPENDDS_MAP_CMP(RepoId, OPENDDS_STRING, DCPS::GUID_tKeyLessThan)::iterator iter =
     topic_names_.find(topicId);
   if (iter == topic_names_.end()) {
@@ -2260,7 +2264,8 @@ Sedp::update_publication_qos(const RepoId& publicationId,
                              const DDS::DataWriterQos& qos,
                              const DDS::PublisherQos& publisherQos)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
+  TRACE_CALL(tc);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, jlock_, false);
   LocalPublicationIter iter = local_publications_.find(publicationId);
   if (iter != local_publications_.end()) {
     LocalPublication& pb = iter->second;
@@ -2311,7 +2316,8 @@ Sedp::update_subscription_qos(const RepoId& subscriptionId,
                               const DDS::DataReaderQos& qos,
                               const DDS::SubscriberQos& subscriberQos)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
+  TRACE_CALL(tc);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, jlock_, false);
   LocalSubscriptionIter iter = local_subscriptions_.find(subscriptionId);
   if (iter != local_subscriptions_.end()) {
     LocalSubscription& sb = iter->second;
@@ -2337,7 +2343,8 @@ bool
 Sedp::update_subscription_params(const RepoId& subId,
                                  const DDS::StringSeq& params)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
+  TRACE_CALL(tc);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, jlock_, false);
   const LocalSubscriptionIter iter = local_subscriptions_.find(subId);
   if (iter != local_subscriptions_.end()) {
     LocalSubscription& sb = iter->second;
@@ -2441,7 +2448,8 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
 
     if (iter == discovered_publications_.end()) { // add new
       // Must unlock when calling into pub_bit() as it may call back into us
-      ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+      TRACE_CALL(tc);
+      ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(jlock_);
 
       { // Reduce scope of pub and td
         DiscoveredPublication prepub(wdata);
@@ -2598,7 +2606,8 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
         DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
         if (bit) { // bit may be null if the DomainParticipant is shutting down
           wdata_copy = iter->second.writer_data_;
-          ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+          TRACE_CALL(tc);
+          ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(jlock_);
           ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
           bit->store_synthetic_data(wdata_copy.ddsPublicationData,
                                     DDS::NOT_NEW_VIEW_STATE);
@@ -2684,7 +2693,8 @@ Sedp::data_received(DCPS::MessageId message_id,
   const RepoId& guid = wdata.writerProxy.remoteWriterGuid;
   const RepoId guid_participant = make_part_guid(guid);
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
 
   if (ignoring(guid)
       || ignoring(guid_participant)
@@ -2719,7 +2729,8 @@ void Sedp::data_received(DCPS::MessageId message_id,
   const RepoId& guid = wrapper.data.writerProxy.remoteWriterGuid;
   const RepoId guid_participant = make_part_guid(guid);
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
 
   if (ignoring(guid)
       || ignoring(guid_participant)
@@ -2752,7 +2763,8 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
   DiscoveredSubscriptionIter iter = discovered_subscriptions_.find(guid);
 
   // Must unlock when calling into sub_bit() as it may call back into us
-  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+  TRACE_CALL(tc);
+  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(jlock_);
 
   if (message_id == DCPS::SAMPLE_DATA) {
     DCPS::DiscoveredReaderData rdata_copy;
@@ -2936,7 +2948,8 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
         DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
         if (bit) { // bit may be null if the DomainParticipant is shutting down
           rdata_copy = iter->second.reader_data_;
-          ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+          TRACE_CALL(tc);
+          ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(jlock_);
           ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
           bit->store_synthetic_data(rdata_copy.ddsSubscriptionData,
                                     DDS::NOT_NEW_VIEW_STATE);
@@ -3060,7 +3073,8 @@ Sedp::data_received(DCPS::MessageId message_id,
   const GUID_t& guid = rdata.readerProxy.remoteReaderGuid;
   const GUID_t part_guid = make_part_guid(guid);
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
 
   if (ignoring(guid) || ignoring(part_guid)
       || ignoring(rdata.ddsSubscriptionData.topic_name)) {
@@ -3095,7 +3109,8 @@ void Sedp::data_received(DCPS::MessageId message_id,
   RepoId guid_participant = guid;
   guid_participant.entityId = ENTITYID_PARTICIPANT;
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
 
   if (ignoring(guid)
       || ignoring(guid_participant)
@@ -3119,7 +3134,8 @@ Sedp::data_received(DCPS::MessageId /*message_id*/,
   RepoId prefix = data.participantGuid;
   prefix.entityId = EntityId_t(); // Clear the entityId so lower bound will work.
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
 
   if (ignoring(guid)
       || ignoring(guid_participant)) {
@@ -3160,7 +3176,8 @@ Sedp::received_participant_message_data_secure(DCPS::MessageId /*message_id*/,
   RepoId prefix = data.participantGuid;
   prefix.entityId = EntityId_t(); // Clear the entityId so lower bound will work.
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
 
   if (ignoring(guid) || ignoring(guid_participant)) {
     return;
@@ -3188,7 +3205,8 @@ bool Sedp::should_drop_stateless_message(const DDS::Security::ParticipantGeneric
   using DCPS::GUID_t;
   using DCPS::GUID_UNKNOWN;
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, true);
+  TRACE_CALL(tc);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, jlock_, true);
 
   const GUID_t& src_endpoint = msg.source_endpoint_guid;
   const GUID_t& dst_endpoint = msg.destination_endpoint_guid;
@@ -3216,7 +3234,8 @@ bool Sedp::should_drop_volatile_message(const DDS::Security::ParticipantGenericM
   using DCPS::GUID_t;
   using DCPS::GUID_UNKNOWN;
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, true);
+  TRACE_CALL(tc);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, jlock_, true);
 
   const GUID_t src_endpoint = msg.source_endpoint_guid;
   const GUID_t dst_participant = msg.destination_participant_guid;
@@ -4163,7 +4182,8 @@ void Sedp::TypeLookupReplyReader::get_continuation_point(const GuidPrefix_t& gui
                                                          const XTypes::TypeIdentifier& remote_ti,
                                                          XTypes::OctetSeq32& cont_point) const
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, sedp_.lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, sedp_.jlock_);
   const GuidPrefixWrapper guid_pref_wrap(guid_prefix);
   const DependenciesMap::const_iterator it = dependencies_.find(guid_pref_wrap);
   if (it == dependencies_.end() || it->second.find(remote_ti) == it->second.end()) {
@@ -4207,7 +4227,8 @@ bool Sedp::TypeLookupReplyReader::process_type_lookup_reply(
       seq_num.getValue()));
   }
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, sedp_.lock_, false);
+  TRACE_CALL(tc);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, sedp_.jlock_, false);
   if (DCPS::transport_debug.log_progress) {
     log_progress("receive type lookup reply", get_repo_id(), sample.header_.publication_id_, sedp_.spdp_.get_participant_discovered_at(sample.header_.publication_id_));
   }
@@ -5654,7 +5675,8 @@ Sedp::handle_datawriter_crypto_tokens(const DDS::Security::ParticipantVolatileMe
   DDS::Security::SecurityException se = {"", 0, 0};
   Security::CryptoKeyExchange_var key_exchange = spdp_.get_security_config()->get_crypto_key_exchange();
 
-  ACE_Guard<ACE_Thread_Mutex> g(lock_, false);
+  TRACE_CALL(tc);
+  ACE_Guard<ACE_Thread_Mutex> g(jlock_, false);
 
   const DDS::Security::DatawriterCryptoHandle dwch =
     get_handle_registry()->get_remote_datawriter_crypto_handle(msg.source_endpoint_guid);
@@ -5716,7 +5738,8 @@ Sedp::handle_datareader_crypto_tokens(const DDS::Security::ParticipantVolatileMe
   DDS::Security::SecurityException se = {"", 0, 0};
   Security::CryptoKeyExchange_var key_exchange = spdp_.get_security_config()->get_crypto_key_exchange();
 
-  ACE_Guard<ACE_Thread_Mutex> g(lock_, false);
+  TRACE_CALL(tc);
+  ACE_Guard<ACE_Thread_Mutex> g(jlock_, false);
 
   const DDS::Security::DatareaderCryptoHandle drch =
     get_handle_registry()->get_remote_datareader_crypto_handle(msg.source_endpoint_guid);
@@ -5923,7 +5946,8 @@ void
 Sedp::PublicationAgentInfoListener::update_agent_info(const DCPS::RepoId& a_local_guid,
                                                       const ICE::AgentInfo& a_agent_info)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, sedp.lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, sedp.jlock_);
   LocalPublicationIter pos = sedp.local_publications_.find(a_local_guid);
   if (pos != sedp.local_publications_.end()) {
     pos->second.have_ice_agent_info = true;
@@ -5935,7 +5959,8 @@ Sedp::PublicationAgentInfoListener::update_agent_info(const DCPS::RepoId& a_loca
 void
 Sedp::PublicationAgentInfoListener::remove_agent_info(const DCPS::RepoId& a_local_guid)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, sedp.lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, sedp.jlock_);
   LocalPublicationIter pos = sedp.local_publications_.find(a_local_guid);
   if (pos != sedp.local_publications_.end()) {
     pos->second.have_ice_agent_info = false;
@@ -5947,7 +5972,8 @@ void
 Sedp::SubscriptionAgentInfoListener::update_agent_info(const DCPS::RepoId& a_local_guid,
                                                        const ICE::AgentInfo& a_agent_info)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, sedp.lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, sedp.jlock_);
   LocalSubscriptionIter pos = sedp.local_subscriptions_.find(a_local_guid);
   if (pos != sedp.local_subscriptions_.end()) {
     pos->second.have_ice_agent_info = true;
@@ -5959,7 +5985,8 @@ Sedp::SubscriptionAgentInfoListener::update_agent_info(const DCPS::RepoId& a_loc
 void
 Sedp::SubscriptionAgentInfoListener::remove_agent_info(const DCPS::RepoId& a_local_guid)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, sedp.lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, sedp.jlock_);
   LocalSubscriptionIter pos = sedp.local_subscriptions_.find(a_local_guid);
   if (pos != sedp.local_subscriptions_.end()) {
     pos->second.have_ice_agent_info = false;
@@ -6155,7 +6182,8 @@ Sedp::use_ice_now(bool f)
     return;
   }
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
 
   for (LocalPublicationIter pos = local_publications_.begin(), limit = local_publications_.end(); pos != limit; ++pos) {
     LocalPublication& pub = pos->second;

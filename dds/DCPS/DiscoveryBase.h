@@ -323,7 +323,7 @@ namespace OpenDDS {
         : max_type_lookup_service_reply_period_(0)
         , type_lookup_service_sequence_number_(0)
         , use_xtypes_(true)
-        , lock_(lock)
+        , jlock_(lock)
         , participant_id_(participant_id)
         , publication_counter_(0)
         , subscription_counter_(0)
@@ -449,7 +449,8 @@ namespace OpenDDS {
                                      const char* dataTypeName, const DDS::TopicQos& qos,
                                      bool hasDcpsKey, TopicCallbacks* topic_callbacks)
       {
-        ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, INTERNAL_ERROR);
+        TRACE_CALL(tc);
+        ACE_GUARD_RETURN(ACE_Thread_Mutex, g, jlock_, INTERNAL_ERROR);
         typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator iter =
           topics_.find(topicName);
         if (iter != topics_.end()) {
@@ -475,7 +476,8 @@ namespace OpenDDS {
                                    DDS::TopicQos_out qos,
                                    RepoId_out topicId)
       {
-        ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, INTERNAL_ERROR);
+        TRACE_CALL(tc);
+        ACE_GUARD_RETURN(ACE_Thread_Mutex, g, jlock_, INTERNAL_ERROR);
         typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::const_iterator iter =
           topics_.find(topicName);
         if (iter == topics_.end()) {
@@ -492,7 +494,8 @@ namespace OpenDDS {
 
       TopicStatus remove_topic(const RepoId& topicId)
       {
-        ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, INTERNAL_ERROR);
+        TRACE_CALL(tc);
+        ACE_GUARD_RETURN(ACE_Thread_Mutex, g, jlock_, INTERNAL_ERROR);
         TopicNameMap::iterator name_iter = topic_names_.find(topicId);
         if (name_iter == topic_names_.end()) {
           return NOT_FOUND;
@@ -516,7 +519,8 @@ namespace OpenDDS {
                              const DDS::PublisherQos& publisherQos,
                              const XTypes::TypeInformation& type_info)
       {
-        ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, RepoId());
+        TRACE_CALL(tc);
+        ACE_GUARD_RETURN(ACE_Thread_Mutex, g, jlock_, RepoId());
 
         RepoId rid = participant_id_;
         assign_publication_key(rid, topicId, qos);
@@ -635,7 +639,8 @@ namespace OpenDDS {
 
       void remove_publication(const RepoId& publicationId)
       {
-        ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+        TRACE_CALL(tc);
+        ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
         LocalPublicationIter iter = local_publications_.find(publicationId);
         if (iter != local_publications_.end()) {
           if (DDS::RETCODE_OK == remove_publication_i(publicationId, iter->second)) {
@@ -668,7 +673,8 @@ namespace OpenDDS {
       void update_publication_locators(const RepoId& publicationId,
                                        const TransportLocatorSeq& transInfo)
       {
-        ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+        TRACE_CALL(tc);
+        ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
         LocalPublicationIter iter = local_publications_.find(publicationId);
         if (iter != local_publications_.end()) {
           if (DCPS_debug_level > 3) {
@@ -692,7 +698,8 @@ namespace OpenDDS {
                                     const DDS::StringSeq& params,
                                     const XTypes::TypeInformation& type_info)
       {
-        ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, RepoId());
+        TRACE_CALL(tc);
+        ACE_GUARD_RETURN(ACE_Thread_Mutex, g, jlock_, RepoId());
 
         RepoId rid = participant_id_;
         assign_subscription_key(rid, topicId, qos);
@@ -815,7 +822,8 @@ namespace OpenDDS {
 
       void remove_subscription(const RepoId& subscriptionId)
       {
-        ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+        TRACE_CALL(tc);
+        ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
         LocalSubscriptionIter iter = local_subscriptions_.find(subscriptionId);
         if (iter != local_subscriptions_.end()) {
           if (DDS::RETCODE_OK == remove_subscription_i(subscriptionId, iter->second)) {
@@ -851,7 +859,8 @@ namespace OpenDDS {
       void update_subscription_locators(const RepoId& subscriptionId,
                                         const TransportLocatorSeq& transInfo)
       {
-        ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+        TRACE_CALL(tc);
+        ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
         LocalSubscriptionIter iter = local_subscriptions_.find(subscriptionId);
         if (iter != local_subscriptions_.end()) {
           if (DCPS_debug_level > 3) {
@@ -1292,7 +1301,8 @@ namespace OpenDDS {
       void
       remove_expired_endpoints(const MonotonicTimePoint& /*now*/)
       {
-        ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+        TRACE_CALL(tc);
+        ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
         const MonotonicTimePoint now = MonotonicTimePoint::now();
 
         MatchingDataIter end_iter = matching_data_buffer_.end();
@@ -1592,7 +1602,8 @@ namespace OpenDDS {
         // Need to release lock, below, for callbacks into DCPS which could
         // call into Spdp/Sedp.  Note that this doesn't unlock, it just constructs
         // an ACE object which will be used below for unlocking.
-        ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+        TRACE_CALL(tc);
+        ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(jlock_);
 
         // 4. Check transport and QoS compatibility
 
@@ -1994,7 +2005,7 @@ namespace OpenDDS {
 
 #endif
 
-      ACE_Thread_Mutex& lock_;
+      ACE_Thread_Mutex& jlock_;
       RepoId participant_id_;
       RepoIdSet ignored_guids_;
       unsigned int publication_counter_, subscription_counter_, topic_counter_;
@@ -2051,7 +2062,8 @@ namespace OpenDDS {
 
       void ignore_domain_participant(const RepoId& ignoreId)
       {
-        ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+        TRACE_CALL(tc);
+        ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
         endpoint_manager().ignore(ignoreId);
 
         DiscoveredParticipantIter iter = participants_.find(ignoreId);
@@ -2069,7 +2081,8 @@ namespace OpenDDS {
       bool
       update_domain_participant_qos(const DDS::DomainParticipantQos& qos)
       {
-        ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
+        TRACE_CALL(tc);
+        ACE_GUARD_RETURN(ACE_Thread_Mutex, g, jlock_, false);
         qos_ = qos;
         return announce_domain_participant_qos();
       }
@@ -2108,7 +2121,8 @@ namespace OpenDDS {
       void
       ignore_topic(const RepoId& ignoreId)
       {
-        ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+        TRACE_CALL(tc);
+        ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
         endpoint_manager().ignore(ignoreId);
       }
 
@@ -2139,7 +2153,8 @@ namespace OpenDDS {
       void
       ignore_publication(const RepoId& ignoreId)
       {
-        ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+        TRACE_CALL(tc);
+        ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
         return endpoint_manager().ignore(ignoreId);
       }
 
@@ -2181,7 +2196,8 @@ namespace OpenDDS {
       void
       ignore_subscription(const RepoId& ignoreId)
       {
-        ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+        TRACE_CALL(tc);
+        ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
         return endpoint_manager().ignore(ignoreId);
       }
 
@@ -2383,7 +2399,8 @@ namespace OpenDDS {
               const DDS::InstanceHandle_t bit_ih = iter->second.bit_ih_;
               const DDS::InstanceHandle_t location_ih = iter->second.location_ih_;
 
-              ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+              TRACE_CALL(tc);
+              ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(jlock_);
               ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
               if (bit && bit_ih != DDS::HANDLE_NIL) {
                 bit->set_instance_state(bit_ih,
@@ -2456,7 +2473,7 @@ namespace OpenDDS {
     }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-      mutable ACE_Thread_Mutex lock_;
+      mutable ACE_Thread_Mutex jlock_;
       DDS::Subscriber_var bit_subscriber_;
       DDS::DomainParticipantQos qos_;
       DiscoveredParticipantMap participants_;

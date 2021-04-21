@@ -251,10 +251,10 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , tport_(DCPS::make_rch<SpdpTransport>(rchandle_from(this)))
   , initialized_flag_(false)
   , eh_shutdown_(false)
-  , shutdown_cond_(lock_)
+  , shutdown_cond_(jlock_)
   , shutdown_flag_(false)
   , available_builtin_endpoints_(0)
-  , sedp_(DCPS::make_rch<Sedp>(guid_, DCPS::ref(*this), DCPS::ref(lock_)))
+  , sedp_(DCPS::make_rch<Sedp>(guid_, DCPS::ref(*this), DCPS::ref(jlock_)))
 #ifdef OPENDDS_SECURITY
   , available_extended_builtin_endpoints_(0)
   , security_config_()
@@ -264,7 +264,8 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , crypto_handle_(DDS::HANDLE_NIL)
 #endif
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
 
   init(domain, guid, qos, disco);
 
@@ -292,10 +293,10 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , tport_(DCPS::make_rch<SpdpTransport>(rchandle_from(this)))
   , initialized_flag_(false)
   , eh_shutdown_(false)
-  , shutdown_cond_(lock_)
+  , shutdown_cond_(jlock_)
   , shutdown_flag_(false)
   , available_builtin_endpoints_(0)
-  , sedp_(DCPS::make_rch<Sedp>(guid_, DCPS::ref(*this), DCPS::ref(lock_)))
+  , sedp_(DCPS::make_rch<Sedp>(guid_, DCPS::ref(*this), DCPS::ref(jlock_)))
   , available_extended_builtin_endpoints_(0)
   , security_config_(Security::SecurityRegistry::instance()->default_config())
   , security_enabled_(security_config_->get_authentication() && security_config_->get_access_control() &&
@@ -304,7 +305,8 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , permissions_handle_(perm_handle)
   , crypto_handle_(crypto_handle)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
 
   init(domain, guid_, qos, disco);
 
@@ -368,7 +370,8 @@ void
 Spdp::shutdown()
 {
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    TRACE_CALL(tc);
+    ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
     shutdown_flag_ = true;
     if (DCPS::DCPS_debug_level > 3) {
       ACE_DEBUG((LM_INFO,
@@ -428,7 +431,8 @@ Spdp::shutdown()
   tport_->close(sedp_->reactor_task());
   tport_.reset();
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    TRACE_CALL(tc);
+    ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
     while (!eh_shutdown_) {
       shutdown_cond_.wait();
     }
@@ -594,7 +598,8 @@ Spdp::publish_location_update_i(DiscoveredParticipantIter& iter)
     DDS::InstanceHandle_t handle = DDS::HANDLE_NIL;
     {
       const DCPS::ParticipantLocationBuiltinTopicData ld_copy(iter->second.location_data_);
-      ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+      TRACE_CALL(tc);
+      ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(jlock_);
       ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
       handle = locbit->store_synthetic_data(ld_copy, DDS::NEW_VIEW_STATE);
     }
@@ -628,7 +633,8 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
   const GUID_t guid = DCPS::make_part_guid(pdata.participantProxy.guidPrefix);
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
   if (sedp_->ignoring(guid)) {
     // Ignore, this is our domain participant or one that the user has
     // asked us to ignore.
@@ -804,7 +810,8 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     // Check if sequence numbers are increasing
     if (validateSequenceNumber(now, seq, iter)) {
       // Must unlock when calling into part_bit() as it may call back into us
-      ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+      TRACE_CALL(tc);
+      ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(jlock_);
 
       // update an existing participant
       DDS::ParticipantBuiltinTopicData& pdataBit = partBitData(pdata);
@@ -955,7 +962,8 @@ void
 Spdp::match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& dp_iter)
 {
   // Must unlock when calling into part_bit() as it may call back into us
-  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+  TRACE_CALL(tc);
+  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(jlock_);
 
   DDS::InstanceHandle_t bit_instance_handle = DDS::HANDLE_NIL;
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -1019,7 +1027,8 @@ Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
     return;
   }
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
 
   if (sedp_->ignoring(guid)) {
     // Ignore, this is our domain participant or one that the user has
@@ -1326,7 +1335,8 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     return;
   }
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
 
   // If discovery hasn't initialized / validated this participant yet, ignore handshake messages
   DiscoveredParticipantIter iter = participants_.find(src_participant);
@@ -1594,7 +1604,8 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
 void
 Spdp::process_handshake_deadlines(const DCPS::MonotonicTimePoint& now)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
 
   for (TimeQueue::iterator pos = handshake_deadlines_.begin(),
         limit = handshake_deadlines_.upper_bound(now); pos != limit;) {
@@ -1642,7 +1653,8 @@ Spdp::process_handshake_deadlines(const DCPS::MonotonicTimePoint& now)
 void
 Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
 
   for (TimeQueue::iterator pos = handshake_resends_.begin(), limit = handshake_resends_.end();
        pos != limit && pos->first <= now;) {
@@ -1715,7 +1727,8 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
     return false;
   }
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
+  TRACE_CALL(tc);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, jlock_, false);
 
   if (crypto_handle_ == DDS::HANDLE_NIL) {
     // not configured for RTPS Protection, therefore doesn't support participant crypto tokens
@@ -2405,7 +2418,8 @@ Spdp::SpdpTransport::~SpdpTransport()
   DCPS::RcHandle<Spdp> outer = outer_.lock();
 
   if (outer) {
-    ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
+    TRACE_CALL(tc);
+    ACE_GUARD(ACE_Thread_Mutex, g, outer->jlock_);
     dispose_unregister();
     outer->eh_shutdown_ = true;
     outer->shutdown_cond_.notify_all();
@@ -2541,7 +2555,8 @@ Spdp::SpdpTransport::write(WriteFlags flags)
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
-  ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, outer->jlock_);
   write_i(flags);
 }
 
@@ -2619,7 +2634,8 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
 void
 Spdp::send_to_relay()
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
   tport_->write_i(SpdpTransport::SEND_RELAY);
 }
 
@@ -3065,7 +3081,8 @@ Spdp::SendStun::execute()
   DCPS::RcHandle<Spdp> outer = tport->outer_.lock();
   if (!outer) return;
 
-  ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, outer->jlock_);
   tport->wbuff_.reset();
   Serializer serializer(&tport->wbuff_, STUN::encoding);
   const_cast<STUN::Message&>(message_).block = &tport->wbuff_;
@@ -3113,7 +3130,8 @@ Spdp::SpdpTransport::ice_connect(const ICE::GuidSetType& guids, const ACE_INET_A
 void
 Spdp::IceConnect::execute()
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, spdp_->lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, spdp_->jlock_);
   for (ICE::GuidSetType::const_iterator pos = guids_.begin(), limit = guids_.end(); pos != limit; ++pos) {
     DiscoveredParticipantIter iter = spdp_->participants_.find(pos->remote);
     if (iter != spdp_->participants_.end()) {
@@ -3280,7 +3298,8 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
-  ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, outer->jlock_);
 
   if (nic.exclude_from_multicast(multicast_interface_.c_str())) {
     return;
@@ -3364,7 +3383,8 @@ Spdp::SpdpTransport::leave_multicast_group(const DCPS::NetworkInterface& nic)
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
-  ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, outer->jlock_);
 
   if (joined_interfaces_.count(nic.name()) != 0 && !nic.has_ipv4()) {
     if (DCPS::DCPS_debug_level > 3) {
@@ -3542,7 +3562,8 @@ Spdp::update_lease_expiration_i(DiscoveredParticipantIter iter,
 void
 Spdp::process_lease_expirations(const DCPS::MonotonicTimePoint& now)
 {
-  ACE_GUARD (ACE_Thread_Mutex, g, lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD (ACE_Thread_Mutex, g, jlock_);
 
   for (TimeQueue::iterator pos = lease_expirations_.begin(), limit = lease_expirations_.end();
        pos != limit && pos->first <= now;) {
@@ -3634,7 +3655,8 @@ Spdp::lookup_participant_permissions(const DCPS::RepoId& id) const
 {
   DDS::Security::PermissionsHandle result = DDS::HANDLE_NIL;
 
-  ACE_Guard<ACE_Thread_Mutex> g(lock_, false);
+  TRACE_CALL(tc);
+  ACE_Guard<ACE_Thread_Mutex> g(jlock_, false);
   DiscoveredParticipantConstIter pi = participants_.find(id);
   if (pi != participants_.end()) {
     result = pi->second.permissions_handle_;
@@ -3645,7 +3667,8 @@ Spdp::lookup_participant_permissions(const DCPS::RepoId& id) const
 DCPS::AuthState
 Spdp::lookup_participant_auth_state(const DCPS::RepoId& id) const
 {
-  ACE_Guard<ACE_Thread_Mutex> g(lock_, false);
+  TRACE_CALL(tc);
+  ACE_Guard<ACE_Thread_Mutex> g(jlock_, false);
   DiscoveredParticipantConstIter pi = participants_.find(id);
   if (pi != participants_.end()) {
     return pi->second.auth_state_;
@@ -4057,7 +4080,8 @@ void Spdp::SpdpTransport::send_directed(const DCPS::MonotonicTimePoint& /*now*/)
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
-  ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
+  TRACE_CALL(tc);
+  ACE_GUARD(ACE_Thread_Mutex, g, outer->jlock_);
 
   while (!directed_guids_.empty()) {
     const DCPS::RepoId id = directed_guids_.front();
@@ -4199,7 +4223,8 @@ void Spdp::process_participant_ice(const ParameterList& plist,
   ICE::AgentInfoMap::const_iterator spdp_pos = ai_map.find(SPDP_AGENT_INFO_KEY);
 
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    TRACE_CALL(tc);
+    ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
     DiscoveredParticipantIter iter = participants_.find(guid);
     if (iter != participants_.end()) {
       if (sedp_pos != ai_map.end()) {
@@ -4235,7 +4260,8 @@ void Spdp::process_participant_ice(const ParameterList& plist,
     } else {
       ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, guid);
 #ifndef DDS_HAS_MINIMUM_BIT
-      ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+      TRACE_CALL(tc);
+      ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
       DiscoveredParticipantIter iter = participants_.find(guid);
       if (iter != participants_.end()) {
         enqueue_location_update_i(iter, DCPS::LOCATION_ICE, ACE_INET_Addr());
@@ -4280,7 +4306,8 @@ Spdp::rtps_relay_only_now(bool flag)
   sedp_->rtps_relay_only_now(flag);
 
   if (flag) {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    TRACE_CALL(tc);
+    ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
 
     tport_->relay_sender_->enable(false, config_->spdp_rtps_relay_send_period());
     tport_->relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
@@ -4326,12 +4353,14 @@ Spdp::use_rtps_relay_now(bool f)
   sedp_->use_rtps_relay_now(f);
 
   if (f) {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    TRACE_CALL(tc);
+    ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
     tport_->relay_sender_->enable(false, config_->spdp_rtps_relay_send_period());
     tport_->relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
 
   } else {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    TRACE_CALL(tc);
+    ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
 
     if (!config_->rtps_relay_only()) {
       if (tport_->relay_sender_) {
@@ -4381,7 +4410,8 @@ Spdp::use_ice_now(bool flag)
       ICE::Agent::instance()->add_local_agent_info_listener(sedp_endpoint, l, this);
     }
     ICE::Agent::instance()->add_endpoint(tport_.get());
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    TRACE_CALL(tc);
+    ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
     tport_->ice_endpoint_added_ = true;
     if (spdp_endpoint) {
       ICE::Agent::instance()->add_local_agent_info_listener(spdp_endpoint, guid_, this);
@@ -4399,7 +4429,8 @@ Spdp::use_ice_now(bool flag)
     }
   } else {
     ICE::Agent::instance()->remove_endpoint(tport_.get());
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    TRACE_CALL(tc);
+    ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
     tport_->ice_endpoint_added_ = false;
 
 #ifndef DDS_HAS_MINIMUM_BIT
