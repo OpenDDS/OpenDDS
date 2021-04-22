@@ -32,7 +32,24 @@ int main(int, char*[])
 
   // Message to send
   Messenger::Message msg;
-  msg.text = "Hello, World!";
+  
+
+    std::string text = "";
+    std::string a10 = "aaaaaaaaaa";// 10 "a"s
+    std::string a100 = a10 + a10 + a10 + a10 + a10 + a10 + a10 + a10 + a10 + a10; // 100 "a"s
+    std::string a1000 = a100 + a100 + a100 + a100 + a100 + a100 + a100 + a100 + a100 + a100; // 1000 "a"s
+    
+    // If changed to i<100, the message successfully sends
+    for(int i=0; i<200; i++) {
+      text = text + a1000; 
+    }
+    printf("Saving message\n");
+    
+
+  //printf("size of string = %d\n", sizeof(text));
+  //msg.text = "Hello, World!";
+  const char* textMsg = text.c_str();
+  msg.text = textMsg;
   msg.subject_id = 14;
   msg.count = 1;
 
