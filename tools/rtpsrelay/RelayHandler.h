@@ -1,10 +1,11 @@
 #ifndef RTPSRELAY_RELAY_HANDLER_H_
 #define RTPSRELAY_RELAY_HANDLER_H_
 
-#include "AssociationTable.h"
 #include "Config.h"
+#include "GuidPartitionTable.h"
 #include "HandlerStatisticsReporter.h"
 #include "ParticipantStatisticsReporter.h"
+#include "RelayPartitionTable.h"
 
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 
@@ -30,6 +31,8 @@ namespace RtpsRelay {
 class RelayHandler : public ACE_Event_Handler {
 public:
   int open(const ACE_INET_Addr& address);
+
+  const std::string& name() const { return name_; }
 
 protected:
   RelayHandler(const Config& config,
@@ -90,9 +93,8 @@ public:
                   const std::string& name,
                   const ACE_INET_Addr& horizontal_address,
                   ACE_Reactor* reactor,
-                  const AssociationTable& association_table,
-                  GuidNameAddressDataWriter_var responsible_relay_writer,
-                  GuidNameAddressDataReader_var responsible_relay_reader,
+                  const GuidPartitionTable& guid_partition_table,
+                  const RelayPartitionTable& relay_partition_table,
                   const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
                   const CRYPTO_TYPE& crypto,
                   const ACE_INET_Addr& application_participant_addr,
@@ -140,7 +142,8 @@ protected:
   void send(const OpenDDS::DCPS::RepoId& src_guid,
             ParticipantStatisticsReporter& stats_reporter,
             bool undirected,
-            const GuidSet& to,
+            const StringSet& to_partitions,
+            const GuidSet& to_guids,
             bool send_to_application_participant,
             const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
             const OpenDDS::DCPS::MonotonicTimePoint& now);
@@ -148,13 +151,11 @@ protected:
               OpenDDS::STUN::Message message,
               const OpenDDS::DCPS::MonotonicTimePoint& now);
 
-  void populate_address_map(AddressMap& address_map,
-                            const GuidSet& to,
-                            const OpenDDS::DCPS::MonotonicTimePoint& now);
+  void populate_address_set(AddressSet& address_set,
+                            const StringSet& to_partitions);
 
-  const AssociationTable& association_table_;
-  GuidNameAddressDataWriter_var responsible_relay_writer_;
-  GuidNameAddressDataReader_var responsible_relay_reader_;
+  const GuidPartitionTable& guid_partition_table_;
+  const RelayPartitionTable& relay_partition_table_;
   HorizontalHandler* horizontal_handler_;
   GuidAddrSetMap guid_addr_set_map_;
   typedef std::map<GuidAddr, OpenDDS::DCPS::MonotonicTimePoint> GuidAddrExpirationMap;
@@ -171,14 +172,8 @@ private:
                      bool check_submessages,
                      const OpenDDS::DCPS::MonotonicTimePoint& now);
 
-  ACE_INET_Addr read_address(const OpenDDS::DCPS::RepoId& guid, const OpenDDS::DCPS::MonotonicTimePoint& now) const;
-  void write_address(const OpenDDS::DCPS::RepoId& guid, const OpenDDS::DCPS::MonotonicTimePoint& now);
-  void unregister_address(const OpenDDS::DCPS::RepoId& guid, const OpenDDS::DCPS::MonotonicTimePoint& now);
-  int handle_timeout(const ACE_Time_Value& now, const void* act) override;
-
   const ACE_INET_Addr horizontal_address_;
   const std::string horizontal_address_str_;
-  std::list<OpenDDS::DCPS::GUID_t> unregister_queue_;
 
   OpenDDS::RTPS::RtpsDiscovery_rch rtps_discovery_;
 #ifdef OPENDDS_SECURITY
@@ -194,15 +189,18 @@ public:
   explicit HorizontalHandler(const Config& config,
                              const std::string& name,
                              ACE_Reactor* reactor,
+                             const GuidPartitionTable& guid_partition_table,
                              HandlerStatisticsReporter& stats_reporter);
 
   void vertical_handler(VerticalHandler* vertical_handler) { vertical_handler_ = vertical_handler; }
   void enqueue_message(const ACE_INET_Addr& addr,
-                       const GuidSet& to,
+                       const StringSet& to_partitions,
+                       const GuidSet& to_guids,
                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
                        const OpenDDS::DCPS::MonotonicTimePoint& now);
 
 private:
+  const GuidPartitionTable& guid_partition_table_;
   VerticalHandler* vertical_handler_;
   void process_message(const ACE_INET_Addr& remote,
                        const OpenDDS::DCPS::MonotonicTimePoint& now,
@@ -215,28 +213,21 @@ public:
               const std::string& name,
               const ACE_INET_Addr& address,
               ACE_Reactor* reactor,
-              const AssociationTable& association_table,
-              GuidNameAddressDataWriter_var responsible_relay_writer,
-              GuidNameAddressDataReader_var responsible_relay_reader,
+              const GuidPartitionTable& guid_partition_table,
+              const RelayPartitionTable& relay_partition_table,
               const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
               const CRYPTO_TYPE& crypto,
               const ACE_INET_Addr& application_participant_addr,
               HandlerStatisticsReporter& stats_reporter);
 
-  void replay(const OpenDDS::DCPS::RepoId& from,
-              const GuidSet& to);
+  void replay(const StringSequence& partitions);
 
 private:
   typedef std::map<OpenDDS::DCPS::RepoId, OpenDDS::DCPS::Message_Block_Shared_Ptr, OpenDDS::DCPS::GUID_tKeyLessThan> SpdpMessages;
   SpdpMessages spdp_messages_;
   ACE_Thread_Mutex spdp_messages_mutex_;
 
-  struct Replay {
-    OpenDDS::DCPS::RepoId from_guid;
-    GuidSet to;
-  };
-  typedef std::queue<Replay> ReplayQueue;
-  ReplayQueue replay_queue_;
+  StringSet replay_queue_;
   ACE_Thread_Mutex replay_queue_mutex_;
 
   bool do_normal_processing(const ACE_INET_Addr& remote,
@@ -257,9 +248,8 @@ public:
               const std::string& name,
               const ACE_INET_Addr& horizontal_address,
               ACE_Reactor* reactor,
-              const AssociationTable& association_table,
-              GuidNameAddressDataWriter_var responsible_relay_writer,
-              GuidNameAddressDataReader_var responsible_relay_reader,
+              const GuidPartitionTable& guid_partition_table,
+              const RelayPartitionTable& relay_partition_table,
               const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
               const CRYPTO_TYPE& crypto,
               const ACE_INET_Addr& application_participant_addr,
@@ -281,9 +271,8 @@ public:
               const std::string& name,
               const ACE_INET_Addr& horizontal_address,
               ACE_Reactor* reactor,
-              const AssociationTable& association_table,
-              GuidNameAddressDataWriter_var responsible_relay_writer,
-              GuidNameAddressDataReader_var responsible_relay_reader,
+              const GuidPartitionTable& guid_partition_table,
+              const RelayPartitionTable& relay_partition_table,
               const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
               const CRYPTO_TYPE& crypto,
               HandlerStatisticsReporter& stats_reporter);

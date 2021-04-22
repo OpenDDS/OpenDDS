@@ -8,10 +8,14 @@
 
 #include <ace/INET_Addr.h>
 
+#include <set>
 #include <sstream>
 #include <string>
+#include <unordered_set>
 
 namespace RtpsRelay {
+
+typedef std::set<std::string> StringSet;
 
 inline std::string addr_to_string(const ACE_INET_Addr& a_addr)
 {
@@ -88,6 +92,46 @@ inline bool operator<(const Duration_t& x, const Duration_t& y)
   }
   return x.nanosec() < y.nanosec();
 }
+
+inline OpenDDS::DCPS::RepoId guid_to_repoid(const GUID_t& a_guid)
+{
+  OpenDDS::DCPS::RepoId retval;
+  std::memcpy(&retval, &a_guid, sizeof(OpenDDS::DCPS::RepoId));
+  return retval;
+}
+
+inline GUID_t repoid_to_guid(const OpenDDS::DCPS::RepoId& a_guid)
+{
+  GUID_t retval;
+  std::memcpy(&retval._guidPrefix[0], &a_guid.guidPrefix, sizeof(retval._guidPrefix));
+  std::memcpy(&retval._entityId._entityKey[0], &a_guid.entityId.entityKey, sizeof(retval._entityId._entityKey));
+  retval._entityId._entityKind = a_guid.entityId.entityKind;
+  return retval;
+}
+
+struct GuidHash {
+  std::size_t operator() (const OpenDDS::DCPS::RepoId& guid) const
+  {
+    return
+      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[0]) << 15) ^
+      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[1]) << 14) ^
+      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[2]) << 13) ^
+      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[3]) << 12) ^
+      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[4]) << 11) ^
+      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[5]) << 10) ^
+      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[6]) << 9) ^
+      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[7]) << 8) ^
+      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[8]) << 7) ^
+      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[9]) << 6) ^
+      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[10]) << 5) ^
+      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[11]) << 4) ^
+      (std::hash<::CORBA::Octet>{}(guid.entityId.entityKey[0]) << 3) ^
+      (std::hash<::CORBA::Octet>{}(guid.entityId.entityKey[1]) << 2) ^
+      (std::hash<::CORBA::Octet>{}(guid.entityId.entityKey[2]) << 1) ^
+      (std::hash<::CORBA::Octet>{}(guid.entityId.entityKind) << 0);
+  }
+};
+typedef std::unordered_set<OpenDDS::DCPS::RepoId, GuidHash> GuidSet;
 
 }
 

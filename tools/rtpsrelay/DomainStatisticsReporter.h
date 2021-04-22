@@ -4,7 +4,6 @@
 #include "Config.h"
 #include "utility.h"
 
-#include "lib/QosIndex.h"
 #include "lib/RelayTypeSupportImpl.h"
 
 #include <dds/DCPS/JsonValueWriter.h>
@@ -65,27 +64,6 @@ public:
   {
     --log_domain_statistics_.local_readers();
     --publish_domain_statistics_.local_readers();
-    report(now);
-  }
-
-  void total_participants(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    log_domain_statistics_.total_participants(static_cast<uint32_t>(count));
-    publish_domain_statistics_.total_participants(static_cast<uint32_t>(count));
-    report(now);
-  }
-
-  void total_writers(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    log_domain_statistics_.total_writers(static_cast<uint32_t>(count));
-    publish_domain_statistics_.total_writers(static_cast<uint32_t>(count));
-    report(now);
-  }
-
-  void total_readers(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    log_domain_statistics_.total_readers(static_cast<uint32_t>(count));
-    publish_domain_statistics_.total_readers(static_cast<uint32_t>(count));
     report(now);
   }
 

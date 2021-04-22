@@ -4,7 +4,6 @@
 #include "Config.h"
 #include "utility.h"
 
-#include "lib/QosIndex.h"
 #include "lib/RelayTypeSupportImpl.h"
 
 #include <dds/DCPS/JsonValueWriter.h>

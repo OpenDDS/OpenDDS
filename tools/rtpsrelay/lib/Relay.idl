@@ -9,6 +9,13 @@
 
 module RtpsRelay {
 
+  const string HSPDP = "HSPDP";
+  const string HSEDP = "HSEDP";
+  const string HDATA = "HDATA";
+  const string VSPDP = "VSPDP";
+  const string VSEDP = "VSEDP";
+  const string VDATA = "VDATA";
+
   // GUID prefix bytes - uniquely specify the participant.
   typedef octet GuidPrefix_t[12];
 
@@ -29,43 +36,28 @@ module RtpsRelay {
     @key EntityId_t entityId;
   };
 
-  const string WRITERS_TOPIC_NAME = "Writers";
+  typedef sequence<string> StringSequence;
+  typedef sequence<GUID_t> GuidSequence;
 
+  const string RELAY_PARTITIONS_TOPIC_NAME = "Relay Partitions";
   @topic
-  struct WriterEntry {
-    @key GUID_t guid;
-
-    string topic_name;
-    string type_name;
-    DDS::DataWriterQos data_writer_qos;
-    DDS::PublisherQos publisher_qos;
+  struct RelayPartitions {
+    @key GUID_t application_participant_guid;
+    StringSequence partitions;
   };
 
-  const string READERS_TOPIC_NAME = "Readers";
-
+  const string RELAY_PARTITIONS_INCREMENT_TOPIC_NAME = "Relay Partitions Increment";
   @topic
-  struct ReaderEntry {
-    @key GUID_t guid;
-
-    string topic_name;
-    string type_name;
-    DDS::DataReaderQos data_reader_qos;
-    DDS::SubscriberQos subscriber_qos;
+  struct RelayPartitionsIncrement {
+    @key GUID_t application_participant_guid;
+    StringSequence partitions;
   };
 
-  const string PARTICIPANTS_TOPIC_NAME = "Participants";
+  const string RELAY_ADDRESSES_TOPIC_NAME = "Relay Addresses";
 
   @topic
-  struct ParticipantEntry {
-    @key GUID_t guid;
-    DDS::UserDataQosPolicy user_data;
-  };
-
-  const string RESPONSIBLE_RELAY_TOPIC_NAME = "Responsible Relay";
-
-  @topic
-  struct GuidNameAddress {
-    @key GUID_t guid;
+  struct RelayAddress {
+    @key GUID_t application_participant_guid;
     @key string name;
     string address;
   };
@@ -77,10 +69,15 @@ module RtpsRelay {
     DDS::UserDataQosPolicy application_participant_user_data;
   };
 
-  typedef sequence<GUID_t> GuidSequence;
+  const string SPDP_REPLAY_TOPIC_NAME = "SPDP Replay";
+  @topic
+  struct SpdpReplay {
+    StringSequence partitions;
+  };
 
   struct RelayHeader {
-    GuidSequence to;
+    StringSequence to_partitions;
+    GuidSequence to_guids;
   };
 
   struct Duration_t {
@@ -168,9 +165,6 @@ module RtpsRelay {
     unsigned long local_participants;
     unsigned long local_writers;
     unsigned long local_readers;
-    unsigned long total_participants;
-    unsigned long total_writers;
-    unsigned long total_readers;
   };
 
 };
