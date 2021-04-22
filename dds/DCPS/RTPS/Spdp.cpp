@@ -266,14 +266,14 @@ Spdp::Spdp(DDS::DomainId_t domain,
 {
   TRACE_CALL(tc);
 #ifdef ACE_LINUX
-  const __pthread_mutex_s& m = jlock_.lock().__data;
+  const pthread_mutex_t& m = jlock_.lock();
   ACE_DEBUG((LM_DEBUG, "(%P|%t) LOCK STATUS Spdp1 before: %x count: %u owner: %d, users: %u kind: %u\n",
-    m.__lock, m.__count, m.__owner, m.__nusers, m.__kind));
+    m.__data.__lock, m.__data.__count, m.__data.__owner, m.__data.__nusers, m.__data.__kind));
 #endif
   ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
 #ifdef ACE_LINUX
   ACE_DEBUG((LM_DEBUG, "(%P|%t) LOCK STATUS Spdp1 after: %x count: %u owner: %d, users: %u kind: %u\n",
-    m.__lock, m.__count, m.__owner, m.__nusers, m.__kind));
+    m.__data.__lock, m.__data.__count, m.__data.__owner, m.__data.__nusers, m.__data.__kind));
 #endif
 
   init(domain, guid, qos, disco);
@@ -316,14 +316,14 @@ Spdp::Spdp(DDS::DomainId_t domain,
 {
   TRACE_CALL(tc);
 #ifdef ACE_LINUX
-  const __pthread_mutex_s& m = jlock_.lock().__data;
+  const pthread_mutex_t& m = jlock_.lock();
   ACE_DEBUG((LM_DEBUG, "(%P|%t) LOCK STATUS Spdp2 before: %x count: %u owner: %d, users: %u kind: %u\n",
-    m.__lock, m.__count, m.__owner, m.__nusers, m.__kind));
+    m.__data.__lock, m.__data.__count, m.__data.__owner, m.__data.__nusers, m.__data.__kind));
 #endif
   ACE_GUARD(ACE_Thread_Mutex, g, jlock_);
 #ifdef ACE_LINUX
   ACE_DEBUG((LM_DEBUG, "(%P|%t) LOCK STATUS Spdp2 after: %x count: %u owner: %d, users: %u kind: %u\n",
-    m.__lock, m.__count, m.__owner, m.__nusers, m.__kind));
+    m.__data.__lock, m.__data.__count, m.__data.__owner, m.__data.__nusers, m.__data.__kind));
 #endif
 
   init(domain, guid_, qos, disco);
@@ -3318,14 +3318,14 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
 
   TRACE_CALL(tc);
 #ifdef ACE_LINUX
-  const __pthread_mutex_s& m = outer->jlock_.lock().__data;
+  const pthread_mutex_t& m = outer->jlock_.lock();
   ACE_DEBUG((LM_DEBUG, "(%P|%t) LOCK STATUS join_multicast_group before: %x count: %u owner: %d, users: %u kind: %u\n",
-    m.__lock, m.__count, m.__owner, m.__nusers, m.__kind));
+    m.__data.__lock, m.__data.__count, m.__data.__owner, m.__data.__nusers, m.__data.__kind));
 #endif
   ACE_GUARD(ACE_Thread_Mutex, g, outer->jlock_);
 #ifdef ACE_LINUX
   ACE_DEBUG((LM_DEBUG, "(%P|%t) LOCK STATUS join_multicast_group after: %x count: %u owner: %d, users: %u kind: %u\n",
-    m.__lock, m.__count, m.__owner, m.__nusers, m.__kind));
+    m.__data.__lock, m.__data.__count, m.__data.__owner, m.__data.__nusers, m.__data.__kind));
 #endif
 
   if (nic.exclude_from_multicast(multicast_interface_.c_str())) {
