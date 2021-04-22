@@ -234,7 +234,6 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
   }
 #endif
   initialized_flag_ = true;
-  tport_->enable_periodic_tasks();
 }
 
 Spdp::Spdp(DDS::DomainId_t domain,
@@ -2046,6 +2045,9 @@ void
 Spdp::init_bit(const DDS::Subscriber_var& bit_subscriber)
 {
   bit_subscriber_ = bit_subscriber;
+
+  // This is here to make sure thread status gets a valid BIT Subscriber
+  tport_->enable_periodic_tasks();
 }
 
 class Noop : public DCPS::ReactorInterceptor::Command {
@@ -4109,6 +4111,8 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
                "(%P|%t) Spdp::SpdpTransport::thread_status_task(): Updating internal thread status BIT.\n"));
   }
 
+  ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
+
   const DCPS::RepoId guid = outer->guid();
   DCPS::InternalThreadBuiltinTopicDataDataReaderImpl* bit = outer->internal_thread_bit();
 
@@ -4124,10 +4128,13 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
       return;
     }
     if (bit) {
+      ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(outer->lock_);
+
       for (StatusMap::const_iterator i = removed.begin(); i != removed.end(); ++i) {
         DCPS::InternalThreadBuiltinTopicData data;
         assign(data.participant_guid, guid);
         data.thread_id = i->first.c_str();
+        ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
         bit->set_instance_state(bit->lookup_instance(data), DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
       }
 
@@ -4135,6 +4142,7 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
         DCPS::InternalThreadBuiltinTopicData data;
         assign(data.participant_guid, guid);
         data.thread_id = i->first.c_str();
+        ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
         bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE, i->second.timestamp);
       }
     } else if (DCPS::DCPS_debug_level >= 2) {
