@@ -51,10 +51,10 @@ exit 1 if !GetOptions(
     "skip-typecode" => \$skip_typecode,
     "no-shared" => \$no_shared,
     );
-my @dirs;
-#my @dirs = ('../Nested_IDL', 'Messenger_1', 'Messenger_2');
-#push @dirs, '../generated_global' unless $no_shared;
-#push @dirs, 'C++11_Messenger' unless $skip_cxx11;
+
+my @dirs = ('../Nested_IDL', 'Messenger_1', 'Messenger_2');
+push @dirs, '../generated_global' unless $no_shared;
+push @dirs, 'C++11_Messenger' unless $skip_cxx11;
 push @dirs, '../C++11_typecode' unless $skip_cxx11 || $skip_typecode;
 
 my %builds_lib = ('Messenger_2' => 1, 'C++11_Messenger' => 1);

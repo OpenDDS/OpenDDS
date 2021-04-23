@@ -65,11 +65,6 @@ macro(OPENDDS_GET_SOURCES_AND_OPTIONS
   endforeach()
 endmacro()
 
-macro(OPENDDS_NO_SUPPRESS_ANYS)
-  list(REMOVE_ITEM OPENDDS_DDS_BASE_IDL_FLAGS -Sa -St)
-  list(REMOVE_ITEM OPENDDS_TAO_BASE_IDL_FLAGS -Sa -St)
-endmacro ()
-
 macro(_OPENDDS_GENERATE_EXPORT_MACRO_COMMAND  target  output)
   set(_bin_dir ${CMAKE_CURRENT_BINARY_DIR})
   set(_src_dir ${CMAKE_CURRENT_SOURCE_DIR})
@@ -209,6 +204,11 @@ macro(OPENDDS_TARGET_SOURCES target)
 
   else()
     message(FATAL_ERROR "OpenDDS does not support argument items in CMAKE_CXX_COMPILER.")
+  endif()
+
+  if(OPENDDS_FEATURES MATCHES "dds_suppress_anys=0" AND OPENDDS_FEATURES MATCHES "no_cxx11=0")
+    list(REMOVE_ITEM OPENDDS_DDS_BASE_IDL_FLAGS -Sa -St)
+    list(REMOVE_ITEM OPENDDS_TAO_BASE_IDL_FLAGS -Sa -St)
   endif()
 
   foreach(scope PUBLIC PRIVATE INTERFACE)
