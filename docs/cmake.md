@@ -315,7 +315,6 @@ The following values impact the build in one way or another.
 |---                        | ---                                                                | ---                 |
 |`OPENDDS_ACE`              | Location of ACE root dir.                                          | N/A                 |
 |`OPENDDS_TAO`              | Location of TAO root dir.                                          | N/A                 |
-|`OPENDDS_STD`              | Forces C++ standard (Unix only). This option is used as a way for the configure script to inform CMake builds of the C/C++ standard used to build OpenDDS. To prevent weirdness, the C/C++ standards should match. The typical GCC `-std` values are supported. | Existing `CMAKE_CXX_STANDARD` value. |
 |`OPENDDS_NO_DEBUG`         | Sets NDEBUG flags on ACE for non-debug builds (Unix only)          | `OFF`                 |
 |`OPENDDS_INLINE`           | ACE's inline build flag                                            | See below           |
 |`OPENDDS_STATIC`           | Use static libraries                                               | `OFF`                 |

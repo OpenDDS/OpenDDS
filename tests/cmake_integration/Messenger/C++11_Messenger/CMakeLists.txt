@@ -1,6 +1,9 @@
 project(OpenDDS_C++11_Messenger CXX)
 cmake_minimum_required(VERSION 3.8.2)
 
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 if(NOT OpenDDS_FOUND)
   find_package(OpenDDS REQUIRED)
 endif()

@@ -103,24 +103,6 @@ if (OPENDDS_STATIC)
   _OPENDDS_APPEND_DEF(ACE_AS_STATIC_LIBS ACE_HAS_CUSTOM_EXPORT_MACROS=0 TAO_AS_STATIC_LIBS)
 endif()
 
-# Force C++ standard.
-
-if (OPENDDS_STD AND UNIX)
-  if("${OPENDDS_STD}" MATCHES "(03|98)$")
-    set(CMAKE_CXX_STANDARD 98)
-  elseif("${OPENDDS_STD}" MATCHES "(0x|11)$")
-    set(CMAKE_CXX_STANDARD 11)
-  elseif("${OPENDDS_STD}" MATCHES "(1y|14)$")
-    set(CMAKE_CXX_STANDARD 14)
-  elseif("${OPENDDS_STD}" MATCHES "(1z|17)$")
-    set(CMAKE_CXX_STANDARD 17)
-  elseif("${OPENDDS_STD}" MATCHES "(2a|20)$")
-    set(CMAKE_CXX_STANDARD 20)
-  else()
-    message(WARNING "Ignoring unknown OPENDDS_STD value '${OPENDDS_STD}'")
-  endif()
-endif()
-
 # Handle other features
 
 if (OPENDDS_FEATURES)
