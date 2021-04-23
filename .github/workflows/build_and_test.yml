@@ -2104,7 +2104,6 @@ jobs:
       uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: get ACE_TAO commit
       shell: bash
@@ -2117,7 +2116,7 @@ jobs:
       uses: actions/cache@v2.1.5
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
+        key: c01_${{ github.job }}_master_${{ env.ACE_COMMIT }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -2179,7 +2178,6 @@ jobs:
       uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
@@ -2279,7 +2277,6 @@ jobs:
       uses: actions/checkout@v2.3.4
       with:
         repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
