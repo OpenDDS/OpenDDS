@@ -50,7 +50,7 @@ on:
       - '!**/.gitignore'
       - '!**/.lint_config'
       - '!**/README*'
-    workflow_dispatch:
+  workflow_dispatch:
 
 env:
   TRIGGERING_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
