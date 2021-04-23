@@ -326,30 +326,29 @@ public:
   DDS::ReturnCode_t setup_serialization()
   {
     const DDS::DataRepresentationIdSeq repIds =
-      get_effective_data_rep_qos(qos_.representation.value);
+      get_effective_data_rep_qos(qos_.representation.value, false);
     if (cdr_encapsulation()) {
-      for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
-        Encoding::Kind encoding_kind;
-        if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
-          encoding_mode_ = EncodingMode(encoding_kind, swap_bytes());
-          if (encoding_kind == Encoding::KIND_XCDR1 &&
-              MarshalTraitsType::max_extensibility_level() == MUTABLE) {
-            if (::OpenDDS::DCPS::DCPS_debug_level) {
-              ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-                ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
-                ACE_TEXT("Encountered unsupported combination of XCDR1 encoding and mutable extensibility\n"),
-                TraitsType::type_name()));
-            }
-            return DDS::RETCODE_ERROR;
+      Encoding::Kind encoding_kind;
+      // There should only be one data representation in a DataWriter, so
+      // simply use repIds[0].
+      if (repr_to_encoding_kind(repIds[0], encoding_kind)) {
+        encoding_mode_ = EncodingMode(encoding_kind, swap_bytes());
+        if (encoding_kind == Encoding::KIND_XCDR1 &&
+            MarshalTraitsType::max_extensibility_level() == MUTABLE) {
+          if (::OpenDDS::DCPS::DCPS_debug_level) {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+              ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
+              ACE_TEXT("Encountered unsupported combination of XCDR1 encoding and mutable extensibility\n"),
+              TraitsType::type_name()));
           }
-          break;
-        } else if (::OpenDDS::DCPS::DCPS_debug_level) {
-          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
-                     ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
-                     ACE_TEXT("Encountered unsupported or unknown data representation: %u\n"),
-                     TraitsType::type_name(),
-                     repIds[i]));
+          return DDS::RETCODE_ERROR;
         }
+      } else if (::OpenDDS::DCPS::DCPS_debug_level) {
+        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
+                    ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
+                    ACE_TEXT("Encountered unsupported or unknown data representation: %u\n"),
+                    TraitsType::type_name(),
+                    repIds[0]));
       }
     } else {
       // Pick unaligned CDR as it is the implicit representation for non-encapsulated
