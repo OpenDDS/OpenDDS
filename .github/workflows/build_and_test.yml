@@ -113,6 +113,15 @@ jobs:
     - name: Get IP Info
       run: |
         ip addr
+    - name: Run Host For Hostnames
+      run: |
+        hostname --all-fqdns | sed 's/ /\n/g' | sort -u | grep "[^ ]" | xargs -I {} /usr/bin/host {}
+    - name: Run Host For IP Addresses
+      run: |
+        echo "Here are some ip addresses:"
+        ip addr | grep global | grep -v temp | grep -v tmp | sed 's/ [ ]*/ /g' | cut -d ' ' -f 3 | cut -d '/' -f 1
+        echo "And here they are, passed to host:"
+        ip addr | grep global | grep -v temp | grep -v tmp | sed 's/ [ ]*/ /g' | cut -d ' ' -f 3 | cut -d '/' -f 1 | xargs -I {} host {}
     - name: Run Messenger Tests - Round 1
       run: |
         cd OpenDDS

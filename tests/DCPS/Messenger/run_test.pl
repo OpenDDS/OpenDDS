@@ -19,7 +19,7 @@ $test->{dcps_debug_level} = 4;
 $test->{dcps_transport_debug_level} = 2;
 # will manually set -DCPSConfigFile
 $test->{add_transport_config} = 0;
-my $dbg_lvl = '-ORBDebugLevel 1';
+my $dbg_lvl = '-ORBDebugLevel 1 -DCPSDebugLevel 3 -DCPSTransportDebugLevel 3';
 my $pub_opts = "$dbg_lvl";
 my $sub_opts = "$dbg_lvl";
 my $repo_bit_opt = "";
@@ -137,6 +137,10 @@ $test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log " .
 $test->process("publisher", "publisher", $pub_opts);
 my $sub_exe = ($stack_based ? 'stack_' : '') . "subscriber";
 $test->process("subscriber", $sub_exe, $sub_opts);
+
+my @args = ("cat", "repo.ior");
+system(@args) == 0 or die "system @args failed: $?";
+print "\n";
 
 $test->start_process("subscriber");
 $test->start_process("publisher");
