@@ -1370,6 +1370,14 @@ struct Cxx11Generator : GeneratorBase
     helpers_[HLP_FIXED_CONSTANT] = "IDL::Fixed_T";
   }
 
+  static void gen_cxx11_typecodes(const std::string& type) {
+    if (!be_global->suppress_typecode()) {
+      be_global->add_include("tao/Basic_Types.h", BE_GlobalData::STREAM_LANG_H);
+      be_global->lang_header_ << "extern ::CORBA::TypeCode_ptr const _tc_" << type << ";\n";
+      be_global->impl_ << "::CORBA::TypeCode_ptr const _tc_" << type << " = 0;\n";
+    }
+  }
+
   std::string map_type_string(AST_PredefinedType::PredefinedType chartype, bool)
   {
     return chartype == AST_PredefinedType::PT_char ? "std::string" : "std::wstring";
@@ -1407,12 +1415,7 @@ struct Cxx11Generator : GeneratorBase
     }
     be_global->add_include("<array>", BE_GlobalData::STREAM_LANG_H);
     be_global->lang_header_ << ind << "using " << type << " = " << array << elem << bounds.str() << ";\n";
-
-    if (!be_global->suppress_typecode()) {
-      be_global->add_include("tao/Basic_Types.h", BE_GlobalData::STREAM_LANG_H);
-      be_global->lang_header_ << "extern ::CORBA::TypeCode_ptr const _tc_" << type << ";\n";
-      be_global->impl_ << "::CORBA::TypeCode_ptr const _tc_" << type << " = 0;\n";
-    }
+    gen_cxx11_typecodes(type);
   }
 
   void gen_array(UTL_ScopedName* tdname, AST_Array* arr)
@@ -1428,11 +1431,7 @@ struct Cxx11Generator : GeneratorBase
   {
     be_global->add_include("<vector>", BE_GlobalData::STREAM_LANG_H);
     be_global->lang_header_ << ind << "using " << type << " = std::vector<" << elem << ">;\n";
-    if (!be_global->suppress_typecode()) {
-      be_global->add_include("tao/Basic_Types.h", BE_GlobalData::STREAM_LANG_H);
-      be_global->lang_header_ << "extern ::CORBA::TypeCode_ptr const _tc_" << type << ";\n";
-      be_global->impl_ << "::CORBA::TypeCode_ptr const _tc_" << type << " = 0;\n";
-    }
+    gen_cxx11_typecodes(type);
   }
 
   void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
@@ -1546,11 +1545,7 @@ struct Cxx11Generator : GeneratorBase
       "{\n"
       "  using std::swap;\n"
       << swaps << "}\n\n";
-    if (!be_global->suppress_typecode()) {
-      be_global->add_include("tao/Basic_Types.h", BE_GlobalData::STREAM_LANG_H);
-      be_global->lang_header_ << "extern ::CORBA::TypeCode_ptr const _tc_" << nm << ";\n";
-      be_global->impl_ << "::CORBA::TypeCode_ptr const _tc_" << nm << " = 0;\n";
-    }
+    gen_cxx11_typecodes(nm);
     return true;
   }
 
@@ -1773,11 +1768,7 @@ struct Cxx11Generator : GeneratorBase
       "  std::swap(lhs, rhs);\n"
       "}\n\n";
 
-    if (!be_global->suppress_typecode()) {
-      be_global->add_include("tao/Basic_Types.h", BE_GlobalData::STREAM_LANG_H);
-      be_global->lang_header_ << "extern ::CORBA::TypeCode_ptr const _tc_" << nm << ";\n";
-      be_global->impl_ << "::CORBA::TypeCode_ptr const _tc_" << nm << " = 0;\n";
-    }
+    gen_cxx11_typecodes(nm);
     return true;
   }
 

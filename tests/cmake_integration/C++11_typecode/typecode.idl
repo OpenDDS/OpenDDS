@@ -1,0 +1,10 @@
+#ifndef __TYPECODE_IDL__
+#define __TYPECODE_IDL__
+module mod{
+  @topic
+  struct typecode_struct {
+    long l;
+  };
+};
+
+#endif

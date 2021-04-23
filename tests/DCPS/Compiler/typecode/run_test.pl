@@ -10,13 +10,8 @@ use PerlDDS::Run_Test;
 use strict;
 
 my $name = 'Compiler_Typecode';
-my $status = 0;
-my $TESTDVR = PerlDDS::create_process ($name);
-
-my $status = $TESTDVR->SpawnWaitKill (60);
-if ($status != 0) {
-    print STDERR "ERROR: $name returned $status\n";
-    $status = 1;
-}
-
-exit $status;
+my $test = new PerlDDS::TestFramework();
+$test->enable_console_logging();
+$test->process('tc', 'Compiler_Typecode');
+$test->start_process('tc');
+exit $test->finish(15);
