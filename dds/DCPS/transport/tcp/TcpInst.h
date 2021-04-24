@@ -11,6 +11,7 @@
 #include "Tcp_export.h"
 #include "TcpTransport.h"
 
+#include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/transport/framework/TransportInst.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
 #include "ace/INET_Addr.h"
