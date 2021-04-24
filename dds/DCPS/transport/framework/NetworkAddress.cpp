@@ -473,6 +473,82 @@ bool open_appropriate_socket_type(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& l
   return socket.open(local_address) == 0;
 #endif
 }
+
+ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& address)
+{
+  ACE_INET_Addr copy(address);
+
+#ifdef ACE_HAS_IPV6
+  OPENDDS_SET(ACE_INET_Addr) set6;
+#endif
+  OPENDDS_SET(ACE_INET_Addr) set4;
+
+  do {
+    ACE_INET_Addr temp;
+    temp.set_addr(copy.get_addr(), copy.get_addr_size());
+
+#ifdef ACE_HAS_IPV6
+    if (temp.get_type() == AF_INET6 && !temp.is_multicast()) {
+      if (!temp.is_ipv4_mapped_ipv6() && !temp.is_ipv4_compat_ipv6()) {
+        set6.insert(temp);
+      } else {
+        set4.insert(temp);
+      }
+    }
+#endif
+    if (temp.get_type() == AF_INET && !temp.is_multicast()) {
+      set4.insert(temp);
+    }
+  } while (copy.next());
+
+#ifdef ACE_HAS_IPV6
+  ACE_INET_Addr loop6;
+  OPENDDS_SET(ACE_INET_Addr) set6_local;
+  for (OPENDDS_SET(ACE_INET_Addr)::const_iterator it = set6.begin(); it != set6.end(); /* inc in loop */) {
+    if (it->is_loopback()) {
+      loop6 = *it;
+      set6.erase(it++);
+    } else if (it->is_linklocal()) {
+      set6_local.insert(*it);
+      set6.erase(it++);
+    } else {
+      ++it;
+    }
+  }
+#endif
+
+  ACE_INET_Addr loop4;
+  for (OPENDDS_SET(ACE_INET_Addr)::const_iterator it = set4.begin(); it != set4.end(); /* inc in loop */) {
+    if (it->is_loopback()) {
+      loop4 = *it;
+      set4.erase(it++);
+    } else {
+      ++it;
+    }
+  }
+
+#ifdef ACE_HAS_IPV6
+  if (loop6 != ACE_INET_Addr()) {
+    return loop6;
+  }
+#endif
+
+  if (loop4 != ACE_INET_Addr()) {
+    return loop4;
+  }
+
+#ifdef ACE_HAS_IPV6
+  if (!set6_local.empty()) {
+    return *set6_local.begin();
+  }
+  if (!set6.empty()) {
+    return *set6.begin();
+  }
+#endif
+
+  return *set4.begin();
+}
+
 }
 }
 
