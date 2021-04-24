@@ -476,6 +476,10 @@ bool open_appropriate_socket_type(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& l
 
 ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& address)
 {
+#if ACE_MAJOR_VERSION < 6 || (ACE_MAJOR_VERSION == 6 && (ACE_MINOR_VERSION < 3 || (ACE_MINOR_VERSION == 3 && ACE_MICRO_VERSION < 1)))
+  // ACE_INET_Addr does not support next()
+  return address;
+#else
   ACE_INET_Addr copy(address);
 
 #ifdef ACE_HAS_IPV6
@@ -547,6 +551,7 @@ ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& address)
 #endif
 
   return *set4.begin();
+#endif //ACE_MAJOR_VERSION < 6 || (ACE_MAJOR_VERSION == 6 && (ACE_MINOR_VERSION < 3 || (ACE_MINOR_VERSION == 3 && ACE_MICRO_VERSION < 1)))
 }
 
 }
