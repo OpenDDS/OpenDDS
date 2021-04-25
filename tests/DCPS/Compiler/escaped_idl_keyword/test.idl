@@ -1,0 +1,11 @@
+// This test was made to catch problems with IDL keywords
+// used as module name and escaped with an appended '_'
+// as requested by the IDL language specification
+
+module _ATTRIBUTE
+{
+  @topic
+  struct TopicA {
+    string a;
+  };
+}; // module _ATTRIBUTE
