@@ -1524,19 +1524,15 @@ namespace OpenDDS {
           if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE) {
             if (!writer_local || !reader_local) {
               const DDS::DataRepresentationIdSeq repIds =
-                get_effective_data_rep_qos(writer_local ? tempDrQos.representation.value : tempDwQos.representation.value);
-              for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
-                Encoding::Kind encoding_kind;
-                if (repr_to_encoding_kind(repIds[i], encoding_kind) && encoding_kind == Encoding::KIND_XCDR1) {
-                  const XTypes::TypeFlag extensibility_mask = XTypes::IS_APPENDABLE;
-
-                  if (type_lookup_service_->extensibility(extensibility_mask,
-                                                          writer_local ? reader_type_id : writer_type_id)) {
-                    if (OpenDDS::DCPS::DCPS_debug_level) {
-                      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
-                        ACE_TEXT("EndpointManager::match_continue: ")
-                        ACE_TEXT("Encountered unsupported combination of XCDR1 encoding and appendable extensibility\n")));
-                    }
+                get_effective_data_rep_qos(tempDwQos.representation.value, false);
+              Encoding::Kind encoding_kind;
+              if (repr_to_encoding_kind(repIds[0], encoding_kind) && encoding_kind == Encoding::KIND_XCDR1) {
+                const XTypes::TypeFlag extensibility_mask = XTypes::IS_APPENDABLE;
+                if (type_lookup_service_->extensibility(extensibility_mask, writer_type_id)) {
+                  if (OpenDDS::DCPS::DCPS_debug_level) {
+                    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
+                      ACE_TEXT("EndpointManager::match_continue: ")
+                      ACE_TEXT("Encountered unsupported combination of XCDR1 encoding and appendable extensibility\n")));
                   }
                 }
               }
