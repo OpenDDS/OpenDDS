@@ -496,24 +496,24 @@ ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& address, bool 
 #ifdef ACE_HAS_IPV6
     if (temp.get_type() == AF_INET6 && !temp.is_multicast()) {
       if (temp.is_loopback()) {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
+        VDBG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
                    "Considering Address %C:%d (%C) - ADDING TO IPv6 LOOPBACK LIST\n",
                    temp.get_host_addr(), temp.get_port_number(), temp.get_host_name()));
         set6_loopback.insert(temp);
       } else if (temp.is_ipv4_mapped_ipv6() || temp.is_ipv4_compat_ipv6()) {
 #ifndef IPV6_V6ONLY
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
+        VDBG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
                    "Considering Address %C:%d (%C) - ADDING TO IPv6 MAPPED / COMPATIBLE IPv4 LIST\n",
                    temp.get_host_addr(), temp.get_port_number(), temp.get_host_name()));
         set6_mapped_v4.insert(temp);
 #endif  // ! IPV6_V6ONLY
       } else if (temp.is_linklocal()) {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
+        VDBG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
                    "Considering Address %C:%d (%C) - ADDING TO IPv6 LINK-LOCAL LIST\n",
                    temp.get_host_addr(), temp.get_port_number(), temp.get_host_name()));
         set6_linklocal.insert(temp);
       } else {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
+        VDBG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
                    "Considering Address %C:%d (%C) - ADDING TO IPv6 NORMAL LIST\n",
                    temp.get_host_addr(), temp.get_port_number(), temp.get_host_name()));
         set6.insert(temp);
@@ -521,7 +521,7 @@ ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& address, bool 
     }
 #endif
     if (temp.get_type() == AF_INET && !temp.is_multicast()) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
+      VDBG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
                  "Considering Address %C:%d (%C) - ADDING TO IPv4 NORMAL LIST\n",
                  temp.get_host_addr(), temp.get_port_number(), temp.get_host_name()));
       set4.insert(temp);
