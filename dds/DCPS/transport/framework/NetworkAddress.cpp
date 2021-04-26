@@ -485,7 +485,7 @@ ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& address, bool 
   OPENDDS_SET(ACE_INET_Addr) set6_linklocal;
   OPENDDS_SET(ACE_INET_Addr) set6_mapped_v4;
   OPENDDS_SET(ACE_INET_Addr) set6;
-#endif
+#endif // ACE_HAS_IPV6
   OPENDDS_SET(ACE_INET_Addr) set4_loopback;
   OPENDDS_SET(ACE_INET_Addr) set4;
 
@@ -519,7 +519,7 @@ ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& address, bool 
         set6.insert(temp);
       }
     }
-#endif
+#endif // ACE_HAS_IPV6
     if (temp.get_type() == AF_INET && !temp.is_multicast()) {
       VDBG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
                  "Considering Address %C:%d (%C) - ADDING TO IPv4 NORMAL LIST\n",
@@ -532,7 +532,7 @@ ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& address, bool 
   if (prefer_loopback && !set6_loopback.empty()) {
     return *set6_loopback.begin();
   }
-#endif
+#endif // ACE_HAS_IPV6
 
   if (prefer_loopback && !set4_loopback.empty()) {
     return *set4_loopback.begin();
@@ -548,7 +548,7 @@ ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& address, bool 
   if (!set6_mapped_v4.empty()) {
     return *set6_mapped_v4.begin();
   }
-#endif
+#endif // ACE_HAS_IPV6
 
   if (!set4.empty()) {
     return *set4.begin();
@@ -558,14 +558,14 @@ ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& address, bool 
   if (!set6_loopback.empty()) {
     return *set6_loopback.begin();
   }
-#endif
+#endif // ACE_HAS_IPV6
 
   if (!set4_loopback.empty()) {
     return *set4_loopback.begin();
   }
 
 #endif // !(ACE_MAJOR_VERSION < 6 || (ACE_MAJOR_VERSION == 6 && (ACE_MINOR_VERSION < 3 || (ACE_MINOR_VERSION == 3 && ACE_MICRO_VERSION < 1))))
-  ACE_UNUSED(prefer_loopback)
+  ACE_UNUSED_ARG(prefer_loopback)
   return address;
 }
 
