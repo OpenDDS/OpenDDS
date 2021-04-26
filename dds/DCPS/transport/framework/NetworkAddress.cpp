@@ -476,7 +476,7 @@ bool open_appropriate_socket_type(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& l
 
 ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& address, bool prefer_loopback)
 {
-// Check ACE_INET_Addr does supports next()
+// Check that ACE_INET_Addr supports next()
 #if !(ACE_MAJOR_VERSION < 6 || (ACE_MAJOR_VERSION == 6 && (ACE_MINOR_VERSION < 3 || (ACE_MINOR_VERSION == 3 && ACE_MICRO_VERSION < 1))))
   ACE_INET_Addr copy(address);
 
@@ -565,6 +565,7 @@ ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& address, bool 
   }
 
 #endif // !(ACE_MAJOR_VERSION < 6 || (ACE_MAJOR_VERSION == 6 && (ACE_MINOR_VERSION < 3 || (ACE_MINOR_VERSION == 3 && ACE_MICRO_VERSION < 1))))
+  ACE_UNUSED(prefer_loopback)
   return address;
 }
 
