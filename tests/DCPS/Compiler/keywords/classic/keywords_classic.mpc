@@ -1,0 +1,10 @@
+project: dcps_test {
+  exename = keywords-classic
+  idlflags += -I..
+  IDL_Files {
+    ../test.idl
+  }
+  TypeSupport_Files {
+    ../test.idl
+  }
+}

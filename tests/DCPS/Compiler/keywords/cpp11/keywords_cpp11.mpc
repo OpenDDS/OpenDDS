@@ -1,0 +1,7 @@
+project: dcps_test, opendds_cxx11 {
+  exename = keywords-cpp11
+  idlflags += -I..
+  TypeSupport_Files {
+    ../test.idl
+  }
+}
