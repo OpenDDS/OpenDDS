@@ -118,7 +118,7 @@ public:
     local_address_str_ += ":" + to_dds_string(port_number);
     ACE_INET_Addr address_list;
     address_list.set(port_number, host_name);
-    local_address_ = choose_single_coherent_address(address_list);
+    local_address_ = choose_single_coherent_address(address_list, false);
   }
   void local_address_set_port(u_short port_number) {
     local_address_.set_port_number(port_number);

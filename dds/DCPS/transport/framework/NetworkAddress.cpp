@@ -474,17 +474,19 @@ bool open_appropriate_socket_type(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& l
 #endif
 }
 
-ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& address)
+ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& address, bool prefer_loopback)
 {
-#if ACE_MAJOR_VERSION < 6 || (ACE_MAJOR_VERSION == 6 && (ACE_MINOR_VERSION < 3 || (ACE_MINOR_VERSION == 3 && ACE_MICRO_VERSION < 1)))
-  // ACE_INET_Addr does not support next()
-  return address;
-#else
+// Check ACE_INET_Addr does supports next()
+#if !(ACE_MAJOR_VERSION < 6 || (ACE_MAJOR_VERSION == 6 && (ACE_MINOR_VERSION < 3 || (ACE_MINOR_VERSION == 3 && ACE_MICRO_VERSION < 1))))
   ACE_INET_Addr copy(address);
 
 #ifdef ACE_HAS_IPV6
+  OPENDDS_SET(ACE_INET_Addr) set6_loopback;
+  OPENDDS_SET(ACE_INET_Addr) set6_linklocal;
+  OPENDDS_SET(ACE_INET_Addr) set6_mapped_v4;
   OPENDDS_SET(ACE_INET_Addr) set6;
 #endif
+  OPENDDS_SET(ACE_INET_Addr) set4_loopback;
   OPENDDS_SET(ACE_INET_Addr) set4;
 
   do {
@@ -493,65 +495,77 @@ ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& address)
 
 #ifdef ACE_HAS_IPV6
     if (temp.get_type() == AF_INET6 && !temp.is_multicast()) {
-      if (!temp.is_ipv4_mapped_ipv6() && !temp.is_ipv4_compat_ipv6()) {
-        set6.insert(temp);
+      if (temp.is_loopback()) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
+                   "Considering Address %C:%d (%C) - ADDING TO IPv6 LOOPBACK LIST\n",
+                   temp.get_host_addr(), temp.get_port_number(), temp.get_host_name()));
+        set6_loopback.insert(temp);
+      } else if (temp.is_ipv4_mapped_ipv6() || temp.is_ipv4_compat_ipv6()) {
+#ifndef IPV6_V6ONLY
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
+                   "Considering Address %C:%d (%C) - ADDING TO IPv6 MAPPED / COMPATIBLE IPv4 LIST\n",
+                   temp.get_host_addr(), temp.get_port_number(), temp.get_host_name()));
+        set6_mapped_v4.insert(temp);
+#endif  // ! IPV6_V6ONLY
+      } else if (temp.is_linklocal()) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
+                   "Considering Address %C:%d (%C) - ADDING TO IPv6 LINK-LOCAL LIST\n",
+                   temp.get_host_addr(), temp.get_port_number(), temp.get_host_name()));
+        set6_linklocal.insert(temp);
       } else {
-        set4.insert(temp);
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
+                   "Considering Address %C:%d (%C) - ADDING TO IPv6 NORMAL LIST\n",
+                   temp.get_host_addr(), temp.get_port_number(), temp.get_host_name()));
+        set6.insert(temp);
       }
     }
 #endif
     if (temp.get_type() == AF_INET && !temp.is_multicast()) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
+                 "Considering Address %C:%d (%C) - ADDING TO IPv4 NORMAL LIST\n",
+                 temp.get_host_addr(), temp.get_port_number(), temp.get_host_name()));
       set4.insert(temp);
     }
   } while (copy.next());
 
 #ifdef ACE_HAS_IPV6
-  ACE_INET_Addr loop6;
-  OPENDDS_SET(ACE_INET_Addr) set6_local;
-  for (OPENDDS_SET(ACE_INET_Addr)::const_iterator it = set6.begin(); it != set6.end(); /* inc in loop */) {
-    if (it->is_loopback()) {
-      loop6 = *it;
-      set6.erase(it++);
-    } else if (it->is_linklocal()) {
-      set6_local.insert(*it);
-      set6.erase(it++);
-    } else {
-      ++it;
-    }
+  if (prefer_loopback && !set6_loopback.empty()) {
+    return *set6_loopback.begin();
   }
 #endif
 
-  ACE_INET_Addr loop4;
-  for (OPENDDS_SET(ACE_INET_Addr)::const_iterator it = set4.begin(); it != set4.end(); /* inc in loop */) {
-    if (it->is_loopback()) {
-      loop4 = *it;
-      set4.erase(it++);
-    } else {
-      ++it;
-    }
+  if (prefer_loopback && !set4_loopback.empty()) {
+    return *set4_loopback.begin();
   }
 
 #ifdef ACE_HAS_IPV6
-  if (loop6 != ACE_INET_Addr()) {
-    return loop6;
-  }
-#endif
-
-  if (loop4 != ACE_INET_Addr()) {
-    return loop4;
-  }
-
-#ifdef ACE_HAS_IPV6
-  if (!set6_local.empty()) {
-    return *set6_local.begin();
+  if (!set6_linklocal.empty()) {
+    return *set6_linklocal.begin();
   }
   if (!set6.empty()) {
     return *set6.begin();
   }
+  if (!set6_mapped_v4.empty()) {
+    return *set6_mapped_v4.begin();
+  }
 #endif
 
-  return *set4.begin();
-#endif //ACE_MAJOR_VERSION < 6 || (ACE_MAJOR_VERSION == 6 && (ACE_MINOR_VERSION < 3 || (ACE_MINOR_VERSION == 3 && ACE_MICRO_VERSION < 1)))
+  if (!set4.empty()) {
+    return *set4.begin();
+  }
+
+#ifdef ACE_HAS_IPV6
+  if (!set6_loopback.empty()) {
+    return *set6_loopback.begin();
+  }
+#endif
+
+  if (!set4_loopback.empty()) {
+    return *set4_loopback.begin();
+  }
+
+#endif // !(ACE_MAJOR_VERSION < 6 || (ACE_MAJOR_VERSION == 6 && (ACE_MINOR_VERSION < 3 || (ACE_MINOR_VERSION == 3 && ACE_MICRO_VERSION < 1))))
+  return address;
 }
 
 }
