@@ -1,4 +1,4 @@
-project(DDS*): dcpsexe, dcps_test {
+project: dcps_test {
   TypeSupport_Files {
     test.idl
   }

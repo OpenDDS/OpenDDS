@@ -1,0 +1,43 @@
+// This test was made to catch problems with IDL keywords
+// used as module name and escaped with an appended '_'
+// as requested by the IDL language specification
+
+// Escaped Non-Keywords
+module _the_module {
+  @topic
+  struct _the_struct {
+    @key long _the_field;
+  };
+  const long _the_const = 0;
+};
+
+// Identifiers that are just IDL keywords.
+module _boolean {
+  @topic
+  struct _attribute {
+    @key long _component;
+  };
+  const long _oneway = 0;
+};
+
+// Identifiers that are just C++ keywords.
+module bool {
+  /* TODO(iguessthislldo): DCPS_DATA_SEQUENCE_TYPE in TAO_IDL needs to be fixed
+  @topic
+  struct class {
+    @key long else;
+  };
+  */
+  const long continue = 0;
+};
+
+// Identifiers that are both IDL and C++ keywords.
+module _case {
+  /* TODO(iguessthislldo): DCPS_DATA_SEQUENCE_TYPE in TAO_IDL needs to be fixed
+  @topic
+  struct _struct {
+    @key long _union;
+  };
+  */
+  const long _typeid = 0;
+};
