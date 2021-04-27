@@ -102,15 +102,17 @@ public:
   ACE_INET_Addr local_address() const { return local_address_; }
   void local_address(const ACE_INET_Addr& addr)
   {
+    local_address_ = choose_single_coherent_address(addr, false);
     char buffer[INET6_ADDRSTRLEN];
-    local_address_str_ = addr.get_host_addr(buffer, sizeof buffer);
+    local_address_str_ = local_address_.get_host_addr(buffer, sizeof buffer);
     local_address_str_ += ':' + to_dds_string(addr.get_port_number());
-    local_address_ = addr;
   }
   void local_address(const char* str)
   {
     local_address_str_ = str;
-    local_address_.set(str);
+    ACE_INET_Addr address_list;
+    address_list.set(str);
+    local_address_ = choose_single_coherent_address(address_list, false);
   }
   void local_address(u_short port_number, const char* host_name)
   {

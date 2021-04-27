@@ -131,7 +131,7 @@ $test->report_unused_flags(!$flag_found);
 
 $pub_opts .= $thread_per_connection;
 
-$test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log " .
+$test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log -DCPSDebugLevel 6 -DCPSTransportDebugLevel 6" .
                        "$repo_bit_opt") unless $is_rtps_disc;
 
 $test->process("publisher", "publisher", $pub_opts);
