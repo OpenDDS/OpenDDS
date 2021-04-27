@@ -2460,11 +2460,6 @@ namespace OpenDDS {
       DDS::Subscriber_var bit_subscriber_;
       DDS::DomainParticipantQos qos_;
       DiscoveredParticipantMap participants_;
-
-#ifdef OPENDDS_SECURITY
-      PendingRemoteAuthTokenMap pending_remote_auth_tokens_;
-#endif
-
     };
 
     template<typename Participant>
