@@ -2394,7 +2394,7 @@ void Spdp::SpdpTransport::register_unicast_socket(
   if (reactor->register_handler(socket.get_handle(),
                                 this, ACE_Event_Handler::READ_MASK) != 0) {
     throw std::runtime_error(
-      DCPS::String("failed to register ") + what + " unicast input handler");
+      (DCPS::String("failed to register ") + what + " unicast input handler").c_str());
   }
 }
 
