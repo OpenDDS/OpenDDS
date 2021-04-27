@@ -62,9 +62,9 @@ To build the core OpenDDS native libraries for Android you will need:
    - Windows and Linux were tested, but macOS should work as well.
  - [Android Native Development Kit (NDK)](https://developer.android.com/ndk/)
    r18 or higher. [Building with the NDK directly](#using-the-ndk-directly)
-   requires ACE7/TAO3 and NDK r19 or higher. You can download it separately
-   from android.com or using the SDK Manager that comes with Android Studio. If
-   you download the NDK using the SDK Manager, this is located in
+   requires NDK r19 or higher. You can download it separately from android.com
+   or using the SDK Manager that comes with Android Studio. If you download the
+   NDK using the SDK Manager, this is located in
    `$SDK/ndk-bundle`.
  - Some knowledge about OpenDDS and Android development will be assumed, but
    more OpenDDS knowledge will be assumed than Android knowledge.
@@ -137,7 +137,7 @@ directly.
 
 ### Using the NDK Directly
 
-**Building with the NDK directly requires ACE7/TAO3 and NDK r19 or later.**
+**Building with the NDK directly requires NDK r19 or later.**
 
 OpenDDS can be configured and built with the Android NDK using the following
 commands.
@@ -435,11 +435,6 @@ the basic list of library file for OpenDDS are as follows:
 
     - `$ACE_ROOT/lib/libACE.so`
     - `$ACE_ROOT/lib/libTAO.so`
-    - `$ACE_ROOT/lib/libTAO_AnyTypeCode.so`
-    - `$ACE_ROOT/lib/libTAO_BiDirGIOP.so`
-    - `$ACE_ROOT/lib/libTAO_CodecFactory.so`
-    - `$ACE_ROOT/lib/libTAO_PI.so`
-
     - `$DDS_ROOT/lib/libOpenDDS_Dcps.so`
 
  - The following are the transport libraries, one for each transport type. You
@@ -462,7 +457,12 @@ the basic list of library file for OpenDDS are as follows:
 
    - Required to use the DCPSInfoRepo Discovery:
      - `$DDS_ROOT/lib/libOpenDDS_InfoRepoDiscovery.so`
-       - Depends on `$ACE_ROOT/lib/libTAO_PortableServer.so`
+       - Depends on:
+         - `$ACE_ROOT/lib/libTAO_PortableServer.so`
+         - `$ACE_ROOT/lib/libTAO_AnyTypeCode.so`
+         - `$ACE_ROOT/lib/libTAO_BiDirGIOP.so`
+         - `$ACE_ROOT/lib/libTAO_CodecFactory.so`
+         - `$ACE_ROOT/lib/libTAO_PI.so`
 
  - Required to use OpenDDS Security:
    - `$ACE_ROOT/lib/libACE_XML_Utils.so`
