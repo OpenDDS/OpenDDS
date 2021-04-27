@@ -20,7 +20,6 @@ int ACE_TMAIN(int, ACE_TCHAR**)
   boolean::attributeDataWriter* b_dw = 0;
   ACE_UNUSED_ARG(b_dw);
 
-#ifdef TAO_IDL_DCPS_DATA_SEQUENCE_TYPE_SUPPORTS_CXX_KEYWORDS
   _cxx_bool::_cxx_class c;
   c._cxx_else REF = _cxx_bool::_cxx_continue;
   ACE_UNUSED_ARG(c);
@@ -32,7 +31,6 @@ int ACE_TMAIN(int, ACE_TCHAR**)
   ACE_UNUSED_ARG(d);
   _cxx_case::structDataWriter* d_dw = 0;
   ACE_UNUSED_ARG(d_dw);
-#endif
 
   return 0;
 }
