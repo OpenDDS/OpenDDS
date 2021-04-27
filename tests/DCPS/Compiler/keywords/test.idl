@@ -22,22 +22,22 @@ module _boolean {
 
 // Identifiers that are just C++ keywords.
 module bool {
-  /* TODO(iguessthislldo): DCPS_DATA_SEQUENCE_TYPE in TAO_IDL needs to be fixed
+#ifdef __TAO_IDL_DCPS_DATA_SEQUENCE_TYPE_SUPPORTS_CXX_KEYWORDS
   @topic
   struct class {
     @key long else;
   };
-  */
+#endif
   const long continue = 0;
 };
 
 // Identifiers that are both IDL and C++ keywords.
 module _case {
-  /* TODO(iguessthislldo): DCPS_DATA_SEQUENCE_TYPE in TAO_IDL needs to be fixed
+#ifdef __TAO_IDL_DCPS_DATA_SEQUENCE_TYPE_SUPPORTS_CXX_KEYWORDS
   @topic
   struct _struct {
     @key long _union;
   };
-  */
+#endif
   const long _typeid = 0;
 };

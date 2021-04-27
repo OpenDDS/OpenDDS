@@ -14,10 +14,11 @@ using namespace AstTypeClassification;
 
 dds_generator::~dds_generator() {}
 
+const std::string cxx_escape = "_cxx_";
+
 bool dds_generator::cxx_escaped(const std::string& s)
 {
-  const std::string cxx = "_cxx_";
-  return s.substr(0, cxx.size()) == cxx;
+  return s.substr(0, cxx_escape.size()) == cxx_escape;
 }
 
 std::string dds_generator::valid_var_name(const std::string& str)
@@ -63,27 +64,27 @@ std::string dds_generator::get_tag_name(const std::string& base_name, bool neste
 string dds_generator::to_string(Identifier* id, EscapeContext ec)
 {
   string str = id->get_string();
-  bool add_underscore = false;
-  bool remove_underscore = false;
   switch (ec) {
   case EscapeContext_ForGenIdl:
-    // If it was escaped in the input, it must be escaped in generated IDL,
-    // unless it's a C++ keyword, which case str already has an underscore.
-    add_underscore = id->escaped() && !cxx_escaped(str);
+    if (id->escaped()) {
+      // If it was escaped in the input, it must be escaped in generated IDL.
+      if (cxx_escaped(str)) {
+        // Strip "_cxx"
+        str = str.substr(cxx_escape.size() - 1);
+      } else {
+        str = '_' + str;
+      }
+    }
     break;
   case EscapeContext_FromGenIdl:
-    // If this is a C++ keyword that was inserted into generated IDL, the
-    // underscore was stripped if it wasn't a module name.
-    remove_underscore = id->escaped() && cxx_escaped(str);
+    if (id->escaped() && cxx_escaped(str)) {
+      // If this is a C++ keyword that was inserted into generated IDL, the
+      // "_cxx_" was stripped.
+      str = str.substr(cxx_escape.size());
+    }
     break;
   case EscapeContext_Normal:
     break;
-  }
-  if (add_underscore) {
-    str = '_' + str;
-  }
-  if (remove_underscore) {
-    str = str.substr(1);
   }
   return str;
 }
