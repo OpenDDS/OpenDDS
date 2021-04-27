@@ -109,22 +109,38 @@ public:
   }
   void local_address(const char* str)
   {
-    local_address_str_ = str;
     ACE_INET_Addr address_list;
     address_list.set(str);
     local_address_ = choose_single_coherent_address(address_list, false);
+    char buffer[INET6_ADDRSTRLEN];
+    if (local_address_.get_host_name(buffer, sizeof buffer) == 0) {
+      local_address_str_ = buffer;
+      local_address_str_ += ':' + to_dds_string(local_address_.get_port_number());
+    } else {
+      local_address_str_ = str;
+    }
   }
   void local_address(u_short port_number, const char* host_name)
   {
-    local_address_str_ = host_name;
-    local_address_str_ += ":" + to_dds_string(port_number);
     ACE_INET_Addr address_list;
     address_list.set(port_number, host_name);
     local_address_ = choose_single_coherent_address(address_list, false);
+    char buffer[INET6_ADDRSTRLEN];
+    if (local_address_.get_host_name(buffer, sizeof buffer) == 0) {
+      local_address_str_ = buffer;
+    } else {
+      local_address_str_ = host_name;
+    }
+    local_address_str_ += ':' + to_dds_string(local_address_.get_port_number());
   }
   void local_address_set_port(u_short port_number) {
     local_address_.set_port_number(port_number);
     set_port_in_addr_string(local_address_str_, port_number);
+    char buffer[INET6_ADDRSTRLEN];
+    if (local_address_.get_host_name(buffer, sizeof buffer) == 0) {
+      local_address_str_ = buffer;
+      local_address_str_ += ':' + to_dds_string(local_address_.get_port_number());
+    }
   }
 
 private:

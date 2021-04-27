@@ -492,8 +492,8 @@ ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& address, bool 
   do {
     if (copy == ACE_INET_Addr()) {
       VDBG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
-            "Considering Address %C:%d (%C) - IGNORING EMPTY ADDRESS\n",
-            copy.get_host_addr(), copy.get_port_number(), copy.get_host_name()));
+            "Considering Address %C:%d - IGNORING EMPTY ADDRESS\n",
+            copy.get_host_addr(), copy.get_port_number()));
       continue;
     }
     ACE_INET_Addr temp;
