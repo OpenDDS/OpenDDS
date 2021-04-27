@@ -1,5 +1,10 @@
 project: dcps_test {
   exename = keywords-classic
+  includes += .
+  macros += CPP11_MAPPING=0
+  Source_Files {
+    ../main.cpp
+  }
   idlflags += -I..
   IDL_Files {
     ../test.idl
