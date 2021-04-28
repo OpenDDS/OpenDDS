@@ -132,4 +132,8 @@ DDS::ReturnCode_t MyDataReaderImpl::read_next_instance_generic(void*&,
   return DDS::RETCODE_UNSUPPORTED;
 }
 
+void MyDataReaderImpl::set_instance_state(DDS::InstanceHandle_t, DDS::InstanceStateKind,
+    const OpenDDS::DCPS::SystemTimePoint&, const OpenDDS::DCPS::GUID_t& = OpenDDS::DCPS::GUID_UNKNOWN)
+{}
+
 #endif

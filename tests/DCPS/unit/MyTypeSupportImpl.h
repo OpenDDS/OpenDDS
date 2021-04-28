@@ -122,8 +122,7 @@ public:
     DDS::ViewStateMask, DDS::InstanceStateMask);
 
   void set_instance_state(DDS::InstanceHandle_t, DDS::InstanceStateKind,
-    const OpenDDS::DCPS::SystemTimePoint&, const OpenDDS::DCPS::GUID_t& = OpenDDS::DCPS::GUID_UNKNOWN)
-  {}
+    const OpenDDS::DCPS::SystemTimePoint&, const OpenDDS::DCPS::GUID_t& = OpenDDS::DCPS::GUID_UNKNOWN);
 #endif
 };
 
