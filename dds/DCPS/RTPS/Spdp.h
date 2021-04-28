@@ -98,6 +98,16 @@ public:
   // Managing reader/writer associations
   void signal_liveliness(DDS::LivelinessQosPolicyKind kind);
 
+  // Is Spdp fully initialized?
+  bool initialized()
+  {
+#ifdef ACE_HAS_CPP11
+    return initialized_flag_;
+#else
+    return initialized_flag_.value();
+#endif
+  }
+
   void shutdown();
 
   // Is Spdp shutting down?
@@ -132,7 +142,7 @@ public:
                                const ACE_INET_Addr& from,
                                bool from_sedp);
 
-  static bool validateSequenceNumber(const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter);
+  bool validateSequenceNumber(const DCPS::MonotonicTimePoint& now, const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter);
 
 #ifdef OPENDDS_SECURITY
   void process_handshake_deadlines(const DCPS::MonotonicTimePoint& tv);
@@ -272,6 +282,29 @@ private:
     static const WriteFlags SEND_RELAY = (1 << 1);
     static const WriteFlags SEND_DIRECT = (1 << 2);
 
+    class RegisterHandlers : public DCPS::ReactorInterceptor::Command {
+    public:
+      RegisterHandlers(const DCPS::RcHandle<SpdpTransport>& tport,
+        const DCPS::ReactorTask_rch& reactor_task)
+        : tport_(tport)
+        , reactor_task_(reactor_task)
+      {
+      }
+
+      void execute()
+      {
+        DCPS::RcHandle<SpdpTransport> tport = tport_.lock();
+        if (!tport) {
+          return;
+        }
+        tport->register_handlers(reactor_task_);
+      }
+
+    private:
+      DCPS::WeakRcHandle<SpdpTransport> tport_;
+      DCPS::ReactorTask_rch reactor_task_;
+    };
+
     explicit SpdpTransport(DCPS::RcHandle<Spdp> outer);
     ~SpdpTransport();
 
@@ -279,7 +312,11 @@ private:
 
     virtual int handle_input(ACE_HANDLE h);
 
-    void open(const DCPS::ReactorTask_rch&);
+    void open(const DCPS::ReactorTask_rch& reactor_task);
+    void register_unicast_socket(
+      ACE_Reactor* reactor, ACE_SOCK_Dgram& socket, const char* what);
+    void register_handlers(const DCPS::ReactorTask_rch& reactor_task);
+    void enable_periodic_tasks();
 
     void shorten_local_sender_delay_i();
     void write(WriteFlags flags);
@@ -347,7 +384,8 @@ private:
     OPENDDS_LIST(DCPS::RepoId) directed_guids_;
     void process_lease_expirations(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpSporadic> lease_expiration_processor_;
-    DCPS::ThreadStatus* thread_status_;
+    DCPS::ThreadStatusManager* global_thread_status_manager_;
+    DCPS::ThreadStatusManager local_thread_status_manager_;
     void thread_status_task(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpPeriodic> thread_status_sender_;
 #ifdef OPENDDS_SECURITY
@@ -440,6 +478,12 @@ private:
 #endif /* DDS_HAS_MINIMUM_BIT */
 #endif
 
+#ifdef ACE_HAS_CPP11
+  std::atomic<bool> initialized_flag_; // Spdp initialized
+#else
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> initialized_flag_; // Spdp initialized
+#endif
+
   bool eh_shutdown_;
   DCPS::ConditionVariable<ACE_Thread_Mutex> shutdown_cond_;
 #ifdef ACE_HAS_CPP11
@@ -451,7 +495,7 @@ private:
   void get_discovered_participant_ids(DCPS::RepoIdSet& results) const;
 
   BuiltinEndpointSet_t available_builtin_endpoints_;
-  DCPS::RcHandle<Sedp>  sedp_;
+  DCPS::RcHandle<Sedp> sedp_;
 
   typedef OPENDDS_MULTIMAP(DCPS::MonotonicTimePoint, DCPS::RepoId) TimeQueue;
 

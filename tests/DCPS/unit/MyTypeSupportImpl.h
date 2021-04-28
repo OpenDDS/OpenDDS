@@ -109,7 +109,7 @@ public:
   DDS::ReturnCode_t take(
     OpenDDS::DCPS::AbstractSamples&,
     DDS::SampleStateMask, DDS::ViewStateMask,
-    DDS::InstanceStateMask ) { return 0; }
+    DDS::InstanceStateMask) { return 0; }
 
   DDS::ReturnCode_t read_instance_generic(void*& data,
     DDS::SampleInfo& info, DDS::InstanceHandle_t instance,
@@ -120,7 +120,8 @@ public:
     DDS::SampleInfo&, DDS::InstanceHandle_t, DDS::SampleStateMask,
     DDS::ViewStateMask, DDS::InstanceStateMask);
 
-  void set_instance_state(DDS::InstanceHandle_t, DDS::InstanceStateKind)
+  void set_instance_state(DDS::InstanceHandle_t, DDS::InstanceStateKind,
+    const OpenDDS::DCPS::SystemTimePoint&)
   {}
 #endif
 };

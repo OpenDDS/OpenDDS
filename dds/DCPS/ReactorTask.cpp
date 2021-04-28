@@ -5,7 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
+
 #include "ReactorTask.h"
 
 #if !defined (__ACE_INLINE__)
@@ -18,6 +19,9 @@
 #include <ace/Proactor_Impl.h>
 #include <ace/WIN32_Proactor.h>
 #include <ace/OS_NS_Thread.h>
+
+#include <exception>
+#include <cstring>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -34,7 +38,7 @@ ReactorTask::ReactorTask(bool useAsyncSend)
   , use_async_send_(useAsyncSend)
 #endif
   , timer_queue_(0)
-  , thread_status_(0)
+  , thread_status_manager_(0)
   , timeout_(TimeDuration(0))
 {
   ACE_UNUSED_ARG(useAsyncSend);
@@ -64,7 +68,7 @@ void ReactorTask::cleanup()
 }
 
 int ReactorTask::open_reactor_task(void*, TimeDuration timeout,
-  ThreadStatus* thread_stat, const String& name)
+  ThreadStatusManager* thread_status_manager, const String& name)
 {
   GuardType guard(lock_);
 
@@ -73,7 +77,7 @@ int ReactorTask::open_reactor_task(void*, TimeDuration timeout,
 
   // thread status reporting support
   timeout_ = timeout;
-  thread_status_ = thread_stat;
+  thread_status_manager_ = thread_status_manager;
   name_ = name;
 
   // Set our reactor and proactor pointers to a new reactor/proactor objects.
@@ -145,26 +149,26 @@ int ReactorTask::svc()
     condition_.notify_all();
   }
 
+  const bool update_thread_status = thread_status_manager_ && !timeout_.is_zero();
+  const String thread_key = ThreadStatusManager::get_key("ReactorTask", name_);
+
   try {
     // Tell the reactor to handle events.
-    if (timeout_ == TimeDuration(0)) {
-      reactor_->run_reactor_event_loop();
-    } else {
-      const String thread_key = ThreadStatus::get_key("ReactorTask", name_);
-
+    if (update_thread_status) {
       while (state_ == STATE_RUNNING) {
         ACE_Time_Value t = timeout_.value();
         reactor_->run_reactor_event_loop(t, 0);
-        if (thread_status_) {
-          if (DCPS_debug_level >= 4) {
-            ACE_DEBUG((LM_DEBUG,
-                       "(%P|%t) ReactorTask::svc. Updating thread status.\n"));
-          }
-          if (!thread_status_->update(thread_key) && DCPS_debug_level) {
-            ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ReactorTask::svc: updated failed\n"));
-          }
+        if (DCPS_debug_level >= 4) {
+          ACE_DEBUG((LM_DEBUG,
+                     "(%P|%t) ReactorTask::svc. Updating thread status.\n"));
+        }
+        if (!thread_status_manager_->update(thread_key) && DCPS_debug_level) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ReactorTask::svc: updated failed\n"));
         }
       }
+
+    } else {
+      reactor_->run_reactor_event_loop();
     }
   } catch (const std::exception& e) {
     ACE_ERROR((LM_ERROR,
@@ -174,6 +178,18 @@ int ReactorTask::svc()
     ACE_ERROR((LM_ERROR,
                "(%P|%t) ERROR: ReactorTask::svc caught exception.\n"));
   }
+
+  if (update_thread_status) {
+    if (DCPS_debug_level >= 4) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) ReactorTask::svc: "
+        "Updating thread status for the last time\n"));
+    }
+    if (!thread_status_manager_->update(thread_key, ThreadStatus_Finished) &&
+        DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ReactorTask::svc: final update failed\n"));
+    }
+  }
+
   return 0;
 }
 
@@ -228,20 +244,58 @@ void ReactorTask::stop()
   }
 }
 
-bool ThreadStatus::update(const String& thread_key)
+const char* ThreadStatusManager::status_to_string(ThreadStatus status)
 {
-  ACE_WRITE_GUARD_RETURN(ACE_Thread_Mutex, g, lock, false);
+  switch (status) {
+  case ThreadStatus_Running:
+    return "Running";
+
+  case ThreadStatus_Finished:
+    return "Finished";
+
+  default:
+    if (DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ThreadStatusManager::status_to_string: ")
+        ACE_TEXT("%d is either invalid or not recognized.\n"),
+        status));
+    }
+    return "<Invalid thread status>";
+  }
+}
+
+bool ThreadStatusManager::update(const String& thread_key, ThreadStatus status)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
   const SystemTimePoint now = SystemTimePoint::now();
-  map[thread_key] = Thread(now);
   if (DCPS_debug_level >= 4) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) ThreadStatus::update: "
-      "update for thread \"%C\" @ %d\n",
-      thread_key.c_str(), now.value().sec()));
+      "update for thread \"%C\" %C @ %d\n",
+      thread_key.c_str(), status_to_string(status), now.value().sec()));
   }
+  switch (status) {
+  case ThreadStatus_Finished:
+    {
+      Map::iterator it = map_.find(thread_key);
+      if (it == map_.end()) {
+        if (DCPS_debug_level) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ThreadStatus::update: "
+            "Trying to remove \"%C\", but it's not an existing thread!\n",
+            thread_key.c_str()));
+        }
+        return false;
+      }
+      map_.erase(it);
+    }
+    break;
+
+  default:
+    map_[thread_key] = Thread(now, status);
+  }
+
   return true;
 }
 
-String ThreadStatus::get_key(const char* safety_profile_tid, const String& name)
+String ThreadStatusManager::get_key(const char* safety_profile_tid, const String& name)
 {
   String key;
 #ifdef OPENDDS_SAFETY_PROFILE
@@ -270,6 +324,39 @@ String ThreadStatus::get_key(const char* safety_profile_tid, const String& name)
   }
 
   return key;
+}
+
+bool ThreadStatusManager::sync_with_parent(ThreadStatusManager& parent,
+  ThreadStatusManager::Map& running, ThreadStatusManager::Map& finished)
+{
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g2, parent.lock_, false);
+    running = parent.map_;
+  }
+
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g1, lock_, false);
+
+  // Figure out what threads were removed from parent.map_
+  Map::iterator mi = map_.begin();
+  Map::iterator ri = running.begin();
+  while (mi != map_.end() || ri != running.end()) {
+    const int cmp = mi != map_.end() && ri != running.end() ?
+      std::strcmp(mi->first.c_str(), ri->first.c_str()) :
+      ri != running.end() ? 1 : -1;
+    if (cmp < 0) { // We're behind, this thread was removed
+      finished.insert(*mi);
+      ++mi;
+    } else if (cmp > 0) { // We're ahead, this thread was added
+      ++ri;
+    } else { // Same thread, continue
+      ++mi;
+      ++ri;
+    }
+  }
+
+  map_ = running;
+
+  return true;
 }
 
 } // namespace DCPS

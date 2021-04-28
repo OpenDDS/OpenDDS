@@ -18,10 +18,32 @@
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #endif
+#include <dds/DCPS/DCPS_Utils.h>
 
 #include <ace/Get_Opt.h>
 
 #include <iostream>
+
+const DDS::Duration_t max_wait_time = {10, 0};
+
+bool wait_for_samples(DDS::DataReader_var reader, bool disposed) {
+  DDS::ReadCondition_var read_condition = reader->create_readcondition(
+    DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE,
+    disposed ? DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE : DDS::ALIVE_INSTANCE_STATE);
+  DDS::WaitSet_var ws = new DDS::WaitSet;
+  ws->attach_condition(read_condition);
+  DDS::ConditionSeq active;
+  DDS::ReturnCode_t rc = ws->wait(active, max_wait_time);
+  ws->detach_condition(read_condition);
+  reader->delete_readcondition(read_condition);
+  if (rc != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l wait_for_samples() ERROR: ")
+      ACE_TEXT("wait failed: %C\n"),
+      OpenDDS::DCPS::retcode_to_string(rc)));
+    return false;
+  }
+  return true;
+}
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -125,7 +147,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (!thread_reader) {
       std::cerr << "Could not get " << OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC
                 << " DataReader." << std::endl;
-      ACE_OS::exit(EXIT_FAILURE);
+      return EXIT_FAILURE;
     }
 
     InternalThreadStatusListenerImpl* listener = new InternalThreadStatusListenerImpl("Publisher");
@@ -135,7 +157,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       thread_reader->set_listener(listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (retcode != DDS::RETCODE_OK) {
       std::cerr << "set_listener for " << OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC << " failed." << std::endl;
-      ACE_OS::exit(EXIT_FAILURE);
+      return EXIT_FAILURE;
     }
 
     // wait for subscriber
@@ -164,8 +186,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter is waiting for acknowledgments\n"));
-    DDS::Duration_t timeout = { 10, 0 };
-    message_writer->wait_for_acknowledgments(timeout);
+    message_writer->wait_for_acknowledgments(max_wait_time);
     // With static discovery, it's not an error for wait_for_acks to fail
     // since the peer process may have terminated before sending acks.
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter is done\n"));
@@ -183,11 +204,62 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       std::cout << "Publisher received " << count << " internal thread status messages." << std::endl;
     }
 
-    // Clean-up!
+    // Create 2nd participant to witness disposes of the 1st participant's threads.
+    DDS::DomainParticipant_var part2 = dpf->create_participant(
+      42, part_qos, DDS::DomainParticipantListener::_nil(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    if (!part2) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("%N:%l: main()")
+                        ACE_TEXT(" ERROR: create_participant (2nd) failed!\n")),
+                       EXIT_FAILURE);
+    }
+
+    DDS::Subscriber_var bit_subscriber2 = part2->get_builtin_subscriber();
+    DDS::DataReader_var thread_reader2 =
+      bit_subscriber2->lookup_datareader(OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC);
+    if (!thread_reader2) {
+      std::cerr << "ERROR: Could not get 2nd " << OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC
+                << " DataReader." << std::endl;
+      return EXIT_FAILURE;
+    }
+
+    InternalThreadStatusListenerImpl* listener2 =
+      new InternalThreadStatusListenerImpl("Publisher part2");
+    DDS::DataReaderListener_var listener2_var(listener2);
+    if (thread_reader2->set_listener(listener2, OpenDDS::DCPS::DEFAULT_STATUS_MASK) != DDS::RETCODE_OK) {
+      std::cerr << "ERROR: set_listener for " << OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC
+        << " failed." << std::endl;
+      return EXIT_FAILURE;
+    }
+
+    // Wait for valid thread status to come into the 2nd thread reader
+    if (!wait_for_samples(thread_reader2, false)) {
+      ACE_ERROR((LM_ERROR, "ERROR: wait for part2 thread status failed\n"));
+      return EXIT_FAILURE;
+    }
+    if (listener->disposes() > 0 || listener2->disposes() > 0) {
+      ACE_ERROR((LM_ERROR, "ERROR: thread listener has disposes before participant deletes\n"));
+      return EXIT_FAILURE;
+    }
+
+    // Clean-up first participant
     std::cerr << "publisher deleting contained entities" << std::endl;
     participant->delete_contained_entities();
     std::cerr << "publisher deleting participant" << std::endl;
     dpf->delete_participant(participant.in());
+
+    // Wait for disposes to come in to 2nd thread reader
+    if (!wait_for_samples(thread_reader2, true)) {
+      ACE_ERROR((LM_ERROR, "ERROR: wait for part2 thread status disposes failed\n"));
+      status = EXIT_FAILURE;
+    }
+    if (listener2->disposes() == 0) {
+      ACE_ERROR((LM_ERROR, "ERROR: 2nd thread listener has no disposes after 1st participant delete\n"));
+      return EXIT_FAILURE;
+    }
+
+    // Finish cleaning up
+    dpf->delete_participant(part2);
     std::cerr << "publisher shutdown" << std::endl;
     TheServiceParticipant->shutdown();
 

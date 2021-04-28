@@ -96,16 +96,16 @@ namespace OpenDDS {
         : drr_(drr), reader_(reader), wa_(wa), active_(active), dwr_(dwr)
         , reader_done_(false), writer_done_(false), cnd_(mtx_)
         , interval_(TheServiceParticipant->get_thread_status_interval())
-        , status_(TheServiceParticipant->get_thread_statuses())
-        , thread_key_(ThreadStatus::get_key("DcpsUpcalls"))
+        , thread_status_manager_(TheServiceParticipant->get_thread_status_manager())
+        , thread_key_(ThreadStatusManager::get_key("DcpsUpcalls"))
       {
       }
 
       int svc()
       {
         MonotonicTimePoint expire;
-        const bool use_expire = has_timeout();
-        if (use_expire) {
+        const bool update_thread_status = thread_status_manager_ && has_timeout();
+        if (update_thread_status) {
           expire = MonotonicTimePoint::now() + interval_;
         }
 
@@ -119,7 +119,7 @@ namespace OpenDDS {
           reader_done_ = true;
           cnd_.notify_one();
           while (!writer_done_) {
-            if (use_expire) {
+            if (update_thread_status) {
               switch (cnd_.wait_until(expire)) {
               case CvStatus_NoTimeout:
                 break;
@@ -127,18 +127,16 @@ namespace OpenDDS {
               case CvStatus_Timeout:
                 {
                   expire = MonotonicTimePoint::now() + interval_;
-                  if (status_) {
-                    if (DCPS_debug_level >= 4) {
-                      ACE_DEBUG((LM_DEBUG,
-                                 "(%P|%t) DcpsUpcalls::svc. Updating thread status.\n"));
+                  if (DCPS_debug_level >= 4) {
+                    ACE_DEBUG((LM_DEBUG,
+                               "(%P|%t) DcpsUpcalls::svc. Updating thread status.\n"));
+                  }
+                  if (!thread_status_manager_->update(thread_key_)) {
+                    if (DCPS_debug_level) {
+                      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DcpsUpcalls::svc: "
+                        "update failed\n"));
                     }
-                    if (!status_->update(thread_key_)) {
-                      if (DCPS_debug_level) {
-                        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DcpsUpcalls::svc: "
-                          "update failed\n"));
-                      }
-                      return -1;
-                    }
+                    return -1;
                   }
                 }
                 break;
@@ -157,6 +155,18 @@ namespace OpenDDS {
             }
           }
         }
+
+        if (update_thread_status) {
+          if (DCPS_debug_level >= 4) {
+            ACE_DEBUG((LM_DEBUG, "(%P|%t) DcpsUpcalls: "
+              "Updating thread status for the last time\n"));
+          }
+          if (!thread_status_manager_->update(thread_key_, ThreadStatus_Finished) &&
+              DCPS_debug_level) {
+            ACE_ERROR((LM_ERROR, "(%P|%t) DcpsUpcalls: final update failed\n"));
+          }
+        }
+
         return 0;
       }
 
@@ -173,12 +183,12 @@ namespace OpenDDS {
 
         wait(); // ACE_Task_Base::wait does not accept a timeout
 
-        if (status_ && has_timeout() && MonotonicTimePoint::now() > expire) {
+        if (thread_status_manager_ && has_timeout() && MonotonicTimePoint::now() > expire) {
           if (DCPS_debug_level >= 4) {
             ACE_DEBUG((LM_DEBUG,
                        "(%P|%t) DcpsUpcalls::writer_done. Updating thread status.\n"));
           }
-          if (!status_->update(thread_key_) && DCPS_debug_level) {
+          if (!thread_status_manager_->update(thread_key_) && DCPS_debug_level) {
             ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DcpsUpcalls::writer_done: "
               "update failed\n"));
           }
@@ -196,7 +206,7 @@ namespace OpenDDS {
 
       // thread reporting
       const TimeDuration interval_;
-      ThreadStatus* const status_;
+      ThreadStatusManager* const thread_status_manager_;
       const String thread_key_;
     };
 
@@ -1514,19 +1524,15 @@ namespace OpenDDS {
           if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE) {
             if (!writer_local || !reader_local) {
               const DDS::DataRepresentationIdSeq repIds =
-                get_effective_data_rep_qos(writer_local ? tempDrQos.representation.value : tempDwQos.representation.value);
-              for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
-                Encoding::Kind encoding_kind;
-                if (repr_to_encoding_kind(repIds[i], encoding_kind) && encoding_kind == Encoding::KIND_XCDR1) {
-                  const XTypes::TypeFlag extensibility_mask = XTypes::IS_APPENDABLE;
-
-                  if (type_lookup_service_->extensibility(extensibility_mask,
-                                                          writer_local ? reader_type_id : writer_type_id)) {
-                    if (OpenDDS::DCPS::DCPS_debug_level) {
-                      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
-                        ACE_TEXT("EndpointManager::match_continue: ")
-                        ACE_TEXT("Encountered unsupported combination of XCDR1 encoding and appendable extensibility\n")));
-                    }
+                get_effective_data_rep_qos(tempDwQos.representation.value, false);
+              Encoding::Kind encoding_kind;
+              if (repr_to_encoding_kind(repIds[0], encoding_kind) && encoding_kind == Encoding::KIND_XCDR1) {
+                const XTypes::TypeFlag extensibility_mask = XTypes::IS_APPENDABLE;
+                if (type_lookup_service_->extensibility(extensibility_mask, writer_type_id)) {
+                  if (OpenDDS::DCPS::DCPS_debug_level) {
+                    ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
+                      ACE_TEXT("EndpointManager::match_continue: ")
+                      ACE_TEXT("Encountered unsupported combination of XCDR1 encoding and appendable extensibility\n")));
                   }
                 }
               }
@@ -2210,7 +2216,6 @@ namespace OpenDDS {
 
         DiscoveredParticipant()
         : location_ih_(DDS::HANDLE_NIL)
-        , discovered_at_(monotonic_time_zero())
         , bit_ih_(DDS::HANDLE_NIL)
         , seq_reset_count_(0)
 #ifdef OPENDDS_SECURITY
@@ -2240,7 +2245,6 @@ namespace OpenDDS {
           const SequenceNumber& seq)
         : pdata_(p)
         , location_ih_(DDS::HANDLE_NIL)
-        , discovered_at_(monotonic_time_zero())
         , bit_ih_(DDS::HANDLE_NIL)
         , last_seq_(seq)
         , seq_reset_count_(0)
@@ -2300,7 +2304,7 @@ namespace OpenDDS {
         DDS::InstanceHandle_t location_ih_;
 
         ACE_INET_Addr local_address_;
-        MonotonicTime_t discovered_at_;
+        MonotonicTimePoint discovered_at_;
         MonotonicTimePoint lease_expiration_;
         DDS::InstanceHandle_t bit_ih_;
         SequenceNumber last_seq_;

@@ -993,7 +993,21 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
   ACE_Guard<ACE_Thread_Mutex> guard(identity_mutex_);
 
   LocalParticipantMap::iterator local = local_participants_.find(identity_handle);
+
   if (local != local_participants_.end()) {
+
+    {
+      ACE_Guard<ACE_Thread_Mutex> handshake_data_guard(handshake_mutex_);
+
+      for (HandshakeDataMap::iterator it = handshake_data_.begin(); it != handshake_data_.end(); /* increment in loop*/) {
+        if (it->second.first == local->second) {
+          handshake_data_.erase(it++);
+        } else {
+          ++it;
+        }
+      }
+    }
+
     local_participants_.erase(local);
 
     if (DCPS::security_debug.bookkeeping) {
@@ -1009,7 +1023,22 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
                        local_has_remote_handle(identity_handle));
 
   if (local != local_participants_.end()) {
-    local->second->validated_remotes.erase(identity_handle);
+
+    const RemoteParticipantMap::iterator remote = local->second->validated_remotes.find(identity_handle);
+
+    {
+      ACE_Guard<ACE_Thread_Mutex> handshake_data_guard(handshake_mutex_);
+
+      for (HandshakeDataMap::iterator it = handshake_data_.begin(); it != handshake_data_.end(); /* increment in loop*/) {
+        if (it->second.second == remote->second) {
+          handshake_data_.erase(it++);
+        } else {
+          ++it;
+        }
+      }
+    }
+
+    local->second->validated_remotes.erase(remote);
 
     if (DCPS::security_debug.bookkeeping) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")

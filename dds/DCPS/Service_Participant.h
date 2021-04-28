@@ -649,7 +649,8 @@ public:
   /// getter for lock that protects the static initialization of XTypes related data structures
   ACE_Thread_Mutex& get_static_xtypes_lock();
 
-  ThreadStatus* get_thread_statuses();
+  /// Get the service participant's thread status manager.
+  ThreadStatusManager* get_thread_status_manager();
 
   /// Pointer to the monitor factory that is used to create
   /// monitor objects.
@@ -720,7 +721,7 @@ private:
   /// Enable Internal Thread Status Monitoring
   TimeDuration thread_status_interval_;
 
-  ThreadStatus thread_status_;
+  ThreadStatusManager thread_status_manager_;
 
   /// Thread mutex used to protect the static initialization of XTypes data structures
   ACE_Thread_Mutex xtypes_lock_;

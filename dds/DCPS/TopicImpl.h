@@ -95,6 +95,8 @@ private:
   /// The topic qos
   DDS::TopicQos                qos_;
 
+  /// Mutex to protect listener info
+  ACE_Thread_Mutex             listener_mutex_;
   /// The mask for which kind of events the listener
   ///  will be notified about.
   DDS::StatusMask              listener_mask_;
