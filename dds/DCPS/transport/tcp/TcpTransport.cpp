@@ -75,6 +75,17 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
 {
   DBG_ENTRY_LVL("TcpTransport", "connect_datalink", 6);
 
+  NetworkAddress network_order_address;
+  ACE_InputCDR cdr((const char*)remote.blob_.get_buffer(), remote.blob_.length());
+
+  if ((cdr >> network_order_address) == 0) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: TcpTransport::connect_datalink")
+      ACE_TEXT(" failed to de-serialize the NetworkAddress\n")));
+  }
+
+  network_order_address.dump();
+
   const PriorityKey key =
     blob_to_key(remote.blob_, attribs.priority_, true /*active*/);
 
