@@ -72,11 +72,6 @@ if (OPENDDS_SECURITY)
   _OPENDDS_APPEND_DEF(OPENDDS_SECURITY)
 endif()
 
-if (OPENDDS_SUPPRESS_ANYS)
-  list(APPEND OPENDDS_DDS_BASE_IDL_FLAGS -Sa -St)
-  list(APPEND OPENDDS_TAO_BASE_IDL_FLAGS -Sa -St)
-endif()
-
 # ACE defines.
 
 # TODO(iguessthislldo): Separate ACE and TAO (maybe more) definitions lists

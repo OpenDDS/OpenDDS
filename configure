@@ -2509,6 +2509,11 @@ sub write_cmake_file {
         name => 'VERSIONED_NAMESPACE',
         feature => 'versioned_namespace',
       },
+      {
+        name => 'suppress_anys',
+        feature => 'dds_suppress_anys',
+        default => 1,
+      },
     );
     my %features = get_features($buildEnv);
     for my $config (@configs) {
@@ -2538,7 +2543,6 @@ sub write_cmake_file {
       object-model-profile
       persistence-profile
       inline
-      suppress-anys
     );
 
     my %disabled_by_default = map {$_, 0} qw(
