@@ -28,7 +28,7 @@ bool
 DisjointSequence::insert_i(const SequenceRange& range,
                            OPENDDS_VECTOR(SequenceRange)* gaps /* = 0 */)
 {
-  validate(range);
+  OPENDDS_ASSERT(range.first <= range.second);
 
   typedef RangeSet::Container::iterator iter_t;
 
@@ -312,15 +312,6 @@ DisjointSequence::missing_sequence_ranges() const
   }
 
   return missing;
-}
-
-void
-DisjointSequence::validate(const SequenceRange& range)
-{
-  if (range.first > range.second) {
-    throw std::runtime_error("SequenceNumber range invalid, range must "
-                             "be ascending.");
-  }
 }
 
 void

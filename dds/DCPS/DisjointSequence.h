@@ -251,8 +251,6 @@ public:
   };
 
 private:
-  static void validate(const SequenceRange& range);
-
   typedef OrderedRanges<SequenceNumber> RangeSet;
   RangeSet sequences_;
 
