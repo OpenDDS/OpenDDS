@@ -1074,7 +1074,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/cmake
-        perl run_ci_tests.pl --compiler=clang++-5.0
+        perl run_ci_tests.pl --compiler=clang++-5.0 --cxx-standard 11
 
   ACE_TAO_u18_clang10_sec_js0:
 
@@ -1495,7 +1495,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/cmake
-        perl run_ci_tests.pl --skip-cxx11 --compiler=g++-6
+        perl run_ci_tests.pl --compiler=g++-6 --cxx-standard 03
 
   ACE_TAO_u18_gcc8_i0_js0_j:
 

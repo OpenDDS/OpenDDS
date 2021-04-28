@@ -37,7 +37,7 @@ my $generator = "";
 my $arch = "";
 my $compiler = "";
 my $skip_run_test;
-my $skip_cxx11;
+my $cxx_standard;
 my $no_shared;
 
 exit 1 if !GetOptions(
@@ -46,13 +46,13 @@ exit 1 if !GetOptions(
     "arch=s" => \$arch,
     "compiler=s" => \$compiler,
     "skip-run-test" => \$skip_run_test,
-    "skip-cxx11" => \$skip_cxx11,
+    "cxx-standard=s" => \$cxx_standard,
     "no-shared" => \$no_shared,
     );
 
 my @dirs = ('../Nested_IDL', 'Messenger_1', 'Messenger_2');
 push @dirs, '../generated_global' unless $no_shared;
-push @dirs, 'C++11_Messenger' unless $skip_cxx11;
+push @dirs, 'C++11_Messenger' unless defined($cxx_standard) && $cxx_standard < 11;
 
 my %builds_lib = ('Messenger_2' => 1, 'C++11_Messenger' => 1);
 my %runtest_in_config_dir = ('Messenger_1' => 1, 'Messenger_2' => 1);
@@ -68,6 +68,9 @@ for my $dir (@dirs) {
   );
   if ($compiler ne "") {
     push @generate_cmd, "-DCMAKE_CXX_COMPILER=$compiler";
+  }
+  if (defined($cxx_standard)) {
+    push(@generate_cmd, "-DCMAKE_CXX_STANDARD=$cxx_standard");
   }
 
   my @build_cmd = ("cmake", "--build", ".");
