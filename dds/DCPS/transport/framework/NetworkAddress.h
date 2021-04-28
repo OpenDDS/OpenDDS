@@ -85,6 +85,10 @@ bool set_socket_multicast_ttl(const ACE_SOCK_Dgram& socket, const unsigned char&
 /// Otherwise defaults to opening a socket based on the type of local_address
 extern OpenDDS_Dcps_Export
 bool open_appropriate_socket_type(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& local_address, int* proto_family = 0);
+
+extern OpenDDS_Dcps_Export
+ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& addr, bool prefer_loopback = true);
+
 } // namespace DCPS
 } // namespace OpenDDS
 

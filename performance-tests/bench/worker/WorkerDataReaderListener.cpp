@@ -74,6 +74,7 @@ WorkerDataReaderListener::on_sample_rejected(
   DDS::DataReader_ptr /*reader*/,
   const DDS::SampleRejectedStatus& status)
 {
+  std::unique_lock<std::mutex> lock(mutex_);
   rejected_sample_count_->value.ull_prop(rejected_sample_count_->value.ull_prop() + status.total_count_change);
 }
 
@@ -250,12 +251,15 @@ WorkerDataReaderListener::on_subscription_matched(
 void
 WorkerDataReaderListener::on_sample_lost(DDS::DataReader_ptr /*reader*/, const DDS::SampleLostStatus& status)
 {
+  std::unique_lock<std::mutex> lock(mutex_);
   lost_sample_count_->value.ull_prop(lost_sample_count_->value.ull_prop() + status.total_count_change);
 }
 
 void
 WorkerDataReaderListener::set_datareader(Builder::DataReader& datareader)
 {
+  std::unique_lock<std::mutex> lock(mutex_);
+
   datareader_ = &datareader;
 
   auto durability_kind = datareader_->get_qos().durability.kind;
@@ -315,6 +319,8 @@ WorkerDataReaderListener::set_datareader(Builder::DataReader& datareader)
 void
 WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
 {
+  std::unique_lock<std::mutex> lock(mutex_);
+
   if (datareader_ == &datareader) {
 
     size_t out_of_order_data_count = 0;

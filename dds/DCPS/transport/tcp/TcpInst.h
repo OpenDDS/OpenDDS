@@ -11,6 +11,7 @@
 #include "Tcp_export.h"
 #include "TcpTransport.h"
 
+#include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/transport/framework/TransportInst.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
 #include "ace/INET_Addr.h"
@@ -115,7 +116,9 @@ public:
   {
     local_address_str_ = host_name;
     local_address_str_ += ":" + to_dds_string(port_number);
-    local_address_.set(port_number, host_name);
+    ACE_INET_Addr address_list;
+    address_list.set(port_number, host_name);
+    local_address_ = choose_single_coherent_address(address_list, false);
   }
   void local_address_set_port(u_short port_number) {
     local_address_.set_port_number(port_number);
