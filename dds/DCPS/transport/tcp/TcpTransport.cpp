@@ -63,7 +63,13 @@ TcpTransport::blob_to_key(const TransportBLOB& remote,
                           bool active)
 {
   const ACE_INET_Addr remote_addresses = AssociationData::get_remote_address(remote);
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpTransport::blob_to_key() - "
+    "Address List's Initial Address : %C:%d (%C)\n",
+    remote_addresses.get_host_addr(), remote_addresses.get_port_number(), remote_addresses.get_host_name()));
   const ACE_INET_Addr remote_address = choose_single_coherent_address(remote_addresses);
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpTransport::blob_to_key() - "
+    "Final Chosen Address %C:%d (%C)\n",
+    remote_address.get_host_addr(), remote_address.get_port_number(), remote_address.get_host_name()));
   const bool is_loopback = remote_address == config().local_address();
   return PriorityKey(priority, remote_address, is_loopback, active);
 }
