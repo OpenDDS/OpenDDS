@@ -10,7 +10,7 @@ cmake_minimum_required(VERSION 3.8.2)
 find_package(OpenDDS REQUIRED)
 
 if (NOT OPENDDS_OWNERSHIP_PROFILE)
-  message(FATAL_ERROR "These tests require OpenDDS to be built with Ownership Profile enabled")
+  message(FATAL_ERROR "This test requires OpenDDS to be built with Ownership Profile enabled")
 endif()
 
 set(target_prefix "opendds_cmake_messenger_1_")
