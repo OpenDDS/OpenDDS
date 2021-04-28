@@ -507,7 +507,11 @@ ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& address, bool 
               temp.get_host_addr(), temp.get_port_number(), temp.get_host_name()));
         set6_loopback.insert(temp);
       } else if (temp.is_ipv4_mapped_ipv6() || temp.is_ipv4_compat_ipv6()) {
-#ifndef IPV6_V6ONLY
+#ifdef IPV6_V6ONLY
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
+              "Considering Address %C:%d (%C) - IGNORING IPv6 MAPPED / COMPATIBLE IPv4\n",
+              temp.get_host_addr(), temp.get_port_number(), temp.get_host_name()));
+#else
         ACE_DEBUG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
               "Considering Address %C:%d (%C) - ADDING TO IPv6 MAPPED / COMPATIBLE IPv4 LIST\n",
               temp.get_host_addr(), temp.get_port_number(), temp.get_host_name()));
