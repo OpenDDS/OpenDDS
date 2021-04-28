@@ -1,0 +1,10 @@
+Compiler_Typecode_C++11
+typecodeC.h
+typecodeTypeSupportC.cpp
+typecodeTypeSupportC.h
+typecodeTypeSupportC.inl
+typecodeTypeSupportImpl.cpp
+typecodeTypeSupportImpl.h
+typecodeTypeSupportS.cpp
+typecodeTypeSupportS.h
+typecodeTypeSupport.idl

@@ -1370,6 +1370,15 @@ struct Cxx11Generator : GeneratorBase
     helpers_[HLP_FIXED_CONSTANT] = "IDL::Fixed_T";
   }
 
+  static void gen_typecode_ptrs(const std::string& type)
+  {
+    if (!be_global->suppress_typecode()) {
+      be_global->add_include("tao/Basic_Types.h", BE_GlobalData::STREAM_LANG_H);
+      be_global->lang_header_ << "extern const ::CORBA::TypeCode_ptr _tc_" << type << ";\n";
+      be_global->impl_ << "const ::CORBA::TypeCode_ptr _tc_" << type << " = nullptr;\n";
+    }
+  }
+
   std::string map_type_string(AST_PredefinedType::PredefinedType chartype, bool)
   {
     return chartype == AST_PredefinedType::PT_char ? "std::string" : "std::wstring";
@@ -1407,6 +1416,7 @@ struct Cxx11Generator : GeneratorBase
     }
     be_global->add_include("<array>", BE_GlobalData::STREAM_LANG_H);
     be_global->lang_header_ << ind << "using " << type << " = " << array << elem << bounds.str() << ";\n";
+    gen_typecode_ptrs(type);
   }
 
   void gen_array(UTL_ScopedName* tdname, AST_Array* arr)
@@ -1422,6 +1432,7 @@ struct Cxx11Generator : GeneratorBase
   {
     be_global->add_include("<vector>", BE_GlobalData::STREAM_LANG_H);
     be_global->lang_header_ << ind << "using " << type << " = std::vector<" << elem << ">;\n";
+    gen_typecode_ptrs(type);
   }
 
   void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
@@ -1526,7 +1537,6 @@ struct Cxx11Generator : GeneratorBase
       if (i < fields.size() - 1) init_list += "\n  , ";
       swaps += "  swap(lhs._" + fn + ", rhs._" + fn + ");\n";
     }
-
     be_global->lang_header_ << ";\n\n";
     be_global->impl_ << "\n  : " << init_list << "\n{}\n\n";
 
@@ -1536,6 +1546,7 @@ struct Cxx11Generator : GeneratorBase
       "{\n"
       "  using std::swap;\n"
       << swaps << "}\n\n";
+    gen_typecode_ptrs(nm);
     return true;
   }
 
@@ -1758,6 +1769,7 @@ struct Cxx11Generator : GeneratorBase
       "  std::swap(lhs, rhs);\n"
       "}\n\n";
 
+    gen_typecode_ptrs(nm);
     return true;
   }
 

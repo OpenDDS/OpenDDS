@@ -38,6 +38,7 @@ my $arch = "";
 my $compiler = "";
 my $skip_run_test;
 my $cxx_standard;
+my $skip_typecode;
 my $no_shared;
 
 exit 1 if !GetOptions(
@@ -47,12 +48,16 @@ exit 1 if !GetOptions(
     "compiler=s" => \$compiler,
     "skip-run-test" => \$skip_run_test,
     "cxx-standard=s" => \$cxx_standard,
+    "skip-typecode" => \$skip_typecode,
     "no-shared" => \$no_shared,
     );
 
+my $skip_cxx11 = defined($cxx_standard) && $cxx_standard < 11;
+
 my @dirs = ('../Nested_IDL', 'Messenger_1', 'Messenger_2');
 push @dirs, '../generated_global' unless $no_shared;
-push @dirs, 'C++11_Messenger' unless defined($cxx_standard) && $cxx_standard < 11;
+push @dirs, 'C++11_Messenger' unless $skip_cxx11;
+push @dirs, '../C++11_typecode' unless $skip_cxx11 || $skip_typecode;
 
 my %builds_lib = ('Messenger_2' => 1, 'C++11_Messenger' => 1);
 my %runtest_in_config_dir = ('Messenger_1' => 1, 'Messenger_2' => 1);
@@ -94,7 +99,7 @@ for my $dir (@dirs) {
     run_command("@generate_cmd $lib_opt ..");
     run_command("@build_cmd");
 
-    if (! $skip_run_test && $dir ne '../generated_global') {
+    if (! $skip_run_test && $dir ne '../generated_global' && $dir ne '../C++11_typecode') {
       if ($build_config ne "" && $runtest_in_config_dir{$dir}) {
         my $run_dir = getcwd() . "/$build_config";
         print "Switching to '$run_dir' to run tests\n";
