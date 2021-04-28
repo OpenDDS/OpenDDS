@@ -1,6 +1,6 @@
 #include "SubscriptionListener.h"
 
-#include "utility.h"
+#include "lib/Utility.h"
 
 #include <dds/DCPS/JsonValueWriter.h>
 

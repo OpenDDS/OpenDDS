@@ -1,5 +1,7 @@
 #include "RelayPartitionsIncrementListener.h"
 
+#include "lib/RelayTypeSupportImpl.h"
+
 namespace RtpsRelay {
 
 RelayPartitionsIncrementListener::RelayPartitionsIncrementListener(RelayPartitionTable& relay_partition_table)

@@ -1,6 +1,6 @@
 #include "ParticipantListener.h"
 
-#include "utility.h"
+#include "lib/Utility.h"
 
 #include <dds/DdsDcpsCoreTypeSupportImpl.h>
 #include <dds/DCPS/JsonValueWriter.h>

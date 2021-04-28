@@ -1,5 +1,7 @@
 #include "RelayAddressListener.h"
 
+#include "lib/RelayTypeSupportImpl.h"
+
 namespace RtpsRelay {
 
 RelayAddressListener::RelayAddressListener(RelayPartitionTable& relay_partition_table)

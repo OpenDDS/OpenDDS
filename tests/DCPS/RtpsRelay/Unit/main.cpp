@@ -1,5 +1,5 @@
 #include "tools/rtpsrelay/lib/Name.h"
-#include "tools/rtpsrelay/lib/QosIndex.h"
+#include "tools/rtpsrelay/lib/PartitionIndex.h"
 
 #include "dds/DCPS/Service_Participant.h"
 
@@ -35,628 +35,14 @@ void test_invalid(int& status, const std::string& s)
   }
 }
 
-#define ASSERT_MATCHED(x) do {                                  \
-  GuidSet expected_guids;                                       \
-  expected_guids.insert(x->participant_guid());                 \
-  if (guids != expected_guids) { \
-    std::cout << "ERROR: " <<  __func__ << " failed: guids do not match" << std::endl; \
-    status = EXIT_FAILURE;                                              \
-  } \
-  ReaderSet actual_readers, expected_readers;                           \
-  index.get_readers(writer, actual_readers);                            \
-  expected_readers.insert(reader);                                      \
-  if (actual_readers != expected_readers) {                             \
-    std::cout << "ERROR: " <<  __func__ << " failed: writer does not match reader" << std::endl; \
-    status = EXIT_FAILURE;                                              \
-  }                                                                     \
-  WriterSet actual_writers, expected_writers;                           \
-  index.get_writers(reader, actual_writers);                           \
-  expected_writers.insert(writer);                                     \
-  if (actual_writers != expected_writers) {                             \
-    std::cout << "ERROR: " << __func__ << " failed: reader does not match writer" << std::endl; \
-    status = EXIT_FAILURE; \
- } \
-} while(0);
-
-#define ASSERT_NOT_MATCHED do { \
-  if (!guids.empty()) {                    \
-    std::cout << "ERROR: " <<  __func__ << " failed: guids should be empty" << std::endl; \
-    status = EXIT_FAILURE;                                              \
-  } \
-  ReaderSet actual_readers, expected_readers;                   \
-  index.get_readers(writer, actual_readers);                           \
-  if (actual_readers != expected_readers) {                             \
-    std::cout << "ERROR: " << __func__ << " failed: writer matches reader" << std::endl; \
-    status = EXIT_FAILURE;                                              \
-  }                                                                     \
-  WriterSet actual_writers, expected_writers;                   \
-  index.get_writers(reader, actual_writers);                           \
-  if (actual_writers != expected_writers) {                             \
-    std::cout << "ERROR: " << __func__ << " failed: reader matches writer" << std::endl; \
-    status = EXIT_FAILURE; \
- } \
-} while(0);
-
-template <typename Index>
-void writer_then_matched_reader(int& status)
+void test_equal(int& status, const std::string& s, const GuidSet& actual, const GuidSet& expected)
 {
-  WriterEntry writer_entry;
-  writer_entry.topic_name("the topic");
-  writer_entry.type_name("the type");
-  writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer_entry.publisher_qos().partition.name.length(1);
-  writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
-  WriterPtr writer(new Writer(writer_entry));
+  if (actual != expected) {
+    std::cout << "ERROR: Test " << '\'' << s << '\'' << ":  expected guid sets not equal" << std::endl;
+    status = EXIT_FAILURE;
+    return;
+  }
 
-  ReaderEntry reader_entry;
-  reader_entry.topic_name("the topic");
-  reader_entry.type_name("the type");
-  reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader_entry.subscriber_qos().partition.name.length(1);
-  reader_entry.subscriber_qos().partition.name[0] = "?bjec[!s] *, [Ii]nc.";
-  ReaderPtr reader(new Reader(reader_entry));
-
-  Index index;
-  GuidSet guids;
-  index.insert(writer, guids);
-  index.insert(reader, guids);
-
-  ASSERT_MATCHED(writer);
-}
-
-template <typename Index>
-void reader_then_matched_writer(int& status)
-{
-  WriterEntry writer_entry;
-  writer_entry.topic_name("the topic");
-  writer_entry.type_name("the type");
-  writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer_entry.publisher_qos().partition.name.length(1);
-  writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
-  WriterPtr writer(new Writer(writer_entry));
-
-  ReaderEntry reader_entry;
-  reader_entry.topic_name("the topic");
-  reader_entry.type_name("the type");
-  reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader_entry.subscriber_qos().partition.name.length(1);
-  reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
-  ReaderPtr reader(new Reader(reader_entry));
-
-  Index index;
-  GuidSet guids;
-  index.insert(reader, guids);
-  index.insert(writer, guids);
-
-  ASSERT_MATCHED(reader);
-}
-
-template <typename Index>
-void matched_then_writer_changes_reliability(int& status)
-{
-  WriterEntry writer_entry;
-  writer_entry.topic_name("the topic");
-  writer_entry.type_name("the type");
-  writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer_entry.data_writer_qos().reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-  writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer_entry.publisher_qos().partition.name.length(1);
-  writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
-  WriterPtr writer(new Writer(writer_entry));
-
-  ReaderEntry reader_entry;
-  reader_entry.topic_name("the topic");
-  reader_entry.type_name("the type");
-  reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader_entry.data_reader_qos().reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-  reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader_entry.subscriber_qos().partition.name.length(1);
-  reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
-  ReaderPtr reader(new Reader(reader_entry));
-
-  Index index;
-  GuidSet guids;
-  index.insert(writer, guids);
-  index.insert(reader, guids);
-
-  ASSERT_MATCHED(writer);
-
-  writer_entry.data_writer_qos().reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
-
-  guids.clear();
-  index.reinsert(writer, writer_entry, guids);
-  ASSERT_NOT_MATCHED;
-}
-
-template <typename Index>
-void matched_then_reader_changes_reliability(int& status)
-{
-  WriterEntry writer_entry;
-  writer_entry.topic_name("the topic");
-  writer_entry.type_name("the type");
-  writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer_entry.data_writer_qos().reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
-  writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer_entry.publisher_qos().partition.name.length(1);
-  writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
-  WriterPtr writer(new Writer(writer_entry));
-
-  ReaderEntry reader_entry;
-  reader_entry.topic_name("the topic");
-  reader_entry.type_name("the type");
-  reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader_entry.data_reader_qos().reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
-  reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader_entry.subscriber_qos().partition.name.length(1);
-  reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
-  ReaderPtr reader(new Reader(reader_entry));
-
-  Index index;
-  GuidSet guids;
-  index.insert(writer, guids);
-  index.insert(reader, guids);
-
-  ASSERT_MATCHED(writer);
-
-  reader_entry.data_reader_qos().reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-
-  guids.clear();
-  index.reinsert(reader, reader_entry, guids);
-
-  ASSERT_NOT_MATCHED;
-}
-
-template <typename Index>
-void matched_then_writer_changes_partition(int& status)
-{
-  WriterEntry writer_entry;
-  writer_entry.topic_name("the topic");
-  writer_entry.type_name("the type");
-  writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer_entry.publisher_qos().partition.name.length(1);
-  writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
-  WriterPtr writer(new Writer(writer_entry));
-
-  ReaderEntry reader_entry;
-  reader_entry.topic_name("the topic");
-  reader_entry.type_name("the type");
-  reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader_entry.subscriber_qos().partition.name.length(1);
-  reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
-  ReaderPtr reader(new Reader(reader_entry));
-
-  Index index;
-  GuidSet guids;
-  index.insert(writer, guids);
-  index.insert(reader, guids);
-
-  ASSERT_MATCHED(writer);
-
-  writer_entry.publisher_qos().partition.name[0] = "Object";
-
-  guids.clear();
-  index.reinsert(writer, writer_entry, guids);
-
-  ASSERT_NOT_MATCHED;
-}
-
-template <typename Index>
-void matched_then_reader_changes_partition(int& status)
-{
-  WriterEntry writer_entry;
-  writer_entry.topic_name("the topic");
-  writer_entry.type_name("the type");
-  writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer_entry.publisher_qos().partition.name.length(1);
-  writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
-  WriterPtr writer(new Writer(writer_entry));
-
-  ReaderEntry reader_entry;
-  reader_entry.topic_name("the topic");
-  reader_entry.type_name("the type");
-  reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader_entry.subscriber_qos().partition.name.length(1);
-  reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
-  ReaderPtr reader(new Reader(reader_entry));
-
-  Index index;
-  GuidSet guids;
-  index.insert(writer, guids);
-  index.insert(reader, guids);
-
-  ASSERT_MATCHED(writer);
-
-  reader_entry.subscriber_qos().partition.name[0] = "Object";
-
-  guids.clear();
-  index.reinsert(reader, reader_entry, guids);
-
-  ASSERT_NOT_MATCHED;
-}
-
-template <typename Index>
-void matched_then_writer_changes_topic(int& status)
-{
-  WriterEntry writer_entry;
-  writer_entry.topic_name("the topic");
-  writer_entry.type_name("the type");
-  writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer_entry.publisher_qos().partition.name.length(1);
-  writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
-  WriterPtr writer(new Writer(writer_entry));
-
-  ReaderEntry reader_entry;
-  reader_entry.topic_name("the topic");
-  reader_entry.type_name("the type");
-  reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader_entry.subscriber_qos().partition.name.length(1);
-  reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
-  ReaderPtr reader(new Reader(reader_entry));
-
-  Index index;
-  GuidSet guids;
-  index.insert(writer, guids);
-  index.insert(reader, guids);
-
-  ASSERT_MATCHED(writer);
-
-  writer_entry.topic_name("a new topic");
-
-  guids.clear();
-  index.reinsert(writer, writer_entry, guids);
-
-  ASSERT_NOT_MATCHED;
-}
-
-template <typename Index>
-void matched_then_reader_changes_topic(int& status)
-{
-  WriterEntry writer_entry;
-  writer_entry.topic_name("the topic");
-  writer_entry.type_name("the type");
-  writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer_entry.publisher_qos().partition.name.length(1);
-  writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
-  WriterPtr writer(new Writer(writer_entry));
-
-  ReaderEntry reader_entry;
-  reader_entry.topic_name("the topic");
-  reader_entry.type_name("the type");
-  reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader_entry.subscriber_qos().partition.name.length(1);
-  reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
-  ReaderPtr reader(new Reader(reader_entry));
-
-  Index index;
-  GuidSet guids;
-  index.insert(writer, guids);
-  index.insert(reader, guids);
-
-  ASSERT_MATCHED(writer);
-
-  reader_entry.topic_name("a new topic");
-
-  guids.clear();
-  index.reinsert(reader, reader_entry, guids);
-
-  ASSERT_NOT_MATCHED;
-}
-
-template <typename Index>
-void unmatched_then_writer_changes_reliability(int& status)
-{
-  WriterEntry writer_entry;
-  writer_entry.topic_name("the topic");
-  writer_entry.type_name("the type");
-  writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer_entry.data_writer_qos().reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
-  writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer_entry.publisher_qos().partition.name.length(1);
-  writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
-  WriterPtr writer(new Writer(writer_entry));
-
-  ReaderEntry reader_entry;
-  reader_entry.topic_name("the topic");
-  reader_entry.type_name("the type");
-  reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader_entry.data_reader_qos().reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-  reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader_entry.subscriber_qos().partition.name.length(1);
-  reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
-  ReaderPtr reader(new Reader(reader_entry));
-
-  Index index;
-  GuidSet guids;
-  index.insert(writer, guids);
-  index.insert(reader, guids);
-
-  ASSERT_NOT_MATCHED;
-
-  writer_entry.data_writer_qos().reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-
-  index.reinsert(writer, writer_entry, guids);
-
-  ASSERT_MATCHED(reader);
-}
-
-template <typename Index>
-void unmatched_then_reader_changes_reliability(int& status)
-{
-  WriterEntry writer_entry;
-  writer_entry.topic_name("the topic");
-  writer_entry.type_name("the type");
-  writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer_entry.data_writer_qos().reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
-  writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer_entry.publisher_qos().partition.name.length(1);
-  writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
-  WriterPtr writer(new Writer(writer_entry));
-
-  ReaderEntry reader_entry;
-  reader_entry.topic_name("the topic");
-  reader_entry.type_name("the type");
-  reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader_entry.data_reader_qos().reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-  reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader_entry.subscriber_qos().partition.name.length(1);
-  reader_entry.subscriber_qos().partition.name[0] = "?bject *, [Ii]nc.";
-  ReaderPtr reader(new Reader(reader_entry));
-
-  Index index;
-  GuidSet guids;
-  index.insert(writer, guids);
-  index.insert(reader, guids);
-
-  ASSERT_NOT_MATCHED;
-
-  reader_entry.data_reader_qos().reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
-
-  index.reinsert(reader, reader_entry, guids);
-
-  ASSERT_MATCHED(writer);
-}
-
-template <typename Index>
-void unmatched_then_writer_changes_partition(int& status)
-{
-  WriterEntry writer_entry;
-  writer_entry.topic_name("the topic");
-  writer_entry.type_name("the type");
-  writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer_entry.publisher_qos().partition.name.length(1);
-  writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
-  WriterPtr writer(new Writer(writer_entry));
-
-  ReaderEntry reader_entry;
-  reader_entry.topic_name("the topic");
-  reader_entry.type_name("the type");
-  reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader_entry.subscriber_qos().partition.name.length(1);
-  reader_entry.subscriber_qos().partition.name[0] = "OCI";
-  ReaderPtr reader(new Reader(reader_entry));
-
-  Index index;
-  GuidSet guids;
-  index.insert(writer, guids);
-  index.insert(reader, guids);
-
-  ASSERT_NOT_MATCHED;
-
-  writer_entry.publisher_qos().partition.name[0] = "OCI";
-
-  index.reinsert(writer, writer_entry, guids);
-
-  ASSERT_MATCHED(reader);
-}
-
-template <typename Index>
-void unmatched_then_reader_changes_partition(int& status)
-{
-  WriterEntry writer_entry;
-  writer_entry.topic_name("the topic");
-  writer_entry.type_name("the type");
-  writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer_entry.publisher_qos().partition.name.length(1);
-  writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
-  WriterPtr writer(new Writer(writer_entry));
-
-  ReaderEntry reader_entry;
-  reader_entry.topic_name("the topic");
-  reader_entry.type_name("the type");
-  reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader_entry.subscriber_qos().partition.name.length(1);
-  reader_entry.subscriber_qos().partition.name[0] = "OCI";
-  ReaderPtr reader(new Reader(reader_entry));
-
-  Index index;
-  GuidSet guids;
-  index.insert(writer, guids);
-  index.insert(reader, guids);
-
-  ASSERT_NOT_MATCHED;
-
-  reader_entry.subscriber_qos().partition.name[0] = "Object Computing, Inc.";
-
-  index.reinsert(reader, reader_entry, guids);
-
-  ASSERT_MATCHED(writer);
-}
-
-template <typename Index>
-void unmatched_then_writer_changes_topic(int& status)
-{
-  WriterEntry writer_entry;
-  writer_entry.topic_name("wrong topic");
-  writer_entry.type_name("the type");
-  writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer_entry.publisher_qos().partition.name.length(1);
-  writer_entry.publisher_qos().partition.name[0] = "O*C*I*";
-  WriterPtr writer(new Writer(writer_entry));
-
-  ReaderEntry reader_entry;
-  reader_entry.topic_name("the topic");
-  reader_entry.type_name("the type");
-  reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader_entry.subscriber_qos().partition.name.length(1);
-  reader_entry.subscriber_qos().partition.name[0] = "Object Computing, Inc.";
-  ReaderPtr reader(new Reader(reader_entry));
-
-  Index index;
-  GuidSet guids;
-  index.insert(writer, guids);
-  index.insert(reader, guids);
-
-  ASSERT_NOT_MATCHED;
-
-  writer_entry.topic_name("the topic");
-
-  index.reinsert(writer, writer_entry, guids);
-
-  ASSERT_MATCHED(reader);
-}
-
-template <typename Index>
-void unmatched_then_reader_changes_topic(int& status)
-{
-  WriterEntry writer_entry;
-  writer_entry.topic_name("the topic");
-  writer_entry.type_name("the type");
-  writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  WriterPtr writer(new Writer(writer_entry));
-
-  ReaderEntry reader_entry;
-  reader_entry.topic_name("wrong topic");
-  reader_entry.type_name("the type");
-  reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader_entry.subscriber_qos().partition.name.length(1);
-  reader_entry.subscriber_qos().partition.name[0] = "";
-  ReaderPtr reader(new Reader(reader_entry));
-
-  Index index;
-  GuidSet guids;
-  index.insert(writer, guids);
-  index.insert(reader, guids);
-
-  ASSERT_NOT_MATCHED;
-
-  reader_entry.topic_name("the topic");
-
-  index.reinsert(reader, reader_entry, guids);
-
-  ASSERT_MATCHED(writer);
-}
-
-template <typename Index>
-void matched_then_writer_disappears(int& status)
-{
-  WriterEntry writer_entry;
-  writer_entry.topic_name("the topic");
-  writer_entry.type_name("the type");
-  writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer_entry.publisher_qos().partition.name.length(1);
-  writer_entry.publisher_qos().partition.name[0] = "Object Computing, Inc.";
-  WriterPtr writer(new Writer(writer_entry));
-
-  ReaderEntry reader_entry;
-  reader_entry.topic_name("the topic");
-  reader_entry.type_name("the type");
-  reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader_entry.subscriber_qos().partition.name.length(1);
-  reader_entry.subscriber_qos().partition.name[0] = "O*C*I*";
-  ReaderPtr reader(new Reader(reader_entry));
-
-  Index index;
-  GuidSet guids;
-  index.insert(writer, guids);
-  index.insert(reader, guids);
-
-  ASSERT_MATCHED(writer);
-
-  index.erase(writer);
-
-  guids.clear();
-
-  ASSERT_NOT_MATCHED;
-}
-
-template <typename Index>
-void matched_then_reader_disappears(int& status)
-{
-  WriterEntry writer_entry;
-  writer_entry.topic_name("the topic");
-  writer_entry.type_name("the type");
-  writer_entry.data_writer_qos(TheServiceParticipant->initial_DataWriterQos());
-  writer_entry.publisher_qos(TheServiceParticipant->initial_PublisherQos());
-  writer_entry.publisher_qos().partition.name.length(1);
-  writer_entry.publisher_qos().partition.name[0] = "O*C*I*";
-  WriterPtr writer(new Writer(writer_entry));
-
-  ReaderEntry reader_entry;
-  reader_entry.topic_name("the topic");
-  reader_entry.type_name("the type");
-  reader_entry.data_reader_qos(TheServiceParticipant->initial_DataReaderQos());
-  reader_entry.subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-  reader_entry.subscriber_qos().partition.name.length(1);
-  reader_entry.subscriber_qos().partition.name[0] = "Object Computing, Inc.";
-  ReaderPtr reader(new Reader(reader_entry));
-
-  Index index;
-  GuidSet guids;
-  index.insert(writer, guids);
-  index.insert(reader, guids);
-  ASSERT_MATCHED(writer);
-
-  index.erase(reader);
-
-  guids.clear();
-
-  ASSERT_NOT_MATCHED;
-}
-
-template <typename Index>
-void qos_index_test(int& status)
-{
-  writer_then_matched_reader<Index>(status);
-  reader_then_matched_writer<Index>(status);
-
-  matched_then_writer_changes_reliability<Index>(status);
-  matched_then_reader_changes_reliability<Index>(status);
-  matched_then_writer_changes_partition<Index>(status);
-  matched_then_reader_changes_partition<Index>(status);
-  matched_then_writer_changes_topic<Index>(status);
-  matched_then_reader_changes_topic<Index>(status);
-
-  unmatched_then_writer_changes_reliability<Index>(status);
-  unmatched_then_reader_changes_reliability<Index>(status);
-  unmatched_then_writer_changes_partition<Index>(status);
-  unmatched_then_reader_changes_partition<Index>(status);
-  unmatched_then_writer_changes_topic<Index>(status);
-  unmatched_then_reader_changes_topic<Index>(status);
-
-  matched_then_writer_disappears<Index>(status);
-  matched_then_reader_disappears<Index>(status);
 }
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
@@ -775,19 +161,165 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   test_invalid(status, "[a-]");
   test_invalid(status, "[b-a]");
 
-  try {
-    qos_index_test<NoIndex>(status);
-    qos_index_test<PartitionIndex<NoIndex> >(status);
-    qos_index_test<TopicIndex<NoIndex> >(status);
-    qos_index_test<TopicIndex<PartitionIndex<NoIndex> > >(status);
-    qos_index_test<PartitionIndex<TopicIndex<NoIndex> > >(status);
-  } catch (const CORBA::BAD_PARAM&) {
-    std::cout << "Exception" << std::endl;
-    status = EXIT_FAILURE;
+  // Literal test.
+  OpenDDS::DCPS::GUID_t guid1 = make_part_guid(OpenDDS::DCPS::GUID_UNKNOWN);
+  guid1.guidPrefix[0] = 1;
+  OpenDDS::DCPS::GUID_t guid2 = make_part_guid(OpenDDS::DCPS::GUID_UNKNOWN);
+  guid2.guidPrefix[0] = 2;
+  OpenDDS::DCPS::GUID_t guid3 = make_part_guid(OpenDDS::DCPS::GUID_UNKNOWN);
+  guid3.guidPrefix[0] = 3;
+  OpenDDS::DCPS::GUID_t guid4 = make_part_guid(OpenDDS::DCPS::GUID_UNKNOWN);
+  guid3.guidPrefix[0] = 4;
+
+  {
+    // Test the empty string.
+    PartitionIndex pi;
+    pi.insert("", guid1);
+
+    GuidSet expected;
+    expected.insert(guid1);
+
+    GuidSet actual;
+
+    actual.clear();
+    pi.lookup("", actual);
+    test_equal(status, "find '' with ''", actual, expected);
+
+    actual.clear();
+    pi.lookup("*", actual);
+    test_equal(status, "find '' with '*'", actual, expected);
+
+    actual.clear();
+    pi.lookup("**", actual);
+    test_equal(status, "find '' with '**'", actual, expected);
+
+    actual.clear();
+    pi.lookup("***", actual);
+    test_equal(status, "find '' with '***'", actual, expected);
+
+    pi.remove("", guid1);
+
+    actual.clear();
+    pi.lookup("", actual);
+    test_equal(status, "remove ''", actual, GuidSet());
   }
 
-  if (!status) {
-    std::cout << "SUCCESS" << std::endl;
+  {
+    // Test a literal.
+    PartitionIndex pi;
+    pi.insert("apple", guid1);
+
+    GuidSet expected;
+    expected.insert(guid1);
+
+    GuidSet actual;
+
+    actual.clear();
+    pi.lookup("apple", actual);
+    test_equal(status, "find 'apple' with 'apple'", actual, expected);
+
+    actual.clear();
+    pi.lookup("[ab]pple", actual);
+    test_equal(status, "find 'apple' with '[ab]pple'", actual, expected);
+
+    actual.clear();
+    pi.lookup("[!b]pple", actual);
+    test_equal(status, "find 'apple' with '[!b]pple'", actual, expected);
+
+    actual.clear();
+    pi.lookup("?pple", actual);
+    test_equal(status, "find 'apple' with '?pple'", actual, expected);
+
+    actual.clear();
+    pi.lookup("**a**p**p**l**e**", actual);
+    test_equal(status, "find 'apple' with '**a**p**p**l**e**'", actual, expected);
+
+    pi.remove("apple", guid1);
+
+    actual.clear();
+    pi.lookup("apple", actual);
+    test_equal(status, "remove 'apple'", actual, GuidSet());
+  }
+
+  {
+    // Test a pattern.
+    PartitionIndex pi;
+    pi.insert("**a[pq][!rs]?**", guid1);
+
+    GuidSet expected;
+    expected.insert(guid1);
+
+    GuidSet actual;
+
+    actual.clear();
+    pi.lookup("apple", actual);
+    test_equal(status, "find '**a[pq][!rs]?**' with 'apple'", actual, expected);
+
+    actual.clear();
+    pi.lookup("aqple", actual);
+    test_equal(status, "find '**a[pq][!rs]?**' with 'aqple'", actual, expected);
+
+    actual.clear();
+    pi.lookup("arple", actual);
+    test_equal(status, "don't find '**a[pq][!rs]?**' with 'arple'", actual, GuidSet());
+
+    actual.clear();
+    pi.lookup("aprle", actual);
+    test_equal(status, "don't find '**a[pq][!rs]?**' with 'aprle'", actual, GuidSet());
+
+    actual.clear();
+    pi.lookup("appl", actual);
+    test_equal(status, "find '**a[pq][!rs]?**' with 'apple'", actual, expected);
+
+    pi.remove("**a[pq][!rs]?**", guid1);
+
+    actual.clear();
+    pi.lookup("apple", actual);
+    test_equal(status, "remove '**a[pq][!rs]?**'", actual, GuidSet());
+  }
+
+  {
+    // Test multiple literals and patterns.
+    PartitionIndex pi;
+    pi.insert("apple", guid1);
+    pi.insert("orange", guid2);
+    pi.insert("*a*e*", guid3);
+    pi.insert("?pp[lmnop][!i]", guid4);
+
+    GuidSet expected;
+    GuidSet actual;
+
+    expected.clear();
+    expected.insert(guid1);
+    expected.insert(guid3);
+    expected.insert(guid4);
+    actual.clear();
+
+    pi.lookup("apple", actual);
+    test_equal(status, "general find 'apple'", actual, expected);
+
+    expected.clear();
+    expected.insert(guid2);
+    expected.insert(guid3);
+    actual.clear();
+
+    pi.lookup("orange", actual);
+    test_equal(status, "general find 'orange'", actual, expected);
+
+    expected.clear();
+    expected.insert(guid1);
+    expected.insert(guid2);
+    actual.clear();
+
+    pi.lookup("*a*e*", actual);
+    test_equal(status, "general find '*a*e*'", actual, expected);
+
+    expected.clear();
+    expected.insert(guid1);
+    actual.clear();
+
+    pi.lookup("?pp[lmnop][!i]", actual);
+    test_equal(status, "general find '?pp[lmnop][!i]'", actual, expected);
   }
 
   return status;

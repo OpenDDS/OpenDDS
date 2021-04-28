@@ -1,8 +1,9 @@
 #ifndef RTPSRELAY_GUID_PARTITION_TABLE_H_
 #define RTPSRELAY_GUID_PARTITION_TABLE_H_
 
+#include "lib/PartitionIndex.h"
 #include "lib/RelayTypeSupportImpl.h"
-#include "utility.h"
+#include "lib/Utility.h"
 
 #include "dds/DCPS/GuidConverter.h"
 
@@ -64,6 +65,7 @@ public:
       for (const auto& part : to_add) {
         const auto q = partition_to_guid_.insert(std::make_pair(part, OrderedGuidSet()));
         q.first->second.insert(guid);
+        partition_index_.insert(part, guid);
         if (q.second) {
           globally_new.insert(part);
         }
@@ -71,6 +73,7 @@ public:
       for (const auto& part : to_remove) {
         r.first->second.erase(part);
         partition_to_guid_[part].erase(guid);
+        partition_index_.remove(part, guid);
         if (partition_to_guid_[part].empty()) {
           partition_to_guid_.erase(part);
         }
@@ -95,6 +98,7 @@ public:
     if (pos != guid_to_partitions_.end()) {
       for (const auto& partition : pos->second) {
         partition_to_guid_[partition].erase(guid);
+        partition_index_.remove(partition, guid);
         if (partition_to_guid_[partition].empty()) {
           partition_to_guid_.erase(partition);
         }
@@ -123,12 +127,7 @@ public:
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
     for (const auto& part : partitions) {
-      const auto pos = partition_to_guid_.find(part);
-      if (pos != partition_to_guid_.end()) {
-        for (const auto& guid : pos->second) {
-          guids.insert(make_part_guid(guid));
-        }
-      }
+      partition_index_.lookup(part, guids);
     }
   }
 
@@ -137,12 +136,7 @@ public:
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
     for (const auto& part : partitions) {
-      const auto pos = partition_to_guid_.find(part);
-      if (pos != partition_to_guid_.end()) {
-        for (const auto& guid : pos->second) {
-          guids.insert(make_part_guid(guid));
-        }
-      }
+      partition_index_.lookup(part, guids);
     }
   }
 
@@ -203,6 +197,7 @@ private:
   typedef std::set<OpenDDS::DCPS::GUID_t, OpenDDS::DCPS::GUID_tKeyLessThan> OrderedGuidSet;
   typedef std::map<std::string, OrderedGuidSet> PartitionToGuid;
   PartitionToGuid partition_to_guid_;
+  PartitionIndex partition_index_;
 
   mutable ACE_Thread_Mutex mutex_;
 };

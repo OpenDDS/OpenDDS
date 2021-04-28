@@ -1,8 +1,8 @@
 #ifndef RTPSRELAY_RELAY_PARTITION_TABLE_H_
 #define RTPSRELAY_RELAY_PARTITION_TABLE_H_
 
-#include "lib/RelayTypeSupportImpl.h"
-#include "utility.h"
+#include "lib/PartitionIndex.h"
+#include "lib/Utility.h"
 
 #include "dds/DCPS/GuidConverter.h"
 
@@ -116,14 +116,11 @@ private:
         const auto r = relay_to_partitions_.insert(std::make_pair(application_participant_guid, StringSet()));
         r.first->second.insert(to_add.begin(), to_add.end());
         for (const auto& part : to_add) {
-          partition_to_relay_[part].insert(application_participant_guid);
+          partition_index_.insert(part, application_participant_guid);
         }
         for (const auto& part : to_remove) {
           r.first->second.erase(part);
-          partition_to_relay_[part].erase(application_participant_guid);
-          if (partition_to_relay_[part].empty()) {
-            partition_to_relay_.erase(part);
-          }
+          partition_index_.remove(part, application_participant_guid);
         }
         if (r.first->second.empty()) {
           relay_to_partitions_.erase(r.first);
@@ -136,10 +133,7 @@ private:
       const auto pos = relay_to_partitions_.find(application_participant_guid);
       if (pos != relay_to_partitions_.end()) {
         for (const auto& partition : pos->second) {
-          partition_to_relay_[partition].erase(application_participant_guid);
-          if (partition_to_relay_[partition].empty()) {
-            partition_to_relay_.erase(partition);
-          }
+          partition_index_.remove(partition, application_participant_guid);
         }
       }
 
@@ -149,15 +143,14 @@ private:
     void lookup(AddressSet& address_set, const StringSet& partitions, const std::string& name) const
     {
       for (const auto& partition : partitions) {
-        const auto pos = partition_to_relay_.find(partition);
-        if (pos != partition_to_relay_.end()) {
-          for (const auto& guid : pos->second) {
-            const auto pos2 = relay_to_address_.find(guid);
-            if (pos2 != relay_to_address_.end()) {
-              const auto pos3 = pos2->second.find(name);
-              if (pos3 != pos2->second.end()) {
-                address_set.insert(pos3->second);
-              }
+        GuidSet guids;
+        partition_index_.lookup(partition, guids);
+        for (const auto& guid : guids) {
+          const auto pos2 = relay_to_address_.find(guid);
+          if (pos2 != relay_to_address_.end()) {
+            const auto pos3 = pos2->second.find(name);
+            if (pos3 != pos2->second.end()) {
+              address_set.insert(pos3->second);
             }
           }
         }
@@ -166,8 +159,7 @@ private:
 
     RelayToAddress& relay_to_address_;
 
-    typedef std::map<std::string, GuidSet> PartitionToRelay;
-    PartitionToRelay partition_to_relay_;
+    PartitionIndex partition_index_;
 
     typedef std::map<OpenDDS::DCPS::GUID_t, StringSet> RelayToPartitions;
     RelayToPartitions relay_to_partitions_;

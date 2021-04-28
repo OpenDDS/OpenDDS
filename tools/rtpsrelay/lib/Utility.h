@@ -1,7 +1,7 @@
 #ifndef RTPSRELAY_UTILITY_H_
 #define RTPSRELAY_UTILITY_H_
 
-#include "lib/RelayC.h"
+#include "RelayC.h"
 
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/TimeDuration.h"
@@ -103,9 +103,7 @@ inline OpenDDS::DCPS::RepoId guid_to_repoid(const GUID_t& a_guid)
 inline GUID_t repoid_to_guid(const OpenDDS::DCPS::RepoId& a_guid)
 {
   GUID_t retval;
-  std::memcpy(&retval._guidPrefix[0], &a_guid.guidPrefix, sizeof(retval._guidPrefix));
-  std::memcpy(&retval._entityId._entityKey[0], &a_guid.entityId.entityKey, sizeof(retval._entityId._entityKey));
-  retval._entityId._entityKind = a_guid.entityId.entityKind;
+  std::memcpy(&retval, &a_guid, sizeof(GUID_t));
   return retval;
 }
 

@@ -2,9 +2,9 @@
 #define RTPSRELAY_PARTICIPANT_STATISTICS_REPORTER_H_
 
 #include "Config.h"
-#include "utility.h"
 
 #include "lib/RelayTypeSupportImpl.h"
+#include "lib/Utility.h"
 
 #include <dds/DCPS/JsonValueWriter.h>
 
