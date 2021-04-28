@@ -103,7 +103,6 @@ control the behavior of the OpenDDS CMake package.
 | -------------------------------- | ---------------------------------------------------------------------------- | ------- |
 | `OPENDDS_CMAKE_VERBOSE`          | Print detailed status information at CMake-Generation time                   | `OFF`   |
 | `OPENDDS_DEFAULT_NESTED`         | [Topic types must be declared explicitly.](#opendds_default_nested)          | `ON`    |
-| `OPENDDS_ALLOW_ENV_CHANGE`       | [Ignore environment variable changes.](#opendds_allow_env_change)            | `OFF`   |
 | `OPENDDS_FILENAME_ONLY_INCLUDES` | [No directory info in generated #includes.](#opendds_filename_only_includes) | `OFF`   |
 
 ### Libraries
@@ -350,14 +349,6 @@ OPENDDS_TARGET_SOURCES(messenger
   OPENDDS_IDL_OPTIONS --no-default-nested
 )
 ```
-
-### `OPENDDS_ALLOW_ENV_CHANGE`
-
-OpenDDS's CMake build default settings generate an error if the project attempts
-to change the value of `$DDS_ROOT`, `$ACE_ROOT`, or `$TAO_ROOT`. This can happen
-unintentionally if a project's libraries and executable both require OpenDDS with
-`find_package(OpenDDS REQUIRED)`. Setting `OPENDDS_ALLOW_ENV_CHANGE` to `ON`
-disables the environment variable check.
 
 ### `OPENDDS_FILENAME_ONLY_INCLUDES`
 

@@ -4,9 +4,7 @@ cmake_minimum_required(VERSION 3.8.2)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if(NOT OpenDDS_FOUND)
-  find_package(OpenDDS REQUIRED)
-endif()
+find_package(OpenDDS REQUIRED)
 
 set(target_prefix "opendds_cmake_cpp11_messenger_")
 set(src "${CMAKE_CURRENT_SOURCE_DIR}/../../../DCPS/C++11/Messenger")
