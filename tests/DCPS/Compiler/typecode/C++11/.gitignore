@@ -1,9 +1,5 @@
 Compiler_Typecode_C++11
-typecodeC.cpp
 typecodeC.h
-typecodeC.inl
-typecodeS.cpp
-typecodeS.h
 typecodeTypeSupportC.cpp
 typecodeTypeSupportC.h
 typecodeTypeSupportC.inl

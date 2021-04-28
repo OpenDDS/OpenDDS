@@ -1370,7 +1370,8 @@ struct Cxx11Generator : GeneratorBase
     helpers_[HLP_FIXED_CONSTANT] = "IDL::Fixed_T";
   }
 
-  static void gen_typecode_ptrs(const std::string& type) {
+  static void gen_typecode_ptrs(const std::string& type)
+  {
     if (!be_global->suppress_typecode()) {
       be_global->add_include("tao/Basic_Types.h", BE_GlobalData::STREAM_LANG_H);
       be_global->lang_header_ << "extern const ::CORBA::TypeCode_ptr _tc_" << type << ";\n";
