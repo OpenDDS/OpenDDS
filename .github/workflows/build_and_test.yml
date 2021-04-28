@@ -270,7 +270,7 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        cd tests/cmake_integration
+        cd tests/cmake
         perl run_ci_tests.pl
 
   build_u18_o1d0v1_xer0_j12:
@@ -345,7 +345,7 @@ jobs:
       run: |
         cd OpenDDS
         . install_setenv.sh
-        cd tests/cmake_integration/Messenger/Messenger_1
+        cd tests/cmake/Messenger/Messenger_1
         git clean -dfx .
         mkdir build
         cd build
@@ -424,7 +424,7 @@ jobs:
       run: |
         cd OpenDDS
         . install_setenv.sh
-        cd tests/cmake_integration/Messenger/Messenger_1/build
+        cd tests/cmake/Messenger/Messenger_1/build
         perl run_test.pl
     - name: remove install clutter
       shell: bash
@@ -1073,7 +1073,7 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        cd tests/cmake_integration
+        cd tests/cmake
         perl run_ci_tests.pl --compiler=clang++-5.0
 
   ACE_TAO_u18_clang10_sec_js0:
@@ -1284,7 +1284,7 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        cd tests/cmake_integration
+        cd tests/cmake
         perl run_ci_tests.pl --compiler=clang++-10
 
   ACE_TAO_u18_gcc6_d0w1_cpp03:
@@ -1494,7 +1494,7 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        cd tests/cmake_integration
+        cd tests/cmake
         perl run_ci_tests.pl --skip-cxx11 --compiler=g++-6
 
   ACE_TAO_u18_gcc8_i0_js0_j:
@@ -1704,7 +1704,7 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        cd tests/cmake_integration
+        cd tests/cmake
         perl run_ci_tests.pl --compiler=g++-8
 
   ACE_TAO_u18_gcc10_i0w1_xer0:
@@ -1907,7 +1907,7 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        cd tests/cmake_integration
+        cd tests/cmake
         perl run_ci_tests.pl --compiler=g++-10
 
   u20_gcc10_bsafe_js0_FM-2c:
@@ -3553,7 +3553,7 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        cd tests/cmake_integration
+        cd tests/cmake
         perl run_ci_tests.pl --no-shared
 
   messenger_u18_stat_qt_ws_sec:
@@ -4441,7 +4441,7 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        cd tests/cmake_integration/
+        cd tests/cmake/
         perl run_ci_tests.pl --no-shared --build-config=Debug
 
   messenger_w19_p1_stat_js0:

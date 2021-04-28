@@ -8,5 +8,5 @@ project(opendds_root_project)
 
 add_subdirectory("DevGuideExamples/DCPS")
 if(NOT ${CMAKE_VERSION} VERSION_LESS 3.8.2)
-  add_subdirectory("tests/cmake_integration")
+  add_subdirectory("tests/cmake")
 endif()

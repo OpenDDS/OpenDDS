@@ -58,7 +58,7 @@ my %builds_lib = ('Messenger_2' => 1, 'C++11_Messenger' => 1);
 my %runtest_in_config_dir = ('Messenger_1' => 1, 'Messenger_2' => 1);
 
 for my $dir (@dirs) {
-  my $build_dir="$ENV{'DDS_ROOT'}/tests/cmake_integration/Messenger/$dir/build";
+  my $build_dir="$ENV{'DDS_ROOT'}/tests/cmake/Messenger/$dir/build";
   mkdir($build_dir) or die "ERROR '$!': failed to make directory $build_dir";
   chdir($build_dir) or die "ERROR: '$!': failed to switch to $build_dir";
 

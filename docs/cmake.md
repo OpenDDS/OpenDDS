@@ -145,7 +145,7 @@ To generate/compile the [Messenger with direct IDL inclusion] within the OpenDDS
 #### Unix
 
 ```bash
-cd tests/cmake_integration/Messenger/Messenger_1
+cd tests/cmake/Messenger/Messenger_1
 mkdir build
 cd build
 cmake -DCMAKE_PREFIX_PATH=<location of OpenDDS source tree> ..
@@ -158,7 +158,7 @@ The following assumes Visual Studio 2017 using 64-bit architecture (adjust the
 CMake `-G` parameter if using something different).
 
 ```bat
-cd tests\cmake_integration\Messenger\Messenger_1
+cd tests\cmake\Messenger\Messenger_1
 mkdir build
 cd build
 cmake -DCMAKE_PREFIX_PATH=<location of OpenDDS source tree> -G "Visual Studio 15 2017 Win64" ..
@@ -327,8 +327,8 @@ The following values impact the build in one way or another.
 
 `OPENDDS_INLINE` should be explicitly set to `ON` or `OFF` (based on the ACE `platform_macros.GNU` variable `inline`) in `config.cmake` unless you will only be using a CMake Microsoft Visual Studio Generator.
 
-[Messenger with direct IDL inclusion]: ../tests/cmake_integration/Messenger/Messenger_1/CMakeLists.txt
-[Messenger with auxiliary IDL library]: ../tests/cmake_integration/Messenger/Messenger_2/CMakeLists.txt
+[Messenger with direct IDL inclusion]: ../tests/cmake/Messenger/Messenger_1/CMakeLists.txt
+[Messenger with auxiliary IDL library]: ../tests/cmake/Messenger/Messenger_2/CMakeLists.txt
 [OpenDDS Dev Guide]: http://opendds.org/documents/
 
 ### `OPENDDS_DEFAULT_NESTED`
