@@ -135,7 +135,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::SubscriberQos subscriber_qos;
     participant->get_default_subscriber_qos(subscriber_qos);
     subscriber_qos.partition.name.length(1);
-    subscriber_qos.partition.name[0] = "OCI";
+    subscriber_qos.partition.name[0] = "?CI";
 
     DDS::Subscriber_var sub =
       participant->create_subscriber(subscriber_qos,

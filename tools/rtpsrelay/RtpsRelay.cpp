@@ -638,25 +638,23 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
+  RelayStatisticsReporter relay_statistics_reporter(config, relay_statistics_writer);
   ACE_Reactor reactor_(new ACE_Select_Reactor, true);
   const auto reactor = &reactor_;
   GuidPartitionTable guid_partition_table(config, relay_partitions_writer, relay_partitions_increment_writer, spdp_replay_writer);
   RelayPartitionTable relay_partition_table;
-
-  // Setup readers and writers for managing the association table.
-
-  RelayStatisticsReporter relay_statistics_reporter(config, relay_statistics_writer);
+  GuidAddrSet guid_addr_set(config, relay_statistics_reporter);
   relay_statistics_reporter.report();
 
   HandlerStatisticsReporter spdp_vertical_reporter(config, VSPDP, handler_statistics_writer, relay_statistics_reporter);
   spdp_vertical_reporter.report();
-  SpdpHandler spdp_vertical_handler(config, VSPDP, spdp_horizontal_addr, reactor, guid_partition_table, relay_partition_table, rtps_discovery, crypto, spdp, spdp_vertical_reporter);
+  SpdpHandler spdp_vertical_handler(config, VSPDP, spdp_horizontal_addr, reactor, guid_partition_table, relay_partition_table, guid_addr_set, rtps_discovery, crypto, spdp, spdp_vertical_reporter);
   HandlerStatisticsReporter sedp_vertical_reporter(config, VSEDP, handler_statistics_writer, relay_statistics_reporter);
   sedp_vertical_reporter.report();
-  SedpHandler sedp_vertical_handler(config, VSEDP, sedp_horizontal_addr, reactor, guid_partition_table, relay_partition_table, rtps_discovery, crypto, sedp, sedp_vertical_reporter);
+  SedpHandler sedp_vertical_handler(config, VSEDP, sedp_horizontal_addr, reactor, guid_partition_table, relay_partition_table, guid_addr_set, rtps_discovery, crypto, sedp, sedp_vertical_reporter);
   HandlerStatisticsReporter data_vertical_reporter(config, VDATA, handler_statistics_writer, relay_statistics_reporter);
   data_vertical_reporter.report();
-  DataHandler data_vertical_handler(config, VDATA, data_horizontal_addr, reactor, guid_partition_table, relay_partition_table, rtps_discovery, crypto, data_vertical_reporter);
+  DataHandler data_vertical_handler(config, VDATA, data_horizontal_addr, reactor, guid_partition_table, relay_partition_table, guid_addr_set, rtps_discovery, crypto, data_vertical_reporter);
 
   HandlerStatisticsReporter spdp_horizontal_reporter(config, HSPDP, handler_statistics_writer, relay_statistics_reporter);
   spdp_horizontal_reporter.report();
@@ -675,6 +673,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   spdp_vertical_handler.horizontal_handler(&spdp_horizontal_handler);
   sedp_vertical_handler.horizontal_handler(&sedp_horizontal_handler);
   data_vertical_handler.horizontal_handler(&data_horizontal_handler);
+
+  guid_addr_set.spdp_vertical_handler(&spdp_vertical_handler);
+  guid_addr_set.sedp_vertical_handler(&sedp_vertical_handler);
+  guid_addr_set.data_vertical_handler(&data_vertical_handler);
 
   DDS::Subscriber_var bit_subscriber = application_participant->get_builtin_subscriber();
 

@@ -94,6 +94,13 @@ public:
     report(now);
   }
 
+  void local_active_participants(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    log_relay_statistics_.local_active_participants() = static_cast<uint32_t>(count);
+    publish_relay_statistics_.local_active_participants() = static_cast<uint32_t>(count);
+    report(now);
+  }
+
   void error(const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     ++log_relay_statistics_.error_count();
@@ -112,20 +119,6 @@ public:
   {
     ++log_relay_statistics_.expired_address_count();
     ++publish_relay_statistics_.expired_address_count();
-    report(now);
-  }
-
-  void claim(const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    ++log_relay_statistics_.claim_count();
-    ++publish_relay_statistics_.claim_count();
-    report(now);
-  }
-
-  void disclaim(const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    ++log_relay_statistics_.disclaim_count();
-    ++publish_relay_statistics_.disclaim_count();
     report(now);
   }
 
@@ -184,8 +177,6 @@ private:
     log_relay_statistics_.error_count(0);
     log_relay_statistics_.new_address_count(0);
     log_relay_statistics_.expired_address_count(0);
-    log_relay_statistics_.claim_count(0);
-    log_relay_statistics_.disclaim_count(0);
     log_relay_statistics_.max_queue_size(0);
     log_input_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
     log_output_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
@@ -229,8 +220,6 @@ private:
     publish_relay_statistics_.error_count(0);
     publish_relay_statistics_.new_address_count(0);
     publish_relay_statistics_.expired_address_count(0);
-    publish_relay_statistics_.claim_count(0);
-    publish_relay_statistics_.disclaim_count(0);
     publish_relay_statistics_.max_queue_size(0);
     publish_input_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
     publish_output_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;

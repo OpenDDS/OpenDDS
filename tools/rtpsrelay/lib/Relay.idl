@@ -119,12 +119,7 @@ module RtpsRelay {
     Duration_t output_processing_time;
     unsigned long max_directed_gain;
     unsigned long max_undirected_gain;
-    unsigned long local_active_participants;
     unsigned long error_count;
-    unsigned long new_address_count;
-    unsigned long expired_address_count;
-    unsigned long claim_count;
-    unsigned long disclaim_count;
     unsigned long max_queue_size;
     Duration_t max_queue_latency;
   };
@@ -148,10 +143,9 @@ module RtpsRelay {
     unsigned long max_directed_gain;
     unsigned long max_undirected_gain;
     unsigned long error_count;
+    unsigned long local_active_participants;
     unsigned long new_address_count;
     unsigned long expired_address_count;
-    unsigned long claim_count;
-    unsigned long disclaim_count;
     unsigned long max_queue_size;
     Duration_t max_queue_latency;
   };
