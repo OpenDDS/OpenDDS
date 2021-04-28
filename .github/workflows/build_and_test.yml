@@ -6983,7 +6983,7 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_w16_x86_doi0_sec:
+  build_w16_x86_d0i0_sec:
 
     runs-on: windows-2016
 
@@ -7071,11 +7071,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_w16_x86_doi0_sec:
+  test_w16_x86_d0i0_sec:
 
     runs-on: windows-2016
 
-    needs: build_w16_x86_doi0_sec
+    needs: build_w16_x86_d0i0_sec
     timeout-minutes: 150
 
     steps:
@@ -7126,14 +7126,14 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
-        name: build_w16_x86_doi0_sec_artifact
+        name: build_w16_x86_d0i0_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w16_x86_doi0_sec.tar.xz
-        rm -f build_w16_x86_doi0_sec.tar.xz
+        tar xvfJ build_w16_x86_d0i0_sec.tar.xz
+        rm -f build_w16_x86_d0i0_sec.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.7.0
     - name: check build configuration
