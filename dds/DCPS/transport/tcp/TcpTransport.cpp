@@ -62,8 +62,8 @@ TcpTransport::blob_to_key(const TransportBLOB& remote,
                           Priority priority,
                           bool active)
 {
-  const ACE_INET_Addr remote_address =
-    AssociationData::get_remote_address(remote);
+  const ACE_INET_Addr remote_addresses = AssociationData::get_remote_address(remote);
+  const ACE_INET_Addr remote_address = choose_single_coherent_address(remote_addresses);
   const bool is_loopback = remote_address == config().local_address();
   return PriorityKey(priority, remote_address, is_loopback, active);
 }

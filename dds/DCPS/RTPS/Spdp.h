@@ -282,6 +282,29 @@ private:
     static const WriteFlags SEND_RELAY = (1 << 1);
     static const WriteFlags SEND_DIRECT = (1 << 2);
 
+    class RegisterHandlers : public DCPS::ReactorInterceptor::Command {
+    public:
+      RegisterHandlers(const DCPS::RcHandle<SpdpTransport>& tport,
+        const DCPS::ReactorTask_rch& reactor_task)
+        : tport_(tport)
+        , reactor_task_(reactor_task)
+      {
+      }
+
+      void execute()
+      {
+        DCPS::RcHandle<SpdpTransport> tport = tport_.lock();
+        if (!tport) {
+          return;
+        }
+        tport->register_handlers(reactor_task_);
+      }
+
+    private:
+      DCPS::WeakRcHandle<SpdpTransport> tport_;
+      DCPS::ReactorTask_rch reactor_task_;
+    };
+
     explicit SpdpTransport(DCPS::RcHandle<Spdp> outer);
     ~SpdpTransport();
 
@@ -289,7 +312,10 @@ private:
 
     virtual int handle_input(ACE_HANDLE h);
 
-    void open(const DCPS::ReactorTask_rch&);
+    void open(const DCPS::ReactorTask_rch& reactor_task);
+    void register_unicast_socket(
+      ACE_Reactor* reactor, ACE_SOCK_Dgram& socket, const char* what);
+    void register_handlers(const DCPS::ReactorTask_rch& reactor_task);
     void enable_periodic_tasks();
 
     void shorten_local_sender_delay_i();
