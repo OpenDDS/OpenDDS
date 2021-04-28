@@ -570,6 +570,8 @@ ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& address, bool 
     return *set4_loopback.begin();
   }
 
+#else
+  ACE_DEBUG((LM_DEBUG, "NetworkAddress::choose_single_coherent_address() - ACE_VERSION: %d.%d.%d\n", ACE_MAJOR_VERSION, ACE_MINOR_VERSION, ACE_MICRO_VERSION));
 #endif // !(ACE_MAJOR_VERSION < 6 || (ACE_MAJOR_VERSION == 6 && (ACE_MINOR_VERSION < 3 || (ACE_MINOR_VERSION == 3 && ACE_MICRO_VERSION < 1))))
   ACE_UNUSED_ARG(prefer_loopback);
   return address;
