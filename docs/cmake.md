@@ -264,7 +264,7 @@ that require the IDL. Additionally if the library is a shared library,
 executables can share that file and this reduces the size of the executable
 files.
 
-*Note:* This may issue a warning in earlier version of CMake due to the messenger library
+*Note:* This may issue a warning in earlier versions of CMake due to the messenger library
 not having any sources added with it in the call to `add_library`.
 
 ## Advanced Usage
@@ -276,10 +276,11 @@ of its contained variables. Below is a list of the important variables with
 some information on their purpose.
 
 #### Optional OpenDDS Features
+
 When OpenDDS is built using the MPC build-system
-and optional features are specified, various C/C++; tao_idl; and opendds_idl
+and optional features are specified, various C/C++; `tao_idl`; and `opendds_idl`
 compiler macros are set on dependent libraries or executables. These defines
-are set by MPC using the [dcps_optional_features.mpb](../MPC/config/dcps_optional_features.mpb)
+are set by MPC using the [`dcps_optional_features.mpb`](../MPC/config/dcps_optional_features.mpb)
 file.
 
 CMake-Based targets must also inherit the defined macros, so the functionality
@@ -291,7 +292,7 @@ within `config.cmake` prior to compilation.
 This table outlines the feature-related variables and their _expected_ default
 values (generated when the configure script is run without arguments).
 If any feature is explicitly enabled/disabled in the OpenDDS build then the corresponding
-CMake variable below should be set to either _ON_ or _OFF_ depending on the desired state.
+CMake variable below should be set to either `ON` or `OFF` depending on the desired state.
 
 | CMake Variable                   | Notes (from configure script output)    | Default |
 |---                               | ---                                     | ---     |
@@ -305,6 +306,7 @@ CMake variable below should be set to either _ON_ or _OFF_ depending on the desi
 |`OPENDDS_PERSISTENCE_PROFILE`     | Persistence Profile                     | `ON`      |
 |`OPENDDS_QUERY_CONDITION`         | QueryCondition (CS Profile)             | `ON`      |
 |`OPENDDS_SECURITY`                | DDS Security plugin                     | `OFF`     |
+|`OPENDDS_SAFETY_PROFILE`          | Safety Profile                          | `OFF`     |
 
 #### Build-Related Options
 
@@ -318,7 +320,10 @@ The following values impact the build in one way or another.
 |`OPENDDS_INLINE`           | ACE's inline build flag                                            | See below           |
 |`OPENDDS_STATIC`           | Use static libraries                                               | `OFF`                 |
 |`OPENDDS_XERCES3`          | Adds dependencies to targets; required when `OPENDDS_SECURITY` is `ON` | `OFF`                 |
-|`OPENDDS_FEATURES`         | Semicolon-Separated list of additional features which impact the build. Currently supported are `versioned_namespace=1` (see [this](https://github.com/DOCGroup/ACE_TAO/blob/master/ACE/docs/Symbol_Versioning.html) document) and `uses_wchar=1` for wide-character support. | N/A |
+|`OPENDDS_CXX11`            | ACE/TAO and OpenDDS were built with C++11 or later.                | N/A                 |
+|`OPENDDS_WCHAR`            | ACE/TAO and OpenDDS were built to prefer wide characters.          | `OFF`               |
+|`OPENDDS_VERSIONED_NAMEPSACE` | ACE/TAO and OpenDDS have versioned namespaces.                  | `OFF`               |
+|`OPENDDS_FEATURES`         | List of additional features which impact the build.                | N/A                 |
 
 `OPENDDS_INLINE` should be explicitly set to `ON` or `OFF` (based on the ACE `platform_macros.GNU` variable `inline`) in `config.cmake` unless you will only be using a CMake Microsoft Visual Studio Generator.
 

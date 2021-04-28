@@ -1862,6 +1862,47 @@ sub disable_feature {
   push(@{$featureArray}, "$feature=0");
 }
 
+sub get_default_features {
+  my $buildEnv = shift;
+
+  my %default_features;
+  my $file = "$buildEnv->{ACE_ROOT}/bin/MakeProjectCreator/config/default.features";
+  if (-e $file) {
+    open(my $fh, '<', $file) or die "ERROR: Could not open $file: $!";
+    while (my $row = <$fh>) {
+      chomp $row;
+      $row =~ s/\/\/.*//;
+      $row =~ s/^\s+//;
+      $row =~ s/\s+$//;
+      next if $row eq '';
+      my ($key, $value) = split(/=/, $row);
+      $default_features{$key} = $value;
+    }
+  }
+  return %default_features;
+}
+
+sub get_requested_features {
+  my %requested_features;
+  for my $f (@features) {
+    my ($key, $value) = split(/=/, $f);
+    $value = "1" unless defined $value;
+    $requested_features{$key} = $value;
+  }
+  return %requested_features;
+}
+
+sub get_features {
+  my $buildEnv = shift;
+
+  my %features = get_default_features($buildEnv);
+  my %requested_features = get_requested_features();
+  for my $key (keys(%requested_features)) {
+    $features{$key} = $requested_features{$key};
+  }
+  return %features;
+}
+
 my $buildtao;
 sub generate_workspace {
   my $buildEnv = shift;
@@ -1997,27 +2038,8 @@ EOT
     if (!$buildtao && !defined $opts{'safety-profile'}) {
       # Check for compatibility between the requested features/macros
       # and the pre-built ACE/TAO.
-      my $file = $buildEnv->{'ACE_ROOT'} .
-        '/bin/MakeProjectCreator/config/default.features';
-      my %existing_features;
-      if (-e $file) {
-        open(my $fh, '<', $file) or die "ERROR: Could not open $file: $!";
-        while (my $row = <$fh>) {
-          chomp $row;
-          $row =~ s/\/\/.*//;
-          $row =~ s/^\s+//;
-          $row =~ s/\s+$//;
-          next if $row eq '';
-          my ($key, $value) = split(/=/, $row);
-          $existing_features{$key} = $value;
-        }
-      }
-      my %requested_features;
-      for my $f (@features) {
-        my ($key, $value) = split(/=/, $f);
-        $value = "1" unless defined $value;
-        $requested_features{$key} = $value;
-      }
+      my %existing_features = get_default_features($buildEnv);
+      my %requested_features = get_requested_features();
       for my $f (@ace_features) {
         if (defined $requested_features{$f}) {
           if (!defined $existing_features{$f}) {
@@ -2030,7 +2052,7 @@ EOT
         }
       }
 
-      $file = "$buildEnv->{'ACE_ROOT'}/include/makeinclude/platform_macros.GNU";
+      my $file = "$buildEnv->{'ACE_ROOT'}/include/makeinclude/platform_macros.GNU";
       my %existing_macros;
       if (-e $file) {
         open(my $fh, '<', $file) or die "ERROR: Could not open $file: $!";
@@ -2226,7 +2248,9 @@ sub configure_build {
   generate_workspace($buildEnvRef);
   write_environment($buildEnvRef, $buildEnvRef->{'DDS_ROOT'});
 
-  write_cmake_file($buildEnvRef, $buildEnvRef->{'DDS_ROOT'});
+  if ($buildEnvRef->{'build'} eq 'target') {
+    write_cmake_file($buildEnvRef);
+  }
 }
 
 sub write_cross_compile_makefile {
@@ -2404,32 +2428,104 @@ if ($is_windows && !$cross_compile) {
 }
 
 sub write_cmake_file {
-  my %buildEnv = %{shift()};
-  my $dir = shift;
-  my $module_dir = $dir . '/cmake';
+  my $buildEnv = shift();
 
+  my $module_dir = "$buildEnv->{'DDS_ROOT'}/cmake";
   mkpath($module_dir) unless -d $module_dir;
-  my $CM = backup_and_open($module_dir . '/config.cmake');
+  my $fh = backup_and_open($module_dir . '/config.cmake');
 
   sub whack_to_slash {
     my $s = shift;
     $s =~ s|\\|/|g;
     return $s;
-  };
+  }
 
   sub to_cmake_scalar {
     my $val = shift;
     return 'ON' if "$val" eq '1';
     return 'OFF' if "$val" eq '0';
-    return whack_to_slash($val);
-  };
+    return '"' . whack_to_slash($val) . '"';
+  }
 
   sub to_cmake_list {
     my @list = @{$_[0]};
-    join ';', map {whack_to_slash($_)} @list;
-  };
+    return '"' . join(';', map {whack_to_slash($_)} @list) . '"';
+  }
+
+  sub to_cmake_value {
+    my $value = shift();
+
+    my $ref_type = ref($value);
+    if ($ref_type eq 'ARRAY') {
+      return to_cmake_list($value);
+    }
+    elsif ($ref_type eq '') {
+      return to_cmake_scalar($value);
+    }
+    else {
+      die "ERROR: to_cmake_value invalid value type, stopped";
+    }
+  }
+
+  sub print_cmake_config {
+    my $fh = shift();
+    my $name = shift();
+    my $value = shift();
+
+    $name = uc("OPENDDS_$name");
+    $name =~ s/-/_/g;
+
+    print $fh "set($name ", to_cmake_value($value), ")\n";
+  }
 
   sub generate_cmake_options {
+    my $fh = shift();
+    my $buildEnv = shift();
+
+    print_cmake_config($fh, 'MPC', Cwd::abs_path($buildEnv->{'MPC_ROOT'}));
+    print_cmake_config($fh, 'ACE', Cwd::abs_path($buildEnv->{'ACE_ROOT'}));
+    print_cmake_config($fh, 'TAO', Cwd::abs_path($buildEnv->{'TAO_ROOT'}));
+
+    my @configs = (
+      {
+        name => 'CXX11',
+        feature => 'no_cxx11',
+        inverted => 1,
+      },
+      {
+        name => 'WCHAR',
+        feature => 'uses_wchar',
+      },
+      {
+        name => 'IPV6',
+        feature => 'ipv6',
+      },
+      {
+        name => 'SAFETY_PROFILE',
+        feature => 'no_opendds_safety_profile',
+        inverted => 1,
+      },
+      {
+        name => 'VERSIONED_NAMESPACE',
+        feature => 'versioned_namespace',
+      },
+    );
+    my %features = get_features($buildEnv);
+    for my $config (@configs) {
+      my $inverted = $config->{inverted} // 0;
+      my $default = $config->{default} // 0;
+      my $enabled;
+      if (exists($features{$config->{feature}})) {
+        $enabled = $features{$config->{feature}} eq "1" ? !$inverted : $inverted;
+      }
+      else {
+        $enabled = $default;
+      }
+      print_cmake_config($fh, $config->{name}, $enabled);
+    }
+
+    # TODO(iguessthislldo): Remove option-based values or at least reduce to a
+    # FIXED subset of options.
     # These flags only appear in the %opts map when specified by the user.
     my %enabled_by_default = map {$_, 1} qw(
       built-in-topics
@@ -2449,56 +2545,42 @@ sub write_cmake_file {
       security
     );
 
-    my %make_absolute_path = map {$_, 1} qw(
+    my %ignore = map {$_, 0} qw(
+      backup
+      solution_file
+      ipv6
+      safety-profile
+      no-opendds-safety-profile
+      target
+      host
+      tests
+      cmake
+      verbose
       ace
       tao
       mpc
+      static
     );
 
-    my $result = "";
     # Merge the hashes together; the user-supplied %opts will override
     # the enabled-/disabled-defaults.
     my %opts_ = (%enabled_by_default, %disabled_by_default, %opts);
-    $opts_{'ace'} = $ace_src;
-    $opts_{'tao'} = $tao_src;
-
     for my $k (sort keys %opts_) {
-      my $var = uc "OPENDDS_${k}";
-      $var =~ s/-/_/g;
-      my $val = $opts_{$k};
-
-      if ($make_absolute_path{$k}) {
-        $val = Cwd::abs_path($val);
-      }
-
-      $result .= "\n";
-      if (ref($val) eq 'ARRAY') {
-        $result .= qq{set($var "${\( to_cmake_list($val))}")};
-      }
-      else {
-        my $cmake_scalar = to_cmake_scalar($val);
-
-        if ($cmake_scalar eq 'ON' || $cmake_scalar eq 'OFF') {
-          $result .= qq{set($var $cmake_scalar)};
-        }
-        else {
-          $result .= qq{set($var "$cmake_scalar")};
-        }
+      if (!exists($ignore{$k})) {
+        print_cmake_config($fh, $k, $opts_{$k});
       }
     }
-    return $result;
   };
 
-  print $CM <<"FIND_OPENDDS_CMAKE_CONFIG";
+  print $fh <<"EOF";
 # Contains configuration variables for the FindOpenDDS cmake module based on
 # detected defaults and/or user-supplied switches. Feel free to edit them as
 # necessary, but keep in mind that they will be moved to config.cmake.bak.*
 # the next time the \$DDS_ROOT/configure script is executed.
 #
 # THIS FILE WAS AUTO-GENERATED BY: $0 @ARGS
-#
-${\( generate_cmake_options() )}
-FIND_OPENDDS_CMAKE_CONFIG
 
-  dump_and_unlink($CM) if $opts{'dry-run'};
+EOF
+  generate_cmake_options($fh, $buildEnv);
+  dump_and_unlink($fh) if $opts{'dry-run'};
 }
