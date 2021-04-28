@@ -367,7 +367,7 @@ Set environment variables based on the NDK location and Android configuration se
 Configure and build with CMake
 1. `cd C:\your\location\of\Xerces-for-android`
 2. `mkdir build & cd build`
-3. `cmake -GNinja -DCMAKE_INSTALL_PREFIX=C:\your\location\of\installed-xerces -DCMAKE_TOOLCHAIN_FILE=%NDK%\build\cmake\android.toolchain.cmake -DANDROID_ABI=%abi% -DANDROID_PLATFORM=android-%api% "-DANDROID_CPP_FEATURES=rtti exceptions" ..`
+3. `cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=C:\your\location\of\installed-xerces -DCMAKE_TOOLCHAIN_FILE=%NDK%\build\cmake\android.toolchain.cmake -DANDROID_ABI=%abi% -DANDROID_PLATFORM=android-%api% "-DANDROID_CPP_FEATURES=rtti exceptions" ..`
 4. `cmake --build . --target install`
 
 ## Cross-Compiling IDL Libraries
@@ -441,7 +441,7 @@ the basic list of library file for OpenDDS are as follows:
    will need at least one of these, depending on the transport(s) you want to
    use:
    - `$DDS_ROOT/lib/libOpenDDS_Rtps_Udp.so`
-     - Depends on `$DDS_ROOT/lib/libOpenDDS_Rtps.so`.
+     - Depends on `$DDS_ROOT/lib/libOpenDDS_Rtps.so`
    - `$DDS_ROOT/lib/libOpenDDS_Multicast.so`
    - `$DDS_ROOT/lib/libOpenDDS_Shmem.so`
    - `$DDS_ROOT/lib/libOpenDDS_Tcp.so`
@@ -475,6 +475,16 @@ the basic list of library file for OpenDDS are as follows:
    - `$DDS_ROOT/lib/libtao_java.so`
    - `$DDS_ROOT/lib/libidl2jni_runtime.so`
    - `$DDS_ROOT/lib/libOpenDDS_DCPS_Java.so`
+     - Depends on:
+       - `$DDS_ROOT/lib/libOpenDDS_Rtps_Udp.so`
+       - `$DDS_ROOT/lib/libOpenDDS_Rtps.so`
+       - `$DDS_ROOT/lib/libOpenDDS_Tcp.so`
+       - `$DDS_ROOT/lib/libOpenDDS_Udp.so`
+       - `$ACE_ROOT/lib/libTAO_PortableServer.so`
+       - `$ACE_ROOT/lib/libTAO_AnyTypeCode.so`
+       - `$ACE_ROOT/lib/libTAO_BiDirGIOP.so`
+       - `$ACE_ROOT/lib/libTAO_CodecFactory.so`
+       - `$ACE_ROOT/lib/libTAO_PI.so`
    - The [native part of the Java library for your IDL libraries](
       #java-idl-libraries)
 
