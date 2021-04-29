@@ -96,22 +96,22 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
   int status = 0;
   DistributedConditionSet_rch dcs = OpenDDS::DCPS::make_rch<InMemoryDistributedConditionSet>();
 
-  const int DOMAIN = 111;
+  const int MY_DOMAIN = 111;
 
   DDS::DomainParticipantFactory_var dpf =
     TheParticipantFactoryWithArgs(argc, argv);
   DDS::DomainParticipant_var pub1_participant =
-    dpf->create_participant(DOMAIN,
+    dpf->create_participant(MY_DOMAIN,
                             PARTICIPANT_QOS_DEFAULT,
                             DDS::DomainParticipantListener::_nil(),
                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   DDS::DomainParticipant_var pub2_participant =
-    dpf->create_participant(DOMAIN,
+    dpf->create_participant(MY_DOMAIN,
                             PARTICIPANT_QOS_DEFAULT,
                             DDS::DomainParticipantListener::_nil(),
                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   DDS::DomainParticipant_var sub_participant =
-    dpf->create_participant(DOMAIN,
+    dpf->create_participant(MY_DOMAIN,
                             PARTICIPANT_QOS_DEFAULT,
                             DDS::DomainParticipantListener::_nil(),
                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
