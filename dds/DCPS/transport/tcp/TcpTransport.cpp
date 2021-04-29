@@ -370,8 +370,8 @@ TcpTransport::configure_i(TcpInst& config)
   // qualified hostname and actual listening port number.
   if (config.local_address().is_any()) {
     ACE_INET_Addr addr;
-    get_fully_qualified_hostname(&addr);
-    config.local_address(addr);
+    OPENDDS_STRING fqdn = get_fully_qualified_hostname(&addr);
+    config.local_address(fqdn.c_str(), addr);
     if (config.local_address() == ACE_INET_Addr()) {
        ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: Failed to resolve a local address using fully qualified hostname '%C'\n"),
