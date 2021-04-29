@@ -120,7 +120,7 @@ public:
                           int num_alive_writers,
                           const MonotonicTimePoint& when);
 
-  /// Returns true if the writer is a writer of this instances.
+  /// Returns true if the writer is a writer of this instance.
   bool writes_instance(const PublicationId& writer_id)
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
