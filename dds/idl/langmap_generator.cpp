@@ -68,7 +68,7 @@ namespace {
 
   void gen_typecode(UTL_ScopedName* name)
   {
-    if (be_global->suppress_typecode()) {
+    if (be_global->suppress_typecode() || be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
       return;
     }
     const char* const nm = name->last_component()->get_string();
@@ -1416,7 +1416,6 @@ struct Cxx11Generator : GeneratorBase
     }
     be_global->add_include("<array>", BE_GlobalData::STREAM_LANG_H);
     be_global->lang_header_ << ind << "using " << type << " = " << array << elem << bounds.str() << ";\n";
-    gen_typecode_ptrs(type);
   }
 
   void gen_array(UTL_ScopedName* tdname, AST_Array* arr)
@@ -1432,7 +1431,6 @@ struct Cxx11Generator : GeneratorBase
   {
     be_global->add_include("<vector>", BE_GlobalData::STREAM_LANG_H);
     be_global->lang_header_ << ind << "using " << type << " = std::vector<" << elem << ">;\n";
-    gen_typecode_ptrs(type);
   }
 
   void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
