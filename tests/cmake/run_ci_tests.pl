@@ -52,7 +52,7 @@ exit 1 if !GetOptions(
     "no-shared" => \$no_shared,
     );
 
-my $skip_cxx11 = defined($cxx_standard) && $cxx_standard < 11;
+my $skip_cxx11 = defined($cxx_standard) && $cxx_standard != 98;
 
 my @dirs = ('../Nested_IDL', 'Messenger_1', 'Messenger_2');
 push @dirs, '../generated_global' unless $no_shared;
