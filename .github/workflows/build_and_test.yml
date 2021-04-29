@@ -1495,7 +1495,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/cmake
-        perl run_ci_tests.pl --compiler=g++-6 --cxx-standard 03
+        perl run_ci_tests.pl --compiler=g++-6 --cxx-standard 98
 
   ACE_TAO_u18_gcc8_i0_js0_j:
 
