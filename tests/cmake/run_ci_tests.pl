@@ -52,7 +52,7 @@ exit 1 if !GetOptions(
     "no-shared" => \$no_shared,
     );
 
-my $skip_cxx11 = defined($cxx_standard) && $cxx_standard != 98;
+my $skip_cxx11 = defined($cxx_standard) && $cxx_standard == 98;
 
 my @dirs = ('../Nested_IDL', 'Messenger_1', 'Messenger_2');
 push @dirs, '../generated_global' unless $no_shared;
@@ -78,7 +78,8 @@ for my $dir (@dirs) {
     push(@generate_cmd, "-DCMAKE_CXX_STANDARD=$cxx_standard");
   }
 
-  my @build_cmd = ("cmake", "--build", ".");
+  my @base_build_cmd = ("cmake", "--build", ".");
+  my @build_cmd = @base_build_cmd;
 
   if ($generator ne "") {
     splice @generate_cmd, 1, 0, ("-G", qq("$generator"));
@@ -90,6 +91,9 @@ for my $dir (@dirs) {
 
   if ($build_config ne "") {
     push @build_cmd, ("--config", "$build_config");
+  }
+  if ($^O ne "MSWin32") {
+    push(@build_cmd, "--", "-j2");
   }
 
   my @lib_options = ($builds_lib{$dir} && !$no_shared) ? ('OFF', 'ON') : ('');
@@ -111,6 +115,6 @@ for my $dir (@dirs) {
         chdir($build_dir) or die "ERROR: '$!': failed to switch to $build_dir";
       }
     }
-    run_command("@build_cmd --target clean");
+    run_command("@base_build_cmd --target clean");
   }
 }
