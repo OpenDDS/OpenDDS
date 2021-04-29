@@ -101,14 +101,19 @@ OPENDDS_STRING get_fully_qualified_hostname(ACE_INET_Addr* addr)
 #endif
       for (size_t i = 0; i < addr_count; i++) {
         char hostname[MAXHOSTNAMELEN+1] = "";
+        ACE_INET_Addr& ref = addr_array[i];
 
         //Discover the fully qualified hostname
 
-        if (ACE::get_fqdn(addr_array[i], hostname, MAXHOSTNAMELEN+1) == 0) {
-          if (!addr_array[i].is_loopback() && ACE_OS::strchr(hostname, '.') != 0) {
+        if (ACE::get_fqdn(ref, hostname, MAXHOSTNAMELEN+1) == 0) {
+          if (!ref.is_loopback() &&
+#ifdef IPV6_V6ONLY
+              !(ref.get_type() == AF_INET6 && (ref.is_ipv4_mapped_ipv6() || ref.is_ipv4_compat_ipv6())) &&
+#endif
+              ACE_OS::strchr(hostname, '.') != 0) {
             VDBG_LVL((LM_DEBUG, "(%P|%t) found fqdn %C from %C:%d\n",
-                      hostname, addr_array[i].get_host_addr(), addr_array[i].get_port_number()), 2);
-            selected_address = addr_array[i];
+                      hostname, ref.get_host_addr(), ref.get_port_number()), 2);
+            selected_address = ref;
             fullname = hostname;
             if (addr) {
               *addr = selected_address;
@@ -117,10 +122,10 @@ OPENDDS_STRING get_fully_qualified_hostname(ACE_INET_Addr* addr)
 
           } else {
             VDBG_LVL((LM_DEBUG, "(%P|%t) ip interface %C:%d maps to hostname %C\n",
-                      addr_array[i].get_host_addr(), addr_array[i].get_port_number(), hostname), 2);
+                      ref.get_host_addr(), ref.get_port_number(), hostname), 2);
 
             if (ACE_OS::strncmp(hostname, "localhost", 9) == 0) {
-              addr_array[i].get_host_addr(hostname, MAXHOSTNAMELEN);
+              ref.get_host_addr(hostname, MAXHOSTNAMELEN);
             }
 
             OpenDDS::DCPS::HostnameInfo info;
