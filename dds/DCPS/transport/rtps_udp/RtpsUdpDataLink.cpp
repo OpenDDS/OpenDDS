@@ -2140,7 +2140,7 @@ RtpsUdpDataLink::RtpsReader::gather_preassociation_acknack_i(MetaSubmessageVec& 
     reader_id,
     writer_id,
     { // SequenceNumberSet: acking bitmapBase - 1
-      {0, 1},
+      {0, 0},
       num_bits, bitmap
     },
     {writer->heartbeat_recvd_count_}
@@ -2970,7 +2970,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   }
 
   const bool is_final = acknack.smHeader.flags & RTPS::FLAG_F;
-  const bool is_postassociation = count_is_not_zero && (is_final || bitmapNonEmpty(acknack.readerSNState) || ack != 1);
+  const bool is_postassociation = count_is_not_zero && (is_final || bitmapNonEmpty(acknack.readerSNState) || ack > 1);
 
   if (preassociation_readers_.count(reader)) {
     if (is_postassociation) {
