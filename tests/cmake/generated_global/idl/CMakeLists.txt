@@ -7,9 +7,7 @@
 project(opendds_generated_property CXX)
 cmake_minimum_required(VERSION 3.8.2)
 
-if(NOT OpenDDS_FOUND)
-  find_package(OpenDDS REQUIRED)
-endif()
+find_package(OpenDDS REQUIRED)
 
 if (OPENDDS_STATIC)
   message(FATAL_ERROR "This test cannot be run on static builds.")

@@ -72,11 +72,6 @@ if (OPENDDS_SECURITY)
   _OPENDDS_APPEND_DEF(OPENDDS_SECURITY)
 endif()
 
-if (OPENDDS_SUPPRESS_ANYS)
-  list(APPEND OPENDDS_DDS_BASE_IDL_FLAGS -Sa -St)
-  list(APPEND OPENDDS_TAO_BASE_IDL_FLAGS -Sa -St)
-endif()
-
 # ACE defines.
 
 # TODO(iguessthislldo): Separate ACE and TAO (maybe more) definitions lists
@@ -103,32 +98,10 @@ if (OPENDDS_STATIC)
   _OPENDDS_APPEND_DEF(ACE_AS_STATIC_LIBS ACE_HAS_CUSTOM_EXPORT_MACROS=0 TAO_AS_STATIC_LIBS)
 endif()
 
-# Force C++ standard.
-
-if (OPENDDS_STD AND UNIX)
-  if("${OPENDDS_STD}" MATCHES "(03|98)$")
-    set(CMAKE_CXX_STANDARD 98)
-  elseif("${OPENDDS_STD}" MATCHES "(0x|11)$")
-    set(CMAKE_CXX_STANDARD 11)
-  elseif("${OPENDDS_STD}" MATCHES "(1y|14)$")
-    set(CMAKE_CXX_STANDARD 14)
-  elseif("${OPENDDS_STD}" MATCHES "(1z|17)$")
-    set(CMAKE_CXX_STANDARD 17)
-  elseif("${OPENDDS_STD}" MATCHES "(2a|20)$")
-    set(CMAKE_CXX_STANDARD 20)
-  else()
-    message(WARNING "Ignoring unknown OPENDDS_STD value '${OPENDDS_STD}'")
-  endif()
+if(OPENDDS_WCHAR)
+  list(APPEND OPENDDS_DCPS_COMPILE_DEFS ACE_USES_WCHAR)
 endif()
 
-# Handle other features
-
-if (OPENDDS_FEATURES)
-  if ("${OPENDDS_FEATURES}" MATCHES "versioned_namespace=1")
-    list(APPEND OPENDDS_DCPS_COMPILE_DEFS ACE_HAS_VERSIONED_NAMESPACE=1)
-  endif()
-
-  if ("${OPENDDS_FEATURES}" MATCHES "uses_wchar=1")
-    list(APPEND OPENDDS_DCPS_COMPILE_DEFS ACE_USES_WCHAR)
-  endif()
+if(OPENDDS_VERSIONED_NAMESPACE)
+  list(APPEND OPENDDS_DCPS_COMPILE_DEFS ACE_HAS_VERSIONED_NAMESPACE=1)
 endif()

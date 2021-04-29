@@ -1,12 +1,14 @@
 project(OpenDDS_C++11_Typecode CXX)
 cmake_minimum_required(VERSION 3.8.2)
 
-if(NOT OpenDDS_FOUND)
-  find_package(OpenDDS REQUIRED)
+find_package(OpenDDS REQUIRED)
+
+if(OPENDDS_SAFETY_PROFILE)
+  message(FATAL_ERROR "This test cannot be built with Safety Profile enabled")
 endif()
 
-if(OPENDDS_NO_OPENDDS_SAFETY_PROFILE EQUAL OFF)
-  message(FATAL_ERROR "This test cannot be built with Safety Profile enabled")
+if (NOT OPENDDS_CXX11)
+  message(FATAL_ERROR "This test requires OpenDDS to be built with C++11 Support")
 endif()
 
 set(target_prefix "opendds_cmake_cpp11_typecode_")
