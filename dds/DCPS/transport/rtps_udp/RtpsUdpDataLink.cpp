@@ -2004,7 +2004,7 @@ RtpsUdpDataLink::RtpsReader::gather_preassociation_ack_nack_i(MetaSubmessageVec&
   const DisjointSequence& recvd = writer->recvd_;
   const CORBA::ULong num_bits = 0;
   const LongSeq8 bitmap;
-  const SequenceNumber ack = recvd.empty() ? 1 : ++SequenceNumber(recvd.cumulative_ack());
+  const SequenceNumber ack = recvd.empty() ? 0 : ++SequenceNumber(recvd.cumulative_ack());
   const EntityId_t reader_id = id_.entityId;
   const EntityId_t writer_id = writer->id_.entityId;
 
@@ -2793,7 +2793,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     is_final ||
     bitmapNonEmpty(acknack.readerSNState) ||
     !(acknack.readerSNState.bitmapBase.high == 0 &&
-      acknack.readerSNState.bitmapBase.low == 1);
+      acknack.readerSNState.bitmapBase.low <= 1);
 
   if (preassociation_readers_.count(reader)) {
     if (is_postassociation) {
