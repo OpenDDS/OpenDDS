@@ -119,31 +119,25 @@ public:
 
   void spdp_vertical_handler(RelayHandler* spdp_vertical_handler)
   {
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
     spdp_vertical_handler_ = spdp_vertical_handler;
   }
 
   void sedp_vertical_handler(RelayHandler* sedp_vertical_handler)
   {
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
     sedp_vertical_handler_ = sedp_vertical_handler;
   }
 
   void data_vertical_handler(RelayHandler* data_vertical_handler)
   {
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
     data_vertical_handler_ = data_vertical_handler;
-  }
-
-  GuidAddrSetMap::iterator find(const OpenDDS::DCPS::RepoId& guid)
-  {
-    return guid_addr_set_map_.find(guid);
-  }
-
-  GuidAddrSetMap::const_iterator end()
-  {
-    return guid_addr_set_map_.end();
   }
 
   void pop(const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
     while (!new_guids_.empty() && new_guids_.front() < now) {
       new_guids_.pop_front();
     }
@@ -152,6 +146,8 @@ public:
   bool
   ignore(const OpenDDS::DCPS::GUID_t& guid, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
+
     // Client has already been admitted.
     if (guid_addr_set_map_.count(guid) != 0) {
       return false;
@@ -174,6 +170,51 @@ public:
     return false;
   }
 
+  void remove(const OpenDDS::DCPS::RepoId& guid);
+
+  class Proxy {
+  public:
+    Proxy(GuidAddrSet& gas)
+      : gas_(gas)
+    {
+      gas_.mutex_.acquire();
+    }
+
+    ~Proxy()
+    {
+      gas_.mutex_.release();
+    }
+
+    GuidAddrSetMap::iterator find(const OpenDDS::DCPS::RepoId& guid)
+    {
+      return gas_.guid_addr_set_map_.find(guid);
+    }
+
+    GuidAddrSetMap::const_iterator end()
+    {
+      return gas_.guid_addr_set_map_.end();
+    }
+
+    ParticipantStatisticsReporter&
+    record_activity(const ACE_INET_Addr& remote_address,
+                    const OpenDDS::DCPS::MonotonicTimePoint& now,
+                    const OpenDDS::DCPS::RepoId& src_guid,
+                    const size_t& msg_len,
+                    RelayHandler& handler);
+
+    ParticipantStatisticsReporter&
+    participant_statistics_reporter(const OpenDDS::DCPS::RepoId& guid,
+                                    const RelayHandler& handler)
+    {
+      return *handler.select_stats_reporter(gas_.guid_addr_set_map_[guid]);
+    }
+
+  private:
+    GuidAddrSet& gas_;
+    OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(Proxy)
+  };
+
+private:
   ParticipantStatisticsReporter&
   record_activity(const ACE_INET_Addr& remote_address,
                   const OpenDDS::DCPS::MonotonicTimePoint& now,
@@ -181,14 +222,8 @@ public:
                   const size_t& msg_len,
                   RelayHandler& handler);
 
-  ParticipantStatisticsReporter*
-  participant_statistics_reporter(const OpenDDS::DCPS::RepoId& guid,
-                                  const RelayHandler& handler)
-  {
-    return handler.select_stats_reporter(guid_addr_set_map_[guid]);
-  }
+  void remove_helper(const OpenDDS::DCPS::RepoId& guid, const AddrSet& addr_set);
 
-private:
   const Config& config_;
   RelayStatisticsReporter& relay_stats_reporter_;
   RelayHandler* spdp_vertical_handler_;
@@ -200,6 +235,8 @@ private:
   typedef std::multimap<OpenDDS::DCPS::MonotonicTimePoint, GuidAddr> ExpirationGuidAddrMap;
   ExpirationGuidAddrMap expiration_guid_addr_map_;
   std::list<OpenDDS::DCPS::MonotonicTimePoint> new_guids_;
+
+  mutable ACE_Thread_Mutex mutex_;
 };
 
 class HorizontalHandler;
@@ -222,14 +259,9 @@ public:
 
   void horizontal_handler(HorizontalHandler* horizontal_handler) { horizontal_handler_ = horizontal_handler; }
 
-  GuidAddrSet::GuidAddrSetMap::iterator find(const OpenDDS::DCPS::RepoId& guid)
+  GuidAddrSet& guid_addr_set()
   {
-    return guid_addr_set_.find(guid);
-  }
-
-  GuidAddrSet::GuidAddrSetMap::const_iterator end()
-  {
-    return guid_addr_set_.end();
+    return guid_addr_set_;
   }
 
   void venqueue_message(const ACE_INET_Addr& addr,
@@ -240,7 +272,8 @@ public:
 protected:
   typedef std::map<ACE_INET_Addr, GuidSet> AddressMap;
 
-  virtual bool do_normal_processing(const ACE_INET_Addr& /*remote*/,
+  virtual bool do_normal_processing(GuidAddrSet::Proxy& /*proxy*/,
+                                    const ACE_INET_Addr& /*remote*/,
                                     const OpenDDS::DCPS::RepoId& /*src_guid*/,
                                     ParticipantStatisticsReporter& /*stats_reporter*/,
                                     const GuidSet& /*to*/,
@@ -251,11 +284,13 @@ protected:
   void process_message(const ACE_INET_Addr& remote,
                        const OpenDDS::DCPS::MonotonicTimePoint& now,
                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) override;
-  ParticipantStatisticsReporter& record_activity(const ACE_INET_Addr& remote_address,
+  ParticipantStatisticsReporter& record_activity(GuidAddrSet::Proxy& proxy,
+                                                 const ACE_INET_Addr& remote_address,
                                                  const OpenDDS::DCPS::MonotonicTimePoint& now,
                                                  const OpenDDS::DCPS::RepoId& src_guid,
                                                  const size_t& msg_len);
-  void send(const OpenDDS::DCPS::RepoId& src_guid,
+  void send(GuidAddrSet::Proxy& proxy,
+            const OpenDDS::DCPS::RepoId& src_guid,
             ParticipantStatisticsReporter& stats_reporter,
             bool undirected,
             const StringSet& to_partitions,
@@ -352,7 +387,8 @@ private:
   StringSet replay_queue_;
   ACE_Thread_Mutex replay_queue_mutex_;
 
-  bool do_normal_processing(const ACE_INET_Addr& remote,
+  bool do_normal_processing(GuidAddrSet::Proxy& proxy,
+                            const ACE_INET_Addr& remote,
                             const OpenDDS::DCPS::RepoId& src_guid,
                             ParticipantStatisticsReporter& stats_reporter,
                             const GuidSet& to,
@@ -389,7 +425,8 @@ public:
   }
 
 private:
-  bool do_normal_processing(const ACE_INET_Addr& remote,
+  bool do_normal_processing(GuidAddrSet::Proxy& proxy,
+                            const ACE_INET_Addr& remote,
                             const OpenDDS::DCPS::RepoId& src_guid,
                             ParticipantStatisticsReporter& stats_reporter,
                             const GuidSet& to,

@@ -217,6 +217,16 @@ void RelayHandler::enqueue_message(const ACE_INET_Addr& addr,
 
 
 ParticipantStatisticsReporter&
+GuidAddrSet::Proxy::record_activity(const ACE_INET_Addr& remote_address,
+                                    const OpenDDS::DCPS::MonotonicTimePoint& now,
+                                    const OpenDDS::DCPS::RepoId& src_guid,
+                                    const size_t& msg_len,
+                                    RelayHandler& handler)
+{
+  return gas_.record_activity(remote_address, now, src_guid, msg_len, handler);
+}
+
+ParticipantStatisticsReporter&
 GuidAddrSet::record_activity(const ACE_INET_Addr& remote_address,
                              const OpenDDS::DCPS::MonotonicTimePoint& now,
                              const OpenDDS::DCPS::RepoId& src_guid,
@@ -228,7 +238,7 @@ GuidAddrSet::record_activity(const ACE_INET_Addr& remote_address,
     const auto res = handler.select_addr_set(guid_addr_set_map_[src_guid])->insert(remote_address);
     if (res.second) {
       if (config_.log_activity()) {
-        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: VerticalHandler::record_activity %C %C is at %C\n"), handler.name().c_str(), guid_to_string(src_guid).c_str(), addr_to_string(remote_address).c_str()));
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity %C %C is at %C\n"), handler.name().c_str(), guid_to_string(src_guid).c_str(), addr_to_string(remote_address).c_str()));
       }
       relay_stats_reporter_.new_address(now);
       const auto after = guid_addr_set_map_.size();
@@ -267,7 +277,7 @@ GuidAddrSet::record_activity(const ACE_INET_Addr& remote_address,
   // Process expirations.
   for (auto pos = expiration_guid_addr_map_.begin(), limit = expiration_guid_addr_map_.end(); pos != limit && pos->first < now;) {
     if (config_.log_activity()) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: VerticalHandler::record_activity %C %C %C expired at %d.%d now=%d.%d\n"), handler.name().c_str(), guid_to_string(pos->second.guid).c_str(), addr_to_string(pos->second.address).c_str(), pos->first.value().sec(), pos->first.value().usec(), now.value().sec(), now.value().usec()));
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity %C %C %C expired at %d.%d now=%d.%d\n"), handler.name().c_str(), guid_to_string(pos->second.guid).c_str(), addr_to_string(pos->second.address).c_str(), pos->first.value().sec(), pos->first.value().usec(), now.value().sec(), now.value().usec()));
     }
     relay_stats_reporter_.expired_address(now);
     AddrSetStats& addr_stats = guid_addr_set_map_[pos->second.guid];
@@ -276,7 +286,7 @@ GuidAddrSet::record_activity(const ACE_INET_Addr& remote_address,
     addr_set.erase(pos->second.address);
     if (addr_stats.empty()) {
       if (config_.log_activity()) {
-        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: VerticalHandler::record_activity %C %C removed\n"), handler.name().c_str(), guid_to_string(pos->second.guid).c_str()));
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity %C %C removed\n"), handler.name().c_str(), guid_to_string(pos->second.guid).c_str()));
       }
       stats_reporter.report(now, true);
       guid_addr_set_map_.erase(pos->second.guid);
@@ -290,6 +300,50 @@ GuidAddrSet::record_activity(const ACE_INET_Addr& remote_address,
   }
 
   return stats_reporter;
+}
+
+void GuidAddrSet::remove(const OpenDDS::DCPS::RepoId& guid)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+
+  const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
+
+  AddrSetStats& addr_stats = guid_addr_set_map_[guid];
+  spdp_vertical_handler_->select_stats_reporter(addr_stats)->report(now, true);
+  sedp_vertical_handler_->select_stats_reporter(addr_stats)->report(now, true);
+  data_vertical_handler_->select_stats_reporter(addr_stats)->report(now, true);
+
+  remove_helper(guid, addr_stats.spdp_addr_set);
+  remove_helper(guid, addr_stats.sedp_addr_set);
+  remove_helper(guid, addr_stats.data_addr_set);
+
+  guid_addr_set_map_.erase(guid);
+  relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
+  spdp_vertical_handler_->purge(guid);
+  sedp_vertical_handler_->purge(guid);
+  data_vertical_handler_->purge(guid);
+
+  if (config_.log_activity()) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::remove %C removed\n"), guid_to_string(guid).c_str()));
+  }
+}
+
+void GuidAddrSet::remove_helper(const OpenDDS::DCPS::RepoId& guid, const AddrSet& addr_set)
+{
+  for (const auto& addr : addr_set) {
+    const GuidAddr ga(guid, addr);
+    const auto pos = guid_addr_expiration_map_.find(ga);
+    if (pos != guid_addr_expiration_map_.end()) {
+      for (auto pos2 = expiration_guid_addr_map_.lower_bound(pos->second), limit2 = expiration_guid_addr_map_.upper_bound(pos->second); pos2 != limit2; ) {
+        if (pos2->second == ga) {
+          expiration_guid_addr_map_.erase(pos2++);
+        } else {
+          ++pos2;
+        }
+      }
+      guid_addr_expiration_map_.erase(pos);
+    }
+  }
 }
 
 VerticalHandler::VerticalHandler(const Config& config,
@@ -357,14 +411,15 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
       return;
     }
 
-    ParticipantStatisticsReporter& from_psr = record_activity(remote_address, now, src_guid, msg_len);
+    GuidAddrSet::Proxy proxy(guid_addr_set_);
+    ParticipantStatisticsReporter& from_psr = record_activity(proxy, remote_address, now, src_guid, msg_len);
     const bool undirected = to.empty();
     bool send_to_application_participant = false;
 
-    if (do_normal_processing(remote_address, src_guid, from_psr, to, send_to_application_participant, msg, now)) {
+    if (do_normal_processing(proxy, remote_address, src_guid, from_psr, to, send_to_application_participant, msg, now)) {
       StringSet to_partitions;
       guid_partition_table_.lookup(to_partitions, src_guid);
-      send(src_guid, from_psr, undirected, to_partitions, to, send_to_application_participant, msg, now);
+      send(proxy, src_guid, from_psr, undirected, to_partitions, to, send_to_application_participant, msg, now);
     }
   } else {
     // Assume STUN.
@@ -433,7 +488,8 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
     }
 
     if (has_guid) {
-      ParticipantStatisticsReporter& from_psr = record_activity(remote_address, now, src_guid, msg_len);
+      GuidAddrSet::Proxy proxy(guid_addr_set_);
+      ParticipantStatisticsReporter& from_psr = record_activity(proxy, remote_address, now, src_guid, msg_len);
       if (bytes_sent) {
         from_psr.message_to(bytes_sent, now);
         from_psr.max_directed_gain(1, now);
@@ -443,12 +499,13 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
 }
 
 ParticipantStatisticsReporter&
-VerticalHandler::record_activity(const ACE_INET_Addr& remote_address,
+VerticalHandler::record_activity(GuidAddrSet::Proxy& proxy,
+                                 const ACE_INET_Addr& remote_address,
                                  const OpenDDS::DCPS::MonotonicTimePoint& now,
                                  const OpenDDS::DCPS::RepoId& src_guid,
                                  const size_t& msg_len)
 {
-  return guid_addr_set_.record_activity(remote_address, now, src_guid, msg_len, *this);
+  return proxy.record_activity(remote_address, now, src_guid, msg_len, *this);
 }
 
 bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser,
@@ -591,7 +648,8 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
   return true;
 }
 
-void VerticalHandler::send(const OpenDDS::DCPS::RepoId& src_guid,
+void VerticalHandler::send(GuidAddrSet::Proxy& proxy,
+                           const OpenDDS::DCPS::RepoId& src_guid,
                            ParticipantStatisticsReporter& from_psr,
                            bool undirected,
                            const StringSet& to_partitions,
@@ -616,8 +674,8 @@ void VerticalHandler::send(const OpenDDS::DCPS::RepoId& src_guid,
           if (guid == src_guid) {
             continue;
           }
-          auto p = guid_addr_set_.find(guid);
-          if (p != guid_addr_set_.end()) {
+          auto p = proxy.find(guid);
+          if (p != proxy.end()) {
             for (const auto& addr : *select_addr_set(p->second)) {
               venqueue_message(addr, *select_stats_reporter(p->second), msg, now);
               ++sent_message_count;
@@ -631,8 +689,8 @@ void VerticalHandler::send(const OpenDDS::DCPS::RepoId& src_guid,
           if (guid == src_guid) {
             continue;
           }
-          auto p = guid_addr_set_.find(guid);
-          if (p != guid_addr_set_.end()) {
+          auto p = proxy.find(guid);
+          if (p != proxy.end()) {
             for (const auto& addr : *select_addr_set(p->second)) {
               venqueue_message(addr, *select_stats_reporter(p->second), msg, now);
               ++sent_message_count;
@@ -644,7 +702,7 @@ void VerticalHandler::send(const OpenDDS::DCPS::RepoId& src_guid,
   }
 
   if (send_to_application_participant) {
-    venqueue_message(application_participant_addr_, *guid_addr_set_.participant_statistics_reporter(config_.application_participant_guid(), *this), msg, now);
+    venqueue_message(application_participant_addr_, proxy.participant_statistics_reporter(config_.application_participant_guid(), *this), msg, now);
     ++sent_message_count;
   }
 
@@ -765,10 +823,12 @@ void HorizontalHandler::process_message(const ACE_INET_Addr& from,
 
   msg->rd_ptr(size_before_header - size_after_header);
 
+  GuidAddrSet::Proxy proxy(vertical_handler_->guid_addr_set());
+
   if (!relay_header.to_guids().empty()) {
     for (const auto& guid : relay_header.to_guids()) {
-      const auto p = vertical_handler_->find(guid_to_repoid(guid));
-      if (p != vertical_handler_->end()) {
+      const auto p = proxy.find(guid_to_repoid(guid));
+      if (p != proxy.end()) {
         for (const auto& addr : *vertical_handler_->select_addr_set(p->second)) {
           vertical_handler_->venqueue_message(addr, *vertical_handler_->select_stats_reporter(p->second), msg, now);
         }
@@ -778,8 +838,8 @@ void HorizontalHandler::process_message(const ACE_INET_Addr& from,
     GuidSet guids;
     guid_partition_table_.lookup(guids, relay_header.to_partitions());
     for (const auto& guid : guids) {
-      const auto p = vertical_handler_->find(guid);
-      if (p != vertical_handler_->end()) {
+      const auto p = proxy.find(guid);
+      if (p != proxy.end()) {
         for (const auto& addr : *vertical_handler_->select_addr_set(p->second)) {
           vertical_handler_->venqueue_message(addr, *vertical_handler_->select_stats_reporter(p->second), msg, now);
         }
@@ -802,7 +862,8 @@ SpdpHandler::SpdpHandler(const Config& config,
 : VerticalHandler(config, name, address, reactor, guid_partition_table, relay_partition_table, guid_addr_set, rtps_discovery, crypto, application_participant_addr, stats_reporter)
 {}
 
-bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& remote,
+bool SpdpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
+                                       const ACE_INET_Addr& remote,
                                        const OpenDDS::DCPS::RepoId& src_guid,
                                        ParticipantStatisticsReporter& from_psr,
                                        const GuidSet& to,
@@ -822,8 +883,8 @@ bool SpdpHandler::do_normal_processing(const ACE_INET_Addr& remote,
       // Forward to destinations.
       size_t sent_message_count = 0;
       for (const auto& guid : to) {
-        const auto pos = guid_addr_set_.find(guid);
-        if (pos != guid_addr_set_.end()) {
+        const auto pos = proxy.find(guid);
+        if (pos != proxy.end()) {
           for (const auto& addr : *select_addr_set(pos->second)) {
             venqueue_message(addr, *select_stats_reporter(pos->second), msg, now);
             ++sent_message_count;
@@ -890,7 +951,8 @@ int SpdpHandler::handle_exception(ACE_HANDLE /*fd*/)
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, spdp_messages_mutex_, 0);
     const auto pos = spdp_messages_.find(guid);
     if (pos != spdp_messages_.end()) {
-      send(guid, *guid_addr_set_.participant_statistics_reporter(guid, *this), false, q, GuidSet(), false, pos->second, now);
+      GuidAddrSet::Proxy proxy(guid_addr_set_);
+      send(proxy, guid, proxy.participant_statistics_reporter(guid, *this), false, q, GuidSet(), false, pos->second, now);
     }
   }
 
@@ -911,7 +973,8 @@ SedpHandler::SedpHandler(const Config& config,
 : VerticalHandler(config, name, address, reactor, guid_partition_table, relay_partition_table, guid_addr_set, rtps_discovery, crypto, application_participant_addr, stats_reporter)
 {}
 
-bool SedpHandler::do_normal_processing(const ACE_INET_Addr& remote,
+bool SedpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
+                                       const ACE_INET_Addr& remote,
                                        const OpenDDS::DCPS::RepoId& src_guid,
                                        ParticipantStatisticsReporter& from_psr,
                                        const GuidSet& to,
@@ -931,8 +994,8 @@ bool SedpHandler::do_normal_processing(const ACE_INET_Addr& remote,
       // Forward to destinations.
       size_t sent_message_count = 0;
       for (const auto& guid : to) {
-        auto pos = guid_addr_set_.find(guid);
-        if (pos != guid_addr_set_.end()) {
+        const auto pos = proxy.find(guid);
+        if (pos != proxy.end()) {
           for (const auto& addr : *select_addr_set(pos->second)) {
             venqueue_message(addr, *select_stats_reporter(pos->second), msg, now);
             ++sent_message_count;

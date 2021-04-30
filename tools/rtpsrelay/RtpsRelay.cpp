@@ -731,7 +731,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   ParticipantListener* participant_listener =
-    new ParticipantListener(config, application_participant_impl, domain_statistics_reporter);
+    new ParticipantListener(config, guid_addr_set, application_participant_impl, domain_statistics_reporter);
   DDS::DataReaderListener_var participant_listener_var(participant_listener);
   DDS::ReturnCode_t ret = participant_reader->set_listener(participant_listener_var, DDS::DATA_AVAILABLE_STATUS);
   if (ret != DDS::RETCODE_OK) {

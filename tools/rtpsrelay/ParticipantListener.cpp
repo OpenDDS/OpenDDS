@@ -8,9 +8,11 @@
 namespace RtpsRelay {
 
 ParticipantListener::ParticipantListener(const Config& config,
+                                         GuidAddrSet& guid_addr_set,
                                          OpenDDS::DCPS::DomainParticipantImpl* participant,
                                          DomainStatisticsReporter& stats_reporter)
   : config_(config)
+  , guid_addr_set_(guid_addr_set)
   , participant_(participant)
   , stats_reporter_(stats_reporter)
 {}
@@ -56,6 +58,8 @@ void ParticipantListener::on_data_available(DDS::DataReader_ptr reader)
     case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
       {
         const auto repoid = participant_->get_repoid(info.instance_handle);
+
+        guid_addr_set_.remove(repoid);
 
         if (config_.log_discovery()) {
           ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: ParticipantListener::on_data_available remove local participant %C\n"), guid_to_string(repoid).c_str()));
