@@ -914,7 +914,8 @@ namespace OpenDDS {
 
   void set_instance_state(DDS::InstanceHandle_t instance,
                           DDS::InstanceStateKind state,
-                          const SystemTimePoint& timestamp = SystemTimePoint::now())
+                          const SystemTimePoint& timestamp = SystemTimePoint::now(),
+                          const OpenDDS::DCPS::GUID_t& publication_id = GUID_UNKNOWN)
   {
     using namespace OpenDDS::DCPS;
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
@@ -923,6 +924,7 @@ namespace OpenDDS {
     if (si && state != DDS::ALIVE_INSTANCE_STATE) {
       const DDS::Time_t now = timestamp.to_dds_time();
       DataSampleHeader header;
+      header.publication_id_ = publication_id;
       header.source_timestamp_sec_ = now.sec;
       header.source_timestamp_nanosec_ = now.nanosec;
       const int msg = (state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
