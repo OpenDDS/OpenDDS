@@ -1,9 +1,8 @@
-#include "typecodeTypeSupportImpl.h"
+#include <typecodeTypeSupportImpl.h>
 
-using namespace OpenDDS::DCPS;
-
-int main(int argc, char* argv[])
+int main(int, char*[])
 {
-  my_module::_tc_my_struct;
-  my_module::_tc_my_union;
+  ACE_UNUSED_ARG(my_module::_tc_my_struct);
+  ACE_UNUSED_ARG(my_module::_tc_my_union);
+  return 0;
 }

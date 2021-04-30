@@ -9,12 +9,12 @@ macro(OPENDDS_GET_SOURCES_AND_OPTIONS
   libs
   tao_options
   opendds_options
-  suppress_typecodes)
+  suppress_anys)
 
   set(_options_n
     PUBLIC PRIVATE INTERFACE
     TAO_IDL_OPTIONS OPENDDS_IDL_OPTIONS
-    OPENDDS_SUPPRESS_TYPECODES)
+    SUPPRESS_ANYS)
 
   cmake_parse_arguments(_arg "" "" "${_options_n}" ${ARGN})
 
@@ -45,7 +45,10 @@ macro(OPENDDS_GET_SOURCES_AND_OPTIONS
 
   set(${tao_options} ${_arg_TAO_IDL_OPTIONS})
   set(${opendds_options} ${_arg_OPENDDS_IDL_OPTIONS})
-  set(${suppress_typecodes} ${_arg_OPENDDS_SUPPRESS_TYPECODES})
+
+  if (${_arg_SUPPRESS_ANYS} MATCHES ON OR ${_arg_SUPPRESS_ANYS} MATCHES OFF)
+    set(${suppress_anys} ${_arg_SUPPRESS_ANYS})
+  endif()
 
   foreach(arg ${_arg_UNPARSED_ARGUMENTS})
     get_filename_component(arg ${arg} ABSOLUTE)
@@ -134,13 +137,15 @@ macro(OPENDDS_TARGET_SOURCES target)
     list(APPEND _extra_idl_flags "--filename-only-includes")
   endif()
 
+  set(${_suppress_anys} ${OPENDDS_SUPPRESS_ANYS})
+
   OPENDDS_GET_SOURCES_AND_OPTIONS(
     _sources
     _idl_sources
     _libs
     _tao_options
     _opendds_options
-    _suppress_typecodes
+    _suppress_anys
     ${arglist})
 
   if(NOT _opendds_options MATCHES "--(no-)?default-nested")
@@ -210,7 +215,7 @@ macro(OPENDDS_TARGET_SOURCES target)
     message(FATAL_ERROR "OpenDDS does not support argument items in CMAKE_CXX_COMPILER.")
   endif()
 
-  if("${_suppress_typecodes}" MATCHES ON OR (NOT "${_suppress_typecodes}" MATCHES OFF AND OPENDDS_SUPPRESS_ANYS MATCHES ON))
+  if(${_suppress_anys} MATCHES ON)
     list(APPEND _opendds_options -Sa -St)
     list(APPEND _tao_options -Sa -St)
   endif()

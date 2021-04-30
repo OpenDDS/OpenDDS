@@ -1,12 +1,11 @@
-#include "typecodeTypeSupportImpl.h"
+#include <typecodeTypeSupportImpl.h>
 
-using namespace OpenDDS::DCPS;
-
-int main(int argc, char* argv[])
+int main(int, char*[])
 {
-  my_module::_tc_my_struct;
-  my_module::_tc_my_union;
-  my_module::_tc_my_long_seq_bound;
-  my_module::_tc_my_long_seq_unbound;
-  my_module::_tc_my_long_array;
+  ACE_UNUSED_ARG(my_module::_tc_my_struct);
+  ACE_UNUSED_ARG(my_module::_tc_my_union);
+  ACE_UNUSED_ARG(my_module::_tc_my_long_seq_bound);
+  ACE_UNUSED_ARG(my_module::_tc_my_long_seq_unbound);
+  ACE_UNUSED_ARG(my_module::_tc_my_long_array);
+  return 0;
 }

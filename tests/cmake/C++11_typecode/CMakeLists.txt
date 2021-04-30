@@ -18,22 +18,22 @@ set(dst ${CMAKE_CURRENT_BINARY_DIR})
 # IDL Library
 set(idl "${target_prefix}idl")
 add_library(${idl})
-OPENDDS_TARGET_SOURCES(${idl} "${src}/typecode.idl" OPENDDS_IDL_OPTIONS "-Lc++11" OPENDDS_SUPPRESS_TYPECODES OFF)
+OPENDDS_TARGET_SOURCES(${idl} "${src}/typecode.idl" OPENDDS_IDL_OPTIONS "-Lc++11" SUPPRESS_ANYS OFF)
 target_link_libraries(${idl} PUBLIC OpenDDS::Dcps)
 set_target_properties(${idl} PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${dst}/Idl"
 )
 
 # main
-set(main "${target_prefix}main")
-add_executable(${main}
-  "${dst}/../main.cpp"
+set(typecode "${target_prefix}typecode")
+add_executable(${typecode}
+  "${src}/C++11/typecode.cpp"
 )
-set_target_properties(${main} PROPERTIES
-  OUTPUT_NAME "main"
-  RUNTIME_OUTPUT_DIRECTORY "${dst}/main"
+set_target_properties(${typecode} PROPERTIES
+  OUTPUT_NAME "typecode"
+  RUNTIME_OUTPUT_DIRECTORY "${dst}/typecode"
 )
-target_link_libraries(${main} ${idl})
+target_link_libraries(${typecode} ${idl})
 
 # Assert the mapping used was C++11
 get_property(mappings TARGET ${idl} PROPERTY OPENDDS_LANGUAGE_MAPPINGS)
