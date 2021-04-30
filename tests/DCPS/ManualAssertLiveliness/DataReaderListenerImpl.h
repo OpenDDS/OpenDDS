@@ -43,11 +43,13 @@ public:
   virtual void on_sample_lost(DDS::DataReader_ptr reader,
                               const DDS::SampleLostStatus& status);
 
-  int num_reads() const {
+  int num_reads() const
+  {
     return num_reads_;
   }
 
-  int num_liveliness_change_callbacks() const {
+  int num_liveliness_change_callbacks() const
+  {
     return num_liveliness_change_callbacks_;
   }
 

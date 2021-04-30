@@ -10,7 +10,8 @@
 
 #include <ace/Task.h>
 
-class Writer_Base : public ACE_Task_Base {
+class Writer_Base : public ACE_Task_Base
+{
 public:
   Writer_Base(DDS::DataWriter_ptr writer, const char* name);
   void start();

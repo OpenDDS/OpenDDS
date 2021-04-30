@@ -49,7 +49,8 @@
  * test could use the file system, a network protocol, or even OpenDDS
  * to distribute and record conditions.
  */
-class DistributedConditionSet : public OpenDDS::DCPS::RcObject {
+class DistributedConditionSet : public OpenDDS::DCPS::RcObject
+{
 public:
   /// Establish a condition.
   virtual void post(const std::string& actor, const std::string& condition) = 0;
@@ -61,7 +62,8 @@ public:
 
 typedef OpenDDS::DCPS::RcHandle<DistributedConditionSet> DistributedConditionSet_rch;
 
-class InMemoryDistributedConditionSet : public DistributedConditionSet {
+class InMemoryDistributedConditionSet : public DistributedConditionSet
+{
 public:
   InMemoryDistributedConditionSet()
     : condition_(mutex_)
@@ -77,7 +79,8 @@ public:
 
   void wait_for(const std::string& waiting_actor,
                 const std::string& posting_actor,
-                const std::string& condition) const {
+                const std::string& condition) const
+  {
     ACE_DEBUG((LM_INFO, "(%P|%t) %C waiting_for %C %C\n",
                waiting_actor.c_str(), posting_actor.c_str(), condition.c_str()));
 

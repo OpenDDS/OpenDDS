@@ -92,7 +92,8 @@ parse_args (int argc, ACE_TCHAR *argv[])
   return 0;
 }
 
-int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
+int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
+{
   int status = 0;
   DistributedConditionSet_rch dcs = OpenDDS::DCPS::make_rch<InMemoryDistributedConditionSet>();
 
