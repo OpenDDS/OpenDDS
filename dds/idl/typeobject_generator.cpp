@@ -203,15 +203,15 @@ struct StructMemberFlagPrinter : MemberFlagPrinter {
 };
 
 struct UnionMemberFlagPrinter : MemberFlagPrinter {
-  explicit UnionMemberFlagPrinter(const OpenDDS::XTypes::StructMemberFlag a_value) : MemberFlagPrinter(a_value) {}
+  explicit UnionMemberFlagPrinter(const OpenDDS::XTypes::UnionMemberFlag a_value) : MemberFlagPrinter(a_value) {}
 };
 
 struct UnionDiscriminatorFlagPrinter : MemberFlagPrinter {
-  explicit UnionDiscriminatorFlagPrinter(const OpenDDS::XTypes::StructMemberFlag a_value) : MemberFlagPrinter(a_value) {}
+  explicit UnionDiscriminatorFlagPrinter(const OpenDDS::XTypes::UnionDiscriminatorFlag a_value) : MemberFlagPrinter(a_value) {}
 };
 
 struct EnumeratedLiteralFlagPrinter : MemberFlagPrinter {
-  explicit EnumeratedLiteralFlagPrinter(const OpenDDS::XTypes::StructMemberFlag a_value) : MemberFlagPrinter(a_value) {}
+  explicit EnumeratedLiteralFlagPrinter(const OpenDDS::XTypes::EnumeratedLiteralFlag a_value) : MemberFlagPrinter(a_value) {}
 };
 
 struct AliasMemberFlagPrinter : MemberFlagPrinter {
@@ -265,12 +265,12 @@ struct EnumTypeFlagPrinter :  TypeFlagPrinter {
 };
 
 struct MemberIdPrinter : UintPrinter<OpenDDS::XTypes::MemberId> {
-  explicit MemberIdPrinter(const OpenDDS::XTypes::StructMemberFlag a_value)
+  explicit MemberIdPrinter(const OpenDDS::XTypes::MemberId a_value)
   : UintPrinter<OpenDDS::XTypes::MemberId>(a_value) {}
 };
 
 struct BitBoundPrinter : UintPrinter<OpenDDS::XTypes::BitBound> {
-  explicit BitBoundPrinter(const OpenDDS::XTypes::StructMemberFlag a_value)
+  explicit BitBoundPrinter(const OpenDDS::XTypes::BitBound a_value)
   : UintPrinter<OpenDDS::XTypes::BitBound>(a_value) {}
 };
 
@@ -1180,48 +1180,71 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
     } while (wt != v.type);
 
     if (scc.size() == 1) {
-      generate_minimal_type_identifier(scc[0].type, false);
+      generate_type_identifier(scc[0].type, false);
     } else {
-      OpenDDS::XTypes::TypeIdentifier ti(OpenDDS::XTypes::TI_STRONGLY_CONNECTED_COMPONENT);
-      ti.sc_component_id().sc_component_id.kind = OpenDDS::XTypes::EK_MINIMAL;
-      std::memset(&ti.sc_component_id().sc_component_id.hash, 0, sizeof(OpenDDS::XTypes::EquivalenceHash));
-      ti.sc_component_id().scc_length = static_cast<int>(scc.size());
+      OpenDDS::XTypes::TypeIdentifier minimal_ti(OpenDDS::XTypes::TI_STRONGLY_CONNECTED_COMPONENT);
+      minimal_ti.sc_component_id().sc_component_id.kind = OpenDDS::XTypes::EK_MINIMAL;
+      std::memset(&minimal_ti.sc_component_id().sc_component_id.hash, 0, sizeof(OpenDDS::XTypes::EquivalenceHash));
+      minimal_ti.sc_component_id().scc_length = static_cast<int>(scc.size());
+
+      OpenDDS::XTypes::TypeIdentifier complete_ti = minimal_ti;
+      complete_ti.sc_component_id().sc_component_id.kind = OpenDDS::XTypes::EK_COMPLETE;
 
       {
         size_t idx = 0;
         for (List::const_iterator pos = scc.begin(), limit = scc.end(); pos != limit; ++pos) {
-          ti.sc_component_id().scc_index = static_cast<int>(++idx); // Starts at 1.
-          minimal_type_identifier_map_[pos->type] = ti;
+          minimal_ti.sc_component_id().scc_index = static_cast<int>(++idx); // Starts at 1.
+          complete_ti.sc_component_id().scc_index = minimal_ti.sc_component_id().scc_index;
+          minimal_type_identifier_map_[pos->type] = minimal_ti;
+          complete_type_identifier_map_[pos->type] = complete_ti;
         }
       }
 
-      OpenDDS::XTypes::TypeObjectSeq seq;
+      OpenDDS::XTypes::TypeObjectSeq minimal_seq, complete_seq;
       for (List::const_iterator pos = scc.begin(), limit = scc.end(); pos != limit; ++pos) {
-        generate_minimal_type_identifier(pos->type, true);
-        OPENDDS_ASSERT(minimal_type_object_map_.count(pos->type) != 0);
-        seq.append(minimal_type_object_map_[pos->type]);
+        generate_type_identifier(pos->type, true);
+        OPENDDS_ASSERT(minimal_type_object_map_.count(pos->type) != 0 &&
+                       complete_type_object_map_.count(pos->type) != 0);
+        minimal_seq.append(minimal_type_object_map_[pos->type]);
+        complete_seq.append(complete_type_object_map_[pos->type]);
       }
 
       const OpenDDS::DCPS::Encoding& encoding = OpenDDS::XTypes::get_typeobject_encoding();
-      size_t size = serialized_size(encoding, seq);
-      ACE_Message_Block buff(size);
-      OpenDDS::DCPS::Serializer ser(&buff, encoding);
-      if (!(ser << seq)) {
-        be_util::misc_error_and_abort("Failed to serialize type object sequence in strongly-connected component", type);
+      size_t minimal_size = serialized_size(encoding, minimal_seq);
+      ACE_Message_Block minimal_buff(minimal_size);
+      OpenDDS::DCPS::Serializer minimal_ser(&minimal_buff, encoding);
+      if (!(minimal_ser << minimal_seq)) {
+        be_util::misc_error_and_abort("Failed to serialize minimal type object sequence in strongly-connected component", type);
       }
 
       unsigned char result[sizeof(OpenDDS::DCPS::MD5Result)];
-      OpenDDS::DCPS::MD5Hash(result, buff.rd_ptr(), buff.length());
+      OpenDDS::DCPS::MD5Hash(result, minimal_buff.rd_ptr(), minimal_buff.length());
 
       // First 14 bytes of MD5 of the serialized TypeObject using XCDR
       // version 2 with Little Endian encoding
-      std::memcpy(ti.sc_component_id().sc_component_id.hash, result, sizeof(OpenDDS::XTypes::EquivalenceHash));
+      std::memcpy(minimal_ti.sc_component_id().sc_component_id.hash, result, sizeof(OpenDDS::XTypes::EquivalenceHash));
+
+      size_t complete_size = serialized_size(encoding, complete_seq);
+      ACE_Message_Block complete_buff(complete_size);
+      OpenDDS::DCPS::Serializer complete_ser(&complete_buff, encoding);
+      if (!(complete_ser << complete_seq)) {
+        be_util::misc_error_and_abort("Failed to serialize complete type object sequence in strongly-connected component", type);
+      }
+
+      OpenDDS::DCPS::MD5Hash(result, complete_buff.rd_ptr(), complete_buff.length());
+      std::memcpy(complete_ti.sc_component_id().sc_component_id.hash, result, sizeof(OpenDDS::XTypes::EquivalenceHash));
 
       {
         size_t idx = 0;
         for (List::const_iterator pos = scc.begin(), limit = scc.end(); pos != limit; ++pos) {
-          ti.sc_component_id().scc_index = static_cast<int>(++idx);
-          minimal_type_identifier_map_[pos->type] = ti;
+          minimal_ti.sc_component_id().scc_index = static_cast<int>(++idx);
+          complete_ti.sc_component_id().scc_index = minimal_ti.sc_component_id().scc_index;
+          minimal_type_identifier_map_[pos->type] = minimal_ti;
+          complete_type_identifier_map_[pos->type] = complete_ti;
+
+          // TODO(sonndinh): Is the following sufficient? The type objects in the SCC
+          // must contain type identifiers with the hash value computed above.
+          // Have the cached type objects in minimal_type_object_map_ been updated with the hash?
           minimal_type_map_[ti] = minimal_type_object_map_[pos->type];
         }
       }
@@ -1229,10 +1252,106 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
   }
 }
 
+// Generate minimal and complete type objects and type identifiers for a struct type
 void
-typeobject_generator::generate_minimal_type_identifier(AST_Type* type, bool force_type_object)
+typeobject_generator::generate_struct_type_identifier(AST_Type* type)
 {
-  // Generate the minimal identifier (and type object) and cache.
+  AST_Structure* const n = dynamic_cast<AST_Structure*>(type);
+
+  const Fields fields(n);
+
+  const ExtensibilityKind exten = be_global->extensibility(n);
+  const AutoidKind auto_id = be_global->autoid(n);
+
+  OpenDDS::XTypes::TypeObject minimal_to, complete_to;
+  minimal_to.kind = OpenDDS::XTypes::EK_MINIMAL;
+  minimal_to.minimal.kind = OpenDDS::XTypes::TK_STRUCTURE;
+
+  minimal_to.minimal.struct_type.struct_flags = extensibility_to_type_flag(exten);
+
+  if (be_global->is_nested(n)) {
+    minimal_to.minimal.struct_type.struct_flags |= OpenDDS::XTypes::IS_NESTED;
+  }
+
+  if (auto_id == autoidkind_hash) {
+    minimal_to.minimal.struct_type.struct_flags |= OpenDDS::XTypes::IS_AUTOID_HASH;
+  }
+
+  // TODO: Support inheritance.
+  minimal_to.minimal.struct_type.header.base_type = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_NONE);
+
+  complete_to.kind = OpenDDS::XTypes::EK_COMPLETE;
+  complete_to.complete.kind = OpenDDS::XTypes::TK_STRUCTURE;
+
+  complete_to.complete.struct_type.struct_flags = minimal_to.minimal.struct_type.struct_flags;
+  complete_to.complete.struct_type.header.base_type = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_NONE);
+  complete_to.complete.struct_type.header.detail.type_name = type->name()->get_string_copy();
+  // TODO(sonndinh): Set up the other fields of CompleteTypeDetail.
+
+  for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
+    AST_Field* field = *i;
+    const TryConstructFailAction trycon = be_global->try_construct(field);
+
+    OpenDDS::XTypes::MinimalStructMember minimal_member;
+    minimal_member.common.member_id = be_global->get_id(field);
+    minimal_member.common.member_flags = try_construct_to_member_flag(trycon);
+
+    if (be_global->is_optional(field)) {
+      minimal_member.common.member_flags |= OpenDDS::XTypes::IS_OPTIONAL;
+    }
+
+    if (be_global->is_must_understand(field)) {
+      minimal_member.common.member_flags |= OpenDDS::XTypes::IS_MUST_UNDERSTAND;
+    }
+
+    if (be_global->is_key(field)) {
+      minimal_member.common.member_flags |= OpenDDS::XTypes::IS_KEY;
+    }
+
+    if (be_global->is_external(field)) {
+      minimal_member.common.member_flags |= OpenDDS::XTypes::IS_EXTERNAL;
+    }
+
+    minimal_member.common.member_type_id = get_minimal_type_identifier(field->field_type());
+    OpenDDS::XTypes::hash_member_name(minimal_member.detail.name_hash, field->local_name()->get_string());
+    minimal_to.minimal.struct_type.member_seq.append(minimal_member);
+
+    OpenDDS::XTypes::CompleteStructMember complete_member;
+    complete_member.common.member_id = minimal_member.common.member_id;
+    complete_member.common.member_flags = minimal_member.common.member_flags;
+    complete_member.common.member_type_id = get_complete_type_identifier(field->field_type());
+
+    // TODO(sonndinh): Set up the other fields of CompleteMemberDetail.
+    complete_member.detail.name = field->local_name()->get_string();
+
+    complete_to.complete.struct_type.member_seq.append(complete_member);
+  }
+
+  minimal_to.minimal.struct_type.member_seq.sort();
+  // TODO(sonndinh): Define comparison operator for CompleteStructMember.
+  complete_to.complete.struct_type.member_seq.sort();
+
+  TypeObjectPair to_pair = {minimal_to, complete_to};
+  type_object_map_[type] = to_pair;
+  //  minimal_type_object_map_[type] = minimal_to;
+  //  complete_type_object_map_[type] = complete_to;
+
+  if (hash_type_identifier_map_.count(type) == 0) {
+    const OpenDDS::XTypes::TypeIdentifier minimal_ti = makeTypeIdentifier(minimal_to);
+    const OpenDDS::XTypes::TypeIdentifier complete_ti = makeTypeIdentifier(complete_to);
+    TypeIdentifierPair ti_pair = {minimal_ti, complete_ti};
+    hash_type_identifier_map_[type] = ti_pair;
+    //    minimal_type_identifier_map_[type] = ti;
+
+    minimal_type_map_[minimal_ti] = minimal_to;
+    complete_type_map_[complete_ti] = complete_to;
+  }
+}
+
+void
+typeobject_generator::generate_type_identifier(AST_Type* type, bool force_type_object)
+{
+  // Generate both minimal and complete identifiers (and type objects) and cache.
   switch (type->node_type()) {
 
   case AST_ConcreteType::NT_union:
@@ -1322,72 +1441,7 @@ typeobject_generator::generate_minimal_type_identifier(AST_Type* type, bool forc
 
   case AST_ConcreteType::NT_struct:
     {
-      AST_Structure* const n = dynamic_cast<AST_Structure*>(type);
-
-      const Fields fields(n);
-      const Fields::Iterator fields_end = fields.end();
-
-      const ExtensibilityKind exten = be_global->extensibility(n);
-      const AutoidKind auto_id = be_global->autoid(n);
-
-      OpenDDS::XTypes::TypeObject to;
-      to.kind = OpenDDS::XTypes::EK_MINIMAL;
-      to.minimal.kind = OpenDDS::XTypes::TK_STRUCTURE;
-
-      to.minimal.struct_type.struct_flags = extensibility_to_type_flag(exten);
-
-      if (be_global->is_nested(n)) {
-        to.minimal.struct_type.struct_flags |= OpenDDS::XTypes::IS_NESTED;
-      }
-
-      if (auto_id == autoidkind_hash) {
-        to.minimal.struct_type.struct_flags |= OpenDDS::XTypes::IS_AUTOID_HASH;
-      }
-
-      // TODO: Support inheritance.
-      to.minimal.struct_type.header.base_type = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_NONE);
-      // to.minimal.struct_type.header.detail is not used.
-
-      for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
-        AST_Field* field = *i;
-        const TryConstructFailAction trycon = be_global->try_construct(field);
-
-        OpenDDS::XTypes::MinimalStructMember member;
-
-        member.common.member_id = be_global->get_id(field);
-
-        member.common.member_flags = try_construct_to_member_flag(trycon);
-
-        if (be_global->is_optional(field)) {
-          member.common.member_flags |= OpenDDS::XTypes::IS_OPTIONAL;
-        }
-
-        if (be_global->is_must_understand(field)) {
-          member.common.member_flags |= OpenDDS::XTypes::IS_MUST_UNDERSTAND;
-        }
-
-        if (be_global->is_key(field)) {
-          member.common.member_flags |= OpenDDS::XTypes::IS_KEY;
-        }
-
-        if (be_global->is_external(field)) {
-          member.common.member_flags |= OpenDDS::XTypes::IS_EXTERNAL;
-        }
-
-        member.common.member_type_id = get_minimal_type_identifier((field)->field_type());
-
-        OpenDDS::XTypes::hash_member_name(member.detail.name_hash, (field)->local_name()->get_string());
-
-        to.minimal.struct_type.member_seq.append(member);
-      }
-      to.minimal.struct_type.member_seq.sort();
-
-      minimal_type_object_map_[type] = to;
-      if (minimal_type_identifier_map_.count(type) == 0) {
-        const OpenDDS::XTypes::TypeIdentifier ti = makeTypeIdentifier(to);
-        minimal_type_identifier_map_[type] = ti;
-        minimal_type_map_[ti] = to;
-      }
+      generate_struct_type_identifier(type);
       break;
     }
 
@@ -1719,6 +1773,7 @@ typeobject_generator::get_minimal_type_object(AST_Type* type)
   return pos->second;
 }
 
+// Get minimal or fully descriptive type identifier
 OpenDDS::XTypes::TypeIdentifier
 typeobject_generator::get_minimal_type_identifier(AST_Type* type)
 {
@@ -1740,6 +1795,13 @@ typeobject_generator::get_minimal_type_identifier(AST_Type* type)
   MinimalTypeIdentifierMap::const_iterator pos = minimal_type_identifier_map_.find(type);
   OPENDDS_ASSERT(pos != minimal_type_identifier_map_.end());
   return pos->second;
+}
+
+// Get complete or fully descriptive type identifier
+OpenDDS::XTypes::TypeIdentifier
+typeobject_generator::get_complete_type_identifier(AST_Type* type)
+{
+  // TODO(sonndinh)
 }
 
 bool

@@ -698,9 +698,9 @@ void compute_dependencies(const TypeMap& type_map,
   compute_dependencies(type_map, type.element, dependencies);
 }
 
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalEnumeratedType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
+void compute_dependencies(const TypeMap&,
+                          const MinimalEnumeratedType&,
+                          OPENDDS_SET(TypeIdentifier)&)
 {
   // Doesn't have any dependencies.
 }
