@@ -529,12 +529,12 @@ public:
     DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
     DDS::InstanceStateMask instance_states) = 0;
 
+#endif
+
   virtual void set_instance_state(DDS::InstanceHandle_t instance,
                                   DDS::InstanceStateKind state,
                                   const SystemTimePoint& timestamp = SystemTimePoint::now(),
                                   const OpenDDS::DCPS::GUID_t& = GUID_UNKNOWN) = 0;
-
-#endif
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   void begin_access();
