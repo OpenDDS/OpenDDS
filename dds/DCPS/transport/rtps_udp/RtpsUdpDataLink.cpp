@@ -1723,7 +1723,9 @@ RtpsUdpDataLink::RtpsReader::process_gap_i(const RTPS::GapSubmessage& gap,
   writer->recvd_.insert(base, gap.gapList.numBits, gap.gapList.bitmap.get_buffer());
 
   DisjointSequence gaps;
-  gaps.insert(SequenceRange(start, base.previous()));
+  if (start < base) {
+    gaps.insert(SequenceRange(start, base.previous()));
+  }
   gaps.insert(base, gap.gapList.numBits, gap.gapList.bitmap.get_buffer());
 
   if (!gaps.empty()) {
