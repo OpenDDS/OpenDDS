@@ -1070,7 +1070,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
     max_sn_ = std::max(max_sn_, seq);
     if (!durable_ && !is_pvs_writer() &&
         element->subscription_id() == GUID_UNKNOWN &&
-        previous_max_sn != max_sn_.previous()) {
+        previous_max_sn < max_sn_.previous()) {
       add_gap_submsg_i(subm, previous_max_sn + 1);
     }
   }
@@ -1645,7 +1645,9 @@ RtpsUdpDataLink::RtpsReader::process_gap_i(const RTPS::GapSubmessage& gap,
   writer->recvd_.insert(base, gap.gapList.numBits, gap.gapList.bitmap.get_buffer());
 
   DisjointSequence gaps;
-  gaps.insert(SequenceRange(start, base.previous()));
+  if (start < base) {
+    gaps.insert(SequenceRange(start, base.previous()));
+  }
   gaps.insert(base, gap.gapList.numBits, gap.gapList.bitmap.get_buffer());
 
   if (!gaps.empty()) {
