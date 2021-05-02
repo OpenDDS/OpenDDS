@@ -54,10 +54,16 @@ private:
 
   void consider(Element& v, AST_Type* type, const std::string& anonymous_name);
   void strong_connect(AST_Type* type, const std::string& anonymous_name);
-  void generate_minimal_type_identifier(AST_Type* type, bool force_type_object);
+  void generate_type_identifier(AST_Type* type, bool force_type_object);
+  void generate_struct_type_identifier(AST_Type* type);
+  void generate_union_type_identifier(AST_Type* type);
+  void generate_enum_type_identifier(AST_Type* type);
+  void generate_array_type_identifier(AST_Type* type, bool force_type_object);
+
   static bool name_sorter(const Element& x, const Element& y);
   OpenDDS::XTypes::TypeObject get_minimal_type_object(AST_Type* type);
   OpenDDS::XTypes::TypeIdentifier get_minimal_type_identifier(AST_Type* type);
+  OpenDDS::XTypes::TypeIdentifier get_complete_type_identifier(AST_Type* type);
   bool generate(AST_Type* node, UTL_ScopedName* name);
 
   // Both fields must be constructed when an object is created.
@@ -68,8 +74,6 @@ private:
 
   typedef std::map<AST_Type*, TypeObjectPair> TypeObjectMap;
   TypeObjectMap type_object_map_;
-  //  TypeObjectMap minimal_type_object_map_;
-  //  TypeObjectMap complete_type_object_map_;
 
   // Both fields must be constructed when an object is created.
   typedef struct TypeIdentifierPair {
@@ -82,8 +86,6 @@ private:
 
   typedef std::map<AST_Type*, TypeIdentifier> FullyDescriptiveTypeIdentifierMap;
   FullyDescriptiveTypeIdentifierMap fully_desc_type_identifier_map_;
-  //  TypeIdentifierMap minimal_type_identifier_map_;
-  //  TypeIdentifierMap complete_type_identifier_map_;
 
   OpenDDS::XTypes::TypeMap minimal_type_map_;
   OpenDDS::XTypes::TypeMap complete_type_map_;
