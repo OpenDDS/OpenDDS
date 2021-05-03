@@ -46,7 +46,7 @@ macro(OPENDDS_GET_SOURCES_AND_OPTIONS
   set(${tao_options} ${_arg_TAO_IDL_OPTIONS})
   set(${opendds_options} ${_arg_OPENDDS_IDL_OPTIONS})
 
-  if (${_arg_SUPPRESS_ANYS} MATCHES ON OR ${_arg_SUPPRESS_ANYS} MATCHES OFF)
+  if (${_arg_SUPPRESS_ANYS} OR ${_arg_SUPPRESS_ANYS} MATCHES OFF)
     set(${suppress_anys} ${_arg_SUPPRESS_ANYS})
   endif()
 
@@ -215,7 +215,7 @@ macro(OPENDDS_TARGET_SOURCES target)
     message(FATAL_ERROR "OpenDDS does not support argument items in CMAKE_CXX_COMPILER.")
   endif()
 
-  if(${_suppress_anys} MATCHES ON)
+  if(${_suppress_anys})
     list(APPEND _opendds_options -Sa -St)
     list(APPEND _tao_options -Sa -St)
   endif()
