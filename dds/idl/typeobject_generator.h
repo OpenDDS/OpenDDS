@@ -55,10 +55,15 @@ private:
   void consider(Element& v, AST_Type* type, const std::string& anonymous_name);
   void strong_connect(AST_Type* type, const std::string& anonymous_name);
   void generate_type_identifier(AST_Type* type, bool force_type_object);
+
+  // Generate minimal and complete type objects and type identifiers for the corresponding types.
   void generate_struct_type_identifier(AST_Type* type);
   void generate_union_type_identifier(AST_Type* type);
   void generate_enum_type_identifier(AST_Type* type);
   void generate_array_type_identifier(AST_Type* type, bool force_type_object);
+  void generate_sequence_type_identifier(AST_Type* type, bool force_type_object);
+  void generate_alias_type_identifier(AST_Type* type);
+  void generate_primitive_type_identifier(AST_Type* type);
 
   static bool name_sorter(const Element& x, const Element& y);
   OpenDDS::XTypes::TypeObject get_minimal_type_object(AST_Type* type);
