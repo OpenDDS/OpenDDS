@@ -1,17 +1,8 @@
-#include "typecodeTypeSupportImpl.h"
+#include <typecodeTypeSupportImpl.h>
 
-#include <gtest/gtest.h>
-
-using namespace OpenDDS::DCPS;
-
-TEST(TestTypecodes, can_allocate)
+int main(int, char*[])
 {
-  ASSERT_EQ(my_module::_tc_my_struct, nullptr);
-  ASSERT_EQ(my_module::_tc_my_union, nullptr);
-}
-
-int main(int argc, char* argv[])
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  ACE_UNUSED_ARG(my_module::_tc_my_struct);
+  ACE_UNUSED_ARG(my_module::_tc_my_union);
+  return 0;
 }
