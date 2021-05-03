@@ -1080,7 +1080,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
     max_sn_ = std::max(max_sn_, seq);
     if (!durable_ && !is_pvs_writer() &&
         element->subscription_id() == GUID_UNKNOWN &&
-        previous_max_sn != max_sn_.previous()) {
+        previous_max_sn < max_sn_.previous()) {
       add_gap_submsg_i(subm, previous_max_sn + 1);
     }
   }
@@ -1452,6 +1452,7 @@ RtpsUdpDataLink::RtpsWriter::add_gap_submsg_i(RTPS::SubmessageSeq& msg,
     to_rtps_seqnum(gap_start),
     {to_rtps_seqnum(max_sn_), 0, bitmap}
   };
+  OPENDDS_ASSERT(gap_start < max_sn_);
 
   const size_t size = serialized_size(Encoding(Encoding::KIND_XCDR1), gap);
   gap.smHeader.submessageLength =
@@ -1714,11 +1715,17 @@ RtpsUdpDataLink::RtpsReader::process_gap_i(const RTPS::GapSubmessage& gap,
   const SequenceNumber start = to_opendds_seqnum(gap.gapStart);
   const SequenceNumber base = to_opendds_seqnum(gap.gapList.bitmapBase);
 
-  writer->recvd_.insert(SequenceRange(start, base.previous()));
+  if (start < base) {
+    writer->recvd_.insert(SequenceRange(start, base.previous()));
+  } else if (start != base) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::RtpsReader::process_gap_i - ERROR - Incoming GAP has inverted start (%q) & base (%q) values, ignoring start value\n", start.getValue(), base.getValue()));
+  }
   writer->recvd_.insert(base, gap.gapList.numBits, gap.gapList.bitmap.get_buffer());
 
   DisjointSequence gaps;
-  gaps.insert(SequenceRange(start, base.previous()));
+  if (start < base) {
+    gaps.insert(SequenceRange(start, base.previous()));
+  }
   gaps.insert(base, gap.gapList.numBits, gap.gapList.bitmap.get_buffer());
 
   if (!gaps.empty()) {
@@ -2887,6 +2894,7 @@ RtpsUdpDataLink::RtpsWriter::gather_gaps_i(const ReaderInfo_rch& reader,
     gapStart,
     {gapListBase, num_bits, bitmap}
   };
+  OPENDDS_ASSERT(firstMissing < base);
   meta_submessage.sm_.gap_sm(gap);
 
   if (Transport_debug_level > 5) {
