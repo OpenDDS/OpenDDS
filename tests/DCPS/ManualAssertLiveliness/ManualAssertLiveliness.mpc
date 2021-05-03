@@ -8,17 +8,6 @@ project(DDS*Publisher) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
     publisher.cpp
     Writer.cpp
     DataWriterListenerImpl.cpp
-  }
-}
-
-project(DDS*Subscriber) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
-  exename = subscriber
-
-  Idl_Files {
-  }
-
-  Source_Files {
-    subscriber.cpp
-    DataReaderListener.cpp
+    DataReaderListenerImpl.cpp
   }
 }
