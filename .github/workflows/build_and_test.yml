@@ -2034,7 +2034,7 @@ jobs:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: install wireshark
-      run: sudo apt-get -y install wireshark-dev
+      run: sudo apt-get update -y install wireshark-dev
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
     - name: checkout MPC
@@ -3405,7 +3405,7 @@ jobs:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: install wireshark
-      run: sudo apt-get -y install wireshark-dev
+      run: sudo apt-get update -y install wireshark-dev
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
     - name: checkout MPC
@@ -3447,7 +3447,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --static --qt --security --rapidjson --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --static --qt --wireshark --security --rapidjson --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -3487,8 +3487,6 @@ jobs:
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
-    - name: install wireshark
-      run: sudo apt-get -y install wireshark-dev
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
     - name: checkout MPC
@@ -3566,8 +3564,6 @@ jobs:
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
-    - name: install wireshark
-      run: sudo apt-get -y install wireshark-dev
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
     - name: checkout MPC
