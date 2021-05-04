@@ -137,7 +137,7 @@ macro(OPENDDS_TARGET_SOURCES target)
     list(APPEND _extra_idl_flags "--filename-only-includes")
   endif()
 
-  set(${_suppress_anys} ${OPENDDS_SUPPRESS_ANYS})
+  set(_suppress_anys ${OPENDDS_SUPPRESS_ANYS})
 
   OPENDDS_GET_SOURCES_AND_OPTIONS(
     _sources
