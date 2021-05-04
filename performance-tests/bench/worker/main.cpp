@@ -56,11 +56,11 @@
 #include "WriteAction.h"
 
 #include <cmath>
-#include <iostream>
 #include <fstream>
+#include <iomanip>
+#include <iostream>
 #include <sstream>
 #include <thread>
-#include <iomanip>
 
 #include <util.h>
 #include <json_conversion.h>
@@ -214,8 +214,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   if (force_worker_deadlock_prop) {
     if (force_worker_deadlock_prop->value.ull_prop()) {
       std::mutex m;
-      std::unique_lock<std::mutex> l1(m);
-      std::unique_lock<std::mutex> l2(m);
+      std::unique_lock<std::mutex> l(m);
+      std::thread t([&](){
+        std::unique_lock<std::mutex> tl(m);
+      });
+      t.join();
     }
   }
 
