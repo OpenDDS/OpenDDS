@@ -158,7 +158,7 @@ int ReactorTask::svc()
       while (state_ == STATE_RUNNING) {
         ACE_Time_Value t = timeout_.value();
         reactor_->run_reactor_event_loop(t, 0);
-        if (DCPS_debug_level >= 4) {
+        if (DCPS_debug_level > 4) {
           ACE_DEBUG((LM_DEBUG,
                      "(%P|%t) ReactorTask::svc. Updating thread status.\n"));
         }
@@ -180,7 +180,7 @@ int ReactorTask::svc()
   }
 
   if (update_thread_status) {
-    if (DCPS_debug_level >= 4) {
+    if (DCPS_debug_level > 4) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) ReactorTask::svc: "
         "Updating thread status for the last time\n"));
     }
@@ -267,7 +267,7 @@ bool ThreadStatusManager::update(const String& thread_key, ThreadStatus status)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
   const SystemTimePoint now = SystemTimePoint::now();
-  if (DCPS_debug_level >= 4) {
+  if (DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) ThreadStatus::update: "
       "update for thread \"%C\" %C @ %d\n",
       thread_key.c_str(), status_to_string(status), now.value().sec()));

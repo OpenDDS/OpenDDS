@@ -3,10 +3,12 @@
 #ifndef WRITER_H
 #define WRITER_H
 
-#include <dds/DdsDcpsPublicationC.h>
-#include <ace/Task.h>
-#include "dds/DCPS/PoolAllocator.h"
 #include "MessengerTypeSupportC.h"
+
+#include <dds/DdsDcpsPublicationC.h>
+#include <dds/DCPS/PoolAllocator.h>
+
+#include <ace/Task.h>
 
 class Writer_Base : public ACE_Task_Base
 {
@@ -16,12 +18,11 @@ public:
   void end();
 
 protected:
-  const char* get_id() const { return id_.c_str(); }
   virtual void pre_loop() {}
   virtual void in_loop(int i) = 0;
+  virtual void post_loop() {}
 
   ::DDS::DataWriter_var writer_;
-  OPENDDS_STRING id_;
   const char* name_;
 
 private:
@@ -36,6 +37,7 @@ public:
 private:
   void pre_loop();
   void in_loop(int i);
+  void post_loop();
 
   Messenger::MessageDataWriter_var message_dw_;
   Messenger::Message message_;
@@ -47,6 +49,7 @@ class Assert_Participant_Liveliness : public Writer_Base
 {
 public:
   Assert_Participant_Liveliness(DDS::DataWriter_ptr writer, const char* name);
+
 private:
   void in_loop(int i);
   DDS::DomainParticipant_var participant_;
@@ -57,6 +60,7 @@ class Assert_Writer_Liveliness : public Writer_Base
 {
 public:
   Assert_Writer_Liveliness(DDS::DataWriter_ptr writer, const char* name);
+
 private:
   void in_loop(int i);
 };

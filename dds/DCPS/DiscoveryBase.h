@@ -127,7 +127,7 @@ namespace OpenDDS {
               case CvStatus_Timeout:
                 {
                   expire = MonotonicTimePoint::now() + interval_;
-                  if (DCPS_debug_level >= 4) {
+                  if (DCPS_debug_level > 4) {
                     ACE_DEBUG((LM_DEBUG,
                                "(%P|%t) DcpsUpcalls::svc. Updating thread status.\n"));
                   }
@@ -157,7 +157,7 @@ namespace OpenDDS {
         }
 
         if (update_thread_status) {
-          if (DCPS_debug_level >= 4) {
+          if (DCPS_debug_level > 4) {
             ACE_DEBUG((LM_DEBUG, "(%P|%t) DcpsUpcalls: "
               "Updating thread status for the last time\n"));
           }
@@ -184,7 +184,7 @@ namespace OpenDDS {
         wait(); // ACE_Task_Base::wait does not accept a timeout
 
         if (thread_status_manager_ && has_timeout() && MonotonicTimePoint::now() > expire) {
-          if (DCPS_debug_level >= 4) {
+          if (DCPS_debug_level > 4) {
             ACE_DEBUG((LM_DEBUG,
                        "(%P|%t) DcpsUpcalls::writer_done. Updating thread status.\n"));
           }
@@ -2456,11 +2456,6 @@ namespace OpenDDS {
       DDS::Subscriber_var bit_subscriber_;
       DDS::DomainParticipantQos qos_;
       DiscoveredParticipantMap participants_;
-
-#ifdef OPENDDS_SECURITY
-      PendingRemoteAuthTokenMap pending_remote_auth_tokens_;
-#endif
-
     };
 
     template<typename Participant>

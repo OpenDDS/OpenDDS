@@ -1,0 +1,14 @@
+/Compiler_Typecode
+typecodeC.cpp
+typecodeC.h
+typecodeC.inl
+typecodeS.cpp
+typecodeS.h
+typecodeTypeSupport.idl
+typecodeTypeSupportC.cpp
+typecodeTypeSupportC.h
+typecodeTypeSupportC.inl
+typecodeTypeSupportImpl.cpp
+typecodeTypeSupportImpl.h
+typecodeTypeSupportS.cpp
+typecodeTypeSupportS.h

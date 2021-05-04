@@ -1028,7 +1028,7 @@ Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
     return;
   }
 
-  pending_remote_auth_tokens_[guid] = msg.message_data[0];
+
   DiscoveredParticipantMap::iterator iter = participants_.find(guid);
 
   if (iter != participants_.end()) {
@@ -1039,6 +1039,8 @@ Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
       }
       return;
     }
+
+    iter->second.remote_auth_request_token_ = msg.message_data[0];
     iter->second.auth_req_sequence_number_ = msg.message_identity.sequence_number;
 
     attempt_authentication(iter, false);
@@ -1174,14 +1176,6 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
 {
   const DCPS::RepoId& guid = iter->first;
   DiscoveredParticipant& dp = iter->second;
-
-  PendingRemoteAuthTokenMap::iterator token_iter = pending_remote_auth_tokens_.find(guid);
-  if (token_iter == pending_remote_auth_tokens_.end()) {
-    dp.remote_auth_request_token_ = DDS::Security::Token();
-  } else {
-    dp.remote_auth_request_token_ = token_iter->second;
-    pending_remote_auth_tokens_.erase(token_iter);
-  }
 
   if (DCPS::security_debug.auth_debug) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) {auth_debug} DEBUG: Spdp::attempt_authentication "

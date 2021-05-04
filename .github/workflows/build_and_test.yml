@@ -270,7 +270,7 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        cd tests/cmake_integration
+        cd tests/cmake
         perl run_ci_tests.pl
 
   build_u18_o1d0v1_xer0_j12:
@@ -345,7 +345,7 @@ jobs:
       run: |
         cd OpenDDS
         . install_setenv.sh
-        cd tests/cmake_integration/Messenger/Messenger_1
+        cd tests/cmake/Messenger/Messenger_1
         git clean -dfx .
         mkdir build
         cd build
@@ -424,7 +424,7 @@ jobs:
       run: |
         cd OpenDDS
         . install_setenv.sh
-        cd tests/cmake_integration/Messenger/Messenger_1/build
+        cd tests/cmake/Messenger/Messenger_1/build
         perl run_test.pl
     - name: remove install clutter
       shell: bash
@@ -1073,8 +1073,8 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        cd tests/cmake_integration
-        perl run_ci_tests.pl --compiler=clang++-5.0
+        cd tests/cmake
+        perl run_ci_tests.pl --compiler=clang++-5.0 --cxx-standard 11
 
   ACE_TAO_u18_clang10_sec_js0:
 
@@ -1284,7 +1284,7 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        cd tests/cmake_integration
+        cd tests/cmake
         perl run_ci_tests.pl --compiler=clang++-10
 
   ACE_TAO_u18_gcc6_d0w1_cpp03:
@@ -1494,8 +1494,8 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        cd tests/cmake_integration
-        perl run_ci_tests.pl --skip-cxx11 --compiler=g++-6
+        cd tests/cmake
+        perl run_ci_tests.pl --compiler=g++-6 --cxx-standard 98
 
   ACE_TAO_u18_gcc8_i0_js0_j:
 
@@ -1704,7 +1704,7 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        cd tests/cmake_integration
+        cd tests/cmake
         perl run_ci_tests.pl --compiler=g++-8
 
   ACE_TAO_u18_gcc10_i0w1_xer0:
@@ -1907,7 +1907,7 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        cd tests/cmake_integration
+        cd tests/cmake
         perl run_ci_tests.pl --compiler=g++-10
 
   u20_gcc10_bsafe_js0_FM-2c:
@@ -1956,7 +1956,7 @@ jobs:
         . setenv.sh
         tools/scripts/show_build_config.pl
 
-  ACE_TAO_u20_j_qt_ws_sec:
+  ACE_TAO_u20_ace7_j_qt_ws_sec:
 
     runs-on: ubuntu-20.04
 
@@ -2024,17 +2024,19 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_u20_j_qt_ws_sec:
+  build_u20_ace7_j_qt_ws_sec:
 
     runs-on: ubuntu-20.04
 
-    needs: ACE_TAO_u20_j_qt_ws_sec
+    needs: ACE_TAO_u20_ace7_j_qt_ws_sec
 
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: install wireshark
-      run: sudo apt-get -y install wireshark-dev
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install wireshark-dev
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
     - name: checkout MPC
@@ -2050,13 +2052,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ACE_TAO_u20_j_qt_ws_sec_artifact
+        name: ACE_TAO_u20_ace7_j_qt_ws_sec_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u20_j_qt_ws_sec.tar.xz
+        tar xvfJ ACE_TAO_u20_ace7_j_qt_ws_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
       with:
@@ -2121,11 +2123,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_u20_j_qt_ws_sec:
+  test_u20_ace7_j_qt_ws_sec:
 
     runs-on: ubuntu-20.04
 
-    needs: build_u20_j_qt_ws_sec
+    needs: build_u20_ace7_j_qt_ws_sec
     timeout-minutes: 150
 
     steps:
@@ -2149,13 +2151,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ACE_TAO_u20_j_qt_ws_sec_artifact
+        name: ACE_TAO_u20_ace7_j_qt_ws_sec_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u20_j_qt_ws_sec.tar.xz
+        tar xvfJ ACE_TAO_u20_ace7_j_qt_ws_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
       with:
@@ -2164,13 +2166,13 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
-        name: build_u20_j_qt_ws_sec_artifact
+        name: build_u20_ace7_j_qt_ws_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_u20_j_qt_ws_sec.tar.xz
+        tar xvfJ build_u20_ace7_j_qt_ws_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -3405,7 +3407,9 @@ jobs:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: install wireshark
-      run: sudo apt-get -y install wireshark-dev
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install wireshark-dev
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
     - name: checkout MPC
@@ -3447,7 +3451,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --static --qt --security --rapidjson --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --static --qt --wireshark --security --rapidjson --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -3487,8 +3491,6 @@ jobs:
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
-    - name: install wireshark
-      run: sudo apt-get -y install wireshark-dev
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
     - name: checkout MPC
@@ -3553,7 +3555,7 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        cd tests/cmake_integration
+        cd tests/cmake
         perl run_ci_tests.pl --no-shared
 
   messenger_u18_stat_qt_ws_sec:
@@ -3566,8 +3568,6 @@ jobs:
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
-    - name: install wireshark
-      run: sudo apt-get -y install wireshark-dev
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
     - name: checkout MPC
@@ -4239,12 +4239,12 @@ jobs:
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
-    - name: install openssl-windows & xerces-c
+    - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
-        vcpkgArguments: --recurse openssl-windows xerces-c
+        vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
+        vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
@@ -4294,11 +4294,11 @@ jobs:
     needs: ACE_TAO_w19_p1_stat_js0
 
     steps:
-    - name: install openssl-windows & xerces-c
+    - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
-        vcpkgArguments: --recurse openssl-windows xerces-c
+        vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
+        vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
@@ -4381,11 +4381,11 @@ jobs:
     timeout-minutes: 15
 
     steps:
-    - name: install openssl-windows & xerces-c
+    - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
-        vcpkgArguments: --recurse openssl-windows xerces-c
+        vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
+        vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
@@ -4441,7 +4441,7 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        cd tests/cmake_integration/
+        cd tests/cmake/
         perl run_ci_tests.pl --no-shared --build-config=Debug
 
   messenger_w19_p1_stat_js0:
@@ -4452,11 +4452,11 @@ jobs:
     timeout-minutes: 40
 
     steps:
-    - name: install openssl-windows & xerces-c
+    - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
-        vcpkgArguments: --recurse openssl-windows xerces-c
+        vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
+        vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
@@ -4606,11 +4606,11 @@ jobs:
     timeout-minutes: 30
 
     steps:
-    - name: install openssl-windows & xerces-c
+    - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
-        vcpkgArguments: --recurse openssl-windows xerces-c
+        vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
+        vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
@@ -4747,11 +4747,11 @@ jobs:
     timeout-minutes: 15
 
     steps:
-    - name: install openssl-windows & xerces-c
+    - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
-        vcpkgArguments: --recurse openssl-windows xerces-c
+        vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
+        vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
@@ -4909,12 +4909,12 @@ jobs:
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
-    - name: install openssl-windows & xerces-c
+    - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
-        vcpkgArguments: --recurse openssl-windows xerces-c
+        vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
+        vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
@@ -4964,11 +4964,11 @@ jobs:
     needs: ACE_TAO_w19_re_p1_stat_FM-08
 
     steps:
-    - name: install openssl-windows & xerces-c
+    - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
-        vcpkgArguments: --recurse openssl-windows xerces-c
+        vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
+        vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
@@ -5051,11 +5051,11 @@ jobs:
     timeout-minutes: 40
 
     steps:
-    - name: install openssl-windows & xerces-c
+    - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
-        vcpkgArguments: --recurse openssl-windows xerces-c
+        vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
+        vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
@@ -5205,11 +5205,11 @@ jobs:
     timeout-minutes: 30
 
     steps:
-    - name: install openssl-windows & xerces-c
+    - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
-        vcpkgArguments: --recurse openssl-windows xerces-c
+        vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
+        vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
@@ -5345,11 +5345,11 @@ jobs:
     timeout-minutes: 15
 
     steps:
-    - name: install openssl-windows & xerces-c
+    - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
-        vcpkgArguments: --recurse openssl-windows xerces-c
+        vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
+        vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
@@ -5507,12 +5507,12 @@ jobs:
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
-    - name: install openssl-windows & xerces-c
+    - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
-        vcpkgArguments: --recurse openssl-windows xerces-c
+        vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
+        vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
@@ -5562,11 +5562,11 @@ jobs:
     needs: ACE_TAO_w19_re_o1p1_sec
 
     steps:
-    - name: install openssl-windows & xerces-c
+    - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
-        vcpkgArguments: --recurse openssl-windows xerces-c
+        vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
+        vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
@@ -5656,11 +5656,11 @@ jobs:
     timeout-minutes: 40
 
     steps:
-    - name: install openssl-windows & xerces-c
+    - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
-        vcpkgArguments: --recurse openssl-windows xerces-c
+        vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
+        vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
@@ -5810,11 +5810,11 @@ jobs:
     timeout-minutes: 30
 
     steps:
-    - name: install openssl-windows & xerces-c
+    - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
-        vcpkgArguments: --recurse openssl-windows xerces-c
+        vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
+        vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
@@ -5950,11 +5950,11 @@ jobs:
     timeout-minutes: 15
 
     steps:
-    - name: install openssl-windows & xerces-c
+    - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
-        vcpkgArguments: --recurse openssl-windows xerces-c
+        vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
+        vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
@@ -6107,7 +6107,7 @@ jobs:
       uses: lukka/run-vcpkg@v6
       with:
         vcpkgDirectory: '${{ github.workspace }}/vcpkg-qt'
-        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
+        vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
         vcpkgArguments: --recurse qt5-winextras qt5-tools qt5-svg qt5-multimedia qt5-declarative
         vcpkgTriplet: x64-windows
     - name: checkout WinFlexBison
@@ -6183,12 +6183,12 @@ jobs:
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
-    - name: install openssl-windows & xerces-c
+    - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
-        vcpkgArguments: --recurse openssl-windows xerces-c
+        vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
+        vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
@@ -6247,12 +6247,12 @@ jobs:
       run: |
         tar xvJf wireshark_w19-release.tar.xz
         rm -f wireshark_w19-release.tar.xz
-    - name: install openssl-windows & xerces-c
+    - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
-        vcpkgArguments: --recurse openssl-windows xerces-c
+        vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
+        vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
@@ -6341,7 +6341,7 @@ jobs:
     - name: install xerces-c
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
+        vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
         vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -6495,7 +6495,7 @@ jobs:
     - name: install xerces-c
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
+        vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
         vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -6635,7 +6635,7 @@ jobs:
     - name: install xerces-c
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
+        vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
         vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -6801,12 +6801,12 @@ jobs:
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
-    - name: install openssl-windows & xerces-c
+    - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
-        vcpkgArguments: --recurse openssl-windows xerces-c
+        vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
+        vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x86-windows
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
@@ -6851,18 +6851,18 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_w16_x86_doi0_sec:
+  build_w16_x86_d0i0_sec:
 
     runs-on: windows-2016
 
     needs: ACE_TAO_w16_x86_d0i0
 
     steps:
-    - name: install openssl-windows & xerces-c
+    - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
-        vcpkgArguments: --recurse openssl-windows xerces-c
+        vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
+        vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x86-windows
     - name: ls
       shell: bash
@@ -6939,19 +6939,19 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_w16_x86_doi0_sec:
+  test_w16_x86_d0i0_sec:
 
     runs-on: windows-2016
 
-    needs: build_w16_x86_doi0_sec
+    needs: build_w16_x86_d0i0_sec
     timeout-minutes: 150
 
     steps:
-    - name: install openssl-windows & xerces-c
+    - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
-        vcpkgArguments: --recurse openssl-windows xerces-c
+        vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
+        vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x86-windows
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
@@ -6994,14 +6994,14 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
-        name: build_w16_x86_doi0_sec_artifact
+        name: build_w16_x86_d0i0_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w16_x86_doi0_sec.tar.xz
-        rm -f build_w16_x86_doi0_sec.tar.xz
+        tar xvfJ build_w16_x86_d0i0_sec.tar.xz
+        rm -f build_w16_x86_d0i0_sec.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.7.0
     - name: check build configuration
@@ -7070,7 +7070,7 @@ jobs:
     - name: install xerces-c
       uses: lukka/run-vcpkg@v6
       with:
-        vcpkgGitCommitId: ec6fe06e8da05a8157dc8581fa96b36b571c1bd5
+        vcpkgGitCommitId: 44d94c2edbd44f0c01d66c2ad95eb6982a9a61bc
         vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x86-windows
     - name: checkout MPC
