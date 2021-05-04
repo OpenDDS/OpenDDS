@@ -290,6 +290,7 @@ GuidAddrSet::record_activity(const ACE_INET_Addr& remote_address,
       }
       stats_reporter.report(now, true);
       guid_addr_set_map_.erase(pos->second.guid);
+      pending_.erase(pos->second.guid);
       relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
       spdp_vertical_handler_->purge(pos->second.guid);
       sedp_vertical_handler_->purge(pos->second.guid);
@@ -318,6 +319,7 @@ void GuidAddrSet::remove(const OpenDDS::DCPS::RepoId& guid)
   remove_helper(guid, addr_stats.data_addr_set);
 
   guid_addr_set_map_.erase(guid);
+  pending_.erase(guid);
   relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
   spdp_vertical_handler_->purge(guid);
   sedp_vertical_handler_->purge(guid);
@@ -392,9 +394,6 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
                                       const OpenDDS::DCPS::MonotonicTimePoint& now,
                                       const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
 {
-  // Make room for new clients if possible.
-  guid_addr_set_.pop(now);
-
   const auto msg_len = msg->length();
   if (msg_len >= 4 && ACE_OS::memcmp(msg->rd_ptr(), "RTPS", 4) == 0) {
     OpenDDS::RTPS::MessageParser mp(*msg);
@@ -406,7 +405,7 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
       return;
     }
 
-    if (guid_addr_set_.ignore(src_guid, now)) {
+    if (guid_addr_set_.ignore(src_guid)) {
       stats_reporter_.ignored_message(msg_len, now);
       return;
     }
@@ -451,7 +450,7 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
       src_guid.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
       has_guid = true;
 
-      if (guid_addr_set_.ignore(src_guid, now)) {
+      if (guid_addr_set_.ignore(src_guid)) {
         stats_reporter_.ignored_message(msg_len, now);
         return;
       }

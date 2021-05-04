@@ -47,6 +47,8 @@ void ParticipantListener::on_data_available(DDS::DataReader_ptr reader)
       if (info.valid_data) {
         const auto repoid = participant_->get_repoid(info.instance_handle);
 
+        guid_addr_set_.remove_pending(repoid);
+
         if (config_.log_discovery()) {
           ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: ParticipantListener::on_data_available add local participant %C %C\n"), guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str()));
         }

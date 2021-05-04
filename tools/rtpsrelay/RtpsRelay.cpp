@@ -112,14 +112,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-Lifespan"))) {
       config.lifespan(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-Pending"))) {
-      config.pending(OpenDDS::DCPS::TimeDuration::from_msec(ACE_OS::atoi(arg)));
-      args.consume_arg();
     } else if ((arg = args.get_the_parameter("-StaticLimit"))) {
       config.static_limit(ACE_OS::atoi(arg));
       args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-DynamicLimit"))) {
-      config.dynamic_limit(ACE_OS::atoi(arg));
+    } else if ((arg = args.get_the_parameter("-MaxPending"))) {
+      config.max_pending(ACE_OS::atoi(arg));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-UserData"))) {
       user_data = arg;
@@ -442,12 +439,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   writer_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
   writer_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  writer_qos.history.kind = DDS::KEEP_LAST_HISTORY_QOS;
+  writer_qos.history.depth = 1;
 
   DDS::DataReaderQos reader_qos;
   relay_subscriber->get_default_datareader_qos(reader_qos);
 
   reader_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
   reader_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  reader_qos.history.kind = DDS::KEEP_LAST_HISTORY_QOS;
+  reader_qos.history.depth = 1;
   reader_qos.reader_data_lifecycle.autopurge_nowriter_samples_delay = one_minute;
   reader_qos.reader_data_lifecycle.autopurge_disposed_samples_delay = one_minute;
 
@@ -620,11 +621,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  writer_qos.durability.kind = DDS::VOLATILE_DURABILITY_QOS;
+  DDS::DataWriterQos replay_writer_qos;
+  relay_publisher->get_default_datawriter_qos(replay_writer_qos);
+
+  replay_writer_qos.durability.kind = DDS::VOLATILE_DURABILITY_QOS;
+  replay_writer_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  replay_writer_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+
   DDS::DataWriter_var spdp_replay_writer_var =
-    relay_publisher->create_datawriter(spdp_replay_topic, writer_qos, nullptr,
+    relay_publisher->create_datawriter(spdp_replay_topic, replay_writer_qos, nullptr,
                                        OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-  writer_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
 
   if (!spdp_replay_writer_var) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Spdp Replay data writer\n")));
@@ -717,13 +723,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
+  DDS::DataReaderQos replay_reader_qos;
+  relay_subscriber->get_default_datareader_qos(replay_reader_qos);
+
+  replay_reader_qos.durability.kind = DDS::VOLATILE_DURABILITY_QOS;
+  replay_reader_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  replay_reader_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+  replay_reader_qos.reader_data_lifecycle.autopurge_nowriter_samples_delay = one_minute;
+  replay_reader_qos.reader_data_lifecycle.autopurge_disposed_samples_delay = one_minute;
+
   DDS::DataReaderListener_var spdp_replay_listener = new SpdpReplayListener(spdp_vertical_handler);
-  reader_qos.durability.kind = DDS::VOLATILE_DURABILITY_QOS;
   DDS::DataReader_var spdp_replay_reader_var =
-    relay_subscriber->create_datareader(spdp_replay_topic, reader_qos,
+    relay_subscriber->create_datareader(spdp_replay_topic, replay_reader_qos,
                                         spdp_replay_listener,
                                         DDS::DATA_AVAILABLE_STATUS);
-  reader_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
 
   if (!spdp_replay_reader_var) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Address data reader\n")));

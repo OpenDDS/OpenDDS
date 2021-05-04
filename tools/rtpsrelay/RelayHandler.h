@@ -135,16 +135,8 @@ public:
     data_vertical_handler_ = data_vertical_handler;
   }
 
-  void pop(const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-    while (!new_guids_.empty() && new_guids_.front() < now) {
-      new_guids_.pop_front();
-    }
-  }
-
   bool
-  ignore(const OpenDDS::DCPS::GUID_t& guid, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  ignore(const OpenDDS::DCPS::GUID_t& guid)
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
 
@@ -159,18 +151,24 @@ public:
       return true;
     }
 
-    if (config_.dynamic_limit() != 0 &&
-        new_guids_.size() >= config_.dynamic_limit()) {
+    if (config_.max_pending() != 0 &&
+        pending_.size() >= config_.max_pending()) {
       // Too many new clients to admit another.
       return true;
     }
 
-    new_guids_.push_back(now + config_.pending());
+    pending_.insert(guid);
 
     return false;
   }
 
   void remove(const OpenDDS::DCPS::RepoId& guid);
+
+  void remove_pending(const OpenDDS::DCPS::RepoId& guid)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+    pending_.erase(guid);
+  }
 
   class Proxy {
   public:
@@ -234,7 +232,7 @@ private:
   GuidAddrExpirationMap guid_addr_expiration_map_;
   typedef std::multimap<OpenDDS::DCPS::MonotonicTimePoint, GuidAddr> ExpirationGuidAddrMap;
   ExpirationGuidAddrMap expiration_guid_addr_map_;
-  std::list<OpenDDS::DCPS::MonotonicTimePoint> new_guids_;
+  GuidSet pending_;
 
   mutable ACE_Thread_Mutex mutex_;
 };
