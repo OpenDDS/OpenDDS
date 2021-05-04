@@ -190,6 +190,35 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     return 3;
   }
 
+  // Bad-actor test & debugging options for node & test controllers
+
+  Builder::ConstPropertyIndex force_worker_segfault_prop =
+    get_property(config.properties, "force_worker_segfault", Builder::PVK_ULL);
+  if (force_worker_segfault_prop) {
+    if (force_worker_segfault_prop->value.ull_prop()) {
+      DDS::DataReaderListener* drl_ptr = 0;
+      drl_ptr->on_data_available(0);
+    }
+  }
+
+  Builder::ConstPropertyIndex force_worker_assert_prop =
+    get_property(config.properties, "force_worker_assert", Builder::PVK_ULL);
+  if (force_worker_assert_prop) {
+    if (force_worker_assert_prop->value.ull_prop()) {
+      OPENDDS_ASSERT(false);
+    }
+  }
+
+  Builder::ConstPropertyIndex force_worker_deadlock_prop =
+    get_property(config.properties, "force_worker_deadlock", Builder::PVK_ULL);
+  if (force_worker_deadlock_prop) {
+    if (force_worker_deadlock_prop->value.ull_prop()) {
+      std::mutex m;
+      std::unique_lock<std::mutex> l1(m);
+      std::unique_lock<std::mutex> l2(m);
+    }
+  }
+
   // Register some Bench-specific types
   Builder::TypeSupportRegistry::TypeSupportRegistration
     process_config_registration(new Builder::ProcessConfigTypeSupportImpl());
