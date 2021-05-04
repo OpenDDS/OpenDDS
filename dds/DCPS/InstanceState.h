@@ -120,6 +120,13 @@ public:
                           int num_alive_writers,
                           const MonotonicTimePoint& when);
 
+  /// Returns true if the writer is a writer of this instances.
+  bool writes_instance(const PublicationId& writer_id)
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
+    return writers_.count(writer_id);
+  }
+
   WeakRcHandle<OpenDDS::DCPS::DataReaderImpl> data_reader() const;
 
   virtual int handle_timeout(const ACE_Time_Value& current_time,
