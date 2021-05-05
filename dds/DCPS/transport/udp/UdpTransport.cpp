@@ -207,7 +207,9 @@ UdpTransport::get_connection_addr(const TransportBLOB& data) const
 
   ACE_InputCDR cdr(buffer, len);
   if (cdr >> network_address) {
-    network_address.to_addr(local_address);
+    ACE_INET_Addr local_addresses;
+    network_address.to_addr(local_addresses);
+    local_address = choose_single_coherent_address(local_addresses);
   }
 
   return local_address;

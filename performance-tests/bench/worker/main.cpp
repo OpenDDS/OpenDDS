@@ -56,11 +56,11 @@
 #include "WriteAction.h"
 
 #include <cmath>
-#include <iostream>
 #include <fstream>
+#include <iomanip>
+#include <iostream>
 #include <sstream>
 #include <thread>
-#include <iomanip>
 
 #include <util.h>
 #include <json_conversion.h>
@@ -188,6 +188,38 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   if (!json_2_idl(config_file, config)) {
     std::cerr << "Unable to parse configuration" << std::endl;
     return 3;
+  }
+
+  // Bad-actor test & debugging options for node & test controllers
+
+  Builder::ConstPropertyIndex force_worker_segfault_prop =
+    get_property(config.properties, "force_worker_segfault", Builder::PVK_ULL);
+  if (force_worker_segfault_prop) {
+    if (force_worker_segfault_prop->value.ull_prop()) {
+      DDS::DataReaderListener* drl_ptr = 0;
+      drl_ptr->on_data_available(0);
+    }
+  }
+
+  Builder::ConstPropertyIndex force_worker_assert_prop =
+    get_property(config.properties, "force_worker_assert", Builder::PVK_ULL);
+  if (force_worker_assert_prop) {
+    if (force_worker_assert_prop->value.ull_prop()) {
+      OPENDDS_ASSERT(false);
+    }
+  }
+
+  Builder::ConstPropertyIndex force_worker_deadlock_prop =
+    get_property(config.properties, "force_worker_deadlock", Builder::PVK_ULL);
+  if (force_worker_deadlock_prop) {
+    if (force_worker_deadlock_prop->value.ull_prop()) {
+      std::mutex m;
+      std::unique_lock<std::mutex> l(m);
+      std::thread t([&](){
+        std::unique_lock<std::mutex> tl(m);
+      });
+      t.join();
+    }
   }
 
   // Register some Bench-specific types

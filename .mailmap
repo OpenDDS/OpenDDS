@@ -1,5 +1,5 @@
 # This is used by gitrelease.pl to correct commit individual author info for
-# the gernation of the AUTHORS file
+# the generation of the AUTHORS file
 #
 # See https://git-scm.com/docs/git-check-mailmap for how this works
 #
