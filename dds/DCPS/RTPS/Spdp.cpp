@@ -4101,7 +4101,7 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
-  if (DCPS::DCPS_debug_level >= 4) {
+  if (DCPS::DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
                "(%P|%t) Spdp::SpdpTransport::thread_status_task(): Updating internal thread status BIT.\n"));
   }
