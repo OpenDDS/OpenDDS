@@ -878,8 +878,8 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::TypeObject& to)
   return out;
 }
 
-const std::string get_minimal_type_map_decl =
-  "static const XTypes::TypeMap& get_minimal_type_map();\n";
+const std::string get_type_map_decl = "static const XTypes::TypeMap& get_minimal_type_map();\n"
+         "static const XTypes::TypeMap& get_complete_type_map();\n";
 }
 
 void
@@ -888,7 +888,7 @@ typeobject_generator::gen_prologue()
   be_global->add_include("dds/DCPS/XTypes/TypeObject.h", BE_GlobalData::STREAM_H);
   NamespaceGuard ng;
 
-  be_global->impl_ << get_minimal_type_map_decl;
+  be_global->impl_ << get_type_map_decl;
 }
 
 void
@@ -896,8 +896,7 @@ typeobject_generator::gen_epilogue()
 {
   if (minimal_type_map_.empty()) {
     std::string impl_contents = be_global->impl_.str();
-    impl_contents.erase(
-      impl_contents.find(get_minimal_type_map_decl), get_minimal_type_map_decl.size());
+    impl_contents.erase(impl_contents.find(get_type_map_decl), get_type_map_decl.size());
     be_global->impl_.str(impl_contents);
     return;
   }
@@ -908,40 +907,76 @@ typeobject_generator::gen_epilogue()
     "namespace {\n";
 
   size_t idx = 0;
-
-  for (OpenDDS::XTypes::TypeMap::const_iterator pos = minimal_type_map_.begin(), limit = minimal_type_map_.end();
-       pos != limit; ++pos, ++idx) {
+  for (OpenDDS::XTypes::TypeMap::const_iterator pos = minimal_type_map_.begin();
+       pos != minimal_type_map_.end(); ++pos, ++idx) {
     be_global->impl_ <<
-      "XTypes::TypeObject to" << idx << "()\n"
+      "XTypes::TypeObject minimal_to" << idx << "()\n"
       "{\n"
       "  return " << pos->second << ";\n"
-      "}\n";
+      "}\n\n";
   }
-
-  be_global->impl_ <<
-    "XTypes::TypeMap get_minimal_type_map_private()\n"
-    "{\n"
-    "  XTypes::TypeMap tm;\n";
 
   idx = 0;
-  for (OpenDDS::XTypes::TypeMap::const_iterator pos = minimal_type_map_.begin(), limit = minimal_type_map_.end();
-       pos != limit; ++pos, ++idx) {
-    be_global->impl_ << "  tm[" << pos->first << "] = to" << idx << "();\n";
+  for (OpenDDS::XTypes::TypeMap::const_iterator pos = complete_type_map_.begin();
+       pos != complete_type_map_.end(); ++pos, ++idx) {
+    be_global->impl_ <<
+      "XTypes::TypeObject complete_to" << idx << "()\n"
+      "{\n"
+      "  return " << pos->second << ";\n"
+      "}\n\n";
   }
 
-  be_global->impl_ <<
-    "  return tm;\n"
-    "}\n"
-    "}\n";
+  {
+    be_global->impl_ <<
+      "XTypes::TypeMap get_minimal_type_map_private()\n"
+      "{\n"
+      "  XTypes::TypeMap tm;\n";
+
+    idx = 0;
+    for (OpenDDS::XTypes::TypeMap::const_iterator pos = minimal_type_map_.begin();
+         pos != minimal_type_map_.end(); ++pos, ++idx) {
+      be_global->impl_ << "  tm[" << pos->first << "] = minimal_to" << idx << "();\n";
+    }
+
+    be_global->impl_ <<
+      "  return tm;\n"
+      "}\n\n";
+  }
+
+  {
+    be_global->impl_ <<
+      "XTypes::TypeMap get_complete_type_map_private()\n"
+      "{\n"
+      "  XTypes::TypeMap tm;\n";
+
+    idx = 0;
+    for (OpenDDS::XTypes::TypeMap::const_iterator pos = complete_type_map_.begin();
+         pos != complete_type_map_.end(); ++pos, ++idx) {
+      be_global->impl_ << "  tm[" << pos->first << "] = complete_to" << idx << "();\n";
+    }
+
+    be_global->impl_ <<
+      "  return tm;\n"
+      "}\n"
+      "}\n\n";
+  }
+
+  const std::string common = "{\n"
+    "  static XTypes::TypeMap tm;\n"
+    "  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, TheServiceParticipant->get_static_xtypes_lock(), tm);\n"
+    "  if (tm.empty()) {\n";
 
   be_global->add_include("dds/DCPS/Service_Participant.h");
   be_global->impl_ <<
-    "const XTypes::TypeMap& get_minimal_type_map()\n"
-    "{\n"
-    "  static XTypes::TypeMap tm;\n"
-    "  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, TheServiceParticipant->get_static_xtypes_lock(), tm);\n"
-    "  if (tm.empty()) {\n"
+    "const XTypes::TypeMap& get_minimal_type_map()\n" << common <<
     "    tm = get_minimal_type_map_private();\n"
+    "  }\n"
+    "  return tm;\n"
+    "}\n\n";
+
+  be_global->impl_ <<
+    "const XTypes::TypeMap& get_complete_type_map()\n" << common <<
+    "    tm = get_complete_type_map_private();\n"
     "  }\n"
     "  return tm;\n"
     "}\n";
@@ -1047,14 +1082,13 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
 
       AST_Type* discriminator = n->disc_type();
       const Fields fields(n);
-      const Fields::Iterator fields_end = fields.end();
 
       consider(v, discriminator, v.name + ".d");
 
       const AutoidKind auto_id = be_global->autoid(n);
       OpenDDS::XTypes::MemberId member_id = 0;
 
-      for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+      for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
         AST_UnionBranch* ub = dynamic_cast<AST_UnionBranch*>(*i);
         const OpenDDS::XTypes::MemberId id = be_global->compute_id(ub, auto_id, member_id);
         consider(v, ub->field_type(), v.name + "." + OpenDDS::DCPS::to_dds_string(id));
@@ -1071,12 +1105,10 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
       // TODO: Struct inheritance.
 
       const Fields fields(n);
-      const Fields::Iterator fields_end = fields.end();
-
       const AutoidKind auto_id = be_global->autoid(n);
       OpenDDS::XTypes::MemberId member_id = 0;
 
-      for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+      for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
         AST_Field* field = *i;
         const OpenDDS::XTypes::MemberId id = be_global->compute_id(field, auto_id, member_id);
         consider(v, field->field_type(), v.name + "." + OpenDDS::DCPS::to_dds_string(id));
@@ -1105,7 +1137,7 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
     {
       AST_Typedef* const n = dynamic_cast<AST_Typedef*>(type);
       v.name = dds_generator::scoped_helper(n->name(), "::");
-      // TODO: What is the member name for an anonymous type in a  typedef?
+      // TODO: What is the member name for an anonymous type in a typedef?
       // 7.3.4.9.2
       consider(v, n->base_type(), v.name + ".0");
       break;
@@ -1182,6 +1214,7 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
     if (scc.size() == 1) {
       generate_type_identifier(scc[0].type, false);
     } else {
+      // Compute temporary type identifiers for the types in SCC with hash value of zero.
       OpenDDS::XTypes::TypeIdentifier minimal_ti(OpenDDS::XTypes::TI_STRONGLY_CONNECTED_COMPONENT);
       minimal_ti.sc_component_id().sc_component_id.kind = OpenDDS::XTypes::EK_MINIMAL;
       std::memset(&minimal_ti.sc_component_id().sc_component_id.hash, 0, sizeof(OpenDDS::XTypes::EquivalenceHash));
@@ -1192,23 +1225,23 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
 
       {
         size_t idx = 0;
-        for (List::const_iterator pos = scc.begin(), limit = scc.end(); pos != limit; ++pos) {
+        for (List::const_iterator pos = scc.begin(); pos != scc.end(); ++pos) {
           minimal_ti.sc_component_id().scc_index = static_cast<int>(++idx); // Starts at 1.
           complete_ti.sc_component_id().scc_index = minimal_ti.sc_component_id().scc_index;
-          minimal_type_identifier_map_[pos->type] = minimal_ti;
-          complete_type_identifier_map_[pos->type] = complete_ti;
+          hash_type_identifier_map_[pos->type] = {minimal_ti, complete_ti};
         }
       }
 
+      // Construct temporary type objects from the temporary type identifiers.
       OpenDDS::XTypes::TypeObjectSeq minimal_seq, complete_seq;
-      for (List::const_iterator pos = scc.begin(), limit = scc.end(); pos != limit; ++pos) {
+      for (List::const_iterator pos = scc.begin(); pos != scc.end(); ++pos) {
         generate_type_identifier(pos->type, true);
-        OPENDDS_ASSERT(minimal_type_object_map_.count(pos->type) != 0 &&
-                       complete_type_object_map_.count(pos->type) != 0);
-        minimal_seq.append(minimal_type_object_map_[pos->type]);
-        complete_seq.append(complete_type_object_map_[pos->type]);
+        OPENDDS_ASSERT(type_object_map_.count(pos->type) != 0);
+        minimal_seq.append(type_object_map_[pos->type].minimal);
+        complete_seq.append(type_object_map_[pos->type].complete);
       }
 
+      // Compute the final type identifiers with the correct hash value.
       const OpenDDS::DCPS::Encoding& encoding = OpenDDS::XTypes::get_typeobject_encoding();
       size_t minimal_size = serialized_size(encoding, minimal_seq);
       ACE_Message_Block minimal_buff(minimal_size);
@@ -1236,19 +1269,45 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
 
       {
         size_t idx = 0;
-        for (List::const_iterator pos = scc.begin(), limit = scc.end(); pos != limit; ++pos) {
+        for (List::const_iterator pos = scc.begin(); pos != scc.end(); ++pos) {
           minimal_ti.sc_component_id().scc_index = static_cast<int>(++idx);
           complete_ti.sc_component_id().scc_index = minimal_ti.sc_component_id().scc_index;
-          minimal_type_identifier_map_[pos->type] = minimal_ti;
-          complete_type_identifier_map_[pos->type] = complete_ti;
-
-          // TODO(sonndinh): Is the following sufficient? The type objects in the SCC
-          // must contain type identifiers with the hash value computed above.
-          // Have the cached type objects in minimal_type_object_map_ been updated with the hash?
-          minimal_type_map_[ti] = minimal_type_object_map_[pos->type];
+          hash_type_identifier_map_[pos->type] = {minimal_ti, complete_ti};
         }
       }
+
+      // Compute the final type objects with the final type identifiers.
+      for (List::const_iterator pos = scc.begin(); pos != scc.end(); ++pos) {
+        generate_type_identifier(pos->type, true);
+        const TypeIdentifier& minimal_ti = hash_type_identifier_map_[pos->type].minimal;
+        const TypeIdentifier& complete_ti = hash_type_identifier_map_[pos->type].complete;
+        minimal_type_map_[minimal_ti] = type_object_map_[pos->type].minimal;
+        complete_type_map_[complete_ti] = type_object_map_[pos->type].complete;
+      }
     }
+  }
+}
+
+void
+typeobject_generator::update_maps(AST_Type* type,
+                                  const OpenDDS::XTypes::TypeObject& minimal_to,
+                                  const OpenDDS::XTypes::TypeObject& complete_to)
+{
+  const TypeObjectPair to_pair = {minimal_to, complete_to};
+  type_object_map_[type] = to_pair;
+
+  // In case of SCC, type identifiers of the types in SCC are computed first and
+  // type objects are constructed using them. In that case, we don't want to update
+  // each individual type's type identifier by hashing the corresponding type object.
+  // On the other hand, type identifier is computed if the type is not part of a SCC.
+  if (hash_type_identifier_map_.count(type) == 0) {
+    const OpenDDS::XTypes::TypeIdentifier minimal_ti = makeTypeIdentifier(minimal_to);
+    const OpenDDS::XTypes::TypeIdentifier complete_ti = makeTypeIdentifier(complete_to);
+    const TypeIdentifierPair ti_pair = {minimal_ti, complete_ti};
+    hash_type_identifier_map_[type] = ti_pair;
+
+    minimal_type_map_[minimal_ti] = minimal_to;
+    complete_type_map_[complete_ti] = complete_to;
   }
 }
 
@@ -1329,18 +1388,7 @@ typeobject_generator::generate_struct_type_identifier(AST_Type* type)
   // TODO(sonndinh): Define comparison operator for CompleteStructMember.
   complete_to.complete.struct_type.member_seq.sort();
 
-  const TypeObjectPair to_pair = {minimal_to, complete_to};
-  type_object_map_[type] = to_pair;
-
-  if (hash_type_identifier_map_.count(type) == 0) {
-    const OpenDDS::XTypes::TypeIdentifier minimal_ti = makeTypeIdentifier(minimal_to);
-    const OpenDDS::XTypes::TypeIdentifier complete_ti = makeTypeIdentifier(complete_to);
-    const TypeIdentifierPair ti_pair = {minimal_ti, complete_ti};
-    hash_type_identifier_map_[type] = ti_pair;
-
-    minimal_type_map_[minimal_ti] = minimal_to;
-    complete_type_map_[complete_ti] = complete_to;
-  }
+  update_maps(type, minimal_to, complete_to);
 }
 
 void
@@ -1436,18 +1484,7 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
   minimal_to.minimal.union_type.member_seq.sort();
   complete_to.complete.union_type.member_seq.sort();
 
-  const TypeObjectPair to_pair = {minimal_to, complete_to};
-  type_object_map_[type] = to_pair;
-
-  if (hash_type_identifier_map_.count(type) == 0) {
-    const OpenDDS::XTypes::TypeIdentifier minimal_ti = makeTypeIdentifier(minimal_to);
-    const OpenDDS::XTypes::TypeIdentifier complete_ti = makeTypeIdentifier(complete_to);
-    const TypeIdentifierPair ti_pair = {minimal_ti, complete_ti};
-    hash_type_identifier_map_[type] = ti_pair;
-
-    minimal_type_map_[minimal_ti] = minimal_to;
-    complete_typ_map_[complete_ti] = complete_to;
-  }
+  update_maps(type, minimal_to, complete_to);
 }
 
 void
@@ -1494,14 +1531,7 @@ typeobject_generator::generate_enum_type_identifier(AST_Type* type)
   // TODO(sonndinh): Add comparison operator to CompleteEnumeratedLiteral.
   complete_to.complete.enumerated_type.literal_seq.sort();
 
-  const TypeObjectPair to_pair = {minimal_to, complete_to};
-  type_object_map_[type] = to_pair;
-  const OpenDDS::XTypes::TypeIdentifier minimal_ti = makeTypeIdentifier(minimal_to);
-  const OpenDDS::XTypes::TypeIdentifier complete_ti = makeTypeIdentifier(complete_to);
-  const TypeIdentifierPair ti_pair = {minimal_ti, complete_ti};
-  hash_type_identifier_map_[type] = ti_pair;
-  minimal_type_map_[minimal_ti] = minimal_to;
-  complete_type_map_[complete_ti] = complete_to;
+  update_maps(type, minimal_to, complete_to);
 }
 
 void
@@ -1590,18 +1620,7 @@ typeobject_generator::generate_array_type_identifier(AST_Type* type, bool force_
     complete_to.complete.array_type.element.common.type = complete_elem_ti;
     // TODO(sonndinh): Construct complete_to.complete.array_type.element.detail.
 
-    const TypeObjectPair to_pair = {minimal_to, complete_to};
-    type_object_map_[type] = to_pair;
-
-    if (hash_type_identifier_map_.count(type) == 0) {
-      const OpenDDS::XTypes::TypeIdentifier minimal_ti = makeTypeIdentifier(minimal_to);
-      const OpenDDS::XTypes::TypeIdentifier complete_ti = makeTypeIdentifier(complete_to);
-      const TypeIdentifierPair ti_pair = {minimal_ti, complete_ti};
-      hash_type_identifier_map_[type] = ti_pair;
-
-      minimal_type_map_[minimal_ti] = minimal_to;
-      complete_type_map_[complete_ti] = complete_to;
-    }
+    update_maps(type, minimal_to, complete_to);
   }
 }
 
@@ -1681,18 +1700,7 @@ typeobject_generator::generate_sequence_type_identifier(AST_Type* type, bool for
     complete_to.complete.sequence_type.element.common.type = complete_elem_ti;
     // TODO(sonndinh): Construct complete_to.complete.sequence_type.element.detail.
 
-    const TypeObjectPair to_pair = {minimal_to, complete_to};
-    type_object_map_[type] = to_pair;
-
-    if (hash_type_identifier_map_.count(type) == 0) {
-      const OpenDDS::XTypes::TypeIdentifier minimal_ti = makeTypeIdentifier(minimal_to);
-      const OpenDDS::XTypes::TypeIdentifier complete_ti = makeTypeIdentifier(complete_to);
-      const TypeIdentifierPair ti_pair = {minimal_ti, complete_ti};
-      hash_type_identifier_map_[type] = ti_pair;
-
-      minimal_type_map_[minimal_ti] = minimal_to;
-      complete_type_map_[complete_ti] = complete_to;
-    }
+    update_maps(type, minimal_to, complete_to);
   }
 }
 
@@ -1713,18 +1721,7 @@ typeobject_generator::generate_alias_type_identifier(AST_Type* type)
   // TODO(sonndinh): Construct the other fields of CompleteAliasBody.
   complete_to.complete.alias_type.body.common.related_type = get_complete_type_identifier(n->base_type());
 
-  const TypeObjectPair to_pair = {minimal_to, complete_to};
-  type_object_map_[type] = to_pair;
-
-  if (hash_type_identifier_map_.count(type) == 0) {
-    const OpenDDS::XTypes::TypeIdentifier minimal_ti = makeTypeIdentifier(minimal_to);
-    const OpenDDS::XTypes::TypeIdentifier complete_ti = makeTypeIdentifier(complete_to);
-    const TypeIdentifierPair ti_pair = {minimal_ti, complete_ti};
-    hash_type_identifier_map_[type] = ti_pair;
-
-    minimal_type_map_[minimal_ti] = minimal_to;
-    complete_type_map_[complete_ti] = complete_to;
-  }
+  update_maps(type, minimal_to, complete_to);
 }
 
 void
@@ -1861,16 +1858,13 @@ typeobject_generator::generate_type_identifier(AST_Type* type, bool force_type_o
       break;
     }
 
-  case AST_ConcreteType::NT_fixed: {
-    fully_desc_type_identifier_map_[type] = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_NONE);
-    break;
-  }
-
+  case AST_ConcreteType::NT_fixed:
   case AST_ConcreteType::NT_interface:
-  case AST_ConcreteType::NT_interface_fwd: {
-    fully_desc_type_identifier_map_[type] = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_NONE);
-    break;
-  }
+  case AST_ConcreteType::NT_interface_fwd:
+    {
+      fully_desc_type_identifier_map_[type] = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_NONE);
+      break;
+    }
 
   case AST_ConcreteType::NT_struct_fwd:
   case AST_ConcreteType::NT_union_fwd:
@@ -1917,29 +1911,6 @@ bool
 typeobject_generator::name_sorter(const Element& x, const Element& y)
 {
   return x.name < y.name;
-}
-
-OpenDDS::XTypes::TypeObject
-typeobject_generator::get_minimal_type_object(AST_Type* type)
-{
-  switch(type->node_type()) {
-  case AST_Decl::NT_union_fwd:
-    {
-      AST_UnionFwd* const td = dynamic_cast<AST_UnionFwd*>(type);
-      return get_minimal_type_object(td->full_definition());
-    }
-  case AST_Decl::NT_struct_fwd:
-    {
-      AST_StructureFwd* const td = dynamic_cast<AST_StructureFwd*>(type);
-      return get_minimal_type_object(td->full_definition());
-    }
-  default:
-    break;
-  }
-
-  TypeObjectMap::const_iterator pos = type_object_map_.find(type);
-  OPENDDS_ASSERT(pos != type_object_map_.end());
-  return pos->second.minimal;
 }
 
 // Get minimal or fully descriptive type identifier
@@ -2012,19 +1983,32 @@ typeobject_generator::generate(AST_Type* node, UTL_ScopedName* name)
 
   be_global->header_ << "struct " << clazz << " {};\n";
 
+  const std::string common = "  static XTypes::TypeIdentifier ti;\n"
+    "  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, TheServiceParticipant->get_static_xtypes_lock(), ti);\n"
+    "  if (ti.kind() == XTypes::TK_NONE) {\n";
+
   {
     const string decl = "getMinimalTypeIdentifier<" + clazz + ">";
-    Function gti(decl.c_str(), "const XTypes::TypeIdentifier &", "");
+    Function gti(decl.c_str(), "const XTypes::TypeIdentifier&", "");
     gti.endArgs();
     const OpenDDS::XTypes::TypeIdentifier ti = get_minimal_type_identifier(node);
-    be_global->impl_ <<
-      "  static XTypes::TypeIdentifier ti;\n"
-      "  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, TheServiceParticipant->get_static_xtypes_lock(), ti);\n"
-      "  if (ti.kind() == XTypes::TK_NONE) {\n"
+    be_global->impl_ << common <<
       "    ti = " << ti << ";\n"
       "  }\n"
       "  return ti;\n";
   }
+
+  {
+    const string decl = "getCompleteTypeIdentifier<" + clazz + ">";
+    Function gti(decl.c_str(), "const XTypes::TypeIdentifier&", "");
+    gti.endArgs();
+    const OpenDDS::XTypes::TypeIdentifier ti = get_complete_type_identifier(node);
+    be_global->impl_ << common <<
+      "    ti = " << ti << ";\n"
+      "  }\n"
+      "  return ti;\n";
+  }
+
   {
     const string decl = "getMinimalTypeMap<" + clazz + ">";
     Function gti(decl.c_str(), "const XTypes::TypeMap&", "");
@@ -2032,5 +2016,14 @@ typeobject_generator::generate(AST_Type* node, UTL_ScopedName* name)
     be_global->impl_ <<
       "  return get_minimal_type_map();\n";
   }
+
+  {
+    const string decl = "getCompleteTypeMap<" + clazz + ">";
+    Function gti(decl.c_str(), "const XTypes::TypeMap&", "");
+    gti.endArgs();
+    be_global->impl_ <<
+      "  return get_complete_type_map();\n";
+  }
+
   return true;
 }

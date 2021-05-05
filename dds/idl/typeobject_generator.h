@@ -64,9 +64,11 @@ private:
   void generate_sequence_type_identifier(AST_Type* type, bool force_type_object);
   void generate_alias_type_identifier(AST_Type* type);
   void generate_primitive_type_identifier(AST_Type* type);
+  void update_maps(AST_Type* type,
+                   const OpenDDS::XTypes::TypeIdentifier& minimal_to,
+                   const OpenDDS::XTypes::TypeIdentifier& complete_to);
 
   static bool name_sorter(const Element& x, const Element& y);
-  OpenDDS::XTypes::TypeObject get_minimal_type_object(AST_Type* type);
   OpenDDS::XTypes::TypeIdentifier get_minimal_type_identifier(AST_Type* type);
   OpenDDS::XTypes::TypeIdentifier get_complete_type_identifier(AST_Type* type);
   bool generate(AST_Type* node, UTL_ScopedName* name);
@@ -85,7 +87,7 @@ private:
     OpenDDS::XTypes::TypeIdentifier minimal;
     OpenDDS::XTypes::TypeIdentifier complete;
   };
-  
+
   typedef std::map<AST_Type*, TypeIdentifierPair> HashTypeIdentifierMap;
   TypeIdentifierMap hash_type_identifier_map_;
 
