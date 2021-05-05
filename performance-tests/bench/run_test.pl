@@ -88,6 +88,18 @@ elsif ($test->flag('echo_frag_mini')) {
   $tc_opts .= " ci_echo_frag_mini";
   $is_rtps_disc = 1;
 }
+elsif ($test->flag('force_worker_segfault')) {
+  $tc_opts .= " ci_force_worker_segfault";
+  $is_rtps_disc = 1;
+}
+elsif ($test->flag('force_worker_assert')) {
+  $tc_opts .= " ci_force_worker_assert";
+  $is_rtps_disc = 1;
+}
+elsif ($test->flag('force_worker_deadlock')) {
+  $tc_opts .= " ci_force_worker_deadlock";
+  $is_rtps_disc = 1;
+}
 elsif ($test->flag('mixed')) {
   $tc_opts .= " ci_mixed";
   $is_rtps_disc = 1;
