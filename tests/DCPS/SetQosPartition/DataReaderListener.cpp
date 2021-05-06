@@ -23,8 +23,6 @@ DataReaderListenerImpl::~DataReaderListenerImpl ()
 void
 DataReaderListenerImpl::on_data_available (DDS::DataReader_ptr reader)
 {
-  ++num_reads_;
-
   try {
     ::Messenger::MessageDataReader_var message_dr =
         ::Messenger::MessageDataReader::_narrow(reader);
@@ -44,6 +42,7 @@ DataReaderListenerImpl::on_data_available (DDS::DataReader_ptr reader)
 
       if (si.valid_data == 1)
       {
+        ++num_reads_;
         cout << "Message: subject    = " << message.subject.in() << endl
           << "         subject_id = " << message.subject_id   << endl
           << "         from       = " << message.from.in()    << endl
