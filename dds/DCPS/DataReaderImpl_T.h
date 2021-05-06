@@ -2040,7 +2040,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
   if (! ptr->coherent_change_) {
 #endif
     RcHandle<OpenDDS::DCPS::SubscriberImpl> sub = get_subscriber_servant ();
-    if (!sub)
+    if (!sub || this->get_deleted())
       return;
 
     sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, true);
