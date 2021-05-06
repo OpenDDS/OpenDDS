@@ -38,7 +38,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
   if (status == DDS::RETCODE_OK) {
     if (si.valid_data == 1) {
       ++num_reads_;
-     ACE_DEBUG((LM_INFO,
+      ACE_DEBUG((LM_INFO,
                  "(%P|%t) "
                  "Message: subject    = %C\n"
                  "         subject_id = %d\n"
