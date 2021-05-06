@@ -58,13 +58,18 @@ Writer::svc()
     ws->attach_condition(condition);
 
     DDS::Duration_t timeout =
-      { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+      { 5, DDS::DURATION_INFINITE_NSEC };
 
     DDS::ConditionSeq conditions;
     DDS::PublicationMatchedStatus matches = {0, 0, 0, 0, 0};
 
     do {
-      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
+      DDS::ReturnCode_t ret = ws->wait(conditions, timeout);
+      if (ret == DDS::RETCODE_TIMEOUT) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("match timed out\n")));
+        return 0;
+      }
+      if (ret != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l: svc()")
                    ACE_TEXT(" ERROR: wait failed!\n")));
