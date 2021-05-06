@@ -15,7 +15,8 @@ PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
 
 my $test = new PerlDDS::TestFramework();
 
-$test->{'dcps_debug_level'} = 4; # $test->{'dcps_transport_debug_level'} = 10;
+$test->{'dcps_debug_level'} = 0;
+$test->{'dcps_transport_debug_level'} = 0;
 $test->setup_discovery();
 
 my $pub_count = 10;
@@ -72,4 +73,4 @@ for (my $i = 0; $i < $total_count; $i++) {
   }
 }
 
-exit $test->finish(60);
+exit $test->finish(600);

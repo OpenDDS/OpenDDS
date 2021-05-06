@@ -114,10 +114,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]){
         cout << ss.str() << flush;
       }
 
-      message_dw = 0;
+      // Semi-arbitrary change to clean-up approach
+      if (ACE_OS::getpid() % 3) {
+        message_dw = 0;
 
-      pub->delete_datawriter(dw);
-      participant->delete_publisher(pub);
+        pub->delete_datawriter(dw);
+        participant->delete_publisher(pub);
+      }
 
       participant->delete_contained_entities();
       dpf->delete_participant(participant.in());

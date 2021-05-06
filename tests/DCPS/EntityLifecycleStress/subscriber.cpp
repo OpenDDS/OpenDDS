@@ -8,7 +8,7 @@
 #include "dds/DCPS/unique_ptr.h"
 
 #include "tests/Utils/ExceptionStreams.h"
-#include "tests/Utils/WaitForSample.h"
+#include "tests/Utils/StatusMatching.h"
 
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
@@ -21,8 +21,99 @@
 
 #include <memory>
 
+#ifdef ACE_HAS_CPP11
+#include <condition_variable>
+#include <mutex>
+#include <thread>
+#endif
+
 using namespace Messenger;
 using namespace std;
+
+struct DataReaderListenerImpl : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
+{
+  DataReaderListenerImpl()
+   : mutex_()
+#ifdef ACE_HAS_CPP11
+   , cv_()
+#else
+   , cv_(mutex_)
+#endif
+   , valid_data_seen(false) {}
+
+  virtual ~DataReaderListenerImpl() {}
+
+  virtual void on_requested_deadline_missed(
+    DDS::DataReader* reader,
+    const DDS::RequestedDeadlineMissedStatus& status) {}
+  virtual void on_requested_incompatible_qos(
+    DDS::DataReader* reader,
+    const DDS::RequestedIncompatibleQosStatus& status) {}
+  virtual void on_liveliness_changed(
+    DDS::DataReader* reader,
+    const DDS::LivelinessChangedStatus& status) {}
+  virtual void on_subscription_matched(
+    DDS::DataReader* reader,
+    const DDS::SubscriptionMatchedStatus& status) {}
+  virtual void on_sample_rejected(
+    DDS::DataReader* reader,
+    const DDS::SampleRejectedStatus& status) {}
+  virtual void on_sample_lost(
+    DDS::DataReader* reader,
+    const DDS::SampleLostStatus& status) {}
+
+  virtual void on_data_available(DDS::DataReader* reader)
+  {
+    Messenger::MessageDataReader_var message_dr =
+      Messenger::MessageDataReader::_narrow(reader);
+    if (0 == message_dr) {
+      return;
+    }
+
+    Messenger::Message message;
+    DDS::SampleInfo si;
+
+    if (message_dr->take_next_sample(message, si) == DDS::RETCODE_OK) {
+      if (si.valid_data) {
+        stringstream ss;
+        ss << "Subscriber " << ACE_OS::getpid() << " got new message data:" << endl;
+        ss << " - From  : " << message.from << endl;
+        ss << " - Count : " << message.count << endl;
+        cout << ss.str() << flush;
+        valid_data_seen = true;
+#ifdef ACE_HAS_CPP11
+        cv_.notify_all();
+#else
+        cv_.broadcast();
+#endif
+      }
+    }
+  }
+
+  void wait_valid_data(const OpenDDS::DCPS::MonotonicTimePoint& deadline) {
+#ifdef ACE_HAS_CPP11
+    std::chrono::milliseconds ms((deadline - OpenDDS::DCPS::MonotonicTimePoint::now()).value().get_msec());
+    std::unique_lock<std::mutex> lock(mutex_);
+#else
+    ACE_Guard<ACE_Thread_Mutex> g(mutex_);
+#endif
+#ifdef ACE_HAS_CPP11
+    while (!valid_data_seen && cv_.wait_for(lock, ms) != cv_status::timeout) {
+#else
+    while (!valid_data_seen && !(cv_.wait(&deadline.value()) == -1 && errno == ETIME)) {
+#endif
+    }
+  }
+
+#ifdef ACE_HAS_CPP11
+  std::mutex mutex_;
+  std::condition_variable cv_;
+#else
+  ACE_Thread_Mutex mutex_;
+  ACE_Condition<ACE_Thread_Mutex> cv_;
+#endif
+  bool valid_data_seen;
+};
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[]){
   try
@@ -74,54 +165,65 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]){
         exit(1);
       }
 
+      DataReaderListenerImpl* drli = new DataReaderListenerImpl();
+      DDS::DataReaderListener_var drl = drli;
+
       DDS::DataReader_var dr =
         sub->create_datareader(topic.in(),
                                DATAREADER_QOS_DEFAULT,
-                               DDS::DataReaderListener::_nil(),
+                               drl.in(),
                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       Messenger::MessageDataReader_var message_dr =
         Messenger::MessageDataReader::_narrow(dr.in());
 
-      Messenger::Message message;
-      DDS::SampleInfo si;
-      bool valid_data = false;
+      const OpenDDS::DCPS::MonotonicTimePoint deadline = OpenDDS::DCPS::MonotonicTimePoint::now() + OpenDDS::DCPS::TimeDuration(2, 500000);
 
-      while (!valid_data) {
+      drli->wait_valid_data(deadline);
 
-        Utils::waitForSample(dr);
-        DDS::ReturnCode_t ret = message_dr->take_next_sample(message, si);
+      {
+        stringstream ss;
+        ss << "Subscriber " << ACE_OS::getpid() << " is done. Exiting." << endl;
 
-        if (ret != DDS::RETCODE_OK) {
-          cerr << "take sample failed" << endl;
-          exit(1);
-        }
-
-        if (si.valid_data) {
-          stringstream ss;
-          ss << "Subscriber " << ACE_OS::getpid() << " got new message data:" << endl;
-          ss << " - From  : " << message.from << endl;
-          ss << " - Count : " << message.count << endl;
-          cout << ss.str() << flush;
-          valid_data = true;
-        }
+        cout << ss.str() << flush;
       }
 
-      message_dr = 0;
+      // Semi-arbitrary change to clean-up approach
+      if (ACE_OS::getpid() % 3) {
+        message_dr = 0;
 
-      sub->delete_datareader(dr);
-      participant->delete_subscriber(sub);
+        sub->delete_datareader(dr);
+        participant->delete_subscriber(sub);
+      }
+
+#ifdef ACE_HAS_CPP11
+      bool still_cleaning = true;
+      thread t([&](){
+        this_thread::sleep_for(chrono::seconds(3));
+        while (still_cleaning) {
+          stringstream ss;
+          ss << "Subscriber " << ACE_OS::getpid() << " is taking a long time to clean up." << endl;
+          cout << ss.str() << flush;
+          this_thread::sleep_for(chrono::seconds(1));
+        }
+      });
+#endif
 
       participant->delete_contained_entities();
       dpf->delete_participant(participant.in());
-  }
-  catch (CORBA::Exception& e)
-  {
-    cerr << "PUB: Exception caught in main.cpp:" << endl
-         << e << endl;
-    exit(1);
-  }
-  TheServiceParticipant->shutdown();
 
-  return 0;
+#ifdef ACE_HAS_CPP11
+      still_cleaning = false;
+      t.join();
+#endif
+   }
+   catch (CORBA::Exception& e)
+   {
+      cerr << "PUB: Exception caught in main.cpp:" << endl
+        << e << endl;
+      exit(1);
+   }
+   TheServiceParticipant->shutdown();
+
+   return 0;
 }
