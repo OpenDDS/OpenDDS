@@ -915,7 +915,7 @@ namespace OpenDDS {
   void set_instance_state(DDS::InstanceHandle_t instance,
                           DDS::InstanceStateKind state,
                           const SystemTimePoint& timestamp = SystemTimePoint::now(),
-                          const OpenDDS::DCPS::GUID_t& publication_id = GUID_UNKNOWN)
+                          const GUID_t& publication_id = GUID_UNKNOWN)
   {
     using namespace OpenDDS::DCPS;
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);

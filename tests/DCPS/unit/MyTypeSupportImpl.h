@@ -17,6 +17,7 @@
 #include <dds/DCPS/DataReaderImpl.h>
 #include <dds/DCPS/DataWriterImpl.h>
 #include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/GuidUtils.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -120,10 +121,11 @@ public:
     DDS::SampleInfo&, DDS::InstanceHandle_t, DDS::SampleStateMask,
     DDS::ViewStateMask, DDS::InstanceStateMask);
 
-  void set_instance_state(DDS::InstanceHandle_t, DDS::InstanceStateKind,
-    const OpenDDS::DCPS::SystemTimePoint&)
-  {}
 #endif
+
+  void set_instance_state(DDS::InstanceHandle_t, DDS::InstanceStateKind,
+    const OpenDDS::DCPS::SystemTimePoint&, const OpenDDS::DCPS::GUID_t& = OpenDDS::DCPS::GUID_UNKNOWN)
+  {}
 };
 
 class MyDataWriterImpl :  public virtual OpenDDS::DCPS::DataWriterImpl
