@@ -44,23 +44,23 @@ struct DataReaderListenerImpl : public virtual OpenDDS::DCPS::LocalObject<DDS::D
   virtual ~DataReaderListenerImpl() {}
 
   virtual void on_requested_deadline_missed(
-    DDS::DataReader* reader,
-    const DDS::RequestedDeadlineMissedStatus& status) {}
+    DDS::DataReader*,
+    const DDS::RequestedDeadlineMissedStatus&) {}
   virtual void on_requested_incompatible_qos(
-    DDS::DataReader* reader,
-    const DDS::RequestedIncompatibleQosStatus& status) {}
+    DDS::DataReader*,
+    const DDS::RequestedIncompatibleQosStatus&) {}
   virtual void on_liveliness_changed(
-    DDS::DataReader* reader,
-    const DDS::LivelinessChangedStatus& status) {}
+    DDS::DataReader*,
+    const DDS::LivelinessChangedStatus&) {}
   virtual void on_subscription_matched(
-    DDS::DataReader* reader,
-    const DDS::SubscriptionMatchedStatus& status) {}
+    DDS::DataReader*,
+    const DDS::SubscriptionMatchedStatus&) {}
   virtual void on_sample_rejected(
-    DDS::DataReader* reader,
-    const DDS::SampleRejectedStatus& status) {}
+    DDS::DataReader*,
+    const DDS::SampleRejectedStatus&) {}
   virtual void on_sample_lost(
-    DDS::DataReader* reader,
-    const DDS::SampleLostStatus& status) {}
+    DDS::DataReader*,
+    const DDS::SampleLostStatus&) {}
 
   virtual void on_data_available(DDS::DataReader* reader)
   {
@@ -117,113 +117,113 @@ struct DataReaderListenerImpl : public virtual OpenDDS::DCPS::LocalObject<DDS::D
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[]){
   try
-    {
-      DDS::DomainParticipantFactory_var dpf =
-        TheParticipantFactoryWithArgs(argc, argv);
+  {
+    DDS::DomainParticipantFactory_var dpf =
+      TheParticipantFactoryWithArgs(argc, argv);
 
-      DDS::DomainParticipant_var participant =
-        dpf->create_participant(31,
-                                PARTICIPANT_QOS_DEFAULT,
-                                DDS::DomainParticipantListener::_nil(),
-                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-      if (CORBA::is_nil(participant.in())) {
-        cerr << "create_participant failed." << endl;
-        return 1;
-      }
+    DDS::DomainParticipant_var participant =
+      dpf->create_participant(31,
+                              PARTICIPANT_QOS_DEFAULT,
+                              DDS::DomainParticipantListener::_nil(),
+                              ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    if (CORBA::is_nil(participant.in())) {
+      cerr << "create_participant failed." << endl;
+      return 1;
+    }
 
-      MessageTypeSupportImpl::_var_type servant = new MessageTypeSupportImpl();
+    MessageTypeSupportImpl::_var_type servant = new MessageTypeSupportImpl();
 
-      if (DDS::RETCODE_OK != servant->register_type(participant.in(), "")) {
-        cerr << "register_type failed." << endl;
-        exit(1);
-      }
-
-      CORBA::String_var type_name = servant->get_type_name();
-
-      DDS::TopicQos topic_qos;
-      participant->get_default_topic_qos(topic_qos);
-      DDS::Topic_var topic =
-        participant->create_topic("Movie Discussion List",
-                                  type_name.in(),
-                                  topic_qos,
-                                  DDS::TopicListener::_nil(),
-                                  ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-      if (CORBA::is_nil(topic.in())) {
-        cerr << "create_topic failed." << endl;
-        exit(1);
-      }
-
-      DDS::SubscriberQos sub_qos;
-      participant->get_default_subscriber_qos(sub_qos);
-
-      DDS::Subscriber_var sub =
-        participant->create_subscriber(sub_qos, DDS::SubscriberListener::_nil(),
-                                      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-      if (CORBA::is_nil(sub.in())) {
-        cerr << "create_subscriber failed." << endl;
-        exit(1);
-      }
-
-      DataReaderListenerImpl* drli = new DataReaderListenerImpl();
-      DDS::DataReaderListener_var drl = drli;
-
-      DDS::DataReader_var dr =
-        sub->create_datareader(topic.in(),
-                               DATAREADER_QOS_DEFAULT,
-                               drl.in(),
-                               ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-      Messenger::MessageDataReader_var message_dr =
-        Messenger::MessageDataReader::_narrow(dr.in());
-
-      const OpenDDS::DCPS::MonotonicTimePoint deadline = OpenDDS::DCPS::MonotonicTimePoint::now() + OpenDDS::DCPS::TimeDuration(2, 500000);
-
-      drli->wait_valid_data(deadline);
-
-      {
-        stringstream ss;
-        ss << "Subscriber " << ACE_OS::getpid() << " is done. Exiting." << endl;
-
-        cout << ss.str() << flush;
-      }
-
-      // Semi-arbitrary change to clean-up approach
-      if (ACE_OS::getpid() % 3) {
-        message_dr = 0;
-
-        sub->delete_datareader(dr);
-        participant->delete_subscriber(sub);
-      }
-
-#ifdef ACE_HAS_CPP11
-      bool still_cleaning = true;
-      thread t([&](){
-        this_thread::sleep_for(chrono::seconds(3));
-        while (still_cleaning) {
-          stringstream ss;
-          ss << "Subscriber " << ACE_OS::getpid() << " is taking a long time to clean up." << endl;
-          cout << ss.str() << flush;
-          this_thread::sleep_for(chrono::seconds(1));
-        }
-      });
-#endif
-
-      participant->delete_contained_entities();
-      dpf->delete_participant(participant.in());
-
-#ifdef ACE_HAS_CPP11
-      still_cleaning = false;
-      t.join();
-#endif
-   }
-   catch (CORBA::Exception& e)
-   {
-      cerr << "PUB: Exception caught in main.cpp:" << endl
-        << e << endl;
+    if (DDS::RETCODE_OK != servant->register_type(participant.in(), "")) {
+      cerr << "register_type failed." << endl;
       exit(1);
-   }
-   TheServiceParticipant->shutdown();
+    }
 
-   return 0;
+    CORBA::String_var type_name = servant->get_type_name();
+
+    DDS::TopicQos topic_qos;
+    participant->get_default_topic_qos(topic_qos);
+    DDS::Topic_var topic =
+      participant->create_topic("Movie Discussion List",
+                                type_name.in(),
+                                topic_qos,
+                                DDS::TopicListener::_nil(),
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+    if (CORBA::is_nil(topic.in())) {
+      cerr << "create_topic failed." << endl;
+      exit(1);
+    }
+
+    DDS::SubscriberQos sub_qos;
+    participant->get_default_subscriber_qos(sub_qos);
+
+    DDS::Subscriber_var sub =
+      participant->create_subscriber(sub_qos, DDS::SubscriberListener::_nil(),
+                                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    if (CORBA::is_nil(sub.in())) {
+      cerr << "create_subscriber failed." << endl;
+      exit(1);
+    }
+
+    DataReaderListenerImpl* drli = new DataReaderListenerImpl();
+    DDS::DataReaderListener_var drl = drli;
+
+    DDS::DataReader_var dr =
+      sub->create_datareader(topic.in(),
+                              DATAREADER_QOS_DEFAULT,
+                              drl.in(),
+                              ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+    Messenger::MessageDataReader_var message_dr =
+      Messenger::MessageDataReader::_narrow(dr.in());
+
+    const OpenDDS::DCPS::MonotonicTimePoint deadline = OpenDDS::DCPS::MonotonicTimePoint::now() + OpenDDS::DCPS::TimeDuration(2, 500000);
+
+    drli->wait_valid_data(deadline);
+
+    {
+      stringstream ss;
+      ss << "Subscriber " << ACE_OS::getpid() << " is done. Exiting." << endl;
+
+      cout << ss.str() << flush;
+    }
+
+    // Semi-arbitrary change to clean-up approach
+    if (ACE_OS::getpid() % 3) {
+      message_dr = 0;
+
+      sub->delete_datareader(dr);
+      participant->delete_subscriber(sub);
+    }
+
+#ifdef ACE_HAS_CPP11
+    bool still_cleaning = true;
+    thread t([&](){
+      this_thread::sleep_for(chrono::seconds(3));
+      while (still_cleaning) {
+        stringstream ss;
+        ss << "Subscriber " << ACE_OS::getpid() << " is taking a long time to clean up." << endl;
+        cout << ss.str() << flush;
+        this_thread::sleep_for(chrono::seconds(1));
+      }
+    });
+#endif
+
+    participant->delete_contained_entities();
+    dpf->delete_participant(participant.in());
+
+#ifdef ACE_HAS_CPP11
+    still_cleaning = false;
+    t.join();
+#endif
+  }
+  catch (const CORBA::Exception& e)
+  {
+     cerr << "PUB: Exception caught in main.cpp:" << endl
+       << e << endl;
+     exit(1);
+  }
+  TheServiceParticipant->shutdown();
+
+  return 0;
 }

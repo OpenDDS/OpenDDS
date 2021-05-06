@@ -24,108 +24,108 @@
 using namespace Messenger;
 using namespace std;
 
-int ACE_TMAIN(int argc, ACE_TCHAR *argv[]){
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
   try
-    {
-      DDS::DomainParticipantFactory_var dpf =
-        TheParticipantFactoryWithArgs(argc, argv);
+  {
+    DDS::DomainParticipantFactory_var dpf =
+      TheParticipantFactoryWithArgs(argc, argv);
 
-      DDS::DomainParticipant_var participant =
-        dpf->create_participant(31,
-                                PARTICIPANT_QOS_DEFAULT,
-                                DDS::DomainParticipantListener::_nil(),
+    DDS::DomainParticipant_var participant =
+      dpf->create_participant(31,
+                              PARTICIPANT_QOS_DEFAULT,
+                              DDS::DomainParticipantListener::_nil(),
+                              ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    if (CORBA::is_nil(participant.in())) {
+      cerr << "create_participant failed." << endl;
+      return 1;
+    }
+
+    MessageTypeSupportImpl::_var_type servant = new MessageTypeSupportImpl();
+
+    if (DDS::RETCODE_OK != servant->register_type(participant.in(), "")) {
+      cerr << "register_type failed." << endl;
+      exit(1);
+    }
+
+    CORBA::String_var type_name = servant->get_type_name();
+
+    DDS::TopicQos topic_qos;
+    participant->get_default_topic_qos(topic_qos);
+    DDS::Topic_var topic =
+      participant->create_topic("Movie Discussion List",
+                                type_name.in(),
+                                topic_qos,
+                                DDS::TopicListener::_nil(),
                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-      if (CORBA::is_nil(participant.in())) {
-        cerr << "create_participant failed." << endl;
-        return 1;
-      }
 
-      MessageTypeSupportImpl::_var_type servant = new MessageTypeSupportImpl();
+    if (CORBA::is_nil(topic.in())) {
+      cerr << "create_topic failed." << endl;
+      exit(1);
+    }
 
-      if (DDS::RETCODE_OK != servant->register_type(participant.in(), "")) {
-        cerr << "register_type failed." << endl;
-        exit(1);
-      }
+    DDS::PublisherQos pub_qos;
+    participant->get_default_publisher_qos(pub_qos);
 
-      CORBA::String_var type_name = servant->get_type_name();
+    DDS::Publisher_var pub =
+      participant->create_publisher(pub_qos, DDS::PublisherListener::_nil(),
+                                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    if (CORBA::is_nil(pub.in())) {
+      cerr << "create_publisher failed." << endl;
+      exit(1);
+    }
 
-      DDS::TopicQos topic_qos;
-      participant->get_default_topic_qos(topic_qos);
-      DDS::Topic_var topic =
-        participant->create_topic("Movie Discussion List",
-                                  type_name.in(),
-                                  topic_qos,
-                                  DDS::TopicListener::_nil(),
-                                  ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    DDS::DataWriter_var dw =
+      pub->create_datawriter(topic.in(),
+                              DATAWRITER_QOS_DEFAULT,
+                              DDS::DataWriterListener::_nil(),
+                              ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-      if (CORBA::is_nil(topic.in())) {
-        cerr << "create_topic failed." << endl;
-        exit(1);
-      }
+    Messenger::MessageDataWriter_var message_dw =
+      Messenger::MessageDataWriter::_narrow(dw.in());
 
-      DDS::PublisherQos pub_qos;
-      participant->get_default_publisher_qos(pub_qos);
+    Messenger::Message message;
+    message.subject_id = 16;
 
-      DDS::Publisher_var pub =
-        participant->create_publisher(pub_qos, DDS::PublisherListener::_nil(),
-                                      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-      if (CORBA::is_nil(pub.in())) {
-        cerr << "create_publisher failed." << endl;
-        exit(1);
-      }
+    ::DDS::InstanceHandle_t handle = message_dw->register_instance(message);
 
-      DDS::DataWriter_var dw =
-        pub->create_datawriter(topic.in(),
-                               DATAWRITER_QOS_DEFAULT,
-                               DDS::DataWriterListener::_nil(),
-                               ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    {
+      stringstream ss;
+      ss << ACE_OS::getpid() << flush;
 
-      Messenger::MessageDataWriter_var message_dw =
-        Messenger::MessageDataWriter::_narrow(dw.in());
+      message.from       = ss.str().c_str();
+      message.subject    = CORBA::string_dup("Review");
+      message.text       = CORBA::string_dup("Worst. Movie. Ever.");
+      message.count      = 0;
+    }
 
-      Messenger::Message message;
-      message.subject_id = 16;
+    const ACE_Time_Value delay(0, 10000);
 
-      ::DDS::InstanceHandle_t handle = message_dw->register_instance(message);
+    const size_t count = 250u;
+    for (size_t i = 0; i < count; ++i) {
+      ACE_OS::sleep(delay);
+      ++message.count;
+      message_dw->write(message, handle);
+    }
 
-      {
-        stringstream ss;
-        ss << ACE_OS::getpid() << flush;
+    {
+      stringstream ss;
+      ss << "Publisher " << ACE_OS::getpid() << " is done. Exiting." << endl;
 
-        message.from       = ss.str().c_str();
-        message.subject    = CORBA::string_dup("Review");
-        message.text       = CORBA::string_dup("Worst. Movie. Ever.");
-        message.count      = 0;
-      }
+      cout << ss.str() << flush;
+    }
 
-      const ACE_Time_Value delay(0, 10000);
+    // Semi-arbitrary change to clean-up approach
+    if (ACE_OS::getpid() % 3) {
+      message_dw = 0;
 
-      const size_t count = 250u;
-      for (size_t i = 0; i < count; ++i) {
-        ACE_OS::sleep(delay);
-        ++message.count;
-        message_dw->write(message, handle);
-      }
+      pub->delete_datawriter(dw);
+      participant->delete_publisher(pub);
+    }
 
-      {
-        stringstream ss;
-        ss << "Publisher " << ACE_OS::getpid() << " is done. Exiting." << endl;
-
-        cout << ss.str() << flush;
-      }
-
-      // Semi-arbitrary change to clean-up approach
-      if (ACE_OS::getpid() % 3) {
-        message_dw = 0;
-
-        pub->delete_datawriter(dw);
-        participant->delete_publisher(pub);
-      }
-
-      participant->delete_contained_entities();
-      dpf->delete_participant(participant.in());
+    participant->delete_contained_entities();
+    dpf->delete_participant(participant.in());
   }
-  catch (CORBA::Exception& e)
+  catch (const CORBA::Exception& e)
   {
     cerr << "PUB: Exception caught in main.cpp:" << endl
          << e << endl;
