@@ -531,7 +531,8 @@ public:
 
   virtual void set_instance_state(DDS::InstanceHandle_t instance,
                                   DDS::InstanceStateKind state,
-                                  const SystemTimePoint& timestamp = SystemTimePoint::now()) = 0;
+                                  const SystemTimePoint& timestamp = SystemTimePoint::now(),
+                                  const OpenDDS::DCPS::GUID_t& = GUID_UNKNOWN) = 0;
 
 #endif
 
