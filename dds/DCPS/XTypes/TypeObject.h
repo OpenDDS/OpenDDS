@@ -882,12 +882,115 @@ namespace XTypes {
     OPENDDS_STRING string8_value;
     OPENDDS_WSTRING string16_value;
     ExtendedAnnotationParameterValue extended_value;
+
+    AnnotationParameterValue() {}
+
+    explicit AnnotationParameterValue(ACE_CDR::Boolean value)
+      : kind(TK_BOOLEAN)
+      , boolean_value(value)
+    {}
+
+    explicit AnnotationParameterValue(ACE_CDR::Octet value)
+      : kind(TK_BYTE)
+      , byte_value(value)
+    {}
+
+    explicit AnnotationParameterValue(ACE_CDR::Short value)
+      : kind(TK_INT16)
+      , int16_value(value)
+    {}
+
+    explicit AnnotationParameterValue(ACE_CDR::UShort value)
+      : kind(TK_UINT16)
+      , uint16_value(value)
+    {}
+
+    AnnotationParameterValue(ACE_CDR::Octet k, ACE_CDR::Long value)
+    {
+      if (k == TK_INT32) {
+        kind = k;
+        int32_value = value;
+      } else if (k == TK_ENUM) {
+        kind = k;
+        enumerated_value = value;
+      } else {
+        kind = TK_NONE;
+      }
+    }
+
+    explicit AnnotationParameterValue(ACE_CDR::ULong value)
+      : kind(TK_UINT32)
+      , uint32_value(value)
+    {}
+
+    explicit AnnotationParameterValue(ACE_CDR::LongLong value)
+      : kind(TK_INT64)
+      , int64_value(value)
+    {}
+
+    explicit AnnotationParameterValue(ACE_CDR::ULongLong value)
+      : kind(TK_UINT64)
+      , uint64_value(value)
+    {}
+
+    explicit AnnotationParameterValue(ACE_CDR::Float value)
+      : kind(TK_FLOAT32)
+      , float32_value(value)
+    {}
+
+    explicit AnnotationParameterValue(ACE_CDR::Double value)
+      : kind(TK_FLOAT64)
+      , float64_value(value)
+    {}
+
+    explicit AnnotationParameterValue(ACE_CDR::LongDouble value)
+      : kind(TK_FLOAT128)
+      , float128_value(value)
+    {}
+
+    explicit AnnotationParameterValue(ACE_CDR::Char value)
+      : kind(TK_CHAR8)
+      , char_value(value)
+    {}
+
+    explicit AnnotationParameterValue(ACE_CDR::WChar value)
+      : kind(TK_CHAR16)
+      , wchar_value(value)
+    {}
+
+    explicit AnnotationParameterValue(const OPENDDS_STRING& value)
+      : kind(TK_STRING8)
+      , string8_value(value)
+    {}
+
+    explicit AnnotationParameterValue(const OPENDDS_WSTRING& value)
+      : kind(TK_STRING16)
+      , string16_value(value)
+    {}
   };
 
   // The application of an annotation to some type or type member
   struct AppliedAnnotationParameter {
     NameHash paramname_hash;
     AnnotationParameterValue value;
+
+    AppliedAnnotationParameter() {}
+
+    AppliedAnnotationParameter(ACE_CDR::Octet a, ACE_CDR::Octet b, ACE_CDR::Octet c, ACE_CDR::Octet d, const AnnotationParameterValue& a_value)
+      : value(a_value)
+    {
+      paramname_hash[0] = a;
+      paramname_hash[1] = b;
+      paramname_hash[2] = c;
+      paramname_hash[3] = d;
+    }
+
+    AppliedAnnotationParameter(const NameHash& a_name_hash,
+                               const AnnotationParameterValue& a_value)
+      : value(a_value)
+    {
+      std::memcpy(&paramname_hash, a_name_hash, sizeof paramname_hash);
+    }
   };
   // Sorted by AppliedAnnotationParameter.paramname_hash
   typedef Sequence<AppliedAnnotationParameter> AppliedAnnotationParameterSeq;
@@ -895,6 +998,14 @@ namespace XTypes {
   struct AppliedAnnotation {
     TypeIdentifier annotation_typeid;
     Optional<AppliedAnnotationParameterSeq> param_seq;
+
+    AppliedAnnotation() {}
+
+    AppliedAnnotation(const TypeIdentifier& ann_typeid,
+                      const Optional<AppliedAnnotationParameterSeq>& a_param_seq)
+      : annotation_typeid(ann_typeid)
+      , param_seq(a_param_seq)
+    {}
   };
   // Sorted by AppliedAnnotation.annotation_typeid
   typedef Sequence<AppliedAnnotation> AppliedAnnotationSeq;
@@ -904,6 +1015,16 @@ namespace XTypes {
     OPENDDS_STRING placement;
     OPENDDS_STRING language;
     OPENDDS_STRING text;
+
+    AppliedVerbatimAnnotation() {}
+
+    AppliedVerbatimAnnotation(const OPENDDS_STRING& a_placement,
+                              const OPENDDS_STRING& a_language,
+                              const OPENDDS_STRING& a_text)
+      : placement(a_placement)
+      , language(a_language)
+      , text(a_text)
+    {}
   };
 
 
@@ -913,6 +1034,18 @@ namespace XTypes {
     Optional<AnnotationParameterValue> min; // @min , @range
     Optional<AnnotationParameterValue> max; // @max , @range
     Optional<OPENDDS_STRING> hash_id; // @hash_id("<membername>")
+
+    AppliedBuiltinMemberAnnotations() {}
+
+    AppliedBuiltinMemberAnnotations(const Optional<OPENDDS_STRING>& a_unit,
+                                    const Optional<AnnotationParameterValue>& a_min,
+                                    const Optional<AnnotationParameterValue>& a_max,
+                                    const Optional<OPENDDS_STRING>& a_hash_id)
+      : unit(a_unit)
+      , min(a_min)
+      , max(a_max)
+      , hash_id(a_hash_id)
+    {}
   };
 
   struct CommonStructMember {
@@ -923,6 +1056,7 @@ namespace XTypes {
     CommonStructMember()
       : member_flags(0)
     {}
+
     CommonStructMember (const MemberId& a_member_id,
                         const StructMemberFlag& a_member_flags,
                         const TypeIdentifier& a_member_type_id)
@@ -944,14 +1078,17 @@ namespace XTypes {
     NameHash name_hash;
 
     MinimalMemberDetail() {}
+
     MinimalMemberDetail(ACE_CDR::Octet a, ACE_CDR::Octet b, ACE_CDR::Octet c, ACE_CDR::Octet d)
     {
       name_hash[0] = a; name_hash[1] = b; name_hash[2] = c; name_hash[3] = d;
     }
+
     explicit MinimalMemberDetail(const NameHash& a_name_hash)
     {
       std::memcpy(&name_hash, &a_name_hash, sizeof name_hash);
     }
+
     explicit MinimalMemberDetail(const OPENDDS_STRING& name);
   };
 
@@ -986,6 +1123,12 @@ namespace XTypes {
 
   struct AppliedBuiltinTypeAnnotations {
     Optional<AppliedVerbatimAnnotation> verbatim;  // @verbatim(...)
+
+    AppliedBuiltinTypeAnnotations() {}
+
+    explicit AppliedBuiltinTypeAnnotations(const Optional<AppliedVerbatimAnnotation>& a_verbatim)
+      : verbatim(a_verbatim)
+    {}
   };
 
   struct MinimalTypeDetail {
@@ -996,6 +1139,16 @@ namespace XTypes {
     Optional<AppliedBuiltinTypeAnnotations> ann_builtin;
     Optional<AppliedAnnotationSeq> ann_custom;
     QualifiedTypeName type_name;
+
+    CompleteTypeDetail() {}
+
+    CompleteTypeDetail(const Optional<AppliedBuiltinTypeAnnotations>& an_ann_builtin,
+                       const Optional<AppliedAnnotationSeq>& an_ann_custom,
+                       const QualifiedTypeName& a_type_name)
+      : ann_builtin(an_ann_builtin)
+      , ann_custom(an_ann_custom)
+      , type_name(a_type_name)
+    {}
   };
 
   struct CompleteStructHeader {
@@ -1230,6 +1383,16 @@ namespace XTypes {
     CommonAliasBody common;
     Optional<AppliedBuiltinMemberAnnotations> ann_builtin;
     Optional<AppliedAnnotationSeq> ann_custom;
+
+    CompleteAliasBody() {}
+
+    CompleteAliasBody(const CommonAliasBody& a_common,
+                      const Optional<AppliedBuiltinMemberAnnotation>& an_ann_builtin,
+                      const Optional<AppliedAnnotationSeq>& an_ann_custom)
+      : common(a_common)
+      , ann_builtin(an_ann_builtin)
+      , ann_custom(an_ann_custom)
+    {}
   };
 
   struct MinimalAliasBody {
@@ -1244,6 +1407,7 @@ namespace XTypes {
 
   struct CompleteAliasHeader {
     CompleteTypeDetail detail;
+
   };
 
   struct MinimalAliasHeader {
@@ -1254,6 +1418,18 @@ namespace XTypes {
     AliasTypeFlag alias_flags;
     CompleteAliasHeader header;
     CompleteAliasBody body;
+
+    CompleteAliasType()
+      : alias_flags(0)
+    {}
+
+    CompleteAliasType(const AliasTypeFlag& a_alias_flags,
+                      const CompleteAliasHeader& a_header,
+                      const CompleteAliasBody& a_body)
+      : alias_flags(a_alias_flags)
+      , header(a_header)
+      , body(a_body)
+    {}
   };
 
   struct MinimalAliasType {

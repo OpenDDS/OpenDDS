@@ -248,19 +248,19 @@ struct StructTypeFlagPrinter : TypeFlagPrinter {
   explicit StructTypeFlagPrinter(const OpenDDS::XTypes::StructTypeFlag a_value) : TypeFlagPrinter(a_value) {}
 };
 
-struct UnionTypeFlagPrinter :  TypeFlagPrinter {
+struct UnionTypeFlagPrinter : TypeFlagPrinter {
   explicit UnionTypeFlagPrinter(const OpenDDS::XTypes::UnionTypeFlag a_value) : TypeFlagPrinter(a_value) {}
 };
 
-struct CollectionTypeFlagPrinter :  TypeFlagPrinter {
+struct CollectionTypeFlagPrinter : TypeFlagPrinter {
   explicit CollectionTypeFlagPrinter(const OpenDDS::XTypes::CollectionTypeFlag a_value) : TypeFlagPrinter(a_value) {}
 };
 
-struct AliasTypeFlagPrinter :  TypeFlagPrinter {
+struct AliasTypeFlagPrinter : TypeFlagPrinter {
   explicit AliasTypeFlagPrinter(const OpenDDS::XTypes::AliasTypeFlag a_value) : TypeFlagPrinter(a_value) {}
 };
 
-struct EnumTypeFlagPrinter :  TypeFlagPrinter {
+struct EnumTypeFlagPrinter : TypeFlagPrinter {
   explicit EnumTypeFlagPrinter(const OpenDDS::XTypes::EnumTypeFlag a_value) : TypeFlagPrinter(a_value) {}
 };
 
@@ -315,7 +315,7 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::PlainCollectionHeader& head
 {
   return out
     << "XTypes::PlainCollectionHeader("
-    << EquivalenceKindPrinter(header.equiv_kind) << ","
+    << EquivalenceKindPrinter(header.equiv_kind) << ", "
     << CollectionElementFlagPrinter(header.element_flags)
     << ")";
 }
@@ -325,8 +325,8 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::PlainSequenceSElemDefn& seq
 {
   return out
     << "XTypes::PlainSequenceSElemDefn("
-    << seq_sdefn.header << ","
-    << SBoundPrinter(seq_sdefn.bound) << ","
+    << seq_sdefn.header << ", "
+    << SBoundPrinter(seq_sdefn.bound) << ", "
     << *seq_sdefn.element_identifier
     << ")";
 }
@@ -336,8 +336,8 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::PlainSequenceLElemDefn& seq
 {
   return out
     << "XTypes::PlainSequenceLElemDefn("
-    << seq_ldefn.header << ","
-    << LBoundPrinter(seq_ldefn.bound) << ","
+    << seq_ldefn.header << ", "
+    << LBoundPrinter(seq_ldefn.bound) << ", "
     << *seq_ldefn.element_identifier
     << ")";
 }
@@ -347,8 +347,8 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::PlainArraySElemDefn& array_
 {
   return out
     << "XTypes::PlainArraySElemDefn("
-    << array_sdefn.header << ","
-    << array_sdefn.array_bound_seq << ","
+    << array_sdefn.header << ", "
+    << array_sdefn.array_bound_seq << ", "
     << *array_sdefn.element_identifier
     << ")";
 }
@@ -358,8 +358,8 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::PlainArrayLElemDefn& array_
 {
   return out
     << "XTypes::PlainArrayLElemDefn("
-    << array_ldefn.header << ","
-    << array_ldefn.array_bound_seq << ","
+    << array_ldefn.header << ", "
+    << array_ldefn.array_bound_seq << ", "
     << *array_ldefn.element_identifier
     << ")";
 }
@@ -369,10 +369,10 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::PlainMapSTypeDefn& map_sdef
 {
   return out
     << "XTypes::PlainMapSTypeDefn("
-    << map_sdefn.header << ","
-    << SBoundPrinter(map_sdefn.bound) << ","
-    << *map_sdefn.element_identifier << ","
-    << CollectionElementFlagPrinter(map_sdefn.key_flags) << ","
+    << map_sdefn.header << ", "
+    << SBoundPrinter(map_sdefn.bound) << ", "
+    << *map_sdefn.element_identifier << ", "
+    << CollectionElementFlagPrinter(map_sdefn.key_flags) << ", "
     << *map_sdefn.key_identifier
     << ")";
 }
@@ -382,10 +382,10 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::PlainMapLTypeDefn& map_ldef
 {
   return out
     << "XTypes::PlainMapLTypeDefn("
-    << map_ldefn.header << ","
-    << LBoundPrinter(map_ldefn.bound) << ","
-    << *map_ldefn.element_identifier << ","
-    << CollectionElementFlagPrinter(map_ldefn.key_flags) << ","
+    << map_ldefn.header << ", "
+    << LBoundPrinter(map_ldefn.bound) << ", "
+    << *map_ldefn.element_identifier << ", "
+    << CollectionElementFlagPrinter(map_ldefn.key_flags) << ", "
     << *map_ldefn.key_identifier
     << ")";
 }
@@ -408,7 +408,7 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::TypeObjectHashId& id)
 {
   return out
     << "XTypes::TypeObjectHashId("
-    << EquivalenceKindPrinter(id.kind) << ","
+    << EquivalenceKindPrinter(id.kind) << ", "
     << id.hash
     << ")";
 }
@@ -472,43 +472,43 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::TypeIdentifier& ti)
     out << "XTypes::TK_CHAR16";
     break;
   case OpenDDS::XTypes::TI_STRING8_SMALL:
-    out << "XTypes::TI_STRING8_SMALL," << ti.string_sdefn();
+    out << "XTypes::TI_STRING8_SMALL, " << ti.string_sdefn();
     break;
   case OpenDDS::XTypes::TI_STRING16_SMALL:
-    out << "XTypes::TI_STRING16_SMALL," << ti.string_sdefn();
+    out << "XTypes::TI_STRING16_SMALL, " << ti.string_sdefn();
     break;
   case OpenDDS::XTypes::TI_STRING8_LARGE:
-    out << "XTypes::TI_STRING8_LARGE," << ti.string_ldefn();
+    out << "XTypes::TI_STRING8_LARGE, " << ti.string_ldefn();
     break;
   case OpenDDS::XTypes::TI_STRING16_LARGE:
-    out << "XTypes::TI_STRING16_LARGE," << ti.string_ldefn();
+    out << "XTypes::TI_STRING16_LARGE, " << ti.string_ldefn();
     break;
   case OpenDDS::XTypes::TI_PLAIN_SEQUENCE_SMALL:
-    out << "XTypes::TI_PLAIN_SEQUENCE_SMALL," << ti.seq_sdefn();
+    out << "XTypes::TI_PLAIN_SEQUENCE_SMALL, " << ti.seq_sdefn();
     break;
   case OpenDDS::XTypes::TI_PLAIN_SEQUENCE_LARGE:
-    out << "XTypes::TI_PLAIN_SEQUENCE_LARGE," << ti.seq_ldefn();
+    out << "XTypes::TI_PLAIN_SEQUENCE_LARGE, " << ti.seq_ldefn();
     break;
   case OpenDDS::XTypes::TI_PLAIN_ARRAY_SMALL:
-    out << "XTypes::TI_PLAIN_ARRAY_SMALL," << ti.array_sdefn();
+    out << "XTypes::TI_PLAIN_ARRAY_SMALL, " << ti.array_sdefn();
     break;
   case OpenDDS::XTypes::TI_PLAIN_ARRAY_LARGE:
-    out << "XTypes::TI_PLAIN_ARRAY_LARGE," << ti.array_ldefn();
+    out << "XTypes::TI_PLAIN_ARRAY_LARGE, " << ti.array_ldefn();
     break;
   case OpenDDS::XTypes::TI_PLAIN_MAP_SMALL:
-    out << "XTypes::TI_PLAIN_MAP_SMALL," << ti.map_sdefn();
+    out << "XTypes::TI_PLAIN_MAP_SMALL, " << ti.map_sdefn();
     break;
   case OpenDDS::XTypes::TI_PLAIN_MAP_LARGE:
-    out << "XTypes::TI_PLAIN_MAP_LARGE," << ti.map_ldefn();
+    out << "XTypes::TI_PLAIN_MAP_LARGE, " << ti.map_ldefn();
     break;
   case OpenDDS::XTypes::TI_STRONGLY_CONNECTED_COMPONENT:
-    out << "XTypes::TI_STRONGLY_CONNECTED_COMPONENT," << ti.sc_component_id();
+    out << "XTypes::TI_STRONGLY_CONNECTED_COMPONENT, " << ti.sc_component_id();
     break;
   case OpenDDS::XTypes::EK_COMPLETE:
-    out << "XTypes::EK_COMPLETE," << ti.equivalence_hash();
+    out << "XTypes::EK_COMPLETE, " << ti.equivalence_hash();
     break;
   case OpenDDS::XTypes::EK_MINIMAL:
-    out << "XTypes::EK_MINIMAL," << ti.equivalence_hash();
+    out << "XTypes::EK_MINIMAL, " << ti.equivalence_hash();
     break;
   default:
     be_util::misc_error_and_abort("Extended type definitions output is not supported");
@@ -519,6 +519,151 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::TypeIdentifier& ti)
   return out;
 }
 
+template<typename T>
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::Optional<T>& optional)
+{
+  if (optional.present) {
+    return out
+      << "XTypes::Optional("
+      << optional.value
+      << ")";
+  } else {
+    return out << "XTypes::Optional()";
+  }
+}
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::AppliedVerbatimAnnotation& ann)
+{
+  return out
+    << "XTypes::AppliedVerbatimAnnotation("
+    << ann.placement << ", "
+    << ann.language << ", "
+    << ann.text
+    << ")";
+}
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::AppliedBuiltinTypeAnnotations& ann)
+{
+  return out
+    << "XTypes::AppliedBuiltinTypeAnnotations("
+    << ann.verbatim
+    << ")";
+}
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::NameHash& name_hash)
+{
+  for (size_t i = 0; i < sizeof name_hash; ++i) {
+    out << int(name_hash[i]);
+    if (i < sizeof name_hash - 1) {
+      out << ", ";
+    }
+  }
+  return out;
+}
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::AnnotationParameterValue& param_value)
+{
+  out << "XTypes::AnnotationParameterValue(";
+  switch (param_value.kind) {
+  case TK_BOOLEAN:
+    out << (param_value.boolean_value ? "true" : "false");
+    break;
+  case TK_BYTE:
+    out << "static_cast<ACE_CDR::Octet>(" << param_value.byte_value << ")";
+    break;
+  case TK_INT16:
+    out << "static_cast<ACE_CDR::Short>(" << param_value.int16_value << ")";
+    break;
+  case TK_UINT16:
+    out << "static_cast<ACE_CDR::UShort>(" << param_value.uint16_value << ")";
+    break;
+  case TK_INT32:
+    out << "XTypes::TK_INT32, " << param_value.int32_value;
+    break;
+  case TK_UINT32:
+    out << "static_cast<ACE_CDR::ULong>(" << param_value.uint32_value << ")";
+    break;
+  case TK_INT64:
+    out << "static_cast<ACE_CDR::LongLong>(" << param_value.int64_value << ")";
+    break;
+  case TK_UINT64:
+    out << "static_cast<ACE_CDR::ULongLong>(" << param_value.uint64_value << ")";
+    break;
+  case TK_FLOAT32:
+    out << "static_cast<ACE_CDR::Float>(" << param_value.float32_value << ")";
+    break;
+  case TK_FLOAT64:
+    out << "static_cast<ACE_CDR::Double>(" << param_value.float64_value << ")";
+    break;
+  case TK_FLOAT128:
+    out << "static_cast<ACE_CDR::LongDouble>(" << param_value.float128_value << ")";
+    break;
+  case TK_CHAR8:
+    out << "static_cast<ACE_CDR::Char>(" << param_value.char_value << ")";
+    break;
+  case TK_CHAR16:
+    out << "static_cast<ACE_CDR::WChar>(" << param_value.wchar_value << ")";
+    break;
+  case TK_ENUM:
+    out << "XTypes::TK_ENUM, " << param_value.enumerated_value;
+    break;
+  case TK_STRING8:
+    out << "OPENDDS_STRING(" << param_value.string8_value << ")";
+    break;
+  case TK_STRING16:
+    out << "OPENDDS_WSTRING(" << param_value.string16_value << ")";
+  }
+  out << ")";
+  return out;
+}
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::AppliedAnnotationParameter& param)
+{
+  return out
+    << "XTypes::AppliedAnnotationParameter("
+    << param.paramname_hash << ", "
+    << param.value
+    << ")";
+}
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::AppliedAnnotationParameterSeq& param_seq)
+{
+  out << "XTypes::AppliedAnnotationParameterSeq()";
+  for (OpenDDS::XTypes::AppliedAnnotationParameterSeq::const_iterator pos = param_seq.begin();
+       pos != param_seq.end(); ++pos) {
+    out << ".append(" << *pos << ")";
+  }
+  return out;
+}
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::AppliedAnnotation& ann)
+{
+  return out
+    << "XTypes::AppliedAnnotation("
+    << ann.annotation_typeid << ", "
+    << ann.param_seq
+    << ")";
+}
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::AppliedAnnotationSeq& ann_seq)
+{
+  out << "XTypes::AppliedAnnotationSeq()";
+  for (OpenDDS::XTypes::AppliedAnnotationSeq::const_iterator pos = ann_seq.begin();
+       pos != ann_seq.end(); ++pos) {
+    out << ".append(" << *pos << ")";
+  }
+  return out;
+}
+
 std::ostream&
 operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalAliasHeader&)
 {
@@ -526,11 +671,31 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalAliasHeader&)
 }
 
 std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteTypeDetail& detail)
+{
+  return out
+    << "XTypes::CompleteTypeDetail("
+    << detail.ann_builtin << ", "
+    << detail.ann_custom << ", "
+    << detail.type_name
+    << ")";
+}
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteAliasHeader& header)
+{
+  return out
+    << "XTypes::CompleteAliasHeader("
+    << header.detail
+    << ")";
+}
+
+std::ostream&
 operator<<(std::ostream& out, const OpenDDS::XTypes::CommonAliasBody& common)
 {
   return out
     << "XTypes::CommonAliasBody("
-    << AliasMemberFlagPrinter(common.related_flags) << ","
+    << AliasMemberFlagPrinter(common.related_flags) << ", "
     << common.related_type
     << ")";
 }
@@ -542,12 +707,46 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalAliasBody& body)
 }
 
 std::ostream&
+operator<<(std::ostream& out, const AppliedBuiltinMemberAnnotations& ann)
+{
+  return out
+    << "XTypes::AppliedBuiltinMemberAnnotations("
+    << ann.unit << ", "
+    << ann.min << ", "
+    << ann.max << ", "
+    << ann.hash_id
+    << ")";
+}
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteAliasBody& body)
+{
+  return out
+    << "XTypes::CompleteAliasBody("
+    << body.common << ", "
+    << body.ann_builtin << ", "
+    << body.ann_custom
+    << ")";
+}
+
+std::ostream&
 operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalAliasType& alias_type)
 {
   return out
     << "XTypes::MinimalAliasType("
-    << AliasTypeFlagPrinter(alias_type.alias_flags) << ","
-    << alias_type.header << ","
+    << AliasTypeFlagPrinter(alias_type.alias_flags) << ", "
+    << alias_type.header << ", "
+    << alias_type.body
+    << ")";
+}
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteAliasType& alias_type)
+{
+  return out
+    << "XTypes::CompleteAliasType("
+    << AliasTypeFlagPrinter(alias_type.alias_flags) << ", "
+    << alias_type.header << ", "
     << alias_type.body
     << ")";
 }
@@ -568,7 +767,6 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalStructHeader& header
     << ")";
 }
 
-
 std::ostream&
 operator<<(std::ostream& out, const OpenDDS::XTypes::CommonStructMember& common)
 {
@@ -578,18 +776,6 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::CommonStructMember& common)
     << StructMemberFlagPrinter(common.member_flags) << ","
     << common.member_type_id
     << ")";
-}
-
-std::ostream&
-operator<<(std::ostream& out, const OpenDDS::XTypes::NameHash& name_hash)
-{
-  for (size_t i = 0; i < sizeof name_hash; ++i) {
-    out << int(name_hash[i]);
-    if (i < sizeof name_hash - 1) {
-      out << ", ";
-    }
-  }
-  return out;
 }
 
 std::ostream&
@@ -628,7 +814,6 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalStructType& struct_t
     << struct_type.member_seq
     << ")";
 }
-
 
 std::ostream&
 operator<<(std::ostream& out, const OpenDDS::XTypes::CommonEnumeratedHeader& common)
@@ -855,6 +1040,52 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalTypeObject& minimal)
   case OpenDDS::XTypes::TK_BITMASK:
     be_util::misc_error_and_abort("Bitmask output is not supported");
     break;
+  default:
+    be_util::misc_error_and_abort("Extended type output is not supported");
+    break;
+  }
+  out << ")";
+  return out;
+}
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteTypeObject& complete)
+{
+  out << "XTypes::CompleteTypeObject(";
+  switch (complete.kind) {
+  case OpenDDS::XTypes::TK_ALIAS:
+    out << complete.alias_type;
+    break;
+  case OpenDDS::XTypes::TK_ANNOTATION:
+    be_util::misc_error_and_abort("Annotation output is not supported");
+    break;
+  case OpenDDS::XTypes::TK_STRUCTURE:
+    out << complete.struct_type;
+    break;
+  case OpenDDS::XTypes::TK_UNION:
+    out << complete.union_type;
+    break;
+  case OpenDDS::XTypes::TK_BITSET:
+    be_util::misc_error_and_abort("Bitset output is not supported");
+    break;
+  case OpenDDS::XTypes::TK_SEQUENCE:
+    out << complete.sequence_type;
+    break;
+  case OpenDDS::XTypes::TK_ARRAY:
+    out << complete.array_type;
+    break;
+  case OpenDDS::XTypes::TK_MAP:
+    be_util::misc_error_and_abort("Map output is not supported");
+    break;
+  case OpenDDS::XTypes::TK_ENUM:
+    out << complete.enumerated_type;
+    break;
+  case OpenDDS::XTypes::TK_BITMASK:
+    be_util::misc_error_and_abort("Bitmask output is not supported");
+    break;
+  default:
+    be_util::misc_error_and_abort("Extended type output is not supported");
+    break;
   }
   out << ")";
   return out;
@@ -869,7 +1100,7 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::TypeObject& to)
     out << to.minimal;
     break;
   case OpenDDS::XTypes::EK_COMPLETE:
-    be_util::misc_error_and_abort("Complete output is not supported");
+    out << to.complete;
     break;
   default:
     be_util::misc_error_and_abort("Unknown type object kind");
