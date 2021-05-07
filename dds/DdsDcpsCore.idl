@@ -619,6 +619,11 @@ module OpenDDS {
       DDS::OctetArray16 participant_guid;
     };
 
+    struct MonotonicTime_t {
+      long sec;
+      unsigned long nanosec;
+    };
+
   };// End of module DCPS
 
 }; // End of module OpenDDS

@@ -21,6 +21,7 @@ public:
   explicit SporadicTask(RcHandle<ReactorInterceptor> interceptor)
     : interceptor_(interceptor)
     , scheduled_(false)
+    , last_command_(SPORADIC_TASK_NONE)
   {
     reactor(interceptor->reactor());
   }
@@ -56,7 +57,9 @@ public:
     RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
     if (interceptor) {
       ReactorInterceptor::CommandPtr command = interceptor->execute_or_enqueue(new CancelCommand(this));
-      command->wait();
+      if (command) {
+        command->wait();
+      }
     } else if (DCPS_debug_level >= 1) {
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: SporadicTask::cancel_and_wait")
@@ -69,15 +72,35 @@ public:
 private:
   WeakRcHandle<ReactorInterceptor> interceptor_;
   bool scheduled_;
+  enum {
+    SPORADIC_TASK_NONE,
+    SPORADIC_TASK_SCHEDULE,
+    SPORADIC_TASK_CANCEL
+  } last_command_;
 
   struct ScheduleCommand : public ReactorInterceptor::Command {
     ScheduleCommand(SporadicTask* hb, const TimeDuration& delay)
       : sporadic_task_(hb), delay_(delay)
     { }
 
+    virtual bool should_execute() const
+    {
+      return sporadic_task_->last_command_ != SPORADIC_TASK_SCHEDULE;
+    }
+
+    virtual void will_execute()
+    {
+      sporadic_task_->last_command_ = SPORADIC_TASK_SCHEDULE;
+    }
+
     virtual void execute()
     {
       sporadic_task_->schedule_i(delay_);
+    }
+
+    virtual void queue_flushed()
+    {
+      sporadic_task_->last_command_ = SPORADIC_TASK_NONE;
     }
 
     SporadicTask* const sporadic_task_;
@@ -89,9 +112,24 @@ private:
       : sporadic_task_(hb)
     { }
 
+    virtual bool should_execute() const
+    {
+      return sporadic_task_->last_command_ != SPORADIC_TASK_CANCEL;
+    }
+
+    virtual void will_execute()
+    {
+      sporadic_task_->last_command_ = SPORADIC_TASK_CANCEL;
+    }
+
     virtual void execute()
     {
       sporadic_task_->cancel_i();
+    }
+
+    virtual void queue_flushed()
+    {
+      sporadic_task_->last_command_ = SPORADIC_TASK_NONE;
     }
 
     SporadicTask* const sporadic_task_;

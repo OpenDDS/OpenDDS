@@ -53,6 +53,11 @@ PublisherImpl::PublisherImpl(DDS::InstanceHandle_t      handle,
 
 PublisherImpl::~PublisherImpl()
 {
+  const RcHandle<DomainParticipantImpl> participant = participant_.lock();
+  if (participant) {
+    participant->return_handle(handle_);
+  }
+
   //The datawriters should be deleted already before calling delete
   //publisher.
   if (!is_clean()) {
@@ -492,6 +497,7 @@ DDS::ReturnCode_t
 PublisherImpl::set_listener(DDS::PublisherListener_ptr a_listener,
     DDS::StatusMask            mask)
 {
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
   listener_ = DDS::PublisherListener::_duplicate(a_listener);
@@ -501,6 +507,7 @@ PublisherImpl::set_listener(DDS::PublisherListener_ptr a_listener,
 DDS::PublisherListener_ptr
 PublisherImpl::get_listener()
 {
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   return DDS::PublisherListener::_duplicate(listener_.in());
 }
 
@@ -878,7 +885,9 @@ PublisherImpl::listener_for(DDS::StatusKind kind)
   if (!participant)
     return 0;
 
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   if (CORBA::is_nil(listener_.in()) || (listener_mask_ & kind) == 0) {
+    g.release();
     return participant->listener_for(kind);
 
   } else {
@@ -1000,7 +1009,6 @@ PublisherImpl::validate_datawriter_qos(const DDS::DataWriterQos& qos,
   return true;
 }
 
-OPENDDS_END_VERSIONED_NAMESPACE_DECL
-
 } // namespace DCPS
 } // namespace OpenDDS
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

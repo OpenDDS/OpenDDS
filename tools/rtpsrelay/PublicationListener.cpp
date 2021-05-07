@@ -6,13 +6,26 @@
 
 namespace RtpsRelay {
 
-PublicationListener::PublicationListener(OpenDDS::DCPS::DomainParticipantImpl* participant,
+PublicationListener::PublicationListener(const Config& config,
+                                         OpenDDS::DCPS::DomainParticipantImpl* participant,
                                          WriterEntryDataWriter_var writer,
                                          DomainStatisticsReporter& stats_reporter)
-  : participant_(participant)
+  : config_(config)
+  , participant_(participant)
   , writer_(writer)
   , stats_reporter_(stats_reporter)
+  , unregister_(OpenDDS::DCPS::make_rch<Unregister>(OpenDDS::DCPS::ref(*this)))
 {}
+
+void PublicationListener::enable()
+{
+  unregister_->enable();
+}
+
+void PublicationListener::disable()
+{
+  unregister_->disable();
+}
 
 void PublicationListener::on_data_available(DDS::DataReader_ptr reader)
 {
@@ -24,7 +37,7 @@ void PublicationListener::on_data_available(DDS::DataReader_ptr reader)
 
   DDS::PublicationBuiltinTopicDataSeq data;
   DDS::SampleInfoSeq infos;
-  DDS::ReturnCode_t ret = dr->read(data,
+  DDS::ReturnCode_t ret = dr->take(data,
                                    infos,
                                    DDS::LENGTH_UNLIMITED,
                                    DDS::NOT_READ_SAMPLE_STATE,
@@ -90,7 +103,9 @@ void PublicationListener::write_sample(const DDS::PublicationBuiltinTopicData& d
     publisher_qos,
   };
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: PublicationLister::write_sample add local writer %C %C\n"), guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str()));
+  if (config_.log_discovery()) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: PublicationLister::write_sample add local writer %C %C\n"), guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str()));
+  }
   DDS::ReturnCode_t ret = writer_->write(entry, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: PublicationListener::write_sample failed to write\n")));
@@ -100,17 +115,52 @@ void PublicationListener::write_sample(const DDS::PublicationBuiltinTopicData& d
 void PublicationListener::unregister_instance(const DDS::SampleInfo& info)
 {
   const auto repoid = participant_->get_repoid(info.instance_handle);
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  unregister_queue_.push_back(repoid);
+}
+
+void PublicationListener::unregister()
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+
+  if (unregister_queue_.empty()) {
+    return;
+  }
+
+  const auto repoid = unregister_queue_.front();
   GUID_t guid;
   assign(guid, repoid);
 
   WriterEntry entry;
   entry.guid(guid);
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: PublicationListener::unregister_instance remove local writer %C\n"), guid_to_string(repoid).c_str()));
+  if (config_.log_discovery()) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: PublicationListener::unregister remove local writer %C\n"), guid_to_string(repoid).c_str()));
+  }
   DDS::ReturnCode_t ret = writer_->unregister_instance(entry, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: PublicationListener::unregister_instance failed to unregister_instance\n")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: PublicationListener::unregister failed to unregister_instance\n")));
   }
+}
+
+PublicationListener::Unregister::Unregister(PublicationListener& listener)
+  : listener_(listener)
+  , unregister_task_(TheServiceParticipant->interceptor(), *this, &PublicationListener::Unregister::execute)
+{}
+
+void PublicationListener::Unregister::enable()
+{
+  unregister_task_.enable(false, OpenDDS::DCPS::TimeDuration(1));
+}
+
+void PublicationListener::Unregister::disable()
+{
+  unregister_task_.disable_and_wait();
+}
+
+void PublicationListener::Unregister::execute(const OpenDDS::DCPS::MonotonicTimePoint&)
+{
+  listener_.unregister();
 }
 
 }

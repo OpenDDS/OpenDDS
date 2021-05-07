@@ -97,6 +97,7 @@ public:
                   const CRYPTO_TYPE& crypto,
                   const ACE_INET_Addr& application_participant_addr,
                   HandlerStatisticsReporter& stats_reporter);
+  void stop();
 
   void horizontal_handler(HorizontalHandler* horizontal_handler) { horizontal_handler_ = horizontal_handler; }
 
@@ -130,6 +131,8 @@ protected:
   void process_message(const ACE_INET_Addr& remote,
                        const OpenDDS::DCPS::MonotonicTimePoint& now,
                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) override;
+  bool ignore(const OpenDDS::DCPS::GUID_t& guid,
+              const OpenDDS::DCPS::MonotonicTimePoint& now);
   ParticipantStatisticsReporter& record_activity(const ACE_INET_Addr& remote_address,
                                                  const OpenDDS::DCPS::MonotonicTimePoint& now,
                                                  const OpenDDS::DCPS::RepoId& src_guid,
@@ -171,15 +174,18 @@ private:
   ACE_INET_Addr read_address(const OpenDDS::DCPS::RepoId& guid, const OpenDDS::DCPS::MonotonicTimePoint& now) const;
   void write_address(const OpenDDS::DCPS::RepoId& guid, const OpenDDS::DCPS::MonotonicTimePoint& now);
   void unregister_address(const OpenDDS::DCPS::RepoId& guid, const OpenDDS::DCPS::MonotonicTimePoint& now);
+  int handle_timeout(const ACE_Time_Value& now, const void* act) override;
 
   const ACE_INET_Addr horizontal_address_;
   const std::string horizontal_address_str_;
+  std::list<OpenDDS::DCPS::GUID_t> unregister_queue_;
 
   OpenDDS::RTPS::RtpsDiscovery_rch rtps_discovery_;
 #ifdef OPENDDS_SECURITY
   const DDS::Security::CryptoTransform_var crypto_;
   const DDS::Security::ParticipantCryptoHandle application_participant_crypto_handle_;
 #endif
+  std::list<OpenDDS::DCPS::MonotonicTimePoint> new_guids_;
 };
 
 // Sends to and receives from other relays.

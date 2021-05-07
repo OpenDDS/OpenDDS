@@ -12,10 +12,12 @@
 #ifndef MYTYPESUPPORTIMPL_H_
 #define MYTYPESUPPORTIMPL_H_
 
-#include "dds/DCPS/DataReaderImpl.h"
-#include "dds/DCPS/DataWriterImpl.h"
-#include "dds/DCPS/Definitions.h"
 #include "MyTypeSupportC.h"
+
+#include <dds/DCPS/DataReaderImpl.h>
+#include <dds/DCPS/DataWriterImpl.h>
+#include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/GuidUtils.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -31,30 +33,23 @@ class MyTypeSupportImpl : public virtual OpenDDS::DCPS::LocalObject<MyTypeSuppor
 {
 
 public:
-  MyTypeSupportImpl (void);
+  MyTypeSupportImpl();
 
-  virtual ~MyTypeSupportImpl (void);
+  virtual ~MyTypeSupportImpl();
 
-
-  virtual ::DDS::ReturnCode_t register_type (
-      ::DDS::DomainParticipant_ptr participant,
-      const char * type_name
-    );
+  virtual ::DDS::ReturnCode_t register_type(
+    ::DDS::DomainParticipant_ptr participant,
+    const char* type_name);
 
   virtual ::DDS::ReturnCode_t unregister_type(
-      ::DDS::DomainParticipant_ptr participant,
-      const char * type_name
-    );
+    ::DDS::DomainParticipant_ptr participant,
+    const char* type_name);
 
-  virtual
-  char * get_type_name (
-    );
+  virtual char* get_type_name();
 
-  virtual ::DDS::DataWriter_ptr create_datawriter (
-    );
+  virtual ::DDS::DataWriter_ptr create_datawriter();
 
-  virtual ::DDS::DataReader_ptr create_datareader (
-    );
+  virtual ::DDS::DataReader_ptr create_datareader();
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
   virtual ::DDS::DataReader_ptr create_multitopic_datareader();
@@ -72,8 +67,10 @@ public:
 class MyDataReaderImpl :  public virtual OpenDDS::DCPS::DataReaderImpl
 {
 public:
-  virtual ::DDS::ReturnCode_t enable_specific (
-      ) { return ::DDS::RETCODE_OK;};
+  virtual ::DDS::ReturnCode_t enable_specific ()
+  {
+    return ::DDS::RETCODE_OK;
+  }
 
   virtual ::DDS::ReturnCode_t auto_return_loan (void *)
   {
@@ -87,6 +84,7 @@ public:
 
   virtual void purge_data(OpenDDS::DCPS::SubscriptionInstance_rch) {}
   virtual void release_instance_i(DDS::InstanceHandle_t) {}
+  void release_all_instances() {}
   virtual OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::MessageHolder>
   dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample&,
                 OpenDDS::DCPS::SubscriptionInstance_rch &,
@@ -96,8 +94,6 @@ public:
   {
     return OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::MessageHolder>();
   }
-  virtual void dec_ref_data_element(OpenDDS::DCPS::ReceivedDataElement *) {}
-  virtual void delete_instance_map (void *) {}
   bool contains_sample_filtered(DDS::SampleStateMask, DDS::ViewStateMask,
     DDS::InstanceStateMask, const OpenDDS::DCPS::FilterEvaluator&,
     const DDS::StringSeq&) { return true; }
@@ -114,7 +110,7 @@ public:
   DDS::ReturnCode_t take(
     OpenDDS::DCPS::AbstractSamples&,
     DDS::SampleStateMask, DDS::ViewStateMask,
-    DDS::InstanceStateMask ) { return 0; }
+    DDS::InstanceStateMask) { return 0; }
 
   DDS::ReturnCode_t read_instance_generic(void*& data,
     DDS::SampleInfo& info, DDS::InstanceHandle_t instance,
@@ -125,9 +121,11 @@ public:
     DDS::SampleInfo&, DDS::InstanceHandle_t, DDS::SampleStateMask,
     DDS::ViewStateMask, DDS::InstanceStateMask);
 
-  void set_instance_state(DDS::InstanceHandle_t, DDS::InstanceStateKind)
-  {}
 #endif
+
+  void set_instance_state(DDS::InstanceHandle_t, DDS::InstanceStateKind,
+    const OpenDDS::DCPS::SystemTimePoint&, const OpenDDS::DCPS::GUID_t& = OpenDDS::DCPS::GUID_UNKNOWN)
+  {}
 };
 
 class MyDataWriterImpl :  public virtual OpenDDS::DCPS::DataWriterImpl

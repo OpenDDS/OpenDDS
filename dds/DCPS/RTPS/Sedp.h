@@ -110,7 +110,8 @@ public:
   void generate_remote_crypto_handles(const Security::SPDPdiscoveredParticipantData& pdata);
   void associate_secure_reader_to_writer(const DCPS::RepoId& remote_writer);
   void associate_secure_writer_to_reader(const DCPS::RepoId& remote_reader);
-  void disassociate_security_builtins(ParticipantData_t& pdata);
+  void disassociate_security_builtins(const DCPS::RepoId& part, BuiltinEndpointSet_t& associated_endpoints,
+                                      DDS::Security::ExtendedBuiltinEndpointSet_t& extended_associated_endpoints);
   void remove_remote_crypto_handle(const DCPS::RepoId& participant, const EntityId_t& entity);
 
   void send_builtin_crypto_tokens(const DCPS::RepoId& remoteId);

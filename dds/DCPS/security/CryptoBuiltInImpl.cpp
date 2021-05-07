@@ -473,13 +473,13 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_matched_remote_datareader(
                    ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datareader sessions_ (total %B)\n"),
                    sessions_.size()));
       }
-      return h;
-    }
-    derived_key_handles_[input_handles] = h;
-    if (DCPS::security_debug.bookkeeping) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
-                 ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datareader derived_key_handles_ (total %B)\n"),
-                 derived_key_handles_.size()));
+    } else {
+      derived_key_handles_[input_handles] = h;
+      if (DCPS::security_debug.bookkeeping) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                   ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datareader derived_key_handles_ (total %B)\n"),
+                   derived_key_handles_.size()));
+      }
     }
   }
 
@@ -627,13 +627,13 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_matched_remote_datawriter(
                    ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datawriter sessions_ (total %B)\n"),
                    sessions_.size()));
       }
-      return h;
-    }
-    derived_key_handles_[input_handles] = h;
-    if (DCPS::security_debug.bookkeeping) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
-                 ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datawriter derived_key_handles_ (total %B)\n"),
-                 derived_key_handles_.size()));
+    } else {
+      derived_key_handles_[input_handles] = h;
+      if (DCPS::security_debug.bookkeeping) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                   ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datawriter derived_key_handles_ (total %B)\n"),
+                   derived_key_handles_.size()));
+      }
     }
   }
 
@@ -2049,7 +2049,10 @@ bool CryptoBuiltInImpl::decode_submessage(
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   const KeyTable_t::const_iterator keys_iter = keys_.find(sender_handle);
-  OPENDDS_ASSERT(keys_iter != keys_.end());
+  if (keys_iter == keys_.end()) {
+    return CommonUtilities::set_security_error(ex, -2, 3, "Crypto Key not found");
+  }
+
   const KeySeq& keyseq = keys_iter->second;
   for (unsigned int i = 0; i < keyseq.length(); ++i) {
     if (matches(keyseq[i], ch)) {

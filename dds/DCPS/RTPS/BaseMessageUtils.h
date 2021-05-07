@@ -13,6 +13,7 @@
 #include "BaseMessageTypes.h"
 
 #include <dds/DCPS/Hash.h>
+#include <dds/DCPS/Util.h>
 #include <dds/DCPS/Message_Block_Ptr.h>
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/TypeSupportImpl.h>
@@ -220,6 +221,34 @@ inline RTPS::SequenceNumber_t to_rtps_seqnum(const DCPS::SequenceNumber& opendds
   rtps_seqnum.high = opendds_seqnum.getHigh();
   rtps_seqnum.low = opendds_seqnum.getLow();
   return rtps_seqnum;
+}
+
+inline void append_submessage(RTPS::Message& message, const RTPS::InfoDestinationSubmessage& submessage)
+{
+  RTPS::Submessage sm;
+  sm.info_dst_sm(submessage);
+  DCPS::push_back(message.submessages, sm);
+}
+
+inline void append_submessage(RTPS::Message& message, const RTPS::InfoTimestampSubmessage& submessage)
+{
+  RTPS::Submessage sm;
+  sm.info_ts_sm(submessage);
+  DCPS::push_back(message.submessages, sm);
+}
+
+inline void append_submessage(RTPS::Message& message, const RTPS::DataSubmessage& submessage)
+{
+  RTPS::Submessage sm;
+  sm.data_sm(submessage);
+  DCPS::push_back(message.submessages, sm);
+}
+
+inline void append_submessage(RTPS::Message& message, const RTPS::DataFragSubmessage& submessage)
+{
+  RTPS::Submessage sm;
+  sm.data_frag_sm(submessage);
+  DCPS::push_back(message.submessages, sm);
 }
 
 } // namespace RTPS

@@ -99,6 +99,7 @@ TopicImpl::get_qos(DDS::TopicQos& qos)
 DDS::ReturnCode_t
 TopicImpl::set_listener(DDS::TopicListener_ptr a_listener, DDS::StatusMask mask)
 {
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
   listener_ = DDS::TopicListener::_duplicate(a_listener);
@@ -108,6 +109,7 @@ TopicImpl::set_listener(DDS::TopicListener_ptr a_listener, DDS::StatusMask mask)
 DDS::TopicListener_ptr
 TopicImpl::get_listener()
 {
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   return DDS::TopicListener::_duplicate(listener_.in());
 }
 
@@ -174,7 +176,7 @@ TopicImpl::get_id() const
 DDS::InstanceHandle_t
 TopicImpl::get_instance_handle()
 {
-  return this->participant_->id_to_handle(this->id_);
+  return get_entity_instance_handle(id_, participant_);
 }
 
 const char*
@@ -204,11 +206,15 @@ TopicImpl::inconsistent_topic(int count)
 
   set_status_changed_flag(DDS::INCONSISTENT_TOPIC_STATUS, true);
 
-  DDS::TopicListener_var listener = listener_;
-  if (!listener || !(listener_mask_ & DDS::INCONSISTENT_TOPIC_STATUS)) {
-    listener = participant_->listener_for(DDS::INCONSISTENT_TOPIC_STATUS);
+  DDS::TopicListener_var listener;
+  {
+    ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
+    listener = listener_;
+    if (!listener || !(listener_mask_ & DDS::INCONSISTENT_TOPIC_STATUS)) {
+      g.release();
+      listener = participant_->listener_for(DDS::INCONSISTENT_TOPIC_STATUS);
+    }
   }
-
   if (listener) {
     listener->on_inconsistent_topic(this, inconsistent_topic_status_);
     inconsistent_topic_status_.total_count_change = 0;

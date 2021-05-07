@@ -49,10 +49,13 @@ public:
   OverrideToken override_destinations(
     const OPENDDS_SET(ACE_INET_Addr)& destinations);
 
-  void send_rtps_control(ACE_Message_Block& submessages,
+  void send_rtps_control(RTPS::Message& message,
+                         ACE_Message_Block& submessages,
                          const ACE_INET_Addr& destination);
-  void send_rtps_control(ACE_Message_Block& submessages,
+  void send_rtps_control(RTPS::Message& message,
+                         ACE_Message_Block& submessages,
                          const OPENDDS_SET(ACE_INET_Addr)& destinations);
+  void append_submessages(const RTPS::SubmessageSeq& submessages);
 
 #if defined(OPENDDS_SECURITY)
   void encode_payload(const RepoId& pub_id, Message_Block_Ptr& payload,
@@ -131,7 +134,8 @@ private:
   const ACE_INET_Addr* override_single_dest_;
 
   const size_t max_message_size_;
-  RTPS::Header rtps_header_;
+  RTPS::Message rtps_message_;
+  ACE_Thread_Mutex rtps_message_mutex_;
   char rtps_header_data_[RTPS::RTPSHDR_SZ];
   ACE_Data_Block rtps_header_db_;
   ACE_Message_Block rtps_header_mb_;

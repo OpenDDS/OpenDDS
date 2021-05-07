@@ -54,7 +54,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 #else
     if (reader == part_reader_) {
       DDS::ParticipantBuiltinTopicDataDataReader_var part_reader_impl =
-        DDS::ParticipantBuiltinTopicDataDataReader::_narrow(part_reader_);
+        DDS::ParticipantBuiltinTopicDataDataReader::_narrow(reader);
       if (!part_reader_impl) {
         std::cerr << "ERROR: Failed to get particpant builtin topic reader\n";
         return;
@@ -144,10 +144,12 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
           std::cout << "ERROR: Invalid message.text" << std::endl;
           valid_ = false;
         }
-        if (message.subject_id != 99) {
+        static CORBA::Long previous_subject_id = 100;
+        if (message.subject_id != previous_subject_id - 1) {
           std::cout << "ERROR: Invalid message.subject_id" << std::endl;
           valid_ = false;
         }
+        previous_subject_id = message.subject_id;
       } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
 

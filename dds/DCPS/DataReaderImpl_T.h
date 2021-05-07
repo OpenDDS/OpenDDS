@@ -913,14 +913,20 @@ namespace OpenDDS {
   }
 
   void set_instance_state(DDS::InstanceHandle_t instance,
-                          DDS::InstanceStateKind state)
+                          DDS::InstanceStateKind state,
+                          const SystemTimePoint& timestamp = SystemTimePoint::now(),
+                          const GUID_t& publication_id = GUID_UNKNOWN)
   {
     using namespace OpenDDS::DCPS;
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
 
     SubscriptionInstance_rch si = get_handle_instance(instance);
     if (si && state != DDS::ALIVE_INSTANCE_STATE) {
+      const DDS::Time_t now = timestamp.to_dds_time();
       DataSampleHeader header;
+      header.publication_id_ = publication_id;
+      header.source_timestamp_sec_ = now.sec;
+      header.source_timestamp_nanosec_ = now.nanosec;
       const int msg = (state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
         ? DISPOSE_INSTANCE : UNREGISTER_INSTANCE;
       header.message_id_ = static_cast<char>(msg);
@@ -1046,6 +1052,19 @@ namespace OpenDDS {
   bool get_marshal_skip_serialize() const
   {
     return marshal_skip_serialize_;
+  }
+
+  void release_all_instances()
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+
+    const typename InstanceMap::iterator end = instance_map_.end();
+    typename InstanceMap::iterator it = instance_map_.begin();
+    while (it != end) {
+      const DDS::InstanceHandle_t handle = it->second;
+      ++it; // it will be invalid, so iterate now.
+      release_instance(handle);
+    }
   }
 
 protected:
@@ -1720,16 +1739,17 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
 
     just_registered = true;
     DDS::BuiltinTopicKey_t key = OpenDDS::DCPS::keyFromSample(static_cast<MessageType*>(instance_data.get()));
-    handle = handle == DDS::HANDLE_NIL ? this->get_next_handle( key) : handle;
+    bool owns_handle = false;
+    if (handle == DDS::HANDLE_NIL) {
+      handle = get_next_handle(key);
+      owns_handle = true;
+    }
     OpenDDS::DCPS::SubscriptionInstance_rch instance =
       OpenDDS::DCPS::make_rch<OpenDDS::DCPS::SubscriptionInstance>(
         this,
         this->qos_,
         ref(this->instances_lock_),
-        handle);
-
-    instance->instance_handle_ = handle;
-
+        handle, owns_handle);
     {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
       int ret = OpenDDS::DCPS::bind(instances_, handle, instance);
@@ -2020,7 +2040,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
   if (! ptr->coherent_change_) {
 #endif
     RcHandle<OpenDDS::DCPS::SubscriberImpl> sub = get_subscriber_servant ();
-    if (!sub)
+    if (!sub || this->get_deleted())
       return;
 
     sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, true);

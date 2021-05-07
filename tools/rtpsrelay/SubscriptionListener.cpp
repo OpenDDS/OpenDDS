@@ -6,25 +6,38 @@
 
 namespace RtpsRelay {
 
-SubscriptionListener::SubscriptionListener(OpenDDS::DCPS::DomainParticipantImpl* participant,
+SubscriptionListener::SubscriptionListener(const Config& config,
+                                           OpenDDS::DCPS::DomainParticipantImpl* participant,
                                            ReaderEntryDataWriter_var writer,
                                            DomainStatisticsReporter& stats_reporter)
-  : participant_(participant)
+  : config_(config)
+  , participant_(participant)
   , writer_(writer)
   , stats_reporter_(stats_reporter)
+  , unregister_(OpenDDS::DCPS::make_rch<Unregister>(OpenDDS::DCPS::ref(*this)))
 {}
+
+void SubscriptionListener::enable()
+{
+  unregister_->enable();
+}
+
+void SubscriptionListener::disable()
+{
+  unregister_->disable();
+}
 
 void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
 {
   DDS::SubscriptionBuiltinTopicDataDataReader_var dr = DDS::SubscriptionBuiltinTopicDataDataReader::_narrow(reader);
   if (!dr) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SubscriptionListener::on_data_available failed to narrow PublicationBuiltinTopicDataDataReader\n")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SubscriptionListener::on_data_available failed to narrow SubscriptionBuiltinTopicDataDataReader\n")));
     return;
   }
 
   DDS::SubscriptionBuiltinTopicDataSeq data;
   DDS::SampleInfoSeq infos;
-  DDS::ReturnCode_t ret = dr->read(data,
+  DDS::ReturnCode_t ret = dr->take(data,
                                    infos,
                                    DDS::LENGTH_UNLIMITED,
                                    DDS::NOT_READ_SAMPLE_STATE,
@@ -87,7 +100,9 @@ void SubscriptionListener::write_sample(const DDS::SubscriptionBuiltinTopicData&
     subscriber_qos,
   };
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SubscriptionListener::write_sample add local reader %C %C\n"), guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str()));
+  if (config_.log_discovery()) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SubscriptionListener::write_sample add local reader %C %C\n"), guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str()));
+  }
   DDS::ReturnCode_t ret = writer_->write(entry, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SubscriptionListener::write_sample failed to write\n")));
@@ -97,17 +112,52 @@ void SubscriptionListener::write_sample(const DDS::SubscriptionBuiltinTopicData&
 void SubscriptionListener::unregister_instance(const DDS::SampleInfo& info)
 {
   const auto repoid = participant_->get_repoid(info.instance_handle);
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  unregister_queue_.push_back(repoid);
+}
+
+void SubscriptionListener::unregister()
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+
+  if (unregister_queue_.empty()) {
+    return;
+  }
+
+  const auto repoid = unregister_queue_.front();
   GUID_t guid;
   assign(guid, repoid);
 
   ReaderEntry entry;
   entry.guid(guid);
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SubscriptionListener::unregister_instance remove local reader %C\n"), guid_to_string(repoid).c_str()));
+  if (config_.log_discovery()) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SubscriptionListener::unregister_instance remove local reader %C\n"), guid_to_string(repoid).c_str()));
+  }
   DDS::ReturnCode_t ret = writer_->unregister_instance(entry, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SubscriptionListener::unregister_instance failed to unregister_instance\n")));
   }
+}
+
+SubscriptionListener::Unregister::Unregister(SubscriptionListener& listener)
+  : listener_(listener)
+  , unregister_task_(TheServiceParticipant->interceptor(), *this, &SubscriptionListener::Unregister::execute)
+{}
+
+void SubscriptionListener::Unregister::enable()
+{
+  unregister_task_.enable(false, OpenDDS::DCPS::TimeDuration(1));
+}
+
+void SubscriptionListener::Unregister::disable()
+{
+  unregister_task_.disable_and_wait();
+}
+
+void SubscriptionListener::Unregister::execute(const OpenDDS::DCPS::MonotonicTimePoint&)
+{
+  listener_.unregister();
 }
 
 }

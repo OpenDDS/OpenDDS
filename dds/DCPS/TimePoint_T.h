@@ -92,6 +92,11 @@ public:
    */
   DDS::Time_t to_dds_time() const;
 
+  /**
+   * Convert to OpenDDS::DCPS::MonotonicTime_t.
+   */
+  MonotonicTime_t to_monotonic_time() const;
+
   TimePoint_T<AceClock>& operator+=(const TimeDuration& td);
   TimePoint_T<AceClock>& operator-=(const TimeDuration& td);
 

@@ -2,10 +2,12 @@
 
 namespace RtpsRelay {
 
-ReaderListener::ReaderListener(AssociationTable& association_table,
+ReaderListener::ReaderListener(const Config& config,
+                               AssociationTable& association_table,
                                SpdpHandler& spdp_handler,
                                DomainStatisticsReporter& stats_reporter)
-  : association_table_(association_table)
+  : config_(config)
+  , association_table_(association_table)
   , spdp_handler_(spdp_handler)
   , stats_reporter_(stats_reporter)
 {}
@@ -20,7 +22,7 @@ void ReaderListener::on_data_available(DDS::DataReader_ptr reader)
 
   ReaderEntrySeq data;
   DDS::SampleInfoSeq infos;
-  DDS::ReturnCode_t ret = dr->read(data,
+  DDS::ReturnCode_t ret = dr->take(data,
                                    infos,
                                    DDS::LENGTH_UNLIMITED,
                                    DDS::NOT_READ_SAMPLE_STATE,
@@ -37,7 +39,9 @@ void ReaderListener::on_data_available(DDS::DataReader_ptr reader)
       {
         const auto from = guid_to_repoid(data[idx].guid());
         GuidSet to_before, to_after;
-        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: ReaderListener::on_data_available add global reader %C\n"), guid_to_string(from).c_str()));
+        if (config_.log_entries()) {
+          ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: ReaderListener::on_data_available add global reader %C\n"), guid_to_string(from).c_str()));
+        }
         association_table_.lookup_destinations(to_before, from);
         association_table_.insert(data[idx], to_after);
         for (const auto& to : to_before) {
@@ -49,7 +53,9 @@ void ReaderListener::on_data_available(DDS::DataReader_ptr reader)
       break;
     case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
     case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: ReaderListener::on_data_available remove global reader %C\n"), guid_to_string(guid_to_repoid(data[idx].guid())).c_str()));
+      if (config_.log_entries()) {
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: ReaderListener::on_data_available remove global reader %C\n"), guid_to_string(guid_to_repoid(data[idx].guid())).c_str()));
+      }
       association_table_.remove(data[idx]);
       stats_reporter_.total_readers(association_table_.reader_count(), OpenDDS::DCPS::MonotonicTimePoint::now());
       break;
