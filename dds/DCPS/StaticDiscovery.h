@@ -230,6 +230,8 @@ public:
     bit_subscriber_ = 0;
   }
 
+  void shutdown() {}
+
 private:
   virtual StaticEndpointManager& endpoint_manager() { return *endpoint_manager_; }
 

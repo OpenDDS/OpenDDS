@@ -74,7 +74,7 @@ void InstanceState::sample_info(DDS::SampleInfo& si, const ReceivedDataElement* 
   RcHandle<DataReaderImpl> reader = reader_.lock();
   if (reader) {
     RcHandle<DomainParticipantImpl> participant = reader->participant_servant_.lock();
-    si.publication_handle = participant ? participant->id_to_handle(de->pub_) : DDS::HANDLE_NIL;
+    si.publication_handle = participant ? participant->lookup_handle(de->pub_) : DDS::HANDLE_NIL;
   } else {
     si.publication_handle = DDS::HANDLE_NIL;
   }
@@ -175,24 +175,6 @@ bool InstanceState::unregister_was_received(const PublicationId& writer_id)
   }
 
   return false;
-}
-
-void InstanceState::writer_became_dead(const PublicationId& writer_id, int, const MonotonicTimePoint&)
-{
-  if (DCPS_debug_level > 1) {
-    GuidConverter conv(writer_id);
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) InstanceState::writer_became_dead on %C\n"),
-      OPENDDS_STRING(conv).c_str()
-    ));
-  }
-
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
-  writers_.erase(writer_id);
-
-  if (writers_.empty() && (instance_state_ & DDS::ALIVE_INSTANCE_STATE)) {
-    instance_state_ = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE;
-    schedule_release();
-  }
 }
 
 void InstanceState::schedule_pending()

@@ -1,5 +1,5 @@
 /*
- * The Node Controller takes directives from a Test Controller, spawns Workers,
+ * The Node Controller takes directives from a Test Controller, spawns Spawned Processes,
  * and report the results back.
  */
 #include <map>
@@ -16,6 +16,7 @@
 
 #include <ace/Process_Manager.h>
 #include <ace/OS_NS_stdlib.h>
+#include <ace/OS_NS_fcntl.h>
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsPublicationC.h>
@@ -40,6 +41,7 @@ using namespace Bench::NodeController;
 using Bench::get_option_argument_int;
 using Bench::get_option_argument;
 using Bench::join_path;
+using Bench::string_replace;
 using Bench::create_temp_dir;
 using Bench::TestController::AllocatedScenarioDataReader;
 using Bench::TestController::AllocatedScenarioDataReader_var;
@@ -68,27 +70,29 @@ std::string create_config(const std::string& file_base_name, const char* content
   return filename;
 }
 
-class Worker {
+class SpawnedProcess {
 public:
-  Worker() = delete;
-  Worker(const Worker&) = delete;
-  Worker(Worker&&) = delete;
-  Worker& operator=(const Worker&) = delete;
-  Worker& operator=(Worker&&) = delete;
+  SpawnedProcess() = delete;
+  SpawnedProcess(const SpawnedProcess&) = delete;
+  SpawnedProcess(SpawnedProcess&&) = delete;
+  SpawnedProcess& operator=(const SpawnedProcess&) = delete;
+  SpawnedProcess& operator=(SpawnedProcess&&) = delete;
 
-  Worker(const std::string& node_name, const NodeId& node_id, const WorkerConfig& config)
+  SpawnedProcess(const std::string& node_name, const NodeId& node_id, const SpawnedProcessConfig& config)
   : node_name_(node_name), node_id_(node_id)
-  , worker_id_(config.worker_id)
+  , spawned_process_id_(config.spawned_process_id)
   {
     std::stringstream ss;
-    ss << 'n' << node_id_ << 'w' << worker_id_;
+    ss << 'n' << node_id_ << 'w' << spawned_process_id_;
     file_base_name_ = ss.str();
     allocated_scenario_filename_ = create_config(file_base_name_, config.config.in());
     report_filename_ = join_path(output_dir, file_base_name_ + "_report.json");
     log_filename_ = join_path(output_dir, file_base_name_ + "_log.txt");
+    executable_name_ = config.executable.in();
+    spawned_process_command_ = config.command.in();
   }
 
-  ~Worker()
+  ~SpawnedProcess()
   {
     if (!allocated_scenario_filename_.empty()) {
       try {
@@ -100,9 +104,9 @@ public:
     }
   }
 
-  WorkerId id() noexcept
+  SpawnedProcessId id() noexcept
   {
-    return worker_id_;
+    return spawned_process_id_;
   }
 
   NodeId nodeid() noexcept
@@ -110,9 +114,9 @@ public:
     return node_id_;
   }
 
-  void create_worker_report(WorkerReport& report)
+  void create_spawned_process_report(SpawnedProcessReport& report)
   {
-    report.worker_id = worker_id_;
+    report.spawned_process_id = spawned_process_id_;
     report.failed = (pid_ == ACE_INVALID_PID || exit_status_ != 0);
     report.details = "";
     report.log = "";
@@ -135,10 +139,31 @@ public:
   {
     std::shared_ptr<ACE_Process_Options> proc_opts = std::make_shared<ACE_Process_Options>();
     std::stringstream ss;
-    ss << join_path(bench_root, "worker", "worker")
-      << " " << allocated_scenario_filename_
-      << " --report " << report_filename_
-      << " --log " << log_filename_ << std::flush;
+    if (spawned_process_command_.empty()) {
+      if (executable_name_.empty()) {
+        ss << join_path(bench_root, "worker", "worker")
+          << " " << allocated_scenario_filename_
+          << " --report " << report_filename_
+          << " --log " << log_filename_ << std::flush;
+      } else {
+        ss << join_path(bench_root, executable_name_) << std::flush;
+      }
+    } else {
+      std::string command(spawned_process_command_);
+      string_replace(command, "%ds%", ACE_DIRECTORY_SEPARATOR_STR_A);
+      string_replace(command, "%bench_root%", bench_root);
+      string_replace(command, "%executable_full_path%", join_path(bench_root, executable_name_));
+      string_replace(command, "%executable%", executable_name_);
+      string_replace(command, "%config%", allocated_scenario_filename_);
+      string_replace(command, "%report%", report_filename_);
+      if (command.find("%log%") != std::string::npos) {
+        string_replace(command, "%log%", log_filename_);
+      } else {
+        ACE_HANDLE log_handle = ACE_OS::open(log_filename_.c_str(), O_WRONLY | O_CREAT);
+        proc_opts->set_handles(ACE_INVALID_HANDLE, log_handle, log_handle);
+      }
+      ss << command << std::flush;
+    }
     const std::string command = ss.str();
     std::cerr << command + "\n" << std::flush;
     proc_opts->command_line("%s", command.c_str());
@@ -178,7 +203,7 @@ public:
 private:
   std::string node_name_;
   NodeId node_id_;
-  WorkerId worker_id_;
+  SpawnedProcessId spawned_process_id_;
   bool running_ = false;
   pid_t pid_ = ACE_INVALID_PID;
   int exit_status_ = 0;
@@ -186,15 +211,17 @@ private:
   std::string allocated_scenario_filename_;
   std::string report_filename_;
   std::string log_filename_;
+  std::string executable_name_;
+  std::string spawned_process_command_;
 };
 
-using WorkerPtr = std::shared_ptr<Worker>;
+using SpawnedProcessPtr = std::shared_ptr<SpawnedProcess>;
 using ProcessStatsCollectorPtr = std::shared_ptr<ProcessStatsCollector>;
 
-class WorkerManager : public ACE_Event_Handler {
+class SpawnedProcessManager : public ACE_Event_Handler {
 public:
 
-  explicit WorkerManager(const std::string& node_name, const NodeId& node_id, ACE_Process_Manager& process_manager)
+  explicit SpawnedProcessManager(const std::string& node_name, const NodeId& node_id, ACE_Process_Manager& process_manager)
   : node_name_(node_name), node_id_(node_id)
   , process_manager_(process_manager)
   {
@@ -202,13 +229,13 @@ public:
     ACE_Reactor::instance()->register_handler(SIGINT, this);
   }
 
-  WorkerManager() = delete;
-  WorkerManager(const WorkerManager&) = delete;
-  WorkerManager(WorkerManager&&) = delete;
-  WorkerManager& operator=(const WorkerManager&) = delete;
-  WorkerManager& operator=(WorkerManager&&) = delete;
+  SpawnedProcessManager() = delete;
+  SpawnedProcessManager(const SpawnedProcessManager&) = delete;
+  SpawnedProcessManager(SpawnedProcessManager&&) = delete;
+  SpawnedProcessManager& operator=(const SpawnedProcessManager&) = delete;
+  SpawnedProcessManager& operator=(SpawnedProcessManager&&) = delete;
 
-  ~WorkerManager()
+  ~SpawnedProcessManager()
   {
     try {
       ACE_Reactor::instance()->remove_handler(SIGINT, nullptr);
@@ -223,70 +250,70 @@ public:
     timeout_ = value;
   }
 
-  bool add_worker(const WorkerConfig& config)
+  bool add_spawned_process(const SpawnedProcessConfig& config)
   {
     std::lock_guard<std::mutex> guard(mutex_);
-    if (all_workers_.count(config.worker_id)) {
-      std::cerr << "Received the same worker id twice: " << config.worker_id << std::endl;
+    if (all_spawned_processes_.count(config.spawned_process_id)) {
+      std::cerr << "Received the same spawned process id twice: " << config.spawned_process_id << std::endl;
       return true;
     }
-    all_workers_[config.worker_id] = std::make_shared<Worker>(node_name_, node_id_, config);
-    remaining_worker_count_++;
+    all_spawned_processes_[config.spawned_process_id] = std::make_shared<SpawnedProcess>(node_name_, node_id_, config);
+    remaining_spawned_process_count_++;
     return false;
   }
 
   // Must hold lock_
-  void worker_is_finished(WorkerPtr worker)
+  void spawned_process_is_finished(SpawnedProcessPtr spawned_process)
   {
-    remaining_worker_count_--;
-    finished_workers_.push_back(worker);
+    remaining_spawned_process_count_--;
+    finished_spawned_processes_.push_back(spawned_process);
     cv_.notify_all();
   }
 
   // Must hold lock_
-  void kill_all_the_workers()
+  void kill_all_the_spawned_processes()
   {
-    for (auto worker_i : all_workers_) {
-      auto& worker = worker_i.second;
-      if (worker->running()) {
+    for (auto spawned_process_i : all_spawned_processes_) {
+      auto& spawned_process = spawned_process_i.second;
+      if (spawned_process->running()) {
 #ifndef ACE_WIN32
-        if (process_manager_.terminate(worker->get_pid(), SIGABRT)) {
-          if (process_manager_.wait(worker->get_pid(), ACE_Time_Value(0, ACE_ONE_SECOND_IN_USECS / 10))) {
+        if (process_manager_.terminate(spawned_process->get_pid(), SIGABRT)) {
+          if (process_manager_.wait(spawned_process->get_pid(), ACE_Time_Value(0, ACE_ONE_SECOND_IN_USECS / 10))) {
             continue;
           }
         }
 #endif
-        if (process_manager_.terminate(worker->get_pid())) {
-          process_manager_.wait(worker->get_pid(), ACE_Time_Value(0, ACE_ONE_SECOND_IN_USECS / 10));
+        if (process_manager_.terminate(spawned_process->get_pid())) {
+          process_manager_.wait(spawned_process->get_pid(), ACE_Time_Value(0, ACE_ONE_SECOND_IN_USECS / 10));
         }
       }
     }
   }
 
-  bool run_workers(ReportDataWriter_var report_writer_impl)
+  bool run_spawned_processes(ReportDataWriter_var report_writer_impl)
   {
     ACE_Reactor::instance()->schedule_timer(this, nullptr, ACE_Time_Value(timeout_));
-    // Spawn Workers
+    // Spawn Processes
     {
       std::lock_guard<std::mutex> guard(mutex_);
-      for (auto worker_i : all_workers_) {
-        auto& worker = worker_i.second;
-        std::shared_ptr<ACE_Process_Options> proc_opts = worker->get_proc_opts();
+      for (auto spawned_process_i : all_spawned_processes_) {
+        auto& spawned_process = spawned_process_i.second;
+        std::shared_ptr<ACE_Process_Options> proc_opts = spawned_process->get_proc_opts();
         pid_t pid = process_manager_.spawn(*proc_opts);
         if (pid != ACE_INVALID_PID) {
-          worker->set_pid(pid);
-          pid_to_worker_id_[pid] = worker->id();
-          worker_process_stat_collectors_[pid] = std::make_shared<ProcessStatsCollector>(pid);
+          spawned_process->set_pid(pid);
+          pid_to_spawned_process_id_[pid] = spawned_process->id();
+          spawned_process_process_stat_collectors_[pid] = std::make_shared<ProcessStatsCollector>(pid);
         } else {
-          std::cerr << "Failed to run worker " << worker->id() << std::endl;
-          worker_is_finished(worker);
+          std::cerr << "Failed to run spawned process " << spawned_process->id() << std::endl;
+          spawned_process_is_finished(spawned_process);
         }
       }
     }
 
     // Wait For Them to Finish, Writing Reports As They Do
     Report report{};
-    report.worker_reports.length(static_cast<CORBA::ULong>(all_workers_.size()));
+    report.spawned_process_reports.length(static_cast<CORBA::ULong>(all_spawned_processes_.size()));
     constexpr size_t max_stat_buffer_size = 3600; // one hour in seconds
     auto cpu_block = std::make_shared<Bench::PropertyStatBlock>(report.properties, "cpu_percent", max_stat_buffer_size, true);
     auto mem_block = std::make_shared<Bench::PropertyStatBlock>(report.properties, "mem_percent", max_stat_buffer_size, true);
@@ -306,7 +333,7 @@ public:
         double mem_sum = 0.0;
         double virtual_mem_sum = 0.0;
 
-        for (auto it = worker_process_stat_collectors_.begin(); it != worker_process_stat_collectors_.end(); it++) {
+        for (auto it = spawned_process_process_stat_collectors_.begin(); it != spawned_process_process_stat_collectors_.end(); it++) {
           cpu_sum += it->second->get_cpu_usage();
           mem_sum += it->second->get_mem_usage();
           virtual_mem_sum += it->second->get_virtual_mem_usage();
@@ -318,37 +345,38 @@ public:
       }
     });
 
+    bool spawned_processes_killed = false;
     while (running) {
-      // Check to see if any workers are done and write their reports
-      std::list<WorkerPtr> finished_workers;
+      // Check to see if any spawned_processs are done and write their reports
+      std::list<SpawnedProcessPtr> finished_spawned_processes;
       {
         std::lock_guard<std::mutex> guard(mutex_);
-        finished_workers.swap(finished_workers_);
-        running = remaining_worker_count_ != 0;
+        finished_spawned_processes.swap(finished_spawned_processes_);
+        running = remaining_spawned_process_count_ != 0;
       }
-      for (auto& i : finished_workers) {
-        WorkerReport& worker_report = report.worker_reports[pos++];
-        i->create_worker_report(worker_report);
+      for (auto& i : finished_spawned_processes) {
+        SpawnedProcessReport& spawned_process_report = report.spawned_process_reports[pos++];
+        i->create_spawned_process_report(spawned_process_report);
       }
 
       // Check to see if we have to stop prematurely
-      bool kill_workers = false;
-      if (scenario_timedout_.load()) {
+      bool kill_spawned_processes = false;
+      if (!spawned_processes_killed && scenario_timedout_.load()) {
         std::stringstream ss;
-        ss << "Scenario Timedout, Killing Workers..." << std::endl;
+        ss << "Scenario timed out at " << Bench::iso8601() << ", Killing Spawned Processes..." << std::endl;
         std::cerr << ss.str() << std::flush;
-        kill_workers = true;
+        kill_spawned_processes = true;
       }
-      if (sigint_.load()) {
+      if (!spawned_processes_killed && sigint_.load()) {
         std::stringstream ss;
-        ss << "Interrupted, Killing Workers..." << std::endl;
+        ss << "Interrupted, Killing Spawned Processes..." << std::endl;
         std::cerr << ss.str() << std::flush;
-        kill_workers = true;
+        kill_spawned_processes = true;
       }
-      if (kill_workers) {
+      if (!spawned_processes_killed && kill_spawned_processes) {
         std::lock_guard<std::mutex> guard(mutex_);
-        kill_all_the_workers(); // Bwahahaha
-        running = false;
+        kill_all_the_spawned_processes(); // Bwahahaha
+        spawned_processes_killed = true;
       }
 
       if (running) {
@@ -368,9 +396,9 @@ public:
     }
 
     if (node_name_.length() > 0) {
-      std::cout << "Writing report for node '" << node_name_ << "', id: " << node_id_ << std::endl;
+      std::cout << "Writing report for node name '" << node_name_ << "' (id '" << node_id_ << "') with " << report.spawned_process_reports.length() << " spawned process reports" << std::endl;
     } else {
-      std::cout << "Writing report for node " << node_id_ << std::endl;
+      std::cout << "Writing report for node id '" << node_id_ << "' with " << report.spawned_process_reports.length() << " spawned process reports" << std::endl;
     }
     if (report_writer_impl->write(report, DDS::HANDLE_NIL)) {
       std::cerr << "Write report failed" << std::endl;
@@ -385,7 +413,7 @@ public:
     return true;
   }
 
-  /// Used to the Handle Exit of a Worker
+  /// Used to the Handle Exit of a SpawnedProcess
   int handle_exit(ACE_Process* process) override
   {
     assert(process != nullptr);
@@ -394,15 +422,16 @@ public:
 
     std::lock_guard<std::mutex> guard(mutex_);
 
-    const auto i = pid_to_worker_id_.find(pid);
-    if (i != pid_to_worker_id_.end()) {
-      auto& worker = all_workers_[i->second];
-      worker->set_exit_status(process->return_value(), process->exit_code());
-      remaining_worker_count_--;
-      finished_workers_.push_back(worker);
+    const auto i = pid_to_spawned_process_id_.find(pid);
+    if (i != pid_to_spawned_process_id_.end()) {
+      auto& spawned_process = all_spawned_processes_[i->second];
+      std::cout << "SpawnedProcessManager::handle_exit() - Handling exit of process " << pid << " at " << Bench::iso8601() << " with exit code " << process->exit_code() << std::endl;
+      spawned_process->set_exit_status(process->return_value(), process->exit_code());
+      remaining_spawned_process_count_--;
+      finished_spawned_processes_.push_back(spawned_process);
       cv_.notify_all();
     } else {
-      std::cerr << "WorkerManager::handle_exit() received an unknown PID: " << pid << std::endl;
+      std::cerr << "SpawnedProcessManager::handle_exit() received an unknown PID: " << pid << std::endl;
     }
 
     return 0;
@@ -430,11 +459,11 @@ private:
   unsigned timeout_ = 0;
   std::mutex mutex_;
   std::condition_variable cv_;
-  std::map<WorkerId, WorkerPtr> all_workers_;
-  size_t remaining_worker_count_ = 0;
-  std::map<pid_t, WorkerId> pid_to_worker_id_;
-  std::map<pid_t, ProcessStatsCollectorPtr> worker_process_stat_collectors_;
-  std::list<WorkerPtr> finished_workers_;
+  std::map<SpawnedProcessId, SpawnedProcessPtr> all_spawned_processes_;
+  size_t remaining_spawned_process_count_ = 0;
+  std::map<pid_t, SpawnedProcessId> pid_to_spawned_process_id_;
+  std::map<pid_t, ProcessStatsCollectorPtr> spawned_process_process_stat_collectors_;
+  std::list<SpawnedProcessPtr> finished_spawned_processes_;
   std::string node_name_;
   NodeId node_id_;
   ACE_Process_Manager& process_manager_;
@@ -787,18 +816,18 @@ int run_cycle(
   wait_for_full_scenario(name, this_node_id, status_writer_impl, allocated_scenario_reader_impl, scenario);
 
   // This constructor traps signals, wait until we really need it.
-  auto worker_manager = std::make_shared<WorkerManager>(name, this_node_id, process_manager);
+  auto spawned_process_manager = std::make_shared<SpawnedProcessManager>(name, this_node_id, process_manager);
 
   Bench::NodeController::Configs& configs = scenario.configs;
   for (CORBA::ULong node = 0; node < configs.length(); ++node) {
     if (configs[node].node_id == this_node_id) {
-      worker_manager->timeout(configs[node].timeout);
-      const CORBA::ULong allocated_scenario_count = configs[node].workers.length();
+      spawned_process_manager->timeout(configs[node].timeout);
+      const CORBA::ULong allocated_scenario_count = configs[node].spawned_processes.length();
       for (CORBA::ULong config = 0; config < allocated_scenario_count; config++) {
-        WorkerId& id = configs[node].workers[config].worker_id;
-        const WorkerId end = id + configs[node].workers[config].count;
+        SpawnedProcessId& id = configs[node].spawned_processes[config].spawned_process_id;
+        const SpawnedProcessId end = id + configs[node].spawned_processes[config].count;
         for (; id < end; id++) {
-          if (worker_manager->add_worker(configs[node].workers[config])) {
+          if (spawned_process_manager->add_spawned_process(configs[node].spawned_processes[config])) {
             return 1;
           }
         }
@@ -822,12 +851,12 @@ int run_cycle(
     }
   }
 
-  // Run Workers and Wait for Them to Finish
-  if (!worker_manager->run_workers(report_writer_impl)) {
-    std::cerr << "Running workers failed (likely because we received a SIGINT)" << std::endl;
+  // Run Spawned Processess and Wait for Them to Finish
+  if (!spawned_process_manager->run_spawned_processes(report_writer_impl)) {
+    std::cerr << "Running spawned processes failed (likely because we received a SIGINT)" << std::endl;
     return 1;
   }
-  worker_manager.reset();
+  spawned_process_manager.reset();
 
   const DDS::Duration_t timeout = { 10, 0 };
   if (report_writer_impl->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK) {

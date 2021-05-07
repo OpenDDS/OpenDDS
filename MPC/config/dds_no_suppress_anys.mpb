@@ -1,0 +1,4 @@
+project: dcps_ts_defaults {
+  dcps_ts_flags -= -Sa -St
+  idlflags -= -Sa -St
+}

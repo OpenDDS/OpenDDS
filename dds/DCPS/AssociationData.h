@@ -21,12 +21,14 @@ namespace DCPS {
 struct AssociationData {
   RepoId               remote_id_;
   TransportLocatorSeq  remote_data_;
+  MonotonicTime_t      participant_discovered_at_;
   ACE_CDR::ULong       remote_transport_context_;
   Priority             publication_transport_priority_;
   bool                 remote_reliable_, remote_durable_;
 
   AssociationData()
     : remote_id_(GUID_UNKNOWN)
+    , participant_discovered_at_(monotonic_time_zero())
     , remote_transport_context_(0)
     , publication_transport_priority_(0)
     , remote_reliable_(false)

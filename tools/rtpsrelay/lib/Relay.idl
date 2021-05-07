@@ -70,6 +70,13 @@ module RtpsRelay {
     string address;
   };
 
+  const string RELAY_INSTANCES_TOPIC_NAME = "Relay Instances";
+  @topic
+  struct RelayInstance {
+    @key GUID_t application_participant_guid;
+    DDS::UserDataQosPolicy application_participant_user_data;
+  };
+
   typedef sequence<GUID_t> GuidSequence;
 
   struct RelayHeader {
@@ -105,6 +112,8 @@ module RtpsRelay {
     Duration_t interval;
     unsigned long messages_in;
     unsigned long long bytes_in;
+    unsigned long messages_ignored;
+    unsigned long long bytes_ignored;
     Duration_t input_processing_time;
     unsigned long messages_out;
     unsigned long long bytes_out;
@@ -131,6 +140,8 @@ module RtpsRelay {
     Duration_t interval;
     unsigned long messages_in;
     unsigned long long bytes_in;
+    unsigned long messages_ignored;
+    unsigned long long bytes_ignored;
     Duration_t input_processing_time;
     unsigned long messages_out;
     unsigned long long bytes_out;
@@ -157,6 +168,7 @@ module RtpsRelay {
     unsigned long local_participants;
     unsigned long local_writers;
     unsigned long local_readers;
+    unsigned long total_participants;
     unsigned long total_writers;
     unsigned long total_readers;
   };

@@ -176,6 +176,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         ACE_OS::sleep (1);
       }
 
+      // Let reader acknowledge the data.
+      ACE_OS::sleep (3);
+
       // ----------------------------------------------
       // Now switch first reader/subscriber from A to B
       // and it should be connected with DataWriter.

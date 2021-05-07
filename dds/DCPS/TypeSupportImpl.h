@@ -23,10 +23,9 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-
 namespace OpenDDS {
 namespace XTypes {
-  class TypeLookupService;
+class TypeLookupService;
 }
 
 namespace DCPS {
@@ -110,8 +109,20 @@ private:
   OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(TypeSupportImpl)
 };
 
+template<typename Type>
+void set_default(Type&)
+{
+  OPENDDS_ASSERT(false);
 }
+
+template<typename Type, typename Tag>
+void set_default(IDL::DistinctType<Type, Tag>)
+{
+  OPENDDS_ASSERT(false);
 }
+
+} // namespace DCPS
+} // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 

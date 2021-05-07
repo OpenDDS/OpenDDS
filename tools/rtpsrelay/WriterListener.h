@@ -10,13 +10,15 @@ namespace RtpsRelay {
 
 class WriterListener : public ListenerBase {
 public:
-  WriterListener(AssociationTable& association_table,
+  WriterListener(const Config& config,
+                 AssociationTable& association_table,
                  SpdpHandler& spdp_handler,
                  DomainStatisticsReporter& stats_reporter);
 
 private:
   void on_data_available(DDS::DataReader_ptr /*reader*/) override;
 
+  const Config& config_;
   AssociationTable& association_table_;
   SpdpHandler& spdp_handler_;
   DomainStatisticsReporter& stats_reporter_;

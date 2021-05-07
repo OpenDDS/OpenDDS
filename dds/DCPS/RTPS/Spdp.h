@@ -98,6 +98,18 @@ public:
   // Managing reader/writer associations
   void signal_liveliness(DDS::LivelinessQosPolicyKind kind);
 
+  // Is Spdp fully initialized?
+  bool initialized()
+  {
+#ifdef ACE_HAS_CPP11
+    return initialized_flag_;
+#else
+    return initialized_flag_.value();
+#endif
+  }
+
+  void shutdown();
+
   // Is Spdp shutting down?
   bool shutting_down()
   {
@@ -130,7 +142,7 @@ public:
                                const ACE_INET_Addr& from,
                                bool from_sedp);
 
-  static bool validateSequenceNumber(const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter);
+  bool validateSequenceNumber(const DCPS::MonotonicTimePoint& now, const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter);
 
 #ifdef OPENDDS_SECURITY
   void process_handshake_deadlines(const DCPS::MonotonicTimePoint& tv);
@@ -162,10 +174,12 @@ public:
                                const ParticipantData_t& pdata,
                                const DCPS::RepoId& guid);
 
+#endif
+
   const ParticipantData_t& get_participant_data(const DCPS::RepoId& guid) const;
   ParticipantData_t& get_participant_data(const DCPS::RepoId& guid);
-
-#endif
+  DCPS::MonotonicTime_t get_participant_discovered_at() const;
+  DCPS::MonotonicTime_t get_participant_discovered_at(const DCPS::RepoId& guid) const;
 
   u_short get_spdp_port() const { return tport_ ? tport_->uni_port_ : 0; }
 
@@ -200,14 +214,17 @@ public:
 #endif
   );
 
+  DCPS::RcHandle<RtpsDiscoveryConfig> config() const { return config_; }
+  void send_to_relay();
+
 protected:
   Sedp& endpoint_manager() { return *sedp_; }
-  void remove_discovered_participant_i(DiscoveredParticipantIter iter);
+  void remove_discovered_participant_i(DiscoveredParticipantIter& iter);
 
 #ifndef DDS_HAS_MINIMUM_BIT
   void enqueue_location_update_i(DiscoveredParticipantIter iter, DCPS::ParticipantLocation mask, const ACE_INET_Addr& from);
-  void process_location_updates_i(DiscoveredParticipantIter iter, bool force_publish = false);
-  void publish_location_update_i(DiscoveredParticipantIter iter);
+  void process_location_updates_i(DiscoveredParticipantIter& iter, bool force_publish = false);
+  void publish_location_update_i(DiscoveredParticipantIter& iter);
 #endif
 
   bool announce_domain_participant_qos();
@@ -225,6 +242,7 @@ private:
   // Participant:
   const DDS::DomainId_t domain_;
   DCPS::RepoId guid_;
+  const DCPS::MonotonicTime_t participant_discovered_at_;
 
   void data_received(const DataSubmessage& data, const ParameterList& plist, const ACE_INET_Addr& from);
 
@@ -260,23 +278,51 @@ private:
 #endif
   {
     typedef size_t WriteFlags;
-    static const WriteFlags SEND_TO_LOCAL = (1 << 0);
-    static const WriteFlags SEND_TO_RELAY = (1 << 1);
+    static const WriteFlags SEND_MULTICAST = (1 << 0);
+    static const WriteFlags SEND_RELAY = (1 << 1);
+    static const WriteFlags SEND_DIRECT = (1 << 2);
 
-    explicit SpdpTransport(Spdp* outer);
+    class RegisterHandlers : public DCPS::ReactorInterceptor::Command {
+    public:
+      RegisterHandlers(const DCPS::RcHandle<SpdpTransport>& tport,
+        const DCPS::ReactorTask_rch& reactor_task)
+        : tport_(tport)
+        , reactor_task_(reactor_task)
+      {
+      }
+
+      void execute()
+      {
+        DCPS::RcHandle<SpdpTransport> tport = tport_.lock();
+        if (!tport) {
+          return;
+        }
+        tport->register_handlers(reactor_task_);
+      }
+
+    private:
+      DCPS::WeakRcHandle<SpdpTransport> tport_;
+      DCPS::ReactorTask_rch reactor_task_;
+    };
+
+    explicit SpdpTransport(DCPS::RcHandle<Spdp> outer);
     ~SpdpTransport();
 
     const ACE_SOCK_Dgram& choose_recv_socket(ACE_HANDLE h) const;
 
     virtual int handle_input(ACE_HANDLE h);
 
-    void open(const DCPS::ReactorTask_rch&);
+    void open(const DCPS::ReactorTask_rch& reactor_task);
+    void register_unicast_socket(
+      ACE_Reactor* reactor, ACE_SOCK_Dgram& socket, const char* what);
+    void register_handlers(const DCPS::ReactorTask_rch& reactor_task);
+    void enable_periodic_tasks();
 
     void shorten_local_sender_delay_i();
     void write(WriteFlags flags);
     void write_i(WriteFlags flags);
-    void write_i(const DCPS::RepoId& guid, WriteFlags flags);
-    void send(WriteFlags flags);
+    void write_i(const DCPS::RepoId& guid, const ACE_INET_Addr& local_address, WriteFlags flags);
+    void send(WriteFlags flags, const ACE_INET_Addr& local_address = ACE_INET_Addr());
     const ACE_SOCK_Dgram& choose_send_socket(const ACE_INET_Addr& addr) const;
     void send(const ACE_INET_Addr& addr);
     void close(const DCPS::ReactorTask_rch& reactor_task);
@@ -306,7 +352,7 @@ private:
   #endif
 #endif
 
-    Spdp* outer_;
+    DCPS::WeakRcHandle<Spdp> outer_;
     Header hdr_;
     DataSubmessage data_;
     DCPS::SequenceNumber seq_;
@@ -338,7 +384,8 @@ private:
     OPENDDS_LIST(DCPS::RepoId) directed_guids_;
     void process_lease_expirations(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpSporadic> lease_expiration_processor_;
-    DCPS::ThreadStatus* thread_status_;
+    DCPS::ThreadStatusManager* global_thread_status_manager_;
+    DCPS::ThreadStatusManager local_thread_status_manager_;
     void thread_status_task(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpPeriodic> thread_status_sender_;
 #ifdef OPENDDS_SECURITY
@@ -352,15 +399,18 @@ private:
     DCPS::RcHandle<SpdpPeriodic> relay_stun_task_;
     ICE::ServerReflexiveStateMachine relay_srsm_;
     void process_relay_sra(ICE::ServerReflexiveStateMachine::StateChange);
+    void disable_relay_stun_task();
 #endif
     bool network_is_unreachable_;
     bool ice_endpoint_added_;
-  } *tport_;
+  };
+
+  DCPS::RcHandle<SpdpTransport> tport_;
 
   struct ChangeMulticastGroup : public DCPS::JobQueue::Job {
     enum CmgAction {CMG_JOIN, CMG_LEAVE};
 
-    ChangeMulticastGroup(DCPS::RcHandle<SpdpTransport> tport,
+    ChangeMulticastGroup(const DCPS::RcHandle<SpdpTransport>& tport,
                          const DCPS::NetworkInterface& nic, CmgAction action,
                          bool all_interfaces = false)
       : tport_(tport)
@@ -371,14 +421,19 @@ private:
 
     void execute()
     {
+      DCPS::RcHandle<SpdpTransport> tport = tport_.lock();
+      if (!tport) {
+        return;
+      }
+
       if (action_ == CMG_JOIN) {
-        tport_->join_multicast_group(nic_, all_interfaces_);
+        tport->join_multicast_group(nic_, all_interfaces_);
       } else {
-        tport_->leave_multicast_group(nic_);
+        tport->leave_multicast_group(nic_);
       }
     }
 
-    DCPS::RcHandle<SpdpTransport> tport_;
+    DCPS::WeakRcHandle<SpdpTransport> tport_;
     DCPS::NetworkInterface nic_;
     CmgAction action_;
     bool all_interfaces_;
@@ -387,7 +442,7 @@ private:
 #ifdef OPENDDS_SECURITY
   class SendStun : public DCPS::JobQueue::Job {
   public:
-    SendStun(DCPS::RcHandle<SpdpTransport> tport,
+    SendStun(const DCPS::RcHandle<SpdpTransport>& tport,
              const ACE_INET_Addr& address,
              const STUN::Message& message)
       : tport_(tport)
@@ -396,7 +451,7 @@ private:
     {}
     void execute();
   private:
-    DCPS::RcHandle<SpdpTransport> tport_;
+    DCPS::WeakRcHandle<SpdpTransport> tport_;
     ACE_INET_Addr address_;
     STUN::Message message_;
   };
@@ -423,7 +478,12 @@ private:
 #endif /* DDS_HAS_MINIMUM_BIT */
 #endif
 
-  ACE_Event_Handler_var eh_; // manages our refcount on tport_
+#ifdef ACE_HAS_CPP11
+  std::atomic<bool> initialized_flag_; // Spdp initialized
+#else
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> initialized_flag_; // Spdp initialized
+#endif
+
   bool eh_shutdown_;
   DCPS::ConditionVariable<ACE_Thread_Mutex> shutdown_cond_;
 #ifdef ACE_HAS_CPP11
@@ -435,7 +495,7 @@ private:
   void get_discovered_participant_ids(DCPS::RepoIdSet& results) const;
 
   BuiltinEndpointSet_t available_builtin_endpoints_;
-  DCPS::RcHandle<Sedp>  sedp_;
+  DCPS::RcHandle<Sedp> sedp_;
 
   typedef OPENDDS_MULTIMAP(DCPS::MonotonicTimePoint, DCPS::RepoId) TimeQueue;
 

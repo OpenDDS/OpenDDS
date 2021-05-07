@@ -21,72 +21,115 @@ public:
 
   ParticipantStatisticsReporter(const GUID_t& guid,
                                 const std::string& name)
-    : last_report_(OpenDDS::DCPS::MonotonicTimePoint::now())
+    : log_last_report_(OpenDDS::DCPS::MonotonicTimePoint::now())
+    , publish_last_report_(OpenDDS::DCPS::MonotonicTimePoint::now())
   {
-    participant_statistics_.guid(guid);
-    participant_statistics_.name(name);
+    log_participant_statistics_.guid(guid);
+    log_participant_statistics_.name(name);
+    publish_participant_statistics_.guid(guid);
+    publish_participant_statistics_.name(name);
   }
 
   void message_from(size_t byte_count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    participant_statistics_.bytes_from() += byte_count;
-    ++participant_statistics_.messages_from();
+    log_participant_statistics_.bytes_from() += byte_count;
+    ++log_participant_statistics_.messages_from();
+    publish_participant_statistics_.bytes_from() += byte_count;
+    ++publish_participant_statistics_.messages_from();
     report(now);
   }
 
   void message_to(size_t byte_count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    participant_statistics_.bytes_to() += byte_count;
-    ++participant_statistics_.messages_to();
+    log_participant_statistics_.bytes_to() += byte_count;
+    ++log_participant_statistics_.messages_to();
+    publish_participant_statistics_.bytes_to() += byte_count;
+    ++publish_participant_statistics_.messages_to();
     report(now);
   }
 
   void max_directed_gain(size_t value, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    participant_statistics_.max_directed_gain() = std::max(participant_statistics_.max_directed_gain(), static_cast<uint32_t>(value));
+    log_participant_statistics_.max_directed_gain() = std::max(log_participant_statistics_.max_directed_gain(), static_cast<uint32_t>(value));
+    publish_participant_statistics_.max_directed_gain() = std::max(publish_participant_statistics_.max_directed_gain(), static_cast<uint32_t>(value));
     report(now);
   }
 
   void max_undirected_gain(size_t value, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    participant_statistics_.max_undirected_gain() = std::max(participant_statistics_.max_undirected_gain(), static_cast<uint32_t>(value));
+    log_participant_statistics_.max_undirected_gain() = std::max(log_participant_statistics_.max_undirected_gain(), static_cast<uint32_t>(value));
+    publish_participant_statistics_.max_undirected_gain() = std::max(publish_participant_statistics_.max_undirected_gain(), static_cast<uint32_t>(value));
     report(now);
   }
 
   void report(const OpenDDS::DCPS::MonotonicTimePoint& now,
               bool force = false)
   {
-    const auto d = now - last_report_;
-    if (!force && d < config->statistics_interval()) {
+    log_report(now, force);
+    publish_report(now, force);
+  }
+
+  void log_report(const OpenDDS::DCPS::MonotonicTimePoint& now,
+                  bool force)
+  {
+    if (config->log_participant_statistics().is_zero()) {
       return;
     }
 
-    participant_statistics_.interval(time_diff_to_duration(d));
-
-    if (config->log_relay_statistics()) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name.in(), OpenDDS::DCPS::to_json(participant_statistics_).c_str()));
+    const auto d = now - log_last_report_;
+    if (!force && d < config->log_participant_statistics()) {
+      return;
     }
 
-    if (config->publish_relay_statistics()) {
-      const auto ret = writer->write(participant_statistics_, DDS::HANDLE_NIL);
-      if (ret != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: writing participant %C statistics\n"), guid_to_string(guid_to_repoid(participant_statistics_.guid())).c_str()));
-      }
+    log_participant_statistics_.interval(time_diff_to_duration(d));
+
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name.in(), OpenDDS::DCPS::to_json(log_participant_statistics_).c_str()));
+
+    log_last_report_ = now;
+
+    log_participant_statistics_.messages_from(0);
+    log_participant_statistics_.bytes_from(0);
+    log_participant_statistics_.messages_to(0);
+    log_participant_statistics_.bytes_to(0);
+    log_participant_statistics_.max_directed_gain(0);
+    log_participant_statistics_.max_undirected_gain(0);
+  }
+
+  void publish_report(const OpenDDS::DCPS::MonotonicTimePoint& now,
+                      bool force)
+  {
+    if (config->publish_participant_statistics().is_zero()) {
+      return;
     }
 
-    last_report_ = now;
+    const auto d = now - publish_last_report_;
+    if (!force && d < config->publish_participant_statistics()) {
+      return;
+    }
 
-    participant_statistics_.messages_from(0);
-    participant_statistics_.bytes_from(0);
-    participant_statistics_.messages_to(0);
-    participant_statistics_.bytes_to(0);
-    participant_statistics_.max_directed_gain(0);
-    participant_statistics_.max_undirected_gain(0);
+    publish_participant_statistics_.interval(time_diff_to_duration(d));
+
+    const auto ret = writer->write(publish_participant_statistics_, DDS::HANDLE_NIL);
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: writing participant %C statistics\n"), guid_to_string(guid_to_repoid(publish_participant_statistics_.guid())).c_str()));
+    }
+
+    publish_last_report_ = now;
+
+    publish_participant_statistics_.messages_from(0);
+    publish_participant_statistics_.bytes_from(0);
+    publish_participant_statistics_.messages_to(0);
+    publish_participant_statistics_.bytes_to(0);
+    publish_participant_statistics_.max_directed_gain(0);
+    publish_participant_statistics_.max_undirected_gain(0);
   }
 
 private:
-  OpenDDS::DCPS::MonotonicTimePoint last_report_;
-  ParticipantStatistics participant_statistics_;
+  OpenDDS::DCPS::MonotonicTimePoint log_last_report_;
+  ParticipantStatistics log_participant_statistics_;
+
+  OpenDDS::DCPS::MonotonicTimePoint publish_last_report_;
+  ParticipantStatistics publish_participant_statistics_;
 };
 
 }

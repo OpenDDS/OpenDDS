@@ -5,7 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
 
 #include "DataReaderImpl.h"
 
@@ -33,12 +33,13 @@
 #include "XTypes/TypeObject.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
-#include <dds/DdsDcpsCoreTypeSupportC.h>
+#endif
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
+#  include <dds/DdsDcpsCoreTypeSupportC.h>
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 #include <dds/DdsDcpsCoreC.h>
 #include <dds/DdsDcpsGuidTypeSupportImpl.h>
-
-#include <tao/ORB_Core.h>
 
 #include <ace/Reactor.h>
 #include <ace/Auto_Ptr.h>
@@ -188,8 +189,7 @@ void DataReaderImpl::init(
   is_exclusive_ownership_ = this->qos_.ownership.kind == ::DDS::EXCLUSIVE_OWNERSHIP_QOS;
 #endif
 
-  listener_ = DDS::DataReaderListener::_duplicate(a_listener);
-  listener_mask_ = mask;
+  set_listener(a_listener, mask);
 
   // Only store the participant pointer, since it is our "grand"
   // parent, we will exist as long as it does
@@ -209,11 +209,8 @@ void DataReaderImpl::init(
 DDS::InstanceHandle_t
 DataReaderImpl::get_instance_handle()
 {
-  using namespace OpenDDS::DCPS;
-  RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
-  if (participant)
-    return participant->id_to_handle(subscription_id_);
-  return DDS::HANDLE_NIL;
+  const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+  return get_entity_instance_handle(subscription_id_, participant.get());
 }
 
 void
@@ -313,6 +310,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
   AssociationData data;
   data.remote_id_ = writer.writerId;
   data.remote_data_ = writer.writerTransInfo;
+  data.participant_discovered_at_ = writer.participantDiscoveredAt;
   data.remote_transport_context_ = writer.transportContext;
   data.publication_transport_priority_ =
       writer.writerQos.transport_priority.value;
@@ -374,15 +372,15 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
   }
   // We no longer hold the publication_handle_lock_.
 
+
+  const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+
+  if (!participant)
+    return;
+
+  const DDS::InstanceHandle_t handle = participant->assign_handle(remote_id);
+
   if (!is_bit_) {
-
-    RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
-
-    if (!participant)
-      return;
-
-    const DDS::InstanceHandle_t handle = participant->id_to_handle(remote_id);
-
     // We acquire the publication_handle_lock_ for the remainder of our
     // processing.
     {
@@ -490,6 +488,7 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
 
       for (CORBA::ULong i = 0; i < wr_len; i++) {
         PublicationId writer_id = writers[i];
+        statistics_.erase(writer_id);
 
         WriterMapType::iterator it = this->writers_.find(writer_id);
         if (it != this->writers_.end() &&
@@ -754,7 +753,7 @@ DataReaderImpl::signal_liveliness(const RepoId& remote_participant)
     ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
     for (WriterMapType::iterator pos = writers_.lower_bound(prefix),
            limit = writers_.end();
-         pos != limit && GuidPrefixEqual() (pos->first.guidPrefix, prefix.guidPrefix);
+         pos != limit && equal_guid_prefixes(pos->first, prefix);
          ++pos) {
       writers.push_back(std::make_pair(pos->first, pos->second));
     }
@@ -941,6 +940,7 @@ DDS::ReturnCode_t DataReaderImpl::set_listener(
     DDS::DataReaderListener_ptr a_listener,
     DDS::StatusMask mask)
 {
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
   listener_ = DDS::DataReaderListener::_duplicate(a_listener);
@@ -949,7 +949,14 @@ DDS::ReturnCode_t DataReaderImpl::set_listener(
 
 DDS::DataReaderListener_ptr DataReaderImpl::get_listener()
 {
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   return DDS::DataReaderListener::_duplicate(listener_.in());
+}
+
+DataReaderListener_ptr DataReaderImpl::get_ext_listener()
+{
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
+  return DataReaderListener::_narrow(listener_.in());
 }
 
 DDS::TopicDescription_ptr DataReaderImpl::get_topicdescription()
@@ -1302,12 +1309,19 @@ DataReaderImpl::enable()
             filterExpression,
             exprParams,
             type_info);
-
-    if (this->subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN) {
-      ACE_ERROR((LM_WARNING,
-          ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::enable, ")
-          ACE_TEXT("add_subscription returned invalid id.\n")));
+    if (subscription_id_ == GUID_UNKNOWN) {
+      if (DCPS_debug_level >= 1) {
+        ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: DataReaderImpl::enable: "
+          "add_subscription failed\n"));
+      }
       return DDS::RETCODE_ERROR;
+    }
+
+    if (DCPS_debug_level >= 2) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReaderImpl::enable: "
+        "got GUID %C, subscribed to topic name \"%C\" type \"%C\"\n",
+        LogGuid(subscription_id_).c_str(),
+        topic_servant_->topic_name(), topic_servant_->type_name()));
     }
   }
 
@@ -1826,7 +1840,9 @@ DataReaderImpl::listener_for(DDS::StatusKind kind)
   // use this entities factory if listener is mask not enabled
   // for this kind.
   RcHandle<SubscriberImpl> subscriber = get_subscriber_servant();
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   if (subscriber && (CORBA::is_nil(listener_.in()) || (listener_mask_ & kind) == 0)) {
+    g.release();
     return subscriber->listener_for(kind);
 
   } else {
@@ -2274,14 +2290,15 @@ DataReaderImpl::writer_became_dead(WriterInfo& info,
 
 void
 DataReaderImpl::instances_liveliness_update(WriterInfo& info,
-    const MonotonicTimePoint& when)
+    const MonotonicTimePoint&)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
-  for (SubscriptionInstanceMapType::iterator iter = instances_.begin(),
-      next = iter; iter != instances_.end(); iter = next) {
+  for (SubscriptionInstanceMapType::iterator iter = instances_.begin(), next = iter;
+       iter != instances_.end(); iter = next) {
     ++next;
-    iter->second->instance_state_->writer_became_dead(
-        info.writer_id_, liveliness_changed_status_.alive_count, when);
+    if (iter->second->instance_state_->writes_instance(info.writer_id_)) {
+      set_instance_state(iter->first, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, SystemTimePoint::now(), info.writer_id_);
+    }
   }
 }
 
@@ -2369,8 +2386,7 @@ void DataReaderImpl::notify_latency(PublicationId writer)
 {
   // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
   // is given to this DataReader then narrow() fails.
-  DataReaderListener_var listener
-  = DataReaderListener::_narrow(this->listener_.in());
+  DataReaderListener_var listener = get_ext_listener();
 
   if (!CORBA::is_nil(listener.in())) {
     WriterIdSeq writerIds;
@@ -2476,10 +2492,18 @@ DataReaderImpl::get_next_handle(const DDS::BuiltinTopicKey_t& key)
 
   if (is_bit()) {
     const RepoId id = bit_key_to_repo_id(key);
-    return participant->id_to_handle(id);
+    return participant->assign_handle(id);
 
   } else {
-    return participant->id_to_handle(GUID_UNKNOWN);
+    return participant->assign_handle();
+  }
+}
+
+void DataReaderImpl::return_handle(DDS::InstanceHandle_t handle)
+{
+  const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+  if (participant) {
+    participant->return_handle(handle);
   }
 }
 
@@ -2490,8 +2514,7 @@ DataReaderImpl::notify_subscription_disconnected(const WriterIdSeq& pubids)
 
   // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
   // is given to this DataReader then narrow() fails.
-  DataReaderListener_var the_listener
-  = DataReaderListener::_narrow(this->listener_.in());
+  DataReaderListener_var the_listener = get_ext_listener();
 
   if (!CORBA::is_nil(the_listener.in())) {
     SubscriptionLostStatus status;
@@ -2511,8 +2534,7 @@ DataReaderImpl::notify_subscription_reconnected(const WriterIdSeq& pubids)
   if (!this->is_bit_) {
     // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
     // is given to this DataReader then narrow() fails.
-    DataReaderListener_var the_listener
-    = DataReaderListener::_narrow(this->listener_.in());
+    DataReaderListener_var the_listener = get_ext_listener();
 
     if (!CORBA::is_nil(the_listener.in())) {
       SubscriptionLostStatus status;
@@ -2533,8 +2555,7 @@ DataReaderImpl::notify_subscription_lost(const DDS::InstanceHandleSeq& handles)
   if (!this->is_bit_) {
     // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
     // is given to this DataReader then narrow() fails.
-    DataReaderListener_var the_listener
-    = DataReaderListener::_narrow(this->listener_.in());
+    DataReaderListener_var the_listener = get_ext_listener();
 
     if (!CORBA::is_nil(the_listener.in())) {
       SubscriptionLostStatus status;
@@ -2558,8 +2579,7 @@ DataReaderImpl::notify_subscription_lost(const WriterIdSeq& pubids)
 
   // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
   // is given to this DataReader then narrow() fails.
-  DataReaderListener_var the_listener
-  = DataReaderListener::_narrow(this->listener_.in());
+  DataReaderListener_var the_listener = get_ext_listener();
 
   if (!CORBA::is_nil(the_listener.in())) {
     SubscriptionLostStatus status;
@@ -2599,7 +2619,7 @@ DataReaderImpl::lookup_instance_handles(const WriterIdSeq& ids,
   RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
   if (participant) {
     for (CORBA::ULong i = 0; i < num_wrts; ++i) {
-      hdls[i] = participant->id_to_handle(ids[i]);
+      hdls[i] = participant->lookup_handle(ids[i]);
     }
   }
 }
@@ -2796,6 +2816,7 @@ void DataReaderImpl::notify_liveliness_change()
   notify_status_condition();
 
   if (DCPS_debug_level > 9) {
+    ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
     OPENDDS_STRING output_str;
     output_str += "subscription ";
     output_str += OPENDDS_STRING(GuidConverter(subscription_id_));

@@ -48,6 +48,10 @@ if ($test->flag('disco')) {
   $tc_opts .= " ci_disco";
   $is_rtps_disc = 1;
 }
+elsif ($test->flag('script')) {
+  $tc_opts .= " script";
+  $is_rtps_disc = 1;
+}
 elsif ($test->flag('fan')) {
   $tc_opts .= " ci_fan";
   $is_rtps_disc = 1;
@@ -84,6 +88,18 @@ elsif ($test->flag('echo_frag_mini')) {
   $tc_opts .= " ci_echo_frag_mini";
   $is_rtps_disc = 1;
 }
+elsif ($test->flag('force_worker_segfault')) {
+  $tc_opts .= " ci_force_worker_segfault";
+  $is_rtps_disc = 1;
+}
+elsif ($test->flag('force_worker_assert')) {
+  $tc_opts .= " ci_force_worker_assert";
+  $is_rtps_disc = 1;
+}
+elsif ($test->flag('force_worker_deadlock')) {
+  $tc_opts .= " ci_force_worker_deadlock";
+  $is_rtps_disc = 1;
+}
 elsif ($test->flag('mixed')) {
   $tc_opts .= " ci_mixed";
   $is_rtps_disc = 1;
@@ -104,6 +120,14 @@ elsif ($test->flag('tag')) {
   $tc_opts .= " simple_tags --tag continuous --tag control --tag processed --tag unknown";
   $is_rtps_disc = 1;
   $test->process("node_controller2", "node_controller/node_controller", $nc_opts);
+}
+elsif ($test->flag('script')) {
+  $tc_opts .= " script";
+  $is_rtps_disc = 1;
+}
+elsif ($test->flag('valgrind')) {
+  $tc_opts .= " valgrind";
+  $is_rtps_disc = 1;
 }
 else {
   $flag_found = 0;

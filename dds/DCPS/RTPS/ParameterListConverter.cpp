@@ -34,6 +34,11 @@ namespace {
   void add_param(ParameterList& param_list, const Parameter& param)
   {
     const CORBA::ULong length = param_list.length();
+    // Grow by factor of 2 when length is a power of 2 in order to prevent every call to length(+1)
+    // allocating a new buffer & copying previous results. The maximum is kept when length is reduced.
+    if (length && !(length & (length - 1))) {
+      param_list.length(2 * length);
+    }
     param_list.length(length + 1);
     param_list[length] = param;
   }

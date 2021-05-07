@@ -16,7 +16,6 @@
 #include "ConditionVariable.h"
 
 #include <ace/Task.h>
-#include <ace/Barrier.h>
 #include <ace/Synch_Traits.h>
 #include <ace/Timer_Heap_T.h>
 #include <ace/Event_Handler_Handle_Timeout_Upcall.h>
@@ -31,19 +30,25 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-struct OpenDDS_Dcps_Export ThreadStatus {
+enum ThreadStatus {
+  ThreadStatus_Running,
+  ThreadStatus_Finished
+};
+
+struct OpenDDS_Dcps_Export ThreadStatusManager {
   struct Thread {
     Thread() {}
-    explicit Thread(const SystemTimePoint& time)
+    Thread(const SystemTimePoint& time, ThreadStatus status)
       : timestamp(time)
+      , status(status)
     {}
     SystemTimePoint timestamp;
+    ThreadStatus status;
     // TODO(iguessthislldo): Add Participant GUID
   };
   typedef OPENDDS_MAP(String, Thread) Map;
 
-  ACE_Thread_Mutex lock;
-  Map map;
+  static const char* status_to_string(ThreadStatus status);
 
   /// Get key for map and update.
   /// safety_profile_tid is the thread id under safety profile, otherwise unused.
@@ -52,7 +57,12 @@ struct OpenDDS_Dcps_Export ThreadStatus {
 
   /// Update the status of a thread to indicate it was able to check in at the
   /// given time. Returns false if failed.
-  bool update(const String& key);
+  bool update(const String& key, ThreadStatus status = ThreadStatus_Running);
+
+  /// To support multiple readers determining that a thread finished without
+  /// having to do something more complicated to cleanup that fact, have a
+  /// Manager for each reader use this to get the information the readers need.
+  bool sync_with_parent(ThreadStatusManager& parent, Map& running, Map& finished);
 
 #ifdef ACE_HAS_GETTID
   static inline pid_t gettid()
@@ -60,6 +70,10 @@ struct OpenDDS_Dcps_Export ThreadStatus {
     return syscall(SYS_gettid);
   }
 #endif
+
+private:
+  ACE_Thread_Mutex lock_;
+  Map map_;
 };
 
 class OpenDDS_Dcps_Export ReactorTask : public virtual ACE_Task_Base,
@@ -72,7 +86,7 @@ public:
 
 public:
   int open_reactor_task(void*, TimeDuration timeout = TimeDuration(0),
-    ThreadStatus* thread_stat = 0, const String& name = "");
+    ThreadStatusManager* thread_status_manager = 0, const String& name = "");
   virtual int open(void* ptr) {
     return open_reactor_task(ptr);
   }
@@ -89,7 +103,7 @@ public:
   ACE_Proactor* get_proactor();
   const ACE_Proactor* get_proactor() const;
 
-  void wait_for_startup() { barrier_.wait(); }
+  void wait_for_startup() { while (state_ != STATE_RUNNING) { condition_.wait(); } }
 
   bool is_shut_down() const { return state_ == STATE_NOT_RUNNING; }
 
@@ -98,6 +112,8 @@ public:
   OPENDDS_POOL_ALLOCATION_FWD
 
 private:
+
+  void cleanup();
 
   typedef ACE_SYNCH_MUTEX LockType;
   typedef ACE_Guard<LockType> GuardType;
@@ -123,18 +139,22 @@ private:
     DCPS::ReactorTask* const task_;
   };
 
-  ACE_Barrier   barrier_;
   LockType      lock_;
   State         state_;
   ConditionVariableType condition_;
   ACE_Reactor*  reactor_;
   ACE_thread_t  reactor_owner_;
   ACE_Proactor* proactor_;
-  bool          use_async_send_;
+
+#if defined ACE_WIN32 && defined ACE_HAS_WIN32_OVERLAPPED_IO
+#define OPENDDS_REACTOR_TASK_ASYNC
+  bool use_async_send_;
+#endif
+
   TimerQueueType* timer_queue_;
 
   // thread status reporting
-  ThreadStatus* thread_status_;
+  ThreadStatusManager* thread_status_manager_;
   TimeDuration timeout_;
   String name_;
 

@@ -88,46 +88,58 @@ int Governance::load(const SSL::SignedDocument& doc)
 
   // Successfully parsed the governance file
 
-  xercesc::DOMDocument* xmlDoc = parser->getDocument();
+  const xercesc::DOMDocument* xmlDoc = parser->getDocument();
 
-  xercesc::DOMElement* elementRoot = xmlDoc->getDocumentElement();
+  const xercesc::DOMElement* elementRoot = xmlDoc->getDocumentElement();
   if (!elementRoot) {
     throw std::runtime_error("empty XML document");
   }
 
   // Find the domain rules
-  xercesc::DOMNodeList * domainRules = xmlDoc->getElementsByTagName(XStr(ACE_TEXT("domain_rule")));
+  const xercesc::DOMNodeList* domainRules = xmlDoc->getElementsByTagName(XStr(ACE_TEXT("domain_rule")));
 
-  for (XMLSize_t r = 0; r < domainRules->getLength(); ++r) {
+  for (XMLSize_t r = 0, dr_len = domainRules->getLength(); r < dr_len; ++r) {
     Governance::DomainRule rule_holder_;
     rule_holder_.domain_attrs.plugin_participant_attributes = 0;
 
-    // Pull out domain ids used in the rule. We are NOT supporting ranges at this time
-    xercesc::DOMNodeList * ruleNodes = domainRules->item(r)->getChildNodes();
+    const xercesc::DOMNode* domainRule = domainRules->item(r);
 
-    for (XMLSize_t rn = 0; rn < ruleNodes->getLength(); rn++) {
-      const XStr dn_tag = ruleNodes->item(rn)->getNodeName();
+    // Pull out domain ids used in the rule. We are NOT supporting ranges at this time
+    const xercesc::DOMNodeList* ruleNodes = domainRule->getChildNodes();
+
+    for (XMLSize_t rn = 0, rn_len = ruleNodes->getLength(); rn < rn_len; rn++) {
+
+      const xercesc::DOMNode* ruleNode = ruleNodes->item(rn);
+
+      const XStr dn_tag = ruleNode->getNodeName();
 
       if (ACE_TEXT("domains") == dn_tag) {
-        xercesc::DOMNodeList * domainIdNodes = ruleNodes->item(rn)->getChildNodes();
+        const xercesc::DOMNodeList* domainIdNodes = ruleNode->getChildNodes();
 
-        for (XMLSize_t did = 0; did < domainIdNodes->getLength(); did++) {
-          if (ACE_TEXT("id") == XStr(domainIdNodes->item(did)->getNodeName())) {
-            const XMLCh* t = domainIdNodes->item(did)->getTextContent();
+        for (XMLSize_t did = 0, did_len = domainIdNodes->getLength(); did < did_len; did++) {
+
+          const xercesc::DOMNode* domainIdNode = domainIdNodes->item(did);
+
+          if (ACE_TEXT("id") == XStr(domainIdNode->getNodeName())) {
+            const XMLCh* t = domainIdNode->getTextContent();
             unsigned int i;
             if (xercesc::XMLString::textToBin(t, i)) {
               rule_holder_.domain_list.insert(i);
             }
-          } else if (ACE_TEXT("id_range") == XStr(domainIdNodes->item(did)->getNodeName())) {
+          } else if (ACE_TEXT("id_range") == XStr(domainIdNode->getNodeName())) {
             int min_value = 0;
             int max_value = 0;
-            xercesc::DOMNodeList * domRangeIdNodes = domainIdNodes->item(did)->getChildNodes();
 
-            for (XMLSize_t drid = 0; drid < domRangeIdNodes->getLength(); drid++) {
-              if (ACE_OS::strcmp("min", xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getNodeName())) == 0) {
-                min_value = atoi(xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getTextContent()));
-              } else if (strcmp("max", xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getNodeName())) == 0) {
-                max_value = atoi(xercesc::XMLString::transcode(domRangeIdNodes->item(drid)->getTextContent()));
+            const xercesc::DOMNodeList* domRangeIdNodes = domainIdNode->getChildNodes();
+
+            for (XMLSize_t drid = 0, drid_len = domRangeIdNodes->getLength(); drid < drid_len; drid++) {
+
+              const xercesc::DOMNode* domRangeIdNode = domRangeIdNodes->item(drid);
+
+              if (ACE_OS::strcmp("min", xercesc::XMLString::transcode(domRangeIdNode->getNodeName())) == 0) {
+                min_value = atoi(xercesc::XMLString::transcode(domRangeIdNode->getTextContent()));
+              } else if (strcmp("max", xercesc::XMLString::transcode(domRangeIdNode->getNodeName())) == 0) {
+                max_value = atoi(xercesc::XMLString::transcode(domRangeIdNode->getTextContent()));
 
                 if (min_value > max_value) {
                   ACE_DEBUG((LM_ERROR, ACE_TEXT(
@@ -147,23 +159,23 @@ int Governance::load(const SSL::SignedDocument& doc)
     }
 
     // Process allow_unauthenticated_participants
-    xercesc::DOMNodeList * allow_unauthenticated_participants_ =
+    const xercesc::DOMNodeList* allow_unauthenticated_participants_ =
               xmlDoc->getElementsByTagName(XStr(ACE_TEXT("allow_unauthenticated_participants")));
-    char * attr_aup = xercesc::XMLString::transcode(allow_unauthenticated_participants_->item(0)->getTextContent());
+    char* attr_aup = xercesc::XMLString::transcode(allow_unauthenticated_participants_->item(0)->getTextContent());
     rule_holder_.domain_attrs.allow_unauthenticated_participants = (ACE_OS::strcasecmp(attr_aup,"false") == 0 ? false : true);
     xercesc::XMLString::release(&attr_aup);
 
     // Process enable_join_access_control
-    xercesc::DOMNodeList * enable_join_access_control_ =
+    const xercesc::DOMNodeList* enable_join_access_control_ =
              xmlDoc->getElementsByTagName(XStr(ACE_TEXT("enable_join_access_control")));
-    char * attr_ejac = xercesc::XMLString::transcode(enable_join_access_control_->item(0)->getTextContent());
+    char* attr_ejac = xercesc::XMLString::transcode(enable_join_access_control_->item(0)->getTextContent());
     rule_holder_.domain_attrs.is_access_protected = ACE_OS::strcasecmp(attr_ejac, "false") == 0 ? false : true;
     xercesc::XMLString::release(&attr_ejac);
 
     // Process discovery_protection_kind
-    xercesc::DOMNodeList * discovery_protection_kind_ =
+    const xercesc::DOMNodeList* discovery_protection_kind_ =
              xmlDoc->getElementsByTagName(XStr(ACE_TEXT("discovery_protection_kind")));
-    char * attr_dpk = xercesc::XMLString::transcode(discovery_protection_kind_->item(0)->getTextContent());
+    char* attr_dpk = xercesc::XMLString::transcode(discovery_protection_kind_->item(0)->getTextContent());
     if (ACE_OS::strcasecmp(attr_dpk, "NONE") == 0) {
       rule_holder_.domain_attrs.is_discovery_protected = false;
     } else if (ACE_OS::strcasecmp(attr_dpk, "SIGN") == 0) {
@@ -182,9 +194,9 @@ int Governance::load(const SSL::SignedDocument& doc)
     xercesc::XMLString::release(&attr_dpk);
 
     // Process liveliness_protection_kind
-    xercesc::DOMNodeList * liveliness_protection_kind_ =
+    const xercesc::DOMNodeList* liveliness_protection_kind_ =
              xmlDoc->getElementsByTagName(XStr(ACE_TEXT("liveliness_protection_kind")));
-    char * attr_lpk = xercesc::XMLString::transcode(liveliness_protection_kind_->item(0)->getTextContent());
+    char* attr_lpk = xercesc::XMLString::transcode(liveliness_protection_kind_->item(0)->getTextContent());
     if (ACE_OS::strcasecmp(attr_lpk, "NONE") == 0) {
       rule_holder_.domain_attrs.is_liveliness_protected = false;
     } else if (ACE_OS::strcasecmp(attr_lpk, "SIGN") == 0) {
@@ -203,9 +215,9 @@ int Governance::load(const SSL::SignedDocument& doc)
     xercesc::XMLString::release(&attr_lpk);
 
     // Process rtps_protection_kind
-    xercesc::DOMNodeList * rtps_protection_kind_ =
+    const xercesc::DOMNodeList* rtps_protection_kind_ =
              xmlDoc->getElementsByTagName(XStr(ACE_TEXT("rtps_protection_kind")));
-    char * attr_rpk = xercesc::XMLString::transcode(rtps_protection_kind_->item(0)->getTextContent());
+    char* attr_rpk = xercesc::XMLString::transcode(rtps_protection_kind_->item(0)->getTextContent());
 
     if (ACE_OS::strcasecmp(attr_rpk, "NONE") == 0) {
       rule_holder_.domain_attrs.is_rtps_protected = false;
@@ -228,15 +240,21 @@ int Governance::load(const SSL::SignedDocument& doc)
 
     // Process topic rules
 
-    xercesc::DOMNodeList * topic_rules = xmlDoc->getElementsByTagName(XStr(ACE_TEXT("topic_rule")));
+    const xercesc::DOMNodeList* topic_rules = xmlDoc->getElementsByTagName(XStr(ACE_TEXT("topic_rule")));
 
-    for (XMLSize_t tr = 0; tr < topic_rules->getLength(); tr++) {
-      xercesc::DOMNodeList * topic_rule_nodes = topic_rules->item(tr)->getChildNodes();
+    for (XMLSize_t tr = 0, tr_len = topic_rules->getLength(); tr < tr_len; tr++) {
+
+      const xercesc::DOMNode* topic_rule = topic_rules->item(tr);
+
+      const xercesc::DOMNodeList* topic_rule_nodes = topic_rule->getChildNodes();
       Governance::TopicAccessRule t_rules;
 
-      for (XMLSize_t trn = 0; trn < topic_rule_nodes->getLength(); trn++) {
-        XStr tr_tag = topic_rule_nodes->item(trn)->getNodeName();
-        char * tr_val = xercesc::XMLString::transcode(topic_rule_nodes->item(trn)->getTextContent());
+      for (XMLSize_t trn = 0, trn_len = topic_rule_nodes->getLength(); trn < trn_len; trn++) {
+
+        const xercesc::DOMNode* topic_rule_node = topic_rule_nodes->item(trn);
+
+        const XStr tr_tag = topic_rule_node->getNodeName();
+        char* tr_val = xercesc::XMLString::transcode(topic_rule_node->getTextContent());
 
         if (tr_tag == ACE_TEXT("topic_expression")) {
           t_rules.topic_expression = tr_val;

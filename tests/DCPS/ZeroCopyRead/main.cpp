@@ -8,22 +8,21 @@
  */
 // ============================================================================
 
-
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/Qos_Helper.h"
-#include "dds/DCPS/TopicDescriptionImpl.h"
-#include "dds/DCPS/SubscriberImpl.h"
-#include "dds/DCPS/PublisherImpl.h"
 #include "SimpleTypeSupportImpl.h"
-#include "dds/DCPS/transport/framework/EntryExit.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
-#include "dds/DCPS/DCPS_Utils.h"
 
-#include "dds/DCPS/StaticIncludes.h"
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/TopicDescriptionImpl.h>
+#include <dds/DCPS/SubscriberImpl.h>
+#include <dds/DCPS/PublisherImpl.h>
+#include <dds/DCPS/transport/framework/EntryExit.h>
+#include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/DCPS_Utils.h>
+#include <dds/DCPS/StaticIncludes.h>
 
-#include "ace/Arg_Shifter.h"
-#include "ace/OS_NS_unistd.h"
+#include <ace/Arg_Shifter.h>
+#include <ace/OS_NS_unistd.h>
 
 #include <string.h>
 
@@ -209,8 +208,7 @@ private:
 };
 
 
-int wait_for_data (::DDS::Subscriber_ptr sub,
-                   int timeout_sec)
+bool wait_for_data(::DDS::Subscriber_ptr sub, int timeout_sec)
 {
   const int factor = 10;
   ACE_Time_Value small_time(0,1000000/factor);
@@ -225,11 +223,11 @@ int wait_for_data (::DDS::Subscriber_ptr sub,
                     ::DDS::ANY_VIEW_STATE,
                     ::DDS::ANY_INSTANCE_STATE );
       if (discard->length () > 0)
-        return 1;
+        return true;
 
       ACE_OS::sleep (small_time);
     }
-  return 0;
+  return false;
 }
 
 /// parse the command line arguments
@@ -1582,6 +1580,104 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       }
 
+      // Test for an invalid zero copy count after a data sequence is reused
+      // with multiple instances involved.
+      {
+        ACE_DEBUG((LM_INFO, "==== sequence reuse test\n"));
+
+        OpenDDS::DCPS::DataReaderImpl_rch dr_impl = rchandle_from(
+          dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(dr.in()));
+        if (dr_impl->has_zero_copies()) {
+          ACE_ERROR((LM_ERROR, "ERROR: sequence reuse test: "
+            "DataReader already has outstanding zero-copy samples\n"));
+          throw TestException();
+        }
+
+        // Ensure samples from previous tests don't interact with this one.
+        dr_impl->release_all_instances();
+
+        const CORBA::Long key1 = 1378;
+        foo.key = key1;
+        foo_dw->write(foo, DDS::HANDLE_NIL);
+
+        const CORBA::Long key2 = key1 + 1;
+        foo.key = key2;
+        foo_dw->write(foo, DDS::HANDLE_NIL);
+
+        // Sleep until we got both of the instances up to about 5 seconds
+        DDS::InstanceHandle_t inst1 = DDS::HANDLE_NIL;
+        DDS::InstanceHandle_t inst2 = DDS::HANDLE_NIL;
+        for (unsigned spin = 0;
+            spin < 25 && (inst1 == DDS::HANDLE_NIL || inst2 == DDS::HANDLE_NIL); ++spin) {
+          if (inst1 == DDS::HANDLE_NIL) {
+            foo.key = key1;
+            inst1 = foo_dr->lookup_instance(foo);
+          }
+          if (inst2 == DDS::HANDLE_NIL) {
+            foo.key = key2;
+            inst2 = foo_dr->lookup_instance(foo);
+          }
+          ACE_OS::sleep(ACE_Time_Value(0, 200000)); // 1/5 sec
+        }
+        if (inst1 == DDS::HANDLE_NIL || inst2 == DDS::HANDLE_NIL) {
+          ACE_ERROR((LM_ERROR, "ERROR: sequence reuse test: Timedout waiting for instances\n"));
+          throw TestException();
+        }
+
+        // Do a read of the instance we didn't see an issue with.
+        {
+          Test::SimpleSeq data;
+          DDS::SampleInfoSeq info;
+          const DDS::ReturnCode_t rc = foo_dr->read_instance(data, info, 1, inst2,
+            DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+          if (rc != DDS::RETCODE_OK) {
+            ACE_ERROR((LM_ERROR, "ERROR: sequence reuse test: read_instance Failed: %C\n",
+              retcode_to_string(rc)));
+            throw TestException();
+          }
+          if (data[0].key != key2) {
+            ACE_ERROR((LM_ERROR, "ERROR: sequence reuse test: read_instance "
+              "expected key %d, got key %d\n", key2, data[0].key));
+            throw TestException();
+          }
+        }
+
+        // Read the instance that had the incorrect zero-copy count.
+        {
+          Test::SimpleSeq data;
+          DDS::SampleInfoSeq info;
+          DDS::InstanceHandle_t handle = DDS::HANDLE_NIL;
+          DDS::ReturnCode_t rc = DDS::RETCODE_OK;
+          while (rc == DDS::RETCODE_OK) {
+            rc = foo_dr->read_next_instance(data, info, 1, handle,
+              DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+            if (rc == DDS::RETCODE_OK) {
+              handle = info[0].instance_handle;
+            }
+          }
+          if (handle == DDS::HANDLE_NIL) {
+            ACE_ERROR((LM_ERROR, "ERROR: sequence reuse test: read_next_instance: No Sample\n"));
+            throw TestException();
+          }
+          if (rc != DDS::RETCODE_NO_DATA) {
+            ACE_ERROR((LM_ERROR, "ERROR: sequence reuse test: read_next_instance Failed: %C\n",
+              retcode_to_string(rc)));
+            throw TestException();
+          }
+        }
+
+        // See if we could remove the datareader without issues.
+        if (dr_impl->has_zero_copies()) {
+          ACE_ERROR((LM_ERROR, "ERROR: sequence reuse test: "
+            "DataReader has outstanding zero-copy samples after reads\n"));
+          throw TestException();
+        }
+
+        // Don't mess up the next test.
+        dr_impl->release_instance(inst1);
+        dr_impl->release_instance(inst2);
+      }
+
       {
         //=====================================================
         // 10) Show that loans are checked by delete_datareader.
@@ -1674,8 +1770,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     }
   catch (const TestException&)
     {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) TestException caught in main.cpp. ")));
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TestException caught in main.cpp.\n")));
       return 1;
     }
       //======== clean up ============
@@ -1707,8 +1802,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
     } //xxx dp::Entity::Object::muxtex_refcount_ = 1
   catch (const TestException&)
     {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) TestException caught in main.cpp. ")));
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TestException caught in main.cpp\n")));
       return 1;
     }
   catch (const CORBA::Exception& ex)

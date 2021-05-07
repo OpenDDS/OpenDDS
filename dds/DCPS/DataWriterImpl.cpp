@@ -5,7 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
 
 #include "DataWriterImpl.h"
 
@@ -35,6 +35,9 @@
 #include "transport/framework/TransportRegistry.h"
 #ifndef DDS_HAS_MINIMUM_BIT
 #  include "BuiltInTopicUtils.h"
+#endif
+
+#ifndef DDS_HAS_MINIMUM_BIT
 #  include <dds/DdsDcpsCoreTypeSupportC.h>
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 #include <dds/DdsDcpsCoreC.h>
@@ -141,9 +144,7 @@ DataWriterImpl::init(
 
   qos_ = qos;
 
-  //Note: OK to _duplicate(nil).
-  listener_ = DDS::DataWriterListener::_duplicate(a_listener);
-  listener_mask_ = mask;
+  set_listener(a_listener, mask);
 
   // Only store the participant pointer, since it is our "grand"
   // parent, we will exist as long as it does.
@@ -162,21 +163,26 @@ DataWriterImpl::init(
 DDS::InstanceHandle_t
 DataWriterImpl::get_instance_handle()
 {
-  using namespace OpenDDS::DCPS;
-  RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
-  if (participant)
-    return participant->id_to_handle(publication_id_);
-  return DDS::HANDLE_NIL;
+  const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+  return get_entity_instance_handle(publication_id_, participant.get());
 }
 
 DDS::InstanceHandle_t
 DataWriterImpl::get_next_handle()
 {
-  using namespace OpenDDS::DCPS;
   RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
-  if (participant)
-    return participant->id_to_handle(GUID_UNKNOWN);
+  if (participant) {
+    return participant->assign_handle();
+  }
   return DDS::HANDLE_NIL;
+}
+
+void DataWriterImpl::return_handle(DDS::InstanceHandle_t handle)
+{
+  const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+  if (participant) {
+    participant->return_handle(handle);
+  }
 }
 
 DDS::Subscriber_var
@@ -239,6 +245,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
   AssociationData data;
   data.remote_id_ = reader.readerId;
   data.remote_data_ = reader.readerTransInfo;
+  data.participant_discovered_at_ = reader.participantDiscoveredAt;
   data.remote_transport_context_ = reader.transportContext;
   data.remote_reliable_ =
     (reader.readerQos.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS);
@@ -413,8 +420,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
     if (!participant)
       return;
 
-    DDS::InstanceHandle_t handle =
-      participant->id_to_handle(remote_id);
+    const DDS::InstanceHandle_t handle = participant->assign_handle(remote_id);
 
     {
       // protect publication_match_status_ and status changed flags.
@@ -662,6 +668,11 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
   // subscription lost.
   if (notify_lost && handles.length() > 0) {
     this->notify_publication_lost(handles);
+  }
+
+  const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+  for (unsigned int i = 0; i < handles.length(); ++i) {
+    participant->return_handle(handles[i]);
   }
 }
 
@@ -967,6 +978,7 @@ DDS::ReturnCode_t
 DataWriterImpl::set_listener(DDS::DataWriterListener_ptr a_listener,
                              DDS::StatusMask mask)
 {
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
   listener_ = DDS::DataWriterListener::_duplicate(a_listener);
@@ -976,7 +988,15 @@ DataWriterImpl::set_listener(DDS::DataWriterListener_ptr a_listener,
 DDS::DataWriterListener_ptr
 DataWriterImpl::get_listener()
 {
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   return DDS::DataWriterListener::_duplicate(listener_.in());
+}
+
+DataWriterListener_ptr
+DataWriterImpl::get_ext_listener()
+{
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
+  return DataWriterListener::_narrow(listener_.in());
 }
 
 DDS::Topic_ptr
@@ -1306,7 +1326,7 @@ DataWriterImpl::enable()
     dp_id_ = participant->get_id();
   }
 
-  if (!topic_servant_->check_data_representation(get_effective_data_rep_qos(qos_.representation.value), true)) {
+  if (!topic_servant_->check_data_representation(get_effective_data_rep_qos(qos_.representation.value, false), true)) {
     if (DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable: ")
         ACE_TEXT("none of the data representation QoS is allowed by the ")
@@ -1482,14 +1502,20 @@ DataWriterImpl::enable()
                            trans_conf_info,
                            pub_qos,
                            type_info);
-
-
-  if (!publisher || this->publication_id_ == GUID_UNKNOWN) {
-    ACE_DEBUG((LM_WARNING,
-               ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::enable, ")
-               ACE_TEXT("add_publication returned invalid id.\n")));
+  if (publication_id_ == GUID_UNKNOWN) {
+    if (DCPS_debug_level >= 1) {
+      ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: DataWriterImpl::enable: "
+        "add_publication failed\n"));
+    }
     data_container_->shutdown_ = true;
     return DDS::RETCODE_ERROR;
+  }
+
+  if (DCPS_debug_level >= 2) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriterImpl::enable: "
+      "got GUID %C, publishing to topic name \"%C\" type \"%C\"\n",
+      LogGuid(publication_id_).c_str(),
+      topic_servant_->topic_name(), topic_servant_->type_name()));
   }
 
   this->data_container_->publication_id_ = this->publication_id_;
@@ -2392,7 +2418,9 @@ DataWriterImpl::listener_for(DDS::StatusKind kind)
   if (!publisher)
     return 0;
 
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   if (CORBA::is_nil(listener_.in()) || (listener_mask_ & kind) == 0) {
+    g.release();
     return publisher->listener_for(kind);
 
   } else {
@@ -2542,8 +2570,7 @@ DataWriterImpl::notify_publication_disconnected(const ReaderIdSeq& subids)
   if (!is_bit_) {
     // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
     // is given to this DataWriter then narrow() fails.
-    DataWriterListener_var the_listener =
-      DataWriterListener::_narrow(this->listener_.in());
+    DataWriterListener_var the_listener = get_ext_listener();
 
     if (!CORBA::is_nil(the_listener.in())) {
       PublicationDisconnectedStatus status;
@@ -2566,8 +2593,7 @@ DataWriterImpl::notify_publication_reconnected(const ReaderIdSeq& subids)
     // Narrow to DDS::DCPS::DataWriterListener. If a
     // DDS::DataWriterListener is given to this DataWriter then
     // narrow() fails.
-    DataWriterListener_var the_listener =
-      DataWriterListener::_narrow(this->listener_.in());
+    DataWriterListener_var the_listener = get_ext_listener();
 
     if (!CORBA::is_nil(the_listener.in())) {
       PublicationDisconnectedStatus status;
@@ -2589,8 +2615,7 @@ DataWriterImpl::notify_publication_lost(const ReaderIdSeq& subids)
     // Narrow to DDS::DCPS::DataWriterListener. If a
     // DDS::DataWriterListener is given to this DataWriter then
     // narrow() fails.
-    DataWriterListener_var the_listener =
-      DataWriterListener::_narrow(this->listener_.in());
+    DataWriterListener_var the_listener = get_ext_listener();
 
     if (!CORBA::is_nil(the_listener.in())) {
       PublicationLostStatus status;
@@ -2613,8 +2638,7 @@ DataWriterImpl::notify_publication_lost(const DDS::InstanceHandleSeq& handles)
     // Narrow to DDS::DCPS::DataWriterListener. If a
     // DDS::DataWriterListener is given to this DataWriter then
     // narrow() fails.
-    DataWriterListener_var the_listener =
-      DataWriterListener::_narrow(this->listener_.in());
+    DataWriterListener_var the_listener = get_ext_listener();
 
     if (!CORBA::is_nil(the_listener.in())) {
       PublicationLostStatus status;
@@ -2660,7 +2684,7 @@ DataWriterImpl::lookup_instance_handles(const ReaderIdSeq& ids,
   hdls.length(num_rds);
 
   for (CORBA::ULong i = 0; i < num_rds; ++i) {
-    hdls[i] = participant->id_to_handle(ids[i]);
+    hdls[i] = participant->lookup_handle(ids[i]);
   }
 }
 

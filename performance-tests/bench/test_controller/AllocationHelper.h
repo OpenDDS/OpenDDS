@@ -83,9 +83,9 @@ private:
     const std::map<std::string, std::string>& worker_configs,
     Bench::NodeController::Config& node);
 
-  static unsigned add_protoworkers_to_node(const Bench::TestController::WorkerPrototypes& protoworkers,
-    const std::map<std::string, std::string>& worker_configs,
-    Bench::NodeController::Config& node);
+  static void add_protoworkers_to_node(const Bench::TestController::WorkerPrototypes& protoworkers,
+    const std::map<std::string, std::string>& worker_configs, Bench::NodeController::Config& node,
+    unsigned& expected_process_reports, unsigned& expected_worker_reports);
 };
 
 #endif

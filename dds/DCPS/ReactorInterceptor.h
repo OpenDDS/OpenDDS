@@ -33,7 +33,10 @@ public:
   public:
     Command() : executed_(false), condition_(mutex_), reactor_(0) {}
     virtual ~Command() { }
+    virtual bool should_execute() const { return true; }
+    virtual void will_execute() {}
     virtual void execute() = 0;
+    virtual void queue_flushed() {}
 
     void reset()
     {
@@ -115,7 +118,11 @@ protected:
     const CommandPtr command(c, keep_count());
     {
       ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+      if (!command->should_execute()) {
+        return CommandPtr();
+      }
       command_queue_.push_back(command);
+      command->will_execute();
       if (state_ == NONE) {
         state_ = NOTIFIED;
         do_notify = true;

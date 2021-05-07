@@ -19,6 +19,9 @@ namespace OpenDDS {
 namespace Security {
 namespace SSL {
 
+const char DH_2048_MODP_256_PRIME_STR[] = "DH+MODP-2048-256";
+const char ECDH_PRIME_256_V1_CEUM_STR[] = "ECDH+prime256v1-CEUM";
+
 class OpenDDS_Security_Export DHAlgorithm {
 public:
   typedef DCPS::unique_ptr<DHAlgorithm> unique_ptr;
@@ -71,7 +74,7 @@ public:
    */
   int compute_shared_secret(const DDS::OctetSeq& pub_key);
 
-  const char* kagree_algo() const { return "DH+MODP-2048-256"; }
+  const char* kagree_algo() const { return DH_2048_MODP_256_PRIME_STR; }
 };
 
 class OpenDDS_Security_Export ECDH_PRIME_256_V1_CEUM : public DHAlgorithm {
@@ -94,7 +97,7 @@ public:
    */
   int compute_shared_secret(const DDS::OctetSeq& pub_key);
 
-  const char* kagree_algo() const { return "ECDH+prime256v1-CEUM"; }
+  const char* kagree_algo() const { return ECDH_PRIME_256_V1_CEUM_STR; }
 };
 
 class OpenDDS_Security_Export DiffieHellman {

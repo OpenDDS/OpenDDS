@@ -45,8 +45,6 @@ using DCPS::TimeDuration;
 RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   : resend_period_(30 /*seconds*/) // see RTPS v2.1 9.6.1.4.2
   , quick_resend_ratio_(0.1)
-  , sedp_heartbeat_backoff_factor_(2.0)
-  , sedp_heartbeat_safety_factor_(1.1)
   , min_resend_delay_(TimeDuration::from_msec(100))
   , lease_duration_(300)
   , pb_(7400) // see RTPS v2.1 9.6.1.3 for PB, DG, PG, D0, D1 defaults
@@ -79,9 +77,11 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , secure_participant_user_data_(false)
   , max_type_lookup_service_reply_period_(5, 0)
   , use_xtypes_(true)
-  , sedp_heartbeat_period_(0, 100000)
-  , sedp_heartbeat_period_minimum_(0, 10000)
-  , sedp_heartbeat_period_maximum_(1, 0)
+  , sedp_heartbeat_period_(1)
+  , sedp_nak_response_delay_(0, 200*1000 /*microseconds*/) // default from RTPS
+  , sedp_send_delay_(0, 10 * 1000)
+  , participant_flags_(PFLAGS_THIS_VERSION)
+  , sedp_responsive_mode_(false)
 {}
 
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
@@ -168,28 +168,6 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
               value.c_str(), rtps_name.c_str()), -1);
           }
           config->quick_resend_ratio(ratio);
-        } else if (name == "SedpHeartbeatBackoffFactor") {
-          const OPENDDS_STRING& value = it->second;
-          double ratio;
-          if (!DCPS::convertToDouble(value, ratio)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-              ACE_TEXT("Invalid entry (%C) for SedpHeartbeatBackoffFactor in ")
-              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-              value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->sedp_heartbeat_backoff_factor(ratio);
-        } else if (name == "SedpHeartbeatSafetyFactor") {
-          const OPENDDS_STRING& value = it->second;
-          double ratio;
-          if (!DCPS::convertToDouble(value, ratio)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-              ACE_TEXT("Invalid entry (%C) for SedpHeartbeatSafetyFactor in ")
-              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-              value.c_str(), rtps_name.c_str()), -1);
-          }
-          config->sedp_heartbeat_safety_factor(ratio);
         } else if (name == "MinResendDelay") {
           const OPENDDS_STRING& value = it->second;
           int delay;
@@ -312,6 +290,16 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                              -1);
           }
           config->sedp_local_address(addr);
+        } else if (name == "SedpAdvertisedLocalAddress") {
+          ACE_INET_Addr addr;
+          if (addr.set(it->second.c_str())) {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) ERROR: RtpsDiscovery::Config::discovery_config(): ")
+                              ACE_TEXT("failed to parse SedpAdvertisedLocalAddress %C\n"),
+                              it->second.c_str()),
+                             -1);
+          }
+          config->sedp_advertised_address(addr);
         } else if (name == "SpdpLocalAddress") {
           ACE_INET_Addr addr;
           if (addr.set(u_short(0), it->second.c_str())) {
@@ -621,27 +609,27 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                               ACE_TEXT("[rtps_discovery/%C] section.\n"),
                               string_value.c_str(), rtps_name.c_str()), -1);
           }
-        } else if (name == "SedpHeartbeatPeriodMinimum") {
+        } else if (name == "SedpNakResponseDelay") {
           const OPENDDS_STRING& string_value = it->second;
           int value;
           if (DCPS::convertToInteger(string_value, value)) {
-            config->sedp_heartbeat_period_minimum(TimeDuration::from_msec(value));
+            config->sedp_nak_response_delay(TimeDuration::from_msec(value));
           } else {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-                              ACE_TEXT("Invalid entry (%C) for SedpHeartbeatPeriodMinimum in ")
+                              ACE_TEXT("Invalid entry (%C) for SedpNakResponseDelay in ")
                               ACE_TEXT("[rtps_discovery/%C] section.\n"),
                               string_value.c_str(), rtps_name.c_str()), -1);
           }
-        } else if (name == "SedpHeartbeatPeriodMaximum") {
+        } else if (name == "SedpSendDelay") {
           const OPENDDS_STRING& string_value = it->second;
           int value;
           if (DCPS::convertToInteger(string_value, value)) {
-            config->sedp_heartbeat_period_maximum(TimeDuration::from_msec(value));
+            config->sedp_send_delay(TimeDuration::from_msec(value));
           } else {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
-                              ACE_TEXT("Invalid entry (%C) for SedpHeartbeatPeriodMaximum in ")
+                              ACE_TEXT("Invalid entry (%C) for SedpSendDelay in ")
                               ACE_TEXT("[rtps_discovery/%C] section.\n"),
                               string_value.c_str(), rtps_name.c_str()), -1);
           }
@@ -707,6 +695,17 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
               value.c_str(), rtps_name.c_str()), -1);
           }
           config->use_xtypes(bool(smInt));
+        } else if (name == "SedpResponsiveMode") {
+          const OPENDDS_STRING& value = it->second;
+          int smInt;
+          if (!DCPS::convertToInteger(value, smInt)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
+                              ACE_TEXT("Invalid entry (%C) for SedpResponsiveMode in ")
+                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->sedp_responsive_mode(bool(smInt));
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -945,7 +944,24 @@ RtpsDiscovery::get_ipv6_sedp_port(DDS::DomainId_t domain,
 void
 RtpsDiscovery::spdp_rtps_relay_address(const ACE_INET_Addr& address)
 {
+  const ACE_INET_Addr prev = config_->spdp_rtps_relay_address();
+  if (prev == address) {
+    return;
+  }
+
   config_->spdp_rtps_relay_address(address);
+
+  if (address == ACE_INET_Addr()) {
+    return;
+  }
+
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
+       dom_pos != dom_limit; ++dom_pos) {
+    for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
+      part_pos->second->send_to_relay();
+    }
+  }
 }
 
 void

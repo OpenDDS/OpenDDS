@@ -1,0 +1,19 @@
+{
+  "name": "Force Worker Assert",
+  "desc": "This is an example of forcing the worker to assert and catching / reporting it correctly",
+  "any_node": [
+    {
+      "config": "ci_force_worker_noop.json",
+      "count": 1
+    },
+    {
+      "config": "ci_force_worker_assert.json",
+      "count": 1
+    },
+    {
+      "config": "ci_force_worker_noop.json",
+      "count": 1
+    }
+  ],
+  "timeout": 120
+}

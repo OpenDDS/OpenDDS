@@ -348,9 +348,10 @@ string type_to_default(const std::string& indent, AST_Type* type, const string& 
     AST_Enum* enu = dynamic_cast<AST_Enum*>(actual_type);
     UTL_ScopeActiveIterator i(enu, UTL_Scope::IK_decls);
     AST_EnumVal *item = dynamic_cast<AST_EnumVal*>(i.item());
-    def_val = item->name()->get_string_copy();
     if (use_cxx11) {
       def_val = scoped(type->name()) + "::" + item->local_name()->get_string();
+    } else {
+      def_val = scoped(item->name());
     }
   } else if (fld_cls & CL_SEQUENCE) {
     string seq_resize_func = (use_cxx11) ? "resize" : "length";

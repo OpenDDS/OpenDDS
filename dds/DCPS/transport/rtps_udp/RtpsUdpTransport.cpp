@@ -71,7 +71,7 @@ RtpsUdpTransport::rtps_relay_only_now(bool flag)
     relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
   } else {
     if (!config().use_rtps_relay()) {
-      relay_stun_task_->disable();
+      disable_relay_stun_task();
     }
   }
 #endif
@@ -87,7 +87,7 @@ RtpsUdpTransport::use_rtps_relay_now(bool flag)
     relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
   } else {
     if (!config().rtps_relay_only()) {
-      relay_stun_task_->disable();
+      disable_relay_stun_task();
     }
   }
 #endif
@@ -113,12 +113,14 @@ RtpsUdpTransport::use_ice_now(bool after)
 RtpsUdpDataLink_rch
 RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 {
-  OPENDDS_ASSERT(!GuidPrefixEqual()(local_prefix, GUIDPREFIX_UNKNOWN));
+  OPENDDS_ASSERT(!equal_guid_prefixes(local_prefix, GUIDPREFIX_UNKNOWN));
 
-  assign(local_prefix_, local_prefix);
+  if (equal_guid_prefixes(local_prefix_, GUIDPREFIX_UNKNOWN)) {
+    assign(local_prefix_, local_prefix);
 #ifdef OPENDDS_SECURITY
-  relay_stun_task(DCPS::MonotonicTimePoint::now());
+    relay_stun_task(DCPS::MonotonicTimePoint::now());
 #endif
+  }
 
   RtpsUdpDataLink_rch link = make_rch<RtpsUdpDataLink>(ref(*this), local_prefix, config(), reactor_task());
 
@@ -199,7 +201,8 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
 
   RtpsUdpDataLink_rch link = link_;
 
-  if (use_datalink(attribs.local_id_, remote.repo_id_, remote.blob_, remote.context_,
+  if (use_datalink(attribs.local_id_, remote.repo_id_, remote.blob_, remote.participant_discovered_at_,
+                   remote.context_,
                    attribs.local_reliable_, remote.reliable_,
                    attribs.local_durable_, remote.durable_, attribs.max_sn_, client)) {
     return AcceptConnectResult(link);
@@ -232,7 +235,8 @@ RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
   }
   RtpsUdpDataLink_rch link = link_;
 
-  if (use_datalink(attribs.local_id_, remote.repo_id_, remote.blob_, remote.context_,
+  if (use_datalink(attribs.local_id_, remote.repo_id_, remote.blob_, remote.participant_discovered_at_,
+                   remote.context_,
                    attribs.local_reliable_, remote.reliable_,
                    attribs.local_durable_, remote.durable_, attribs.max_sn_, client)) {
     return AcceptConnectResult(link);
@@ -276,7 +280,8 @@ bool
 RtpsUdpTransport::use_datalink(const RepoId& local_id,
                                const RepoId& remote_id,
                                const TransportBLOB& remote_data,
-                               ACE_CDR::ULong remote_context,
+                               const MonotonicTime_t& participant_discovered_at,
+                               ACE_CDR::ULong participant_flags,
                                bool local_reliable, bool remote_reliable,
                                bool local_durable, bool remote_durable,
                                SequenceNumber max_sn,
@@ -291,7 +296,7 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
     link_->add_locators(remote_id, addrs.first, addrs.second, requires_inline_qos);
 
     return link_->associated(local_id, remote_id, local_reliable, remote_reliable,
-                             local_durable, remote_durable, remote_context, max_sn, client);
+                             local_durable, remote_durable, participant_discovered_at, participant_flags, max_sn, client);
   }
 
   return true;
@@ -556,7 +561,7 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
 #endif
 
   if (config.opendds_discovery_default_listener_) {
-    link_= make_datalink(config.opendds_discovery_guid_.guidPrefix);
+    link_ = make_datalink(config.opendds_discovery_guid_.guidPrefix);
     link_->default_listener(*config.opendds_discovery_default_listener_);
   }
 
@@ -824,6 +829,8 @@ RtpsUdpTransport::stop_ice()
 void
 RtpsUdpTransport::relay_stun_task(const DCPS::MonotonicTimePoint& /*now*/)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, relay_stun_mutex_);
+
   if (!(config().use_rtps_relay() ||
         config().rtps_relay_only())) {
     return;
@@ -833,7 +840,7 @@ RtpsUdpTransport::relay_stun_task(const DCPS::MonotonicTimePoint& /*now*/)
 
   process_relay_sra(relay_srsm_.send(stun_server_address, ICE::Configuration::instance()->server_reflexive_indication_count(), local_prefix_));
 
-  if (!GuidPrefixEqual()(local_prefix_, GUIDPREFIX_UNKNOWN) && stun_server_address != ACE_INET_Addr()) {
+  if (!equal_guid_prefixes(local_prefix_, GUIDPREFIX_UNKNOWN) && stun_server_address != ACE_INET_Addr()) {
     ice_endpoint_.send(stun_server_address, relay_srsm_.message());
   }
 }
@@ -871,6 +878,32 @@ RtpsUdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::StateChang
 
 #else
   ACE_UNUSED_ARG(sc);
+#endif
+}
+
+void
+RtpsUdpTransport::disable_relay_stun_task()
+{
+#ifndef DDS_HAS_MINIMUM_BIT
+  relay_stun_task_->disable();
+
+  DCPS::ConnectionRecord connection_record;
+  std::memset(connection_record.guid, 0, sizeof(connection_record.guid));
+  connection_record.protocol = RTPS_RELAY_STUN_PROTOCOL;
+
+  if (relay_srsm_.stun_server_address() != ACE_INET_Addr()) {
+    connection_record.address = to_dds_string(relay_srsm_.stun_server_address()).c_str();
+    deferred_connection_records_.push_back(std::make_pair(false, connection_record));
+  }
+
+  if (!bit_sub_) {
+    return;
+  }
+
+  job_queue_->enqueue(DCPS::make_rch<WriteConnectionRecords>(bit_sub_, deferred_connection_records_));
+  deferred_connection_records_.clear();
+
+  relay_srsm_ = ICE::ServerReflexiveStateMachine();
 #endif
 }
 

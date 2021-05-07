@@ -52,7 +52,6 @@ DisjointSequence::disjoint() const
 
 ACE_INLINE
 DisjointSequence::DisjointSequence()
-  : sequences_(SequenceRange_LessThan)
 {
 }
 
@@ -103,17 +102,13 @@ DisjointSequence::present_sequence_ranges() const
 ACE_INLINE bool
 DisjointSequence::contains(SequenceNumber value) const
 {
-  RangeSet::const_iterator iter =
-    sequences_.lower_bound(SequenceRange(0 /*ignored*/, value));
-  return iter != sequences_.end() && iter->first <= value;
+  return sequences_.has(value);
 }
 
 ACE_INLINE bool
 DisjointSequence::contains_any(const SequenceRange& range) const
 {
-  const SequenceRange search(0 /*ignored*/, range.first);
-  const RangeSet::const_iterator iter = sequences_.lower_bound(search);
-  return iter != sequences_.end() && iter->first <= range.second;
+  return sequences_.has_any(range);
 }
 
 } // namespace DCPS

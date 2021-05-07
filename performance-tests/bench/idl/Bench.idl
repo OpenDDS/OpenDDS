@@ -126,7 +126,7 @@ module Bench {
    */
   module NodeController {
     typedef OpenDDS::DCPS::GUID_t NodeId;
-    typedef unsigned long WorkerId;
+    typedef unsigned long SpawnedProcessId;
 
     const short default_control_domain = 89;
 
@@ -144,15 +144,21 @@ module Bench {
     };
     const string status_topic_name = "Node_Controller_Status";
 
-    struct WorkerConfig {
+    struct SpawnedProcessConfig {
+      // Worker executable name
+      string executable;
+      // Command to invoke worker
+      string command;
       // JSON Serialized Bench::WorkerConfig
       string config;
       // Number of workers to spawn using this config (Must be >=1)
       unsigned long count;
       // If count > 1, then this is where the range of worker ids start
-      WorkerId worker_id;
+      SpawnedProcessId spawned_process_id;
+      // Whether we expect a WorkerReport from this process
+      boolean expect_worker_report;
     };
-    typedef sequence<WorkerConfig> WorkerConfigs;
+    typedef sequence<SpawnedProcessConfig> SpawnedProcessConfigs;
 
     struct Config {
       NodeId node_id;
@@ -161,25 +167,25 @@ module Bench {
        * as failed. 0 means never timeout.
        */
       unsigned long timeout;
-      WorkerConfigs workers;
+      SpawnedProcessConfigs spawned_processes;
     };
     const string allocated_scenario_topic_name = "Allocated_Scenario_Config";
     typedef sequence<Config> Configs;
 
-    struct WorkerReport {
-      WorkerId worker_id;
+    struct SpawnedProcessReport {
+      SpawnedProcessId spawned_process_id;
       boolean failed;
       // JSON Serialized Bench::WorkerReport
       string details;
       string log;
     };
-    typedef sequence<WorkerReport> WorkerReports;
+    typedef sequence<SpawnedProcessReport> SpawnedProcessReports;
 
     @topic
     struct Report {
       string node_name;
       NodeId node_id;
-      WorkerReports worker_reports;
+      SpawnedProcessReports spawned_process_reports;
       Builder::PropertySeq properties;
     };
     const string report_topic_name = "Node_Controller_Report";
@@ -190,7 +196,14 @@ module Bench {
    */
   module TestController {
     struct WorkerPrototype {
-      // Filename of the JSON Serialized Bench::WorkerConfig
+      // Filename of the executable to run. Defaults to "worker/worker"
+      string executable;
+      // Command to run. Defaults to "<executable> <config>"
+      string command;
+      // Whether the test controller should not expect a report from this worker instance. Defaults to false.
+      boolean no_report;
+      // Filename of the JSON Serialized Bench::WorkerConfig. Required. Config is modified
+      // and transferred to node_controllers as dictated by the scenario.
       string config;
       // Number of workers to spawn using this prototype (Must be >=1)
       unsigned long count;
@@ -229,18 +242,19 @@ module Bench {
     struct AllocatedScenario {
       string scenario_id;
       NodeController::Configs configs;
-      unsigned long expected_reports;
+      unsigned long expected_process_reports;
+      unsigned long expected_worker_reports;
       unsigned long timeout;
       Builder::TimeStamp launch_time;
     };
 
-    typedef sequence<NodeController::WorkerId> WorkerIdSeq;
+    typedef sequence<NodeController::SpawnedProcessId> SpawnedProcessIdSeq;
     struct NodeReport {
       string node_name;
       NodeController::NodeId node_id;
       WorkerReportSeq worker_reports;
-      Builder::StringSeq worker_logs;
-      WorkerIdSeq worker_ids;
+      Builder::StringSeq spawned_process_logs;
+      SpawnedProcessIdSeq spawned_process_ids;
       Builder::PropertySeq properties;
     };
 

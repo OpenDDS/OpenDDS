@@ -518,7 +518,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-bool vread(ValueReader& reader, MyStruct& s) {
+bool vread(ValueReader& reader, MyStruct& s)
+{
   if (!reader.begin_struct()) return false;
   MemberId member_id;
   if (!reader.begin_struct_member(member_id, member_helper)) return false;
@@ -527,6 +528,12 @@ bool vread(ValueReader& reader, MyStruct& s) {
   if (!reader.end_struct_member()) return false;
   if (!reader.end_struct()) return false;
   return true;
+}
+
+template <>
+void set_default(MyStruct& value)
+{
+  value.value = false;
 }
 
 }

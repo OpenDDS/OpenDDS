@@ -254,7 +254,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
           OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::bit_key_to_repo_id(data.key);
 
-          if (part_svt->id_to_handle (id) != handles[i])
+          if (part_svt->lookup_handle(id) != handles[i])
           {
             ACE_ERROR((LM_ERROR, "(%P|%t) monitor: get_discovered_participant_data test failed.\n"));
             return 1;
@@ -370,7 +370,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             TheServiceParticipant->get_discovery(participant->get_domain_id());
           OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::bit_key_to_repo_id(data.key);
 
-          if (part_svt->id_to_handle (id) != handles[i])
+          if (part_svt->lookup_handle(id) != handles[i])
           {
             ACE_ERROR((LM_ERROR, "(%P|%t) monitor: get_discovered_topic_data test failed.\n"));
             return 1;
