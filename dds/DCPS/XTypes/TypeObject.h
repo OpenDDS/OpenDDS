@@ -991,6 +991,15 @@ namespace XTypes {
     {
       std::memcpy(&paramname_hash, a_name_hash, sizeof paramname_hash);
     }
+
+    bool operator<(const AppliedAnnotationParameter& other) const
+    {
+      for (unsigned int i = 0; i < 4; ++i) {
+        if (paramname_hash[i] < other.paramname_hash[i]) return true;
+        if (other.paramname_hash[i] < paramname_hash[i]) return false;
+      }
+      return false;
+    }
   };
   // Sorted by AppliedAnnotationParameter.paramname_hash
   typedef Sequence<AppliedAnnotationParameter> AppliedAnnotationParameterSeq;
@@ -1006,6 +1015,11 @@ namespace XTypes {
       : annotation_typeid(ann_typeid)
       , param_seq(a_param_seq)
     {}
+
+    bool operator<(const AppliedAnnotation& other) const
+    {
+      return annotation_typeid < other.annotation_typeid;
+    }
   };
   // Sorted by AppliedAnnotation.annotation_typeid
   typedef Sequence<AppliedAnnotation> AppliedAnnotationSeq;
@@ -1071,6 +1085,16 @@ namespace XTypes {
     MemberName name;
     Optional<AppliedBuiltinMemberAnnotations> ann_builtin;
     Optional<AppliedAnnotationSeq> ann_custom;
+
+    CompleteMemberDetail() {}
+
+    CompleteMemberDetail(const MemberName& a_name,
+                         const Optional<AppliedBuiltinMemberAnnotations>& an_ann_builtin,
+                         const Optional<AppliedAnnotationSeq>& an_ann_custom)
+      : name(a_name)
+      , ann_builtin(an_ann_builtin)
+      , ann_custom(an_ann_custom)
+    {}
   };
 
   // MINIMAL Details for a member of an aggregate type
@@ -1096,6 +1120,19 @@ namespace XTypes {
   struct CompleteStructMember {
     CommonStructMember common;
     CompleteMemberDetail detail;
+
+    CompleteStructMember() {}
+
+    CompleteStructMember(const CommonStructMember& a_common,
+                         const CompleteMemberDetail& a_detail)
+      : common(a_common)
+      , detail(a_detail)
+    {}
+
+    bool operator<(const CompleteStructMember& other) const
+    {
+      common.member_id < other.common.member_id;
+    }
   };
   // Ordered by the member_index
   typedef Sequence<CompleteStructMember> CompleteStructMemberSeq;
@@ -1154,6 +1191,14 @@ namespace XTypes {
   struct CompleteStructHeader {
     TypeIdentifier base_type;
     CompleteTypeDetail detail;
+
+    CompleteStructHeader() {}
+
+    CompleteStructHeader(const TypeIdentifier& a_base_type,
+                         const CompleteTypeDetail& a_detail)
+      : base_type(a_base_type)
+      , detail(a_detail)
+    {}
   };
 
   struct MinimalStructHeader {
@@ -1173,6 +1218,16 @@ namespace XTypes {
     StructTypeFlag struct_flags;
     CompleteStructHeader header;
     CompleteStructMemberSeq member_seq;
+
+    CompleteStructType() {}
+
+    CompleteStructType(const StructTypeFlag& a_struct_flags,
+                       const CompleteStructHeader& a_header,
+                       const CompleteStructMemberSeq& a_member_seq)
+      :struct_flags(a_struct_flags)
+      , header(a_header)
+      , member_seq(a_member_seq)
+    {}
   };
 
   struct MinimalStructType {
@@ -1220,6 +1275,19 @@ namespace XTypes {
   struct CompleteUnionMember {
     CommonUnionMember common;
     CompleteMemberDetail detail;
+
+    CompleteUnionMember() {}
+
+    CompleteUnionMember(const CommonUnionMember& a_common,
+                        const CompleteMemberDetail& a_detail)
+      : common(a_common)
+      , detail(a_detail)
+    {}
+
+    bool operator<(const CompleteUnionMember& other) const
+    {
+      return common.member_id < other.common.member_id;
+    }
   };
   // Ordered by member_index
   typedef Sequence<CompleteUnionMember> CompleteUnionMemberSeq;
@@ -1265,6 +1333,16 @@ namespace XTypes {
     CommonDiscriminatorMember common;
     Optional<AppliedBuiltinTypeAnnotations> ann_builtin;
     Optional<AppliedAnnotationSeq> ann_custom;
+
+    CompleteDiscriminatorMember() {}
+
+    CompleteDiscriminatorMember(const CommonDiscriminatorMember& a_common,
+                                const Optional<AppliedBuiltinTypeAnnotations>& an_ann_builtin,
+                                const Optional<AppliedAnnotationSeq>& an_ann_custom)
+      : common(a_common)
+      , ann_builtin(an_ann_builtin)
+      , ann_custom(an_ann_custom)
+    {}
   };
 
   // Member of a union type
@@ -1280,6 +1358,12 @@ namespace XTypes {
 
   struct CompleteUnionHeader {
     CompleteTypeDetail detail;
+
+    CompleteUnionHeader() {}
+
+    explicit CompleteUnionHeader(const CompleteTypeDetail& a_detail)
+      : detail(a_detail)
+    {}
   };
 
   struct MinimalUnionHeader {
@@ -1297,6 +1381,20 @@ namespace XTypes {
     CompleteUnionHeader header;
     CompleteDiscriminatorMember discriminator;
     CompleteUnionMemberSeq member_seq;
+
+    CompleteUnionType()
+      : union_flags(0)
+    {}
+
+    CompleteUnionType(const UnionTypeFlag& a_union_flags,
+                      const CompleteUnionHeader& a_header,
+                      const CompleteDiscriminatorMember& a_discriminator,
+                      const CompleteUnionMemberSeq& a_member_seq)
+      : union_flags(a_union_flags)
+      , header(a_header)
+      , discriminator(a_discriminator)
+      , member_seq(a_member_seq)
+    {}
   };
 
   struct MinimalUnionType {
@@ -1454,6 +1552,14 @@ namespace XTypes {
   struct CompleteElementDetail {
     Optional<AppliedBuiltinMemberAnnotations> ann_builtin;
     Optional<AppliedAnnotationSeq> ann_custom;
+
+    CompleteElementDetail() {}
+
+    CompleteElementDetail(const Optional<AppliedBuiltinMemberAnnotations>& an_ann_builtin,
+                          const Optional<AppliedAnnotationSeq>& an_ann_custom)
+      : ann_builtin(an_ann_builtin)
+      , ann_custom(an_ann_custom)
+    {}
   };
 
   struct CommonCollectionElement {
@@ -1461,6 +1567,7 @@ namespace XTypes {
     TypeIdentifier type;
 
     CommonCollectionElement() {}
+
     CommonCollectionElement(CollectionElementFlag a_element_flags,
                             const TypeIdentifier& a_type)
       : element_flags(a_element_flags)
@@ -1471,32 +1578,54 @@ namespace XTypes {
   struct CompleteCollectionElement {
     CommonCollectionElement common;
     CompleteElementDetail detail;
+
+    CompleteCollectionElement() {}
+
+    CompleteCollectionElement(const CommonCollectionElement& a_common,
+                              const CompleteElementDetail& a_detail)
+      : common(a_common)
+      , detail(a_detail)
+    {}
   };
 
   struct MinimalCollectionElement {
     CommonCollectionElement common;
 
     MinimalCollectionElement() {}
-    MinimalCollectionElement(const CommonCollectionElement& a_common) : common(a_common) {}
+
+    explicit MinimalCollectionElement(const CommonCollectionElement& a_common)
+      : common(a_common) {}
   };
 
   struct CommonCollectionHeader {
     LBound bound;
 
     CommonCollectionHeader() {}
-    explicit CommonCollectionHeader(LBound a_bound) : bound(a_bound) {}
+
+    explicit CommonCollectionHeader(LBound a_bound)
+      : bound(a_bound) {}
   };
 
   struct CompleteCollectionHeader {
     CommonCollectionHeader common;
     Optional<CompleteTypeDetail> detail; // not present for anonymous
+
+    CompleteCollectionHeader() {}
+
+    CompleteCollectionHeader(const CommonCollectionHeader& a_common,
+                             const Optional<CompleteTypeDetail>& a_detail)
+      : common(a_common)
+      , detail(a_detail)
+    {}
   };
 
   struct MinimalCollectionHeader {
     CommonCollectionHeader common;
 
     MinimalCollectionHeader() {}
-    MinimalCollectionHeader(const CommonCollectionHeader& a_common) : common(a_common) {}
+
+    explicit MinimalCollectionHeader(const CommonCollectionHeader& a_common)
+      : common(a_common) {}
   };
 
   // --- Sequence: ------------------------------------------------------
@@ -1504,6 +1633,16 @@ namespace XTypes {
     CollectionTypeFlag collection_flag;
     CompleteCollectionHeader header;
     CompleteCollectionElement element;
+
+    CompleteSequenceType() {}
+
+    CompleteSequenceType(CollectionTypeFlag a_collection_flag,
+                         const CompleteCollectionHeader& a_header,
+                         const CompleteCollectionElement& an_element)
+      : collection_flag(a_collection_flag)
+      , header(a_header)
+      , element(an_element)
+    {}
   };
 
   struct MinimalSequenceType {
@@ -1512,6 +1651,7 @@ namespace XTypes {
     MinimalCollectionElement element;
 
     MinimalSequenceType() {}
+
     MinimalSequenceType(CollectionTypeFlag a_collection_flag,
                         const MinimalCollectionHeader& a_header,
                         const MinimalCollectionElement& a_element)
@@ -1526,19 +1666,30 @@ namespace XTypes {
     LBoundSeq bound_seq;
 
     CommonArrayHeader() {}
-    explicit CommonArrayHeader(const LBoundSeq& a_bound_seq) : bound_seq(a_bound_seq) {}
+
+    explicit CommonArrayHeader(const LBoundSeq& a_bound_seq)
+      : bound_seq(a_bound_seq) {}
   };
 
   struct CompleteArrayHeader {
     CommonArrayHeader common;
     CompleteTypeDetail detail;
+
+    CompleteArrayHeader() {}
+
+    CompleteArrayHeader(const CommonArrayHeader& a_common,
+                        const CompleteTypeDetail& a_detail)
+      : common(a_common)
+      , detail(a_detail)
+    {}
   };
 
   struct MinimalArrayHeader {
     CommonArrayHeader common;
 
     MinimalArrayHeader() {}
-    MinimalArrayHeader(const CommonArrayHeader& a_common)
+
+    explicit MinimalArrayHeader(const CommonArrayHeader& a_common)
       : common(a_common)
     {}
   };
@@ -1547,6 +1698,16 @@ namespace XTypes {
     CollectionTypeFlag collection_flag;
     CompleteArrayHeader header;
     CompleteCollectionElement element;
+
+    CompleteArrayType() {}
+
+    CompleteArrayType(CollectionTypeFlag a_collection_flag,
+                      const CompleteArrayHeader& a_header,
+                      const CompleteCollectionElement& an_element)
+      : collection_flag(a_collection_flag)
+      , header(a_header)
+      , element(an_element)
+    {}
   };
 
   struct MinimalArrayType  {
@@ -1555,6 +1716,7 @@ namespace XTypes {
     MinimalCollectionElement element;
 
     MinimalArrayType() {}
+
     MinimalArrayType(CollectionTypeFlag a_collection_flag,
                      const MinimalArrayHeader& a_header,
                      const MinimalCollectionElement& a_element)
@@ -1591,8 +1753,8 @@ namespace XTypes {
       : flags(0)
     {}
 
-    CommonEnumeratedLiteral(const ACE_CDR::Long& a_value,
-                            const EnumeratedLiteralFlag a_flags)
+    CommonEnumeratedLiteral(ACE_CDR::Long a_value,
+                            EnumeratedLiteralFlag a_flags)
       : value(a_value)
       , flags(a_flags)
     {}
@@ -1602,6 +1764,19 @@ namespace XTypes {
   struct CompleteEnumeratedLiteral {
     CommonEnumeratedLiteral common;
     CompleteMemberDetail detail;
+
+    CompleteEnumeratedLiteral() {}
+
+    CompleteEnumeratedLiteral(const CommonEnumeratedLiteral& a_common,
+                              const CompleteMemberDetail& a_detail)
+      : common(a_common)
+      , detail(a_detail)
+    {}
+
+    bool operator<(const CompleteEnumeratedLiteral& other) const
+    {
+      return common.value < other.common.value;
+    }
   };
   // Ordered by EnumeratedLiteral.common.value
   typedef Sequence<CompleteEnumeratedLiteral> CompleteEnumeratedLiteralSeq;
@@ -1619,7 +1794,8 @@ namespace XTypes {
       , detail(a_detail)
     {}
 
-    bool operator<(const MinimalEnumeratedLiteral& other) const {
+    bool operator<(const MinimalEnumeratedLiteral& other) const
+    {
       return common.value < other.common.value;
     }
   };
@@ -1631,7 +1807,7 @@ namespace XTypes {
 
     CommonEnumeratedHeader() {}
 
-    explicit CommonEnumeratedHeader(const BitBound& a_bit_bound)
+    explicit CommonEnumeratedHeader(BitBound a_bit_bound)
       : bit_bound(a_bit_bound)
     {}
   };
@@ -1639,6 +1815,14 @@ namespace XTypes {
   struct CompleteEnumeratedHeader {
     CommonEnumeratedHeader common;
     CompleteTypeDetail detail;
+
+    CompleteEnumeratedHeader() {}
+
+    CompleteEnumeratedHeader(const CommonEnumeratedHeader& a_common,
+                             const CompleteTypeDetail& a_detail)
+      : common(a_common)
+      , detail(a_detail)
+    {}
   };
 
   struct MinimalEnumeratedHeader {
@@ -1656,6 +1840,18 @@ namespace XTypes {
     EnumTypeFlag enum_flags; // unused
     CompleteEnumeratedHeader header;
     CompleteEnumeratedLiteralSeq literal_seq;
+
+    CompleteEnumeratedType()
+      : enum_flags(0)
+    {}
+
+    CompleteEnumeratedType(const EnumTypeFlag& a_enum_flags,
+                           const CompleteEnumeratedHeader& a_header,
+                           const CopmleteEnumeratedLiteralSeq& a_literal_seq)
+      : enum_flags(a_enum_flags)
+      , header(a_header)
+      , literal_seq(a_literal_seq)
+    {}
   };
 
   // Enumerated type

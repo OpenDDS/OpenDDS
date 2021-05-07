@@ -768,6 +768,16 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalStructHeader& header
 }
 
 std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteStructHeader& header)
+{
+  return out
+    << "XTypes::CompleteStructHeader("
+    << header.base_type << ", "
+    << header.detail
+    << ")";
+}
+
+std::ostream&
 operator<<(std::ostream& out, const OpenDDS::XTypes::CommonStructMember& common)
 {
   return out
@@ -785,6 +795,17 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalMemberDetail& detail
 }
 
 std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteMemberDetail& detail)
+{
+  return out
+    << "XTypes::CompleteMemberDetail("
+    << detail.name << ", "
+    << detail.ann_builtin << ", "
+    << detail.ann_custom
+    << ")";
+}
+
+std::ostream&
 operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalStructMember& member)
 {
   return out
@@ -795,10 +816,32 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalStructMember& member
 }
 
 std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteStructMember& member)
+{
+  return out
+    << "XTypes::CompleteStructMember("
+    << member.common << ", "
+    << member.detail
+    << ")";
+}
+
+std::ostream&
 operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalStructMemberSeq& member_seq)
 {
   out << "XTypes::MinimalStructMemberSeq()";
-  for (OpenDDS::XTypes::MinimalStructMemberSeq::const_iterator pos = member_seq.begin(), limit = member_seq.end(); pos != limit; ++pos) {
+  for (OpenDDS::XTypes::MinimalStructMemberSeq::const_iterator pos = member_seq.begin();
+       pos != member_seq.end(); ++pos) {
+    out << ".append(" << *pos << ")";
+  }
+  return out;
+}
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteStructMemberSeq& member_seq)
+{
+  out << "XTypes::CompleteStructMemberSeq()";
+  for (OpenDDS::XTypes::CompleteStructMemberSeq::const_iterator pos = member_seq.begin();
+       pos != member_seq.end(); ++pos) {
     out << ".append(" << *pos << ")";
   }
   return out;
@@ -809,8 +852,19 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalStructType& struct_t
 {
   return out
     << "XTypes::MinimalStructType("
-    << StructTypeFlagPrinter(struct_type.struct_flags) << ","
-    << struct_type.header << ","
+    << StructTypeFlagPrinter(struct_type.struct_flags) << ", "
+    << struct_type.header << ", "
+    << struct_type.member_seq
+    << ")";
+}
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteStructType& struct_type)
+{
+  return out
+    << "XTypes::CompleteStructType("
+    << StructTypeFlagPrinter(struct_type.struct_flags) << ", "
+    << struct_type.header << ", "
     << struct_type.member_seq
     << ")";
 }
@@ -825,6 +879,16 @@ std::ostream&
 operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalEnumeratedHeader& header)
 {
   return out << "XTypes::MinimalEnumeratedHeader(" << header.common << ")";
+}
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteEnumeratedHeader& header)
+{
+  return out
+    << "XTypes::CompleteEnumeratedHeader("
+    << header.common << ", "
+    << header.detail
+    << ")";
 }
 
 std::ostream&
@@ -858,12 +922,44 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalEnumeratedLiteralSeq
 }
 
 std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteEnumeratedLiteral& literal)
+{
+  return out
+    << "XTypes::CompleteEnumeratedLiteral("
+    << literal.common << ", "
+    << literal.detail
+    << ")";
+}
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteEnumeratedLiteralSeq& literal_seq)
+{
+  out << "XTypes::CompleteEnumeratedLiteralSeq(";
+  for (OpenDDS::XTypes::CompleteEnumeratedLiteralSeq::const_iterator pos = literal_seq.begin();
+       pos != literal_seq.end(); ++pos) {
+    out << ".append(" << *pos << ")";
+  }
+  return out;
+}
+
+std::ostream&
 operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalEnumeratedType& enumerated_type)
 {
   return out
     << "XTypes::MinimalEnumeratedType("
-    << EnumTypeFlagPrinter(enumerated_type.enum_flags) << ","
-    << enumerated_type.header << ","
+    << EnumTypeFlagPrinter(enumerated_type.enum_flags) << ", "
+    << enumerated_type.header << ", "
+    << enumerated_type.literal_seq
+    << ")";
+}
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteEnumeratedType& enumerated_type)
+{
+  return out
+    << "XTypes::CompleteEnumeratedType("
+    << EnumTypeFlagPrinter(enumerated_type.enum_flags) << ", "
+    << enumerated_type.header << ", "
     << enumerated_type.literal_seq
     << ")";
 }
@@ -875,19 +971,36 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalUnionHeader& header)
 }
 
 std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteUnionHeader& header)
+{
+  return out << "XTypes::CompleteUnionHeader(" << header.detail << ")";
+}
+
+std::ostream&
 operator<<(std::ostream& out, const OpenDDS::XTypes::CommonDiscriminatorMember& member)
 {
   return out
     << "XTypes::CommonDiscriminatorMember("
-    << UnionDiscriminatorFlagPrinter(member.member_flags) << ","
+    << UnionDiscriminatorFlagPrinter(member.member_flags) << ", "
     << member.type_id
-   << ")";
+    << ")";
 }
 
 std::ostream&
 operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalDiscriminatorMember& member)
 {
   return out << "XTypes::MinimalDiscriminatorMember(" << member.common << ")";
+}
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteDiscriminatorMember& member)
+{
+  return out
+    << "XTypes::CompleteDiscriminatorMember("
+    << member.common << ", "
+    << member.ann_builtin << ", "
+    << member.ann_custom
+    << ")";
 }
 
 std::ostream&
@@ -905,9 +1018,9 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::CommonUnionMember& member)
 {
   return out
     << "XTypes::CommonUnionMember("
-    << MemberIdPrinter(member.member_id) << ","
-    << UnionMemberFlagPrinter(member.member_flags) << ","
-    << member.type_id << ","
+    << MemberIdPrinter(member.member_id) << ", "
+    << UnionMemberFlagPrinter(member.member_flags) << ", "
+    << member.type_id << ", "
     << member.label_seq
     << ")";
 }
@@ -917,7 +1030,17 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalUnionMember& member)
 {
   return out
     << "XTypes::MinimalUnionMember("
-    << member.common << ","
+    << member.common << ", "
+    << member.detail
+    << ")";
+}
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteUnionMember& member)
+{
+  return out
+    << "XTypes::CompleteUnionMember("
+    << member.common << ", "
     << member.detail
     << ")";
 }
@@ -933,13 +1056,36 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalUnionMemberSeq& seq)
 }
 
 std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteUnionMemberSeq& seq)
+{
+  out << "XTypes::CompleteUnionMemberSeq()";
+  for (OpenDDS::XTypes::CompleteUnionMemberSeq::const_iterator pos = seq.begin();
+       pos != seq.end(); ++pos) {
+    out << ".append(" << *pos << ")";
+  }
+  return out;
+}
+
+std::ostream&
 operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalUnionType& union_type)
 {
   return out
     << "XTypes::MinimalUnionType("
-    << UnionTypeFlagPrinter(union_type.union_flags) << ","
-    << union_type.header << ","
-    << union_type.discriminator << ","
+    << UnionTypeFlagPrinter(union_type.union_flags) << ", "
+    << union_type.header << ", "
+    << union_type.discriminator << ", "
+    << union_type.member_seq
+    << ")";
+}
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteUnionType& union_type)
+{
+  return out
+    << "XTypes::CompleteUnionType("
+    << UnionTypeFlagPrinter(union_type.union_flags) << ", "
+    << union_type.header << ", "
+    << union_type.discriminator << ", "
     << union_type.member_seq
     << ")";
 }
@@ -957,12 +1103,32 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalCollectionHeader& he
 }
 
 std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteCollectionHeader& header)
+{
+  return out
+    << "XTypes::CompleteCollectionHeader("
+    << header.common << ", "
+    << header.detail
+    << ")";
+}
+
+std::ostream&
 operator<<(std::ostream& out, const OpenDDS::XTypes::CommonCollectionElement& element)
 {
   return out << "XTypes::CommonCollectionElement("
-             << CollectionElementFlagPrinter(element.element_flags) << ","
+             << CollectionElementFlagPrinter(element.element_flags) << ", "
              << element.type
              << ")";
+}
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteElementDetail& detail)
+{
+  return out
+    << "XTypes::CompleteElementDetail("
+    << detail.ann_builtin << ", "
+    << detail.ann_custom
+    << ")";
 }
 
 std::ostream&
@@ -972,12 +1138,33 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalCollectionElement& e
 }
 
 std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteCollectionElement& element)
+{
+  return out
+    << "XTypes::CompleteCollectionElement("
+    << element.common << ", "
+    << element.detail
+    << ")";
+}
+
+std::ostream&
 operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalSequenceType& sequence_type)
 {
   return out
     << "XTypes::MinimalSequenceType("
-    << CollectionTypeFlagPrinter(sequence_type.collection_flag) << ","
-    << sequence_type.header << ","
+    << CollectionTypeFlagPrinter(sequence_type.collection_flag) << ", "
+    << sequence_type.header << ", "
+    << sequence_type.element
+    << ")";
+}
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteSequenceType& sequence_type)
+{
+  return out
+    << "XTypes::CompleteSequenceType("
+    << CollectionTypeFlagPrinter(sequence_type.collection_flag) << ", "
+    << sequence_type.header << ", "
     << sequence_type.element
     << ")";
 }
@@ -995,12 +1182,33 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalArrayHeader& header)
 }
 
 std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteArrayHeader& header)
+{
+  return out
+    << "XTypes::CompleteArrayHeader("
+    << header.common << ", "
+    << header.detail
+    << ")";
+}
+
+std::ostream&
 operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalArrayType& array_type)
 {
   return out
     << "XTypes::MinimalArrayType("
-    << CollectionTypeFlagPrinter(array_type.collection_flag) << ","
-    << array_type.header << ","
+    << CollectionTypeFlagPrinter(array_type.collection_flag) << ", "
+    << array_type.header << ", "
+    << array_type.element
+    << ")";
+}
+
+std::ostream&
+operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteArrayType& array_type)
+{
+  return out
+    << "XTypes::CompleteArrayType("
+    << CollectionTypeFlagPrinter(array_type.collection_flag) << ", "
+    << array_type.header << ", "
     << array_type.element
     << ")";
 }
