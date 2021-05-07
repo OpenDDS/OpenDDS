@@ -649,7 +649,7 @@ ACE_INET_Addr choose_single_coherent_address(const std::string& url, bool prefer
 
   if (ACE_OS::inet_pton(AF_INET, host_name, &inet_addr.in4_.sin_addr) == 1) {
 #ifdef ACE_HAS_SOCKADDR_IN_SIN_LEN
-    inet_addr.in4_.sin_len = sizeof result.inet_addr_.in4_;
+    inet_addr.in4_.sin_len = sizeof inet_addr.in4_;
 #endif /* ACE_HAS_SOCKADDR_IN_SIN_LEN */
     inet_addr.in4_.sin_family = AF_INET;
     result.set_addr(&inet_addr, sizeof inet_addr);
