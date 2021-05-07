@@ -89,6 +89,9 @@ bool open_appropriate_socket_type(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& l
 extern OpenDDS_Dcps_Export
 ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& addr, bool prefer_loopback = true);
 
+extern OpenDDS_Dcps_Export
+ACE_INET_Addr choose_single_coherent_address(const std::string& hostname, bool prefer_loopback = true);
+
 } // namespace DCPS
 } // namespace OpenDDS
 

@@ -569,6 +569,12 @@ ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& address, bool 
   return address;
 }
 
+ACE_INET_Addr choose_single_coherent_address(const std::string& hostname, bool prefer_loopback)
+{
+  ACE_INET_Addr temp(hostname.c_str());
+  return choose_single_coherent_address(temp, prefer_loopback);
+}
+
 }
 }
 
