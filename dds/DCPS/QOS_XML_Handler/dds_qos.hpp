@@ -2026,6 +2026,7 @@ namespace dds
     qos_profile_const_iterator begin_qos_profile () const;
     qos_profile_const_iterator end_qos_profile () const;
     void add_qos_profile (qos_profile_value_type const&);
+    void del_qos_profile (qos_profile_value_type const&);
     size_t count_qos_profile () const;
 
     protected:

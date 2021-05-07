@@ -28,6 +28,14 @@ namespace DCPS {
   ::dds::qosProfile *
   QOS_XML_Handler::get_profile(const ACE_TCHAR * profile_name)
   {
+    if (ACE_OS::strlen(profile_name) == 0)
+      {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: QOS_XML_Handler::get_profile - ")
+          ACE_TEXT("No profile specified\n")));
+        return 0;
+      }
+
     for (::dds::qosProfile_seq::qos_profile_const_iterator it = this->profiles_.begin_qos_profile();
         it != this->profiles_.end_qos_profile();
         ++it)
@@ -44,21 +52,92 @@ namespace DCPS {
             return it->get();
           }
       }
-    if (ACE_OS::strlen(profile_name) == 0)
+
+    if (OpenDDS::DCPS::DCPS_debug_level > 7)
       {
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: QOS_XML_Handler::get_profile - ")
-          ACE_TEXT("No profile specified\n")));
-      }
-    else
-      {
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: QOS_XML_Handler::get_profile - ")
+        ACE_DEBUG ((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DEBUG: QOS_XML_Handler::get_profile - ")
           ACE_TEXT("Did not find profile <%s>\n"),
           profile_name));
       }
+
     return 0;
   }
+
+ DDS::ReturnCode_t
+ QOS_XML_Handler::addQoSProfile(const dds::qosProfile & profile)
+ {
+   // get profile name  and check if it exists
+   
+   std::string profileName = profile.name().c_str();
+   if (profileName.empty()) {
+     ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: QOS_XML_Handler::addQoSProfile - ")
+               ACE_TEXT("No profile name specified\n")));
+     return DDS::RETCODE_ERROR;
+   }
+
+   dds::qosProfile * qosProfile =
+     get_profile(profileName.c_str());
+
+   if (qosProfile != 0)
+   {
+     ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: QOS_XML_Handler::addQoSProfile - ")
+               ACE_TEXT("Profile exists or profile name in use.\n")));
+     return DDS::RETCODE_ERROR;
+   }
+
+   // append qos profile to qos profile list
+   dds::qosProfile_seq::qos_profile_value_type t (new ::dds::qosProfile (profile));
+   profiles_.add_qos_profile(t);
+
+   return DDS::RETCODE_OK;
+   
+ }
+
+ DDS::ReturnCode_t
+ QOS_XML_Handler::addQoSProfileSeq(const dds::qosProfile_seq & profiles)
+ {
+
+   for (::dds::qosProfile_seq::qos_profile_const_iterator it = profiles.begin_qos_profile();
+        it != profiles.end_qos_profile();
+        ++it)
+   {
+     dds::qosProfile qos(*(it->get()));
+     addQoSProfile(qos);
+   }
+
+   return DDS::RETCODE_OK;
+
+ }
+   
+ DDS::ReturnCode_t
+ QOS_XML_Handler::delQoSProfile(const ACE_TCHAR * profileName)
+ {
+   dds::qosProfile_seq::qos_profile_value_type qos;
+
+   qos.reset(get_profile(profileName));
+
+   if (qos.null())
+   {
+     ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: QOS_XML_Handler::delQoSProfile - ")
+               ACE_TEXT("Profile doesn't exists or wrong profile name.\n")));
+     return DDS::RETCODE_ERROR;
+   }
+
+   // add profile to qos profile list
+   profiles_.del_qos_profile(qos);
+
+   return DDS::RETCODE_OK;
+
+ }
+
+ size_t QOS_XML_Handler::length()
+ {
+   return profiles_.count_qos_profile();
+ }
 
   DDS::ReturnCode_t
   QOS_XML_Handler::get_datawriter_qos(::DDS::DataWriterQos& dw_qos,

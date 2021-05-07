@@ -69,7 +69,43 @@ namespace DCPS {
     DDS::ReturnCode_t
     get_participant_qos(::DDS::DomainParticipantQos& sub_qos,
                         const ACE_TCHAR * profile_name);
-    //@}
+
+    /**
+     *  Add qos profile to sequence
+     */
+    DDS::ReturnCode_t
+    addQoSProfile(const dds::qosProfile & profile);
+
+    /**
+     *  Add qos profile to sequence
+     */
+    DDS::ReturnCode_t
+    addQoSProfileSeq(const dds::qosProfile_seq & profiles);
+
+    /**
+     *  Remove  qos profile to sequence
+     */
+    DDS::ReturnCode_t
+    delQoSProfile(const ACE_TCHAR * profileName);
+    
+    /**
+     *  number of profiles in sequence
+     */
+    size_t length();
+
+    /**
+    * Get profile by name
+    */
+    ::dds::qosProfile getProfile(const char * profileName) {
+      return *get_profile (profileName);
+    }
+
+    /**
+     *  get profiles sequence
+     */
+    const ::dds::qosProfile_seq& get() {
+      return profiles_;
+    }
 
   protected:
     ::dds::qosProfile_seq profiles_;

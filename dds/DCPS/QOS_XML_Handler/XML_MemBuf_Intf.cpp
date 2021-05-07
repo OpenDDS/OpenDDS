@@ -1,4 +1,3 @@
-
 #include "XML_MemBuf_Intf.h"
 #include "xercesc/util/XercesDefs.hpp"
 #include "xercesc/framework/MemBufInputSource.hpp"
@@ -241,7 +240,6 @@ namespace DCPS {
     return retcode;
 
   }
-
 
   void
   QOS_XML_MemBuf_Handler::add_search_path(const ACE_TCHAR *environment,
