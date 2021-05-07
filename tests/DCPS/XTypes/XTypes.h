@@ -7,6 +7,7 @@
 #include <dds/DCPS/transport/framework/TransportSendStrategy.h>
 #include <dds/DCPS/security/framework/Properties.h>
 #include <dds/DCPS/BuiltInTopicUtils.h>
+#include <dds/DCPS/DCPS_Utils.h>
 
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
@@ -121,7 +122,7 @@ ReturnCode_t read_i(const DataReader_var& dr, const T1& pdr, T2& data)
     ACE_ERROR((LM_ERROR, "ERROR: reader timedout\n"));
   } else if (ret != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: Reader: wait returned %C\n",
-      OpenDDS::DCPS::retcode_to_string(ret)));
+          OpenDDS::DCPS::retcode_to_string(ret)));
   } else {
     SampleInfoSeq info;
     if ((ret = pdr->take_w_condition(data, info, LENGTH_UNLIMITED, dr_rc)) != RETCODE_OK) {
