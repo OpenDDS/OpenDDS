@@ -2290,14 +2290,15 @@ DataReaderImpl::writer_became_dead(WriterInfo& info,
 
 void
 DataReaderImpl::instances_liveliness_update(WriterInfo& info,
-    const MonotonicTimePoint& when)
+    const MonotonicTimePoint&)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
-  for (SubscriptionInstanceMapType::iterator iter = instances_.begin(),
-      next = iter; iter != instances_.end(); iter = next) {
+  for (SubscriptionInstanceMapType::iterator iter = instances_.begin(), next = iter;
+       iter != instances_.end(); iter = next) {
     ++next;
-    iter->second->instance_state_->writer_became_dead(
-        info.writer_id_, liveliness_changed_status_.alive_count, when);
+    if (iter->second->instance_state_->writes_instance(info.writer_id_)) {
+      set_instance_state(iter->first, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, SystemTimePoint::now(), info.writer_id_);
+    }
   }
 }
 

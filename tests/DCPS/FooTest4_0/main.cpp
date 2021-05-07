@@ -334,7 +334,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       si_map['c'].instance_state = ::DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE ;
       si_map['c'].disposed_generation_count = 0 ;
       si_map['c'].no_writers_generation_count = 0 ;
-      si_map['c'].sample_rank = 0 ;
+      si_map['c'].sample_rank = 1;
       si_map['c'].generation_rank = 0 ;
       si_map['c'].absolute_generation_rank = 0 ;
 
@@ -345,7 +345,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       si_map['c'].instance_state = ::DDS::ALIVE_INSTANCE_STATE ;
       si_map['c'].disposed_generation_count = 0 ;
       si_map['c'].no_writers_generation_count = 1 ;
-      si_map['c'].sample_rank = 1 ;
+      si_map['c'].sample_rank = 2;
       si_map['c'].generation_rank = 1 ;
       si_map['c'].absolute_generation_rank = 1 ;
 
@@ -375,7 +375,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       si_map['c'].instance_state = ::DDS::ALIVE_INSTANCE_STATE ;
       si_map['c'].disposed_generation_count = 0 ;
       si_map['c'].no_writers_generation_count = 1 ;
-      si_map['c'].sample_rank = 2 ;
+      si_map['c'].sample_rank = 3;
       si_map['c'].generation_rank = 1 ;
       si_map['c'].absolute_generation_rank = 1 ;
 
