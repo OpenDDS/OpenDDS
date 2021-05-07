@@ -135,32 +135,9 @@ public:
     data_vertical_handler_ = data_vertical_handler;
   }
 
-  bool
-  ignore(const OpenDDS::DCPS::GUID_t& guid)
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
+  void process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now, RelayHandler& handler);
 
-    // Client has already been admitted.
-    if (guid_addr_set_map_.count(guid) != 0) {
-      return false;
-    }
-
-    if (config_.static_limit() != 0 &&
-        guid_addr_set_map_.size() >= config_.static_limit()) {
-      // Too many clients to admit another.
-      return true;
-    }
-
-    if (config_.max_pending() != 0 &&
-        pending_.size() >= config_.max_pending()) {
-      // Too many new clients to admit another.
-      return true;
-    }
-
-    pending_.insert(guid);
-
-    return false;
-  }
+  bool ignore(const OpenDDS::DCPS::GUID_t& guid);
 
   void remove(const OpenDDS::DCPS::RepoId& guid);
 
