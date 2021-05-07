@@ -106,7 +106,7 @@ OPENDDS_STRING get_fully_qualified_hostname(ACE_INET_Addr* addr)
         //Discover the fully qualified hostname
 
         if (ACE::get_fqdn(addr_array[i], hostname, MAXHOSTNAMELEN+1) == 0) {
-          if (!addr_array[i].is_loopback() && ACE_OS::strchr(hostname, '.') != 0) {
+          if (!addr_array[i].is_loopback() && ACE_OS::strchr(hostname, '.') != 0 && choose_single_coherent_address(hostname, false) != ACE_INET_Addr()) {
             VDBG_LVL((LM_DEBUG, "(%P|%t) found fqdn %C from %C:%d\n",
                       hostname, addr_array[i].get_host_addr(), addr_array[i].get_port_number()), 2);
             selected_address = addr_array[i];
