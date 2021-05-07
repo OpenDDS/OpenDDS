@@ -10,6 +10,7 @@
 #include "ace/OS_NS_netdb.h"
 #include "ace/Sock_Connect.h"
 #include "ace/OS_NS_sys_socket.h" // For setsockopt()
+#include "ace/OS_NS_arpa_inet.h"
 
 #if !defined (__ACE_INLINE__)
 # include "NetworkAddress.inl"
