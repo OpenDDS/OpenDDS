@@ -87,6 +87,9 @@ extern OpenDDS_Dcps_Export
 bool open_appropriate_socket_type(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& local_address, int* proto_family = 0);
 
 extern OpenDDS_Dcps_Export
+ACE_INET_Addr choose_single_coherent_address(const std::vector<ACE_INET_Addr>& addrs, bool prefer_loopback = true);
+
+extern OpenDDS_Dcps_Export
 ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& addr, bool prefer_loopback = true);
 
 extern OpenDDS_Dcps_Export

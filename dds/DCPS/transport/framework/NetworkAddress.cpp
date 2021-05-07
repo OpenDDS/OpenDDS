@@ -479,6 +479,21 @@ ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& address, bool 
 // Check that ACE_INET_Addr supports next()
 #if !(ACE_MAJOR_VERSION < 6 || (ACE_MAJOR_VERSION == 6 && (ACE_MINOR_VERSION < 3 || (ACE_MINOR_VERSION == 3 && ACE_MICRO_VERSION < 1))))
   ACE_INET_Addr copy(address);
+  std::vector<ACE_INET_Addr> addresses;
+  do {
+    ACE_INET_Addr temp;
+    temp.set_addr(copy.get_addr(), copy.get_addr_size());
+    addresses.push_back(temp);
+  } while (copy.next());
+  return choose_single_coherent_address(addresses, prefer_loopback);
+#else
+  ACE_UNUSED_ARG(prefer_loopback);
+  return address;
+#endif // !(ACE_MAJOR_VERSION < 6 || (ACE_MAJOR_VERSION == 6 && (ACE_MINOR_VERSION < 3 || (ACE_MINOR_VERSION == 3 && ACE_MICRO_VERSION < 1))))
+}
+
+ACE_INET_Addr choose_single_coherent_address(const std::vector<ACE_INET_Addr>& addresses, bool prefer_loopback)
+{
 
 #ifdef ACE_HAS_IPV6
   OPENDDS_SET(ACE_INET_Addr) set6_loopback;
@@ -489,44 +504,41 @@ ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& address, bool 
   OPENDDS_SET(ACE_INET_Addr) set4_loopback;
   OPENDDS_SET(ACE_INET_Addr) set4;
 
-  do {
-    ACE_INET_Addr temp;
-    temp.set_addr(copy.get_addr(), copy.get_addr_size());
-
+  for (std::vector<ACE_INET_Addr>::const_iterator it = addresses.begin(); it != addresses.end(); ++it) {
 #ifdef ACE_HAS_IPV6
-    if (temp.get_type() == AF_INET6 && !temp.is_multicast()) {
-      if (temp.is_loopback()) {
+    if (it->get_type() == AF_INET6 && !it->is_multicast()) {
+      if (it->is_loopback()) {
         VDBG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
                    "Considering Address %C:%d (%C) - ADDING TO IPv6 LOOPBACK LIST\n",
-                   temp.get_host_addr(), temp.get_port_number(), temp.get_host_name()));
-        set6_loopback.insert(temp);
-      } else if (temp.is_ipv4_mapped_ipv6() || temp.is_ipv4_compat_ipv6()) {
+                   it->get_host_addr(), it->get_port_number(), it->get_host_name()));
+        set6_loopback.insert(*it);
+      } else if (it->is_ipv4_mapped_ipv6() || it->is_ipv4_compat_ipv6()) {
 #ifndef IPV6_V6ONLY
         VDBG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
                    "Considering Address %C:%d (%C) - ADDING TO IPv6 MAPPED / COMPATIBLE IPv4 LIST\n",
-                   temp.get_host_addr(), temp.get_port_number(), temp.get_host_name()));
-        set6_mapped_v4.insert(temp);
+                   it->get_host_addr(), it->get_port_number(), it->get_host_name()));
+        set6_mapped_v4.insert(*it);
 #endif  // ! IPV6_V6ONLY
-      } else if (temp.is_linklocal()) {
+      } else if (it->is_linklocal()) {
         VDBG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
                    "Considering Address %C:%d (%C) - ADDING TO IPv6 LINK-LOCAL LIST\n",
-                   temp.get_host_addr(), temp.get_port_number(), temp.get_host_name()));
-        set6_linklocal.insert(temp);
+                   it->get_host_addr(), it->get_port_number(), it->get_host_name()));
+        set6_linklocal.insert(*it);
       } else {
         VDBG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
                    "Considering Address %C:%d (%C) - ADDING TO IPv6 NORMAL LIST\n",
-                   temp.get_host_addr(), temp.get_port_number(), temp.get_host_name()));
-        set6.insert(temp);
+                   it->get_host_addr(), it->get_port_number(), it->get_host_name()));
+        set6.insert(*it);
       }
     }
 #endif // ACE_HAS_IPV6
-    if (temp.get_type() == AF_INET && !temp.is_multicast()) {
+    if (it->get_type() == AF_INET && !it->is_multicast()) {
       VDBG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
                  "Considering Address %C:%d (%C) - ADDING TO IPv4 NORMAL LIST\n",
-                 temp.get_host_addr(), temp.get_port_number(), temp.get_host_name()));
-      set4.insert(temp);
+                 it->get_host_addr(), it->get_port_number(), it->get_host_name()));
+      set4.insert(*it);
     }
-  } while (copy.next());
+  }
 
 #ifdef ACE_HAS_IPV6
   if (prefer_loopback && !set6_loopback.empty()) {
@@ -564,15 +576,143 @@ ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& address, bool 
     return *set4_loopback.begin();
   }
 
-#endif // !(ACE_MAJOR_VERSION < 6 || (ACE_MAJOR_VERSION == 6 && (ACE_MINOR_VERSION < 3 || (ACE_MINOR_VERSION == 3 && ACE_MICRO_VERSION < 1))))
-  ACE_UNUSED_ARG(prefer_loopback);
-  return address;
+  if (!addresses.empty()) {
+    return *addresses.begin();
+  }
+
+  return ACE_INET_Addr();
 }
 
-ACE_INET_Addr choose_single_coherent_address(const std::string& hostname, bool prefer_loopback)
+ACE_INET_Addr choose_single_coherent_address(const std::string& url, bool prefer_loopback)
 {
-  ACE_INET_Addr temp(hostname.c_str());
-  return choose_single_coherent_address(temp, prefer_loopback);
+  //ACE_INET_Addr temp(hostname.c_str());
+  //return choose_single_coherent_address(temp, prefer_loopback);
+
+  ACE_INET_Addr result;
+
+  if (url.empty()) {
+    return result;
+  }
+
+  // TODO: Fix for literal IPv6 addresses
+  std::string host_name_str;
+  unsigned long port_number = 0;
+
+  std::string::size_type port_div = url.find_last_of(':');
+  if (port_div != std::string::npos) {
+    host_name_str = host_name_str = url.substr(0, port_div);
+    port_number = std::strtoul(url.substr(port_div + 1).c_str(), 0, 10);
+  } else {
+    host_name_str = url;
+  }
+
+  if (host_name_str.empty() || port_number > ACE_MAX_DEFAULT_PORT) {
+    return result;
+  }
+
+  const char* host_name = host_name_str.c_str();
+
+  union ip46
+  {
+    sockaddr_in  in4_;
+#if defined (ACE_HAS_IPV6)
+    sockaddr_in6 in6_;
+#endif /* ACE_HAS_IPV6 */
+  } inet_addr;
+
+  int address_family = AF_UNSPEC;
+
+#if defined ACE_HAS_IPV6 && defined ACE_USES_IPV4_IPV6_MIGRATION
+  if (address_family == AF_UNSPEC && !ACE::ipv6_enabled()) {
+    address_family = AF_INET;
+  }
+#endif /* ACE_HAS_IPV6 && ACE_USES_IPV4_IPV6_MIGRATION */
+
+#ifdef ACE_HAS_IPV6
+  if (address_family == AF_UNSPEC && ACE::ipv6_enabled()) {
+    address_family = AF_INET6;
+  }
+
+  if (address_family != AF_INET && ACE_OS::inet_pton(AF_INET6, host_name, &inet_addr.in6_.sin6_addr) == 1) {
+#ifdef ACE_HAS_SOCKADDR_IN6_SIN6_LEN
+    inet_addr.in6_.sin6_len = sizeof inet_addr.in6_;
+#endif /* ACE_HAS_SOCKADDR_IN6_SIN6_LEN */
+    inet_addr.in6_.sin6_family = AF_INET6;
+    result.set_addr(&inet_addr, sizeof inet_addr);
+    result.set_port_number(port_number, 1 /*encode*/);
+    return result;
+  }
+#else
+  address_family = AF_INET;
+#endif /* ACE_HAS_IPV6 */
+
+  if (ACE_OS::inet_pton(AF_INET, host_name, &inet_addr.in4_.sin_addr) == 1) {
+#ifdef ACE_HAS_SOCKADDR_IN_SIN_LEN
+    inet_addr.in4_.sin_len = sizeof result.inet_addr_.in4_;
+#endif /* ACE_HAS_SOCKADDR_IN_SIN_LEN */
+    inet_addr.in4_.sin_family = AF_INET;
+    result.set_addr(&inet_addr, sizeof inet_addr);
+    result.set_port_number(port_number, 1 /*encode*/);
+    return result;
+  }
+
+  addrinfo hints;
+  ACE_OS::memset(&hints, 0, sizeof hints);
+  hints.ai_family = address_family;
+
+  // The ai_flags used to contain AI_ADDRCONFIG as well but that prevented
+  // lookups from completing if there is no, or only a loopback, IPv6
+  // interface configured. See Bugzilla 4211 for more info.
+
+#if defined ACE_HAS_IPV6 && !defined IPV6_V6ONLY
+  hints.ai_flags = AI_V4MAPPED;
+#endif
+
+#if defined ACE_HAS_IPV6  && defined AI_ALL
+  // Without AI_ALL, Windows machines exhibit inconsistent behaviors on
+  // difference machines we have tested.
+  hints.ai_flags |= AI_ALL;
+#endif
+
+  // Note - specify the socktype here to avoid getting multiple entries
+  // returned with the same address for different socket types or
+  // protocols. If this causes a problem for some reason (an address that's
+  // available for TCP but not UDP, or vice-versa) this will need to change
+  // back to unrestricted hints and weed out the duplicate addresses by
+  // searching this->inet_addrs_ which would slow things down.
+  hints.ai_socktype = SOCK_STREAM;
+
+  addrinfo *res = 0;
+  const int error = ACE_OS::getaddrinfo(host_name, 0, &hints, &res);
+
+  if (error) {
+    return result;
+  }
+
+  std::vector<ACE_INET_Addr> addresses;
+
+  for (addrinfo *curr = res; curr; curr = curr->ai_next) {
+    ip46 addr;
+    ACE_OS::memcpy(&addr, curr->ai_addr, curr->ai_addrlen);
+#ifdef ACE_HAS_IPV6
+    if (curr->ai_family == AF_INET6) {
+      addr.in6_.sin6_port = ACE_NTOHS(port_number);
+    } else {
+#endif /* ACE_HAS_IPV6 */
+      addr.in4_.sin_port = ACE_NTOHS(port_number);;
+#ifdef ACE_HAS_IPV6
+    }
+#endif /* ACE_HAS_IPV6 */
+
+    ACE_INET_Addr temp;
+    temp.set_addr(&addr, sizeof addr);
+    temp.set_port_number(port_number, 1 /*encode*/);
+    addresses.push_back(temp);
+  }
+
+  ACE_OS::freeaddrinfo(res);
+
+  return choose_single_coherent_address(addresses, prefer_loopback);
 }
 
 }

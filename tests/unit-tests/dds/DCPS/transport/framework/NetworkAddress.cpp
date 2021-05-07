@@ -17,6 +17,19 @@ TEST(network_addres_test, choose_single_coherent_address_double)
 #endif
 }
 
+TEST(network_addres_test, choose_single_coherent_address_double_portless)
+{
+  ACE_INET_Addr addr1 = choose_single_coherent_address("www.yahoo.com", false);
+  ACE_INET_Addr addr2 = choose_single_coherent_address("www.yahoo.com", false);
+  EXPECT_NE(addr1, ACE_INET_Addr());
+  EXPECT_NE(addr2, ACE_INET_Addr());
+  EXPECT_EQ(addr1, addr2);
+#if defined ACE_HAS_IPV6 && defined IPV6_V6ONLY
+  EXPECT_FALSE(addr1.is_ipv4_mapped_ipv6());
+  EXPECT_FALSE(addr2.is_ipv4_mapped_ipv6());
+#endif
+}
+
 TEST(network_addres_test, choose_single_coherent_address_triple)
 {
   ACE_INET_Addr addr1 = choose_single_coherent_address("www.facebook.com:80", false);
