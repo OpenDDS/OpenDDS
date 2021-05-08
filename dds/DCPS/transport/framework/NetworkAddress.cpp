@@ -107,8 +107,8 @@ OPENDDS_STRING get_fully_qualified_hostname(ACE_INET_Addr* addr)
 
         if (ACE::get_fqdn(addr_array[i], hostname, MAXHOSTNAMELEN+1) == 0) {
           if (!addr_array[i].is_loopback() && ACE_OS::strchr(hostname, '.') != 0 && choose_single_coherent_address(hostname, false) != ACE_INET_Addr()) {
-            VDBG_LVL((LM_DEBUG, "(%P|%t) found fqdn %C from %C:%d\n",
-                      hostname, addr_array[i].get_host_addr(), addr_array[i].get_port_number()), 2);
+            ACE_DEBUG((LM_DEBUG, "(%P|%t) found fqdn %C from %C:%d\n",
+                      hostname, addr_array[i].get_host_addr(), addr_array[i].get_port_number()));
             selected_address = addr_array[i];
             fullname = hostname;
             if (addr) {
@@ -117,8 +117,8 @@ OPENDDS_STRING get_fully_qualified_hostname(ACE_INET_Addr* addr)
             return fullname;
 
           } else {
-            VDBG_LVL((LM_DEBUG, "(%P|%t) ip interface %C:%d maps to hostname %C\n",
-                      addr_array[i].get_host_addr(), addr_array[i].get_port_number(), hostname), 2);
+            ACE_DEBUG((LM_DEBUG, "(%P|%t) ip interface %C:%d maps to hostname %C\n",
+                      addr_array[i].get_host_addr(), addr_array[i].get_port_number(), hostname));
 
             if (ACE_OS::strncmp(hostname, "localhost", 9) == 0) {
               addr_array[i].get_host_addr(hostname, MAXHOSTNAMELEN);
@@ -509,24 +509,24 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_VECTOR(ACE_INET_Addr)
 #ifdef ACE_HAS_IPV6
     if (it->get_type() == AF_INET6 && !it->is_multicast()) {
       if (it->is_loopback()) {
-        VDBG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
                    "Considering Address %C:%d (%C) - ADDING TO IPv6 LOOPBACK LIST\n",
                    it->get_host_addr(), it->get_port_number(), it->get_host_name()));
         set6_loopback.insert(*it);
       } else if (it->is_ipv4_mapped_ipv6() || it->is_ipv4_compat_ipv6()) {
 #ifndef IPV6_V6ONLY
-        VDBG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
                    "Considering Address %C:%d (%C) - ADDING TO IPv6 MAPPED / COMPATIBLE IPv4 LIST\n",
                    it->get_host_addr(), it->get_port_number(), it->get_host_name()));
         set6_mapped_v4.insert(*it);
 #endif  // ! IPV6_V6ONLY
       } else if (it->is_linklocal()) {
-        VDBG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
                    "Considering Address %C:%d (%C) - ADDING TO IPv6 LINK-LOCAL LIST\n",
                    it->get_host_addr(), it->get_port_number(), it->get_host_name()));
         set6_linklocal.insert(*it);
       } else {
-        VDBG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
                    "Considering Address %C:%d (%C) - ADDING TO IPv6 NORMAL LIST\n",
                    it->get_host_addr(), it->get_port_number(), it->get_host_name()));
         set6.insert(*it);
@@ -534,7 +534,7 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_VECTOR(ACE_INET_Addr)
     }
 #endif // ACE_HAS_IPV6
     if (it->get_type() == AF_INET && !it->is_multicast()) {
-      VDBG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
                  "Considering Address %C:%d (%C) - ADDING TO IPv4 NORMAL LIST\n",
                  it->get_host_addr(), it->get_port_number(), it->get_host_name()));
       set4.insert(*it);
@@ -666,14 +666,14 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_STRING& url, bool pre
   // interface configured. See Bugzilla 4211 for more info.
 
 #if defined ACE_HAS_IPV6 && !defined IPV6_V6ONLY
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - For some reason this process has IPv6 enabled but not IPV6_V6ONLY - Why?"));
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - For some reason this process has IPv6 enabled but not IPV6_V6ONLY - Why?\n"));
   //hints.ai_flags |= AI_V4MAPPED;
 #endif
 
 #if defined ACE_HAS_IPV6 && defined AI_ALL
   // Without AI_ALL, Windows machines exhibit inconsistent behaviors on
   // difference machines we have tested.
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - It looks like this process has IPv6 enabled as well as AI_ALL - Why?"));
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - It looks like this process has IPv6 enabled as well as AI_ALL - Why?\n"));
   hints.ai_flags |= AI_ALL;
 #endif
 
