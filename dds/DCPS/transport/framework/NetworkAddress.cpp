@@ -480,7 +480,7 @@ ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& address, bool 
 // Check that ACE_INET_Addr supports next()
 #if !(ACE_MAJOR_VERSION < 6 || (ACE_MAJOR_VERSION == 6 && (ACE_MINOR_VERSION < 3 || (ACE_MINOR_VERSION == 3 && ACE_MICRO_VERSION < 1))))
   ACE_INET_Addr copy(address);
-  std::vector<ACE_INET_Addr> addresses;
+  OPENDDS_VECTOR(ACE_INET_Addr) addresses;
   do {
     ACE_INET_Addr temp;
     temp.set_addr(copy.get_addr(), copy.get_addr_size());
@@ -493,7 +493,7 @@ ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& address, bool 
 #endif // !(ACE_MAJOR_VERSION < 6 || (ACE_MAJOR_VERSION == 6 && (ACE_MINOR_VERSION < 3 || (ACE_MINOR_VERSION == 3 && ACE_MICRO_VERSION < 1))))
 }
 
-ACE_INET_Addr choose_single_coherent_address(const std::vector<ACE_INET_Addr>& addresses, bool prefer_loopback)
+ACE_INET_Addr choose_single_coherent_address(const OPENDDS_VECTOR(ACE_INET_Addr)& addresses, bool prefer_loopback)
 {
 
 #ifdef ACE_HAS_IPV6
@@ -505,7 +505,7 @@ ACE_INET_Addr choose_single_coherent_address(const std::vector<ACE_INET_Addr>& a
   OPENDDS_SET(ACE_INET_Addr) set4_loopback;
   OPENDDS_SET(ACE_INET_Addr) set4;
 
-  for (std::vector<ACE_INET_Addr>::const_iterator it = addresses.begin(); it != addresses.end(); ++it) {
+  for (OPENDDS_VECTOR(ACE_INET_Addr)::const_iterator it = addresses.begin(); it != addresses.end(); ++it) {
 #ifdef ACE_HAS_IPV6
     if (it->get_type() == AF_INET6 && !it->is_multicast()) {
       if (it->is_loopback()) {
@@ -584,7 +584,7 @@ ACE_INET_Addr choose_single_coherent_address(const std::vector<ACE_INET_Addr>& a
   return ACE_INET_Addr();
 }
 
-ACE_INET_Addr choose_single_coherent_address(const std::string& url, bool prefer_loopback)
+ACE_INET_Addr choose_single_coherent_address(const OPENDDS_STRING& url, bool prefer_loopback)
 {
   //ACE_INET_Addr temp(hostname.c_str());
   //return choose_single_coherent_address(temp, prefer_loopback);
@@ -596,11 +596,11 @@ ACE_INET_Addr choose_single_coherent_address(const std::string& url, bool prefer
   }
 
   // TODO: Fix for literal IPv6 addresses
-  std::string host_name_str;
+  OPENDDS_STRING host_name_str;
   unsigned long port_number = 0;
 
-  std::string::size_type port_div = url.find_last_of(':');
-  if (port_div != std::string::npos) {
+  OPENDDS_STRING::size_type port_div = url.find_last_of(':');
+  if (port_div != OPENDDS_STRING::npos) {
     host_name_str = host_name_str = url.substr(0, port_div);
     port_number = std::strtoul(url.substr(port_div + 1).c_str(), 0, 10);
   } else {
@@ -690,7 +690,7 @@ ACE_INET_Addr choose_single_coherent_address(const std::string& url, bool prefer
     return result;
   }
 
-  std::vector<ACE_INET_Addr> addresses;
+  OPENDDS_VECTOR(ACE_INET_Addr) addresses;
 
   for (addrinfo *curr = res; curr; curr = curr->ai_next) {
     ip46 addr;
