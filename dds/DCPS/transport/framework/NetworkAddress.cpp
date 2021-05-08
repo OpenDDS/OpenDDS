@@ -666,12 +666,14 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_STRING& url, bool pre
   // interface configured. See Bugzilla 4211 for more info.
 
 #if defined ACE_HAS_IPV6 && !defined IPV6_V6ONLY
-  hints.ai_flags = AI_V4MAPPED;
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - For some reason this process has IPv6 enabled but not IPV6_V6ONLY - Why?"));
+  //hints.ai_flags |= AI_V4MAPPED;
 #endif
 
-#if defined ACE_HAS_IPV6  && defined AI_ALL
+#if defined ACE_HAS_IPV6 && defined AI_ALL
   // Without AI_ALL, Windows machines exhibit inconsistent behaviors on
   // difference machines we have tested.
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - It looks like this process has IPv6 enabled as well as AI_ALL - Why?"));
   hints.ai_flags |= AI_ALL;
 #endif
 
