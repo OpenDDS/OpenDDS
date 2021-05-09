@@ -70,8 +70,8 @@ namespace DCPS {
  {
    // get profile name  and check if it exists
    
-   std::string profileName = profile.name().c_str();
-   if (profileName.empty()) {
+   const ACE_TCHAR* profileName = ACE_TEXT_CHAR_TO_TCHAR(profile.name().c_str());
+   if (ACE_OS::strlen(profileName) == 0) {
      ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: QOS_XML_Handler::addQoSProfile - ")
                ACE_TEXT("No profile name specified\n")));
@@ -84,7 +84,7 @@ namespace DCPS {
         it != profiles_.end_qos_profile();
         ++it)
    {
-     if (ACE_OS::strcmp((*it)->name().c_str(), profileName.c_str()) == 0) {
+     if (ACE_OS::strcmp((*it)->name().c_str(), profileName) == 0) {
        ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DEBUG: QOS_XML_Handler::addQoSProfile - ")
                  ACE_TEXT("Profile exists or profile name in use.\n")));
