@@ -77,7 +77,7 @@ namespace DCPS {
     addQoSProfile(const dds::qosProfile & profile);
 
     /**
-     *  Add qos profile to sequence
+     *  Add qos profiles to sequence
      */
     DDS::ReturnCode_t
     addQoSProfileSeq(const dds::qosProfile_seq & profiles);
@@ -89,14 +89,14 @@ namespace DCPS {
     delQoSProfile(const ACE_TCHAR * profileName);
     
     /**
-     *  number of profiles in sequence
+     *  Get number of profiles in sequence
      */
-    size_t length();
+    size_t length() const;
 
     /**
     * Get profile by name
     */
-    ::dds::qosProfile getProfile(const char * profileName) {
+    ::dds::qosProfile getProfile(const ACE_TCHAR * profileName) {
       return *get_profile (profileName);
     }
 

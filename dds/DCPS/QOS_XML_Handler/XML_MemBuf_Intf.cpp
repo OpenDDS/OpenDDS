@@ -33,14 +33,17 @@ namespace DCPS {
       parser_ =  new XercesDOMParser();
 
       // Create a DomImplementation
-      DOMImplementation * domImpl = DOMImplementationRegistry::getDOMImplementation(XMLString::transcode("XML 1.0"));
+      XMLCh* xmlver = XMLString::transcode("XML 1.0");
+      DOMImplementation * domImpl = DOMImplementationRegistry::getDOMImplementation(xmlver);
+      XMLString::release(&xmlver);
 
       // Create a temporary document with a generic element
       // it shall be replaced in future with final version
-      finalDoc_ = domImpl->createDocument(
-        XMLString::transcode(""),
-        XMLString::transcode("temp"),
-        NULL);
+      XMLCh* namespaceURI = XMLString::transcode("");
+       XMLCh* qualifiedName = XMLString::transcode("temp");
+      finalDoc_ = domImpl->createDocument(namespaceURI, qualifiedName,0);
+      XMLString::release(&namespaceURI);
+      XMLString::release(&qualifiedName);
 
     } catch (const XMLException& toCatch) {
 
@@ -71,8 +74,9 @@ namespace DCPS {
     try
     {
       // Create a InputSource to be used in parser with XML string
-      const XMLCh * conv = XMLString::transcode(ACE_TEXT_ALWAYS_CHAR (membuf));
+      XMLCh * conv = XMLString::transcode(ACE_TEXT_ALWAYS_CHAR (membuf));
       TranscodeToStr xmlTranscoded(conv,"utf-8");
+      XMLString::release(&conv);
       MemBufInputSource xmlBuf(xmlTranscoded.str(), xmlTranscoded.length() ,"xml (in memory)");
 
       ///////////////////
@@ -170,7 +174,12 @@ namespace DCPS {
       }
 
       // Find "dds" node using the opendds namespace
-      DOMNodeList * ddsNodeList = initialDoc->getElementsByTagNameNS(XMLString::transcode("http://www.omg.org/dds"),XMLString::transcode("dds"));
+      XMLCh* ns = XMLString::transcode("http://www.omg.org/dds");
+      XMLCh* ddstag = XMLString::transcode("dds");
+
+      DOMNodeList * ddsNodeList = initialDoc->getElementsByTagNameNS(ns, ddstag);
+      XMLString::release(&ns);
+      XMLString::release(&ddstag);
 
       // Check if it could find tag and namespace
       if (ddsNodeList->getLength() == 0)
