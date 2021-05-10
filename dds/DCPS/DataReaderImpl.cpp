@@ -2292,6 +2292,7 @@ void
 DataReaderImpl::instances_liveliness_update(WriterInfo& info,
     const MonotonicTimePoint&)
 {
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
   ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
   for (SubscriptionInstanceMapType::iterator iter = instances_.begin(), next = iter;
        iter != instances_.end(); iter = next) {
