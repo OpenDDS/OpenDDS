@@ -128,7 +128,9 @@ OPENDDS_STRING get_fully_qualified_hostname(ACE_INET_Addr* addr)
             OpenDDS::DCPS::HostnameInfo info;
             info.index_ = i;
             info.hostname_ = hostname;
-            nonFQDN.push_back(info);
+            if (choose_single_coherent_address(hostname, false) != ACE_INET_Addr()) {
+              nonFQDN.push_back(info);
+            }
           }
         }
       }
