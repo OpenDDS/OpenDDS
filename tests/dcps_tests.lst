@@ -326,8 +326,8 @@ tests/DCPS/ManualAssertLiveliness/run_test.pl rtps: !DCPS_MIN RTPS !OPENDDS_SAFE
 tests/DCPS/ManualAssertLiveliness/run_test.pl rtps lost: !DCPS_MIN RTPS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/ManualAssertLiveliness/run_test.pl rtpsdisco: !DCPS_MIN RTPS !OPENDDS_SAFETY_PROFILE !GH_ACTIONS
 tests/DCPS/ManualAssertLiveliness/run_test.pl rtpsdisco lost: !DCPS_MIN RTPS !OPENDDS_SAFETY_PROFILE !GH_ACTIONS
-tests/DCPS/ManualAssertLiveliness/run_test.pl rtpsdisco rtps: !DCPS_MIN RTPS
-tests/DCPS/ManualAssertLiveliness/run_test.pl rtpsdisco rtps lost: !DCPS_MIN RTPS !GH_ACTIONS
+tests/DCPS/ManualAssertLiveliness/run_test.pl rtpsdisco rtps: !DCPS_MIN RTPS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/ManualAssertLiveliness/run_test.pl rtpsdisco rtps lost: !DCPS_MIN RTPS !OPENDDS_SAFETY_PROFILE !GH_ACTIONS
 tests/DCPS/Serializer_wstring/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/SharedTransport/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/SharedTransport/run_test.pl rtps: !DCPS_MIN !OPENDDS_SAFETY_PROFILE RTPS !GH_ACTIONS

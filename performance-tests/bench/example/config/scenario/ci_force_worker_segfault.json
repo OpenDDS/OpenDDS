@@ -1,0 +1,15 @@
+{
+  "name": "Force Worker Segfault",
+  "desc": "This is an example of forcing the worker to segfault and catching / reporting it correctly",
+  "any_node": [
+    {
+      "config": "ci_force_worker_segfault.json",
+      "count": 1
+    },
+    {
+      "config": "ci_force_worker_noop.json",
+      "count": 1
+    }
+  ],
+  "timeout": 120
+}

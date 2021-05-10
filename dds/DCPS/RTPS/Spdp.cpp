@@ -135,9 +135,7 @@ namespace {
   }
 
 #endif
-}
 
-namespace {
   inline bool prop_to_bool(const DDS::Property_t& prop)
   {
     const char* const value = prop.value.in();
@@ -234,7 +232,6 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
   }
 #endif
   initialized_flag_ = true;
-  tport_->enable_periodic_tasks();
 }
 
 Spdp::Spdp(DDS::DomainId_t domain,
@@ -652,10 +649,12 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     partBitData(pdata).key = repo_id_to_bit_key(guid);
 
     if (DCPS::DCPS_debug_level) {
+      ACE_TCHAR addr_buff[256] = {};
+      from.addr_to_string(addr_buff, 256);
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Spdp::handle_participant_data - %C discovered %C lease %ds\n"),
+        ACE_TEXT("(%P|%t) Spdp::handle_participant_data - %C discovered %C lease %ds from %s\n"),
         DCPS::LogGuid(guid_).c_str(), DCPS::LogGuid(guid).c_str(),
-        pdata.leaseDuration.seconds));
+        pdata.leaseDuration.seconds, addr_buff));
     }
 
     if (tport_->directed_sender_) {
@@ -1031,7 +1030,7 @@ Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
     return;
   }
 
-  pending_remote_auth_tokens_[guid] = msg.message_data[0];
+
   DiscoveredParticipantMap::iterator iter = participants_.find(guid);
 
   if (iter != participants_.end()) {
@@ -1042,6 +1041,8 @@ Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
       }
       return;
     }
+
+    iter->second.remote_auth_request_token_ = msg.message_data[0];
     iter->second.auth_req_sequence_number_ = msg.message_identity.sequence_number;
 
     attempt_authentication(iter, false);
@@ -1177,14 +1178,6 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
 {
   const DCPS::RepoId& guid = iter->first;
   DiscoveredParticipant& dp = iter->second;
-
-  PendingRemoteAuthTokenMap::iterator token_iter = pending_remote_auth_tokens_.find(guid);
-  if (token_iter == pending_remote_auth_tokens_.end()) {
-    dp.remote_auth_request_token_ = DDS::Security::Token();
-  } else {
-    dp.remote_auth_request_token_ = token_iter->second;
-    pending_remote_auth_tokens_.erase(token_iter);
-  }
 
   if (DCPS::security_debug.auth_debug) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) {auth_debug} DEBUG: Spdp::attempt_authentication "
@@ -2046,6 +2039,9 @@ void
 Spdp::init_bit(const DDS::Subscriber_var& bit_subscriber)
 {
   bit_subscriber_ = bit_subscriber;
+
+  // This is here to make sure thread status gets a valid BIT Subscriber
+  tport_->enable_periodic_tasks();
 }
 
 class Noop : public DCPS::ReactorInterceptor::Command {
@@ -2300,43 +2296,8 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
   }
 #endif
 
-#ifdef ACE_WIN32
-  // By default Winsock will cause reads to fail with "connection reset"
-  // when UDP sends result in ICMP "port unreachable" messages.
-  // The transport framework is not set up for this since returning <= 0
-  // from our receive_bytes causes the framework to close down the datalink
-  // which in this case is used to receive from multiple peers.
-  {
-    BOOL recv_udp_connreset = FALSE;
-    unicast_socket_.control(SIO_UDP_CONNRESET, &recv_udp_connreset);
-  }
-#endif
-
-  ACE_Reactor* reactor = reactor_task->get_reactor();
-  if (reactor->register_handler(unicast_socket_.get_handle(),
-                                this, ACE_Event_Handler::READ_MASK) != 0) {
-    throw std::runtime_error("failed to register unicast input handler");
-  }
-
-#ifdef ACE_HAS_IPV6
-#ifdef ACE_WIN32
-  // By default Winsock will cause reads to fail with "connection reset"
-  // when UDP sends result in ICMP "port unreachable" messages.
-  // The transport framework is not set up for this since returning <= 0
-  // from our receive_bytes causes the framework to close down the datalink
-  // which in this case is used to receive from multiple peers.
-  {
-    BOOL recv_udp_connreset = FALSE;
-    unicast_ipv6_socket_.control(SIO_UDP_CONNRESET, &recv_udp_connreset);
-  }
-#endif
-
-
-  if (reactor->register_handler(unicast_ipv6_socket_.get_handle(),
-                                this, ACE_Event_Handler::READ_MASK) != 0) {
-    throw std::runtime_error("failed to register unicast IPv6 input handler");
-  }
-#endif
+  reactor_task->interceptor()->execute_or_enqueue(
+    new RegisterHandlers(rchandle_from(this), reactor_task));
 
 #ifdef OPENDDS_SECURITY
   // Now that the endpoint is added, SEDP can write the SPDP info.
@@ -2344,7 +2305,6 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
     outer->write_secure_updates();
   }
 #endif
-
 
   local_sender_ = DCPS::make_rch<SpdpMulti>(reactor_task->interceptor(), outer->config_->resend_period(), ref(*this), &SpdpTransport::send_local);
 
@@ -2409,6 +2369,43 @@ Spdp::SpdpTransport::~SpdpTransport()
 #ifdef ACE_HAS_IPV6
   unicast_ipv6_socket_.close();
   multicast_ipv6_socket_.close();
+#endif
+}
+
+void Spdp::SpdpTransport::register_unicast_socket(
+  ACE_Reactor* reactor, ACE_SOCK_Dgram& socket, const char* what)
+{
+#ifdef ACE_WIN32
+  // By default Winsock will cause reads to fail with "connection reset"
+  // when UDP sends result in ICMP "port unreachable" messages.
+  // The transport framework is not set up for this since returning <= 0
+  // from our receive_bytes causes the framework to close down the datalink
+  // which in this case is used to receive from multiple peers.
+  {
+    BOOL recv_udp_connreset = FALSE;
+    socket.control(SIO_UDP_CONNRESET, &recv_udp_connreset);
+  }
+#endif
+
+  if (reactor->register_handler(socket.get_handle(),
+                                this, ACE_Event_Handler::READ_MASK) != 0) {
+    throw std::runtime_error(
+      (DCPS::String("failed to register ") + what + " unicast input handler").c_str());
+  }
+}
+
+void Spdp::SpdpTransport::register_handlers(const DCPS::ReactorTask_rch& reactor_task)
+{
+  DCPS::RcHandle<Spdp> outer = outer_.lock();
+  if (!outer) {
+    return;
+  }
+  ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
+
+  ACE_Reactor* const reactor = reactor_task->get_reactor();
+  register_unicast_socket(reactor, unicast_socket_, "IPV4");
+#ifdef ACE_HAS_IPV6
+  register_unicast_socket(reactor, unicast_ipv6_socket_, "IPV6");
 #endif
 }
 
@@ -4104,10 +4101,12 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
-  if (DCPS::DCPS_debug_level >= 4) {
+  if (DCPS::DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
                "(%P|%t) Spdp::SpdpTransport::thread_status_task(): Updating internal thread status BIT.\n"));
   }
+
+  ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
 
   const DCPS::RepoId guid = outer->guid();
   DCPS::InternalThreadBuiltinTopicDataDataReaderImpl* bit = outer->internal_thread_bit();
@@ -4124,10 +4123,13 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
       return;
     }
     if (bit) {
+      ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(outer->lock_);
+
       for (StatusMap::const_iterator i = removed.begin(); i != removed.end(); ++i) {
         DCPS::InternalThreadBuiltinTopicData data;
         assign(data.participant_guid, guid);
         data.thread_id = i->first.c_str();
+        ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
         bit->set_instance_state(bit->lookup_instance(data), DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
       }
 
@@ -4135,6 +4137,7 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
         DCPS::InternalThreadBuiltinTopicData data;
         assign(data.participant_guid, guid);
         data.thread_id = i->first.c_str();
+        ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
         bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE, i->second.timestamp);
       }
     } else if (DCPS::DCPS_debug_level >= 2) {

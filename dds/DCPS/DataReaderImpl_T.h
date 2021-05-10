@@ -915,7 +915,7 @@ namespace OpenDDS {
   void set_instance_state(DDS::InstanceHandle_t instance,
                           DDS::InstanceStateKind state,
                           const SystemTimePoint& timestamp = SystemTimePoint::now(),
-                          const OpenDDS::DCPS::GUID_t& publication_id = GUID_UNKNOWN)
+                          const GUID_t& publication_id = GUID_UNKNOWN)
   {
     using namespace OpenDDS::DCPS;
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
@@ -2040,7 +2040,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
   if (! ptr->coherent_change_) {
 #endif
     RcHandle<OpenDDS::DCPS::SubscriberImpl> sub = get_subscriber_servant ();
-    if (!sub)
+    if (!sub || this->get_deleted())
       return;
 
     sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, true);
