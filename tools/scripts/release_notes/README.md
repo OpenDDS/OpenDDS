@@ -23,3 +23,9 @@ There are two scripts, primarily intended to be used together:
   * Examples:
     * ./get_pr_list_since.sh "Release 3.16" | xargs -I {} ./get_pr_info.sh {} | tee release_notes.csv
     * ./get_pr_list_since.sh 772885787256800fa23910397b96297dd7c34087 | xargs -I {} ./get_pr_info.sh {} > partial_notes.csv
+
+# `missing-news-prs.py`
+
+After a spreadsheet is updated, it can be downloaded as a csv file again and passed to `missing-news-prs.py`.
+`missing-news-prs.py` will print out a list of partially prepared lines that are missing from the NEWS file.
+It just looks for the PR numbers (`#NUMBER`), so it's fine if a PR is completly changed or combined with other PRs as long as the number is there.

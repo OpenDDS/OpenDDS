@@ -2127,7 +2127,7 @@ if (%parsed_version) {
   if (!%parsed_next_version) {
     die "Invalid next version: $next_version\nStopped";
   }
-  $next_version = $parsed_next_version{string_with_metadata};
+  $next_version = $parsed_next_version{string};
   print("Next after this version is going to be $next_version\n");
 }
 elsif (!$print_help) {
