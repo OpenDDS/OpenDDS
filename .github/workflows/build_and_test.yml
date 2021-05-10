@@ -4224,8 +4224,8 @@ jobs:
     - name: checkout ACE_TAO
       uses: actions/checkout@v2.3.4
       with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
+        repository: simpsont-oci/ACE_TAO
+        ref: ace6tao2_ip_check_fix
         path: OpenDDS/ACE_TAO
     - name: get ACE_TAO commit
       shell: bash
@@ -4313,8 +4313,8 @@ jobs:
     - name: checkout ACE_TAO
       uses: actions/checkout@v2.3.4
       with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
+        repository: simpsont-oci/ACE_TAO
+        ref: ace6tao2_ip_check_fix
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
@@ -4405,8 +4405,8 @@ jobs:
     - name: checkout ACE_TAO
       uses: actions/checkout@v2.3.4
       with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
+        repository: simpsont-oci/ACE_TAO
+        ref: ace6tao2_ip_check_fix
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
@@ -4476,8 +4476,8 @@ jobs:
     - name: checkout ACE_TAO
       uses: actions/checkout@v2.3.4
       with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
+        repository: simpsont-oci/ACE_TAO
+        ref: ace6tao2_ip_check_fix
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
@@ -4630,8 +4630,8 @@ jobs:
     - name: checkout ACE_TAO
       uses: actions/checkout@v2.3.4
       with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
+        repository: simpsont-oci/ACE_TAO
+        ref: ace6tao2_ip_check_fix
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
@@ -4771,8 +4771,8 @@ jobs:
     - name: checkout ACE_TAO
       uses: actions/checkout@v2.3.4
       with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
+        repository: simpsont-oci/ACE_TAO
+        ref: ace6tao2_ip_check_fix
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
