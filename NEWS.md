@@ -7,8 +7,8 @@ OpenDDS 3.17.0 is currently in development, so this list might change.
 - Support for converting samples to and from JSON (#2312)
   - This requires RapidJSON, so it is now installed along with OpenDDS if it was configured (#2426)
     - NOTE: This might conflict with an existing RapidJSON installation.
-- Support for `ignore_member_names` in the XTypes type Consistency enforcement QoS (#2364)
-- Internal tracking of and reuse of InstanceHandles (#2530, #2557)
+- Support for `ignore_member_names` in the XTypes type consistency enforcement QoS (#2364)
+- Internal tracking of and reuse of instance handles (#2530, #2557)
 - RTPS:
   - RTPS message logging (#2458)
   - RTPS performance logging (#2477)
@@ -34,7 +34,7 @@ OpenDDS 3.17.0 is currently in development, so this list might change.
   - Generate Typecode identifiers needed by `tao_idl` when using C++11 Mapping (#2582, #2627)
 - CMake Module:
   - Fix an issue where a type support library's export header was expected to exist before it was created (#2495)
-  - Use `CMAKE_CXX_COMPILER` as the preprocessor for `opendds_idl` and `tao_idl` so it no longer need to be in the path. (#2503)
+  - Use `CMAKE_CXX_COMPILER` as the preprocessor for `opendds_idl` and `tao_idl` so a compiler is no longer required on the path. (#2503)
   - Fix compatibility with CMake 3.3 (#2562)
   - Subsequent calls to `find_package(OpenDDS)` no longer cause a fatal error (#2616)
     - NOTE: `OPENDDS_ALLOW_ENV_CHANGE` optionally allowed this before, so it is no longer needed and has been removed.
