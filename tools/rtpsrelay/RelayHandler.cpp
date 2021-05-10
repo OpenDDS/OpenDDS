@@ -796,38 +796,18 @@ void HorizontalHandler::enqueue_message(const ACE_INET_Addr& addr,
 
   size_t size = 0;
   serialized_size(encoding, size, relay_header);
+
+  const size_t total_size = size + msg->length();
+  if (total_size > TransportSendStrategy::UDP_MAX_MESSAGE_SIZE) {
+    HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: HorizontalHandler::enqueue_message %C header and message too large (%B > %B)\n"), name_.c_str(), total_size, static_cast<size_t>(TransportSendStrategy::UDP_MAX_MESSAGE_SIZE)));
+    return;
+  }
+
   Message_Block_Shared_Ptr header_block(new ACE_Message_Block(size));
   Serializer ser(header_block.get(), encoding);
   ser << relay_header;
   header_block->cont(msg.get()->duplicate());
   RelayHandler::enqueue_message(addr, header_block, now);
-
-  // TODO: This needs to be reworked.
-  // Determine how many guids we can pack into a single UDP message.
-  // const auto max_guids_per_message =
-  //   (TransportSendStrategy::UDP_MAX_MESSAGE_SIZE - msg->length() - 4) / sizeof(RepoId);
-
-  // auto remaining = guids.size();
-  // auto pos = guids.begin();
-
-  // while (remaining) {
-  //   auto guids_in_message = std::min(max_guids_per_message, remaining);
-  //   remaining -= guids_in_message;
-
-  //   RelayHeader relay_header;
-  //   auto& to = relay_header.to();
-  //   for (; guids_in_message; --guids_in_message, ++pos) {
-  //     to.push_back(repoid_to_guid(*pos));
-  //   }
-
-  //   size_t size = 0;
-  //   serialized_size(encoding, size, relay_header);
-  //   Message_Block_Shared_Ptr header_block(new ACE_Message_Block(size));
-  //   Serializer ser(header_block.get(), encoding);
-  //   ser << relay_header;
-  //   header_block->cont(msg.get()->duplicate());
-  //   RelayHandler::enqueue_message(addr, header_block, now);
-  // }
 }
 
 CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr& from,
