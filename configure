@@ -177,6 +177,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
       $argIndent . 'target DDS_ROOT to target ACE_ROOT)',
     'host-tools-only!', 'Just build the host tools (no)',
     'prefix=s', 'Installation prefix (none)',
+    'install-origin-relative!', 'Install with RPATH relative to $ORIGIN (no)',
     'workspace=s', 'Custom MPC workspace file to copy and use (Use a builtin one)',
    ],
    ['Build flags:',
@@ -1143,6 +1144,13 @@ sub write_platform_macros {
       for my $var ('CC', 'CXX', 'LD') {
         print $PMG "$var = $opts{'compiler'}\n";
       }
+    }
+    if ($opts{'prefix'} && $opts{'install-origin-relative'}) {
+      print $PMG <<'EOT';
+install_rpath = 0
+INSTALL_ORIGIN = $$ORIGIN/../$(INSTALL_LIB)
+LDFLAGS += '-Wl,-rpath,$(INSTALL_ORIGIN)' $(LD_RPATH_FLAGS)
+EOT
     }
     $PMG->close;
     print "Wrote $buildEnv{'ACE_ROOT'}/.../platform_macros.GNU\n"
