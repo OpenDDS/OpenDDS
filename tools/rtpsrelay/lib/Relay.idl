@@ -96,8 +96,6 @@ module RtpsRelay {
     unsigned long long bytes_from;
     unsigned long messages_to;
     unsigned long long bytes_to;
-    unsigned long max_directed_gain;
-    unsigned long max_undirected_gain;
   };
 
   const string HANDLER_STATISTICS_TOPIC_NAME = "Handler Statistics";
@@ -117,8 +115,7 @@ module RtpsRelay {
     unsigned long messages_dropped;
     unsigned long long bytes_dropped;
     Duration_t output_processing_time;
-    unsigned long max_directed_gain;
-    unsigned long max_undirected_gain;
+    unsigned long max_gain;
     unsigned long error_count;
     unsigned long max_queue_size;
     Duration_t max_queue_latency;
@@ -140,8 +137,7 @@ module RtpsRelay {
     unsigned long messages_dropped;
     unsigned long long bytes_dropped;
     Duration_t output_processing_time;
-    unsigned long max_directed_gain;
-    unsigned long max_undirected_gain;
+    unsigned long max_gain;
     unsigned long error_count;
     unsigned long local_active_participants;
     unsigned long new_address_count;

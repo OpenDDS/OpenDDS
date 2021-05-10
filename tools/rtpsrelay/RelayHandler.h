@@ -78,9 +78,9 @@ protected:
 
   ACE_HANDLE get_handle() const override { return socket_.get_handle(); }
 
-  virtual void process_message(const ACE_INET_Addr& remote,
-                               const OpenDDS::DCPS::MonotonicTimePoint& now,
-                               const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) = 0;
+  virtual CORBA::ULong process_message(const ACE_INET_Addr& remote,
+                                       const OpenDDS::DCPS::MonotonicTimePoint& now,
+                                       const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) = 0;
 
 private:
   ACE_SOCK_Dgram socket_;
@@ -250,29 +250,27 @@ protected:
   virtual bool do_normal_processing(GuidAddrSet::Proxy& /*proxy*/,
                                     const ACE_INET_Addr& /*remote*/,
                                     const OpenDDS::DCPS::RepoId& /*src_guid*/,
-                                    ParticipantStatisticsReporter& /*stats_reporter*/,
                                     const GuidSet& /*to*/,
                                     bool& /*send_to_application_participant*/,
                                     const OpenDDS::DCPS::Message_Block_Shared_Ptr& /*msg*/,
-                                    const OpenDDS::DCPS::MonotonicTimePoint& /*now*/) { return true; }
+                                    const OpenDDS::DCPS::MonotonicTimePoint& /*now*/,
+                                    CORBA::ULong& /*sent*/) { return true; }
 
-  void process_message(const ACE_INET_Addr& remote,
-                       const OpenDDS::DCPS::MonotonicTimePoint& now,
-                       const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) override;
+  CORBA::ULong process_message(const ACE_INET_Addr& remote,
+                               const OpenDDS::DCPS::MonotonicTimePoint& now,
+                               const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) override;
   ParticipantStatisticsReporter& record_activity(GuidAddrSet::Proxy& proxy,
                                                  const ACE_INET_Addr& remote_address,
                                                  const OpenDDS::DCPS::MonotonicTimePoint& now,
                                                  const OpenDDS::DCPS::RepoId& src_guid,
                                                  const size_t& msg_len);
-  void send(GuidAddrSet::Proxy& proxy,
-            const OpenDDS::DCPS::RepoId& src_guid,
-            ParticipantStatisticsReporter& stats_reporter,
-            bool undirected,
-            const StringSet& to_partitions,
-            const GuidSet& to_guids,
-            bool send_to_application_participant,
-            const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
-            const OpenDDS::DCPS::MonotonicTimePoint& now);
+  CORBA::ULong send(GuidAddrSet::Proxy& proxy,
+                    const OpenDDS::DCPS::RepoId& src_guid,
+                    const StringSet& to_partitions,
+                    const GuidSet& to_guids,
+                    bool send_to_application_participant,
+                    const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
+                    const OpenDDS::DCPS::MonotonicTimePoint& now);
   size_t send(const ACE_INET_Addr& addr,
               OpenDDS::STUN::Message message,
               const OpenDDS::DCPS::MonotonicTimePoint& now);
@@ -323,9 +321,9 @@ public:
 private:
   const GuidPartitionTable& guid_partition_table_;
   VerticalHandler* vertical_handler_;
-  void process_message(const ACE_INET_Addr& remote,
-                       const OpenDDS::DCPS::MonotonicTimePoint& now,
-                       const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) override;
+  CORBA::ULong process_message(const ACE_INET_Addr& remote,
+                               const OpenDDS::DCPS::MonotonicTimePoint& now,
+                               const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) override;
 };
 
 class SpdpHandler : public VerticalHandler {
@@ -365,11 +363,11 @@ private:
   bool do_normal_processing(GuidAddrSet::Proxy& proxy,
                             const ACE_INET_Addr& remote,
                             const OpenDDS::DCPS::RepoId& src_guid,
-                            ParticipantStatisticsReporter& stats_reporter,
                             const GuidSet& to,
                             bool& send_to_application_participant,
                             const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
-                            const OpenDDS::DCPS::MonotonicTimePoint& now) override;
+                            const OpenDDS::DCPS::MonotonicTimePoint& now,
+                            CORBA::ULong& sent) override;
 
   void purge(const OpenDDS::DCPS::RepoId& guid) override;
   int handle_exception(ACE_HANDLE fd) override;
@@ -403,11 +401,11 @@ private:
   bool do_normal_processing(GuidAddrSet::Proxy& proxy,
                             const ACE_INET_Addr& remote,
                             const OpenDDS::DCPS::RepoId& src_guid,
-                            ParticipantStatisticsReporter& stats_reporter,
                             const GuidSet& to,
                             bool& send_to_application_participant,
                             const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
-                            const OpenDDS::DCPS::MonotonicTimePoint& now) override;
+                            const OpenDDS::DCPS::MonotonicTimePoint& now,
+                            CORBA::ULong& sent) override;
 };
 
 class DataHandler : public VerticalHandler {

@@ -144,7 +144,8 @@ int RelayHandler::handle_input(ACE_HANDLE handle)
   }
 
   buffer->length(bytes);
-  process_message(remote, now, buffer);
+  const CORBA::ULong generated_messages = process_message(remote, now, buffer);
+  stats_reporter_.max_gain(generated_messages, now);
   stats_reporter_.input_message(static_cast<size_t>(bytes), OpenDDS::DCPS::MonotonicTimePoint::now() - now, now);
 
   return 0;
@@ -422,9 +423,9 @@ void VerticalHandler::venqueue_message(const ACE_INET_Addr& addr,
   to_psr.message_to(msg->length(), now);
 }
 
-void VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
-                                      const OpenDDS::DCPS::MonotonicTimePoint& now,
-                                      const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
+CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
+                                              const OpenDDS::DCPS::MonotonicTimePoint& now,
+                                              const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
 {
   guid_addr_set_.process_expirations(now);
 
@@ -436,24 +437,25 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
 
     if (!parse_message(mp, msg, src_guid, to, true, now)) {
       HANDLER_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C failed to parse_message from %C\n"), name_.c_str(), addr_to_string(remote_address).c_str()));
-      return;
+      return 0;
     }
 
     if (guid_addr_set_.ignore(src_guid)) {
       stats_reporter_.ignored_message(msg_len, now);
-      return;
+      return 0;
     }
 
     GuidAddrSet::Proxy proxy(guid_addr_set_);
-    ParticipantStatisticsReporter& from_psr = record_activity(proxy, remote_address, now, src_guid, msg_len);
-    const bool undirected = to.empty();
+    record_activity(proxy, remote_address, now, src_guid, msg_len);
     bool send_to_application_participant = false;
 
-    if (do_normal_processing(proxy, remote_address, src_guid, from_psr, to, send_to_application_participant, msg, now)) {
+    CORBA::ULong sent = 0;
+    if (do_normal_processing(proxy, remote_address, src_guid, to, send_to_application_participant, msg, now, sent)) {
       StringSet to_partitions;
       guid_partition_table_.lookup(to_partitions, src_guid);
-      send(proxy, src_guid, from_psr, undirected, to_partitions, to, send_to_application_participant, msg, now);
+      sent += send(proxy, src_guid, to_partitions, to, send_to_application_participant, msg, now);
     }
+    return sent;
   } else {
     // Assume STUN.
     OpenDDS::DCPS::Serializer serializer(msg.get(), OpenDDS::STUN::encoding);
@@ -461,7 +463,7 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
     message.block = msg.get();
     if (!(serializer >> message)) {
       HANDLER_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C Could not deserialize STUN message from %C\n"), name_.c_str(), addr_to_string(remote_address).c_str()));
-      return;
+      return 0;
     }
 
     std::vector<OpenDDS::STUN::AttributeType> unknown_attributes = message.unknown_comprehension_required_attributes();
@@ -469,13 +471,13 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
     if (!unknown_attributes.empty()) {
       HANDLER_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C Unknown comprehension requird attributes from %C\n"), name_.c_str(), addr_to_string(remote_address).c_str()));
       send(remote_address, make_unknown_attributes_error_response(message, unknown_attributes), now);
-      return;
+      return 1;
     }
 
     if (!message.has_fingerprint()) {
       HANDLER_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C No FINGERPRINT attribute from %C\n"), name_.c_str(), addr_to_string(remote_address).c_str()));
       send(remote_address, make_bad_request_error_response(message, "Bad Request: FINGERPRINT must be pesent"), now);
-      return;
+      return 1;
     }
 
     bool has_guid = false;
@@ -486,7 +488,7 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
 
       if (guid_addr_set_.ignore(src_guid)) {
         stats_reporter_.ignored_message(msg_len, now);
-        return;
+        return 0;
       }
     }
 
@@ -508,7 +510,6 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
           // Do nothing.
         } else {
           HANDLER_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C Unknown STUN message class from %C\n"), name_.c_str(), addr_to_string(remote_address).c_str()));
-          return;
         }
         break;
       }
@@ -525,9 +526,10 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
       ParticipantStatisticsReporter& from_psr = record_activity(proxy, remote_address, now, src_guid, msg_len);
       if (bytes_sent) {
         from_psr.message_to(bytes_sent, now);
-        from_psr.max_directed_gain(1, now);
       }
     }
+
+    return bytes_sent ? 0 : 1;
   }
 }
 
@@ -681,25 +683,22 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
   return true;
 }
 
-void VerticalHandler::send(GuidAddrSet::Proxy& proxy,
-                           const OpenDDS::DCPS::RepoId& src_guid,
-                           ParticipantStatisticsReporter& from_psr,
-                           bool undirected,
-                           const StringSet& to_partitions,
-                           const GuidSet& to_guids,
-                           bool send_to_application_participant,
-                           const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
-                           const OpenDDS::DCPS::MonotonicTimePoint& now)
+CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
+                                   const OpenDDS::DCPS::RepoId& src_guid,
+                                   const StringSet& to_partitions,
+                                   const GuidSet& to_guids,
+                                   bool send_to_application_participant,
+                                   const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
+                                   const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
   AddressSet address_set;
   populate_address_set(address_set, to_partitions);
 
-  size_t sent_message_count = 0;
+  CORBA::ULong sent = 0;
   for (const auto& addr : address_set) {
     if (addr != horizontal_address_) {
       horizontal_handler_->enqueue_message(addr, to_partitions, to_guids, msg, now);
-      // TODO: This is wrong since we don't know how many are at the other relay.
-      sent_message_count += 1;
+      ++sent;
     } else {
       // Local recipients.
       if (!to_guids.empty()) {
@@ -711,7 +710,7 @@ void VerticalHandler::send(GuidAddrSet::Proxy& proxy,
           if (p != proxy.end()) {
             for (const auto& addr : *select_addr_set(p->second)) {
               venqueue_message(addr, *select_stats_reporter(p->second), msg, now);
-              ++sent_message_count;
+              ++sent;
             }
           }
         }
@@ -726,7 +725,7 @@ void VerticalHandler::send(GuidAddrSet::Proxy& proxy,
           if (p != proxy.end()) {
             for (const auto& addr : *select_addr_set(p->second)) {
               venqueue_message(addr, *select_stats_reporter(p->second), msg, now);
-              ++sent_message_count;
+              ++sent;
             }
           }
         }
@@ -736,14 +735,10 @@ void VerticalHandler::send(GuidAddrSet::Proxy& proxy,
 
   if (send_to_application_participant) {
     venqueue_message(application_participant_addr_, proxy.participant_statistics_reporter(config_.application_participant_guid(), *this), msg, now);
-    ++sent_message_count;
+    ++sent;
   }
 
-  if (undirected) {
-    from_psr.max_undirected_gain(sent_message_count, now);
-  } else {
-    from_psr.max_directed_gain(sent_message_count, now);
-  }
+  return sent;
 }
 
 size_t VerticalHandler::send(const ACE_INET_Addr& addr,
@@ -760,7 +755,6 @@ size_t VerticalHandler::send(const ACE_INET_Addr& addr,
   RelayHandler::enqueue_message(addr, block, now);
   const auto new_now = OpenDDS::DCPS::MonotonicTimePoint::now();
   stats_reporter_.output_message(length, new_now - now, new_now - now, now);
-  stats_reporter_.max_directed_gain(1, now);
   return length;
 }
 
@@ -836,9 +830,9 @@ void HorizontalHandler::enqueue_message(const ACE_INET_Addr& addr,
   // }
 }
 
-void HorizontalHandler::process_message(const ACE_INET_Addr& from,
-                                        const OpenDDS::DCPS::MonotonicTimePoint& now,
-                                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
+CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr& from,
+                                                const OpenDDS::DCPS::MonotonicTimePoint& now,
+                                                const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
 {
   ACE_UNUSED_ARG(from);
 
@@ -849,7 +843,7 @@ void HorizontalHandler::process_message(const ACE_INET_Addr& from,
   RelayHeader relay_header;
   if (!(mp >> relay_header)) {
     HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: HorizontalHandler::process_message %C failed to deserialize Relay header\n"), name_.c_str()));
-    return;
+    return 0;
   }
 
   const size_t size_after_header = mp.remaining();
@@ -858,12 +852,15 @@ void HorizontalHandler::process_message(const ACE_INET_Addr& from,
 
   GuidAddrSet::Proxy proxy(vertical_handler_->guid_addr_set());
 
+  CORBA::ULong sent = 0;
+
   if (!relay_header.to_guids().empty()) {
     for (const auto& guid : relay_header.to_guids()) {
       const auto p = proxy.find(guid_to_repoid(guid));
       if (p != proxy.end()) {
         for (const auto& addr : *vertical_handler_->select_addr_set(p->second)) {
           vertical_handler_->venqueue_message(addr, *vertical_handler_->select_stats_reporter(p->second), msg, now);
+          ++sent;
         }
       }
     }
@@ -875,10 +872,13 @@ void HorizontalHandler::process_message(const ACE_INET_Addr& from,
       if (p != proxy.end()) {
         for (const auto& addr : *vertical_handler_->select_addr_set(p->second)) {
           vertical_handler_->venqueue_message(addr, *vertical_handler_->select_stats_reporter(p->second), msg, now);
+          ++sent;
         }
       }
     }
   }
+
+  return sent;
 }
 
 SpdpHandler::SpdpHandler(const Config& config,
@@ -898,11 +898,11 @@ SpdpHandler::SpdpHandler(const Config& config,
 bool SpdpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
                                        const ACE_INET_Addr& remote,
                                        const OpenDDS::DCPS::RepoId& src_guid,
-                                       ParticipantStatisticsReporter& from_psr,
                                        const GuidSet& to,
                                        bool& send_to_application_participant,
                                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
-                                       const OpenDDS::DCPS::MonotonicTimePoint& now)
+                                       const OpenDDS::DCPS::MonotonicTimePoint& now,
+                                       CORBA::ULong& sent)
 {
   if (src_guid == config_.application_participant_guid()) {
     if (remote != application_participant_addr_) {
@@ -914,17 +914,15 @@ bool SpdpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
     // SPDP message is from the application participant.
     if (!to.empty()) {
       // Forward to destinations.
-      size_t sent_message_count = 0;
       for (const auto& guid : to) {
         const auto pos = proxy.find(guid);
         if (pos != proxy.end()) {
           for (const auto& addr : *select_addr_set(pos->second)) {
             venqueue_message(addr, *select_stats_reporter(pos->second), msg, now);
-            ++sent_message_count;
+            ++sent;
           }
         }
       }
-      from_psr.max_directed_gain(sent_message_count, now);
     } else {
       HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SpdpHandler::do_normal_processing dropping non-directed SPDP message from application participant\n")));
       return false;
@@ -985,7 +983,7 @@ int SpdpHandler::handle_exception(ACE_HANDLE /*fd*/)
     const auto pos = spdp_messages_.find(guid);
     if (pos != spdp_messages_.end()) {
       GuidAddrSet::Proxy proxy(guid_addr_set_);
-      send(proxy, guid, proxy.participant_statistics_reporter(guid, *this), false, q, GuidSet(), false, pos->second, now);
+      send(proxy, guid, q, GuidSet(), false, pos->second, now);
     }
   }
 
@@ -1009,11 +1007,11 @@ SedpHandler::SedpHandler(const Config& config,
 bool SedpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
                                        const ACE_INET_Addr& remote,
                                        const OpenDDS::DCPS::RepoId& src_guid,
-                                       ParticipantStatisticsReporter& from_psr,
                                        const GuidSet& to,
                                        bool& send_to_application_participant,
                                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
-                                       const OpenDDS::DCPS::MonotonicTimePoint& now)
+                                       const OpenDDS::DCPS::MonotonicTimePoint& now,
+                                       CORBA::ULong& sent)
 {
   if (src_guid == config_.application_participant_guid()) {
     if (remote != application_participant_addr_) {
@@ -1025,17 +1023,15 @@ bool SedpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
     // SEDP message is from the application participant.
     if (!to.empty()) {
       // Forward to destinations.
-      size_t sent_message_count = 0;
       for (const auto& guid : to) {
         const auto pos = proxy.find(guid);
         if (pos != proxy.end()) {
           for (const auto& addr : *select_addr_set(pos->second)) {
             venqueue_message(addr, *select_stats_reporter(pos->second), msg, now);
-            ++sent_message_count;
+            ++sent;
           }
         }
       }
-      from_psr.max_directed_gain(sent_message_count, now);
     } else {
       HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SedpHandler::do_normal_processing dropping non-directed SEDP message from application participant\n")));
       return false;

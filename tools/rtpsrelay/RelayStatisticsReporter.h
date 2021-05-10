@@ -80,17 +80,10 @@ public:
     report(now);
   }
 
-  void max_directed_gain(size_t value, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  void max_gain(size_t value, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    log_relay_statistics_.max_directed_gain() = std::max(log_relay_statistics_.max_directed_gain(), static_cast<uint32_t>(value));
-    publish_relay_statistics_.max_directed_gain() = std::max(publish_relay_statistics_.max_directed_gain(), static_cast<uint32_t>(value));
-    report(now);
-  }
-
-  void max_undirected_gain(size_t value, const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    log_relay_statistics_.max_undirected_gain() = std::max(log_relay_statistics_.max_undirected_gain(), static_cast<uint32_t>(value));
-    publish_relay_statistics_.max_undirected_gain() = std::max(publish_relay_statistics_.max_undirected_gain(), static_cast<uint32_t>(value));
+    log_relay_statistics_.max_gain() = std::max(log_relay_statistics_.max_gain(), static_cast<uint32_t>(value));
+    publish_relay_statistics_.max_gain() = std::max(publish_relay_statistics_.max_gain(), static_cast<uint32_t>(value));
     report(now);
   }
 
@@ -172,8 +165,7 @@ private:
     log_relay_statistics_.bytes_out(0);
     log_relay_statistics_.messages_dropped(0);
     log_relay_statistics_.bytes_dropped(0);
-    log_relay_statistics_.max_directed_gain(0);
-    log_relay_statistics_.max_undirected_gain(0);
+    log_relay_statistics_.max_gain(0);
     log_relay_statistics_.error_count(0);
     log_relay_statistics_.new_address_count(0);
     log_relay_statistics_.expired_address_count(0);
@@ -215,8 +207,7 @@ private:
     publish_relay_statistics_.bytes_out(0);
     publish_relay_statistics_.messages_dropped(0);
     publish_relay_statistics_.bytes_dropped(0);
-    publish_relay_statistics_.max_directed_gain(0);
-    publish_relay_statistics_.max_undirected_gain(0);
+    publish_relay_statistics_.max_gain(0);
     publish_relay_statistics_.error_count(0);
     publish_relay_statistics_.new_address_count(0);
     publish_relay_statistics_.expired_address_count(0);

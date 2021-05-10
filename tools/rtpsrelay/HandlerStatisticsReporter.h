@@ -90,19 +90,11 @@ public:
     report(now);
   }
 
-  void max_directed_gain(size_t value, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  void max_gain(size_t value, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    relay_statistics_reporter_.max_directed_gain(value, now);
-    log_handler_statistics_.max_directed_gain() = std::max(log_handler_statistics_.max_directed_gain(), static_cast<uint32_t>(value));
-    publish_handler_statistics_.max_directed_gain() = std::max(publish_handler_statistics_.max_directed_gain(), static_cast<uint32_t>(value));
-    report(now);
-  }
-
-  void max_undirected_gain(size_t value, const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    relay_statistics_reporter_.max_undirected_gain(value, now);
-    log_handler_statistics_.max_undirected_gain() = std::max(log_handler_statistics_.max_undirected_gain(), static_cast<uint32_t>(value));
-    publish_handler_statistics_.max_undirected_gain() = std::max(publish_handler_statistics_.max_undirected_gain(), static_cast<uint32_t>(value));
+    relay_statistics_reporter_.max_gain(value, now);
+    log_handler_statistics_.max_gain() = std::max(log_handler_statistics_.max_gain(), static_cast<uint32_t>(value));
+    publish_handler_statistics_.max_gain() = std::max(publish_handler_statistics_.max_gain(), static_cast<uint32_t>(value));
     report(now);
   }
 
@@ -165,8 +157,7 @@ private:
     log_handler_statistics_.bytes_out(0);
     log_handler_statistics_.messages_dropped(0);
     log_handler_statistics_.bytes_dropped(0);
-    log_handler_statistics_.max_directed_gain(0);
-    log_handler_statistics_.max_undirected_gain(0);
+    log_handler_statistics_.max_gain(0);
     log_handler_statistics_.error_count(0);
     log_handler_statistics_.max_queue_size(0);
     log_input_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
@@ -206,8 +197,7 @@ private:
     publish_handler_statistics_.bytes_out(0);
     publish_handler_statistics_.messages_dropped(0);
     publish_handler_statistics_.bytes_dropped(0);
-    publish_handler_statistics_.max_directed_gain(0);
-    publish_handler_statistics_.max_undirected_gain(0);
+    publish_handler_statistics_.max_gain(0);
     publish_handler_statistics_.error_count(0);
     publish_handler_statistics_.max_queue_size(0);
     publish_input_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
