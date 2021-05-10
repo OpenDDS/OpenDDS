@@ -259,8 +259,7 @@ public:
   /// tell instances when a DataWriter transitions to DEAD
   /// The writer state is inout parameter, the state is set to DEAD
   /// when it returns.
-  void writer_became_dead(WriterInfo& info,
-                          const MonotonicTimePoint& when);
+  void writer_became_dead(WriterInfo& info);
 
   /// tell instance when a DataWriter is removed.
   /// The liveliness status need update.
@@ -708,8 +707,7 @@ private:
   void lookup_instance_handles(const WriterIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
 
-  void instances_liveliness_update(WriterInfo& info,
-                                   const MonotonicTimePoint& when);
+  void instances_liveliness_update(const PublicationId& writer);
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   bool verify_coherent_changes_completion(WriterInfo* writer);
