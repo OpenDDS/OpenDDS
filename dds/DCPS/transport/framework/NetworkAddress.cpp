@@ -668,6 +668,16 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_STRING& url, bool pre
   // lookups from completing if there is no, or only a loopback, IPv6
   // interface configured. See Bugzilla 4211 for more info.
 
+#if ACE_HAS_IPV6
+  if (ACE::ipv6_enabled()) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - Operating with ACE_HAS_IPV6 and ACE::ipv6_enabled() is TRUE\n"));
+  } else {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - Operating with ACE_HAS_IPV6 but ACE::ipv6_enabled() is FALSE\n"));
+  }
+#else
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - Operating WITHOUT ACE_HAS_IPV6\n"));
+#endif
+
 #if defined ACE_HAS_IPV6 && !defined IPV6_V6ONLY
   ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - For some reason this process has IPv6 enabled but not IPV6_V6ONLY - Why?\n"));
   //hints.ai_flags |= AI_V4MAPPED;
@@ -676,7 +686,6 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_STRING& url, bool pre
 #if defined ACE_HAS_IPV6 && defined AI_ALL
   // Without AI_ALL, Windows machines exhibit inconsistent behaviors on
   // difference machines we have tested.
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - It looks like this process has IPv6 enabled as well as AI_ALL - Why?\n"));
   hints.ai_flags |= AI_ALL;
 #endif
 
