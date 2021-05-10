@@ -626,6 +626,23 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_STRING& url, bool pre
 
   int address_family = AF_UNSPEC;
 
+#if ACE_HAS_IPV6
+#if ACE_USES_IPV4_IPV6_MIGRATION
+  if (ACE::ipv6_enabled()) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - Operating with ACE_HAS_IPV6 is TRUE and ACE_USES_IPV4_IPV6_MIGRATION is TRUE and ACE::ipv6_enabled() is TRUE\n"));
+  } else {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - Operating with ACE_HAS_IPV6 is TRUE and ACE_USES_IPV4_IPV6_MIGRATION is TRUE but ACE::ipv6_enabled() is FALSE\n"));
+  }
+#else
+  if (ACE::ipv6_enabled()) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - Operating with ACE_HAS_IPV6 is TRUE and ACE_USES_IPV4_IPV6_MIGRATION is FALSE and ACE::ipv6_enabled() is TRUE\n"));
+  } else {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - Operating with ACE_HAS_IPV6 is TRUE and ACE_USES_IPV4_IPV6_MIGRATION is FALSE but ACE::ipv6_enabled() is FALSE\n"));
+  }
+#else
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - Operating WITHOUT ACE_HAS_IPV6\n"));
+#endif
+
 #if defined ACE_HAS_IPV6 && defined ACE_USES_IPV4_IPV6_MIGRATION
   if (address_family == AF_UNSPEC && !ACE::ipv6_enabled()) {
     address_family = AF_INET;
@@ -667,16 +684,6 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_STRING& url, bool pre
   // The ai_flags used to contain AI_ADDRCONFIG as well but that prevented
   // lookups from completing if there is no, or only a loopback, IPv6
   // interface configured. See Bugzilla 4211 for more info.
-
-#if ACE_HAS_IPV6
-  if (ACE::ipv6_enabled()) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - Operating with ACE_HAS_IPV6 and ACE::ipv6_enabled() is TRUE\n"));
-  } else {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - Operating with ACE_HAS_IPV6 but ACE::ipv6_enabled() is FALSE\n"));
-  }
-#else
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - Operating WITHOUT ACE_HAS_IPV6\n"));
-#endif
 
 #if defined ACE_HAS_IPV6 && !defined IPV6_V6ONLY
   ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - For some reason this process has IPv6 enabled but not IPV6_V6ONLY - Why?\n"));
