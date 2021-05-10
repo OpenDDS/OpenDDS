@@ -639,6 +639,7 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_STRING& url, bool pre
   } else {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - Operating with ACE_HAS_IPV6 is TRUE and ACE_USES_IPV4_IPV6_MIGRATION is FALSE but ACE::ipv6_enabled() is FALSE\n"));
   }
+#endif
 #else
   ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - Operating WITHOUT ACE_HAS_IPV6\n"));
 #endif
