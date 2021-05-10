@@ -64,7 +64,6 @@ TcpTransport::blob_to_key(const TransportBLOB& remote,
 {
   const ACE_INET_Addr remote_address = AssociationData::get_remote_address(remote);
   const bool is_loopback = remote_address == config().local_address();
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpTransport::blob_to_key() - Call Stack:\n%?\n"));
   return PriorityKey(priority, remote_address, is_loopback, active);
 }
 
