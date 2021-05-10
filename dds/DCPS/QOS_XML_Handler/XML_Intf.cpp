@@ -70,7 +70,7 @@ namespace DCPS {
   {
     // get profile name  and check if it exists
     
-    const ACE_TCHAR* profileName = ACE_TEXT(profile.name().c_str());
+    const ACE_TCHAR* profileName = profile.name().c_str();
     if (ACE_OS::strlen(profileName) == 0) {
       ACE_ERROR((LM_ERROR,
                 ACE_TEXT("(%P|%t) ERROR: QOS_XML_Handler::addQoSProfile - ")
