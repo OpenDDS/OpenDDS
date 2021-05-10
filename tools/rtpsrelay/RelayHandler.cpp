@@ -277,24 +277,26 @@ GuidAddrSet::record_activity(const ACE_INET_Addr& remote_address,
   return stats_reporter;
 }
 
-void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now, RelayHandler& handler)
+void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
   for (auto pos = expiration_guid_addr_map_.begin(), limit = expiration_guid_addr_map_.end(); pos != limit && pos->first < now;) {
     if (config_.log_activity()) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C %C %C expired at %d.%d now=%d.%d\n"), handler.name().c_str(), guid_to_string(pos->second.guid).c_str(), addr_to_string(pos->second.address).c_str(), pos->first.value().sec(), pos->first.value().usec(), now.value().sec(), now.value().usec()));
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C %C expired at %d.%d now=%d.%d\n"), guid_to_string(pos->second.guid).c_str(), addr_to_string(pos->second.address).c_str(), pos->first.value().sec(), pos->first.value().usec(), now.value().sec(), now.value().usec()));
     }
     relay_stats_reporter_.expired_address(now);
     AddrSetStats& addr_stats = guid_addr_set_map_[pos->second.guid];
-    ParticipantStatisticsReporter& stats_reporter = *handler.select_stats_reporter(addr_stats);
-    AddrSet& addr_set = *handler.select_addr_set(addr_stats);
-    addr_set.erase(pos->second.address);
+    addr_stats.spdp_addr_set.erase(pos->second.address);
+    addr_stats.sedp_addr_set.erase(pos->second.address);
+    addr_stats.data_addr_set.erase(pos->second.address);
     if (addr_stats.empty()) {
       if (config_.log_activity()) {
-        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C %C removed\n"), handler.name().c_str(), guid_to_string(pos->second.guid).c_str()));
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C removed\n"), guid_to_string(pos->second.guid).c_str()));
       }
-      stats_reporter.report(now, true);
+      addr_stats.spdp_stats_reporter.report(now, true);
+      addr_stats.sedp_stats_reporter.report(now, true);
+      addr_stats.data_stats_reporter.report(now, true);
       guid_addr_set_map_.erase(pos->second.guid);
       pending_.erase(pos->second.guid);
       relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
@@ -424,7 +426,7 @@ void VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
                                       const OpenDDS::DCPS::MonotonicTimePoint& now,
                                       const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
 {
-  guid_addr_set_.process_expirations(now, *this);
+  guid_addr_set_.process_expirations(now);
 
   const auto msg_len = msg->length();
   if (msg_len >= 4 && ACE_OS::memcmp(msg->rd_ptr(), "RTPS", 4) == 0) {

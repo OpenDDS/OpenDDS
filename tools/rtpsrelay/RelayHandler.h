@@ -135,7 +135,7 @@ public:
     data_vertical_handler_ = data_vertical_handler;
   }
 
-  void process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now, RelayHandler& handler);
+  void process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now);
 
   bool ignore(const OpenDDS::DCPS::GUID_t& guid);
 
