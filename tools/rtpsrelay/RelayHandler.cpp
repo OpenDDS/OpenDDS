@@ -288,8 +288,9 @@ void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& n
     relay_stats_reporter_.expired_address(now);
     AddrSetStats& addr_stats = guid_addr_set_map_[pos->second.guid];
     ParticipantStatisticsReporter& stats_reporter = *handler.select_stats_reporter(addr_stats);
-    AddrSet& addr_set = *handler.select_addr_set(addr_stats);
-    addr_set.erase(pos->second.address);
+    addr_stats.spdp_addr_set.erase(pos->second.address);
+    addr_stats.sedp_addr_set.erase(pos->second.address);
+    addr_stats.data_addr_set.erase(pos->second.address);
     if (addr_stats.empty()) {
       if (config_.log_activity()) {
         ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C %C removed\n"), handler.name().c_str(), guid_to_string(pos->second.guid).c_str()));
