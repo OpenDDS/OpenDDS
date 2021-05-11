@@ -868,7 +868,7 @@ namespace XTypes {
     ACE_CDR::Boolean boolean_value;
     ACE_CDR::Octet byte_value;
     ACE_CDR::Short int16_value;
-    ACE_CDR::UShort uint_16_value;
+    ACE_CDR::UShort uint16_value;
     ACE_CDR::Long int32_value;
     ACE_CDR::ULong uint32_value;
     ACE_CDR::LongLong int64_value;
@@ -1131,7 +1131,7 @@ namespace XTypes {
 
     bool operator<(const CompleteStructMember& other) const
     {
-      common.member_id < other.common.member_id;
+      return common.member_id < other.common.member_id;
     }
   };
   // Ordered by the member_index
@@ -1485,7 +1485,7 @@ namespace XTypes {
     CompleteAliasBody() {}
 
     CompleteAliasBody(const CommonAliasBody& a_common,
-                      const Optional<AppliedBuiltinMemberAnnotation>& an_ann_builtin,
+                      const Optional<AppliedBuiltinMemberAnnotations>& an_ann_builtin,
                       const Optional<AppliedAnnotationSeq>& an_ann_custom)
       : common(a_common)
       , ann_builtin(an_ann_builtin)
@@ -1847,7 +1847,7 @@ namespace XTypes {
 
     CompleteEnumeratedType(const EnumTypeFlag& a_enum_flags,
                            const CompleteEnumeratedHeader& a_header,
-                           const CopmleteEnumeratedLiteralSeq& a_literal_seq)
+                           const CompleteEnumeratedLiteralSeq& a_literal_seq)
       : enum_flags(a_enum_flags)
       , header(a_header)
       , literal_seq(a_literal_seq)

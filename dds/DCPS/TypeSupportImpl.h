@@ -96,6 +96,8 @@ public:
 
   virtual const XTypes::TypeIdentifier& getMinimalTypeIdentifier() const = 0;
   virtual const XTypes::TypeMap& getMinimalTypeMap() const = 0;
+  virtual const XTypes::TypeIdentifier& getCompleteTypeIdentifier() const = 0;
+  virtual const XTypes::TypeMap& getCompleteTypeMap() const = 0;
 
   virtual Extensibility getExtensibility() const = 0;
 

@@ -570,52 +570,52 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::AnnotationParameterValue& p
 {
   out << "XTypes::AnnotationParameterValue(";
   switch (param_value.kind) {
-  case TK_BOOLEAN:
+  case OpenDDS::XTypes::TK_BOOLEAN:
     out << (param_value.boolean_value ? "true" : "false");
     break;
-  case TK_BYTE:
+  case OpenDDS::XTypes::TK_BYTE:
     out << "static_cast<ACE_CDR::Octet>(" << param_value.byte_value << ")";
     break;
-  case TK_INT16:
+  case OpenDDS::XTypes::TK_INT16:
     out << "static_cast<ACE_CDR::Short>(" << param_value.int16_value << ")";
     break;
-  case TK_UINT16:
+  case OpenDDS::XTypes::TK_UINT16:
     out << "static_cast<ACE_CDR::UShort>(" << param_value.uint16_value << ")";
     break;
-  case TK_INT32:
+  case OpenDDS::XTypes::TK_INT32:
     out << "XTypes::TK_INT32, " << param_value.int32_value;
     break;
-  case TK_UINT32:
+  case OpenDDS::XTypes::TK_UINT32:
     out << "static_cast<ACE_CDR::ULong>(" << param_value.uint32_value << ")";
     break;
-  case TK_INT64:
+  case OpenDDS::XTypes::TK_INT64:
     out << "static_cast<ACE_CDR::LongLong>(" << param_value.int64_value << ")";
     break;
-  case TK_UINT64:
+  case OpenDDS::XTypes::TK_UINT64:
     out << "static_cast<ACE_CDR::ULongLong>(" << param_value.uint64_value << ")";
     break;
-  case TK_FLOAT32:
+  case OpenDDS::XTypes::TK_FLOAT32:
     out << "static_cast<ACE_CDR::Float>(" << param_value.float32_value << ")";
     break;
-  case TK_FLOAT64:
+  case OpenDDS::XTypes::TK_FLOAT64:
     out << "static_cast<ACE_CDR::Double>(" << param_value.float64_value << ")";
     break;
-  case TK_FLOAT128:
+  case OpenDDS::XTypes::TK_FLOAT128:
     out << "static_cast<ACE_CDR::LongDouble>(" << param_value.float128_value << ")";
     break;
-  case TK_CHAR8:
+  case OpenDDS::XTypes::TK_CHAR8:
     out << "static_cast<ACE_CDR::Char>(" << param_value.char_value << ")";
     break;
-  case TK_CHAR16:
+  case OpenDDS::XTypes::TK_CHAR16:
     out << "static_cast<ACE_CDR::WChar>(" << param_value.wchar_value << ")";
     break;
-  case TK_ENUM:
+  case OpenDDS::XTypes::TK_ENUM:
     out << "XTypes::TK_ENUM, " << param_value.enumerated_value;
     break;
-  case TK_STRING8:
+  case OpenDDS::XTypes::TK_STRING8:
     out << "OPENDDS_STRING(" << param_value.string8_value << ")";
     break;
-  case TK_STRING16:
+  case OpenDDS::XTypes::TK_STRING16:
     out << "OPENDDS_WSTRING(" << param_value.string16_value << ")";
   }
   out << ")";
@@ -707,7 +707,7 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalAliasBody& body)
 }
 
 std::ostream&
-operator<<(std::ostream& out, const AppliedBuiltinMemberAnnotations& ann)
+operator<<(std::ostream& out, const OpenDDS::XTypes::AppliedBuiltinMemberAnnotations& ann)
 {
   return out
     << "XTypes::AppliedBuiltinMemberAnnotations("
@@ -1718,8 +1718,8 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
       // Compute the final type objects with the final type identifiers.
       for (List::const_iterator pos = scc.begin(); pos != scc.end(); ++pos) {
         generate_type_identifier(pos->type, true);
-        const TypeIdentifier& minimal_ti = hash_type_identifier_map_[pos->type].minimal;
-        const TypeIdentifier& complete_ti = hash_type_identifier_map_[pos->type].complete;
+        const OpenDDS::XTypes::TypeIdentifier& minimal_ti = hash_type_identifier_map_[pos->type].minimal;
+        const OpenDDS::XTypes::TypeIdentifier& complete_ti = hash_type_identifier_map_[pos->type].complete;
         minimal_type_map_[minimal_ti] = type_object_map_[pos->type].minimal;
         complete_type_map_[complete_ti] = type_object_map_[pos->type].complete;
       }
@@ -1747,6 +1747,19 @@ typeobject_generator::update_maps(AST_Type* type,
 
     minimal_type_map_[minimal_ti] = minimal_to;
     complete_type_map_[complete_ti] = complete_to;
+  }
+}
+
+void typeobject_generator::set_builtin_member_annotations(AST_Decl* member,
+  OpenDDS::XTypes::Optional<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>& annotations)
+{
+  // Support only @hashid annotation for member at this time.
+  const HashidAnnotation* hashid_ann = dynamic_cast<const HashidAnnotation*>(be_global->builtin_annotations_["::@hashid"]);
+  std::string hash_name;
+  if (hashid_ann->node_value_exists(member, hash_name)) {
+    annotations.present = true;
+    annotations.value.hash_id.present = true;
+    annotations.value.hash_id.value = hash_name;
   }
 }
 
@@ -1781,8 +1794,8 @@ typeobject_generator::generate_struct_type_identifier(AST_Type* type)
 
   complete_to.complete.struct_type.struct_flags = minimal_to.minimal.struct_type.struct_flags;
   complete_to.complete.struct_type.header.base_type = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_NONE);
-  // TODO(sonndinh): Set up the other fields of CompleteTypeDetail.
   complete_to.complete.struct_type.header.detail.type_name = type->name()->get_string_copy();
+  // @verbatim and custom annotations are not supported.
 
   for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
     AST_Field* field = *i;
@@ -1817,14 +1830,13 @@ typeobject_generator::generate_struct_type_identifier(AST_Type* type)
     complete_member.common.member_flags = minimal_member.common.member_flags;
     complete_member.common.member_type_id = get_complete_type_identifier(field->field_type());
 
-    // TODO(sonndinh): Set up the other fields of CompleteMemberDetail.
     complete_member.detail.name = field->local_name()->get_string();
+    set_builtin_member_annotations(field, complete_member.detail.ann_builtin);
 
     complete_to.complete.struct_type.member_seq.append(complete_member);
   }
 
   minimal_to.minimal.struct_type.member_seq.sort();
-  // TODO(sonndinh): Define comparison operator for CompleteStructMember.
   complete_to.complete.struct_type.member_seq.sort();
 
   update_maps(type, minimal_to, complete_to);
@@ -1846,7 +1858,7 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
   minimal_to.minimal.union_type.union_flags = extensibility_to_type_flag(exten);
 
   if (be_global->is_nested(n)) {
-    mnimal_to.minimal.union_type.union_flags |= OpenDDS::XTypes::IS_NESTED;
+    minimal_to.minimal.union_type.union_flags |= OpenDDS::XTypes::IS_NESTED;
   }
 
   if (auto_id == autoidkind_hash) {
@@ -1864,10 +1876,8 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
   complete_to.complete.kind = OpenDDS::XTypes::TK_UNION;
   complete_to.complete.union_type.union_flags = minimal_to.minimal.union_type.union_flags;
 
-  // TODO(sonndinh): Construct the other fields of CompleteTypeDetail.
   complete_to.complete.union_type.header.detail.type_name = type->name()->get_string_copy();
 
-  // TODO(sonndinh): Construct the other fields of CompleteDiscriminatorMember.
   complete_to.complete.union_type.discriminator.common.member_flags =
     minimal_to.minimal.union_type.discriminator.common.member_flags;
   complete_to.complete.union_type.discriminator.common.type_id = get_complete_type_identifier(discriminator);
@@ -1915,8 +1925,9 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
     complete_member.common.member_flags = minimal_member.common.member_flags;
     complete_member.common.type_id = get_complete_type_identifier(branch->field_type());
     complete_member.common.label_seq = minimal_member.common.label_seq;
-    // TODO(sonndinh): Construct the other fields of CompleteMemberDetail.
+
     complete_member.detail.name = branch->local_name()->get_string();
+    set_builtin_member_annotations(branch, complete_member.detail.ann_builtin);
 
     complete_to.complete.union_type.member_seq.append(complete_member);
   }
@@ -1950,7 +1961,6 @@ typeobject_generator::generate_enum_type_identifier(AST_Type* type)
   complete_to.kind = OpenDDS::XTypes::EK_COMPLETE;
   complete_to.complete.kind = OpenDDS::XTypes::TK_ENUM;
   complete_to.complete.enumerated_type.header.common.bit_bound = 32;
-  // TODO(sonndinh): Construct the other fields of CompleteTypedDetail.
   complete_to.complete.enumerated_type.header.detail.type_name = type->name()->get_string_copy();
 
   for (size_t i = 0; i != contents.size(); ++i) {
@@ -1962,12 +1972,11 @@ typeobject_generator::generate_enum_type_identifier(AST_Type* type)
 
     OpenDDS::XTypes::CompleteEnumeratedLiteral complete_lit;
     complete_lit.common = minimal_lit.common;
-    // TODO(sonndinh): Construct the other fields of
     complete_lit.detail.name = contents[i]->local_name()->get_string();
+
     complete_to.complete.enumerated_type.literal_seq.append(complete_lit);
   }
   minimal_to.minimal.enumerated_type.literal_seq.sort();
-  // TODO(sonndinh): Add comparison operator to CompleteEnumeratedLiteral.
   complete_to.complete.enumerated_type.literal_seq.sort();
 
   update_maps(type, minimal_to, complete_to);
@@ -2053,11 +2062,10 @@ typeobject_generator::generate_array_type_identifier(AST_Type* type, bool force_
     complete_to.kind = OpenDDS::XTypes::EK_COMPLETE;
     complete_to.complete.kind = OpenDDS::XTypes::TK_ARRAY;
     complete_to.complete.array_type.header.common.bound_seq = minimal_to.minimal.array_type.header.common.bound_seq;
-    // TODO(sonndinh): Construct the other fields of CompleteTypeDetail.
     complete_to.complete.array_type.header.detail.type_name = type->name()->get_string_copy();
+
     complete_to.complete.array_type.element.common.element_flags = cef;
     complete_to.complete.array_type.element.common.type = complete_elem_ti;
-    // TODO(sonndinh): Construct complete_to.complete.array_type.element.detail.
 
     update_maps(type, minimal_to, complete_to);
   }
@@ -2137,7 +2145,6 @@ typeobject_generator::generate_sequence_type_identifier(AST_Type* type, bool for
     complete_to.complete.sequence_type.header.common.bound = bound;
     complete_to.complete.sequence_type.element.common.element_flags = cef;
     complete_to.complete.sequence_type.element.common.type = complete_elem_ti;
-    // TODO(sonndinh): Construct complete_to.complete.sequence_type.element.detail.
 
     update_maps(type, minimal_to, complete_to);
   }
@@ -2155,9 +2162,7 @@ typeobject_generator::generate_alias_type_identifier(AST_Type* type)
 
   complete_to.kind = OpenDDS::XTypes::EK_COMPLETE;
   complete_to.complete.kind = OpenDDS::XTypes::TK_ALIAS;
-  // TODO(sonndinh): Construct the other fields of CompleteTypeDetail.
   complete_to.complete.alias_type.header.detail.type_name = type->name()->get_string_copy();
-  // TODO(sonndinh): Construct the other fields of CompleteAliasBody.
   complete_to.complete.alias_type.body.common.related_type = get_complete_type_identifier(n->base_type());
 
   update_maps(type, minimal_to, complete_to);

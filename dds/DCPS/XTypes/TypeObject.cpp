@@ -323,20 +323,6 @@ bool has_type_object(const TypeIdentifier& ti)
 
 namespace {
 
-/*
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalStructMember& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalUnionMember& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalEnumeratedLiteral& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-*/
-
 void compute_dependencies(const TypeMap& type_map,
                           const CommonAliasBody& type,
                           OPENDDS_SET(TypeIdentifier)& dependencies)

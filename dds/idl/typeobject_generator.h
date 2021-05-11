@@ -65,8 +65,10 @@ private:
   void generate_alias_type_identifier(AST_Type* type);
   void generate_primitive_type_identifier(AST_Type* type);
   void update_maps(AST_Type* type,
-                   const OpenDDS::XTypes::TypeIdentifier& minimal_to,
-                   const OpenDDS::XTypes::TypeIdentifier& complete_to);
+                   const OpenDDS::XTypes::TypeObject& minimal_to,
+                   const OpenDDS::XTypes::TypeObject& complete_to);
+  void set_builtin_member_annotations(AST_Decl* member,
+    OpenDDS::XTypes::Optional<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>& annotations);
 
   static bool name_sorter(const Element& x, const Element& y);
   OpenDDS::XTypes::TypeIdentifier get_minimal_type_identifier(AST_Type* type);
@@ -74,24 +76,24 @@ private:
   bool generate(AST_Type* node, UTL_ScopedName* name);
 
   // Both fields must be constructed when an object is created.
-  typedef struct TypeObjectPair {
+  typedef struct {
     OpenDDS::XTypes::TypeObject minimal;
     OpenDDS::XTypes::TypeObject complete;
-  };
+  } TypeObjectPair;
 
   typedef std::map<AST_Type*, TypeObjectPair> TypeObjectMap;
   TypeObjectMap type_object_map_;
 
   // Both fields must be constructed when an object is created.
-  typedef struct TypeIdentifierPair {
+  typedef struct {
     OpenDDS::XTypes::TypeIdentifier minimal;
     OpenDDS::XTypes::TypeIdentifier complete;
-  };
+  } TypeIdentifierPair;
 
   typedef std::map<AST_Type*, TypeIdentifierPair> HashTypeIdentifierMap;
-  TypeIdentifierMap hash_type_identifier_map_;
+  HashTypeIdentifierMap hash_type_identifier_map_;
 
-  typedef std::map<AST_Type*, TypeIdentifier> FullyDescriptiveTypeIdentifierMap;
+  typedef std::map<AST_Type*, OpenDDS::XTypes::TypeIdentifier> FullyDescriptiveTypeIdentifierMap;
   FullyDescriptiveTypeIdentifierMap fully_desc_type_identifier_map_;
 
   OpenDDS::XTypes::TypeMap minimal_type_map_;
