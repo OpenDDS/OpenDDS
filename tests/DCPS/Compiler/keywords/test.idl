@@ -1,5 +1,5 @@
 // This test was made to catch problems with IDL keywords
-// used as module name and escaped with an appended '_'
+// used as module name and escaped with a prepended '_'
 // as requested by the IDL language specification
 
 // Escaped Non-Keywords
