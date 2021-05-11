@@ -641,7 +641,7 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_STRING& url, bool pre
   }
 #endif
 #else
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(%C) - Operating without ACE_HAS_IPV6\n", host_name));
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(%C) - Operating w/o ACE_HAS_IPV6\n", host_name));
 #endif
 
 #if defined ACE_HAS_IPV6 && defined ACE_USES_IPV4_IPV6_MIGRATION
