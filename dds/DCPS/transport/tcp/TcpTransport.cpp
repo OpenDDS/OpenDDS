@@ -222,10 +222,10 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
   const PriorityKey key =
     blob_to_key(remote.blob_, attribs.priority_, false /* !active */);
 
-  VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink PriorityKey "
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink PriorityKey "
             "prio=%d, addr=%C:%hu, is_loopback=%d, is_active=%d\n", attribs.priority_,
             key.address().get_host_addr(), key.address().get_port_number(),
-            key.is_loopback(), key.is_active()), 2);
+            key.is_loopback(), key.is_active()));
 
   TcpDataLink_rch link;
   {
