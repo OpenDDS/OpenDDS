@@ -239,7 +239,7 @@ GuidAddrSet::record_activity(const ACE_INET_Addr& remote_address,
     const auto res = handler.select_addr_set(guid_addr_set_map_[src_guid])->insert(remote_address);
     if (res.second) {
       if (config_.log_activity()) {
-        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity %C %C is at %C\n"), handler.name().c_str(), guid_to_string(src_guid).c_str(), addr_to_string(remote_address).c_str()));
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity %C %C is at %C total=%B/%B pending=%B/%B\n"), handler.name().c_str(), guid_to_string(src_guid).c_str(), addr_to_string(remote_address).c_str(), guid_addr_set_map_.size(), config_.static_limit(), pending_.size(), config_.max_pending()));
       }
       relay_stats_reporter_.new_address(now);
       const auto after = guid_addr_set_map_.size();
@@ -284,7 +284,7 @@ void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& n
 
   for (auto pos = expiration_guid_addr_map_.begin(), limit = expiration_guid_addr_map_.end(); pos != limit && pos->first < now;) {
     if (config_.log_activity()) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C %C expired at %d.%d now=%d.%d\n"), guid_to_string(pos->second.guid).c_str(), addr_to_string(pos->second.address).c_str(), pos->first.value().sec(), pos->first.value().usec(), now.value().sec(), now.value().usec()));
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C %C expired at %d.%d now=%d.%d total=%B/%B pending=%B/%B\n"), guid_to_string(pos->second.guid).c_str(), addr_to_string(pos->second.address).c_str(), pos->first.value().sec(), pos->first.value().usec(), now.value().sec(), now.value().usec(), guid_addr_set_map_.size(), config_.static_limit(), pending_.size(), config_.max_pending()));
     }
     relay_stats_reporter_.expired_address(now);
     AddrSetStats& addr_stats = guid_addr_set_map_[pos->second.guid];
@@ -292,9 +292,6 @@ void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& n
     addr_stats.sedp_addr_set.erase(pos->second.address);
     addr_stats.data_addr_set.erase(pos->second.address);
     if (addr_stats.empty()) {
-      if (config_.log_activity()) {
-        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C removed\n"), guid_to_string(pos->second.guid).c_str()));
-      }
       addr_stats.spdp_stats_reporter.report(now, true);
       addr_stats.sedp_stats_reporter.report(now, true);
       addr_stats.data_stats_reporter.report(now, true);
@@ -304,6 +301,9 @@ void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& n
       spdp_vertical_handler_->purge(pos->second.guid);
       sedp_vertical_handler_->purge(pos->second.guid);
       data_vertical_handler_->purge(pos->second.guid);
+      if (config_.log_activity()) {
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C removed total=%B/%B pending=%B/%B\n"), guid_to_string(pos->second.guid).c_str(), guid_addr_set_map_.size(), config_.static_limit(), pending_.size(), config_.max_pending()));
+      }
     }
     guid_addr_expiration_map_.erase(pos->second);
     expiration_guid_addr_map_.erase(pos++);
@@ -359,7 +359,7 @@ void GuidAddrSet::remove(const OpenDDS::DCPS::RepoId& guid)
   data_vertical_handler_->purge(guid);
 
   if (config_.log_activity()) {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::remove %C removed\n"), guid_to_string(guid).c_str()));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::remove %C removed total=%B/%B pending=%B/%B\n"), guid_to_string(guid).c_str(), guid_addr_set_map_.size(), config_.static_limit(), pending_.size(), config_.max_pending()));
   }
 }
 
