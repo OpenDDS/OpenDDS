@@ -117,7 +117,6 @@ namespace DCPS {
 
       // Parsing buffer
       try {
-        ACE::debug(true);
         parser_->parse(xmlBuf);
       }
       catch (const SAXParseException& toCatch) {
@@ -127,7 +126,6 @@ namespace DCPS {
           ACE_TEXT ("Exception message is: <%C>\n"),
           message));
         XMLString::release(&message);
-        ACE::debug(false);
         return DDS::RETCODE_ERROR;
       }
       catch (const XMLException& toCatch) {
@@ -137,7 +135,6 @@ namespace DCPS {
           ACE_TEXT ("Exception message is: <%C>\n"),
           message));
         XMLString::release(&message);
-        ACE::debug(false);
         return DDS::RETCODE_ERROR;
       }
       catch (const DOMException& toCatch) {
@@ -147,7 +144,6 @@ namespace DCPS {
           ACE_TEXT ("Exception message is: <%C>\n"),
           message));
         XMLString::release(&message);
-        ACE::debug(false);
         return DDS::RETCODE_ERROR;
       }
       catch (...) {
@@ -155,10 +151,8 @@ namespace DCPS {
           ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
           ACE_TEXT ("Unexpected exception\n")
           ));
-        ACE::debug(false);
         return DDS::RETCODE_ERROR;
       }
-      ACE::debug(false);
 
       DOMDocument * initialDoc = parser_->getDocument();
       if (initialDoc == 0)
@@ -199,7 +193,7 @@ namespace DCPS {
       if (DCPS_debug_level > 1)
       {
         char* message = XMLString::transcode(ddsNode->getNodeName());
-        ACE_DEBUG ((LM_INFO,
+        ACE_DEBUG ((LM_DEBUG,
           ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
           ACE_TEXT ("Node name: <%C>\n"),
           message));
