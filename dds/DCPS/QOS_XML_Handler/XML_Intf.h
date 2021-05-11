@@ -87,7 +87,7 @@ namespace DCPS {
      */
     DDS::ReturnCode_t
     delQoSProfile(const ACE_TCHAR * profileName);
- 
+
     /**
      *  Get number of profiles in sequence
      */

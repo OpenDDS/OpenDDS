@@ -69,7 +69,7 @@ namespace DCPS {
   QOS_XML_Handler::addQoSProfile(const dds::qosProfile & profile)
   {
     // get profile name  and check if it exists
-    
+
     const ACE_TCHAR* profileName = profile.name().c_str();
     if (ACE_OS::strlen(profileName) == 0) {
       ACE_ERROR((LM_ERROR,
@@ -77,7 +77,7 @@ namespace DCPS {
                 ACE_TEXT("No profile name specified\n")));
       return DDS::RETCODE_ERROR;
     }
- 
+
     // check if this profile name is already in the list
     dds::qosProfile_seq::qos_profile_const_iterator it;
     for (it = profiles_.begin_qos_profile();
@@ -95,19 +95,19 @@ namespace DCPS {
         return DDS::RETCODE_ERROR;
       }
     }
- 
+
     // append qos profile to list
     dds::qosProfile_seq::qos_profile_value_type t(new dds::qosProfile(profile));
     profiles_.add_qos_profile(t);
- 
+
     return DDS::RETCODE_OK;
- 
+
   }
- 
+
   DDS::ReturnCode_t
   QOS_XML_Handler::addQoSProfileSeq(const dds::qosProfile_seq & profiles)
   {
- 
+
     dds::qosProfile_seq::qos_profile_const_iterator it;
     for (it = profiles.begin_qos_profile();
          it != profiles.end_qos_profile();
@@ -116,15 +116,15 @@ namespace DCPS {
       dds::qosProfile qos(*(it->get()));
       addQoSProfile(qos);
     }
- 
+
     return DDS::RETCODE_OK;
- 
+
   }
- 
+
   DDS::ReturnCode_t
   QOS_XML_Handler::delQoSProfile(const ACE_TCHAR * profileName)
   {
- 
+
     if (ACE_OS::strlen(profileName) == 0)
     {
       ACE_ERROR((LM_ERROR,
@@ -132,7 +132,7 @@ namespace DCPS {
         ACE_TEXT("No profile specified\n")));
       return DDS::RETCODE_ERROR;
     }
-    
+
     dds::qosProfile_seq::qos_profile_const_iterator it;
     for (it = profiles_.begin_qos_profile();
          it != profiles_.end_qos_profile();
@@ -142,9 +142,9 @@ namespace DCPS {
         profiles_.del_qos_profile(*it);
         return DDS::RETCODE_OK;
       }
- 
+
     }
-    
+
     if (DCPS_debug_level > 7)
     {
       ACE_DEBUG((LM_DEBUG,
@@ -153,7 +153,7 @@ namespace DCPS {
     }
     return DDS::RETCODE_ERROR;
   }
- 
+
   size_t QOS_XML_Handler::length() const
   {
      return profiles_.count_qos_profile();

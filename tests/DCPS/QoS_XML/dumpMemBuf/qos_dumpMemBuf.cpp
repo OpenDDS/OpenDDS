@@ -191,7 +191,7 @@ int ACE_TMAIN (int, ACE_TCHAR *[])
       return ++retval;
     }
 
-    // Remove profile 
+    // Remove profile
     retcode = xml1.delQoSProfile(profileName);
     if (retcode != DDS::RETCODE_OK)
     {
