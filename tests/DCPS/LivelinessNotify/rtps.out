@@ -1,0 +1,206 @@
+/home/calabresec/3_16/liveliness/OpenDDS/tests/DCPS/LivelinessNotify/subscriber  -w 1 -m 0 -l 3 -i 2 -t 0 -DCPSConfigFile rtps_disc.ini  -DCPSPendingTimeout 3  -T /home/calabresec/3_16/liveliness/OpenDDS/tests/DCPS/LivelinessNotify/
+sub PID: 20090
+/home/calabresec/3_16/liveliness/OpenDDS/tests/DCPS/LivelinessNotify/publisher  -w 1 -m 0 -l 3 -i 2 -DCPSConfigFile rtps_disc.ini  -DCPSPendingTimeout 3  -T /home/calabresec/3_16/liveliness/OpenDDS/tests/DCPS/LivelinessNotify/
+pub PID: 20091
+(20090|20090)  18:19:01.169676 subscriber main
+(20091|20091)  18:19:01.169676 publisher main
+(20091|20091) NOTICE: using DCPSPendingTimeout value from command option (overrides value if it's in config file)
+(20090|20090) NOTICE: using DCPSPendingTimeout value from command option (overrides value if it's in config file)
+(20090|20090) DataReaderListenerImpl::DataReaderListenerImpl
+(20090|20090) DataReaderListenerImpl::DataReaderListenerImpl
+ use_take=0 num_ops_per_thread=2
+(20090|20090) DataReaderListenerImpl::DataReaderListenerImpl
+(20090|20090) DataReaderListenerImpl::DataReaderListenerImpl
+ use_take=0 num_ops_per_thread=2
+(20090|20090) RtpsUdpSendStrategy::send_single_i() - destination 192.168.1.103:38746 failed send: Operation not permitted
+(20090|20090)  18:19:01.177817 waiting for publisher to be ready
+(20090|20095) DataReaderListenerImpl::on_subscription_matched
+(20090|20095) DataReaderListenerImpl::on_subscription_matched
+(20090|20095)  18:19:02.777484 Sedp::data_received(DCPS::MessageId, const ParticipantMessageData&), 16777216
+(20090|20095) SIGNAL FOR LIVELINESS: AUTOMATIC 
+(20090|20095)  18:19:02.777698 DataReaderListenerImpl::on_liveliness_changed reader=0x562644862f28, 1
+alive_count 1 not_alive_count 0 alive_count_change 1 not_alive_count_change 0
+(20090|20090)  18:19:03.179628 Publisher is ready
+(20090|20090)  18:19:03.179686 waiting for publisher to finish
+(20090|20098)  18:19:03.429820 DataReaderListenerImpl::on_liveliness_changed reader=0x562644876178, 1
+alive_count 1 not_alive_count 0 alive_count_change 1 not_alive_count_change 0
+ 18:19:03.430815 read foo[0]: x = -1.000000 y = -1.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1620688743 429520999
+  instance_handle: 7
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+(20090|20092)  18:19:04.779361 DataReaderListenerImpl::on_liveliness_changed reader=0x562644862f28, 2
+alive_count 0 not_alive_count 1 alive_count_change -1 not_alive_count_change 1
+(20090|20092)  18:19:05.430741 DataReaderListenerImpl::on_liveliness_changed reader=0x562644876178, 2
+alive_count 0 not_alive_count 1 alive_count_change -1 not_alive_count_change 1
+(20091|20091) Writer::run_test begins.
+(20091|20091)  18:19:08.430312 Writer::run_test starting to write pass 0
+(20090|20098)  18:19:08.431242 DataReaderListenerImpl::on_liveliness_changed reader=0x562644862f28, 3
+alive_count 1 not_alive_count 0 alive_count_change 1 not_alive_count_change -1
+(20091|20091)  18:19:08.431740 Writer::run_test done writing.
+(20091|20091) Writer::run_test finished.
+ 18:19:08.431977 read foo[0]: x = 0.000000 y = 0.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1620688748 430978999
+  instance_handle: 8
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+ 18:19:08.432428 read foo[0]: x = 1.000000 y = 0.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1620688748 431365999
+  instance_handle: 8
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+(20090|20092)  18:19:10.433564 DataReaderListenerImpl::on_liveliness_changed reader=0x562644862f28, 4
+alive_count 0 not_alive_count 1 alive_count_change -1 not_alive_count_change 1
+(20091|20091) Writer::run_test begins.
+(20091|20091)  18:19:11.432138 Writer::run_test starting to write pass 1
+(20090|20098)  18:19:11.433055 DataReaderListenerImpl::on_liveliness_changed reader=0x562644862f28, 5
+alive_count 1 not_alive_count 0 alive_count_change 1 not_alive_count_change -1
+(20091|20091)  18:19:11.433218 Writer::run_test done writing.
+(20091|20091) Writer::run_test finished.
+ 18:19:11.433383 read foo[0]: x = 0.000000 y = -1.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1620688751 432216999
+  instance_handle: 8
+  disposed_generation_count: 0
+  no_writers_generation_count: 1
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+ 18:19:11.433834 read foo[0]: x = 1.000000 y = -1.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1620688751 432839999
+  instance_handle: 8
+  disposed_generation_count: 0
+  no_writers_generation_count: 1
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+(20090|20092)  18:19:13.435261 DataReaderListenerImpl::on_liveliness_changed reader=0x562644862f28, 6
+alive_count 0 not_alive_count 1 alive_count_change -1 not_alive_count_change 1
+(20091|20091) Writer::run_test begins.
+(20091|20091)  18:19:14.433693 Writer::run_test starting to write pass 2
+(20090|20098)  18:19:14.434607 DataReaderListenerImpl::on_liveliness_changed reader=0x562644862f28, 7
+alive_count 1 not_alive_count 0 alive_count_change 1 not_alive_count_change -1
+(20091|20091)  18:19:14.434798 Writer::run_test done writing.
+(20091|20091) Writer::run_test finished.
+ 18:19:14.435012 read foo[0]: x = 0.000000 y = -2.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1620688754 433751999
+  instance_handle: 8
+  disposed_generation_count: 0
+  no_writers_generation_count: 2
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+ 18:19:14.435477 read foo[0]: x = 1.000000 y = -2.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1620688754 434404999
+  instance_handle: 8
+  disposed_generation_count: 0
+  no_writers_generation_count: 2
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+(20090|20092)  18:19:16.436930 DataReaderListenerImpl::on_liveliness_changed reader=0x562644862f28, 8
+alive_count 0 not_alive_count 1 alive_count_change -1 not_alive_count_change 1
+(20091|20091) Writer::run_test begins.
+(20091|20091)  18:19:17.435256 Writer::run_test starting to write pass 3
+(20090|20098)  18:19:17.436239 DataReaderListenerImpl::on_liveliness_changed reader=0x562644862f28, 9
+alive_count 1 not_alive_count 0 alive_count_change 1 not_alive_count_change -1
+(20091|20091)  18:19:17.436431 Writer::run_test done writing.
+(20091|20091) Writer::run_test finished.
+(20091|20091)  18:19:17.436544 waiting for writers to finish
+ 18:19:17.436664 read foo[0]: x = 0.000000 y = -3.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1620688757 435314999
+  instance_handle: 8
+  disposed_generation_count: 0
+  no_writers_generation_count: 3
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+ 18:19:17.437126 read foo[0]: x = 1.000000 y = -3.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1620688757 436034999
+  instance_handle: 8
+  disposed_generation_count: 0
+  no_writers_generation_count: 3
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+(20090|20095)  18:19:17.437453 Sedp::data_received(DCPS::MessageId, const ParticipantMessageData&), 16777216
+(20090|20095) SIGNAL FOR LIVELINESS: AUTOMATIC 
+(20091|20091)  18:19:17.686713 Writers are finished
+(20091|20091)  18:19:17.686787 waiting for readers to finish
+(20091|20091)  18:19:17.937013 Readers are finished
+ 18:19:17.938254 read foo[0]: x = 0.000000 y = 0.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: NOT_ALIVE_DISPOSED_INSTANCE_STATE
+  source_timestamp: 1620688757 937141999
+  instance_handle: 8
+  disposed_generation_count: 0
+  no_writers_generation_count: 3
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+(20090|20098)  18:19:17.938630 DataReaderListenerImpl::on_liveliness_changed reader=0x562644876178, 3
+alive_count 1 not_alive_count 0 alive_count_change 1 not_alive_count_change -1
+(20090|20092)  18:19:19.938920 DataReaderListenerImpl::on_liveliness_changed reader=0x562644862f28, 10
+alive_count 0 not_alive_count 1 alive_count_change -1 not_alive_count_change 1
+(20090|20092)  18:19:19.939091 DataReaderListenerImpl::on_liveliness_changed reader=0x562644876178, 4
+alive_count 0 not_alive_count 1 alive_count_change -1 not_alive_count_change 1
+(20090|20092)  18:19:19.940709 DataReaderListenerImpl::on_liveliness_changed reader=0x562644862f28, 11
+alive_count 0 not_alive_count 0 alive_count_change 0 not_alive_count_change -1
+(20090|20092) DataReaderListenerImpl::on_subscription_matched
+(20090|20092)  18:19:19.941275 DataReaderListenerImpl::on_liveliness_changed reader=0x562644876178, 5
+alive_count 0 not_alive_count 0 alive_count_change 0 not_alive_count_change -1
+(20090|20092) DataReaderListenerImpl::on_subscription_matched
+**********
+drl_servant->liveliness_changed_count() = 11
+drl_servant->no_writers_generation_count() = 3
+********** use_take=0
+(20090|20090)  18:19:22.691655 publisher is finish - cleanup subscriber
+(20090|20090) DataReaderListenerImpl::~DataReaderListenerImpl
+(20090|20090) DataReaderListenerImpl::~DataReaderListenerImpl
+test PASSED.

@@ -1,0 +1,204 @@
+/home/calabresec/3_16/liveliness/OpenDDS/bin/DCPSInfoRepo  -o repo.ior -DCPSPendingTimeout 3 
+InfoRepo PID: 584
+/home/calabresec/3_16/liveliness/OpenDDS/tests/DCPS/LivelinessNotify/subscriber  -w 1 -m 0 -l 3 -i 2 -t 0 -DCPSPendingTimeout 3  -T /home/calabresec/3_16/liveliness/OpenDDS/tests/DCPS/LivelinessNotify/
+sub PID: 591
+/home/calabresec/3_16/liveliness/OpenDDS/tests/DCPS/LivelinessNotify/publisher  -w 1 -m 0 -l 3 -i 2 -DCPSPendingTimeout 3  -T /home/calabresec/3_16/liveliness/OpenDDS/tests/DCPS/LivelinessNotify/
+pub PID: 592
+(591|591)  16:14:01.023210 subscriber main
+(592|592)  16:14:01.024095 publisher main
+(584|584) WARNING: Could not find FQDN. Using "oci1602" as fully qualified hostname, please correct system configuration.
+(592|592) WARNING: Could not find FQDN. Using "oci1602" as fully qualified hostname, please correct system configuration.
+(591|591) WARNING: Could not find FQDN. Using "oci1602" as fully qualified hostname, please correct system configuration.
+(591|591) DataReaderListenerImpl::DataReaderListenerImpl
+(591|591) DataReaderListenerImpl::DataReaderListenerImpl
+ use_take=0 num_ops_per_thread=2
+(591|591) DataReaderListenerImpl::DataReaderListenerImpl
+(591|591) DataReaderListenerImpl::DataReaderListenerImpl
+ use_take=0 num_ops_per_thread=2
+(591|591)  16:14:01.106489 waiting for publisher to be ready
+(591|603) DataReaderListenerImpl::on_subscription_matched
+(591|603) DataReaderListenerImpl::on_subscription_matched
+(591|603)  16:14:02.706172 DataReaderListenerImpl::on_liveliness_changed reader=0x55caff5f6dc8, 1
+alive_count 1 not_alive_count 0 alive_count_change 1 not_alive_count_change 0
+(591|591)  16:14:03.108094 Publisher is ready
+(591|591)  16:14:03.108278 waiting for publisher to finish
+(591|603)  16:14:03.358933 DataReaderListenerImpl::on_liveliness_changed reader=0x55caff62be98, 1
+alive_count 1 not_alive_count 0 alive_count_change 1 not_alive_count_change 0
+(592|592) Writer::run_test begins.
+(592|592)  16:14:03.359401 Writer::run_test starting to write pass 0
+ 16:14:03.359838 read foo[0]: x = -1.000000 y = -1.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1620681243 358887000
+  instance_handle: 11
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+(592|592)  16:14:03.360228 Writer::run_test done writing.
+(592|592) Writer::run_test finished.
+ 16:14:03.360525 read foo[0]: x = 0.000000 y = 0.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1620681243 359676000
+  instance_handle: 12
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+ 16:14:03.360898 read foo[0]: x = 1.000000 y = 0.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1620681243 359982000
+  instance_handle: 12
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+(591|593)  16:14:05.359951 DataReaderListenerImpl::on_liveliness_changed reader=0x55caff62be98, 2
+alive_count 0 not_alive_count 1 alive_count_change -1 not_alive_count_change 1
+(591|593)  16:14:05.361032 DataReaderListenerImpl::on_liveliness_changed reader=0x55caff5f6dc8, 2
+alive_count 0 not_alive_count 1 alive_count_change -1 not_alive_count_change 1
+(592|592) Writer::run_test begins.
+(592|592)  16:14:09.360594 Writer::run_test starting to write pass 1
+(591|603)  16:14:09.361246 DataReaderListenerImpl::on_liveliness_changed reader=0x55caff5f6dc8, 3
+alive_count 1 not_alive_count 0 alive_count_change 1 not_alive_count_change -1
+(592|592)  16:14:09.361371 Writer::run_test done writing.
+(592|592) Writer::run_test finished.
+ 16:14:09.361600 read foo[0]: x = 0.000000 y = -1.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1620681249 360677000
+  instance_handle: 12
+  disposed_generation_count: 0
+  no_writers_generation_count: 1
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+ 16:14:09.362073 read foo[0]: x = 1.000000 y = -1.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1620681249 361102000
+  instance_handle: 12
+  disposed_generation_count: 0
+  no_writers_generation_count: 1
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+(591|593)  16:14:11.363438 DataReaderListenerImpl::on_liveliness_changed reader=0x55caff5f6dc8, 4
+alive_count 0 not_alive_count 1 alive_count_change -1 not_alive_count_change 1
+(592|592) Writer::run_test begins.
+(592|592)  16:14:15.361701 Writer::run_test starting to write pass 2
+(591|603)  16:14:15.362296 DataReaderListenerImpl::on_liveliness_changed reader=0x55caff5f6dc8, 5
+alive_count 1 not_alive_count 0 alive_count_change 1 not_alive_count_change -1
+(592|592)  16:14:15.362394 Writer::run_test done writing.
+(592|592) Writer::run_test finished.
+ 16:14:15.362664 read foo[0]: x = 0.000000 y = -2.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1620681255 361756000
+  instance_handle: 12
+  disposed_generation_count: 0
+  no_writers_generation_count: 2
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+ 16:14:15.363104 read foo[0]: x = 1.000000 y = -2.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1620681255 362159000
+  instance_handle: 12
+  disposed_generation_count: 0
+  no_writers_generation_count: 2
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+(591|593)  16:14:17.364473 DataReaderListenerImpl::on_liveliness_changed reader=0x55caff5f6dc8, 6
+alive_count 0 not_alive_count 1 alive_count_change -1 not_alive_count_change 1
+(592|592) Writer::run_test begins.
+(592|592)  16:14:21.362735 Writer::run_test starting to write pass 3
+(591|603)  16:14:21.363380 DataReaderListenerImpl::on_liveliness_changed reader=0x55caff5f6dc8, 7
+alive_count 1 not_alive_count 0 alive_count_change 1 not_alive_count_change -1
+(592|592)  16:14:21.363459 Writer::run_test done writing.
+(592|592) Writer::run_test finished.
+(592|592)  16:14:21.363546 waiting for writers to finish
+ 16:14:21.363745 read foo[0]: x = 0.000000 y = -3.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1620681261 362808000
+  instance_handle: 12
+  disposed_generation_count: 0
+  no_writers_generation_count: 3
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+ 16:14:21.364243 read foo[0]: x = 1.000000 y = -3.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1620681261 363223000
+  instance_handle: 12
+  disposed_generation_count: 0
+  no_writers_generation_count: 3
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+(592|592)  16:14:21.613720 Writers are finished
+(592|592)  16:14:21.613891 waiting for readers to finish
+(592|592)  16:14:21.864137 Readers are finished
+ 16:14:21.864955 read foo[0]: x = 0.000000 y = 0.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: NOT_ALIVE_DISPOSED_INSTANCE_STATE
+  source_timestamp: 1620681261 864309000
+  instance_handle: 12
+  disposed_generation_count: 0
+  no_writers_generation_count: 3
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+(591|603)  16:14:21.865254 DataReaderListenerImpl::on_liveliness_changed reader=0x55caff62be98, 3
+alive_count 1 not_alive_count 0 alive_count_change 1 not_alive_count_change -1
+(591|603) DataReaderListenerImpl::on_subscription_disconnected
+(591|603) DataReaderListenerImpl::on_subscription_disconnected
+(591|593)  16:14:23.865189 DataReaderListenerImpl::on_liveliness_changed reader=0x55caff5f6dc8, 8
+alive_count 0 not_alive_count 1 alive_count_change -1 not_alive_count_change 1
+(591|593)  16:14:23.865370 DataReaderListenerImpl::on_liveliness_changed reader=0x55caff62be98, 4
+alive_count 0 not_alive_count 1 alive_count_change -1 not_alive_count_change 1
+(591|593)  16:14:23.867372 DataReaderListenerImpl::on_liveliness_changed reader=0x55caff5f6dc8, 9
+alive_count 0 not_alive_count 0 alive_count_change 0 not_alive_count_change -1
+(591|593) DataReaderListenerImpl::on_subscription_matched
+(591|593)  16:14:23.869610 DataReaderListenerImpl::on_liveliness_changed reader=0x55caff62be98, 5
+alive_count 0 not_alive_count 0 alive_count_change 0 not_alive_count_change -1
+(591|593) DataReaderListenerImpl::on_subscription_matched
+**********
+drl_servant->liveliness_changed_count() = 9
+drl_servant->no_writers_generation_count() = 3
+********** use_take=0
+(591|591)  16:14:26.620256 publisher is finish - cleanup subscriber
+(591|591) DataReaderListenerImpl::~DataReaderListenerImpl
+(591|591) DataReaderListenerImpl::~DataReaderListenerImpl
+INFO: /home/calabresec/3_16/liveliness/OpenDDS/bin/DCPSInfoRepo being killed.
+InfoRepo_Shutdown: shutting down on signal 15
+test PASSED.
