@@ -512,24 +512,24 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_VECTOR(ACE_INET_Addr)
 #ifdef ACE_HAS_IPV6
     if (it->get_type() == AF_INET6 && !it->is_multicast()) {
       if (it->is_loopback()) {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(list) - "
                    "Considering Address %C:%d (%C) - ADDING TO IPv6 LOOPBACK LIST\n",
                    it->get_host_addr(), it->get_port_number(), it->get_host_name()));
         set6_loopback.insert(*it);
       } else if (it->is_ipv4_mapped_ipv6() || it->is_ipv4_compat_ipv6()) {
 #ifndef IPV6_V6ONLY
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(list) - "
                    "Considering Address %C:%d (%C) - ADDING TO IPv6 MAPPED / COMPATIBLE IPv4 LIST\n",
                    it->get_host_addr(), it->get_port_number(), it->get_host_name()));
         set6_mapped_v4.insert(*it);
 #endif  // ! IPV6_V6ONLY
       } else if (it->is_linklocal()) {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(list) - "
                    "Considering Address %C:%d (%C) - ADDING TO IPv6 LINK-LOCAL LIST\n",
                    it->get_host_addr(), it->get_port_number(), it->get_host_name()));
         set6_linklocal.insert(*it);
       } else {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(list) - "
                    "Considering Address %C:%d (%C) - ADDING TO IPv6 NORMAL LIST\n",
                    it->get_host_addr(), it->get_port_number(), it->get_host_name()));
         set6.insert(*it);
@@ -537,7 +537,7 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_VECTOR(ACE_INET_Addr)
     }
 #endif // ACE_HAS_IPV6
     if (it->get_type() == AF_INET && !it->is_multicast()) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) NetworkAddress::choose_single_coherent_address() - "
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(list) - "
                  "Considering Address %C:%d (%C) - ADDING TO IPv4 NORMAL LIST\n",
                  it->get_host_addr(), it->get_port_number(), it->get_host_name()));
       set4.insert(*it);
@@ -629,19 +629,19 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_STRING& url, bool pre
 #if ACE_HAS_IPV6
 #if ACE_USES_IPV4_IPV6_MIGRATION
   if (ACE::ipv6_enabled()) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - Operating with ACE_HAS_IPV6 is TRUE and ACE_USES_IPV4_IPV6_MIGRATION is TRUE and ACE::ipv6_enabled() is TRUE\n"));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(%C) - Operating with ACE_HAS_IPV6 is TRUE and ACE_USES_IPV4_IPV6_MIGRATION is TRUE and ACE::ipv6_enabled() is TRUE\n", host_name));
   } else {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - Operating with ACE_HAS_IPV6 is TRUE and ACE_USES_IPV4_IPV6_MIGRATION is TRUE but ACE::ipv6_enabled() is FALSE\n"));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(%C) - Operating with ACE_HAS_IPV6 is TRUE and ACE_USES_IPV4_IPV6_MIGRATION is TRUE but ACE::ipv6_enabled() is FALSE\n", host_name));
   }
 #else
   if (ACE::ipv6_enabled()) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - Operating with ACE_HAS_IPV6 is TRUE and ACE_USES_IPV4_IPV6_MIGRATION is FALSE and ACE::ipv6_enabled() is TRUE\n"));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(%C) - Operating with ACE_HAS_IPV6 is TRUE and ACE_USES_IPV4_IPV6_MIGRATION is FALSE and ACE::ipv6_enabled() is TRUE\n", host_name));
   } else {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - Operating with ACE_HAS_IPV6 is TRUE and ACE_USES_IPV4_IPV6_MIGRATION is FALSE but ACE::ipv6_enabled() is FALSE\n"));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(%C) - Operating with ACE_HAS_IPV6 is TRUE and ACE_USES_IPV4_IPV6_MIGRATION is FALSE but ACE::ipv6_enabled() is FALSE\n", host_name));
   }
 #endif
 #else
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - Operating WITHOUT ACE_HAS_IPV6\n"));
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(%C) - Operating WITHOUT ACE_HAS_IPV6\n", host_name));
 #endif
 
 #if defined ACE_HAS_IPV6 && defined ACE_USES_IPV4_IPV6_MIGRATION
