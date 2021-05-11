@@ -203,7 +203,7 @@ int ACE_TMAIN (int, ACE_TCHAR *[])
   }
   // append existing profile name
   {
-    const ACE_TCHAR* profileName = "TestProfile";
+    const ACE_TCHAR* profileName = ACE_TEXT("TestProfile");
     dds::qosProfile profile = xml2.getProfile(profileName);
     DDS::ReturnCode_t retcode = xml1.addQoSProfile(profile);
     if (retcode == DDS::RETCODE_OK)
