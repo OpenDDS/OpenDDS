@@ -3197,10 +3197,10 @@ Sedp::received_participant_message_data_secure(DCPS::MessageId /*message_id*/,
     if (pos != i->second.matched_endpoints_.end() && DCPS::equal_guid_prefixes(*pos, prefix)) {
       DCPS::DataReaderCallbacks_rch sl = i->second.subscription_.lock();
       if (sl) {
-        if (sub_pos->second.qos_.liveliness.kind == ::DDS::AUTOMATIC_LIVELINESS_QOS && is_automatic) {
+        if (i->second.qos_.liveliness.kind == ::DDS::AUTOMATIC_LIVELINESS_QOS && is_automatic) {
           ACE_DEBUG((LM_DEBUG, "(%P|%t) SIGNAL FOR LIVELINESS: AUTOMATIC \n"));
           sl->signal_liveliness(guid_participant);
-        } else if (sub_pos->second.qos_.liveliness.kind == ::DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS && !is_automatic) {
+        } else if (i->second.qos_.liveliness.kind == ::DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS && !is_automatic) {
           ACE_DEBUG((LM_DEBUG, "(%P|%t) SIGNAL FOR LIVELINESS: MANUAL \n"));
           sl->signal_liveliness(guid_participant);
         }
