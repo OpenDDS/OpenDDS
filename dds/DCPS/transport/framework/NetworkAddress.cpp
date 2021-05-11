@@ -496,7 +496,24 @@ ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& address, bool 
 #endif // !(ACE_MAJOR_VERSION < 6 || (ACE_MAJOR_VERSION == 6 && (ACE_MINOR_VERSION < 3 || (ACE_MINOR_VERSION == 3 && ACE_MICRO_VERSION < 1))))
 }
 
-ACE_INET_Addr choose_single_coherent_address(const OPENDDS_VECTOR(ACE_INET_Addr)& addresses, bool prefer_loopback)
+namespace {
+
+template <typename T>
+ACE_INET_Addr tie_breaker(const T& addrs, const std::string& name)
+{
+  if (!name.empty()) {
+    for (typename T::const_iterator it = addrs.begin(); it != addrs.end(); ++it) {
+      if (name.compare(it->get_host_name()) == 0) {
+        return *it;
+      }
+    }
+  }
+  return *addrs.begin();
+}
+
+}
+
+ACE_INET_Addr choose_single_coherent_address(const OPENDDS_VECTOR(ACE_INET_Addr)& addresses, bool prefer_loopback, const std::string& name)
 {
 
 #ifdef ACE_HAS_IPV6
@@ -546,42 +563,42 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_VECTOR(ACE_INET_Addr)
 
 #ifdef ACE_HAS_IPV6
   if (prefer_loopback && !set6_loopback.empty()) {
-    return *set6_loopback.begin();
+    return tie_breaker(set6_loopback, name);
   }
 #endif // ACE_HAS_IPV6
 
   if (prefer_loopback && !set4_loopback.empty()) {
-    return *set4_loopback.begin();
+    return tie_breaker(set4_loopback, name);
   }
 
 #ifdef ACE_HAS_IPV6
   if (!set6_linklocal.empty()) {
-    return *set6_linklocal.begin();
+    return tie_breaker(set6_linklocal, name);
   }
   if (!set6.empty()) {
-    return *set6.begin();
+    return tie_breaker(set6, name);
   }
   if (!set6_mapped_v4.empty()) {
-    return *set6_mapped_v4.begin();
+    return tie_breaker(set6_mapped_v4, name);
   }
 #endif // ACE_HAS_IPV6
 
   if (!set4.empty()) {
-    return *set4.begin();
+    return tie_breaker(set4, name);
   }
 
 #ifdef ACE_HAS_IPV6
   if (!set6_loopback.empty()) {
-    return *set6_loopback.begin();
+    return tie_breaker(set6_loopback, name);
   }
 #endif // ACE_HAS_IPV6
 
   if (!set4_loopback.empty()) {
-    return *set4_loopback.begin();
+    return tie_breaker(set4_loopback, name);
   }
 
   if (!addresses.empty()) {
-    return *addresses.begin();
+    return tie_breaker(addresses, name);
   }
 
   return ACE_INET_Addr();
@@ -687,8 +704,7 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_STRING& url, bool pre
   // interface configured. See Bugzilla 4211 for more info.
 
 #if defined ACE_HAS_IPV6 && !defined IPV6_V6ONLY
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) choose_single_coherent_address() - For some reason this process has IPv6 enabled but not IPV6_V6ONLY - Why?\n"));
-  //hints.ai_flags |= AI_V4MAPPED;
+  hints.ai_flags |= AI_V4MAPPED;
 #endif
 
 #if defined ACE_HAS_IPV6 && defined AI_ALL
@@ -735,7 +751,7 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_STRING& url, bool pre
 
   ACE_OS::freeaddrinfo(res);
 
-  return choose_single_coherent_address(addresses, prefer_loopback);
+  return choose_single_coherent_address(addresses, prefer_loopback, url);
 }
 
 }
