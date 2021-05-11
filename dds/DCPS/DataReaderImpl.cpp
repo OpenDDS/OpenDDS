@@ -2132,7 +2132,7 @@ DataReaderImpl::writer_removed(WriterInfo& info)
   }
 
   liveliness_changed_status_.last_publication_handle = info.handle_;
-  instances_liveliness_update(info, MonotonicTimePoint::now());
+  instances_liveliness_update(info.writer_id_);
 
   if (liveliness_changed) {
     set_status_changed_flag(DDS::LIVELINESS_CHANGED_STATUS, true);
@@ -2215,8 +2215,7 @@ DataReaderImpl::writer_became_alive(WriterInfo& info,
 }
 
 void
-DataReaderImpl::writer_became_dead(WriterInfo& info,
-    const MonotonicTimePoint& when)
+DataReaderImpl::writer_became_dead(WriterInfo& info)
 {
   if (DCPS_debug_level >= 5) {
     GuidConverter reader_converter(subscription_id_);
@@ -2279,7 +2278,7 @@ DataReaderImpl::writer_became_dead(WriterInfo& info,
     return;
   }
 
-  instances_liveliness_update(info, when);
+  instances_liveliness_update(info.writer_id_);
 
   // Call listener only when there are liveliness status changes.
   if (liveliness_changed) {
@@ -2289,15 +2288,16 @@ DataReaderImpl::writer_became_dead(WriterInfo& info,
 }
 
 void
-DataReaderImpl::instances_liveliness_update(WriterInfo& info,
-    const MonotonicTimePoint& when)
+DataReaderImpl::instances_liveliness_update(const PublicationId& writer)
 {
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
-  for (SubscriptionInstanceMapType::iterator iter = instances_.begin(),
-      next = iter; iter != instances_.end(); iter = next) {
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
+  for (SubscriptionInstanceMapType::iterator iter = instances_.begin(), next = iter;
+       iter != instances_.end(); iter = next) {
     ++next;
-    iter->second->instance_state_->writer_became_dead(
-        info.writer_id_, liveliness_changed_status_.alive_count, when);
+    if (iter->second->instance_state_->writes_instance(writer)) {
+      set_instance_state(iter->first, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, SystemTimePoint::now(), writer);
+    }
   }
 }
 

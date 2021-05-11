@@ -11,16 +11,13 @@
 #ifndef OPENDDS_SAFETY_PROFILE
 
 #include "dcps_export.h"
+
+#include "DirentWrapper.h"
 #include "RcHandle_T.h"
 #include "RcObject.h"
 
 #include "ace/Synch_Traits.h"
 #include "ace/SString.h"
-#include "ace/os_include/os_dirent.h"
-
-ACE_BEGIN_VERSIONED_NAMESPACE_DECL
-class ACE_Dirent;
-ACE_END_VERSIONED_NAMESPACE_DECL
 
 #include <iosfwd>
 #include "PoolAllocator.h"

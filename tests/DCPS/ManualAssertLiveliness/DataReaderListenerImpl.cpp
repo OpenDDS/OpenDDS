@@ -29,8 +29,6 @@ DataReaderListenerImpl::~DataReaderListenerImpl()
 
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
-  ++num_reads_;
-
   ::Messenger::MessageDataReader_var message_dr = ::Messenger::MessageDataReader::_narrow(reader);
 
   Messenger::Message message;
@@ -39,6 +37,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
   if (status == DDS::RETCODE_OK) {
     if (si.valid_data == 1) {
+      ++num_reads_;
       ACE_DEBUG((LM_INFO,
                  "(%P|%t) "
                  "Message: subject    = %C\n"

@@ -57,8 +57,7 @@ public:
   /// tell instances when a DataWriter transitions to DEAD
   /// The writer state is inout parameter, the state is set to DEAD
   /// when it returns.
-  virtual void writer_became_dead(WriterInfo& info,
-                                  const MonotonicTimePoint& when);
+  virtual void writer_became_dead(WriterInfo& info);
 
   /// tell instance when a DataWriter is removed.
   /// The liveliness status need update.
