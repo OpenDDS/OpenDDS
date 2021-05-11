@@ -2,8 +2,9 @@
 #include <streambuf>
 #include "dds/DCPS/QOS_XML_Handler/XML_MemBuf_Intf.h"
 #include "dds/DdsDcpsC.h"
+#include "dds/DCPS/debug.h"
 
-int testXML(const char* fileName,
+int parseXML(const char* fileName,
             const ACE_TCHAR* profileName,
             const ACE_TCHAR* topicName,
             OpenDDS::DCPS::QOS_XML_MemBuf_Handler& xml_membuf)
@@ -33,21 +34,22 @@ int testXML(const char* fileName,
           topicName);
       if (retcode_qos != DDS::RETCODE_OK)
       {
-        ACE_ERROR ((LM_ERROR, "MAIN - "
+        ACE_ERROR ((LM_ERROR, "PARSEXML - "
               "%s : get_datawriter_qos return an error. Retcode <%d>\n",
               fileName, retcode_qos));
         ++retval;
       }
+
       if (dw_qos.history.kind != ::DDS::KEEP_ALL_HISTORY_QOS)
       {
-        ACE_ERROR ((LM_ERROR, "MAIN - "
+        ACE_ERROR ((LM_ERROR, "PARSEXML - "
               "%s : get_datawriter_qos return an invalid history kind.\n",
               fileName));
         ++retval;
       }
       if (dw_qos.history.depth != 5)
       {
-        ACE_ERROR ((LM_ERROR, "MAIN - "
+        ACE_ERROR ((LM_ERROR, "PARSEXML - "
               "%s : get_datawriter_qos return an invalid history depth.\n",
               fileName));
         ++retval;
@@ -60,7 +62,7 @@ int testXML(const char* fileName,
           topicName);
       if (retcode_qos != DDS::RETCODE_OK)
       {
-        ACE_ERROR ((LM_ERROR, "MAIN - "
+        ACE_ERROR ((LM_ERROR, "PARSEXML - "
               "%s : get_datareader_qos return an error. Retcode <%d>\n",
               fileName, retcode_qos));
         ++retval;
@@ -73,7 +75,7 @@ int testXML(const char* fileName,
           topicName);
       if (retcode_qos != DDS::RETCODE_OK)
       {
-        ACE_ERROR ((LM_ERROR, "MAIN - "
+        ACE_ERROR ((LM_ERROR, "PARSEXML - "
               "%s : get_topic_qos return an error. Retcode <%d>\n",
               fileName, retcode_qos));
         ++retval;
@@ -85,7 +87,7 @@ int testXML(const char* fileName,
           profileName);
       if (retcode_qos != DDS::RETCODE_OK)
       {
-        ACE_ERROR ((LM_ERROR, "MAIN - "
+        ACE_ERROR ((LM_ERROR, "PARSEXML - "
               "%s : get_publisher_qos return an error. Retcode <%d>\n",
               fileName, retcode_qos));
         ++retval;
@@ -97,7 +99,7 @@ int testXML(const char* fileName,
           profileName);
       if (retcode_qos != DDS::RETCODE_OK)
       {
-        ACE_ERROR ((LM_ERROR, "MAIN - "
+        ACE_ERROR ((LM_ERROR, "PARSEXML - "
               "%s : get_subscriber_qos return an error. Retcode <%d>\n",
               fileName, retcode_qos));
         ++retval;
@@ -109,7 +111,7 @@ int testXML(const char* fileName,
           profileName);
       if (retcode_qos != DDS::RETCODE_OK)
       {
-        ACE_ERROR ((LM_ERROR, "MAIN - "
+        ACE_ERROR ((LM_ERROR, "PARSEXML - "
               "%s : get_participant_qos return an error. Retcode <%d>\n",
               fileName, retcode_qos));
         ++retval;
@@ -117,7 +119,7 @@ int testXML(const char* fileName,
     }
     else
     {
-      ACE_ERROR ((LM_ERROR, "%s - Init return an error. Retcode <%d>\n",
+      ACE_ERROR ((LM_ERROR, "Error processing file %s - Init return an error. Retcode <%d>\n",
             fileName, retcode));
       ++retval;
     }
@@ -126,7 +128,7 @@ int testXML(const char* fileName,
   catch (const CORBA::Exception& ex)
   {
     ex._tao_print_exception ("QOS_Dump::main\n");
-    return -1;
+    return 1;
   }
   catch (...)
   {
@@ -140,103 +142,88 @@ int testXML(const char* fileName,
 int ACE_TMAIN (int, ACE_TCHAR *[])
 {
   int retval = 0;
-
-  // Skip DEBUG messages
-  ACE_LOG_MSG->priority_mask (LM_ERROR | LM_WARNING | LM_INFO, ACE_Log_Msg::PROCESS);
+  OpenDDS::DCPS::QOS_XML_MemBuf_Handler xml1;
+  OpenDDS::DCPS::QOS_XML_MemBuf_Handler xml2;
 
   // Test first file
   // File name and profile name in respective file
   // topic name in respective profile name
-  std::string fileName;
-  std::string profileName;
-  std::string topicName;
-  fileName = "test.xml";
-  profileName = "TestProfile";
-  topicName = "TopicName";
-  
-  OpenDDS::DCPS::QOS_XML_MemBuf_Handler xml1;
-  retval += testXML(fileName.c_str(),
-                    ACE_TEXT_CHAR_TO_TCHAR(profileName.c_str()),
-                    ACE_TEXT_CHAR_TO_TCHAR(topicName.c_str()),
-                    xml1);
-
+  {
+    retval += parseXML("test.xml",
+                      ACE_TEXT("TestProfile"),
+                      ACE_TEXT("TopicName"),
+                      xml1);
+    if (retval > 0)
+      return retval;
+  }
   // Test second file
   // File name and profile name in respective file
   // topic name in respective profile name
-  fileName = "append2test.xml";
-  profileName = "TestProfile2";
-  topicName = "TopicName";
-  
-  OpenDDS::DCPS::QOS_XML_MemBuf_Handler xml2;
-  retval += testXML(fileName.c_str(),
-                    ACE_TEXT_CHAR_TO_TCHAR(profileName.c_str()),
-                    ACE_TEXT_CHAR_TO_TCHAR(topicName.c_str()),
-                    xml2);
-
+  {
+    retval += parseXML("append2test.xml",
+                      ACE_TEXT("TestProfile2"),
+                      ACE_TEXT("TopicName"),
+                      xml2);
+    if (retval > 0)
+      return retval;
+  }
   // Test xml_membuf operations
   // append a profile
-  profileName = "TestA";
-  dds::qosProfile profile = xml2.getProfile(ACE_TEXT_CHAR_TO_TCHAR(profileName.c_str()));
-  DDS::ReturnCode_t retcode;
-  retcode = xml1.addQoSProfile(profile);
-  if (retcode != DDS::RETCODE_OK)
   {
-    ACE_ERROR ((LM_ERROR, "MAIN - "
-          "Cannot append profile name <%s>. Retcode <%d>\n",
-          profileName.c_str(), retcode));
-    return retval;
-  }
-  // Check if it was inserted
-  dds::qosProfile testA = xml2.getProfile(ACE_TEXT_CHAR_TO_TCHAR(profileName.c_str()));
-  if (profileName.compare(testA.name().c_str()))
-  {
-    ACE_ERROR ((LM_ERROR, "MAIN - "
-          "Cannot get last profile name <%s> inserted. Retcode <%d>\n",
-          profileName.c_str(), retcode));
-    return retval;
-  }
+    const ACE_TCHAR* profileName = ACE_TEXT("TestA");
+    dds::qosProfile profile = xml2.getProfile(profileName);
+    DDS::ReturnCode_t retcode;
+    retcode = xml1.addQoSProfile(profile);
+    if (retcode != DDS::RETCODE_OK)
+    {
+      ACE_ERROR ((LM_ERROR, "MAIN - "
+            "Cannot append profile name <%C>. Retcode <%d>\n",
+            profileName, retcode));
+      return ++retval;
+    }
+    // Check if it was inserted
+    dds::qosProfile testA = xml2.getProfile(profileName);
+    if (ACE_OS::strcmp(testA.name().c_str(),profileName) != 0)
+    {
+      ACE_ERROR ((LM_ERROR, "MAIN - "
+            "Cannot get last profile name <%C> inserted. Retcode <%d>\n",
+            profileName, retcode));
+      return ++retval;
+    }
 
-
-  // Remove profile 
-  retcode = xml1.delQoSProfile(ACE_TEXT_CHAR_TO_TCHAR(profileName.c_str()));
-  if (retcode != DDS::RETCODE_OK)
-  {
-    ACE_ERROR ((LM_ERROR, "MAIN - "
-          "Cannot remove profile name <%s>. Retcode <%d>\n",
-          profileName.c_str(), retcode));
-    return retval;
+    // Remove profile 
+    retcode = xml1.delQoSProfile(profileName);
+    if (retcode != DDS::RETCODE_OK)
+    {
+      ACE_ERROR ((LM_ERROR, "MAIN - "
+            "Cannot remove profile name <%C>. Retcode <%d>\n",
+            profileName, retcode));
+      return ++retval;
+    }
   }
-
   // append existing profile name
-  profileName = "TestProfile";
-  profile = xml2.getProfile(ACE_TEXT_CHAR_TO_TCHAR(profileName.c_str()));
-  retcode = xml1.addQoSProfile(profile);
-  if (retcode == DDS::RETCODE_OK)
   {
-    ACE_ERROR ((LM_ERROR, "MAIN - "
-          "Unexpected insertion of profile name <%s>.\n",
-          profileName.c_str()));
-    return retval;
+    const ACE_TCHAR* profileName = "TestProfile";
+    dds::qosProfile profile = xml2.getProfile(profileName);
+    DDS::ReturnCode_t retcode = xml1.addQoSProfile(profile);
+    if (retcode == DDS::RETCODE_OK)
+    {
+      ACE_ERROR ((LM_ERROR, "MAIN - "
+            "Unexpected insertion of profile name <%C>.\n",
+            profileName));
+      return ++retval;
+    }
   }
-
   // append list of profiles
-  int profileNum = xml2.length();
-  if (profileNum != 5)
   {
-    ACE_ERROR ((LM_ERROR, "MAIN - "
-          "Wrong number (%d) of profiles in <%s>.\n",
-          profileNum, fileName.c_str()));
-    return -1;
+    const dds::qosProfile_seq& profiles = xml2.get();
+    DDS::ReturnCode_t retcode = xml1.addQoSProfileSeq(profiles);
+    if (retcode != DDS::RETCODE_OK)
+    {
+      ACE_ERROR ((LM_ERROR, "MAIN - "
+            "Cannot append profile list. RetCode %d\n",retcode));
+      return ++retval;
+    }
   }
-
-  const dds::qosProfile_seq& profiles = xml2.get();
-  retcode = xml1.addQoSProfileSeq(profiles);
-  if (retcode != DDS::RETCODE_OK)
-  {
-    ACE_ERROR ((LM_ERROR, "MAIN - "
-          "Cannot append profile list. RetCode %d\n",retcode));
-    return ++retval;
-  }
-
   return retval;
 }
