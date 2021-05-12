@@ -1,11 +1,9 @@
 This performance test is also used as an example to show the application uses the file
 configuration and can overwrite part of the configuration value.
 
-
 The configuration file specified the publisher and subscriber to use the same address
 which is a problem. But the test code uses address from command line to reset the
 address for the publisher and subscriber and makes the test pass.
-
 
 1) manually run test:
 
@@ -24,11 +22,9 @@ address for the publisher and subscriber and makes the test pass.
 
   Note the "-a" option gives the address which overwrites the configuration value.
 
-
 2) auto run test:
 
    run_test.pl
-
 
 ---------------------------------------------
 Run manually on Windows for a "long" period:
