@@ -66,7 +66,6 @@ public:
   }
 
 private:
-
   DDS::DataReader_var reader_;
   long                  num_reads_;
 };

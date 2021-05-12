@@ -1,4 +1,4 @@
-This directory contains throughput performace tests for
+This directory contains throughput performance tests for
 the Data Distribution Service implementation in TAO.
 
 These tests are meant to be apples-to-apples comparison test with
@@ -21,8 +21,8 @@ The tests support samples of 128, 512, 2048 and 8192 floats.
     Must throttle the publisher to avoid having too many dropped packets.
     Subscriber reads after N calls to on_data_available.
 
-
 - UDPNoKeyTest
+
 - SimpleE2ETest
    These tests are equivalent to the TCPListenerTest and UDPListenerTest
    but the subscriber polls calling read.
