@@ -50,10 +50,10 @@ public:
   int run ();
 
   // Write the merged IOR to a file
-  int write_to_file (void);
+  int write_to_file ();
 
   // Return the pointer to the copy of our ORB
-  CORBA::ORB_ptr orb (void);
+  CORBA::ORB_ptr orb ();
 
 private:
   // Our ORB
