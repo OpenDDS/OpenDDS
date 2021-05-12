@@ -704,7 +704,7 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_STRING& url, bool pre
   // lookups from completing if there is no, or only a loopback, IPv6
   // interface configured. See Bugzilla 4211 for more info.
 
-#if defined ACE_HAS_IPV6 && !defined ACE_HAS_IPV6_V6ONLY
+#if defined ACE_HAS_IPV6 && !defined IPV6_V6ONLY
   hints.ai_flags |= AI_V4MAPPED;
 #endif
 
