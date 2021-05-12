@@ -33,7 +33,7 @@ class Aggregator
 {
 public:
   // Ctor
-  Aggregator (void);
+  Aggregator();
 
   // Initialize the ORB, POA etc.
   void init (int argc,
