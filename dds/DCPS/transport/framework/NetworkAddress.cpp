@@ -7,6 +7,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "NetworkAddress.h"
+#include "dds/DCPS/TimeTypes.h"
 #include "ace/OS_NS_netdb.h"
 #include "ace/Sock_Connect.h"
 #include "ace/OS_NS_sys_socket.h" // For setsockopt()
@@ -703,7 +704,7 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_STRING& url, bool pre
   // lookups from completing if there is no, or only a loopback, IPv6
   // interface configured. See Bugzilla 4211 for more info.
 
-#if defined ACE_HAS_IPV6 && !defined IPV6_V6ONLY
+#if defined ACE_HAS_IPV6 && !defined ACE_HAS_IPV6_V6ONLY
   hints.ai_flags |= AI_V4MAPPED;
 #endif
 
@@ -730,6 +731,27 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_STRING& url, bool pre
 
   OPENDDS_VECTOR(ACE_INET_Addr) addresses;
 
+#ifdef ACE_WIN32
+  static ACE_Thread_Mutex addr_cache_map_mutex_;
+  typedef std::pair<SystemTimePoint, OPENDDS_SET(ACE_INET_Addr)> AddrCachePair;
+  typedef OPENDDS_MAP(OPENDDS_STRING, AddrCachePair) AddrCacheMap;
+  static AddrCacheMap addr_cache_map_;
+  ACE_Guard<ACE_Thread_Mutex> g(addr_cache_map_mutex_);
+  SystemTimePoint now = SystemTimePoint::now();
+  for (AddrCacheMap::iterator it = addr_cache_map_.begin(); it != addr_cache_map_.end(); /* inc in loop */) {
+    if (it->second.first + TimeDuration(3, 0) < now) {
+      addr_cache_map_.erase(it++);
+    } else {
+      ++it;
+    }
+  }
+  AddrCacheMap::iterator it = addr_cache_map_.find(host_name);
+  if (it != addr_cache_map_.end()) {
+    addresses.insert(addresses.end(), it->second.second.begin(), it->second.second.end());
+    it->second.first = now;
+  }
+#endif /* ACE_WIN32 */
+
   for (addrinfo *curr = res; curr; curr = curr->ai_next) {
     ip46 addr;
     ACE_OS::memcpy(&addr, curr->ai_addr, curr->ai_addrlen);
@@ -747,7 +769,16 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_STRING& url, bool pre
     temp.set_addr(&addr, sizeof addr);
     temp.set_port_number(port_number, 1 /*encode*/);
     addresses.push_back(temp);
+#ifdef ACE_WIN32
+    if (it != addr_cache_map_.end()) {
+      it->second.second.insert(temp);
+    }
+#endif /* ACE_WIN32 */
   }
+
+#ifdef ACE_WIN32
+  g.release();
+#endif /* ACE_WIN32 */
 
   ACE_OS::freeaddrinfo(res);
 
