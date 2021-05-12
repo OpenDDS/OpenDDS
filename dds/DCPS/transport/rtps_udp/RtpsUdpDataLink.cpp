@@ -1464,18 +1464,31 @@ RtpsUdpDataLink::RtpsWriter::add_gap_submsg_i(RTPS::SubmessageSeq& msg,
   msg[i].gap_sm(gap);
 }
 
+void RtpsUdpDataLink::update_last_recv_addr(const RepoId& src, const ACE_INET_Addr& addr)
+{
+  if (addr == config().rtps_relay_address()) {
+    return;
+  }
+
+  ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
+  const RemoteInfoMap::iterator pos = locators_.find(src);
+  if (pos != locators_.end()) {
+    pos->second.last_recv_addr_ = addr;
+    pos->second.last_recv_time_ = MonotonicTimePoint::now();
+  }
+}
 
 // DataReader's side of Reliability
 
 void
 RtpsUdpDataLink::received(const RTPS::DataSubmessage& data,
-                          const GuidPrefix_t& src_prefix)
+                          const GuidPrefix_t& src_prefix,
+                          const ACE_INET_Addr& remote_addr)
 {
   const RepoId local = make_id(local_prefix_, data.readerId);
+  const RepoId src = make_id(src_prefix, data.writerId);
 
-  RepoId src;
-  std::memcpy(src.guidPrefix, src_prefix, sizeof(GuidPrefix_t));
-  src.entityId = data.writerId;
+  update_last_recv_addr(src, remote_addr);
 
   OPENDDS_VECTOR(RtpsReader_rch) to_call;
   {
@@ -1672,8 +1685,10 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
 void
 RtpsUdpDataLink::received(const RTPS::GapSubmessage& gap,
                           const GuidPrefix_t& src_prefix,
-                          bool directed)
+                          bool directed,
+                          const ACE_INET_Addr& remote_addr)
 {
+  update_last_recv_addr(make_id(src_prefix, gap.writerId), remote_addr);
   datareader_dispatch(gap, src_prefix, directed, &RtpsReader::process_gap_i);
 }
 
@@ -1785,10 +1800,13 @@ RtpsUdpDataLink::send_interesting_ack_nack(const RepoId& writerid,
 void
 RtpsUdpDataLink::received(const RTPS::HeartBeatSubmessage& heartbeat,
                           const GuidPrefix_t& src_prefix,
-                          bool directed)
+                          bool directed,
+                          const ACE_INET_Addr& remote_addr)
 {
   const RepoId src = make_id(src_prefix, heartbeat.writerId);
   const MonotonicTimePoint now = MonotonicTimePoint::now();
+
+  update_last_recv_addr(src, remote_addr);
 
   MetaSubmessageVec meta_submessages;
   OPENDDS_VECTOR(InterestingRemote) callbacks;
@@ -2764,8 +2782,10 @@ RtpsUdpDataLink::extend_bitmap_range(RTPS::FragmentNumberSet& fnSet,
 void
 RtpsUdpDataLink::received(const RTPS::HeartBeatFragSubmessage& hb_frag,
                           const GuidPrefix_t& src_prefix,
-                          bool directed)
+                          bool directed,
+                          const ACE_INET_Addr& remote_addr)
 {
+  update_last_recv_addr(make_id(src_prefix, hb_frag.writerId), remote_addr);
   datareader_dispatch(hb_frag, src_prefix, directed, &RtpsReader::process_heartbeat_frag_i);
 }
 
@@ -2824,12 +2844,15 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_frag_i(const RTPS::HeartBeatFragS
 
 void
 RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
-                          const GuidPrefix_t& src_prefix)
+                          const GuidPrefix_t& src_prefix,
+                          const ACE_INET_Addr& remote_addr)
 {
   // local side is DW
   const RepoId local = make_id(local_prefix_, acknack.writerId); // can't be ENTITYID_UNKNOWN
 
   const RepoId remote = make_id(src_prefix, acknack.readerId);
+
+  update_last_recv_addr(remote, remote_addr);
 
   const MonotonicTimePoint now = MonotonicTimePoint::now();
   OPENDDS_VECTOR(DiscoveryListener*) callbacks;
@@ -3163,8 +3186,10 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
 
 void
 RtpsUdpDataLink::received(const RTPS::NackFragSubmessage& nackfrag,
-                          const GuidPrefix_t& src_prefix)
+                          const GuidPrefix_t& src_prefix,
+                          const ACE_INET_Addr& remote_addr)
 {
+  update_last_recv_addr(make_id(src_prefix, nackfrag.readerId), remote_addr);
   datawriter_dispatch(nackfrag, src_prefix, &RtpsWriter::process_nackfrag);
 }
 
@@ -4301,15 +4326,22 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
 
   AddrSet normal_addrs;
   ACE_INET_Addr ice_addr;
+  bool valid_last_recv_addr = false;
   static const ACE_INET_Addr NO_ADDR;
 
   typedef OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter_t;
   iter_t pos = locators_.find(remote);
   if (pos != locators_.end()) {
-    if (prefer_unicast && !pos->second.unicast_addrs_.empty()) {
+    if (prefer_unicast && pos->second.last_recv_addr_ != ACE_INET_Addr()) {
+      normal_addrs.insert(pos->second.last_recv_addr_);
+      valid_last_recv_addr = (MonotonicTimePoint::now() - pos->second.last_recv_time_) <= config().receive_address_duration_;
+    } else if (prefer_unicast && !pos->second.unicast_addrs_.empty()) {
       normal_addrs = pos->second.unicast_addrs_;
     } else if (!pos->second.multicast_addrs_.empty()) {
       normal_addrs = pos->second.multicast_addrs_;
+    } else if (pos->second.last_recv_addr_ != ACE_INET_Addr()) {
+      normal_addrs.insert(pos->second.last_recv_addr_);
+      valid_last_recv_addr = (MonotonicTimePoint::now() - pos->second.last_recv_time_) <= config().receive_address_duration_;
     } else {
       normal_addrs = pos->second.unicast_addrs_;
     }
@@ -4338,7 +4370,7 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
   if (ice_addr == NO_ADDR) {
     addresses.insert(normal_addrs.begin(), normal_addrs.end());
     const ACE_INET_Addr relay_addr = config().rtps_relay_address();
-    if (relay_addr != NO_ADDR) {
+    if (!valid_last_recv_addr && relay_addr != NO_ADDR) {
       addresses.insert(relay_addr);
     }
     return;
@@ -4349,9 +4381,7 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
     return;
   }
 
-  if (!normal_addrs.empty()) {
-    addresses.insert(normal_addrs.begin(), normal_addrs.end());
-  }
+  addresses.insert(normal_addrs.begin(), normal_addrs.end());
 }
 
 ICE::Endpoint*

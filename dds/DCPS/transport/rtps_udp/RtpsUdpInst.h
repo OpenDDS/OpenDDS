@@ -42,6 +42,7 @@ public:
   TimeDuration heartbeat_period_;
   TimeDuration heartbeat_response_delay_;
   TimeDuration durable_data_timeout_;
+  TimeDuration receive_address_duration_;
   bool responsive_mode_;
   TimeDuration send_delay_;
 

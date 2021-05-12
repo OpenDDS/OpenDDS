@@ -106,25 +106,31 @@ public:
             );
 
   void received(const RTPS::DataSubmessage& data,
-                const GuidPrefix_t& src_prefix);
+                const GuidPrefix_t& src_prefix,
+                const ACE_INET_Addr& remote_addr);
 
   void received(const RTPS::GapSubmessage& gap,
                 const GuidPrefix_t& src_prefix,
-                bool directed);
+                bool directed,
+                const ACE_INET_Addr& remote_addr);
 
   void received(const RTPS::HeartBeatSubmessage& heartbeat,
                 const GuidPrefix_t& src_prefix,
-                bool directed);
+                bool directed,
+                const ACE_INET_Addr& remote_addr);
 
   void received(const RTPS::HeartBeatFragSubmessage& hb_frag,
                 const GuidPrefix_t& src_prefix,
-                bool directed);
+                bool directed,
+                const ACE_INET_Addr& remote_addr);
 
   void received(const RTPS::AckNackSubmessage& acknack,
-                const GuidPrefix_t& src_prefix);
+                const GuidPrefix_t& src_prefix,
+                const ACE_INET_Addr& remote_addr);
 
   void received(const RTPS::NackFragSubmessage& nackfrag,
-                const GuidPrefix_t& src_prefix);
+                const GuidPrefix_t& src_prefix,
+                const ACE_INET_Addr& remote_addr);
 
   const GuidPrefix_t& local_prefix() const { return local_prefix_; }
 
@@ -242,10 +248,14 @@ private:
     AddrSet unicast_addrs_;
     AddrSet multicast_addrs_;
     bool requires_inline_qos_;
+    ACE_INET_Addr last_recv_addr_;
+    MonotonicTimePoint last_recv_time_;
   };
 
   typedef OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan) RemoteInfoMap;
   RemoteInfoMap locators_;
+
+  void update_last_recv_addr(const RepoId& src, const ACE_INET_Addr& addr);
 
   ACE_SOCK_Dgram unicast_socket_;
   ACE_SOCK_Dgram_Mcast multicast_socket_;
