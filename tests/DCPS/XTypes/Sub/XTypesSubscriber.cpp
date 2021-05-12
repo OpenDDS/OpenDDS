@@ -341,7 +341,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   Topic_var control_topic;
   ControlStructTypeSupport_var control_ts = new ControlStructTypeSupportImpl;
-  get_topic(control_ts, dp, "ControlStruct", control_topic, "ControlStruct");
+  get_topic(control_ts, dp, "SET_PD_OL_OA_OM_OD_ControlStruct", control_topic, "ControlStruct");
 
   Publisher_var control_pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
     DEFAULT_STATUS_MASK);
