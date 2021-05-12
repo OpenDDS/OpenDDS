@@ -751,7 +751,7 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_STRING& url, bool pre
 
   ACE_OS::freeaddrinfo(res);
 
-  return choose_single_coherent_address(addresses, prefer_loopback, url);
+  return choose_single_coherent_address(addresses, prefer_loopback, host_name);
 }
 
 }
