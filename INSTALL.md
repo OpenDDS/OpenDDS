@@ -114,6 +114,9 @@ bin\auto_run_tests.pl
   libraries, code generators, header files, IDL files, and associated scripts
   and documentation.
 
+  **NOTE:** If configured with RapidJSON, OpenDDS will install the headers for
+  RapidJSON, which might conflict with an existing installation.
+
 ### Application Development with an Installed OpenDDS
 
   After `make install` completes, the shell script in

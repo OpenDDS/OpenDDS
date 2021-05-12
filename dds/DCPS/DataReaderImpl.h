@@ -73,7 +73,7 @@ class Monitor;
 class DataReaderImpl;
 class FilterEvaluator;
 
-typedef Cached_Allocator_With_Overflow<OpenDDS::DCPS::ReceivedDataElementMemoryBlock, ACE_Null_Mutex>
+typedef Cached_Allocator_With_Overflow<ReceivedDataElementMemoryBlock, ACE_Null_Mutex>
 ReceivedDataAllocator;
 
 enum MarshalingType {
@@ -131,8 +131,8 @@ public:
                                   ACE_thread_t owner,
                                   DataReaderImpl* reader);
 
-  void schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info);
-  void cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info);
+  void schedule_timer(RcHandle<WriterInfo>& info);
+  void cancel_timer(RcHandle<WriterInfo>& info);
 
   // Arg will be PublicationId
   int handle_timeout(const ACE_Time_Value& current_time, const void* arg);
@@ -146,25 +146,25 @@ private:
   ~EndHistoricSamplesMissedSweeper();
 
   WeakRcHandle<DataReaderImpl> reader_;
-  OPENDDS_SET(RcHandle<OpenDDS::DCPS::WriterInfo>) info_set_;
+  OPENDDS_SET(RcHandle<WriterInfo>) info_set_;
 
   class CommandBase : public Command {
   public:
     CommandBase(EndHistoricSamplesMissedSweeper* sweeper,
-                OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+                RcHandle<WriterInfo>& info)
       : sweeper_ (sweeper)
       , info_(info)
     { }
 
   protected:
     EndHistoricSamplesMissedSweeper* sweeper_;
-    OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo> info_;
+    RcHandle<WriterInfo> info_;
   };
 
   class ScheduleCommand : public CommandBase {
   public:
     ScheduleCommand(EndHistoricSamplesMissedSweeper* sweeper,
-                    OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+                    RcHandle<WriterInfo>& info)
       : CommandBase(sweeper, info)
     { }
     virtual void execute();
@@ -173,7 +173,7 @@ private:
   class CancelCommand : public CommandBase {
   public:
     CancelCommand(EndHistoricSamplesMissedSweeper* sweeper,
-                  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+                  RcHandle<WriterInfo>& info)
       : CommandBase(sweeper, info)
     { }
     virtual void execute();
@@ -259,8 +259,7 @@ public:
   /// tell instances when a DataWriter transitions to DEAD
   /// The writer state is inout parameter, the state is set to DEAD
   /// when it returns.
-  void writer_became_dead(WriterInfo& info,
-                          const MonotonicTimePoint& when);
+  void writer_became_dead(WriterInfo& info);
 
   /// tell instance when a DataWriter is removed.
   /// The liveliness status need update.
@@ -345,7 +344,7 @@ public:
 
 #ifndef OPENDDS_SAFETY_PROFILE
   virtual void get_latency_stats(
-    OpenDDS::DCPS::LatencyStatisticsSeq & stats);
+    LatencyStatisticsSeq & stats);
 #endif
 
   virtual void reset_latency_stats();
@@ -480,8 +479,8 @@ public:
   OwnershipManagerPtr ownership_manager() { return OwnershipManagerPtr(this); }
 #endif
 
-  virtual void lookup_instance(const OpenDDS::DCPS::ReceivedDataSample& sample,
-                               OpenDDS::DCPS::SubscriptionInstance_rch& instance) = 0;
+  virtual void lookup_instance(const ReceivedDataSample& sample,
+                               SubscriptionInstance_rch& instance) = 0;
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
@@ -529,11 +528,12 @@ public:
     DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
     DDS::InstanceStateMask instance_states) = 0;
 
+#endif
+
   virtual void set_instance_state(DDS::InstanceHandle_t instance,
                                   DDS::InstanceStateKind state,
-                                  const SystemTimePoint& timestamp = SystemTimePoint::now()) = 0;
-
-#endif
+                                  const SystemTimePoint& timestamp = SystemTimePoint::now(),
+                                  const GUID_t& = GUID_UNKNOWN) = 0;
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   void begin_access();
@@ -707,8 +707,7 @@ private:
   void lookup_instance_handles(const WriterIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
 
-  void instances_liveliness_update(WriterInfo& info,
-                                   const MonotonicTimePoint& when);
+  void instances_liveliness_update(const PublicationId& writer);
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   bool verify_coherent_changes_completion(WriterInfo* writer);
