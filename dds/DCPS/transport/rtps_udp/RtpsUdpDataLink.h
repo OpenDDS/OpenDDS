@@ -131,8 +131,8 @@ public:
   typedef OPENDDS_SET(ACE_INET_Addr) AddrSet;
 
   void add_locators(const RepoId& remote_id,
-                    const AddrSet& narrow_addresses,
-                    const AddrSet& wide_addresses,
+                    const AddrSet& unicast_addresses,
+                    const AddrSet& multicast_addresses,
                     bool requires_inline_qos);
 
   /// Given a 'local' id and a 'remote' id of a publication or
@@ -236,11 +236,11 @@ private:
   GuidPrefix_t local_prefix_;
 
   struct RemoteInfo {
-    RemoteInfo() : narrow_addrs_(), wide_addrs_(), requires_inline_qos_(false) {}
-    RemoteInfo(const AddrSet& narrow_addrs, const AddrSet& wide_addrs, bool iqos)
-      : narrow_addrs_(narrow_addrs), wide_addrs_(wide_addrs), requires_inline_qos_(iqos) {}
-    AddrSet narrow_addrs_;
-    AddrSet wide_addrs_;
+    RemoteInfo() : unicast_addrs_(), multicast_addrs_(), requires_inline_qos_(false) {}
+    RemoteInfo(const AddrSet& unicast_addrs, const AddrSet& multicast_addrs, bool iqos)
+      : unicast_addrs_(unicast_addrs), multicast_addrs_(multicast_addrs), requires_inline_qos_(iqos) {}
+    AddrSet unicast_addrs_;
+    AddrSet multicast_addrs_;
     bool requires_inline_qos_;
   };
 
@@ -812,7 +812,7 @@ private:
   DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
 #endif
 
-  void accumulate_addresses(const RepoId& local, const RepoId& remote, AddrSet& addresses, bool prefer_narrow = false) const;
+  void accumulate_addresses(const RepoId& local, const RepoId& remote, AddrSet& addresses, bool prefer_unicast = false) const;
 
   struct ChangeMulticastGroup : public JobQueue::Job {
     enum CmgAction {CMG_JOIN, CMG_LEAVE};

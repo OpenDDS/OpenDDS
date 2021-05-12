@@ -537,33 +537,29 @@ RtpsUdpDataLink::leave_multicast_group(const NetworkInterface& nic)
 
 void
 RtpsUdpDataLink::add_locators(const RepoId& remote_id,
-                              const AddrSet& narrow_addresses,
-                              const AddrSet& wide_addresses,
+                              const AddrSet& unicast_addresses,
+                              const AddrSet& multicast_addresses,
                               bool requires_inline_qos)
 {
-  if (narrow_addresses.empty()) {
-    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: RtpsUdpDataLink::add_locators: narrow_addresses for %C is empty\n"), LogGuid(remote_id).c_str()));
-  }
-
-  if (wide_addresses.empty()) {
-    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: RtpsUdpDataLink::add_locators: wide_addresses for %C is empty\n"), LogGuid(remote_id).c_str()));
+  if (unicast_addresses.empty() && multicast_addresses.empty()) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::add_locators: no addresses for %C\n"), LogGuid(remote_id).c_str()));
   }
 
   ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
-  locators_[remote_id] = RemoteInfo(narrow_addresses, wide_addresses, requires_inline_qos);
+  locators_[remote_id] = RemoteInfo(unicast_addresses, multicast_addresses, requires_inline_qos);
 
   if (DCPS_debug_level > 3) {
-    for (AddrSet::const_iterator pos = narrow_addresses.begin(), limit = narrow_addresses.end();
+    for (AddrSet::const_iterator pos = unicast_addresses.begin(), limit = unicast_addresses.end();
          pos != limit; ++pos) {
-      ACE_TCHAR narrow_addr_buff[256] = {};
-      pos->addr_to_string(narrow_addr_buff, 256);
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::add_locators %C is now at %s\n"), LogGuid(remote_id).c_str(), narrow_addr_buff));
+      ACE_TCHAR addr_buff[256] = {};
+      pos->addr_to_string(addr_buff, 256);
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::add_locators %C is now at %s\n"), LogGuid(remote_id).c_str(), addr_buff));
     }
-    for (AddrSet::const_iterator pos = wide_addresses.begin(), limit = wide_addresses.end();
+    for (AddrSet::const_iterator pos = multicast_addresses.begin(), limit = multicast_addresses.end();
          pos != limit; ++pos) {
-      ACE_TCHAR wide_addr_buff[256] = {};
-      pos->addr_to_string(wide_addr_buff, 256);
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::add_locators %C is now at %s\n"), LogGuid(remote_id).c_str(), wide_addr_buff));
+      ACE_TCHAR addr_buff[256] = {};
+      pos->addr_to_string(addr_buff, 256);
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::add_locators %C is now at %s\n"), LogGuid(remote_id).c_str(), addr_buff));
     }
   }
 }
@@ -4293,7 +4289,7 @@ RtpsUdpDataLink::get_addresses_i(const RepoId& local) const {
 
 void
 RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
-                                      AddrSet& addresses, bool prefer_narrow) const {
+                                      AddrSet& addresses, bool prefer_unicast) const {
   ACE_UNUSED_ARG(local);
   OPENDDS_ASSERT(local != GUID_UNKNOWN);
   OPENDDS_ASSERT(remote != GUID_UNKNOWN);
@@ -4310,10 +4306,12 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
   typedef OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter_t;
   iter_t pos = locators_.find(remote);
   if (pos != locators_.end()) {
-    if (prefer_narrow) {
-      normal_addrs = pos->second.narrow_addrs_;
+    if (prefer_unicast && !pos->second.unicast_addrs_.empty()) {
+      normal_addrs = pos->second.unicast_addrs_;
+    } else if (!pos->second.multicast_addrs_.empty()) {
+      normal_addrs = pos->second.multicast_addrs_;
     } else {
-      normal_addrs = pos->second.wide_addrs_;
+      normal_addrs = pos->second.unicast_addrs_;
     }
   } else {
     const GuidConverter conv(remote);
