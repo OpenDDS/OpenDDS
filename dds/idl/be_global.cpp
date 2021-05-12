@@ -48,6 +48,7 @@ BE_GlobalData::BE_GlobalData()
   , suppress_idl_(false)
   , suppress_typecode_(false)
   , suppress_xtypes_(false)
+  , suppress_xtypes_complete_(false)
   , no_default_gen_(false)
   , generate_itl_(false)
   , generate_v8_(false)
@@ -424,6 +425,9 @@ BE_GlobalData::parse_args(long& i, char** av)
       break;
     case 'x':
       suppress_xtypes_ = true;
+      break;
+    case 'c':
+      suppress_xtypes_complete_ = true;
       break;
     case 'a':
       // ignore, accepted for tao_idl compatibility

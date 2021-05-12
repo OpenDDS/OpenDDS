@@ -616,7 +616,16 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::AnnotationParameterValue& p
     out << "OPENDDS_STRING(" << param_value.string8_value << ")";
     break;
   case OpenDDS::XTypes::TK_STRING16:
-    out << "OPENDDS_WSTRING(" << param_value.string16_value << ")";
+    // Assuming each wide character can be converted to a single byte character.
+    size_t length = param_value.string16_value.size() + 1;
+    char* dst = new char[length];
+    size_t ret = wcstombs(dst, param_value.string16_value.c_str(), length);
+    if (ret == (size_t)-1) {
+      delete[] dst;
+      be_util::misc_error_and_abort("Failed to convert wide string to multibyte character string");
+    }
+    out << "OPENDDS_WSTRING(L\"" << dst << "\")";
+    delete[] dst;
   }
   out << ")";
   return out;
@@ -1355,34 +1364,32 @@ typeobject_generator::gen_epilogue()
       "}\n\n";
   }
 
+  be_global->impl_ <<
+    "XTypes::TypeMap get_minimal_type_map_private()\n"
+    "{\n"
+    "  XTypes::TypeMap tm;\n";
+
   idx = 0;
-  for (OpenDDS::XTypes::TypeMap::const_iterator pos = complete_type_map_.begin();
-       pos != complete_type_map_.end(); ++pos, ++idx) {
-    be_global->impl_ <<
-      "XTypes::TypeObject complete_to" << idx << "()\n"
-      "{\n"
-      "  return " << pos->second << ";\n"
-      "}\n\n";
+  for (OpenDDS::XTypes::TypeMap::const_iterator pos = minimal_type_map_.begin();
+       pos != minimal_type_map_.end(); ++pos, ++idx) {
+    be_global->impl_ << "  tm[" << pos->first << "] = minimal_to" << idx << "();\n";
   }
 
-  {
-    be_global->impl_ <<
-      "XTypes::TypeMap get_minimal_type_map_private()\n"
-      "{\n"
-      "  XTypes::TypeMap tm;\n";
+  be_global->impl_ <<
+    "  return tm;\n"
+    "}\n\n";
 
+  if (!suppress_complete_type_output_) {
     idx = 0;
-    for (OpenDDS::XTypes::TypeMap::const_iterator pos = minimal_type_map_.begin();
-         pos != minimal_type_map_.end(); ++pos, ++idx) {
-      be_global->impl_ << "  tm[" << pos->first << "] = minimal_to" << idx << "();\n";
+    for (OpenDDS::XTypes::TypeMap::const_iterator pos = complete_type_map_.begin();
+         pos != complete_type_map_.end(); ++pos, ++idx) {
+      be_global->impl_ <<
+        "XTypes::TypeObject complete_to" << idx << "()\n"
+        "{\n"
+        "  return " << pos->second << ";\n"
+        "}\n\n";
     }
 
-    be_global->impl_ <<
-      "  return tm;\n"
-      "}\n\n";
-  }
-
-  {
     be_global->impl_ <<
       "XTypes::TypeMap get_complete_type_map_private()\n"
       "{\n"
@@ -1396,9 +1403,9 @@ typeobject_generator::gen_epilogue()
 
     be_global->impl_ <<
       "  return tm;\n"
-      "}\n"
-      "}\n\n";
+      "}\n";
   }
+  be_global->impl_ << "}\n\n";
 
   const std::string common = "{\n"
     "  static XTypes::TypeMap tm;\n"
@@ -1413,12 +1420,14 @@ typeobject_generator::gen_epilogue()
     "  return tm;\n"
     "}\n\n";
 
-  be_global->impl_ <<
-    "const XTypes::TypeMap& get_complete_type_map()\n" << common <<
-    "    tm = get_complete_type_map_private();\n"
-    "  }\n"
-    "  return tm;\n"
-    "}\n";
+  if (!suppress_complete_type_output_) {
+    be_global->impl_ <<
+      "const XTypes::TypeMap& get_complete_type_map()\n" << common <<
+      "    tm = get_complete_type_map_private();\n"
+      "  }\n"
+      "  return tm;\n"
+      "}\n";
+  }
 }
 
 string
@@ -2443,17 +2452,6 @@ typeobject_generator::generate(AST_Type* node, UTL_ScopedName* name)
   }
 
   {
-    const string decl = "getCompleteTypeIdentifier<" + clazz + ">";
-    Function gti(decl.c_str(), "const XTypes::TypeIdentifier&", "");
-    gti.endArgs();
-    const OpenDDS::XTypes::TypeIdentifier ti = get_complete_type_identifier(node);
-    be_global->impl_ << common <<
-      "    ti = " << ti << ";\n"
-      "  }\n"
-      "  return ti;\n";
-  }
-
-  {
     const string decl = "getMinimalTypeMap<" + clazz + ">";
     Function gti(decl.c_str(), "const XTypes::TypeMap&", "");
     gti.endArgs();
@@ -2461,12 +2459,25 @@ typeobject_generator::generate(AST_Type* node, UTL_ScopedName* name)
       "  return get_minimal_type_map();\n";
   }
 
-  {
-    const string decl = "getCompleteTypeMap<" + clazz + ">";
-    Function gti(decl.c_str(), "const XTypes::TypeMap&", "");
-    gti.endArgs();
-    be_global->impl_ <<
-      "  return get_complete_type_map();\n";
+  if (!suppress_complete_type_output_) {
+    {
+      const string decl = "getCompleteTypeIdentifier<" + clazz + ">";
+      Function gti(decl.c_str(), "const XTypes::TypeIdentifier&", "");
+      gti.endArgs();
+      const OpenDDS::XTypes::TypeIdentifier ti = get_complete_type_identifier(node);
+      be_global->impl_ << common <<
+        "    ti = " << ti << ";\n"
+        "  }\n"
+        "  return ti;\n";
+    }
+
+    {
+      const string decl = "getCompleteTypeMap<" + clazz + ">";
+      Function gti(decl.c_str(), "const XTypes::TypeMap&", "");
+      gti.endArgs();
+      be_global->impl_ <<
+        "  return get_complete_type_map();\n";
+    }
   }
 
   return true;

@@ -164,6 +164,7 @@ public:
   bool suppress_idl() const { return suppress_idl_; }
   bool suppress_typecode() const { return suppress_typecode_; }
   bool suppress_xtypes() const { return suppress_xtypes_; }
+  bool suppress_xtypes_complete() const { return suppress_xtypes_complete_; }
 
   static bool writeFile(const char* fileName, const std::string &content);
 
@@ -240,8 +241,8 @@ private:
   const char* filename_;
 
   bool java_, suppress_idl_, suppress_typecode_, suppress_xtypes_,
-    no_default_gen_, generate_itl_, generate_v8_,
-    generate_rapidjson_, face_ts_, printer_;
+    suppress_xtypes_complete_, no_default_gen_, generate_itl_,
+    generate_v8_, generate_rapidjson_, face_ts_, printer_;
 
   bool filename_only_includes_;
 
