@@ -87,9 +87,10 @@ private:
                                      const RepoId& /*writerid*/);
 
   virtual bool connection_info_i(TransportLocator& info, ConnectionInfoFlags flags) const;
-  std::pair<ACE_INET_Addr, ACE_INET_Addr> get_connection_addrs(const TransportBLOB& data,
-                                                               bool* requires_inline_qos = 0,
-                                                               unsigned int* blob_bytes_read = 0) const;
+  std::pair<RtpsUdpDataLink::AddrSet, RtpsUdpDataLink::AddrSet>
+    get_connection_addrs(const TransportBLOB& data,
+                         bool* requires_inline_qos = 0,
+                         unsigned int* blob_bytes_read = 0) const;
 
   virtual void release_datalink(DataLink* link);
 

@@ -537,29 +537,34 @@ RtpsUdpDataLink::leave_multicast_group(const NetworkInterface& nic)
 
 void
 RtpsUdpDataLink::add_locators(const RepoId& remote_id,
-                              const ACE_INET_Addr& narrow_address,
-                              const ACE_INET_Addr& wide_address,
+                              const AddrSet& narrow_addresses,
+                              const AddrSet& wide_addresses,
                               bool requires_inline_qos)
 {
-  if (narrow_address == ACE_INET_Addr()) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::add_locators: narrow_address for %C is empty\n"), LogGuid(remote_id).c_str()));
-    return;
+  if (narrow_addresses.empty()) {
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: RtpsUdpDataLink::add_locators: narrow_addresses for %C is empty\n"), LogGuid(remote_id).c_str()));
   }
 
-  if (wide_address == ACE_INET_Addr()) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::add_locators: wide_address for %C is empty\n"), LogGuid(remote_id).c_str()));
-    return;
+  if (wide_addresses.empty()) {
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: RtpsUdpDataLink::add_locators: wide_addresses for %C is empty\n"), LogGuid(remote_id).c_str()));
   }
 
   ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
-  locators_[remote_id] = RemoteInfo(narrow_address, wide_address, requires_inline_qos);
+  locators_[remote_id] = RemoteInfo(narrow_addresses, wide_addresses, requires_inline_qos);
 
   if (DCPS_debug_level > 3) {
-    ACE_TCHAR narrow_addr_buff[256] = {};
-    narrow_address.addr_to_string(narrow_addr_buff, 256);
-    ACE_TCHAR wide_addr_buff[256] = {};
-    wide_address.addr_to_string(wide_addr_buff, 256);
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::add_locators %C is now at %s and %s\n"), LogGuid(remote_id).c_str(), narrow_addr_buff, wide_addr_buff));
+    for (AddrSet::const_iterator pos = narrow_addresses.begin(), limit = narrow_addresses.end();
+         pos != limit; ++pos) {
+      ACE_TCHAR narrow_addr_buff[256] = {};
+      pos->addr_to_string(narrow_addr_buff, 256);
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::add_locators %C is now at %s\n"), LogGuid(remote_id).c_str(), narrow_addr_buff));
+    }
+    for (AddrSet::const_iterator pos = wide_addresses.begin(), limit = wide_addresses.end();
+         pos != limit; ++pos) {
+      ACE_TCHAR wide_addr_buff[256] = {};
+      pos->addr_to_string(wide_addr_buff, 256);
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::add_locators %C is now at %s\n"), LogGuid(remote_id).c_str(), wide_addr_buff));
+    }
   }
 }
 
@@ -692,7 +697,7 @@ RtpsUdpDataLink::disassociated(const RepoId& local_id,
 void
 RtpsUdpDataLink::register_for_reader(const RepoId& writerid,
                                      const RepoId& readerid,
-                                     const ACE_INET_Addr& address,
+                                     const AddrSet& addresses,
                                      DiscoveryListener* listener)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_);
@@ -700,7 +705,7 @@ RtpsUdpDataLink::register_for_reader(const RepoId& writerid,
   interesting_readers_.insert(
     InterestingRemoteMapType::value_type(
       readerid,
-      InterestingRemote(writerid, address, listener)));
+      InterestingRemote(writerid, addresses, listener)));
   if (heartbeat_counts_.find(writerid.entityId) == heartbeat_counts_.end()) {
     heartbeat_counts_[writerid.entityId] = 0;
   }
@@ -730,7 +735,7 @@ RtpsUdpDataLink::unregister_for_reader(const RepoId& writerid,
 void
 RtpsUdpDataLink::register_for_writer(const RepoId& readerid,
                                      const RepoId& writerid,
-                                     const ACE_INET_Addr& address,
+                                     const AddrSet& addresses,
                                      DiscoveryListener* listener)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
@@ -738,7 +743,7 @@ RtpsUdpDataLink::register_for_writer(const RepoId& readerid,
   interesting_writers_.insert(
     InterestingRemoteMapType::value_type(
       writerid,
-      InterestingRemote(readerid, address, listener)));
+      InterestingRemote(readerid, addresses, listener)));
   g.release();
   if (enableheartbeatchecker) {
     heartbeatchecker_.enable(false, config().heartbeat_period_);
@@ -4298,25 +4303,29 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
     return;
   }
 
-  ACE_INET_Addr normal_addr;
+  AddrSet normal_addrs;
   ACE_INET_Addr ice_addr;
   static const ACE_INET_Addr NO_ADDR;
 
   typedef OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter_t;
   iter_t pos = locators_.find(remote);
   if (pos != locators_.end()) {
-    normal_addr = prefer_narrow ? pos->second.narrow_addr_ : pos->second.wide_addr_;
+    if (prefer_narrow) {
+      normal_addrs = pos->second.narrow_addrs_;
+    } else {
+      normal_addrs = pos->second.wide_addrs_;
+    }
   } else {
     const GuidConverter conv(remote);
     if (conv.isReader()) {
       InterestingRemoteMapType::const_iterator ipos = interesting_readers_.find(remote);
       if (ipos != interesting_readers_.end()) {
-        normal_addr = ipos->second.address;
+        normal_addrs = ipos->second.addresses;
       }
     } else if (conv.isWriter()) {
       InterestingRemoteMapType::const_iterator ipos = interesting_writers_.find(remote);
       if (ipos != interesting_writers_.end()) {
-        normal_addr = ipos->second.address;
+        normal_addrs = ipos->second.addresses;
       }
     }
   }
@@ -4329,9 +4338,7 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
 #endif
 
   if (ice_addr == NO_ADDR) {
-    if (normal_addr != NO_ADDR) {
-      addresses.insert(normal_addr);
-    }
+    addresses.insert(normal_addrs.begin(), normal_addrs.end());
     const ACE_INET_Addr relay_addr = config().rtps_relay_address();
     if (relay_addr != NO_ADDR) {
       addresses.insert(relay_addr);
@@ -4339,13 +4346,13 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
     return;
   }
 
-  if (ice_addr != normal_addr) {
+  if (normal_addrs.count(ice_addr) == 0) {
     addresses.insert(ice_addr);
     return;
   }
 
-  if (normal_addr != NO_ADDR) {
-    addresses.insert(normal_addr);
+  if (!normal_addrs.empty()) {
+    addresses.insert(normal_addrs.begin(), normal_addrs.end());
   }
 }
 

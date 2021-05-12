@@ -128,10 +128,12 @@ public:
 
   const GuidPrefix_t& local_prefix() const { return local_prefix_; }
 
-  void add_locators(const RepoId& remote_id, const ACE_INET_Addr& narrow_address,
-                    const ACE_INET_Addr& wide_address, bool requires_inline_qos);
-
   typedef OPENDDS_SET(ACE_INET_Addr) AddrSet;
+
+  void add_locators(const RepoId& remote_id,
+                    const AddrSet& narrow_addresses,
+                    const AddrSet& wide_addresses,
+                    bool requires_inline_qos);
 
   /// Given a 'local' id and a 'remote' id of a publication or
   /// subscription, return the set of addresses of the remote peers.
@@ -158,7 +160,7 @@ public:
 
   void register_for_reader(const RepoId& writerid,
                            const RepoId& readerid,
-                           const ACE_INET_Addr& address,
+                           const AddrSet& addresses,
                            DiscoveryListener* listener);
 
   void unregister_for_reader(const RepoId& writerid,
@@ -166,7 +168,7 @@ public:
 
   void register_for_writer(const RepoId& readerid,
                            const RepoId& writerid,
-                           const ACE_INET_Addr& address,
+                           const AddrSet& addresses,
                            DiscoveryListener* listener);
 
   void unregister_for_writer(const RepoId& readerid,
@@ -234,11 +236,11 @@ private:
   GuidPrefix_t local_prefix_;
 
   struct RemoteInfo {
-    RemoteInfo() : narrow_addr_(), wide_addr_(), requires_inline_qos_(false) {}
-    RemoteInfo(const ACE_INET_Addr& narrow_addr, const ACE_INET_Addr& wide_addr, bool iqos)
-      : narrow_addr_(narrow_addr), wide_addr_(wide_addr), requires_inline_qos_(iqos) {}
-    ACE_INET_Addr narrow_addr_;
-    ACE_INET_Addr wide_addr_;
+    RemoteInfo() : narrow_addrs_(), wide_addrs_(), requires_inline_qos_(false) {}
+    RemoteInfo(const AddrSet& narrow_addrs, const AddrSet& wide_addrs, bool iqos)
+      : narrow_addrs_(narrow_addrs), wide_addrs_(wide_addrs), requires_inline_qos_(iqos) {}
+    AddrSet narrow_addrs_;
+    AddrSet wide_addrs_;
     bool requires_inline_qos_;
   };
 
@@ -745,8 +747,8 @@ private:
   struct InterestingRemote {
     /// id of local entity that is interested in this remote.
     RepoId localid;
-    /// address of this entity
-    ACE_INET_Addr address;
+    /// addresses of this entity
+    AddrSet addresses;
     /// Callback to invoke.
     DiscoveryListener* listener;
     /**
@@ -758,9 +760,9 @@ private:
     enum { DOES_NOT_EXIST, EXISTS } status;
 
     InterestingRemote() { }
-    InterestingRemote(const RepoId& w, const ACE_INET_Addr& a, DiscoveryListener* l)
+    InterestingRemote(const RepoId& w, const AddrSet& a, DiscoveryListener* l)
       : localid(w)
-      , address(a)
+      , addresses(a)
       , listener(l)
       , status(DOES_NOT_EXIST)
     { }
