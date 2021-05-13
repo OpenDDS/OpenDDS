@@ -3153,7 +3153,6 @@ Sedp::data_received(DCPS::MessageId /*message_id*/,
 
   const RepoId& guid = data.participantGuid;
   RepoId guid_participant = guid;
-
   guid_participant.entityId = ENTITYID_PARTICIPANT;
   RepoId prefix = data.participantGuid;
   prefix.entityId = EntityId_t(); // Clear the entityId so lower bound will work.
@@ -5395,7 +5394,6 @@ Sedp::write_participant_message_data(
                              !associated_participants_.empty())) {
     pmd.participantGuid = rid;
     result = participant_message_writer_->write_participant_message(pmd, reader, pm.sequence_);
-
   } else if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_participant_message_data - ")
                ACE_TEXT("not currently associated, dropping msg.\n")));
