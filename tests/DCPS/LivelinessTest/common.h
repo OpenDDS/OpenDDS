@@ -24,6 +24,8 @@
 #include "ace/SString.h"
 
 #define MY_DOMAIN 111
+#define AUTOMATIC_TOPIC "automatic"
+#define MANUAL_TOPIC "manual"
 #define MY_TOPIC  "foo"
 #define MY_TYPE "foo"
 

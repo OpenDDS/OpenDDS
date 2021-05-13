@@ -3107,6 +3107,9 @@ void Sedp::data_received(DCPS::MessageId message_id,
 }
 #endif
 
+//This is a function to unify the notifcation of liveliness within RTPS
+//The local participant map is checked for associated entities and then they are notified
+//of liveliness if their QoS is compatibile
 void
 Sedp::notify_liveliness(const ParticipantMessageData& pmd)
 {
@@ -3132,10 +3135,9 @@ Sedp::notify_liveliness(const ParticipantMessageData& pmd)
       DCPS::DataReaderCallbacks_rch sl = sub_pos->second.subscription_.lock();
       if (sl) {
         if (sub_pos->second.qos_.liveliness.kind == ::DDS::AUTOMATIC_LIVELINESS_QOS && is_automatic) {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) SIGNAL FOR LIVELINESS: AUTOMATIC \n"));
           sl->signal_liveliness(guid_participant);
-        } else if (sub_pos->second.qos_.liveliness.kind == ::DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS && !is_automatic) {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) SIGNAL FOR LIVELINESS: MANUAL \n"));
+        } else if (sub_pos->second.qos_.liveliness.kind == ::DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS
+                   || sub_pos->second.qos_.liveliness.kind == ::DDS::AUTOMATIC_LIVELINESS_QOS && !is_automatic) {
           sl->signal_liveliness(guid_participant);
         }
       }

@@ -26,3 +26,47 @@ project(LivelinessTestSubscriber): dcpsexe, dcps_test, dcps_transports_for_test 
     DataReaderListener.cpp
   }
 }
+
+project(LivelinessNotifyTestPublisher): dcpsexe, dcps_test, dcps_transports_for_test {
+  exename   = dualpub
+  libpaths += ../FooType4
+  libpaths += ../common
+  libs     +=  common DcpsFooType4
+  after    += DcpsFooType4 common
+
+  Source_Files {
+    common.cpp
+    dualpub.cpp
+    Writer.cpp
+  }
+}
+
+
+project(LivelinessNotifyTestSubscriber): dcpsexe, dcps_test, dcps_transports_for_test {
+  exename   = dualsub
+  libpaths += ../FooType4
+  libpaths += ../common
+  libs     +=  common DcpsFooType4
+  after    += DcpsFooType4 common
+
+  Source_Files {
+    common.cpp
+    dualsub.cpp
+    DataReaderListener.cpp
+  }
+}
+
+project(LivelinessLocal): dcpsexe, dcps_test, dcps_transports_for_test {
+  exename   = local
+  libpaths += ../FooType4
+  libpaths += ../common
+  libs     +=  common DcpsFooType4
+  after    += DcpsFooType4 common
+
+  Source_Files {
+    common.cpp
+    DataReaderListener.cpp
+    local.cpp
+    Writer.cpp
+  }
+}

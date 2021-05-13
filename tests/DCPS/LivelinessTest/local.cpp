@@ -1,7 +1,7 @@
 // -*- C++ -*-
 // ============================================================================
 /**
- *  @file   subscriber.cpp
+ *  @file   publisher.cpp
  *
  *
  *
@@ -9,15 +9,18 @@
 // ============================================================================
 
 
+#include "Writer.h"
 #include "../common/TestException.h"
 #include "DataReaderListener.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/TopicDescriptionImpl.h"
+#include "dds/DCPS/PublisherImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #include "dds/DCPS/StaticIncludes.h"
 #if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
@@ -25,8 +28,60 @@
 #endif
 
 #include "ace/Arg_Shifter.h"
+#include "ace/Reactor.h"
+#include "ace/OS_NS_unistd.h"
 
 #include "common.h"
+
+
+class ReactorCtrl : public ACE_Event_Handler
+{
+public:
+  ReactorCtrl() : cond_(lock_) {}
+
+  int handle_timeout (const ACE_Time_Value &tv,
+                      const void *arg)
+  {
+    ACE_UNUSED_ARG(tv);
+    ACE_UNUSED_ARG(arg);
+
+    // it appears that you must have the lock before waiting or signaling on Win32
+    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                      guard,
+                      this->lock_,
+                      -1);
+
+    return cond_.wait();
+  }
+
+  void pause()
+  {
+    ACE_Reactor_Timer_Interface* reactor = TheServiceParticipant->timer();
+
+    if (reactor->schedule_timer(this,
+                                0,
+                                ACE_Time_Value(0,1)) == -1)
+    {
+      ACE_ERROR ((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: PauseReactor, ")
+                 ACE_TEXT(" %p.\n"), ACE_TEXT("schedule_timer")));
+    }
+  }
+
+  void resume()
+  {
+    // it appears that you must have the lock before waiting or signaling on Win32
+    ACE_GUARD (ACE_Recursive_Thread_Mutex,
+               guard,
+               this->lock_);
+    cond_.signal();
+  }
+
+private:
+  ACE_Recursive_Thread_Mutex lock_;
+  ACE_Condition<ACE_Recursive_Thread_Mutex> cond_;
+} ;
+
 
 /// parse the command line arguments
 int parse_args (int argc, ACE_TCHAR *argv[])
@@ -38,10 +93,9 @@ int parse_args (int argc, ACE_TCHAR *argv[])
   while (arg_shifter.is_anything_left ())
   {
     // options:
-    //  -t use_take?1:0             defaults to 0
     //  -i num_ops_per_thread       defaults to 1
     //  -l num_unlively_periods     defaults to 10
-    //  -r num_datareaders          defaults to 1
+    //  -w num_datawriters          defaults to 1
     //  -n max_samples_per_instance defaults to INFINITE
     //  -d history.depth            defaults to 1
     //  -z                          verbose transport debug
@@ -57,11 +111,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-l"))) != 0)
     {
       num_unlively_periods = ACE_OS::atoi (currentArg);
-      arg_shifter.consume_arg ();
-    }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-t"))) != 0)
-    {
-      use_take = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
     else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-n"))) != 0)
@@ -101,17 +150,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   try
     {
-      ACE_DEBUG((LM_INFO,"(%P|%t) %T subscriber main\n"));
+      ACE_DEBUG((LM_INFO,"(%P|%t) %T publisher main\n"));
 
       ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
-
-//      TheServiceParticipant->liveliness_factor(100) ;
 
       // let the Service_Participant (in above line) strip out -DCPSxxx parameters
       // and then get application specific parameters.
       parse_args (argc, argv);
 
-      ::Xyz::FooTypeSupport_var fts (new ::Xyz::FooTypeSupportImpl);
+      ::Xyz::FooTypeSupport_var fts(new ::Xyz::FooTypeSupportImpl);
 
       ::DDS::DomainParticipant_var dp =
         dpf->create_participant(MY_DOMAIN,
@@ -141,35 +188,60 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       topic_qos.history.depth = history_depth;
 
-      ::DDS::Topic_var automatic_topic =
-        dp->create_topic (AUTOMATIC_TOPIC,
+      ::DDS::Topic_var topic =
+        dp->create_topic (MY_TOPIC,
                           MY_TYPE,
                           topic_qos,
                           ::DDS::TopicListener::_nil(),
                           ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-      ::DDS::Topic_var manual_topic =
-        dp->create_topic (MANUAL_TOPIC,
-                          MY_TYPE,
-                          topic_qos,
-                          ::DDS::TopicListener::_nil(),
-                          ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-      if (CORBA::is_nil (automatic_topic.in ()) || CORBA::is_nil (manual_topic.in ()))
+      if (CORBA::is_nil (topic.in ()))
       {
         return 1 ;
       }
 
-      ::DDS::TopicDescription_var automatic_description =
-        dp->lookup_topicdescription(AUTOMATIC_TOPIC);
-      ::DDS::TopicDescription_var manual_description =
-        dp->lookup_topicdescription(MANUAL_TOPIC);
-      if (CORBA::is_nil (automatic_description.in ()) || CORBA::is_nil (manual_description.in ()))
+      // Create the publisher
+      ::DDS::Publisher_var pub =
+        dp->create_publisher(PUBLISHER_QOS_DEFAULT,
+                             ::DDS::PublisherListener::_nil(),
+                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      if (CORBA::is_nil (pub.in ()))
+      {
+        ACE_ERROR_RETURN ((LM_ERROR,
+                          ACE_TEXT("(%P|%t) create_publisher failed.\n")),
+                          1);
+      }
+
+      // Create the datawriters
+      ::DDS::DataWriterQos dw_qos;
+      pub->get_default_datawriter_qos (dw_qos);
+
+      dw_qos.history.depth = history_depth  ;
+      dw_qos.resource_limits.max_samples_per_instance =
+            max_samples_per_instance ;
+      dw_qos.liveliness.kind = ::DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
+      dw_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC ;
+      dw_qos.liveliness.lease_duration.nanosec = 0 ;
+
+      ::DDS::DataWriter_var dw = pub->create_datawriter(topic.in (),
+                                  dw_qos,
+                                  ::DDS::DataWriterListener::_nil(),
+                                  ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+      if (CORBA::is_nil (dw.in ()))
+        {
+          ACE_ERROR ((LM_ERROR,
+                     ACE_TEXT("(%P|%t) create_datawriter failed.\n")));
+          return 1 ;
+        }
+
+      ::DDS::TopicDescription_var description =
+        dp->lookup_topicdescription(MY_TOPIC);
+      if (CORBA::is_nil (description.in ()))
       {
         ACE_ERROR_RETURN ((LM_ERROR,
                            ACE_TEXT("(%P|%t) lookup_topicdescription failed.\n")),
                            1);
       }
-
-
 
       // Create the subscriber
       ::DDS::Subscriber_var sub =
@@ -184,30 +256,19 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       // Create the Datareaders
-      ::DDS::DataReaderQos automatic_dr_qos;
-      sub->get_default_datareader_qos (automatic_dr_qos);
-      automatic_dr_qos.history.depth = history_depth  ;
-      automatic_dr_qos.resource_limits.max_samples_per_instance =
-            max_samples_per_instance ;
-      automatic_dr_qos.liveliness.kind = ::DDS::AUTOMATIC_LIVELINESS_QOS;
-      automatic_dr_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC ;
-      automatic_dr_qos.liveliness.lease_duration.nanosec = 0 ;
+      ::DDS::DataReaderQos dr_qos;
+      sub->get_default_datareader_qos (dr_qos);
 
-      ::DDS::DataReaderQos manual_dr_qos;
-      sub->get_default_datareader_qos (manual_dr_qos);
-      manual_dr_qos.history.depth = history_depth  ;
-      manual_dr_qos.resource_limits.max_samples_per_instance =
+      dr_qos.history.depth = history_depth  ;
+      dr_qos.resource_limits.max_samples_per_instance =
             max_samples_per_instance ;
-      manual_dr_qos.liveliness.kind = ::DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
-      manual_dr_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC ;
-      manual_dr_qos.liveliness.lease_duration.nanosec = 0 ;
+      dr_qos.liveliness.kind = ::DDS::AUTOMATIC_LIVELINESS_QOS;
+      dr_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC ;
+      dr_qos.liveliness.lease_duration.nanosec = 0 ;
 
       ::DDS::DataReaderListener_var drl (new DataReaderListenerImpl);
       DataReaderListenerImpl* drl_servant =
         dynamic_cast<DataReaderListenerImpl*>(drl.in());
-      ::DDS::DataReaderListener_var drl2 (new DataReaderListenerImpl);
-      DataReaderListenerImpl* drl_servant2 =
-        dynamic_cast<DataReaderListenerImpl*>(drl2.in());
 
       if (!drl_servant) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -215,70 +276,57 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           ACE_TEXT(" ERROR: drl_servant is nil (dynamic_cast failed)!\n")), -1);
       }
 
-      ::DDS::DataReader_var automatic_dr ;
+      ::DDS::DataReader_var dr ;
 
-      automatic_dr = sub->create_datareader(automatic_description.in (),
-                                  automatic_dr_qos,
+      dr = sub->create_datareader(description.in (),
+                                  dr_qos,
                                   drl.in (),
                                   ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      
 
-      ::DDS::DataReader_var manual_dr ;
+      // ensure that the connection and association has been fully established
+      ACE_OS::sleep(5);  //TBD remove this kludge when the transport is fixed.
 
-      manual_dr = sub->create_datareader(manual_description.in (),
-                                  manual_dr_qos,
-                                  drl2.in (),
-                                  ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      // stop the Service_Participant reactor so LIVELINESS.kind=AUTOMATIC does not
+      // send out an automatic liveliness control message when sleeping in the loop
+      // below.
 
-      // Indicate that the subscriber is ready
-      FILE* readers_ready = ACE_OS::fopen ((temp_file_prefix + sub_ready_filename).c_str (), ACE_TEXT("w"));
-      if (readers_ready == 0)
+      Writer* writer = new Writer(dw.in (),
+                                1,
+                                num_ops_per_thread);
+
+      for (int i = 0 ; i < num_unlively_periods ; i++)
         {
-          ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Unable to create subscriber completed file\n")));
+          writer->run_test (i);
+
+          // 3 ensures that we will detect when an DataReader detects
+          // liveliness lost on an already unliveliy DataReader.
+          ACE_OS::sleep (3 * LEASE_DURATION_SEC);
         }
+      writer->run_test (num_unlively_periods);
 
-      ACE_DEBUG((LM_DEBUG,ACE_TEXT("(%P|%t) %T waiting for publisher to be ready\n") ));
-
-      // Wait for the publisher to be ready
-      FILE* writers_ready = 0;
-      do
-        {
-          ACE_Time_Value small_time(0,250000);
-          ACE_OS::sleep (small_time);
-          writers_ready = ACE_OS::fopen ((temp_file_prefix + pub_ready_filename).c_str (), ACE_TEXT("r"));
-        } while (0 == writers_ready);
-
-      if (readers_ready) ACE_OS::fclose(readers_ready);
-      if (writers_ready) ACE_OS::fclose(writers_ready);
-
-      ACE_DEBUG((LM_DEBUG,ACE_TEXT("(%P|%t) %T Publisher is ready\n") ));
-
-      // Indicate that the subscriber is done
-      // (((it is done when ever the publisher is done)))
-      FILE* readers_completed = ACE_OS::fopen ((temp_file_prefix + sub_finished_filename).c_str (), ACE_TEXT("w"));
-      if (readers_completed == 0)
-        {
-          ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Unable to create subscriber completed file\n")));
-        }
-
-      ACE_DEBUG((LM_DEBUG,ACE_TEXT("(%P|%t) %T waiting for publisher to finish\n") ));
-      // Wait for the publisher to finish
-      FILE* writers_completed = 0;
-      do
-        {
-          ACE_Time_Value small_time(0,250000);
-          ACE_OS::sleep (small_time);
-          writers_completed = ACE_OS::fopen ((temp_file_prefix + pub_finished_filename).c_str (), ACE_TEXT("r"));
-        } while (0 == writers_completed);
-
-      if (readers_completed) ACE_OS::fclose(readers_completed);
-      if (writers_completed) ACE_OS::fclose(writers_completed);
-
-      //
       // We need to wait for liveliness to go away here.
       //
-      ACE_OS::sleep( 5);
+
+      // We need to wait for liveliness to go away here.
+      //
+      // clean up subscriber objects
+
+      sub->delete_contained_entities() ;
+
+      dp->delete_subscriber(sub.in ());
+
+      // Clean up publisher objects
+      pub->delete_contained_entities() ;
+
+      delete writer;
+
+      dp->delete_publisher(pub.in ());
+
+      dp->delete_topic(topic.in ());
+      dpf->delete_participant(dp.in ());
+
+      ACE_OS::sleep(5);
 
       //
       // Determine the test status at this point.
@@ -322,16 +370,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       ACE_DEBUG((LM_DEBUG,ACE_TEXT("(%P|%t) %T publisher is finish - cleanup subscriber\n") ));
-
-      // clean up subscriber objects
-
-      sub->delete_contained_entities() ;
-
-      dp->delete_subscriber(sub.in ());
-
-      dp->delete_topic(automatic_topic.in ());
-      dp->delete_topic(manual_topic.in ());
-      dpf->delete_participant(dp.in ());
 
       TheServiceParticipant->shutdown ();
 

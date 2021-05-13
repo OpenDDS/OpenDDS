@@ -14,6 +14,11 @@ use strict;
 PerlDDS::add_lib_path('../FooType4');
 PerlDDS::add_lib_path('../common');
 
+my $subscriber_completed = "subscriber_finished.txt";
+my $subscriber_ready = "subscriber_ready.txt";
+my $publisher_completed = "publisher_finished.txt";
+my $publisher_ready = "publisher_ready.txt";
+
 # single reader with single instances test
 my $multiple_instance = 0;
 my $num_samples_per_reader = 2;
@@ -36,7 +41,16 @@ $test->enable_console_logging();
 my $common_parameters = $app_bit_conf
     . " -w $num_readers -m $multiple_instance"
     . " -l $num_unlively_periods -i $num_samples_per_reader";
-$test->process('pub', 'publisher', $common_parameters);
+
+$test->process('sub', 'dualsub', $common_parameters . " -t $use_take");
+$test->process('pub', 'dualpub', $common_parameters);
+
+$test->add_temporary_file('sub', $subscriber_completed);
+$test->add_temporary_file('sub', $subscriber_ready);
+$test->add_temporary_file('pub', $publisher_completed);
+$test->add_temporary_file('pub', $publisher_ready);
+
+$test->start_process('sub', '-T');
 $test->start_process('pub', '-T');
 
 my $result = $test->finish(60);
