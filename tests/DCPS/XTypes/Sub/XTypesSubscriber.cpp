@@ -308,7 +308,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       OpenDDS::DCPS::retcode_to_string(ret)));
     failed = true;
   }
-
   ws->detach_condition(condition);
 
   if (!failed) {
@@ -339,9 +338,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   // As the subscriber is now about to exit, let the publisher know it can exit too
   //
 
-  Topic_var control_topic;
-  ControlStructTypeSupport_var control_ts = new ControlStructTypeSupportImpl;
-  get_topic(control_ts, dp, "SET_PD_OL_OA_OM_OD_ControlStruct", control_topic, "ControlStruct");
+  Topic_var start_control_topic;
+  Topic_var stop_control_topic;
+  ControlStructTypeSupport_var start_control_ts = new ControlStructTypeSupportImpl;
+  ControlStructTypeSupport_var stop_control_ts = new ControlStructTypeSupportImpl;
+  get_topic(start_control_ts, dp, "SET_PD_OL_OA_OM_OD_Start", start_control_topic, "ControlStruct");
+  get_topic(stop_control_ts, dp, "SET_PD_OL_OA_OM_OD_Stop", stop_control_topic, "ControlStruct");
 
   Publisher_var control_pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
     DEFAULT_STATUS_MASK);
@@ -354,7 +356,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   control_pub->get_default_datawriter_qos(control_dw_qos);
   control_dw_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
 
-  DataWriter_var control_dw = control_pub->create_datawriter(control_topic, control_dw_qos, 0,
+  DataWriter_var control_dw = control_pub->create_datawriter(start_control_topic, control_dw_qos, 0,
     DEFAULT_STATUS_MASK);
   if (!control_dw) {
     ACE_ERROR((LM_ERROR, "ERROR: create_datawriter for control_pub failed\n"));
@@ -362,7 +364,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   ControlStructDataWriter_var control_typed_dw = ControlStructDataWriter::_narrow(control_dw);
-
   ControlStruct cs;
   ReturnCode_t control_ret = control_typed_dw->write(cs, HANDLE_NIL);
   if (control_ret != RETCODE_OK) {
@@ -383,7 +384,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   control_dr_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
   control_dr_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
 
-  DataReader_var control_dr = control_sub->create_datareader(control_topic, control_dr_qos, 0,
+  DataReader_var control_dr = control_sub->create_datareader(stop_control_topic, control_dr_qos, 0,
     DEFAULT_STATUS_MASK);
   if (!control_dr) {
     ACE_ERROR((LM_ERROR, "ERROR: create_datareader failed\n"));
@@ -392,10 +393,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   ControlStructDataReader_var control_pdr = ControlStructDataReader::_narrow(control_dr);
   ::ControlStructSeq control_data;
-  control_ret = read_i(control_dr, control_pdr, control_data);
+  control_ret = read_i(control_dr, control_pdr, control_data, true);
   if (control_ret != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: control read returned %C\n",
-      OpenDDS::DCPS::retcode_to_string(ret)));
+      OpenDDS::DCPS::retcode_to_string(control_ret)));
     return 1;
   }
 

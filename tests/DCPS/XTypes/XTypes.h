@@ -105,7 +105,7 @@ void create_participant(const DomainParticipantFactory_var& dpf, DomainParticipa
 }
 
 template<typename T1, typename T2>
-ReturnCode_t read_i(const DataReader_var& dr, const T1& pdr, T2& data)
+ReturnCode_t read_i(const DataReader_var& dr, const T1& pdr, T2& data, bool ignore_no_data = false)
 {
   ReadCondition_var dr_rc = dr->create_readcondition(NOT_READ_SAMPLE_STATE,
     ANY_VIEW_STATE,
@@ -125,7 +125,12 @@ ReturnCode_t read_i(const DataReader_var& dr, const T1& pdr, T2& data)
           OpenDDS::DCPS::retcode_to_string(ret)));
   } else {
     SampleInfoSeq info;
-    if ((ret = pdr->take_w_condition(data, info, LENGTH_UNLIMITED, dr_rc)) != RETCODE_OK) {
+
+    ret = pdr->take_w_condition(data, info, LENGTH_UNLIMITED, dr_rc);
+    if (ignore_no_data && ret == RETCODE_NO_DATA) {
+        ret = RETCODE_OK;
+    }
+    if (ret != RETCODE_OK) {
       ACE_ERROR((LM_ERROR, "ERROR: Reader: take_w_condition returned %C\n",
         OpenDDS::DCPS::retcode_to_string(ret)));
     }
