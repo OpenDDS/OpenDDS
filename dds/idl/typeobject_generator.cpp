@@ -2478,6 +2478,8 @@ typeobject_generator::generate(AST_Type* node, UTL_ScopedName* name)
       be_global->impl_ <<
         "  return get_complete_type_map();\n";
     }
+  } else {
+    // TODO(sonndinh): Generate methods that return TK_NONE TypeIdentifier and empty map.
   }
 
   return true;

@@ -26,9 +26,9 @@ void TypeLookupService::get_type_objects(const TypeIdentifierSeq& type_ids,
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   for (CORBA::ULong i = 0; i < type_ids.length(); ++i) {
-    TypeMap::const_iterator it_object = minimal_type_map_.find(type_ids[i]);
-    if (it_object != minimal_type_map_.end()) {
-      types.append(TypeIdentifierTypeObjectPair(it_object->first, it_object->second));
+    TypeMap::const_iterator pos = type_map_.find(type_ids[i]);
+    if (pos != type_map_.end()) {
+      types.append(TypeIdentifierTypeObjectPair(pos->first, pos->second));
     }
   }
 }
@@ -41,9 +41,9 @@ const TypeObject& TypeLookupService::get_type_objects(const TypeIdentifier& type
 
 const TypeObject& TypeLookupService::get_type_objects_i(const TypeIdentifier& type_id) const
 {
-  const TypeMap::const_iterator it_object = minimal_type_map_.find(type_id);
-  if (it_object != minimal_type_map_.end()) {
-    return it_object->second;
+  const TypeMap::const_iterator pos = type_map_.find(type_id);
+  if (pos != type_map_.end()) {
+    return pos->second;
   }
   return to_empty_;
 }
@@ -58,6 +58,13 @@ bool TypeLookupService::get_type_dependencies(const TypeIdentifier& type_id,
     return true;
   }
   return false;
+}
+
+void TypeLookupService::get_type_dependencies(const TypeIdentifierSeq& type_ids,
+  TypeIdentifierWithSizeSeq& dependencies) const
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  get_type_dependencies_i(type_ids, dependencies);
 }
 
 void TypeLookupService::get_type_dependencies_i(const TypeIdentifierSeq& type_ids,
@@ -77,8 +84,8 @@ void TypeLookupService::get_type_dependencies_i(const TypeIdentifierSeq& type_id
   dependencies.length(static_cast<unsigned>(tmp.size()));
   OPENDDS_SET(TypeIdentifier)::const_iterator iter = tmp.begin();
   for (unsigned i = 0; iter != tmp.end(); ++i, ++iter) {
-    const TypeMap::const_iterator tobj_it = minimal_type_map_.find(*iter);
-    if (tobj_it != minimal_type_map_.end()) {
+    const TypeMap::const_iterator tobj_it = type_map_.find(*iter);
+    if (tobj_it != type_map_.end()) {
       dependencies[i].type_id = *iter;
       const size_t sz = DCPS::serialized_size(get_typeobject_encoding(), tobj_it->second);
       dependencies[i].typeobject_serialized_size = static_cast<unsigned>(sz);
@@ -86,20 +93,13 @@ void TypeLookupService::get_type_dependencies_i(const TypeIdentifierSeq& type_id
   }
 }
 
-void TypeLookupService::get_type_dependencies(const TypeIdentifierSeq& type_ids,
-  TypeIdentifierWithSizeSeq& dependencies) const
-{
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  get_type_dependencies_i(type_ids, dependencies);
-}
-
 void TypeLookupService::add_type_objects_to_cache(const TypeIdentifierTypeObjectPairSeq& types)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   for (ACE_UINT32 i = 0; i < types.length(); ++i) {
-    const TypeMap::iterator it_type_id_with_size_seq = minimal_type_map_.find(types[i].type_identifier);
-    if (it_type_id_with_size_seq == minimal_type_map_.end()) {
-      minimal_type_map_.insert(std::make_pair(types[i].type_identifier, types[i].type_object));
+    const TypeMap::iterator pos = type_map_.find(types[i].type_identifier);
+    if (pos == type_map_.end()) {
+      type_map_.insert(std::make_pair(types[i].type_identifier, types[i].type_object));
     }
   }
 }
@@ -109,15 +109,17 @@ void TypeLookupService::add_type_objects_to_cache(const DCPS::TypeSupportImpl& t
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   // TODO: This populates the map N times instead of 1.
   const XTypes::TypeMap& minimal_type_map = typesupport.getMinimalTypeMap();
-  minimal_type_map_.insert(minimal_type_map.begin(), minimal_type_map.end());
+  const XTypes::TypeMap& complete_type_map = typesupport.getCompleteTypeMap();
+  type_map_.insert(minimal_type_map.begin(), minimal_type_map.end());
+  type_map_.insert(complete_type_map.begin(), complete_type_map.end());
 }
 
 void TypeLookupService::add_type_objects_to_cache(const TypeIdentifier& ti, const TypeObject& tobj)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  TypeMap::const_iterator it_type_id_with_size_seq = minimal_type_map_.find(ti);
-  if (it_type_id_with_size_seq == minimal_type_map_.end()) {
-    minimal_type_map_.insert(std::make_pair(ti, tobj));
+  TypeMap::const_iterator pos = type_map_.find(ti);
+  if (pos == type_map_.end()) {
+    type_map_.insert(std::make_pair(ti, tobj));
   }
 }
 
@@ -133,20 +135,24 @@ void TypeLookupService::add_type_dependencies(const TypeIdentifier& type_id,
 bool TypeLookupService::type_object_in_cache(const TypeIdentifier& ti) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
-  TypeMap::const_iterator it_type_id_with_size_seq = minimal_type_map_.find(ti);
-  return it_type_id_with_size_seq != minimal_type_map_.end();
+  return type_map_.find(ti) != type_map_.end();
 }
 
 bool TypeLookupService::extensibility(TypeFlag extensibility_mask, const TypeIdentifier& type_id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
   bool result = false;
-  TypeObject to = get_type_objects_i(type_id);
+  const TypeObject& to = get_type_objects_i(type_id);
+  TypeKind tk = to.kind == EK_MINIMAL ? to.minimal.kind : to.complete.kind;
 
-  if (TK_UNION == to.minimal.kind) {
-    result = to.minimal.union_type.union_flags & extensibility_mask;
-  } else if (TK_STRUCTURE == to.minimal.kind) {
-    result = to.minimal.struct_type.struct_flags & extensibility_mask;
+  if (TK_UNION == tk) {
+    result = to.kind == EK_MINIMAL ?
+      (to.minimal.union_type.union_flags & extensibility_mask) :
+      (to.complete.union_type.union_flags & extensibility_mask);
+  } else if (TK_STRUCTURE == tk) {
+    result = to.kind == EK_MINIMAL ?
+      (to.minimal.struct_type.struct_flags & extensibility_mask) :
+      (to.complete.struct_type.struct_flags & extensibility_mask);
   }
 
   if (result) {
@@ -159,11 +165,17 @@ bool TypeLookupService::extensibility(TypeFlag extensibility_mask, const TypeIde
   get_type_dependencies_i(type_ids, dependencies);
 
   for (unsigned i = 0; i < dependencies.length(); ++i) {
-    TypeObject dep_to = get_type_objects_i(dependencies[i].type_id);
-    if (TK_UNION == dep_to.minimal.kind) {
-      result = dep_to.minimal.union_type.union_flags & extensibility_mask;
-    } else if (TK_STRUCTURE == dep_to.minimal.kind) {
-      result = dep_to.minimal.struct_type.struct_flags & extensibility_mask;
+    const TypeObject& dep_to = get_type_objects_i(dependencies[i].type_id);
+    tk = dep_to.kind == EK_MINIMAL ? dep_to.minimal.kind : dep_to.complete.kind;
+
+    if (TK_UNION == tk) {
+      result = dep_to.kind == EK_MINIMAL ?
+        (dep_to.minimal.union_type.union_flags & extensibility_mask) :
+        (dep_to.complete.union_type.union_flags & extensibility_mask);
+    } else if (TK_STRUCTURE == tk) {
+      result = dep_to.kind == EK_MINIMAL ?
+        (dep_to.minimal.struct_type.struct_flags & extensibility_mask) :
+        (dep_to.complete.struct_type.struct_flags & extensibility_mask);
     }
     if (result) {
       return true;

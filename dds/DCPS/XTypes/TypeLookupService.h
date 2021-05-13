@@ -56,8 +56,8 @@ private:
   void get_type_dependencies_i(const TypeIdentifierSeq& type_ids,
     TypeIdentifierWithSizeSeq& dependencies) const;
 
-  // Only minimal Type Objects for now
-  TypeMap minimal_type_map_;
+  // Contains both minimal and complete type mapping.
+  TypeMap type_map_;
 
   // For dependencies of local types
   typedef OPENDDS_MAP(TypeIdentifier, TypeIdentifierWithSizeSeq) TypeIdentifierWithSizeSeqMap;
