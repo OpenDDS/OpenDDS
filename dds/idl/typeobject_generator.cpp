@@ -1427,6 +1427,13 @@ typeobject_generator::gen_epilogue()
       "  }\n"
       "  return tm;\n"
       "}\n";
+  } else {
+    be_global->impl_ <<
+      "const XTypes::TypeMap& get_complete_type_map()\n"
+      "{\n"
+      "  static XTypes::TypeMap tm;\n"
+      "  return tm;\n"
+      "}\n";
   }
 }
 
@@ -2459,27 +2466,30 @@ typeobject_generator::generate(AST_Type* node, UTL_ScopedName* name)
       "  return get_minimal_type_map();\n";
   }
 
-  if (!suppress_complete_type_output_) {
-    {
-      const string decl = "getCompleteTypeIdentifier<" + clazz + ">";
-      Function gti(decl.c_str(), "const XTypes::TypeIdentifier&", "");
-      gti.endArgs();
+  {
+    const string decl = "getCompleteTypeIdentifier<" + clazz + ">";
+    Function gti(decl.c_str(), "const XTypes::TypeIdentifier&", "");
+    gti.endArgs();
+
+    if (!suppress_complete_type_output_) {
       const OpenDDS::XTypes::TypeIdentifier ti = get_complete_type_identifier(node);
       be_global->impl_ << common <<
         "    ti = " << ti << ";\n"
         "  }\n"
         "  return ti;\n";
-    }
-
-    {
-      const string decl = "getCompleteTypeMap<" + clazz + ">";
-      Function gti(decl.c_str(), "const XTypes::TypeMap&", "");
-      gti.endArgs();
+    } else {
       be_global->impl_ <<
-        "  return get_complete_type_map();\n";
+        "  static XTypes::TypeIdentifier ti;\n"
+        "  return ti;\n";
     }
-  } else {
-    // TODO(sonndinh): Generate methods that return TK_NONE TypeIdentifier and empty map.
+  }
+
+  {
+    const string decl = "getCompleteTypeMap<" + clazz + ">";
+    Function gti(decl.c_str(), "const XTypes::TypeMap&", "");
+    gti.endArgs();
+    be_global->impl_ <<
+      "  return get_complete_type_map();\n";
   }
 
   return true;
