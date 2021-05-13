@@ -615,17 +615,17 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_STRING& url, bool pre
 
   // TODO: Fix for literal IPv6 addresses
   OPENDDS_STRING host_name_str;
-  unsigned long port_number = 0;
+  unsigned short port_number = 0;
 
   OPENDDS_STRING::size_type port_div = url.find_last_of(':');
   if (port_div != OPENDDS_STRING::npos) {
     host_name_str = host_name_str = url.substr(0, port_div);
-    port_number = std::strtoul(url.substr(port_div + 1).c_str(), 0, 10);
+    port_number = static_cast<unsigned short>(std::strtoul(url.substr(port_div + 1).c_str(), 0, 10));
   } else {
     host_name_str = url;
   }
 
-  if (host_name_str.empty() || port_number > ACE_MAX_DEFAULT_PORT) {
+  if (host_name_str.empty()) {
     return result;
   }
 
