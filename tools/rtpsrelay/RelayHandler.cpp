@@ -27,6 +27,7 @@ namespace RtpsRelay {
 
 // This macro makes it easier to make sure the stats are updated when an error is logged
 #define HANDLER_ERROR(X) { ACE_ERROR (X); stats_reporter_.error(now); }
+#define HANDLER_WARNING(X) { if (config_.log_warnings()) { ACE_ERROR (X); }; stats_reporter_.error(now); }
 
 #ifdef OPENDDS_SECURITY
 namespace {
@@ -139,7 +140,7 @@ int RelayHandler::handle_input(ACE_HANDLE handle)
     return 0;
   } else if (bytes == 0) {
     // Okay.  Empty datagram.
-    HANDLER_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: RelayHandler::handle_input %C received an empty datagram from %C\n"), name_.c_str(), addr_to_string(remote).c_str()));
+    HANDLER_WARNING((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: RelayHandler::handle_input %C received an empty datagram from %C\n"), name_.c_str(), addr_to_string(remote).c_str()));
     return 0;
   }
 
@@ -436,7 +437,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
     GuidSet to;
 
     if (!parse_message(mp, msg, src_guid, to, true, now)) {
-      HANDLER_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C failed to parse_message from %C\n"), name_.c_str(), addr_to_string(remote_address).c_str()));
+      HANDLER_WARNING((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C failed to parse_message from %C\n"), name_.c_str(), addr_to_string(remote_address).c_str()));
       return 0;
     }
 
@@ -462,20 +463,20 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
     OpenDDS::STUN::Message message;
     message.block = msg.get();
     if (!(serializer >> message)) {
-      HANDLER_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C Could not deserialize STUN message from %C\n"), name_.c_str(), addr_to_string(remote_address).c_str()));
+      HANDLER_WARNING((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C Could not deserialize STUN message from %C\n"), name_.c_str(), addr_to_string(remote_address).c_str()));
       return 0;
     }
 
     std::vector<OpenDDS::STUN::AttributeType> unknown_attributes = message.unknown_comprehension_required_attributes();
 
     if (!unknown_attributes.empty()) {
-      HANDLER_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C Unknown comprehension requird attributes from %C\n"), name_.c_str(), addr_to_string(remote_address).c_str()));
+      HANDLER_WARNING((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C Unknown comprehension required attributes from %C\n"), name_.c_str(), addr_to_string(remote_address).c_str()));
       send(remote_address, make_unknown_attributes_error_response(message, unknown_attributes), now);
       return 1;
     }
 
     if (!message.has_fingerprint()) {
-      HANDLER_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C No FINGERPRINT attribute from %C\n"), name_.c_str(), addr_to_string(remote_address).c_str()));
+      HANDLER_WARNING((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C No FINGERPRINT attribute from %C\n"), name_.c_str(), addr_to_string(remote_address).c_str()));
       send(remote_address, make_bad_request_error_response(message, "Bad Request: FINGERPRINT must be pesent"), now);
       return 1;
     }
@@ -509,14 +510,14 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
         } else if (message.class_ == OpenDDS::STUN::INDICATION) {
           // Do nothing.
         } else {
-          HANDLER_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C Unknown STUN message class from %C\n"), name_.c_str(), addr_to_string(remote_address).c_str()));
+          HANDLER_WARNING((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C Unknown STUN message class from %C\n"), name_.c_str(), addr_to_string(remote_address).c_str()));
         }
         break;
       }
 
     default:
       // Unknown method.  Stop processing.
-      HANDLER_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C Unknown STUN method from %C\n"), name_.c_str(), addr_to_string(remote_address).c_str()));
+      HANDLER_WARNING((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C Unknown STUN method from %C\n"), name_.c_str(), addr_to_string(remote_address).c_str()));
       bytes_sent = send(remote_address, make_bad_request_error_response(message, "Bad Request: Unknown method"), now);
       break;
     }
@@ -604,7 +605,7 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
 
           DDS::Security::ParticipantCryptoHandle remote_crypto_handle = rtps_discovery_->get_crypto_handle(config_.application_domain(), config_.application_participant_guid(), src_guid);
           if (remote_crypto_handle == DDS::HANDLE_NIL) {
-            HANDLER_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::parse_message %C no crypto handle for message from %C\n"), name_.c_str(), guid_to_string(src_guid).c_str()));
+            HANDLER_WARNING((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::parse_message %C no crypto handle for message from %C\n"), name_.c_str(), guid_to_string(src_guid).c_str()));
             return false;
           }
 
@@ -620,7 +621,7 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
           std::memcpy(encoded_buffer.get_buffer(), msg->rd_ptr(), msg->length());
 
           if (!crypto_->decode_rtps_message(plain_buffer, encoded_buffer, application_participant_crypto_handle_, remote_crypto_handle, ex)) {
-            HANDLER_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::parse_message %C message from %C could not be verified [%d.%d]: \"%C\"\n"), name_.c_str(), guid_to_string(src_guid).c_str(), ex.code, ex.minor_code, ex.message.in()));
+            HANDLER_WARNING((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::parse_message %C message from %C could not be verified [%d.%d]: \"%C\"\n"), name_.c_str(), guid_to_string(src_guid).c_str(), ex.code, ex.minor_code, ex.message.in()));
             return false;
           }
 
@@ -657,7 +658,7 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
           if (rtps_discovery_->get_crypto_handle(config_.application_domain(), config_.application_participant_guid()) != DDS::HANDLE_NIL &&
               !(OpenDDS::DCPS::RtpsUdpDataLink::separate_message(writerId) ||
                 writerId == OpenDDS::DCPS::ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER)) {
-            HANDLER_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::parse_message %C submessage from %C with id %d could not be verified writerId=%02X%02X%02X%02X\n"), name_.c_str(), guid_to_string(src_guid).c_str(), submessage_header.submessageId, writerId.entityKey[0], writerId.entityKey[1], writerId.entityKey[2], writerId.entityKind));
+            HANDLER_WARNING((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::parse_message %C submessage from %C with id %d could not be verified writerId=%02X%02X%02X%02X\n"), name_.c_str(), guid_to_string(src_guid).c_str(), submessage_header.submessageId, writerId.entityKey[0], writerId.entityKey[1], writerId.entityKey[2], writerId.entityKind));
             return false;
           }
         }
