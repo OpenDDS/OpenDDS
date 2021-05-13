@@ -3108,33 +3108,18 @@ void Sedp::data_received(DCPS::MessageId message_id,
 #endif
 
 void
-Sedp::data_received(DCPS::MessageId /*message_id*/,
-                    const ParticipantMessageData& data)
+Sedp::notify_liveliness(const ParticipantMessageData& pmd)
 {
-  if (!spdp_.initialized() || spdp_.shutting_down()) { return; }
-
-  const RepoId& guid = data.participantGuid;
+  const RepoId& guid = pmd.participantGuid;
   RepoId guid_participant = guid;
-  bool is_automatic = true;
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) %T Sedp::data_received(DCPS::MessageId, const ParticipantMessageData&), %d\n",
-             *(long*)(&data.participantGuid.entityId)));
-  if (PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE == data.participantGuid.entityId) {
-    is_automatic = false;
-  }
-
   guid_participant.entityId = ENTITYID_PARTICIPANT;
-  RepoId prefix = data.participantGuid;
+  RepoId prefix = pmd.participantGuid;
   prefix.entityId = EntityId_t(); // Clear the entityId so lower bound will work.
-
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-
-  if (ignoring(guid)
-      || ignoring(guid_participant)) {
-    return;
-  }
-
-  if (!spdp_.has_discovered_participant(guid_participant)) {
-    return;
+  bool is_automatic = true;
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) %T Sedp::notify_liveliness(const ParticipantMessageData& pmd), %d\n",
+             *(long*)(&pmd.participantGuid.entityId)));
+  if (PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE == pmd.participantGuid.entityId) {
+    is_automatic = false;
   }
 
   for (LocalSubscriptionMap::const_iterator sub_pos = local_subscriptions_.begin(),
@@ -3156,6 +3141,32 @@ Sedp::data_received(DCPS::MessageId /*message_id*/,
       }
     }
   }
+}
+
+void
+Sedp::data_received(DCPS::MessageId /*message_id*/,
+                    const ParticipantMessageData& data)
+{
+  if (!spdp_.initialized() || spdp_.shutting_down()) { return; }
+
+  const RepoId& guid = data.participantGuid;
+  RepoId guid_participant = guid;
+
+  guid_participant.entityId = ENTITYID_PARTICIPANT;
+  RepoId prefix = data.participantGuid;
+  prefix.entityId = EntityId_t(); // Clear the entityId so lower bound will work.
+
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+  if (ignoring(guid)
+      || ignoring(guid_participant)) {
+    return;
+  }
+
+  if (!spdp_.has_discovered_participant(guid_participant)) {
+    return;
+  }
+  notify_liveliness(data);
 }
 
 #ifdef OPENDDS_SECURITY
@@ -5401,13 +5412,50 @@ Sedp::write_participant_message_data(
   if (!(spdp_.available_builtin_endpoints() & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER)) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
-
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
+
+
+  {
+    ParticipantMessageData pmd;
+    pmd.participantGuid = rid;
+    const RepoId& guid = pmd.participantGuid;
+    RepoId guid_participant = guid;
+    bool is_automatic = true;
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) %T Sedp::wpmd, %d\n",
+              *(long*)(&pmd.participantGuid.entityId)));
+    guid_participant.entityId = ENTITYID_PARTICIPANT;
+    RepoId prefix = pmd.participantGuid;
+    prefix.entityId = EntityId_t(); // Clear the entityId so lower bound will work.
+    if (PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE == pmd.participantGuid.entityId) {
+      is_automatic = false;
+    }
+    for (LocalSubscriptionMap::const_iterator sub_pos = local_subscriptions_.begin(),
+         sub_limit = local_subscriptions_.end();
+         sub_pos != sub_limit; ++sub_pos) {
+      const DCPS::RepoIdSet::const_iterator pos =
+        sub_pos->second.matched_endpoints_.lower_bound(prefix);
+      if (pos != sub_pos->second.matched_endpoints_.end() &&
+          DCPS::equal_guid_prefixes(*pos, prefix)) {
+        DCPS::DataReaderCallbacks_rch sl = sub_pos->second.subscription_.lock();
+        if (sl) {
+          if (sub_pos->second.qos_.liveliness.kind == ::DDS::AUTOMATIC_LIVELINESS_QOS && is_automatic) {
+            ACE_DEBUG((LM_DEBUG, "(%P|%t) %T SIGNAL FOR LIVELINESS: AUTOMATIC \n"));
+            sl->signal_liveliness(guid_participant);
+          } else if ((sub_pos->second.qos_.liveliness.kind == ::DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS
+                     || sub_pos->second.qos_.liveliness.kind == ::DDS::AUTOMATIC_LIVELINESS_QOS) && !is_automatic) {
+            ACE_DEBUG((LM_DEBUG, "(%P|%t) %T SIGNAL FOR LIVELINESS: MANUAL \n"));
+            sl->signal_liveliness(guid_participant);
+          }
+        }
+      }
+    }
+  }
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
     ParticipantMessageData pmd;
     pmd.participantGuid = rid;
     result = participant_message_writer_->write_participant_message(pmd, reader, pm.sequence_);
+
   } else if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_participant_message_data - ")
                ACE_TEXT("not currently associated, dropping msg.\n")));

@@ -749,6 +749,8 @@ private:
                      const DiscoveredSubscription_SecurityWrapper& wrapper);
 #endif
 
+  void notify_liveliness(const ParticipantMessageData& pmd);
+
   void data_received(DCPS::MessageId message_id,
                      const ParticipantMessageData& data);
 

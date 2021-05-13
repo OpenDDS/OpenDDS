@@ -1,0 +1,165 @@
+/home/calabresec/3_16/liveliness/OpenDDS/tests/DCPS/LivelinessLocal/publisher  -w 1 -m 0 -l 3 -i 2 -DCPSConfigFile rtps_disc.ini  -DCPSPendingTimeout 3  -T /home/calabresec/3_16/liveliness/OpenDDS/tests/DCPS/LivelinessLocal/
+pub PID: 10858
+(10858|10858)  11:41:28.714949 publisher main
+(10858|10858) NOTICE: using DCPSPendingTimeout value from command option (overrides value if it's in config file)
+(10858|10858) DataReaderListenerImpl::DataReaderListenerImpl
+(10858|10858) DataReaderListenerImpl::DataReaderListenerImpl
+ use_take=0 num_ops_per_thread=2
+(10858|10864) DataReaderListenerImpl::on_subscription_matched
+(10858|10858) Writer::run_test begins.
+(10858|10858)  11:41:33.723093 Writer::run_test starting to write pass 0
+CLAYTON: Wrote sample
+CLAYTON: Wrote sample
+(10858|10862)  11:41:33.723959 DataReaderListenerImpl::on_liveliness_changed 1
+alive_count 1 not_alive_count 0 alive_count_change 1 not_alive_count_change 0
+(10858|10858)  11:41:33.724067 Writer::run_test done writing.
+(10858|10858) Writer::run_test finished.
+ 11:41:33.724278 read foo[0]: x = 0.000000 y = 0.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1620924093 723783999
+  instance_handle: 7
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+ 11:41:33.724425 read foo[0]: x = 1.000000 y = 0.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1620924093 723962999
+  instance_handle: 7
+  disposed_generation_count: 0
+  no_writers_generation_count: 0
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+(10858|10859)  11:41:35.122925 Sedp::wpmd, 33554432
+(10858|10859)  11:41:35.123086 SIGNAL FOR LIVELINESS: MANUAL 
+(10858|10859)  11:41:37.123477 DataReaderListenerImpl::on_liveliness_changed 2
+alive_count 0 not_alive_count 1 alive_count_change -1 not_alive_count_change 1
+(10858|10858) Writer::run_test begins.
+(10858|10858)  11:41:39.724301 Writer::run_test starting to write pass 1
+CLAYTON: Wrote sample
+(10858|10862)  11:41:39.725144 DataReaderListenerImpl::on_liveliness_changed 3
+alive_count 1 not_alive_count 0 alive_count_change 1 not_alive_count_change -1
+CLAYTON: Wrote sample
+ 11:41:39.725535 read foo[0]: x = 0.000000 y = -1.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1620924099 724374999
+  instance_handle: 7
+  disposed_generation_count: 0
+  no_writers_generation_count: 1
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+(10858|10858)  11:41:39.725804 Writer::run_test done writing.
+(10858|10858) Writer::run_test finished.
+ 11:41:39.726033 read foo[0]: x = 1.000000 y = -1.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1620924099 725327999
+  instance_handle: 7
+  disposed_generation_count: 0
+  no_writers_generation_count: 1
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+(10858|10859)  11:41:39.925860 Sedp::wpmd, 33554432
+(10858|10859)  11:41:39.925896 SIGNAL FOR LIVELINESS: MANUAL 
+(10858|10859)  11:41:41.926336 DataReaderListenerImpl::on_liveliness_changed 4
+alive_count 0 not_alive_count 1 alive_count_change -1 not_alive_count_change 1
+(10858|10858) Writer::run_test begins.
+(10858|10858)  11:41:45.726108 Writer::run_test starting to write pass 2
+CLAYTON: Wrote sample
+CLAYTON: Wrote sample
+(10858|10862)  11:41:45.726935 DataReaderListenerImpl::on_liveliness_changed 5
+alive_count 1 not_alive_count 0 alive_count_change 1 not_alive_count_change -1
+(10858|10858)  11:41:45.727215 Writer::run_test done writing.
+(10858|10858) Writer::run_test finished.
+ 11:41:45.727408 read foo[0]: x = 0.000000 y = -2.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1620924105 726183999
+  instance_handle: 7
+  disposed_generation_count: 0
+  no_writers_generation_count: 2
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+ 11:41:45.728027 read foo[0]: x = 1.000000 y = -2.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1620924105 726798999
+  instance_handle: 7
+  disposed_generation_count: 0
+  no_writers_generation_count: 2
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+(10858|10859)  11:41:46.327165 Sedp::wpmd, 33554432
+(10858|10859)  11:41:46.327221 SIGNAL FOR LIVELINESS: MANUAL 
+(10858|10859)  11:41:48.327921 DataReaderListenerImpl::on_liveliness_changed 6
+alive_count 0 not_alive_count 1 alive_count_change -1 not_alive_count_change 1
+(10858|10858) Writer::run_test begins.
+(10858|10858)  11:41:51.727412 Writer::run_test starting to write pass 3
+CLAYTON: Wrote sample
+CLAYTON: Wrote sample
+(10858|10862)  11:41:51.727806 DataReaderListenerImpl::on_liveliness_changed 7
+alive_count 1 not_alive_count 0 alive_count_change 1 not_alive_count_change -1
+(10858|10858)  11:41:51.727917 Writer::run_test done writing.
+(10858|10858) Writer::run_test finished.
+ 11:41:51.727950 read foo[0]: x = 0.000000 y = -3.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1620924111 727451999
+  instance_handle: 7
+  disposed_generation_count: 0
+  no_writers_generation_count: 3
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+ 11:41:51.728156 read foo[0]: x = 1.000000 y = -3.000000, key = 101010
+  sample_state: NOT_READ_SAMPLE_STATE
+  view_state: NOT_NEW_VIEW_STATE
+  instance_state: ALIVE_INSTANCE_STATE
+  source_timestamp: 1620924111 727750999
+  instance_handle: 7
+  disposed_generation_count: 0
+  no_writers_generation_count: 3
+  sample_rank: 0
+  generation_rank: 0
+  absolute_generation_rank: 0
+
+(10858|10859)  11:41:52.729808 Sedp::wpmd, 33554432
+(10858|10859)  11:41:52.729845 SIGNAL FOR LIVELINESS: MANUAL 
+(10858|10859)  11:41:54.730395 DataReaderListenerImpl::on_liveliness_changed 8
+alive_count 0 not_alive_count 1 alive_count_change -1 not_alive_count_change 1
+**********
+drl_servant->liveliness_changed_count() = 8
+drl_servant->no_writers_generation_count() = 3
+********** use_take=0
+(10858|10858) ERROR: subscriber - test failed second condition.
+(10858|10858)  11:41:56.728080 publisher is finish - cleanup subscriber
+(10858|10858) DataReaderListenerImpl::on_liveliness_changed - this is the time callback
+(10858|10858)  11:41:56.728509 DataReaderListenerImpl::on_liveliness_changed 9
+alive_count 0 not_alive_count 0 alive_count_change 0 not_alive_count_change -1
+(10858|10858) DataReaderListenerImpl::on_subscription_matched
+(10858|10858) DataReaderListenerImpl::~DataReaderListenerImpl
+2021-05-13 11:41:56: ERROR: pub returned 1 (started at 2021-05-13 11:41:28)
+test FAILED.
