@@ -20,14 +20,13 @@ OpenDDS::DCPS::NetworkAddress::NetworkAddress()
 }
 
 ACE_INLINE
-OpenDDS::DCPS::NetworkAddress::NetworkAddress(const ACE_INET_Addr& addr,
-                                              bool use_hostname)
+OpenDDS::DCPS::NetworkAddress::NetworkAddress(const ACE_INET_Addr& addr)
   : reserved_(0)
 {
   DBG_ENTRY_LVL("NetworkAddress","NetworkAddress",6);
 
   ACE_TCHAR addr_s[MAXHOSTNAMELEN + 1];
-  addr.addr_to_string(addr_s, sizeof (addr_s), !use_hostname);
+  addr.addr_to_string(addr_s, sizeof (addr_s), 1 /* ipaddr_format */);
 
   this->addr_ = ACE_TEXT_ALWAYS_CHAR(addr_s);
 }

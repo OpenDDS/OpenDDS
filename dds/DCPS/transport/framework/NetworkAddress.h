@@ -40,7 +40,7 @@ typedef OPENDDS_VECTOR(HostnameInfo) HostnameInfoVector;
  */
 struct OpenDDS_Dcps_Export NetworkAddress {
   NetworkAddress();
-  explicit NetworkAddress(const ACE_INET_Addr& addr, bool use_hostname = false);
+  explicit NetworkAddress(const ACE_INET_Addr& addr);
   explicit NetworkAddress(const OPENDDS_STRING& addr);
 
   ~NetworkAddress();
