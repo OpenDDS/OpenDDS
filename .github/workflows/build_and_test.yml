@@ -6,6 +6,7 @@ on:
       - master
       - branch-DDS-3.*
       - gh_wf_*
+      - xtypes_dynamic
     paths:
       - '**'
       # Don't run this workflow if the only files that changed are the
