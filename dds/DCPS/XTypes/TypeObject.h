@@ -1506,6 +1506,11 @@ namespace XTypes {
   struct CompleteAliasHeader {
     CompleteTypeDetail detail;
 
+    CompleteAliasHeader() {}
+
+    explicit CompleteAliasHeader(const CompleteTypeDetail& a_detail)
+      : detail(a_detail)
+    {}
   };
 
   struct MinimalAliasHeader {
@@ -2007,6 +2012,58 @@ namespace XTypes {
 
     // ===================  Future extensibility  ============
     CompleteExtendedType extended_type;
+
+    CompleteTypeObject() {}
+
+    explicit CompleteTypeObject(const CompleteAliasType& alias)
+      : kind(TK_ALIAS)
+      , alias_type(alias)
+    {}
+
+    explicit CompleteTypeObject(const CompleteAnnotationType& annotation)
+      : kind(TK_ANNOTATION)
+      , annotation_type(annotation)
+    {}
+
+    explicit CompleteTypeObject(const CompleteStructType& struct_)
+      : kind(TK_STRUCTURE)
+      , struct_type(struct_)
+    {}
+
+    explicit CompleteTypeObject(const CompleteUnionType& union_)
+      : kind(TK_UNION)
+      , union_type(union_)
+    {}
+
+    explicit CompleteTypeObject(const CompleteBitsetType& bitset)
+      : kind(TK_BITSET)
+      , bitset_type(bitset)
+    {}
+
+    explicit CompleteTypeObject(const CompleteSequenceType& sequence)
+      : kind(TK_SEQUENCE)
+      , sequence_type(sequence)
+    {}
+
+    explicit CompleteTypeObject(const CompleteArrayType& array)
+      : kind(TK_ARRAY)
+      , array_type(array)
+    {}
+
+    explicit CompleteTypeObject(const CompleteMapType& map)
+      : kind(TK_MAP)
+      , map_type(map)
+    {}
+
+    explicit CompleteTypeObject(const CompleteEnumeratedType& enum_)
+      : kind(TK_ENUM)
+      , enumerated_type(enum_)
+    {}
+
+    explicit CompleteTypeObject(const CompleteBitmaskType& bitmask)
+      : kind(TK_BITMASK)
+      , bitmask_type(bitmask)
+    {}
   };
 
   struct MinimalExtendedType {
@@ -2263,6 +2320,12 @@ const XTypes::TypeIdentifier& getMinimalTypeIdentifier();
 
 template<typename T>
 const XTypes::TypeMap& getMinimalTypeMap();
+
+template<typename T>
+const XTypes::TypeIdentifier& getCompleteTypeIdentifier();
+
+template<typename T>
+const XTypes::TypeMap& getCompleteTypeMap();
 
 template<typename T>
 void serialized_size(const Encoding& encoding, size_t& size,

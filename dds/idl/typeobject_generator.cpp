@@ -519,17 +519,70 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::TypeIdentifier& ti)
   return out;
 }
 
+namespace {
+template<typename T>
+std::string getTypeName();
+
+template<>
+std::string getTypeName<OPENDDS_STRING>()
+{
+  return "OPENDDS_STRING";
+}
+
+template<>
+std::string getTypeName<OpenDDS::XTypes::AppliedAnnotationParameterSeq>()
+{
+  return "XTypes::AppliedAnnotationParameterSeq";
+}
+
+template<>
+std::string getTypeName<OpenDDS::XTypes::AnnotationParameterValue>()
+{
+  return "XTypes::AnnotationParameterValue";
+}
+
+template<>
+std::string getTypeName<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>()
+{
+  return "XTypes::AppliedBuiltinMemberAnnotations";
+}
+
+template<>
+std::string getTypeName<OpenDDS::XTypes::AppliedAnnotationSeq>()
+{
+  return "XTypes::AppliedAnnotationSeq";
+}
+
+template<>
+std::string getTypeName<OpenDDS::XTypes::AppliedVerbatimAnnotation>()
+{
+  return "XTypes::AppliedVerbatimAnnotation";
+}
+
+template<>
+std::string getTypeName<OpenDDS::XTypes::AppliedBuiltinTypeAnnotations>()
+{
+  return "XTypes::AppliedBuiltinTypeAnnotations";
+}
+
+template<>
+std::string getTypeName<OpenDDS::XTypes::CompleteTypeDetail>()
+{
+  return "XTypes::CompleteTypeDetail";
+}
+}
+
 template<typename T>
 std::ostream&
 operator<<(std::ostream& out, const OpenDDS::XTypes::Optional<T>& optional)
 {
   if (optional.present) {
     return out
-      << "XTypes::Optional("
+      << "XTypes::Optional<" << getTypeName<T>()  << ">("
       << optional.value
       << ")";
   } else {
-    return out << "XTypes::Optional()";
+    return out << "XTypes::Optional<" << getTypeName<T>() << ">()";
   }
 }
 
@@ -686,7 +739,7 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteTypeDetail& detail)
     << "XTypes::CompleteTypeDetail("
     << detail.ann_builtin << ", "
     << detail.ann_custom << ", "
-    << detail.type_name
+    << "\"" << detail.type_name << "\""
     << ")";
 }
 
@@ -791,8 +844,8 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::CommonStructMember& common)
 {
   return out
     << "XTypes::CommonStructMember("
-    << MemberIdPrinter(common.member_id) << ","
-    << StructMemberFlagPrinter(common.member_flags) << ","
+    << MemberIdPrinter(common.member_id) << ", "
+    << StructMemberFlagPrinter(common.member_flags) << ", "
     << common.member_type_id
     << ")";
 }
@@ -808,7 +861,7 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteMemberDetail& detai
 {
   return out
     << "XTypes::CompleteMemberDetail("
-    << detail.name << ", "
+    << "\"" << detail.name << "\", "
     << detail.ann_builtin << ", "
     << detail.ann_custom
     << ")";
@@ -819,7 +872,7 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalStructMember& member
 {
   return out
     << "XTypes::MinimalStructMember("
-    << member.common << ","
+    << member.common << ", "
     << member.detail
     << ")";
 }
@@ -905,7 +958,7 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::CommonEnumeratedLiteral& co
 {
   return out
     << "XTypes::CommonEnumeratedLiteral("
-    << common.value << ","
+    << common.value << ", "
     << EnumeratedLiteralFlagPrinter(common.flags)
     << ")";
 }
@@ -915,7 +968,7 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::MinimalEnumeratedLiteral& l
 {
   return out
     << "XTypes::MinimalEnumeratedLiteral("
-    << literal.common << ","
+    << literal.common << ", "
     << literal.detail
     << ")";
 }
@@ -943,7 +996,7 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteEnumeratedLiteral& 
 std::ostream&
 operator<<(std::ostream& out, const OpenDDS::XTypes::CompleteEnumeratedLiteralSeq& literal_seq)
 {
-  out << "XTypes::CompleteEnumeratedLiteralSeq(";
+  out << "XTypes::CompleteEnumeratedLiteralSeq()";
   for (OpenDDS::XTypes::CompleteEnumeratedLiteralSeq::const_iterator pos = literal_seq.begin();
        pos != literal_seq.end(); ++pos) {
     out << ".append(" << *pos << ")";
