@@ -82,19 +82,19 @@ private:
   bool generate(AST_Type* node, UTL_ScopedName* name);
 
   // Both fields must be constructed when an object is created.
-  typedef struct {
+  struct TypeObjectPair {
     OpenDDS::XTypes::TypeObject minimal;
     OpenDDS::XTypes::TypeObject complete;
-  } TypeObjectPair;
+  };
 
   typedef std::map<AST_Type*, TypeObjectPair> TypeObjectMap;
   TypeObjectMap type_object_map_;
 
   // Both fields must be constructed when an object is created.
-  typedef struct {
+  struct TypeIdentifierPair {
     OpenDDS::XTypes::TypeIdentifier minimal;
     OpenDDS::XTypes::TypeIdentifier complete;
-  } TypeIdentifierPair;
+  };
 
   typedef std::map<AST_Type*, TypeIdentifierPair> HashTypeIdentifierMap;
   HashTypeIdentifierMap hash_type_identifier_map_;
