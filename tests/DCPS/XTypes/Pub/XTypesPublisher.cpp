@@ -339,6 +339,51 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   ACE_DEBUG((LM_DEBUG, "Writer starting at %T\n"));
+  Topic_var start_control_topic;
+  Topic_var stop_control_topic;
+  ControlStructTypeSupport_var start_control_ts = new ControlStructTypeSupportImpl;
+  ControlStructTypeSupport_var stop_control_ts = new ControlStructTypeSupportImpl;
+  get_topic(start_control_ts, dp, "SET_PD_OL_OA_OM_OD_Start",start_control_topic, "ControlStruct");
+  get_topic(stop_control_ts, dp, "SET_PD_OL_OA_OM_OD_Stop",stop_control_topic, "ControlStruct");
+
+  Subscriber_var control_sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
+                                                     DEFAULT_STATUS_MASK);
+  if (!control_sub) {
+    ACE_ERROR((LM_ERROR, "ERROR: create_subscriber failed\n"));
+    return 1;
+  }
+  Publisher_var control_pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
+                                                   DEFAULT_STATUS_MASK);
+  if (!control_pub) {
+    ACE_ERROR((LM_ERROR, "ERROR: create_publisher failed for control_pub\n"));
+    return 1;
+  }
+
+  DataReaderQos control_dr_qos;
+  control_sub->get_default_datareader_qos(control_dr_qos);
+  control_dr_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
+  control_dr_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
+
+  DataReader_var control_dr = control_sub->create_datareader(start_control_topic, control_dr_qos, 0,
+                                                             DEFAULT_STATUS_MASK);
+  if (!control_dr) {
+    ACE_ERROR((LM_ERROR, "ERROR: create_datareader failed\n"));
+    return 1;
+  }
+
+  DataWriterQos control_dw_qos;
+  control_pub->get_default_datawriter_qos(control_dw_qos);
+  control_dw_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
+
+  DataWriter_var control_dw = control_pub->create_datawriter(stop_control_topic, control_dw_qos, 0,
+                                                             DEFAULT_STATUS_MASK);
+  if (!control_dw) {
+    ACE_ERROR((LM_ERROR, "ERROR: create_datawriter for control_pub failed\n"));
+    return 1;
+  }
+
+  ControlStructDataWriter_var control_typed_dw = ControlStructDataWriter::_narrow(control_dw);
+  ControlStructDataReader_var control_pdr = ControlStructDataReader::_narrow(control_dr);
 
   Publisher_var pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
     DEFAULT_STATUS_MASK);
@@ -409,34 +454,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   }
 
-  Topic_var start_control_topic;
-  Topic_var stop_control_topic;
-  ControlStructTypeSupport_var start_control_ts = new ControlStructTypeSupportImpl;
-  ControlStructTypeSupport_var stop_control_ts = new ControlStructTypeSupportImpl;
-  get_topic(start_control_ts, dp, "SET_PD_OL_OA_OM_OD_Start",start_control_topic, "ControlStruct");
-  get_topic(stop_control_ts, dp, "SET_PD_OL_OA_OM_OD_Stop",stop_control_topic, "ControlStruct");
-
-  Subscriber_var control_sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
-    DEFAULT_STATUS_MASK);
-  if (!control_sub) {
-    ACE_ERROR((LM_ERROR, "ERROR: create_subscriber failed\n"));
-    return 1;
-  }
-
-  DataReaderQos control_dr_qos;
-  control_sub->get_default_datareader_qos(control_dr_qos);
-  control_dr_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
-  control_dr_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
-
-  DataReader_var control_dr = control_sub->create_datareader(start_control_topic, control_dr_qos, 0,
-    DEFAULT_STATUS_MASK);
-  if (!control_dr) {
-    ACE_ERROR((LM_ERROR, "ERROR: create_datareader failed\n"));
-    return 1;
-  }
-
-  ControlStructDataReader_var control_pdr = ControlStructDataReader::_narrow(control_dr);
-  ::ControlStructSeq control_data;
+   ::ControlStructSeq control_data;
   ReturnCode_t control_ret = read_i(control_dr, control_pdr, control_data);
   if (control_ret != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: control read returned %C\n",
@@ -444,25 +462,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
-  Publisher_var control_pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
-    DEFAULT_STATUS_MASK);
-  if (!control_pub) {
-    ACE_ERROR((LM_ERROR, "ERROR: create_publisher failed for control_pub\n"));
-    return 1;
-  }
-
-  DataWriterQos control_dw_qos;
-  control_pub->get_default_datawriter_qos(control_dw_qos);
-  control_dw_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
-
-  DataWriter_var control_dw = control_pub->create_datawriter(stop_control_topic, control_dw_qos, 0,
-    DEFAULT_STATUS_MASK);
-  if (!control_dw) {
-    ACE_ERROR((LM_ERROR, "ERROR: create_datawriter for control_pub failed\n"));
-    return 1;
-  }
-
-  ControlStructDataWriter_var control_typed_dw = ControlStructDataWriter::_narrow(control_dw);
 
   ControlStruct cs;
   control_ret = control_typed_dw->write(cs, HANDLE_NIL);
