@@ -102,7 +102,7 @@ There are two distributions of ACE/TAO that can be used with OpenDDS:
     script.
   * Can be manually downloaded from:
     * http://download.objectcomputing.com/TAO-2.2a_patches/
-* DOC Group ACE 6.5.13/ TAO 2.5.13 or later in the ACE 6.x / TAO 2.x series
+* DOC Group ACE 6.5.13 / TAO 2.5.13 or later in the ACE 6.x / TAO 2.x series
   * When using the configure script, DOC Group ACE/TAO can be downloaded using
     one of these arguments:
     * `--doc-group` for the latest release
