@@ -4348,11 +4348,13 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
   } else {
     const GuidConverter conv(remote);
     if (conv.isReader()) {
+      ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_);
       InterestingRemoteMapType::const_iterator ipos = interesting_readers_.find(remote);
       if (ipos != interesting_readers_.end()) {
         normal_addrs = ipos->second.addresses;
       }
     } else if (conv.isWriter()) {
+      ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
       InterestingRemoteMapType::const_iterator ipos = interesting_writers_.find(remote);
       if (ipos != interesting_writers_.end()) {
         normal_addrs = ipos->second.addresses;
