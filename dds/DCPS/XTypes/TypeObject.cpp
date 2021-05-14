@@ -3342,7 +3342,7 @@ void serialized_size(const Encoding& encoding, size_t& size,
     break;
   }
   case XTypes::TK_UINT16: {
-    primitive_serialized_size(encoding, size, uni.uint_16_value);
+    primitive_serialized_size(encoding, size, uni.uint16_value);
     break;
   }
   case XTypes::TK_INT32: {
@@ -3420,7 +3420,7 @@ bool operator<<(Serializer& strm, const XTypes::AnnotationParameterValue& uni)
     return (strm << uni.int16_value);
   }
   case XTypes::TK_UINT16: {
-    return (strm << uni.uint_16_value);
+    return (strm << uni.uint16_value);
   }
   case XTypes::TK_INT32: {
     return (strm << uni.int32_value);
@@ -3505,7 +3505,7 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
   case XTypes::TK_UINT16: {
     ACE_CDR::UShort tmp;
     if (strm >> tmp) {
-      uni.uint_16_value = tmp;
+      uni.uint16_value = tmp;
       uni.kind = kind;
       return true;
     }

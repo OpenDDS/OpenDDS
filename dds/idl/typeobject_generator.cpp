@@ -524,9 +524,9 @@ template<typename T>
 std::string getTypeName();
 
 template<>
-std::string getTypeName<OPENDDS_STRING>()
+std::string getTypeName<OpenDDS::DCPS::String>()
 {
-  return "OPENDDS_STRING";
+  return "String";
 }
 
 template<>
@@ -666,7 +666,7 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::AnnotationParameterValue& p
     out << "XTypes::TK_ENUM, " << param_value.enumerated_value;
     break;
   case OpenDDS::XTypes::TK_STRING8:
-    out << "OPENDDS_STRING(" << param_value.string8_value << ")";
+    out << "String(" << param_value.string8_value << ")";
     break;
   case OpenDDS::XTypes::TK_STRING16:
     // Assuming each wide character can be converted to a single byte character.
@@ -677,7 +677,7 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::AnnotationParameterValue& p
       delete[] dst;
       be_util::misc_error_and_abort("Failed to convert wide string to multibyte character string");
     }
-    out << "OPENDDS_WSTRING(L\"" << dst << "\")";
+    out << "WString(L\"" << dst << "\")";
     delete[] dst;
   }
   out << ")";
