@@ -550,6 +550,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
   // removed, which is a proper subset of the writers which were
   // requested to be removed.
   WriterIdSeq updated_writers;
+  WriterMapType removed_writers;
 
   CORBA::ULong wr_len;
 
@@ -568,7 +569,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
       WriterMapType::iterator it = this->writers_.find(writer_id);
 
       if (it != this->writers_.end()) {
-        it->second->removed();
+        removed_writers.insert(*it);
         end_historic_sweeper_->cancel_timer(it->second);
         remove_association_sweeper_->cancel_timer(it->second);
       }
@@ -586,6 +587,11 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
         push_back(updated_writers, writer_id);
       }
     }
+  }
+
+  while (!removed_writers.empty()) {
+    removed_writers.begin()->second->removed();
+    removed_writers.erase(removed_writers.begin());
   }
 
   wr_len = updated_writers.length();
