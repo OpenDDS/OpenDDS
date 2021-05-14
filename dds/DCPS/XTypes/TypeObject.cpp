@@ -602,7 +602,6 @@ void compute_dependencies(const TypeMap&,
                           const StronglyConnectedComponentId&,
                           OPENDDS_SET(TypeIdentifier)&);
 
-////////////////////////////////
 void compute_dependencies(const TypeMap& type_map,
                           const CommonAliasBody& type,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
