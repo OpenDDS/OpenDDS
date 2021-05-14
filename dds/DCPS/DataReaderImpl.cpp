@@ -589,10 +589,10 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
     }
   }
 
-  while (!removed_writers.empty()) {
-    removed_writers.begin()->second->removed();
-    removed_writers.erase(removed_writers.begin());
+  for (WriterMapType::iterator it = removed_writers.begin(); it != removed_writers.end(); ++it) {
+    it->second->removed();
   }
+  removed_writers.clear();
 
   wr_len = updated_writers.length();
 
