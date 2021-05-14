@@ -282,7 +282,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                   dr_qos,
                                   drl.in (),
                                   ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-      
+
 
       // ensure that the connection and association has been fully established
       ACE_OS::sleep(5);  //TBD remove this kludge when the transport is fixed.
