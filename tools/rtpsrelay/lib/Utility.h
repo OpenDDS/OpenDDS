@@ -103,7 +103,9 @@ inline OpenDDS::DCPS::RepoId guid_to_repoid(const GUID_t& a_guid)
 inline GUID_t repoid_to_guid(const OpenDDS::DCPS::RepoId& a_guid)
 {
   GUID_t retval;
-  std::memcpy(&retval, &a_guid, sizeof(GUID_t));
+  std::memcpy(&retval.guidPrefix(), a_guid.guidPrefix, sizeof(a_guid.guidPrefix));
+  std::memcpy(&retval.entityId().entityKey(), a_guid.entityId.entityKey, sizeof(a_guid.entityId.entityKey));
+  retval.entityId().entityKind(a_guid.entityId.entityKind);
   return retval;
 }
 
