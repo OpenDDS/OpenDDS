@@ -4468,10 +4468,14 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 #endif
       false;
     if (is_mutable == is_final) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::Reader::data_received: "
-        "entity id extensibility error over %C: both is_final and is_mutable are %d\n",
-        to_string(entity_id).c_str(), is_mutable));
-      break;
+      if (is_mutable) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::Reader::data_received: "
+          "entity id extensibility error over %C: both is_final and is_mutable are %d\n",
+          to_string(entity_id).c_str(), is_mutable));
+        break;
+      } else {
+        return;
+      }
     }
     const DCPS::Extensibility extensibility =
       is_mutable ? DCPS::MUTABLE : DCPS::FINAL;
