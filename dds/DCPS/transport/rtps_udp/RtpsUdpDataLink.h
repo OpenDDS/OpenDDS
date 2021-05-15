@@ -106,32 +106,40 @@ public:
             );
 
   void received(const RTPS::DataSubmessage& data,
-                const GuidPrefix_t& src_prefix);
+                const GuidPrefix_t& src_prefix,
+                const ACE_INET_Addr& remote_addr);
 
   void received(const RTPS::GapSubmessage& gap,
                 const GuidPrefix_t& src_prefix,
-                bool directed);
+                bool directed,
+                const ACE_INET_Addr& remote_addr);
 
   void received(const RTPS::HeartBeatSubmessage& heartbeat,
                 const GuidPrefix_t& src_prefix,
-                bool directed);
+                bool directed,
+                const ACE_INET_Addr& remote_addr);
 
   void received(const RTPS::HeartBeatFragSubmessage& hb_frag,
                 const GuidPrefix_t& src_prefix,
-                bool directed);
+                bool directed,
+                const ACE_INET_Addr& remote_addr);
 
   void received(const RTPS::AckNackSubmessage& acknack,
-                const GuidPrefix_t& src_prefix);
+                const GuidPrefix_t& src_prefix,
+                const ACE_INET_Addr& remote_addr);
 
   void received(const RTPS::NackFragSubmessage& nackfrag,
-                const GuidPrefix_t& src_prefix);
+                const GuidPrefix_t& src_prefix,
+                const ACE_INET_Addr& remote_addr);
 
   const GuidPrefix_t& local_prefix() const { return local_prefix_; }
 
-  void add_locators(const RepoId& remote_id, const ACE_INET_Addr& narrow_address,
-                    const ACE_INET_Addr& wide_address, bool requires_inline_qos);
-
   typedef OPENDDS_SET(ACE_INET_Addr) AddrSet;
+
+  void add_locators(const RepoId& remote_id,
+                    const AddrSet& unicast_addresses,
+                    const AddrSet& multicast_addresses,
+                    bool requires_inline_qos);
 
   /// Given a 'local' id and a 'remote' id of a publication or
   /// subscription, return the set of addresses of the remote peers.
@@ -158,7 +166,7 @@ public:
 
   void register_for_reader(const RepoId& writerid,
                            const RepoId& readerid,
-                           const ACE_INET_Addr& address,
+                           const AddrSet& addresses,
                            DiscoveryListener* listener);
 
   void unregister_for_reader(const RepoId& writerid,
@@ -166,7 +174,7 @@ public:
 
   void register_for_writer(const RepoId& readerid,
                            const RepoId& writerid,
-                           const ACE_INET_Addr& address,
+                           const AddrSet& addresses,
                            DiscoveryListener* listener);
 
   void unregister_for_writer(const RepoId& readerid,
@@ -234,16 +242,20 @@ private:
   GuidPrefix_t local_prefix_;
 
   struct RemoteInfo {
-    RemoteInfo() : narrow_addr_(), wide_addr_(), requires_inline_qos_(false) {}
-    RemoteInfo(const ACE_INET_Addr& narrow_addr, const ACE_INET_Addr& wide_addr, bool iqos)
-      : narrow_addr_(narrow_addr), wide_addr_(wide_addr), requires_inline_qos_(iqos) {}
-    ACE_INET_Addr narrow_addr_;
-    ACE_INET_Addr wide_addr_;
+    RemoteInfo() : unicast_addrs_(), multicast_addrs_(), requires_inline_qos_(false) {}
+    RemoteInfo(const AddrSet& unicast_addrs, const AddrSet& multicast_addrs, bool iqos)
+      : unicast_addrs_(unicast_addrs), multicast_addrs_(multicast_addrs), requires_inline_qos_(iqos) {}
+    AddrSet unicast_addrs_;
+    AddrSet multicast_addrs_;
     bool requires_inline_qos_;
+    ACE_INET_Addr last_recv_addr_;
+    MonotonicTimePoint last_recv_time_;
   };
 
   typedef OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan) RemoteInfoMap;
   RemoteInfoMap locators_;
+
+  void update_last_recv_addr(const RepoId& src, const ACE_INET_Addr& addr);
 
   ACE_SOCK_Dgram unicast_socket_;
   ACE_SOCK_Dgram_Mcast multicast_socket_;
@@ -745,8 +757,8 @@ private:
   struct InterestingRemote {
     /// id of local entity that is interested in this remote.
     RepoId localid;
-    /// address of this entity
-    ACE_INET_Addr address;
+    /// addresses of this entity
+    AddrSet addresses;
     /// Callback to invoke.
     DiscoveryListener* listener;
     /**
@@ -758,9 +770,9 @@ private:
     enum { DOES_NOT_EXIST, EXISTS } status;
 
     InterestingRemote() { }
-    InterestingRemote(const RepoId& w, const ACE_INET_Addr& a, DiscoveryListener* l)
+    InterestingRemote(const RepoId& w, const AddrSet& a, DiscoveryListener* l)
       : localid(w)
-      , address(a)
+      , addresses(a)
       , listener(l)
       , status(DOES_NOT_EXIST)
     { }
@@ -810,7 +822,7 @@ private:
   DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
 #endif
 
-  void accumulate_addresses(const RepoId& local, const RepoId& remote, AddrSet& addresses, bool prefer_narrow = false) const;
+  void accumulate_addresses(const RepoId& local, const RepoId& remote, AddrSet& addresses, bool prefer_unicast = false) const;
 
   struct ChangeMulticastGroup : public JobQueue::Job {
     enum CmgAction {CMG_JOIN, CMG_LEAVE};
