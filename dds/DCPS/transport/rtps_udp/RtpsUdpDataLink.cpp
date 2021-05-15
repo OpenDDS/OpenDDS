@@ -822,6 +822,12 @@ void RtpsUdpDataLink::client_stop(const RepoId& localId)
         (*drop_it)->data_dropped(true);
         ++drop_it;
       }
+      writer->remove_all_msgs();
+    } else {
+      GuardType guard(strategy_lock_);
+      if (send_strategy_) {
+        send_strategy_->remove_all_msgs(localId);
+      }
     }
   }
 }
@@ -1425,6 +1431,10 @@ RtpsUdpDataLink::RtpsWriter::send_nack_responses(const MonotonicTimePoint& /*now
   MetaSubmessageVec meta_submessages;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+
+    if (stopping_) {
+      return;
+    }
 
     gather_nack_replies_i(meta_submessages);
   }
