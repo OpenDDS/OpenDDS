@@ -1292,7 +1292,7 @@ TransportSendStrategy::remove_all_msgs(const RepoId& pub_id)
     this->send_buffer_->retain_all(pub_id);
   }
 
-  do_remove_sample(pub_id, match);
+  do_remove_sample(pub_id, match, true);
 }
 
 RemoveResult
@@ -1325,7 +1325,7 @@ TransportSendStrategy::remove_sample(const DataSampleElement* sample)
 
 RemoveResult
 TransportSendStrategy::do_remove_sample(const RepoId&,
-  const TransportQueueElement::MatchCriteria& criteria)
+  const TransportQueueElement::MatchCriteria& criteria, bool remove_all)
 {
   DBG_ENTRY_LVL("TransportSendStrategy", "do_remove_sample", 6);
 
@@ -1356,7 +1356,7 @@ TransportSendStrategy::do_remove_sample(const RepoId&,
             "Failed to find the sample to remove.\n"));
     }
 
-    return status;
+    if (!remove_all || status == REMOVE_ERROR) return status;
   }
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -1373,7 +1373,7 @@ TransportSendStrategy::do_remove_sample(const RepoId&,
     // This means that the visitor did not encounter any fatal error
     // along the way, *AND* the sample was found in the queue_,
     // and has now been removed.  We are done.
-    return status;
+    if (!remove_all) return status;
   }
 
   if (status == REMOVE_ERROR) {
