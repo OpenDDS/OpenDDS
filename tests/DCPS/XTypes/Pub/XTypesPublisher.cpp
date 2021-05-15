@@ -373,7 +373,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DataWriterQos control_dw_qos;
   control_pub->get_default_datawriter_qos(control_dw_qos);
-  control_dw_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
+  control_dw_qos.durability.kind = TRANSIENT_DURABILITY_QOS;
 
   DataWriter_var control_dw = control_pub->create_datawriter(stop_control_topic, control_dw_qos, 0,
                                                              DEFAULT_STATUS_MASK);
@@ -394,7 +394,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DataWriterQos dw_qos;
   pub->get_default_datawriter_qos(dw_qos);
-  dw_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
+  dw_qos.durability.kind = TRANSIENT_DURABILITY_QOS;
 
   DataWriter_var dw = pub->create_datawriter(topic, dw_qos, 0,
     DEFAULT_STATUS_MASK);
@@ -454,7 +454,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   }
 
-   ::ControlStructSeq control_data;
+  ACE_DEBUG((LM_DEBUG,"Writer waiting for ack at %T\n"));
+
+  ::ControlStructSeq control_data;
   ReturnCode_t control_ret = read_i(control_dr, control_pdr, control_data);
   if (control_ret != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: control read returned %C\n",
@@ -462,18 +464,41 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
+  ACE_DEBUG((LM_DEBUG,"Writer sending echo at %T\n"));
 
   ControlStruct cs;
   control_ret = control_typed_dw->write(cs, HANDLE_NIL);
   if (control_ret != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: control write returned %C\n",
-      OpenDDS::DCPS::retcode_to_string(ret)));
+      OpenDDS::DCPS::retcode_to_string(control_ret)));
     return 1;
   }
 
+  condition = control_dw->get_statuscondition();
+  condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
+
+  ws->attach_condition(condition);
+  DDS::Duration_t p = { 5, 0 };
+  DDS::PublicationMatchedStatus pms;
+  control_dw->get_publication_matched_status(pms);
+  ACE_DEBUG((LM_DEBUG, "count of subs = %d change count = %d at %T\n", pms.current_count, pms.current_count_change));
+  for (int retries = 3; retries > 0 && pms.current_count > 0; retries-- ) {
+    conditions.length(0);
+    control_ret = ws->wait(conditions, p);
+    control_dw->get_publication_matched_status(pms);
+    ACE_DEBUG((LM_DEBUG, "count of subs = %d change count = %d with retcode = %C at %T\n",
+               pms.current_count, pms.current_count_change,
+               OpenDDS::DCPS::retcode_to_string(control_ret)));
+  }
+  ws->detach_condition (condition);
+
   topic = 0;
+  ACE_DEBUG((LM_DEBUG,"Writer cleanup at %T\n"));
+
   dp->delete_contained_entities();
   dpf->delete_participant(dp);
   TheServiceParticipant->shutdown();
+
+  ACE_DEBUG((LM_DEBUG, "writer exiting at %T\n"));
   return failed ? 1 : 0;
 }

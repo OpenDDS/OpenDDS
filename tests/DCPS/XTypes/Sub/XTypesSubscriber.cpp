@@ -284,7 +284,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DataWriterQos control_dw_qos;
   control_pub->get_default_datawriter_qos(control_dw_qos);
-  control_dw_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
+  control_dw_qos.durability.kind = TRANSIENT_DURABILITY_QOS;
 
   DataWriter_var control_dw = control_pub->create_datawriter(start_control_topic, control_dw_qos, 0,
                                                              DEFAULT_STATUS_MASK);
@@ -304,7 +304,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DataReaderQos control_dr_qos;
   control_sub->get_default_datareader_qos(control_dr_qos);
   control_dr_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
-  control_dr_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
+  control_dr_qos.durability.kind = TRANSIENT_DURABILITY_QOS;
 
   DataReader_var control_dr = control_sub->create_datareader(stop_control_topic, control_dr_qos, 0,
                                                              DEFAULT_STATUS_MASK);
@@ -383,6 +383,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   //
   // As the subscriber is now about to exit, let the publisher know it can exit too
   //
+  ACE_DEBUG((LM_DEBUG,"Reader sending ack at %T\n"));
 
   ControlStruct cs;
   ReturnCode_t control_ret = control_typed_dw->write(cs, HANDLE_NIL);
@@ -392,13 +393,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
-    ::ControlStructSeq control_data;
+  ACE_DEBUG((LM_DEBUG,"Reader waiting for echo at %T\n"));
+
+  ::ControlStructSeq control_data;
   control_ret = read_i(control_dr, control_pdr, control_data, true);
   if (control_ret != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: control read returned %C\n",
       OpenDDS::DCPS::retcode_to_string(control_ret)));
     return 1;
   }
+
+  ACE_DEBUG((LM_DEBUG,"Reader cleanup at %T\n"));
 
   topic = 0;
   dp->delete_contained_entities();
