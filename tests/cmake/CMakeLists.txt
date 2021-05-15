@@ -1,10 +1,15 @@
 cmake_minimum_required(VERSION 3.3)
 
 project(opendds_cmake_tests_root_project)
+enable_testing()
 
 find_package(OpenDDS REQUIRED)
 
-add_subdirectory("../../DevGuideExamples/DCPS" "../../DevGuideExamples/DCPS/build")
+configure_file("CTestCustom.cmake" "." COPYONLY)
+
+add_subdirectory(
+  "../../DevGuideExamples/DCPS/Messenger"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../../DevGuideExamples/DCPS/Messenger/build")
 
 add_subdirectory(Messenger)
 add_subdirectory(Nested_IDL)
