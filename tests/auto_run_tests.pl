@@ -311,7 +311,7 @@ if ($cmake) {
     if (run_command("CMake Tests", "$ctest --no-compress-output -T Test $ctest_args")) {
         exit(1) if ($stop_on_fail);
     }
-    elsif (run_command("Process CMake Test Results", "../ctest-to-auto-run-tests.py .")) {
+    elsif (run_command("Process CMake Test Results", "../ctest-to-auto-run-tests.py .. .")) {
         exit(1);
     }
 }
