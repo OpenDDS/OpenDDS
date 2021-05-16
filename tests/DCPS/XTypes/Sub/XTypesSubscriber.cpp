@@ -284,7 +284,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DataWriterQos control_dw_qos;
   control_pub->get_default_datawriter_qos(control_dw_qos);
-  control_dw_qos.durability.kind = TRANSIENT_DURABILITY_QOS;
+  control_dw_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
 
   DataWriter_var control_dw = control_pub->create_datawriter(start_control_topic, control_dw_qos, 0,
                                                              DEFAULT_STATUS_MASK);
@@ -304,7 +304,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DataReaderQos control_dr_qos;
   control_sub->get_default_datareader_qos(control_dr_qos);
   control_dr_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
-  control_dr_qos.durability.kind = TRANSIENT_DURABILITY_QOS;
+  control_dr_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
 
   DataReader_var control_dr = control_sub->create_datareader(stop_control_topic, control_dr_qos, 0,
                                                              DEFAULT_STATUS_MASK);
