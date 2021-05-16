@@ -268,12 +268,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   ACE_DEBUG((LM_DEBUG, "Reader starting at %T\n"));
-  Topic_var start_control_topic;
-  Topic_var stop_control_topic;
-  ControlStructTypeSupport_var start_control_ts = new ControlStructTypeSupportImpl;
-  ControlStructTypeSupport_var stop_control_ts = new ControlStructTypeSupportImpl;
-  get_topic(start_control_ts, dp, "SET_PD_OL_OA_OM_OD_Start", start_control_topic, "ControlStruct");
-  get_topic(stop_control_ts, dp, "SET_PD_OL_OA_OM_OD_Stop", stop_control_topic, "ControlStruct");
+  Topic_var ack_control_topic;
+  Topic_var echo_control_topic;
+  ControlStructTypeSupport_var ack_control_ts = new ControlStructTypeSupportImpl;
+  ControlStructTypeSupport_var echo_control_ts = new ControlStructTypeSupportImpl;
+  get_topic(ack_control_ts, dp, "SET_PD_OL_OA_OM_OD_Ack", ack_control_topic, "ControlStruct");
+  get_topic(echo_control_ts, dp, "SET_PD_OL_OA_OM_OD_Echo", echo_control_topic, "ControlStruct");
 
   Publisher_var control_pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
                                                    DEFAULT_STATUS_MASK);
@@ -286,7 +286,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   control_pub->get_default_datawriter_qos(control_dw_qos);
   control_dw_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
 
-  DataWriter_var control_dw = control_pub->create_datawriter(start_control_topic, control_dw_qos, 0,
+  DataWriter_var control_dw = control_pub->create_datawriter(ack_control_topic, control_dw_qos, 0,
                                                              DEFAULT_STATUS_MASK);
   if (!control_dw) {
     ACE_ERROR((LM_ERROR, "ERROR: create_datawriter for control_pub failed\n"));
@@ -306,7 +306,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   control_dr_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
   control_dr_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
 
-  DataReader_var control_dr = control_sub->create_datareader(stop_control_topic, control_dr_qos, 0,
+  DataReader_var control_dr = control_sub->create_datareader(echo_control_topic, control_dr_qos, 0,
                                                              DEFAULT_STATUS_MASK);
   if (!control_dr) {
     ACE_ERROR((LM_ERROR, "ERROR: create_datareader failed\n"));
