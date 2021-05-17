@@ -864,37 +864,56 @@ TransportSendStrategy::stop()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","stop",6);
 
-  if (this->header_block_ != 0) {
-    this->header_block_->release ();
-    this->header_block_ = 0;
+  if (header_block_ != 0) {
+    header_block_->release ();
+    header_block_ = 0;
   }
 
-  this->synch_->unregister_worker();
+  synch_->unregister_worker();
 
+  QueueType elems;
+  QueueType queue;
   {
-    GuardType guard(this->lock_);
+    GuardType guard(lock_);
 
-    if (this->pkt_chain_ != 0) {
-      size_t size = this->pkt_chain_->total_length();
-
+    if (pkt_chain_ != 0) {
+      size_t size = pkt_chain_->total_length();
       if (size > 0) {
-        this->pkt_chain_->release();
+        pkt_chain_->release();
         ACE_DEBUG((LM_WARNING,
                    ACE_TEXT("(%P|%t) WARNING: TransportSendStrategy::stop() - ")
                    ACE_TEXT("terminating with %d unsent bytes.\n"),
                    size));
       }
     }
+
+    if (elems_.size()) {
+      elems_.swap(elems);
+      ACE_DEBUG((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: TransportSendStrategy::stop() - ")
+                 ACE_TEXT("terminating with %d unsent elements.\n"),
+                 elems_.size()));
+    }
+
+    if (queue_.size()) {
+      queue_.swap(queue);
+      ACE_DEBUG((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: TransportSendStrategy::stop() - ")
+                 ACE_TEXT("terminating with %d queued elements.\n"),
+                 queue_.size()));
+    }
   }
+
+  RemoveAllVisitor remove_all_visitor;
+
+  elems.accept_remove_visitor(remove_all_visitor);
+  queue.accept_remove_visitor(remove_all_visitor);
 
   {
-    GuardType guard(this->lock_);
+    GuardType guard(lock_);
 
-    this->stop_i();
+    stop_i();
   }
-
-  // TBD SOON - What about all of the samples that may still be stuck in
-  //            our queue_ and/or elems_?
 }
 
 void
