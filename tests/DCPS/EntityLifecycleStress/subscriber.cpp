@@ -4,20 +4,23 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Qos_Helper.h>
-#include "dds/DCPS/StaticIncludes.h"
-#include "dds/DCPS/unique_ptr.h"
-
-#include "tests/Utils/ExceptionStreams.h"
-#include "tests/Utils/StatusMatching.h"
+#include <dds/DCPS/StaticIncludes.h>
+#include <dds/DCPS/unique_ptr.h>
+#ifndef ACE_HAS_CPP11
+#include <dds/DCPS/ConditionVariable.h>
+#endif
 
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
+#include "tests/Utils/ExceptionStreams.h"
+#include "tests/Utils/StatusMatching.h"
+
 #include <ace/streams.h>
-#include "ace/Get_Opt.h"
-#include "ace/OS_NS_unistd.h"
+#include <ace/Get_Opt.h>
+#include <ace/OS_NS_unistd.h>
 
 #include <memory>
 
@@ -110,7 +113,7 @@ struct DataReaderListenerImpl : public virtual OpenDDS::DCPS::LocalObject<DDS::D
   std::condition_variable cv_;
 #else
   ACE_Thread_Mutex mutex_;
-  ACE_Condition<ACE_Thread_Mutex> cv_;
+  OpenDDS::DCPS::ConditionVariable<ACE_Thread_Mutex> cv_;
 #endif
   bool valid_data_seen;
 };

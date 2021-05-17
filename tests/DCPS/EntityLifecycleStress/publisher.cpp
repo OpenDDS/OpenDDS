@@ -7,13 +7,13 @@
 #include <dds/DCPS/StaticIncludes.h>
 #include <dds/DCPS/unique_ptr.h>
 
-#include "tests/Utils/ExceptionStreams.h"
-#include "tests/Utils/StatusMatching.h"
-
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
+
+#include <tests/Utils/ExceptionStreams.h>
+#include <tests/Utils/StatusMatching.h>
 
 #include <ace/streams.h>
 #include <ace/Get_Opt.h>
