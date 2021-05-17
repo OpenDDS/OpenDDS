@@ -1,23 +1,14 @@
-// -*- C++ -*-
-// ============================================================================
-/**
- *  @file   publisher.cpp
- *
- *
- *
- */
-// ============================================================================
-
-
 #include "Writer.h"
+#include "common.h"
+
 #include "../common/TestException.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
+
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/PublisherImpl.h"
-#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
-
 #include "dds/DCPS/StaticIncludes.h"
 #if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
 #include "dds/DCPS/transport/udp/Udp.h"
@@ -26,9 +17,6 @@
 #include "ace/Arg_Shifter.h"
 #include "ace/Reactor.h"
 #include "ace/OS_NS_unistd.h"
-
-#include "common.h"
-
 
 class ReactorCtrl : public ACE_Event_Handler
 {
@@ -295,7 +283,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       foo_dw->write(foo,
                     handle);
 
-      ACE_OS::sleep(5);
+      ACE_OS::sleep(3 * LEASE_DURATION_SEC);
 
       Writer* writer = new Writer(dw_automatic.in(),
                                   1,
@@ -307,7 +295,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
           // 3 ensures that we will detect when an DataReader detects
           // liveliness lost on an already unliveliy DataReader.
-          ACE_OS::sleep (3);
+          ACE_OS::sleep (3 * LEASE_DURATION_SEC);
         }
       writer->run_test (num_unlively_periods);
       rc.resume() ;

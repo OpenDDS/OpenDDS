@@ -1,38 +1,27 @@
-// -*- C++ -*-
-// ============================================================================
-/**
- *  @file   publisher.cpp
- *
- *
- *
- */
-// ============================================================================
-
-
+#include "common.h"
 #include "Writer.h"
-#include "../common/TestException.h"
 #include "DataReaderListener.h"
+
+#include "../common/TestException.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
+
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/TopicDescriptionImpl.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
-#include "dds/DdsDcpsSubscriptionC.h"
-#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
-
 #include "dds/DCPS/StaticIncludes.h"
 #if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
 #include "dds/DCPS/transport/udp/Udp.h"
 #endif
 
+#include "dds/DdsDcpsSubscriptionC.h"
+
 #include "ace/Arg_Shifter.h"
 #include "ace/Reactor.h"
 #include "ace/OS_NS_unistd.h"
-
-#include "common.h"
-
 
 class ReactorCtrl : public ACE_Event_Handler
 {
@@ -52,29 +41,6 @@ public:
                       -1);
 
     return cond_.wait();
-  }
-
-  void pause()
-  {
-    ACE_Reactor_Timer_Interface* reactor = TheServiceParticipant->timer();
-
-    if (reactor->schedule_timer(this,
-                                0,
-                                ACE_Time_Value(0,1)) == -1)
-    {
-      ACE_ERROR ((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: PauseReactor, ")
-                 ACE_TEXT(" %p.\n"), ACE_TEXT("schedule_timer")));
-    }
-  }
-
-  void resume()
-  {
-    // it appears that you must have the lock before waiting or signaling on Win32
-    ACE_GUARD (ACE_Recursive_Thread_Mutex,
-               guard,
-               this->lock_);
-    cond_.signal();
   }
 
 private:
@@ -283,51 +249,38 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                   drl.in (),
                                   ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-
-      // ensure that the connection and association has been fully established
-      ACE_OS::sleep(5);  //TBD remove this kludge when the transport is fixed.
-
-      // stop the Service_Participant reactor so LIVELINESS.kind=AUTOMATIC does not
-      // send out an automatic liveliness control message when sleeping in the loop
-      // below.
-
       Writer* writer = new Writer(dw.in (),
                                 1,
                                 num_ops_per_thread);
 
-      for (int i = 0 ; i < num_unlively_periods ; i++)
-        {
-          writer->run_test (i);
-
-          // 3 ensures that we will detect when an DataReader detects
-          // liveliness lost on an already unliveliy DataReader.
-          ACE_OS::sleep (3 * LEASE_DURATION_SEC);
+      //we want to only publish after the reader loses liveliness from the writer
+      //the follows the pattern of an up and a down, so there should be 2 liveliness
+      //changes per call to run_test
+      int lcc = 0;
+      for (int i = 0 ; i < num_unlively_periods + 1 ; i++)
+      {
+        lcc = drl_servant->liveliness_changed_count();
+        while(lcc != 2 * i){
+          ACE_OS::sleep(ACE_Time_Value(0, 250000));
+          lcc = drl_servant->liveliness_changed_count();
         }
-      writer->run_test (num_unlively_periods);
+        writer->run_test (i);
+      }
 
-      // We need to wait for liveliness to go away here.
-      //
-
-      // We need to wait for liveliness to go away here.
-      //
-      // clean up subscriber objects
-
-      sub->delete_contained_entities() ;
-
-      dp->delete_subscriber(sub.in ());
+      while(lcc != 2 * (num_unlively_periods + 1)){
+        ACE_OS::sleep(ACE_Time_Value(0, 250000));
+        lcc = drl_servant->liveliness_changed_count();
+      }
 
       // Clean up publisher objects
       pub->delete_contained_entities() ;
-
       delete writer;
-
       dp->delete_publisher(pub.in ());
 
-      dp->delete_topic(topic.in ());
-      dpf->delete_participant(dp.in ());
-
-      ACE_OS::sleep(5);
-
+      while(lcc != 2 * (num_unlively_periods + 2) + 1){
+        ACE_OS::sleep(ACE_Time_Value(0, 250000));
+        lcc = drl_servant->liveliness_changed_count();
+      }
       //
       // Determine the test status at this point.
       //
@@ -370,9 +323,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       ACE_DEBUG((LM_DEBUG,ACE_TEXT("(%P|%t) %T publisher is finish - cleanup subscriber\n") ));
-
+      sub->delete_contained_entities() ;
+      dp->delete_subscriber(sub.in ());
+      dp->delete_topic(topic.in ());
+      dpf->delete_participant(dp.in ());
       TheServiceParticipant->shutdown ();
-
     }
   catch (const TestException&)
     {

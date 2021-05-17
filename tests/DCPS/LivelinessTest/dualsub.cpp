@@ -1,32 +1,22 @@
-// -*- C++ -*-
-// ============================================================================
-/**
- *  @file   subscriber.cpp
- *
- *
- *
- */
-// ============================================================================
-
+#include "DataReaderListener.h"
+#include "common.h"
 
 #include "../common/TestException.h"
-#include "DataReaderListener.h"
+#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
+
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/TopicDescriptionImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
-#include "dds/DdsDcpsSubscriptionC.h"
-#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
-
 #include "dds/DCPS/StaticIncludes.h"
 #if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
 #include "dds/DCPS/transport/udp/Udp.h"
 #endif
 
-#include "ace/Arg_Shifter.h"
+#include "dds/DdsDcpsSubscriptionC.h"
 
-#include "common.h"
+#include "ace/Arg_Shifter.h"
 
 /// parse the command line arguments
 int parse_args (int argc, ACE_TCHAR *argv[])
@@ -278,7 +268,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       //
       // We need to wait for liveliness to go away here.
       //
-      ACE_OS::sleep( 5);
+      ACE_OS::sleep(5);
 
       //
       // Determine the test status at this point.
@@ -343,7 +333,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           ACE_TEXT("test failed second condition.\n")
         ));
 
-      } else if( drl_servant2->no_writers_generation_count() != 1) {
+      } else if( drl_servant2->no_writers_generation_count() != 0) {
         status = 1;
         // Yet another error condition.
 
