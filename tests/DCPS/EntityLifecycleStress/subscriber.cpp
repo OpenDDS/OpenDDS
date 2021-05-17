@@ -174,8 +174,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]){
                               drl.in(),
                               ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
+    if (CORBA::is_nil(dr.in())) {
+      cerr << "create_datareader failed." << endl;
+      exit(1);
+    }
+
     Messenger::MessageDataReader_var message_dr =
       Messenger::MessageDataReader::_narrow(dr.in());
+
+    if (CORBA::is_nil(message_dr.in())) {
+      cerr << "Messenger::MessageDataReader::_narrow() failed." << endl;
+      exit(1);
+    }
 
     const OpenDDS::DCPS::MonotonicTimePoint deadline = OpenDDS::DCPS::MonotonicTimePoint::now() + OpenDDS::DCPS::TimeDuration(2, 500000);
 

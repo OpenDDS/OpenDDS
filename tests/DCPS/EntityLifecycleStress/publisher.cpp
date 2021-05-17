@@ -80,8 +80,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
                               DDS::DataWriterListener::_nil(),
                               ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
+    if (CORBA::is_nil(dw.in())) {
+      cerr << "create_datawriter failed." << endl;
+      exit(1);
+    }
+
     Messenger::MessageDataWriter_var message_dw =
       Messenger::MessageDataWriter::_narrow(dw.in());
+
+    if (CORBA::is_nil(message_dw.in())) {
+      cerr << "Messenger::MessageDataWriter::_narrow() failed." << endl;
+      exit(1);
+    }
 
     Messenger::Message message;
     message.subject_id = 16;
