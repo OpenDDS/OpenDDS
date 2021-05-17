@@ -55,6 +55,8 @@ int ACE_TMAIN(int, ACE_TCHAR**)
   ACE_UNUSED_ARG(du);
   _cxx_case::privateDataWriter* du_dw = 0;
   ACE_UNUSED_ARG(du_dw);
+  _cxx_case::privateTypeSupportImpl* du_tsi = 0;
+  ACE_UNUSED_ARG(du_tsi);
 
   return 0;
 }
