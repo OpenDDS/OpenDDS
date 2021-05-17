@@ -660,10 +660,10 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::AnnotationParameterValue& p
     out << "static_cast<ACE_CDR::Char>(" << param_value.char_value << ")";
     break;
   case OpenDDS::XTypes::TK_CHAR16:
-    out << "static_cast<ACE_CDR::WChar>(" << param_value.wchar_value << ")";
+    out << "XTypes::AnnotationParameterValue::WCharValue(" << param_value.wchar_value << "))";
     break;
   case OpenDDS::XTypes::TK_ENUM:
-    out << "XTypes::TK_ENUM, " << param_value.enumerated_value;
+    out << "XTypes::AnnotationParameterValue::EnumValue(" << param_value.enumerated_value << "))";
     break;
   case OpenDDS::XTypes::TK_STRING8:
     out << "String(" << param_value.string8_value << ")";

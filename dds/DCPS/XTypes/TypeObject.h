@@ -883,6 +883,24 @@ namespace XTypes {
     OPENDDS_WSTRING string16_value;
     ExtendedAnnotationParameterValue extended_value;
 
+    struct WCharValue {
+      ACE_CDR::WChar value;
+
+      WCharValue() {}
+
+      WCharValue(ACE_CDR::WChar a_value)
+        : value(a_value) {}
+    };
+
+    struct EnumValue {
+      ACE_CDR::Long value;
+
+      EnumValue() {}
+
+      EnumValue(ACE_CDR::Long a_value)
+        : value(a_value) {}
+    };
+
     AnnotationParameterValue() {}
 
     explicit AnnotationParameterValue(ACE_CDR::Boolean value)
@@ -905,18 +923,10 @@ namespace XTypes {
       , uint16_value(value)
     {}
 
-    AnnotationParameterValue(ACE_CDR::Octet k, ACE_CDR::Long value)
-    {
-      if (k == TK_INT32) {
-        kind = k;
-        int32_value = value;
-      } else if (k == TK_ENUM) {
-        kind = k;
-        enumerated_value = value;
-      } else {
-        kind = TK_NONE;
-      }
-    }
+    AnnotationParameterValue(ACE_CDR::Long value)
+      : kind(TK_INT32)
+      , int32_value(value)
+    {}
 
     explicit AnnotationParameterValue(ACE_CDR::ULong value)
       : kind(TK_UINT32)
@@ -953,9 +963,14 @@ namespace XTypes {
       , char_value(value)
     {}
 
-    explicit AnnotationParameterValue(ACE_CDR::WChar value)
+    explicit AnnotationParameterValue(WCharValue value)
       : kind(TK_CHAR16)
-      , wchar_value(value)
+      , wchar_value(value.value)
+    {}
+
+    explicit AnnotationParameterValue(EnumValue value)
+      : kind(TK_ENUM)
+      , enumerated_value(value.value)
     {}
 
     explicit AnnotationParameterValue(const OPENDDS_STRING& value)
