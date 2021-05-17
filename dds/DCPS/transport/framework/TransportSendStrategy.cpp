@@ -1356,7 +1356,7 @@ TransportSendStrategy::do_remove_sample(const RepoId&,
             "Failed to find the sample to remove.\n"));
     }
 
-    if (!remove_all || status == REMOVE_ERROR) return status;
+    if (criteria.unique() || !remove_all) return status;
   }
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -1373,7 +1373,7 @@ TransportSendStrategy::do_remove_sample(const RepoId&,
     // This means that the visitor did not encounter any fatal error
     // along the way, *AND* the sample was found in the queue_,
     // and has now been removed.  We are done.
-    if (!remove_all) return status;
+    if (criteria.unique() || !remove_all) return status;
   }
 
   if (status == REMOVE_ERROR) {
