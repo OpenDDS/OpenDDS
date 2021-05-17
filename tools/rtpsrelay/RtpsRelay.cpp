@@ -121,6 +121,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-UserData"))) {
       user_data = arg;
       args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-LogWarnings"))) {
+      config.log_warnings(ACE_OS::atoi(arg));
+      args.consume_arg();
     } else if ((arg = args.get_the_parameter("-LogEntries"))) {
       config.log_entries(ACE_OS::atoi(arg));
       args.consume_arg();
