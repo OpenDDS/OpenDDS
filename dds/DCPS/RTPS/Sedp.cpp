@@ -3114,13 +3114,14 @@ void
 Sedp::notify_liveliness(const ParticipantMessageData& pmd)
 {
   const RepoId& guid = pmd.participantGuid;
-  RepoId guid_participant = guid;
-  guid_participant.entityId = ENTITYID_PARTICIPANT;
-  RepoId prefix = pmd.participantGuid;
-  prefix.entityId = EntityId_t(); // Clear the entityId so lower bound will work.
+  const RepoId guid_participant = make_part_guid(guid);
+  // Clear the entityId so lower bound will work.
+  const RepoId prefix = make_id(pmd.participantGuid, PARTICIPANT_MESSAGE_DATA_KIND_UNKNOWN);
   bool is_automatic = true;
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) %T Sedp::notify_liveliness(const ParticipantMessageData& pmd), %d\n",
-             *(long*)(&pmd.participantGuid.entityId)));
+  if (OpenDDS::DCPS::DCPS_debug_level >= 8)
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) Notifying Liveliness, %s\n"),
+             OpenDDS::DCPS::LogGuid(guid).c_str()));
   if (PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE == pmd.participantGuid.entityId) {
     is_automatic = false;
   }
@@ -3136,8 +3137,8 @@ Sedp::notify_liveliness(const ParticipantMessageData& pmd)
       if (sl) {
         if (sub_pos->second.qos_.liveliness.kind == ::DDS::AUTOMATIC_LIVELINESS_QOS && is_automatic) {
           sl->signal_liveliness(guid_participant);
-        } else if (sub_pos->second.qos_.liveliness.kind == ::DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS
-                   || sub_pos->second.qos_.liveliness.kind == ::DDS::AUTOMATIC_LIVELINESS_QOS && !is_automatic) {
+        } else if ((sub_pos->second.qos_.liveliness.kind == ::DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS
+                   || sub_pos->second.qos_.liveliness.kind == ::DDS::AUTOMATIC_LIVELINESS_QOS) && !is_automatic) {
           sl->signal_liveliness(guid_participant);
         }
       }
@@ -5388,11 +5389,12 @@ Sedp::write_participant_message_data(
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
+  //Update liveliness for local subscriptions
   ParticipantMessageData pmd;
+  pmd.participantGuid = rid;
   notify_liveliness(pmd);
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
-    pmd.participantGuid = rid;
     result = participant_message_writer_->write_participant_message(pmd, reader, pm.sequence_);
   } else if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_participant_message_data - ")
