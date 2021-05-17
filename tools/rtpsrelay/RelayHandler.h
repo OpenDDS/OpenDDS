@@ -8,6 +8,7 @@
 #include "RelayPartitionTable.h"
 #include "RelayStatisticsReporter.h"
 
+#include <dds/DCPS/Claimable.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 
 #include <ace/Message_Block.h>
@@ -45,6 +46,83 @@ struct AddrSetStats {
   }
 };
 
+class RelayHandler;
+
+class GuidAddrSet {
+public:
+  typedef std::map<OpenDDS::DCPS::RepoId, AddrSetStats, OpenDDS::DCPS::GUID_tKeyLessThan> GuidAddrSetMap;
+
+  GuidAddrSet(const Config& config,
+              RelayStatisticsReporter& relay_stats_reporter)
+    : config_(config)
+    , relay_stats_reporter_(relay_stats_reporter)
+  {}
+
+  void spdp_vertical_handler(RelayHandler* spdp_vertical_handler)
+  {
+    spdp_vertical_handler_ = spdp_vertical_handler;
+  }
+
+  void sedp_vertical_handler(RelayHandler* sedp_vertical_handler)
+  {
+    sedp_vertical_handler_ = sedp_vertical_handler;
+  }
+
+  void data_vertical_handler(RelayHandler* data_vertical_handler)
+  {
+    data_vertical_handler_ = data_vertical_handler;
+  }
+
+  void process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now);
+
+  bool ignore(const OpenDDS::DCPS::GUID_t& guid);
+
+  void remove(const OpenDDS::DCPS::RepoId& guid);
+
+  void remove_pending(const OpenDDS::DCPS::RepoId& guid)
+  {
+    pending_.erase(guid);
+  }
+
+  GuidAddrSetMap::iterator find(const OpenDDS::DCPS::RepoId& guid)
+  {
+    return guid_addr_set_map_.find(guid);
+  }
+
+  GuidAddrSetMap::const_iterator end()
+  {
+    return guid_addr_set_map_.end();
+  }
+
+  ParticipantStatisticsReporter&
+  record_activity(const ACE_INET_Addr& remote_address,
+                  const OpenDDS::DCPS::MonotonicTimePoint& now,
+                  const OpenDDS::DCPS::RepoId& src_guid,
+                  const size_t& msg_len,
+                  RelayHandler& handler);
+
+  ParticipantStatisticsReporter&
+  participant_statistics_reporter(const OpenDDS::DCPS::RepoId& guid,
+                                  const RelayHandler& handler);
+
+private:
+  void remove_helper(const OpenDDS::DCPS::RepoId& guid, const AddrSet& addr_set);
+
+  const Config& config_;
+  RelayStatisticsReporter& relay_stats_reporter_;
+  RelayHandler* spdp_vertical_handler_;
+  RelayHandler* sedp_vertical_handler_;
+  RelayHandler* data_vertical_handler_;
+  GuidAddrSetMap guid_addr_set_map_;
+  typedef std::map<GuidAddr, OpenDDS::DCPS::MonotonicTimePoint> GuidAddrExpirationMap;
+  GuidAddrExpirationMap guid_addr_expiration_map_;
+  typedef std::multimap<OpenDDS::DCPS::MonotonicTimePoint, GuidAddr> ExpirationGuidAddrMap;
+  ExpirationGuidAddrMap expiration_guid_addr_map_;
+  GuidSet pending_;
+};
+
+typedef OpenDDS::DCPS::Claimable<GuidAddrSet> ClaimableGuidAddrSet;
+
 class RelayHandler : public ACE_Event_Handler {
 public:
   int open(const ACE_INET_Addr& address);
@@ -64,9 +142,13 @@ public:
   virtual void purge(const OpenDDS::DCPS::RepoId& /*guid*/) {}
 
 protected:
+  typedef ClaimableGuidAddrSet::Claim Claim;
+
   RelayHandler(const Config& config,
                const std::string& name,
                ACE_Reactor* reactor,
+               const GuidPartitionTable& guid_partition_table,
+               ClaimableGuidAddrSet& guid_addr_set,
                HandlerStatisticsReporter& stats_reporter);
 
   int handle_input(ACE_HANDLE handle) override;
@@ -104,114 +186,9 @@ private:
 protected:
   const Config& config_;
   const std::string name_;
+  const GuidPartitionTable& guid_partition_table_;
+  ClaimableGuidAddrSet& guid_addr_set_;
   HandlerStatisticsReporter& stats_reporter_;
-};
-
-class GuidAddrSet {
-public:
-  typedef std::map<OpenDDS::DCPS::RepoId, AddrSetStats, OpenDDS::DCPS::GUID_tKeyLessThan> GuidAddrSetMap;
-
-  GuidAddrSet(const Config& config,
-              RelayStatisticsReporter& relay_stats_reporter)
-    : config_(config)
-    , relay_stats_reporter_(relay_stats_reporter)
-  {}
-
-  void spdp_vertical_handler(RelayHandler* spdp_vertical_handler)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-    spdp_vertical_handler_ = spdp_vertical_handler;
-  }
-
-  void sedp_vertical_handler(RelayHandler* sedp_vertical_handler)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-    sedp_vertical_handler_ = sedp_vertical_handler;
-  }
-
-  void data_vertical_handler(RelayHandler* data_vertical_handler)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-    data_vertical_handler_ = data_vertical_handler;
-  }
-
-  void process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now);
-
-  bool ignore(const OpenDDS::DCPS::GUID_t& guid);
-
-  void remove(const OpenDDS::DCPS::RepoId& guid);
-
-  void remove_pending(const OpenDDS::DCPS::RepoId& guid)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-    pending_.erase(guid);
-  }
-
-  class Proxy {
-  public:
-    Proxy(GuidAddrSet& gas)
-      : gas_(gas)
-    {
-      gas_.mutex_.acquire();
-    }
-
-    ~Proxy()
-    {
-      gas_.mutex_.release();
-    }
-
-    GuidAddrSetMap::iterator find(const OpenDDS::DCPS::RepoId& guid)
-    {
-      return gas_.guid_addr_set_map_.find(guid);
-    }
-
-    GuidAddrSetMap::const_iterator end()
-    {
-      return gas_.guid_addr_set_map_.end();
-    }
-
-    ParticipantStatisticsReporter&
-    record_activity(const ACE_INET_Addr& remote_address,
-                    const OpenDDS::DCPS::MonotonicTimePoint& now,
-                    const OpenDDS::DCPS::RepoId& src_guid,
-                    const size_t& msg_len,
-                    RelayHandler& handler);
-
-    ParticipantStatisticsReporter&
-    participant_statistics_reporter(const OpenDDS::DCPS::RepoId& guid,
-                                    const RelayHandler& handler)
-    {
-      return *handler.select_stats_reporter(gas_.guid_addr_set_map_[guid]);
-    }
-
-  private:
-    GuidAddrSet& gas_;
-    OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(Proxy)
-  };
-
-private:
-  ParticipantStatisticsReporter&
-  record_activity(const ACE_INET_Addr& remote_address,
-                  const OpenDDS::DCPS::MonotonicTimePoint& now,
-                  const OpenDDS::DCPS::RepoId& src_guid,
-                  const size_t& msg_len,
-                  RelayHandler& handler);
-
-  void remove_helper(const OpenDDS::DCPS::RepoId& guid, const AddrSet& addr_set);
-
-  const Config& config_;
-  RelayStatisticsReporter& relay_stats_reporter_;
-  RelayHandler* spdp_vertical_handler_;
-  RelayHandler* sedp_vertical_handler_;
-  RelayHandler* data_vertical_handler_;
-  GuidAddrSetMap guid_addr_set_map_;
-  typedef std::map<GuidAddr, OpenDDS::DCPS::MonotonicTimePoint> GuidAddrExpirationMap;
-  GuidAddrExpirationMap guid_addr_expiration_map_;
-  typedef std::multimap<OpenDDS::DCPS::MonotonicTimePoint, GuidAddr> ExpirationGuidAddrMap;
-  ExpirationGuidAddrMap expiration_guid_addr_map_;
-  GuidSet pending_;
-
-  mutable ACE_Thread_Mutex mutex_;
 };
 
 class HorizontalHandler;
@@ -225,7 +202,7 @@ public:
                   ACE_Reactor* reactor,
                   const GuidPartitionTable& guid_partition_table,
                   const RelayPartitionTable& relay_partition_table,
-                  GuidAddrSet& guid_addr_set,
+                  ClaimableGuidAddrSet& guid_addr_set,
                   const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
                   const CRYPTO_TYPE& crypto,
                   const ACE_INET_Addr& application_participant_addr,
@@ -233,11 +210,6 @@ public:
   void stop();
 
   void horizontal_handler(HorizontalHandler* horizontal_handler) { horizontal_handler_ = horizontal_handler; }
-
-  GuidAddrSet& guid_addr_set()
-  {
-    return guid_addr_set_;
-  }
 
   void venqueue_message(const ACE_INET_Addr& addr,
                         ParticipantStatisticsReporter& stats_reporter,
@@ -247,7 +219,7 @@ public:
 protected:
   typedef std::map<ACE_INET_Addr, GuidSet> AddressMap;
 
-  virtual bool do_normal_processing(GuidAddrSet::Proxy& /*proxy*/,
+  virtual bool do_normal_processing(Claim& /*claim*/,
                                     const ACE_INET_Addr& /*remote*/,
                                     const OpenDDS::DCPS::RepoId& /*src_guid*/,
                                     const GuidSet& /*to*/,
@@ -259,12 +231,12 @@ protected:
   CORBA::ULong process_message(const ACE_INET_Addr& remote,
                                const OpenDDS::DCPS::MonotonicTimePoint& now,
                                const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) override;
-  ParticipantStatisticsReporter& record_activity(GuidAddrSet::Proxy& proxy,
+  ParticipantStatisticsReporter& record_activity(Claim& claim,
                                                  const ACE_INET_Addr& remote_address,
                                                  const OpenDDS::DCPS::MonotonicTimePoint& now,
                                                  const OpenDDS::DCPS::RepoId& src_guid,
                                                  const size_t& msg_len);
-  CORBA::ULong send(GuidAddrSet::Proxy& proxy,
+  CORBA::ULong send(Claim& claim,
                     const OpenDDS::DCPS::RepoId& src_guid,
                     const StringSet& to_partitions,
                     const GuidSet& to_guids,
@@ -278,9 +250,7 @@ protected:
   void populate_address_set(AddressSet& address_set,
                             const StringSet& to_partitions);
 
-  const GuidPartitionTable& guid_partition_table_;
   const RelayPartitionTable& relay_partition_table_;
-  GuidAddrSet& guid_addr_set_;
   HorizontalHandler* horizontal_handler_;
   const ACE_INET_Addr application_participant_addr_;
 
@@ -309,6 +279,7 @@ public:
                              const std::string& name,
                              ACE_Reactor* reactor,
                              const GuidPartitionTable& guid_partition_table,
+                             ClaimableGuidAddrSet& guid_addr_set,
                              HandlerStatisticsReporter& stats_reporter);
 
   void vertical_handler(VerticalHandler* vertical_handler) { vertical_handler_ = vertical_handler; }
@@ -319,7 +290,6 @@ public:
                        const OpenDDS::DCPS::MonotonicTimePoint& now);
 
 private:
-  const GuidPartitionTable& guid_partition_table_;
   VerticalHandler* vertical_handler_;
   CORBA::ULong process_message(const ACE_INET_Addr& remote,
                                const OpenDDS::DCPS::MonotonicTimePoint& now,
@@ -334,7 +304,7 @@ public:
               ACE_Reactor* reactor,
               const GuidPartitionTable& guid_partition_table,
               const RelayPartitionTable& relay_partition_table,
-              GuidAddrSet& guid_addr_set,
+              ClaimableGuidAddrSet& guid_addr_set,
               const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
               const CRYPTO_TYPE& crypto,
               const ACE_INET_Addr& application_participant_addr,
@@ -360,7 +330,7 @@ private:
   StringSet replay_queue_;
   ACE_Thread_Mutex replay_queue_mutex_;
 
-  bool do_normal_processing(GuidAddrSet::Proxy& proxy,
+  bool do_normal_processing(Claim& claim,
                             const ACE_INET_Addr& remote,
                             const OpenDDS::DCPS::RepoId& src_guid,
                             const GuidSet& to,
@@ -381,7 +351,7 @@ public:
               ACE_Reactor* reactor,
               const GuidPartitionTable& guid_partition_table,
               const RelayPartitionTable& relay_partition_table,
-              GuidAddrSet& guid_addr_set,
+              ClaimableGuidAddrSet& guid_addr_set,
               const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
               const CRYPTO_TYPE& crypto,
               const ACE_INET_Addr& application_participant_addr,
@@ -398,7 +368,7 @@ public:
   }
 
 private:
-  bool do_normal_processing(GuidAddrSet::Proxy& proxy,
+  bool do_normal_processing(Claim& claim,
                             const ACE_INET_Addr& remote,
                             const OpenDDS::DCPS::RepoId& src_guid,
                             const GuidSet& to,
@@ -416,7 +386,7 @@ public:
               ACE_Reactor* reactor,
               const GuidPartitionTable& guid_partition_table,
               const RelayPartitionTable& relay_partition_table,
-              GuidAddrSet& guid_addr_set,
+              ClaimableGuidAddrSet& guid_addr_set,
               const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
               const CRYPTO_TYPE& crypto,
               HandlerStatisticsReporter& stats_reporter);

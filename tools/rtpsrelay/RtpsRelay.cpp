@@ -652,7 +652,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   const auto reactor = &reactor_;
   GuidPartitionTable guid_partition_table(config, relay_partitions_writer, relay_partitions_increment_writer, spdp_replay_writer);
   RelayPartitionTable relay_partition_table;
-  GuidAddrSet guid_addr_set(config, relay_statistics_reporter);
+  ClaimableGuidAddrSet guid_addr_set(GuidAddrSet(config, relay_statistics_reporter));
   relay_statistics_reporter.report();
 
   HandlerStatisticsReporter spdp_vertical_reporter(config, VSPDP, handler_statistics_writer, relay_statistics_reporter);
@@ -667,13 +667,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   HandlerStatisticsReporter spdp_horizontal_reporter(config, HSPDP, handler_statistics_writer, relay_statistics_reporter);
   spdp_horizontal_reporter.report();
-  HorizontalHandler spdp_horizontal_handler(config, HSPDP, reactor, guid_partition_table, spdp_horizontal_reporter);
+  HorizontalHandler spdp_horizontal_handler(config, HSPDP, reactor, guid_partition_table, guid_addr_set, spdp_horizontal_reporter);
   HandlerStatisticsReporter sedp_horizontal_reporter(config, HSEDP, handler_statistics_writer, relay_statistics_reporter);
   sedp_horizontal_reporter.report();
-  HorizontalHandler sedp_horizontal_handler(config, HSEDP, reactor, guid_partition_table, sedp_horizontal_reporter);
+  HorizontalHandler sedp_horizontal_handler(config, HSEDP, reactor, guid_partition_table, guid_addr_set, sedp_horizontal_reporter);
   HandlerStatisticsReporter data_horizontal_reporter(config, HDATA, handler_statistics_writer, relay_statistics_reporter);
   data_horizontal_reporter.report();
-  HorizontalHandler data_horizontal_handler(config, HDATA, reactor, guid_partition_table, data_horizontal_reporter);
+  HorizontalHandler data_horizontal_handler(config, HDATA, reactor, guid_partition_table, guid_addr_set, data_horizontal_reporter);
 
   spdp_horizontal_handler.vertical_handler(&spdp_vertical_handler);
   sedp_horizontal_handler.vertical_handler(&sedp_vertical_handler);
@@ -683,9 +683,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   sedp_vertical_handler.horizontal_handler(&sedp_horizontal_handler);
   data_vertical_handler.horizontal_handler(&data_horizontal_handler);
 
-  guid_addr_set.spdp_vertical_handler(&spdp_vertical_handler);
-  guid_addr_set.sedp_vertical_handler(&sedp_vertical_handler);
-  guid_addr_set.data_vertical_handler(&data_vertical_handler);
+  {
+    ClaimableGuidAddrSet::Claim claim(guid_addr_set);
+    claim->spdp_vertical_handler(&spdp_vertical_handler);
+    claim->sedp_vertical_handler(&sedp_vertical_handler);
+    claim->data_vertical_handler(&data_vertical_handler);
+  }
 
   DDS::Subscriber_var bit_subscriber = application_participant->get_builtin_subscriber();
 

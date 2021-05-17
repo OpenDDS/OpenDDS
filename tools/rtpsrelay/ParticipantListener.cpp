@@ -8,7 +8,7 @@
 namespace RtpsRelay {
 
 ParticipantListener::ParticipantListener(const Config& config,
-                                         GuidAddrSet& guid_addr_set,
+                                         ClaimableGuidAddrSet& guid_addr_set,
                                          OpenDDS::DCPS::DomainParticipantImpl* participant,
                                          DomainStatisticsReporter& stats_reporter)
   : config_(config)
@@ -47,7 +47,8 @@ void ParticipantListener::on_data_available(DDS::DataReader_ptr reader)
       if (info.valid_data) {
         const auto repoid = participant_->get_repoid(info.instance_handle);
 
-        guid_addr_set_.remove_pending(repoid);
+        ClaimableGuidAddrSet::Claim claim(guid_addr_set_);
+        claim->remove_pending(repoid);
 
         if (config_.log_discovery()) {
           ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: ParticipantListener::on_data_available add local participant %C %C\n"), guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str()));
@@ -61,7 +62,8 @@ void ParticipantListener::on_data_available(DDS::DataReader_ptr reader)
       {
         const auto repoid = participant_->get_repoid(info.instance_handle);
 
-        guid_addr_set_.remove(repoid);
+        ClaimableGuidAddrSet::Claim claim(guid_addr_set_);
+        claim->remove(repoid);
 
         if (config_.log_discovery()) {
           ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: ParticipantListener::on_data_available remove local participant %C\n"), guid_to_string(repoid).c_str()));
