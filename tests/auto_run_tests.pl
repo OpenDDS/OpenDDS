@@ -214,15 +214,15 @@ if ($list_configs) {
         }
     }
     for my $config (sort(keys(%configs))) {
-        print("$config\n");
+        print "$config\n";
     }
     exit(0);
 }
 
-if (!$query) {
-    print("Test Lists:" . join(',', @file_list) . "\n");
-    print("Configs: " . join(',', @PerlACE::ConfigList::Configs) . "\n");
-    print("Excludes: " . join(',', @PerlACE::ConfigList::Excludes) . "\n");
+if (!$list_tests) {
+    print "Test Lists:", join(',', @file_list), "\n");
+    print "Configs: ", join(',', @PerlACE::ConfigList::Configs), "\n";
+    print "Excludes: ", join(',', @PerlACE::ConfigList::Excludes), "\n";
 }
 
 foreach my $test_lst (@file_list) {
@@ -235,7 +235,7 @@ foreach my $test_lst (@file_list) {
 
     foreach my $test ($config_list->valid_entries()) {
         if ($list_tests) {
-            print("$test\n");
+            print "$test\n";
             next;
         }
 
