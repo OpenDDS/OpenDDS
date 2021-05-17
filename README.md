@@ -106,8 +106,8 @@ There are two distributions of ACE/TAO that can be used with OpenDDS:
   * When using the configure script, DOC Group ACE/TAO can be downloaded using
     one of these arguments:
     * `--doc-group` for the latest release
-    * `--ace-github-latest` to use the master branch of ACE/TAO as is. This
-      also downloads the master branch of MPC as is.
+    * `--ace-github-latest` to use the `ace6tao2` branch of ACE/TAO as is. This
+      also downloads the `master` branch of MPC as is.
   * Can be manually downloaded from:
     * https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-6_5_13
 
