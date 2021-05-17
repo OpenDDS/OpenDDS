@@ -77,6 +77,7 @@ string dds_generator::to_string(Identifier* id, EscapeContext ec)
     }
     break;
   case EscapeContext_FromGenIdl:
+  case EscapeContext_StripEscapes:
     if (id->escaped() && cxx_escaped(str)) {
       // If this is a C++ keyword that was inserted into generated IDL, the
       // "_cxx_" was stripped.

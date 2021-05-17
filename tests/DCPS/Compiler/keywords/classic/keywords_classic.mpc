@@ -1,4 +1,4 @@
-project: dcps_test, msvc_bigobj {
+project: dcps_test, googletest, msvc_bigobj {
   exename = keywords-classic
   includes += .
   macros += CPP11_MAPPING=0

@@ -60,12 +60,12 @@ module _case {
   struct _struct;
   @topic
   struct _struct {
-    @key long _union;
+    @key long _private;
   };
 
-  union _private;
+  union _union;
   @topic
-  union _private switch (@key long) {
+  union _union switch (@key long) {
     case 2: short _public;
   };
 };

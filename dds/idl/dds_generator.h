@@ -36,6 +36,8 @@ enum EscapeContext {
   EscapeContext_ForGenIdl,
   /// This is for a name coming from generated IDL. (Like *TypeSupportC.h)
   EscapeContext_FromGenIdl,
+  /// Strip any escapes
+  EscapeContext_StripEscapes,
   /// This is for everything else.
   EscapeContext_Normal,
 };
