@@ -115,7 +115,8 @@ struct DataReaderListenerImpl : public virtual OpenDDS::DCPS::LocalObject<DDS::D
   bool valid_data_seen;
 };
 
-int ACE_TMAIN(int argc, ACE_TCHAR *argv[]){
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+{
   try
   {
     DDS::DomainParticipantFactory_var dpf =

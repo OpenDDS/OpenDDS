@@ -4,8 +4,8 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Qos_Helper.h>
-#include "dds/DCPS/StaticIncludes.h"
-#include "dds/DCPS/unique_ptr.h"
+#include <dds/DCPS/StaticIncludes.h>
+#include <dds/DCPS/unique_ptr.h>
 
 #include "tests/Utils/ExceptionStreams.h"
 #include "tests/Utils/StatusMatching.h"
@@ -16,15 +16,16 @@
 #endif
 
 #include <ace/streams.h>
-#include "ace/Get_Opt.h"
-#include "ace/OS_NS_unistd.h"
+#include <ace/Get_Opt.h>
+#include <ace/OS_NS_unistd.h>
 
 #include <memory>
 
 using namespace Messenger;
 using namespace std;
 
-int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+{
   try
   {
     DDS::DomainParticipantFactory_var dpf =
