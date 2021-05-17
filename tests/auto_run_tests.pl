@@ -220,7 +220,7 @@ if ($list_configs) {
 }
 
 if (!$list_tests) {
-    print "Test Lists:", join(',', @file_list), "\n");
+    print "Test Lists:", join(',', @file_list), "\n";
     print "Configs: ", join(',', @PerlACE::ConfigList::Configs), "\n";
     print "Excludes: ", join(',', @PerlACE::ConfigList::Excludes), "\n";
 }
