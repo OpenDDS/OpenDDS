@@ -26,6 +26,7 @@ my $num_unlively_periods = 3;
 my $num_readers = 1;
 
 my $use_take = 0;
+my $dual = 0;
 
 my $test = new PerlDDS::TestFramework();
 my $app_bit_conf = ($test->{'transport'} eq 'udp') ? '-DCPSBit 0' : '';
@@ -35,6 +36,11 @@ if ($test->flag('take')) {
   $use_take = 1;
 }
 
+if ($test->flag('dual')) {
+  print "dual !!!!!\n";
+  $dual = 1;
+}
+
 $test->setup_discovery();
 $test->enable_console_logging();
 
@@ -42,8 +48,13 @@ my $common_parameters = $app_bit_conf
     . " -w $num_readers -m $multiple_instance"
     . " -l $num_unlively_periods -i $num_samples_per_reader";
 
-$test->process('sub', 'subscriber', $common_parameters . " -t $use_take");
-$test->process('pub', 'publisher', $common_parameters);
+if($dual == 1) {
+  $test->process('sub', 'dualsub', $common_parameters . " -t $use_take");
+  $test->process('pub', 'dualpub', $common_parameters);
+} else {
+  $test->process('sub', 'subscriber', $common_parameters . " -t $use_take");
+  $test->process('pub', 'publisher', $common_parameters);
+}
 
 $test->add_temporary_file('sub', $subscriber_completed);
 $test->add_temporary_file('sub', $subscriber_ready);
