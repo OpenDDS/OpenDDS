@@ -347,7 +347,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DDS::ConditionSeq conditions;
   DDS::Duration_t timeout = { 10, 0 };
-  const ReturnCode_t ret = ws->wait(conditions, timeout);
+  ReturnCode_t ret = ws->wait(conditions, timeout);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: %C condition wait failed for type %C: %C\n",
       expect_to_match ? "SUBSCRIPTION_MATCHED_STATUS" : "INCONSISTENT_TOPIC_STATUS", type.c_str(),
@@ -383,27 +383,27 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   //
   // As the subscriber is now about to exit, let the publisher know it can exit too
   //
-  ACE_DEBUG((LM_DEBUG,"Reader sending ack at %T\n"));
+  ACE_DEBUG((LM_DEBUG, "Reader sending ack at %T\n"));
 
   ControlStruct cs;
-  ReturnCode_t control_ret = control_typed_dw->write(cs, HANDLE_NIL);
-  if (control_ret != RETCODE_OK) {
+  ret = control_typed_dw->write(cs, HANDLE_NIL);
+  if (ret != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: control write returned %C\n",
       OpenDDS::DCPS::retcode_to_string(ret)));
     return 1;
   }
 
-  ACE_DEBUG((LM_DEBUG,"Reader waiting for echo at %T\n"));
+  ACE_DEBUG((LM_DEBUG, "Reader waiting for echo at %T\n"));
 
   ::ControlStructSeq control_data;
-  control_ret = read_i(control_dr, control_pdr, control_data, true);
-  if (control_ret != RETCODE_OK) {
+  ret = read_i(control_dr, control_pdr, control_data, true);
+  if (ret != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: control read returned %C\n",
-      OpenDDS::DCPS::retcode_to_string(control_ret)));
+      OpenDDS::DCPS::retcode_to_string(ret)));
     return 1;
   }
 
-  ACE_DEBUG((LM_DEBUG,"Reader cleanup at %T\n"));
+  ACE_DEBUG((LM_DEBUG, "Reader cleanup at %T\n"));
 
   topic = 0;
   dp->delete_contained_entities();

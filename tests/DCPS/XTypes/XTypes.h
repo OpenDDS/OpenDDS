@@ -112,7 +112,6 @@ ReturnCode_t read_i(const DataReader_var& dr, const T1& pdr, T2& data, bool igno
     ALIVE_INSTANCE_STATE);
   WaitSet_var ws = new WaitSet;
   ws->attach_condition(dr_rc);
-  std::set<int> instances;
 
   ConditionSeq active;
   const Duration_t max_wait = { 10, 0 };

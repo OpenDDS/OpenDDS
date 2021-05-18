@@ -343,8 +343,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   Topic_var echo_control_topic;
   ControlStructTypeSupport_var ack_control_ts = new ControlStructTypeSupportImpl;
   ControlStructTypeSupport_var echo_control_ts = new ControlStructTypeSupportImpl;
-  get_topic(ack_control_ts, dp, "SET_PD_OL_OA_OM_OD_Ack",ack_control_topic, "ControlStruct");
-  get_topic(echo_control_ts, dp, "SET_PD_OL_OA_OM_OD_Echo",echo_control_topic, "ControlStruct");
+  get_topic(ack_control_ts, dp, "SET_PD_OL_OA_OM_OD_Ack", ack_control_topic, "ControlStruct");
+  get_topic(echo_control_ts, dp, "SET_PD_OL_OA_OM_OD_Echo", echo_control_topic, "ControlStruct");
 
   Subscriber_var control_sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
                                                      DEFAULT_STATUS_MASK);
@@ -410,7 +410,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DDS::ConditionSeq conditions;
   DDS::Duration_t timeout = { 10, 0 };
-  const ReturnCode_t ret = ws->wait(conditions, timeout);
+  ReturnCode_t ret = ws->wait(conditions, timeout);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: %C condition wait failed for type %C: %C\n",
       expect_to_match ? "PUBLICATION_MATCHED_STATUS" : "INCONSISTENT_TOPIC_STATUS", type.c_str(),
@@ -454,23 +454,23 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   }
 
-  ACE_DEBUG((LM_DEBUG,"Writer waiting for ack at %T\n"));
+  ACE_DEBUG((LM_DEBUG, "Writer waiting for ack at %T\n"));
 
   ::ControlStructSeq control_data;
-  ReturnCode_t control_ret = read_i(control_dr, control_pdr, control_data);
-  if (control_ret != RETCODE_OK) {
+  ret = read_i(control_dr, control_pdr, control_data);
+  if (ret != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: control read returned %C\n",
       OpenDDS::DCPS::retcode_to_string(ret)));
     return 1;
   }
 
-  ACE_DEBUG((LM_DEBUG,"Writer sending echo at %T\n"));
+  ACE_DEBUG((LM_DEBUG, "Writer sending echo at %T\n"));
 
   ControlStruct cs;
-  control_ret = control_typed_dw->write(cs, HANDLE_NIL);
-  if (control_ret != RETCODE_OK) {
+  ret = control_typed_dw->write(cs, HANDLE_NIL);
+  if (ret != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: control write returned %C\n",
-      OpenDDS::DCPS::retcode_to_string(control_ret)));
+      OpenDDS::DCPS::retcode_to_string(ret)));
     return 1;
   }
 
@@ -481,19 +481,23 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DDS::Duration_t p = { 5, 0 };
   DDS::PublicationMatchedStatus pms;
   control_dw->get_publication_matched_status(pms);
-  ACE_DEBUG((LM_DEBUG, "count of subs = %d change count = %d at %T\n", pms.current_count, pms.current_count_change));
-  for (int retries = 3; retries > 0 && pms.current_count > 0; retries-- ) {
+  for (int retries = 3; retries > 0 && pms.current_count > 0; --retries) {
     conditions.length(0);
-    control_ret = ws->wait(conditions, p);
+    ret = ws->wait(conditions, p);
+    if (ret != RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "ERROR: wait on control_dw condition returned %C\n",
+        OpenDDS::DCPS::retcode_to_string(ret)));
+      return 1;
+    }
     control_dw->get_publication_matched_status(pms);
-    ACE_DEBUG((LM_DEBUG, "count of subs = %d change count = %d with retcode = %C at %T\n",
-               pms.current_count, pms.current_count_change,
-               OpenDDS::DCPS::retcode_to_string(control_ret)));
   }
-  ws->detach_condition (condition);
+  if (pms.current_count > 0) {
+    ACE_DEBUG((LM_DEBUG, "Data reader shutdown not detected at %T\n"));
+  }
+  ws->detach_condition(condition);
 
   topic = 0;
-  ACE_DEBUG((LM_DEBUG,"Writer cleanup at %T\n"));
+  ACE_DEBUG((LM_DEBUG, "Writer cleanup at %T\n"));
 
   dp->delete_contained_entities();
   dpf->delete_participant(dp);
