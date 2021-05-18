@@ -186,8 +186,8 @@ This release of OpenDDS has been tested using the following compilers:
 * gcc 4.4.7, 4.8.5
 * gcc 6.3
 * gcc 7.2
-* gcc 10.2
-* Clang 11.0.1 (llvm.org) and 11.0.3 (Apple)
+* gcc 11.1
+* Clang 12.0.1 (llvm.org) and 11.0.3 (Apple)
 
 ## Building and Installing
 
