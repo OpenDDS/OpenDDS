@@ -1,4 +1,4 @@
-project: dcps_test, opendds_cxx11, msvc_bigobj {
+project: dcps_test, opendds_cxx11, googletest, msvc_bigobj {
   exename = keywords-cpp11
   includes += .
   macros += CPP11_MAPPING=1
