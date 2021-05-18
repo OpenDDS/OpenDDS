@@ -237,8 +237,27 @@ tests/DCPS/EntityLifecycleStress/run_test.pl rtps_disc publishers 10 subscribers
 tests/DCPS/LivelinessKeepAliveTest/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/LivelinessTimeout/run_test.pl: !DCPS_MIN !GH_ACTIONS
 tests/DCPS/LivelinessTimeout/run_test.pl rtps_disc: !DCPS_MIN RTPS
-tests/DCPS/UnitTests/run_test.pl: !DCPS_MIN !GH_ACTIONS
-tests/unit-tests/dds/DCPS/run_test_unit.pl: !DCPS_MIN !GH_ACTIONS
+tests/DCPS/BitDataReader/run_test.pl: !DCPS_MIN !GH_ACTIONS
+
+tests/run_test.pl unit-tests/dds/DCPS/transport/framework/UnitTests_TransportReassembly: !DCPS_MIN !GH_ACTIONS
+tests/run_test.pl unit-tests/dds/DCPS/UnitTests_Qos_Helper: !DCPS_MIN !GH_ACTIONS
+tests/run_test.pl unit-tests/dds/DCPS/UnitTests_JsonValueWriter: !DCPS_MIN !GH_ACTIONS
+tests/run_test.pl unit-tests/dds/DCPS/UnitTests_SequenceNumber: !DCPS_MIN !GH_ACTIONS
+tests/run_test.pl unit-tests/dds/DCPS/RTPS/UnitTests_ParameterListConverter: !DCPS_MIN !GH_ACTIONS
+tests/run_test.pl unit-tests/dds/DCPS/RTPS/UnitTests_BaseMessageUtils: !DCPS_MIN !GH_ACTIONS
+tests/run_test.pl unit-tests/dds/DCPS/UnitTests_GuidGenerator: !DCPS_MIN !GH_ACTIONS
+tests/run_test.pl unit-tests/dds/DCPS/UnitTests_DataSampleHeader: !DCPS_MIN !GH_ACTIONS
+tests/run_test.pl unit-tests/dds/DCPS/UnitTests_NetworkConfigModifier: !DCPS_MIN !GH_ACTIONS
+tests/run_test.pl unit-tests/dds/DCPS/UnitTests_Serializer: !DCPS_MIN !GH_ACTIONS
+tests/run_test.pl unit-tests/dds/DCPS/XTypes/UnitTests_TypeAssignability: !DCPS_MIN !GH_ACTIONS
+tests/run_test.pl unit-tests/dds/DCPS/UnitTests_JsonValueReader: !DCPS_MIN !GH_ACTIONS
+tests/run_test.pl unit-tests/dds/DCPS/UnitTests_DisjointSequence: !DCPS_MIN !GH_ACTIONS
+tests/run_test.pl unit-tests/dds/DCPS/UnitTests_Time_Helper: !DCPS_MIN !GH_ACTIONS
+tests/run_test.pl unit-tests/dds/DCPS/UnitTests_GuidUtils: !DCPS_MIN !GH_ACTIONS
+tests/run_test.pl unit-tests/dds/DCPS/UnitTests_DomainParticipantImpl: !DCPS_MIN !GH_ACTIONS
+
+tests/run_test.pl stress-tests/dds/DCPS/StressTests_MultiTask: !DCPS_MIN !GH_ACTIONS
+
 tests/DCPS/KeyTest/run_test.pl keymarshalling: !DCPS_MIN
 tests/DCPS/KeyTest/run_test.pl isbounded: !DCPS_MIN
 tests/DCPS/KeyTest/run_test.pl md5: !DCPS_MIN

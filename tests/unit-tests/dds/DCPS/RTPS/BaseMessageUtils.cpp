@@ -5,7 +5,9 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "../common/TestSupport.h"
+#include <ace/OS_main.h>
+
+#include "dds/DCPS/Service_Participant.h"
 
 #include <dds/DCPS/DataSampleHeader.h>
 #include <dds/DCPS/RepoIdBuilder.h>
@@ -16,9 +18,11 @@
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h>
+#include <dds/DCPS/RTPS/BaseMessageUtils.h>
 
-#include <ace/OS_main.h>
+#include "../../../../DCPS/common/TestSupport.h"
 
+#include <iostream>
 #include <cstring>
 
 using namespace OpenDDS::DCPS;
@@ -67,11 +71,38 @@ void matches(const DataFragSubmessage& df, const DataFragSubmessage& expected)
 
 int ACE_TMAIN(int, ACE_TCHAR*[])
 {
-  Fragments before_fragmentation;
-  const size_t N = 3000;
+  const VendorId_t SomeoneElse = { { '\x04', '\x02' } };
 
   try
   {
+    {
+      Duration_t duration = { 7, 0x80000000 };
+      TimeDuration result = rtps_duration_to_time_duration(duration, PROTOCOLVERSION_2_4, VENDORID_OPENDDS);
+      TEST_CHECK(result.value().sec() == 7);
+      TEST_CHECK(result.value().usec() == 500000);
+    }
+    {
+      Duration_t duration = { 0, 0x10000000 };
+      TimeDuration result = rtps_duration_to_time_duration(duration, PROTOCOLVERSION_2_4, VENDORID_OPENDDS);
+      TEST_CHECK(result.value().sec() == 0);
+      TEST_CHECK(result.value().usec() == 62500);
+    }
+    {
+      Duration_t duration = { 0, 0x08000000 };
+      TimeDuration result = rtps_duration_to_time_duration(duration, PROTOCOLVERSION_2_3, SomeoneElse);
+      TEST_CHECK(result.value().sec() == 0);
+      TEST_CHECK(result.value().usec() == 31250);
+    }
+    {
+      Duration_t duration = { 0, 967000 };
+      TimeDuration result = rtps_duration_to_time_duration(duration, PROTOCOLVERSION_2_3, VENDORID_OPENDDS);
+      TEST_CHECK(result.value().sec() == 0);
+      TEST_CHECK(result.value().usec() == 967);
+    }
+
+    Fragments before_fragmentation;
+    const size_t N = 3000;
+
     // Create pre-fragmented headers
     {
       const InfoTimestampSubmessage ts = {
@@ -146,7 +177,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
       Fragments f2;
       const SequenceRange sr2 =
         RtpsSampleHeader::split(*before_fragmentation.tail_,
-          N / 2, f2.head_, f2.tail_);
+                                N / 2, f2.head_, f2.tail_);
 
       // Check results
       TEST_CHECK(sr2.first == 2 && sr2.second == 3);
@@ -177,10 +208,213 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
         TEST_CHECK(f2.tail_->cont() && f2.tail_->cont()->length() == N - 2 * 1024);
       }
     }
+
+
+    // Test an empty bitmap sequence / zero numbits
+
+    {
+      SequenceNumberSet sns;
+      sns.numBits = 0;
+      sns.bitmap.length(0);
+      TEST_CHECK(bitmapNonEmpty(sns) == false);
+    }
+
+    // Test a bitmap of one unsigned long
+
+    // Test empty maps
+
+    {
+      SequenceNumberSet sns;
+      sns.numBits = 0;
+      sns.bitmap.length(1); // this is not necessarily invalid, could be left over from reducing numBits
+      sns.bitmap[0] = 0xFFFFFFFF;
+      TEST_CHECK(bitmapNonEmpty(sns) == false);
+    }
+
+    {
+      SequenceNumberSet sns;
+      sns.numBits = 1;
+      sns.bitmap.length(1);
+      sns.bitmap[0] = 0x7FFFFFFF;
+      TEST_CHECK(bitmapNonEmpty(sns) == false);
+    }
+
+    {
+      SequenceNumberSet sns;
+      sns.numBits = 16;
+      sns.bitmap.length(1);
+      sns.bitmap[0] = 0x0000FFFF;
+      TEST_CHECK(bitmapNonEmpty(sns) == false);
+    }
+
+    {
+      SequenceNumberSet sns;
+      sns.numBits = 31;
+      sns.bitmap.length(1);
+      sns.bitmap[0] = 0x00000001;
+      TEST_CHECK(bitmapNonEmpty(sns) == false);
+    }
+
+    // Test non-empty maps
+
+    {
+      SequenceNumberSet sns;
+      sns.numBits = 1;
+      sns.bitmap.length(1);
+      sns.bitmap[0] = 0x80000000;
+      TEST_CHECK(bitmapNonEmpty(sns) == true);
+    }
+
+    {
+      SequenceNumberSet sns;
+      sns.numBits = 16;
+      sns.bitmap.length(1);
+      sns.bitmap[0] = 0x80000000;
+      TEST_CHECK(bitmapNonEmpty(sns) == true);
+    }
+
+    {
+      SequenceNumberSet sns;
+      sns.numBits = 16;
+      sns.bitmap.length(1);
+      sns.bitmap[0] = 0x00010000;
+      TEST_CHECK(bitmapNonEmpty(sns) == true);
+    }
+
+    {
+      SequenceNumberSet sns;
+      sns.numBits = 32;
+      sns.bitmap.length(1);
+      sns.bitmap[0] = 0x80000000;
+      TEST_CHECK(bitmapNonEmpty(sns) == true);
+    }
+
+    {
+      SequenceNumberSet sns;
+      sns.numBits = 32;
+      sns.bitmap.length(1);
+      sns.bitmap[0] = 0x00010000;
+      TEST_CHECK(bitmapNonEmpty(sns) == true);
+    }
+
+    {
+      SequenceNumberSet sns;
+      sns.numBits = 32;
+      sns.bitmap.length(1);
+      sns.bitmap[0] = 0x00000001;
+      TEST_CHECK(bitmapNonEmpty(sns) == true);
+    }
+
+    // Test a bitmap of more than one unsigned long
+
+    // Test empty maps
+
+    {
+      SequenceNumberSet sns;
+      sns.numBits = 32;
+      sns.bitmap.length(2); // this is not necessarily invalid, could be left over from reducing numBits
+      sns.bitmap[0] = 0x0;
+      sns.bitmap[1] = 0xFFFFFFFF;
+      TEST_CHECK(bitmapNonEmpty(sns) == false);
+    }
+
+    {
+      SequenceNumberSet sns;
+      sns.numBits = 33;
+      sns.bitmap.length(2);
+      sns.bitmap[0] = 0x0;
+      sns.bitmap[1] = 0x7FFFFFFF;
+      TEST_CHECK(bitmapNonEmpty(sns) == false);
+    }
+
+    {
+      SequenceNumberSet sns;
+      sns.numBits = 48;
+      sns.bitmap.length(2);
+      sns.bitmap[0] = 0x0;
+      sns.bitmap[1] = 0x0000FFFF;
+      TEST_CHECK(bitmapNonEmpty(sns) == false);
+    }
+
+    {
+      SequenceNumberSet sns;
+      sns.numBits = 63;
+      sns.bitmap.length(2);
+      sns.bitmap[0] = 0x0;
+      sns.bitmap[1] = 0x00000001;
+      TEST_CHECK(bitmapNonEmpty(sns) == false);
+    }
+
+    // Test non-empty maps
+
+    {
+      SequenceNumberSet sns;
+      sns.numBits = 32;
+      sns.bitmap.length(2);
+      sns.bitmap[0] = 0x80000000;
+      sns.bitmap[1] = 0x0;
+      TEST_CHECK(bitmapNonEmpty(sns) == true);
+    }
+
+    {
+      SequenceNumberSet sns;
+      sns.numBits = 33;
+      sns.bitmap.length(2);
+      sns.bitmap[0] = 0x0;
+      sns.bitmap[1] = 0x80000000;
+      TEST_CHECK(bitmapNonEmpty(sns) == true);
+    }
+
+    {
+      SequenceNumberSet sns;
+      sns.numBits = 48;
+      sns.bitmap.length(2);
+      sns.bitmap[0] = 0x0;
+      sns.bitmap[1] = 0x80000000;
+      TEST_CHECK(bitmapNonEmpty(sns) == true);
+    }
+
+    {
+      SequenceNumberSet sns;
+      sns.numBits = 48;
+      sns.bitmap.length(2);
+      sns.bitmap[0] = 0x0;
+      sns.bitmap[1] = 0x00010000;
+      TEST_CHECK(bitmapNonEmpty(sns) == true);
+    }
+
+    {
+      SequenceNumberSet sns;
+      sns.numBits = 64;
+      sns.bitmap.length(2);
+      sns.bitmap[0] = 0x0;
+      sns.bitmap[1] = 0x80000000;
+      TEST_CHECK(bitmapNonEmpty(sns) == true);
+    }
+
+    {
+      SequenceNumberSet sns;
+      sns.numBits = 64;
+      sns.bitmap.length(2);
+      sns.bitmap[0] = 0x0;
+      sns.bitmap[1] = 0x00010000;
+      TEST_CHECK(bitmapNonEmpty(sns) == true);
+    }
+
+    {
+      SequenceNumberSet sns;
+      sns.numBits = 64;
+      sns.bitmap.length(2);
+      sns.bitmap[0] = 0x0;
+      sns.bitmap[1] = 0x00000001;
+      TEST_CHECK(bitmapNonEmpty(sns) == true);
+    }
+
   }
-  catch (const CORBA::BAD_PARAM& ex) {
-    ex._tao_print_exception("Exception caught in RtpsFragmentation.cpp:");
+  catch (...) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Exception Caught")));
     return 1;
   }
+
   return 0;
 }

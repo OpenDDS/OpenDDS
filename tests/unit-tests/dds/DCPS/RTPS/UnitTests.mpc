@@ -1,0 +1,15 @@
+project(*BaseMessageUtils): dcpsexe, dcps_test, dcps_rtps_udp {
+  exename   = *
+
+  Source_Files {
+    BaseMessageUtils.cpp
+  }
+}
+
+project(*ParameterListConverter): dcps_rtpsexe, dcps_test {
+  exename   = *
+
+  Source_Files {
+    ParameterListConverter.cpp
+  }
+}

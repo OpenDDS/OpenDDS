@@ -1,0 +1,7 @@
+project(*TransportReassembly): dcpsexe, dcps_test {
+  exename   = *
+
+  Source_Files {
+    TransportReassembly.cpp
+  }
+}

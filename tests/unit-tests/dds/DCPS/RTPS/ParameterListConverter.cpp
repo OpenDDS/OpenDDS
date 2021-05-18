@@ -7,7 +7,7 @@
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 #include "ace/OS_main.h"
 #include "dds/DCPS/RTPS/ParameterListConverter.h"
-#include "../common/TestSupport.h"
+#include "../../../../DCPS/common/TestSupport.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/GuidBuilder.h"
 #include "dds/DCPS/Service_Participant.h"

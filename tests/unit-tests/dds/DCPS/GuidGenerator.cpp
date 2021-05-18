@@ -10,7 +10,7 @@
 #include "dds/DCPS/RTPS/GuidGenerator.h"
 #include "dds/DCPS/GuidConverter.h"
 
-#include "../common/TestSupport.h"
+#include "../../../DCPS/common/TestSupport.h"
 
 using namespace OpenDDS::RTPS;
 using namespace OpenDDS::DCPS;

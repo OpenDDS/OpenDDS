@@ -11,7 +11,7 @@
 #include "dds/DCPS/MultiTask.h"
 #include "dds/DCPS/ReactorTask.h"
 
-#include "../common/TestSupport.h"
+#include "../../../DCPS/common/TestSupport.h"
 
 using namespace OpenDDS::DCPS;
 

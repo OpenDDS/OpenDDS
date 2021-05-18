@@ -11,7 +11,7 @@
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/TimeTypes.h"
 
-#include "../common/TestSupport.h"
+#include "../../../DCPS/common/TestSupport.h"
 
 #include <iostream>
 
@@ -70,6 +70,16 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK (tv.sec() == duration.sec  + (time_t)(duration.nanosec/1000/ACE_ONE_SECOND_IN_USECS));
     TEST_CHECK (tv.usec() == (suseconds_t)(duration.nanosec/1000%ACE_ONE_SECOND_IN_USECS));
     TEST_CHECK (tv < ACE_Time_Value::max_time);
+  }
+  {
+    DDS::Time_t tt1 = {3,1};
+    DDS::Time_t tt2 = {1,3};
+    DDS::Duration_t result1 = tt2 - tt1;
+    DDS::Duration_t result2 = tt1 - tt2;
+    // std::cout << "tt2 - tt1 : " << result1.sec << " : " << result1.nanosec  << std::endl;
+    // std::cout << "tt1 - tt2 : " << result2.sec << " : " << result2.nanosec << std::endl;
+    TEST_CHECK (result1.sec == -2 && result1.nanosec == 2);
+    TEST_CHECK (result2.sec == 1 && result2.nanosec == 999999998);
   }
   return 0;
 }

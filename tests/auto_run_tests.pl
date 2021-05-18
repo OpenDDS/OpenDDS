@@ -73,9 +73,13 @@ foreach my $test_lst (@file_list) {
         ## scoreboard matrix to read things correctly
         $test =~ s!/./!/!g;
 
-        if ($test =~ /(.*)\/([^\/]*)$/) {
+        my @tokens = split / /, $test;
+        my $progname = shift @tokens;
+
+        if ($progname =~ /(.*)\/([^\/]*)$/) {
             $directory = $1;
-            $program = $2;
+            push(@tokens, ($2));
+            $program = join ' ', @tokens;
         }
         else {
             $program = $test;

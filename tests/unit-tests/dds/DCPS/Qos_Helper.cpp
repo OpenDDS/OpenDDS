@@ -8,7 +8,7 @@
  */
 // ============================================================================
 
-#include "../common/TestSupport.h"
+#include "../../../DCPS/common/TestSupport.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/Definitions.h"

@@ -1,0 +1,6 @@
+project(*TypeAssignability): dcps_test, googletest {
+  exename = *
+  Source_Files {
+    TypeAssignability.cpp
+  }
+}

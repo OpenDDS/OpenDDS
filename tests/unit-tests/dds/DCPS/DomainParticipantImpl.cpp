@@ -1,6 +1,6 @@
 
 #include "ace/OS_main.h"
-#include "../common/TestSupport.h"
+#include "../../../DCPS/common/TestSupport.h"
 #include "dds/DCPS/DomainParticipantImpl.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/GuidUtils.h"

@@ -9,7 +9,7 @@
 
 #include "dds/DCPS/DisjointSequence.h"
 
-#include "../common/TestSupport.h"
+#include "../../../DCPS/common/TestSupport.h"
 
 #include <stdexcept>
 

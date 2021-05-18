@@ -10,7 +10,7 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/SequenceNumber.h"
 
-#include "../common/TestSupport.h"
+#include "../../../DCPS/common/TestSupport.h"
 
 using namespace OpenDDS::DCPS;
 
