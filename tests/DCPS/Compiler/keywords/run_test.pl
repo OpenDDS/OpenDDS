@@ -11,7 +11,6 @@ use PerlDDS::Run_Test;
 
 my $kind = $ARGV[0];
 my $path = "$kind/keywords-$kind";
-die("ERROR: Invalid argument. Pass classic or cpp11.") if (!-f $path);
 
 my $test = new PerlDDS::TestFramework();
 $test->process('test', $path);
