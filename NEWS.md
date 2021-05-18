@@ -1,7 +1,7 @@
 # OpenDDS Releases
 
 ## Version 3.17.0 of OpenDDS
-OpenDDS 3.17.0 is currently in development, so this list might change.
+OpenDDS 3.17.0 was released on May 18 2021.
 
 ### Additions:
 - Support for converting samples to and from JSON (#2312)
