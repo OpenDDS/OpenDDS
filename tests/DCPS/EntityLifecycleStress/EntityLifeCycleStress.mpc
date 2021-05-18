@@ -1,0 +1,15 @@
+project(DDS*Publisher) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
+  exename = publisher
+
+  Source_Files {
+    publisher.cpp
+  }
+}
+
+project(DDS*Subscriber) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
+  exename = subscriber
+
+  Source_Files {
+    subscriber.cpp
+  }
+}
