@@ -40,7 +40,7 @@ typedef OPENDDS_VECTOR(HostnameInfo) HostnameInfoVector;
  */
 struct OpenDDS_Dcps_Export NetworkAddress {
   NetworkAddress();
-  explicit NetworkAddress(const ACE_INET_Addr& addr, bool use_hostname = false);
+  explicit NetworkAddress(const ACE_INET_Addr& addr);
   explicit NetworkAddress(const OPENDDS_STRING& addr);
 
   ~NetworkAddress();
@@ -87,7 +87,13 @@ extern OpenDDS_Dcps_Export
 bool open_appropriate_socket_type(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& local_address, int* proto_family = 0);
 
 extern OpenDDS_Dcps_Export
+ACE_INET_Addr choose_single_coherent_address(const OPENDDS_VECTOR(ACE_INET_Addr)& addrs, bool prefer_loopback = true, const std::string& name = std::string());
+
+extern OpenDDS_Dcps_Export
 ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& addr, bool prefer_loopback = true);
+
+extern OpenDDS_Dcps_Export
+ACE_INET_Addr choose_single_coherent_address(const OPENDDS_STRING& hostname, bool prefer_loopback = true);
 
 } // namespace DCPS
 } // namespace OpenDDS
