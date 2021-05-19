@@ -2048,6 +2048,7 @@ my $skip_doxygen = 0;
 my $skip_website = 0;
 my $skip_ftp = 0;
 my $ftp_active = 0;
+my $ftp_port = 0;
 
 GetOptions(
   'help' => \$print_help,
@@ -2068,6 +2069,7 @@ GetOptions(
   'skip-website' => \$skip_website ,
   'skip-ftp' => \$skip_ftp,
   'ftp-active' => \$ftp_active,
+  'ftp-port=s' => \$ftp_port,
 ) or die "See --help for options.\nStopped";
 
 if (!(scalar(@ARGV) == 0 || scalar(@ARGV) == 2)) {
@@ -2166,7 +2168,7 @@ my %global_settings = (
     tar_dox      => "${base_name}-doxygen.tar",
     tgz_dox      => "${base_name}-doxygen.tar.gz",
     zip_dox      => "${base_name}-doxygen.zip",
-    devguide_ver => "${base_name}.pdf",
+    devguide_ver => "${base_name_prefix}$parsed_version{release_string}.pdf",
     devguide_lat => "${base_name_prefix}latest.pdf",
     timestamp    => $release_timestamp,
     git_url      => "git\@github.com:${github_user}/${repo_name}.git",
@@ -2194,6 +2196,7 @@ my %global_settings = (
     release_flag_file_path => "$workspace/$release_flag_filename",
     release_flag_file_exists => 0,
     ftp_active => $ftp_active,
+    ftp_port => $ftp_port,
 );
 
 if (verify_release_flag_file(\%global_settings)) {

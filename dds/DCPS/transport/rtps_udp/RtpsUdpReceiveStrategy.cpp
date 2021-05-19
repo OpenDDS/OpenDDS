@@ -328,7 +328,7 @@ bool RtpsUdpReceiveStrategy::check_encoded(const EntityId_t& sender)
 
 void
 RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
-                                       const ACE_INET_Addr& /*remote_address*/)
+                                       const ACE_INET_Addr& remote_address)
 {
   using namespace RTPS;
 
@@ -362,7 +362,7 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
   encoded_submsg_ = false;
 #endif
 
-  deliver_sample_i(sample, rsh.submessage_);
+  deliver_sample_i(sample, rsh.submessage_, remote_address);
 }
 
 void
@@ -375,7 +375,8 @@ RtpsUdpReceiveStrategy::finish_message()
 
 void
 RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
-                                         const RTPS::Submessage& submessage)
+                                         const RTPS::Submessage& submessage,
+                                         const ACE_INET_Addr& remote_addr)
 {
   using namespace RTPS;
   const SubmessageKind kind = submessage._d();
@@ -418,7 +419,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     // If this sample should be withheld from some readers in order to maintain
     // in-order delivery, link_->received() will add it to readers_withheld_ otherwise
     // it will be added to readers_selected_
-    link_->received(data, receiver_.source_guid_prefix_);
+    link_->received(data, receiver_.source_guid_prefix_, remote_addr);
     recvd_sample_ = 0;
 
     link_->filterBestEffortReaders(sample, readers_selected_, readers_withheld_);
@@ -506,7 +507,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
       }
       break;
     }
-    link_->received(submessage.gap_sm(), receiver_.source_guid_prefix_, receiver_.directed_);
+    link_->received(submessage.gap_sm(), receiver_.source_guid_prefix_, receiver_.directed_, remote_addr);
     break;
 
   case HEARTBEAT:
@@ -516,7 +517,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
       }
       break;
     }
-    link_->received(submessage.heartbeat_sm(), receiver_.source_guid_prefix_, receiver_.directed_);
+    link_->received(submessage.heartbeat_sm(), receiver_.source_guid_prefix_, receiver_.directed_, remote_addr);
     if (submessage.heartbeat_sm().smHeader.flags & FLAG_L) {
       // Liveliness has been asserted.  Create a DATAWRITER_LIVELINESS message.
       sample.header_.message_id_ = DATAWRITER_LIVELINESS;
@@ -533,8 +534,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
       }
       break;
     }
-    link_->received(submessage.acknack_sm(),
-                    receiver_.source_guid_prefix_);
+    link_->received(submessage.acknack_sm(), receiver_.source_guid_prefix_, remote_addr);
     break;
 
   case HEARTBEAT_FRAG:
@@ -544,7 +544,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
       }
       break;
     }
-    link_->received(submessage.hb_frag_sm(), receiver_.source_guid_prefix_, receiver_.directed_);
+    link_->received(submessage.hb_frag_sm(), receiver_.source_guid_prefix_, receiver_.directed_, remote_addr);
     break;
 
   case NACK_FRAG:
@@ -554,8 +554,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
       }
       break;
     }
-    link_->received(submessage.nack_frag_sm(),
-                    receiver_.source_guid_prefix_);
+    link_->received(submessage.nack_frag_sm(), receiver_.source_guid_prefix_, remote_addr);
     break;
 
   /* no case DATA_FRAG: by the time deliver_sample() is called, reassemble()
@@ -568,7 +567,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     break;
 
   case SEC_POSTFIX:
-    deliver_from_secure(submessage);
+    deliver_from_secure(submessage, remote_addr);
     break;
 #endif
 
@@ -579,7 +578,8 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
 
 #ifdef OPENDDS_SECURITY
 void
-RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
+RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage,
+                                            const ACE_INET_Addr& remote_addr)
 {
   using namespace DDS::Security;
 
@@ -590,9 +590,7 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
     return;
   }
 
-  RepoId peer;
-  assign(peer.guidPrefix, receiver_.source_guid_prefix_);
-  peer.entityId = ENTITYID_PARTICIPANT;
+  const RepoId peer = make_id(receiver_.source_guid_prefix_, ENTITYID_PARTICIPANT);
   const ParticipantCryptoHandle peer_pch = link_->handle_registry()->get_remote_participant_crypto_handle(peer);
 
   DDS::OctetSeq encoded_submsg, plain_submsg;
@@ -675,7 +673,7 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
             message_.submessages.length(message_.submessages.length() - 3);
             DCPS::push_back(message_.submessages, rsh.submessage_);
           }
-          deliver_sample_i(plain_sample, rsh.submessage_);
+          deliver_sample_i(plain_sample, rsh.submessage_, remote_addr);
           return;
         }
       }
@@ -685,7 +683,7 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage)
         message_.submessages.length(message_.submessages.length() - 3);
         DCPS::push_back(message_.submessages, rsh.submessage_);
       }
-      deliver_sample_i(plain_sample, rsh.submessage_);
+      deliver_sample_i(plain_sample, rsh.submessage_, remote_addr);
     }
   }
 }

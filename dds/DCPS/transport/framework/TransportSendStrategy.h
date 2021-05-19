@@ -313,7 +313,7 @@ public:
 protected:
   /// Implement framework chain visitations to remove a sample.
   virtual RemoveResult do_remove_sample(const RepoId& pub_id,
-    const TransportQueueElement::MatchCriteria& criteria);
+    const TransportQueueElement::MatchCriteria& criteria, bool remove_all = false);
 
 private:
 

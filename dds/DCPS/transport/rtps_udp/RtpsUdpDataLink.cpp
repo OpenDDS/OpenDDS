@@ -537,29 +537,30 @@ RtpsUdpDataLink::leave_multicast_group(const NetworkInterface& nic)
 
 void
 RtpsUdpDataLink::add_locators(const RepoId& remote_id,
-                              const ACE_INET_Addr& narrow_address,
-                              const ACE_INET_Addr& wide_address,
+                              const AddrSet& unicast_addresses,
+                              const AddrSet& multicast_addresses,
                               bool requires_inline_qos)
 {
-  if (narrow_address == ACE_INET_Addr()) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::add_locators: narrow_address for %C is empty\n"), LogGuid(remote_id).c_str()));
-    return;
-  }
-
-  if (wide_address == ACE_INET_Addr()) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::add_locators: wide_address for %C is empty\n"), LogGuid(remote_id).c_str()));
-    return;
+  if (unicast_addresses.empty() && multicast_addresses.empty()) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::add_locators: no addresses for %C\n"), LogGuid(remote_id).c_str()));
   }
 
   ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
-  locators_[remote_id] = RemoteInfo(narrow_address, wide_address, requires_inline_qos);
+  locators_[remote_id] = RemoteInfo(unicast_addresses, multicast_addresses, requires_inline_qos);
 
   if (DCPS_debug_level > 3) {
-    ACE_TCHAR narrow_addr_buff[256] = {};
-    narrow_address.addr_to_string(narrow_addr_buff, 256);
-    ACE_TCHAR wide_addr_buff[256] = {};
-    wide_address.addr_to_string(wide_addr_buff, 256);
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::add_locators %C is now at %s and %s\n"), LogGuid(remote_id).c_str(), narrow_addr_buff, wide_addr_buff));
+    for (AddrSet::const_iterator pos = unicast_addresses.begin(), limit = unicast_addresses.end();
+         pos != limit; ++pos) {
+      ACE_TCHAR addr_buff[256] = {};
+      pos->addr_to_string(addr_buff, 256);
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::add_locators %C is now at %s\n"), LogGuid(remote_id).c_str(), addr_buff));
+    }
+    for (AddrSet::const_iterator pos = multicast_addresses.begin(), limit = multicast_addresses.end();
+         pos != limit; ++pos) {
+      ACE_TCHAR addr_buff[256] = {};
+      pos->addr_to_string(addr_buff, 256);
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::add_locators %C is now at %s\n"), LogGuid(remote_id).c_str(), addr_buff));
+    }
   }
 }
 
@@ -692,7 +693,7 @@ RtpsUdpDataLink::disassociated(const RepoId& local_id,
 void
 RtpsUdpDataLink::register_for_reader(const RepoId& writerid,
                                      const RepoId& readerid,
-                                     const ACE_INET_Addr& address,
+                                     const AddrSet& addresses,
                                      DiscoveryListener* listener)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_);
@@ -700,7 +701,7 @@ RtpsUdpDataLink::register_for_reader(const RepoId& writerid,
   interesting_readers_.insert(
     InterestingRemoteMapType::value_type(
       readerid,
-      InterestingRemote(writerid, address, listener)));
+      InterestingRemote(writerid, addresses, listener)));
   if (heartbeat_counts_.find(writerid.entityId) == heartbeat_counts_.end()) {
     heartbeat_counts_[writerid.entityId] = 0;
   }
@@ -730,7 +731,7 @@ RtpsUdpDataLink::unregister_for_reader(const RepoId& writerid,
 void
 RtpsUdpDataLink::register_for_writer(const RepoId& readerid,
                                      const RepoId& writerid,
-                                     const ACE_INET_Addr& address,
+                                     const AddrSet& addresses,
                                      DiscoveryListener* listener)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
@@ -738,7 +739,7 @@ RtpsUdpDataLink::register_for_writer(const RepoId& readerid,
   interesting_writers_.insert(
     InterestingRemoteMapType::value_type(
       writerid,
-      InterestingRemote(readerid, address, listener)));
+      InterestingRemote(readerid, addresses, listener)));
   g.release();
   if (enableheartbeatchecker) {
     heartbeatchecker_.enable(false, config().heartbeat_period_);
@@ -820,6 +821,12 @@ void RtpsUdpDataLink::client_stop(const RepoId& localId)
       while (drop_it != to_drop.end()) {
         (*drop_it)->data_dropped(true);
         ++drop_it;
+      }
+      writer->remove_all_msgs();
+    } else {
+      GuardType guard(strategy_lock_);
+      if (send_strategy_) {
+        send_strategy_->remove_all_msgs(localId);
       }
     }
   }
@@ -1425,6 +1432,10 @@ RtpsUdpDataLink::RtpsWriter::send_nack_responses(const MonotonicTimePoint& /*now
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
+    if (stopping_) {
+      return;
+    }
+
     gather_nack_replies_i(meta_submessages);
   }
 
@@ -1463,18 +1474,31 @@ RtpsUdpDataLink::RtpsWriter::add_gap_submsg_i(RTPS::SubmessageSeq& msg,
   msg[i].gap_sm(gap);
 }
 
+void RtpsUdpDataLink::update_last_recv_addr(const RepoId& src, const ACE_INET_Addr& addr)
+{
+  if (addr == config().rtps_relay_address()) {
+    return;
+  }
+
+  ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
+  const RemoteInfoMap::iterator pos = locators_.find(src);
+  if (pos != locators_.end()) {
+    pos->second.last_recv_addr_ = addr;
+    pos->second.last_recv_time_ = MonotonicTimePoint::now();
+  }
+}
 
 // DataReader's side of Reliability
 
 void
 RtpsUdpDataLink::received(const RTPS::DataSubmessage& data,
-                          const GuidPrefix_t& src_prefix)
+                          const GuidPrefix_t& src_prefix,
+                          const ACE_INET_Addr& remote_addr)
 {
   const RepoId local = make_id(local_prefix_, data.readerId);
+  const RepoId src = make_id(src_prefix, data.writerId);
 
-  RepoId src;
-  std::memcpy(src.guidPrefix, src_prefix, sizeof(GuidPrefix_t));
-  src.entityId = data.writerId;
+  update_last_recv_addr(src, remote_addr);
 
   OPENDDS_VECTOR(RtpsReader_rch) to_call;
   {
@@ -1671,8 +1695,10 @@ RtpsUdpDataLink::RtpsReader::process_data_i(const RTPS::DataSubmessage& data,
 void
 RtpsUdpDataLink::received(const RTPS::GapSubmessage& gap,
                           const GuidPrefix_t& src_prefix,
-                          bool directed)
+                          bool directed,
+                          const ACE_INET_Addr& remote_addr)
 {
+  update_last_recv_addr(make_id(src_prefix, gap.writerId), remote_addr);
   datareader_dispatch(gap, src_prefix, directed, &RtpsReader::process_gap_i);
 }
 
@@ -1784,10 +1810,13 @@ RtpsUdpDataLink::send_interesting_ack_nack(const RepoId& writerid,
 void
 RtpsUdpDataLink::received(const RTPS::HeartBeatSubmessage& heartbeat,
                           const GuidPrefix_t& src_prefix,
-                          bool directed)
+                          bool directed,
+                          const ACE_INET_Addr& remote_addr)
 {
   const RepoId src = make_id(src_prefix, heartbeat.writerId);
   const MonotonicTimePoint now = MonotonicTimePoint::now();
+
+  update_last_recv_addr(src, remote_addr);
 
   MetaSubmessageVec meta_submessages;
   OPENDDS_VECTOR(InterestingRemote) callbacks;
@@ -2763,8 +2792,10 @@ RtpsUdpDataLink::extend_bitmap_range(RTPS::FragmentNumberSet& fnSet,
 void
 RtpsUdpDataLink::received(const RTPS::HeartBeatFragSubmessage& hb_frag,
                           const GuidPrefix_t& src_prefix,
-                          bool directed)
+                          bool directed,
+                          const ACE_INET_Addr& remote_addr)
 {
+  update_last_recv_addr(make_id(src_prefix, hb_frag.writerId), remote_addr);
   datareader_dispatch(hb_frag, src_prefix, directed, &RtpsReader::process_heartbeat_frag_i);
 }
 
@@ -2823,12 +2854,15 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_frag_i(const RTPS::HeartBeatFragS
 
 void
 RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
-                          const GuidPrefix_t& src_prefix)
+                          const GuidPrefix_t& src_prefix,
+                          const ACE_INET_Addr& remote_addr)
 {
   // local side is DW
   const RepoId local = make_id(local_prefix_, acknack.writerId); // can't be ENTITYID_UNKNOWN
 
   const RepoId remote = make_id(src_prefix, acknack.readerId);
+
+  update_last_recv_addr(remote, remote_addr);
 
   const MonotonicTimePoint now = MonotonicTimePoint::now();
   OPENDDS_VECTOR(DiscoveryListener*) callbacks;
@@ -3162,8 +3196,10 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
 
 void
 RtpsUdpDataLink::received(const RTPS::NackFragSubmessage& nackfrag,
-                          const GuidPrefix_t& src_prefix)
+                          const GuidPrefix_t& src_prefix,
+                          const ACE_INET_Addr& remote_addr)
 {
+  update_last_recv_addr(make_id(src_prefix, nackfrag.readerId), remote_addr);
   datawriter_dispatch(nackfrag, src_prefix, &RtpsWriter::process_nackfrag);
 }
 
@@ -4288,7 +4324,7 @@ RtpsUdpDataLink::get_addresses_i(const RepoId& local) const {
 
 void
 RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
-                                      AddrSet& addresses, bool prefer_narrow) const {
+                                      AddrSet& addresses, bool prefer_unicast) const {
   ACE_UNUSED_ARG(local);
   OPENDDS_ASSERT(local != GUID_UNKNOWN);
   OPENDDS_ASSERT(remote != GUID_UNKNOWN);
@@ -4298,25 +4334,40 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
     return;
   }
 
-  ACE_INET_Addr normal_addr;
+  AddrSet normal_addrs;
   ACE_INET_Addr ice_addr;
+  bool valid_last_recv_addr = false;
   static const ACE_INET_Addr NO_ADDR;
 
   typedef OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter_t;
   iter_t pos = locators_.find(remote);
   if (pos != locators_.end()) {
-    normal_addr = prefer_narrow ? pos->second.narrow_addr_ : pos->second.wide_addr_;
+    if (prefer_unicast && pos->second.last_recv_addr_ != ACE_INET_Addr()) {
+      normal_addrs.insert(pos->second.last_recv_addr_);
+      valid_last_recv_addr = (MonotonicTimePoint::now() - pos->second.last_recv_time_) <= config().receive_address_duration_;
+    } else if (prefer_unicast && !pos->second.unicast_addrs_.empty()) {
+      normal_addrs = pos->second.unicast_addrs_;
+    } else if (!pos->second.multicast_addrs_.empty()) {
+      normal_addrs = pos->second.multicast_addrs_;
+    } else if (pos->second.last_recv_addr_ != ACE_INET_Addr()) {
+      normal_addrs.insert(pos->second.last_recv_addr_);
+      valid_last_recv_addr = (MonotonicTimePoint::now() - pos->second.last_recv_time_) <= config().receive_address_duration_;
+    } else {
+      normal_addrs = pos->second.unicast_addrs_;
+    }
   } else {
     const GuidConverter conv(remote);
     if (conv.isReader()) {
+      ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_);
       InterestingRemoteMapType::const_iterator ipos = interesting_readers_.find(remote);
       if (ipos != interesting_readers_.end()) {
-        normal_addr = ipos->second.address;
+        normal_addrs = ipos->second.addresses;
       }
     } else if (conv.isWriter()) {
+      ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);
       InterestingRemoteMapType::const_iterator ipos = interesting_writers_.find(remote);
       if (ipos != interesting_writers_.end()) {
-        normal_addr = ipos->second.address;
+        normal_addrs = ipos->second.addresses;
       }
     }
   }
@@ -4329,24 +4380,20 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
 #endif
 
   if (ice_addr == NO_ADDR) {
-    if (normal_addr != NO_ADDR) {
-      addresses.insert(normal_addr);
-    }
+    addresses.insert(normal_addrs.begin(), normal_addrs.end());
     const ACE_INET_Addr relay_addr = config().rtps_relay_address();
-    if (relay_addr != NO_ADDR) {
+    if (!valid_last_recv_addr && relay_addr != NO_ADDR) {
       addresses.insert(relay_addr);
     }
     return;
   }
 
-  if (ice_addr != normal_addr) {
+  if (normal_addrs.count(ice_addr) == 0) {
     addresses.insert(ice_addr);
     return;
   }
 
-  if (normal_addr != NO_ADDR) {
-    addresses.insert(normal_addr);
-  }
+  addresses.insert(normal_addrs.begin(), normal_addrs.end());
 }
 
 ICE::Endpoint*

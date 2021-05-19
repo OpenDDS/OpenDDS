@@ -1,7 +1,19 @@
 # OpenDDS Releases
 
+## Version 3.18.0-dev of OpenDDS
+OpenDDS 3.18.0-dev is currently in development, so this list might change.
+
+### Additions:
+- TODO: Add your features here
+
+### Fixes:
+- TODO: Add your fixes here
+
+### Notes:
+- TODO: Add your notes here
+
 ## Version 3.17.0 of OpenDDS
-OpenDDS 3.17.0 is currently in development, so this list might change.
+OpenDDS 3.17.0 was released on May 18 2021.
 
 ### Additions:
 - Support for converting samples to and from JSON (#2312)
@@ -9,18 +21,22 @@ OpenDDS 3.17.0 is currently in development, so this list might change.
     - NOTE: This might conflict with an existing RapidJSON installation.
 - Support for `ignore_member_names` in the XTypes type consistency enforcement QoS (#2364)
 - Internal tracking of and reuse of instance handles (#2530, #2557)
+- `--install-origin-relative` configure script option for installing with RPATH relative to `$ORIGIN` (#2651)
 - RTPS:
   - RTPS message logging (#2458)
   - RTPS performance logging (#2477)
   - Add logging to measure latency of RTPS discovery and association (#2511)
   - Consolidate RTPS messages based on time (#2534)
+  - `RtpsUdpDataLink` can now handle more than one unicast address (#2653)
 
 ### Fixes:
 - DiscoveryBase: additional iterator checks (#2421)
-- Use `RTPS_REFLECT_HEARTBEAT_COUNT` for relay participant (#2442)
 - Improve memory usage (#2481)
 - Allow Java with `linux-cross` in configure script, Fixes #2518 (#2519)
-- RtpsUdpDataLink: `flush_send_queue_task_` cleanup (#2544)
+- Fix listeners not being invoked when remote participant times out (#2602, #2650)
+- RTPS:
+  - `RtpsRelay` improvements (#2402, #2442, #2484, #2578, #2598)
+  - `RtpsUdpDataLink::flush_send_queue_task_` cleanup (#2544)
 - Security:
   - Auth plugin: check for one of the expected handshake message types (#2551)
   - Fixed re-keying the endpoints that use derived keys (#2623)
@@ -32,6 +48,7 @@ OpenDDS 3.17.0 is currently in development, so this list might change.
   - Corrected serialization for XCDR2 mutable unions. (#2471)
   - Fix for include of a TAO pidl sequence using the `TAO_ROOT`-based path (#2566)
   - Generate Typecode identifiers needed by `tao_idl` when using C++11 Mapping (#2582, #2627)
+  - Support IDL modules and topic types that are C++ or IDL keywords (#2608, #2665, #2668)
 - CMake Module:
   - Fix an issue where a type support library's export header was expected to exist before it was created (#2495)
   - Use `CMAKE_CXX_COMPILER` as the preprocessor for `opendds_idl` and `tao_idl` so a compiler is no longer required on the path. (#2503)

@@ -1,0 +1,13 @@
+project(MockedTypeSupport): dcpsexe, dcps_test, dcps_transports_for_test {
+  exename = MockedTypeSupport
+
+  IDL_Files {
+    MyTypeSupport.idl
+  }
+
+  Source_Files {
+    MockedTypeSupport.cpp
+    MyTypeSupportImpl.cpp
+    MyTypeSupportC.cpp
+  }
+}

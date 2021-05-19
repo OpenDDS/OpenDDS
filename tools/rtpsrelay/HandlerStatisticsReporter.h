@@ -3,10 +3,9 @@
 
 #include "Config.h"
 #include "RelayStatisticsReporter.h"
-#include "utility.h"
 
-#include "lib/QosIndex.h"
 #include "lib/RelayTypeSupportImpl.h"
+#include "lib/Utility.h"
 
 #include <dds/DCPS/JsonValueWriter.h>
 
@@ -91,26 +90,11 @@ public:
     report(now);
   }
 
-  void max_directed_gain(size_t value, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  void max_gain(size_t value, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    relay_statistics_reporter_.max_directed_gain(value, now);
-    log_handler_statistics_.max_directed_gain() = std::max(log_handler_statistics_.max_directed_gain(), static_cast<uint32_t>(value));
-    publish_handler_statistics_.max_directed_gain() = std::max(publish_handler_statistics_.max_directed_gain(), static_cast<uint32_t>(value));
-    report(now);
-  }
-
-  void max_undirected_gain(size_t value, const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    relay_statistics_reporter_.max_undirected_gain(value, now);
-    log_handler_statistics_.max_undirected_gain() = std::max(log_handler_statistics_.max_undirected_gain(), static_cast<uint32_t>(value));
-    publish_handler_statistics_.max_undirected_gain() = std::max(publish_handler_statistics_.max_undirected_gain(), static_cast<uint32_t>(value));
-    report(now);
-  }
-
-  void local_active_participants(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    log_handler_statistics_.local_active_participants() = static_cast<uint32_t>(count);
-    publish_handler_statistics_.local_active_participants() = static_cast<uint32_t>(count);
+    relay_statistics_reporter_.max_gain(value, now);
+    log_handler_statistics_.max_gain() = std::max(log_handler_statistics_.max_gain(), static_cast<uint32_t>(value));
+    publish_handler_statistics_.max_gain() = std::max(publish_handler_statistics_.max_gain(), static_cast<uint32_t>(value));
     report(now);
   }
 
@@ -119,38 +103,6 @@ public:
     relay_statistics_reporter_.error(now);
     ++log_handler_statistics_.error_count();
     ++publish_handler_statistics_.error_count();
-    report(now);
-  }
-
-  void new_address(const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    relay_statistics_reporter_.new_address(now);
-    ++log_handler_statistics_.new_address_count();
-    ++publish_handler_statistics_.new_address_count();
-    report(now);
-  }
-
-  void expired_address(const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    relay_statistics_reporter_.expired_address(now);
-    ++log_handler_statistics_.expired_address_count();
-    ++publish_handler_statistics_.expired_address_count();
-    report(now);
-  }
-
-  void claim(const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    relay_statistics_reporter_.claim(now);
-    ++log_handler_statistics_.claim_count();
-    ++publish_handler_statistics_.claim_count();
-    report(now);
-  }
-
-  void disclaim(const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    relay_statistics_reporter_.disclaim(now);
-    ++log_handler_statistics_.disclaim_count();
-    ++publish_handler_statistics_.disclaim_count();
     report(now);
   }
 
@@ -205,14 +157,8 @@ private:
     log_handler_statistics_.bytes_out(0);
     log_handler_statistics_.messages_dropped(0);
     log_handler_statistics_.bytes_dropped(0);
-    log_handler_statistics_.max_directed_gain(0);
-    log_handler_statistics_.max_undirected_gain(0);
-    // Don't reset local_active_participant_count.
+    log_handler_statistics_.max_gain(0);
     log_handler_statistics_.error_count(0);
-    log_handler_statistics_.new_address_count(0);
-    log_handler_statistics_.expired_address_count(0);
-    log_handler_statistics_.claim_count(0);
-    log_handler_statistics_.disclaim_count(0);
     log_handler_statistics_.max_queue_size(0);
     log_input_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
     log_output_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
@@ -251,14 +197,8 @@ private:
     publish_handler_statistics_.bytes_out(0);
     publish_handler_statistics_.messages_dropped(0);
     publish_handler_statistics_.bytes_dropped(0);
-    publish_handler_statistics_.max_directed_gain(0);
-    publish_handler_statistics_.max_undirected_gain(0);
-    // Don't reset local_active_participant_count.
+    publish_handler_statistics_.max_gain(0);
     publish_handler_statistics_.error_count(0);
-    publish_handler_statistics_.new_address_count(0);
-    publish_handler_statistics_.expired_address_count(0);
-    publish_handler_statistics_.claim_count(0);
-    publish_handler_statistics_.disclaim_count(0);
     publish_handler_statistics_.max_queue_size(0);
     publish_input_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
     publish_output_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
