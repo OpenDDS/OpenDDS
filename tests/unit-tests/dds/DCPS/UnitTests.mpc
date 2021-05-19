@@ -50,6 +50,13 @@ project(*JsonValueReader): dcps_test, googletest, rapidjson {
   }
 }
 
+project(*MemoryPool) : dcps, opendds_face, dcps_test {
+  exename = *
+  Source_Files {
+    MemoryPool.cpp
+  }
+}
+
 project(*NetworkConfigModifier): dcps_test, googletest {
   exename = *
   Source_Files {

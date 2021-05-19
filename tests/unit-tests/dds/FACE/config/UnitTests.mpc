@@ -1,0 +1,6 @@
+project(*QosSettings) : dcps, opendds_face, dcps_test {
+  exename = *
+  Source_Files {
+    QosSettings.cpp
+  }
+}
