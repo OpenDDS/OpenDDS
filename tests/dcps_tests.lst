@@ -431,10 +431,10 @@ tests/DCPS/Instances/run_test.pl multiple_instance multiple_datawriter keyed: !D
 tests/DCPS/Instances/run_test.pl multiple_instance multiple_datawriter nokey: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/SkipSerialize/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
 
-tests/run_test.pl unit-tests/dds/FACE/config/UnitTests_QosSettings: !DCPS_MIN !WCHAR !NO_BUILT_IN_TOPICS
-tests/run_test.pl unit-tests/dds/DCPS/UnitTests_MemoryPool: !DCPS_MIN !WCHAR !NO_BUILT_IN_TOPICS
-tests/run_test.pl unit-tests/dds/DCPS/UnitTests_SafetyProfilePool: !DCPS_MIN !WCHAR !NO_BUILT_IN_TOPICS OPENDDS_SAFETY_PROFILE
-tests/run_test.pl unit-tests/FACE/UnitTests_Sequence: !DCPS_MIN !WCHAR OPENDDS_SAFETY_PROFILE !NO_BUILT_IN_TOPICS
+tests/run_test.pl unit-tests/dds/FACE/config/UnitTests_QosSettings: !DCPS_MIN
+tests/run_test.pl unit-tests/dds/DCPS/UnitTests_MemoryPool: !DCPS_MIN
+tests/run_test.pl unit-tests/dds/DCPS/UnitTests_SafetyProfilePool: !DCPS_MIN
+tests/run_test.pl unit-tests/FACE/UnitTests_Sequence: !DCPS_MIN
 
 tests/FACE/Messenger/run_test.pl: !DCPS_MIN !WCHAR RTPS !NO_BUILT_IN_TOPICS
 tests/FACE/Messenger/run_test.pl callback: !DCPS_MIN !WCHAR RTPS !NO_BUILT_IN_TOPICS

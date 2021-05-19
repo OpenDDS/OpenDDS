@@ -15,17 +15,23 @@ use FileHandle;
 use Cwd;
 use strict;
 
-my $single_test = $ARGV[0];
+my $executable = $ARGV[0];
 
-if ($single_test eq '') {
-    print STDERR "ERROR: no test was specified\n";
+if ($executable eq '') {
+    print STDERR "ERROR: no executable was specified\n";
     exit 1;
 }
 
+if (! -e $executable) {
+    print STDERR "Executable $executable does not exist\n";
+    # FUTURE: Return a status indicating that the test was not run.
+    exit 0;
+}
+
 my $test = new PerlDDS::TestFramework();
-$test->process("$single_test", "$single_test", "");
-print STDERR "Running $single_test\n";
-$test->start_process("$single_test");
+$test->process("$executable", "$executable", "");
+print STDERR "Running $executable\n";
+$test->start_process("$executable");
 my $retcode = $test->finish(60);
 if ($retcode != 0) {
     exit 1;
