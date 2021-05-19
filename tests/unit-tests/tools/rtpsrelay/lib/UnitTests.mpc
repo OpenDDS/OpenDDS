@@ -1,0 +1,13 @@
+project(*Name): dcpsexe, rtps_relay_lib {
+  exename = *
+  Source_Files {
+    Name.cpp
+  }
+}
+
+project(*PartitionIndex): dcpsexe, rtps_relay_lib {
+  exename = *
+  Source_Files {
+    PartitionIndex.cpp
+  }
+}

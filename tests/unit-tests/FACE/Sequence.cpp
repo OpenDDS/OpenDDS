@@ -8,7 +8,7 @@
 #include "ace/OS_main.h"
 #include "ace/Log_Msg.h"
 
-#include "test_check.h"
+#include "../test_check.h"
 
 #include <algorithm>
 #include <iostream>
