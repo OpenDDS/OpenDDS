@@ -4,6 +4,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "dds/DCPS/security/OpenSSL_init.h"
 #include "dds/DCPS/security/SSL/DiffieHellman.h"
 #include <iostream>
 
@@ -62,4 +63,11 @@ TEST_F(DiffieHellmanTest, EC_SharedSecret_GenerationAndComparison)
 
   bool was_successful = dh3.cmp_shared_secret(dh4);
   ASSERT_TRUE(was_successful);
+}
+
+int main(int argc, char* argv[])
+{
+  openssl_init();
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }

@@ -1,10 +1,15 @@
 tests/security/IDL_Serialization/run_test.pl
-tests/security/SSL/run_test.pl
-tests/unit-tests/dds/DCPS/security/run_test.pl AccessControlBuiltInImpl
-tests/security/unit_tests/run_test.pl OpenDDS_AuthenticationTest
-tests/security/unit_tests/run_test.pl OpenDDS_CryptoKeyFactoryTest
-tests/security/unit_tests/run_test.pl OpenDDS_CryptoKeyExchangeTest
-tests/security/unit_tests/run_test.pl OpenDDS_CryptoTransformTest
+tests/run_test.pl unit-tests/dds/DCPS/security/UnitTests_AccessControlBuiltInImpl
+tests/run_test.pl unit-tests/dds/DCPS/security/UnitTests_CryptoBuiltInImpl
+tests/run_test.pl unit-tests/dds/DCPS/security/UnitTests_AuthenticationBuiltInImpl
+tests/run_test.pl unit-tests/dds/DCPS/security/Authentication/UnitTests_LocalAuthCredentialData
+tests/run_test.pl unit-tests/dds/DCPS/security/framework/UnitTests_SecurityConfig
+tests/run_test.pl unit-tests/dds/DCPS/security/SSL/UnitTests_Certificate
+tests/run_test.pl unit-tests/dds/DCPS/security/SSL/UnitTests_DiffieHellman
+tests/run_test.pl unit-tests/dds/DCPS/security/SSL/UnitTests_PrivateKey
+tests/run_test.pl unit-tests/dds/DCPS/security/SSL/UnitTests_SignedDocument
+tests/run_test.pl unit-tests/dds/DCPS/security/SSL/UnitTests_SubjectName
+tests/run_test.pl unit-tests/dds/DCPS/security/SSL/UnitTests_Utils
 tests/security/attributes/run_test.pl SC0_sec_off
 tests/security/attributes/run_test.pl SC0_sec_sub
 tests/security/attributes/run_test.pl SC0_sec_pub

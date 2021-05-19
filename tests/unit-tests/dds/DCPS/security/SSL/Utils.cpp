@@ -4,6 +4,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "dds/DCPS/security/OpenSSL_init.h"
 #include "dds/DCPS/security/SSL/Utils.h"
 
 TEST(UtilsTest, MakeNonce256_Success)
@@ -11,4 +12,11 @@ TEST(UtilsTest, MakeNonce256_Success)
   std::vector<unsigned char> nonce;
   int err = OpenDDS::Security::SSL::make_nonce_256(nonce);
   ASSERT_EQ(0, err);
+}
+
+int main(int argc, char* argv[])
+{
+  openssl_init();
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }

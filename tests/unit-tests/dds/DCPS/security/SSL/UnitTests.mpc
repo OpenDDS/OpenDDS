@@ -1,0 +1,53 @@
+project(*Certificate): dcpsexe, dcps_test, opendds_security, googletest {
+  requires += no_opendds_safety_profile
+  exename = *
+
+  Source_Files {
+    Certificate.cpp
+  }
+}
+
+project(*DiffieHellman): dcpsexe, dcps_test, opendds_security, googletest {
+  requires += no_opendds_safety_profile
+  exename = *
+
+  Source_Files {
+    DiffieHellman.cpp
+  }
+}
+
+project(*PrivateKey): dcpsexe, dcps_test, opendds_security, googletest {
+  requires += no_opendds_safety_profile
+  exename = *
+
+  Source_Files {
+    PrivateKey.cpp
+  }
+}
+
+project(*SignedDocument): dcpsexe, dcps_test, opendds_security, googletest {
+  requires += no_opendds_safety_profile
+  exename = *
+
+  Source_Files {
+    SignedDocument.cpp
+  }
+}
+
+project(*SubjectName): dcpsexe, dcps_test, opendds_security, googletest {
+  requires += no_opendds_safety_profile
+  exename = *
+
+  Source_Files {
+    SubjectName.cpp
+  }
+}
+
+project(*Utils): dcpsexe, dcps_test, opendds_security, googletest {
+  requires += no_opendds_safety_profile
+  exename = *
+
+  Source_Files {
+    Utils.cpp
+  }
+}

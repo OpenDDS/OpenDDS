@@ -4,22 +4,31 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "dds/DCPS/RTPS/BaseMessageUtils.h"
-#include "ace/OS_main.h"
-#include "dds/DCPS/RTPS/ParameterListConverter.h"
 #include "../../../../DCPS/common/TestSupport.h"
+#include "ace/OS_main.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/GuidBuilder.h"
+#include "dds/DCPS/RTPS/BaseMessageUtils.h"
+#include "dds/DCPS/RTPS/GuidGenerator.h"
+#include "dds/DCPS/RTPS/ParameterListConverter.h"
+#include "dds/DCPS/RTPS/RtpsCoreC.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
-#include "dds/DCPS/RTPS/RtpsCoreC.h"
-#include "dds/DCPS/RTPS/GuidGenerator.h"
-#include <iostream>
 
-using namespace OpenDDS::RTPS;
-using namespace OpenDDS::RTPS::ParameterListConverter;
+#include "gtest/gtest.h"
+
+#include <cstring>
+#include <iostream>
+#include <memory>
+#include <sstream>
+
+using namespace DDS::Security;
 using namespace DDS;
 using namespace OpenDDS::DCPS;
+using namespace OpenDDS::RTPS::ParameterListConverter;
+using namespace OpenDDS::RTPS;
+using namespace OpenDDS::Security;
+using namespace std;
 
 namespace {
   GuidGenerator guid_generator;
@@ -44,7 +53,7 @@ namespace {
       return result;
     }
 
-    SPDPdiscoveredParticipantData spdp_participant(
+    OpenDDS::RTPS::SPDPdiscoveredParticipantData spdp_participant(
       const void* user_data = NULL,
       CORBA::ULong user_data_len = 0,
       char major_protocol_version = 0,
@@ -66,7 +75,7 @@ namespace {
       unsigned long lease_dur_fraction = 0
     )
     {
-      SPDPdiscoveredParticipantData result;
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData result;
       if (user_data_len && user_data) {
         result.ddsParticipantData.user_data.value.length(user_data_len);
         for (CORBA::ULong i = 0; i < user_data_len; ++i) {
@@ -129,9 +138,9 @@ namespace {
       return result;
     }
 
-    SPDPdiscoveredParticipantData default_participant_data()
+    OpenDDS::RTPS::SPDPdiscoveredParticipantData default_participant_data()
     {
-      SPDPdiscoveredParticipantData part_data;
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData part_data;
       part_data.ddsParticipantData.user_data =
           TheServiceParticipant->initial_UserDataQosPolicy();
       part_data.participantProxy.expectsInlineQos = false;
@@ -458,6 +467,162 @@ namespace {
       return result;
     } // method
   } // Factory namespace
+
+#ifdef OPENDDS_SECURITY
+  OpenDDS::RTPS::SPDPdiscoveredParticipantData spdp_participant(
+    const void* user_data = NULL,
+    CORBA::ULong user_data_len = 0,
+    char major_protocol_version = 0,
+    char minor_protocol_version = 0,
+    char* vendor_id = NULL,
+    OpenDDS::DCPS::GUID_t* guid = NULL,
+    bool expects_inline_qos = false,
+    unsigned long builtin_endpoints = 0,
+    OpenDDS::DCPS::Locator_t* mtu_locs = NULL,
+    CORBA::ULong num_mtu_locs = 0,
+    OpenDDS::DCPS::Locator_t* mtm_locs = NULL,
+    CORBA::ULong num_mtm_locs = 0,
+    OpenDDS::DCPS::Locator_t* du_locs = NULL,
+    CORBA::ULong num_du_locs = 0,
+    OpenDDS::DCPS::Locator_t* dm_locs = NULL,
+    CORBA::ULong num_dm_locs = 0,
+    long liveliness_count = 0,
+    long lease_dur_seconds = 100,
+    unsigned long lease_dur_fraction = 0
+  )
+  {
+    OpenDDS::RTPS::SPDPdiscoveredParticipantData result;
+    if (user_data_len && user_data) {
+      result.ddsParticipantData.user_data.value.length(user_data_len);
+      for (CORBA::ULong i = 0; i < user_data_len; ++i) {
+        result.ddsParticipantData.user_data.value[i] = ((char*)user_data)[i];
+      }
+    }
+    if (major_protocol_version && minor_protocol_version) {
+      result.participantProxy.protocolVersion.major = major_protocol_version;
+      result.participantProxy.protocolVersion.minor = minor_protocol_version;
+    }
+    if (vendor_id) {
+      result.participantProxy.vendorId.vendorId[0] = vendor_id[0];
+      result.participantProxy.vendorId.vendorId[1] = vendor_id[1];
+    }
+    if (guid) {
+      memcpy(result.participantProxy.guidPrefix,
+             guid->guidPrefix,
+             sizeof(guid->guidPrefix));
+    }
+    result.participantProxy.expectsInlineQos = expects_inline_qos;
+    result.participantProxy.availableBuiltinEndpoints = builtin_endpoints;
+
+    if (num_mtu_locs && mtu_locs) {
+      result.participantProxy.metatrafficUnicastLocatorList.length(num_mtu_locs);
+      for (CORBA::ULong i = 0; i < num_mtu_locs; ++i) {
+        result.participantProxy.metatrafficUnicastLocatorList[i] =
+            mtu_locs[i];
+      }
+    }
+
+    if (num_mtm_locs && mtm_locs) {
+      result.participantProxy.metatrafficMulticastLocatorList.length(num_mtm_locs);
+      for (CORBA::ULong i = 0; i < num_mtm_locs; ++i) {
+        result.participantProxy.metatrafficMulticastLocatorList[i] =
+            mtm_locs[i];
+      }
+    }
+
+    if (num_du_locs && du_locs) {
+      result.participantProxy.defaultUnicastLocatorList.length(num_du_locs);
+      for (CORBA::ULong i = 0; i < num_du_locs; ++i) {
+        result.participantProxy.defaultUnicastLocatorList[i] = du_locs[i];
+      }
+    }
+
+    if (num_dm_locs && dm_locs) {
+      result.participantProxy.defaultMulticastLocatorList.length(num_dm_locs);
+      for (CORBA::ULong i = 0; i < num_dm_locs; ++i) {
+        result.participantProxy.defaultMulticastLocatorList[i] = dm_locs[i];
+      }
+    }
+
+    if (liveliness_count) {
+      result.participantProxy.manualLivelinessCount.value = liveliness_count;
+    }
+
+    result.leaseDuration.seconds = lease_dur_seconds;
+    result.leaseDuration.fraction = lease_dur_fraction;
+
+    return result;
+  }
+
+  Token token(string classid = "Test-Class-Id",
+              CORBA::ULong proplen = 1,
+              CORBA::ULong bproplen = 1,
+              bool propagate = true)
+  {
+    Token t;
+
+    t.class_id = classid.c_str();
+
+    t.properties.length(proplen);
+    for (CORBA::ULong i = 0; i < proplen; ++i) {
+        stringstream name, value;
+        name << "Property " << i;
+        value << "PropertyValue " << i;
+
+        t.properties[i].name = name.str().c_str();
+        t.properties[i].value = value.str().c_str();
+        t.properties[i].propagate = propagate;
+    }
+
+    t.binary_properties.length(bproplen);
+    for (CORBA::ULong i = 0; i < bproplen; ++i) {
+        stringstream name, value;
+        name << "BinaryProperty " << i;
+        value << "BinaryPropertyValue " << i;
+
+        t.binary_properties[i].name = name.str().c_str();
+
+        const CORBA::ULong vlen = static_cast<CORBA::ULong>(value.str().length());
+        t.binary_properties[i].value.length(vlen);
+        memcpy(t.binary_properties[i].value.get_buffer(),  value.str().c_str(),  vlen);
+
+        t.binary_properties[i].propagate = propagate;
+    }
+
+    return t;
+  }
+
+#if 0
+  void participant_security_attribs(ParticipantSecurityAttributes& a,
+                                    size_t plen = 1,
+                                    bool allow_unauthenticated_participants = false,
+                                    bool is_access_protected = false,
+                                    bool is_discovery_protected = false,
+                                    bool is_liveliness_protected = false,
+                                    PluginParticipantSecurityAttributesMask plugin_participant_attribs = 0u,
+                                    bool propagate = true)
+  {
+    a.ac_endpoint_properties.length(plen);
+
+    for (size_t i = 0; i < plen; ++i) {
+        stringstream name, value;
+        name << "Property " << i;
+        value << "Value " << i;
+
+        a.ac_endpoint_properties[i].name = name.str().c_str();
+        a.ac_endpoint_properties[i].value = value.str().c_str();
+        a.ac_endpoint_properties[i].propagate = propagate;
+    }
+
+    a.allow_unauthenticated_participants = allow_unauthenticated_participants;
+    a.is_access_protected = is_access_protected;
+    a.is_discovery_protected = is_discovery_protected;
+    a.is_liveliness_protected = is_liveliness_protected;
+    a.plugin_participant_attributes = plugin_participant_attribs;
+  }
+#endif
+
+#endif
 } // anon namespace
 
 bool is_present(const ParameterList& param_list, const ParameterId_t pid) {
@@ -496,13 +661,37 @@ Parameter get(const ParameterList& param_list,
   TEST_ASSERT(false); // Not found
 }
 
+#ifdef OPENDDS_SECURITY
+TEST(ToParamListTest, From_SPDPdiscoveredParticipantData_IdentityStatusToken)
+{
+  OpenDDS::Security::SPDPdiscoveredParticipantData w1, w2;
+
+  OpenDDS::RTPS::SPDPdiscoveredParticipantData temp = spdp_participant("Test-Test-Test", 10);
+
+  w1.dataKind = OpenDDS::Security::DPDK_SECURE;
+  w1.ddsParticipantDataSecure.identity_status_token = token();
+  w1.ddsParticipantDataSecure.base.base = temp.ddsParticipantData;
+  w1.participantProxy = temp.participantProxy;
+  w1.leaseDuration = temp.leaseDuration;
+
+  ParameterList p;
+  ASSERT_EQ(true, ParameterListConverter::to_param_list(w1, p));
+  ASSERT_EQ(true, ParameterListConverter::from_param_list(p, w2));
+
+  ASSERT_EQ(0, strcmp("Property 0", w2.ddsParticipantDataSecure.identity_status_token.properties[0].name));
+  ASSERT_EQ(0, strcmp("PropertyValue 0", w2.ddsParticipantDataSecure.identity_status_token.properties[0].value));
+  ASSERT_EQ(0, strcmp("BinaryProperty 0", w2.ddsParticipantDataSecure.identity_status_token.binary_properties[0].name));
+  ASSERT_EQ(0, memcmp("BinaryPropertyValue 0", w2.ddsParticipantDataSecure.identity_status_token.binary_properties[0].value.get_buffer(), strlen("BinaryPropertyValue 0")));
+}
+#endif
+
 int
-ACE_TMAIN(int, ACE_TCHAR*[])
+ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   try
   {
     { // Should encode participant data with 1 locator to param list properly
-      SPDPdiscoveredParticipantData participant_data = Factory::default_participant_data();
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data = Factory::default_participant_data();
       ParameterList param_list;
       participant_data.participantProxy.metatrafficUnicastLocatorList.length(1);
       bool status = to_param_list(participant_data, param_list);
@@ -516,7 +705,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
 
     { // Should encode participant data with 2 locators to param list properly
-      SPDPdiscoveredParticipantData participant_data = Factory::default_participant_data();
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data = Factory::default_participant_data();
       ParameterList param_list;
       participant_data.participantProxy.metatrafficUnicastLocatorList.length(1);
       participant_data.participantProxy.metatrafficMulticastLocatorList.length(1);
@@ -531,7 +720,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
 
     { // Should encode participant data with 3 locators to param list properly
-      SPDPdiscoveredParticipantData participant_data = Factory::default_participant_data();
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data = Factory::default_participant_data();
       ParameterList param_list;
       participant_data.participantProxy.metatrafficUnicastLocatorList.length(1);
       participant_data.participantProxy.metatrafficMulticastLocatorList.length(1);
@@ -547,7 +736,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
 
     { // Should encode participant data with 4 locators to param list properly
-      SPDPdiscoveredParticipantData participant_data = Factory::default_participant_data();
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data = Factory::default_participant_data();
       ParameterList param_list;
       participant_data.participantProxy.metatrafficUnicastLocatorList.length(1);
       participant_data.participantProxy.metatrafficMulticastLocatorList.length(1);
@@ -564,7 +753,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
 
     { // Should encode participant user data properly
-      SPDPdiscoveredParticipantData participant_data =
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant("hello user", 10);
       ParameterList param_list;
       bool status = to_param_list(participant_data, param_list);
@@ -586,12 +775,12 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
 
     { // Should decode participant user data properly
-      SPDPdiscoveredParticipantData participant_data =
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant("hello user", 10);
       ParameterList param_list;
       bool status = to_param_list(participant_data, param_list);
       TEST_ASSERT(status == true);
-      SPDPdiscoveredParticipantData part_data_out;
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData part_data_out;
       status = from_param_list(param_list, part_data_out);
       TEST_ASSERT(status == true);
       TEST_ASSERT(participant_data.ddsParticipantData.user_data.value[0] ==
@@ -617,7 +806,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
 
     { // Should encode participant protocol version properly
-      SPDPdiscoveredParticipantData participant_data =
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 3, 8);
       ParameterList param_list;
       bool status = to_param_list(participant_data, param_list);
@@ -630,12 +819,12 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
 
     { // Should decode participant protocol version properly
-      SPDPdiscoveredParticipantData participant_data =
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 9, 1);
       ParameterList param_list;
       bool status = to_param_list(participant_data, param_list);
       TEST_ASSERT(status == true);
-      SPDPdiscoveredParticipantData part_data_out;
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData part_data_out;
       status = from_param_list(param_list, part_data_out);
       TEST_ASSERT(status == true);
       TEST_ASSERT(participant_data.participantProxy.protocolVersion.major ==
@@ -646,7 +835,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
     { // Should encode participant vendor id properly
       char vendor_id[] = {7, 9};
-      SPDPdiscoveredParticipantData participant_data =
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, vendor_id);
       ParameterList param_list;
       bool status = to_param_list(participant_data, param_list);
@@ -660,12 +849,12 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
     { // Should decode participant vendor id properly
       char vendor_id[] = {7, 9};
-      SPDPdiscoveredParticipantData participant_data =
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, vendor_id);
       ParameterList param_list;
       bool status = to_param_list(participant_data, param_list);
       TEST_ASSERT(status == true);
-      SPDPdiscoveredParticipantData part_data_out;
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData part_data_out;
       status = from_param_list(param_list, part_data_out);
       TEST_ASSERT(status == true);
       TEST_ASSERT(!memcmp(participant_data.participantProxy.vendorId.vendorId,
@@ -676,7 +865,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     { // Should encode participant guid prefix properly
       GUID_t guid_in;
       memcpy(guid_in.guidPrefix, "GUID-ABC                 ", 12);
-      SPDPdiscoveredParticipantData participant_data =
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, &guid_in);
       ParameterList param_list;
       bool status = to_param_list(participant_data, param_list);
@@ -690,12 +879,12 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     { // Should decode participant guid prefix properly
       GUID_t guid_in;
       memcpy(guid_in.guidPrefix, "GUID-ABC                 ", 12);
-      SPDPdiscoveredParticipantData participant_data =
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, &guid_in);
       ParameterList param_list;
       bool status = to_param_list(participant_data, param_list);
       TEST_ASSERT(status == true);
-      SPDPdiscoveredParticipantData part_data_out;
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData part_data_out;
       status = from_param_list(param_list, part_data_out);
       TEST_ASSERT(status == true);
       TEST_ASSERT(memcmp(participant_data.participantProxy.guidPrefix,
@@ -704,7 +893,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
 
     { // Should encode participant expects inline qos properly
-      SPDPdiscoveredParticipantData participant_data =
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, true);
       ParameterList param_list;
       bool status = to_param_list(participant_data, param_list);
@@ -715,12 +904,12 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
 
     { // Should decode participant expects inline qos properly
-      SPDPdiscoveredParticipantData participant_data =
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, true);
       ParameterList param_list;
       bool status = to_param_list(participant_data, param_list);
       TEST_ASSERT(status == true);
-      SPDPdiscoveredParticipantData part_data_out;
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData part_data_out;
       status = from_param_list(param_list, part_data_out);
       TEST_ASSERT(status == true);
       TEST_ASSERT(part_data_out.participantProxy.expectsInlineQos == true);
@@ -734,7 +923,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
 
     { // Should encode participant builtin endpoints properly
-      SPDPdiscoveredParticipantData participant_data =
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 72393L);
       ParameterList param_list;
       bool status = to_param_list(participant_data, param_list);
@@ -748,12 +937,12 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
 
     { // Should decode participant builtin endpoints properly
-      SPDPdiscoveredParticipantData participant_data =
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 72393L);
       ParameterList param_list;
       bool status = to_param_list(participant_data, param_list);
       TEST_ASSERT(status == true);
-      SPDPdiscoveredParticipantData part_data_out;
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData part_data_out;
       status = from_param_list(param_list, part_data_out);
       TEST_ASSERT(status == true);
       TEST_ASSERT(
@@ -770,7 +959,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
                                      7734,
                                      107, 9, 8, 21);
-      SPDPdiscoveredParticipantData participant_data =
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
                                     locators, 2);
       ParameterList param_list;
@@ -798,13 +987,13 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
                                      7734,
                                      107, 9, 8, 21);
-      SPDPdiscoveredParticipantData participant_data =
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
                                     locators, 2);
       ParameterList param_list;
       bool status = to_param_list(participant_data, param_list);
       TEST_ASSERT(status == true);
-      SPDPdiscoveredParticipantData part_data_out;
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData part_data_out;
       status = from_param_list(param_list, part_data_out);
       TEST_ASSERT(status == true);
       {
@@ -829,13 +1018,13 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
                                      7734,
                                      107, 9, 8, 21);
-      SPDPdiscoveredParticipantData participant_data =
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
                                     NULL, 0, locators, 2);
       ParameterList param_list;
       bool status = to_param_list(participant_data, param_list);
       TEST_ASSERT(status == true);
-      SPDPdiscoveredParticipantData part_data_out;
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData part_data_out;
       status = from_param_list(param_list, part_data_out);
       TEST_ASSERT(status == true);
       {
@@ -860,13 +1049,13 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
                                      7734,
                                      107, 9, 8, 21);
-      SPDPdiscoveredParticipantData participant_data =
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
                                     NULL, 0, locators, 2);
       ParameterList param_list;
       bool status = to_param_list(participant_data, param_list);
       TEST_ASSERT(status == true);
-      SPDPdiscoveredParticipantData part_data_out;
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData part_data_out;
       status = from_param_list(param_list, part_data_out);
       TEST_ASSERT(status == true);
       {
@@ -892,7 +1081,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
                                      7734,
                                      107, 9, 8, 21);
-      SPDPdiscoveredParticipantData participant_data =
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
                                     NULL, 0, NULL, 0, locators, 2);
       ParameterList param_list;
@@ -920,13 +1109,13 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
                                      7734,
                                      107, 9, 8, 21);
-      SPDPdiscoveredParticipantData participant_data =
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
                                     NULL, 0, NULL, 0, locators, 2);
       ParameterList param_list;
       bool status = to_param_list(participant_data, param_list);
       TEST_ASSERT(status == true);
-      SPDPdiscoveredParticipantData part_data_out;
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData part_data_out;
       status = from_param_list(param_list, part_data_out);
       TEST_ASSERT(status == true);
       {
@@ -952,7 +1141,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
                                      7734,
                                      107, 9, 8, 21);
-      SPDPdiscoveredParticipantData participant_data =
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
                                     NULL, 0, NULL, 0, NULL, 0,
                                     locators, 2);
@@ -981,14 +1170,14 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
                                      7734,
                                      107, 9, 8, 21);
-      SPDPdiscoveredParticipantData participant_data =
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
                                     NULL, 0, NULL, 0, NULL, 0,
                                     locators, 2);
       ParameterList param_list;
       bool status = to_param_list(participant_data, param_list);
       TEST_ASSERT(status == true);
-      SPDPdiscoveredParticipantData part_data_out;
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData part_data_out;
       status = from_param_list(param_list, part_data_out);
       TEST_ASSERT(status == true);
       {
@@ -1006,7 +1195,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
 
     { // Should encode participant liveliness count properly
-      SPDPdiscoveredParticipantData participant_data =
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
                                     NULL, 0, NULL, 0, NULL, 0, NULL, 0,
                                     7);
@@ -1019,14 +1208,14 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
 
     { // Should decode participant liveliness count properly
-      SPDPdiscoveredParticipantData participant_data =
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
                                     NULL, 0, NULL, 0, NULL, 0, NULL, 0,
                                     6);
       ParameterList param_list;
       bool status = to_param_list(participant_data, param_list);
       TEST_ASSERT(status == true);
-      SPDPdiscoveredParticipantData part_data_out;
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData part_data_out;
       status = from_param_list(param_list, part_data_out);
       TEST_ASSERT(status == true);
       TEST_ASSERT(
@@ -1034,7 +1223,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
 
     { // Should encode participant lease duration properly
-      SPDPdiscoveredParticipantData participant_data =
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
                                     NULL, 0, NULL, 0, NULL, 0, NULL, 0, 7,
                                     12, 300);
@@ -1048,14 +1237,14 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
 
     { // Should decode participant lease duration properly
-      SPDPdiscoveredParticipantData participant_data =
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
           Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
                                     NULL, 0, NULL, 0, NULL, 0, NULL, 0, 7,
                                     12, 300);
       ParameterList param_list;
       bool status = to_param_list(participant_data, param_list);
       TEST_ASSERT(status == true);
-      SPDPdiscoveredParticipantData part_data_out;
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData part_data_out;
       status = from_param_list(param_list, part_data_out);
       TEST_ASSERT(status == true);
       TEST_ASSERT(part_data_out.leaseDuration.seconds ==
@@ -1065,7 +1254,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
 
     { // Should set participant user data qos to default if not present in param list
-      SPDPdiscoveredParticipantData part_data_out;
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData part_data_out;
       part_data_out.ddsParticipantData.user_data.value.length(4);
       ParameterList empty_param_list;
       bool status = from_param_list(empty_param_list, part_data_out);
@@ -1079,7 +1268,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     // There is no defaul vendor id
 
     { // Should set participant expects inline qos to default if not present in param list
-      SPDPdiscoveredParticipantData part_data_out;
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData part_data_out;
       part_data_out.participantProxy.expectsInlineQos = true;
       ParameterList empty_param_list;
       bool status = from_param_list(empty_param_list, part_data_out);
@@ -1096,7 +1285,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     // The lease duration default is { 100, 0 }
 
     { // Should set participant lease duration to default if not present in param list
-      SPDPdiscoveredParticipantData part_data_out;
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData part_data_out;
       ParameterList empty_param_list;
       bool status = from_param_list(empty_param_list, part_data_out);
       TEST_ASSERT(status == true);
@@ -1105,7 +1294,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
 
     { // Should ignore participant vendor-specific parameters
-      SPDPdiscoveredParticipantData part_data_out;
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData part_data_out;
       ParameterList vs_param_list;
       Parameter vs_param;
       vs_param._d(0x8001);
@@ -1116,7 +1305,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
 
     { // Should not fail on participant optional parameters
-      SPDPdiscoveredParticipantData part_data_out;
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData part_data_out;
       ParameterList vs_param_list;
       Parameter vs_param;
       vs_param._d(0x3FFF);
@@ -1127,7 +1316,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
 
     { // Should fail on participant required parameters
-      SPDPdiscoveredParticipantData part_data_out;
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData part_data_out;
       ParameterList vs_param_list;
       Parameter vs_param;
       vs_param._d(0x4001);
@@ -1144,7 +1333,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       ParameterList vs_param_list;
       vs_param_list.length(1);
       vs_param_list[0] = vs_param;
-      SPDPdiscoveredParticipantData part_data_out;
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData part_data_out;
       const bool status = from_param_list(vs_param_list, part_data_out);
       TEST_ASSERT(status == true);
       TEST_ASSERT(part_data_out.participantProxy.availableBuiltinEndpoints
@@ -1152,7 +1341,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
 
     { // Should ignore participant SENTINEL
-      SPDPdiscoveredParticipantData part_data_out;
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData part_data_out;
       ParameterList vs_param_list;
       Parameter vs_param;
       vs_param._d(PID_SENTINEL);
@@ -1163,7 +1352,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
 
     { // Should ignore participant PAD
-      SPDPdiscoveredParticipantData part_data_out;
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData part_data_out;
       ParameterList vs_param_list;
       Parameter vs_param;
       vs_param._d(PID_PAD);
@@ -3294,7 +3483,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       TEST_ASSERT(!reader_data_out.contentFilterProperty.expressionParameters.length());
     }
     { // Should not encode participant default data
-      SPDPdiscoveredParticipantData participant_data =
+      OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
           Factory::default_participant_data();
       ParameterList param_list;
       bool status = to_param_list(participant_data, param_list);
@@ -3358,6 +3547,13 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       TEST_ASSERT(!is_present(param_list, PID_GROUP_DATA));
       TEST_ASSERT(!is_present(param_list, PID_CONTENT_FILTER_PROPERTY));
     }
+
+#ifdef OPENDDS_SECURITY
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+#else
+    return 0;
+#endif
   }
   catch (char const *ex)
   {
@@ -3369,6 +3565,4 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     ex._tao_print_exception("Exception caught in ut_ParameterListConverter.cpp:");
     return 1;
   }
-
-  return 0;
 }

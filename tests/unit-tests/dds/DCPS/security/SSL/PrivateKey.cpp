@@ -4,6 +4,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "dds/DCPS/security/OpenSSL_init.h"
 #include "dds/DCPS/security/SSL/PrivateKey.h"
 #include "dds/DCPS/security/SSL/Certificate.h"
 #include <cstring>
@@ -14,7 +15,7 @@ class PrivateKeyTest : public ::testing::Test
 {
 public:
   PrivateKeyTest() :
-    ca_("file:../certs/identity/identity_ca_cert.pem"),
+    ca_("file:./security/certs/identity/identity_ca_cert.pem"),
     ca_data_("data:,-----BEGIN CERTIFICATE-----\n"
       "MIIEJDCCAwwCCQDpnuwIVmSK5jANBgkqhkiG9w0BAQsFADCB0zELMAkGA1UEBhMC\n"
       "VVMxCzAJBgNVBAgMAk1PMRQwEgYDVQQHDAtTYWludCBMb3VpczE7MDkGA1UECgwy\n"
@@ -40,7 +41,7 @@ public:
       "LULdD3nLP7M1yNJ0HE7/eXCTWgw5dBLik6Ig4d7QjWVa4osvPz3m4frCB8d2lkRr\n"
       "a2FBDC7mCEo=\n"
       "-----END CERTIFICATE-----"),
-    pubkey_("file:../certs/identity/test_participant_01_cert.pem"),
+    pubkey_("file:./security/certs/identity/test_participant_01_cert.pem"),
     pubkey_data_("data:,-----BEGIN CERTIFICATE-----\n"
       "MIIDpDCCAowCAQEwDQYJKoZIhvcNAQELBQAwgdMxCzAJBgNVBAYTAlVTMQswCQYD\n"
       "VQQIDAJNTzEUMBIGA1UEBwwLU2FpbnQgTG91aXMxOzA5BgNVBAoMMk9iamVjdCBD\n"
@@ -63,8 +64,8 @@ public:
       "9AdjUsAs4dBaNa1tK0vdJ0vqf7kRoHqPw511+1K4XTpca9cTwCVfeh0h4nNOpeRg\n"
       "xEKmvR/EewryBDJPaU31JQdVyqlEMtgm\n"
       "-----END CERTIFICATE-----"),
-    pubkey_ec_("file:../certs/identity/test_participant_03_cert.pem"),
-    privkey_("file:../certs/identity/test_participant_01_private_key.pem"),
+    pubkey_ec_("file:./security/certs/identity/test_participant_03_cert.pem"),
+    privkey_("file:./security/certs/identity/test_participant_01_private_key.pem"),
     privkey_data_("data:,-----BEGIN RSA PRIVATE KEY-----\n"
       "MIIEpQIBAAKCAQEAxo3qIy0JSC9DmlenQVMXdcstrwfVmidkjPH6LNdMlxL3ICHR\n"
       "BKGrIYh/Z67o0OEMQe4hnCoh4YH8I/yY9SAVztRUUvj9n5+41rPw7a4S18eIqdGH\n"
@@ -92,7 +93,7 @@ public:
       "gXSdff/CEvcyC7AP3NhNHQDqUWuI9UedCaGHY/kf3blu1/D0xL1OfGE1ZeBuoG9B\n"
       "Zvsf1uTb+JGPR5x+2BTXo4VZXzknBqM3S8XZDHSyQtKKxFekMYfNkkQ=\n"
       "-----END RSA PRIVATE KEY-----\n"),
-    privkey_ec_("file:../certs/identity/test_participant_03_private_key.pem"),
+    privkey_ec_("file:./security/certs/identity/test_participant_03_private_key.pem"),
     hello_(),
     world_(),
     empty_()
@@ -203,4 +204,11 @@ TEST_F(PrivateKeyTest, SignAndVerify_DoesNotUseEmptyData)
   int verify_result = pubkey_.verify_signature(tmp, verify_these);
 
   ASSERT_EQ(0, verify_result);
+}
+
+int main(int argc, char* argv[])
+{
+  openssl_init();
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }

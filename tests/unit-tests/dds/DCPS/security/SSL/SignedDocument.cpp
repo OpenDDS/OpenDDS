@@ -4,6 +4,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "dds/DCPS/security/OpenSSL_init.h"
 #include "dds/DCPS/security/SSL/SignedDocument.h"
 #include "dds/DCPS/security/SSL/Certificate.h"
 #include "dds/DCPS/SequenceIterator.h"
@@ -16,7 +17,7 @@ class SignedDocumentTest : public ::testing::Test
 {
 public:
   SignedDocumentTest() :
-    ca_("file:../certs/permissions/permissions_ca_cert.pem"),
+    ca_("file:./security/certs/permissions/permissions_ca_cert.pem"),
     ca_data_("data:,-----BEGIN CERTIFICATE-----\n"
       "MIID9DCCAtwCCQCkjopvwK438jANBgkqhkiG9w0BAQsFADCBuzELMAkGA1UEBhMC\n"
       "VVMxCzAJBgNVBAgMAk1PMRQwEgYDVQQHDAtTYWludCBMb3VpczEvMC0GA1UECgwm\n"
@@ -41,7 +42,7 @@ public:
       "DHYxM+pYtQAgmBKLBxTyDrgJZ+3j3FVOp0orRxarE3XjJ+0bIVnO6yhjunPOpgsy\n"
       "EcxH9/7Enm8=\n"
       "-----END CERTIFICATE-----"),
-    doc_("file:../governance/governance_SC1_ProtectedDomain1_signed.p7s")
+    doc_("file:./security/governance/governance_SC1_ProtectedDomain1_signed.p7s")
   {
   }
 
@@ -73,7 +74,7 @@ TEST_F(SignedDocumentTest, VerifySignature_Data_Success)
 
 TEST_F(SignedDocumentTest, LoadFromMemory)
 {
-  const char fname[] = "../governance/governance_SC1_ProtectedDomain1_signed.p7s";
+  const char fname[] = "./security/governance/governance_SC1_ProtectedDomain1_signed.p7s";
   std::ifstream file(fname, std::ifstream::binary);
   std::ostringstream mem;
   mem << file.rdbuf();
@@ -106,4 +107,11 @@ TEST_F(SignedDocumentTest, CopyConstruct)
 {
   SignedDocument doc(doc_);
   ASSERT_EQ(doc, doc_);
+}
+
+int main(int argc, char* argv[])
+{
+  openssl_init();
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }

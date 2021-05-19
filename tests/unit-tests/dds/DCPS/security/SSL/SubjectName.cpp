@@ -4,6 +4,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "dds/DCPS/security/OpenSSL_init.h"
 #include "dds/DCPS/security/SSL/SubjectName.h"
 
 #include <iostream>
@@ -114,4 +115,11 @@ TEST_F(SubjectNameTest, LDAP_DCE_CMP)
   ASSERT_NE(sn_dce_cmp_, sn_ldap_cmp_backwards);
   ASSERT_NE(sn_dce_cmp_, sn_dce_cmp_backwards);
   */
+}
+
+int main(int argc, char* argv[])
+{
+  openssl_init();
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }
