@@ -561,9 +561,9 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_VECTOR(ACE_INET_Addr)
     if (it->get_type() == AF_INET && !it->is_multicast()) {
       if (it->is_loopback()) {
         VDBG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(list) - "
-                   "Considering Address %C:%d (%C) - ADDING TO IPv6 LOOPBACK LIST\n",
+                   "Considering Address %C:%d (%C) - ADDING TO IPv4 LOOPBACK LIST\n",
                    it->get_host_addr(), it->get_port_number(), it->get_host_name()));
-        set6_loopback.insert(*it);
+        set4_loopback.insert(*it);
       } else {
         VDBG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(list) - "
                    "Considering Address %C:%d (%C) - ADDING TO IPv4 NORMAL LIST\n",
