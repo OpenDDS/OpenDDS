@@ -22,12 +22,16 @@
 #include <memory>
 #include <sstream>
 
-using namespace DDS::Security;
 using namespace DDS;
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS::ParameterListConverter;
 using namespace OpenDDS::RTPS;
+
+#ifdef OPENDDS_SECURITY
+using namespace DDS::Security;
 using namespace OpenDDS::Security;
+#endif
+
 using namespace std;
 
 namespace {
