@@ -180,7 +180,7 @@ namespace DCPS {
       {
         if (DCPS_debug_level > 1)
           {
-            ACE_DEBUG ((LM_DEBUG,
+            ACE_ERROR ((LM_ERROR,
               ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
               ACE_TEXT ("Could not find tag(dds) in namespace(http://www.omg.org/dds)\n")
               ));

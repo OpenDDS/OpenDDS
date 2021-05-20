@@ -29,12 +29,15 @@ namespace DCPS {
   QOS_XML_Handler::get_profile(const ACE_TCHAR * profile_name)
   {
     if (ACE_OS::strlen(profile_name) == 0)
+    {
+      if (DCPS_debug_level > 7)
       {
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: QOS_XML_Handler::get_profile - ")
           ACE_TEXT("No profile specified\n")));
         return 0;
       }
+    }
 
     dds::qosProfile_seq::qos_profile_const_iterator it;
     for (it = profiles_.begin_qos_profile();
@@ -45,7 +48,7 @@ namespace DCPS {
           {
             if (DCPS_debug_level > 7)
               {
-                ACE_DEBUG((LM_DEBUG,
+                ACE_ERROR((LM_ERROR,
                   ACE_TEXT("QOS_XML_Handler::get_profile - ")
                   ACE_TEXT("Found profile <%s>\n"),
                   (*it)->name().c_str()));
@@ -56,8 +59,8 @@ namespace DCPS {
 
     if (OpenDDS::DCPS::DCPS_debug_level > 7)
       {
-        ACE_DEBUG ((LM_DEBUG,
-          ACE_TEXT("(%P|%t) DEBUG: QOS_XML_Handler::get_profile - ")
+        ACE_ERROR ((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: QOS_XML_Handler::get_profile - ")
           ACE_TEXT("Did not find profile <%s>\n"),
           profile_name));
       }
@@ -72,10 +75,13 @@ namespace DCPS {
 
     const ACE_TCHAR* profileName = profile.name().c_str();
     if (ACE_OS::strlen(profileName) == 0) {
-      ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: QOS_XML_Handler::addQoSProfile - ")
-                ACE_TEXT("No profile name specified\n")));
+      if (DCPS_debug_level > 7)
+      {
+         ACE_ERROR((LM_ERROR,
+           ACE_TEXT("(%P|%t) ERROR: QOS_XML_Handler::addQoSProfile - ")
+           ACE_TEXT("No profile name specified\n")));
       return DDS::RETCODE_ERROR;
+      }
     }
 
     // check if this profile name is already in the list
@@ -87,10 +93,10 @@ namespace DCPS {
       if (ACE_OS::strcmp((*it)->name().c_str(), profileName) == 0) {
         if (DCPS_debug_level > 7)
         {
-          ACE_DEBUG((LM_DEBUG,
-                    ACE_TEXT("(%P|%t) DEBUG: QOS_XML_Handler::addQoSProfile - ")
-                    ACE_TEXT("Profile exists or profile name <%C> in use.\n"),
-                    profileName));
+          ACE_ERROR((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: QOS_XML_Handler::addQoSProfile - ")
+            ACE_TEXT("Profile exists or profile name <%C> in use.\n"),
+            profileName));
         }
         return DDS::RETCODE_ERROR;
       }
@@ -99,9 +105,7 @@ namespace DCPS {
     // append qos profile to list
     dds::qosProfile_seq::qos_profile_value_type t(new dds::qosProfile(profile));
     profiles_.add_qos_profile(t);
-
     return DDS::RETCODE_OK;
-
   }
 
   DDS::ReturnCode_t
@@ -127,10 +131,13 @@ namespace DCPS {
 
     if (ACE_OS::strlen(profileName) == 0)
     {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: QOS_XML_Handler::delQoSProfile - ")
-        ACE_TEXT("No profile specified\n")));
-      return DDS::RETCODE_ERROR;
+      if (DCPS_debug_level > 7)
+      {
+        ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: QOS_XML_Handler::delQoSProfile - ")
+          ACE_TEXT("No profile specified\n")));
+        return DDS::RETCODE_ERROR;
+      }
     }
 
     dds::qosProfile_seq::qos_profile_const_iterator it;
@@ -147,9 +154,9 @@ namespace DCPS {
 
     if (DCPS_debug_level > 7)
     {
-      ACE_DEBUG((LM_DEBUG,
-                ACE_TEXT("(%P|%t) ERROR: QOS_XML_Handler::delQoSProfile - ")
-                ACE_TEXT("Profile doesn't exists or wrong profile name.\n")));
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: QOS_XML_Handler::delQoSProfile - ")
+        ACE_TEXT("Profile doesn't exists or wrong profile name.\n")));
     }
     return DDS::RETCODE_ERROR;
   }
