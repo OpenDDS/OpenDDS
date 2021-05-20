@@ -59,11 +59,11 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-OPENDDS_STRING get_fully_qualified_hostname(ACE_INET_Addr* addr)
+String get_fully_qualified_hostname(ACE_INET_Addr* addr)
 {
   // cache the determined fully qualified hostname and its
   // address to be used on subsequent calls
-  static OPENDDS_STRING fullname;
+  static String fullname;
   static ACE_INET_Addr selected_address;
 
   if (fullname.length() == 0) {
@@ -619,7 +619,7 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_VECTOR(ACE_INET_Addr)
   return ACE_INET_Addr();
 }
 
-ACE_INET_Addr choose_single_coherent_address(const OPENDDS_STRING& url, bool prefer_loopback)
+ACE_INET_Addr choose_single_coherent_address(const String& url, bool prefer_loopback)
 {
   ACE_INET_Addr result;
 
@@ -628,11 +628,11 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_STRING& url, bool pre
   }
 
   // TODO: Fix for literal IPv6 addresses
-  OPENDDS_STRING host_name_str;
+  String host_name_str;
   unsigned short port_number = 0;
 
-  OPENDDS_STRING::size_type port_div = url.find_last_of(':');
-  if (port_div != OPENDDS_STRING::npos) {
+  String::size_type port_div = url.find_last_of(':');
+  if (port_div != String::npos) {
     host_name_str = host_name_str = url.substr(0, port_div);
     port_number = static_cast<unsigned short>(std::strtoul(url.substr(port_div + 1).c_str(), 0, 10));
   } else {
@@ -727,7 +727,7 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_STRING& url, bool pre
 #ifdef ACE_WIN32
   static ACE_Thread_Mutex addr_cache_map_mutex_;
   typedef std::pair<SystemTimePoint, OPENDDS_SET(ACE_INET_Addr)> AddrCachePair;
-  typedef OPENDDS_MAP(OPENDDS_STRING, AddrCachePair) AddrCacheMap;
+  typedef OPENDDS_MAP(String, AddrCachePair) AddrCacheMap;
   static AddrCacheMap addr_cache_map_;
   ACE_Guard<ACE_Thread_Mutex> g(addr_cache_map_mutex_);
   SystemTimePoint now = SystemTimePoint::now();

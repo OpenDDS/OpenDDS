@@ -32,8 +32,8 @@ TEST(network_address_test, fully_qualified_domain_hostname_basic)
 {
   //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
 
-  OPENDDS_STRING empty;
-  OPENDDS_STRING hostname = get_fully_qualified_hostname();
+  String empty;
+  String hostname = get_fully_qualified_hostname();
   EXPECT_NE(hostname, empty);
 }
 
@@ -155,7 +155,7 @@ TEST(network_addres_test, choose_single_coherent_address_triple_self)
 {
   //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
 
-  OPENDDS_STRING hostname = get_fully_qualified_hostname();
+  String hostname = get_fully_qualified_hostname();
   ACE_INET_Addr addr1 = choose_single_coherent_address(hostname + ":5432", false);
   ACE_INET_Addr addr2 = choose_single_coherent_address(hostname + ":5432", false);
   ACE_INET_Addr addr3 = choose_single_coherent_address(hostname + ":5432", false);
