@@ -1,4 +1,5 @@
 #include <dds/DCPS/transport/framework/NetworkAddress.h>
+#include <dds/DCPS/transport/framework/TransportDebug.h>
 
 #include <gtest/gtest.h>
 
