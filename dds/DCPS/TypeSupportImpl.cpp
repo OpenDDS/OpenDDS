@@ -94,8 +94,9 @@ void TypeSupportImpl::populate_dependencies_i(const RcHandle<XTypes::TypeLookupS
       XTypes::TypeIdentifierWithSize ti_with_size = {*it, static_cast<ACE_CDR::ULong>(tobj_size)};
       deps_with_size.append(ti_with_size);
     } else if (XTypes::has_type_object(*it)) {
+      std::string kind = ek == XTypes::EK_MINIMAL ? "minimal" : "complete";
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: TypeSupportImpl::populate_dependencies, ")
-                 ACE_TEXT("local TypeIdentifier not found in local type map.\n")));
+                 ACE_TEXT("local %C TypeIdentifier not found in local type map.\n"), kind));
     }
   }
   tls->add_type_dependencies(type_id, deps_with_size);

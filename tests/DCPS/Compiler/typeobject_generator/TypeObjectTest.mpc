@@ -1,0 +1,11 @@
+project: dcps_test, googletest {
+  exename = *
+
+  Idl_Files {
+    TypeObjectTest.idl
+  }
+
+  TypeSupport_Files {
+    TypeObjectTest.idl
+  }
+}
