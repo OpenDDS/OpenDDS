@@ -3894,14 +3894,14 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        cd tests/DCPS/UnitTests
+        cd tests/unit-tests
         perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features ipv6=1 -features no_opendds_security=0
     - name: make unit tests
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
-        cd tests/DCPS/UnitTests
+        cd tests/unit-tests
         make
     - name: run OpenDDS tests
       shell: bash
@@ -4820,15 +4820,15 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        cd tests\DCPS\UnitTests
+        cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
     - name: make unit tests
       shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
-        cd tests\DCPS\UnitTests
-        msbuild -p:Configuration=Debug,Platform=x64 -m UnitTests.sln
+        cd tests\unit-tests
+        msbuild -p:Configuration=Debug,Platform=x64 -m unit_tests.sln
     - name: create autobuild config
       shell: bash
       run: |
@@ -5418,15 +5418,15 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        cd tests\DCPS\UnitTests
+        cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
     - name: make unit tests
       shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
-        cd tests\DCPS\UnitTests
-        msbuild -p:Configuration=Release,Platform=x64 -m UnitTests.sln
+        cd tests\unit-tests
+        msbuild -p:Configuration=Release,Platform=x64 -m unit_tests.sln
     - name: create autobuild config
       shell: bash
       run: |
@@ -6023,15 +6023,15 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        cd tests\DCPS\UnitTests
+        cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0
     - name: make unit tests
       shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
-        cd tests\DCPS\UnitTests
-        msbuild -p:Configuration=Release,Platform=x64 -m UnitTests.sln
+        cd tests\unit-tests
+        msbuild -p:Configuration=Release,Platform=x64 -m unit_tests.sln
     - name: create autobuild config
       shell: bash
       run: |
@@ -6712,15 +6712,15 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        cd tests\DCPS\UnitTests
+        cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features no_cxx11=0 -features java=1 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0
     - name: make unit tests
       shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
-        cd tests\DCPS\UnitTests
-        msbuild -p:Configuration=Release,Platform=x64 -m UnitTests.sln
+        cd tests\unit-tests
+        msbuild -p:Configuration=Release,Platform=x64 -m unit_tests.sln
     - name: create autobuild config
       shell: bash
       run: |
