@@ -178,9 +178,11 @@ if (!GetOptions(%opts)) {
 elsif ($help) {
     print_help();
 }
+my $files_passed = scalar(@ARGV);
 for my $list (@builtin_test_lists) {
     if (!exists($list->{enabled})) {
-        $list->{enabled} = defined($list->{option}) ? $list->{option} : $list->{default};
+        $list->{enabled} = defined($list->{option}) ? $list->{option} :
+            $files_passed ? 0 : $list->{default};
     }
 }
 my $query = $show_configs || $list_configs || $list_tests;
@@ -220,9 +222,9 @@ if ($list_configs) {
 }
 
 if (!$list_tests) {
-    print "Test Lists:", join(',', @file_list), "\n";
-    print "Configs: ", join(',', @PerlACE::ConfigList::Configs), "\n";
-    print "Excludes: ", join(',', @PerlACE::ConfigList::Excludes), "\n";
+    print "Test Lists: ", join(', ', @file_list), "\n";
+    print "Configs: ", join(', ', @PerlACE::ConfigList::Configs), "\n";
+    print "Excludes: ", join(', ', @PerlACE::ConfigList::Excludes), "\n";
 }
 
 foreach my $test_lst (@file_list) {
