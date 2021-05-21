@@ -2,60 +2,230 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
     & eval 'exec perl -S $0 $argv:q'
     if 0;
 
-# -*- perl -*-
-# This file is for running the run_test.pl scripts listed in
-# auto_run_tests.lst.
+# Executes test list files (*.lst), which contain commands with conditions
+# called configurations under which the commands are run.
 
-use lib "$ENV{ACE_ROOT}/bin";
-use lib "$ENV{DDS_ROOT}/bin";
+use strict;
+use warnings;
+
+use Env qw(ACE_ROOT DDS_ROOT PATH);
+
+use lib "$ACE_ROOT/bin";
+use lib "$DDS_ROOT/bin";
 use PerlDDS::Run_Test;
 
 use Getopt::Long;
 use Cwd;
-use Env qw(DDS_ROOT PATH);
-use strict;
+use POSIX qw(SIGINT);
 
-################################################################################
+my $dry_run = 0;
 
-my ($opt_h, $opt_d, $opt_a, $opt_x, $opt_s, @opt_l);
-
-if (!GetOptions('h' => \$opt_h,
-                'd' => \$opt_d,
-                'a' => \$opt_a,
-                'x' => \$opt_x,
-                's=s' => \$opt_s,
-                'l=s' => \@opt_l)
-    || $opt_h) {
-    print "auto_run_tests.pl [-a] [-h] [-s sandbox] [-o] [-t] [-l listfile]\n";
-    print "\n";
-    print "Runs the tests listed in dcps_tests.lst\n";
-    print "\n";
-    print "Options:\n";
-    print "    -h          display this help\n";
-    print "    -c config   Run the tests for the <config> configuration\n";
-    print "    -Config cfg Run the tests for the <cfg> configuration\n";
-    print "    -s sandbox  Runs each program using a sandbox program\n";
-    print "    -a          Run all DDS (DCPS) tests (default unless -l)\n";
-    print "    -x          Stop on any failure\n";
-    print "    -l listfile Run the tests specified in list file\n";
-    print "\n";
-    my $dcps_config_list = new PerlACE::ConfigList;
-    $dcps_config_list->load($DDS_ROOT . "/tests/dcps_tests.lst");
-    print "DCPS Test Configs: " . $dcps_config_list->list_configs() . "\n";
-    exit 1;
+sub cd {
+    my $dir = shift;
+    chdir($dir) || die "auto_run_tests: Error: Cannot chdir to $dir";
 }
 
-my @file_list;
+sub run_command {
+    my $what = shift;
+    my $command = shift;
+    my $print_error = shift // 1;
 
-if ($opt_a || !scalar @opt_l) {
-    push(@file_list, "$DDS_ROOT/tests/dcps_tests.lst");
+    if ($dry_run) {
+        my $cwd = getcwd();
+        print "In \"$cwd\" would run:\n    $command\n";
+        return 0;
+    }
+
+    my $result = 0;
+    if (system($command)) {
+        $result = $? >> 8;
+        my $signal = $? & 127;
+        die("auto_run_tests: \"$what\" was interrupted") if ($signal == SIGINT);
+        if ($print_error) {
+            my $coredump = $? & 128;
+            my $error_message;
+            if ($? == -1) {
+                $error_message = "failed to run: $!";
+            }
+            elsif ($signal) {
+                $error_message = sprintf("exited on signal %d", ($signal));
+                $error_message .= " and created coredump" if ($coredump);
+            }
+            else {
+                $error_message = sprintf("returned with status %d", $result);
+            }
+            print "auto_run_tests: Error: $what $error_message\n";
+        }
+    }
+    return $result;
 }
 
-if (scalar @opt_l) {
-    push(@file_list, @opt_l);
+my @builtin_test_lists = (
+    {
+        name => 'dcps',
+        file => "tests/dcps_tests.lst",
+        default => 1,
+    },
+    {
+        name => 'security',
+        file => "tests/security/security_tests.lst",
+    },
+    {
+        name => 'java',
+        file => "java/tests/dcps_java_tests.lst",
+    },
+    {
+        name => 'modeling',
+        file => "tools/modeling/tests/modeling_tests.lst",
+    },
+);
+my %builtin_test_lists_hash = map { $_->{name} => $_ } @builtin_test_lists;
+
+sub print_usage {
+    my $error = shift // 1;
+
+    my $fd = $error ? *STDERR : *STDOUT;
+    print $fd
+        "auto_run_tests.pl [<options> ...] [<list_file> ...]\n" .
+        "auto_run_tests.pl -h | --help\n" .
+        "\n";
+    if ($error) {
+        print STDERR "Use auto_run_tests.pl --help to see all the options\n";
+        exit(1);
+    }
 }
 
-my $cwd = getcwd();
+sub print_help {
+    print_usage(0);
+
+    print
+        "Executes test list files (*.lst), which contain commands with conditions called\n" .
+        "configurations under which the commands are run.\n" .
+        "\n" .
+        "Options:\n" .
+        "    --help | -h              Display this help\n";
+
+    my $indent = 29;
+    foreach my $list (@builtin_test_lists) {
+        my $prefix = "    --" . ($list->{default} ? "no-" : "");
+        print sprintf("%s%-" . ($indent - length($prefix) - 1) . "s Include %s\n",
+            $prefix, $list->{name}, $list->{file});
+        print sprintf(" " x 29 . "%sncluded by default\n",
+            $list->{default} ? "I" : "Not i");
+    }
+
+    print
+        "    --cmake                  Run CMake Tests\n" .
+        "                             Not included by default\n" .
+        "    --ctest <cmd>            CTest to use to run CMake Tests\n" .
+        "                             Default is `ctest`\n" .
+        "    --ctest-args <args>      Additional arguments to pass to CTest\n" .
+        # These two are processed by PerlACE/ConfigList.pm
+        "    -Config <cfg>            Include tests with <cfg> configuration\n" .
+        "    -Exclude <cfg>           Exclude tests with <cfg> configuration\n" .
+        "                             This is parsed as a Perl regex and will always\n" .
+        "                             override -Config regardless of the order\n" .
+
+        # This one is processed by PerlACE/Process.pm
+        "    -ExeSubDir <dir>         Subdirectory for finding the executables\n" .
+
+        "    --sandbox | -s <sandbox> Runs each program using a sandbox program\n" .
+        "    --dry-run | -z           Do everything except run the tests\n" .
+        "    --show-configs           Print possible values for -Config and -Excludes\n" .
+        "                             broken down by list file\n" .
+        "    --list-configs           Print combined set of the configs from the list\n" .
+        "                             files\n" .
+        "    --list-tests             List all the tests that would run\n" .
+        "    --stop-on-fail | -x      Stop on any failure\n";
+
+    exit(0);
+}
+
+# Parse Options
+my $help = 0;
+my $sandbox = '';
+my $show_configs = 0;
+my $list_configs = 0;
+my $list_tests = 0;
+my $stop_on_fail = 0;
+my $cmake = 0;
+my $ctest = 'ctest';
+my $ctest_args = '';
+my %opts = (
+    'help|h' => \$help,
+    'sandbox|s=s' => \$sandbox,
+    'dry-run|z' => \$dry_run,
+    'show-configs' => \$show_configs,
+    'list-configs' => \$list_configs,
+    'list-tests' => \$list_tests,
+    'stop-on-fail|x' => \$stop_on_fail,
+    'cmake' => \$cmake,
+    'ctest=s' => \$ctest,
+    'ctest-args=s' => \$ctest_args,
+);
+foreach my $list (@builtin_test_lists) {
+    if (!exists($list->{default})) {
+        $list->{default} = 0;
+    }
+    $list->{option} = undef;
+    my $opt = "$list->{name}!";
+    $opts{$opt} = \$list->{option};
+}
+Getopt::Long::Configure('bundling', 'no_auto_abbrev');
+if (!GetOptions(%opts)) {
+    print_usage(1);
+}
+elsif ($help) {
+    print_help();
+}
+my $files_passed = scalar(@ARGV);
+for my $list (@builtin_test_lists) {
+    if (!exists($list->{enabled})) {
+        $list->{enabled} = defined($list->{option}) ? $list->{option} :
+            $files_passed ? 0 : $list->{default};
+    }
+}
+my $query = $show_configs || $list_configs || $list_tests;
+
+# Determine what test list files to use
+my @file_list = ();
+foreach my $list (@builtin_test_lists) {
+    push(@file_list, "$DDS_ROOT/$list->{file}") if ($query || $list->{enabled});
+}
+push(@file_list, @ARGV);
+foreach my $list (@file_list) {
+    die("$list is not a readable file!") if (!-r $list);
+}
+
+if ($show_configs) {
+    foreach my $test_list (@file_list) {
+        my $config_list = new PerlACE::ConfigList;
+        $config_list->load($test_list);
+        print "$test_list: " . $config_list->list_configs() . "\n";
+    }
+    exit(0);
+}
+
+if ($list_configs) {
+    my %configs = ();
+    foreach my $test_list (@file_list) {
+        my $config_list = new PerlACE::ConfigList;
+        $config_list->load($test_list);
+        for my $config (split(/ /, $config_list->list_configs())) {
+            $configs{$config} = 1;
+        }
+    }
+    for my $config (sort(keys(%configs))) {
+        print "$config\n";
+    }
+    exit(0);
+}
+
+if (!$list_tests) {
+    print "Test Lists: ", join(', ', @file_list), "\n";
+    print "Configs: ", join(', ', @PerlACE::ConfigList::Configs), "\n";
+    print "Excludes: ", join(', ', @PerlACE::ConfigList::Excludes), "\n";
+}
 
 foreach my $test_lst (@file_list) {
 
@@ -66,6 +236,11 @@ foreach my $test_lst (@file_list) {
     $PATH .= $Config::Config{path_sep} . '.';
 
     foreach my $test ($config_list->valid_entries()) {
+        if ($list_tests) {
+            print "$test\n";
+            next;
+        }
+
         my $directory = ".";
         my $program = ".";
 
@@ -81,32 +256,29 @@ foreach my $test_lst (@file_list) {
             $program = $test;
         }
 
-        my $start_time_string = localtime;
         print "auto_run_tests: $test\n";
-        print "start $test at $start_time_string\n";
 
-        chdir($DDS_ROOT."/$directory")
-            || die "Error: Cannot chdir to $DDS_ROOT/$directory";
+        cd("$DDS_ROOT/$directory");
 
         my $subdir = $PerlACE::Process::ExeSubDir;
         my $progNoArgs = $program;
         if ($program =~ /(.*?) (.*)/) {
             $progNoArgs = $1;
             if (! -e $progNoArgs) {
-                print STDERR "Error: $directory.$1 does not exist\n";
+                print STDERR "auto_run_tests: Error: $directory/$1 does not exist\n";
                 next;
-              }
-          }
+            }
+        }
         else {
             my $cmd = $program;
             $cmd = $subdir.$cmd if ($program !~ /\.pl$/);
             if ((! -e $cmd) && (! -e "$cmd.exe")) {
-                print STDERR "Error: $directory/$cmd does not exist\n";
+                print STDERR "auto_run_tests: Error: $directory/$cmd does not exist\n";
                 next;
-              }
-          }
+            }
+        }
 
-        ### Genrate the -ExeSubDir and -Config options
+        ### Generate the -ExeSubDir and -Config options
         my $inherited_options = " -ExeSubDir $subdir ";
 
         foreach my $config ($config_list->my_config_list()) {
@@ -115,8 +287,8 @@ foreach my $test_lst (@file_list) {
 
         my $cmd = '';
         $program = "perl $program" if ($progNoArgs =~ /\.pl$/);
-        if ($opt_s) {
-            $cmd = "$opt_s \"$program $inherited_options\"";
+        if ($sandbox) {
+            $cmd = "$sandbox \"$program $inherited_options\"";
         }
         else {
             $cmd = $program.$inherited_options;
@@ -124,27 +296,26 @@ foreach my $test_lst (@file_list) {
         }
 
         my $result = 0;
+        my $start_time = time();
+        $result = run_command($test, $cmd);
+        my $time = time() - $start_time;
+        print "\nauto_run_tests_finished: $test Time:$time"."s Result:$result\n";
+        print "==============================================================================\n";
 
-        if (defined $opt_d) {
-            print "Running: $cmd\n";
+        if ($result && $stop_on_fail) {
+            exit(1);
         }
-        else {
-            my $start_time = time();
-            $result = system($cmd);
-            my $time = time() - $start_time;
+    }
+}
 
-            if ($result != 0) {
-                print "Error: $test returned with status $result\n";
-                if ($opt_x) {
-                    exit($result >> 8);
-                }
-            }
+if ($cmake) {
+    cd("$DDS_ROOT/tests/cmake/build");
+    if (run_command("CMake Tests", "$ctest --no-compress-output -T Test $ctest_args")) {
+        exit(1) if ($stop_on_fail);
+    }
+    elsif (run_command("Process CMake Test Results", "../ctest-to-auto-run-tests.py .. .")) {
+        exit(1);
+    }
+}
 
-            my $stop_time_string = localtime;
-            print "stop $test at $stop_time_string\n";
-            print "\nauto_run_tests_finished: $test Time:$time"
-                . "s Result:$result\n";
-        }
-    } #foreach $test
-    chdir $cwd; #back to base dir
-} #foreach $test_lst
+# vim: expandtab:ts=4:sw=4
