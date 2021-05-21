@@ -120,7 +120,7 @@ Perl is used for the configure script, running the automated tests and examples
 included in this source tree, and generating Makefiles or Visual Studio project
 files.
 
-On Windows we recommend the use of [Straweberry Perl](https://strawberryperl.com).
+On Windows we recommend the use of [Strawberry Perl](https://strawberryperl.com).
 
 ### Optional Dependencies
 
