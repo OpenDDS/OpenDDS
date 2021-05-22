@@ -56,6 +56,11 @@ private:
     size_t lowlink;
     bool on_stack;
     std::string name;
+
+    bool operator<(const Element& other) const
+    {
+      return name < other.name;
+    }
   };
 
   void consider(Element& v, AST_Type* type, const std::string& anonymous_name);
@@ -76,7 +81,6 @@ private:
   void set_builtin_member_annotations(AST_Decl* member,
     OpenDDS::XTypes::Optional<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>& annotations);
 
-  static bool name_sorter(const Element& x, const Element& y);
   OpenDDS::XTypes::TypeIdentifier get_minimal_type_identifier(AST_Type* type);
   OpenDDS::XTypes::TypeIdentifier get_complete_type_identifier(AST_Type* type);
   bool generate(AST_Type* node, UTL_ScopedName* name);

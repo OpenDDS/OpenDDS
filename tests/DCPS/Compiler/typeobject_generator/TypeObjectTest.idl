@@ -1,17 +1,18 @@
 @mutable
 struct NestedStruct {
-  @hashid("a_short") short a_short;
-  @hashid("a_long") long a_long;
-  @hashid("a_float") float a_float;
+  @hashid("short_member") short a_short;
+  @hashid("long_member") long a_long;
+  @hashid("float_member") float a_float;
 };
 
-@appendable
 enum UnionDisc { SEQUENCE_MEMBER, STRUCT_MEMBER, PRIMITIVE_MEMBER };
+
+typedef sequence<long, 10> Long10Seq;
 
 @final
 union SomeUnion switch(@key UnionDisc) {
 case SEQUENCE_MEMBER:
-  sequence<long> a_seq;
+  Long10Seq a_seq;
 case STRUCT_MEMBER:
   NestedStruct a_struct;
 case PRIMITIVE_MEMBER:
