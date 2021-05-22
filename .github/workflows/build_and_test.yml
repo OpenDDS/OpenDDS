@@ -31,6 +31,7 @@ on:
     branches:
       - master
       - branch-DDS-3.*
+      - xtypes_*
     paths:
       - '**'
       # Don't run this workflow if the only files that changed are the

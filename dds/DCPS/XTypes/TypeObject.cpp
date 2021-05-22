@@ -322,285 +322,10 @@ bool has_type_object(const TypeIdentifier& ti)
 }
 
 namespace {
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalAnnotationParameter& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteAnnotationParameter& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CommonAliasBody& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalAliasBody& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalAliasType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const AppliedAnnotation& ann,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
 template <typename T>
 void compute_dependencies(const TypeMap& type_map,
                           const Sequence<T>& type,
                           OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const Optional<AppliedAnnotationSeq>& ann_seq,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteTypeDetail& type_detail,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteAliasHeader& header,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteAliasBody& body,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteAliasType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CommonAnnotationParameter& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalAnnotationParameter& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalAnnotationType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteAnnotationParameter& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteAnnotationType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalStructHeader& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CommonStructMember& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalStructMember& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalStructType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteStructHeader& header,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteMemberDetail& detail,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteStructMember& member,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteStructType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CommonDiscriminatorMember& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalDiscriminatorMember& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CommonUnionMember& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalUnionMember& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalUnionType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteUnionHeader& header,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteDiscriminatorMember& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteUnionMember& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteUnionType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap&,
-                          const MinimalBitsetType&,
-                          OPENDDS_SET(TypeIdentifier)&);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteBitsetHeader& header,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteBitfield& field,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteBitsetType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CommonCollectionElement& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalCollectionElement& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalSequenceType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteCollectionHeader& header,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteElementDetail& detail,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteCollectionElement& element,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteSequenceType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalArrayType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteArrayHeader& header,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteArrayType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalMapType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteMapType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap&,
-                          const MinimalEnumeratedType&,
-                          OPENDDS_SET(TypeIdentifier)&);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteEnumeratedHeader& header,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteEnumeratedLiteral& literal,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteEnumeratedType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap&,
-                          const MinimalBitmaskType&,
-                          OPENDDS_SET(TypeIdentifier)&);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteBitflag& bitflag,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteBitmaskType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalTypeObject& type_object,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteTypeObject& type_object,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const TypeObject& type_object,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap&,
-                          const StringSTypeDefn&,
-                          OPENDDS_SET(TypeIdentifier)&);
-
-void compute_dependencies(const TypeMap&,
-                          const StringLTypeDefn&,
-                          OPENDDS_SET(TypeIdentifier)&);
-
-void compute_dependencies(const TypeMap&,
-                          const PlainCollectionHeader&,
-                          OPENDDS_SET(TypeIdentifier)&);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const PlainSequenceSElemDefn& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const PlainSequenceLElemDefn& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const PlainArraySElemDefn& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const PlainArrayLElemDefn& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const PlainMapSTypeDefn& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap& type_map,
-                          const PlainMapLTypeDefn& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
-
-void compute_dependencies(const TypeMap&,
-                          const StronglyConnectedComponentId&,
-                          OPENDDS_SET(TypeIdentifier)&);
 
 void compute_dependencies(const TypeMap& type_map,
                           const CommonAliasBody& type,
@@ -628,16 +353,6 @@ void compute_dependencies(const TypeMap& type_map,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
   compute_dependencies(type_map, ann.annotation_typeid, dependencies);
-}
-
-template <typename T>
-void compute_dependencies(const TypeMap& type_map,
-                          const Sequence<T>& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  for (typename Sequence<T>::const_iterator pos = type.begin(), limit = type.end(); pos != limit; ++pos) {
-    compute_dependencies(type_map, *pos, dependencies);
-  }
 }
 
 void compute_dependencies(const TypeMap& type_map,
@@ -1180,6 +895,16 @@ void compute_dependencies(const TypeMap&,
                           OPENDDS_SET(TypeIdentifier)&)
 {
   // Do nothing.
+}
+
+template <typename T>
+void compute_dependencies(const TypeMap& type_map,
+                          const Sequence<T>& type,
+                          OPENDDS_SET(TypeIdentifier)& dependencies)
+{
+  for (typename Sequence<T>::const_iterator pos = type.begin(), limit = type.end(); pos != limit; ++pos) {
+    compute_dependencies(type_map, *pos, dependencies);
+  }
 }
 
 }
