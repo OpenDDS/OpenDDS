@@ -923,7 +923,7 @@ namespace XTypes {
       , uint16_value(value)
     {}
 
-    AnnotationParameterValue(ACE_CDR::Long value)
+    explicit AnnotationParameterValue(ACE_CDR::Long value)
       : kind(TK_INT32)
       , int32_value(value)
     {}
@@ -1009,10 +1009,9 @@ namespace XTypes {
 
     bool operator<(const AppliedAnnotationParameter& other) const
     {
-      for (unsigned int i = 0; i < 4; ++i) {
-        if (paramname_hash[i] < other.paramname_hash[i]) return true;
-        if (other.paramname_hash[i] < paramname_hash[i]) return false;
-      }
+      int ret = std::memcmp(paramname_hash, other.paramname_hash, sizeof paramname_hash);
+      if (ret < 0) return true;
+      if (ret > 0) return false;
       return false;
     }
   };
@@ -1239,7 +1238,7 @@ namespace XTypes {
     CompleteStructType(const StructTypeFlag& a_struct_flags,
                        const CompleteStructHeader& a_header,
                        const CompleteStructMemberSeq& a_member_seq)
-      :struct_flags(a_struct_flags)
+      : struct_flags(a_struct_flags)
       , header(a_header)
       , member_seq(a_member_seq)
     {}

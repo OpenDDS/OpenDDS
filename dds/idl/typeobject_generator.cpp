@@ -640,7 +640,7 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::AnnotationParameterValue& p
     out << "static_cast<ACE_CDR::UShort>(" << param_value.uint16_value << ")";
     break;
   case OpenDDS::XTypes::TK_INT32:
-    out << "XTypes::TK_INT32, " << param_value.int32_value;
+    out << "static_cast<ACE_CDR::Long>(" << param_value.int32_value << ")";
     break;
   case OpenDDS::XTypes::TK_UINT32:
     out << "static_cast<ACE_CDR::ULong>(" << param_value.uint32_value << ")";
