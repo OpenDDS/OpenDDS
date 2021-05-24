@@ -12,11 +12,9 @@ class ScopedDebugLevels
 {
 public:
   explicit ScopedDebugLevels(int level) : previous_transport_debug_level_(OpenDDS::DCPS::Transport_debug_level) {
-    ACE_DEBUG((LM_DEBUG, "BLURP\n"));
     OpenDDS::DCPS::Transport_debug_level = level;
   }
   ~ScopedDebugLevels() {
-    ACE_DEBUG((LM_DEBUG, "BLAH\n"));
     OpenDDS::DCPS::Transport_debug_level = previous_transport_debug_level_;
   }
 private:
@@ -170,6 +168,125 @@ TEST(network_addres_test, choose_single_coherent_address_triple_self)
   EXPECT_FALSE(addr2.is_ipv4_mapped_ipv6());
   EXPECT_FALSE(addr3.is_ipv4_mapped_ipv6());
 #endif
+}
+
+#if defined ACE_HAS_IPV6
+TEST(network_addres_test, choose_single_coherent_address_ipv6_literals)
+{
+  //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
+
+  ACE_INET_Addr addr1 = choose_single_coherent_address("2001:4860:4860::8844:22", false);
+  ACE_INET_Addr addr2 = choose_single_coherent_address("2001:4860:4860:0000:0000:0000:0000:8844:22", false);
+  ACE_INET_Addr addr3 = choose_single_coherent_address("[2001:4860:4860::8844]:22", false);
+  ACE_INET_Addr addr4 = choose_single_coherent_address("[2001:4860:4860:0000:0000:0000:0000:8844]:22", false);
+  EXPECT_NE(addr1, ACE_INET_Addr());
+  EXPECT_NE(addr2, ACE_INET_Addr());
+  EXPECT_NE(addr3, ACE_INET_Addr());
+  EXPECT_NE(addr4, ACE_INET_Addr());
+  EXPECT_EQ(addr1, addr2);
+  EXPECT_EQ(addr2, addr3);
+  EXPECT_EQ(addr3, addr4);
+  EXPECT_EQ(addr4, addr1);
+  EXPECT_EQ(addr1.get_port_number(), 22);
+  EXPECT_EQ(addr2.get_port_number(), 22);
+  EXPECT_EQ(addr3.get_port_number(), 22);
+  EXPECT_EQ(addr4.get_port_number(), 22);
+#if defined ACE_HAS_IPV6 && defined IPV6_V6ONLY
+  EXPECT_FALSE(addr1.is_ipv4_mapped_ipv6());
+  EXPECT_FALSE(addr2.is_ipv4_mapped_ipv6());
+  EXPECT_FALSE(addr3.is_ipv4_mapped_ipv6());
+  EXPECT_FALSE(addr4.is_ipv4_mapped_ipv6());
+#endif
+}
+
+TEST(network_addres_test, choose_single_coherent_address_ipv6_literals_port0)
+{
+  //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
+
+  ACE_INET_Addr addr1 = choose_single_coherent_address("2001:4860:4860::8844:0", false);
+  ACE_INET_Addr addr2 = choose_single_coherent_address("2001:4860:4860:0000:0000:0000:0000:8844:0", false);
+  ACE_INET_Addr addr3 = choose_single_coherent_address("[2001:4860:4860::8844]", false);
+  ACE_INET_Addr addr4 = choose_single_coherent_address("[2001:4860:4860:0000:0000:0000:0000:8844]", false);
+  ACE_INET_Addr addr5 = choose_single_coherent_address("[2001:4860:4860::8844]:0", false);
+  ACE_INET_Addr addr6 = choose_single_coherent_address("[2001:4860:4860:0000:0000:0000:0000:8844]:0", false);
+  EXPECT_NE(addr1, ACE_INET_Addr());
+  EXPECT_NE(addr2, ACE_INET_Addr());
+  EXPECT_NE(addr3, ACE_INET_Addr());
+  EXPECT_NE(addr4, ACE_INET_Addr());
+  EXPECT_NE(addr5, ACE_INET_Addr());
+  EXPECT_NE(addr6, ACE_INET_Addr());
+  EXPECT_EQ(addr1, addr2);
+  EXPECT_EQ(addr2, addr3);
+  EXPECT_EQ(addr3, addr4);
+  EXPECT_EQ(addr4, addr5);
+  EXPECT_EQ(addr5, addr6);
+  EXPECT_EQ(addr6, addr1);
+  EXPECT_EQ(addr1.get_port_number(), 0);
+  EXPECT_EQ(addr2.get_port_number(), 0);
+  EXPECT_EQ(addr3.get_port_number(), 0);
+  EXPECT_EQ(addr4.get_port_number(), 0);
+  EXPECT_EQ(addr5.get_port_number(), 0);
+  EXPECT_EQ(addr6.get_port_number(), 0);
+#if defined ACE_HAS_IPV6 && defined IPV6_V6ONLY
+  EXPECT_FALSE(addr1.is_ipv4_mapped_ipv6());
+  EXPECT_FALSE(addr2.is_ipv4_mapped_ipv6());
+  EXPECT_FALSE(addr3.is_ipv4_mapped_ipv6());
+  EXPECT_FALSE(addr4.is_ipv4_mapped_ipv6());
+  EXPECT_FALSE(addr5.is_ipv4_mapped_ipv6());
+  EXPECT_FALSE(addr6.is_ipv4_mapped_ipv6());
+#endif
+}
+
+TEST(network_addres_test, choose_single_coherent_address_ipv6_literals_localhost)
+{
+  //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
+
+  ACE_INET_Addr addr1 = choose_single_coherent_address("::1:42", false); // This is ambiguous / malformed, but we should probably handle it
+  ACE_INET_Addr addr2 = choose_single_coherent_address("[::1]:42", false);
+  EXPECT_NE(addr1, ACE_INET_Addr());
+  EXPECT_NE(addr2, ACE_INET_Addr());
+  EXPECT_EQ(addr1, addr2);
+  EXPECT_EQ(addr2, addr1);
+  EXPECT_EQ(addr1.get_port_number(), 42);
+  EXPECT_EQ(addr2.get_port_number(), 42);
+#if defined ACE_HAS_IPV6 && defined IPV6_V6ONLY
+  EXPECT_FALSE(addr1.is_ipv4_mapped_ipv6());
+  EXPECT_FALSE(addr2.is_ipv4_mapped_ipv6());
+#endif
+}
+
+TEST(network_addres_test, choose_single_coherent_address_ipv6_literals_localhost_port0)
+{
+  //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
+
+  ACE_INET_Addr addr1 = choose_single_coherent_address("::1", false);
+  EXPECT_NE(addr1, ACE_INET_Addr());
+  EXPECT_EQ(addr1.get_port_number(), 0);
+#if defined ACE_HAS_IPV6 && defined IPV6_V6ONLY
+  EXPECT_FALSE(addr1.is_ipv4_mapped_ipv6());
+#endif
+}
+#endif // ACE_HAS_IPV6
+
+TEST(network_addres_test, choose_single_coherent_address_ipv4_literals)
+{
+  //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
+
+  ACE_INET_Addr addr1 = choose_single_coherent_address("192.168.1.23:30", false);
+  EXPECT_NE(addr1, ACE_INET_Addr());
+  EXPECT_EQ(addr1.get_port_number(), 30);
+}
+
+TEST(network_addres_test, choose_single_coherent_address_ipv4_literals_port0)
+{
+  //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
+
+  ACE_INET_Addr addr1 = choose_single_coherent_address("10.20.30.40", false);
+  ACE_INET_Addr addr2 = choose_single_coherent_address("10.20.30.40:0", false);
+  EXPECT_NE(addr1, ACE_INET_Addr());
+  EXPECT_NE(addr2, ACE_INET_Addr());
+  EXPECT_EQ(addr1.get_port_number(), 0);
+  EXPECT_EQ(addr2.get_port_number(), 0);
 }
 
 int main(int argc, char* argv[])

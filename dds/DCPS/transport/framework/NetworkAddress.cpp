@@ -129,7 +129,7 @@ String get_fully_qualified_hostname(ACE_INET_Addr* addr)
             OpenDDS::DCPS::HostnameInfo info;
             info.index_ = i;
             info.hostname_ = hostname;
-            if (choose_single_coherent_address(hostname, false) != ACE_INET_Addr()) {
+            if (choose_single_coherent_address(info.hostname_, false) != ACE_INET_Addr()) {
               nonFQDN.push_back(info);
             }
           }
@@ -619,28 +619,49 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_VECTOR(ACE_INET_Addr)
   return ACE_INET_Addr();
 }
 
-ACE_INET_Addr choose_single_coherent_address(const String& url, bool prefer_loopback)
+ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_loopback)
 {
   ACE_INET_Addr result;
 
-  if (url.empty()) {
-    return result;
+  if (address.empty()) {
+    return ACE_INET_Addr();
   }
 
-  // TODO: Fix for literal IPv6 addresses
   String host_name_str;
   unsigned short port_number = 0;
 
-  String::size_type port_div = url.find_last_of(':');
+#ifdef ACE_HAS_IPV6
+  const String::size_type openb = address.find_first_of('[');
+  const String::size_type closeb = address.find_first_of(']', openb);
+  const String::size_type last_double = address.rfind("::", closeb);
+  const String::size_type port_div = closeb != String::npos ?
+                                       address.find_first_of(':', closeb + 1) :
+                                       (last_double != String::npos ?
+                                         address.find_first_of(':', last_double + 2) :
+                                         address.find_last_of(':'));
+#else
+  const String::size_type openb = String::npos;
+  const String::size_type closeb = String::npos;
+  const String::size_type port_div = address.find_last_of(':');
+#endif
+
   if (port_div != String::npos) {
-    host_name_str = host_name_str = url.substr(0, port_div);
-    port_number = static_cast<unsigned short>(std::strtoul(url.substr(port_div + 1).c_str(), 0, 10));
+    if (openb != String::npos && closeb != String::npos) {
+      host_name_str = address.substr(openb + 1, closeb - 1);
+    } else {
+      host_name_str = address.substr(0, port_div);
+    }
+    port_number = static_cast<unsigned short>(std::strtoul(address.substr(port_div + 1).c_str(), 0, 10));
   } else {
-    host_name_str = url;
+    if (openb != String::npos && closeb != String::npos) {
+      host_name_str = address.substr(openb + 1, closeb - 1);
+    } else {
+      host_name_str = address;
+    }
   }
 
   if (host_name_str.empty()) {
-    return result;
+    return ACE_INET_Addr();
   }
 
   const char* host_name = host_name_str.c_str();
@@ -719,7 +740,8 @@ ACE_INET_Addr choose_single_coherent_address(const String& url, bool prefer_loop
   const int error = ACE_OS::getaddrinfo(host_name, 0, &hints, &res);
 
   if (error) {
-    return result;
+    ACE_ERROR((LM_ERROR, "(%P|%t) choose_single_coherent_address() - Call to getaddrinfo() for hostname %C returned error: %d\n", host_name, error));
+    return ACE_INET_Addr();
   }
 
   OPENDDS_VECTOR(ACE_INET_Addr) addresses;
