@@ -153,8 +153,6 @@ tests/DCPS/NotifyTest/run_test.pl: !DCPS_MIN !GHA_OPENDDS_SAFETY_PROFILE
 tests/DCPS/Observer/run_test.pl: !DCPS_MIN !GH_ACTIONS
 tests/DCPS/Reliability/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Reliability/run_test.pl rtps: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/Reliability/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
-tests/DCPS/Reliability/run_test.pl rtps: !DCPS_MIN !GH_ACTIONS
 tests/DCPS/ReliableBestEffortReaders/run_test.pl: RTPS !DCPS_MIN !GH_ACTIONS
 
 tests/DCPS/WriteDataContainer/run_test.pl: !DCPS_MIN
