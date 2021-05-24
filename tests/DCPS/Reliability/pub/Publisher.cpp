@@ -28,28 +28,15 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Initialize DomainParticipantFactory, handling command line args
     dpf = TheParticipantFactoryWithArgs(argc, argv);
 
-    bool keep_last_one = false;
-
     // Override message count
     long msg_count = 5000;
     if (argc > 1) {
-      if (!ACE_OS::strcmp(ACE_TEXT("-keep-last-one"), argv[1])) {
-        keep_last_one = true;
-      } else {
         msg_count = ACE_OS::atoi(argv[1]);
-      }
     }
-
     if (msg_count < 0 || msg_count > 5000) {
       ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("ERROR: %N:%l: main() -")
         ACE_TEXT(" specified msg_count outside range!\n")), -1);
-    }
-
-    if (argc > 2) {
-      if (!ACE_OS::strcmp(ACE_TEXT("-keep-last-one"), argv[2])) {
-        keep_last_one = true;
-      }
     }
 
     // Create domain participant
@@ -62,7 +49,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::Publisher_var publisher = createPublisher(participant);
 
     // Create data writer for the topic
-    DDS::DataWriter_var writer = createDataWriter(publisher, topic, keep_last_one);
+    DDS::DataWriter_var writer = createDataWriter(publisher, topic);
 
     // Safely downcast data writer to type-specific data writer
     Reliability::MessageDataWriter_var msg_writer = narrow(writer);
