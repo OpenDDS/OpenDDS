@@ -518,7 +518,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_EXTENDED -Config RTPS -Config LINUX -Config CXX11 -Config OPENDDS_SAFETY_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GHA_OPENDDS_SAFETY_PROFILE -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_EXTENDED -Config RTPS -Config LINUX -Config OPENDDS_SAFETY_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GHA_OPENDDS_SAFETY_PROFILE -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -613,7 +613,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_BASE -Config RTPS -Config LINUX -Config CXX11 -Config OPENDDS_SAFETY_PROFILE -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GHA_OPENDDS_SAFETY_PROFILE -Config GHA_NO_BUILT_IN_TOPICS -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_BASE -Config RTPS -Config LINUX -Config OPENDDS_SAFETY_PROFILE -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GHA_OPENDDS_SAFETY_PROFILE -Config GHA_NO_BUILT_IN_TOPICS -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -849,7 +849,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config LINUX -Config XERCES3 -Config WCHAR -Config CXX11 -Config OPENDDS_SECURITY -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GHA_NO_BUILT_IN_TOPICS -Config GH_ACTIONS  -a -l tests/security/security_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config LINUX -Config XERCES3 -Config WCHAR -Config CXX11 -Config OPENDDS_SECURITY -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GHA_NO_BUILT_IN_TOPICS -Config GH_ACTIONS  --security"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -2205,7 +2205,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS -a -l java/tests/dcps_java_tests.lst -l tools/modeling/tests/modeling_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS --java --modeling"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -2445,13 +2445,12 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS -a -l tests/security/security_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS --security"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
         echo "leak:getaddrinfo" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
-        echo "leak:send_graceful_disconnect_message" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
         export LSAN_OPTIONS=suppressions=$GITHUB_WORKSPACE/OpenDDS/suppr.txt
         export ASAN_OPTIONS=detect_leaks=1:fast_unwind_on_malloc=0
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -2685,7 +2684,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS -a -l tests/security/security_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS --security"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -2879,7 +2878,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config RTPS -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS -l tools/modeling/tests/modeling_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config RTPS -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS --modeling"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -3117,7 +3116,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config WCHAR -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS -a -l tests/security/security_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config WCHAR -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS --security"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -3311,7 +3310,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config WCHAR -Config RTPS -Config CXX11 -Config RAPIDJSON -Config DDS_NO_CONTENT_SUBSCRIPTION -Config GH_ACTIONS -a -l java/tests/dcps_java_tests.lst -l tools/modeling/tests/modeling_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config WCHAR -Config RTPS -Config CXX11 -Config RAPIDJSON -Config DDS_NO_CONTENT_SUBSCRIPTION -Config GH_ACTIONS --java --modeling"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -3681,7 +3680,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -l tests/static_ci_tests.lst -Config STATIC_MESSENGER -Config RTPS -Config STATIC -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS tests/static_ci_tests.lst -Config STATIC_MESSENGER -Config RTPS -Config STATIC -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -3805,7 +3804,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -l tests/static_ci_tests.lst -Config STATIC_COMPILER -Config RTPS -Config STATIC -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS tests/static_ci_tests.lst -Config STATIC_COMPILER -Config RTPS -Config STATIC -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -3929,7 +3928,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -l tests/static_ci_tests.lst -Config STATIC_UNIT -Config RTPS -Config STATIC -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS tests/static_ci_tests.lst -Config STATIC_UNIT -Config RTPS -Config STATIC -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -4192,7 +4191,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config RAPIDJSON -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config GH_ACTIONS -l tools/modeling/tests/modeling_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config RAPIDJSON -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config GH_ACTIONS --modeling"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -4574,7 +4573,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_MESSENGER -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config CXX11 -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_MESSENGER -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config CXX11 -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -4715,7 +4714,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_COMPILER -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config CXX11 -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_COMPILER -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config CXX11 -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -4855,7 +4854,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_UNIT -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config CXX11 -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_UNIT -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config CXX11 -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -5173,7 +5172,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Static_Release -Config STATIC -Config STATIC_MESSENGER -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config RTPS -Config CXX11 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Static_Release -Config STATIC -Config STATIC_MESSENGER -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config RTPS -Config CXX11 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -5313,7 +5312,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Static_Release -Config STATIC_COMPILER -Config STATIC -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config RTPS -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Static_Release -Config STATIC_COMPILER -Config STATIC -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config RTPS -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -5453,7 +5452,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Static_Release -Config STATIC_UNIT -Config STATIC -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config RTPS -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Static_Release -Config STATIC_UNIT -Config STATIC -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config RTPS -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -5778,7 +5777,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Release -Config STATIC_MESSENGER -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Release -Config STATIC_MESSENGER -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -5918,7 +5917,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Release -Config STATIC_COMPILER -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Release -Config STATIC_COMPILER -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -6058,7 +6057,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Release -Config STATIC_UNIT -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Release -Config STATIC_UNIT -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -6460,7 +6459,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Release -Config STATIC_MESSENGER -Config RTPS -Config WIN64 -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Release -Config STATIC_MESSENGER -Config RTPS -Config WIN64 -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -6600,7 +6599,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Release -Config STATIC_COMPILER -Config RTPS -Config WIN64 -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Release -Config STATIC_COMPILER -Config RTPS -Config WIN64 -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -6747,7 +6746,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -Config STATIC_UNIT -Config RTPS -Config WIN64 -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -Config STATIC_UNIT -Config RTPS -Config WIN64 -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -7036,7 +7035,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -Config RTPS -Config WIN32 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS -a -l tests/security/security_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -Config RTPS -Config WIN32 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS --security"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -7364,7 +7363,7 @@ jobs:
 #        <command name="check_compiler" options="gcc"/>
 #        <command name="print_perl_version"/>
 #        <command name="print_autobuild_config"/>
-#        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config OSX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config GH_ACTIONS -a -l tests/security/security_tests.lst"/>
+#        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config OSX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config GH_ACTIONS --security"/>
 #        <command name="log" options="off"/>
 #        <command name="process_logs" options="prettify"/>
 #        </autobuild>
@@ -7559,7 +7558,7 @@ jobs:
 #        <command name="check_compiler" options="gcc"/>
 #        <command name="print_perl_version"/>
 #        <command name="print_autobuild_config"/>
-#        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS -a -l java/tests/dcps_java_tests.lst -l tools/modeling/tests/modeling_tests.lst"/>
+#        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS --java --modeling"/>
 #        <command name="log" options="off"/>
 #        <command name="process_logs" options="prettify"/>
 #        </autobuild>
@@ -7800,7 +7799,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config OSX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config GH_ACTIONS -a -l tests/security/security_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config OSX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config GH_ACTIONS --security"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -8067,7 +8066,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config GHA_NO_BUILT_IN_TOPICS -Config GH_ACTIONS -a -l java/tests/dcps_java_tests.lst -l tools/modeling/tests/modeling_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config GHA_NO_BUILT_IN_TOPICS -Config GH_ACTIONS --java --modeling"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
