@@ -280,6 +280,34 @@ void test_fill_ltor()
   TEST_ASSERT(!gaps.check_gap(8));    // No gap
 }
 
+void test_fill_ooo()
+{
+  TransportReassembly tr;
+  Gaps gaps;
+  SequenceNumber msg_seq(3);
+  RepoId pub_id = create_pub_id();
+  Sample data1(pub_id, msg_seq);
+  Sample data2(pub_id, msg_seq);
+  Sample data3(pub_id, msg_seq);
+  Sample data4(pub_id, msg_seq);
+  Sample data5(pub_id, msg_seq, false);
+  Sample data6(pub_id, msg_seq, false);
+  Sample data7(pub_id, msg_seq);
+  Sample data8(pub_id, msg_seq);
+  Sample data9(pub_id, msg_seq);
+  Sample data10(pub_id, msg_seq);
+
+  TEST_ASSERT(!tr.reassemble(SequenceRange(1, 63), data1.sample, 251)); // 1-63
+  TEST_ASSERT(!tr.reassemble(SequenceRange(1, 63), data2.sample, 251)); // 1-63
+  TEST_ASSERT(!tr.reassemble(SequenceRange(127, 189), data3.sample, 251)); // 1-63, 127-189
+  TEST_ASSERT(!tr.reassemble(SequenceRange(127, 189), data4.sample, 251)); // 1-63, 127-189
+  TEST_ASSERT(!tr.reassemble(SequenceRange(190, 251), data5.sample, 251)); // 1-63, 127-251
+  TEST_ASSERT(!tr.reassemble(SequenceRange(190, 251), data6.sample, 251)); // 1-63, 127-251
+  TEST_ASSERT(tr.reassemble(SequenceRange(64, 126), data7.sample, 251)); // 1-251
+  TEST_ASSERT(!tr.reassemble(SequenceRange(1, 63), data8.sample, 251)); // 1-251
+  TEST_ASSERT(!tr.reassemble(SequenceRange(64, 126), data9.sample, 251)); // 1-251
+}
+
 int
 ACE_TMAIN(int, ACE_TCHAR*[])
 {
@@ -295,6 +323,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
       test_fill_rtol();
       test_fill_ltor();
     */
+    test_fill_ooo();
   }
   catch (char const *ex)
   {
