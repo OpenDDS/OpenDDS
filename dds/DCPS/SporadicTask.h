@@ -163,8 +163,11 @@ private:
   cancel_i()
   {
     if (scheduled_) {
-      reactor()->cancel_timer(this);
       scheduled_ = false;
+      reactor()->cancel_timer(this);
+      // Don't touch any members anymore, at this moment we could
+      // be deleted when the cancel_timer results in a drop of
+      // our refcount to 0
     }
   }
 };
