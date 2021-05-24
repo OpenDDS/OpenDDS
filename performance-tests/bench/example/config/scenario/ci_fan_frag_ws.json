@@ -1,0 +1,15 @@
+{
+  "name": "Continuous Integration Fan-Out / Fan-In Test Using WaitSets",
+  "desc": "This is a small quick test for data fan-out / fan-in capability with large samples (fragmentation) that uses waitsets and read conditions for reading data",
+  "any_node": [
+    {
+      "config": "ci_fan_frag_ws_client.json",
+      "count": 1
+    },
+    {
+      "config": "ci_fan_frag_ws_server.json",
+      "count": 10
+    }
+  ],
+  "timeout": 120
+}

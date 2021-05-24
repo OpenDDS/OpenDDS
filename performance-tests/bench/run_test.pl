@@ -68,6 +68,10 @@ elsif ($test->flag('fan_frag')) {
   $tc_opts .= " ci_fan_frag";
   $is_rtps_disc = 1;
 }
+elsif ($test->flag('fan_frag_ws')) {
+  $tc_opts .= " ci_fan_frag_ws";
+  $is_rtps_disc = 1;
+}
 elsif ($test->flag('fan_frag_mini')) {
   $tc_opts .= " ci_fan_frag_mini";
   $is_rtps_disc = 1;

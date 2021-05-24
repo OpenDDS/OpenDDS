@@ -19,6 +19,9 @@
           },
           { "name": "DCPSPendingTimeout",
             "value": "3"
+          },
+          { "name": "ORBVerboseLogging",
+            "value": "1"
           }
         ]
       }
@@ -67,8 +70,12 @@
                   }
                 ],
 
-                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" } },
-                "qos_mask": { "reliability": { "has_kind": true } }
+                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" },
+                         "history": { "kind": "KEEP_ALL_HISTORY_QOS" }
+                       },
+                "qos_mask": { "reliability": { "has_kind": true },
+                              "history": { "has_kind": true }
+                            }
               }
             ]
           }
@@ -84,7 +91,14 @@
                   { "name": "expected_match_count",
                     "value": { "_d": "PVK_ULL", "ull_prop": 10 }
                   }
-                ]
+                ],
+
+                "qos": { "reliability": { "kind": "RELIABLE_RELIABILITY_QOS" },
+                         "history": { "kind": "KEEP_ALL_HISTORY_QOS" }
+                       },
+                "qos_mask": { "reliability": { "has_kind": true },
+                              "history": { "has_kind": true }
+                            }
               }
             ]
           }
