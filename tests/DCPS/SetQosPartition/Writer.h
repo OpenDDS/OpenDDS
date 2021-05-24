@@ -12,7 +12,7 @@
 
 class Writer : public ACE_Task_Base {
 public:
-  Writer(::DDS::DataWriter_ptr writer, const OPENDDS_STRING& name, int write_count);
+  Writer(const ::DDS::DataWriter_var& writer, const OPENDDS_STRING& name, int write_count);
 
   void start ();
   void end ();

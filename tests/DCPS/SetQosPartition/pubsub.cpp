@@ -136,7 +136,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
   ::DDS::InstanceHandle_t reader_handle_1 = -1;
   {
     listener_impl_1->reset(EXPECTED_READS_1, 10);
-    OpenDDS::DCPS::unique_ptr<Writer> writer(new Writer(dw.in(), " 1", 10));
+    Writer writer(dw, " 1", 10);
 
     cout << "Pub waiting for match on " << PARTITION_A << std::endl;
     if (Utils::wait_match(dw, 1, Utils::GTE)) {
@@ -152,9 +152,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       return 1;
     }
 
-    writer->start();
+    writer.start();
     dcs->wait_for("driver", SUBSCRIBER_ACTOR_1, EXPECTED_READS_1);
-    writer->end();
+    writer.end();
   }
 
   // Write to PARTITION_B, one reader.
@@ -167,7 +167,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
   ::DDS::InstanceHandle_t reader_handle_2 = -1;
   {
     listener_impl_2->reset(EXPECTED_READS_1, 10);
-    OpenDDS::DCPS::unique_ptr<Writer> writer(new Writer(dw.in(), " 2", 10));
+    Writer writer(dw, " 2", 10);
 
     cout << "Pub waiting for match on " << PARTITION_B << std::endl;
     if (wait_match(dw, 1, Utils::GTE)) {
@@ -183,9 +183,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       return 1;
     }
 
-    writer->start();
+    writer.start();
     dcs->wait_for("driver", SUBSCRIBER_ACTOR_2, EXPECTED_READS_1);
-    writer->end();
+    writer.end();
   }
 
   if (reader_handle_1 == reader_handle_2) {
@@ -204,7 +204,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
   {
     listener_impl_1->reset(EXPECTED_READS_2, 20);
     listener_impl_2->reset(EXPECTED_READS_2, 20);
-    OpenDDS::DCPS::unique_ptr<Writer> writer(new Writer(dw.in(), " 3", 10));
+    Writer writer(dw, " 3", 10);
 
     cout << "Pub waiting for additional match on " << PARTITION_B << std::endl;
     if (wait_match(dw, 2, Utils::GTE)) {
@@ -217,11 +217,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       handle_set.insert(handles[idx]);
     }
 
-    writer->start();
+    writer.start();
     dcs->wait_for("driver", SUBSCRIBER_ACTOR_1, EXPECTED_READS_2);
     dcs->wait_for("driver", SUBSCRIBER_ACTOR_2, EXPECTED_READS_2);
     // NOTE: At this point, the readers have received all of the data.
-    writer->end();
+    writer.end();
   }
 
   if (handle_set.count(reader_handle_1) != 1) {

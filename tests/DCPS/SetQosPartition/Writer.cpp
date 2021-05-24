@@ -16,8 +16,8 @@ using namespace std;
 
 static int const num_instances_per_writer = 1;
 
-Writer::Writer(::DDS::DataWriter_ptr writer, const OPENDDS_STRING& name, int write_count)
-  : writer_(::DDS::DataWriter::_duplicate (writer))
+Writer::Writer(const ::DDS::DataWriter_var& writer, const OPENDDS_STRING& name, int write_count)
+  : writer_(writer)
   , name_(name)
   , write_count_(write_count)
 {}
