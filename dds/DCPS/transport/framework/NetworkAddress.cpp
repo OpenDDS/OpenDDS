@@ -690,7 +690,7 @@ ACE_INET_Addr choose_single_coherent_address(const String& url, bool prefer_loop
   }
 
   addrinfo hints;
-  ACE_OS::memset(&hints, 0, sizeof hints);
+  std::memset(&hints, 0, sizeof hints);
   hints.ai_family = address_family;
 
   // The ai_flags used to contain AI_ADDRCONFIG as well but that prevented
@@ -730,7 +730,7 @@ ACE_INET_Addr choose_single_coherent_address(const String& url, bool prefer_loop
   typedef OPENDDS_MAP(String, AddrCachePair) AddrCacheMap;
   static AddrCacheMap addr_cache_map_;
   ACE_Guard<ACE_Thread_Mutex> g(addr_cache_map_mutex_);
-  SystemTimePoint now = SystemTimePoint::now();
+  const SystemTimePoint now = SystemTimePoint::now();
   for (AddrCacheMap::iterator it = addr_cache_map_.begin(); it != addr_cache_map_.end(); /* inc in loop */) {
     if (it->second.first + TimeDuration(3, 0) < now) {
       addr_cache_map_.erase(it++);
@@ -745,9 +745,9 @@ ACE_INET_Addr choose_single_coherent_address(const String& url, bool prefer_loop
   }
 #endif /* ACE_WIN32 */
 
-  for (addrinfo *curr = res; curr; curr = curr->ai_next) {
+  for (addrinfo* curr = res; curr; curr = curr->ai_next) {
     ip46 addr;
-    ACE_OS::memcpy(&addr, curr->ai_addr, curr->ai_addrlen);
+    std::memcpy(&addr, curr->ai_addr, curr->ai_addrlen);
 #ifdef ACE_HAS_IPV6
     if (curr->ai_family == AF_INET6) {
       addr.in6_.sin6_port = ACE_NTOHS(port_number);

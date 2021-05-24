@@ -29,9 +29,9 @@ my $something_ran = 0;
 my $status = 0;
 
 sub run_unit_tests {
-  if($single_test ne '') {
+  if ($single_test ne '') {
     my $test = new PerlDDS::TestFramework();
-    $test->process("$single_test", "$single_test", "");
+    $test->process($single_test, $single_test, "");
     $something_ran = 1;
     print STDERR "Running only $single_test\n";
     $test->start_process("$single_test");
