@@ -500,7 +500,7 @@ ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& address, bool 
 namespace {
 
 template <typename T>
-ACE_INET_Addr tie_breaker(const T& addrs, const std::string& name)
+ACE_INET_Addr tie_breaker(const T& addrs, const String& name)
 {
   if (!name.empty()) {
     for (typename T::const_iterator it = addrs.begin(); it != addrs.end(); ++it) {
@@ -518,7 +518,7 @@ ACE_INET_Addr tie_breaker(const T& addrs, const std::string& name)
 
 }
 
-ACE_INET_Addr choose_single_coherent_address(const OPENDDS_VECTOR(ACE_INET_Addr)& addresses, bool prefer_loopback, const std::string& name)
+ACE_INET_Addr choose_single_coherent_address(const OPENDDS_VECTOR(ACE_INET_Addr)& addresses, bool prefer_loopback, const String& name)
 {
 
 #ifdef ACE_HAS_IPV6
