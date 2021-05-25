@@ -742,7 +742,7 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
   const int error = ACE_OS::getaddrinfo(host_name, 0, &hints, &res);
 
   if (error) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) choose_single_coherent_address() - Call to getaddrinfo() for hostname %C returned error: %d\n", host_name, error));
+    VDBG((LM_WARNING, "(%P|%t) choose_single_coherent_address() - Call to getaddrinfo() for hostname %C returned error: %d\n", host_name, error));
     return ACE_INET_Addr();
   }
 
