@@ -464,6 +464,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
+  if (!wait_for_reader (true, control_dw)) {
+    return 1;
+  }
+
   ACE_DEBUG((LM_DEBUG, "Writer sending echo at %T\n"));
 
   ControlStruct cs;
@@ -474,28 +478,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
-  condition = control_dw->get_statuscondition();
-  condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
-
-  ws->attach_condition(condition);
-  DDS::Duration_t p = { 5, 0 };
-  DDS::PublicationMatchedStatus pms;
-  control_dw->get_publication_matched_status(pms);
-  for (int retries = 3; retries > 0 && pms.current_count > 0; --retries) {
-    conditions.length(0);
-    ret = ws->wait(conditions, p);
-    if (ret != RETCODE_OK) {
-      ACE_ERROR((LM_ERROR, "ERROR: wait on control_dw condition returned %C\n",
-        OpenDDS::DCPS::retcode_to_string(ret)));
-      return 1;
-    }
-    control_dw->get_publication_matched_status(pms);
+  if (!wait_for_reader (false, control_dw)) {
+    return 1;
   }
-  if (pms.current_count > 0) {
-    ACE_DEBUG((LM_DEBUG, "Data reader shutdown not detected at %T\n"));
-  }
-  ws->detach_condition(condition);
-
   topic = 0;
   ACE_DEBUG((LM_DEBUG, "Writer cleanup at %T\n"));
 
