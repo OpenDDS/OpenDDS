@@ -339,7 +339,7 @@ private:
     {}
     ~ReaderInfo();
     void swap_durable_data(OPENDDS_MAP(SequenceNumber, TransportQueueElement*)& dd);
-    void expire_durable_data();
+    void expunge_durable_data();
     bool expecting_durable_data() const;
     SequenceNumber acked_sn() const { return cur_cumulative_ack_.previous(); }
     bool reflects_heartbeat_count() const;
@@ -432,10 +432,6 @@ private:
     bool is_lagging(const ReaderInfo_rch& reader) const;
     void check_leader_lagger() const;
     void record_directed(const RepoId& reader, SequenceNumber seq);
-    void expire_durable_data(const ReaderInfo_rch& reader,
-                             const RtpsUdpInst& cfg,
-                             const MonotonicTimePoint& now,
-                             TqeVector& pendingCallbacks);
 
 #ifdef OPENDDS_SECURITY
     bool is_pvs_writer() const { return is_pvs_writer_; }
@@ -492,8 +488,7 @@ private:
                           MetaSubmessageVec& meta_submessages);
     void process_acked_by_all();
     void gather_nack_replies_i(MetaSubmessageVec& meta_submessages);
-    void gather_heartbeats_i(TqeVector& pendingCallbacks,
-                             MetaSubmessageVec& meta_submessages);
+    void gather_heartbeats_i(MetaSubmessageVec& meta_submessages);
     void gather_heartbeats(const RepoIdSet& additional_guids,
                            MetaSubmessageVec& meta_submessages);
     typedef OPENDDS_MAP_CMP(RepoId, SequenceNumber, GUID_tKeyLessThan) ExpectedMap;

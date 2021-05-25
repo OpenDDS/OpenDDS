@@ -2075,6 +2075,13 @@ jobs:
         cd OpenDDS
         . setenv.sh
         make -j4 -C tools/modeling/tests
+    - name: Build CMake Tests
+      run: |
+        source OpenDDS/setenv.sh
+        mkdir OpenDDS/tests/cmake/build
+        cd OpenDDS/tests/cmake/build
+        cmake ..
+        cmake --build . -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -2172,7 +2179,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS --java --modeling"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS --java --modeling --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -6869,6 +6876,15 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         msbuild -p:Configuration=Release,Platform=Win32 -m DDS.sln
+    - name: Build CMake Tests
+      shell: cmd
+      run: |
+        cd OpenDDS
+        call setenv.cmd
+        mkdir tests\cmake\build
+        cd tests\cmake\build
+        cmake ..
+        cmake --build .
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -6981,7 +6997,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -Config RTPS -Config WIN32 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS --security"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -Config RTPS -Config WIN32 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS --security --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -7644,6 +7660,13 @@ jobs:
         cd OpenDDS
         . setenv.sh
         make -j4
+    - name: Build CMake Tests
+      run: |
+        source OpenDDS/setenv.sh
+        mkdir OpenDDS/tests/cmake/build
+        cd OpenDDS/tests/cmake/build
+        cmake -DCMAKE_CXX_STANDARD=11 ..
+        cmake --build . -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -7743,7 +7766,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config OSX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config GH_ACTIONS --security"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config OSX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config GH_ACTIONS --security --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
