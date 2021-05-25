@@ -326,7 +326,7 @@ if ($cmake) {
 
     my $tests = "$DDS_ROOT/tests/cmake";
     if (run_command("Process CMake Test Results",
-            "$python $tests/ctest-to-auto-run-tests.py $tests $cmake_build_dir")) {
+            "$python $tests/ctest-to-auto-run-tests.py $tests .")) {
         exit(1);
     }
 }
