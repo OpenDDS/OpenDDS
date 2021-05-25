@@ -675,6 +675,7 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
     sockaddr_in6 in6_;
 #endif /* ACE_HAS_IPV6 */
   } inet_addr;
+  std::memset(&inet_addr, 0, sizeof inet_addr);
 
   int address_family = AF_UNSPEC;
 
@@ -770,7 +771,11 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
 #endif /* ACE_WIN32 */
 
   for (addrinfo* curr = res; curr; curr = curr->ai_next) {
+    if (curr->ai_family != AF_INET && curr->ai_family != AF_INET6) {
+      continue;
+    }
     ip46 addr;
+    std::memset(&addr, 0, sizeof addr);
     std::memcpy(&addr, curr->ai_addr, curr->ai_addrlen);
 #ifdef ACE_HAS_IPV6
     if (curr->ai_family == AF_INET6) {
