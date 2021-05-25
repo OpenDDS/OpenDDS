@@ -117,9 +117,14 @@ sub print_help {
     print
         "    --cmake                  Run CMake Tests\n" .
         "                             Not included by default\n" .
+        "    --cmake-build-dir <path> Path to the CMake tests binary directory\n" .
+        "                             Default is \$DDS_ROOT/tests/cmake/build\n" .
         "    --ctest <cmd>            CTest to use to run CMake Tests\n" .
         "                             Default is `ctest`\n" .
         "    --ctest-args <args>      Additional arguments to pass to CTest\n" .
+        "    --python <cmd>           Python command to use to run\n" .
+        "                             ctest-to-auto-run-tests.py.\n" .
+        "                             Default is `python3`\n" .
         # These two are processed by PerlACE/ConfigList.pm
         "    -Config <cfg>            Include tests with <cfg> configuration\n" .
         "    -Exclude <cfg>           Exclude tests with <cfg> configuration\n" .
@@ -149,8 +154,10 @@ my $list_configs = 0;
 my $list_tests = 0;
 my $stop_on_fail = 0;
 my $cmake = 0;
+my $cmake_build_dir = "$DDS_ROOT/tests/cmake/build";
 my $ctest = 'ctest';
 my $ctest_args = '';
+my $python = 'python3';
 my %opts = (
     'help|h' => \$help,
     'sandbox|s=s' => \$sandbox,
@@ -160,8 +167,10 @@ my %opts = (
     'list-tests' => \$list_tests,
     'stop-on-fail|x' => \$stop_on_fail,
     'cmake' => \$cmake,
+    'cmake-build-dir=s' => \$cmake_build_dir,
     'ctest=s' => \$ctest,
     'ctest-args=s' => \$ctest_args,
+    'python=s' => \$python,
 );
 foreach my $list (@builtin_test_lists) {
     if (!exists($list->{default})) {
@@ -309,11 +318,15 @@ foreach my $test_lst (@file_list) {
 }
 
 if ($cmake) {
-    cd("$DDS_ROOT/tests/cmake/build");
+    cd($cmake_build_dir);
+
     if (run_command("CMake Tests", "$ctest --no-compress-output -T Test $ctest_args")) {
         exit(1) if ($stop_on_fail);
     }
-    elsif (run_command("Process CMake Test Results", "../ctest-to-auto-run-tests.py .. .")) {
+
+    my $tests = "$DDS_ROOT/tests/cmake";
+    if (run_command("Process CMake Test Results",
+            "$python $tests/ctest-to-auto-run-tests.py $tests $cmake_build_dir")) {
         exit(1);
     }
 }
