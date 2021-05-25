@@ -1186,7 +1186,7 @@ namespace XTypes {
     // Empty. Available for future extension
   };
 
-  struct CompleteTypeDetail {
+struct CompleteTypeDetail {
     Optional<AppliedBuiltinTypeAnnotations> ann_builtin;
     Optional<AppliedAnnotationSeq> ann_custom;
     QualifiedTypeName type_name;
