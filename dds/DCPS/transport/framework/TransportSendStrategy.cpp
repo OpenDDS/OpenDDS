@@ -1422,7 +1422,8 @@ TransportSendStrategy::do_remove_sample(const RepoId&,
                                   this->pkt_chain_,
                                   this->header_block_,
                                   this->replaced_element_mb_allocator_,
-                                  this->replaced_element_db_allocator_);
+                                  this->replaced_element_db_allocator_,
+                                  remove_all);
 
   this->elems_.accept_replace_visitor(pac_rem_vis);
 
