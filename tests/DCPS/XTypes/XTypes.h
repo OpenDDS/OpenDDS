@@ -103,7 +103,7 @@ bool check_inconsistent_topic_status(Topic_var topic)
   if (retcode != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: get_inconsistent_topic_status failed\n"));
     return false;
-  } else if (expect_to_match xor (status.total_count == 0)) {
+  } else if (expect_to_match !=  (status.total_count == 0)) {
     ACE_ERROR((LM_ERROR, "ERROR: inconsistent topic count is %d\n", status.total_count));
     return false;
   }
