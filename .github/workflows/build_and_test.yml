@@ -6784,9 +6784,9 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd ACE_TAO\ACE
-        msbuild -p:Configuration=Debug,Platform=Win32 -m ace.sln
+        msbuild -p:Configuration=Release,Platform=Win32 -m ace.sln
         cd ..\TAO
-        msbuild -p:Configuration=Debug,Platform=Win32 -m tao.sln
+        msbuild -p:Configuration=Release,Platform=Win32 -m tao.sln
     - name: create ACE_TAO tar.xz artifact
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
@@ -6875,7 +6875,7 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        msbuild -p:Configuration=Debug,Platform=Win32 -m DDS.sln
+        msbuild -p:Configuration=Release,Platform=Win32 -m DDS.sln
     - name: Build CMake Tests
       shell: cmd
       run: |
