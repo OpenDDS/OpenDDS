@@ -71,6 +71,7 @@ transport protocols:
 * UDP/IP
 * IP multicast
 * RTPS over UDP/IP (unicast and multicast)
+* Shared memory
 
 RTPS (Interoperability) features are based on the [DDS-RTPS Specification
 formal/2019-04-03 (version 2.3)](https://www.omg.org/spec/DDSI-RTPS/2.3).  See
