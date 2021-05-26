@@ -99,7 +99,7 @@ TEST(network_address_test, choose_single_coherent_address_ipv6)
 }
 #endif // ACE_HAS_IPV6
 
-TEST(network_addres_test, choose_single_coherent_address_double)
+TEST(network_address_test, choose_single_coherent_address_double)
 {
   //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
 
@@ -108,55 +108,37 @@ TEST(network_addres_test, choose_single_coherent_address_double)
   EXPECT_NE(addr1, ACE_INET_Addr());
   EXPECT_NE(addr2, ACE_INET_Addr());
   EXPECT_EQ(addr1, addr2);
+  EXPECT_EQ(addr2, addr1);
 #if defined ACE_HAS_IPV6 && defined IPV6_V6ONLY
   EXPECT_FALSE(addr1.is_ipv4_mapped_ipv6());
   EXPECT_FALSE(addr2.is_ipv4_mapped_ipv6());
 #endif
 }
 
-TEST(network_addres_test, choose_single_coherent_address_double_portless)
-{
-  //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
-
-  ACE_INET_Addr addr1 = choose_single_coherent_address("www.yahoo.com", false);
-  ACE_INET_Addr addr2 = choose_single_coherent_address("www.yahoo.com", false);
-  EXPECT_NE(addr1, ACE_INET_Addr());
-  EXPECT_NE(addr2, ACE_INET_Addr());
-  EXPECT_EQ(addr1, addr2);
-#if defined ACE_HAS_IPV6 && defined IPV6_V6ONLY
-  EXPECT_FALSE(addr1.is_ipv4_mapped_ipv6());
-  EXPECT_FALSE(addr2.is_ipv4_mapped_ipv6());
-#endif
-}
-
-TEST(network_addres_test, choose_single_coherent_address_triple)
-{
-  //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
-
-  ACE_INET_Addr addr1 = choose_single_coherent_address("hp.com:587", false);
-  ACE_INET_Addr addr2 = choose_single_coherent_address("hp.com:587", false);
-  ACE_INET_Addr addr3 = choose_single_coherent_address("hp.com:587", false);
-  EXPECT_NE(addr1, ACE_INET_Addr());
-  EXPECT_NE(addr2, ACE_INET_Addr());
-  EXPECT_NE(addr3, ACE_INET_Addr());
-  EXPECT_EQ(addr1, addr2);
-  EXPECT_EQ(addr2, addr3);
-  EXPECT_EQ(addr3, addr1);
-#if defined ACE_HAS_IPV6 && defined IPV6_V6ONLY
-  EXPECT_FALSE(addr1.is_ipv4_mapped_ipv6());
-  EXPECT_FALSE(addr2.is_ipv4_mapped_ipv6());
-  EXPECT_FALSE(addr3.is_ipv4_mapped_ipv6());
-#endif
-}
-
-TEST(network_addres_test, choose_single_coherent_address_triple_self)
+TEST(network_address_test, choose_single_coherent_address_double_self)
 {
   //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
 
   String hostname = get_fully_qualified_hostname();
   ACE_INET_Addr addr1 = choose_single_coherent_address(hostname + ":5432", false);
   ACE_INET_Addr addr2 = choose_single_coherent_address(hostname + ":5432", false);
-  ACE_INET_Addr addr3 = choose_single_coherent_address(hostname + ":5432", false);
+  EXPECT_NE(addr1, ACE_INET_Addr());
+  EXPECT_NE(addr2, ACE_INET_Addr());
+  EXPECT_EQ(addr1, addr2);
+  EXPECT_EQ(addr2, addr1);
+#if defined ACE_HAS_IPV6 && defined IPV6_V6ONLY
+  EXPECT_FALSE(addr1.is_ipv4_mapped_ipv6());
+  EXPECT_FALSE(addr2.is_ipv4_mapped_ipv6());
+#endif
+}
+
+TEST(network_address_test, choose_single_coherent_address_triple)
+{
+  //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
+
+  ACE_INET_Addr addr1 = choose_single_coherent_address("www.hp.com:587", false);
+  ACE_INET_Addr addr2 = choose_single_coherent_address("www.hp.com:587", false);
+  ACE_INET_Addr addr3 = choose_single_coherent_address("www.hp.com:587", false);
   EXPECT_NE(addr1, ACE_INET_Addr());
   EXPECT_NE(addr2, ACE_INET_Addr());
   EXPECT_NE(addr3, ACE_INET_Addr());
@@ -171,7 +153,7 @@ TEST(network_addres_test, choose_single_coherent_address_triple_self)
 }
 
 #if defined ACE_HAS_IPV6
-TEST(network_addres_test, choose_single_coherent_address_ipv6_literals)
+TEST(network_address_test, choose_single_coherent_address_ipv6_literals)
 {
   //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
 
@@ -199,7 +181,7 @@ TEST(network_addres_test, choose_single_coherent_address_ipv6_literals)
 #endif
 }
 
-TEST(network_addres_test, choose_single_coherent_address_ipv6_literals_port0)
+TEST(network_address_test, choose_single_coherent_address_ipv6_literals_port0)
 {
   //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
 
@@ -237,7 +219,7 @@ TEST(network_addres_test, choose_single_coherent_address_ipv6_literals_port0)
 #endif
 }
 
-TEST(network_addres_test, choose_single_coherent_address_ipv6_literals_localhost)
+TEST(network_address_test, choose_single_coherent_address_ipv6_literals_localhost)
 {
   //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
 
@@ -255,7 +237,7 @@ TEST(network_addres_test, choose_single_coherent_address_ipv6_literals_localhost
 #endif
 }
 
-TEST(network_addres_test, choose_single_coherent_address_ipv6_literals_localhost_port0)
+TEST(network_address_test, choose_single_coherent_address_ipv6_literals_localhost_port0)
 {
   //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
 
@@ -268,7 +250,7 @@ TEST(network_addres_test, choose_single_coherent_address_ipv6_literals_localhost
 }
 #endif // ACE_HAS_IPV6
 
-TEST(network_addres_test, choose_single_coherent_address_ipv4_literals)
+TEST(network_address_test, choose_single_coherent_address_ipv4_literals)
 {
   //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
 
@@ -277,7 +259,7 @@ TEST(network_addres_test, choose_single_coherent_address_ipv4_literals)
   EXPECT_EQ(addr1.get_port_number(), 30);
 }
 
-TEST(network_addres_test, choose_single_coherent_address_ipv4_literals_port0)
+TEST(network_address_test, choose_single_coherent_address_ipv4_literals_port0)
 {
   //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
 
