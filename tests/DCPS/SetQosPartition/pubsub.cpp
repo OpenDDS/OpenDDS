@@ -15,6 +15,8 @@
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/unique_ptr.h>
 
+#include <dds/DCPS/transport/framework/TransportRegistry.h>
+
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
@@ -43,6 +45,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
                                                                        PARTICIPANT_QOS_DEFAULT,
                                                                        DDS::DomainParticipantListener::_nil(),
                                                                        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+  OpenDDS::DCPS::TransportConfig_rch cfg = TheTransportRegistry->get_config("pub_part");
+  TheTransportRegistry->bind_config(cfg, pub_participant);
 
   MessageTypeSupportImpl::_var_type pub_type_support = new MessageTypeSupportImpl();
   pub_type_support->register_type(pub_participant.in(), "");
@@ -77,6 +82,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
                                                                        PARTICIPANT_QOS_DEFAULT,
                                                                        DDS::DomainParticipantListener::_nil(),
                                                                        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+  cfg = TheTransportRegistry->get_config("sub_part");
+  TheTransportRegistry->bind_config(cfg, sub_participant);
 
   MessageTypeSupportImpl::_var_type sub_type_support = new MessageTypeSupportImpl();
 

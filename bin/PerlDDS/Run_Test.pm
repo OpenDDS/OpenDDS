@@ -351,8 +351,8 @@ sub new {
       $flag_name = "<No Name Provided>";
     }
     my $flag_value;
-    if (defined($2)) {
-      $flag_value = $2;
+    if (defined($3)) {
+      $flag_value = $3;
     }
     else {
       $flag_value = "<FLAG>";
@@ -376,6 +376,15 @@ sub new {
       $self->_time_info("Test starting ($left arguments remaining)\n");
     } elsif (lc($arg) eq "nobits") {
       $self->{nobits} = 1;
+    } elsif ($flag_name eq "ini") {
+      $flag_value =~ /^([^_]+)_([^_]+).ini/;
+      if ($1 eq "inforepo") {
+          $self->{discovery} = "info_repo";
+      } else {
+        $self->{discovery} = $1;
+      }
+      $flag_value =~ s/\.ini$//;
+      $self->{transport} = $flag_value;
     } elsif (!$transport) {
       # also keep a copy to delete so we can see which parameters
       # are unused (above args are already "used")
