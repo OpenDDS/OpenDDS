@@ -1952,6 +1952,9 @@ jobs:
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_master_${{ env.ACE_COMMIT }}
+    - name: update apt
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      run: sudo apt-get update
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -1998,12 +2001,12 @@ jobs:
     needs: ACE_TAO_u20_ace7_j_qt_ws_sec
 
     steps:
+    - name: update apt
+      run: sudo apt-get update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: install wireshark
-      run: |
-        sudo apt-get update
-        sudo apt-get -y install wireshark-dev
+      run: sudo apt-get -y install wireshark-dev
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
     - name: checkout MPC
@@ -2105,6 +2108,8 @@ jobs:
     timeout-minutes: 150
 
     steps:
+    - name: update apt
+      run: sudo apt-get update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -3323,6 +3328,9 @@ jobs:
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
+    - name: update apt
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      run: sudo apt-get update
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -3369,12 +3377,12 @@ jobs:
     needs: ACE_TAO_u18_stat_qt_ws_sec
 
     steps:
+    - name: update apt
+      run: sudo apt-get update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: install wireshark
-      run: |
-        sudo apt-get update
-        sudo apt-get -y install wireshark-dev
+      run:  sudo apt-get -y install wireshark-dev
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
     - name: checkout MPC
@@ -3445,7 +3453,6 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-
   cmake_u18_stat_qt_ws_sec:
 
     runs-on: ubuntu-18.04
@@ -3454,6 +3461,8 @@ jobs:
     timeout-minutes: 15
 
     steps:
+    - name: update apt
+      run: sudo apt-get update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: install qt
@@ -3531,6 +3540,8 @@ jobs:
     timeout-minutes: 40
 
     steps:
+    - name: update apt
+      run: sudo apt-get update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: install qt
@@ -3671,6 +3682,8 @@ jobs:
     timeout-minutes: 30
 
     steps:
+    - name: update apt
+      run: sudo apt-get update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -3795,6 +3808,8 @@ jobs:
     timeout-minutes: 15
 
     steps:
+    - name: update apt
+      run: sudo apt-get update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -5460,7 +5475,7 @@ jobs:
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v2.1.4
+      uses: actions/cache@v2.1.5
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
