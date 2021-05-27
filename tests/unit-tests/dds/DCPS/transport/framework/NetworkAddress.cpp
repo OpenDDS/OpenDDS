@@ -1,6 +1,8 @@
 #include <dds/DCPS/transport/framework/NetworkAddress.h>
 #include <dds/DCPS/transport/framework/TransportDebug.h>
 
+#include <ace/Init_ACE.h>
+
 #include <gtest/gtest.h>
 
 using namespace OpenDDS::DCPS;
@@ -274,5 +276,8 @@ TEST(network_address_test, choose_single_coherent_address_ipv4_literals_port0)
 int main(int argc, char* argv[])
 {
   ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  ACE::init();
+  int result = RUN_ALL_TESTS();
+  ACE::fini();
+  return result;
 }
