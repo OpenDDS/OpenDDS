@@ -13,6 +13,7 @@
 #include "ace/OS_NS_sys_socket.h" // For setsockopt()
 #include "ace/OS_NS_arpa_inet.h"
 
+#include <cstdlib>
 #include <cstring>
 
 #if !defined (__ACE_INLINE__)
