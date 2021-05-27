@@ -577,10 +577,14 @@ std::ostream&
 operator<<(std::ostream& out, const OpenDDS::XTypes::Optional<T>& optional)
 {
   if (optional.present) {
-    return out
-      << "XTypes::Optional<" << getTypeName<T>()  << ">("
-      << optional.value
-      << ")";
+    out << "XTypes::Optional<" << getTypeName<T>()  << ">(";
+    if (getTypeName<T>() == "String") {
+      out << "\"" << optional.value << "\"";
+    } else {
+      out << optional.value;
+    }
+    out << ")";
+    return out;
   } else {
     return out << "XTypes::Optional<" << getTypeName<T>() << ">()";
   }
@@ -636,7 +640,7 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::AnnotationParameterValue& p
     out << "static_cast<ACE_CDR::UShort>(" << param_value.uint16_value << ")";
     break;
   case OpenDDS::XTypes::TK_INT32:
-    out << "XTypes::TK_INT32, " << param_value.int32_value;
+    out << "static_cast<ACE_CDR::Long>(" << param_value.int32_value << ")";
     break;
   case OpenDDS::XTypes::TK_UINT32:
     out << "static_cast<ACE_CDR::ULong>(" << param_value.uint32_value << ")";
@@ -1743,6 +1747,9 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
       scc.push_back(w);
     } while (wt != v.type);
 
+    // Sort types in SCC using lexicographic order of their fully qualified names.
+    std::sort(scc.begin(), scc.end());
+
     if (scc.size() == 1) {
       generate_type_identifier(scc[0].type, false);
     } else {
@@ -2444,12 +2451,6 @@ typeobject_generator::generate_type_identifier(AST_Type* type, bool force_type_o
   case AST_ConcreteType::NT_enum_val:
     be_util::misc_error_and_abort("Unexpected AST type", type);
   }
-}
-
-bool
-typeobject_generator::name_sorter(const Element& x, const Element& y)
-{
-  return x.name < y.name;
 }
 
 // Get minimal or fully descriptive type identifier
