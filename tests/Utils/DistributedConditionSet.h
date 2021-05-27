@@ -8,7 +8,6 @@
 #include <ace/Condition_Thread_Mutex.h>
 
 #include <set>
-#include <string>
 #include <utility>
 
 /**
@@ -53,11 +52,11 @@ class DistributedConditionSet : public OpenDDS::DCPS::RcObject
 {
 public:
   /// Establish a condition.
-  virtual void post(const std::string& actor, const std::string& condition) = 0;
+  virtual void post(const OPENDDS_STRING& actor, const OPENDDS_STRING& condition) = 0;
   /// Block until a condition is established.  (waiting_actor is only used for logging.)
-  virtual void wait_for(const std::string& waiting_actor,
-                        const std::string& posting_actor,
-                        const std::string& condition) const = 0;
+  virtual void wait_for(const OPENDDS_STRING& waiting_actor,
+                        const OPENDDS_STRING& posting_actor,
+                        const OPENDDS_STRING& condition) const = 0;
 };
 
 typedef OpenDDS::DCPS::RcHandle<DistributedConditionSet> DistributedConditionSet_rch;
@@ -69,7 +68,7 @@ public:
     : condition_(mutex_)
   {}
 
-  void post(const std::string& actor, const std::string& condition)
+  void post(const OPENDDS_STRING& actor, const OPENDDS_STRING& condition)
   {
     ACE_DEBUG((LM_INFO, "(%P|%t) %C posting %C\n", actor.c_str(), condition.c_str()));
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
@@ -77,9 +76,9 @@ public:
     condition_.broadcast();
   }
 
-  void wait_for(const std::string& waiting_actor,
-                const std::string& posting_actor,
-                const std::string& condition) const
+  void wait_for(const OPENDDS_STRING& waiting_actor,
+                const OPENDDS_STRING& posting_actor,
+                const OPENDDS_STRING& condition) const
   {
     ACE_DEBUG((LM_INFO, "(%P|%t) %C waiting_for %C %C\n",
                waiting_actor.c_str(), posting_actor.c_str(), condition.c_str()));
@@ -97,7 +96,7 @@ public:
   }
 
 private:
-  typedef std::pair<std::string, std::string> PairType;
+  typedef std::pair<OPENDDS_STRING, OPENDDS_STRING> PairType;
   typedef std::set<PairType> SetType;
   SetType set_;
   mutable ACE_Thread_Mutex mutex_;

@@ -14,10 +14,10 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-const std::string SUBSCRIBER_ACTOR_1 = "Subscriber_1";
-const std::string SUBSCRIBER_ACTOR_2 = "Subscriber_2";
-const std::string EXPECTED_READS_1 = "expected_reads_1";
-const std::string EXPECTED_READS_2 = "expected_reads_2";
+const char SUBSCRIBER_ACTOR_1[] = "Subscriber_1";
+const char SUBSCRIBER_ACTOR_2[] = "Subscriber_2";
+const char EXPECTED_READS_1[] = "expected_reads_1";
+const char EXPECTED_READS_2[] = "expected_reads_2";
 
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataReaderListener>
