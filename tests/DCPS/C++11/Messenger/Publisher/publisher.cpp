@@ -76,7 +76,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     DDS::DataWriterQos qos;
     pub->get_default_datawriter_qos(qos);
+#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
     qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+#endif
 
     DDS::DataWriter_var dw =
       pub->create_datawriter(topic,
