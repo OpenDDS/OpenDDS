@@ -17,47 +17,103 @@ use PerlDDS::Run_Test;
 use Getopt::Long;
 use Cwd;
 use POSIX qw(SIGINT);
+use File::Temp qw(tempfile);
 
 my $dry_run = 0;
 
 sub cd {
     my $dir = shift;
-    chdir($dir) || die "auto_run_tests: Error: Cannot chdir to $dir";
+    chdir($dir) or die "auto_run_tests: Error: Cannot chdir to $dir: $!";
 }
 
 sub run_command {
     my $what = shift;
     my $command = shift;
-    my $print_error = shift // 1;
+    my %args = (
+        capture_stdout => undef,
+        @_,
+    );
+    my $capture_stdout = $args{capture_stdout};
 
     if ($dry_run) {
         my $cwd = getcwd();
         print "In \"$cwd\" would run:\n    $command\n";
-        return 0;
+        return (0, 0);
     }
 
-    my $result = 0;
-    if (system($command)) {
-        $result = $? >> 8;
-        my $signal = $? & 127;
-        die("auto_run_tests: \"$what\" was interrupted") if ($signal == SIGINT);
-        if ($print_error) {
-            my $coredump = $? & 128;
-            my $error_message;
-            if ($? == -1) {
-                $error_message = "failed to run: $!";
-            }
-            elsif ($signal) {
-                $error_message = sprintf("exited on signal %d", ($signal));
-                $error_message .= " and created coredump" if ($coredump);
-            }
-            else {
-                $error_message = sprintf("returned with status %d", $result);
-            }
-            print "auto_run_tests: Error: $what $error_message\n";
-        }
+    my $saved_stdout;
+    my $tmp_fd;
+    my $tmp_path;
+
+    if (defined($capture_stdout)) {
+        ($tmp_fd, $tmp_path) = File::Temp::tempfile(UNLINK => 1);
+        open($saved_stdout, '>&', STDOUT);
+        open(STDOUT, '>&', $tmp_fd);
     }
-    return $result;
+
+    my $failed = system($command) ? 1 : 0;
+    my $system_status = $?;
+    my $system_error = $!;
+    my $ran = $system_status != -1;
+
+    if (defined($capture_stdout)) {
+        open(STDOUT, '>&', $saved_stdout);
+        close($tmp_fd);
+    }
+
+    my $exit_status = 0;
+    if ($failed) {
+        $exit_status = $system_status >> 8;
+        my $signal = $system_status & 127;
+        die("auto_run_tests: \"$what\" was interrupted") if ($signal == SIGINT);
+        my $coredump = $system_status & 128;
+        my $error_message;
+        if (!$ran) {
+            $error_message = "failed to run: $system_error";
+        }
+        elsif ($signal) {
+            $error_message = sprintf("exited on signal %d", ($signal));
+            $error_message .= " and created coredump" if ($coredump);
+        }
+        else {
+            $error_message = sprintf("returned with status %d", $exit_status);
+        }
+        print STDERR "auto_run_tests: Error: \"$what\" $error_message\n";
+    }
+
+    if (defined($capture_stdout) && $ran) {
+        open($tmp_fd, $tmp_path);
+        ${$capture_stdout} = do { local $/; <$tmp_fd> };
+        close($tmp_fd);
+    }
+
+    return ($failed, $exit_status);
+}
+
+sub mark_test_start {
+    my $name = shift;
+    print
+        "\n==============================================================================\n" .
+        "auto_run_tests: $name\n\n";
+}
+
+sub mark_test_finish {
+    my $name = shift;
+    my $time = shift;
+    my $result = shift;
+    print "\nauto_run_tests_finished: $name Time:${time}s Result:$result\n";
+}
+
+my $stop_on_fail = 0;
+
+sub run_test {
+    my $name = shift;
+    my $command = shift;
+
+    my $start_time = time();
+    my ($failed, $exit_status) = run_command($name, $command, @_);
+    mark_test_finish($name, time() - $start_time, $exit_status);
+    exit(1) if ($failed && $stop_on_fail);
 }
 
 my @builtin_test_lists = (
@@ -152,7 +208,6 @@ my $sandbox = '';
 my $show_configs = 0;
 my $list_configs = 0;
 my $list_tests = 0;
-my $stop_on_fail = 0;
 my $cmake = 0;
 my $cmake_build_dir = "$DDS_ROOT/tests/cmake/build";
 my $ctest = 'ctest';
@@ -265,7 +320,7 @@ foreach my $test_lst (@file_list) {
             $program = $test;
         }
 
-        print "auto_run_tests: $test\n";
+        mark_test_start($test);
 
         cd("$DDS_ROOT/$directory");
 
@@ -304,31 +359,24 @@ foreach my $test_lst (@file_list) {
             $cmd = $subdir.$cmd if ($progNoArgs !~ /\.pl$/);
         }
 
-        my $result = 0;
-        my $start_time = time();
-        $result = run_command($test, $cmd);
-        my $time = time() - $start_time;
-        print "\nauto_run_tests_finished: $test Time:$time"."s Result:$result\n";
-        print "==============================================================================\n";
-
-        if ($result && $stop_on_fail) {
-            exit(1);
-        }
+        run_test($test, $cmd);
     }
 }
 
 if ($cmake) {
     cd($cmake_build_dir);
 
-    if (run_command("CMake Tests", "$ctest --no-compress-output -T Test $ctest_args")) {
-        exit(1) if ($stop_on_fail);
-    }
+    my $fake_name = "Run CMake Tests";
+    mark_test_start($fake_name);
+    run_test($fake_name, "$ctest --no-compress-output -T Test $ctest_args");
 
+    $fake_name = "Process CMake Test Results";
+    mark_test_start($fake_name);
     my $tests = "$DDS_ROOT/tests/cmake";
-    if (run_command("Process CMake Test Results",
-            "$python $tests/ctest-to-auto-run-tests.py $tests .")) {
-        exit(1);
-    }
+    my $output = "";
+    run_test($fake_name, "$python $tests/ctest-to-auto-run-tests.py $tests .",
+        capture_stdout => \$output);
+    print($output);
 }
 
 # vim: expandtab:ts=4:sw=4

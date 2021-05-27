@@ -10,6 +10,8 @@ from pathlib import Path
 from argparse import ArgumentParser
 
 template = '''\
+
+==============================================================================
 auto_run_tests: {art_name}
 The CMake name of this test is "{cmake_name}"
 {output}
@@ -25,12 +27,17 @@ def get_named_measurement(test_node, name):
             return value
     return None
 
+
+def relative_to(a, b):
+    return Path(os.path.relpath(a.resolve(), start=b.resolve()))
+
+
 def generate_test_results(build_path, source_path, debug=False):
     testing_path = build_path.resolve() / 'Testing'
     if debug:
         print('testing_path:', testing_path)
-    test_path_prefix = Path(
-        os.path.relpath(source_path.resolve(), start=os.environ['DDS_ROOT']))
+    root = Path(os.environ['DDS_ROOT'])
+    test_path_prefix = relative_to(source_path, root)
     if debug:
         print('test_path_prefix:', test_path_prefix)
 
@@ -59,8 +66,21 @@ def generate_test_results(build_path, source_path, debug=False):
             output=output_text,
             command=get_named_measurement(test_node, 'Command Line'),
         )
-        test_path = test_path_prefix / results['path']
-        results['art_name'] = '{} {}'.format(test_path, results['command'])
+
+        # Find the relative path to the directory with the test's CMakeLists
+        # file from source_path.
+        abs_test_path = Path(results['path'])
+        if not abs_test_path.is_absolute():
+            abs_test_path = source_path.resolve() / abs_test_path
+        if abs_test_path.name == 'build':
+            abs_test_path = abs_test_path.parent
+        cmakelists = abs_test_path / 'CMakeLists.txt'
+        if not cmakelists.is_file():
+            raise FileNotFoundError('"{}" was not found'.format(cmakelists))
+        test_path = test_path_prefix / relative_to(abs_test_path, source_path)
+
+        command_parts = [s.strip('"') for s in results['command'].split(' ')[1:]]
+        results['art_name'] = '{}/{}'.format(test_path, ' '.join(command_parts))
         # Exit Value isn't included if the test passed
         results['art_result'] = 0 if results['passed'] else results['exit_value']
         results['art_time'] = time=int(results['exec_time'])
