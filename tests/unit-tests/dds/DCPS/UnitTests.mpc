@@ -11,3 +11,13 @@ project(*SafetyProfilePool) : dcps, opendds_face, dcps_test {
     SafetyProfilePoolTest.cpp
   }
 }
+
+project(*CompleteToMinimalTypeObject) : dcps_test, googletest {
+  exename = *
+  TypeSupport_Files {
+    CompleteToMinimalTypeObject.idl
+  }
+  Source_Files {
+    CompleteToMinimalTypeObject.cpp
+  }
+}

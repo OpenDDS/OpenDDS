@@ -1,0 +1,40 @@
+module my_mod {
+  //struct
+  @topic
+  @mutable
+  struct stru {
+    long l;
+  };
+  
+  struct circular_struct2;
+  //struct
+  @topic
+  @mutable
+  struct circular_struct {
+    sequence<circular_struct2> circular_struct2_seq;
+  };
+
+  @topic
+  @mutable
+  struct circular_struct2 {
+    sequence<circular_struct> circular_struct_seq;
+    circular_struct circular_struct_arr[3];
+  };
+
+  //enum
+  enum EnumType {A, B};
+
+  //union
+  @topic
+  union un switch (EnumType) {
+    case A: long l1;
+    case B: long l2;
+  };
+
+  //sequence
+  //TODO CLAYTON: INCLUDE THE HEADER FOR LONG SEQ
+  typedef sequence<long> lseq;
+
+  //array
+  typedef long larr[5];
+};
