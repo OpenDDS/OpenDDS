@@ -2000,10 +2000,10 @@ jobs:
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
+    - name: update apt
+      run: sudo apt-get update
     - name: install wireshark
-      run: |
-        sudo apt-get update
-        sudo apt-get -y install wireshark-dev
+      run: sudo apt-get -y install wireshark-dev
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
     - name: checkout MPC
@@ -2107,6 +2107,12 @@ jobs:
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
+    - name: update apt
+      run: sudo apt-get update
+    - name: install wireshark
+      run: sudo apt-get -y install wireshark-dev
+    - name: install qt
+      run: sudo apt-get -y install qtbase5-dev
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
       with:
@@ -3371,10 +3377,10 @@ jobs:
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
+    - name: update apt
+      run: sudo apt-get update
     - name: install wireshark
-      run: |
-        sudo apt-get update
-        sudo apt-get -y install wireshark-dev
+      run: sudo apt-get -y install wireshark-dev
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
     - name: checkout MPC
@@ -3445,7 +3451,6 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-
   cmake_u18_stat_qt_ws_sec:
 
     runs-on: ubuntu-18.04
@@ -3456,6 +3461,8 @@ jobs:
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
+    - name: update apt
+      run: sudo apt-get update
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
     - name: checkout MPC
@@ -3533,6 +3540,8 @@ jobs:
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
+    - name: update apt
+      run: sudo apt-get update
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
     - name: checkout MPC
@@ -3673,6 +3682,10 @@ jobs:
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
+    - name: update apt
+      run: sudo apt-get update
+    - name: install qt
+      run: sudo apt-get -y install qtbase5-dev
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
       with:
@@ -3797,6 +3810,10 @@ jobs:
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
+    - name: update apt
+      run: sudo apt-get update
+    - name: install qt
+      run: sudo apt-get -y install qtbase5-dev
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
       with:
@@ -5460,7 +5477,7 @@ jobs:
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v2.1.4
+      uses: actions/cache@v2.1.5
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
