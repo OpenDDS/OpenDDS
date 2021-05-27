@@ -5,7 +5,7 @@ module my_mod {
   struct stru {
     long l;
   };
-  
+
   struct circular_struct2;
   //struct
   @topic

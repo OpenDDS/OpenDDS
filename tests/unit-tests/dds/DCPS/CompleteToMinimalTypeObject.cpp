@@ -377,7 +377,7 @@ bool operator== (const TypeObject& lhs, const TypeObject& rhs)
   if (!(lhs.minimal == rhs.minimal)) {
     return false;
   }
-  return true; 
+  return true;
     //lhs.complete == rhs.complete;
 }
 }
@@ -386,35 +386,35 @@ bool operator== (const TypeObject& lhs, const TypeObject& rhs)
 ::DDS::DomainParticipant_var dp;
 OpenDDS::XTypes::TypeLookupService_rch tls;
 
-// TEST(CompleteToMinimalTypeObject, Struct)
-// {
-//   my_mod::unTypeSupportImpl stru_tsi;
-//   stru_tsi.register_type(dp.in (), "stru");
-//   ::DDS::Topic_var my_topic =
-//     dp->create_topic ("stru",
-//                     "stru",
-//                     TOPIC_QOS_DEFAULT,
-//                     ::DDS::TopicListener::_nil(),
-//                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-//   ::DDS::Publisher_var pub =
-//     dp->create_publisher(PUBLISHER_QOS_DEFAULT,
-//                           ::DDS::PublisherListener::_nil(),
-//                           ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-//   ::DDS::DataWriter_var dw =
-//     pub->create_datawriter(my_topic.in (),
-//                             DATAWRITER_QOS_DEFAULT,
-//                             ::DDS::DataWriterListener::_nil(),
-//                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-//   TypeMap ctm = stru_tsi.getCompleteTypeMap();
-//   TypeObject cto = ctm[TypeIdentifier(EK_COMPLETE, EquivalenceHashWrapper(168, 72, 172, 8, 184, 103, 37, 100, 24, 24, 29, 129, 165, 47))];
-//   TypeMap mtm = stru_tsi.getMinimalTypeMap();
-//   TypeObject c_to_m_mto;
-//   if (!tls->complete_to_minimal_typeobject(cto, c_to_m_mto)) {
-//     ASSERT_EQ(1,0);
-//   }
-//   TypeObject mto2 = mtm[TypeIdentifier(EK_MINIMAL, EquivalenceHashWrapper(189, 72, 116, 15, 57, 244, 144, 185, 189, 193, 70, 196, 210, 42))];
-//   ASSERT_EQ(mto2, c_to_m_mto);
-// }
+TEST(CompleteToMinimalTypeObject, Struct)
+{
+  my_mod::unTypeSupportImpl stru_tsi;
+  stru_tsi.register_type(dp.in (), "stru");
+  ::DDS::Topic_var my_topic =
+    dp->create_topic ("stru",
+                    "stru",
+                    TOPIC_QOS_DEFAULT,
+                    ::DDS::TopicListener::_nil(),
+                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  ::DDS::Publisher_var pub =
+    dp->create_publisher(PUBLISHER_QOS_DEFAULT,
+                          ::DDS::PublisherListener::_nil(),
+                          ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  ::DDS::DataWriter_var dw =
+    pub->create_datawriter(my_topic.in (),
+                            DATAWRITER_QOS_DEFAULT,
+                            ::DDS::DataWriterListener::_nil(),
+                            ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  TypeMap ctm = stru_tsi.getCompleteTypeMap();
+  TypeObject cto = ctm[TypeIdentifier(EK_COMPLETE, EquivalenceHashWrapper(168, 72, 172, 8, 184, 103, 37, 100, 24, 24, 29, 129, 165, 47))];
+  TypeMap mtm = stru_tsi.getMinimalTypeMap();
+  TypeObject c_to_m_mto;
+  if (!tls->complete_to_minimal_typeobject(cto, c_to_m_mto)) {
+    ASSERT_EQ(1,0);
+  }
+  TypeObject mto2 = mtm[TypeIdentifier(EK_MINIMAL, EquivalenceHashWrapper(189, 72, 116, 15, 57, 244, 144, 185, 189, 193, 70, 196, 210, 42))];
+  ASSERT_EQ(mto2, c_to_m_mto);
+}
 TEST(CompleteToMinimalTypeObject, Union)
 {
   my_mod::unTypeSupportImpl uts;
@@ -444,152 +444,152 @@ TEST(CompleteToMinimalTypeObject, Union)
   TypeObject mto2 = mtm[TypeIdentifier(EK_MINIMAL, EquivalenceHashWrapper(94, 42, 84, 196, 20, 69, 255, 70, 95, 183, 166, 22, 4, 142))];
   ASSERT_EQ(mto2, c_to_m_mto);
 }
-// TEST(CompleteToMinimalTypeObject, Sequence)
-// {
-//   my_mod::unTypeSupportImpl stru_tsi;
-//   stru_tsi.register_type(dp.in (), "circular_struct_seq2");
-//   ::DDS::Topic_var my_topic =
-//     dp->create_topic ("circular_struct_seq2",
-//                     "circular_struct_seq2",
-//                     TOPIC_QOS_DEFAULT,
-//                     ::DDS::TopicListener::_nil(),
-//                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-//   ::DDS::Publisher_var pub =
-//     dp->create_publisher(PUBLISHER_QOS_DEFAULT,
-//                           ::DDS::PublisherListener::_nil(),
-//                           ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-//   ::DDS::DataWriter_var dw =
-//     pub->create_datawriter(my_topic.in (),
-//                             DATAWRITER_QOS_DEFAULT,
-//                             ::DDS::DataWriterListener::_nil(),
-//                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-//   TypeMap ctm = stru_tsi.getCompleteTypeMap();
-//   TypeObject cto = ctm[TypeIdentifier(TI_STRONGLY_CONNECTED_COMPONENT, StronglyConnectedComponentId(TypeObjectHashId(EK_COMPLETE, EquivalenceHashWrapper(42, 203, 214, 182, 80, 84, 4, 33, 118, 109, 127, 170, 57, 95)), 5, 2))];
-//   TypeMap mtm = stru_tsi.getMinimalTypeMap();
-//   TypeObject c_to_m_mto;
-//   if (!tls->complete_to_minimal_typeobject(cto, c_to_m_mto)) {
-//     ASSERT_EQ(1,0);
-//   }
-//   TypeObject mto2 = mtm[TypeIdentifier(TI_STRONGLY_CONNECTED_COMPONENT, StronglyConnectedComponentId(TypeObjectHashId(EK_MINIMAL, EquivalenceHashWrapper(23, 96, 109, 112, 215, 248, 161, 152, 79, 50, 37, 116, 6, 230)), 5, 2))];
-//   ASSERT_EQ(mto2, c_to_m_mto);
-// }
-// TEST(CompleteToMinimalTypeObject, Array)
-// {
-//   my_mod::unTypeSupportImpl un_tsi;
-//   un_tsi.register_type(dp.in (), "circular_struct_arr");
-//   ::DDS::Topic_var my_topic =
-//     dp->create_topic ("circular_struct_arr",
-//                     "circular_struct_arr",
-//                     TOPIC_QOS_DEFAULT,
-//                     ::DDS::TopicListener::_nil(),
-//                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-//   ::DDS::Publisher_var pub =
-//     dp->create_publisher(PUBLISHER_QOS_DEFAULT,
-//                           ::DDS::PublisherListener::_nil(),
-//                           ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-//   ::DDS::DataWriter_var dw =
-//     pub->create_datawriter(my_topic.in (),
-//                             DATAWRITER_QOS_DEFAULT,
-//                             ::DDS::DataWriterListener::_nil(),
-//                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-//   TypeMap ctm = un_tsi.getCompleteTypeMap();
-//   TypeObject cto = ctm[TypeIdentifier(TI_STRONGLY_CONNECTED_COMPONENT, StronglyConnectedComponentId(TypeObjectHashId(EK_COMPLETE, EquivalenceHashWrapper(42, 203, 214, 182, 80, 84, 4, 33, 118, 109, 127, 170, 57, 95)), 5, 1))];
-//   TypeMap mtm = un_tsi.getMinimalTypeMap();
-//   TypeObject c_to_m_mto;
-//   if (!tls->complete_to_minimal_typeobject(cto, c_to_m_mto)) {
-//     ASSERT_EQ(1,0);
-//   }
-//   TypeObject mto2 = mtm[TypeIdentifier(TI_STRONGLY_CONNECTED_COMPONENT, StronglyConnectedComponentId(TypeObjectHashId(EK_MINIMAL, EquivalenceHashWrapper(23, 96, 109, 112, 215, 248, 161, 152, 79, 50, 37, 116, 6, 230)), 5, 1))];
-//   ASSERT_EQ(mto2, c_to_m_mto);
-// }
+TEST(CompleteToMinimalTypeObject, Sequence)
+{
+  my_mod::unTypeSupportImpl stru_tsi;
+  stru_tsi.register_type(dp.in (), "circular_struct_seq2");
+  ::DDS::Topic_var my_topic =
+    dp->create_topic ("circular_struct_seq2",
+                    "circular_struct_seq2",
+                    TOPIC_QOS_DEFAULT,
+                    ::DDS::TopicListener::_nil(),
+                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  ::DDS::Publisher_var pub =
+    dp->create_publisher(PUBLISHER_QOS_DEFAULT,
+                          ::DDS::PublisherListener::_nil(),
+                          ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  ::DDS::DataWriter_var dw =
+    pub->create_datawriter(my_topic.in (),
+                            DATAWRITER_QOS_DEFAULT,
+                            ::DDS::DataWriterListener::_nil(),
+                            ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  TypeMap ctm = stru_tsi.getCompleteTypeMap();
+  TypeObject cto = ctm[TypeIdentifier(TI_STRONGLY_CONNECTED_COMPONENT, StronglyConnectedComponentId(TypeObjectHashId(EK_COMPLETE, EquivalenceHashWrapper(42, 203, 214, 182, 80, 84, 4, 33, 118, 109, 127, 170, 57, 95)), 5, 2))];
+  TypeMap mtm = stru_tsi.getMinimalTypeMap();
+  TypeObject c_to_m_mto;
+  if (!tls->complete_to_minimal_typeobject(cto, c_to_m_mto)) {
+    ASSERT_EQ(1,0);
+  }
+  TypeObject mto2 = mtm[TypeIdentifier(TI_STRONGLY_CONNECTED_COMPONENT, StronglyConnectedComponentId(TypeObjectHashId(EK_MINIMAL, EquivalenceHashWrapper(23, 96, 109, 112, 215, 248, 161, 152, 79, 50, 37, 116, 6, 230)), 5, 2))];
+  ASSERT_EQ(mto2, c_to_m_mto);
+}
+TEST(CompleteToMinimalTypeObject, Array)
+{
+  my_mod::unTypeSupportImpl un_tsi;
+  un_tsi.register_type(dp.in (), "circular_struct_arr");
+  ::DDS::Topic_var my_topic =
+    dp->create_topic ("circular_struct_arr",
+                    "circular_struct_arr",
+                    TOPIC_QOS_DEFAULT,
+                    ::DDS::TopicListener::_nil(),
+                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  ::DDS::Publisher_var pub =
+    dp->create_publisher(PUBLISHER_QOS_DEFAULT,
+                          ::DDS::PublisherListener::_nil(),
+                          ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  ::DDS::DataWriter_var dw =
+    pub->create_datawriter(my_topic.in (),
+                            DATAWRITER_QOS_DEFAULT,
+                            ::DDS::DataWriterListener::_nil(),
+                            ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  TypeMap ctm = un_tsi.getCompleteTypeMap();
+  TypeObject cto = ctm[TypeIdentifier(TI_STRONGLY_CONNECTED_COMPONENT, StronglyConnectedComponentId(TypeObjectHashId(EK_COMPLETE, EquivalenceHashWrapper(42, 203, 214, 182, 80, 84, 4, 33, 118, 109, 127, 170, 57, 95)), 5, 1))];
+  TypeMap mtm = un_tsi.getMinimalTypeMap();
+  TypeObject c_to_m_mto;
+  if (!tls->complete_to_minimal_typeobject(cto, c_to_m_mto)) {
+    ASSERT_EQ(1,0);
+  }
+  TypeObject mto2 = mtm[TypeIdentifier(TI_STRONGLY_CONNECTED_COMPONENT, StronglyConnectedComponentId(TypeObjectHashId(EK_MINIMAL, EquivalenceHashWrapper(23, 96, 109, 112, 215, 248, 161, 152, 79, 50, 37, 116, 6, 230)), 5, 1))];
+  ASSERT_EQ(mto2, c_to_m_mto);
+}
 
-// TEST(CompleteToMinimalTypeObject, AliasSequence)
-// {
-//   my_mod::unTypeSupportImpl un_tsi;
-//   un_tsi.register_type(dp.in (), "lseq");
-//   ::DDS::Topic_var my_topic =
-//     dp->create_topic ("lseq",
-//                     "lseq",
-//                     TOPIC_QOS_DEFAULT,
-//                     ::DDS::TopicListener::_nil(),
-//                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-//   ::DDS::Publisher_var pub =
-//     dp->create_publisher(PUBLISHER_QOS_DEFAULT,
-//                           ::DDS::PublisherListener::_nil(),
-//                           ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-//   ::DDS::DataWriter_var dw =
-//     pub->create_datawriter(my_topic.in (),
-//                             DATAWRITER_QOS_DEFAULT,
-//                             ::DDS::DataWriterListener::_nil(),
-//                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-//   TypeMap ctm = un_tsi.getCompleteTypeMap();
-//   TypeObject cto = ctm[TypeIdentifier(EK_COMPLETE, EquivalenceHashWrapper(191, 174, 166, 236, 84, 2, 202, 95, 146, 223, 113, 33, 94, 89))];
-//   TypeMap mtm = un_tsi.getMinimalTypeMap();
-//   TypeObject c_to_m_mto;
-//   if (!tls->complete_to_minimal_typeobject(cto, c_to_m_mto)) {
-//     ASSERT_EQ(1,0);
-//   }
-//   TypeObject mto2 = mtm[TypeIdentifier(EK_MINIMAL, EquivalenceHashWrapper(64, 132, 84, 128, 187, 1, 123, 173, 187, 231, 55, 190, 22, 206))];
-//   ASSERT_EQ(mto2, c_to_m_mto);
-// }
-// TEST(CompleteToMinimalTypeObject, AliasArray)
-// {
-//   my_mod::unTypeSupportImpl un_tsi;
-//   un_tsi.register_type(dp.in (), "larr");
-//   ::DDS::Topic_var my_topic =
-//     dp->create_topic ("larr",
-//                     "larr",
-//                     TOPIC_QOS_DEFAULT,
-//                     ::DDS::TopicListener::_nil(),
-//                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-//   ::DDS::Publisher_var pub =
-//     dp->create_publisher(PUBLISHER_QOS_DEFAULT,
-//                           ::DDS::PublisherListener::_nil(),
-//                           ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-//   ::DDS::DataWriter_var dw =
-//     pub->create_datawriter(my_topic.in (),
-//                             DATAWRITER_QOS_DEFAULT,
-//                             ::DDS::DataWriterListener::_nil(),
-//                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-//   TypeMap ctm = un_tsi.getCompleteTypeMap();
-//   TypeObject cto = ctm[TypeIdentifier(EK_COMPLETE, EquivalenceHashWrapper(80, 3, 53, 153, 247, 134, 18, 76, 42, 156, 63, 245, 137, 180))];
-//   TypeMap mtm = un_tsi.getMinimalTypeMap();
-//   TypeObject c_to_m_mto;
-//   if (!tls->complete_to_minimal_typeobject(cto, c_to_m_mto)) {
-//     ASSERT_EQ(1,0);
-//   }
-//   TypeObject mto2 = mtm[TypeIdentifier(EK_MINIMAL, EquivalenceHashWrapper(115, 7, 58, 161, 22, 145, 40, 98, 164, 53, 75, 57, 105, 170))];
-//   ASSERT_EQ(mto2, c_to_m_mto);
-// }
-// TEST(CompleteToMinimalTypeObject, Enumerated)
-// {
-//   my_mod::unTypeSupportImpl un_tsi;
-//   un_tsi.register_type(dp.in (), "EnumType");
-//   ::DDS::Topic_var my_topic =
-//     dp->create_topic ("EnumType",
-//                     "EnumType",
-//                     TOPIC_QOS_DEFAULT,
-//                     ::DDS::TopicListener::_nil(),
-//                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-//   ::DDS::Publisher_var pub =
-//     dp->create_publisher(PUBLISHER_QOS_DEFAULT,
-//                           ::DDS::PublisherListener::_nil(),
-//                           ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-//   ::DDS::DataWriter_var dw =
-//     pub->create_datawriter(my_topic.in (),
-//                             DATAWRITER_QOS_DEFAULT,
-//                             ::DDS::DataWriterListener::_nil(),
-//                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-//   TypeMap ctm = un_tsi.getCompleteTypeMap();
-//   TypeObject cto = ctm[TypeIdentifier(EK_COMPLETE, EquivalenceHashWrapper(208, 102, 40, 140, 43, 232, 192, 255, 146, 120, 236, 77, 165, 0))];
-//   TypeMap mtm = un_tsi.getMinimalTypeMap();
-//   TypeObject c_to_m_mto;
-//   if (!tls->complete_to_minimal_typeobject(cto, c_to_m_mto)) {
-//     ASSERT_EQ(1,0);
-//   }
-//   TypeObject mto2 = mtm[TypeIdentifier(EK_MINIMAL, EquivalenceHashWrapper(197, 93, 228, 89, 233, 88, 151, 207, 208, 98, 147, 32, 200, 147))];
-//   ASSERT_EQ(mto2, c_to_m_mto);
-// }
+TEST(CompleteToMinimalTypeObject, AliasSequence)
+{
+  my_mod::unTypeSupportImpl un_tsi;
+  un_tsi.register_type(dp.in (), "lseq");
+  ::DDS::Topic_var my_topic =
+    dp->create_topic ("lseq",
+                    "lseq",
+                    TOPIC_QOS_DEFAULT,
+                    ::DDS::TopicListener::_nil(),
+                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  ::DDS::Publisher_var pub =
+    dp->create_publisher(PUBLISHER_QOS_DEFAULT,
+                          ::DDS::PublisherListener::_nil(),
+                          ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  ::DDS::DataWriter_var dw =
+    pub->create_datawriter(my_topic.in (),
+                            DATAWRITER_QOS_DEFAULT,
+                            ::DDS::DataWriterListener::_nil(),
+                            ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  TypeMap ctm = un_tsi.getCompleteTypeMap();
+  TypeObject cto = ctm[TypeIdentifier(EK_COMPLETE, EquivalenceHashWrapper(191, 174, 166, 236, 84, 2, 202, 95, 146, 223, 113, 33, 94, 89))];
+  TypeMap mtm = un_tsi.getMinimalTypeMap();
+  TypeObject c_to_m_mto;
+  if (!tls->complete_to_minimal_typeobject(cto, c_to_m_mto)) {
+    ASSERT_EQ(1,0);
+  }
+  TypeObject mto2 = mtm[TypeIdentifier(EK_MINIMAL, EquivalenceHashWrapper(64, 132, 84, 128, 187, 1, 123, 173, 187, 231, 55, 190, 22, 206))];
+  ASSERT_EQ(mto2, c_to_m_mto);
+}
+TEST(CompleteToMinimalTypeObject, AliasArray)
+{
+  my_mod::unTypeSupportImpl un_tsi;
+  un_tsi.register_type(dp.in (), "larr");
+  ::DDS::Topic_var my_topic =
+    dp->create_topic ("larr",
+                    "larr",
+                    TOPIC_QOS_DEFAULT,
+                    ::DDS::TopicListener::_nil(),
+                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  ::DDS::Publisher_var pub =
+    dp->create_publisher(PUBLISHER_QOS_DEFAULT,
+                          ::DDS::PublisherListener::_nil(),
+                          ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  ::DDS::DataWriter_var dw =
+    pub->create_datawriter(my_topic.in (),
+                            DATAWRITER_QOS_DEFAULT,
+                            ::DDS::DataWriterListener::_nil(),
+                            ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  TypeMap ctm = un_tsi.getCompleteTypeMap();
+  TypeObject cto = ctm[TypeIdentifier(EK_COMPLETE, EquivalenceHashWrapper(80, 3, 53, 153, 247, 134, 18, 76, 42, 156, 63, 245, 137, 180))];
+  TypeMap mtm = un_tsi.getMinimalTypeMap();
+  TypeObject c_to_m_mto;
+  if (!tls->complete_to_minimal_typeobject(cto, c_to_m_mto)) {
+    ASSERT_EQ(1,0);
+  }
+  TypeObject mto2 = mtm[TypeIdentifier(EK_MINIMAL, EquivalenceHashWrapper(115, 7, 58, 161, 22, 145, 40, 98, 164, 53, 75, 57, 105, 170))];
+  ASSERT_EQ(mto2, c_to_m_mto);
+}
+TEST(CompleteToMinimalTypeObject, Enumerated)
+{
+  my_mod::unTypeSupportImpl un_tsi;
+  un_tsi.register_type(dp.in (), "EnumType");
+  ::DDS::Topic_var my_topic =
+    dp->create_topic ("EnumType",
+                    "EnumType",
+                    TOPIC_QOS_DEFAULT,
+                    ::DDS::TopicListener::_nil(),
+                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  ::DDS::Publisher_var pub =
+    dp->create_publisher(PUBLISHER_QOS_DEFAULT,
+                          ::DDS::PublisherListener::_nil(),
+                          ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  ::DDS::DataWriter_var dw =
+    pub->create_datawriter(my_topic.in (),
+                            DATAWRITER_QOS_DEFAULT,
+                            ::DDS::DataWriterListener::_nil(),
+                            ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  TypeMap ctm = un_tsi.getCompleteTypeMap();
+  TypeObject cto = ctm[TypeIdentifier(EK_COMPLETE, EquivalenceHashWrapper(208, 102, 40, 140, 43, 232, 192, 255, 146, 120, 236, 77, 165, 0))];
+  TypeMap mtm = un_tsi.getMinimalTypeMap();
+  TypeObject c_to_m_mto;
+  if (!tls->complete_to_minimal_typeobject(cto, c_to_m_mto)) {
+    ASSERT_EQ(1,0);
+  }
+  TypeObject mto2 = mtm[TypeIdentifier(EK_MINIMAL, EquivalenceHashWrapper(197, 93, 228, 89, 233, 88, 151, 207, 208, 98, 147, 32, 200, 147))];
+  ASSERT_EQ(mto2, c_to_m_mto);
+}
 
 int main(int argc, char* argv[])
 {
