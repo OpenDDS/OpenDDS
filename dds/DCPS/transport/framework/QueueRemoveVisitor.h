@@ -27,7 +27,7 @@ class OpenDDS_Dcps_Export QueueRemoveVisitor
   : public BasicQueueVisitor<TransportQueueElement> {
 public:
 
-  explicit QueueRemoveVisitor(const TransportQueueElement::MatchCriteria& mc);
+  explicit QueueRemoveVisitor(const TransportQueueElement::MatchCriteria& mc, bool remove_all = false);
 
   virtual ~QueueRemoveVisitor();
 
@@ -51,6 +51,8 @@ private:
   RemoveResult status_;
 
   size_t removed_bytes_;
+
+  bool remove_all_;
 };
 
 } // namespace DCPS
