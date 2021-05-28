@@ -285,11 +285,7 @@ SingleSendBuffer::insert_buffer(BufferType& buffer,
                            &retained_db_allocator_);
   queue->accept_visitor(visitor);
 
-  // Copy sample's message/data block descriptors:
-  ACE_Message_Block*& data = buffer.second;
-  data = TransportQueueElement::clone_mb(chain,
-                                         &retained_mb_allocator_,
-                                         &retained_db_allocator_);
+  buffer.second = chain->duplicate();
 }
 
 void
