@@ -6725,7 +6725,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
-  ACE_TAO_w16_x86_d0i0:
+  ACE_TAO_w16_x86_i0:
 
     runs-on: windows-2016
 
@@ -6803,11 +6803,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_w16_x86_d0i0_sec:
+  build_w16_x86_i0_sec:
 
     runs-on: windows-2016
 
-    needs: ACE_TAO_w16_x86_d0i0
+    needs: ACE_TAO_w16_x86_i0
 
     steps:
     - name: install openssl & xerces-c
@@ -6840,14 +6840,14 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ACE_TAO_w16_x86_d0i0_artifact
+        name: ACE_TAO_w16_x86_i0_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w16_x86_d0i0.tar.xz
-        rm -f ACE_TAO_w16_x86_d0i0.tar.xz
+        tar xvfJ ACE_TAO_w16_x86_i0.tar.xz
+        rm -f ACE_TAO_w16_x86_i0.tar.xz
         find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
     - name: Move ACE and MPC to C Drive
       shell: bash
@@ -6900,11 +6900,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_w16_x86_d0i0_sec:
+  test_w16_x86_i0_sec:
 
     runs-on: windows-2016
 
-    needs: build_w16_x86_d0i0_sec
+    needs: build_w16_x86_i0_sec
     timeout-minutes: 150
 
     steps:
@@ -6938,14 +6938,14 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ACE_TAO_w16_x86_d0i0_artifact
+        name: ACE_TAO_w16_x86_i0_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w16_x86_d0i0.tar.xz
-        rm -f ACE_TAO_w16_x86_d0i0.tar.xz
+        tar xvfJ ACE_TAO_w16_x86_i0.tar.xz
+        rm -f ACE_TAO_w16_x86_i0.tar.xz
         find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
     - name: Move ACE and MPC to C Drive
       shell: bash
@@ -6955,14 +6955,14 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
-        name: build_w16_x86_d0i0_sec_artifact
+        name: build_w16_x86_i0_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w16_x86_d0i0_sec.tar.xz
-        rm -f build_w16_x86_d0i0_sec.tar.xz
+        tar xvfJ build_w16_x86_i0_sec.tar.xz
+        rm -f build_w16_x86_i0_sec.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.8.0
     - name: check build configuration
@@ -7021,11 +7021,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
-  build_w16_x86_d0i0_j_FM-1f:
+  build_w16_x86_i0_j_FM-1f:
 
     runs-on: windows-2016
 
-    needs: ACE_TAO_w16_x86_d0i0
+    needs: ACE_TAO_w16_x86_i0
 
     steps:
     - name: install xerces-c
@@ -7053,14 +7053,14 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ACE_TAO_w16_x86_d0i0_artifact
+        name: ACE_TAO_w16_x86_i0_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w16_x86_d0i0.tar.xz
-        rm -f ACE_TAO_w16_x86_d0i0.tar.xz
+        tar xvfJ ACE_TAO_w16_x86_i0.tar.xz
+        rm -f ACE_TAO_w16_x86_i0.tar.xz
         find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
     - name: Move ACE and MPC to C Drive
       shell: bash
