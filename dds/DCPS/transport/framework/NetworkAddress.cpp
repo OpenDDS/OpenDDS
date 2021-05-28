@@ -638,9 +638,9 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
   const String::size_type closeb = address.find_first_of(']', openb);
   const String::size_type last_double = address.rfind("::", closeb);
   const String::size_type port_div = closeb != String::npos ?
-                                       address.find_first_of(':', closeb + 1) :
+                                       address.find_first_of(':', closeb + 1u) :
                                        (last_double != String::npos ?
-                                         address.find_first_of(':', last_double + 2) :
+                                         address.find_first_of(':', last_double + 2u) :
                                          address.find_last_of(':'));
 #else
   const String::size_type openb = String::npos;
@@ -650,14 +650,14 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
 
   if (port_div != String::npos) {
     if (openb != String::npos && closeb != String::npos) {
-      host_name_str = address.substr(openb + 1, closeb - 1);
+      host_name_str = address.substr(openb + 1u, closeb - 1u);
     } else {
       host_name_str = address.substr(0, port_div);
     }
-    port_number = static_cast<unsigned short>(std::strtoul(address.substr(port_div + 1).c_str(), 0, 10));
+    port_number = static_cast<unsigned short>(std::strtoul(address.substr(port_div + 1u).c_str(), 0, 10));
   } else {
     if (openb != String::npos && closeb != String::npos) {
-      host_name_str = address.substr(openb + 1, closeb - 1);
+      host_name_str = address.substr(openb + 1u, closeb - 1u);
     } else {
       host_name_str = address;
     }
