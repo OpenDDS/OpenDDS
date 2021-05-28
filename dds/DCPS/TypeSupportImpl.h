@@ -108,6 +108,10 @@ public:
 private:
   virtual const char* default_type_name() const = 0;
 
+  void to_type_info_i(XTypes::TypeIdentifierWithDependencies& ti_with_deps,
+                      const XTypes::TypeIdentifier& ti,
+                      const XTypes::TypeMap& type_map) const;
+
   void populate_dependencies_i(const RcHandle<XTypes::TypeLookupService>& tls,
                                XTypes::EquivalenceKind ek) const;
 

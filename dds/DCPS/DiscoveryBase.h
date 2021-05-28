@@ -937,10 +937,13 @@ namespace OpenDDS {
 
       typedef typename OPENDDS_MAP_CMP(RepoId, OPENDDS_STRING, GUID_tKeyLessThan) TopicNameMap;
 
-      static DDS::BuiltinTopicKey_t get_key(const DiscoveredPublication& pub) {
+      static DDS::BuiltinTopicKey_t get_key(const DiscoveredPublication& pub)
+      {
         return pub.writer_data_.ddsPublicationData.key;
       }
-      static DDS::BuiltinTopicKey_t get_key(const DiscoveredSubscription& sub) {
+
+      static DDS::BuiltinTopicKey_t get_key(const DiscoveredSubscription& sub)
+      {
         return sub.reader_data_.ddsSubscriptionData.key;
       }
 
@@ -949,23 +952,28 @@ namespace OpenDDS {
 
       virtual void assign_publication_key(RepoId& rid,
                                           const RepoId& topicId,
-                                          const DDS::DataWriterQos& /*qos*/) {
+                                          const DDS::DataWriterQos& /*qos*/)
+      {
         rid.entityId.entityKind =
           has_dcps_key(topicId)
           ? ENTITYKIND_USER_WRITER_WITH_KEY
           : ENTITYKIND_USER_WRITER_NO_KEY;
         assign(rid.entityId.entityKey, publication_counter_++);
       }
+
       virtual void assign_subscription_key(RepoId& rid,
                                            const RepoId& topicId,
-                                           const DDS::DataReaderQos& /*qos*/) {
+                                           const DDS::DataReaderQos& /*qos*/)
+      {
         rid.entityId.entityKind =
           has_dcps_key(topicId)
           ? ENTITYKIND_USER_READER_WITH_KEY
           : ENTITYKIND_USER_READER_NO_KEY;
         assign(rid.entityId.entityKey, subscription_counter_++);
       }
-      virtual void assign_topic_key(RepoId& guid) {
+
+      virtual void assign_topic_key(RepoId& guid)
+      {
         assign(guid.entityId.entityKey, topic_counter_++);
 
         if (topic_counter_ == 0x1000000) {
@@ -2659,13 +2667,13 @@ namespace OpenDDS {
       }
 
       virtual RepoId add_publication(DDS::DomainId_t domainId,
-                                                    const RepoId& participantId,
-                                                    const RepoId& topicId,
-                                                    DataWriterCallbacks_rch publication,
-                                                    const DDS::DataWriterQos& qos,
-                                                    const TransportLocatorSeq& transInfo,
-                                                    const DDS::PublisherQos& publisherQos,
-                                                    const XTypes::TypeInformation& type_info)
+                                     const RepoId& participantId,
+                                     const RepoId& topicId,
+                                     DataWriterCallbacks_rch publication,
+                                     const DDS::DataWriterQos& qos,
+                                     const TransportLocatorSeq& transInfo,
+                                     const DDS::PublisherQos& publisherQos,
+                                     const XTypes::TypeInformation& type_info)
       {
         return get_part(domainId, participantId)->add_publication(topicId, publication, qos, transInfo, publisherQos, type_info);
       }
@@ -2705,16 +2713,16 @@ namespace OpenDDS {
       }
 
       virtual RepoId add_subscription(DDS::DomainId_t domainId,
-                                                     const RepoId& participantId,
-                                                     const RepoId& topicId,
-                                                     DataReaderCallbacks_rch subscription,
-                                                     const DDS::DataReaderQos& qos,
-                                                     const TransportLocatorSeq& transInfo,
-                                                     const DDS::SubscriberQos& subscriberQos,
-                                                     const char* filterClassName,
-                                                     const char* filterExpr,
-                                                     const DDS::StringSeq& params,
-                                                     const XTypes::TypeInformation& type_info)
+                                      const RepoId& participantId,
+                                      const RepoId& topicId,
+                                      DataReaderCallbacks_rch subscription,
+                                      const DDS::DataReaderQos& qos,
+                                      const TransportLocatorSeq& transInfo,
+                                      const DDS::SubscriberQos& subscriberQos,
+                                      const char* filterClassName,
+                                      const char* filterExpr,
+                                      const DDS::StringSeq& params,
+                                      const XTypes::TypeInformation& type_info)
       {
         return get_part(domainId, participantId)->
           add_subscription(

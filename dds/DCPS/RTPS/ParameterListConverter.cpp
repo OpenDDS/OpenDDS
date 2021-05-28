@@ -76,7 +76,7 @@ namespace {
   {
     // Convert the tls blob to an RTPS locator seq
     DCPS::LocatorSeq locators;
-    DDS::ReturnCode_t result = blob_to_locators(dcps_locator.data, locators);
+    const DDS::ReturnCode_t result = blob_to_locators(dcps_locator.data, locators);
     if (result == DDS::RETCODE_OK) {
       const CORBA::ULong locators_len = locators.length();
       for (CORBA::ULong i = 0; i < locators_len; ++i) {
@@ -313,7 +313,7 @@ namespace {
 
     unsigned char field_mask = 0x00;
 
-    CORBA::ULong length = param_list.length();
+    const CORBA::ULong length = param_list.length();
     for (CORBA::ULong i = 0; i < length; ++i) {
       const Parameter& param = param_list[i];
       switch (param._d()) {
@@ -373,7 +373,7 @@ bool from_param_list(const ParameterList& param_list,
 {
   pbtd.user_data.value.length(0);
 
-  CORBA::ULong length = param_list.length();
+  const CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
     const Parameter& param = param_list[i];
     switch (param._d()) {
@@ -430,7 +430,7 @@ bool from_param_list(const ParameterList& param_list,
   pbtd.security_info.participant_security_attributes = 0;
   pbtd.security_info.plugin_participant_security_attributes = 0;
 
-  CORBA::ULong length = param_list.length();
+  const CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
     const Parameter& param = param_list[i];
     switch (param._d()) {
@@ -477,7 +477,7 @@ bool from_param_list(const ParameterList& param_list,
   if (!from_param_list(param_list, pbtds.base))
     return false;
 
-  CORBA::ULong length = param_list.length();
+  const CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
     const Parameter& param = param_list[i];
     switch (param._d()) {
@@ -597,7 +597,7 @@ bool from_param_list(const ParameterList& param_list,
 #endif
   proxy.expectsInlineQos = false;
 
-  CORBA::ULong length = param_list.length();
+  const CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
     const Parameter& param = param_list[i];
     switch (param._d()) {
@@ -707,7 +707,7 @@ bool from_param_list(const ParameterList& param_list,
   duration.seconds = 100;
   duration.fraction = 0;
 
-  CORBA::ULong length = param_list.length();
+  const CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
     const Parameter& param = param_list[i];
     switch (param._d()) {
@@ -754,13 +754,10 @@ bool from_param_list(const ParameterList& param_list,
 bool to_param_list(const OpenDDS::Security::SPDPdiscoveredParticipantData& participant_data,
                    ParameterList& param_list)
 {
-
   if (participant_data.dataKind == OpenDDS::Security::DPDK_SECURE) {
     to_param_list(participant_data.ddsParticipantDataSecure, param_list);
-
   } else if (participant_data.dataKind == OpenDDS::Security::DPDK_ENHANCED) {
     to_param_list(participant_data.ddsParticipantDataSecure.base, param_list);
-
   } else {
     to_param_list(participant_data.ddsParticipantDataSecure.base.base, param_list);
   }
@@ -819,7 +816,6 @@ void add_DataRepresentationQos(ParameterList& param_list, const DDS::DataReprese
 bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
                    ParameterList& param_list,
                    bool use_xtypes,
-                   const XTypes::TypeInformation& type_info,
                    bool map)
 {
   // Ignore builtin topic key
@@ -831,15 +827,15 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
     add_param(param_list, param);
   }
 
-  if (use_xtypes) {
-    add_type_info_param(param_list, type_info);
-  }
-
   {
     Parameter param;
     param.string_data(writer_data.ddsPublicationData.type_name);
     param._d(PID_TYPE_NAME);
     add_param(param_list, param);
+  }
+
+  if (use_xtypes) {
+    add_type_info_param(param_list, writer_data.ddsPublicationData.type_information);
   }
 
   if (not_default(writer_data.ddsPublicationData.durability)) {
@@ -951,7 +947,7 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
     param._d(PID_ENDPOINT_GUID);
     add_param(param_list, param);
   }
-  CORBA::ULong locator_len = writer_data.writerProxy.allLocators.length();
+  const CORBA::ULong locator_len = writer_data.writerProxy.allLocators.length();
 
   // Serialize from allLocators, rather than the unicastLocatorList
   // and multicastLocatorList.  This allows OpenDDS transports to be
@@ -981,8 +977,7 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
 
 bool from_param_list(const ParameterList& param_list,
                      DCPS::DiscoveredWriterData& writer_data,
-                     bool use_xtypes,
-                     XTypes::TypeInformation& type_info)
+                     bool use_xtypes)
 {
   // Collect the rtps_udp locators before appending them to allLocators
   DCPS::LocatorSeq rtps_udp_locators;
@@ -1027,7 +1022,7 @@ bool from_param_list(const ParameterList& param_list,
   writer_data.ddsPublicationData.representation.value.length(1);
   writer_data.ddsPublicationData.representation.value[0] = DDS::XCDR_DATA_REPRESENTATION;
 
-  CORBA::ULong length = param_list.length();
+  const CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
     const Parameter& param = param_list[i];
     switch (param._d()) {
@@ -1131,7 +1126,7 @@ bool from_param_list(const ParameterList& param_list,
         break;
       case PID_XTYPES_TYPE_INFORMATION:
         if (use_xtypes) {
-          extract_type_info_param(param, type_info);
+          extract_type_info_param(param, writer_data.ddsPublicationData.type_information);
         }
         break;
       default:
@@ -1290,7 +1285,7 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
   }
 
   CORBA::ULong i;
-  CORBA::ULong locator_len = reader_data.readerProxy.allLocators.length();
+  const CORBA::ULong locator_len = reader_data.readerProxy.allLocators.length();
   // Serialize from allLocators, rather than the unicastLocatorList
   // and multicastLocatorList.  This allows OpenDDS transports to be
   // serialized in the proper order using custom PIDs.
@@ -1314,8 +1309,7 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
     }
   }
 
-  CORBA::ULong num_associations =
-    reader_data.readerProxy.associatedWriters.length();
+  const CORBA::ULong num_associations = reader_data.readerProxy.associatedWriters.length();
   for (i = 0; i < num_associations; ++i) {
     Parameter param;
     param.guid(reader_data.readerProxy.associatedWriters[i]);
@@ -1373,7 +1367,7 @@ bool from_param_list(const ParameterList& param_list,
   reader_data.contentFilterProperty.filterExpression = "";
   reader_data.contentFilterProperty.expressionParameters.length(0);
 
-  CORBA::ULong length = param_list.length();
+  const CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
     const Parameter& param = param_list[i];
     switch (param._d()) {
@@ -1578,8 +1572,8 @@ bool from_param_list(const ParameterList& param_list,
                      XTypes::TypeInformation& type_info)
 {
   bool result = from_param_list(param_list, wrapper.data, use_xtypes, type_info) &&
-               from_param_list(param_list, wrapper.security_info) &&
-               from_param_list(param_list, wrapper.data_tags);
+    from_param_list(param_list, wrapper.security_info) &&
+    from_param_list(param_list, wrapper.data_tags);
 
   return result;
 }
@@ -1604,8 +1598,8 @@ bool from_param_list(const ParameterList& param_list,
                      XTypes::TypeInformation& type_info)
 {
   bool result = from_param_list(param_list, wrapper.data, use_xtypes, type_info) &&
-               from_param_list(param_list, wrapper.security_info) &&
-               from_param_list(param_list, wrapper.data_tags);
+    from_param_list(param_list, wrapper.security_info) &&
+    from_param_list(param_list, wrapper.data_tags);
 
   return result;
 }

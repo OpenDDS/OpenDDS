@@ -4810,6 +4810,7 @@ Sedp::populate_discovered_writer_msg(
   dwd.ddsPublicationData.topic_name = topic_name.c_str();
   TopicDetails& topic_details = topics_[topic_name];
   dwd.ddsPublicationData.type_name = topic_details.local_data_type_name().c_str();
+  dwd.ddsPublicationData.type_information = pub.type_info_;
   dwd.ddsPublicationData.durability = pub.qos_.durability;
   dwd.ddsPublicationData.durability_service = pub.qos_.durability_service;
   dwd.ddsPublicationData.deadline = pub.qos_.deadline;
@@ -5088,7 +5089,7 @@ Sedp::write_publication_data(
 DDS::ReturnCode_t
 Sedp::write_publication_data_unsecure(
   const RepoId& rid,
-  LocalPublication& lp,
+  const LocalPublication& lp,
   const RepoId& reader)
 {
   if (!(spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER)) {
@@ -5103,7 +5104,7 @@ Sedp::write_publication_data_unsecure(
     populate_discovered_writer_msg(dwd, rid, lp);
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(dwd, plist, use_xtypes_, lp.type_info_, false)) {
+    if (!ParameterListConverter::to_param_list(dwd, plist, use_xtypes_, false)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
@@ -5138,7 +5139,7 @@ Sedp::write_publication_data_unsecure(
 DDS::ReturnCode_t
 Sedp::write_publication_data_secure(
   const RepoId& rid,
-  LocalPublication& lp,
+  const LocalPublication& lp,
   const RepoId& reader)
 {
   if (!(spdp_.available_builtin_endpoints() & DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER)) {
@@ -5157,7 +5158,7 @@ Sedp::write_publication_data_secure(
     dwd.security_info.plugin_endpoint_security_attributes = lp.security_attribs_.plugin_endpoint_attributes;
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(dwd, plist, use_xtypes_, lp.type_info_, false)) {
+    if (!ParameterListConverter::to_param_list(dwd, plist, use_xtypes_, false)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data_secure - ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
