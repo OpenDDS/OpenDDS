@@ -213,12 +213,8 @@ void verify_long10seq(const TypeIdentifier& ti, const TypeObject& to)
   EXPECT_EQ(makeTypeIdentifier(to), ti);
 }
 
-void verify_typemap(const TypeMap& type_map, EquivalenceKind ek)
+void extract_scc(const TypeMap& type_map, TypeMap& scc15_map, TypeMap& scc12_map, TypeMap& other_types_map)
 {
-  const unsigned int num_types = 31;
-  EXPECT_EQ(type_map.size(), num_types);
-
-  TypeMap scc15_map, scc12_map, other_types_map;
   for (TypeMap::const_iterator it = type_map.begin(); it != type_map.end(); ++it) {
     if (it->first.kind() == TI_STRONGLY_CONNECTED_COMPONENT &&
         it->first.sc_component_id().scc_length == 15) {
@@ -230,7 +226,12 @@ void verify_typemap(const TypeMap& type_map, EquivalenceKind ek)
       other_types_map.insert(*it);
     }
   }
+}
 
+void common_check_typemap(const TypeMap& scc15_map, const TypeMap& scc12_map,
+                          const TypeMap& other_types_map, EquivalenceKind ek)
+{
+  EXPECT_EQ(type_map.size(), 31);
   EXPECT_EQ(scc15_map.size(), static_cast<size_t>(15));
   EXPECT_EQ(scc12_map.size(), static_cast<size_t>(12));
   EXPECT_EQ(other_types_map.size(), static_cast<size_t>(4));
@@ -246,13 +247,6 @@ void verify_typemap(const TypeMap& type_map, EquivalenceKind ek)
     ACE_CDR::Long scc_index = it->first.sc_component_id().scc_index;
     EXPECT_TRUE(scc_indexes.find(scc_index) != scc_indexes.end());
     scc_indexes.erase(scc_index);
-
-    // TODO(sonndinh): Verify each type.
-    if (ek == EK_MINIMAL) {
-
-    } else {
-
-    }
   }
   EXPECT_TRUE(scc_indexes.empty());
 
@@ -266,8 +260,6 @@ void verify_typemap(const TypeMap& type_map, EquivalenceKind ek)
     ACE_CDR::Long scc_index = it->first.sc_component_id().scc_index;
     EXPECT_TRUE(scc_indexes.find(scc_index) != scc_indexes.end());
     scc_indexes.erase(scc_index);
-
-    // TODO(sonndinh): Verify each type.
   }
   EXPECT_TRUE(scc_indexes.empty());
 
@@ -289,16 +281,92 @@ void verify_typemap(const TypeMap& type_map, EquivalenceKind ek)
   }
 }
 
+enum TypeName { A, B, C, D, E, F, G, H, I,
+  A_SEQ, B_SEQ, C_SEQ, D_SEQ, E_SEQ, F_SEQ, G_SEQ, H_SEQ, I_SEQ,
+  A_SEQ_ALIAS, B_SEQ_ALIAS, C_SEQ_ALIAS, D_SEQ_ALIAS, E_SEQ_ALIAS,
+  F_SEQ_ALIAS, G_SEQ_ALIAS, H_SEQ_ALIAS, I_SEQ_ALIAS };
+
+// Map from each type to its SCC index.
+typedef std::map<unsigned, TypeName> IndexMap;
+
+IndexMap compute_scc15_index_map(const TypeMap& com_scc15)
+{
+  // TODO(sonndinh)
+  for (TypeMap::const_iterator it = com_scc15.begin(); it != com_scc15.end(); ++it) {
+    const TypeKind tk = it->second.complete.kind;
+    if (tk == TK_ALIAS) {
+      const String type_name = it->second.complete.alias_type.header.detail.type_name;
+      switch (type_name) {
+      case "::ASequence":
+      case "::BSeq":
+      case "::CSeq":
+      case "::DSeq":
+      case "::ESeq":
+        
+      }
+    } else if (tk == TK_SEQUENCE) {
+    } else if (tk == TK_STRUCT) {
+    }
+  }
+}
+
+IndexMap compute_scc12_index_map(const TypeMap& com_scc12)
+{
+  // TODO(sonndinh)
+}
+
+void check_scc15_map(const TypeMap& scc15, const IndexMap& indexes, EquivalenceKind ek)
+{
+  // TODO(sonndinh)
+}
+
+void check_scc12_map(const TypeMap& scc12, const IndexMap& indexes, EquivalenceKind ek)
+{
+  // TODO(sonndinh)
+}
+
+void verify_minimal_typemap(const TypeMap& minimal_map, const TypeMap& complete_map)
+{
+  TypeMap min_scc15, min_scc12, min_other;
+  extract_scc(minimal_map, min_scc15, min_scc12, min_other);
+  common_check_typemap(min_scc15, min_scc12, min_other, EK_MINIMAL);
+
+  TypeMap com_scc15, com_scc12, com_other;
+  extract_scc(complete_map, com_scc15, com_scc12, com_other);
+
+  // It is not straight-forward to determine directly which type each entry in the
+  // minimal type map is associated with. This goes an indirect way by first computing
+  // the index of each type in its SCC using the complete type map, and then using
+  // those indexes to determine the types in the minimal type map.
+  IndexMap scc15_index_map = compute_scc15_index_map(com_scc15);
+  IndexMap scc12_index_map = compute_scc12_index_map(com_scc12);
+  check_scc15_map(min_scc15, scc15_index_map, EK_MINIMAL);
+  check_scc12_map(min_scc12, scc12_index_map, EK_MINIMAL);
+}
+
+void verify_complete_typemap(const TypeMap& complete_map)
+{
+  TypeMap scc15, scc12, other;
+  extract_scc(complete_map, scc15, scc12, other);
+  common_check_typemap(scc15, scc12, other, EK_COMPLETE);
+
+  IndexMap scc15_index_map = compute_scc15_index_map(scc15);
+  IndexMap scc12_index_map = compute_scc12_index_map(scc12);
+  check_scc15_map(scc15, scc15_index_map, EK_COMPLETE);
+  check_scc12_map(scc12, scc12_index_map, EK_COMPLETE);
+}
+
 TEST(TypeMapTest, Minimal)
 {
   const TypeMap& minimal_map = getMinimalTypeMap<A_xtag>();
-  verify_typemap(minimal_map, EK_MINIMAL);
+  const TypeMap& complete_map = getCompleteTypeMap<A_xtag>();
+  verify_minimal_typemap(minimal_map, complete_map);
 }
 
 TEST(TypeMapTest, Complete)
 {
   const TypeMap& complete_map = getCompleteTypeMap<A_xtag>();
-  verify_typemap(complete_map, EK_COMPLETE);
+  verify_complete_typemap(complete_map);
 }
 
 int main(int argc, char* argv[])
