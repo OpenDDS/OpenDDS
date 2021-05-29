@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 
 #include <set>
+#include <map>
 
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::XTypes;
@@ -231,7 +232,6 @@ void extract_scc(const TypeMap& type_map, TypeMap& scc15_map, TypeMap& scc12_map
 void common_check_typemap(const TypeMap& scc15_map, const TypeMap& scc12_map,
                           const TypeMap& other_types_map, EquivalenceKind ek)
 {
-  EXPECT_EQ(type_map.size(), 31);
   EXPECT_EQ(scc15_map.size(), static_cast<size_t>(15));
   EXPECT_EQ(scc12_map.size(), static_cast<size_t>(12));
   EXPECT_EQ(other_types_map.size(), static_cast<size_t>(4));
@@ -287,37 +287,197 @@ enum TypeName { A, B, C, D, E, F, G, H, I,
   F_SEQ_ALIAS, G_SEQ_ALIAS, H_SEQ_ALIAS, I_SEQ_ALIAS };
 
 // Map from each type to its SCC index.
-typedef std::map<unsigned, TypeName> IndexMap;
+typedef std::map<ACE_CDR::Long, TypeName> IndexMap;
 
 IndexMap compute_scc15_index_map(const TypeMap& com_scc15)
 {
-  // TODO(sonndinh)
+  IndexMap result;
+
   for (TypeMap::const_iterator it = com_scc15.begin(); it != com_scc15.end(); ++it) {
     const TypeKind tk = it->second.complete.kind;
+    const ACE_CDR::Long index = it->first.sc_component_id().scc_index;
     if (tk == TK_ALIAS) {
       const String type_name = it->second.complete.alias_type.header.detail.type_name;
-      switch (type_name) {
-      case "::ASequence":
-      case "::BSeq":
-      case "::CSeq":
-      case "::DSeq":
-      case "::ESeq":
-        
+      EXPECT_TRUE(type_name == "::ASequence" || type_name == "::BSeq" ||
+                  type_name == "::CSeq" || type_name == "::DSeq" || type_name == "::ESeq");
+
+      if (type_name == "::ASequence") {
+        result[index] = A_SEQ_ALIAS;
+      } else if (type_name == "::BSeq") {
+        result[index] = B_SEQ_ALIAS;
+      } else if (type_name == "::CSeq") {
+        result[index] = C_SEQ_ALIAS;
+      } else if (type_name == "::DSeq") {
+        result[index] = D_SEQ_ALIAS;
+      } else {
+        result[index] = E_SEQ_ALIAS;
       }
-    } else if (tk == TK_SEQUENCE) {
-    } else if (tk == TK_STRUCT) {
+    } else if (tk == TK_STRUCTURE) {
+      const String type_name = it->second.complete.struct_type.header.detail.type_name;
+      EXPECT_TRUE(type_name == "::A" || type_name == "::B" || type_name == "::C" ||
+                  type_name == "::D" || type_name == "::E");
+
+      if (type_name == "::A") {
+        result[index] = A;
+      } else if (type_name == "::B") {
+        result[index] = B;
+      } else if (type_name == "::C") {
+        result[index] = C;
+      } else if (type_name == "::D") {
+        result[index] = D;
+      } else {
+        result[index] = E;
+      }
     }
   }
+
+  for (TypeMap::const_iterator it = com_scc15.begin(); it != com_scc15.end(); ++it) {
+    const TypeKind tk = it->second.complete.kind;
+    const ACE_CDR::Long index = it->first.sc_component_id().scc_index;
+    if (tk == TK_SEQUENCE) {
+      const TypeIdentifier& elem_ti = it->second.complete.sequence_type.element.common.type;
+      TypeMap::const_iterator elem_pos = com_scc15.find(elem_ti);
+      EXPECT_TRUE(elem_pos != com_scc15.end());
+      EXPECT_EQ(elem_pos->second.complete.kind, TK_STRUCTURE);
+      const String elem_type_name = elem_pos->second.complete.struct_type.header.detail.type_name;
+
+      if (elem_type_name == "::A") {
+        result[index] = A_SEQ;
+      } else if (elem_type_name == "::B") {
+        result[index] = B_SEQ;
+      } else if (elem_type_name == "::C") {
+        result[index] = C_SEQ;
+      } else if (elem_type_name == "::D") {
+        result[index] = D_SEQ;
+      } else {
+        result[index] = E_SEQ;
+      }
+    }
+  }
+
+  return result;
 }
 
 IndexMap compute_scc12_index_map(const TypeMap& com_scc12)
 {
-  // TODO(sonndinh)
+  IndexMap result;
+
+  for (TypeMap::const_iterator it = com_scc12.begin(); it != com_scc12.end(); ++it) {
+    const TypeKind tk = it->second.complete.kind;
+    const ACE_CDR::Long index = it->first.sc_component_id().scc_index;
+    if (tk == TK_ALIAS) {
+      const String type_name = it->second.complete.alias_type.header.detail.type_name;
+      EXPECT_TRUE(type_name == "::FSeq" || type_name == "::GSeq" ||
+                  type_name == "::HSeq" || type_name == "::ISeq");
+
+      if (type_name == "::FSeq") {
+        result[index] = F_SEQ_ALIAS;
+      } else if (type_name == "::GSeq") {
+        result[index] = G_SEQ_ALIAS;
+      } else if (type_name == "::HSeq") {
+        result[index] = H_SEQ_ALIAS;
+      } else {
+        result[index] = I_SEQ_ALIAS;
+      }
+    } else if (tk == TK_STRUCTURE) {
+      const String type_name = it->second.complete.struct_type.header.detail.type_name;
+      EXPECT_TRUE(type_name == "::F" || type_name == "::G" ||
+                  type_name == "::H" || type_name == "::I");
+
+      if (type_name == "::F") {
+        result[index] = F;
+      } else if (type_name == "::G") {
+        result[index] = G;
+      } else if (type_name == "::H") {
+        result[index] = H;
+      } else {
+        result[index] = I;
+      }
+    }
+  }
+
+  for (TypeMap::const_iterator it = com_scc12.begin(); it != com_scc12.end(); ++it) {
+    const TypeKind tk = it->second.complete.kind;
+    const ACE_CDR::Long index = it->first.sc_component_id().scc_index;
+    if (tk == TK_SEQUENCE) {
+      const TypeIdentifier& elem_ti = it->second.complete.sequence_type.element.common.type;
+      TypeMap::const_iterator elem_pos = com_scc12.find(elem_ti);
+      EXPECT_TRUE(elem_pos != com_scc12.end());
+      EXPECT_EQ(elem_pos->second.complete.kind, TK_STRUCTURE);
+      const String elem_type_name = elem_pos->second.complete.struct_type.header.detail.type_name;
+
+      if (elem_type_name == "::F") {
+        result[index] = F_SEQ;
+      } else if (elem_type_name == "::G") {
+        result[index] = G_SEQ;
+      } else if (elem_type_name == "::H") {
+        result[index] = H_SEQ;
+      } else {
+        result[index] = I_SEQ;
+      }
+    }
+  }
+
+  return result;
+}
+
+void check_struct_a(const TypeMap& scc15, const TypeIdentifier& ti,
+                    const TypeObject& to, const IndexMap& indexes, EquivalenceKind ek)
+{
+  const StructTypeFlag type_flags = ek == EK_MINIMAL ?
+    to.minimal.struct_type.struct_flags : to.complete.struct_type.struct_flags;
+  EXPECT_GT(type_flags | IS_APPENDABLE, 0);
+
+  if (ek == EK_MINIMAL) {
+    EXPECT_EQ(to.minimal.struct_type.header.base_type, TypeIdentifier(TK_NONE));
+    const MinimalStructMemberSeq& member_seq = to.minimal.struct_type.member_seq;
+    EXPECT_EQ(member_seq.length(), static_cast<ACE_CDR::ULong>(2));
+
+    for (ACE_CDR::ULong i = 0; i < member_seq.length(); ++i) {
+      const TypeKind member_tk = member_seq[i].common.member_type_id.kind();
+      // TODO(sonndinh): Make sure the expected type of sequence is TI_PLAIN_SEQUENCE_SMALL.
+      EXPECT_TRUE(member_tk == TI_STRONGLY_CONNECTED_COMPONENT ||
+                  member_tk == TI_PLAIN_SEQUENCE_SMALL);
+      if (member_seq[i].common.member_type_id.kind() == TI_STRONGLY_CONNECTED_COMPONENT) {
+        const ACE_CDR::Long member_idx = member_seq[i].common.member_type_id.sc_component_id().scc_index;
+      } else {
+
+      }
+    }
+  } else {
+  }
 }
 
 void check_scc15_map(const TypeMap& scc15, const IndexMap& indexes, EquivalenceKind ek)
 {
-  // TODO(sonndinh)
+  typedef std::map<TypeName, ACE_CDR::Long> TypeToIndexMap;
+  TypeToIndexMap to_index;
+  for (IndexMap::const_iterator it = indexes.begin(); it != indexes.end(); ++it) {
+    to_index[it->second] = it->first;
+  }
+
+  for (TypeMap::const_iterator it = scc15.begin(); it != scc15.end(); ++it) {
+    const ACE_CDR::Long index = it->first.sc_component_id().scc_index;
+
+    if (index == to_index[A]) {
+      check_struct_a(scc15, it->first, it->second, indexes, ek);
+    } else if (index == to_index[B]) {
+      // TODO(sonndinh): Add methods to handle this and the other cases.
+    } else if (index == to_index[C]) {
+    } else if (index == to_index[D]) {
+    } else if (index == to_index[E]) {
+    } else if (index == to_index[A_SEQ]) {
+    } else if (index == to_index[B_SEQ]) {
+    } else if (index == to_index[C_SEQ]) {
+    } else if (index == to_index[D_SEQ]) {
+    } else if (index == to_index[E_SEQ]) {
+    } else if (index == to_index[A_SEQ_ALIAS]) {
+    } else if (index == to_index[B_SEQ_ALIAS]) {
+    } else if (index == to_index[C_SEQ_ALIAS]) {
+    } else if (index == to_index[D_SEQ_ALIAS]) {
+    } else if (index == to_index[E_SEQ_ALIAS]) {
+    }
+  }
 }
 
 void check_scc12_map(const TypeMap& scc12, const IndexMap& indexes, EquivalenceKind ek)
