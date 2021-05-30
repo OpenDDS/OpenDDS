@@ -31,7 +31,7 @@ OpenDDS_Dcps_Export
 bool
 is_wildcard(const char *str);
 
-/// Increments the count of occurances of the incompatible policy
+/// Increments the count of occurrences of the incompatible policy
 ///  for the status
 OpenDDS_Dcps_Export
 void

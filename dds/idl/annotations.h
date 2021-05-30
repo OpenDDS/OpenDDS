@@ -397,7 +397,7 @@ namespace OpenDDS {
   };
 
   /**
-   * Used to specifiy the allowed RTPS data representations in XTypes.
+   * Used to specify the allowed RTPS data representations in XTypes.
    * Replacement for @::data_representation which requires bitmask.
    */
   class DataRepresentationAnnotation :

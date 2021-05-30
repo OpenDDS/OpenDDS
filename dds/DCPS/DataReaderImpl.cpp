@@ -1223,7 +1223,7 @@ DataReaderImpl::enable()
   // enable the type specific part of this DataReader
   this->enable_specific();
 
-  //Note: the QoS used to set n_chunks_ is Changable=No so
+  //Note: the QoS used to set n_chunks_ is Changeable=No so
   // it is OK that we cannot change the size of our allocators.
   rd_allocator_.reset(new ReceivedDataAllocator(n_chunks_));
 

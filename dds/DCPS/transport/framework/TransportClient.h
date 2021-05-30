@@ -35,7 +35,7 @@ namespace DCPS {
 
 class EntityImpl;
 class TransportInst;
-class AssocationInfo;
+class AssociationInfo;
 class ReaderIdSeq;
 class WriterIdSeq;
 class SendStateDataSampleList;

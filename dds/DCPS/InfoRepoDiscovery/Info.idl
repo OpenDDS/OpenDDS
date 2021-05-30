@@ -175,7 +175,7 @@ module OpenDDS {
                Invalid_Participant,
                Invalid_Publication);
 
-      //Note: the ignore_xxx methods are not reversable - per DDS spec.
+      //Note: the ignore_xxx methods are not reversible - per DDS spec.
 
       // ignore participant when matching/associating pubs & subs
       void ignore_domain_participant (in ::DDS::DomainId_t domainId,
