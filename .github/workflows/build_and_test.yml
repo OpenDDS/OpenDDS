@@ -877,7 +877,7 @@ jobs:
       uses: actions/cache@v2.1.6
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
+        key: "c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_clang++-5.0"
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -1085,7 +1085,7 @@ jobs:
       uses: actions/cache@v2.1.6
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
+        key: "c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_clang++-10"
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -1294,7 +1294,7 @@ jobs:
       uses: actions/cache@v2.1.6
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
+        key: "c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_g++-6"
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -1502,7 +1502,7 @@ jobs:
       uses: actions/cache@v2.1.6
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
+        key: "c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_g++-8"
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -1710,7 +1710,7 @@ jobs:
       uses: actions/cache@v2.1.6
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
+        key: "c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_g++-10"
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2.3.4
