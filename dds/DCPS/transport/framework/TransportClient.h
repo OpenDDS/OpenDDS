@@ -33,11 +33,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class EntityImpl;
-class TransportInst;
-class AssociationInfo;
-class ReaderIdSeq;
-class WriterIdSeq;
 class SendStateDataSampleList;
 class SendStateDataSampleListIterator;
 
