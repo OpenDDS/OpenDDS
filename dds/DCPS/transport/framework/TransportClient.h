@@ -33,9 +33,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class SendStateDataSampleList;
-class SendStateDataSampleListIterator;
-
 /**
  * @brief Mix-in class for DDS entities which directly use the transport layer.
  *
