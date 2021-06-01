@@ -31,7 +31,8 @@ public:
                       ACE_Message_Block*&          unsent_head_block,
                       ACE_Message_Block*           header_block,
                       MessageBlockAllocator& mb_allocator,
-                      DataBlockAllocator& db_allocator);
+                      DataBlockAllocator& db_allocator,
+                      bool remove_all = false);
 
   virtual ~PacketRemoveVisitor();
 
@@ -68,6 +69,8 @@ private:
   MessageBlockAllocator& replaced_element_mb_allocator_;
   /// Cached allocator for DataSampleHeader data block
   DataBlockAllocator& replaced_element_db_allocator_;
+  // Continue removing for non-unique elements even when status is RELEASED
+  bool remove_all_;
 };
 
 } // namespace DCPS

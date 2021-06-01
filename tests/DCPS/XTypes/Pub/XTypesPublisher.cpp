@@ -208,7 +208,7 @@ void write_modified_name_mutable_union(const DataWriter_var& dw)
                OpenDDS::DCPS::retcode_to_string(ret)));
   }
   if (verbose) {
-    ACE_DEBUG((LM_DEBUG, "writer: ModifiedNameMutableUnion\n"));
+    ACE_DEBUG((LM_DEBUG, "writer:  ModifiedNameMutableUnion\n"));
   }
 }
 
@@ -339,6 +339,51 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   ACE_DEBUG((LM_DEBUG, "Writer starting at %T\n"));
+  Topic_var ack_control_topic;
+  Topic_var echo_control_topic;
+  ControlStructTypeSupport_var ack_control_ts = new ControlStructTypeSupportImpl;
+  ControlStructTypeSupport_var echo_control_ts = new ControlStructTypeSupportImpl;
+  get_topic(ack_control_ts, dp, "SET_PD_OL_OA_OM_OD_Ack", ack_control_topic, "ControlStruct");
+  get_topic(echo_control_ts, dp, "SET_PD_OL_OA_OM_OD_Echo", echo_control_topic, "ControlStruct");
+
+  Subscriber_var control_sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
+                                                     DEFAULT_STATUS_MASK);
+  if (!control_sub) {
+    ACE_ERROR((LM_ERROR, "ERROR: create_subscriber failed\n"));
+    return 1;
+  }
+  Publisher_var control_pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
+                                                   DEFAULT_STATUS_MASK);
+  if (!control_pub) {
+    ACE_ERROR((LM_ERROR, "ERROR: create_publisher failed for control_pub\n"));
+    return 1;
+  }
+
+  DataReaderQos control_dr_qos;
+  control_sub->get_default_datareader_qos(control_dr_qos);
+  control_dr_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
+  control_dr_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
+
+  DataReader_var control_dr = control_sub->create_datareader(ack_control_topic, control_dr_qos, 0,
+                                                             DEFAULT_STATUS_MASK);
+  if (!control_dr) {
+    ACE_ERROR((LM_ERROR, "ERROR: create_datareader failed\n"));
+    return 1;
+  }
+
+  DataWriterQos control_dw_qos;
+  control_pub->get_default_datawriter_qos(control_dw_qos);
+  control_dw_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
+
+  DataWriter_var control_dw = control_pub->create_datawriter(echo_control_topic, control_dw_qos, 0,
+                                                             DEFAULT_STATUS_MASK);
+  if (!control_dw) {
+    ACE_ERROR((LM_ERROR, "ERROR: create_datawriter for control_pub failed\n"));
+    return 1;
+  }
+
+  ControlStructDataWriter_var control_typed_dw = ControlStructDataWriter::_narrow(control_dw);
+  ControlStructDataReader_var control_pdr = ControlStructDataReader::_narrow(control_dr);
 
   Publisher_var pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
     DEFAULT_STATUS_MASK);
@@ -365,7 +410,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DDS::ConditionSeq conditions;
   DDS::Duration_t timeout = { 10, 0 };
-  const ReturnCode_t ret = ws->wait(conditions, timeout);
+  ReturnCode_t ret = ws->wait(conditions, timeout);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: %C condition wait failed for type %C: %C\n",
       expect_to_match ? "PUBLICATION_MATCHED_STATUS" : "INCONSISTENT_TOPIC_STATUS", type.c_str(),
@@ -409,11 +454,40 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   }
 
-  ACE_OS::sleep(ACE_Time_Value(3, 0));
+  ACE_DEBUG((LM_DEBUG, "Writer waiting for ack at %T\n"));
 
+  ::ControlStructSeq control_data;
+  ret = read_i(control_dr, control_pdr, control_data);
+  if (ret != RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: control read returned %C\n",
+      OpenDDS::DCPS::retcode_to_string(ret)));
+    return 1;
+  }
+
+  if (!wait_for_reader (true, control_dw)) {
+    return 1;
+  }
+
+  ACE_DEBUG((LM_DEBUG, "Writer sending echo at %T\n"));
+
+  ControlStruct cs;
+  ret = control_typed_dw->write(cs, HANDLE_NIL);
+  if (ret != RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: control write returned %C\n",
+      OpenDDS::DCPS::retcode_to_string(ret)));
+    return 1;
+  }
+
+  if (!wait_for_reader (false, control_dw)) {
+    return 1;
+  }
   topic = 0;
+  ACE_DEBUG((LM_DEBUG, "Writer cleanup at %T\n"));
+
   dp->delete_contained_entities();
   dpf->delete_participant(dp);
   TheServiceParticipant->shutdown();
+
+  ACE_DEBUG((LM_DEBUG, "writer exiting at %T\n"));
   return failed ? 1 : 0;
 }

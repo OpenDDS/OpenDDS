@@ -62,8 +62,7 @@ TcpTransport::blob_to_key(const TransportBLOB& remote,
                           Priority priority,
                           bool active)
 {
-  const ACE_INET_Addr remote_addresses = AssociationData::get_remote_address(remote);
-  const ACE_INET_Addr remote_address = choose_single_coherent_address(remote_addresses);
+  const ACE_INET_Addr remote_address = AssociationData::get_remote_address(remote);
   const bool is_loopback = remote_address == config().local_address();
   return PriorityKey(priority, remote_address, is_loopback, active);
 }
@@ -74,6 +73,10 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
                                const TransportClient_rch& client)
 {
   DBG_ENTRY_LVL("TcpTransport", "connect_datalink", 6);
+
+  if (is_shut_down()) {
+    return AcceptConnectResult();
+  }
 
   const PriorityKey key =
     blob_to_key(remote.blob_, attribs.priority_, true /*active*/);
@@ -212,6 +215,12 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
                               const ConnectionAttribs& attribs,
                               const TransportClient_rch& client)
 {
+  DBG_ENTRY_LVL("TcpTransport", "accept_datalink", 6);
+
+  if (is_shut_down()) {
+    return AcceptConnectResult();
+  }
+
   GuidConverter remote_conv(remote.repo_id_);
   GuidConverter local_conv(attribs.local_id_);
 
@@ -570,6 +579,10 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
                                  const TcpConnection_rch& connection)
 {
   DBG_ENTRY_LVL("TcpTransport", "passive_connection", 6);
+
+  if (is_shut_down()) {
+    return;
+  }
 
   const PriorityKey key(connection->transport_priority(),
                         remote_address,

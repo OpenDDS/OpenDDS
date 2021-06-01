@@ -62,12 +62,16 @@ Some other features OpenDDS relies on ACE for:
   MPC) to manage shared libraries' symbol visibility (also known as
   export/import)
   - See ACE documentation and usage guidelines for details
-  - ACE logging is used (`ACE_Log_Msg` and related classes).
+- ACE logging is used (`ACE_Log_Msg` and related classes).
+  - This is used through the `ACE_DEBUG` and `ACE_ERROR` macros.
   - ACE logging uses a formatting string that works like `std::printf()` but not
     all of the formatting specifiers are the same as `printf()`. Please read the
     `ACE_Log_Msg` documentation before using.
-- The most commonly misused one is `%s` for `char*` strings. ACE uses `%C` for
-  `char*` strings.
+  - The most commonly misused formating specifier is `%s`. In `printf` this is
+    for `char*` C strings, but in `ACE_Log_Msg` this is for `ACE_TCHAR*` C
+    strings.  `ACE_TCHAR` can be `char` or a wide character depending on how ACE
+    was built (see next point). `%C` should be used for strings that are always
+    `char*`, like `std::string::c_str()`.
 - ACE has classes and macros for wide/narrow string conversion. See
   `docs/design/WCHAR` in the OpenDDS repository for details.
 - ACE provides support for platforms that have a non-standard program

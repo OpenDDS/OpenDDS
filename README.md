@@ -71,6 +71,7 @@ transport protocols:
 * UDP/IP
 * IP multicast
 * RTPS over UDP/IP (unicast and multicast)
+* Shared memory
 
 RTPS (Interoperability) features are based on the [DDS-RTPS Specification
 formal/2019-04-03 (version 2.3)](https://www.omg.org/spec/DDSI-RTPS/2.3).  See
@@ -97,20 +98,19 @@ first -- the `configure` script will download it for you.
 
 There are two distributions of ACE/TAO that can be used with OpenDDS:
 
-* OCI ACE/TAO 2.2a patch 19 or later
+* OCI ACE/TAO 2.2a patch 20 or later
   * This will be automatically downloaded by default when using the configure
     script.
   * Can be manually downloaded from:
     * http://download.objectcomputing.com/TAO-2.2a_patches/
-* DOC Group ACE 6.5.12 / TAO 2.5.12 or later in the ACE 6.x / TAO 2.x series
+* DOC Group ACE 6.5.13 / TAO 2.5.13 or later in the ACE 6.x / TAO 2.x series
   * When using the configure script, DOC Group ACE/TAO can be downloaded using
     one of these arguments:
     * `--doc-group` for the latest release
-    * `--ace-github-latest` to use the master branch of ACE/TAO as is. This
-      also downloads the master branch of MPC as is.
+    * `--ace-github-latest` to use the `ace6tao2` branch of ACE/TAO as is. This
+      also downloads the `master` branch of MPC as is.
   * Can be manually downloaded from:
-    * https://github.com/DOCGroup/ACE_TAO/releases
-    * https://download.dre.vanderbilt.edu/
+    * https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-6_5_13
 
 The TAO Developer's Guide book can be requested for free from
 https://objectcomputing.com/products/tao/tao-developers-guide
@@ -121,7 +121,7 @@ Perl is used for the configure script, running the automated tests and examples
 included in this source tree, and generating Makefiles or Visual Studio project
 files.
 
-On Windows we recommend the use of [Straweberry Perl](https://strawberryperl.com).
+On Windows we recommend the use of [Strawberry Perl](https://strawberryperl.com).
 
 ### Optional Dependencies
 
@@ -187,8 +187,8 @@ This release of OpenDDS has been tested using the following compilers:
 * gcc 4.4.7, 4.8.5
 * gcc 6.3
 * gcc 7.2
-* gcc 10.2
-* Clang 11.0.1 (llvm.org) and 11.0.3 (Apple)
+* gcc 11.1
+* Clang 12.0.1 (llvm.org) and 11.0.3 (Apple)
 
 ## Building and Installing
 

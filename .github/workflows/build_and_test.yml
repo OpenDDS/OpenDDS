@@ -52,30 +52,18 @@ on:
       - '!**/README*'
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   TRIGGERING_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
 
-  wait_cancel_previous:
-
-    runs-on: ubuntu-20.04
-
-    steps:
-    - uses: convictional/trigger-workflow-and-wait@v1.3.0
-      with:
-        owner: ${{ github.repository_owner }}
-        repo: OpenDDS
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        workflow_file_name: cancel_previous_runs.yml
-        ref: ${{ env.TRIGGERING_COMMIT }}
-        trigger_workflow: false
-
   ACE_TAO_u18_i0_xer0_js0_j12:
 
     runs-on: ubuntu-18.04
-
-    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -276,7 +264,6 @@ jobs:
   build_u18_o1d0v1_xer0_j12:
 
     runs-on: ubuntu-18.04
-    needs: wait_cancel_previous
 
     steps:
     - name: checkout MPC
@@ -444,8 +431,6 @@ jobs:
 
     runs-on: ubuntu-18.04
 
-    needs: wait_cancel_previous
-
     steps:
     - name: checkout OpenDDS
       uses: actions/checkout@v2.3.4
@@ -518,7 +503,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_EXTENDED -Config RTPS -Config LINUX -Config CXX11 -Config OPENDDS_SAFETY_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_EXTENDED -Config RTPS -Config LINUX -Config OPENDDS_SAFETY_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GHA_OPENDDS_SAFETY_PROFILE -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -533,13 +518,11 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   u18_bsafe_js0_FM-1f:
 
     runs-on: ubuntu-18.04
-
-    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -613,7 +596,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_BASE -Config RTPS -Config LINUX -Config CXX11 -Config OPENDDS_SAFETY_PROFILE -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE  -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_BASE -Config RTPS -Config LINUX -Config OPENDDS_SAFETY_PROFILE -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GHA_OPENDDS_SAFETY_PROFILE -Config GHA_NO_BUILT_IN_TOPICS -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -628,13 +611,11 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   ACE_TAO_u18_d0i0v1_sec_js0_FM-06:
 
     runs-on: ubuntu-18.04
-
-    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -849,7 +830,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config LINUX -Config XERCES3 -Config WCHAR -Config CXX11 -Config OPENDDS_SECURITY -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GH_ACTIONS  -a -l tests/security/security_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config LINUX -Config XERCES3 -Config WCHAR -Config CXX11 -Config OPENDDS_SECURITY -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GHA_NO_BUILT_IN_TOPICS -Config GH_ACTIONS  --security"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -864,13 +845,11 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   ACE_TAO_u18_clang5_i0w1_sec:
 
     runs-on: ubuntu-18.04
-
-    needs: wait_cancel_previous
 
     steps:
     - name: install clang++
@@ -1079,8 +1058,6 @@ jobs:
   ACE_TAO_u18_clang10_sec_js0:
 
     runs-on: ubuntu-18.04
-
-    needs: wait_cancel_previous
 
     steps:
     - name: install clang++
@@ -1291,8 +1268,6 @@ jobs:
 
     runs-on: ubuntu-18.04
 
-    needs: wait_cancel_previous
-
     steps:
     - name: install gcc and g++
       run: |
@@ -1500,8 +1475,6 @@ jobs:
   ACE_TAO_u18_gcc8_i0_js0_j:
 
     runs-on: ubuntu-18.04
-
-    needs: wait_cancel_previous
 
     steps:
     - name: install gcc and g++
@@ -1711,8 +1684,6 @@ jobs:
 
     runs-on: ubuntu-18.04
 
-    needs: wait_cancel_previous
-
     steps:
     - name: install gcc and g++
       run: |
@@ -1914,8 +1885,6 @@ jobs:
 
     runs-on: ubuntu-20.04
 
-    needs: wait_cancel_previous
-
     steps:
     - name: install gcc and g++
       run: |
@@ -1959,8 +1928,6 @@ jobs:
   ACE_TAO_u20_ace7_j_qt_ws_sec:
 
     runs-on: ubuntu-20.04
-
-    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -2033,10 +2000,10 @@ jobs:
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
+    - name: update apt
+      run: sudo apt-get update
     - name: install wireshark
-      run: |
-        sudo apt-get update
-        sudo apt-get -y install wireshark-dev
+      run: sudo apt-get -y install wireshark-dev
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
     - name: checkout MPC
@@ -2108,6 +2075,13 @@ jobs:
         cd OpenDDS
         . setenv.sh
         make -j4 -C tools/modeling/tests
+    - name: Build CMake Tests
+      run: |
+        source OpenDDS/setenv.sh
+        mkdir OpenDDS/tests/cmake/build
+        cd OpenDDS/tests/cmake/build
+        cmake ..
+        cmake --build . -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -2133,6 +2107,12 @@ jobs:
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
+    - name: update apt
+      run: sudo apt-get update
+    - name: install wireshark
+      run: sudo apt-get -y install wireshark-dev
+    - name: install qt
+      run: sudo apt-get -y install qtbase5-dev
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
       with:
@@ -2205,7 +2185,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS -a -l java/tests/dcps_java_tests.lst -l tools/modeling/tests/modeling_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS --java --modeling --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -2220,13 +2200,11 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   ACE_TAO_u20_p1_asan:
 
     runs-on: ubuntu-20.04
-
-    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -2445,13 +2423,12 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS -a -l tests/security/security_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS --security"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
         echo "leak:getaddrinfo" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
-        echo "leak:send_graceful_disconnect_message" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
         export LSAN_OPTIONS=suppressions=$GITHUB_WORKSPACE/OpenDDS/suppr.txt
         export ASAN_OPTIONS=detect_leaks=1:fast_unwind_on_malloc=0
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
@@ -2464,13 +2441,11 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   ACE_TAO_u20_p1:
 
     runs-on: ubuntu-20.04
-
-    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -2685,7 +2660,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS -a -l tests/security/security_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS --security"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -2700,7 +2675,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   build_u20_p1_j8_FM-1f:
 
@@ -2879,7 +2854,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config RTPS -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS -l tools/modeling/tests/modeling_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config RTPS -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS --modeling"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -2894,15 +2869,13 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   # Ubuntu 18.04 - WChar
 
   ACE_TAO_u18_w1:
 
     runs-on: ubuntu-18.04
-
-    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -3117,7 +3090,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config WCHAR -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS -a -l tests/security/security_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config WCHAR -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS --security"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -3132,7 +3105,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   build_u18_w1_j_FM-2f:
 
@@ -3311,7 +3284,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config WCHAR -Config RTPS -Config CXX11 -Config RAPIDJSON -Config DDS_NO_CONTENT_SUBSCRIPTION -Config GH_ACTIONS -a -l java/tests/dcps_java_tests.lst -l tools/modeling/tests/modeling_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config WCHAR -Config RTPS -Config CXX11 -Config RAPIDJSON -Config DDS_NO_CONTENT_SUBSCRIPTION -Config GH_ACTIONS --java --modeling"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -3326,13 +3299,11 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   ACE_TAO_u18_stat_qt_ws_sec:
 
     runs-on: ubuntu-18.04
-
-    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -3406,10 +3377,10 @@ jobs:
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
+    - name: update apt
+      run: sudo apt-get update
     - name: install wireshark
-      run: |
-        sudo apt-get update
-        sudo apt-get -y install wireshark-dev
+      run: sudo apt-get -y install wireshark-dev
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
     - name: checkout MPC
@@ -3480,7 +3451,6 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-
   cmake_u18_stat_qt_ws_sec:
 
     runs-on: ubuntu-18.04
@@ -3491,6 +3461,8 @@ jobs:
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
+    - name: update apt
+      run: sudo apt-get update
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
     - name: checkout MPC
@@ -3568,6 +3540,8 @@ jobs:
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
+    - name: update apt
+      run: sudo apt-get update
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
     - name: checkout MPC
@@ -3681,7 +3655,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -l tests/static_ci_tests.lst -Config STATIC_MESSENGER -Config RTPS -Config STATIC -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS tests/static_ci_tests.lst -Config STATIC_MESSENGER -Config RTPS -Config STATIC -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -3696,7 +3670,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   compiler_u18_stat_qt_ws_sec:
 
@@ -3708,6 +3682,10 @@ jobs:
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
+    - name: update apt
+      run: sudo apt-get update
+    - name: install qt
+      run: sudo apt-get -y install qtbase5-dev
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
       with:
@@ -3805,7 +3783,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -l tests/static_ci_tests.lst -Config STATIC_COMPILER -Config RTPS -Config STATIC -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS tests/static_ci_tests.lst -Config STATIC_COMPILER -Config RTPS -Config STATIC -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -3820,7 +3798,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   unit_u18_stat_qt_ws_sec:
 
@@ -3832,6 +3810,10 @@ jobs:
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
+    - name: update apt
+      run: sudo apt-get update
+    - name: install qt
+      run: sudo apt-get -y install qtbase5-dev
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
       with:
@@ -3929,7 +3911,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -l tests/static_ci_tests.lst -Config STATIC_UNIT -Config RTPS -Config STATIC -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS tests/static_ci_tests.lst -Config STATIC_UNIT -Config RTPS -Config STATIC -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -3944,13 +3926,11 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   ACE_TAO_u18_j_cft0_FM-37:
 
     runs-on: ubuntu-18.04
-
-    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -4192,7 +4172,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config RAPIDJSON -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config GH_ACTIONS -l tools/modeling/tests/modeling_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config RAPIDJSON -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config GH_ACTIONS --modeling"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -4207,13 +4187,11 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   ACE_TAO_w19_p1_stat_js0:
 
     runs-on: windows-2019
-
-    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -4254,7 +4232,7 @@ jobs:
         path: MPC
     - name: set up msvc env
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: ilammy/msvc-dev-cmd@v1.7.0
+      uses: ilammy/msvc-dev-cmd@v1.8.0
     - name: configure OpenDDS
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -4329,7 +4307,7 @@ jobs:
         rm -f ACE_TAO_w19_p1_stat_js0.tar.xz
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.7.0
+      uses: ilammy/msvc-dev-cmd@v1.8.0
     - name: setup gtest
       shell: cmd
       run: |
@@ -4502,7 +4480,7 @@ jobs:
         tar xvfJ build_w19_p1_stat_js0.tar.xz
         rm -f build_w19_p1_stat_js0.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.7.0
+      uses: ilammy/msvc-dev-cmd@v1.8.0
     - name: setup gtest
       shell: cmd
       run: |
@@ -4574,7 +4552,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_MESSENGER -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config CXX11 -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_MESSENGER -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config CXX11 -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -4596,7 +4574,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   compiler_w19_p1_stat_js0:
 
@@ -4656,7 +4634,7 @@ jobs:
         tar xvfJ build_w19_p1_stat_js0.tar.xz
         rm -f build_w19_p1_stat_js0.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.7.0
+      uses: ilammy/msvc-dev-cmd@v1.8.0
     - name: setup gtest
       shell: cmd
       run: |
@@ -4715,7 +4693,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_COMPILER -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config CXX11 -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_COMPILER -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config CXX11 -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -4737,7 +4715,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   unit_w19_p1_stat_js0:
 
@@ -4797,7 +4775,7 @@ jobs:
         tar xvfJ build_w19_p1_stat_js0.tar.xz
         rm -f build_w19_p1_stat_js0.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.7.0
+      uses: ilammy/msvc-dev-cmd@v1.8.0
     - name: setup gtest
       shell: cmd
       run: |
@@ -4855,7 +4833,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_UNIT -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config CXX11 -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_UNIT -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config CXX11 -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -4877,13 +4855,11 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   ACE_TAO_w19_re_p1_stat_FM-08:
 
     runs-on: windows-2019
-
-    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -4924,7 +4900,7 @@ jobs:
         path: MPC
     - name: set up msvc env
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: ilammy/msvc-dev-cmd@v1.7.0
+      uses: ilammy/msvc-dev-cmd@v1.8.0
     - name: configure OpenDDS
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -4999,7 +4975,7 @@ jobs:
         rm -f ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.7.0
+      uses: ilammy/msvc-dev-cmd@v1.8.0
     - name: setup gtest
       shell: cmd
       run: |
@@ -5101,7 +5077,7 @@ jobs:
         tar xvfJ build_w19_re_p1_stat_FM-08.tar.xz
         rm -f build_w19_re_p1_stat_FM-08.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.7.0
+      uses: ilammy/msvc-dev-cmd@v1.8.0
     - name: setup gtest
       shell: cmd
       run: |
@@ -5173,7 +5149,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Static_Release -Config STATIC -Config STATIC_MESSENGER -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config RTPS -Config CXX11 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Static_Release -Config STATIC -Config STATIC_MESSENGER -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config RTPS -Config CXX11 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -5195,7 +5171,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   compiler_w19_re_p1_stat_FM-08:
 
@@ -5255,7 +5231,7 @@ jobs:
         tar xvfJ build_w19_re_p1_stat_FM-08.tar.xz
         rm -f build_w19_re_p1_stat_FM-08.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.7.0
+      uses: ilammy/msvc-dev-cmd@v1.8.0
     - name: setup gtest
       shell: cmd
       run: |
@@ -5313,7 +5289,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Static_Release -Config STATIC_COMPILER -Config STATIC -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config RTPS -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Static_Release -Config STATIC_COMPILER -Config STATIC -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config RTPS -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -5335,7 +5311,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   unit_w19_re_p1_stat_FM-08:
 
@@ -5395,7 +5371,7 @@ jobs:
         tar xvfJ build_w19_re_p1_stat_FM-08.tar.xz
         rm -f build_w19_re_p1_stat_FM-08.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.7.0
+      uses: ilammy/msvc-dev-cmd@v1.8.0
     - name: setup gtest
       shell: cmd
       run: |
@@ -5453,7 +5429,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Static_Release -Config STATIC_UNIT -Config STATIC -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config RTPS -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Static_Release -Config STATIC_UNIT -Config STATIC -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config RTPS -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -5475,13 +5451,11 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   ACE_TAO_w19_re_o1p1_sec:
 
     runs-on: windows-2019
-
-    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -5503,7 +5477,7 @@ jobs:
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v2.1.4
+      uses: actions/cache@v2.1.5
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
@@ -5522,7 +5496,7 @@ jobs:
         path: MPC
     - name: set up msvc env
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: ilammy/msvc-dev-cmd@v1.7.0
+      uses: ilammy/msvc-dev-cmd@v1.8.0
     - name: configure OpenDDS
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -5597,7 +5571,7 @@ jobs:
         rm -f ACE_TAO_w19_re_o1p1_sec.tar.xz
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.7.0
+      uses: ilammy/msvc-dev-cmd@v1.8.0
     - name: setup gtest
       shell: cmd
       run: |
@@ -5706,7 +5680,7 @@ jobs:
         tar xvfJ build_w19_re_o1p1_sec.tar.xz
         rm -f build_w19_re_o1p1_sec.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.7.0
+      uses: ilammy/msvc-dev-cmd@v1.8.0
     - name: setup gtest
       shell: cmd
       run: |
@@ -5778,7 +5752,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Release -Config STATIC_MESSENGER -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Release -Config STATIC_MESSENGER -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -5800,7 +5774,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   compiler_w19_re_o1p1_sec:
 
@@ -5860,7 +5834,7 @@ jobs:
         tar xvfJ build_w19_re_o1p1_sec.tar.xz
         rm -f build_w19_re_o1p1_sec.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.7.0
+      uses: ilammy/msvc-dev-cmd@v1.8.0
     - name: check build configuration
       shell: cmd
       run: |
@@ -5918,7 +5892,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Release -Config STATIC_COMPILER -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Release -Config STATIC_COMPILER -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -5940,7 +5914,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   unit_w19_re_o1p1_sec:
 
@@ -5989,7 +5963,7 @@ jobs:
         tar xvfJ ACE_TAO_w19_re_o1p1_sec.tar.xz
         rm -f ACE_TAO_w19_re_o1p1_sec.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.7.0
+      uses: ilammy/msvc-dev-cmd@v1.8.0
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
@@ -6058,7 +6032,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Release -Config STATIC_UNIT -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Release -Config STATIC_UNIT -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -6080,13 +6054,12 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
 
   wireshark_w19-release:
 
     runs-on: windows-2019
-    needs: wait_cancel_previous
 
     steps:
     - name: checkout Wireshark
@@ -6118,7 +6091,7 @@ jobs:
         path: winflexbison
     - name: set up msvc env
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: ilammy/msvc-dev-cmd@v1.6.0
+      uses: ilammy/msvc-dev-cmd@v1.8.0
     - name: build WinFlexBison
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-cmake@v3
@@ -6156,8 +6129,6 @@ jobs:
   ACE_TAO_w19_re_j_ws_FM-1f:
 
     runs-on: windows-2019
-
-    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -6198,7 +6169,7 @@ jobs:
         path: MPC
     - name: set up msvc env
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: ilammy/msvc-dev-cmd@v1.7.0
+      uses: ilammy/msvc-dev-cmd@v1.8.0
     - name: configure OpenDDS
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -6284,7 +6255,7 @@ jobs:
     - name: set up MSVC problem matcher
       uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.7.0
+      uses: ilammy/msvc-dev-cmd@v1.8.0
     - name: setup gtest
       shell: cmd
       run: |
@@ -6308,7 +6279,7 @@ jobs:
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.7.0
+      uses: ilammy/msvc-dev-cmd@v1.8.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -6388,7 +6359,7 @@ jobs:
         tar xvfJ build_w19_re_j_ws_FM-1f.tar.xz
         rm -f build_w19_re_j_ws_FM-1f.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.7.0
+      uses: ilammy/msvc-dev-cmd@v1.8.0
     - name: check build configuration
       shell: cmd
       run: |
@@ -6460,7 +6431,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Release -Config STATIC_MESSENGER -Config RTPS -Config WIN64 -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Release -Config STATIC_MESSENGER -Config RTPS -Config WIN64 -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -6482,7 +6453,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   compiler_w19_re_j_ws_FM-1f:
 
@@ -6542,7 +6513,7 @@ jobs:
         tar xvfJ build_w19_re_j_ws_FM-1f.tar.xz
         rm -f build_w19_re_j_ws_FM-1f.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.7.0
+      uses: ilammy/msvc-dev-cmd@v1.8.0
     - name: check build configuration
       shell: cmd
       run: |
@@ -6600,7 +6571,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -ExeSubDir Release -Config STATIC_COMPILER -Config RTPS -Config WIN64 -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Release -Config STATIC_COMPILER -Config RTPS -Config WIN64 -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -6622,7 +6593,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   unit_w19_re_j_ws_FM-1f:
 
@@ -6682,7 +6653,7 @@ jobs:
         tar xvfJ build_w19_re_j_ws_FM-1f.tar.xz
         rm -f build_w19_re_j_ws_FM-1f.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.7.0
+      uses: ilammy/msvc-dev-cmd@v1.8.0
     - name: check build configuration
       shell: cmd
       run: |
@@ -6747,7 +6718,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -l tests\static_ci_tests.lst -Config STATIC_UNIT -Config RTPS -Config WIN64 -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -Config STATIC_UNIT -Config RTPS -Config WIN64 -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -6769,13 +6740,11 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   ACE_TAO_w16_x86_d0i0:
 
     runs-on: windows-2016
-
-    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -6816,7 +6785,7 @@ jobs:
         path: MPC
     - name: set up msvc env
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: ilammy/msvc-dev-cmd@v1.7.0
+      uses: ilammy/msvc-dev-cmd@v1.8.0
       with:
         arch: x86
     - name: configure OpenDDS
@@ -6904,7 +6873,7 @@ jobs:
         mv MPC /c/
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.7.0
+      uses: ilammy/msvc-dev-cmd@v1.8.0
       with:
         arch: x86
     - name: configure OpenDDS
@@ -6924,6 +6893,15 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         msbuild -p:Configuration=Debug,Platform=Win32 -m DDS.sln
+    - name: Build CMake Tests
+      shell: cmd
+      run: |
+        cd OpenDDS
+        call setenv.cmd
+        mkdir tests\cmake\build
+        cd tests\cmake\build
+        cmake ..
+        cmake --build .
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -7003,7 +6981,7 @@ jobs:
         tar xvfJ build_w16_x86_d0i0_sec.tar.xz
         rm -f build_w16_x86_d0i0_sec.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.7.0
+      uses: ilammy/msvc-dev-cmd@v1.8.0
     - name: check build configuration
       shell: cmd
       run: |
@@ -7036,7 +7014,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -Config RTPS -Config WIN32 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS -a -l tests/security/security_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -Config RTPS -Config WIN32 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS --security --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -7058,7 +7036,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   build_w16_x86_d0i0_j_FM-1f:
 
@@ -7108,7 +7086,7 @@ jobs:
         mv MPC /c/
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.7.0
+      uses: ilammy/msvc-dev-cmd@v1.8.0
       with:
         arch: x86
     - name: configure OpenDDS
@@ -7364,7 +7342,7 @@ jobs:
 #        <command name="check_compiler" options="gcc"/>
 #        <command name="print_perl_version"/>
 #        <command name="print_autobuild_config"/>
-#        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config OSX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config GH_ACTIONS -a -l tests/security/security_tests.lst"/>
+#        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config OSX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config GH_ACTIONS --security"/>
 #        <command name="log" options="off"/>
 #        <command name="process_logs" options="prettify"/>
 #        </autobuild>
@@ -7379,7 +7357,7 @@ jobs:
 #      shell: bash
 #      run: |
 #        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-#        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+#        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
 #  macos-11_0_defaults_java_no-bit_build:
 
@@ -7559,7 +7537,7 @@ jobs:
 #        <command name="check_compiler" options="gcc"/>
 #        <command name="print_perl_version"/>
 #        <command name="print_autobuild_config"/>
-#        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS -a -l java/tests/dcps_java_tests.lst -l tools/modeling/tests/modeling_tests.lst"/>
+#        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS --java --modeling"/>
 #        <command name="log" options="off"/>
 #        <command name="process_logs" options="prettify"/>
 #        </autobuild>
@@ -7574,15 +7552,13 @@ jobs:
 #      shell: bash
 #      run: |
 #        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-#        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+#        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   # macOS 10.15
 
   ACE_TAO_m10_o1d0_sec:
 
     runs-on: macos-10.15
-
-    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -7701,6 +7677,13 @@ jobs:
         cd OpenDDS
         . setenv.sh
         make -j4
+    - name: Build CMake Tests
+      run: |
+        source OpenDDS/setenv.sh
+        mkdir OpenDDS/tests/cmake/build
+        cd OpenDDS/tests/cmake/build
+        cmake -DCMAKE_CXX_STANDARD=11 ..
+        cmake --build . -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -7800,7 +7783,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config OSX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config GH_ACTIONS -a -l tests/security/security_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config OSX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config GH_ACTIONS --security --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -7815,13 +7798,11 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   ACE_TAO_m10_i0_j_FM-1f:
 
     runs-on: macos-10.15
-
-    needs: wait_cancel_previous
 
     steps:
     - name: checkout OpenDDS
@@ -8067,7 +8048,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS -a -l java/tests/dcps_java_tests.lst -l tools/modeling/tests/modeling_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config GHA_NO_BUILT_IN_TOPICS -Config GH_ACTIONS --java --modeling"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -8082,4 +8063,4 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=latest.txt,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi

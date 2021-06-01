@@ -81,7 +81,7 @@ UdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info, ConnectionInfoF
     if (!this->local_address_string().empty()) {
       network_address = NetworkAddress(this->local_address_string());
     } else {
-      network_address = NetworkAddress(this->local_address(), true);
+      network_address = NetworkAddress(get_fully_qualified_hostname());
     }
     ACE_OutputCDR cdr;
     cdr << network_address;

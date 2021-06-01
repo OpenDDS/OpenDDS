@@ -16,39 +16,6 @@ ReturnCode_t check_additional_field_value(const T1& data, AdditionalFieldValue e
 }
 
 template<typename T1, typename T2>
-ReturnCode_t read_i(const DataReader_var& dr, const T1& pdr, T2& data)
-{
-  ReadCondition_var dr_rc = dr->create_readcondition(NOT_READ_SAMPLE_STATE,
-    ANY_VIEW_STATE,
-    ALIVE_INSTANCE_STATE);
-  WaitSet_var ws = new WaitSet;
-  ws->attach_condition(dr_rc);
-  std::set<int> instances;
-
-  ConditionSeq active;
-  const Duration_t max_wait = { 10, 0 };
-  ReturnCode_t ret = ws->wait(active, max_wait);
-
-  if (ret == RETCODE_TIMEOUT) {
-    ACE_ERROR((LM_ERROR, "ERROR: reader timedout\n"));
-  } else if (ret != RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: Reader: wait returned %C\n",
-               OpenDDS::DCPS::retcode_to_string(ret)));
-  } else {
-    SampleInfoSeq info;
-    if ((ret = pdr->take_w_condition(data, info, LENGTH_UNLIMITED, dr_rc)) != RETCODE_OK) {
-      ACE_ERROR((LM_ERROR, "ERROR: Reader: take_w_condition returned %C\n",
-                 OpenDDS::DCPS::retcode_to_string(ret)));
-    }
-  }
-
-  ws->detach_condition(dr_rc);
-  dr->delete_readcondition(dr_rc);
-
-  return ret;
-}
-
-template<typename T1, typename T2>
 ReturnCode_t read_tryconstruct_struct(const DataReader_var& dr, const T1& pdr, T2& data, const std::string& expected_value)
 {
   ReturnCode_t ret = RETCODE_OK;
@@ -301,6 +268,52 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   ACE_DEBUG((LM_DEBUG, "Reader starting at %T\n"));
+  Topic_var ack_control_topic;
+  Topic_var echo_control_topic;
+  ControlStructTypeSupport_var ack_control_ts = new ControlStructTypeSupportImpl;
+  ControlStructTypeSupport_var echo_control_ts = new ControlStructTypeSupportImpl;
+  get_topic(ack_control_ts, dp, "SET_PD_OL_OA_OM_OD_Ack", ack_control_topic, "ControlStruct");
+  get_topic(echo_control_ts, dp, "SET_PD_OL_OA_OM_OD_Echo", echo_control_topic, "ControlStruct");
+
+  Publisher_var control_pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
+                                                   DEFAULT_STATUS_MASK);
+  if (!control_pub) {
+    ACE_ERROR((LM_ERROR, "ERROR: create_publisher failed for control_pub\n"));
+    return 1;
+  }
+
+  DataWriterQos control_dw_qos;
+  control_pub->get_default_datawriter_qos(control_dw_qos);
+  control_dw_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
+
+  DataWriter_var control_dw = control_pub->create_datawriter(ack_control_topic, control_dw_qos, 0,
+                                                             DEFAULT_STATUS_MASK);
+  if (!control_dw) {
+    ACE_ERROR((LM_ERROR, "ERROR: create_datawriter for control_pub failed\n"));
+    return 1;
+  }
+
+  ControlStructDataWriter_var control_typed_dw = ControlStructDataWriter::_narrow(control_dw);
+  Subscriber_var control_sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
+                                                     DEFAULT_STATUS_MASK);
+  if (!control_sub) {
+    ACE_ERROR((LM_ERROR, "ERROR: create_subscriber failed\n"));
+    return 1;
+  }
+
+  DataReaderQos control_dr_qos;
+  control_sub->get_default_datareader_qos(control_dr_qos);
+  control_dr_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
+  control_dr_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
+
+  DataReader_var control_dr = control_sub->create_datareader(echo_control_topic, control_dr_qos, 0,
+                                                             DEFAULT_STATUS_MASK);
+  if (!control_dr) {
+    ACE_ERROR((LM_ERROR, "ERROR: create_datareader failed\n"));
+    return 1;
+  }
+
+  ControlStructDataReader_var control_pdr = ControlStructDataReader::_narrow(control_dr);
 
   Subscriber_var sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
     DEFAULT_STATUS_MASK);
@@ -334,14 +347,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DDS::ConditionSeq conditions;
   DDS::Duration_t timeout = { 10, 0 };
-  const ReturnCode_t ret = ws->wait(conditions, timeout);
+  ReturnCode_t ret = ws->wait(conditions, timeout);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: %C condition wait failed for type %C: %C\n",
       expect_to_match ? "SUBSCRIPTION_MATCHED_STATUS" : "INCONSISTENT_TOPIC_STATUS", type.c_str(),
       OpenDDS::DCPS::retcode_to_string(ret)));
     failed = true;
   }
-
   ws->detach_condition(condition);
 
   if (!failed) {
@@ -368,7 +380,30 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   }
 
-  ACE_OS::sleep(ACE_Time_Value(3, 0));
+  //
+  // As the subscriber is now about to exit, let the publisher know it can exit too
+  //
+  ACE_DEBUG((LM_DEBUG, "Reader sending ack at %T\n"));
+
+  ControlStruct cs;
+  ret = control_typed_dw->write(cs, HANDLE_NIL);
+  if (ret != RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: control write returned %C\n",
+      OpenDDS::DCPS::retcode_to_string(ret)));
+    return 1;
+  }
+
+  ACE_DEBUG((LM_DEBUG, "Reader waiting for echo at %T\n"));
+
+  ::ControlStructSeq control_data;
+  ret = read_i(control_dr, control_pdr, control_data, true);
+  if (ret != RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: control read returned %C\n",
+      OpenDDS::DCPS::retcode_to_string(ret)));
+    return 1;
+  }
+
+  ACE_DEBUG((LM_DEBUG, "Reader cleanup at %T\n"));
 
   topic = 0;
   dp->delete_contained_entities();

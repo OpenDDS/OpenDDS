@@ -1403,9 +1403,8 @@ RtpsUdpDataLink::RtpsWriter::send_heartbeats(const MonotonicTimePoint& /*now*/)
     return;
   }
 
-  TqeVector pendingCallbacks;
   MetaSubmessageVec meta_submessages;
-  gather_heartbeats_i(pendingCallbacks, meta_submessages);
+  gather_heartbeats_i(meta_submessages);
 
   if (!preassociation_readers_.empty() || !lagging_readers_.empty()) {
     heartbeat_.schedule(link->config().heartbeat_period_);
@@ -1414,10 +1413,6 @@ RtpsUdpDataLink::RtpsWriter::send_heartbeats(const MonotonicTimePoint& /*now*/)
   g.release();
 
   link->queue_submessages(meta_submessages);
-
-  for (size_t i = 0; i < pendingCallbacks.size(); ++i) {
-    pendingCallbacks[i]->data_dropped();
-  }
 }
 
 void
@@ -3869,29 +3864,6 @@ RtpsUdpDataLink::send_heartbeats(const MonotonicTimePoint& now)
 }
 
 void
-RtpsUdpDataLink::RtpsWriter::expire_durable_data(const ReaderInfo_rch& reader,
-                                                 const RtpsUdpInst& cfg,
-                                                 const MonotonicTimePoint& now,
-                                                 TqeVector& pendingCallbacks)
-{
-  if (!reader->durable_data_.empty()) {
-    const MonotonicTimePoint expiration = reader->durable_timestamp_ + cfg.durable_data_timeout_;
-    if (now > expiration) {
-      typedef OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator dd_iter;
-      for (dd_iter it = reader->durable_data_.begin(); it != reader->durable_data_.end(); ++it) {
-        pendingCallbacks.push_back(it->second);
-      }
-      reader->durable_data_.clear();
-      if (Transport_debug_level > 3) {
-        VDBG_LVL((LM_INFO, "(%P|%t) RtpsUdpDataLink::gather_heartbeats - "
-                  "removed expired durable data for %C -> %C\n",
-                  LogGuid(id_).c_str(), LogGuid(reader->id_).c_str()), 3);
-      }
-    }
-  }
-}
-
-void
 RtpsUdpDataLink::RtpsWriter::initialize_heartbeat(const SingleSendBuffer::Proxy& proxy,
                                                   MetaSubmessage& meta_submessage)
 {
@@ -3942,8 +3914,7 @@ RtpsUdpDataLink::RtpsWriter::gather_directed_heartbeat_i(const SingleSendBuffer:
 }
 
 void
-RtpsUdpDataLink::RtpsWriter::gather_heartbeats_i(TqeVector& pendingCallbacks,
-                                                 MetaSubmessageVec& meta_submessages)
+RtpsUdpDataLink::RtpsWriter::gather_heartbeats_i(MetaSubmessageVec& meta_submessages)
 {
   if (preassociation_readers_.empty() && lagging_readers_.empty()) {
     return;
@@ -3957,7 +3928,6 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats_i(TqeVector& pendingCallbacks,
   }
 
   const MonotonicTimePoint now = MonotonicTimePoint::now();
-  const RtpsUdpInst& cfg = link->config();
 
   using namespace OpenDDS::RTPS;
 
@@ -3993,8 +3963,6 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats_i(TqeVector& pendingCallbacks,
       meta_submessage.sm_.heartbeat_sm().firstSN = to_rtps_seqnum(firstSN);
       meta_submessage.sm_.heartbeat_sm().lastSN = to_rtps_seqnum(lastSN);
       for (ReaderInfoMap::const_iterator pos = remote_readers_.begin(), limit = remote_readers_.end(); pos != limit; ++pos) {
-        // TODO: This should be factored out in a sporadic task.
-        expire_durable_data(pos->second, cfg, now, pendingCallbacks);
         meta_submessage.to_guids_.insert(pos->first);
       }
       meta_submessages.push_back(meta_submessage);
@@ -4006,8 +3974,6 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats_i(TqeVector& pendingCallbacks,
                limit = snris_pos->second->readers.end();
              pos != limit; ++pos) {
           const ReaderInfo_rch& reader = *pos;
-          // TODO: This should be factored out in a sporadic task.
-          expire_durable_data(reader, cfg, now, pendingCallbacks);
           gather_directed_heartbeat_i(proxy, meta_submessages, meta_submessage, reader);
         }
       }
@@ -4126,7 +4092,7 @@ RtpsUdpDataLink::RtpsWriter::send_heartbeats_manual_i(MetaSubmessageVec& meta_su
 
 RtpsUdpDataLink::ReaderInfo::~ReaderInfo()
 {
-  expire_durable_data();
+  expunge_durable_data();
 }
 
 void
@@ -4136,7 +4102,7 @@ RtpsUdpDataLink::ReaderInfo::swap_durable_data(OPENDDS_MAP(SequenceNumber, Trans
 }
 
 void
-RtpsUdpDataLink::ReaderInfo::expire_durable_data()
+RtpsUdpDataLink::ReaderInfo::expunge_durable_data()
 {
   typedef OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator iter_t;
   for (iter_t it = durable_data_.begin(); it != durable_data_.end(); ++it) {

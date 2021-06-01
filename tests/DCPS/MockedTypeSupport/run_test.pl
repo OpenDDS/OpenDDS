@@ -18,6 +18,6 @@ $test->setup_discovery();
 my $logFile = 'test.log';
 $test->{'report_errors_in_log_file'} = 0;
 
-$test->process('ut', 'DdsDcps_UnitTest', "-ORBLogFile $logFile");
+$test->process('ut', 'MockedTypeSupport', "-ORBLogFile $logFile");
 $test->start_process('ut');
 exit $test->finish(30);

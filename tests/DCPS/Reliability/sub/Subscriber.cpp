@@ -28,7 +28,6 @@ namespace
   bool take_next = true;
   bool take = false;
   bool zero_copy = false;
-  bool keep_last_one = false;
   int sleep_time = 0;
   int num_sleeps = 0;
 
@@ -36,11 +35,9 @@ namespace
   parse_args(int& argc, ACE_TCHAR** argv)
   {
     ACE_Arg_Shifter shifter(argc, argv);
-
     while (shifter.is_anything_left())
     {
       const ACE_TCHAR* arg;
-
       if ((arg = shifter.get_the_parameter(ACE_TEXT("-num_sleeps"))))
       {
         num_sleeps = ACE_OS::atoi(arg);
@@ -66,11 +63,6 @@ namespace
       {
         take_next = false;
         zero_copy = true;
-        shifter.consume_arg();
-      }
-      else if (shifter.cur_arg_strncasecmp(ACE_TEXT("-keep-last-one")) == 0)
-      {
-        keep_last_one = true;
         shifter.consume_arg();
       }
       else
@@ -119,10 +111,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::DataReaderListener_var listener(listener_impl);
 
     // Create DataReader with the listener attached
-    DDS::DataReader_var reader = createDataReader(subscriber,
-                                                  topic,
-                                                  listener,
-                                                  keep_last_one);
+    DDS::DataReader_var reader = createDataReader(subscriber, topic, listener);
 
     std::cout << "Waiting for connection" << std::endl;
     {
