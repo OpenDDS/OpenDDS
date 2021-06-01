@@ -78,7 +78,7 @@ foreach my $test_lst (@file_list) {
 
         if ($progname =~ /(.*)\/([^\/]*)$/) {
             $directory = $1;
-            push(@tokens, ($2));
+            push(@tokens, $2);
             $program = join ' ', @tokens;
         }
         else {

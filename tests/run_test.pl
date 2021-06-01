@@ -29,9 +29,9 @@ if (! -e $executable) {
 }
 
 my $test = new PerlDDS::TestFramework();
-$test->process("$executable", "$executable", "");
+$test->process($executable, $executable, "");
 print STDERR "Running $executable\n";
-$test->start_process("$executable");
+$test->start_process($executable);
 my $retcode = $test->finish(60);
 if ($retcode != 0) {
     exit 1;
