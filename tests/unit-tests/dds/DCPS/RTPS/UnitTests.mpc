@@ -8,8 +8,6 @@ project(*BaseMessageUtils): dcpsexe, dcps_test, dcps_rtps_udp {
 
 project(*ParameterListConverter): dcps_rtpsexe, dcps_test, googletest {
   exename   = *
-  //  requires += no_opendds_safety_profile
-  //  avoids += no_opendds_security
 
   Source_Files {
     ParameterListConverter.cpp
