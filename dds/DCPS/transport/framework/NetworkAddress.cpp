@@ -643,22 +643,26 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
                                          address.find_first_of(':', last_double + 2u) :
                                          address.find_last_of(':'));
 #else
-  const String::size_type openb = String::npos;
-  const String::size_type closeb = String::npos;
   const String::size_type port_div = address.find_last_of(':');
 #endif
 
   if (port_div != String::npos) {
+#ifdef ACE_HAS_IPV6
     if (openb != String::npos && closeb != String::npos) {
       host_name_str = address.substr(openb + 1u, closeb - 1u);
-    } else {
+    } else
+#endif /* ACE_HAS_IPV6 */
+    {
       host_name_str = address.substr(0, port_div);
     }
     port_number = static_cast<unsigned short>(std::strtoul(address.substr(port_div + 1u).c_str(), 0, 10));
   } else {
+#ifdef ACE_HAS_IPV6
     if (openb != String::npos && closeb != String::npos) {
       host_name_str = address.substr(openb + 1u, closeb - 1u);
-    } else {
+    } else
+#endif /* ACE_HAS_IPV6 */
+    {
       host_name_str = address;
     }
   }
@@ -672,7 +676,7 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
   union ip46
   {
     sockaddr_in  in4_;
-#if defined (ACE_HAS_IPV6)
+#ifdef ACE_HAS_IPV6
     sockaddr_in6 in6_;
 #endif /* ACE_HAS_IPV6 */
   } inet_addr;
