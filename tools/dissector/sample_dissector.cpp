@@ -246,7 +246,7 @@ namespace OpenDDS
     Field_Context* Sample_Base::create_context(ftenum ft, field_display_e fd) {
       if (field_contexts_.count(get_ns())) {
         throw Sample_Dissector_Error(
-          std::string("Could not create context becuase it already exists for: ") +
+          std::string("Could not create context because it already exists for: ") +
           get_ns()
         );
       }

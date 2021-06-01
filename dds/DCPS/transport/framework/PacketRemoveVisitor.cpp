@@ -317,7 +317,7 @@ PacketRemoveVisitor::visit_element_ref(TransportQueueElement*& element)
     }
 
     // Finally!At this point we have broken the unsent packet chain of
-    // blocks into three seperate chains:
+    // blocks into three separate chains:
     //
     //   (1) this->previous_block_ is either 0, or it points to the block
     //       (from the unsent packet chain) that immediately preceded the

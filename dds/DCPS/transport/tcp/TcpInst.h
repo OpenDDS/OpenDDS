@@ -59,7 +59,7 @@ public:
   /// The default value is 2.0.
   double conn_retry_backoff_multiplier_;
 
-  /// Number of attemps to reconnect before giving up and calling
+  /// Number of attempts to reconnect before giving up and calling
   /// on_publication_lost() and on_subscription_lost() callbacks.
   /// The default is 3.
   int conn_retry_attempts_;

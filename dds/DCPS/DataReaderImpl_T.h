@@ -2331,7 +2331,7 @@ private:
       if (data->second.message) {
         const bool NOT_DISPOSE_MSG = false;
         const bool NOT_UNREGISTER_MSG = false;
-        // clear the message, since ownership is being transfered to finish_store_instance_data.
+        // clear the message, since ownership is being transferred to finish_store_instance_data.
 
         instance->last_accepted_.set_to_now();
         const DataSampleHeader_ptr header = data->second.header;

@@ -130,13 +130,13 @@ my $help_message = $usage_message .
   "--all | -a          Run all checks\n" .
   "--try-fix           ATTEMPT to fix issues that support fixing. THIS IS POWERED\n" .
   "                    BY REGEX, NOT MAGIC. Don't try this unless your existing\n" .
-  "                    work is commited or otherwise safe from this script.\n" .
+  "                    work is committed or otherwise safe from this script.\n" .
   "                    See --list to see what checks support this.\n" .
   "--include PATH      Add PATH to preproccessor include paths for the sake of\n" .
   "                    checks that care about them. Can be specified multiple\n" .
   "                    times. Default is root of OpenDDS source tree.\n" .
   "--[no-]color        Force enable or disable ANSI escape code color output.\n" .
-  "                    Can also be done with NO_COLOR enviroment variable.\n" .
+  "                    Can also be done with NO_COLOR environment variable.\n" .
   "                    By default it uses isatty like most programs\n" .
   "\n" .
   "If run with DDS_ROOT being defined, it will use that path. If not it will\n" .
@@ -153,7 +153,7 @@ my $help_message = $usage_message .
   "check and path can optionally be plural for readability.\n" .
   "If there are no checks then the entire file is ignored. If PATH is \".\", then\n" .
   "all the files in the directory are ignored except the .lint_config file itself.\n" .
-  "For comments and .lint_config files the checks and paths are space seperated.\n";
+  "For comments and .lint_config files the checks and paths are space separated.\n";
 #  ###############################################################################
 
 if (!GetOptions(
@@ -426,7 +426,7 @@ sub match_prefix_get_suffix {
 #     - If left out no message is printed
 #   default => do not run this check unless told to explicitly. default is true.
 #   strip_fix => If line_matched is being used with a regex with capture groups
-#     around error and it can be fixed by simply omited the contents of the
+#     around error and it can be fixed by simply omitted the contents of the
 #     capture groups, allow --try-fix to do that.
 #   can_fix => Simply indicate that this check **could** be fixed by running
 #     --try-fix. This just inserts a messsage during --list.
