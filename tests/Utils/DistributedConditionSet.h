@@ -4,6 +4,7 @@
 #define TESTUTILS_DISTRIBUTED_CONDITION_SET_H
 
 #include <dds/DCPS/RcObject.h>
+#include <dds/DCPS/PoolAllocator.h>
 
 #include <ace/Condition_Thread_Mutex.h>
 
