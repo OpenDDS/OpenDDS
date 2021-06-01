@@ -6,3 +6,4 @@ _site
 *.iml
 vendor
 .vscode/
+/Gemfile.lock

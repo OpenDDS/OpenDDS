@@ -5,8 +5,7 @@
       <div class="above-nav-main-content">
         <a href="/">
           <div class="opendds-logo">
-            <img src="/images/opendds-notext.png">
-            <h1>{{ site.title }}</h1>
+            <img src="/images/opendds-horizontal.svg">
           </div>
         </a>
       </div>
@@ -23,6 +22,24 @@
           <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
         </svg>
       </span></label>
+{% comment %}
+      <!-- 
+        The Following is useful for assessing the menu structure 
+        un-comment it to get an overview of the current page ordering
+      -->
+      <!-- {% assign sorted_pages = site.pages | sort: "order"  %}
+      {% for p in sorted_pages %}
+      {% assign slash = p.url | split: '/' %}
+      {% unless slash == empty
+                  or p.redirect
+                  or p.url == '/'
+                  or p.url contains '.css'
+                  or p.sitemap == false
+                  or p.url == '/redirects.json' %}
+        <div>--- {{p.order}} : {{p.url}} | {{p.redirect}}</div>
+      {% endunless %}
+      {% endfor %} -->
+{% endcomment %}
       <ul class="trigger">
         {% assign sorted_pages = site.pages | sort: "order" %}
         {% assign level = 2 %}
@@ -30,28 +47,48 @@
         {% for p in sorted_pages %}
           {% assign slash = p.url | split: '/' %}
           {% unless slash == empty
-                      or slash[2] == 'main.css'
+                      or p.redirect
+                      or p.url == '/'
+                      or p.url contains '.css'
                       or p.sitemap == false
                       or p.url == '/redirects.json' %}
             {% assign indent = slash.size %}
             {% assign level_m1 = level | minus: 1 %}
-            {% for i in (indent..level_m1) %}</ul></li>{% endfor %}
             {% assign last = p.url | slice: -1, 1 %}
+            {% for i in (indent..level_m1) %}</ul></li>{% endfor %}
             {% if last == '/' %}
                 <li>
                   <input type="checkbox" id="drop-{{counter}}"/>
                   <label for="drop-{{counter}}" class="toggle">{{p.title}} <span class="arrow">&#9660;</span></label>
-                  <a class="page-link" href="{{p.url | prepend: site.baseurl}}">{{p.title}} <span class="arrow">&#96{% if indent > 2 %}54{% else %}60{% endif %};</span></a>
+                  <a class="page-link" href="{{p.url | prepend: site.baseurl}}">
+                    {% if p.menu_title %}
+                    {{ p.menu_title}}
+                  {% else %}      
+                    {{ p.title }} 
+                  {% endif %}
+                  <span class="arrow">&#96{% if indent > 2 %}54{% else %}60{% endif %};</span></a>
               {% assign counter = counter | plus: 1 %}
                   <ul class="sub-menu">
                 {% if p.title == 'Documentation' %}
                     <li><a class="page-link" href="/documents/">All Documentation</a></li>
                     <li><a class="page-link" href="{{ site.data.oci.download_uri }}/OpenDDS/OpenDDS-latest.pdf">Developer's Guide [PDF]</a></li>
                 {% else %}
-                    <li class="mobile"><a class="page-link" href="{{p.url | prepend: site.baseurl}}">{{ p.title }}</a></li>
+                    <li class="mobile"><a class="page-link" href="{{p.url | prepend: site.baseurl}}">
+                      {% if p.menu_title %}
+                        {{ p.menu_title}}
+                      {% else %}      
+                        {{ p.title }} 
+                      {% endif %}
+                    </a></li>
                 {% endif %}
             {% else %}
-                <li><a class="page-link" href="{{p.url | prepend: site.baseurl}}">{{p.title}}</a></li>
+                <li><a class="page-link" href="{{p.url | prepend: site.baseurl}}">
+                  {% if p.menu_title %}
+                    {{ p.menu_title}}
+                  {% else %}      
+                    {{ p.title }} 
+                  {% endif %}
+                </a></li>
             {% endif %}
             {% assign level = slash.size %}
           {% endunless %}

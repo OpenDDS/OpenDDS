@@ -1,0 +1,39 @@
+---
+layout: default
+title: Thank You From The OpenDDS&trade; Foundation
+sitemap: false
+---
+
+<h1>
+	Foundation Sponsorship
+</h1>
+
+<div class="content container foundation-donations-thank-you">
+    <div class='donations-content one-column' style="min-height: 50vh; margin-top: 1rem">
+		<h2>
+			Thank you for your support
+		</h2>
+		<p>
+			Your <span id="support-level"></span> contribution is greatly appreciated!
+		</p>
+		<p>
+			We will reach out to you shortly so we can find the best way to get you your rewards.
+		</p>
+	</div>
+</div>
+
+<script>
+
+    function writeMessage() {
+        try {
+            const message = JSON.parse(window.sessionStorage.getItem("FOUNDATION_SUPPORT_LEVEL"))
+            const el = document.getElementById("support-level")
+            el.innerText = "as a " + message.description
+        } catch (ignore) {
+            // This extra bit of text is just a nice to have, and
+            // we don't really need to do anything on failure.
+        }
+    }
+
+    writeMessage()
+</script>
