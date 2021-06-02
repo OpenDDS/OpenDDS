@@ -228,6 +228,14 @@ SingleSendBuffer::retain_buffer(const RepoId& pub_id, BufferType& buffer)
                               replaced_db_allocator_);
 
   buffer.first->accept_replace_visitor(visitor);
+  if (visitor.status() != REMOVE_ERROR) {
+    // Copy sample's message/data block descriptors:
+    ACE_Message_Block* data = buffer.second;
+    buffer.second = TransportQueueElement::clone_mb(data,
+                                           &retained_mb_allocator_,
+                                           &retained_db_allocator_);
+    data->release();
+  }
   return visitor.status();
 }
 
