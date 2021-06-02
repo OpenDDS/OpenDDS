@@ -1,3 +1,5 @@
+#include <tao/LongSeq.pidl>
+
 module my_mod {
   //struct
   @topic
@@ -32,7 +34,6 @@ module my_mod {
   };
 
   //sequence
-  //TODO CLAYTON: INCLUDE THE HEADER FOR LONG SEQ
   typedef sequence<long> lseq;
 
   //array

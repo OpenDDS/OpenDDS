@@ -2321,20 +2321,6 @@ struct CompleteTypeDetail {
     operator TypeMap&() { return type_map_; }
   };
 
-  typedef OPENDDS_MAP(TypeIdentifier, TypeIdentifier) TypeIdentifierMap;
-
-  struct TypeIdentifierMapBuilder {
-    TypeIdentifierMap type_identifier_map_;
-
-    TypeIdentifierMapBuilder& insert(const TypeIdentifier& cti, const TypeIdentifier& mti)
-    {
-      type_identifier_map_[cti] = mti;
-      return *this;
-    }
-
-    operator TypeIdentifierMap&() { return type_identifier_map_; }
-  };
-
   void compute_dependencies(const TypeMap& type_map,
                             const TypeIdentifier& type_identifier,
                             OPENDDS_SET(TypeIdentifier)& dependencies);
@@ -2354,9 +2340,6 @@ const XTypes::TypeIdentifier& getCompleteTypeIdentifier();
 
 template<typename T>
 const XTypes::TypeMap& getCompleteTypeMap();
-
-template<typename T>
-const XTypes::TypeIdentifierMap& getTypeIdentifierMap();
 
 template<typename T>
 void serialized_size(const Encoding& encoding, size_t& size,

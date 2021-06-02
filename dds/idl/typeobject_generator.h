@@ -108,7 +108,6 @@ private:
 
   OpenDDS::XTypes::TypeMap minimal_type_map_;
   OpenDDS::XTypes::TypeMap complete_type_map_;
-  OpenDDS::XTypes::TypeIdentifierMap type_identifier_map_;
 
   bool produce_output_;
   bool suppress_complete_type_output_;

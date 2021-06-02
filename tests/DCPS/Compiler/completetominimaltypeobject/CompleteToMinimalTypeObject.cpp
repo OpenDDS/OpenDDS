@@ -1,11 +1,11 @@
 #include "CompleteToMinimalTypeObjectTypeSupportImpl.h"
 
 #include "dds/DCPS/Service_Participant.h"
-#include <dds/DCPS/XTypes/TypeObject.h>
+#include "dds/DCPS/XTypes/TypeObject.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/TopicDescriptionImpl.h"
 #include "dds/DCPS/PublisherImpl.h"
-#include <dds/DCPS/DomainParticipantImpl.h>
+#include "dds/DCPS/DomainParticipantImpl.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 
@@ -15,7 +15,7 @@ using namespace OpenDDS::XTypes;
 namespace OpenDDS {
 namespace XTypes {
 
-bool compare_member_hash(const NameHash& lhs,const NameHash& rhs)
+bool compare_member_hash(const NameHash& lhs, const NameHash& rhs)
 {
   return lhs[0] == rhs[0] &&
     lhs[1] == rhs[1] &&
@@ -384,6 +384,7 @@ bool operator== (const TypeObject& lhs, const TypeObject& rhs)
 }
 
 ::DDS::DomainParticipant_var dp;
+::DDS::DomainParticipantFactory_var dpf;
 OpenDDS::XTypes::TypeLookupService_rch tls;
 
 TEST(CompleteToMinimalTypeObject, Struct)
@@ -415,6 +416,7 @@ TEST(CompleteToMinimalTypeObject, Struct)
   TypeObject mto2 = mtm[TypeIdentifier(EK_MINIMAL, EquivalenceHashWrapper(189, 72, 116, 15, 57, 244, 144, 185, 189, 193, 70, 196, 210, 42))];
   ASSERT_EQ(mto2, c_to_m_mto);
 }
+
 TEST(CompleteToMinimalTypeObject, Union)
 {
   my_mod::unTypeSupportImpl uts;
@@ -444,6 +446,7 @@ TEST(CompleteToMinimalTypeObject, Union)
   TypeObject mto2 = mtm[TypeIdentifier(EK_MINIMAL, EquivalenceHashWrapper(94, 42, 84, 196, 20, 69, 255, 70, 95, 183, 166, 22, 4, 142))];
   ASSERT_EQ(mto2, c_to_m_mto);
 }
+
 TEST(CompleteToMinimalTypeObject, Sequence)
 {
   my_mod::unTypeSupportImpl stru_tsi;
@@ -473,6 +476,7 @@ TEST(CompleteToMinimalTypeObject, Sequence)
   TypeObject mto2 = mtm[TypeIdentifier(TI_STRONGLY_CONNECTED_COMPONENT, StronglyConnectedComponentId(TypeObjectHashId(EK_MINIMAL, EquivalenceHashWrapper(23, 96, 109, 112, 215, 248, 161, 152, 79, 50, 37, 116, 6, 230)), 5, 2))];
   ASSERT_EQ(mto2, c_to_m_mto);
 }
+
 TEST(CompleteToMinimalTypeObject, Array)
 {
   my_mod::unTypeSupportImpl un_tsi;
@@ -532,6 +536,7 @@ TEST(CompleteToMinimalTypeObject, AliasSequence)
   TypeObject mto2 = mtm[TypeIdentifier(EK_MINIMAL, EquivalenceHashWrapper(64, 132, 84, 128, 187, 1, 123, 173, 187, 231, 55, 190, 22, 206))];
   ASSERT_EQ(mto2, c_to_m_mto);
 }
+
 TEST(CompleteToMinimalTypeObject, AliasArray)
 {
   my_mod::unTypeSupportImpl un_tsi;
@@ -561,6 +566,7 @@ TEST(CompleteToMinimalTypeObject, AliasArray)
   TypeObject mto2 = mtm[TypeIdentifier(EK_MINIMAL, EquivalenceHashWrapper(115, 7, 58, 161, 22, 145, 40, 98, 164, 53, 75, 57, 105, 170))];
   ASSERT_EQ(mto2, c_to_m_mto);
 }
+
 TEST(CompleteToMinimalTypeObject, Enumerated)
 {
   my_mod::unTypeSupportImpl un_tsi;
@@ -594,7 +600,7 @@ TEST(CompleteToMinimalTypeObject, Enumerated)
 int main(int argc, char* argv[])
 {
   ::testing::InitGoogleTest(&argc, argv);
-    ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
+  dpf = TheParticipantFactoryWithArgs(argc, argv);
   dp = dpf->create_participant(184,
                                PARTICIPANT_QOS_DEFAULT,
                                0,

@@ -1384,8 +1384,7 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::TypeObject& to)
 }
 
 const std::string get_type_map_decl = "static const XTypes::TypeMap& get_minimal_type_map();\n"
-         "static const XTypes::TypeMap& get_complete_type_map();\n"
-         "static const XTypes::TypeIdentifierMap& get_type_identifier_map();\n";
+         "static const XTypes::TypeMap& get_complete_type_map();\n";
 }
 
 void
@@ -1437,20 +1436,6 @@ typeobject_generator::gen_epilogue()
     "  return tm;\n"
     "}\n\n";
 
-  be_global->impl_ <<
-    "XTypes::TypeIdentifierMap get_type_identifier_map_private()\n"
-    "{\n"
-    "  XTypes::TypeIdentifierMap tim;\n";
-
-  idx = 0;
-  for (OpenDDS::XTypes::TypeIdentifierMap::const_iterator pos = type_identifier_map_.begin();
-       pos != type_identifier_map_.end(); ++pos, ++idx) {
-    be_global->impl_ << "  tim[" << pos->first << "] = " << pos->second << ";\n";
-  }
-  be_global->impl_ <<
-    "  return tim;\n"
-    "}\n\n";
-
   if (!suppress_complete_type_output_) {
     idx = 0;
     for (OpenDDS::XTypes::TypeMap::const_iterator pos = complete_type_map_.begin();
@@ -1490,15 +1475,6 @@ typeobject_generator::gen_epilogue()
     "    tm = get_minimal_type_map_private();\n"
     "  }\n"
     "  return tm;\n"
-    "}\n\n";
-  be_global->impl_ <<
-    "const XTypes::TypeIdentifierMap& get_type_identifier_map()\n" << "{\n"
-    "  static XTypes::TypeIdentifierMap tim;\n"
-    "  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, TheServiceParticipant->get_static_xtypes_lock(), tim);\n"
-    "  if (tim.empty()) {\n"
-    "    tim = get_type_identifier_map_private();\n"
-    "  }\n"
-    "  return tim;\n"
     "}\n\n";
 
   if (!suppress_complete_type_output_) {
@@ -1822,7 +1798,6 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
         const OpenDDS::XTypes::TypeIdentifier& complete_ti = hash_type_identifier_map_[pos->type].complete;
         minimal_type_map_[minimal_ti] = type_object_map_[pos->type].minimal;
         complete_type_map_[complete_ti] = type_object_map_[pos->type].complete;
-        type_identifier_map_[complete_ti] = minimal_ti;
       }
     }
   }
@@ -1848,7 +1823,6 @@ typeobject_generator::update_maps(AST_Type* type,
 
     minimal_type_map_[minimal_ti] = minimal_to;
     complete_type_map_[complete_ti] = complete_to;
-    type_identifier_map_[complete_ti] = minimal_ti;
   }
 }
 
@@ -2544,13 +2518,6 @@ typeobject_generator::generate(AST_Type* node, UTL_ScopedName* name)
     gti.endArgs();
     be_global->impl_ <<
       "  return get_minimal_type_map();\n";
-  }
-  {
-    const string decl = "getTypeIdentifierMap<" + clazz + ">";
-    Function gti(decl.c_str(), "const XTypes::TypeIdentifierMap&", "");
-    gti.endArgs();
-    be_global->impl_ <<
-      "  return get_type_identifier_map();\n";
   }
 
   {
