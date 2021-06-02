@@ -705,6 +705,7 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
     return result;
   }
 #else
+  ACE_UNUSED_ARG(allow_ipv4_fallback);
   address_family = AF_INET;
 #endif /* ACE_HAS_IPV6 */
 
