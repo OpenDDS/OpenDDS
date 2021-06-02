@@ -61,7 +61,7 @@ typedef sequence<B> BSeq;
 @topic
 @appendable
 struct A {
-  BSeq a_bseq;
+  @key BSeq a_bseq;
   sequence<boolean> a_boolseq;
 };
 
@@ -94,6 +94,6 @@ struct D {
 
 @mutable
 struct E {
-  ASequence a_aseq;
+  @try_construct(TRIM) ASequence a_aseq;
   F a_f;
 };
