@@ -691,10 +691,6 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
 #endif /* ACE_HAS_IPV6 && ACE_USES_IPV4_IPV6_MIGRATION */
 
 #ifdef ACE_HAS_IPV6
-  if (address_family == AF_UNSPEC && ACE::ipv6_enabled()) {
-    address_family = AF_INET6;
-  }
-
   if (address_family != AF_INET && ACE_OS::inet_pton(AF_INET6, host_name, &inet_addr.in6_.sin6_addr) == 1) {
 #ifdef ACE_HAS_SOCKADDR_IN6_SIN6_LEN
     inet_addr.in6_.sin6_len = sizeof inet_addr.in6_;
