@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
     if 0;
 
 # -*- perl -*-
-
+#TODO CLAYTON: Once test is up and running add to lst file
 use Sys::Hostname;
 
 use Env (DDS_ROOT);
@@ -17,7 +17,7 @@ use strict;
 my $status = 0;
 
 my $test = new PerlDDS::TestFramework();
-$test->process("ctmto", "completetominimaltypeobject", "");
+$test->process("ctmto", "CompleteToMinimalTypeObject", "");
 $test->start_process("ctmto");
 my $retcode = $test->finish(30);
 if ($retcode != 0) {
