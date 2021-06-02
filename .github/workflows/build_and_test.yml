@@ -82,7 +82,7 @@ jobs:
       run: |
         cd OpenDDS/ACE_TAO
         export ACE_COMMIT=$(git rev-parse HEAD)
-        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
+        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV #??
     - name: Cache Artifact
       id: cache-artifact
       uses: actions/cache@v2.1.6
@@ -4879,12 +4879,17 @@ jobs:
         cd OpenDDS/ACE_TAO
         export ACE_COMMIT=$(git rev-parse HEAD)
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
+    - name: get Compiler version
+      shell: bash
+      run: |
+        export COMPILER_VERSION=$("C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -property catalog_productDisplayVersion)
+        echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
       uses: actions/cache@v2.1.6
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}
+        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v6
