@@ -2152,10 +2152,13 @@ typeobject_generator::generate_sequence_type_identifier(AST_Type* type, bool for
 {
   AST_Sequence* const n = dynamic_cast<AST_Sequence*>(type);
 
-  ACE_CDR::ULong bound = 0;
+  ACE_CDR::ULong bound;
   if (!n->unbounded()) {
     bound = n->max_size()->ev()->u.ulval;
+  } else {
+    bound = ACE_UINT32_MAX;
   }
+
   const TryConstructFailAction trycon = be_global->try_construct(n->base_type());
   OpenDDS::XTypes::CollectionElementFlag cef = try_construct_to_member_flag(trycon);
   if (be_global->is_external(n->base_type())) {
