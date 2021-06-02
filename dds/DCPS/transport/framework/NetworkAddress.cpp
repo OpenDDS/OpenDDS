@@ -111,7 +111,7 @@ String get_fully_qualified_hostname(ACE_INET_Addr* addr)
 
         if (ACE::get_fqdn(addr_array[i], hostname, MAXHOSTNAMELEN+1) == 0) {
           VDBG_LVL((LM_DEBUG, "(%P|%t) considering fqdn %C\n", hostname), 4);
-          if (!addr_array[i].is_loopback() && ACE_OS::strchr(hostname, '.') != 0 && choose_single_coherent_address(hostname, false) != ACE_INET_Addr()) {
+          if (!addr_array[i].is_loopback() && ACE_OS::strchr(hostname, '.') != 0 && choose_single_coherent_address(hostname, false, false) != ACE_INET_Addr()) {
             VDBG_LVL((LM_DEBUG, "(%P|%t) found fqdn %C from %C:%d\n",
                       hostname, addr_array[i].get_host_addr(), addr_array[i].get_port_number()), 2);
             selected_address = addr_array[i];
@@ -622,7 +622,7 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_VECTOR(ACE_INET_Addr)
   return ACE_INET_Addr();
 }
 
-ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_loopback)
+ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_loopback, bool allow_ipv4_fallback)
 {
   ACE_INET_Addr result;
 
@@ -691,6 +691,10 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
 #endif /* ACE_HAS_IPV6 && ACE_USES_IPV4_IPV6_MIGRATION */
 
 #ifdef ACE_HAS_IPV6
+  if (address_family == AF_UNSPEC && ACE::ipv6_enabled() && !allow_ipv4_fallback) {
+    address_family = AF_INET6;
+  }
+
   if (address_family != AF_INET && ACE_OS::inet_pton(AF_INET6, host_name, &inet_addr.in6_.sin6_addr) == 1) {
 #ifdef ACE_HAS_SOCKADDR_IN6_SIN6_LEN
     inet_addr.in6_.sin6_len = sizeof inet_addr.in6_;

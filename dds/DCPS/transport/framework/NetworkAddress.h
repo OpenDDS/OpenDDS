@@ -93,7 +93,7 @@ extern OpenDDS_Dcps_Export
 ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& addr, bool prefer_loopback = true);
 
 extern OpenDDS_Dcps_Export
-ACE_INET_Addr choose_single_coherent_address(const String& hostname, bool prefer_loopback = true);
+ACE_INET_Addr choose_single_coherent_address(const String& hostname, bool prefer_loopback = true, bool allow_ipv4_fallback = true);
 
 } // namespace DCPS
 } // namespace OpenDDS
