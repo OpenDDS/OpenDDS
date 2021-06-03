@@ -3998,9 +3998,3 @@ TEST(UnionTypeTest, NotAssignable)
   b10.member_seq.append(mb10_1);
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(a10)), TypeObject(MinimalTypeObject(b10))));
 }
-
-int main(int argc, char* argv[])
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

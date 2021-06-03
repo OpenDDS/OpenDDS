@@ -116,11 +116,11 @@ struct AuthenticationTest : public ::testing::Test
     Property_t idca, pkey, pass, idcert, cperms;
 
     idca.name = "dds.sec.auth.identity_ca";
-    idca.value = "file:./security/certs/identity/identity_ca_cert.pem";
+    idca.value = "file:../security/certs/identity/identity_ca_cert.pem";
     idca.propagate = false;
 
     pkey.name = "dds.sec.auth.private_key";
-    pkey.value = "file:./security/certs/identity/test_participant_01_private_key.pem";
+    pkey.value = "file:../security/certs/identity/test_participant_01_private_key.pem";
     pkey.propagate = false;
 
     pass.name = "dds.sec.auth.password";
@@ -128,11 +128,11 @@ struct AuthenticationTest : public ::testing::Test
     pass.propagate = false;
 
     idcert.name = "dds.sec.auth.identity_certificate";
-    idcert.value = "file:./security/certs/identity/test_participant_01_cert.pem";
+    idcert.value = "file:../security/certs/identity/test_participant_01_cert.pem";
     idcert.propagate = false;
 
     cperms.name = "dds.sec.access.permissions";
-    cperms.value = "file:./security/permissions/permissions_test_participant_01_JoinDomain_signed.p7s";
+    cperms.value = "file:../security/permissions/permissions_test_participant_01_JoinDomain_signed.p7s";
     cperms.propagate = false;
 
     mp1.add_property(idca);
@@ -151,11 +151,11 @@ struct AuthenticationTest : public ::testing::Test
     Property_t idca, pkey, pass, idcert, cperms;
 
     idca.name = "dds.sec.auth.identity_ca";
-    idca.value = "file:./security/certs/identity/identity_ca_cert.pem";
+    idca.value = "file:../security/certs/identity/identity_ca_cert.pem";
     idca.propagate = false;
 
     pkey.name = "dds.sec.auth.private_key";
-    pkey.value = "file:./security/certs/identity/test_participant_02_private_key.pem";
+    pkey.value = "file:../security/certs/identity/test_participant_02_private_key.pem";
     pkey.propagate = false;
 
     pass.name = "dds.sec.auth.password";
@@ -163,11 +163,11 @@ struct AuthenticationTest : public ::testing::Test
     pass.propagate = false;
 
     idcert.name = "dds.sec.auth.identity_certificate";
-    idcert.value = "file:./security/certs/identity/test_participant_02_cert.pem";
+    idcert.value = "file:../security/certs/identity/test_participant_02_cert.pem";
     idcert.propagate = false;
 
     cperms.name = "dds.sec.access.permissions";
-    cperms.value = "file:./security/permissions/permissions_test_participant_02_JoinDomain_signed.p7s";
+    cperms.value = "file:../security/permissions/permissions_test_participant_02_JoinDomain_signed.p7s";
     cperms.propagate = false;
 
     mp2.add_property(idca);
@@ -1092,11 +1092,4 @@ TEST_F(AuthenticationTest, GetSharedSecret_InitiatorAndReplier_Match)
   DDS::OctetSeq_var secret2_data = secret2->sharedSecret();
   ASSERT_NE(0u, secret1_data->length());
   ASSERT_EQ(secret1_data.in(), secret2_data.in());
-}
-
-int main(int argc, char** argv)
-{
-  openssl_init();
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }

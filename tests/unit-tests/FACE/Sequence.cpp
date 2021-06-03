@@ -8,16 +8,11 @@
 #include "ace/OS_main.h"
 #include "ace/Log_Msg.h"
 
-#include "../test_check.h"
+#include <gtest/gtest.h>
 
 #include <algorithm>
 #include <iostream>
 #include <typeinfo>
-
-namespace {
-  unsigned int assertions = 0;
-  unsigned int failed = 0;
-}
 
 using OpenDDS::FaceTypes::Sequence;
 using OpenDDS::FaceTypes::SequenceVar;
@@ -55,30 +50,30 @@ template <typename Seq>
 void testSeq(Seq& seq, const typename Seq::value_type& t)
 {
   std::cerr << "Testing Seq: " << typeid(Seq).name() << '\n';
-  TEST_CHECK(seq.length() == 0);
+  EXPECT_TRUE(seq.length() == 0);
   Seq cpy(seq);
-  TEST_CHECK(cpy.length() == 0);
-  TEST_CHECK(cpy.release());
+  EXPECT_TRUE(cpy.length() == 0);
+  EXPECT_TRUE(cpy.release());
   seq = cpy;
   seq.length(1);
-  TEST_CHECK(seq.length() == 1);
+  EXPECT_TRUE(seq.length() == 1);
   assignTo0(seq, t);
   const Seq& cseq = seq;
-  TEST_CHECK(equal(cseq[0], t));
-  TEST_CHECK(equal(cseq.get_buffer()[0], t));
-  TEST_CHECK(cseq.length() == 1);
-  TEST_CHECK(cseq.size() == 1);
-  TEST_CHECK(!cseq.empty());
-  TEST_CHECK(cseq.max_size());
-  TEST_CHECK(cseq.release());
-  TEST_CHECK(cseq.maximum());
-  TEST_CHECK(cseq.begin() + 1 == cseq.end());
-  TEST_CHECK(seq.begin() + 1 == seq.end());
-  TEST_CHECK(cseq == seq);
-  TEST_CHECK(!(cseq != seq));
+  EXPECT_TRUE(equal(cseq[0], t));
+  EXPECT_TRUE(equal(cseq.get_buffer()[0], t));
+  EXPECT_TRUE(cseq.length() == 1);
+  EXPECT_TRUE(cseq.size() == 1);
+  EXPECT_TRUE(!cseq.empty());
+  EXPECT_TRUE(cseq.max_size());
+  EXPECT_TRUE(cseq.release());
+  EXPECT_TRUE(cseq.maximum());
+  EXPECT_TRUE(cseq.begin() + 1 == cseq.end());
+  EXPECT_TRUE(seq.begin() + 1 == seq.end());
+  EXPECT_TRUE(cseq == seq);
+  EXPECT_TRUE(!(cseq != seq));
 
   typename Seq::value_type* const buf = seq.get_buffer(true /*orphan*/);
-  TEST_CHECK(equal(buf[0], t));
+  EXPECT_TRUE(equal(buf[0], t));
   Seq::freebuf(buf);
 }
 
@@ -207,12 +202,12 @@ void basic_test()
 {
 }
 
-int ACE_TMAIN(int, ACE_TCHAR*[])
+TEST(Sequence, main)
 {
   S1 s1;
   S2 s2;
-  TEST_CHECK_RETURN(s1.maximum() == 0, -1);
-  TEST_CHECK_RETURN(s2.maximum() == 5, -1);
+  EXPECT_TRUE(s1.maximum() == 0);
+  EXPECT_TRUE(s2.maximum() == 5);
   int* const b1 = S1::allocbuf(3);
   int* const b2 = S2::allocbuf();
   S1::freebuf(b1);
@@ -226,7 +221,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
 
   int i = 42;
   s2.replace(1, &i);
-  TEST_CHECK_RETURN(s2[0] == i, -1);
+  EXPECT_TRUE(s2[0] == i);
 
   S4 s4;
   MyStru2 stru = {42, "42"};
@@ -239,8 +234,8 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   testSeq(ss, FACE::string_dup(""));
 
   ss.length(2);
-  TEST_CHECK_RETURN(ss[0][0] == '\0', -1);
-  TEST_CHECK_RETURN(ss[1][0] == '\0', -1);
+  EXPECT_TRUE(ss[0][0] == '\0');
+  EXPECT_TRUE(ss[1][0] == '\0');
   ss[0] = "foo";
   ss[1] = "bar";
   ss[0] = "baz"; // frees "foo" before copying "baz"
@@ -252,14 +247,14 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
                     const_cast<char*>(storage[2]),
                     const_cast<char*>(storage[3])};
   ss.replace(4, 2, buffer);
-  TEST_CHECK_RETURN(ss.maximum() == 4, -1);
-  TEST_CHECK_RETURN(ss.length() == 2, -1);
-  TEST_CHECK_RETURN(!ss.release(), -1);
-  TEST_CHECK_RETURN(0 == std::strcmp(ss[0], "Hello"), -1);
-  TEST_CHECK_RETURN(0 == std::strcmp(ss[1], "world"), -1);
+  EXPECT_TRUE(ss.maximum() == 4);
+  EXPECT_TRUE(ss.length() == 2);
+  EXPECT_TRUE(!ss.release());
+  EXPECT_TRUE(0 == std::strcmp(ss[0], "Hello"));
+  EXPECT_TRUE(0 == std::strcmp(ss[1], "world"));
   ss.length(4);
-  TEST_CHECK_RETURN(0 == std::strcmp(ss[2], "from"), -1);
-  TEST_CHECK_RETURN(0 == std::strcmp(ss[3], "sequence"), -1);
+  EXPECT_TRUE(0 == std::strcmp(ss[2], "from"));
+  EXPECT_TRUE(0 == std::strcmp(ss[3], "sequence"));
 
   SB sb;
   testSeq(sb, FACE::string_dup(""));
@@ -267,7 +262,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   SB sb2;
   sb2.length(1);
   swap(sb, sb2);
-  TEST_CHECK_RETURN(sb.length() == 1, -1);
+  EXPECT_TRUE(sb.length() == 1);
 
   // Sequences of Arrays
 
@@ -291,7 +286,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   s1v[0] = 1;
   s1v[1] = s1v[0];
   const S1_var& s1vc = s1v;
-  TEST_CHECK_RETURN(s1vc[1] == 1, -1);
+  EXPECT_TRUE(s1vc[1] == 1);
 
 #if !defined __SUNPRO_CC && (!defined _MSC_VER || _MSC_VER >= 1500) && \
    (!defined __GNUC__ || __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC__MINOR__ > 1))
@@ -301,9 +296,6 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   s4v[0].s1_ = "testing";
   s4v[1] = s4v[0];
   const S4_var& s4vc = s4v;
-  TEST_CHECK_RETURN(s4vc[1].s1_ == "testing", -1);
+  EXPECT_TRUE(s4vc[1].s1_ == "testing", -1);
 #endif
-
-  printf("%d assertions passed\n", assertions);
-  return 0;
 }

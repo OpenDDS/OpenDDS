@@ -5,12 +5,10 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "ace/OS_main.h"
+#include <gtest/gtest.h>
 
 #include "dds/DCPS/RTPS/GuidGenerator.h"
 #include "dds/DCPS/GuidConverter.h"
-
-#include "../../../DCPS/common/TestSupport.h"
 
 using namespace OpenDDS::RTPS;
 using namespace OpenDDS::DCPS;
@@ -33,8 +31,7 @@ bool not_null (GUID_t &g1)
   return false;
 }
 
-int
-ACE_TMAIN(int, ACE_TCHAR*[])
+TEST(GuidGenerator, main)
 {
 
   // Test GUID uniqueness
@@ -44,8 +41,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
     gen.populate(g1);
     gen.populate(g2);
-    TEST_CHECK(not_null(g1));
-    TEST_CHECK(compare_prefix(g1,g2) != 0);
+    EXPECT_TRUE(not_null(g1));
+    EXPECT_TRUE(compare_prefix(g1,g2) != 0);
   }
 
   // Test GUID converter
@@ -65,13 +62,11 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     guid.guidPrefix[11] = 12;
     guid.entityId.entityKey[0] = guid.entityId.entityKey[1] = guid.entityId.entityKey[2] = 0;
     guid.entityId.entityKind = 0;
-    TEST_CHECK(GuidConverter(guid).uniqueParticipantId() == "0102030405060708090a0b0c");
+    EXPECT_TRUE(GuidConverter(guid).uniqueParticipantId() == "0102030405060708090a0b0c");
 
     guid.guidPrefix[2] = 233;
     guid.guidPrefix[4] = 244;
     guid.guidPrefix[6] = 255;
-    TEST_CHECK(GuidConverter(guid).uniqueParticipantId() == "0102e904f406ff08090a0b0c");
+    EXPECT_TRUE(GuidConverter(guid).uniqueParticipantId() == "0102e904f406ff08090a0b0c");
   }
-
-  return 0;
 }

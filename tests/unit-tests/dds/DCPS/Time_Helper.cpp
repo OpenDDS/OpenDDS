@@ -5,20 +5,18 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "ace/OS_main.h"
+#include <gtest/gtest.h>
+
 #include "ace/Time_Value.h"
 
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/TimeTypes.h"
 
-#include "../../../DCPS/common/TestSupport.h"
-
 #include <iostream>
 
 using namespace OpenDDS::DCPS;
 
-int
-ACE_TMAIN(int, ACE_TCHAR*[])
+TEST(Time_Helper, main)
 {
   DDS::Duration_t duration;
   duration.sec = ::DDS::DURATION_INFINITE_SEC;
@@ -33,9 +31,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     //std::cout << "infinite sec and nsec convert to time value: sec="
     //          << sec << " usec=" << usec << " msec=" << msec << std::endl;
 
-    TEST_CHECK (tv.sec() == ACE_Time_Value::max_time.sec()
+    EXPECT_TRUE (tv.sec() == ACE_Time_Value::max_time.sec()
              || tv.sec() == (time_t)(duration.sec  + duration.nanosec/1000/ACE_ONE_SECOND_IN_USECS));
-    TEST_CHECK (tv.usec() == ACE_Time_Value::max_time.usec()
+    EXPECT_TRUE (tv.usec() == ACE_Time_Value::max_time.usec()
              || tv.usec() == (suseconds_t)(duration.nanosec/1000%ACE_ONE_SECOND_IN_USECS));
   }
 
@@ -50,9 +48,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     //std::cout << "infinite sec and nsec convert to absolute time value: sec="
     //          << sec << " usec=" << usec << " msec=" << msec << std::endl;
 
-    TEST_CHECK (tv.sec() == ACE_Time_Value::max_time.sec()
+    EXPECT_TRUE (tv.sec() == ACE_Time_Value::max_time.sec()
              || tv.sec() == duration.sec  + now.sec() + (time_t)((duration.nanosec/1000 + now.usec ())/ACE_ONE_SECOND_IN_USECS));
-    TEST_CHECK (tv.usec() == ACE_Time_Value::max_time.usec()
+    EXPECT_TRUE (tv.usec() == ACE_Time_Value::max_time.usec()
              || tv.usec() == (suseconds_t)(duration.nanosec/1000 + now.usec ())%ACE_ONE_SECOND_IN_USECS);
   }
   {
@@ -67,9 +65,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     //std::cout << "finite sec convert to time value: sec="
     //          << sec << " usec=" << usec << " msec=" << msec << std::endl;
 
-    TEST_CHECK (tv.sec() == duration.sec  + (time_t)(duration.nanosec/1000/ACE_ONE_SECOND_IN_USECS));
-    TEST_CHECK (tv.usec() == (suseconds_t)(duration.nanosec/1000%ACE_ONE_SECOND_IN_USECS));
-    TEST_CHECK (tv < ACE_Time_Value::max_time);
+    EXPECT_TRUE (tv.sec() == duration.sec  + (time_t)(duration.nanosec/1000/ACE_ONE_SECOND_IN_USECS));
+    EXPECT_TRUE (tv.usec() == (suseconds_t)(duration.nanosec/1000%ACE_ONE_SECOND_IN_USECS));
+    EXPECT_TRUE (tv < ACE_Time_Value::max_time);
   }
   {
     DDS::Time_t tt1 = {3,1};
@@ -78,8 +76,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     DDS::Duration_t result2 = tt1 - tt2;
     // std::cout << "tt2 - tt1 : " << result1.sec << " : " << result1.nanosec  << std::endl;
     // std::cout << "tt1 - tt2 : " << result2.sec << " : " << result2.nanosec << std::endl;
-    TEST_CHECK (result1.sec == -2 && result1.nanosec == 2);
-    TEST_CHECK (result2.sec == 1 && result2.nanosec == 999999998);
+    EXPECT_TRUE (result1.sec == -2 && result1.nanosec == 2);
+    EXPECT_TRUE (result2.sec == 1 && result2.nanosec == 999999998);
   }
-  return 0;
 }

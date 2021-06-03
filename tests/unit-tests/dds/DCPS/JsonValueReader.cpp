@@ -547,9 +547,3 @@ TEST(JsonValueReader, from_json)
   MyStruct s;
   EXPECT_TRUE(from_json(s, ss));
 }
-
-int main(int argc, char* argv[])
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

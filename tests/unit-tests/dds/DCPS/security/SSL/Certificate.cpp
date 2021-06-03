@@ -14,7 +14,7 @@ class CertificateTest : public ::testing::Test
 {
 public:
   CertificateTest() :
-    ca_("file:./security/certs/identity/identity_ca_cert.pem"),
+    ca_("file:../security/certs/identity/identity_ca_cert.pem"),
     ca_data_("data:,-----BEGIN CERTIFICATE-----\n"
       "MIID6DCCAtACCQCSMMZ5KQ7ffTANBgkqhkiG9w0BAQsFADCBtTELMAkGA1UEBhMC\n"
       "VVMxCzAJBgNVBAgMAk1PMRQwEgYDVQQHDAtTYWludCBMb3VpczEsMCoGA1UECgwj\n"
@@ -38,7 +38,7 @@ public:
       "cPsocF+pCa71fQnlW8L9cyn2E/6zJkzj4aYZWwc2KVJm5JBuaIIcu1oeI5IdZ5sl\n"
       "w5GeIeP0nXVHuhQf4mWrMi+KvQhorQEGftxnDhS0TWWEFVOUigRao7blBXY=\n"
       "-----END CERTIFICATE-----"),
-    signed_("file:./security/certs/identity/test_participant_01_cert.pem"),
+    signed_("file:../security/certs/identity/test_participant_01_cert.pem"),
     signed_data_("data:,-----BEGIN CERTIFICATE-----\n"
       "MIIDhjCCAm4CAQEwDQYJKoZIhvcNAQELBQAwgbUxCzAJBgNVBAYTAlVTMQswCQYD\n"
       "VQQIDAJNTzEUMBIGA1UEBwwLU2FpbnQgTG91aXMxLDAqBgNVBAoMI09iamVjdCBD\n"
@@ -60,8 +60,8 @@ public:
       "1Duu88crRp00ghesoFKx5OURjTrImIo5cQEazVQ7sX3BAki3egwpaKXNiWQ7VIuZ\n"
       "NFqBYfNRpivWQhcdG7g0MTK/AF6ddad6GdaknYlmBhlYpSd/K9DYIkMx\n"
       "-----END CERTIFICATE-----"),
-    signed_ec_("file:./security/certs/identity/test_participant_03_cert.pem"),
-    not_signed_("file:./security/certs/identity/not_signed.pem")
+    signed_ec_("file:../security/certs/identity/test_participant_03_cert.pem"),
+    not_signed_("file:../security/certs/identity/not_signed.pem")
   {
 
   }
@@ -95,7 +95,7 @@ TEST_F(CertificateTest, Validate_ECDSA_SHA256_Data_Success)
 
 TEST_F(CertificateTest, Validate_RSASSA_PSS_SHA256_Failure_LoadingWrongKeyType)
 {
-  Certificate wrong_key_type("file:./security/certs/identity/test_participant_01_private_key.pem");
+  Certificate wrong_key_type("file:../security/certs/identity/test_participant_01_private_key.pem");
   ASSERT_NE(wrong_key_type.validate(ca_), X509_V_OK);
 }
 
@@ -179,11 +179,4 @@ TEST_F(CertificateTest, CopyConstruct_ECDSA_SHA256)
 {
   Certificate c(signed_ec_);
   ASSERT_EQ(c, signed_ec_);
-}
-
-int main(int argc, char* argv[])
-{
-  openssl_init();
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }

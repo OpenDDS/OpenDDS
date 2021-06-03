@@ -1085,10 +1085,3 @@ TEST_F(CryptoTransformTest, decode_serialized_payload_Success)
   EXPECT_TRUE(get_inst().decode_serialized_payload(output, get_buffer(), inline_qos, drch, dwch, ex));
   EXPECT_EQ(get_buffer(), output);
 }
-
-
-int main(int argc, char** argv)
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

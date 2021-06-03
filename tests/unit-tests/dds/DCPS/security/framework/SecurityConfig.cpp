@@ -30,7 +30,7 @@ public:
   {
     cf_.open();
     ACE_Ini_ImpExp import(cf_);
-    ASSERT_EQ(0, import.import_config(ACE_TEXT("unit-tests/dds/DCPS/security/framework/test1.ini")));
+    ASSERT_EQ(0, import.import_config(ACE_TEXT("dds/DCPS/security/framework/test1.ini")));
     ASSERT_EQ(0, TheSecurityRegistry->load_security_configuration(cf_));
   }
 
@@ -113,10 +113,4 @@ TEST_F(SecurityConfigTest, TestConfig_NoProperties)
         config->get_properties(property_data);
         EXPECT_EQ(0U, property_data.binary_value.length());
         EXPECT_EQ(0U, property_data.value.length());
-}
-
-int main(int argc, char** argv)
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }

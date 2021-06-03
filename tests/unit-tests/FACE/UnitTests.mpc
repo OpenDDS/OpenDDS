@@ -1,6 +1,0 @@
-project(*Sequences): dcps, opendds_face, dcps_test {
-  exename = *
-  Source_Files {
-    Sequence.cpp
-  }
-}

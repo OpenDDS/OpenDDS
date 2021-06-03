@@ -5,12 +5,10 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "ace/OS_main.h"
+#include <gtest/gtest.h>
 
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/SequenceNumber.h"
-
-#include "../../../DCPS/common/TestSupport.h"
 
 using namespace OpenDDS::DCPS;
 
@@ -21,77 +19,73 @@ namespace {
   const SequenceNumber::Value SN_SEAM  = ACE_UINT32_MAX;
 }
 
-int
-ACE_TMAIN(int, ACE_TCHAR*[])
+TEST(SequenceNumber, main)
 {
   // Construction (default)
-  TEST_CHECK(SequenceNumber(INITIAL) == SequenceNumber());
+  EXPECT_TRUE(SequenceNumber(INITIAL) == SequenceNumber());
 
-  TEST_CHECK(SequenceNumber::ZERO().getValue() == 0);
-  TEST_CHECK(SequenceNumber::ZERO() < SequenceNumber());
-  TEST_CHECK(++SequenceNumber(SequenceNumber::ZERO()) == SequenceNumber());
+  EXPECT_TRUE(SequenceNumber::ZERO().getValue() == 0);
+  EXPECT_TRUE(SequenceNumber::ZERO() < SequenceNumber());
+  EXPECT_TRUE(++SequenceNumber(SequenceNumber::ZERO()) == SequenceNumber());
 
   // testing numerical sequence
-  TEST_CHECK(SequenceNumber(SN_MIN) < SequenceNumber(SN_MIN+1));
-  TEST_CHECK(!(SequenceNumber(SN_MIN+1) < SequenceNumber(SN_MIN)));
-  TEST_CHECK(SequenceNumber(SN_SEAM) < SequenceNumber(SN_SEAM+1));
-  TEST_CHECK(!(SequenceNumber(SN_SEAM+1) < SequenceNumber(SN_SEAM)));
-  TEST_CHECK(SequenceNumber(SN_MAX-1) < SequenceNumber(SN_MAX));
-  TEST_CHECK(!(SequenceNumber(SN_MAX) < SequenceNumber(SN_MAX-1)));
+  EXPECT_TRUE(SequenceNumber(SN_MIN) < SequenceNumber(SN_MIN+1));
+  EXPECT_TRUE(!(SequenceNumber(SN_MIN+1) < SequenceNumber(SN_MIN)));
+  EXPECT_TRUE(SequenceNumber(SN_SEAM) < SequenceNumber(SN_SEAM+1));
+  EXPECT_TRUE(!(SequenceNumber(SN_SEAM+1) < SequenceNumber(SN_SEAM)));
+  EXPECT_TRUE(SequenceNumber(SN_MAX-1) < SequenceNumber(SN_MAX));
+  EXPECT_TRUE(!(SequenceNumber(SN_MAX) < SequenceNumber(SN_MAX-1)));
 
   // testing values and increment operator
   {
     SequenceNumber num(SN_MIN);
-    TEST_CHECK(num.getValue() == SN_MIN);
-    TEST_CHECK((++num).getValue() == SN_MIN+1);
+    EXPECT_TRUE(num.getValue() == SN_MIN);
+    EXPECT_TRUE((++num).getValue() == SN_MIN+1);
   }
 
   {
     SequenceNumber num(SN_SEAM);
-    TEST_CHECK(num.getValue() == SN_SEAM);
-    TEST_CHECK((++num).getValue() == SN_SEAM+1);
-    TEST_CHECK((++num).getValue() == SN_SEAM+2);
+    EXPECT_TRUE(num.getValue() == SN_SEAM);
+    EXPECT_TRUE((++num).getValue() == SN_SEAM+1);
+    EXPECT_TRUE((++num).getValue() == SN_SEAM+2);
   }
 
   {
     SequenceNumber num(SN_MAX);
-    TEST_CHECK(num.getValue() == SN_MAX);
-    TEST_CHECK((++num).getValue() == INITIAL);
+    EXPECT_TRUE(num.getValue() == SN_MAX);
+    EXPECT_TRUE((++num).getValue() == INITIAL);
     // test post-incrementer
-    TEST_CHECK((num++).getValue() == INITIAL);
-    TEST_CHECK(num.getValue() == INITIAL+1);
+    EXPECT_TRUE((num++).getValue() == INITIAL);
+    EXPECT_TRUE(num.getValue() == INITIAL+1);
   }
 
   // Test SEQUENCENUMBER_UNKNOWN
   {
     SequenceNumber num = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
-    TEST_CHECK(num.getValue() == ACE_INT64(0xffffffff) << 32);
+    EXPECT_TRUE(num.getValue() == ACE_INT64(0xffffffff) << 32);
     SequenceNumber min;
-    TEST_CHECK(num != min);
-    TEST_CHECK(num == SequenceNumber::SEQUENCENUMBER_UNKNOWN());
+    EXPECT_TRUE(num != min);
+    EXPECT_TRUE(num == SequenceNumber::SEQUENCENUMBER_UNKNOWN());
   }
 
   // Test previous() member function
   {
     SequenceNumber num(SN_MIN);
-    TEST_CHECK(num.previous() == SN_MAX);
+    EXPECT_TRUE(num.previous() == SN_MAX);
   }
 
   {
     SequenceNumber num(SN_SEAM+1);
-    TEST_CHECK(num.previous() == SN_SEAM);
+    EXPECT_TRUE(num.previous() == SN_SEAM);
   }
 
   {
     SequenceNumber num(99);
-    TEST_CHECK(num.previous() == 98);
+    EXPECT_TRUE(num.previous() == 98);
   }
 
   {
     SequenceNumber num(SN_MAX);
-    TEST_CHECK(num.previous() == SN_MAX-1);
+    EXPECT_TRUE(num.previous() == SN_MAX-1);
   }
-
-
-  return 0;
 }

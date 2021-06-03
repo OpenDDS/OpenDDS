@@ -13,10 +13,3 @@ TEST(UtilsTest, MakeNonce256_Success)
   int err = OpenDDS::Security::SSL::make_nonce_256(nonce);
   ASSERT_EQ(0, err);
 }
-
-int main(int argc, char* argv[])
-{
-  openssl_init();
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

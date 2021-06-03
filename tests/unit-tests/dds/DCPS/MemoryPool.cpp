@@ -1,16 +1,11 @@
+#include <gtest/gtest.h>
+
 #include "dds/DCPS/MemoryPool.h"
 #include "ace/Log_Msg.h"
-#include "../../test_check.h"
-#include "ace/OS_main.h"
 
 #include <string.h>
 #include <iostream>
 #include <map>
-
-namespace {
-  unsigned int assertions = 0;
-  unsigned int failed = 0;
-}
 
 using namespace OpenDDS::DCPS;
 
@@ -21,7 +16,7 @@ public:
     MemoryPool pool(1024, 8);
     void* ptr = pool.pool_alloc(128);
 
-    TEST_CHECK(ptr);
+    EXPECT_TRUE(ptr);
     validate_pool(pool, 128);
   }
 
@@ -36,11 +31,11 @@ public:
     void* ptr2 = pool.pool_alloc(128);
     validate_pool(pool, 512);
 
-    TEST_CHECK(ptr0);
-    TEST_CHECK(ptr1);
-    TEST_CHECK(ptr2);
-    TEST_CHECK(ptr0 > ptr1);
-    TEST_CHECK(ptr1 > ptr2);
+    EXPECT_TRUE(ptr0);
+    EXPECT_TRUE(ptr1);
+    EXPECT_TRUE(ptr2);
+    EXPECT_TRUE(ptr0 > ptr1);
+    EXPECT_TRUE(ptr1 > ptr2);
   }
 
   // Test allocating sizes which are not multiples of 8
@@ -55,13 +50,13 @@ public:
     void* ptr3 = pool.pool_alloc(7);
     //ACE_DEBUG((LM_INFO, "pool sizes: min_free_size %u, min_alloc_size_ %u, alloc hdr %u, free hdr %u\n", pool.min_free_size, pool.min_alloc_size_, sizeof(AllocHeader), sizeof(FreeHeader)));
     validate_pool(pool, 120+128+16+pool.min_alloc_size_);
-    TEST_CHECK(ptr0);
-    TEST_CHECK(ptr1);
-    TEST_CHECK(ptr2);
-    TEST_CHECK(ptr3);
-    TEST_CHECK(ptr0 > ptr1);
-    TEST_CHECK(ptr1 > ptr2);
-    TEST_CHECK(ptr2 > ptr3);
+    EXPECT_TRUE(ptr0);
+    EXPECT_TRUE(ptr1);
+    EXPECT_TRUE(ptr2);
+    EXPECT_TRUE(ptr3);
+    EXPECT_TRUE(ptr0 > ptr1);
+    EXPECT_TRUE(ptr1 > ptr2);
+    EXPECT_TRUE(ptr2 > ptr3);
   }
 
   // Allocate a several blocks until all gone
@@ -76,13 +71,13 @@ public:
     void* ptr3 = pool.pool_alloc(448);
     validate_pool(pool, 1024 - 64);
 
-    TEST_CHECK(ptr0);
-    TEST_CHECK(ptr1);
-    TEST_CHECK(ptr2);
-    TEST_CHECK(ptr3);
-    TEST_CHECK(ptr0 > ptr1);
-    TEST_CHECK(ptr1 > ptr2);
-    TEST_CHECK(ptr2 > ptr3);
+    EXPECT_TRUE(ptr0);
+    EXPECT_TRUE(ptr1);
+    EXPECT_TRUE(ptr2);
+    EXPECT_TRUE(ptr3);
+    EXPECT_TRUE(ptr0 > ptr1);
+    EXPECT_TRUE(ptr1 > ptr2);
+    EXPECT_TRUE(ptr2 > ptr3);
   }
 
   // Allocate a block and free it, case I
@@ -103,8 +98,8 @@ public:
     void* ptr2 = pool.pool_alloc(128);
     void* ptr3 = pool.pool_alloc(512);
     validate_pool(pool, 1024);
-    TEST_CHECK(ptr1);
-    TEST_CHECK(ptr2);
+    EXPECT_TRUE(ptr1);
+    EXPECT_TRUE(ptr2);
     pool.pool_free(ptr0);
     validate_pool(pool, 1024 - 128);
     pool.pool_free(ptr3);
@@ -118,8 +113,8 @@ public:
     void* ptr1 = pool.pool_alloc(256);
     void* ptr2 = pool.pool_alloc(128);
     void* ptr3 = pool.pool_alloc(512);
-    TEST_CHECK(ptr1);
-    TEST_CHECK(ptr2);
+    EXPECT_TRUE(ptr1);
+    EXPECT_TRUE(ptr2);
     validate_pool(pool, 1024);
     pool.pool_free(ptr3);
     pool.pool_free(ptr0);
@@ -137,9 +132,9 @@ public:
     void* ptr3 = pool.pool_alloc(48);
     void* ptr4 = pool.pool_alloc(2664);
     pool.pool_alloc(16);
-    TEST_CHECK(ptr0);
-    TEST_CHECK(ptr1);
-    TEST_CHECK(ptr2);
+    EXPECT_TRUE(ptr0);
+    EXPECT_TRUE(ptr1);
+    EXPECT_TRUE(ptr2);
     validate_pool(pool, 16*3 + 6096 + 2048 + 5288 + 48 + 2664);
     pool.pool_free(ptr1);
     validate_pool(pool, 16*3 + 6096 + 5288 + 48 + 2664);
@@ -158,7 +153,7 @@ public:
     pool.pool_free(ptr0);
     void* ptr1 = pool.pool_alloc(128);
     validate_pool(pool, 128);
-    TEST_CHECK(ptr0 == ptr1);
+    EXPECT_TRUE(ptr0 == ptr1);
 
     pool.pool_free(ptr1);
     validate_pool(pool, 0);
@@ -174,9 +169,9 @@ public:
     void* ptr4 = pool.pool_alloc(128);
     void* ptr5 = pool.pool_alloc(128);
     void* ptr6 = pool.pool_alloc(128); // leftmost
-    TEST_CHECK(ptr0);
-    TEST_CHECK(ptr5);
-    TEST_CHECK(ptr6);
+    EXPECT_TRUE(ptr0);
+    EXPECT_TRUE(ptr5);
+    EXPECT_TRUE(ptr6);
     validate_pool(pool, 128*7);
     pool.pool_free(ptr2);
     validate_pool(pool, 128*6);
@@ -185,10 +180,10 @@ public:
     validate_pool(pool, 128*5);
     // Alloate from free
     void* ptr7 = pool.pool_alloc(256);
-    TEST_CHECK(ptr7);
+    EXPECT_TRUE(ptr7);
     validate_pool(pool, 128*7+sizeof(AllocHeader));
-    TEST_CHECK(ptr7 < ptr1);
-    TEST_CHECK(ptr7 > ptr4);
+    EXPECT_TRUE(ptr7 < ptr1);
+    EXPECT_TRUE(ptr7 > ptr4);
   }
 
   // Free a block and the block to it's left, case III
@@ -201,9 +196,9 @@ public:
     void* ptr4 = pool.pool_alloc(128);
     void* ptr5 = pool.pool_alloc(128);
     void* ptr6 = pool.pool_alloc(128); // leftmost
-    TEST_CHECK(ptr4);
-    TEST_CHECK(ptr5);
-    TEST_CHECK(ptr6);
+    EXPECT_TRUE(ptr4);
+    EXPECT_TRUE(ptr5);
+    EXPECT_TRUE(ptr6);
     validate_pool(pool, 128*7);
     pool.pool_free(ptr2);
     validate_pool(pool, 128*6);
@@ -212,10 +207,10 @@ public:
     validate_pool(pool, 128*5);
     // Alloate from free
     void* ptr7 = pool.pool_alloc(256);
-    TEST_CHECK(ptr7);
+    EXPECT_TRUE(ptr7);
     validate_pool(pool, 128*7+sizeof(AllocHeader));
-    TEST_CHECK(ptr7 < ptr0);
-    TEST_CHECK(ptr7 > ptr3);
+    EXPECT_TRUE(ptr7 < ptr0);
+    EXPECT_TRUE(ptr7 > ptr3);
   }
 
   // Free a block and the ones to its left and right, case IV
@@ -228,8 +223,8 @@ public:
     void* ptr4 = pool.pool_alloc(128); // freed ahead of time
     void* ptr5 = pool.pool_alloc(128);
     void* ptr6 = pool.pool_alloc(128); // leftmost
-    TEST_CHECK(ptr0);
-    TEST_CHECK(ptr6);
+    EXPECT_TRUE(ptr0);
+    EXPECT_TRUE(ptr6);
     validate_pool(pool, 128*7);
     pool.pool_free(ptr2);
     pool.pool_free(ptr4);
@@ -239,10 +234,10 @@ public:
     validate_pool(pool, 128*4);
     // Alloate from free
     void* ptr7 = pool.pool_alloc(256);
-    TEST_CHECK(ptr7);
+    EXPECT_TRUE(ptr7);
     validate_pool(pool, 128*6);
-    TEST_CHECK(ptr7 < ptr1);
-    TEST_CHECK(ptr7 > ptr5);
+    EXPECT_TRUE(ptr7 < ptr1);
+    EXPECT_TRUE(ptr7 > ptr5);
   }
 
   void test_pool_free_join_first_both() {
@@ -254,11 +249,11 @@ public:
     void* ptr4 = pool.pool_alloc(128);
     void* ptr5 = pool.pool_alloc(256); // freed ahead of time, second largest
     void* ptr6 = pool.pool_alloc(128); // leftmost, join with head and ptr5
-    TEST_CHECK(ptr0);
-    TEST_CHECK(ptr1);
-    TEST_CHECK(ptr3);
-    TEST_CHECK(ptr4);
-    TEST_CHECK(ptr6);
+    EXPECT_TRUE(ptr0);
+    EXPECT_TRUE(ptr1);
+    EXPECT_TRUE(ptr3);
+    EXPECT_TRUE(ptr4);
+    EXPECT_TRUE(ptr6);
     pool.pool_free(ptr5);
     pool.pool_free(ptr2);
     validate_pool(pool, 128*4 + 64);
@@ -277,9 +272,9 @@ public:
     void* ptr4 = pool.pool_alloc(128);
     void* ptr5 = pool.pool_alloc(128);
     void* ptr6 = pool.pool_alloc(128); // leftmost
-    TEST_CHECK(ptr0);
-    TEST_CHECK(ptr5);
-    TEST_CHECK(ptr6);
+    EXPECT_TRUE(ptr0);
+    EXPECT_TRUE(ptr5);
+    EXPECT_TRUE(ptr6);
     validate_pool(pool, 128*8);
     pool.pool_free(ptr2);
     validate_pool(pool, 128*6);
@@ -288,10 +283,10 @@ public:
     validate_pool(pool, 128*5);
     // Alloate from free
     void* ptr7 = pool.pool_alloc(256);
-    TEST_CHECK(ptr7);
+    EXPECT_TRUE(ptr7);
     validate_pool(pool, 128*7);
-    TEST_CHECK(ptr7 < ptr1);
-    TEST_CHECK(ptr7 > ptr4);
+    EXPECT_TRUE(ptr7 < ptr1);
+    EXPECT_TRUE(ptr7 > ptr4);
   }
 
   // Free block join with and the block to it's left (largest), case III
@@ -304,9 +299,9 @@ public:
     void* ptr4 = pool.pool_alloc(128);
     void* ptr5 = pool.pool_alloc(128);
     void* ptr6 = pool.pool_alloc(128); // leftmost
-    TEST_CHECK(ptr4);
-    TEST_CHECK(ptr5);
-    TEST_CHECK(ptr6);
+    EXPECT_TRUE(ptr4);
+    EXPECT_TRUE(ptr5);
+    EXPECT_TRUE(ptr6);
     validate_pool(pool, 128*8);
     pool.pool_free(ptr2);
     validate_pool(pool, 128*6);
@@ -315,10 +310,10 @@ public:
     validate_pool(pool, 128*5);
     // Alloate from free
     void* ptr7 = pool.pool_alloc(256);
-    TEST_CHECK(ptr7);
+    EXPECT_TRUE(ptr7);
     validate_pool(pool, 128*7);
-    TEST_CHECK(ptr7 < ptr0);
-    TEST_CHECK(ptr7 > ptr3);
+    EXPECT_TRUE(ptr7 < ptr0);
+    EXPECT_TRUE(ptr7 > ptr3);
   }
 
   void test_pool_free_join_second_largest_right() {
@@ -330,9 +325,9 @@ public:
     void* ptr4 = pool.pool_alloc(128);
     void* ptr5 = pool.pool_alloc(128);
     void* ptr6 = pool.pool_alloc(128); // leftmost
-    TEST_CHECK(ptr0);
-    TEST_CHECK(ptr5);
-    TEST_CHECK(ptr6);
+    EXPECT_TRUE(ptr0);
+    EXPECT_TRUE(ptr5);
+    EXPECT_TRUE(ptr6);
     validate_pool(pool, 128*8);
     pool.pool_free(ptr2);
     validate_pool(pool, 128*6);
@@ -341,10 +336,10 @@ public:
     validate_pool(pool, 128*5);
     // Alloate from free
     void* ptr7 = pool.pool_alloc(256);
-    TEST_CHECK(ptr7);
+    EXPECT_TRUE(ptr7);
     validate_pool(pool, 128*7);
-    TEST_CHECK(ptr7 < ptr1);
-    TEST_CHECK(ptr7 > ptr4);
+    EXPECT_TRUE(ptr7 < ptr1);
+    EXPECT_TRUE(ptr7 > ptr4);
   }
 
   // Free block join with and the block to it's left (largest), case III
@@ -357,9 +352,9 @@ public:
     void* ptr4 = pool.pool_alloc(128);
     void* ptr5 = pool.pool_alloc(128);
     void* ptr6 = pool.pool_alloc(128); // leftmost
-    TEST_CHECK(ptr4);
-    TEST_CHECK(ptr5);
-    TEST_CHECK(ptr6);
+    EXPECT_TRUE(ptr4);
+    EXPECT_TRUE(ptr5);
+    EXPECT_TRUE(ptr6);
     validate_pool(pool, 128*8);
     pool.pool_free(ptr2);
     validate_pool(pool, 128*6);
@@ -368,10 +363,10 @@ public:
     validate_pool(pool, 128*5);
     // Alloate from free
     void* ptr7 = pool.pool_alloc(256);
-    TEST_CHECK(ptr7);
+    EXPECT_TRUE(ptr7);
     validate_pool(pool, 128*7);
-    TEST_CHECK(ptr7 < ptr0);
-    TEST_CHECK(ptr7 > ptr3);
+    EXPECT_TRUE(ptr7 < ptr0);
+    EXPECT_TRUE(ptr7 > ptr3);
   }
 
   // Free block and join with the ones to its left and largest right, case IV
@@ -384,8 +379,8 @@ public:
     void* ptr4 = pool.pool_alloc(128); // freed ahead of time
     void* ptr5 = pool.pool_alloc(128);
     void* ptr6 = pool.pool_alloc(128); // leftmost
-    TEST_CHECK(ptr0);
-    TEST_CHECK(ptr6);
+    EXPECT_TRUE(ptr0);
+    EXPECT_TRUE(ptr6);
     validate_pool(pool, 128*8);
     pool.pool_free(ptr2);
     pool.pool_free(ptr4);
@@ -395,10 +390,10 @@ public:
     validate_pool(pool, 128*4);
     // Alloate from free
     void* ptr7 = pool.pool_alloc(256);
-    TEST_CHECK(ptr7);
+    EXPECT_TRUE(ptr7);
     validate_pool(pool, 128*6);
-    TEST_CHECK(ptr7 < ptr1);
-    TEST_CHECK(ptr7 > ptr5);
+    EXPECT_TRUE(ptr7 < ptr1);
+    EXPECT_TRUE(ptr7 > ptr5);
   }
 
   // Free block and join with the ones to its largest left and right, case IV
@@ -411,8 +406,8 @@ public:
     void* ptr4 = pool.pool_alloc(256); // freed ahead of time
     void* ptr5 = pool.pool_alloc(128);
     void* ptr6 = pool.pool_alloc(128); // leftmost
-    TEST_CHECK(ptr0);
-    TEST_CHECK(ptr6);
+    EXPECT_TRUE(ptr0);
+    EXPECT_TRUE(ptr6);
     validate_pool(pool, 128*8);
     pool.pool_free(ptr2);
     pool.pool_free(ptr4);
@@ -422,10 +417,10 @@ public:
     validate_pool(pool, 128*4);
     // Alloate from free
     void* ptr7 = pool.pool_alloc(256);
-    TEST_CHECK(ptr7);
+    EXPECT_TRUE(ptr7);
     validate_pool(pool, 128*6);
-    TEST_CHECK(ptr7 < ptr1);
-    TEST_CHECK(ptr7 > ptr5);
+    EXPECT_TRUE(ptr7 < ptr1);
+    EXPECT_TRUE(ptr7 > ptr5);
   }
 
   // Free block and join with the one to its right (smallest), case II
@@ -438,9 +433,9 @@ public:
     void* ptr4 = pool.pool_alloc(128);
     void* ptr5 = pool.pool_alloc(128);
     void* ptr6 = pool.pool_alloc(512); // leftmost, freed largest
-    TEST_CHECK(ptr0);
-    TEST_CHECK(ptr5);
-    TEST_CHECK(ptr6);
+    EXPECT_TRUE(ptr0);
+    EXPECT_TRUE(ptr5);
+    EXPECT_TRUE(ptr6);
     pool.pool_free(ptr2);
     pool.pool_free(ptr6);
     validate_pool(pool, 128*5);
@@ -449,10 +444,10 @@ public:
     validate_pool(pool, 128*4);
     // Alloate from free
     void* ptr7 = pool.pool_alloc(160);
-    TEST_CHECK(ptr7);
+    EXPECT_TRUE(ptr7);
     validate_pool(pool, 128*4 + 160);
-    TEST_CHECK(ptr7 < ptr1);
-    TEST_CHECK(ptr7 > ptr4);
+    EXPECT_TRUE(ptr7 < ptr1);
+    EXPECT_TRUE(ptr7 > ptr4);
   }
 
   // Free block and join with the one to its left (smallest), case III
@@ -465,9 +460,9 @@ public:
     void* ptr4 = pool.pool_alloc(64);  // freed ahead of time (smallest)
     void* ptr5 = pool.pool_alloc(128);
     void* ptr6 = pool.pool_alloc(512); // leftmost, freed largest
-    TEST_CHECK(ptr0);
-    TEST_CHECK(ptr2);
-    TEST_CHECK(ptr5);
+    EXPECT_TRUE(ptr0);
+    EXPECT_TRUE(ptr2);
+    EXPECT_TRUE(ptr5);
     pool.pool_free(ptr4);
     pool.pool_free(ptr6);
     validate_pool(pool, 128*5);
@@ -476,10 +471,10 @@ public:
     validate_pool(pool, 128*4);
     // Alloate from free
     void* ptr7 = pool.pool_alloc(160);
-    TEST_CHECK(ptr7);
+    EXPECT_TRUE(ptr7);
     validate_pool(pool, 128*4 + 160);
-    TEST_CHECK(ptr7 < ptr1);
-    TEST_CHECK(ptr7 > ptr4);
+    EXPECT_TRUE(ptr7 < ptr1);
+    EXPECT_TRUE(ptr7 > ptr4);
   }
 
   void test_pool_free_join_smallest_both_right() {
@@ -491,9 +486,9 @@ public:
     void* ptr4 = pool.pool_alloc(128); // freed ahead of time
     void* ptr5 = pool.pool_alloc(128);
     void* ptr6 = pool.pool_alloc(512); // leftmost, freed largest
-    TEST_CHECK(ptr0);
-    TEST_CHECK(ptr1);
-    TEST_CHECK(ptr5);
+    EXPECT_TRUE(ptr0);
+    EXPECT_TRUE(ptr1);
+    EXPECT_TRUE(ptr5);
     pool.pool_free(ptr2);
     pool.pool_free(ptr4);
     pool.pool_free(ptr6);
@@ -503,10 +498,10 @@ public:
     validate_pool(pool, 128*3);
     // Alloate from free
     void* ptr7 = pool.pool_alloc(160);
-    TEST_CHECK(ptr7);
+    EXPECT_TRUE(ptr7);
     validate_pool(pool, 128*3 + 160);
-    TEST_CHECK(ptr7 < ptr1);
-    TEST_CHECK(ptr7 > ptr4);
+    EXPECT_TRUE(ptr7 < ptr1);
+    EXPECT_TRUE(ptr7 > ptr4);
   }
 
   void test_pool_free_join_smallest_both_left() {
@@ -518,9 +513,9 @@ public:
     void* ptr4 = pool.pool_alloc(64);  // freed ahead of time (smallest)
     void* ptr5 = pool.pool_alloc(128);
     void* ptr6 = pool.pool_alloc(512); // leftmost, freed largest
-    TEST_CHECK(ptr0);
-    TEST_CHECK(ptr1);
-    TEST_CHECK(ptr5);
+    EXPECT_TRUE(ptr0);
+    EXPECT_TRUE(ptr1);
+    EXPECT_TRUE(ptr5);
     pool.pool_free(ptr2);
     pool.pool_free(ptr4);
     pool.pool_free(ptr6);
@@ -530,10 +525,10 @@ public:
     validate_pool(pool, 128*3);
     // Alloate from free
     void* ptr7 = pool.pool_alloc(160);
-    TEST_CHECK(ptr7);
+    EXPECT_TRUE(ptr7);
     validate_pool(pool, 128*3 + 160);
-    TEST_CHECK(ptr7 < ptr1);
-    TEST_CHECK(ptr7 > ptr4);
+    EXPECT_TRUE(ptr7 < ptr1);
+    EXPECT_TRUE(ptr7 > ptr4);
   }
 
   // Allocate and move ahead in free list
@@ -578,10 +573,10 @@ public:
     for (int i = 0; i < 256; ++i) {
       void* ptr0 = pool.pool_alloc(128);
       validate_pool(pool, 128);
-      TEST_CHECK(ptr0);
+      EXPECT_TRUE(ptr0);
       void* ptr1 = pool.pool_alloc(64);
       validate_pool(pool, 128 + 64);
-      TEST_CHECK(ptr1);
+      EXPECT_TRUE(ptr1);
       pool.pool_free(ptr0);
       validate_pool(pool, 64);
       pool.pool_free(ptr1);
@@ -605,9 +600,9 @@ public:
     // F160 A128 F384 A128
     void* ptr4 = pool.pool_alloc(320);
     validate_pool(pool, 256 + 320);
-    TEST_CHECK(ptr0);
-    TEST_CHECK(ptr3);
-    TEST_CHECK(ptr4);
+    EXPECT_TRUE(ptr0);
+    EXPECT_TRUE(ptr3);
+    EXPECT_TRUE(ptr4);
   }
 
   // Allocate blocks and free in alloc order
@@ -689,11 +684,11 @@ public:
     validate_pool(pool, 1024+512+256+128+64+32+16 + 16*5);
     // Now create free list
     pool.pool_free(ptr0);
-    TEST_CHECK(ptr1);
+    EXPECT_TRUE(ptr1);
     pool.pool_free(ptr2);
-    TEST_CHECK(ptr3);
+    EXPECT_TRUE(ptr3);
     pool.pool_free(ptr4);
-    TEST_CHECK(ptr5);
+    EXPECT_TRUE(ptr5);
     pool.pool_free(ptr6);
     // Free list sizes are 1024, 256, 64
     validate_pool(pool, 0+512+0+128+0+32+0 + 16*5);
@@ -720,11 +715,11 @@ public:
     void* ptr6 = pool.pool_alloc(16);
     validate_pool(pool, 1024+512+256+128+64+32+16 + 16*6);
     pool.pool_free(ptr0);
-    TEST_CHECK(ptr1);
+    EXPECT_TRUE(ptr1);
     pool.pool_free(ptr2);
-    TEST_CHECK(ptr3);
+    EXPECT_TRUE(ptr3);
     pool.pool_free(ptr4);
-    TEST_CHECK(ptr5);
+    EXPECT_TRUE(ptr5);
     pool.pool_free(ptr6);
     // Free list sizes are 1024, 256, 64, 16
     validate_pool(pool, 0+512+0+128+0+32+0 + 16*6);
@@ -858,28 +853,28 @@ public:
     void* ptr2 = pool.pool_alloc(256);
     void* ptr3 = pool.pool_alloc(128);
     validate_pool(pool, 256*3 + 128);
-    TEST_CHECK(ptr0);
-    TEST_CHECK(ptr1);
-    TEST_CHECK(ptr2);
-    TEST_CHECK(ptr3);
+    EXPECT_TRUE(ptr0);
+    EXPECT_TRUE(ptr1);
+    EXPECT_TRUE(ptr2);
+    EXPECT_TRUE(ptr3);
     void* ptr4 = pool.pool_alloc(128 - 8*5);
-    TEST_CHECK(ptr4);
+    EXPECT_TRUE(ptr4);
     // Out of memory
     validate_pool(pool, 1024 - 8*5);
     void* ptr5 = pool.pool_alloc(128);
-    TEST_CHECK(!ptr5);
+    EXPECT_TRUE(!ptr5);
     validate_pool(pool, 1024 - 8*5);
     pool.pool_free(ptr2); // free 256
     validate_pool(pool, 1024  - 8*5 - 256);
     void* ptr6 = pool.pool_alloc(128); // alloc 128
-    TEST_CHECK(ptr6);
+    EXPECT_TRUE(ptr6);
     validate_pool(pool, 1024 - 8*5 - 128);
     void* ptr7 = pool.pool_alloc(128 - 16);  // extra header
-    TEST_CHECK(ptr7);
+    EXPECT_TRUE(ptr7);
     validate_pool(pool, 1024 - 8*6);
     // Out of memory
     void* ptr8 = pool.pool_alloc(128);
-    TEST_CHECK(!ptr8);
+    EXPECT_TRUE(!ptr8);
     validate_pool(pool, 1024 - 8*6);
   }
 
@@ -891,11 +886,11 @@ public:
     void* ptr2 = pool.pool_alloc(256);
     void* ptr3 = pool.pool_alloc(128);
     void* ptr4 = pool.pool_alloc(640);
-    TEST_CHECK(ptr0);
-    TEST_CHECK(ptr1);
-    TEST_CHECK(ptr2);
-    TEST_CHECK(ptr3);
-    TEST_CHECK(!ptr4);
+    EXPECT_TRUE(ptr0);
+    EXPECT_TRUE(ptr1);
+    EXPECT_TRUE(ptr2);
+    EXPECT_TRUE(ptr3);
+    EXPECT_TRUE(!ptr4);
     validate_pool(pool, 1024 - 128);
     pool.pool_free(ptr2);
     validate_pool(pool, 1024 - 128 - 256);
@@ -905,8 +900,8 @@ public:
     MemoryPool pool(1024, 8);
     void* ptr0 = pool.pool_alloc(64);  // 2 allocs
     void* ptr1 = pool.pool_alloc(64);  // 3 allocs
-    TEST_CHECK(ptr0);
-    TEST_CHECK(ptr1);
+    EXPECT_TRUE(ptr0);
+    EXPECT_TRUE(ptr1);
     validate_pool(pool, 64*2);
     pool.pool_free(ptr1);
     pool.pool_free(NULL);
@@ -951,10 +946,10 @@ private:
       // Find size or larger
       FreeHeader* header = index.find(size, pool_base);
       if (header) {
-        TEST_CHECK(header->size() >= size);
+        EXPECT_TRUE(header->size() >= size);
         FreeHeader* smaller = header->smaller_free(pool_base);
         if (smaller) {
-          TEST_CHECK(smaller->size() <= header->size());
+          EXPECT_TRUE(smaller->size() <= header->size());
         }
       }
     }
@@ -1030,12 +1025,12 @@ private:
           );
       }
 
-      TEST_CHECK(alloc->size());
+      EXPECT_TRUE(alloc->size());
       if (prev) {
-        TEST_CHECK(prev->next_adjacent() == alloc);
-        TEST_CHECK(alloc->prev_adjacent() == prev);
+        EXPECT_TRUE(prev->next_adjacent() == alloc);
+        EXPECT_TRUE(alloc->prev_adjacent() == prev);
         // Validate  these are not consecutive free blocks
-        TEST_CHECK(!(prev_was_free && alloc->is_free()));
+        EXPECT_TRUE(!(prev_was_free && alloc->is_free()));
       }
 
       if (!alloc->is_free()) {
@@ -1049,10 +1044,10 @@ private:
       prev = alloc;
       alloc = alloc->next_adjacent();
     }
-    TEST_CHECK((unsigned char*)alloc == pool_end);
+    EXPECT_TRUE((unsigned char*)alloc == pool_end);
 
-    TEST_CHECK(allocated_bytes == expected_allocated_bytes);
-    TEST_CHECK(allocated_bytes + free_bytes + oh_bytes == pool.pool_size_);
+    EXPECT_TRUE(allocated_bytes == expected_allocated_bytes);
+    EXPECT_TRUE(allocated_bytes + free_bytes + oh_bytes == pool.pool_size_);
 
     validate_index(pool.free_index_, pool.pool_ptr_, log);
 
@@ -1066,23 +1061,23 @@ private:
          free_alloc;
          free_alloc = free_alloc->smaller_free(pool.pool_ptr_)) {
       // Should be marked free
-      TEST_CHECK(free_alloc->is_free());
+      EXPECT_TRUE(free_alloc->is_free());
       // Check for infinite loop
-      TEST_CHECK(++free_count < 10000);
+      EXPECT_TRUE(++free_count < 10000);
 
       // Sum bytes found
       free_bytes_in_list += free_alloc->size();
 
       // If not the first alloc
       if (free_alloc != pool.largest_free_) {
-        TEST_CHECK(free_alloc->size() <= prev_size);
-        TEST_CHECK(free_alloc->size() > 0);
+        EXPECT_TRUE(free_alloc->size() <= prev_size);
+        EXPECT_TRUE(free_alloc->size() > 0);
       }
       prev_size = free_alloc->size();
       prev_free = free_alloc;
     }
 
-    TEST_CHECK(free_bytes == free_bytes_in_list);
+    EXPECT_TRUE(free_bytes == free_bytes_in_list);
 
     // Try again from smallest to largest
     if (prev_free) {
@@ -1092,19 +1087,19 @@ private:
            free_alloc;
            free_alloc = free_alloc->larger_free(pool.pool_ptr_)) {
         // Should be marked free
-        TEST_CHECK(free_alloc->is_free());
+        EXPECT_TRUE(free_alloc->is_free());
 
         // Sum bytes found
         free_bytes_in_list += free_alloc->size();
 
         // If not the first alloc
         if (free_alloc != prev_free) {
-          TEST_CHECK(free_alloc->size() >= prev_size);
-          TEST_CHECK(free_alloc->size() > 0);
+          EXPECT_TRUE(free_alloc->size() >= prev_size);
+          EXPECT_TRUE(free_alloc->size() > 0);
         }
         prev_size = free_alloc->size();
       }
-      TEST_CHECK(free_bytes == free_bytes_in_list);
+      EXPECT_TRUE(free_bytes == free_bytes_in_list);
     }
   }
 };
@@ -1123,31 +1118,31 @@ FreeIndexTest()
 void test_setup() {
   FreeIndex index(largest_free_);
   setup(index, 1024*5);
-  TEST_CHECK(largest_free_->size() == 1024*5);
-  TEST_CHECK(index.size_ == 10);
-  TEST_CHECK(index.nodes_[9].ptr() == largest_free_);
+  EXPECT_TRUE(largest_free_->size() == 1024*5);
+  EXPECT_TRUE(index.size_ == 10);
+  EXPECT_TRUE(index.nodes_[9].ptr() == largest_free_);
 }
 
 void test_index_lookup() {
-  TEST_CHECK(FreeIndex::node_index(0) == 0);
-  TEST_CHECK(FreeIndex::node_index(8) == 0);
-  TEST_CHECK(FreeIndex::node_index(9) == 0);
-  TEST_CHECK(FreeIndex::node_index(15) == 0);
-  TEST_CHECK(FreeIndex::node_index(16) == 1);
-  TEST_CHECK(FreeIndex::node_index(31) == 1);
-  TEST_CHECK(FreeIndex::node_index(32) == 2);
-  TEST_CHECK(FreeIndex::node_index(63) == 2);
-  TEST_CHECK(FreeIndex::node_index(64) == 3);
-  TEST_CHECK(FreeIndex::node_index(128) == 4);
-  TEST_CHECK(FreeIndex::node_index(256) == 5);
-  TEST_CHECK(FreeIndex::node_index(512) == 6);
-  TEST_CHECK(FreeIndex::node_index(1024) == 7);
-  TEST_CHECK(FreeIndex::node_index(2048) == 8);
-  TEST_CHECK(FreeIndex::node_index(4096) == 9);
-  TEST_CHECK(FreeIndex::node_index(4097) == 9);
-  TEST_CHECK(FreeIndex::node_index(9000) == 9);
-  TEST_CHECK(FreeIndex::node_index(12000) == 9);
-  TEST_CHECK(FreeIndex::node_index(120000) == 9);
+  EXPECT_TRUE(FreeIndex::node_index(0) == 0);
+  EXPECT_TRUE(FreeIndex::node_index(8) == 0);
+  EXPECT_TRUE(FreeIndex::node_index(9) == 0);
+  EXPECT_TRUE(FreeIndex::node_index(15) == 0);
+  EXPECT_TRUE(FreeIndex::node_index(16) == 1);
+  EXPECT_TRUE(FreeIndex::node_index(31) == 1);
+  EXPECT_TRUE(FreeIndex::node_index(32) == 2);
+  EXPECT_TRUE(FreeIndex::node_index(63) == 2);
+  EXPECT_TRUE(FreeIndex::node_index(64) == 3);
+  EXPECT_TRUE(FreeIndex::node_index(128) == 4);
+  EXPECT_TRUE(FreeIndex::node_index(256) == 5);
+  EXPECT_TRUE(FreeIndex::node_index(512) == 6);
+  EXPECT_TRUE(FreeIndex::node_index(1024) == 7);
+  EXPECT_TRUE(FreeIndex::node_index(2048) == 8);
+  EXPECT_TRUE(FreeIndex::node_index(4096) == 9);
+  EXPECT_TRUE(FreeIndex::node_index(4097) == 9);
+  EXPECT_TRUE(FreeIndex::node_index(9000) == 9);
+  EXPECT_TRUE(FreeIndex::node_index(12000) == 9);
+  EXPECT_TRUE(FreeIndex::node_index(120000) == 9);
 }
 
 // add should insert
@@ -1156,8 +1151,8 @@ void test_add() {
   setup(index, 1024);
   FreeHeader* alloc = free_block(512);
   index.add(alloc);
-  TEST_CHECK(index.nodes_[6].size() == 512);
-  TEST_CHECK(index.nodes_[6].ptr() == alloc);
+  EXPECT_TRUE(index.nodes_[6].size() == 512);
+  EXPECT_TRUE(index.nodes_[6].ptr() == alloc);
 };
 
 // add odd size should insert
@@ -1166,8 +1161,8 @@ void test_add_odd_size() {
   setup(index, 1024);
   FreeHeader* alloc = free_block(512 + 80);
   index.add(alloc);
-  TEST_CHECK(index.nodes_[6].size() == 512);
-  TEST_CHECK(index.nodes_[6].ptr() == alloc);
+  EXPECT_TRUE(index.nodes_[6].size() == 512);
+  EXPECT_TRUE(index.nodes_[6].ptr() == alloc);
 };
 
 // add two of size should insert ahead
@@ -1178,8 +1173,8 @@ void test_add_same_size() {
   FreeHeader* alloc2 = free_block(512 + 80);
   index.add(alloc);
   index.add(alloc2);
-  TEST_CHECK(index.nodes_[6].size() == 512);
-  TEST_CHECK(index.nodes_[6].ptr() == alloc2);
+  EXPECT_TRUE(index.nodes_[6].size() == 512);
+  EXPECT_TRUE(index.nodes_[6].ptr() == alloc2);
 };
 
 // add larger should ignore
@@ -1190,8 +1185,8 @@ void test_add_larger() {
   FreeHeader* alloc2 = free_block(512 + 180);
   index.add(alloc);
   index.add(alloc2);
-  TEST_CHECK(index.nodes_[6].size() == 512);
-  TEST_CHECK(index.nodes_[6].ptr() == alloc);
+  EXPECT_TRUE(index.nodes_[6].size() == 512);
+  EXPECT_TRUE(index.nodes_[6].ptr() == alloc);
 };
 
 // Add smaller should replace
@@ -1202,8 +1197,8 @@ void test_add_smaller() {
   FreeHeader* alloc2 = free_block(512 + 80);
   index.add(alloc);
   index.add(alloc2);
-  TEST_CHECK(index.nodes_[6].size() == 512);
-  TEST_CHECK(index.nodes_[6].ptr() == alloc2);
+  EXPECT_TRUE(index.nodes_[6].size() == 512);
+  EXPECT_TRUE(index.nodes_[6].ptr() == alloc2);
 };
 
 // Add and remove
@@ -1212,10 +1207,10 @@ void test_add_remove() {
   setup(index, 1024);
   FreeHeader* alloc = free_block(512);
   index.add(alloc);
-  TEST_CHECK(index.find(512, pool_ptr_) == alloc);
+  EXPECT_TRUE(index.find(512, pool_ptr_) == alloc);
   list_remove(alloc);
   index.remove(alloc, alloc->larger_free(pool_ptr_));
-  TEST_CHECK(index.find(512, pool_ptr_) == largest_free_);
+  EXPECT_TRUE(index.find(512, pool_ptr_) == largest_free_);
 }
 
 void test_removes() {
@@ -1227,13 +1222,13 @@ void test_removes() {
   index.add(alloc);
   index.add(alloc2);
   index.add(alloc3);
-  TEST_CHECK(index.find(512, pool_ptr_) == alloc3);
+  EXPECT_TRUE(index.find(512, pool_ptr_) == alloc3);
   list_remove(alloc3);
   index.remove(alloc3, alloc3->larger_free(pool_ptr_));
-  TEST_CHECK(index.find(512, pool_ptr_) == alloc);
+  EXPECT_TRUE(index.find(512, pool_ptr_) == alloc);
   list_remove(alloc);
   index.remove(alloc, alloc->larger_free(pool_ptr_));
-  TEST_CHECK(index.find(512, pool_ptr_) == alloc2);
+  EXPECT_TRUE(index.find(512, pool_ptr_) == alloc2);
 }
 
 // Find should find only alloc
@@ -1246,7 +1241,7 @@ void test_simple_find() {
   index.add(alloc);
   index.add(alloc2);
   index.add(alloc3);
-  TEST_CHECK(index.find(512, pool_ptr_) == alloc3);
+  EXPECT_TRUE(index.find(512, pool_ptr_) == alloc3);
 };
 
 // Find should find when lots of free nodes
@@ -1259,12 +1254,12 @@ void test_full_find() {
   index.add(alloc);
   index.add(alloc2);
   index.add(alloc3);
-  TEST_CHECK(index.nodes_[6].size() == 512);
-  TEST_CHECK(index.nodes_[6].ptr() == alloc3);
-  TEST_CHECK(index.find(512, pool_ptr_) == alloc3);
-  TEST_CHECK(index.find(513, pool_ptr_) == alloc);
-  TEST_CHECK(index.find(512 + 80, pool_ptr_) == alloc);
-  TEST_CHECK(index.find(512 + 81, pool_ptr_) == alloc2);
+  EXPECT_TRUE(index.nodes_[6].size() == 512);
+  EXPECT_TRUE(index.nodes_[6].ptr() == alloc3);
+  EXPECT_TRUE(index.find(512, pool_ptr_) == alloc3);
+  EXPECT_TRUE(index.find(513, pool_ptr_) == alloc);
+  EXPECT_TRUE(index.find(512 + 80, pool_ptr_) == alloc);
+  EXPECT_TRUE(index.find(512 + 81, pool_ptr_) == alloc2);
 }
 
 // Should find when smaller than smallest
@@ -1277,12 +1272,12 @@ void test_too_small_find() {
   index.add(alloc);
   index.add(alloc2);
   index.add(alloc3);
-  TEST_CHECK(index.nodes_[6].size() == 512);
-  TEST_CHECK(index.nodes_[6].ptr() == alloc3);
-  TEST_CHECK(index.find(500, pool_ptr_) == alloc3);
-  TEST_CHECK(index.find(480, pool_ptr_) == alloc3);
-  TEST_CHECK(index.find(256, pool_ptr_) == alloc3);
-  TEST_CHECK(index.find(8, pool_ptr_) == alloc3);
+  EXPECT_TRUE(index.nodes_[6].size() == 512);
+  EXPECT_TRUE(index.nodes_[6].ptr() == alloc3);
+  EXPECT_TRUE(index.find(500, pool_ptr_) == alloc3);
+  EXPECT_TRUE(index.find(480, pool_ptr_) == alloc3);
+  EXPECT_TRUE(index.find(256, pool_ptr_) == alloc3);
+  EXPECT_TRUE(index.find(8, pool_ptr_) == alloc3);
 }
 
 // Should give NULL when larger than largest
@@ -1295,11 +1290,11 @@ void test_too_large_find() {
   index.add(alloc);
   index.add(alloc2);
   index.add(alloc3);
-  TEST_CHECK(index.nodes_[6].size() == 512);
-  TEST_CHECK(index.nodes_[6].ptr() == alloc3);
-  TEST_CHECK(index.find(512+181, pool_ptr_) == largest_free_);
-  TEST_CHECK(index.find(largest_free_->size(), pool_ptr_) == largest_free_);
-  TEST_CHECK(index.find(largest_free_->size() + 1, pool_ptr_) == NULL);
+  EXPECT_TRUE(index.nodes_[6].size() == 512);
+  EXPECT_TRUE(index.nodes_[6].ptr() == alloc3);
+  EXPECT_TRUE(index.find(512+181, pool_ptr_) == largest_free_);
+  EXPECT_TRUE(index.find(largest_free_->size(), pool_ptr_) == largest_free_);
+  EXPECT_TRUE(index.find(largest_free_->size() + 1, pool_ptr_) == NULL);
 }
 
 private:
@@ -1395,7 +1390,7 @@ private:
 unsigned char
 FreeIndexTest::pool_ptr_[1024*1024];
 
-int ACE_TMAIN(int, ACE_TCHAR* [] )
+TEST(MemoryPool, main)
 {
   {
     MemoryPoolTest test;
@@ -1471,8 +1466,4 @@ int ACE_TMAIN(int, ACE_TCHAR* [] )
     test.test_too_small_find();
     test.test_too_large_find();
   }
-
-  printf("%d assertions failed, %d passed\n", failed, assertions - failed);
-
-  return failed;
 }

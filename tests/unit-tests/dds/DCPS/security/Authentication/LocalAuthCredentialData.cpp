@@ -42,7 +42,7 @@ struct LocalAuthCredentialDataTest : public ::testing::Test
 
 TEST_F(LocalAuthCredentialDataTest, LoadAccessPermissions_Success)
 {
-  std::string path("./security/permissions/permissions_test_participant_01_JoinDomain_signed.p7s");
+  std::string path("../security/permissions/permissions_test_participant_01_JoinDomain_signed.p7s");
   DDS::Security::SecurityException ex;
 
   DDS::OctetSeq expected_bytes;
@@ -71,7 +71,7 @@ TEST_F(LocalAuthCredentialDataTest, LoadIdentityCa_Success)
 {
   Property_t idca;
   idca.name = "dds.sec.auth.identity_ca";
-  idca.value = "file:./security/certs/identity/identity_ca_cert.pem";
+  idca.value = "file:../security/certs/identity/identity_ca_cert.pem";
   idca.propagate = false;
   add_property(idca);
 
@@ -84,7 +84,7 @@ TEST_F(LocalAuthCredentialDataTest, LoadPrivateKey_Success)
 {
   Property_t pkey;
   pkey.name = "dds.sec.auth.private_key";
-  pkey.value = "file:./security/certs/identity/test_participant_01_private_key.pem";
+  pkey.value = "file:../security/certs/identity/test_participant_01_private_key.pem";
   pkey.propagate = false;
   add_property(pkey);
 
@@ -103,18 +103,11 @@ TEST_F(LocalAuthCredentialDataTest, LoadIdentityCert_Success)
 {
   Property_t idcert;
   idcert.name = "dds.sec.auth.identity_certificate";
-  idcert.value = "file:./security/certs/identity/test_participant_01_cert.pem";
+  idcert.value = "file:../security/certs/identity/test_participant_01_cert.pem";
   idcert.propagate = false;
   add_property(idcert);
 
   DDS::Security::SecurityException ex;
   credential_data.load_credentials(properties, ex);
   ASSERT_TRUE(1); // TODO
-}
-
-int main(int argc, char** argv)
-{
-  openssl_init();
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }

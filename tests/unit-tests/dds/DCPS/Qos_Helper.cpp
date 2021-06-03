@@ -8,7 +8,8 @@
  */
 // ============================================================================
 
-#include "../../../DCPS/common/TestSupport.h"
+#include <gtest/gtest.h>
+
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/Definitions.h"
@@ -21,11 +22,8 @@ lease_greater_than (::DDS::LivelinessQosPolicy const & qos1,
   return qos1.lease_duration > qos2.lease_duration;
 }
 
-
-int ACE_TMAIN(int , ACE_TCHAR *[])
+TEST(Qos_Helper, main)
 {
-  int status = 0;
-
   // verify that if dw is infinite, that it is always greater
   // (except when dr is also infinite, covered next)
   {
@@ -38,22 +36,22 @@ int ACE_TMAIN(int , ACE_TCHAR *[])
     dr_liveliness.lease_duration.nanosec = ::DDS::DURATION_INFINITE_NSEC + 1;
 
     // verify that the datawriter liveliness is greater, since it is infinite
-    TEST_CHECK(lease_greater_than(dw_liveliness, dr_liveliness))
-    TEST_CHECK(!lease_greater_than(dr_liveliness, dw_liveliness))
+    EXPECT_TRUE(lease_greater_than(dw_liveliness, dr_liveliness));
+    EXPECT_TRUE(!lease_greater_than(dr_liveliness, dw_liveliness));
 
     dr_liveliness.lease_duration.sec = ::DDS::DURATION_INFINITE_NSEC;
     dr_liveliness.lease_duration.nanosec = ::DDS::DURATION_INFINITE_NSEC - 1;
 
     // verify that the datawriter liveliness is greater, since it is infinite
-    TEST_CHECK(lease_greater_than(dw_liveliness, dr_liveliness));
-    TEST_CHECK(!lease_greater_than(dr_liveliness, dw_liveliness));
+    EXPECT_TRUE(lease_greater_than(dw_liveliness, dr_liveliness));
+    EXPECT_TRUE(!lease_greater_than(dr_liveliness, dw_liveliness));
 
     dr_liveliness.lease_duration.sec = 0;
     dr_liveliness.lease_duration.nanosec = 0;
 
     // verify that the datawriter liveliness is greater, since it is infinite
-    TEST_CHECK(lease_greater_than(dw_liveliness, dr_liveliness));
-    TEST_CHECK(!lease_greater_than(dr_liveliness, dw_liveliness));
+    EXPECT_TRUE(lease_greater_than(dw_liveliness, dr_liveliness));
+    EXPECT_TRUE(!lease_greater_than(dr_liveliness, dw_liveliness));
   }
 
   // verify that if dr is infinite, that dw is never greater
@@ -67,29 +65,29 @@ int ACE_TMAIN(int , ACE_TCHAR *[])
     dr_liveliness.lease_duration.nanosec = ::DDS::DURATION_INFINITE_NSEC;
 
     // verify that the datawriter liveliness isn't greater, since they are equal
-    TEST_CHECK(!lease_greater_than(dw_liveliness, dr_liveliness));
-    TEST_CHECK(!lease_greater_than(dr_liveliness, dw_liveliness));
+    EXPECT_TRUE(!lease_greater_than(dw_liveliness, dr_liveliness));
+    EXPECT_TRUE(!lease_greater_than(dr_liveliness, dw_liveliness));
 
     dw_liveliness.lease_duration.sec = ::DDS::DURATION_INFINITE_SEC;
     dw_liveliness.lease_duration.nanosec = ::DDS::DURATION_INFINITE_NSEC + 1;
 
     // verify that the datawriter liveliness isn't greater, since dr is infinite
-    TEST_CHECK(!lease_greater_than(dw_liveliness, dr_liveliness));
-    TEST_CHECK(lease_greater_than(dr_liveliness, dw_liveliness));
+    EXPECT_TRUE(!lease_greater_than(dw_liveliness, dr_liveliness));
+    EXPECT_TRUE(lease_greater_than(dr_liveliness, dw_liveliness));
 
     dw_liveliness.lease_duration.sec = ::DDS::DURATION_INFINITE_SEC;
     dw_liveliness.lease_duration.nanosec = ::DDS::DURATION_INFINITE_NSEC - 1;
 
     // verify that the datawriter liveliness isn't greater, since dr is infinite
-    TEST_CHECK(!lease_greater_than(dw_liveliness, dr_liveliness));
-    TEST_CHECK(lease_greater_than(dr_liveliness, dw_liveliness));
+    EXPECT_TRUE(!lease_greater_than(dw_liveliness, dr_liveliness));
+    EXPECT_TRUE(lease_greater_than(dr_liveliness, dw_liveliness));
 
     dw_liveliness.lease_duration.sec = 0;
     dw_liveliness.lease_duration.nanosec = 0;
 
     // verify that the datawriter liveliness isn't greater, since dr is infinite
-    TEST_CHECK(!lease_greater_than(dw_liveliness, dr_liveliness));
-    TEST_CHECK(lease_greater_than(dr_liveliness, dw_liveliness));
+    EXPECT_TRUE(!lease_greater_than(dw_liveliness, dr_liveliness));
+    EXPECT_TRUE(lease_greater_than(dr_liveliness, dw_liveliness));
   }
 
   // neither is infinite
@@ -103,20 +101,20 @@ int ACE_TMAIN(int , ACE_TCHAR *[])
     dr_liveliness.lease_duration.nanosec = 0;
 
     // verify that the datawriter liveliness isn't greater
-    TEST_CHECK(!lease_greater_than(dw_liveliness, dr_liveliness));
-    TEST_CHECK(!lease_greater_than(dr_liveliness, dw_liveliness));
+    EXPECT_TRUE(!lease_greater_than(dw_liveliness, dr_liveliness));
+    EXPECT_TRUE(!lease_greater_than(dr_liveliness, dw_liveliness));
 
     dw_liveliness.lease_duration.sec += 1;
 
     // verify that the datawriter liveliness is greater
-    TEST_CHECK(lease_greater_than(dw_liveliness, dr_liveliness));
-    TEST_CHECK(!lease_greater_than(dr_liveliness, dw_liveliness));
+    EXPECT_TRUE(lease_greater_than(dw_liveliness, dr_liveliness));
+    EXPECT_TRUE(!lease_greater_than(dr_liveliness, dw_liveliness));
 
     dw_liveliness.lease_duration.sec -= 2;
 
     // verify that the datawriter liveliness isn't greater
-    TEST_CHECK(!lease_greater_than(dw_liveliness, dr_liveliness));
-    TEST_CHECK(lease_greater_than(dr_liveliness, dw_liveliness));
+    EXPECT_TRUE(!lease_greater_than(dw_liveliness, dr_liveliness));
+    EXPECT_TRUE(lease_greater_than(dr_liveliness, dw_liveliness));
 
     dw_liveliness.lease_duration.sec = 15;
     dw_liveliness.lease_duration.nanosec = 16;
@@ -125,15 +123,13 @@ int ACE_TMAIN(int , ACE_TCHAR *[])
     dr_liveliness.lease_duration.nanosec = 15;
 
     // verify that the datawriter liveliness is greater
-    TEST_CHECK(lease_greater_than(dw_liveliness, dr_liveliness));
-    TEST_CHECK(!lease_greater_than(dr_liveliness, dw_liveliness));
+    EXPECT_TRUE(lease_greater_than(dw_liveliness, dr_liveliness));
+    EXPECT_TRUE(!lease_greater_than(dr_liveliness, dw_liveliness));
 
     dw_liveliness.lease_duration.nanosec -= 2;
 
     // verify that the datawriter liveliness isn't greater
-    TEST_CHECK(!lease_greater_than(dw_liveliness, dr_liveliness));
-    TEST_CHECK(lease_greater_than(dr_liveliness, dw_liveliness));
+    EXPECT_TRUE(!lease_greater_than(dw_liveliness, dr_liveliness));
+    EXPECT_TRUE(lease_greater_than(dr_liveliness, dw_liveliness));
   }
-
-  return status;
 }

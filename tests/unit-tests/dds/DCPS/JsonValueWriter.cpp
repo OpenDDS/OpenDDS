@@ -378,9 +378,3 @@ TEST(JsonValueWriter, write_enum)
   jvw.write_enum("label", 5);
   EXPECT_STREQ(jvw.buffer().GetString(), "\"label\"");
 }
-
-int main(int argc, char* argv[])
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

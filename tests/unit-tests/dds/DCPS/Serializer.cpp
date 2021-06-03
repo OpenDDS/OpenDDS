@@ -340,10 +340,3 @@ TEST(serializer_test, Serializer__swap_bytes_endianness)
   ser.swap_bytes(true);
   EXPECT_EQ(ser.endianness(), ENDIAN_NONNATIVE);
 }
-
-int main(int argc, char* argv[])
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  DCPS_debug_level = 0;
-  return RUN_ALL_TESTS();
-}

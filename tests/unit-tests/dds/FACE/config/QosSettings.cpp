@@ -1,13 +1,9 @@
-#include "dds/FACE/config/QosSettings.h"
+#include <gtest/gtest.h>
 
-#include "ace/OS_main.h"
-#include "../../../test_check.h"
+#include "dds/FACE/config/QosSettings.h"
 
 #include <string.h>
 #include <iostream>
-
-unsigned int assertions = 0;
-unsigned int failed = 0;
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS { namespace FaceTSS { namespace config {
@@ -38,8 +34,8 @@ void test_set_publisher_single_partition() {
   DDS::PublisherQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(1 == qos.partition.name.length());
-  TEST_CHECK(!strcmp(qos.partition.name[0], "Foo123"));
+  EXPECT_TRUE(1 == qos.partition.name.length());
+  EXPECT_TRUE(!strcmp(qos.partition.name[0], "Foo123"));
 }
 
 void test_set_publisher_multiple_partitions() {
@@ -50,9 +46,9 @@ void test_set_publisher_multiple_partitions() {
   DDS::PublisherQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(2 == qos.partition.name.length());
-  TEST_CHECK(!strcmp(qos.partition.name[0], "Foo123"));
-  TEST_CHECK(!strcmp(qos.partition.name[1], "Bar234"));
+  EXPECT_TRUE(2 == qos.partition.name.length());
+  EXPECT_TRUE(!strcmp(qos.partition.name[0], "Foo123"));
+  EXPECT_TRUE(!strcmp(qos.partition.name[1], "Bar234"));
 }
 
 void test_set_publisher_presentation_access_scope_instance() {
@@ -62,7 +58,7 @@ void test_set_publisher_presentation_access_scope_instance() {
   DDS::PublisherQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::INSTANCE_PRESENTATION_QOS == qos.presentation.access_scope);
+  EXPECT_TRUE(DDS::INSTANCE_PRESENTATION_QOS == qos.presentation.access_scope);
 }
 
 void test_set_publisher_presentation_access_scope_topic() {
@@ -72,7 +68,7 @@ void test_set_publisher_presentation_access_scope_topic() {
   DDS::PublisherQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::TOPIC_PRESENTATION_QOS == qos.presentation.access_scope);
+  EXPECT_TRUE(DDS::TOPIC_PRESENTATION_QOS == qos.presentation.access_scope);
 }
 
 void test_set_publisher_presentation_access_scope_group() {
@@ -82,7 +78,7 @@ void test_set_publisher_presentation_access_scope_group() {
   DDS::PublisherQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::GROUP_PRESENTATION_QOS == qos.presentation.access_scope);
+  EXPECT_TRUE(DDS::GROUP_PRESENTATION_QOS == qos.presentation.access_scope);
 }
 
 void test_set_publisher_presentation_coherent_access_true() {
@@ -92,7 +88,7 @@ void test_set_publisher_presentation_coherent_access_true() {
   DDS::PublisherQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(qos.presentation.coherent_access);
+  EXPECT_TRUE(qos.presentation.coherent_access);
 }
 
 void test_set_publisher_presentation_coherent_access_false() {
@@ -102,7 +98,7 @@ void test_set_publisher_presentation_coherent_access_false() {
   DDS::PublisherQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(!qos.presentation.coherent_access);
+  EXPECT_TRUE(!qos.presentation.coherent_access);
 }
 
 void test_set_publisher_presentation_ordered_access_true() {
@@ -112,7 +108,7 @@ void test_set_publisher_presentation_ordered_access_true() {
   DDS::PublisherQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(qos.presentation.ordered_access);
+  EXPECT_TRUE(qos.presentation.ordered_access);
 }
 
 void test_set_publisher_presentation_ordered_access_false() {
@@ -122,7 +118,7 @@ void test_set_publisher_presentation_ordered_access_false() {
   DDS::PublisherQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(!qos.presentation.ordered_access);
+  EXPECT_TRUE(!qos.presentation.ordered_access);
 }
 
 /////// Subscriber tests
@@ -133,8 +129,8 @@ void test_set_subscriber_single_partition() {
   DDS::SubscriberQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(1 == qos.partition.name.length());
-  TEST_CHECK(!strcmp(qos.partition.name[0], "Foo123"));
+  EXPECT_TRUE(1 == qos.partition.name.length());
+  EXPECT_TRUE(!strcmp(qos.partition.name[0], "Foo123"));
 }
 
 void test_set_subscriber_multiple_partitions() {
@@ -146,9 +142,9 @@ void test_set_subscriber_multiple_partitions() {
   DDS::SubscriberQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(2 == qos.partition.name.length());
-  TEST_CHECK(!strcmp(qos.partition.name[0], "Foo123"));
-  TEST_CHECK(!strcmp(qos.partition.name[1], "Bar234"));
+  EXPECT_TRUE(2 == qos.partition.name.length());
+  EXPECT_TRUE(!strcmp(qos.partition.name[0], "Foo123"));
+  EXPECT_TRUE(!strcmp(qos.partition.name[1], "Bar234"));
 }
 
 void test_set_subscriber_presentation_access_scope_instance() {
@@ -158,7 +154,7 @@ void test_set_subscriber_presentation_access_scope_instance() {
   DDS::SubscriberQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::INSTANCE_PRESENTATION_QOS == qos.presentation.access_scope);
+  EXPECT_TRUE(DDS::INSTANCE_PRESENTATION_QOS == qos.presentation.access_scope);
 }
 
 void test_set_subscriber_presentation_access_scope_topic() {
@@ -168,7 +164,7 @@ void test_set_subscriber_presentation_access_scope_topic() {
   DDS::SubscriberQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::TOPIC_PRESENTATION_QOS == qos.presentation.access_scope);
+  EXPECT_TRUE(DDS::TOPIC_PRESENTATION_QOS == qos.presentation.access_scope);
 }
 
 void test_set_subscriber_presentation_access_scope_group() {
@@ -178,7 +174,7 @@ void test_set_subscriber_presentation_access_scope_group() {
   DDS::SubscriberQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::GROUP_PRESENTATION_QOS == qos.presentation.access_scope);
+  EXPECT_TRUE(DDS::GROUP_PRESENTATION_QOS == qos.presentation.access_scope);
 }
 
 void test_set_subscriber_presentation_coherent_access_true() {
@@ -188,7 +184,7 @@ void test_set_subscriber_presentation_coherent_access_true() {
   DDS::SubscriberQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(qos.presentation.coherent_access);
+  EXPECT_TRUE(qos.presentation.coherent_access);
 }
 
 void test_set_subscriber_presentation_coherent_access_false() {
@@ -198,7 +194,7 @@ void test_set_subscriber_presentation_coherent_access_false() {
   DDS::SubscriberQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(!qos.presentation.coherent_access);
+  EXPECT_TRUE(!qos.presentation.coherent_access);
 }
 
 void test_set_subscriber_presentation_ordered_access_true() {
@@ -208,7 +204,7 @@ void test_set_subscriber_presentation_ordered_access_true() {
   DDS::SubscriberQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(qos.presentation.ordered_access);
+  EXPECT_TRUE(qos.presentation.ordered_access);
 }
 
 void test_set_subscriber_presentation_ordered_access_false() {
@@ -218,7 +214,7 @@ void test_set_subscriber_presentation_ordered_access_false() {
   DDS::SubscriberQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(!qos.presentation.ordered_access);
+  EXPECT_TRUE(!qos.presentation.ordered_access);
 }
 
 /////// DataWriter tests
@@ -230,7 +226,7 @@ void test_set_datawriter_durability_volatile()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::VOLATILE_DURABILITY_QOS == qos.durability.kind);
+  EXPECT_TRUE(DDS::VOLATILE_DURABILITY_QOS == qos.durability.kind);
 }
 
 void test_set_datawriter_durability_transient_local()
@@ -241,7 +237,7 @@ void test_set_datawriter_durability_transient_local()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::TRANSIENT_LOCAL_DURABILITY_QOS == qos.durability.kind);
+  EXPECT_TRUE(DDS::TRANSIENT_LOCAL_DURABILITY_QOS == qos.durability.kind);
 }
 
 void test_set_datawriter_durability_transient()
@@ -252,7 +248,7 @@ void test_set_datawriter_durability_transient()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::TRANSIENT_DURABILITY_QOS == qos.durability.kind);
+  EXPECT_TRUE(DDS::TRANSIENT_DURABILITY_QOS == qos.durability.kind);
 }
 
 void test_set_datawriter_durability_persistent()
@@ -263,7 +259,7 @@ void test_set_datawriter_durability_persistent()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::PERSISTENT_DURABILITY_QOS == qos.durability.kind);
+  EXPECT_TRUE(DDS::PERSISTENT_DURABILITY_QOS == qos.durability.kind);
 }
 
 void test_set_datawriter_deadline_sec() {
@@ -274,8 +270,8 @@ void test_set_datawriter_deadline_sec() {
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(2 == qos.deadline.period.sec);
-  TEST_CHECK(0 == qos.deadline.period.nanosec);
+  EXPECT_TRUE(2 == qos.deadline.period.sec);
+  EXPECT_TRUE(0 == qos.deadline.period.nanosec);
 }
 
 void test_set_datawriter_deadline_nanosec() {
@@ -286,8 +282,8 @@ void test_set_datawriter_deadline_nanosec() {
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(0 == qos.deadline.period.sec);
-  TEST_CHECK(200 == qos.deadline.period.nanosec);
+  EXPECT_TRUE(0 == qos.deadline.period.sec);
+  EXPECT_TRUE(200 == qos.deadline.period.nanosec);
 }
 
 void test_set_datawriter_deadline_both() {
@@ -298,8 +294,8 @@ void test_set_datawriter_deadline_both() {
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(3 == qos.deadline.period.sec);
-  TEST_CHECK(500 == qos.deadline.period.nanosec);
+  EXPECT_TRUE(3 == qos.deadline.period.sec);
+  EXPECT_TRUE(500 == qos.deadline.period.nanosec);
 }
 
 void test_set_datawriter_latency_budget_sec() {
@@ -309,8 +305,8 @@ void test_set_datawriter_latency_budget_sec() {
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(2 == qos.latency_budget.duration.sec);
-  TEST_CHECK(0 == qos.latency_budget.duration.nanosec);
+  EXPECT_TRUE(2 == qos.latency_budget.duration.sec);
+  EXPECT_TRUE(0 == qos.latency_budget.duration.nanosec);
 }
 
 void test_set_datawriter_latency_budget_nanosec() {
@@ -320,8 +316,8 @@ void test_set_datawriter_latency_budget_nanosec() {
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(0 == qos.latency_budget.duration.sec);
-  TEST_CHECK(350 == qos.latency_budget.duration.nanosec);
+  EXPECT_TRUE(0 == qos.latency_budget.duration.sec);
+  EXPECT_TRUE(350 == qos.latency_budget.duration.nanosec);
 }
 
 void test_set_datawriter_latency_budget_both() {
@@ -332,8 +328,8 @@ void test_set_datawriter_latency_budget_both() {
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(1 == qos.latency_budget.duration.sec);
-  TEST_CHECK(150 == qos.latency_budget.duration.nanosec);
+  EXPECT_TRUE(1 == qos.latency_budget.duration.sec);
+  EXPECT_TRUE(150 == qos.latency_budget.duration.nanosec);
 }
 
 void
@@ -345,7 +341,7 @@ test_set_datawriter_liveliness_kind_automatic()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::AUTOMATIC_LIVELINESS_QOS  == qos.liveliness.kind);
+  EXPECT_TRUE(DDS::AUTOMATIC_LIVELINESS_QOS  == qos.liveliness.kind);
 }
 
 void
@@ -357,7 +353,7 @@ test_set_datawriter_liveliness_kind_manual_by_topic()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS  == qos.liveliness.kind);
+  EXPECT_TRUE(DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS  == qos.liveliness.kind);
 }
 
 void
@@ -369,7 +365,7 @@ test_set_datawriter_liveliness_kind_manual_by_participant()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS  == qos.liveliness.kind);
+  EXPECT_TRUE(DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS  == qos.liveliness.kind);
 }
 
 void
@@ -382,8 +378,8 @@ test_set_datawriter_liveliness_lease_duration_sec()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(2 == qos.liveliness.lease_duration.sec);
-  TEST_CHECK(0 == qos.liveliness.lease_duration.nanosec);
+  EXPECT_TRUE(2 == qos.liveliness.lease_duration.sec);
+  EXPECT_TRUE(0 == qos.liveliness.lease_duration.nanosec);
 }
 
 void
@@ -396,8 +392,8 @@ test_set_datawriter_liveliness_lease_duration_nanosec()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(0 == qos.liveliness.lease_duration.sec);
-  TEST_CHECK(333 == qos.liveliness.lease_duration.nanosec);
+  EXPECT_TRUE(0 == qos.liveliness.lease_duration.sec);
+  EXPECT_TRUE(333 == qos.liveliness.lease_duration.nanosec);
 }
 
 void
@@ -410,8 +406,8 @@ test_set_datawriter_liveliness_lease_duration_both()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(1 == qos.liveliness.lease_duration.sec);
-  TEST_CHECK(333 == qos.liveliness.lease_duration.nanosec);
+  EXPECT_TRUE(1 == qos.liveliness.lease_duration.sec);
+  EXPECT_TRUE(333 == qos.liveliness.lease_duration.nanosec);
 }
 
 void test_set_datawriter_reliability_kind_best_effort()
@@ -422,7 +418,7 @@ void test_set_datawriter_reliability_kind_best_effort()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::BEST_EFFORT_RELIABILITY_QOS == qos.reliability.kind);
+  EXPECT_TRUE(DDS::BEST_EFFORT_RELIABILITY_QOS == qos.reliability.kind);
 }
 
 void test_set_datawriter_reliability_kind_reliable()
@@ -433,7 +429,7 @@ void test_set_datawriter_reliability_kind_reliable()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::RELIABLE_RELIABILITY_QOS == qos.reliability.kind);
+  EXPECT_TRUE(DDS::RELIABLE_RELIABILITY_QOS == qos.reliability.kind);
 }
 
 void test_set_datawriter_reliability_max_blocking_time_sec()
@@ -445,8 +441,8 @@ void test_set_datawriter_reliability_max_blocking_time_sec()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(2 == qos.reliability.max_blocking_time.sec);
-  TEST_CHECK(0 == qos.reliability.max_blocking_time.nanosec);
+  EXPECT_TRUE(2 == qos.reliability.max_blocking_time.sec);
+  EXPECT_TRUE(0 == qos.reliability.max_blocking_time.nanosec);
 }
 
 void test_set_datawriter_reliability_max_blocking_time_nanosec()
@@ -457,8 +453,8 @@ void test_set_datawriter_reliability_max_blocking_time_nanosec()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(0 == qos.reliability.max_blocking_time.sec);
-  TEST_CHECK(175 == qos.reliability.max_blocking_time.nanosec);
+  EXPECT_TRUE(0 == qos.reliability.max_blocking_time.sec);
+  EXPECT_TRUE(175 == qos.reliability.max_blocking_time.nanosec);
 }
 
 void test_set_datawriter_reliability_max_blocking_time_both()
@@ -470,8 +466,8 @@ void test_set_datawriter_reliability_max_blocking_time_both()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(1 == qos.reliability.max_blocking_time.sec);
-  TEST_CHECK(175 == qos.reliability.max_blocking_time.nanosec);
+  EXPECT_TRUE(1 == qos.reliability.max_blocking_time.sec);
+  EXPECT_TRUE(175 == qos.reliability.max_blocking_time.nanosec);
 }
 
 void test_set_datawriter_destination_order_kind_by_source_timestamp()
@@ -482,7 +478,7 @@ void test_set_datawriter_destination_order_kind_by_source_timestamp()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS ==
+  EXPECT_TRUE(DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS ==
              qos.destination_order.kind);
 }
 
@@ -494,7 +490,7 @@ void test_set_datawriter_destination_order_kind_by_reception_timestamp()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS ==
+  EXPECT_TRUE(DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS ==
              qos.destination_order.kind);
 }
 
@@ -506,7 +502,7 @@ void test_set_datawriter_history_kind_keep_all()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::KEEP_ALL_HISTORY_QOS == qos.history.kind);
+  EXPECT_TRUE(DDS::KEEP_ALL_HISTORY_QOS == qos.history.kind);
 }
 
 void test_set_datawriter_history_kind_keep_last()
@@ -517,7 +513,7 @@ void test_set_datawriter_history_kind_keep_last()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::KEEP_LAST_HISTORY_QOS == qos.history.kind);
+  EXPECT_TRUE(DDS::KEEP_LAST_HISTORY_QOS == qos.history.kind);
 }
 
 void test_set_datawriter_history_depth()
@@ -528,7 +524,7 @@ void test_set_datawriter_history_depth()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(14 == qos.history.depth);
+  EXPECT_TRUE(14 == qos.history.depth);
 }
 
 void test_set_datawriter_resource_limits_max_samples()
@@ -539,7 +535,7 @@ void test_set_datawriter_resource_limits_max_samples()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(14 == qos.resource_limits.max_samples);
+  EXPECT_TRUE(14 == qos.resource_limits.max_samples);
 }
 
 void test_set_datawriter_resource_limits_max_instances()
@@ -550,7 +546,7 @@ void test_set_datawriter_resource_limits_max_instances()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(14 == qos.resource_limits.max_instances);
+  EXPECT_TRUE(14 == qos.resource_limits.max_instances);
 }
 
 void test_set_datawriter_resource_limits_max_samples_per_instance()
@@ -561,7 +557,7 @@ void test_set_datawriter_resource_limits_max_samples_per_instance()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(14 == qos.resource_limits.max_samples_per_instance);
+  EXPECT_TRUE(14 == qos.resource_limits.max_samples_per_instance);
 }
 
 void test_set_datawriter_transport_priority_value()
@@ -572,7 +568,7 @@ void test_set_datawriter_transport_priority_value()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(3 == qos.transport_priority.value);
+  EXPECT_TRUE(3 == qos.transport_priority.value);
 }
 
 void test_set_datawriter_lifespan_duration_sec()
@@ -583,7 +579,7 @@ void test_set_datawriter_lifespan_duration_sec()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(3 == qos.lifespan.duration.sec);
+  EXPECT_TRUE(3 == qos.lifespan.duration.sec);
 }
 
 void test_set_datawriter_lifespan_duration_nanosec()
@@ -594,7 +590,7 @@ void test_set_datawriter_lifespan_duration_nanosec()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(100 == qos.lifespan.duration.nanosec);
+  EXPECT_TRUE(100 == qos.lifespan.duration.nanosec);
 }
 
 void test_set_datawriter_lifespan_duration_both()
@@ -606,8 +602,8 @@ void test_set_datawriter_lifespan_duration_both()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(1 == qos.lifespan.duration.sec);
-  TEST_CHECK(100 == qos.lifespan.duration.nanosec);
+  EXPECT_TRUE(1 == qos.lifespan.duration.sec);
+  EXPECT_TRUE(100 == qos.lifespan.duration.nanosec);
 }
 
 void test_set_datawriter_ownership_kind_shared()
@@ -618,7 +614,7 @@ void test_set_datawriter_ownership_kind_shared()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::SHARED_OWNERSHIP_QOS == qos.ownership.kind);
+  EXPECT_TRUE(DDS::SHARED_OWNERSHIP_QOS == qos.ownership.kind);
 }
 
 void test_set_datawriter_ownership_kind_exclusive()
@@ -629,7 +625,7 @@ void test_set_datawriter_ownership_kind_exclusive()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::EXCLUSIVE_OWNERSHIP_QOS == qos.ownership.kind);
+  EXPECT_TRUE(DDS::EXCLUSIVE_OWNERSHIP_QOS == qos.ownership.kind);
 }
 
 void test_set_datawriter_ownership_strength_value()
@@ -640,7 +636,7 @@ void test_set_datawriter_ownership_strength_value()
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(32 == qos.ownership_strength.value);
+  EXPECT_TRUE(32 == qos.ownership_strength.value);
 }
 
 /////// DataReader tests
@@ -652,7 +648,7 @@ void test_set_datareader_durability_volatile()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::VOLATILE_DURABILITY_QOS == qos.durability.kind);
+  EXPECT_TRUE(DDS::VOLATILE_DURABILITY_QOS == qos.durability.kind);
 }
 
 void test_set_datareader_durability_transient_local()
@@ -663,7 +659,7 @@ void test_set_datareader_durability_transient_local()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::TRANSIENT_LOCAL_DURABILITY_QOS == qos.durability.kind);
+  EXPECT_TRUE(DDS::TRANSIENT_LOCAL_DURABILITY_QOS == qos.durability.kind);
 }
 
 void test_set_datareader_durability_transient()
@@ -674,7 +670,7 @@ void test_set_datareader_durability_transient()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::TRANSIENT_DURABILITY_QOS == qos.durability.kind);
+  EXPECT_TRUE(DDS::TRANSIENT_DURABILITY_QOS == qos.durability.kind);
 }
 
 void test_set_datareader_durability_persistent()
@@ -685,7 +681,7 @@ void test_set_datareader_durability_persistent()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::PERSISTENT_DURABILITY_QOS == qos.durability.kind);
+  EXPECT_TRUE(DDS::PERSISTENT_DURABILITY_QOS == qos.durability.kind);
 }
 
 void test_set_datareader_deadline_sec() {
@@ -696,8 +692,8 @@ void test_set_datareader_deadline_sec() {
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(2 == qos.deadline.period.sec);
-  TEST_CHECK(0 == qos.deadline.period.nanosec);
+  EXPECT_TRUE(2 == qos.deadline.period.sec);
+  EXPECT_TRUE(0 == qos.deadline.period.nanosec);
 }
 
 void test_set_datareader_deadline_nanosec() {
@@ -708,8 +704,8 @@ void test_set_datareader_deadline_nanosec() {
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(0 == qos.deadline.period.sec);
-  TEST_CHECK(200 == qos.deadline.period.nanosec);
+  EXPECT_TRUE(0 == qos.deadline.period.sec);
+  EXPECT_TRUE(200 == qos.deadline.period.nanosec);
 }
 
 void test_set_datareader_deadline_both() {
@@ -720,8 +716,8 @@ void test_set_datareader_deadline_both() {
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(3 == qos.deadline.period.sec);
-  TEST_CHECK(500 == qos.deadline.period.nanosec);
+  EXPECT_TRUE(3 == qos.deadline.period.sec);
+  EXPECT_TRUE(500 == qos.deadline.period.nanosec);
 }
 
 void
@@ -733,7 +729,7 @@ test_set_datareader_liveliness_kind_automatic()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::AUTOMATIC_LIVELINESS_QOS  == qos.liveliness.kind);
+  EXPECT_TRUE(DDS::AUTOMATIC_LIVELINESS_QOS  == qos.liveliness.kind);
 }
 
 void
@@ -745,7 +741,7 @@ test_set_datareader_liveliness_kind_manual_by_topic()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS  == qos.liveliness.kind);
+  EXPECT_TRUE(DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS  == qos.liveliness.kind);
 }
 
 void
@@ -757,7 +753,7 @@ test_set_datareader_liveliness_kind_manual_by_participant()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS  == qos.liveliness.kind);
+  EXPECT_TRUE(DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS  == qos.liveliness.kind);
 }
 
 void
@@ -770,8 +766,8 @@ test_set_datareader_liveliness_lease_duration_sec()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(2 == qos.liveliness.lease_duration.sec);
-  TEST_CHECK(0 == qos.liveliness.lease_duration.nanosec);
+  EXPECT_TRUE(2 == qos.liveliness.lease_duration.sec);
+  EXPECT_TRUE(0 == qos.liveliness.lease_duration.nanosec);
 }
 
 void
@@ -784,8 +780,8 @@ test_set_datareader_liveliness_lease_duration_nanosec()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(0 == qos.liveliness.lease_duration.sec);
-  TEST_CHECK(333 == qos.liveliness.lease_duration.nanosec);
+  EXPECT_TRUE(0 == qos.liveliness.lease_duration.sec);
+  EXPECT_TRUE(333 == qos.liveliness.lease_duration.nanosec);
 }
 
 void
@@ -798,8 +794,8 @@ test_set_datareader_liveliness_lease_duration_both()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(1 == qos.liveliness.lease_duration.sec);
-  TEST_CHECK(333 == qos.liveliness.lease_duration.nanosec);
+  EXPECT_TRUE(1 == qos.liveliness.lease_duration.sec);
+  EXPECT_TRUE(333 == qos.liveliness.lease_duration.nanosec);
 }
 
 void test_set_datareader_reliability_kind_best_effort()
@@ -810,7 +806,7 @@ void test_set_datareader_reliability_kind_best_effort()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::BEST_EFFORT_RELIABILITY_QOS == qos.reliability.kind);
+  EXPECT_TRUE(DDS::BEST_EFFORT_RELIABILITY_QOS == qos.reliability.kind);
 }
 
 void test_set_datareader_reliability_kind_reliable()
@@ -821,7 +817,7 @@ void test_set_datareader_reliability_kind_reliable()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::RELIABLE_RELIABILITY_QOS == qos.reliability.kind);
+  EXPECT_TRUE(DDS::RELIABLE_RELIABILITY_QOS == qos.reliability.kind);
 }
 
 void test_set_datareader_reliability_max_blocking_time_sec()
@@ -833,8 +829,8 @@ void test_set_datareader_reliability_max_blocking_time_sec()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(2 == qos.reliability.max_blocking_time.sec);
-  TEST_CHECK(0 == qos.reliability.max_blocking_time.nanosec);
+  EXPECT_TRUE(2 == qos.reliability.max_blocking_time.sec);
+  EXPECT_TRUE(0 == qos.reliability.max_blocking_time.nanosec);
 }
 
 void test_set_datareader_reliability_max_blocking_time_nanosec()
@@ -846,8 +842,8 @@ void test_set_datareader_reliability_max_blocking_time_nanosec()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(0 == qos.reliability.max_blocking_time.sec);
-  TEST_CHECK(175 == qos.reliability.max_blocking_time.nanosec);
+  EXPECT_TRUE(0 == qos.reliability.max_blocking_time.sec);
+  EXPECT_TRUE(175 == qos.reliability.max_blocking_time.nanosec);
 }
 
 void test_set_datareader_reliability_max_blocking_time_both()
@@ -859,8 +855,8 @@ void test_set_datareader_reliability_max_blocking_time_both()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(1 == qos.reliability.max_blocking_time.sec);
-  TEST_CHECK(175 == qos.reliability.max_blocking_time.nanosec);
+  EXPECT_TRUE(1 == qos.reliability.max_blocking_time.sec);
+  EXPECT_TRUE(175 == qos.reliability.max_blocking_time.nanosec);
 }
 
 void test_set_datareader_destination_order_kind_by_source_timestamp()
@@ -871,7 +867,7 @@ void test_set_datareader_destination_order_kind_by_source_timestamp()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS ==
+  EXPECT_TRUE(DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS ==
              qos.destination_order.kind);
 }
 
@@ -883,7 +879,7 @@ void test_set_datareader_destination_order_kind_by_reception_timestamp()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS ==
+  EXPECT_TRUE(DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS ==
              qos.destination_order.kind);
 }
 
@@ -895,7 +891,7 @@ void test_set_datareader_history_kind_keep_all()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::KEEP_ALL_HISTORY_QOS == qos.history.kind);
+  EXPECT_TRUE(DDS::KEEP_ALL_HISTORY_QOS == qos.history.kind);
 }
 
 void test_set_datareader_history_kind_keep_last()
@@ -906,7 +902,7 @@ void test_set_datareader_history_kind_keep_last()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::KEEP_LAST_HISTORY_QOS == qos.history.kind);
+  EXPECT_TRUE(DDS::KEEP_LAST_HISTORY_QOS == qos.history.kind);
 }
 
 void test_set_datareader_history_depth()
@@ -917,7 +913,7 @@ void test_set_datareader_history_depth()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(21 == qos.history.depth);
+  EXPECT_TRUE(21 == qos.history.depth);
 }
 
 void test_set_datareader_resource_limits_max_samples()
@@ -928,7 +924,7 @@ void test_set_datareader_resource_limits_max_samples()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(14 == qos.resource_limits.max_samples);
+  EXPECT_TRUE(14 == qos.resource_limits.max_samples);
 }
 
 void test_set_datareader_resource_limits_max_instances()
@@ -939,7 +935,7 @@ void test_set_datareader_resource_limits_max_instances()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(14 == qos.resource_limits.max_instances);
+  EXPECT_TRUE(14 == qos.resource_limits.max_instances);
 }
 
 void test_set_datareader_resource_limits_max_samples_per_instance()
@@ -950,7 +946,7 @@ void test_set_datareader_resource_limits_max_samples_per_instance()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(14 == qos.resource_limits.max_samples_per_instance);
+  EXPECT_TRUE(14 == qos.resource_limits.max_samples_per_instance);
 }
 
 void test_set_datareader_ownership_kind_shared()
@@ -961,7 +957,7 @@ void test_set_datareader_ownership_kind_shared()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::SHARED_OWNERSHIP_QOS == qos.ownership.kind);
+  EXPECT_TRUE(DDS::SHARED_OWNERSHIP_QOS == qos.ownership.kind);
 }
 
 void test_set_datareader_ownership_kind_exclusive()
@@ -972,7 +968,7 @@ void test_set_datareader_ownership_kind_exclusive()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(DDS::EXCLUSIVE_OWNERSHIP_QOS == qos.ownership.kind);
+  EXPECT_TRUE(DDS::EXCLUSIVE_OWNERSHIP_QOS == qos.ownership.kind);
 }
 
 void test_set_datareader_time_based_filter_minimum_separation_sec()
@@ -983,8 +979,8 @@ void test_set_datareader_time_based_filter_minimum_separation_sec()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(2 == qos.time_based_filter.minimum_separation.sec);
-  TEST_CHECK(0 == qos.time_based_filter.minimum_separation.nanosec);
+  EXPECT_TRUE(2 == qos.time_based_filter.minimum_separation.sec);
+  EXPECT_TRUE(0 == qos.time_based_filter.minimum_separation.nanosec);
 }
 
 void test_set_datareader_time_based_filter_minimum_separation_nanosec()
@@ -995,8 +991,8 @@ void test_set_datareader_time_based_filter_minimum_separation_nanosec()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(0 == qos.time_based_filter.minimum_separation.sec);
-  TEST_CHECK(170 == qos.time_based_filter.minimum_separation.nanosec);
+  EXPECT_TRUE(0 == qos.time_based_filter.minimum_separation.sec);
+  EXPECT_TRUE(170 == qos.time_based_filter.minimum_separation.nanosec);
 }
 
 void test_set_datareader_time_based_filter_minimum_separation_both()
@@ -1008,8 +1004,8 @@ void test_set_datareader_time_based_filter_minimum_separation_both()
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(1 == qos.time_based_filter.minimum_separation.sec);
-  TEST_CHECK(100 == qos.time_based_filter.minimum_separation.nanosec);
+  EXPECT_TRUE(1 == qos.time_based_filter.minimum_separation.sec);
+  EXPECT_TRUE(100 == qos.time_based_filter.minimum_separation.nanosec);
 }
 
 void test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_sec()
@@ -1021,8 +1017,8 @@ void test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(5 == qos.reader_data_lifecycle.autopurge_nowriter_samples_delay.sec);
-  TEST_CHECK(0 == qos.reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec);
+  EXPECT_TRUE(5 == qos.reader_data_lifecycle.autopurge_nowriter_samples_delay.sec);
+  EXPECT_TRUE(0 == qos.reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec);
 }
 
 void test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_nanosec()
@@ -1034,8 +1030,8 @@ void test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(0 == qos.reader_data_lifecycle.autopurge_nowriter_samples_delay.sec);
-  TEST_CHECK(5000 == qos.reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec);
+  EXPECT_TRUE(0 == qos.reader_data_lifecycle.autopurge_nowriter_samples_delay.sec);
+  EXPECT_TRUE(5000 == qos.reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec);
 }
 
 void test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_both()
@@ -1047,8 +1043,8 @@ void test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(1 == qos.reader_data_lifecycle.autopurge_nowriter_samples_delay.sec);
-  TEST_CHECK(1000 == qos.reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec);
+  EXPECT_TRUE(1 == qos.reader_data_lifecycle.autopurge_nowriter_samples_delay.sec);
+  EXPECT_TRUE(1000 == qos.reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec);
 }
 
 void test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_sec()
@@ -1060,8 +1056,8 @@ void test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(5 == qos.reader_data_lifecycle.autopurge_disposed_samples_delay.sec);
-  TEST_CHECK(0 == qos.reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec);
+  EXPECT_TRUE(5 == qos.reader_data_lifecycle.autopurge_disposed_samples_delay.sec);
+  EXPECT_TRUE(0 == qos.reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec);
 }
 
 void test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_nanosec()
@@ -1073,8 +1069,8 @@ void test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(0 == qos.reader_data_lifecycle.autopurge_disposed_samples_delay.sec);
-  TEST_CHECK(5000 == qos.reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec);
+  EXPECT_TRUE(0 == qos.reader_data_lifecycle.autopurge_disposed_samples_delay.sec);
+  EXPECT_TRUE(5000 == qos.reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec);
 }
 
 void test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_both()
@@ -1086,123 +1082,112 @@ void test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
-  TEST_CHECK(1 == qos.reader_data_lifecycle.autopurge_disposed_samples_delay.sec);
-  TEST_CHECK(1000 == qos.reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec);
+  EXPECT_TRUE(1 == qos.reader_data_lifecycle.autopurge_disposed_samples_delay.sec);
+  EXPECT_TRUE(1000 == qos.reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec);
 }
 
-int ACE_TMAIN(int, ACE_TCHAR*[])
+TEST(QosSettings, main)
 {
-  try
-  {
-    // Publisher QOS
-    test_set_publisher_single_partition();
-    test_set_publisher_multiple_partitions();
-    test_set_publisher_presentation_access_scope_instance();
-    test_set_publisher_presentation_access_scope_topic();
-    test_set_publisher_presentation_access_scope_group();
-    test_set_publisher_presentation_coherent_access_true();
-    test_set_publisher_presentation_coherent_access_false();
-    test_set_publisher_presentation_ordered_access_true();
-    test_set_publisher_presentation_ordered_access_false();
+  // Publisher QOS
+  test_set_publisher_single_partition();
+  test_set_publisher_multiple_partitions();
+  test_set_publisher_presentation_access_scope_instance();
+  test_set_publisher_presentation_access_scope_topic();
+  test_set_publisher_presentation_access_scope_group();
+  test_set_publisher_presentation_coherent_access_true();
+  test_set_publisher_presentation_coherent_access_false();
+  test_set_publisher_presentation_ordered_access_true();
+  test_set_publisher_presentation_ordered_access_false();
 
-    // Subscriber QOS
-    test_set_subscriber_single_partition();
-    test_set_subscriber_multiple_partitions();
-    test_set_subscriber_presentation_access_scope_instance();
-    test_set_subscriber_presentation_access_scope_topic();
-    test_set_subscriber_presentation_access_scope_group();
-    test_set_subscriber_presentation_coherent_access_true();
-    test_set_subscriber_presentation_coherent_access_false();
-    test_set_subscriber_presentation_ordered_access_true();
-    test_set_subscriber_presentation_ordered_access_false();
+  // Subscriber QOS
+  test_set_subscriber_single_partition();
+  test_set_subscriber_multiple_partitions();
+  test_set_subscriber_presentation_access_scope_instance();
+  test_set_subscriber_presentation_access_scope_topic();
+  test_set_subscriber_presentation_access_scope_group();
+  test_set_subscriber_presentation_coherent_access_true();
+  test_set_subscriber_presentation_coherent_access_false();
+  test_set_subscriber_presentation_ordered_access_true();
+  test_set_subscriber_presentation_ordered_access_false();
 
-    // DataWriter QOS
-    test_set_datawriter_durability_volatile();
-    test_set_datawriter_durability_transient_local();
+  // DataWriter QOS
+  test_set_datawriter_durability_volatile();
+  test_set_datawriter_durability_transient_local();
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-    test_set_datawriter_durability_transient();
-    test_set_datawriter_durability_persistent();
+  test_set_datawriter_durability_transient();
+  test_set_datawriter_durability_persistent();
 #endif // OPENDDS_NO_PERSISTENCE_PROFILE
-    test_set_datawriter_deadline_sec();
-    test_set_datawriter_deadline_nanosec();
-    test_set_datawriter_deadline_both();
-    test_set_datawriter_latency_budget_sec();
-    test_set_datawriter_latency_budget_nanosec();
-    test_set_datawriter_latency_budget_both();
-    test_set_datawriter_liveliness_kind_automatic();
-    test_set_datawriter_liveliness_kind_manual_by_topic();
-    test_set_datawriter_liveliness_kind_manual_by_participant();
-    test_set_datawriter_liveliness_lease_duration_sec();
-    test_set_datawriter_liveliness_lease_duration_nanosec();
-    test_set_datawriter_liveliness_lease_duration_both();
-    test_set_datawriter_reliability_kind_best_effort();
-    test_set_datawriter_reliability_kind_reliable();
-    test_set_datawriter_reliability_max_blocking_time_sec();
-    test_set_datawriter_reliability_max_blocking_time_nanosec();
-    test_set_datawriter_reliability_max_blocking_time_both();
-    test_set_datawriter_destination_order_kind_by_source_timestamp();
-    test_set_datawriter_destination_order_kind_by_reception_timestamp();
-    test_set_datawriter_history_kind_keep_all();
-    test_set_datawriter_history_kind_keep_last();
-    test_set_datawriter_history_depth();
-    test_set_datawriter_resource_limits_max_samples();
-    test_set_datawriter_resource_limits_max_instances();
-    test_set_datawriter_resource_limits_max_samples_per_instance();
-    test_set_datawriter_transport_priority_value();
-    test_set_datawriter_lifespan_duration_sec();
-    test_set_datawriter_lifespan_duration_nanosec();
-    test_set_datawriter_lifespan_duration_both();
-    test_set_datawriter_ownership_kind_shared();
-    test_set_datawriter_ownership_kind_exclusive();
-    test_set_datawriter_ownership_strength_value();
+  test_set_datawriter_deadline_sec();
+  test_set_datawriter_deadline_nanosec();
+  test_set_datawriter_deadline_both();
+  test_set_datawriter_latency_budget_sec();
+  test_set_datawriter_latency_budget_nanosec();
+  test_set_datawriter_latency_budget_both();
+  test_set_datawriter_liveliness_kind_automatic();
+  test_set_datawriter_liveliness_kind_manual_by_topic();
+  test_set_datawriter_liveliness_kind_manual_by_participant();
+  test_set_datawriter_liveliness_lease_duration_sec();
+  test_set_datawriter_liveliness_lease_duration_nanosec();
+  test_set_datawriter_liveliness_lease_duration_both();
+  test_set_datawriter_reliability_kind_best_effort();
+  test_set_datawriter_reliability_kind_reliable();
+  test_set_datawriter_reliability_max_blocking_time_sec();
+  test_set_datawriter_reliability_max_blocking_time_nanosec();
+  test_set_datawriter_reliability_max_blocking_time_both();
+  test_set_datawriter_destination_order_kind_by_source_timestamp();
+  test_set_datawriter_destination_order_kind_by_reception_timestamp();
+  test_set_datawriter_history_kind_keep_all();
+  test_set_datawriter_history_kind_keep_last();
+  test_set_datawriter_history_depth();
+  test_set_datawriter_resource_limits_max_samples();
+  test_set_datawriter_resource_limits_max_instances();
+  test_set_datawriter_resource_limits_max_samples_per_instance();
+  test_set_datawriter_transport_priority_value();
+  test_set_datawriter_lifespan_duration_sec();
+  test_set_datawriter_lifespan_duration_nanosec();
+  test_set_datawriter_lifespan_duration_both();
+  test_set_datawriter_ownership_kind_shared();
+  test_set_datawriter_ownership_kind_exclusive();
+  test_set_datawriter_ownership_strength_value();
 
-    // DataReader QOS
-    test_set_datareader_durability_volatile();
-    test_set_datareader_durability_transient_local();
+  // DataReader QOS
+  test_set_datareader_durability_volatile();
+  test_set_datareader_durability_transient_local();
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-    test_set_datareader_durability_transient();
-    test_set_datareader_durability_persistent();
+  test_set_datareader_durability_transient();
+  test_set_datareader_durability_persistent();
 #endif // OPENDDS_NO_PERSISTENCE_PROFILE
-    test_set_datareader_deadline_sec();
-    test_set_datareader_deadline_nanosec();
-    test_set_datareader_deadline_both();
-    test_set_datareader_liveliness_kind_automatic();
-    test_set_datareader_liveliness_kind_manual_by_topic();
-    test_set_datareader_liveliness_kind_manual_by_participant();
-    test_set_datareader_liveliness_lease_duration_sec();
-    test_set_datareader_liveliness_lease_duration_nanosec();
-    test_set_datareader_liveliness_lease_duration_both();
-    test_set_datareader_reliability_kind_best_effort();
-    test_set_datareader_reliability_kind_reliable();
-    test_set_datareader_reliability_max_blocking_time_sec();
-    test_set_datareader_reliability_max_blocking_time_nanosec();
-    test_set_datareader_reliability_max_blocking_time_both();
-    test_set_datareader_destination_order_kind_by_source_timestamp();
-    test_set_datareader_destination_order_kind_by_reception_timestamp();
-    test_set_datareader_history_kind_keep_all();
-    test_set_datareader_history_kind_keep_last();
-    test_set_datareader_history_depth();
-    test_set_datareader_resource_limits_max_samples();
-    test_set_datareader_resource_limits_max_instances();
-    test_set_datareader_resource_limits_max_samples_per_instance();
-    test_set_datareader_ownership_kind_shared();
-    test_set_datareader_ownership_kind_exclusive();
-    test_set_datareader_time_based_filter_minimum_separation_sec();
-    test_set_datareader_time_based_filter_minimum_separation_nanosec();
-    test_set_datareader_time_based_filter_minimum_separation_both();
-    test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_sec();
-    test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_nanosec();
-    test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_both();
-    test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_sec();
-    test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_nanosec();
-    test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_both();
-  }
-  catch (const CORBA::BAD_PARAM& ex)
-  {
-    ex._tao_print_exception("Exception caught in QosSettings.cpp:");
-    return 1;
-  }
-
-  printf("%d assertions failed, %d passed\n", failed, assertions - failed);
-  return failed;
+  test_set_datareader_deadline_sec();
+  test_set_datareader_deadline_nanosec();
+  test_set_datareader_deadline_both();
+  test_set_datareader_liveliness_kind_automatic();
+  test_set_datareader_liveliness_kind_manual_by_topic();
+  test_set_datareader_liveliness_kind_manual_by_participant();
+  test_set_datareader_liveliness_lease_duration_sec();
+  test_set_datareader_liveliness_lease_duration_nanosec();
+  test_set_datareader_liveliness_lease_duration_both();
+  test_set_datareader_reliability_kind_best_effort();
+  test_set_datareader_reliability_kind_reliable();
+  test_set_datareader_reliability_max_blocking_time_sec();
+  test_set_datareader_reliability_max_blocking_time_nanosec();
+  test_set_datareader_reliability_max_blocking_time_both();
+  test_set_datareader_destination_order_kind_by_source_timestamp();
+  test_set_datareader_destination_order_kind_by_reception_timestamp();
+  test_set_datareader_history_kind_keep_all();
+  test_set_datareader_history_kind_keep_last();
+  test_set_datareader_history_depth();
+  test_set_datareader_resource_limits_max_samples();
+  test_set_datareader_resource_limits_max_instances();
+  test_set_datareader_resource_limits_max_samples_per_instance();
+  test_set_datareader_ownership_kind_shared();
+  test_set_datareader_ownership_kind_exclusive();
+  test_set_datareader_time_based_filter_minimum_separation_sec();
+  test_set_datareader_time_based_filter_minimum_separation_nanosec();
+  test_set_datareader_time_based_filter_minimum_separation_both();
+  test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_sec();
+  test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_nanosec();
+  test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_both();
+  test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_sec();
+  test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_nanosec();
+  test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_both();
 }

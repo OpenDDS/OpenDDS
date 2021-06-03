@@ -13,9 +13,3 @@ TEST(guid_utils_test, guid_t_vs_octet_array16_size_test)
 {
   ASSERT_EQ(sizeof(OctetArray16), sizeof(GUID_t));
 }
-
-int main(int argc, char* argv[])
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

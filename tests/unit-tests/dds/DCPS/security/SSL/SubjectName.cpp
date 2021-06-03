@@ -116,10 +116,3 @@ TEST_F(SubjectNameTest, LDAP_DCE_CMP)
   ASSERT_NE(sn_dce_cmp_, sn_dce_cmp_backwards);
   */
 }
-
-int main(int argc, char* argv[])
-{
-  openssl_init();
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

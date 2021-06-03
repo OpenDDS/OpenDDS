@@ -35,24 +35,4 @@ tests/DCPS/Compiler/TryConstruct/C++11/run_test.pl: !DCPS_MIN CXX11 !OPENDDS_SAF
 tests/DCPS/Compiler/xcdr/run_test.pl: !DCPS_MIN STATIC_COMPILER
 tests/DCPS/Compiler/XtypesExtensibility/run_test.pl: !DCPS_MIN STATIC_COMPILER
 
-tests/run_test.pl unit-tests/dds/DCPS/transport/framework/UnitTests_TransportReassembly: !DCPS_MIN
-tests/run_test.pl unit-tests/dds/DCPS/UnitTests_Qos_Helper: !DCPS_MIN
-tests/run_test.pl unit-tests/dds/DCPS/UnitTests_JsonValueWriter: !DCPS_MIN
-tests/run_test.pl unit-tests/dds/DCPS/UnitTests_SequenceNumber: !DCPS_MIN
-tests/run_test.pl unit-tests/dds/DCPS/RTPS/UnitTests_ParameterListConverter: !DCPS_MIN
-tests/run_test.pl unit-tests/dds/DCPS/RTPS/UnitTests_BaseMessageUtils: !DCPS_MIN
-tests/run_test.pl unit-tests/dds/DCPS/UnitTests_GuidGenerator: !DCPS_MIN
-tests/run_test.pl unit-tests/dds/DCPS/UnitTests_DataSampleHeader: !DCPS_MIN
-tests/run_test.pl unit-tests/dds/DCPS/UnitTests_NetworkConfigModifier: !DCPS_MIN
-tests/run_test.pl unit-tests/dds/DCPS/UnitTests_Serializer: !DCPS_MIN
-tests/run_test.pl unit-tests/dds/DCPS/XTypes/UnitTests_TypeAssignability: !DCPS_MIN
-tests/run_test.pl unit-tests/dds/DCPS/UnitTests_JsonValueReader: !DCPS_MIN
-tests/run_test.pl unit-tests/dds/DCPS/UnitTests_DisjointSequence: !DCPS_MIN
-tests/run_test.pl unit-tests/dds/DCPS/UnitTests_Time_Helper: !DCPS_MIN
-tests/run_test.pl unit-tests/dds/DCPS/UnitTests_GuidUtils: !DCPS_MIN
-tests/run_test.pl unit-tests/dds/DCPS/UnitTests_DomainParticipantImpl: !DCPS_MIN
-
-tests/run_test.pl unit-tests/dds/FACE/config/UnitTests_QosSettings: !DCPS_MIN
-tests/run_test.pl unit-tests/dds/DCPS/UnitTests_MemoryPool: !DCPS_MIN
-tests/run_test.pl unit-tests/dds/DCPS/UnitTests_SafetyProfilePool: !DCPS_MIN
-tests/run_test.pl unit-tests/FACE/UnitTests_Sequence: !DCPS_MIN
+tests/unit-tests/run_test.pl: !DCPS_MIN
