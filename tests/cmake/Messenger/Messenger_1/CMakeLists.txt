@@ -63,21 +63,8 @@ foreach(t ${all_targets})
   endif()
 endforeach()
 
-# Copy configs/scripts into build-output directory
-file(GLOB ini "${src}/*.ini")
-file(GLOB pl "${src}/*.pl")
-file(GLOB xml "${src}/*.xml")
-file(GLOB p7s "${src}/*.p7s")
-
-add_custom_target("${target_prefix}Copy_ini_and_scripts"
-  ALL
-  COMMAND_EXPAND_LISTS
-  VERBATIM
-  COMMENT "Copying configs/scripts into build-output directory"
-  COMMAND ${CMAKE_COMMAND} -E copy ${ini} ${pl} ${xml} ${p7s} ${dst}/$<CONFIG>
-)
-add_dependencies("${target_prefix}Copy_ini_and_scripts" ${all_targets})
-
+# Testing
+configure_file("${src}/run_test.pl" . COPYONLY)
 add_test(NAME "${target_prefix}test"
-  COMMAND perl run_test.pl -ExeSubDir $<CONFIG>
+  COMMAND perl run_test.pl $<$<BOOL:$<CONFIG>>:-ExeSubDir> $<CONFIG>
 )

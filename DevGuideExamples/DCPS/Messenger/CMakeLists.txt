@@ -38,8 +38,8 @@ target_link_libraries(subscriber ${opendds_libs})
 configure_file(run_test.pl . COPYONLY)
 configure_file(rtps.ini . COPYONLY)
 add_test(NAME opendds_devguide_messenger_test_inforepo
-  COMMAND perl run_test.pl -ExeSubDir $<CONFIG>
+  COMMAND perl run_test.pl $<$<BOOL:$<CONFIG>>:-ExeSubDir> $<CONFIG>
 )
 add_test(NAME opendds_devguide_messenger_test_rtps
-  COMMAND perl run_test.pl -ExeSubDir $<CONFIG> --rtps
+  COMMAND perl run_test.pl $<$<BOOL:$<CONFIG>>:-ExeSubDir> $<CONFIG> --rtps
 )
