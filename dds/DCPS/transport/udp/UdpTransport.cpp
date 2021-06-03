@@ -77,6 +77,12 @@ UdpTransport::connect_datalink(const RemoteTransport& remote,
   const bool active = true;
   const PriorityKey key = blob_to_key(remote.blob_, attribs.priority_, this->config().local_address(), active);
 
+  VDBG_LVL((LM_DEBUG, "(%P|%t) UdpTransport::connect_datalink PriorityKey "
+            "prio=%d, addr=%C:%hu, is_loopback=%d, is_active=%d\n",
+            key.priority(), key.address().get_host_addr(),
+            key.address().get_port_number(), key.is_loopback(),
+            key.is_active()), 2);
+
   GuardType guard(client_links_lock_);
   if (this->is_shut_down()) {
     return AcceptConnectResult(AcceptConnectResult::ACR_FAILED);
@@ -110,6 +116,13 @@ UdpTransport::accept_datalink(const RemoteTransport& remote,
   //GuardType guard(connections_lock_);
   const PriorityKey key = blob_to_key(remote.blob_,
                                       attribs.priority_, config().local_address(), false /* !active */);
+
+  VDBG_LVL((LM_DEBUG, "(%P|%t) UdpTransport::accept_datalink PriorityKey "
+            "prio=%d, addr=%C:%hu, is_loopback=%d, is_active=%d\n",
+            key.priority(), key.address().get_host_addr(),
+            key.address().get_port_number(), key.is_loopback(),
+            key.is_active()), 2);
+
   if (server_link_keys_.count(key)) {
     VDBG((LM_DEBUG, "(%P|%t) UdpTransport::accept_datalink found\n"));
     return AcceptConnectResult(UdpDataLink_rch(server_link_));
@@ -207,9 +220,7 @@ UdpTransport::get_connection_addr(const TransportBLOB& data) const
 
   ACE_InputCDR cdr(buffer, len);
   if (cdr >> network_address) {
-    ACE_INET_Addr local_addresses;
-    network_address.to_addr(local_addresses);
-    local_address = choose_single_coherent_address(local_addresses);
+    network_address.to_addr(local_address);
   }
 
   return local_address;

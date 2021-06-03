@@ -289,7 +289,7 @@ OpenDDS::DCPS::TcpDataLink::send_graceful_disconnect_message()
   // not receive the message when the message has no sample data and is sent
   // in a single packet.
 
-  // To work arround this problem, I have to add bogus data to chain with the
+  // To work around this problem, I have to add bogus data to chain with the
   // DataSampleHeader to make the receiving work.
 
   Message_Block_Ptr data(

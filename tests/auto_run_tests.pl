@@ -33,7 +33,7 @@ use File::Temp qw(tempfile);
 
 sub cd {
     my $dir = shift;
-    chdir($dir) or die "auto_run_tests: Error: Cannot chdir to $dir: $!";
+    chdir($dir) or die "auto_run_tests.pl: Error: Cannot chdir to $dir: $!";
 }
 
 sub run_command {
@@ -79,7 +79,7 @@ sub run_command {
     if ($failed) {
         $exit_status = $system_status >> 8;
         my $signal = $system_status & 127;
-        die("auto_run_tests: \"$what\" was interrupted") if ($signal == SIGINT);
+        die("auto_run_tests.pl: \"$what\" was interrupted") if ($signal == SIGINT);
         my $coredump = $system_status & 128;
         my $error_message;
         if (!$ran) {
@@ -92,7 +92,7 @@ sub run_command {
         else {
             $error_message = sprintf("returned with status %d", $exit_status);
         }
-        print STDERR "auto_run_tests: Error: \"$what\" $error_message\n";
+        print STDERR "auto_run_tests.pl: Error: \"$what\" $error_message\n";
     }
 
     if (defined($capture_stdout) && $ran) {
@@ -346,7 +346,7 @@ foreach my $test_lst (@file_list) {
         if ($program =~ /(.*?) (.*)/) {
             $progNoArgs = $1;
             if (! -e $progNoArgs) {
-                print STDERR "auto_run_tests: Error: $directory/$1 does not exist\n";
+                print STDERR "auto_run_tests.pl: Error: $directory/$1 does not exist\n";
                 next;
             }
         }
@@ -354,7 +354,7 @@ foreach my $test_lst (@file_list) {
             my $cmd = $program;
             $cmd = $subdir.$cmd if ($program !~ /\.pl$/);
             if ((! -e $cmd) && (! -e "$cmd.exe")) {
-                print STDERR "auto_run_tests: Error: $directory/$cmd does not exist\n";
+                print STDERR "auto_run_tests.pl: Error: $directory/$cmd does not exist\n";
                 next;
             }
         }

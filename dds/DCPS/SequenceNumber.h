@@ -125,7 +125,7 @@ public:
     return low_;
   }
 
-  // SEQUENCENUMBER_UNKOWN is defined by the RTPS spec.
+  // SEQUENCENUMBER_UNKNOWN is defined by the RTPS spec.
   static SequenceNumber SEQUENCENUMBER_UNKNOWN() {
     return SequenceNumber(-1, 0);
   }
