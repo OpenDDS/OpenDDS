@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 
-# Convert CTest/CDash XML results to fake auto_run_tests output.
-# Info about the XML file format: https://public.kitware.com/Wiki/CDash:XML
+'''\
+Convert CTest/CDash XML results to fake auto_run_tests output. See the
+following URL for information about the XML file format:
+https://public.kitware.com/Wiki/CDash:XML
+
+Requires that ctest was run with "--no-compress-output -T Test".
+'''
 
 import sys
 import os
@@ -32,6 +37,15 @@ def relative_to(a, b):
     return Path(os.path.relpath(a.resolve(), start=b.resolve()))
 
 
+def fix_ctest_path(abs_source_path, path):
+    '''Work around ctest puting C_ instead of C: in the path
+    '''
+    drive = abs_source_path.drive
+    if drive and path.upper().startswith(drive[0].upper() + '_'):
+        path = path[2:]
+    return path
+
+
 def generate_test_results(build_path, source_path, debug=False):
     testing_path = build_path.resolve() / 'Testing'
     if debug:
@@ -57,9 +71,11 @@ def generate_test_results(build_path, source_path, debug=False):
             sys.exit('ERROR: Test output in XML file is not usable, ' +
                 'pass --no-compress-output to ctest')
 
+        abs_source_path = source_path.resolve()
+
         results = dict(
             cmake_name=test_node.findtext('./Name'),
-            path=test_node.findtext('./Path'),
+            path=fix_ctest_path(abs_source_path, test_node.findtext('./Path')),
             passed=test_node.get('Status') == "passed",
             exec_time=get_named_measurement(test_node, 'Execution Time'),
             exit_value=get_named_measurement(test_node, 'Exit Value'),
@@ -71,7 +87,7 @@ def generate_test_results(build_path, source_path, debug=False):
         # file from source_path.
         abs_test_path = Path(results['path'])
         if not abs_test_path.is_absolute():
-            abs_test_path = source_path.resolve() / abs_test_path
+            abs_test_path = abs_source_path / abs_test_path
         if abs_test_path.name == 'build':
             abs_test_path = abs_test_path.parent
         cmakelists = abs_test_path / 'CMakeLists.txt'
@@ -96,8 +112,7 @@ def generate_test_results(build_path, source_path, debug=False):
             print(template.format(**results))
 
 if __name__ == "__main__":
-    arg_parser = ArgumentParser(
-        description='Convert CTest/CDash XML results to fake auto_run_tests output.')
+    arg_parser = ArgumentParser(description=__doc__)
     arg_parser.add_argument('source_path', metavar='SOURCE_PATH', type=Path)
     arg_parser.add_argument('build_path', metavar='BUILD_PATH', type=Path)
     arg_parser.add_argument('--debug', action='store_true', default=False)

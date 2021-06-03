@@ -10,6 +10,18 @@ use warnings;
 
 use Env qw(ACE_ROOT DDS_ROOT PATH);
 
+my $exe_sub_dir;
+BEGIN {
+    for (my $i = 0; $i <= $#ARGV; ++$i) {
+        if ($ARGV[$i] eq '-ExeSubDir') {
+            if (defined($ARGV[$i + 1])) {
+                $exe_sub_dir = $ARGV[++$i];
+                print("ExeSubDir: $ARGV[$i]\n");
+            } # else let Process.pm deal with that
+        }
+    }
+}
+
 use lib "$ACE_ROOT/bin";
 use lib "$DDS_ROOT/bin";
 use PerlDDS::Run_Test;
@@ -18,8 +30,6 @@ use Getopt::Long;
 use Cwd;
 use POSIX qw(SIGINT);
 use File::Temp qw(tempfile);
-
-my $dry_run = 0;
 
 sub cd {
     my $dir = shift;
@@ -31,14 +41,18 @@ sub run_command {
     my $command = shift;
     my %args = (
         capture_stdout => undef,
+        verbose => undef,
+        dry_run => undef,
         @_,
     );
     my $capture_stdout = $args{capture_stdout};
+    my $verbose = $args{verbose} // $args{dry_run};
+    my $dry_run = $args{dry_run};
 
-    if ($dry_run) {
+    if ($verbose) {
         my $cwd = getcwd();
-        print "In \"$cwd\" would run:\n    $command\n";
-        return (0, 0);
+        print "In \"$cwd\" ", $dry_run ? "would run" : "running", ":\n    $command\n";
+        return (0, 0) if ($dry_run);
     }
 
     my $saved_stdout;
@@ -202,14 +216,17 @@ sub print_help {
     exit(0);
 }
 
+my $cmake_tests = "$DDS_ROOT/tests/cmake";
+
 # Parse Options
 my $help = 0;
 my $sandbox = '';
+my $dry_run = 0;
 my $show_configs = 0;
 my $list_configs = 0;
 my $list_tests = 0;
 my $cmake = 0;
-my $cmake_build_dir = "$DDS_ROOT/tests/cmake/build";
+my $cmake_build_dir = "$cmake_tests/build";
 my $ctest = 'ctest';
 my $ctest_args = '';
 my $python = 'python3';
@@ -359,7 +376,7 @@ foreach my $test_lst (@file_list) {
             $cmd = $subdir.$cmd if ($progNoArgs !~ /\.pl$/);
         }
 
-        run_test($test, $cmd);
+        run_test($test, $cmd, dry_run => $dry_run);
     }
 }
 
@@ -367,16 +384,34 @@ if ($cmake) {
     cd($cmake_build_dir);
 
     my $fake_name = "Run CMake Tests";
-    mark_test_start($fake_name);
-    run_test($fake_name, "$ctest --no-compress-output -T Test $ctest_args");
+    mark_test_start($fake_name) unless ($list_tests);
+    my @cmd = ("$ctest");
+    if ($dry_run || $list_tests) {
+        push(@cmd, "--show-only");
+    } else {
+        push(@cmd, "--no-compress-output -T Test");
+    }
+    if ($ctest_args) {
+        push(@cmd, $ctest_args);
+    }
+    if ($ctest_args !~ /--build-config/ && defined($exe_sub_dir)) {
+        push(@cmd, "--build-config $exe_sub_dir");
+    }
+    if ($list_tests) {
+        run_command($fake_name, join(' ', @cmd));
+    } else {
+        run_test($fake_name,  join(' ', @cmd), verbose => 1);
 
-    $fake_name = "Process CMake Test Results";
-    mark_test_start($fake_name);
-    my $tests = "$DDS_ROOT/tests/cmake";
-    my $output = "";
-    run_test($fake_name, "$python $tests/ctest-to-auto-run-tests.py $tests .",
-        capture_stdout => \$output);
-    print($output);
+        $fake_name = "Process CMake Test Results";
+        mark_test_start($fake_name);
+        my $tests = "$DDS_ROOT/tests/cmake";
+        my $output = "";
+        run_test($fake_name, "$python $tests/ctest-to-auto-run-tests.py $tests .",
+            dry_run => $dry_run,
+            verbose => 1,
+            capture_stdout => \$output);
+        print($output);
+    }
 }
 
 # vim: expandtab:ts=4:sw=4
