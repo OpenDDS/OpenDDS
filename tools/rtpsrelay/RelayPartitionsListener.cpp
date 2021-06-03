@@ -2,6 +2,8 @@
 
 #include "lib/RelayTypeSupportImpl.h"
 
+#include <dds/DCPS/DCPS_Utils.h>
+
 namespace RtpsRelay {
 
 RelayPartitionsListener::RelayPartitionsListener(RelayPartitionTable& relay_partition_table)
@@ -12,7 +14,7 @@ void RelayPartitionsListener::on_data_available(DDS::DataReader_ptr reader)
 {
   RelayPartitionsDataReader_var dr = RelayPartitionsDataReader::_narrow(reader);
   if (!dr) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ReaderListener::on_data_available failed to narrow RtpsRelay::RelayPartitionsDataReader\n")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RelayPartitionsListener::on_data_available failed to narrow RtpsRelay::RelayPartitionsDataReader\n")));
     return;
   }
 
@@ -25,7 +27,7 @@ void RelayPartitionsListener::on_data_available(DDS::DataReader_ptr reader)
                                    DDS::ANY_VIEW_STATE,
                                    DDS::ANY_INSTANCE_STATE);
   if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ReaderListener::on_data_available failed to read\n")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RelayPartitionsListener::on_data_available failed to take %C\n"), OpenDDS::DCPS::retcode_to_string(ret)));
     return;
   }
 
