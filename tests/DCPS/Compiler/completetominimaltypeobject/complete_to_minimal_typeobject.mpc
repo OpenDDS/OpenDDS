@@ -1,0 +1,8 @@
+project(completetominimaltypeobject) : dcps_test, googletest {
+  TypeSupport_Files {
+    CompleteToMinimalTypeObject.idl
+  }
+  Source_Files {
+    CompleteToMinimalTypeObject.cpp
+  }
+}

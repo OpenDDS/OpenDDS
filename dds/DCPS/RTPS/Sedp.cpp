@@ -4125,7 +4125,6 @@ bool Sedp::TypeLookupRequestReader::process_get_types_request(
   sedp_.type_lookup_service_->get_type_objects(type_lookup_request.data.getTypes.type_ids,
     type_lookup_reply._cxx_return.getType.result.types);
   type_lookup_reply._cxx_return.getType.result.complete_to_minimal.length(0);
-  //TODO CLAYTON Populate complete to minimal for populating map
   if (type_lookup_reply._cxx_return.getType.result.types.length() > 0) {
     type_lookup_reply._cxx_return.getType.return_code = DDS::RETCODE_OK;
     type_lookup_reply._cxx_return.kind = XTypes::TypeLookup_getTypes_HashId;
@@ -4273,8 +4272,6 @@ bool Sedp::TypeLookupReplyReader::process_get_types_reply(const XTypes::TypeLook
   }
 
   sedp_.type_lookup_service_->add_type_objects_to_cache(reply._cxx_return.getType.result.types);
-  // TODO: CLAYTON
-  //sedp_.type_lookup_service_->add_type_identifiers_to_cache(reply._cxx_return.getType.result.complete_to_minimal);
   return true;
 }
 
