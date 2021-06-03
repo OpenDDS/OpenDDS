@@ -41,5 +41,5 @@ add_test(NAME opendds_devguide_messenger_test_inforepo
   COMMAND perl run_test.pl -ExeSubDir $<CONFIG>
 )
 add_test(NAME opendds_devguide_messenger_test_rtps
-  COMMAND perl run_test.pl -ExeSubDir $<CONFIG> --rtps)
+  COMMAND perl run_test.pl -ExeSubDir $<CONFIG> --rtps
 )
