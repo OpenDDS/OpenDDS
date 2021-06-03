@@ -389,6 +389,7 @@ OpenDDS::XTypes::TypeLookupService_rch tls;
 
 TEST(CompleteToMinimalTypeObject, Struct)
 {
+  using namespace OpenDDS::XTypes;
   my_mod::unTypeSupportImpl stru_tsi;
   stru_tsi.register_type(dp.in (), "stru");
   ::DDS::Topic_var my_topic =
@@ -419,6 +420,7 @@ TEST(CompleteToMinimalTypeObject, Struct)
 
 TEST(CompleteToMinimalTypeObject, Union)
 {
+  using namespace OpenDDS::XTypes;
   my_mod::unTypeSupportImpl uts;
   uts.register_type(dp.in (), "un");
   ::DDS::Topic_var my_topic =
@@ -449,6 +451,7 @@ TEST(CompleteToMinimalTypeObject, Union)
 
 TEST(CompleteToMinimalTypeObject, Sequence)
 {
+  using namespace OpenDDS::XTypes;
   my_mod::unTypeSupportImpl stru_tsi;
   stru_tsi.register_type(dp.in (), "circular_struct_seq2");
   ::DDS::Topic_var my_topic =
@@ -479,6 +482,7 @@ TEST(CompleteToMinimalTypeObject, Sequence)
 
 TEST(CompleteToMinimalTypeObject, Array)
 {
+  using namespace OpenDDS::XTypes;
   my_mod::unTypeSupportImpl un_tsi;
   un_tsi.register_type(dp.in (), "circular_struct_arr");
   ::DDS::Topic_var my_topic =
@@ -509,6 +513,7 @@ TEST(CompleteToMinimalTypeObject, Array)
 
 TEST(CompleteToMinimalTypeObject, AliasSequence)
 {
+  using namespace OpenDDS::XTypes;
   my_mod::unTypeSupportImpl un_tsi;
   un_tsi.register_type(dp.in (), "lseq");
   ::DDS::Topic_var my_topic =
@@ -539,6 +544,7 @@ TEST(CompleteToMinimalTypeObject, AliasSequence)
 
 TEST(CompleteToMinimalTypeObject, AliasArray)
 {
+  using namespace OpenDDS::XTypes;
   my_mod::unTypeSupportImpl un_tsi;
   un_tsi.register_type(dp.in (), "larr");
   ::DDS::Topic_var my_topic =
@@ -569,6 +575,7 @@ TEST(CompleteToMinimalTypeObject, AliasArray)
 
 TEST(CompleteToMinimalTypeObject, Enumerated)
 {
+  using namespace OpenDDS::XTypes;
   my_mod::unTypeSupportImpl un_tsi;
   un_tsi.register_type(dp.in (), "EnumType");
   ::DDS::Topic_var my_topic =
