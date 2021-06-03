@@ -71,6 +71,12 @@ def generate_test_results(build_path, source_path, debug=False):
             sys.exit('ERROR: Test output in XML file is not usable, ' +
                 'pass --no-compress-output to ctest')
 
+        status = get_named_measurement(test_node, 'Completion Status')
+        if status == "Missing Configuration":
+            sys.exit('ERROR: Build has a configuration and ctest needs to know it. ' +
+                'Pass --cmake-build-cfg with the config if using auto_run_tests.pl. ' +
+                'Pass --build-config with the config if using ctest directly')
+
         abs_source_path = source_path.resolve()
 
         results = dict(
