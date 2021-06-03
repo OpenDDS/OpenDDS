@@ -376,7 +376,7 @@ foreach my $test_lst (@file_list) {
             $cmd = $subdir.$cmd if ($progNoArgs !~ /\.pl$/);
         }
 
-        run_test($test, $cmd);
+        run_test($test, $cmd, dry_run => $dry_run);
     }
 }
 
@@ -384,24 +384,34 @@ if ($cmake) {
     cd($cmake_build_dir);
 
     my $fake_name = "Run CMake Tests";
-    mark_test_start($fake_name);
-    my @command = ("$ctest --no-compress-output -T Test");
+    mark_test_start($fake_name) unless ($list_tests);
+    my @cmd = ("$ctest");
+    if ($dry_run || $list_tests) {
+        push(@cmd, "--show-only");
+    } else {
+        push(@cmd, "--no-compress-output -T Test");
+    }
     if ($ctest_args) {
-        push(@command, $ctest_args);
+        push(@cmd, $ctest_args);
     }
     if ($ctest_args !~ /--build-config/ && defined($exe_sub_dir)) {
-        push(@command, "--build-config $exe_sub_dir");
+        push(@cmd, "--build-config $exe_sub_dir");
     }
-    run_test($fake_name,  join(' ', @command), verbose => 1);
+    if ($list_tests) {
+        run_command($fake_name, join(' ', @cmd));
+    } else {
+        run_test($fake_name,  join(' ', @cmd), verbose => 1);
 
-    $fake_name = "Process CMake Test Results";
-    mark_test_start($fake_name);
-    my $tests = "$DDS_ROOT/tests/cmake";
-    my $output = "";
-    run_test($fake_name, "$python $tests/ctest-to-auto-run-tests.py $tests .",
-        verbose => 1,
-        capture_stdout => \$output);
-    print($output);
+        $fake_name = "Process CMake Test Results";
+        mark_test_start($fake_name);
+        my $tests = "$DDS_ROOT/tests/cmake";
+        my $output = "";
+        run_test($fake_name, "$python $tests/ctest-to-auto-run-tests.py $tests .",
+            dry_run => $dry_run,
+            verbose => 1,
+            capture_stdout => \$output);
+        print($output);
+    }
 }
 
 # vim: expandtab:ts=4:sw=4
