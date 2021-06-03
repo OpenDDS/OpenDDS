@@ -38,7 +38,7 @@ def relative_to(a, b):
 
 
 def fix_ctest_path(abs_source_path, path):
-    '''Work around ctest puting C_ instead of C: in the path
+    '''Work around ctest putting C_ instead of C: in the path
     '''
     drive = abs_source_path.drive
     if drive and path.upper().startswith(drive[0].upper() + '_'):
