@@ -11,7 +11,9 @@
 #include "dcps_export.h"
 #include "GuidConverter.h"
 
+#ifndef ACE_HAS_CPP11
 #include <ace/Bound_Ptr.h>
+#endif
 #include <ace/Time_Value.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -2390,9 +2392,11 @@ private:
   }
 
   WeakRcHandle<DataReaderImpl_T<MessageType> > data_reader_impl_;
-
+#ifndef ACE_HAS_CPP11
   typedef ACE_Strong_Bound_Ptr<const OpenDDS::DCPS::DataSampleHeader, ACE_Null_Mutex> DataSampleHeader_ptr;
-
+#else
+  typedef std::shared_ptr<const OpenDDS::DCPS::DataSampleHeader> DataSampleHeader_ptr;
+#endif /* ACE_HAS_PP11 */
   struct FilterDelayedSample {
 
     FilterDelayedSample(unique_ptr<MessageTypeWithAllocator> msg, DataSampleHeader_ptr hdr, bool new_inst)
