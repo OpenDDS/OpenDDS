@@ -1767,7 +1767,8 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
         for (List::const_iterator pos = scc.begin(); pos != scc.end(); ++pos) {
           minimal_ti.sc_component_id().scc_index = static_cast<int>(++idx); // Starts at 1.
           complete_ti.sc_component_id().scc_index = minimal_ti.sc_component_id().scc_index;
-          hash_type_identifier_map_[pos->type] = {minimal_ti, complete_ti};
+          const TypeIdentifierPair ti_pair = {minimal_ti, complete_ti};
+          hash_type_identifier_map_[pos->type] = ti_pair;
         }
       }
 
@@ -1811,7 +1812,8 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
         for (List::const_iterator pos = scc.begin(); pos != scc.end(); ++pos) {
           minimal_ti.sc_component_id().scc_index = static_cast<int>(++idx);
           complete_ti.sc_component_id().scc_index = minimal_ti.sc_component_id().scc_index;
-          hash_type_identifier_map_[pos->type] = {minimal_ti, complete_ti};
+          const TypeIdentifierPair ti_pair = {minimal_ti, complete_ti};
+          hash_type_identifier_map_[pos->type] = ti_pair;
         }
       }
 
