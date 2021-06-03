@@ -41,4 +41,6 @@ target_link_libraries(${ecu_exe} OpenDDS::Dcps ${ecu_lib})
 # copy run_test.pl to build/
 configure_file("run_test.pl" "." COPYONLY)
 
-add_test("${target_prefix}test" perl run_test.pl)
+add_test(NAME "${target_prefix}test"
+  COMMAND perl run_test.pl -ExeSubDir $<CONFIG>
+)

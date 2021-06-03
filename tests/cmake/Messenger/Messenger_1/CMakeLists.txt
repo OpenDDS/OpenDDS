@@ -78,4 +78,6 @@ add_custom_target("${target_prefix}Copy_ini_and_scripts"
 )
 add_dependencies("${target_prefix}Copy_ini_and_scripts" ${all_targets})
 
-add_test("${target_prefix}test" perl run_test.pl)
+add_test(NAME "${target_prefix}test"
+  COMMAND perl run_test.pl -ExeSubDir $<CONFIG>
+)
