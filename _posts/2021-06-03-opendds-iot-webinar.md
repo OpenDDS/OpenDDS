@@ -10,6 +10,6 @@ In a complimentary webinar sponsored by the OpenDDS Foundation on July 9, 2021, 
 Designing a Secure Cloud-Enabled Peer-to-Peer IoT Application
 
 Date: July 9, 2021
-Time: 10:00 a.m. to 11:00 a.m.
+Time: 10-11 AM Central Time (US and Canada)
 
 [Learn more and register for free](https://us02web.zoom.us/webinar/register/3516227495123/WN_QcdtQJYSQJmj9DHCuAJ_Sg)
