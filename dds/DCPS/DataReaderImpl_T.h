@@ -1,6 +1,12 @@
 #ifndef OPENDDS_DCPS_DATAREADERIMPL_T_H
 #define OPENDDS_DCPS_DATAREADERIMPL_T_H
 
+#include "ace/config-lite.h"
+
+#ifdef ACE_HAS_CPP11
+#  define HAS_STD_SHARED_PTR
+#endif
+
 #include "MultiTopicImpl.h"
 #include "RakeResults_T.h"
 #include "SubscriberImpl.h"
@@ -11,10 +17,10 @@
 #include "dcps_export.h"
 #include "GuidConverter.h"
 
-#ifndef ACE_HAS_CPP11
-#include <ace/Bound_Ptr.h>
-#else
+#ifdef HAS_STD_SHARED_PTR
 #include <memory>
+#else
+#include <ace/Bound_Ptr.h>
 #endif
 #include <ace/Time_Value.h>
 
@@ -2394,10 +2400,10 @@ private:
   }
 
   WeakRcHandle<DataReaderImpl_T<MessageType> > data_reader_impl_;
-#ifndef ACE_HAS_CPP11
-  typedef ACE_Strong_Bound_Ptr<const OpenDDS::DCPS::DataSampleHeader, ACE_Null_Mutex> DataSampleHeader_ptr;
-#else
+#ifdef HAS_STD_SHARED_PTR
   typedef std::shared_ptr<const OpenDDS::DCPS::DataSampleHeader> DataSampleHeader_ptr;
+#else
+  typedef ACE_Strong_Bound_Ptr<const OpenDDS::DCPS::DataSampleHeader, ACE_Null_Mutex> DataSampleHeader_ptr;
 #endif
   struct FilterDelayedSample {
 
