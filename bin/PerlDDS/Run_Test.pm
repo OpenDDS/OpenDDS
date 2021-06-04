@@ -327,6 +327,7 @@ sub new {
   $self->{nobits} = 0;
   $self->{add_pending_timeout} = 1;
   $self->{transport} = "";
+  $self->{ini} = "";
   $self->{report_errors_in_log_file} = 1;
   $self->{dcps_debug_level} = 1;
   $self->{dcps_transport_debug_level} = 1;
@@ -351,8 +352,8 @@ sub new {
       $flag_name = "<No Name Provided>";
     }
     my $flag_value;
-    if (defined($2)) {
-      $flag_value = $2;
+    if (defined($3)) {
+      $flag_value = $3;
     }
     else {
       $flag_value = "<FLAG>";
@@ -376,6 +377,15 @@ sub new {
       $self->_time_info("Test starting ($left arguments remaining)\n");
     } elsif (lc($arg) eq "nobits") {
       $self->{nobits} = 1;
+    } elsif ($flag_name eq "ini") {
+      $flag_value =~ /^([^_]+)_([^_]+).ini/;
+      if ($1 eq "inforepo") {
+        $self->{discovery} = "info_repo";
+      } else {
+        $self->{discovery} = $1;
+      }
+      $self->{transport} = $2;
+      $self->{ini} = $flag_value;
     } elsif (!$transport) {
       # also keep a copy to delete so we can see which parameters
       # are unused (above args are already "used")
@@ -1005,6 +1015,10 @@ sub _alternate_transport {
 sub _ini_file {
   my $self = shift;
   my $name = shift;
+  if ($self->{ini} ne "") {
+      return $self->{ini};
+  }
+
   if ($self->{transport} eq "") {
     print STDERR "ERROR: TestFramework::_ini_file should not be called if no "
       . "transport has been identified.\n";

@@ -12,8 +12,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-const std::string SUBSCRIBER_ACTOR = "subscriber";
-const std::string CALLBACKS_DONE_CONDITION = "callbacks_done";
+const char SUBSCRIBER_ACTOR[] = "subscriber";
+const char CALLBACKS_DONE_CONDITION[] = "callbacks_done";
 
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>

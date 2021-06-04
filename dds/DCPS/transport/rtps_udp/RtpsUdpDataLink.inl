@@ -52,13 +52,6 @@ RtpsUdpDataLink::ipv6_multicast_socket()
 }
 #endif
 
-ACE_INLINE void
-RtpsUdpDataLink::release_remote_i(const RepoId& remote_id)
-{
-  ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
-  locators_.erase(remote_id);
-}
-
 #if defined(OPENDDS_SECURITY)
 ACE_INLINE DDS::Security::ParticipantCryptoHandle
 RtpsUdpDataLink::local_crypto_handle() const

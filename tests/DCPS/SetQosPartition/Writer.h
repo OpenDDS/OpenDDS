@@ -3,34 +3,25 @@
 #ifndef WRITER_H
 #define WRITER_H
 
-
-#include "dds/DCPS/PoolAllocator.h"
-#include <dds/DdsDcpsPublicationC.h>
 #include "MessengerTypeSupportC.h"
+
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DdsDcpsPublicationC.h>
+
 #include <ace/Task.h>
 
-
-class Writer : public ACE_Task_Base
-{
+class Writer : public ACE_Task_Base {
 public:
-
-  Writer (::DDS::DataWriter_ptr writer, const OPENDDS_STRING& name);
+  Writer(const ::DDS::DataWriter_var& writer, const OPENDDS_STRING& name, int write_count);
 
   void start ();
-
   void end ();
-
-  /** Lanch a thread to write. **/
   virtual int svc ();
 
 private:
-
-  ::DDS::DataWriter_var writer_;
-
+  const ::DDS::DataWriter_var writer_;
   const OPENDDS_STRING name_;
-
-  // The lock used to synchronize the two write threads.
-  ACE_Thread_Mutex lock_;
+  const int write_count_;
 };
 
 #endif /* WRITER_H */
