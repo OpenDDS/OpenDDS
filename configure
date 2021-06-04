@@ -22,6 +22,11 @@ use POSIX qw(strftime);
 use strict;
 use warnings;
 
+use FindBin;
+use lib "$FindBin::Bin/tools/scripts/modules";
+
+use compiler_properties;
+
 ## Version of OCI's TAO to download
 my $oci_tao_version = '2.2a';
 ## Version of DOC Group ACE/TAO to download, uses the ACE version number
@@ -583,6 +588,20 @@ if ($has_host_compiler) {
                                   "Command Prompt.\n" : '') . "Stopped";
     }
   }
+
+  # Test compiler_properties
+  my $compiler_kind = compiler_properties::kind_from_command($opts{'compiler'});
+  if (!defined($compiler_kind)) {
+    die("Could not determine compiler kind of command: $opts{'compiler'}");
+  }
+  print("$compiler_kind Compiler: $opts{'compiler'}\n");
+  my $get_prop = shift;
+  my $props_hash = compiler_properties::get_props($opts{'compiler'}, $compiler_kind);
+  my $props_array = compiler_properties::props_in_order($props_hash);
+  for my $prop (@{$props_array}) {
+    print("  $prop->{name}: $prop->{value}\n");
+  }
+
   print "compiler is: $opts{'compiler'}\n" if $opts{'verbose'};
 
   if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
