@@ -109,7 +109,7 @@ private:
   {
     std::set<size_t> slots_to_write;
     for (const auto& partition : partitions) {
-      size_t slot = get_free_slot();
+      const size_t slot = get_free_slot();
       add_to_slot(slot, partition);
       slots_to_write.insert(slot);
     }
@@ -121,7 +121,7 @@ private:
   {
     std::set<size_t> slots_to_write;
     for (const auto& partition : partitions) {
-      size_t slot = partition_to_slot_[partition];
+      const size_t slot = partition_to_slot_[partition];
       remove_from_slot(slot, partition);
       slots_to_write.insert(slot);
     }
