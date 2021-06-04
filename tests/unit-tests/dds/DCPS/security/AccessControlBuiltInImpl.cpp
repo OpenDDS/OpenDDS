@@ -8,7 +8,9 @@
 #ifndef ACE_HAS_CPP11
 #include <ace/Bound_Ptr.h>
 #include <ace/Null_Mutex.h>
-#endif /* ACE_HAS_CPP11 */
+#else
+#include <memory>
+#endif
 // These are just used to meet signature requirements for a test
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
