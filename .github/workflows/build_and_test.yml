@@ -1312,7 +1312,7 @@ jobs:
     - name: get compiler version
       shell: bash
       run: |
-        export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
+        export COMPILER_VERSION=$(g++-6 --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
@@ -1525,7 +1525,7 @@ jobs:
     - name: get compiler version
       shell: bash
       run: |
-        export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
+        export COMPILER_VERSION=$(g++-8 --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
@@ -1738,7 +1738,7 @@ jobs:
     - name: get compiler version
       shell: bash
       run: |
-        export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
+        export COMPILER_VERSION=$(g++-10 --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
