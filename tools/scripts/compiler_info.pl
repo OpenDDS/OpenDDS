@@ -47,7 +47,7 @@ my %compilers = (
   },
   msvc => {
     cmd_re => qr/cl(?!ang)/,
-    opts => '/EP',
+    opts => '/EP /Zc:__cplusplus',
   },
 );
 
@@ -239,7 +239,7 @@ sub set_value {
   $info_with_values{$info->{name}} = $info;
 }
 
-my ($tmp_fd, $tmp_filename) = File::Temp::tempfile(
+my ($in_fd, $in_filename) = File::Temp::tempfile(
   'opendds-compiler-info-XXXXXX', SUFFIX => ".cpp");
 
 for my $info (@all_info) {
@@ -247,11 +247,11 @@ for my $info (@all_info) {
   my $macro_defined = get_info_prop($info, 'macro_defined');
   if ($macro_value) {
     $inserted_macros{$info->{name}} = $info;
-    print $tmp_fd "$info->{name}: $macro_value\n";
+    print $in_fd "$info->{name}: $macro_value\n";
   }
   elsif ($macro_defined) {
     $inserted_macros{$info->{name}} = $info;
-    print $tmp_fd
+    print $in_fd
       "#ifdef $macro_defined\n" .
       "$info->{name}: 1\n" .
       "#else\n" .
@@ -259,8 +259,9 @@ for my $info (@all_info) {
       "#endif\n";
   }
 }
+close($in_fd);
 
-my $command = "\"$compiler_command\" $compilers{$compiler_kind}->{opts} \"$tmp_filename\" 2>&1";
+my $command = "\"$compiler_command\" $compilers{$compiler_kind}->{opts} \"$in_filename\" 2>&1";
 open(my $out_fd, "-|", $command) or die "ERROR: $!";
 while (my $line = <$out_fd>) {
   chomp($line);
@@ -293,8 +294,8 @@ while (my $line = <$out_fd>) {
   }
 }
 close($out_fd);
-unlink($tmp_filename)
-  or warn "Unable to delete temporary file $tmp_filename: $!";
+unlink($in_filename)
+  or warn "Unable to delete temporary file $in_filename: $!";
 
 for my $info (@all_info) {
   my $get_value = get_info_prop($info, 'get_value');
