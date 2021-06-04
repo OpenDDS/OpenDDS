@@ -38,7 +38,7 @@ class MockDataWriter : public DDS::DataWriter {
 #ifndef ACE_HAS_CPP11
   typedef ACE_Strong_Bound_Ptr<MockDataWriter, ACE_Null_Mutex> SmartPtr;
 #else
-  std::shared_ptr<MockDataWriter> SmartPtr;
+  typedef std::shared_ptr<MockDataWriter> SmartPtr;
 #endif /* ACW_HAS_CPP11 */
   MOCK_METHOD1(set_qos, ::DDS::ReturnCode_t(const ::DDS::DataWriterQos & qos));
   MOCK_METHOD1(get_qos,
@@ -83,7 +83,7 @@ class MockDataReader : public DDS::DataReader {
 #ifndef ACE_HAS_CPP11
     typedef ACE_Strong_Bound_Ptr<MockDataReader, ACE_Null_Mutex> SmartPtr;
 #else
-    std::shared_ptr<MockDataReader> SmartPtr;
+    typedef std::shared_ptr<MockDataReader> SmartPtr;
 #endif /* ACW_HAS_CPP11 */
 
   MOCK_METHOD3(create_readcondition,
@@ -142,7 +142,7 @@ class MockAuthentication : public DDS::Security::Authentication {
 #ifndef ACE_HAS_CPP11
     typedef ACE_Strong_Bound_Ptr<MockAuthentication, ACE_Null_Mutex> SmartPtr;
 #else
-    std::shared_ptr<MockAuthentication> SmartPtr;
+    typedef std::shared_ptr<MockAuthentication> SmartPtr;
 #endif /* ACW_HAS_CPP11 */
 
   MOCK_METHOD6(validate_local_identity,
@@ -187,7 +187,7 @@ class MockAccessControlListener : public DDS::Security::AccessControlListener
 #ifndef ACE_HAS_CPP11
     typedef ACE_Strong_Bound_Ptr<MockAccessControlListener, ACE_Null_Mutex> SmartPtr;
 #else
-    std::shared_ptr<MockAccessControlListener> SmartPtr;
+    typedef std::shared_ptr<MockAccessControlListener> SmartPtr;
 #endif /* ACW_HAS_CPP11 */
 
   MOCK_METHOD2(on_revoke_permissions,
@@ -203,7 +203,7 @@ public:
   #ifndef ACE_HAS_CPP11
     typedef ACE_Strong_Bound_Ptr<FakeDynamicData, ACE_Null_Mutex> SmartPtr;
 #else
-    std::shared_ptr<FakeDynamicData> SmartPtr;
+    typedef std::shared_ptr<FakeDynamicData> SmartPtr;
 #endif /* ACW_HAS_CPP11 */
 };
 
