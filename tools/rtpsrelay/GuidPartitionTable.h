@@ -134,7 +134,7 @@ private:
     RelayPartitions relay_partitions;
     relay_partitions.application_participant_guid(repoid_to_guid(config_.application_participant_guid()));
     for (const auto slot : slots_to_write) {
-      relay_partitions.slot(slot);
+      relay_partitions.slot(static_cast<CORBA::ULong>(slot));
       relay_partitions.partitions().assign(slots_[slot].begin(), slots_[slot].end());
       if (relay_partitions_writer_->write(relay_partitions, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to write Relay Partitions\n")));
