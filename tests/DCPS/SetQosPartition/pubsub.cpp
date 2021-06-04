@@ -178,6 +178,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
     Writer writer(dw, " 2", 10);
 
     cout << "Pub waiting for match on " << PARTITION_B << std::endl;
+    if (wait_match(dr_1, 0, Utils::EQ)) {
+      cerr << "Error waiting for set_qos to propagate" << std::endl;
+      return 1;
+    }
     if (wait_match(dw, 1, Utils::GTE)) {
       cerr << "Error waiting for match on " << PARTITION_B << std::endl;
       return 1;
