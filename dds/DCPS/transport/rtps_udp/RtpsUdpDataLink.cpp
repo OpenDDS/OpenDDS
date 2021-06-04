@@ -536,6 +536,24 @@ RtpsUdpDataLink::leave_multicast_group(const NetworkInterface& nic)
 }
 
 void
+RtpsUdpDataLink::remove_locator_and_address_cache_i(const RepoId& remote_id) {
+  for (LocatorCache::iterator it = locator_cache_.begin(); it != locator_cache_.end(); /* inc in loop */) {
+    if (it->first.remote_ == remote_id) {
+      locator_cache_.erase(it++);
+    } else {
+      ++it;
+    }
+  }
+  for (AddressCache::iterator it = address_cache_.begin(); it != address_cache_.end(); /* inc in loop */) {
+    if (it->first.dst_guid_ == remote_id || it->first.to_guids_.count(remote_id) != 0) {
+      address_cache_.erase(it++);
+    } else {
+      ++it;
+    }
+  }
+}
+
+void
 RtpsUdpDataLink::add_locators(const RepoId& remote_id,
                               const AddrSet& unicast_addresses,
                               const AddrSet& multicast_addresses,
@@ -546,7 +564,9 @@ RtpsUdpDataLink::add_locators(const RepoId& remote_id,
   }
 
   ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
+  remove_locator_and_address_cache_i(remote_id);
   locators_[remote_id] = RemoteInfo(unicast_addresses, multicast_addresses, requires_inline_qos);
+  g.release();
 
   if (DCPS_debug_level > 3) {
     for (AddrSet::const_iterator pos = unicast_addresses.begin(), limit = unicast_addresses.end();
@@ -956,6 +976,11 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
         }
       }
     }
+  }
+
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
+    remove_locator_and_address_cache_i(remote_id);
   }
 
   for (TqeVector::iterator drop_it = to_drop.begin(); drop_it != to_drop.end(); ++drop_it) {
@@ -2312,43 +2337,61 @@ namespace {
 }
 #endif
 
+namespace {
+}
+
 void
 RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVecVecVec& meta_submessages, AddrDestMetaSubmessageMap& adr_map)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
-  AddrSet addrs;
+
+  size_t cache_hits = 0;
+  size_t cache_misses = 0;
+
   // Sort meta_submessages by address set and destination
   for (MetaSubmessageVecVecVec::iterator vvit = meta_submessages.begin(); vvit != meta_submessages.end(); ++vvit) {
     for (MetaSubmessageVecVec::iterator vit = vvit->begin(); vit != vvit->end(); ++vit) {
       for (MetaSubmessageVec::iterator it = vit->begin(); it != vit->end(); ++it) {
-        const bool directed = it->dst_guid_ != GUID_UNKNOWN;
-        if (directed) {
-          accumulate_addresses(it->from_guid_, it->dst_guid_, addrs, true);
+        const AddressCacheKey key(it->from_guid_, it->dst_guid_, it->to_guids_);
+        AddressCache::iterator pos = address_cache_.find(key);
+        if (pos == address_cache_.end()) {
+          pos = address_cache_.insert(std::make_pair(key, AddrSet())).first;
+          const bool directed = it->dst_guid_ != GUID_UNKNOWN;
+          if (directed) {
+            accumulate_addresses(it->from_guid_, it->dst_guid_, pos->second, true);
+          } else {
+            pos->second = get_addresses_i(it->from_guid_); // This will overwrite, but addrs should always be empty here
+          }
+          for (RepoIdSet::iterator it2 = it->to_guids_.begin(); it2 != it->to_guids_.end(); ++it2) {
+            accumulate_addresses(it->from_guid_, *it2, pos->second, directed);
+          }
+#ifdef OPENDDS_SECURITY
+          if (local_crypto_handle() != DDS::HANDLE_NIL && separate_message(it->from_guid_.entityId)) {
+            pos->second.insert(BUNDLING_PLACEHOLDER); // removed in bundle_mapped_meta_submessages
+          }
+#endif
+          ++cache_misses;
         } else {
-          addrs = get_addresses_i(it->from_guid_); // This will overwrite, but addrs should always be empty here
+          ++cache_hits;
         }
-        for (RepoIdSet::iterator it2 = it->to_guids_.begin(); it2 != it->to_guids_.end(); ++it2) {
-          accumulate_addresses(it->from_guid_, *it2, addrs, directed);
-        }
+        AddrSet& addrs = pos->second;
         if (addrs.empty()) {
           continue;
-        }
-
 #ifdef OPENDDS_SECURITY
-        if (local_crypto_handle() != DDS::HANDLE_NIL && separate_message(it->from_guid_.entityId)) {
-          addrs.insert(BUNDLING_PLACEHOLDER); // removed in bundle_mapped_meta_submessages
-        }
+        } else if (addrs.size() == 1 && *addrs.begin() == BUNDLING_PLACEHOLDER) {
+          continue;
 #endif
+        }
 
         if (std::memcmp(&(it->dst_guid_.guidPrefix), &GUIDPREFIX_UNKNOWN, sizeof(GuidPrefix_t)) != 0) {
           adr_map[addrs][make_unknown_guid(it->dst_guid_.guidPrefix)].push_back(it);
         } else {
           adr_map[addrs][GUID_UNKNOWN].push_back(it);
         }
-        addrs.clear();
       }
     }
   }
+  VDBG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::build_meta_submessage_map() - Address Cache Stats: hits = %d, misses = %d\n", cache_hits, cache_misses));
 }
 
 #ifdef OPENDDS_SECURITY
@@ -4329,8 +4372,17 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
   OPENDDS_ASSERT(local != GUID_UNKNOWN);
   OPENDDS_ASSERT(remote != GUID_UNKNOWN);
 
+  const LocatorCacheKey key(local, remote, prefer_unicast);
+  LocatorCache::const_iterator aci = locator_cache_.find(key);
+  if (aci != locator_cache_.end()) {
+    addresses.insert(aci->second.begin(), aci->second.end());
+    return;
+  }
+  AddrSet& cached_addrs = locator_cache_[key];
+
   if (config().rtps_relay_only()) {
     addresses.insert(config().rtps_relay_address());
+    cached_addrs.insert(config().rtps_relay_address());
     return;
   }
 
@@ -4381,19 +4433,23 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
 
   if (ice_addr == NO_ADDR) {
     addresses.insert(normal_addrs.begin(), normal_addrs.end());
+    cached_addrs.insert(normal_addrs.begin(), normal_addrs.end());
     const ACE_INET_Addr relay_addr = config().rtps_relay_address();
     if (!valid_last_recv_addr && relay_addr != NO_ADDR) {
       addresses.insert(relay_addr);
+      cached_addrs.insert(relay_addr);
     }
     return;
   }
 
   if (normal_addrs.count(ice_addr) == 0) {
     addresses.insert(ice_addr);
+    cached_addrs.insert(ice_addr);
     return;
   }
 
   addresses.insert(normal_addrs.begin(), normal_addrs.end());
+  cached_addrs.insert(normal_addrs.begin(), normal_addrs.end());
 }
 
 ICE::Endpoint*

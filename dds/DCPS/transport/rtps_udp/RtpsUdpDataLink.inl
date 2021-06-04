@@ -56,6 +56,7 @@ ACE_INLINE void
 RtpsUdpDataLink::release_remote_i(const RepoId& remote_id)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
+  remove_locator_and_address_cache_i(remote_id);
   locators_.erase(remote_id);
 }
 
