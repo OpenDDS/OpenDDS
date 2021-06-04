@@ -83,7 +83,7 @@ jobs:
         cd OpenDDS/ACE_TAO
         export ACE_COMMIT=$(git rev-parse HEAD)
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get Compiler version
+    - name: get compiler version
       shell: bash
       run: |
         export COMPILER_VERSION=$("c++ --version 2>&1 | head -n 1")
@@ -640,7 +640,7 @@ jobs:
         cd OpenDDS/ACE_TAO
         export ACE_COMMIT=$(git rev-parse HEAD)
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get Compiler version
+    - name: get compiler version
       shell: bash
       run: |
         export COMPILER_VERSION=$("c++ --version 2>&1 | head -n 1")
@@ -882,10 +882,10 @@ jobs:
         cd OpenDDS/ACE_TAO
         export ACE_COMMIT=$(git rev-parse HEAD)
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get Compiler version
+    - name: get compiler version
       shell: bash
       run: |
-        export COMPILER_VERSION=$("c++ --version 2>&1 | head -n 1")
+        export COMPILER_VERSION=$("clang++-5.0 --version 2>&1 | head -n 1")
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
@@ -1095,10 +1095,10 @@ jobs:
         cd OpenDDS/ACE_TAO
         export ACE_COMMIT=$(git rev-parse HEAD)
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get Compiler version
+    - name: get compiler version
       shell: bash
       run: |
-        export COMPILER_VERSION=$("c++ --version 2>&1 | head -n 1")
+        export COMPILER_VERSION=$("clang++-10 --version 2>&1 | head -n 1")
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
@@ -1309,7 +1309,7 @@ jobs:
         cd OpenDDS/ACE_TAO
         export ACE_COMMIT=$(git rev-parse HEAD)
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get Compiler version
+    - name: get compiler version
       shell: bash
       run: |
         export COMPILER_VERSION=$("c++ --version 2>&1 | head -n 1")
@@ -1522,7 +1522,7 @@ jobs:
         cd OpenDDS/ACE_TAO
         export ACE_COMMIT=$(git rev-parse HEAD)
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get Compiler version
+    - name: get compiler version
       shell: bash
       run: |
         export COMPILER_VERSION=$("c++ --version 2>&1 | head -n 1")
@@ -1735,7 +1735,7 @@ jobs:
         cd OpenDDS/ACE_TAO
         export ACE_COMMIT=$(git rev-parse HEAD)
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get Compiler version
+    - name: get compiler version
       shell: bash
       run: |
         export COMPILER_VERSION=$("c++ --version 2>&1 | head -n 1")
@@ -1981,7 +1981,7 @@ jobs:
         cd OpenDDS/ACE_TAO
         export ACE_COMMIT=$(git rev-parse HEAD)
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get Compiler version
+    - name: get compiler version
       shell: bash
       run: |
         export COMPILER_VERSION=$("c++ --version 2>&1 | head -n 1")
@@ -2264,7 +2264,7 @@ jobs:
         cd OpenDDS/ACE_TAO
         export ACE_COMMIT=$(git rev-parse HEAD)
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get Compiler version
+    - name: get compiler version
       shell: bash
       run: |
         export COMPILER_VERSION=$("c++ --version 2>&1 | head -n 1")
@@ -2510,7 +2510,7 @@ jobs:
         cd OpenDDS/ACE_TAO
         export ACE_COMMIT=$(git rev-parse HEAD)
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get Compiler version
+    - name: get compiler version
       shell: bash
       run: |
         export COMPILER_VERSION=$("c++ --version 2>&1 | head -n 1")
@@ -2945,7 +2945,7 @@ jobs:
         cd OpenDDS/ACE_TAO
         export ACE_COMMIT=$(git rev-parse HEAD)
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get Compiler version
+    - name: get compiler version
       shell: bash
       run: |
         export COMPILER_VERSION=$("c++ --version 2>&1 | head -n 1")
@@ -3378,7 +3378,7 @@ jobs:
         cd OpenDDS/ACE_TAO
         export ACE_COMMIT=$(git rev-parse HEAD)
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get Compiler version
+    - name: get compiler version
       shell: bash
       run: |
         export COMPILER_VERSION=$("c++ --version 2>&1 | head -n 1")
@@ -4010,7 +4010,7 @@ jobs:
         cd OpenDDS/ACE_TAO
         export ACE_COMMIT=$(git rev-parse HEAD)
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get Compiler version
+    - name: get compiler version
       shell: bash
       run: |
         export COMPILER_VERSION=$("c++ --version 2>&1 | head -n 1")
@@ -4276,7 +4276,7 @@ jobs:
         cd OpenDDS/ACE_TAO
         export ACE_COMMIT=$(git rev-parse HEAD)
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get Compiler version
+    - name: get compiler version
       shell: bash
       run: |
         export COMPILER_VERSION=$("C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -property catalog_productDisplayVersion)
@@ -4949,7 +4949,7 @@ jobs:
         cd OpenDDS/ACE_TAO
         export ACE_COMMIT=$(git rev-parse HEAD)
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get Compiler version
+    - name: get compiler version
       shell: bash
       run: |
         export COMPILER_VERSION=$("C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -property catalog_productDisplayVersion)
@@ -5550,7 +5550,7 @@ jobs:
         cd OpenDDS/ACE_TAO
         export ACE_COMMIT=$(git rev-parse HEAD)
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get Compiler version
+    - name: get compiler version
       shell: bash
       run: |
         export COMPILER_VERSION=$("C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -property catalog_productDisplayVersion)
@@ -6148,7 +6148,7 @@ jobs:
         git clone -q -b release-3.4 --depth=1 https://gitlab.com/wireshark/wireshark.git
         cd wireshark
         for /f %%x in ('git rev-parse HEAD') do @echo WIRESHARK_COMMIT=%%x>> %GITHUB_ENV%
-    - name: get Compiler version
+    - name: get compiler version
       shell: bash
       run: |
         export COMPILER_VERSION=$("C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -property catalog_productDisplayVersion)
@@ -6233,7 +6233,7 @@ jobs:
         cd OpenDDS/ACE_TAO
         export ACE_COMMIT=$(git rev-parse HEAD)
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get Compiler version
+    - name: get compiler version
       shell: bash
       run: |
         export COMPILER_VERSION=$("C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -property catalog_productDisplayVersion)
@@ -6854,7 +6854,7 @@ jobs:
         cd OpenDDS/ACE_TAO
         export ACE_COMMIT=$(git rev-parse HEAD)
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get Compiler version
+    - name: get compiler version
       shell: bash
       run: |
         export COMPILER_VERSION=$("C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -property catalog_productDisplayVersion)
@@ -7673,7 +7673,7 @@ jobs:
         cd OpenDDS/ACE_TAO
         export ACE_COMMIT=$(git rev-parse HEAD)
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get Compiler version
+    - name: get compiler version
       shell: bash
       run: |
         export COMPILER_VERSION=$("c++ --version 2>&1 | head -n 1")
@@ -7922,7 +7922,7 @@ jobs:
         cd OpenDDS/ACE_TAO
         export ACE_COMMIT=$(git rev-parse HEAD)
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get Compiler version
+    - name: get compiler version
       shell: bash
       run: |
         export COMPILER_VERSION=$("c++ --version 2>&1 | head -n 1")
