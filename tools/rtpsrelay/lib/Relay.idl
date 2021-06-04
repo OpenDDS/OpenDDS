@@ -43,18 +43,11 @@ module RtpsRelay {
   @topic
   struct RelayPartitions {
     @key GUID_t application_participant_guid;
-    StringSequence partitions;
-  };
-
-  const string RELAY_PARTITIONS_INCREMENT_TOPIC_NAME = "Relay Partitions Increment";
-  @topic
-  struct RelayPartitionsIncrement {
-    @key GUID_t application_participant_guid;
+    @key unsigned long slot;
     StringSequence partitions;
   };
 
   const string RELAY_ADDRESSES_TOPIC_NAME = "Relay Addresses";
-
   @topic
   struct RelayAddress {
     @key GUID_t application_participant_guid;

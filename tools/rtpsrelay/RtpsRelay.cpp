@@ -12,7 +12,6 @@
 #include "PublicationListener.h"
 #include "RelayAddressListener.h"
 #include "RelayHandler.h"
-#include "RelayPartitionsIncrementListener.h"
 #include "RelayPartitionTable.h"
 #include "RelayPartitionsListener.h"
 #include "RelayStatisticsReporter.h"
@@ -272,24 +271,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   if (!relay_partitions_topic) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Partitions topic\n")));
-    return EXIT_FAILURE;
-  }
-
-  RelayPartitionsIncrementTypeSupport_var relay_partitions_increment_ts = new RelayPartitionsIncrementTypeSupportImpl;
-  if (relay_partitions_increment_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to register RelayPartitionsIncrement type\n")));
-    return EXIT_FAILURE;
-  }
-  CORBA::String_var relay_partitions_increment_type_name = relay_partitions_increment_ts->get_type_name();
-
-  DDS::Topic_var relay_partitions_increment_topic =
-    relay_participant->create_topic(RELAY_PARTITIONS_INCREMENT_TOPIC_NAME.c_str(),
-                                    relay_partitions_increment_type_name,
-                                    TOPIC_QOS_DEFAULT, nullptr,
-                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-  if (!relay_partitions_increment_topic) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Partitions Increment topic\n")));
     return EXIT_FAILURE;
   }
 
@@ -608,22 +589,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  DDS::DataWriter_var relay_partitions_increment_writer_var =
-    relay_publisher->create_datawriter(relay_partitions_increment_topic, writer_qos, nullptr,
-                                       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-  if (!relay_partitions_increment_writer_var) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Partitions Increment data writer\n")));
-    return EXIT_FAILURE;
-  }
-
-  RelayPartitionsIncrementDataWriter_var relay_partitions_increment_writer = RelayPartitionsIncrementDataWriter::_narrow(relay_partitions_increment_writer_var);
-
-  if (!relay_partitions_increment_writer) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to narrow Relay Partitions Increment data writer\n")));
-    return EXIT_FAILURE;
-  }
-
   DDS::DataWriterQos replay_writer_qos;
   relay_publisher->get_default_datawriter_qos(replay_writer_qos);
 
@@ -650,7 +615,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   RelayStatisticsReporter relay_statistics_reporter(config, relay_statistics_writer);
   ACE_Reactor reactor_(new ACE_Select_Reactor, true);
   const auto reactor = &reactor_;
-  GuidPartitionTable guid_partition_table(config, relay_partitions_writer, relay_partitions_increment_writer, spdp_replay_writer);
+  GuidPartitionTable guid_partition_table(config, relay_partitions_writer, spdp_replay_writer);
   RelayPartitionTable relay_partition_table;
   GuidAddrSet guid_addr_set(config, relay_statistics_reporter);
   relay_statistics_reporter.report();
@@ -701,17 +666,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   if (!relay_partition_reader_var) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Partition data reader\n")));
-    return EXIT_FAILURE;
-  }
-
-  DDS::DataReaderListener_var relay_partitions_increment_listener = new RelayPartitionsIncrementListener(relay_partition_table);
-  DDS::DataReader_var relay_partitions_increment_reader_var =
-    relay_subscriber->create_datareader(relay_partitions_increment_topic, reader_qos,
-                                        relay_partitions_increment_listener,
-                                        DDS::DATA_AVAILABLE_STATUS);
-
-  if (!relay_partitions_increment_reader_var) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Partition Increment data reader\n")));
     return EXIT_FAILURE;
   }
 

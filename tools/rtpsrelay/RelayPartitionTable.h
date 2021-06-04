@@ -11,12 +11,12 @@
 namespace RtpsRelay {
 
 typedef std::set<ACE_INET_Addr> AddressSet;
+typedef std::pair<OpenDDS::DCPS::GUID_t, size_t> SlotKey;
 
 class RelayPartitionTable {
 public:
   RelayPartitionTable()
     : complete_(relay_to_address_)
-    , increment_(relay_to_address_)
   {}
 
   void insert(const OpenDDS::DCPS::GUID_t& application_participant_guid,
@@ -42,34 +42,12 @@ public:
     }
   }
 
-  void complete_insert(const OpenDDS::DCPS::GUID_t& application_participant_guid,
+  void complete_insert(const SlotKey& slot_key,
                        const StringSequence& partitions)
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
-    complete_.insert(application_participant_guid, partitions);
-  }
-
-  void complete_remove(const OpenDDS::DCPS::GUID_t& application_participant_guid)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-
-    complete_.remove(application_participant_guid);
-  }
-
-  void increment_insert(const OpenDDS::DCPS::GUID_t& application_participant_guid,
-                       const StringSequence& partitions)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-
-    increment_.insert(application_participant_guid, partitions);
-  }
-
-  void increment_remove(const OpenDDS::DCPS::GUID_t& application_participant_guid)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-
-    increment_.remove(application_participant_guid);
+    complete_.insert(slot_key, partitions);
   }
 
   void lookup(AddressSet& address_set, const StringSet& partitions, const std::string& name) const
@@ -77,7 +55,6 @@ public:
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
     complete_.lookup(address_set, partitions, name);
-    increment_.lookup(address_set, partitions, name);
   }
 
 private:
@@ -90,16 +67,12 @@ private:
       : relay_to_address_(relay_to_address)
     {}
 
-    void insert(const OpenDDS::DCPS::GUID_t& application_participant_guid,
+    void insert(const SlotKey& slot_key,
                 const StringSequence& partitions)
     {
       StringSet parts(partitions.begin(), partitions.end());
-      if (parts.empty()) {
-        // Special case for empty list of partitions.
-        parts.insert("");
-      }
 
-      const auto& x = relay_to_partitions_[application_participant_guid];
+      const auto& x = relay_to_partitions_[slot_key];
 
       std::vector<std::string> to_add;
       std::set_difference(parts.begin(), parts.end(), x.begin(), x.end(), std::back_inserter(to_add));
@@ -113,31 +86,19 @@ private:
       }
 
       {
-        const auto r = relay_to_partitions_.insert(std::make_pair(application_participant_guid, StringSet()));
+        const auto r = relay_to_partitions_.insert(std::make_pair(slot_key, StringSet()));
         r.first->second.insert(to_add.begin(), to_add.end());
         for (const auto& part : to_add) {
-          partition_index_.insert(part, application_participant_guid);
+          partition_index_.insert(part, slot_key.first);
         }
         for (const auto& part : to_remove) {
           r.first->second.erase(part);
-          partition_index_.remove(part, application_participant_guid);
+          partition_index_.remove(part, slot_key.first);
         }
         if (r.first->second.empty()) {
           relay_to_partitions_.erase(r.first);
         }
       }
-    }
-
-    void remove(const OpenDDS::DCPS::GUID_t& application_participant_guid)
-    {
-      const auto pos = relay_to_partitions_.find(application_participant_guid);
-      if (pos != relay_to_partitions_.end()) {
-        for (const auto& partition : pos->second) {
-          partition_index_.remove(partition, application_participant_guid);
-        }
-      }
-
-      relay_to_partitions_.erase(application_participant_guid);
     }
 
     void lookup(AddressSet& address_set, const StringSet& partitions, const std::string& name) const
@@ -161,12 +122,11 @@ private:
 
     PartitionIndex partition_index_;
 
-    typedef std::map<OpenDDS::DCPS::GUID_t, StringSet> RelayToPartitions;
+    typedef std::map<SlotKey, StringSet> RelayToPartitions;
     RelayToPartitions relay_to_partitions_;
   };
 
   Map complete_;
-  Map increment_;
 
   mutable ACE_Thread_Mutex mutex_;
 };
