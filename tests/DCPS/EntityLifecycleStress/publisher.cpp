@@ -115,7 +115,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     for (size_t i = 0; i < count; ++i) {
       ACE_OS::sleep(delay);
       ++message.count;
-      message_dw->write(message, handle);
+      DDS::ReturnCode_t error =  message_dw->write(message, handle);
+
+      if (error != DDS::RETCODE_OK) {
+        cerr << "Messenger::MessageDataWriter::write() failed." << endl;
+        exit(1);
+      }
     }
 
     {

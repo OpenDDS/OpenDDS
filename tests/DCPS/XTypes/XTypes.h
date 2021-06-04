@@ -58,7 +58,42 @@ bool get_topic(T ts, const DomainParticipant_var dp, const std::string& topic_na
   return true;
 }
 
-
+bool wait_for_reader(bool tojoin, DataWriter_var &dw) {
+  DDS::WaitSet_var ws = new DDS::WaitSet;
+  DDS::StatusCondition_var condition = dw->get_statuscondition();
+  condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
+  bool success = true;
+  DDS::ConditionSeq conditions;
+  ReturnCode_t ret = RETCODE_OK;
+  ws->attach_condition(condition);
+  DDS::Duration_t p = { 5, 0 };
+  DDS::PublicationMatchedStatus pms;
+  dw->get_publication_matched_status(pms);
+  ACE_DEBUG((LM_DEBUG,"Starting wait for reader %s count = %d at %T\n", (tojoin ? "startup":"shutdown"), pms.current_count));
+  for (int retries = 3; retries > 0 && (tojoin == (pms.current_count == 0)); --retries) {
+    conditions.length(0);
+    ret = ws->wait(conditions, p);
+    if (ret != RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "ERROR: wait on control_dw condition returned %C\n",
+                 OpenDDS::DCPS::retcode_to_string(ret)));
+      success = false;
+      break;
+    }
+    dw->get_publication_matched_status(pms);
+  }
+  if (success) {
+    ACE_DEBUG((LM_DEBUG, "After wait for reader %s count = %d at %T\n", (tojoin
+                                                                         ? "startup"
+                                                                         : "shutdown"), pms.current_count));
+    if (tojoin != (pms.current_count > 0)) {
+      ACE_ERROR((LM_ERROR, "Data reader %s not detected at %T\n", (tojoin
+                                                                   ? "startup"
+                                                                   : "shutdown")));
+    }
+  }
+  ws->detach_condition(condition);
+  return success;
+}
 bool check_inconsistent_topic_status(Topic_var topic)
 {
   DDS::InconsistentTopicStatus status;
@@ -68,7 +103,7 @@ bool check_inconsistent_topic_status(Topic_var topic)
   if (retcode != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: get_inconsistent_topic_status failed\n"));
     return false;
-  } else if (status.total_count != (expect_to_match ? 0 : 1)) {
+  } else if (expect_to_match !=  (status.total_count == 0)) {
     ACE_ERROR((LM_ERROR, "ERROR: inconsistent topic count is %d\n", status.total_count));
     return false;
   }

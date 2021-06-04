@@ -71,6 +71,7 @@ transport protocols:
 * UDP/IP
 * IP multicast
 * RTPS over UDP/IP (unicast and multicast)
+* Shared memory
 
 RTPS (Interoperability) features are based on the [DDS-RTPS Specification
 formal/2019-04-03 (version 2.3)](https://www.omg.org/spec/DDSI-RTPS/2.3).  See
@@ -120,7 +121,7 @@ Perl is used for the configure script, running the automated tests and examples
 included in this source tree, and generating Makefiles or Visual Studio project
 files.
 
-On Windows we recommend the use of [Straweberry Perl](https://strawberryperl.com).
+On Windows we recommend the use of [Strawberry Perl](https://strawberryperl.com).
 
 ### Optional Dependencies
 

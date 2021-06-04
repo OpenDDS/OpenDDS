@@ -10,18 +10,11 @@ discovery and TCP transports, run `perl run_test.pl --rtps` instead.
 
 ## CMake
 
-There is an example `CMakeLists.txt` provided, but it can conflict with the
-default MPC-based build system. If you want to build this example with CMake,
-these are the recommend steps:
-
+There is a `CMakeLists.txt` provided that can be used to build this example.
+Follow these steps to do that:
  - Make sure your environment is set correctly.
- - Clean all the existing build files out of this directory. If this is a git
-   repository you can use `git clean -dfX .` in this directory to do this.
-   Otherwise at least remove all the `Messenger*.h` files, because these will
-   conflict even if you do an "out-of-source" build with CMake.
- - Next make a `build` directory in this directory and `cd` to it to do an
+ - Make a `build` directory in this directory and `cd` to it to do an
    "out-of-source" build.
  - Run `cmake ..` to generate the build and `cmake --build .` to build.
- - To run the example you can copy `run_test.pl` to the `build` directory and
-   use that or run `./publisher -DCPSConfigFile ../rtps.ini` and `./subscriber
-   -DCPSConfigFile ../rtps.ini` at the same time.
+ - Then it can be run the same way as described above, but in the `build`
+   directory.

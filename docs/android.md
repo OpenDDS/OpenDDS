@@ -686,7 +686,7 @@ given the singleton nature of both.
 This might not be ideal or efficient though, because deleting and recreating
 participants will happen every time the app loses focus, like during
 orientation changes. An alternative to this is to run OpenDDS within an
-[Android Sevice](https://developer.android.com/guide/components/services)
+[Android Service](https://developer.android.com/guide/components/services)
 separate from the main app with the service configured so that it does not
 stopped when the Application's `onStop()` is called. The service should be
 specified in `AndroidManifest.xml`.

@@ -1673,7 +1673,7 @@ AccessControlBuiltInImpl::RevokePermissionsTask::~RevokePermissionsTask()
 
 namespace {
   // Some platforms cannot schedule timers far enough into the future
-  // to accomodate expiration times so the scheduling interval is
+  // to accommodate expiration times so the scheduling interval is
   // capped at an hour.
   const TimeDuration MAX_DURATION = TimeDuration(3600, 0);
 }

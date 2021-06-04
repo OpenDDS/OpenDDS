@@ -60,7 +60,6 @@ push @dirs, 'C++11_Messenger' unless $skip_cxx11;
 push @dirs, '../C++11_typecode' unless $skip_cxx11 || $skip_typecode;
 
 my %builds_lib = ('Messenger_2' => 1, 'C++11_Messenger' => 1);
-my %runtest_in_config_dir = ('Messenger_1' => 1, 'Messenger_2' => 1);
 
 for my $dir (@dirs) {
   my $build_dir="$ENV{'DDS_ROOT'}/tests/cmake/Messenger/$dir/build";
@@ -68,7 +67,6 @@ for my $dir (@dirs) {
   chdir($build_dir) or die "ERROR: '$!': failed to switch to $build_dir";
 
   my @generate_cmd = ("cmake",
-    "-D", "CMAKE_PREFIX_PATH=$ENV{'DDS_ROOT'}",
     "-D", "CMAKE_VERBOSE_MAKEFILE:BOOL=ON",
   );
   if ($compiler ne "") {
@@ -103,17 +101,9 @@ for my $dir (@dirs) {
     run_command("@generate_cmd $lib_opt ..");
     run_command("@build_cmd");
 
-    if (! $skip_run_test && $dir ne '../generated_global' && $dir ne '../C++11_typecode') {
-      if ($build_config ne "" && $runtest_in_config_dir{$dir}) {
-        my $run_dir = getcwd() . "/$build_config";
-        print "Switching to '$run_dir' to run tests\n";
-        chdir($run_dir) or die "ERROR: '$!'";
-      }
+    if (!$skip_run_test && $dir ne '../generated_global' && $dir ne '../C++11_typecode') {
       my $args = $build_config ? "-ExeSubDir $build_config -Config ARCH" : '';
       run_command("perl run_test.pl $args");
-      if ($build_config ne "" && $runtest_in_config_dir{$dir}) {
-        chdir($build_dir) or die "ERROR: '$!': failed to switch to $build_dir";
-      }
     }
     run_command("@base_build_cmd --target clean");
   }

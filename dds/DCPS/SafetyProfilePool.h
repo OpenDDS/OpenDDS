@@ -28,7 +28,7 @@ namespace DCPS {
 
 /// Memory pool for use when the Safety Profile is enabled.
 ///
-/// Saftey Profile disallows std::free() and the delete operators
+/// Safety Profile disallows std::free() and the delete operators
 /// See PoolAllocator.h for a class that allows STL containers to use an
 /// instance of SafetyProfilePool managed by our Service_Participant singleton.
 class OpenDDS_Dcps_Export SafetyProfilePool : public ACE_Allocator

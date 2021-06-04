@@ -1362,7 +1362,7 @@ TransportSendStrategy::do_remove_sample(const RepoId&,
           "The mode is MODE_DIRECT, or the queue is empty and no "
           "transport packet is in progress.\n"));
 
-    QueueRemoveVisitor simple_rem_vis(criteria);
+    QueueRemoveVisitor simple_rem_vis(criteria, remove_all);
     this->elems_.accept_remove_visitor(simple_rem_vis);
 
     const RemoveResult status = simple_rem_vis.status();
@@ -1381,7 +1381,7 @@ TransportSendStrategy::do_remove_sample(const RepoId&,
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Visit the queue_ with the RemoveElementVisitor.\n"));
 
-  QueueRemoveVisitor simple_rem_vis(criteria);
+  QueueRemoveVisitor simple_rem_vis(criteria, remove_all);
   this->queue_.accept_remove_visitor(simple_rem_vis);
 
   RemoveResult status = simple_rem_vis.status();
@@ -1422,7 +1422,8 @@ TransportSendStrategy::do_remove_sample(const RepoId&,
                                   this->pkt_chain_,
                                   this->header_block_,
                                   this->replaced_element_mb_allocator_,
-                                  this->replaced_element_db_allocator_);
+                                  this->replaced_element_db_allocator_,
+                                  remove_all);
 
   this->elems_.accept_replace_visitor(pac_rem_vis);
 
