@@ -161,6 +161,8 @@ sub print_help {
         "Executes test list files (*.lst), which contain commands with conditions called\n" .
         "configurations under which the commands are run.\n" .
         "\n" .
+        "<list_file> can be a path or - to use stdin.\n" .
+        "\n" .
         "Options:\n" .
         "    --help | -h              Display this help\n";
 
@@ -273,9 +275,6 @@ foreach my $list (@builtin_test_lists) {
     push(@file_list, "$DDS_ROOT/$list->{file}") if ($query || $list->{enabled});
 }
 push(@file_list, @ARGV);
-foreach my $list (@file_list) {
-    die("$list is not a readable file!") if (!-r $list);
-}
 
 if ($show_configs) {
     foreach my $test_list (@file_list) {
