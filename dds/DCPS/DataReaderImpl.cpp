@@ -550,6 +550,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
   // removed, which is a proper subset of the writers which were
   // requested to be removed.
   WriterIdSeq updated_writers;
+  WriterMapType removed_writers;
 
   CORBA::ULong wr_len;
 
@@ -568,7 +569,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
       WriterMapType::iterator it = this->writers_.find(writer_id);
 
       if (it != this->writers_.end()) {
-        it->second->removed();
+        removed_writers.insert(*it);
         end_historic_sweeper_->cancel_timer(it->second);
         remove_association_sweeper_->cancel_timer(it->second);
       }
@@ -587,6 +588,11 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
       }
     }
   }
+
+  for (WriterMapType::iterator it = removed_writers.begin(); it != removed_writers.end(); ++it) {
+    it->second->removed();
+  }
+  removed_writers.clear();
 
   wr_len = updated_writers.length();
 
@@ -1217,7 +1223,7 @@ DataReaderImpl::enable()
   // enable the type specific part of this DataReader
   this->enable_specific();
 
-  //Note: the QoS used to set n_chunks_ is Changable=No so
+  //Note: the QoS used to set n_chunks_ is Changeable=No so
   // it is OK that we cannot change the size of our allocators.
   rd_allocator_.reset(new ReceivedDataAllocator(n_chunks_));
 

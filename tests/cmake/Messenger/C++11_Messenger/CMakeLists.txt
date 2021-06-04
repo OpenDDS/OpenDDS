@@ -1,5 +1,6 @@
-project(OpenDDS_C++11_Messenger CXX)
+project(opendds_cpp11_messenger CXX)
 cmake_minimum_required(VERSION 3.8.2)
+enable_testing()
 
 find_package(OpenDDS REQUIRED)
 
@@ -11,7 +12,7 @@ if (NOT OPENDDS_CXX11)
   message(FATAL_ERROR "This test requires OpenDDS to be built with C++11 Support")
 endif()
 
-set(target_prefix "opendds_cmake_cpp11_messenger_")
+set(target_prefix "${PROJECT_NAME}_")
 set(src "${CMAKE_CURRENT_SOURCE_DIR}/../../../DCPS/C++11/Messenger")
 set(dst ${CMAKE_CURRENT_BINARY_DIR})
 set(opendds_libs
@@ -57,4 +58,7 @@ set_target_properties(${subscriber} PROPERTIES
 target_link_libraries(${subscriber} ${opendds_libs} ${idl})
 
 # run_test.pl
-configure_file("${src}/run_test.pl" "${dst}/run_test.pl" COPYONLY)
+configure_file("${src}/run_test.pl" "." COPYONLY)
+add_test(NAME "${target_prefix}test"
+  COMMAND perl run_test.pl $<$<BOOL:$<CONFIG>>:-ExeSubDir> $<CONFIG>
+)

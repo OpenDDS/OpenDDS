@@ -32,35 +32,35 @@
 class Aggregator
 {
 public:
-
-  Aggregator (void);
   // Ctor
+  Aggregator();
 
+  // Initialize the ORB, POA etc.
   void init (int argc,
              char *argv[]);
 
-  // Initialize the ORB, POA etc.
 
-  int make_merged_iors ();
   // Merges the different IORS
+  int make_merged_iors ();
 
-  int set_properties ();
   // Sets the properties for the profiles
+  int set_properties ();
 
-  int run ();
   // Run the  ORB event loop..
+  int run ();
 
-  int write_to_file (void);
   // Write the merged IOR to a file
+  int write_to_file ();
 
-  CORBA::ORB_ptr orb (void);
   // Return the pointer to the copy of our ORB
-private:
-  CORBA::ORB_var orb_;
-  // Our ORB
+  CORBA::ORB_ptr orb ();
 
-  CORBA::Object_var merged_set_;
+private:
+  // Our ORB
+  CORBA::ORB_var orb_;
+
   // The merged IOR set
+  CORBA::Object_var merged_set_;
 
   TAO_IOP::TAO_IOR_Manipulation_var iorm_;
   CORBA::Object_var object_primary_;

@@ -14,10 +14,12 @@ namespace DCPS {
 
 ACE_INLINE
 QueueRemoveVisitor::QueueRemoveVisitor(
-  const TransportQueueElement::MatchCriteria& mc)
+  const TransportQueueElement::MatchCriteria& mc,
+  bool remove_all)
   : mc_(mc)
   , status_(REMOVE_NOT_FOUND)
   , removed_bytes_(0)
+  , remove_all_(remove_all)
 {
   DBG_ENTRY_LVL("QueueRemoveVisitor", "QueueRemoveVisitor", 6);
 }

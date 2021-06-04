@@ -115,7 +115,7 @@ public:
   void terminate_send(bool graceful_disconnecting = false);
   virtual void terminate_send_if_suspended();
 
-  // Moved clear() declaration below as Enums can't be foward declared.
+  // Moved clear() declaration below as Enums can't be forward declared.
 
   /// Let the subclass stop.
   virtual void stop_i() = 0;
@@ -313,7 +313,7 @@ public:
 protected:
   /// Implement framework chain visitations to remove a sample.
   virtual RemoveResult do_remove_sample(const RepoId& pub_id,
-    const TransportQueueElement::MatchCriteria& criteria);
+    const TransportQueueElement::MatchCriteria& criteria, bool remove_all = false);
 
 private:
 
@@ -364,7 +364,7 @@ private:
   /// Incremented once for each call to our send_start() method,
   /// and decremented once for each call to our send_stop() method.
   /// We only care about the transitions of the start_counter_
-  /// value from 0 to 1, and from 1 to 0.  This accomodates the
+  /// value from 0 to 1, and from 1 to 0.  This accommodates the
   /// case where more than one TransportClient is sending to
   /// us at the same time.  We use this counter to enable a
   /// "composite" send_start() and send_stop().

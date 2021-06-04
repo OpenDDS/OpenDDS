@@ -349,7 +349,7 @@ bool Permissions::Action::partitions_match(const DDS::StringSeq& entity_partitio
       // In order for an action to be denied it must meet the denied partitions condition.
       // For this to happen one [or] more of the partition names associated with the DDS Entity
       // ... must match one [of] the partitions ... listed in the partitions condition section.
-      return true; // i'th QoS partition name matches some <partition> in Permissons
+      return true; // i'th QoS partition name matches some <partition> in Permissions
     }
   }
 

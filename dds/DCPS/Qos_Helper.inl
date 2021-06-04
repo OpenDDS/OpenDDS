@@ -1104,7 +1104,7 @@ bool Qos_Helper::valid(const DDS::DataRepresentationQosPolicy& qos)
     default:
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("Qos_Helper::valid(const DataRepresentationQosPolicy&): ")
-        ACE_TEXT("Unkown DataRepresentationId_t: %d\n"), value));
+        ACE_TEXT("Unknown DataRepresentationId_t: %d\n"), value));
       return false;
     };
   }

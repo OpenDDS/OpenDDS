@@ -100,6 +100,9 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
 
   const std::string cxxName = scoped(name);
   const std::string short_name = name->last_component()->get_string();
+  const std::string ts_name = scoped(name, EscapeContext_FromGenIdl);
+  const std::string ts_short_name = to_string(
+    name->last_component(), EscapeContext_FromGenIdl);
 
   static const char* idl_includes[] = {
     "dds/DdsDcpsInfrastructure.idl", "dds/DdsDcpsTopic.idl",
@@ -131,9 +134,12 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
   add_includes(cpp_includes, BE_GlobalData::STREAM_CPP);
 
   std::map<std::string, std::string> replacements;
-  replacements["SCOPED"] = cxxName;
-  replacements["SCOPED_NOT_GLOBAL"] = dds_generator::scoped_helper(name, "::");
-  replacements["TYPE"] = short_name;
+  replacements["SCOPED"] = scoped(name, EscapeContext_ForGenIdl);
+  // SCOPED_NOT_GLOBAL is EscapeContext_FromGenIdl, because
+  // DCPS_DATA_SEQUENCE_TYPE is strange.
+  replacements["SCOPED_NOT_GLOBAL"] =
+    dds_generator::scoped_helper(name, "::", EscapeContext_FromGenIdl);
+  replacements["TYPE"] = to_string(name->last_component(), EscapeContext_ForGenIdl);
   replacements["EXPORT"] = be_global->export_macro().c_str();
   replacements["SEQ"] = be_global->sequence_suffix().c_str();
 
@@ -147,10 +153,12 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     ScopedNamespaceGuard hGuard(name, be_global->header_);
 
     be_global->header_ <<
-      "class " << short_name << "TypeSupportImpl;\n";
+      "class " << ts_short_name << "TypeSupportImpl;\n";
   }
   be_global->header_ << be_global->versioning_end() << "\n";
 
+  const std::string unescaped_name =
+    dds_generator::scoped_helper(name, "::", EscapeContext_StripEscapes);
   be_global->header_ <<
     "OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL\n"
     "namespace OpenDDS {\n"
@@ -158,15 +166,15 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     "template <>\n"
     "struct DDSTraits<" << cxxName << "> {\n"
     "  typedef " << cxxName << " MessageType;\n"
-    "  typedef " << cxxName << "Seq MessageSequenceType;\n"
-    "  typedef " << cxxName << "TypeSupport TypeSupportType;\n"
-    "  typedef " << cxxName << "TypeSupportImpl TypeSupportTypeImpl;\n"
-    "  typedef " << cxxName << "DataWriter DataWriterType;\n"
-    "  typedef " << cxxName << "DataReader DataReaderType;\n"
+    "  typedef " << ts_name << "Seq MessageSequenceType;\n"
+    "  typedef " << ts_name << "TypeSupport TypeSupportType;\n"
+    "  typedef " << ts_name << "TypeSupportImpl TypeSupportTypeImpl;\n"
+    "  typedef " << ts_name << "DataWriter DataWriterType;\n"
+    "  typedef " << ts_name << "DataReader DataReaderType;\n"
     "  typedef " << cxxName << "_OpenDDS_KeyLessThan LessThanType;\n"
     "  typedef OpenDDS::DCPS::KeyOnly<const " << cxxName << "> KeyOnlyType;\n"
     "\n"
-    "  static const char* type_name() { return \"" << replacements["SCOPED_NOT_GLOBAL"] << "\"; }\n"
+    "  static const char* type_name() { return \"" << unescaped_name << "\"; }\n"
     "  static bool gen_has_key() { return " << (key_count ? "true" : "false") << "; }\n"
     "  static size_t key_count() { return " << key_count << "; }\n"
     "};\n"
@@ -179,19 +187,19 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     ScopedNamespaceGuard hGuard(name, be_global->header_);
 
     be_global->header_ <<
-      "class " << be_global->export_macro() << " " << short_name << "TypeSupportImpl\n"
-      "  : public virtual OpenDDS::DCPS::LocalObject<" << short_name << "TypeSupport>\n"
+      "class " << be_global->export_macro() << " " << ts_short_name << "TypeSupportImpl\n"
+      "  : public virtual OpenDDS::DCPS::LocalObject<" << ts_short_name << "TypeSupport>\n"
       "  , public virtual OpenDDS::DCPS::TypeSupportImpl\n"
       "{\n"
       "public:\n"
       "  typedef OpenDDS::DCPS::DDSTraits<" << short_name << "> TraitsType;\n"
       "  typedef OpenDDS::DCPS::MarshalTraits<" << short_name << "> MarshalTraitsType;\n"
-      "  typedef " << short_name << "TypeSupport TypeSupportType;\n"
-      "  typedef " << short_name << "TypeSupport::_var_type _var_type;\n"
-      "  typedef " << short_name << "TypeSupport::_ptr_type _ptr_type;\n"
+      "  typedef " << ts_short_name << "TypeSupport TypeSupportType;\n"
+      "  typedef " << ts_short_name << "TypeSupport::_var_type _var_type;\n"
+      "  typedef " << ts_short_name << "TypeSupport::_ptr_type _ptr_type;\n"
       "\n"
-      "  " << short_name << "TypeSupportImpl() {}\n"
-      "  virtual ~" << short_name << "TypeSupportImpl() {}\n"
+      "  " << ts_short_name << "TypeSupportImpl() {}\n"
+      "  virtual ~" << ts_short_name << "TypeSupportImpl() {}\n"
       "\n"
       "  virtual " << be_global->versioning_name() << "::DDS::DataWriter_ptr create_datawriter();\n"
       "  virtual " << be_global->versioning_name() << "::DDS::DataReader_ptr create_datareader();\n"
@@ -211,7 +219,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "\n"
       "  virtual OpenDDS::DCPS::Extensibility getExtensibility() const;\n"
       "\n"
-      "  static " << short_name << "TypeSupport::_ptr_type _narrow(CORBA::Object_ptr obj);\n"
+      "  static " << ts_short_name << "TypeSupport::_ptr_type _narrow(CORBA::Object_ptr obj);\n"
       "};\n";
   }
   be_global->header_ << be_global->versioning_end() << "\n";
@@ -220,7 +228,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
   {
     ScopedNamespaceGuard cppGuard(name, be_global->impl_);
     be_global->impl_ <<
-      "::DDS::DataWriter_ptr " << short_name << "TypeSupportImpl::create_datawriter()\n"
+      "::DDS::DataWriter_ptr " << ts_short_name << "TypeSupportImpl::create_datawriter()\n"
       "{\n"
       "  typedef OpenDDS::DCPS::DataWriterImpl_T<" << short_name << "> DataWriterImplType;\n"
       "  ::DDS::DataWriter_ptr writer_impl = ::DDS::DataWriter::_nil();\n"
@@ -228,7 +236,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "                   DataWriterImplType());\n"
       "  return writer_impl;\n"
       "}\n\n"
-      "::DDS::DataReader_ptr " << short_name << "TypeSupportImpl::create_datareader()\n"
+      "::DDS::DataReader_ptr " << ts_short_name << "TypeSupportImpl::create_datareader()\n"
       "{\n"
       "  typedef OpenDDS::DCPS::DataReaderImpl_T<" << short_name << "> DataReaderImplType;\n"
       "  ::DDS::DataReader_ptr reader_impl = ::DDS::DataReader::_nil();\n"
@@ -237,7 +245,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "  return reader_impl;\n"
       "}\n\n"
       "#ifndef OPENDDS_NO_MULTI_TOPIC\n"
-      "::DDS::DataReader_ptr " << short_name << "TypeSupportImpl::create_multitopic_datareader()\n"
+      "::DDS::DataReader_ptr " << ts_short_name << "TypeSupportImpl::create_multitopic_datareader()\n"
       "{\n"
       "  typedef OpenDDS::DCPS::DataReaderImpl_T<" << short_name << "> DataReaderImplType;\n"
       "  typedef OpenDDS::DCPS::MultiTopicDataReader_T<" << short_name << ", DataReaderImplType> MultiTopicDataReaderImplType;\n"
@@ -248,39 +256,39 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "}\n"
       "#endif /* !OPENDDS_NO_MULTI_TOPIC */\n\n"
       "#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE\n"
-      "const OpenDDS::DCPS::MetaStruct& " << short_name << "TypeSupportImpl::getMetaStructForType()\n"
+      "const OpenDDS::DCPS::MetaStruct& " << ts_short_name << "TypeSupportImpl::getMetaStructForType()\n"
       "{\n"
       "  return OpenDDS::DCPS::getMetaStruct<" << short_name << ">();\n"
       "}\n"
       "#endif /* !OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE */\n\n"
-      "bool " << short_name << "TypeSupportImpl::has_dcps_key()\n"
+      "bool " << ts_short_name << "TypeSupportImpl::has_dcps_key()\n"
       "{\n"
       "  return TraitsType::gen_has_key();\n"
       "}\n\n"
-      "const char* " << short_name << "TypeSupportImpl::default_type_name() const\n"
+      "const char* " << ts_short_name << "TypeSupportImpl::default_type_name() const\n"
       "{\n"
       "  return TraitsType::type_name();\n"
       "}\n"
       "\n"
-      "void " << short_name << "TypeSupportImpl::representations_allowed_by_type(\n"
+      "void " << ts_short_name << "TypeSupportImpl::representations_allowed_by_type(\n"
       "  ::DDS::DataRepresentationIdSeq& seq)\n"
       "{\n"
       "  MarshalTraitsType::representations_allowed_by_type(seq);\n"
       "}\n"
       "\n"
-      "const OpenDDS::XTypes::TypeIdentifier& " << short_name << "TypeSupportImpl::getMinimalTypeIdentifier() const\n"
+      "const OpenDDS::XTypes::TypeIdentifier& " << ts_short_name << "TypeSupportImpl::getMinimalTypeIdentifier() const\n"
       "{\n"
       "  return OpenDDS::DCPS::getMinimalTypeIdentifier<OpenDDS::DCPS::" << typeobject_generator::tag_type(name) << ">();\n"
       "}\n\n"
-      "const OpenDDS::XTypes::TypeMap& " << short_name << "TypeSupportImpl::getMinimalTypeMap() const\n"
+      "const OpenDDS::XTypes::TypeMap& " << ts_short_name << "TypeSupportImpl::getMinimalTypeMap() const\n"
       "{\n"
       "  return OpenDDS::DCPS::getMinimalTypeMap<OpenDDS::DCPS::" << typeobject_generator::tag_type(name) << ">();\n"
       "}\n\n"
-      "OpenDDS::DCPS::Extensibility " << short_name << "TypeSupportImpl::getExtensibility() const\n"
+      "OpenDDS::DCPS::Extensibility " << ts_short_name << "TypeSupportImpl::getExtensibility() const\n"
       "{\n"
       "  return MarshalTraitsType::extensibility();\n"
       "}\n\n"
-      << short_name << "TypeSupport::_ptr_type " << short_name << "TypeSupportImpl::_narrow(CORBA::Object_ptr obj)\n"
+      << ts_short_name << "TypeSupport::_ptr_type " << ts_short_name << "TypeSupportImpl::_narrow(CORBA::Object_ptr obj)\n"
       "{\n"
       "  return TypeSupportType::_narrow(obj);\n"
       "}\n";
@@ -388,6 +396,7 @@ namespace face_ts_generator {
       name_underscores = dds_generator::scoped_helper(name, "_"),
       exportMacro = be_global->export_macro().c_str(),
       exporter = exportMacro.empty() ? "" : ("    " + exportMacro + '\n');
+    const std::string ts_name = scoped(name, EscapeContext_FromGenIdl);
     be_global->add_include("FACE/TS.hpp", BE_GlobalData::STREAM_FACETS_H);
     be_global->facets_header_ <<
       "namespace FACE\n"
@@ -461,7 +470,7 @@ namespace face_ts_generator {
       "struct " << name_underscores << "_Initializer {\n"
       "  " << name_underscores << "_Initializer()\n"
       "  {\n"
-      "    " << name_cxx << "TypeSupport_var ts = new " << name_cxx
+      "    " << ts_name << "TypeSupport_var ts = new " << name_cxx
                           << "TypeSupportImpl;\n"
       "    ts->register_type(0, \"\");\n"
       "  }\n"

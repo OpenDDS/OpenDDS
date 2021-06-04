@@ -151,7 +151,7 @@ public:
   /**
    * Write Secured Updated DP QOS
    *
-   * lock_ must be aquired before calling this.
+   * lock_ must be acquired before calling this.
    */
   void write_secure_updates();
   void write_secure_disposes();
