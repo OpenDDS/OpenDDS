@@ -10,18 +10,6 @@ use warnings;
 
 use Env qw(ACE_ROOT DDS_ROOT PATH);
 
-my $exe_sub_dir;
-BEGIN {
-    for (my $i = 0; $i <= $#ARGV; ++$i) {
-        if ($ARGV[$i] eq '-ExeSubDir') {
-            if (defined($ARGV[$i + 1])) {
-                $exe_sub_dir = $ARGV[++$i];
-                print("ExeSubDir: $ARGV[$i]\n");
-            } # else let Process.pm deal with that
-        }
-    }
-}
-
 use lib "$ACE_ROOT/bin";
 use lib "$DDS_ROOT/bin";
 use PerlDDS::Run_Test;
@@ -30,6 +18,8 @@ use Getopt::Long;
 use Cwd;
 use POSIX qw(SIGINT);
 use File::Temp qw(tempfile);
+
+use constant windows => $^O eq "MSWin32";
 
 sub cd {
     my $dir = shift;
@@ -149,7 +139,6 @@ my @builtin_test_lists = (
         file => "tools/modeling/tests/modeling_tests.lst",
     },
 );
-my %builtin_test_lists_hash = map { $_->{name} => $_ } @builtin_test_lists;
 
 sub print_usage {
     my $error = shift // 1;
@@ -172,6 +161,8 @@ sub print_help {
         "Executes test list files (*.lst), which contain commands with conditions called\n" .
         "configurations under which the commands are run.\n" .
         "\n" .
+        "<list_file> can be a path or - to use stdin.\n" .
+        "\n" .
         "Options:\n" .
         "    --help | -h              Display this help\n";
 
@@ -189,12 +180,18 @@ sub print_help {
         "                             Not included by default\n" .
         "    --cmake-build-dir <path> Path to the CMake tests binary directory\n" .
         "                             Default is \$DDS_ROOT/tests/cmake/build\n" .
+        "    --cmake-build-cfg <cfg>  CMake build configuration, like the one passed to\n" .
+        "                             `cmake --config`. Mostly used by Visual Studio.\n" .
+        "                             Default is \"Debug\" on Windows, no default\n" .
+        "                             elsewhere.\n" .
         "    --ctest <cmd>            CTest to use to run CMake Tests\n" .
         "                             Default is `ctest`\n" .
         "    --ctest-args <args>      Additional arguments to pass to CTest\n" .
         "    --python <cmd>           Python command to use to run\n" .
         "                             ctest-to-auto-run-tests.py.\n" .
-        "                             Default is `python3`\n" .
+        "                             Default is `python` on Windows, `python3`\n" .
+        "                             elsewhere.\n" .
+
         # These two are processed by PerlACE/ConfigList.pm
         "    -Config <cfg>            Include tests with <cfg> configuration\n" .
         "    -Exclude <cfg>           Exclude tests with <cfg> configuration\n" .
@@ -227,9 +224,12 @@ my $list_configs = 0;
 my $list_tests = 0;
 my $cmake = 0;
 my $cmake_build_dir = "$cmake_tests/build";
+my $cmake_build_cfg = windows ? 'Debug' : undef;
 my $ctest = 'ctest';
 my $ctest_args = '';
-my $python = 'python3';
+# Python on Windows is called python from what I can see. On other platforms
+# that are legacy-mindful python is Python 2, but we can rely on python3.
+my $python = windows ? 'python' : 'python3';
 my %opts = (
     'help|h' => \$help,
     'sandbox|s=s' => \$sandbox,
@@ -240,6 +240,7 @@ my %opts = (
     'stop-on-fail|x' => \$stop_on_fail,
     'cmake' => \$cmake,
     'cmake-build-dir=s' => \$cmake_build_dir,
+    'cmake-build-cfg=s' => \$cmake_build_cfg,
     'ctest=s' => \$ctest,
     'ctest-args=s' => \$ctest_args,
     'python=s' => \$python,
@@ -274,9 +275,6 @@ foreach my $list (@builtin_test_lists) {
     push(@file_list, "$DDS_ROOT/$list->{file}") if ($query || $list->{enabled});
 }
 push(@file_list, @ARGV);
-foreach my $list (@file_list) {
-    die("$list is not a readable file!") if (!-r $list);
-}
 
 if ($show_configs) {
     foreach my $test_list (@file_list) {
@@ -394,8 +392,8 @@ if ($cmake) {
     if ($ctest_args) {
         push(@cmd, $ctest_args);
     }
-    if ($ctest_args !~ /--build-config/ && defined($exe_sub_dir)) {
-        push(@cmd, "--build-config $exe_sub_dir");
+    if ($ctest_args !~ /--build-config/ && defined($cmake_build_cfg)) {
+        push(@cmd, "--build-config $cmake_build_cfg");
     }
     if ($list_tests) {
         run_command($fake_name, join(' ', @cmd));

@@ -38,7 +38,7 @@ def relative_to(a, b):
 
 
 def fix_ctest_path(abs_source_path, path):
-    '''Work around ctest puting C_ instead of C: in the path
+    '''Work around ctest putting C_ instead of C: in the path
     '''
     drive = abs_source_path.drive
     if drive and path.upper().startswith(drive[0].upper() + '_'):
@@ -70,6 +70,12 @@ def generate_test_results(build_path, source_path, debug=False):
                 output_node.get('compression') is not None:
             sys.exit('ERROR: Test output in XML file is not usable, ' +
                 'pass --no-compress-output to ctest')
+
+        status = get_named_measurement(test_node, 'Completion Status')
+        if status == "Missing Configuration":
+            sys.exit('ERROR: Build has a configuration and ctest needs to know it. ' +
+                'Pass --cmake-build-cfg with the config if using auto_run_tests.pl. ' +
+                'Pass --build-config with the config if using ctest directly')
 
         abs_source_path = source_path.resolve()
 
