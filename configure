@@ -59,7 +59,6 @@ my %platforminfo =
                                  16 => 'vc10', 17 => 'vc11', 18 => 'vc12',
                                  19 => 'vc14', 19.1 => 'vs2017',
                                  19.2 => 'vs2019'},
-               'cl_archs' => {'x64' => 1, 'Win32' => 1, 'ARM64' => 0, 'ARM' => 0}, # 1 if supported
               },
    'macosx' => {
                 'compilers' => ['clang++'],
@@ -345,6 +344,8 @@ sub parseArgs {
   usage(0) if $opts->{'help'};
   targetUsage(0) if $opts->{'target-help'};
 
+  $opts->{'verbose'} = 1 if ($ENV{'GITHUB_ACTIONS'} eq 'true');
+
   if ($opts->{'verbose'}) {
     print "Options:\n";
     new Dumpvalue()->dumpValue($opts);
@@ -589,114 +590,43 @@ if ($has_host_compiler) {
     }
   }
 
-  # Test compiler_properties
+  print "Compiler is: $opts{'compiler'}\n" if $opts{'verbose'};
+
   my $compiler_kind = compiler_properties::kind_from_command($opts{'compiler'});
   if (!defined($compiler_kind)) {
     die("Could not determine compiler kind of command: $opts{'compiler'}");
   }
-  print("$compiler_kind Compiler: $opts{'compiler'}\n");
-  my $get_prop = shift;
+  print "Compiler kind is: $compiler_kind\n" if $opts{'verbose'};
+
   my $props_hash = compiler_properties::get_props($opts{'compiler'}, $compiler_kind);
-  my $props_array = compiler_properties::props_in_order($props_hash);
-  for my $prop (@{$props_array}) {
-    print("  $prop->{name}: $prop->{value}\n");
-  }
-
-  print "compiler is: $opts{'compiler'}\n" if $opts{'verbose'};
-
-  if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
-    my $savepath = $ENV{'PATH'};
-    my $clpath = which($opts{'compiler'});
-    if ($clpath) {
-      $clpath =~ s/vc\\bin(\\(x86_)?amd64)?/common7\\ide/i;
-      $ENV{'PATH'} .= ";$clpath";
-    }
-
-    # Have CL Tell Us Its Target Architecture and Version
-    my ($tmp_fd, $tmp_filename) = File::Temp::tempfile();
-    my $cl_check = << "EOF";
-#ifdef _M_X64
-#  define ARCH x64
-#elif defined(_M_IX86)
-#  define ARCH Win32
-#elif defined(_M_ARM64)
-#  define ARCH ARM64
-#elif defined(_M_ARM)
-#  define ARCH ARM
-#else
-#  define ARCH Unknown
-#endif
-CL is _MSC_VER ARCH
-EOF
-    print $tmp_fd $cl_check;
-    close($tmp_fd);
-    my $cl_command = "\"$opts{'compiler'}\" /EP $tmp_filename 2>&1";
-    print "Running $cl_command\n" if $opts{'verbose'};
-    open(my $cl_out_fd, "-|", $cl_command)
-      or die "ERROR: Could not detect Visual C++ version, try running this ".
-        "script from the Visual Studio Command Prompt.\nStopped";
-    my $ver = 0;
-    my $arch = '';
-    while (my $line = <$cl_out_fd>) {
-      chomp ($line);
-      print "CL says: $line\n" if $opts{'verbose'} && $line !~ /^\s*$/;
-      # Convert _MSC_VER to the form \d+\.\d
-      if ($line =~ /^CL is (\d+)\d (\w+)$/) {
-        $ver = int($1) / 10;
-        $arch = $2;
-        last;
-      }
-    }
-    close($cl_out_fd);
-    unlink($tmp_filename)
-      or warn "Unable to delete temporary file $tmp_filename: $!";
-    print "CL Version is $ver, architecture is $arch\n" if $opts{'verbose'};
-    if (!$ver && !$arch) {
-      die "cl version probe failed, invalid output from cl\nStopped";
-    }
-    if ($arch eq 'Unknown') {
-      die "cl version probe failed, no known architecture macro was defined\nStopped";
-    }
-    if (!exists $platforminfo{'win32'}->{'cl_archs'}->{$arch}) {
-      die "cl version probe failed, invalid architecture \"$arch\"\nStopped";
-    }
-    if (!$platforminfo{'win32'}->{'cl_archs'}->{$arch}) {
-      die "ERROR: Windows for $arch isn't supported\nStopped";
-    }
-    if (!exists $platforminfo{'win32'}->{'cl_versions'}->{$ver}) {
-      die "ERROR: Unknown or unsupported Visual C++ compiler version: $ver\n"
-        . "Stopped";
-    }
-
-    $opts{'compiler_version'} = $platforminfo{'win32'}->{'cl_versions'}->{$ver};
-    $opts{'compiler_target_architecture'} = $arch;
-
-    if ($ver >= 19) {
-      push(@{$opts{'features'}}, 'no_cxx11=0');
-      print "Visual C++ has C++11 support\n" if $opts{'verbose'};
-    }
-    $ENV{'PATH'} = $savepath;
-    print "Detected Visual C++ version: $opts{'compiler_version'}\n"
-      if $opts{'verbose'};
-  }
-  elsif ($opts{'compiler'} =~ /g\+\+/) {
-    if ($opts{'std'}) {
-      push(@{$opts{'macros'}}, 'CCFLAGS += -std=' . $opts{'std'});
-      print "Added platform_macros for -std=$opts{std}\n" if $opts{'verbose'};
-    }
-    else {
-      my $ver = `$opts{'compiler'} --version`;
-      if ($ver =~ /\(.*\) (\d+)\.\d+/ && $1 >= 6) {
-        $opts{'std'} = 'gnu++14';
-        print "Detected GCC >=6, default -std=gnu++14\n" if $opts{'verbose'};
-      }
-    }
-
-    if ($opts{'std'} && $opts{'std'} =~ /(0x|11|1y|14|1z|17|2a|20)$/) {
-      push(@{$opts{'features'}}, 'no_cxx11=0');
-      print "Compiler has C++11 support\n" if $opts{'verbose'};
+  if ($opts{'verbose'}) {
+    print("Compiler properties are:\n");
+    my $props_array = compiler_properties::props_in_order($props_hash);
+    for my $prop (@{$props_array}) {
+      print("  $prop->{name}: $prop->{value}\n");
     }
   }
+
+  my $cpp11 = 0;
+  if ($opts{'std'} && compiler_properties::kind_accepts_std($compiler_kind)) {
+    # TODO: Warn if we don't think compiler accepts -std?
+    push(@{$opts{'macros'}}, 'CCFLAGS += -std=' . $opts{'std'});
+    print "Added platform_macros for -std=$opts{std}\n" if $opts{'verbose'};
+    # TODO: Move this into compiler_properties
+    # TODO: Test to see if compiler actually supports this standard?
+    if ($opts{'std'} =~ /(0x|11|1y|14|1z|17|2a|20)$/) {
+      $cpp11 = 1;
+    }
+  }
+  elsif (compiler_properties::cpp_standard_at_least($props_hash, "c++11")) {
+    $cpp11 = 1;
+  }
+  if ($cpp11) {
+    push(@{$opts{'features'}}, 'no_cxx11=0');
+    print "Compiler has C++11 support\n" if $opts{'verbose'};
+  }
+
+  $opts{'compiler_target_architecture'} = $props_hash->{arch};
 }
 
 sub looksRelative {
@@ -1323,7 +1253,7 @@ else {
 
 sub targets_win64 {
   my $arch = exists $opts{'compiler_target_architecture'} ?
-               $opts{'compiler_target_architecture'} : '';
+    compiler_properties::arch_to_msvc($opts{'compiler_target_architecture'}) : '';
 
   return $arch eq 'x64';
 }
@@ -1638,7 +1568,7 @@ if ($build_gtest) {
     ('-Dgtest_force_shared_crt=ON',
      '-DCMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1',
      '-G', '"' . win32_cmake_generator($opts{'compiler_version'}) . '"',
-     '-A', $opts{'compiler_target_architecture'}) : ();
+     '-A', compiler_properties::arch_to_msvc($opts{'compiler_target_architecture'})) : ();
   my @cmake_cmds = ([$cmake,
                      "-DCMAKE_INSTALL_PREFIX=$install_dir",
                      '-DCMAKE_INSTALL_LIBDIR=lib',

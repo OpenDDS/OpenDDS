@@ -5,8 +5,17 @@ use strict;
 
 use File::Temp ();
 
-my @targets = qw/32b_x86 64b_x86 32b_arm 64b_arm/;
-my @target_prop_names = map { "targets_$_" } @targets;
+my @archs = qw/32b_x86 64b_x86 32b_arm 64b_arm/;
+sub arch_to_msvc {
+  my $arch = shift;
+  my %table = (
+    '32b_x86' => 'Win32',
+    '64b_x86' => 'x64',
+    '32b_arm' => 'ARM',
+    '64b_arm' => 'ARM64',
+  );
+  return $table{$arch};
+}
 
 # Human Friendly Name, Value of __cplusplus
 my @cpp_standards = (
@@ -53,10 +62,12 @@ my %compilers = (
   gcc => {
     cmd_re => qr/(?<!clan)g\+\+/,
     opts => '-E',
+    accepts_std => 1,
   },
   clang => {
     cmd_re => qr/clang\+\+/,
     opts => '-E',
+    accepts_std => 1,
   },
   msvc => {
     cmd_re => qr/cl(?!ang)/,
@@ -153,7 +164,7 @@ my @all_props = (
     },
   },
   {
-    name => 'targets_32b_x86',
+    name => '32b_x86',
     for => {
       gcc => {
         macro_defined => '__i386__',
@@ -167,7 +178,7 @@ my @all_props = (
     },
   },
   {
-    name => 'targets_64b_x86',
+    name => '64b_x86',
     for => {
       gcc => {
         macro_defined => '__x86_64__',
@@ -181,7 +192,7 @@ my @all_props = (
     },
   },
   {
-    name => 'targets_32b_arm',
+    name => '32b_arm',
     for => {
       gcc => {
         macro_defined => '__arm__',
@@ -195,7 +206,7 @@ my @all_props = (
     },
   },
   {
-    name => 'targets_64b_arm',
+    name => '64b_arm',
     for => {
       gcc => {
         macro_defined => '__aarch64__',
@@ -209,24 +220,23 @@ my @all_props = (
     },
   },
   {
-    name => 'targets',
-    depends => \@target_prop_names,
+    name => 'arch',
+    depends => \@archs,
     get_value => sub {
       my $props = shift;
-      my $target = undef;
-      for my $t (@targets) {
-        my $name = "targets_$t";
-        next unless ($props->{$name});
-        if (defined($target)) {
-          print STDERR "WARNING: Multiple targets matched\n";
+      my $arch = undef;
+      for my $a (@archs) {
+        next unless ($props->{$a});
+        if (defined($arch)) {
+          print STDERR "WARNING: Multiple archs matched\n";
         }
-        $target = $t;
+        $arch = $a;
       }
-      if (!defined($target)) {
-        print STDERR "WARNING: Could not determine target\n";
-        $target = "UNKNOWN";
+      if (!defined($arch)) {
+        print STDERR "WARNING: Could not determine arch\n";
+        $arch = "UNKNOWN";
       }
-      return $target;
+      return $arch;
     }
   },
 );
@@ -290,6 +300,11 @@ sub kind_from_command {
     }
   }
   return $compiler_kind;
+}
+
+sub kind_accepts_std {
+  my $compiler_kind = shift;
+  return $compilers{accepts_std};
 }
 
 sub get_props {
