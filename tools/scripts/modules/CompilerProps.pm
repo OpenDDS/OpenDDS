@@ -6,6 +6,7 @@ use strict;
 use File::Temp ();
 
 my @archs = qw/32b_x86 64b_x86 32b_arm 64b_arm/;
+my @oses = qw/linux android windows ios macos/;
 
 # Human Friendly Name, Value of __cplusplus
 my @cpp_stds = (
@@ -57,14 +58,34 @@ my %compilers = (
 
 my @version_parts = qw/major_version minor_version patch_version/;
 
+sub prop_from_bool_props {
+  my $props = shift;
+  my $prop = shift;
+  my $bool_props = shift;
+
+  my $value = undef;
+  for my $bool_prop (@{$bool_props}) {
+    next unless ($props->{$bool_prop});
+    if (defined($value)) {
+      warn("Multiple properties matched for $prop");
+    }
+    $value = $bool_prop;
+  }
+  if (!defined($value)) {
+    warn("Could not determine value for $prop");
+    return undef;
+  }
+  return $value;
+}
+
 # All possible properties and how to get them.
 # There are three kinds of ways to get properties which can be defined per
 # compiler or for all compilers:
 #   macro_value: base value off of the value of macro. Can be combined with
 #     macro_value_re regex and/or macro_value_process function to refine the
 #     result.
-#   macro_defined: If given macro is defined, then the value of the property is
-#     a 1 or else a 0.
+#   macro_if: If given macro expression is true, then the value of the property
+#     is a 1 or else a 0.
 #   get_value: function that is passed the hash of current property values and
 #     returns the value. Can use the depends array of property names to define
 #     properties that must be defined first. This will loop if the dependencies
@@ -180,13 +201,13 @@ my @all_props = (
     name => '32b_x86',
     for => {
       gcc => {
-        macro_defined => '__i386__',
+        macro_if => 'defined(__i386__)',
       },
       clang => {
-        macro_defined => '__i386__',
+        macro_if => 'defined(__i386__)',
       },
       msvc => {
-        macro_defined => '_M_IX86',
+        macro_if => 'defined(_M_IX86)',
       },
     },
   },
@@ -194,13 +215,13 @@ my @all_props = (
     name => '64b_x86',
     for => {
       gcc => {
-        macro_defined => '__x86_64__',
+        macro_if => 'defined(__x86_64__)',
       },
       clang => {
-        macro_defined => '__x86_64__',
+        macro_if => 'defined(__x86_64__)',
       },
       msvc => {
-        macro_defined => '_M_X64',
+        macro_if => 'defined(_M_X64)',
       },
     },
   },
@@ -208,13 +229,13 @@ my @all_props = (
     name => '32b_arm',
     for => {
       gcc => {
-        macro_defined => '__arm__',
+        macro_if => 'defined(__arm__)',
       },
       clang => {
-        macro_defined => '__arm__',
+        macro_if => 'defined(__arm__)',
       },
       msvc => {
-        macro_defined => '_M_ARM',
+        macro_if => 'defined(_M_ARM)',
       },
     },
   },
@@ -222,13 +243,13 @@ my @all_props = (
     name => '64b_arm',
     for => {
       gcc => {
-        macro_defined => '__aarch64__',
+        macro_if => 'defined(__aarch64__)',
       },
       clang => {
-        macro_defined => '__aarch64__',
+        macro_if => 'defined(__aarch64__)',
       },
       msvc => {
-        macro_defined => '_M_ARM64',
+        macro_if => 'defined(_M_ARM64)',
       },
     },
   },
@@ -238,19 +259,7 @@ my @all_props = (
     get_value => sub {
       my $props = shift;
 
-      my $arch = undef;
-      for my $a (@archs) {
-        next unless ($props->{$a});
-        if (defined($arch)) {
-          warn("Multiple archs matched");
-        }
-        $arch = $a;
-      }
-      if (!defined($arch)) {
-        warn("Could not determine arch");
-        $arch = "UNKNOWN";
-      }
-      return $arch;
+      return prop_from_bool_props($props, 'arch', \@archs);
     }
   },
   {
@@ -313,6 +322,36 @@ my @all_props = (
       $ver =~ s/^(\d+)\d$/$1/;
       return $table{$ver};
     },
+  },
+  {
+    name => 'linux',
+    alt_prop_id => 'is_linux', # linux is a macro in GCC
+    macro_if => 'defined(__linux__) && !defined(__ANDROID__)',
+  },
+  {
+    name => 'android',
+    macro_if => 'defined(__ANDROID__)',
+  },
+  {
+    name => 'windows',
+    macro_if => 'defined(_WIN32)',
+  },
+  {
+    name => 'ios',
+    macro_if => 'TARGET_OS_IOS',
+  },
+  {
+    name => 'macos',
+    macro_if => 'TARGET_OS_MAC && !TARGET_OS_IPHONE',
+  },
+  {
+    name => 'os',
+    depends => \@oses,
+    get_value => sub {
+      my $props = shift;
+
+      return prop_from_bool_props($props, 'os', \@oses);
+    }
   },
 );
 
@@ -400,21 +439,33 @@ sub get_props {
   my ($in_fd, $in_filename) = File::Temp::tempfile(
     'opendds-compiler-info-XXXXXX', SUFFIX => ".cpp");
   my $magic = "opendds-compiler-props-magic";
-  print $in_fd "$magic\n";
+  print $in_fd
+    "$magic\n" .
+    "#ifdef __APPLE__\n" .
+    "#  include <TargetConditionals.h>\n" .
+    "#else\n" .
+    "#  define TARGET_OS_IOS 0\n" .
+    "#  define TARGET_OS_MAC 0\n" .
+    "#  define TARGET_OS_IPHONE 0\n" .
+    "#endif\n";
   for my $prop (@all_props) {
     my $macro_value = get_prop_hint($prop, $compiler_kind, 'macro_value');
-    my $macro_defined = get_prop_hint($prop, $compiler_kind, 'macro_defined');
+    my $macro_if = get_prop_hint($prop, $compiler_kind, 'macro_if');
+    # Allow an alternative name if something is wrong of the actual property
+    # name, like "linux" on Linux GCC is a builtin defined to 1.
+    my $alt_prop_id = get_prop_hint($prop, $compiler_kind, 'alt_prop_id');
+    my $prop_id = $alt_prop_id // $prop->{name};
     if ($macro_value) {
-      $inserted_macros{$prop->{name}} = $prop;
-      print $in_fd "$prop->{name}: $macro_value\n";
+      $inserted_macros{$prop_id} = $prop;
+      print $in_fd "$prop_id: $macro_value\n";
     }
-    elsif ($macro_defined) {
-      $inserted_macros{$prop->{name}} = $prop;
+    elsif ($macro_if) {
+      $inserted_macros{$prop_id} = $prop;
       print $in_fd
-        "#ifdef $macro_defined\n" .
-        "$prop->{name}: 1\n" .
+        "#if $macro_if\n" .
+        "$prop_id: 1\n" .
         "#else\n" .
-        "$prop->{name}: 0\n" .
+        "$prop_id: 0\n" .
         "#endif\n";
     }
   }
@@ -456,9 +507,9 @@ sub get_props {
   # Look for Inserted Macros
   for my $line (@lines) {
     if ($line =~ /^(\w+): (.*)$/) {
-      my $name = $1;
+      my $prop_id = $1; # Might not be the same as name
       my $raw_value = $2;
-      my $prop = $inserted_macros{$name};
+      my $prop = $inserted_macros{$prop_id};
       if (defined($prop)) {
         my $value;
         my $re = get_prop_hint($prop, $compiler_kind, 'macro_value_re');
