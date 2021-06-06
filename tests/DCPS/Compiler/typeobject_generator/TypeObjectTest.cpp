@@ -423,22 +423,23 @@ IndexMap compute_scc12_index_map(const TypeMap& com_scc12)
 
 void check_struct_a_alias_member(const CommonStructMember& common, const TypeMap& scc15, const IndexMap& indexes)
 {
-  EXPECT_EQ(common.member_id, 0);
-  EXPECT_EQ(common.member_flags, TRY_CONSTRUCT1 | IS_KEY);
+  EXPECT_EQ(common.member_id, static_cast<ACE_CDR::ULong>(0));
+  EXPECT_EQ(common.member_flags, TRY_CONSTRUCT1);
   EXPECT_TRUE(scc15.find(common.member_type_id) != scc15.end());
   const ACE_CDR::Long idx = common.member_type_id.sc_component_id().scc_index;
-  EXPECT_EQ(indexes[idx], B_SEQ_ALIAS);
+  const IndexMap::const_iterator pos = indexes.find(idx);
+  EXPECT_TRUE(pos != indexes.end() && pos->second == B_SEQ_ALIAS);
 }
 
 void check_struct_a_sequence_member(const CommonStructMember& common)
 {
-  EXPECT_EQ(common.member_id, 1);
+  EXPECT_EQ(common.member_id, static_cast<ACE_CDR::ULong>(1));
   EXPECT_EQ(common.member_flags, TRY_CONSTRUCT1);
   const PlainSequenceLElemDefn& seq_ldefn = common.member_type_id.seq_ldefn();
   EXPECT_EQ(seq_ldefn.header.equiv_kind, EK_BOTH);
   EXPECT_EQ(seq_ldefn.header.element_flags, TRY_CONSTRUCT1);
   EXPECT_EQ(seq_ldefn.bound, ACE_UINT32_MAX);
-  EXPECT_EQ(seq_ldefn.element_identifier.kind(), TK_BOOLEAN);
+  EXPECT_EQ(seq_ldefn.element_identifier->kind(), TK_BOOLEAN);
 }
 
 void check_struct_a(const TypeMap& scc15, const TypeObject& to, const IndexMap& indexes, EquivalenceKind ek)
@@ -472,9 +473,9 @@ void check_struct_a(const TypeMap& scc15, const TypeObject& to, const IndexMap& 
     EXPECT_EQ(to.complete.struct_type.header.base_type, TypeIdentifier(TK_NONE));
     EXPECT_EQ(to.complete.struct_type.header.detail.type_name, "::A");
     const CompleteStructMemberSeq& member_seq = to.complete.struct_type.member_seq;
-    EXPECT_EQ(member_seq.length(), static_cast<ACE_CDR::ULong>(2))
+    EXPECT_EQ(member_seq.length(), static_cast<ACE_CDR::ULong>(2));
 
-    for (ACE_CDR::ULong i = 0; i < member_seq.length(), ++i) {
+    for (ACE_CDR::ULong i = 0; i < member_seq.length(); ++i) {
       const TypeKind tk = member_seq[i].common.member_type_id.kind();
       EXPECT_TRUE(tk == TI_STRONGLY_CONNECTED_COMPONENT ||
                   tk == TI_PLAIN_SEQUENCE_LARGE);
@@ -491,14 +492,14 @@ void check_struct_a(const TypeMap& scc15, const TypeObject& to, const IndexMap& 
 
 void check_struct_b_cseq_member(const CommonStructMember& common, const TypeMap& scc15)
 {
-  EXPECT_EQ(common.member_id, 0);
+  EXPECT_EQ(common.member_id, static_cast<ACE_CDR::ULong>(0));
   EXPECT_EQ(common.member_flags, TRY_CONSTRUCT1);
   EXPECT_TRUE(scc15.find(common.member_type_id) != scc15.end());
 }
 
 void check_struct_b_eseq_member(const CommonStructMember& common, const TypeMap& scc15)
 {
-  EXPECT_EQ(common.member_id, 1);
+  EXPECT_EQ(common.member_id, static_cast<ACE_CDR::ULong>(1));
   EXPECT_EQ(common.member_flags, TRY_CONSTRUCT1);
   EXPECT_TRUE(scc15.find(common.member_type_id) != scc15.end());
 }
@@ -528,8 +529,11 @@ void check_struct_b(const TypeMap& scc15, const TypeMap& other,
                   tk == EK_MINIMAL);
       if (tk == TI_STRONGLY_CONNECTED_COMPONENT) {
         const ACE_CDR::Long idx = member_seq[i].common.member_type_id.sc_component_id().scc_index;
-        EXPECT_TRUE(indexes[idx] == C_SEQ_ALIAS || indexes[idx] == E_SEQ_ALIAS);
-        if (indexes[idx] == C_SEQ_ALIAS) {
+        const IndexMap::const_iterator pos = indexes.find(idx);
+        EXPECT_TRUE(pos != indexes.end() && (pos->second == C_SEQ_ALIAS || pos->second == E_SEQ_ALIAS));
+        //EXPECT_TRUE(indexes[idx] == C_SEQ_ALIAS || indexes[idx] == E_SEQ_ALIAS);
+        //if (indexes[idx] == C_SEQ_ALIAS) {
+        if (pos->second == C_SEQ_ALIAS) {
           check_struct_b_cseq_member(member_seq[i].common, scc15);
           NameHash nh;
           hash_member_name(nh, "a_cseq");
@@ -550,14 +554,17 @@ void check_struct_b(const TypeMap& scc15, const TypeMap& other,
     const CompleteStructMemberSeq& member_seq = to.complete.struct_type.member_seq;
     EXPECT_EQ(member_seq.length(), static_cast<ACE_CDR::ULong>(3));
 
-    for (ACE_CDR::ULong i = 0; i < member_seq.length(); ++i) } {
+    for (ACE_CDR::ULong i = 0; i < member_seq.length(); ++i) {
       const TypeKind tk = member_seq[i].common.member_type_id.kind();
       EXPECT_TRUE(tk == TI_STRONGLY_CONNECTED_COMPONENT ||
                   tk == EK_COMPLETE);
       if (tk == TI_STRONGLY_CONNECTED_COMPONENT) {
         const ACE_CDR::Long idx = member_seq[i].common.member_type_id.sc_component_id().scc_index;
-        EXPECT_TRUE(indexes[idx] == C_SEQ_ALIAS || indexes[idx] == E_SEQ_ALIAS);
-        if (indexes[idx] == C_SEQ_ALIAS) {
+        const IndexMap::const_iterator pos = indexes.find(idx);
+        EXPECT_TRUE(pos != indexes.end() && (pos->second == C_SEQ_ALIAS || pos->second == E_SEQ_ALIAS));
+        //        EXPECT_TRUE(indexes[idx] == C_SEQ_ALIAS || indexes[idx] == E_SEQ_ALIAS);
+        //        if (indexes[idx] == C_SEQ_ALIAS) {
+        if (pos->second == C_SEQ_ALIAS) {
           check_struct_b_cseq_member(member_seq[i].common, scc15);
           EXPECT_EQ(member_seq[i].detail.name, "a_cseq");
         } else {
@@ -573,14 +580,14 @@ void check_struct_b(const TypeMap& scc15, const TypeMap& other,
 
 void check_struct_c_dseq_member(const CommonStructMember& common, const TypeMap& scc15)
 {
-  EXPECT_EQ(common.member_id, 0);
+  EXPECT_EQ(common.member_id, static_cast<ACE_CDR::ULong>(0));
   EXPECT_EQ(common.member_flags, TRY_CONSTRUCT1);
   EXPECT_TRUE(scc15.find(common.member_type_id) != scc15.end());
 }
 
 void check_struct_c_asequence_member(const CommonStructMember& common, const TypeMap& scc15)
 {
-  EXPECT_EQ(common.member_id, 1);
+  EXPECT_EQ(common.member_id, static_cast<ACE_CDR::ULong>(1));
   EXPECT_EQ(common.member_flags, TRY_CONSTRUCT1);
   EXPECT_TRUE(scc15.find(common.member_type_id) != scc15.end());
 }
@@ -600,8 +607,9 @@ void check_struct_c(const TypeMap& scc15, const TypeObject& to, const IndexMap& 
       const TypeKind tk = member_seq[i].common.member_type_id.kind();
       EXPECT_TRUE(tk == TI_STRONGLY_CONNECTED_COMPONENT);
       const ACE_CDR::Long idx = member_seq[i].common.member_type_id.sc_component_id().scc_index;
-      EXPECT_TRUE(indexes[idx] == D_SEQ_ALIAS || indexes[idx] == A_SEQ_ALIAS);
-      if (indexes[idx] == D_SEQ_ALIAS) {
+      const IndexMap::const_iterator pos = indexes.find(idx);
+      EXPECT_TRUE(pos != indexes.end() && (pos->second == D_SEQ_ALIAS || pos->second == A_SEQ_ALIAS));
+      if (pos->second == D_SEQ_ALIAS) {
         check_struct_c_dseq_member(member_seq[i].common, scc15);
         NameHash nh;
         hash_member_name(nh, "a_dseq");
@@ -623,8 +631,9 @@ void check_struct_c(const TypeMap& scc15, const TypeObject& to, const IndexMap& 
       const TypeKind tk = member_seq[i].common.member_type_id.kind();
       EXPECT_TRUE(tk == TI_STRONGLY_CONNECTED_COMPONENT);
       const ACE_CDR::Long idx = member_seq[i].common.member_type_id.sc_component_id().scc_index;
-      EXPECT_TRUE(indexes[idx] == D_SEQ_ALIAS || indexes[idx] == A_SEQ_ALIAS);
-      if (indexes[idx] == D_SEQ_ALIAS) {
+      const IndexMap::const_iterator pos = indexes.find(idx);
+      EXPECT_TRUE(pos != indexes.end() && (pos->second == D_SEQ_ALIAS || pos->second == A_SEQ_ALIAS));
+      if (pos->second == D_SEQ_ALIAS) {
         check_struct_c_dseq_member(member_seq[i].common, scc15);
         EXPECT_EQ(member_seq[i].detail.name, "a_dseq");
       } else {
@@ -637,22 +646,23 @@ void check_struct_c(const TypeMap& scc15, const TypeObject& to, const IndexMap& 
 
 void check_struct_d_eseq_member(const CommonStructMember& common, const TypeMap& scc15, const IndexMap& indexes)
 {
-  EXPECT_EQ(common.member_id, 0);
+  EXPECT_EQ(common.member_id, static_cast<ACE_CDR::ULong>(0));
   EXPECT_EQ(common.member_flags, TRY_CONSTRUCT1);
   EXPECT_TRUE(scc15.find(common.member_type_id) != scc15.end());
   const ACE_CDR::Long idx = common.member_type_id.sc_component_id().scc_index;
-  EXPECT_EQ(indexes[idx], E_SEQ_ALIAS);
+  const IndexMap::const_iterator pos = indexes.find(idx);
+  EXPECT_TRUE(pos != indexes.end() && pos->second == E_SEQ_ALIAS);
 }
 
 void check_struct_d_sequence_member(const CommonStructMember& common)
 {
-  EXPECT_EQ(common.member_id, 1);
+  EXPECT_EQ(common.member_id, static_cast<ACE_CDR::ULong>(1));
   EXPECT_EQ(common.member_flags, TRY_CONSTRUCT1);
   const PlainSequenceLElemDefn& seq_ldefn = common.member_type_id.seq_ldefn();
   EXPECT_EQ(seq_ldefn.header.equiv_kind, EK_BOTH);
   EXPECT_EQ(seq_ldefn.header.element_flags, TRY_CONSTRUCT1);
   EXPECT_EQ(seq_ldefn.bound, ACE_UINT32_MAX);
-  EXPECT_EQ(seq_ldefn.element_identifier.kind(), TK_BYTE);
+  EXPECT_EQ(seq_ldefn.element_identifier->kind(), TK_BYTE);
 }
 
 void check_struct_d(const TypeMap& scc15, const TypeObject& to, const IndexMap& indexes, EquivalenceKind ek)
@@ -703,19 +713,21 @@ void check_struct_d(const TypeMap& scc15, const TypeObject& to, const IndexMap& 
 
 void check_struct_e_aseq_member(const CommonStructMember& common, const TypeMap& scc15, const IndexMap& scc15_index_map)
 {
-  EXPECT_EQ(common.member_id, 0);
+  EXPECT_EQ(common.member_id, static_cast<ACE_CDR::ULong>(0));
   EXPECT_EQ(common.member_flags, TRY_CONSTRUCT1 | TRY_CONSTRUCT2);
   EXPECT_TRUE(scc15.find(common.member_type_id) != scc15.end());
   const ACE_CDR::Long idx = common.member_type_id.sc_component_id().scc_index;
-  EXPECT_EQ(scc15_index_map[idx], A_SEQ_ALIAS);
+  const IndexMap::const_iterator pos = scc15_index_map.find(idx);
+  EXPECT_TRUE(pos != scc15_index_map.end() && pos->second == A_SEQ_ALIAS);
 }
 
 void check_struct_e_struct_member(const CommonStructMember& common, const IndexMap& scc12_index_map)
 {
-  EXPECT_EQ(common.member_id, 1);
+  EXPECT_EQ(common.member_id, static_cast<ACE_CDR::ULong>(1));
   EXPECT_EQ(common.member_flags, TRY_CONSTRUCT1);
   const ACE_CDR::Long idx = common.member_type_id.sc_component_id().scc_index;
-  EXPECT_EQ(scc12_index_map[idx], F);
+  const IndexMap::const_iterator pos = scc12_index_map.find(idx);
+  EXPECT_TRUE(pos != scc12_index_map.end() && pos->second == F);
 }
 
 void check_struct_e(const TypeMap& scc15, const TypeMap& scc12,
@@ -769,7 +781,7 @@ void check_struct_e(const TypeMap& scc15, const TypeMap& scc12,
 }
 
 void check_sequence(const TypeMap& scc15, const TypeObject& to, const IndexMap& scc15_index_map,
-                    const TypeName& elem_type, EquivalenceKind ek)
+                    const TypeName& elem_type_name, EquivalenceKind ek)
 {
   const ACE_CDR::ULong bound = ek == EK_MINIMAL ?
     to.minimal.sequence_type.header.common.bound : to.complete.sequence_type.header.common.bound;
@@ -784,18 +796,22 @@ void check_sequence(const TypeMap& scc15, const TypeObject& to, const IndexMap& 
   EXPECT_EQ(elem_type.kind(), TI_STRONGLY_CONNECTED_COMPONENT);
   EXPECT_TRUE(scc15.find(elem_type) != scc15.end());
   const ACE_CDR::Long elem_idx = elem_type.sc_component_id().scc_index;
-  EXPECT_EQ(scc15_index_map[elem_idx], elem_type);
+  const IndexMap::const_iterator pos = scc15_index_map.find(elem_idx);
+  EXPECT_TRUE(pos != scc15_index_map.end() && pos->second == elem_type_name);
+  //  EXPECT_EQ(scc15_index_map[elem_idx], elem_type_name);
 }
 
 void check_alias(const TypeMap& scc15, const TypeObject& to, const IndexMap& scc15_index_map,
-                 const String type_name, const TypeName& base_type, EquivalenceKind ek)
+                 const String type_name, const TypeName& base_type_name, EquivalenceKind ek)
 {
   const TypeIdentifier& base_type = ek == EK_MINIMAL ?
     to.minimal.alias_type.body.common.related_type : to.complete.alias_type.body.common.related_type;
   EXPECT_EQ(base_type.kind(), TI_STRONGLY_CONNECTED_COMPONENT);
   EXPECT_TRUE(scc15.find(base_type) != scc15.end());
   const ACE_CDR::Long base_idx = base_type.sc_component_id().scc_index;
-  EXPECT_EQ(scc15_index_map[base_idx], base_type);
+  const IndexMap::const_iterator pos = scc15_index_map.find(base_idx);
+  EXPECT_TRUE(pos != scc15_index_map.end() && pos->second == base_type_name);
+  //  EXPECT_EQ(scc15_index_map[base_idx], base_type);
 
   if (ek == EK_COMPLETE) {
     EXPECT_EQ(to.complete.alias_type.header.detail.type_name, type_name);
@@ -808,7 +824,7 @@ void check_scc15_map(const TypeMap& scc15, const TypeMap& scc12, const TypeMap& 
 {
   typedef std::map<TypeName, ACE_CDR::Long> TypeToIndexMap;
   TypeToIndexMap to_index;
-  for (IndexMap::const_iterator it = indexes.begin(); it != indexes.end(); ++it) {
+  for (IndexMap::const_iterator it = scc15_index_map.begin(); it != scc15_index_map.end(); ++it) {
     to_index[it->second] = it->first;
   }
 

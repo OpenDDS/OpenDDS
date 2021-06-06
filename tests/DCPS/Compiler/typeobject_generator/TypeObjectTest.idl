@@ -61,7 +61,7 @@ typedef sequence<B> BSeq;
 @topic
 @appendable
 struct A {
-  @key BSeq a_bseq;
+  BSeq a_bseq;
   sequence<boolean> a_boolseq;
 };
 
