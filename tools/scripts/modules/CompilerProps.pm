@@ -1,4 +1,4 @@
-package compiler_properties;
+package CompilerProps;
 
 use warnings;
 use strict;
@@ -6,19 +6,9 @@ use strict;
 use File::Temp ();
 
 my @archs = qw/32b_x86 64b_x86 32b_arm 64b_arm/;
-sub arch_to_msvc {
-  my $arch = shift;
-  my %table = (
-    '32b_x86' => 'Win32',
-    '64b_x86' => 'x64',
-    '32b_arm' => 'ARM',
-    '64b_arm' => 'ARM64',
-  );
-  return $table{$arch};
-}
 
 # Human Friendly Name, Value of __cplusplus
-my @cpp_standards = (
+my @cpp_stds = (
   ["c++03", 199711],
   ["c++11", 201103],
   ["c++14", 201402],
@@ -26,11 +16,11 @@ my @cpp_standards = (
   ["c++20", 202002],
 );
 
-sub cpp_standard_from_macro {
+sub cpp_std_from_macro {
   my $macro_value = shift;
 
-  my $std = "UNKNOWN";
-  for my $pair (@cpp_standards) {
+  my $std = undef;
+  for my $pair (@cpp_stds) {
     if ($pair->[1] <= $macro_value) {
       $std = $pair->[0];
     }
@@ -38,23 +28,15 @@ sub cpp_standard_from_macro {
   return $std;
 }
 
-sub cpp_standard_to_macro {
+sub cpp_std_to_macro {
   my $std = shift;
 
-  for my $pair (@cpp_standards) {
+  for my $pair (@cpp_stds) {
     if ($pair->[0] eq $std) {
       return $pair->[1];
     }
   }
-  print STDERR "WARNING: \"$std\" is an invalid standard\n";
-  return 999999;
-}
-
-sub cpp_standard_at_least {
-  my $macro_value = shift;
-  my $std = shift;
-
-  return ($macro_value >= cpp_standard_to_macro($std)) ? 1 : 0;
+  die("\"$std\" is an unreconized C++ standard\n")
 }
 
 # Maps compiler_kind to how to detect and invoke the compiler.
@@ -62,12 +44,10 @@ my %compilers = (
   gcc => {
     cmd_re => qr/(?<!clan)g\+\+/,
     opts => '-E',
-    accepts_std => 1,
   },
   clang => {
     cmd_re => qr/clang\+\+/,
     opts => '-E',
-    accepts_std => 1,
   },
   msvc => {
     cmd_re => qr/cl(?!ang)/,
@@ -87,15 +67,36 @@ my @version_parts = qw/major_version minor_version patch_version/;
 #     a 1 or else a 0.
 #   get_value: function that is passed the hash of current property values and
 #     returns the value. Can use the depends array of property names to define
-#     properties that have a value first. This will loop if the dependencies are
-#     circular, so be careful.
+#     properties that must be defined first. This will loop if the dependencies
+#     are circular, so be careful.
 my @all_props = (
+  {
+    name => 'command',
+  },
+  {
+    name => 'kind',
+  },
+  {
+    name => 'accepts_std',
+    get_value => sub { return 1; },
+    for => {
+      msvc => {
+        get_value => sub { return 0; },
+      },
+    },
+  },
   {
     name => 'version',
     depends => \@version_parts,
+    for => {
+      msvc => {
+        depends => ['major_version', 'minor_version'],
+      },
+    },
     get_value => sub {
       my $props = shift;
-      return join('.', map {$props->{$_}} @version_parts);
+
+      return join('.', map {$props->{$_}} grep {exists $props->{$_}} @version_parts);
     },
   },
   {
@@ -143,24 +144,20 @@ my @all_props = (
       clang => {
         macro_value => '__clang_patchlevel__',
       },
-      msvc => {
-        # cl doesn't seem to have this. It does have a build number in
-        # _MSC_VER_FULL, but that is probably, not needed.
-        get_value => sub { return '0'; },
-      },
     },
   },
   {
-    name => 'default_cpp_standard_macro_value',
+    name => 'default_cpp_std_macro_value',
     macro_value_re => qr/(\d+)L/,
     macro_value => '__cplusplus',
   },
   {
-    name => 'default_cpp_standard',
-    depends => ['default_cpp_standard_macro_value'],
+    name => 'default_cpp_std',
+    depends => ['default_cpp_std_macro_value'],
     get_value => sub {
       my $props = shift;
-      return cpp_standard_from_macro($props->{default_cpp_standard_macro_value});
+
+      return cpp_std_from_macro($props->{default_cpp_std_macro_value});
     },
   },
   {
@@ -224,20 +221,86 @@ my @all_props = (
     depends => \@archs,
     get_value => sub {
       my $props = shift;
+
       my $arch = undef;
       for my $a (@archs) {
         next unless ($props->{$a});
         if (defined($arch)) {
-          print STDERR "WARNING: Multiple archs matched\n";
+          warn("Multiple archs matched");
         }
         $arch = $a;
       }
       if (!defined($arch)) {
-        print STDERR "WARNING: Could not determine arch\n";
+        warn("Could not determine arch");
         $arch = "UNKNOWN";
       }
       return $arch;
     }
+  },
+  {
+    name => 'vs_cmake_arch',
+    depends => ['arch'],
+    for => {
+      msvc => {
+        get_value => sub {
+          my $props = shift;
+
+          my %table = (
+            '32b_x86' => 'Win32',
+            '64b_x86' => 'x64',
+            '32b_arm' => 'ARM',
+            '64b_arm' => 'ARM64',
+          );
+          return $table{$props->{arch}};
+        },
+      },
+    },
+  },
+  {
+    name => 'vs_cmake_gen',
+    depends => ['version'],
+    for => {
+      msvc => {
+        get_value => sub {
+          my $props = shift;
+
+          my %table = (
+            '15.0' => 'Visual Studio 9 2008',
+            '16.0' => 'Visual Studio 10 2010',
+            '17.0' => 'Visual Studio 11 2012',
+            '18.0' => 'Visual Studio 12 2013',
+            '19.0' => 'Visual Studio 14 2015',
+            '19.1' => 'Visual Studio 15 2017',
+            '19.2' => 'Visual Studio 16 2019',
+          );
+          return $table{$props->{version}};
+        },
+      },
+    },
+  },
+  {
+    name => 'vs_mpc_type',
+    depends => ['version'],
+    for => {
+      msvc => {
+        get_value => sub {
+          my $props = shift;
+
+          my %table = (
+            '13.1' => 'vc71',
+            '14.0' => 'vc8',
+            '15.0' => 'vc9',
+            '16.0' => 'vc10',
+            '17.0' => 'vc11',
+            '18.0' => 'vc12',
+            '19.0' => 'vc14',
+            '19.1' => 'vs2017',
+            '19.2' => 'vs2019',
+          );
+          return $table{$props->{version}};
+        },
+      },
+    },
   },
 );
 
@@ -258,9 +321,10 @@ sub eval_prop {
   my $prop = shift;
 
   my $get_value = get_prop_hint($prop, $compiler_kind, 'get_value');
+  my $depends = get_prop_hint($prop, $compiler_kind, 'depends');
   if (defined($get_value) && !exists($props->{$prop->{name}})) {
-    if (exists($prop->{depends})) {
-      for my $name (@{$prop->{depends}}) {
+    if (defined($depends)) {
+      for my $name (@{$depends}) {
         if (!exists($props->{$name})) {
           if (!eval_prop($props, $compiler_kind, get_prop_by_name($name))) {
             return 0;
@@ -268,8 +332,11 @@ sub eval_prop {
         }
       }
     }
-    $props->{$prop->{name}} = &{\&{$get_value}}($props);
-    return 1;
+    my $value = &{\&{$get_value}}($props);
+    if (defined($value)) {
+      $props->{$prop->{name}} = $value;
+      return 1;
+    }
   }
   return 0;
 }
@@ -296,27 +363,31 @@ sub kind_from_command {
   my $compiler_kind;
   for my $key (keys(%compilers)) {
     if ($compiler_command =~ /$compilers{$key}->{cmd_re}/i) {
+      if (defined($compiler_kind)) {
+        warn "compiler matched $key, but already matched $compiler_kind!";
+      }
       $compiler_kind = $key;
     }
   }
   return $compiler_kind;
 }
 
-sub kind_accepts_std {
-  my $compiler_kind = shift;
-  return $compilers{accepts_std};
-}
-
 sub get_props {
   my $compiler_command = shift;
   my $compiler_kind = shift;
+  my $debug = shift;
 
   my %inserted_macros;
-  my %props;
+  my %props = (
+    command => $compiler_command,
+    kind => $compiler_kind,
+  );
 
+  # Make the Input File
   my ($in_fd, $in_filename) = File::Temp::tempfile(
     'opendds-compiler-info-XXXXXX', SUFFIX => ".cpp");
-  print $in_fd "valid: 1\n";
+  my $magic = "opendds-compiler-props-magic";
+  print $in_fd "$magic\n";
   for my $prop (@all_props) {
     my $macro_value = get_prop_hint($prop, $compiler_kind, 'macro_value');
     my $macro_defined = get_prop_hint($prop, $compiler_kind, 'macro_defined');
@@ -336,50 +407,69 @@ sub get_props {
   }
   close($in_fd);
 
+  # Run the Compiler on Input File
   my $command = "\"$compiler_command\" $compilers{$compiler_kind}->{opts} " .
     "\"$in_filename\" 2>&1";
+  if ($debug) {
+    print("Running command: $command\n");
+  }
   my $valid = 0;
   open(my $out_fd, "-|", $command) or die "ERROR: $!";
+  my @lines;
   while (my $line = <$out_fd>) {
     chomp($line);
-    # print("compiler says: $line\n");
-    if ($line =~ /^(\w+): (.*)$/) {
-      my $name = $1;
-      my $raw_value = $2;
-      if ($name eq 'valid' && $raw_value eq "1") {
-        $valid = 1;
-      }
-      for my $prop (values(%inserted_macros)) {
-        if ($prop->{name} eq $name) {
-          my $value;
-          my $re = get_prop_hint($prop, $compiler_kind, 'macro_value_re');
-          if ($re) {
-            if ($raw_value =~ m/^$re$/) {
-              $value = $1;
-            } else {
-              $value = "INVALID";
-            }
-          }
-          else {
-            $value = $raw_value;
-          }
-          my $macro_value_process =
-            get_prop_hint($prop, $compiler_kind, 'macro_value_process');
-          if (defined($macro_value_process)) {
-              $value = &{\&{$macro_value_process}}($value);
-          }
-          $props{$prop->{name}} = $value;
-          last;
-        }
-      }
-    }
+    $valid = 1 if ($line eq $magic);
+    push(@lines, $line);
   }
   close($out_fd);
   unlink($in_filename)
-    or warn "Unable to delete temporary file $in_filename: $!";
+    or warn("Unable to delete temporary file $in_filename: $!");
+  if (!$valid) {
+    print STDERR
+      "ERROR: Invalid compiler output from: $command\n" .
+      "This is the output:\n";
+    for my $line (@lines) {
+      print STDERR ("compiler said: $line\n");
+    }
+    die("Stopped");
+  }
 
-  die ("Invalid compiler output") if (!$valid);
+  if ($debug) {
+    for my $line (@lines) {
+      print("compiler said: $line\n");
+    }
+  }
 
+  # Look for Inserted Macros
+  for my $line (@lines) {
+    if ($line =~ /^(\w+): (.*)$/) {
+      my $name = $1;
+      my $raw_value = $2;
+      my $prop = $inserted_macros{$name};
+      if (defined($prop)) {
+        my $value;
+        my $re = get_prop_hint($prop, $compiler_kind, 'macro_value_re');
+        if ($re) {
+          if ($raw_value =~ m/^$re$/) {
+            $value = $1;
+          } else {
+            $value = "INVALID";
+          }
+        }
+        else {
+          $value = $raw_value;
+        }
+        my $macro_value_process =
+          get_prop_hint($prop, $compiler_kind, 'macro_value_process');
+        if (defined($macro_value_process)) {
+          $value = &{\&{$macro_value_process}}($value);
+        }
+        $props{$prop->{name}} = $value;
+      }
+    }
+  }
+
+  # Evaluate Remaining Properties that can be Evaluated
   for my $prop (@all_props) {
     eval_prop(\%props, $compiler_kind, $prop);
   }
@@ -399,6 +489,60 @@ sub props_in_order {
   }
 
   return \@props_array;
+}
+
+# Below is the Public Object-Oriented Interface
+
+sub new {
+  my $class = shift;
+  my $command = shift;
+  my $args = shift;
+  my $debug = $args->{debug} // 0;
+
+  print("Compiler is \"$command\"\n") if ($debug);
+
+  my $kind = $args->{kind};
+  if (!defined($kind)) {
+    $kind = kind_from_command($command);
+    if (!defined($kind)) {
+      die("ERROR: Could not determine compiler kind of command: $command");
+    }
+  }
+  elsif (!exists($compilers{$kind})) {
+    die("ERROR: Invalid compiler kind: \"$kind\"");
+  }
+  print("Compiler kind is \"$kind\"\n") if ($debug);
+
+  my $self = get_props($command, $kind, $debug);
+  $self->{debug} = $debug;
+
+  return bless($self, $class);
+}
+
+sub log {
+  my $self = shift;
+  my $indent = shift || '';
+
+  my $props_array = props_in_order($self);
+  for my $prop (@{$props_array}) {
+    print("$indent$prop->{name}: $prop->{value}\n");
+  }
+}
+
+sub require {
+  my $self = shift;
+  my $prop = shift;
+  get_prop_by_name($prop);
+  die("ERROR: No such compiler property: \"$prop\"") unless exists($self->{$prop});
+  return $self->{$prop};
+}
+
+sub default_cpp_std_is_at_least {
+  my $self = shift;
+  my $std = shift;
+
+  return
+    ($self->require('default_cpp_std_macro_value') >= cpp_std_to_macro($std)) ? 1 : 0;
 }
 
 1;

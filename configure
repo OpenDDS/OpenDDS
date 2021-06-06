@@ -25,7 +25,7 @@ use warnings;
 use FindBin;
 use lib "$FindBin::Bin/tools/scripts/modules";
 
-use compiler_properties;
+use CompilerProps;
 
 ## Version of OCI's TAO to download
 my $oci_tao_version = '2.2a';
@@ -55,10 +55,6 @@ my %platforminfo =
   ('win32' => {
                'compilers' => ['cl'],
                'libpath' => 'PATH',
-               'cl_versions' => {13.1 => 'vc71', 14 => 'vc8', 15 => 'vc9',
-                                 16 => 'vc10', 17 => 'vc11', 18 => 'vc12',
-                                 19 => 'vc14', 19.1 => 'vs2017',
-                                 19.2 => 'vs2019'},
               },
    'macosx' => {
                 'compilers' => ['clang++'],
@@ -564,6 +560,7 @@ if (!exists $platforminfo{$opts{'target'}}->{'needs_i2jrt_corba'}) {
 
 ## compiler
 
+my $host_compiler_props = undef;
 if ($has_host_compiler) {
   if ($opts{'compiler'}) {
     my $standard = 0;
@@ -590,25 +587,14 @@ if ($has_host_compiler) {
     }
   }
 
-  print "Compiler is: $opts{'compiler'}\n" if $opts{'verbose'};
-
-  my $compiler_kind = compiler_properties::kind_from_command($opts{'compiler'});
-  if (!defined($compiler_kind)) {
-    die("Could not determine compiler kind of command: $opts{'compiler'}");
-  }
-  print "Compiler kind is: $compiler_kind\n" if $opts{'verbose'};
-
-  my $props_hash = compiler_properties::get_props($opts{'compiler'}, $compiler_kind);
+  $host_compiler_props = CompilerProps->new($opts{'compiler'}, {debug => $opts{'verbose'}});
   if ($opts{'verbose'}) {
     print("Compiler properties are:\n");
-    my $props_array = compiler_properties::props_in_order($props_hash);
-    for my $prop (@{$props_array}) {
-      print("  $prop->{name}: $prop->{value}\n");
-    }
+    $host_compiler_props->log('  ');
   }
 
   my $cpp11 = 0;
-  if ($opts{'std'} && compiler_properties::kind_accepts_std($compiler_kind)) {
+  if ($opts{'std'} && $host_compiler_props->require('accepts_std') eq '1') {
     # TODO: Warn if we don't think compiler accepts -std?
     push(@{$opts{'macros'}}, 'CCFLAGS += -std=' . $opts{'std'});
     print "Added platform_macros for -std=$opts{std}\n" if $opts{'verbose'};
@@ -618,15 +604,13 @@ if ($has_host_compiler) {
       $cpp11 = 1;
     }
   }
-  elsif (compiler_properties::cpp_standard_at_least($props_hash, "c++11")) {
+  elsif ($host_compiler_props->default_cpp_std_is_at_least("c++11")) {
     $cpp11 = 1;
   }
   if ($cpp11) {
     push(@{$opts{'features'}}, 'no_cxx11=0');
     print "Compiler has C++11 support\n" if $opts{'verbose'};
   }
-
-  $opts{'compiler_target_architecture'} = $props_hash->{arch};
 }
 
 sub looksRelative {
@@ -1251,20 +1235,13 @@ else {
   print "Could not find CMake at '$opts{'cmake'}'\n" if $opts{'verbose'};
 }
 
-sub targets_win64 {
-  my $arch = exists $opts{'compiler_target_architecture'} ?
-    compiler_properties::arch_to_msvc($opts{'compiler_target_architecture'}) : '';
-
-  return $arch eq 'x64';
-}
-
 sub system_default_install_dir {
   if ($is_windows) {
     # When the host is 32-bit.
     return $ENV{'ProgramFiles'}
       if ! exists $ENV{'ProgramFiles(x86)'};
-
-    return targets_win64() ? $ENV{'ProgramFiles'} : $ENV{'ProgramFiles(x86)'};
+    return $host_compiler_props->require('arch') eq '64b_x86' ?
+      $ENV{'ProgramFiles'} : $ENV{'ProgramFiles(x86)'};
   }
   return '/usr';
 }
@@ -1540,23 +1517,6 @@ if ($opts{'openssl'} && $opts{'openssl'} ne 'skip_version_check') {
     if grep m/OpenSSL[\W]+1.1/, <$fh>;
 }
 
-sub win32_cmake_generator {
-  my $ver = shift;
-
-  my %map = ('vc9' => 'Visual Studio 9 2008',
-             'vc10' => 'Visual Studio 10 2010',
-             'vc11' => 'Visual Studio 11 2012',
-             'vc12' => 'Visual Studio 12 2013',
-             'vc14' => 'Visual Studio 14 2015',
-             'vs2017' => 'Visual Studio 15 2017',
-             'vs2019' => 'Visual Studio 16 2019');
-
-  die "ERROR: Unsupported Visual Studio version '$ver' supplied.\nStopped"
-    if ! exists $map{$ver};
-
-  return $map{$ver};
-}
-
 if ($build_gtest) {
   print("Building Google Test...\n");
 
@@ -1567,8 +1527,8 @@ if ($build_gtest) {
   my @cmake_platform_args = $is_windows ?
     ('-Dgtest_force_shared_crt=ON',
      '-DCMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1',
-     '-G', '"' . win32_cmake_generator($opts{'compiler_version'}) . '"',
-     '-A', compiler_properties::arch_to_msvc($opts{'compiler_target_architecture'})) : ();
+     '-G', '"' . $host_compiler_props->require('vs_cmake_gen') . '"',
+     '-A', $host_compiler_props->require('vs_cmake_arch')) : ();
   my @cmake_cmds = ([$cmake,
                      "-DCMAKE_INSTALL_PREFIX=$install_dir",
                      '-DCMAKE_INSTALL_LIBDIR=lib',
@@ -1924,7 +1884,7 @@ sub generate_workspace {
   }
 
   my $mpctype = (!$is_windows || ($cross_compile && $is_target))
-                ? 'gnuace' : $opts{'compiler_version'};
+                ? 'gnuace' : $host_compiler_props->require('vs_mpc_type');
 
   if ($mpctype eq 'gnuace') {
     my $UM;
