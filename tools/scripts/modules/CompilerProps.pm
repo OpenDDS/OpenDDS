@@ -1,5 +1,10 @@
 package CompilerProps;
 
+# Code for extracting properties from a given supported compiler. First part of
+# the module is the utility info and code. Last part is the CompilerProps
+# OO interface that a user will use.
+# See compiler_props.pl for command line interface to this module.
+
 use warnings;
 use strict;
 
@@ -78,18 +83,18 @@ sub prop_from_bool_props {
   return $value;
 }
 
-# All possible properties and how to get them.
-# There are three kinds of ways to get properties which can be defined per
-# compiler or for all compilers:
-#   macro_value: base value off of the value of macro. Can be combined with
-#     macro_value_re regex and/or macro_value_process function to refine the
-#     result.
-#   macro_if: If given macro expression is true, then the value of the property
-#     is a 1 or else a 0.
+# This is a list of all the possible properties and how to get them.
+# There are three ways to get properties and they can be defined per compiler
+# or for all compilers:
+#   macro_value: base the value off of the value of a C preprocessor macro. Can
+#     be combined with macro_value_re (regex) and/or
+#     macro_value_process (function) to refine the result.
+#   macro_if: If the given macro expression is true, then the value of the
+#     property is a 1 or else a 0.
 #   get_value: function that is passed the hash of current property values and
-#     returns the value. Can use the depends array of property names to define
-#     properties that must be defined first. This will loop if the dependencies
-#     are circular, so be careful.
+#     returns the value. Can use the depends array ref of property names to
+#     define properties that must be defined first. This will loop if the
+#     dependencies are circular, so be careful.
 my @all_props = (
   {
     name => 'command',
@@ -516,19 +521,21 @@ sub get_props {
         if ($re) {
           if ($raw_value =~ m/^$re$/) {
             $value = $1;
-          } else {
-            $value = "INVALID";
           }
         }
         else {
           $value = $raw_value;
         }
-        my $macro_value_process =
-          get_prop_hint($prop, $compiler_kind, 'macro_value_process');
-        if (defined($macro_value_process)) {
-          $value = &{\&{$macro_value_process}}($value);
+        if (defined($value)) {
+          my $macro_value_process =
+            get_prop_hint($prop, $compiler_kind, 'macro_value_process');
+          if (defined($macro_value_process)) {
+            $value = &{\&{$macro_value_process}}($value);
+          }
+          if (defined($value)) {
+            $props{$prop->{name}} = $value;
+          }
         }
-        $props{$prop->{name}} = $value;
       }
     }
   }
