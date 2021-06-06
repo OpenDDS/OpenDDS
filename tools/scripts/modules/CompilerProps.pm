@@ -100,6 +100,15 @@ my @all_props = (
     },
   },
   {
+    name => 'msc_ver',
+    for => {
+      msvc => {
+        macro_value => '_MSC_VER',
+        macro_value_re => qr/(\d{3,})/,
+      },
+    },
+  },
+  {
     name => 'major_version',
     macro_value_re => qr/(\d+)/,
     for => {
@@ -110,8 +119,13 @@ my @all_props = (
         macro_value => '__clang_major__',
       },
       msvc => {
-        macro_value => '_MSC_VER',
-        macro_value_re => qr/(\d+)\d{2}/,
+        depends => ['msc_ver'],
+        get_value => sub {
+          my $props = shift;
+
+          $props->{msc_ver} =~ /^(\d+)\d{2}$/;
+          return $1;
+        },
       },
     },
   },
@@ -126,10 +140,12 @@ my @all_props = (
         macro_value => '__clang_minor__',
       },
       msvc => {
-        macro_value => '_MSC_VER',
-        macro_value_re => qr/\d+(\d{2})/,
-        macro_value_process => sub {
-          return int(shift);
+        depends => ['msc_ver'],
+        get_value => sub {
+          my $props = shift;
+
+          $props->{msc_ver} =~ /^\d+(\d{2})$/;
+          return int($1); # Get rid of leading zeros
         },
       },
     },
@@ -258,48 +274,44 @@ my @all_props = (
   },
   {
     name => 'vs_cmake_gen',
-    depends => ['version'],
-    for => {
-      msvc => {
-        get_value => sub {
-          my $props = shift;
+    depends => ['msc_ver'],
+    get_value => sub {
+      my $props = shift;
 
-          my %table = (
-            '15.0' => 'Visual Studio 9 2008',
-            '16.0' => 'Visual Studio 10 2010',
-            '17.0' => 'Visual Studio 11 2012',
-            '18.0' => 'Visual Studio 12 2013',
-            '19.0' => 'Visual Studio 14 2015',
-            '19.1' => 'Visual Studio 15 2017',
-            '19.2' => 'Visual Studio 16 2019',
-          );
-          return $table{$props->{version}};
-        },
-      },
+      my %table = (
+        '150' => 'Visual Studio 9 2008',
+        '160' => 'Visual Studio 10 2010',
+        '170' => 'Visual Studio 11 2012',
+        '180' => 'Visual Studio 12 2013',
+        '190' => 'Visual Studio 14 2015',
+        '191' => 'Visual Studio 15 2017',
+        '192' => 'Visual Studio 16 2019',
+      );
+      my $ver = $props->{version};
+      $ver =~ s/^(\d+)\d$/$1/;
+      return $table{$ver};
     },
   },
   {
     name => 'vs_mpc_type',
-    depends => ['version'],
-    for => {
-      msvc => {
-        get_value => sub {
-          my $props = shift;
+    depends => ['msc_ver'],
+    get_value => sub {
+      my $props = shift;
 
-          my %table = (
-            '13.1' => 'vc71',
-            '14.0' => 'vc8',
-            '15.0' => 'vc9',
-            '16.0' => 'vc10',
-            '17.0' => 'vc11',
-            '18.0' => 'vc12',
-            '19.0' => 'vc14',
-            '19.1' => 'vs2017',
-            '19.2' => 'vs2019',
-          );
-          return $table{$props->{version}};
-        },
-      },
+      my %table = (
+        '131' => 'vc71',
+        '140' => 'vc8',
+        '150' => 'vc9',
+        '160' => 'vc10',
+        '170' => 'vc11',
+        '180' => 'vc12',
+        '190' => 'vc14',
+        '191' => 'vs2017',
+        '192' => 'vs2019',
+      );
+      my $ver = $props->{version};
+      $ver =~ s/^(\d+)\d$/$1/;
+      return $table{$ver};
     },
   },
 );
@@ -313,6 +325,7 @@ sub get_prop_by_name {
     }
   }
   warn("No such prop $name");
+  return undef;
 }
 
 sub eval_prop {
@@ -532,8 +545,9 @@ sub log {
 sub require {
   my $self = shift;
   my $prop = shift;
-  get_prop_by_name($prop);
-  die("ERROR: No such compiler property: \"$prop\"") unless exists($self->{$prop});
+
+  die("ERROR: property \"$prop\" " . (get_prop_by_name($prop) ?
+    "was not defined for this compiler" : "is invalid")) unless exists($self->{$prop});
   return $self->{$prop};
 }
 
