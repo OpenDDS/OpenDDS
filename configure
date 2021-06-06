@@ -26,6 +26,7 @@ use FindBin;
 use lib "$FindBin::Bin/tools/scripts/modules";
 
 use CompilerProps;
+use OsProps;
 
 ## Version of OCI's TAO to download
 my $oci_tao_version = '2.2a';
@@ -374,36 +375,16 @@ $opts{'host'} = perlOS_to_host() unless $opts{'host'};
 
 my $is_windows = $opts{'host'} eq 'win32';
 
-my ($slash, $exeext) = $is_windows ? ('\\', '.exe') : ('/', '');
-
-my %specific =
-  ($is_windows ?
-   ('ext' => 'cmd', 'export' => 'set', 'pathsep' => ';', 'refpre' => '%',
-    'refpost' => '%', 'comment' => '::') :
-   ('ext' => 'sh', 'export' => 'export', 'pathsep' => ':', 'refpre' => '${',
-    'refpost' => '}', 'comment' => '#')
-  );
-
-sub which {
-  my $file = shift;
-  for my $p (File::Spec->path()) {
-    next if $p eq '.';
-    if (-x "$p/$file") {
-      return "$p/$file";
-    }
-    elsif ($exeext ne '' && -x "$p/$file$exeext") {
-      return "$p/$file$exeext";
-    }
-  }
-  return undef;
-}
+my $host_props = OsProps->new({is_windows => $is_windows});
+my $slash = $host_props->{slash};
+my $exeext = $host_props->{exeext};
+my $setenv_name = "setenv$host_props->{shext}";
 
 sub addCurLibPathRef {
   my $buildEnvRef = shift;
   my $platform = $opts{$buildEnvRef->{'build'}};
   my $libpathname = $platforminfo{$platform}->{'libpath'};
-  my $curLibPathRef = $specific{'refpre'} . $libpathname . $specific{'refpost'};
-  $buildEnvRef->{$libpathname} = $curLibPathRef;
+  $buildEnvRef->{$libpathname} = $host_props->envvar($libpathname);
 }
 
 sub run_command {
@@ -478,7 +459,7 @@ sub run_command {
   return $failed;
 }
 
-my $curpathRef = $specific{'refpre'} . 'PATH' . $specific{'refpost'};
+my $curpathRef = $host_props->envvar('PATH');
 my %hostEnv = ('build' => 'host', 'PATH' => $curpathRef);
 my %targetEnv = ('build' => 'target', 'PATH' => $curpathRef);
 
@@ -548,10 +529,10 @@ if ($platforminfo{$opts{'target'}}->{'compiler_root_env'}) {
   # we will need to override (not append to) PATH for the host build.
   my $root_env = $platforminfo{$opts{'target'}}->{'compiler_root_env'};
   my $root_dir = $ENV{$root_env};
-  my @oldpath = split /$specific{'pathsep'}/, $ENV{'PATH'};
-  my $newpath = join($specific{'pathsep'}, grep {!/^$root_dir/} @oldpath);
-  $hostEnv{'PATH'} =~
-    s/\Q$specific{'refpre'}\EPATH\Q$specific{'refpost'}\E/$newpath/;
+  my @oldpath = split /$host_props->{'pathsep'}/, $ENV{'PATH'};
+  my $newpath = join($host_props->{'pathsep'}, grep {!/^$root_dir/} @oldpath);
+  my $escaped_path = quotemeta($host_props->envvar('PATH'));
+  $hostEnv{'PATH'} =~ s/$escaped_path/$newpath/;
 }
 
 if (!exists $platforminfo{$opts{'target'}}->{'needs_i2jrt_corba'}) {
@@ -572,7 +553,7 @@ if ($has_host_compiler) {
   else {
     print "Auto-detecting compiler\n" if $opts{'verbose'};
     for my $stdcomp (@{$platforminfo{$opts{'host'}}->{'compilers'}}) {
-      my $path = which($stdcomp);
+      my $path = $host_props->which($stdcomp);
       if ($path) {
         print "Found $stdcomp at: $path\n" if $opts{'verbose'};
         $opts{'compiler'} = $stdcomp;
@@ -710,7 +691,7 @@ if ($opts{'safety-profile'}) {
 if (!$ace_src || !$tao_src) {
   if ($opts{'ace-github-latest'}) {
     die "ERROR: Git not found in path (required to clone ACE/TAO/MPC)"
-      if ! which('git');
+      if ! $host_props->which('git');
 
     my $urlbase = 'https://github.com/DOCGroup';
 
@@ -787,13 +768,13 @@ if (!$ace_src || !$tao_src) {
         }
       };
       if ($@) {
-        if (which('wget')) {
+        if ($host_props->which('wget')) {
           print $download_message . " (using wget)\n";
           if (run_command(['wget', "$urlbase$file"])) {
             die "ERROR from wget, stopped";
           }
         }
-        elsif (which('curl')) {
+        elsif ($host_props->which('curl')) {
           print $download_message . " (using curl)\n";
           if (run_command(['curl', '-L', "$urlbase$file", '-o', "$file"])) {
             die "ERROR: from curl, stopped";
@@ -1213,7 +1194,7 @@ if ($opts{'security'}) {
 # Try to find CMake
 unless ($opts{'cmake'}) {
   print "--cmake not specified by user; searching path...\n" if $opts{'verbose'};
-  $opts{'cmake'} = which('cmake');
+  $opts{'cmake'} = $host_props->which('cmake');
 
   unless ($opts{'cmake'}) {
     print "CMake not found in path; searching default location...\n"
@@ -1331,7 +1312,7 @@ sub default_java_home {
     return $result;
   }
   else {
-    $result = which('javac');
+    $result = $host_props->which('javac');
     if (!$result) {
       die "ERROR: No javac in PATH.\nStopped";
     }
@@ -1614,7 +1595,7 @@ if ($opts{'glib'}) {
 sub push_env_dir {
   my ($buildEnvRef, $var, $path) = @_;
   if (exists $buildEnvRef->{$var}) {
-    $buildEnvRef->{$var} .= $specific{'pathsep'} . $path;
+    $buildEnvRef->{$var} .= $host_props->{'pathsep'} . $path;
   }
   else {
     $buildEnvRef->{$var} = $path;
@@ -1772,8 +1753,8 @@ sub mergeToEnv {
   my $buildEnv = shift;
   for my $k (keys %{$buildEnv}) {
     next if $k eq 'build';
-    if ($buildEnv->{$k} =~
-        /^\Q$specific{'refpre'}\E$k\Q$specific{'refpost'}\E(.*)/) {
+    my $escaped = quotemeta($host_props->envvar($k));
+    if ($buildEnv->{$k} =~ /^$escaped(.*)/) {
       if ($1 ne '') {
         $ENV{$k} .= $1;
         print "ENV: Appending $1 to $k\n" if $opts{'verbose'};
@@ -2118,15 +2099,16 @@ sub write_environment {
     $MK = backup_and_open($dir . '/GNUmakefile');
   }
 
-  my $SE = backup_and_open($dir . '/setenv.' . $specific{'ext'});
+  my $setenv_path = "$dir$slash$setenv_name";
+  my $SE = backup_and_open($setenv_path);
 
   my $args_ = join(' ', map {/ / ? ('"' . $_ . '"') : $_} @ARGS);
-  print $SE "$specific{'comment'} OpenDDS configure script: $0 $args_\n";
-  print $MK "$specific{'comment'} OpenDDS configure script: $0 $args_\n" if $MK;
+  print $SE "$host_props->{'comment'} OpenDDS configure script: $0 $args_\n";
+  print $MK "$host_props->{'comment'} OpenDDS configure script: $0 $args_\n" if $MK;
 
   for my $key (keys %buildEnv) {
     if ($key ne 'build' && $key ne 'mpctype') {
-      print $SE "$specific{'export'} $key=$buildEnv{$key}\n";
+      print $SE "$host_props->{'export'} $key=$buildEnv{$key}\n";
       if ($MK) {
         my $value = $buildEnv{$key};
         convert_environment(\$value) if $is_windows;
@@ -2136,7 +2118,7 @@ sub write_environment {
   }
 
   $SE->close;
-  print "Wrote $dir/setenv.$specific{'ext'}\n" if $opts{'verbose'};
+  print "Wrote $setenv_path\n" if $opts{'verbose'};
   dump_and_unlink($SE) if $opts{'dry-run'};
 
   if ($MK) {
@@ -2347,7 +2329,7 @@ else {
 print " to compile ",
   ($cloned_build ? "\nthe host and target builds of " : ''),
   "OpenDDS", (($buildtao || $cloned_build) ? ' and ACE+TAO' : '') ,".\n",
-  "You can use the generated setenv.$specific{'ext'} script ",
+  "You can use the generated $setenv_name script ",
   ($cloned_build ?
    "in the\nbuild${slash}host and build${slash}target dirs " : ''),
   "to set environment\nvariables for future shell sessions.\n";
