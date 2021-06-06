@@ -504,6 +504,14 @@ sub props_in_order {
   return \@props_array;
 }
 
+sub version_parse {
+  my $str = shift;
+  if ($str =~ /^(\d+)(?:\.(\d+)(?:\.(\d+))?)?$/) {
+    return (int($1), int($2 // 0), int($3 // 0));
+  }
+  die("ERROR: Invalid version string: \"$str\"");
+}
+
 # Below is the Public Object-Oriented Interface
 
 sub new {
@@ -557,6 +565,25 @@ sub default_cpp_std_is_at_least {
 
   return
     ($self->require('default_cpp_std_macro_value') >= cpp_std_to_macro($std)) ? 1 : 0;
+}
+
+sub version_at_least {
+  my $self = shift;
+  my $cmp_str = shift;
+
+  my $maj = int($self->require('major_version'));
+  my $min = int($self->require('minor_version'));
+  my $pat = int($self->{patch_version} // 0);
+
+  my ($cmp_maj, $cmp_min, $cmp_pat) = version_parse($cmp_str);
+
+  return 1 if ($maj > $cmp_maj);
+  return 0 if ($maj < $cmp_maj);
+
+  return 1 if ($min > $cmp_min);
+  return 0 if ($min < $cmp_min);
+
+  return $pat >= $cmp_pat ? 1 : 0;
 }
 
 1;

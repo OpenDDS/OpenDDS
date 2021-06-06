@@ -17,24 +17,28 @@ my $help_message = $usage_message .
   "\n" .
   "Extract properties of a supported C++ compiler that can be ran.\n" .
   "\n" .
-  "COMPILER               Compiler command to inspect.\n" .
-  "PROP                   Single property to print. Prints all properties if not\n" .
-  "                       given\n" .
+  "COMPILER                Compiler command to inspect.\n" .
+  "PROP                    Single property to print. Prints all properties if not\n" .
+  "                        given\n" .
   "\n" .
   "OPTIONS:\n" .
-  "--help | -h            Prints this message\n" .
-  "--debug                Prints debug information\n" .
-  "--default-cpp-std STD  Prints 1 if compiler's default C++ standard is at least\n" .
-  "                       STD, else prints 1.\n";
+  "--help | -h             Prints this message\n" .
+  "--debug                 Prints debug information\n" .
+  "--default-cpp-std STD   Prints 1 if compiler's default C++ standard is at least\n" .
+  "                        STD, else prints 0.\n" .
+  "--version-at-least VER  Prints 1 if compiler's version is at least VER, else\n" .
+  "                        prints 0.\n";
 
 my $debug = 0;
 my $help = 0;
 my $default_cpp_std = undef;
+my $version_at_least = undef;
 
 if (!GetOptions(
   'h|help' => \$help,
   'debug' => \$debug,
   'default-cpp-std=s' => \$default_cpp_std,
+  'version-at-least=s' => \$version_at_least,
 )) {
   print STDERR $usage_message;
   exit(1);
@@ -55,10 +59,13 @@ my $get_prop = shift;
 my $props = CompilerProps->new($compiler_command, {debug => $debug});
 
 if (defined($get_prop)) {
-  print($props->required_prop($get_prop), "\n");
+  print($props->require($get_prop), "\n");
 }
 elsif (defined($default_cpp_std)) {
   print($props->default_cpp_std_is_at_least($default_cpp_std), "\n");
+}
+elsif (defined($version_at_least)) {
+  print($props->version_at_least($version_at_least), "\n");
 }
 else {
   $props->log();
