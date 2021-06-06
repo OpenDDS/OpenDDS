@@ -1599,7 +1599,8 @@ if ($opts{'glib'}) {
   if (!-r "$opts{'glib'}/lib/glib-2.0/include/glibconfig.h") {
     my $pc = `pkg-config --cflags-only-I glib-2.0`;
     chomp $pc;
-    if ($pc =~ m!-I$opts{'glib'}/([-\w/]+)/glib-2.0/include!) {
+    my $escaped_glib = quotemeta($opts{'glib'});
+    if ($pc =~ m!-I$escaped_glib/([-\w/]+)/glib-2.0/include!) {
       print "pkg-config found GLIB_LIB_DIR=$1\n" if $opts{'verbose'};
       setEnv('GLIB_LIB_DIR', $1);
     }
