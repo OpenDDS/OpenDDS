@@ -296,7 +296,7 @@ my @all_props = (
         '191' => 'Visual Studio 15 2017',
         '192' => 'Visual Studio 16 2019',
       );
-      my $ver = $props->{version};
+      my $ver = $props->{msc_ver};
       $ver =~ s/^(\d+)\d$/$1/;
       return $table{$ver};
     },
@@ -318,7 +318,7 @@ my @all_props = (
         '191' => 'vs2017',
         '192' => 'vs2019',
       );
-      my $ver = $props->{version};
+      my $ver = $props->{msc_ver};
       $ver =~ s/^(\d+)\d$/$1/;
       return $table{$ver};
     },
