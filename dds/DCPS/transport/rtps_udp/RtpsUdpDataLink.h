@@ -256,26 +256,26 @@ private:
   RemoteInfoMap locators_;
 
   struct LocatorCacheKey {
-    LocatorCacheKey(const RepoId& local, const RepoId& remote, bool prefer_unicast) : local_(local), remote_(remote), prefer_unicast_(prefer_unicast) {}
+    LocatorCacheKey(const RepoId& remote, const RepoId& local, bool prefer_unicast) : remote_(remote), local_(local), prefer_unicast_(prefer_unicast) {}
     bool operator<(const LocatorCacheKey& rhs) const {
       return std::memcmp(this, &rhs, sizeof (LocatorCacheKey)) < 0;
     }
 
-    const RepoId local_;
     const RepoId remote_;
+    const RepoId local_;
     const bool prefer_unicast_;
   };
   typedef OPENDDS_MAP(LocatorCacheKey, AddrSet) LocatorCache;
   mutable LocatorCache locator_cache_;
   struct AddressCacheKey {
-    AddressCacheKey(const RepoId& from_guid, const RepoId& dst_guid, const RepoIdSet& to_guids) : from_guid_(from_guid), dst_guid_(dst_guid), to_guids_(to_guids) {}
+    AddressCacheKey(const RepoId& dst_guid, const RepoId& from_guid, const RepoIdSet& to_guids) : dst_guid_(dst_guid), from_guid_(from_guid), to_guids_(to_guids) {}
     bool operator<(const AddressCacheKey& rhs) const {
-      int r1 = std::memcmp(&from_guid_, &rhs.from_guid_, sizeof (RepoId));
+      int r1 = std::memcmp(&dst_guid_, &rhs.dst_guid_, sizeof (RepoId));
       if (r1 < 0) {
         return true;
       }
       else if (r1 == 0) {
-        int r2 = std::memcmp(&dst_guid_, &rhs.dst_guid_, sizeof (RepoId));
+        int r2 = std::memcmp(&from_guid_, &rhs.from_guid_, sizeof (RepoId));
         if (r2 < 0) {
           return true;
         }
@@ -286,8 +286,8 @@ private:
       return false;
     }
 
-    const RepoId from_guid_;
     const RepoId dst_guid_;
+    const RepoId from_guid_;
     const RepoIdSet to_guids_;
   };
   typedef OPENDDS_MAP(AddressCacheKey, AddrSet) AddressCache;

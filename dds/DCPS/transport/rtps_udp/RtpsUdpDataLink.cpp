@@ -537,12 +537,9 @@ RtpsUdpDataLink::leave_multicast_group(const NetworkInterface& nic)
 
 void
 RtpsUdpDataLink::remove_locator_and_address_cache_i(const RepoId& remote_id) {
-  for (LocatorCache::iterator it = locator_cache_.begin(); it != locator_cache_.end(); /* inc in loop */) {
-    if (it->first.remote_ == remote_id) {
-      locator_cache_.erase(it++);
-    } else {
-      ++it;
-    }
+  LocatorCache::iterator lit = locator_cache_.lower_bound(LocatorCacheKey(remote_id, GUID_UNKNOWN, false));
+  while (lit != locator_cache_.end() && lit->first.remote_ == remote_id) {
+    locator_cache_.erase(lit++);
   }
   for (AddressCache::iterator it = address_cache_.begin(); it != address_cache_.end(); /* inc in loop */) {
     if (it->first.dst_guid_ == remote_id || it->first.to_guids_.count(remote_id) != 0) {
@@ -2352,7 +2349,7 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVecVecVec& meta_submess
   for (MetaSubmessageVecVecVec::iterator vvit = meta_submessages.begin(); vvit != meta_submessages.end(); ++vvit) {
     for (MetaSubmessageVecVec::iterator vit = vvit->begin(); vit != vvit->end(); ++vit) {
       for (MetaSubmessageVec::iterator it = vit->begin(); it != vit->end(); ++it) {
-        const AddressCacheKey key(it->from_guid_, it->dst_guid_, it->to_guids_);
+        const AddressCacheKey key(it->dst_guid_, it->from_guid_, it->to_guids_);
         AddressCache::iterator pos = address_cache_.find(key);
         if (pos == address_cache_.end()) {
           pos = address_cache_.insert(std::make_pair(key, AddrSet())).first;
@@ -4387,7 +4384,7 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
   OPENDDS_ASSERT(local != GUID_UNKNOWN);
   OPENDDS_ASSERT(remote != GUID_UNKNOWN);
 
-  const LocatorCacheKey key(local, remote, prefer_unicast);
+  const LocatorCacheKey key(remote, local, prefer_unicast);
   LocatorCache::const_iterator aci = locator_cache_.find(key);
   if (aci != locator_cache_.end()) {
     addresses.insert(aci->second.begin(), aci->second.end());
