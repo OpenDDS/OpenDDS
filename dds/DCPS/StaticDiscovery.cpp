@@ -131,6 +131,7 @@ void StaticEndpointManager::init_bit()
 #ifndef DDS_HAS_MINIMUM_BIT
       OpenDDS::DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
       if (bit) { // bit may be null if the DomainParticipant is shutting down
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("init_bit 1 \n")));
         bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE);
       }
 #endif /* DDS_HAS_MINIMUM_BIT */
@@ -175,6 +176,7 @@ void StaticEndpointManager::init_bit()
 #ifndef DDS_HAS_MINIMUM_BIT
       OpenDDS::DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
       if (bit) { // bit may be null if the DomainParticipant is shutting down
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("init_bit 2 \n")));
         bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE);
       }
 #endif /* DDS_HAS_MINIMUM_BIT */

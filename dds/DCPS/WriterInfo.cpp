@@ -139,6 +139,7 @@ WriterInfo::check_activity(const MonotonicTimePoint& now)
 
     if (expires_at <= now) {
       // let all instances know this write is not alive.
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) CALLING writer_became_dead from check_activity \n")));
       reader_->writer_became_dead(*this, now);
       expires_at = MonotonicTimePoint::max_value;
     }
