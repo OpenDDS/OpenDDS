@@ -323,7 +323,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       dp2->lookup_topicdescription(AUTOMATIC_TOPIC);
     ::DDS::TopicDescription_var manual_description2 =
       dp2->lookup_topicdescription(MANUAL_TOPIC);
-    if (CORBA::is_nil (CORBA::is_nil (manual_description.in ()) || 
+    if (CORBA::is_nil (CORBA::is_nil (manual_description.in ()) ||
         automatic_description2.in ()) || CORBA::is_nil (manual_description2.in ()))
     {
       ACE_ERROR_RETURN ((LM_ERROR,
@@ -408,7 +408,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::StatusCondition_var condition = remote_manual_dr->get_statuscondition();
     condition->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
     DDS::WaitSet_var ws = new DDS::WaitSet;
-    ws->attach_condition(condition);        
+    ws->attach_condition(condition);
     while (true) {
       DDS::SubscriptionMatchedStatus matches;
       if (remote_manual_dr->get_subscription_matched_status(matches) != ::DDS::RETCODE_OK) {
@@ -441,7 +441,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                 local_manual_dr_qos,
                                 drl3.in (),
                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    
+
     if (CORBA::is_nil (automatic_dr.in ()) || CORBA::is_nil (remote_manual_dr.in ()) ||
         CORBA::is_nil (local_manual_dr.in ()))
     {
@@ -478,7 +478,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         lcc_remote = drl_servant2->liveliness_changed_count();
       }
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT("(%P|%t) Running Write: remote: %d local: %d \n"), lcc_remote, lcc_local));
+        ACE_TEXT("(%P|%t) Running Write: remote: %d local: %d \n"), lcc_remote, lcc_local));
       writer->run_test (i);
     }
 
@@ -500,9 +500,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       lcc_local = drl_servant3->liveliness_changed_count();
       lcc_remote = drl_servant2->liveliness_changed_count();
     }
-    
+
     // Determine the test status at this point.
-    
+
     ACE_OS::fprintf (stderr, "**********\n") ;
     ACE_OS::fprintf (stderr, "drl_servant->liveliness_changed_count() = %d\n",
                     drl_servant->liveliness_changed_count()) ;
@@ -510,7 +510,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                     drl_servant->no_writers_generation_count()) ;
     ACE_OS::fprintf (stderr, "********** use_take=%d\n", use_take) ;
 
-    //automatic should stay alive due to reactor and 
+    //automatic should stay alive due to reactor and
     //therefore go up at start then come down at end
     if( drl_servant->liveliness_changed_count() != 3) {
       status = 1;

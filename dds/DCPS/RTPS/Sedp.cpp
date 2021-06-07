@@ -3107,9 +3107,6 @@ void Sedp::data_received(DCPS::MessageId message_id,
 }
 #endif
 
-//This is a function to unify the notifcation of liveliness within RTPS
-//The local participant map is checked for associated entities and then they are notified
-//of liveliness if their QoS is compatibile
 void
 Sedp::notify_liveliness(const ParticipantMessageData& pmd)
 {
@@ -3118,10 +3115,10 @@ Sedp::notify_liveliness(const ParticipantMessageData& pmd)
   // Clear the entityId so lower bound will work.
   const RepoId prefix = make_id(pmd.participantGuid, PARTICIPANT_MESSAGE_DATA_KIND_UNKNOWN);
   bool is_automatic = true;
-  if (OpenDDS::DCPS::DCPS_debug_level >= 8) {
+  if (DCPS::DCPS_debug_level >= 8) {
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) Notifying Liveliness, %s\n"),
-               OpenDDS::DCPS::LogGuid(guid).c_str()));
+               ACE_TEXT("(%P|%t) Sedp::notify_liveliness: Notifying Liveliness, %C\n"),
+               DCPS::LogGuid(guid).c_str()));
   }
   if (PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE == pmd.participantGuid.entityId) {
     is_automatic = false;
