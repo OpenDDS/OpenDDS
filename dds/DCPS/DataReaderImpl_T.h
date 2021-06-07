@@ -4,7 +4,7 @@
 #include "ace/config-lite.h"
 
 #ifdef ACE_HAS_CPP11
-#  define HAS_STD_SHARED_PTR
+#  define OPENDDS_HAS_STD_SHARED_PTR
 #endif
 
 #include "MultiTopicImpl.h"
@@ -17,7 +17,7 @@
 #include "dcps_export.h"
 #include "GuidConverter.h"
 
-#ifdef HAS_STD_SHARED_PTR
+#ifdef OPENDDS_HAS_STD_SHARED_PTR
 #include <memory>
 #else
 #include <ace/Bound_Ptr.h>
@@ -2400,7 +2400,7 @@ private:
   }
 
   WeakRcHandle<DataReaderImpl_T<MessageType> > data_reader_impl_;
-#ifdef HAS_STD_SHARED_PTR
+#ifdef OPENDDS_HAS_STD_SHARED_PTR
   typedef std::shared_ptr<const OpenDDS::DCPS::DataSampleHeader> DataSampleHeader_ptr;
 #else
   typedef ACE_Strong_Bound_Ptr<const OpenDDS::DCPS::DataSampleHeader, ACE_Null_Mutex> DataSampleHeader_ptr;
