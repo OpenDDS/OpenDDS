@@ -2,27 +2,27 @@
 #include "Writer.h"
 #include "DataReaderListener.h"
 
-#include "../common/TestException.h"
-#include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
+#include <tests/DCPS/common/TestException.h>
+#include <tests/DCPS/FooType4/FooDefTypeSupportImpl.h>
 
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/Qos_Helper.h"
-#include "dds/DCPS/TopicDescriptionImpl.h"
-#include "dds/DCPS/PublisherImpl.h"
-#include "dds/DCPS/SubscriberImpl.h"
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
-#include "dds/DCPS/StaticIncludes.h"
-#include "dds/DCPS/WaitSet.h"
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/TopicDescriptionImpl.h>
+#include <dds/DCPS/PublisherImpl.h>
+#include <dds/DCPS/SubscriberImpl.h>
+#include <dds/DCPS/transport/framework/TransportRegistry.h>
+#include <dds/DCPS/StaticIncludes.h>
+#include <dds/DCPS/WaitSet.h>
 #if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
-#include "dds/DCPS/transport/udp/Udp.h"
+#include <dds/DCPS/transport/udp/Udp.h>
 #endif
 
-#include "dds/DdsDcpsSubscriptionC.h"
+#include <dds/DdsDcpsSubscriptionC.h>
 
-#include "ace/Arg_Shifter.h"
-#include "ace/Reactor.h"
-#include "ace/OS_NS_unistd.h"
+#include <ace/Arg_Shifter.h>
+#include <ace/Reactor.h>
+#include <ace/OS_NS_unistd.h>
 
 class ReactorCtrl : public ACE_Event_Handler
 {
@@ -36,10 +36,7 @@ public:
     ACE_UNUSED_ARG(arg);
 
     // it appears that you must have the lock before waiting or signaling on Win32
-    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                      guard,
-                      this->lock_,
-                      -1);
+    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, this->lock_, -1);
 
     return cond_.wait();
   }
@@ -66,42 +63,28 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     //  -n max_samples_per_instance defaults to INFINITE
     //  -d history.depth            defaults to 1
     //  -z                          verbose transport debug
-    //  -T                          prefix for temporary files
 
     const ACE_TCHAR *currentArg = 0;
 
-    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-i"))) != 0)
-    {
+    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-i"))) != 0) {
       num_ops_per_thread = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
-    }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-l"))) != 0)
-    {
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-l"))) != 0) {
       num_unlively_periods = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
-    }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-n"))) != 0)
-    {
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-n"))) != 0) {
       max_samples_per_instance = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
-    }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-d"))) != 0)
-    {
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-d"))) != 0) {
       history_depth = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
-    }
-    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-z")) == 0)
-    {
+    } else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-z")) == 0) {
       TURN_ON_VERBOSE_DEBUG;
       arg_shifter.consume_arg();
-    }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-T"))) == 0)
-    {
-      temp_file_prefix = currentArg;
-      arg_shifter.consume_arg();
-    }
-    else
-    {
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-t"))) != 0) {
+      use_take = ACE_OS::atoi (currentArg);
+      arg_shifter.consume_arg ();
+    } else {
       arg_shifter.ignore_arg ();
     }
   }
@@ -375,13 +358,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     local_manual_dr_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC ;
     local_manual_dr_qos.liveliness.lease_duration.nanosec = 0 ;
 
-    ::DDS::DataReaderListener_var drl (new DataReaderListenerImpl("RemoteAutomaticReader"));
+    ::DDS::DataReaderListener_var drl (new DataReaderListenerImpl);
     DataReaderListenerImpl* drl_servant =
       dynamic_cast<DataReaderListenerImpl*>(drl.in());
-    ::DDS::DataReaderListener_var drl2 (new DataReaderListenerImpl("RemoteManualReader"));
+    ::DDS::DataReaderListener_var drl2 (new DataReaderListenerImpl);
     DataReaderListenerImpl* drl_servant2 =
       dynamic_cast<DataReaderListenerImpl*>(drl2.in());
-    ::DDS::DataReaderListener_var drl3 (new DataReaderListenerImpl("LocalManualReader"));
+    ::DDS::DataReaderListener_var drl3 (new DataReaderListenerImpl);
     DataReaderListenerImpl* drl_servant3 =
       dynamic_cast<DataReaderListenerImpl*>(drl3.in());
 
@@ -405,10 +388,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                 drl2.in (),
                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    DDS::StatusCondition_var condition = remote_manual_dr->get_statuscondition();
-    condition->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    ws->attach_condition(condition);
+    DDS::StatusCondition_var reader_condition = remote_manual_dr->get_statuscondition();
+    reader_condition->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
+    DDS::WaitSet_var reader_ws = new DDS::WaitSet;
+    reader_ws->attach_condition(reader_condition);
     while (true) {
       DDS::SubscriptionMatchedStatus matches;
       if (remote_manual_dr->get_subscription_matched_status(matches) != ::DDS::RETCODE_OK) {
@@ -422,18 +405,40 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
       DDS::ConditionSeq conditions;
       DDS::Duration_t timeout = { 60, 0 };
-      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
+      if (reader_ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("ERROR: %N:%l: main() -")
                           ACE_TEXT(" wait failed!\n")),
                          1);
       }
     }
-    ws->detach_condition(condition);
+    reader_ws->detach_condition(reader_condition);
 
-    // I need this sleep to ensure correct values of no_writers_generation_count for
-    // the rtps transport between different participants.
-    sleep(1);
+    DDS::StatusCondition_var writer_condition = dw_manual->get_statuscondition();
+    writer_condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
+    DDS::WaitSet_var writer_ws = new DDS::WaitSet;
+    writer_ws->attach_condition(writer_condition);
+    while (true) {
+      DDS::PublicationMatchedStatus matches;
+      if (dw_manual->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("ERROR: %N:%l: main() -")
+                          ACE_TEXT(" get_publication_matched_status failed!\n")),
+                         1);
+      }
+      if (matches.current_count >= 1) {
+        break;
+      }
+      DDS::ConditionSeq conditions;
+      DDS::Duration_t timeout = { 60, 0 };
+      if (writer_ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("ERROR: %N:%l: main() -")
+                          ACE_TEXT(" wait failed!\n")),
+                         1);
+      }
+    }
+    writer_ws->detach_condition(writer_condition);
 
     ::DDS::DataReader_var local_manual_dr ;
 
@@ -446,7 +451,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         CORBA::is_nil (local_manual_dr.in ()))
     {
       ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) create_datawriter failed.\n")));
+                  ACE_TEXT("(%P|%t) create_datareader failed.\n")));
       return 1 ;
     }
     // send an automatic message to show manual readers are not

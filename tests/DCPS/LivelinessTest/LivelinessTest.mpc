@@ -1,5 +1,5 @@
-project(LivelinessLocal): dcpsexe, dcps_test, dcps_transports_for_test {
-  exename   = local
+project(LivelinessTest): dcpsexe, dcps_test, dcps_transports_for_test {
+  exename   = LivelinessTest
   libpaths += ../FooType4
   libpaths += ../common
   libs     +=  common DcpsFooType4
@@ -8,7 +8,7 @@ project(LivelinessLocal): dcpsexe, dcps_test, dcps_transports_for_test {
   Source_Files {
     common.cpp
     DataReaderListener.cpp
-    local.cpp
+    LivelinessTest.cpp
     Writer.cpp
   }
 }

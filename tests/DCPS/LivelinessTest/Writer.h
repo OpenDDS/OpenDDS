@@ -3,8 +3,9 @@
 #ifndef WRITER_H
 #define WRITER_H
 
-#include "dds/DdsDcpsPublicationC.h"
-#include "ace/Task.h"
+#include <dds/DdsDcpsPublicationC.h>
+
+#include <ace/Task.h>
 
 
 class Writer
@@ -12,8 +13,8 @@ class Writer
 public:
 
   Writer (::DDS::DataWriter_ptr writer,
-          int num_thread_to_write = 1,
-          int num_writes_per_thread = 100);
+    int num_thread_to_write = 1,
+    int num_writes_per_thread = 100);
 
   void start ();
 

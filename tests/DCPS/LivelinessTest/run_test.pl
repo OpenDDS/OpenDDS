@@ -36,8 +36,8 @@ $test->enable_console_logging();
 my $common_parameters = $app_bit_conf
     . " -w $num_readers -m $multiple_instance"
     . " -l $num_unlively_periods -i $num_samples_per_reader";
-$test->process('loc', 'local', $common_parameters);
-$test->start_process('loc', '-T');
+$test->process('lt', 'LivelinessTest', $common_parameters);
+$test->start_process('lt', "-t $use_take");
 
 my $result = $test->finish(60);
 
