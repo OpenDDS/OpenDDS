@@ -1674,20 +1674,20 @@ if (exists $opts{'qt'}) {
   $qt_path = $qt_lib;
 
   # Try to guess if Qt vcpkg is being used
-  my $vcpkg_tools = join($slash, $targetEnv{'QTDIR'}, "tools", "qt5");
+  my $vcpkg_tools = $host_props->path($targetEnv{'QTDIR'}, "tools", "qt5");
   my $assume_vcpkg =
-    (-r $vcpkg_tools . $slash . 'bin' . $slash . $qt_moc) &&
+    (-r $host_props->path($vcpkg_tools, 'bin', $qt_moc)) &&
     !exists $ENV{'QT5_LIBDIR'} &&
     !exists $ENV{'QT5_BINDIR'};
   if ($assume_vcpkg) {
     $qt_bin = $vcpkg_tools . $slash . 'bin';
     if ($debug) {
-      $qt_lib = join($slash, $targetEnv{'QTDIR'}, "debug", "lib");
-      $qt_path = join($slash, $targetEnv{'QTDIR'}, "debug",
+      $qt_lib = $host_props->path($targetEnv{'QTDIR'}, "debug", "lib");
+      $qt_path = $host_props->path($targetEnv{'QTDIR'}, "debug",
         ($is_windows ? 'bin' : 'lib'));
     }
     else {
-      $qt_lib = join($slash, $targetEnv{'QTDIR'}, 'lib');
+      $qt_lib = $host_props->path($targetEnv{'QTDIR'}, 'lib');
     }
   }
 

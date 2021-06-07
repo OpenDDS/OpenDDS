@@ -59,4 +59,9 @@ sub envvar {
   return "$self->{refpre}$name$self->{refpost}";
 }
 
+sub path {
+  my $self = shift;
+  return join($self->{slash}, @_);
+}
+
 1;

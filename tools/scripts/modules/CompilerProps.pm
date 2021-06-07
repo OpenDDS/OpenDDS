@@ -10,6 +10,11 @@ use strict;
 
 use File::Temp ();
 
+use FindBin;
+use lib "$FindBin::Bin";
+
+use OsProps;
+
 my @archs = qw/32b_x86 64b_x86 32b_arm 64b_arm/;
 my @oses = qw/linux android windows ios macos/;
 
@@ -60,6 +65,74 @@ my %compilers = (
     opts => '/EP /Zc:__cplusplus',
   },
 );
+
+sub android_compiler {
+  # This function should closely mirror the logic of
+  # ACE/include/makeinclude/platform_android.GNU
+  my $os_props = shift;
+  my $abi = shift // 'armeabi-v7a';
+  my $ndk = shift;
+  my $api = shift;
+
+  my $cross_compile;
+  if ($abi eq 'armeabi-v7a' || $abi eq 'neon' || $abi eq 'armeabi-v7a-with-neon') {
+    $cross_compile = 'armv7a-linux-androideabi';
+  }
+  elsif ($abi eq 'arm64-v8a') {
+    $cross_compile = 'aarch64-linux-android';
+  }
+  elsif ($abi eq 'x86') {
+    $cross_compile = 'i686-linux-android';
+  }
+  elsif ($abi eq 'x86_64') {
+    $cross_compile = 'x86_64-linux-android';
+  }
+  else {
+    die("ERROR: Invalid android_abi: \"$abi\"");
+  }
+
+  my $command = undef;
+  if (defined($ndk)) {
+    # NDK method is based on an absolute path of the NDK
+    die("ERROR: android_ndk also requires android_api") unless (defined($api));
+
+    my $bin = undef;
+    my $glob = $os_props->path($ndk, 'toolchains', 'llvm', 'prebuilt', '');
+    foreach my $path (<$glob*>) {
+      my $p = "$path$os_props->{slash}bin";
+      $bin = $p if (-d $p);
+    }
+
+    if (defined($bin)) {
+      my $path = $os_props->path($bin, "${cross_compile}${api}-clang++");
+      $command = $path if (-x $path);
+    }
+    die("ERROR: Could not find Android compiler in NDK: \"$ndk\"") unless (defined($command));
+  }
+  else { # Standalone Toolchain
+    # Standalone toolchain method is based on the compilers being on the PATH
+    # Fallback to gcc if the NDK too old to be clang-based
+    for my $c ('clang++', 'g++') {
+      my $cmd = "$cross_compile-$c";
+      print("$cmd\n");
+      if ($os_props->which($cmd)) {
+        $command = $cmd;
+      }
+      elsif ($cross_compile eq 'armv7a-linux-androideabi') {
+        # Fallback to ARMv5 if ARMv7 isn't there.
+        # For details about this see armv7a note in platform_android.GNU
+        $cmd = "arm-linux-androideabi-$c";
+        print("$cmd\n");
+        if ($os_props->which($cmd)) {
+          $command = $cmd;
+        }
+      }
+    }
+    die("ERROR: Could not find standalone toolchain Android compiler on PATH")
+      unless (defined($command));
+  }
+  return $command;
+}
 
 my @version_parts = qw/major_version minor_version patch_version/;
 
@@ -577,6 +650,12 @@ sub new {
   my $command = shift;
   my $args = shift;
   my $debug = $args->{debug} // 0;
+  my $os_props = $args->{os_props} // OsProps->new();
+
+  if (exists($args->{android_abi}) && !defined($command)) {
+    $command = android_compiler($os_props,
+      $args->{android_abi}, $args->{android_ndk}, $args->{android_api});
+  }
 
   print("Compiler is \"$command\"\n") if ($debug);
 
@@ -594,6 +673,7 @@ sub new {
 
   my $self = get_props($command, $kind, $debug);
   $self->{debug} = $debug;
+  $self->{os_props} = $os_props;
 
   return bless($self, $class);
 }
