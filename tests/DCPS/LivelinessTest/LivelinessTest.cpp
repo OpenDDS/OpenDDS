@@ -98,7 +98,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   OPENDDS_STRING transport("rtps_udp");
 
-
   OPENDDS_STRING config_1("dds4ccm_");
   config_1 += transport + "_1";
 
@@ -121,48 +120,41 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     OpenDDS::DCPS::TransportConfig_rch config =
       OpenDDS::DCPS::TransportRegistry::instance()->get_config(config_1.c_str());
 
-    if (config.is_nil())
-      {
-        config =
-          OpenDDS::DCPS::TransportRegistry::instance()->create_config(config_1.c_str());
-      }
+    if (config.is_nil()) {
+      config =
+        OpenDDS::DCPS::TransportRegistry::instance()->create_config(config_1.c_str());
+    }
 
     OpenDDS::DCPS::TransportInst_rch inst =
       OpenDDS::DCPS::TransportRegistry::instance()->get_inst(instance_1.c_str());
 
-    if (inst.is_nil())
-      {
-        inst =
-          OpenDDS::DCPS::TransportRegistry::instance()->create_inst(instance_1.c_str(),
-                                                                    transport.c_str());
-
-        config->instances_.push_back(inst);
-
-        OpenDDS::DCPS::TransportRegistry::instance()->global_config(config);
-      }
+    if (inst.is_nil()) {
+      inst =
+        OpenDDS::DCPS::TransportRegistry::instance()->create_inst(instance_1.c_str(),
+        transport.c_str());
+      config->instances_.push_back(inst);
+      OpenDDS::DCPS::TransportRegistry::instance()->global_config(config);
+    }
 
     // Create another transport instance for participant2 since RTPS transport instances
     // cannot be shared by domain participants.
     OpenDDS::DCPS::TransportConfig_rch config2 =
       OpenDDS::DCPS::TransportRegistry::instance()->get_config(config_2.c_str());
 
-    if (config2.is_nil())
-      {
-        config2 =
-          OpenDDS::DCPS::TransportRegistry::instance()->create_config(config_2.c_str());
-      }
+    if (config2.is_nil()) {
+      config2 =
+        OpenDDS::DCPS::TransportRegistry::instance()->create_config(config_2.c_str());
+    }
 
     OpenDDS::DCPS::TransportInst_rch inst2 =
       OpenDDS::DCPS::TransportRegistry::instance()->get_inst(instance_2.c_str());
 
-    if (inst2.is_nil())
-      {
-        inst2 =
-          OpenDDS::DCPS::TransportRegistry::instance()->create_inst(instance_2.c_str(),
-                                                                    transport.c_str());
-        config2->instances_.push_back(inst2);
-
-      }
+    if (inst2.is_nil()) {
+      inst2 =
+        OpenDDS::DCPS::TransportRegistry::instance()->create_inst(instance_2.c_str(),
+                                                                  transport.c_str());
+      config2->instances_.push_back(inst2);
+    }
 
     // let the Service_Participant (in above line) strip out -DCPSxxx parameters
     // and then get application specific parameters.
@@ -182,6 +174,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                               PARTICIPANT_QOS_DEFAULT,
                               ::DDS::DomainParticipantListener::_nil(),
                               ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
     OpenDDS::DCPS::TransportConfig_rch cfg = TheTransportRegistry->get_config("rtps");
     if (!cfg.is_nil()) {
       TheTransportRegistry->bind_config(cfg, dp);
@@ -191,75 +184,59 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       TheTransportRegistry->bind_config(cfg, dp2);
     }
 
-    if (CORBA::is_nil(dp.in()) || CORBA::is_nil(dp2.in()))
-    {
+    if (CORBA::is_nil(dp.in()) || CORBA::is_nil(dp2.in())) {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) create_participant failed.\n")));
       return 1 ;
     }
 
-    if (::DDS::RETCODE_OK != fts->register_type(dp.in (), MY_TYPE))
-      {
-        ACE_ERROR ((LM_ERROR,
-          ACE_TEXT ("Failed to register the FooTypeSupport.")));
-        return 1;
-      }
+    if (::DDS::RETCODE_OK != fts->register_type(dp.in (), MY_TYPE)) {
+      ACE_ERROR ((LM_ERROR,
+        ACE_TEXT ("Failed to register the FooTypeSupport.")));
+      return 1;
+    }
 
-    if (::DDS::RETCODE_OK != fts2->register_type(dp2.in (), MY_TYPE))
-      {
-        ACE_ERROR ((LM_ERROR,
-          ACE_TEXT ("Failed to register the FooTypeSupport.")));
-        return 1;
-      }
-
+    if (::DDS::RETCODE_OK != fts2->register_type(dp2.in (), MY_TYPE)) {
+      ACE_ERROR ((LM_ERROR,
+        ACE_TEXT ("Failed to register the FooTypeSupport.")));
+      return 1;
+    }
 
     ::DDS::TopicQos topic_qos;
     dp->get_default_topic_qos(topic_qos);
-
     topic_qos.resource_limits.max_samples_per_instance =
-          max_samples_per_instance ;
-
+      max_samples_per_instance ;
     topic_qos.history.depth = history_depth;
 
     ::DDS::Topic_var automatic_topic =
-      dp->create_topic (AUTOMATIC_TOPIC,
-                        MY_TYPE,
-                        topic_qos,
-                        ::DDS::TopicListener::_nil(),
-                        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      dp->create_topic (AUTOMATIC_TOPIC, MY_TYPE, topic_qos,
+      ::DDS::TopicListener::_nil(), ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     ::DDS::Topic_var manual_topic =
-      dp->create_topic (MANUAL_TOPIC,
-                        MY_TYPE,
-                        topic_qos,
-                        ::DDS::TopicListener::_nil(),
-                        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      dp->create_topic (MANUAL_TOPIC, MY_TYPE, topic_qos,
+      ::DDS::TopicListener::_nil(), ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     ::DDS::Topic_var automatic_topic2 =
-      dp2->create_topic (AUTOMATIC_TOPIC,
-                        MY_TYPE,
-                        topic_qos,
-                        ::DDS::TopicListener::_nil(),
-                        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      dp2->create_topic (AUTOMATIC_TOPIC, MY_TYPE, topic_qos,
+      ::DDS::TopicListener::_nil(), ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     ::DDS::Topic_var manual_topic2 =
-      dp2->create_topic (MANUAL_TOPIC,
-                        MY_TYPE,
-                        topic_qos,
-                        ::DDS::TopicListener::_nil(),
-                        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (CORBA::is_nil (automatic_topic.in ()) || CORBA::is_nil (manual_topic.in ()))
-    {
-      return 1 ;
+      dp2->create_topic (MANUAL_TOPIC, MY_TYPE, topic_qos,
+      ::DDS::TopicListener::_nil(), ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+    if (CORBA::is_nil (automatic_topic.in()) || 
+        CORBA::is_nil (automatic_topic2.in()) ||
+        CORBA::is_nil (manual_topic.in()) ||
+        CORBA::is_nil (manual_topic2.in())) {
+      ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) create_topic failed.\n")), 1);
     }
 
     // Create the publisher
     ::DDS::Publisher_var pub =
       dp->create_publisher(PUBLISHER_QOS_DEFAULT,
-                            ::DDS::PublisherListener::_nil(),
-                            ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (CORBA::is_nil (pub.in ()))
-    {
+      ::DDS::PublisherListener::_nil(), ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+    if (CORBA::is_nil (pub.in ())) {
       ACE_ERROR_RETURN ((LM_ERROR,
-                        ACE_TEXT("(%P|%t) create_publisher failed.\n")),
-                        1);
+        ACE_TEXT("(%P|%t) create_publisher failed.\n")), 1);
     }
 
     // Create the datawriters
@@ -267,7 +244,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     pub->get_default_datawriter_qos (automatic_dw_qos);
     automatic_dw_qos.history.depth = history_depth;
     automatic_dw_qos.resource_limits.max_samples_per_instance =
-          max_samples_per_instance;
+      max_samples_per_instance;
     automatic_dw_qos.liveliness.kind = ::DDS::AUTOMATIC_LIVELINESS_QOS;
     automatic_dw_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC;
     automatic_dw_qos.liveliness.lease_duration.nanosec = 0;
@@ -276,29 +253,21 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     pub->get_default_datawriter_qos (manual_dw_qos);
     manual_dw_qos.history.depth = history_depth;
     manual_dw_qos.resource_limits.max_samples_per_instance =
-          max_samples_per_instance;
+      max_samples_per_instance;
     manual_dw_qos.liveliness.kind = ::DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
     manual_dw_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC;
     manual_dw_qos.liveliness.lease_duration.nanosec = 0;
 
     ::DDS::DataWriter_var dw_automatic =
-      pub->create_datawriter(automatic_topic.in (),
-                              automatic_dw_qos,
-                              ::DDS::DataWriterListener::_nil(),
-                              ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
+      pub->create_datawriter(automatic_topic.in (), automatic_dw_qos,
+      ::DDS::DataWriterListener::_nil(), ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     ::DDS::DataWriter_var dw_manual =
-      pub->create_datawriter(manual_topic.in (),
-                              manual_dw_qos,
-                              ::DDS::DataWriterListener::_nil(),
-                              ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      pub->create_datawriter(manual_topic.in (), manual_dw_qos,
+      ::DDS::DataWriterListener::_nil(), ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-
-    if (CORBA::is_nil (dw_automatic.in ()) || CORBA::is_nil (dw_manual.in ()))
-    {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) create_datawriter failed.\n")));
-      return 1 ;
+    if (CORBA::is_nil (dw_automatic.in ()) || CORBA::is_nil (dw_manual.in ())) {
+      ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) create_datawriter failed.\n")), 1);
     }
     ::DDS::TopicDescription_var manual_description =
       dp->lookup_topicdescription(MANUAL_TOPIC);
@@ -306,28 +275,25 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       dp2->lookup_topicdescription(AUTOMATIC_TOPIC);
     ::DDS::TopicDescription_var manual_description2 =
       dp2->lookup_topicdescription(MANUAL_TOPIC);
-    if (CORBA::is_nil (CORBA::is_nil (manual_description.in ()) ||
-        automatic_description2.in ()) || CORBA::is_nil (manual_description2.in ()))
-    {
+
+    if (CORBA::is_nil (manual_description.in()) || CORBA::is_nil (automatic_description2.in()) ||
+        CORBA::is_nil (manual_description2.in())) {
       ACE_ERROR_RETURN ((LM_ERROR,
-                          ACE_TEXT("(%P|%t) lookup_topicdescription failed.\n")),
-                          1);
+        ACE_TEXT("(%P|%t) lookup_topicdescription failed.\n")), 1);
     }
 
     // Create the subscriber
     ::DDS::Subscriber_var remote_sub =
-      dp2->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                            ::DDS::SubscriberListener::_nil(),
-                            ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      dp2->create_subscriber(SUBSCRIBER_QOS_DEFAULT, ::DDS::SubscriberListener::_nil(),
+      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     ::DDS::Subscriber_var local_sub =
-      dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                            ::DDS::SubscriberListener::_nil(),
-                            ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, ::DDS::SubscriberListener::_nil(),
+      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
     if (CORBA::is_nil(remote_sub.in()) || CORBA::is_nil(local_sub.in()))
     {
       ACE_ERROR_RETURN ((LM_ERROR,
-                          ACE_TEXT("(%P|%t) create_subscriber failed.\n")),
-                          1);
+        ACE_TEXT("(%P|%t) create_subscriber failed.\n")), 1);
     }
 
     // Create the Datareaders
@@ -358,47 +324,50 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     local_manual_dr_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC ;
     local_manual_dr_qos.liveliness.lease_duration.nanosec = 0 ;
 
-    ::DDS::DataReaderListener_var drl (new DataReaderListenerImpl);
-    DataReaderListenerImpl* drl_servant =
-      dynamic_cast<DataReaderListenerImpl*>(drl.in());
-    ::DDS::DataReaderListener_var drl2 (new DataReaderListenerImpl);
-    DataReaderListenerImpl* drl_servant2 =
-      dynamic_cast<DataReaderListenerImpl*>(drl2.in());
-    ::DDS::DataReaderListener_var drl3 (new DataReaderListenerImpl);
-    DataReaderListenerImpl* drl_servant3 =
-      dynamic_cast<DataReaderListenerImpl*>(drl3.in());
+    ::DDS::DataReaderListener_var automatic_drl (new DataReaderListenerImpl);
+    DataReaderListenerImpl* automatic_drl_servant =
+      dynamic_cast<DataReaderListenerImpl*>(automatic_drl.in());
+    ::DDS::DataReaderListener_var remote_manual_drl (new DataReaderListenerImpl);
+    DataReaderListenerImpl* remote_manual_drl_servant =
+      dynamic_cast<DataReaderListenerImpl*>(remote_manual_drl.in());
+    ::DDS::DataReaderListener_var local_manual_drl (new DataReaderListenerImpl);
+    DataReaderListenerImpl* local_manual_drl_servant =
+      dynamic_cast<DataReaderListenerImpl*>(local_manual_drl.in());
 
-    if (!drl_servant || !drl_servant2 || !drl_servant3) {
-      ACE_ERROR_RETURN((LM_ERROR,
-        ACE_TEXT("%N:%l main()")
+    if (!automatic_drl_servant || !remote_manual_drl_servant || !local_manual_drl_servant) {
+      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l main()")
         ACE_TEXT(" ERROR: drl_servant is nil (dynamic_cast failed)!\n")), -1);
     }
 
     ::DDS::DataReader_var automatic_dr ;
-
-    automatic_dr = remote_sub->create_datareader(automatic_description2.in (),
-                                automatic_dr_qos,
-                                drl.in (),
-                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
     ::DDS::DataReader_var remote_manual_dr ;
+    ::DDS::DataReader_var local_manual_dr ;
 
-    remote_manual_dr = remote_sub->create_datareader(manual_description2.in (),
-                                remote_manual_dr_qos,
-                                drl2.in (),
-                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    automatic_dr =
+      remote_sub->create_datareader(automatic_description2.in (),
+      automatic_dr_qos, automatic_drl.in (), ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    remote_manual_dr =
+      remote_sub->create_datareader(manual_description2.in (),
+      remote_manual_dr_qos, remote_manual_drl.in (), ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
+
+    // The following waitsets are required to give the remote manual reader time to associate
+    // as well as giving time for the writer to associate with the remote reader.
+    // The test will fail in rtps_udp if they are removed.
     DDS::StatusCondition_var reader_condition = remote_manual_dr->get_statuscondition();
+    DDS::StatusCondition_var writer_condition = dw_manual->get_statuscondition();
     reader_condition->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
+    writer_condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
     DDS::WaitSet_var reader_ws = new DDS::WaitSet;
+    DDS::WaitSet_var writer_ws = new DDS::WaitSet;
     reader_ws->attach_condition(reader_condition);
+    writer_ws->attach_condition(writer_condition);
+
     while (true) {
       DDS::SubscriptionMatchedStatus matches;
       if (remote_manual_dr->get_subscription_matched_status(matches) != ::DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" get_subscription_matched_status failed!\n")),
-                         1);
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %N:%l: main() -")
+          ACE_TEXT(" get_subscription_matched_status failed!\n")), 1);
       }
       if (matches.current_count >= 1) {
         break;
@@ -406,25 +375,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       DDS::ConditionSeq conditions;
       DDS::Duration_t timeout = { 60, 0 };
       if (reader_ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" wait failed!\n")),
-                         1);
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %N:%l: main() -")
+          ACE_TEXT(" wait failed!\n")), 1);
       }
     }
     reader_ws->detach_condition(reader_condition);
 
-    DDS::StatusCondition_var writer_condition = dw_manual->get_statuscondition();
-    writer_condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
-    DDS::WaitSet_var writer_ws = new DDS::WaitSet;
-    writer_ws->attach_condition(writer_condition);
     while (true) {
       DDS::PublicationMatchedStatus matches;
       if (dw_manual->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" get_publication_matched_status failed!\n")),
-                         1);
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %N:%l: main() -")
+          ACE_TEXT(" get_publication_matched_status failed!\n")), 1);
       }
       if (matches.current_count >= 1) {
         break;
@@ -432,27 +393,19 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       DDS::ConditionSeq conditions;
       DDS::Duration_t timeout = { 60, 0 };
       if (writer_ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" wait failed!\n")),
-                         1);
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %N:%l: main() -")
+          ACE_TEXT(" wait failed!\n")), 1);
       }
     }
     writer_ws->detach_condition(writer_condition);
 
-    ::DDS::DataReader_var local_manual_dr ;
-
     local_manual_dr = local_sub->create_datareader(manual_description.in (),
-                                local_manual_dr_qos,
-                                drl3.in (),
-                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      local_manual_dr_qos, local_manual_drl.in (), ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil (automatic_dr.in ()) || CORBA::is_nil (remote_manual_dr.in ()) ||
-        CORBA::is_nil (local_manual_dr.in ()))
-    {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) create_datareader failed.\n")));
-      return 1 ;
+        CORBA::is_nil (local_manual_dr.in ())) {
+      ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) create_datareader failed.\n")), 1);
     }
     // send an automatic message to show manual readers are not
     // notified of liveliness.
@@ -460,27 +413,25 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     foo.x = -1;
     foo.y = -1;
     foo.key = 101010;
-    ::Xyz::FooDataWriter_var foo_dw
-      = ::Xyz::FooDataWriter::_narrow(dw_automatic.in());
+    ::Xyz::FooDataWriter_var foo_dw =
+      ::Xyz::FooDataWriter::_narrow(dw_automatic.in());
     ::DDS::InstanceHandle_t handle = foo_dw->register_instance(foo);
-    foo_dw->write(foo,
-                  handle);
+    foo_dw->write(foo, handle);
 
     Writer* writer = new Writer(dw_manual.in(),
-                                1,
-                                num_ops_per_thread);
+      1, num_ops_per_thread);
     int lcc_local = 0;
     int lcc_remote = 0;
     //we want to only publish after the reader loses liveliness from the writer
-    //the follows the pattern of an up and a down, so there should be 2 liveliness
-    //changes per call to run_test
+    //this follows the pattern of an up and a down, so there should be 2 liveliness
+    //changes per call to run_test, which does the writing
     for (int i = 0 ; i < num_unlively_periods + 1 ; ++i) {
-      lcc_local = drl_servant3->liveliness_changed_count();
-      lcc_remote = drl_servant2->liveliness_changed_count();
+      lcc_local = local_manual_drl_servant->liveliness_changed_count();
+      lcc_remote = remote_manual_drl_servant->liveliness_changed_count();
       while(lcc_local != 2 * i || lcc_remote != 2 * i) {
         ACE_OS::sleep(ACE_Time_Value(0, 250000));
-        lcc_local = drl_servant3->liveliness_changed_count();
-        lcc_remote = drl_servant2->liveliness_changed_count();
+        lcc_local = local_manual_drl_servant->liveliness_changed_count();
+        lcc_remote = remote_manual_drl_servant->liveliness_changed_count();
       }
       ACE_DEBUG ((LM_DEBUG,
         ACE_TEXT("(%P|%t) Running Write: remote: %d local: %d \n"), lcc_remote, lcc_local));
@@ -490,8 +441,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     while(lcc_local != 2 * (num_unlively_periods + 1) ||
           lcc_remote != 2 * (num_unlively_periods + 1)) {
       ACE_OS::sleep(ACE_Time_Value(0, 250000));
-      lcc_local = drl_servant3->liveliness_changed_count();
-      lcc_remote = drl_servant2->liveliness_changed_count();
+      lcc_local = local_manual_drl_servant->liveliness_changed_count();
+      lcc_remote = remote_manual_drl_servant->liveliness_changed_count();
     }
 
     // Clean up publisher objects
@@ -502,120 +453,87 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     while(lcc_local != 2 * (num_unlively_periods + 2) + 1 &&
           lcc_remote != 2 * (num_unlively_periods + 2) + 1){
       ACE_OS::sleep(ACE_Time_Value(0, 250000));
-      lcc_local = drl_servant3->liveliness_changed_count();
-      lcc_remote = drl_servant2->liveliness_changed_count();
+      lcc_local = local_manual_drl_servant->liveliness_changed_count();
+      lcc_remote = remote_manual_drl_servant->liveliness_changed_count();
     }
 
     // Determine the test status at this point.
 
     ACE_OS::fprintf (stderr, "**********\n") ;
-    ACE_OS::fprintf (stderr, "drl_servant->liveliness_changed_count() = %d\n",
-                    drl_servant->liveliness_changed_count()) ;
-    ACE_OS::fprintf (stderr, "drl_servant->no_writers_generation_count() = %d\n",
-                    drl_servant->no_writers_generation_count()) ;
+    ACE_OS::fprintf (stderr, "automatic_drl_servant->liveliness_changed_count() = %d\n",
+                    automatic_drl_servant->liveliness_changed_count()) ;
+    ACE_OS::fprintf (stderr, "automatic_drl_servant->no_writers_generation_count() = %d\n",
+                    automatic_drl_servant->no_writers_generation_count()) ;
     ACE_OS::fprintf (stderr, "********** use_take=%d\n", use_take) ;
 
-    //automatic should stay alive due to reactor and
-    //therefore go up at start then come down at end
-    if( drl_servant->liveliness_changed_count() != 3) {
+    //automatic should stay alive due to reactor,
+    //going up at start then coming down at end
+    if( automatic_drl_servant->liveliness_changed_count() != 3) {
       status = 1;
-      // Some error condition.
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: subscriber - ")
         ACE_TEXT("test failed first condition.\n")
       ));
-
-    } else if( drl_servant->verify_last_liveliness_status () == false) {
+    } else if( automatic_drl_servant->verify_last_liveliness_status () == false) {
       status = 1;
-      // Some other error condition.
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: subscriber - ")
         ACE_TEXT("test failed second condition.\n")
       ));
-
-    } else if( drl_servant->no_writers_generation_count() != 0) {
+    } else if( automatic_drl_servant->no_writers_generation_count() != 0) {
       status = 1;
-      // Yet another error condition.
-
-      // Using take will remove the instance and instance state will be
-      // reset for any subsequent samples sent.  Since there are no
-      // more samples sent, the information available from the listener
-      // retains that from the last read sample rather than the reset
-      // value for an (as yet unreceived) next sample.
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: subscriber - ")
         ACE_TEXT("test failed third condition.\n")
       ));
     }
     ACE_OS::fprintf (stderr, "**********\n") ;
-    ACE_OS::fprintf (stderr, "drl_servant2->liveliness_changed_count() = %d\n",
-                    drl_servant2->liveliness_changed_count()) ;
-    ACE_OS::fprintf (stderr, "drl_servant2->no_writers_generation_count() = %d\n",
-                    drl_servant2->no_writers_generation_count()) ;
+    ACE_OS::fprintf (stderr, "remote_manual_drl_servant->liveliness_changed_count() = %d\n",
+                    remote_manual_drl_servant->liveliness_changed_count()) ;
+    ACE_OS::fprintf (stderr, "remote_manual_drl_servant->no_writers_generation_count() = %d\n",
+                    remote_manual_drl_servant->no_writers_generation_count()) ;
     ACE_OS::fprintf (stderr, "********** use_take=%d\n", use_take) ;
 
-    if( drl_servant2->liveliness_changed_count() < 2 + 2) {
+    if( remote_manual_drl_servant->liveliness_changed_count() < 2 + 2) {
       status = 1;
-      // Some error condition.
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: subscriber - ")
         ACE_TEXT("test failed first condition.\n")
       ));
-
-    } else if( drl_servant2->verify_last_liveliness_status () == false) {
+    } else if( remote_manual_drl_servant->verify_last_liveliness_status () == false) {
       status = 1;
-      // Some other error condition.
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: subscriber - ")
         ACE_TEXT("test failed second condition.\n")
       ));
-
-    } else if( drl_servant2->no_writers_generation_count() != num_unlively_periods) {
+    } else if( remote_manual_drl_servant->no_writers_generation_count() != num_unlively_periods) {
       status = 1;
-      // Yet another error condition.
-
-      // Using take will remove the instance and instance state will be
-      // reset for any subsequent samples sent.  Since there are no
-      // more samples sent, the information available from the listener
-      // retains that from the last read sample rather than the reset
-      // value for an (as yet unreceived) next sample.
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: subscriber - ")
         ACE_TEXT("test failed third condition.\n")
       ));
     }
     ACE_OS::fprintf (stderr, "**********\n") ;
-    ACE_OS::fprintf (stderr, "drl_servant3->liveliness_changed_count() = %d\n",
-                    drl_servant3->liveliness_changed_count()) ;
-    ACE_OS::fprintf (stderr, "drl_servant3->no_writers_generation_count() = %d\n",
-                    drl_servant3->no_writers_generation_count()) ;
+    ACE_OS::fprintf (stderr, "local_manual_drl_servant->liveliness_changed_count() = %d\n",
+                    local_manual_drl_servant->liveliness_changed_count()) ;
+    ACE_OS::fprintf (stderr, "local_manual_drl_servant->no_writers_generation_count() = %d\n",
+                    local_manual_drl_servant->no_writers_generation_count()) ;
     ACE_OS::fprintf (stderr, "********** use_take=%d\n", use_take) ;
 
-    if( drl_servant3->liveliness_changed_count() < 2 + 2) {
+    if( local_manual_drl_servant->liveliness_changed_count() < 2 + 2) {
       status = 1;
-      // Some error condition.
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: subscriber - ")
         ACE_TEXT("test failed first condition.\n")
       ));
-
-    } else if( drl_servant3->verify_last_liveliness_status () == false) {
+    } else if( local_manual_drl_servant->verify_last_liveliness_status () == false) {
       status = 1;
-      // Some other error condition.
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: subscriber - ")
         ACE_TEXT("test failed second condition.\n")
       ));
-
-    } else if( drl_servant3->no_writers_generation_count() != num_unlively_periods) {
+    } else if( local_manual_drl_servant->no_writers_generation_count() != num_unlively_periods) {
       status = 1;
-      // Yet another error condition.
-
-      // Using take will remove the instance and instance state will be
-      // reset for any subsequent samples sent.  Since there are no
-      // more samples sent, the information available from the listener
-      // retains that from the last read sample rather than the reset
-      // value for an (as yet unreceived) next sample.
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: subscriber - ")
         ACE_TEXT("test failed third condition.\n")
@@ -633,14 +551,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       dpf->delete_participant(dp2.in ());
       TheServiceParticipant->shutdown ();
     }
-  catch (const TestException&)
-    {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) TestException caught in main.cpp. ")));
+  catch (const TestException&) {
+      ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t) TestException caught in main.cpp. ")));
       return 1;
     }
-  catch (const CORBA::Exception& ex)
-    {
+  catch (const CORBA::Exception& ex) {
       ex._tao_print_exception ("Exception caught in main.cpp:");
       return 1;
     }
