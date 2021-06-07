@@ -55,7 +55,7 @@ void GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_t& guid, const DDS::St
     }
   }
 
-  add_globally_new(globally_new);
+  add_new(globally_new);
 
   if (spdp_replay_writer_->write(spdp_replay, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to write Relay Partitions\n")));

@@ -1513,23 +1513,27 @@ sub remedy_zip_source {
   return !$result;
 }
 ############################################################################
-sub verify_md5_checksum{
+sub verify_md5_checksum {
   my $settings = shift();
-  my $file = join("/", $settings->{workspace}, $settings->{md5_src});
-  return run_command("md5sum --check --quiet $file");
+  my $orig_dir = getcwd();
+  chdir($settings->{workspace});
+  my $status = run_command("md5sum --check --quiet $settings->{md5_src}");
+  chdir($orig_dir);
+  return $status;
 }
 
-sub message_md5_checksum{
+sub message_md5_checksum {
   return "Generate the MD5 checksum file";
 }
 
-sub remedy_md5_checksum{
+sub remedy_md5_checksum {
   my $settings = shift();
   print "Creating file $settings->{md5_src}\n";
-  my $md5_file = join("/", $settings->{workspace}, $settings->{md5_src});
-  my $tgz_file = join("/", $settings->{workspace}, $settings->{tgz_src});
-  my $zip_file = join("/", $settings->{workspace}, $settings->{zip_src});
-  return run_command("md5sum $tgz_file $zip_file > $md5_file");
+  my $orig_dir = getcwd();
+  chdir($settings->{workspace});
+  my $status = run_command("md5sum $settings->{tgz_src} $settings->{zip_src} > $settings->{md5_src}");
+  chdir($orig_dir);
+  return $status;
 }
 ############################################################################
 
@@ -2106,7 +2110,7 @@ my $release_branch = "";
 if (%parsed_version) {
   $version = $parsed_version{string};
   print("Version to release is $version\n");
-  $base_name = "${base_name_prefix}${version}";
+  $base_name = "${base_name_prefix}$parsed_version{tag_string}";
   if (!$micro) {
     $release_branch =
       "${release_branch_prefix}${git_name_prefix}$parsed_version{series_string}";
@@ -2168,7 +2172,7 @@ my %global_settings = (
     tar_dox      => "${base_name}-doxygen.tar",
     tgz_dox      => "${base_name}-doxygen.tar.gz",
     zip_dox      => "${base_name}-doxygen.zip",
-    devguide_ver => "${base_name_prefix}$parsed_version{release_string}.pdf",
+    devguide_ver => "${base_name_prefix}$parsed_version{series_string}.pdf",
     devguide_lat => "${base_name_prefix}latest.pdf",
     timestamp    => $release_timestamp,
     git_url      => "git\@github.com:${github_user}/${repo_name}.git",
@@ -2337,6 +2341,16 @@ my @release_steps  = (
     remedy  => sub{remedy_zip_source(@_)}
   },
   {
+    name    => 'Create MD5 Checksum File',
+    prereqs => [
+      'Create Unix Release Archive',
+      'Create Windows Release Archive',
+    ],
+    verify  => sub{verify_md5_checksum(@_)},
+    message => sub{message_md5_checksum(@_)},
+    remedy  => sub{remedy_md5_checksum(@_)},
+  },
+  {
     name    => 'Download OCI ACE/TAO',
     prereqs => ['Create Workspace Directory'],
     verify  => sub{verify_download_ace_tao(@_)},
@@ -2375,16 +2389,6 @@ my @release_steps  = (
     message => sub{message_zip_doxygen(@_)},
     remedy  => sub{remedy_zip_doxygen(@_)},
     skip    => $global_settings{skip_doxygen},
-  },
-  {
-    name    => 'Create MD5 Checksum File',
-    prereqs => [
-      'Create Unix Release Archive',
-      'Create Windows Release Archive',
-    ],
-    verify  => sub{verify_md5_checksum(@_)},
-    message => sub{message_md5_checksum(@_)},
-    remedy  => sub{remedy_md5_checksum(@_)},
   },
   {
     name    => 'Download Devguide',
@@ -2576,7 +2580,7 @@ sub run_step {
     print "$divider\n";
   }
 
-  print "  OK!\n";
+  print "  Step $step_count \"$title\" is OK!\n";
 
   $step->{verified} = 1;
 }

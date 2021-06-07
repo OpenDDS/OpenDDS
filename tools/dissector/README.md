@@ -17,7 +17,7 @@ from within Wireshark.
 - [See Also](#see-also)
 - [Building](#building)
 - [Usage](#usage)
-  - [Enviroment Variables](#enviroment-variables)
+  - [Environment Variables](#environment-variables)
   - [Display Filters](#display-filters)
   - [Color Filters](#color-filters)
 - [Sample Dissection](#sample-dissection)
@@ -157,7 +157,7 @@ can usually be found somewhere under the "Help" or "Internals" menus.
 The `OpenDDS_Dissector` library we created above should appear in the
 list of plugins or protocols.
 
-<a name="enviroment-variables"></a>
+<a name="environment-variables"></a>
 ### Environment Variables
 
   - `OPENDDS_DISSECTORS`

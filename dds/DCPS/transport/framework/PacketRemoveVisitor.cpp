@@ -24,7 +24,8 @@ PacketRemoveVisitor::PacketRemoveVisitor(
   ACE_Message_Block*& unsent_head_block,
   ACE_Message_Block* header_block,
   MessageBlockAllocator& mb_allocator,
-  DataBlockAllocator& db_allocator)
+  DataBlockAllocator& db_allocator,
+  bool remove_all)
   : match_(match)
   , head_(unsent_head_block)
   , header_block_(header_block)
@@ -33,6 +34,7 @@ PacketRemoveVisitor::PacketRemoveVisitor(
   , previous_block_(0)
   , replaced_element_mb_allocator_(mb_allocator)
   , replaced_element_db_allocator_(db_allocator)
+  , remove_all_(remove_all)
 {
   DBG_ENTRY_LVL("PacketRemoveVisitor", "PacketRemoveVisitor", 6);
 }
@@ -315,7 +317,7 @@ PacketRemoveVisitor::visit_element_ref(TransportQueueElement*& element)
     }
 
     // Finally!At this point we have broken the unsent packet chain of
-    // blocks into three seperate chains:
+    // blocks into three separate chains:
     //
     //   (1) this->previous_block_ is either 0, or it points to the block
     //       (from the unsent packet chain) that immediately preceded the
@@ -466,7 +468,7 @@ PacketRemoveVisitor::visit_element_ref(TransportQueueElement*& element)
     // is retained sample and no callback is made to writer.
     this->status_ = orig_elem->data_dropped() ? REMOVE_RELEASED : REMOVE_FOUND;
 
-    if (this->status_ == REMOVE_RELEASED || this->match_.unique()) {
+    if ((!remove_all_ && status_ == REMOVE_RELEASED) || match_.unique()) {
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
             "Return 0 to halt visitation.\n"));
       // Replace a single sample if one is specified, otherwise visit the

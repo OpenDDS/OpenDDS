@@ -293,10 +293,10 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
     get_connection_addrs(remote_data, &requires_inline_qos, &blob_bytes_read);
 
   if (link_) {
-    link_->add_locators(remote_id, addrs.first, addrs.second, requires_inline_qos);
-
     return link_->associated(local_id, remote_id, local_reliable, remote_reliable,
-                             local_durable, remote_durable, participant_discovered_at, participant_flags, max_sn, client);
+                             local_durable, remote_durable,
+                             participant_discovered_at, participant_flags, max_sn, client,
+                             addrs.first, addrs.second, requires_inline_qos);
   }
 
   return true;
@@ -421,7 +421,7 @@ RtpsUdpTransport::update_locators(const RepoId& remote,
     unsigned int blob_bytes_read;
     std::pair<RtpsUdpDataLink::AddrSet, RtpsUdpDataLink::AddrSet> addrs =
       get_connection_addrs(*blob, &requires_inline_qos, &blob_bytes_read);
-    link_->add_locators(remote, addrs.first, addrs.second, requires_inline_qos);
+    link_->update_locators(remote, addrs.first, addrs.second, requires_inline_qos, false);
   }
 }
 

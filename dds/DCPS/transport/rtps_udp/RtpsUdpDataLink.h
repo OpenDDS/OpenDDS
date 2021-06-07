@@ -136,10 +136,11 @@ public:
 
   typedef OPENDDS_SET(ACE_INET_Addr) AddrSet;
 
-  void add_locators(const RepoId& remote_id,
-                    const AddrSet& unicast_addresses,
-                    const AddrSet& multicast_addresses,
-                    bool requires_inline_qos);
+  void update_locators(const RepoId& remote_id,
+                       const AddrSet& unicast_addresses,
+                       const AddrSet& multicast_addresses,
+                       bool requires_inline_qos,
+                       bool add_ref);
 
   /// Given a 'local' id and a 'remote' id of a publication or
   /// subscription, return the set of addresses of the remote peers.
@@ -160,7 +161,10 @@ public:
                   const MonotonicTime_t& participant_discovered_at,
                   ACE_CDR::ULong participant_flags,
                   SequenceNumber max_sn,
-                  const TransportClient_rch& client);
+                  const TransportClient_rch& client,
+                  const AddrSet& unicast_addresses,
+                  const AddrSet& multicast_addresses,
+                  bool requires_inline_qos);
 
   void disassociated(const RepoId& local, const RepoId& remote);
 
@@ -222,7 +226,6 @@ private:
   virtual TransportQueueElement* customize_queue_element(
     TransportQueueElement* element);
 
-  virtual void release_remote_i(const RepoId& remote_id);
   virtual void release_reservations_i(const RepoId& remote_id,
                                       const RepoId& local_id);
 
@@ -242,14 +245,15 @@ private:
   GuidPrefix_t local_prefix_;
 
   struct RemoteInfo {
-    RemoteInfo() : unicast_addrs_(), multicast_addrs_(), requires_inline_qos_(false) {}
+    RemoteInfo() : unicast_addrs_(), multicast_addrs_(), requires_inline_qos_(false), ref_count_(0) {}
     RemoteInfo(const AddrSet& unicast_addrs, const AddrSet& multicast_addrs, bool iqos)
-      : unicast_addrs_(unicast_addrs), multicast_addrs_(multicast_addrs), requires_inline_qos_(iqos) {}
+      : unicast_addrs_(unicast_addrs), multicast_addrs_(multicast_addrs), requires_inline_qos_(iqos), ref_count_(0) {}
     AddrSet unicast_addrs_;
     AddrSet multicast_addrs_;
     bool requires_inline_qos_;
     ACE_INET_Addr last_recv_addr_;
     MonotonicTimePoint last_recv_time_;
+    size_t ref_count_;
   };
 
   typedef OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan) RemoteInfoMap;
@@ -378,7 +382,7 @@ private:
     {}
     ~ReaderInfo();
     void swap_durable_data(OPENDDS_MAP(SequenceNumber, TransportQueueElement*)& dd);
-    void expire_durable_data();
+    void expunge_durable_data();
     bool expecting_durable_data() const;
     SequenceNumber acked_sn() const { return cur_cumulative_ack_.previous(); }
     bool reflects_heartbeat_count() const;
@@ -471,10 +475,6 @@ private:
     bool is_lagging(const ReaderInfo_rch& reader) const;
     void check_leader_lagger() const;
     void record_directed(const RepoId& reader, SequenceNumber seq);
-    void expire_durable_data(const ReaderInfo_rch& reader,
-                             const RtpsUdpInst& cfg,
-                             const MonotonicTimePoint& now,
-                             TqeVector& pendingCallbacks);
 
 #ifdef OPENDDS_SECURITY
     bool is_pvs_writer() const { return is_pvs_writer_; }
@@ -531,8 +531,7 @@ private:
                           MetaSubmessageVec& meta_submessages);
     void process_acked_by_all();
     void gather_nack_replies_i(MetaSubmessageVec& meta_submessages);
-    void gather_heartbeats_i(TqeVector& pendingCallbacks,
-                             MetaSubmessageVec& meta_submessages);
+    void gather_heartbeats_i(MetaSubmessageVec& meta_submessages);
     void gather_heartbeats(const RepoIdSet& additional_guids,
                            MetaSubmessageVec& meta_submessages);
     typedef OPENDDS_MAP_CMP(RepoId, SequenceNumber, GUID_tKeyLessThan) ExpectedMap;

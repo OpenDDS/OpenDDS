@@ -54,7 +54,7 @@ QueueRemoveVisitor::visit_element_remove(TransportQueueElement* element,
     // the sample.
     this->status_ = released ? REMOVE_RELEASED : REMOVE_FOUND;
 
-    if (released || this->mc_.unique()) {
+    if ((!remove_all_ && released) || this->mc_.unique()) {
       // Stop visitation since we've handled the element that matched
       // our sample_.
       // N.B. This unique() test means that if we are comparing by sample, we

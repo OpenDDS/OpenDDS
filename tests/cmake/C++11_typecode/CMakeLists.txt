@@ -1,4 +1,4 @@
-project(OpenDDS_C++11_Typecode CXX)
+project(opendds_cpp11_typecode CXX)
 cmake_minimum_required(VERSION 3.8.2)
 
 find_package(OpenDDS REQUIRED)
@@ -11,7 +11,7 @@ if (NOT OPENDDS_CXX11)
   message(FATAL_ERROR "This test requires OpenDDS to be built with C++11 Support")
 endif()
 
-set(target_prefix "opendds_cmake_cpp11_typecode_")
+set(target_prefix "${PROJECT_NAME}_")
 set(src "${CMAKE_CURRENT_SOURCE_DIR}/../../DCPS/Compiler/typecode")
 set(dst ${CMAKE_CURRENT_BINARY_DIR})
 

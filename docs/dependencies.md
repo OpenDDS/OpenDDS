@@ -17,6 +17,7 @@
   * [Boost](#boost)
   * [Xerces](#xerces)
   * [OpenSSL](#openssl)
+  * [Python](#python)
 
 ## Required to Build the Core OpenDDS Libraries
 
@@ -26,7 +27,7 @@ downloaded automatically by the configure script by default.**
 ### Perl
 
 Perl is an interpreted language used in the configure script, the tests, and
-any other scripting in OpenDDS codebase. Even if the configure script is not
+most other scripting in OpenDDS codebase. Even if the configure script is not
 used, it is also required to run MPC, so it is required to build OpenDDS.
 
 Testing scripts are written in Perl and use the common PerlACE modules provided
@@ -191,3 +192,15 @@ security XML configuration files.
 
 OpenSSL is used for DDS Security for verifying security configurations and
 encryption and decryption. Version 1.0 and version 1.1 are supported.
+
+### Python
+
+Python is used for some scripts where Perl isn't as suitable. Most notably this
+includes the [Sphinx-based documentation](README.md#sphinx-documentation) and
+processing the results of the CMake tests in `auto_run_tests.pl` if `--cmake`
+is passed.
+
+Unless noted otherwise, Python should be version 3.6 or later. Because it's an
+optional dependency, Python should not be required for any script used for
+building and testing the core functionality of OpenDDS. Right now only Perl can
+be used for situations like that.
