@@ -200,10 +200,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
     writer.end();
   }
 
+#ifndef DDS_HAS_MINIMUM_BIT
   if (reader_handle_1 == reader_handle_2) {
     cerr << "ERROR: readers have the same handle" << endl;
     return 1;
   }
+#endif
 
   // Write to PARTITION_B, two readers.
   sub_qos_1.partition.name[0] = PARTITION_B;
