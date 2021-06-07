@@ -7,6 +7,9 @@
 
 #include <gtest/gtest.h>
 
+#ifdef OPENDDS_RAPIDJSON
+#ifndef OPENDDS_SAFETY_PROFILE
+
 using namespace rapidjson;
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::XTypes;
@@ -547,3 +550,6 @@ TEST(JsonValueReader, from_json)
   MyStruct s;
   EXPECT_TRUE(from_json(s, ss));
 }
+
+#endif
+#endif

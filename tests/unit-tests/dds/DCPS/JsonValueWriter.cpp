@@ -7,6 +7,9 @@
 
 #include "gtest/gtest.h"
 
+#ifdef OPENDDS_RAPIDJSON
+#ifndef OPENDDS_SAFETY_PROFILE
+
 using namespace rapidjson;
 using namespace OpenDDS::DCPS;
 

@@ -296,6 +296,6 @@ TEST(Sequence, main)
   s4v[0].s1_ = "testing";
   s4v[1] = s4v[0];
   const S4_var& s4vc = s4v;
-  EXPECT_TRUE(s4vc[1].s1_ == "testing", -1);
+  EXPECT_TRUE(s4vc[1].s1_ == "testing");
 #endif
 }
