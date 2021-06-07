@@ -221,7 +221,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       dp2->create_topic (MANUAL_TOPIC, MY_TYPE, topic_qos,
       ::DDS::TopicListener::_nil(), ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (CORBA::is_nil (automatic_topic.in()) || 
+    if (CORBA::is_nil (automatic_topic.in()) ||
         CORBA::is_nil (automatic_topic2.in()) ||
         CORBA::is_nil (manual_topic.in()) ||
         CORBA::is_nil (manual_topic2.in())) {
@@ -434,7 +434,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         lcc_remote = remote_manual_drl_servant->liveliness_changed_count();
       }
       ACE_DEBUG ((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Running Write: remote: %d local: %d \n"), lcc_remote, lcc_local));
+        ACE_TEXT("(%P|%t) Running Write: remote: %d local: %d\n"), lcc_remote, lcc_local));
       writer->run_test (i);
     }
 
