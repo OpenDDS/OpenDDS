@@ -571,14 +571,14 @@ sub get_props {
       "ERROR: Invalid compiler output from: $command\n" .
       "This is the output:\n";
     for my $line (@lines) {
-      print STDERR ("compiler said: $line\n");
+      print STDERR ("compiler said: $line\n") if (length($line));
     }
     die("Stopped");
   }
 
   if ($debug) {
     for my $line (@lines) {
-      print("compiler said: $line\n");
+      print("compiler said: $line\n") if (length($line));
     }
   }
 
