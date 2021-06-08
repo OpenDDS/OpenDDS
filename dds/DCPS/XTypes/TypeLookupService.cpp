@@ -123,44 +123,66 @@ void TypeLookupService::add_type_objects_to_cache(const TypeIdentifier& ti, cons
   }
 }
 
-typedef OPENDDS_MAP(TypeIdentifier, TypeIdentifier) ti_map;
-ti_map complete_to_minimal_ti_map;
-
-void TypeLookupService::complete_to_minimal_typeidentifier(const TypeIdentifier& ct, TypeIdentifier& mt)
+void TypeLookupService::update_type_identifier_map(const TypeIdentifierPairSeq& tid_pairs)
 {
-  const ti_map::iterator pos = complete_to_minimal_ti_map.find(ct);
-  if (pos == complete_to_minimal_ti_map.end()) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("complete_to_minimal_struct: unable to find type identifier in the map.")));
-  } else {
-    mt = pos->second;
+  for (ACE_CDR::ULong i = 0; i < tid_pairs.length(); ++i) {
+    const TypeIdentifierPair& pair = tid_pairs[i];
+    complete_to_minimal_ti_map_.insert(std::make_pair(pair.type_identifier1, pair.type_identifier2));
   }
 }
 
-bool TypeLookupService::complete_to_minimal_struct(const CompleteStructType& ct, MinimalStructType& mt)
+bool TypeLookupService::get_minimal_type_identifier(const TypeIdentifier& ct, TypeIdentifier& mt)
+{
+  const TypeIdentifierMap::const_iterator pos = complete_to_minimal_ti_map_.find(ct);
+  if (pos == complete_to_minimal_ti_map_.end()) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) get_minimal_type_identifier: complete TypeIdentifier not found.")));
+    mt = TypeIdentifier(TK_NONE);
+    return false;
+  }
+  mt = pos->second;
+  return true;
+}
+
+bool TypeLookupService::complete_to_minimal_struct(const CompleteStructType& ct,
+                                                   MinimalStructType& mt)
 {
   mt.struct_flags = ct.struct_flags;
-  complete_to_minimal_typeidentifier(ct.header.base_type, mt.header.base_type);
+  if (!get_minimal_type_identifier(ct.header.base_type, mt.header.base_type)) {
+    return false;
+  }
   mt.member_seq.length(ct.member_seq.length());
-  for (unsigned long i = 0; i < ct.member_seq.length(); ++i) {
+
+  for (ACE_CDR::ULong i = 0; i < ct.member_seq.length(); ++i) {
     mt.member_seq[i].common.member_id = ct.member_seq[i].common.member_id;
     mt.member_seq[i].common.member_flags = ct.member_seq[i].common.member_flags;
-    complete_to_minimal_typeidentifier(ct.member_seq[i].common.member_type_id, mt.member_seq[i].common.member_type_id);
+    if (!get_minimal_type_identifier(ct.member_seq[i].common.member_type_id,
+                                     mt.member_seq[i].common.member_type_id)) {
+      return false;
+    }
     hash_member_name(mt.member_seq[i].detail.name_hash, ct.member_seq[i].detail.name);
   }
   return true;
 }
 
 bool TypeLookupService::complete_to_minimal_union(const CompleteUnionType& ct,
-  MinimalUnionType& mt)
+                                                  MinimalUnionType& mt)
 {
   mt.union_flags = ct.union_flags;
   mt.discriminator.common.member_flags = ct.discriminator.common.member_flags;
-  complete_to_minimal_typeidentifier(ct.discriminator.common.type_id, mt.discriminator.common.type_id);
+  if (!get_minimal_type_identifier(ct.discriminator.common.type_id,
+                                   mt.discriminator.common.type_id)) {
+    return false;
+  }
   mt.member_seq.length(ct.member_seq.length());
-  for (unsigned long i = 0; i < ct.member_seq.length(); ++i) {
+
+  for (ACE_CDR::ULong i = 0; i < ct.member_seq.length(); ++i) {
     mt.member_seq[i].common.member_id = ct.member_seq[i].common.member_id;
     mt.member_seq[i].common.member_flags = ct.member_seq[i].common.member_flags;
-    complete_to_minimal_typeidentifier(ct.member_seq[i].common.type_id, mt.member_seq[i].common.type_id);
+    if (!get_minimal_type_identifier(ct.member_seq[i].common.type_id,
+                                     mt.member_seq[i].common.type_id)) {
+      return false;
+    }
     mt.member_seq[i].common.label_seq = ct.member_seq[i].common.label_seq;
     hash_member_name(mt.member_seq[i].detail.name_hash, ct.member_seq[i].detail.name);
   }
@@ -168,13 +190,17 @@ bool TypeLookupService::complete_to_minimal_union(const CompleteUnionType& ct,
 }
 
 bool TypeLookupService::complete_to_minimal_annotation(const CompleteAnnotationType& ct,
-   MinimalAnnotationType& mt)
+                                                       MinimalAnnotationType& mt)
 {
   mt.annotation_flag = ct.annotation_flag;
   mt.member_seq.length(ct.member_seq.length());
-  for (unsigned long i = 0; i < ct.member_seq.length(); ++i) {
+
+  for (ACE_CDR::ULong i = 0; i < ct.member_seq.length(); ++i) {
     mt.member_seq[i].common.member_flags = ct.member_seq[i].common.member_flags;
-    complete_to_minimal_typeidentifier(ct.member_seq[i].common.member_type_id, mt.member_seq[i].common.member_type_id);
+    if (!get_minimal_type_identifier(ct.member_seq[i].common.member_type_id,
+                                     mt.member_seq[i].common.member_type_id)) {
+      return false;
+    }
     hash_member_name(mt.member_seq[i].name_hash, ct.member_seq[i].name);
     mt.member_seq[i].default_value = ct.member_seq[i].default_value;
   }
@@ -182,52 +208,64 @@ bool TypeLookupService::complete_to_minimal_annotation(const CompleteAnnotationT
 }
 
 bool TypeLookupService::complete_to_minimal_alias(const CompleteAliasType& ct,
-   MinimalAliasType& mt)
+                                                  MinimalAliasType& mt)
 {
   mt.alias_flags = ct.alias_flags;
   mt.body.common.related_flags = ct.body.common.related_flags;
-  complete_to_minimal_typeidentifier(ct.body.common.related_type, mt.body.common.related_type);
+  if (!get_minimal_type_identifier(ct.body.common.related_type,
+                                   mt.body.common.related_type)) {
+    return false;
+  }
   return true;
 }
 
 bool TypeLookupService::complete_to_minimal_sequence(const CompleteSequenceType& ct,
-  MinimalSequenceType& mt)
+                                                     MinimalSequenceType& mt)
 {
   mt.collection_flag = ct.collection_flag;
   mt.header.common = ct.header.common;
   mt.element.common.element_flags = ct.element.common.element_flags;
-  complete_to_minimal_typeidentifier(ct.element.common.type, mt.element.common.type);
+  if (!get_minimal_type_identifier(ct.element.common.type, mt.element.common.type)) {
+    return false;
+  }
   return true;
 }
 
 bool TypeLookupService::complete_to_minimal_array(const CompleteArrayType& ct,
-  MinimalArrayType& mt)
+                                                  MinimalArrayType& mt)
 {
   mt.collection_flag = ct.collection_flag;
   mt.header.common = ct.header.common;
   mt.element.common.element_flags = ct.element.common.element_flags;
-  complete_to_minimal_typeidentifier(ct.element.common.type, mt.element.common.type);
+  if (!get_minimal_type_identifier(ct.element.common.type, mt.element.common.type)) {
+    return false;
+  }
   return true;
 }
 
 bool TypeLookupService::complete_to_minimal_map(const CompleteMapType& ct,
-  MinimalMapType& mt)
+                                                MinimalMapType& mt)
 {
   mt.collection_flag = ct.collection_flag;
   mt.header.common = ct.header.common;
   mt.key.common.element_flags = ct.key.common.element_flags;
-  complete_to_minimal_typeidentifier(ct.key.common.type, mt.key.common.type);
+  if (!get_minimal_type_identifier(ct.key.common.type, mt.key.common.type)) {
+    return false;
+  }
   mt.element.common.element_flags = ct.element.common.element_flags;
-  complete_to_minimal_typeidentifier(ct.element.common.type, mt.element.common.type);
+  if (!get_minimal_type_identifier(ct.element.common.type, mt.element.common.type)) {
+    return false;
+  }
   return true;
 }
 
 bool TypeLookupService::complete_to_minimal_enumerated(const CompleteEnumeratedType& ct,
-  MinimalEnumeratedType& mt)
+                                                       MinimalEnumeratedType& mt)
 {
+  mt.enum_flags = ct.enum_flags;
   mt.header.common = ct.header.common;
   mt.literal_seq.length(ct.literal_seq.length());
-  for (unsigned long i = 0; i < ct.literal_seq.length(); ++i) {
+  for (ACE_CDR::ULong i = 0; i < ct.literal_seq.length(); ++i) {
     mt.literal_seq[i].common = ct.literal_seq[i].common;
     hash_member_name(mt.literal_seq[i].detail.name_hash, ct.literal_seq[i].detail.name);
   }
@@ -235,11 +273,12 @@ bool TypeLookupService::complete_to_minimal_enumerated(const CompleteEnumeratedT
 }
 
 bool TypeLookupService::complete_to_minimal_bitmask(const CompleteBitmaskType& ct,
-  MinimalBitmaskType& mt)
+                                                    MinimalBitmaskType& mt)
 {
+  mt.bitmask_flags = ct.bitmask_flags;
   mt.header.common = ct.header.common;
   mt.flag_seq.length(ct.flag_seq.length());
-  for (unsigned long i = 0; i < ct.flag_seq.length(); ++i) {
+  for (ACE_CDR::ULong i = 0; i < ct.flag_seq.length(); ++i) {
     mt.flag_seq[i].common = ct.flag_seq[i].common;
     hash_member_name(mt.flag_seq[i].detail.name_hash, ct.flag_seq[i].detail.name);
   }
@@ -247,55 +286,44 @@ bool TypeLookupService::complete_to_minimal_bitmask(const CompleteBitmaskType& c
 }
 
 bool TypeLookupService::complete_to_minimal_bitset(const CompleteBitsetType& ct,
-  MinimalBitsetType& mt)
+                                                   MinimalBitsetType& mt)
 {
+  mt.bitset_flags = ct.bitset_flags;
   mt.field_seq.length(ct.field_seq.length());
-  for (unsigned long i = 0; i < ct.field_seq.length(); ++i) {
+  for (ACE_CDR::ULong i = 0; i < ct.field_seq.length(); ++i) {
     mt.field_seq[i].common = ct.field_seq[i].common;
     hash_member_name(mt.field_seq[i].name_hash, ct.field_seq[i].detail.name);
   }
   return true;
 }
 
-bool TypeLookupService::complete_to_minimal_typeobject(const TypeObject& cto,
-  TypeObject& mto)
+bool TypeLookupService::complete_to_minimal_type_object(const TypeObject& cto, TypeObject& mto)
 {
   mto.kind = EK_MINIMAL;
-  bool retval = false;
   mto.minimal.kind = cto.complete.kind;
+
   switch (cto.complete.kind) {
   case TK_ALIAS:
-    retval = complete_to_minimal_alias(cto.complete.alias_type, mto.minimal.alias_type);
-    break;
+    return complete_to_minimal_alias(cto.complete.alias_type, mto.minimal.alias_type);
   case TK_ANNOTATION:
-    retval = complete_to_minimal_annotation(cto.complete.annotation_type, mto.minimal.annotation_type);
-    break;
+    return complete_to_minimal_annotation(cto.complete.annotation_type, mto.minimal.annotation_type);
   case TK_STRUCTURE:
-    retval = complete_to_minimal_struct(cto.complete.struct_type, mto.minimal.struct_type);
-    break;
+    return complete_to_minimal_struct(cto.complete.struct_type, mto.minimal.struct_type);
   case TK_UNION:
-    retval = complete_to_minimal_union(cto.complete.union_type, mto.minimal.union_type);
-    break;
+    return complete_to_minimal_union(cto.complete.union_type, mto.minimal.union_type);
   case TK_BITSET:
-    retval = complete_to_minimal_bitset(cto.complete.bitset_type, mto.minimal.bitset_type);
-    break;
+    return complete_to_minimal_bitset(cto.complete.bitset_type, mto.minimal.bitset_type);
   case TK_SEQUENCE:
-    retval = complete_to_minimal_sequence(cto.complete.sequence_type, mto.minimal.sequence_type);
-    break;
+    return complete_to_minimal_sequence(cto.complete.sequence_type, mto.minimal.sequence_type);
   case TK_ARRAY:
-    retval = complete_to_minimal_array(cto.complete.array_type, mto.minimal.array_type);
-    break;
+    return complete_to_minimal_array(cto.complete.array_type, mto.minimal.array_type);
   case TK_MAP:
-    retval = complete_to_minimal_map(cto.complete.map_type, mto.minimal.map_type);
-    break;
+    return complete_to_minimal_map(cto.complete.map_type, mto.minimal.map_type);
   case TK_ENUM:
-    retval = complete_to_minimal_enumerated(cto.complete.enumerated_type, mto.minimal.enumerated_type);
-    break;
+    return complete_to_minimal_enumerated(cto.complete.enumerated_type, mto.minimal.enumerated_type);
   case TK_BITMASK:
-    retval = complete_to_minimal_bitmask(cto.complete.bitmask_type, mto.minimal.bitmask_type);
-    break;
+    return complete_to_minimal_bitmask(cto.complete.bitmask_type, mto.minimal.bitmask_type);
   }
-  return retval;
 }
 
 void TypeLookupService::add_type_dependencies(const TypeIdentifier& type_id,

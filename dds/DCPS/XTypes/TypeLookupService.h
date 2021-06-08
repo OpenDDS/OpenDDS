@@ -37,8 +37,8 @@ public:
     TypeIdentifierTypeObjectPairSeq& types) const;
   void add_type_objects_to_cache(const TypeIdentifierTypeObjectPairSeq& types);
 
-  void complete_to_minimal_typeidentifier(const TypeIdentifier& ct, TypeIdentifier& mt);
-  bool complete_to_minimal_typeobject(const TypeObject& cto, TypeObject& mto);
+  void update_type_identifier_map(const TypeIdentifierPairSeq& tid_pairs);
+  bool complete_to_minimal_type_object(const TypeObject& cto, TypeObject& mto);
 
   // For TypeLookup_getTypeDependencies
   bool get_type_dependencies(const TypeIdentifier& type_id,
@@ -69,6 +69,12 @@ private:
   mutable ACE_Thread_Mutex mutex_;
 
   TypeObject to_empty_;
+
+  // Mapping from complete to minimal TypeIdentifiers of dependencies of remote types.
+  typedef OPENDDS_MAP(TypeIdentifier, TypeIdentifier) TypeIdentifierMap;
+  TypeIdentifierMap complete_to_minimal_ti_map_;
+
+  bool get_minimal_type_identifier(const TypeIdentifier& ct, TypeIdentifier& mt);
 
   bool complete_to_minimal_struct(const CompleteStructType& ct, MinimalStructType& mt);
   bool complete_to_minimal_union(const CompleteUnionType& ct, MinimalUnionType& mt);
