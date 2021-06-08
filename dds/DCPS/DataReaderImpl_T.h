@@ -1,6 +1,12 @@
 #ifndef OPENDDS_DCPS_DATAREADERIMPL_T_H
 #define OPENDDS_DCPS_DATAREADERIMPL_T_H
 
+#include "ace/config-lite.h"
+
+#ifdef ACE_HAS_CPP11
+#  define OPENDDS_HAS_STD_SHARED_PTR
+#endif
+
 #include "MultiTopicImpl.h"
 #include "RakeResults_T.h"
 #include "SubscriberImpl.h"
@@ -11,7 +17,11 @@
 #include "dcps_export.h"
 #include "GuidConverter.h"
 
+#ifdef OPENDDS_HAS_STD_SHARED_PTR
+#include <memory>
+#else
 #include <ace/Bound_Ptr.h>
+#endif
 #include <ace/Time_Value.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -2390,9 +2400,11 @@ private:
   }
 
   WeakRcHandle<DataReaderImpl_T<MessageType> > data_reader_impl_;
-
+#ifdef OPENDDS_HAS_STD_SHARED_PTR
+  typedef std::shared_ptr<const OpenDDS::DCPS::DataSampleHeader> DataSampleHeader_ptr;
+#else
   typedef ACE_Strong_Bound_Ptr<const OpenDDS::DCPS::DataSampleHeader, ACE_Null_Mutex> DataSampleHeader_ptr;
-
+#endif
   struct FilterDelayedSample {
 
     FilterDelayedSample(unique_ptr<MessageTypeWithAllocator> msg, DataSampleHeader_ptr hdr, bool new_inst)
