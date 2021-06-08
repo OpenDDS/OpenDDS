@@ -471,19 +471,19 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if( automatic_drl_servant->liveliness_changed_count() != 3) {
       status = 1;
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: subscriber - ")
+        ACE_TEXT("(%P|%t) ERROR: automatic_drl_servant - ")
         ACE_TEXT("test failed first condition.\n")
       ));
     } else if( automatic_drl_servant->verify_last_liveliness_status () == false) {
       status = 1;
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: subscriber - ")
+        ACE_TEXT("(%P|%t) ERROR: automatic_drl_servant - ")
         ACE_TEXT("test failed second condition.\n")
       ));
     } else if( automatic_drl_servant->no_writers_generation_count() != 0) {
       status = 1;
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: subscriber - ")
+        ACE_TEXT("(%P|%t) ERROR: automatic_drl_servant - ")
         ACE_TEXT("test failed third condition.\n")
       ));
     }
@@ -497,19 +497,19 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if( remote_manual_drl_servant->liveliness_changed_count() < 2 + 2) {
       status = 1;
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: subscriber - ")
+        ACE_TEXT("(%P|%t) ERROR: remote_manual_drl_servant - ")
         ACE_TEXT("test failed first condition.\n")
       ));
     } else if( remote_manual_drl_servant->verify_last_liveliness_status () == false) {
       status = 1;
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: subscriber - ")
+        ACE_TEXT("(%P|%t) ERROR: remote_manual_drl_servant - ")
         ACE_TEXT("test failed second condition.\n")
       ));
     } else if( remote_manual_drl_servant->no_writers_generation_count() != num_unlively_periods) {
       status = 1;
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: subscriber - ")
+        ACE_TEXT("(%P|%t) ERROR: remote_manual_drl_servant - ")
         ACE_TEXT("test failed third condition.\n")
       ));
     }
@@ -523,19 +523,19 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if( local_manual_drl_servant->liveliness_changed_count() < 2 + 2) {
       status = 1;
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: subscriber - ")
+        ACE_TEXT("(%P|%t) ERROR: local_manual_drl_servant - ")
         ACE_TEXT("test failed first condition.\n")
       ));
     } else if( local_manual_drl_servant->verify_last_liveliness_status () == false) {
       status = 1;
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: subscriber - ")
+        ACE_TEXT("(%P|%t) ERROR: local_manual_drl_servant - ")
         ACE_TEXT("test failed second condition.\n")
       ));
     } else if( local_manual_drl_servant->no_writers_generation_count() != num_unlively_periods) {
       status = 1;
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: subscriber - ")
+        ACE_TEXT("(%P|%t) ERROR: local_manual_drl_servant - ")
         ACE_TEXT("test failed third condition.\n")
       ));
     }
