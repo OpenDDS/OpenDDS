@@ -2526,7 +2526,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
       meta_submessage_bundle_addrs.back().erase(BUNDLING_PLACEHOLDER); \
     }
 #else
-#define ERASE_BUNDLING_PLACEHOLDER(set)
+#define ERASE_BUNDLING_PLACEHOLDER()
 #endif
 
     // A new address set always starts a new bundle
