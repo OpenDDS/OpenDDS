@@ -37,7 +37,8 @@ my $generator = "";
 my $arch = "";
 my $compiler = "";
 my $skip_run_test;
-my $skip_cxx11;
+my $cxx_standard;
+my $skip_typecode;
 my $no_shared;
 
 exit 1 if !GetOptions(
@@ -46,19 +47,23 @@ exit 1 if !GetOptions(
     "arch=s" => \$arch,
     "compiler=s" => \$compiler,
     "skip-run-test" => \$skip_run_test,
-    "skip-cxx11" => \$skip_cxx11,
+    "cxx-standard=s" => \$cxx_standard,
+    "skip-typecode" => \$skip_typecode,
     "no-shared" => \$no_shared,
     );
+
+my $skip_cxx11 = defined($cxx_standard) && $cxx_standard == 98;
 
 my @dirs = ('../Nested_IDL', 'Messenger_1', 'Messenger_2');
 push @dirs, '../generated_global' unless $no_shared;
 push @dirs, 'C++11_Messenger' unless $skip_cxx11;
+push @dirs, '../C++11_typecode' unless $skip_cxx11 || $skip_typecode;
 
 my %builds_lib = ('Messenger_2' => 1, 'C++11_Messenger' => 1);
 my %runtest_in_config_dir = ('Messenger_1' => 1, 'Messenger_2' => 1);
 
 for my $dir (@dirs) {
-  my $build_dir="$ENV{'DDS_ROOT'}/tests/cmake_integration/Messenger/$dir/build";
+  my $build_dir="$ENV{'DDS_ROOT'}/tests/cmake/Messenger/$dir/build";
   mkdir($build_dir) or die "ERROR '$!': failed to make directory $build_dir";
   chdir($build_dir) or die "ERROR: '$!': failed to switch to $build_dir";
 
@@ -69,8 +74,12 @@ for my $dir (@dirs) {
   if ($compiler ne "") {
     push @generate_cmd, "-DCMAKE_CXX_COMPILER=$compiler";
   }
+  if (defined($cxx_standard)) {
+    push(@generate_cmd, "-DCMAKE_CXX_STANDARD=$cxx_standard");
+  }
 
-  my @build_cmd = ("cmake", "--build", ".");
+  my @base_build_cmd = ("cmake", "--build", ".");
+  my @build_cmd = @base_build_cmd;
 
   if ($generator ne "") {
     splice @generate_cmd, 1, 0, ("-G", qq("$generator"));
@@ -83,6 +92,9 @@ for my $dir (@dirs) {
   if ($build_config ne "") {
     push @build_cmd, ("--config", "$build_config");
   }
+  if ($^O ne "MSWin32") {
+    push(@build_cmd, "--", "-j2");
+  }
 
   my @lib_options = ($builds_lib{$dir} && !$no_shared) ? ('OFF', 'ON') : ('');
   for my $lib_option (@lib_options) {
@@ -91,7 +103,7 @@ for my $dir (@dirs) {
     run_command("@generate_cmd $lib_opt ..");
     run_command("@build_cmd");
 
-    if (! $skip_run_test && $dir ne '../generated_global') {
+    if (! $skip_run_test && $dir ne '../generated_global' && $dir ne '../C++11_typecode') {
       if ($build_config ne "" && $runtest_in_config_dir{$dir}) {
         my $run_dir = getcwd() . "/$build_config";
         print "Switching to '$run_dir' to run tests\n";
@@ -103,6 +115,6 @@ for my $dir (@dirs) {
         chdir($build_dir) or die "ERROR: '$!': failed to switch to $build_dir";
       }
     }
-    run_command("@build_cmd --target clean");
+    run_command("@base_build_cmd --target clean");
   }
 }

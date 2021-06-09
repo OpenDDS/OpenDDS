@@ -46,6 +46,17 @@ public:
     report(now);
   }
 
+  void ignored_message(size_t byte_count,
+                       const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    relay_statistics_reporter_.ignored_message(byte_count, now);
+    log_handler_statistics_.bytes_ignored() += byte_count;
+    ++log_handler_statistics_.messages_ignored();
+    publish_handler_statistics_.bytes_ignored() += byte_count;
+    ++publish_handler_statistics_.messages_ignored();
+    report(now);
+  }
+
   void output_message(size_t byte_count,
                       const OpenDDS::DCPS::TimeDuration& time,
                       const OpenDDS::DCPS::TimeDuration& queue_latency,
@@ -151,22 +162,29 @@ public:
     report(now);
   }
 
-private:
-
-  void report(const OpenDDS::DCPS::MonotonicTimePoint& now)
+  void report()
   {
-    log_report(now);
-    publish_report(now);
+    report(OpenDDS::DCPS::MonotonicTimePoint::now(), true);
   }
 
-  void log_report(const OpenDDS::DCPS::MonotonicTimePoint& now)
+private:
+
+  void report(const OpenDDS::DCPS::MonotonicTimePoint& now,
+              bool force = false)
+  {
+    log_report(now, force);
+    publish_report(now, force);
+  }
+
+  void log_report(const OpenDDS::DCPS::MonotonicTimePoint& now,
+                  bool force)
   {
     if (config_.log_handler_statistics().is_zero()) {
       return;
     }
 
     const auto d = now - log_last_report_;
-    if (d < config_.log_handler_statistics()) {
+    if (!force && d < config_.log_handler_statistics()) {
       return;
     }
 
@@ -181,6 +199,8 @@ private:
 
     log_handler_statistics_.messages_in(0);
     log_handler_statistics_.bytes_in(0);
+    log_handler_statistics_.messages_ignored(0);
+    log_handler_statistics_.bytes_ignored(0);
     log_handler_statistics_.messages_out(0);
     log_handler_statistics_.bytes_out(0);
     log_handler_statistics_.messages_dropped(0);
@@ -199,14 +219,15 @@ private:
     log_max_queue_latency_ = OpenDDS::DCPS::TimeDuration::zero_value;
   }
 
-  void publish_report(const OpenDDS::DCPS::MonotonicTimePoint& now)
+  void publish_report(const OpenDDS::DCPS::MonotonicTimePoint& now,
+                      bool force)
   {
     if (config_.publish_handler_statistics().is_zero()) {
       return;
     }
 
     const auto d = now - publish_last_report_;
-    if (d < config_.publish_handler_statistics()) {
+    if (!force && d < config_.publish_handler_statistics()) {
       return;
     }
 
@@ -224,6 +245,8 @@ private:
 
     publish_handler_statistics_.messages_in(0);
     publish_handler_statistics_.bytes_in(0);
+    publish_handler_statistics_.messages_ignored(0);
+    publish_handler_statistics_.bytes_ignored(0);
     publish_handler_statistics_.messages_out(0);
     publish_handler_statistics_.bytes_out(0);
     publish_handler_statistics_.messages_dropped(0);

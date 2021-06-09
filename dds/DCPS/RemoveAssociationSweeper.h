@@ -66,7 +66,7 @@ private:
   WeakRcHandle<T> reader_;
   OPENDDS_VECTOR(RcHandle<WriterInfo>) info_set_;
 
-  struct TimerArg {
+  struct TimerArg : PoolAllocationBase {
     TimerArg(RcHandle<RemoveAssociationSweeper<T> > sweeper,
              RcHandle<WriterInfo> info)
       : sweeper_(sweeper)
