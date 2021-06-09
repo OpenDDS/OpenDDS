@@ -4,9 +4,7 @@
 project(OpenDDS_car_cmake CXX)
 cmake_minimum_required(VERSION 3.8.2)
 
-if(NOT OpenDDS_FOUND)
-  find_package(OpenDDS REQUIRED)
-endif()
+find_package(OpenDDS REQUIRED)
 
 if(MSVC)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR})

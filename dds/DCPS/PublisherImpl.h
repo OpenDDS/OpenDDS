@@ -169,6 +169,8 @@ private:
   /// Default datawriter Qos policy list.
   DDS::DataWriterQos           default_datawriter_qos_;
 
+  /// Mutex to protect listener info
+  ACE_Thread_Mutex             listener_mutex_;
   /// The StatusKind bit mask indicates which status condition change
   /// can be notified by the listener of this entity.
   DDS::StatusMask              listener_mask_;

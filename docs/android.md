@@ -62,9 +62,9 @@ To build the core OpenDDS native libraries for Android you will need:
    - Windows and Linux were tested, but macOS should work as well.
  - [Android Native Development Kit (NDK)](https://developer.android.com/ndk/)
    r18 or higher. [Building with the NDK directly](#using-the-ndk-directly)
-   requires ACE7/TAO3 and NDK r19 or higher. You can download it separately
-   from android.com or using the SDK Manager that comes with Android Studio. If
-   you download the NDK using the SDK Manager, this is located in
+   requires NDK r19 or higher. You can download it separately from android.com
+   or using the SDK Manager that comes with Android Studio. If you download the
+   NDK using the SDK Manager, this is located in
    `$SDK/ndk-bundle`.
  - Some knowledge about OpenDDS and Android development will be assumed, but
    more OpenDDS knowledge will be assumed than Android knowledge.
@@ -137,7 +137,7 @@ directly.
 
 ### Using the NDK Directly
 
-**Building with the NDK directly requires ACE7/TAO3 and NDK r19 or later.**
+**Building with the NDK directly requires NDK r19 or later.**
 
 OpenDDS can be configured and built with the Android NDK using the following
 commands.
@@ -367,7 +367,7 @@ Set environment variables based on the NDK location and Android configuration se
 Configure and build with CMake
 1. `cd C:\your\location\of\Xerces-for-android`
 2. `mkdir build & cd build`
-3. `cmake -GNinja -DCMAKE_INSTALL_PREFIX=C:\your\location\of\installed-xerces -DCMAKE_TOOLCHAIN_FILE=%NDK%\build\cmake\android.toolchain.cmake -DANDROID_ABI=%abi% -DANDROID_PLATFORM=android-%api% "-DANDROID_CPP_FEATURES=rtti exceptions" ..`
+3. `cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=C:\your\location\of\installed-xerces -DCMAKE_TOOLCHAIN_FILE=%NDK%\build\cmake\android.toolchain.cmake -DANDROID_ABI=%abi% -DANDROID_PLATFORM=android-%api% "-DANDROID_CPP_FEATURES=rtti exceptions" ..`
 4. `cmake --build . --target install`
 
 ## Cross-Compiling IDL Libraries
@@ -435,18 +435,13 @@ the basic list of library file for OpenDDS are as follows:
 
     - `$ACE_ROOT/lib/libACE.so`
     - `$ACE_ROOT/lib/libTAO.so`
-    - `$ACE_ROOT/lib/libTAO_AnyTypeCode.so`
-    - `$ACE_ROOT/lib/libTAO_BiDirGIOP.so`
-    - `$ACE_ROOT/lib/libTAO_CodecFactory.so`
-    - `$ACE_ROOT/lib/libTAO_PI.so`
-
     - `$DDS_ROOT/lib/libOpenDDS_Dcps.so`
 
  - The following are the transport libraries, one for each transport type. You
    will need at least one of these, depending on the transport(s) you want to
    use:
    - `$DDS_ROOT/lib/libOpenDDS_Rtps_Udp.so`
-     - Depends on `$DDS_ROOT/lib/libOpenDDS_Rtps.so`.
+     - Depends on `$DDS_ROOT/lib/libOpenDDS_Rtps.so`
    - `$DDS_ROOT/lib/libOpenDDS_Multicast.so`
    - `$DDS_ROOT/lib/libOpenDDS_Shmem.so`
    - `$DDS_ROOT/lib/libOpenDDS_Tcp.so`
@@ -462,7 +457,12 @@ the basic list of library file for OpenDDS are as follows:
 
    - Required to use the DCPSInfoRepo Discovery:
      - `$DDS_ROOT/lib/libOpenDDS_InfoRepoDiscovery.so`
-       - Depends on `$ACE_ROOT/lib/libTAO_PortableServer.so`
+       - Depends on:
+         - `$ACE_ROOT/lib/libTAO_PortableServer.so`
+         - `$ACE_ROOT/lib/libTAO_AnyTypeCode.so`
+         - `$ACE_ROOT/lib/libTAO_BiDirGIOP.so`
+         - `$ACE_ROOT/lib/libTAO_CodecFactory.so`
+         - `$ACE_ROOT/lib/libTAO_PI.so`
 
  - Required to use OpenDDS Security:
    - `$ACE_ROOT/lib/libACE_XML_Utils.so`
@@ -475,6 +475,16 @@ the basic list of library file for OpenDDS are as follows:
    - `$DDS_ROOT/lib/libtao_java.so`
    - `$DDS_ROOT/lib/libidl2jni_runtime.so`
    - `$DDS_ROOT/lib/libOpenDDS_DCPS_Java.so`
+     - Depends on:
+       - `$DDS_ROOT/lib/libOpenDDS_Rtps_Udp.so`
+       - `$DDS_ROOT/lib/libOpenDDS_Rtps.so`
+       - `$DDS_ROOT/lib/libOpenDDS_Tcp.so`
+       - `$DDS_ROOT/lib/libOpenDDS_Udp.so`
+       - `$ACE_ROOT/lib/libTAO_PortableServer.so`
+       - `$ACE_ROOT/lib/libTAO_AnyTypeCode.so`
+       - `$ACE_ROOT/lib/libTAO_BiDirGIOP.so`
+       - `$ACE_ROOT/lib/libTAO_CodecFactory.so`
+       - `$ACE_ROOT/lib/libTAO_PI.so`
    - The [native part of the Java library for your IDL libraries](
       #java-idl-libraries)
 

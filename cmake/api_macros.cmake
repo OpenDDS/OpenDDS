@@ -206,6 +206,11 @@ macro(OPENDDS_TARGET_SOURCES target)
     message(FATAL_ERROR "OpenDDS does not support argument items in CMAKE_CXX_COMPILER.")
   endif()
 
+  if(OPENDDS_SUPPRESS_ANYS)
+    list(APPEND _opendds_options -Sa -St)
+    list(APPEND _tao_options -Sa -St)
+  endif()
+
   foreach(scope PUBLIC PRIVATE INTERFACE)
     if(_idl_sources_${scope})
       opendds_target_idl_sources(${target}

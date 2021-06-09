@@ -1542,6 +1542,7 @@ RtpsUdpDataLink::RtpsReader::pre_stop_helper()
     it->second->held_.clear();
   }
 
+  guard.release();
   g.release();
 
   preassociation_task_.cancel_and_wait();
@@ -2015,6 +2016,11 @@ bool
 RtpsUdpDataLink::RtpsReader::add_writer(const WriterInfo_rch& writer)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
+
+  if (stopping_) {
+    return false;
+  }
+
   WriterInfoMap::const_iterator iter = remote_writers_.find(writer->id_);
   if (iter == remote_writers_.end()) {
     remote_writers_[writer->id_] = writer;

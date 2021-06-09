@@ -3,8 +3,6 @@
 # OpenDDS
 
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/opendds/badge.svg)](https://scan.coverity.com/projects/opendds)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/4647c7248ac14e7bb60c142c626ba574)](https://www.codacy.com/app/OpenDDS/OpenDDS?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=objectcomputing/OpenDDS&amp;utm_campaign=Badge_Grade)
-[![Azure DevOps](https://dev.azure.com/opendds/OpenDDS/_apis/build/status/objectcomputing.OpenDDS)](https://dev.azure.com/opendds/OpenDDS/_build/latest?definitionId=1)
 
 OpenDDS is an open-source C++ implementation of the Object Management Group's
 specification "Data Distribution Service for Real-time Systems" (DDS), as well

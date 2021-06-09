@@ -473,13 +473,13 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_matched_remote_datareader(
                    ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datareader sessions_ (total %B)\n"),
                    sessions_.size()));
       }
-      return h;
-    }
-    derived_key_handles_[input_handles] = h;
-    if (DCPS::security_debug.bookkeeping) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
-                 ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datareader derived_key_handles_ (total %B)\n"),
-                 derived_key_handles_.size()));
+    } else {
+      derived_key_handles_[input_handles] = h;
+      if (DCPS::security_debug.bookkeeping) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                   ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datareader derived_key_handles_ (total %B)\n"),
+                   derived_key_handles_.size()));
+      }
     }
   }
 
@@ -627,13 +627,13 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_matched_remote_datawriter(
                    ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datawriter sessions_ (total %B)\n"),
                    sessions_.size()));
       }
-      return h;
-    }
-    derived_key_handles_[input_handles] = h;
-    if (DCPS::security_debug.bookkeeping) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
-                 ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datawriter derived_key_handles_ (total %B)\n"),
-                 derived_key_handles_.size()));
+    } else {
+      derived_key_handles_[input_handles] = h;
+      if (DCPS::security_debug.bookkeeping) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                   ACE_TEXT("CryptoBuiltInImpl::register_matched_remote_datawriter derived_key_handles_ (total %B)\n"),
+                   derived_key_handles_.size()));
+      }
     }
   }
 

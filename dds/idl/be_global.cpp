@@ -401,7 +401,6 @@ BE_GlobalData::parse_args(long& i, char** av)
       language_mapping(LANGMAP_SP_CXX);
     else if (0 == ACE_OS::strcasecmp(av[i], "-Lc++11")) {
       language_mapping(LANGMAP_CXX11);
-      suppress_typecode_ = true;
     } else {
       invalid_option(av[i]);
     }

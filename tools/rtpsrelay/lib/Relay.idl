@@ -112,6 +112,8 @@ module RtpsRelay {
     Duration_t interval;
     unsigned long messages_in;
     unsigned long long bytes_in;
+    unsigned long messages_ignored;
+    unsigned long long bytes_ignored;
     Duration_t input_processing_time;
     unsigned long messages_out;
     unsigned long long bytes_out;
@@ -138,6 +140,8 @@ module RtpsRelay {
     Duration_t interval;
     unsigned long messages_in;
     unsigned long long bytes_in;
+    unsigned long messages_ignored;
+    unsigned long long bytes_ignored;
     Duration_t input_processing_time;
     unsigned long messages_out;
     unsigned long long bytes_out;

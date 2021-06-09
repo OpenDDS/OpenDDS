@@ -1,8 +1,14 @@
 project(OpenDDS_C++11_Messenger CXX)
 cmake_minimum_required(VERSION 3.8.2)
 
-if(NOT OpenDDS_FOUND)
-  find_package(OpenDDS REQUIRED)
+find_package(OpenDDS REQUIRED)
+
+if (NOT OPENDDS_OWNERSHIP_PROFILE)
+  message(FATAL_ERROR "This test requires OpenDDS to be built with Ownership Profile enabled")
+endif()
+
+if (NOT OPENDDS_CXX11)
+  message(FATAL_ERROR "This test requires OpenDDS to be built with C++11 Support")
 endif()
 
 set(target_prefix "opendds_cmake_cpp11_messenger_")
