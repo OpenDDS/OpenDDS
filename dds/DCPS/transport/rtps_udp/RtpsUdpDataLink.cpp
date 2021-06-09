@@ -3295,10 +3295,13 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
 
   // Consolidated non-directed requests and address sets to be sent together at the end, after directed replies
   typedef OPENDDS_MAP(SequenceNumber, AddrSet) RecipientMap;
+  typedef OPENDDS_MAP(SequenceNumber, RepoIdSet) ReaderMap;
   DisjointSequence consolidated_requests;
+  ReaderMap consolidated_request_readers;
   RecipientMap consolidated_recipients_unicast;
   RecipientMap consolidated_recipients_multicast;
   FragmentInfo consolidated_fragment_requests;
+  ReaderMap consolidated_fragment_request_readers;
   RecipientMap consolidated_fragment_recipients_unicast;
   RecipientMap consolidated_fragment_recipients_multicast;
   DisjointSequence consolidated_gaps;
@@ -3381,6 +3384,7 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
           if (destination == GUID_UNKNOWN) {
             // Not directed.
             consolidated_requests.insert(seq);
+            consolidated_request_readers[seq].insert(reader->id_);
             consolidated_recipients_unicast[seq].insert(addrs.begin(), addrs.end());
             ACE_Guard<ACE_Thread_Mutex> g(link->locators_lock_);
             link->accumulate_addresses(id_, reader->id_, consolidated_recipients_multicast[seq], false);
@@ -3422,6 +3426,7 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
         if (destination == GUID_UNKNOWN) {
           consolidated_fragment_requests[seq].insert(rf->second.bitmapBase.value, rf->second.numBits,
                                                      rf->second.bitmap.get_buffer());
+          consolidated_fragment_request_readers[seq].insert(reader->id_);
           consolidated_fragment_recipients_unicast[seq].insert(addrs.begin(), addrs.end());
           ACE_Guard<ACE_Thread_Mutex> g(link->locators_lock_);
           link->accumulate_addresses(id_, reader->id_, consolidated_fragment_recipients_multicast[seq], false);
@@ -3473,8 +3478,9 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
       for (SequenceNumber seq = pos->first; seq <= pos->second; ++seq) {
         const AddrSet& uni = consolidated_recipients_unicast[seq];
         const AddrSet& multi = consolidated_recipients_multicast[seq];
+        const RepoIdSet& readers = consolidated_request_readers[seq];
         const RtpsUdpSendStrategy::OverrideToken ot =
-          link->send_strategy()->override_destinations(multi.size() * 2 < uni.size() ? multi : uni);
+          link->send_strategy()->override_destinations(readers.size() * 2 > remote_readers_.size() ? multi : uni);
 
           proxy.resend_i(SequenceRange(seq, seq));
       }
@@ -3484,8 +3490,9 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
            limit = consolidated_fragment_requests.end(); pos != limit; ++pos) {
       const AddrSet& uni = consolidated_fragment_recipients_unicast[pos->first];
       const AddrSet& multi = consolidated_fragment_recipients_multicast[pos->first];
+      const RepoIdSet& readers = consolidated_fragment_request_readers[pos->first];
       const RtpsUdpSendStrategy::OverrideToken ot =
-        link->send_strategy()->override_destinations(multi.size() * 2 < uni.size() ? multi : uni);
+        link->send_strategy()->override_destinations(readers.size() * 2 > remote_readers_.size() ? multi : uni);
 
       proxy.resend_fragments_i(pos->first, pos->second);
     }
