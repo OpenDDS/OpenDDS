@@ -6,6 +6,8 @@
 #include "DCPS/DdsDcps_pch.h"
 #include "TypeLookupService.h"
 
+#include <sstream>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -131,12 +133,118 @@ void TypeLookupService::update_type_identifier_map(const TypeIdentifierPairSeq& 
   }
 }
 
-bool TypeLookupService::get_minimal_type_identifier(const TypeIdentifier& ct, TypeIdentifier& mt)
+DCPS::String TypeLookupService::equivalence_hash_to_string(const EquivalenceHash& hash) const
 {
+  std::ostringstream out;
+  out << "(";
+  for (unsigned i = 0; i < sizeof(EquivalenceHash); ++i) {
+    out << hash[i];
+    if (i < sizeof(EquivalenceHash) - 1) {
+      out << ", ";
+    } else {
+      out << ")";
+    }
+  }
+  return out.str().c_str();
+}
+
+bool TypeLookupService::get_minimal_type_identifier(const TypeIdentifier& ct, TypeIdentifier& mt) const
+{
+  if (ct.kind() == TK_NONE || is_fully_descriptive(ct)) {
+    mt = ct;
+    return true;
+  }
+
+  // Non-fully descriptive plain collection is a scpecial case where we have to
+  // get the minimal TypeIdentifier of the element type to create the TypeIdentifier
+  // of the minimal collection type.
+  if (is_plain_collection(ct)) {
+    mt = ct;
+    TypeIdentifier complete_elem_ti, minimal_elem_ti;
+    switch (mt.kind()) {
+    case TI_PLAIN_SEQUENCE_SMALL:
+      mt.seq_sdefn().header.equiv_kind = EK_MINIMAL;
+      complete_elem_ti = *ct.seq_sdefn().element_identifier;
+      break;
+    case TI_PLAIN_SEQUENCE_LARGE:
+      mt.seq_ldefn().header.equiv_kind = EK_MINIMAL;
+      complete_elem_ti = *ct.seq_ldefn().element_identifier;
+      break;
+    case TI_PLAIN_ARRAY_SMALL:
+      mt.array_sdefn().header.equiv_kind = EK_MINIMAL;
+      complete_elem_ti = *ct.array_sdefn().element_identifier;
+      break;
+    case TI_PLAIN_ARRAY_LARGE:
+      mt.array_ldefn().header.equiv_kind = EK_MINIMAL;
+      complete_elem_ti = *ct.array_ldefn().element_identifier;
+      break;
+    case TI_PLAIN_MAP_SMALL:
+      mt.map_sdefn().header.equiv_kind = EK_MINIMAL;
+      complete_elem_ti = *ct.map_sdefn().element_identifier;
+      break;
+    case TI_PLAIN_MAP_LARGE:
+      mt.map_ldefn().header.equiv_kind = EK_MINIMAL;
+      complete_elem_ti = *ct.map_ldefn().element_identifier;
+      break;
+    }
+    get_minimal_type_identifier(complete_elem_ti, minimal_elem_ti);
+
+    switch (mt.kind()) {
+    case TI_PLAIN_SEQUENCE_SMALL:
+      mt.seq_sdefn().element_identifier = minimal_elem_ti;
+      break;
+    case TI_PLAIN_SEQUENCE_LARGE:
+      mt.seq_ldefn().element_identifier = minimal_elem_ti;
+      break;
+    case TI_PLAIN_ARRAY_SMALL:
+      mt.array_sdefn().element_identifier = minimal_elem_ti;
+      break;
+    case TI_PLAIN_ARRAY_LARGE:
+      mt.array_ldefn().element_identifier = minimal_elem_ti;
+      break;
+    case TI_PLAIN_MAP_SMALL:
+      {
+        mt.map_sdefn().element_identifier = minimal_elem_ti;
+        TypeIdentifier minimal_key_ti;
+        get_minimal_type_identifier(*ct.map_sdefn().key_identifier, minimal_key_ti);
+        mt.map_sdefn().key_identifier = minimal_key_ti;
+        break;
+      }
+    case TI_PLAIN_MAP_LARGE:
+      {
+        mt.map_ldefn().element_identifier = minimal_elem_ti;
+        TypeIdentifier minimal_key_ti;
+        get_minimal_type_identifier(*ct.map_ldefn().key_identifier, minimal_key_ti);
+        mt.map_ldefn().key_identifier = minimal_key_ti;
+        break;
+      }
+    }
+
+    return true;
+  }
+
+  // Mapping for the remaining type kinds should be provided by the remote endpoint.
   const TypeIdentifierMap::const_iterator pos = complete_to_minimal_ti_map_.find(ct);
   if (pos == complete_to_minimal_ti_map_.end()) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) get_minimal_type_identifier: complete TypeIdentifier not found.")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TypeLookupService::get_minimal_type_identifier: ")
+               ACE_TEXT("complete TypeIdentifier not found.\n")));
+    if (ct.kind() == EK_COMPLETE) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("Kind: EK_COMPLETE. Hash: %C\n"),
+                 equivalence_hash_to_string(ct.equivalence_hash()).c_str()));
+    } else if (ct.kind() == TI_STRONGLY_CONNECTED_COMPONENT) {
+      const EquivalenceKind ek = ct.sc_component_id().sc_component_id.kind;
+      if (ek == EK_MINIMAL) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("Expect EK_COMPLETE but received EK_MINIMAL.\n")));
+      }
+      const DCPS::String ek_str = ek == EK_COMPLETE ? "EK_COMPLETE" : "EK_MINIMAL";
+      ACE_ERROR((LM_ERROR, ACE_TEXT("Kind: TI_STRONGLY_CONNECTED_COMPONENT. ")
+                 ACE_TEXT("Equivalence kind: %C. Hash: %C. Scc length: %d. Scc index: %d\n"),
+                 ek_str.c_str(),
+                 equivalence_hash_to_string(ct.sc_component_id().sc_component_id.hash).c_str(),
+                 ct.sc_component_id().scc_length,
+                 ct.sc_component_id().scc_index));
+    }
+
     mt = TypeIdentifier(TK_NONE);
     return false;
   }
@@ -145,7 +253,7 @@ bool TypeLookupService::get_minimal_type_identifier(const TypeIdentifier& ct, Ty
 }
 
 bool TypeLookupService::complete_to_minimal_struct(const CompleteStructType& ct,
-                                                   MinimalStructType& mt)
+                                                   MinimalStructType& mt) const
 {
   mt.struct_flags = ct.struct_flags;
   if (!get_minimal_type_identifier(ct.header.base_type, mt.header.base_type)) {
@@ -166,7 +274,7 @@ bool TypeLookupService::complete_to_minimal_struct(const CompleteStructType& ct,
 }
 
 bool TypeLookupService::complete_to_minimal_union(const CompleteUnionType& ct,
-                                                  MinimalUnionType& mt)
+                                                  MinimalUnionType& mt) const
 {
   mt.union_flags = ct.union_flags;
   mt.discriminator.common.member_flags = ct.discriminator.common.member_flags;
@@ -190,7 +298,7 @@ bool TypeLookupService::complete_to_minimal_union(const CompleteUnionType& ct,
 }
 
 bool TypeLookupService::complete_to_minimal_annotation(const CompleteAnnotationType& ct,
-                                                       MinimalAnnotationType& mt)
+                                                       MinimalAnnotationType& mt) const
 {
   mt.annotation_flag = ct.annotation_flag;
   mt.member_seq.length(ct.member_seq.length());
@@ -208,7 +316,7 @@ bool TypeLookupService::complete_to_minimal_annotation(const CompleteAnnotationT
 }
 
 bool TypeLookupService::complete_to_minimal_alias(const CompleteAliasType& ct,
-                                                  MinimalAliasType& mt)
+                                                  MinimalAliasType& mt) const
 {
   mt.alias_flags = ct.alias_flags;
   mt.body.common.related_flags = ct.body.common.related_flags;
@@ -220,7 +328,7 @@ bool TypeLookupService::complete_to_minimal_alias(const CompleteAliasType& ct,
 }
 
 bool TypeLookupService::complete_to_minimal_sequence(const CompleteSequenceType& ct,
-                                                     MinimalSequenceType& mt)
+                                                     MinimalSequenceType& mt) const
 {
   mt.collection_flag = ct.collection_flag;
   mt.header.common = ct.header.common;
@@ -232,7 +340,7 @@ bool TypeLookupService::complete_to_minimal_sequence(const CompleteSequenceType&
 }
 
 bool TypeLookupService::complete_to_minimal_array(const CompleteArrayType& ct,
-                                                  MinimalArrayType& mt)
+                                                  MinimalArrayType& mt) const
 {
   mt.collection_flag = ct.collection_flag;
   mt.header.common = ct.header.common;
@@ -244,7 +352,7 @@ bool TypeLookupService::complete_to_minimal_array(const CompleteArrayType& ct,
 }
 
 bool TypeLookupService::complete_to_minimal_map(const CompleteMapType& ct,
-                                                MinimalMapType& mt)
+                                                MinimalMapType& mt) const
 {
   mt.collection_flag = ct.collection_flag;
   mt.header.common = ct.header.common;
@@ -260,7 +368,7 @@ bool TypeLookupService::complete_to_minimal_map(const CompleteMapType& ct,
 }
 
 bool TypeLookupService::complete_to_minimal_enumerated(const CompleteEnumeratedType& ct,
-                                                       MinimalEnumeratedType& mt)
+                                                       MinimalEnumeratedType& mt) const
 {
   mt.enum_flags = ct.enum_flags;
   mt.header.common = ct.header.common;
@@ -273,7 +381,7 @@ bool TypeLookupService::complete_to_minimal_enumerated(const CompleteEnumeratedT
 }
 
 bool TypeLookupService::complete_to_minimal_bitmask(const CompleteBitmaskType& ct,
-                                                    MinimalBitmaskType& mt)
+                                                    MinimalBitmaskType& mt) const
 {
   mt.bitmask_flags = ct.bitmask_flags;
   mt.header.common = ct.header.common;
@@ -286,7 +394,7 @@ bool TypeLookupService::complete_to_minimal_bitmask(const CompleteBitmaskType& c
 }
 
 bool TypeLookupService::complete_to_minimal_bitset(const CompleteBitsetType& ct,
-                                                   MinimalBitsetType& mt)
+                                                   MinimalBitsetType& mt) const
 {
   mt.bitset_flags = ct.bitset_flags;
   mt.field_seq.length(ct.field_seq.length());
@@ -297,7 +405,7 @@ bool TypeLookupService::complete_to_minimal_bitset(const CompleteBitsetType& ct,
   return true;
 }
 
-bool TypeLookupService::complete_to_minimal_type_object(const TypeObject& cto, TypeObject& mto)
+bool TypeLookupService::complete_to_minimal_type_object(const TypeObject& cto, TypeObject& mto) const
 {
   mto.kind = EK_MINIMAL;
   mto.minimal.kind = cto.complete.kind;
@@ -323,6 +431,8 @@ bool TypeLookupService::complete_to_minimal_type_object(const TypeObject& cto, T
     return complete_to_minimal_enumerated(cto.complete.enumerated_type, mto.minimal.enumerated_type);
   case TK_BITMASK:
     return complete_to_minimal_bitmask(cto.complete.bitmask_type, mto.minimal.bitmask_type);
+  default:
+    return false;
   }
 }
 

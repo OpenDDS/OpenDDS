@@ -38,7 +38,7 @@ public:
   void add_type_objects_to_cache(const TypeIdentifierTypeObjectPairSeq& types);
 
   void update_type_identifier_map(const TypeIdentifierPairSeq& tid_pairs);
-  bool complete_to_minimal_type_object(const TypeObject& cto, TypeObject& mto);
+  bool complete_to_minimal_type_object(const TypeObject& cto, TypeObject& mto) const;
 
   // For TypeLookup_getTypeDependencies
   bool get_type_dependencies(const TypeIdentifier& type_id,
@@ -74,18 +74,19 @@ private:
   typedef OPENDDS_MAP(TypeIdentifier, TypeIdentifier) TypeIdentifierMap;
   TypeIdentifierMap complete_to_minimal_ti_map_;
 
-  bool get_minimal_type_identifier(const TypeIdentifier& ct, TypeIdentifier& mt);
+  DCPS::String equivalence_hash_to_string(const EquivalenceHash& hash) const;
+  bool get_minimal_type_identifier(const TypeIdentifier& ct, TypeIdentifier& mt) const;
 
-  bool complete_to_minimal_struct(const CompleteStructType& ct, MinimalStructType& mt);
-  bool complete_to_minimal_union(const CompleteUnionType& ct, MinimalUnionType& mt);
-  bool complete_to_minimal_annotation(const CompleteAnnotationType& ct, MinimalAnnotationType& mt);
-  bool complete_to_minimal_alias(const CompleteAliasType& ct, MinimalAliasType& mt);
-  bool complete_to_minimal_sequence(const CompleteSequenceType& ct, MinimalSequenceType& mt);
-  bool complete_to_minimal_array(const CompleteArrayType& ct, MinimalArrayType& mt);
-  bool complete_to_minimal_map(const CompleteMapType& ct, MinimalMapType& mt);
-  bool complete_to_minimal_enumerated(const CompleteEnumeratedType& ct, MinimalEnumeratedType& mt);
-  bool complete_to_minimal_bitmask(const CompleteBitmaskType& ct, MinimalBitmaskType& mt);
-  bool complete_to_minimal_bitset(const CompleteBitsetType& ct, MinimalBitsetType& mt);
+  bool complete_to_minimal_struct(const CompleteStructType& ct, MinimalStructType& mt) const;
+  bool complete_to_minimal_union(const CompleteUnionType& ct, MinimalUnionType& mt) const;
+  bool complete_to_minimal_annotation(const CompleteAnnotationType& ct, MinimalAnnotationType& mt) const;
+  bool complete_to_minimal_alias(const CompleteAliasType& ct, MinimalAliasType& mt) const;
+  bool complete_to_minimal_sequence(const CompleteSequenceType& ct, MinimalSequenceType& mt) const;
+  bool complete_to_minimal_array(const CompleteArrayType& ct, MinimalArrayType& mt) const;
+  bool complete_to_minimal_map(const CompleteMapType& ct, MinimalMapType& mt) const;
+  bool complete_to_minimal_enumerated(const CompleteEnumeratedType& ct, MinimalEnumeratedType& mt) const;
+  bool complete_to_minimal_bitmask(const CompleteBitmaskType& ct, MinimalBitmaskType& mt) const;
+  bool complete_to_minimal_bitset(const CompleteBitsetType& ct, MinimalBitsetType& mt) const;
 };
 
 typedef DCPS::RcHandle<TypeLookupService> TypeLookupService_rch;

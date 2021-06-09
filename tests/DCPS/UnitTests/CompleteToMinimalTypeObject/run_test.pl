@@ -3,7 +3,6 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
     if 0;
 
 # -*- perl -*-
-#TODO CLAYTON: Once test is up and running add to lst file
 use Sys::Hostname;
 
 use Env (DDS_ROOT);
