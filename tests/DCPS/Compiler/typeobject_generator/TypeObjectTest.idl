@@ -1,3 +1,7 @@
+#include <tao/LongSeq.pidl>
+#include <tao/BooleanSeq.pidl>
+#include <tao/OctetSeq.pidl>
+
 @mutable
 struct NestedStruct {
   @hashid("short_member") @must_understand short a_short;
