@@ -515,9 +515,9 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
+        source OpenDDS/build/target/setenv.sh
+        mkdir OpenDDS/build/target/tests/cmake/build
+        cd OpenDDS/build/target/tests/cmake/build
         cmake ..
         cmake --build . -- -j4
     - name: check build configuration
@@ -615,9 +615,9 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
+        source OpenDDS/build/target/setenv.sh
+        mkdir OpenDDS/build/target/tests/cmake/build
+        cd OpenDDS/build/target/tests/cmake/build
         cmake ..
         cmake --build . -- -j4
     - name: check build configuration
@@ -1043,7 +1043,7 @@ jobs:
         source OpenDDS/setenv.sh
         mkdir OpenDDS/tests/cmake/build
         cd OpenDDS/tests/cmake/build
-        cmake ..
+        cmake -DCMAKE_CXX_STANDARD=11 ..
         cmake --build . -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
@@ -1293,7 +1293,7 @@ jobs:
         source OpenDDS/setenv.sh
         mkdir OpenDDS/tests/cmake/build
         cd OpenDDS/tests/cmake/build
-        cmake ..
+        cmake -DCMAKE_CXX_STANDARD=11 ..
         cmake --build . -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
@@ -1543,7 +1543,7 @@ jobs:
         source OpenDDS/setenv.sh
         mkdir OpenDDS/tests/cmake/build
         cd OpenDDS/tests/cmake/build
-        cmake ..
+        cmake -DCMAKE_CXX_STANDARD=03 ..
         cmake --build . -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
@@ -2192,9 +2192,9 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
+        source OpenDDS/build/target/setenv.sh
+        mkdir OpenDDS/build/target/tests/cmake/build
+        cd OpenDDS/build/target/tests/cmake/build
         cmake ..
         cmake --build . -- -j4
     - name: check build configuration
@@ -2251,18 +2251,18 @@ jobs:
     - name: extract OpenDDS artifact
       shell: bash
       run: |
-        cd OpenDDS
+        cd OpenDDS/build/target
         tar xvfJ build_u20_gcc10_bsafe_js0_FM-2c.tar.xz
     - name: check build configuration
       shell: bash
       run: |
-        cd OpenDDS
+        cd OpenDDS/build/target
         . setenv.sh
         tools/scripts/show_build_config.pl
     - name: run OpenDDS tests
       shell: bash
       run: |
-        cd OpenDDS
+        cd OpenDDS/build/target
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
@@ -2717,7 +2717,7 @@ jobs:
         source OpenDDS/setenv.sh
         mkdir OpenDDS/tests/cmake/build
         cd OpenDDS/tests/cmake/build
-        cmake ..
+        cmake -DCMAKE_CXX_STANDARD=11 ..
         cmake --build . -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
@@ -6152,7 +6152,7 @@ jobs:
         mkdir tests\cmake\build
         cd tests\cmake\build
         cmake ..
-        cmake --build .
+        cmake --build . --config Release
     - name: gitclean
       shell: bash
       run: |
@@ -6977,7 +6977,7 @@ jobs:
         mkdir tests\cmake\build
         cd tests\cmake\build
         cmake ..
-        cmake --build .
+        cmake --build . --config Release
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
