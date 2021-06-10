@@ -37,11 +37,12 @@ RUN apt-get update && apt-get install -y \
     curl \
     g++ \
     gdb \
-    valgrind \
-    make \
-    libxerces-c-dev \
     libssl-dev \
-    perl
+    libxerces-c-dev \
+    make \
+    ninja-build \
+    perl \
+    valgrind
 
 WORKDIR /opt/OpenDDS
 
