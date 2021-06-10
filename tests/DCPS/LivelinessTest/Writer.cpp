@@ -23,7 +23,7 @@ Writer::Writer(::DDS::DataWriter_ptr writer,
 }
 
 int
-Writer::run_test (int pass)
+Writer::run_test(int pass)
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::run_test begins.\n")));
 
@@ -65,7 +65,7 @@ Writer::run_test (int pass)
 }
 
 bool
-Writer::is_finished () const
+Writer::is_finished() const
 {
   return finished_sending_;
 }

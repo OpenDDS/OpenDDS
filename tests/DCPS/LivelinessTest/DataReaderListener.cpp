@@ -11,7 +11,7 @@
 
 #include <dds/DdsDcpsSubscriptionC.h>
 
-DataReaderListenerImpl::DataReaderListenerImpl (void) :
+DataReaderListenerImpl::DataReaderListenerImpl(void) :
   liveliness_changed_count_(0)
   {
     last_status_.alive_count = 0;
@@ -49,13 +49,13 @@ DataReaderListenerImpl::DataReaderListenerImpl (void) :
 
   }
 
-DataReaderListenerImpl::~DataReaderListenerImpl (void)
+DataReaderListenerImpl::~DataReaderListenerImpl(void)
   {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::~DataReaderListenerImpl\n")));
   }
 
-void DataReaderListenerImpl::on_requested_deadline_missed (
+void DataReaderListenerImpl::on_requested_deadline_missed(
     ::DDS::DataReader_ptr reader,
     const ::DDS::RequestedDeadlineMissedStatus & status)
   {
@@ -65,7 +65,7 @@ void DataReaderListenerImpl::on_requested_deadline_missed (
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_requested_deadline_missed\n")));
   }
 
-void DataReaderListenerImpl::on_requested_incompatible_qos (
+void DataReaderListenerImpl::on_requested_incompatible_qos(
     ::DDS::DataReader_ptr reader,
     const ::DDS::RequestedIncompatibleQosStatus & status)
   {
@@ -75,7 +75,7 @@ void DataReaderListenerImpl::on_requested_incompatible_qos (
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_requested_incompatible_qos\n")));
   }
 
-void DataReaderListenerImpl::on_liveliness_changed (
+void DataReaderListenerImpl::on_liveliness_changed(
     ::DDS::DataReader_ptr reader,
     const ::DDS::LivelinessChangedStatus & status)
   {
@@ -124,7 +124,7 @@ void DataReaderListenerImpl::on_liveliness_changed (
       status.alive_count_change, status.not_alive_count_change));
   }
 
-void DataReaderListenerImpl::on_subscription_matched (
+void DataReaderListenerImpl::on_subscription_matched(
     ::DDS::DataReader_ptr reader,
     const ::DDS::SubscriptionMatchedStatus & status)
   {
@@ -134,7 +134,7 @@ void DataReaderListenerImpl::on_subscription_matched (
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_matched\n")));
   }
 
-  void DataReaderListenerImpl::on_sample_rejected (
+  void DataReaderListenerImpl::on_sample_rejected(
     ::DDS::DataReader_ptr reader,
     const DDS::SampleRejectedStatus& status)
   {
@@ -144,7 +144,7 @@ void DataReaderListenerImpl::on_subscription_matched (
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_rejected\n")));
   }
 
-  void DataReaderListenerImpl::on_data_available (
+  void DataReaderListenerImpl::on_data_available(
     ::DDS::DataReader_ptr reader)
   {
     ::Xyz::FooDataReader_var foo_dr =
@@ -198,7 +198,7 @@ void DataReaderListenerImpl::on_subscription_matched (
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_lost\n")));
   }
 
-  void DataReaderListenerImpl::on_subscription_disconnected (
+  void DataReaderListenerImpl::on_subscription_disconnected(
     ::DDS::DataReader_ptr reader,
     const ::OpenDDS::DCPS::SubscriptionDisconnectedStatus & status)
   {
@@ -208,7 +208,7 @@ void DataReaderListenerImpl::on_subscription_matched (
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_disconnected\n")));
   }
 
-  void DataReaderListenerImpl::on_subscription_reconnected (
+  void DataReaderListenerImpl::on_subscription_reconnected(
     ::DDS::DataReader_ptr reader,
     const ::OpenDDS::DCPS::SubscriptionReconnectedStatus & status)
   {
@@ -218,7 +218,7 @@ void DataReaderListenerImpl::on_subscription_matched (
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_reconnected\n")));
   }
 
-  void DataReaderListenerImpl::on_subscription_lost (
+  void DataReaderListenerImpl::on_subscription_lost(
     ::DDS::DataReader_ptr reader,
     const ::OpenDDS::DCPS::SubscriptionLostStatus & status)
   {
@@ -228,7 +228,7 @@ void DataReaderListenerImpl::on_subscription_matched (
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_lost\n")));
   }
 
-  void DataReaderListenerImpl::on_budget_exceeded (
+  void DataReaderListenerImpl::on_budget_exceeded(
     ::DDS::DataReader_ptr,
     const ::OpenDDS::DCPS::BudgetExceededStatus&)
   {

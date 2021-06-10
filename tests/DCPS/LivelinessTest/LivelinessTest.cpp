@@ -21,31 +21,7 @@
 #include <dds/DdsDcpsSubscriptionC.h>
 
 #include <ace/Arg_Shifter.h>
-#include <ace/Reactor.h>
 #include <ace/OS_NS_unistd.h>
-
-class ReactorCtrl : public ACE_Event_Handler
-{
-public:
-  ReactorCtrl() : cond_(lock_) {}
-
-  int handle_timeout (const ACE_Time_Value &tv,
-                      const void *arg)
-  {
-    ACE_UNUSED_ARG(tv);
-    ACE_UNUSED_ARG(arg);
-
-    // it appears that you must have the lock before waiting or signaling on Win32
-    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, this->lock_, -1);
-
-    return cond_.wait();
-  }
-
-private:
-  ACE_Recursive_Thread_Mutex lock_;
-  ACE_Condition<ACE_Recursive_Thread_Mutex> cond_;
-} ;
-
 
 /// parse the command line arguments
 int parse_args (int argc, ACE_TCHAR *argv[])
@@ -113,7 +89,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   int status = 0;
 
   try {
-    ACE_DEBUG((LM_INFO,"(%P|%t) %T publisher main\n"));
 
     ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
@@ -445,7 +420,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       lcc_remote = remote_manual_drl_servant->liveliness_changed_count();
     }
 
-    // Clean up publisher objects
     pub->delete_contained_entities() ;
     delete writer;
     dp->delete_publisher(pub.in ());
@@ -456,91 +430,89 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       lcc_local = local_manual_drl_servant->liveliness_changed_count();
       lcc_remote = remote_manual_drl_servant->liveliness_changed_count();
     }
-
+    int expected_manual_liveliness_changes = 3 + (2 * (num_unlively_periods + 1));
     // Determine the test status at this point.
 
-    ACE_OS::fprintf (stderr, "**********\n") ;
-    ACE_OS::fprintf (stderr, "automatic_drl_servant->liveliness_changed_count() = %d\n",
+    ACE_OS::fprintf(stderr, "**********\n") ;
+    ACE_OS::fprintf(stderr, "automatic_drl_servant->liveliness_changed_count() = %d\n",
                     automatic_drl_servant->liveliness_changed_count()) ;
-    ACE_OS::fprintf (stderr, "automatic_drl_servant->no_writers_generation_count() = %d\n",
+    ACE_OS::fprintf(stderr, "automatic_drl_servant->no_writers_generation_count() = %d\n",
                     automatic_drl_servant->no_writers_generation_count()) ;
-    ACE_OS::fprintf (stderr, "********** use_take=%d\n", use_take) ;
+    ACE_OS::fprintf(stderr, "********** use_take=%d\n", use_take) ;
 
     //automatic should stay alive due to reactor,
     //going up at start then coming down at end
-    if( automatic_drl_servant->liveliness_changed_count() != 3) {
+    if (automatic_drl_servant->liveliness_changed_count() != 3) {
       status = 1;
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: automatic_drl_servant - ")
-        ACE_TEXT("test failed first condition.\n")
+        ACE_TEXT("(%P|%t) ERROR: automatic_drl_servant->liveliness_changed_count is %d - ")
+        ACE_TEXT("expected 3\n"), automatic_drl_servant->liveliness_changed_count()
       ));
-    } else if( automatic_drl_servant->verify_last_liveliness_status () == false) {
+    } else if (automatic_drl_servant->verify_last_liveliness_status () == false) {
       status = 1;
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: automatic_drl_servant - ")
-        ACE_TEXT("test failed second condition.\n")
+        ACE_TEXT("test shut down while alive.\n")
       ));
-    } else if( automatic_drl_servant->no_writers_generation_count() != 0) {
+    } else if (automatic_drl_servant->no_writers_generation_count() != 0) {
       status = 1;
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: automatic_drl_servant - ")
-        ACE_TEXT("test failed third condition.\n")
+        ACE_TEXT("(%P|%t) ERROR: automatic_drl_servant->no_writers_generation_count is %d - ")
+        ACE_TEXT("expected %d\n"), automatic_drl_servant->no_writers_generation_count(), 0
       ));
     }
-    ACE_OS::fprintf (stderr, "**********\n") ;
-    ACE_OS::fprintf (stderr, "remote_manual_drl_servant->liveliness_changed_count() = %d\n",
+    ACE_OS::fprintf(stderr, "**********\n") ;
+    ACE_OS::fprintf(stderr, "remote_manual_drl_servant->liveliness_changed_count() = %d\n",
                     remote_manual_drl_servant->liveliness_changed_count()) ;
-    ACE_OS::fprintf (stderr, "remote_manual_drl_servant->no_writers_generation_count() = %d\n",
+    ACE_OS::fprintf(stderr, "remote_manual_drl_servant->no_writers_generation_count() = %d\n",
                     remote_manual_drl_servant->no_writers_generation_count()) ;
-    ACE_OS::fprintf (stderr, "********** use_take=%d\n", use_take) ;
+    ACE_OS::fprintf(stderr, "********** use_take=%d\n", use_take) ;
 
-    if( remote_manual_drl_servant->liveliness_changed_count() < 2 + 2) {
+    if (remote_manual_drl_servant->liveliness_changed_count() != expected_manual_liveliness_changes) {
       status = 1;
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: remote_manual_drl_servant - ")
-        ACE_TEXT("test failed first condition.\n")
+        ACE_TEXT("(%P|%t) ERROR: remote_manual_drl_servant->liveliness_changed_count is %d - ")
+        ACE_TEXT("expected %d\n"), remote_manual_drl_servant->liveliness_changed_count(), expected_manual_liveliness_changes
       ));
-    } else if( remote_manual_drl_servant->verify_last_liveliness_status () == false) {
+    } else if (remote_manual_drl_servant->verify_last_liveliness_status () == false) {
       status = 1;
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: remote_manual_drl_servant - ")
-        ACE_TEXT("test failed second condition.\n")
+        ACE_TEXT("test shut down while alive.\n")
       ));
-    } else if( remote_manual_drl_servant->no_writers_generation_count() != num_unlively_periods) {
+    } else if (remote_manual_drl_servant->no_writers_generation_count() != num_unlively_periods) {
       status = 1;
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: remote_manual_drl_servant - ")
-        ACE_TEXT("test failed third condition.\n")
+        ACE_TEXT("(%P|%t) ERROR: remote_manual_drl_servant->no_writers_generation_count is %d - ")
+        ACE_TEXT("expected %d\n"), remote_manual_drl_servant->no_writers_generation_count(), num_unlively_periods
       ));
     }
-    ACE_OS::fprintf (stderr, "**********\n") ;
-    ACE_OS::fprintf (stderr, "local_manual_drl_servant->liveliness_changed_count() = %d\n",
+    ACE_OS::fprintf(stderr, "**********\n") ;
+    ACE_OS::fprintf(stderr, "local_manual_drl_servant->liveliness_changed_count() = %d\n",
                     local_manual_drl_servant->liveliness_changed_count()) ;
-    ACE_OS::fprintf (stderr, "local_manual_drl_servant->no_writers_generation_count() = %d\n",
+    ACE_OS::fprintf(stderr, "local_manual_drl_servant->no_writers_generation_count() = %d\n",
                     local_manual_drl_servant->no_writers_generation_count()) ;
-    ACE_OS::fprintf (stderr, "********** use_take=%d\n", use_take) ;
+    ACE_OS::fprintf(stderr, "********** use_take=%d\n", use_take) ;
 
-    if( local_manual_drl_servant->liveliness_changed_count() < 2 + 2) {
+    if (local_manual_drl_servant->liveliness_changed_count() < expected_manual_liveliness_changes) {
       status = 1;
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: local_manual_drl_servant - ")
-        ACE_TEXT("test failed first condition.\n")
+        ACE_TEXT("(%P|%t) ERROR: local_manual_drl_servant->liveliness_changed_count is %d - ")
+        ACE_TEXT("expected %d\n"), local_manual_drl_servant->liveliness_changed_count(), expected_manual_liveliness_changes
       ));
-    } else if( local_manual_drl_servant->verify_last_liveliness_status () == false) {
+    } else if (local_manual_drl_servant->verify_last_liveliness_status () == false) {
       status = 1;
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: local_manual_drl_servant - ")
-        ACE_TEXT("test failed second condition.\n")
+        ACE_TEXT("test shut down while alive.\n")
       ));
-    } else if( local_manual_drl_servant->no_writers_generation_count() != num_unlively_periods) {
+    } else if (local_manual_drl_servant->no_writers_generation_count() != num_unlively_periods) {
       status = 1;
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: local_manual_drl_servant - ")
-        ACE_TEXT("test failed third condition.\n")
+        ACE_TEXT("(%P|%t) ERROR: local_manual_drl_servant->no_writers_generation_count is %d - ")
+        ACE_TEXT("expected %d\n"), local_manual_drl_servant->no_writers_generation_count(), num_unlively_periods
       ));
     }
-
-      ACE_DEBUG((LM_DEBUG,ACE_TEXT("(%P|%t) %T publisher is finish - cleanup subscriber\n") ));
       local_sub->delete_contained_entities() ;
       remote_sub->delete_contained_entities() ;
       dp->delete_subscriber(local_sub.in ());

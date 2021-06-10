@@ -3113,15 +3113,12 @@ Sedp::notify_liveliness(const ParticipantMessageData& pmd)
   const RepoId& guid = pmd.participantGuid;
   const RepoId guid_participant = make_part_guid(guid);
   // Clear the entityId so lower bound will work.
-  const RepoId prefix = make_id(pmd.participantGuid, PARTICIPANT_MESSAGE_DATA_KIND_UNKNOWN);
-  bool is_automatic = true;
+  const RepoId prefix = make_unknown_guid(pmd.participantGuid);
+  const bool is_automatic = PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE != pmd.participantGuid.entityId;
   if (DCPS::DCPS_debug_level >= 8) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Sedp::notify_liveliness: Notifying Liveliness, %C\n"),
                DCPS::LogGuid(guid).c_str()));
-  }
-  if (PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE == pmd.participantGuid.entityId) {
-    is_automatic = false;
   }
 
   for (LocalSubscriptionMap::const_iterator sub_pos = local_subscriptions_.begin(),

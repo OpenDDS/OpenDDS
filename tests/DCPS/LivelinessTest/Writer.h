@@ -12,17 +12,17 @@ class Writer
 {
 public:
 
-  Writer (::DDS::DataWriter_ptr writer,
+  Writer(::DDS::DataWriter_ptr writer,
     int num_thread_to_write = 1,
     int num_writes_per_thread = 100);
 
-  void start ();
+  void start();
 
-  void end ();
+  void end();
 
-  int run_test (int pass);
+  int run_test(int pass);
 
-  bool is_finished () const;
+  bool is_finished() const;
 
 private:
 
