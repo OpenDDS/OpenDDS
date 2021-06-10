@@ -448,6 +448,7 @@ jobs:
         . install_setenv.sh
         cd tests/DCPS/Messenger
         perl run_test.pl rtps
+    - name: test make install cmake
       shell: bash
       run: |
         cd OpenDDS/build/target
