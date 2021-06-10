@@ -381,3 +381,6 @@ TEST(JsonValueWriter, write_enum)
   jvw.write_enum("label", 5);
   EXPECT_STREQ(jvw.buffer().GetString(), "\"label\"");
 }
+
+#endif
+#endif
