@@ -163,7 +163,8 @@ public:
   struct OrderBySequenceNumber {
     bool operator()(const TransportQueueElement* lhs, const TransportQueueElement* rhs) const
     {
-      return lhs->sequence() < rhs->sequence();
+      const SequenceNumber seq_l = lhs->sequence(), seq_r = rhs->sequence();
+      return seq_l < seq_r || (seq_l == seq_r && lhs < rhs);
     }
   };
 
