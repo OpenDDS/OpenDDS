@@ -5581,11 +5581,13 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1
     - name: configure OpenDDS
       if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: cmd
       run: |
         cd OpenDDS
         configure --optimize --ipv6 --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
@@ -5599,7 +5601,7 @@ jobs:
       run: |
         cd OpenDDS/ACE_TAO
         perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
-        find . -iname "*\.o" | xargs rm
+        find . -iname "*\.obj" | xargs rm
         tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
@@ -5611,7 +5613,7 @@ jobs:
 
   build_w19_re_o1p1_sec:
 
-    runs-on: ubuntu-18.04
+    runs-on: windows-2019
 
     needs: ACE_TAO_w19_re_o1p1_sec
 
@@ -5637,7 +5639,7 @@ jobs:
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
-        path: ACE_TAO
+        path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
@@ -5664,18 +5666,18 @@ jobs:
         cmake -DCMAKE_INSTALL_PREFIX=./install -DBUILD_SHARED_LIBS=ON ..
         cmake --build . --target install --config Release
     - name: configure OpenDDS
+      shell: cmd
       run: |
         cd OpenDDS
         configure --optimize --ipv6 --rapidjson --security --gtest=%GITHUB_WORKSPACE%/OpenDDS/tests/googletest/build/install --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
     - name: check build configuration
-      shell: bash
+      shell: cmd
       run: |
         cd OpenDDS
-        . setenv.sh
-        tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+        call setenv.cmd
+        perl tools\scripts\show_build_config.pl
     - name: build OpenDDS
-      shell: bash
+      shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
@@ -5858,7 +5860,7 @@ jobs:
 
   compiler_w19_re_o1p1_sec:
 
-    runs-on: ubuntu-18.04
+    runs-on: windows-2019
 
     needs: build_w19_re_o1p1_sec
     timeout-minutes: 30
@@ -5890,7 +5892,7 @@ jobs:
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
-        path: ACE_TAO
+        path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
@@ -5916,7 +5918,7 @@ jobs:
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: check build configuration
-      shell: bash
+      shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
