@@ -324,56 +324,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     remote_manual_dr =
       remote_sub->create_datareader(manual_description2.in (),
       remote_manual_dr_qos, remote_manual_drl.in (), ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-
-    // The following waitsets are required to give the remote manual reader time to associate
-    // as well as giving time for the writer to associate with the remote reader.
-    // The test will fail in rtps_udp if they are removed.
-    DDS::StatusCondition_var reader_condition = remote_manual_dr->get_statuscondition();
-    DDS::StatusCondition_var writer_condition = dw_manual->get_statuscondition();
-    reader_condition->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
-    writer_condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
-    DDS::WaitSet_var reader_ws = new DDS::WaitSet;
-    DDS::WaitSet_var writer_ws = new DDS::WaitSet;
-    reader_ws->attach_condition(reader_condition);
-    writer_ws->attach_condition(writer_condition);
-
-    while (true) {
-      DDS::SubscriptionMatchedStatus matches;
-      if (remote_manual_dr->get_subscription_matched_status(matches) != ::DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %N:%l: main() -")
-          ACE_TEXT(" get_subscription_matched_status failed!\n")), 1);
-      }
-      if (matches.current_count >= 1) {
-        break;
-      }
-      DDS::ConditionSeq conditions;
-      DDS::Duration_t timeout = { 60, 0 };
-      if (reader_ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %N:%l: main() -")
-          ACE_TEXT(" wait failed!\n")), 1);
-      }
-    }
-    reader_ws->detach_condition(reader_condition);
-
-    while (true) {
-      DDS::PublicationMatchedStatus matches;
-      if (dw_manual->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %N:%l: main() -")
-          ACE_TEXT(" get_publication_matched_status failed!\n")), 1);
-      }
-      if (matches.current_count >= 1) {
-        break;
-      }
-      DDS::ConditionSeq conditions;
-      DDS::Duration_t timeout = { 60, 0 };
-      if (writer_ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %N:%l: main() -")
-          ACE_TEXT(" wait failed!\n")), 1);
-      }
-    }
-    writer_ws->detach_condition(writer_condition);
-
     local_manual_dr = local_sub->create_datareader(manual_description.in (),
       local_manual_dr_qos, local_manual_drl.in (), ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
@@ -382,6 +332,76 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_ERROR_RETURN ((LM_ERROR,
         ACE_TEXT("(%P|%t) create_datareader failed.\n")), 1);
     }
+    // The following waitsets are required to give the remote manual reader time to associate
+    // as well as giving time for the writer to associate with the remote reader.
+    // The test will fail in rtps_udp if they are removed.
+    DDS::StatusCondition_var remote_reader_condition = remote_manual_dr->get_statuscondition();
+    DDS::StatusCondition_var local_reader_condition = local_manual_dr->get_statuscondition();
+    DDS::StatusCondition_var writer_condition = dw_manual->get_statuscondition();
+    remote_reader_condition->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
+    local_reader_condition->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
+    writer_condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
+    DDS::WaitSet_var remote_reader_ws = new DDS::WaitSet;
+    DDS::WaitSet_var local_reader_ws = new DDS::WaitSet;
+    DDS::WaitSet_var writer_ws = new DDS::WaitSet;
+    remote_reader_ws->attach_condition(remote_reader_condition);
+    local_reader_ws->attach_condition(local_reader_condition);
+    writer_ws->attach_condition(writer_condition);
+
+    while (true) {
+      DDS::SubscriptionMatchedStatus matches;
+      if (remote_manual_dr->get_subscription_matched_status(matches) != ::DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %N:%l: remote_manual_dr -")
+          ACE_TEXT(" get_subscription_matched_status failed!\n")), 1);
+      }
+      if (matches.current_count >= 1) {
+        break;
+      }
+      DDS::ConditionSeq conditions;
+      DDS::Duration_t timeout = { 60, 0 };
+      if (remote_reader_ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %N:%l: main() -")
+          ACE_TEXT(" wait failed!\n")), 1);
+      }
+    }
+    remote_reader_ws->detach_condition(remote_reader_condition);
+
+    while (true) {
+      DDS::SubscriptionMatchedStatus matches;
+      if (local_manual_dr->get_subscription_matched_status(matches) != ::DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %N:%l: local_manual_dr -")
+          ACE_TEXT(" get_subscription_matched_status failed!\n")), 1);
+      }
+      if (matches.current_count >= 1) {
+        break;
+      }
+      DDS::ConditionSeq conditions;
+      DDS::Duration_t timeout = { 60, 0 };
+      if (local_reader_ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %N:%l: main() -")
+          ACE_TEXT(" wait failed!\n")), 1);
+      }
+    }
+    local_reader_ws->detach_condition(local_reader_condition);
+
+    while (true) {
+      DDS::PublicationMatchedStatus matches;
+      if (dw_manual->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %N:%l: dw_manual -")
+          ACE_TEXT(" get_publication_matched_status failed!\n")), 1);
+      }
+      if (matches.current_count >= 2) {
+        break;
+      }
+      DDS::ConditionSeq conditions;
+      DDS::Duration_t timeout = { 60, 0 };
+      if (writer_ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %N:%l: dw_manual -")
+          ACE_TEXT(" match wait failed!\n")), 1);
+      }
+    }
+    writer_ws->detach_condition(writer_condition);
+
     // send an automatic message to show manual readers are not
     // notified of liveliness.
     ::Xyz::Foo foo;
