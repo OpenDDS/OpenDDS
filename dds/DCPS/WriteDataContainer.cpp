@@ -648,10 +648,11 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
       GuidConverter converter(publication_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered: ")
-                 ACE_TEXT("domain %d topic %C publication %C %s.\n"),
+                 ACE_TEXT("domain %d topic %C publication %C seq# %q %s.\n"),
                  this->domain_id_,
                  this->topic_name_,
                  OPENDDS_STRING(converter).c_str(),
+                 acked_seq.getValue(),
                  max_durable_per_instance_
                  ? ACE_TEXT("stored for durability")
                  : ACE_TEXT("released")));
@@ -1301,6 +1302,11 @@ WriteDataContainer::copy_and_prepend(SendStateDataSampleList& list,
 
     element->set_num_subs(1);
     element->set_sub_id(0, reader_id);
+
+    if (DCPS_debug_level > 9) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) WriteDataContainer::copy_and_prepend added seq# %q\n",
+                 cur->get_header().sequence_.getValue()));
+    }
 
     list.enqueue_head(element);
     --max_resend_samples;
