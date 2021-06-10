@@ -1,4 +1,5 @@
 project: dcps_test, dcps_rtps_udp {
+  idlflags += -SS
   TypeSupport_Files {
     DelayedDurable.idl
   }
