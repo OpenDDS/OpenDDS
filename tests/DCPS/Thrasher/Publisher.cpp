@@ -10,18 +10,10 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/WaitSet.h>
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/transport/framework/TransportConfig.h>
 #include <dds/DCPS/transport/framework/TransportInst.h>
-
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
-
-#include <ace/Atomic_Op_T.h>
-#include <ace/Basic_Types.h>
-#include <ace/Log_Msg.h>
-#include <ace/OS_NS_stdlib.h>
-#include <ace/OS_NS_stdio.h>
-#include <ace/Thread_Mutex.h>
 
 #include <string>
 

@@ -13,14 +13,20 @@ DataReaderListenerImpl::DataReaderListenerImpl(const std::size_t expected_sample
 DataReaderListenerImpl::~DataReaderListenerImpl()
 {}
 
-bool DataReaderListenerImpl::wait_received(const OpenDDS::DCPS::TimeDuration& duration, size_t target)
+void DataReaderListenerImpl::wait_received()
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
-  const OpenDDS::DCPS::MonotonicTimePoint deadline(OpenDDS::DCPS::MonotonicTimePoint::now() + duration);
-  while (received_samples_ < target && OpenDDS::DCPS::MonotonicTimePoint::now() < deadline) {
-    condition_.wait(&deadline.value());
+  ACE_Guard<ACE_SYNCH_MUTEX> g(mutex_);
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) sub wait_received received:expected = %d:%d\n"),
+                               received_samples_, expected_samples_));
+  while (received_samples_ < expected_samples_) {
+    if (g.locked()) {
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) sub->wait received_samples %d\n"), received_samples_));
+      condition_.wait();
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) sub<-wait received_samples %d\n"), received_samples_));
+    } else {
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: wait_received locked() failed\n")));
+    }
   }
-  return received_samples_ >= target;
 }
 
 int DataReaderListenerImpl::check_received(const size_t n_publishers) const
@@ -63,7 +69,6 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
   DDS::SampleInfo si;
   while (reader_i->take_next_sample(foo, si) == DDS::RETCODE_OK) {
     if (si.valid_data) {
-    //ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
       ACE_Guard<ACE_SYNCH_MUTEX> g(mutex_);
       ++received_samples_;
       ++progress_;

@@ -1,19 +1,6 @@
 #include "Publisher.h"
 #include "Subscriber.h"
 
-#include <FooTypeTypeSupportImpl.h>
-
-#include <dds/DdsDcpsInfrastructureC.h>
-#include <dds/DCPS/Marked_Default_Qos.h>
-#include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/SubscriberImpl.h>
-#include <dds/DCPS/StaticIncludes.h>
-#include <dds/DCPS/WaitSet.h>
-#ifdef ACE_AS_STATIC_LIBS
-# include <dds/DCPS/RTPS/RtpsDiscovery.h>
-# include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
-#endif
-
 #include <ace/Arg_Shifter.h>
 #include <ace/Log_Msg.h>
 #include <ace/OS_main.h>

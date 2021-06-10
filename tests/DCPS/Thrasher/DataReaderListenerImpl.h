@@ -6,7 +6,6 @@
 #include <dds/DdsDcpsSubscriptionC.h>
 #include <dds/DCPS/LocalObject.h>
 #include <dds/DCPS/PoolAllocator.h>
-#include <dds/DCPS/TimeDuration.h>
 
 #include <cstdlib>
 
@@ -16,7 +15,7 @@ public:
   DataReaderListenerImpl(const std::size_t expected_samples, const char* progress_fmt);
   virtual ~DataReaderListenerImpl();
 
-  bool wait_received(const OpenDDS::DCPS::TimeDuration& duration, size_t target);
+  void wait_received();
   int check_received(const size_t n_publishers) const;
   virtual void on_data_available(DDS::DataReader_ptr reader);
 

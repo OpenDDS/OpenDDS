@@ -12,7 +12,6 @@
 #endif
 
 #include <ace/Log_Msg.h>
-#include <ace/OS_NS_stdlib.h>
 
 Subscriber::Subscriber(const std::size_t n_pub_threads, const std::size_t expected_samples, const bool durable)
   : n_pub_threads_(n_pub_threads)
@@ -128,7 +127,7 @@ int Subscriber::wait(unsigned int num_writers, const int cmp)
 
 void Subscriber::wait_received()
 {
-  listener_i_->wait_received(OpenDDS::DCPS::TimeDuration(280, 0), expected_samples_);
+  listener_i_->wait_received();
 }
 
 int Subscriber::check_result() const
