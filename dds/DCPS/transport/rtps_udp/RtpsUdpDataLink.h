@@ -397,7 +397,7 @@ private:
     ReaderInfoSet readers_expecting_heartbeat_;
     RcHandle<SingleSendBuffer> send_buff_;
     SequenceNumber max_sn_;
-    typedef OPENDDS_SET(TransportQueueElement*) TqeSet;
+    typedef OPENDDS_SET_CMP(TransportQueueElement*, TransportQueueElement::OrderBySequenceNumber) TqeSet;
     typedef OPENDDS_MULTIMAP(SequenceNumber, TransportQueueElement*) SnToTqeMap;
     SnToTqeMap elems_not_acked_;
     WeakRcHandle<RtpsUdpDataLink> link_;

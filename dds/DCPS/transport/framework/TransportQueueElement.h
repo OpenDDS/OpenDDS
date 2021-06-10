@@ -160,6 +160,13 @@ public:
 
   virtual bool is_retained_replaced() const { return false; }
 
+  struct OrderBySequenceNumber {
+    bool operator()(const TransportQueueElement* lhs, const TransportQueueElement* rhs) const
+    {
+      return lhs->sequence() < rhs->sequence();
+    }
+  };
+
 protected:
 
   /// Ctor.  The initial_count is the number of DataLinks to which
