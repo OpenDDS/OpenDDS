@@ -1,6 +1,6 @@
 # Using Docker for OpenDDS development
 #
-# Images created from this Dockerfile can be used as to launch containers
+# Images created from this Dockerfile can be used to launch containers
 # as build platforms for OpenDDS.  The difference between this image
 # and thes one created by $DDS_ROOT/Dockerfile is that for this image the source
 # tree resides in the Docker host and Docker's "bind mount" feature is used
