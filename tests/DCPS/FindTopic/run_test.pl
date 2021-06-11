@@ -13,15 +13,17 @@ use strict;
 
 PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
 
-my $status = 0;
 my $debug = 0;
-# $debug = 10;
 my $debugOpts = "-DCPSDebugLevel $debug" if $debug;
-my $pub_opts = "-DCPSConfigFile rtps_disc.ini";
+
 my $test = new PerlDDS::TestFramework();
-$test->process("findtopic", "findtopic", "$debugOpts $pub_opts");
+$test->enable_console_logging();
+
+$test->process("findtopic", "findtopic", $debugOpts);
 $test->start_process("findtopic");
+
 my $client = $test->finish(15);
+my $status = 0;
 if ($client != 0) {
     print STDERR "ERROR: client returned $client\n";
     $status = 1;
