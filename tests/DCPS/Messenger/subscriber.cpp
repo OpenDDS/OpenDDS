@@ -39,8 +39,6 @@ const char governance_file[] = "file:./governance_signed.p7s";
 const char permissions_file[] = "file:./permissions_2_signed.p7s";
 #endif
 
-bool reliable = false;
-
 void append(DDS::PropertySeq& props, const char* name, const char* value, bool propagate = false)
 {
   const DDS::Property_t prop = {name, value, propagate};
