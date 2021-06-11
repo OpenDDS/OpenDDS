@@ -1,2 +1,2 @@
-project(DDS*): dcpsexe, dcps_test, dcps_cm {
+project(DDS*): dcps_cm {
 }
