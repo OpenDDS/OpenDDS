@@ -272,20 +272,59 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "}\n"
       "\n"
       "const OpenDDS::XTypes::TypeIdentifier& " << short_name << "TypeSupportImpl::getMinimalTypeIdentifier() const\n"
-      "{\n"
-      "  return OpenDDS::DCPS::getMinimalTypeIdentifier<OpenDDS::DCPS::" << typeobject_generator::tag_type(name) << ">();\n"
+      "{\n";
+
+    const bool java_ts_only = be_global->java_arg().length() > 0;
+    const bool generate_xtypes = !be_global->suppress_xtypes() && !java_ts_only;
+    if (generate_xtypes) {
+      be_global->impl_ <<
+        "  return OpenDDS::DCPS::getMinimalTypeIdentifier<OpenDDS::DCPS::" << typeobject_generator::tag_type(name) << ">();\n";
+    } else {
+      be_global->impl_ <<
+        "  static OpenDDS::XTypes::TypeIdentifier ti;\n"
+        "  return ti;\n";
+    }
+    be_global->impl_ <<
       "}\n\n"
       "const OpenDDS::XTypes::TypeMap& " << short_name << "TypeSupportImpl::getMinimalTypeMap() const\n"
-      "{\n"
-      "  return OpenDDS::DCPS::getMinimalTypeMap<OpenDDS::DCPS::" << typeobject_generator::tag_type(name) << ">();\n"
+      "{\n";
+
+    if (generate_xtypes) {
+      be_global->impl_ <<
+        "  return OpenDDS::DCPS::getMinimalTypeMap<OpenDDS::DCPS::" << typeobject_generator::tag_type(name) << ">();\n";
+    } else {
+      be_global->impl_ <<
+        "  static OpenDDS::XTypes::TypeMap tm;\n"
+        "  return tm;\n";
+    }
+    be_global->impl_ <<
       "}\n\n"
       "const OpenDDS::XTypes::TypeIdentifier& " << short_name << "TypeSupportImpl::getCompleteTypeIdentifier() const\n"
-      "{\n"
-      "  return OpenDDS::DCPS::getCompleteTypeIdentifier<OpenDDS::DCPS::" << typeobject_generator::tag_type(name) << ">();\n"
+      "{\n";
+
+    const bool generate_xtypes_complete = generate_xtypes && be_global->xtypes_complete();
+    if (generate_xtypes_complete) {
+      be_global->impl_ <<
+        "  return OpenDDS::DCPS::getCompleteTypeIdentifier<OpenDDS::DCPS::" << typeobject_generator::tag_type(name) << ">();\n";
+    } else {
+      be_global->impl_ <<
+        "  static OpenDDS::XTypes::TypeIdentifier ti;\n"
+        "  return ti;\n";
+    }
+    be_global->impl_ <<
       "}\n\n"
       "const OpenDDS::XTypes::TypeMap& " << short_name << "TypeSupportImpl::getCompleteTypeMap() const\n"
-      "{\n"
-      "  return OpenDDS::DCPS::getCompleteTypeMap<OpenDDS::DCPS::" << typeobject_generator::tag_type(name) << ">();\n"
+      "{\n";
+
+    if (generate_xtypes_complete) {
+      be_global->impl_ <<
+        "  return OpenDDS::DCPS::getCompleteTypeMap<OpenDDS::DCPS::" << typeobject_generator::tag_type(name) << ">();\n";
+    } else {
+      be_global->impl_ <<
+        "  static OpenDDS::XTypes::TypeMap tm;\n"
+        "  return tm;\n";
+    }
+    be_global->impl_ <<
       "}\n\n"
       "OpenDDS::DCPS::Extensibility " << short_name << "TypeSupportImpl::getExtensibility() const\n"
       "{\n"

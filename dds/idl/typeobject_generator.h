@@ -15,7 +15,7 @@ class typeobject_generator : public dds_generator {
 public:
   typeobject_generator()
     : produce_output_(false)
-    , suppress_complete_type_output_(false)
+    , produce_xtypes_complete_(false)
     , index_(0)
   {}
 
@@ -43,9 +43,9 @@ public:
     produce_output_ = flag;
   }
 
-  void suppress_complete_type_output(bool flag)
+  void produce_xtypes_complete(bool flag)
   {
-    suppress_complete_type_output_ = flag;
+    produce_xtypes_complete_ = flag;
   }
 
 private:
@@ -110,7 +110,7 @@ private:
   OpenDDS::XTypes::TypeMap complete_type_map_;
 
   bool produce_output_;
-  bool suppress_complete_type_output_;
+  bool produce_xtypes_complete_;
   size_t index_;
   typedef std::vector<AST_Type*> Stack;
   Stack stack_;

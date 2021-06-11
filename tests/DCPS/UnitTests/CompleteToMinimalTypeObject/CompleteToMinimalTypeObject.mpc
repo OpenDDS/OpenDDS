@@ -1,4 +1,6 @@
 project(completetominimaltypeobject) : dcps_test, googletest {
+  dcps_ts_flags += -Gxcom
+
   TypeSupport_Files {
     CompleteToMinimalTypeObject.idl
   }

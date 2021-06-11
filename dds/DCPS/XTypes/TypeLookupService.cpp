@@ -155,7 +155,7 @@ bool TypeLookupService::get_minimal_type_identifier(const TypeIdentifier& ct, Ty
     return true;
   }
 
-  // Non-fully descriptive plain collection is a scpecial case where we have to
+  // Non-fully descriptive plain collection is a special case where we have to
   // get the minimal TypeIdentifier of the element type to create the TypeIdentifier
   // of the minimal collection type.
   if (is_plain_collection(ct)) {
