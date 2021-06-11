@@ -415,40 +415,37 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     Writer* writer = new Writer(dw_manual.in(),
       1, num_ops_per_thread);
-    int lcc_local = 0;
-    int lcc_remote = 0;
     //we want to only publish after the reader loses liveliness from the writer
     //this follows the pattern of an up and a down, so there should be 2 liveliness
     //changes per call to run_test, which does the writing
     for (int i = 0 ; i < num_unlively_periods + 1 ; ++i) {
-      lcc_local = local_manual_drl_servant->liveliness_changed_count();
-      lcc_remote = remote_manual_drl_servant->liveliness_changed_count();
-      while(lcc_local != 2 * i || lcc_remote != 2 * i) {
+      while(local_manual_drl_servant->liveliness_changed_count() != 2 * i ||
+            remote_manual_drl_servant->liveliness_changed_count() != 2 * i) {
         ACE_OS::sleep(ACE_Time_Value(0, 250000));
-        lcc_local = local_manual_drl_servant->liveliness_changed_count();
-        lcc_remote = remote_manual_drl_servant->liveliness_changed_count();
       }
       ACE_DEBUG ((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Running Write: remote: %d local: %d\n"), lcc_remote, lcc_local));
-      writer->run_test (i);
+        ACE_TEXT("(%P|%t) Running Write: remote: %d local: %d\n"),
+                 local_manual_drl_servant->liveliness_changed_count(),
+                 remote_manual_drl_servant->liveliness_changed_count()));
+      writer->run_test(i);
+      while (remote_manual_drl_servant->no_writers_generation_count() != i ||
+             local_manual_drl_servant->no_writers_generation_count() != i) {
+        ACE_OS::sleep(ACE_Time_Value(0, 250000));
+      }
     }
 
-    while(lcc_local != 2 * (num_unlively_periods + 1) ||
-          lcc_remote != 2 * (num_unlively_periods + 1)) {
+    while(local_manual_drl_servant->liveliness_changed_count() != 2 * (num_unlively_periods + 1) ||
+          remote_manual_drl_servant->liveliness_changed_count() != 2 * (num_unlively_periods + 1)) {
       ACE_OS::sleep(ACE_Time_Value(0, 250000));
-      lcc_local = local_manual_drl_servant->liveliness_changed_count();
-      lcc_remote = remote_manual_drl_servant->liveliness_changed_count();
     }
 
     pub->delete_contained_entities() ;
     delete writer;
     dp->delete_publisher(pub.in ());
 
-    while(lcc_local != 2 * (num_unlively_periods + 2) + 1 &&
-          lcc_remote != 2 * (num_unlively_periods + 2) + 1){
+    while(local_manual_drl_servant->liveliness_changed_count() != 2 * (num_unlively_periods + 2) + 1 ||
+          remote_manual_drl_servant->liveliness_changed_count() != 2 * (num_unlively_periods + 2) + 1){
       ACE_OS::sleep(ACE_Time_Value(0, 250000));
-      lcc_local = local_manual_drl_servant->liveliness_changed_count();
-      lcc_remote = remote_manual_drl_servant->liveliness_changed_count();
     }
     int expected_manual_liveliness_changes = 3 + (2 * (num_unlively_periods + 1));
     // Determine the test status at this point.
