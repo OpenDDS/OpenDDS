@@ -1,4 +1,4 @@
-
+#ifdef OPENDDS_SECURITY
 
 #include "dds/DCPS/security/framework/SecurityConfig.h"
 #include "dds/DCPS/security/framework/SecurityRegistry.h"
@@ -114,3 +114,5 @@ TEST_F(SecurityConfigTest, TestConfig_NoProperties)
         EXPECT_EQ(0U, property_data.binary_value.length());
         EXPECT_EQ(0U, property_data.value.length());
 }
+
+#endif

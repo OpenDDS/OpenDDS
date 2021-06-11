@@ -3,6 +3,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifdef OPENDDS_SECURITY
+
 #include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/security/SSL/Certificate.h>
@@ -1093,3 +1095,5 @@ TEST_F(AuthenticationTest, GetSharedSecret_InitiatorAndReplier_Match)
   ASSERT_NE(0u, secret1_data->length());
   ASSERT_EQ(secret1_data.in(), secret2_data.in());
 }
+
+#endif

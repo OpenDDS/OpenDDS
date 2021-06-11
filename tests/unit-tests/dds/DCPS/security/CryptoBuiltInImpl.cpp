@@ -1,3 +1,5 @@
+#ifdef OPENDDS_SECURITY
+
 #include "dds/DCPS/LocalObject.h"
 #include "dds/DCPS/security/CryptoBuiltInImpl.h"
 #include "dds/DdsDcpsInfrastructureC.h"
@@ -1085,3 +1087,5 @@ TEST_F(CryptoTransformTest, decode_serialized_payload_Success)
   EXPECT_TRUE(get_inst().decode_serialized_payload(output, get_buffer(), inline_qos, drch, dwch, ex));
   EXPECT_EQ(get_buffer(), output);
 }
+
+#endif

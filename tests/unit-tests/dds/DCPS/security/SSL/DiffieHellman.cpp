@@ -3,6 +3,8 @@
  * See: http://www.OpenDDS.org/license.html
  */
 
+#ifdef OPENDDS_SECURITY
+
 #include "gtest/gtest.h"
 #include "dds/DCPS/security/OpenSSL_init.h"
 #include "dds/DCPS/security/SSL/DiffieHellman.h"
@@ -64,3 +66,5 @@ TEST_F(DiffieHellmanTest, EC_SharedSecret_GenerationAndComparison)
   bool was_successful = dh3.cmp_shared_secret(dh4);
   ASSERT_TRUE(was_successful);
 }
+
+#endif

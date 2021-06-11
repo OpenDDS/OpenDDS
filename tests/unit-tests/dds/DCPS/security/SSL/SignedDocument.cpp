@@ -3,6 +3,8 @@
  * See: http://www.OpenDDS.org/license.html
  */
 
+#ifdef OPENDDS_SECURITY
+
 #include "gtest/gtest.h"
 #include "dds/DCPS/security/OpenSSL_init.h"
 #include "dds/DCPS/security/SSL/SignedDocument.h"
@@ -108,3 +110,5 @@ TEST_F(SignedDocumentTest, CopyConstruct)
   SignedDocument doc(doc_);
   ASSERT_EQ(doc, doc_);
 }
+
+#endif

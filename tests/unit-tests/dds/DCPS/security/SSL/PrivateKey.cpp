@@ -3,6 +3,8 @@
  * See: http://www.OpenDDS.org/license.html
  */
 
+#ifdef OPENDDS_SECURITY
+
 #include "gtest/gtest.h"
 #include "dds/DCPS/security/OpenSSL_init.h"
 #include "dds/DCPS/security/SSL/PrivateKey.h"
@@ -205,3 +207,5 @@ TEST_F(PrivateKeyTest, SignAndVerify_DoesNotUseEmptyData)
 
   ASSERT_EQ(0, verify_result);
 }
+
+#endif

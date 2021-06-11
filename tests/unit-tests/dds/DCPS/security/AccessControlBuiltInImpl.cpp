@@ -1,3 +1,5 @@
+#ifdef OPENDDS_SECURITY
+
 #include <dds/DCPS/security/AccessControlBuiltInImpl.h>
 #include <dds/DCPS/security/OpenSSL_init.h>
 #include <dds/DCPS/security/framework/Properties.h>
@@ -1404,3 +1406,5 @@ TEST_F(AccessControlTest, return_datareader_sec_attributes)
   ::DDS::Security::SecurityException ex;
   EXPECT_TRUE(get_inst().return_datareader_sec_attributes(attributes, ex));
 }
+
+#endif

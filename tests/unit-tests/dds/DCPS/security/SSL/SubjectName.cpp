@@ -3,6 +3,8 @@
  * See: http://www.OpenDDS.org/license.html
  */
 
+#ifdef OPENDDS_SECURITY
+
 #include "gtest/gtest.h"
 #include "dds/DCPS/security/OpenSSL_init.h"
 #include "dds/DCPS/security/SSL/SubjectName.h"
@@ -116,3 +118,5 @@ TEST_F(SubjectNameTest, LDAP_DCE_CMP)
   ASSERT_NE(sn_dce_cmp_, sn_dce_cmp_backwards);
   */
 }
+
+#endif

@@ -3,6 +3,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifdef OPENDDS_SECURITY
+
 #include <dds/DCPS/security/Authentication/LocalAuthCredentialData.h>
 #include <dds/DCPS/security/TokenWriter.h>
 #include <dds/DCPS/security/OpenSSL_init.h>
@@ -111,3 +113,5 @@ TEST_F(LocalAuthCredentialDataTest, LoadIdentityCert_Success)
   credential_data.load_credentials(properties, ex);
   ASSERT_TRUE(1); // TODO
 }
+
+#endif

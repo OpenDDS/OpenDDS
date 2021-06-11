@@ -3,6 +3,8 @@
  * See: http://www.OpenDDS.org/license.html
  */
 
+#ifdef OPENDDS_SECURITY
+
 #include "gtest/gtest.h"
 #include "dds/DCPS/security/OpenSSL_init.h"
 #include "dds/DCPS/security/SSL/Certificate.h"
@@ -180,3 +182,5 @@ TEST_F(CertificateTest, CopyConstruct_ECDSA_SHA256)
   Certificate c(signed_ec_);
   ASSERT_EQ(c, signed_ec_);
 }
+
+#endif
