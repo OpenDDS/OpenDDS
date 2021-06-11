@@ -479,17 +479,17 @@ jobs:
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/config.xml"
+        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v2
       with:
         name: ${{ github.job }}_autobuild_output
-        path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: check results
       shell: bash
       run: |
-        cat "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
     - name: remove install clutter
       shell: bash
@@ -549,13 +549,6 @@ jobs:
       run: |
         cd OpenDDS
         make -j4
-    - name: Build CMake Tests
-      run: |
-        source OpenDDS/build/target/setenv.sh
-        mkdir OpenDDS/build/target/tests/cmake/build
-        cd OpenDDS/build/target/tests/cmake/build
-        cmake ..
-        cmake --build . -- -j4
     - name: check build configuration
       shell: bash
       run: |
@@ -588,7 +581,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_EXTENDED -Config RTPS -Config LINUX -Config OPENDDS_SAFETY_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GHA_OPENDDS_SAFETY_PROFILE -Config GH_ACTIONS --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_EXTENDED -Config RTPS -Config LINUX -Config OPENDDS_SAFETY_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GHA_OPENDDS_SAFETY_PROFILE -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -649,13 +642,6 @@ jobs:
       run: |
         cd OpenDDS
         make -j4
-    - name: Build CMake Tests
-      run: |
-        source OpenDDS/build/target/setenv.sh
-        mkdir OpenDDS/build/target/tests/cmake/build
-        cd OpenDDS/build/target/tests/cmake/build
-        cmake ..
-        cmake --build . -- -j4
     - name: check build configuration
       shell: bash
       run: |
@@ -688,7 +674,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_BASE -Config RTPS -Config LINUX -Config OPENDDS_SAFETY_PROFILE -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GHA_OPENDDS_SAFETY_PROFILE -Config GHA_NO_BUILT_IN_TOPICS -Config GH_ACTIONS --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_BASE -Config RTPS -Config LINUX -Config OPENDDS_SAFETY_PROFILE -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GHA_OPENDDS_SAFETY_PROFILE -Config GHA_NO_BUILT_IN_TOPICS -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -2226,117 +2212,12 @@ jobs:
       run: |
         cd OpenDDS
         make -j4
-    - name: Build CMake Tests
-      run: |
-        source OpenDDS/build/target/setenv.sh
-        mkdir OpenDDS/build/target/tests/cmake/build
-        cd OpenDDS/build/target/tests/cmake/build
-        cmake ..
-        cmake --build . -- -j4
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS/build/target
         . setenv.sh
         tools/scripts/show_build_config.pl
-
-  cmake_u20_gcc10_bsafe_js0_FM-2c:
-
-    runs-on: ubuntu-20.04
-
-    needs: u20_gcc10_bsafe_js0_FM-2c
-    timeout-minutes: 150
-
-    steps:
-    - name: checkout MPC
-      uses: actions/checkout@v2.3.4
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout autobuild
-      uses: actions/checkout@v2.3.4
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v2.3.4
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: ACE_TAO_u20_gcc10_bsafe_js0_FM-2c_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u20_gcc10_bsafe_js0_FM-2c.tar.xz
-    - name: checkout OpenDDS
-      uses: actions/checkout@v2.3.4
-      with:
-        path: OpenDDS
-        submodules: true
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: build_u20_gcc10_bsafe_js0_FM-2c_artifact
-        path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS/build/target
-        tar xvfJ build_u20_gcc10_bsafe_js0_FM-2c.tar.xz
-    - name: check build configuration
-      shell: bash
-      run: |
-        cd OpenDDS/build/target
-        . setenv.sh
-        tools/scripts/show_build_config.pl
-    - name: run OpenDDS tests
-      shell: bash
-      run: |
-        cd OpenDDS/build/target
-        . setenv.sh
-        mkdir ${{ github.job }}_autobuild_workspace
-        cd ${{ github.job }}_autobuild_workspace
-        echo using commit $TRIGGERING_COMMIT for SHA
-        echo $TRIGGERING_COMMIT >> ./SHA
-        cat > config.xml <<EOF
-        <autobuild>
-        <configuration>
-        <variable name="log_file" value="output.log"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-        <variable name="project_root" value="$DDS_ROOT"/>
-        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-        <variable name="junit_xml_output" value="Tests"/>
-        </configuration>
-        <command name="log" options="on"/>
-        <command name="print_os_version"/>
-        <command name="print_env_vars"/>
-        <command name="print_ace_config"/>
-        <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
-        <command name="print_perl_version"/>
-        <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps -Config RTPS -Config LINUX -Config OPENDDS_SAFETY_PROFILE -Config SAFETY_BASE -Config CXX11 -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GH_ACTIONS --cmake"/>
-        <command name="log" options="off"/>
-        <command name="process_logs" options="prettify"/>
-        </autobuild>
-        EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
-    - name: upload autobuild output
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ github.job }}_autobuild_output
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
-    - name: check results
-      shell: bash
-      run: |
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
   ACE_TAO_u20_ace7_j_qt_ws_sec:
 
@@ -6307,7 +6188,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -ExeSubDir Release -Config STATIC_MESSENGER -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS --no-dcps -ExeSubDir Release -Config STATIC_MESSENGER -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
