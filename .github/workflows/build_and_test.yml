@@ -451,8 +451,8 @@ jobs:
     - name: test make install cmake
       shell: bash
       run: |
-        cd OpenDDS/build/target
-        . setenv.sh
+        cd OpenDDS
+        . install_setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
         echo using commit $TRIGGERING_COMMIT for SHA
