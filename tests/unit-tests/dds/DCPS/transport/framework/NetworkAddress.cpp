@@ -101,6 +101,22 @@ TEST(network_address_test, choose_single_coherent_address_ipv6)
 }
 #endif // ACE_HAS_IPV6
 
+TEST(network_address_test, choose_single_coherent_address_localhost)
+{
+  //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
+
+  ACE_INET_Addr addr1 = choose_single_coherent_address("localhost:5200", false);
+  ACE_INET_Addr addr2 = choose_single_coherent_address("localhost:5200", true);
+  EXPECT_NE(addr1, ACE_INET_Addr());
+  EXPECT_NE(addr2, ACE_INET_Addr());
+  EXPECT_EQ(addr1, addr2);
+  EXPECT_EQ(addr2, addr1);
+#if defined ACE_HAS_IPV6 && defined IPV6_V6ONLY
+  EXPECT_FALSE(addr1.is_ipv4_mapped_ipv6());
+  EXPECT_FALSE(addr2.is_ipv4_mapped_ipv6());
+#endif
+}
+
 TEST(network_address_test, choose_single_coherent_address_double)
 {
   //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
