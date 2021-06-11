@@ -98,7 +98,8 @@ private:
   virtual void finish_message();
 
   void deliver_sample_i(ReceivedDataSample& sample,
-                        const RTPS::Submessage& submessage);
+                        const RTPS::Submessage& submessage,
+                        const ACE_INET_Addr& remote_addr);
 
   virtual int start_i();
   virtual void stop_i();
@@ -114,7 +115,8 @@ private:
   void sec_submsg_to_octets(DDS::OctetSeq& encoded,
                             const RTPS::Submessage& postfix);
 
-  void deliver_from_secure(const RTPS::Submessage& submessage);
+  void deliver_from_secure(const RTPS::Submessage& submessage,
+                           const ACE_INET_Addr& remote_addr);
 
   bool decode_payload(ReceivedDataSample& sample,
                       const RTPS::DataSubmessage& submessage);

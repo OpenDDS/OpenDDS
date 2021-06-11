@@ -1,23 +1,12 @@
-project(*Publisher) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dds_model {
-  exename = publisher
+project(*) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dds_model {
+  exename = pubsub
 
   Idl_Files {
   }
 
   Source_Files {
-    publisher.cpp
+    pubsub.cpp
     Writer.cpp
-  }
-}
-
-project(*Subscriber) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
-  exename = subscriber
-
-  Idl_Files {
-  }
-
-  Source_Files {
-    subscriber.cpp
-    DataReaderListener.cpp
+    DataReaderListenerImpl.cpp
   }
 }

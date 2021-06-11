@@ -1,0 +1,71 @@
+// This test was made to catch problems with IDL keywords
+// used as module name and escaped with a prepended '_'
+// as requested by the IDL language specification
+
+// Escaped Non-Keywords
+module _the_module {
+  const long _the_const = 0;
+
+  struct _the_struct;
+  @topic
+  struct _the_struct {
+    @key long _the_field;
+  };
+
+  union _the_union;
+  @topic
+  union _the_union switch (@key long) {
+    case 2: short _the_field;
+  };
+};
+
+// Identifiers that are just IDL keywords.
+module _boolean {
+  const long _oneway = 0;
+
+  struct _attribute;
+  @topic
+  struct _attribute {
+    @key long _component;
+  };
+
+  union _primarykey;
+  @topic
+  union _primarykey switch (@key long) {
+    case 2: short _truncatable;
+  };
+};
+
+// Identifiers that are just C++ keywords.
+module bool {
+  const long continue = 0;
+
+  struct class;
+  @topic
+  struct class {
+    @key long else;
+  };
+
+  union goto;
+  @topic
+  union goto switch (@key long) {
+    case 2: short asm;
+  };
+};
+
+// Identifiers that are both IDL and C++ keywords.
+module _case {
+  const long _typeid = 0;
+
+  struct _struct;
+  @topic
+  struct _struct {
+    @key long _private;
+  };
+
+  union _union;
+  @topic
+  union _union switch (@key long) {
+    case 2: short _public;
+  };
+};

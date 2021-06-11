@@ -6,6 +6,9 @@
 #include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/transport/framework/TransportSendStrategy.h>
 #include <dds/DCPS/security/framework/Properties.h>
+#include <dds/DCPS/BuiltInTopicUtils.h>
+#include <dds/DCPS/DCPS_Utils.h>
+
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
@@ -55,7 +58,42 @@ bool get_topic(T ts, const DomainParticipant_var dp, const std::string& topic_na
   return true;
 }
 
-
+bool wait_for_reader(bool tojoin, DataWriter_var &dw) {
+  DDS::WaitSet_var ws = new DDS::WaitSet;
+  DDS::StatusCondition_var condition = dw->get_statuscondition();
+  condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
+  bool success = true;
+  DDS::ConditionSeq conditions;
+  ReturnCode_t ret = RETCODE_OK;
+  ws->attach_condition(condition);
+  DDS::Duration_t p = { 5, 0 };
+  DDS::PublicationMatchedStatus pms;
+  dw->get_publication_matched_status(pms);
+  ACE_DEBUG((LM_DEBUG,"Starting wait for reader %s count = %d at %T\n", (tojoin ? "startup":"shutdown"), pms.current_count));
+  for (int retries = 3; retries > 0 && (tojoin == (pms.current_count == 0)); --retries) {
+    conditions.length(0);
+    ret = ws->wait(conditions, p);
+    if (ret != RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "ERROR: wait on control_dw condition returned %C\n",
+                 OpenDDS::DCPS::retcode_to_string(ret)));
+      success = false;
+      break;
+    }
+    dw->get_publication_matched_status(pms);
+  }
+  if (success) {
+    ACE_DEBUG((LM_DEBUG, "After wait for reader %s count = %d at %T\n", (tojoin
+                                                                         ? "startup"
+                                                                         : "shutdown"), pms.current_count));
+    if (tojoin != (pms.current_count > 0)) {
+      ACE_ERROR((LM_ERROR, "Data reader %s not detected at %T\n", (tojoin
+                                                                   ? "startup"
+                                                                   : "shutdown")));
+    }
+  }
+  ws->detach_condition(condition);
+  return success;
+}
 bool check_inconsistent_topic_status(Topic_var topic)
 {
   DDS::InconsistentTopicStatus status;
@@ -65,7 +103,7 @@ bool check_inconsistent_topic_status(Topic_var topic)
   if (retcode != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: get_inconsistent_topic_status failed\n"));
     return false;
-  } else if (status.total_count != (expect_to_match ? 0 : 1)) {
+  } else if (expect_to_match !=  (status.total_count == 0)) {
     ACE_ERROR((LM_ERROR, "ERROR: inconsistent topic count is %d\n", status.total_count));
     return false;
   }
@@ -100,4 +138,42 @@ void create_participant(const DomainParticipantFactory_var& dpf, DomainParticipa
 
   dp = dpf->create_participant(0, part_qos, 0, DEFAULT_STATUS_MASK);
 }
+
+template<typename T1, typename T2>
+ReturnCode_t read_i(const DataReader_var& dr, const T1& pdr, T2& data, bool ignore_no_data = false)
+{
+  ReadCondition_var dr_rc = dr->create_readcondition(NOT_READ_SAMPLE_STATE,
+    ANY_VIEW_STATE,
+    ALIVE_INSTANCE_STATE);
+  WaitSet_var ws = new WaitSet;
+  ws->attach_condition(dr_rc);
+
+  ConditionSeq active;
+  const Duration_t max_wait = { 10, 0 };
+  ReturnCode_t ret = ws->wait(active, max_wait);
+
+  if (ret == RETCODE_TIMEOUT) {
+    ACE_ERROR((LM_ERROR, "ERROR: reader timedout\n"));
+  } else if (ret != RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: Reader: wait returned %C\n",
+          OpenDDS::DCPS::retcode_to_string(ret)));
+  } else {
+    SampleInfoSeq info;
+
+    ret = pdr->take_w_condition(data, info, LENGTH_UNLIMITED, dr_rc);
+    if (ignore_no_data && ret == RETCODE_NO_DATA) {
+        ret = RETCODE_OK;
+    }
+    if (ret != RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "ERROR: Reader: take_w_condition returned %C\n",
+        OpenDDS::DCPS::retcode_to_string(ret)));
+    }
+  }
+
+  ws->detach_condition(dr_rc);
+  dr->delete_readcondition(dr_rc);
+
+  return ret;
+}
+
 #endif

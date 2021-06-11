@@ -345,6 +345,7 @@ public:
       }
     });
 
+    bool spawned_processes_killed = false;
     while (running) {
       // Check to see if any spawned_processs are done and write their reports
       std::list<SpawnedProcessPtr> finished_spawned_processes;
@@ -360,22 +361,22 @@ public:
 
       // Check to see if we have to stop prematurely
       bool kill_spawned_processes = false;
-      if (scenario_timedout_.load()) {
+      if (!spawned_processes_killed && scenario_timedout_.load()) {
         std::stringstream ss;
-        ss << "Scenario Timedout, Killing Spawned Processes..." << std::endl;
+        ss << "Scenario timed out at " << Bench::iso8601() << ", Killing Spawned Processes..." << std::endl;
         std::cerr << ss.str() << std::flush;
         kill_spawned_processes = true;
       }
-      if (sigint_.load()) {
+      if (!spawned_processes_killed && sigint_.load()) {
         std::stringstream ss;
         ss << "Interrupted, Killing Spawned Processes..." << std::endl;
         std::cerr << ss.str() << std::flush;
         kill_spawned_processes = true;
       }
-      if (kill_spawned_processes) {
+      if (!spawned_processes_killed && kill_spawned_processes) {
         std::lock_guard<std::mutex> guard(mutex_);
         kill_all_the_spawned_processes(); // Bwahahaha
-        running = false;
+        spawned_processes_killed = true;
       }
 
       if (running) {
@@ -395,9 +396,9 @@ public:
     }
 
     if (node_name_.length() > 0) {
-      std::cout << "Writing report for node '" << node_name_ << "', id: " << node_id_ << std::endl;
+      std::cout << "Writing report for node name '" << node_name_ << "' (id '" << node_id_ << "') with " << report.spawned_process_reports.length() << " spawned process reports" << std::endl;
     } else {
-      std::cout << "Writing report for node " << node_id_ << std::endl;
+      std::cout << "Writing report for node id '" << node_id_ << "' with " << report.spawned_process_reports.length() << " spawned process reports" << std::endl;
     }
     if (report_writer_impl->write(report, DDS::HANDLE_NIL)) {
       std::cerr << "Write report failed" << std::endl;
@@ -424,6 +425,7 @@ public:
     const auto i = pid_to_spawned_process_id_.find(pid);
     if (i != pid_to_spawned_process_id_.end()) {
       auto& spawned_process = all_spawned_processes_[i->second];
+      std::cout << "SpawnedProcessManager::handle_exit() - Handling exit of process " << pid << " at " << Bench::iso8601() << " with exit code " << process->exit_code() << std::endl;
       spawned_process->set_exit_status(process->return_value(), process->exit_code());
       remaining_spawned_process_count_--;
       finished_spawned_processes_.push_back(spawned_process);

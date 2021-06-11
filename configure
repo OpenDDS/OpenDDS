@@ -25,8 +25,8 @@ use warnings;
 ## Version of OCI's TAO to download
 my $oci_tao_version = '2.2a';
 ## Version of DOC Group ACE/TAO to download, uses the ACE version number
-my $doc_tao2_version = '6.5.12';
-my $doc_tao3_version = '7.0.1';
+my $doc_tao2_version = '6.5.13';
+my $doc_tao3_version = '7.0.2';
 
 my $backup_timestamp = strftime "%Y-%m-%d-%H-%M-%S", localtime time;
 
@@ -177,6 +177,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
       $argIndent . 'target DDS_ROOT to target ACE_ROOT)',
     'host-tools-only!', 'Just build the host tools (no)',
     'prefix=s', 'Installation prefix (none)',
+    'install-origin-relative!', 'Install with RPATH relative to $ORIGIN (no)',
     'workspace=s', 'Custom MPC workspace file to copy and use (Use a builtin one)',
    ],
    ['Build flags:',
@@ -1144,6 +1145,13 @@ sub write_platform_macros {
         print $PMG "$var = $opts{'compiler'}\n";
       }
     }
+    if ($opts{'prefix'} && $opts{'install-origin-relative'}) {
+      print $PMG <<'EOT';
+install_rpath = 0
+INSTALL_ORIGIN = $$ORIGIN/../$(INSTALL_LIB)
+LDFLAGS += '-Wl,-rpath,$(INSTALL_ORIGIN)' $(LD_RPATH_FLAGS)
+EOT
+    }
     $PMG->close;
     print "Wrote $buildEnv{'ACE_ROOT'}/.../platform_macros.GNU\n"
       if $opts{'verbose'};
@@ -1152,27 +1160,39 @@ sub write_platform_macros {
 }
 
 ## Optional OpenDDS dependencies
-
-my %optdep =
-# %opts key =>    [env var,           sanity check,                    MPC feature]
-  ('java' =>      ['JAVA_HOME',       'include/jni.h',                 'java'],
-   'jboss' =>     ['JBOSS_HOME',      'lib/jboss-common.jar'],
-   'ant' =>       ['ANT_HOME',        'bin/ant'],
-   'wireshark' => ['WIRESHARK_SRC',   'epan/packet.h',                 'wireshark'],
-   'wireshark-cmake' =>
-                  ['WIRESHARK_SRC',   'epan/packet.h',                 'wireshark_cmake'],
-   'wireshark-build' =>
-                  ['WIRESHARK_BUILD', 'config.h'],
-   'wireshark-lib' =>
-                  ['WIRESHARK_LIB'],
-   'glib' =>      ['GLIB_ROOT',       {'include/glib-2.0/glib.h' => undef,
-                                       'include/glib.h' => 'glib_versioned_includes=0'}],
-   'rapidjson' => ['RAPIDJSON_ROOT',  'include/rapidjson/rapidjson.h', 'no_rapidjson=0'],
-   'qt' =>        ['QTDIR',           '',                              'qt5'],
-   'boost' =>     ['BOOST_ROOT',      'include/boost/version.hpp',     'boost'],
-   'xerces3' =>   ['XERCESCROOT',     'include/xercesc/dom/DOM.hpp',   'xerces3'],
-   'openssl' =>   ['SSL_ROOT',        'include/openssl/opensslv.h',    'ssl'],
-  );
+my %optdep = (
+  'java' => {env => 'JAVA_HOME', sanity => 'include/jni.h', mpc => 'java'},
+  'jboss' => {env => 'JBOSS_HOME', sanity => 'lib/jboss-common.jar'},
+  'ant' => {env => 'ANT_HOME', sanity => 'bin/ant'},
+  'wireshark' => {env => 'WIRESHARK_SRC', sanity => 'epan/packet.h', mpc => 'wireshark'},
+  'wireshark-cmake' => {
+    env => 'WIRESHARK_SRC',
+    sanity => 'epan/packet.h',
+    mpc => 'wireshark_cmake',
+  },
+  'wireshark-build' => {env => 'WIRESHARK_BUILD', sanity => 'config.h'},
+  'wireshark-lib' => {env => 'WIRESHARK_LIB', may_be_blank => 1},
+  'glib' => {
+    env => 'GLIB_ROOT',
+    sanity => {
+      'include/glib-2.0/glib.h' => undef,
+      'include/glib.h' => 'glib_versioned_includes=0',
+    },
+  },
+  'rapidjson' => {
+    env => 'RAPIDJSON_ROOT',
+    sanity => 'include/rapidjson/rapidjson.h',
+    mpc => 'no_rapidjson=0',
+  },
+  'qt' => {env => 'QTDIR', sanity => '', mpc => 'qt5'},
+  'boost' => {env => 'BOOST_ROOT', sanity => 'include/boost/version.hpp', mpc => 'boost'},
+  'xerces3' => {
+    env => 'XERCESCROOT',
+    sanity => 'include/xercesc/dom/DOM.hpp',
+    mpc => 'xerces3',
+  },
+  'openssl' => {env => 'SSL_ROOT', sanity => 'include/openssl/opensslv.h', mpc => 'ssl'},
+);
 
 my $host_tools_only = exists $opts{'host-tools-only'} && $opts{'host-tools-only'};
 if ($host_tools_only) {
@@ -1219,7 +1239,7 @@ $opts{'boost'} = '' if exists $opts{'boost-version'} && !exists $opts{'boost'};
 # supplied.
 my $wireshark_install = '/usr/include/wireshark';
 if (exists $opts{'wireshark'} && !defined $ENV{'WIRESHARK_SRC'} && $opts{'wireshark'} eq '') {
-  my $sanity = $optdep{'wireshark'}->[1];
+  my $sanity = $optdep{'wireshark'}->{sanity};
   if (-f File::Spec->catdir($wireshark_install, $sanity)) {
     $opts{'wireshark'} = $wireshark_install;
   }
@@ -1339,7 +1359,7 @@ if ($build_gtest && !$has_cmake) {
 
 if (exists $opts{'rapidjson'}) {
   if ($opts{'rapidjson'} eq '') {
-    my $sanity = $optdep{'rapidjson'}->[1];
+    my $sanity = $optdep{'rapidjson'}->{sanity};
     my $sm_dir = Cwd::abs_path('./tools/rapidjson');
     my $sys_dir = File::Spec->catdir((system_default_install_dir(),
                               $is_windows ? 'RapidJSON' : ''));
@@ -1401,15 +1421,14 @@ sub default_java_home {
 # or system-wide default paths.
 for my $key (keys %optdep) {
   if (exists $opts{$key} && $opts{$key} eq '') {
-    if (defined $optdep{$key}->[0] && $ENV{$optdep{$key}->[0]}) {
-      $opts{$key} = $ENV{$optdep{$key}->[0]};
+    if (defined $optdep{$key}->{env} && $ENV{$optdep{$key}->{env}}) {
+      $opts{$key} = $ENV{$optdep{$key}->{env}};
 
       if ($key eq 'java') {
         ## when the environment variable JAVA_HOME is set to a JRE location,
         ## try to resolve JAVA_HOME based on the location of javac
         my $java_home = default_java_home();
-        my $jre_h_path = $opts{$key} . '/' . $optdep{'java'}->[1];
-        if (!-r $jre_h_path and $java_home ne '') {
+        if (!-r "$opts{$key}$slash$optdep{'java'}->{sanity}" and $java_home ne '') {
           $opts{'java'} = $java_home;
         }
       }
@@ -1438,7 +1457,7 @@ for my $key (keys %optdep) {
           die "ERROR: --$key requires a value.\nStopped";
       }
     }
-    elsif (defined $optdep{$key}->[0]) {
+    elsif (exists $optdep{$key}->{env} && !$optdep{$key}->{may_be_blank}) {
       die "ERROR: --$key requires a value.\nStopped";
     }
   }
@@ -1486,7 +1505,7 @@ sub env_from_opt {
 }
 
 if (exists $opts{'boost'} && !exists $opts{'boost-version'}) {
-  if (!-r $opts{'boost'} . '/' . $optdep{'boost'}->[1]
+  if (!-r $opts{'boost'} . '/' . $optdep{'boost'}->{sanity}
       && -d $opts{'boost'} . '/include') {
     opendir DIR, $opts{'boost'} . '/include';
     my @dirs = sort {$b cmp $a} grep {/boost-/} readdir DIR;
@@ -1500,13 +1519,13 @@ if (exists $opts{'boost'} && !exists $opts{'boost-version'}) {
 }
 
 if (exists $opts{'boost'} && exists $opts{'boost-version'}) {
-  env_from_opt('boost', $optdep{'boost'}->[0]);
+  env_from_opt('boost', $optdep{'boost'}->{env});
   env_from_opt('boost-version', 'BOOST_VERSION', 1);
   if ($targetEnv{'BOOST_VERSION'}
-      && !-r $targetEnv{'BOOST_ROOT'} . '/' . $optdep{'boost'}->[1]
+      && !-r $targetEnv{'BOOST_ROOT'} . '/' . $optdep{'boost'}->{sanity}
       && -r $targetEnv{'BOOST_ROOT'} . '/include/' . $targetEnv{'BOOST_VERSION'}
       . '/boost/version.hpp') {
-    $optdep{'boost'}->[1] = ''; # skip sanity check in for-loop below
+    $optdep{'boost'}->{sanity} = ''; # skip sanity check in for-loop below
   }
 }
 
@@ -1515,7 +1534,9 @@ if (exists $opts{'boost'} && exists $opts{'boost-version'}) {
 for my $key (keys %optdep) {
   if (exists $opts{$key}) {
     print "Enabling $key\n" if $opts{'verbose'};
-    my ($e, $s, $m) = @{$optdep{$key}};
+    my $e = $optdep{$key}->{env};
+    my $s = $optdep{$key}->{sanity};
+    my $m = $optdep{$key}->{mpc};
     if ($opts{$key} ne 'skip_version_check') {
       env_from_opt($key, $e) if defined $e;
       if (ref $s eq 'HASH') {
@@ -1546,7 +1567,7 @@ for my $key (keys %optdep) {
 
 if ($is_windows && !$opts{'optimize'}) { # look for nonstandard vcpkg layout
   for my $key ('xerces3', 'openssl') {
-    my $env = $optdep{$key}->[0];
+    my $env = $optdep{$key}->{env};
     if ($opts{$key} && $targetEnv{$env}) {
       if (-d $targetEnv{$env} . '/debug/lib') {
         print "Using debug/lib subdir for $key\n" if $opts{'verbose'};
@@ -1561,8 +1582,7 @@ if ($is_windows && !$opts{'optimize'}) { # look for nonstandard vcpkg layout
 
 ## OpenSSL version-detection / feature-injection
 if ($opts{'openssl'} && $opts{'openssl'} ne 'skip_version_check') {
-  my $ssl_version_file = $opts{'openssl'} . '/' .
-                           $optdep{'openssl'}->[1]; # Use sanity file
+  my $ssl_version_file = $opts{'openssl'} . '/' . $optdep{'openssl'}->{sanity};
 
   open my $fh, '<', $ssl_version_file
     or die "ERROR: Failed to open '$ssl_version_file' for OpenSSL version detection.\nStopped";
@@ -2288,12 +2308,11 @@ sub add_dependency_paths {
   for my $key ('openssl', 'xerces3') {
     if ($opts{$key}) {
       next if $opts{$key} eq '/usr' || $opts{$key} eq 'skip_version_check';
-      my $env = $optdep{$key}->[0];
       my $suffix = $slash . 'bin';
       if ($opts{$key . '-debugbin'}) {
         $suffix = $slash . 'debug' . $suffix;
       }
-      $dirs{$targetEnv{$env} . $suffix} = 1;
+      $dirs{$targetEnv{$optdep{$key}->{env}} . $suffix} = 1;
     }
   }
   for my $d (keys %dirs) {

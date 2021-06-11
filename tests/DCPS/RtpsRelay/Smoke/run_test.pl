@@ -40,8 +40,8 @@ if ($test->flag('single')) {
 }
 
 
-$test->process("relay1", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-LogRelayStatistics 3 -DCPSConfigFile relay1.ini -ApplicationDomain 42 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444 -UserData relay1 " . $relay_security_opts);
-$test->process("relay2", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-LogRelayStatistics 3 -DCPSConfigFile relay2.ini -ApplicationDomain 42 -VerticalAddress 5444 -HorizontalAddress 127.0.0.1:11544 -UserData relay2 " . $relay_security_opts);
+$test->process("relay1", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-LogActivity 1 -LogRelayStatistics 3 -DCPSConfigFile relay1.ini -ApplicationDomain 42 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444 -UserData relay1 " . $relay_security_opts);
+$test->process("relay2", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-LogActivity 1 -LogRelayStatistics 3 -DCPSConfigFile relay2.ini -ApplicationDomain 42 -VerticalAddress 5444 -HorizontalAddress 127.0.0.1:11544 -UserData relay2 " . $relay_security_opts);
 $test->process("publisher", "publisher", "-ORBDebugLevel 1 -DCPSConfigFile". $pub_ini . $pub_sub_security_opts);
 $test->process("subscriber", "subscriber", "-ORBDebugLevel 1 -DCPSConfigFile" . $sub_ini . $pub_sub_security_opts);
 

@@ -14,10 +14,11 @@ using namespace AstTypeClassification;
 
 dds_generator::~dds_generator() {}
 
-bool dds_generator::cxx_escape(const std::string& s, size_t i)
+const std::string cxx_escape = "_cxx_";
+
+bool dds_generator::cxx_escaped(const std::string& s)
 {
-  const std::string cxx = "_cxx_";
-  return s.substr(i, cxx.size()) == cxx;
+  return s.substr(0, cxx_escape.size()) == cxx_escape;
 }
 
 std::string dds_generator::valid_var_name(const std::string& str)
@@ -44,7 +45,7 @@ std::string dds_generator::valid_var_name(const std::string& str)
 
   // Remove underscores at start and end
   if (s.size() > 1 && s[0] == '_') {
-    if (!cxx_escape(s, 0)) {
+    if (!cxx_escaped(s)) {
       s.erase(0, 1);
     }
   }
@@ -60,20 +61,45 @@ std::string dds_generator::get_tag_name(const std::string& base_name, bool neste
   return valid_var_name(base_name) + (nested_key_only ? "_nested_key_only" : "") + "_tag";
 }
 
-string dds_generator::to_string(Identifier* id)
+string dds_generator::to_string(Identifier* id, EscapeContext ec)
 {
-  const string str = id->get_string();
-  return id->escaped() ? '_' + str : str;
+  string str = id->get_string();
+  switch (ec) {
+  case EscapeContext_ForGenIdl:
+    if (id->escaped()) {
+      // If it was escaped in the input, it must be escaped in generated IDL.
+      if (cxx_escaped(str)) {
+        // Strip "_cxx"
+        str = str.substr(cxx_escape.size() - 1);
+      } else {
+        str = '_' + str;
+      }
+    }
+    break;
+  case EscapeContext_FromGenIdl:
+  case EscapeContext_StripEscapes:
+    if (id->escaped() && cxx_escaped(str)) {
+      // If this is a C++ keyword that was inserted into generated IDL, the
+      // "_cxx_" was stripped.
+      str = str.substr(cxx_escape.size());
+    }
+    break;
+  case EscapeContext_Normal:
+    break;
+  }
+  return str;
 }
 
-string dds_generator::scoped_helper(UTL_ScopedName* sn, const char* sep)
+string dds_generator::scoped_helper(UTL_ScopedName* sn, const char* sep, EscapeContext ec)
 {
   string sname;
 
   for (; sn; sn = static_cast<UTL_ScopedName*>(sn->tail())) {
-    sname += to_string(sn->head());
+    const bool not_last = sn->tail();
+    sname += to_string(sn->head(),
+      (ec == EscapeContext_FromGenIdl && not_last) ? EscapeContext_Normal : ec);
 
-    if (sname != "" && sn->tail()) {
+    if (sname.size() && not_last) {
       sname += sep;
     }
   }
@@ -81,17 +107,15 @@ string dds_generator::scoped_helper(UTL_ScopedName* sn, const char* sep)
   return sname;
 }
 
-string dds_generator::module_scope_helper(UTL_ScopedName* sn, const char* sep)
+string dds_generator::module_scope_helper(UTL_ScopedName* sn, const char* sep, EscapeContext ec)
 {
   string sname;
 
-  for (; sn; sn = static_cast<UTL_ScopedName*>(sn->tail())) {
-    if (sn->tail() != 0) {
-      sname += to_string(sn->head());
+  for (; sn && sn->tail(); sn = static_cast<UTL_ScopedName*>(sn->tail())) {
+    sname += to_string(sn->head(), ec == EscapeContext_FromGenIdl ? EscapeContext_Normal : ec);
 
-      if (sname != "" && sn->tail()) {
-        sname += sep;
-      }
+    if (sname.size()) {
+      sname += sep;
     }
   }
 

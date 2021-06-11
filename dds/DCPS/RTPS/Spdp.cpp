@@ -649,10 +649,12 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     partBitData(pdata).key = repo_id_to_bit_key(guid);
 
     if (DCPS::DCPS_debug_level) {
+      ACE_TCHAR addr_buff[256] = {};
+      from.addr_to_string(addr_buff, 256);
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Spdp::handle_participant_data - %C discovered %C lease %ds\n"),
+        ACE_TEXT("(%P|%t) Spdp::handle_participant_data - %C discovered %C lease %ds from %s\n"),
         DCPS::LogGuid(guid_).c_str(), DCPS::LogGuid(guid).c_str(),
-        pdata.leaseDuration.seconds));
+        pdata.leaseDuration.seconds, addr_buff));
     }
 
     if (tport_->directed_sender_) {
@@ -860,7 +862,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         process_location_updates_i(iter, secure_part_user_data());
 #endif
       }
-    // Else a reset has occured and check if we should remove the participant
+    // Else a reset has occurred and check if we should remove the participant
     } else if (iter->second.seq_reset_count_ >= config_->max_spdp_sequence_msg_reset_check()) {
 #ifdef OPENDDS_SECURITY
       purge_handshake_deadlines(iter);
@@ -4099,7 +4101,7 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
-  if (DCPS::DCPS_debug_level >= 4) {
+  if (DCPS::DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
                "(%P|%t) Spdp::SpdpTransport::thread_status_task(): Updating internal thread status BIT.\n"));
   }

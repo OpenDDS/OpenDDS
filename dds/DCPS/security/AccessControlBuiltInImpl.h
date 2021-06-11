@@ -237,6 +237,8 @@ public:
 
   static bool pattern_match(const char* string, const char* pattern);
 
+  static time_t convert_permissions_time(const std::string& timeString);
+
 private:
 
   AccessControlBuiltInImpl(const AccessControlBuiltInImpl&);
@@ -292,8 +294,6 @@ private:
   DDS::Security::AccessControlListener_ptr listener_ptr_;
 
   RevokePermissionsTask_rch& make_task(RevokePermissionsTask_rch& task);
-
-  time_t convert_permissions_time(const std::string& timeString);
 
   bool validate_date_time(const Permissions::Validity_t& validity,
                           time_t& expiration,

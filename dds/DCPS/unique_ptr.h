@@ -11,10 +11,10 @@
 #include "ace/config-lite.h"
 
 #ifdef ACE_HAS_CPP11
-#  define HAS_STD_UNIQUE_PTR
+#  define OPENDDS_HAS_STD_UNIQUE_PTR
 #endif
 
-#ifdef HAS_STD_UNIQUE_PTR
+#ifdef OPENDDS_HAS_STD_UNIQUE_PTR
 #  include <memory>
 #else
 #  include "ace/Atomic_Op.h"
@@ -31,7 +31,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-#ifdef HAS_STD_UNIQUE_PTR
+#ifdef OPENDDS_HAS_STD_UNIQUE_PTR
 
 using std::move;
 using std::unique_ptr;

@@ -931,7 +931,7 @@ Service_Participant::set_repo_ior(const char* ior,
                key.c_str(), ior));
   }
 
-  // This is a global used for the bizzare commandline/configfile
+  // This is a global used for the bizarre commandline/configfile
   // processing done for this class.
   got_info = true;
 

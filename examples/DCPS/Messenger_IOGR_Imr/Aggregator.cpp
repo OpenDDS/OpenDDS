@@ -78,7 +78,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   return 0;
 }
 
-Aggregator::Aggregator (void)
+Aggregator::Aggregator ()
   :orb_ (0),
    merged_set_ (0)
 {
@@ -196,7 +196,7 @@ Aggregator::run ()
 }
 
 int
-Aggregator::write_to_file (void)
+Aggregator::write_to_file ()
 {
   //
   CORBA::String_var iorref =
@@ -218,7 +218,7 @@ Aggregator::write_to_file (void)
 }
 
 CORBA::ORB_ptr
-Aggregator::orb (void)
+Aggregator::orb ()
 {
   return this->orb_.in ();
 }

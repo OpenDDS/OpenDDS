@@ -21,6 +21,7 @@ using namespace Bench::TestController;
 
 namespace {
   const size_t DEFAULT_MAX_DECIMAL_PLACES = 9u;
+  const size_t SCENARIO_TIMEOUT_GRACE_PERIOD = 10u;
 }
 
 ScenarioManager::ScenarioManager(
@@ -286,7 +287,7 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
   size_t reports_left = allocated_scenario.expected_process_reports;
   std::mutex reports_left_mutex;
   std::condition_variable timeout_cv;
-  const std::chrono::seconds timeout(allocated_scenario.timeout);
+  const std::chrono::seconds timeout(allocated_scenario.timeout + SCENARIO_TIMEOUT_GRACE_PERIOD);
   std::shared_ptr<std::thread> timeout_thread;
   if (timeout.count() > 0) {
     timeout_thread.reset(new std::thread([&] {

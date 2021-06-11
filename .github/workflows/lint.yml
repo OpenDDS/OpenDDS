@@ -6,6 +6,10 @@ on:
   schedule:
     - cron: '0 1 * * SUN'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   DDS_ROOT: ${{github.workspace}}
   DOC_ROOT: ${{github.workspace}}/ACE_TAO

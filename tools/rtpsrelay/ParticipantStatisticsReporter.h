@@ -2,10 +2,9 @@
 #define RTPSRELAY_PARTICIPANT_STATISTICS_REPORTER_H_
 
 #include "Config.h"
-#include "utility.h"
 
-#include "lib/QosIndex.h"
 #include "lib/RelayTypeSupportImpl.h"
+#include "lib/Utility.h"
 
 #include <dds/DCPS/JsonValueWriter.h>
 
@@ -48,20 +47,6 @@ public:
     report(now);
   }
 
-  void max_directed_gain(size_t value, const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    log_participant_statistics_.max_directed_gain() = std::max(log_participant_statistics_.max_directed_gain(), static_cast<uint32_t>(value));
-    publish_participant_statistics_.max_directed_gain() = std::max(publish_participant_statistics_.max_directed_gain(), static_cast<uint32_t>(value));
-    report(now);
-  }
-
-  void max_undirected_gain(size_t value, const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    log_participant_statistics_.max_undirected_gain() = std::max(log_participant_statistics_.max_undirected_gain(), static_cast<uint32_t>(value));
-    publish_participant_statistics_.max_undirected_gain() = std::max(publish_participant_statistics_.max_undirected_gain(), static_cast<uint32_t>(value));
-    report(now);
-  }
-
   void report(const OpenDDS::DCPS::MonotonicTimePoint& now,
               bool force = false)
   {
@@ -91,8 +76,6 @@ public:
     log_participant_statistics_.bytes_from(0);
     log_participant_statistics_.messages_to(0);
     log_participant_statistics_.bytes_to(0);
-    log_participant_statistics_.max_directed_gain(0);
-    log_participant_statistics_.max_undirected_gain(0);
   }
 
   void publish_report(const OpenDDS::DCPS::MonotonicTimePoint& now,
@@ -120,8 +103,6 @@ public:
     publish_participant_statistics_.bytes_from(0);
     publish_participant_statistics_.messages_to(0);
     publish_participant_statistics_.bytes_to(0);
-    publish_participant_statistics_.max_directed_gain(0);
-    publish_participant_statistics_.max_undirected_gain(0);
   }
 
 private:

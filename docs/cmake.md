@@ -202,6 +202,9 @@ built-in [`target_sources`](https://cmake.org/cmake/help/latest/command/target_s
     using `TAO_IDL_OPTIONS` and/or `OPENDDS_IDL_OPTIONS` (if the default
     behavior is not suitable).
     - Add `OPENDDS_IDL_OPTIONS -Lc++11` to use the C++11 IDL Mapping.
+  - A command-line option is available to force creation of
+    typecodes by using `SUPPRESS_ANYS OFF`.  This value will
+    overrule the one received from config.cmake `OPENDDS_SUPPRESS_ANYS`.
 
 When IDL sources are supplied, custom commands are generated which will
 be invoked to compile the IDL sources into their component cpp/h files.
@@ -221,6 +224,7 @@ OPENDDS_TARGET_SOURCES(target
   [<INTERFACE|PUBLIC|PRIVATE> items...]
   [TAO_IDL_OPTIONS options...]
   [OPENDDS_IDL_OPTIONS options...]
+  [SUPPRESS_ANYS ON|OFF]
 )
 ```
 

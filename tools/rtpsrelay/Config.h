@@ -12,10 +12,10 @@ public:
   Config()
     : application_participant_guid_(OpenDDS::DCPS::GUID_UNKNOWN)
     , lifespan_(60) // 1 minute
-    , pending_(1) // 1 second
     , static_limit_(0)
-    , dynamic_limit_(0)
+    , max_pending_(0)
     , application_domain_(1)
+    , log_warnings_(false)
     , log_entries_(false)
     , log_discovery_(false)
     , log_activity_(false)
@@ -41,16 +41,6 @@ public:
     return lifespan_;
   }
 
-  void pending(const OpenDDS::DCPS::TimeDuration& value)
-  {
-    pending_ = value;
-  }
-
-  const OpenDDS::DCPS::TimeDuration& pending() const
-  {
-    return pending_;
-  }
-
   void static_limit(size_t value)
   {
     static_limit_ = value;
@@ -61,14 +51,14 @@ public:
     return static_limit_;
   }
 
-  void dynamic_limit(size_t value)
+  void max_pending(size_t value)
   {
-    dynamic_limit_ = value;
+    max_pending_ = value;
   }
 
-  size_t dynamic_limit() const
+  size_t max_pending() const
   {
-    return dynamic_limit_;
+    return max_pending_;
   }
 
   void application_domain(DDS::DomainId_t value)
@@ -79,6 +69,16 @@ public:
   DDS::DomainId_t application_domain() const
   {
     return application_domain_;
+  }
+
+  void log_warnings(bool flag)
+  {
+    log_warnings_ = flag;
+  }
+
+  bool log_warnings() const
+  {
+    return log_warnings_;
   }
 
   void log_entries(bool flag)
@@ -194,10 +194,10 @@ public:
 private:
   OpenDDS::DCPS::RepoId application_participant_guid_;
   OpenDDS::DCPS::TimeDuration lifespan_;
-  OpenDDS::DCPS::TimeDuration pending_;
   size_t static_limit_;
-  size_t dynamic_limit_;
+  size_t max_pending_;
   DDS::DomainId_t application_domain_;
+  bool log_warnings_;
   bool log_entries_;
   bool log_discovery_;
   bool log_activity_;

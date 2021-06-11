@@ -204,6 +204,8 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
       }
 
       if (current_time >= deadline) {
+        writer->end();
+        delete writer;
         CLEAN_ERROR_RETURN((LM_WARNING,
                             ACE_TEXT("(%P|%t) %N:%l - WARNING: ")
                             ACE_TEXT("main() - timeout exceeded!\n")),
