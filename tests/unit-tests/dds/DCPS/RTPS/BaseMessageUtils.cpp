@@ -67,7 +67,7 @@ void matches(const DataFragSubmessage& df, const DataFragSubmessage& expected)
   }
 }
 
-TEST(BaseMessageUtils, main)
+TEST(BaseMessageUtils, maintest)
 {
   const VendorId_t SomeoneElse = { { '\x04', '\x02' } };
 

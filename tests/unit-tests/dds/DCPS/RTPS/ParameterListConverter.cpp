@@ -689,7 +689,7 @@ TEST(ToParamListTest, From_SPDPdiscoveredParticipantData_IdentityStatusToken)
 }
 #endif
 
-TEST(ParameterListConverter, main)
+TEST(ParameterListConverter, maintest)
 {
   { // Should encode participant data with 1 locator to param list properly
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data = Factory::default_participant_data();

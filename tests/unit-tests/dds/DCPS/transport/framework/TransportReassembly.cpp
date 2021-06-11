@@ -352,7 +352,7 @@ bool check_reassembled(const ACE_Message_Block& data)
   return true;
 }
 
-TEST(TransportReassembly, main)
+TEST(TransportReassembly, maintest)
 {
   DataSampleHeader dsh;
   const size_t N = 300;

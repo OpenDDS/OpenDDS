@@ -5,9 +5,6 @@
 #include <tao/Seq_Var_T.h>
 #include <tao/Seq_Out_T.h>
 
-#include "ace/OS_main.h"
-#include "ace/Log_Msg.h"
-
 #include <gtest/gtest.h>
 
 #include <algorithm>
@@ -202,7 +199,7 @@ void basic_test()
 {
 }
 
-TEST(Sequence, main)
+TEST(Sequence, maintest)
 {
   S1 s1;
   S2 s2;

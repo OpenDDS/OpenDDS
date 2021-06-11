@@ -19,7 +19,7 @@ namespace {
   const SequenceNumber::Value SN_SEAM  = ACE_UINT32_MAX;
 }
 
-TEST(SequenceNumber, main)
+TEST(SequenceNumber, maintest)
 {
   // Construction (default)
   EXPECT_TRUE(SequenceNumber(INITIAL) == SequenceNumber());

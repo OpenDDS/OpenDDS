@@ -42,7 +42,7 @@ namespace {
   }
 };
 
-TEST(DomainParticipantImpl, main)
+TEST(DomainParticipantImpl, maintest)
 {
   { // First sequence should be 1
     RepoId repoId;

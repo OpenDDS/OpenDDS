@@ -13,7 +13,7 @@ void test_equal(const char*, const GuidSet& actual, const GuidSet& expected)
   EXPECT_TRUE(actual == expected);
 }
 
-TEST(PartitionIndex, main)
+TEST(PartitionIndex, maintest)
 {
   // Literal test.
   OpenDDS::DCPS::GUID_t guid1 = make_part_guid(OpenDDS::DCPS::GUID_UNKNOWN);

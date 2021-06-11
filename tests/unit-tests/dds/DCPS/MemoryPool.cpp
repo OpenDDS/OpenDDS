@@ -1390,7 +1390,7 @@ private:
 unsigned char
 FreeIndexTest::pool_ptr_[1024*1024];
 
-TEST(MemoryPool, main)
+TEST(MemoryPool, maintest)
 {
   {
     MemoryPoolTest test;

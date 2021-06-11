@@ -36,7 +36,7 @@ void test_mallocs() {
   EXPECT_TRUE(p4 > p5);
 }
 
-TEST(SafetyProfilePool, main)
+TEST(SafetyProfilePool, maintest)
 {
   test_malloc();
   test_mallocs();

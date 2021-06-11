@@ -21,7 +21,7 @@ void test_invalid(const std::string& s)
   EXPECT_TRUE(!actual.is_valid());
 }
 
-TEST(Name, main)
+TEST(Name, maintest)
 {
   std::set<char> digits;
   for (char c = '0'; c <= '9'; ++c) {

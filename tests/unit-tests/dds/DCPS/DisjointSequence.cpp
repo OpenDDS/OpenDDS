@@ -11,7 +11,7 @@
 
 using namespace OpenDDS::DCPS;
 
-TEST(DisjointSequence, main)
+TEST(DisjointSequence, maintest)
 {
   // Construction (default)
   {

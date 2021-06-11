@@ -31,7 +31,7 @@ bool not_null (GUID_t &g1)
   return false;
 }
 
-TEST(GuidGenerator, main)
+TEST(GuidGenerator, maintest)
 {
 
   // Test GUID uniqueness
