@@ -89,7 +89,7 @@ TopicStatus LocalDiscovery::assert_topic(
   DDS::DomainId_t,
   const RepoId&,
   const char* topicName,
-  const char*,
+  const char* typeName,
   const DDS::TopicQos&,
   bool,
   TopicCallbacks*)
@@ -98,6 +98,7 @@ TopicStatus LocalDiscovery::assert_topic(
   if (iter == topics_.end()) {
     guid = make_guid(topics_[topicName] = next_topic_id_);
     ++next_topic_id_.entityKey[0];
+    types_[topicName] = typeName;
     return CREATED;
   }
   guid = make_guid(iter->second);
@@ -120,6 +121,7 @@ TopicStatus LocalDiscovery::find_topic(
     return NOT_FOUND;
   }
   topicId = make_guid(iter->second);
+  dataTypeName = types_[topicName].c_str();
   return FOUND;
 }
 

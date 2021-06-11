@@ -12,6 +12,7 @@ public:
 private:
   EntityId_t next_topic_id_;
   std::map<std::string, EntityId_t> topics_;
+  std::map<std::string, std::string> types_;
 
   static GUID_t make_guid(EntityId_t eid);
 
