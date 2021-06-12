@@ -23,7 +23,7 @@ void DataReaderListenerImpl::wait_received()
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) sub wait_received %d:%d\n"), received_samples_, expected_samples_));
   while (received_samples_ < expected_samples_) {
 #ifdef ACE_HAS_CPP11
-    condition_.wait(lock, []{ return received_samples_ >= expected_samples_; });
+    condition_.wait(lock);
 #else
     condition_.wait();
 #endif
