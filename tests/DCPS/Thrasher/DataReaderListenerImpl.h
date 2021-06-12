@@ -7,6 +7,12 @@
 #include <dds/DCPS/LocalObject.h>
 #include <dds/DCPS/PoolAllocator.h>
 
+#ifdef ACE_HAS_CPP11
+#include <condition_variable>
+#include <mutex>
+#else
+#include <dds/DCPS/ConditionVariable.h>
+#endif
 #include <cstdlib>
 
 class DataReaderListenerImpl : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
@@ -28,10 +34,17 @@ public:
 
 private:
   typedef OPENDDS_MAP(size_t, OPENDDS_SET(size_t)) TaskSamplesMap;
-  //mutable ACE_Thread_Mutex mutex_;
-  //ACE_Condition<ACE_Thread_Mutex> condition_;
-  ACE_SYNCH_MUTEX mutex_;
-  ACE_Condition<ACE_SYNCH_MUTEX> condition_;
+#ifdef ACE_HAS_CPP11
+  typedef std::mutex Mutex;
+  typedef std::condition_variable Condition;
+  typedef std::unique_lock<Mutex> Lock;
+#else
+  typedef ACE_Thread_Mutex Mutex;
+  typedef OpenDDS::DCPS::ConditionVariable<Mutex> Condition;
+  typedef ACE_Guard<Mutex> Lock;
+#endif
+  Mutex mutex_;
+  Condition condition_;
   const size_t expected_samples_;
   size_t received_samples_;
   TaskSamplesMap task_samples_map_;
