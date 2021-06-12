@@ -22,11 +22,11 @@ void DataReaderListenerImpl::wait_received()
   Lock lock(mutex_);
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) sub wait_received received:expected = %d:%d\n"),
              received_samples_, expected_samples_));
-  while (received_samples_ < expected_samples_ &&
+  while (received_samples_ < expected_samples_) {
 #ifdef ACE_HAS_CPP11
-         condition_.wait(lock, []{ return received_samples_ < expected_samples_; })) {
+    condition_.wait(lock, []{ return received_samples_ >= expected_samples_; });
 #else
-         (condition_.wait() != OpenDDS::DCPS::CvStatus_NoTimeout)) {
+    condition_.wait();
 #endif
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) sub wait received:expected = %d:%d\n"),
                received_samples_, expected_samples_));
@@ -73,10 +73,12 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
   DDS::SampleInfo si;
   while (reader_i->take_next_sample(foo, si) == DDS::RETCODE_OK) {
     if (si.valid_data) {
-      Lock lock(mutex_);
-      ++received_samples_;
-      ++progress_;
-      task_samples_map_[(size_t) foo.x].insert((size_t) foo.y);
+      {
+        Lock lock(mutex_);
+        ++received_samples_;
+        ++progress_;
+        task_samples_map_[(size_t) foo.x].insert((size_t) foo.y);
+      }
       condition_.notify_all();
     }
   }
