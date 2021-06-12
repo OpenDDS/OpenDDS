@@ -20,16 +20,13 @@ DataReaderListenerImpl::~DataReaderListenerImpl()
 void DataReaderListenerImpl::wait_received()
 {
   Lock lock(mutex_);
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) sub wait_received received:expected = %d:%d\n"),
-             received_samples_, expected_samples_));
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) sub wait_received %d:%d\n"), received_samples_, expected_samples_));
   while (received_samples_ < expected_samples_) {
 #ifdef ACE_HAS_CPP11
     condition_.wait(lock, []{ return received_samples_ >= expected_samples_; });
 #else
     condition_.wait();
 #endif
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) sub wait received:expected = %d:%d\n"),
-               received_samples_, expected_samples_));
   }
 }
 

@@ -36,8 +36,8 @@ public:
     Publisher pub(samples_per_thread_, durable_); // Spawn Publisher threads
     pub.activate(DEFAULT_FLAGS, static_cast<int>(n_pub_threads_));
     sub.wait(1, 2);
-    pub.wait();
     sub.wait_received();
+    pub.wait();
     sub.wait(0);
     return sub.check_result();
   }
