@@ -38,6 +38,7 @@ if ($test->flag('udp')) {
     $sub_opts .= " -DCPSConfigFile sub_udp.ini";
 }
 elsif ($test->flag('udp_free')) {
+    #similar to udp, but don't set localaddress / use localhost
     $pub_opts .= " -DCPSConfigFile pub_udp_free.ini";
     $sub_opts .= " -DCPSConfigFile sub_udp_free.ini";
 }
