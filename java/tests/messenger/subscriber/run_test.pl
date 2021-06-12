@@ -33,9 +33,9 @@ if ($config eq 'udp') {
   $reliable = '';
 }
 
-my $opts = "-DCPSBit 0 -DCPSConfigFile ../$config.ini $reliable";
+my $opts = "-DCPSBit 0 -DCPSConfigFile ../$config.ini";
 my $pub_opts = $opts;
-my $sub_opts = $opts;
+my $sub_opts = "$opts $reliable";
 if ($debug ne '0') {
     my $debug_opt = "-ORBDebugLevel $debug -DCPSDebugLevel $debug " .
                     "-DCPSTransportDebugLevel $debug";
