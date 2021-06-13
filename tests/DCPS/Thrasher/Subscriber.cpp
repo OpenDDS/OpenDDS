@@ -122,6 +122,7 @@ int Subscriber::wait(unsigned int num_writers, const int cmp)
     }
   }
   ws->detach_condition(condition);
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) <- Subscriber::wait returns %d\n"), ret));
   return ret;
 }
 

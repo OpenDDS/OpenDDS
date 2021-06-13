@@ -143,7 +143,7 @@ int Publisher::svc()
       ACE_DEBUG((LM_INFO, (pfx + "<-match found!\n").c_str()));
     }
 
-    DDS::Duration_t interval = { 30, 0 };
+    DDS::Duration_t interval = {120, 0};
     ACE_DEBUG((LM_INFO, (pfx + "  waiting for acks\n").c_str()));
     if (DDS::RETCODE_OK != writer->wait_for_acknowledgments(interval)) {
       ACE_ERROR_RETURN((LM_ERROR, (pfx + " ERROR: timed out waiting for acks!\n").c_str()), 1);

@@ -33,8 +33,8 @@ public:
   int run()
   {
     Subscriber sub(n_pub_threads_, expected_samples_, durable_);
-    Publisher pub(samples_per_thread_, durable_); // Spawn Publisher threads
-    pub.activate(DEFAULT_FLAGS, static_cast<int>(n_pub_threads_));
+    Publisher pub(samples_per_thread_, durable_);
+    pub.activate(DEFAULT_FLAGS, static_cast<int>(n_pub_threads_)); //spawn Publisher threads
     sub.wait(1, 2);
     sub.wait_received();
     pub.wait();
