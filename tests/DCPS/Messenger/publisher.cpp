@@ -46,7 +46,8 @@ const char permissions_file[] = "file:./permissions_1_signed.p7s";
 bool dw_reliable()
 {
   OpenDDS::DCPS::TransportConfig_rch gc = TheTransportRegistry->global_config();
-  return gc->instances_[0]->transport_type_ != "udp";
+  return gc->instances_[0]->transport_type_ != "udp" &&
+         !(gc->instances_[0]->transport_type_ == "multicast" && !gc->instances_[0]->is_reliable());
 }
 
 void append(DDS::PropertySeq& props, const char* name, const char* value, bool propagate = false)
@@ -181,7 +182,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
       // Start writing threads
       std::cout << "Creating Writer" << std::endl;
-      Writer* writer = new Writer(dw.in());
+      Writer* writer = new Writer(dw.in(), dw_reliable());
       std::cout << "Starting Writer" << std::endl;
       writer->start();
 

@@ -19,12 +19,11 @@
 #include <cstdlib>
 
 const size_t num_messages = 40;
-extern bool reliable;
 
 inline
 int parse_args(int argc, ACE_TCHAR* argv[])
 {
-  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("t:prw"));
+  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("t:pw"));
 
   OpenDDS::DCPS::String transport_type;
   int c;
@@ -46,9 +45,6 @@ int parse_args(int argc, ACE_TCHAR* argv[])
       break;
     case 'p':
       thread_per_connection = true;
-      break;
-    case 'r':
-      reliable = true;
       break;
     case '?':
     default:
