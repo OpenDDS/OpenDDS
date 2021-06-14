@@ -1627,8 +1627,9 @@ if ($build_gtest) {
                      @cmake_platform_args,
                      '..'],
                     ["$cmake", "--build", ".", "--target", "install"]);
+
   if ($is_windows) {
-    push_libpath(\%targetEnv, $install_dir . $slash . 'lib');
+    push_path(\%targetEnv, $install_dir . $slash . 'lib');
   }
 
   mkdir($build_dir)
