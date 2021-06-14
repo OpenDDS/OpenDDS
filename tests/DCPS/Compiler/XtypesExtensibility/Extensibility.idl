@@ -92,4 +92,12 @@ module extensibility {
    case 1: short B;
   };
 
+  enum disc { A, B, C };
+  union union_empty_label switch(disc) {
+   case A: long a_long;
+   case B: short b_short;
+   case C:
+   default: float f_float;
+  };
+
 };

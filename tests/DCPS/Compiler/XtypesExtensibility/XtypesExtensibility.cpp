@@ -85,6 +85,19 @@ TEST(TestDefault, flags_match)
             .minimal.union_type.union_flags, IS_APPENDABLE | IS_NESTED);
 }
 
+//tests that the enum value for an otherwise empty label used as an alias to the default case
+//is correctly assigned.
+TEST(TestDefault, empty_label)
+{
+  TypeMap type_map = getMinimalTypeMap<extensibility_union_empty_label_xtag>();
+
+  EXPECT_EQ(type_map[getMinimalTypeIdentifier<extensibility_union_empty_label_xtag>()]
+  .minimal.union_type.member_seq[2].common.member_flags, TRY_CONSTRUCT1 | IS_DEFAULT);
+
+  EXPECT_EQ(type_map[getMinimalTypeIdentifier<extensibility_union_empty_label_xtag>()]
+  .minimal.union_type.member_seq[2].common.label_seq[0], 2);
+}
+
 int main(int argc, char* argv[])
 {
   ::testing::InitGoogleTest(&argc, argv);
