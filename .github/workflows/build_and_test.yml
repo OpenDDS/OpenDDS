@@ -5990,7 +5990,7 @@ jobs:
         mkdir build
         cd build
         mkdir install
-        cmake -DCMAKE_INSTALL_PREFIX=./install -DBUILD_SHARED_LIBS=ON ..
+        cmake -DCMAKE_INSTALL_PREFIX=./install -DBUILD_SHARED_LIBS=ON -Dgtest_force_shared_crt=ON ..
         cmake --build . --target install --config Release
     - name: build unit tests
       shell: cmd
