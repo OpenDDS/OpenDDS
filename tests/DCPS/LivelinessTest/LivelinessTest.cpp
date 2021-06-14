@@ -413,8 +413,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     ::DDS::InstanceHandle_t handle = foo_dw->register_instance(foo);
     foo_dw->write(foo, handle);
 
-    Writer* writer = new Writer(dw_manual.in(),
-      1, num_ops_per_thread);
+
     //we want to only publish after the reader loses liveliness from the writer
     //this follows the pattern of an up and a down, so there should be 2 liveliness
     //changes per call to run_test, which does the writing
@@ -427,10 +426,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_TEXT("(%P|%t) Running Write: remote: %d local: %d\n"),
                  local_manual_drl_servant->liveliness_changed_count(),
                  remote_manual_drl_servant->liveliness_changed_count()));
+      Writer* writer = new Writer(dw_manual.in(), 1, num_ops_per_thread);
       writer->run_test(i);
+      delete writer;
       while (remote_manual_drl_servant->no_writers_generation_count() != i ||
              local_manual_drl_servant->no_writers_generation_count() != i) {
         ACE_OS::sleep(ACE_Time_Value(0, 250000));
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("remote_manual_drl_servant->no_writers_generation_count()=%d\n"), remote_manual_drl_servant->no_writers_generation_count()));
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("local_manual_drl_servant->no_writers_generation_count()=%d\n"), local_manual_drl_servant->no_writers_generation_count()));
       }
     }
 
@@ -440,7 +443,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     pub->delete_contained_entities() ;
-    delete writer;
     dp->delete_publisher(pub.in ());
 
     while(local_manual_drl_servant->liveliness_changed_count() != 2 * (num_unlively_periods + 2) + 1 ||

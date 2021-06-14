@@ -39,6 +39,6 @@ my $common_parameters = $app_bit_conf
 $test->process('lt', 'LivelinessTest', $common_parameters);
 $test->start_process('lt', "-t $use_take");
 
-my $result = $test->finish(60);
+my $result = $test->finish(180);
 
 exit $result;
