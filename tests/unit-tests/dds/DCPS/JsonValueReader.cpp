@@ -481,7 +481,7 @@ TEST(JsonValueReader, sequence_zero)
   EXPECT_TRUE(jvr.elements_remaining());
   EXPECT_TRUE(jvr.begin_element());
   EXPECT_TRUE(jvr.read_float128(float128_value));
-  EXPECT_EQ(float128_value, 0);
+  EXPECT_EQ(float128_value, 0.0);
   EXPECT_TRUE(jvr.end_element());
 
   EXPECT_TRUE(jvr.elements_remaining());
