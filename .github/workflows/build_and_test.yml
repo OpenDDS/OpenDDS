@@ -490,13 +490,14 @@ jobs:
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
-
     - name: remove install clutter
       shell: bash
       run: |
         cd OpenDDS
         rm build_u18_o1d0v1_xer0_j12.tar.xz
         rm -rf install_temp install_prefix install_setenv.sh
+        cd OpenDDS/tests/cmake
+        rm -rf build
     - name: gitclean
       shell: bash
       run: |
@@ -1065,7 +1066,7 @@ jobs:
         source OpenDDS/setenv.sh
         mkdir OpenDDS/tests/cmake/build
         cd OpenDDS/tests/cmake/build
-        cmake -DCMAKE_CXX_STANDARD=11 ..
+        cmake -DCMAKE_CXX_STANDARD=11 -DCMAKE_CXX_COMPILER=clang++-5.0 ..
         cmake --build . -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
@@ -1315,7 +1316,7 @@ jobs:
         source OpenDDS/setenv.sh
         mkdir OpenDDS/tests/cmake/build
         cd OpenDDS/tests/cmake/build
-        cmake -DCMAKE_CXX_STANDARD=11 ..
+        cmake -DCMAKE_CXX_STANDARD=11 -DCMAKE_CXX_COMPILER=clang++-10 ..
         cmake --build . -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
@@ -1565,7 +1566,7 @@ jobs:
         source OpenDDS/setenv.sh
         mkdir OpenDDS/tests/cmake/build
         cd OpenDDS/tests/cmake/build
-        cmake -DCMAKE_CXX_STANDARD=98 ..
+        cmake -DCMAKE_CXX_STANDARD=98 -DCMAKE_CXX_COMPILER=g++-6 ..
         cmake --build . -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
@@ -1815,7 +1816,7 @@ jobs:
         source OpenDDS/setenv.sh
         mkdir OpenDDS/tests/cmake/build
         cd OpenDDS/tests/cmake/build
-        cmake ..
+        cmake -DCMAKE_CXX_COMPILER=g++-8 ..
         cmake --build . -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
@@ -2060,7 +2061,7 @@ jobs:
         source OpenDDS/setenv.sh
         mkdir OpenDDS/tests/cmake/build
         cd OpenDDS/tests/cmake/build
-        cmake ..
+        cmake -DCMAKE_CXX_COMPILER=g++-10 ..
         cmake --build . -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
