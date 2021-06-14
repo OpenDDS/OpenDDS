@@ -209,7 +209,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_i0_xer0_js0_j12
-    timeout-minutes: 15
+    timeout-minutes: 150
 
     steps:
     - name: checkout MPC
@@ -450,10 +450,8 @@ jobs:
         repository: DOCGroup/autobuild
         path: autobuild
     - name: install xerces
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         repository: DOCGroup/MPC
@@ -469,21 +467,19 @@ jobs:
         cmake -DCMAKE_INSTALL_PREFIX=./install ..
         cmake --build . --target install
     - name: configure OpenDDS
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
         ./configure --tests --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install --safety-profile --no-rapidjson --mpc=$GITHUB_WORKSPACE/MPC
-    - name: build everything
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      run: |
-        cd OpenDDS
-        make -j4
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS/build/target
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: build everything
+      run: |
+        cd OpenDDS
+        make -j4
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -543,10 +539,8 @@ jobs:
         repository: DOCGroup/autobuild
         path: autobuild
     - name: install xerces
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         repository: DOCGroup/MPC
@@ -562,21 +556,19 @@ jobs:
         cmake -DCMAKE_INSTALL_PREFIX=./install ..
         cmake --build . --target install
     - name: configure OpenDDS
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
         ./configure --tests --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install --safety-profile=base --no-rapidjson --no-built-in-topics --mpc=$GITHUB_WORKSPACE/MPC
-    - name: build everything
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      run: |
-        cd OpenDDS
-        make -j4
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS/build/target
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: build everything
+      run: |
+        cd OpenDDS
+        make -j4
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -1009,7 +1001,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_clang5_i0w1_sec
-    timeout-minutes: 15
+    timeout-minutes: 150
 
     steps:
     - name: install clang++
@@ -1222,14 +1214,13 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_clang10_sec_js0
-    timeout-minutes: 15
+    timeout-minutes: 150
 
     steps:
     - name: install clang++
       run: |
         sudo apt-get install -y clang-10
     - name: install xerces
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
       uses: actions/checkout@v2
@@ -1436,7 +1427,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_gcc6_d0w1_cpp03
-    timeout-minutes: 15
+    timeout-minutes: 150
 
     steps:
     - name: install gcc and g++
@@ -1649,7 +1640,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_gcc8_i0_js0_j
-    timeout-minutes: 15
+    timeout-minutes: 150
 
     steps:
     - name: install gcc and g++
@@ -1857,7 +1848,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_gcc10_i0w1_xer0
-    timeout-minutes: 15
+    timeout-minutes: 150
 
     steps:
     - name: install gcc and g++
@@ -1937,30 +1928,26 @@ jobs:
         repository: DOCGroup/autobuild
         path: autobuild
     - name: install xerces
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: configure OpenDDS
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
         ./configure --compiler=g++-10 --safety-profile=base --tests --no-rapidjson --no-content-subscription --no-object-model-profile --no-persistence-profile --mpc=$GITHUB_WORKSPACE/MPC
-    - name: build everything
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      run: |
-        cd OpenDDS
-        make -j4
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS/build/target
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: build everything
+      run: |
+        cd OpenDDS
+        make -j4
 
   ACE_TAO_u20_ace7_j_qt_ws_sec:
 
@@ -3518,7 +3505,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_stat_qt_ws_sec
-    timeout-minutes: 15
+    timeout-minutes: 150
 
     steps:
     - name: install xerces
@@ -3867,7 +3854,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_stat_qt_ws_sec
-    timeout-minutes: 15
+    timeout-minutes: 150
 
     steps:
     - name: install xerces
@@ -4428,7 +4415,7 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_p1_stat_js0
-    timeout-minutes: 15
+    timeout-minutes: 150
 
     steps:
     - name: install openssl & xerces-c
@@ -4794,7 +4781,7 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_p1_stat_js0
-    timeout-minutes: 15
+    timeout-minutes: 150
 
     steps:
     - name: install openssl & xerces-c
@@ -5395,7 +5382,7 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_p1_stat_FM-08
-    timeout-minutes: 15
+    timeout-minutes: 150
 
     steps:
     - name: install openssl & xerces-c
@@ -6003,7 +5990,7 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_o1p1_sec
-    timeout-minutes: 15
+    timeout-minutes: 150
 
     steps:
     - name: install openssl & xerces-c
@@ -6692,7 +6679,7 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_j_ws_FM-1f
-    timeout-minutes: 15
+    timeout-minutes: 150
 
     steps:
     - name: install xerces-c

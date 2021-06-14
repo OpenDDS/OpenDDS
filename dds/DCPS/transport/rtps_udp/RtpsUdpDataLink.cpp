@@ -2475,16 +2475,21 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
   for (AddrDestMetaSubmessageMap::iterator addr_it = adr_map.begin(); addr_it != adr_map.end(); ++addr_it) {
 
     // Prepare the set of addresses.
-    AddrSet addrs = addr_it->first;
+    const AddrSet& addrs = addr_it->first;
+
 #ifdef OPENDDS_SECURITY
-    if (local_crypto_handle() != DDS::HANDLE_NIL) {
-      addrs.erase(BUNDLING_PLACEHOLDER);
+#define ERASE_BUNDLING_PLACEHOLDER() \
+    if (local_crypto_handle() != DDS::HANDLE_NIL) { \
+      meta_submessage_bundle_addrs.back().erase(BUNDLING_PLACEHOLDER); \
     }
+#else
+#define ERASE_BUNDLING_PLACEHOLDER()
 #endif
 
     // A new address set always starts a new bundle
     meta_submessage_bundles.push_back(MetaSubmessageIterVec());
     meta_submessage_bundle_addrs.push_back(addrs);
+    ERASE_BUNDLING_PLACEHOLDER();
 
     prev_dst = GUID_UNKNOWN;
 
@@ -2498,6 +2503,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
           if (!helper.add_to_bundle(idst)) {
             meta_submessage_bundles.push_back(MetaSubmessageIterVec());
             meta_submessage_bundle_addrs.push_back(addrs);
+            ERASE_BUNDLING_PLACEHOLDER();
           }
         }
         // Attempt to add the submessage meta_submessage to the bundle
@@ -2539,6 +2545,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
         if (!result) {
           meta_submessage_bundles.push_back(MetaSubmessageIterVec());
           meta_submessage_bundle_addrs.push_back(addrs);
+          ERASE_BUNDLING_PLACEHOLDER();
           prev_dst = GUID_UNKNOWN;
         }
         meta_submessage_bundles.back().push_back(*resp_it);
