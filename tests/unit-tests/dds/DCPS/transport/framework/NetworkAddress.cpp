@@ -101,12 +101,12 @@ TEST(network_address_test, choose_single_coherent_address_ipv6)
 }
 #endif // ACE_HAS_IPV6
 
-TEST(network_address_test, choose_single_coherent_address_double)
+TEST(network_address_test, choose_single_coherent_address_localhost)
 {
   //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
 
-  ACE_INET_Addr addr1 = choose_single_coherent_address("www.bing.com:80", false);
-  ACE_INET_Addr addr2 = choose_single_coherent_address("www.bing.com:80", false);
+  ACE_INET_Addr addr1 = choose_single_coherent_address("localhost:5200", false);
+  ACE_INET_Addr addr2 = choose_single_coherent_address("localhost:5200", true);
   EXPECT_NE(addr1, ACE_INET_Addr());
   EXPECT_NE(addr2, ACE_INET_Addr());
   EXPECT_EQ(addr1, addr2);
@@ -115,6 +115,28 @@ TEST(network_address_test, choose_single_coherent_address_double)
   EXPECT_FALSE(addr1.is_ipv4_mapped_ipv6());
   EXPECT_FALSE(addr2.is_ipv4_mapped_ipv6());
 #endif
+}
+
+TEST(network_address_test, choose_single_coherent_address_double)
+{
+  //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
+
+  ACE_INET_Addr addr1 = choose_single_coherent_address("www.bing.com:80", false);
+  ACE_INET_Addr addr2 = choose_single_coherent_address("www.bing.com:80", false);
+
+  // Since tihs test winds up doing real DNS lookups which might fail, allow the result to be be empty but expect it to be consistant
+
+  if (addr1 == ACE_INET_Addr()) {
+    EXPECT_NE(addr2, ACE_INET_Addr());
+  } else {
+    EXPECT_NE(addr2, ACE_INET_Addr());
+    EXPECT_EQ(addr1, addr2);
+    EXPECT_EQ(addr2, addr1);
+#if defined ACE_HAS_IPV6 && defined IPV6_V6ONLY
+    EXPECT_FALSE(addr1.is_ipv4_mapped_ipv6());
+    EXPECT_FALSE(addr2.is_ipv4_mapped_ipv6());
+#endif
+  }
 }
 
 TEST(network_address_test, choose_single_coherent_address_double_self)
@@ -141,17 +163,24 @@ TEST(network_address_test, choose_single_coherent_address_triple)
   ACE_INET_Addr addr1 = choose_single_coherent_address("www.hp.com:587", false);
   ACE_INET_Addr addr2 = choose_single_coherent_address("www.hp.com:587", false);
   ACE_INET_Addr addr3 = choose_single_coherent_address("www.hp.com:587", false);
-  EXPECT_NE(addr1, ACE_INET_Addr());
-  EXPECT_NE(addr2, ACE_INET_Addr());
-  EXPECT_NE(addr3, ACE_INET_Addr());
-  EXPECT_EQ(addr1, addr2);
-  EXPECT_EQ(addr2, addr3);
-  EXPECT_EQ(addr3, addr1);
+
+  // Since tihs test winds up doing real DNS lookups which might fail, allow the result to be be empty but expect it to be consistant
+
+  if (addr1 == ACE_INET_Addr()) {
+    EXPECT_EQ(addr2, ACE_INET_Addr());
+    EXPECT_EQ(addr3, ACE_INET_Addr());
+  } else {
+    EXPECT_NE(addr2, ACE_INET_Addr());
+    EXPECT_NE(addr3, ACE_INET_Addr());
+    EXPECT_EQ(addr1, addr2);
+    EXPECT_EQ(addr2, addr3);
+    EXPECT_EQ(addr3, addr1);
 #if defined ACE_HAS_IPV6 && defined IPV6_V6ONLY
-  EXPECT_FALSE(addr1.is_ipv4_mapped_ipv6());
-  EXPECT_FALSE(addr2.is_ipv4_mapped_ipv6());
-  EXPECT_FALSE(addr3.is_ipv4_mapped_ipv6());
+    EXPECT_FALSE(addr1.is_ipv4_mapped_ipv6());
+    EXPECT_FALSE(addr2.is_ipv4_mapped_ipv6());
+    EXPECT_FALSE(addr3.is_ipv4_mapped_ipv6());
 #endif
+  }
 }
 
 #if defined ACE_HAS_IPV6
