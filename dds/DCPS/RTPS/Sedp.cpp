@@ -2678,7 +2678,7 @@ void
 Sedp::data_received(DCPS::MessageId message_id,
                     const DiscoveredPublication& dpub)
 {
-  if (spdp_.shutting_down()) { return; }
+  if (!spdp_.initialized() || spdp_.shutting_down()) { return; }
 
   const DCPS::DiscoveredWriterData& wdata = dpub.writer_data_;
   const RepoId& guid = wdata.writerProxy.remoteWriterGuid;
@@ -2714,7 +2714,7 @@ Sedp::data_received(DCPS::MessageId message_id,
 void Sedp::data_received(DCPS::MessageId message_id,
                          const DiscoveredPublication_SecurityWrapper& wrapper)
 {
-  if (spdp_.shutting_down()) { return; }
+  if (!spdp_.initialized() || spdp_.shutting_down()) { return; }
 
   const RepoId& guid = wrapper.data.writerProxy.remoteWriterGuid;
   const RepoId guid_participant = make_part_guid(guid);
@@ -3054,7 +3054,7 @@ void
 Sedp::data_received(DCPS::MessageId message_id,
                     const DiscoveredSubscription& dsub)
 {
-  if (spdp_.shutting_down()) { return; }
+  if (!spdp_.initialized() || spdp_.shutting_down()) { return; }
 
   const DCPS::DiscoveredReaderData& rdata = dsub.reader_data_;
   const GUID_t& guid = rdata.readerProxy.remoteReaderGuid;
@@ -3089,7 +3089,7 @@ Sedp::data_received(DCPS::MessageId message_id,
 void Sedp::data_received(DCPS::MessageId message_id,
                          const DiscoveredSubscription_SecurityWrapper& wrapper)
 {
-  if (spdp_.shutting_down()) { return; }
+  if (!spdp_.initialized() || spdp_.shutting_down()) { return; }
 
   const RepoId& guid = wrapper.data.readerProxy.remoteReaderGuid;
   RepoId guid_participant = guid;
@@ -3111,7 +3111,7 @@ void
 Sedp::data_received(DCPS::MessageId /*message_id*/,
                     const ParticipantMessageData& data)
 {
-  if (spdp_.shutting_down()) { return; }
+  if (!spdp_.initialized() || spdp_.shutting_down()) { return; }
 
   const RepoId& guid = data.participantGuid;
   RepoId guid_participant = guid;
@@ -3222,11 +3222,36 @@ bool Sedp::should_drop_volatile_message(const DDS::Security::ParticipantGenericM
   const GUID_t dst_participant = msg.destination_participant_guid;
   const GUID_t this_participant = participant_id_;
 
-  if (ignoring(src_endpoint) || !msg.message_data.length()) {
+  if (ignoring(src_endpoint)) {
+    if (DCPS::security_debug.auth_debug) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Sedp::should_drop_volatile_message() - ")
+                 ACE_TEXT("ignoring %C -> %C local %C\n"),
+                 DCPS::LogGuid(src_endpoint).c_str(),
+                 DCPS::LogGuid(dst_participant).c_str(),
+                 DCPS::LogGuid(this_participant).c_str()));
+    }
+    return true;
+  }
+
+  if (!msg.message_data.length()) {
+    if (DCPS::security_debug.auth_debug) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Sedp::should_drop_volatile_message() - ")
+                 ACE_TEXT("no data %C -> %C local %C\n"),
+                 DCPS::LogGuid(src_endpoint).c_str(),
+                 DCPS::LogGuid(dst_participant).c_str(),
+                 DCPS::LogGuid(this_participant).c_str()));
+    }
     return true;
   }
 
   if (dst_participant != GUID_UNKNOWN && dst_participant != this_participant) {
+    if (DCPS::security_debug.auth_debug) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Sedp::should_drop_volatile_message() - ")
+                 ACE_TEXT("not for us %C -> %C local %C\n"),
+                 DCPS::LogGuid(src_endpoint).c_str(),
+                 DCPS::LogGuid(dst_participant).c_str(),
+                 DCPS::LogGuid(this_participant).c_str()));
+    }
     return true;
   }
 
@@ -4443,9 +4468,11 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 #endif
       false;
     if (is_mutable == is_final) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::Reader::data_received: "
-        "entity id extensibility error over %C: both is_final and is_mutable are %d\n",
-        to_string(entity_id).c_str(), is_mutable));
+      if (is_mutable) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::Reader::data_received: "
+          "entity id extensibility error over %C: both is_final and is_mutable are %d\n",
+          to_string(entity_id).c_str(), is_mutable));
+      }
       break;
     }
     const DCPS::Extensibility extensibility =

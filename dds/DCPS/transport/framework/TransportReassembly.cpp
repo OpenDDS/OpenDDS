@@ -213,7 +213,7 @@ TransportReassembly::get_gaps(const SequenceNumber& seq, const RepoId& pub_id,
       DisjointSequence::fill_bitmap_range(0, 0, bitmap, length, numBits);
     } else {
       const size_t rlimit = static_cast<size_t>(flist.back().transport_seq_.second.getValue() - 1);
-      const CORBA::ULong ulimit = static_cast<CORBA::ULong>(iter->second.total_frags_ - rlimit);
+      const CORBA::ULong ulimit = static_cast<CORBA::ULong>(iter->second.total_frags_ - (base < rlimit ? rlimit : base));
       DisjointSequence::fill_bitmap_range(0,
                                           ulimit,
                                           bitmap, length, numBits);

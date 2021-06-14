@@ -428,15 +428,9 @@ Service_Participant::get_domain_participant_factory(int &argc,
 #endif
 
       if (DCPS_debug_level > 0) {
-        String version_string = OPENDDS_VERSION;
-        const char* const version_metadata = "-" OPENDDS_VERSION_METADATA;
-        if (version_metadata[1] != '\0') {
-          version_string += version_metadata;
-        }
         ACE_DEBUG((LM_NOTICE,
-                   ACE_TEXT("(%P|%t) NOTICE: Service_Participant::get_domain_participant_factory - ")
-                   ACE_TEXT("This is OpenDDS %C using ACE %C.\n"),
-                   version_string.c_str(), ACE_VERSION));
+                   "(%P|%t) NOTICE: Service_Participant::get_domain_participant_factory - "
+                   "This is OpenDDS " OPENDDS_VERSION " using ACE " ACE_VERSION "\n"));
       }
 
       // Establish the default scheduling mechanism and
@@ -937,7 +931,7 @@ Service_Participant::set_repo_ior(const char* ior,
                key.c_str(), ior));
   }
 
-  // This is a global used for the bizzare commandline/configfile
+  // This is a global used for the bizarre commandline/configfile
   // processing done for this class.
   got_info = true;
 

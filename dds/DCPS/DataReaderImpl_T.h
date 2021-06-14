@@ -1,6 +1,12 @@
 #ifndef OPENDDS_DCPS_DATAREADERIMPL_T_H
 #define OPENDDS_DCPS_DATAREADERIMPL_T_H
 
+#include "ace/config-lite.h"
+
+#ifdef ACE_HAS_CPP11
+#  define OPENDDS_HAS_STD_SHARED_PTR
+#endif
+
 #include "MultiTopicImpl.h"
 #include "RakeResults_T.h"
 #include "SubscriberImpl.h"
@@ -11,7 +17,11 @@
 #include "dcps_export.h"
 #include "GuidConverter.h"
 
+#ifdef OPENDDS_HAS_STD_SHARED_PTR
+#include <memory>
+#else
 #include <ace/Bound_Ptr.h>
+#endif
 #include <ace/Time_Value.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -914,7 +924,8 @@ namespace OpenDDS {
 
   void set_instance_state(DDS::InstanceHandle_t instance,
                           DDS::InstanceStateKind state,
-                          const SystemTimePoint& timestamp = SystemTimePoint::now())
+                          const SystemTimePoint& timestamp = SystemTimePoint::now(),
+                          const GUID_t& publication_id = GUID_UNKNOWN)
   {
     using namespace OpenDDS::DCPS;
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
@@ -923,6 +934,7 @@ namespace OpenDDS {
     if (si && state != DDS::ALIVE_INSTANCE_STATE) {
       const DDS::Time_t now = timestamp.to_dds_time();
       DataSampleHeader header;
+      header.publication_id_ = publication_id;
       header.source_timestamp_sec_ = now.sec;
       header.source_timestamp_nanosec_ = now.nanosec;
       const int msg = (state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
@@ -2038,7 +2050,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
   if (! ptr->coherent_change_) {
 #endif
     RcHandle<OpenDDS::DCPS::SubscriberImpl> sub = get_subscriber_servant ();
-    if (!sub)
+    if (!sub || this->get_deleted())
       return;
 
     sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, true);
@@ -2329,7 +2341,7 @@ private:
       if (data->second.message) {
         const bool NOT_DISPOSE_MSG = false;
         const bool NOT_UNREGISTER_MSG = false;
-        // clear the message, since ownership is being transfered to finish_store_instance_data.
+        // clear the message, since ownership is being transferred to finish_store_instance_data.
 
         instance->last_accepted_.set_to_now();
         const DataSampleHeader_ptr header = data->second.header;
@@ -2388,9 +2400,11 @@ private:
   }
 
   WeakRcHandle<DataReaderImpl_T<MessageType> > data_reader_impl_;
-
+#ifdef OPENDDS_HAS_STD_SHARED_PTR
+  typedef std::shared_ptr<const OpenDDS::DCPS::DataSampleHeader> DataSampleHeader_ptr;
+#else
   typedef ACE_Strong_Bound_Ptr<const OpenDDS::DCPS::DataSampleHeader, ACE_Null_Mutex> DataSampleHeader_ptr;
-
+#endif
   struct FilterDelayedSample {
 
     FilterDelayedSample(unique_ptr<MessageTypeWithAllocator> msg, DataSampleHeader_ptr hdr, bool new_inst)

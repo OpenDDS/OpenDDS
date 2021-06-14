@@ -430,7 +430,7 @@ public:
 
   /**
    * Set deadline to complete wait_pending by. If 0, then wait_pending will
-   * wait indefinately if needed.
+   * wait indefinitely if needed.
    */
   void set_wait_pending_deadline(const MonotonicTimePoint& deadline);
 
@@ -467,6 +467,9 @@ public:
  SequenceNumber get_max_sn() const { return sequence_number_; }
 
 protected:
+
+  // Perform cast to get extended version of listener (otherwise nil)
+  DataWriterListener_ptr get_ext_listener();
 
   DDS::ReturnCode_t wait_for_specific_ack(const AckToken& token);
 
@@ -588,6 +591,8 @@ private:
   /// The topic servant.
   TopicDescriptionPtr<TopicImpl>                 topic_servant_;
 
+  /// Mutex to protect listener info
+  ACE_Thread_Mutex                listener_mutex_;
   /// The StatusKind bit mask indicates which status condition change
   /// can be notified by the listener of this entity.
   DDS::StatusMask                 listener_mask_;

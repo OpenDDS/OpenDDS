@@ -48,11 +48,11 @@ BE_GlobalData::BE_GlobalData()
   , suppress_idl_(false)
   , suppress_typecode_(false)
   , suppress_xtypes_(false)
-  , suppress_xtypes_complete_(false)
   , no_default_gen_(false)
   , generate_itl_(false)
   , generate_v8_(false)
   , generate_rapidjson_(false)
+  , generate_xtypes_complete_(false)
   , face_ts_(false)
   , printer_(false)
   , filename_only_includes_(false)
@@ -273,6 +273,16 @@ bool BE_GlobalData::printer() const
   return this->printer_;
 }
 
+void BE_GlobalData::xtypes_complete(bool b)
+{
+  this->generate_xtypes_complete_ = b;
+}
+
+bool BE_GlobalData::xtypes_complete() const
+{
+  return this->generate_xtypes_complete_;
+}
+
 void
 BE_GlobalData::open_streams(const char* filename)
 {
@@ -387,8 +397,10 @@ BE_GlobalData::parse_args(long& i, char** av)
       v8(true);
     } else if (0 == ACE_OS::strcasecmp(av[i], "-Grapidjson")) {
       rapidjson(true);
-    } else if (!ACE_OS::strcasecmp(av[i], "-Gprinter")) {
+    } else if (0 == ACE_OS::strcasecmp(av[i], "-Gprinter")) {
       printer(true);
+    } else if (0 == ACE_OS::strcasecmp(av[i], "-Gxcom")) {
+      xtypes_complete(true);
     } else {
       invalid_option(av[i]);
     }
@@ -401,7 +413,6 @@ BE_GlobalData::parse_args(long& i, char** av)
       language_mapping(LANGMAP_SP_CXX);
     else if (0 == ACE_OS::strcasecmp(av[i], "-Lc++11")) {
       language_mapping(LANGMAP_CXX11);
-      suppress_typecode_ = true;
     } else {
       invalid_option(av[i]);
     }
@@ -425,9 +436,6 @@ BE_GlobalData::parse_args(long& i, char** av)
       break;
     case 'x':
       suppress_xtypes_ = true;
-      break;
-    case 'c':
-      suppress_xtypes_complete_ = true;
       break;
     case 'a':
       // ignore, accepted for tao_idl compatibility

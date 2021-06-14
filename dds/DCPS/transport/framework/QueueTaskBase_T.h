@@ -133,7 +133,7 @@ public:
               MonotonicTimePoint now = MonotonicTimePoint::now();
               if (now > expire) {
                 expire = now + interval;
-                if (DCPS_debug_level >= 4) {
+                if (DCPS_debug_level > 4) {
                   ACE_DEBUG((LM_DEBUG,
                              "(%P|%t) QueueTaskBase::svc. Updating thread status.\n"));
                 }
@@ -168,7 +168,7 @@ public:
     }
 
     if (update_thread_status) {
-      if (DCPS_debug_level >= 4) {
+      if (DCPS_debug_level > 4) {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) QueueTaskBase::svc: "
           "Updating thread status for the last time\n"));
       }

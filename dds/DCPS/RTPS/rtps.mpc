@@ -1,4 +1,4 @@
-project(OpenDDS_Rtps): dcpslib, install, rtps_optional_safety {
+project(OpenDDS_Rtps): dcpslib, install, rtps_optional_safety, msvc_bigobj {
   sharedname = OpenDDS_Rtps
   dynamicflags = OPENDDS_RTPS_BUILD_DLL
 

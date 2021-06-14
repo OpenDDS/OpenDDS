@@ -864,37 +864,56 @@ TransportSendStrategy::stop()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","stop",6);
 
-  if (this->header_block_ != 0) {
-    this->header_block_->release ();
-    this->header_block_ = 0;
+  if (header_block_ != 0) {
+    header_block_->release ();
+    header_block_ = 0;
   }
 
-  this->synch_->unregister_worker();
+  synch_->unregister_worker();
 
+  QueueType elems;
+  QueueType queue;
   {
-    GuardType guard(this->lock_);
+    GuardType guard(lock_);
 
-    if (this->pkt_chain_ != 0) {
-      size_t size = this->pkt_chain_->total_length();
-
+    if (pkt_chain_ != 0) {
+      size_t size = pkt_chain_->total_length();
       if (size > 0) {
-        this->pkt_chain_->release();
+        pkt_chain_->release();
         ACE_DEBUG((LM_WARNING,
                    ACE_TEXT("(%P|%t) WARNING: TransportSendStrategy::stop() - ")
                    ACE_TEXT("terminating with %d unsent bytes.\n"),
                    size));
       }
     }
+
+    if (elems_.size()) {
+      elems_.swap(elems);
+      ACE_DEBUG((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: TransportSendStrategy::stop() - ")
+                 ACE_TEXT("terminating with %d unsent elements.\n"),
+                 elems_.size()));
+    }
+
+    if (queue_.size()) {
+      queue_.swap(queue);
+      ACE_DEBUG((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: TransportSendStrategy::stop() - ")
+                 ACE_TEXT("terminating with %d queued elements.\n"),
+                 queue_.size()));
+    }
   }
+
+  RemoveAllVisitor remove_all_visitor;
+
+  elems.accept_remove_visitor(remove_all_visitor);
+  queue.accept_remove_visitor(remove_all_visitor);
 
   {
-    GuardType guard(this->lock_);
+    GuardType guard(lock_);
 
-    this->stop_i();
+    stop_i();
   }
-
-  // TBD SOON - What about all of the samples that may still be stuck in
-  //            our queue_ and/or elems_?
 }
 
 void
@@ -1292,7 +1311,7 @@ TransportSendStrategy::remove_all_msgs(const RepoId& pub_id)
     this->send_buffer_->retain_all(pub_id);
   }
 
-  do_remove_sample(pub_id, match);
+  do_remove_sample(pub_id, match, true);
 }
 
 RemoveResult
@@ -1325,7 +1344,7 @@ TransportSendStrategy::remove_sample(const DataSampleElement* sample)
 
 RemoveResult
 TransportSendStrategy::do_remove_sample(const RepoId&,
-  const TransportQueueElement::MatchCriteria& criteria)
+  const TransportQueueElement::MatchCriteria& criteria, bool remove_all)
 {
   DBG_ENTRY_LVL("TransportSendStrategy", "do_remove_sample", 6);
 
@@ -1343,7 +1362,7 @@ TransportSendStrategy::do_remove_sample(const RepoId&,
           "The mode is MODE_DIRECT, or the queue is empty and no "
           "transport packet is in progress.\n"));
 
-    QueueRemoveVisitor simple_rem_vis(criteria);
+    QueueRemoveVisitor simple_rem_vis(criteria, remove_all);
     this->elems_.accept_remove_visitor(simple_rem_vis);
 
     const RemoveResult status = simple_rem_vis.status();
@@ -1356,13 +1375,13 @@ TransportSendStrategy::do_remove_sample(const RepoId&,
             "Failed to find the sample to remove.\n"));
     }
 
-    return status;
+    if (criteria.unique() || !remove_all) return status;
   }
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Visit the queue_ with the RemoveElementVisitor.\n"));
 
-  QueueRemoveVisitor simple_rem_vis(criteria);
+  QueueRemoveVisitor simple_rem_vis(criteria, remove_all);
   this->queue_.accept_remove_visitor(simple_rem_vis);
 
   RemoveResult status = simple_rem_vis.status();
@@ -1373,7 +1392,7 @@ TransportSendStrategy::do_remove_sample(const RepoId&,
     // This means that the visitor did not encounter any fatal error
     // along the way, *AND* the sample was found in the queue_,
     // and has now been removed.  We are done.
-    return status;
+    if (criteria.unique() || !remove_all) return status;
   }
 
   if (status == REMOVE_ERROR) {
@@ -1403,7 +1422,8 @@ TransportSendStrategy::do_remove_sample(const RepoId&,
                                   this->pkt_chain_,
                                   this->header_block_,
                                   this->replaced_element_mb_allocator_,
-                                  this->replaced_element_db_allocator_);
+                                  this->replaced_element_db_allocator_,
+                                  remove_all);
 
   this->elems_.accept_replace_visitor(pac_rem_vis);
 

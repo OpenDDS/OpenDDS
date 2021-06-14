@@ -103,7 +103,6 @@ control the behavior of the OpenDDS CMake package.
 | -------------------------------- | ---------------------------------------------------------------------------- | ------- |
 | `OPENDDS_CMAKE_VERBOSE`          | Print detailed status information at CMake-Generation time                   | `OFF`   |
 | `OPENDDS_DEFAULT_NESTED`         | [Topic types must be declared explicitly.](#opendds_default_nested)          | `ON`    |
-| `OPENDDS_ALLOW_ENV_CHANGE`       | [Ignore environment variable changes.](#opendds_allow_env_change)            | `OFF`   |
 | `OPENDDS_FILENAME_ONLY_INCLUDES` | [No directory info in generated #includes.](#opendds_filename_only_includes) | `OFF`   |
 
 ### Libraries
@@ -146,7 +145,7 @@ To generate/compile the [Messenger with direct IDL inclusion] within the OpenDDS
 #### Unix
 
 ```bash
-cd tests/cmake_integration/Messenger/Messenger_1
+cd tests/cmake/Messenger/Messenger_1
 mkdir build
 cd build
 cmake -DCMAKE_PREFIX_PATH=<location of OpenDDS source tree> ..
@@ -159,7 +158,7 @@ The following assumes Visual Studio 2017 using 64-bit architecture (adjust the
 CMake `-G` parameter if using something different).
 
 ```bat
-cd tests\cmake_integration\Messenger\Messenger_1
+cd tests\cmake\Messenger\Messenger_1
 mkdir build
 cd build
 cmake -DCMAKE_PREFIX_PATH=<location of OpenDDS source tree> -G "Visual Studio 15 2017 Win64" ..
@@ -203,6 +202,9 @@ built-in [`target_sources`](https://cmake.org/cmake/help/latest/command/target_s
     using `TAO_IDL_OPTIONS` and/or `OPENDDS_IDL_OPTIONS` (if the default
     behavior is not suitable).
     - Add `OPENDDS_IDL_OPTIONS -Lc++11` to use the C++11 IDL Mapping.
+  - A command-line option is available to force creation of
+    typecodes by using `SUPPRESS_ANYS OFF`.  This value will
+    overrule the one received from config.cmake `OPENDDS_SUPPRESS_ANYS`.
 
 When IDL sources are supplied, custom commands are generated which will
 be invoked to compile the IDL sources into their component cpp/h files.
@@ -222,7 +224,7 @@ OPENDDS_TARGET_SOURCES(target
   [<INTERFACE|PUBLIC|PRIVATE> items...]
   [TAO_IDL_OPTIONS options...]
   [OPENDDS_IDL_OPTIONS options...]
-  [NO_FILENAME_ONLY_INCLUDES]
+  [SUPPRESS_ANYS ON|OFF]
 )
 ```
 
@@ -265,7 +267,7 @@ that require the IDL. Additionally if the library is a shared library,
 executables can share that file and this reduces the size of the executable
 files.
 
-*Note:* This may issue a warning in earlier version of CMake due to the messenger library
+*Note:* This may issue a warning in earlier versions of CMake due to the messenger library
 not having any sources added with it in the call to `add_library`.
 
 ## Advanced Usage
@@ -277,10 +279,11 @@ of its contained variables. Below is a list of the important variables with
 some information on their purpose.
 
 #### Optional OpenDDS Features
+
 When OpenDDS is built using the MPC build-system
-and optional features are specified, various C/C++; tao_idl; and opendds_idl
+and optional features are specified, various C/C++; `tao_idl`; and `opendds_idl`
 compiler macros are set on dependent libraries or executables. These defines
-are set by MPC using the [dcps_optional_features.mpb](../MPC/config/dcps_optional_features.mpb)
+are set by MPC using the [`dcps_optional_features.mpb`](../MPC/config/dcps_optional_features.mpb)
 file.
 
 CMake-Based targets must also inherit the defined macros, so the functionality
@@ -292,7 +295,7 @@ within `config.cmake` prior to compilation.
 This table outlines the feature-related variables and their _expected_ default
 values (generated when the configure script is run without arguments).
 If any feature is explicitly enabled/disabled in the OpenDDS build then the corresponding
-CMake variable below should be set to either _ON_ or _OFF_ depending on the desired state.
+CMake variable below should be set to either `ON` or `OFF` depending on the desired state.
 
 | CMake Variable                   | Notes (from configure script output)    | Default |
 |---                               | ---                                     | ---     |
@@ -306,6 +309,7 @@ CMake variable below should be set to either _ON_ or _OFF_ depending on the desi
 |`OPENDDS_PERSISTENCE_PROFILE`     | Persistence Profile                     | `ON`      |
 |`OPENDDS_QUERY_CONDITION`         | QueryCondition (CS Profile)             | `ON`      |
 |`OPENDDS_SECURITY`                | DDS Security plugin                     | `OFF`     |
+|`OPENDDS_SAFETY_PROFILE`          | Safety Profile                          | `OFF`     |
 
 #### Build-Related Options
 
@@ -315,17 +319,19 @@ The following values impact the build in one way or another.
 |---                        | ---                                                                | ---                 |
 |`OPENDDS_ACE`              | Location of ACE root dir.                                          | N/A                 |
 |`OPENDDS_TAO`              | Location of TAO root dir.                                          | N/A                 |
-|`OPENDDS_STD`              | Forces C++ standard (Unix only). This option is used as a way for the configure script to inform CMake builds of the C/C++ standard used to build OpenDDS. To prevent weirdness, the C/C++ standards should match. The typical GCC `-std` values are supported. | Existing `CMAKE_CXX_STANDARD` value. |
 |`OPENDDS_NO_DEBUG`         | Sets NDEBUG flags on ACE for non-debug builds (Unix only)          | `OFF`                 |
 |`OPENDDS_INLINE`           | ACE's inline build flag                                            | See below           |
 |`OPENDDS_STATIC`           | Use static libraries                                               | `OFF`                 |
 |`OPENDDS_XERCES3`          | Adds dependencies to targets; required when `OPENDDS_SECURITY` is `ON` | `OFF`                 |
-|`OPENDDS_FEATURES`         | Semicolon-Separated list of additional features which impact the build. Currently supported are `versioned_namespace=1` (see [this](https://github.com/DOCGroup/ACE_TAO/blob/master/ACE/docs/Symbol_Versioning.html) document) and `uses_wchar=1` for wide-character support. | N/A |
+|`OPENDDS_CXX11`            | ACE/TAO and OpenDDS were built with C++11 or later.                | N/A                 |
+|`OPENDDS_WCHAR`            | ACE/TAO and OpenDDS were built to prefer wide characters.          | `OFF`               |
+|`OPENDDS_VERSIONED_NAMEPSACE` | ACE/TAO and OpenDDS have versioned namespaces.                  | `OFF`               |
+|`OPENDDS_FEATURES`         | List of additional features which impact the build.                | N/A                 |
 
 `OPENDDS_INLINE` should be explicitly set to `ON` or `OFF` (based on the ACE `platform_macros.GNU` variable `inline`) in `config.cmake` unless you will only be using a CMake Microsoft Visual Studio Generator.
 
-[Messenger with direct IDL inclusion]: ../tests/cmake_integration/Messenger/Messenger_1/CMakeLists.txt
-[Messenger with auxiliary IDL library]: ../tests/cmake_integration/Messenger/Messenger_2/CMakeLists.txt
+[Messenger with direct IDL inclusion]: ../tests/cmake/Messenger/Messenger_1/CMakeLists.txt
+[Messenger with auxiliary IDL library]: ../tests/cmake/Messenger/Messenger_2/CMakeLists.txt
 [OpenDDS Dev Guide]: http://opendds.org/documents/
 
 ### `OPENDDS_DEFAULT_NESTED`
@@ -351,14 +357,6 @@ OPENDDS_TARGET_SOURCES(messenger
   OPENDDS_IDL_OPTIONS --no-default-nested
 )
 ```
-
-### `OPENDDS_ALLOW_ENV_CHANGE`
-
-OpenDDS's CMake build default settings generate an error if the project attempts
-to change the value of `$DDS_ROOT`, `$ACE_ROOT`, or `$TAO_ROOT`. This can happen
-unintentionally if a project's libraries and executable both require OpenDDS with
-`find_package(OpenDDS REQUIRED)`. Setting `OPENDDS_ALLOW_ENV_CHANGE` to `ON`
-disables the environment variable check.
 
 ### `OPENDDS_FILENAME_ONLY_INCLUDES`
 

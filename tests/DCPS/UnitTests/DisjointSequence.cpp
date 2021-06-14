@@ -161,21 +161,6 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
       TEST_CHECK(sequence.disjoint());
     }
 
-    // invalid set of SequenceNumbers
-    {
-      DisjointSequence sequence;
-      sequence.insert(1);
-      sequence.insert(3);
-
-      try {
-        // Should throw because of invalid range
-        sequence.insert(SequenceRange(50, 40));
-        TEST_CHECK(false);
-      }
-      catch (const std::exception&) {
-      }
-    }
-
     // Range iterator
     {
       DisjointSequence sequence;

@@ -1,0 +1,9 @@
+{
+  "enable_time": { "sec": -1, "nsec": 0 },
+  "start_time": { "sec": -5, "nsec": 0 },
+  "stop_time": { "sec": -5, "nsec": 0 },
+  "destruction_time": { "sec": -1, "nsec": 0 },
+
+  "wait_for_discovery": false,
+  "wait_for_discovery_seconds": 0
+}

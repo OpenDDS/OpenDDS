@@ -1,6 +1,6 @@
 // Base project for libraries that only contains IDL Typesupport
 
-project: dcps {
+project: dcps, dds_corbaseq {
   libout = .
 
   Header_Files {

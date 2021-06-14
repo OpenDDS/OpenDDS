@@ -507,7 +507,7 @@ CORBA::SystemException::_tao_get_omg_exception_description (
       "wchar or wstring data erroneously returned by server over GIOP 1.0 connection.", //6
       "Unsupported RMI/IDL custom value type stream format.", // 7
       "Custom data not compatible with ValueHandler read operation.", // 8
-      "Codeset service contexts with different values recieved on the same connection." // 9
+      "Codeset service contexts with different values received on the same connection." // 9
 
     };
 

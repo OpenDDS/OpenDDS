@@ -126,7 +126,7 @@ sub usage {
     "                         options. (default perform check)\n" .
     "  --list-all             Same as --list, but show every step regardless of\n" .
     "                         options.\n" .
-    "  --steps                Optional, Steps to perform, default is all\n" .
+    "  --steps STEPS          Optional, Steps to perform, default is all\n" .
     "                         See \"Step Expressions\" Below for what it accepts.\n" .
     "  --remedy               Remediate problems where possible\n" .
     "  --force                Keep going if possible\n" .
@@ -396,18 +396,15 @@ sub parse_version {
     my $metadata_maybe = $result{metadata} ? "-$result{metadata}" : "";
 
     $result{series_string} = "$result{major}.$result{minor}";
-    $result{series_string_with_metadata} = "$result{series_string}$metadata_maybe";
     $result{release_string} = "$result{series_string}.$result{micro}";
-    $result{release_string_with_metadata} = "$result{release_string}$metadata_maybe";
+    $result{string} = "$result{release_string}$metadata_maybe";
     if ($result{micro} eq "0") {
-      $result{string} = $result{series_string};
+      $result{tag_string} = $result{series_string};
     } else {
-      $result{string} = $result{release_string};
+      $result{tag_string} = $result{release_string};
     }
-    $result{string_with_metadata} = "$result{string}$metadata_maybe";
 
     # For Version Comparison
-    $result{full_string} = $result{release_string_with_metadata};
     my @metadata_fields = split(/\./, $result{metadata});
     $result{metadata_fields} = \@metadata_fields;
   }
@@ -475,7 +472,7 @@ sub version_greater_equal {
 sub version_not_equal {
   my $left = shift();
   my $right = shift();
-  return $left->{full_string} ne $right->{full_string};
+  return $left->{string} ne $right->{string};
 }
 
 sub version_greater {
@@ -532,7 +529,6 @@ sub override_git_remote {
 ############################################################################
 sub verify_git_status_clean {
   my ($settings, $strict) = @_;
-  my $version = $settings->{version};
   my $clean = 1;
   my $status = open(GITSTATUS, 'git status -s|');
   my $modified = $settings->{modified};
@@ -1517,23 +1513,27 @@ sub remedy_zip_source {
   return !$result;
 }
 ############################################################################
-sub verify_md5_checksum{
+sub verify_md5_checksum {
   my $settings = shift();
-  my $file = join("/", $settings->{workspace}, $settings->{md5_src});
-  return run_command("md5sum --check --quiet $file");
+  my $orig_dir = getcwd();
+  chdir($settings->{workspace});
+  my $status = run_command("md5sum --check --quiet $settings->{md5_src}");
+  chdir($orig_dir);
+  return $status;
 }
 
-sub message_md5_checksum{
+sub message_md5_checksum {
   return "Generate the MD5 checksum file";
 }
 
-sub remedy_md5_checksum{
+sub remedy_md5_checksum {
   my $settings = shift();
   print "Creating file $settings->{md5_src}\n";
-  my $md5_file = join("/", $settings->{workspace}, $settings->{md5_src});
-  my $tgz_file = join("/", $settings->{workspace}, $settings->{tgz_src});
-  my $zip_file = join("/", $settings->{workspace}, $settings->{zip_src});
-  return run_command("md5sum $tgz_file $zip_file > $md5_file");
+  my $orig_dir = getcwd();
+  chdir($settings->{workspace});
+  my $status = run_command("md5sum $settings->{tgz_src} $settings->{zip_src} > $settings->{md5_src}");
+  chdir($orig_dir);
+  return $status;
 }
 ############################################################################
 
@@ -2052,6 +2052,7 @@ my $skip_doxygen = 0;
 my $skip_website = 0;
 my $skip_ftp = 0;
 my $ftp_active = 0;
+my $ftp_port = 0;
 
 GetOptions(
   'help' => \$print_help,
@@ -2072,6 +2073,7 @@ GetOptions(
   'skip-website' => \$skip_website ,
   'skip-ftp' => \$skip_ftp,
   'ftp-active' => \$ftp_active,
+  'ftp-port=s' => \$ftp_port,
 ) or die "See --help for options.\nStopped";
 
 if (!(scalar(@ARGV) == 0 || scalar(@ARGV) == 2)) {
@@ -2108,7 +2110,7 @@ my $release_branch = "";
 if (%parsed_version) {
   $version = $parsed_version{string};
   print("Version to release is $version\n");
-  $base_name = "${base_name_prefix}${version}";
+  $base_name = "${base_name_prefix}$parsed_version{tag_string}";
   if (!$micro) {
     $release_branch =
       "${release_branch_prefix}${git_name_prefix}$parsed_version{series_string}";
@@ -2131,7 +2133,7 @@ if (%parsed_version) {
   if (!%parsed_next_version) {
     die "Invalid next version: $next_version\nStopped";
   }
-  $next_version = $parsed_next_version{string_with_metadata};
+  $next_version = $parsed_next_version{string};
   print("Next after this version is going to be $next_version\n");
 }
 elsif (!$print_help) {
@@ -2161,7 +2163,7 @@ my %global_settings = (
     next_version => $next_version,
     parsed_next_version => \%parsed_next_version,
     base_name    => $base_name,
-    git_tag      => "${git_name_prefix}${version}",
+    git_tag      => "${git_name_prefix}$parsed_version{tag_string}",
     clone_dir    => join("/", $workspace, ${base_name}),
     tar_src      => "${base_name}.tar",
     tgz_src      => "${base_name}.tar.gz",
@@ -2170,7 +2172,7 @@ my %global_settings = (
     tar_dox      => "${base_name}-doxygen.tar",
     tgz_dox      => "${base_name}-doxygen.tar.gz",
     zip_dox      => "${base_name}-doxygen.zip",
-    devguide_ver => "${base_name}.pdf",
+    devguide_ver => "${base_name_prefix}$parsed_version{series_string}.pdf",
     devguide_lat => "${base_name_prefix}latest.pdf",
     timestamp    => $release_timestamp,
     git_url      => "git\@github.com:${github_user}/${repo_name}.git",
@@ -2198,6 +2200,7 @@ my %global_settings = (
     release_flag_file_path => "$workspace/$release_flag_filename",
     release_flag_file_exists => 0,
     ftp_active => $ftp_active,
+    ftp_port => $ftp_port,
 );
 
 if (verify_release_flag_file(\%global_settings)) {
@@ -2338,6 +2341,16 @@ my @release_steps  = (
     remedy  => sub{remedy_zip_source(@_)}
   },
   {
+    name    => 'Create MD5 Checksum File',
+    prereqs => [
+      'Create Unix Release Archive',
+      'Create Windows Release Archive',
+    ],
+    verify  => sub{verify_md5_checksum(@_)},
+    message => sub{message_md5_checksum(@_)},
+    remedy  => sub{remedy_md5_checksum(@_)},
+  },
+  {
     name    => 'Download OCI ACE/TAO',
     prereqs => ['Create Workspace Directory'],
     verify  => sub{verify_download_ace_tao(@_)},
@@ -2376,16 +2389,6 @@ my @release_steps  = (
     message => sub{message_zip_doxygen(@_)},
     remedy  => sub{remedy_zip_doxygen(@_)},
     skip    => $global_settings{skip_doxygen},
-  },
-  {
-    name    => 'Create MD5 Checksum File',
-    prereqs => [
-      'Create Unix Release Archive',
-      'Create Windows Release Archive',
-    ],
-    verify  => sub{verify_md5_checksum(@_)},
-    message => sub{message_md5_checksum(@_)},
-    remedy  => sub{remedy_md5_checksum(@_)},
   },
   {
     name    => 'Download Devguide',
@@ -2577,7 +2580,7 @@ sub run_step {
     print "$divider\n";
   }
 
-  print "  OK!\n";
+  print "  Step $step_count \"$title\" is OK!\n";
 
   $step->{verified} = 1;
 }

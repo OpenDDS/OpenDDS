@@ -35,7 +35,7 @@ CORBA::string_dup (const char *str)
 char *
 CORBA::string_alloc (CORBA::ULong len)
 {
-  // Allocate 1 + strlen to accomodate the null terminating character.
+  // Allocate 1 + strlen to accommodate the null terminating character.
   char *s = 0;
   ACE_ALLOCATOR_NEW (s,
                      char[size_t (len + 1)],

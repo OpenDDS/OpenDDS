@@ -1383,26 +1383,29 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::TypeObject& to)
   return out;
 }
 
-const std::string get_type_map_decl = "static const XTypes::TypeMap& get_minimal_type_map();\n"
-         "static const XTypes::TypeMap& get_complete_type_map();\n";
 }
 
 void
 typeobject_generator::gen_prologue()
 {
-  be_global->add_include("dds/DCPS/XTypes/TypeObject.h", BE_GlobalData::STREAM_H);
-  NamespaceGuard ng;
+  if (!produce_output_) {
+    return;
+  }
 
-  be_global->impl_ << get_type_map_decl;
+  be_global->add_include("dds/DCPS/XTypes/TypeObject.h", BE_GlobalData::STREAM_H);
+
+  NamespaceGuard ng;
+  be_global->impl_ << "static const XTypes::TypeMap& get_minimal_type_map();\n";
+
+  if (produce_xtypes_complete_) {
+    be_global->impl_ << "static const XTypes::TypeMap& get_complete_type_map();\n";
+  }
 }
 
 void
 typeobject_generator::gen_epilogue()
 {
-  if (minimal_type_map_.empty()) {
-    std::string impl_contents = be_global->impl_.str();
-    impl_contents.erase(impl_contents.find(get_type_map_decl), get_type_map_decl.size());
-    be_global->impl_.str(impl_contents);
+  if (!produce_output_) {
     return;
   }
 
@@ -1436,7 +1439,7 @@ typeobject_generator::gen_epilogue()
     "  return tm;\n"
     "}\n\n";
 
-  if (!suppress_complete_type_output_) {
+  if (produce_xtypes_complete_) {
     idx = 0;
     for (OpenDDS::XTypes::TypeMap::const_iterator pos = complete_type_map_.begin();
          pos != complete_type_map_.end(); ++pos, ++idx) {
@@ -1477,18 +1480,11 @@ typeobject_generator::gen_epilogue()
     "  return tm;\n"
     "}\n\n";
 
-  if (!suppress_complete_type_output_) {
+  if (produce_xtypes_complete_) {
     be_global->impl_ <<
       "const XTypes::TypeMap& get_complete_type_map()\n" << common <<
       "    tm = get_complete_type_map_private();\n"
       "  }\n"
-      "  return tm;\n"
-      "}\n";
-  } else {
-    be_global->impl_ <<
-      "const XTypes::TypeMap& get_complete_type_map()\n"
-      "{\n"
-      "  static XTypes::TypeMap tm;\n"
       "  return tm;\n"
       "}\n";
   }
@@ -1743,7 +1739,8 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
         for (List::const_iterator pos = scc.begin(); pos != scc.end(); ++pos) {
           minimal_ti.sc_component_id().scc_index = static_cast<int>(++idx); // Starts at 1.
           complete_ti.sc_component_id().scc_index = minimal_ti.sc_component_id().scc_index;
-          hash_type_identifier_map_[pos->type] = {minimal_ti, complete_ti};
+          const TypeIdentifierPair ti_pair = {minimal_ti, complete_ti};
+          hash_type_identifier_map_[pos->type] = ti_pair;
         }
       }
 
@@ -1787,7 +1784,8 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
         for (List::const_iterator pos = scc.begin(); pos != scc.end(); ++pos) {
           minimal_ti.sc_component_id().scc_index = static_cast<int>(++idx);
           complete_ti.sc_component_id().scc_index = minimal_ti.sc_component_id().scc_index;
-          hash_type_identifier_map_[pos->type] = {minimal_ti, complete_ti};
+          const TypeIdentifierPair ti_pair = {minimal_ti, complete_ti};
+          hash_type_identifier_map_[pos->type] = ti_pair;
         }
       }
 
@@ -2152,10 +2150,13 @@ typeobject_generator::generate_sequence_type_identifier(AST_Type* type, bool for
 {
   AST_Sequence* const n = dynamic_cast<AST_Sequence*>(type);
 
-  ACE_CDR::ULong bound = 0;
+  ACE_CDR::ULong bound;
   if (!n->unbounded()) {
     bound = n->max_size()->ev()->u.ulval;
+  } else {
+    bound = ACE_UINT32_MAX;
   }
+
   const TryConstructFailAction trycon = be_global->try_construct(n->base_type());
   OpenDDS::XTypes::CollectionElementFlag cef = try_construct_to_member_flag(trycon);
   if (be_global->is_external(n->base_type())) {
@@ -2520,30 +2521,32 @@ typeobject_generator::generate(AST_Type* node, UTL_ScopedName* name)
       "  return get_minimal_type_map();\n";
   }
 
-  {
-    const string decl = "getCompleteTypeIdentifier<" + clazz + ">";
-    Function gti(decl.c_str(), "const XTypes::TypeIdentifier&", "");
-    gti.endArgs();
+  if (produce_xtypes_complete_) {
+    {
+      const string decl = "getCompleteTypeIdentifier<" + clazz + ">";
+      Function gti(decl.c_str(), "const XTypes::TypeIdentifier&", "");
+      gti.endArgs();
 
-    if (!suppress_complete_type_output_) {
-      const OpenDDS::XTypes::TypeIdentifier ti = get_complete_type_identifier(node);
-      be_global->impl_ << common <<
-        "    ti = " << ti << ";\n"
-        "  }\n"
-        "  return ti;\n";
-    } else {
-      be_global->impl_ <<
-        "  static XTypes::TypeIdentifier ti;\n"
-        "  return ti;\n";
+      if (produce_xtypes_complete_) {
+        const OpenDDS::XTypes::TypeIdentifier ti = get_complete_type_identifier(node);
+        be_global->impl_ << common <<
+          "    ti = " << ti << ";\n"
+          "  }\n"
+          "  return ti;\n";
+      } else {
+        be_global->impl_ <<
+          "  static XTypes::TypeIdentifier ti;\n"
+          "  return ti;\n";
+      }
     }
-  }
 
-  {
-    const string decl = "getCompleteTypeMap<" + clazz + ">";
-    Function gti(decl.c_str(), "const XTypes::TypeMap&", "");
-    gti.endArgs();
-    be_global->impl_ <<
-      "  return get_complete_type_map();\n";
+    {
+      const string decl = "getCompleteTypeMap<" + clazz + ">";
+      Function gti(decl.c_str(), "const XTypes::TypeMap&", "");
+      gti.endArgs();
+      be_global->impl_ <<
+        "  return get_complete_type_map();\n";
+    }
   }
 
   return true;

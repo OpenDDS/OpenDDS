@@ -181,6 +181,7 @@ private:
   DDS::SubscriberQos           qos_;
   DDS::DataReaderQos           default_datareader_qos_;
 
+  ACE_Thread_Mutex             listener_mutex_;
   DDS::StatusMask              listener_mask_;
   DDS::SubscriberListener_var  listener_;
 

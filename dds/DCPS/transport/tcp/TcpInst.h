@@ -11,6 +11,7 @@
 #include "Tcp_export.h"
 #include "TcpTransport.h"
 
+#include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/transport/framework/TransportInst.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
 #include "ace/INET_Addr.h"
@@ -58,7 +59,7 @@ public:
   /// The default value is 2.0.
   double conn_retry_backoff_multiplier_;
 
-  /// Number of attemps to reconnect before giving up and calling
+  /// Number of attempts to reconnect before giving up and calling
   /// on_publication_lost() and on_subscription_lost() callbacks.
   /// The default is 3.
   int conn_retry_attempts_;
@@ -109,13 +110,13 @@ public:
   void local_address(const char* str)
   {
     local_address_str_ = str;
-    local_address_.set(str);
+    local_address_ = choose_single_coherent_address(local_address_str_, false);
   }
   void local_address(u_short port_number, const char* host_name)
   {
     local_address_str_ = host_name;
     local_address_str_ += ":" + to_dds_string(port_number);
-    local_address_.set(port_number, host_name);
+    local_address_ = choose_single_coherent_address(local_address_str_, false);
   }
   void local_address_set_port(u_short port_number) {
     local_address_.set_port_number(port_number);

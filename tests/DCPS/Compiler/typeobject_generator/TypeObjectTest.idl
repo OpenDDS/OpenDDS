@@ -1,3 +1,7 @@
+#include <tao/LongSeq.pidl>
+#include <tao/BooleanSeq.pidl>
+#include <tao/OctetSeq.pidl>
+
 @mutable
 struct NestedStruct {
   @hashid("short_member") @must_understand short a_short;
@@ -94,6 +98,6 @@ struct D {
 
 @mutable
 struct E {
-  ASequence a_aseq;
+  @try_construct(TRIM) ASequence a_aseq;
   F a_f;
 };

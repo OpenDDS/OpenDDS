@@ -86,7 +86,7 @@ public:
 
   ///@{
   /// Add a topic to the domain
-  /// Returns OpenDDS::DCPS::CREATED if successfull
+  /// Returns OpenDDS::DCPS::CREATED if successful
   OpenDDS::DCPS::TopicStatus add_topic(OpenDDS::DCPS::RepoId_out topicId,
                                        const char * topicName,
                                        const char * dataTypeName,

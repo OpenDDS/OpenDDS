@@ -772,7 +772,7 @@ The frequency for set action, per second
           },
 
 Lists of allowed values to set to, for each parameter. Worker will iterate
-throught the list sequentially unless "random_order" flag (below) is specified
+thought the list sequentially unless "random_order" flag (below) is specified
 
 ::
 

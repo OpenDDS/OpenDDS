@@ -1,0 +1,11 @@
+project(Compiler_Typecode): dcps_test, msvc_bigobj, dds_no_suppress_anys{
+  requires += no_opendds_safety_profile
+  exename = *
+  includes += .
+  Source_Files {
+    typecode.cpp
+  }
+  TypeSupport_Files {
+    typecode.idl
+  }
+}

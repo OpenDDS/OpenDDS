@@ -74,6 +74,7 @@ BestEffortSession::start(bool active, bool /*acked*/)
   if (this->started_) return true;  // already started
 
   this->active_ = active;
+  set_acked();
 
   if (active && !this->start_syn()) {
     ACE_ERROR_RETURN((LM_ERROR,

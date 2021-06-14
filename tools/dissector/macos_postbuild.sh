@@ -8,7 +8,7 @@
 #   $DDS_ROOT/lib.
 #
 #   It produces dylib files which Wireshark will accept but only if they have
-#   a "so" file extention. To remedy this we just make a copy with the "so"
+#   a "so" file extension. To remedy this we just make a copy with the "so"
 #   extension.
 
 filename="OpenDDS_Dissector"

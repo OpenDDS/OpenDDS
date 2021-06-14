@@ -445,6 +445,8 @@ private:
 
   /// The qos of this DomainParticipant.
   DDS::DomainParticipantQos qos_;
+  /// Mutex to protect listener info
+  ACE_Thread_Mutex listener_mutex_;
   /// Used to notify the entity for relevant events.
   DDS::DomainParticipantListener_var listener_;
   /// The StatusKind bit mask indicates which status condition change

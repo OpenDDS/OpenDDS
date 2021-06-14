@@ -31,7 +31,7 @@ OpenDDS_Dcps_Export
 bool
 is_wildcard(const char *str);
 
-/// Increments the count of occurances of the incompatible policy
+/// Increments the count of occurrences of the incompatible policy
 ///  for the status
 OpenDDS_Dcps_Export
 void
@@ -100,7 +100,7 @@ OpenDDS_Dcps_Export
 bool repr_to_encoding_kind(DDS::DataRepresentationId_t repr, Encoding::Kind& kind);
 
 OpenDDS_Dcps_Export
-DDS::DataRepresentationIdSeq get_effective_data_rep_qos(const DDS::DataRepresentationIdSeq& qos, bool reader = false);
+DDS::DataRepresentationIdSeq get_effective_data_rep_qos(const DDS::DataRepresentationIdSeq& qos, bool reader);
 
 } // namespace DCPS
 } // namespace OpenDDS

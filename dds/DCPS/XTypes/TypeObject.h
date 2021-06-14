@@ -1009,10 +1009,7 @@ namespace XTypes {
 
     bool operator<(const AppliedAnnotationParameter& other) const
     {
-      int ret = std::memcmp(paramname_hash, other.paramname_hash, sizeof paramname_hash);
-      if (ret < 0) return true;
-      if (ret > 0) return false;
-      return false;
+      return std::memcmp(paramname_hash, other.paramname_hash, sizeof paramname_hash) < 0;
     }
   };
   // Sorted by AppliedAnnotationParameter.paramname_hash
@@ -1186,7 +1183,7 @@ namespace XTypes {
     // Empty. Available for future extension
   };
 
-struct CompleteTypeDetail {
+  struct CompleteTypeDetail {
     Optional<AppliedBuiltinTypeAnnotations> ann_builtin;
     Optional<AppliedAnnotationSeq> ann_custom;
     QualifiedTypeName type_name;

@@ -2,10 +2,9 @@
 #define RTPSRELAY_DOMAIN_STATISTICS_REPORTER_H_
 
 #include "Config.h"
-#include "utility.h"
 
-#include "lib/QosIndex.h"
 #include "lib/RelayTypeSupportImpl.h"
+#include "lib/Utility.h"
 
 #include <dds/DCPS/JsonValueWriter.h>
 
@@ -68,42 +67,28 @@ public:
     report(now);
   }
 
-  void total_participants(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  void report()
   {
-    log_domain_statistics_.total_participants(static_cast<uint32_t>(count));
-    publish_domain_statistics_.total_participants(static_cast<uint32_t>(count));
-    report(now);
-  }
-
-  void total_writers(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    log_domain_statistics_.total_writers(static_cast<uint32_t>(count));
-    publish_domain_statistics_.total_writers(static_cast<uint32_t>(count));
-    report(now);
-  }
-
-  void total_readers(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    log_domain_statistics_.total_readers(static_cast<uint32_t>(count));
-    publish_domain_statistics_.total_readers(static_cast<uint32_t>(count));
-    report(now);
+    report(OpenDDS::DCPS::MonotonicTimePoint::now(), true);
   }
 
 private:
-  void report(const OpenDDS::DCPS::MonotonicTimePoint& now)
+  void report(const OpenDDS::DCPS::MonotonicTimePoint& now,
+              bool force = false)
   {
-    log_report(now);
-    publish_report(now);
+    log_report(now, force);
+    publish_report(now, force);
   }
 
-  void log_report(const OpenDDS::DCPS::MonotonicTimePoint& now)
+  void log_report(const OpenDDS::DCPS::MonotonicTimePoint& now,
+                  bool force)
   {
     if (config_.log_domain_statistics().is_zero()) {
       return;
     }
 
     const auto d = now - log_last_report_;
-    if (d < config_.log_domain_statistics()) {
+    if (!force && d < config_.log_domain_statistics()) {
       return;
     }
 
@@ -114,14 +99,15 @@ private:
     log_last_report_ = now;
   }
 
-  void publish_report(const OpenDDS::DCPS::MonotonicTimePoint& now)
+  void publish_report(const OpenDDS::DCPS::MonotonicTimePoint& now,
+                      bool force)
   {
     if (config_.publish_domain_statistics().is_zero()) {
       return;
     }
 
     const auto d = now - publish_last_report_;
-    if (d < config_.publish_domain_statistics()) {
+    if (!force && d < config_.publish_domain_statistics()) {
       return;
     }
 

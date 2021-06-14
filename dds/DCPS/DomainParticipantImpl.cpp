@@ -1203,6 +1203,7 @@ DomainParticipantImpl::set_listener(
   DDS::DomainParticipantListener_ptr a_listener,
   DDS::StatusMask mask)
 {
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
   listener_ = DDS::DomainParticipantListener::_duplicate(a_listener);
@@ -1212,6 +1213,7 @@ DomainParticipantImpl::set_listener(
 DDS::DomainParticipantListener_ptr
 DomainParticipantImpl::get_listener()
 {
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   return DDS::DomainParticipantListener::_duplicate(listener_.in());
 }
 
@@ -2093,6 +2095,7 @@ DomainParticipantImpl::is_clean() const
 DDS::DomainParticipantListener_ptr
 DomainParticipantImpl::listener_for(DDS::StatusKind kind)
 {
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   if (CORBA::is_nil(listener_.in()) || (listener_mask_ & kind) == 0) {
     return DDS::DomainParticipantListener::_nil ();
   } else {

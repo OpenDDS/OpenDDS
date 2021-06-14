@@ -1,6 +1,8 @@
 project: dcps_test, googletest {
   exename = *
 
+  dcps_ts_flags += -Gxcom
+
   Idl_Files {
     TypeObjectTest.idl
   }

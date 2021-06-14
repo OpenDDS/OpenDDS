@@ -45,7 +45,7 @@ public:
 
   virtual ~TransportSendControlElement();
 
-  /// Overriden to always return true for Send Control elements.
+  /// Overridden to always return true for Send Control elements.
   virtual bool requires_exclusive_packet() const;
 
   /// Accessor for the publisher id.

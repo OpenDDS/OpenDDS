@@ -189,8 +189,7 @@ void DataReaderImpl::init(
   is_exclusive_ownership_ = this->qos_.ownership.kind == ::DDS::EXCLUSIVE_OWNERSHIP_QOS;
 #endif
 
-  listener_ = DDS::DataReaderListener::_duplicate(a_listener);
-  listener_mask_ = mask;
+  set_listener(a_listener, mask);
 
   // Only store the participant pointer, since it is our "grand"
   // parent, we will exist as long as it does
@@ -551,6 +550,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
   // removed, which is a proper subset of the writers which were
   // requested to be removed.
   WriterIdSeq updated_writers;
+  WriterMapType removed_writers;
 
   CORBA::ULong wr_len;
 
@@ -569,7 +569,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
       WriterMapType::iterator it = this->writers_.find(writer_id);
 
       if (it != this->writers_.end()) {
-        it->second->removed();
+        removed_writers.insert(*it);
         end_historic_sweeper_->cancel_timer(it->second);
         remove_association_sweeper_->cancel_timer(it->second);
       }
@@ -588,6 +588,11 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
       }
     }
   }
+
+  for (WriterMapType::iterator it = removed_writers.begin(); it != removed_writers.end(); ++it) {
+    it->second->removed();
+  }
+  removed_writers.clear();
 
   wr_len = updated_writers.length();
 
@@ -941,6 +946,7 @@ DDS::ReturnCode_t DataReaderImpl::set_listener(
     DDS::DataReaderListener_ptr a_listener,
     DDS::StatusMask mask)
 {
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
   listener_ = DDS::DataReaderListener::_duplicate(a_listener);
@@ -949,7 +955,14 @@ DDS::ReturnCode_t DataReaderImpl::set_listener(
 
 DDS::DataReaderListener_ptr DataReaderImpl::get_listener()
 {
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   return DDS::DataReaderListener::_duplicate(listener_.in());
+}
+
+DataReaderListener_ptr DataReaderImpl::get_ext_listener()
+{
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
+  return DataReaderListener::_narrow(listener_.in());
 }
 
 DDS::TopicDescription_ptr DataReaderImpl::get_topicdescription()
@@ -1210,7 +1223,7 @@ DataReaderImpl::enable()
   // enable the type specific part of this DataReader
   this->enable_specific();
 
-  //Note: the QoS used to set n_chunks_ is Changable=No so
+  //Note: the QoS used to set n_chunks_ is Changeable=No so
   // it is OK that we cannot change the size of our allocators.
   rd_allocator_.reset(new ReceivedDataAllocator(n_chunks_));
 
@@ -1833,7 +1846,9 @@ DataReaderImpl::listener_for(DDS::StatusKind kind)
   // use this entities factory if listener is mask not enabled
   // for this kind.
   RcHandle<SubscriberImpl> subscriber = get_subscriber_servant();
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   if (subscriber && (CORBA::is_nil(listener_.in()) || (listener_mask_ & kind) == 0)) {
+    g.release();
     return subscriber->listener_for(kind);
 
   } else {
@@ -2123,7 +2138,7 @@ DataReaderImpl::writer_removed(WriterInfo& info)
   }
 
   liveliness_changed_status_.last_publication_handle = info.handle_;
-  instances_liveliness_update(info, MonotonicTimePoint::now());
+  instances_liveliness_update(info.writer_id_);
 
   if (liveliness_changed) {
     set_status_changed_flag(DDS::LIVELINESS_CHANGED_STATUS, true);
@@ -2206,8 +2221,7 @@ DataReaderImpl::writer_became_alive(WriterInfo& info,
 }
 
 void
-DataReaderImpl::writer_became_dead(WriterInfo& info,
-    const MonotonicTimePoint& when)
+DataReaderImpl::writer_became_dead(WriterInfo& info)
 {
   if (DCPS_debug_level >= 5) {
     GuidConverter reader_converter(subscription_id_);
@@ -2270,7 +2284,7 @@ DataReaderImpl::writer_became_dead(WriterInfo& info,
     return;
   }
 
-  instances_liveliness_update(info, when);
+  instances_liveliness_update(info.writer_id_);
 
   // Call listener only when there are liveliness status changes.
   if (liveliness_changed) {
@@ -2280,15 +2294,16 @@ DataReaderImpl::writer_became_dead(WriterInfo& info,
 }
 
 void
-DataReaderImpl::instances_liveliness_update(WriterInfo& info,
-    const MonotonicTimePoint& when)
+DataReaderImpl::instances_liveliness_update(const PublicationId& writer)
 {
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
-  for (SubscriptionInstanceMapType::iterator iter = instances_.begin(),
-      next = iter; iter != instances_.end(); iter = next) {
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
+  for (SubscriptionInstanceMapType::iterator iter = instances_.begin(), next = iter;
+       iter != instances_.end(); iter = next) {
     ++next;
-    iter->second->instance_state_->writer_became_dead(
-        info.writer_id_, liveliness_changed_status_.alive_count, when);
+    if (iter->second->instance_state_->writes_instance(writer)) {
+      set_instance_state(iter->first, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, SystemTimePoint::now(), writer);
+    }
   }
 }
 
@@ -2376,8 +2391,7 @@ void DataReaderImpl::notify_latency(PublicationId writer)
 {
   // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
   // is given to this DataReader then narrow() fails.
-  DataReaderListener_var listener
-  = DataReaderListener::_narrow(this->listener_.in());
+  DataReaderListener_var listener = get_ext_listener();
 
   if (!CORBA::is_nil(listener.in())) {
     WriterIdSeq writerIds;
@@ -2505,8 +2519,7 @@ DataReaderImpl::notify_subscription_disconnected(const WriterIdSeq& pubids)
 
   // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
   // is given to this DataReader then narrow() fails.
-  DataReaderListener_var the_listener
-  = DataReaderListener::_narrow(this->listener_.in());
+  DataReaderListener_var the_listener = get_ext_listener();
 
   if (!CORBA::is_nil(the_listener.in())) {
     SubscriptionLostStatus status;
@@ -2526,8 +2539,7 @@ DataReaderImpl::notify_subscription_reconnected(const WriterIdSeq& pubids)
   if (!this->is_bit_) {
     // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
     // is given to this DataReader then narrow() fails.
-    DataReaderListener_var the_listener
-    = DataReaderListener::_narrow(this->listener_.in());
+    DataReaderListener_var the_listener = get_ext_listener();
 
     if (!CORBA::is_nil(the_listener.in())) {
       SubscriptionLostStatus status;
@@ -2548,8 +2560,7 @@ DataReaderImpl::notify_subscription_lost(const DDS::InstanceHandleSeq& handles)
   if (!this->is_bit_) {
     // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
     // is given to this DataReader then narrow() fails.
-    DataReaderListener_var the_listener
-    = DataReaderListener::_narrow(this->listener_.in());
+    DataReaderListener_var the_listener = get_ext_listener();
 
     if (!CORBA::is_nil(the_listener.in())) {
       SubscriptionLostStatus status;
@@ -2573,8 +2584,7 @@ DataReaderImpl::notify_subscription_lost(const WriterIdSeq& pubids)
 
   // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
   // is given to this DataReader then narrow() fails.
-  DataReaderListener_var the_listener
-  = DataReaderListener::_narrow(this->listener_.in());
+  DataReaderListener_var the_listener = get_ext_listener();
 
   if (!CORBA::is_nil(the_listener.in())) {
     SubscriptionLostStatus status;
@@ -2811,6 +2821,7 @@ void DataReaderImpl::notify_liveliness_change()
   notify_status_condition();
 
   if (DCPS_debug_level > 9) {
+    ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
     OPENDDS_STRING output_str;
     output_str += "subscription ";
     output_str += OPENDDS_STRING(GuidConverter(subscription_id_));

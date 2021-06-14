@@ -27,7 +27,7 @@ class DataSampleElement;
 /**
 * A list of DataSampleElement pointers to be queued by the order the
 * samples are written to the instance (within
-* PRESENTAION.access_scope==INSTANCE).  It is mainly used on the
+* PRESENTATION.access_scope==INSTANCE).  It is mainly used on the
 * send side to count the depth of instance data and to allow the
 * removal of elements by instance.
 * Manages DataSampleElement's next_instance_sample pointer

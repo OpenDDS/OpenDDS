@@ -135,9 +135,7 @@ namespace {
   }
 
 #endif
-}
 
-namespace {
   inline bool prop_to_bool(const DDS::Property_t& prop)
   {
     const char* const value = prop.value.in();
@@ -224,6 +222,7 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
   guid = guid_; // may have changed in SpdpTransport constructor
   sedp_->ignore(guid);
   sedp_->init(guid_, *disco, domain_);
+  tport_->open(sedp_->reactor_task());
 
 #ifdef OPENDDS_SECURITY
   ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
@@ -232,6 +231,7 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
     ICE::Agent::instance()->add_local_agent_info_listener(sedp_endpoint, l, this);
   }
 #endif
+  initialized_flag_ = true;
 }
 
 Spdp::Spdp(DDS::DomainId_t domain,
@@ -246,6 +246,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , guid_(guid)
   , participant_discovered_at_(MonotonicTimePoint::now().to_monotonic_time())
   , tport_(DCPS::make_rch<SpdpTransport>(rchandle_from(this)))
+  , initialized_flag_(false)
   , eh_shutdown_(false)
   , shutdown_cond_(lock_)
   , shutdown_flag_(false)
@@ -286,6 +287,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , guid_(guid)
   , participant_discovered_at_(MonotonicTimePoint::now().to_monotonic_time())
   , tport_(DCPS::make_rch<SpdpTransport>(rchandle_from(this)))
+  , initialized_flag_(false)
   , eh_shutdown_(false)
   , shutdown_cond_(lock_)
   , shutdown_flag_(false)
@@ -647,10 +649,12 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     partBitData(pdata).key = repo_id_to_bit_key(guid);
 
     if (DCPS::DCPS_debug_level) {
+      ACE_TCHAR addr_buff[256] = {};
+      from.addr_to_string(addr_buff, 256);
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Spdp::handle_participant_data - %C discovered %C lease %ds\n"),
+        ACE_TEXT("(%P|%t) Spdp::handle_participant_data - %C discovered %C lease %ds from %s\n"),
         DCPS::LogGuid(guid_).c_str(), DCPS::LogGuid(guid).c_str(),
-        pdata.leaseDuration.seconds));
+        pdata.leaseDuration.seconds, addr_buff));
     }
 
     if (tport_->directed_sender_) {
@@ -858,7 +862,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         process_location_updates_i(iter, secure_part_user_data());
 #endif
       }
-    // Else a reset has occured and check if we should remove the participant
+    // Else a reset has occurred and check if we should remove the participant
     } else if (iter->second.seq_reset_count_ >= config_->max_spdp_sequence_msg_reset_check()) {
 #ifdef OPENDDS_SECURITY
       purge_handshake_deadlines(iter);
@@ -903,7 +907,7 @@ Spdp::data_received(const DataSubmessage& data,
                     const ParameterList& plist,
                     const ACE_INET_Addr& from)
 {
-  if (shutdown_flag_ == true) {
+  if (initialized_flag_ == false || shutdown_flag_ == true) {
     return;
   }
 
@@ -1026,7 +1030,7 @@ Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
     return;
   }
 
-  pending_remote_auth_tokens_[guid] = msg.message_data[0];
+
   DiscoveredParticipantMap::iterator iter = participants_.find(guid);
 
   if (iter != participants_.end()) {
@@ -1037,6 +1041,8 @@ Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
       }
       return;
     }
+
+    iter->second.remote_auth_request_token_ = msg.message_data[0];
     iter->second.auth_req_sequence_number_ = msg.message_identity.sequence_number;
 
     attempt_authentication(iter, false);
@@ -1172,14 +1178,6 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
 {
   const DCPS::RepoId& guid = iter->first;
   DiscoveredParticipant& dp = iter->second;
-
-  PendingRemoteAuthTokenMap::iterator token_iter = pending_remote_auth_tokens_.find(guid);
-  if (token_iter == pending_remote_auth_tokens_.end()) {
-    dp.remote_auth_request_token_ = DDS::Security::Token();
-  } else {
-    dp.remote_auth_request_token_ = token_iter->second;
-    pending_remote_auth_tokens_.erase(token_iter);
-  }
 
   if (DCPS::security_debug.auth_debug) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) {auth_debug} DEBUG: Spdp::attempt_authentication "
@@ -2041,7 +2039,9 @@ void
 Spdp::init_bit(const DDS::Subscriber_var& bit_subscriber)
 {
   bit_subscriber_ = bit_subscriber;
-  tport_->open(sedp_->reactor_task());
+
+  // This is here to make sure thread status gets a valid BIT Subscriber
+  tport_->enable_periodic_tasks();
 }
 
 class Noop : public DCPS::ReactorInterceptor::Command {
@@ -2296,43 +2296,8 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
   }
 #endif
 
-#ifdef ACE_WIN32
-  // By default Winsock will cause reads to fail with "connection reset"
-  // when UDP sends result in ICMP "port unreachable" messages.
-  // The transport framework is not set up for this since returning <= 0
-  // from our receive_bytes causes the framework to close down the datalink
-  // which in this case is used to receive from multiple peers.
-  {
-    BOOL recv_udp_connreset = FALSE;
-    unicast_socket_.control(SIO_UDP_CONNRESET, &recv_udp_connreset);
-  }
-#endif
-
-  ACE_Reactor* reactor = reactor_task->get_reactor();
-  if (reactor->register_handler(unicast_socket_.get_handle(),
-                                this, ACE_Event_Handler::READ_MASK) != 0) {
-    throw std::runtime_error("failed to register unicast input handler");
-  }
-
-#ifdef ACE_HAS_IPV6
-#ifdef ACE_WIN32
-  // By default Winsock will cause reads to fail with "connection reset"
-  // when UDP sends result in ICMP "port unreachable" messages.
-  // The transport framework is not set up for this since returning <= 0
-  // from our receive_bytes causes the framework to close down the datalink
-  // which in this case is used to receive from multiple peers.
-  {
-    BOOL recv_udp_connreset = FALSE;
-    unicast_ipv6_socket_.control(SIO_UDP_CONNRESET, &recv_udp_connreset);
-  }
-#endif
-
-
-  if (reactor->register_handler(unicast_ipv6_socket_.get_handle(),
-                                this, ACE_Event_Handler::READ_MASK) != 0) {
-    throw std::runtime_error("failed to register unicast IPv6 input handler");
-  }
-#endif
+  reactor_task->interceptor()->execute_or_enqueue(
+    new RegisterHandlers(rchandle_from(this), reactor_task));
 
 #ifdef OPENDDS_SECURITY
   // Now that the endpoint is added, SEDP can write the SPDP info.
@@ -2341,9 +2306,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
   }
 #endif
 
-
   local_sender_ = DCPS::make_rch<SpdpMulti>(reactor_task->interceptor(), outer->config_->resend_period(), ref(*this), &SpdpTransport::send_local);
-  local_sender_->enable(TimeDuration::zero_value);
 
   if (outer->config_->periodic_directed_spdp()) {
     directed_sender_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::send_directed);
@@ -2357,12 +2320,6 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
 
   relay_sender_ = DCPS::make_rch<SpdpPeriodic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::send_relay);
   relay_stun_task_ = DCPS::make_rch<SpdpPeriodic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::relay_stun_task);
-
-  if (outer->config_->use_rtps_relay() ||
-      outer->config_->rtps_relay_only()) {
-    relay_sender_->enable(false, outer->config_->spdp_rtps_relay_send_period());
-    relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
-  }
 #endif
 
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -2377,7 +2334,6 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
 
     global_thread_status_manager_ = TheServiceParticipant->get_thread_status_manager();
     thread_status_sender_ = DCPS::make_rch<SpdpPeriodic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::thread_status_task);
-    thread_status_sender_->enable(false, interval);
   }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
@@ -2414,6 +2370,69 @@ Spdp::SpdpTransport::~SpdpTransport()
   unicast_ipv6_socket_.close();
   multicast_ipv6_socket_.close();
 #endif
+}
+
+void Spdp::SpdpTransport::register_unicast_socket(
+  ACE_Reactor* reactor, ACE_SOCK_Dgram& socket, const char* what)
+{
+#ifdef ACE_WIN32
+  // By default Winsock will cause reads to fail with "connection reset"
+  // when UDP sends result in ICMP "port unreachable" messages.
+  // The transport framework is not set up for this since returning <= 0
+  // from our receive_bytes causes the framework to close down the datalink
+  // which in this case is used to receive from multiple peers.
+  {
+    BOOL recv_udp_connreset = FALSE;
+    socket.control(SIO_UDP_CONNRESET, &recv_udp_connreset);
+  }
+#endif
+
+  if (reactor->register_handler(socket.get_handle(),
+                                this, ACE_Event_Handler::READ_MASK) != 0) {
+    throw std::runtime_error(
+      (DCPS::String("failed to register ") + what + " unicast input handler").c_str());
+  }
+}
+
+void Spdp::SpdpTransport::register_handlers(const DCPS::ReactorTask_rch& reactor_task)
+{
+  DCPS::RcHandle<Spdp> outer = outer_.lock();
+  if (!outer) {
+    return;
+  }
+  ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
+
+  ACE_Reactor* const reactor = reactor_task->get_reactor();
+  register_unicast_socket(reactor, unicast_socket_, "IPV4");
+#ifdef ACE_HAS_IPV6
+  register_unicast_socket(reactor, unicast_ipv6_socket_, "IPV6");
+#endif
+}
+
+void
+Spdp::SpdpTransport::enable_periodic_tasks()
+{
+  if (local_sender_) {
+    local_sender_->enable(TimeDuration::zero_value);
+  }
+
+#ifdef OPENDDS_SECURITY
+  DCPS::RcHandle<Spdp> outer = outer_.lock();
+  if (!outer) return;
+
+  if (outer->config_->use_rtps_relay() ||
+      outer->config_->rtps_relay_only()) {
+    relay_sender_->enable(false, outer->config_->spdp_rtps_relay_send_period());
+    relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
+  }
+#endif
+
+#ifndef DDS_HAS_MINIMUM_BIT
+  TimeDuration thread_status_interval = TheServiceParticipant->get_thread_status_interval();
+  if (!thread_status_interval.is_zero()) {
+    thread_status_sender_->enable(false, thread_status_interval);
+  }
+#endif /* DDS_HAS_MINIMUM_BIT */
 }
 
 void
@@ -2948,7 +2967,11 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
     return 0; // Ignore
   }
 
+#ifdef OPENDDS_SECURITY
   // Assume STUN
+  if (!outer->initialized() || outer->shutting_down()) {
+    return 0;
+  }
 
 #ifndef ACE_RECVPKTINFO
   ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() ")
@@ -2958,7 +2981,6 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
   ACE_NOTSUP_RETURN(0);
 #else
 
-#ifdef OPENDDS_SECURITY
   DCPS::Serializer serializer(&buff_, STUN::encoding);
   STUN::Message message;
   message.block = &buff_;
@@ -4079,10 +4101,12 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
-  if (DCPS::DCPS_debug_level >= 4) {
+  if (DCPS::DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
                "(%P|%t) Spdp::SpdpTransport::thread_status_task(): Updating internal thread status BIT.\n"));
   }
+
+  ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
 
   const DCPS::RepoId guid = outer->guid();
   DCPS::InternalThreadBuiltinTopicDataDataReaderImpl* bit = outer->internal_thread_bit();
@@ -4099,10 +4123,13 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
       return;
     }
     if (bit) {
+      ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(outer->lock_);
+
       for (StatusMap::const_iterator i = removed.begin(); i != removed.end(); ++i) {
         DCPS::InternalThreadBuiltinTopicData data;
         assign(data.participant_guid, guid);
         data.thread_id = i->first.c_str();
+        ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
         bit->set_instance_state(bit->lookup_instance(data), DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
       }
 
@@ -4110,6 +4137,7 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
         DCPS::InternalThreadBuiltinTopicData data;
         assign(data.participant_guid, guid);
         data.thread_id = i->first.c_str();
+        ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
         bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE, i->second.timestamp);
       }
     } else if (DCPS::DCPS_debug_level >= 2) {

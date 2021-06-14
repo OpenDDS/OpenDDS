@@ -16,6 +16,7 @@ GNUmakefile*
 
 # CMake
 build/
+cmake-build/
 compile_commands.json
 
 # Visual Studio

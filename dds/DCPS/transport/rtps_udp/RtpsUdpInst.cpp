@@ -38,7 +38,7 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , nak_response_delay_(0, 200*1000 /*microseconds*/) // default from RTPS
   , heartbeat_period_(1) // no default in RTPS spec
   , heartbeat_response_delay_(0, 500*1000 /*microseconds*/) // default from RTPS
-  , durable_data_timeout_(60)
+  , receive_address_duration_(5)
   , responsive_mode_(false)
   , send_delay_(0, 10 * 1000)
   , opendds_discovery_guid_(GUID_UNKNOWN)
