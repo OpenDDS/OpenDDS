@@ -1339,8 +1339,12 @@ if (exists $opts{'gtest'} || $tests) {
 
     if (-f File::Spec->catfile($sm_src, $gtest_sanity)) {
       # Check for existing build
-      $build_gtest = ! -d File::Spec->catdir($sm_dir, 'build/install');
+      $build_gtest = ! -d File::Spec->catdir($sm_dir, 'build' . $slash . 'install');
       $opts{'gtest'} = $sm_dir;
+      if ($is_windows) {
+        push_path(\%targetEnv, $sm_dir . $slash . 'build' . $slash . 'install' . $slash . 'lib');
+      }
+
       # No need to set env. variable with submodule.
     }
     elsif (-f File::Spec->catfile($sys_dir, $gtest_sanity)) {
@@ -1627,10 +1631,6 @@ if ($build_gtest) {
                      @cmake_platform_args,
                      '..'],
                     ["$cmake", "--build", ".", "--target", "install"]);
-
-  if ($is_windows) {
-    push_path(\%targetEnv, $install_dir . $slash . 'lib');
-  }
 
   mkdir($build_dir)
     or die "ERROR '$!': failed to make directory $build_dir from $cwd.\nStopped"
