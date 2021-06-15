@@ -1329,6 +1329,11 @@ if (exists $opts{'gtest'} || $tests) {
       if ! -f File::Spec->catfile($opts{'gtest'}, $gtest_sanity);
 
     env_from_opt('gtest', 'GTEST_ROOT');
+    if ($is_windows && -d File::Spec->catdir($opts{'gtest'}, 'bin')) {
+      push_path(\%targetEnv, $opts{'gtest'} . $slash . 'bin');
+    } elsif (!$is_windows && -f File::Spec->catfile($opts{'gtest'}, 'lib' . $slash . 'libgtest.so')) {
+      push_libpath(\%targetEnv, $opts{'gtest'} . $slash . 'lib');
+    }
 
   }
   else {
@@ -1339,22 +1344,30 @@ if (exists $opts{'gtest'} || $tests) {
 
     if (-f File::Spec->catfile($sm_src, $gtest_sanity)) {
       # Check for existing build
-      $build_gtest = ! -d File::Spec->catdir($sm_dir, 'build/install');
+      $build_gtest = ! -d File::Spec->catdir($sm_dir, 'build' . $slash . 'install');
       $opts{'gtest'} = $sm_dir;
       # No need to set env. variable with submodule.
+      # Check for existence of googletest shared / dynamic libraries
+      if ($is_windows && -d File::Spec->catdir($opts{'gtest'}, 'build' . $slash . 'install' . $slash . 'bin')) {
+        push_path(\%targetEnv, $opts{'gtest'} . $slash . 'build' . $slash . 'install' . $slash . 'bin');
+      } elsif (!$is_windows && -f File::Spec->catfile($opts{'gtest'}, 'build' . $slash . 'install' . $slash . 'lib' . $slash . 'libgtest.so')) {
+        push_libpath(\%targetEnv, $opts{'gtest'} . $slash . 'build' . $slash . 'install' . $slash . 'lib');
+      }
     }
     elsif (-f File::Spec->catfile($sys_dir, $gtest_sanity)) {
       $opts{'gtest'} = $sys_dir;
       env_from_opt('gtest', 'GTEST_ROOT');
+      # Check for existence of googletest shared / dynamic libraries
+      if ($is_windows && -d File::Spec->catdir($opts{'gtest'}, 'bin')) {
+        push_path(\%targetEnv, $opts{'gtest'} . $slash . 'bin');
+      } elsif (!$is_windows && -f File::Spec->catfile($opts{'gtest'}, 'lib' . $slash . 'libgtest.so')) {
+        push_libpath(\%targetEnv, $opts{'gtest'} . $slash . 'lib');
+      }
     }
     else {
       die "ERROR: Google Test '$gtest_sanity' not found in submodule src '$sm_src' or " .
         "default install dir '$sys_dir', please pass a correct version of Google Test to --gtest\nStopped";
     }
-  }
-  # Check for existence of googletest shared / dynamic libraries
-  if (-d File::Spec->catdir($opts{'gtest'}, 'bin')) {
-    push_path(\%targetEnv, $opts{'gtest'} . $slash . 'bin');
   }
 }
 if ($build_gtest && !$has_cmake) {
