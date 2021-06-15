@@ -1342,7 +1342,7 @@ if (exists $opts{'gtest'} || $tests) {
       $build_gtest = ! -d File::Spec->catdir($sm_dir, 'build' . $slash . 'install');
       $opts{'gtest'} = $sm_dir;
       if (-d File::Spec->catdir($sm_dir, 'build' . $slash . 'install' . $slash . 'bin')) {
-        push_path(\%buildEnv, $sm_dir . $slash . 'build' . $slash . 'install' . $slash . 'bin');
+        push_path(\%hostEnv, $sm_dir . $slash . 'build' . $slash . 'install' . $slash . 'bin');
       }
 
       # No need to set env. variable with submodule.
