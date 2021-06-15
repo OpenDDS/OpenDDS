@@ -94,14 +94,16 @@ TopicStatus LocalDiscovery::assert_topic(
   bool,
   TopicCallbacks*)
 {
-  const std::map<std::string, EntityId_t>::iterator iter = topics_.find(topicName);
+  const std::map<std::string, TopicDetails>::iterator iter = topics_.find(topicName);
   if (iter == topics_.end()) {
-    guid = make_guid(topics_[topicName] = next_topic_id_);
+    TopicDetails& td = topics_[topicName];
+    guid = make_guid(td.entity_id_ = next_topic_id_);
     ++next_topic_id_.entityKey[0];
-    types_[topicName] = typeName;
+    td.type_ = typeName;
     return CREATED;
   }
-  guid = make_guid(iter->second);
+  guid = make_guid(iter->second.entity_id_);
+  ++iter->second.refcount_;
   return FOUND;
 }
 
@@ -116,12 +118,13 @@ TopicStatus LocalDiscovery::find_topic(
   dataTypeName = "";
   qos = new DDS::TopicQos();
   topicId = GUID_UNKNOWN;
-  const std::map<std::string, EntityId_t>::iterator iter = topics_.find(topicName);
+  const std::map<std::string, TopicDetails>::iterator iter = topics_.find(topicName);
   if (iter == topics_.end()) {
     return NOT_FOUND;
   }
-  topicId = make_guid(iter->second);
-  dataTypeName = types_[topicName].c_str();
+  topicId = make_guid(iter->second.entity_id_);
+  dataTypeName = iter->second.type_.c_str();
+  ++iter->second.refcount_;
   return FOUND;
 }
 
@@ -130,10 +133,12 @@ TopicStatus LocalDiscovery::remove_topic(
   const RepoId&,
   const RepoId& topicId)
 {
-  typedef std::map<std::string, EntityId_t>::iterator iter_t;
+  typedef std::map<std::string, TopicDetails>::iterator iter_t;
   for (iter_t iter = topics_.begin(); iter != topics_.end(); ++iter) {
-    if (iter->second == topicId.entityId) {
-      topics_.erase(iter);
+    if (iter->second.entity_id_ == topicId.entityId) {
+      if (--iter->second.refcount_ == 0) {
+        topics_.erase(iter);
+      }
       return REMOVED;
     }
   }

@@ -11,8 +11,15 @@ public:
 
 private:
   EntityId_t next_topic_id_;
-  std::map<std::string, EntityId_t> topics_;
-  std::map<std::string, std::string> types_;
+
+  struct TopicDetails {
+    TopicDetails() : refcount_(1) {}
+    EntityId_t entity_id_;
+    std::string type_;
+    int refcount_;
+  };
+
+  std::map<std::string, TopicDetails> topics_;
 
   static GUID_t make_guid(EntityId_t eid);
 

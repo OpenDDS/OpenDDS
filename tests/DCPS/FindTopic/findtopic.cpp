@@ -85,9 +85,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     DDS::DomainParticipant_var participant = dpf->create_participant(11, PARTICIPANT_QOS_DEFAULT, 0, 0);
     if (!participant) {
       ACE_ERROR_RETURN((LM_ERROR, "%N:%l: main() ERROR: create_participant failed!\n"), EXIT_FAILURE);
-    } else {
-      ACE_DEBUG((LM_DEBUG, "Created participant 1 with instance handle %d\n",
-                 participant->get_instance_handle()));
     }
 
     Messenger::MessageTypeSupport_var mts = new Messenger::MessageTypeSupportImpl;
