@@ -1329,7 +1329,7 @@ if (exists $opts{'gtest'} || $tests) {
       if ! -f File::Spec->catfile($opts{'gtest'}, $gtest_sanity);
 
     if (-d File::Spec->catdir($opts{'gtest'}, 'build' . $slash . 'install' . $slash . 'bin')) {
-      push_path(\%targetEnv, $opts{'gtest'} . $slash . 'build' . $slash . 'install' . $slash . 'bin');
+      push_path(\%hostEnv, $opts{'gtest'} . $slash . 'build' . $slash . 'install' . $slash . 'bin');
     }
     env_from_opt('gtest', 'GTEST_ROOT');
 
