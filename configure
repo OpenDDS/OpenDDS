@@ -1327,10 +1327,6 @@ if (exists $opts{'gtest'} || $tests) {
   if ($opts{'gtest'}) {
     die "ERROR: '$gtest_sanity' not found in supplied gtest directory '$opts{'gtest'}'"
       if ! -f File::Spec->catfile($opts{'gtest'}, $gtest_sanity);
-
-    #if (-d File::Spec->catdir($opts{'gtest'}, 'bin')) {
-      push_path(\%targetEnv, $opts{'gtest'} . $slash . 'bin');
-    #}
     env_from_opt('gtest', 'GTEST_ROOT');
 
   }
@@ -1354,6 +1350,10 @@ if (exists $opts{'gtest'} || $tests) {
       die "ERROR: Google Test '$gtest_sanity' not found in submodule src '$sm_src' or " .
         "default install dir '$sys_dir', please pass a correct version of Google Test to --gtest\nStopped";
     }
+  }
+  # Check for existence of googletest shared / dynamic libraries
+  if (-d File::Spec->catdir($opts{'gtest'}, 'bin')) {
+    push_path(\%targetEnv, $opts{'gtest'} . $slash . 'bin');
   }
 }
 if ($build_gtest && !$has_cmake) {
