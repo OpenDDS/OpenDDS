@@ -35,7 +35,7 @@ public:
   {
     Subscriber sub(domainId_, n_pub_threads_, expected_samples_, durable_);
     Publisher pub(domainId_, samples_per_thread_, durable_);
-    pub.activate(DEFAULT_FLAGS, static_cast<int>(n_pub_threads_)); //spawn Publisher threads
+    pub.start(n_pub_threads_);
     sub.wait(1, 2);
     sub.wait_received();
     ACE_DEBUG((LM_INFO, "(%P|%t) -> pub.wait()\n"));
@@ -79,7 +79,7 @@ private:
 
   const DDS::DomainId_t domainId_;
   DDS::DomainParticipantFactory_var dpf_;
-  std::size_t n_pub_threads_;
+  int n_pub_threads_;
   std::size_t samples_per_thread_;
   std::size_t expected_samples_;
   bool durable_;

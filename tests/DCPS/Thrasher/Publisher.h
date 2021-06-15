@@ -8,17 +8,17 @@
 
 #include <cstdlib>
 
-#define DEFAULT_FLAGS (THR_NEW_LWP | THR_JOINABLE | THR_INHERIT_SCHED)
-
 class Publisher : public ACE_Task_Base
 {
 public:
+  static const long FLAGS = (THR_NEW_LWP | THR_JOINABLE | THR_INHERIT_SCHED);
   Publisher(const DDS::DomainId_t domainId, std::size_t samples_per_thread, bool durable);
   ~Publisher();
+  void start(const int n_threads, const long flags = FLAGS);
   int svc();
 private:
   int get_thread_index(std::string& pfx);
-  void set_rtps_discovery(const std::string& pfx, const int thread_index, const DDS::DomainParticipant_var& dp);
+  DDS::DomainParticipant_var create_participant(const std::string& pfx, const int thread_index, DDS::DomainParticipantFactory_var& dpf);
   typedef ACE_SYNCH_MUTEX Mutex;
   typedef ACE_Guard<Mutex> Lock;
   const DDS::DomainId_t domainId_;
