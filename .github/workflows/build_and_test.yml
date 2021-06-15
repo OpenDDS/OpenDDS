@@ -497,6 +497,7 @@ jobs:
         rm -rf tests/cmake/build
         rm build_u18_o1d0v1_xer0_j12.tar.xz
         rm -rf install_temp install_prefix install_setenv.sh
+        rm -rf OpenDDS/${{ github.job }}_autobuild_workspace
     - name: gitclean
       shell: bash
       run: |
