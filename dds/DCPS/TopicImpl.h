@@ -41,13 +41,14 @@ class OpenDDS_Dcps_Export TopicImpl
     public virtual TopicDescriptionImpl {
 public:
 
-  TopicImpl(const char*                    topic_name,
-            const char*                    type_name,
-            OpenDDS::DCPS::TypeSupport_ptr type_support,
-            const DDS::TopicQos &          qos,
-            DDS::TopicListener_ptr         a_listener,
-            const DDS::StatusMask &        mask,
-            DomainParticipantImpl*         participant);
+  TopicImpl(const char* topic_name,
+            const char* type_name,
+            TypeSupport_ptr type_support,
+            const DDS::TopicQos& qos,
+            DDS::TopicListener_ptr a_listener,
+            const DDS::StatusMask& mask,
+            DomainParticipantImpl* participant,
+            const GUID_t& id = GUID_UNKNOWN);
 
   virtual ~TopicImpl();
 

@@ -623,12 +623,18 @@ DomainParticipantImpl::delete_topic_i(
       CORBA::String_var topic_name = the_topic_servant->get_name();
       TopicMap::mapped_type* entry = 0;
 
-      if (Util::find(topics_, topic_name.in(), entry) == -1) {
+      TopicMapIteratorPair iters = topics_.equal_range(topic_name.in());
+      TopicMapIterator iter;
+      for (iter = iters.first; iter != iters.second; ++iter) {
+        if (iter->second.pair_.svt_ == the_topic_servant) {
+          entry = &iter->second;
+          break;
+        }
+      }
+      if (entry == 0) {
         if (DCPS_debug_level > 0) {
           ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
-                     ACE_TEXT("%p\n"),
-                     ACE_TEXT("find")));
+                     ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, not found\n")));
         }
         return DDS::RETCODE_ERROR;
       }
@@ -636,8 +642,8 @@ DomainParticipantImpl::delete_topic_i(
       const CORBA::ULong client_refs = --entry->client_refs_;
 
       if (remove_objref || 0 == client_refs) {
-        //TBD - mark the TopicImpl as deleted and make it
-        //      reject calls to the TopicImpl.
+        topics_.erase(iter);
+
         Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
         TopicStatus status = disco->remove_topic(
           the_dp_servant->get_domain_id(), the_dp_servant->get_id(), the_topic_servant->get_id());
@@ -651,20 +657,8 @@ DomainParticipantImpl::delete_topic_i(
           return DDS::RETCODE_ERROR;
         }
 
-        // note: this will destroy the TopicImpl if there are no
-        // client object reference to it.
-        if (topics_.erase(topic_name.in()) == 0) {
-          if (DCPS_debug_level > 0) {
-            ACE_ERROR((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
-                       ACE_TEXT("%p\n"),
-                       ACE_TEXT("erase")));
-          }
-          return DDS::RETCODE_ERROR;
+        return DDS::RETCODE_OK;
 
-        } else {
-          return DDS::RETCODE_OK;
-        }
       } else {
         if (DCPS_debug_level > 4) {
           ACE_DEBUG((LM_DEBUG,
@@ -687,8 +681,6 @@ DomainParticipantImpl::delete_topic_i(
   return ret;
 }
 
-//Note: caller should NOT assign to Topic_var (without _duplicate'ing)
-//      because it will steal the framework's reference.
 DDS::Topic_ptr
 DomainParticipantImpl::find_topic(
   const char* topic_name,
@@ -700,19 +692,6 @@ DomainParticipantImpl::find_topic(
   while (first_time || MonotonicTimePoint::now() < timeout_at) {
     if (first_time) {
       first_time = false;
-    }
-
-    TopicMap::mapped_type* entry = 0;
-    {
-      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                       tao_mon,
-                       this->topics_protector_,
-                       DDS::Topic::_nil());
-
-      if (Util::find(topics_, topic_name, entry) == 0) {
-        ++entry->client_refs_;
-        return DDS::Topic::_duplicate(entry->pair_.obj_.in());
-      }
     }
 
     RepoId topic_id;
@@ -747,7 +726,8 @@ DomainParticipantImpl::find_topic(
                                                   qos,
                                                   DDS::TopicListener::_nil(),
                                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK,
-                                                  type_support);
+                                                  type_support,
+                                                  topic_id);
       return new_topic;
 
     } else if (status == INTERNAL_ERROR) {
@@ -1977,12 +1957,13 @@ GUID_t DomainParticipantImpl::get_repoid(DDS::InstanceHandle_t handle) const
 
 DDS::Topic_ptr
 DomainParticipantImpl::create_new_topic(
-  const char * topic_name,
-  const char * type_name,
-  const DDS::TopicQos & qos,
+  const char* topic_name,
+  const char* type_name,
+  const DDS::TopicQos& qos,
   DDS::TopicListener_ptr a_listener,
-  const DDS::StatusMask & mask,
-  OpenDDS::DCPS::TypeSupport_ptr type_support)
+  const DDS::StatusMask& mask,
+  TypeSupport_ptr type_support,
+  const GUID_t& topic_id)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    tao_mon,
@@ -2050,16 +2031,7 @@ DomainParticipantImpl::create_new_topic(
 
   // this object will also act as a guard against leaking the new TopicImpl
   RefCounted_Topic refCounted_topic(Topic_Pair(topic_servant, obj, false));
-
-  if (OpenDDS::DCPS::bind(topics_, topic_name, refCounted_topic) == -1) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_new_topic, ")
-                 ACE_TEXT("%p\n"),
-                 ACE_TEXT("bind")));
-    }
-    return DDS::Topic::_nil();
-  }
+  topics_.insert(std::make_pair(topic_name, refCounted_topic));
 
   if (this->monitor_) {
     this->monitor_->report();
