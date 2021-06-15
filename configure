@@ -1341,8 +1341,8 @@ if (exists $opts{'gtest'} || $tests) {
       # Check for existing build
       $build_gtest = ! -d File::Spec->catdir($sm_dir, 'build' . $slash . 'install');
       $opts{'gtest'} = $sm_dir;
-      if ($is_windows) {
-        push_path(\%targetEnv, $sm_dir . $slash . 'build' . $slash . 'install' . $slash . 'bin');
+      if (-d File::Spec->catdir($sm_dir, 'build' . $slash . 'install' . $slash . 'bin')) {
+        push_path(\%buildEnv, $sm_dir . $slash . 'build' . $slash . 'install' . $slash . 'bin');
       }
 
       # No need to set env. variable with submodule.
