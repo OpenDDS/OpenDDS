@@ -46,13 +46,18 @@ int Publisher::svc()
   DDS::DomainParticipantFactory_var dpf;
   DDS::DomainParticipant_var dp;
   try {
-    const int this_thread_index = get_thread_index(pfx);
-    ACE_DEBUG((LM_INFO, (pfx + "->started\n").c_str()));
     dpf = TheParticipantFactory;
     if (!dpf) {
       throw std::runtime_error(" ERROR: TheParticipantFactoryd is null!\n");
     }
-    dp = create_participant(pfx, this_thread_index, dpf);
+    // Create Participant
+    dp = dpf->create_participant(domainId_, PARTICIPANT_QOS_DEFAULT, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    if (!dp) {
+      throw std::runtime_error(" ERROR: create_participant failed!\n");
+    }
+    const int this_thread_index = get_thread_index(pfx, dp);
+    ACE_DEBUG((LM_INFO, (pfx + "->started\n").c_str()));
+
     // Create Publisher
     DDS::Publisher_var pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!pub) {
@@ -145,47 +150,42 @@ int Publisher::svc()
   return ret;
 }
 
-int Publisher::get_thread_index(std::string& pfx)
+void Publisher::configure_transport(const int thread_index, const std::string& pfx, const DDS::DomainParticipant_var& dp)
+{
+  // RTPS cannot be shared
+  OpenDDS::DCPS::Discovery_rch disc = TheServiceParticipant->get_discovery(domainId_);
+  OpenDDS::RTPS::RtpsDiscovery_rch rd = OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(disc);
+  if (!rd.is_nil()) {
+    char config_name[64], inst_name[64];
+    ACE_TCHAR nak_depth[8];
+    ACE_OS::snprintf(config_name, 64, "cfg_%d", thread_index);
+    ACE_OS::snprintf(inst_name, 64, "rtps_%d", thread_index);
+    // The 2 is a safety factor to allow for control messages.
+    ACE_OS::snprintf(nak_depth, 8, ACE_TEXT("%lu"), 2 * samples_per_thread_);
+    ACE_DEBUG((LM_INFO, (pfx + "->transport %C\n").c_str(), config_name));
+    OpenDDS::DCPS::TransportConfig_rch config = TheTransportRegistry->create_config(config_name);
+    OpenDDS::DCPS::TransportInst_rch inst = TheTransportRegistry->create_inst(inst_name, "rtps_udp");
+    ACE_Configuration_Heap ach;
+    ACE_Configuration_Section_Key sect_key;
+    ach.open();
+    ach.open_section(ach.root_section(), ACE_TEXT("not_root"), 1, sect_key);
+    ach.set_string_value(sect_key, ACE_TEXT("use_multicast"), ACE_TEXT("0"));
+    ach.set_string_value(sect_key, ACE_TEXT("nak_depth"), nak_depth);
+    ach.set_string_value(sect_key, ACE_TEXT("heartbeat_period"), ACE_TEXT("200"));
+    ach.set_string_value(sect_key, ACE_TEXT("heartbeat_response_delay"), ACE_TEXT("100"));
+    inst->load(ach, sect_key);
+    config->instances_.push_back(inst);
+    TheTransportRegistry->bind_config(config_name, dp);
+  }
+}
+
+int Publisher::get_thread_index(std::string& pfx, const DDS::DomainParticipant_var& dp)
 {
   Lock lock(mutex_);
   int index = thread_index_++;
   char pub_i[8];
   ACE_OS::snprintf(pub_i, 8, "%d", index);
   pfx += pub_i;
+  configure_transport(index, pfx, dp);
   return index;
-}
-
-DDS::DomainParticipant_var Publisher::create_participant(const std::string& pfx, const int thread_index, DDS::DomainParticipantFactory_var& dpf)
-{
-  // RTPS cannot be shared
-  OpenDDS::DCPS::Discovery_rch disc = TheServiceParticipant->get_discovery(domainId_);
-  OpenDDS::RTPS::RtpsDiscovery_rch rd = OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(disc);
-  if (rd.is_nil()) {
-    throw std::runtime_error(" ERROR: get_discovery failed!\n");
-  }
-  char config_name[64], inst_name[64];
-  ACE_TCHAR nak_depth[8];
-  ACE_OS::snprintf(config_name, 64, "cfg_%d", thread_index);
-  ACE_OS::snprintf(inst_name, 64, "rtps_%d", thread_index);
-  // The 2 is a safety factor to allow for control messages.
-  ACE_OS::snprintf(nak_depth, 8, ACE_TEXT("%lu"), 2 * samples_per_thread_);
-  ACE_DEBUG((LM_INFO, (pfx + "->transport %C\n").c_str(), config_name));
-  OpenDDS::DCPS::TransportConfig_rch config = TheTransportRegistry->create_config(config_name);
-  OpenDDS::DCPS::TransportInst_rch inst = TheTransportRegistry->create_inst(inst_name, "rtps_udp");
-  ACE_Configuration_Heap ach;
-  ACE_Configuration_Section_Key sect_key;
-  ach.open();
-  ach.open_section(ach.root_section(), ACE_TEXT("not_root"), 1, sect_key);
-  ach.set_string_value(sect_key, ACE_TEXT("use_multicast"), ACE_TEXT("0"));
-  ach.set_string_value(sect_key, ACE_TEXT("nak_depth"), nak_depth);
-  ach.set_string_value(sect_key, ACE_TEXT("heartbeat_period"), ACE_TEXT("200"));
-  ach.set_string_value(sect_key, ACE_TEXT("heartbeat_response_delay"), ACE_TEXT("100"));
-  inst->load(ach, sect_key);
-  config->instances_.push_back(inst);
-  DDS::DomainParticipant_var dp = dpf->create_participant(domainId_, PARTICIPANT_QOS_DEFAULT, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-  if (!dp) {
-    throw std::runtime_error(" ERROR: create_participant failed!\n");
-  }
-  TheTransportRegistry->bind_config(config_name, dp);
-  return dp;
 }

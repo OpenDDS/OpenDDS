@@ -17,8 +17,8 @@ public:
   void start(const int n_threads, const long flags = FLAGS);
   int svc();
 private:
-  int get_thread_index(std::string& pfx);
-  DDS::DomainParticipant_var create_participant(const std::string& pfx, const int thread_index, DDS::DomainParticipantFactory_var& dpf);
+  void configure_transport(const int thread_index, const std::string& pfx, const DDS::DomainParticipant_var& dp);
+  int get_thread_index(std::string& pfx, const DDS::DomainParticipant_var& dp);
   typedef ACE_SYNCH_MUTEX Mutex;
   typedef ACE_Guard<Mutex> Lock;
   const DDS::DomainId_t domainId_;
