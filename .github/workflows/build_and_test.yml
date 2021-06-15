@@ -6057,7 +6057,7 @@ jobs:
         mkdir build
         cd build
         mkdir install
-        cmake -DCMAKE_INSTALL_PREFIX=./install -DBUILD_SHARED_LIBS=ON -Dgtest_force_shared_crt=ON ..
+        cmake -DCMAKE_INSTALL_PREFIX=./install -DBUILD_SHARED_LIBS=ON ..
         cmake --build . --target install --config Release
     - name: build unit tests
       shell: cmd
@@ -6958,6 +6958,17 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: x86
+    - name: setup gtest
+      shell: cmd
+      run: |
+        cd OpenDDS/tests/googletest
+        git submodule init
+        git submodule update
+        mkdir build
+        cd build
+        mkdir install
+        cmake -DCMAKE_INSTALL_PREFIX=./install -DBUILD_SHARED_LIBS=ON ..
+        cmake --build . --target install
     - name: configure OpenDDS
       shell: cmd
       run: |
