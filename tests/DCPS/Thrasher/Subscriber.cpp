@@ -13,8 +13,9 @@
 
 #include <ace/Log_Msg.h>
 
-Subscriber::Subscriber(const std::size_t n_pub_threads, const std::size_t expected_samples, const bool durable)
-  : n_pub_threads_(n_pub_threads)
+Subscriber::Subscriber(const DDS::DomainId_t domainId, const std::size_t n_pub_threads, const std::size_t expected_samples, const bool durable)
+  : domainId_(domainId)
+  , n_pub_threads_(n_pub_threads)
   , expected_samples_(expected_samples)
   , durable_(durable)
 {
@@ -24,29 +25,29 @@ Subscriber::Subscriber(const std::size_t n_pub_threads, const std::size_t expect
     if (!dpf_) {
       throw std::runtime_error("TheParticipantFactory failed.");
     }
-    participant_ = dpf_->create_participant(42, PARTICIPANT_QOS_DEFAULT, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (!participant_) {
+    dp_ = dpf_->create_participant(domainId_, PARTICIPANT_QOS_DEFAULT, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    if (!dp_) {
       throw std::runtime_error("create_participant failed.");
     }
     FooTypeSupport_var ts = new FooTypeSupportImpl;
-    if (ts->register_type(participant_.in(), "") != DDS::RETCODE_OK) {
+    if (ts->register_type(dp_.in(), "") != DDS::RETCODE_OK) {
       throw std::runtime_error("register_type failed.");
     }
-    DDS::Topic_var topic = participant_->create_topic("FooTopic",
+    DDS::Topic_var topic = dp_->create_topic("FooTopic",
       CORBA::String_var(ts->get_type_name()), TOPIC_QOS_DEFAULT, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!topic) {
       throw std::runtime_error("create_topic failed.");
     }
     // Create Subscriber
-    DDS::Subscriber_var subscriber = participant_->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (!subscriber) {
+    DDS::Subscriber_var sub = dp_->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    if (!sub) {
       throw std::runtime_error("create_subscriber failed.");
     }
     // Create DataReader
     listener_i_ = new DataReaderListenerImpl(expected_samples_, "(%P|%t)  sub %d%% (%d samples received)\n");
     listener_ = listener_i_;
     DDS::DataReaderQos qos;
-    subscriber->get_default_datareader_qos(qos);
+    sub->get_default_datareader_qos(qos);
     qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
     if (durable_) {
       qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
@@ -54,7 +55,7 @@ Subscriber::Subscriber(const std::size_t n_pub_threads, const std::size_t expect
 #ifndef OPENDDS_NO_OWNERSHIP_PROFILE
     qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
 #endif
-    reader_ = subscriber->create_datareader(topic.in(), qos, listener_.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    reader_ = sub->create_datareader(topic.in(), qos, listener_.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!reader_) {
       throw std::runtime_error("create_datareader failed.");
     }
@@ -78,20 +79,21 @@ Subscriber::~Subscriber()
 
 void Subscriber::cleanup()
 {
-  if (!dpf_) {
-    if (!participant_) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    <- Subscriber delete_contained_entities\n")));
-      participant_->delete_contained_entities();
+  if (!dp_) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    <- Subscriber delete_contained_entities\n")));
+    dp_->delete_contained_entities();
+    if (!dpf_) {
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    <- Subscriber delete_participant\n")));
-      dpf_->delete_participant(participant_.in());
-      participant_ = 0;
+      dpf_->delete_participant(dp_.in());
+      dpf_ = 0;
     }
-    dpf_ = 0;
+    dp_ = 0;
   }
 }
 
 int Subscriber::wait(unsigned int num_writers, const int cmp)
 {
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) -> Subscriber::wait\n")));
   int ret = 1;
   const CORBA::Long n_writers = static_cast<CORBA::Long>(num_writers);
   DDS::StatusCondition_var condition = reader_->get_statuscondition();
@@ -110,6 +112,7 @@ int Subscriber::wait(unsigned int num_writers, const int cmp)
           (cmp == -2 && ms.current_count <= n_writers)) {
         ret = 0;
       } else { // wait for a change
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) -> ws->wait %d\n"), ms.current_count));
         DDS::ReturnCode_t stat = ws->wait(conditions, wake_interval);
         if ((stat != DDS::RETCODE_OK) && (stat != DDS::RETCODE_TIMEOUT)) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: %N:%l: wait failed!\n")));

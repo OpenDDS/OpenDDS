@@ -8,18 +8,19 @@
 class Subscriber
 {
 public:
-  Subscriber(const std::size_t n_pub_threads, const std::size_t expected_samples, const bool durable);
+  Subscriber(const DDS::DomainId_t domainId, const std::size_t n_pub_threads, const std::size_t expected_samples, const bool durable);
   ~Subscriber();
   int wait(unsigned int num_writers, const int cmp = 0);
   void wait_received();
   int check_result() const;
 private:
   void cleanup();
+  const DDS::DomainId_t domainId_;
   const std::size_t n_pub_threads_;
   const std::size_t expected_samples_;
   const bool durable_;
   DDS::DomainParticipantFactory_var dpf_;
-  DDS::DomainParticipant_var participant_;
+  DDS::DomainParticipant_var dp_;
   DataReaderListenerImpl* listener_i_;
   DDS::DataReaderListener_var listener_;
   DDS::DataReader_var reader_;

@@ -33,6 +33,7 @@ void DataReaderListenerImpl::wait_received()
 
 int DataReaderListenerImpl::check_received(const size_t n_publishers) const
 {
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) sub check_received\n")));
   int ret = 0;
   const size_t samples_per_publisher = expected_samples_ / n_publishers;
   for (size_t p = 0; p < n_publishers; ++p) {

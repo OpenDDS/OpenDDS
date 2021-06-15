@@ -10,7 +10,8 @@ class Thrasher
 {
 public:
   Thrasher(int& argc, ACE_TCHAR** argv)
-    : dpf_()
+    : domainId_(42)
+    , dpf_()
     , n_pub_threads_(1)
     , samples_per_thread_(1024)
     , expected_samples_(1024)
@@ -32,11 +33,12 @@ public:
 
   int run()
   {
-    Subscriber sub(n_pub_threads_, expected_samples_, durable_);
-    Publisher pub(samples_per_thread_, durable_);
+    Subscriber sub(domainId_, n_pub_threads_, expected_samples_, durable_);
+    Publisher pub(domainId_, samples_per_thread_, durable_);
     pub.activate(DEFAULT_FLAGS, static_cast<int>(n_pub_threads_)); //spawn Publisher threads
     sub.wait(1, 2);
     sub.wait_received();
+    ACE_DEBUG((LM_INFO, "(%P|%t) -> pub.wait()\n"));
     pub.wait();
     sub.wait(0);
     return sub.check_result();
@@ -75,6 +77,7 @@ private:
     }
   }
 
+  const DDS::DomainId_t domainId_;
   DDS::DomainParticipantFactory_var dpf_;
   std::size_t n_pub_threads_;
   std::size_t samples_per_thread_;
