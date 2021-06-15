@@ -25,7 +25,7 @@ fi
 
 if [ ! -d ACE_wrappers/MPC ]; then
   if [ ! -f $MPC_ROOT/mwc.pl ]; then
-    echo "Cannnot find MPC installation, please set the MPC_ROOT environment variable."
+    echo "Cannot find MPC installation, please set the MPC_ROOT environment variable."
     exit 1
   else
     EXTRA_DOCKER_FLAGS="-v $MPC_ROOT:/MPC -e MPC_ROOT=/MPC"

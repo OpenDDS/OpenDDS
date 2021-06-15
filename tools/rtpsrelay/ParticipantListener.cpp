@@ -2,8 +2,9 @@
 
 #include "lib/Utility.h"
 
-#include <dds/DdsDcpsCoreTypeSupportImpl.h>
+#include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/JsonValueWriter.h>
+#include <dds/DdsDcpsCoreTypeSupportImpl.h>
 
 namespace RtpsRelay {
 
@@ -34,7 +35,7 @@ void ParticipantListener::on_data_available(DDS::DataReader_ptr reader)
                                    DDS::ANY_VIEW_STATE,
                                    DDS::ANY_INSTANCE_STATE);
   if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ParticipantListener::on_data_available failed to read\n")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ParticipantListener::on_data_available failed to take %C\n"), OpenDDS::DCPS::retcode_to_string(ret)));
     return;
   }
 

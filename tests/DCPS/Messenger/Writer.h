@@ -13,7 +13,7 @@
 class Writer : public ACE_Task_Base {
 public:
 
-  Writer(DDS::DataWriter_ptr writer);
+  Writer(DDS::DataWriter_ptr writer, bool reliable);
 
   void start();
 
@@ -27,6 +27,7 @@ public:
 private:
   DDS::DataWriter_var writer_;
   ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> finished_instances_;
+  bool reliable_;
 };
 
 #endif /* WRITER_H */

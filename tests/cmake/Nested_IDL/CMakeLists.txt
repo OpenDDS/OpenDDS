@@ -9,13 +9,6 @@ find_package(OpenDDS REQUIRED)
 
 set(target_prefix "${PROJECT_NAME}_")
 
-if(MSVC)
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR})
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR})
-  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR})
-  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR})
-endif()
-
 set(OPENDDS_FILENAME_ONLY_INCLUDES ON CACHE BOOL "IDL files include other IDL files" FORCE)
 
 set(ecu_lib "${target_prefix}lib")
@@ -38,7 +31,8 @@ set_target_properties(${ecu_exe}
 )
 target_link_libraries(${ecu_exe} OpenDDS::Dcps ${ecu_lib})
 
-# copy run_test.pl to build/
+# Testing
 configure_file("run_test.pl" "." COPYONLY)
-
-add_test("${target_prefix}test" perl run_test.pl)
+add_test(NAME "${target_prefix}test"
+  COMMAND perl run_test.pl $<$<BOOL:$<CONFIG>>:-ExeSubDir> $<CONFIG>
+)

@@ -111,7 +111,7 @@ String get_fully_qualified_hostname(ACE_INET_Addr* addr)
 
         if (ACE::get_fqdn(addr_array[i], hostname, MAXHOSTNAMELEN+1) == 0) {
           VDBG_LVL((LM_DEBUG, "(%P|%t) considering fqdn %C\n", hostname), 4);
-          if (!addr_array[i].is_loopback() && ACE_OS::strchr(hostname, '.') != 0 && choose_single_coherent_address(hostname, false) != ACE_INET_Addr()) {
+          if (!addr_array[i].is_loopback() && ACE_OS::strchr(hostname, '.') != 0 && choose_single_coherent_address(hostname, false, false) != ACE_INET_Addr()) {
             VDBG_LVL((LM_DEBUG, "(%P|%t) found fqdn %C from %C:%d\n",
                       hostname, addr_array[i].get_host_addr(), addr_array[i].get_port_number()), 2);
             selected_address = addr_array[i];
@@ -622,7 +622,7 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_VECTOR(ACE_INET_Addr)
   return ACE_INET_Addr();
 }
 
-ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_loopback)
+ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_loopback, bool allow_ipv4_fallback)
 {
   ACE_INET_Addr result;
 
@@ -638,27 +638,31 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
   const String::size_type closeb = address.find_first_of(']', openb);
   const String::size_type last_double = address.rfind("::", closeb);
   const String::size_type port_div = closeb != String::npos ?
-                                       address.find_first_of(':', closeb + 1) :
+                                       address.find_first_of(':', closeb + 1u) :
                                        (last_double != String::npos ?
-                                         address.find_first_of(':', last_double + 2) :
+                                         address.find_first_of(':', last_double + 2u) :
                                          address.find_last_of(':'));
 #else
-  const String::size_type openb = String::npos;
-  const String::size_type closeb = String::npos;
   const String::size_type port_div = address.find_last_of(':');
 #endif
 
   if (port_div != String::npos) {
+#ifdef ACE_HAS_IPV6
     if (openb != String::npos && closeb != String::npos) {
-      host_name_str = address.substr(openb + 1, closeb - 1);
-    } else {
+      host_name_str = address.substr(openb + 1u, closeb - 1u);
+    } else
+#endif /* ACE_HAS_IPV6 */
+    {
       host_name_str = address.substr(0, port_div);
     }
-    port_number = static_cast<unsigned short>(std::strtoul(address.substr(port_div + 1).c_str(), 0, 10));
+    port_number = static_cast<unsigned short>(std::strtoul(address.substr(port_div + 1u).c_str(), 0, 10));
   } else {
+#ifdef ACE_HAS_IPV6
     if (openb != String::npos && closeb != String::npos) {
-      host_name_str = address.substr(openb + 1, closeb - 1);
-    } else {
+      host_name_str = address.substr(openb + 1u, closeb - 1u);
+    } else
+#endif /* ACE_HAS_IPV6 */
+    {
       host_name_str = address;
     }
   }
@@ -672,7 +676,7 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
   union ip46
   {
     sockaddr_in  in4_;
-#if defined (ACE_HAS_IPV6)
+#ifdef ACE_HAS_IPV6
     sockaddr_in6 in6_;
 #endif /* ACE_HAS_IPV6 */
   } inet_addr;
@@ -687,7 +691,7 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
 #endif /* ACE_HAS_IPV6 && ACE_USES_IPV4_IPV6_MIGRATION */
 
 #ifdef ACE_HAS_IPV6
-  if (address_family == AF_UNSPEC && ACE::ipv6_enabled()) {
+  if (address_family == AF_UNSPEC && ACE::ipv6_enabled() && !allow_ipv4_fallback) {
     address_family = AF_INET6;
   }
 
@@ -701,6 +705,7 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
     return result;
   }
 #else
+  ACE_UNUSED_ARG(allow_ipv4_fallback);
   address_family = AF_INET;
 #endif /* ACE_HAS_IPV6 */
 

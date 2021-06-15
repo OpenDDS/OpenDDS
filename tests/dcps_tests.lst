@@ -4,7 +4,7 @@
 # auto_run_tests.pl.
 # Each line has its own test, and a test can be followed by a
 # list of configurations required to be enabled (or not
-# enabled if preceeded by !). For example,
+# enabled if preceded by !). For example,
 #
 # tests/DCPS/SomeText/run_test.pl rtps: !DCPS_MIN RTPS
 
@@ -122,6 +122,7 @@ tests/DCPS/TransientLocalTest/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DD
 tests/DCPS/TransientLocalTest/run_test.pl rtps: !DCPS_MIN RTPS !STATIC !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/DelayedDurable/run_test.pl: !DCPS_MIN RTPS
 tests/DCPS/DelayedDurable/run_test.pl --large-samples: !DCPS_MIN RTPS
+tests/DCPS/DelayedDurable/run_test.pl --early-reader: !DCPS_MIN RTPS
 tests/DCPS/MultiRepoTest/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/MultiRepoTest/run_test.pl fileconfig: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Presentation/run_test.pl: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE !DDS_NO_OWNERSHIP_PROFILE
@@ -197,6 +198,7 @@ tests/DCPS/Messenger/run_test.pl thread_per: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !
 tests/DCPS/Messenger/run_test.pl udp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Messenger/run_test.pl default_udp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !GH_ACTIONS
 tests/DCPS/Messenger/run_test.pl multicast: !DCPS_MIN !NO_MCAST !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Messenger/run_test.pl multicast_be: !DCPS_MIN !NO_MCAST !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Messenger/run_test.pl default_multicast: !DCPS_MIN !NO_MCAST !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Messenger/run_test.pl shmem: !DCPS_MIN !NO_SHMEM !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS
 tests/DCPS/Messenger/run_test.pl nobits: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
@@ -258,9 +260,9 @@ tests/DCPS/PersistentDurability/run_test.pl: !DCPS_MIN !DDS_NO_PERSISTENCE_PROFI
 tests/DCPS/SampleLost/run_test.pl: !DCPS_MIN !DDS_NO_PERSISTENCE_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/SetQosDeadline/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !GH_ACTIONS
 tests/DCPS/SetQosDeadline/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS !GH_ACTIONS
-tests/DCPS/SetQosPartition/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
-tests/DCPS/SetQosPartition/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS !GHA_NO_BUILT_IN_TOPICS
-tests/DCPS/SetQosPartition/run_test.pl rtps_disc_tcp: !DCPS_MIN !NO_MCAST RTPS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/SetQosPartition/run_test.pl ini=inforepo_tcp.ini: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
+tests/DCPS/SetQosPartition/run_test.pl ini=rtps_rtps.ini: !DCPS_MIN !NO_MCAST RTPS !GHA_NO_BUILT_IN_TOPICS
+tests/DCPS/SetQosPartition/run_test.pl ini=rtps_tcp.ini: !DCPS_MIN !NO_MCAST RTPS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/StringKey/run_test.pl: !DCPS_MIN !GHA_OPENDDS_SAFETY_PROFILE
 tests/DCPS/GuardCondition/run_test.pl: !DCPS_MIN !GH_ACTIONS
 tests/DCPS/StatusCondition/run_test.pl: !DCPS_MIN !DDS_NO_PERSISTENCE_PROFILE

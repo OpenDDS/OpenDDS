@@ -1380,7 +1380,7 @@ DataWriterImpl::enable()
     TheServiceParticipant->get_data_durability_cache(qos_.durability);
 #endif
 
-  //Note: the QoS used to set n_chunks_ is Changable=No so
+  //Note: the QoS used to set n_chunks_ is Changeable=No so
   // it is OK that we cannot change the size of our allocators.
   data_container_ = RcHandle<WriteDataContainer>
     (new WriteDataContainer

@@ -84,7 +84,7 @@ module OpenDDS {
 
     @topic
     struct PublisherReport {
-      /// Instance handle of this Publisher. Unique withing the DP.
+      /// Instance handle of this Publisher. Unique within the DP.
       @key DDS::InstanceHandle_t handle;
       /// GUID of the Domain Participant this Publisher belongs to
       @key GUID_t dp_id;
@@ -95,7 +95,7 @@ module OpenDDS {
 
     @topic
     struct SubscriberReport {
-      /// Instance handle of this Subscriber. Unique withing the DP.
+      /// Instance handle of this Subscriber. Unique within the DP.
       @key DDS::InstanceHandle_t handle;
       /// GUID of the Domain Participant this Subscriber belongs to
       @key GUID_t dp_id;
