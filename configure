@@ -1328,6 +1328,9 @@ if (exists $opts{'gtest'} || $tests) {
     die "ERROR: '$gtest_sanity' not found in supplied gtest directory '$opts{'gtest'}'"
       if ! -f File::Spec->catfile($opts{'gtest'}, $gtest_sanity);
 
+    if (-d File::Spec->catdir($opts{'gtest'}, 'build' . $slash . 'install' . $slash . 'bin')) {
+      push_path(\%targetEnv, $opts{'gtest'} . $slash . 'build' . $slash . 'install' . $slash . 'bin');
+    }
     env_from_opt('gtest', 'GTEST_ROOT');
 
   }
@@ -1339,12 +1342,8 @@ if (exists $opts{'gtest'} || $tests) {
 
     if (-f File::Spec->catfile($sm_src, $gtest_sanity)) {
       # Check for existing build
-      $build_gtest = ! -d File::Spec->catdir($sm_dir, 'build' . $slash . 'install');
+      $build_gtest = ! -d File::Spec->catdir($sm_dir, 'build/install');
       $opts{'gtest'} = $sm_dir;
-      if (-d File::Spec->catdir($sm_dir, 'build' . $slash . 'install' . $slash . 'bin')) {
-        push_path(\%hostEnv, $sm_dir . $slash . 'build' . $slash . 'install' . $slash . 'bin');
-      }
-
       # No need to set env. variable with submodule.
     }
     elsif (-f File::Spec->catfile($sys_dir, $gtest_sanity)) {
