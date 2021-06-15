@@ -1405,6 +1405,8 @@ typeobject_generator::gen_prologue()
 void
 typeobject_generator::gen_epilogue()
 {
+  be_global->add_include("dds/DCPS/Service_Participant.h");
+
   if (!produce_output_) {
     return;
   }
@@ -1472,7 +1474,6 @@ typeobject_generator::gen_epilogue()
     "  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, TheServiceParticipant->get_static_xtypes_lock(), tm);\n"
     "  if (tm.empty()) {\n";
 
-  be_global->add_include("dds/DCPS/Service_Participant.h");
   be_global->impl_ <<
     "const XTypes::TypeMap& get_minimal_type_map()\n" << common <<
     "    tm = get_minimal_type_map_private();\n"

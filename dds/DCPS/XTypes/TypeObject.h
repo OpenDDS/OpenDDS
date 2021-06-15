@@ -868,7 +868,7 @@ namespace XTypes {
     ACE_CDR::Boolean boolean_value;
     ACE_CDR::Octet byte_value;
     ACE_CDR::Short int16_value;
-    ACE_CDR::UShort uint16_value;
+    ACE_CDR::UShort uint16_value; // OMG Issue DDSXTY14-46.
     ACE_CDR::Long int32_value;
     ACE_CDR::ULong uint32_value;
     ACE_CDR::LongLong int64_value;
