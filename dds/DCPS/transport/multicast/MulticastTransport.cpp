@@ -414,6 +414,24 @@ MulticastTransport::release_datalink(DataLink* /*link*/)
   // until the transport is shut down.
 }
 
+void MulticastTransport::client_stop(const RepoId& localId)
+{
+  GuardThreadType guard_links(this->links_lock_);
+  const MulticastPeer local_peer = (ACE_INT64)RepoIdConverter(localId).federationId() << 32
+                                 | RepoIdConverter(localId).participantId();
+  Links::const_iterator link_iter = this->client_links_.find(local_peer);
+  MulticastDataLink_rch link;
+
+  if (link_iter != this->client_links_.end()) {
+    link = link_iter->second;
+  }
+  guard_links.release();
+
+  if (link) {
+    link->client_stop(localId);
+  }
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 
