@@ -1328,9 +1328,9 @@ if (exists $opts{'gtest'} || $tests) {
     die "ERROR: '$gtest_sanity' not found in supplied gtest directory '$opts{'gtest'}'"
       if ! -f File::Spec->catfile($opts{'gtest'}, $gtest_sanity);
 
-    if (-d File::Spec->catdir($opts{'gtest'}, 'build' . $slash . 'install' . $slash . 'bin')) {
-      push_path(\%hostEnv, $opts{'gtest'} . $slash . 'build' . $slash . 'install' . $slash . 'bin');
-    }
+    #if (-d File::Spec->catdir($opts{'gtest'}, 'bin')) {
+      push_path(\%targetEnv, $opts{'gtest'} . $slash . 'bin');
+    #}
     env_from_opt('gtest', 'GTEST_ROOT');
 
   }
