@@ -1,31 +1,32 @@
 #ifndef DCPS_THRASHER_PUBLISHER_H
 #define DCPS_THRASHER_PUBLISHER_H
 
-#include <dds/DdsDcpsDomainC.h>
+#include <FooTypeTypeSupportImpl.h>
+
 #include <dds/DdsDcpsInfrastructureC.h>
 
-#include <ace/Task.h>
+#include <memory>
 
-#include <cstdlib>
-
-class Publisher : public ACE_Task_Base
+class Publisher
 {
 public:
-  static const long FLAGS = (THR_NEW_LWP | THR_JOINABLE | THR_INHERIT_SCHED);
-  Publisher(const DDS::DomainId_t domainId, std::size_t samples_per_thread, bool durable);
-  ~Publisher();
-  void start(const int n_threads, const long flags = FLAGS);
-  int svc();
+  typedef std::unique_ptr<Publisher> Ptr;
+  Publisher(const long domain_id, std::size_t samples_per_thread, bool durable, const int thread_index);
+  ~Publisher() { cleanup(); }
+  void publish();
 private:
-  void configure_transport(const int thread_index, const std::string& pfx, const DDS::DomainParticipant_var& dp);
-  int get_thread_index(std::string& pfx, const DDS::DomainParticipant_var& dp);
-  typedef ACE_SYNCH_MUTEX Mutex;
-  typedef ACE_Guard<Mutex> Lock;
-  const DDS::DomainId_t domainId_;
+  static std::string create_pfx(const int thread_index);
+  void cleanup();
+  void configure_transport();
+  const long domain_id_;
   const std::size_t samples_per_thread_;
   const bool durable_;
-  Mutex mutex_;
-  int thread_index_;
+  const int thread_index_;
+  const std::string pfx_;
+  DDS::DomainParticipantFactory_var dpf_;
+  DDS::DomainParticipant_var dp_;
+  DDS::DataWriter_var dw_;
+  FooDataWriter_var writer_;
 };
 
 #endif // DCPS_THRASHER_PUBLISHER_H

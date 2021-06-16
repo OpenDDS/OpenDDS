@@ -79,11 +79,11 @@ Subscriber::~Subscriber()
 
 void Subscriber::cleanup()
 {
-  if (!dp_) {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    <- Subscriber delete_contained_entities\n")));
+  if (dp_) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) <- Subscriber delete_contained_entities\n")));
     dp_->delete_contained_entities();
-    if (!dpf_) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    <- Subscriber delete_participant\n")));
+    if (dpf_) {
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) <- Subscriber delete_participant\n")));
       dpf_->delete_participant(dp_.in());
       dpf_ = 0;
     }
@@ -93,7 +93,7 @@ void Subscriber::cleanup()
 
 int Subscriber::wait(unsigned int num_writers, const int cmp)
 {
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) -> Subscriber::wait\n")));
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) -> Subscriber::wait for %d\n"), num_writers));
   int ret = 1;
   const CORBA::Long n_writers = static_cast<CORBA::Long>(num_writers);
   DDS::StatusCondition_var condition = reader_->get_statuscondition();

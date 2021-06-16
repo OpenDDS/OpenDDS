@@ -15,6 +15,7 @@ project(*): dcpsexe, dcps_test, dcps_transports_for_test {
     DataReaderListenerImpl.cpp
     Publisher.cpp
     Subscriber.cpp
+    PublisherService.cpp
     Thrasher.cpp
   }
 }
