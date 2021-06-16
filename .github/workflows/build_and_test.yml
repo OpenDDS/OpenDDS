@@ -401,6 +401,19 @@ jobs:
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
+    - name: remove install clutter
+      shell: bash
+      run: |
+        cd OpenDDS
+        rm build_u18_o1d0v1_xer0_j12.tar.xz
+        rm -rf install_temp install_prefix install_setenv.sh
+    - name: gitclean
+      shell: bash
+      run: |
+        touch output.txt
+        cd OpenDDS
+        git clean -nd -e ext | tee ../output.txt
+        if [ -s ../output.txt ]; then exit 1; fi
 
   inst_u18_o1d0v1_xer0_j12:
 
@@ -490,21 +503,6 @@ jobs:
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
-    - name: remove install clutter
-      shell: bash
-      run: |
-        cd OpenDDS
-        rm -rf tests/cmake/build
-        rm build_u18_o1d0v1_xer0_j12.tar.xz
-        rm -rf install_temp install_prefix install_setenv.sh
-        rm -rf OpenDDS/${{ github.job }}_autobuild_workspace
-    - name: gitclean
-      shell: bash
-      run: |
-        touch output.txt
-        cd OpenDDS
-        git clean -nd -e ext | tee ../output.txt
-        if [ -s ../output.txt ]; then exit 1; fi
 
   u18_esafe_js0:
 
@@ -1088,7 +1086,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_clang5_i0w1_sec
-    timeout-minutes: 150
+    timeout-minutes: 30
 
     steps:
     - name: install xerces
@@ -1340,7 +1338,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_clang10_sec_js0
-    timeout-minutes: 150
+    timeout-minutes: 30
 
     steps:
     - name: install xerces
@@ -1592,7 +1590,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_gcc6_d0w1_cpp03
-    timeout-minutes: 150
+    timeout-minutes: 30
 
     steps:
     - name: checkout MPC
@@ -1842,7 +1840,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_gcc8_i0_js0_j
-    timeout-minutes: 150
+    timeout-minutes: 30
 
     steps:
     - name: checkout MPC
@@ -2087,7 +2085,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_gcc10_i0w1_xer0
-    timeout-minutes: 150
+    timeout-minutes: 30
 
     steps:
     - name: checkout MPC
@@ -3822,7 +3820,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_stat_qt_ws_sec
-    timeout-minutes: 15
+    timeout-minutes: 30
 
     steps:
     - name: install xerces
@@ -4761,7 +4759,7 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_p1_stat_js0
-    timeout-minutes: 15
+    timeout-minutes: 30
 
     steps:
     - name: install openssl & xerces-c
@@ -6104,7 +6102,7 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_o1p1_sec
-    timeout-minutes: 40
+    timeout-minutes: 30
 
     steps:
     - name: checkout MPC
@@ -6922,7 +6920,7 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_j_ws_FM-1f
-    timeout-minutes: 15
+    timeout-minutes: 30
 
     steps:
     - name: checkout MPC
