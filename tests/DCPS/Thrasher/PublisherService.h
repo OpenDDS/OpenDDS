@@ -14,7 +14,7 @@ public:
   void end();
   int svc();
 private:
-  Publisher::Ptr createPublisher();
+  Publisher* createPublisher();
   typedef ACE_SYNCH_MUTEX Mutex;
   typedef ACE_Guard<Mutex> Lock;
   const long domain_id_;

@@ -4,13 +4,13 @@
 #include <FooTypeTypeSupportImpl.h>
 
 #include <dds/DdsDcpsInfrastructureC.h>
-
-#include <memory>
+#include <dds/DCPS/unique_ptr.h>
 
 class Publisher
 {
 public:
-  typedef std::unique_ptr<Publisher> Ptr;
+  //Note: OpenDDS::DCPS::unique_ptr instead of std::unique_ptr is used here to support c++03
+  typedef OpenDDS::DCPS::unique_ptr<Publisher> Ptr;
   Publisher(const long domain_id, std::size_t samples_per_thread, bool durable, const int thread_index);
   ~Publisher() { cleanup(); }
   void publish();

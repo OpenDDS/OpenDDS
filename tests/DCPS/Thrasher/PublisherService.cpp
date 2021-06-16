@@ -32,20 +32,21 @@ void PublisherService::end()
   wait();
 }
 
-Publisher::Ptr PublisherService::createPublisher()
-{
-  Lock lock(mutex_);
-  return Publisher::Ptr(new Publisher(domain_id_, samples_per_thread_, durable_, thread_index_++));
-}
-
 int PublisherService::svc()
 {
   try {
-    Publisher::Ptr pub = createPublisher();
+    Publisher::Ptr pub(createPublisher());
     pub->publish();
   } catch (...) {
     ACE_ERROR((LM_ERROR, ("(%P|%t) ERROR: PublisherService::svc exception\n")));
     throw;
   }
   return 0;
+}
+
+// Note: With std::unique_ptr, this method should return Publisher::Ptr.
+Publisher* PublisherService::createPublisher()
+{
+  Lock lock(mutex_);
+  return new Publisher(domain_id_, samples_per_thread_, durable_, thread_index_++);
 }
