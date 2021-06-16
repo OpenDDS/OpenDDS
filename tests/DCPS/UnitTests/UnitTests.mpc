@@ -160,11 +160,3 @@ project(*JsonValueReader): dcps_test, googletest, rapidjson {
     JsonValueReader.cpp
   }
 }
-
-project(*Source): dcpsexe, dcps_test {
-  exename   = *
-
-  Source_Files {
-    ut_Source.cpp
-  }
-}

@@ -73,6 +73,71 @@ private:
 
 typedef RcHandle<JobQueue> JobQueue_rch;
 
+class Schedulable : public virtual RcObject {
+public:
+  virtual void schedule() = 0;
+};
+
+class Executable : public virtual RcObject {
+public:
+  virtual void execute() = 0;
+};
+
+class JobQueueSchedulable : public Schedulable, public JobQueue::Job {
+public:
+  typedef RcHandle<Executable> ExecutablePtr;
+  typedef WeakRcHandle<Executable> WeakExecutablePtr;
+
+  JobQueueSchedulable()
+    : scheduled_(false)
+  {}
+
+  void set_job_queue(WeakRcHandle<JobQueue> job_queue)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+    job_queue_ = job_queue;
+  }
+
+  void set_executable(WeakExecutablePtr executable)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+    executable_ = executable;
+  }
+
+  virtual void schedule()
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+    if (scheduled_ == true) {
+      return;
+    }
+
+    RcHandle<JobQueue> job_queue = job_queue_.lock();
+    if (job_queue) {
+      job_queue->enqueue(rchandle_from(this));
+      scheduled_ = true;
+    }
+  }
+
+  virtual void execute()
+  {
+    ExecutablePtr executable;
+    {
+      ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+      scheduled_ = false;
+      executable = executable_.lock();
+    }
+    if (executable) {
+      executable->execute();
+    }
+  }
+
+private:
+  WeakRcHandle<JobQueue> job_queue_;
+  WeakExecutablePtr executable_;
+  mutable ACE_Thread_Mutex mutex_;
+  bool scheduled_;
+};
+
 } // namespace DCPS
 } // namespace OpenDDS
 

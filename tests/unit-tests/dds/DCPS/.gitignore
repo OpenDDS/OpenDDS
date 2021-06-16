@@ -1,2 +1,6 @@
-/UnitTests_DataSampleHeader
+/InternalDataReader
+/InternalDataWriter
+/JobQueue
 /SafetyProfilePoolTest
+/SampleCache
+/UnitTests_DataSampleHeader

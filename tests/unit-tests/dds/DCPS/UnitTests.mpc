@@ -5,9 +5,33 @@ project(*DataSampleHeader): dcps_test, googletest {
   }
 }
 
+project(InternalDataReader): dcps_test {
+  Source_Files {
+    InternalDataReader.cpp
+  }
+}
+
+project(InternalDataWriter): dcps_test {
+  Source_Files {
+    InternalDataWriter.cpp
+  }
+}
+
+project(JobQueue): dcps_test {
+  Source_Files {
+    JobQueue.cpp
+  }
+}
+
 project(*SafetyProfilePool) : dcps, opendds_face, dcps_test {
   avoids      += no_opendds_safety_profile
   Source_Files {
     SafetyProfilePoolTest.cpp
+  }
+}
+
+project(SampleCache): dcps_test {
+  Source_Files {
+    SampleCache.cpp
   }
 }
