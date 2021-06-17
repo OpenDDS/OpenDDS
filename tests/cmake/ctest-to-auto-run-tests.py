@@ -128,7 +128,7 @@ def generate_test_results(build_path, source_path, debug=False):
             command_parts.pop(index)
         except ValueError: # from index, no -ExeSubDir
             pass
-        results['art_name'] = '{}/{}'.format(test_path, ' '.join(command_parts))
+        results['art_name'] = '{}/{}'.format(test_path.as_posix(), ' '.join(command_parts))
         # Exit Value isn't included if the test passed
         results['art_result'] = 0 if results['passed'] else results['exit_value']
         results['art_time'] = time=int(results['exec_time'])
