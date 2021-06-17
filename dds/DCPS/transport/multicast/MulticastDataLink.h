@@ -86,6 +86,7 @@ public:
   void release_reservations_i(const RepoId& remote_id,
                               const RepoId& local_id);
 
+  void client_stop(const RepoId& localId);
 
 private:
 

@@ -434,6 +434,15 @@ MulticastDataLink::stop_i()
   this->socket_.close();
 }
 
+void
+MulticastDataLink::client_stop(const RepoId& localId)
+{
+  if (send_buffer_) {
+    send_buffer_->retain_all(localId);
+    send_buffer_.reset();
+  }
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 
