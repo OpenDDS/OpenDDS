@@ -36,12 +36,12 @@ int PublisherService::svc()
 {
   try {
     Publisher::Ptr pub(createPublisher());
-    pub->publish();
+    ACE_OS::sleep(ACE_Time_Value(0, 50000)); // to simulate concurrency
+    return pub->publish();
   } catch (...) {
     ACE_ERROR((LM_ERROR, ("(%P|%t) ERROR: PublisherService::svc exception\n")));
-    throw;
   }
-  return 0;
+  return 1;
 }
 
 // Note: With std::unique_ptr, this method should return Publisher::Ptr.

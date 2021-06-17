@@ -85,7 +85,7 @@ Publisher::Publisher(const long domain_id, std::size_t samples_per_thread, bool 
   }
 }
 
-void Publisher::publish()
+int Publisher::publish()
 {
   if (!durable_) {
     ACE_DEBUG((LM_INFO, (pfx_ + "->wait_match() before write\n").c_str()));
@@ -104,9 +104,11 @@ void Publisher::publish()
   for (std::size_t i = 0; i < samples_per_thread_; ++i) {
     foo.y = (float) i;
     if (writer_->write(foo, instance) != DDS::RETCODE_OK) {
-      throw std::runtime_error(" ERROR: write failed!\n");
+      ACE_ERROR((LM_ERROR, (pfx_ + " ERROR: write failed!\n").c_str()));
+      return 1;
     }
     ++progress;
+    ACE_OS::sleep(ACE_Time_Value(0, 10000)); // to simulate concurrency
   }
 
   if (durable_) {
@@ -115,11 +117,13 @@ void Publisher::publish()
     ACE_DEBUG((LM_INFO, (pfx_ + "<-match found!\n").c_str()));
   }
 
-  DDS::Duration_t interval = {120, 0};
+  DDS::Duration_t interval = {300, 0};
   ACE_DEBUG((LM_INFO, (pfx_ + "  waiting for acks\n").c_str()));
   if (DDS::RETCODE_OK != dw_->wait_for_acknowledgments(interval)) {
-    throw std::runtime_error(" ERROR: timed out waiting for acks!\n");
+    ACE_ERROR((LM_ERROR, (pfx_ + " ERROR: timed out waiting for acks!\n").c_str()));
+    return 1;
   }
+  return 0;
 }
 
 std::string Publisher::create_pfx(const int thread_index)

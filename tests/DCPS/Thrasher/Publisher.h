@@ -13,7 +13,7 @@ public:
   typedef OpenDDS::DCPS::unique_ptr<Publisher> Ptr;
   Publisher(const long domain_id, std::size_t samples_per_thread, bool durable, const int thread_index);
   ~Publisher() { cleanup(); }
-  void publish();
+  int publish();
 private:
   static std::string create_pfx(const int thread_index);
   void cleanup();
