@@ -523,7 +523,6 @@ ACE_INET_Addr tie_breaker(const T& addrs, const String& name)
 
 ACE_INET_Addr choose_single_coherent_address(const OPENDDS_VECTOR(ACE_INET_Addr)& addresses, bool prefer_loopback, const String& name)
 {
-
 #ifdef ACE_HAS_IPV6
   OPENDDS_SET(ACE_INET_Addr) set6_loopback;
   OPENDDS_SET(ACE_INET_Addr) set6_linklocal;
