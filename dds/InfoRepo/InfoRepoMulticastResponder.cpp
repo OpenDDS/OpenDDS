@@ -213,7 +213,7 @@ InfoRepoMulticastResponder::handle_input(ACE_HANDLE)
     remote_addr.addr_to_string(addr, sizeof(addr), 0);
     ACE_DEBUG((LM_DEBUG,
                "(%P|%t) Received multicast from %s.\n"
-               "Service Name received : %C\n"
+               "Service Name received : %s\n"
                "Port received : %u\n",
                addr,
                object_key,
@@ -229,7 +229,6 @@ InfoRepoMulticastResponder::handle_input(ACE_HANDLE)
 
   if (CORBA::is_nil(locator.in())) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("Nil IORTable\n")));
-
   }
 
   std::string ior;
