@@ -9,7 +9,7 @@
 using namespace Bench;
 
 bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
-    OutputFormat& output_format, Report& report, std::ofstream& output_file_stream,
+    OutputFormat& output_format, Report& report, std::shared_ptr<std::ostream>& output_stream,
     ParseParameters& parse_parameters)
 {
   std::string input_file_path;
@@ -37,6 +37,7 @@ bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
         } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--output-type"))) {
           std::string option_argument = get_option_argument(i, argc, argv);
           static std::unordered_map<std::string, OutputType> const table = {
+            { "single-statistic", OutputType::SingleStatistic },
             { "time-series", OutputType::TimeSeries }
           };
 
@@ -51,6 +52,7 @@ bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
         } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--output-format"))) {
           std::string option_argument = get_option_argument(i, argc, argv);
           static std::unordered_map<std::string, OutputFormat> const table = {
+            { "stat-block", OutputFormat::StatBlock },
             { "gnuplot", OutputFormat::Gnuplot }
           };
 
@@ -136,35 +138,33 @@ bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
     }
   }
 
-  if (input_file_path.empty()) {
-    std::cerr << "Input file not specified" << std::endl;
-    return false;
-  } else if (output_file_path.empty()) {
-    std::cerr << "Output file not specified" << std::endl;
-    return false;
-  } else {
+  std::shared_ptr<std::ifstream> ifs;
+
+  if (!input_file_path.empty()) {
     std::cout << "Opening input file: " << input_file_path << std::endl;
-
-    std::ifstream ifs(input_file_path);
-
-    if (ifs.is_open()) {
-      std::cout << "Reading input file" << std::endl;
-
-      if (!json_2_idl(ifs, report)) {
-        std::cerr << "Could not parse " << input_file_path << std::endl;
-        return false;
-      } else {
-        std::cout << "Opening output file: " << output_file_path << std::endl;
-        output_file_stream.open(output_file_path);
-        if (!output_file_stream.is_open()) {
-          std::cerr << "Could not open output file " << output_file_path << std::endl;
-          return false;
-        }
-      }
-    } else {
+    ifs.reset(new std::ifstream(input_file_path));
+    if (!ifs->is_open()) {
       std::cerr << "Could not open input file " << input_file_path << std::endl;
       return false;
     }
+  }
+
+  if (!output_file_path.empty()) {
+    std::cout << "Opening output file: " << output_file_path << std::endl;
+    output_stream.reset(new std::ofstream(output_file_path));
+    if (!std::dynamic_pointer_cast<std::ofstream>(output_stream)->is_open()) {
+      std::cerr << "Could not open output file " << output_file_path << std::endl;
+      return false;
+    }
+  }
+
+  std::istream& is = input_file_path.empty() ? std::cin : *ifs;
+
+  std::cout << "Parsing input JSON" << std::endl;
+
+  if (!json_2_idl(is, report)) {
+    std::cerr << "Could not parse input JSON" << std::endl;
+    return false;
   }
 
   return true;
@@ -192,15 +192,17 @@ void ArgumentParser::show_usage()
   std::cout
     << "usage: report_parser [-h|--help] | [OPTIONS...]" << std::endl
     << "OPTIONS:" << std::endl
-    << "--input-file  <filename>     The report file to read" << std::endl
-    << "--output-file <filename>     The parsed file to generate" << std::endl
-    << "--output-type <type>         Specifies type of data to parse." << std::endl
+    << "--input-file  <filename>      The report file to read" << std::endl
+    << "--output-file <filename>      The parsed file to generate" << std::endl
+    << "--output-type <type>          Specifies type of data to parse." << std::endl
     << "     Options:" << std::endl
-    << "            time-series:     Parses out time-series data" << std::endl
-    << "--output-format <format>     Specifies format of output." << std::endl
+    << "            single-statistic: Parses out single statistic" << std::endl
+    << "            time-series:      Parses out time-series data" << std::endl
+    << "--output-format <format>      Specifies format of output." << std::endl
     << "     Options:" << std::endl
-    << "            gnuplot:         Formats output for plotting with gnuplot" << std::endl
-    << "--tags   <list of tags>      Specifies the status block types to output." << std::endl
-    << "--stats  <list of stats>     Specifies the status block value types to output." << std::endl
-    << "--values <list of values>    Specifies the status block values to output." << std::endl;
+    << "            stat-block:       Formats output for printing a single consolidated stat block" << std::endl
+    << "            gnuplot:          Formats output for plotting with gnuplot" << std::endl
+    << "--tags   <list of tags>       Specifies the status block types to output." << std::endl
+    << "--stats  <list of stats>      Specifies the status block value types to output." << std::endl
+    << "--values <list of values>     Specifies the status block values to output." << std::endl;
 }

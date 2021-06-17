@@ -9,37 +9,37 @@
 
 using namespace Bench;
 
-int TimeSeriesGnuPlotFormatter::format(const Report& report, std::ofstream& output_file_stream,
-    const ParseParameters& parse_parameters)
+int TimeSeriesGnuPlotFormatter::format(const Report& report, std::ostream& output_stream, const ParseParameters& parse_parameters)
 {
+  // TODO These functions need to be made generic for requested stats / tags (see other formatters)
+
   if (report.node_reports.length() > 0) {
-    output_header(report, output_file_stream, parse_parameters);
-    output_data(report, output_file_stream, parse_parameters);
+    output_header(report, output_stream, parse_parameters);
+    output_data(report, output_stream, parse_parameters);
     return EXIT_SUCCESS;
   }
   return EXIT_FAILURE;
 }
 
-void TimeSeriesGnuPlotFormatter::output_header(const Report& report, std::ofstream& output_file_stream,
-  const ParseParameters& parse_parameters)
+void TimeSeriesGnuPlotFormatter::output_header(const Report& report, std::ostream& output_stream, const ParseParameters& parse_parameters)
 {
   const bool show_postfix = report.node_reports.length() > 1;
 
   // A gnuplot data file header comment line begins with # character.
-  output_file_stream << "#";
+  output_stream << "#";
 
   // Write header line.
   std::cerr << "Writing header..." << std::endl;
   for (unsigned int ni = 0; ni < report.node_reports.length(); ni++) {
     if (ni > 0) {
-      output_file_stream << " ";
+      output_stream << " ";
     }
-    output_file_stream << "cpu_percent_median" << (show_postfix ? std::to_string(ni + 1) : "");
-    output_file_stream << " cpu_percent_timestamp" << (show_postfix ? std::to_string(ni + 1) : "");
-    output_file_stream << " mem_percent_median" << (show_postfix ? std::to_string(ni + 1) : "");
-    output_file_stream << " mem_percent_timestamp" << (show_postfix ? std::to_string(ni + 1) : "");
-    output_file_stream << " virtual_mem_percent_median" << (show_postfix ? std::to_string(ni + 1) : "");
-    output_file_stream << " virtual_mem_percent_timestamp" << (show_postfix ? std::to_string(ni + 1) : "");
+    output_stream << "cpu_percent_median" << (show_postfix ? std::to_string(ni + 1) : "");
+    output_stream << " cpu_percent_timestamp" << (show_postfix ? std::to_string(ni + 1) : "");
+    output_stream << " mem_percent_median" << (show_postfix ? std::to_string(ni + 1) : "");
+    output_stream << " mem_percent_timestamp" << (show_postfix ? std::to_string(ni + 1) : "");
+    output_stream << " virtual_mem_percent_median" << (show_postfix ? std::to_string(ni + 1) : "");
+    output_stream << " virtual_mem_percent_timestamp" << (show_postfix ? std::to_string(ni + 1) : "");
 
     std::unordered_set<std::string> tags;
 
@@ -70,15 +70,14 @@ void TimeSeriesGnuPlotFormatter::output_header(const Report& report, std::ofstre
     }
 
     for (std::unordered_set<std::string>::iterator it = tags.begin(); it != tags.end(); ++it) {
-      output_file_stream << " " << *it << (show_postfix ? std::to_string(ni + 1) : "");
+      output_stream << " " << *it << (show_postfix ? std::to_string(ni + 1) : "");
     }
   }
 
-  output_file_stream << std::endl;
+  output_stream << std::endl;
 }
 
-void TimeSeriesGnuPlotFormatter::output_data(const Report& report, std::ofstream& output_file_stream,
-  const ParseParameters& parse_parameters)
+void TimeSeriesGnuPlotFormatter::output_data(const Report& report, std::ostream& output_stream, const ParseParameters& parse_parameters)
 {
   std::vector<Bench::SimpleStatBlock> cpu_percent_stats;
   std::vector<Bench::SimpleStatBlock> mem_percent_stats;
@@ -130,39 +129,39 @@ void TimeSeriesGnuPlotFormatter::output_data(const Report& report, std::ofstream
       const size_t virtual_mem_percent_timestamp_count = virtual_mem_percent_stats[node_index].timestamp_buffer_.size();
 
       if (index < cpu_percent_median_count) {
-        output_file_stream << cpu_percent_stats[node_index].median_buffer_[index] << " ";
+        output_stream << cpu_percent_stats[node_index].median_buffer_[index] << " ";
       } else {
-        output_file_stream << "- ";
+        output_stream << "- ";
       }
 
       if (index < cpu_percent_timestamp_count) {
-        output_file_stream << cpu_percent_stats[node_index].timestamp_buffer_[index] << " ";
+        output_stream << cpu_percent_stats[node_index].timestamp_buffer_[index] << " ";
       } else {
-        output_file_stream << "- ";
+        output_stream << "- ";
       }
 
       if (index < mem_percent_median_count) {
-        output_file_stream << mem_percent_stats[node_index].median_buffer_[index] << " ";
+        output_stream << mem_percent_stats[node_index].median_buffer_[index] << " ";
       } else {
-        output_file_stream << "- ";
+        output_stream << "- ";
       }
 
       if (index < mem_percent_timestamp_count) {
-        output_file_stream << mem_percent_stats[node_index].timestamp_buffer_[index] << " ";
+        output_stream << mem_percent_stats[node_index].timestamp_buffer_[index] << " ";
       } else {
-        output_file_stream << "- ";
+        output_stream << "- ";
       }
 
       if (index < virtual_mem_percent_median_count) {
-        output_file_stream << virtual_mem_percent_stats[node_index].median_buffer_[index] << " ";
+        output_stream << virtual_mem_percent_stats[node_index].median_buffer_[index] << " ";
       } else {
-        output_file_stream << "- ";
+        output_stream << "- ";
       }
 
       if (index < virtual_mem_percent_timestamp_count) {
-        output_file_stream << virtual_mem_percent_stats[node_index].timestamp_buffer_[index];
+        output_stream << virtual_mem_percent_stats[node_index].timestamp_buffer_[index];
       } else {
-        output_file_stream << "-";
+        output_stream << "-";
       }
 
       if (index == 0) {
@@ -213,7 +212,7 @@ void TimeSeriesGnuPlotFormatter::output_data(const Report& report, std::ofstream
             for (std::unordered_map<std::string, std::unordered_map<std::string, uint64_t>>::const_iterator it = prop_maps.begin(); it != prop_maps.end(); it++) {
               if (it->first == value) {
                 std::unordered_map<std::string, uint64_t> prop_map = it->second;
-                output_file_stream << prop_map[tag] << " ";
+                output_stream << prop_map[tag] << " ";
                 break;
               }
             }
@@ -222,9 +221,9 @@ void TimeSeriesGnuPlotFormatter::output_data(const Report& report, std::ofstream
       }
 
       if (node_index + 1 < report.node_reports.length())
-        output_file_stream << " ";
+        output_stream << " ";
     }
 
-    output_file_stream << std::endl;
+    output_stream << std::endl;
   }
 }

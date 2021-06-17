@@ -1,5 +1,5 @@
-#ifndef TIME_SERIES_RAW_FORMATTER_HEADER
-#define TIME_SERIES_RAW_FORMATTER_HEADER
+#ifndef STAT_BLOCK_RAW_FORMATTER_HEADER
+#define STAT_BLOCK_RAW_FORMATTER_HEADER
 
 #include "ParseParameters.h"
 
@@ -7,7 +7,7 @@
 
 using namespace Bench::TestController;
 
-class TimeSeriesRawFormatter {
+class StatBlockRawFormatter {
 public:
   int format(const Report& report, std::ostream& output_stream, const ParseParameters& parse_parameters);
 };

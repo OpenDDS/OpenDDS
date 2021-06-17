@@ -1,8 +1,8 @@
-#include "TimeSeriesRawFormatter.h"
+#include "StatBlockRawFormatter.h"
 
 #include <PropertyStatBlock.h>
 
-int TimeSeriesRawFormatter::format(const Report& report, std::ostream& output_stream, const ParseParameters& parse_parameters)
+int StatBlockRawFormatter::format(const Report& report, std::ostream& output_stream, const ParseParameters& parse_parameters)
 {
   std::map<std::string, std::vector<Bench::SimpleStatBlock> > consolidated_stat_vec_map;
 
@@ -95,15 +95,7 @@ int TimeSeriesRawFormatter::format(const Report& report, std::ostream& output_st
   }
 
   for (auto it = parse_parameters.stats.begin(); it != parse_parameters.stats.end(); ++it) {
-    Bench::SimpleStatBlock consolidated = consolidate(consolidated_stat_vec_map[*it]);
-    output_stream << *it << " median buffer values:" << std::endl;
-    for (size_t i = 0; i != consolidated.median_buffer_.size(); i++) {
-      output_stream << "\t" << consolidated.median_buffer_[i] << std::endl;
-    }
-    output_stream << *it << " timestamp buffer values:" << std::endl;
-    for (size_t i = 0; i != consolidated.timestamp_buffer_.size(); i++) {
-      output_stream << "\t" << consolidated.timestamp_buffer_[i] << std::endl;
-    }
+    consolidate(consolidated_stat_vec_map[*it]).pretty_print(output_stream, *it);
   }
 
   return EXIT_SUCCESS;

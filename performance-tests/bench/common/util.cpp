@@ -182,7 +182,8 @@ void consolidate_tagged_stats(std::unordered_map<std::string, Bench::SimpleStatB
   for (CORBA::ULong i = 0; i < reported_tags.length(); ++i) {
     const std::string tag(reported_tags[i]);
     if (input_tags.find(tag) != input_tags.end()) {
-      stats[tag] = consolidate(stats[tag], data.to_simple_stat_block());
+      Bench::SimpleStatBlock& ssb = stats[tag];
+      ssb = consolidate(ssb, data.to_simple_stat_block());
     }
   }
 }

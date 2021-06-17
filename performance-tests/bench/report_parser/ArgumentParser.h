@@ -12,7 +12,7 @@ using namespace Bench::TestController;
 class ArgumentParser {
 public:
   bool parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
-    OutputFormat& output_format, Report& report, std::ofstream& output_file_stream,
+    OutputFormat& output_format, Report& report, std::shared_ptr<std::ostream>& output_stream,
     ParseParameters& parse_parameters);
 private:
   void show_usage_prompt();

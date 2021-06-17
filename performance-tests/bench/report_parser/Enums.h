@@ -4,12 +4,14 @@
 enum class OutputType
 {
   None,
+  SingleStatistic,
   TimeSeries
 };
 
 enum class OutputFormat
 {
   None,
+  StatBlock,
   Gnuplot
 };
 
