@@ -332,7 +332,7 @@ InfoRepoMulticastResponder::handle_input(ACE_HANDLE)
                "sent to %C:%u.\n"
                "result from send = %d\n",
                ior.c_str(),
-               peer_addr.get_host_name(),
+               peer_addr.get_host_addr(),
                peer_addr.get_port_number(),
                result));
 
