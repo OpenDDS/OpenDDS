@@ -305,7 +305,7 @@ InfoRepoMulticastResponder::handle_input(ACE_HANDLE)
   // length as the first element, and ior itself as the second.)
 
   // Length of ior to be sent.
-  CORBA::Short data_len = ACE_HTONS(static_cast<CORBA::Short>(ior.length()) + 1);
+  const CORBA::Short data_len = ACE_HTONS(static_cast<CORBA::Short>(ior.length()) + 1);
 
   // Vector to be sent.
   const int cnt = 2;
@@ -319,7 +319,7 @@ InfoRepoMulticastResponder::handle_input(ACE_HANDLE)
   iovp[1].iov_base = const_cast<char*>(ior.c_str());
   iovp[1].iov_len  = static_cast<u_long>(ior.length() + 1);
 
-  ssize_t result = stream.sendv_n(iovp, cnt);
+  const ssize_t result = stream.sendv_n(iovp, cnt);
   // Close the stream.
   stream.close();
 
