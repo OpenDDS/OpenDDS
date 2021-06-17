@@ -48,12 +48,19 @@ int Thrasher::run()
 {
   Subscriber sub(domain_id_, n_pub_threads_, expected_samples_, durable_);
   PublisherService pub_svc(domain_id_, samples_per_thread_, durable_);
-  pub_svc.start(n_pub_threads_);
+  if (!pub_svc.start(n_pub_threads_)) {
+    return 71;
+  }
+
   sub.wait(1, 2);
   sub.wait_received();
-  pub_svc.end();
-  sub.wait(0);
-  return sub.check_result();
+
+  if (!pub_svc.end()) {
+    return 73;
+  }
+
+  const int r = sub.wait(0);
+  return (r == 0) ? sub.check_result() : r;
 }
 
 void Thrasher::parse_args(int& argc, ACE_TCHAR** argv)
@@ -98,5 +105,5 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
   } catch (...) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: exception\n"));
   }
-  return 1;
+  return 101;
 }

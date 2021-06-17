@@ -10,8 +10,8 @@ class PublisherService : public ACE_Task_Base
 public:
   PublisherService(const long domain_id, std::size_t samples_per_thread, bool durable);
   ~PublisherService();
-  void start(const int n_threads, const long flags=THR_NEW_LWP|THR_JOINABLE|THR_INHERIT_SCHED);
-  void end();
+  bool start(const int n_threads, const long flags=THR_NEW_LWP|THR_JOINABLE|THR_INHERIT_SCHED);
+  bool end();
   int svc();
 private:
   Publisher* createPublisher();
