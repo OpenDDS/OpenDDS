@@ -1662,9 +1662,11 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     }
 
     if (got_chunk_association_multiplier) {
-      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSChunkAssociationMutltiplier")));
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSChunkAssociationMultiplier")));
     } else {
+      // This is legacy support for a misspelling of the config option.
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSChunkAssociationMutltiplier"), this->association_chunk_multiplier_, size_t)
+      GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSChunkAssociationMultiplier"), this->association_chunk_multiplier_, size_t)
     }
 
     if (got_bit_transport_port) {

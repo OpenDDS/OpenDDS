@@ -18,11 +18,11 @@
 #include <cstdlib>
 
 const int num_instances_per_writer = 1;
-bool reliable = false;
 
-Writer::Writer(DDS::DataWriter_ptr writer)
-  : writer_(DDS::DataWriter::_duplicate(writer)),
-    finished_instances_(0)
+Writer::Writer(DDS::DataWriter_ptr writer, bool reliable)
+  : writer_(DDS::DataWriter::_duplicate(writer))
+  , finished_instances_(0)
+  , reliable_(reliable)
 {
 }
 
@@ -108,6 +108,10 @@ int Writer::svc()
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l: svc()")
                    ACE_TEXT(" ERROR: write returned %d!\n"), error));
+      }
+
+      if (!reliable_) {
+        ACE_OS::sleep(ACE_Time_Value(0, 20000));
       }
 
       message.count++;

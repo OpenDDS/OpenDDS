@@ -58,6 +58,8 @@ protected:
 
   virtual std::string transport_type() const { return "multicast"; }
 
+  void client_stop(const RepoId& localId);
+
 private:
 
   typedef ACE_SYNCH_MUTEX         LockType;

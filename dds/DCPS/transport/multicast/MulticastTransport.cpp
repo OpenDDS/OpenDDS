@@ -198,7 +198,6 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
     }
   }
 
-  link->remove_on_start_callback(client, remote.repo_id_);
   return AcceptConnectResult(link);
 }
 
@@ -232,6 +231,7 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
 
   MulticastPeer remote_peer = (ACE_INT64)RepoIdConverter(remote.repo_id_).federationId() << 32
                             | RepoIdConverter(remote.repo_id_).participantId();
+
   GuardThreadType guard(this->connections_lock_);
 
   if (connections_.count(std::make_pair(remote_peer, local_peer))) {
@@ -250,18 +250,24 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
 
   } else {
 
-    this->pending_connections_[std::make_pair(remote_peer, local_peer)].
-    push_back(std::make_pair(client, remote.repo_id_));
+    if (config().is_reliable()) {
+      pending_connections_[std::make_pair(remote_peer, local_peer)].
+      push_back(std::make_pair(client, remote.repo_id_));
+    }
+
     //can't call start session with connections_lock_ due to reactor
     //call in session->start which could deadlock with passive_connection
     guard.release();
     MulticastSession_rch session(
       this->start_session(link, remote_peer, false /*!active*/));
 
-    return AcceptConnectResult(
-      session ? AcceptConnectResult::ACR_SUCCESS : AcceptConnectResult::ACR_FAILED
-    );
-
+    if (!session) {
+      return AcceptConnectResult(AcceptConnectResult::ACR_FAILED);
+    } else if (config().is_reliable()) {
+      return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
+    } else {
+      return AcceptConnectResult(link);
+    }
   }
 }
 
@@ -309,6 +315,7 @@ MulticastTransport::passive_connection(MulticastPeer local_peer, MulticastPeer r
   const PendConnMap::iterator pend = this->pending_connections_.find(peers);
   //if connection was pending, calls to use_datalink finalized the connection
   //if it was not previously pending, accept_datalink() will finalize connection
+
   this->connections_.insert(peers);
 
   Links::const_iterator server_link = this->server_links_.find(local_peer);
@@ -333,8 +340,9 @@ MulticastTransport::passive_connection(MulticastPeer local_peer, MulticastPeer r
           RepoId remote_repo = tmp.at(i).second;
           guard.release();
           TransportClient_rch client = pend_client.lock();
-          if (client)
+          if (client) {
             client->use_datalink(remote_repo, link);
+          }
           guard.acquire();
         }
       }
@@ -404,6 +412,24 @@ MulticastTransport::release_datalink(DataLink* /*link*/)
 {
   // No-op for multicast: keep both the client_link_ and server_link_ around
   // until the transport is shut down.
+}
+
+void MulticastTransport::client_stop(const RepoId& localId)
+{
+  GuardThreadType guard_links(this->links_lock_);
+  const MulticastPeer local_peer = (ACE_INT64)RepoIdConverter(localId).federationId() << 32
+                                 | RepoIdConverter(localId).participantId();
+  Links::const_iterator link_iter = this->client_links_.find(local_peer);
+  MulticastDataLink_rch link;
+
+  if (link_iter != this->client_links_.end()) {
+    link = link_iter->second;
+  }
+  guard_links.release();
+
+  if (link) {
+    link->client_stop(localId);
+  }
 }
 
 } // namespace DCPS

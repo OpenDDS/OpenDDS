@@ -37,9 +37,18 @@ if ($test->flag('udp')) {
     $pub_opts .= " -DCPSConfigFile pub_udp.ini";
     $sub_opts .= " -DCPSConfigFile sub_udp.ini";
 }
+elsif ($test->flag('udp_free')) {
+    #similar to udp, but don't set localaddress / use localhost
+    $pub_opts .= " -DCPSConfigFile pub_udp_free.ini";
+    $sub_opts .= " -DCPSConfigFile sub_udp_free.ini";
+}
 elsif ($test->flag('multicast')) {
     $pub_opts .= " -DCPSConfigFile pub_multicast.ini";
     $sub_opts .= " -DCPSConfigFile sub_multicast.ini";
+}
+elsif ($test->flag('multicast_be')) {
+    $pub_opts .= " -DCPSConfigFile pub_multicast_be.ini";
+    $sub_opts .= " -DCPSConfigFile sub_multicast_be.ini";
 }
 elsif ($test->flag('default_tcp')) {
     $pub_opts .= " -t tcp";

@@ -22,8 +22,6 @@
 
 #include <cstdlib>
 
-bool reliable = false;
-
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   int status = EXIT_SUCCESS;
