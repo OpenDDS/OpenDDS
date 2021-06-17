@@ -54,9 +54,9 @@ void TypeSupportImpl::to_type_info_i(XTypes::TypeIdentifierWithDependencies& ti_
   const TypeMap::const_iterator pos = type_map.find(ti);
 
   if (pos == type_map.end()) {
-    std::string ek = ti.kind() == XTypes::EK_MINIMAL ? "minimal" : "complete";
+    const char* ek = ti.kind() == XTypes::EK_MINIMAL ? "minimal" : "complete";
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: TypeSupportImpl::to_type_info_i, ")
-               ACE_TEXT("%C TypeIdentifier of topic type not found in local type map.\n"), ek.c_str()));
+               ACE_TEXT("%C TypeIdentifier of topic type not found in local type map.\n"), ek));
     ti_with_deps.typeid_with_size.type_id = TypeIdentifier();
     ti_with_deps.typeid_with_size.typeobject_serialized_size = 0;
   } else {
