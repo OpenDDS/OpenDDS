@@ -145,6 +145,9 @@ public:
   bool printer() const;
   void printer(bool b);
 
+  bool xtypes_complete() const;
+  void xtypes_complete(bool b);
+
   ACE_CString java_arg() const;
   void java_arg(const ACE_CString& str);
 
@@ -240,8 +243,8 @@ private:
   const char* filename_;
 
   bool java_, suppress_idl_, suppress_typecode_, suppress_xtypes_,
-    no_default_gen_, generate_itl_, generate_v8_,
-    generate_rapidjson_, face_ts_, printer_;
+    no_default_gen_, generate_itl_, generate_v8_, generate_rapidjson_,
+    generate_xtypes_complete_, face_ts_, printer_;
 
   bool filename_only_includes_;
 

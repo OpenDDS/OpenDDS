@@ -1,0 +1,14 @@
+TypeObjectTest
+TypeObjectTestC.cpp
+TypeObjectTestC.h
+TypeObjectTestC.inl
+TypeObjectTestS.cpp
+TypeObjectTestS.h
+TypeObjectTestTypeSupport.idl
+TypeObjectTestTypeSupportC.cpp
+TypeObjectTestTypeSupportC.h
+TypeObjectTestTypeSupportC.inl
+TypeObjectTestTypeSupportImpl.cpp
+TypeObjectTestTypeSupportImpl.h
+TypeObjectTestTypeSupportS.cpp
+TypeObjectTestTypeSupportS.h

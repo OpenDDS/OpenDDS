@@ -76,7 +76,9 @@ dds_visitor::dds_visitor(AST_Decl* scope, bool java_ts_only)
 {
   if (!be_global->no_default_gen()) {
     gen_target_.add_generator(&to_gen_);
-    to_gen_.produce_output(!be_global->suppress_xtypes() && !java_ts_only);
+    const bool generate_xtypes = !be_global->suppress_xtypes() && !java_ts_only;
+    to_gen_.produce_output(generate_xtypes);
+    to_gen_.produce_xtypes_complete(generate_xtypes && be_global->xtypes_complete());
     gen_target_.add_generator(&value_reader_generator_);
     gen_target_.add_generator(&value_writer_generator_);
     gen_target_.add_generator(&mar_gen_);

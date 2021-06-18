@@ -96,6 +96,8 @@ public:
 
   virtual const XTypes::TypeIdentifier& getMinimalTypeIdentifier() const = 0;
   virtual const XTypes::TypeMap& getMinimalTypeMap() const = 0;
+  virtual const XTypes::TypeIdentifier& getCompleteTypeIdentifier() const = 0;
+  virtual const XTypes::TypeMap& getCompleteTypeMap() const = 0;
 
   virtual Extensibility getExtensibility() const = 0;
 
@@ -105,6 +107,9 @@ public:
 
 private:
   virtual const char* default_type_name() const = 0;
+
+  void populate_dependencies_i(const RcHandle<XTypes::TypeLookupService>& tls,
+                               XTypes::EquivalenceKind ek) const;
 
   OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(TypeSupportImpl)
 };
