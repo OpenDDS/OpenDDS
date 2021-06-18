@@ -74,7 +74,7 @@ String get_fully_qualified_hostname(ACE_INET_Addr* addr)
     ACE_INET_Addr *addr_array = 0;
     OpenDDS::DCPS::HostnameInfoVector nonFQDN;
 
-    int result = ACE::get_ip_interfaces(addr_count, addr_array);
+    const int result = ACE::get_ip_interfaces(addr_count, addr_array);
 
     struct Array_Guard {
       Array_Guard(ACE_INET_Addr *ptr) : ptr_(ptr) {}
@@ -90,8 +90,12 @@ String get_fully_qualified_hostname(ACE_INET_Addr* addr)
                  ACE_TEXT("ACE::get_ip_interfaces")));
 
     } else {
+      for (size_t i = 0; i < addr_count; i++) {
+        VDBG_LVL((LM_DEBUG, "(%P|%t) NetworkAddress: found IP interface %C\n", addr_array[i].get_host_addr()), 4);
+      }
+
 #ifdef ACE_HAS_IPV6
-        //front load IPV6 addresses to give preference to IPV6 interfaces
+        // Front load IPV6 addresses to give preference to IPV6 interfaces
         size_t index_last_non_ipv6 = 0;
         for (size_t i = 0; i < addr_count; i++) {
           if (addr_array[i].get_type() == AF_INET6) {
@@ -107,8 +111,7 @@ String get_fully_qualified_hostname(ACE_INET_Addr* addr)
       for (size_t i = 0; i < addr_count; i++) {
         char hostname[MAXHOSTNAMELEN+1] = "";
 
-        //Discover the fully qualified hostname
-
+        // Discover the fully qualified hostname
         if (ACE::get_fqdn(addr_array[i], hostname, MAXHOSTNAMELEN+1) == 0) {
           VDBG_LVL((LM_DEBUG, "(%P|%t) considering fqdn %C\n", hostname), 4);
           if (!addr_array[i].is_loopback() && ACE_OS::strchr(hostname, '.') != 0 && choose_single_coherent_address(hostname, false, false) != ACE_INET_Addr()) {
