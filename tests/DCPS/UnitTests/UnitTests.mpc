@@ -160,3 +160,10 @@ project(*JsonValueReader): dcps_test, googletest, rapidjson {
     JsonValueReader.cpp
   }
 }
+
+project(*TypeObject): dcpsexe, dcps_test {
+  exename = *
+  Source_Files {
+    TypeObject.cpp
+  }
+}
