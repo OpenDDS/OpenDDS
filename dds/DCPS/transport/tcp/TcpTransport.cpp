@@ -591,7 +591,7 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
 
   VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::passive_connection() - ")
             ACE_TEXT("established with %C:%d.\n"),
-            remote_address.get_host_name(),
+            remote_address.get_host_addr(),
             remote_address.get_port_number()), 2);
 
   GuardType connection_guard(connections_lock_);
@@ -631,7 +631,7 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
                ACE_TEXT("(%P|%t) TcpTransport::passive_connection() - ")
                ACE_TEXT("ERROR: connection with %C:%d at priority %d already exists, ")
                ACE_TEXT("overwriting previously established connection.\n"),
-               remote_address.get_host_name(),
+               remote_address.get_host_addr(),
                remote_address.get_port_number(),
                connection->transport_priority()));
   }

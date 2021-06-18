@@ -91,7 +91,7 @@ OpenDDS::DCPS::TcpReceiveStrategy::start_i()
                ACE_TEXT("link:\n%C connected to %C:%d ")
                ACE_TEXT("registering with reactor to receive.\n"),
                buffer.str().c_str(),
-               connection->get_remote_address().get_host_name(),
+               connection->get_remote_address().get_host_addr(),
                connection->get_remote_address().get_port_number()));
   }
 
