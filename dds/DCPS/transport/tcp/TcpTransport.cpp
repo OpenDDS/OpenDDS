@@ -329,7 +329,6 @@ TcpTransport::configure_i(TcpInst& config)
 
   // Open our acceptor object so that we can accept passive connections
   // on our config.local_address_.
-
   if (this->acceptor_->open(config.local_address(),
                             this->reactor_task()->get_reactor()) != 0) {
 
@@ -356,7 +355,7 @@ TcpTransport::configure_i(TcpInst& config)
             ACE_TEXT("(%P|%t) TcpTransport::configure_i listening on %C:%hu\n"),
             listening_addr.c_str(), address.get_port_number()), 2);
 
-  unsigned short port = address.get_port_number();
+  const unsigned short port = address.get_port_number();
 
   // As default, the acceptor will be listening on INADDR_ANY but advertise with the fully
   // qualified hostname and actual listening port number.
