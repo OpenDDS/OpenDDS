@@ -4,10 +4,10 @@ used to evaluate the readiness of pull requests. It runs our suite of
 tests accross a wide variation of operation systems and configurations.
 
 When run on a pull request, Github Actions will simulate a merge between
-the pull request branch, and master. 
+the pull request branch, and master.
 
-When not on a PR, Github Actions can made to run by giving your branch
-the prefix "gh_wf_". These local runs of Github Actions be viewed in
+When not on a pull request, Github Actions can made to run by giving your
+branch the prefix "gh_wf_". These local runs of Github Actions be viewed in
 the "actions" tab in your fork. Local runs of the workflows do not
 simulate a merge and run only the code on the branch. This prefix is
 useful when you are early in development and are not ready to open
@@ -132,7 +132,7 @@ called "Artifacts" which lists each artifact that can be downloaded.
 
 ### Using Artifacts to Replicate Builds
 You can download the *ACE_TAO* and *build_* artifacts then use them for a local build,
-so long as your operating system is the same as the one on the runner. 
+so long as your operating system is the same as the one on the runner.
 
 1. "git clone" the ACE_TAO branch which is targeted by the build. This is usually going to be
 ace6tao2.
