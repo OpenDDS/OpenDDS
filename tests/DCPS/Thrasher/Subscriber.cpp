@@ -91,40 +91,10 @@ void Subscriber::cleanup()
   }
 }
 
-int Subscriber::wait(unsigned int num_writers, const int cmp)
+int Subscriber::wait(unsigned int num_writers, Utils::CmpOp cmp)
 {
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) -> Subscriber::wait for %d\n"), num_writers));
-  int ret = 1;
-  const CORBA::Long n_writers = static_cast<CORBA::Long>(num_writers);
-  DDS::StatusCondition_var condition = reader_->get_statuscondition();
-  condition->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
-  DDS::WaitSet_var ws(new DDS::WaitSet);
-  ws->attach_condition(condition);
-  DDS::SubscriptionMatchedStatus ms = {0, 0, 0, 0, 0};
-  const DDS::Duration_t wake_interval = {3, 0};
-  DDS::ConditionSeq conditions;
-  while (ret == 1) {
-    if (reader_->get_subscription_matched_status(ms) == DDS::RETCODE_OK) {
-      if ((cmp ==  0 && ms.current_count == n_writers) ||
-          (cmp ==  2 && ms.current_count >= n_writers) ||
-          (cmp ==  1 && ms.current_count >  n_writers) ||
-          (cmp == -1 && ms.current_count <  n_writers) ||
-          (cmp == -2 && ms.current_count <= n_writers)) {
-        ret = 0;
-      } else { // wait for a change
-        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) -> ws->wait %d\n"), ms.current_count));
-        DDS::ReturnCode_t stat = ws->wait(conditions, wake_interval);
-        if ((stat != DDS::RETCODE_OK) && (stat != DDS::RETCODE_TIMEOUT)) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: %N:%l: wait failed!\n")));
-          ret = -1;
-        }
-      }
-    } else {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: %N:%l: get_subscription_matched_status failed!\n")));
-      ret = -1;
-    }
-  }
-  ws->detach_condition(condition);
+  int ret = Utils::wait_match(reader_, num_writers, cmp);
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) <- Subscriber::wait returns %d\n"), ret));
   return ret;
 }

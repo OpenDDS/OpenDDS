@@ -3,6 +3,8 @@
 
 #include "DataReaderListenerImpl.h"
 
+#include <tests/Utils/StatusMatching.h>
+
 #include <dds/DCPS/Service_Participant.h>
 
 class Subscriber
@@ -10,7 +12,7 @@ class Subscriber
 public:
   Subscriber(const DDS::DomainId_t domainId, const std::size_t n_pub_threads, const std::size_t expected_samples, const bool durable);
   ~Subscriber();
-  int wait(unsigned int num_writers, const int cmp = 0);
+  int wait(unsigned int num_writers, Utils::CmpOp cmp);
   void wait_received();
   int check_result() const;
 private:

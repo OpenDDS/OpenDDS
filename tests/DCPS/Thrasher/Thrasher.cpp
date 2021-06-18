@@ -1,6 +1,8 @@
 #include "PublisherService.h"
 #include "Subscriber.h"
 
+#include <tests/Utils/StatusMatching.h>
+
 #include <ace/Arg_Shifter.h>
 #include <ace/Log_Msg.h>
 #include <ace/OS_main.h>
@@ -52,14 +54,14 @@ int Thrasher::run()
     return 71;
   }
 
-  sub.wait(1, 2);
+  sub.wait(1, Utils::GTE);
   sub.wait_received();
 
   if (!pub_svc.end()) {
     return 73;
   }
 
-  const int r = sub.wait(0);
+  const int r = sub.wait(0, Utils::EQ);
   return (r == 0) ? sub.check_result() : r;
 }
 
