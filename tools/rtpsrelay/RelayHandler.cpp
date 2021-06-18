@@ -309,9 +309,19 @@ void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& n
     guid_addr_expiration_map_.erase(pos->second);
     expiration_guid_addr_map_.erase(pos++);
   }
+
+  for (auto pos = pending_expiration_map_.begin(), limit = pending_expiration_map_.end(); pos != limit && pos->first < now;) {
+    if (config_.log_activity()) {
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C pending expired at %d.%d now=%d.%d total=%B/%B pending=%B/%B\n"), guid_to_string(pos->second).c_str(), pos->first.value().sec(), pos->first.value().usec(), now.value().sec(), now.value().usec(), guid_addr_set_map_.size(), config_.static_limit(), pending_.size(), config_.max_pending()));
+    }
+    relay_stats_reporter_.expired_pending(now);
+    pending_.erase(pos->second);
+    pending_expiration_map_.erase(pos++);
+  }
 }
 
-bool GuidAddrSet::ignore(const OpenDDS::DCPS::GUID_t& guid)
+bool GuidAddrSet::ignore(const OpenDDS::DCPS::GUID_t& guid,
+                         const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
 
@@ -333,6 +343,7 @@ bool GuidAddrSet::ignore(const OpenDDS::DCPS::GUID_t& guid)
   }
 
   pending_.insert(guid);
+  pending_expiration_map_.insert(std::make_pair(now + config_.lifespan(), guid));
 
   return false;
 }
@@ -441,7 +452,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
       return 0;
     }
 
-    if (guid_addr_set_.ignore(src_guid)) {
+    if (guid_addr_set_.ignore(src_guid, now)) {
       stats_reporter_.ignored_message(msg_len, now);
       return 0;
     }
@@ -487,7 +498,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
       src_guid.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
       has_guid = true;
 
-      if (guid_addr_set_.ignore(src_guid)) {
+      if (guid_addr_set_.ignore(src_guid, now)) {
         stats_reporter_.ignored_message(msg_len, now);
         return 0;
       }
