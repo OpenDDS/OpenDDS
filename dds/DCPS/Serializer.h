@@ -669,7 +669,7 @@ public:
 
   void set_construction_status(ConstructionStatus cs);
 
-  struct SavePoint
+  struct OpenDDS_Dcps_Export SavePoint
   {
     explicit SavePoint(Serializer& ser);
 
