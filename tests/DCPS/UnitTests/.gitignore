@@ -3,6 +3,9 @@
 /UnitTests_DurationToTimeValue
 /UnitTests_Fragmentation
 /UnitTests_GuidGenerator
+/UnitTests_GuidUtils
+/UnitTests_JsonValueReader
+/UnitTests_JsonValueWriter
 /UnitTests_LivelinessCompatibility
 /UnitTests_MultiTask
 /UnitTests_NetworkConfig
@@ -14,8 +17,6 @@
 /UnitTests_RtpsSequenceNumberSet
 /UnitTests_SequenceNumber
 /UnitTests_TimeTSubtraction
+/UnitTests_TypeObject
 /UnitTests_XTypesAssignability
 /UnitTests_Serializer
-/UnitTests_GuidUtils
-/UnitTests_JsonValueWriter
-/UnitTests_JsonValueReader

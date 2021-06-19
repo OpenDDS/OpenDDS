@@ -11,6 +11,9 @@
 
 #include "../common/TestSupport.h"
 
+#include <cstring>
+#include <iomanip>
+#include <iostream>
 #include <stdexcept>
 
 using namespace OpenDDS::XTypes;
@@ -52,14 +55,14 @@ bool operator>>(Serializer& strm, Struct& stru)
 template<typename T, size_t N>
 void check_encode(const T& object, const Encoding& enc, const unsigned char (&expected)[N])
 {
-  size_t size = 0;
-  serialized_size(enc, size, object);
+  const size_t size = serialized_size(enc, object);
   TEST_CHECK(size == N);
   ACE_Message_Block buffer(size);
   {
     Serializer ser(&buffer, enc);
     TEST_CHECK(ser << object);
     TEST_CHECK(buffer.length() == N);
+    TEST_CHECK(0 == std::memcmp(expected, buffer.rd_ptr(), N));
   }
   Serializer ser(&buffer, enc);
   T object2;
@@ -107,9 +110,13 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(seqs.length() == 1);
     TEST_CHECK(seqs[0].member == 2);
 
+    const char invalid_encoding[] = {0, 0, 0, 0};
+    check_decode(seqs, xcdr2_be, invalid_encoding);
+    TEST_CHECK(seqs.length() == 0);
+
   } catch (const std::runtime_error& err) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %C\n"),
-      err.what()), -1);
+      err.what()), EXIT_FAILURE);
   }
-  return 0;
+  return EXIT_SUCCESS;
 }
