@@ -237,8 +237,8 @@ tests/DCPS/EntityLifecycleStress/run_test.pl rtps_disc publishers 10 subscribers
 tests/DCPS/LivelinessKeepAliveTest/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/LivelinessTimeout/run_test.pl: !DCPS_MIN !GH_ACTIONS
 tests/DCPS/LivelinessTimeout/run_test.pl rtps_disc: !DCPS_MIN RTPS
-tests/DCPS/UnitTests/run_test.pl: !DCPS_MIN !GH_ACTIONS
-tests/unit-tests/dds/DCPS/run_test_unit.pl: !DCPS_MIN !GH_ACTIONS
+tests/DCPS/UnitTests/run_test.pl
+tests/unit-tests/dds/DCPS/run_test_unit.pl
 tests/unit-tests/dds/DCPS/transport/framework/run_test_unit.pl
 tests/DCPS/KeyTest/run_test.pl keymarshalling: !DCPS_MIN
 tests/DCPS/KeyTest/run_test.pl isbounded: !DCPS_MIN
