@@ -358,6 +358,23 @@ Serializer::~Serializer()
 {
 }
 
+Serializer::SavePoint::SavePoint(Serializer& ser)
+  : pos_(ser.pos_)
+  , current_(ser.current_)
+  , rd_ptr_(ser.current_->rd_ptr())
+  , wr_ptr_(ser.current_->wr_ptr())
+{
+}
+
+void
+Serializer::SavePoint::restore(Serializer& ser) const
+{
+  ser.pos_ = pos_;
+  ser.current_ = current_;
+  ser.current_->rd_ptr(rd_ptr_);
+  ser.current_->wr_ptr(wr_ptr_);
+}
+
 void
 Serializer::reset_alignment()
 {

@@ -3574,40 +3574,33 @@ namespace {
     }
     {
       Function insertion("operator<<", "bool");
-      insertion.addArg("outer_strm", "Serializer&");
+      insertion.addArg("strm", "Serializer&");
       insertion.addArg("uni", "const " + cxx + "&");
       insertion.endArgs();
       be_global->impl_ <<
-        "  if (!(outer_strm << uni._d())) {\n"
+        "  if (!(strm << uni._d())) {\n"
         "    return false;\n"
         "  }\n"
-        "  size_t size = serialized_size(outer_strm.encoding(), uni);\n"
+        "  size_t size = serialized_size(strm.encoding(), uni);\n"
         "  size -= 4; // parameterId & length\n"
         "  const size_t post_pad = 4 - (size % 4);\n"
         "  const size_t total = size + ((post_pad < 4) ? post_pad : 0);\n"
-        "  if (size > ACE_UINT16_MAX || "
-        "!(outer_strm << ACE_CDR::UShort(total))) {\n"
+        "  if (size > ACE_UINT16_MAX || !(strm << ACE_CDR::UShort(total))) {\n"
         "    return false;\n"
         "  }\n"
-        "  ACE_Message_Block param(size);\n"
-        "  Serializer strm(&param, outer_strm.encoding());\n"
+        "  const Serializer::SavePoint sp(strm);\n"
         "  if (uni._d() == RTPS::PID_XTYPES_TYPE_INFORMATION) {\n"
         "    if (!strm.write_octet_array(uni.type_information().get_buffer(), uni.type_information().length())) {\n"
+        "      sp.restore(strm);\n"
         "      return false;\n"
         "    }\n"
         "  } else if (!insertParamData(strm, uni)) {\n"
+        "    sp.restore(strm);\n"
         "    return false;\n"
         "  }\n"
-        "  const ACE_CDR::Octet* data = reinterpret_cast<ACE_CDR::Octet*>("
-        "param.rd_ptr());\n"
-        "  if (!outer_strm.write_octet_array(data, ACE_CDR::ULong(param.length()))) {\n"
-        "    return false;\n"
-        "  }\n"
-        "  if (post_pad < 4 && outer_strm.encoding().alignment() != "
-        "Encoding::ALIGN_NONE) {\n"
+        "  if (post_pad < 4 && strm.encoding().alignment() != Encoding::ALIGN_NONE) {\n"
         "    static const ACE_CDR::Octet padding[3] = {0};\n"
-        "    return outer_strm.write_octet_array(padding, "
-        "ACE_CDR::ULong(post_pad));\n"
+        "    return strm.write_octet_array(padding, ACE_CDR::ULong(post_pad));\n"
         "  }\n"
         "  return true;\n";
     }

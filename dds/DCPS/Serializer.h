@@ -669,14 +669,23 @@ public:
 
   void set_construction_status(ConstructionStatus cs);
 
+  struct SavePoint
+  {
+    explicit SavePoint(Serializer& ser);
+
+    void restore(Serializer& ser) const;
+
+    const size_t pos_;
+    ACE_Message_Block* current_;
+    char* const rd_ptr_;
+    char* const wr_ptr_;
+  };
+
   template <typename T>
   bool peek(T& t)
   {
     // save
-    const size_t pos = pos_;
-    ACE_Message_Block* current = current_;
-    char* const rd_ptr = current_->rd_ptr();
-    char* const wr_ptr = current_->wr_ptr();
+    SavePoint sp(*this);
 
     // read
     if (!(*this >> t)) {
@@ -684,10 +693,7 @@ public:
     }
 
     // reset
-    current->wr_ptr(wr_ptr);
-    current->rd_ptr(rd_ptr);
-    current_ = current;
-    pos_ = pos;
+    sp.restore(*this);
     return true;
   }
 
