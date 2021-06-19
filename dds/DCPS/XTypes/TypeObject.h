@@ -1965,19 +1965,28 @@ bool operator>>(Serializer& strm, XTypes::Sequence<T>& seq)
 
 // non-template overloads for sequences of basic types:
 
+OpenDDS_Dcps_Export
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::LBoundSeq& seq);
+OpenDDS_Dcps_Export
 bool operator<<(Serializer& strm, const XTypes::LBoundSeq& seq);
+OpenDDS_Dcps_Export
 bool operator>>(Serializer& strm, XTypes::LBoundSeq& seq);
 
+OpenDDS_Dcps_Export
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::SBoundSeq& seq);
+OpenDDS_Dcps_Export
 bool operator<<(Serializer& strm, const XTypes::SBoundSeq& seq);
+OpenDDS_Dcps_Export
 bool operator>>(Serializer& strm, XTypes::SBoundSeq& seq);
 
+OpenDDS_Dcps_Export
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::UnionCaseLabelSeq& seq);
+OpenDDS_Dcps_Export
 bool operator<<(Serializer& strm, const XTypes::UnionCaseLabelSeq& seq);
+OpenDDS_Dcps_Export
 bool operator>>(Serializer& strm, XTypes::UnionCaseLabelSeq& seq);
 
 
