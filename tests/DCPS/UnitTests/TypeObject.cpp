@@ -79,6 +79,26 @@ void check_decode(T& object, const Encoding& enc, const char (&expected)[N])
   TEST_CHECK(buffer.length() == 0);
 }
 
+TypeObject getTypeObject()
+{
+  using namespace OpenDDS;
+  return XTypes::TypeObject(XTypes::MinimalTypeObject(XTypes::MinimalStructType(XTypes::IS_APPENDABLE, XTypes::MinimalStructHeader(XTypes::TypeIdentifier(XTypes::TK_NONE), XTypes::MinimalTypeDetail()), XTypes::MinimalStructMemberSeq().append(XTypes::MinimalStructMember(XTypes::CommonStructMember(0, XTypes::TRY_CONSTRUCT1 | XTypes::IS_KEY, XTypes::TypeIdentifier(XTypes::TK_INT32)), XTypes::MinimalMemberDetail(60, 110, 11, 138))))));
+}
+
+std::ostream& operator<<(std::ostream& os, const TypeIdentifier& ti)
+{
+  std::ostream os_hex(os.rdbuf());
+  os_hex << std::hex << std::showbase;
+  os_hex << "Kind: " << int(ti.kind()) << ' ';
+  if (ti.kind() == EK_COMPLETE || ti.kind() == EK_MINIMAL) {
+    os_hex << "Equiv Hash: ";
+    for (size_t i = 0; i < sizeof ti.equivalence_hash(); ++i) {
+      os_hex << int(ti.equivalence_hash()[i]) << ' ';
+    }
+  }
+  return os << '\n';
+}
+
 int ACE_TMAIN(int, ACE_TCHAR*[])
 {
   try {
@@ -113,6 +133,21 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     const char invalid_encoding[] = {0, 0, 0, 0};
     check_decode(seqs, xcdr2_be, invalid_encoding);
     TEST_CHECK(seqs.length() == 0);
+
+
+    const TypeObject testObject = getTypeObject();
+    const TypeIdentifier goodIdentifier = makeTypeIdentifier(testObject);
+    std::cout << goodIdentifier << std::endl;
+    using namespace OpenDDS;
+    const XTypes::TypeIdentifier good(XTypes::EK_MINIMAL, XTypes::EquivalenceHashWrapper(47, 43, 14, 5, 138, 206, 143, 33, 189, 131, 116, 89, 176, 60));
+    TEST_CHECK(goodIdentifier == good);
+
+    Encoding encoding(Encoding::KIND_XCDR2, ENDIAN_LITTLE);
+    encoding.skip_sequence_dheader(true);
+    const TypeIdentifier badIdentifier = makeTypeIdentifier(testObject, &encoding);
+    std::cout << badIdentifier << std::endl;
+    const XTypes::TypeIdentifier bad(XTypes::EK_MINIMAL,XTypes::EquivalenceHashWrapper(100, 92, 123, 199, 182, 88, 54, 251, 172, 100, 66, 123, 137, 217));
+    TEST_CHECK(badIdentifier == bad);
 
   } catch (const std::runtime_error& err) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %C\n"),

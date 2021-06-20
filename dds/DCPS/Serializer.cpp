@@ -76,18 +76,21 @@ OPENDDS_STRING endianness_to_string(Endianness endianness)
 
 Encoding::Encoding()
 : endianness_(ENDIAN_NATIVE)
+, skip_sequence_dheader_(false)
 {
   kind(KIND_XCDR1);
 }
 
 Encoding::Encoding(Encoding::Kind kind, Endianness endianness)
 : endianness_(endianness)
+, skip_sequence_dheader_(false)
 {
   this->kind(kind);
 }
 
 Encoding::Encoding(Encoding::Kind kind, bool swap_bytes)
 : endianness_(swap_bytes ? ENDIAN_NONNATIVE : ENDIAN_NATIVE)
+, skip_sequence_dheader_(false)
 {
   this->kind(kind);
 }
