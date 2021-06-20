@@ -669,14 +669,13 @@ public:
 
   void set_construction_status(ConstructionStatus cs);
 
-  struct OpenDDS_Dcps_Export SavePoint
-  {
+  struct OpenDDS_Dcps_Export SavePoint {
     explicit SavePoint(Serializer& ser);
 
     void restore(Serializer& ser) const;
 
     const size_t pos_;
-    ACE_Message_Block* current_;
+    ACE_Message_Block* const current_;
     char* const rd_ptr_;
     char* const wr_ptr_;
   };
