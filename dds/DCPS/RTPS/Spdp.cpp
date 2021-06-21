@@ -158,6 +158,8 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
       enable_endpoint_announcements = prop_to_bool(prop);
     } else if (std::strcmp(RTPS_DISCOVERY_TYPE_LOOKUP_SERVICE, prop.name.in()) == 0) {
       enable_type_lookup_service = prop_to_bool(prop);
+    } else if (std::strcmp(RTPS_RELAY_APPLICATION_PARTICIPANT, prop.name.in()) == 0) {
+      is_application_participant_ = prop_to_bool(prop);
     } else if (std::strcmp(RTPS_REFLECT_HEARTBEAT_COUNT, prop.name.in()) == 0) {
       const CORBA::ULong old_flags = config_->participant_flags();
       const CORBA::ULong new_flags = prop_to_bool(prop) ? (old_flags | PFLAGS_REFLECT_HEARTBEAT_COUNT) : (old_flags & ~PFLAGS_REFLECT_HEARTBEAT_COUNT);
@@ -245,6 +247,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , domain_(domain)
   , guid_(guid)
   , participant_discovered_at_(MonotonicTimePoint::now().to_monotonic_time())
+  , is_application_participant_(false)
   , tport_(DCPS::make_rch<SpdpTransport>(rchandle_from(this)))
   , initialized_flag_(false)
   , eh_shutdown_(false)
@@ -2149,6 +2152,7 @@ ParticipantData_t Spdp::build_local_pdata(
       , {0 /*manualLivelinessCount*/}   //FUTURE: implement manual liveliness
       , qos_.property
       , {config_->participant_flags()} // opendds_participant_flags
+      , is_application_participant_
 #ifdef OPENDDS_SECURITY
       , available_extended_builtin_endpoints_
 #endif
@@ -2622,6 +2626,19 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
   }
 
   send(flags);
+}
+
+void
+Spdp::remove_application_participant()
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+  for (DiscoveredParticipantIter pos = participants_.begin(), limit = participants_.end(); pos != limit; ++pos) {
+    if (pos->second.pdata_.participantProxy.opendds_rtps_relay_application_participant) {
+      remove_discovered_participant(pos);
+      break;
+    }
+  }
 }
 
 void
