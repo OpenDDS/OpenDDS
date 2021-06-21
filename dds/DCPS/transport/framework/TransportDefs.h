@@ -90,6 +90,13 @@ ACE_END_VERSIONED_NAMESPACE_DECL
     }                                                                            \
     else                                                                         \
     {                                                                            \
+      if (OpenDDS::DCPS::Transport_debug_level > 0)                              \
+      {                                                                          \
+        ACE_DEBUG ((LM_INFO,                                                     \
+                    ACE_TEXT ("(%P|%t) INFO: \"%s\" is defined in config ")      \
+                    ACE_TEXT ("file, with value \"%C\".\n"),                     \
+                    KEY, ACE_TEXT_ALWAYS_CHAR(stringvalue.c_str())));            \
+      }                                                                          \
       VALUE = ACE_TEXT_ALWAYS_CHAR(stringvalue.c_str());                         \
     }                                                                            \
   }
@@ -138,10 +145,10 @@ ACE_END_VERSIONED_NAMESPACE_DECL
     }                                                                            \
     else  if (stringvalue == ACE_TEXT(""))                                       \
     {                                                                            \
-      if (OpenDDS::DCPS::Transport_debug_level > 0)                            \
+      if (OpenDDS::DCPS::Transport_debug_level > 0)                              \
       {                                                                          \
-        ACE_DEBUG ((LM_WARNING,                                                  \
-                    ACE_TEXT ("(%P|%t) WARNING: \"%s\" is defined in config ")   \
+        ACE_DEBUG ((LM_NOTICE,                                                   \
+                    ACE_TEXT ("(%P|%t) NOTICE: \"%s\" is defined in config ")    \
                     ACE_TEXT ("file, but is missing value - using code default.\n"), \
                     KEY));                                                       \
       }                                                                          \
