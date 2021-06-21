@@ -481,7 +481,7 @@ X509* Certificate::x509_from_pem(const std::string& path,
 
   BIO* filebuf = BIO_new_file(path.c_str(), "r");
   if (filebuf) {
-    if (!password.empty ()) {
+    if (!password.empty()) {
       result =
         PEM_read_bio_X509_AUX(filebuf, NULL, NULL, (void*)password.c_str());
       if (!result) {
