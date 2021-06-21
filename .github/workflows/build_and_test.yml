@@ -460,6 +460,14 @@ jobs:
         . install_setenv.sh
         cd tests/DCPS/Messenger
         perl run_test.pl rtps
+    - name: move cmake tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . install_setenv.sh
+        mkdir install_prefix/share/dds/tests
+        cd install_prefix/share/dds/tests
+        mv ../../../../tests/cmake .
     - name: test make install cmake
       shell: bash
       run: |
