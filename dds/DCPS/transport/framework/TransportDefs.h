@@ -135,10 +135,10 @@ ACE_END_VERSIONED_NAMESPACE_DECL
     ACE_TString stringvalue;                                                     \
     if (CF.get_string_value (SECT, KEY, stringvalue) == -1)                      \
     {                                                                            \
-      if (OpenDDS::DCPS::Transport_debug_level > 0)                            \
+      if (OpenDDS::DCPS::Transport_debug_level > 0)                              \
       {                                                                          \
-        ACE_DEBUG ((LM_NOTICE,                                                   \
-                    ACE_TEXT ("(%P|%t) NOTICE: \"%s\" is not defined in config ") \
+        ACE_DEBUG ((LM_WARNING,                                                  \
+                    ACE_TEXT ("(%P|%t) WARNING: \"%s\" is not defined in config ") \
                     ACE_TEXT ("file - using code default.\n"),                   \
                     KEY));                                                       \
       }                                                                          \
