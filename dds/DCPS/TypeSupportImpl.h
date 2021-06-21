@@ -109,18 +109,6 @@ private:
   OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(TypeSupportImpl)
 };
 
-template<typename Type>
-void set_default(Type&)
-{
-  OPENDDS_ASSERT(false);
-}
-
-template<typename Type, typename Tag>
-void set_default(IDL::DistinctType<Type, Tag>)
-{
-  OPENDDS_ASSERT(false);
-}
-
 } // namespace DCPS
 } // namespace OpenDDS
 

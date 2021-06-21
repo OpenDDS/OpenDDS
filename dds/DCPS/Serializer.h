@@ -811,6 +811,18 @@ namespace IDL {
   };
 }
 
+template<typename Type>
+void set_default(Type&)
+{
+  OPENDDS_ASSERT(false);
+}
+
+template<typename Type, typename Tag>
+void set_default(IDL::DistinctType<Type, Tag>)
+{
+  OPENDDS_ASSERT(false);
+}
+
 // predefined type methods
 OpenDDS_Dcps_Export
 bool primitive_serialized_size(
