@@ -30,7 +30,7 @@ public:
 
   // For TypeAssignability
   const TypeObject& get_type_objects(const TypeIdentifier& type_id) const;
-  void add_type_objects_to_cache(const TypeIdentifier& ti, const TypeObject& tobj);
+  void add(const TypeIdentifier& ti, const TypeObject& tobj);
 
   // For TypeLookup_getTypes
   void get_type_objects(const TypeIdentifierSeq& type_ids,

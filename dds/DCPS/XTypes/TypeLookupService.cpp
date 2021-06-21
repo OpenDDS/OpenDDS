@@ -112,7 +112,7 @@ void TypeLookupService::add_type_objects_to_cache(const DCPS::TypeSupportImpl& t
   minimal_type_map_.insert(minimal_type_map.begin(), minimal_type_map.end());
 }
 
-void TypeLookupService::add_type_objects_to_cache(const TypeIdentifier& ti, const TypeObject& tobj)
+void TypeLookupService::add(const TypeIdentifier& ti, const TypeObject& tobj)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   TypeMap::const_iterator it_type_id_with_size_seq = minimal_type_map_.find(ti);
