@@ -137,8 +137,8 @@ ACE_END_VERSIONED_NAMESPACE_DECL
     {                                                                            \
       if (OpenDDS::DCPS::Transport_debug_level > 0)                              \
       {                                                                          \
-        ACE_DEBUG ((LM_WARNING,                                                  \
-                    ACE_TEXT ("(%P|%t) WARNING: \"%s\" is not defined in config ") \
+        ACE_DEBUG ((LM_NOTICE,                                                   \
+                    ACE_TEXT ("(%P|%t) NOTICE: \"%s\" is not defined in config ") \
                     ACE_TEXT ("file - using code default.\n"),                   \
                     KEY));                                                       \
       }                                                                          \
@@ -148,7 +148,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
       if (OpenDDS::DCPS::Transport_debug_level > 0)                              \
       {                                                                          \
         ACE_DEBUG ((LM_WARNING,                                                  \
-                    ACE_TEXT ("(%P|%t) LM_WARNING: \"%s\" is defined in config ")    \
+                    ACE_TEXT ("(%P|%t) WARNING: \"%s\" is defined in config ")   \
                     ACE_TEXT ("file, but is missing value - using code default.\n"), \
                     KEY));                                                       \
       }                                                                          \
