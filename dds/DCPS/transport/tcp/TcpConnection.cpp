@@ -479,7 +479,7 @@ OpenDDS::DCPS::TcpConnection::on_active_connection_established()
   // It will use that as an "identifier" of sorts.  To the other
   // (passive) side, our local_address that we send here will be known
   // as the remote_address.
-  std::string address = tcp_config_->get_public_address();
+  const std::string address = tcp_config_->get_public_address();
 
   if (DCPS_debug_level >= 2) {
     ACE_DEBUG((LM_DEBUG,
