@@ -360,7 +360,7 @@ TcpTransport::configure_i(TcpInst& config)
   // As default, the acceptor will be listening on INADDR_ANY but advertise with the fully
   // qualified hostname and actual listening port number.
   if (config.local_address().is_any()) {
-    std::string hostname = get_fully_qualified_hostname();
+    const std::string hostname = get_fully_qualified_hostname();
     config.local_address(port, hostname.c_str());
     if (config.local_address() == ACE_INET_Addr()) {
        ACE_ERROR_RETURN((LM_ERROR,
