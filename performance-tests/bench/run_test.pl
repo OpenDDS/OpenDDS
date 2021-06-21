@@ -24,7 +24,7 @@ $test->{dcps_transport_debug_level} = 0;
 $test->{add_transport_config} = 0;
 $test->{add_orb_log_file} = 0;
 $test->{add_pending_timeout} = 0;
-my $tc_opts = "--wait-for-nodes 4 example";
+my $tc_opts = "--wait-for-nodes 7 example";
 my $nc_opts = "one-shot --name test_nc_" . $$;
 my $is_rtps_disc = 0;
 
@@ -74,6 +74,10 @@ elsif ($test->flag('fan_mini')) {
 }
 elsif ($test->flag('fan_frag')) {
   $tc_opts .= " ci_fan_frag";
+  $is_rtps_disc = 1;
+}
+elsif ($test->flag('fan_frag_ws')) {
+  $tc_opts .= " ci_fan_frag_ws";
   $is_rtps_disc = 1;
 }
 elsif ($test->flag('fan_frag_mini')) {
