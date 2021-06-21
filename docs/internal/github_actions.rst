@@ -1,51 +1,52 @@
 ##############################
-Github Actions Summary and FAQ
+GitHub Actions Summary and FAQ
 ##############################
 
-Github Actions is the continuous integration technique currently being
-used to evaluate the readiness of pull requests. It runs our suite of
-tests accross a wide variation of operation systems and configurations.
+GitHub Actions is the continuous integration solution currently being
+used to evaluate the readiness of pull requests. It runs the OpenDDS suite of
+tests accross a wide variation of operation systems and build configurations.
 
-When run on a pull request, Github Actions will simulate a merge between
+When run on a pull request, GitHub Actions will simulate a merge between
 the pull request branch, and master.
 
-When not on a pull request, Github Actions can made to run by giving your
-branch the prefix "gh_wf_". These local runs of Github Actions be viewed in
-the "actions" tab in your fork. Local runs of the workflows do not
-simulate a merge and run only the code on the branch. This prefix is
-useful when you are early in development and are not ready to open
-a PR for your branch.
+The OpenDDS workflow can be triggered by push events on a fork when a
+branch is prefixed with "gh_wf_". These fork runs of GitHub Actions can be
+viewed in the "Actions" tab. These runs do not simulate a merge and run only the
+code on the forked branch. This prefix is useful when a branch is early in
+development and is not ready to open a PR.
 
 *****************
 Table of Contents
 *****************
 
-* [Legend for Github Actions Builds]
+* [Legend for GitHub Actions Build Names]
   * [Operating System]
   * [Build Configuration]
   * [Build Type]
   * [Build Options]
   * [Feature Mask]
-* [Introduction to Github Actions Workflows]
-* [Cacheing]
+* [Introduction to GitHub Actions Workflows]
+* [Caching]
 * [Job Types]
 * [Test Results]
 * [Artifacts]
   * [Using Artifacts to Replicate Builds]
   * [Using Artifacts to View More Test Information]
 
-********************************
-Legend for Github Actions Builds
-********************************
+*************************************
+Legend for GitHub Actions Build Names
+*************************************
 
 Operating System
 ================
+
 * u18/u20 - Ubuntu 18.04/Ubuntu 20.04
 * w16/w19 - Windows 2016/Windows 2019
 * m10 - MacOS 10.15
 
 Build Configuration
 ===================
+
 * x86 - Windows 32 bit. If not specified, x64 is implied.
 * re - Release build.  If not specified, Debug is implied.
 * clang5/clang10/gcc6/gcc8/gcc10 - compiler used to build
@@ -53,6 +54,7 @@ OpenDDS. If not specified, default system compiler is used.
 
 Build Type
 ==========
+
 * stat - Static build
 * bsafe/esafe - Base Safety/Extended Safety build
 * sec - Security build
@@ -60,6 +62,7 @@ Build Type
 
 Build Options
 =============
+
 * o1 - enables --optimize
 * d0 - enables --no-debug
 * i0 - enables --no-inline
@@ -76,6 +79,7 @@ Build Options
 
 Feature Mask
 ============
+
 This is a mask in an attempt to keep names shorter.
 * FM-08
   * --no-built-in-topics
@@ -94,21 +98,22 @@ This is a mask in an attempt to keep names shorter.
 * FM-37
   * --no-content-filtered-topics
 
-****************************************
-Introduction to Github Actions Workflows
-****************************************
+***************************
+build_and_test.yml Workflow
+***************************
 
-Our main workflow which dictates our Github Actions run is
+Our main workflow which dictates our GitHub Actions run is
 build_and_test.yml. It defines jobs, which are the tasks that
 are run by the CI.
 
-Cacheing
+Caching
 ========
 
-In order to save time on running jobs, a cacheing systems is used.
-This cacheing system creates .tar.xz files which are called artifacts.
-A cache name comparison is run to determine if there is no new commit
-to what is being built, and use an existing artifact if that is the case.
+The OpenDDS workflows create .tar.xz archives of certain build artifacts
+which can then up uploaded and shared between jobs (and the user)
+as part of GitHub Actions' "artifact" API. A cache key comparison made using
+the relevant git commit SHA in order to determine if there is any need to rebuild
+the artifact, or if the existing cached artifact can be used instead.
 
 To make CI runs quicker, a seperate build is made for ACE_TAO, rather
 than building it at the same time as OpenDDS. This allows us to cache
@@ -117,7 +122,7 @@ ACE_TAO relatively often due to the stability of the ace6tao2 branch.
 Job Types
 =========
 
-There a number of job types that are contained in the built_and_test.yml.
+There are a number of job types that are contained in the file build_and_test.yml.
 Where possible, a configuration will contain 3 jobs. The first job that
 is run is the *ACE_TAO_*. This will create an artifact which is used later
 by the OpenDDS build. The second job is *build_*, which uses the previous
@@ -126,16 +131,16 @@ an artifact to be used in the third step. The third step is the *test_*
 job, which runs the appropriate tests for the associated OpenDDS
 configuration.
 
-Certain builds do not follow this 3 step model. Safety builds are done
+Certain builds do not follow this 3 step model. Safety Profile builds are done
 in one step due to the cross-compile nature causing problems. Static and Release
 builds have a large footprint and therefore cannot fit the entire test suite onto
-a Github Actions runner.  As a result, they instead build tests during the test
-step, and run different groups of tests in individual jobs. These individual test
-groups are prefixed by *compiler_* which runs the tests/DCPS/Compiler tests, *unit_*
+a Github Actions runner.  As a result, they only build and run a subset of the tests
+in their final jobs, but then have multiple final jobs to increase test coverage. These
+jobs are prefixed by: *compiler_* which runs the tests/DCPS/Compiler tests, *unit_*
 which runs the unit tests located in tests/DCPS/UnitTest and tests/unit-tests, and
 *messenger_* which runs the tests in tests/DCPS/Messenger and tests/DCPS/C++11/Messenger.
 
-In addition to these builds, there are some builds which will not run the test suite, in
+In addition to these builds, there are some builds which will not run the test suite in
 an effort to shorten the runtime of the continuous integration.  An exception to this is
 that all builds which are not safety, and have ownership profile enabled, will run the
 tests/cmake tests. Test runs which only contain CMake tests are prefixed by *cmake_*.
@@ -143,21 +148,23 @@ tests/cmake tests. Test runs which only contain CMake tests are prefixed by *cma
 Test Results
 ============
 
-The tests are run using autobuild which will generate an artifact containing the test
-results. These test results will be appended to the continuous intergration checks
-once all test runs for a commit are completed. This test analysis is handled by
-check_test_results.yml. The output from the test results will either be posted in
-build_and_test or lint, it is random which one of the workflows the results will appear
-in.
+The tests are run using `autobuild <https://github.com/DOCGroup/autobuild>` which creates a number of output files
+that are turned into a GitHub artifact. This artifact is processed by the
+"Check Test Results" workflow which modifies the files with detailed summaries of the test runs.
+After all of the Check Test Results jobs are complete, the test results will be posted in either
+the build_and_test or lint workflows. It is random which one of the workflows the results will appear
+in, so be sure to check both.
 
 Artifacts
 =========
+
 Artifacts from the continuous integration run can be downloaded by clicking details
 on one of the Build & Test runs. There is a dropdown on the bar next to "Re-run jobs"
 called "Artifacts" which lists each artifact that can be downloaded.
 
 Using Artifacts to Replicate Builds
 -----------------------------------
+
 You can download the *ACE_TAO* and *build_* artifacts then use them for a local build,
 so long as your operating system is the same as the one on the runner.
 
@@ -170,7 +177,7 @@ ace6tao2.
 6. Adjust the setenv.sh located inside OpenDDS to match the new locations for your ACE_TAO,
 and OpenDDS. The word "runner" should not appear within the setenv.sh once you are finished.
 
-You should now have a working duplicate of the build that was run on Github Actions. This can
+You should now have a working duplicate of the build that was run on GitHub Actions. This can
 be used for debugging as a way to quickly set up a problematic build.
 
 Using Artifacts to View More Test Information
