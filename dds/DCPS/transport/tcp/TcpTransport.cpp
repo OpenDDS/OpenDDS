@@ -327,11 +327,15 @@ TcpTransport::configure_i(TcpInst& config)
     config.local_address(TheServiceParticipant->default_address());
   }
 
+  VDBG_LVL((LM_DEBUG,
+            ACE_TEXT("(%P|%t) TcpTransport::configure_i opening acceptor on %C:%hu\n"),
+            config.local_address().get_host_addr(),
+            config.local_address().get_port_number()), 2);
+
   // Open our acceptor object so that we can accept passive connections
   // on our config.local_address_.
   if (this->acceptor_->open(config.local_address(),
                             this->reactor_task()->get_reactor()) != 0) {
-
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: Acceptor failed to open %C:%d: %p\n"),
                       config.local_address().get_host_addr(),
@@ -350,10 +354,9 @@ TcpTransport::configure_i(TcpInst& config)
                ACE_TEXT("cannot get local addr\n")));
   }
 
-  OPENDDS_STRING listening_addr(address.get_host_addr());
   VDBG_LVL((LM_DEBUG,
             ACE_TEXT("(%P|%t) TcpTransport::configure_i listening on %C:%hu\n"),
-            listening_addr.c_str(), address.get_port_number()), 2);
+            address.get_host_addr(), address.get_port_number()), 2);
 
   const unsigned short port = address.get_port_number();
 
