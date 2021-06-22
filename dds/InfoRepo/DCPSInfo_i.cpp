@@ -2178,13 +2178,13 @@ int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
     }
 #endif
 
-    std::string config_name =
+    const std::string config_name =
       OpenDDS::DCPS::TransportRegistry::DEFAULT_INST_PREFIX
       + std::string("InfoRepoBITTransportConfig");
     OpenDDS::DCPS::TransportConfig_rch config =
       OpenDDS::DCPS::TransportRegistry::instance()->create_config(config_name);
 
-    std::string inst_name =
+    const std::string inst_name =
       OpenDDS::DCPS::TransportRegistry::DEFAULT_INST_PREFIX
       + std::string("InfoRepoBITTCPTransportInst");
     OpenDDS::DCPS::TransportInst_rch inst =
