@@ -10,24 +10,6 @@ GitHub Actions is the continuous integration solution currently being
 used to evaluate the readiness of pull requests. It builds OpenDDS and runs the
 test suite across a wide variety of operation systems and build configurations.
 
-*****************
-Table of Contents
-*****************
-
-* [Legend for GitHub Actions Build Names]
-  * [Operating System]
-  * [Build Configuration]
-  * [Build Type]
-  * [Build Options]
-  * [Feature Mask]
-* [Introduction to GitHub Actions Workflows]
-* [Caching]
-* [Job Types]
-* [Test Results]
-* [Artifacts]
-  * [Using Artifacts to Replicate Builds]
-  * [Using Artifacts to View More Test Information]
-
 *************************************
 Legend for GitHub Actions Build Names
 *************************************
@@ -58,59 +40,69 @@ Build Type
 Build Options
 =============
 
-* o1 - enables --optimize
-* d0 - enables --no-debug
-* i0 - enables --no-inline
-* p1 - enables ipv6x
+* o1 - enables ``--optimize``
+* d0 - enables ``--no-debug``
+* i0 - enables ``--no-inline``
+* p1 - enables ipv6
 * w1 - enables wide characters
 * v1 - enables versioned namespace
-* cpp03 - --std=c++03
+* cpp03 - ``--std=c++03``
 * j/j8/j12 - Default System Java/Java8/Java12
 * ace7 - uses ace7tao3 rather than ace6tao2
 * xer0 - disables xerces
-* qt - enables --qt
-* ws - enables --wireshark
-* js0 - enables --no-rapidjson
+* qt - enables ``--qt``
+* ws - enables ``--wireshark``
+* js0 - enables ``--no-rapidjson``
 
 Feature Mask
 ============
 
 This is a mask in an attempt to keep names shorter.
+
 * FM-08
-  * --no-built-in-topics
-  * --no-content-subscription
-  * --no-ownership-profile
-  * --no-object-model-profile
-  * --no-persistence-profile
+
+  * ``--no-built-in-topics``
+  * ``--no-content-subscription``
+  * ``--no-ownership-profile``
+  * ``--no-object-model-profile``
+  * ``--no-persistence-profile``
+
 * FM-1f
-  * --no-built-in-topics
+
+  * ``--no-built-in-topics``
+
 * FM-2c
-  * --no-content-subscription
-  * --no-object-model-profile
-  * --no-persistence-profile
+
+  * ``--no-content-subscription``
+  * ``--no-object-model-profile``
+  * ``--no-persistence-profile``
+
 * FM-2f
-  * --no-content-subscription
+
+  * ``--no-content-subscription``
+
 * FM-37
-  * --no-content-filtered-topics
+
+  * ``--no-content-filtered-topics``
 
 ***************************
 build_and_test.yml Workflow
 ***************************
 
 Our main workflow which dictates our GitHub Actions run is
-`.github/workflows/build_and_test.yml`. It defines jobs, which are the tasks that
+``.github/workflows/build_and_test.yml``. It defines jobs, which are the tasks that
 are run by the CI.
 
 Triggering the Build And Test Workflow
 ======================================
 
-There are a couple ways in which a run of build and test workflow can be `started <https://docs.github.com/en/actions/reference/events-that-trigger-workflows>`.
+There are a couple ways in which a run of build and test workflow can be `started <https://docs.github.com/en/actions/reference/events-that-trigger-workflows>`_.
 
 Any pull request targeting master will automatically run the
 OpenDDS workflows. This form of workflow run with simulate a merge
 between the branch and master.
 
-Push events on branches prefixed "gh_wf_" will trigger workflow runs
+Push events on branches prefixed ``gh_wf_`` will trigger workflow runs
 on the fork in which the branch resides. These fork runs of GitHub Actions can be
 viewed in the "Actions" tab. Runs of the workflow on forks will not simulate a
 merge between the branch and master.
@@ -145,19 +137,19 @@ in one step due to the cross-compile nature causing problems. Static and Release
 builds have a large footprint and therefore cannot fit the entire test suite onto
 a Github Actions runner.  As a result, they only build and run a subset of the tests
 in their final jobs, but then have multiple final jobs to increase test coverage. These
-jobs are prefixed by: *compiler_* which runs the tests/DCPS/Compiler tests, *unit_*
-which runs the unit tests located in tests/DCPS/UnitTest and tests/unit-tests, and
-*messenger_* which runs the tests in tests/DCPS/Messenger and tests/DCPS/C++11/Messenger.
+jobs are prefixed by: *compiler_* which runs the ``tests/DCPS/Compiler tests``, *unit_*
+which runs the unit tests located in ``tests/DCPS/UnitTest`` and ``tests/unit-tests``, and
+*messenger_* which runs the tests in ``tests/DCPS/Messenger`` and ``tests/DCPS/C++11/Messenger``.
 
 In addition to these builds, there are some builds which will not run the test suite in
 an effort to shorten the runtime of the continuous integration.  An exception to this is
 that all builds which are not safety, and have ownership profile enabled, will run the
-tests/cmake tests. Test runs which only contain CMake tests are prefixed by *cmake_*.
+``tests/cmake`` tests. Test runs which only contain CMake tests are prefixed by ``cmake_``.
 
 Test Results
 ============
 
-The tests are run using `autobuild <https://github.com/DOCGroup/autobuild>` which creates a number of output files
+The tests are run using `autobuild <https://github.com/DOCGroup/autobuild>`_ which creates a number of output files
 that are turned into a GitHub artifact. This artifact is processed by the
 "Check Test Results" workflow which modifies the files with detailed summaries of the test runs.
 After all of the Check Test Results jobs are complete, the test results will be posted in either
@@ -177,15 +169,15 @@ list all the available artifacts at the bottom of the page.
 Using Artifacts to Replicate Builds
 -----------------------------------
 
-You can download the *ACE_TAO* and *build_* artifacts then use them for a local build,
+You can download the ``ACE_TAO_`` and ``build_`` artifacts then use them for a local build,
 so long as your operating system is the same as the one on the runner.
 
-1. "git clone" the ACE_TAO branch which is targeted by the build. This is usually going to be
-ace6tao2.
-2. "git clone --recursive" the OpenDDS branch on which the CI was run.
+1. ``git clone`` the ACE_TAO branch which is targeted by the build. This is usually going to be
+``ace6tao2``.
+2. ``git clone --recursive`` the OpenDDS branch on which the CI was run.
 3. Merge OpenDDS master into your cloned branch.
-4. run "tar xvfJ" from inside the cloned ACE_TAO, targeting the *ACE_TAO_* .tar.xz file.
-5. run "tar xvfJ" from inside the cloned OpenDDS, targeting the *build_* .tar.xz file.
+4. run ``tar xvfJ`` from inside the cloned ACE_TAO, targeting the *ACE_TAO_* .tar.xz file.
+5. run ``tar xvfJ`` from inside the cloned OpenDDS, targeting the *build_* .tar.xz file.
 6. Adjust the setenv.sh located inside OpenDDS to match the new locations for your ACE_TAO,
 and OpenDDS. The word "runner" should not appear within the setenv.sh once you are finished.
 
@@ -198,6 +190,6 @@ Using Artifacts to View More Test Information
 Tests failures which are recorded on github only contain a brief capture of output surrounding
 a failure. This is useful for some tests, but it can often be helpful to view more of a test run.
 This can be done by downloading the artifact for a test step you are viewing. This test step
-artifact contains a number of files including "output.log_Full.html". This is the full log of
+artifact contains a number of files including ``output.log_Full.html``. This is the full log of
 all output from all test runs done for the corresponding job.  It should be opened in either a
 text editor or Firefox, as Chrome will have issues due to the length of the file.
