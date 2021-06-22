@@ -1,3 +1,8 @@
+#include "dds/DCPS/Definitions.h"
+
+#ifndef DDS_HAS_WCHAR
+#ifndef DDS_HAS_MINIMUM_BIT
+
 #include "FACE/Sequence.h"
 #include "FACE/SequenceVar.h"
 
@@ -296,3 +301,6 @@ TEST(Sequence, maintest)
   EXPECT_TRUE(s4vc[1].s1_ == "testing");
 #endif
 }
+
+#endif
+#endif

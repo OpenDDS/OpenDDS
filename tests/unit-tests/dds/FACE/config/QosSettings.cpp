@@ -1,3 +1,8 @@
+#include "dds/DCPS/Definitions.h"
+
+#ifndef DDS_HAS_WCHAR
+#ifndef DDS_HAS_MINIMUM_BIT
+
 #include <gtest/gtest.h>
 
 #include "dds/FACE/config/QosSettings.h"
@@ -1191,3 +1196,6 @@ TEST(QosSettings, maintest)
   test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_nanosec();
   test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_both();
 }
+
+#endif
+#endif
