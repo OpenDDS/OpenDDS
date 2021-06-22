@@ -481,9 +481,9 @@ jobs:
         <autobuild>
         <configuration>
         <variable name="log_file" value="output.log"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-        <variable name="project_root" value="$DDS_ROOT"/>
-        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_root" value="/home/runner/work/OpenDDS/OpenDDS/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="project_root" value="/home/runner/work/OpenDDS/OpenDDS/OpenDDS"/>
+        <variable name="root" value="/home/runner/work/OpenDDS/OpenDDS/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
