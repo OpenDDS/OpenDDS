@@ -647,8 +647,8 @@ namespace {
     if (result < 0) {
       const int err = errno;
       if (err != ENETUNREACH || !network_is_unreachable) {
-        ACE_TCHAR addr_buff[256] = {};
-        addr.addr_to_string(addr_buff, 256);
+        ACE_TCHAR addr_buff[DCPS::AddrToStringSize] = {};
+        addr.addr_to_string(addr_buff, DCPS::AddrToStringSize);
         errno = err;
         const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
         ACE_ERROR((prio, "(%P|%t) RtpsUdpTransport.cpp send_single_i() - "

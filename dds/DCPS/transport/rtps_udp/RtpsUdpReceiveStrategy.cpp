@@ -133,8 +133,8 @@ namespace {
   ssize_t recv_err(const char* msg, const ACE_INET_Addr& remote, const DCPS::RepoId& peer, bool& stop)
   {
     if (security_debug.encdec_warn) {
-      ACE_TCHAR addr_buff[256] = {};
-      remote.addr_to_string(addr_buff, 256);
+      ACE_TCHAR addr_buff[DCPS::AddrToStringSize] = {};
+      remote.addr_to_string(addr_buff, DCPS::AddrToStringSize);
       GuidConverter gc(peer);
       ACE_ERROR((LM_WARNING, "(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy::receive_bytes - "
                  "from %s %C secure RTPS processing failed: %C\n", addr_buff, OPENDDS_STRING(gc).c_str(), msg));
