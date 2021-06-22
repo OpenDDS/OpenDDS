@@ -119,9 +119,6 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
 
   TcpConnection* pConn = connection.in();
 
-  ACE_TCHAR str[64];
-  key.address().addr_to_string(str,sizeof(str)/sizeof(str[0]), 0);
-
   // Can't make this call while holding onto TransportClient::lock_
   ACE_Time_Value conn_timeout;
   conn_timeout.msec(this->config().active_conn_timeout_period_);
