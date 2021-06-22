@@ -52,7 +52,15 @@ namespace {
   {
     Parameter param;
     DDS::OctetSeq seq;
-    XTypes::serialize_type_info(type_info, seq);
+    if (TheServiceParticipant->type_object_encoding() == DCPS::Service_Participant::Encoding_WriteOldFormat) {
+      DCPS::Encoding encoding = XTypes::get_typeobject_encoding();
+      encoding.skip_sequence_dheader(true);
+      XTypes::serialize_type_info(type_info, seq, &encoding);
+
+    } else {
+      XTypes::serialize_type_info(type_info, seq);
+    }
+
     param.type_information(seq);
     add_param(param_list, param);
   }

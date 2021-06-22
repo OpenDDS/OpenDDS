@@ -1826,12 +1826,14 @@ namespace XTypes {
                                     const DCPS::Encoding* encoding_option = 0);
 
   template <typename T>
-  void serialize_type_info(const TypeInformation& type_info, T& seq)
+  void serialize_type_info(const TypeInformation& type_info, T& seq,
+                           const DCPS::Encoding* encoding_option = 0)
   {
-    const size_t sz = DCPS::serialized_size(XTypes::get_typeobject_encoding(), type_info);
+    const DCPS::Encoding& encoding = encoding_option ? *encoding_option : get_typeobject_encoding();
+    const size_t sz = DCPS::serialized_size(encoding, type_info);
     seq.length(static_cast<unsigned>(sz));
     DCPS::MessageBlockHelper<T> helper(seq);
-    DCPS::Serializer serializer(helper, XTypes::get_typeobject_encoding());
+    DCPS::Serializer serializer(helper, encoding);
     if (!(serializer << type_info)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: serialize_type_info ")
                  ACE_TEXT("serialization of type information failed.\n")));
