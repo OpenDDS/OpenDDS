@@ -71,6 +71,7 @@ Subscriber::Subscriber(const DDS::DomainId_t domainId, const std::size_t n_pub_t
     throw;
   }
 }
+
 Subscriber::~Subscriber()
 {
   cleanup();

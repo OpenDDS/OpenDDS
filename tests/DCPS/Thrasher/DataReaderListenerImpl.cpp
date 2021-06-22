@@ -17,7 +17,7 @@ DataReaderListenerImpl::DataReaderListenerImpl(const std::size_t expected_sample
 DataReaderListenerImpl::~DataReaderListenerImpl()
 {}
 
-void DataReaderListenerImpl::wait_received()
+void DataReaderListenerImpl::wait_received() const
 {
   Lock lock(mutex_);
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) sub wait_received %d:%d\n"), received_samples_, expected_samples_));

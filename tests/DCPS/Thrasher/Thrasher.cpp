@@ -17,7 +17,10 @@ public:
 private:
   void parse_args(int& argc, ACE_TCHAR** argv);
   void cleanup();
-  const long domain_id_;
+  static const long DomainID = 42;
+  static const int DefaultPubThreads = 1;
+  static const std::size_t DefaultSamplesPerThread = 1024;
+  static const std::size_t DefaultExpectedSamples = 1024;
   DDS::DomainParticipantFactory_var dpf_;
   int n_pub_threads_;
   std::size_t samples_per_thread_;
@@ -26,11 +29,10 @@ private:
 };
 
 Thrasher::Thrasher(int& argc, ACE_TCHAR** argv)
-  : domain_id_(42)
-  , dpf_()
-  , n_pub_threads_(1)
-  , samples_per_thread_(1024)
-  , expected_samples_(1024)
+  : dpf_()
+  , n_pub_threads_(DefaultPubThreads)
+  , samples_per_thread_(DefaultSamplesPerThread)
+  , expected_samples_(DefaultExpectedSamples)
   , durable_(false)
 {
   try {
@@ -48,8 +50,8 @@ Thrasher::Thrasher(int& argc, ACE_TCHAR** argv)
 
 int Thrasher::run()
 {
-  Subscriber sub(domain_id_, n_pub_threads_, expected_samples_, durable_);
-  PublisherService pub_svc(domain_id_, samples_per_thread_, durable_);
+  Subscriber sub(DomainID, n_pub_threads_, expected_samples_, durable_);
+  PublisherService pub_svc(DomainID, samples_per_thread_, durable_);
   if (!pub_svc.start(n_pub_threads_)) {
     return 71;
   }
@@ -90,7 +92,7 @@ void Thrasher::parse_args(int& argc, ACE_TCHAR** argv)
 
 void Thrasher::cleanup()
 {
-  if(dpf_){
+  if( dpf_ ) {
     ACE_DEBUG((LM_INFO, "(%P|%t) <- Thrasher shutdown\n"));
     TheServiceParticipant->shutdown();
     dpf_ = 0;

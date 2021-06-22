@@ -21,7 +21,7 @@ public:
   DataReaderListenerImpl(const std::size_t expected_samples, const char* progress_fmt);
   virtual ~DataReaderListenerImpl();
 
-  void wait_received();
+  void wait_received() const;
   int check_received(const size_t n_publishers) const;
   virtual void on_data_available(DDS::DataReader_ptr reader);
 
@@ -43,8 +43,8 @@ private:
   typedef OpenDDS::DCPS::ConditionVariable<Mutex> Condition;
   typedef ACE_Guard<Mutex> Lock;
 #endif
-  Mutex mutex_;
-  Condition condition_;
+  mutable Mutex mutex_;
+  mutable Condition condition_;
   const size_t expected_samples_;
   size_t received_samples_;
   TaskSamplesMap task_samples_map_;
