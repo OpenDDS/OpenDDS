@@ -2,6 +2,10 @@
 GitHub Actions Summary and FAQ
 ##############################
 
+********
+Overview
+********
+
 GitHub Actions is the continuous integration solution currently being
 used to evaluate the readiness of pull requests. It runs the OpenDDS suite of
 tests accross a wide variation of operation systems and build configurations.
@@ -167,6 +171,9 @@ Artifacts from the continuous integration run can be downloaded by clicking deta
 on one of the Build & Test runs. There is a dropdown on the bar next to "Re-run jobs"
 called "Artifacts" which lists each artifact that can be downloaded.
 
+Alternatively, clicking the "Summary" button at the top of the list of jobs will
+list all the available artifacts at the bottom of the page.
+
 Using Artifacts to Replicate Builds
 -----------------------------------
 
@@ -187,6 +194,7 @@ be used for debugging as a way to quickly set up a problematic build.
 
 Using Artifacts to View More Test Information
 ---------------------------------------------
+
 Tests failures which are recorded on github only contain a brief capture of output surrounding
 a failure. This is useful for some tests, but it can often be helpful to view more of a test run.
 This can be done by downloading the artifact for a test step you are viewing. This test step
