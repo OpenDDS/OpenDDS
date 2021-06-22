@@ -7,8 +7,8 @@ Overview
 ********
 
 GitHub Actions is the continuous integration solution currently being
-used to evaluate the readiness of pull requests. It runs the OpenDDS suite of
-tests accross a wide variation of operation systems and build configurations.
+used to evaluate the readiness of pull requests. It builds OpenDDS and runs the
+test suite across a wide variety of operation systems and build configurations.
 
 *****************
 Table of Contents
@@ -45,7 +45,7 @@ Build Configuration
 * x86 - Windows 32 bit. If not specified, x64 is implied.
 * re - Release build.  If not specified, Debug is implied.
 * clang5/clang10/gcc6/gcc8/gcc10 - compiler used to build
-OpenDDS. If not specified, default system compiler is used.
+OpenDDS. If not specified, the default system compiler is used.
 
 Build Type
 ==========
@@ -98,7 +98,7 @@ build_and_test.yml Workflow
 ***************************
 
 Our main workflow which dictates our GitHub Actions run is
-build_and_test.yml. It defines jobs, which are the tasks that
+`.github/workflows/build_and_test.yml`. It defines jobs, which are the tasks that
 are run by the CI.
 
 Triggering the Build And Test Workflow
