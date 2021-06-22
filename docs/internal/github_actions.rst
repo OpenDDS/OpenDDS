@@ -6,15 +6,6 @@ GitHub Actions is the continuous integration solution currently being
 used to evaluate the readiness of pull requests. It runs the OpenDDS suite of
 tests accross a wide variation of operation systems and build configurations.
 
-When run on a pull request, GitHub Actions will simulate a merge between
-the pull request branch, and master.
-
-The OpenDDS workflow can be triggered by push events on a fork when a
-branch is prefixed with "gh_wf_". These fork runs of GitHub Actions can be
-viewed in the "Actions" tab. These runs do not simulate a merge and run only the
-code on the forked branch. This prefix is useful when a branch is early in
-development and is not ready to open a PR.
-
 *****************
 Table of Contents
 *****************
@@ -105,6 +96,20 @@ build_and_test.yml Workflow
 Our main workflow which dictates our GitHub Actions run is
 build_and_test.yml. It defines jobs, which are the tasks that
 are run by the CI.
+
+Triggering the Build And Test Workflow
+======================================
+
+There are a couple ways in which a run of build and test workflow can be `started <https://docs.github.com/en/actions/reference/events-that-trigger-workflows>`.
+
+Any pull request targeting master will automatically run the
+OpenDDS workflows. This form of workflow run with simulate a merge
+between the branch and master.
+
+Push events on branches prefixed "gh_wf_" will trigger workflow runs
+on the fork in which the branch resides. These fork runs of GitHub Actions can be
+viewed in the "Actions" tab. Runs of the workflow on forks will not simulate a
+merge between the branch and master.
 
 Caching
 ========
