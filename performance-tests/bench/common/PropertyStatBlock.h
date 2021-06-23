@@ -26,7 +26,8 @@ struct Bench_Common_Export SimpleStatBlock {
   double median_;
   double median_absolute_deviation_;
 
-  void pretty_print(std::ostream& os, const std::string& prefix, const std::string& indentation = "  ", size_t indentation_level = 0);
+  void pretty_print(std::ostream& os, const std::string& prefix, const std::string& indentation = "  ", size_t indentation_level = 0) const;
+  void to_json_summary(const std::string& name, rapidjson::Value& dst, rapidjson::Value::AllocatorType& alloc) const;
 };
 
 Bench_Common_Export SimpleStatBlock consolidate(const SimpleStatBlock& sb1, const SimpleStatBlock& sb2);

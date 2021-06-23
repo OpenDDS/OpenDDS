@@ -63,6 +63,11 @@ Bench_Common_Export void consolidate_tagged_stats(std::unordered_map<std::string
   const Builder::StringSeq& reported_tags,
   const std::unordered_set<std::string>& input_tags,
   const Bench::ConstPropertyStatBlock& data);
+
+Bench_Common_Export void gather_stats_and_tags(const TestController::Report& report,
+  std::unordered_set<std::string>& stat_names,
+  std::unordered_set<std::string>& tag_names);
+
 }
 
 #endif

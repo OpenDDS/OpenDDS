@@ -38,7 +38,8 @@ bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
           std::string option_argument = get_option_argument(i, argc, argv);
           static std::unordered_map<std::string, OutputType> const table = {
             { "single-statistic", OutputType::SingleStatistic },
-            { "time-series", OutputType::TimeSeries }
+            { "time-series", OutputType::TimeSeries },
+            { "summary", OutputType::Summary }
           };
 
           auto it = table.find(option_argument);
@@ -53,7 +54,8 @@ bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
           std::string option_argument = get_option_argument(i, argc, argv);
           static std::unordered_map<std::string, OutputFormat> const table = {
             { "stat-block", OutputFormat::StatBlock },
-            { "gnuplot", OutputFormat::Gnuplot }
+            { "gnuplot", OutputFormat::Gnuplot },
+            { "json", OutputFormat::Json }
           };
 
           auto it = table.find(option_argument);

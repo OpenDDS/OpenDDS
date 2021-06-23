@@ -100,9 +100,17 @@ int TimeSeriesRawFormatter::format(const Report& report, std::ostream& output_st
     for (size_t i = 0; i != consolidated.median_buffer_.size(); i++) {
       output_stream << "\t" << consolidated.median_buffer_[i] << std::endl;
     }
-    output_stream << *it << " timestamp buffer values:" << std::endl;
+    bool show_timestamps = false;
     for (size_t i = 0; i != consolidated.timestamp_buffer_.size(); i++) {
-      output_stream << "\t" << consolidated.timestamp_buffer_[i] << std::endl;
+      if (consolidated.timestamp_buffer_[i] != Builder::ZERO) {
+        show_timestamps = true;
+      }
+    }
+    if (show_timestamps) {
+      output_stream << *it << " timestamp buffer values:" << std::endl;
+      for (size_t i = 0; i != consolidated.timestamp_buffer_.size(); i++) {
+        output_stream << "\t" << consolidated.timestamp_buffer_[i] << std::endl;
+      }
     }
   }
 

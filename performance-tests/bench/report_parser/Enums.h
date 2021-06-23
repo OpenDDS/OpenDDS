@@ -5,6 +5,7 @@ enum class OutputType
 {
   None,
   SingleStatistic,
+  Summary,
   TimeSeries
 };
 
@@ -12,7 +13,8 @@ enum class OutputFormat
 {
   None,
   StatBlock,
-  Gnuplot
+  Gnuplot,
+  Json
 };
 
 #endif

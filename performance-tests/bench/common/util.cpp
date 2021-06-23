@@ -187,4 +187,79 @@ void consolidate_tagged_stats(std::unordered_map<std::string, Bench::SimpleStatB
     }
   }
 }
+
+void gather_stats_and_tags(const TestController::Report& report,
+  std::unordered_set<std::string>& stat_names,
+  std::unordered_set<std::string>& tag_names)
+{
+
+  for (unsigned int node_index = 0; node_index < report.node_reports.length(); ++node_index) {
+    const Bench::TestController::NodeReport& nc_report = report.node_reports[node_index];
+
+    for (unsigned int property_index = 0; property_index < nc_report.properties.length(); ++property_index) {
+      const std::string name = nc_report.properties[property_index].name.in();
+      auto pos = name.rfind("_var_x_sample_count");
+      if (pos != std::string::npos) {
+        stat_names.insert(name.substr(0, name.length() - 19));
+      }
+    }
+
+    for (unsigned int worker_index = 0; worker_index < nc_report.worker_reports.length(); ++worker_index) {
+      const Bench::WorkerReport& worker_report = nc_report.worker_reports[worker_index];
+
+      for (unsigned int participant_index = 0; participant_index < worker_report.process_report.participants.length(); ++participant_index) {
+        const Builder::ParticipantReport& participant_report = worker_report.process_report.participants[participant_index];
+
+        for (unsigned int subscriber_index = 0; subscriber_index < participant_report.subscribers.length(); ++subscriber_index) {
+          const Builder::SubscriberReport& subscriber_report = participant_report.subscribers[subscriber_index];
+
+          for (unsigned int datareader_index = 0; datareader_index < subscriber_report.datareaders.length(); ++datareader_index) {
+            const Builder::DataReaderReport& datareader_report = subscriber_report.datareaders[datareader_index];
+
+            for (unsigned int tag_index = 0; tag_index < datareader_report.tags.length(); ++tag_index) {
+              tag_names.insert(datareader_report.tags[tag_index].in());
+            }
+
+            for (unsigned int property_index = 0; property_index < datareader_report.properties.length(); ++property_index) {
+              const std::string name = datareader_report.properties[property_index].name.in();
+              auto pos = name.rfind("_var_x_sample_count");
+              if (pos != std::string::npos) {
+                stat_names.insert(name.substr(0, name.length() - 19));
+              }
+            }
+
+          }
+
+        }
+
+        for (unsigned int publisher_index = 0; publisher_index < participant_report.publishers.length(); ++publisher_index) {
+          const Builder::PublisherReport& publisher_report = participant_report.publishers[publisher_index];
+
+          for (unsigned int datawriter_index = 0; datawriter_index < publisher_report.datawriters.length(); ++datawriter_index) {
+            const Builder::DataWriterReport& datawriter_report = publisher_report.datawriters[datawriter_index];
+
+            for (unsigned int tag_index = 0; tag_index < datawriter_report.tags.length(); ++tag_index) {
+              tag_names.insert(datawriter_report.tags[tag_index].in());
+            }
+
+            for (unsigned int property_index = 0; property_index < datawriter_report.properties.length(); ++property_index) {
+              const std::string name = datawriter_report.properties[property_index].name.in();
+              auto pos = name.rfind("_var_x_sample_count");
+              if (pos != std::string::npos) {
+                stat_names.insert(name.substr(0, name.length() - 19));
+              }
+            }
+
+          }
+
+        }
+
+      }
+
+    }
+
+  }
+
 }
+
+} // Bench

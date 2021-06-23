@@ -30,7 +30,7 @@ char my_toupper(char ch)
 }
 }
 
-void SimpleStatBlock::pretty_print(std::ostream& os, const std::string& name, const std::string& indent, size_t indent_level)
+void SimpleStatBlock::pretty_print(std::ostream& os, const std::string& name, const std::string& indent, size_t indent_level) const
 {
   std::string i1, i2;
   for (size_t i = 0; i < indent_level; ++i) {
@@ -59,6 +59,23 @@ void SimpleStatBlock::pretty_print(std::ostream& os, const std::string& name, co
     if (median_sample_overflow_) {
       os << i2 << name << std::setw(my_w) << std::setfill(' ') << " overflow" << " = " << median_sample_overflow_ << std::endl;
     }
+  }
+}
+
+void SimpleStatBlock::to_json_summary(const std::string& name, rapidjson::Value& dst, rapidjson::Value::AllocatorType& alloc) const
+{
+  rapidjson::Value& stat_val = dst.AddMember(rapidjson::StringRef(name.c_str()), rapidjson::Value(0).Move(), alloc)[name.c_str()].SetObject();
+  stat_val.AddMember("sample_count", rapidjson::Value(sample_count_).Move(), alloc);
+  if (sample_count_) {
+    stat_val.AddMember("min", rapidjson::Value(min_).Move(), alloc);
+    stat_val.AddMember("max", rapidjson::Value(max_).Move(), alloc);
+    stat_val.AddMember("mean", rapidjson::Value(mean_).Move(), alloc);
+    const double stdev = sample_count_ ? std::sqrt(var_x_sample_count_ / static_cast<double>(sample_count_)) : 0.0;
+    stat_val.AddMember("stdev", rapidjson::Value(stdev).Move(), alloc);
+    stat_val.AddMember("median", rapidjson::Value(median_).Move(), alloc);
+    stat_val.AddMember("madev", rapidjson::Value(median_absolute_deviation_).Move(), alloc);
+    stat_val.AddMember("median_sample_count", rapidjson::Value(median_sample_count_).Move(), alloc);
+    stat_val.AddMember("median_sample_overflow", rapidjson::Value(median_sample_overflow_).Move(), alloc);
   }
 }
 
