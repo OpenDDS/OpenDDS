@@ -59,7 +59,7 @@ int SummaryRawFormatter::format(const Report& report, std::ostream& output_strea
                 }
               }
             }
-              
+
           }
 
         }
@@ -114,7 +114,7 @@ int SummaryRawFormatter::format(const Report& report, std::ostream& output_strea
           consolidate(stat_pos->second).pretty_print(output_stream, *stat_it);
         }
       }
-      
+
     }
   }
   return EXIT_SUCCESS;

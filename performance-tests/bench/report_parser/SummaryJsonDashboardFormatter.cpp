@@ -59,7 +59,7 @@ int SummaryJsonDashboardFormatter::format(const Report& report, std::ostream& ou
                 }
               }
             }
-              
+
           }
 
         }
@@ -124,7 +124,7 @@ int SummaryJsonDashboardFormatter::format(const Report& report, std::ostream& ou
           consolidate(stat_pos->second).to_json_summary(*stat_it, tagged_stat_val, document.GetAllocator());
         }
       }
-      
+
     }
   }
 
