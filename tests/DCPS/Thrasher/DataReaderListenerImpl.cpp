@@ -70,20 +70,21 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
   // take only one sample at a time.
   Foo foo;
   DDS::SampleInfo si;
-  bool received_all = false;
   while (reader_i->take_next_sample(foo, si) == DDS::RETCODE_OK) {
     if (si.valid_data) {
-      {
-        Lock lock(mutex_);
-        ++received_samples_;
-        ++progress_;
-        task_samples_map_[(size_t) foo.x].insert((size_t) foo.y);
-        received_all = received_samples_ >= expected_samples_;
-      }
-      if (received_all) {
+      if (received_all((size_t) foo.x, (size_t) foo.y)) {
         ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)  sub condition_.notify_all\n")));
         condition_.notify_all();
       }
     }
   }
+}
+
+bool DataReaderListenerImpl::received_all(const size_t x, const size_t y)
+{
+  Lock lock(mutex_);
+  ++received_samples_;
+  ++progress_;
+  task_samples_map_[x].insert(y);
+  return received_samples_ >= expected_samples_;
 }

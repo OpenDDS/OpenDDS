@@ -34,6 +34,7 @@ public:
 
 private:
   typedef OPENDDS_MAP(size_t, OPENDDS_SET(size_t)) TaskSamplesMap;
+  bool received_all(const size_t x, const size_t y);
 #ifdef ACE_HAS_CPP11
   typedef std::mutex Mutex;
   typedef std::condition_variable Condition;
