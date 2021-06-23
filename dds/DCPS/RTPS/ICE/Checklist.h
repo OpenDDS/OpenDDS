@@ -103,7 +103,7 @@ struct ConnectivityCheck {
 
   const CandidatePair& candidate_pair() const
   {
-    return candiate_pair_;
+    return candidate_pair_;
   }
   const STUN::Message& request() const
   {
@@ -126,7 +126,7 @@ struct ConnectivityCheck {
     request_.password = a_password;
   }
 private:
-  CandidatePair candiate_pair_;
+  CandidatePair candidate_pair_;
   STUN::Message request_;
   bool cancelled_;
   DCPS::MonotonicTimePoint expiration_date_;

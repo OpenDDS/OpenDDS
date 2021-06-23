@@ -56,7 +56,7 @@ ACE_UINT64 CandidatePair::compute_priority()
 ConnectivityCheck::ConnectivityCheck(const CandidatePair& a_candidate_pair,
                                      const AgentInfo& a_local_agent_info, const AgentInfo& a_remote_agent_info,
                                      ACE_UINT64 a_ice_tie_breaker, const MonotonicTimePoint& a_expiration_date)
-  : candiate_pair_(a_candidate_pair), cancelled_(false), expiration_date_(a_expiration_date)
+  : candidate_pair_(a_candidate_pair), cancelled_(false), expiration_date_(a_expiration_date)
 {
   request_.class_ = STUN::REQUEST;
   request_.method = STUN::BINDING;

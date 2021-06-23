@@ -925,7 +925,7 @@ sub replace_macros {
                   $usee = $i + 1;
                 }
                 else {
-                  ## This isn't the end of the paramters, so keep going
+                  ## This isn't the end of the parameters, so keep going
                   next;
                 }
               }
@@ -963,7 +963,7 @@ sub replace_macros {
         }
       }
       else {
-        ## There were no macro paramters, so just do a simple search and
+        ## There were no macro parameters, so just do a simple search and
         ## replace.
         $line =~ s/\b$macro\b/$val/g;
       }

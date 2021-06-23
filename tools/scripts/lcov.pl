@@ -224,7 +224,7 @@ for (my $i = 0; $i <= $#ARGV; ++$i) {
         $create_final_cov = 0;
     }
     else {
-        print "Ignoring unkown argument: $ARGV[$i]\n";
+        print "Ignoring unknown argument: $ARGV[$i]\n";
     }
 }
 

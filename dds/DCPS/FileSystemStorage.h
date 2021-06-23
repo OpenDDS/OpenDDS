@@ -28,7 +28,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-// This can be overriden by the user, but make sure that it's less than
+// This can be overridden by the user, but make sure that it's less than
 // the actual operating system and filesystem limit so that the "overflow"
 // directories can be created as needed.
 #ifndef OPENDDS_FILESYSTEMSTORAGE_MAX_FILES_PER_DIR

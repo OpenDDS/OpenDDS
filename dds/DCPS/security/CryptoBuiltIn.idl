@@ -9,7 +9,7 @@ module OpenDDS {
   module Security {
 
     // The CRYPTO_TRANSFORMATION_KIND_* constants below are used in this
-    // index of the CryptoTransfromKind array.  (Other elements are 0.)
+    // index of the CryptoTransformKind array.  (Other elements are 0.)
     const unsigned long TransformKindIndex = 3;
 
     /* No encryption, no authentication tag */
@@ -18,7 +18,7 @@ module OpenDDS {
     /*
       No encryption.
       One AES128-GMAC authentication tag using the sender_key
-      Zero or more AES128-GMAC auth. tags with receiver specfic keys
+      Zero or more AES128-GMAC auth. tags with receiver specific keys
     */
     const octet CRYPTO_TRANSFORMATION_KIND_AES128_GMAC = 1;
 
@@ -26,7 +26,7 @@ module OpenDDS {
       Authenticated Encryption using AES-128 in Galois Counter Mode
       (GCM) using the sender key.
       The authentication tag using the sender_key obtained from GCM
-      Zero or more AES128-GMAC auth. tags with receiver specfic keys
+      Zero or more AES128-GMAC auth. tags with receiver specific keys
     */
     const octet CRYPTO_TRANSFORMATION_KIND_AES128_GCM = 2;
 
@@ -34,7 +34,7 @@ module OpenDDS {
       No encryption.
       One AES256-GMAC authentication tag using the sender_key
       Zero or more AES256-GMAC auth.
-      tags with receiver specfic keys
+      tags with receiver specific keys
     */
     const octet CRYPTO_TRANSFORMATION_KIND_AES256_GMAC = 3;
 
@@ -43,7 +43,7 @@ module OpenDDS {
       (GCM) using the sender key.
       The authentication tag using the sender_key obtained from GCM
       Zero or more AES256-GMAC auth.
-      tags with receiver specfic keys
+      tags with receiver specific keys
     */
     const octet CRYPTO_TRANSFORMATION_KIND_AES256_GCM = 4;
 

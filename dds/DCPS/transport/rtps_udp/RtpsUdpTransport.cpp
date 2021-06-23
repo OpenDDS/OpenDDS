@@ -289,20 +289,20 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
 {
   bool requires_inline_qos;
   unsigned int blob_bytes_read;
-  std::pair<ACE_INET_Addr, ACE_INET_Addr> addrs = get_connection_addrs(remote_data, &requires_inline_qos,
-                                                                       &blob_bytes_read);
+  std::pair<RtpsUdpDataLink::AddrSet, RtpsUdpDataLink::AddrSet> addrs =
+    get_connection_addrs(remote_data, &requires_inline_qos, &blob_bytes_read);
 
   if (link_) {
-    link_->add_locators(remote_id, addrs.first, addrs.second, requires_inline_qos);
-
     return link_->associated(local_id, remote_id, local_reliable, remote_reliable,
-                             local_durable, remote_durable, participant_discovered_at, participant_flags, max_sn, client);
+                             local_durable, remote_durable,
+                             participant_discovered_at, participant_flags, max_sn, client,
+                             addrs.first, addrs.second, requires_inline_qos);
   }
 
   return true;
 }
 
-std::pair<ACE_INET_Addr, ACE_INET_Addr>
+std::pair<RtpsUdpDataLink::AddrSet, RtpsUdpDataLink::AddrSet>
 RtpsUdpTransport::get_connection_addrs(const TransportBLOB& remote,
                                        bool* requires_inline_qos,
                                        unsigned int* blob_bytes_read) const
@@ -312,43 +312,26 @@ RtpsUdpTransport::get_connection_addrs(const TransportBLOB& remote,
   DDS::ReturnCode_t result =
     blob_to_locators(remote, locators, requires_inline_qos, blob_bytes_read);
   if (result != DDS::RETCODE_OK) {
-    return std::make_pair(ACE_INET_Addr(), ACE_INET_Addr());
+    return std::make_pair(RtpsUdpDataLink::AddrSet(), RtpsUdpDataLink::AddrSet());
   }
 
-  ACE_INET_Addr uc_addr;
-  ACE_INET_Addr mc_addr;
-  bool uc_addr_valid = false;
-  bool mc_addr_valid = false;
+  RtpsUdpDataLink::AddrSet uc_addrs;
+  RtpsUdpDataLink::AddrSet mc_addrs;
   for (CORBA::ULong i = 0; i < locators.length(); ++i) {
     ACE_INET_Addr addr;
     // If conversion was successful
     if (locator_to_address(addr, locators[i], false) == 0) {
       if (addr.is_multicast()) {
-        if (mc_addr == ACE_INET_Addr()) {
-          mc_addr = addr;
-          mc_addr_valid = true;
+        if (config().use_multicast_) {
+          mc_addrs.insert(addr);
         }
       } else {
-        if (uc_addr == ACE_INET_Addr()) {
-          uc_addr = addr;
-          uc_addr_valid = true;
-        }
-      }
-      if (uc_addr_valid && (!config().use_multicast_ || mc_addr_valid)) {
-        return std::make_pair(uc_addr, config().use_multicast_ ? mc_addr : uc_addr);
+        uc_addrs.insert(addr);
       }
     }
   }
 
-  // If we didn't return early, something was 'missing'
-  if (uc_addr == ACE_INET_Addr() && !(mc_addr == ACE_INET_Addr())) {
-    uc_addr = mc_addr;
-  }
-  if (mc_addr == ACE_INET_Addr() && !(uc_addr == ACE_INET_Addr())) {
-    mc_addr = uc_addr;
-  }
-
-  return std::make_pair(uc_addr, config().use_multicast_ ? mc_addr : uc_addr);
+  return std::make_pair(uc_addrs, mc_addrs);
 }
 
 bool
@@ -376,7 +359,7 @@ RtpsUdpTransport::register_for_reader(const RepoId& participant,
     link_ = make_datalink(participant.guidPrefix);
   }
 
-  link_->register_for_reader(writerid, readerid, get_connection_addrs(*blob).second,
+  link_->register_for_reader(writerid, readerid, get_connection_addrs(*blob).first,
                              listener);
 }
 
@@ -436,9 +419,9 @@ RtpsUdpTransport::update_locators(const RepoId& remote,
   if (link_) {
     bool requires_inline_qos;
     unsigned int blob_bytes_read;
-    std::pair<ACE_INET_Addr, ACE_INET_Addr> addrs = get_connection_addrs(*blob, &requires_inline_qos,
-                                                                         &blob_bytes_read);
-    link_->add_locators(remote, addrs.first, addrs.second, requires_inline_qos);
+    std::pair<RtpsUdpDataLink::AddrSet, RtpsUdpDataLink::AddrSet> addrs =
+      get_connection_addrs(*blob, &requires_inline_qos, &blob_bytes_read);
+    link_->update_locators(remote, addrs.first, addrs.second, requires_inline_qos, false);
   }
 }
 

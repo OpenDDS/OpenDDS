@@ -168,7 +168,7 @@ public:
         if (frees_to_heap_.value() % 500 == 0) {
           ACE_DEBUG((LM_DEBUG,
                      "(%P|%t) Dynamic_Cached_Allocator_With_Overflow::free %@"
-                     " %Lu heap allocs with %Lu oustanding\n",
+                     " %Lu heap allocs with %Lu outstanding\n",
                      this, this->allocs_from_heap_.value(),
                      this->allocs_from_heap_.value() - this->frees_to_heap_.value()));
         }

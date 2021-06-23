@@ -247,9 +247,7 @@ OpenDDS::DCPS::TcpConnection::handle_setup_input(ACE_HANDLE /*h*/)
 
       const std::string bufstr(passive_setup_buffer_.rd_ptr());
       const NetworkAddress network_order_address(bufstr);
-      ACE_INET_Addr remote_addresses;
-      network_order_address.to_addr(remote_addresses);
-      remote_address_ = choose_single_coherent_address(remote_addresses);
+      network_order_address.to_addr(remote_address_);
 
       ACE_OS::memcpy(&nprio, passive_setup_buffer_.rd_ptr() + hlen, sizeof(nprio));
       transport_priority_ = ntohl(nprio);
@@ -481,7 +479,7 @@ OpenDDS::DCPS::TcpConnection::on_active_connection_established()
   // It will use that as an "identifier" of sorts.  To the other
   // (passive) side, our local_address that we send here will be known
   // as the remote_address.
-  std::string address = tcp_config_->get_public_address();
+  const std::string address = tcp_config_->get_public_address();
 
   if (DCPS_debug_level >= 2) {
     ACE_DEBUG((LM_DEBUG,

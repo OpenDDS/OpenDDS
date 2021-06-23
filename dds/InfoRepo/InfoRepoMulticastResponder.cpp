@@ -213,7 +213,7 @@ InfoRepoMulticastResponder::handle_input(ACE_HANDLE)
     remote_addr.addr_to_string(addr, sizeof(addr), 0);
     ACE_DEBUG((LM_DEBUG,
                "(%P|%t) Received multicast from %s.\n"
-               "Service Name received : %C\n"
+               "Service Name received : %s\n"
                "Port received : %u\n",
                addr,
                object_key,
@@ -229,7 +229,6 @@ InfoRepoMulticastResponder::handle_input(ACE_HANDLE)
 
   if (CORBA::is_nil(locator.in())) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("Nil IORTable\n")));
-
   }
 
   std::string ior;
@@ -305,7 +304,7 @@ InfoRepoMulticastResponder::handle_input(ACE_HANDLE)
   // length as the first element, and ior itself as the second.)
 
   // Length of ior to be sent.
-  CORBA::Short data_len = ACE_HTONS(static_cast<CORBA::Short>(ior.length()) + 1);
+  const CORBA::Short data_len = ACE_HTONS(static_cast<CORBA::Short>(ior.length()) + 1);
 
   // Vector to be sent.
   const int cnt = 2;
@@ -319,7 +318,7 @@ InfoRepoMulticastResponder::handle_input(ACE_HANDLE)
   iovp[1].iov_base = const_cast<char*>(ior.c_str());
   iovp[1].iov_len  = static_cast<u_long>(ior.length() + 1);
 
-  ssize_t result = stream.sendv_n(iovp, cnt);
+  const ssize_t result = stream.sendv_n(iovp, cnt);
   // Close the stream.
   stream.close();
 
@@ -333,7 +332,7 @@ InfoRepoMulticastResponder::handle_input(ACE_HANDLE)
                "sent to %C:%u.\n"
                "result from send = %d\n",
                ior.c_str(),
-               peer_addr.get_host_name(),
+               peer_addr.get_host_addr(),
                peer_addr.get_port_number(),
                result));
 

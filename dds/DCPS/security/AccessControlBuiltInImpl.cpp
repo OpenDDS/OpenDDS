@@ -2,23 +2,23 @@
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
+
 #include "AccessControlBuiltInImpl.h"
+
 #include "CommonUtilities.h"
 #include "TokenWriter.h"
-
 #include "SSL/SubjectName.h"
 
-#include "dds/DdsDcpsInfrastructureC.h"
+#include <dds/DCPS/Service_Participant.h>
 
-#include "dds/DCPS/Service_Participant.h"
+#include <dds/DdsDcpsInfrastructureC.h>
 
-#include "ace/ACE.h"
-#include "ace/config-macros.h"
-#include "ace/OS_NS_strings.h"
-#include "ace/Reactor.h"
+#include <ace/ACE.h>
+#include <ace/config-macros.h>
+#include <ace/OS_NS_strings.h>
+#include <ace/Reactor.h>
 
 #include <time.h>
-
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -1326,7 +1326,7 @@ AccessControlBuiltInImpl::make_task(RevokePermissionsTask_rch& task)
 }
 
 // NOTE: This function will return the time value as UTC
-// Format from DDS Security spec 1.1 is:
+// Format from DDS Security spec 1.1 is a kind of ISO 8601:
 //   CCYY-MM-DDThh:mm:ss[Z|(+|-)hh:mm]
 time_t AccessControlBuiltInImpl::convert_permissions_time(const std::string& timeString)
 {
@@ -1371,34 +1371,25 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(const std::string& tim
 
     // The only adjustments that need to be made are if the character
     // is a '+' or '-'
-    if (strcmp(temp_str.c_str(), "Z") == 0) {
-      //int hours_adj = 0;
-      //int mins_adj = 0;
-
+    if (temp_str == "Z") {
       temp_str.clear();
       temp_str = timeString.substr(20, 1);
 
-      if (strcmp(temp_str.c_str(), "+") == 0) {
+      if (temp_str == "+") {
         temp_str.clear();
         temp_str = timeString.substr(21, 2);
-        //hours_adj = atoi(temp_str.c_str());
         permission_tm.tm_hour -= atoi(temp_str.c_str());
         temp_str.clear();
         temp_str = timeString.substr(24, 2);
-        //mins_adj = atoi(temp_str.c_str());
         permission_tm.tm_min -= atoi(temp_str.c_str());
-        //permission_time_t -= (hours_adj + mins_adj);
       }
-      else if (strcmp(temp_str.c_str(), "-") == 0) {
+      else if (temp_str == "-") {
         temp_str.clear();
         temp_str = timeString.substr(21, 2);
-        //hours_adj = atoi(temp_str.c_str());
         permission_tm.tm_hour += atoi(temp_str.c_str());
         temp_str.clear();
         temp_str = timeString.substr(24, 2);
-        //mins_adj = atoi(temp_str.c_str());
         permission_tm.tm_min += atoi(temp_str.c_str());
-        //permission_time_t += (hours_adj + mins_adj);
       }
     }
 
@@ -1406,7 +1397,6 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(const std::string& tim
 
   permission_tm.tm_isdst = -1;
 
-  //return permission_time_t;
   return mktime(&permission_tm);
 }
 
@@ -1683,7 +1673,7 @@ AccessControlBuiltInImpl::RevokePermissionsTask::~RevokePermissionsTask()
 
 namespace {
   // Some platforms cannot schedule timers far enough into the future
-  // to accomodate expiration times so the scheduling interval is
+  // to accommodate expiration times so the scheduling interval is
   // capped at an hour.
   const TimeDuration MAX_DURATION = TimeDuration(3600, 0);
 }

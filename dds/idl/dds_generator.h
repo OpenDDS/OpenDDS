@@ -29,13 +29,26 @@
 #include <set>
 #include <stdexcept>
 
+/// How to handle IDL underscore escaping. Depends on where the name is
+/// going and where the name came from.
+enum EscapeContext {
+  /// This is for generated IDL. (Like *TypeSupport.idl)
+  EscapeContext_ForGenIdl,
+  /// This is for a name coming from generated IDL. (Like *TypeSupportC.h)
+  EscapeContext_FromGenIdl,
+  /// Strip any escapes
+  EscapeContext_StripEscapes,
+  /// This is for everything else.
+  EscapeContext_Normal,
+};
+
 class dds_generator {
 public:
   virtual ~dds_generator() = 0;
 
   static std::string get_tag_name(const std::string& base_name, bool nested_key_only = false);
 
-  static bool cxx_escape(const std::string& s, size_t i);
+  static bool cxx_escaped(const std::string& s);
 
   static std::string valid_var_name(const std::string& str);
 
@@ -90,9 +103,12 @@ public:
                              AST_Type::SIZE_TYPE /*size*/)
   { return true; }
 
-  static std::string to_string(Identifier* id);
-  static std::string scoped_helper(UTL_ScopedName* sn, const char* sep);
-  static std::string module_scope_helper(UTL_ScopedName* sn, const char* sep);
+  static std::string to_string(
+    Identifier* id, EscapeContext ec = EscapeContext_Normal);
+  static std::string scoped_helper(
+    UTL_ScopedName* sn, const char* sep, EscapeContext cxt = EscapeContext_Normal);
+  static std::string module_scope_helper(
+    UTL_ScopedName* sn, const char* sep, EscapeContext cxt = EscapeContext_Normal);
 };
 
 class composite_generator : public dds_generator {
@@ -180,15 +196,17 @@ struct ScopedNamespaceGuard  {
     , semi_()
     , n_(0)
   {
+    const bool idl = !std::strcmp(keyword, "module");
+    const EscapeContext ec = idl ? EscapeContext_ForGenIdl : EscapeContext_Normal;
     for (n_ = 0; name->tail();
          name = static_cast<UTL_ScopedName*>(name->tail())) {
       const char* str = name->head()->get_string();
       if (str && str[0]) {
         ++n_;
-        os_ << keyword << ' ' << dds_generator::to_string(name->head()) << " {\n";
+        os_ << keyword << ' ' << dds_generator::to_string(name->head(), ec) << " {\n";
       }
     }
-    if (std::strcmp(keyword, "module") == 0) semi_ = ";";
+    if (idl) semi_ = ";";
   }
 
   ~ScopedNamespaceGuard()
@@ -298,13 +316,13 @@ private:
   bool extra_newline_;
 };
 
-inline std::string scoped(UTL_ScopedName* sn)
+inline std::string scoped(UTL_ScopedName* sn, EscapeContext ec = EscapeContext_Normal)
 {
   // Add the leading scope operator here to make type names "fully-qualified" and avoid
   // naming collisions with identifiers in OpenDDS::DCPS.
   // The leading space allows this string to be used directly in a <>-delimeted template
   // argument list while avoiding the <: digraph.
-  return " ::" + dds_generator::scoped_helper(sn, "::");
+  return " ::" + dds_generator::scoped_helper(sn, "::", ec);
 }
 
 inline std::string module_scope(UTL_ScopedName* sn)

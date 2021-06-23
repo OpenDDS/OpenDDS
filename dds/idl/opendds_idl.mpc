@@ -1,4 +1,4 @@
-project: aceexe, dds_macros, crosscompile, install, opendds_util {
+project: aceexe, dds_macros, crosscompile, install, opendds_util, dds_corbaseq {
 
   exename   = *
   exeout    = $(DDS_ROOT)/bin

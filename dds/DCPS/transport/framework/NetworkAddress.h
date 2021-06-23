@@ -25,7 +25,7 @@ namespace DCPS {
 
 struct HostnameInfo {
   size_t index_;
-  OPENDDS_STRING hostname_;
+  String hostname_;
 };
 
 typedef OPENDDS_VECTOR(HostnameInfo) HostnameInfoVector;
@@ -40,8 +40,8 @@ typedef OPENDDS_VECTOR(HostnameInfo) HostnameInfoVector;
  */
 struct OpenDDS_Dcps_Export NetworkAddress {
   NetworkAddress();
-  explicit NetworkAddress(const ACE_INET_Addr& addr, bool use_hostname = false);
-  explicit NetworkAddress(const OPENDDS_STRING& addr);
+  explicit NetworkAddress(const ACE_INET_Addr& addr);
+  explicit NetworkAddress(const String& addr);
 
   ~NetworkAddress();
 
@@ -56,7 +56,7 @@ struct OpenDDS_Dcps_Export NetworkAddress {
   CORBA::Octet reserved_;
 
   /// The address in string format. e.g. ip:port, hostname:port
-  OPENDDS_STRING addr_;
+  String addr_;
 };
 
 /// Helper function to get the fully qualified hostname.
@@ -68,7 +68,7 @@ struct OpenDDS_Dcps_Export NetworkAddress {
 /// an error is logged.
 /// If ACE_HAS_IPV6, will give priority to IPV6 interfaces
 extern OpenDDS_Dcps_Export
-OPENDDS_STRING get_fully_qualified_hostname(ACE_INET_Addr* addr = 0);
+String get_fully_qualified_hostname(ACE_INET_Addr* addr = 0);
 
 /// Helper function to get the vector of addresses which should
 /// be advertised to peers
@@ -87,7 +87,13 @@ extern OpenDDS_Dcps_Export
 bool open_appropriate_socket_type(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& local_address, int* proto_family = 0);
 
 extern OpenDDS_Dcps_Export
+ACE_INET_Addr choose_single_coherent_address(const OPENDDS_VECTOR(ACE_INET_Addr)& addrs, bool prefer_loopback = true, const String& name = String());
+
+extern OpenDDS_Dcps_Export
 ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& addr, bool prefer_loopback = true);
+
+extern OpenDDS_Dcps_Export
+ACE_INET_Addr choose_single_coherent_address(const String& hostname, bool prefer_loopback = true, bool allow_ipv4_fallback = true);
 
 } // namespace DCPS
 } // namespace OpenDDS

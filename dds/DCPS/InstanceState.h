@@ -115,12 +115,14 @@ public:
   /// Remove the instance immediately.
   void release();
 
-  /// tell this instance when a DataWriter transitions to NOT_ALIVE
-  void writer_became_dead(const PublicationId& writer_id,
-                          int num_alive_writers,
-                          const MonotonicTimePoint& when);
+  /// Returns true if the writer is a writer of this instance.
+  bool writes_instance(const PublicationId& writer_id) const
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
+    return writers_.count(writer_id);
+  }
 
-  WeakRcHandle<OpenDDS::DCPS::DataReaderImpl> data_reader() const;
+  WeakRcHandle<DataReaderImpl> data_reader() const;
 
   virtual int handle_timeout(const ACE_Time_Value& current_time,
                              const void* arg);

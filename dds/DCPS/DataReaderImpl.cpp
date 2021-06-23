@@ -550,6 +550,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
   // removed, which is a proper subset of the writers which were
   // requested to be removed.
   WriterIdSeq updated_writers;
+  WriterMapType removed_writers;
 
   CORBA::ULong wr_len;
 
@@ -568,7 +569,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
       WriterMapType::iterator it = this->writers_.find(writer_id);
 
       if (it != this->writers_.end()) {
-        it->second->removed();
+        removed_writers.insert(*it);
         end_historic_sweeper_->cancel_timer(it->second);
         remove_association_sweeper_->cancel_timer(it->second);
       }
@@ -587,6 +588,11 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
       }
     }
   }
+
+  for (WriterMapType::iterator it = removed_writers.begin(); it != removed_writers.end(); ++it) {
+    it->second->removed();
+  }
+  removed_writers.clear();
 
   wr_len = updated_writers.length();
 
@@ -1217,7 +1223,7 @@ DataReaderImpl::enable()
   // enable the type specific part of this DataReader
   this->enable_specific();
 
-  //Note: the QoS used to set n_chunks_ is Changable=No so
+  //Note: the QoS used to set n_chunks_ is Changeable=No so
   // it is OK that we cannot change the size of our allocators.
   rd_allocator_.reset(new ReceivedDataAllocator(n_chunks_));
 
@@ -2132,7 +2138,7 @@ DataReaderImpl::writer_removed(WriterInfo& info)
   }
 
   liveliness_changed_status_.last_publication_handle = info.handle_;
-  instances_liveliness_update(info, MonotonicTimePoint::now());
+  instances_liveliness_update(info.writer_id_);
 
   if (liveliness_changed) {
     set_status_changed_flag(DDS::LIVELINESS_CHANGED_STATUS, true);
@@ -2215,8 +2221,7 @@ DataReaderImpl::writer_became_alive(WriterInfo& info,
 }
 
 void
-DataReaderImpl::writer_became_dead(WriterInfo& info,
-    const MonotonicTimePoint& when)
+DataReaderImpl::writer_became_dead(WriterInfo& info)
 {
   if (DCPS_debug_level >= 5) {
     GuidConverter reader_converter(subscription_id_);
@@ -2279,7 +2284,7 @@ DataReaderImpl::writer_became_dead(WriterInfo& info,
     return;
   }
 
-  instances_liveliness_update(info, when);
+  instances_liveliness_update(info.writer_id_);
 
   // Call listener only when there are liveliness status changes.
   if (liveliness_changed) {
@@ -2289,15 +2294,16 @@ DataReaderImpl::writer_became_dead(WriterInfo& info,
 }
 
 void
-DataReaderImpl::instances_liveliness_update(WriterInfo& info,
-    const MonotonicTimePoint& when)
+DataReaderImpl::instances_liveliness_update(const PublicationId& writer)
 {
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
-  for (SubscriptionInstanceMapType::iterator iter = instances_.begin(),
-      next = iter; iter != instances_.end(); iter = next) {
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
+  for (SubscriptionInstanceMapType::iterator iter = instances_.begin(), next = iter;
+       iter != instances_.end(); iter = next) {
     ++next;
-    iter->second->instance_state_->writer_became_dead(
-        info.writer_id_, liveliness_changed_status_.alive_count, when);
+    if (iter->second->instance_state_->writes_instance(writer)) {
+      set_instance_state(iter->first, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, SystemTimePoint::now(), writer);
+    }
   }
 }
 

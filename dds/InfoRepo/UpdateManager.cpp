@@ -45,7 +45,7 @@ Manager::add(Updater* updater)
 void
 Manager::remove()
 {
-  // Clean the refrence to the InfoRepo.
+  // Clean the reference to the InfoRepo.
   info_ = 0;
 }
 
@@ -122,7 +122,7 @@ Manager::pushImage(const DImage& image)
   /***************************
   // The downstream image needs to be converted to a
   // format compatible with the upstream layers (Dimage -> UImage)
-  // The Uimage cotains a lot of refrences to the complex data
+  // The Uimage cotains a lot of references to the complex data
   // types. These are collecetd in several buckets (see below) and
   // passed by reference. Usage of a custom guard class 'SeqGuard'
   // automates memory cleanup.

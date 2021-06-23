@@ -37,13 +37,6 @@ elsif ($test->flag('zero-copy')) {
 if ($test->flag('rtps')) {
   $pub_opts .= " 50";
 }
-if ($test->flag('keep-last-one')) {
-  if (!$test->flag('rtps')) {
-    $pub_opts .= " 50";
-  }
-  $pub_opts .= " -keep-last-one";
-  $sub_opts .= " -keep-last-one";
-}
 
 $test->setup_discovery();
 $test->enable_console_logging();

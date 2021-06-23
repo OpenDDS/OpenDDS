@@ -686,7 +686,7 @@ DCPS_IR_Publication::reevaluate_association(DCPS_IR_Subscription* subscription)
   int status = this->associations_.find(subscription);
 
   if (status == 0) {
-    // verify if they are still compatiable after change
+    // verify if they are still compatible after change
 
 
     if (!OpenDDS::DCPS::compatibleQOS(this->get_incompatibleQosStatus(),

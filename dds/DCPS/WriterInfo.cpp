@@ -41,8 +41,7 @@ WriterInfoListener::writer_became_alive(WriterInfo&,
 /// The writer state is inout parameter, the state is set to DEAD
 /// when it returns.
 void
-WriterInfoListener::writer_became_dead(WriterInfo&,
-                                       const MonotonicTimePoint&)
+WriterInfoListener::writer_became_dead(WriterInfo&)
 {
 }
 
@@ -139,7 +138,7 @@ WriterInfo::check_activity(const MonotonicTimePoint& now)
 
     if (expires_at <= now) {
       // let all instances know this write is not alive.
-      reader_->writer_became_dead(*this, now);
+      reader_->writer_became_dead(*this);
       expires_at = MonotonicTimePoint::max_value;
     }
   }

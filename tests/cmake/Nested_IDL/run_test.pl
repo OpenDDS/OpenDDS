@@ -24,4 +24,4 @@ $test->process("main", $test_file_name, "");
 $test->start_process("main");
 
 # start killing processes in 3 seconds
-exit $test->finish(3);
+exit $test->finish(3) ? 1 : 0;
