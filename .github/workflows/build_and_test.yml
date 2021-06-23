@@ -373,13 +373,17 @@ jobs:
         git clean -dfx .
         $ACE_ROOT/bin/mwc.pl -type gnuace .
         make
-    - name: make install Build CMake Tests
+    - name: make install build cmake
+      shell: bash
       run: |
-        source OpenDDS/install_setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
+        cd OpenDDS
+        . install_setenv.sh
+        cd tests/cmake/Messenger/Messenger_1
+        git clean -dfx .
+        mkdir build
+        cd build
         cmake -DCMAKE_PREFIX_PATH=$DDS_ROOT ..
-        cmake --build . -- -j4
+        cmake --build .
     - name: make install build java
       shell: bash
       run: |
@@ -401,18 +405,6 @@ jobs:
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
-    - name: remove install clutter
-      shell: bash
-      run: |
-        cd OpenDDS
-        rm -rf install_temp install_prefix install_setenv.sh
-    - name: gitclean
-      shell: bash
-      run: |
-        touch output.txt
-        cd OpenDDS
-        git clean -nd -e ext | tee ../output.txt
-        if [ -s ../output.txt ]; then exit 1; fi
 
   inst_u18_o1d0v1_xer0_j12:
 
@@ -460,56 +452,26 @@ jobs:
         . install_setenv.sh
         cd tests/DCPS/Messenger
         perl run_test.pl rtps
-    - name: move cmake tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . install_setenv.sh
-        mkdir install_prefix/share/dds/tests
-        cd install_prefix/share/dds/tests
-        mv ../../../../tests/cmake .
     - name: test make install cmake
       shell: bash
       run: |
         cd OpenDDS
         . install_setenv.sh
-        mkdir ${{ github.job }}_autobuild_workspace
-        cd ${{ github.job }}_autobuild_workspace
-        echo using commit $TRIGGERING_COMMIT for SHA
-        echo $TRIGGERING_COMMIT >> ./SHA
-        cat > config.xml <<EOF
-        <autobuild>
-        <configuration>
-        <variable name="log_file" value="output.log"/>
-        <variable name="log_root" value="/home/runner/work/OpenDDS/OpenDDS/OpenDDS/${{ github.job }}_autobuild_workspace"/>
-        <variable name="project_root" value="/home/runner/work/OpenDDS/OpenDDS/OpenDDS"/>
-        <variable name="root" value="/home/runner/work/OpenDDS/OpenDDS/OpenDDS/${{ github.job }}_autobuild_workspace"/>
-        <variable name="junit_xml_output" value="Tests"/>
-        </configuration>
-        <command name="log" options="on"/>
-        <command name="print_os_version"/>
-        <command name="print_env_vars"/>
-        <command name="print_ace_config"/>
-        <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
-        <command name="print_perl_version"/>
-        <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps -Config RTPS -Config LINUX -Config GH_ACTIONS --cmake"/>
-        <command name="log" options="off"/>
-        <command name="process_logs" options="prettify"/>
-        </autobuild>
-        EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
-    - name: upload autobuild output
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ github.job }}_autobuild_output
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
-    - name: check results
+        cd tests/cmake/Messenger/Messenger_1/build
+        perl run_test.pl
+    - name: remove install clutter
       shell: bash
       run: |
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        cd OpenDDS
+        rm build_u18_o1d0v1_xer0_j12.tar.xz
+        rm -rf install_temp install_prefix install_setenv.sh
+    - name: gitclean
+      shell: bash
+      run: |
+        touch output.txt
+        cd OpenDDS
+        git clean -nd -e ext | tee ../output.txt
+        if [ -s ../output.txt ]; then exit 1; fi
 
   u18_esafe_js0:
 
