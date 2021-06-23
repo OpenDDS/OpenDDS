@@ -499,13 +499,12 @@ void Spdp::process_location_updates_i(DiscoveredParticipantIter& iter, bool forc
     DCPS::ParticipantLocationBuiltinTopicData& location_data = iter->second.location_data_;
 
     OPENDDS_STRING addr = "";
-    ACE_TCHAR buffer[256];
-
     const DCPS::ParticipantLocation old_mask = location_data.location;
 
     if (pos->from_ != ACE_INET_Addr()) {
       location_data.location |= pos->mask_;
-      pos->from_.addr_to_string(buffer, 256);
+      ACE_TCHAR buffer[DCPS::AddrToStringSize];
+      pos->from_.addr_to_string(buffer, DCPS::AddrToStringSize);
       addr = ACE_TEXT_ALWAYS_CHAR(buffer);
     } else {
       location_data.location &= ~(pos->mask_);
@@ -652,8 +651,8 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     partBitData(pdata).key = repo_id_to_bit_key(guid);
 
     if (DCPS::DCPS_debug_level) {
-      ACE_TCHAR addr_buff[256] = {};
-      from.addr_to_string(addr_buff, 256);
+      ACE_TCHAR addr_buff[DCPS::AddrToStringSize] = {};
+      from.addr_to_string(addr_buff, DCPS::AddrToStringSize);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Spdp::handle_participant_data - %C discovered %C lease %ds from %s\n"),
         DCPS::LogGuid(guid_).c_str(), DCPS::LogGuid(guid).c_str(),
@@ -2770,8 +2769,8 @@ Spdp::SpdpTransport::send(const ACE_INET_Addr& addr)
   if (res < 0) {
     const int err = errno;
     if (err != ENETUNREACH || !network_is_unreachable_) {
-      ACE_TCHAR addr_buff[256] = {};
-      addr.addr_to_string(addr_buff, 256);
+      ACE_TCHAR addr_buff[DCPS::AddrToStringSize] = {};
+      addr.addr_to_string(addr_buff, DCPS::AddrToStringSize);
       errno = err;
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: Spdp::SpdpTransport::send() - ")
@@ -3099,15 +3098,14 @@ Spdp::SendStun::execute()
   const_cast<STUN::Message&>(message_).block = &tport->wbuff_;
   serializer << message_;
 
-  ssize_t res;
   const ACE_SOCK_Dgram& socket = tport->choose_send_socket(address_);
-  res = socket.send(tport->wbuff_.rd_ptr(), tport->wbuff_.length(), address_);
+  const ssize_t res = socket.send(tport->wbuff_.rd_ptr(), tport->wbuff_.length(), address_);
 
   if (res < 0) {
     const int err = errno;
     if (err != ENETUNREACH || !tport->network_is_unreachable_) {
-      ACE_TCHAR addr_buff[256] = {};
-      address_.addr_to_string(addr_buff, 256);
+      ACE_TCHAR addr_buff[DCPS::AddrToStringSize] = {};
+      address_.addr_to_string(addr_buff, DCPS::AddrToStringSize);
       errno = err;
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: Spdp::SendStun::execute() - ")
@@ -3316,8 +3314,8 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
 
   if (joined_interfaces_.count(nic.name()) == 0 && nic.has_ipv4()) {
     if (DCPS::DCPS_debug_level > 3) {
-      ACE_TCHAR buff[256];
-      multicast_address_.addr_to_string(buff, 256);
+      ACE_TCHAR buff[DCPS::AddrToStringSize];
+      multicast_address_.addr_to_string(buff, DCPS::AddrToStringSize);
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) Spdp::SpdpTransport::join_multicast_group ")
                  ACE_TEXT("joining group %s on %C\n"),
@@ -3336,8 +3334,8 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
 
       shorten_local_sender_delay_i();
     } else {
-      ACE_TCHAR buff[256];
-      multicast_address_.addr_to_string(buff, 256);
+      ACE_TCHAR buff[DCPS::AddrToStringSize];
+      multicast_address_.addr_to_string(buff, DCPS::AddrToStringSize);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::join_multicast_group() - ")
                  ACE_TEXT("failed to join multicast group %s on %C: %p\n"),
@@ -3350,8 +3348,8 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
 #ifdef ACE_HAS_IPV6
   if (joined_ipv6_interfaces_.count(nic.name()) == 0 && nic.has_ipv6()) {
     if (DCPS::DCPS_debug_level > 3) {
-      ACE_TCHAR buff[256];
-      multicast_ipv6_address_.addr_to_string(buff, 256);
+      ACE_TCHAR buff[DCPS::AddrToStringSize];
+      multicast_ipv6_address_.addr_to_string(buff, DCPS::AddrToStringSize);
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) Spdp::SpdpTransport::join_multicast_group ")
                  ACE_TEXT("joining group %s on %C\n"),
@@ -3373,8 +3371,8 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
 
       shorten_local_sender_delay_i();
     } else {
-      ACE_TCHAR buff[256];
-      multicast_ipv6_address_.addr_to_string(buff, 256);
+      ACE_TCHAR buff[DCPS::AddrToStringSize];
+      multicast_ipv6_address_.addr_to_string(buff, DCPS::AddrToStringSize);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::join_multicast_group() - ")
                  ACE_TEXT("failed to join multicast group %s on %C: %p\n"),
@@ -3396,8 +3394,8 @@ Spdp::SpdpTransport::leave_multicast_group(const DCPS::NetworkInterface& nic)
 
   if (joined_interfaces_.count(nic.name()) != 0 && !nic.has_ipv4()) {
     if (DCPS::DCPS_debug_level > 3) {
-      ACE_TCHAR buff[256];
-      multicast_address_.addr_to_string(buff, 256);
+      ACE_TCHAR buff[DCPS::AddrToStringSize];
+      multicast_address_.addr_to_string(buff, DCPS::AddrToStringSize);
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) Spdp::SpdpTransport::leave_multicast_group ")
                  ACE_TEXT("leaving group %s on %C\n"),
@@ -3406,8 +3404,8 @@ Spdp::SpdpTransport::leave_multicast_group(const DCPS::NetworkInterface& nic)
     }
 
     if (0 != multicast_socket_.leave(multicast_address_, ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
-      ACE_TCHAR buff[256];
-      multicast_address_.addr_to_string(buff, 256);
+      ACE_TCHAR buff[DCPS::AddrToStringSize];
+      multicast_address_.addr_to_string(buff, DCPS::AddrToStringSize);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::leave_multicast_group() - ")
                  ACE_TEXT("failed to leave multicast group %s on %C: %p\n"),
@@ -3421,8 +3419,8 @@ Spdp::SpdpTransport::leave_multicast_group(const DCPS::NetworkInterface& nic)
 #ifdef ACE_HAS_IPV6
   if (joined_ipv6_interfaces_.count(nic.name()) != 0 && !nic.has_ipv6()) {
     if (DCPS::DCPS_debug_level > 3) {
-      ACE_TCHAR buff[256];
-      multicast_ipv6_address_.addr_to_string(buff, 256);
+      ACE_TCHAR buff[DCPS::AddrToStringSize];
+      multicast_ipv6_address_.addr_to_string(buff, DCPS::AddrToStringSize);
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) Spdp::SpdpTransport::leave_multicast_group ")
                  ACE_TEXT("leaving group %s on %C\n"),
