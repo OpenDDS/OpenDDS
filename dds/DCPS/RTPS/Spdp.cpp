@@ -639,6 +639,12 @@ Spdp::handle_participant_data(DCPS::MessageId id,
   const DCPS::ParticipantLocation location_mask = compute_location_mask(from, from_relay);
 #endif
 
+  // Don't trust SPDP for the RtpsRelay application participant.
+  // Otherwise, anyone can reset the application participant.
+  if (is_security_enabled() && !from_sedp) {
+    pdata.participantProxy.opendds_rtps_relay_application_participant = false;
+  }
+
   // Find the participant - iterator valid only as long as we hold the lock
   DiscoveredParticipantIter iter = participants_.find(guid);
 
@@ -671,6 +677,12 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     iter = p.first;
     iter->second.discovered_at_ = now;
     update_lease_expiration_i(iter, now);
+    update_rtps_relay_application_participant_i(iter);
+    iter = participants_.find(guid);
+    if (iter == participants_.end()) {
+      return;
+    }
+
     if (!from_relay && from != ACE_INET_Addr()) {
       iter->second.local_address_ = from;
     }
@@ -851,6 +863,11 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         iter->second.pdata_ = pdata;
         iter->second.pdata_.discoveredAt = da;
         update_lease_expiration_i(iter, now);
+        update_rtps_relay_application_participant_i(iter);
+        iter = participants_.find(guid);
+        if (iter == participants_.end()) {
+          return;
+        }
         if (!from_relay && from != ACE_INET_Addr()) {
           iter->second.local_address_ = from;
         }
@@ -2628,14 +2645,26 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
 }
 
 void
-Spdp::remove_application_participant()
+Spdp::update_rtps_relay_application_participant_i(DiscoveredParticipantIter iter)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  if (!iter->second.pdata_.participantProxy.opendds_rtps_relay_application_participant) {
+    return;
+  }
+
+  if (DCPS::DCPS_debug_level) {
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) Spdp::update_rtps_relay_application_participant - %C is an RtpsRelay application participant\n"),
+               DCPS::LogGuid(iter->first).c_str()));
+  }
 
   for (DiscoveredParticipantIter pos = participants_.begin(), limit = participants_.end(); pos != limit; ++pos) {
-    if (pos->second.pdata_.participantProxy.opendds_rtps_relay_application_participant) {
+    if (pos != iter && pos->second.pdata_.participantProxy.opendds_rtps_relay_application_participant) {
+      if (DCPS::DCPS_debug_level) {
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) Spdp::update_rtps_relay_application_participant - removing previous RtpsRelay application participant %C\n"),
+                   DCPS::LogGuid(pos->first).c_str()));
+      }
       remove_discovered_participant(pos);
-      break;
     }
   }
 }
