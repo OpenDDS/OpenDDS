@@ -338,7 +338,7 @@ module OpenDDS {
     const ParameterId_t PID_OPENDDS_ICE_GENERAL       = PID_OPENDDS_BASE + 3;
     const ParameterId_t PID_OPENDDS_ICE_CANDIDATE     = PID_OPENDDS_BASE + 4;
     const ParameterId_t PID_OPENDDS_PARTICIPANT_FLAGS = PID_OPENDDS_BASE + 5;
-
+    const ParameterId_t PID_OPENDDS_RTPS_RELAY_APPLICATION_PARTICIPANT = PID_OPENDDS_BASE + 6;
 
     /* Always used inside a ParameterList */
     /* custom de/serializer implemented in opendds_idl */
@@ -426,6 +426,9 @@ module OpenDDS {
 
       case PID_OPENDDS_PARTICIPANT_FLAGS:
         OpenDDSParticipantFlags_t participant_flags;
+
+      case PID_OPENDDS_RTPS_RELAY_APPLICATION_PARTICIPANT:
+        boolean opendds_rtps_relay_application_participant;
 
       case PID_BUILTIN_ENDPOINT_SET:
         BuiltinEndpointSet_t builtin_endpoints;
@@ -606,6 +609,7 @@ module OpenDDS {
       Count_t manualLivelinessCount;
       DDS::PropertyQosPolicy property;
       OpenDDSParticipantFlags_t opendds_participant_flags;
+      boolean opendds_rtps_relay_application_participant;
 #ifdef OPENDDS_SECURITY
       DDS::Security::ExtendedBuiltinEndpointSet_t availableExtendedBuiltinEndpoints;
 #endif
