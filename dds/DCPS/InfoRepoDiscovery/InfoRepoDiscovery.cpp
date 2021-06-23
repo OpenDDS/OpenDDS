@@ -289,8 +289,8 @@ InfoRepoDiscovery::bit_config()
     }
 
     if (DCPS_debug_level) {
-        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) InfoRepoDiscovery::bit_config")
-                   ACE_TEXT(" - BIT tcp transport %C\n"), tcp_inst->local_address_string().c_str()));
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) InfoRepoDiscovery::bit_config")
+                 ACE_TEXT(" - BIT tcp transport %C\n"), tcp_inst->local_address_string().c_str()));
     }
   }
   return bit_config_;
