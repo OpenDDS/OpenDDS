@@ -1964,17 +1964,15 @@ template<typename T>
 bool operator>>(Serializer& strm, XTypes::Sequence<T>& seq)
 {
   size_t total_size = 0;
-  if (!strm.encoding().skip_sequence_dheader()) {
-    if (!strm.read_delimiter(total_size)) {
-      return false;
-    }
-    // special case for compatibility with older versions that encoded this
-    // sequence incorrectly - if the DHeader was read as a 0, it's an empty
-    // seqeunce although it should have been encoded as DHeader (4) + Length (0)
-    if (total_size == 0) {
-      seq.length(0);
-      return true;
-    }
+  if (!strm.read_delimiter(total_size)) {
+    return false;
+  }
+  // special case for compatibility with older versions that encoded this
+  // sequence incorrectly - if the DHeader was read as a 0, it's an empty
+  // sequence although it should have been encoded as DHeader (4) + Length (0)
+  if (total_size == 0) {
+    seq.length(0);
+    return true;
   }
 
   const size_t end_of_seq = strm.pos() + total_size;
@@ -1988,7 +1986,7 @@ bool operator>>(Serializer& strm, XTypes::Sequence<T>& seq)
       return false;
     }
   }
-  return (total_size == 0) ? true : strm.skip(end_of_seq - strm.pos());
+  return strm.skip(end_of_seq - strm.pos());
 }
 
 

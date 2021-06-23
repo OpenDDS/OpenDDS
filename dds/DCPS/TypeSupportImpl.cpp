@@ -88,7 +88,7 @@ void TypeSupportImpl::add_types(const RcHandle<XTypes::TypeLookupService>& tls) 
   if (TheServiceParticipant->type_object_encoding() != Service_Participant::Encoding_Normal) {
     // In this mode we need to be able to recognize TypeIdentifiers received over the network
     // by peers that may have encoded them incorrectly.  Populate the TypeLookupService with
-    // additional entires that map the alternate (wrong) TypeIdentifiers to the same TypeObjects.
+    // additional entries that map the alternate (wrong) TypeIdentifiers to the same TypeObjects.
     Encoding encoding = get_typeobject_encoding();
     encoding.skip_sequence_dheader(true);
     TypeMap altMap;

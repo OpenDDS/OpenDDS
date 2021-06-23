@@ -39,7 +39,7 @@ enum RemoteExceptionCode_t
 @final
 struct RequestHeader {
   SampleIdentity requestId;
-  InstanceName _instanceName;
+  InstanceName _instanceName; // DDSRPC11-5
 };
 
 @final
