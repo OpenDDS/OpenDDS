@@ -1841,14 +1841,16 @@ namespace XTypes {
   }
 
   template <typename T>
-  void deserialize_type_info(TypeInformation& type_info, const T& seq)
+  bool deserialize_type_info(TypeInformation& type_info, const T& seq)
   {
     DCPS::MessageBlockHelper<T> helper(seq);
     DCPS::Serializer serializer(helper, XTypes::get_typeobject_encoding());
     if (!(serializer >> type_info)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: deserialize_type_info ")
                  ACE_TEXT("deserialization of type information failed.\n")));
+      return false;
     }
+    return true;
   }
 
   OpenDDS_Dcps_Export
@@ -1967,7 +1969,8 @@ bool operator>>(Serializer& strm, XTypes::Sequence<T>& seq)
   if (!strm.read_delimiter(total_size)) {
     return false;
   }
-  // special case for compatibility with older versions that encoded this
+
+  // special cases for compatibility with older versions that encoded this
   // sequence incorrectly - if the DHeader was read as a 0, it's an empty
   // sequence although it should have been encoded as DHeader (4) + Length (0)
   if (total_size == 0) {
@@ -1975,11 +1978,23 @@ bool operator>>(Serializer& strm, XTypes::Sequence<T>& seq)
     return true;
   }
 
+  if (total_size < 4) {
+    return false;
+  }
+
   const size_t end_of_seq = strm.pos() + total_size;
   ACE_CDR::ULong length;
   if (!(strm >> length)) {
     return false;
   }
+
+  if (length > strm.length()) {
+    // if encoded incorrectly, the first 4 bytes of the elements were read
+    // as if they were the length - this may end up being larger than the
+    // number of bytes remaining in the Serializer
+    return false;
+  }
+
   seq.length(length);
   for (ACE_CDR::ULong i = 0; i < length; ++i) {
     if (!(strm >> seq[i])) {
