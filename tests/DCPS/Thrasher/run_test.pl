@@ -64,4 +64,4 @@ $test->enable_console_logging();
 $test->process('Thrasher', 'Thrasher', $opts);
 $test->start_process('Thrasher');
 
-exit $test->finish(1200);
+exit $test->finish(600);
