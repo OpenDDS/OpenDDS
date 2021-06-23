@@ -65,7 +65,7 @@ void SimpleStatBlock::pretty_print(std::ostream& os, const std::string& name, co
 void SimpleStatBlock::to_json_summary(const std::string& name, rapidjson::Value& dst, rapidjson::Value::AllocatorType& alloc) const
 {
   rapidjson::Value& stat_val = dst.AddMember(rapidjson::StringRef(name.c_str()), rapidjson::Value(0).Move(), alloc)[name.c_str()].SetObject();
-  stat_val.AddMember("sample_count", rapidjson::Value(sample_count_).Move(), alloc);
+  stat_val.AddMember("sample_count", rapidjson::Value(static_cast<uint64_t>(sample_count_)).Move(), alloc);
   if (sample_count_) {
     stat_val.AddMember("min", rapidjson::Value(min_).Move(), alloc);
     stat_val.AddMember("max", rapidjson::Value(max_).Move(), alloc);
@@ -74,8 +74,8 @@ void SimpleStatBlock::to_json_summary(const std::string& name, rapidjson::Value&
     stat_val.AddMember("stdev", rapidjson::Value(stdev).Move(), alloc);
     stat_val.AddMember("median", rapidjson::Value(median_).Move(), alloc);
     stat_val.AddMember("madev", rapidjson::Value(median_absolute_deviation_).Move(), alloc);
-    stat_val.AddMember("median_sample_count", rapidjson::Value(median_sample_count_).Move(), alloc);
-    stat_val.AddMember("median_sample_overflow", rapidjson::Value(median_sample_overflow_).Move(), alloc);
+    stat_val.AddMember("median_sample_count", rapidjson::Value(static_cast<uint64_t>(median_sample_count_)).Move(), alloc);
+    stat_val.AddMember("median_sample_overflow", rapidjson::Value(static_cast<uint64_t>(median_sample_overflow_)).Move(), alloc);
   }
 }
 
