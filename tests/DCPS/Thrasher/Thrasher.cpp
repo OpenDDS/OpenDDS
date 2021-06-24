@@ -52,19 +52,12 @@ int Thrasher::run()
 {
   Subscriber sub(DomainID, n_pub_threads_, expected_samples_, durable_);
   PublisherService pub_svc(DomainID, samples_per_thread_, durable_);
-  if (!pub_svc.start(n_pub_threads_)) {
-    return 71;
+  if (pub_svc.start(n_pub_threads_)) {
+    sub.wait_received();
+    pub_svc.end();
+    return sub.check_result();
   }
-
-  sub.wait(1, Utils::GTE);
-  sub.wait_received();
-
-  if (!pub_svc.end()) {
-    return 73;
-  }
-
-  const int r = sub.wait(0, Utils::EQ);
-  return (r == 0) ? sub.check_result() : r;
+  return 71;
 }
 
 void Thrasher::parse_args(int& argc, ACE_TCHAR** argv)

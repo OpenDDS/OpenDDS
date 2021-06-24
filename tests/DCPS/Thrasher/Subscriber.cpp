@@ -92,15 +92,7 @@ void Subscriber::cleanup()
   }
 }
 
-int Subscriber::wait(unsigned int num_writers, Utils::CmpOp cmp)
-{
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) -> Subscriber::wait for %d\n"), num_writers));
-  int ret = Utils::wait_match(reader_, num_writers, cmp);
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) <- Subscriber::wait returns %d\n"), ret));
-  return ret;
-}
-
-void Subscriber::wait_received()
+void Subscriber::wait_received() const
 {
   listener_i_->wait_received();
 }
