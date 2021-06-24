@@ -318,7 +318,7 @@ tests/DCPS/Thrasher/run_test.pl single rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS
 tests/DCPS/Thrasher/run_test.pl double rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Thrasher/run_test.pl triangle rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Thrasher/run_test.pl default rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/Thrasher/run_test.pl low rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Thrasher/run_test.pl low rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS_NO_OWNERSHIP_PROFILE !ASAN
 tests/DCPS/Thrasher/run_test.pl medium rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS_NO_OWNERSHIP_PROFILE !ASAN
 tests/DCPS/Thrasher/run_test.pl high rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS_NO_OWNERSHIP_PROFILE !ASAN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Thrasher/run_test.pl aggressive rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS_NO_OWNERSHIP_PROFILE !ASAN !OPENDDS_SAFETY_PROFILE
