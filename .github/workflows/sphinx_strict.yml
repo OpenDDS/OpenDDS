@@ -1,0 +1,30 @@
+name: sphinx_strict
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 1 * * SUN'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v2
+
+    - name: Install Dependences
+      run: |
+        cd docs
+        python3 -m pip install -r requirements.txt
+
+    - name: Check for Sphinx Warnings
+      run: |
+        cd docs
+        sphinx-build . _build -W -b dummy
+
+    - name: Check Links
+      if: always()
+      run: |
+        cd docs
+        sphinx-build . _build -b linkcheck
