@@ -147,8 +147,8 @@ Artifacts
 =========
 
 Artifacts from the continuous integration run can be downloaded by clicking details
-on one of the Build & Test runs. There is a dropdown on the bar next to "Re-run jobs"
-called "Artifacts" which lists each artifact that can be downloaded.
+on one of the Build & Test runs. Once all jobs are completed, a dropdown will appear on the
+bar next to "Re-run jobs", called "Artifacts" which lists each artifact that can be downloaded.
 
 Alternatively, clicking the "Summary" button at the top of the list of jobs will
 list all the available artifacts at the bottom of the page.
