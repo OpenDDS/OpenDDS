@@ -1,3 +1,5 @@
+#ifdef OPENDDS_HAS_CXX11
+
 #include <gtest/gtest.h>
 
 #include "tools/rtpsrelay/lib/Name.h"
@@ -132,3 +134,5 @@ TEST(Name, maintest)
   test_invalid("[a-]");
   test_invalid("[b-a]");
 }
+
+#endif

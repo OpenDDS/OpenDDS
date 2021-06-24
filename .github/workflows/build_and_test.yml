@@ -5311,17 +5311,6 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - name: setup gtest
-      shell: cmd
-      run: |
-        cd OpenDDS/tests/googletest
-        git submodule init
-        git submodule update
-        mkdir build
-        cd build
-        mkdir install
-        cmake -DCMAKE_INSTALL_PREFIX=./install -DBUILD_SHARED_LIBS=ON ..
-        cmake --build . --target install --config Release
     - name: build compiler tests
       shell: cmd
       run: |
@@ -6806,7 +6795,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -Config STATIC_UNIT -Config RTPS -Config WIN64 -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Release -Config STATIC_UNIT -Config RTPS -Config WIN64 -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -7084,6 +7073,17 @@ jobs:
         cd OpenDDS
         tar xvfJ build_w16_x86_i0_sec.tar.xz
         rm -f build_w16_x86_i0_sec.tar.xz
+    - name: setup gtest
+      shell: cmd
+      run: |
+        cd OpenDDS/tests/googletest
+        git submodule init
+        git submodule update
+        mkdir build
+        cd build
+        mkdir install
+        cmake -DCMAKE_INSTALL_PREFIX=./install -DBUILD_SHARED_LIBS=ON ..
+        cmake --build . --target install
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: check build configuration

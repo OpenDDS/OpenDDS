@@ -1,5 +1,6 @@
-#include <gtest/gtest.h>
+#ifdef OPENDDS_HAS_CXX11
 
+#include <gtest/gtest.h>
 #include "tools/rtpsrelay/lib/PartitionIndex.h"
 
 #include "dds/DCPS/Service_Participant.h"
@@ -176,3 +177,5 @@ TEST(PartitionIndex, maintest)
     test_equal("general find '?pp[lmnop][!i]'", actual, expected);
   }
 }
+
+#endif
