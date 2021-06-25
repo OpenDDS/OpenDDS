@@ -1,0 +1,2 @@
+feature(built_in_topics, !uses_wchar): opendds_face {
+}
