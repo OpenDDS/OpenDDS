@@ -1,32 +1,9 @@
+#include "Thrasher.h"
 #include "PublisherService.h"
 #include "Subscriber.h"
 
-#include <tests/Utils/StatusMatching.h>
-
 #include <ace/Arg_Shifter.h>
 #include <ace/Log_Msg.h>
-#include <ace/OS_main.h>
-#include <ace/OS_NS_stdlib.h>
-
-class Thrasher
-{
-public:
-  Thrasher(int& argc, ACE_TCHAR** argv);
-  ~Thrasher() { cleanup(); }
-  int run();
-private:
-  void parse_args(int& argc, ACE_TCHAR** argv);
-  void cleanup();
-  static const long DomainID = 42;
-  static const int DefaultPubThreads = 1;
-  static const std::size_t DefaultSamplesPerThread = 1024;
-  static const std::size_t DefaultExpectedSamples = 1024;
-  DDS::DomainParticipantFactory_var dpf_;
-  int n_pub_threads_;
-  std::size_t samples_per_thread_;
-  std::size_t expected_samples_;
-  bool durable_;
-};
 
 Thrasher::Thrasher(int& argc, ACE_TCHAR** argv)
   : dpf_()
@@ -90,17 +67,4 @@ void Thrasher::cleanup()
     TheServiceParticipant->shutdown();
     dpf_ = 0;
   }
-}
-
-int ACE_TMAIN(int argc, ACE_TCHAR** argv)
-{
-  try {
-    Thrasher thrasher(argc, argv);
-    return thrasher.run();
-  } catch (const std::exception& e) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: %C\n", e.what()));
-  } catch (...) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: exception\n"));
-  }
-  return 101;
 }

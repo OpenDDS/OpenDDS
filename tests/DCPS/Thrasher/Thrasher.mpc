@@ -17,5 +17,6 @@ project(*): dcpsexe, dcps_test, dcps_transports_for_test {
     Subscriber.cpp
     PublisherService.cpp
     Thrasher.cpp
+    main.cpp
   }
 }
