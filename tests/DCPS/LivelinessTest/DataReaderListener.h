@@ -3,6 +3,8 @@
 #ifndef DATAREADER_LISTENER_IMPL
 #define DATAREADER_LISTENER_IMPL
 
+#include <tests/Utils/DistributedConditionSet.h>
+
 #include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/LocalObject.h>
 
@@ -12,11 +14,16 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+const char AUTOMATIC_DATAREADER[] = "AUTOMATIC_DATAREADER";
+const char REMOTE_MANUAL_DATAREADER[] = "REMOTE_MANUAL_DATAREADER";
+const char LOCAL_MANUAL_DATAREADER[] = "LOCAL_MANUAL_DATAREADER";
+
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataReaderListener>
 {
 public:
-  DataReaderListenerImpl(void);
+  DataReaderListenerImpl(DistributedConditionSet_rch dcs,
+                         const OPENDDS_STRING& actor);
 
   virtual ~DataReaderListenerImpl(void);
 
@@ -76,6 +83,12 @@ public:
   }
 
 private:
+  DistributedConditionSet_rch dcs_;
+  const OPENDDS_STRING actor_;
+
+  int liveliness_lost_count_;
+  int liveliness_gained_count_;
+
   int liveliness_changed_count_;
   ::DDS::SampleInfo last_si_;
   ::DDS::LivelinessChangedStatus last_status_;
