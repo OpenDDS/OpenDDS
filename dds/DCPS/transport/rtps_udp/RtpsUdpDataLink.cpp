@@ -435,8 +435,8 @@ RtpsUdpDataLink::join_multicast_group(const NetworkInterface& nic,
 
   if (joined_interfaces_.count(nic.name()) == 0 && nic.has_ipv4()) {
     if (DCPS_debug_level > 3) {
-      ACE_TCHAR buff[256];
-      config().multicast_group_address().addr_to_string(buff, 256);
+      ACE_TCHAR buff[DCPS::AddrToStringSize];
+      config().multicast_group_address().addr_to_string(buff, DCPS::AddrToStringSize);
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group ")
                  ACE_TEXT("joining group %s on %C\n"),
@@ -462,8 +462,8 @@ RtpsUdpDataLink::join_multicast_group(const NetworkInterface& nic,
 #ifdef ACE_HAS_IPV6
   if (ipv6_joined_interfaces_.count(nic.name()) == 0 && nic.has_ipv6()) {
     if (DCPS_debug_level > 3) {
-      ACE_TCHAR buff[256];
-      config().ipv6_multicast_group_address().addr_to_string(buff, 256);
+      ACE_TCHAR buff[DCPS::AddrToStringSize];
+      config().ipv6_multicast_group_address().addr_to_string(buff, DCPS::AddrToStringSize);
 
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group ")
@@ -494,8 +494,8 @@ RtpsUdpDataLink::leave_multicast_group(const NetworkInterface& nic)
 {
   if (joined_interfaces_.count(nic.name()) != 0 && !nic.has_ipv4()) {
     if (DCPS_debug_level > 3) {
-      ACE_TCHAR buff[256];
-      config().multicast_group_address().addr_to_string(buff, 256);
+      ACE_TCHAR buff[DCPS::AddrToStringSize];
+      config().multicast_group_address().addr_to_string(buff, DCPS::AddrToStringSize);
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) RtpsUdpDataLink::leave_multicast_group ")
                  ACE_TEXT("leaving group %s on %C\n"),
@@ -515,8 +515,8 @@ RtpsUdpDataLink::leave_multicast_group(const NetworkInterface& nic)
 #ifdef ACE_HAS_IPV6
   if (ipv6_joined_interfaces_.count(nic.name()) != 0 && !nic.has_ipv6()) {
     if (DCPS_debug_level > 3) {
-      ACE_TCHAR buff[256];
-      config().multicast_group_address().addr_to_string(buff, 256);
+      ACE_TCHAR buff[DCPS::AddrToStringSize];
+      config().multicast_group_address().addr_to_string(buff, DCPS::AddrToStringSize);
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) RtpsUdpDataLink::leave_ipv6_multicast_group ")
                  ACE_TEXT("leaving group %s on %C\n"),
@@ -561,16 +561,16 @@ RtpsUdpDataLink::update_locators(const RepoId& remote_id,
   if (log_unicast_change) {
     for (AddrSet::const_iterator pos = unicast_addresses.begin(), limit = unicast_addresses.end();
          pos != limit; ++pos) {
-      ACE_TCHAR addr_buff[256] = {};
-      pos->addr_to_string(addr_buff, 256);
+      ACE_TCHAR addr_buff[DCPS::AddrToStringSize] = {};
+      pos->addr_to_string(addr_buff, DCPS::AddrToStringSize);
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::update_locators %C is now at %s\n"), LogGuid(remote_id).c_str(), addr_buff));
     }
   }
   if (log_multicast_change) {
     for (AddrSet::const_iterator pos = multicast_addresses.begin(), limit = multicast_addresses.end();
          pos != limit; ++pos) {
-      ACE_TCHAR addr_buff[256] = {};
-      pos->addr_to_string(addr_buff, 256);
+      ACE_TCHAR addr_buff[DCPS::AddrToStringSize] = {};
+      pos->addr_to_string(addr_buff, DCPS::AddrToStringSize);
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::update_locators %C is now at %s\n"), LogGuid(remote_id).c_str(), addr_buff));
     }
   }

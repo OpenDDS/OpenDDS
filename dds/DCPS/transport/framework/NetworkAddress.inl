@@ -50,7 +50,7 @@ void OpenDDS::DCPS::NetworkAddress::to_addr(ACE_INET_Addr& addr) const
 {
   DBG_ENTRY_LVL("NetworkAddress","to_addr",6);
   addr = choose_single_coherent_address(addr_.c_str(), true /*prefer_loopback*/);
-  VDBG_LVL((LM_DEBUG, "NetworkAddress::to_addr() - Resolving address for %C to be %C\n", addr_.c_str(), addr.get_host_addr()), 2);
+  VDBG_LVL((LM_DEBUG, "(%P|%t) NetworkAddress::to_addr() - Resolving address for %C to be %C\n", addr_.c_str(), addr.get_host_addr()), 2);
 }
 
 ACE_INLINE

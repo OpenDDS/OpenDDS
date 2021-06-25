@@ -215,6 +215,7 @@ public:
   );
 
   DCPS::RcHandle<RtpsDiscoveryConfig> config() const { return config_; }
+  void remove_application_participant();
   void send_to_relay();
 
 protected:
@@ -243,6 +244,7 @@ private:
   const DDS::DomainId_t domain_;
   DCPS::RepoId guid_;
   const DCPS::MonotonicTime_t participant_discovered_at_;
+  bool is_application_participant_;
 
   void data_received(const DataSubmessage& data, const ParameterList& plist, const ACE_INET_Addr& from);
 
