@@ -642,11 +642,12 @@ DomainParticipantImpl::delete_topic_i(
       const CORBA::ULong client_refs = --entry->client_refs_;
 
       if (remove_objref || 0 == client_refs) {
+        const GUID_t topicId = the_topic_servant->get_id();
         topics_.erase(iter);
 
         Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
         TopicStatus status = disco->remove_topic(
-          the_dp_servant->get_domain_id(), the_dp_servant->get_id(), the_topic_servant->get_id());
+          the_dp_servant->get_domain_id(), the_dp_servant->get_id(), topicId);
 
         if (status != REMOVED) {
           if (DCPS_debug_level > 0) {

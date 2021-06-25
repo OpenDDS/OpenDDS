@@ -28,6 +28,7 @@ namespace OpenDDS {
         , has_dcps_key_(false)
         , topic_callbacks_(0)
         , inconsistent_topic_count_(0)
+        , assertion_count_(0)
       {}
 
       void init(const OPENDDS_STRING& name,
@@ -49,13 +50,16 @@ namespace OpenDDS {
         local_qos_ = qos;
         has_dcps_key_ = has_dcps_key;
         topic_callbacks_ = topic_callbacks;
+        ++assertion_count_;
       }
 
       void unset_local()
       {
         OPENDDS_ASSERT(local_publications_.empty());
         OPENDDS_ASSERT(local_subscriptions_.empty());
-        topic_callbacks_ = 0;
+        if (--assertion_count_ == 0) {
+          topic_callbacks_ = 0;
+        }
       }
 
       void update(const DDS::TopicQos& qos)
@@ -157,6 +161,7 @@ namespace OpenDDS {
       RepoIdSet discovered_publications_;
       RepoIdSet discovered_subscriptions_;
       int inconsistent_topic_count_;
+      int assertion_count_;
     };
 
   } // namespace DCPS

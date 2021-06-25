@@ -312,9 +312,13 @@ bool MultiTopicDataReaderBase::have_sample_states(
 void MultiTopicDataReaderBase::cleanup()
 {
   DDS::Subscriber_var sub = resulting_reader_->get_subscriber();
+  DDS::DomainParticipant_var participant = sub->get_participant();
   for (std::map<OPENDDS_STRING, QueryPlan>::iterator it = query_plans_.begin();
        it != query_plans_.end(); ++it) {
+    const DDS::TopicDescription_var topicDescr = it->second.data_reader_->get_topicdescription();
+    const DDS::Topic_var topic = DDS::Topic::_narrow(topicDescr);
     sub->delete_datareader(it->second.data_reader_);
+    participant->delete_topic(topic);
   }
   DataReaderImpl* dri = dynamic_cast<DataReaderImpl*>(resulting_reader_.in());
   SubscriberImpl* si = dynamic_cast<SubscriberImpl*>(sub.in());
