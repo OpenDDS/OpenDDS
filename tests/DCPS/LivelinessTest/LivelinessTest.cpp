@@ -401,7 +401,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
     }
     writer_ws->detach_condition(writer_condition);
-    sleep(5);
     // send an automatic message to show manual readers are not
     // notified of liveliness.
     ::Xyz::Foo foo;
@@ -427,13 +426,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_TEXT("(%P|%t) Running Write: remote: %d local: %d\n"),
                  local_manual_drl_servant->liveliness_changed_count(),
                  remote_manual_drl_servant->liveliness_changed_count()));
-      sleep(5);
       writer->run_test(i);
-      while (remote_manual_drl_servant->no_writers_generation_count() != i ||
-             local_manual_drl_servant->no_writers_generation_count() != i) {
-        ACE_OS::sleep(ACE_Time_Value(0, 250000));
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("remote_manual_drl_servant->no_writers_generation_count()=%d\n"), remote_manual_drl_servant->no_writers_generation_count()));
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("local_manual_drl_servant->no_writers_generation_count()=%d\n"), local_manual_drl_servant->no_writers_generation_count()));
+      if (!use_take) {
+        while (remote_manual_drl_servant->no_writers_generation_count() != i ||
+              local_manual_drl_servant->no_writers_generation_count() != i) {
+          ACE_OS::sleep(ACE_Time_Value(0, 250000));
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("remote_manual_drl_servant->no_writers_generation_count()=%d\n"), remote_manual_drl_servant->no_writers_generation_count()));
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("local_manual_drl_servant->no_writers_generation_count()=%d\n"), local_manual_drl_servant->no_writers_generation_count()));
+        }
       }
     }
 
@@ -451,6 +451,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::sleep(ACE_Time_Value(0, 250000));
     }
     int expected_manual_liveliness_changes = 3 + (2 * (num_unlively_periods + 1));
+    int expected_no_writers_generation_count = (use_take ? 0 : num_unlively_periods);
     // Determine the test status at this point.
 
     ACE_OS::fprintf(stderr, "**********\n") ;
@@ -500,7 +501,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_TEXT("(%P|%t) ERROR: remote_manual_drl_servant - ")
         ACE_TEXT("test shut down while alive.\n")
       ));
-    } else if (remote_manual_drl_servant->no_writers_generation_count() != num_unlively_periods) {
+    } else if (remote_manual_drl_servant->no_writers_generation_count() != expected_no_writers_generation_count) {
       status = 1;
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: remote_manual_drl_servant->no_writers_generation_count is %d - ")
@@ -526,7 +527,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_TEXT("(%P|%t) ERROR: local_manual_drl_servant - ")
         ACE_TEXT("test shut down while alive.\n")
       ));
-    } else if (local_manual_drl_servant->no_writers_generation_count() != num_unlively_periods) {
+    } else if (local_manual_drl_servant->no_writers_generation_count() != expected_no_writers_generation_count) {
       status = 1;
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: local_manual_drl_servant->no_writers_generation_count is %d - ")
