@@ -5561,7 +5561,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS --no-dcps --cmake --cmake-build-cfg Static_Release"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS --no-dcps --cmake --cmake-build-cfg Release"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
