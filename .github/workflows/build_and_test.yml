@@ -209,7 +209,7 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_u18_i0_xer0_js0_j12:
+  cmake_u18_i0_xer0_js0_j12:
 
     runs-on: ubuntu-18.04
 
@@ -291,7 +291,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps -Config RTPS -Config LINUX -Config CXX11 -Config GH_ACTIONS --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -4831,7 +4831,7 @@ jobs:
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
+        <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS --no-dcps --cmake"/>
@@ -4985,7 +4985,7 @@ jobs:
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
+        <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_MESSENGER -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config CXX11 -Config GH_ACTIONS"/>
@@ -5126,7 +5126,7 @@ jobs:
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
+        <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_COMPILER -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config CXX11 -Config GH_ACTIONS"/>
@@ -5266,7 +5266,7 @@ jobs:
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
+        <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_UNIT -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config CXX11 -Config GH_ACTIONS"/>
@@ -5558,7 +5558,7 @@ jobs:
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
+        <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS --no-dcps --cmake --cmake-build-cfg Static_Release"/>
@@ -5712,7 +5712,7 @@ jobs:
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
+        <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Static_Release -Config STATIC -Config STATIC_MESSENGER -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config RTPS -Config CXX11 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config GH_ACTIONS"/>
@@ -5852,7 +5852,7 @@ jobs:
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
+        <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Static_Release -Config STATIC_COMPILER -Config STATIC -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config RTPS -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config GH_ACTIONS"/>
@@ -5992,7 +5992,7 @@ jobs:
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
+        <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Static_Release -Config STATIC_UNIT -Config STATIC -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config RTPS -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config GH_ACTIONS"/>
@@ -6296,7 +6296,7 @@ jobs:
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
+        <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS --no-dcps --cmake --cmake-build-cfg Release"/>
@@ -6450,7 +6450,7 @@ jobs:
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
+        <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Release -Config STATIC_MESSENGER -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS"/>
@@ -6590,7 +6590,7 @@ jobs:
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
+        <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Release -Config STATIC_COMPILER -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS"/>
@@ -6730,7 +6730,7 @@ jobs:
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
+        <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Release -Config STATIC_UNIT -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS"/>
@@ -7104,7 +7104,7 @@ jobs:
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
+        <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS --no-dcps --cmake --cmake-build-cfg Release"/>
@@ -7258,7 +7258,7 @@ jobs:
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
+        <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Release -Config STATIC_MESSENGER -Config RTPS -Config WIN64 -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS"/>
@@ -7398,7 +7398,7 @@ jobs:
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
+        <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Release -Config STATIC_COMPILER -Config RTPS -Config WIN64 -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS"/>
@@ -7545,7 +7545,7 @@ jobs:
         <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
+        <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -Config STATIC_UNIT -Config RTPS -Config WIN64 -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS"/>
@@ -7847,7 +7847,7 @@ jobs:
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
+        <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -Config RTPS -Config WIN32 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS --security --cmake"/>
@@ -8061,7 +8061,7 @@ jobs:
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
+        <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS --no-dcps --cmake"/>
