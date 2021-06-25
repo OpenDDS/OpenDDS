@@ -692,10 +692,8 @@ public:
   {
     // save
     const size_t rpos = rpos_;
-    const size_t wpos = wpos_;
     ACE_Message_Block* current = current_;
     char* const rd_ptr = current_->rd_ptr();
-    char* const wr_ptr = current_->wr_ptr();
 
     // read
     if (!(*this >> t)) {
@@ -703,11 +701,9 @@ public:
     }
 
     // reset
-    current->wr_ptr(wr_ptr);
     current->rd_ptr(rd_ptr);
     current_ = current;
     rpos_ = rpos;
-    wpos_ = wpos;
     return true;
   }
 
