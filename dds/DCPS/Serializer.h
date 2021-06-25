@@ -688,21 +688,35 @@ public:
   };
 
   template <typename T>
+  bool peek_helper(ACE_Message_Block* const block, T& t)
+  {
+    bool result = false;
+    char* const rd_ptr = block->rd_ptr();
+    if (block->cont()) {
+      result = peek_helper(block->cont(), t);
+    } else {
+      result = *this >> t;
+    }
+    block->rd_ptr(rd_ptr);
+    return result;
+  }
+
+  template <typename T>
   bool peek(T& t)
   {
     // save
     const size_t rpos = rpos_;
-    ACE_Message_Block* current = current_;
-    char* const rd_ptr = current_->rd_ptr();
+    const unsigned char align_rshift = align_rshift_;
+    ACE_Message_Block* const current = current_;
 
     // read
-    if (!(*this >> t)) {
+    if (!peek_helper(current_, t)) {
       return false;
     }
 
     // reset
-    current->rd_ptr(rd_ptr);
     current_ = current;
+    align_rshift_ = align_rshift;
     rpos_ = rpos;
     return true;
   }

@@ -483,6 +483,46 @@ TEST(serializer_test, Serializer__align_context_2_buff_diff_walign)
   //std::cout << std::endl;
 }
 
+TEST(serializer_test, Serializer__test_peek_align)
+{
+  ACE_Message_Block amb(5);
+  amb.cont(new ACE_Message_Block(8));
+
+  Encoding enc;
+  Serializer ser(&amb, enc);
+
+  std::memset(amb.wr_ptr(), 0, 5);
+  std::memset(amb.cont()->wr_ptr(), 0, 8);
+
+  amb.cont()->rd_ptr(1);
+  amb.cont()->wr_ptr(1);
+
+  const ACE_CDR::ULong a = 7;
+  const ACE_CDR::ULong b = 13;
+  const ACE_CDR::ULong c = 42;
+
+  ASSERT_TRUE(ser << a);
+  ASSERT_TRUE(ser << b);
+  ASSERT_TRUE(ser << c);
+
+  Serializer rser(&amb, enc);
+  ACE_CDR::ULong res = 0;
+
+  ASSERT_TRUE(rser.peek(res));
+  ASSERT_EQ(res, a);
+  ASSERT_TRUE(rser >> res);
+  ASSERT_EQ(res, a);
+  ASSERT_TRUE(rser.peek(res));
+  ASSERT_EQ(res, b);
+  ASSERT_TRUE(rser >> res);
+  ASSERT_EQ(res, b);
+  ASSERT_TRUE(rser.peek(res));
+  ASSERT_TRUE(res == c);
+  ASSERT_TRUE(rser >> res);
+  ASSERT_TRUE(res == c);
+}
+
+
 int main(int argc, char* argv[])
 {
   ::testing::InitGoogleTest(&argc, argv);
