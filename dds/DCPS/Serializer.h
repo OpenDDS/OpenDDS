@@ -688,14 +688,15 @@ public:
   };
 
   template <typename T>
-  bool peek_helper(ACE_Message_Block* const block, T& t)
+  bool peek_helper(ACE_Message_Block* const block, size_t bytes, T& t)
   {
     bool result = false;
     char* const rd_ptr = block->rd_ptr();
-    if (block->cont()) {
-      result = peek_helper(block->cont(), t);
-    } else {
+    const size_t length = block->length();
+    if (!block->cont() || (block != 0 && bytes <= length)) {
       result = *this >> t;
+    } else {
+      result = peek_helper(block->cont(), bytes - length, t);
     }
     block->rd_ptr(rd_ptr);
     return result;
@@ -710,7 +711,7 @@ public:
     ACE_Message_Block* const current = current_;
 
     // read
-    if (!peek_helper(current_, t)) {
+    if (!peek_helper(current_, 0, t)) {
       return false;
     }
 
@@ -720,6 +721,8 @@ public:
     rpos_ = rpos;
     return true;
   }
+
+  bool peek(ACE_CDR::ULong& t);
 
 private:
   /// Read an array of values from the chain.

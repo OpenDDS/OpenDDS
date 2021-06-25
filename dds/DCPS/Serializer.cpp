@@ -381,6 +381,26 @@ Serializer::ScopedAlignmentContext::restore(Serializer& ser) const
   }
 }
 
+bool
+Serializer::peek(ACE_CDR::ULong& t)
+{
+  // save
+  const size_t rpos = rpos_;
+  const unsigned char align_rshift = align_rshift_;
+  ACE_Message_Block* const current = current_;
+
+  // read
+  if (!peek_helper(current_, 2 * sizeof (ACE_CDR::ULong), t)) {
+    return false;
+  }
+
+  // reset
+  current_ = current;
+  align_rshift_ = align_rshift;
+  rpos_ = rpos;
+  return true;
+}
+
 void
 Serializer::reset_alignment()
 {

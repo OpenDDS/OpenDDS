@@ -292,7 +292,7 @@ TEST(serializer_test, EncapsulationHeader__to_encoding_XML)
   EXPECT_STREQ("XML", eh.to_string().c_str());
 }
 
-TEST(serializer_test, Serializer__Serializer_ACE_Message_Block_Encoding)
+TEST(serializer_test, Serializer_Serializer_ACE_Message_Block_Encoding)
 {
   ACE_Message_Block amb;
   Encoding enc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_LITTLE);
@@ -302,7 +302,7 @@ TEST(serializer_test, Serializer__Serializer_ACE_Message_Block_Encoding)
   EXPECT_EQ(0, ser.encoding().to_string().compare(0, 28, "Unaligned CDR, little-endian"));
 }
 
-TEST(serializer_test, Serializer__Serializer_ACE_Message_Block_Kind)
+TEST(serializer_test, Serializer_Serializer_ACE_Message_Block_Kind)
 {
   ACE_Message_Block amb;
   Serializer ser(&amb, Encoding::KIND_XCDR1);
@@ -311,7 +311,7 @@ TEST(serializer_test, Serializer__Serializer_ACE_Message_Block_Kind)
   EXPECT_EQ(0, ser.encoding().to_string().compare(0, 24, "CDR/XCDR1, little-endian"));
 }
 
-TEST(serializer_test, Serializer__Serializer_ACE_Message_Block_Kind_bool)
+TEST(serializer_test, Serializer_Serializer_ACE_Message_Block_Kind_bool)
 {
   ACE_Message_Block amb;
   Serializer ser(&amb, Encoding::KIND_XCDR2);
@@ -320,7 +320,7 @@ TEST(serializer_test, Serializer__Serializer_ACE_Message_Block_Kind_bool)
   EXPECT_EQ(0, ser.encoding().to_string().compare(0, 20, "XCDR2, little-endian"));
 }
 
-TEST(serializer_test, Serializer__set_endianness)
+TEST(serializer_test, Serializer_set_endianness)
 {
   ACE_Message_Block amb;
   Encoding enc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_LITTLE);
@@ -333,7 +333,7 @@ TEST(serializer_test, Serializer__set_endianness)
   EXPECT_EQ(0, ser.encoding().to_string().compare(0, 25, "Unaligned CDR, big-endian"));
 }
 
-TEST(serializer_test, Serializer__swap_bytes_endianness)
+TEST(serializer_test, Serializer_swap_bytes_endianness)
 {
   ACE_Message_Block amb;
   Encoding enc;
@@ -343,7 +343,7 @@ TEST(serializer_test, Serializer__swap_bytes_endianness)
   EXPECT_EQ(ser.endianness(), ENDIAN_NONNATIVE);
 }
 
-TEST(serializer_test, Serializer__align_context_basic_reference)
+TEST(serializer_test, Serializer_align_context_basic_reference)
 {
   ACE_Message_Block amb(64);
   Encoding enc;
@@ -374,7 +374,7 @@ TEST(serializer_test, Serializer__align_context_basic_reference)
   //std::cout << std::endl;
 }
 
-TEST(serializer_test, Serializer__align_context_basic)
+TEST(serializer_test, Serializer_align_context_basic)
 {
   ACE_Message_Block amb(64);
 
@@ -408,7 +408,7 @@ TEST(serializer_test, Serializer__align_context_basic)
   //std::cout << std::endl;
 }
 
-TEST(serializer_test, Serializer__align_context_2_buff)
+TEST(serializer_test, Serializer_align_context_2_buff)
 {
   ACE_Message_Block amb(24);
   amb.cont(new ACE_Message_Block(32));
@@ -444,7 +444,7 @@ TEST(serializer_test, Serializer__align_context_2_buff)
   //std::cout << std::endl;
 }
 
-TEST(serializer_test, Serializer__align_context_2_buff_diff_walign)
+TEST(serializer_test, Serializer_align_context_2_buff_diff_walign)
 {
   ACE_Message_Block amb(21);
   amb.cont(new ACE_Message_Block(32));
@@ -483,7 +483,7 @@ TEST(serializer_test, Serializer__align_context_2_buff_diff_walign)
   //std::cout << std::endl;
 }
 
-TEST(serializer_test, Serializer__test_peek_align)
+TEST(serializer_test, Serializer_test_peek_align)
 {
   ACE_Message_Block amb(5);
   amb.cont(new ACE_Message_Block(8));
