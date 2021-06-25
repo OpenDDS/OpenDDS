@@ -50,14 +50,14 @@ Thrasher::Thrasher(int& argc, ACE_TCHAR** argv)
 
 int Thrasher::run()
 {
+  int ret = -1;
   Subscriber sub(DomainID, n_pub_threads_, expected_samples_, durable_);
   PublisherService pub_svc(DomainID, samples_per_thread_, durable_);
   if (pub_svc.start(n_pub_threads_)) {
-    sub.wait_received();
+    ret = sub.wait_and_check_received();
     pub_svc.end();
-    return sub.check_result();
   }
-  return 71;
+  return ret;
 }
 
 void Thrasher::parse_args(int& argc, ACE_TCHAR** argv)

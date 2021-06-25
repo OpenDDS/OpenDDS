@@ -92,12 +92,8 @@ void Subscriber::cleanup()
   }
 }
 
-void Subscriber::wait_received() const
+int Subscriber::wait_and_check_received() const
 {
   listener_i_->wait_received();
-}
-
-int Subscriber::check_result() const
-{
   return listener_i_->check_received(n_pub_threads_);
 }

@@ -10,8 +10,7 @@ class Subscriber
 public:
   Subscriber(const DDS::DomainId_t domainId, const std::size_t n_pub_threads, const std::size_t expected_samples, const bool durable);
   ~Subscriber();
-  void wait_received() const;
-  int check_result() const;
+  int wait_and_check_received() const;
 private:
   void cleanup();
   const DDS::DomainId_t domainId_;
