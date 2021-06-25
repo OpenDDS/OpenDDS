@@ -117,7 +117,6 @@ struct DiscoveredPublication_SecurityWrapper {
   DDS::Security::DataTags data_tags;
   bool have_ice_agent_info;
   ICE::AgentInfo ice_agent_info;
-  XTypes::TypeInformation type_info;
 
   DiscoveredPublication_SecurityWrapper()
     : have_ice_agent_info(false) {

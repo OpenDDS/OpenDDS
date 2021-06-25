@@ -292,7 +292,6 @@ namespace OpenDDS {
         DDS::InstanceHandle_t bit_ih_;
         MonotonicTime_t participant_discovered_at_;
         ACE_CDR::ULong transport_context_;
-        XTypes::TypeInformation type_info_;
 
 #ifdef OPENDDS_SECURITY
         DDS::Security::EndpointSecurityAttributes security_attribs_;
@@ -360,7 +359,8 @@ namespace OpenDDS {
         type_lookup_service_ = type_lookup_service;
       }
 
-      void purge_dead_topic(const OPENDDS_STRING& topic_name) {
+      void purge_dead_topic(const OPENDDS_STRING& topic_name)
+      {
         typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it = topics_.find(topic_name);
         topic_names_.erase(top_it->second.topic_id());
         topics_.erase(top_it);
@@ -438,16 +438,19 @@ namespace OpenDDS {
         }
       }
 
-      bool ignoring(const RepoId& guid) const {
+      bool ignoring(const RepoId& guid) const
+      {
         return ignored_guids_.count(guid);
       }
-      bool ignoring(const char* topic_name) const {
+
+      bool ignoring(const char* topic_name) const
+      {
         return ignored_topics_.count(topic_name);
       }
 
       TopicStatus assert_topic(RepoId_out topicId, const char* topicName,
-                                     const char* dataTypeName, const DDS::TopicQos& qos,
-                                     bool hasDcpsKey, TopicCallbacks* topic_callbacks)
+                               const char* dataTypeName, const DDS::TopicQos& qos,
+                               bool hasDcpsKey, TopicCallbacks* topic_callbacks)
       {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, INTERNAL_ERROR);
         typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator iter =
@@ -471,9 +474,9 @@ namespace OpenDDS {
       }
 
       TopicStatus find_topic(const char* topicName,
-                                   CORBA::String_out dataTypeName,
-                                   DDS::TopicQos_out qos,
-                                   RepoId_out topicId)
+                             CORBA::String_out dataTypeName,
+                             DDS::TopicQos_out qos,
+                             RepoId_out topicId)
       {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, INTERNAL_ERROR);
         typename OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::const_iterator iter =
@@ -683,14 +686,14 @@ namespace OpenDDS {
       }
 
       RepoId add_subscription(const RepoId& topicId,
-                                    DataReaderCallbacks_rch subscription,
-                                    const DDS::DataReaderQos& qos,
-                                    const TransportLocatorSeq& transInfo,
-                                    const DDS::SubscriberQos& subscriberQos,
-                                    const char* filterClassName,
-                                    const char* filterExpr,
-                                    const DDS::StringSeq& params,
-                                    const XTypes::TypeInformation& type_info)
+                              DataReaderCallbacks_rch subscription,
+                              const DDS::DataReaderQos& qos,
+                              const TransportLocatorSeq& transInfo,
+                              const DDS::SubscriberQos& subscriberQos,
+                              const char* filterClassName,
+                              const char* filterExpr,
+                              const DDS::StringSeq& params,
+                              const XTypes::TypeInformation& type_info)
       {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, RepoId());
 
@@ -1226,7 +1229,7 @@ namespace OpenDDS {
           writer_type_info = &lpi->second.type_info_;
         } else if ((dpi = discovered_publications_.find(writer))
                    != discovered_publications_.end()) {
-          writer_type_info = &dpi->second.type_info_;
+          writer_type_info = &dpi->second.writer_data_.ddsPublicationData.type_information;
         } else {
           if (DCPS_debug_level >= 4) {
             ACE_DEBUG((LM_DEBUG, "(%P|%t) EndpointManager::match: Undiscovered Writer\n"));
@@ -1411,7 +1414,7 @@ namespace OpenDDS {
         } else if (dpi != discovered_publications_.end()) {
           wTls = &dpi->second.writer_data_.writerProxy.allLocators;
           wTransportContext = dpi->second.transport_context_;
-          writer_type_info = &dpi->second.type_info_;
+          writer_type_info = &dpi->second.writer_data_.ddsPublicationData.type_information;
           topic_name = dpi->second.get_topic_name();
           writer_participant_discovered_at = dpi->second.participant_discovered_at_;
 
@@ -1585,9 +1588,9 @@ namespace OpenDDS {
             td_iter->second.increment_inconsistent();
             if (DCPS::DCPS_debug_level) {
               ACE_DEBUG((LM_WARNING,
-                        ACE_TEXT("(%P|%t) EndpointManager::match_continue - WARNING ")
-                        ACE_TEXT("Data types of topic %C does not match (inconsistent)\n"),
-                        topic_name.c_str()));
+                         ACE_TEXT("(%P|%t) EndpointManager::match_continue - WARNING ")
+                         ACE_TEXT("Data types of topic %C does not match (inconsistent)\n"),
+                         topic_name.c_str()));
             }
             return;
           }
@@ -1619,7 +1622,7 @@ namespace OpenDDS {
         IncompatibleQosStatus readerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()};
 
         if (compatibleQOS(&writerStatus, &readerStatus, *wTls, *rTls,
-          dwQos, drQos, pubQos, subQos)) {
+                          dwQos, drQos, pubQos, subQos)) {
 
           bool call_writer = false, call_reader = false;
 
@@ -1684,8 +1687,9 @@ namespace OpenDDS {
           if (call_writer) {
             if (DCPS_debug_level > 3) {
               ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match_continue - ")
-                ACE_TEXT("adding writer %C association for reader %C\n"), OPENDDS_STRING(GuidConverter(writer)).c_str(),
-                OPENDDS_STRING(GuidConverter(reader)).c_str()));
+                         ACE_TEXT("adding writer %C association for reader %C\n"),
+                         OPENDDS_STRING(GuidConverter(writer)).c_str(),
+                         OPENDDS_STRING(GuidConverter(reader)).c_str()));
             }
             DataWriterCallbacks_rch dwr_lock = dwr.lock();
             if (dwr_lock) {
@@ -1704,8 +1708,9 @@ namespace OpenDDS {
           } else if (call_reader) {
             if (DCPS_debug_level > 3) {
               ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match_continue - ")
-                ACE_TEXT("adding reader %C association for writer %C\n"),
-                OPENDDS_STRING(GuidConverter(reader)).c_str(), OPENDDS_STRING(GuidConverter(writer)).c_str()));
+                         ACE_TEXT("adding reader %C association for writer %C\n"),
+                         OPENDDS_STRING(GuidConverter(reader)).c_str(),
+                         OPENDDS_STRING(GuidConverter(writer)).c_str()));
             }
             DataReaderCallbacks_rch drr_lock = drr.lock();
             if (drr_lock) {
@@ -1713,7 +1718,7 @@ namespace OpenDDS {
             }
           }
 
-        } else if (already_matched) { // break an existing associtaion
+        } else if (already_matched) { // break an existing association
           if (writer_local) {
             lpi->second.matched_endpoints_.erase(reader);
             lpi->second.remote_expectant_opendds_associations_.erase(reader);
@@ -1754,10 +1759,10 @@ namespace OpenDDS {
             }
           }
         } else { // something was incompatible
-          ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
+          ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
           if (writer_local && writerStatus.count_since_last_send) {
             if (DCPS_debug_level > 3) {
-              ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match - ")
+              ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match_continue - ")
                          ACE_TEXT("writer incompatible\n")));
             }
             DataWriterCallbacks_rch dwr_lock = dwr.lock();
@@ -1767,7 +1772,7 @@ namespace OpenDDS {
           }
           if (reader_local && readerStatus.count_since_last_send) {
             if (DCPS_debug_level > 3) {
-              ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match - ")
+              ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match_continue - ")
                          ACE_TEXT("reader incompatible\n")));
             }
             DataReaderCallbacks_rch drr_lock = drr.lock();

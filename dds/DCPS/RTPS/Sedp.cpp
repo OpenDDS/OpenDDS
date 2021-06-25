@@ -2401,8 +2401,7 @@ Sedp::shutdown()
 
 void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
                                           const DCPS::DiscoveredWriterData& wdata,
-                                          const RepoId& guid,
-                                          const XTypes::TypeInformation& type_info
+                                          const RepoId& guid
 #ifdef OPENDDS_SECURITY
                                           ,
                                           bool have_ice_agent_info,
@@ -2447,7 +2446,6 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
         DiscoveredPublication prepub(wdata);
         prepub.participant_discovered_at_ = spdp_.get_participant_discovered_at(participant_id);
         prepub.transport_context_ = spdp_.get_participant_flags(participant_id);
-        prepub.type_info_ = type_info;
 
 #ifdef OPENDDS_SECURITY
         prepub.have_ice_agent_info_ = have_ice_agent_info;
@@ -2481,22 +2479,20 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
             DDS::Security::PermissionsHandle remote_permissions = spdp_.lookup_participant_permissions(participant_id);
 
             if (participant_sec_attr_.is_access_protected &&
-                !get_access_control()->check_remote_topic(remote_permissions, spdp_.get_domain_id(), data, ex))
-            {
+                !get_access_control()->check_remote_topic(remote_permissions, spdp_.get_domain_id(), data, ex)) {
               ACE_ERROR((LM_WARNING,
                 ACE_TEXT("(%P|%t) WARNING: ")
-                ACE_TEXT("Sedp::data_received(dwd) - ")
+                ACE_TEXT("Sedp::process_discovered_writer_data - ")
                 ACE_TEXT("Unable to check remote topic '%C'. SecurityException[%d.%d]: %C\n"),
                 topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
               return;
             }
 
             DDS::Security::TopicSecurityAttributes topic_sec_attr;
-            if (!get_access_control()->get_topic_sec_attributes(remote_permissions, topic_name.data(), topic_sec_attr, ex))
-            {
+            if (!get_access_control()->get_topic_sec_attributes(remote_permissions, topic_name.data(), topic_sec_attr, ex)) {
               ACE_ERROR((LM_WARNING,
                 ACE_TEXT("(%P|%t) WARNING: ")
-                ACE_TEXT("Sedp::data_received(dwd) - ")
+                ACE_TEXT("Sedp::process_discovered_writer_data - ")
                 ACE_TEXT("Unable to get security attributes for remote topic '%C'. SecurityException[%d.%d]: %C\n"),
                 topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
               return;
@@ -2513,11 +2509,10 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
             }
 
             if (topic_sec_attr.is_write_protected &&
-              !get_access_control()->check_remote_datawriter(remote_permissions, spdp_.get_domain_id(), pub_data_sec, ex))
-            {
+                !get_access_control()->check_remote_datawriter(remote_permissions, spdp_.get_domain_id(), pub_data_sec, ex)) {
               ACE_ERROR((LM_WARNING,
                 ACE_TEXT("(%P|%t) WARNING: ")
-                ACE_TEXT("Sedp::data_received(dwd) - ")
+                ACE_TEXT("Sedp::process_discovered_writer_data - ")
                 ACE_TEXT("Unable to check remote datawriter '%C'. SecurityException[%d.%d]: %C\n"),
                 topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
               return;
@@ -2525,7 +2520,7 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
           } else if (auth_state != DCPS::AUTH_STATE_UNAUTHENTICATED) {
             ACE_ERROR((LM_WARNING,
               ACE_TEXT("(%P|%t) WARNING: ")
-              ACE_TEXT("Sedp::data_received(dwd) - ")
+              ACE_TEXT("Sedp::process_discovered_writer_data - ")
               ACE_TEXT("Unsupported remote participant authentication state for discovered datawriter '%C'. ")
               ACE_TEXT("SecurityException[%d.%d]: %C\n"),
               topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
@@ -2563,10 +2558,9 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
         // Release lock for call into pub_bit
         DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
         if (bit) { // bit may be null if the DomainParticipant is shutting down
-          ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
-          instance_handle =
-            bit->store_synthetic_data(wdata_copy.ddsPublicationData,
-                                      DDS::NEW_VIEW_STATE);
+          ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
+          instance_handle = bit->store_synthetic_data(wdata_copy.ddsPublicationData,
+                                                      DDS::NEW_VIEW_STATE);
         }
       }
       if (spdp_.shutting_down()) { return; }
@@ -2576,15 +2570,15 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
       iter = discovered_publications_.find(guid);
       if (iter != discovered_publications_.end()) {
         iter->second.bit_ih_ = instance_handle;
-        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
-            topics_.find(topic_name);
+        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it = topics_.find(topic_name);
         if (top_it != topics_.end()) {
           if (DCPS::DCPS_debug_level > 3) {
-            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(dwd) - ")
-                                 ACE_TEXT("calling match_endpoints new\n")));
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::process_discovered_writer_data - ")
+                       ACE_TEXT("calling match_endpoints new\n")));
           }
           if (DCPS::transport_debug.log_progress) {
-            DCPS::log_progress("discovered writer data new", participant_id_, participant_id, spdp_.get_participant_discovered_at(participant_id), guid);
+            DCPS::log_progress("discovered writer data new", participant_id_, participant_id,
+                               spdp_.get_participant_discovered_at(participant_id), guid);
           }
           match_endpoints(guid, top_it->second);
         }
@@ -2599,7 +2593,7 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
         if (bit) { // bit may be null if the DomainParticipant is shutting down
           wdata_copy = iter->second.writer_data_;
           ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
-          ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
+          ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
           bit->store_synthetic_data(wdata_copy.ddsPublicationData,
                                     DDS::NOT_NEW_VIEW_STATE);
         }
@@ -2612,11 +2606,12 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
           topics_.find(topic_name);
         if (top_it != topics_.end()) {
           if (DCPS::DCPS_debug_level > 3) {
-            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(dwd) - ")
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::process_discovered_writer_data - ")
                        ACE_TEXT("calling match_endpoints update\n")));
           }
           if (DCPS::transport_debug.log_progress) {
-            log_progress("discovered writer data update", participant_id_, participant_id, spdp_.get_participant_discovered_at(participant_id), guid);
+            log_progress("discovered writer data update", participant_id_, participant_id,
+                         spdp_.get_participant_discovered_at(participant_id), guid);
           }
           match_endpoints(guid, top_it->second);
           iter = discovered_publications_.find(guid);
@@ -2650,8 +2645,7 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
     if (iter != discovered_publications_.end()) {
       // Unmatch local subscription(s)
       topic_name = iter->second.get_topic_name();
-      OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
-          topics_.find(topic_name);
+      OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it = topics_.find(topic_name);
       if (top_it != topics_.end()) {
         top_it->second.remove_discovered_publication(guid);
         match_endpoints(guid, top_it->second, true /*remove*/);
@@ -2664,11 +2658,12 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
       discovered_publications_.erase(iter);
       remove_from_bit(p);
       if (DCPS::DCPS_debug_level > 3) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(dwd) - ")
-                             ACE_TEXT("calling match_endpoints disp/unreg\n")));
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::process_discovered_writer_data - ")
+                   ACE_TEXT("calling match_endpoints disp/unreg\n")));
       }
       if (DCPS::transport_debug.log_progress) {
-        log_progress("discovered writer data disposed", participant_id_, participant_id, spdp_.get_participant_discovered_at(participant_id), guid);
+        log_progress("discovered writer data disposed", participant_id_, participant_id,
+                     spdp_.get_participant_discovered_at(participant_id), guid);
       }
     }
   }
@@ -2703,7 +2698,7 @@ Sedp::data_received(DCPS::MessageId message_id,
     return;
   }
 
-  process_discovered_writer_data(message_id, wdata, guid, dpub.type_info_
+  process_discovered_writer_data(message_id, wdata, guid
 #ifdef OPENDDS_SECURITY
                                  , dpub.have_ice_agent_info_, dpub.ice_agent_info_
 #endif
@@ -2727,7 +2722,8 @@ void Sedp::data_received(DCPS::MessageId message_id,
     return;
   }
 
-  process_discovered_writer_data(message_id, wrapper.data, guid, wrapper.type_info, wrapper.have_ice_agent_info, wrapper.ice_agent_info, &wrapper.security_info);
+  process_discovered_writer_data(message_id, wrapper.data, guid, wrapper.have_ice_agent_info,
+                                 wrapper.ice_agent_info, &wrapper.security_info);
 }
 #endif
 
@@ -2812,22 +2808,20 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
             DDS::Security::PermissionsHandle remote_permissions = spdp_.lookup_participant_permissions(participant_id);
 
             if (participant_sec_attr_.is_access_protected &&
-                !get_access_control()->check_remote_topic(remote_permissions, spdp_.get_domain_id(), data, ex))
-            {
+                !get_access_control()->check_remote_topic(remote_permissions, spdp_.get_domain_id(), data, ex)) {
               ACE_ERROR((LM_WARNING,
                 ACE_TEXT("(%P|%t) WARNING: ")
-                ACE_TEXT("Sedp::data_received(drd) - ")
+                ACE_TEXT("Sedp::process_discovered_reader_data - ")
                 ACE_TEXT("Unable to check remote topic '%C'. SecurityException[%d.%d]: %C\n"),
                 topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
               return;
             }
 
             DDS::Security::TopicSecurityAttributes topic_sec_attr;
-            if (!get_access_control()->get_topic_sec_attributes(remote_permissions, topic_name.data(), topic_sec_attr, ex))
-            {
+            if (!get_access_control()->get_topic_sec_attributes(remote_permissions, topic_name.data(), topic_sec_attr, ex)) {
               ACE_ERROR((LM_WARNING,
                 ACE_TEXT("(%P|%t) WARNING: ")
-                ACE_TEXT("Sedp::data_received(drd) - ")
+                ACE_TEXT("Sedp::process_discovered_reader_data - ")
                 ACE_TEXT("Unable to get security attributes for remote topic '%C'. SecurityException[%d.%d]: %C\n"),
                 topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
               return;
@@ -2846,11 +2840,10 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
             bool relay_only = false;
             if (topic_sec_attr.is_read_protected &&
                 !get_access_control()->check_remote_datareader(
-                  remote_permissions, spdp_.get_domain_id(), sub_data_sec, relay_only, ex))
-            {
+                  remote_permissions, spdp_.get_domain_id(), sub_data_sec, relay_only, ex)) {
               ACE_ERROR((LM_WARNING,
                 ACE_TEXT("(%P|%t) WARNING: ")
-                ACE_TEXT("Sedp::data_received(drd) - ")
+                ACE_TEXT("Sedp::process_discovered_reader_data - ")
                 ACE_TEXT("Unable to check remote datareader '%C'. SecurityException[%d.%d]: %C\n"),
                 topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
               return;
@@ -2864,7 +2857,7 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
           } else if (auth_state != DCPS::AUTH_STATE_UNAUTHENTICATED) {
             ACE_ERROR((LM_WARNING,
               ACE_TEXT("(%P|%t) WARNING: ")
-              ACE_TEXT("Sedp::data_received(dwd) - ")
+              ACE_TEXT("Sedp::process_discovered_reader_data - ")
               ACE_TEXT("Unsupported remote participant authentication state for discovered datawriter '%C'. ")
               ACE_TEXT("SecurityException[%d.%d]: %C\n"),
               topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
@@ -2903,9 +2896,8 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
         DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
         if (bit) { // bit may be null if the DomainParticipant is shutting down
           ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
-          instance_handle =
-            bit->store_synthetic_data(rdata_copy.ddsSubscriptionData,
-                                      DDS::NEW_VIEW_STATE);
+          instance_handle = bit->store_synthetic_data(rdata_copy.ddsSubscriptionData,
+                                                      DDS::NEW_VIEW_STATE);
         }
       }
       if (spdp_.shutting_down()) { return; }
@@ -2915,15 +2907,15 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
       iter = discovered_subscriptions_.find(guid);
       if (iter != discovered_subscriptions_.end()) {
         iter->second.bit_ih_ = instance_handle;
-        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
-            topics_.find(topic_name);
+        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it = topics_.find(topic_name);
         if (top_it != topics_.end()) {
           if (DCPS::DCPS_debug_level > 3) {
-            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(drd) - ")
-                                 ACE_TEXT("calling match_endpoints new\n")));
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::process_discovered_reader_data - ")
+                       ACE_TEXT("calling match_endpoints new\n")));
           }
           if (DCPS::transport_debug.log_progress) {
-            DCPS::log_progress("discovered reader data new", participant_id_, participant_id, spdp_.get_participant_discovered_at(participant_id), guid);
+            DCPS::log_progress("discovered reader data new", participant_id_, participant_id,
+                               spdp_.get_participant_discovered_at(participant_id), guid);
           }
           match_endpoints(guid, top_it->second);
         }
@@ -2937,7 +2929,7 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
         if (bit) { // bit may be null if the DomainParticipant is shutting down
           rdata_copy = iter->second.reader_data_;
           ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
-          ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
+          ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
           bit->store_synthetic_data(rdata_copy.ddsSubscriptionData,
                                     DDS::NOT_NEW_VIEW_STATE);
         }
@@ -2946,15 +2938,15 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
 
         // Match/unmatch local publication(s)
         topic_name = iter->second.get_topic_name();
-        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
-            topics_.find(topic_name);
+        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it = topics_.find(topic_name);
         if (top_it != topics_.end()) {
           if (DCPS::DCPS_debug_level > 3) {
-            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(drd) - ")
-                                 ACE_TEXT("calling match_endpoints update\n")));
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::process_discovered_reader_data - ")
+                       ACE_TEXT("calling match_endpoints update\n")));
           }
           if (DCPS::transport_debug.log_progress) {
-            log_progress("discovered reader data update", participant_id_, participant_id, spdp_.get_participant_discovered_at(participant_id), guid);
+            log_progress("discovered reader data update", participant_id_, participant_id,
+                         spdp_.get_participant_discovered_at(participant_id), guid);
           }
           match_endpoints(guid, top_it->second);
           iter = discovered_subscriptions_.find(guid);
@@ -2968,8 +2960,7 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
                                rdata.contentFilterProperty)) {
         // Let any associated local publications know about the change
         topic_name = iter->second.get_topic_name();
-        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
-            topics_.find(topic_name);
+        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it = topics_.find(topic_name);
         using DCPS::RepoIdSet;
         const RepoIdSet& assoc =
           (top_it == topics_.end()) ? RepoIdSet() : top_it->second.local_publications();
@@ -2986,8 +2977,7 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
 
       if (checkAndAssignLocators(iter->second.reader_data_.readerProxy, rdata.readerProxy)) {
         topic_name = iter->second.get_topic_name();
-        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::const_iterator top_it =
-          topics_.find(topic_name);
+        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::const_iterator top_it = topics_.find(topic_name);
         using DCPS::RepoIdSet;
         const RepoIdSet& assoc =
           (top_it == topics_.end()) ? RepoIdSet() : top_it->second.local_publications();
@@ -3007,8 +2997,7 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
     if (is_expectant_opendds(guid)) {
       // For each associated opendds writer to this reader
       CORBA::ULong len = rdata.readerProxy.associatedWriters.length();
-      for (CORBA::ULong writerIndex = 0; writerIndex < len; ++writerIndex)
-      {
+      for (CORBA::ULong writerIndex = 0; writerIndex < len; ++writerIndex) {
         GUID_t writerGuid = rdata.readerProxy.associatedWriters[writerIndex];
 
         // If the associated writer is in this participant
@@ -3026,16 +3015,16 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
     if (iter != discovered_subscriptions_.end()) {
       // Unmatch local publication(s)
       topic_name = iter->second.get_topic_name();
-      OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
-          topics_.find(topic_name);
+      OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it = topics_.find(topic_name);
       if (top_it != topics_.end()) {
         top_it->second.remove_discovered_subscription(guid);
         if (DCPS::DCPS_debug_level > 3) {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(drd) - ")
-                               ACE_TEXT("calling match_endpoints disp/unreg\n")));
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::process_discovered_reader_data - ")
+                     ACE_TEXT("calling match_endpoints disp/unreg\n")));
         }
         if (DCPS::transport_debug.log_progress) {
-          log_progress("discovered reader data disposed", participant_id_, participant_id, spdp_.get_participant_discovered_at(participant_id), guid);
+          log_progress("discovered reader data disposed", participant_id_, participant_id,
+                       spdp_.get_participant_discovered_at(participant_id), guid);
         }
         match_endpoints(guid, top_it->second, true /*remove*/);
         if (top_it->second.is_dead()) {
@@ -4583,7 +4572,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
     }
 
     DiscoveredPublication wdata;
-    if (!ParameterListConverter::from_param_list(data, wdata.writer_data_, sedp_.use_xtypes_, wdata.type_info_)) {
+    if (!ParameterListConverter::from_param_list(data, wdata.writer_data_, sedp_.use_xtypes_)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::DiscoveryReader::data_received_i - ")
                  ACE_TEXT("failed to convert from ParameterList ")
@@ -4619,7 +4608,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
 
     DiscoveredPublication_SecurityWrapper wdata_secure;
 
-    if (!ParameterListConverter::from_param_list(data, wdata_secure, sedp_.use_xtypes_, wdata_secure.type_info)) {
+    if (!ParameterListConverter::from_param_list(data, wdata_secure, sedp_.use_xtypes_)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::DiscoveryReader::data_received_i - ")
                  ACE_TEXT("failed to convert from ParameterList ")
@@ -4740,7 +4729,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
     sedp_.spdp_.process_participant_ice(data, pdata, guid);
     sedp_.spdp_.handle_participant_data(id, pdata, DCPS::SequenceNumber::ZERO(), ACE_INET_Addr(), true);
 
-  #endif
+#endif
   }
 }
 

@@ -1555,10 +1555,9 @@ bool from_param_list(const ParameterList& param_list,
 bool to_param_list(const DiscoveredPublication_SecurityWrapper& wrapper,
                    ParameterList& param_list,
                    bool use_xtypes,
-                   const XTypes::TypeInformation& type_info,
                    bool map)
 {
-  bool result = to_param_list(wrapper.data, param_list, use_xtypes, type_info, map);
+  bool result = to_param_list(wrapper.data, param_list, use_xtypes, map);
 
   to_param_list(wrapper.security_info, param_list);
   to_param_list(wrapper.data_tags, param_list);
@@ -1568,10 +1567,9 @@ bool to_param_list(const DiscoveredPublication_SecurityWrapper& wrapper,
 
 bool from_param_list(const ParameterList& param_list,
                      DiscoveredPublication_SecurityWrapper& wrapper,
-                     bool use_xtypes,
-                     XTypes::TypeInformation& type_info)
+                     bool use_xtypes)
 {
-  bool result = from_param_list(param_list, wrapper.data, use_xtypes, type_info) &&
+  bool result = from_param_list(param_list, wrapper.data, use_xtypes) &&
     from_param_list(param_list, wrapper.security_info) &&
     from_param_list(param_list, wrapper.data_tags);
 
