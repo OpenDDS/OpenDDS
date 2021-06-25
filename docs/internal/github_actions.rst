@@ -141,7 +141,8 @@ that are turned into a GitHub artifact. This artifact is processed by the
 "Check Test Results" workflow which modifies the files with detailed summaries of the test runs.
 After all of the Check Test Results jobs are complete, the test results will be posted in either
 the build_and_test or lint workflows. It is 'random <https://github.com/dorny/test-reporter/issues/67>'_ which one of the workflows the results will appear
-in, so be sure to check both. This is due to a 'known issue <https://github.com/mikepenz/action-junit-report/issues/40>'_ in GitHub actions.
+in, so be sure to check both. This is due to a 'known problem <https://github.com/mikepenz/action-junit-report/issues/40>'_ with the GitHub API for
+creating a new Test Check.
 
 Artifacts
 =========
