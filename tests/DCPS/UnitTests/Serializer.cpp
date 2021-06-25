@@ -2,6 +2,8 @@
 
 #include <gtest/gtest.h>
 
+#include <cstring>
+
 using namespace OpenDDS::DCPS;
 
 TEST(serializer_test, Encoding__Encoding)
@@ -339,6 +341,146 @@ TEST(serializer_test, Serializer__swap_bytes_endianness)
 
   ser.swap_bytes(true);
   EXPECT_EQ(ser.endianness(), ENDIAN_NONNATIVE);
+}
+
+TEST(serializer_test, Serializer__align_context_basic_reference)
+{
+  ACE_Message_Block amb(64);
+  Encoding enc;
+  Serializer ser(&amb, enc);
+
+  std::memset(amb.wr_ptr(), 0, 64);
+
+  const ACE_CDR::Octet c = 3;
+  const ACE_CDR::Double d = 0.12345;
+
+  ASSERT_TRUE(ser << c);
+  ASSERT_TRUE(ser << d);
+  ASSERT_TRUE(ser << c);
+  ASSERT_TRUE(ser << d);
+  ASSERT_TRUE(ser << d);
+
+
+  std::set<size_t> expected_zeros;
+  size_t zeros[] = {2, 3, 4, 5, 6, 7, 8, 18, 19, 20, 21, 22, 23, 24};
+  expected_zeros.insert(zeros, zeros + (sizeof zeros / sizeof (size_t*)));
+  Serializer rser(&amb, enc);
+  char i = 0;
+  while (rser.rpos() != ser.wpos()) {
+    ASSERT_TRUE(rser >> i);
+    //std::cout << static_cast<unsigned short>(static_cast<unsigned char>(i)) << " " << std::flush;
+    ASSERT_TRUE(expected_zeros.count(rser.rpos()) ? !i : i);
+  }
+  //std::cout << std::endl;
+}
+
+TEST(serializer_test, Serializer__align_context_basic)
+{
+  ACE_Message_Block amb(64);
+
+  Encoding enc;
+  Serializer ser(&amb, enc);
+
+  std::memset(amb.wr_ptr(), 0, 64);
+
+  const ACE_CDR::Octet c = 3;
+  const ACE_CDR::Double d = 0.12345;
+
+  ASSERT_TRUE(ser << c);
+  {
+    Serializer::ScopedAlignmentContext sac(ser);
+    ASSERT_TRUE(ser << d);
+    ASSERT_TRUE(ser << c);
+    ASSERT_TRUE(ser << d);
+  }
+  ASSERT_TRUE(ser << d);
+
+  Serializer rser(&amb, enc);
+  char i = 0;
+  std::set<size_t> expected_zeros;
+  size_t zeros[] = {2, 3, 4, 14, 15, 16, 17, 18, 19, 20, 29, 30, 31, 32};
+  expected_zeros.insert(zeros, zeros + (sizeof zeros / sizeof (size_t*)));
+  while (rser.rpos() != ser.wpos()) {
+    ASSERT_TRUE(rser >> i);
+    //std::cout << static_cast<unsigned short>(static_cast<unsigned char>(i)) << " " << std::flush;
+    ASSERT_TRUE(expected_zeros.count(rser.rpos()) ? !i : i);
+  }
+  //std::cout << std::endl;
+}
+
+TEST(serializer_test, Serializer__align_context_2_buff)
+{
+  ACE_Message_Block amb(24);
+  amb.cont(new ACE_Message_Block(32));
+
+  Encoding enc;
+  Serializer ser(&amb, enc);
+
+  std::memset(amb.wr_ptr(), 0, 24);
+  std::memset(amb.cont()->wr_ptr(), 0, 32);
+
+  const ACE_CDR::Octet c = 3;
+  const ACE_CDR::Double d = 0.12345;
+
+  ASSERT_TRUE(ser << c);
+  {
+    Serializer::ScopedAlignmentContext sac(ser);
+    ASSERT_TRUE(ser << d);
+    ASSERT_TRUE(ser << c);
+    ASSERT_TRUE(ser << d);
+  }
+  ASSERT_TRUE(ser << d);
+
+  Serializer rser(&amb, enc);
+  char i = 0;
+  std::set<size_t> expected_zeros;
+  size_t zeros[] = {2, 3, 4, 14, 15, 16, 17, 18, 19, 20, 29, 30, 31, 32};
+  expected_zeros.insert(zeros, zeros + (sizeof zeros / sizeof (size_t*)));
+  while (rser.rpos() != ser.wpos()) {
+    ASSERT_TRUE(rser >> i);
+    //std::cout << static_cast<unsigned short>(static_cast<unsigned char>(i)) << " " << std::flush;
+    ASSERT_TRUE(expected_zeros.count(rser.rpos()) ? !i : i);
+  }
+  //std::cout << std::endl;
+}
+
+TEST(serializer_test, Serializer__align_context_2_buff_diff_walign)
+{
+  ACE_Message_Block amb(21);
+  amb.cont(new ACE_Message_Block(32));
+
+  Encoding enc;
+  Serializer ser(&amb, enc);
+
+  std::memset(amb.wr_ptr(), 0, 21);
+  std::memset(amb.cont()->wr_ptr(), 0, 32);
+
+  amb.cont()->rd_ptr(3);
+  amb.cont()->wr_ptr(3);
+
+  const ACE_CDR::Octet c = 3;
+  const ACE_CDR::Double d = 0.12345;
+
+  ASSERT_TRUE(ser << c);
+  {
+    Serializer::ScopedAlignmentContext sac(ser);
+    ASSERT_TRUE(ser << d);
+    ASSERT_TRUE(ser << c);
+    ASSERT_TRUE(ser << d);
+  }
+  ASSERT_TRUE(ser << d);
+
+  Serializer rser(&amb, enc);
+  char i = 0;
+  std::set<size_t> expected_zeros;
+  size_t zeros[] = {2, 3, 4, 14, 15, 16, 17, 18, 19, 20, 29, 30, 31, 32};
+  expected_zeros.insert(zeros, zeros + (sizeof zeros / sizeof (size_t*)));
+  while (rser.rpos() != ser.wpos()) {
+    ASSERT_TRUE(rser >> i);
+    //std::cout << static_cast<unsigned short>(static_cast<unsigned char>(i)) << " " << std::flush;
+    ASSERT_TRUE(expected_zeros.count(rser.rpos()) ? !i : i);
+  }
+  //std::cout << std::endl;
 }
 
 int main(int argc, char* argv[])

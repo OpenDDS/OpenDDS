@@ -426,9 +426,13 @@ public:
   bool skip(size_t n, int size = 1);
 
   const char* pos_rd() const { return current_ ? current_->rd_ptr() : 0; }
+  const char* pos_wr() const { return current_ ? current_->wr_ptr() : 0; }
 
   /// Examine the logical reading position of the stream.
-  size_t pos() const { return pos_; }
+  size_t rpos() const { return rpos_; }
+
+  /// Examine the logical writing position of the stream.
+  size_t wpos() const { return wpos_; }
 
   /**
    * The buffer @a x must be large enough to contain @a length
@@ -669,22 +673,29 @@ public:
 
   void set_construction_status(ConstructionStatus cs);
 
-  struct OpenDDS_Dcps_Export SavePoint {
-    explicit SavePoint(Serializer& ser);
+  struct OpenDDS_Dcps_Export ScopedAlignmentContext {
+    explicit ScopedAlignmentContext(Serializer& ser);
+    virtual ~ScopedAlignmentContext() { restore(ser_); }
 
     void restore(Serializer& ser) const;
 
-    const size_t pos_;
-    ACE_Message_Block* const current_;
-    char* const rd_ptr_;
-    char* const wr_ptr_;
+    Serializer& ser_;
+    const size_t max_align_;
+    const size_t start_rpos_;
+    const size_t rblock_;
+    const size_t start_wpos_;
+    const size_t wblock_;
   };
 
   template <typename T>
   bool peek(T& t)
   {
     // save
-    SavePoint sp(*this);
+    const size_t rpos = rpos_;
+    const size_t wpos = wpos_;
+    ACE_Message_Block* current = current_;
+    char* const rd_ptr = current_->rd_ptr();
+    char* const wr_ptr = current_->wr_ptr();
 
     // read
     if (!(*this >> t)) {
@@ -692,7 +703,11 @@ public:
     }
 
     // reset
-    sp.restore(*this);
+    current->wr_ptr(wr_ptr);
+    current->rd_ptr(rd_ptr);
+    current_ = current;
+    rpos_ = rpos;
+    wpos_ = wpos;
     return true;
   }
 
@@ -767,7 +782,10 @@ private:
   unsigned char align_wshift_;
 
   /// Logical reading position of the stream.
-  size_t pos_;
+  size_t rpos_;
+
+  /// Logical writing position of the stream.
+  size_t wpos_;
 
   /// Buffer that is copied for zero padding
   static const char ALIGN_PAD[Encoding::ALIGN_MAX];
