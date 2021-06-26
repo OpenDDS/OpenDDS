@@ -693,7 +693,7 @@ public:
     bool result = false;
     char* const rd_ptr = block->rd_ptr();
     const size_t length = block->length();
-    if (!block->cont() || (block != 0 && bytes <= length)) {
+    if (!block->cont() || (bytes != 0 && bytes <= length)) {
       result = *this >> t;
     } else {
       result = peek_helper(block->cont(), bytes - length, t);

@@ -390,7 +390,7 @@ Serializer::peek(ACE_CDR::ULong& t)
   ACE_Message_Block* const current = current_;
 
   // read
-  if (!peek_helper(current_, 2 * sizeof (ACE_CDR::ULong), t)) {
+  if (!peek_helper(current_, 2 * uint32_cdr_size, t)) {
     return false;
   }
 
