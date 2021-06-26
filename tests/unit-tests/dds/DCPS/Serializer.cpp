@@ -410,14 +410,14 @@ TEST(serializer_test, Serializer_align_context_basic)
 
 TEST(serializer_test, Serializer_align_context_2_buff)
 {
-  ACE_Message_Block amb(24);
-  amb.cont(new ACE_Message_Block(32));
+  OpenDDS::DCPS::Message_Block_Ptr amb(new ACE_Message_Block(24));
+  amb->cont(new ACE_Message_Block(32));
 
   Encoding enc;
-  Serializer ser(&amb, enc);
+  Serializer ser(amb.get(), enc);
 
-  std::memset(amb.wr_ptr(), 0, 24);
-  std::memset(amb.cont()->wr_ptr(), 0, 32);
+  std::memset(amb->wr_ptr(), 0, 24);
+  std::memset(amb->cont()->wr_ptr(), 0, 32);
 
   const ACE_CDR::Octet c = 3;
   const ACE_CDR::Double d = 0.12345;
@@ -431,7 +431,7 @@ TEST(serializer_test, Serializer_align_context_2_buff)
   }
   ASSERT_TRUE(ser << d);
 
-  Serializer rser(&amb, enc);
+  Serializer rser(amb.get(), enc);
   char i = 0;
   std::set<size_t> expected_zeros;
   size_t zeros[] = {2, 3, 4, 14, 15, 16, 17, 18, 19, 20, 29, 30, 31, 32};
@@ -446,17 +446,17 @@ TEST(serializer_test, Serializer_align_context_2_buff)
 
 TEST(serializer_test, Serializer_align_context_2_buff_diff_walign)
 {
-  ACE_Message_Block amb(21);
-  amb.cont(new ACE_Message_Block(32));
+  OpenDDS::DCPS::Message_Block_Ptr amb(new ACE_Message_Block(21));
+  amb->cont(new ACE_Message_Block(32));
 
   Encoding enc;
-  Serializer ser(&amb, enc);
+  Serializer ser(amb.get(), enc);
 
-  std::memset(amb.wr_ptr(), 0, 21);
-  std::memset(amb.cont()->wr_ptr(), 0, 32);
+  std::memset(amb->wr_ptr(), 0, 21);
+  std::memset(amb->cont()->wr_ptr(), 0, 32);
 
-  amb.cont()->rd_ptr(3);
-  amb.cont()->wr_ptr(3);
+  amb->cont()->rd_ptr(3);
+  amb->cont()->wr_ptr(3);
 
   const ACE_CDR::Octet c = 3;
   const ACE_CDR::Double d = 0.12345;
@@ -470,7 +470,7 @@ TEST(serializer_test, Serializer_align_context_2_buff_diff_walign)
   }
   ASSERT_TRUE(ser << d);
 
-  Serializer rser(&amb, enc);
+  Serializer rser(amb.get(), enc);
   char i = 0;
   std::set<size_t> expected_zeros;
   size_t zeros[] = {2, 3, 4, 14, 15, 16, 17, 18, 19, 20, 29, 30, 31, 32};
@@ -485,17 +485,17 @@ TEST(serializer_test, Serializer_align_context_2_buff_diff_walign)
 
 TEST(serializer_test, Serializer_test_peek_align)
 {
-  ACE_Message_Block amb(5);
-  amb.cont(new ACE_Message_Block(8));
+  OpenDDS::DCPS::Message_Block_Ptr amb(new ACE_Message_Block(5));
+  amb->cont(new ACE_Message_Block(8));
 
   Encoding enc;
-  Serializer ser(&amb, enc);
+  Serializer ser(amb.get(), enc);
 
-  std::memset(amb.wr_ptr(), 0, 5);
-  std::memset(amb.cont()->wr_ptr(), 0, 8);
+  std::memset(amb->wr_ptr(), 0, 5);
+  std::memset(amb->cont()->wr_ptr(), 0, 8);
 
-  amb.cont()->rd_ptr(1);
-  amb.cont()->wr_ptr(1);
+  amb->cont()->rd_ptr(1);
+  amb->cont()->wr_ptr(1);
 
   const ACE_CDR::ULong a = 7;
   const ACE_CDR::ULong b = 13;
@@ -505,7 +505,7 @@ TEST(serializer_test, Serializer_test_peek_align)
   ASSERT_TRUE(ser << b);
   ASSERT_TRUE(ser << c);
 
-  Serializer rser(&amb, enc);
+  Serializer rser(amb.get(), enc);
   ACE_CDR::ULong res = 0;
 
   ASSERT_TRUE(rser.peek(res));
