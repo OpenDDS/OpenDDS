@@ -301,12 +301,3 @@ TEST(network_address_test, choose_single_coherent_address_ipv4_literals_port0)
   EXPECT_EQ(addr1.get_port_number(), 0);
   EXPECT_EQ(addr2.get_port_number(), 0);
 }
-
-int main(int argc, char* argv[])
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  ACE::init();
-  int result = RUN_ALL_TESTS();
-  ACE::fini();
-  return result;
-}

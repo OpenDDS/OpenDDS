@@ -5,7 +5,9 @@ Convert CTest/CDash XML results to fake auto_run_tests output. See the
 following URL for information about the XML file format:
 https://public.kitware.com/Wiki/CDash:XML
 
-Requires that ctest was run with "--no-compress-output -T Test".
+Requires that ctest was run with "-T Test".
+Might require "--no-compress-output" depending on how CMake embeds the test
+console output into the XML.
 '''
 
 import sys
@@ -13,12 +15,16 @@ import os
 import xml.etree.ElementTree
 from pathlib import Path
 from argparse import ArgumentParser
+from base64 import b64decode
+import zlib
 
 template = '''\
 
 ==============================================================================
 auto_run_tests: {art_name}
 The CMake name of this test is "{cmake_name}"
+The reported command was {command}
+The following is the actual output:
 {output}
 auto_run_tests_finished: {art_name} Time:{art_time}s Result:{art_result}
 '''
@@ -65,11 +71,24 @@ def generate_test_results(build_path, source_path, debug=False):
     root_node = xml.etree.ElementTree.parse(str(test_xml_path)).getroot()
     for test_node in root_node.findall('./Testing/Test'):
         output_node = test_node.find('./Results/Measurement/Value')
-        output_text = output_node.text
-        if output_node.get('encoding') is not None or \
-                output_node.get('compression') is not None:
-            sys.exit('ERROR: Test output in XML file is not usable, ' +
-                'pass --no-compress-output to ctest')
+        encoding = output_node.get('encoding')
+        compression = output_node.get('compression')
+        decoded_bytes = None
+        output_text = None
+        if encoding == 'base64':
+            decoded_bytes = b64decode(output_node.text)
+        elif encoding is None:
+            decoded_bytes = output_node.text
+        if decoded_bytes is not None:
+            if compression == 'gzip':
+                output_text = zlib.decompress(decoded_bytes).decode()
+            elif encoding is None:
+                output_text = decoded_bytes
+        if output_text is None:
+            sys.exit(('ERROR: Test output in XML file is not usable, ' +
+                'encoding is {} and compression is {}. ' +
+                'Pass --no-compress-output to ctest').format(
+                    repr(encoding), repr(compression)))
 
         status = get_named_measurement(test_node, 'Completion Status')
         if status == "Missing Configuration":
@@ -102,7 +121,14 @@ def generate_test_results(build_path, source_path, debug=False):
         test_path = test_path_prefix / relative_to(abs_test_path, source_path)
 
         command_parts = [s.strip('"') for s in results['command'].split(' ')[1:]]
-        results['art_name'] = '{}/{}'.format(test_path, ' '.join(command_parts))
+        try:
+            # Remove -ExeSubDir DIR to make the output consistent
+            index = command_parts.index('-ExeSubDir')
+            command_parts.pop(index)
+            command_parts.pop(index)
+        except ValueError: # from index, no -ExeSubDir
+            pass
+        results['art_name'] = '{}/{}'.format(test_path.as_posix(), ' '.join(command_parts))
         # Exit Value isn't included if the test passed
         results['art_result'] = 0 if results['passed'] else results['exit_value']
         results['art_time'] = time=int(results['exec_time'])

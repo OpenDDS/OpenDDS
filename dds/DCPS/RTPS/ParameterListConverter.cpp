@@ -595,6 +595,12 @@ bool to_param_list(const ParticipantProxy_t& proxy,
     add_param(param_list, param_opf);
   }
 
+  if (proxy.opendds_rtps_relay_application_participant) {
+    Parameter param;
+    param.opendds_rtps_relay_application_participant(proxy.opendds_rtps_relay_application_participant);
+    add_param(param_list, param);
+  }
+
   return true;
 }
 
@@ -607,6 +613,8 @@ bool from_param_list(const ParameterList& param_list,
   proxy.availableExtendedBuiltinEndpoints = 0;
 #endif
   proxy.expectsInlineQos = false;
+  proxy.opendds_participant_flags.bits = 0;
+  proxy.opendds_rtps_relay_application_participant = false;
 
   CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
@@ -680,6 +688,9 @@ bool from_param_list(const ParameterList& param_list,
         break;
       case PID_OPENDDS_PARTICIPANT_FLAGS:
         proxy.opendds_participant_flags = param.participant_flags();
+        break;
+      case PID_OPENDDS_RTPS_RELAY_APPLICATION_PARTICIPANT:
+        proxy.opendds_rtps_relay_application_participant = param.opendds_rtps_relay_application_participant();
         break;
       case PID_SENTINEL:
       case PID_PAD:

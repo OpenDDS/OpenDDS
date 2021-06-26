@@ -119,9 +119,6 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
 
   TcpConnection* pConn = connection.in();
 
-  ACE_TCHAR str[64];
-  key.address().addr_to_string(str,sizeof(str)/sizeof(str[0]), 0);
-
   // Can't make this call while holding onto TransportClient::lock_
   ACE_Time_Value conn_timeout;
   conn_timeout.msec(this->config().active_conn_timeout_period_);
@@ -324,15 +321,22 @@ TcpTransport::configure_i(TcpInst& config)
   // Override with DCPSDefaultAddress.
   if (config.local_address() == ACE_INET_Addr() &&
       TheServiceParticipant->default_address() != ACE_INET_Addr()) {
+    VDBG_LVL((LM_DEBUG,
+              ACE_TEXT("(%P|%t) TcpTransport::configure_i overriding with DCPSDefaultAddress\n")), 2);
+
     config.local_address(TheServiceParticipant->default_address());
   }
 
+  VDBG_LVL((LM_DEBUG,
+            ACE_TEXT("(%P|%t) TcpTransport::configure_i opening acceptor for %C on %C:%hu\n"),
+            config.local_address_string().c_str(),
+            config.local_address().get_host_addr(),
+            config.local_address().get_port_number()), 2);
+
   // Open our acceptor object so that we can accept passive connections
   // on our config.local_address_.
-
   if (this->acceptor_->open(config.local_address(),
                             this->reactor_task()->get_reactor()) != 0) {
-
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: Acceptor failed to open %C:%d: %p\n"),
                       config.local_address().get_host_addr(),
@@ -351,17 +355,16 @@ TcpTransport::configure_i(TcpInst& config)
                ACE_TEXT("cannot get local addr\n")));
   }
 
-  OPENDDS_STRING listening_addr(address.get_host_addr());
   VDBG_LVL((LM_DEBUG,
             ACE_TEXT("(%P|%t) TcpTransport::configure_i listening on %C:%hu\n"),
-            listening_addr.c_str(), address.get_port_number()), 2);
+            address.get_host_addr(), address.get_port_number()), 2);
 
-  unsigned short port = address.get_port_number();
+  const unsigned short port = address.get_port_number();
 
   // As default, the acceptor will be listening on INADDR_ANY but advertise with the fully
   // qualified hostname and actual listening port number.
   if (config.local_address().is_any()) {
-    std::string hostname = get_fully_qualified_hostname();
+    const std::string hostname = get_fully_qualified_hostname();
     config.local_address(port, hostname.c_str());
     if (config.local_address() == ACE_INET_Addr()) {
        ACE_ERROR_RETURN((LM_ERROR,
@@ -591,7 +594,7 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
 
   VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::passive_connection() - ")
             ACE_TEXT("established with %C:%d.\n"),
-            remote_address.get_host_name(),
+            remote_address.get_host_addr(),
             remote_address.get_port_number()), 2);
 
   GuardType connection_guard(connections_lock_);
@@ -631,7 +634,7 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
                ACE_TEXT("(%P|%t) TcpTransport::passive_connection() - ")
                ACE_TEXT("ERROR: connection with %C:%d at priority %d already exists, ")
                ACE_TEXT("overwriting previously established connection.\n"),
-               remote_address.get_host_name(),
+               remote_address.get_host_addr(),
                remote_address.get_port_number(),
                connection->transport_priority()));
   }
