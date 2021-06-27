@@ -727,8 +727,7 @@ DomainParticipantImpl::find_topic(
                                                   qos,
                                                   DDS::TopicListener::_nil(),
                                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK,
-                                                  type_support,
-                                                  topic_id);
+                                                  type_support);
       return new_topic;
 
     } else if (status == INTERNAL_ERROR) {
@@ -1958,13 +1957,12 @@ GUID_t DomainParticipantImpl::get_repoid(DDS::InstanceHandle_t handle) const
 
 DDS::Topic_ptr
 DomainParticipantImpl::create_new_topic(
-  const char* topic_name,
-  const char* type_name,
-  const DDS::TopicQos& qos,
+  const char * topic_name,
+  const char * type_name,
+  const DDS::TopicQos & qos,
   DDS::TopicListener_ptr a_listener,
-  const DDS::StatusMask& mask,
-  TypeSupport_ptr type_support,
-  const GUID_t& topic_id)
+  const DDS::StatusMask & mask,
+  OpenDDS::DCPS::TypeSupport_ptr type_support)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    tao_mon,

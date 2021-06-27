@@ -23,14 +23,13 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-TopicImpl::TopicImpl(const char* topic_name,
-                     const char* type_name,
-                     TypeSupport_ptr type_support,
-                     const DDS::TopicQos& qos,
-                     DDS::TopicListener_ptr a_listener,
-                     const DDS::StatusMask& mask,
-                     DomainParticipantImpl* participant,
-                     const GUID_t& id)
+TopicImpl::TopicImpl(const char*                    topic_name,
+                     const char*                    type_name,
+                     OpenDDS::DCPS::TypeSupport_ptr type_support,
+                     const DDS::TopicQos &          qos,
+                     DDS::TopicListener_ptr         a_listener,
+                     const DDS::StatusMask &        mask,
+                     DomainParticipantImpl*         participant)
   : TopicDescriptionImpl(topic_name,
                          type_name,
                          type_support,
@@ -38,7 +37,7 @@ TopicImpl::TopicImpl(const char* topic_name,
     qos_(qos),
     listener_mask_(mask),
     listener_(DDS::TopicListener::_duplicate(a_listener)),
-    id_(id)
+    id_(GUID_UNKNOWN)
 {
   inconsistent_topic_status_.total_count = 0;
   inconsistent_topic_status_.total_count_change = 0;

@@ -424,13 +424,12 @@ private:
     int                    topic_mask);
 
   DDS::Topic_ptr create_new_topic(
-    const char* topic_name,
-    const char* type_name,
-    const DDS::TopicQos& qos,
-    DDS::TopicListener_ptr a_listener,
-    const DDS::StatusMask& mask,
-    TypeSupport_ptr type_support,
-    const GUID_t& topic_id = GUID_UNKNOWN);
+    const char *                   topic_name,
+    const char *                   type_name,
+    const DDS::TopicQos &          qos,
+    DDS::TopicListener_ptr         a_listener,
+    const DDS::StatusMask &        mask,
+    OpenDDS::DCPS::TypeSupport_ptr type_support);
 
   /** Delete the topic with option of whether the
    *  topic object reference should be removed.
