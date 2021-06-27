@@ -55,6 +55,7 @@ int DataReaderListenerImpl::check_received(const size_t n_publishers) const
       received_samples_, expected_samples_));
     ++ret;
   }
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) sub check_received returns %d\n"), ret));
   return ret;
 }
 

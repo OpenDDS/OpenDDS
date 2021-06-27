@@ -123,6 +123,7 @@ int Publisher::publish()
     ACE_ERROR((LM_ERROR, (pfx_ + " ERROR: timed out waiting for acks!\n").c_str()));
     return 1;
   }
+  ACE_DEBUG((LM_INFO, (pfx_ + "  waiting for acks returned\n").c_str()));
   return 0;
 }
 
