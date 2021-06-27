@@ -522,3 +522,40 @@ TEST(serializer_test, Serializer_test_peek_align)
   ASSERT_TRUE(res == c);
 }
 
+TEST(serializer_test, Serializer_test_peek_depth)
+{
+  OpenDDS::DCPS::Message_Block_Ptr amb(new ACE_Message_Block(1));
+  ACE_Message_Block* cont = amb.get();
+  for (size_t i = 0; i < 10000; ++i) {
+    cont->cont(new ACE_Message_Block(1));
+    cont = cont->cont();
+  }
+
+  Encoding enc;
+  Serializer ser(amb.get(), enc);
+
+  const ACE_CDR::ULong a = 7;
+  const ACE_CDR::ULong b = 13;
+  const ACE_CDR::ULong c = 42;
+
+  ASSERT_TRUE(ser << a);
+  ASSERT_TRUE(ser << b);
+  ASSERT_TRUE(ser << c);
+
+  Serializer rser(amb.get(), enc);
+  ACE_CDR::ULong res = 0;
+
+  ASSERT_TRUE(rser.peek(res));
+  ASSERT_EQ(res, a);
+  ASSERT_TRUE(rser >> res);
+  ASSERT_EQ(res, a);
+  ASSERT_TRUE(rser.peek(res));
+  ASSERT_EQ(res, b);
+  ASSERT_TRUE(rser >> res);
+  ASSERT_EQ(res, b);
+  ASSERT_TRUE(rser.peek(res));
+  ASSERT_TRUE(res == c);
+  ASSERT_TRUE(rser >> res);
+  ASSERT_TRUE(res == c);
+}
+
