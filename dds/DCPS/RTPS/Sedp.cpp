@@ -4029,9 +4029,9 @@ bool Sedp::TypeLookupRequestWriter::send_type_lookup_request(
   }
 
   XTypes::TypeLookup_Request type_lookup_request;
-  type_lookup_request.header.request_id.writer_guid = get_repo_id();
-  type_lookup_request.header.request_id.sequence_number = to_rtps_seqnum(rpc_sequence);
-  type_lookup_request.header.instance_name = get_instance_name(reader).c_str();
+  type_lookup_request.header.requestId.writer_guid = get_repo_id();
+  type_lookup_request.header.requestId.sequence_number = to_rtps_seqnum(rpc_sequence);
+  type_lookup_request.header.instanceName = get_instance_name(reader).c_str();
   type_lookup_request.data.kind = tl_kind;
 
   if (tl_kind == XTypes::TypeLookup_getTypes_HashId) {
@@ -4074,13 +4074,13 @@ bool Sedp::TypeLookupReplyWriter::send_type_lookup_reply(
   const DCPS::RepoId& reader)
 {
   if (DCPS::DCPS_debug_level >= 8) {
-    const DDS::SampleIdentity id = type_lookup_reply.header.related_request_id;
+    const DDS::SampleIdentity id = type_lookup_reply.header.relatedRequestId;
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyWriter::send_type_lookup_reply: "
       "to %C seq: %q\n", DCPS::LogGuid(reader).c_str(),
       to_opendds_seqnum(id.sequence_number).getValue()));
   }
 
-  type_lookup_reply.header.remote_ex = DDS::RPC::REMOTE_EX_OK;
+  type_lookup_reply.header.remoteEx = DDS::RPC::REMOTE_EX_OK;
 
   // Determine message length
   const size_t size = DCPS::EncapsulationHeader::serialized_size +
@@ -4122,14 +4122,14 @@ bool Sedp::TypeLookupRequestReader::process_type_lookup_request(
   }
 
   if (DCPS::DCPS_debug_level >= 8) {
-    const DDS::SampleIdentity& request_id = type_lookup_request.header.request_id;
+    const DDS::SampleIdentity& request_id = type_lookup_request.header.requestId;
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyWriter::process_type_lookup_request: "
       "from %C seq: %q\n",
       DCPS::LogGuid(request_id.writer_guid).c_str(),
       to_opendds_seqnum(request_id.sequence_number).getValue()));
   }
 
-  if (OPENDDS_STRING(type_lookup_request.header.instance_name) != instance_name_) {
+  if (OPENDDS_STRING(type_lookup_request.header.instanceName) != instance_name_) {
     return true;
   }
 
@@ -4153,7 +4153,7 @@ bool Sedp::TypeLookupRequestReader::process_get_types_request(
   if (type_lookup_reply._cxx_return.getType.result.types.length() > 0) {
     type_lookup_reply._cxx_return.getType.return_code = DDS::RETCODE_OK;
     type_lookup_reply._cxx_return.kind = XTypes::TypeLookup_getTypes_HashId;
-    type_lookup_reply.header.related_request_id = type_lookup_request.header.request_id;
+    type_lookup_reply.header.relatedRequestId = type_lookup_request.header.requestId;
     return true;
   }
   if (DCPS::DCPS_debug_level) {
@@ -4180,7 +4180,7 @@ bool Sedp::TypeLookupRequestReader::process_get_dependencies_request(
   reply._cxx_return.kind = XTypes::TypeLookup_getDependencies_HashId;
   reply._cxx_return.getTypeDependencies.return_code = DDS::RETCODE_OK;
   gen_continuation_point(reply._cxx_return.getTypeDependencies.result.continuation_point);
-  reply.header.related_request_id = request.header.request_id;
+  reply.header.relatedRequestId = request.header.requestId;
   return true;
 }
 
@@ -4223,7 +4223,7 @@ bool Sedp::TypeLookupReplyReader::process_type_lookup_reply(
     return false;
   }
 
-  const DDS::SampleIdentity& request_id = type_lookup_reply.header.related_request_id;
+  const DDS::SampleIdentity& request_id = type_lookup_reply.header.relatedRequestId;
   const DCPS::SequenceNumber seq_num = to_opendds_seqnum(request_id.sequence_number);
   if (DCPS::DCPS_debug_level >= 8) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyReader::process_type_lookup_reply: "
