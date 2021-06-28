@@ -628,7 +628,8 @@ namespace {
 #endif
 } // anon namespace
 
-bool is_present(const ParameterList& param_list, const ParameterId_t pid) {
+bool is_present(const ParameterList& param_list, const OpenDDS::RTPS::ParameterId_t pid)
+{
   CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
     if (pid == param_list[i]._d()) {
@@ -638,7 +639,8 @@ bool is_present(const ParameterList& param_list, const ParameterId_t pid) {
   return false;
 }
 
-bool is_missing(const ParameterList& param_list, const ParameterId_t pid) {
+bool is_missing(const ParameterList& param_list, const OpenDDS::RTPS::ParameterId_t pid)
+{
   CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
     if (pid == param_list[i]._d()) {
@@ -649,8 +651,9 @@ bool is_missing(const ParameterList& param_list, const ParameterId_t pid) {
 }
 
 Parameter get(const ParameterList& param_list,
-              const ParameterId_t pid,
-              const CORBA::ULong instance_num = 0) {
+              const OpenDDS::RTPS::ParameterId_t pid,
+              const CORBA::ULong instance_num = 0)
+{
 
   const CORBA::ULong length = param_list.length();
   CORBA::ULong count = 0;
