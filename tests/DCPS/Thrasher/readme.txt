@@ -7,7 +7,7 @@ The aspects to be tested within a predefined time limit:
 2. The subscriber has successfully received exactly the same number of messages from each publisher, and the test cleanly exited.
 
 3. The rtps discovery and durability are tested with these configurations:
-3.1 all the defined publisher P and M settings (single, ..., low, medium, high, aggressive) 
+3.1 all the defined publisher P and M settings (single, ..., low, medium, high, aggressive)
 3.2 3.1 plus rtps
 3.3 3.1 plus durable
 3.4 3.1 plus rtps and durable
