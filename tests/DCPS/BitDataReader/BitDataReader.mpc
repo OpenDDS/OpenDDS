@@ -1,0 +1,8 @@
+project(BitDataReader): dcps_rtps_udp, dcps_default_discovery, dcps_test {
+  exename   = *
+  requires += built_in_topics
+
+  Source_Files {
+    BitDataReader.cpp
+  }
+}

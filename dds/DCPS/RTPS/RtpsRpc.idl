@@ -38,14 +38,14 @@ enum RemoteExceptionCode_t
 
 @final
 struct RequestHeader {
-  SampleIdentity request_id;
-  InstanceName instance_name;
+  SampleIdentity requestId;
+  InstanceName _instanceName; // DDSRPC11-5
 };
 
 @final
-struct ResponseHeader {
-  SampleIdentity related_request_id;
-  RemoteExceptionCode_t remote_ex;
+struct ReplyHeader {
+  SampleIdentity relatedRequestId;
+  RemoteExceptionCode_t remoteEx;
 };
 
 }; // module RPC

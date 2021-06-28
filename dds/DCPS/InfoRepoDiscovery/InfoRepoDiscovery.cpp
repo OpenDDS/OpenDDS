@@ -287,6 +287,11 @@ InfoRepoDiscovery::bit_config()
     } else {
       tcp_inst->local_address_set_port(bit_transport_port_);
     }
+
+    if (DCPS_debug_level) {
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) InfoRepoDiscovery::bit_config")
+                 ACE_TEXT(" - BIT tcp transport %C\n"), tcp_inst->local_address_string().c_str()));
+    }
   }
   return bit_config_;
 #else
@@ -384,7 +389,7 @@ InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
     if (ret != DDS::RETCODE_OK) {
       if (DCPS_debug_level) {
         ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) InfoRepoDiscovery::init_bit")
-                   ACE_TEXT(" - Error %d enabling subscriber\n"), ret));
+                   ACE_TEXT(" - Error <%C> enabling subscriber\n"), retcode_to_string(ret)));
       }
       return 0;
     }

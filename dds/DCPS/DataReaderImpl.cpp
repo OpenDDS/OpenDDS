@@ -1299,8 +1299,7 @@ DataReaderImpl::enable()
     typesupport->to_type_info(type_info);
 
     XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
-    type_lookup_service->add_type_objects_to_cache(*typesupport);
-
+    typesupport->add_types(type_lookup_service);
     typesupport->populate_dependencies(type_lookup_service);
 
     this->subscription_id_ =

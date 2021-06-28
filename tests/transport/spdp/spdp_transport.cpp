@@ -360,6 +360,7 @@ bool run_test()
       , { 0 /*manualLivelinessCount*/ }
       , qos.property
       , {PFLAGS_THIS_VERSION} // opendds_participant_flags
+      , false // opendds_rtps_relay_application_participant
 #ifdef OPENDDS_SECURITY
       , availableExtendedBuiltinEndpoints
 #endif
