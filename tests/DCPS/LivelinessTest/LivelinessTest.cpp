@@ -418,6 +418,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     //this follows the pattern of an up and a down, so there should be 2 liveliness
     //changes per call to run_test, which does the writing
     for (int i = 0 ; i < num_unlively_periods + 1 ; ++i) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("Starting wait for liveliness_changed_count\n")));
       while(local_manual_drl_servant->liveliness_changed_count() != 2 * i ||
             remote_manual_drl_servant->liveliness_changed_count() != 2 * i) {
         ACE_OS::sleep(ACE_Time_Value(0, 250000));
@@ -428,6 +429,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                  remote_manual_drl_servant->liveliness_changed_count()));
       writer->run_test(i);
       if (!use_take) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("Beginning wait for no_writers_generation_count\n")));
         while (remote_manual_drl_servant->no_writers_generation_count() != i ||
               local_manual_drl_servant->no_writers_generation_count() != i) {
           ACE_OS::sleep(ACE_Time_Value(0, 250000));
@@ -442,10 +444,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::sleep(ACE_Time_Value(0, 250000));
     }
 
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("Deleting publisher and writer\n")));
     pub->delete_contained_entities() ;
     delete writer;
     dp->delete_publisher(pub.in ());
 
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("Waiting for liveliness_changed_count after deletion of publisher\n")));
     while(local_manual_drl_servant->liveliness_changed_count() != 2 * (num_unlively_periods + 2) + 1 ||
           remote_manual_drl_servant->liveliness_changed_count() != 2 * (num_unlively_periods + 2) + 1){
       ACE_OS::sleep(ACE_Time_Value(0, 250000));
@@ -505,7 +509,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       status = 1;
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: remote_manual_drl_servant->no_writers_generation_count is %d - ")
-        ACE_TEXT("expected %d\n"), remote_manual_drl_servant->no_writers_generation_count(), num_unlively_periods
+        ACE_TEXT("expected %d\n"), remote_manual_drl_servant->no_writers_generation_count(), expected_no_writers_generation_count
       ));
     }
     ACE_OS::fprintf(stderr, "**********\n") ;
@@ -531,7 +535,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       status = 1;
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: local_manual_drl_servant->no_writers_generation_count is %d - ")
-        ACE_TEXT("expected %d\n"), local_manual_drl_servant->no_writers_generation_count(), num_unlively_periods
+        ACE_TEXT("expected %d\n"), local_manual_drl_servant->no_writers_generation_count(), expected_no_writers_generation_count
       ));
     }
       local_sub->delete_contained_entities() ;
