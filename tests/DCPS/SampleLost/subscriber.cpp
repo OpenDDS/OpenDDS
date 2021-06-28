@@ -24,6 +24,7 @@ using namespace std;
 int
 ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
+  int retval = 0;
   try
     {
       DDS::DomainParticipantFactory_var dpf =
@@ -125,6 +126,11 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       cerr << "Got " << listener_servant->num_samples_rejected() << " sample rejected callbacks" << endl;
       if (listener_servant->num_budget_exceeded() > 0) {
         cerr << "ERROR: Got " << listener_servant->num_budget_exceeded() << " budget exceeded callbacks" << endl;
+        ++retval;
+      }
+      if (listener_servant->num_samples_lost() == 0) {
+        cerr << "ERROR: Got no sample lost callbacks" << endl;
+        ++retval;
       }
 
       if (!CORBA::is_nil (participant.in ())) {
@@ -143,5 +149,5 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       return 1;
     }
 
-  return 0;
+  return retval;
 }
