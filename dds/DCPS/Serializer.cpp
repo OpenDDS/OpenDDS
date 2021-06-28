@@ -325,10 +325,10 @@ const char Serializer::ALIGN_PAD[] = {0};
 Serializer::Serializer(ACE_Message_Block* chain, const Encoding& encoding)
   : current_(chain)
   , good_bit_(true)
+  , construction_status_(ConstructionStatusUndefined)
   , align_rshift_(0)
   , align_wshift_(0)
   , pos_(0)
-  , construction_status_(ConstructionStatusUndefined)
 {
   this->encoding(encoding);
   reset_alignment();
@@ -338,10 +338,10 @@ Serializer::Serializer(ACE_Message_Block* chain, Encoding::Kind kind,
   Endianness endianness)
   : current_(chain)
   , good_bit_(true)
+  , construction_status_(ConstructionStatusUndefined)
   , align_rshift_(0)
   , align_wshift_(0)
   , pos_(0)
-  , construction_status_(ConstructionStatusUndefined)
 {
   encoding(Encoding(kind, endianness));
   reset_alignment();
@@ -351,10 +351,10 @@ Serializer::Serializer(ACE_Message_Block* chain,
   Encoding::Kind kind, bool swap_bytes)
   : current_(chain)
   , good_bit_(true)
+  , construction_status_(ConstructionStatusUndefined)
   , align_rshift_(0)
   , align_wshift_(0)
   , pos_(0)
-  , construction_status_(ConstructionStatusUndefined)
 {
   encoding(Encoding(kind, swap_bytes));
   reset_alignment();
