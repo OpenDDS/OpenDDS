@@ -327,7 +327,8 @@ Serializer::Serializer(ACE_Message_Block* chain, const Encoding& encoding)
   , good_bit_(true)
   , align_rshift_(0)
   , align_wshift_(0)
-  , pos_(0)
+  , rpos_(0)
+  , wpos_(0)
 {
   this->encoding(encoding);
   reset_alignment();
@@ -339,7 +340,8 @@ Serializer::Serializer(ACE_Message_Block* chain, Encoding::Kind kind,
   , good_bit_(true)
   , align_rshift_(0)
   , align_wshift_(0)
-  , pos_(0)
+  , rpos_(0)
+  , wpos_(0)
 {
   encoding(Encoding(kind, endianness));
   reset_alignment();
@@ -351,7 +353,8 @@ Serializer::Serializer(ACE_Message_Block* chain,
   , good_bit_(true)
   , align_rshift_(0)
   , align_wshift_(0)
-  , pos_(0)
+  , rpos_(0)
+  , wpos_(0)
 {
   encoding(Encoding(kind, swap_bytes));
   reset_alignment();
@@ -359,6 +362,46 @@ Serializer::Serializer(ACE_Message_Block* chain,
 
 Serializer::~Serializer()
 {
+}
+
+Serializer::ScopedAlignmentContext::ScopedAlignmentContext(Serializer& ser)
+  : ser_(ser)
+  , max_align_(ser.encoding().max_align())
+  , start_rpos_(ser.rpos())
+  , rblock_(max_align_ ? (ptrdiff_t(ser.current_->rd_ptr()) - ser.align_rshift_) % max_align_ : 0)
+  , start_wpos_(ser.wpos())
+  , wblock_(max_align_ ? (ptrdiff_t(ser.current_->wr_ptr()) - ser.align_wshift_) % max_align_ : 0)
+{
+  ser_.reset_alignment();
+}
+
+void
+Serializer::ScopedAlignmentContext::restore(Serializer& ser) const
+{
+  if (ser.current_ && max_align_) {
+    ser.align_rshift_ = offset(ser.current_->rd_ptr(), ser.rpos() - start_rpos_ + rblock_, max_align_);
+    ser.align_wshift_ = offset(ser.current_->wr_ptr(), ser.wpos() - start_wpos_ + wblock_, max_align_);
+  }
+}
+
+bool
+Serializer::peek(ACE_CDR::ULong& t)
+{
+  // save
+  const size_t rpos = rpos_;
+  const unsigned char align_rshift = align_rshift_;
+  ACE_Message_Block* const current = current_;
+
+  // read
+  if (!peek_helper(current_, 2 * uint32_cdr_size, t)) {
+    return false;
+  }
+
+  // reset
+  current_ = current;
+  align_rshift_ = align_rshift;
+  rpos_ = rpos;
+  return true;
 }
 
 void

@@ -128,7 +128,7 @@ bool extractions(Serializer& serializer, Values& values,
   const Encoding& encoding, const bool checkPos)
 {
   bool readPosOk = true;
-  size_t pos = serializer.pos(), expectedPos = 0, prevPos = pos;
+  size_t pos = serializer.rpos(), expectedPos = 0, prevPos = pos;
   if (pos != expectedPos) {
     std::cerr << "ERROR: Initial position is" << pos
               << ". It should be 0." << std::endl;
@@ -138,7 +138,7 @@ bool extractions(Serializer& serializer, Values& values,
   serializer >> ACE_InputCDR::to_octet(values.octetValue);
   if (checkPos) {
     expectedPos += 1;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "octet");
   }
 
@@ -146,7 +146,7 @@ bool extractions(Serializer& serializer, Values& values,
   if (checkPos) {
     expectedPos += skip(pos, OpenDDS::DCPS::int16_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::int16_cdr_size;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "short");
   }
 
@@ -154,7 +154,7 @@ bool extractions(Serializer& serializer, Values& values,
   if (checkPos) {
     expectedPos += skip(pos, OpenDDS::DCPS::int32_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::int32_cdr_size;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "long");
   }
 
@@ -162,7 +162,7 @@ bool extractions(Serializer& serializer, Values& values,
   if (checkPos) {
     expectedPos += skip(pos, OpenDDS::DCPS::int64_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::int64_cdr_size;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "long long");
   }
 
@@ -170,7 +170,7 @@ bool extractions(Serializer& serializer, Values& values,
   if (checkPos) {
     expectedPos += skip(pos, OpenDDS::DCPS::uint16_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::uint16_cdr_size;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "ushort");
   }
 
@@ -178,7 +178,7 @@ bool extractions(Serializer& serializer, Values& values,
   if (checkPos) {
     expectedPos += skip(pos, OpenDDS::DCPS::uint32_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::uint32_cdr_size;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "ulong");
   }
 
@@ -186,7 +186,7 @@ bool extractions(Serializer& serializer, Values& values,
   if (checkPos) {
     expectedPos += skip(pos, OpenDDS::DCPS::uint64_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::uint64_cdr_size;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "ulong long");
   }
 
@@ -194,7 +194,7 @@ bool extractions(Serializer& serializer, Values& values,
   if (checkPos) {
     expectedPos += skip(pos, OpenDDS::DCPS::float32_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::float32_cdr_size;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "float");
   }
 
@@ -202,7 +202,7 @@ bool extractions(Serializer& serializer, Values& values,
   if (checkPos) {
     expectedPos += skip(pos, OpenDDS::DCPS::float64_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::float64_cdr_size;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "double");
   }
 
@@ -210,14 +210,14 @@ bool extractions(Serializer& serializer, Values& values,
   if (checkPos) {
     expectedPos += skip(pos, OpenDDS::DCPS::float128_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::float128_cdr_size;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "long double");
   }
 
   serializer >> values.charValue;
   if (checkPos) {
     expectedPos += OpenDDS::DCPS::char8_cdr_size;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "char");
   }
 
@@ -225,7 +225,7 @@ bool extractions(Serializer& serializer, Values& values,
   if (checkPos) {
     expectedPos += skip(pos, OpenDDS::DCPS::char16_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::char16_cdr_size;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "wchar");
   }
 
@@ -233,7 +233,7 @@ bool extractions(Serializer& serializer, Values& values,
   if (checkPos) {
     expectedPos += skip(pos, OpenDDS::DCPS::uint32_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::uint32_cdr_size + ACE_OS::strlen(values.stringValue) + 1;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "string");
   }
 #ifndef OPENDDS_SAFETY_PROFILE
@@ -241,7 +241,7 @@ bool extractions(Serializer& serializer, Values& values,
   if (checkPos) {
     expectedPos += skip(pos, OpenDDS::DCPS::uint32_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::uint32_cdr_size + values.stdstringValue.size() + 1;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "std string");
   }
 #endif
@@ -251,7 +251,7 @@ bool extractions(Serializer& serializer, Values& values,
     expectedPos += skip(pos, OpenDDS::DCPS::uint32_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::uint32_cdr_size +
       ACE_OS::strlen(values.wstringValue) * OpenDDS::DCPS::char16_cdr_size;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "wstring");
   }
 #ifndef OPENDDS_SAFETY_PROFILE
@@ -260,7 +260,7 @@ bool extractions(Serializer& serializer, Values& values,
     expectedPos += skip(pos, OpenDDS::DCPS::uint32_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::uint32_cdr_size +
       values.stdwstringValue.size() * OpenDDS::DCPS::char16_cdr_size;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "std wstring");
   }
 #endif
