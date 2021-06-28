@@ -240,7 +240,6 @@ Spdp::Spdp(DDS::DomainId_t domain,
            RepoId& guid,
            const DDS::DomainParticipantQos& qos,
            RtpsDiscovery* disco)
-
   : DCPS::LocalParticipant<Sedp>(qos)
   , disco_(disco)
   , config_(disco_->config())
@@ -282,13 +281,13 @@ Spdp::Spdp(DDS::DomainId_t domain,
            DDS::Security::IdentityHandle identity_handle,
            DDS::Security::PermissionsHandle perm_handle,
            DDS::Security::ParticipantCryptoHandle crypto_handle)
-
   : DCPS::LocalParticipant<Sedp>(qos)
   , disco_(disco)
   , config_(disco_->config())
   , domain_(domain)
   , guid_(guid)
   , participant_discovered_at_(MonotonicTimePoint::now().to_monotonic_time())
+  , is_application_participant_(false)
   , tport_(DCPS::make_rch<SpdpTransport>(rchandle_from(this)))
   , initialized_flag_(false)
   , eh_shutdown_(false)
