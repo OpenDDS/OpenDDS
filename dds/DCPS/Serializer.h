@@ -241,7 +241,7 @@ public:
   const static size_t padding_marker_byte_index = 3;
   const static size_t padding_marker_alignment = 4;
 
-  EncapsulationHeader();
+  EncapsulationHeader(Kind k = KIND_CDR_BE, ACE_UINT16 o = 0);
 
   Kind kind() const;
   void kind(Kind value);
