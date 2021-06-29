@@ -108,7 +108,6 @@ int Publisher::publish()
       return 1;
     }
     ++progress;
-    ACE_OS::sleep(ACE_Time_Value(0, 10000)); // to simulate concurrency
   }
 
   if (durable_) {

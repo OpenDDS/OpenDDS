@@ -42,7 +42,6 @@ int PublisherService::svc()
 {
   try {
     Publisher::Ptr pub(createPublisher());
-    ACE_OS::sleep(ACE_Time_Value(0, 50000)); // to simulate concurrency
     return pub->publish();
   } catch (...) {
     ACE_ERROR((LM_ERROR, ("(%P|%t) ERROR: PublisherService::svc exception\n")));
