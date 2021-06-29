@@ -14,11 +14,11 @@ test suite across a wide variety of operation systems and build configurations.
 Legend for GitHub Actions Build Names
 *************************************
 
-Operating System
-================
+Operating System (see `GitHub Virtual Environments<https://github.com/actions/virtual-environments>`_)
+==================================================
 
 * u18/u20 - Ubuntu 18.04/Ubuntu 20.04
-* w16/w19 - Windows 2016/Windows 2019
+* w16/w19 - Windows Server 2016 (Visual Studio 2017)/Windows Server 2019 (Visual Studio 2019)
 * m10 - MacOS 10.15
 
 Build Configuration
