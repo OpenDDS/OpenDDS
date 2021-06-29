@@ -124,7 +124,7 @@ in one step due to cross-compile issues. Static and Release builds have a large
 footprint and therefore cannot fit the entire test suite onto a Github Actions runner.
 As a result, they only build and run a subset of the tests in their final jobs, but then have
 multiple final jobs to increase test coverage. These jobs are prefixed by: *compiler_* which
-runs the ``tests/DCPS/Compiler tests``, *unit_* which runs the unit tests located
+runs the ``tests/DCPS/Compiler`` tests, *unit_* which runs the unit tests located
 in ``tests/DCPS/UnitTest`` and ``tests/unit-tests``, and *messenger_* which runs the tests
 in ``tests/DCPS/Messenger`` and ``tests/DCPS/C++11/Messenger``.
 
