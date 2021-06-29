@@ -69,8 +69,7 @@ public:
 
 private:
   bool deserializeEncapsulationHeader(Serializer& s) {
-    // TODO(iguessthislldo): convert
-    ACE_CDR::ULong encap;
+    EncapsulationHeader encap;
     return (s >> encap); // read and ignore 32-bit CDR Encapsulation header
   }
   bool deserializeData(TestMsg& data, Serializer& s) {

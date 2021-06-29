@@ -33,7 +33,7 @@ using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
 
 const Encoding SocketWriter::encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
-
+const EncapsulationHeader SocketWriter::ENCAP(EncapsulationHeader::KIND_CDR_LE);
 const double SocketWriter::NTP_FRACTIONAL = 4294.967296; // NTP fractional (2^-32) sec per microsec
 
 Header SocketWriter::header(RepoId id)

@@ -95,9 +95,9 @@ Encoding::Encoding(Encoding::Kind kind, bool swap_bytes)
   this->kind(kind);
 }
 
-EncapsulationHeader::EncapsulationHeader()
-: kind_(KIND_CDR_BE)
-, options_(0)
+EncapsulationHeader::EncapsulationHeader(EncapsulationHeader::Kind k, ACE_UINT16 o)
+: kind_(k)
+, options_(o)
 {
 }
 
