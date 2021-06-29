@@ -5527,7 +5527,7 @@ jobs:
         mkdir tests\cmake\build
         cd tests\cmake\build
         cmake -DBUILD_SHARED_LIBS=ON ..
-        cmake --build . -Config Release
+        cmake --build . --config Release
     - name: check build configuration
       shell: cmd
       run: |
