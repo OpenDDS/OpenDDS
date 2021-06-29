@@ -133,6 +133,23 @@ To shorten the runtime of the continuous integration, some other builds will not
 All builds with safety profile disabled and ownership profile enabled, will run the ``tests/cmake`` tests.
 Test runs which only contain CMake tests are prefixed by ``cmake_``.
 
+.lst Files
+==========
+
+.lst files contain a list of tests with configuration options that will turn tests on or off. The *test_* jobs
+pass in ``tests/dcps_tests.lst``. Static and Release builds instead use ``tests/static_ci_tests.lst``. This seperation
+of .lst files is due to how excluding all but a few tests in the dcps_tests.lst would require adding a new config option
+to every test we didn't want to run. There is a seperate security test list, ``tests/security/security_tests.lst``, which governs
+the security tests which are run when ``--security`` is passed to ``auto_run_tests.pl``. The last list file used by
+``build_and_test.yml`` is ``tools/modeling/tests/modeling_tests.lst``, which is included by passing ``--modeling`` to
+``auto_run_tests.pl``.
+
+To disable a test in GitHub Actions, ``!GH_ACTIONS`` must be added next to the test in the .lst file. These tests will not run when
+``-Config GH_ACTIONS`` is passed alongside the lst file. There are similar test blockers which only block for specific github actions
+configurations: ``!GHA_NO_BUILT_IN_TOPICS`` blocks GitHub Actions builds without built-in-topics from running a test, and
+``!GHA_OPENDDS_SAFETY_PROFILE`` blocks Safety Profile builds from running a test. These blocks are necessary because certain tests
+cannot properly run on GitHub Actions due to how the runners are configured.
+
 Test Results
 ============
 
