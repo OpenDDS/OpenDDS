@@ -173,6 +173,12 @@ void EncapsulationHeader::kind(EncapsulationHeader::Kind value)
 }
 
 ACE_INLINE
+bool EncapsulationHeader::is_good() const
+{
+  return kind_ != KIND_INVALID;
+}
+
+ACE_INLINE
 ACE_UINT16 EncapsulationHeader::options() const
 {
   return options_;
