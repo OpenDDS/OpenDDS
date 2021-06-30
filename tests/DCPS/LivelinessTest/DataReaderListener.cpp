@@ -11,8 +11,13 @@
 
 #include <dds/DdsDcpsSubscriptionC.h>
 
-DataReaderListenerImpl::DataReaderListenerImpl(void) :
-  liveliness_changed_count_(0)
+DataReaderListenerImpl::DataReaderListenerImpl(DistributedConditionSet_rch dcs,
+                                               const OPENDDS_STRING& actor)
+  : dcs_(dcs)
+  , actor_(actor)
+  , liveliness_lost_count_(0)
+  , liveliness_gained_count_(0)
+  , liveliness_changed_count_(0)
   {
     last_status_.alive_count = 0;
     last_status_.not_alive_count = 0;
@@ -37,10 +42,7 @@ DataReaderListenerImpl::DataReaderListenerImpl(void) :
     last_si_.opendds_reserved_publication_seq = 0;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderListenerImpl::DataReaderListenerImpl\n")));
-
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderListenerImpl::DataReaderListenerImpl\n")
+      ACE_TEXT("(%P|%t) DataReaderListenerImpl::DataReaderListenerImpl")
       ACE_TEXT(" use_take=%d num_ops_per_thread=%d\n"),
       use_take, num_ops_per_thread
       ));
@@ -81,6 +83,19 @@ void DataReaderListenerImpl::on_liveliness_changed(
   {
     ACE_UNUSED_ARG(reader);
     ACE_UNUSED_ARG(status);
+
+    if (status.alive_count_change > 0) {
+      OPENDDS_ASSERT(status.alive_count_change == 1);
+      OPENDDS_ASSERT(status.not_alive_count_change <= 0);
+      ++liveliness_gained_count_;
+      dcs_->post(actor_, "LIVELINESS_GAINED_" + OpenDDS::DCPS::to_dds_string(liveliness_gained_count_));
+    }
+    if (status.not_alive_count_change > 0) {
+      OPENDDS_ASSERT(status.alive_count_change <= 0);
+      OPENDDS_ASSERT(status.not_alive_count_change == 1);
+      ++liveliness_lost_count_;
+      dcs_->post(actor_, "LIVELINESS_LOST_" + OpenDDS::DCPS::to_dds_string(liveliness_gained_count_));
+    }
 
     ++liveliness_changed_count_;
 
