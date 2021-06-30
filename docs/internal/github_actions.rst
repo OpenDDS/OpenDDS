@@ -14,9 +14,10 @@ test suite across a wide variety of operation systems and build configurations.
 Legend for GitHub Actions Build Names
 *************************************
 
-Operating System (see `GitHub Virtual Environments<https://github.com/actions/virtual-environments>`_)
-==================================================
+Operating System
+================
 
+See `GitHub Virtual Environments <https://github.com/actions/virtual-environments>`_.
 * u18/u20 - Ubuntu 18.04/Ubuntu 20.04
 * w16/w19 - Windows Server 2016 (Visual Studio 2017)/Windows Server 2019 (Visual Studio 2019)
 * m10 - MacOS 10.15
@@ -157,9 +158,8 @@ The tests are run using `autobuild <https://github.com/DOCGroup/autobuild>`_ whi
 that are turned into a GitHub artifact. This artifact is processed by the
 "Check Test Results" workflow which modifies the files with detailed summaries of the test runs.
 After all of the Check Test Results jobs are complete, the test results will be posted in either
-the build_and_test or lint workflows. It is 'random <https://github.com/dorny/test-reporter/issues/67>'_ which one of the workflows the results will appear
-in, so be sure to check both. This is due to a 'known problem <https://github.com/mikepenz/action-junit-report/issues/40>'_ with the GitHub API for
-creating a new Test Check.
+the build_and_test or lint workflows. It is `random <https://github.com/dorny/test-reporter/issues/67>`_ which one of the workflows the results will appear
+in, so be sure to check both. This is due to a `known problem <https://github.com/mikepenz/action-junit-report/issues/40>`_ with the GitHub API for
 
 Artifacts
 =========
