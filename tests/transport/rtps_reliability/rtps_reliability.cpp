@@ -143,7 +143,7 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
     dsle_.get_header().message_length_ = 8;
     dsle_.get_header().byte_order_ = ACE_CDR_BYTE_ORDER;
     payload_.init(dsle_.get_header().message_length_);
-    const EncapsulationHeader encap(EncapsulationHeader::KIND_CDR_LE);
+    const EncapsulationHeader encap(encoding, FINAL);
     const ACE_CDR::ULong data = 0xDCBADCBA;
     Serializer ser(&payload_, encoding);
     if (!(ser << encap && ser << data)) {
@@ -253,7 +253,7 @@ struct TestParticipant: ACE_Event_Handler {
     size += 8; // CDR encap header + 4 bytes of data
     ACE_Message_Block mb(size);
     Serializer ser(&mb, encoding);
-    const EncapsulationHeader encap(EncapsulationHeader::KIND_CDR_LE);
+    const EncapsulationHeader encap(encoding, FINAL);
     const ACE_CDR::ULong data = 0xABCDABCD;
     if (!(ser << hdr_ && ser << ds && ser << encap && ser << data)) {
       ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize data\n"));
@@ -305,7 +305,7 @@ struct TestParticipant: ACE_Event_Handler {
     size += FRAG_SIZE;
     ACE_Message_Block mb(size);
     Serializer ser(&mb, encoding);
-    const EncapsulationHeader encap(EncapsulationHeader::KIND_CDR_LE);
+    const EncapsulationHeader encap(encoding, FINAL);
     bool ok = (ser << hdr_ && ser << df);
     if (i == 0) ok &= (ser << encap);
     ok &= ser.write_octet_array(data_for_frag_,

@@ -83,7 +83,7 @@ private:
 
 using namespace OpenDDS::RTPS;
 
-const EncapsulationHeader DDS_TEST::encap(EncapsulationHeader::KIND_CDR_LE);
+const EncapsulationHeader DDS_TEST::encap(encoding, FINAL);
 
 bool DDS_TEST::writeHeartbeat(const OpenDDS::DCPS::RepoId& reader) const
 {

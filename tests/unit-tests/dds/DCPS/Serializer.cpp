@@ -121,6 +121,22 @@ TEST(serializer_test, EncapsulationHeader__EncapsulationHeader)
   EXPECT_STREQ("CDR/XCDR1 Big Endian Plain", eh.to_string().c_str());
 }
 
+TEST(serializer_test, EncapsulationHeader__EncapsulationHeader_Encoding_Valid)
+{
+  Encoding initenc;
+  EncapsulationHeader eh(initenc, FINAL);
+  EXPECT_TRUE(eh.is_good());
+  EXPECT_STREQ("CDR/XCDR1 Little Endian Plain", eh.to_string().c_str());
+}
+
+TEST(serializer_test, EncapsulationHeader__EncapsulationHeader_Encoding_Invalid)
+{
+  Encoding initenc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_LITTLE);
+  EncapsulationHeader eh(initenc, FINAL);
+  EXPECT_FALSE(eh.is_good());
+  EXPECT_STREQ("Invalid", eh.to_string().c_str());
+}
+
 TEST(serializer_test, EncapsulationHeader__from_encoding_XCDR1_BIG_FINAL)
 {
   EncapsulationHeader eh;
@@ -290,6 +306,15 @@ TEST(serializer_test, EncapsulationHeader__to_encoding_XML)
   Encoding enc;
   EXPECT_FALSE(eh.to_encoding(enc, MUTABLE));
   EXPECT_STREQ("XML", eh.to_string().c_str());
+}
+
+TEST(serializer_test, EncapsulationHeader__to_encoding_INVALID)
+{
+  Encoding initenc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_LITTLE);
+  EncapsulationHeader eh(initenc, FINAL);
+  Encoding enc;
+  EXPECT_FALSE(eh.to_encoding(enc, FINAL));
+  EXPECT_STREQ("Invalid", eh.to_string().c_str());
 }
 
 TEST(serializer_test, Serializer_Serializer_ACE_Message_Block_Encoding)
