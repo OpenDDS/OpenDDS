@@ -9,6 +9,8 @@
 #include "MulticastLoader.h"
 #include "MulticastTransport.h"
 
+#include <dds/DCPS/LogAddr.h>
+
 #include "dds/DCPS/transport/framework/TransportDefs.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 
@@ -155,8 +157,7 @@ MulticastInst::dump_to_str() const
   std::ostringstream os;
   os << TransportInst::dump_to_str() << std::endl;
 
-  os << formatNameForDump("group_address")       << this->group_address_.get_host_addr()
-                                                           << ":" << this->group_address_.get_port_number() << std::endl;
+  os << formatNameForDump("group_address")       << LogAddr(group_address_).str() << std::endl;
   os << formatNameForDump("local_address")       << this->local_address_ << std::endl;
   os << formatNameForDump("default_to_ipv6")     << (this->default_to_ipv6_ ? "true" : "false") << std::endl;
   os << formatNameForDump("port_offset")         << this->port_offset_ << std::endl;
