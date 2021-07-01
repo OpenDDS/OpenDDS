@@ -670,7 +670,6 @@ public:
   bool write_delimiter(size_t size);
 
   enum ConstructionStatus {
-    ConstructionStatusUndefined,
     ConstructionSuccessful,
     ElementConstructionFailure,
     BoundConstructionFailure
