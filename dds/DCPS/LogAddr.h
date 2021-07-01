@@ -7,6 +7,8 @@
 
 #include <ace/INET_Addr.h>
 
+#include <string>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
