@@ -635,6 +635,10 @@ namespace {
       be_global->impl_ <<
         "  while (true) {\n"
         "    const CORBA::ULong len = seq.length();\n"
+        "    // Improves growth behavior. See note in ParameterListConverter's add_param()\n"
+        "    if (len && !(len & (len - 1))) {\n"
+        "      seq.length(2 * len);\n"
+        "    }\n"
         "    seq.length(len + 1);\n"
         "    if (!(strm >> seq[len])) {\n"
         "      return false;\n"
