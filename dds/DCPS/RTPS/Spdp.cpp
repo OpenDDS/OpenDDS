@@ -2665,7 +2665,7 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, const ACE_INET_Addr& loca
   ParameterList plist;
   if (!ParameterListConverter::to_param_list(pdata, plist)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-      ACE_TEXT("Spdp::SpdpTransport::write() - ")
+      ACE_TEXT("Spdp::SpdpTransport::write_i() - ")
       ACE_TEXT("failed to convert from SPDPdiscoveredParticipantData ")
       ACE_TEXT("to ParameterList\n")));
     return;
@@ -2685,7 +2685,7 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, const ACE_INET_Addr& loca
 
     if (!ParameterListConverter::to_param_list(ai_map, plist)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("Spdp::SpdpTransport::write() - ")
+                 ACE_TEXT("Spdp::SpdpTransport::write_i() - ")
                  ACE_TEXT("failed to convert from ICE::AgentInfo ")
                  ACE_TEXT("to ParameterList\n")));
       return;
@@ -2705,7 +2705,7 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, const ACE_INET_Addr& loca
   if (!(ser << hdr_) || !(ser << info_dst) || !(ser << data_) || !(ser << encap_LE) || !(ser << options)
       || !(ser << plist)) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write() - ")
+      ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write_i() - ")
       ACE_TEXT("failed to serialize headers for SPDP\n")));
     return;
   }
