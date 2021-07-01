@@ -5132,7 +5132,7 @@ Sedp::write_publication_data_unsecure(
     // Convert to parameter list
     if (!ParameterListConverter::to_param_list(dwd, plist, use_xtypes_, lp.type_info_, false)) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
+                 ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data_unsecure - ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
                  ACE_TEXT(" to ParameterList\n")));
       result = DDS::RETCODE_ERROR;
@@ -5143,7 +5143,7 @@ Sedp::write_publication_data_unsecure(
       ai_map["DATA"] = lp.ice_agent_info;
       if (!ParameterListConverter::to_param_list(ai_map, plist)) {
         ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
+                   ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data_unsecure - ")
                    ACE_TEXT("Failed to convert ICE Agent info ")
                    ACE_TEXT("to ParameterList\n")));
         result = DDS::RETCODE_ERROR;
@@ -5155,7 +5155,7 @@ Sedp::write_publication_data_unsecure(
       result = publications_writer_->write_parameter_list(plist, reader, lp.sequence_);
     }
   } else if (DCPS::DCPS_debug_level > 3) {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_publication_data - ")
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_publication_data_unsecure - ")
                ACE_TEXT("not currently associated, dropping msg.\n")));
   }
   return result;
