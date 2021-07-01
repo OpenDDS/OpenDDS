@@ -483,6 +483,52 @@ TEST(serializer_test, Serializer_align_context_2_buff_diff_walign)
   //std::cout << std::endl;
 }
 
+TEST(serializer_test, Serializer_align_context_2_buff_diff_walign_read)
+{
+  OpenDDS::DCPS::Message_Block_Ptr amb(new ACE_Message_Block(21));
+  amb->cont(new ACE_Message_Block(32));
+
+  Encoding enc;
+  Serializer ser(amb.get(), enc);
+
+  std::memset(amb->wr_ptr(), 0, 21);
+  std::memset(amb->cont()->wr_ptr(), 0, 32);
+
+  amb->cont()->rd_ptr(3);
+  amb->cont()->wr_ptr(3);
+
+  const ACE_CDR::UShort c = 3;
+  const ACE_CDR::ULongLong d = 54321;
+
+  ASSERT_TRUE(ser << c);
+  {
+    Serializer::ScopedAlignmentContext sac(ser);
+    ASSERT_TRUE(ser << d);
+    ASSERT_TRUE(ser << c);
+    ASSERT_TRUE(ser << d);
+  }
+  ASSERT_TRUE(ser << d);
+
+  ACE_CDR::UShort c_out = 0;
+  ACE_CDR::ULongLong d_out = 0.0;
+
+  Serializer rser(amb.get(), enc);
+
+  ASSERT_TRUE(rser >> c_out);
+  ASSERT_EQ(c, c_out);
+  {
+    Serializer::ScopedAlignmentContext sac(rser);
+    ASSERT_TRUE(rser >> d_out);
+    ASSERT_EQ(d, d_out);
+    ASSERT_TRUE(rser >> c_out);
+    ASSERT_EQ(c, c_out);
+    ASSERT_TRUE(rser >> d_out);
+    ASSERT_EQ(d, d_out);
+  }
+  ASSERT_TRUE(rser >> d_out);
+  ASSERT_EQ(d, d_out);
+}
+
 TEST(serializer_test, Serializer_test_peek_align)
 {
   OpenDDS::DCPS::Message_Block_Ptr amb(new ACE_Message_Block(5));
