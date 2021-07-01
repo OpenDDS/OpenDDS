@@ -15,10 +15,10 @@
 
 using namespace OpenDDS::Security::SSL;
 
-class SignedDocumentTest : public ::testing::Test
+class dds_DCPS_security_SSL_SignedDocument : public ::testing::Test
 {
 public:
-  SignedDocumentTest() :
+  dds_DCPS_security_SSL_SignedDocument() :
     ca_("file:../security/certs/permissions/permissions_ca_cert.pem"),
     ca_data_("data:,-----BEGIN CERTIFICATE-----\n"
       "MIID9DCCAtwCCQCkjopvwK438jANBgkqhkiG9w0BAQsFADCBuzELMAkGA1UEBhMC\n"
@@ -48,7 +48,7 @@ public:
   {
   }
 
-  ~SignedDocumentTest()
+  ~dds_DCPS_security_SSL_SignedDocument()
   {
   }
 
@@ -57,24 +57,24 @@ public:
   SignedDocument doc_;
 };
 
-TEST_F(SignedDocumentTest, GetContent_Success)
+TEST_F(dds_DCPS_security_SSL_SignedDocument, GetContent_Success)
 {
   std::string content;
   doc_.get_original(content);
   ASSERT_TRUE(0 < content.length());
 }
 
-TEST_F(SignedDocumentTest, VerifySignature_Success)
+TEST_F(dds_DCPS_security_SSL_SignedDocument, VerifySignature_Success)
 {
   ASSERT_EQ(0, doc_.verify_signature(ca_));
 }
 
-TEST_F(SignedDocumentTest, VerifySignature_Data_Success)
+TEST_F(dds_DCPS_security_SSL_SignedDocument, VerifySignature_Data_Success)
 {
   ASSERT_EQ(0, doc_.verify_signature(ca_data_));
 }
 
-TEST_F(SignedDocumentTest, LoadFromMemory)
+TEST_F(dds_DCPS_security_SSL_SignedDocument, LoadFromMemory)
 {
   const char fname[] = "../security/governance/governance_SC1_ProtectedDomain1_signed.p7s";
   std::ifstream file(fname, std::ifstream::binary);
@@ -92,20 +92,20 @@ TEST_F(SignedDocumentTest, LoadFromMemory)
   ASSERT_EQ(doc, doc_);
 }
 
-TEST_F(SignedDocumentTest, CopyAssignment)
+TEST_F(dds_DCPS_security_SSL_SignedDocument, CopyAssignment)
 {
   SignedDocument doc = doc_;
   ASSERT_EQ(doc, doc_);
 }
 
-TEST_F(SignedDocumentTest, Assignment)
+TEST_F(dds_DCPS_security_SSL_SignedDocument, Assignment)
 {
   SignedDocument doc;
   doc = doc_;
   ASSERT_EQ(doc, doc_);
 }
 
-TEST_F(SignedDocumentTest, CopyConstruct)
+TEST_F(dds_DCPS_security_SSL_SignedDocument, CopyConstruct)
 {
   SignedDocument doc(doc_);
   ASSERT_EQ(doc, doc_);

@@ -9,7 +9,7 @@
 #include "dds/DCPS/security/OpenSSL_init.h"
 #include "dds/DCPS/security/SSL/Utils.h"
 
-TEST(UtilsTest, MakeNonce256_Success)
+TEST(dds_DCPS_security_SSL_Utils, MakeNonce256_Success)
 {
   std::vector<unsigned char> nonce;
   int err = OpenDDS::Security::SSL::make_nonce_256(nonce);

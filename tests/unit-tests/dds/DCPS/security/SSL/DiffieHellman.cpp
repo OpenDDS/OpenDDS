@@ -14,10 +14,10 @@ using namespace OpenDDS::Security::SSL;
 using OpenDDS::DCPS::move;
 
 
-class DiffieHellmanTest : public ::testing::Test
+class dds_DCPS_security_SSL_DiffieHellman : public ::testing::Test
 {
 public:
-  DiffieHellmanTest() :
+  dds_DCPS_security_SSL_DiffieHellman() :
     dh1(new DH_2048_MODP_256_PRIME),
     dh2(new DH_2048_MODP_256_PRIME),
     dh3(new ECDH_PRIME_256_V1_CEUM),
@@ -26,7 +26,7 @@ public:
 
   }
 
-  ~DiffieHellmanTest()
+  ~dds_DCPS_security_SSL_DiffieHellman()
   {
 
   }
@@ -37,7 +37,7 @@ public:
   DiffieHellman dh4;
 };
 
-TEST_F(DiffieHellmanTest, DH_SharedSecret_GenerationAndComparison)
+TEST_F(dds_DCPS_security_SSL_DiffieHellman, DH_SharedSecret_GenerationAndComparison)
 {
   DDS::OctetSeq dh1_pubkey;
   dh1.pub_key(dh1_pubkey);
@@ -52,7 +52,7 @@ TEST_F(DiffieHellmanTest, DH_SharedSecret_GenerationAndComparison)
   ASSERT_TRUE(was_successful);
 }
 
-TEST_F(DiffieHellmanTest, EC_SharedSecret_GenerationAndComparison)
+TEST_F(dds_DCPS_security_SSL_DiffieHellman, EC_SharedSecret_GenerationAndComparison)
 {
   DDS::OctetSeq dh3_pubkey;
   dh3.pub_key(dh3_pubkey);

@@ -13,14 +13,14 @@
 using namespace rapidjson;
 using namespace OpenDDS::DCPS;
 
-TEST(JsonValueWriter, begin_struct)
+TEST(dds_DCPS_JsonValueWriter, begin_struct)
 {
   JsonValueWriter<> jvw;
   jvw.begin_struct();
   EXPECT_STREQ(jvw.buffer().GetString(), "{");
 }
 
-TEST(JsonValueWriter, end_struct)
+TEST(dds_DCPS_JsonValueWriter, end_struct)
 {
   JsonValueWriter<> jvw;
   jvw.begin_struct();
@@ -28,7 +28,7 @@ TEST(JsonValueWriter, end_struct)
   EXPECT_STREQ(jvw.buffer().GetString(), "{}");
 }
 
-TEST(JsonValueWriter, begin_struct_member)
+TEST(dds_DCPS_JsonValueWriter, begin_struct_member)
 {
   JsonValueWriter<> jvw;
   jvw.begin_struct();
@@ -36,7 +36,7 @@ TEST(JsonValueWriter, begin_struct_member)
   EXPECT_STREQ(jvw.buffer().GetString(), "{\"aField\"");
 }
 
-TEST(JsonValueWriter, end_struct_member)
+TEST(dds_DCPS_JsonValueWriter, end_struct_member)
 {
   JsonValueWriter<> jvw;
   jvw.begin_struct();
@@ -46,14 +46,14 @@ TEST(JsonValueWriter, end_struct_member)
   EXPECT_STREQ(jvw.buffer().GetString(), "{\"aField\":5");
 }
 
-TEST(JsonValueWriter, begin_union)
+TEST(dds_DCPS_JsonValueWriter, begin_union)
 {
   JsonValueWriter<> jvw;
   jvw.begin_union();
   EXPECT_STREQ(jvw.buffer().GetString(), "{");
 }
 
-TEST(JsonValueWriter, end_union)
+TEST(dds_DCPS_JsonValueWriter, end_union)
 {
   JsonValueWriter<> jvw;
   jvw.begin_union();
@@ -61,7 +61,7 @@ TEST(JsonValueWriter, end_union)
   EXPECT_STREQ(jvw.buffer().GetString(), "{}");
 }
 
-TEST(JsonValueWriter, begin_discriminator)
+TEST(dds_DCPS_JsonValueWriter, begin_discriminator)
 {
   JsonValueWriter<> jvw;
   jvw.begin_union();
@@ -70,7 +70,7 @@ TEST(JsonValueWriter, begin_discriminator)
   EXPECT_STREQ(jvw.buffer().GetString(), "{\"$discriminator\":5");
 }
 
-TEST(JsonValueWriter, end_discriminator)
+TEST(dds_DCPS_JsonValueWriter, end_discriminator)
 {
   JsonValueWriter<> jvw;
   jvw.begin_union();
@@ -80,7 +80,7 @@ TEST(JsonValueWriter, end_discriminator)
   EXPECT_STREQ(jvw.buffer().GetString(), "{\"$discriminator\":5");
 }
 
-TEST(JsonValueWriter, begin_union_member)
+TEST(dds_DCPS_JsonValueWriter, begin_union_member)
 {
   JsonValueWriter<> jvw;
   jvw.begin_union();
@@ -88,7 +88,7 @@ TEST(JsonValueWriter, begin_union_member)
   EXPECT_STREQ(jvw.buffer().GetString(), "{\"aField\"");
 }
 
-TEST(JsonValueWriter, end_union_member)
+TEST(dds_DCPS_JsonValueWriter, end_union_member)
 {
   JsonValueWriter<> jvw;
   jvw.begin_union();
@@ -98,7 +98,7 @@ TEST(JsonValueWriter, end_union_member)
   EXPECT_STREQ(jvw.buffer().GetString(), "{\"aField\":5");
 }
 
-TEST(JsonValueWriter, complete_struct)
+TEST(dds_DCPS_JsonValueWriter, complete_struct)
 {
   JsonValueWriter<> jvw;
   jvw.begin_struct();
@@ -112,14 +112,14 @@ TEST(JsonValueWriter, complete_struct)
   EXPECT_STREQ(jvw.buffer().GetString(), "{\"aField\":5,\"bField\":6}");
 }
 
-TEST(JsonValueWriter, begin_array)
+TEST(dds_DCPS_JsonValueWriter, begin_array)
 {
   JsonValueWriter<> jvw;
   jvw.begin_array();
   EXPECT_STREQ(jvw.buffer().GetString(), "[");
 }
 
-TEST(JsonValueWriter, end_array)
+TEST(dds_DCPS_JsonValueWriter, end_array)
 {
   JsonValueWriter<> jvw;
   jvw.begin_array();
@@ -127,14 +127,14 @@ TEST(JsonValueWriter, end_array)
   EXPECT_STREQ(jvw.buffer().GetString(), "[]");
 }
 
-TEST(JsonValueWriter, begin_sequence)
+TEST(dds_DCPS_JsonValueWriter, begin_sequence)
 {
   JsonValueWriter<> jvw;
   jvw.begin_sequence();
   EXPECT_STREQ(jvw.buffer().GetString(), "[");
 }
 
-TEST(JsonValueWriter, end_sequence)
+TEST(dds_DCPS_JsonValueWriter, end_sequence)
 {
   JsonValueWriter<> jvw;
   jvw.begin_sequence();
@@ -142,7 +142,7 @@ TEST(JsonValueWriter, end_sequence)
   EXPECT_STREQ(jvw.buffer().GetString(), "[]");
 }
 
-TEST(JsonValueWriter, begin_element)
+TEST(dds_DCPS_JsonValueWriter, begin_element)
 {
   JsonValueWriter<> jvw;
   jvw.begin_sequence();
@@ -150,7 +150,7 @@ TEST(JsonValueWriter, begin_element)
   EXPECT_STREQ(jvw.buffer().GetString(), "[");
 }
 
-TEST(JsonValueWriter, end_element)
+TEST(dds_DCPS_JsonValueWriter, end_element)
 {
   JsonValueWriter<> jvw;
   jvw.begin_sequence();
@@ -160,7 +160,7 @@ TEST(JsonValueWriter, end_element)
   EXPECT_STREQ(jvw.buffer().GetString(), "[5");
 }
 
-TEST(JsonValueWriter, complete_array)
+TEST(dds_DCPS_JsonValueWriter, complete_array)
 {
   JsonValueWriter<> jvw;
   jvw.begin_array();
@@ -174,7 +174,7 @@ TEST(JsonValueWriter, complete_array)
   EXPECT_STREQ(jvw.buffer().GetString(), "[5,6]");
 }
 
-TEST(JsonValueWriter, write_boolean)
+TEST(dds_DCPS_JsonValueWriter, write_boolean)
 {
   {
     JsonValueWriter<> jvw;
@@ -188,7 +188,7 @@ TEST(JsonValueWriter, write_boolean)
   }
 }
 
-TEST(JsonValueWriter, write_byte)
+TEST(dds_DCPS_JsonValueWriter, write_byte)
 {
   {
     JsonValueWriter<> jvw;
@@ -202,7 +202,7 @@ TEST(JsonValueWriter, write_byte)
   }
 }
 
-TEST(JsonValueWriter, write_int8)
+TEST(dds_DCPS_JsonValueWriter, write_int8)
 {
   {
     JsonValueWriter<> jvw;
@@ -216,7 +216,7 @@ TEST(JsonValueWriter, write_int8)
   }
 }
 
-TEST(JsonValueWriter, write_uint8)
+TEST(dds_DCPS_JsonValueWriter, write_uint8)
 {
   {
     JsonValueWriter<> jvw;
@@ -230,7 +230,7 @@ TEST(JsonValueWriter, write_uint8)
   }
 }
 
-TEST(JsonValueWriter, write_int16)
+TEST(dds_DCPS_JsonValueWriter, write_int16)
 {
   {
     JsonValueWriter<> jvw;
@@ -244,7 +244,7 @@ TEST(JsonValueWriter, write_int16)
   }
 }
 
-TEST(JsonValueWriter, write_uint16)
+TEST(dds_DCPS_JsonValueWriter, write_uint16)
 {
   {
     JsonValueWriter<> jvw;
@@ -258,7 +258,7 @@ TEST(JsonValueWriter, write_uint16)
   }
 }
 
-TEST(JsonValueWriter, write_int32)
+TEST(dds_DCPS_JsonValueWriter, write_int32)
 {
   {
     JsonValueWriter<> jvw;
@@ -272,7 +272,7 @@ TEST(JsonValueWriter, write_int32)
   }
 }
 
-TEST(JsonValueWriter, write_uint32)
+TEST(dds_DCPS_JsonValueWriter, write_uint32)
 {
   {
     JsonValueWriter<> jvw;
@@ -286,7 +286,7 @@ TEST(JsonValueWriter, write_uint32)
   }
 }
 
-TEST(JsonValueWriter, write_int64)
+TEST(dds_DCPS_JsonValueWriter, write_int64)
 {
   {
     JsonValueWriter<> jvw;
@@ -310,7 +310,7 @@ TEST(JsonValueWriter, write_int64)
   }
 }
 
-TEST(JsonValueWriter, write_uint64)
+TEST(dds_DCPS_JsonValueWriter, write_uint64)
 {
   {
     JsonValueWriter<> jvw;
@@ -324,21 +324,21 @@ TEST(JsonValueWriter, write_uint64)
   }
 }
 
-TEST(JsonValueWriter, write_float32)
+TEST(dds_DCPS_JsonValueWriter, write_float32)
 {
   JsonValueWriter<> jvw;
   jvw.write_float32(1.2f);
   EXPECT_STREQ(jvw.buffer().GetString(), "1.2000000476837159");
 }
 
-TEST(JsonValueWriter, write_float64)
+TEST(dds_DCPS_JsonValueWriter, write_float64)
 {
   JsonValueWriter<> jvw;
   jvw.write_float64(3.4);
   EXPECT_STREQ(jvw.buffer().GetString(), "3.4");
 }
 
-TEST(JsonValueWriter, write_float128)
+TEST(dds_DCPS_JsonValueWriter, write_float128)
 {
   JsonValueWriter<> jvw;
   ACE_CDR::LongDouble x;
@@ -347,35 +347,35 @@ TEST(JsonValueWriter, write_float128)
   EXPECT_STREQ(jvw.buffer().GetString(), "5.6");
 }
 
-TEST(JsonValueWriter, write_fixed)
+TEST(dds_DCPS_JsonValueWriter, write_fixed)
 {
   JsonValueWriter<> jvw;
   jvw.write_fixed(OpenDDS::FaceTypes::Fixed());
   EXPECT_STREQ(jvw.buffer().GetString(), "\"fixed\"");
 }
 
-TEST(JsonValueWriter, write_char8)
+TEST(dds_DCPS_JsonValueWriter, write_char8)
 {
   JsonValueWriter<> jvw;
   jvw.write_char8('a');
   EXPECT_STREQ(jvw.buffer().GetString(), "97");
 }
 
-TEST(JsonValueWriter, write_char16)
+TEST(dds_DCPS_JsonValueWriter, write_char16)
 {
   JsonValueWriter<> jvw;
   jvw.write_char16('a');
   EXPECT_STREQ(jvw.buffer().GetString(), "97");
 }
 
-TEST(JsonValueWriter, write_string)
+TEST(dds_DCPS_JsonValueWriter, write_string)
 {
   JsonValueWriter<> jvw;
   jvw.write_string("a string");
   EXPECT_STREQ(jvw.buffer().GetString(), "\"a string\"");
 }
 
-TEST(JsonValueWriter, write_enum)
+TEST(dds_DCPS_JsonValueWriter, write_enum)
 {
   JsonValueWriter<> jvw;
   jvw.write_enum("label", 5);

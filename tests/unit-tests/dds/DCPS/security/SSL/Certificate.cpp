@@ -12,10 +12,10 @@
 
 using namespace OpenDDS::Security::SSL;
 
-class CertificateTest : public ::testing::Test
+class dds_DCPS_security_SSL_Certificate : public ::testing::Test
 {
 public:
-  CertificateTest() :
+  dds_DCPS_security_SSL_Certificate() :
     ca_("file:../security/certs/identity/identity_ca_cert.pem"),
     ca_data_("data:,-----BEGIN CERTIFICATE-----\n"
       "MIID6DCCAtACCQCSMMZ5KQ7ffTANBgkqhkiG9w0BAQsFADCBtTELMAkGA1UEBhMC\n"
@@ -68,7 +68,7 @@ public:
 
   }
 
-  ~CertificateTest()
+  ~dds_DCPS_security_SSL_Certificate()
   {
   }
 
@@ -80,33 +80,33 @@ public:
   Certificate not_signed_;
 };
 
-TEST_F(CertificateTest, Validate_RSASSA_PSS_SHA256_Success)
+TEST_F(dds_DCPS_security_SSL_Certificate, Validate_RSASSA_PSS_SHA256_Success)
 {
   ASSERT_EQ(signed_.validate(ca_), X509_V_OK);
 }
 
-TEST_F(CertificateTest, Validate_RSASSA_PSS_SHA256_Data_Success)
+TEST_F(dds_DCPS_security_SSL_Certificate, Validate_RSASSA_PSS_SHA256_Data_Success)
 {
   ASSERT_EQ(signed_.validate(ca_data_), X509_V_OK);
 }
 
-TEST_F(CertificateTest, Validate_ECDSA_SHA256_Data_Success)
+TEST_F(dds_DCPS_security_SSL_Certificate, Validate_ECDSA_SHA256_Data_Success)
 {
   ASSERT_EQ(signed_ec_.validate(ca_data_), X509_V_OK);
 }
 
-TEST_F(CertificateTest, Validate_RSASSA_PSS_SHA256_Failure_LoadingWrongKeyType)
+TEST_F(dds_DCPS_security_SSL_Certificate, Validate_RSASSA_PSS_SHA256_Failure_LoadingWrongKeyType)
 {
   Certificate wrong_key_type("file:../security/certs/identity/test_participant_01_private_key.pem");
   ASSERT_NE(wrong_key_type.validate(ca_), X509_V_OK);
 }
 
-TEST_F(CertificateTest, Validate_RSASSA_PSS_SHA256_Failure_SelfSigned)
+TEST_F(dds_DCPS_security_SSL_Certificate, Validate_RSASSA_PSS_SHA256_Failure_SelfSigned)
 {
   ASSERT_NE(not_signed_.validate(ca_), X509_V_OK);
 }
 
-TEST_F(CertificateTest, SubjectNameDigest_RSASSA_PSS_SHA256_Success)
+TEST_F(dds_DCPS_security_SSL_Certificate, SubjectNameDigest_RSASSA_PSS_SHA256_Success)
 {
   typedef std::vector<unsigned char> hash_vec;
 
@@ -118,19 +118,19 @@ TEST_F(CertificateTest, SubjectNameDigest_RSASSA_PSS_SHA256_Success)
   ASSERT_EQ(hash1, hash2);
 }
 
-TEST_F(CertificateTest, Algorithm_RSASSA_PSS_SHA256_Success)
+TEST_F(dds_DCPS_security_SSL_Certificate, Algorithm_RSASSA_PSS_SHA256_Success)
 {
   std::string algorithm(signed_.dsign_algo());
   ASSERT_EQ(std::string("RSASSA-PSS-SHA256"), algorithm);
 }
 
-TEST_F(CertificateTest, Algorithm_ECDSA_SHA256_Success)
+TEST_F(dds_DCPS_security_SSL_Certificate, Algorithm_ECDSA_SHA256_Success)
 {
     std::string algorithm(signed_ec_.dsign_algo());
     ASSERT_EQ(std::string("ECDSA-SHA256"), algorithm);
 }
 
-TEST_F(CertificateTest, SubjectNameToString_Success)
+TEST_F(dds_DCPS_security_SSL_Certificate, SubjectNameToString_Success)
 {
   /* From this cmd: openssl x509 -noout -subject -in ./security/certs/identity/test_participant_01_cert.pem */
   std::string expected("C = AU, ST = Some-State, O = Internet Widgits Pty Ltd, CN = Ozzie Ozmann");
@@ -139,7 +139,7 @@ TEST_F(CertificateTest, SubjectNameToString_Success)
   ASSERT_EQ(name, expected);
 }
 
-TEST_F(CertificateTest, SerializeDeserialize_RSASSA_PSS_SHA256_Success)
+TEST_F(dds_DCPS_security_SSL_Certificate, SerializeDeserialize_RSASSA_PSS_SHA256_Success)
 {
   DDS::OctetSeq tmp;
   ASSERT_EQ(0, signed_.serialize(tmp));
@@ -148,7 +148,7 @@ TEST_F(CertificateTest, SerializeDeserialize_RSASSA_PSS_SHA256_Success)
   ASSERT_EQ(copy, signed_);
 }
 
-TEST_F(CertificateTest, SerializeDeserialize_ECDSA_SHA256_Success)
+TEST_F(dds_DCPS_security_SSL_Certificate, SerializeDeserialize_ECDSA_SHA256_Success)
 {
   DDS::OctetSeq tmp;
   ASSERT_EQ(0, signed_ec_.serialize(tmp));
@@ -157,27 +157,27 @@ TEST_F(CertificateTest, SerializeDeserialize_ECDSA_SHA256_Success)
   ASSERT_EQ(copy, signed_ec_);
 }
 
-TEST_F(CertificateTest, AssignmentOperator_RSASSA_PSS_SHA256)
+TEST_F(dds_DCPS_security_SSL_Certificate, AssignmentOperator_RSASSA_PSS_SHA256)
 {
   Certificate c;
   c = signed_;
   ASSERT_EQ(c, signed_);
 }
 
-TEST_F(CertificateTest, AssignmentOperator_ECDSA_SHA256)
+TEST_F(dds_DCPS_security_SSL_Certificate, AssignmentOperator_ECDSA_SHA256)
 {
   Certificate c;
   c = signed_ec_;
   ASSERT_EQ(c, signed_ec_);
 }
 
-TEST_F(CertificateTest, CopyConstruct_RSASSA_PSS_SHA256)
+TEST_F(dds_DCPS_security_SSL_Certificate, CopyConstruct_RSASSA_PSS_SHA256)
 {
   Certificate c(signed_);
   ASSERT_EQ(c, signed_);
 }
 
-TEST_F(CertificateTest, CopyConstruct_ECDSA_SHA256)
+TEST_F(dds_DCPS_security_SSL_Certificate, CopyConstruct_ECDSA_SHA256)
 {
   Certificate c(signed_ec_);
   ASSERT_EQ(c, signed_ec_);

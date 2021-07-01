@@ -217,10 +217,10 @@ public:
 #endif
 };
 
-class AccessControlTest : public Test
+class dds_DCPS_security_AccessControlBuiltInImpl : public Test
 {
 public:
-  AccessControlTest()
+  dds_DCPS_security_AccessControlBuiltInImpl()
   : auth_plugin_(new MockAuthentication())
   , test_class_()
   {
@@ -307,7 +307,7 @@ public:
     TheServiceParticipant->shutdown();
   }
 
-  ~AccessControlTest()
+  ~dds_DCPS_security_AccessControlBuiltInImpl()
   {
   }
 
@@ -392,7 +392,7 @@ private:
   AccessControlBuiltInImpl test_class_;
 };
 
-TEST_F(AccessControlTest, validate_local_permissions_InvalidInput)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, validate_local_permissions_InvalidInput)
 {
   ::DDS::DomainParticipantQos qos;
   ::DDS::Security::SecurityException ex;
@@ -403,7 +403,7 @@ TEST_F(AccessControlTest, validate_local_permissions_InvalidInput)
     get_inst().validate_local_permissions(auth_plugin_.get(), DDS::HANDLE_NIL, 1, qos, ex));
 }
 
-TEST_F(AccessControlTest, validate_local_permissions_Success)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, validate_local_permissions_Success)
 {
   ::DDS::Security::SecurityException ex;
 
@@ -412,7 +412,7 @@ TEST_F(AccessControlTest, validate_local_permissions_Success)
   EXPECT_FALSE(DDS::HANDLE_NIL == out_handle);
 }
 
-TEST_F(AccessControlTest, validate_remote_permissions_InvalidInput)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, validate_remote_permissions_InvalidInput)
 {
   ::DDS::Security::PermissionsToken remote_perm;
   ::DDS::Security::AuthenticatedPeerCredentialToken remote_cred;
@@ -430,7 +430,7 @@ TEST_F(AccessControlTest, validate_remote_permissions_InvalidInput)
     auth_plugin_.get(), 1, DDS::HANDLE_NIL, remote_perm, remote_cred, ex));
 }
 
-TEST_F(AccessControlTest, validate_remote_permissions_Success)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, validate_remote_permissions_Success)
 {
   ::DDS::Security::PermissionsToken remote_perm_token;
   ::DDS::Security::AuthenticatedPeerCredentialToken remote_apc_token;
@@ -464,7 +464,7 @@ TEST_F(AccessControlTest, validate_remote_permissions_Success)
   std::cout << ex.message << std::endl;
 }
 
-TEST_F(AccessControlTest, check_create_participant_InvalidInput)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_create_participant_InvalidInput)
 {
   ::DDS::DomainParticipantQos qos;
   ::DDS::Security::SecurityException ex;
@@ -473,7 +473,7 @@ TEST_F(AccessControlTest, check_create_participant_InvalidInput)
     DDS::HANDLE_NIL, 1, qos, ex));
 }
 
-TEST_F(AccessControlTest, check_create_participant_Success)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_create_participant_Success)
 {
   ::DDS::DomainParticipantQos qos;
   ::DDS::Security::SecurityException ex;
@@ -482,7 +482,7 @@ TEST_F(AccessControlTest, check_create_participant_Success)
   EXPECT_FALSE(DDS::HANDLE_NIL == get_inst().check_create_participant(out_handle, 0, domain_participant_qos_, ex));
 }
 
-TEST_F(AccessControlTest, check_create_datawriter_InvalidInput)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_create_datawriter_InvalidInput)
 {
   ::DDS::Security::PermissionsHandle permissions_handle = 1;
   ::DDS::Security::DomainId_t domain_id = 1;
@@ -512,7 +512,7 @@ TEST_F(AccessControlTest, check_create_datawriter_InvalidInput)
     ex));
 }
 
-TEST_F(AccessControlTest, check_create_datawriter_Success)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_create_datawriter_Success)
 {
   ::DDS::Security::DomainId_t domain_id = 0;
   const char * topic_name = "Square";
@@ -522,7 +522,7 @@ TEST_F(AccessControlTest, check_create_datawriter_Success)
   ::DDS::Security::SecurityException ex;
 
   set_up_service_participant();
-  add_or_replace_property(AccessControlTest::gov_6_p7s_);
+  add_or_replace_property(dds_DCPS_security_AccessControlBuiltInImpl::gov_6_p7s_);
 
   ::DDS::Security::PermissionsHandle out_handle =
           get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos_, ex);
@@ -540,7 +540,7 @@ TEST_F(AccessControlTest, check_create_datawriter_Success)
   ASSERT_STREQ("", ex.message);
 }
 
-TEST_F(AccessControlTest, check_create_datawriter_default_Success)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_create_datawriter_default_Success)
 {
   ::DDS::Security::DomainId_t domain_id = 0;
   const char * topic_name = "Rectangle";
@@ -550,7 +550,7 @@ TEST_F(AccessControlTest, check_create_datawriter_default_Success)
   ::DDS::Security::SecurityException ex;
 
   set_up_service_participant();
-  add_or_replace_property(AccessControlTest::gov_6_p7s_);
+  add_or_replace_property(dds_DCPS_security_AccessControlBuiltInImpl::gov_6_p7s_);
 
   ::DDS::Security::PermissionsHandle out_handle =
       get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos_, ex);
@@ -566,7 +566,7 @@ TEST_F(AccessControlTest, check_create_datawriter_default_Success)
   ASSERT_STREQ("", ex.message);
 }
 
-TEST_F(AccessControlTest, check_create_datawriter_date_Fail)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_create_datawriter_date_Fail)
 {
     ::DDS::Security::DomainId_t domain_id = 0;
     const char * topic_name = "Square";
@@ -576,8 +576,8 @@ TEST_F(AccessControlTest, check_create_datawriter_date_Fail)
     ::DDS::Security::SecurityException ex;
 
     set_up_service_participant();
-    add_or_replace_property(AccessControlTest::gov_6_p7s_);
-    add_or_replace_property(AccessControlTest::perm_date_p7s_);
+    add_or_replace_property(dds_DCPS_security_AccessControlBuiltInImpl::gov_6_p7s_);
+    add_or_replace_property(dds_DCPS_security_AccessControlBuiltInImpl::perm_date_p7s_);
 
     ::DDS::Security::PermissionsHandle out_handle =
         get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos_, ex);
@@ -594,7 +594,7 @@ TEST_F(AccessControlTest, check_create_datawriter_date_Fail)
         ex));
 }
 
-TEST_F(AccessControlTest, check_create_datareader_InvalidInput)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_create_datareader_InvalidInput)
 {
   ::DDS::Security::PermissionsHandle permissions_handle = 1;
   ::DDS::Security::DomainId_t domain_id = 1;
@@ -624,7 +624,7 @@ TEST_F(AccessControlTest, check_create_datareader_InvalidInput)
     ex));
 }
 
-TEST_F(AccessControlTest, check_create_datareader_Success)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_create_datareader_Success)
 {
   ::DDS::Security::DomainId_t domain_id = 0;
   const char * topic_name = "Square";
@@ -634,7 +634,7 @@ TEST_F(AccessControlTest, check_create_datareader_Success)
   ::DDS::Security::SecurityException ex;
 
   set_up_service_participant();
-  add_or_replace_property(AccessControlTest::gov_6_p7s_);
+  add_or_replace_property(dds_DCPS_security_AccessControlBuiltInImpl::gov_6_p7s_);
 
   ::DDS::Security::PermissionsHandle permissions_handle =
           get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos_, ex);
@@ -652,14 +652,14 @@ TEST_F(AccessControlTest, check_create_datareader_Success)
   ASSERT_STREQ("", ex.message);
 }
 
-TEST_F(AccessControlTest, check_create_datareader_Partitions)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_create_datareader_Partitions)
 {
   static const DDS::Security::DomainId_t domain_id = 0;
   static const char topic_name[] = "Square";
 
   set_up_service_participant();
-  add_or_replace_property(AccessControlTest::gov_6_p7s_);
-  add_or_replace_property(AccessControlTest::perm_two_partitions_p7s_);
+  add_or_replace_property(dds_DCPS_security_AccessControlBuiltInImpl::gov_6_p7s_);
+  add_or_replace_property(dds_DCPS_security_AccessControlBuiltInImpl::perm_two_partitions_p7s_);
 
   ::DDS::Security::SecurityException ex;
   ::DDS::Security::PermissionsHandle permissions_handle =
@@ -680,7 +680,7 @@ TEST_F(AccessControlTest, check_create_datareader_Partitions)
   ASSERT_STREQ("", ex.message);
 }
 
-//TEST_F(AccessControlTest, check_permissions_timer_Success)
+//TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_permissions_timer_Success)
 //{
 //
 //    ::DDS::Security::DomainId_t domain_id = 0;
@@ -692,7 +692,7 @@ TEST_F(AccessControlTest, check_create_datareader_Partitions)
 //    ::DDS::Security::SecurityException ex;
 //
 //    set_up_service_participant();
-//    add_or_replace_property(AccessControlTest::gov_6_p7s_);
+//    add_or_replace_property(dds_DCPS_security_AccessControlBuiltInImpl::gov_6_p7s_);
 //
 //    ::DDS::Security::PermissionsHandle permissions_handle =
 //        get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos_, ex);
@@ -729,7 +729,7 @@ TEST_F(AccessControlTest, check_create_datareader_Partitions)
 //        permissions_handle, domain_id, topic_name, tqos, ex));
 //}
 
-TEST_F(AccessControlTest, check_create_datareader_default_Success)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_create_datareader_default_Success)
 {
   ::DDS::Security::DomainId_t domain_id = 0;
   const char * topic_name = "Oval";
@@ -739,7 +739,7 @@ TEST_F(AccessControlTest, check_create_datareader_default_Success)
   ::DDS::Security::SecurityException ex;
 
   set_up_service_participant();
-  add_or_replace_property(AccessControlTest::gov_6_p7s_);
+  add_or_replace_property(dds_DCPS_security_AccessControlBuiltInImpl::gov_6_p7s_);
 
   ::DDS::Security::PermissionsHandle permissions_handle =
       get_inst().validate_local_permissions(auth_plugin_.get(), 1, 0, domain_participant_qos_, ex);
@@ -756,7 +756,7 @@ TEST_F(AccessControlTest, check_create_datareader_default_Success)
       ex));
 }
 
-TEST_F(AccessControlTest, check_create_topic_InvalidInput)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_create_topic_InvalidInput)
 {
   ::DDS::Security::PermissionsHandle permissions_handle = 1;
   ::DDS::Security::DomainId_t domain_id = 1;
@@ -772,7 +772,7 @@ TEST_F(AccessControlTest, check_create_topic_InvalidInput)
     permissions_handle, domain_id, 0, qos, ex));
 }
 
-TEST_F(AccessControlTest, check_create_topic_Success)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_create_topic_Success)
 {
   ::DDS::Security::DomainId_t domain_id = 0;
   const char * topic_name = "Square";
@@ -785,7 +785,7 @@ TEST_F(AccessControlTest, check_create_topic_Success)
     permissions_handle, domain_id, topic_name, qos, ex));
 }
 
-TEST_F(AccessControlTest, check_create_topic_default_Success)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_create_topic_default_Success)
 {
     ::DDS::Security::DomainId_t domain_id = 0;
     const char * topic_name = "Polygon";
@@ -798,7 +798,7 @@ TEST_F(AccessControlTest, check_create_topic_default_Success)
         permissions_handle, domain_id, topic_name, qos, ex));
 }
 
-TEST_F(AccessControlTest, check_local_datawriter_register_instance_InvalidInput)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_local_datawriter_register_instance_InvalidInput)
 {
   ::DDS::Security::PermissionsHandle permissions_handle = 1;
   MockDataWriter::SmartPtr writer(new MockDataWriter());
@@ -818,7 +818,7 @@ TEST_F(AccessControlTest, check_local_datawriter_register_instance_InvalidInput)
     permissions_handle, writer.get(), 0, ex));
 }
 
-TEST_F(AccessControlTest, check_local_datawriter_register_instance_Success)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_local_datawriter_register_instance_Success)
 {
   ::DDS::Security::PermissionsHandle permissions_handle = 1;
   MockDataWriter::SmartPtr writer(new MockDataWriter());
@@ -829,7 +829,7 @@ TEST_F(AccessControlTest, check_local_datawriter_register_instance_Success)
     permissions_handle, writer.get(), key.get(), ex));
 }
 
-TEST_F(AccessControlTest, check_local_datawriter_dispose_instance_InvalidInput)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_local_datawriter_dispose_instance_InvalidInput)
 {
   ::DDS::Security::PermissionsHandle permissions_handle = 1;
   MockDataWriter::SmartPtr writer(new MockDataWriter());
@@ -849,7 +849,7 @@ TEST_F(AccessControlTest, check_local_datawriter_dispose_instance_InvalidInput)
     permissions_handle, writer.get(), 0, ex));
 }
 
-TEST_F(AccessControlTest, check_local_datawriter_dispose_instance_Success)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_local_datawriter_dispose_instance_Success)
 {
   ::DDS::Security::PermissionsHandle permissions_handle = 1;
   MockDataWriter::SmartPtr writer(new MockDataWriter());
@@ -860,7 +860,7 @@ TEST_F(AccessControlTest, check_local_datawriter_dispose_instance_Success)
     permissions_handle, writer.get(), key.get(), ex));
 }
 
-TEST_F(AccessControlTest, check_remote_participant_InvalidInput)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_participant_InvalidInput)
 {
   ::DDS::Security::DomainId_t domain_id = 1;
   ::DDS::Security::ParticipantBuiltinTopicDataSecure participant_data;
@@ -871,7 +871,7 @@ TEST_F(AccessControlTest, check_remote_participant_InvalidInput)
     DDS::HANDLE_NIL, domain_id, participant_data, ex));
 }
 
-TEST_F(AccessControlTest, check_remote_participant_Success_Governance)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_participant_Success_Governance)
 {
 
   ::DDS::Security::DomainId_t domain_id = 0;
@@ -909,7 +909,7 @@ TEST_F(AccessControlTest, check_remote_participant_Success_Governance)
     remote_out_handle, domain_id, participant_data, ex));
 }
 
-TEST_F(AccessControlTest, check_remote_participant_Success_Permissions)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_participant_Success_Permissions)
 {
   ::DDS::Security::DomainId_t domain_id = 0;
   ::DDS::Security::ParticipantBuiltinTopicDataSecure participant_data;
@@ -917,7 +917,7 @@ TEST_F(AccessControlTest, check_remote_participant_Success_Permissions)
   ::DDS::Security::AuthenticatedPeerCredentialToken remote_apc_token;
   ::DDS::Security::SecurityException ex;
 
-  add_or_replace_property(AccessControlTest::gov_6_p7s_);
+  add_or_replace_property(dds_DCPS_security_AccessControlBuiltInImpl::gov_6_p7s_);
 
   participant_data.base.permissions_token.class_id = Expected_Permissions_Token_Class_Id;
 
@@ -950,7 +950,7 @@ TEST_F(AccessControlTest, check_remote_participant_Success_Permissions)
     remote_out_handle, domain_id, participant_data, ex));
 }
 
-TEST_F(AccessControlTest, check_remote_datawriter_InvalidInput)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_datawriter_InvalidInput)
 {
   ::DDS::Security::DomainId_t domain_id = 1;
   ::DDS::Security::PublicationBuiltinTopicDataSecure publication_data;
@@ -961,7 +961,7 @@ TEST_F(AccessControlTest, check_remote_datawriter_InvalidInput)
     DDS::HANDLE_NIL, domain_id, publication_data, ex));
 }
 
-TEST_F(AccessControlTest, check_remote_datawriter_Success)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_datawriter_Success)
 {
   ::DDS::Security::AuthenticatedPeerCredentialToken remote_apc_token;
   ::DDS::Security::DomainId_t domain_id = 0;
@@ -999,7 +999,7 @@ TEST_F(AccessControlTest, check_remote_datawriter_Success)
     remote_out_handle, domain_id, publication_data, ex));
 }
 
-TEST_F(AccessControlTest, check_remote_datareader_InvalidInput)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_datareader_InvalidInput)
 {
   ::DDS::Security::DomainId_t domain_id = 1;
   ::DDS::Security::SubscriptionBuiltinTopicDataSecure subscription_data;
@@ -1011,7 +1011,7 @@ TEST_F(AccessControlTest, check_remote_datareader_InvalidInput)
     DDS::HANDLE_NIL, domain_id, subscription_data, relay_only, ex));
 }
 
-TEST_F(AccessControlTest, check_remote_datareader_Success)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_datareader_Success)
 {
   ::DDS::Security::AuthenticatedPeerCredentialToken remote_apc_token;
   ::DDS::Security::DomainId_t domain_id = 0;
@@ -1051,7 +1051,7 @@ TEST_F(AccessControlTest, check_remote_datareader_Success)
   EXPECT_FALSE(relay_only);
 }
 
-TEST_F(AccessControlTest, check_remote_topic_InvalidInput)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_topic_InvalidInput)
 {
   ::DDS::Security::DomainId_t domain_id = 1;
   ::DDS::TopicBuiltinTopicData topic_data;
@@ -1062,7 +1062,7 @@ TEST_F(AccessControlTest, check_remote_topic_InvalidInput)
     DDS::HANDLE_NIL, domain_id, topic_data, ex));
 }
 
-TEST_F(AccessControlTest, check_remote_topic_Success)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_topic_Success)
 {
   ::DDS::Security::DomainId_t domain_id = 0;
   ::DDS::TopicBuiltinTopicData topic_data;
@@ -1104,7 +1104,7 @@ TEST_F(AccessControlTest, check_remote_topic_Success)
     remote_permissions_handle, domain_id, topic_data, ex));
 }
 
-TEST_F(AccessControlTest, check_local_datawriter_match_InvalidInput)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_local_datawriter_match_InvalidInput)
 {
   ::DDS::Security::PermissionsHandle writer_handle = 1;
   ::DDS::Security::PermissionsHandle reader_handle = 2;
@@ -1121,7 +1121,7 @@ TEST_F(AccessControlTest, check_local_datawriter_match_InvalidInput)
     writer_handle, DDS::HANDLE_NIL, publication_data, subscription_data, ex));
 }
 
-TEST_F(AccessControlTest, check_local_datawriter_match_Success)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_local_datawriter_match_Success)
 {
   ::DDS::Security::PermissionsHandle writer_handle = 1;
   ::DDS::Security::PermissionsHandle reader_handle = 2;
@@ -1133,7 +1133,7 @@ TEST_F(AccessControlTest, check_local_datawriter_match_Success)
     writer_handle, reader_handle, publication_data, subscription_data, ex));
 }
 
-TEST_F(AccessControlTest, check_local_datareader_match_InvalidInput)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_local_datareader_match_InvalidInput)
 {
   ::DDS::Security::PermissionsHandle writer_handle = 1;
   ::DDS::Security::PermissionsHandle reader_handle = 2;
@@ -1150,7 +1150,7 @@ TEST_F(AccessControlTest, check_local_datareader_match_InvalidInput)
     reader_handle, DDS::HANDLE_NIL, subscription_data, publication_data, ex));
 }
 
-TEST_F(AccessControlTest, check_local_datareader_match_Success)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_local_datareader_match_Success)
 {
   ::DDS::Security::PermissionsHandle writer_handle = 1;
   ::DDS::Security::PermissionsHandle reader_handle = 2;
@@ -1162,7 +1162,7 @@ TEST_F(AccessControlTest, check_local_datareader_match_Success)
     reader_handle, writer_handle, subscription_data, publication_data, ex));
 }
 
-TEST_F(AccessControlTest, check_remote_datawriter_register_instance_InvalidInput)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_datawriter_register_instance_InvalidInput)
 {
   ::DDS::Security::PermissionsHandle perm_handle = 1;
   ::DDS::InstanceHandle_t pub_handle = 2;
@@ -1186,7 +1186,7 @@ TEST_F(AccessControlTest, check_remote_datawriter_register_instance_InvalidInput
     perm_handle, reader.get(), pub_handle, 0, in_handle, ex));
 }
 
-TEST_F(AccessControlTest, check_remote_datawriter_register_instance_Success)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_datawriter_register_instance_Success)
 {
   ::DDS::Security::PermissionsHandle perm_handle = 1;
   ::DDS::InstanceHandle_t pub_handle = 2;
@@ -1199,7 +1199,7 @@ TEST_F(AccessControlTest, check_remote_datawriter_register_instance_Success)
     perm_handle, reader.get(), pub_handle, key.get(), in_handle, ex));
 }
 
-TEST_F(AccessControlTest, check_remote_datawriter_dispose_instance_InvalidInput)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_datawriter_dispose_instance_InvalidInput)
 {
   ::DDS::Security::PermissionsHandle perm_handle = 1;
   ::DDS::InstanceHandle_t pub_handle = 2;
@@ -1220,7 +1220,7 @@ TEST_F(AccessControlTest, check_remote_datawriter_dispose_instance_InvalidInput)
     perm_handle, reader.get(), pub_handle, 0, ex));
 }
 
-TEST_F(AccessControlTest, get_permissions_token_InvalidInput)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, get_permissions_token_InvalidInput)
 {
   ::DDS::Security::PermissionsToken token;
   ::DDS::Security::SecurityException ex;
@@ -1230,7 +1230,7 @@ TEST_F(AccessControlTest, get_permissions_token_InvalidInput)
 
 }
 
-TEST_F(AccessControlTest, get_permissions_token_Success)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, get_permissions_token_Success)
 {
 
   ::DDS::DomainParticipantQos qos;
@@ -1246,7 +1246,7 @@ TEST_F(AccessControlTest, get_permissions_token_Success)
 
 }
 
-TEST_F(AccessControlTest, get_permissions_credential_token_InvalidInput)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, get_permissions_credential_token_InvalidInput)
 {
   ::DDS::Security::PermissionsCredentialToken token;
   ::DDS::Security::SecurityException ex;
@@ -1256,7 +1256,7 @@ TEST_F(AccessControlTest, get_permissions_credential_token_InvalidInput)
 
 }
 
-TEST_F(AccessControlTest, get_permissions_credential_token_Success)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, get_permissions_credential_token_Success)
 {
   ::DDS::Security::PermissionsHandle perm_handle = 1;
   ::DDS::Security::PermissionsCredentialToken token;
@@ -1275,7 +1275,7 @@ TEST_F(AccessControlTest, get_permissions_credential_token_Success)
   EXPECT_STREQ(comp_file_.c_str(), token.properties[0].value);
 }
 
-TEST_F(AccessControlTest, set_listener)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, set_listener)
 {
   ::DDS::Security::SecurityException ex;
 
@@ -1285,28 +1285,28 @@ TEST_F(AccessControlTest, set_listener)
   EXPECT_TRUE(get_inst().set_listener(listener.get(), ex));
 }
 
-TEST_F(AccessControlTest, return_permissions_token)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, return_permissions_token)
 {
   ::DDS::Security::PermissionsToken token;
   ::DDS::Security::SecurityException ex;
   EXPECT_TRUE(get_inst().return_permissions_token(token, ex));
 }
 
-TEST_F(AccessControlTest, return_permissions_credential_token)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, return_permissions_credential_token)
 {
   ::DDS::Security::PermissionsCredentialToken token;
   ::DDS::Security::SecurityException ex;
   EXPECT_TRUE(get_inst().return_permissions_credential_token(token, ex));
 }
 
-TEST_F(AccessControlTest, get_participant_sec_attributes_InvalidInput)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, get_participant_sec_attributes_InvalidInput)
 {
   ::DDS::Security::ParticipantSecurityAttributes attributes;
   ::DDS::Security::SecurityException ex;
   EXPECT_FALSE(get_inst().get_participant_sec_attributes(DDS::HANDLE_NIL, attributes, ex));
 }
 
-TEST_F(AccessControlTest, get_participant_sec_attributes_Success)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, get_participant_sec_attributes_Success)
 {
   ::DDS::Security::ParticipantSecurityAttributes attributes;
   ::DDS::Security::SecurityException ex;
@@ -1323,7 +1323,7 @@ TEST_F(AccessControlTest, get_participant_sec_attributes_Success)
   EXPECT_EQ(0x80000000, attributes.plugin_participant_attributes);
 }
 
-TEST_F(AccessControlTest, get_topic_sec_attributes_InvalidInput)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, get_topic_sec_attributes_InvalidInput)
 {
   ::DDS::Security::TopicSecurityAttributes attributes;
 
@@ -1335,7 +1335,7 @@ TEST_F(AccessControlTest, get_topic_sec_attributes_InvalidInput)
   EXPECT_FALSE(get_inst().get_topic_sec_attributes(1, 0, attributes, ex));
 }
 
-TEST_F(AccessControlTest, get_topic_sec_attributes_Success)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, get_topic_sec_attributes_Success)
 {
   ::DDS::Security::TopicSecurityAttributes attributes;
   ::DDS::Security::SecurityException ex;
@@ -1349,7 +1349,7 @@ TEST_F(AccessControlTest, get_topic_sec_attributes_Success)
   EXPECT_FALSE(attributes.is_liveliness_protected);
 }
 
-TEST_F(AccessControlTest, get_datawriter_sec_attributes_InvalidInput)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, get_datawriter_sec_attributes_InvalidInput)
 {
   ::DDS::PartitionQosPolicy partition;
   ::DDS::Security::DataTagQosPolicy data_tag;
@@ -1361,7 +1361,7 @@ TEST_F(AccessControlTest, get_datawriter_sec_attributes_InvalidInput)
     DDS::HANDLE_NIL, "TestTopic", partition, data_tag, attributes, ex));
 }
 
-TEST_F(AccessControlTest, get_datawriter_sec_attributes_Success)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, get_datawriter_sec_attributes_Success)
 {
   ::DDS::PartitionQosPolicy partition;
   ::DDS::Security::DataTagQosPolicy data_tag;
@@ -1381,7 +1381,7 @@ TEST_F(AccessControlTest, get_datawriter_sec_attributes_Success)
   EXPECT_EQ(0U, attributes.plugin_endpoint_attributes);
 }
 
-TEST_F(AccessControlTest, get_datareader_sec_attributes_InvalidInput)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, get_datareader_sec_attributes_InvalidInput)
 {
   ::DDS::PartitionQosPolicy partition;
   ::DDS::Security::DataTagQosPolicy data_tag;
@@ -1393,7 +1393,7 @@ TEST_F(AccessControlTest, get_datareader_sec_attributes_InvalidInput)
     DDS::HANDLE_NIL, "TestTopic", partition, data_tag, attributes, ex));
 }
 
-TEST_F(AccessControlTest, get_datareader_sec_attributes_Success)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, get_datareader_sec_attributes_Success)
 {
   ::DDS::PartitionQosPolicy partition;
   ::DDS::Security::DataTagQosPolicy data_tag;
@@ -1413,21 +1413,21 @@ TEST_F(AccessControlTest, get_datareader_sec_attributes_Success)
   EXPECT_EQ(0U, attributes.plugin_endpoint_attributes);
 }
 
-TEST_F(AccessControlTest, return_participant_sec_attributes)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, return_participant_sec_attributes)
 {
   ::DDS::Security::ParticipantSecurityAttributes attributes;
   ::DDS::Security::SecurityException ex;
   EXPECT_TRUE(get_inst().return_participant_sec_attributes(attributes, ex));
 }
 
-TEST_F(AccessControlTest, return_datawriter_sec_attributes)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, return_datawriter_sec_attributes)
 {
   ::DDS::Security::EndpointSecurityAttributes attributes;
   ::DDS::Security::SecurityException ex;
   EXPECT_TRUE(get_inst().return_datawriter_sec_attributes(attributes, ex));
 }
 
-TEST_F(AccessControlTest, return_datareader_sec_attributes)
+TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, return_datareader_sec_attributes)
 {
   ::DDS::Security::EndpointSecurityAttributes attributes;
   ::DDS::Security::SecurityException ex;

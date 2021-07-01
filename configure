@@ -179,6 +179,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'prefix=s', 'Installation prefix (none)',
     'install-origin-relative!', 'Install with RPATH relative to $ORIGIN (no)',
     'workspace=s', 'Custom MPC workspace file to copy and use (Use a builtin one)',
+    'coverage!', 'Enable code coverage (no)',
    ],
    ['Build flags:',
     'debug!', 'Debugging (yes)',
@@ -1042,6 +1043,10 @@ sub write_default_features {
   }
   elsif ($opts{'java'}) {
     push(@feat, 'java=1');
+  }
+
+  if ($opts{'coverage'}) {
+    push(@feat, 'dds_non_coverage=0');
   }
 
   if (@feat) {
@@ -1947,6 +1952,10 @@ sub generate_workspace {
 
   if ($opts{'security'}) {
     disable_feature(\@features, 'no-opendds-security');
+  }
+
+  if ($opts{'coverage'}) {
+    disable_feature(\@features, 'dds_non_coverage');
   }
 
   # default of these depends on whether we are doing a safety-profile build

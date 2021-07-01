@@ -17,15 +17,15 @@ static const ::DDS::Security::DatareaderCryptoHandle Local_Reader = 4;
 static const ::DDS::Security::DatawriterCryptoHandle Remote_Writer = 5;
 static const ::DDS::Security::DatareaderCryptoHandle Remote_Reader = 6;
 
-class CryptoKeyExchangeTest : public Test
+class dds_DCPS_security_CryptoBuiltInImpl : public Test
 {
 public:
-  CryptoKeyExchangeTest()
+  dds_DCPS_security_CryptoBuiltInImpl()
   : test_class_()
   {
   }
 
-  ~CryptoKeyExchangeTest()
+  ~dds_DCPS_security_CryptoBuiltInImpl()
   {
   }
 
@@ -44,7 +44,7 @@ private:
 // don't report uninteresting calls
 
 
-TEST_F(CryptoKeyExchangeTest, CreateLocalParticipantTokens)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl, CreateLocalParticipantTokens)
 {
   ::DDS::Security::CryptoTokenSeq tokens;
   ::DDS::Security::SecurityException ex;
@@ -56,7 +56,7 @@ TEST_F(CryptoKeyExchangeTest, CreateLocalParticipantTokens)
   EXPECT_EQ(0U, tokens.length());
 }
 
-TEST_F(CryptoKeyExchangeTest, SetRemoteParticipantTokens)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl, SetRemoteParticipantTokens)
 {
   // The function set_remote_participant_crypto_tokens has no required
   // behavior in the stub implementation, and so it should always succeed
@@ -65,7 +65,7 @@ TEST_F(CryptoKeyExchangeTest, SetRemoteParticipantTokens)
   EXPECT_TRUE(get_inst().set_remote_participant_crypto_tokens(Local_Participant, Remote_Participant, tokens, ex));
 }
 
-TEST_F(CryptoKeyExchangeTest, CreateLocalDatawriterTokens)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl, CreateLocalDatawriterTokens)
 {
   ::DDS::Security::CryptoTokenSeq tokens;
   ::DDS::Security::SecurityException ex;
@@ -82,7 +82,7 @@ TEST_F(CryptoKeyExchangeTest, CreateLocalDatawriterTokens)
   EXPECT_TRUE(get_inst().create_local_datawriter_crypto_tokens(tokens, Local_Writer, Remote_Reader, ex));
 }
 
-TEST_F(CryptoKeyExchangeTest, SetRemoteDataWriterTokens)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl, SetRemoteDataWriterTokens)
 {
   // The function set_remote_participant_crypto_tokens has no required
   // behavior in the stub implementation, and so it should always succeed
@@ -91,7 +91,7 @@ TEST_F(CryptoKeyExchangeTest, SetRemoteDataWriterTokens)
   EXPECT_TRUE(get_inst().set_remote_datawriter_crypto_tokens(Local_Reader, Remote_Writer, tokens, ex));
 }
 
-TEST_F(CryptoKeyExchangeTest, CreateLocalDataReaderTokens)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl, CreateLocalDataReaderTokens)
 {
   ::DDS::Security::CryptoTokenSeq tokens;
   ::DDS::Security::SecurityException ex;
@@ -108,7 +108,7 @@ TEST_F(CryptoKeyExchangeTest, CreateLocalDataReaderTokens)
   EXPECT_TRUE(get_inst().create_local_datareader_crypto_tokens(tokens, Local_Reader, Remote_Writer, ex));
 }
 
-TEST_F(CryptoKeyExchangeTest, SetRemoteDataReaderTokens)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl, SetRemoteDataReaderTokens)
 {
   // The function set_remote_participant_crypto_tokens has no required
   // behavior in the stub implementation, and so it should always succeed
@@ -127,7 +127,7 @@ struct FakeSharedSecret
 
 // Test fixture to allow a repeatable scenario where multiple participants are
 // registered for each test case without having to repeat the code
-class CryptoKeyFactoryFixture : public ::testing::Test
+class dds_DCPS_security_CryptoBuiltInImpl_CryptoKeyFactoryFixture : public ::testing::Test
 {
 public:
 
@@ -139,7 +139,7 @@ public:
   static const DDS::Security::IdentityHandle Remote_Id_Handle         = 5;
   static const DDS::Security::PermissionsHandle Remote_Perm_Handle    = 6;
 
-  CryptoKeyFactoryFixture()
+  dds_DCPS_security_CryptoBuiltInImpl_CryptoKeyFactoryFixture()
     : auth_only_handle_(DDS::HANDLE_NIL)
     , encryption_handle_(DDS::HANDLE_NIL)
     , remote_handle_(DDS::HANDLE_NIL)
@@ -147,7 +147,7 @@ public:
   {
   }
 
-  ~CryptoKeyFactoryFixture()
+  ~dds_DCPS_security_CryptoBuiltInImpl_CryptoKeyFactoryFixture()
   {
   }
 
@@ -227,7 +227,7 @@ protected:
   DDS::Security::SharedSecretHandle_var secret_handle_;
 };
 
-TEST(CryptoKeyFactoryBuiltInImplTest, NullInputHandles)
+TEST(dds_DCPS_security_CryptoBuiltInImpl, NullInputHandles)
 {
   DDS::Security::CryptoKeyFactory_var test_class = new CryptoBuiltInImpl;
   DDS::Security::IdentityHandle part_id_handle = 1;
@@ -257,7 +257,7 @@ TEST(CryptoKeyFactoryBuiltInImplTest, NullInputHandles)
     ex));
 }
 
-TEST_F(CryptoKeyFactoryFixture, TestRegisterLocal)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoKeyFactoryFixture, TestRegisterLocal)
 {
   // Provide a local identity and some permissions
   DDS::Security::IdentityHandle part_id_handle = 1;
@@ -303,7 +303,7 @@ TEST_F(CryptoKeyFactoryFixture, TestRegisterLocal)
     ex));
 }
 
-TEST_F(CryptoKeyFactoryFixture, RegisterRemoteParticipant)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoKeyFactoryFixture, RegisterRemoteParticipant)
 {
   DDS::Security::CryptoKeyFactory_var test_class = new CryptoBuiltInImpl;
 
@@ -379,7 +379,7 @@ TEST_F(CryptoKeyFactoryFixture, RegisterRemoteParticipant)
   //  ex));
 }
 
-TEST_F(CryptoKeyFactoryFixture, RegisterLocalDataWriterRemoteReader)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoKeyFactoryFixture, RegisterLocalDataWriterRemoteReader)
 {
   ::DDS::PropertySeq datawriter_properties;
   ::DDS::Security::EndpointSecurityAttributes datawriter_security_attributes =
@@ -442,7 +442,7 @@ TEST_F(CryptoKeyFactoryFixture, RegisterLocalDataWriterRemoteReader)
     ex));
 }
 
-TEST_F(CryptoKeyFactoryFixture, RegisterDataReaderAndRemoteWriter)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoKeyFactoryFixture, RegisterDataReaderAndRemoteWriter)
 {
   ::DDS::PropertySeq datareader_properties;
   ::DDS::Security::EndpointSecurityAttributes datareader_security_attributes =
@@ -495,7 +495,7 @@ TEST_F(CryptoKeyFactoryFixture, RegisterDataReaderAndRemoteWriter)
     ex));
 }
 
-TEST_F(CryptoKeyFactoryFixture, UnregisterParticipants)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoKeyFactoryFixture, UnregisterParticipants)
 {
   ::DDS::Security::SecurityException ex;
 
@@ -509,7 +509,7 @@ TEST_F(CryptoKeyFactoryFixture, UnregisterParticipants)
   // Known handle
 }
 
-TEST_F(CryptoKeyFactoryFixture, UnregisterDataWriter)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoKeyFactoryFixture, UnregisterDataWriter)
 {
   ::DDS::PropertySeq datawriter_properties;
   ::DDS::Security::EndpointSecurityAttributes datawriter_security_attributes =
@@ -535,7 +535,7 @@ TEST_F(CryptoKeyFactoryFixture, UnregisterDataWriter)
   //EXPECT_FALSE(GetFactory().unregister_datawriter(4322, ex));
 }
 
-TEST_F(CryptoKeyFactoryFixture, UnRegisterDataReader)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoKeyFactoryFixture, UnRegisterDataReader)
 {
   ::DDS::PropertySeq datareader_properties;
   ::DDS::Security::EndpointSecurityAttributes datareader_security_attributes =
@@ -561,10 +561,10 @@ TEST_F(CryptoKeyFactoryFixture, UnRegisterDataReader)
   //EXPECT_FALSE(GetFactory().unregister_datareader(4322, ex));
 }
 
-class CryptoTransformTest : public Test
+class dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest : public Test
 {
 public:
-  CryptoTransformTest()
+  dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest()
     : test_class_()
     , test_buffer_()
     , readers_()
@@ -573,7 +573,7 @@ public:
   {
   }
 
-  ~CryptoTransformTest()
+  ~dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest()
   {
   }
 
@@ -653,7 +653,7 @@ protected:
 };
 
 
-TEST_F(CryptoTransformTest, encode_serialized_payload_NullHandle)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest, encode_serialized_payload_NullHandle)
 {
   DDS::OctetSeq inline_qos;
   DDS::OctetSeq output;
@@ -663,7 +663,7 @@ TEST_F(CryptoTransformTest, encode_serialized_payload_NullHandle)
   EXPECT_EQ(0U, output.length());
 }
 
-TEST_F(CryptoTransformTest, encode_serialized_payload_EmptyBuffer)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest, encode_serialized_payload_EmptyBuffer)
 {
   using namespace DDS::Security;
   CryptoKeyFactory& kef = dynamic_cast<CryptoKeyFactory&>(get_inst());
@@ -679,7 +679,7 @@ TEST_F(CryptoTransformTest, encode_serialized_payload_EmptyBuffer)
   EXPECT_EQ(get_buffer(), output);
 }
 
-TEST_F(CryptoTransformTest, encode_serialized_payload_WithData)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest, encode_serialized_payload_WithData)
 {
   using namespace DDS::Security;
   CryptoKeyFactory& kef = dynamic_cast<CryptoKeyFactory&>(get_inst());
@@ -698,7 +698,7 @@ TEST_F(CryptoTransformTest, encode_serialized_payload_WithData)
   EXPECT_EQ(get_buffer(), output);
 }
 
-TEST_F(CryptoTransformTest, encode_datawriter_submessage_NullSendingHandle)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest, encode_datawriter_submessage_NullSendingHandle)
 {
   DDS::OctetSeq output;
   DDS::Security::SecurityException ex;
@@ -713,7 +713,7 @@ TEST_F(CryptoTransformTest, encode_datawriter_submessage_NullSendingHandle)
   EXPECT_EQ(0U, output.length());
 }
 
-TEST_F(CryptoTransformTest, encode_datawriter_submessage_NegativeIndex)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest, encode_datawriter_submessage_NegativeIndex)
 {
   DDS::OctetSeq output;
   DDS::Security::SecurityException ex;
@@ -727,7 +727,7 @@ TEST_F(CryptoTransformTest, encode_datawriter_submessage_NegativeIndex)
   EXPECT_EQ(0U, output.length());
 }
 
-TEST_F(CryptoTransformTest, encode_datawriter_submessage_NilReaderAtN)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest, encode_datawriter_submessage_NilReaderAtN)
 {
   ::DDS::OctetSeq output;
   ::DDS::Security::SecurityException ex;
@@ -755,7 +755,7 @@ TEST_F(CryptoTransformTest, encode_datawriter_submessage_NilReaderAtN)
   }
 }
 
-TEST_F(CryptoTransformTest, encode_datawriter_submessage_MultiPass)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest, encode_datawriter_submessage_MultiPass)
 {
   using namespace DDS::Security;
   CryptoKeyFactory& kef = dynamic_cast<CryptoKeyFactory&>(get_inst());
@@ -791,7 +791,7 @@ TEST_F(CryptoTransformTest, encode_datawriter_submessage_MultiPass)
   }
 }
 
-TEST_F(CryptoTransformTest, encode_datareader_submessage_NullHandle)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest, encode_datareader_submessage_NullHandle)
 {
   DDS::OctetSeq output;
   DDS::Security::SecurityException ex;
@@ -805,7 +805,7 @@ TEST_F(CryptoTransformTest, encode_datareader_submessage_NullHandle)
   EXPECT_EQ(0U, output.length());
 }
 
-TEST_F(CryptoTransformTest, encode_datareader_submessage_EmptyBuffer)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest, encode_datareader_submessage_EmptyBuffer)
 {
   DDS::OctetSeq output;
   DDS::Security::SecurityException ex;
@@ -819,7 +819,7 @@ TEST_F(CryptoTransformTest, encode_datareader_submessage_EmptyBuffer)
   EXPECT_EQ(get_buffer(), output);
 }
 
-TEST_F(CryptoTransformTest, encode_datareader_submessage_GoodBuffer)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest, encode_datareader_submessage_GoodBuffer)
 {
   DDS::OctetSeq output;
   DDS::Security::SecurityException ex;
@@ -836,7 +836,7 @@ TEST_F(CryptoTransformTest, encode_datareader_submessage_GoodBuffer)
   EXPECT_EQ(get_buffer(), output);
 }
 
-TEST_F(CryptoTransformTest, encode_rtps_message_NullSendingHandle)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest, encode_rtps_message_NullSendingHandle)
 {
   DDS::OctetSeq output;
   DDS::Security::SecurityException ex;
@@ -851,7 +851,7 @@ TEST_F(CryptoTransformTest, encode_rtps_message_NullSendingHandle)
   EXPECT_EQ(0U, output.length());
 }
 
-TEST_F(CryptoTransformTest, encode_rtps_message_NoParticipants)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest, encode_rtps_message_NoParticipants)
 {
   DDS::OctetSeq output;
   DDS::Security::SecurityException ex;
@@ -863,7 +863,7 @@ TEST_F(CryptoTransformTest, encode_rtps_message_NoParticipants)
   EXPECT_EQ(0U, output.length());
 }
 
-TEST_F(CryptoTransformTest, encode_rtps_message_NegativeIndex)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest, encode_rtps_message_NegativeIndex)
 {
   DDS::OctetSeq output;
   DDS::Security::SecurityException ex;
@@ -880,7 +880,7 @@ TEST_F(CryptoTransformTest, encode_rtps_message_NegativeIndex)
 
 // Multiple receiver handles is not currently supported in RTPS Message encoding
 //
-//TEST_F(CryptoTransformTest, encode_rtps_message_NilReaderAtN)
+//TEST_F(dds_DCPS_security_CryptoBuiltInImpl, encode_rtps_message_NilReaderAtN)
 //{
 //  ::DDS::OctetSeq output;
 //  ::DDS::Security::SecurityException ex;
@@ -908,7 +908,7 @@ TEST_F(CryptoTransformTest, encode_rtps_message_NegativeIndex)
 //  }
 //}
 //
-//TEST_F(CryptoTransformTest, encode_rtps_message_MultiPass)
+//TEST_F(dds_DCPS_security_CryptoBuiltInImpl, encode_rtps_message_MultiPass)
 //{
 //  ::DDS::OctetSeq output;
 //  ::DDS::Security::SecurityException ex;
@@ -935,7 +935,7 @@ TEST_F(CryptoTransformTest, encode_rtps_message_NegativeIndex)
 //  }
 //}
 
-TEST_F(CryptoTransformTest, decode_rtps_message_NilHandles)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest, decode_rtps_message_NilHandles)
 {
   DDS::OctetSeq output;
   DDS::Security::SecurityException ex;
@@ -948,7 +948,7 @@ TEST_F(CryptoTransformTest, decode_rtps_message_NilHandles)
     output, get_buffer(), DDS::HANDLE_NIL, DDS::HANDLE_NIL, ex));
 }
 
-TEST_F(CryptoTransformTest, preprocess_secure_submsg_NilHandles)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest, preprocess_secure_submsg_NilHandles)
 {
   ::DDS::Security::DatawriterCryptoHandle datawriter_crypto = DDS::HANDLE_NIL;
   ::DDS::Security::DatawriterCryptoHandle datareader_crypto = DDS::HANDLE_NIL;
@@ -968,7 +968,7 @@ TEST_F(CryptoTransformTest, preprocess_secure_submsg_NilHandles)
     datawriter_crypto, datareader_crypto, submsgcat, get_buffer(), DDS::HANDLE_NIL, DDS::HANDLE_NIL, ex));
 }
 
-//TEST_F(CryptoTransformTest, preprocess_secure_submsg_Success)
+//TEST_F(dds_DCPS_security_CryptoBuiltInImpl, preprocess_secure_submsg_Success)
 //{
 //  ::DDS::Security::DatawriterCryptoHandle datawriter_crypto = DDS::HANDLE_NIL;
 //  ::DDS::Security::DatawriterCryptoHandle datareader_crypto = DDS::HANDLE_NIL;
@@ -982,7 +982,7 @@ TEST_F(CryptoTransformTest, preprocess_secure_submsg_NilHandles)
 //    datawriter_crypto, datareader_crypto, submsgcat, get_buffer(), recv_handle, send_handle, ex));
 //}
 
-TEST_F(CryptoTransformTest, decode_datawriter_submessage_NilHandles)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest, decode_datawriter_submessage_NilHandles)
 {
   ::DDS::OctetSeq output;
   ::DDS::Security::SecurityException ex;
@@ -1000,7 +1000,7 @@ TEST_F(CryptoTransformTest, decode_datawriter_submessage_NilHandles)
     output, get_buffer(), DDS::HANDLE_NIL, DDS::HANDLE_NIL, ex));
 }
 
-//TEST_F(CryptoTransformTest, decode_datawriter_submessage_Success)
+//TEST_F(dds_DCPS_security_CryptoBuiltInImpl, decode_datawriter_submessage_Success)
 //{
 //  ::DDS::OctetSeq output;
 //  ::DDS::Security::SecurityException ex;
@@ -1013,7 +1013,7 @@ TEST_F(CryptoTransformTest, decode_datawriter_submessage_NilHandles)
 //  EXPECT_EQ(output, get_buffer());
 //}
 
-TEST_F(CryptoTransformTest, decode_datareader_submessage_NilHandles)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest, decode_datareader_submessage_NilHandles)
 {
   ::DDS::OctetSeq output;
   ::DDS::Security::SecurityException ex;
@@ -1031,7 +1031,7 @@ TEST_F(CryptoTransformTest, decode_datareader_submessage_NilHandles)
     output, get_buffer(), DDS::HANDLE_NIL, DDS::HANDLE_NIL, ex));
 }
 
-TEST_F(CryptoTransformTest, decode_datareader_submessage_Success)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest, decode_datareader_submessage_Success)
 {
   ::DDS::OctetSeq output;
   ::DDS::Security::SecurityException ex;
@@ -1043,7 +1043,7 @@ TEST_F(CryptoTransformTest, decode_datareader_submessage_Success)
   // EXPECT_EQ(output, get_buffer());
 }
 
-TEST_F(CryptoTransformTest, decode_serialized_payload_NilHandles)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest, decode_serialized_payload_NilHandles)
 {
   ::DDS::OctetSeq output;
   ::DDS::OctetSeq inline_qos;
@@ -1063,7 +1063,7 @@ TEST_F(CryptoTransformTest, decode_serialized_payload_NilHandles)
     output, get_buffer(), inline_qos, DDS::HANDLE_NIL, DDS::HANDLE_NIL, ex));
 }
 
-TEST_F(CryptoTransformTest, decode_serialized_payload_Success)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest, decode_serialized_payload_Success)
 {
   using namespace DDS::Security;
   CryptoKeyFactory& kef = dynamic_cast<CryptoKeyFactory&>(get_inst());

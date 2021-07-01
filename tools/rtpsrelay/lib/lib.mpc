@@ -1,4 +1,4 @@
-project(RtpsRelayLib): dcpslib, opendds_cxx11, install, msvc_bigobj {
+project(RtpsRelayLib): dcpslib, opendds_cxx11, install, msvc_bigobj, coverage_optional {
   idlflags      += -Wb,export_macro=RtpsRelayLib_Export -Wb,export_include=export.h -SS
   dcps_ts_flags += -Wb,export_macro=RtpsRelayLib_Export -Wb,export_include=export.h
   dynamicflags  += RTPSRELAYLIB_BUILD_DLL

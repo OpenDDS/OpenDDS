@@ -13,10 +13,10 @@
 
 using namespace OpenDDS::Security::SSL;
 
-class PrivateKeyTest : public ::testing::Test
+class dds_DCPS_security_SSL_PrivateKey : public ::testing::Test
 {
 public:
-  PrivateKeyTest() :
+  dds_DCPS_security_SSL_PrivateKey() :
     ca_("file:../security/certs/identity/identity_ca_cert.pem"),
     ca_data_("data:,-----BEGIN CERTIFICATE-----\n"
       "MIIEJDCCAwwCCQDpnuwIVmSK5jANBgkqhkiG9w0BAQsFADCB0zELMAkGA1UEBhMC\n"
@@ -109,7 +109,7 @@ public:
     std::memcpy(world_.get_buffer(), "world", world_len);
   }
 
-  ~PrivateKeyTest()
+  ~dds_DCPS_security_SSL_PrivateKey()
   {
 
   }
@@ -128,7 +128,7 @@ public:
   const DDS::OctetSeq empty_;
 };
 
-TEST_F(PrivateKeyTest, SignAndVerify_Success)
+TEST_F(dds_DCPS_security_SSL_PrivateKey, SignAndVerify_Success)
 {
   std::vector<const DDS::OctetSeq*> sign_these;
   sign_these.push_back(&hello_);
@@ -142,7 +142,7 @@ TEST_F(PrivateKeyTest, SignAndVerify_Success)
   ASSERT_EQ(0, verify_result);
 }
 
-TEST_F(PrivateKeyTest, SignAndVerify_Data_Success)
+TEST_F(dds_DCPS_security_SSL_PrivateKey, SignAndVerify_Data_Success)
 {
   std::vector<const DDS::OctetSeq*> sign_these;
   sign_these.push_back(&hello_);
@@ -158,7 +158,7 @@ TEST_F(PrivateKeyTest, SignAndVerify_Data_Success)
   ASSERT_EQ(0, verify_result);
 }
 
-TEST_F(PrivateKeyTest, SignAndVerify_EC_Success)
+TEST_F(dds_DCPS_security_SSL_PrivateKey, SignAndVerify_EC_Success)
 {
   std::vector<const DDS::OctetSeq*> sign_these;
   sign_these.push_back(&hello_);
@@ -174,7 +174,7 @@ TEST_F(PrivateKeyTest, SignAndVerify_EC_Success)
   ASSERT_EQ(0, verify_result);
 }
 
-TEST_F(PrivateKeyTest, SignAndVerify_WrongData_Failure)
+TEST_F(dds_DCPS_security_SSL_PrivateKey, SignAndVerify_WrongData_Failure)
 {
   std::vector<const DDS::OctetSeq*> sign_these;
   sign_these.push_back(&hello_);
@@ -191,7 +191,7 @@ TEST_F(PrivateKeyTest, SignAndVerify_WrongData_Failure)
   ASSERT_EQ(1, verify_result);
 }
 
-TEST_F(PrivateKeyTest, SignAndVerify_DoesNotUseEmptyData)
+TEST_F(dds_DCPS_security_SSL_PrivateKey, SignAndVerify_DoesNotUseEmptyData)
 {
   std::vector<const DDS::OctetSeq*> sign_these;
   sign_these.push_back(&hello_);

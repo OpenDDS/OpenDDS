@@ -103,7 +103,7 @@ namespace {
 
 }
 
-TEST(PrimitiveTypesTest, Assignable)
+TEST(dds_DCPS_XTypes_TypeAssignability, PrimitiveTypesTest_Assignable)
 {
   TypeAssignability test(make_rch<TypeLookupService>());
   {
@@ -211,7 +211,7 @@ TEST(PrimitiveTypesTest, Assignable)
   }
 }
 
-TEST(PrimitiveTypesTest, NotAssignable)
+TEST(dds_DCPS_XTypes_TypeAssignability, PrimitiveTypesTest_NotAssignable)
 {
   TypeAssignability test(make_rch<TypeLookupService>());
   {
@@ -317,7 +317,7 @@ TEST(PrimitiveTypesTest, NotAssignable)
   }
 }
 
-TEST(StringTypesTest, Assignable)
+TEST(dds_DCPS_XTypes_TypeAssignability, StringTypesTest_Assignable)
 {
   TypeAssignability test(make_rch<TypeLookupService>());
   {
@@ -483,7 +483,7 @@ void string_expect_false(const TypeAssignability& test, const TypeIdentifier& ti
   }
 }
 
-TEST(StringTypesTest, NotAssignable)
+TEST(dds_DCPS_XTypes_TypeAssignability, StringTypesTest_NotAssignable)
 {
   TypeAssignability test(make_rch<TypeLookupService>());
   {
@@ -504,7 +504,7 @@ TEST(StringTypesTest, NotAssignable)
   }
 }
 
-class EnumTypeTest : public ::testing::Test {
+class dds_DCPS_XTypes_TypeAssignability_EnumTypeTest : public ::testing::Test {
 protected:
   void SetUp()
   {
@@ -544,7 +544,7 @@ protected:
   MinimalEnumeratedType enum_b_;
 };
 
-TEST_F(EnumTypeTest, Assignable)
+TEST_F(dds_DCPS_XTypes_TypeAssignability_EnumTypeTest, Assignable)
 {
   TypeAssignability test(make_rch<TypeLookupService>());
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(enum_a_)),
@@ -558,7 +558,7 @@ TEST_F(EnumTypeTest, Assignable)
                               TypeObject(MinimalTypeObject(enum_b_))));
 }
 
-TEST_F(EnumTypeTest, NotAssignable)
+TEST_F(dds_DCPS_XTypes_TypeAssignability_EnumTypeTest, NotAssignable)
 {
   TypeAssignability test(make_rch<TypeLookupService>());
 
@@ -728,7 +728,7 @@ TEST_F(EnumTypeTest, NotAssignable)
   }
 }
 
-TEST(BitmaskTypeTest, Assignable)
+TEST(dds_DCPS_XTypes_TypeAssignability, BitmaskTypeTest_Assignable)
 {
   TypeAssignability test(make_rch<TypeLookupService>());
   MinimalBitmaskType bitmask_a, bitmask_b;
@@ -764,7 +764,7 @@ TEST(BitmaskTypeTest, Assignable)
   }
 }
 
-TEST(BitmaskTypeTest, NotAssignable)
+TEST(dds_DCPS_XTypes_TypeAssignability, BitmaskTypeTest_NotAssignable)
 {
   TypeAssignability test(make_rch<TypeLookupService>());
   MinimalBitmaskType bitmask_a;
@@ -929,7 +929,7 @@ static void get_equivalence_hash(EquivalenceHash& out)
   }
 }
 
-TEST(SequenceTypeTest, Assignable)
+TEST(dds_DCPS_XTypes_TypeAssignability, SequenceTypeTest_Assignable)
 {
   TypeAssignability test(make_rch<TypeLookupService>());
   MinimalSequenceType seq_a, seq_b;
@@ -1068,7 +1068,7 @@ TEST(SequenceTypeTest, Assignable)
                               TypeObject(MinimalTypeObject(seq_b))));
 }
 
-TEST(SequenceTypeTest, NotAssignable)
+TEST(dds_DCPS_XTypes_TypeAssignability, SequenceTypeTest_NotAssignable)
 {
   TypeAssignability test(make_rch<TypeLookupService>());
   MinimalSequenceType seq_a, seq_b;
@@ -1198,7 +1198,7 @@ TEST(SequenceTypeTest, NotAssignable)
                                TypeObject(MinimalTypeObject(seq_b))));
 }
 
-TEST(ArrayTypeTest, Assignable)
+TEST(dds_DCPS_XTypes_TypeAssignability, ArrayTypeTest_Assignable)
 {
   TypeAssignability test(make_rch<TypeLookupService>());
   MinimalArrayType arr_a, arr_b;
@@ -1337,7 +1337,7 @@ TEST(ArrayTypeTest, Assignable)
                               TypeObject(MinimalTypeObject(arr_b))));
 }
 
-TEST(ArrayTypeTest, NotAssignable)
+TEST(dds_DCPS_XTypes_TypeAssignability, ArrayTypeTest_NotAssignable)
 {
   TypeAssignability test(make_rch<TypeLookupService>());
   MinimalArrayType arr_a, arr_b;
@@ -1467,7 +1467,7 @@ TEST(ArrayTypeTest, NotAssignable)
                                TypeObject(MinimalTypeObject(arr_b))));
 }
 
-TEST(MapTypeTest, Assignable)
+TEST(dds_DCPS_XTypes_TypeAssignability, MapTypeTest_Assignable)
 {
   TypeAssignability test(make_rch<TypeLookupService>());
   MinimalMapType map_a, map_b;
@@ -1661,7 +1661,7 @@ TEST(MapTypeTest, Assignable)
                               TypeObject(MinimalTypeObject(map_b))));
 }
 
-TEST(MapTypeTest, NotAssignable)
+TEST(dds_DCPS_XTypes_TypeAssignability, MapTypeTest_NotAssignable)
 {
   TypeAssignability test(make_rch<TypeLookupService>());
   MinimalMapType map_a, map_b;
@@ -2333,7 +2333,7 @@ void expect_true_alias_to_alias()
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 }
 
-TEST(AliasTypeTest, Assignable)
+TEST(dds_DCPS_XTypes_TypeAssignability, AliasTypeTest_Assignable)
 {
   expect_true_non_alias_to_alias();
   expect_true_alias_to_non_alias();
@@ -2838,14 +2838,14 @@ void expect_false_alias_to_alias()
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(ali_a)), TypeObject(MinimalTypeObject(ali_b))));
 }
 
-TEST(AliasTypeTest, NotAssignable)
+TEST(dds_DCPS_XTypes_TypeAssignability, AliasTypeTest_NotAssignable)
 {
   expect_false_non_alias_to_alias();
   expect_false_alias_to_non_alias();
   expect_false_alias_to_alias();
 }
 
-TEST(StructTypeTest, Assignable)
+TEST(dds_DCPS_XTypes_TypeAssignability, StructTypeTest_Assignable)
 {
   TypeAssignability test(make_rch<TypeLookupService>());
   MinimalStructType a, b;
@@ -3597,7 +3597,7 @@ void expect_false_final()
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
 }
 
-TEST(StructTypeTest, NotAssignable)
+TEST(dds_DCPS_XTypes_TypeAssignability, StructTypeTest_NotAssignable)
 {
   expect_false_different_extensibilities();
   expect_false_different_ids();
@@ -3615,7 +3615,7 @@ TEST(StructTypeTest, NotAssignable)
   expect_false_final();
 }
 
-TEST(UnionTypeTest, Assignable)
+TEST(dds_DCPS_XTypes_TypeAssignability, UnionTypeTest_Assignable)
 {
   TypeAssignability test(make_rch<TypeLookupService>());
   MinimalUnionType a, b;
@@ -3745,7 +3745,7 @@ TEST(UnionTypeTest, Assignable)
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a4)), TypeObject(MinimalTypeObject(b4))));
 }
 
-TEST(UnionTypeTest, NotAssignable)
+TEST(dds_DCPS_XTypes_TypeAssignability, UnionTypeTest_NotAssignable)
 {
   TypeAssignability test(make_rch<TypeLookupService>());
   MinimalUnionType a, b;
