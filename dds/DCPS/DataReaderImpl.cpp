@@ -3414,7 +3414,7 @@ void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& in
       GuidConverter subscriptionBuffer(subscription_id_);
       GuidConverter publicationBuffer(header.publication_id_);
       ACE_DEBUG((LM_WARNING,
-        ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::data_received() - ")
+        ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::accept_sample_processing - ")
         ACE_TEXT("subscription %C failed to find ")
         ACE_TEXT("publication data for %C.\n"),
         OPENDDS_STRING(subscriptionBuffer).c_str(),
