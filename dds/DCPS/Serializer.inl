@@ -1622,6 +1622,7 @@ void serialized_size_list_end_parameter_id(
 ACE_INLINE
 Serializer::ConstructionStatus Serializer::get_construction_status() const
 {
+  OPENDDS_ASSERT(construction_status_ != ConstructionStatusUndefined);
   return construction_status_;
 }
 
