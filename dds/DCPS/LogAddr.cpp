@@ -1,6 +1,9 @@
+#include "DCPS/DdsDcps_pch.h"
+
 #include "LogAddr.h"
 
 #include <sstream>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
