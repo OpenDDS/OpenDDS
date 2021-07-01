@@ -1,13 +1,13 @@
 #include <fstream>
 #include <streambuf>
-#include "dds/DCPS/QOS_XML_Handler/XML_MemBuf_Intf.h"
+#include "dds/DCPS/QOS_XML_Handler/XML_String_Intf.h"
 #include "dds/DdsDcpsC.h"
 #include "dds/DCPS/debug.h"
 
 int parseXML(const char* fileName,
             const ACE_TCHAR* profileName,
             const ACE_TCHAR* topicName,
-            OpenDDS::DCPS::QOS_XML_MemBuf_Handler& xml_membuf)
+            OpenDDS::DCPS::QOS_XML_String_Handler& xml_membuf)
 {
   int retval = 0;
 
@@ -142,8 +142,8 @@ int parseXML(const char* fileName,
 int ACE_TMAIN (int, ACE_TCHAR *[])
 {
   int retval = 0;
-  OpenDDS::DCPS::QOS_XML_MemBuf_Handler xml1;
-  OpenDDS::DCPS::QOS_XML_MemBuf_Handler xml2;
+  OpenDDS::DCPS::QOS_XML_String_Handler xml1;
+  OpenDDS::DCPS::QOS_XML_String_Handler xml2;
 
   // Test first file
   // File name and profile name in respective file

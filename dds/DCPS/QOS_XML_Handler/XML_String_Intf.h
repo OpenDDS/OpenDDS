@@ -1,6 +1,6 @@
 //==============================================================
 /**
- *  @file  XML_MemBuf_Intf.h
+ *  @file  XML_String_Intf.h
  *
  *
  *  @author Danilo C. Zanella (dczanella@gmail.com)
@@ -38,13 +38,13 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-  class OpenDDS_XML_QOS_Handler_Export QOS_XML_MemBuf_Handler :
+  class OpenDDS_XML_QOS_Handler_Export QOS_XML_String_Handler :
     public QOS_XML_Handler
   {
   public:
-    QOS_XML_MemBuf_Handler(void);
+    QOS_XML_String_Handler(void);
 
-    ~QOS_XML_MemBuf_Handler(void);
+    ~QOS_XML_String_Handler(void);
 
     /**
      *

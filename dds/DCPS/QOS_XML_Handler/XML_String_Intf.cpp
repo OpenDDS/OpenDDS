@@ -1,4 +1,4 @@
-#include "XML_MemBuf_Intf.h"
+#include "XML_String_Intf.h"
 #include "xercesc/util/XercesDefs.hpp"
 #include "xercesc/framework/MemBufInputSource.hpp"
 #include "xercesc/parsers/XercesDOMParser.hpp"
@@ -16,7 +16,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-  QOS_XML_MemBuf_Handler::QOS_XML_MemBuf_Handler(void) :
+  QOS_XML_String_Handler::QOS_XML_String_Handler(void) :
     QOS_XML_Handler(),
     res_(new XML::XML_Schema_Resolver<XML::Environment_Resolver>()),
     eh_(new XML::XML_Error_Handler()),
@@ -49,14 +49,14 @@ namespace DCPS {
 
       char* message = XMLString::transcode(toCatch.getMessage());
       ACE_ERROR ((LM_ERROR,
-        ACE_TEXT ("QOS_XML_MemBuf_Handler::QOS_XML_MemBuf_Handler - ")
+        ACE_TEXT ("QOS_XML_String_Handler::QOS_XML_String_Handler - ")
         ACE_TEXT ("Error during XML initialization! :\n<%C>\n"),
         message));
       XMLString::release(&message);
     }
   }
 
-  QOS_XML_MemBuf_Handler::~QOS_XML_MemBuf_Handler(void)
+  QOS_XML_String_Handler::~QOS_XML_String_Handler(void)
   {
     if (finalDoc_ != 0)
       finalDoc_->release();
@@ -68,7 +68,7 @@ namespace DCPS {
   }
 
   DDS::ReturnCode_t
-  QOS_XML_MemBuf_Handler::init(const ACE_TCHAR * membuf)
+  QOS_XML_String_Handler::init(const ACE_TCHAR * membuf)
   {
     DDS::ReturnCode_t retcode = DDS::RETCODE_OK;
     try
@@ -122,7 +122,7 @@ namespace DCPS {
       catch (const SAXParseException& toCatch) {
         char* message = XMLString::transcode(toCatch.getMessage());
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
+          ACE_TEXT ("QOS_XML_String_Handler::init - ")
           ACE_TEXT ("Exception message is: <%C>\n"),
           message));
         XMLString::release(&message);
@@ -131,7 +131,7 @@ namespace DCPS {
       catch (const XMLException& toCatch) {
         char* message = XMLString::transcode(toCatch.getMessage());
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
+          ACE_TEXT ("QOS_XML_String_Handler::init - ")
           ACE_TEXT ("Exception message is: <%C>\n"),
           message));
         XMLString::release(&message);
@@ -140,7 +140,7 @@ namespace DCPS {
       catch (const DOMException& toCatch) {
         char* message = XMLString::transcode(toCatch.getMessage());
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
+          ACE_TEXT ("QOS_XML_String_Handler::init - ")
           ACE_TEXT ("Exception message is: <%C>\n"),
           message));
         XMLString::release(&message);
@@ -148,7 +148,7 @@ namespace DCPS {
       }
       catch (...) {
         ACE_ERROR ((LM_ERROR,
-          ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
+          ACE_TEXT ("QOS_XML_String_Handler::init - ")
           ACE_TEXT ("Unexpected exception\n")
           ));
         return DDS::RETCODE_ERROR;
@@ -160,7 +160,7 @@ namespace DCPS {
         if (DCPS_debug_level > 1)
         {
           ACE_ERROR ((LM_ERROR,
-            ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
+            ACE_TEXT ("QOS_XML_String_Handler::init - ")
             ACE_TEXT ("Failed to parse string\n")
             ));
         }
@@ -181,7 +181,7 @@ namespace DCPS {
         if (DCPS_debug_level > 1)
           {
             ACE_ERROR ((LM_ERROR,
-              ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
+              ACE_TEXT ("QOS_XML_String_Handler::init - ")
               ACE_TEXT ("Could not find tag(dds) in namespace(http://www.omg.org/dds)\n")
               ));
           }
@@ -194,7 +194,7 @@ namespace DCPS {
       {
         char* message = XMLString::transcode(ddsNode->getNodeName());
         ACE_DEBUG ((LM_DEBUG,
-          ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
+          ACE_TEXT ("QOS_XML_String_Handler::init - ")
           ACE_TEXT ("Node name: <%C>\n"),
           message));
         XMLString::release(&message);
@@ -208,7 +208,7 @@ namespace DCPS {
         if (DCPS_debug_level > 1)
         {
           ACE_ERROR ((LM_ERROR,
-            ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
+            ACE_TEXT ("QOS_XML_String_Handler::init - ")
             ACE_TEXT ("Failed to get pointer of imported node\n")
             ));
         }
@@ -227,7 +227,7 @@ namespace DCPS {
     catch (const CORBA::Exception &ex)
     {
       ACE_ERROR ((LM_ERROR,
-        ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
+        ACE_TEXT ("QOS_XML_String_Handler::init - ")
         ACE_TEXT ("Caught CORBA exception whilst parsing XML\n"),
         ex._info ().c_str ()));
       retcode = DDS::RETCODE_ERROR;
@@ -235,7 +235,7 @@ namespace DCPS {
     catch (...)
     {
       ACE_ERROR ((LM_ERROR,
-        ACE_TEXT ("QOS_XML_MemBuf_Handler::init - ")
+        ACE_TEXT ("QOS_XML_String_Handler::init - ")
         ACE_TEXT ("Unexpected exception whilst parsing XML.\n")
         ));
       retcode = DDS::RETCODE_ERROR;
@@ -245,7 +245,7 @@ namespace DCPS {
   }
 
   void
-  QOS_XML_MemBuf_Handler::add_search_path(const ACE_TCHAR *environment,
+  QOS_XML_String_Handler::add_search_path(const ACE_TCHAR *environment,
                                           const ACE_TCHAR *relpath)
   {
     res_->get_resolver().add_path(environment,relpath);

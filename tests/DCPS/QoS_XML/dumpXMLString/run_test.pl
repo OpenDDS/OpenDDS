@@ -10,8 +10,8 @@ use PerlDDS::Run_Test;
 use strict;
 
 my $test = new PerlDDS::TestFramework();
-$test->process("qos_dumpMemBufTest", 'qos_dumpMemBufTest');
-$test->start_process("qos_dumpMemBufTest");
+$test->process("qos_dumpXMLStringTest", 'qos_dumpXMLStringTest');
+$test->start_process("qos_dumpXMLStringTest");
 my $result = $test->finish(60);
 if ($result != 0) {
   print STDERR "ERROR: test returned $result\n";
