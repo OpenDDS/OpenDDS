@@ -235,18 +235,34 @@ public:
     KIND_PL_CDR2_BE = 0x000a,
     KIND_PL_CDR2_LE = 0x000b,
     KIND_XML = 0x0004,
+    KIND_INVALID = 0xFFFF
   };
 
   const static size_t serialized_size = 4;
   const static size_t padding_marker_byte_index = 3;
   const static size_t padding_marker_alignment = 4;
 
-  EncapsulationHeader();
+  /**
+   * default constructor
+   */
+  EncapsulationHeader(Kind k = KIND_CDR_BE, ACE_UINT16 o = 0);
+
+  /**
+   * from encoding constructor. Success can be verified using the is_good()
+   * method
+   */
+  EncapsulationHeader(const Encoding& enc, Extensibility ext, ACE_UINT16 o = 0);
 
   Kind kind() const;
   void kind(Kind value);
   ACE_UINT16 options() const;
   void options(ACE_UINT16 value);
+
+  /**
+   * post-initialization test for a successful call to from_encoding during
+   * construction of this encapsulation header.
+   */
+  bool is_good () const;
 
   /**
    * Translate from an encoding, returns false if it failed.
@@ -436,9 +452,13 @@ public:
   bool skip(size_t n, int size = 1);
 
   const char* pos_rd() const { return current_ ? current_->rd_ptr() : 0; }
+  const char* pos_wr() const { return current_ ? current_->wr_ptr() : 0; }
 
   /// Examine the logical reading position of the stream.
-  size_t pos() const { return pos_; }
+  size_t rpos() const { return rpos_; }
+
+  /// Examine the logical writing position of the stream.
+  size_t wpos() const { return wpos_; }
 
   /**
    * The buffer @a x must be large enough to contain @a length
@@ -679,27 +699,56 @@ public:
 
   void set_construction_status(ConstructionStatus cs);
 
+  struct OpenDDS_Dcps_Export ScopedAlignmentContext {
+    explicit ScopedAlignmentContext(Serializer& ser);
+    virtual ~ScopedAlignmentContext() { restore(ser_); }
+
+    void restore(Serializer& ser) const;
+
+    Serializer& ser_;
+    const size_t max_align_;
+    const size_t start_rpos_;
+    const size_t rblock_;
+    const size_t start_wpos_;
+    const size_t wblock_;
+  };
+
+  template <typename T>
+  bool peek_helper(ACE_Message_Block* const block, size_t bytes, T& t)
+  {
+    bool result = false;
+    char* const rd_ptr = block->rd_ptr();
+    const size_t length = block->length();
+    if (!block->cont() || length == 0 || (bytes != 0 && bytes <= length)) {
+      result = *this >> t;
+    } else {
+      result = peek_helper(block->cont(), bytes - length, t);
+    }
+    block->rd_ptr(rd_ptr);
+    return result;
+  }
+
   template <typename T>
   bool peek(T& t)
   {
     // save
-    const size_t pos = pos_;
-    ACE_Message_Block* current = current_;
-    char* const rd_ptr = current_->rd_ptr();
-    char* const wr_ptr = current_->wr_ptr();
+    const size_t rpos = rpos_;
+    const unsigned char align_rshift = align_rshift_;
+    ACE_Message_Block* const current = current_;
 
     // read
-    if (!(*this >> t)) {
+    if (!peek_helper(current_, 0, t)) {
       return false;
     }
 
     // reset
-    current->wr_ptr(wr_ptr);
-    current->rd_ptr(rd_ptr);
     current_ = current;
-    pos_ = pos;
+    align_rshift_ = align_rshift;
+    rpos_ = rpos;
     return true;
   }
+
+  bool peek(ACE_CDR::ULong& t);
 
 private:
   /// Read an array of values from the chain.
@@ -772,7 +821,10 @@ private:
   unsigned char align_wshift_;
 
   /// Logical reading position of the stream.
-  size_t pos_;
+  size_t rpos_;
+
+  /// Logical writing position of the stream.
+  size_t wpos_;
 
   /// Buffer that is copied for zero padding
   static const char ALIGN_PAD[Encoding::ALIGN_MAX];

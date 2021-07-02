@@ -2,6 +2,8 @@
 
 #include <gtest/gtest.h>
 
+#include <cstring>
+
 using namespace OpenDDS::DCPS;
 
 TEST(serializer_test, Encoding__Encoding)
@@ -117,6 +119,22 @@ TEST(serializer_test, EncapsulationHeader__EncapsulationHeader)
 {
   EncapsulationHeader eh;
   EXPECT_STREQ("CDR/XCDR1 Big Endian Plain", eh.to_string().c_str());
+}
+
+TEST(serializer_test, EncapsulationHeader__EncapsulationHeader_Encoding_Valid)
+{
+  Encoding initenc;
+  EncapsulationHeader eh(initenc, FINAL);
+  EXPECT_TRUE(eh.is_good());
+  EXPECT_STREQ("CDR/XCDR1 Little Endian Plain", eh.to_string().c_str());
+}
+
+TEST(serializer_test, EncapsulationHeader__EncapsulationHeader_Encoding_Invalid)
+{
+  Encoding initenc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_LITTLE);
+  EncapsulationHeader eh(initenc, FINAL);
+  EXPECT_FALSE(eh.is_good());
+  EXPECT_STREQ("Invalid", eh.to_string().c_str());
 }
 
 TEST(serializer_test, EncapsulationHeader__from_encoding_XCDR1_BIG_FINAL)
@@ -290,7 +308,16 @@ TEST(serializer_test, EncapsulationHeader__to_encoding_XML)
   EXPECT_STREQ("XML", eh.to_string().c_str());
 }
 
-TEST(serializer_test, Serializer__Serializer_ACE_Message_Block_Encoding)
+TEST(serializer_test, EncapsulationHeader__to_encoding_INVALID)
+{
+  Encoding initenc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_LITTLE);
+  EncapsulationHeader eh(initenc, FINAL);
+  Encoding enc;
+  EXPECT_FALSE(eh.to_encoding(enc, FINAL));
+  EXPECT_STREQ("Invalid", eh.to_string().c_str());
+}
+
+TEST(serializer_test, Serializer_Serializer_ACE_Message_Block_Encoding)
 {
   ACE_Message_Block amb;
   Encoding enc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_LITTLE);
@@ -300,7 +327,7 @@ TEST(serializer_test, Serializer__Serializer_ACE_Message_Block_Encoding)
   EXPECT_EQ(0, ser.encoding().to_string().compare(0, 28, "Unaligned CDR, little-endian"));
 }
 
-TEST(serializer_test, Serializer__Serializer_ACE_Message_Block_Kind)
+TEST(serializer_test, Serializer_Serializer_ACE_Message_Block_Kind)
 {
   ACE_Message_Block amb;
   Serializer ser(&amb, Encoding::KIND_XCDR1);
@@ -309,7 +336,7 @@ TEST(serializer_test, Serializer__Serializer_ACE_Message_Block_Kind)
   EXPECT_EQ(0, ser.encoding().to_string().compare(0, 24, "CDR/XCDR1, little-endian"));
 }
 
-TEST(serializer_test, Serializer__Serializer_ACE_Message_Block_Kind_bool)
+TEST(serializer_test, Serializer_Serializer_ACE_Message_Block_Kind_bool)
 {
   ACE_Message_Block amb;
   Serializer ser(&amb, Encoding::KIND_XCDR2);
@@ -318,7 +345,7 @@ TEST(serializer_test, Serializer__Serializer_ACE_Message_Block_Kind_bool)
   EXPECT_EQ(0, ser.encoding().to_string().compare(0, 20, "XCDR2, little-endian"));
 }
 
-TEST(serializer_test, Serializer__set_endianness)
+TEST(serializer_test, Serializer_set_endianness)
 {
   ACE_Message_Block amb;
   Encoding enc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_LITTLE);
@@ -331,7 +358,7 @@ TEST(serializer_test, Serializer__set_endianness)
   EXPECT_EQ(0, ser.encoding().to_string().compare(0, 25, "Unaligned CDR, big-endian"));
 }
 
-TEST(serializer_test, Serializer__swap_bytes_endianness)
+TEST(serializer_test, Serializer_swap_bytes_endianness)
 {
   ACE_Message_Block amb;
   Encoding enc;
@@ -340,3 +367,220 @@ TEST(serializer_test, Serializer__swap_bytes_endianness)
   ser.swap_bytes(true);
   EXPECT_EQ(ser.endianness(), ENDIAN_NONNATIVE);
 }
+
+TEST(serializer_test, Serializer_align_context_basic_reference)
+{
+  ACE_Message_Block amb(64);
+  Encoding enc;
+  Serializer ser(&amb, enc);
+
+  std::memset(amb.wr_ptr(), 0, 64);
+
+  const ACE_CDR::Octet c = 3;
+  const ACE_CDR::Double d = 0.12345;
+
+  ASSERT_TRUE(ser << c);
+  ASSERT_TRUE(ser << d);
+  ASSERT_TRUE(ser << c);
+  ASSERT_TRUE(ser << d);
+  ASSERT_TRUE(ser << d);
+
+
+  std::set<size_t> expected_zeros;
+  size_t zeros[] = {2, 3, 4, 5, 6, 7, 8, 18, 19, 20, 21, 22, 23, 24};
+  expected_zeros.insert(zeros, zeros + (sizeof zeros / sizeof (size_t*)));
+  Serializer rser(&amb, enc);
+  char i = 0;
+  while (rser.rpos() != ser.wpos()) {
+    ASSERT_TRUE(rser >> i);
+    //std::cout << static_cast<unsigned short>(static_cast<unsigned char>(i)) << " " << std::flush;
+    ASSERT_TRUE(expected_zeros.count(rser.rpos()) ? !i : i);
+  }
+  //std::cout << std::endl;
+}
+
+TEST(serializer_test, Serializer_align_context_basic)
+{
+  ACE_Message_Block amb(64);
+
+  Encoding enc;
+  Serializer ser(&amb, enc);
+
+  std::memset(amb.wr_ptr(), 0, 64);
+
+  const ACE_CDR::Octet c = 3;
+  const ACE_CDR::Double d = 0.12345;
+
+  ASSERT_TRUE(ser << c);
+  {
+    Serializer::ScopedAlignmentContext sac(ser);
+    ASSERT_TRUE(ser << d);
+    ASSERT_TRUE(ser << c);
+    ASSERT_TRUE(ser << d);
+  }
+  ASSERT_TRUE(ser << d);
+
+  Serializer rser(&amb, enc);
+  char i = 0;
+  std::set<size_t> expected_zeros;
+  size_t zeros[] = {2, 3, 4, 14, 15, 16, 17, 18, 19, 20, 29, 30, 31, 32};
+  expected_zeros.insert(zeros, zeros + (sizeof zeros / sizeof (size_t*)));
+  while (rser.rpos() != ser.wpos()) {
+    ASSERT_TRUE(rser >> i);
+    //std::cout << static_cast<unsigned short>(static_cast<unsigned char>(i)) << " " << std::flush;
+    ASSERT_TRUE(expected_zeros.count(rser.rpos()) ? !i : i);
+  }
+  //std::cout << std::endl;
+}
+
+TEST(serializer_test, Serializer_align_context_2_buff)
+{
+  OpenDDS::DCPS::Message_Block_Ptr amb(new ACE_Message_Block(24));
+  amb->cont(new ACE_Message_Block(32));
+
+  Encoding enc;
+  Serializer ser(amb.get(), enc);
+
+  std::memset(amb->wr_ptr(), 0, 24);
+  std::memset(amb->cont()->wr_ptr(), 0, 32);
+
+  const ACE_CDR::Octet c = 3;
+  const ACE_CDR::Double d = 0.12345;
+
+  ASSERT_TRUE(ser << c);
+  {
+    Serializer::ScopedAlignmentContext sac(ser);
+    ASSERT_TRUE(ser << d);
+    ASSERT_TRUE(ser << c);
+    ASSERT_TRUE(ser << d);
+  }
+  ASSERT_TRUE(ser << d);
+
+  Serializer rser(amb.get(), enc);
+  char i = 0;
+  std::set<size_t> expected_zeros;
+  size_t zeros[] = {2, 3, 4, 14, 15, 16, 17, 18, 19, 20, 29, 30, 31, 32};
+  expected_zeros.insert(zeros, zeros + (sizeof zeros / sizeof (size_t*)));
+  while (rser.rpos() != ser.wpos()) {
+    ASSERT_TRUE(rser >> i);
+    //std::cout << static_cast<unsigned short>(static_cast<unsigned char>(i)) << " " << std::flush;
+    ASSERT_TRUE(expected_zeros.count(rser.rpos()) ? !i : i);
+  }
+  //std::cout << std::endl;
+}
+
+TEST(serializer_test, Serializer_align_context_2_buff_diff_walign)
+{
+  OpenDDS::DCPS::Message_Block_Ptr amb(new ACE_Message_Block(21));
+  amb->cont(new ACE_Message_Block(32));
+
+  Encoding enc;
+  Serializer ser(amb.get(), enc);
+
+  std::memset(amb->wr_ptr(), 0, 21);
+  std::memset(amb->cont()->wr_ptr(), 0, 32);
+
+  amb->cont()->rd_ptr(3);
+  amb->cont()->wr_ptr(3);
+
+  const ACE_CDR::Octet c = 3;
+  const ACE_CDR::Double d = 0.12345;
+
+  ASSERT_TRUE(ser << c);
+  {
+    Serializer::ScopedAlignmentContext sac(ser);
+    ASSERT_TRUE(ser << d);
+    ASSERT_TRUE(ser << c);
+    ASSERT_TRUE(ser << d);
+  }
+  ASSERT_TRUE(ser << d);
+
+  Serializer rser(amb.get(), enc);
+  char i = 0;
+  std::set<size_t> expected_zeros;
+  size_t zeros[] = {2, 3, 4, 14, 15, 16, 17, 18, 19, 20, 29, 30, 31, 32};
+  expected_zeros.insert(zeros, zeros + (sizeof zeros / sizeof (size_t*)));
+  while (rser.rpos() != ser.wpos()) {
+    ASSERT_TRUE(rser >> i);
+    //std::cout << static_cast<unsigned short>(static_cast<unsigned char>(i)) << " " << std::flush;
+    ASSERT_TRUE(expected_zeros.count(rser.rpos()) ? !i : i);
+  }
+  //std::cout << std::endl;
+}
+
+TEST(serializer_test, Serializer_test_peek_align)
+{
+  OpenDDS::DCPS::Message_Block_Ptr amb(new ACE_Message_Block(5));
+  amb->cont(new ACE_Message_Block(8));
+
+  Encoding enc;
+  Serializer ser(amb.get(), enc);
+
+  std::memset(amb->wr_ptr(), 0, 5);
+  std::memset(amb->cont()->wr_ptr(), 0, 8);
+
+  amb->cont()->rd_ptr(1);
+  amb->cont()->wr_ptr(1);
+
+  const ACE_CDR::ULong a = 7;
+  const ACE_CDR::ULong b = 13;
+  const ACE_CDR::ULong c = 42;
+
+  ASSERT_TRUE(ser << a);
+  ASSERT_TRUE(ser << b);
+  ASSERT_TRUE(ser << c);
+
+  Serializer rser(amb.get(), enc);
+  ACE_CDR::ULong res = 0;
+
+  ASSERT_TRUE(rser.peek(res));
+  ASSERT_EQ(res, a);
+  ASSERT_TRUE(rser >> res);
+  ASSERT_EQ(res, a);
+  ASSERT_TRUE(rser.peek(res));
+  ASSERT_EQ(res, b);
+  ASSERT_TRUE(rser >> res);
+  ASSERT_EQ(res, b);
+  ASSERT_TRUE(rser.peek(res));
+  ASSERT_TRUE(res == c);
+  ASSERT_TRUE(rser >> res);
+  ASSERT_TRUE(res == c);
+}
+
+TEST(serializer_test, Serializer_test_peek_depth)
+{
+  OpenDDS::DCPS::Message_Block_Ptr amb(new ACE_Message_Block(1));
+  ACE_Message_Block* cont = amb.get();
+  for (size_t i = 0; i < 10000; ++i) {
+    cont->cont(new ACE_Message_Block(1));
+    cont = cont->cont();
+  }
+
+  Encoding enc;
+  Serializer ser(amb.get(), enc);
+
+  const ACE_CDR::ULong a = 7;
+  const ACE_CDR::ULong b = 13;
+  const ACE_CDR::ULong c = 42;
+
+  ASSERT_TRUE(ser << a);
+  ASSERT_TRUE(ser << b);
+  ASSERT_TRUE(ser << c);
+
+  Serializer rser(amb.get(), enc);
+  ACE_CDR::ULong res = 0;
+
+  ASSERT_TRUE(rser.peek(res));
+  ASSERT_EQ(res, a);
+  ASSERT_TRUE(rser >> res);
+  ASSERT_EQ(res, a);
+  ASSERT_TRUE(rser.peek(res));
+  ASSERT_EQ(res, b);
+  ASSERT_TRUE(rser >> res);
+  ASSERT_EQ(res, b);
+  ASSERT_TRUE(rser.peek(res));
+  ASSERT_TRUE(res == c);
+  ASSERT_TRUE(rser >> res);
+  ASSERT_TRUE(res == c);
+}
+

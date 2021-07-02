@@ -652,7 +652,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
         if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
 
-  ACE_TAO_u18_d0i0v1_sec_js0_FM-06:
+  ACE_TAO_u18_d0i0v1_sec_js0_FM-08:
 
     runs-on: ubuntu-18.04
 
@@ -724,11 +724,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_u18_d0i0v1_sec_js0_FM-06:
+  build_u18_d0i0v1_sec_js0_FM-08:
 
     runs-on: ubuntu-18.04
 
-    needs: ACE_TAO_u18_d0i0v1_sec_js0_FM-06
+    needs: ACE_TAO_u18_d0i0v1_sec_js0_FM-08
 
     steps:
     - name: install xerces
@@ -747,13 +747,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ACE_TAO_u18_d0i0v1_sec_js0_FM-06_artifact
+        name: ACE_TAO_u18_d0i0v1_sec_js0_FM-08_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u18_d0i0v1_sec_js0_FM-06.tar.xz
+        tar xvfJ ACE_TAO_u18_d0i0v1_sec_js0_FM-08.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v2
       with:
@@ -798,11 +798,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_u18_d0i0v1_sec_js0_FM-06:
+  test_u18_d0i0v1_sec_js0_FM-08:
 
     runs-on: ubuntu-18.04
 
-    needs: build_u18_d0i0v1_sec_js0_FM-06
+    needs: build_u18_d0i0v1_sec_js0_FM-08
     timeout-minutes: 150
 
     steps:
@@ -827,13 +827,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ACE_TAO_u18_d0i0v1_sec_js0_FM-06_artifact
+        name: ACE_TAO_u18_d0i0v1_sec_js0_FM-08_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u18_d0i0v1_sec_js0_FM-06.tar.xz
+        tar xvfJ ACE_TAO_u18_d0i0v1_sec_js0_FM-08.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v2
       with:
@@ -842,13 +842,13 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
-        name: build_u18_d0i0v1_sec_js0_FM-06_artifact
+        name: build_u18_d0i0v1_sec_js0_FM-08_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_u18_d0i0v1_sec_js0_FM-06.tar.xz
+        tar xvfJ build_u18_d0i0v1_sec_js0_FM-08.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -2710,7 +2710,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS --security --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS --security -Config ASAN --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>

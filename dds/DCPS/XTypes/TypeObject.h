@@ -1982,7 +1982,7 @@ bool operator>>(Serializer& strm, XTypes::Sequence<T>& seq)
     return false;
   }
 
-  const size_t end_of_seq = strm.pos() + total_size;
+  const size_t end_of_seq = strm.rpos() + total_size;
   ACE_CDR::ULong length;
   if (!(strm >> length)) {
     return false;
@@ -2001,7 +2001,7 @@ bool operator>>(Serializer& strm, XTypes::Sequence<T>& seq)
       return false;
     }
   }
-  return strm.skip(end_of_seq - strm.pos());
+  return strm.skip(end_of_seq - strm.rpos());
 }
 
 

@@ -173,6 +173,12 @@ void EncapsulationHeader::kind(EncapsulationHeader::Kind value)
 }
 
 ACE_INLINE
+bool EncapsulationHeader::is_good() const
+{
+  return kind_ != KIND_INVALID;
+}
+
+ACE_INLINE
 ACE_UINT16 EncapsulationHeader::options() const
 {
   return options_;
@@ -256,7 +262,7 @@ Serializer::doread(char* dest, size_t size, bool swap, size_t offset)
   this->current_->rd_ptr(initial);
 
   // Update the logical reading position in the stream.
-  pos_ += initial;
+  rpos_ += initial;
 
   //   smemcpy
   //
@@ -342,6 +348,9 @@ Serializer::dowrite(const char* src, size_t size, bool swap, size_t offset)
     ? this->swapcpy(this->current_->wr_ptr(), src + remainder, initial)
     : this->smemcpy(this->current_->wr_ptr(), src + offset, initial);
   this->current_->wr_ptr(initial);
+
+  // Update the logical writing position in the stream.
+  wpos_ += initial;
 
   //   smemcpy
   //
@@ -458,7 +467,7 @@ Serializer::skip(size_t n, int size)
   }
 
   if (this->good_bit_) {
-    pos_ += n * size;
+    rpos_ += n * size;
   }
   return this->good_bit();
 }
@@ -814,12 +823,14 @@ bool Serializer::align_w(size_t al)
         this->smemcpy(this->current_->wr_ptr(), ALIGN_PAD, cur_spc);
       }
       this->current_->wr_ptr(cur_spc);
+      wpos_ += cur_spc;
       this->align_cont_w();
     } else {
       if (encoding().zero_init_padding()) {
         this->smemcpy(this->current_->wr_ptr(), ALIGN_PAD, len);
       }
       this->current_->wr_ptr(len);
+      wpos_ += len;
       break;
     }
   }

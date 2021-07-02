@@ -719,7 +719,7 @@ namespace {
     std::string tempvar = "tempvar";
     be_global->impl_ <<
       indent << "if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n" <<
-      indent << "  strm.skip(end_of_seq - strm.pos());\n" <<
+      indent << "  strm.skip(end_of_seq - strm.rpos());\n" <<
       indent << "} else {\n" <<
       indent << "  " << seq_type_name << " " << tempvar << ";\n" <<
       indent << "  " << tempvar << "." << seq_resize_func << "(1);\n" <<
@@ -759,7 +759,7 @@ namespace {
     be_global->impl_ <<
       indent << "if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n" <<
       indent << "  strm.set_construction_status(Serializer::ElementConstructionFailure);\n" <<
-      indent << "  strm.skip(end_of_arr - strm.pos());\n" <<
+      indent << "  strm.skip(end_of_arr - strm.rpos());\n" <<
       indent << "  return false;\n" <<
       indent << "} else {\n" <<
       indent << "  strm.set_construction_status(Serializer::ConstructionSuccessful);\n" <<
@@ -985,7 +985,7 @@ namespace {
           "    }\n", !primitive);
 
         if (!primitive) {
-          be_global->impl_ << "  const size_t end_of_seq = strm.pos() + total_size;\n";
+          be_global->impl_ << "  const size_t end_of_seq = strm.rpos() + total_size;\n";
         }
         be_global->impl_ <<
           "  CORBA::ULong length;\n"
@@ -1333,7 +1333,7 @@ namespace {
         "    }\n", !primitive);
 
       if (!primitive && (try_construct != tryconstructfailaction_use_default)) {
-        be_global->impl_ << "  const size_t end_of_arr = strm.pos() + total_size;\n";
+        be_global->impl_ << "  const size_t end_of_arr = strm.rpos() + total_size;\n";
       }
 
       const std::string accessor = wrapper.value_access() + (use_cxx11 ? ".data()" : ".out()");
@@ -2744,7 +2744,7 @@ namespace {
 
       if (not_final) {
         be_global->impl_ <<
-          "  const size_t end_of_struct = strm.pos() + total_size;\n"
+          "  const size_t end_of_struct = strm.rpos() + total_size;\n"
           "\n";
       }
 
@@ -2766,7 +2766,7 @@ namespace {
         */
         be_global->impl_ <<
           "      if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 &&\n"
-          "            strm.pos() >= end_of_struct) {\n"
+          "            strm.rpos() >= end_of_struct) {\n"
           "        return true;\n"
           "      }\n"
           "      bool must_understand = false;\n"
@@ -2777,7 +2777,7 @@ namespace {
           "            member_id == Serializer::pid_list_end) {\n"
           "        return true;\n"
           "      }\n"
-          "      const size_t end_of_field = strm.pos() + field_size;\n"
+          "      const size_t end_of_field = strm.rpos() + field_size;\n"
           "      ACE_UNUSED_ARG(end_of_field);\n"
           "\n";
 
@@ -2802,7 +2802,7 @@ namespace {
             cases <<
               type_to_default("          ", field_type, field_name, field->field_type()->anonymous()) <<
               "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
-            if (!(fld_cls & CL_STRING)) cases << "        strm.skip(end_of_field - strm.pos());\n";
+            if (!(fld_cls & CL_STRING)) cases << "        strm.skip(end_of_field - strm.rpos());\n";
           } else if ((try_construct == tryconstructfailaction_trim) && (fld_cls & CL_BOUNDED) &&
                     (fld_cls & (CL_STRING | CL_SEQUENCE))) {
             if ((fld_cls & CL_STRING) && (fld_cls & CL_BOUNDED)) {
@@ -2831,7 +2831,7 @@ namespace {
                 "            return false;\n"
                 "          }\n"
                 "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
-                "          strm.skip(end_of_field - strm.pos());\n";
+                "          strm.skip(end_of_field - strm.rpos());\n";
             }
 
           } else { //discard/default
@@ -2839,7 +2839,7 @@ namespace {
               "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
             if (!(fld_cls & CL_STRING)) {
               cases <<
-                "          strm.skip(end_of_field - strm.pos());\n";
+                "          strm.skip(end_of_field - strm.rpos());\n";
             }
             cases <<
               "          return false;\n";
@@ -2895,7 +2895,7 @@ namespace {
         if (is_appendable) {
           expr +=
             "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 &&\n"
-            "      strm.pos() >= end_of_struct) {\n"
+            "      strm.rpos() >= end_of_struct) {\n"
             "    return true;\n"
             "  }\n";
         }
@@ -2932,8 +2932,8 @@ namespace {
       if (is_appendable) {
         expr +=
           "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 &&\n"
-          "      strm.pos() < end_of_struct) {\n"
-          "    strm.skip(end_of_struct - strm.pos());\n"
+          "      strm.rpos() < end_of_struct) {\n"
+          "    strm.skip(end_of_struct - strm.rpos());\n"
           "  }\n"
           "  return true;\n";
         be_global->impl_ << expr;
@@ -3375,10 +3375,10 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
       "      ACE_UNUSED_ARG(field_id);\n"
       "      unsigned member_id;\n"
       "      size_t field_size;\n"
-      "      const size_t end_of_struct = strm.pos() + total_size;\n"
+      "      const size_t end_of_struct = strm.rpos() + total_size;\n"
       "      while (true) {\n"
       "        if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 &&\n"
-      "            strm.pos() >= end_of_struct) {\n"
+      "            strm.rpos() >= end_of_struct) {\n"
       "          break;\n"
       "        }\n"
       "        bool must_understand = false;\n"
@@ -3391,7 +3391,7 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
       "          throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" not "
       "valid for struct " << clazz << "\");\n"
       "        }\n"
-      "        const size_t end_of_field = strm.pos() + field_size;\n"
+      "        const size_t end_of_field = strm.rpos() + field_size;\n"
       "        ACE_UNUSED_ARG(end_of_field);\n"
       "\n";
 
@@ -3574,23 +3574,21 @@ namespace {
     }
     {
       Function insertion("operator<<", "bool");
-      insertion.addArg("outer_strm", "Serializer&");
+      insertion.addArg("strm", "Serializer&");
       insertion.addArg("uni", "const " + cxx + "&");
       insertion.endArgs();
       be_global->impl_ <<
-        "  if (!(outer_strm << uni._d())) {\n"
+        "  if (!(strm << uni._d())) {\n"
         "    return false;\n"
         "  }\n"
-        "  size_t size = serialized_size(outer_strm.encoding(), uni);\n"
+        "  size_t size = serialized_size(strm.encoding(), uni);\n"
         "  size -= 4; // parameterId & length\n"
         "  const size_t post_pad = 4 - (size % 4);\n"
         "  const size_t total = size + ((post_pad < 4) ? post_pad : 0);\n"
-        "  if (size > ACE_UINT16_MAX || "
-        "!(outer_strm << ACE_CDR::UShort(total))) {\n"
+        "  if (size > ACE_UINT16_MAX || !(strm << ACE_CDR::UShort(total))) {\n"
         "    return false;\n"
         "  }\n"
-        "  ACE_Message_Block param(size);\n"
-        "  Serializer strm(&param, outer_strm.encoding());\n"
+        "  const Serializer::ScopedAlignmentContext sac(strm);\n"
         "  if (uni._d() == RTPS::PID_XTYPES_TYPE_INFORMATION) {\n"
         "    if (!strm.write_octet_array(uni.type_information().get_buffer(), uni.type_information().length())) {\n"
         "      return false;\n"
@@ -3598,16 +3596,9 @@ namespace {
         "  } else if (!insertParamData(strm, uni)) {\n"
         "    return false;\n"
         "  }\n"
-        "  const ACE_CDR::Octet* data = reinterpret_cast<ACE_CDR::Octet*>("
-        "param.rd_ptr());\n"
-        "  if (!outer_strm.write_octet_array(data, ACE_CDR::ULong(param.length()))) {\n"
-        "    return false;\n"
-        "  }\n"
-        "  if (post_pad < 4 && outer_strm.encoding().alignment() != "
-        "Encoding::ALIGN_NONE) {\n"
+        "  if (post_pad < 4 && strm.encoding().alignment() != Encoding::ALIGN_NONE) {\n"
         "    static const ACE_CDR::Octet padding[3] = {0};\n"
-        "    return outer_strm.write_octet_array(padding, "
-        "ACE_CDR::ULong(post_pad));\n"
+        "    return strm.write_octet_array(padding, ACE_CDR::ULong(post_pad));\n"
         "  }\n"
         "  return true;\n";
     }
