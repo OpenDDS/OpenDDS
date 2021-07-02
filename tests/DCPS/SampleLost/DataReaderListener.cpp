@@ -22,7 +22,7 @@ DataReaderListenerImpl::~DataReaderListenerImpl ()
 }
 
 void
-DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
+DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr /*reader*/)
 {
   ++num_data_available_;
 }
