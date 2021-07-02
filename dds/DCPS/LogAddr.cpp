@@ -2,7 +2,7 @@
 
 #include "LogAddr.h"
 
-#include <sstream>
+#include <dds/DCPS/Definitions.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -11,19 +11,24 @@ namespace DCPS {
 
 LogAddr::LogAddr(const ACE_INET_Addr& addr, Fmt fmt)
 {
-  std::stringstream s;
-  if (fmt == IP) {
-    s << addr.get_host_addr();
-  } else if (fmt == IP_PORT) {
-    s << addr.get_host_addr() << ':' << addr.get_port_number();
+  if (fmt == IP_PORT || fmt == HOST_PORT) {
+    ACE_TCHAR buf[AddrToStringSize] = {'\0'};
+    if (addr.addr_to_string(buf, AddrToStringSize, fmt == IP_PORT) == 0) {
+      addr_ = buf;
+    }
+  } else if (fmt == IP) {
+    addr_ = addr.get_host_addr();
   } else if (fmt == HOST) {
-    s << addr.get_host_name();
-  } else if (fmt == HOST_PORT) {
-    s << addr.get_host_name() << ':' << addr.get_port_number();
+    addr_ = addr.get_host_name();
   } else if (fmt == IP_PORT_HOST) {
-    s << addr.get_host_addr() << ':' << addr.get_port_number() << " (" << addr.get_host_name() << ')';
+    ACE_TCHAR buf[AddrToStringSize] = {'\0'};
+    if (addr.addr_to_string(buf, AddrToStringSize) == 0) {
+      addr_ = buf;
+      addr_ += " (";
+      addr_ += addr.get_host_name();
+      addr_ += ')';
+    }
   }
-  addr_ = s.str();
 }
 
 } // namespace DCPS
