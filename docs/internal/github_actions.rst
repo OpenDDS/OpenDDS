@@ -18,6 +18,7 @@ Operating System
 ================
 
 See `GitHub Virtual Environments <https://github.com/actions/virtual-environments>`_.
+
 * u18/u20 - Ubuntu 18.04/Ubuntu 20.04
 * w16/w19 - Windows Server 2016 (Visual Studio 2017)/Windows Server 2019 (Visual Studio 2019)
 * m10 - MacOS 10.15
@@ -91,7 +92,7 @@ build_and_test.yml Workflow
 ***************************
 
 Our main `workflow <https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions>`_ which dictates our GitHub Actions run is
-``.github/workflows/build_and_test.yml``. It defines jobs, which are the tasks that
+:ghfile:`.github/workflows/build_and_test.yml`. It defines jobs, which are the tasks that
 are run by the CI.
 
 Triggering the Build And Test Workflow
@@ -125,24 +126,24 @@ in one step due to cross-compile issues. Static and Release builds have a large
 footprint and therefore cannot fit the entire test suite onto a Github Actions runner.
 As a result, they only build and run a subset of the tests in their final jobs, but then have
 multiple final jobs to increase test coverage. These jobs are prefixed by: *compiler_* which
-runs the ``tests/DCPS/Compiler`` tests, *unit_* which runs the unit tests located
-in ``tests/DCPS/UnitTest`` and ``tests/unit-tests``, and *messenger_* which runs the tests
-in ``tests/DCPS/Messenger`` and ``tests/DCPS/C++11/Messenger``.
+runs the :ghfile:`tests/DCPS/Compiler` tests, *unit_* which runs the unit tests located
+in :ghfile:`tests/DCPS/UnitTests` and :ghfile:`tests/unit-tests`, and *messenger_* which runs the tests
+in :ghfile:`tests/DCPS/Messenger` and :ghfile:`tests/DCPS/C++11/Messenger`.
 
 To shorten the runtime of the continuous integration, some other builds will not run the test suite.
 
-All builds with safety profile disabled and ownership profile enabled, will run the ``tests/cmake`` tests.
+All builds with safety profile disabled and ownership profile enabled, will run the :ghfile:`tests/cmake` tests.
 Test runs which only contain CMake tests are prefixed by ``cmake_``.
 
 .lst Files
 ==========
 
 .lst files contain a list of tests with configuration options that will turn tests on or off. The *test_* jobs
-pass in ``tests/dcps_tests.lst``. Static and Release builds instead use ``tests/static_ci_tests.lst``. This seperation
+pass in :ghfile:`tests/dcps_tests.lst`. Static and Release builds instead use :ghfile:`tests/static_ci_tests.lst`. This seperation
 of .lst files is due to how excluding all but a few tests in the dcps_tests.lst would require adding a new config option
-to every test we didn't want to run. There is a seperate security test list, ``tests/security/security_tests.lst``, which governs
+to every test we didn't want to run. There is a seperate security test list, :ghfile:`tests/security/security_tests.lst`, which governs
 the security tests which are run when ``--security`` is passed to ``auto_run_tests.pl``. The last list file used by
-``build_and_test.yml`` is ``tools/modeling/tests/modeling_tests.lst``, which is included by passing ``--modeling`` to
+``build_and_test.yml`` is :ghfile:`tools/modeling/tests/modeling_tests.lst`, which is included by passing ``--modeling`` to
 ``auto_run_tests.pl``.
 
 To disable a test in GitHub Actions, ``!GH_ACTIONS`` must be added next to the test in the .lst file. These tests will not run when
