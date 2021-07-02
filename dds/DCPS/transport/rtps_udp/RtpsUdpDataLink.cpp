@@ -3798,7 +3798,7 @@ void RtpsUdpDataLink::durability_resend(TransportQueueElement* element,
                                         const RTPS::FragmentNumberSet& fragmentSet)
 {
   if (Transport_debug_level > 5) {
-    ACE_DEBUG((LM_DEBUG, "TRACK RtpsUdpDataLink::durability_resend %q\n", element->sequence().getValue()));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) TRACK RtpsUdpDataLink::durability_resend %q\n", element->sequence().getValue()));
   }
   const AddrSet addrs = get_addresses(element->publication_id(), element->subscription_id());
   if (addrs.empty()) {
