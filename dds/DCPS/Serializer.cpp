@@ -95,11 +95,21 @@ Encoding::Encoding(Encoding::Kind kind, bool swap_bytes)
   this->kind(kind);
 }
 
-EncapsulationHeader::EncapsulationHeader()
-: kind_(KIND_CDR_BE)
-, options_(0)
+EncapsulationHeader::EncapsulationHeader(EncapsulationHeader::Kind k, ACE_UINT16 o)
+: kind_(k)
+, options_(o)
 {
 }
+
+EncapsulationHeader::EncapsulationHeader(const Encoding& enc, Extensibility ext, ACE_UINT16 o)
+: kind_(KIND_INVALID)
+, options_(o)
+{
+   if (!from_encoding(enc, ext)) {
+     kind_ = KIND_INVALID;
+   }
+}
+
 
 bool EncapsulationHeader::from_encoding(
   const Encoding& encoding, Extensibility extensibility)
@@ -265,6 +275,8 @@ OPENDDS_STRING EncapsulationHeader::to_string() const
     return "XCDR2 Little Endian Parameter List";
   case KIND_XML:
     return "XML";
+  case KIND_INVALID:
+    return "Invalid";
   default:
     return "Unknown: " + to_dds_string(static_cast<unsigned>(kind_), true);
   }
@@ -285,6 +297,9 @@ bool operator>>(Serializer& s, EncapsulationHeader& value)
 
 bool operator<<(Serializer& s, const EncapsulationHeader& value)
 {
+  if (!value.is_good()) {
+    return false;
+  }
   ACE_CDR::Octet data[EncapsulationHeader::serialized_size];
   data[0] = (value.kind() >> 8) & 0xff;
   data[1] = value.kind() & 0xff;
