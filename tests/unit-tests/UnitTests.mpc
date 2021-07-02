@@ -1,0 +1,4 @@
+project(UnitTests): dcps, dcps_rtps_udp, dcps_rtpsexe, dcps_test, dcps_transports_for_test, dcpsexe, googlemock, googletest, optional_opendds_face, opendds_optional_security, optional_rapidjson, optional_rtps_relay_lib {
+  exename = *
+  recurse = 1
+}
