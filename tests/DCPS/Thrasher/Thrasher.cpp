@@ -62,7 +62,7 @@ void Thrasher::parse_args(int& argc, ACE_TCHAR** argv)
 
 void Thrasher::cleanup()
 {
-  if( dpf_ ) {
+  if (dpf_) {
     ACE_DEBUG((LM_INFO, "(%P|%t) <- Thrasher shutdown\n"));
     TheServiceParticipant->shutdown();
     dpf_ = 0;
