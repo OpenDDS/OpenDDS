@@ -698,7 +698,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       if (from_relay) {
         tport_->write_i(guid, iter->second.local_address_, SpdpTransport::SEND_RELAY);
       } else {
-        tport_->shorten_local_sender_delay_i();
+        tport_->zero_local_sender_delay_i ();
       }
     }
 
@@ -2533,6 +2533,7 @@ Spdp::SpdpTransport::close(const DCPS::ReactorTask_rch& reactor_task)
 #endif
 }
 
+
 void
 Spdp::SpdpTransport::shorten_local_sender_delay_i()
 {
@@ -2543,6 +2544,17 @@ Spdp::SpdpTransport::shorten_local_sender_delay_i()
     const TimeDuration quick_resend = outer->config_->resend_period() * outer->config_->quick_resend_ratio();
     const TimeDuration min_resend = outer->config_->min_resend_delay();
     local_sender_->enable(std::max(quick_resend, min_resend));
+  }
+}
+
+void
+Spdp::SpdpTransport::zero_local_sender_delay_i ()
+{
+  DCPS::RcHandle<Spdp> outer = outer_.lock ();
+  if (!outer) return;
+
+  if (local_sender_) {
+    local_sender_->enable (TimeDuration::zero_value);
   }
 }
 
@@ -3332,7 +3344,7 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
         return;
       }
 
-      shorten_local_sender_delay_i();
+      zero_local_sender_delay_i ();
     } else {
       ACE_TCHAR buff[DCPS::AddrToStringSize];
       multicast_address_.addr_to_string(buff, DCPS::AddrToStringSize);
@@ -3369,7 +3381,7 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
         return;
       }
 
-      shorten_local_sender_delay_i();
+      zero_local_sender_delay_i ();
     } else {
       ACE_TCHAR buff[DCPS::AddrToStringSize];
       multicast_ipv6_address_.addr_to_string(buff, DCPS::AddrToStringSize);
