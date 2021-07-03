@@ -2,9 +2,9 @@
 #define OPENDDS_DCPS_LOGADDR_H
 
 #include "dcps_export.h"
+#include "PoolAllocator.h"
 
 #include <dds/Versioned_Namespace.h>
-#include <dds/DCPS/PoolAllocator.h>
 
 #include <ace/INET_Addr.h>
 

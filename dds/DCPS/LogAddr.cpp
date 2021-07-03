@@ -1,8 +1,7 @@
 #include "DCPS/DdsDcps_pch.h"
 
 #include "LogAddr.h"
-
-#include <dds/DCPS/Definitions.h>
+#include "Definitions.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
