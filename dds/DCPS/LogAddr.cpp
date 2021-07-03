@@ -12,7 +12,7 @@ namespace DCPS {
 LogAddr::LogAddr(const ACE_INET_Addr& addr, Fmt fmt)
 {
   if (fmt == IP_PORT || fmt == HOST_PORT) {
-    ACE_TCHAR buf[AddrToStringSize] = {'\0'};
+    char buf[AddrToStringSize] = {'\0'};
     if (addr.addr_to_string(buf, AddrToStringSize, fmt == IP_PORT) == 0) {
       addr_ = buf;
     }
@@ -21,7 +21,7 @@ LogAddr::LogAddr(const ACE_INET_Addr& addr, Fmt fmt)
   } else if (fmt == HOST) {
     addr_ = addr.get_host_name();
   } else if (fmt == IP_PORT_HOST) {
-    ACE_TCHAR buf[AddrToStringSize] = {'\0'};
+    char buf[AddrToStringSize] = {'\0'};
     if (addr.addr_to_string(buf, AddrToStringSize) == 0) {
       addr_ = buf;
       addr_ += " (";
