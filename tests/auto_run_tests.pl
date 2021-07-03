@@ -149,7 +149,7 @@ sub print_usage {
         "auto_run_tests.pl -h | --help\n" .
         "\n";
     if ($error) {
-        print STDERR "Use auto_run_tests.pl --help to see all the options\n";
+        print STDERR "ERROR: Use auto_run_tests.pl --help to see all the options\n";
         exit(1);
     }
 }
