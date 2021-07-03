@@ -27,7 +27,7 @@ def log(*args, **kwargs):
     if error:
         prefix += 'ERROR: '
     print(prefix, end='', file=f)
-    print(*args, **kwargs, file=f)
+    print(*args, **kwargs, file=f, flush=True)
 
 
 class DocEnv:
