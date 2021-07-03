@@ -700,7 +700,7 @@ public:
   void set_construction_status(ConstructionStatus cs);
 
   struct OpenDDS_Dcps_Export ScopedAlignmentContext {
-    explicit ScopedAlignmentContext(Serializer& ser);
+    explicit ScopedAlignmentContext(Serializer& ser, size_t min_read = 0);
     virtual ~ScopedAlignmentContext() { restore(ser_); }
 
     void restore(Serializer& ser) const;
@@ -709,6 +709,7 @@ public:
     const size_t max_align_;
     const size_t start_rpos_;
     const size_t rblock_;
+    const size_t min_read_;
     const size_t start_wpos_;
     const size_t wblock_;
   };

@@ -382,11 +382,12 @@ Serializer::~Serializer()
 {
 }
 
-Serializer::ScopedAlignmentContext::ScopedAlignmentContext(Serializer& ser)
+Serializer::ScopedAlignmentContext::ScopedAlignmentContext(Serializer& ser, size_t min_read)
   : ser_(ser)
   , max_align_(ser.encoding().max_align())
   , start_rpos_(ser.rpos())
   , rblock_(max_align_ ? (ptrdiff_t(ser.current_->rd_ptr()) - ser.align_rshift_) % max_align_ : 0)
+  , min_read_(min_read)
   , start_wpos_(ser.wpos())
   , wblock_(max_align_ ? (ptrdiff_t(ser.current_->wr_ptr()) - ser.align_wshift_) % max_align_ : 0)
 {
@@ -396,6 +397,10 @@ Serializer::ScopedAlignmentContext::ScopedAlignmentContext(Serializer& ser)
 void
 Serializer::ScopedAlignmentContext::restore(Serializer& ser) const
 {
+  if (min_read_ != 0 && (ser.rpos() - start_rpos_) < min_read_) {
+    ser.skip(min_read_ - (ser.rpos() - start_rpos_));
+  }
+
   if (ser.current_ && max_align_) {
     ser.align_rshift_ = offset(ser.current_->rd_ptr(), ser.rpos() - start_rpos_ + rblock_, max_align_);
     ser.align_wshift_ = offset(ser.current_->wr_ptr(), ser.wpos() - start_wpos_ + wblock_, max_align_);
