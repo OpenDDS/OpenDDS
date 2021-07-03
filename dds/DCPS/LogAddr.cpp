@@ -10,23 +10,23 @@ namespace DCPS {
 
 LogAddr::LogAddr(const ACE_INET_Addr& addr, Fmt fmt)
 {
-  if (fmt == IP_PORT || fmt == HOST_PORT) {
+  if (fmt == IP_PORT) {
     char buf[AddrToStringSize] = {'\0'};
-    if (addr.addr_to_string(buf, AddrToStringSize, fmt == IP_PORT) == 0) {
-      addr_ = buf;
-    }
+    ACE_OS::snprintf(buf, AddrToStringSize, "%s:%d", addr.get_host_addr(), addr.get_port_number());
+    addr_ = buf;
+  } else if (fmt == HOST_PORT) {
+    char buf[AddrToStringSize] = {'\0'};
+    ACE_OS::snprintf(buf, AddrToStringSize, "%s:%d", addr.get_host_name(), addr.get_port_number());
+    addr_ = buf;
   } else if (fmt == IP) {
     addr_ = addr.get_host_addr();
   } else if (fmt == HOST) {
     addr_ = addr.get_host_name();
   } else if (fmt == IP_PORT_HOST) {
-    char buf[AddrToStringSize] = {'\0'};
-    if (addr.addr_to_string(buf, AddrToStringSize) == 0) {
-      addr_ = buf;
-      addr_ += " (";
-      addr_ += addr.get_host_name();
-      addr_ += ')';
-    }
+    char buf[AddrToStringSize * 2] = {'\0'};
+    ACE_OS::snprintf(buf, AddrToStringSize * 2, "%s:%d (%s)",
+      addr.get_host_addr(), addr.get_port_number(), addr.get_host_name());
+    addr_ = buf;
   }
 }
 
