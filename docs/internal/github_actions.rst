@@ -17,11 +17,13 @@ Legend for GitHub Actions Build Names
 Operating System
 ================
 
-See `GitHub Virtual Environments <https://github.com/actions/virtual-environments>`_.
-
 * u18/u20 - Ubuntu 18.04/Ubuntu 20.04
 * w16/w19 - Windows Server 2016 (Visual Studio 2017)/Windows Server 2019 (Visual Studio 2019)
 * m10 - MacOS 10.15
+
+.. seealso::
+
+  `GitHub Virtual Environments <https://github.com/actions/virtual-environments>`_
 
 Build Configuration
 ===================
@@ -151,6 +153,11 @@ To disable a test in GitHub Actions, ``!GH_ACTIONS`` must be added next to the t
 configurations: ``!GHA_NO_BUILT_IN_TOPICS`` blocks GitHub Actions builds without built-in-topics from running a test, and
 ``!GHA_OPENDDS_SAFETY_PROFILE`` blocks Safety Profile builds from running a test. These blocks are necessary because certain tests
 cannot properly run on GitHub Actions due to how the runners are configured.
+
+.. seealso::
+
+  :doc:`running_tests`
+    For how ``auto_run_tests.pl`` works in general.
 
 Test Results
 ============
