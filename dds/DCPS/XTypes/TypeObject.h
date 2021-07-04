@@ -1328,6 +1328,12 @@ namespace XTypes {
     CollectionTypeFlag collection_flag;
     CompleteCollectionHeader header;
     CompleteCollectionElement element;
+
+    CompleteSequenceType()
+    : collection_flag(0)
+    , header()
+    , element()
+    {}
   };
 
   struct MinimalSequenceType {
@@ -1335,8 +1341,13 @@ namespace XTypes {
     MinimalCollectionHeader header;
     MinimalCollectionElement element;
 
-    MinimalSequenceType() {}
-    MinimalSequenceType(CollectionTypeFlag a_collection_flag,
+    MinimalSequenceType()
+    : collection_flag(0)
+    , header()
+    , element()
+    {}
+
+      MinimalSequenceType(CollectionTypeFlag a_collection_flag,
                         const MinimalCollectionHeader& a_header,
                         const MinimalCollectionElement& a_element)
       : collection_flag(a_collection_flag)
@@ -1362,6 +1373,7 @@ namespace XTypes {
     CommonArrayHeader common;
 
     MinimalArrayHeader() {}
+
     MinimalArrayHeader(const CommonArrayHeader& a_common)
       : common(a_common)
     {}
@@ -1371,6 +1383,13 @@ namespace XTypes {
     CollectionTypeFlag collection_flag;
     CompleteArrayHeader header;
     CompleteCollectionElement element;
+
+    CompleteArrayType()
+    : collection_flag(0)
+    , header()
+    , element()
+    {}
+
   };
 
   struct MinimalArrayType  {
@@ -1378,7 +1397,12 @@ namespace XTypes {
     MinimalArrayHeader header;
     MinimalCollectionElement element;
 
-    MinimalArrayType() {}
+    MinimalArrayType()
+    : collection_flag(0)
+    , header()
+    , element()
+    {}
+
     MinimalArrayType(CollectionTypeFlag a_collection_flag,
                      const MinimalArrayHeader& a_header,
                      const MinimalCollectionElement& a_element)
