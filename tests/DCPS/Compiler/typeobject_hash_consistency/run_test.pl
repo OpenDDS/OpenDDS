@@ -4,12 +4,10 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 
 use Env (DDS_ROOT);
 use lib "$DDS_ROOT/bin";
-use Env (ACE_ROOT);
-use lib "$ACE_ROOT/bin";
-use PerlDDS::Run_Test;
+
 use strict;
 
-my $gencmd = "opendds_idl -Sa -St --no-dcps-data-type-warnings sample.idl";
+my $gencmd = "$ENV{DDS_ROOT}/bin/opendds_idl -Sa -St --no-dcps-data-type-warnings sample.idl";
 system($gencmd);
 system("mv sampleTypeSupportImpl.cpp pass1");
 system($gencmd);
