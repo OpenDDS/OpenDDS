@@ -13,11 +13,15 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export LogAddr
-{
+class OpenDDS_Dcps_Export LogAddr {
 public:
-  enum Fmt {IP, IP_PORT, HOST, HOST_PORT, IP_PORT_HOST};
-  explicit LogAddr(const ACE_INET_Addr& addr, Fmt fmt = IP_PORT);
+  static const String ip(const ACE_INET_Addr& addr);
+  static const String port(const ACE_INET_Addr& addr);
+  static const String host(const ACE_INET_Addr& addr);
+
+  enum Option {Ip, Port, Host, IpPort, HostPort, IpPortHost};
+  explicit LogAddr(const ACE_INET_Addr& addr, Option opt = IpPort);
+
   const String& str() const { return addr_; }
   const char* c_str() const { return addr_.c_str(); }
 private:

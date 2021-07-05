@@ -2,32 +2,48 @@
 
 #include "LogAddr.h"
 #include "Definitions.h"
-#include <ace/OS_NS_stdio.h>
+#include <stdio.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
 
-LogAddr::LogAddr(const ACE_INET_Addr& addr, Fmt fmt)
+const String LogAddr::ip(const ACE_INET_Addr& addr)
 {
-  if (fmt == IP_PORT) {
-    char buf[AddrToStringSize] = {'\0'};
-    ACE_OS::snprintf(buf, AddrToStringSize, "%s:%d", addr.get_host_addr(), addr.get_port_number());
-    addr_ = buf;
-  } else if (fmt == HOST_PORT) {
-    char buf[AddrToStringSize] = {'\0'};
-    ACE_OS::snprintf(buf, AddrToStringSize, "%s:%d", addr.get_host_name(), addr.get_port_number());
-    addr_ = buf;
-  } else if (fmt == IP) {
-    addr_ = addr.get_host_addr();
-  } else if (fmt == HOST) {
-    addr_ = addr.get_host_name();
-  } else if (fmt == IP_PORT_HOST) {
-    char buf[AddrToStringSize * 2] = {'\0'};
-    ACE_OS::snprintf(buf, AddrToStringSize * 2, "%s:%d (%s)",
-      addr.get_host_addr(), addr.get_port_number(), addr.get_host_name());
-    addr_ = buf;
+  char s[AddrToStringSize] = {'\0'};
+  return String(addr.get_host_addr(s, AddrToStringSize));
+}
+
+const String LogAddr::port(const ACE_INET_Addr& addr)
+{
+  const size_t SZ = 8;
+  char s[SZ] = {'\0'};
+  snprintf(s, SZ, "%d", addr.get_port_number());
+  return String(s);
+}
+
+const String LogAddr::host(const ACE_INET_Addr& addr)
+{
+  char s[AddrToStringSize] = {'\0'};
+  addr.get_host_name(s, AddrToStringSize);
+  return String(s);
+}
+
+LogAddr::LogAddr(const ACE_INET_Addr& addr, Option opt)
+{
+  if (opt == IpPort) {
+    addr_ = ip(addr) + ':' + port(addr);
+  } else if (opt == HostPort) {
+    addr_ = host(addr) + ':' + port(addr);
+  } else if (opt == Ip) {
+    addr_ = ip(addr);
+  } else if (opt == Port) {
+    addr_ = port(addr);
+  } else if (opt == Host) {
+    addr_ = host(addr);
+  } else if (opt == IpPortHost) {
+    addr_ = ip(addr) + ':' + port(addr) + " (" + host(addr) + ')';
   }
 }
 
