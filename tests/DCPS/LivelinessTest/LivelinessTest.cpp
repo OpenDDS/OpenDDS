@@ -72,7 +72,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-
+/*
   OPENDDS_STRING transport("rtps_udp");
 
   OPENDDS_STRING config_1("dds4ccm_");
@@ -86,11 +86,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   OPENDDS_STRING instance_2("the_");
   instance_2 += transport + "_transport_2";
+*/
 
   int status = 0;
 
   DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
-
+/*
   OpenDDS::DCPS::TransportConfig_rch config =
     OpenDDS::DCPS::TransportRegistry::instance()->get_config(config_1.c_str());
 
@@ -129,7 +130,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                                                 transport.c_str());
     config2->instances_.push_back(inst2);
   }
-
+*/
   // let the Service_Participant (in above line) strip out -DCPSxxx parameters
   // and then get application specific parameters.
   parse_args (argc, argv);
@@ -264,6 +265,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                   automatic_dr_qos,
                                   automatic_drl,
                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+  if (CORBA::is_nil (automatic_dr.in ())) {
+    ACE_ERROR_RETURN ((LM_ERROR,
+      ACE_TEXT("(%P|%t) create_datareader failed.\n")), 1);
+  }
   DDS::DataReader_var remote_manual_dr =
     remote_sub->create_datareader(manual_description2,
                                   remote_manual_dr_qos,
