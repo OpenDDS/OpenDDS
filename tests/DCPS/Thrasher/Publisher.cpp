@@ -14,6 +14,7 @@
 #include <dds/DCPS/transport/framework/TransportInst.h>
 
 #include <string>
+#include <stdexcept>
 
 Publisher::Publisher(const long domain_id, std::size_t samples_per_thread, bool durable, const int thread_index)
   : domain_id_(domain_id)
@@ -25,29 +26,29 @@ Publisher::Publisher(const long domain_id, std::size_t samples_per_thread, bool 
   try {
     dpf_ = TheParticipantFactory;
     if (!dpf_) {
-      throw std::runtime_error(" ERROR: TheParticipantFactoryd is null!\n");
+      throw std::runtime_error("TheParticipantFactoryd is null!\n");
     }
     dp_ = dpf_->create_participant(domain_id_, PARTICIPANT_QOS_DEFAULT, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!dp_) {
-      throw std::runtime_error(" ERROR: create_participant failed!\n");
+      throw std::runtime_error("create_participant failed!\n");
     }
     configure_transport();
 
     // Create Publisher
     DDS::Publisher_var pub = dp_->create_publisher(PUBLISHER_QOS_DEFAULT, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!pub) {
-      throw std::runtime_error(" ERROR: create_publisher failed!\n");
+      throw std::runtime_error("create_publisher failed!\n");
     }
     // Register Type
     FooTypeSupport_var ts = new FooTypeSupportImpl;
     if (!ts || ts->register_type(dp_.in(), "") != DDS::RETCODE_OK) {
-      throw std::runtime_error(" ERROR: register_type failed!\n");
+      throw std::runtime_error("register_type failed!\n");
     }
     // Create Topic
     DDS::Topic_var topic = dp_->create_topic("FooTopic", CORBA::String_var(ts->get_type_name()),
       TOPIC_QOS_DEFAULT, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!topic) {
-      throw std::runtime_error(" ERROR: create_topic failed!\n");
+      throw std::runtime_error("create_topic failed!\n");
     }
     // Create DataWriter
     DDS::DataWriterQos qos;
@@ -61,29 +62,29 @@ Publisher::Publisher(const long domain_id, std::size_t samples_per_thread, bool 
 #endif
     dw_ = pub->create_datawriter(topic.in(), qos, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!dw_) {
-      throw std::runtime_error(" ERROR: create_datawriter failed!\n");
+      throw std::runtime_error("create_datawriter failed!\n");
     }
     OpenDDS::DCPS::DataWriterImpl* wi = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(dw_.in());
     if (wi) {
       ACE_DEBUG((LM_INFO, (pfx_ + "  writer id: %C\n").c_str(), OpenDDS::DCPS::LogGuid(wi->get_repo_id()).c_str()));
     } else {
-      throw std::runtime_error(" ERROR: dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(dw_.in()) failed!\n");
+      throw std::runtime_error("dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(dw_.in()) failed!\n");
     }
     writer_ = FooDataWriter::_narrow(dw_);
     if (!writer_) {
-      throw std::runtime_error(" ERROR: FooDataWriter::_narrow failed!\n");
+      throw std::runtime_error("FooDataWriter::_narrow failed!\n");
     }
     ACE_DEBUG((LM_INFO, (pfx_ + "->started\n").c_str()));
   } catch (const CORBA::Exception& e) {
-    e._tao_print_exception(" ERROR: in Publisher::Publisher");
+    e._tao_print_exception((pfx_ + " ERROR: in Publisher::Publisher").c_str());
     cleanup();
     throw;
   } catch (const std::exception& e) {
-    ACE_ERROR((LM_ERROR, (pfx_ + e.what()).c_str()));
+    ACE_ERROR((LM_ERROR, ((pfx_ + " ERROR: ") + e.what()).c_str()));
     cleanup();
     throw;
   } catch (...) {
-    ACE_ERROR((LM_ERROR, (pfx_ + " ERROR: exception\n").c_str()));
+    ACE_ERROR((LM_ERROR, (pfx_ + " ERROR: exception in Publisher::Publisher\n").c_str()));
     cleanup();
     throw;
   }

@@ -13,6 +13,8 @@
 
 #include <ace/Log_Msg.h>
 
+#include <stdexcept>
+
 Subscriber::Subscriber(const DDS::DomainId_t domainId, const std::size_t n_pub_threads, const std::size_t expected_samples, const bool durable)
   : domainId_(domainId)
   , n_pub_threads_(n_pub_threads)
@@ -73,7 +75,7 @@ Subscriber::Subscriber(const DDS::DomainId_t domainId, const std::size_t n_pub_t
     cleanup();
     throw;
   } catch (...) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: exception\n"));
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: exception in Subscriber::Subscriber\n"));
     cleanup();
     throw;
   }

@@ -5,6 +5,8 @@
 #include <ace/Arg_Shifter.h>
 #include <ace/Log_Msg.h>
 
+#include <stdexcept>
+
 Thrasher::Thrasher(int& argc, ACE_TCHAR** argv)
   : dpf_()
   , n_pub_threads_(DefaultPubThreads)
