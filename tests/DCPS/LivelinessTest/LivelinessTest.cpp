@@ -72,65 +72,8 @@ int parse_args (int argc, ACE_TCHAR *argv[])
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-/*
-  OPENDDS_STRING transport("rtps_udp");
-
-  OPENDDS_STRING config_1("dds4ccm_");
-  config_1 += transport + "_1";
-
-  OPENDDS_STRING instance_1("the_");
-  instance_1 += transport + "_transport_1";
-
-  OPENDDS_STRING config_2("dds4ccm_");
-  config_2 += transport + "_2";
-
-  OPENDDS_STRING instance_2("the_");
-  instance_2 += transport + "_transport_2";
-*/
-
   int status = 0;
-
   DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
-/*
-  OpenDDS::DCPS::TransportConfig_rch config =
-    OpenDDS::DCPS::TransportRegistry::instance()->get_config(config_1.c_str());
-
-  if (config.is_nil()) {
-    config =
-      OpenDDS::DCPS::TransportRegistry::instance()->create_config(config_1.c_str());
-  }
-
-  OpenDDS::DCPS::TransportInst_rch inst =
-    OpenDDS::DCPS::TransportRegistry::instance()->get_inst(instance_1.c_str());
-
-  if (inst.is_nil()) {
-    inst =
-      OpenDDS::DCPS::TransportRegistry::instance()->create_inst(instance_1.c_str(),
-                                                                transport.c_str());
-    config->instances_.push_back(inst);
-    OpenDDS::DCPS::TransportRegistry::instance()->global_config(config);
-  }
-
-  // Create another transport instance for participant2 since RTPS transport instances
-  // cannot be shared by domain participants.
-  OpenDDS::DCPS::TransportConfig_rch config2 =
-    OpenDDS::DCPS::TransportRegistry::instance()->get_config(config_2.c_str());
-
-  if (config2.is_nil()) {
-    config2 =
-      OpenDDS::DCPS::TransportRegistry::instance()->create_config(config_2.c_str());
-  }
-
-  OpenDDS::DCPS::TransportInst_rch inst2 =
-    OpenDDS::DCPS::TransportRegistry::instance()->get_inst(instance_2.c_str());
-
-  if (inst2.is_nil()) {
-    inst2 =
-      OpenDDS::DCPS::TransportRegistry::instance()->create_inst(instance_2.c_str(),
-                                                                transport.c_str());
-    config2->instances_.push_back(inst2);
-  }
-*/
   // let the Service_Participant (in above line) strip out -DCPSxxx parameters
   // and then get application specific parameters.
   parse_args (argc, argv);
@@ -282,27 +225,27 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                  OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   if (Utils::wait_match(dw_automatic, 1, Utils::EQ)) {
-    std::cerr << "Error waiting for match for dw_automatic" << std::endl;
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Error waiting for match for dw_automatic\n")));
     return 1;
   }
 
   if (Utils::wait_match(automatic_dr, 1, Utils::EQ)) {
-    std::cerr << "Error waiting for match for automatic_dr" << std::endl;
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Error waiting for match for automatic_dr\n")));
     return 1;
   }
 
   if (Utils::wait_match(dw_manual, 2, Utils::EQ)) {
-    std::cerr << "Error waiting for match for dw_manual" << std::endl;
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Error waiting for match for dw_manual\n")));
     return 1;
   }
 
   if (Utils::wait_match(remote_manual_dr, 1, Utils::EQ)) {
-    std::cerr << "Error waiting for match for remote_manual_dr" << std::endl;
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Error waiting for match for remote_manual_dr\n")));
     return 1;
   }
 
   if (Utils::wait_match(local_manual_dr, 1, Utils::EQ)) {
-    std::cerr << "Error waiting for match for local_manual_dr" << std::endl;
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Error waiting for match for local_manual_dr\n")));
     return 1;
   }
 
@@ -334,17 +277,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   dp->delete_publisher(pub);
 
   if (Utils::wait_match(automatic_dr, 0, Utils::EQ)) {
-    std::cerr << "Error waiting for match for automatic_dr" << std::endl;
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Error waiting for match for automatic_dr\n")));
     return 1;
   }
 
   if (Utils::wait_match(remote_manual_dr, 0, Utils::EQ)) {
-    std::cerr << "Error waiting for match for remote_manual_dr" << std::endl;
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Error waiting for match for remote_manual_dr\n")));
     return 1;
   }
 
   if (Utils::wait_match(local_manual_dr, 0, Utils::EQ)) {
-    std::cerr << "Error waiting for match for local_manual_dr" << std::endl;
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Error waiting for match for local_manual_dr\n")));
     return 1;
   }
 
