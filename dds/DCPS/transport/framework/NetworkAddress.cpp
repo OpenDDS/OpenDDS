@@ -92,7 +92,7 @@ String get_fully_qualified_hostname(ACE_INET_Addr* addr)
 
     } else {
       for (size_t i = 0; i < addr_count; i++) {
-        VDBG_LVL((LM_DEBUG, "(%P|%t) NetworkAddress: found IP interface %C\n", addr_array[i].get_host_addr()), 4);
+        VDBG_LVL((LM_DEBUG, "(%P|%t) NetworkAddress: found IP interface %C\n", LogAddr::ip(addr_array[i]).c_str()), 4);
       }
 
 #ifdef ACE_HAS_IPV6
