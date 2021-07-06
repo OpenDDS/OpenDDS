@@ -1,6 +1,7 @@
 #include "MessengerTypeSupportImpl.h"
 #include "DataReaderListenerImpl.h"
 
+#include <dds/DCPS/LogAddr.h>
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/WaitSet.h"
@@ -184,9 +185,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
             RtpsUdpInst_rch rtps_inst = dynamic_rchandle_cast<RtpsUdpInst>(inst);
 
             ACE_INET_Addr mcga = rtps_inst->multicast_group_address();
-            const char test_address[] = "239.255.20.0";
-
-            if (ACE_OS::strncmp(mcga.get_host_addr(), test_address, 12)) {
+            if (LogAddr::ip(mcga).compare("239.255.20.0") != 0) {
               ACE_ERROR_RETURN((LM_ERROR,
                                 ACE_TEXT("ERROR: %N:%l: main() -")
                                 ACE_TEXT(" multicast group address is does not match!\n")),

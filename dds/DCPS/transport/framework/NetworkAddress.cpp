@@ -510,7 +510,7 @@ ACE_INET_Addr tie_breaker(const T& addrs, const String& name)
 {
   if (!name.empty()) {
     for (typename T::const_iterator it = addrs.begin(); it != addrs.end(); ++it) {
-      if (name.compare(it->get_host_name()) == 0) {
+      if (name.compare(LogAddr::host(*it)) == 0) {
         VDBG((LM_DEBUG, "(%P|%t) tie_breaker - Choosing Address %C\n",
           LogAddr(*it, LogAddr::IpPortHost).c_str()));
         return *it;
