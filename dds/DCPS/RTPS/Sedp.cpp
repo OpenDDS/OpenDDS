@@ -3828,7 +3828,7 @@ Sedp::DiscoveryWriter::write_dcps_participant_secure(const Security::SPDPdiscove
 
   if (!ParameterListConverter::to_param_list(msg, plist)) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Sedp::write_dcps_participant_secure - ")
+               ACE_TEXT("(%P|%t) ERROR: Sedp::DiscoveryWriter::write_dcps_participant_secure - ")
                ACE_TEXT("Failed to convert SPDPdiscoveredParticipantData ")
                ACE_TEXT("to ParameterList\n")));
 
@@ -3846,7 +3846,7 @@ Sedp::DiscoveryWriter::write_dcps_participant_secure(const Security::SPDPdiscove
   }
   if (!ParameterListConverter::to_param_list(ai_map, plist)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("Sedp::write_dcps_participant_secure() - ")
+               ACE_TEXT("Sedp::DiscoveryWriter::write_dcps_participant_secure - ")
                ACE_TEXT("failed to convert from ICE::AgentInfo ")
                ACE_TEXT("to ParameterList\n")));
     return DDS::RETCODE_ERROR;
@@ -4277,15 +4277,33 @@ bool Sedp::TypeLookupReplyReader::process_get_types_reply(const XTypes::TypeLook
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyReader::process_get_types_reply\n"));
   }
 
+  if (reply._cxx_return.getType.return_code != DDS::RETCODE_OK) {
+    if (DCPS::DCPS_debug_level) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyReader::process_get_types_reply - "
+                 "received reply with return code %C\n",
+                 DCPS::retcode_to_string(reply._cxx_return.getType.return_code)));
+    }
+    return false;
+  }
+
   if (reply._cxx_return.getType.result.types.length() == 0) {
     if (DCPS::DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_get_types_reply - "
-        "received reply with no data\n"));
+                 "received reply with no data\n"));
     }
     return false;
   }
 
   sedp_.type_lookup_service_->add_type_objects_to_cache(reply._cxx_return.getType.result.types);
+
+  if (reply._cxx_return.getType.result.complete_to_minimal.length() != 0) {
+    if (DCPS::DCPS_debug_level) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyReader::process_get_types_reply - "
+                 "received reply with non-empty complete to minimal map\n"));
+    }
+    sedp_.type_lookup_service_->update_type_identifier_map(reply._cxx_return.getType.result.complete_to_minimal);
+  }
+
   return true;
 }
 
@@ -5081,7 +5099,7 @@ Sedp::add_publication_i(const DCPS::RepoId& rid,
 DDS::ReturnCode_t
 Sedp::write_publication_data(
   const RepoId& rid,
-  LocalPublication& lp,
+  const LocalPublication& lp,
   const RepoId& reader)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
@@ -5122,7 +5140,7 @@ Sedp::write_publication_data_unsecure(
     // Convert to parameter list
     if (!ParameterListConverter::to_param_list(dwd, plist, use_xtypes_, false)) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
+                 ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data_unsecure - ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
                  ACE_TEXT(" to ParameterList\n")));
       result = DDS::RETCODE_ERROR;
@@ -5133,7 +5151,7 @@ Sedp::write_publication_data_unsecure(
       ai_map["DATA"] = lp.ice_agent_info;
       if (!ParameterListConverter::to_param_list(ai_map, plist)) {
         ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
+                   ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data_unsecure - ")
                    ACE_TEXT("Failed to convert ICE Agent info ")
                    ACE_TEXT("to ParameterList\n")));
         result = DDS::RETCODE_ERROR;
@@ -5145,7 +5163,7 @@ Sedp::write_publication_data_unsecure(
       result = publications_writer_->write_parameter_list(plist, reader, lp.sequence_);
     }
   } else if (DCPS::DCPS_debug_level > 3) {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_publication_data - ")
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_publication_data_unsecure - ")
                ACE_TEXT("not currently associated, dropping msg.\n")));
   }
   return result;

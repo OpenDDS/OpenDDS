@@ -818,7 +818,7 @@ private:
                                       LocalPublication& pub);
 
   DDS::ReturnCode_t write_publication_data(const DCPS::RepoId& rid,
-                                           LocalPublication& pub,
+                                           const LocalPublication& pub,
                                            const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 
 #ifdef OPENDDS_SECURITY

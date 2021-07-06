@@ -37,6 +37,7 @@ public:
     TypeIdentifierTypeObjectPairSeq& types) const;
   void add_type_objects_to_cache(const TypeIdentifierTypeObjectPairSeq& types);
 
+  // For converting between complete to minimal TypeObject of remote types
   void update_type_identifier_map(const TypeIdentifierPairSeq& tid_pairs);
   bool complete_to_minimal_type_object(const TypeObject& cto, TypeObject& mto) const;
 

@@ -322,6 +322,7 @@ namespace OpenDDS {
         : max_type_lookup_service_reply_period_(0)
         , type_lookup_service_sequence_number_(0)
         , use_xtypes_(true)
+        , use_xtypes_complete_(false)
         , lock_(lock)
         , participant_id_(participant_id)
         , publication_counter_(0)
@@ -541,7 +542,7 @@ namespace OpenDDS {
           if (!get_access_control()->get_topic_sec_attributes(permh, topic_name.data(), topic_sec_attr, ex)) {
             ACE_ERROR((LM_ERROR,
               ACE_TEXT("(%P|%t) ERROR: ")
-              ACE_TEXT("DomainParticipant::add_publication, ")
+              ACE_TEXT("EndpointManager::add_publication - ")
               ACE_TEXT("Unable to get security attributes for topic '%C'. SecurityException[%d.%d]: %C\n"),
                 topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
             return RepoId();
@@ -552,7 +553,7 @@ namespace OpenDDS {
                   permh, get_domain_id(), topic_name.data(), qos,
                   publisherQos.partition, DDS::Security::DataTagQosPolicy(), ex)) {
               ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
-                ACE_TEXT("EndpointManager::add_publication() - ")
+                ACE_TEXT("EndpointManager::add_publication - ")
                 ACE_TEXT("Permissions check failed for local datawriter on topic '%C'. ")
                 ACE_TEXT("Security Exception[%d.%d]: %C\n"), topic_name.data(),
                   ex.code, ex.minor_code, ex.message.in()));
@@ -563,7 +564,7 @@ namespace OpenDDS {
           if (!get_access_control()->get_datawriter_sec_attributes(permh, topic_name.data(),
               publisherQos.partition, DDS::Security::DataTagQosPolicy(), pb.security_attribs_, ex)) {
             ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-                       ACE_TEXT("EndpointManager::add_publication() - ")
+                       ACE_TEXT("EndpointManager::add_publication - ")
                        ACE_TEXT("Unable to get security attributes for local datawriter. ")
                        ACE_TEXT("Security Exception[%d.%d]: %C\n"),
                        ex.code, ex.minor_code, ex.message.in()));
@@ -576,7 +577,7 @@ namespace OpenDDS {
                 crypto_handle_, DDS::PropertySeq(), pb.security_attribs_, ex);
             if (handle == DDS::HANDLE_NIL) {
               ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-                         ACE_TEXT("EndpointManager::add_publication() - ")
+                         ACE_TEXT("EndpointManager::add_publication - ")
                          ACE_TEXT("Unable to get local datawriter crypto handle. ")
                          ACE_TEXT("Security Exception[%d.%d]: %C\n"),
                          ex.code, ex.minor_code, ex.message.in()));
@@ -1209,6 +1210,7 @@ namespace OpenDDS {
       TimeDuration max_type_lookup_service_reply_period_;
       DCPS::SequenceNumber type_lookup_service_sequence_number_;
       bool use_xtypes_;
+      bool use_xtypes_complete_;
 
       void
       match(const RepoId& writer, const RepoId& reader)
@@ -1263,12 +1265,21 @@ namespace OpenDDS {
         md.reader = reader;
         md.time_added_to_map = MonotonicTimePoint::now();
 
+        // NOTE(sonndinh): Is it possible for a discovered endpoint to include only the "complete"
+        // part in its TypeInformation? If it's possible, then we may need to handle that case, i.e.,
+        // request only the remote complete TypeObject (if it's not already in the cache).
+        // The following code assumes when the "minimal" part is not included in the discovered
+        // endpoint's TypeInformation, then the "complete" part also is not included.
         if ((writer_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE) &&
             (reader_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE)) {
           if (!writer_local && reader_local) {
-            if (type_lookup_service_ &&
-                !type_lookup_service_->type_object_in_cache(
-                  writer_type_info->minimal.typeid_with_size.type_id)) {
+            const bool need_minimal_tobjs = type_lookup_service_ &&
+              !type_lookup_service_->type_object_in_cache(writer_type_info->minimal.typeid_with_size.type_id);
+            const bool need_complete_tobjs = type_lookup_service_ && use_xtypes_complete_ &&
+              writer_type_info->complete.typeid_with_size.type_id.kind() != XTypes::TK_NONE &&
+              !type_lookup_service_->type_object_in_cache(writer_type_info->complete.typeid_with_size.type_id);
+
+            if (need_minimal_tobjs || need_complete_tobjs) {
               if (DCPS_debug_level >= 4) {
                 ACE_DEBUG((LM_DEBUG, "(%P|%t) EndpointManager::match: Remote Writer\n"));
               }
@@ -1276,13 +1287,20 @@ namespace OpenDDS {
 #ifdef OPENDDS_SECURITY
               is_discovery_protected = lsi->second.security_attribs_.base.is_discovery_protected;
 #endif
-              save_matching_data_and_get_typeobjects(
-                writer_type_info, md, MatchingPair(writer, reader), writer, is_discovery_protected);
+              save_matching_data_and_get_typeobjects(writer_type_info, md,
+                                                     MatchingPair(writer, reader),
+                                                     writer, is_discovery_protected,
+                                                     need_minimal_tobjs, need_complete_tobjs);
               return;
             }
           } else if (!reader_local && writer_local) {
-            if (type_lookup_service_ && !type_lookup_service_->type_object_in_cache(
-                reader_type_info->minimal.typeid_with_size.type_id)) {
+            const bool need_minimal_tobjs = type_lookup_service_ &&
+              !type_lookup_service_->type_object_in_cache(reader_type_info->minimal.typeid_with_size.type_id);
+            const bool need_complete_tobjs = type_lookup_service_ && use_xtypes_complete_ &&
+              reader_type_info->complete.typeid_with_size.type_id.kind() != XTypes::TK_NONE &&
+              !type_lookup_service_->type_object_in_cache(reader_type_info->complete.typeid_with_size.type_id);
+
+            if (need_minimal_tobjs || need_complete_tobjs) {
               if (DCPS_debug_level >= 4) {
                 ACE_DEBUG((LM_DEBUG, "(%P|%t) EndpointManager::match: Remote Reader\n"));
               }
@@ -1290,8 +1308,10 @@ namespace OpenDDS {
 #ifdef OPENDDS_SECURITY
               is_discovery_protected = lpi->second.security_attribs_.base.is_discovery_protected;
 #endif
-              save_matching_data_and_get_typeobjects(
-                reader_type_info, md, MatchingPair(writer, reader), reader, is_discovery_protected);
+              save_matching_data_and_get_typeobjects(reader_type_info, md,
+                                                     MatchingPair(writer, reader),
+                                                     reader, is_discovery_protected,
+                                                     need_minimal_tobjs, need_complete_tobjs);
               return;
             }
           }
@@ -1786,7 +1806,23 @@ namespace OpenDDS {
       void save_matching_data_and_get_typeobjects(const XTypes::TypeInformation* type_info,
                                                   MatchingData& md, const MatchingPair& mp,
                                                   const RepoId& remote_id,
-                                                  bool is_discovery_protected)
+                                                  bool is_discovery_protected,
+                                                  bool get_minimal, bool get_complete)
+      {
+        // Send a sequence of requests for minimal remote TypeObjects
+        if (get_minimal) {
+          get_remote_type_objects(type_info->minimal, md, mp, remote_id, is_discovery_protected);
+        }
+
+        // Send another sequence of requests for complete remote TypeObjects
+        if (get_complete) {
+          get_remote_type_objects(type_info->complete, md, mp, remote_id, is_discovery_protected);
+        }
+      }
+
+      void get_remote_type_objects(const XTypes::TypeIdentifierWithDependencies& tid_with_deps,
+                                   MatchingData& md, const MatchingPair& mp,
+                                   const RepoId& remote_id, bool is_discovery_protected)
       {
         const SequenceNumber seqnum = ++type_lookup_service_sequence_number_;
         if (DCPS_debug_level >= 4) {
@@ -1795,16 +1831,12 @@ namespace OpenDDS {
             "remote: %C seq: %q\n", LogGuid(remote_id).c_str(), seqnum.getValue()));
         }
         md.rpc_sequence_number = seqnum;
-        MatchingDataIter md_it = matching_data_buffer_.find(mp);
-        if (md_it != matching_data_buffer_.end()) {
-          md_it->second = md;
-        } else {
-          matching_data_buffer_.insert(std::make_pair(mp, md));
-        }
-        // Store an entry for the first request
+        matching_data_buffer_[mp] = md;
+
+        // Store an entry for the first request in the sequence.
         TypeIdOrigSeqNumber orig_req_data;
         std::memcpy(orig_req_data.participant, remote_id.guidPrefix, sizeof(GuidPrefix_t));
-        orig_req_data.type_id = type_info->minimal.typeid_with_size.type_id;
+        orig_req_data.type_id = tid_with_deps.typeid_with_size.type_id;
         orig_req_data.seq_number = md.rpc_sequence_number;
         orig_req_data.secure = false;
 #ifdef OPENDDS_SECURITY
@@ -1816,19 +1848,21 @@ namespace OpenDDS {
         orig_seq_numbers_.insert(std::make_pair(md.rpc_sequence_number, orig_req_data));
 
         XTypes::TypeIdentifierSeq type_ids;
-        if (type_info->minimal.dependent_typeid_count == -1 ||
-            type_info->minimal.dependent_typeids.length() < (CORBA::ULong)type_info->minimal.dependent_typeid_count) {
-          type_ids.append(type_info->minimal.typeid_with_size.type_id);
+        if (tid_with_deps.dependent_typeid_count == -1 ||
+            tid_with_deps.dependent_typeids.length() < (CORBA::ULong)tid_with_deps.dependent_typeid_count) {
+          type_ids.append(tid_with_deps.typeid_with_size.type_id);
 
-          // Get dependencies of topic type
+          // Get dependencies of the topic type. TypeObjects of both topic type and
+          // its dependencies are obtained in subsequent type lookup requests.
           send_type_lookup_request(type_ids, remote_id, is_discovery_protected, false);
         } else {
-          type_ids.length(type_info->minimal.dependent_typeid_count + 1);
-          type_ids[0] = type_info->minimal.typeid_with_size.type_id;
-          for (unsigned i = 1; i <= (unsigned)type_info->minimal.dependent_typeid_count; ++i) {
-            type_ids[i] = type_info->minimal.dependent_typeids[i - 1].type_id;
+          type_ids.length(tid_with_deps.dependent_typeid_count + 1);
+          type_ids[0] = tid_with_deps.typeid_with_size.type_id;
+          for (unsigned i = 1; i <= (unsigned)tid_with_deps.dependent_typeid_count; ++i) {
+            type_ids[i] = tid_with_deps.dependent_typeids[i - 1].type_id;
           }
-          // Get TypeObjects of topic type and all of its dependencies
+
+          // Get TypeObjects of topic type and all of its dependencies.
           send_type_lookup_request(type_ids, remote_id, is_discovery_protected, true);
         }
         type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
