@@ -65,7 +65,7 @@ Candidate make_host_candidate(const ACE_INET_Addr& address)
 {
   Candidate candidate;
   candidate.address = address;
-  candidate.foundation = std::string("H") + LogAddr::ip(address) + "U";
+  candidate.foundation = std::string("H") + DCPS::LogAddr::ip(address) + "U";
   // See https://tools.ietf.org/html/rfc8445#section-5.1.2.1 for an explanation of the formula below.
   candidate.priority = (126 << 24) + (local_priority(address) << 8) + ((256 - 1) << 0); // No local preference, component 1.
   candidate.type = HOST;
@@ -77,7 +77,7 @@ Candidate make_server_reflexive_candidate(const ACE_INET_Addr& address, const AC
 {
   Candidate candidate;
   candidate.address = address;
-  candidate.foundation = std::string("S") + LogAddr::ip(base) + "_" + LogAddr::ip(server_address) + "U";
+  candidate.foundation = std::string("S") + DCPS::LogAddr::ip(base) + "_" + DCPS::LogAddr::ip(server_address) + "U";
   // See https://tools.ietf.org/html/rfc8445#section-5.1.2.1 for an explanation of the formula below.
   candidate.priority = (100 << 24) + (local_priority(address) << 8) + ((256 - 1) << 0); // No local preference, component 1.
   candidate.type = SERVER_REFLEXIVE;
@@ -89,7 +89,7 @@ Candidate make_peer_reflexive_candidate(const ACE_INET_Addr& address, const ACE_
 {
   Candidate candidate;
   candidate.address = address;
-  candidate.foundation = std::string("P") + LogAddr::ip(base) + "_" + LogAddr::ip(server_address) + "U";
+  candidate.foundation = std::string("P") + DCPS::LogAddr::ip(base) + "_" + DCPS::LogAddr::ip(server_address) + "U";
   candidate.priority = priority;
   candidate.type = PEER_REFLEXIVE;
   candidate.base = base;
