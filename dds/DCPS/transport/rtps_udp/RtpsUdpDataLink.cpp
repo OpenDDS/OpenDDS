@@ -4344,19 +4344,19 @@ RtpsUdpDataLink::receive_strategy()
   return static_cast<RtpsUdpReceiveStrategy*>(receive_strategy_.in());
 }
 
-RtpsUdpDataLink::AddrSet
+AddrSet
 RtpsUdpDataLink::get_addresses(const RepoId& local, const RepoId& remote) const {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, locators_lock_, AddrSet());
   return get_addresses_i(local, remote);
 }
 
-RtpsUdpDataLink::AddrSet
+AddrSet
 RtpsUdpDataLink::get_addresses(const RepoId& local) const {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, locators_lock_, AddrSet());
   return get_addresses_i(local);
 }
 
-RtpsUdpDataLink::AddrSet
+AddrSet
 RtpsUdpDataLink::get_addresses_i(const RepoId& local, const RepoId& remote) const {
   AddrSet retval;
 
@@ -4365,7 +4365,7 @@ RtpsUdpDataLink::get_addresses_i(const RepoId& local, const RepoId& remote) cons
   return retval;
 }
 
-RtpsUdpDataLink::AddrSet
+AddrSet
 RtpsUdpDataLink::get_addresses_i(const RepoId& local) const {
   AddrSet retval;
 

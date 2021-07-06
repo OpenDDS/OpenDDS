@@ -176,8 +176,6 @@ public:
 
   const GuidPrefix_t& local_prefix() const { return local_prefix_; }
 
-  typedef OPENDDS_SET(ACE_INET_Addr) AddrSet;
-
   void remove_locator_and_bundling_cache(const RepoId& remote_id);
 
   void update_locators(const RepoId& remote_id,

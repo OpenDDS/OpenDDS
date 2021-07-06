@@ -26,19 +26,21 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+typedef OPENDDS_SET(ACE_INET_Addr) AddrSet;
+
+struct AddressCacheEntry {
+  AddressCacheEntry() : addrs_(), expires_(MonotonicTimePoint::max_value) {}
+  AddressCacheEntry(const AddrSet& addrs, const MonotonicTimePoint& expires) : addrs_(addrs), expires_(expires) {}
+
+  AddrSet addrs_;
+  MonotonicTimePoint expires_;
+};
+
 template <typename Key>
 class AddressCache {
 public:
 
-  typedef OPENDDS_SET(ACE_INET_Addr) AddrSet;
-  struct MapValue {
-    MapValue() : addrs_(), expires_(MonotonicTimePoint::max_value) {}
-    MapValue(const AddrSet& addrs, const MonotonicTimePoint& expires) : addrs_(addrs), expires_(expires) {}
-
-    AddrSet addrs_;
-    MonotonicTimePoint expires_;
-  };
-  typedef OPENDDS_MAP(Key, MapValue) MapType;
+  typedef OPENDDS_MAP(Key, AddressCacheEntry) MapType;
 
   AddressCache() {}
   virtual ~AddressCache() {}
@@ -60,7 +62,7 @@ public:
 
     ACE_Guard<ACE_Thread_Mutex> guard_;
     typename MapType::iterator find_result_;
-    MapValue& value_;
+    AddressCacheEntry& value_;
     bool previous_expired_;
     bool is_new_;
 
@@ -89,7 +91,7 @@ public:
   void store(const Key& key, const AddrSet& addrs, const MonotonicTimePoint& expires = MonotonicTimePoint::max_value)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    std::pair<typename MapType::iterator, bool> ins = map_.insert(typename MapType::value_type(key, MapValue(addrs, expires)));
+    std::pair<typename MapType::iterator, bool> ins = map_.insert(typename MapType::value_type(key, AddressCacheEntry(addrs, expires)));
     if (!ins.second) {
       ins.first->second.addrs_ = addrs;
       ins.first->second.expires_ = expires;

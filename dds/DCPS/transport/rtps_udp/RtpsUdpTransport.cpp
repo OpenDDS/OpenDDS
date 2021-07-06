@@ -289,7 +289,7 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
 {
   bool requires_inline_qos;
   unsigned int blob_bytes_read;
-  std::pair<RtpsUdpDataLink::AddrSet, RtpsUdpDataLink::AddrSet> addrs =
+  std::pair<AddrSet, AddrSet> addrs =
     get_connection_addrs(remote_data, &requires_inline_qos, &blob_bytes_read);
 
   if (link_) {
@@ -302,7 +302,7 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
   return true;
 }
 
-std::pair<RtpsUdpDataLink::AddrSet, RtpsUdpDataLink::AddrSet>
+std::pair<AddrSet, AddrSet>
 RtpsUdpTransport::get_connection_addrs(const TransportBLOB& remote,
                                        bool* requires_inline_qos,
                                        unsigned int* blob_bytes_read) const
@@ -312,11 +312,11 @@ RtpsUdpTransport::get_connection_addrs(const TransportBLOB& remote,
   DDS::ReturnCode_t result =
     blob_to_locators(remote, locators, requires_inline_qos, blob_bytes_read);
   if (result != DDS::RETCODE_OK) {
-    return std::make_pair(RtpsUdpDataLink::AddrSet(), RtpsUdpDataLink::AddrSet());
+    return std::make_pair(AddrSet(), AddrSet());
   }
 
-  RtpsUdpDataLink::AddrSet uc_addrs;
-  RtpsUdpDataLink::AddrSet mc_addrs;
+  AddrSet uc_addrs;
+  AddrSet mc_addrs;
   for (CORBA::ULong i = 0; i < locators.length(); ++i) {
     ACE_INET_Addr addr;
     // If conversion was successful
@@ -419,7 +419,7 @@ RtpsUdpTransport::update_locators(const RepoId& remote,
   if (link_) {
     bool requires_inline_qos;
     unsigned int blob_bytes_read;
-    std::pair<RtpsUdpDataLink::AddrSet, RtpsUdpDataLink::AddrSet> addrs =
+    std::pair<AddrSet, AddrSet> addrs =
       get_connection_addrs(*blob, &requires_inline_qos, &blob_bytes_read);
     link_->update_locators(remote, addrs.first, addrs.second, requires_inline_qos, false);
   }

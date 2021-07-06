@@ -22,14 +22,14 @@ struct TestKey
 TEST(address_cache_test, load_fail)
 {
   AddressCache<TestKey> test_cache_;
-  AddressCache<TestKey>::AddrSet addrs;
+  AddrSet addrs;
   ASSERT_FALSE(test_cache_.load(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs));
 }
 
 TEST(address_cache_test, store_load_success)
 {
   AddressCache<TestKey> test_cache_;
-  AddressCache<TestKey>::AddrSet addrs;
+  AddrSet addrs;
   addrs.insert(ACE_INET_Addr("127.0.0.1:1234"));
 
   test_cache_.store(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs);
@@ -43,7 +43,7 @@ TEST(address_cache_test, store_load_success)
 TEST(address_cache_test, store_remove_load_fail)
 {
   AddressCache<TestKey> test_cache_;
-  AddressCache<TestKey>::AddrSet addrs;
+  AddrSet addrs;
   addrs.insert(ACE_INET_Addr("127.0.0.1:1234"));
 
   test_cache_.store(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs);
@@ -57,7 +57,7 @@ TEST(address_cache_test, store_remove_load_fail)
 TEST(address_cache_test, store_remove_contains_load_fail)
 {
   AddressCache<TestKey> test_cache_;
-  AddressCache<TestKey>::AddrSet addrs;
+  AddrSet addrs;
   addrs.insert(ACE_INET_Addr("127.0.0.1:1234"));
 
   test_cache_.store(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs);
@@ -73,13 +73,13 @@ TEST(address_cache_test, scoped_access_load_success)
   AddressCache<TestKey> test_cache_;
   {
     AddressCache<TestKey>::ScopedAccess entry(test_cache_, TestKey(GUID_UNKNOWN, GUID_UNKNOWN));
-    AddressCache<TestKey>::AddrSet& addrs = entry.value_.addrs_;
+    AddrSet& addrs = entry.value_.addrs_;
 
     addrs.insert(ACE_INET_Addr("127.0.0.1:1234"));
     addrs.insert(ACE_INET_Addr("127.0.1.1:4321"));
   }
 
-  AddressCache<TestKey>::AddrSet addrs;
+  AddrSet addrs;
   ASSERT_TRUE(test_cache_.load(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs));
   ASSERT_EQ(addrs.size(), 2u);
   ASSERT_EQ(*(addrs.begin()),ACE_INET_Addr("127.0.0.1:1234"));
