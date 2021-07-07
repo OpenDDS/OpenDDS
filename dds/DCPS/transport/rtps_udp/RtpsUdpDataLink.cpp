@@ -2365,7 +2365,7 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVecVecVec& meta_submess
 {
   size_t cache_hits = 0;
   size_t cache_misses = 0;
-  size_t addrset_min_size = std::numeric_limits<size_t>::max());
+  size_t addrset_min_size = std::numeric_limits<size_t>::max();
   size_t addrset_max_size = 0;
 
   // Sort meta_submessages by address set and destination
