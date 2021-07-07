@@ -97,7 +97,7 @@ struct BundlingCacheKey {
   }
 
   bool contains(const RepoId& id) const {
-    return dst_guid_ == id || from_guid_ == id || to_guids_.count(id) != 0;
+    return to_guids_.count(id) != 0;
   }
 
   const RepoId dst_guid_;

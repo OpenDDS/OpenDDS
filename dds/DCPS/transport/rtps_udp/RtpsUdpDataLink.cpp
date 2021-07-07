@@ -540,6 +540,7 @@ RtpsUdpDataLink::remove_locator_and_bundling_cache(const RepoId& remote_id)
 {
   static const RepoId GUID_MAX = { { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }, { { 0xFF, 0xFF, 0xFF }, 0xFF } };
   locator_cache_.remove(LocatorCacheKey(remote_id, GUID_UNKNOWN, false), LocatorCacheKey(remote_id, GUID_MAX, true));
+  bundling_cache_.remove(BundlingCacheKey(remote_id, GUID_UNKNOWN, RepoIdSet()), BundlingCacheKey(remote_id, GUID_MAX, RepoIdSet()));
   bundling_cache_.remove_contains(remote_id);
 }
 
@@ -1520,11 +1521,18 @@ void RtpsUdpDataLink::update_last_recv_addr(const RepoId& src, const ACE_INET_Ad
     return;
   }
 
-  ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
-  const RemoteInfoMap::iterator pos = locators_.find(src);
-  if (pos != locators_.end()) {
-    pos->second.last_recv_addr_ = addr;
-    pos->second.last_recv_time_ = MonotonicTimePoint::now();
+  bool remove_cache = false;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
+    const RemoteInfoMap::iterator pos = locators_.find(src);
+    if (pos != locators_.end()) {
+      remove_cache = pos->second.last_recv_addr_ != addr;
+      pos->second.last_recv_addr_ = addr;
+      pos->second.last_recv_time_ = MonotonicTimePoint::now();
+    }
+  }
+  if (remove_cache) {
+    remove_locator_and_bundling_cache(src);
   }
 }
 
@@ -2357,6 +2365,8 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVecVecVec& meta_submess
 {
   size_t cache_hits = 0;
   size_t cache_misses = 0;
+  size_t addrset_min_size = -1;
+  size_t addrset_max_size = 0;
 
   // Sort meta_submessages by address set and destination
   for (MetaSubmessageVecVecVec::iterator vvit = meta_submessages.begin(); vvit != meta_submessages.end(); ++vvit) {
@@ -2390,6 +2400,8 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVecVecVec& meta_submess
         }
 
         const AddrSet& addrs = entry.value_.addrs_;
+        addrset_min_size = std::min(addrset_min_size, addrs.size());
+        addrset_max_size = std::max(addrset_max_size, addrs.size());
         if (addrs.empty()) {
           continue;
 #ifdef OPENDDS_SECURITY
@@ -2406,7 +2418,7 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVecVecVec& meta_submess
       }
     }
   }
-  VDBG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::build_meta_submessage_map() - Bundling Cache Stats: hits = %d, misses = %d\n", cache_hits, cache_misses));
+  VDBG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::build_meta_submessage_map() - Bundling Cache Stats: hits = %d, misses = %d, min = %d, max = %d\n", cache_hits, cache_misses, addrset_min_size, addrset_max_size));
 }
 
 #ifdef OPENDDS_SECURITY
