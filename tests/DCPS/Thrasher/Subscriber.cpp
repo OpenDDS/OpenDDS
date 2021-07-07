@@ -13,6 +13,8 @@
 
 #include <ace/Log_Msg.h>
 
+#include <stdexcept>
+
 Subscriber::Subscriber(const DDS::DomainId_t domainId, const std::size_t n_pub_threads, const std::size_t expected_samples, const bool durable)
   : domainId_(domainId)
   , n_pub_threads_(n_pub_threads)
@@ -30,7 +32,7 @@ Subscriber::Subscriber(const DDS::DomainId_t domainId, const std::size_t n_pub_t
       throw std::runtime_error("create_participant failed.");
     }
     FooTypeSupport_var ts = new FooTypeSupportImpl;
-    if (ts->register_type(dp_.in(), "") != DDS::RETCODE_OK) {
+    if (!ts || ts->register_type(dp_.in(), "") != DDS::RETCODE_OK) {
       throw std::runtime_error("register_type failed.");
     }
     DDS::Topic_var topic = dp_->create_topic("FooTopic",
@@ -46,6 +48,9 @@ Subscriber::Subscriber(const DDS::DomainId_t domainId, const std::size_t n_pub_t
     // Create DataReader
     listener_i_ = new DataReaderListenerImpl(expected_samples_, "(%P|%t)  sub %d%% (%d samples received)\n");
     listener_ = listener_i_;
+    if (!listener_) {
+      throw std::runtime_error("DataReaderListenerImpl creation failed.");
+    }
     DDS::DataReaderQos qos;
     sub->get_default_datareader_qos(qos);
     qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
@@ -60,13 +65,17 @@ Subscriber::Subscriber(const DDS::DomainId_t domainId, const std::size_t n_pub_t
       throw std::runtime_error("create_datareader failed.");
     }
     OpenDDS::DCPS::DataReaderImpl* impl = dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader_.in());
-    ACE_DEBUG((LM_INFO, "(%P|%t)    Subscriber reader id: %C\n", OpenDDS::DCPS::LogGuid(impl->get_repo_id()).c_str()));
+    if (impl) {
+      ACE_DEBUG((LM_INFO, "(%P|%t)    Subscriber reader id: %C\n", OpenDDS::DCPS::LogGuid(impl->get_repo_id()).c_str()));
+    } else {
+      throw std::runtime_error("dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader_.in()) failed.");
+    }
   } catch (const std::exception& e) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) %C\n", e.what()));
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: %C\n", e.what()));
     cleanup();
     throw;
   } catch (...) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) exception\n"));
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: exception in Subscriber::Subscriber\n"));
     cleanup();
     throw;
   }
