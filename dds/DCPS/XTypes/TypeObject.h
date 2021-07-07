@@ -1330,9 +1330,9 @@ namespace XTypes {
     CompleteCollectionElement element;
 
     CompleteSequenceType()
-    : collection_flag(0)
-    , header()
-    , element()
+      : collection_flag(0)
+      , header()
+      , element()
     {}
   };
 
@@ -1342,12 +1342,12 @@ namespace XTypes {
     MinimalCollectionElement element;
 
     MinimalSequenceType()
-    : collection_flag(0)
-    , header()
-    , element()
+      : collection_flag(0)
+      , header()
+      , element()
     {}
 
-      MinimalSequenceType(CollectionTypeFlag a_collection_flag,
+    MinimalSequenceType(CollectionTypeFlag a_collection_flag,
                         const MinimalCollectionHeader& a_header,
                         const MinimalCollectionElement& a_element)
       : collection_flag(a_collection_flag)
@@ -1385,9 +1385,9 @@ namespace XTypes {
     CompleteCollectionElement element;
 
     CompleteArrayType()
-    : collection_flag(0)
-    , header()
-    , element()
+      : collection_flag(0)
+      , header()
+      , element()
     {}
 
   };
@@ -1398,9 +1398,9 @@ namespace XTypes {
     MinimalCollectionElement element;
 
     MinimalArrayType()
-    : collection_flag(0)
-    , header()
-    , element()
+      : collection_flag(0)
+      , header()
+      , element()
     {}
 
     MinimalArrayType(CollectionTypeFlag a_collection_flag,
