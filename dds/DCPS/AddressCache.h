@@ -40,8 +40,7 @@ template <typename Key>
 class AddressCache {
 public:
 
-  typedef Key KeyType;
-  typedef OPENDDS_MAP(KeyType, AddressCacheEntry) MapType;
+  typedef OPENDDS_MAP(Key, AddressCacheEntry) MapType;
 
   AddressCache() {}
   virtual ~AddressCache() {}
