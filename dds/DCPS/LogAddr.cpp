@@ -9,10 +9,12 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+const size_t LogAddr::BufSize = AddrToStringSize;
+
 const String LogAddr::ip(const ACE_INET_Addr& addr)
 {
-  char s[AddrToStringSize] = {'\0'};
-  return String(addr.get_host_addr(s, AddrToStringSize));
+  char s[BufSize] = {'\0'};
+  return String(addr.get_host_addr(s, BufSize));
 }
 
 const String LogAddr::port(const ACE_INET_Addr& addr)
@@ -25,8 +27,8 @@ const String LogAddr::port(const ACE_INET_Addr& addr)
 
 const String LogAddr::host(const ACE_INET_Addr& addr)
 {
-  char s[AddrToStringSize] = {'\0'};
-  addr.get_host_name(s, AddrToStringSize);
+  char s[BufSize] = {'\0'};
+  addr.get_host_name(s, BufSize);
   return String(s);
 }
 
