@@ -66,8 +66,14 @@ typedef RcHandle<RtpsUdpTransport> RtpsUdpTransport_rch;
 typedef RcHandle<TransportClient> TransportClient_rch;
 
 struct LocatorCacheKey {
-  LocatorCacheKey(const RepoId& remote, const RepoId& local, bool prefer_unicast) : remote_(remote), local_(local), prefer_unicast_(prefer_unicast) {}
-  bool operator<(const LocatorCacheKey& rhs) const {
+  LocatorCacheKey(const RepoId& remote, const RepoId& local, bool prefer_unicast) 
+    : remote_(remote)
+    , local_(local)
+    , prefer_unicast_(prefer_unicast)
+  {
+  }
+  bool operator<(const LocatorCacheKey& rhs) const
+  {
     return std::memcmp(this, &rhs, sizeof (LocatorCacheKey)) < 0;
   }
 
@@ -78,8 +84,14 @@ struct LocatorCacheKey {
 typedef AddressCache<LocatorCacheKey> LocatorCache;
 
 struct BundlingCacheKey {
-  BundlingCacheKey(const RepoId& dst_guid, const RepoId& from_guid, const RepoIdSet& to_guids) : dst_guid_(dst_guid), from_guid_(from_guid), to_guids_(to_guids) {}
-  bool operator<(const BundlingCacheKey& rhs) const {
+  BundlingCacheKey(const RepoId& dst_guid, const RepoId& from_guid, const RepoIdSet& to_guids) 
+    : dst_guid_(dst_guid)
+    , from_guid_(from_guid)
+    , to_guids_(to_guids)
+  {
+  }
+  bool operator<(const BundlingCacheKey& rhs) const
+  {
     int r1 = std::memcmp(&dst_guid_, &rhs.dst_guid_, sizeof (RepoId));
     if (r1 < 0) {
       return true;
@@ -96,7 +108,8 @@ struct BundlingCacheKey {
     return false;
   }
 
-  bool contains(const RepoId& id) const {
+  bool contains(const RepoId& id) const
+  {
     return to_guids_.count(id) != 0;
   }
 

@@ -6,8 +6,7 @@
 
 using namespace OpenDDS::DCPS;
 
-struct TestKey
-{
+struct TestKey {
   TestKey(const RepoId& from, const RepoId& to) : from_(from), to_(to) {}
   bool operator<(const TestKey& rhs) const {
     return std::memcmp(this, &rhs, sizeof (TestKey)) < 0;
