@@ -674,7 +674,7 @@ namespace OpenDDS {
           if (DCPS_debug_level > 3) {
             const GuidConverter conv(publicationId);
             ACE_DEBUG((LM_INFO,
-              ACE_TEXT("(%P|%t) EndpointManager::update_publication_qos - updating locators for %C\n"),
+              ACE_TEXT("(%P|%t) EndpointManager::update_publication_locators - updating locators for %C\n"),
               OPENDDS_STRING(conv).c_str()));
           }
           iter->second.trans_info_ = transInfo;
