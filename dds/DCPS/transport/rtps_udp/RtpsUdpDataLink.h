@@ -66,7 +66,7 @@ typedef RcHandle<RtpsUdpTransport> RtpsUdpTransport_rch;
 typedef RcHandle<TransportClient> TransportClient_rch;
 
 struct LocatorCacheKey {
-  LocatorCacheKey(const RepoId& remote, const RepoId& local, bool prefer_unicast) 
+  LocatorCacheKey(const RepoId& remote, const RepoId& local, bool prefer_unicast)
     : remote_(remote)
     , local_(local)
     , prefer_unicast_(prefer_unicast)
@@ -84,7 +84,7 @@ struct LocatorCacheKey {
 typedef AddressCache<LocatorCacheKey> LocatorCache;
 
 struct BundlingCacheKey {
-  BundlingCacheKey(const RepoId& dst_guid, const RepoId& from_guid, const RepoIdSet& to_guids) 
+  BundlingCacheKey(const RepoId& dst_guid, const RepoId& from_guid, const RepoIdSet& to_guids)
     : dst_guid_(dst_guid)
     , from_guid_(from_guid)
     , to_guids_(to_guids)
