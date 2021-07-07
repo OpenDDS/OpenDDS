@@ -4206,7 +4206,8 @@ bool Sedp::TypeLookupReplyReader::process_type_lookup_reply(
   XTypes::TypeLookup_Reply type_lookup_reply;
   if (!(ser >> type_lookup_reply)) {
     if (DCPS::DCPS_debug_level) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_type_lookup_reply - ")
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_type_lookup_reply - ")
         ACE_TEXT("failed to deserialize type lookup reply\n")));
     }
     return false;
@@ -4215,7 +4216,7 @@ bool Sedp::TypeLookupReplyReader::process_type_lookup_reply(
   const DDS::SampleIdentity& request_id = type_lookup_reply.header.related_request_id;
   const DCPS::SequenceNumber seq_num = to_opendds_seqnum(request_id.sequence_number);
   if (DCPS::DCPS_debug_level >= 8) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyReader::process_type_lookup_reply: "
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyReader::process_type_lookup_reply - "
       "from %C seq %q\n",
       DCPS::LogGuid(request_id.writer_guid).c_str(),
       seq_num.getValue()));
@@ -4228,10 +4229,9 @@ bool Sedp::TypeLookupReplyReader::process_type_lookup_reply(
   const OrigSeqNumberMap::const_iterator seq_num_it = sedp_.orig_seq_numbers_.find(seq_num);
   if (seq_num_it == sedp_.orig_seq_numbers_.end()) {
     ACE_DEBUG((LM_WARNING,
-               ACE_TEXT("(%P|%t) WARNING: Sedp::TypeLookupReplyReader::process_type_lookup_reply - ")
-               ACE_TEXT("could not find request corresponding to the reply from %C seq %q\n"),
-               DCPS::LogGuid(request_id.writer_guid).c_str(),
-               seq_num.getValue()));
+      ACE_TEXT("(%P|%t) WARNING: Sedp::TypeLookupReplyReader::process_type_lookup_reply - ")
+      ACE_TEXT("could not find request corresponding to the reply from %C seq %q\n"),
+      DCPS::LogGuid(request_id.writer_guid).c_str(), seq_num.getValue()));
     return false;
   }
 
@@ -4247,7 +4247,7 @@ bool Sedp::TypeLookupReplyReader::process_type_lookup_reply(
   default:
     if (DCPS::DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
-        "Sedp::TypeLookupReplyReader::process_type_lookup_reply: "
+        "Sedp::TypeLookupReplyReader::process_type_lookup_reply - "
         "reply kind is %u\n", kind));
     }
     return false;
@@ -4255,7 +4255,9 @@ bool Sedp::TypeLookupReplyReader::process_type_lookup_reply(
 
   if (kind == XTypes::TypeLookup_getTypes_HashId) {
     if (DCPS::DCPS_debug_level > 8) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyReader::process_type_lookup_reply: post process\n"));
+      ACE_DEBUG((LM_DEBUG,
+                 "(%P|%t) Sedp::TypeLookupReplyReader::process_type_lookup_reply - "
+                 "got the reply for the final request in the sequence\n"));
     }
     const DCPS::SequenceNumber key_seq_num = seq_num_it->second.seq_number;
 
@@ -4264,7 +4266,36 @@ bool Sedp::TypeLookupReplyReader::process_type_lookup_reply(
     sedp_.orig_seq_numbers_.erase(seq_num);
 
     if (success) {
-      sedp_.match_continue(key_seq_num);
+      MatchingDataIter it;
+      for (it = matching_data_buffer_.begin(); it != matching_data_buffer_.end(); ++it) {
+        const SequenceNumber& seqnum_minimal = it->second.rpc_seqnum_minimal;
+        const SequenceNumber& seqnum_complete = it->second.rpc_seqnum_complete;
+        if (seqnum_minimal == key_seq_num || seqnum_complete == key_seq_num) {
+          if (seqnum_minimal == key_seq_num) {
+            it->second.got_minimal = true;
+          } else {
+            it->second.got_complete = true;
+          }
+
+          if (it->second.got_minimal && it->second.got_complete) {
+            // All remote type objects are obtained, continue the matching process
+            const RepoId writer = it->first.writer_;
+            const RepoId reader = it->first.reader_;
+            sedp_.matching_data_buffer_.erase(it);
+            sedp_.match_continue(writer, reader);
+            return true;
+          }
+          break;
+        }
+      }
+
+      if (it == matching_data_buffer_.end()) {
+        if (DCPS::DCPS_debug_level) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) Sedp::TypeLookupReplyReader::process_type_lookup_reply - "
+                     " RPC sequence number %q: No data found in matching data buffer\n",
+                     key_seq_num.getValue()));
+        }
+      }
     }
   }
 
@@ -4312,7 +4343,7 @@ bool Sedp::TypeLookupReplyReader::process_get_dependencies_reply(
   const DCPS::SequenceNumber& seq_num, bool is_discovery_protected)
 {
   if (DCPS::DCPS_debug_level > 8) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyReader::process_get_dependencies_reply: ",
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyReader::process_get_dependencies_reply - ",
       "seq %q\n", seq_num.getValue()));
   }
 
@@ -4343,6 +4374,8 @@ bool Sedp::TypeLookupReplyReader::process_get_dependencies_reply(
   dependencies_[guid_pref][remote_ti].first = data.continuation_point;
 
   // Update internal data
+  // TODO(sonndinh): Shouldn't sedp_.type_lookup_service_sequence_number_ be protected with
+  // a lock? Looks like it can be modified by multiple threads.
   sedp_.orig_seq_numbers_.insert(std::make_pair(++sedp_.type_lookup_service_sequence_number_,
                                                 sedp_.orig_seq_numbers_[seq_num]));
   sedp_.orig_seq_numbers_.erase(seq_num);

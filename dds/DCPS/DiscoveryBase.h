@@ -1175,9 +1175,19 @@ namespace OpenDDS {
 
 
       struct MatchingData {
-        RepoId writer;
-        RepoId reader;
-        SequenceNumber rpc_sequence_number;
+        // Sequence number of the first request for remote minimal types.
+        SequenceNumber rpc_seqnum_minimal;
+
+        // Whether all minimal types are obtained.
+        bool got_minimal;
+
+        // Sequence number of the first request for remote complete types.
+        // Set to SEQUENCENUMBER_UNKNOWN if there is no such request.
+        SequenceNumber rpc_seqnum_complete;
+
+        // Whether all complete types are obtained.
+        bool got_complete;
+
         MonotonicTimePoint time_added_to_map;
       };
 
@@ -1220,7 +1230,7 @@ namespace OpenDDS {
             LogGuid(writer).c_str(), LogGuid(reader).c_str()));
         }
 
-        // 1. collect type info about the writer, which may be local or discovered
+        // 1. Collect type info about the writer, which may be local or discovered
         XTypes::TypeInformation* writer_type_info = 0;
 
         const LocalPublicationIter lpi = local_publications_.find(writer);
@@ -1239,7 +1249,7 @@ namespace OpenDDS {
           return; // Possible and ok, since lock is released
         }
 
-        // 2. collect type info about the reader, which may be local or discovered
+        // 2. Collect type info about the reader, which may be local or discovered
         XTypes::TypeInformation* reader_type_info = 0;
 
         const LocalSubscriptionIter lsi = local_subscriptions_.find(reader);
@@ -1260,9 +1270,7 @@ namespace OpenDDS {
 
         MatchingData md;
 
-        // if the type object is not in cache, send RPC request
-        md.writer = writer;
-        md.reader = reader;
+        // If the type object is not in cache, send RPC request
         md.time_added_to_map = MonotonicTimePoint::now();
 
         // NOTE(sonndinh): Is it possible for a discovered endpoint to include only the "complete"
@@ -1354,34 +1362,6 @@ namespace OpenDDS {
           } else {
             ++it;
           }
-        }
-      }
-
-      /// This assumes that lock_ is being held
-      void match_continue(SequenceNumber rpc_sequence_number)
-      {
-        if (DCPS_debug_level >= 4) {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) EndpointManager::match_continue: rpc seq: %q\n",
-            rpc_sequence_number.getValue()));
-        }
-
-        MatchingDataIter it;
-        for (it = matching_data_buffer_.begin(); it != matching_data_buffer_.end(); ++it) {
-          if (DCPS_debug_level >= 4) {
-            ACE_DEBUG((LM_DEBUG, "(%P|%t) EndpointManager::match_continue: matches %q?\n",
-              it->second.rpc_sequence_number.getValue()));
-          }
-          if (it->second.rpc_sequence_number == rpc_sequence_number) {
-            RepoId reader = it->second.reader;
-            RepoId writer = it->second.writer;
-            matching_data_buffer_.erase(MatchingPair(writer, reader));
-            return match_continue(writer, reader);
-          }
-        }
-        if (DCPS_debug_level) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) EndpointManager::match_continue: "
-            " rpc seq: %q: No data found in matching data buffer\n",
-            rpc_sequence_number.getValue()));
         }
       }
 
@@ -1809,13 +1789,43 @@ namespace OpenDDS {
                                                   bool is_discovery_protected,
                                                   bool get_minimal, bool get_complete)
       {
+        if (get_minimal) {
+          md.rpc_seqnum_minimal = ++type_lookup_service_sequence_number_;
+          md.got_minimal = false;
+        } else {
+          md.rpc_seqnum_minimal = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+          md.got_minimal = true;
+        }
+
+        if (get_complete) {
+          md.rpc_seqnum_complete = ++type_lookup_service_sequence_number_;
+          md.got_complete = false;
+        } else {
+          md.rpc_seq_num_complete = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+          md.got_complete = true;
+        }
+
+        matching_data_buffer_[mp] = md;
+
         // Send a sequence of requests for minimal remote TypeObjects
         if (get_minimal) {
+          if (DCPS_debug_level >= 4) {
+            ACE_DEBUG((LM_DEBUG,
+                       "(%P|%t) EndpointManager::save_matching_data_and_get_typeobjects: "
+                       "remote: %C seq: %q\n",
+                       LogGuid(remote_id).c_str(), md.rpc_seqnum_minimal.getValue()));
+          }
           get_remote_type_objects(type_info->minimal, md, mp, remote_id, is_discovery_protected);
         }
 
         // Send another sequence of requests for complete remote TypeObjects
         if (get_complete) {
+          if (DCPS_debug_level >= 4) {
+            ACE_DEBUG((LM_DEBUG,
+                       "(%P|%t) EndpointManager::save_matching_data_and_get_typeobjects: "
+                       "remote: %C seq: %q\n",
+                       LogGuid(remote_id).c_str(), md.rpc_seqnum_complete.getValue()));
+          }
           get_remote_type_objects(type_info->complete, md, mp, remote_id, is_discovery_protected);
         }
       }
@@ -1824,15 +1834,6 @@ namespace OpenDDS {
                                    MatchingData& md, const MatchingPair& mp,
                                    const RepoId& remote_id, bool is_discovery_protected)
       {
-        const SequenceNumber seqnum = ++type_lookup_service_sequence_number_;
-        if (DCPS_debug_level >= 4) {
-          ACE_DEBUG((LM_DEBUG,
-            "(%P|%t) EndpointManager::save_matching_data_and_get_typeobjects: "
-            "remote: %C seq: %q\n", LogGuid(remote_id).c_str(), seqnum.getValue()));
-        }
-        md.rpc_sequence_number = seqnum;
-        matching_data_buffer_[mp] = md;
-
         // Store an entry for the first request in the sequence.
         TypeIdOrigSeqNumber orig_req_data;
         std::memcpy(orig_req_data.participant, remote_id.guidPrefix, sizeof(GuidPrefix_t));
