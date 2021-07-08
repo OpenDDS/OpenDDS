@@ -2399,7 +2399,7 @@ namespace OpenDDS {
           if (DCPS_debug_level > 3) {
             GuidConverter conv(iter->first);
             ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) LocalParticipant::remove_discovered_participant")
-                       ACE_TEXT(" - erasing %C\n"), OPENDDS_STRING(conv).c_str()));
+                       ACE_TEXT(" - erasing %C (%B)\n"), OPENDDS_STRING(conv).c_str(), participants_.size()));
           }
 
           remove_discovered_participant_i(iter);

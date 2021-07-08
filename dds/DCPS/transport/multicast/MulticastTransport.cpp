@@ -274,7 +274,8 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
 void
 MulticastTransport::stop_accepting_or_connecting(const TransportClient_wrch& client,
                                                  const RepoId& remote_id,
-                                                 bool /*disassociate*/)
+                                                 bool /*disassociate*/,
+						 bool /*association_failed*/)
 {
   VDBG((LM_DEBUG, "(%P|%t) MulticastTransport::stop_accepting_or_connecting\n"));
 

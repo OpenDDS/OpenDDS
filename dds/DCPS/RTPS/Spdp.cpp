@@ -663,9 +663,9 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       ACE_TCHAR addr_buff[DCPS::AddrToStringSize] = {};
       from.addr_to_string(addr_buff, DCPS::AddrToStringSize);
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Spdp::handle_participant_data - %C discovered %C lease %ds from %s\n"),
-        DCPS::LogGuid(guid_).c_str(), DCPS::LogGuid(guid).c_str(),
-        pdata.leaseDuration.seconds, addr_buff));
+                 ACE_TEXT("(%P|%t) Spdp::handle_participant_data - %C discovered %C lease %ds from %s (%B)\n"),
+                 DCPS::LogGuid(guid_).c_str(), DCPS::LogGuid(guid).c_str(),
+		 pdata.leaseDuration.seconds, addr_buff, participants_.size()));
     }
 
     if (tport_->directed_sender_) {
