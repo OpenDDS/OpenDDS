@@ -516,6 +516,7 @@ Sedp::init(const RepoId& guid,
 
   max_type_lookup_service_reply_period_ = disco.config()->max_type_lookup_service_reply_period();
   use_xtypes_ = disco.config()->use_xtypes();
+  use_xtypes_complete_ = disco.config()->use_xtypes_complete();
 
   return DDS::RETCODE_OK;
 }
