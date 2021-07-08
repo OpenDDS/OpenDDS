@@ -19,6 +19,8 @@
 
 #include "tests/Utils/ExceptionStreams.h"
 
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
+
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Qos_Helper.h>
@@ -58,8 +60,7 @@ int sub_program(DDS::DomainParticipant* participant)
     ACE_ERROR_RETURN((LM_ERROR, "%N:%l: main() ERROR: Not able to find topic 3\n"), EXIT_FAILURE);
   }
   // topic2 and topic3 should have the same instance handles
-  if (topic2->get_instance_handle () != topic3->get_instance_handle ())
-  {
+  if (topic2->get_instance_handle() != topic3->get_instance_handle()) {
     ACE_ERROR_RETURN((LM_ERROR, "%N:%l: main() ERROR: topic2 and topic3 should have the same instance handles\n"), EXIT_FAILURE);
   }
   // Now delete the topic3 again
@@ -96,7 +97,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   try {
     DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
-    OpenDDS::DCPS::Discovery_rch discovery = OpenDDS::DCPS::make_rch<LocalDiscovery>();
+    OpenDDS::DCPS::Discovery_rch discovery;
+    if (argc > 1 && argv[1] == ACE_TString("rtps")) {
+      OpenDDS::RTPS::RtpsDiscovery_rch rtps_disc =
+        OpenDDS::DCPS::make_rch<OpenDDS::RTPS::RtpsDiscovery>("RTPS");
+      rtps_disc->sedp_multicast(false);
+      discovery = rtps_disc;
+      ACE_DEBUG((LM_DEBUG, "%N:%l main() using RTPS Discovery\n"));
+    } else {
+      discovery = OpenDDS::DCPS::make_rch<LocalDiscovery>();
+      ACE_DEBUG((LM_DEBUG, "%N:%l main() using Local Discovery\n"));
+    }
     TheServiceParticipant->add_discovery(discovery);
     TheServiceParticipant->set_default_discovery(discovery->key());
 

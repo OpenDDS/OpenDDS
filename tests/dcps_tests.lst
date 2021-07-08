@@ -48,7 +48,8 @@ tests/DCPS/LivelinessTest/run_test.pl udp: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !
 tests/DCPS/LivelinessTest/run_test.pl rtps_disc: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE RTPS !GH_ACTIONS
 tests/DCPS/LivelinessTest/run_test.pl rtps_disc take: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE RTPS !GH_ACTIONS
 
-tests/DCPS/FindTopic/run_test.pl: RTPS
+tests/DCPS/FindTopic/run_test.pl
+tests/DCPS/FindTopic/run_test.pl rtps: RTPS
 tests/DCPS/Inconsistent_Qos/run_test.pl: RTPS XERCES3 !STATIC !DDS_NO_PERSISTENCE_PROFILE
 tests/DCPS/InconsistentTopic/run_test.pl rtps_disc: RTPS !NO_BUILT_IN_TOPICS
 tests/DCPS/TopicReuse/run_test.pl: RTPS
