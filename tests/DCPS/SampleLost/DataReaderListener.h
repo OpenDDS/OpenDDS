@@ -61,8 +61,8 @@ public:
     DDS::DataReader_ptr,
     const ::OpenDDS::DCPS::BudgetExceededStatus& status);
 
-  long num_reads() const {
-    return num_reads_;
+  long num_data_available() const {
+    return num_data_available_;
   }
 
   long num_samples_lost () const {
@@ -77,7 +77,7 @@ public:
 private:
 
   DDS::DataReader_var reader_;
-  long num_reads_;
+  long num_data_available_;
   long num_samples_lost_;
   long num_samples_rejected_;
   long num_budget_exceeded_;
