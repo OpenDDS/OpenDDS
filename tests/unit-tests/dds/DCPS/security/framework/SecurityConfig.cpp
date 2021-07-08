@@ -1,5 +1,8 @@
 #ifdef OPENDDS_SECURITY
 
+#if defined (ACE_AS_STATIC_LIBS)
+#include <dds/DCPS/security/BuiltInPlugins.h>
+#endif
 #include "dds/DCPS/security/framework/SecurityConfig.h"
 #include "dds/DCPS/security/framework/SecurityRegistry.h"
 #include "dds/DCPS/security/framework/SecurityPluginInst_rch.h"

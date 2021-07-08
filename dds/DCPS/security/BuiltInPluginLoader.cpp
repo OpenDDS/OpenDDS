@@ -18,7 +18,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace Security {
 
-static const std::string PLUGIN_NAME("BuiltIn");
+static const char * PLUGIN_NAME = "BuiltIn";
 
 int
 BuiltInPluginLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
