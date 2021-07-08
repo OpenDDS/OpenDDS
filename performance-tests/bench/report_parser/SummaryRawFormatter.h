@@ -1,5 +1,5 @@
-#ifndef TIME_SERIES_RAW_FORMATTER_HEADER
-#define TIME_SERIES_RAW_FORMATTER_HEADER
+#ifndef SUMMARY_RAW_FORMATTER_HEADER
+#define SUMMARY_RAW_FORMATTER_HEADER
 
 #include "ParseParameters.h"
 
@@ -7,7 +7,7 @@
 
 namespace Bench {
 
-class TimeSeriesRawFormatter {
+class SummaryRawFormatter {
 public:
   int format(const Bench::TestController::Report& report, std::ostream& output_stream, const ParseParameters& parse_parameters);
 };
