@@ -7,7 +7,7 @@ use lib "$DDS_ROOT/bin";
 
 use strict;
 
-my $gencmd = "$ENV{DDS_ROOT}/bin/opendds_idl -Sa -St --no-dcps-data-type-warnings sample.idl";
+my $gencmd = "$ENV{DDS_ROOT}/bin/opendds_idl -Sa -St sample.idl";
 system($gencmd);
 system("mv sampleTypeSupportImpl.cpp pass1");
 system($gencmd);
