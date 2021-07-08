@@ -5,11 +5,9 @@
 
 #include "BenchTypeSupportImpl.h"
 
-using namespace Bench::TestController;
-
 class StatBlockRawFormatter {
 public:
-  int format(const Report& report, std::ostream& output_stream, const ParseParameters& parse_parameters);
+  int format(const Bench::TestController::Report& report, std::ostream& output_stream, const ParseParameters& parse_parameters);
 };
 
 #endif

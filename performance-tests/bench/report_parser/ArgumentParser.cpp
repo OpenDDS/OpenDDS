@@ -9,7 +9,7 @@
 using namespace Bench;
 
 bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
-    OutputFormat& output_format, Report& report, std::shared_ptr<std::ostream>& output_stream,
+    OutputFormat& output_format, Bench::TestController::Report& report, std::shared_ptr<std::ostream>& output_stream,
     ParseParameters& parse_parameters)
 {
   std::string input_file_path;
@@ -211,7 +211,7 @@ void ArgumentParser::show_usage()
     << "--values <list of values>     Specifies the status block values to output." << std::endl;
 }
 
-void ArgumentParser::check_for_iperf(Report& report)
+void ArgumentParser::check_for_iperf(Bench::TestController::Report& report)
 {
 
   // This code is a bit of a hack, and isn't really expected to function well across different versions / flags of iperf
@@ -245,7 +245,7 @@ void ArgumentParser::check_for_iperf(Report& report)
 
           if (is_iperf_server && line[0] == '[') {
 
-            uint64_t id;
+            long unsigned int id;
             double interval_start, interval_end, transfer, bandwidth, jitter, lost, total, lost_pct, latency_avg, latency_min, latency_max, latency_stdev, pps, netpwr;
             char interval_units[16];
             char transfer_units[16];

@@ -1,4 +1,4 @@
-#include "TimeSeriesGnuPlotFormatter.h"
+#include "TimeSeriesGnuplotFormatter.h"
 
 #include <PropertyStatBlock.h>
 #include <util.h>
@@ -9,7 +9,7 @@
 
 using namespace Bench;
 
-int TimeSeriesGnuPlotFormatter::format(const Report& report, std::ostream& output_stream, const ParseParameters& parse_parameters)
+int TimeSeriesGnuplotFormatter::format(const Bench::TestController::Report& report, std::ostream& output_stream, const ParseParameters& parse_parameters)
 {
   // TODO These functions need to be made generic for requested stats / tags (see other formatters)
 
@@ -21,7 +21,7 @@ int TimeSeriesGnuPlotFormatter::format(const Report& report, std::ostream& outpu
   return EXIT_FAILURE;
 }
 
-void TimeSeriesGnuPlotFormatter::output_header(const Report& report, std::ostream& output_stream, const ParseParameters& parse_parameters)
+void TimeSeriesGnuplotFormatter::output_header(const Bench::TestController::Report& report, std::ostream& output_stream, const ParseParameters& parse_parameters)
 {
   const bool show_postfix = report.node_reports.length() > 1;
 
@@ -77,7 +77,7 @@ void TimeSeriesGnuPlotFormatter::output_header(const Report& report, std::ostrea
   output_stream << std::endl;
 }
 
-void TimeSeriesGnuPlotFormatter::output_data(const Report& report, std::ostream& output_stream, const ParseParameters& parse_parameters)
+void TimeSeriesGnuplotFormatter::output_data(const Bench::TestController::Report& report, std::ostream& output_stream, const ParseParameters& parse_parameters)
 {
   std::vector<Bench::SimpleStatBlock> cpu_percent_stats;
   std::vector<Bench::SimpleStatBlock> mem_percent_stats;

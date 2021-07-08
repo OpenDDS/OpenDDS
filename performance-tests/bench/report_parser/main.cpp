@@ -6,7 +6,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   OutputType output_type = OutputType::None;
   OutputFormat output_format = OutputFormat::None;
-  Report report{};
+  Bench::TestController::Report report{};
   std::shared_ptr<std::ostream> output_stream = NULL;
   ParseParameters parse_parameters;
   ArgumentParser argument_parser;

@@ -3,7 +3,7 @@
 #include <PropertyStatBlock.h>
 #include <util.h>
 
-int SummaryJsonDashboardFormatter::format(const Report& report, std::ostream& output_stream, const ParseParameters& parse_parameters)
+int SummaryJsonDashboardFormatter::format(const Bench::TestController::Report& report, std::ostream& output_stream, const ParseParameters& parse_parameters)
 {
   std::unordered_set<std::string> stats;
   std::unordered_set<std::string> tags;

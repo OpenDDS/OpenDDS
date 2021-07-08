@@ -5,11 +5,11 @@
 #include "SummaryJsonDashboardFormatter.h"
 #include "SummaryRawFormatter.h"
 
-#include "TimeSeriesGnuPlotFormatter.h"
+#include "TimeSeriesGnuplotFormatter.h"
 #include "TimeSeriesRawFormatter.h"
 
 int ReportParser::parse(const OutputType output_type, const OutputFormat output_format,
-    const Report& report, std::ostream& output_stream, const ParseParameters& parse_parameters)
+    const Bench::TestController::Report& report, std::ostream& output_stream, const ParseParameters& parse_parameters)
 {
   switch (output_type) {
   case OutputType::SingleStatistic:
@@ -28,7 +28,7 @@ int ReportParser::parse(const OutputType output_type, const OutputFormat output_
   return EXIT_FAILURE;
 }
 
-int ReportParser::parse_single_statistic(const OutputFormat output_format, const Report& report,
+int ReportParser::parse_single_statistic(const OutputFormat output_format, const Bench::TestController::Report& report,
     std::ostream& output_stream, const ParseParameters& parse_parameters)
 {
   switch (output_format) {
@@ -43,7 +43,7 @@ int ReportParser::parse_single_statistic(const OutputFormat output_format, const
   return EXIT_FAILURE;
 }
 
-int ReportParser::parse_summary(const OutputFormat output_format, const Report& report,
+int ReportParser::parse_summary(const OutputFormat output_format, const Bench::TestController::Report& report,
     std::ostream& output_stream, const ParseParameters& parse_parameters)
 {
   switch (output_format) {
@@ -59,12 +59,12 @@ int ReportParser::parse_summary(const OutputFormat output_format, const Report& 
   return summary_raw_formatter.format(report, output_stream, parse_parameters);
 }
 
-int ReportParser::parse_time_series(const OutputFormat output_format, const Report& report,
+int ReportParser::parse_time_series(const OutputFormat output_format, const Bench::TestController::Report& report,
     std::ostream& output_stream, const ParseParameters& parse_parameters)
 {
   switch (output_format) {
   case OutputFormat::Gnuplot:
-    TimeSeriesGnuPlotFormatter time_series_gnuplot_formater;
+    TimeSeriesGnuplotFormatter time_series_gnuplot_formater;
     return time_series_gnuplot_formater.format(report, output_stream, parse_parameters);
     break;
   default:
