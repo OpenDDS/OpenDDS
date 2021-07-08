@@ -2,6 +2,8 @@
 
 #include <PropertyStatBlock.h>
 
+namespace Bench {
+
 int TimeSeriesRawFormatter::format(const Bench::TestController::Report& report, std::ostream& output_stream, const ParseParameters& parse_parameters)
 {
   std::map<std::string, std::vector<Bench::SimpleStatBlock> > consolidated_stat_vec_map;
@@ -116,3 +118,5 @@ int TimeSeriesRawFormatter::format(const Bench::TestController::Report& report, 
 
   return EXIT_SUCCESS;
 }
+
+} // namespace Bench

@@ -8,6 +8,8 @@
 #include "TimeSeriesGnuplotFormatter.h"
 #include "TimeSeriesRawFormatter.h"
 
+namespace Bench {
+
 int ReportParser::parse(const OutputType output_type, const OutputFormat output_format,
     const Bench::TestController::Report& report, std::ostream& output_stream, const ParseParameters& parse_parameters)
 {
@@ -74,3 +76,5 @@ int ReportParser::parse_time_series(const OutputFormat output_format, const Benc
   TimeSeriesRawFormatter time_series_raw_formater;
   return time_series_raw_formater.format(report, output_stream, parse_parameters);
 }
+
+} // namespace Bench

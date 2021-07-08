@@ -5,6 +5,8 @@
 #include "ParseParameters.h"
 #include "BenchTypeSupportImpl.h"
 
+namespace Bench {
+
 class ReportParser {
 public:
   int parse(const OutputType output_type, const OutputFormat output_format,
@@ -17,5 +19,7 @@ private:
   int parse_time_series(const OutputFormat output_format, const Bench::TestController::Report& report,
     std::ostream& output_stream, const ParseParameters& parse_parameters);
 };
+
+} // namespace Bench
 
 #endif

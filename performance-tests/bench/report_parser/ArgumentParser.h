@@ -7,6 +7,8 @@
 
 #include <ace/ace_wchar.h> // For ACE_TCHAR
 
+namespace Bench {
+
 class ArgumentParser {
 public:
   bool parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
@@ -19,5 +21,7 @@ private:
   void show_usage();
   void check_for_iperf(Bench::TestController::Report& report);
 };
+
+} // namespace Bench
 
 #endif
