@@ -136,7 +136,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   automatic_dw_qos.liveliness.kind = DDS::AUTOMATIC_LIVELINESS_QOS;
   automatic_dw_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC;
   automatic_dw_qos.liveliness.lease_duration.nanosec = 0;
-  automatic_dw_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
   DDS::DataWriterQos manual_dw_qos;
   pub->get_default_datawriter_qos (manual_dw_qos);
@@ -145,7 +144,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   manual_dw_qos.liveliness.kind = DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
   manual_dw_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC;
   manual_dw_qos.liveliness.lease_duration.nanosec = 0;
-  manual_dw_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
   DDS::DataWriter_var dw_automatic =
       pub->create_datawriter(automatic_topic, automatic_dw_qos,
@@ -174,7 +172,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   automatic_dr_qos.liveliness.kind = DDS::AUTOMATIC_LIVELINESS_QOS;
   automatic_dr_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC;
   automatic_dr_qos.liveliness.lease_duration.nanosec = 0;
-  automatic_dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
   DDS::DataReaderQos remote_manual_dr_qos;
   remote_sub->get_default_datareader_qos (remote_manual_dr_qos);
@@ -183,7 +180,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   remote_manual_dr_qos.liveliness.kind = DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
   remote_manual_dr_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC;
   remote_manual_dr_qos.liveliness.lease_duration.nanosec = 0;
-  remote_manual_dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
   DDS::DataReaderQos local_manual_dr_qos;
   local_sub->get_default_datareader_qos (local_manual_dr_qos);
@@ -192,7 +188,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   local_manual_dr_qos.liveliness.kind = DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
   local_manual_dr_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC;
   local_manual_dr_qos.liveliness.lease_duration.nanosec = 0;
-  local_manual_dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
   DistributedConditionSet_rch dcs = OpenDDS::DCPS::make_rch<InMemoryDistributedConditionSet>();
 
