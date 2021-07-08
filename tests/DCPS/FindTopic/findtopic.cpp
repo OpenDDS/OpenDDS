@@ -51,6 +51,24 @@ int sub_program(DDS::DomainParticipant* participant)
     ACE_ERROR_RETURN((LM_ERROR, "%N:%l: main() ERROR: create_datawriter 2 failed!\n"), EXIT_FAILURE);
   }
 
+  // Do now a find for topic "Movie Discussion List", that should return a new topic which we directly
+  // delete again which should work because this new topic is not used.
+  DDS::Topic_var topic3 = participant->find_topic("Movie Discussion List", timeout);
+  if (!topic3) {
+    ACE_ERROR_RETURN((LM_ERROR, "%N:%l: main() ERROR: Not able to find topic 3\n"), EXIT_FAILURE);
+  }
+  // topic2 and topic3 should have different instance handles
+  if (topic2->get_instance_handle () == topic3->get_instance_handle ())
+  {
+    ACE_ERROR_RETURN((LM_ERROR, "%N:%l: main() ERROR: topic2 and topic3 should have different instance handles\n"), EXIT_FAILURE);
+  }
+  // Now delete the topic3 again
+  const DDS::ReturnCode_t retcode6 = participant->delete_topic(topic3);
+  if (retcode6 != DDS::RETCODE_OK) {
+    ACE_ERROR_RETURN((LM_ERROR, "%N:%l: main() ERROR: should be able to delete topic 3\n"), EXIT_FAILURE);
+  }
+  topic3 = 0;
+
   // Now the second part will cleanup its datawriter/publisher
   const DDS::ReturnCode_t retcode12 = pub2->delete_datawriter(dw2);
   if (retcode12 != DDS::RETCODE_OK) {
