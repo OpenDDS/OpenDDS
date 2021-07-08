@@ -7,8 +7,8 @@
  */
 //================================================================
 
-#ifndef OPENDDS_DCPS_QOS_XML_HANDLER_XML_MEMBUF_INTF_H
-#define OPENDDS_DCPS_QOS_XML_HANDLER_XML_MEMBUF_INTF_H
+#ifndef OPENDDS_DCPS_QOS_XML_HANDLER_XML_STRING_INTF_H
+#define OPENDDS_DCPS_QOS_XML_HANDLER_XML_STRING_INTF_H
 #include /**/ "ace/pre.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -91,4 +91,4 @@ OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #include /**/ "ace/post.h"
 
-#endif /* DCPS_CONFIG_XML_MEMBUF_INTF_H */
+#endif /* DCPS_CONFIG_XML_STRING_INTF_H */
