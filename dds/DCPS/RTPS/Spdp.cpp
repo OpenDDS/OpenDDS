@@ -4222,7 +4222,7 @@ void Spdp::process_participant_ice(const ParameterList& plist,
 {
   ICE::AgentInfoMap ai_map;
   if (!ParameterListConverter::from_param_list(plist, ai_map)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::data_received - ")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::process_participant_ice - ")
                ACE_TEXT("failed to convert from ParameterList to ")
                ACE_TEXT("ICE::AgentInfo\n")));
     return;
