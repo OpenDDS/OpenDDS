@@ -98,7 +98,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
     OpenDDS::DCPS::Discovery_rch discovery;
-    if (argc > 1 && argv[1] == ACE_TString("rtps")) {
+    if (argc > 1 && ACE_TString(argv[1]) == ACE_TEXT("rtps")) {
       OpenDDS::RTPS::RtpsDiscovery_rch rtps_disc =
         OpenDDS::DCPS::make_rch<OpenDDS::RTPS::RtpsDiscovery>("RTPS");
       rtps_disc->sedp_multicast(false);
