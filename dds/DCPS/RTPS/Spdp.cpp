@@ -2667,8 +2667,8 @@ Spdp::update_rtps_relay_application_participant_i(DiscoveredParticipantIter iter
                    ACE_TEXT("(%P|%t) Spdp::update_rtps_relay_application_participant - removing previous RtpsRelay application participant %C\n"),
                    DCPS::LogGuid(pos->first).c_str()));
       }
-      DiscoveredParticipantIter iter = pos++;
-      remove_discovered_participant(iter);
+      DiscoveredParticipantIter to_erase = pos++;
+      remove_discovered_participant(to_erase);
     } else {
       ++pos;
     }
