@@ -110,10 +110,10 @@ int run_domain_test ()
     = dynamic_cast<OpenDDS::DCPS::TopicImpl*>
     (found_topic.in ());
 
-  TEST_CHECK (new_topic_servant == found_topic_servant);
+  TEST_CHECK (new_topic_servant != found_topic_servant);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) run_domain_test: ")
-    ACE_TEXT("(new_topic_servant == found_topic_servant)")
+    ACE_TEXT("(new_topic_servant != found_topic_servant)")
     ACE_TEXT("\n")
   ));
 

@@ -163,6 +163,43 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
       failed = true;
     }
 
+  // "assert" the same topic - may create a new GUID or find the existing one
+  OpenDDS::DCPS::GUID_t secondTopicId = OpenDDS::DCPS::GUID_UNKNOWN;
+  const OpenDDS::DCPS::TopicStatus topicStatus2 = disc->assert_topic(secondTopicId, domain, pubPartId, tname,
+                                                                     dname, topicQos, false, &callbacks);
+  bool removeTopic2 = false;
+  switch (topicStatus2) {
+  case OpenDDS::DCPS::CREATED:
+    if (pubTopicId == secondTopicId) {
+      failed = true;
+      ACE_ERROR((LM_ERROR, "ERROR: Topic assertion (2nd time) CREATED a topic with the same GUID\n"));
+    } else {
+      removeTopic2 = true;
+      ACE_DEBUG((LM_DEBUG, "2nd topic assertion CREATED a topic\n"));
+    }
+    break;
+  case OpenDDS::DCPS::FOUND:
+    if (pubTopicId != secondTopicId) {
+      failed = true;
+      ACE_ERROR((LM_ERROR, "ERROR: Topic assertion (2nd time) FOUND a topic with a different GUID\n"));
+    } else {
+      removeTopic2 = true;
+      ACE_DEBUG((LM_DEBUG, "2nd topic assertion FOUND a topic\n"));
+    }
+    break;
+  default:
+    failed = true;
+    ACE_ERROR((LM_ERROR, "ERROR: Topic assertion (2nd time) failed with status %d\n", static_cast<int>(topicStatus2)));
+  }
+
+  if (removeTopic2) {
+    const OpenDDS::DCPS::TopicStatus topicStatusRemove = disc->remove_topic(domain, pubPartId, secondTopicId);
+    if (topicStatusRemove != OpenDDS::DCPS::REMOVED) {
+      failed = true;
+      ACE_ERROR((LM_ERROR, "ERROR: Topic remove (for 2nd topic) failed with status %d\n", static_cast<int>(topicStatusRemove)));
+    }
+  }
+
   ::DDS::DataWriterQos_var dwQos = new ::DDS::DataWriterQos;
   *dwQos = TheServiceParticipant->initial_DataWriterQos();
   dwQos->reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
