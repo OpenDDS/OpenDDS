@@ -6,29 +6,31 @@ namespace Bench {
 
 int SummaryJsonDashboardFormatter::format(const Bench::TestController::Report& report, std::ostream& output_stream, const ParseParameters& parse_parameters)
 {
-  std::unordered_set<std::string> stats;
-  std::unordered_set<std::string> tags;
+  SharedSummaryReportVisitor visitor;
 
-  Bench::gather_stats_and_tags(report, stats, tags);
+  Bench::gather_stats_and_tags(report, visitor.stats_, visitor.tags_);
 
   if (!parse_parameters.tags.empty()) {
-    tags = parse_parameters.tags;
+    visitor.tags_ = parse_parameters.tags;
   }
 
   if (!parse_parameters.stats.empty()) {
-    stats = parse_parameters.stats;
+    visitor.stats_ = parse_parameters.stats;
   }
 
-  stat_vec_map untagged_stat_vecs;
-  std::map<std::string, stat_vec_map> tagged_stat_vecs;
-
-  SharedSummaryReportVisitor visitor(stats, tags, untagged_stat_vecs, tagged_stat_vecs);
-
   visit_report(report, visitor);
+
+  const auto& tags = visitor.tags_;
+  const auto& stats = visitor.stats_;
+  const auto& untagged_stat_vecs = visitor.untagged_stat_vecs_;
+  const auto& tagged_stat_vecs = visitor.tagged_stat_vecs_;
+  const auto& untagged_error_count = visitor.untagged_error_count_;
+  const auto& tagged_error_counts = visitor.tagged_error_counts_;
 
   rapidjson::Document document;
   document.SetObject();
 
+  document.AddMember("errors", rapidjson::Value(untagged_error_count).Move(), document.GetAllocator());
   rapidjson::Value& untagged_stat_val = document.AddMember("stats", rapidjson::Value(0).Move(), document.GetAllocator())["stats"].SetObject();
 
   for (auto stat_it = stats.begin(); stat_it != stats.end(); ++stat_it) {
@@ -46,6 +48,8 @@ int SummaryJsonDashboardFormatter::format(const Bench::TestController::Report& r
     if (tag_pos != tagged_stat_vecs.end()) {
 
       rapidjson::Value& tag_val = tags_val.AddMember(rapidjson::StringRef(tag_pos->first.c_str()), rapidjson::Value(0).Move(), document.GetAllocator())[tag_pos->first.c_str()].SetObject();
+      auto tagged_error_pos = tagged_error_counts.find(tag_pos->first);
+      tag_val.AddMember("errors", rapidjson::Value(tagged_error_pos != tagged_error_counts.end() ? tagged_error_pos->second : 0).Move(), document.GetAllocator());
       rapidjson::Value& tagged_stat_val = tag_val.AddMember("stats", rapidjson::Value(0).Move(), document.GetAllocator())["stats"].SetObject();
 
       for (auto stat_it = stats.begin(); stat_it != stats.end(); ++stat_it) {

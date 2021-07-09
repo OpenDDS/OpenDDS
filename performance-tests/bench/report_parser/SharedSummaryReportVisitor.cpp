@@ -2,15 +2,9 @@
 
 namespace Bench {
 
-SharedSummaryReportVisitor::SharedSummaryReportVisitor(std::unordered_set<std::string>& stats,
-                                                       std::unordered_set<std::string>& tags,
-                                                       stat_vec_map& untagged_stat_vecs,
-                                                       std::map<std::string, stat_vec_map>& tagged_stat_vecs)
-  : stats_(stats)
-  , tags_(tags)
-  , untagged_stat_vecs_(untagged_stat_vecs)
-  , tagged_stat_vecs_(tagged_stat_vecs)
-{}
+SharedSummaryReportVisitor::SharedSummaryReportVisitor() : untagged_error_count_(0)
+{
+}
 
 void SharedSummaryReportVisitor::on_node_controller_report(const ReportVisitorContext& context)
 {
@@ -24,6 +18,23 @@ void SharedSummaryReportVisitor::on_node_controller_report(const ReportVisitorCo
 
 void SharedSummaryReportVisitor::on_datareader_report(const ReportVisitorContext& context)
 {
+  Builder::ConstPropertyIndex et_cpi = get_property(context.datareader_report_->properties, "enable_time", Builder::PVK_TIME);
+  const Builder::TimeStamp et = et_cpi ? et_cpi->value.time_prop() : Builder::ZERO;
+
+  Builder::ConstPropertyIndex ldt_cpi = get_property(context.datareader_report_->properties, "last_discovery_time", Builder::PVK_TIME);
+  const Builder::TimeStamp ldt = ldt_cpi ? ldt_cpi->value.time_prop() : Builder::ZERO;
+
+  bool correctly_matched = Builder::ZERO < et && Builder::ZERO < ldt;
+  if (!correctly_matched) {
+    ++untagged_error_count_;
+    for (unsigned int tags_index = 0; tags_index < context.datareader_report_->tags.length(); ++tags_index) {
+      const std::string tag(context.datareader_report_->tags[tags_index]);
+      if (tags_.find(tag) != tags_.end()) {
+        ++tagged_error_counts_[tag];
+      }
+    }
+  }
+
   for (auto it = stats_.begin(); it != stats_.end(); ++it) {
     ConstPropertyStatBlock cpsb(context.datareader_report_->properties, *it);
     if (cpsb) {
@@ -41,6 +52,23 @@ void SharedSummaryReportVisitor::on_datareader_report(const ReportVisitorContext
 
 void SharedSummaryReportVisitor::on_datawriter_report(const ReportVisitorContext& context)
 {
+  Builder::ConstPropertyIndex et_cpi = get_property(context.datawriter_report_->properties, "enable_time", Builder::PVK_TIME);
+  const Builder::TimeStamp et = et_cpi ? et_cpi->value.time_prop() : Builder::ZERO;
+
+  Builder::ConstPropertyIndex ldt_cpi = get_property(context.datawriter_report_->properties, "last_discovery_time", Builder::PVK_TIME);
+  const Builder::TimeStamp ldt = ldt_cpi ? ldt_cpi->value.time_prop() : Builder::ZERO;
+
+  bool correctly_matched = Builder::ZERO < et && Builder::ZERO < ldt;
+  if (!correctly_matched) {
+    ++untagged_error_count_;
+    for (unsigned int tags_index = 0; tags_index < context.datawriter_report_->tags.length(); ++tags_index) {
+      const std::string tag(context.datawriter_report_->tags[tags_index]);
+      if (tags_.find(tag) != tags_.end()) {
+        ++tagged_error_counts_[tag];
+      }
+    }
+  }
+
   for (auto it = stats_.begin(); it != stats_.end(); ++it) {
     ConstPropertyStatBlock cpsb(context.datawriter_report_->properties, *it);
     if (cpsb) {
