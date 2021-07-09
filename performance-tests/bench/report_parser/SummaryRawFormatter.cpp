@@ -6,27 +6,31 @@ namespace Bench {
 
 int SummaryRawFormatter::format(const Bench::TestController::Report& report, std::ostream& output_stream, const ParseParameters& parse_parameters)
 {
-  std::unordered_set<std::string> stats;
-  std::unordered_set<std::string> tags;
 
-  Bench::gather_stats_and_tags(report, stats, tags);
+  SharedSummaryReportVisitor visitor;
+
+  Bench::gather_stats_and_tags(report, visitor.stats_, visitor.tags_);
 
   if (!parse_parameters.tags.empty()) {
-    tags = parse_parameters.tags;
+    visitor.tags_ = parse_parameters.tags;
   }
 
   if (!parse_parameters.stats.empty()) {
-    stats = parse_parameters.stats;
+    visitor.stats_ = parse_parameters.stats;
   }
 
-  typedef std::map<std::string, std::vector<Bench::SimpleStatBlock> > stat_vec_map;
-
-  stat_vec_map untagged_stat_vecs;
-  std::map<std::string, stat_vec_map> tagged_stat_vecs;
-
-  SharedSummaryReportVisitor visitor(stats, tags, untagged_stat_vecs, tagged_stat_vecs);
-
   visit_report(report, visitor);
+
+  const auto& tags = visitor.tags_;
+  const auto& stats = visitor.stats_;
+  const auto& untagged_stat_vecs = visitor.untagged_stat_vecs_;
+  const auto& tagged_stat_vecs = visitor.tagged_stat_vecs_;
+  const auto& untagged_error_counts = visitor.untagged_error_counts_;
+  const auto& tagged_error_counts = visitor.tagged_error_counts_;
+
+  output_stream << std::endl;
+  output_stream << "Total Errors: " << untagged_error_counts.total_ << std::endl;
+  output_stream << "Discovery Errors: " << untagged_error_counts.discovery_ << std::endl;
 
   for (auto stat_it = stats.begin(); stat_it != stats.end(); ++stat_it) {
     auto stat_pos = untagged_stat_vecs.find(*stat_it);
@@ -40,6 +44,13 @@ int SummaryRawFormatter::format(const Bench::TestController::Report& report, std
     if (tag_pos != tagged_stat_vecs.end()) {
       output_stream << std::endl;
       output_stream << "---=== Stats For Tag '" << *tags_it << "' ===---" << std::endl;
+
+      auto tagged_error_counts_pos = tagged_error_counts.find(tag_pos->first);
+      auto tagged_error_counts_copy = tagged_error_counts_pos == tagged_error_counts.end() ? SharedSummaryReportVisitor::ErrorCounts() : tagged_error_counts_pos->second;
+      output_stream << std::endl;
+      output_stream << "Total Errors: " << tagged_error_counts_copy.total_ << std::endl;
+      output_stream << "Discovery Errors: " << tagged_error_counts_copy.discovery_ << std::endl;
+
       for (auto stat_it = stats.begin(); stat_it != stats.end(); ++stat_it) {
         auto stat_pos = tag_pos->second.find(*stat_it);
         if (stat_pos != tag_pos->second.end()) {
