@@ -2553,7 +2553,6 @@ Spdp::SpdpTransport::close(const DCPS::ReactorTask_rch& reactor_task)
 #endif
 }
 
-
 void
 Spdp::SpdpTransport::shorten_local_sender_delay_i()
 {
@@ -3368,7 +3367,7 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
         return;
       }
 
-      shorten_local_sender_delay_i ();
+      shorten_local_sender_delay_i();
     } else {
       ACE_TCHAR buff[DCPS::AddrToStringSize];
       multicast_address_.addr_to_string(buff, DCPS::AddrToStringSize);
@@ -3405,7 +3404,7 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
         return;
       }
 
-      shorten_local_sender_delay_i ();
+      shorten_local_sender_delay_i();
     } else {
       ACE_TCHAR buff[DCPS::AddrToStringSize];
       multicast_ipv6_address_.addr_to_string(buff, DCPS::AddrToStringSize);
