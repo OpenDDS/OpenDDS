@@ -200,7 +200,8 @@ protected:
   /// valid after this method is called.
   virtual void stop_accepting_or_connecting(const TransportClient_wrch& client,
                                             const RepoId& remote_id,
-                                            bool disassociate) = 0;
+                                            bool disassociate,
+                                            bool association_failed) = 0;
 
 
   /// Called during the shutdown() method in order to give the

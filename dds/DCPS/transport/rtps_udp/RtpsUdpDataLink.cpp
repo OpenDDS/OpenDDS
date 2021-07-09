@@ -704,7 +704,7 @@ void
 RtpsUdpDataLink::disassociated(const RepoId& local_id,
                                const RepoId& remote_id)
 {
-  release_reservations_i(local_id, remote_id);
+  release_reservations_i(remote_id, local_id);
 
   ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
 
