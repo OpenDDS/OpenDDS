@@ -8,9 +8,9 @@ use File::Compare;
 use strict;
 
 my $gencmd = "$ENV{DDS_ROOT}/bin/opendds_idl -Sa -St sample.idl";
-system($gencmd);
+system($gencmd) == 0 or die "ERROR: could not run $gencmd $?\n";
 rename("sampleTypeSupportImpl.cpp","pass1");
-system($gencmd);
+system($gencmd) == 0 or die "ERROR: could not run $gencmd $?\n";
 my $result = compare("pass1","sampleTypeSupportImpl.cpp");
 unlink("pass1");
 unlink("sampleT*");
