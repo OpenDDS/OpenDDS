@@ -23,7 +23,7 @@ my $num_readers = 1;
 my $use_take = 0;
 
 my $test = new PerlDDS::TestFramework();
-my $app_bit_conf = ($test->{'transport'} eq 'udp') ? '-DCPSBit 0' : '';
+my $app_bit_conf = ($test->{'transport'} eq 'udp') ? '-DCPSBit 0' : '-r 1';
 
 if ($test->flag('take')) {
   print "use_take !!!!!\n";

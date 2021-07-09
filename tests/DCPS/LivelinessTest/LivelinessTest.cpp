@@ -40,6 +40,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     //  -n max_samples_per_instance defaults to INFINITE
     //  -d history.depth            defaults to 1
     //  -z                          verbose transport debug
+    //  -r reliable                 0 for udp transport 1 for others
 
     const ACE_TCHAR *currentArg = 0;
 
@@ -60,6 +61,9 @@ int parse_args (int argc, ACE_TCHAR *argv[])
       arg_shifter.consume_arg();
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-t"))) != 0) {
       use_take = ACE_OS::atoi (currentArg);
+      arg_shifter.consume_arg();
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-r"))) != 0) {
+      use_reliable = (ACE_OS::atoi (currentArg));
       arg_shifter.consume_arg();
     } else {
       arg_shifter.ignore_arg();
@@ -136,7 +140,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   automatic_dw_qos.liveliness.kind = DDS::AUTOMATIC_LIVELINESS_QOS;
   automatic_dw_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC;
   automatic_dw_qos.liveliness.lease_duration.nanosec = 0;
-
+  if (use_reliable) {
+    automatic_dw_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  }
   DDS::DataWriterQos manual_dw_qos;
   pub->get_default_datawriter_qos (manual_dw_qos);
   manual_dw_qos.history.depth = history_depth;
@@ -144,6 +150,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   manual_dw_qos.liveliness.kind = DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
   manual_dw_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC;
   manual_dw_qos.liveliness.lease_duration.nanosec = 0;
+  if (use_reliable) {
+    manual_dw_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  }
 
   DDS::DataWriter_var dw_automatic =
       pub->create_datawriter(automatic_topic, automatic_dw_qos,
@@ -172,7 +181,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   automatic_dr_qos.liveliness.kind = DDS::AUTOMATIC_LIVELINESS_QOS;
   automatic_dr_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC;
   automatic_dr_qos.liveliness.lease_duration.nanosec = 0;
-
+  if (use_reliable) {
+    automatic_dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  }
   DDS::DataReaderQos remote_manual_dr_qos;
   remote_sub->get_default_datareader_qos (remote_manual_dr_qos);
   remote_manual_dr_qos.history.depth = history_depth;
@@ -180,7 +191,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   remote_manual_dr_qos.liveliness.kind = DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
   remote_manual_dr_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC;
   remote_manual_dr_qos.liveliness.lease_duration.nanosec = 0;
-
+  if (use_reliable) {
+    remote_manual_dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  }
   DDS::DataReaderQos local_manual_dr_qos;
   local_sub->get_default_datareader_qos (local_manual_dr_qos);
   local_manual_dr_qos.history.depth = history_depth;
@@ -188,6 +201,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   local_manual_dr_qos.liveliness.kind = DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
   local_manual_dr_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC;
   local_manual_dr_qos.liveliness.lease_duration.nanosec = 0;
+  if (use_reliable) {
+    local_manual_dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  }
 
   DistributedConditionSet_rch dcs = OpenDDS::DCPS::make_rch<InMemoryDistributedConditionSet>();
 
