@@ -635,6 +635,10 @@ namespace {
       be_global->impl_ <<
         "  while (true) {\n"
         "    const CORBA::ULong len = seq.length();\n"
+        "    // Improves growth behavior. See note in ParameterListConverter's add_param()\n"
+        "    if (len && !(len & (len - 1))) {\n"
+        "      seq.length(2 * len);\n"
+        "    }\n"
         "    seq.length(len + 1);\n"
         "    if (!(strm >> seq[len])) {\n"
         "      return false;\n"
@@ -3612,35 +3616,28 @@ namespace {
     }
     {
       Function extraction("operator>>", "bool");
-      extraction.addArg("outer_strm", "Serializer&");
+      extraction.addArg("strm", "Serializer&");
       extraction.addArg("uni", cxx + "&");
       extraction.endArgs();
       be_global->impl_ <<
         "  ACE_CDR::UShort disc, size;\n"
-        "  if (!(outer_strm >> disc) || !(outer_strm >> size)) {\n"
+        "  if (!(strm >> disc) || !(strm >> size)) {\n"
         "    return false;\n"
         "  }\n"
         "  if (disc == OpenDDS::RTPS::PID_SENTINEL) {\n"
         "    uni._d(OpenDDS::RTPS::PID_SENTINEL);\n"
         "    return true;\n"
         "  }\n"
-        "  ACE_Message_Block param(size);\n"
-        "  ACE_CDR::Octet* data = reinterpret_cast<ACE_CDR::Octet*>("
-        "param.wr_ptr());\n"
-        "  if (!outer_strm.read_octet_array(data, size)) {\n"
-        "    return false;\n"
-        "  }\n"
-        "  param.wr_ptr(size);\n"
+        "  const Serializer::ScopedAlignmentContext sac(strm, size);\n"
         "  if (disc == RTPS::PID_XTYPES_TYPE_INFORMATION) {\n"
         "    DDS::OctetSeq type_info(size);\n"
         "    type_info.length(size);\n"
-        "    std::memcpy(type_info.get_buffer(), data, size);\n"
+        "    if (!strm.read_octet_array(type_info.get_buffer(), size)) {\n"
+        "      return false;\n"
+        "    }\n"
         "    uni.type_information(type_info);\n"
         "    return true;\n"
         "  }\n"
-        "  const Encoding encoding(\n"
-        "    Encoding::KIND_XCDR1, outer_strm.swap_bytes());\n"
-        "  Serializer strm(&param, encoding);\n"
         "  switch (disc) {\n";
       generateSwitchBody(u, streamCommon, branches, discriminator,
                          "", ">> ", cxx.c_str(), true);
@@ -3649,7 +3646,9 @@ namespace {
         "    {\n"
         "      uni.unknown_data(DDS::OctetSeq(size));\n"
         "      uni.unknown_data().length(size);\n"
-        "      std::memcpy(uni.unknown_data().get_buffer(), data, size);\n"
+        "      if (!strm.read_octet_array(uni.unknown_data().get_buffer(), size)) {\n"
+        "        return false;\n"
+        "      }\n"
         "      uni._d(disc);\n"
         "    }\n"
         "  }\n"

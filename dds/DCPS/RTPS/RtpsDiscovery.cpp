@@ -949,16 +949,6 @@ RtpsDiscovery::spdp_rtps_relay_address(const ACE_INET_Addr& address)
     return;
   }
 
-  if (prev != ACE_INET_Addr()) {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-    for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
-         dom_pos != dom_limit; ++dom_pos) {
-      for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
-        part_pos->second->remove_application_participant();
-      }
-    }
-  }
-
   config_->spdp_rtps_relay_address(address);
 
   if (address == ACE_INET_Addr()) {

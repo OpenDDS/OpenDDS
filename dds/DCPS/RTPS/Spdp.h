@@ -215,7 +215,6 @@ public:
   );
 
   DCPS::RcHandle<RtpsDiscoveryConfig> config() const { return config_; }
-  void remove_application_participant();
   void send_to_relay();
 
 protected:
@@ -260,6 +259,8 @@ private:
    * updates should be withheld from the user.
    */
   bool secure_part_user_data() const;
+
+  void update_rtps_relay_application_participant_i(DiscoveredParticipantIter iter);
 
 #ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t send_handshake_message(const DCPS::RepoId& guid,

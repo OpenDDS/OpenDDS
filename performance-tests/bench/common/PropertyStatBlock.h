@@ -26,10 +26,12 @@ struct Bench_Common_Export SimpleStatBlock {
   double median_;
   double median_absolute_deviation_;
 
-  void pretty_print(std::ostream& os, const std::string& prefix, const std::string& indentation = "  ", size_t indentation_level = 0);
+  void pretty_print(std::ostream& os, const std::string& prefix, const std::string& indentation = "  ", size_t indentation_level = 0) const;
+  void to_json_summary(const std::string& name, rapidjson::Value& dst, rapidjson::Value::AllocatorType& alloc) const;
 };
 
 Bench_Common_Export SimpleStatBlock consolidate(const SimpleStatBlock& sb1, const SimpleStatBlock& sb2);
+Bench_Common_Export SimpleStatBlock consolidate(const std::vector<SimpleStatBlock>& vec);
 
 class Bench_Common_Export PropertyStatBlock {
 public:
@@ -39,6 +41,7 @@ public:
   void update(double value, const Builder::TimeStamp& time = Builder::ZERO);
   void finalize();
 
+  void to_simple_stat_block(SimpleStatBlock&) const;
   SimpleStatBlock to_simple_stat_block() const;
 
 private:
@@ -61,6 +64,10 @@ public:
   // Constructor for reading PropertyStatBlock
   ConstPropertyStatBlock(const Builder::PropertySeq& seq, const std::string& prefix);
 
+  inline explicit operator bool() const noexcept { return static_cast<bool>(sample_count_); }
+  inline bool operator!() const noexcept { return !static_cast<bool>(sample_count_); }
+
+  void to_simple_stat_block(SimpleStatBlock&) const;
   SimpleStatBlock to_simple_stat_block() const;
 
 private:

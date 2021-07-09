@@ -289,6 +289,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , domain_(domain)
   , guid_(guid)
   , participant_discovered_at_(MonotonicTimePoint::now().to_monotonic_time())
+  , is_application_participant_(false)
   , tport_(DCPS::make_rch<SpdpTransport>(rchandle_from(this)))
   , initialized_flag_(false)
   , eh_shutdown_(false)
@@ -639,6 +640,14 @@ Spdp::handle_participant_data(DCPS::MessageId id,
   const DCPS::ParticipantLocation location_mask = compute_location_mask(from, from_relay);
 #endif
 
+  // Don't trust SPDP for the RtpsRelay application participant.
+  // Otherwise, anyone can reset the application participant.
+#ifdef OPENDDS_SECURITY
+  if (is_security_enabled() && !from_sedp) {
+    pdata.participantProxy.opendds_rtps_relay_application_participant = false;
+  }
+#endif
+
   // Find the participant - iterator valid only as long as we hold the lock
   DiscoveredParticipantIter iter = participants_.find(guid);
 
@@ -671,6 +680,12 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     iter = p.first;
     iter->second.discovered_at_ = now;
     update_lease_expiration_i(iter, now);
+    update_rtps_relay_application_participant_i(iter);
+    iter = participants_.find(guid);
+    if (iter == participants_.end()) {
+      return;
+    }
+
     if (!from_relay && from != ACE_INET_Addr()) {
       iter->second.local_address_ = from;
     }
@@ -851,6 +866,11 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         iter->second.pdata_ = pdata;
         iter->second.pdata_.discoveredAt = da;
         update_lease_expiration_i(iter, now);
+        update_rtps_relay_application_participant_i(iter);
+        iter = participants_.find(guid);
+        if (iter == participants_.end()) {
+          return;
+        }
         if (!from_relay && from != ACE_INET_Addr()) {
           iter->second.local_address_ = from;
         }
@@ -2640,14 +2660,29 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
 }
 
 void
-Spdp::remove_application_participant()
+Spdp::update_rtps_relay_application_participant_i(DiscoveredParticipantIter iter)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  if (!iter->second.pdata_.participantProxy.opendds_rtps_relay_application_participant) {
+    return;
+  }
 
-  for (DiscoveredParticipantIter pos = participants_.begin(), limit = participants_.end(); pos != limit; ++pos) {
-    if (pos->second.pdata_.participantProxy.opendds_rtps_relay_application_participant) {
-      remove_discovered_participant(pos);
-      break;
+  if (DCPS::DCPS_debug_level) {
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) Spdp::update_rtps_relay_application_participant - %C is an RtpsRelay application participant\n"),
+               DCPS::LogGuid(iter->first).c_str()));
+  }
+
+  for (DiscoveredParticipantIter pos = participants_.begin(), limit = participants_.end(); pos != limit;) {
+    if (pos != iter && pos->second.pdata_.participantProxy.opendds_rtps_relay_application_participant) {
+      if (DCPS::DCPS_debug_level) {
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) Spdp::update_rtps_relay_application_participant - removing previous RtpsRelay application participant %C\n"),
+                   DCPS::LogGuid(pos->first).c_str()));
+      }
+      DiscoveredParticipantIter to_erase = pos++;
+      remove_discovered_participant(to_erase);
+    } else {
+      ++pos;
     }
   }
 }
@@ -2677,7 +2712,7 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, const ACE_INET_Addr& loca
   ParameterList plist;
   if (!ParameterListConverter::to_param_list(pdata, plist)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-      ACE_TEXT("Spdp::SpdpTransport::write() - ")
+      ACE_TEXT("Spdp::SpdpTransport::write_i() - ")
       ACE_TEXT("failed to convert from SPDPdiscoveredParticipantData ")
       ACE_TEXT("to ParameterList\n")));
     return;
@@ -2697,7 +2732,7 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, const ACE_INET_Addr& loca
 
     if (!ParameterListConverter::to_param_list(ai_map, plist)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("Spdp::SpdpTransport::write() - ")
+                 ACE_TEXT("Spdp::SpdpTransport::write_i() - ")
                  ACE_TEXT("failed to convert from ICE::AgentInfo ")
                  ACE_TEXT("to ParameterList\n")));
       return;
@@ -2717,7 +2752,7 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, const ACE_INET_Addr& loca
   if (!(ser << hdr_) || !(ser << info_dst) || !(ser << data_) || !(ser << encap_LE) || !(ser << options)
       || !(ser << plist)) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write() - ")
+      ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write_i() - ")
       ACE_TEXT("failed to serialize headers for SPDP\n")));
     return;
   }
@@ -4234,7 +4269,7 @@ void Spdp::process_participant_ice(const ParameterList& plist,
 {
   ICE::AgentInfoMap ai_map;
   if (!ParameterListConverter::from_param_list(plist, ai_map)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::data_received - ")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::process_participant_ice - ")
                ACE_TEXT("failed to convert from ParameterList to ")
                ACE_TEXT("ICE::AgentInfo\n")));
     return;
