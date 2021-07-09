@@ -713,7 +713,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       if (from_relay) {
         tport_->write_i(guid, iter->second.local_address_, SpdpTransport::SEND_RELAY);
       } else {
-        tport_->zero_local_sender_delay_i ();
+        tport_->write_i(guid, iter->second.local_address_, SpdpTransport::SEND_LOCAL);
       }
     }
 
@@ -2568,17 +2568,6 @@ Spdp::SpdpTransport::shorten_local_sender_delay_i()
 }
 
 void
-Spdp::SpdpTransport::zero_local_sender_delay_i ()
-{
-  DCPS::RcHandle<Spdp> outer = outer_.lock ();
-  if (!outer) return;
-
-  if (local_sender_) {
-    local_sender_->enable (TimeDuration::zero_value);
-  }
-}
-
-void
 Spdp::SpdpTransport::write(WriteFlags flags)
 {
   DCPS::RcHandle<Spdp> outer = outer_.lock();
@@ -3379,7 +3368,7 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
         return;
       }
 
-      zero_local_sender_delay_i ();
+      shorten_local_sender_delay_i ();
     } else {
       ACE_TCHAR buff[DCPS::AddrToStringSize];
       multicast_address_.addr_to_string(buff, DCPS::AddrToStringSize);
@@ -3416,7 +3405,7 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
         return;
       }
 
-      zero_local_sender_delay_i ();
+      shorten_local_sender_delay_i ();
     } else {
       ACE_TCHAR buff[DCPS::AddrToStringSize];
       multicast_ipv6_address_.addr_to_string(buff, DCPS::AddrToStringSize);

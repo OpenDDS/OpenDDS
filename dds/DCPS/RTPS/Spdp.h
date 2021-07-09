@@ -321,7 +321,6 @@ private:
     void register_handlers(const DCPS::ReactorTask_rch& reactor_task);
     void enable_periodic_tasks();
 
-    void zero_local_sender_delay_i ();
     void shorten_local_sender_delay_i();
     void write(WriteFlags flags);
     void write_i(WriteFlags flags);
