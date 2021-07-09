@@ -18,16 +18,21 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace Security {
 
-static const char * PLUGIN_NAME = "BuiltIn";
+//static const char * PLUGIN_NAME = "BuiltIn";
 
 int
 BuiltInPluginLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
 {
+  const OPENDDS_STRING PLUGIN_NAME("BuiltIn");
+  ACE_DEBUG((LM_DEBUG,"BIPloader init, name = '%C'\n",PLUGIN_NAME.c_str()));
   SecurityPluginInst_rch plugin = TheSecurityRegistry->get_plugin_inst(
     PLUGIN_NAME, false /* don't attempt to load the plugin */);
   if (!plugin) {
+    ACE_DEBUG((LM_DEBUG,"BIPloader registering plugin\n"));
     plugin = DCPS::make_rch<BuiltInSecurityPluginInst>();
     TheSecurityRegistry->register_plugin(PLUGIN_NAME, plugin);
+  } else {
+    ACE_DEBUG((LM_DEBUG,"BIPloader found plugin\n"));
   }
 
   SecurityConfig_rch default_config =
