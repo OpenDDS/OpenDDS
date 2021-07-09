@@ -2,6 +2,7 @@
 
 #include "LogAddr.h"
 #include "Definitions.h"
+
 #include <stdio.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
