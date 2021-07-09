@@ -24,13 +24,16 @@ int SummaryJsonDashboardFormatter::format(const Bench::TestController::Report& r
   const auto& stats = visitor.stats_;
   const auto& untagged_stat_vecs = visitor.untagged_stat_vecs_;
   const auto& tagged_stat_vecs = visitor.tagged_stat_vecs_;
-  const auto& untagged_error_count = visitor.untagged_error_count_;
+  const auto& untagged_error_counts = visitor.untagged_error_counts_;
   const auto& tagged_error_counts = visitor.tagged_error_counts_;
 
   rapidjson::Document document;
   document.SetObject();
 
-  document.AddMember("errors", rapidjson::Value(untagged_error_count).Move(), document.GetAllocator());
+  rapidjson::Value& errors_val = document.AddMember("errors", rapidjson::Value(0).Move(), document.GetAllocator())["errors"].SetObject();
+  errors_val.AddMember("total", rapidjson::Value(untagged_error_counts.total_).Move(), document.GetAllocator());
+  errors_val.AddMember("discovery", rapidjson::Value(untagged_error_counts.discovery_).Move(), document.GetAllocator());
+
   rapidjson::Value& untagged_stat_val = document.AddMember("stats", rapidjson::Value(0).Move(), document.GetAllocator())["stats"].SetObject();
 
   for (auto stat_it = stats.begin(); stat_it != stats.end(); ++stat_it) {
@@ -48,8 +51,13 @@ int SummaryJsonDashboardFormatter::format(const Bench::TestController::Report& r
     if (tag_pos != tagged_stat_vecs.end()) {
 
       rapidjson::Value& tag_val = tags_val.AddMember(rapidjson::StringRef(tag_pos->first.c_str()), rapidjson::Value(0).Move(), document.GetAllocator())[tag_pos->first.c_str()].SetObject();
-      auto tagged_error_pos = tagged_error_counts.find(tag_pos->first);
-      tag_val.AddMember("errors", rapidjson::Value(tagged_error_pos != tagged_error_counts.end() ? tagged_error_pos->second : 0).Move(), document.GetAllocator());
+
+      auto tagged_error_counts_pos = tagged_error_counts.find(tag_pos->first);
+      auto tagged_error_counts_copy = tagged_error_counts_pos == tagged_error_counts.end() ? SharedSummaryReportVisitor::ErrorCounts() : tagged_error_counts_pos->second;
+      rapidjson::Value& tagged_errors_val = tag_val.AddMember("errors", rapidjson::Value(0).Move(), document.GetAllocator())["errors"].SetObject();
+      tagged_errors_val.AddMember("total", rapidjson::Value(tagged_error_counts_copy.total_).Move(), document.GetAllocator());
+      tagged_errors_val.AddMember("discovery", rapidjson::Value(tagged_error_counts_copy.discovery_).Move(), document.GetAllocator());
+
       rapidjson::Value& tagged_stat_val = tag_val.AddMember("stats", rapidjson::Value(0).Move(), document.GetAllocator())["stats"].SetObject();
 
       for (auto stat_it = stats.begin(); stat_it != stats.end(); ++stat_it) {

@@ -9,12 +9,18 @@ typedef std::map<std::string, std::vector<SimpleStatBlock> > stat_vec_map;
 
 struct SharedSummaryReportVisitor : public ReportVisitor
 {
+  struct ErrorCounts {
+    ErrorCounts() : total_(0), discovery_(0) {}
+    uint64_t total_;
+    uint64_t discovery_;
+  };
+
   std::unordered_set<std::string> stats_;
   std::unordered_set<std::string> tags_;
   stat_vec_map untagged_stat_vecs_;
   std::map<std::string, stat_vec_map> tagged_stat_vecs_;
-  uint64_t untagged_error_count_;
-  std::map<std::string, uint64_t> tagged_error_counts_;
+  ErrorCounts untagged_error_counts_;
+  std::map<std::string, ErrorCounts> tagged_error_counts_;
 
   SharedSummaryReportVisitor();
 

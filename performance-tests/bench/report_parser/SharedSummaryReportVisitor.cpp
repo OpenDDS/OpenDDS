@@ -2,7 +2,7 @@
 
 namespace Bench {
 
-SharedSummaryReportVisitor::SharedSummaryReportVisitor() : untagged_error_count_(0)
+SharedSummaryReportVisitor::SharedSummaryReportVisitor()
 {
 }
 
@@ -26,11 +26,14 @@ void SharedSummaryReportVisitor::on_datareader_report(const ReportVisitorContext
 
   bool correctly_matched = Builder::ZERO < et && Builder::ZERO < ldt;
   if (!correctly_matched) {
-    ++untagged_error_count_;
+    ++untagged_error_counts_.total_;
+    ++untagged_error_counts_.discovery_;
     for (unsigned int tags_index = 0; tags_index < context.datareader_report_->tags.length(); ++tags_index) {
       const std::string tag(context.datareader_report_->tags[tags_index]);
       if (tags_.find(tag) != tags_.end()) {
-        ++tagged_error_counts_[tag];
+        ErrorCounts& ec = tagged_error_counts_[tag];
+        ++ec.total_;
+        ++ec.discovery_;
       }
     }
   }
@@ -60,11 +63,14 @@ void SharedSummaryReportVisitor::on_datawriter_report(const ReportVisitorContext
 
   bool correctly_matched = Builder::ZERO < et && Builder::ZERO < ldt;
   if (!correctly_matched) {
-    ++untagged_error_count_;
+    ++untagged_error_counts_.total_;
+    ++untagged_error_counts_.discovery_;
     for (unsigned int tags_index = 0; tags_index < context.datawriter_report_->tags.length(); ++tags_index) {
       const std::string tag(context.datawriter_report_->tags[tags_index]);
       if (tags_.find(tag) != tags_.end()) {
-        ++tagged_error_counts_[tag];
+        ErrorCounts& ec = tagged_error_counts_[tag];
+        ++ec.total_;
+        ++ec.discovery_;
       }
     }
   }
