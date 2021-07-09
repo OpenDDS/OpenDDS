@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -28,8 +26,7 @@
 #ifndef OPENDDS_DCPS_SERIALIZER_H
 #define OPENDDS_DCPS_SERIALIZER_H
 
-#include "dcps_export.h"
-
+#include <ace/config-macros.h>
 #ifndef ACE_LACKS_PRAGMA_ONCE
 #  pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -37,6 +34,7 @@
 #include "Definitions.h"
 #include "PoolAllocator.h"
 #include "Message_Block_Ptr.h"
+#include "dcps_export.h"
 
 #include <ace/CDR_Base.h>
 #include <ace/CDR_Stream.h>
@@ -66,7 +64,7 @@ enum Endianness {
 };
 
 OpenDDS_Dcps_Export
-OPENDDS_STRING endianness_to_string(Endianness endianness);
+String endianness_to_string(Endianness endianness);
 
 enum Extensibility {
   FINAL,
@@ -195,9 +193,9 @@ public:
   /// Returns is_encapsulated(this->kind_)
   bool is_encapsulated() const;
 
-  OPENDDS_STRING to_string() const;
+  String to_string() const;
 
-  static OPENDDS_STRING kind_to_string(Kind value);
+  static String kind_to_string(Kind value);
 
 private:
   Kind kind_;
@@ -274,7 +272,7 @@ public:
    */
   bool to_encoding(Encoding& encoding, Extensibility expected_extensibility);
 
-  OPENDDS_STRING to_string() const;
+  String to_string() const;
 
   static bool set_encapsulation_options(Message_Block_Ptr& mb);
 
@@ -470,6 +468,8 @@ public:
   bool read_char_array(ACE_CDR::Char* x, ACE_CDR::ULong length);
   bool read_wchar_array(ACE_CDR::WChar* x, ACE_CDR::ULong length);
   bool read_octet_array(ACE_CDR::Octet* x, ACE_CDR::ULong length);
+  bool read_int8_array(ACE_CDR::Int8* x, ACE_CDR::ULong length);
+  bool read_uint8_array(ACE_CDR::UInt8* x, ACE_CDR::ULong length);
   bool read_short_array(ACE_CDR::Short* x, ACE_CDR::ULong length);
   bool read_ushort_array(ACE_CDR::UShort* x, ACE_CDR::ULong length);
   bool read_long_array(ACE_CDR::Long* x, ACE_CDR::ULong length);
@@ -489,6 +489,8 @@ public:
   bool write_char_array(const ACE_CDR::Char* x, ACE_CDR::ULong length);
   bool write_wchar_array(const ACE_CDR::WChar* x, ACE_CDR::ULong length);
   bool write_octet_array(const ACE_CDR::Octet* x, ACE_CDR::ULong length);
+  bool write_int8_array(const ACE_CDR::Int8* x, ACE_CDR::ULong length);
+  bool write_uint8_array(const ACE_CDR::UInt8* x, ACE_CDR::ULong length);
   bool write_short_array(const ACE_CDR::Short* x, ACE_CDR::ULong length);
   bool write_ushort_array(const ACE_CDR::UShort* x, ACE_CDR::ULong length);
   bool write_long_array(const ACE_CDR::Long* x, ACE_CDR::ULong length);
@@ -544,9 +546,13 @@ public:
   bool operator<<(Serializer& s, ACE_OutputCDR::from_string x);
   friend OpenDDS_Dcps_Export
   bool operator<<(Serializer& s, ACE_OutputCDR::from_wstring x);
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, ACE_OutputCDR::from_uint8 x);
+  friend OpenDDS_Dcps_Export
+  bool operator<<(Serializer& s, ACE_OutputCDR::from_int8 x);
 
   friend OpenDDS_Dcps_Export
-  bool operator<<(Serializer& s, const OPENDDS_STRING& x);
+  bool operator<<(Serializer& s, const String& x);
 
   template <typename CharT>
   struct FromBoundedString {
@@ -563,7 +569,7 @@ public:
 
 #ifdef DDS_HAS_WCHAR
   friend OpenDDS_Dcps_Export
-  bool operator<<(Serializer& s, const OPENDDS_WSTRING& x);
+  bool operator<<(Serializer& s, const WString& x);
 
   friend OpenDDS_Dcps_Export
   bool operator<<(Serializer& s, FromBoundedString<wchar_t> x);
@@ -613,9 +619,13 @@ public:
   bool operator>>(Serializer& s, ACE_InputCDR::to_string x);
   friend OpenDDS_Dcps_Export
   bool operator>>(Serializer& s, ACE_InputCDR::to_wstring x);
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, ACE_InputCDR::to_uint8 x);
+  friend OpenDDS_Dcps_Export
+  bool operator>>(Serializer& s, ACE_InputCDR::to_int8 x);
 
   friend OpenDDS_Dcps_Export
-  bool operator>>(Serializer& s, OPENDDS_STRING& x);
+  bool operator>>(Serializer& s, String& x);
 
   template <typename CharT>
   struct ToBoundedString {
@@ -632,7 +642,7 @@ public:
 
 #ifdef DDS_HAS_WCHAR
   friend OpenDDS_Dcps_Export
-  bool operator>>(Serializer& s, OPENDDS_WSTRING& x);
+  bool operator>>(Serializer& s, WString& x);
 
   friend OpenDDS_Dcps_Export
   bool operator>>(Serializer& s, ToBoundedString<wchar_t> x);
@@ -806,7 +816,7 @@ private:
   /// Indicates the current state of the stream abstraction.
   bool good_bit_;
 
-  ///  The way to judge whether tryconstruct trim is able to be properly done
+  /// The way to judge whether tryconstruct trim is able to be properly done
   ConstructionStatus construction_status_;
 
   /**
@@ -931,6 +941,14 @@ OpenDDS_Dcps_Export
 bool primitive_serialized_size(
   const Encoding& encoding, size_t& size,
   const ACE_OutputCDR::from_octet value, size_t count = 1);
+OpenDDS_Dcps_Export
+bool primitive_serialized_size(
+  const Encoding& encoding, size_t& size,
+  const ACE_OutputCDR::from_uint8 value, size_t count = 1);
+OpenDDS_Dcps_Export
+bool primitive_serialized_size(
+  const Encoding& encoding, size_t& size,
+  const ACE_OutputCDR::from_int8 value, size_t count = 1);
 
 /// predefined type method explicit disambiguators.
 OpenDDS_Dcps_Export
@@ -948,6 +966,12 @@ void primitive_serialized_size_octet(const Encoding& encoding, size_t& size,
 OpenDDS_Dcps_Export
 void primitive_serialized_size_ulong(const Encoding& encoding, size_t& size,
   size_t count = 1);
+OpenDDS_Dcps_Export
+void primitive_serialized_size_uint8(const Encoding& encoding, size_t& size,
+  size_t count = 1);
+OpenDDS_Dcps_Export
+void primitive_serialized_size_int8(const Encoding& encoding, size_t& size,
+  size_t count = 1);
 
 /// Add delimiter to the size of a serialized size if the encoding has them.
 OpenDDS_Dcps_Export
@@ -955,11 +979,11 @@ void serialized_size_delimiter(const Encoding& encoding, size_t& size);
 
 OpenDDS_Dcps_Export
 void serialized_size_parameter_id(
-  const Encoding& encoding, size_t& size, size_t& xcdr1_running_size);
+  const Encoding& encoding, size_t& size, size_t& running_size);
 
 OpenDDS_Dcps_Export
 void serialized_size_list_end_parameter_id(
-  const Encoding& encoding, size_t& size, size_t& xcdr1_running_size);
+  const Encoding& encoding, size_t& size, size_t& running_size);
 
 } // namespace DCPS
 } // namespace OpenDDS

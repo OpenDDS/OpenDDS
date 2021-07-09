@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -565,6 +563,20 @@ Serializer::read_octet_array(ACE_CDR::Octet* x, ACE_CDR::ULong length)
   return this->good_bit();
 }
 
+ACE_INLINE
+bool Serializer::read_int8_array(ACE_CDR::Int8* x, ACE_CDR::ULong length)
+{
+  read_array(reinterpret_cast<char*>(x), int8_cdr_size, length);
+  return good_bit();
+}
+
+ACE_INLINE
+bool Serializer::read_uint8_array(ACE_CDR::UInt8* x, ACE_CDR::ULong length)
+{
+  read_array(reinterpret_cast<char*>(x), uint8_cdr_size, length);
+  return good_bit();
+}
+
 ACE_INLINE bool
 Serializer::read_short_array(ACE_CDR::Short* x, ACE_CDR::ULong length)
 {
@@ -686,6 +698,20 @@ Serializer::write_octet_array(const ACE_CDR::Octet* x, ACE_CDR::ULong length)
 {
   write_array(reinterpret_cast<const char*>(x), byte_cdr_size, length);
   return this->good_bit();
+}
+
+ACE_INLINE
+bool Serializer::write_int8_array(const ACE_CDR::Int8* x, ACE_CDR::ULong length)
+{
+  write_array(reinterpret_cast<const char*>(x), int8_cdr_size, length);
+  return good_bit();
+}
+
+ACE_INLINE
+bool Serializer::write_uint8_array(const ACE_CDR::UInt8* x, ACE_CDR::ULong length)
+{
+  write_array(reinterpret_cast<const char*>(x), uint8_cdr_size, length);
+  return good_bit();
 }
 
 ACE_INLINE bool
@@ -1106,7 +1132,7 @@ operator<<(Serializer& s, ACE_OutputCDR::from_wchar x)
 }
 
 ACE_INLINE bool
-operator<<(Serializer& s, const OPENDDS_STRING& x)
+operator<<(Serializer& s, const String& x)
 {
   return s << x.c_str();
 }
@@ -1119,7 +1145,7 @@ operator<<(Serializer& s, Serializer::FromBoundedString<char> x)
 
 #ifdef DDS_HAS_WCHAR
 ACE_INLINE bool
-operator<<(Serializer& s, const OPENDDS_WSTRING& x)
+operator<<(Serializer& s, const WString& x)
 {
   return s << x.c_str();
 }
@@ -1160,6 +1186,20 @@ operator<<(Serializer& s, ACE_OutputCDR::from_wstring x)
   const ACE_CDR::ULong stringlen =
     x.bound_ ? static_cast<ACE_CDR::ULong>(ACE_OS::strlen(x.val_)) : 0;
   return s.good_bit() && ((x.bound_ == 0) || (stringlen <= x.bound_));
+}
+
+ACE_INLINE
+bool operator<<(Serializer& s, ACE_OutputCDR::from_uint8 x)
+{
+  s.buffer_write(reinterpret_cast<const char*>(&x.val_), uint8_cdr_size, false);
+  return s.good_bit();
+}
+
+ACE_INLINE
+bool operator<<(Serializer& s, ACE_OutputCDR::from_int8 x)
+{
+  s.buffer_write(reinterpret_cast<const char*>(&x.val_), int8_cdr_size, false);
+  return s.good_bit();
 }
 
 //
@@ -1358,8 +1398,22 @@ operator>>(Serializer& s, ACE_InputCDR::to_wstring x)
   return s.good_bit();
 }
 
+ACE_INLINE
+bool operator>>(Serializer& s, ACE_InputCDR::to_uint8 x)
+{
+  s.buffer_read(reinterpret_cast<char*>(&x.ref_), uint8_cdr_size, false);
+  return s.good_bit();
+}
+
+ACE_INLINE
+bool operator>>(Serializer& s, ACE_InputCDR::to_int8 x)
+{
+  s.buffer_read(reinterpret_cast<char*>(&x.ref_), int8_cdr_size, false);
+  return s.good_bit();
+}
+
 ACE_INLINE bool
-operator>>(Serializer& s, OPENDDS_STRING& x)
+operator>>(Serializer& s, String& x)
 {
   char* buf = 0;
   const size_t length = s.read_string(buf);
@@ -1383,7 +1437,7 @@ operator>>(Serializer& s, Serializer::ToBoundedString<char> x)
 
 #ifdef DDS_HAS_WCHAR
 ACE_INLINE bool
-operator>>(Serializer& s, OPENDDS_WSTRING& x)
+operator>>(Serializer& s, WString& x)
 {
   ACE_CDR::WChar* buf = 0;
   const size_t length = s.read_string(buf);
@@ -1537,6 +1591,24 @@ bool primitive_serialized_size(
   return true;
 }
 
+ACE_INLINE
+bool primitive_serialized_size(
+  const Encoding& /*encoding*/, size_t& size,
+  const ACE_OutputCDR::from_uint8 /*value*/, size_t count)
+{
+  size += uint8_cdr_size * count;
+  return true;
+}
+
+ACE_INLINE
+bool primitive_serialized_size(
+  const Encoding& /*encoding*/, size_t& size,
+  const ACE_OutputCDR::from_int8 /*value*/, size_t count)
+{
+  size += int8_cdr_size * count;
+  return true;
+}
+
 // predefined type method explicit disambiguators.
 
 ACE_INLINE
@@ -1574,6 +1646,20 @@ void primitive_serialized_size_ulong(const Encoding& encoding, size_t& size,
 {
   encoding.align(size, uint32_cdr_size);
   size += uint32_cdr_size * count;
+}
+
+ACE_INLINE
+void primitive_serialized_size_uint8(const Encoding& /*encoding*/, size_t& size,
+  size_t count)
+{
+  size += uint8_cdr_size * count;
+}
+
+ACE_INLINE
+void primitive_serialized_size_int8(const Encoding& /*encoding*/, size_t& size,
+  size_t count)
+{
+  size += int8_cdr_size * count;
 }
 
 ACE_INLINE

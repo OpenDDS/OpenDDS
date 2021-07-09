@@ -9,6 +9,7 @@
 #define dds_generator_H
 
 #include "be_extern.h"
+#include "be_util.h"
 #include "../DCPS/RestoreOutputStreamState.h"
 
 #include <utl_scoped_name.h>
@@ -28,6 +29,7 @@
 #include <cstring>
 #include <set>
 #include <stdexcept>
+#include <iomanip>
 
 /// How to handle IDL underscore escaping. Depends on where the name is
 /// going and where the name came from.
@@ -442,7 +444,7 @@ std::string wrapPrefix(AST_Type* type, WrapDirection wd)
 {
   switch (type->node_type()) {
   case AST_Decl::NT_pre_defined: {
-    AST_PredefinedType* p = dynamic_cast<AST_PredefinedType*>(type);
+    AST_PredefinedType* const p = dynamic_cast<AST_PredefinedType*>(type);
     switch (p->pt()) {
     case AST_PredefinedType::PT_char:
       return (wd == WD_OUTPUT)
@@ -456,6 +458,12 @@ std::string wrapPrefix(AST_Type* type, WrapDirection wd)
     case AST_PredefinedType::PT_boolean:
       return (wd == WD_OUTPUT)
         ? "ACE_OutputCDR::from_boolean(" : "ACE_InputCDR::to_boolean(";
+    case AST_PredefinedType::PT_uint8:
+      return (wd == WD_OUTPUT)
+        ? "ACE_OutputCDR::from_uint8(" : "ACE_InputCDR::to_uint8(";
+    case AST_PredefinedType::PT_int8:
+      return (wd == WD_OUTPUT)
+        ? "ACE_OutputCDR::from_int8(" : "ACE_InputCDR::to_int8(";
     default:
       return "";
     }
@@ -510,6 +518,12 @@ inline std::string to_cxx_type(AST_Type* type, std::size_t& size)
     case AST_PredefinedType::PT_ushort:
       size = 2;
       return "ACE_CDR::UShort";
+    case AST_PredefinedType::PT_int8:
+      size = 1;
+      return "ACE_CDR::Int8";
+    case AST_PredefinedType::PT_uint8:
+      size = 1;
+      return "ACE_CDR::UInt8";
     case AST_PredefinedType::PT_float:
       size = 4;
       return "ACE_CDR::Float";
@@ -575,7 +589,18 @@ std::ostream& operator<<(std::ostream& o,
   OpenDDS::DCPS::RestoreOutputStreamState ross(o);
   switch (ev.et) {
   case AST_Expression::EV_octet:
-    return o << static_cast<int>(ev.u.oval);
+    {
+      std::ios saved(nullptr);
+      saved.copyfmt(o);
+      o << "0x" << std::hex << std::setw(2) << std::setfill('0') <<
+        static_cast<int>(ev.u.oval);
+      o.copyfmt(saved);
+    }
+    break;
+  case AST_Expression::EV_int8:
+    return o << static_cast<short>(ev.u.int8val);
+  case AST_Expression::EV_uint8:
+    return o << static_cast<unsigned short>(ev.u.int8val);
   case AST_Expression::EV_short:
     return o << ev.u.sval;
   case AST_Expression::EV_ushort:
@@ -610,8 +635,10 @@ std::ostream& operator<<(std::ostream& o,
   }
 #endif
   default:
-    return o;
+    be_util::misc_error_and_abort(
+      "Unhandled ExprType value in operator<<(std::ostream, AST_ExprValue)");
   }
+  return o;
 }
 
 inline std::string bounded_arg(AST_Type* type)
@@ -662,7 +689,10 @@ inline bool needSyntheticDefault(AST_Type* disc, size_t n_labels)
   switch (pdt->pt()) {
   case AST_PredefinedType::PT_boolean:
     return n_labels < 2;
+  case AST_PredefinedType::PT_int8:
+  case AST_PredefinedType::PT_uint8:
   case AST_PredefinedType::PT_char:
+  case AST_PredefinedType::PT_octet:
     return n_labels < ACE_OCTET_MAX;
   case AST_PredefinedType::PT_short:
   case AST_PredefinedType::PT_ushort:
