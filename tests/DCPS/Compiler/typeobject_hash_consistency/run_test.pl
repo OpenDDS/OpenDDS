@@ -9,11 +9,11 @@ use strict;
 
 my $gencmd = "$ENV{DDS_ROOT}/bin/opendds_idl -Sa -St sample.idl";
 system($gencmd) == 0 or die "ERROR: could not run $gencmd $?\n";
-rename("sampleTypeSupportImpl.cpp","pass1");
+rename("sampleTypeSupportImpl.cpp", "sampleTy1");
 system($gencmd) == 0 or die "ERROR: could not run $gencmd $?\n";
-my $result = compare("pass1","sampleTypeSupportImpl.cpp");
-unlink("pass1");
-unlink("sampleT*");
+my $result = compare("sampleTy1", "sampleTypeSupportImpl.cpp");
+my @intfiles = <sampleTy*>;
+unlink(@intfiles) == @intfiles or die "ERROR: could not clean up intermediate files\n";
 if ($result == 0)
 {
     print "test PASSED\n";
