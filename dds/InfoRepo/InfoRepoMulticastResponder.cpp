@@ -8,6 +8,7 @@
 #include "InfoRepoMulticastResponder.h"
 #include "dds/DCPS/debug.h"
 #include "dds/DCPS/Definitions.h"
+#include <dds/DCPS/LogAddr.h>
 
 #include "tao/debug.h"
 #include "tao/Object.h"
@@ -330,11 +331,10 @@ InfoRepoMulticastResponder::handle_input(ACE_HANDLE)
   if (OpenDDS::DCPS::DCPS_debug_level > 0)
     ACE_DEBUG((LM_DEBUG,
                "(%P|%t) InfoRepoMulticastResponder::handle_input() ior: <%C>\n"
-               "sent to %C:%u.\n"
+               "sent to %C.\n"
                "result from send = %d\n",
                ior.c_str(),
-               peer_addr.get_host_addr(),
-               peer_addr.get_port_number(),
+               DCPS::LogAddr(peer_addr).c_str(),
                result));
 
   return 0;
