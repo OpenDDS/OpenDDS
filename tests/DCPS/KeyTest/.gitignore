@@ -61,3 +61,6 @@
 /BoundTest2TypeSupportS.h
 /BoundTest2TypeSupportS.inl
 /IsBounded
+/KeyTypeError_*TypeSupport.idl
+/KeyTypeError_*TypeSupportImpl.cpp
+/KeyTypeError_*TypeSupportImpl.h

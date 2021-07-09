@@ -4,16 +4,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 
 # -*- perl -*-
 
-use Sys::Hostname;
+use strict;
+use warnings;
 
-use Env (DDS_ROOT);
+use Env qw(DDS_ROOT ACE_ROOT);
 use lib "$DDS_ROOT/bin";
-use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
-use FileHandle;
-use Cwd;
-use strict;
 
 sub compiler_test {
   # These files each represent an expected error from the key processing
@@ -29,31 +26,53 @@ sub compiler_test {
                      "KeyTypeError_struct_no_nest.idl",
                      "KeyTypeError_sequence.idl",
                      );
+  my $failed = 0;
   foreach my $file (@error_files) {
-    my $idl = "$DDS_ROOT/bin/opendds_idl --default-nested $file";
-    my $idl_ret = 0;
-    open(FH, "$idl 2>&1 |");
-    while (<FH>) {
-      $idl_ret = 1 if /^Error - /;
+    my $opendds_idl = PerlDDS::get_opendds_idl();
+    if (!defined($opendds_idl)) {
+      $failed = 1;
+      last;
     }
-    close FH;
-    if ($idl_ret == 0) {
+    my $cmd = "$opendds_idl --default-nested $file";
+    print("compiler_test: $cmd\n");
+    my $found_error = 0;
+    unless (open(FH, "$cmd 2>&1 |")) {
+      print STDERR "ERROR: Couldn't run $cmd: $!\n";
+      $failed = 1;
+      last;
+    }
+    while (<FH>) {
+      $found_error = 1 if /^Error - /;
+    }
+    my $zero_exit_status = close(FH);
+    unless ($found_error && !$zero_exit_status) {
       print STDERR "ERROR: opendds_idl processed $file cleanly when expecting " .
-          "error\n";
-      return 1;
+          "error (found error: $found_error, exit status: $?)\n";
+      $failed = 1;
     }
   }
-  return 0;
+  return $failed;
 }
 
-my %framework_tests = (
-  'keymarshalling' => 'KeyMarshalling',
-  'md5' => 'KeyTest_MD5',
-  'isbounded' => 'IsBounded',
+sub command {
+  my $exe = shift;
+  return sub {
+    my $name = shift;
+    my $test = new PerlDDS::TestFramework();
+    $test->process($name, $exe);
+    $test->start_process($name);
+    return $test->finish(30) ? 1 : 0;
+  };
+}
+
+my @all_tests = (
+  ['keymarshalling', command('KeyMarshalling')],
+  ['md5', command('KeyTest_MD5')],
+  ['isbounded', command('IsBounded')],
+  ['compiler', sub { return compiler_test(); }],
 );
-my @all_tests = keys(%framework_tests);
-push(@all_tests, 'compiler');
-my %all_tests_hash = map {$_ => 1} @all_tests;
+my @all_test_names = map { $_->[0] } @all_tests;
+my %all_tests_hash = map { $_->[0] => $_->[1] } @all_tests;
 
 foreach my $arg (@ARGV) {
   if (!exists($all_tests_hash{$arg})) {
@@ -62,14 +81,7 @@ foreach my $arg (@ARGV) {
 }
 
 my $failed = 0;
-foreach my $testname (scalar(@ARGV) ? @ARGV : @all_tests) {
-  if ($testname eq 'compiler') {
-    $failed |= compiler_test();
-  } else {
-    my $test = new PerlDDS::TestFramework();
-    $test->process($testname, $framework_tests{$testname});
-    $test->start_process($testname);
-    $failed |= $test->finish(30) ? 1 : 0;
-  }
+foreach my $testname (scalar(@ARGV) ? @ARGV : @all_test_names) {
+  $failed |= $all_tests_hash{$testname}->($testname);
 }
 exit($failed);
