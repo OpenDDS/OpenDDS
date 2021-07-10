@@ -101,20 +101,24 @@ SimpleStatBlock consolidate(const SimpleStatBlock& sb1, const SimpleStatBlock& s
   // Consolidate median buffers (no need to include unused / invalid values beyond median sample count)
   result.median_sample_count_ = sb1.median_sample_count_ + sb2.median_sample_count_;
   result.median_buffer_.resize(result.median_sample_count_);
-  memcpy(&result.median_buffer_[0], &sb1.median_buffer_[0], sb1.median_sample_count_ * sizeof (double));
-  memcpy(&result.median_buffer_[sb1.median_sample_count_], &sb2.median_buffer_[0], sb2.median_sample_count_ * sizeof (double));
+  if (sb1.median_sample_count_) {
+    memcpy(&result.median_buffer_[0], &sb1.median_buffer_[0], sb1.median_sample_count_ * sizeof (double));
+  }
+  if (sb2.median_sample_count_) {
+    memcpy(&result.median_buffer_[sb1.median_sample_count_], &sb2.median_buffer_[0], sb2.median_sample_count_ * sizeof (double));
+  }
   result.median_sample_overflow_ = result.sample_count_ - result.median_sample_count_;
 
   // Consolidate timestamp buffers
   result.timestamp_buffer_.resize(result.median_sample_count_);
   if (sb1.timestamp_buffer_.size()) {
     memcpy(&result.timestamp_buffer_[0], &sb1.timestamp_buffer_[0], sb1.median_sample_count_ * sizeof (Builder::TimeStamp));
-  } else {
+  } else if (sb1.median_sample_count_) {
     memset(&result.timestamp_buffer_[0], 0, sb1.median_sample_count_ * sizeof (Builder::TimeStamp));
   }
   if (sb2.timestamp_buffer_.size()) {
     memcpy(&result.timestamp_buffer_[sb1.median_sample_count_], &sb2.timestamp_buffer_[0], sb2.median_sample_count_ * sizeof (Builder::TimeStamp));
-  } else {
+  } else if (sb2.median_sample_count_) {
     memset(&result.timestamp_buffer_[sb1.median_sample_count_], 0, sb2.median_sample_count_ * sizeof (Builder::TimeStamp));
   }
 
