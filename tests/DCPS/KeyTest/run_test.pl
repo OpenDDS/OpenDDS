@@ -31,24 +31,22 @@ sub compiler_test {
   foreach my $file (@error_files) {
     my $opendds_idl = PerlDDS::get_opendds_idl();
     if (!defined($opendds_idl)) {
-      $failed = 1;
-      last;
+      return 1;
     }
     my $cmd = "$opendds_idl --default-nested $file";
     print("compiler_test: $cmd\n");
     my $found_error = 0;
     unless (open(FH, "$cmd 2>&1 |")) {
       print STDERR "ERROR: Couldn't run $cmd: $!\n";
-      $failed = 1;
-      last;
+      return 1;
     }
     while (<FH>) {
       $found_error = 1 if /^Error - /;
     }
-    my $zero_exit_status = close(FH);
-    unless ($found_error && !$zero_exit_status) {
+    my $error_status = close(FH);
+    unless ($found_error && !$error_status) {
       print STDERR "ERROR: opendds_idl processed $file cleanly when expecting " .
-          "error (found error: $found_error, exit status: $?)\n";
+          "error (found error: $found_error, \$?: $?)\n";
       $failed = 1;
     }
   }
@@ -70,7 +68,7 @@ my @all_tests = (
   ['keymarshalling', command('KeyMarshalling')],
   ['md5', command('KeyTest_MD5')],
   ['isbounded', command('IsBounded')],
-  ['compiler', sub { return compiler_test(); }],
+  ['compiler', \&compiler_test],
 );
 my @all_test_names = map { $_->[0] } @all_tests;
 my %all_tests_hash = map { $_->[0] => $_->[1] } @all_tests;
