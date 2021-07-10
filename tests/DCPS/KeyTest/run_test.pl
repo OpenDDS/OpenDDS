@@ -16,16 +16,17 @@ sub compiler_test {
   # These files each represent an expected error from the key processing
   # code in the opendds_idl compiler.  Run the compiler against each of
   # them and verify that an error occurs.
-  my @error_files = ("KeyTypeError_array_noindex.idl",
-                     "KeyTypeError_bad_nesting.idl",
-                     "KeyTypeError_missing_right_bracket.idl",
-                     "KeyTypeError_multi_dim_array.idl",
-                     "KeyTypeError_nofield.idl",
-                     "KeyTypeError_nonarrayindex2.idl",
-                     "KeyTypeError_nonarrayindex.idl",
-                     "KeyTypeError_struct_no_nest.idl",
-                     "KeyTypeError_sequence.idl",
-                     );
+  my @error_files = (
+    "invalid_array_noindex.idl",
+    "invalid_bad_nesting.idl",
+    "invalid_missing_right_bracket.idl",
+    "invalid_multi_dim_array.idl",
+    "invalid_nofield.idl",
+    "invalid_nonarrayindex2.idl",
+    "invalid_nonarrayindex.idl",
+    "invalid_struct_no_nest.idl",
+    "invalid_sequence.idl",
+  );
   my $failed = 0;
   foreach my $file (@error_files) {
     my $opendds_idl = PerlDDS::get_opendds_idl();
