@@ -33,15 +33,15 @@ public:
 
   static void SetUpTestCase()
   {
-    #if defined(ACE_AS_STATIC_LIBS)
+#if defined(ACE_AS_STATIC_LIBS)
     BuiltInPluginLoader *loader =
     ACE_Dynamic_Service<BuiltInPluginLoader>::instance("OpenDDS_Security");
     if (loader == 0) {
-      ACE_ERROR ((LM_ERROR,"could not locate loader\n"));
+      ACE_ERROR ((LM_ERROR,"could not locate BuiltIn plugin loader\n"));
     } else {
       loader->init(0,0);
     }
-    #endif
+#endif
     cf_.open();
     ACE_Ini_ImpExp import(cf_);
     ASSERT_EQ(0, import.import_config(ACE_TEXT("dds/DCPS/security/framework/test1.ini")));
