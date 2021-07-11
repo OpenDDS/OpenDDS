@@ -472,7 +472,7 @@ PublisherImpl::set_qos(const DDS::PublisherQos & qos)
                   ACE_TEXT("failed.\n"),
                   OPENDDS_STRING(converter).c_str()));
             }
-            return DDS::RETCODE_ERROR
+            return DDS::RETCODE_ERROR;
           }
         }
       }

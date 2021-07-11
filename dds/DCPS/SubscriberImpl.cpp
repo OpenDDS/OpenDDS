@@ -1088,7 +1088,7 @@ SubscriberImpl::validate_datareader_qos(const DDS::DataReaderQos & qos,
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
     if (mt) {
-      if (DCPS_debug_level > 0) { {
+      if (DCPS_debug_level > 0) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                    ACE_TEXT("SubscriberImpl::create_datareader, ")
                    ACE_TEXT("DATAREADER_QOS_USE_TOPIC_QOS can not be used ")
@@ -1134,7 +1134,6 @@ SubscriberImpl::validate_datareader_qos(const DDS::DataReaderQos & qos,
     }
     return false;
   }
-
 
   return true;
 }
