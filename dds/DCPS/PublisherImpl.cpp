@@ -572,10 +572,12 @@ DDS::ReturnCode_t
 PublisherImpl::resume_publications()
 {
   if (enabled_ == false) {
-    ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("PublisherImpl::resume_publications, ")
-        ACE_TEXT(" Entity is not enabled.\n")));
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("PublisherImpl::resume_publications, ")
+          ACE_TEXT(" Entity is not enabled.\n")));
+    }
     return DDS::RETCODE_NOT_ENABLED;
   }
 
