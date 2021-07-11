@@ -61,11 +61,13 @@ PublisherImpl::~PublisherImpl()
   //The datawriters should be deleted already before calling delete
   //publisher.
   if (!is_clean()) {
-    ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("PublisherImpl::~PublisherImpl, ")
-        ACE_TEXT("%B datawriters and %B publications still exist.\n"),
-        datawriter_map_.size(), publication_map_.size()));
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("PublisherImpl::~PublisherImpl, ")
+          ACE_TEXT("%B datawriters and %B publications still exist.\n"),
+          datawriter_map_.size(), publication_map_.size()));
+    }
   }
 }
 
@@ -109,12 +111,14 @@ PublisherImpl::create_datawriter(
   TopicImpl* topic_servant = dynamic_cast<TopicImpl*>(a_topic);
 
   if (!topic_servant) {
-    CORBA::String_var name = a_topic->get_name();
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: ")
-      ACE_TEXT("PublisherImpl::create_datawriter, ")
-      ACE_TEXT("topic_servant(topic_name=%C) is nil.\n"),
-      name.in()));
+    if (DCPS_debug_level > 0) {
+      CORBA::String_var name = a_topic->get_name();
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("PublisherImpl::create_datawriter, ")
+        ACE_TEXT("topic_servant(topic_name=%C) is nil.\n"),
+        name.in()));
+    }
     return 0;
   }
 
@@ -122,12 +126,14 @@ PublisherImpl::create_datawriter(
       topic_servant->get_type_support();
 
   if (typesupport == 0) {
-    CORBA::String_var name = topic_servant->get_name();
-    ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("PublisherImpl::create_datawriter, ")
-        ACE_TEXT("typesupport(topic_name=%C) is nil.\n"),
-        name.in()));
+    if (DCPS_debug_level > 0) {
+      CORBA::String_var name = topic_servant->get_name();
+      ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("PublisherImpl::create_datawriter, ")
+          ACE_TEXT("typesupport(topic_name=%C) is nil.\n"),
+          name.in()));
+    }
     return DDS::DataWriter::_nil();
   }
 
@@ -137,10 +143,12 @@ PublisherImpl::create_datawriter(
       dynamic_cast <DataWriterImpl*>(dw_obj.in());
 
   if (dw_servant == 0) {
-    ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("PublisherImpl::create_datawriter, ")
-        ACE_TEXT("servant is nil.\n")));
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("PublisherImpl::create_datawriter, ")
+          ACE_TEXT("servant is nil.\n")));
+    }
     return DDS::DataWriter::_nil();
   }
 
@@ -156,10 +164,12 @@ PublisherImpl::create_datawriter(
     const DDS::ReturnCode_t ret = dw_servant->enable();
 
     if (ret != DDS::RETCODE_OK) {
-      ACE_ERROR((LM_WARNING,
-          ACE_TEXT("(%P|%t) WARNING: ")
-          ACE_TEXT("PublisherImpl::create_datawriter, ")
-          ACE_TEXT("enable failed.\n")));
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: ")
+            ACE_TEXT("PublisherImpl::create_datawriter, ")
+            ACE_TEXT("enable failed.\n")));
+      }
       return DDS::DataWriter::_nil();
     }
   } else {
@@ -175,9 +185,10 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
 {
   DataWriterImpl* dw_servant = dynamic_cast<DataWriterImpl*>(a_datawriter);
   if (!dw_servant) {
-    ACE_ERROR((LM_ERROR,
-              "(%P|%t) PublisherImpl::delete_datawriter - dynamic cast to DataWriterImpl failed\n"
-    ));
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR,
+                "(%P|%t) PublisherImpl::delete_datawriter - dynamic cast to DataWriterImpl failed\n"));
+    }
     return DDS::RETCODE_ERROR;
   }
 
@@ -185,13 +196,15 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
     DDS::Publisher_var dw_publisher(dw_servant->get_publisher());
 
     if (dw_publisher.in() != this) {
-      RepoId id = dw_servant->get_repo_id();
-      GuidConverter converter(id);
-      ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) PublisherImpl::delete_datawriter: ")
-          ACE_TEXT("the data writer %C doesn't ")
-          ACE_TEXT("belong to this subscriber\n"),
-          OPENDDS_STRING(converter).c_str()));
+      if (DCPS_debug_level > 0) {
+        RepoId id = dw_servant->get_repo_id();
+        GuidConverter converter(id);
+        ACE_ERROR((LM_ERROR,
+            ACE_TEXT("(%P|%t) PublisherImpl::delete_datawriter: ")
+            ACE_TEXT("the data writer %C doesn't ")
+            ACE_TEXT("belong to this subscriber\n"),
+            OPENDDS_STRING(converter).c_str()));
+      }
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
   }
@@ -217,12 +230,15 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
     PublicationMap::iterator it = publication_map_.find(publication_id);
 
     if (it == publication_map_.end()) {
-      GuidConverter converter(publication_id);
-      ACE_ERROR_RETURN((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: ")
-          ACE_TEXT("PublisherImpl::delete_datawriter, ")
-          ACE_TEXT("datawriter %C not found.\n"),
-          OPENDDS_STRING(converter).c_str()), DDS::RETCODE_ERROR);
+      if (DCPS_debug_level > 0) {
+        GuidConverter converter(publication_id);
+        ACE_ERROR((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: ")
+            ACE_TEXT("PublisherImpl::delete_datawriter, ")
+            ACE_TEXT("datawriter %C not found.\n"),
+            OPENDDS_STRING(converter).c_str()));
+      }
+      return DDS::RETCODE_ERROR;
     }
 
     // We can not erase the datawriter from datawriter map by the topic name
@@ -279,11 +295,13 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
       this->domain_id_,
       participant->get_id(),
       publication_id)) {
-    ACE_ERROR_RETURN((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("PublisherImpl::delete_datawriter, ")
-        ACE_TEXT("publication not removed from discovery.\n")),
-        DDS::RETCODE_ERROR);
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("PublisherImpl::delete_datawriter, ")
+          ACE_TEXT("publication not removed from discovery.\n")));
+    }
+    return DDS::RETCODE_ERROR;
   }
 
   participant->remove_adjust_liveliness_timers();
@@ -391,14 +409,17 @@ DDS::ReturnCode_t PublisherImpl::delete_contained_entities()
     const DDS::ReturnCode_t ret = delete_datawriter(a_datawriter.in());
 
     if (ret != DDS::RETCODE_OK) {
-      GuidConverter converter(pub_id);
-      ACE_ERROR_RETURN((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: ")
-          ACE_TEXT("PublisherImpl::")
-          ACE_TEXT("delete_contained_entities: ")
-          ACE_TEXT("failed to delete ")
-          ACE_TEXT("datawriter %C.\n"),
-          OPENDDS_STRING(converter).c_str()), ret);
+      if (DCPS_debug_level > 0) {
+        GuidConverter converter(pub_id);
+        ACE_ERROR((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: ")
+            ACE_TEXT("PublisherImpl::")
+            ACE_TEXT("delete_contained_entities: ")
+            ACE_TEXT("failed to delete ")
+            ACE_TEXT("datawriter %C.\n"),
+            OPENDDS_STRING(converter).c_str()));
+      }
+      return ret;
     }
   }
 
@@ -442,13 +463,16 @@ PublisherImpl::set_qos(const DDS::PublisherQos & qos)
               idToQosMap.insert(DwIdToQosMap::value_type(id, qos));
 
           if (!pair.second) {
-            GuidConverter converter(id);
-            ACE_ERROR_RETURN((LM_ERROR,
-                ACE_TEXT("(%P|%t) ")
-                ACE_TEXT("PublisherImpl::set_qos: ")
-                ACE_TEXT("insert id %C to DwIdToQosMap ")
-                ACE_TEXT("failed.\n"),
-                OPENDDS_STRING(converter).c_str()), DDS::RETCODE_ERROR);
+            if (DCPS_debug_level > 0) {
+              GuidConverter converter(id);
+              ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ")
+                  ACE_TEXT("PublisherImpl::set_qos: ")
+                  ACE_TEXT("insert id %C to DwIdToQosMap ")
+                  ACE_TEXT("failed.\n"),
+                  OPENDDS_STRING(converter).c_str()));
+            }
+            return DDS::RETCODE_ERROR
           }
         }
       }
@@ -469,10 +493,12 @@ PublisherImpl::set_qos(const DDS::PublisherQos & qos)
               this->qos_);
 
         if (!status) {
-          ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) PublisherImpl::set_qos, ")
-              ACE_TEXT("failed.\n")),
-              DDS::RETCODE_ERROR);
+          if (DCPS_debug_level > 0) {
+            ACE_ERROR((LM_ERROR,
+                ACE_TEXT("(%P|%t) PublisherImpl::set_qos, ")
+                ACE_TEXT("failed.\n")));
+          }
+          return DDS::RETCODE_ERROR;
         }
 
         ++iter;
@@ -515,11 +541,13 @@ DDS::ReturnCode_t
 PublisherImpl::suspend_publications()
 {
   if (enabled_ == false) {
-    ACE_ERROR_RETURN((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("PublisherImpl::suspend_publications, ")
-        ACE_TEXT(" Entity is not enabled.\n")),
-        DDS::RETCODE_NOT_ENABLED);
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("PublisherImpl::suspend_publications, ")
+          ACE_TEXT(" Entity is not enabled.\n")));
+    }
+    return DDS::RETCODE_NOT_ENABLED;
   }
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
@@ -544,11 +572,11 @@ DDS::ReturnCode_t
 PublisherImpl::resume_publications()
 {
   if (enabled_ == false) {
-    ACE_ERROR_RETURN((LM_ERROR,
+    ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("PublisherImpl::resume_publications, ")
-        ACE_TEXT(" Entity is not enabled.\n")),
-        DDS::RETCODE_NOT_ENABLED);
+        ACE_TEXT(" Entity is not enabled.\n")));
+    return DDS::RETCODE_NOT_ENABLED;
   }
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
@@ -580,17 +608,21 @@ DDS::ReturnCode_t
 PublisherImpl::begin_coherent_changes()
 {
   if (enabled_ == false) {
-    ACE_ERROR_RETURN((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: PublisherImpl::begin_coherent_changes:")
-        ACE_TEXT(" Publisher is not enabled!\n")),
-        DDS::RETCODE_NOT_ENABLED);
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: PublisherImpl::begin_coherent_changes:")
+          ACE_TEXT(" Publisher is not enabled!\n")));
+    }
+    return DDS::RETCODE_NOT_ENABLED;
   }
 
   if (!qos_.presentation.coherent_access) {
-    ACE_ERROR_RETURN((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: PublisherImpl::begin_coherent_changes:")
-        ACE_TEXT(" QoS policy does not support coherent access!\n")),
-        DDS::RETCODE_ERROR);
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: PublisherImpl::begin_coherent_changes:")
+          ACE_TEXT(" QoS policy does not support coherent access!\n")));
+    }
+    return DDS::RETCODE_ERROR;
   }
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
@@ -622,17 +654,21 @@ DDS::ReturnCode_t
 PublisherImpl::end_coherent_changes()
 {
   if (enabled_ == false) {
-    ACE_ERROR_RETURN((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: PublisherImpl::end_coherent_changes:")
-        ACE_TEXT(" Publisher is not enabled!\n")),
-        DDS::RETCODE_NOT_ENABLED);
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: PublisherImpl::end_coherent_changes:")
+          ACE_TEXT(" Publisher is not enabled!\n")));
+    }
+    return DDS::RETCODE_NOT_ENABLED;
   }
 
   if (!qos_.presentation.coherent_access) {
-    ACE_ERROR_RETURN((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: PublisherImpl::end_coherent_changes:")
-        ACE_TEXT(" QoS policy does not support coherent access!\n")),
-        DDS::RETCODE_ERROR);
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: PublisherImpl::end_coherent_changes:")
+          ACE_TEXT(" QoS policy does not support coherent access!\n")));
+    }
+    return DDS::RETCODE_ERROR;
   }
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
@@ -641,10 +677,12 @@ PublisherImpl::end_coherent_changes()
       DDS::RETCODE_ERROR);
 
   if (this->change_depth_ == 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: PublisherImpl::end_coherent_changes:")
-        ACE_TEXT(" No matching call to begin_coherent_changes!\n")),
-        DDS::RETCODE_PRECONDITION_NOT_MET);
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: PublisherImpl::end_coherent_changes:")
+          ACE_TEXT(" No matching call to begin_coherent_changes!\n")));
+    }
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
   --this->change_depth_;
@@ -673,10 +711,12 @@ PublisherImpl::end_coherent_changes()
                   it->second->sequence_number_)));
 
       if (!pair.second) {
-        ACE_ERROR_RETURN((LM_ERROR,
-            ACE_TEXT("(%P|%t) ERROR: PublisherImpl::end_coherent_changes: ")
-            ACE_TEXT("failed to insert to GroupCoherentSamples.\n")),
-            DDS::RETCODE_ERROR);
+        if (DCPS_debug_level > 0) {
+          ACE_ERROR((LM_ERROR,
+              ACE_TEXT("(%P|%t) ERROR: PublisherImpl::end_coherent_changes: ")
+              ACE_TEXT("failed to insert to GroupCoherentSamples.\n")));
+        }
+        return DDS::RETCODE_ERROR;
       }
     }
 
@@ -700,10 +740,12 @@ PublisherImpl::wait_for_acknowledgments(
     const DDS::Duration_t& max_wait)
 {
   if (enabled_ == false) {
-    ACE_ERROR_RETURN((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: PublisherImpl::wait_for_acknowledgments, ")
-        ACE_TEXT("Entity is not enabled.\n")),
-        DDS::RETCODE_NOT_ENABLED);
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: PublisherImpl::wait_for_acknowledgments, ")
+          ACE_TEXT("Entity is not enabled.\n")));
+    }
+    return DDS::RETCODE_NOT_ENABLED;
   }
 
   typedef OPENDDS_MAP(DataWriterImpl*, DataWriterImpl::AckToken) DataWriterAckMap;
@@ -727,10 +769,12 @@ PublisherImpl::wait_for_acknowledgments(
             ack_writers.insert(DataWriterAckMap::value_type(writer.in(), token));
 
         if (!pair.second) {
-          ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) ERROR: PublisherImpl::wait_for_acknowledgments, ")
-              ACE_TEXT("Unable to insert AckToken into DataWriterAckMap!\n")),
-              DDS::RETCODE_ERROR);
+          if (DCPS_debug_level > 0) {
+            ACE_ERROR((LM_ERROR,
+                ACE_TEXT("(%P|%t) ERROR: PublisherImpl::wait_for_acknowledgments, ")
+                ACE_TEXT("Unable to insert AckToken into DataWriterAckMap!\n")));
+          }
+          return DDS::RETCODE_ERROR;
         }
       }
     }
@@ -858,12 +902,15 @@ PublisherImpl::writer_enabled(const char*     topic_name,
       publication_map_.insert(PublicationMap::value_type(publication_id, writer));
 
   if (!pair.second) {
-    GuidConverter converter(publication_id);
-    ACE_ERROR_RETURN((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("PublisherImpl::writer_enabled: ")
-        ACE_TEXT("insert publication %C failed.\n"),
-        OPENDDS_STRING(converter).c_str()), DDS::RETCODE_ERROR);
+    if (DCPS_debug_level > 0) {
+      GuidConverter converter(publication_id);
+      ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("PublisherImpl::writer_enabled: ")
+          ACE_TEXT("insert publication %C failed.\n"),
+          OPENDDS_STRING(converter).c_str()));
+    }
+    return DDS::RETCODE_ERROR;
   }
 
   if (this->monitor_) {
@@ -964,10 +1011,12 @@ PublisherImpl::validate_datawriter_qos(const DDS::DataWriterQos& qos,
     DDS::DataWriterQos&       dw_qos)
 {
   if (CORBA::is_nil(a_topic)) {
-    ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("PublisherImpl::create_datawriter, ")
-        ACE_TEXT("topic is nil.\n")));
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("PublisherImpl::create_datawriter, ")
+          ACE_TEXT("topic is nil.\n")));
+    }
     return DDS::DataWriter::_nil();
   }
 
@@ -992,18 +1041,22 @@ PublisherImpl::validate_datawriter_qos(const DDS::DataWriterQos& qos,
   OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(dw_qos, DDS::DataWriter::_nil());
 
   if (!Qos_Helper::valid(dw_qos)) {
-    ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("PublisherImpl::create_datawriter, ")
-        ACE_TEXT("invalid qos.\n")));
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("PublisherImpl::create_datawriter, ")
+          ACE_TEXT("invalid qos.\n")));
+    }
     return DDS::DataWriter::_nil();
   }
 
   if (!Qos_Helper::consistent(dw_qos)) {
-    ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("PublisherImpl::create_datawriter, ")
-        ACE_TEXT("inconsistent qos.\n")));
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("PublisherImpl::create_datawriter, ")
+          ACE_TEXT("inconsistent qos.\n")));
+    }
     return DDS::DataWriter::_nil();
   }
   return true;
