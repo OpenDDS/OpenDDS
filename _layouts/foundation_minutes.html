@@ -1,0 +1,15 @@
+---
+layout: default
+---
+
+<div class="post">
+  <article class="post-content minutes-content">
+    <div class="main">
+      <h2>OpenDDS Foundation Minutes</h2>
+      <h4>{{ page.date | date_to_long_string }}</h4>
+      <article>{{ page.content }}</article>
+    </div>
+
+    {% include foundation_minutes_sidebar.html %}
+  </article>
+</div>

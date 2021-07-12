@@ -41,7 +41,7 @@
       {% endfor %} -->
 {% endcomment %}
       <ul class="trigger">
-        {% assign sorted_pages = site.pages | sort: "order" %}
+        {% assign sorted_pages = site.pages | where_exp:"item", "item.sitemap != false" | sort: "order" %}
         {% assign level = 2 %}
         {% assign counter = 0 %}
         {% for p in sorted_pages %}
@@ -50,7 +50,6 @@
                       or p.redirect
                       or p.url == '/'
                       or p.url contains '.css'
-                      or p.sitemap == false
                       or p.url == '/redirects.json' %}
             {% assign indent = slash.size %}
             {% assign level_m1 = level | minus: 1 %}

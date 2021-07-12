@@ -25,6 +25,14 @@ $grey-color-dark: #7b7c81;
 $on-palm: 850px;
 $on-laptop: 800px;
 
+:root {
+  --opendds-brick: #71150e;
+  --opesdds-brick-accent: rgb(173 32 0);
+  --oci-blue: #255aa8;
+  --bg-gray: #f5f5f5;
+  --bg-gray-panel: rgb(245, 245, 245);
+}
+
 // Using media queries with like this:
 // @include media-query($palm) {
 //     .wrapper {

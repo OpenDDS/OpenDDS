@@ -1,0 +1,24 @@
+---
+layout: default
+title: ""
+menu_title: Minutes
+order: 203
+categories: [foundation]
+CSS: foundation-minutes.css
+---
+
+<div class="post">
+  {% assign current = site.pages | where:"type","foundation-minutes" |
+   last %}
+
+  <article class="post-content minutes-content">
+    <div class="main">
+      <h2>Latest OpenDDS Foundation Minutes</h2>
+      <h4>{{ current.date | date_to_long_string }}</h4>
+      <article>{{ current.content }}</article>
+    </div>
+
+    {% include minutes_sidebar.html %}
+    </div>
+  </article>
+</div>

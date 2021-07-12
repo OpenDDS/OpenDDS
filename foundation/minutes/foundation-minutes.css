@@ -1,0 +1,66 @@
+.main {
+  flex: 3;
+}
+
+.main article {
+  padding-right: 4rem;
+  max-width: 80ch;
+}
+
+.minutes-content {
+  display: flex;
+  flex-wrap: wrap;
+  padding-top: 1rem;
+}
+
+.minutes-content table {
+  border: 1px solid darkgray;
+  border-collapse: collapse;
+}
+
+.minutes-content tbody {
+  text-align: center;
+}
+
+.minutes-content tbody td:first-child {
+  background-color: lightgrey;
+}
+
+.minutes-content tbody td:last-child {
+  text-align: right;
+}
+
+.minutes-content td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid darkgray;
+}
+
+.sidebar {
+  flex: 1;
+}
+
+.sidebar-content {
+  color: var(--oci-blue);
+  background-color: var(--bg-gray-panel);
+  border-top: 3px solid var(--opendds-brick);
+  padding: 1rem;
+}
+
+.sidebar ul {
+  padding: 0;
+  margin: 0;
+  text-decoration: none;
+}
+
+.sidebar li {
+  list-style-type: none;
+}
+
+.sidebar p {
+  font-size: 0.825rem;
+}
+
+.sidebar a.page-link {
+  color: var(--opendds-brick) !important;
+}
