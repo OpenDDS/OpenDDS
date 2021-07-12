@@ -15,51 +15,46 @@ package PerlDDS;
 
 use File::Spec::Functions qw(catfile catdir);
 
-sub get_exe_from {
+sub is_executable {
   my $path = shift;
 
-  my $path_exe = "$path.exe";
-  if (-x $path) {
-    return $path;
-  }
-  elsif (-x $path_exe) {
-    return $path_exe;
-  }
-  return undef;
+  return -x $path || -x "$path.exe";
 }
 
-sub get_exe {
+sub get_executable {
   my $name = shift;
 
   for my $dir (@_) {
     next unless length($dir);
-    my $path = get_exe_from(catfile($dir, $name));
-    return $path if (defined($path));
+    my $path = catfile($dir, $name);
+    return $path if (is_executable($path));
   }
   return undef;
 }
 
-sub get_bin_exe {
+sub get_bin_executable {
   my $name = shift;
 
   my $install_prefix_bin = "";
   if (defined($ENV{OPENDDS_INSTALL_PREFIX})) {
     $install_prefix_bin = catdir($ENV{OPENDDS_INSTALL_PREFIX}, "bin");
   }
-  return get_exe($name, catdir($ENV{DDS_ROOT}, "bin"), $install_prefix_bin);
+  return get_executable($name, catdir($ENV{DDS_ROOT}, "bin"), $install_prefix_bin);
 }
 
 sub get_opendds_idl {
-  my $path = get_bin_exe("opendds_idl");
+  my $path = get_bin_executable("opendds_idl");
   if (!defined($path)) {
     my $user_macros = catfile($ENV{DDS_ROOT}, "user_macros.GNU");
     if (-r $user_macros) {
       open(my $fd, $user_macros) or die("ERROR: Could not open $user_macros: $!");
       while (my $line = <$fd>) {
         if ($line =~ /^OPENDDS_IDL\s*=\s*(.*)$/) {
-          $path = get_exe_from($1);
-          if (!defined($path)) {
-            printf STDERR "ERROR: Value of OPENDDS_IDL in user_macros.GNU is invalid\n";
+          if (is_executable($1)) {
+            $path = $1;
+          }
+          else {
+            printf STDERR "ERROR: Value of OPENDDS_IDL in user_macros.GNU is invalid: $1\n";
           }
         }
       }
@@ -637,7 +632,7 @@ sub process {
   my $subdir = $PerlACE::Process::ExeSubDir;
   my $basename = File::Basename::basename($executable);
   my $dirname = File::Basename::dirname($executable);
-  if (!defined(PerlDDS::get_exe($basename, $dirname, catdir($dirname, $subdir)))) {
+  if (!defined(PerlDDS::get_executable($basename, $dirname, catdir($dirname, $subdir)))) {
     print STDERR "ERROR: executable \"$executable\" does not exist; subdir: $subdir; basename: $basename ; dirname: $dirname\n";
     $self->{status} = -1;
     return;
@@ -727,7 +722,7 @@ sub setup_discovery {
   }
 
   if (!defined($executable)) {
-    $executable = PerlDDS::get_bin_exe("DCPSInfoRepo");
+    $executable = PerlDDS::get_bin_executable("DCPSInfoRepo");
     if (!defined($executable)) {
       print STDERR "ERROR: Couldn't find \$DDS_ROOT/bin/DCPSInfoRepo. It " .
         "needs to be built or \$OPENDDS_INSTALL_PREFIX needs to be defined " .
@@ -1049,7 +1044,7 @@ sub _create_process {
     my $possible_would_be = ($self->{add_pending_timeout} ? "" : "would be ");
     my $prevent_or_allow = ($self->{add_pending_timeout} ? "prevent" : "allow");
     $self->_info("TestFramework::_create_process " . $possible_would_be
-      . "adding \"$flag\" to $executable\'s parameters. To " . $prevent_or_allow
+      . "adding \"$flag\" to ${executable}s parameters. To " . $prevent_or_allow
       . " this set " . "<TestFramework>->{add_pending_timeout} = "
       . ($self->{add_pending_timeout} ? "0" : "1") . "\n");
     $params .= $flag if $self->{add_pending_timeout};
