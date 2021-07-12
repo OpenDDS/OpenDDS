@@ -42,7 +42,6 @@ parse_input ()
     usage
   fi
   echo "TEST_RUN_DIR : $TEST_RUN_DIR"
-  
 }
 
 
