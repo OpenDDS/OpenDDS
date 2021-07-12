@@ -7,6 +7,16 @@
   max-width: 80ch;
 }
 
+.post.minutes-post h1 {
+  font-size: 2.5rem;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.post.minutes-post h4 {
+  font-size: 1.3rem;
+}
+
 .minutes-content {
   display: flex;
   flex-wrap: wrap;

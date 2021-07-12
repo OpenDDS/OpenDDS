@@ -7,17 +7,14 @@ categories: [foundation]
 CSS: foundation-minutes.css
 ---
 
-<div class="post">
-  {% assign current = site.pages | where:"type","foundation-minutes" |
-   last %}
-
+{% assign current = site.pages | where:"type","foundation-minutes" | last %}
+<div class="post minutes-post">
+  <h1>Latest OpenDDS Foundation Minutes</h1>
+  <h4>{{ current.date | date_to_long_string }}</h4>
   <article class="post-content minutes-content">
     <div class="main">
-      <h2>Latest OpenDDS Foundation Minutes</h2>
-      <h4>{{ current.date | date_to_long_string }}</h4>
       <article>{{ current.content }}</article>
     </div>
-
     {% include foundation_minutes_sidebar.html %}
     </div>
   </article>
