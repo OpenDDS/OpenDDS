@@ -20,6 +20,9 @@
 #include "tests/Utils/ExceptionStreams.h"
 
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#ifdef ACE_AS_STATIC_LIBS
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#endif
 
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
@@ -110,6 +113,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
     TheServiceParticipant->add_discovery(discovery);
     TheServiceParticipant->set_default_discovery(discovery->key());
+
+    TransportInst_rch default_inst = TheTransportRegistry->create_inst("transport", "rtps_udp");
+    TheTransportRegistry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME)->sorted_insert(default_inst);
 
     DDS::DomainParticipant_var participant = dpf->create_participant(11, PARTICIPANT_QOS_DEFAULT, 0, 0);
     if (!participant) {
