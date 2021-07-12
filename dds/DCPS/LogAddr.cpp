@@ -2,8 +2,7 @@
 
 #include "LogAddr.h"
 #include "Definitions.h"
-
-#include <stdio.h>
+#include "SafetyProfileStreams.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -20,10 +19,7 @@ const String LogAddr::ip(const ACE_INET_Addr& addr)
 
 const String LogAddr::port(const ACE_INET_Addr& addr)
 {
-  const size_t SZ = 8;
-  char s[SZ] = {'\0'};
-  snprintf(s, SZ, "%d", addr.get_port_number());
-  return String(s);
+  return to_dds_string(addr.get_port_number());
 }
 
 const String LogAddr::host(const ACE_INET_Addr& addr)
