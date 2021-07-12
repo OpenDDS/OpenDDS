@@ -13,14 +13,15 @@
 #include "BestEffortSessionFactory.h"
 #include "ReliableSessionFactory.h"
 
-#include "ace/Log_Msg.h"
-#include "ace/Truncate.h"
-
+#include <dds/DCPS/LogAddr.h>
 #include "dds/DCPS/RepoIdConverter.h"
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
+
+#include "ace/Log_Msg.h"
+#include "ace/Truncate.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -274,7 +275,8 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
 void
 MulticastTransport::stop_accepting_or_connecting(const TransportClient_wrch& client,
                                                  const RepoId& remote_id,
-                                                 bool /*disassociate*/)
+                                                 bool /*disassociate*/,
+                                                 bool /*association_failed*/)
 {
   VDBG((LM_DEBUG, "(%P|%t) MulticastTransport::stop_accepting_or_connecting\n"));
 
@@ -361,13 +363,9 @@ MulticastTransport::configure_i(MulticastInst& config)
   }
 
   if (!config.group_address_.is_multicast()) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticastTransport[%@]::configure_i: ")
-                      ACE_TEXT("invalid configuration: address %C is not ")
-                      ACE_TEXT("multicast.\n"),
-                      this, this->config().group_address_.get_host_addr()),
-                     false);
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: MulticastTransport[%@]::configure_i: ")
+                      ACE_TEXT("invalid configuration: address %C is not multicast.\n"),
+                      this, LogAddr::ip(this->config().group_address_).c_str()), false);
   }
 
   this->create_reactor_task(config.async_send_, "MulticastTransport" + config.name());

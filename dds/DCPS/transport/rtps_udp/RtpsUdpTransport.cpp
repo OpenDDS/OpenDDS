@@ -252,9 +252,10 @@ RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
 void
 RtpsUdpTransport::stop_accepting_or_connecting(const TransportClient_wrch& client,
                                                const RepoId& remote_id,
-                                               bool disassociate)
+                                               bool disassociate,
+                                               bool association_failed)
 {
-  if (disassociate) {
+  if (disassociate || association_failed) {
     GuardThreadType guard_links(links_lock_);
     if (link_) {
       TransportClient_rch c = client.lock();

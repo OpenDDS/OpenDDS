@@ -147,6 +147,12 @@ operator-(const MonotonicTime_t& t1, const MonotonicTime_t& t2)
   return t;
 }
 
+ACE_INLINE bool
+operator<(const MonotonicTime_t& t1, const MonotonicTime_t& t2)
+{
+  return t1.sec < t2.sec || (t1.sec == t2.sec && t1.nanosec < t2.nanosec);
+}
+
 ACE_INLINE
 ACE_Time_Value time_to_time_value(const DDS::Time_t& t)
 {

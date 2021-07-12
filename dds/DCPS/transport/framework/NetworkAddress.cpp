@@ -7,6 +7,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "NetworkAddress.h"
+#include <dds/DCPS/LogAddr.h>
 #include "dds/DCPS/TimeTypes.h"
 #include "ace/OS_NS_netdb.h"
 #include "ace/Sock_Connect.h"
@@ -91,7 +92,7 @@ String get_fully_qualified_hostname(ACE_INET_Addr* addr)
 
     } else {
       for (size_t i = 0; i < addr_count; i++) {
-        VDBG_LVL((LM_DEBUG, "(%P|%t) NetworkAddress: found IP interface %C\n", addr_array[i].get_host_addr()), 4);
+        VDBG_LVL((LM_DEBUG, "(%P|%t) NetworkAddress: found IP interface %C\n", LogAddr::ip(addr_array[i]).c_str()), 4);
       }
 
 #ifdef ACE_HAS_IPV6
@@ -115,8 +116,7 @@ String get_fully_qualified_hostname(ACE_INET_Addr* addr)
         if (ACE::get_fqdn(addr_array[i], hostname, MAXHOSTNAMELEN+1) == 0) {
           VDBG_LVL((LM_DEBUG, "(%P|%t) considering fqdn %C\n", hostname), 4);
           if (!addr_array[i].is_loopback() && ACE_OS::strchr(hostname, '.') != 0 && choose_single_coherent_address(hostname, false, false) != ACE_INET_Addr()) {
-            VDBG_LVL((LM_DEBUG, "(%P|%t) found fqdn %C from %C:%d\n",
-                      hostname, addr_array[i].get_host_addr(), addr_array[i].get_port_number()), 2);
+            VDBG_LVL((LM_DEBUG, "(%P|%t) found fqdn %C from %C\n", hostname, LogAddr(addr_array[i]).c_str()), 2);
             selected_address = addr_array[i];
             fullname = hostname;
             if (addr) {
@@ -125,8 +125,8 @@ String get_fully_qualified_hostname(ACE_INET_Addr* addr)
             return fullname;
 
           } else {
-            VDBG_LVL((LM_DEBUG, "(%P|%t) ip interface %C:%d maps to hostname %C\n",
-                      addr_array[i].get_host_addr(), addr_array[i].get_port_number(), hostname), 2);
+            VDBG_LVL((LM_DEBUG, "(%P|%t) ip interface %C maps to hostname %C\n",
+                      LogAddr(addr_array[i]).c_str(), hostname), 2);
 
             if (ACE_OS::strncmp(hostname, "localhost", 9) == 0) {
               addr_array[i].get_host_addr(hostname, MAXHOSTNAMELEN);
@@ -510,15 +510,14 @@ ACE_INET_Addr tie_breaker(const T& addrs, const String& name)
 {
   if (!name.empty()) {
     for (typename T::const_iterator it = addrs.begin(); it != addrs.end(); ++it) {
-      if (name.compare(it->get_host_name()) == 0) {
-        VDBG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(list) - Choosing Address %C:%d (%C)\n",
-              it->get_host_addr(), it->get_port_number(), it->get_host_name()));
+      if (name.compare(LogAddr::host(*it)) == 0) {
+        VDBG((LM_DEBUG, "(%P|%t) tie_breaker - Choosing Address %C\n",
+          LogAddr(*it, LogAddr::IpPortHost).c_str()));
         return *it;
       }
     }
   }
-  VDBG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(list) - Choosing Address %C:%d\n",
-        addrs.begin()->get_host_addr(), addrs.begin()->get_port_number()));
+  VDBG((LM_DEBUG, "(%P|%t) tie_breaker - Choosing Address %C\n", LogAddr(*(addrs.begin())).c_str()));
   return *addrs.begin();
 }
 
@@ -540,25 +539,21 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_VECTOR(ACE_INET_Addr)
     if (it->get_type() == AF_INET6 && !it->is_multicast()) {
       if (it->is_loopback()) {
         VDBG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(list) - "
-                   "Considering Address %C:%d - ADDING TO IPv6 LOOPBACK LIST\n",
-                   it->get_host_addr(), it->get_port_number()));
+          "Considering Address %C - ADDING TO IPv6 LOOPBACK LIST\n", LogAddr(*it).c_str()));
         set6_loopback.insert(*it);
       } else if (it->is_ipv4_mapped_ipv6() || it->is_ipv4_compat_ipv6()) {
 #ifndef IPV6_V6ONLY
         VDBG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(list) - "
-                   "Considering Address %C:%d - ADDING TO IPv6 MAPPED / COMPATIBLE IPv4 LIST\n",
-                   it->get_host_addr(), it->get_port_number()));
+          "Considering Address %C - ADDING TO IPv6 MAPPED / COMPATIBLE IPv4 LIST\n", LogAddr(*it).c_str()));
         set6_mapped_v4.insert(*it);
 #endif  // ! IPV6_V6ONLY
       } else if (it->is_linklocal()) {
         VDBG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(list) - "
-                   "Considering Address %C:%d - ADDING TO IPv6 LINK-LOCAL LIST\n",
-                   it->get_host_addr(), it->get_port_number()));
+          "Considering Address %C - ADDING TO IPv6 LINK-LOCAL LIST\n", LogAddr(*it).c_str()));
         set6_linklocal.insert(*it);
       } else {
         VDBG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(list) - "
-                   "Considering Address %C:%d - ADDING TO IPv6 NORMAL LIST\n",
-                   it->get_host_addr(), it->get_port_number()));
+          "Considering Address %C - ADDING TO IPv6 NORMAL LIST\n", LogAddr(*it).c_str()));
         set6.insert(*it);
       }
     }
@@ -566,13 +561,11 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_VECTOR(ACE_INET_Addr)
     if (it->get_type() == AF_INET && !it->is_multicast()) {
       if (it->is_loopback()) {
         VDBG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(list) - "
-                   "Considering Address %C:%d - ADDING TO IPv4 LOOPBACK LIST\n",
-                   it->get_host_addr(), it->get_port_number()));
+          "Considering Address %C - ADDING TO IPv4 LOOPBACK LIST\n", LogAddr(*it).c_str()));
         set4_loopback.insert(*it);
       } else {
         VDBG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(list) - "
-                   "Considering Address %C:%d - ADDING TO IPv4 NORMAL LIST\n",
-                   it->get_host_addr(), it->get_port_number()));
+          "Considering Address %C - ADDING TO IPv4 NORMAL LIST\n", LogAddr(*it).c_str()));
         set4.insert(*it);
       }
     }

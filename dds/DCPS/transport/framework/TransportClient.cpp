@@ -61,7 +61,7 @@ TransportClient::~TransportClient()
     for (size_t i = 0; i < impls_.size(); ++i) {
       RcHandle<TransportImpl> impl = impls_[i].lock();
       if (impl) {
-        impl->stop_accepting_or_connecting(it->second->client_, it->second->data_.remote_id_, false);
+        impl->stop_accepting_or_connecting(it->second->client_, it->second->data_.remote_id_, false, false);
       }
     }
   }
@@ -570,7 +570,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
   for (size_t i = 0; i < pend->impls_.size(); ++i) {
     RcHandle<TransportImpl> impl = pend->impls_[i].lock();
     if (impl) {
-      impl->stop_accepting_or_connecting(*this, pend->data_.remote_id_, false);
+      impl->stop_accepting_or_connecting(*this, pend->data_.remote_id_, false, !ok);
     }
   }
 
@@ -655,7 +655,7 @@ TransportClient::disassociate(const RepoId& peerId)
     for (size_t i = 0; i < iter->second->impls_.size(); ++i) {
       RcHandle<TransportImpl> impl = iter->second->impls_[i].lock();
       if (impl) {
-        impl->stop_accepting_or_connecting(*this, iter->second->data_.remote_id_, true);
+        impl->stop_accepting_or_connecting(*this, iter->second->data_.remote_id_, true, true);
       }
     }
     iter->second->reset_client();
@@ -686,14 +686,14 @@ TransportClient::disassociate(const RepoId& peerId)
   data_link_index_.erase(found);
   DataLinkSetMap released;
 
-    if (DCPS_debug_level > 4) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) TransportClient::disassociate: ")
-                 ACE_TEXT("about to release_reservations for link[%@]\n"),
-                 link.in()));
-    }
+  if (DCPS_debug_level > 4) {
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) TransportClient::disassociate: ")
+               ACE_TEXT("about to release_reservations for link[%@]\n"),
+               link.in()));
+  }
 
-    link->release_reservations(peerId, repo_id_, released);
+  link->release_reservations(peerId, repo_id_, released);
 
   if (!released.empty()) {
 
