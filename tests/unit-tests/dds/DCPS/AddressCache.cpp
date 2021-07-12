@@ -72,7 +72,7 @@ TEST(address_cache_test, scoped_access_load_success)
   AddressCache<TestKey> test_cache_;
   {
     AddressCache<TestKey>::ScopedAccess entry(test_cache_, TestKey(GUID_UNKNOWN, GUID_UNKNOWN));
-    AddrSet& addrs = entry.value_.addrs_;
+    AddrSet& addrs = entry.value().addrs_;
 
     addrs.insert(ACE_INET_Addr("127.0.0.1:1234"));
     addrs.insert(ACE_INET_Addr("127.0.1.1:4321"));

@@ -1527,6 +1527,11 @@ void RtpsUdpDataLink::update_last_recv_addr(const RepoId& src, const ACE_INET_Ad
     const RemoteInfoMap::iterator pos = locators_.find(src);
     if (pos != locators_.end()) {
       remove_cache = pos->second.last_recv_addr_ != addr;
+#ifdef ACE_HAS_IPV6
+      pos->second.last_recv_addr_ != addr && (pos->second.last_recv_addr_.get_type() == AF_INET || addr.get_type() == AF_INET6);
+#else
+      pos->second.last_recv_addr_ != addr;
+#endif
       pos->second.last_recv_addr_ = addr;
       pos->second.last_recv_time_ = MonotonicTimePoint::now();
     }
@@ -2377,7 +2382,7 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVecVecVec& meta_submess
         BundlingCache::ScopedAccess entry(bundling_cache_, key);
         if (entry.is_new_) {
 
-          AddrSet& addrs = entry.value_.addrs_;
+          AddrSet& addrs = entry.value().addrs_;
           ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
 
           const bool directed = it->dst_guid_ != GUID_UNKNOWN;
@@ -2399,7 +2404,7 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVecVecVec& meta_submess
           ++cache_hits;
         }
 
-        const AddrSet& addrs = entry.value_.addrs_;
+        const AddrSet& addrs = entry.value().addrs_;
         addrset_min_size = std::min(addrset_min_size, addrs.size());
         addrset_max_size = std::max(addrset_max_size, addrs.size());
         if (addrs.empty()) {
@@ -2411,14 +2416,16 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVecVecVec& meta_submess
         }
 
         if (std::memcmp(&(it->dst_guid_.guidPrefix), &GUIDPREFIX_UNKNOWN, sizeof(GuidPrefix_t)) != 0) {
-          adr_map[addrs][make_unknown_guid(it->dst_guid_.guidPrefix)].push_back(it);
+          adr_map[AddressCacheEntryProxy(entry.rch_)][make_unknown_guid(it->dst_guid_.guidPrefix)].push_back(it);
         } else {
-          adr_map[addrs][GUID_UNKNOWN].push_back(it);
+          adr_map[AddressCacheEntryProxy(entry.rch_)][GUID_UNKNOWN].push_back(it);
         }
       }
     }
   }
-  VDBG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::build_meta_submessage_map() - Bundling Cache Stats: hits = %d, misses = %d, min = %d, max = %d\n", cache_hits, cache_misses, addrset_min_size, addrset_max_size));
+  VDBG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::build_meta_submessage_map()"
+                  "- Bundling Cache Stats: hits = %B, misses = %B, min = %B, max = %B\n",
+                  cache_hits, cache_misses, addrset_min_size, addrset_max_size));
 }
 
 #ifdef OPENDDS_SECURITY
@@ -2507,7 +2514,7 @@ void
 RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
                                                 AddrDestMetaSubmessageMap& adr_map,
                                                 MetaSubmessageIterVecVec& meta_submessage_bundles,
-                                                OPENDDS_VECTOR(AddrSet)& meta_submessage_bundle_addrs,
+                                                OPENDDS_VECTOR(AddressCacheEntryProxy)& meta_submessage_bundle_addrs,
                                                 OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes,
                                                 CountKeeper& counts)
 {
@@ -2523,22 +2530,9 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
   RepoId prev_dst; // used to determine when we need to write a new info_dst
   for (AddrDestMetaSubmessageMap::iterator addr_it = adr_map.begin(); addr_it != adr_map.end(); ++addr_it) {
 
-    // Prepare the set of addresses.
-    const AddrSet& addrs = addr_it->first;
-
-#ifdef OPENDDS_SECURITY
-#define ERASE_BUNDLING_PLACEHOLDER() \
-    if (local_crypto_handle() != DDS::HANDLE_NIL) { \
-      meta_submessage_bundle_addrs.back().erase(BUNDLING_PLACEHOLDER); \
-    }
-#else
-#define ERASE_BUNDLING_PLACEHOLDER()
-#endif
-
     // A new address set always starts a new bundle
     meta_submessage_bundles.push_back(MetaSubmessageIterVec());
-    meta_submessage_bundle_addrs.push_back(addrs);
-    ERASE_BUNDLING_PLACEHOLDER();
+    meta_submessage_bundle_addrs.push_back(addr_it->first);
 
     prev_dst = GUID_UNKNOWN;
 
@@ -2551,8 +2545,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
           // going
           if (!helper.add_to_bundle(idst)) {
             meta_submessage_bundles.push_back(MetaSubmessageIterVec());
-            meta_submessage_bundle_addrs.push_back(addrs);
-            ERASE_BUNDLING_PLACEHOLDER();
+            meta_submessage_bundle_addrs.push_back(addr_it->first);
           }
         }
         // Attempt to add the submessage meta_submessage to the bundle
@@ -2593,8 +2586,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
         // difference into the next bundle, reset prev_dst, and keep going
         if (!result) {
           meta_submessage_bundles.push_back(MetaSubmessageIterVec());
-          meta_submessage_bundle_addrs.push_back(addrs);
-          ERASE_BUNDLING_PLACEHOLDER();
+          meta_submessage_bundle_addrs.push_back(addr_it->first);
           prev_dst = GUID_UNKNOWN;
         }
         meta_submessage_bundles.back().push_back(*resp_it);
@@ -2692,7 +2684,7 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVecVecVec& meta_subme
 
   // Build reasonably-sized submessage bundles based on our destination map
   MetaSubmessageIterVecVec meta_submessage_bundles; // a vector of vectors of iterators pointing to meta_submessages
-  OPENDDS_VECTOR(AddrSet) meta_submessage_bundle_addrs; // for a bundle's address set
+  OPENDDS_VECTOR(AddressCacheEntryProxy) meta_submessage_bundle_addrs; // for a bundle's address set
   SizeVec meta_submessage_bundle_sizes; // for allocating the bundle's buffer
   CountKeeper counts;
   bundle_mapped_meta_submessages(encoding, adr_map, meta_submessage_bundles, meta_submessage_bundle_addrs, meta_submessage_bundle_sizes, counts);
@@ -2752,7 +2744,7 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVecVecVec& meta_subme
       }
       prev_dst = dst;
     }
-    send_strategy()->send_rtps_control(rtps_message, mb_bundle, meta_submessage_bundle_addrs[i]);
+    send_strategy()->send_rtps_control(rtps_message, mb_bundle, meta_submessage_bundle_addrs[i].entry_->addrs_);
     if (transport_debug.log_messages) {
       RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", rtps_message.hdr.guidPrefix, true, rtps_message);
     }
@@ -4402,13 +4394,13 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
   const LocatorCacheKey key(remote, local, prefer_unicast);
   LocatorCache::ScopedAccess entry(locator_cache_, key);
   if (!entry.is_new_) {
-    addresses.insert(entry.value_.addrs_.begin(), entry.value_.addrs_.end());
+    addresses.insert(entry.value().addrs_.begin(), entry.value().addrs_.end());
     return;
   }
 
   if (config().rtps_relay_only()) {
     addresses.insert(config().rtps_relay_address());
-    entry.value_.addrs_.insert(config().rtps_relay_address());
+    entry.value().addrs_.insert(config().rtps_relay_address());
     return;
   }
 
@@ -4462,25 +4454,25 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
 
   if (ice_addr == NO_ADDR) {
     addresses.insert(normal_addrs.begin(), normal_addrs.end());
-    entry.value_.addrs_.insert(normal_addrs.begin(), normal_addrs.end());
-    entry.value_.expires_ = normal_addrs_expires;
+    entry.value().addrs_.insert(normal_addrs.begin(), normal_addrs.end());
+    entry.value().expires_ = normal_addrs_expires;
     const ACE_INET_Addr relay_addr = config().rtps_relay_address();
     if (!valid_last_recv_addr && relay_addr != NO_ADDR) {
       addresses.insert(relay_addr);
-      entry.value_.addrs_.insert(relay_addr);
+      entry.value().addrs_.insert(relay_addr);
     }
     return;
   }
 
   if (normal_addrs.count(ice_addr) == 0) {
     addresses.insert(ice_addr);
-    entry.value_.addrs_.insert(ice_addr);
+    entry.value().addrs_.insert(ice_addr);
     return;
   }
 
   addresses.insert(normal_addrs.begin(), normal_addrs.end());
-  entry.value_.addrs_.insert(normal_addrs.begin(), normal_addrs.end());
-  entry.value_.expires_ = normal_addrs_expires;
+  entry.value().addrs_.insert(normal_addrs.begin(), normal_addrs.end());
+  entry.value().expires_ = normal_addrs_expires;
 }
 
 ICE::Endpoint*

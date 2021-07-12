@@ -65,6 +65,8 @@ typedef RcHandle<RtpsUdpInst> RtpsUdpInst_rch;
 typedef RcHandle<RtpsUdpTransport> RtpsUdpTransport_rch;
 typedef RcHandle<TransportClient> TransportClient_rch;
 
+#pragma pack(push, 1)
+
 struct LocatorCacheKey {
   LocatorCacheKey(const RepoId& remote, const RepoId& local, bool prefer_unicast)
     : remote_(remote)
@@ -72,6 +74,7 @@ struct LocatorCacheKey {
     , prefer_unicast_(prefer_unicast)
   {
   }
+
   bool operator<(const LocatorCacheKey& rhs) const
   {
     return std::memcmp(this, &rhs, sizeof (LocatorCacheKey)) < 0;
@@ -90,20 +93,14 @@ struct BundlingCacheKey {
     , to_guids_(to_guids)
   {
   }
+
   bool operator<(const BundlingCacheKey& rhs) const
   {
-    int r1 = std::memcmp(&dst_guid_, &rhs.dst_guid_, sizeof (RepoId));
-    if (r1 < 0) {
+    int r = std::memcmp(&dst_guid_, &rhs.dst_guid_, 2 * sizeof (RepoId));
+    if (r < 0) {
       return true;
-    }
-    else if (r1 == 0) {
-      int r2 = std::memcmp(&from_guid_, &rhs.from_guid_, sizeof (RepoId));
-      if (r2 < 0) {
-        return true;
-      }
-      else if (r2 == 0) {
-        return to_guids_ < rhs.to_guids_;
-      }
+    } else if (r == 0) {
+      return to_guids_ < rhs.to_guids_;
     }
     return false;
   }
@@ -118,6 +115,8 @@ struct BundlingCacheKey {
   const RepoIdSet to_guids_;
 };
 typedef AddressCache<BundlingCacheKey> BundlingCache;
+
+#pragma pack(pop)
 
 struct SeqReaders {
   SequenceNumber seq;
@@ -662,7 +661,7 @@ private:
 
   typedef OPENDDS_VECTOR(MetaSubmessageVec::iterator) MetaSubmessageIterVec;
   typedef OPENDDS_MAP_CMP(RepoId, MetaSubmessageIterVec, GUID_tKeyLessThan) DestMetaSubmessageMap;
-  typedef OPENDDS_MAP(AddrSet, DestMetaSubmessageMap) AddrDestMetaSubmessageMap;
+  typedef OPENDDS_MAP(AddressCacheEntryProxy, DestMetaSubmessageMap) AddrDestMetaSubmessageMap;
   typedef OPENDDS_VECTOR(MetaSubmessageIterVec) MetaSubmessageIterVecVec;
   typedef OPENDDS_SET(CORBA::Long) CountSet;
   typedef OPENDDS_MAP_CMP(EntityId_t, CountSet, EntityId_tKeyLessThan) IdCountSet;
@@ -679,7 +678,7 @@ private:
     const Encoding& encoding,
     AddrDestMetaSubmessageMap& adr_map,
     MetaSubmessageIterVecVec& meta_submessage_bundles,
-    OPENDDS_VECTOR(AddrSet)& meta_submessage_bundle_addrs,
+    OPENDDS_VECTOR(AddressCacheEntryProxy)& meta_submessage_bundle_addrs,
                                OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes,
                                CountKeeper& counts);
 

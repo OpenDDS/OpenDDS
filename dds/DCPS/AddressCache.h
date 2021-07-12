@@ -18,6 +18,7 @@
 #include "PoolAllocator.h"
 #include "TimeTypes.h"
 #include "GuidUtils.h"
+#include "RcObject.h"
 
 #include "ace/INET_Addr.h"
 
@@ -28,7 +29,8 @@ namespace DCPS {
 
 typedef OPENDDS_SET(ACE_INET_Addr) AddrSet;
 
-struct AddressCacheEntry {
+struct AddressCacheEntry : public virtual RcObject {
+
   AddressCacheEntry() : addrs_(), expires_(MonotonicTimePoint::max_value) {}
   AddressCacheEntry(const AddrSet& addrs, const MonotonicTimePoint& expires) : addrs_(addrs), expires_(expires) {}
 
@@ -36,34 +38,59 @@ struct AddressCacheEntry {
   MonotonicTimePoint expires_;
 };
 
+struct AddressCacheEntryProxy {
+  AddressCacheEntryProxy(RcHandle<AddressCacheEntry> rch) : entry_(rch) {}
+
+  bool operator<(const AddressCacheEntryProxy& rhs) const {
+    return (rhs.entry_ && (!entry_ || (entry_->addrs_ < rhs.entry_->addrs_)));
+  }
+
+  RcHandle<AddressCacheEntry> entry_;
+};
+
 template <typename Key>
 class AddressCache {
 public:
 
-  typedef OPENDDS_MAP(Key, AddressCacheEntry) MapType;
+  typedef OPENDDS_MAP(Key, RcHandle<AddressCacheEntry>) MapType;
 
   AddressCache() {}
   virtual ~AddressCache() {}
 
-  struct ScopedAccess
-  {
+  struct ScopedAccess {
     ScopedAccess(AddressCache& cache, const Key& key)
       : guard_(cache.mutex_)
-      , find_result_(cache.map_.find(key))
-      , value_(find_result_ == cache.map_.end() ? cache.map_[key] : find_result_->second)
-      , previous_expired_(value_.expires_ < MonotonicTimePoint::now())
-      , is_new_(find_result_ == cache.map_.end() || previous_expired_)
+      , rch_()
+      , is_new_(false)
     {
-      if (previous_expired_) {
-        value_.addrs_.clear();
-        value_.expires_ = MonotonicTimePoint::max_value;
+      typename MapType::iterator pos = cache.map_.find(key);
+      if (pos == cache.map_.end()) {
+        rch_ = make_rch<AddressCacheEntry>();
+        cache.map_[key] = rch_;
+        is_new_ = true;
+      } else {
+        rch_ = pos->second;
+      }
+
+      if (rch_->expires_ < MonotonicTimePoint::now()) {
+        rch_->addrs_.clear();
+        rch_->expires_ = MonotonicTimePoint::max_value;
+        is_new_ = true;
       }
     }
 
+    inline AddressCacheEntry& value() {
+      OPENDDS_ASSERT(rch_);
+      return *rch_;
+    }
+
+    inline const AddressCacheEntry& value() const {
+      OPENDDS_ASSERT(rch_);
+      return *rch_;
+    }
+
     ACE_Guard<ACE_Thread_Mutex> guard_;
-    typename MapType::iterator find_result_;
-    AddressCacheEntry& value_;
-    bool previous_expired_;
+    RcHandle<AddressCacheEntry> rch_;
     bool is_new_;
 
   private:
@@ -77,8 +104,8 @@ public:
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     typename MapType::const_iterator pos = map_.find(key);
     if (pos != map_.end()) {
-      if (MonotonicTimePoint::now() < pos->second.expires_) {
-        const AddrSet& as = pos->second.addrs_;
+      if (MonotonicTimePoint::now() < pos->second->expires_) {
+        const AddrSet& as = pos->second->addrs_;
         for (AddrSet::const_iterator it = as.begin(); it != as.end(); ++it) {
           addrs.insert(*it);
         }
@@ -91,10 +118,10 @@ public:
   void store(const Key& key, const AddrSet& addrs, const MonotonicTimePoint& expires = MonotonicTimePoint::max_value)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    std::pair<typename MapType::iterator, bool> ins = map_.insert(typename MapType::value_type(key, AddressCacheEntry(addrs, expires)));
+    std::pair<typename MapType::iterator, bool> ins = map_.insert(typename MapType::value_type(key, make_rch<AddressCacheEntry>(addrs, expires)));
     if (!ins.second) {
-      ins.first->second.addrs_ = addrs;
-      ins.first->second.expires_ = expires;
+      ins.first->second->addrs_ = addrs;
+      ins.first->second->expires_ = expires;
     }
   }
 
