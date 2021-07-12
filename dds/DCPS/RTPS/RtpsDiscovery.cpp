@@ -77,6 +77,7 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , secure_participant_user_data_(false)
   , max_type_lookup_service_reply_period_(5, 0)
   , use_xtypes_(true)
+  , use_xtypes_complete_(false)
   , sedp_heartbeat_period_(1)
   , sedp_nak_response_delay_(0, 200*1000 /*microseconds*/) // default from RTPS
   , sedp_send_delay_(0, 10 * 1000)
@@ -695,6 +696,17 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
               value.c_str(), rtps_name.c_str()), -1);
           }
           config->use_xtypes(bool(smInt));
+        } else if (name == "UseXTypesComplete") {
+          const OPENDDS_STRING& value = it->second;
+          int smInt;
+          if (!DCPS::convertToInteger(value, smInt)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
+                              ACE_TEXT("Invalid entry (%C) for UseXTypesComplete in ")
+                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->use_xtypes_complete(bool(smInt));
         } else if (name == "SedpResponsiveMode") {
           const OPENDDS_STRING& value = it->second;
           int smInt;
