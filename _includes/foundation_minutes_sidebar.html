@@ -2,7 +2,7 @@
 reverse %}
 <div class="minutes-sidebar">
   <div class="minutes-sidebar-content">
-    <h3>MINUTES ARCHIVE</h3>
+    <h2>MINUTES ARCHIVE</h2>
     <ul>
       {% assign groups = sorted_pages | group_by_exp:"item", 'item.date | date:
       "%Y"' %} {% for group in groups %}

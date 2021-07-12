@@ -48,6 +48,7 @@
 
 .minutes-sidebar {
   flex: 1;
+  min-width: 350px;
 }
 
 .minutes-sidebar ul {
@@ -75,7 +76,22 @@
   margin-bottom: 2rem;
 }
 
-.minutes-sidebar-content h3,
+.minutes-sidebar-content h2,
 .minutes-sidebar-content h4 {
   white-space: nowrap;
+}
+
+.minutes-sidebar-content h4 {
+  font-size: 1.15rem;
+  line-height: 1.5rem;
+  font-weight: 500;
+}
+
+.minutes-sidebar-content h2 {
+  color: var(--opendds-brick);
+  text-transform: uppercase;
+  font-size: 1.1em;
+  font-weight: 400;
+  white-space: nowrap;
+  margin-bottom: 1rem;
 }
