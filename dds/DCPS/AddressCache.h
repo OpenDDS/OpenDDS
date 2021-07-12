@@ -118,10 +118,12 @@ public:
   void store(const Key& key, const AddrSet& addrs, const MonotonicTimePoint& expires = MonotonicTimePoint::max_value)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    std::pair<typename MapType::iterator, bool> ins = map_.insert(typename MapType::value_type(key, make_rch<AddressCacheEntry>(addrs, expires)));
-    if (!ins.second) {
-      ins.first->second->addrs_ = addrs;
-      ins.first->second->expires_ = expires;
+    RcHandle<AddressCacheEntry>& rch = map_[key];
+    if (rch) {
+      rch->addrs_ = addrs;
+      rch->expires_ = expires;
+    } else {
+      rch = make_rch<AddressCacheEntry>(addrs, expires);
     }
   }
 
