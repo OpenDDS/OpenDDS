@@ -1,8 +1,8 @@
 #! /bin/bash
 #
 #
-
-SCRIPT_DIR=$( cd "$( dirname ${BASH_SOURCE[0]} )" && pwd )
+BENCH_ROOT="$DDS_ROOT/performance-tests/bench"
+SCRIPT_DIR="$BENCH_ROOT/legacy_plotting"
 
 
 ###############################################################################
@@ -12,19 +12,17 @@ SCRIPT_DIR=$( cd "$( dirname ${BASH_SOURCE[0]} )" && pwd )
 ###############################################################################
 usage ()
 {
-  echo "Usage: `basename $0` <bench_directory> <destination_directory>"
+  echo "Usage: `basename $0` <test_run_directory>  <destination_directory>"
   echo ""
-  echo "bench_directory         This is the location of the Bench performance"
-  echo "                        tests directory."
+  echo "test_run_directory      This is the path containing test run files to process."
   echo ""
   echo "destination_directory   This is the location of the directory"
-  echo "                         for the generated images."
+  echo "                        for the generated images."
   echo ""
   echo "Options must be specified in the order shown above."
   echo ""
   echo "Examples:"
-  echo "`basename $0` $DDS_ROOT/performance-tests/Bench /var/www/html/perf/images"
-  echo "`basename $0` /home/tester/perf-tests /home/tester/perf-results/images"
+  echo "`basename $0` 2021-06-28T21:07:53+0000_2b84581bca05b99ad8287e608193e1f39d4a1a59_d41d8cd98f00b204e9800998ecf8427e /var/www/html/perf/images"
   exit
 }
 
@@ -39,19 +37,20 @@ usage ()
 parse_input ()
 {
   if [ $# -gt 1 ]; then
-    BASEDIR=$1
-    OUTDIR=$2
+    TEST_RUN_DIR=$1
+    OUTPUT_DIR=$2
 
-    if ! [ -d "$BASEDIR" ]; then
-      echo "bench_directory $BASEDIR does not exist."
+    if ! [ -d "$TEST_RUN_DIR" ]; then
+      echo "Test Run Directory $TEST_RUN_DIR Does Not Exist."
       usage
+      exit
     fi
   else
     usage
     exit
   fi
-  echo "BASEDIR : $BASEDIR"
-  echo "OUTDIR : $OUTDIR"
+  echo "TEST_RUN_DIR : $TEST_RUN_DIR"
+  echo "OUTPUT_DIR : $OUTPUT_DIR"
 }
 
 
@@ -63,18 +62,18 @@ parse_input ()
 #
 ###############################################################################
 
-declare -a protocols=("tcp" "udp" "multi-be" "multi-re" "rtps" "raw-tcp" "raw-udp")
-declare -a protocol_descs=('TCP' 'UDP' 'Best Effort Multicast' 'Reliable Multicast' 'RTPS' 'Raw TCP' 'Raw UDP')
+declare -a protocols=("tcp" "udp" "multi-be" "multi-re" "rtps" ) #"raw-tcp" "raw-udp")
+declare -a protocol_descs=('TCP' 'UDP' 'Best Effort Multicast' 'Reliable Multicast' 'RTPS') #'Raw TCP' 'Raw UDP')
 
 plot_latency_results ()
 {
-  local DATADIR="$BASEDIR/tests/latency/data"
+  local DATA_DIR="$TEST_RUN_DIR/data"
 
-  if [ -e "$DATADIR/latency.csv" ]; then
+  if [ -e "$DATA_DIR/latency.csv" ]; then
     # Plotting summary charts
     gnuplot <<EOF
-      call "$SCRIPT_DIR/plot-transports.gpi"  "$DATADIR/latency.csv" "$OUTDIR/transport-latency"
-      call "$SCRIPT_DIR/plot-jitter.gpi"  "$DATADIR/latency.csv" "$OUTDIR/transport-jitter"
+      call "$SCRIPT_DIR/plot-transports.gpi"  "$DATA_DIR/latency.csv" "$OUTPUT_DIR/transport-latency"
+      call "$SCRIPT_DIR/plot-jitter.gpi"  "$DATA_DIR/latency.csv" "$OUTPUT_DIR/transport-jitter"
       exit
 EOF
 
@@ -84,9 +83,9 @@ EOF
       desc=${protocol_descs[$i]}
       for sz in 50 100 250 500 1000 2500 5000 8000 16000 32000
       do
-        if [ -f "$DATADIR/latency-$protocol-$sz.gpd" ]; then
+        if [ -f "$DATA_DIR/latency-$protocol-$sz.gpd" ]; then
           gnuplot <<EOF
-            call "$SCRIPT_DIR/lj-plots.gpi" "$DATADIR/latency-$protocol-$sz.gpd" "$DATADIR/latency-$protocol-$sz.stats" "$OUTDIR/latency-$protocol-$sz.png" "$desc / Message Size $sz bytes"
+            call "$SCRIPT_DIR/lj-plots.gpi" "$DATA_DIR/latency-$protocol-$sz.gpd" "$DATA_DIR/latency-$protocol-$sz.stats" "$OUTPUT_DIR/latency-$protocol-$sz.png" "$desc / Message Size $sz bytes"
            exit
 EOF
         fi
@@ -98,25 +97,22 @@ EOF
     if [ "$GNUPLOT_MAJORVERSION" -gt 4 -a "$GNUPLOT_MAJORVERSION" -gt 0 ]; then
     # Plotting Quantile Distributions
       gnuplot <<EOF
-        call "$SCRIPT_DIR/plot-quantiles.gpi" "$DATADIR"  "$OUTDIR"
+        call "$SCRIPT_DIR/plot-quantiles.gpi" "$DATA_DIR"  "$OUTPUT_DIR"
         exit
 EOF
 
 
       gnuplot <<EOF
-        call "$SCRIPT_DIR/plot-density.gpi" "$DATADIR"  "$OUTDIR"
+        call "$SCRIPT_DIR/plot-density.gpi" "$DATA_DIR"  "$OUTPUT_DIR"
         exit
 EOF
     fi
 
   else
-    echo "Missing latency data file $DATADIR/latency.csv"
+    echo "Missing latency data file $DATA_DIR/latency.csv"
     echo " No latency plots run"
   fi
 }
-
-
-
 
 
 ###############################################################################
@@ -128,27 +124,26 @@ EOF
 ###############################################################################
 plot_throughput_results ()
 {
-  local DATADIR="$BASEDIR/tests/thru/data"
+  local DATA_DIR="$TEST_RUN_DIR/data"
 
-  if [ -e "$DATADIR/throughput.csv" ]; then
+  if [ -e "$DATA_DIR/throughput.csv" ]; then
     gnuplot <<EOF
       # Plotting test format charts
-      call "$SCRIPT_DIR/plot-throughput-testformats.gpi"  "$DATADIR/throughput.csv" "$OUTDIR"
+      call "$SCRIPT_DIR/plot-throughput-testformats.gpi"  "$DATA_DIR/throughput.csv" "$OUTPUT_DIR"
       # Plotting transport charts
-      call "$SCRIPT_DIR/plot-throughput-transports.gpi"  "$DATADIR/throughput.csv" "$OUTDIR"
-      call "$SCRIPT_DIR/plot-throughput-transports.gpi"  "$DATADIR/throughput.csv" "$OUTDIR" "smooth acspline"
+      call "$SCRIPT_DIR/plot-throughput-transports.gpi"  "$DATA_DIR/throughput.csv" "$OUTPUT_DIR"
+      call "$SCRIPT_DIR/plot-throughput-transports.gpi"  "$DATA_DIR/throughput.csv" "$OUTPUT_DIR" "smooth acspline"
       exit
 EOF
   else
-    echo "Missing throughput data file $DATADIR/throughput.csv"
+    echo "Missing throughput data file $DATA_DIR/throughput.csv"
     echo " No throughput plots run"
   fi
 }
 
 
-
-OUTDIR="."
-BASEDIR="."
+OUTPUT_DIR="."
+TEST_RUN_DIR="."
 GNUPLOT_MAJORVERSION=`gnuplot --version | sed -n -e "s/gnuplot \([0-9]*\).[0-9]* patchlevel.*/\1/gp"`
 GNUPLOT_MINORVERSION=`gnuplot --version | sed -n -e "s/gnuplot [0-9]*.\([0-9]*\) patchlevel.*/\1/gp"`
 
@@ -156,5 +151,4 @@ parse_input $@
 
 plot_latency_results
 
-plot_throughput_results
-
+# plot_throughput_results

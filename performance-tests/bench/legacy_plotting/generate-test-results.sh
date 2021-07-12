@@ -1,8 +1,8 @@
 #! /bin/sh
 #
 #
-SCRIPT_DIR=$( cd "$( dirname ${BASH_SOURCE[0]} )" && pwd )
-
+BENCH_ROOT="$DDS_ROOT/performance-tests/bench"
+SCRIPT_DIR="$BENCH_ROOT/legacy_plotting"
 
 
 ###############################################################################
@@ -12,14 +12,12 @@ SCRIPT_DIR=$( cd "$( dirname ${BASH_SOURCE[0]} )" && pwd )
 ###############################################################################
 usage ()
 {
-  echo "Usage: `basename $0` <bench_directory>"
+  echo "Usage: `basename $0` <test_run_directory>"
   echo ""
-  echo "bench_directory         This is the location of the Bench performance"
-  echo "                        tests directory."
+  echo "test_run_directory      This is the path containing test run files to process."
   echo ""
   echo "Examples:"
-  echo "`basename $0` $DDS_ROOT/performance-tests/Bench"
-  echo "`basename $0` /home/tester/perf-tests"
+  echo "`basename $0` 2021-06-28T21:07:53+0000_2b84581bca05b99ad8287e608193e1f39d4a1a59_d41d8cd98f00b204e9800998ecf8427e"
   exit
 }
 
@@ -34,18 +32,18 @@ usage ()
 parse_input ()
 {
   if [ $# -gt 0 ]; then
-    BASEDIR=$1
+    TEST_RUN_DIR=$1
 
-    if ! [ -d "$BASEDIR" ]; then
-      echo "bench_directory $BASEDIR does not exist."
+    if ! [ -d "$TEST_RUN_DIR" ]; then
+      echo "Test Run Directory $TEST_RUN_DIR Does Not Exist."
       usage
     fi
   else
     usage
   fi
-  echo "BASEDIR : $BASEDIR"
+  echo "TEST_RUN_DIR : $TEST_RUN_DIR"
+  
 }
-
 
 
 ###############################################################################
@@ -57,23 +55,22 @@ parse_input ()
 ###############################################################################
 process_latency_test ()
 {
-  local TESTDIR="$BASEDIR/tests/latency"
-  local DATADIR="$TESTDIR/data"
+  local DATA_DIR="$TEST_RUN_DIR/data"
 
-  mkdir -p "$DATADIR"
+  mkdir -p "$DATA_DIR"
 
   for sz in 50 100 250 500 1000 2500 5000 8000 16000 32000
   do
-    for protocol in tcp udp multi-be multi-rel rtps raw-tcp raw-udp
+    for protocol in tcp udp multicast-be multicast-rel rtps # raw-udp raw-tcp
     do
-      if [ -d "$TESTDIR/$protocol" ]; then
-        $SCRIPT_DIR/reduce-latency-data.pl "$TESTDIR/$protocol/latency-$sz.data" > "$DATADIR/latency-$protocol-$sz.gpd"
-      fi
+      $BENCH_ROOT/report_parser/report_parser --input-file "$TEST_RUN_DIR/b1_latency_${protocol}_${sz}.json" --output-file "$DATA_DIR/latency-$protocol-$sz.data" --output-type time-series --output-format gnuplot --stats round_trip_latency
+      $SCRIPT_DIR/reduce-latency-data.pl "$DATA_DIR/latency-$protocol-$sz.data" > "$DATA_DIR/latency-$protocol-$sz.gpd"
     done
   done
 
-  $SCRIPT_DIR/extract-latency.pl "$DATADIR"/latency-*.gpd > "$DATADIR/latency.csv"
-  $SCRIPT_DIR/gen-latency-stats.pl "$DATADIR/latency.csv"
+  $SCRIPT_DIR/extract-latency.pl "$DATA_DIR"/latency-*.gpd > "$DATA_DIR/latency.csv"
+  $SCRIPT_DIR/extract-latency-json.pl "$DATA_DIR"/latency-*.gpd > "$DATA_DIR/latency.csv.js"
+  $SCRIPT_DIR/gen-latency-stats.pl "$DATA_DIR/latency.csv"
 }
 
 
@@ -86,15 +83,14 @@ process_latency_test ()
 ###############################################################################
 process_throughput_test ()
 {
-  local TESTDIR="$BASEDIR/tests/thru"
-  local DATADIR="$TESTDIR/data"
+  local DATA_DIR="$TEST_RUN_DIR/data"
 
-  mkdir -p "$DATADIR"
+  mkdir -p "$DATA_DIR"
 
-  $SCRIPT_DIR/extract-throughput.pl "$TESTDIR"/*/*.results > "$DATADIR/throughput.csv"
+  $SCRIPT_DIR/extract-throughput.pl "$TEST_RUN_DIR"/*/*.results > "$DATA_DIR/throughput.csv"
 }
 
-BASEDIR="."
+TEST_RUN_DIR="."
 
 parse_input $@
 

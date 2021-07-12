@@ -137,7 +137,7 @@ type, and the message size of the test data.
 use constant LOWER => 0.05;
 use constant UPPER => 0.95;
 use constant BINS  => 25;
-use constant HOPS  => 2;
+use constant HOPS  => 1;
 
 # skip     - indicates whether to process a record or not.
 # previous - is the previous record data.
@@ -155,9 +155,11 @@ BEGIN {
 }
 
 # Only process sections that are for the full path.
-$skip = 0 if /^ --- full path/;
-$skip = 1 if /^ --- last hop/;
-next if $skip;
+#$skip = 0 if /^round_trip_latency/;
+#$skip = 1 if /^ --- last hop/;
+#next if $skip;
+
+next if /^round_trip_latency/;
 
 # Comment out non-data lines.
 chomp;
