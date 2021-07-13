@@ -72,12 +72,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   std::vector<std::shared_ptr<std::ifstream> > files;
 
   for (size_t i = 1; i < static_cast<size_t>(argc); ++i) {
-    const std::string full_file_name(argv[i]);
+    const std::string full_file_name(ACE_TEXT_ALWAYS_CHAR(argv[i]));
     const size_t div = full_file_name.find_last_of("/\\");
     file_names.push_back(full_file_name.substr(div ? div + 1 : div));
-    files.push_back(std::make_shared<std::ifstream>(argv[i]));
+    files.push_back(std::make_shared<std::ifstream>(ACE_TEXT_ALWAYS_CHAR(argv[i])));
     if (!files.back()->good()) {
-      std::cerr << "Unable to open file: '" << argv[i] << "'. Exiting" << std::endl;
+      std::cerr << "Unable to open file: '" << ACE_TEXT_ALWAYS_CHAR(argv[i]) << "'. Exiting" << std::endl;
       return 1;
     }
   }
