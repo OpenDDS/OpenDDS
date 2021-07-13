@@ -582,6 +582,26 @@ std::string getEnumLabel(AST_Expression* label_val, AST_Type* disc)
   return e.replace(colon + 2, std::string::npos, label);
 }
 
+template <typename IntType>
+std::ostream& signed_int_helper(std::ostream& o, IntType value, IntType min)
+{
+  /*
+   * It seems that in C/C++ the minus sign and the bare number are parsed
+   * separately for negative integer literals. This can cause compilers
+   * to complain when using the minimum value of a signed integer because
+   * the number without the minus sign is 1 past the max signed value.
+   *
+   * https://stackoverflow.com/questions/65007935
+   *
+   * Apparently the workaround is to write it as `VALUE_PLUS_ONE - 1`.
+   */
+  const bool min_value = value == min;
+  if (min_value) ++value;
+  o << value;
+  if (min_value) o << " - 1";
+  return o;
+}
+
 inline
 std::ostream& operator<<(std::ostream& o,
                          const AST_Expression::AST_ExprValue& ev)
@@ -600,17 +620,17 @@ std::ostream& operator<<(std::ostream& o,
   case AST_Expression::EV_int8:
     return o << static_cast<short>(ev.u.int8val);
   case AST_Expression::EV_uint8:
-    return o << static_cast<unsigned short>(ev.u.int8val);
+    return o << static_cast<unsigned short>(ev.u.uint8val);
   case AST_Expression::EV_short:
     return o << ev.u.sval;
   case AST_Expression::EV_ushort:
     return o << ev.u.usval << 'u';
   case AST_Expression::EV_long:
-    return o << ev.u.lval;
+    return signed_int_helper<ACE_CDR::Long>(o, ev.u.lval, ACE_INT32_MIN);
   case AST_Expression::EV_ulong:
     return o << ev.u.ulval << 'u';
   case AST_Expression::EV_longlong:
-    return o << ev.u.llval << "LL";
+    return signed_int_helper<ACE_CDR::LongLong>(o, ev.u.llval, ACE_INT64_MIN) << "LL";
   case AST_Expression::EV_ulonglong:
     return o << ev.u.ullval << "ULL";
   case AST_Expression::EV_wchar:

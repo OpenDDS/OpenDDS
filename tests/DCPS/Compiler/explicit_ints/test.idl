@@ -17,34 +17,6 @@ const uint64 u64_max = 18446744073709551615;
 const int64 i64_min = -9223372036854775808;
 const int64 i64_max = 9223372036854775807;
 
-const uint8 u8_min_overflow = u8_min - 1; // == u8_max
-const int8 i8_min_overflow = i8_min - 1; // == i8_max
-const uint8 u8_max_overflow = u8_max + 1; // == 0
-const int8 i8_max_overflow = i8_max + 1; // == i8_min
-
-const uint8 u8_max_negate = ~u8_max; // == 0
-const int8 i8_max_negate = ~i8_max; // == i8_min
-
-const uint8 u8_e1 = 2;
-const uint8 u8_e2 = u8_e1 + 2;
-const uint8 u8_e3 = u8_e2 * 3;
-const uint8 u8_e4 = u8_e3 / 4;
-const uint8 u8_e5 = u8_e4 | 5;
-const uint8 u8_e6 = u8_e5 ^ 6;
-const uint8 u8_e7 = u8_e6 & 7;
-const uint8 u8_e8 = u8_e7 << 4;
-const uint8 u8_e9 = u8_e8 >> 1;
-
-const int8 i8_e1 = -2;
-const int8 i8_e2 = i8_e1 - -6;
-const int8 i8_e3 = i8_e2 * 3;
-const int8 i8_e4 = i8_e3 / 4;
-const int8 i8_e5 = i8_e4 | 5;
-const int8 i8_e6 = i8_e5 ^ 6;
-const int8 i8_e7 = i8_e6 & 7;
-const int8 i8_e8 = i8_e7 << 4;
-const int8 i8_e9 = i8_e8 >> 1;
-
 typedef uint8 U8arr[3];
 typedef int8 I8arr[3];
 typedef octet Oarr[3];
