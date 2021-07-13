@@ -250,6 +250,9 @@ RtpsUdpSendStrategy::send_multi_i(const iovec iov[], int n,
   ssize_t result = -1;
   typedef OPENDDS_SET(ACE_INET_Addr)::const_iterator iter_t;
   for (iter_t iter = addrs.begin(); iter != addrs.end(); ++iter) {
+    if (*iter == ACE_INET_Addr()) {
+      continue;
+    }
     const ssize_t result_per_dest = send_single_i(iov, n, *iter);
     if (result_per_dest >= 0) {
       result = result_per_dest;
