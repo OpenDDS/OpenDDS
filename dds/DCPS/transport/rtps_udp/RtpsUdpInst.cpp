@@ -183,6 +183,7 @@ RtpsUdpInst::dump_to_str() const
   ret += formatNameForDump("send_buffer_size") + to_dds_string(send_buffer_size_) + '\n';
   ret += formatNameForDump("rcv_buffer_size") + to_dds_string(rcv_buffer_size_) + '\n';
   ret += formatNameForDump("ttl") + to_dds_string(ttl_) + '\n';
+  ret += formatNameForDump("responsive_mode") + (responsive_mode_ ? "true" : "false") + '\n';
   return ret;
 }
 
