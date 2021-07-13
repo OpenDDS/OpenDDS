@@ -413,7 +413,6 @@ module DDS {
       @id(0x0050) BuiltinTopicKey_t participant_key;
       @id(0x0005) string topic_name;
       @id(0x0007) string type_name;
-      @id(0x0075) XTypes::TypeInformation type_information;
 
       /* TODO
       // XTYPES 1.1

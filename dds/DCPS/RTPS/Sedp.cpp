@@ -515,8 +515,8 @@ Sedp::init(const RepoId& guid,
 #endif
 
   max_type_lookup_service_reply_period_ = disco.config()->max_type_lookup_service_reply_period();
-  use_xtypes_ = disco.config()->use_xtypes();
-  use_xtypes_complete_ = disco.config()->use_xtypes_complete();
+  use_xtypes_ = disco.use_xtypes();
+  use_xtypes_complete_ = disco.use_xtypes_complete();
 
   return DDS::RETCODE_OK;
 }
@@ -2402,7 +2402,8 @@ Sedp::shutdown()
 
 void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
                                           const DCPS::DiscoveredWriterData& wdata,
-                                          const RepoId& guid
+                                          const RepoId& guid,
+                                          const XTypes::TypeInformation& type_info
 #ifdef OPENDDS_SECURITY
                                           ,
                                           bool have_ice_agent_info,
@@ -2447,6 +2448,7 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
         DiscoveredPublication prepub(wdata);
         prepub.participant_discovered_at_ = spdp_.get_participant_discovered_at(participant_id);
         prepub.transport_context_ = spdp_.get_participant_flags(participant_id);
+        prepub.type_info_ = type_info;
 
 #ifdef OPENDDS_SECURITY
         prepub.have_ice_agent_info_ = have_ice_agent_info;
@@ -2699,7 +2701,7 @@ Sedp::data_received(DCPS::MessageId message_id,
     return;
   }
 
-  process_discovered_writer_data(message_id, wdata, guid
+  process_discovered_writer_data(message_id, wdata, guid, dpub.type_info_
 #ifdef OPENDDS_SECURITY
                                  , dpub.have_ice_agent_info_, dpub.ice_agent_info_
 #endif
@@ -2723,8 +2725,9 @@ void Sedp::data_received(DCPS::MessageId message_id,
     return;
   }
 
-  process_discovered_writer_data(message_id, wrapper.data, guid, wrapper.have_ice_agent_info,
-                                 wrapper.ice_agent_info, &wrapper.security_info);
+  process_discovered_writer_data(message_id, wrapper.data, guid, wrapper.type_info,
+                                 wrapper.have_ice_agent_info, wrapper.ice_agent_info,
+                                 &wrapper.security_info);
 }
 #endif
 
@@ -4624,7 +4627,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
     }
 
     DiscoveredPublication wdata;
-    if (!ParameterListConverter::from_param_list(data, wdata.writer_data_, sedp_.use_xtypes_)) {
+    if (!ParameterListConverter::from_param_list(data, wdata.writer_data_, sedp_.use_xtypes_, wdata.type_info_)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::DiscoveryReader::data_received_i - ")
                  ACE_TEXT("failed to convert from ParameterList ")
@@ -4660,7 +4663,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
 
     DiscoveredPublication_SecurityWrapper wdata_secure;
 
-    if (!ParameterListConverter::from_param_list(data, wdata_secure, sedp_.use_xtypes_)) {
+    if (!ParameterListConverter::from_param_list(data, wdata_secure, sedp_.use_xtypes_, wdata_secure.type_info)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::DiscoveryReader::data_received_i - ")
                  ACE_TEXT("failed to convert from ParameterList ")
@@ -4878,7 +4881,6 @@ Sedp::populate_discovered_writer_msg(
   dwd.ddsPublicationData.topic_name = topic_name.c_str();
   TopicDetails& topic_details = topics_[topic_name];
   dwd.ddsPublicationData.type_name = topic_details.local_data_type_name().c_str();
-  dwd.ddsPublicationData.type_information = pub.type_info_;
   dwd.ddsPublicationData.durability = pub.qos_.durability;
   dwd.ddsPublicationData.durability_service = pub.qos_.durability_service;
   dwd.ddsPublicationData.deadline = pub.qos_.deadline;
@@ -5172,7 +5174,7 @@ Sedp::write_publication_data_unsecure(
     populate_discovered_writer_msg(dwd, rid, lp);
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(dwd, plist, use_xtypes_, false)) {
+    if (!ParameterListConverter::to_param_list(dwd, plist, use_xtypes_, lp.type_info_, false)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data_unsecure - ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
@@ -5226,7 +5228,7 @@ Sedp::write_publication_data_secure(
     dwd.security_info.plugin_endpoint_security_attributes = lp.security_attribs_.plugin_endpoint_attributes;
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(dwd, plist, use_xtypes_, false)) {
+    if (!ParameterListConverter::to_param_list(dwd, plist, use_xtypes_, lp.type_info_, false)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data_secure - ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")

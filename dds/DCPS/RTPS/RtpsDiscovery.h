@@ -761,6 +761,9 @@ public:
   bool use_xtypes() const { return config_->use_xtypes(); }
   void use_xtypes(bool xt) { config_->use_xtypes(xt); }
 
+  bool use_xtypes_complete() const { return config_->use_xtypes_complete(); }
+  void use_xtypes_complete(bool value) { config_->use_xtypes_complete(value); }
+
   RtpsDiscoveryConfig_rch config() const { return config_; }
 
 #ifdef OPENDDS_SECURITY

@@ -292,6 +292,7 @@ namespace OpenDDS {
         DDS::InstanceHandle_t bit_ih_;
         MonotonicTime_t participant_discovered_at_;
         ACE_CDR::ULong transport_context_;
+        XTypes::Information type_info_;
 
 #ifdef OPENDDS_SECURITY
         DDS::Security::EndpointSecurityAttributes security_attribs_;
@@ -1241,7 +1242,7 @@ namespace OpenDDS {
           writer_type_info = &lpi->second.type_info_;
         } else if ((dpi = discovered_publications_.find(writer))
                    != discovered_publications_.end()) {
-          writer_type_info = &dpi->second.writer_data_.ddsPublicationData.type_information;
+          writer_type_info = &dpi->second.type_info_;
         } else {
           if (DCPS_debug_level >= 4) {
             ACE_DEBUG((LM_DEBUG, "(%P|%t) EndpointManager::match: Undiscovered Writer\n"));
@@ -1414,7 +1415,7 @@ namespace OpenDDS {
         } else if (dpi != discovered_publications_.end()) {
           wTls = &dpi->second.writer_data_.writerProxy.allLocators;
           wTransportContext = dpi->second.transport_context_;
-          writer_type_info = &dpi->second.writer_data_.ddsPublicationData.type_information;
+          writer_type_info = &dpi->second.type_info_;
           topic_name = dpi->second.get_topic_name();
           writer_participant_discovered_at = dpi->second.participant_discovered_at_;
 
