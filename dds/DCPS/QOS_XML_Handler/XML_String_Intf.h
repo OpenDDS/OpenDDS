@@ -22,7 +22,7 @@
 
 namespace XML
 {
-  class Environment_Resolver;
+  struct Environment_Resolver;
   template <typename Resolver>
   class XML_Schema_Resolver;
   class XML_Error_Handler;
