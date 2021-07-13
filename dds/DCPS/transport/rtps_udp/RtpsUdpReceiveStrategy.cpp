@@ -78,6 +78,10 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
   }
 
   if (n > 0 && ret > 0 && iov[0].iov_len >= 4 && std::memcmp(iov[0].iov_base, "RTPS", 4) == 0) {
+    if (remote_address == tport.config().rtps_relay_address()) {
+      ++tport.relay_rtps_recv_count_;
+      tport.report_relay();
+    }
     return ret;
   }
 
@@ -112,6 +116,11 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
   STUN::Message message;
   message.block = head;
   if (serializer >> message) {
+    if (remote_address == tport.config().rtps_relay_address()) {
+      ++tport.relay_stun_recv_count_;
+      tport.report_relay();
+    }
+
     if (tport.relay_srsm().is_response(message)) {
       tport.process_relay_sra(tport.relay_srsm().receive(message));
     } else if (endpoint) {

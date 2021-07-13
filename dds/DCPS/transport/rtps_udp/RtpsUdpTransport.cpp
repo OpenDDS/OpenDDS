@@ -38,6 +38,11 @@ RtpsUdpTransport::RtpsUdpTransport(RtpsUdpInst& inst)
 #ifdef OPENDDS_SECURITY
   , ice_endpoint_(*this)
 #endif
+  , last_relay_report_(MonotonicTimePoint::now())
+  , relay_rtps_send_count_(0)
+  , relay_rtps_recv_count_(0)
+  , relay_stun_send_count_(0)
+  , relay_stun_recv_count_(0)
 {
   assign(local_prefix_, GUIDPREFIX_UNKNOWN);
   if (! (configure_i(inst) && open())) {
@@ -724,6 +729,11 @@ RtpsUdpTransport::IceEndpoint::choose_send_socket(const ACE_INET_Addr& destinati
 void
 RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN::Message& message)
 {
+  if (destination == transport.config().rtps_relay_address()) {
+    ++transport.relay_stun_send_count_;
+    transport.report_relay();
+  }
+
   ACE_SOCK_Dgram& socket = choose_send_socket(destination);
 
   ACE_Message_Block block(20 + message.length());
@@ -892,6 +902,26 @@ RtpsUdpTransport::disable_relay_stun_task()
 }
 
 #endif
+
+void
+RtpsUdpTransport::report_relay()
+{
+  const DCPS::MonotonicTimePoint now = DCPS::MonotonicTimePoint::now();
+  if (DCPS::DCPS_debug_level >= 4 && now > last_relay_report_ + DCPS::TimeDuration(300)) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) %C <-> relay RTPS sent %B RTPS recv %B STUN sent %B STUN recv %B\n",
+               config().name().c_str(),
+               relay_rtps_send_count_,
+               relay_rtps_recv_count_,
+               relay_stun_send_count_,
+               relay_stun_recv_count_));
+    last_relay_report_ = now;
+    relay_rtps_send_count_ = 0;
+    relay_rtps_recv_count_ = 0;
+    relay_stun_send_count_ = 0;
+    relay_stun_recv_count_ = 0;
+
+  }
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

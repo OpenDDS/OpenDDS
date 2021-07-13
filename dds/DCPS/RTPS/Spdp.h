@@ -406,6 +406,13 @@ private:
 #endif
     bool network_is_unreachable_;
     bool ice_endpoint_added_;
+
+    void report_relay();
+    DCPS::MonotonicTimePoint last_relay_report_;
+    size_t relay_rtps_send_count_;
+    size_t relay_rtps_recv_count_;
+    size_t relay_stun_send_count_;
+    size_t relay_stun_recv_count_;
   };
 
   DCPS::RcHandle<SpdpTransport> tport_;

@@ -8,6 +8,7 @@
 #include "RtpsUdpSendStrategy.h"
 #include "RtpsUdpDataLink.h"
 #include "RtpsUdpInst.h"
+#include "RtpsUdpTransport.h"
 
 #include "dds/DCPS/transport/framework/NullSynchStrategy.h"
 #include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
@@ -275,6 +276,11 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
                                    const ACE_INET_Addr& addr)
 {
   OPENDDS_ASSERT(addr != ACE_INET_Addr());
+
+  if (addr == link_->transport().config().rtps_relay_address()) {
+    ++link_->transport().relay_rtps_send_count_;
+    link_->transport().report_relay();
+  }
 
   const ACE_SOCK_Dgram& socket = choose_send_socket(addr);
 

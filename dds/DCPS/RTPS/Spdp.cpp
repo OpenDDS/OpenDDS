@@ -2216,6 +2216,11 @@ Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
   , wbuff_(64 * 1024)
   , network_is_unreachable_(false)
   , ice_endpoint_added_(false)
+  , last_relay_report_(MonotonicTimePoint::now())
+  , relay_rtps_send_count_(0)
+  , relay_rtps_recv_count_(0)
+  , relay_stun_send_count_(0)
+  , relay_stun_recv_count_(0)
 {
   hdr_.prefix[0] = 'R';
   hdr_.prefix[1] = 'T';
@@ -2778,6 +2783,26 @@ Spdp::SpdpTransport::send(WriteFlags flags, const ACE_INET_Addr& local_address)
   if (((flags & SEND_RELAY) || outer->config_->rtps_relay_only()) &&
       relay_address != ACE_INET_Addr()) {
     send(relay_address);
+    ++relay_rtps_send_count_;
+    report_relay();
+  }
+}
+
+void
+Spdp::SpdpTransport::report_relay()
+{
+  const DCPS::MonotonicTimePoint now = DCPS::MonotonicTimePoint::now();
+  if (DCPS::DCPS_debug_level >= 4 && now > last_relay_report_ + DCPS::TimeDuration(300)) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) SPDP <-> relay RTPS sent %B RTPS recv %B STUN sent %B STUN recv %B\n",
+               relay_rtps_send_count_,
+               relay_rtps_recv_count_,
+               relay_stun_send_count_,
+               relay_stun_recv_count_));
+    last_relay_report_ = now;
+    relay_rtps_send_count_ = 0;
+    relay_rtps_recv_count_ = 0;
+    relay_stun_send_count_ = 0;
+    relay_stun_recv_count_ = 0;
   }
 }
 
@@ -2885,9 +2910,11 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
 
   DCPS::RcHandle<Spdp> outer = outer_.lock();
 
-    // Ignore messages from the relay when not using it.
+  const bool from_relay = remote == outer->config_->spdp_rtps_relay_address();
+
+  // Ignore messages from the relay when not using it.
   if (outer &&
-      remote == outer->config_->spdp_rtps_relay_address() &&
+      from_relay &&
       !(outer->config_->rtps_relay_only() || outer->config_->use_rtps_relay())) {
     return 0;
   }
@@ -2902,6 +2929,11 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
                  ACE_TEXT("failed to deserialize RTPS header for SPDP\n")));
       return 0;
+    }
+
+    if (from_relay) {
+      ++relay_rtps_recv_count_;
+      report_relay();
     }
 
     if (DCPS::transport_debug.log_messages) {
@@ -3036,6 +3068,11 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
   STUN::Message message;
   message.block = &buff_;
   if (serializer >> message) {
+    if (from_relay) {
+      ++relay_stun_recv_count_;
+      report_relay();
+    }
+
     if (relay_srsm_.is_response(message)) {
       process_relay_sra(relay_srsm_.receive(message));
     } else {
@@ -3135,6 +3172,11 @@ Spdp::SendStun::execute()
 
   const ACE_SOCK_Dgram& socket = tport->choose_send_socket(address_);
   const ssize_t res = socket.send(tport->wbuff_.rd_ptr(), tport->wbuff_.length(), address_);
+
+  if (address_ == outer->config_->spdp_stun_server_address()) {
+    ++tport->relay_stun_send_count_;
+    tport->report_relay();
+  }
 
   if (res < 0) {
     const int err = errno;
