@@ -177,7 +177,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       for (Value::ConstMemberIterator ssi = stats_value.MemberBegin(); ssi != stats_value.MemberEnd(); ++ssi) {
         const auto pos = known_stat_names.find(ssi->name.GetString());
         const std::string display_name = pos != known_stat_names.end() ? pos->second : ssi->name.GetString();
-        //std::cout << "writing statistic " << display_name << " from " << ssi->name.GetString() << " for variety " << variety_name << " on scenario " << scenario_name << std::endl;
         write_statistic(variety_value, doc_out.GetAllocator(), display_name, ssi->value);
       }
     }
