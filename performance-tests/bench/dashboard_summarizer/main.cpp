@@ -69,7 +69,7 @@ void write_statistic(Value& parent_out, Document::AllocatorType& alloc, const st
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   std::vector<std::string> file_names;
-  std::vector<std::shared_ptr<std::ifstream> > files;
+  std::vector<std::shared_ptr<std::ifstream>> files;
 
   for (size_t i = 1; i < static_cast<size_t>(argc); ++i) {
     const std::string full_file_name(ACE_TEXT_ALWAYS_CHAR(argv[i]));
