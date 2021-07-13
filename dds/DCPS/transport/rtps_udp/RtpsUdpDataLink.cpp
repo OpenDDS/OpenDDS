@@ -1526,11 +1526,10 @@ void RtpsUdpDataLink::update_last_recv_addr(const RepoId& src, const ACE_INET_Ad
     ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
     const RemoteInfoMap::iterator pos = locators_.find(src);
     if (pos != locators_.end()) {
-      remove_cache = pos->second.last_recv_addr_ != addr;
 #ifdef ACE_HAS_IPV6
-      pos->second.last_recv_addr_ != addr && (pos->second.last_recv_addr_.get_type() == AF_INET || addr.get_type() == AF_INET6);
+      remove_cache = pos->second.last_recv_addr_ != addr && (pos->second.last_recv_addr_.get_type() == AF_INET || addr.get_type() == AF_INET6);
 #else
-      pos->second.last_recv_addr_ != addr;
+      remove_cache = pos->second.last_recv_addr_ != addr;
 #endif
       pos->second.last_recv_addr_ = addr;
       pos->second.last_recv_time_ = MonotonicTimePoint::now();
