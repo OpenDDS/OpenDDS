@@ -16,6 +16,8 @@ use Term::ANSIColor;
 use constant line_length_limit => 100;
 use constant eof_newline_limit => 2;
 
+STDOUT->autoflush(1);
+
 my $debug = 0;
 my $ace = 1; # Warn if ACE not found
 my $ace_arg = 0; # Error if ACE not found
@@ -446,7 +448,7 @@ my %all_checks = (
     path_matches_all_of => ['cpp_file', 'in_dds_dcps'],
     line_matches => qr/(?:ACE_|ace\/)Condition(?:(?:_Recursive)?_Thread_Mutex)?/,
     message => [
-      'Except for in Condition.h, ACE_Condition and related types are forbidden in the core libraries.',
+      'Except for in ConditionVariable.h, ACE_Condition and related types are forbidden in the core libraries.',
       'See the "Time" section in docs/guidelines.md.',
     ],
   },
@@ -1030,11 +1032,31 @@ sub process_path {
 
   print("process_path: $filename\n") if ($debug);
 
+  if (!-r $full_filename) {
+    print("  (doesn't exist)\n") if ($debug);
+    return;
+  }
+
   if (exists($paths_seen{$full_filename})) {
     print("  (already seen)\n") if ($debug);
     return;
   }
   $paths_seen{$full_filename} = 1;
+
+  # Ignore file if it's ignored by git.
+  my $cmd = "git check-ignore --quiet $full_filename";
+  my $exit_status = 0;
+  if (system($cmd)) {
+    $exit_status = $? >> 8;
+    if ($? == -1 || $? & 127 || $exit_status != 1) {
+      die("${\error()} \"$cmd\" failed: $? $! $exit_status");
+    }
+  }
+  # See https://git-scm.com/docs/git-check-ignore#_exit_status
+  if ($exit_status == 0) {
+    print("  (ignored by git)\n") if ($debug);
+    return;
+  }
 
   my @possible_checks_array = ();
   if (exists($paths_to_ignore{$full_filename})) {
