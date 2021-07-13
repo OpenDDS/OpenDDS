@@ -1,0 +1,46 @@
+# Call parameters:
+#   ARG1 - datafile directory
+#   ARG2 - output directory
+
+file_exists(file) = system("[ -f '".file."' ] && echo '1' || echo '0'") + 0
+
+set datafile separator whitespace
+set timestamp
+
+set terminal push
+set terminal png size 1290,770
+
+set grid
+set autoscale
+unset label
+set key outside right
+
+# Parameters for Quantile and Kernel Density Estimation plots
+samples=5000
+bandwidth=.00001
+
+# Latency Kernel Density Estimation plots
+set autoscale
+set xlabel "Latency (microseconds)"
+set ylabel "Samples"
+set format x "%.1s%cS"
+set format y "%.0f%%"
+set xtics out nomirror rotate by 15 offset -5,-1
+
+list = "50 100 250 500 1000 2500 5000 8000 16000 32000"
+protocols = "tcp udp multi-be multi-re rtps raw-tcp raw-udp"
+protocol_descs = "'TCP' 'UDP' 'Best Effort Multicast' 'Reliable Multicast' 'RTPS' 'Raw TCP' 'Raw UDP'"
+
+do for [j=1:words(protocols)] {
+  protocol = word(protocols, j)
+  if (file_exists(ARG1 . "/latency-" . protocol . "-50.gpd")) {
+    set output ARG2 . '/' . protocol . '-density.png'
+    set title  word(protocol_descs, j) . " - Latency Density Plot per Message Size"
+    plot for [i in list] ARG1 . "/latency-" . protocol . "-" . i . ".gpd" index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t i
+  }
+}
+
+
+set output
+set terminal pop
+
