@@ -14,6 +14,7 @@
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/DiscoveryBase.h"
+#include <dds/DCPS/LogAddr.h>
 
 #include "dds/DCPS/transport/framework/TransportClient.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
@@ -436,10 +437,7 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
   }
   if (config.multicast_interface_.empty() &&
     TheServiceParticipant->default_address() != ACE_INET_Addr()) {
-    ACE_TCHAR buff[ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 1];
-    TheServiceParticipant->default_address().addr_to_string(static_cast<ACE_TCHAR*>(buff), ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 1);
-    OPENDDS_STRING addr_str(ACE_TEXT_ALWAYS_CHAR(static_cast<const ACE_TCHAR*>(buff)));
-    config.multicast_interface_ = addr_str.substr(0, addr_str.find_first_of(':'));
+    config.multicast_interface_ = DCPS::LogAddr::ip(TheServiceParticipant->default_address());
   }
 
   // Open the socket here so that any addresses/ports left
@@ -648,12 +646,10 @@ namespace {
     if (result < 0) {
       const int err = errno;
       if (err != ENETUNREACH || !network_is_unreachable) {
-        ACE_TCHAR addr_buff[DCPS::AddrToStringSize] = {};
-        addr.addr_to_string(addr_buff, DCPS::AddrToStringSize);
         errno = err;
         const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
         ACE_ERROR((prio, "(%P|%t) RtpsUdpTransport.cpp send_single_i() - "
-                   "destination %s failed %p\n", addr_buff, ACE_TEXT("send")));
+                   "destination %C failed %p\n", DCPS::LogAddr(addr).c_str(), ACE_TEXT("send")));
       }
       if (err == ENETUNREACH) {
         network_is_unreachable = true;

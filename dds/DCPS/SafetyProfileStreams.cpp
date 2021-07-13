@@ -7,6 +7,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
 #include "SafetyProfileStreams.h"
+#include "LogAddr.h"
 
 #include "Definitions.h"
 #ifdef OPENDDS_SECURITY
@@ -141,13 +142,6 @@ OPENDDS_STRING to_hex_dds_string(
     rv.push_back(nibble_to_hex_char(data[i]));
   }
   return rv;
-}
-
-OPENDDS_STRING to_dds_string(const ACE_INET_Addr& addr)
-{
-  ACE_TCHAR buffer[AddrToStringSize];
-  addr.addr_to_string(buffer, AddrToStringSize);
-  return ACE_TEXT_ALWAYS_CHAR(buffer);
 }
 
 } // namespace DCPS

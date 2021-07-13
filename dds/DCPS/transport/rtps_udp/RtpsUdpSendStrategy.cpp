@@ -9,6 +9,8 @@
 #include "RtpsUdpDataLink.h"
 #include "RtpsUdpInst.h"
 
+#include <dds/DCPS/LogAddr.h>
+
 #include "dds/DCPS/transport/framework/NullSynchStrategy.h"
 #include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
@@ -297,12 +299,10 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
   if (result < 0) {
     const int err = errno;
     if (err != ENETUNREACH || !network_is_unreachable_) {
-      ACE_TCHAR addr_buff[DCPS::AddrToStringSize] = {};
-      addr.addr_to_string(addr_buff, DCPS::AddrToStringSize);
       errno = err;
       const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
       ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
-                 "destination %s failed send: %m\n", addr_buff));
+                 "destination %C failed send: %m\n", DCPS::LogAddr(addr).c_str()));
       if (errno == EMSGSIZE) {
         for (int i = 0; i < n; ++i) {
           ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i: "
