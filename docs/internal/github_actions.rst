@@ -145,7 +145,7 @@ The last list file used by ``build_and_test.yml`` is :ghfile:`tools/modeling/tes
 
 To disable a test in GitHub Actions, ``!GH_ACTIONS`` must be added next to the test in the .lst file.
 These tests will not run when ``-Config GH_ACTIONS`` is passed alongside the lst file.
-There are similar test blockers which only block for specific github actions configurations: ``!GHA_NO_BUILT_IN_TOPICS`` blocks GitHub Actions builds without built-in-topics from running a test, and ``!GHA_OPENDDS_SAFETY_PROFILE`` blocks Safety Profile builds from running a test.
+There are similar test blockers which only block for specific github actions configurations: ``!GHA_OPENDDS_SAFETY_PROFILE`` blocks Safety Profile builds from running a test.
 These blocks are necessary because certain tests cannot properly run on GitHub Actions due to how the runners are configured.
 
 .. seealso::
