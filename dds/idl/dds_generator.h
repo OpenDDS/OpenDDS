@@ -30,6 +30,7 @@
 #include <set>
 #include <stdexcept>
 #include <iomanip>
+#include <cctype>
 
 /// How to handle IDL underscore escaping. Depends on where the name is
 /// going and where the name came from.
@@ -603,20 +604,54 @@ std::ostream& signed_int_helper(std::ostream& o, IntType value, IntType min)
 }
 
 inline
+std::ostream& hex_value(std::ostream& o, unsigned value, size_t bytes)
+{
+  std::ios saved(0);
+  saved.copyfmt(o);
+  o << std::hex << std::setw(bytes * 2) << std::setfill('0') << value;
+  o.copyfmt(saved);
+  return o;
+}
+
+template <typename CharType>
+std::ostream& char_helper(std::ostream& o, CharType value)
+{
+  switch (value) {
+  case '\'':
+  case '\"':
+  case '\\':
+  case '\?':
+    return o << '\\' << value;
+  case '\n':
+    return o << "\\n";
+  case '\t':
+    return o << "\\t";
+  case '\v':
+    return o << "\\v";
+  case '\b':
+    return o << "\\b";
+  case '\r':
+    return o << "\\r";
+  case '\f':
+    return o << "\\f";
+  case '\a':
+    return o << "\\a";
+  }
+  if (isprint(value)) {
+    return o << value;
+  } else {
+    return hex_value(o << "\\x", value, sizeof(CharType) == 1 ? 1 : 2);
+  }
+}
+
+inline
 std::ostream& operator<<(std::ostream& o,
                          const AST_Expression::AST_ExprValue& ev)
 {
   OpenDDS::DCPS::RestoreOutputStreamState ross(o);
   switch (ev.et) {
   case AST_Expression::EV_octet:
-    {
-      std::ios saved(nullptr);
-      saved.copyfmt(o);
-      o << "0x" << std::hex << std::setw(2) << std::setfill('0') <<
-        static_cast<int>(ev.u.oval);
-      o.copyfmt(saved);
-    }
-    break;
+    return hex_value(o << "0x", static_cast<int>(ev.u.oval), 1);
   case AST_Expression::EV_int8:
     return o << static_cast<short>(ev.u.int8val);
   case AST_Expression::EV_uint8:
@@ -634,9 +669,9 @@ std::ostream& operator<<(std::ostream& o,
   case AST_Expression::EV_ulonglong:
     return o << ev.u.ullval << "ULL";
   case AST_Expression::EV_wchar:
-    return o << "L'" << static_cast<char>(ev.u.wcval) << '\'';
+    return char_helper<ACE_CDR::WChar>(o << "L'", ev.u.wcval) << '\'';
   case AST_Expression::EV_char:
-    return o << '\'' << ev.u.cval << '\'';
+    return char_helper<ACE_CDR::Char>(o << '\'', ev.u.cval) << '\'';
   case AST_Expression::EV_bool:
     return o << std::boolalpha << static_cast<bool>(ev.u.bval);
   case AST_Expression::EV_float:
