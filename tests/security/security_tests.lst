@@ -57,9 +57,7 @@ tests/DCPS/RtpsRelay/STUN/run_test.pl: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS 
 tests/DCPS/RtpsRelay/STUN/run_test.pl ipv6: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE IPV6 RAPIDJSON
 
 tests/DCPS/ParticipantLocationTopic/run_test.pl:            !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6 RAPIDJSON
-tests/DCPS/ParticipantLocationTopic/run_test.pl ipv6:       !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE IPV6 RAPIDJSON
 tests/DCPS/ParticipantLocationTopic/run_test.pl noice:      !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6 RAPIDJSON
-tests/DCPS/ParticipantLocationTopic/run_test.pl noice ipv6: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE IPV6 RAPIDJSON
 
 tests/DCPS/Restart/run_test.pl --secure: !GH_ACTIONS
 tests/DCPS/LargeSample/run_test.pl rtps_disc_sec: !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS
