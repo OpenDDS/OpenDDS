@@ -427,6 +427,13 @@ RtpsUdpTransport::update_locators(const RepoId& remote,
   }
 }
 
+void
+RtpsUdpTransport::get_and_reset_relay_message_counts(RelayMessageCounts& counts)
+{
+  counts = relay_message_counts_;
+  counts.reset();
+}
+
 bool
 RtpsUdpTransport::configure_i(RtpsUdpInst& config)
 {
@@ -720,6 +727,10 @@ RtpsUdpTransport::IceEndpoint::choose_send_socket(const ACE_INET_Addr& destinati
 void
 RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN::Message& message)
 {
+  if (destination == transport.config().rtps_relay_address()) {
+    ++transport.relay_message_counts_.stun_send;
+  }
+
   ACE_SOCK_Dgram& socket = choose_send_socket(destination);
 
   ACE_Message_Block block(20 + message.length());

@@ -6240,6 +6240,12 @@ Sedp::stun_server_address(const ACE_INET_Addr& address)
   rtps_inst->stun_server_address_ = address;
 }
 
+void
+Sedp::get_and_reset_relay_message_counts(DCPS::RelayMessageCounts& counts)
+{
+  transport_inst_->get_and_reset_relay_message_counts(counts);
+}
+
 bool locators_changed(const ParticipantProxy_t& x,
                       const ParticipantProxy_t& y)
 {

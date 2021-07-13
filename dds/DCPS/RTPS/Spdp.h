@@ -219,6 +219,9 @@ public:
   DCPS::RcHandle<RtpsDiscoveryConfig> config() const { return config_; }
   void send_to_relay();
 
+  void get_and_reset_relay_message_counts(DCPS::RelayMessageCounts& spdp,
+                                          DCPS::RelayMessageCounts& sedp);
+
 protected:
   Sedp& endpoint_manager() { return *sedp_; }
   void remove_discovered_participant_i(DiscoveredParticipantIter& iter);
@@ -409,6 +412,8 @@ private:
 #endif
     bool network_is_unreachable_;
     bool ice_endpoint_added_;
+
+    DCPS::RelayMessageCounts relay_message_counts_;
   };
 
   DCPS::RcHandle<SpdpTransport> tport_;

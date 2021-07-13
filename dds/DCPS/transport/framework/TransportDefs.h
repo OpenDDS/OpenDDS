@@ -249,6 +249,26 @@ static const ConnectionInfoFlags CONNINFO_UNICAST = (1 << 0);
 static const ConnectionInfoFlags CONNINFO_MULTICAST = (1 << 1);
 static const ConnectionInfoFlags CONNINFO_ALL = static_cast<ConnectionInfoFlags>(-1);
 
+struct RelayMessageCounts {
+  unsigned long rtps_send;
+  unsigned long rtps_recv;
+  unsigned long stun_send;
+  unsigned long stun_recv;
+
+  RelayMessageCounts()
+  {
+    reset();
+  }
+
+  void reset()
+  {
+    rtps_send = 0;
+    rtps_recv = 0;
+    stun_send = 0;
+    stun_recv = 0;
+  }
+};
+
 } // namespace DCPS
 } // namespace OpenDDS
 
