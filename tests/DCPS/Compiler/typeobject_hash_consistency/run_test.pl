@@ -11,7 +11,7 @@ use strict;
 
 my $opendds_idl = PerlDDS::get_opendds_idl();
 if (!defined($opendds_idl)) {
-    return 1;
+    exit 1;
 }
 
 my $gencmd = $opendds_idl . " -Sa -St sample.idl";
