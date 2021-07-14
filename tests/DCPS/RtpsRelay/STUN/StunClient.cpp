@@ -128,7 +128,7 @@ bool test_success(int& status,
     status = EXIT_FAILURE;
     retval = false;
   }
-  std::cout << "Mapped address = " << DCPS::LogAddr(a).str() << std::endl;
+  std::cout << "Mapped address = " << OpenDDS::DCPS::LogAddr(a).str() << std::endl;
 
   if (!response.has_fingerprint()) {
     std::cerr << "ERROR: no fingerprint" << std::endl;
@@ -322,7 +322,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     for (int i = 0; i < server_port_count; ++i) {
       ACE_INET_Addr server_addr(server_addr_base);
       server_addr.set_port_number(server_addr.get_port_number() + i);
-      const std::string name = "pinging server at " + DCPS::LogAddr(server_addr).str();
+      const std::string name = "pinging server at " + OpenDDS::DCPS::LogAddr(server_addr).str();
       test_success(status, socket, server_addr, name.c_str());
     }
     return status;

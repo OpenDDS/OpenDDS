@@ -905,7 +905,7 @@ jstring JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getGroupAddress
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  return jni->NewStringUTF(DCPS::LogAddr(inst->group_address_).c_str());
+  return jni->NewStringUTF(OpenDDS::DCPS::LogAddr(inst->group_address_).c_str());
 }
 
 // MulticastInst::setGroupAddress
@@ -1100,7 +1100,7 @@ jstring JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getLocalAddress
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  return jni->NewStringUTF(DCPS::LogAddr(inst->local_address()).c_str());
+  return jni->NewStringUTF(OpenDDS::DCPS::LogAddr(inst->local_address()).c_str());
 }
 
 // RtpsUdpInst::setLocalAddress
@@ -1134,7 +1134,7 @@ jstring JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getMulticastGroupAddress
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  return jni->NewStringUTF(DCPS::LogAddr(inst->multicast_group_address()).c_str());
+  return jni->NewStringUTF(OpenDDS::DCPS::LogAddr(inst->multicast_group_address()).c_str());
 }
 
 // RtpsUdpInst::setMulticastGroupAddress

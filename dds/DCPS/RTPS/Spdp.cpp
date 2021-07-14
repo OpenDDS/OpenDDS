@@ -4025,11 +4025,11 @@ void Spdp::SpdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::St
     break;
   case ICE::ServerReflexiveStateMachine::SRSM_Set:
   case ICE::ServerReflexiveStateMachine::SRSM_Change:
-    connection_record.address = DCPS::to_dds_string(relay_srsm_.stun_server_address()).c_str();
+    connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();
     outer->sedp_->job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer->bit_subscriber_, true, connection_record));
     break;
   case ICE::ServerReflexiveStateMachine::SRSM_Unset:
-    connection_record.address = DCPS::to_dds_string(relay_srsm_.unset_stun_server_address()).c_str();
+    connection_record.address = DCPS::LogAddr(relay_srsm_.unset_stun_server_address()).c_str();
     outer->sedp_->job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer->bit_subscriber_, false, connection_record));
     break;
   }
@@ -4052,7 +4052,7 @@ void Spdp::SpdpTransport::disable_relay_stun_task()
 
   DCPS::ConnectionRecordDataReaderImpl* dr = outer->connection_record_bit();
   if (dr && relay_srsm_.stun_server_address() != ACE_INET_Addr())  {
-    connection_record.address = DCPS::to_dds_string(relay_srsm_.stun_server_address()).c_str();
+    connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();
     outer->sedp_->job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer->bit_subscriber_, false, connection_record));
   }
 
