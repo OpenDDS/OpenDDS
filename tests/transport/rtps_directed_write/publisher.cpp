@@ -60,8 +60,7 @@ public:
   }
 
 private:
-  // TODO(iguessthislldo): Convert
-  static const ACE_CDR::ULong encap = 0x00000100; // {CDR_LE, options} in BE format
+  static const EncapsulationHeader encap;
   static const CORBA::Octet DE  = OpenDDS::RTPS::FLAG_D | OpenDDS::RTPS::FLAG_E;
   static const CORBA::Octet DEQ = OpenDDS::RTPS::FLAG_D | OpenDDS::RTPS::FLAG_E | OpenDDS::RTPS::FLAG_Q;
 
@@ -83,6 +82,8 @@ private:
 };
 
 using namespace OpenDDS::RTPS;
+
+const EncapsulationHeader DDS_TEST::encap(encoding, FINAL);
 
 bool DDS_TEST::writeHeartbeat(const OpenDDS::DCPS::RepoId& reader) const
 {

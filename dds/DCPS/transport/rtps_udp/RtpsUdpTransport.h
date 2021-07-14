@@ -58,7 +58,8 @@ private:
 
   virtual void stop_accepting_or_connecting(const TransportClient_wrch& client,
                                             const RepoId& remote_id,
-                                            bool disassociate);
+                                            bool disassociate,
+                                            bool association_failed);
 
   bool configure_i(RtpsUdpInst& config);
 
@@ -87,7 +88,7 @@ private:
                                      const RepoId& /*writerid*/);
 
   virtual bool connection_info_i(TransportLocator& info, ConnectionInfoFlags flags) const;
-  std::pair<RtpsUdpDataLink::AddrSet, RtpsUdpDataLink::AddrSet>
+  std::pair<AddrSet, AddrSet>
     get_connection_addrs(const TransportBLOB& data,
                          bool* requires_inline_qos = 0,
                          unsigned int* blob_bytes_read = 0) const;

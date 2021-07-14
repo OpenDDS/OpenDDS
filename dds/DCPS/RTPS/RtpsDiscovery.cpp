@@ -7,6 +7,7 @@
 
 #include "RtpsDiscovery.h"
 
+#include <dds/DCPS/LogAddr.h>
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/ConfigUtils.h"
 #include "dds/DCPS/DomainParticipantImpl.h"
@@ -135,10 +136,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       // spdpaddr defaults to DCPSDefaultAddress if set
       if (TheServiceParticipant->default_address() != ACE_INET_Addr()) {
         config->spdp_local_address(TheServiceParticipant->default_address());
-        ACE_TCHAR buff[ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 1];
-        TheServiceParticipant->default_address().addr_to_string(static_cast<ACE_TCHAR*>(buff), ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 1);
-        OPENDDS_STRING addr_str(ACE_TEXT_ALWAYS_CHAR(static_cast<const ACE_TCHAR*>(buff)));
-        config->multicast_interface(addr_str.substr(0, addr_str.find_first_of(':')));
+        config->multicast_interface(DCPS::LogAddr::ip(TheServiceParticipant->default_address()));
       }
 
       DCPS::ValueMap values;
@@ -947,16 +945,6 @@ RtpsDiscovery::spdp_rtps_relay_address(const ACE_INET_Addr& address)
   const ACE_INET_Addr prev = config_->spdp_rtps_relay_address();
   if (prev == address) {
     return;
-  }
-
-  if (prev != ACE_INET_Addr()) {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-    for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
-         dom_pos != dom_limit; ++dom_pos) {
-      for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
-        part_pos->second->remove_application_participant();
-      }
-    }
   }
 
   config_->spdp_rtps_relay_address(address);

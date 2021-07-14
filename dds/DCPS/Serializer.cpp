@@ -95,11 +95,21 @@ Encoding::Encoding(Encoding::Kind kind, bool swap_bytes)
   this->kind(kind);
 }
 
-EncapsulationHeader::EncapsulationHeader()
-: kind_(KIND_CDR_BE)
-, options_(0)
+EncapsulationHeader::EncapsulationHeader(EncapsulationHeader::Kind k, ACE_UINT16 o)
+: kind_(k)
+, options_(o)
 {
 }
+
+EncapsulationHeader::EncapsulationHeader(const Encoding& enc, Extensibility ext, ACE_UINT16 o)
+: kind_(KIND_INVALID)
+, options_(o)
+{
+   if (!from_encoding(enc, ext)) {
+     kind_ = KIND_INVALID;
+   }
+}
+
 
 bool EncapsulationHeader::from_encoding(
   const Encoding& encoding, Extensibility extensibility)
@@ -265,6 +275,8 @@ OPENDDS_STRING EncapsulationHeader::to_string() const
     return "XCDR2 Little Endian Parameter List";
   case KIND_XML:
     return "XML";
+  case KIND_INVALID:
+    return "Invalid";
   default:
     return "Unknown: " + to_dds_string(static_cast<unsigned>(kind_), true);
   }
@@ -285,6 +297,9 @@ bool operator>>(Serializer& s, EncapsulationHeader& value)
 
 bool operator<<(Serializer& s, const EncapsulationHeader& value)
 {
+  if (!value.is_good()) {
+    return false;
+  }
   ACE_CDR::Octet data[EncapsulationHeader::serialized_size];
   data[0] = (value.kind() >> 8) & 0xff;
   data[1] = value.kind() & 0xff;
@@ -325,6 +340,7 @@ const char Serializer::ALIGN_PAD[] = {0};
 Serializer::Serializer(ACE_Message_Block* chain, const Encoding& encoding)
   : current_(chain)
   , good_bit_(true)
+  , construction_status_(ConstructionSuccessful)
   , align_rshift_(0)
   , align_wshift_(0)
   , rpos_(0)
@@ -338,6 +354,7 @@ Serializer::Serializer(ACE_Message_Block* chain, Encoding::Kind kind,
   Endianness endianness)
   : current_(chain)
   , good_bit_(true)
+  , construction_status_(ConstructionSuccessful)
   , align_rshift_(0)
   , align_wshift_(0)
   , rpos_(0)
@@ -351,6 +368,7 @@ Serializer::Serializer(ACE_Message_Block* chain,
   Encoding::Kind kind, bool swap_bytes)
   : current_(chain)
   , good_bit_(true)
+  , construction_status_(ConstructionSuccessful)
   , align_rshift_(0)
   , align_wshift_(0)
   , rpos_(0)
@@ -364,11 +382,12 @@ Serializer::~Serializer()
 {
 }
 
-Serializer::ScopedAlignmentContext::ScopedAlignmentContext(Serializer& ser)
+Serializer::ScopedAlignmentContext::ScopedAlignmentContext(Serializer& ser, size_t min_read)
   : ser_(ser)
   , max_align_(ser.encoding().max_align())
   , start_rpos_(ser.rpos())
   , rblock_(max_align_ ? (ptrdiff_t(ser.current_->rd_ptr()) - ser.align_rshift_) % max_align_ : 0)
+  , min_read_(min_read)
   , start_wpos_(ser.wpos())
   , wblock_(max_align_ ? (ptrdiff_t(ser.current_->wr_ptr()) - ser.align_wshift_) % max_align_ : 0)
 {
@@ -378,6 +397,10 @@ Serializer::ScopedAlignmentContext::ScopedAlignmentContext(Serializer& ser)
 void
 Serializer::ScopedAlignmentContext::restore(Serializer& ser) const
 {
+  if (min_read_ != 0 && (ser.rpos() - start_rpos_) < min_read_) {
+    ser.skip(min_read_ - (ser.rpos() - start_rpos_));
+  }
+
   if (ser.current_ && max_align_) {
     ser.align_rshift_ = offset(ser.current_->rd_ptr(), ser.rpos() - start_rpos_ + rblock_, max_align_);
     ser.align_wshift_ = offset(ser.current_->wr_ptr(), ser.wpos() - start_wpos_ + wblock_, max_align_);

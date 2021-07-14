@@ -298,6 +298,7 @@ module Builder {
     string transport_config_name;
     DDS::DataWriterQos qos;
     DataWriterQosMask qos_mask;
+    StringSeq tags;
   };
 
   typedef sequence<DataWriterConfig> DataWriterConfigSeq;
@@ -435,6 +436,7 @@ module Builder {
 
   struct DataWriterReport {
     PropertySeq properties;
+    StringSeq tags;
   };
 
   typedef sequence<DataWriterReport> DataWriterReportSeq;

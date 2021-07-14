@@ -10,6 +10,8 @@
 # single unit, the script can be used to geneerate the coverage for
 # that unit in isolation.
 
+set -e
+
 args=($@)
 
 cd "${DDS_ROOT}"

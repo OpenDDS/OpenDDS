@@ -121,6 +121,22 @@ TEST(dds_DCPS_Serializer, EncapsulationHeader__EncapsulationHeader)
   EXPECT_STREQ("CDR/XCDR1 Big Endian Plain", eh.to_string().c_str());
 }
 
+TEST(dds_DCPS_Serializer, EncapsulationHeader__EncapsulationHeader_Encoding_Valid)
+{
+  Encoding initenc;
+  EncapsulationHeader eh(initenc, FINAL);
+  EXPECT_TRUE(eh.is_good());
+  EXPECT_STREQ("CDR/XCDR1 Little Endian Plain", eh.to_string().c_str());
+}
+
+TEST(dds_DCPS_Serializer, EncapsulationHeader__EncapsulationHeader_Encoding_Invalid)
+{
+  Encoding initenc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_LITTLE);
+  EncapsulationHeader eh(initenc, FINAL);
+  EXPECT_FALSE(eh.is_good());
+  EXPECT_STREQ("Invalid", eh.to_string().c_str());
+}
+
 TEST(dds_DCPS_Serializer, EncapsulationHeader__from_encoding_XCDR1_BIG_FINAL)
 {
   EncapsulationHeader eh;
@@ -292,7 +308,16 @@ TEST(dds_DCPS_Serializer, EncapsulationHeader__to_encoding_XML)
   EXPECT_STREQ("XML", eh.to_string().c_str());
 }
 
-TEST(dds_DCPS_Serializer, Serializer_Serializer_ACE_Message_Block_Encoding)
+TEST(dds_DCPS_Serializer, EncapsulationHeader__to_encoding_INVALID)
+{
+  Encoding initenc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_LITTLE);
+  EncapsulationHeader eh(initenc, FINAL);
+  Encoding enc;
+  EXPECT_FALSE(eh.to_encoding(enc, FINAL));
+  EXPECT_STREQ("Invalid", eh.to_string().c_str());
+}
+
+TEST(serializer_test, Serializer_Serializer_ACE_Message_Block_Encoding)
 {
   ACE_Message_Block amb;
   Encoding enc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_LITTLE);
@@ -481,6 +506,98 @@ TEST(serializer_test, Serializer_align_context_2_buff_diff_walign)
     ASSERT_TRUE(expected_zeros.count(rser.rpos()) ? !i : i);
   }
   //std::cout << std::endl;
+}
+
+TEST(serializer_test, Serializer_align_context_2_buff_diff_walign_read)
+{
+  OpenDDS::DCPS::Message_Block_Ptr amb(new ACE_Message_Block(21));
+  amb->cont(new ACE_Message_Block(32));
+
+  Encoding enc;
+  Serializer ser(amb.get(), enc);
+
+  std::memset(amb->wr_ptr(), 0, 21);
+  std::memset(amb->cont()->wr_ptr(), 0, 32);
+
+  amb->cont()->rd_ptr(3);
+  amb->cont()->wr_ptr(3);
+
+  const ACE_CDR::UShort c = 3;
+  const ACE_CDR::ULongLong d = 54321;
+
+  ASSERT_TRUE(ser << c);
+  {
+    Serializer::ScopedAlignmentContext sac(ser);
+    ASSERT_TRUE(ser << d);
+    ASSERT_TRUE(ser << c);
+    ASSERT_TRUE(ser << d);
+  }
+  ASSERT_TRUE(ser << d);
+
+  ACE_CDR::UShort c_out = 0;
+  ACE_CDR::ULongLong d_out = 0.0;
+
+  Serializer rser(amb.get(), enc);
+
+  ASSERT_TRUE(rser >> c_out);
+  ASSERT_EQ(c, c_out);
+  {
+    Serializer::ScopedAlignmentContext sac(rser);
+    ASSERT_TRUE(rser >> d_out);
+    ASSERT_EQ(d, d_out);
+    ASSERT_TRUE(rser >> c_out);
+    ASSERT_EQ(c, c_out);
+    ASSERT_TRUE(rser >> d_out);
+    ASSERT_EQ(d, d_out);
+  }
+  ASSERT_TRUE(rser >> d_out);
+  ASSERT_EQ(d, d_out);
+}
+
+TEST(serializer_test, Serializer_align_context_2_buff_diff_walign_read_with_min)
+{
+  OpenDDS::DCPS::Message_Block_Ptr amb(new ACE_Message_Block(21));
+  amb->cont(new ACE_Message_Block(32));
+
+  Encoding enc;
+  Serializer ser(amb.get(), enc);
+
+  std::memset(amb->wr_ptr(), 0, 21);
+  std::memset(amb->cont()->wr_ptr(), 0, 32);
+
+  amb->cont()->rd_ptr(3);
+  amb->cont()->wr_ptr(3);
+
+  const ACE_CDR::UShort c = 3;
+  const ACE_CDR::ULongLong d = 54321;
+
+  ASSERT_TRUE(ser << c); // Writes 03 00
+  {
+    Serializer::ScopedAlignmentContext sac(ser);
+    ASSERT_TRUE(ser << d); // Writes 8 bytes
+    ASSERT_TRUE(ser << c); // Writes 2 bytes
+    ASSERT_TRUE(ser << d); // Skips 6 bytes for alignment, writes 8 bytes (so 24 total)
+  }
+  ASSERT_TRUE(ser << d);
+
+  ACE_CDR::UShort c_out = 0;
+  ACE_CDR::ULongLong d_out = 0.0;
+
+  Serializer rser(amb.get(), enc);
+
+  ASSERT_TRUE(rser >> c_out);
+  ASSERT_EQ(c, c_out);
+  {
+    Serializer::ScopedAlignmentContext sac(rser, 24); // See above for why 24
+    ASSERT_TRUE(rser >> d_out);
+    ASSERT_EQ(d, d_out);
+    ASSERT_TRUE(rser >> c_out);
+    ASSERT_EQ(c, c_out);
+    ASSERT_TRUE(rser >> c_out); // this should pass, even though it's not what was written
+    // But we will rely on sac to skip until we've got 20 bytes so that the following d_out is aligned correctly
+  }
+  ASSERT_TRUE(rser >> d_out);
+  ASSERT_EQ(d, d_out);
 }
 
 TEST(serializer_test, Serializer_test_peek_align)

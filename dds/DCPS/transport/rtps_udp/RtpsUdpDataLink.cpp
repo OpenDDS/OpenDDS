@@ -11,6 +11,7 @@
 #include "RtpsUdpSendStrategy.h"
 #include "RtpsUdpReceiveStrategy.h"
 
+#include <dds/DCPS/LogAddr.h>
 #include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/transport/framework/TransportSendControlElement.h"
@@ -435,12 +436,10 @@ RtpsUdpDataLink::join_multicast_group(const NetworkInterface& nic,
 
   if (joined_interfaces_.count(nic.name()) == 0 && nic.has_ipv4()) {
     if (DCPS_debug_level > 3) {
-      ACE_TCHAR buff[DCPS::AddrToStringSize];
-      config().multicast_group_address().addr_to_string(buff, DCPS::AddrToStringSize);
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group ")
-                 ACE_TEXT("joining group %s on %C\n"),
-                 buff,
+                 ACE_TEXT("joining group %C on %C\n"),
+                 DCPS::LogAddr(config().multicast_group_address()).c_str(),
                  nic.name().c_str()));
     }
 
@@ -462,13 +461,10 @@ RtpsUdpDataLink::join_multicast_group(const NetworkInterface& nic,
 #ifdef ACE_HAS_IPV6
   if (ipv6_joined_interfaces_.count(nic.name()) == 0 && nic.has_ipv6()) {
     if (DCPS_debug_level > 3) {
-      ACE_TCHAR buff[DCPS::AddrToStringSize];
-      config().ipv6_multicast_group_address().addr_to_string(buff, DCPS::AddrToStringSize);
-
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group ")
-                 ACE_TEXT("joining group %s on %C\n"),
-                 buff,
+                 ACE_TEXT("joining group %C on %C\n"),
+                 DCPS::LogAddr(config().ipv6_multicast_group_address()).c_str(),
                  nic.name().c_str()));
     }
 
@@ -494,12 +490,10 @@ RtpsUdpDataLink::leave_multicast_group(const NetworkInterface& nic)
 {
   if (joined_interfaces_.count(nic.name()) != 0 && !nic.has_ipv4()) {
     if (DCPS_debug_level > 3) {
-      ACE_TCHAR buff[DCPS::AddrToStringSize];
-      config().multicast_group_address().addr_to_string(buff, DCPS::AddrToStringSize);
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) RtpsUdpDataLink::leave_multicast_group ")
-                 ACE_TEXT("leaving group %s on %C\n"),
-                 buff,
+                 ACE_TEXT("leaving group %C on %C\n"),
+                 DCPS::LogAddr(config().multicast_group_address()).c_str(),
                  nic.name().c_str()));
     }
 
@@ -515,12 +509,10 @@ RtpsUdpDataLink::leave_multicast_group(const NetworkInterface& nic)
 #ifdef ACE_HAS_IPV6
   if (ipv6_joined_interfaces_.count(nic.name()) != 0 && !nic.has_ipv6()) {
     if (DCPS_debug_level > 3) {
-      ACE_TCHAR buff[DCPS::AddrToStringSize];
-      config().multicast_group_address().addr_to_string(buff, DCPS::AddrToStringSize);
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) RtpsUdpDataLink::leave_ipv6_multicast_group ")
-                 ACE_TEXT("leaving group %s on %C\n"),
-                 buff,
+                 ACE_TEXT("leaving group %C on %C\n"),
+                 DCPS::LogAddr(config().multicast_group_address()).c_str(),
                  nic.name().c_str()));
     }
 
@@ -536,6 +528,15 @@ RtpsUdpDataLink::leave_multicast_group(const NetworkInterface& nic)
 }
 
 void
+RtpsUdpDataLink::remove_locator_and_bundling_cache(const RepoId& remote_id)
+{
+  static const RepoId GUID_MAX = { { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }, { { 0xFF, 0xFF, 0xFF }, 0xFF } };
+  locator_cache_.remove(LocatorCacheKey(remote_id, GUID_UNKNOWN, false), LocatorCacheKey(remote_id, GUID_MAX, true));
+  bundling_cache_.remove(BundlingCacheKey(remote_id, GUID_UNKNOWN, RepoIdSet()), BundlingCacheKey(remote_id, GUID_MAX, RepoIdSet()));
+  bundling_cache_.remove_contains(remote_id);
+}
+
+void
 RtpsUdpDataLink::update_locators(const RepoId& remote_id,
                                  const AddrSet& unicast_addresses,
                                  const AddrSet& multicast_addresses,
@@ -545,6 +546,8 @@ RtpsUdpDataLink::update_locators(const RepoId& remote_id,
   if (unicast_addresses.empty() && multicast_addresses.empty()) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::update_locators: no addresses for %C\n"), LogGuid(remote_id).c_str()));
   }
+
+  remove_locator_and_bundling_cache(remote_id);
 
   ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
 
@@ -558,20 +561,20 @@ RtpsUdpDataLink::update_locators(const RepoId& remote_id,
     ++info.ref_count_;
   }
 
+  g.release();
+
   if (log_unicast_change) {
     for (AddrSet::const_iterator pos = unicast_addresses.begin(), limit = unicast_addresses.end();
          pos != limit; ++pos) {
-      ACE_TCHAR addr_buff[DCPS::AddrToStringSize] = {};
-      pos->addr_to_string(addr_buff, DCPS::AddrToStringSize);
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::update_locators %C is now at %s\n"), LogGuid(remote_id).c_str(), addr_buff));
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::update_locators %C is now at %C\n"),
+                 LogGuid(remote_id).c_str(), DCPS::LogAddr(*pos).c_str()));
     }
   }
   if (log_multicast_change) {
     for (AddrSet::const_iterator pos = multicast_addresses.begin(), limit = multicast_addresses.end();
          pos != limit; ++pos) {
-      ACE_TCHAR addr_buff[DCPS::AddrToStringSize] = {};
-      pos->addr_to_string(addr_buff, DCPS::AddrToStringSize);
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::update_locators %C is now at %s\n"), LogGuid(remote_id).c_str(), addr_buff));
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::update_locators %C is now at %C\n"),
+                 LogGuid(remote_id).c_str(), DCPS::LogAddr(*pos).c_str()));
     }
   }
 }
@@ -704,7 +707,9 @@ void
 RtpsUdpDataLink::disassociated(const RepoId& local_id,
                                const RepoId& remote_id)
 {
-  release_reservations_i(local_id, remote_id);
+  release_reservations_i(remote_id, local_id);
+
+  remove_locator_and_bundling_cache(remote_id);
 
   ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
 
@@ -985,6 +990,8 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
       }
     }
   }
+
+  remove_locator_and_bundling_cache(remote_id);
 
   for (TqeVector::iterator drop_it = to_drop.begin(); drop_it != to_drop.end(); ++drop_it) {
     (*drop_it)->data_dropped(true);
@@ -1504,11 +1511,22 @@ void RtpsUdpDataLink::update_last_recv_addr(const RepoId& src, const ACE_INET_Ad
     return;
   }
 
-  ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
-  const RemoteInfoMap::iterator pos = locators_.find(src);
-  if (pos != locators_.end()) {
-    pos->second.last_recv_addr_ = addr;
-    pos->second.last_recv_time_ = MonotonicTimePoint::now();
+  bool remove_cache = false;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
+    const RemoteInfoMap::iterator pos = locators_.find(src);
+    if (pos != locators_.end()) {
+#ifdef ACE_HAS_IPV6
+      remove_cache = pos->second.last_recv_addr_ != addr && (pos->second.last_recv_addr_.get_type() == AF_INET || addr.get_type() == AF_INET6);
+#else
+      remove_cache = pos->second.last_recv_addr_ != addr;
+#endif
+      pos->second.last_recv_addr_ = addr;
+      pos->second.last_recv_time_ = MonotonicTimePoint::now();
+    }
+  }
+  if (remove_cache) {
+    remove_locator_and_bundling_cache(src);
   }
 }
 
@@ -2339,41 +2357,64 @@ namespace {
 void
 RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVecVecVec& meta_submessages, AddrDestMetaSubmessageMap& adr_map)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
-  AddrSet addrs;
+  size_t cache_hits = 0;
+  size_t cache_misses = 0;
+  size_t addrset_min_size = std::numeric_limits<size_t>::max();
+  size_t addrset_max_size = 0;
+
   // Sort meta_submessages by address set and destination
   for (MetaSubmessageVecVecVec::iterator vvit = meta_submessages.begin(); vvit != meta_submessages.end(); ++vvit) {
     for (MetaSubmessageVecVec::iterator vit = vvit->begin(); vit != vvit->end(); ++vit) {
       for (MetaSubmessageVec::iterator it = vit->begin(); it != vit->end(); ++it) {
-        const bool directed = it->dst_guid_ != GUID_UNKNOWN;
-        if (directed) {
-          accumulate_addresses(it->from_guid_, it->dst_guid_, addrs, true);
+
+        const BundlingCacheKey key(it->dst_guid_, it->from_guid_, it->to_guids_);
+        BundlingCache::ScopedAccess entry(bundling_cache_, key);
+        if (entry.is_new_) {
+
+          AddrSet& addrs = entry.value().addrs_;
+          ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
+
+          const bool directed = it->dst_guid_ != GUID_UNKNOWN;
+          if (directed) {
+            accumulate_addresses(it->from_guid_, it->dst_guid_, addrs, true);
+          } else {
+            addrs = get_addresses_i(it->from_guid_);
+          }
+          for (RepoIdSet::iterator it2 = it->to_guids_.begin(); it2 != it->to_guids_.end(); ++it2) {
+            accumulate_addresses(it->from_guid_, *it2, addrs, directed);
+          }
+#ifdef OPENDDS_SECURITY
+          if (local_crypto_handle() != DDS::HANDLE_NIL && separate_message(it->from_guid_.entityId)) {
+            addrs.insert(BUNDLING_PLACEHOLDER); // removed in bundle_mapped_meta_submessages
+          }
+#endif
+          ++cache_misses;
         } else {
-          OPENDDS_ASSERT(addrs.empty());
-          addrs = get_addresses_i(it->from_guid_); // This will overwrite, but addrs should always be empty here
+          ++cache_hits;
         }
-        for (RepoIdSet::iterator it2 = it->to_guids_.begin(); it2 != it->to_guids_.end(); ++it2) {
-          accumulate_addresses(it->from_guid_, *it2, addrs, directed);
-        }
+
+        const AddrSet& addrs = entry.value().addrs_;
+        addrset_min_size = std::min(addrset_min_size, addrs.size());
+        addrset_max_size = std::max(addrset_max_size, addrs.size());
         if (addrs.empty()) {
           continue;
-        }
-
 #ifdef OPENDDS_SECURITY
-        if (local_crypto_handle() != DDS::HANDLE_NIL && separate_message(it->from_guid_.entityId)) {
-          addrs.insert(BUNDLING_PLACEHOLDER); // removed in bundle_mapped_meta_submessages
-        }
+        } else if (addrs.size() == 1 && *addrs.begin() == BUNDLING_PLACEHOLDER) {
+          continue;
 #endif
+        }
 
         if (std::memcmp(&(it->dst_guid_.guidPrefix), &GUIDPREFIX_UNKNOWN, sizeof(GuidPrefix_t)) != 0) {
-          adr_map[addrs][make_unknown_guid(it->dst_guid_.guidPrefix)].push_back(it);
+          adr_map[AddressCacheEntryProxy(entry.rch_)][make_unknown_guid(it->dst_guid_.guidPrefix)].push_back(it);
         } else {
-          adr_map[addrs][GUID_UNKNOWN].push_back(it);
+          adr_map[AddressCacheEntryProxy(entry.rch_)][GUID_UNKNOWN].push_back(it);
         }
-        addrs.clear();
       }
     }
   }
+  VDBG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::build_meta_submessage_map()"
+                  "- Bundling Cache Stats: hits = %B, misses = %B, min = %B, max = %B\n",
+                  cache_hits, cache_misses, addrset_min_size, addrset_max_size));
 }
 
 #ifdef OPENDDS_SECURITY
@@ -2462,7 +2503,7 @@ void
 RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
                                                 AddrDestMetaSubmessageMap& adr_map,
                                                 MetaSubmessageIterVecVec& meta_submessage_bundles,
-                                                OPENDDS_VECTOR(AddrSet)& meta_submessage_bundle_addrs,
+                                                OPENDDS_VECTOR(AddressCacheEntryProxy)& meta_submessage_bundle_addrs,
                                                 OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes,
                                                 CountKeeper& counts)
 {
@@ -2478,22 +2519,9 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
   RepoId prev_dst; // used to determine when we need to write a new info_dst
   for (AddrDestMetaSubmessageMap::iterator addr_it = adr_map.begin(); addr_it != adr_map.end(); ++addr_it) {
 
-    // Prepare the set of addresses.
-    const AddrSet& addrs = addr_it->first;
-
-#ifdef OPENDDS_SECURITY
-#define ERASE_BUNDLING_PLACEHOLDER() \
-    if (local_crypto_handle() != DDS::HANDLE_NIL) { \
-      meta_submessage_bundle_addrs.back().erase(BUNDLING_PLACEHOLDER); \
-    }
-#else
-#define ERASE_BUNDLING_PLACEHOLDER()
-#endif
-
     // A new address set always starts a new bundle
     meta_submessage_bundles.push_back(MetaSubmessageIterVec());
-    meta_submessage_bundle_addrs.push_back(addrs);
-    ERASE_BUNDLING_PLACEHOLDER();
+    meta_submessage_bundle_addrs.push_back(addr_it->first);
 
     prev_dst = GUID_UNKNOWN;
 
@@ -2506,8 +2534,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
           // going
           if (!helper.add_to_bundle(idst)) {
             meta_submessage_bundles.push_back(MetaSubmessageIterVec());
-            meta_submessage_bundle_addrs.push_back(addrs);
-            ERASE_BUNDLING_PLACEHOLDER();
+            meta_submessage_bundle_addrs.push_back(addr_it->first);
           }
         }
         // Attempt to add the submessage meta_submessage to the bundle
@@ -2548,8 +2575,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
         // difference into the next bundle, reset prev_dst, and keep going
         if (!result) {
           meta_submessage_bundles.push_back(MetaSubmessageIterVec());
-          meta_submessage_bundle_addrs.push_back(addrs);
-          ERASE_BUNDLING_PLACEHOLDER();
+          meta_submessage_bundle_addrs.push_back(addr_it->first);
           prev_dst = GUID_UNKNOWN;
         }
         meta_submessage_bundles.back().push_back(*resp_it);
@@ -2647,7 +2673,7 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVecVecVec& meta_subme
 
   // Build reasonably-sized submessage bundles based on our destination map
   MetaSubmessageIterVecVec meta_submessage_bundles; // a vector of vectors of iterators pointing to meta_submessages
-  OPENDDS_VECTOR(AddrSet) meta_submessage_bundle_addrs; // for a bundle's address set
+  OPENDDS_VECTOR(AddressCacheEntryProxy) meta_submessage_bundle_addrs; // for a bundle's address set
   SizeVec meta_submessage_bundle_sizes; // for allocating the bundle's buffer
   CountKeeper counts;
   bundle_mapped_meta_submessages(encoding, adr_map, meta_submessage_bundles, meta_submessage_bundle_addrs, meta_submessage_bundle_sizes, counts);
@@ -2707,7 +2733,7 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVecVecVec& meta_subme
       }
       prev_dst = dst;
     }
-    send_strategy()->send_rtps_control(rtps_message, mb_bundle, meta_submessage_bundle_addrs[i]);
+    send_strategy()->send_rtps_control(rtps_message, mb_bundle, meta_submessage_bundle_addrs[i].entry_->addrs_);
     if (transport_debug.log_messages) {
       RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", rtps_message.hdr.guidPrefix, true, rtps_message);
     }
@@ -3798,7 +3824,7 @@ void RtpsUdpDataLink::durability_resend(TransportQueueElement* element,
                                         const RTPS::FragmentNumberSet& fragmentSet)
 {
   if (Transport_debug_level > 5) {
-    ACE_DEBUG((LM_DEBUG, "TRACK RtpsUdpDataLink::durability_resend %q\n", element->sequence().getValue()));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) TRACK RtpsUdpDataLink::durability_resend %q\n", element->sequence().getValue()));
   }
   const AddrSet addrs = get_addresses(element->publication_id(), element->subscription_id());
   if (addrs.empty()) {
@@ -4311,19 +4337,19 @@ RtpsUdpDataLink::receive_strategy()
   return static_cast<RtpsUdpReceiveStrategy*>(receive_strategy_.in());
 }
 
-RtpsUdpDataLink::AddrSet
+AddrSet
 RtpsUdpDataLink::get_addresses(const RepoId& local, const RepoId& remote) const {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, locators_lock_, AddrSet());
   return get_addresses_i(local, remote);
 }
 
-RtpsUdpDataLink::AddrSet
+AddrSet
 RtpsUdpDataLink::get_addresses(const RepoId& local) const {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, locators_lock_, AddrSet());
   return get_addresses_i(local);
 }
 
-RtpsUdpDataLink::AddrSet
+AddrSet
 RtpsUdpDataLink::get_addresses_i(const RepoId& local, const RepoId& remote) const {
   AddrSet retval;
 
@@ -4332,7 +4358,7 @@ RtpsUdpDataLink::get_addresses_i(const RepoId& local, const RepoId& remote) cons
   return retval;
 }
 
-RtpsUdpDataLink::AddrSet
+AddrSet
 RtpsUdpDataLink::get_addresses_i(const RepoId& local) const {
   AddrSet retval;
 
@@ -4354,12 +4380,21 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
   OPENDDS_ASSERT(local != GUID_UNKNOWN);
   OPENDDS_ASSERT(remote != GUID_UNKNOWN);
 
+  const LocatorCacheKey key(remote, local, prefer_unicast);
+  LocatorCache::ScopedAccess entry(locator_cache_, key);
+  if (!entry.is_new_) {
+    addresses.insert(entry.value().addrs_.begin(), entry.value().addrs_.end());
+    return;
+  }
+
   if (config().rtps_relay_only()) {
     addresses.insert(config().rtps_relay_address());
+    entry.value().addrs_.insert(config().rtps_relay_address());
     return;
   }
 
   AddrSet normal_addrs;
+  MonotonicTimePoint normal_addrs_expires = MonotonicTimePoint::max_value;
   ACE_INET_Addr ice_addr;
   bool valid_last_recv_addr = false;
   static const ACE_INET_Addr NO_ADDR;
@@ -4367,15 +4402,17 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
   typedef OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter_t;
   iter_t pos = locators_.find(remote);
   if (pos != locators_.end()) {
-    if (prefer_unicast && pos->second.last_recv_addr_ != ACE_INET_Addr()) {
+    if (prefer_unicast && pos->second.last_recv_addr_ != NO_ADDR) {
       normal_addrs.insert(pos->second.last_recv_addr_);
+      normal_addrs_expires = pos->second.last_recv_time_ + config().receive_address_duration_;
       valid_last_recv_addr = (MonotonicTimePoint::now() - pos->second.last_recv_time_) <= config().receive_address_duration_;
     } else if (prefer_unicast && !pos->second.unicast_addrs_.empty()) {
       normal_addrs = pos->second.unicast_addrs_;
     } else if (!pos->second.multicast_addrs_.empty()) {
       normal_addrs = pos->second.multicast_addrs_;
-    } else if (pos->second.last_recv_addr_ != ACE_INET_Addr()) {
+    } else if (pos->second.last_recv_addr_ != NO_ADDR) {
       normal_addrs.insert(pos->second.last_recv_addr_);
+      normal_addrs_expires = pos->second.last_recv_time_ + config().receive_address_duration_;
       valid_last_recv_addr = (MonotonicTimePoint::now() - pos->second.last_recv_time_) <= config().receive_address_duration_;
     } else {
       normal_addrs = pos->second.unicast_addrs_;
@@ -4406,19 +4443,25 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
 
   if (ice_addr == NO_ADDR) {
     addresses.insert(normal_addrs.begin(), normal_addrs.end());
+    entry.value().addrs_.insert(normal_addrs.begin(), normal_addrs.end());
+    entry.value().expires_ = normal_addrs_expires;
     const ACE_INET_Addr relay_addr = config().rtps_relay_address();
     if (!valid_last_recv_addr && relay_addr != NO_ADDR) {
       addresses.insert(relay_addr);
+      entry.value().addrs_.insert(relay_addr);
     }
     return;
   }
 
   if (normal_addrs.count(ice_addr) == 0) {
     addresses.insert(ice_addr);
+    entry.value().addrs_.insert(ice_addr);
     return;
   }
 
   addresses.insert(normal_addrs.begin(), normal_addrs.end());
+  entry.value().addrs_.insert(normal_addrs.begin(), normal_addrs.end());
+  entry.value().expires_ = normal_addrs_expires;
 }
 
 ICE::Endpoint*

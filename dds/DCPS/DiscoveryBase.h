@@ -674,7 +674,7 @@ namespace OpenDDS {
           if (DCPS_debug_level > 3) {
             const GuidConverter conv(publicationId);
             ACE_DEBUG((LM_INFO,
-              ACE_TEXT("(%P|%t) EndpointManager::update_publication_locators updating locators for %C\n"),
+              ACE_TEXT("(%P|%t) EndpointManager::update_publication_locators - updating locators for %C\n"),
               OPENDDS_STRING(conv).c_str()));
           }
           iter->second.trans_info_ = transInfo;
@@ -717,7 +717,7 @@ namespace OpenDDS {
               get_permissions_handle(), topic_name.data(), topic_sec_attr, ex)) {
             ACE_ERROR((LM_ERROR,
               ACE_TEXT("(%P|%t) ERROR: ")
-              ACE_TEXT("DomainParticipant::add_subscription, ")
+              ACE_TEXT("EndpointManager::add_subscription, ")
               ACE_TEXT("Unable to get security attributes for topic '%C'. ")
               ACE_TEXT("SecurityException[%d.%d]: %C\n"),
                 topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
@@ -970,7 +970,7 @@ namespace OpenDDS {
 
         if (topic_counter_ == 0x1000000) {
           ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) ERROR: EndpointManager::make_topic_guid: ")
+                     ACE_TEXT("(%P|%t) ERROR: EndpointManager::assign_topic_key: ")
                      ACE_TEXT("Exceeded Maximum number of topic entity keys!")
                      ACE_TEXT("Next key will be a duplicate!\n")));
           topic_counter_ = 0;
@@ -2399,7 +2399,7 @@ namespace OpenDDS {
           if (DCPS_debug_level > 3) {
             GuidConverter conv(iter->first);
             ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) LocalParticipant::remove_discovered_participant")
-                       ACE_TEXT(" - erasing %C\n"), OPENDDS_STRING(conv).c_str()));
+                       ACE_TEXT(" - erasing %C (%B)\n"), OPENDDS_STRING(conv).c_str(), participants_.size()));
           }
 
           remove_discovered_participant_i(iter);

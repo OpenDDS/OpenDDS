@@ -69,7 +69,7 @@ bool wait_for_reader(bool tojoin, DataWriter_var &dw) {
   DDS::Duration_t p = { 5, 0 };
   DDS::PublicationMatchedStatus pms;
   dw->get_publication_matched_status(pms);
-  ACE_DEBUG((LM_DEBUG,"Starting wait for reader %s count = %d at %T\n", (tojoin ? "startup":"shutdown"), pms.current_count));
+  ACE_DEBUG((LM_DEBUG,"Starting wait for reader %C count = %d at %T\n", (tojoin ? "startup":"shutdown"), pms.current_count));
   for (int retries = 3; retries > 0 && (tojoin == (pms.current_count == 0)); --retries) {
     conditions.length(0);
     ret = ws->wait(conditions, p);
@@ -82,11 +82,11 @@ bool wait_for_reader(bool tojoin, DataWriter_var &dw) {
     dw->get_publication_matched_status(pms);
   }
   if (success) {
-    ACE_DEBUG((LM_DEBUG, "After wait for reader %s count = %d at %T\n", (tojoin
+    ACE_DEBUG((LM_DEBUG, "After wait for reader %C count = %d at %T\n", (tojoin
                                                                          ? "startup"
                                                                          : "shutdown"), pms.current_count));
     if (tojoin != (pms.current_count > 0)) {
-      ACE_ERROR((LM_ERROR, "Data reader %s not detected at %T\n", (tojoin
+      ACE_ERROR((LM_ERROR, "Data reader %C not detected at %T\n", (tojoin
                                                                    ? "startup"
                                                                    : "shutdown")));
     }

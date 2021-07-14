@@ -11,14 +11,15 @@
 #include "UdpSendStrategy.h"
 #include "UdpReceiveStrategy.h"
 
-#include "ace/CDR_Base.h"
-#include "ace/Log_Msg.h"
-
+#include <dds/DCPS/LogAddr.h>
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/transport/framework/PriorityKey.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/AssociationData.h"
+
+#include "ace/CDR_Base.h"
+#include "ace/Log_Msg.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -78,9 +79,8 @@ UdpTransport::connect_datalink(const RemoteTransport& remote,
   const PriorityKey key = blob_to_key(remote.blob_, attribs.priority_, this->config().local_address(), active);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) UdpTransport::connect_datalink PriorityKey "
-            "prio=%d, addr=%C:%hu, is_loopback=%d, is_active=%d\n",
-            key.priority(), key.address().get_host_addr(),
-            key.address().get_port_number(), key.is_loopback(),
+            "prio=%d, addr=%C, is_loopback=%d, is_active=%d\n",
+            key.priority(), LogAddr(key.address()).c_str(), key.is_loopback(),
             key.is_active()), 2);
 
   GuardType guard(client_links_lock_);
@@ -118,9 +118,8 @@ UdpTransport::accept_datalink(const RemoteTransport& remote,
                                       attribs.priority_, config().local_address(), false /* !active */);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) UdpTransport::accept_datalink PriorityKey "
-            "prio=%d, addr=%C:%hu, is_loopback=%d, is_active=%d\n",
-            key.priority(), key.address().get_host_addr(),
-            key.address().get_port_number(), key.is_loopback(),
+            "prio=%d, addr=%C, is_loopback=%d, is_active=%d\n",
+            key.priority(), LogAddr(key.address()).c_str(), key.is_loopback(),
             key.is_active()), 2);
 
   if (server_link_keys_.count(key)) {
@@ -145,7 +144,8 @@ UdpTransport::accept_datalink(const RemoteTransport& remote,
 void
 UdpTransport::stop_accepting_or_connecting(const TransportClient_wrch& client,
                                            const RepoId& remote_id,
-                                           bool /*disassociate*/)
+                                           bool /*disassociate*/,
+                                           bool /*association_failed*/)
 {
   VDBG((LM_DEBUG, "(%P|%t) UdpTransport::stop_accepting_or_connecting\n"));
 

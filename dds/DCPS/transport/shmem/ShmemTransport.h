@@ -47,7 +47,8 @@ protected:
 
   virtual void stop_accepting_or_connecting(const TransportClient_wrch& client,
                                             const RepoId& remote_id,
-                                            bool disassociate);
+                                            bool disassociate,
+                                            bool association_failed);
 
   bool configure_i(ShmemInst& config);
 

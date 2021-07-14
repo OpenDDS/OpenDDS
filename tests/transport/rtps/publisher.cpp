@@ -303,8 +303,11 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   ds.inlineQos[0].key_hash(hash);
 
   const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
-  // TODO(iguessthislldo): Convert
-  const ACE_CDR::ULong encap = 0x00000100; // {CDR_LE, options} in BE format
+  const EncapsulationHeader encap(encoding, FINAL);
+  if (!encap.is_good()) {
+    std::cerr <<"ERROR: failed to initialize Encapsulation Header\n";
+    return 1;
+  }
   size_t size = serialized_size(encoding, hdr);
   serialized_size(encoding, size, it);
   serialized_size(encoding, size, ds);
@@ -354,10 +357,8 @@ int DDS_TEST::test(ACE_TString host, u_short port)
     dsh.key_fields_only_ = true;
 
     // Calculate the data buffer length
-    size = 0;
+    size = EncapsulationHeader::serialized_size;
     KeyOnly<const TestMsg> ko_instance_data(control_sample);
-    // TODO(iguessthislldo): Convert
-    primitive_serialized_size_ulong(encoding, size); // encap
     serialized_size(encoding, size, ko_instance_data);
     dsh.message_length_ = static_cast<ACE_UINT32>(size);
 
@@ -478,9 +479,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   dsh.source_timestamp_nanosec_ = st.nanosec;
 
   // Calculate the data buffer length
-  size = 0;
-  // TODO(iguessthislldo): convert
-  primitive_serialized_size_ulong(encoding, size); // encap
+  size = EncapsulationHeader::serialized_size;
   serialized_size(encoding, size, data);
   dsh.message_length_ = static_cast<ACE_UINT32>(size);
 
@@ -515,9 +514,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   data.value = "";
 
   // Calculate the data buffer length
-  size = 0;
-  // TODO(iguessthislldo): convert
-  primitive_serialized_size_ulong(encoding, size); // encap
+  size = EncapsulationHeader::serialized_size;
   serialized_size(encoding, size, data);
   dsh2.message_length_ = static_cast<ACE_UINT32>(size);
 

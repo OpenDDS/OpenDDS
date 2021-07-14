@@ -127,7 +127,7 @@ int dds_chdir(const ACE_TCHAR* path)
     throw std::runtime_error("GetShortPathNameW failed.");
   }
 
-  ACE_OSCALL_RETURN(::_wchdir(spath), int, -1);
+  return ::_wchdir(spath);
 }
 
 bool is_dir(const ACE_TCHAR* path)

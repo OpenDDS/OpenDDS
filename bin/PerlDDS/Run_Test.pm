@@ -2,14 +2,70 @@
 # This module contains a few miscellaneous functions and some
 # startup ARGV processing that is used by all tests.
 
+use strict;
+use warnings;
+
 use PerlACE::Run_Test;
 use PerlDDS::Process;
 use PerlDDS::ProcessFactory;
 use Cwd;
 use POSIX qw(strftime);
-use File::Spec;
 
 package PerlDDS;
+
+use File::Spec::Functions qw(catfile catdir);
+
+sub is_executable {
+  my $path = shift;
+
+  return -x $path || -x "$path.exe";
+}
+
+sub get_executable {
+  my $name = shift;
+
+  for my $dir (@_) {
+    next unless length($dir);
+    my $path = catfile($dir, $name);
+    return $path if (is_executable($path));
+  }
+  return undef;
+}
+
+sub get_bin_executable {
+  my $name = shift;
+
+  my $install_prefix_bin = "";
+  if (defined($ENV{OPENDDS_INSTALL_PREFIX})) {
+    $install_prefix_bin = catdir($ENV{OPENDDS_INSTALL_PREFIX}, "bin");
+  }
+  return get_executable($name, catdir($ENV{DDS_ROOT}, "bin"), $install_prefix_bin);
+}
+
+sub get_opendds_idl {
+  my $path = get_bin_executable("opendds_idl");
+  if (!defined($path)) {
+    my $user_macros = catfile($ENV{DDS_ROOT}, "user_macros.GNU");
+    if (-r $user_macros) {
+      open(my $fd, $user_macros) or die("ERROR: Could not open $user_macros: $!");
+      while (my $line = <$fd>) {
+        if ($line =~ /^OPENDDS_IDL\s*=\s*(.*)$/) {
+          if (is_executable($1)) {
+            $path = $1;
+          }
+          else {
+            printf STDERR "ERROR: Value of OPENDDS_IDL in user_macros.GNU is invalid: $1\n";
+          }
+        }
+      }
+      close($fd);
+    }
+  }
+  if (!defined($path)) {
+    printf STDERR "ERROR: Couldn't determine where opendds_idl is\n";
+  }
+  return $path;
+}
 
 sub orbsvcs {
   my $o = "$ENV{'TAO_ROOT'}/orbsvcs";
@@ -212,7 +268,7 @@ sub get_test_target_os()
     # could refactor out of PerlACE::create_target
     my $config_name = shift;
 
-    $envname = $config_name.'_OS';
+    my $envname = "${config_name}_OS";
     if (!exists $ENV{$envname}) {
         print STDERR "$config_name requires an OS type in $envname\n";
         return undef;
@@ -250,7 +306,7 @@ sub create_test_target()
       }
       if ($config_os =~ /ANDROID/i) {
         require PerlACE::TestTarget_Android;
-        $target = new PerlACE::TestTarget_Android ($config_name, $component);
+        $target = new PerlACE::TestTarget_Android ($config_name, "");
         last SWITCH;
       }
       print STDERR "$config_os is an unknown OS type!\n";
@@ -301,10 +357,9 @@ sub add_lib_path {
 # Add PWD to the load library path
 add_lib_path ('.');
 
-$sleeptime = 5;
-
 package PerlDDS::TestFramework;
-use strict;
+
+use File::Spec::Functions qw(catfile catdir);
 
 sub new {
   my $class = shift;
@@ -567,7 +622,7 @@ sub process {
   my $self = shift;
   my $name = shift;
   my $executable = shift;
-  my $params = shift;
+  my $params = shift // "";
   if (defined($self->{processes}->{process}->{$name})) {
     print STDERR "ERROR: already created process named \"$name\"\n";
     $self->{status} = -1;
@@ -575,10 +630,9 @@ sub process {
   }
 
   my $subdir = $PerlACE::Process::ExeSubDir;
-  my $basename = File::Basename::basename ($executable);
-  my $dirname = File::Basename::dirname ($executable). '/';
-  my $test_executable = $dirname.$subdir.$basename;
-  if (!(-e $test_executable) && !(-e "$test_executable.exe") && !(-e $executable) && !(-e "$executable.exe")) {
+  my $basename = File::Basename::basename($executable);
+  my $dirname = File::Basename::dirname($executable);
+  if (!defined(PerlDDS::get_executable($basename, $dirname, catdir($dirname, $subdir)))) {
     print STDERR "ERROR: executable \"$executable\" does not exist; subdir: $subdir; basename: $basename ; dirname: $dirname\n";
     $self->{status} = -1;
     return;
@@ -668,15 +722,12 @@ sub setup_discovery {
   }
 
   if (!defined($executable)) {
-    $executable = "$ENV{DDS_ROOT}/bin/DCPSInfoRepo";
-    if (!(-e $executable) && !(-e "${executable}.exe")) {
-      if (!defined($ENV{OPENDDS_INSTALL_PREFIX})) {
-        print STDERR "ERROR: Couldn't find \$DDS_ROOT/bin/DCPSInfoRepo. It " .
-          "needs to be built or \$OPENDDS_INSTALL_PREFIX needs to be defined " .
-          "if OpenDDS is installed.\n";
-        exit 1;
-      }
-      $executable = "$ENV{OPENDDS_INSTALL_PREFIX}/bin/DCPSInfoRepo";
+    $executable = PerlDDS::get_bin_executable("DCPSInfoRepo");
+    if (!defined($executable)) {
+      print STDERR "ERROR: Couldn't find \$DDS_ROOT/bin/DCPSInfoRepo. It " .
+        "needs to be built or \$OPENDDS_INSTALL_PREFIX needs to be defined " .
+        "if OpenDDS is installed.\n";
+      exit 1;
     }
   }
 
@@ -936,7 +987,7 @@ sub _temporary_file_path {
     if ($flag) {
       $p = PerlACE::rebase_path ($p, $process->{TARGET}->{TEST_ROOT}, $process->{TARGET}->{TEST_FSROOT});
     }
-    return File::Spec->catfile($p, $file);
+    return catfile($p, $file);
   }
 
   # Local processes use TEST_ROOT.
@@ -946,12 +997,12 @@ sub _temporary_file_path {
       defined($proc->{TARGET}->{TEST_ROOT})) {
       my $p = Cwd::getcwd();
       $p = PerlACE::rebase_path ($p, $ENV{TEST_ROOT}, $proc->{TARGET}->{TEST_ROOT});
-      return File::Spec->catfile($p, $file);
+      return catfile($p, $file);
     }
   }
 
   # No locals or remotes.
-  return File::Spec->catfile(Cwd::getcwd(), $file);
+  return catfile(Cwd::getcwd(), $file);
 }
 
 sub _prefix {
@@ -993,7 +1044,7 @@ sub _create_process {
     my $possible_would_be = ($self->{add_pending_timeout} ? "" : "would be ");
     my $prevent_or_allow = ($self->{add_pending_timeout} ? "prevent" : "allow");
     $self->_info("TestFramework::_create_process " . $possible_would_be
-      . "adding \"$flag\" to $executable's parameters. To " . $prevent_or_allow
+      . "adding \"$flag\" to ${executable}s parameters. To " . $prevent_or_allow
       . " this set " . "<TestFramework>->{add_pending_timeout} = "
       . ($self->{add_pending_timeout} ? "0" : "1") . "\n");
     $params .= $flag if $self->{add_pending_timeout};

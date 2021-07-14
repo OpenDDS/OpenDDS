@@ -37,6 +37,7 @@
 #include "dds/DCPS/RcEventHandler.h"
 #include "dds/DCPS/JobQueue.h"
 #include "dds/DCPS/SequenceNumber.h"
+#include "dds/DCPS/AddressCache.h"
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreC.h"
@@ -63,6 +64,59 @@ class ReceivedDataSample;
 typedef RcHandle<RtpsUdpInst> RtpsUdpInst_rch;
 typedef RcHandle<RtpsUdpTransport> RtpsUdpTransport_rch;
 typedef RcHandle<TransportClient> TransportClient_rch;
+
+#pragma pack(push, 1)
+
+struct LocatorCacheKey {
+  LocatorCacheKey(const RepoId& remote, const RepoId& local, bool prefer_unicast)
+    : remote_(remote)
+    , local_(local)
+    , prefer_unicast_(prefer_unicast)
+  {
+  }
+
+  bool operator<(const LocatorCacheKey& rhs) const
+  {
+    return std::memcmp(this, &rhs, sizeof (LocatorCacheKey)) < 0;
+  }
+
+  const RepoId remote_;
+  const RepoId local_;
+  const bool prefer_unicast_;
+};
+typedef AddressCache<LocatorCacheKey> LocatorCache;
+
+struct BundlingCacheKey {
+  BundlingCacheKey(const RepoId& dst_guid, const RepoId& from_guid, const RepoIdSet& to_guids)
+    : dst_guid_(dst_guid)
+    , from_guid_(from_guid)
+    , to_guids_(to_guids)
+  {
+  }
+
+  bool operator<(const BundlingCacheKey& rhs) const
+  {
+    int r = std::memcmp(&dst_guid_, &rhs.dst_guid_, 2 * sizeof (RepoId));
+    if (r < 0) {
+      return true;
+    } else if (r == 0) {
+      return to_guids_ < rhs.to_guids_;
+    }
+    return false;
+  }
+
+  bool contains(const RepoId& id) const
+  {
+    return to_guids_.count(id) != 0;
+  }
+
+  const RepoId dst_guid_;
+  const RepoId from_guid_;
+  const RepoIdSet to_guids_;
+};
+typedef AddressCache<BundlingCacheKey> BundlingCache;
+
+#pragma pack(pop)
 
 struct SeqReaders {
   SequenceNumber seq;
@@ -134,7 +188,7 @@ public:
 
   const GuidPrefix_t& local_prefix() const { return local_prefix_; }
 
-  typedef OPENDDS_SET(ACE_INET_Addr) AddrSet;
+  void remove_locator_and_bundling_cache(const RepoId& remote_id);
 
   void update_locators(const RepoId& remote_id,
                        const AddrSet& unicast_addresses,
@@ -260,6 +314,9 @@ private:
   RemoteInfoMap locators_;
 
   void update_last_recv_addr(const RepoId& src, const ACE_INET_Addr& addr);
+
+  mutable LocatorCache locator_cache_;
+  mutable BundlingCache bundling_cache_;
 
   ACE_SOCK_Dgram unicast_socket_;
   ACE_SOCK_Dgram_Mcast multicast_socket_;
@@ -604,7 +661,7 @@ private:
 
   typedef OPENDDS_VECTOR(MetaSubmessageVec::iterator) MetaSubmessageIterVec;
   typedef OPENDDS_MAP_CMP(RepoId, MetaSubmessageIterVec, GUID_tKeyLessThan) DestMetaSubmessageMap;
-  typedef OPENDDS_MAP(AddrSet, DestMetaSubmessageMap) AddrDestMetaSubmessageMap;
+  typedef OPENDDS_MAP(AddressCacheEntryProxy, DestMetaSubmessageMap) AddrDestMetaSubmessageMap;
   typedef OPENDDS_VECTOR(MetaSubmessageIterVec) MetaSubmessageIterVecVec;
   typedef OPENDDS_SET(CORBA::Long) CountSet;
   typedef OPENDDS_MAP_CMP(EntityId_t, CountSet, EntityId_tKeyLessThan) IdCountSet;
@@ -621,7 +678,7 @@ private:
     const Encoding& encoding,
     AddrDestMetaSubmessageMap& adr_map,
     MetaSubmessageIterVecVec& meta_submessage_bundles,
-    OPENDDS_VECTOR(AddrSet)& meta_submessage_bundle_addrs,
+    OPENDDS_VECTOR(AddressCacheEntryProxy)& meta_submessage_bundle_addrs,
                                OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes,
                                CountKeeper& counts);
 
