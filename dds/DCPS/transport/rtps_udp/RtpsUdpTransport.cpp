@@ -838,12 +838,12 @@ RtpsUdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::StateChang
     break;
   case ICE::ServerReflexiveStateMachine::SRSM_Set:
   case ICE::ServerReflexiveStateMachine::SRSM_Change:
-    connection_record.address = to_dds_string(relay_srsm_.stun_server_address()).c_str();
+    connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();
     deferred_connection_records_.push_back(std::make_pair(true, connection_record));
     break;
   case ICE::ServerReflexiveStateMachine::SRSM_Unset:
     {
-      connection_record.address = to_dds_string(relay_srsm_.unset_stun_server_address()).c_str();
+      connection_record.address = DCPS::LogAddr(relay_srsm_.unset_stun_server_address()).c_str();
       deferred_connection_records_.push_back(std::make_pair(false, connection_record));
       break;
     }
@@ -872,7 +872,7 @@ RtpsUdpTransport::disable_relay_stun_task()
   connection_record.protocol = RTPS_RELAY_STUN_PROTOCOL;
 
   if (relay_srsm_.stun_server_address() != ACE_INET_Addr()) {
-    connection_record.address = to_dds_string(relay_srsm_.stun_server_address()).c_str();
+    connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();
     deferred_connection_records_.push_back(std::make_pair(false, connection_record));
   }
 

@@ -7,7 +7,6 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
 #include "SafetyProfileStreams.h"
-#include "LogAddr.h"
 
 #include "Definitions.h"
 #ifdef OPENDDS_SECURITY

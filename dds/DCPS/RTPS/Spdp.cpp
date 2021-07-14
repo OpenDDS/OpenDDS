@@ -2793,7 +2793,7 @@ void
 Spdp::SpdpTransport::send(const ACE_INET_Addr& addr)
 {
   const ACE_SOCK_Dgram& socket = choose_send_socket(addr);
-  ssize_t res = socket.send(wbuff_.rd_ptr(), wbuff_.length(), addr);
+  const ssize_t res = socket.send(wbuff_.rd_ptr(), wbuff_.length(), addr);
   if (res < 0) {
     const int err = errno;
     if (err != ENETUNREACH || !network_is_unreachable_) {
