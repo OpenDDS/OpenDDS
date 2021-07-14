@@ -325,8 +325,8 @@ jobs:
         cd OpenDDS
         ./configure \
           --ace-github-latest \
-          --java=/usr/lib/jvm/adoptopenjdk-12-hotspot-amd64
-          --rapidjson
+          --java=/usr/lib/jvm/adoptopenjdk-12-hotspot-amd64 \
+          --rapidjson \
           --optimize \
           --no-debug \
           --features=versioned_namespace=1 \
