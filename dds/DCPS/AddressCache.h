@@ -52,7 +52,7 @@ template <typename Key>
 class AddressCache {
 public:
 
-  typedef OPENDDS_MAP(Key, RcHandle<AddressCacheEntry>) MapType;
+  typedef OPENDDS_MAP_T(Key, RcHandle<AddressCacheEntry>) MapType;
 
   AddressCache() {}
   virtual ~AddressCache() {}
