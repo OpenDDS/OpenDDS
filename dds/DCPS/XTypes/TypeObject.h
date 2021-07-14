@@ -403,7 +403,9 @@ namespace XTypes {
     SBound bound;
     External<TypeIdentifier> element_identifier;
 
-    PlainSequenceSElemDefn() {}
+    PlainSequenceSElemDefn()
+      : bound(INVALID_SBOUND)
+    {}
 
     PlainSequenceSElemDefn(const PlainCollectionHeader& a_header,
                            const SBound& a_bound,
@@ -421,7 +423,9 @@ namespace XTypes {
     LBound bound;
     External<TypeIdentifier> element_identifier;
 
-    PlainSequenceLElemDefn() {}
+    PlainSequenceLElemDefn()
+      : bound(INVALID_LBOUND)
+    {}
 
     PlainSequenceLElemDefn(const PlainCollectionHeader& a_header,
                            const LBound& a_bound,
@@ -478,7 +482,8 @@ namespace XTypes {
     External<TypeIdentifier> key_identifier;
 
     PlainMapSTypeDefn()
-      : key_flags(0)
+      : bound(INVALID_SBOUND)
+      , key_flags(0)
     {}
 
     PlainMapSTypeDefn(const PlainCollectionHeader& a_header,
@@ -503,7 +508,10 @@ namespace XTypes {
     CollectionElementFlag key_flags;
     External<TypeIdentifier> key_identifier;
 
-    PlainMapLTypeDefn() {}
+    PlainMapLTypeDefn()
+      : bound(INVALID_LBOUND)
+      , key_flags(0)
+    {}
 
     PlainMapLTypeDefn(const PlainCollectionHeader& a_header,
                       const LBound& a_bound,
@@ -526,7 +534,10 @@ namespace XTypes {
     ACE_CDR::Long scc_length; // StronglyConnectedComponent.length
     ACE_CDR::Long scc_index; // identify type in Strongly Connected Comp.
 
-    StronglyConnectedComponentId() {}
+    StronglyConnectedComponentId()
+      : scc_length(0)
+      , scc_index(0)
+    {}
 
     StronglyConnectedComponentId(const TypeObjectHashId& a_sc_component_id,
                                  const ACE_CDR::Long& a_scc_length,
