@@ -546,9 +546,15 @@ inline std::string to_cxx_type(AST_Type* type, std::size_t& size)
     case AST_PredefinedType::PT_octet:
       size = 1;
       return "ACE_CDR::Octet";
-    default:
-      throw std::invalid_argument("Unknown PRIMITIVE type");
+    case AST_PredefinedType::PT_any:
+    case AST_PredefinedType::PT_object:
+    case AST_PredefinedType::PT_value:
+    case AST_PredefinedType::PT_abstract:
+    case AST_PredefinedType::PT_void:
+    case AST_PredefinedType::PT_pseudo:
+      be_util::misc_error_and_abort("Unsupported predefined type in to_cxx_type");
     }
+    be_util::misc_error_and_abort("Unhandled predefined type in to_cxx_type");
   }
   return scoped(type->name());
 }
@@ -689,10 +695,17 @@ std::ostream& operator<<(std::ostream& o,
     return o << "\"" << buf << "\"";
   }
 #endif
-  default:
+  case AST_Expression::EV_enum:
+  case AST_Expression::EV_longdouble:
+  case AST_Expression::EV_any:
+  case AST_Expression::EV_object:
+  case AST_Expression::EV_void:
+  case AST_Expression::EV_none:
     be_util::misc_error_and_abort(
-      "Unhandled ExprType value in operator<<(std::ostream, AST_ExprValue)");
+      "Unsupported ExprType value in operator<<(std::ostream, AST_ExprValue)");
   }
+  be_util::misc_error_and_abort(
+    "Unhandled ExprType value in operator<<(std::ostream, AST_ExprValue)");
   return o;
 }
 
