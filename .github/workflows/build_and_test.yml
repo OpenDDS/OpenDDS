@@ -349,7 +349,6 @@ jobs:
         set -e
         export DESTDIR=$(realpath install_temp)
         export INSTALL_PREFIX=$(realpath install_prefix)
-        export INSTALL_LIB=special_lib
         . setenv.sh
         cd $ACE_ROOT
         make install
@@ -367,7 +366,7 @@ jobs:
         export JAVA_PLATFORM=linux
         export PATH="\$OPENDDS_INSTALL_PREFIX/bin:\$PATH"
         export MPC_ROOT=$ACE_ROOT/MPC
-        export LD_LIBRARY_PATH="\$OPENDDS_INSTALL_PREFIX/$INSTALL_LIB:\$LD_LIBRARY_PATH"
+        export LD_LIBRARY_PATH="\$OPENDDS_INSTALL_PREFIX/lib:\$LD_LIBRARY_PATH"
         export PERL5LIB=$(realpath bin):$(realpath $ACE_ROOT/bin)
         EOF
     - name: make install build messenger
