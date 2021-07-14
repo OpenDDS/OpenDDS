@@ -106,7 +106,11 @@ struct TypeLookup_Request {
   DDS::RPC::RequestHeader header;
   TypeLookup_Call data;
 
-  TypeLookup_Request() {}
+  TypeLookup_Request()
+  {
+    header.requestId.writer_guid = RTPS::GUID_UNKNOWN;
+    header.requestId.sequence_number = RTPS::SEQUENCENUMBER_UNKNOWN;
+  }
 };
 
 struct TypeLookup_Return { //IDL: union switch (long)
