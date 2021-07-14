@@ -17,6 +17,7 @@ on:
       - '!.dockerignore'
       - '!.mailmap'
       - '!.github/workflows/lint.yml'
+      - '!.github/workflows/sphinx_strict.yml'
       - '!etc/**'
       - '!docs/**'
       - '!hooks/**'
@@ -41,6 +42,7 @@ on:
       - '!.dockerignore'
       - '!.mailmap'
       - '!.github/workflows/lint.yml'
+      - '!.github/workflows/sphinx_strict.yml'
       - '!etc/**'
       - '!docs/**'
       - '!hooks/**'
@@ -491,11 +493,6 @@ jobs:
         path: autobuild
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v2
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
     - name: setup gtest
       run: |
         cd OpenDDS/tests/googletest
@@ -509,7 +506,12 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --tests --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install --safety-profile --no-rapidjson --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure \
+          --doc-group \
+          --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install \
+          --no-rapidjson \
+          --safety-profile \
+          --tests
     - name: check build configuration
       shell: bash
       run: |
@@ -580,11 +582,6 @@ jobs:
         path: autobuild
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v2
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
     - name: setup gtest
       run: |
         cd OpenDDS/tests/googletest
@@ -598,7 +595,13 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --tests --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install --safety-profile=base --no-rapidjson --no-built-in-topics --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure \
+          --doc-group \
+          --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install \
+          --no-rapidjson \
+          --safety-profile=base \
+          --no-built-in-topics \
+          --tests
     - name: check build configuration
       shell: bash
       run: |
@@ -2173,15 +2176,17 @@ jobs:
         path: autobuild
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v2
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --compiler=g++-10 --safety-profile=base --tests --no-rapidjson --no-content-subscription --no-object-model-profile --no-persistence-profile --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure \
+          --compiler=g++-10 \
+          --no-rapidjson \
+          --safety-profile=base \
+          --no-content-subscription \
+          --no-object-model-profile \
+          --no-persistence-profile \
+          --tests
     - name: check build configuration
       shell: bash
       run: |
