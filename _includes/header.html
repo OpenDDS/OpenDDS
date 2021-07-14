@@ -57,33 +57,51 @@
             {% for i in (indent..level_m1) %}</ul></li>{% endfor %}
             {% if last == '/' %}
                 <li>
+                  {% if p.hide_submenu != true %}
                   <input type="checkbox" id="drop-{{counter}}"/>
-                  <label for="drop-{{counter}}" class="toggle">{{p.title}} <span class="arrow">&#9660;</span></label>
+                  
+                  <label for="drop-{{counter}}" class="toggle">
+                    {% if p.menu_title %}
+                      {{ p.menu_title }}
+                    {% else %}      
+                      {{ p.title }} 
+                    {% endif %}                  
+                    <span class="arrow">&#9660;</span>
+                  </label>
+                  {% endif %}
+
                   <a class="page-link" href="{{p.url | prepend: site.baseurl}}">
                     {% if p.menu_title %}
-                    {{ p.menu_title}}
-                  {% else %}      
-                    {{ p.title }} 
-                  {% endif %}
-                  <span class="arrow">&#96{% if indent > 2 %}54{% else %}60{% endif %};</span></a>
+                      {{ p.menu_title }}
+                    {% else %}      
+                      {{ p.title }} 
+                    {% endif %}
+
+                    {% if p.hide_submenu != true %}
+                      <span class="arrow">&#96{% if indent > 2 %}54{% else %}60{% endif %};</span>
+                    {% endif %}
+                  </a>
+
               {% assign counter = counter | plus: 1 %}
                   <ul class="sub-menu">
                 {% if p.title == 'Documentation' %}
                     <li><a class="page-link" href="/documents/">All Documentation</a></li>
                     <li><a class="page-link" href="{{ site.data.oci.download_uri }}/OpenDDS/OpenDDS-latest.pdf">Developer's Guide [PDF]</a></li>
                 {% else %}
-                    <li class="mobile"><a class="page-link" href="{{p.url | prepend: site.baseurl}}">
-                      {% if p.menu_title %}
-                        {{ p.menu_title}}
+                    <li class="mobile">
+                      <a class="page-link" href="{{p.url | prepend: site.baseurl}}">                      
+                        {% if p.menu_title %}
+                        {{ p.menu_title }}
                       {% else %}      
                         {{ p.title }} 
                       {% endif %}
-                    </a></li>
+                      </a>
+                    </li>
                 {% endif %}
             {% else %}
                 <li><a class="page-link" href="{{p.url | prepend: site.baseurl}}">
                   {% if p.menu_title %}
-                    {{ p.menu_title}}
+                    {{ p.menu_title }}
                   {% else %}      
                     {{ p.title }} 
                   {% endif %}
