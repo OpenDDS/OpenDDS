@@ -11,7 +11,7 @@
 #include <ace/CDR_Base.h>
 
 #include <dds/DCPS/XTypes/DynamicType.h>
-#include <dds/DCPS/XTypes/TypeObject.h>
+
 #include <algorithm>
 #include <cstring>
 
@@ -59,9 +59,8 @@ inline bool operator==(const TypeDescriptor& lhs, const TypeDescriptor& rhs) {
     lhs.base_type == rhs.base_type &&
     lhs.discriminator_type == rhs.discriminator_type &&
     lhs.bound == rhs.bound &&
-    // TODO: Clayton add dynamic type equivalence operator
-    // lhs.element_type == rhs.element_type &&
-    // lhs.key_element_type == rhs.key_element_type &&
+    lhs.element_type.in() == rhs.element_type.in() &&
+    lhs.key_element_type.in() == rhs.key_element_type.in() &&
     lhs.extensibility_kind == rhs.extensibility_kind &&
     lhs.is_nested == rhs.is_nested;
 }

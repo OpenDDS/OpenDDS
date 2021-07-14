@@ -59,8 +59,7 @@ inline bool operator==(const MemberDescriptor& lhs, const MemberDescriptor& rhs)
   return
     lhs.name == rhs.name &&
     lhs.id == rhs.id &&
-    //TODO: Clayton Implement == for dynamic type then uncomment
-    //lhs.type == rhs.type &&
+    lhs.type == rhs.type &&
     lhs.default_value == rhs.default_value &&
     lhs.index == rhs.index &&
     lhs.label == rhs.label &&

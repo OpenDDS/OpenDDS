@@ -11,6 +11,8 @@
 #include <ace/CDR_Base.h>
 #include <dds/DCPS/RcHandle_T.h>
 #include <dds/DCPS/XTypes/DynamicTypeMember.h>
+#include <dds/DCPS/XTypes/MemberDescriptor.h>
+#include <dds/DCPS/XTypes/TypeDescriptor.h>
 #include <algorithm>
 #include <cstring>
 
@@ -36,7 +38,13 @@ public:
   DynamicTypeMembersByName member_by_name;
   DynamicTypeMembersById member_by_id;
   DynamicTypeMembersByIndex member_by_index;
+  TypeDescriptor* descriptor_;
 };
+
+DDS::ReturnCode_t complete_struct_member_to_member_descriptor(MemberDescriptor& md,
+    const CompleteStructMember& cm);
+DDS::ReturnCode_t complete_struct_member_to_dynamic_type_member(DynamicTypeMember_rch dtm, const CompleteStructMember& cm);
+DDS::ReturnCode_t complete_to_dynamic(DynamicType& dt, const CompleteTypeObject& cto);
 
 typedef OpenDDS::DCPS::RcHandle<DynamicType> DynamicType_rch;
 

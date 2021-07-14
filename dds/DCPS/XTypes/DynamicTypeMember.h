@@ -12,6 +12,7 @@
 #include <dds/DCPS/RcObject.h>
 #include <dds/DCPS/RcHandle_T.h>
 #include <dds/DCPS/XTypes/TypeObject.h>
+#include <dds/DCPS/XTypes/MemberDescriptor.h>
 #include <algorithm>
 #include <cstring>
 
@@ -25,16 +26,14 @@ class DynamicTypeMember : public OpenDDS::DCPS::RcObject {
 public:
   DynamicTypeMember();
   ~DynamicTypeMember();
- DDS::ReturnCode_t get_descriptor(MemberDescriptor& descriptor);
-//Spec: Two members shall be considered equal if and only if they belong to the same type and all of
-//their respective properties, as identified in Table 52 above, are equal.
-//TODO CLAYTON: The only property this type has is annotation which our plan says to ignore?
- bool equals(const DynamicTypeMember& other);
- MemberId get_id();
- OPENDDS_STRING get_name();
-
-private:
-   MemberDescriptor* descriptor_;
+   DDS::ReturnCode_t get_descriptor(MemberDescriptor& descriptor);
+  //Spec: Two members shall be considered equal if and only if they belong to the same type and all of
+  //their respective properties, as identified in Table 52 above, are equal.
+  //TODO CLAYTON: The only property this type has is annotation which our plan says to ignore?
+  bool equals(const DynamicTypeMember& other);
+  MemberId get_id();
+  OPENDDS_STRING get_name();
+  MemberDescriptor* descriptor_;
 };
 
 typedef OpenDDS::DCPS::RcHandle<DynamicTypeMember> DynamicTypeMember_rch;
