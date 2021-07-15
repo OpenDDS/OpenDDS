@@ -2394,8 +2394,8 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVecVecVec& meta_submess
         }
 
         const AddrSet& addrs = entry.value().addrs_;
-        addrset_min_size = std::min(addrset_min_size, addrs.size());
-        addrset_max_size = std::max(addrset_max_size, addrs.size());
+        addrset_min_size = std::min(addrset_min_size, static_cast<size_t>(addrs.size()));
+        addrset_max_size = std::max(addrset_max_size, static_cast<size_t>(addrs.size()));
         if (addrs.empty()) {
           continue;
 #ifdef OPENDDS_SECURITY
