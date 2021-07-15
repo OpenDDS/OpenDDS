@@ -31,6 +31,7 @@
 #include <stdexcept>
 #include <iomanip>
 #include <cctype>
+#include <climits>
 
 /// How to handle IDL underscore escaping. Depends on where the name is
 /// going and where the name came from.
@@ -620,6 +621,25 @@ std::ostream& hex_value(std::ostream& o, unsigned value, size_t bytes)
 }
 
 template <typename CharType>
+unsigned char_value(CharType value)
+{
+  return value;
+}
+
+#if CHAR_MIN < 0
+/*
+ * If char is signed, then it needs to be reinterpreted as unsigned char or
+ * else static casting '\xff' to a 32-bit unsigned int would result in
+ * 0xffffffff because those are both the signed 2's complement forms of -1.
+ */
+template <>
+inline unsigned char_value<char>(char value)
+{
+  return reinterpret_cast<unsigned char&>(value);
+}
+#endif
+
+template <typename CharType>
 std::ostream& char_helper(std::ostream& o, CharType value)
 {
   switch (value) {
@@ -627,7 +647,7 @@ std::ostream& char_helper(std::ostream& o, CharType value)
   case '\"':
   case '\\':
   case '\?':
-    return o << '\\' << value;
+    return o << '\\' << static_cast<char>(value);
   case '\n':
     return o << "\\n";
   case '\t':
@@ -644,10 +664,9 @@ std::ostream& char_helper(std::ostream& o, CharType value)
     return o << "\\a";
   }
   if (isprint(value)) {
-    return o << value;
-  } else {
-    return hex_value(o << "\\x", value, sizeof(CharType) == 1 ? 1 : 2);
+    return o << static_cast<char>(value);
   }
+  return hex_value(o << "\\x", char_value<CharType>(value), sizeof(CharType) == 1 ? 1 : 2);
 }
 
 inline
