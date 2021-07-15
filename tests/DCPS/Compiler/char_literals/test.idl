@@ -53,6 +53,9 @@ default:
   long default_member;
 };
 
+const string str_normal = "a\n \t \v \b \r \f \a \\ \? \' \"";
+const string str_values = "\377\x1\xfe\0";
+
 const wchar wc_a = L'a';
 /* TODO(iguessthislldo): See https://github.com/DOCGroup/ACE_TAO/issues/1284
 const wchar wc_newline = L'\n';
@@ -118,7 +121,13 @@ default:
 }
 */
 
-const string str_normal = "a \n \t \v \b \r \f \a \\ \? \' \"";
-const string str_values = "\377\x1\xfe\0";
-const wstring wstr_normal = L"a \n \t \v \b \r \f \a \\ \? \' \" \u203C";
+/* TODO(iguessthislldo): config-linux.h doesn't seem to have ACE_HAS_WCHAR
+ * defined, which makes WChar typedef to ACE_UINT16, which doesn't seem to
+ * always work with wide string contstants. This is weird though because it
+ * works in my local build, but not on some of the GHA builds. Will have to
+ * investigate in ACE/TAO along with all the other problems with wchar.
+ */
+/*
+const wstring wstr_normal = L"a\n \t \v \b \r \f \a \\ \? \' \" \u203C";
 const wstring wstr_values = L"\377\x1\xfe\0";
+*/

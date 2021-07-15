@@ -50,15 +50,17 @@ TEST(CharLiterals, wchar_literal_values)
 
 TEST(CharLiterals, str_literal_values)
 {
-  EXPECT_EQ(str_normal, std::string("a \n \t \v \b \r \f \a \\ \? \' \""));
+  EXPECT_EQ(str_normal, std::string("a\n \t \v \b \r \f \a \\ \? \' \""));
   EXPECT_EQ(str_values, std::string("\377\x1\xfe\0"));
 }
 
+/* TODO(iguessthislldo): See IDL
 TEST(CharLiterals, wstr_literal_values)
 {
-  EXPECT_EQ(wstr_normal, std::wstring(L"a \n \t \v \b \r \f \a \\ \? \' \" \x203c"));
+  EXPECT_EQ(wstr_normal, std::wstring(L"a\n \t \v \b \r \f \a \\ \? \' \" \x203c"));
   EXPECT_EQ(wstr_values, std::wstring(L"\377\x1\xfe\0"));
 }
+*/
 
 int main(int argc, char* argv[])
 {
