@@ -4271,9 +4271,9 @@ bool Sedp::TypeLookupReplyReader::process_type_lookup_reply(
 
     if (success) {
       MatchingDataIter it;
-      for (it = matching_data_buffer_.begin(); it != matching_data_buffer_.end(); ++it) {
-        const SequenceNumber& seqnum_minimal = it->second.rpc_seqnum_minimal;
-        const SequenceNumber& seqnum_complete = it->second.rpc_seqnum_complete;
+      for (it = sedp_.matching_data_buffer_.begin(); it != sedp_.matching_data_buffer_.end(); ++it) {
+        const DCPS::SequenceNumber& seqnum_minimal = it->second.rpc_seqnum_minimal;
+        const DCPS::SequenceNumber& seqnum_complete = it->second.rpc_seqnum_complete;
         if (seqnum_minimal == key_seq_num || seqnum_complete == key_seq_num) {
           if (seqnum_minimal == key_seq_num) {
             it->second.got_minimal = true;
@@ -4293,7 +4293,7 @@ bool Sedp::TypeLookupReplyReader::process_type_lookup_reply(
         }
       }
 
-      if (it == matching_data_buffer_.end()) {
+      if (it == sedp_.matching_data_buffer_.end()) {
         if (DCPS::DCPS_debug_level) {
           ACE_ERROR((LM_ERROR, "(%P|%t) Sedp::TypeLookupReplyReader::process_type_lookup_reply - "
                      " RPC sequence number %q: No data found in matching data buffer\n",
@@ -4656,7 +4656,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
         wdata.type_info_.complete.typeid_with_size.type_id.kind() != XTypes::TK_NONE) {
       const GUID_t& remote_guid = wdata.writer_data_.writerProxy.remoteWriterGuid;
       DDS::BuiltinTopicKey_t key = DCPS::repo_id_to_bit_key(remote_guid);
-      sedp_.type_lookup_service_.cache_type_info(key, wdata.type_info_);
+      sedp_.type_lookup_service_->cache_type_info(key, wdata.type_info_);
     }
 
     sedp_.data_received(id, wdata);
@@ -4699,7 +4699,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
         wdata_secure.type_info.complete.typeid_with_size.type_id.kind() != XTypes::TK_NONE) {
       const GUID_t& remote_guid = wdata_secure.data.writerProxy.remoteWriterGuid;
       DDS::BuiltinTopicKey_t key = DCPS::repo_id_to_bit_key(remote_guid);
-      sedp_.type_lookup_service_.cache_type_info(key, wdata_secure.type_info);
+      sedp_.type_lookup_service_->cache_type_info(key, wdata_secure.type_info);
     }
 
     sedp_.data_received(id, wdata_secure);
@@ -4744,7 +4744,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
         rdata.type_info_.complete.typeid_with_size.type_id.kind() != XTypes::TK_NONE) {
       const GUID_t& remote_guid = rdata.reader_data_.readerProxy.remoteReaderGuid;
       DDS::BuiltinTopicKey_t key = DCPS::repo_id_to_bit_key(remote_guid);
-      sedp_.type_lookup_service_.cache_type_info(key, rdata.type_info_);
+      sedp_.type_lookup_service_->cache_type_info(key, rdata.type_info_);
     }
 
     sedp_.data_received(id, rdata);
@@ -4790,7 +4790,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
         rdata_secure.type_info.complete.typeid_with_size.type_id.kind() != XTypes::TK_NONE) {
       const GUID_t& remote_guid = rdata_secure.data.readerProxy.remoteReaderGuid;
       DDS::BuiltinTopicKey_t key = DCPS::repo_id_to_bit_key(remote_guid);
-      sedp_.type_lookup_service_.cache_type_info(key, rdata_secure.type_info);
+      sedp_.type_lookup_service_->cache_type_info(key, rdata_secure.type_info);
     }
 
     sedp_.data_received(id, rdata_secure);
@@ -5168,7 +5168,7 @@ Sedp::add_publication_i(const DCPS::RepoId& rid,
 DDS::ReturnCode_t
 Sedp::write_publication_data(
   const RepoId& rid,
-  const LocalPublication& lp,
+  LocalPublication& lp,
   const RepoId& reader)
 {
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
@@ -5192,7 +5192,7 @@ Sedp::write_publication_data(
 DDS::ReturnCode_t
 Sedp::write_publication_data_unsecure(
   const RepoId& rid,
-  const LocalPublication& lp,
+  LocalPublication& lp,
   const RepoId& reader)
 {
   if (!(spdp_.available_builtin_endpoints() & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER)) {
@@ -5242,7 +5242,7 @@ Sedp::write_publication_data_unsecure(
 DDS::ReturnCode_t
 Sedp::write_publication_data_secure(
   const RepoId& rid,
-  const LocalPublication& lp,
+  LocalPublication& lp,
   const RepoId& reader)
 {
   if (!(spdp_.available_builtin_endpoints() & DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER)) {

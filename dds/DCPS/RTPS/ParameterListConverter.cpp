@@ -816,7 +816,7 @@ void add_DataRepresentationQos(ParameterList& param_list, const DDS::DataReprese
 bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
                    ParameterList& param_list,
                    bool use_xtypes,
-                   const XTypes::TypeInformation& type_info
+                   const XTypes::TypeInformation& type_info,
                    bool map)
 {
   // Ignore builtin topic key

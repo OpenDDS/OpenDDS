@@ -2245,6 +2245,11 @@ namespace XTypes {
     TypeIdentifierWithSize()
       : typeobject_serialized_size(0)
     {}
+
+    TypeIdentifierWithSize(const TypeIdentifier& ti, ACE_CDR::ULong to_size)
+      : type_id(ti)
+      , typeobject_serialized_size(to_size)
+    {}
   };
   typedef Sequence<TypeIdentifierWithSize> TypeIdentifierWithSizeSeq;
 

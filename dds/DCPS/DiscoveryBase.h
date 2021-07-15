@@ -292,7 +292,7 @@ namespace OpenDDS {
         DDS::InstanceHandle_t bit_ih_;
         MonotonicTime_t participant_discovered_at_;
         ACE_CDR::ULong transport_context_;
-        XTypes::Information type_info_;
+        XTypes::TypeInformation type_info_;
 
 #ifdef OPENDDS_SECURITY
         DDS::Security::EndpointSecurityAttributes security_attribs_;
@@ -1342,7 +1342,7 @@ namespace OpenDDS {
             if (DCPS_debug_level >= 4) {
               ACE_DEBUG((LM_DEBUG, "(%P|%t) EndpointManager::remove_expired_endpoints: "
                 "clean up pending pair w: %C r: %C\n",
-                LogGuid(iter->second.writer).c_str(), LogGuid(iter->second.reader).c_str()));
+                LogGuid(iter->first.writer_).c_str(), LogGuid(iter->first.reader_).c_str()));
             }
             matching_data_buffer_.erase(iter++);
           } else {
@@ -1802,7 +1802,7 @@ namespace OpenDDS {
           md.rpc_seqnum_complete = ++type_lookup_service_sequence_number_;
           md.got_complete = false;
         } else {
-          md.rpc_seq_num_complete = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+          md.rpc_seqnum_complete = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
           md.got_complete = true;
         }
 
@@ -1816,7 +1816,7 @@ namespace OpenDDS {
                        "remote: %C seq: %q\n",
                        LogGuid(remote_id).c_str(), md.rpc_seqnum_minimal.getValue()));
           }
-          get_remote_type_objects(type_info->minimal, md, mp, remote_id, is_discovery_protected);
+          get_remote_type_objects(type_info->minimal, md, true, remote_id, is_discovery_protected);
         }
 
         // Send another sequence of requests for complete remote TypeObjects
@@ -1827,19 +1827,20 @@ namespace OpenDDS {
                        "remote: %C seq: %q\n",
                        LogGuid(remote_id).c_str(), md.rpc_seqnum_complete.getValue()));
           }
-          get_remote_type_objects(type_info->complete, md, mp, remote_id, is_discovery_protected);
+          get_remote_type_objects(type_info->complete, md, false, remote_id, is_discovery_protected);
         }
       }
 
       void get_remote_type_objects(const XTypes::TypeIdentifierWithDependencies& tid_with_deps,
-                                   MatchingData& md, const MatchingPair& mp,
-                                   const RepoId& remote_id, bool is_discovery_protected)
+                                   MatchingData& md, bool get_minimal, const RepoId& remote_id,
+                                   bool is_discovery_protected)
       {
         // Store an entry for the first request in the sequence.
         TypeIdOrigSeqNumber orig_req_data;
         std::memcpy(orig_req_data.participant, remote_id.guidPrefix, sizeof(GuidPrefix_t));
         orig_req_data.type_id = tid_with_deps.typeid_with_size.type_id;
-        orig_req_data.seq_number = md.rpc_sequence_number;
+        const SequenceNumber& orig_seqnum = get_minimal ? md.rpc_seqnum_minimal : md.rpc_seqnum_complete;
+        orig_req_data.seq_number = orig_seqnum;
         orig_req_data.secure = false;
 #ifdef OPENDDS_SECURITY
         if (is_security_enabled() && is_discovery_protected) {
@@ -1847,7 +1848,7 @@ namespace OpenDDS {
         }
 #endif
         orig_req_data.time_started = md.time_added_to_map;
-        orig_seq_numbers_.insert(std::make_pair(md.rpc_sequence_number, orig_req_data));
+        orig_seq_numbers_.insert(std::make_pair(orig_seqnum, orig_req_data));
 
         XTypes::TypeIdentifierSeq type_ids;
         if (tid_with_deps.dependent_typeid_count == -1 ||

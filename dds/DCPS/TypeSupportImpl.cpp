@@ -51,18 +51,18 @@ void TypeSupportImpl::to_type_info_i(XTypes::TypeIdentifierWithDependencies& ti_
                                      const XTypes::TypeIdentifier& ti,
                                      const XTypes::TypeMap& type_map) const
 {
-  const TypeMap::const_iterator pos = type_map.find(ti);
+  const XTypes::TypeMap::const_iterator pos = type_map.find(ti);
 
   if (pos == type_map.end()) {
     const char* ek = ti.kind() == XTypes::EK_MINIMAL ? "minimal" : "complete";
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: TypeSupportImpl::to_type_info_i, ")
                ACE_TEXT("%C TypeIdentifier of topic type not found in local type map.\n"), ek));
-    ti_with_deps.typeid_with_size.type_id = TypeIdentifier();
+    ti_with_deps.typeid_with_size.type_id = XTypes::TypeIdentifier();
     ti_with_deps.typeid_with_size.typeobject_serialized_size = 0;
   } else {
     ti_with_deps.typeid_with_size.type_id = ti;
-    const TypeObject& to = pos->second;
-    const size_t sz = serialized_size(get_typeobject_encoding(), to);
+    const XTypes::TypeObject& to = pos->second;
+    const size_t sz = serialized_size(XTypes::get_typeobject_encoding(), to);
     ti_with_deps.typeid_with_size.typeobject_serialized_size = static_cast<ACE_CDR::ULong>(sz);
   }
   ti_with_deps.dependent_typeid_count = -1;
@@ -95,7 +95,7 @@ void TypeSupportImpl::populate_dependencies_i(const RcHandle<XTypes::TypeLookupS
     XTypes::TypeMap::const_iterator iter = type_map.find(*it);
     if (iter != type_map.end()) {
       const size_t tobj_size = serialized_size(XTypes::get_typeobject_encoding(), iter->second);
-      XTypes::TypeIdentifierWithSize ti_with_size = {*it, static_cast<ACE_CDR::ULong>(tobj_size)};
+      XTypes::TypeIdentifierWithSize ti_with_size(*it, static_cast<ACE_CDR::ULong>(tobj_size));
       deps_with_size.append(ti_with_size);
     } else if (XTypes::has_type_object(*it)) {
       const char* kind = ek == XTypes::EK_MINIMAL ? "minimal" : "complete";
