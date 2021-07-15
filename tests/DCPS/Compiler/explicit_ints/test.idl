@@ -59,7 +59,7 @@ case 0:
   uint8 u8;
 case 1:
   int8 i8;
-/* TODO: Anynoumous Types in Union Branches
+/* TODO(iguessthislldo): Anynoumous Types in Union Branches
 case 2:
   uint8 u8arr[3];
 case 3:
@@ -85,7 +85,7 @@ case 0:
   uint8 u8;
 case 1:
   int8 i8;
-/* TODO: Anynoumous Types in Union Branches
+/* TODO(iguessthislldo): Anynoumous Types in Union Branches
 case 2:
   uint8 u8arr[3];
 case 3:
