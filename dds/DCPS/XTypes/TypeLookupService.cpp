@@ -133,6 +133,25 @@ void TypeLookupService::update_type_identifier_map(const TypeIdentifierPairSeq& 
   }
 }
 
+void TypeLookupService::cache_type_info(const BuiltinTopicKey_t& key,
+                                        const TypeInformation& type_info)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  if (type_info_map_.find(key) == type_info_map_.end()) {
+    type_info_map_.insert(std::make_pair(key, type_info));
+  }
+}
+
+const TypeInformation& TypeLookupService::get_type_info(const BuiltinTopicKey_t& key) const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, TypeInformation());
+  const TypeInformationMap::const_iterator it = type_info_map_.find(key);
+  if (it != type_info_map_.end()) {
+    return it->second;
+  }
+  return TypeInformation();
+}
+
 DCPS::String TypeLookupService::equivalence_hash_to_string(const EquivalenceHash& hash) const
 {
   std::ostringstream out;

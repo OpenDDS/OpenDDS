@@ -2878,6 +2878,36 @@ Service_Participant::bit_autopurge_disposed_samples_delay(const DDS::Duration_t&
   bit_autopurge_disposed_samples_delay_ = duration;
 }
 
+const XTypes::TypeInformation&
+Service_Participant::get_type_information(DDS::DomainParticipant_ptr participant,
+                                          const DDS::BuiltinTopicKey_t& key) const
+{
+  DomainParticipantImpl* participant_servant = dynamic_cast<DomainParticipantImpl*>(participant);
+  if (participant_servant) {
+    XTypes::TypeLookupService_rch tls = participant_servant->get_type_lookup_service();
+    if (tls) {
+      return tls->get_type_info(key);
+    }
+  }
+
+  return XTypes::TypeInformation();
+}
+
+const XTypes::TypeObject&
+Service_Participant::get_type_object(DDS::DomainParticipant_ptr participant,
+                                     const XTypes::TypeIdentifier& ti) const
+{
+  DomainParticipantImpl* participant_servant = dynamic_cast<DomainParticipantImpl*>(participant);
+  if (participant_servant) {
+    XTypes::TypeLookupService_rch tls = participant_servant->get_type_lookup_service();
+    if (tls) {
+      return tls->get_type_objects(ti);
+    }
+  }
+
+  return XTypes::TypeObject();
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

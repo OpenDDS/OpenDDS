@@ -55,6 +55,10 @@ public:
   bool type_object_in_cache(const TypeIdentifier& ti) const;
   bool extensibility(TypeFlag extensibility_mask, const TypeIdentifier& ti) const;
 
+  // For caching and retrieving TypeInformation of remote endpoints
+  void cache_type_info(const BuiltinTopicKey_t& key, const TypeInformation& type_info);
+  void get_type_info(const BuiltinTopicKey_t& key, TypeInformation& type_info) const;
+
 private:
   const TypeObject& get_type_objects_i(const TypeIdentifier& type_id) const;
   void get_type_dependencies_i(const TypeIdentifierSeq& type_ids,
@@ -88,6 +92,10 @@ private:
   bool complete_to_minimal_enumerated(const CompleteEnumeratedType& ct, MinimalEnumeratedType& mt) const;
   bool complete_to_minimal_bitmask(const CompleteBitmaskType& ct, MinimalBitmaskType& mt) const;
   bool complete_to_minimal_bitset(const CompleteBitsetType& ct, MinimalBitsetType& mt) const;
+
+  // Map from BuiltinTopicKey_t of remote endpoint to its TypeInformation.
+  typedef OPENDDS_MAP(DDS::BuiltinTopicKey_t, TypeInformation) TypeInformationMap;
+  TypeInformationMap type_info_map_;
 };
 
 typedef DCPS::RcHandle<TypeLookupService> TypeLookupService_rch;

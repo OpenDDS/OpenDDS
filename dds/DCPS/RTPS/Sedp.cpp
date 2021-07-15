@@ -4650,6 +4650,15 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
       wdata.ice_agent_info_ = pos->second;
     }
 #endif
+
+    // Cache non-empty TypeInformation
+    if (wdata.type_info_.minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE ||
+        wdata.type_info_.complete.typeid_with_size.type_id.kind() != XTypes::TK_NONE) {
+      const GUID_t& remote_guid = wdata.writer_data_.writerProxy.remoteWriterGuid;
+      DDS::BuiltinTopicKey_t key = DCPS::repo_id_to_bit_key(remote_guid);
+      sedp_.type_lookup_service_.cache_type_info(key, wdata.type_info_);
+    }
+
     sedp_.data_received(id, wdata);
 
 #ifdef OPENDDS_SECURITY
@@ -4685,6 +4694,14 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
       wdata_secure.have_ice_agent_info = true;
       wdata_secure.ice_agent_info = pos->second;
     }
+
+    if (wdata_secure.type_info.minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE ||
+        wdata_secure.type_info.complete.typeid_with_size.type_id.kind() != XTypes::TK_NONE) {
+      const GUID_t& remote_guid = wdata_secure.data.writerProxy.remoteWriterGuid;
+      DDS::BuiltinTopicKey_t key = DCPS::repo_id_to_bit_key(remote_guid);
+      sedp_.type_lookup_service_.cache_type_info(key, wdata_secure.type_info);
+    }
+
     sedp_.data_received(id, wdata_secure);
 #endif
   } else if (entity_id == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER) {
@@ -4722,6 +4739,14 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
     if (rdata.reader_data_.readerProxy.expectsInlineQos) {
       set_inline_qos(rdata.reader_data_.readerProxy.allLocators);
     }
+
+    if (rdata.type_info_.minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE ||
+        rdata.type_info_.complete.typeid_with_size.type_id.kind() != XTypes::TK_NONE) {
+      const GUID_t& remote_guid = rdata.reader_data_.readerProxy.remoteReaderGuid;
+      DDS::BuiltinTopicKey_t key = DCPS::repo_id_to_bit_key(remote_guid);
+      sedp_.type_lookup_service_.cache_type_info(key, rdata.type_info_);
+    }
+
     sedp_.data_received(id, rdata);
 
 #ifdef OPENDDS_SECURITY
@@ -4760,6 +4785,14 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
     if ((rdata_secure.data).readerProxy.expectsInlineQos) {
       set_inline_qos((rdata_secure.data).readerProxy.allLocators);
     }
+
+    if (rdata_secure.type_info.minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE ||
+        rdata_secure.type_info.complete.typeid_with_size.type_id.kind() != XTypes::TK_NONE) {
+      const GUID_t& remote_guid = rdata_secure.data.readerProxy.remoteReaderGuid;
+      DDS::BuiltinTopicKey_t key = DCPS::repo_id_to_bit_key(remote_guid);
+      sedp_.type_lookup_service_.cache_type_info(key, rdata_secure.type_info);
+    }
+
     sedp_.data_received(id, rdata_secure);
 
   } else if (entity_id == ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER) {

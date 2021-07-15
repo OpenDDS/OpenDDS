@@ -434,6 +434,18 @@ public:
   DDS::Duration_t bit_autopurge_disposed_samples_delay() const;
   void bit_autopurge_disposed_samples_delay(const DDS::Duration_t& duration);
 
+  /**
+   * Get TypeInformation of a remote entity given the corresponding BuiltinTopicKey_t.
+   */
+  const XTypes::TypeInformation& get_type_information(DDS::DomainParticipant_ptr participant,
+                                                      const DDS::BuiltinTopicKey_t& key) const;
+
+  /**
+   * Get TypeObject of a remote entity given the corresponding TypeIdentifier.
+   */
+  const XTypes::TypeObject& get_type_object(DDS::DomainParticipant_ptr participant,
+                                            const XTypes::TypeIdentifier& ti) const;
+
 private:
 
   /// Initialize default qos.
