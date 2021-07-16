@@ -15,6 +15,8 @@
 #include "RtpsUdpReceiveStrategy.h"
 #include "RtpsUdpReceiveStrategy_rch.h"
 #include "RtpsCustomizedElement.h"
+#include "LocatorCacheKey.h"
+#include "BundlingCacheKey.h"
 
 #include "ace/Basic_Types.h"
 #include "ace/SOCK_Dgram.h"
@@ -38,12 +40,17 @@
 #include "dds/DCPS/JobQueue.h"
 #include "dds/DCPS/SequenceNumber.h"
 #include "dds/DCPS/AddressCache.h"
+#include "dds/DCPS/Hash.h"
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/DCPS/security/framework/SecurityConfig.h"
 #include "dds/DCPS/security/framework/SecurityConfig_rch.h"
 #include "dds/DCPS/RTPS/ICE/Ice.h"
+#endif
+
+#if defined ACE_HAS_CPP11
+#include <functional>
 #endif
 
 class DDS_TEST;
@@ -65,64 +72,14 @@ typedef RcHandle<RtpsUdpInst> RtpsUdpInst_rch;
 typedef RcHandle<RtpsUdpTransport> RtpsUdpTransport_rch;
 typedef RcHandle<TransportClient> TransportClient_rch;
 
-#pragma pack(push, 1)
-
-struct LocatorCacheKey {
-  LocatorCacheKey(const RepoId& remote, const RepoId& local, bool prefer_unicast)
-    : remote_(remote)
-    , local_(local)
-    , prefer_unicast_(prefer_unicast)
-  {
-  }
-
-  bool operator<(const LocatorCacheKey& rhs) const
-  {
-    return std::memcmp(this, &rhs, sizeof (LocatorCacheKey)) < 0;
-  }
-
-  const RepoId remote_;
-  const RepoId local_;
-  const bool prefer_unicast_;
-};
-typedef AddressCache<LocatorCacheKey> LocatorCache;
-
-struct BundlingCacheKey {
-  BundlingCacheKey(const RepoId& dst_guid, const RepoId& from_guid, const RepoIdSet& to_guids)
-    : dst_guid_(dst_guid)
-    , from_guid_(from_guid)
-    , to_guids_(to_guids)
-  {
-  }
-
-  bool operator<(const BundlingCacheKey& rhs) const
-  {
-    int r = std::memcmp(&dst_guid_, &rhs.dst_guid_, 2 * sizeof (RepoId));
-    if (r < 0) {
-      return true;
-    } else if (r == 0) {
-      return to_guids_ < rhs.to_guids_;
-    }
-    return false;
-  }
-
-  bool contains(const RepoId& id) const
-  {
-    return to_guids_.count(id) != 0;
-  }
-
-  const RepoId dst_guid_;
-  const RepoId from_guid_;
-  const RepoIdSet to_guids_;
-};
-typedef AddressCache<BundlingCacheKey> BundlingCache;
-
-#pragma pack(pop)
-
 struct SeqReaders {
   SequenceNumber seq;
   RepoIdSet readers;
   SeqReaders(const RepoId& id) : seq(0) { readers.insert(id); }
 };
+
+typedef AddressCache<LocatorCacheKey> LocatorCache;
+typedef AddressCache<BundlingCacheKey> BundlingCache;
 
 typedef OPENDDS_MAP_CMP(RepoId, SeqReaders, GUID_tKeyLessThan) WriterToSeqReadersMap;
 

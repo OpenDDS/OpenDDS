@@ -530,10 +530,8 @@ RtpsUdpDataLink::leave_multicast_group(const NetworkInterface& nic)
 void
 RtpsUdpDataLink::remove_locator_and_bundling_cache(const RepoId& remote_id)
 {
-  static const RepoId GUID_MAX = { { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }, { { 0xFF, 0xFF, 0xFF }, 0xFF } };
-  locator_cache_.remove(LocatorCacheKey(remote_id, GUID_UNKNOWN, false), LocatorCacheKey(remote_id, GUID_MAX, true));
-  bundling_cache_.remove(BundlingCacheKey(remote_id, GUID_UNKNOWN, RepoIdSet()), BundlingCacheKey(remote_id, GUID_MAX, RepoIdSet()));
-  bundling_cache_.remove_contains(remote_id);
+  locator_cache_.remove_id(remote_id);
+  bundling_cache_.remove_id(remote_id);
 }
 
 void

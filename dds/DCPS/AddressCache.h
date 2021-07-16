@@ -22,6 +22,10 @@
 
 #include "ace/INET_Addr.h"
 
+#if defined ACE_HAS_CPP11 && !defined OPENDDS_SAFETY_PROFILE
+#include <unordered_map>
+#endif
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -52,7 +56,15 @@ template <typename Key>
 class AddressCache {
 public:
 
+#if defined ACE_HAS_CPP11 && !defined OPENDDS_SAFETY_PROFILE
+  typedef std::unordered_map<Key, RcHandle<AddressCacheEntry>> MapType;
+  typedef std::vector<Key> KeyVec;
+  typedef std::unordered_map<RepoId, KeyVec> IdMapType;
+#else
   typedef OPENDDS_MAP_T(Key, RcHandle<AddressCacheEntry>) MapType;
+  typedef std::vector<Key> KeyVec;
+  typedef OPENDDS_MAP_T(RepoId, KeyVec) IdMapType;
+#endif
 
   AddressCache() {}
   virtual ~AddressCache() {}
@@ -67,6 +79,11 @@ public:
       if (pos == cache.map_.end()) {
         rch_ = make_rch<AddressCacheEntry>();
         cache.map_[key] = rch_;
+        RepoIdSet set;
+        key.contains(set);
+        for (RepoIdSet::const_iterator it = set.begin(); it != set.end(); ++it) {
+          cache.id_map_[*it].push_back(key);
+        }
         is_new_ = true;
       } else {
         rch_ = pos->second;
@@ -124,6 +141,11 @@ public:
       rch->expires_ = expires;
     } else {
       rch = make_rch<AddressCacheEntry>(addrs, expires);
+      RepoIdSet set;
+      key.contains(set);
+      for (RepoIdSet::const_iterator it = set.begin(); it != set.end(); ++it) {
+        id_map_[*it].push_back(key);
+      }
     }
   }
 
@@ -133,6 +155,7 @@ public:
     return map_.erase(key) != 0;
   }
 
+  /*
   void remove(const Key& start_key, const Key& end_key)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -144,17 +167,17 @@ public:
       }
     }
   }
+  */
 
-  template <typename T>
-  void remove_contains(const T& val)
+  void remove_id(const RepoId& val)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    for (typename MapType::iterator it = map_.begin(); it != map_.end(); /* inc in loop */) {
-      if (it->first.contains(val)) {
-        map_.erase(it++);
-      } else {
-        ++it;
+    typename IdMapType::iterator pos = id_map_.find(val);
+    if (pos != id_map_.end()) {
+      for (typename KeyVec::iterator it = pos->second.begin(); it != pos->second.end(); ++it) {
+        map_.erase(*it);
       }
+      id_map_.erase(pos);
     }
   }
 
@@ -162,6 +185,7 @@ private:
 
   mutable ACE_Thread_Mutex mutex_;
   MapType map_;
+  IdMapType id_map_;
 };
 
 } // namespace DCPS
