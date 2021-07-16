@@ -18,11 +18,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace Security {
 
-static const std::string PLUGIN_NAME("BuiltIn");
-
 int
 BuiltInPluginLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
 {
+  const OPENDDS_STRING PLUGIN_NAME("BuiltIn");
   SecurityPluginInst_rch plugin = TheSecurityRegistry->get_plugin_inst(
     PLUGIN_NAME, false /* don't attempt to load the plugin */);
   if (!plugin) {

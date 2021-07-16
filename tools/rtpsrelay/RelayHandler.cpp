@@ -2,6 +2,7 @@
 
 #include "lib/RelayTypeSupportImpl.h"
 
+#include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Message_Block_Ptr.h>
 #include <dds/DCPS/RTPS/BaseMessageTypes.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
@@ -72,7 +73,8 @@ RelayHandler::RelayHandler(const Config& config,
 int RelayHandler::open(const ACE_INET_Addr& address)
 {
   if (socket_.open(address) != 0) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RelayHandler::open %C failed to open socket on '%C'\n"), name_.c_str(), addr_to_string(address).c_str()));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RelayHandler::open %C failed to open socket on '%C'\n"),
+               name_.c_str(), OpenDDS::DCPS::LogAddr(address).c_str()));
     return -1;
   }
   if (socket_.enable(ACE_NONBLOCK) != 0) {
@@ -140,7 +142,8 @@ int RelayHandler::handle_input(ACE_HANDLE handle)
     return 0;
   } else if (bytes == 0) {
     // Okay.  Empty datagram.
-    HANDLER_WARNING((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: RelayHandler::handle_input %C received an empty datagram from %C\n"), name_.c_str(), addr_to_string(remote).c_str()));
+    HANDLER_WARNING((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: RelayHandler::handle_input %C received an empty datagram from %C\n"),
+                     name_.c_str(), OpenDDS::DCPS::LogAddr(remote).c_str()));
     return 0;
   }
 
@@ -184,7 +187,8 @@ int RelayHandler::handle_output(ACE_HANDLE)
     const auto bytes = socket_.send(buffers, idx, out.address, 0);
 
     if (bytes < 0) {
-      HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RelayHandler::handle_output %C failed to send to %C: %m\n"), name_.c_str(), addr_to_string(out.address).c_str()));
+      HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RelayHandler::handle_output %C failed to send to %C: %m\n"),
+                     name_.c_str(), OpenDDS::DCPS::LogAddr(out.address).c_str()));
       const auto new_now = OpenDDS::DCPS::MonotonicTimePoint::now();
       stats_reporter_.dropped_message(total_bytes, new_now - now, new_now - out.timestamp, now);
     } else {
@@ -240,7 +244,9 @@ GuidAddrSet::record_activity(const ACE_INET_Addr& remote_address,
     const auto res = handler.select_addr_set(guid_addr_set_map_[src_guid])->insert(remote_address);
     if (res.second) {
       if (config_.log_activity()) {
-        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity %C %C is at %C total=%B/%B pending=%B/%B\n"), handler.name().c_str(), guid_to_string(src_guid).c_str(), addr_to_string(remote_address).c_str(), guid_addr_set_map_.size(), config_.static_limit(), pending_.size(), config_.max_pending()));
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity %C %C is at %C total=%B/%B pending=%B/%B\n"),
+                   handler.name().c_str(), guid_to_string(src_guid).c_str(), OpenDDS::DCPS::LogAddr(remote_address).c_str(),
+                   guid_addr_set_map_.size(), config_.static_limit(), pending_.size(), config_.max_pending()));
       }
       relay_stats_reporter_.new_address(now);
       const auto after = guid_addr_set_map_.size();
@@ -285,7 +291,10 @@ void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& n
 
   for (auto pos = expiration_guid_addr_map_.begin(), limit = expiration_guid_addr_map_.end(); pos != limit && pos->first < now;) {
     if (config_.log_activity()) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C %C expired at %d.%d now=%d.%d total=%B/%B pending=%B/%B\n"), guid_to_string(pos->second.guid).c_str(), addr_to_string(pos->second.address).c_str(), pos->first.value().sec(), pos->first.value().usec(), now.value().sec(), now.value().usec(), guid_addr_set_map_.size(), config_.static_limit(), pending_.size(), config_.max_pending()));
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C %C expired at %d.%d now=%d.%d total=%B/%B pending=%B/%B\n"),
+        guid_to_string(pos->second.guid).c_str(), OpenDDS::DCPS::LogAddr(pos->second.address).c_str(),
+        pos->first.value().sec(), pos->first.value().usec(), now.value().sec(), now.value().usec(),
+        guid_addr_set_map_.size(), config_.static_limit(), pending_.size(), config_.max_pending()));
     }
     relay_stats_reporter_.expired_address(now);
     AddrSetStats& addr_stats = guid_addr_set_map_[pos->second.guid];
@@ -411,7 +420,7 @@ VerticalHandler::VerticalHandler(const Config& config,
   , horizontal_handler_(nullptr)
   , application_participant_addr_(application_participant_addr)
   , horizontal_address_(horizontal_address)
-  , horizontal_address_str_(addr_to_string(horizontal_address))
+  , horizontal_address_str_(OpenDDS::DCPS::LogAddr(horizontal_address).c_str())
   , rtps_discovery_(rtps_discovery)
 #ifdef OPENDDS_SECURITY
   , crypto_(crypto)
@@ -448,7 +457,8 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
     GuidSet to;
 
     if (!parse_message(mp, msg, src_guid, to, true, now)) {
-      HANDLER_WARNING((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C failed to parse_message from %C\n"), name_.c_str(), addr_to_string(remote_address).c_str()));
+      HANDLER_WARNING((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C failed to parse_message from %C\n"),
+        name_.c_str(), OpenDDS::DCPS::LogAddr(remote_address).c_str()));
       return 0;
     }
 
@@ -474,20 +484,23 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
     OpenDDS::STUN::Message message;
     message.block = msg.get();
     if (!(serializer >> message)) {
-      HANDLER_WARNING((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C Could not deserialize STUN message from %C\n"), name_.c_str(), addr_to_string(remote_address).c_str()));
+      HANDLER_WARNING((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C Could not deserialize STUN message from %C\n"),
+        name_.c_str(), OpenDDS::DCPS::LogAddr(remote_address).c_str()));
       return 0;
     }
 
     std::vector<OpenDDS::STUN::AttributeType> unknown_attributes = message.unknown_comprehension_required_attributes();
 
     if (!unknown_attributes.empty()) {
-      HANDLER_WARNING((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C Unknown comprehension required attributes from %C\n"), name_.c_str(), addr_to_string(remote_address).c_str()));
+      HANDLER_WARNING((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C Unknown comprehension required attributes from %C\n"),
+        name_.c_str(), OpenDDS::DCPS::LogAddr(remote_address).c_str()));
       send(remote_address, make_unknown_attributes_error_response(message, unknown_attributes), now);
       return 1;
     }
 
     if (!message.has_fingerprint()) {
-      HANDLER_WARNING((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C No FINGERPRINT attribute from %C\n"), name_.c_str(), addr_to_string(remote_address).c_str()));
+      HANDLER_WARNING((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C No FINGERPRINT attribute from %C\n"),
+        name_.c_str(), OpenDDS::DCPS::LogAddr(remote_address).c_str()));
       send(remote_address, make_bad_request_error_response(message, "Bad Request: FINGERPRINT must be pesent"), now);
       return 1;
     }
@@ -521,14 +534,16 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
         } else if (message.class_ == OpenDDS::STUN::INDICATION) {
           // Do nothing.
         } else {
-          HANDLER_WARNING((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C Unknown STUN message class from %C\n"), name_.c_str(), addr_to_string(remote_address).c_str()));
+          HANDLER_WARNING((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C Unknown STUN message class from %C\n"),
+            name_.c_str(), OpenDDS::DCPS::LogAddr(remote_address).c_str()));
         }
         break;
       }
 
     default:
       // Unknown method.  Stop processing.
-      HANDLER_WARNING((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C Unknown STUN method from %C\n"), name_.c_str(), addr_to_string(remote_address).c_str()));
+      HANDLER_WARNING((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C Unknown STUN method from %C\n"),
+        name_.c_str(), OpenDDS::DCPS::LogAddr(remote_address).c_str()));
       bytes_sent = send(remote_address, make_bad_request_error_response(message, "Bad Request: Unknown method"), now);
       break;
     }
@@ -899,7 +914,8 @@ bool SpdpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
   if (src_guid == config_.application_participant_guid()) {
     if (remote != application_participant_addr_) {
       // Something is impersonating our application participant.
-      HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SpdpHandler::do_normal_processing application participant imposter detected at %C\n"), addr_to_string(remote).c_str()));
+      HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SpdpHandler::do_normal_processing application participant imposter detected at %C\n"),
+        OpenDDS::DCPS::LogAddr(remote).c_str()));
       return false;
     }
 
@@ -1008,7 +1024,8 @@ bool SedpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
   if (src_guid == config_.application_participant_guid()) {
     if (remote != application_participant_addr_) {
       // Something is impersonating our application participant.
-      HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SedpHandler::do_normal_processing application participant imposter detected at %C\n"), addr_to_string(remote).c_str()));
+      HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SedpHandler::do_normal_processing application participant imposter detected at %C\n"),
+        OpenDDS::DCPS::LogAddr(remote).c_str()));
       return false;
     }
 

@@ -1,7 +1,13 @@
 A basic liveliness test of DDS.
 
 run_test.pl
-  Run a separate publisher and subscriber process.
+  Runs a test of liveliness. This test has 2
+  participants, and checks liveliness for both local
+  and remote assocations. This is the inforepo version.
 
 run_test.pl take
   Run the same test but "take" instead of "read".
+
+run_test.pl rtps_disc
+  Runs the same test but using rtps_udp transport and
+  rtps discovery.

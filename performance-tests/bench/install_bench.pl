@@ -38,7 +38,8 @@ make_path( "${dest}/bin", "${dest}/lib" );
 my @bins = ('node_controller/node_controller',
             'test_controller/test_controller',
             'worker/worker',
-            'report_parser/report_parser');
+            'report_parser/report_parser',
+            'dashboard_summarizer/dashboard_summarizer');
 
 foreach (@bins) {
   my $fn = (split '/', $_)[-1];

@@ -21,6 +21,7 @@
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Logging.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/ConnectionRecords.h>
@@ -501,12 +502,9 @@ void Spdp::process_location_updates_i(DiscoveredParticipantIter& iter, bool forc
 
     OPENDDS_STRING addr = "";
     const DCPS::ParticipantLocation old_mask = location_data.location;
-
     if (pos->from_ != ACE_INET_Addr()) {
       location_data.location |= pos->mask_;
-      ACE_TCHAR buffer[DCPS::AddrToStringSize];
-      pos->from_.addr_to_string(buffer, DCPS::AddrToStringSize);
-      addr = ACE_TEXT_ALWAYS_CHAR(buffer);
+      addr = DCPS::LogAddr(pos->from_).str();
     } else {
       location_data.location &= ~(pos->mask_);
     }
@@ -660,12 +658,10 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     partBitData(pdata).key = repo_id_to_bit_key(guid);
 
     if (DCPS::DCPS_debug_level) {
-      ACE_TCHAR addr_buff[DCPS::AddrToStringSize] = {};
-      from.addr_to_string(addr_buff, DCPS::AddrToStringSize);
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Spdp::handle_participant_data - %C discovered %C lease %ds from %s\n"),
+        ACE_TEXT("(%P|%t) Spdp::handle_participant_data - %C discovered %C lease %ds from %C (%B)\n"),
         DCPS::LogGuid(guid_).c_str(), DCPS::LogGuid(guid).c_str(),
-        pdata.leaseDuration.seconds, addr_buff));
+        pdata.leaseDuration.seconds, DCPS::LogAddr(from).c_str(), participants_.size()));
     }
 
     if (tport_->directed_sender_) {
@@ -2796,20 +2792,15 @@ Spdp::SpdpTransport::choose_send_socket(const ACE_INET_Addr& addr) const
 void
 Spdp::SpdpTransport::send(const ACE_INET_Addr& addr)
 {
-  ssize_t res;
-
   const ACE_SOCK_Dgram& socket = choose_send_socket(addr);
-  res = socket.send(wbuff_.rd_ptr(), wbuff_.length(), addr);
-
+  const ssize_t res = socket.send(wbuff_.rd_ptr(), wbuff_.length(), addr);
   if (res < 0) {
     const int err = errno;
     if (err != ENETUNREACH || !network_is_unreachable_) {
-      ACE_TCHAR addr_buff[DCPS::AddrToStringSize] = {};
-      addr.addr_to_string(addr_buff, DCPS::AddrToStringSize);
       errno = err;
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: Spdp::SpdpTransport::send() - ")
-                 ACE_TEXT("destination %s failed send: %m\n"), addr_buff));
+                 ACE_TEXT("destination %C failed send: %m\n"), DCPS::LogAddr(addr).c_str()));
     }
     if (err == ENETUNREACH) {
       network_is_unreachable_ = true;
@@ -3139,12 +3130,10 @@ Spdp::SendStun::execute()
   if (res < 0) {
     const int err = errno;
     if (err != ENETUNREACH || !tport->network_is_unreachable_) {
-      ACE_TCHAR addr_buff[DCPS::AddrToStringSize] = {};
-      address_.addr_to_string(addr_buff, DCPS::AddrToStringSize);
       errno = err;
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: Spdp::SendStun::execute() - ")
-                 ACE_TEXT("destination %s failed send: %m\n"), addr_buff));
+                 ACE_TEXT("destination %C failed send: %m\n"), DCPS::LogAddr(address_).c_str()));
     }
     if (err == ENETUNREACH) {
       tport->network_is_unreachable_ = true;
@@ -3220,23 +3209,18 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
 
   if (unicast_socket_.open(local_addr, PF_INET) != 0) {
     if (fixed_port) {
-      ACE_TCHAR buf[DCPS::AddrToStringSize];
-      local_addr.addr_to_string(buf, DCPS::AddrToStringSize);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")
-                 ACE_TEXT("failed to open %s %p.\n"),
-                 buf, ACE_TEXT("ACE_SOCK_Dgram::open")));
-
+                 ACE_TEXT("failed to open %C %p.\n"),
+                 DCPS::LogAddr(local_addr).c_str(), ACE_TEXT("ACE_SOCK_Dgram::open")));
       throw std::runtime_error("failed to open unicast port for SPDP");
     }
     if (DCPS::DCPS_debug_level > 3) {
-      ACE_TCHAR buf[DCPS::AddrToStringSize];
-      local_addr.addr_to_string(buf, DCPS::AddrToStringSize);
       ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")
-                 ACE_TEXT("failed to open %s %p.  ")
+                 ACE_TEXT("failed to open %C %p.  ")
                  ACE_TEXT("Trying next participantId...\n"),
-                 buf, ACE_TEXT("ACE_SOCK_Dgram::open")));
+                 DCPS::LogAddr(local_addr).c_str(), ACE_TEXT("ACE_SOCK_Dgram::open")));
     }
     return false;
   }
@@ -3286,23 +3270,18 @@ Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port)
 
   if (unicast_ipv6_socket_.open(local_addr, PF_INET6) != 0) {
     if (fixed_port) {
-      ACE_TCHAR buf[DCPS::AddrToStringSize];
-      local_addr.addr_to_string(buf, DCPS::AddrToStringSize);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
-                 ACE_TEXT("failed to open %s %p.\n"),
-                 buf, ACE_TEXT("ACE_SOCK_Dgram::open")));
-
+                 ACE_TEXT("failed to open %C %p.\n"),
+                 DCPS::LogAddr(local_addr).c_str(), ACE_TEXT("ACE_SOCK_Dgram::open")));
       throw std::runtime_error("failed to open ipv6 unicast port for SPDP");
     }
     if (DCPS::DCPS_debug_level > 3) {
-      ACE_TCHAR buf[DCPS::AddrToStringSize];
-      local_addr.addr_to_string(buf, DCPS::AddrToStringSize);
       ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
-                 ACE_TEXT("failed to open %s %p.  ")
+                 ACE_TEXT("failed to open %C %p.  ")
                  ACE_TEXT("Trying next port...\n"),
-                 buf, ACE_TEXT("ACE_SOCK_Dgram::open")));
+                 DCPS::LogAddr(local_addr).c_str(), ACE_TEXT("ACE_SOCK_Dgram::open")));
     }
     return false;
   }
@@ -3349,12 +3328,10 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
 
   if (joined_interfaces_.count(nic.name()) == 0 && nic.has_ipv4()) {
     if (DCPS::DCPS_debug_level > 3) {
-      ACE_TCHAR buff[DCPS::AddrToStringSize];
-      multicast_address_.addr_to_string(buff, DCPS::AddrToStringSize);
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) Spdp::SpdpTransport::join_multicast_group ")
-                 ACE_TEXT("joining group %s on %C\n"),
-                 buff,
+                 ACE_TEXT("joining group %C on %C\n"),
+                 DCPS::LogAddr(multicast_address_).c_str(),
                  all_interfaces ? "all interfaces" : nic.name().c_str()));
     }
 
@@ -3369,12 +3346,10 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
 
       shorten_local_sender_delay_i();
     } else {
-      ACE_TCHAR buff[DCPS::AddrToStringSize];
-      multicast_address_.addr_to_string(buff, DCPS::AddrToStringSize);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::join_multicast_group() - ")
-                 ACE_TEXT("failed to join multicast group %s on %C: %p\n"),
-                 buff,
+                 ACE_TEXT("failed to join multicast group %C on %C: %p\n"),
+                 DCPS::LogAddr(multicast_address_).c_str(),
                  all_interfaces ? "all interfaces" : nic.name().c_str(),
                  ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
     }
@@ -3383,12 +3358,10 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
 #ifdef ACE_HAS_IPV6
   if (joined_ipv6_interfaces_.count(nic.name()) == 0 && nic.has_ipv6()) {
     if (DCPS::DCPS_debug_level > 3) {
-      ACE_TCHAR buff[DCPS::AddrToStringSize];
-      multicast_ipv6_address_.addr_to_string(buff, DCPS::AddrToStringSize);
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) Spdp::SpdpTransport::join_multicast_group ")
-                 ACE_TEXT("joining group %s on %C\n"),
-                 buff,
+                 ACE_TEXT("joining group %C on %C\n"),
+                 DCPS::LogAddr(multicast_ipv6_address_).c_str(),
                  all_interfaces ? "all interfaces" : nic.name().c_str()));
     }
 
@@ -3406,12 +3379,10 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
 
       shorten_local_sender_delay_i();
     } else {
-      ACE_TCHAR buff[DCPS::AddrToStringSize];
-      multicast_ipv6_address_.addr_to_string(buff, DCPS::AddrToStringSize);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::join_multicast_group() - ")
-                 ACE_TEXT("failed to join multicast group %s on %C: %p\n"),
-                 buff,
+                 ACE_TEXT("failed to join multicast group %C on %C: %p\n"),
+                 DCPS::LogAddr(multicast_ipv6_address_).c_str(),
                  all_interfaces ? "all interfaces" : nic.name().c_str(),
                  ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
     }
@@ -3429,22 +3400,18 @@ Spdp::SpdpTransport::leave_multicast_group(const DCPS::NetworkInterface& nic)
 
   if (joined_interfaces_.count(nic.name()) != 0 && !nic.has_ipv4()) {
     if (DCPS::DCPS_debug_level > 3) {
-      ACE_TCHAR buff[DCPS::AddrToStringSize];
-      multicast_address_.addr_to_string(buff, DCPS::AddrToStringSize);
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) Spdp::SpdpTransport::leave_multicast_group ")
-                 ACE_TEXT("leaving group %s on %C\n"),
-                 buff,
+                 ACE_TEXT("leaving group %C on %C\n"),
+                 DCPS::LogAddr(multicast_address_).c_str(),
                  nic.name().c_str()));
     }
 
     if (0 != multicast_socket_.leave(multicast_address_, ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
-      ACE_TCHAR buff[DCPS::AddrToStringSize];
-      multicast_address_.addr_to_string(buff, DCPS::AddrToStringSize);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::leave_multicast_group() - ")
-                 ACE_TEXT("failed to leave multicast group %s on %C: %p\n"),
-                 buff,
+                 ACE_TEXT("failed to leave multicast group %C on %C: %p\n"),
+                 DCPS::LogAddr(multicast_address_).c_str(),
                  nic.name().c_str(),
                  ACE_TEXT("ACE_SOCK_Dgram_Mcast::leave")));
     }
@@ -3454,22 +3421,18 @@ Spdp::SpdpTransport::leave_multicast_group(const DCPS::NetworkInterface& nic)
 #ifdef ACE_HAS_IPV6
   if (joined_ipv6_interfaces_.count(nic.name()) != 0 && !nic.has_ipv6()) {
     if (DCPS::DCPS_debug_level > 3) {
-      ACE_TCHAR buff[DCPS::AddrToStringSize];
-      multicast_ipv6_address_.addr_to_string(buff, DCPS::AddrToStringSize);
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) Spdp::SpdpTransport::leave_multicast_group ")
-                 ACE_TEXT("leaving group %s on %C\n"),
-                 buff,
+                 ACE_TEXT("leaving group %C on %C\n"),
+                 DCPS::LogAddr(multicast_ipv6_address_).c_str(),
                  nic.name().c_str()));
     }
 
     if (0 != multicast_ipv6_socket_.leave(multicast_ipv6_address_, ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
-      ACE_TCHAR buff[256];
-      multicast_ipv6_address_.addr_to_string(buff, 256);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::leave_multicast_group() - ")
-                 ACE_TEXT("failed to leave multicast ipv6 group %s on %C: %p\n"),
-                 buff,
+                 ACE_TEXT("failed to leave multicast ipv6 group %C on %C: %p\n"),
+                 DCPS::LogAddr(multicast_ipv6_address_).c_str(),
                  nic.name().c_str(),
                  ACE_TEXT("ACE_SOCK_Dgram_Mcast::leave")));
     }
@@ -4062,11 +4025,11 @@ void Spdp::SpdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::St
     break;
   case ICE::ServerReflexiveStateMachine::SRSM_Set:
   case ICE::ServerReflexiveStateMachine::SRSM_Change:
-    connection_record.address = DCPS::to_dds_string(relay_srsm_.stun_server_address()).c_str();
+    connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();
     outer->sedp_->job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer->bit_subscriber_, true, connection_record));
     break;
   case ICE::ServerReflexiveStateMachine::SRSM_Unset:
-    connection_record.address = DCPS::to_dds_string(relay_srsm_.unset_stun_server_address()).c_str();
+    connection_record.address = DCPS::LogAddr(relay_srsm_.unset_stun_server_address()).c_str();
     outer->sedp_->job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer->bit_subscriber_, false, connection_record));
     break;
   }
@@ -4089,7 +4052,7 @@ void Spdp::SpdpTransport::disable_relay_stun_task()
 
   DCPS::ConnectionRecordDataReaderImpl* dr = outer->connection_record_bit();
   if (dr && relay_srsm_.stun_server_address() != ACE_INET_Addr())  {
-    connection_record.address = DCPS::to_dds_string(relay_srsm_.stun_server_address()).c_str();
+    connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();
     outer->sedp_->job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer->bit_subscriber_, false, connection_record));
   }
 

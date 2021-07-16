@@ -640,7 +640,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_BASE -Config RTPS -Config LINUX -Config OPENDDS_SAFETY_PROFILE -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GHA_OPENDDS_SAFETY_PROFILE -Config GHA_NO_BUILT_IN_TOPICS -Config GH_ACTIONS -Config NO_UNIT_TESTS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_BASE -Config RTPS -Config LINUX -Config OPENDDS_SAFETY_PROFILE -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GHA_OPENDDS_SAFETY_PROFILE -Config GH_ACTIONS -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -887,7 +887,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config LINUX -Config XERCES3 -Config WCHAR -Config CXX11 -Config OPENDDS_SECURITY -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GHA_NO_BUILT_IN_TOPICS -Config GH_ACTIONS -Config NO_UNIT_TESTS --security --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config LINUX -Config XERCES3 -Config WCHAR -Config CXX11 -Config OPENDDS_SECURITY -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GH_ACTIONS -Config NO_UNIT_TESTS --security --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -2612,13 +2612,6 @@ jobs:
         . setenv.sh
         export ASAN_OPTIONS=detect_leaks=0
         make -j4
-    - name: Build CMake Tests
-      run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake -DCMAKE_CXX_STANDARD=11 ..
-        cmake --build . -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -2718,7 +2711,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS --security -Config ASAN --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS --security -Config ASAN"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -3979,7 +3972,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/DCPS/Messenger
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features ipv6=1 -features no_opendds_security=0 -features no_cxx11=0
+        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0 -features no_cxx11=0
     - name: make messenger tests
       shell: bash
       run: |
@@ -3993,7 +3986,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/DCPS/C++11
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features ipv6=1 -features no_opendds_security=0 -features no_cxx11=0
+        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0 -features no_cxx11=0
     - name: make C++11 messenger test
       shell: bash
       run: |
@@ -4121,7 +4114,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/DCPS/Compiler
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features ipv6=1 -features no_opendds_security=0
+        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0
     - name: make compiler tests
       shell: bash
       run: |
@@ -4249,7 +4242,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/unit-tests
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features ipv6=1 -features no_opendds_security=0
+        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0
     - name: make unit tests
       shell: bash
       run: |
@@ -9064,7 +9057,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config GHA_NO_BUILT_IN_TOPICS -Config GH_ACTIONS -Config NO_UNIT_TESTS --java --modeling --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS -Config NO_UNIT_TESTS --java --modeling --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>

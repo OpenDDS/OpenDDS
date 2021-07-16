@@ -1,0 +1,32 @@
+# Call parameters:
+#   ARG1 - datafilename
+#   ARG2 - outputfilename
+
+set terminal push
+set terminal png size 1290,770
+set timestamp
+
+set datafile separator ","
+set grid
+set autoscale
+set key top right box
+set title  "Normalized Jitter per Message Size"
+set xlabel "Message Size (bytes)"
+set ylabel "Jitter Median Absolute Deviation / Median Latency (percent)"
+set format x "%.1s%c"
+set format y "%.1s%%"
+
+set output ARG2 . '.png'
+
+set key autotitle columnheader
+stats ARG1 using 0 nooutput
+plot for [i=0:(STATS_blocks - 1)] ARG1 using 2:(100.*column(12)/column(5)) index i with linespoints
+
+
+set xrange [0:2500]
+set output ARG2 . '-zoom.png'
+replot
+
+set output
+set terminal pop
+

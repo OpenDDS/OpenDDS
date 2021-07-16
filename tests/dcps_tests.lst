@@ -45,10 +45,11 @@ tests/DCPS/FooTest3_2/run_test.pl rtps b: !DCPS_MIN RTPS !STATIC !DDS_NO_OWNERSH
 tests/DCPS/LivelinessTest/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
 tests/DCPS/LivelinessTest/run_test.pl take: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
 tests/DCPS/LivelinessTest/run_test.pl udp: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
-tests/DCPS/LivelinessTest/run_test.pl rtps_disc: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE RTPS !GH_ACTIONS
-tests/DCPS/LivelinessTest/run_test.pl rtps_disc take: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE RTPS !GH_ACTIONS
+tests/DCPS/LivelinessTest/run_test.pl rtps_disc: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE RTPS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/LivelinessTest/run_test.pl rtps_disc take: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE RTPS !OPENDDS_SAFETY_PROFILE
 
-tests/DCPS/FindTopic/run_test.pl: RTPS
+tests/DCPS/FindTopic/run_test.pl
+tests/DCPS/FindTopic/run_test.pl rtps: RTPS
 tests/DCPS/Inconsistent_Qos/run_test.pl: RTPS XERCES3 !STATIC !DDS_NO_PERSISTENCE_PROFILE
 tests/DCPS/InconsistentTopic/run_test.pl rtps_disc: RTPS !NO_BUILT_IN_TOPICS
 tests/DCPS/TopicReuse/run_test.pl: RTPS
@@ -71,6 +72,7 @@ tests/DCPS/Compiler/is_topic_type/run_test.pl: !DCPS_MIN
 tests/DCPS/Compiler/rapidjson_generator/run_test.pl: !DCPS_MIN RAPIDJSON CXX11
 tests/DCPS/Compiler/TryConstruct/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Compiler/TryConstruct/C++11/run_test.pl: !DCPS_MIN CXX11 !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Compiler/typeobject_hash_consistency/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Compiler/xcdr/run_test.pl
 tests/DCPS/Compiler/XtypesExtensibility/run_test.pl: !DCPS_MIN
 tests/DCPS/Compiler/keywords/run_test.pl classic: !DCPS_MIN
@@ -242,7 +244,7 @@ tests/DCPS/EntityLifecycleStress/run_test.pl rtps_disc publishers 10 subscribers
 tests/DCPS/LivelinessKeepAliveTest/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/LivelinessTimeout/run_test.pl: !DCPS_MIN !GH_ACTIONS
 tests/DCPS/LivelinessTimeout/run_test.pl rtps_disc: !DCPS_MIN RTPS
-tests/DCPS/BitDataReader/run_test.pl: !DCPS_MIN !GH_ACTIONS
+tests/DCPS/BitDataReader/run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS
 
 tests/unit-tests/run_test.pl: !DCPS_MIN !NO_UNIT_TESTS
 
@@ -266,7 +268,7 @@ tests/DCPS/SampleLost/run_test.pl: !DCPS_MIN !DDS_NO_PERSISTENCE_PROFILE !DDS_NO
 tests/DCPS/SetQosDeadline/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !GH_ACTIONS
 tests/DCPS/SetQosDeadline/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS !GH_ACTIONS
 tests/DCPS/SetQosPartition/run_test.pl ini=inforepo_tcp.ini: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
-tests/DCPS/SetQosPartition/run_test.pl ini=rtps_rtps.ini: !DCPS_MIN !NO_MCAST RTPS !GHA_NO_BUILT_IN_TOPICS
+tests/DCPS/SetQosPartition/run_test.pl ini=rtps_rtps.ini: !DCPS_MIN !NO_MCAST RTPS
 tests/DCPS/SetQosPartition/run_test.pl ini=rtps_tcp.ini: !DCPS_MIN !NO_MCAST RTPS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/StringKey/run_test.pl: !DCPS_MIN !GHA_OPENDDS_SAFETY_PROFILE
 tests/DCPS/GuardCondition/run_test.pl: !DCPS_MIN !GH_ACTIONS
@@ -394,6 +396,7 @@ tests/DCPS/ManyTopicMultiProcess/run_test.pl: !DCPS_MIN
 tests/DCPS/Monitor/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !NO_BUILT_IN_TOPICS
 
 tests/DCPS/QoS_XML/dump/run_test.pl: XERCES3
+tests/DCPS/QoS_XML/dumpXMLString/run_test.pl dcps_qos_xml_handler: XERCES3
 tests/DCPS/ManyToMany/run_test.pl tcp 12to12 small: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !LYNXOS
 tests/DCPS/ManyToMany/run_test.pl tcp 12to12 large: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !LYNXOS
 tests/DCPS/ManyToMany/run_test.pl multicast 1to1 small: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE

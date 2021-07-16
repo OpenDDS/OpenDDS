@@ -42,8 +42,6 @@ namespace OpenDDS {
                      bool has_dcps_key,
                      TopicCallbacks* topic_callbacks)
       {
-        OPENDDS_ASSERT(local_publications_.empty());
-        OPENDDS_ASSERT(local_subscriptions_.empty());
         OPENDDS_ASSERT(topic_callbacks != 0);
 
         local_data_type_name_ = data_type_name;
@@ -55,9 +53,9 @@ namespace OpenDDS {
 
       void unset_local()
       {
-        OPENDDS_ASSERT(local_publications_.empty());
-        OPENDDS_ASSERT(local_subscriptions_.empty());
         if (--assertion_count_ == 0) {
+          OPENDDS_ASSERT(local_publications_.empty());
+          OPENDDS_ASSERT(local_subscriptions_.empty());
           topic_callbacks_ = 0;
         }
       }

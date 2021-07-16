@@ -1,0 +1,9 @@
+
+project : taoexe, dcps_qos_xml_handler {
+  exename   = qos_dumpXMLStringTest
+
+  Source_Files {
+    qos_dumpXMLString.cpp
+  }
+}
+
