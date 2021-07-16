@@ -168,7 +168,7 @@ TransportReassembly::clear_completed(const RepoId& pub_id)
   const FragInfoMap::iterator end = fragments_.upper_bound(FragKey(pub_id, SequenceNumber(SequenceNumber::MAX_VALUE)));
   while (begin != end) {
     if (begin->second.complete_) {
-      fragments_.erase(begin++);
+      erase_i(begin++);
     } else {
       ++begin;
     }
@@ -270,17 +270,28 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
       data.header_.sequence_.getValue(), OPENDDS_STRING(conv).c_str()));
   }
 
+  // Purge out expired fragments.
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
+  for (ExpirationQueue::iterator pos = expiration_queue_.begin(), limit = expiration_queue_.end();
+       pos != limit && pos->first <= now;) {
+    fragments_.erase(pos->second);
+    expiration_queue_.erase(pos++);
+  }
+
   const FragKey key(data.header_.publication_id_, data.header_.sequence_);
 
   FragInfoMap::iterator iter = fragments_.find(key);
   if (iter == fragments_.end()) {
-    fragments_[key] = FragInfo(firstFrag, FragRangeList(1, FragRange(seqRange, data)), total_frags);
+    const MonotonicTimePoint expiration = MonotonicTimePoint::now() + TimeDuration(300);
+    fragments_[key] = FragInfo(firstFrag, FragRangeList(1, FragRange(seqRange, data)), total_frags, expiration);
+    expiration_queue_.insert(std::make_pair(expiration, key));
     // since this is the first fragment we've seen, it can't possibly be done
     VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble() "
       "stored first frag, returning false (incomplete)\n"));
     return false;
   } else {
     if (iter->second.complete_) {
+      // TODO: Why is this returning false?
       return false;
     }
     if (firstFrag) {
@@ -373,7 +384,23 @@ TransportReassembly::data_unavailable(const SequenceNumber& dataSampleSeq,
                                       const RepoId& pub_id)
 {
   const FragKey key(pub_id, dataSampleSeq);
-  fragments_.erase(key);
+  erase_i(fragments_.find(key));
+}
+
+void
+TransportReassembly::erase_i(FragInfoMap::iterator pos)
+{
+  if (pos != fragments_.end()) {
+    const FragKey& key = pos->first;
+    ExpirationQueue::iterator pos2 = expiration_queue_.find(pos->second.expiration_);
+    ExpirationQueue::iterator limit = expiration_queue_.end();
+    while (pos2 != limit && pos2->second != key) {
+      ++pos2;
+    }
+    OPENDDS_ASSERT(pos2 != expiration_queue_.end());
+    expiration_queue_.erase(pos2);
+    fragments_.erase(pos);
+  }
 }
 
 }
