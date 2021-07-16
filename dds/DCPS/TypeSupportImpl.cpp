@@ -71,7 +71,14 @@ void TypeSupportImpl::to_type_info_i(XTypes::TypeIdentifierWithDependencies& ti_
 void TypeSupportImpl::to_type_info(XTypes::TypeInformation& type_info) const
 {
   to_type_info_i(type_info.minimal, getMinimalTypeIdentifier(), getMinimalTypeMap());
-  to_type_info_i(type_info.complete, getCompleteTypeIdentifier(), getCompleteTypeMap());
+
+  // Properly populate the complete member if complete TypeObjects are generated.
+  const XTypes::TypeIdentifier& complete_ti = getCompleteTypeIdentifier();
+  if (complete_ti.kind() != XTypes::TK_NONE) {
+    to_type_info_i(type_info.complete, complete_ti, getCompleteTypeMap());
+  } else {
+    type_info.complete = XTypes::TypeIdentifierWithDependencies();
+  }
 }
 
 void TypeSupportImpl::populate_dependencies_i(const RcHandle<XTypes::TypeLookupService>& tls,
