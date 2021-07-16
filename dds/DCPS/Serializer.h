@@ -126,7 +126,7 @@ public:
     ALIGN_NONE = 0, ///< No Alignment Needed
     ALIGN_CDR = 8, ///< Align for CDR and XCDR1
     ALIGN_XCDR2 = 4, ///< Align for XCDR2
-    ALIGN_MAX = ALIGN_CDR ///< Maximum alignment that coud be used
+    ALIGN_MAX = ALIGN_CDR ///< Maximum alignment that could be used
   };
 
   /**
