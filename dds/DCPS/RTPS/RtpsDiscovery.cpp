@@ -16,6 +16,8 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/Registered_Data_Types.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
+
+#include "dds/DCPS/transport/framework/TransportConfig.h"
 #include "dds/DCPS/transport/framework/TransportSendStrategy.h"
 
 #include "ace/Reactor.h"
@@ -33,6 +35,13 @@ namespace {
     }
 #endif
     return fallback;
+  }
+
+  OpenDDS::DCPS::TimeDuration convert_msec(unsigned long msec)
+  {
+    ACE_Time_Value atv;
+    atv.set_msec(msec);
+    return OpenDDS::DCPS::TimeDuration(atv);
   }
 }
 
@@ -81,6 +90,7 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , sedp_heartbeat_period_(1)
   , sedp_nak_response_delay_(0, 200*1000 /*microseconds*/) // default from RTPS
   , sedp_send_delay_(0, 10 * 1000)
+  , sedp_passive_connect_duration_(convert_msec(DCPS::TransportConfig::DEFAULT_PASSIVE_CONNECT_DURATION))
   , participant_flags_(PFLAGS_THIS_VERSION)
   , sedp_responsive_mode_(false)
 {}
@@ -628,6 +638,18 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
                               ACE_TEXT("Invalid entry (%C) for SedpSendDelay in ")
+                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                              string_value.c_str(), rtps_name.c_str()), -1);
+          }
+        } else if (name == "SedpPassiveConnectDuration") {
+          const OPENDDS_STRING& string_value = it->second;
+          int value;
+          if (DCPS::convertToInteger(string_value, value)) {
+            config->sedp_passive_connect_duration(TimeDuration::from_msec(value));
+          } else {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+                              ACE_TEXT("Invalid entry (%C) for SedpPassiveConnectDuration in ")
                               ACE_TEXT("[rtps_discovery/%C] section.\n"),
                               string_value.c_str(), rtps_name.c_str()), -1);
           }
