@@ -8,9 +8,11 @@
 #ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTREASSEMBLY_H
 #define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTREASSEMBLY_H
 
+#include "ReceivedDataSample.h"
+
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/Definitions.h"
-#include "ReceivedDataSample.h"
+#include "dds/DCPS/DisjointSequence.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/TimeTypes.h"
 
@@ -107,11 +109,10 @@ private:
 
   struct FragInfo {
     FragInfo()
-      : complete_(false), have_first_(false), range_list_(), total_frags_(0) {}
+      : have_first_(false), range_list_(), total_frags_(0) {}
     FragInfo(bool hf, const FragRangeList& rl, ACE_UINT32 tf, const MonotonicTimePoint& expiration)
-      : complete_(false), have_first_(hf), range_list_(rl), total_frags_(tf), expiration_(expiration) {}
+      : have_first_(hf), range_list_(rl), total_frags_(tf), expiration_(expiration) {}
 
-    bool complete_;
     bool have_first_;
     FragRangeList range_list_;
     ACE_UINT32 total_frags_;
@@ -120,8 +121,12 @@ private:
 
   typedef OPENDDS_MAP(FragKey, FragInfo) FragInfoMap;
   FragInfoMap fragments_;
+
   typedef OPENDDS_MULTIMAP(MonotonicTimePoint, FragKey) ExpirationQueue;
   ExpirationQueue expiration_queue_;
+
+  typedef OPENDDS_MAP_CMP(PublicationId, DisjointSequence, GUID_tKeyLessThan) CompletedMap;
+  CompletedMap completed_;
 
   void erase_i(FragInfoMap::iterator pos);
 
