@@ -613,10 +613,8 @@ std::ostream& signed_int_helper(std::ostream& o, IntType value, IntType min)
 inline
 std::ostream& hex_value(std::ostream& o, unsigned value, size_t bytes)
 {
-  std::ios saved(0);
-  saved.copyfmt(o);
+  OpenDDS::DCPS::RestoreOutputStreamState ross(o);
   o << std::hex << std::setw(bytes * 2) << std::setfill('0') << value;
-  o.copyfmt(saved);
   return o;
 }
 
@@ -783,6 +781,7 @@ inline bool needSyntheticDefault(AST_Type* disc, size_t n_labels)
     return n_labels < ACE_OCTET_MAX;
   case AST_PredefinedType::PT_short:
   case AST_PredefinedType::PT_ushort:
+  case AST_PredefinedType::PT_wchar:
     return n_labels < ACE_UINT16_MAX;
   case AST_PredefinedType::PT_long:
   case AST_PredefinedType::PT_ulong:

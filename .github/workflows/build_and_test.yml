@@ -402,7 +402,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        tar cvf ../${{ github.job }}.tar setenv.sh install_setenv.sh ACE_TAO
+        tar cvf ../${{ github.job }}.tar setenv.sh install_setenv.sh ACE_TAO/ACE/bin/PerlACE
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
