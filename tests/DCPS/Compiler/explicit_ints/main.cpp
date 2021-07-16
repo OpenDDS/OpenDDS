@@ -2,12 +2,6 @@
 
 #include <gtest/gtest.h>
 
-#if CPP11_MAPPING
-#  define REF(WHAT) (WHAT)()
-#else
-#  define REF(WHAT) (WHAT)
-#endif
-
 TEST(ExplicitInts, min_max)
 {
   EXPECT_EQ(u8_max, 255);

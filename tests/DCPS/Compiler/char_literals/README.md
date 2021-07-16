@@ -1,4 +1,4 @@
 # `char_literals` Test
 
-This test checks that we can reproduce character-type values from IDL correctly
-in type support and the C++ mapping.
+This test checks that we can reproduce the values of character-type literals
+from IDL correctly in type support and the C++11 mapping.
