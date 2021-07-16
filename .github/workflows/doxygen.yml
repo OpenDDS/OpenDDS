@@ -1,0 +1,104 @@
+name: Doxygen
+
+on:
+  push:
+    branches:
+      - master
+      - branch-DDS-3.*
+      - gh_wf_*
+    paths:
+      - '**'
+      # Don't run this workflow if the only files that changed are the
+      # following. Make sure this is the same as the "pull_request.paths" list.
+      - '!AUTHORS'
+      - '!PROBLEM-REPORT-FORM'
+      - '!LICENSE'
+      - '!Dockerfile**'
+      - '!.dockerignore'
+      - '!.mailmap'
+      - '!.github/workflows/lint.yml'
+      - '!etc/**'
+      - '!docs/**'
+      - '!hooks/**'
+      - '!tools/scripts/**'
+      - '!**.md'
+      - '!**.rst'
+      - '!**/.gitignore'
+      - '!**/.lint_config'
+      - '!**/README*'
+  pull_request:
+    branches:
+      - master
+      - branch-DDS-3.*
+    paths:
+      - '**'
+      # Don't run this workflow if the only files that changed are the
+      # following. Make sure this is the same as the "push.paths" list.
+      - '!AUTHORS'
+      - '!PROBLEM-REPORT-FORM'
+      - '!LICENSE'
+      - '!Dockerfile**'
+      - '!.dockerignore'
+      - '!.mailmap'
+      - '!.github/workflows/lint.yml'
+      - '!etc/**'
+      - '!docs/**'
+      - '!hooks/**'
+      - '!tools/scripts/**'
+      - '!**.md'
+      - '!**.rst'
+      - '!**/.gitignore'
+      - '!**/.lint_config'
+      - '!**/README*'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TRIGGERING_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+
+  doxygen_u18:
+
+    runs-on: ubuntu-18.04
+
+    steps:
+    - name: install apt packages
+      run: sudo apt-get -y install doxygen graphviz
+    - name: checkout OpenDDS
+      uses: actions/checkout@v2
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: OpenDDS/ACE_TAO
+    - name: get ACE_TAO commit
+      shell: bash
+      run: |
+        cd OpenDDS/ACE_TAO
+        export ACE_COMMIT=$(git rev-parse HEAD)
+        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
+    - name: Doxygen
+      shell: bash
+      run: |
+        export ACE_ROOT=`pwd`/OpenDDS/ACE_TAO/ACE
+        export DDS_ROOT=`pwd`/OpenDDS
+        mkdir -p Doxygen
+        OpenDDS/tools/scripts/generate_combined_doxygen.pl Doxygen
+    - name: create Doxygen artifact
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        tar cJf Doxygen.tar.xz Doxygen
+    - name: upload Doxygen output
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_Doxygen_output
+        path: Doxygen.tar.xz
