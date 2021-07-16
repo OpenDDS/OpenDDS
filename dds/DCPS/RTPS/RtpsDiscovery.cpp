@@ -36,13 +36,6 @@ namespace {
 #endif
     return fallback;
   }
-
-  OpenDDS::DCPS::TimeDuration convert_msec(unsigned long msec)
-  {
-    ACE_Time_Value atv;
-    atv.set_msec(msec);
-    return OpenDDS::DCPS::TimeDuration(atv);
-  }
 }
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -90,7 +83,7 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , sedp_heartbeat_period_(1)
   , sedp_nak_response_delay_(0, 200*1000 /*microseconds*/) // default from RTPS
   , sedp_send_delay_(0, 10 * 1000)
-  , sedp_passive_connect_duration_(convert_msec(DCPS::TransportConfig::DEFAULT_PASSIVE_CONNECT_DURATION))
+  , sedp_passive_connect_duration_(TimeDuration::from_msec(DCPS::TransportConfig::DEFAULT_PASSIVE_CONNECT_DURATION))
   , participant_flags_(PFLAGS_THIS_VERSION)
   , sedp_responsive_mode_(false)
 {}
