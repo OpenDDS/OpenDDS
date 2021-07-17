@@ -510,6 +510,10 @@ namespace {
       return "primitive_serialized_size_wchar(" + first_args + ", " + count_expr + ")";
     case AST_PredefinedType::PT_boolean:
       return "primitive_serialized_size_boolean(" + first_args + ", " + count_expr + ")";
+    case AST_PredefinedType::PT_uint8:
+      return "primitive_serialized_size_uint8(" + first_args + ", " + count_expr + ")";
+    case AST_PredefinedType::PT_int8:
+      return "primitive_serialized_size_int8(" + first_args + ", " + count_expr + ")";
     default:
       return "primitive_serialized_size(" + first_args + ", " +
         scoped(type->name()) + "(), " + count_expr + ")";
@@ -527,6 +531,10 @@ namespace {
       return "short";
     case AST_PredefinedType::PT_ushort:
       return "ushort";
+    case AST_PredefinedType::PT_int8:
+      return "int8";
+    case AST_PredefinedType::PT_uint8:
+      return "uint8";
     case AST_PredefinedType::PT_octet:
       return "octet";
     case AST_PredefinedType::PT_char:
@@ -1742,6 +1750,8 @@ namespace {
       case AST_PredefinedType::PT_char:
       case AST_PredefinedType::PT_boolean:
       case AST_PredefinedType::PT_octet:
+      case AST_PredefinedType::PT_uint8:
+      case AST_PredefinedType::PT_int8:
         size += 1;
         break;
       case AST_PredefinedType::PT_short:
@@ -3865,6 +3875,8 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         if (ul->label_kind() != AST_UnionLabel::UL_default) {
           AST_Expression::AST_ExprValue* ev = branch->label(i)->label_val()->ev();
           if ((ev->et == AST_Expression::EV_enum && ev->u.eval == default_enum_val) ||
+              (ev->et == AST_Expression::EV_uint8 && ev->u.uint8val == 0) ||
+              (ev->et == AST_Expression::EV_int8 && ev->u.int8val == 0) ||
               (ev->et == AST_Expression::EV_short && ev->u.sval == 0) ||
               (ev->et == AST_Expression::EV_ushort && ev->u.usval == 0) ||
               (ev->et == AST_Expression::EV_long && ev->u.lval == 0) ||

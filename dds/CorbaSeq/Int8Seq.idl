@@ -1,0 +1,16 @@
+/*
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef OPENDDS_CORBASEQ_INT8SEQ_IDL
+#define OPENDDS_CORBASEQ_INT8SEQ_IDL
+
+#pragma prefix "omg.org"
+
+module CORBA
+{
+  typedef sequence<int8> Int8Seq;
+};
+
+#endif /* OPENDDS_CORBASEQ_INT8SEQ_IDL */

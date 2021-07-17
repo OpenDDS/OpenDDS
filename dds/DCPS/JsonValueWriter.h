@@ -70,8 +70,8 @@ public:
 
   void write_boolean(ACE_CDR::Boolean value);
   void write_byte(ACE_CDR::Octet value);
-  void write_int8(ACE_CDR::Char value);
-  void write_uint8(ACE_CDR::Octet value);
+  void write_int8(ACE_CDR::Int8 value);
+  void write_uint8(ACE_CDR::UInt8 value);
   void write_int16(ACE_CDR::Short value);
   void write_uint16(ACE_CDR::UShort value);
   void write_int32(ACE_CDR::Long value);
@@ -195,13 +195,13 @@ void JsonValueWriter<Buffer>::write_byte(ACE_CDR::Octet value)
 }
 
 template <typename Buffer>
-void JsonValueWriter<Buffer>::write_int8(ACE_CDR::Char value)
+void JsonValueWriter<Buffer>::write_int8(ACE_CDR::Int8 value)
 {
   writer_.Int(value);
 }
 
 template <typename Buffer>
-void JsonValueWriter<Buffer>::write_uint8(ACE_CDR::Octet value)
+void JsonValueWriter<Buffer>::write_uint8(ACE_CDR::UInt8 value)
 {
   writer_.Uint(value);
 }
