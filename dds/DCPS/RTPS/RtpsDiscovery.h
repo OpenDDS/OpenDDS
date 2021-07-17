@@ -568,6 +568,17 @@ public:
     sedp_send_delay_ = period;
   }
 
+  DCPS::TimeDuration sedp_passive_connect_duration() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::TimeDuration());
+    return sedp_passive_connect_duration_;
+  }
+  void sedp_passive_connect_duration(const DCPS::TimeDuration& period)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    sedp_passive_connect_duration_ = period;
+  }
+
   DCPS::TimeDuration sedp_fragment_reassembly_timeout() const
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::TimeDuration());
@@ -642,6 +653,7 @@ private:
   DCPS::TimeDuration sedp_heartbeat_period_;
   DCPS::TimeDuration sedp_nak_response_delay_;
   DCPS::TimeDuration sedp_send_delay_;
+  DCPS::TimeDuration sedp_passive_connect_duration_;
   DCPS::TimeDuration sedp_fragment_reassembly_timeout_;
   CORBA::ULong participant_flags_;
   bool sedp_responsive_mode_;
