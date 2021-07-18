@@ -10,7 +10,9 @@
 
 #include "dcps_export.h"
 
+#ifdef ACE_HAS_CPP11
 #include <cstdint>
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
@@ -21,6 +23,7 @@ typedef unsigned char MD5Result[16];
 OpenDDS_Dcps_Export
 void MD5Hash(MD5Result& result, const void* input, size_t size);
 
+#ifdef ACE_HAS_CPP11
 OpenDDS_Dcps_Export
 inline uint32_t one_at_a_time_hash(const uint8_t* key, size_t length, uint32_t start_hash = 0u)
 {
@@ -36,6 +39,7 @@ inline uint32_t one_at_a_time_hash(const uint8_t* key, size_t length, uint32_t s
   hash += hash << 15;
   return hash;
 }
+#endif
 
 }
 }
