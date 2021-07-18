@@ -45,7 +45,7 @@ struct OpenDDS_Rtps_Udp_Export BundlingCacheKey {
 
   bool operator==(const BundlingCacheKey& rhs) const
   {
-    return std::memcmp(&dst_guid_, &rhs.dst_guid_, 2 * sizeof (RepoId)) == 0 && to_guids_ == rhs.to_guids_;
+    return std::memcmp(this, &rhs, 2 * sizeof (RepoId)) == 0 && to_guids_ == rhs.to_guids_;
   }
 
   void contains(RepoIdSet& set) const
