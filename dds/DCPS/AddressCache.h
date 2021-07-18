@@ -22,10 +22,6 @@
 
 #include "ace/INET_Addr.h"
 
-#if defined ACE_HAS_CPP11 && !defined OPENDDS_SAFETY_PROFILE
-#include <unordered_map>
-#endif
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -56,10 +52,10 @@ template <typename Key>
 class AddressCache {
 public:
 
-#if defined ACE_HAS_CPP11 && !defined OPENDDS_SAFETY_PROFILE
-  typedef std::unordered_map<Key, RcHandle<AddressCacheEntry>> MapType;
+#if defined ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP_T(Key, RcHandle<AddressCacheEntry>) MapType;
   typedef std::vector<Key> KeyVec;
-  typedef std::unordered_map<RepoId, KeyVec> IdMapType;
+  typedef OPENDDS_UNORDERED_MAP_T(RepoId, KeyVec) IdMapType;
 #else
   typedef OPENDDS_MAP_T(Key, RcHandle<AddressCacheEntry>) MapType;
   typedef std::vector<Key> KeyVec;

@@ -148,8 +148,8 @@ public:
   void remove_locator_and_bundling_cache(const RepoId& remote_id);
 
   void update_locators(const RepoId& remote_id,
-                       const AddrSet& unicast_addresses,
-                       const AddrSet& multicast_addresses,
+                       AddrSet& unicast_addresses,
+                       AddrSet& multicast_addresses,
                        bool requires_inline_qos,
                        bool add_ref);
 
@@ -173,8 +173,8 @@ public:
                   ACE_CDR::ULong participant_flags,
                   SequenceNumber max_sn,
                   const TransportClient_rch& client,
-                  const AddrSet& unicast_addresses,
-                  const AddrSet& multicast_addresses,
+                  AddrSet& unicast_addresses,
+                  AddrSet& multicast_addresses,
                   bool requires_inline_qos);
 
   void disassociated(const RepoId& local, const RepoId& remote);
@@ -245,8 +245,6 @@ private:
   static bool force_inline_qos_;
   bool requires_inline_qos(const GUIDSeq_var & peers);
 
-  typedef OPENDDS_MAP_CMP(RepoId, OPENDDS_VECTOR(RepoId),GUID_tKeyLessThan) DestToEntityMap;
-
   ReactorTask_rch reactor_task_;
   RcHandle<JobQueue> job_queue_;
 
@@ -267,7 +265,11 @@ private:
     size_t ref_count_;
   };
 
+#ifdef ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP(RepoId, RemoteInfo) RemoteInfoMap;
+#else
   typedef OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan) RemoteInfoMap;
+#endif
   RemoteInfoMap locators_;
 
   void update_last_recv_addr(const RepoId& src, const ACE_INET_Addr& addr);
@@ -364,7 +366,11 @@ private:
   };
 
   typedef RcHandle<ReaderInfo> ReaderInfo_rch;
+#ifdef ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP(RepoId, ReaderInfo_rch) ReaderInfoMap;
+#else
   typedef OPENDDS_MAP_CMP(RepoId, ReaderInfo_rch, GUID_tKeyLessThan) ReaderInfoMap;
+#endif
   typedef OPENDDS_SET(ReaderInfo_rch) ReaderInfoSet;
   struct ReaderInfoSetHolder : RcObject {
     ReaderInfoSet readers;
@@ -509,13 +515,16 @@ private:
     void gather_heartbeats_i(MetaSubmessageVec& meta_submessages);
     void gather_heartbeats(const RepoIdSet& additional_guids,
                            MetaSubmessageVec& meta_submessages);
-    typedef OPENDDS_MAP_CMP(RepoId, SequenceNumber, GUID_tKeyLessThan) ExpectedMap;
 
     RcHandle<SingleSendBuffer> get_send_buff() { return send_buff_; }
   };
   typedef RcHandle<RtpsWriter> RtpsWriter_rch;
 
+#ifdef ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP(RepoId, RtpsWriter_rch) RtpsWriterMap;
+#else
   typedef OPENDDS_MAP_CMP(RepoId, RtpsWriter_rch, GUID_tKeyLessThan) RtpsWriterMap;
+#endif
   RtpsWriterMap writers_;
 
 
@@ -547,7 +556,11 @@ private:
     bool sends_directed_hb() const;
   };
   typedef RcHandle<WriterInfo> WriterInfo_rch;
+#ifdef ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP(RepoId, WriterInfo_rch) WriterInfoMap;
+#else
   typedef OPENDDS_MAP_CMP(RepoId, WriterInfo_rch, GUID_tKeyLessThan) WriterInfoMap;
+#endif
   typedef OPENDDS_SET(WriterInfo_rch) WriterInfoSet;
 
   class RtpsReader : public RcObject {
@@ -617,7 +630,11 @@ private:
   typedef RcHandle<RtpsReader> RtpsReader_rch;
 
   typedef OPENDDS_VECTOR(MetaSubmessageVec::iterator) MetaSubmessageIterVec;
+#ifdef ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP(RepoId, MetaSubmessageIterVec) DestMetaSubmessageMap;
+#else
   typedef OPENDDS_MAP_CMP(RepoId, MetaSubmessageIterVec, GUID_tKeyLessThan) DestMetaSubmessageMap;
+#endif
   typedef OPENDDS_MAP(AddressCacheEntryProxy, DestMetaSubmessageMap) AddrDestMetaSubmessageMap;
   typedef OPENDDS_VECTOR(MetaSubmessageIterVec) MetaSubmessageIterVecVec;
   typedef OPENDDS_SET(CORBA::Long) CountSet;
@@ -651,7 +668,11 @@ private:
 
   RepoIdSet pending_reliable_readers_;
 
+#ifdef ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP(RepoId, RtpsReader_rch) RtpsReaderMap;
+#else
   typedef OPENDDS_MAP_CMP(RepoId, RtpsReader_rch, GUID_tKeyLessThan) RtpsReaderMap;
+#endif
   RtpsReaderMap readers_;
 
   typedef OPENDDS_MULTIMAP_CMP(RepoId, RtpsReader_rch, GUID_tKeyLessThan) RtpsReaderMultiMap;

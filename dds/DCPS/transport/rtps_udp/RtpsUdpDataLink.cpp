@@ -536,8 +536,8 @@ RtpsUdpDataLink::remove_locator_and_bundling_cache(const RepoId& remote_id)
 
 void
 RtpsUdpDataLink::update_locators(const RepoId& remote_id,
-                                 const AddrSet& unicast_addresses,
-                                 const AddrSet& multicast_addresses,
+                                 AddrSet& unicast_addresses,
+                                 AddrSet& multicast_addresses,
                                  bool requires_inline_qos,
                                  bool add_ref)
 {
@@ -552,8 +552,8 @@ RtpsUdpDataLink::update_locators(const RepoId& remote_id,
   RemoteInfo& info = locators_[remote_id];
   const bool log_unicast_change = DCPS_debug_level > 3 && info.unicast_addrs_ != unicast_addresses;
   const bool log_multicast_change = DCPS_debug_level > 3 && info.multicast_addrs_ != multicast_addresses;
-  info.unicast_addrs_ = unicast_addresses;
-  info.multicast_addrs_ = multicast_addresses;
+  info.unicast_addrs_.swap(unicast_addresses);
+  info.multicast_addrs_.swap(multicast_addresses);
   info.requires_inline_qos_ = requires_inline_qos;
   if (add_ref) {
     ++info.ref_count_;
@@ -618,8 +618,8 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
                             ACE_CDR::ULong participant_flags,
                             SequenceNumber max_sn,
                             const TransportClient_rch& client,
-                            const AddrSet& unicast_addresses,
-                            const AddrSet& multicast_addresses,
+                            AddrSet& unicast_addresses,
+                            AddrSet& multicast_addresses,
                             bool requires_inline_qos)
 {
   update_locators(remote_id, unicast_addresses, multicast_addresses, requires_inline_qos, true);
@@ -4397,8 +4397,7 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
   bool valid_last_recv_addr = false;
   static const ACE_INET_Addr NO_ADDR;
 
-  typedef OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter_t;
-  iter_t pos = locators_.find(remote);
+  const RemoteInfoMap::const_iterator pos = locators_.find(remote);
   if (pos != locators_.end()) {
     if (prefer_unicast && pos->second.last_recv_addr_ != NO_ADDR) {
       normal_addrs.insert(pos->second.last_recv_addr_);

@@ -329,21 +329,6 @@ void MD5Hash(MD5Result& result, const void* input, size_t size)
   MD5_Final(result, &ctx);
 }
 
-uint32_t one_at_a_time_hash(const uint8_t* key, size_t length, uint32_t start)
-{
-  uint32_t hash = start;
-  size_t i = 0;
-  while (i != length) {
-    hash += key[i++];
-    hash += hash << 10;
-    hash ^= hash >> 6;
-  }
-  hash += hash << 3;
-  hash ^= hash >> 11;
-  hash += hash << 15;
-  return hash;
-}
-
 }
 }
 
