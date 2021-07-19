@@ -42,6 +42,16 @@ struct OpenDDS_Rtps_Udp_Export LocatorCacheKey {
     return std::memcmp(this, &rhs, sizeof (LocatorCacheKey)) == 0;
   }
 
+  LocatorCacheKey& operator=(const LocatorCacheKey& rhs)
+  {
+    if (this != &rhs) {
+      const_cast<GUID_t&>(remote_) = rhs.remote_;
+      const_cast<GUID_t&>(local_) = rhs.local_;
+      const_cast<bool&>(prefer_unicast_) = rhs.prefer_unicast_;
+    }
+    return *this;
+  }
+
   void contains(GuidSet& set) const
   {
     set.clear();
