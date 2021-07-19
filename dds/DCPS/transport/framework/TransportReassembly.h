@@ -23,6 +23,7 @@ namespace DCPS {
 
 class OpenDDS_Dcps_Export TransportReassembly {
 public:
+  explicit TransportReassembly(const TimeDuration& timeout = TimeDuration(300));
 
   /// Called by TransportReceiveStrategy if the fragmentation header flag
   /// is set.  Returns true/false to indicate if data should be delivered to
@@ -127,6 +128,8 @@ private:
 
   typedef OPENDDS_MAP_CMP(PublicationId, DisjointSequence, GUID_tKeyLessThan) CompletedMap;
   CompletedMap completed_;
+
+  TimeDuration timeout_;
 
   void erase_i(FragInfoMap::iterator pos);
 

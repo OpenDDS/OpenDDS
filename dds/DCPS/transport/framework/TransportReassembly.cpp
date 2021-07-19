@@ -33,6 +33,11 @@ TransportReassembly::FragRange::FragRange(const SequenceRange& seqRange,
 {
 }
 
+TransportReassembly::TransportReassembly(const TimeDuration& timeout)
+  : timeout_(timeout)
+{
+}
+
 namespace {
   inline void join_err(const char* detail)
   {
@@ -275,7 +280,7 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
 
   FragInfoMap::iterator iter = fragments_.find(key);
   if (iter == fragments_.end()) {
-    const MonotonicTimePoint expiration = MonotonicTimePoint::now() + TimeDuration(300);
+    const MonotonicTimePoint expiration = MonotonicTimePoint::now() + timeout_;
     fragments_[key] = FragInfo(firstFrag, FragRangeList(1, FragRange(seqRange, data)), total_frags, expiration);
     expiration_queue_.insert(std::make_pair(expiration, key));
     // since this is the first fragment we've seen, it can't possibly be done
