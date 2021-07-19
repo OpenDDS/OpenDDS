@@ -94,7 +94,6 @@ TransportImpl::open()
                dump_to_str().c_str()));
   }
 
-
   return true;
 }
 
