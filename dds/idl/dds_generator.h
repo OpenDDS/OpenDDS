@@ -661,7 +661,7 @@ std::ostream& char_helper(std::ostream& o, CharType value)
   case '\a':
     return o << "\\a";
   }
-  if (isprint(static_cast<unsigned char>(value))) {
+  if (isprint(char_value(value))) {
     return o << static_cast<char>(value);
   }
   return hex_value(o << "\\x", char_value<CharType>(value), sizeof(CharType) == 1 ? 1 : 2);
