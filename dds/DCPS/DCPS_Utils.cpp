@@ -66,7 +66,7 @@ const char* retcode_to_string(DDS::ReturnCode_t value)
   }
 }
 
-const char* topicstatus_to_string(OpenDDS::DCPS::TopicStatus value)
+const char* topicstatus_to_string(TopicStatus value)
 {
   switch (value) {
   case OpenDDS::DCPS::CREATED:
