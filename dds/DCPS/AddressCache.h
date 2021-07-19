@@ -28,6 +28,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 typedef OPENDDS_SET(ACE_INET_Addr) AddrSet;
+typedef OPENDDS_SET_CMP(GUID_t, GUID_tKeyLessThan) GuidSet;
 
 struct AddressCacheEntry : public virtual RcObject {
 
@@ -55,11 +56,11 @@ public:
 #if defined ACE_HAS_CPP11
   typedef OPENDDS_UNORDERED_MAP_T(Key, RcHandle<AddressCacheEntry>) MapType;
   typedef std::vector<Key> KeyVec;
-  typedef OPENDDS_UNORDERED_MAP_T(RepoId, KeyVec) IdMapType;
+  typedef OPENDDS_UNORDERED_MAP_T(GUID_t, KeyVec) IdMapType;
 #else
   typedef OPENDDS_MAP_T(Key, RcHandle<AddressCacheEntry>) MapType;
   typedef std::vector<Key> KeyVec;
-  typedef OPENDDS_MAP_T(RepoId, KeyVec) IdMapType;
+  typedef OPENDDS_MAP_T(GUID_t, KeyVec) IdMapType;
 #endif
 
   AddressCache() {}
@@ -75,9 +76,9 @@ public:
       if (pos == cache.map_.end()) {
         rch_ = make_rch<AddressCacheEntry>();
         cache.map_[key] = rch_;
-        RepoIdSet set;
+        GuidSet set;
         key.contains(set);
-        for (RepoIdSet::const_iterator it = set.begin(); it != set.end(); ++it) {
+        for (GuidSet::const_iterator it = set.begin(); it != set.end(); ++it) {
           cache.id_map_[*it].push_back(key);
         }
         is_new_ = true;
@@ -137,9 +138,9 @@ public:
       rch->expires_ = expires;
     } else {
       rch = make_rch<AddressCacheEntry>(addrs, expires);
-      RepoIdSet set;
+      GuidSet set;
       key.contains(set);
-      for (RepoIdSet::const_iterator it = set.begin(); it != set.end(); ++it) {
+      for (GuidSet::const_iterator it = set.begin(); it != set.end(); ++it) {
         id_map_[*it].push_back(key);
       }
     }
@@ -165,7 +166,7 @@ public:
   }
   */
 
-  void remove_id(const RepoId& val)
+  void remove_id(const GUID_t& val)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     typename IdMapType::iterator pos = id_map_.find(val);

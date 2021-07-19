@@ -31,7 +31,7 @@ struct TestKey {
 #define NOOP
 
 #ifdef ACE_HAS_CPP11
-OOAT_STD_HASH(TestKey, NOOP);
+OPENDDS_OOAT_STD_HASH(TestKey, NOOP);
 #endif
 
 TEST(address_cache_test, load_fail)

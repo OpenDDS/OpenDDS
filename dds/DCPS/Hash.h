@@ -46,7 +46,7 @@ inline uint32_t one_at_a_time_hash(const uint8_t* key, size_t length, uint32_t s
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #ifdef ACE_HAS_CPP11
-#define OOAT_STD_HASH(Key, Export) \
+#define OPENDDS_OOAT_STD_HASH(Key, Export) \
   namespace std \
   { \
   template<> struct Export hash<Key> \

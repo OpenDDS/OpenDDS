@@ -25,7 +25,7 @@ namespace DCPS {
 #pragma pack(push, 1)
 
 struct OpenDDS_Rtps_Udp_Export LocatorCacheKey {
-  LocatorCacheKey(const RepoId& remote, const RepoId& local, bool prefer_unicast)
+  LocatorCacheKey(const GUID_t& remote, const GUID_t& local, bool prefer_unicast)
     : remote_(remote)
     , local_(local)
     , prefer_unicast_(prefer_unicast)
@@ -42,15 +42,15 @@ struct OpenDDS_Rtps_Udp_Export LocatorCacheKey {
     return std::memcmp(this, &rhs, sizeof (LocatorCacheKey)) == 0;
   }
 
-  void contains(RepoIdSet& set) const
+  void contains(GuidSet& set) const
   {
     set.clear();
     set.insert(remote_);
     set.insert(local_);
   }
 
-  const RepoId remote_;
-  const RepoId local_;
+  const GUID_t remote_;
+  const GUID_t local_;
   const bool prefer_unicast_;
 };
 
@@ -62,7 +62,7 @@ struct OpenDDS_Rtps_Udp_Export LocatorCacheKey {
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined ACE_HAS_CPP11
-OOAT_STD_HASH(OpenDDS::DCPS::LocatorCacheKey, OpenDDS_Rtps_Udp_Export);
+OPENDDS_OOAT_STD_HASH(OpenDDS::DCPS::LocatorCacheKey, OpenDDS_Rtps_Udp_Export);
 #endif
 
 #endif /* OPENDDS_DCPS_TRANSPORT_RTPS_UDP_LOCATORCACHEKEY_H */
