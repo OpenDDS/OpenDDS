@@ -437,14 +437,14 @@ public:
   /**
    * Get TypeInformation of a remote entity given the corresponding BuiltinTopicKey_t.
    */
-  const XTypes::TypeInformation& get_type_information(DDS::DomainParticipant_ptr participant,
-                                                      const DDS::BuiltinTopicKey_t& key) const;
+  XTypes::TypeInformation get_type_information(DDS::DomainParticipant_ptr participant,
+                                               const DDS::BuiltinTopicKey_t& key) const;
 
   /**
    * Get TypeObject of a remote entity given the corresponding TypeIdentifier.
    */
-  const XTypes::TypeObject& get_type_object(DDS::DomainParticipant_ptr participant,
-                                            const XTypes::TypeIdentifier& ti) const;
+  XTypes::TypeObject get_type_object(DDS::DomainParticipant_ptr participant,
+                                     const XTypes::TypeIdentifier& ti) const;
 
 private:
 

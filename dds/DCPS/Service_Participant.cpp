@@ -2878,7 +2878,7 @@ Service_Participant::bit_autopurge_disposed_samples_delay(const DDS::Duration_t&
   bit_autopurge_disposed_samples_delay_ = duration;
 }
 
-const XTypes::TypeInformation&
+XTypes::TypeInformation
 Service_Participant::get_type_information(DDS::DomainParticipant_ptr participant,
                                           const DDS::BuiltinTopicKey_t& key) const
 {
@@ -2893,7 +2893,7 @@ Service_Participant::get_type_information(DDS::DomainParticipant_ptr participant
   return XTypes::TypeInformation();
 }
 
-const XTypes::TypeObject&
+XTypes::TypeObject
 Service_Participant::get_type_object(DDS::DomainParticipant_ptr participant,
                                      const XTypes::TypeIdentifier& ti) const
 {
