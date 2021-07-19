@@ -392,6 +392,10 @@ Sedp::init(const RepoId& guid,
   stun_server_address(disco.config()->sedp_stun_server_address());
   rtps_inst->use_ice_ = disco.config()->use_ice();
 
+  if (!disco.config()->sedp_fragment_reassembly_timeout().is_zero()) {
+    rtps_inst->fragment_reassembly_timeout_ = disco.config()->sedp_fragment_reassembly_timeout();
+  }
+
   // Create a config
   OPENDDS_STRING config_name = DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
                             OPENDDS_STRING("_SEDP_TransportCfg_") + key +
