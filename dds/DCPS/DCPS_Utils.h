@@ -27,7 +27,7 @@ namespace DCPS {
 
 OpenDDS_Dcps_Export const char* retcode_to_string(DDS::ReturnCode_t value);
 
-OpenDDS_Dcps_Export const char* topicstatus_to_string(OpenDDS::DCPS::TopicStatus value);
+OpenDDS_Dcps_Export const char* topicstatus_to_string(TopicStatus value);
 
 OpenDDS_Dcps_Export
 bool
