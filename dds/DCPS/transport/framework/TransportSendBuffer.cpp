@@ -290,7 +290,8 @@ SingleSendBuffer::insert_buffer(BufferType& buffer,
 
   CopyChainVisitor visitor(*elems,
                            &retained_mb_allocator_,
-                           &retained_db_allocator_);
+                           &retained_db_allocator_,
+                           true);
   queue->accept_visitor(visitor);
 
   buffer.second = chain->duplicate();

@@ -17,13 +17,13 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 OpenDDS::DCPS::TransportSendElement::~TransportSendElement()
 {
-  DBG_ENTRY_LVL("TransportSendElement","~TransportSendElement",6);
+  DBG_ENTRY_LVL("TransportSendElement", "~TransportSendElement", 6);
 }
 
 void
 OpenDDS::DCPS::TransportSendElement::release_element(bool dropped_by_transport)
 {
-  DBG_ENTRY_LVL("TransportSendElement","release_element",6);
+  DBG_ENTRY_LVL("TransportSendElement", "release_element", 6);
 
   if (this->was_dropped()) {
     this->element_->get_send_listener()->data_dropped(this->element_,
@@ -40,7 +40,7 @@ OpenDDS::DCPS::TransportSendElement::release_element(bool dropped_by_transport)
 OpenDDS::DCPS::RepoId
 OpenDDS::DCPS::TransportSendElement::publication_id() const
 {
-  DBG_ENTRY_LVL("TransportSendElement","publication_id",6);
+  DBG_ENTRY_LVL("TransportSendElement", "publication_id", 6);
   return this->element_->get_pub_id();
 }
 
@@ -53,10 +53,17 @@ OpenDDS::DCPS::TransportSendElement::subscription_id() const
   return GUID_UNKNOWN;
 }
 
+ACE_Message_Block*
+OpenDDS::DCPS::TransportSendElement::duplicate_msg() const
+{
+  DBG_ENTRY_LVL("TransportSendElement", "duplicate_msg", 6);
+  return this->element_->get_sample()->duplicate();
+}
+
 const ACE_Message_Block*
 OpenDDS::DCPS::TransportSendElement::msg() const
 {
-  DBG_ENTRY_LVL("TransportSendElement","msg",6);
+  DBG_ENTRY_LVL("TransportSendElement", "msg", 6);
   return this->element_->get_sample();
 }
 

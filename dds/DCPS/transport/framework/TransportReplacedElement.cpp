@@ -16,14 +16,14 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 OpenDDS::DCPS::TransportReplacedElement::~TransportReplacedElement()
 {
-  DBG_ENTRY_LVL("TransportReplacedElement","~TransportReplacedElement",6);
+  DBG_ENTRY_LVL("TransportReplacedElement", "~TransportReplacedElement", 6);
 }
 
 void
 OpenDDS::DCPS::TransportReplacedElement::release_element(bool dropped_by_transport)
 {
   ACE_UNUSED_ARG(dropped_by_transport);
-  DBG_ENTRY_LVL("TransportReplacedElement","release_element",6);
+  DBG_ENTRY_LVL("TransportReplacedElement", "release_element", 6);
 
 
   delete this;

@@ -23,6 +23,13 @@ class TransportRetainedElement;
 class OpenDDS_Dcps_Export TransportRetainedElement
   : public TransportQueueElement {
 public:
+
+  /// Construct with message block chain and Id values.
+  TransportRetainedElement(
+    ACE_Message_Block*                 message,
+    const RepoId&                      pubId
+  );
+
   /// Construct with message block chain and Id values.
   TransportRetainedElement(
     const ACE_Message_Block*           message,
@@ -40,6 +47,7 @@ public:
 
   virtual RepoId publication_id() const;
 
+  virtual ACE_Message_Block* duplicate_msg() const;
   virtual const ACE_Message_Block* msg() const;
   virtual const ACE_Message_Block* msg_payload() const;
 
@@ -60,9 +68,11 @@ private:
   RepoId publication_id_;
 
   /// Cached allocator for DataSampleHeader message block
-  MessageBlockAllocator*             mb_allocator_;
+  MessageBlockAllocator* mb_allocator_;
   /// Cached allocator for DataSampleHeader data block
-  DataBlockAllocator*                db_allocator_;
+  DataBlockAllocator* db_allocator_;
+
+  bool is_duplicate_;
 };
 
 } // namespace DCPS

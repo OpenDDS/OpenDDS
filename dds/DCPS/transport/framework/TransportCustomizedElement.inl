@@ -18,6 +18,7 @@ TransportCustomizedElement::TransportCustomizedElement(
   TransportQueueElement* orig)
   : TransportQueueElement(1),
     orig_(orig),
+    ose_(find_original_send_element(orig)),
     publication_id_(orig ? orig->publication_id() : GUID_UNKNOWN),
     subscription_id_(GUID_UNKNOWN),
     sequence_(SequenceNumber::SEQUENCENUMBER_UNKNOWN()),
