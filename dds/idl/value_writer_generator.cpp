@@ -57,6 +57,10 @@ namespace {
       return "int16";
     case AST_PredefinedType::PT_ushort:
       return "uint16";
+    case AST_PredefinedType::PT_int8:
+      return "int8";
+    case AST_PredefinedType::PT_uint8:
+      return "uint8";
     case AST_PredefinedType::PT_float:
       return "float32";
     case AST_PredefinedType::PT_double:

@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -54,7 +52,7 @@ void wstring_free(ACE_CDR::WChar* ptr)
 }
 #endif
 
-OPENDDS_STRING endianness_to_string(Endianness endianness)
+String endianness_to_string(Endianness endianness)
 {
   switch (endianness) {
   case ENDIAN_BIG:
@@ -250,7 +248,7 @@ bool EncapsulationHeader::set_encapsulation_options(Message_Block_Ptr& mb)
   return true;
 }
 
-OPENDDS_STRING EncapsulationHeader::to_string() const
+String EncapsulationHeader::to_string() const
 {
   switch (kind_) {
   case KIND_CDR_BE:
@@ -311,7 +309,7 @@ bool operator<<(Serializer& s, const EncapsulationHeader& value)
   return ok;
 }
 
-OPENDDS_STRING Encoding::kind_to_string(Kind value)
+String Encoding::kind_to_string(Kind value)
 {
   switch (value) {
   case KIND_XCDR1:
@@ -325,9 +323,9 @@ OPENDDS_STRING Encoding::kind_to_string(Kind value)
   }
 }
 
-OPENDDS_STRING Encoding::to_string() const
+String Encoding::to_string() const
 {
-  OPENDDS_STRING rv = Encoding::kind_to_string(kind_) + ", " +
+  String rv = Encoding::kind_to_string(kind_) + ", " +
     endianness_to_string(endianness_);
   if (!zero_init_padding_) {
     rv += ", non-initialized padding";
