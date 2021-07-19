@@ -154,8 +154,8 @@ TopicImpl::enable()
       if (DCPS_debug_level >= 1) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: TopicImpl::enable, ")
-                   ACE_TEXT("assert_topic failed with return value %d.\n"),
-                   status));
+                   ACE_TEXT("assert_topic failed with return value <%C>.\n"),
+                   topicstatus_to_string(status)));
       }
       return DDS::RETCODE_ERROR;
     }

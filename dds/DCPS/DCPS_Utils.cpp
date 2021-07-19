@@ -66,6 +66,35 @@ const char* retcode_to_string(DDS::ReturnCode_t value)
   }
 }
 
+const char* topicstatus_to_string(OpenDDS::DCPS::TopicStatus value)
+{
+  switch (value) {
+  case OpenDDS::DCPS::CREATED:
+    return "Created";
+  case OpenDDS::DCPS::ENABLED:
+    return "Enabled";
+  case OpenDDS::DCPS::FOUND:
+    return "Found";
+  case OpenDDS::DCPS::NOT_FOUND:
+    return "Not found";
+  case OpenDDS::DCPS::REMOVED:
+    return "Removed";
+  case OpenDDS::DCPS::CONFLICTING_TYPENAME:
+    return "Conflicting typename";
+  case OpenDDS::DCPS::PRECONDITION_NOT_MET:
+    return "Precondition not met";
+  case OpenDDS::DCPS::INTERNAL_ERROR:
+    return "Internal error";
+  case OpenDDS::DCPS::TOPIC_DISABLED:
+    return "Topic disabled";
+  default:
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: topicstatus_to_string: ")
+      ACE_TEXT("%d is either invalid or not recognized.\n"),
+      value));
+    return "Invalid topic status";
+  }
+}
+
 bool
 is_wildcard(const char *str)
 {
