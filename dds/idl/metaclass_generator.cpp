@@ -414,7 +414,7 @@ namespace {
       std::for_each(fields.begin(), fields.end(), gen_field_createQC);
     }
     be_global->impl_ <<
-      exception <<
+      "    " << exception <<
       "  }\n\n"
       "#ifndef OPENDDS_NO_MULTI_TOPIC\n"
       "  const char** getFieldNames() const\n"
@@ -435,7 +435,7 @@ namespace {
       be_global->impl_ << "    ACE_UNUSED_ARG(stru);\n";
     }
     be_global->impl_ <<
-      exception <<
+      "    " << exception <<
       "  }\n\n"
       "  void assign(void* lhs, const char* field, const void* rhs,\n"
       "    const char* rhsFieldSpec, const MetaStruct& rhsMeta) const\n"
@@ -449,7 +449,7 @@ namespace {
       std::for_each(fields.begin(), fields.end(), assign_field);
     }
     be_global->impl_ <<
-      exception <<
+      "    " << exception <<
       "  }\n"
       "#endif /* OPENDDS_NO_MULTI_TOPIC */\n\n"
       "  bool compare(const void* lhs, const void* rhs, const char* field) "
@@ -462,7 +462,7 @@ namespace {
       std::for_each(fields.begin(), fields.end(), compare_field);
     }
     be_global->impl_ <<
-      exception <<
+      "    " << exception <<
       "  }\n"
       "};\n\n"
       "template<>\n"

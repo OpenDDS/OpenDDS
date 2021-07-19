@@ -20,6 +20,9 @@
 #include "tests/Utils/ExceptionStreams.h"
 
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#ifdef ACE_AS_STATIC_LIBS
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#endif
 
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
@@ -92,6 +95,38 @@ int sub_program(DDS::DomainParticipant* participant)
   return EXIT_SUCCESS;
 }
 
+int double_delete(DDS::DomainParticipant* participant, const char* type_name)
+{
+  // Currently OpenDDS returns the same topic when we call create_topic twice
+  DDS::Topic_var topic1 = participant->create_topic("Test",
+                                                    type_name, TOPIC_QOS_DEFAULT, 0, 0);
+  if (!topic1) {
+    ACE_ERROR_RETURN((LM_ERROR, "%N:%l: double_delete() ERROR: create_topic 1 failed!\n"), EXIT_FAILURE);
+  }
+
+  DDS::Topic_var topic2 = participant->create_topic("Test",
+                                                    type_name, TOPIC_QOS_DEFAULT, 0, 0);
+  if (!topic2) {
+    ACE_ERROR_RETURN((LM_ERROR, "%N:%l: double_delete() ERROR: create_topic 2 failed!\n"), EXIT_FAILURE);
+  }
+
+  if (topic1->get_instance_handle() != topic2->get_instance_handle()) {
+    ACE_ERROR_RETURN((LM_ERROR, "%N:%l: double_delete() ERROR: instance handle of topic 1 and 2 are different\n"), EXIT_FAILURE);
+  }
+
+  const DDS::ReturnCode_t retcode1 = participant->delete_topic(topic1);
+  if (retcode1 != DDS::RETCODE_OK) {
+    ACE_ERROR_RETURN((LM_ERROR, "%N:%l: double_delete() ERROR: should be able to delete topic 1\n"), EXIT_FAILURE);
+  }
+
+  const DDS::ReturnCode_t retcode2 = participant->delete_topic(topic2);
+  if (retcode2 != DDS::RETCODE_OK) {
+    ACE_ERROR_RETURN((LM_ERROR, "%N:%l: double_delete() ERROR: should be able to delete topic 2\n"), EXIT_FAILURE);
+  }
+
+  return EXIT_SUCCESS;
+}
+
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   try {
@@ -110,6 +145,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
     TheServiceParticipant->add_discovery(discovery);
     TheServiceParticipant->set_default_discovery(discovery->key());
+
+    TransportInst_rch default_inst = TheTransportRegistry->create_inst("transport", "rtps_udp");
+    TheTransportRegistry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME)->sorted_insert(default_inst);
 
     DDS::DomainParticipant_var participant = dpf->create_participant(11, PARTICIPANT_QOS_DEFAULT, 0, 0);
     if (!participant) {
@@ -141,6 +179,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     // Now the second part of the program will try to do its setup
     if (sub_program(participant) != EXIT_SUCCESS) {
       ACE_ERROR_RETURN((LM_ERROR, "%N:%l: main() ERROR: sub program 1 failed!\n"), EXIT_FAILURE);
+    }
+
+    // Now test double create/delete
+    if (double_delete(participant, type_name.in ()) != EXIT_SUCCESS) {
+      ACE_ERROR_RETURN((LM_ERROR, "%N:%l: main() ERROR: double_delete failed!\n"), EXIT_FAILURE);
     }
 
     const DDS::ReturnCode_t retcode2 = pub1->delete_datawriter(dw1);

@@ -7,6 +7,8 @@ namespace Bench {
 
 typedef std::map<std::string, std::vector<SimpleStatBlock> > stat_vec_map;
 
+typedef std::map<std::string, SimpleStatBlock> SimpleStatBlockMap;
+
 struct SharedSummaryReportVisitor : public ReportVisitor
 {
   struct ErrorCounts {

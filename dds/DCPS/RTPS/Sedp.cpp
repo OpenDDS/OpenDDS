@@ -398,6 +398,8 @@ Sedp::init(const RepoId& guid,
                             domainStr;
   transport_cfg_ = TheTransportRegistry->create_config(config_name.c_str());
   transport_cfg_->instances_.push_back(transport_inst_);
+  transport_cfg_->passive_connect_duration_ =
+    static_cast<unsigned long>(disco.config()->sedp_passive_connect_duration().value().get_msec());
 
   rtps_inst->opendds_discovery_default_listener_ = publications_reader_;
   rtps_inst->opendds_discovery_guid_ = guid;

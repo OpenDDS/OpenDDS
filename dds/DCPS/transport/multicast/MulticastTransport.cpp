@@ -52,12 +52,9 @@ MulticastTransport::make_datalink(const RepoId& local_id,
                                   Priority priority,
                                   bool active)
 {
-
   RcHandle<MulticastSessionFactory> session_factory;
-
   if (this->config().is_reliable()) {
     session_factory = make_rch<ReliableSessionFactory>();
-
   } else {
     session_factory = make_rch<BestEffortSessionFactory>();
   }
@@ -79,13 +76,9 @@ MulticastTransport::make_datalink(const RepoId& local_id,
 
   // Join multicast group:
   if (!link->join(this->config().group_address_)) {
-    ACE_TCHAR str[64];
-    this->config().group_address_.addr_to_string(str, sizeof(str)/sizeof(str[0]), 0);
-    ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("(%P|%t) ERROR: ")
-                    ACE_TEXT("MulticastTransport::make_datalink: ")
-                    ACE_TEXT("failed to join multicast group: %s!\n"),
-                    str));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: MulticastTransport::make_datalink: ")
+               ACE_TEXT("failed to join multicast group: %C!\n"),
+               LogAddr(this->config().group_address_, LogAddr::HostPort).c_str()));
     return MulticastDataLink_rch();
   }
 

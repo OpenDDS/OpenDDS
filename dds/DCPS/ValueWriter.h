@@ -57,8 +57,8 @@ struct ValueWriter {
 
   virtual void write_boolean(ACE_CDR::Boolean /*value*/) = 0;
   virtual void write_byte(ACE_CDR::Octet /*value*/) = 0;
-  virtual void write_int8(ACE_CDR::Char /*value*/) = 0;
-  virtual void write_uint8(ACE_CDR::Octet /*value*/) = 0;
+  virtual void write_int8(ACE_CDR::Int8 /*value*/) = 0;
+  virtual void write_uint8(ACE_CDR::UInt8 /*value*/) = 0;
   virtual void write_int16(ACE_CDR::Short /*value*/) = 0;
   virtual void write_uint16(ACE_CDR::UShort /*value*/) = 0;
   virtual void write_int32(ACE_CDR::Long /*value*/) = 0;

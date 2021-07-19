@@ -43,6 +43,7 @@
 #include "dds/DCPS/EntityImpl.h"
 #include "dds/DCPS/WaitSet.h"
 #include "dds/DCPS/GuardCondition.h"
+#include <dds/DCPS/LogAddr.h>
 
 #include "DdsDcpsDomainJC.h"
 #include "DdsDcpsPublicationJC.h"
@@ -904,10 +905,7 @@ jstring JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getGroupAddress
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  ACE_TCHAR buffer[1024];
-  inst->group_address_.addr_to_string(buffer, 1024, 1);
-  std::string addr_str = ACE_TEXT_ALWAYS_CHAR(buffer);
-  return jni->NewStringUTF(addr_str.c_str());
+  return jni->NewStringUTF(OpenDDS::DCPS::LogAddr(inst->group_address_).c_str());
 }
 
 // MulticastInst::setGroupAddress
@@ -1102,10 +1100,7 @@ jstring JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getLocalAddress
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  ACE_TCHAR buffer[1024];
-  inst->local_address().addr_to_string(buffer, 1024, 1);
-  std::string addr_str = ACE_TEXT_ALWAYS_CHAR(buffer);
-  return jni->NewStringUTF(addr_str.c_str());
+  return jni->NewStringUTF(OpenDDS::DCPS::LogAddr(inst->local_address()).c_str());
 }
 
 // RtpsUdpInst::setLocalAddress
@@ -1139,10 +1134,7 @@ jstring JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getMulticastGroupAddress
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  ACE_TCHAR buffer[1024];
-  inst->multicast_group_address().addr_to_string(buffer, 1024, 1);
-  std::string addr_str = ACE_TEXT_ALWAYS_CHAR(buffer);
-  return jni->NewStringUTF(addr_str.c_str());
+  return jni->NewStringUTF(OpenDDS::DCPS::LogAddr(inst->multicast_group_address()).c_str());
 }
 
 // RtpsUdpInst::setMulticastGroupAddress

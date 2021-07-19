@@ -1,118 +1,88 @@
 #include "TimeSeriesRawFormatter.h"
 
+#include "SharedSummaryReportVisitor.h"
+
 #include <PropertyStatBlock.h>
 
 namespace Bench {
 
+namespace {
+
+void write_series(const SimpleStatBlockMap& stats, std::ostream& output_stream, size_t rows) {
+  // Write Header
+  for (auto stat_it = stats.begin(); stat_it != stats.end(); ++stat_it) {
+    if (stat_it != stats.begin()) {
+      output_stream << "\t";
+    }
+    output_stream << stat_it->first << " (times)\t" << stat_it->first << " (values)";
+  }
+  output_stream << std::endl;
+
+  // Write Data
+  for (size_t i = 0; i < rows; ++i) {
+    for (auto stat_it = stats.begin(); stat_it != stats.end(); ++stat_it) {
+      if (stat_it != stats.begin()) {
+        output_stream << "\t";
+      }
+      const size_t delta = rows - stat_it->second.median_buffer_.size();
+      output_stream << ((i < delta || stat_it->second.timestamp_buffer_.size() < stat_it->second.median_buffer_.size()) ? Builder::ZERO : stat_it->second.timestamp_buffer_[i - delta]) << "\t";
+      output_stream << (i < delta ? 0 : stat_it->second.median_buffer_[i - delta]);
+    }
+    output_stream << std::endl;
+  }
+}
+
+}
+
 int TimeSeriesRawFormatter::format(const Bench::TestController::Report& report, std::ostream& output_stream, const ParseParameters& parse_parameters)
 {
-  std::map<std::string, std::vector<Bench::SimpleStatBlock> > consolidated_stat_vec_map;
+  SharedSummaryReportVisitor visitor;
 
-  for (unsigned int node_index = 0; node_index < report.node_reports.length(); ++node_index) {
-    const Bench::TestController::NodeReport& nc_report = report.node_reports[node_index];
-
-    for (auto it = parse_parameters.stats.begin(); it != parse_parameters.stats.end(); ++it) {
-      Bench::ConstPropertyStatBlock cpsb(nc_report.properties, *it);
-      if (cpsb) {
-        consolidated_stat_vec_map[*it].push_back(cpsb.to_simple_stat_block());
-      }
-    }
-
-    for (unsigned int worker_index = 0; worker_index < nc_report.worker_reports.length(); ++worker_index) {
-      const Bench::WorkerReport& worker_report = nc_report.worker_reports[worker_index];
-
-      for (unsigned int participant_index = 0; participant_index < worker_report.process_report.participants.length(); ++participant_index) {
-        const Builder::ParticipantReport& participant_report = worker_report.process_report.participants[participant_index];
-
-        for (unsigned int subscriber_index = 0; subscriber_index < participant_report.subscribers.length(); ++subscriber_index) {
-          const Builder::SubscriberReport& subscriber_report = participant_report.subscribers[subscriber_index];
-
-          for (unsigned int datareader_index = 0; datareader_index < subscriber_report.datareaders.length(); ++datareader_index) {
-            const Builder::DataReaderReport& datareader_report = subscriber_report.datareaders[datareader_index];
-
-            // Check to see if tags match (empty tags always match)
-            if (!parse_parameters.tags.empty()) {
-              bool found = false;
-              for (unsigned int tags_index = 0; tags_index < datareader_report.tags.length(); ++tags_index) {
-                const std::string tag(datareader_report.tags[tags_index]);
-                if (parse_parameters.tags.find(tag) != parse_parameters.tags.end()) {
-                  found = true;
-                  break;
-                }
-              }
-              if (!found) {
-                continue;
-              }
-            }
-
-            // Consolidate Stats
-            for (auto it = parse_parameters.stats.begin(); it != parse_parameters.stats.end(); ++it) {
-              Bench::ConstPropertyStatBlock cpsb(datareader_report.properties, *it);
-              if (cpsb) {
-                consolidated_stat_vec_map[*it].push_back(cpsb.to_simple_stat_block());
-              }
-            }
-
-          }
-
-        }
-
-        for (unsigned int publisher_index = 0; publisher_index < participant_report.publishers.length(); ++publisher_index) {
-          const Builder::PublisherReport& publisher_report = participant_report.publishers[publisher_index];
-
-          for (unsigned int datawriter_index = 0; datawriter_index < publisher_report.datawriters.length(); ++datawriter_index) {
-            const Builder::DataWriterReport& datawriter_report = publisher_report.datawriters[datawriter_index];
-
-            // Check to see if tags match (empty tags always match)
-            if (!parse_parameters.tags.empty()) {
-              bool found = false;
-              for (unsigned int tags_index = 0; tags_index < datawriter_report.tags.length(); ++tags_index) {
-                const std::string tag(datawriter_report.tags[tags_index]);
-                if (parse_parameters.tags.find(tag) != parse_parameters.tags.end()) {
-                  found = true;
-                  break;
-                }
-              }
-              if (!found) {
-                continue;
-              }
-            }
-
-            // Consolidate Stats
-            for (auto it = parse_parameters.stats.begin(); it != parse_parameters.stats.end(); ++it) {
-              Bench::ConstPropertyStatBlock cpsb(datawriter_report.properties, *it);
-              if (cpsb) {
-                consolidated_stat_vec_map[*it].push_back(cpsb.to_simple_stat_block());
-              }
-            }
-
-          }
-
-        }
-
-      }
-
-    }
-
+  if (!parse_parameters.tags.empty()) {
+    visitor.tags_ = parse_parameters.tags;
   }
 
-  for (auto it = parse_parameters.stats.begin(); it != parse_parameters.stats.end(); ++it) {
-    Bench::SimpleStatBlock consolidated = consolidate(consolidated_stat_vec_map[*it]);
-    output_stream << *it << " median buffer values:" << std::endl;
-    for (size_t i = 0; i != consolidated.median_buffer_.size(); i++) {
-      output_stream << "\t" << consolidated.median_buffer_[i] << std::endl;
-    }
-    bool show_timestamps = false;
-    for (size_t i = 0; i != consolidated.timestamp_buffer_.size(); i++) {
-      if (consolidated.timestamp_buffer_[i] != Builder::ZERO) {
-        show_timestamps = true;
+  if (!parse_parameters.stats.empty()) {
+    visitor.stats_ = parse_parameters.stats;
+  }
+
+  visit_report(report, visitor);
+
+  const auto& tags = visitor.tags_;
+  const auto& stats = visitor.stats_;
+  const auto& untagged_stat_vecs = visitor.untagged_stat_vecs_;
+  const auto& tagged_stat_vecs = visitor.tagged_stat_vecs_;
+
+  SimpleStatBlockMap untagged_stat_map;
+  std::map<std::string, SimpleStatBlockMap> tagged_stat_map;
+
+  size_t untagged_rows = 0;
+  for (auto stat_it = stats.begin(); stat_it != stats.end(); ++stat_it) {
+    auto stat_pos = untagged_stat_vecs.find(*stat_it);
+    if (stat_pos != untagged_stat_vecs.end()) {
+      untagged_stat_map[*stat_it] = consolidate(stat_pos->second);
+      if (untagged_rows < untagged_stat_map[*stat_it].median_buffer_.size()) {
+        untagged_rows = untagged_stat_map[*stat_it].median_buffer_.size();
       }
     }
-    if (show_timestamps) {
-      output_stream << *it << " timestamp buffer values:" << std::endl;
-      for (size_t i = 0; i != consolidated.timestamp_buffer_.size(); i++) {
-        output_stream << "\t" << consolidated.timestamp_buffer_[i] << std::endl;
+  }
+
+  write_series(untagged_stat_map, output_stream, untagged_rows);
+
+  for (auto tags_it = tags.begin(); tags_it != tags.end(); ++tags_it) {
+    auto tag_pos = tagged_stat_vecs.find(*tags_it);
+    if (tag_pos != tagged_stat_vecs.end()) {
+      size_t tagged_rows = 0;
+      for (auto stat_it = stats.begin(); stat_it != stats.end(); ++stat_it) {
+        auto stat_pos = tag_pos->second.find(*stat_it);
+        if (stat_pos != tag_pos->second.end()) {
+          tagged_stat_map[*tags_it][*stat_it] = consolidate(stat_pos->second);
+          if (tagged_rows < tagged_stat_map[*tags_it][*stat_it].median_buffer_.size()) {
+            tagged_rows = tagged_stat_map[*tags_it][*stat_it].median_buffer_.size();
+          }
+        }
       }
+      write_series(tagged_stat_map[*tags_it], output_stream, tagged_rows);
     }
   }
 

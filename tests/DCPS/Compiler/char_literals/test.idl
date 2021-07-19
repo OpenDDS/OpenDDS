@@ -1,0 +1,133 @@
+const char c_a = 'a';
+const char c_newline = '\n';
+const char c_tab = '\t';
+const char c_vertical_tab = '\v';
+const char c_backspace = '\b';
+const char c_carriage_return = '\r';
+const char c_form_feed = '\f';
+const char c_alert = '\a';
+const char c_backslash = '\\';
+const char c_question = '\?';
+const char c_single_quote = '\'';
+const char c_double_quote = '\"';
+const char c_oct_0 = '\0';
+const char c_oct_255 = '\377';
+const char c_hex_1 = '\x1';
+const char c_hex_254 = '\xfe';
+
+@topic
+union CharUnion switch (@key char) {
+case 'a':
+  long a;
+case '\n':
+  long newline;
+case '\t':
+  long tab;
+case '\v':
+  long vertical_tab;
+case '\b':
+  long backspace;
+case '\r':
+  long carriage_return;
+case '\f':
+  long form_feed;
+case '\a':
+  long alert;
+case '\\':
+  long backslash;
+case '\?':
+  long question;
+case '\'':
+  long single_quote;
+case '\"':
+  long double_quote;
+case '\0':
+  long oct_0;
+case '\377':
+  long oct_255;
+case '\x1':
+  long hex_1;
+case '\xfe':
+  long hex_254;
+default:
+  long default_member;
+};
+
+const string str_normal = "a\n \t \v \b \r \f \a \\ \? \' \"";
+const string str_values = "\377\x1\xfe\0";
+
+const wchar wc_a = L'a';
+/* TODO(iguessthislldo): See https://github.com/DOCGroup/ACE_TAO/issues/1284
+const wchar wc_newline = L'\n';
+const wchar wc_tab = L'\t';
+const wchar wc_vertical_tab = L'\v';
+const wchar wc_backspace = L'\b';
+const wchar wc_carriage_return = L'\r';
+const wchar wc_form_feed = L'\f';
+const wchar wc_alert = L'\a';
+const wchar wc_backslash = L'\\';
+const wchar wc_question = L'\?';
+const wchar wc_single_quote = L'\'';
+const wchar wc_double_quote = L'\"';
+const wchar wc_oct_0 = L'\0';
+const wchar wc_oct_255 = L'\377';
+const wchar wc_hex_1 = L'\x1';
+const wchar wc_hex_254 = L'\xfe';
+*/
+// TODO(iguessthislldo): See https://github.com/DOCGroup/ACE_TAO/issues/1284#issuecomment-879455512
+#ifdef __OPENDDS_IDL
+const wchar wc_u_escape = L'\u203C'; // (Double Exclamation Mark: ‼)
+#endif
+
+/* TODO(iguessthislldo): Support for 7.4.13.4.2 in TAO_IDL
+@topic
+union WcharUnion switch (@key wchar) {
+case L'a':
+  long a;
+case L'\n':
+  long newline;
+case L'\t':
+  long tab;
+case L'\v':
+  long vertical_tab;
+case L'\b':
+  long backspace;
+case L'\r':
+  long carriage_return;
+case L'\f':
+  long form_feed;
+case L'\a':
+  long alert;
+case L'\\':
+  long backslash;
+case L'\?':
+  long question;
+case L'\'':
+  long single_quote;
+case L'\"':
+  long double_quote;
+case L'\0':
+  long oct_0;
+case L'\377':
+  long oct_255;
+case L'\x1':
+  long hex_1;
+case L'\xfe':
+  long hex_254;
+case L'\u203C':
+  long u_escape;
+default:
+  long defualt_member;
+}
+*/
+
+/* TODO(iguessthislldo): config-linux.h doesn't seem to have ACE_HAS_WCHAR
+ * defined, which makes WChar typedef to ACE_UINT16, which doesn't seem to
+ * always work with wide string contstants. This is weird though because it
+ * works in my local build, but not on some of the GHA builds. Will have to
+ * investigate in ACE/TAO along with all the other problems with wchar.
+ */
+/*
+const wstring wstr_normal = L"a\n \t \v \b \r \f \a \\ \? \' \" \u203C";
+const wstring wstr_values = L"\377\x1\xfe\0";
+*/

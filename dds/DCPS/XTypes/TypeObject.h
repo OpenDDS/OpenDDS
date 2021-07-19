@@ -403,7 +403,9 @@ namespace XTypes {
     SBound bound;
     External<TypeIdentifier> element_identifier;
 
-    PlainSequenceSElemDefn() {}
+    PlainSequenceSElemDefn()
+      : bound(INVALID_SBOUND)
+    {}
 
     PlainSequenceSElemDefn(const PlainCollectionHeader& a_header,
                            const SBound& a_bound,
@@ -421,7 +423,9 @@ namespace XTypes {
     LBound bound;
     External<TypeIdentifier> element_identifier;
 
-    PlainSequenceLElemDefn() {}
+    PlainSequenceLElemDefn()
+      : bound(INVALID_LBOUND)
+    {}
 
     PlainSequenceLElemDefn(const PlainCollectionHeader& a_header,
                            const LBound& a_bound,
@@ -478,7 +482,8 @@ namespace XTypes {
     External<TypeIdentifier> key_identifier;
 
     PlainMapSTypeDefn()
-      : key_flags(0)
+      : bound(INVALID_SBOUND)
+      , key_flags(0)
     {}
 
     PlainMapSTypeDefn(const PlainCollectionHeader& a_header,
@@ -503,7 +508,10 @@ namespace XTypes {
     CollectionElementFlag key_flags;
     External<TypeIdentifier> key_identifier;
 
-    PlainMapLTypeDefn() {}
+    PlainMapLTypeDefn()
+      : bound(INVALID_LBOUND)
+      , key_flags(0)
+    {}
 
     PlainMapLTypeDefn(const PlainCollectionHeader& a_header,
                       const LBound& a_bound,
@@ -526,7 +534,10 @@ namespace XTypes {
     ACE_CDR::Long scc_length; // StronglyConnectedComponent.length
     ACE_CDR::Long scc_index; // identify type in Strongly Connected Comp.
 
-    StronglyConnectedComponentId() {}
+    StronglyConnectedComponentId()
+      : scc_length(0)
+      , scc_index(0)
+    {}
 
     StronglyConnectedComponentId(const TypeObjectHashId& a_sc_component_id,
                                  const ACE_CDR::Long& a_scc_length,
@@ -921,7 +932,8 @@ namespace XTypes {
     TypeIdentifier member_type_id;
 
     CommonStructMember()
-      : member_flags(0)
+      : member_id(0)
+      , member_flags(0)
     {}
     CommonStructMember (const MemberId& a_member_id,
                         const StructMemberFlag& a_member_flags,
@@ -1027,7 +1039,9 @@ namespace XTypes {
     MinimalStructHeader header;
     MinimalStructMemberSeq member_seq;
 
-    MinimalStructType() {}
+    MinimalStructType()
+      : struct_flags(0)
+    {}
 
     MinimalStructType(const StructTypeFlag& a_struct_flags,
                       const MinimalStructHeader& a_header,
@@ -1050,7 +1064,10 @@ namespace XTypes {
     TypeIdentifier type_id;
     UnionCaseLabelSeq label_seq;
 
-    CommonUnionMember() {}
+    CommonUnionMember()
+      : member_id(0)
+      , member_flags(0)
+    {}
 
     CommonUnionMember(const MemberId& a_member_id,
                       const UnionMemberFlag& a_member_flags,
@@ -1284,7 +1301,10 @@ namespace XTypes {
     CollectionElementFlag element_flags;
     TypeIdentifier type;
 
-    CommonCollectionElement() {}
+    CommonCollectionElement()
+      : element_flags(0)
+    {}
+
     CommonCollectionElement(CollectionElementFlag a_element_flags,
                             const TypeIdentifier& a_type)
       : element_flags(a_element_flags)
@@ -1307,7 +1327,10 @@ namespace XTypes {
   struct CommonCollectionHeader {
     LBound bound;
 
-    CommonCollectionHeader() {}
+    CommonCollectionHeader()
+      : bound(0)
+    {}
+
     explicit CommonCollectionHeader(LBound a_bound) : bound(a_bound) {}
   };
 
@@ -1436,7 +1459,8 @@ namespace XTypes {
     EnumeratedLiteralFlag flags;
 
     CommonEnumeratedLiteral()
-      : flags(0)
+      : value(0)
+      , flags(0)
     {}
 
     CommonEnumeratedLiteral(const ACE_CDR::Long& a_value,
@@ -1477,7 +1501,9 @@ namespace XTypes {
   struct CommonEnumeratedHeader {
     BitBound bit_bound;
 
-    CommonEnumeratedHeader() {}
+    CommonEnumeratedHeader()
+      : bit_bound(0)
+    {}
 
     explicit CommonEnumeratedHeader(const BitBound& a_bit_bound)
       : bit_bound(a_bit_bound)
@@ -1709,7 +1735,9 @@ namespace XTypes {
     // ===================  Future extensibility  ============
     MinimalExtendedType extended_type;
 
-    MinimalTypeObject() {}
+    MinimalTypeObject()
+      : kind(TK_NONE)
+    {}
 
     explicit MinimalTypeObject(const MinimalAliasType& alias)
       : kind(TK_ALIAS)
@@ -1775,7 +1803,9 @@ namespace XTypes {
     CompleteTypeObject complete;
     MinimalTypeObject minimal;
 
-    TypeObject() {}
+    TypeObject()
+      : kind(0)
+    {}
 
     explicit TypeObject(const CompleteTypeObject& a_complete)
       : kind(EK_COMPLETE)
