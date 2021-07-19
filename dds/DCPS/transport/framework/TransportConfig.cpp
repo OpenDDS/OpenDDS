@@ -14,7 +14,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+#if !defined _MSC_VER || _MSC_VER > 1700
 const unsigned long TransportConfig::DEFAULT_PASSIVE_CONNECT_DURATION;
+#endif
 
 TransportConfig::TransportConfig(const OPENDDS_STRING& name)
   : swap_bytes_(false)
