@@ -19,6 +19,8 @@
 #include <functional>
 #endif
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace OpenDDS {
 namespace DCPS {
 
