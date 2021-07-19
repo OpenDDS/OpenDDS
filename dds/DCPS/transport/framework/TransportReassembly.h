@@ -131,7 +131,7 @@ private:
 
   TimeDuration timeout_;
 
-  void erase_i(FragInfoMap::iterator pos);
+  void expire(const MonotonicTimePoint& now);
 
   static bool insert(OPENDDS_LIST(FragRange)& flist,
                      const SequenceRange& seqRange,
