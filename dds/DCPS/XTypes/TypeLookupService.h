@@ -12,6 +12,11 @@
 #include <dds/DCPS/SequenceNumber.h>
 #include <dds/DCPS/TypeSupportImpl.h>
 
+#include <dds/DCPS/XTypes/DynamicType.h>
+#include <dds/DCPS/XTypes/DynamicTypeMember.h>
+#include <dds/DCPS/XTypes/MemberDescriptor.h>
+#include <dds/DCPS/XTypes/TypeDescriptor.h>
+
 #include <ace/Thread_Mutex.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -40,6 +45,11 @@ public:
   void update_type_identifier_map(const TypeIdentifierPairSeq& tid_pairs);
   bool complete_to_minimal_type_object(const TypeObject& cto, TypeObject& mto) const;
 
+  DDS::ReturnCode_t complete_to_dynamic(DynamicType_rch& dt, const CompleteTypeObject& cto);
+  DDS::ReturnCode_t complete_struct_member_to_dynamic_type_member(DynamicTypeMember_rch& dtm, const CompleteStructMember& cm);
+  DDS::ReturnCode_t complete_struct_member_to_member_descriptor(MemberDescriptor*& md,
+
+    const CompleteStructMember& cm);
   // For TypeLookup_getTypeDependencies
   bool get_type_dependencies(const TypeIdentifier& type_id,
     TypeIdentifierWithSizeSeq& dependencies) const;
@@ -87,6 +97,7 @@ private:
   bool complete_to_minimal_enumerated(const CompleteEnumeratedType& ct, MinimalEnumeratedType& mt) const;
   bool complete_to_minimal_bitmask(const CompleteBitmaskType& ct, MinimalBitmaskType& mt) const;
   bool complete_to_minimal_bitset(const CompleteBitsetType& ct, MinimalBitsetType& mt) const;
+
 };
 
 typedef DCPS::RcHandle<TypeLookupService> TypeLookupService_rch;

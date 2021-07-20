@@ -12,7 +12,6 @@
 #include <dds/DCPS/RcObject.h>
 #include <dds/DCPS/RcHandle_T.h>
 #include <dds/DCPS/XTypes/TypeObject.h>
-#include <dds/DCPS/XTypes/MemberDescriptor.h>
 #include <algorithm>
 #include <cstring>
 

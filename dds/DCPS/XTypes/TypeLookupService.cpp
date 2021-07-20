@@ -436,6 +436,209 @@ bool TypeLookupService::complete_to_minimal_type_object(const TypeObject& cto, T
   }
 }
 
+DDS::ReturnCode_t TypeLookupService::complete_struct_member_to_member_descriptor(MemberDescriptor*& md,
+  const CompleteStructMember& cm) {
+  md->name = cm.detail.name;
+  md->id = cm.common.member_id;
+  TypeObject to = get_type_objects_i(cm.common.member_type_id);
+  complete_to_dynamic(md->type, to.complete);
+  md->default_value = ""; //TODO CLAYTON: Where do we get the default value from CompleteStructMember?
+  md->label.length(0);
+  if (cm.common.member_flags & (1 << 0)) {
+    if (cm.common.member_flags & (1 << 1)) {
+      md->try_construct_kind = TRIM ;
+    } else {
+      md->try_construct_kind = DISCARD;
+    }
+  } else {
+    if (cm.common.member_flags & (1 << 1)) {
+      md->try_construct_kind = USE_DEFAULT;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("Invalid TryConstruct Kind in complete_struct_member_to_member_descriptor\n")));
+    }
+  }
+  md->is_key = (cm.common.member_flags & (1 << 5));
+  md->is_optional = (cm.common.member_flags & (1 << 3));
+  md->is_must_understand = (cm.common.member_flags & (1 << 4));
+  md->is_shared = (cm.common.member_flags & (1 << 2));
+  md->is_default_label = 0;
+}
+
+DDS::ReturnCode_t TypeLookupService::complete_struct_member_to_dynamic_type_member(DynamicTypeMember_rch& dtm,
+  const CompleteStructMember& cm) {
+  complete_struct_member_to_member_descriptor(dtm->descriptor_, cm);
+}
+
+DDS::ReturnCode_t TypeLookupService::complete_to_dynamic(DynamicType_rch& dt, const CompleteTypeObject& cto) {
+  switch (cto.kind) {
+  //primitive TKs
+  case TK_NONE:
+    dt->descriptor_->kind = TK_NONE;
+    dt->descriptor_->name = ""; //TODO CLAYTON
+    dt->descriptor_->bound.length(0);
+    break;
+  case TK_BOOLEAN:
+    dt->descriptor_->kind = TK_BOOLEAN;
+    dt->descriptor_->name = "bool";
+    dt->descriptor_->bound.length(0);
+    break;
+  case TK_BYTE:
+    dt->descriptor_->kind = TK_BYTE;
+    dt->descriptor_->name = "byte";
+    dt->descriptor_->bound.length(0);
+    break;
+  case TK_INT16:
+    dt->descriptor_->kind = TK_INT16;
+    dt->descriptor_->name = "short";
+    dt->descriptor_->bound.length(0);
+    break;
+  case TK_INT32:
+    dt->descriptor_->kind = TK_INT32;
+    dt->descriptor_->name = "long";
+    dt->descriptor_->bound.length(0);
+    break;
+  case TK_INT64:
+    dt->descriptor_->kind = TK_INT64;
+    dt->descriptor_->name = "longlong";
+    dt->descriptor_->bound.length(0);
+    break;
+  case TK_UINT16:
+    dt->descriptor_->kind = TK_UINT16;
+    dt->descriptor_->name = "ushort";
+    dt->descriptor_->bound.length(0);
+    break;
+  case TK_UINT32:
+    dt->descriptor_->kind = TK_UINT32;
+    dt->descriptor_->name = "ulong";
+    dt->descriptor_->bound.length(0);
+    break;
+  case TK_UINT64:
+    dt->descriptor_->kind = TK_UINT64;
+    dt->descriptor_->name = "ulonglong";
+    dt->descriptor_->bound.length(0);
+    break;
+  case TK_FLOAT32:
+    dt->descriptor_->kind = TK_FLOAT32;
+    dt->descriptor_->name = "double";
+    dt->descriptor_->bound.length(0);
+    break;
+  case TK_FLOAT64:
+    dt->descriptor_->kind = TK_FLOAT32;
+    dt->descriptor_->name = "longdouble";
+    dt->descriptor_->bound.length(0);
+    break;
+  case TK_FLOAT128:
+    dt->descriptor_->kind = TK_FLOAT32;
+    dt->descriptor_->name = "longlongdouble";
+    dt->descriptor_->bound.length(0);
+    break;
+  case TK_INT8:
+    dt->descriptor_->kind = TK_INT8;
+    dt->descriptor_->name = ""; // TODO CLAYTON
+    dt->descriptor_->bound.length(0);
+    break;
+  case TK_UINT8:
+    dt->descriptor_->kind = TK_UINT8;
+    dt->descriptor_->name = ""; //TODO CLAYTON
+    dt->descriptor_->bound.length(0);
+    break;
+  case TK_CHAR8:
+    dt->descriptor_->kind = TK_CHAR8;
+    dt->descriptor_->name = ""; //TODO CLAYTON
+    dt->descriptor_->bound.length(0);
+    break;
+  case TK_CHAR16:
+    dt->descriptor_->kind = TK_CHAR16;
+    dt->descriptor_->name = ""; //TODO CLAYTON
+    dt->descriptor_->bound.length(0);
+    break;
+  //string TKs
+  case TK_STRING8:
+    dt->descriptor_->kind = TK_STRING8;
+    dt->descriptor_->name = ""; //TODO CLAYTON
+    dt->descriptor_->bound.length(0);
+    break;
+  case TK_STRING16:
+    dt->descriptor_->kind = TK_STRING16;
+    dt->descriptor_->name = ""; //TODO CLAYTON
+    dt->descriptor_->bound.length(0);
+    break;
+  // Constructed/Named types
+  case TK_ALIAS:
+    break;
+  // Enumerated TKs
+  case TK_ENUM:
+    dt->descriptor_->kind = TK_ENUM;
+    dt->descriptor_->name = ""; //TODO CLAYTON
+    dt->descriptor_->bound.length(0);
+    break;
+  case TK_BITMASK:
+    dt->descriptor_->kind = TK_BITMASK;
+    dt->descriptor_->name = ""; //TODO CLAYTON
+    dt->descriptor_->bound.length(0);
+    break;
+  // Structured TKs
+  case TK_ANNOTATION:
+    dt->descriptor_->kind = TK_ANNOTATION;
+    dt->descriptor_->name = ""; //TODO CLAYTON
+    dt->descriptor_->bound.length(0);
+    break;
+  case TK_STRUCTURE: {
+    dt->descriptor_->kind = TK_STRUCTURE;
+    dt->descriptor_->name = cto.struct_type.header.detail.type_name;
+    //dt->descriptor_->discriminator_type = nil
+    dt->descriptor_->bound.length(0);
+    
+    TypeObject to = get_type_objects_i(cto.struct_type.header.base_type);
+    complete_to_dynamic(dt->descriptor_->base_type, to.complete);
+    
+    //dt->descriptor_->element_type =  nil
+    //dt->descriptor_->key_element_type =  nil
+    if (cto.struct_type.struct_flags & (1 << 0)) {
+      dt->descriptor_->extensibility_kind = FINAL;
+    } else if (cto.struct_type.struct_flags & (1 << 1)) {
+      dt->descriptor_->extensibility_kind = APPENDABLE;
+    } else if (cto.struct_type.struct_flags & (1 << 2)) {
+      dt->descriptor_->extensibility_kind = MUTABLE;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("Invalid extensibility kind in complete_to_dynamic(DynamicType& dt, const CompleteTypeObject& cto)\n")));
+    }
+    dt->descriptor_->is_nested = (cto.struct_type.struct_flags & (1 << 3));
+    for (ulong i = 0; i < cto.struct_type.member_seq.length(); ++i) {
+      DynamicTypeMember_rch dtm(new DynamicTypeMember, OpenDDS::DCPS::keep_count());
+      complete_struct_member_to_dynamic_type_member(dtm, cto.struct_type.member_seq[i]);
+      dt->member_by_index.insert(dt->member_by_index.end(), dtm); //insert at end?
+    }
+  }
+  break;
+  case TK_UNION:
+    dt->descriptor_->kind = TK_UNION;
+    dt->descriptor_->name = ""; //TODO CLAYTON
+    dt->descriptor_->bound.length(0);
+    break;
+  case TK_BITSET:
+    dt->descriptor_->kind = TK_BITSET;
+    dt->descriptor_->name = ""; //TODO CLAYTON
+    dt->descriptor_->bound.length(0);
+    break;
+  // Collection TKs
+  case TK_SEQUENCE:
+    dt->descriptor_->kind = TK_SEQUENCE;
+    dt->descriptor_->name = ""; //TODO CLAYTON
+    dt->descriptor_->bound.length(0);
+    break;
+  case TK_ARRAY:
+    dt->descriptor_->kind = TK_ARRAY;
+    dt->descriptor_->name = ""; //TODO CLAYTON
+    dt->descriptor_->bound.length(0);
+    break;
+  case TK_MAP:
+    dt->descriptor_->kind = TK_MAP;
+    dt->descriptor_->name = ""; //TODO CLAYTON
+    dt->descriptor_->bound.length(0);
+    break;
+  }
+}
 void TypeLookupService::add_type_dependencies(const TypeIdentifier& type_id,
   const TypeIdentifierWithSizeSeq& dependencies)
 {
