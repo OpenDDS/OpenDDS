@@ -8,10 +8,13 @@
 #ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTREASSEMBLY_H
 #define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTREASSEMBLY_H
 
+#include "ReceivedDataSample.h"
+
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/Definitions.h"
-#include "ReceivedDataSample.h"
+#include "dds/DCPS/DisjointSequence.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/TimeTypes.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -20,6 +23,7 @@ namespace DCPS {
 
 class OpenDDS_Dcps_Export TransportReassembly {
 public:
+  explicit TransportReassembly(const TimeDuration& timeout = TimeDuration(300));
 
   /// Called by TransportReceiveStrategy if the fragmentation header flag
   /// is set.  Returns true/false to indicate if data should be delivered to
@@ -72,6 +76,16 @@ private:
       return this->data_sample_seq_ < rhs.data_sample_seq_;
     }
 
+    bool operator==(const FragKey& other) const
+    {
+      return publication_ == other.publication_ && data_sample_seq_ == other.data_sample_seq_;
+    }
+
+    bool operator!=(const FragKey& other) const
+    {
+      return !(*this == other);
+    }
+
     static GUID_tKeyLessThan compare_;
     PublicationId publication_;
     SequenceNumber data_sample_seq_;
@@ -96,18 +110,28 @@ private:
 
   struct FragInfo {
     FragInfo()
-      : complete_(false), have_first_(false), range_list_(), total_frags_(0) {}
-    FragInfo(bool hf, const FragRangeList& rl, ACE_UINT32 tf)
-      : complete_(false), have_first_(hf), range_list_(rl), total_frags_(tf) {}
+      : have_first_(false), range_list_(), total_frags_(0) {}
+    FragInfo(bool hf, const FragRangeList& rl, ACE_UINT32 tf, const MonotonicTimePoint& expiration)
+      : have_first_(hf), range_list_(rl), total_frags_(tf), expiration_(expiration) {}
 
-    bool complete_;
     bool have_first_;
     FragRangeList range_list_;
     ACE_UINT32 total_frags_;
+    MonotonicTimePoint expiration_;
   };
 
   typedef OPENDDS_MAP(FragKey, FragInfo) FragInfoMap;
   FragInfoMap fragments_;
+
+  typedef OPENDDS_MULTIMAP(MonotonicTimePoint, FragKey) ExpirationQueue;
+  ExpirationQueue expiration_queue_;
+
+  typedef OPENDDS_MAP_CMP(PublicationId, DisjointSequence, GUID_tKeyLessThan) CompletedMap;
+  CompletedMap completed_;
+
+  TimeDuration timeout_;
+
+  void check_expirations(const MonotonicTimePoint& now);
 
   static bool insert(OPENDDS_LIST(FragRange)& flist,
                      const SequenceRange& seqRange,

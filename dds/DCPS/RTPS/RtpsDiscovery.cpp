@@ -634,6 +634,18 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                               ACE_TEXT("[rtps_discovery/%C] section.\n"),
                               string_value.c_str(), rtps_name.c_str()), -1);
           }
+        } else if (name == "SedpFragmentReassemblyTimeout") {
+          const OPENDDS_STRING& string_value = it->second;
+          int value;
+          if (DCPS::convertToInteger(string_value, value)) {
+            config->sedp_fragment_reassembly_timeout(TimeDuration::from_msec(value));
+          } else {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+                              ACE_TEXT("Invalid entry (%C) for SedpFragmentReassemblyTimeout in ")
+                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                              string_value.c_str(), rtps_name.c_str()), -1);
+          }
         } else if (name == "SedpPassiveConnectDuration") {
           const OPENDDS_STRING& string_value = it->second;
           int value;
