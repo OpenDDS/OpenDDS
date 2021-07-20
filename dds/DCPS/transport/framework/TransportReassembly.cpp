@@ -173,6 +173,8 @@ TransportReassembly::clear_completed(const RepoId& pub_id)
       ++begin;
     }
   }
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::clear_completed() "
+             "left with %B fragments\n", fragments_.size()));
 }
 
 CORBA::ULong
@@ -276,8 +278,9 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
   if (iter == fragments_.end()) {
     fragments_[key] = FragInfo(firstFrag, FragRangeList(1, FragRange(seqRange, data)), total_frags);
     // since this is the first fragment we've seen, it can't possibly be done
-    VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble() "
-      "stored first frag, returning false (incomplete)\n"));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble() "
+               "stored first frag, returning false (incomplete) with %B fragments\n",
+               fragments_.size()));
     return false;
   } else {
     if (iter->second.complete_) {
@@ -306,8 +309,9 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
     swap(data, iter->second.range_list_.front().rec_ds_);
     iter->second.range_list_.clear();
     iter->second.complete_ = true;
-    VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble() "
-      "removed frag, returning %C\n", data.sample_ ? "true" : "false"));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble() "
+               "removed frag, returning %C with %B fragments\n",
+               data.sample_ ? "true" : "false", fragments_.size()));
     return data.sample_.get(); // could be false if we had data_unavailable()
   }
 
@@ -373,7 +377,10 @@ TransportReassembly::data_unavailable(const SequenceNumber& dataSampleSeq,
                                       const RepoId& pub_id)
 {
   const FragKey key(pub_id, dataSampleSeq);
-  fragments_.erase(key);
+  if (fragments_.erase(key)) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::data_unavailable "
+               "removed leaving %B fragments\n", fragments_.size()));
+  }
 }
 
 }
