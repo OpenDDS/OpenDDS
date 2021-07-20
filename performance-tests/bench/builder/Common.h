@@ -36,6 +36,8 @@ Bench_Builder_Export bool operator<=(const TimeStamp& lhs, const TimeStamp& rhs)
 
 Bench_Builder_Export bool operator==(const TimeStamp& lhs, const TimeStamp& rhs);
 
+Bench_Builder_Export bool operator!=(const TimeStamp& lhs, const TimeStamp& rhs);
+
 Bench_Builder_Export std::ostream& operator<<(std::ostream& out, const TimeStamp& ts);
 
 /**

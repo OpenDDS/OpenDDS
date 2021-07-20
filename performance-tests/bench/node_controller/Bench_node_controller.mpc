@@ -1,4 +1,6 @@
 project: ../bench_builder_exe, ../bench_exe {
+  exename = node_controller
+
   libs += OpenDDS_Tcp
   after += OpenDDS_Tcp
 }

@@ -10,6 +10,7 @@
 
 #include <dds/DCPS/DataSampleElement.h>
 #include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Message_Block_Ptr.h>
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/SendStateDataSampleList.h>
@@ -159,7 +160,7 @@ bool SocketWriter::send(const ACE_Message_Block& mb) const
     ssize_t res = socket_.send(mb.rd_ptr(), mb.length(), dest);
     if (res >= 0) {
       ACE_DEBUG((LM_INFO, "SocketWriter %C sent %C (%d bytes)\n",
-                 OPENDDS_STRING(GuidConverter(id_)).c_str(), i->get_host_addr(), res));
+                 OPENDDS_STRING(GuidConverter(id_)).c_str(), LogAddr::ip(*i).c_str(), res));
     } else {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: in socket_.send()%m\n")), false);
     }

@@ -30,33 +30,8 @@ project(OpenDDS_QOS_XML_XSC_Handler): install, ace_xml_utils, dcpslib {
   after += OpenDDS_XML_QOS_XSC_Generation
   dynamicflags += OPENDDS_XML_QOS_HANDLER_BUILD_DLL
 
-  Source_Files {
-    dds_qos.cpp
-    XML_File_Intf.cpp
-    QOS_XML_Loader.cpp
-    DataWriterQos_Handler.cpp
-    DataReaderQos_Handler.cpp
-    TopicQos_Handler.cpp
-    PublisherQos_Handler.cpp
-    SubscriberQos_Handler.cpp
-    ParticipantQos_Handler.cpp
-    QOS_Common.cpp
-  }
-
   Header_Files {
     OpenDDS_XML_QOS_Handler_Export.h
-    dds_qos.hpp
-    QOS_Common.h
-    DataWriterQos_Handler.h
-    DataReaderQos_Handler.h
-    TopicQos_Handler.h
-    PublisherQos_Handler.h
-    SubscriberQos_Handler.h
-    ParticipantQos_Handler.h
-  }
-
-  Template_Files {
-    *_T.cpp
   }
 
   specific {

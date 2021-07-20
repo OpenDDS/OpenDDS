@@ -7,6 +7,7 @@
 
 #include "RtpsDiscovery.h"
 
+#include <dds/DCPS/LogAddr.h>
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/ConfigUtils.h"
 #include "dds/DCPS/DomainParticipantImpl.h"
@@ -15,6 +16,8 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/Registered_Data_Types.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
+
+#include "dds/DCPS/transport/framework/TransportConfig.h"
 #include "dds/DCPS/transport/framework/TransportSendStrategy.h"
 
 #include "ace/Reactor.h"
@@ -80,6 +83,7 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , sedp_heartbeat_period_(1)
   , sedp_nak_response_delay_(0, 200*1000 /*microseconds*/) // default from RTPS
   , sedp_send_delay_(0, 10 * 1000)
+  , sedp_passive_connect_duration_(TimeDuration::from_msec(DCPS::TransportConfig::DEFAULT_PASSIVE_CONNECT_DURATION))
   , participant_flags_(PFLAGS_THIS_VERSION)
   , sedp_responsive_mode_(false)
 {}
@@ -135,10 +139,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       // spdpaddr defaults to DCPSDefaultAddress if set
       if (TheServiceParticipant->default_address() != ACE_INET_Addr()) {
         config->spdp_local_address(TheServiceParticipant->default_address());
-        ACE_TCHAR buff[ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 1];
-        TheServiceParticipant->default_address().addr_to_string(static_cast<ACE_TCHAR*>(buff), ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 1);
-        OPENDDS_STRING addr_str(ACE_TEXT_ALWAYS_CHAR(static_cast<const ACE_TCHAR*>(buff)));
-        config->multicast_interface(addr_str.substr(0, addr_str.find_first_of(':')));
+        config->multicast_interface(DCPS::LogAddr::ip(TheServiceParticipant->default_address()));
       }
 
       DCPS::ValueMap values;
@@ -633,6 +634,18 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                               ACE_TEXT("[rtps_discovery/%C] section.\n"),
                               string_value.c_str(), rtps_name.c_str()), -1);
           }
+        } else if (name == "SedpPassiveConnectDuration") {
+          const OPENDDS_STRING& string_value = it->second;
+          int value;
+          if (DCPS::convertToInteger(string_value, value)) {
+            config->sedp_passive_connect_duration(TimeDuration::from_msec(value));
+          } else {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+                              ACE_TEXT("Invalid entry (%C) for SedpPassiveConnectDuration in ")
+                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                              string_value.c_str(), rtps_name.c_str()), -1);
+          }
         } else if (name == "SecureParticipantUserData") {
           const OPENDDS_STRING& string_value = it->second;
           int int_value;
@@ -947,16 +960,6 @@ RtpsDiscovery::spdp_rtps_relay_address(const ACE_INET_Addr& address)
   const ACE_INET_Addr prev = config_->spdp_rtps_relay_address();
   if (prev == address) {
     return;
-  }
-
-  if (prev != ACE_INET_Addr()) {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-    for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
-         dom_pos != dom_limit; ++dom_pos) {
-      for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
-        part_pos->second->remove_application_participant();
-      }
-    }
   }
 
   config_->spdp_rtps_relay_address(address);

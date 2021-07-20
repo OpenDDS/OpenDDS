@@ -14,12 +14,17 @@ use strict;
 PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
 
 my $debug = 0;
-my $debugOpts = "-DCPSDebugLevel $debug" if $debug;
+my $opts = $debug ? "-DCPSDebugLevel $debug " : '';
 
 my $test = new PerlDDS::TestFramework();
 $test->enable_console_logging();
+$test->{'add_transport_config'} = 0;
 
-$test->process("findtopic", "findtopic", $debugOpts);
+if ($test->{'flags'}->{'rtps'}) {
+    $opts .= 'rtps';
+}
+
+$test->process("findtopic", "findtopic", $opts);
 $test->start_process("findtopic");
 
 my $client = $test->finish(15);

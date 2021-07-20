@@ -17,16 +17,6 @@ namespace RtpsRelay {
 
 typedef std::set<std::string> StringSet;
 
-inline std::string addr_to_string(const ACE_INET_Addr& a_addr)
-{
-  std::array<ACE_TCHAR, 256> as_string{{}};
-  if (a_addr.addr_to_string(as_string.data(), as_string.size()) != 0) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: addr_to_string failed to convert address to string")));
-    return "";
-  }
-  return ACE_TEXT_ALWAYS_CHAR(as_string.data());
-}
-
 inline std::string guid_to_string(const OpenDDS::DCPS::GUID_t& a_guid)
 {
   std::stringstream ss;

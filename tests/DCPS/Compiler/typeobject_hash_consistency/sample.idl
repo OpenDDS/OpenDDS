@@ -1,0 +1,37 @@
+#include <tao/LongSeq.pidl>
+
+module MyMod {
+
+  @topic
+  @mutable
+  struct MyStruct {
+    long l;
+  };
+
+  struct CircularStruct2;
+
+  @topic
+  @mutable
+  struct CircularStruct {
+    sequence<CircularStruct2> circular_struct2_seq;
+  };
+
+  @topic
+  @mutable
+  struct CircularStruct2 {
+    sequence<CircularStruct> circular_struct_seq;
+    CircularStruct circular_struct_arr[3];
+  };
+
+  enum MyEnum { A, B };
+
+  @topic
+  union MyUnion switch (MyEnum) {
+    case A: long l1;
+    case B: long l2;
+  };
+
+  typedef sequence<long> LSeq;
+
+  typedef long LArr[5];
+};

@@ -10,6 +10,7 @@ project: acelib, dds_macros, install {
 
   Header_Files {
     Hash.h
+    LogAddr.h
     SafetyProfileStreams.h
     Serializer.h
     debug.h
@@ -19,6 +20,7 @@ project: acelib, dds_macros, install {
 
   Source_Files {
     Hash.cpp
+    LogAddr.cpp
     SafetyProfileStreams.cpp
     Serializer.cpp
     debug.cpp

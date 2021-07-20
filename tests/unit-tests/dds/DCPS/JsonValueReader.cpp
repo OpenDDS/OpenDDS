@@ -125,8 +125,8 @@ TEST(JsonValueReader, struct_max)
   MemberId member_id;
   ACE_CDR::Boolean bool_value;
   ACE_CDR::Octet byte_value;
-  ACE_CDR::Char int8_value;
-  ACE_CDR::Octet uint8_value;
+  ACE_CDR::Int8 int8_value;
+  ACE_CDR::UInt8 uint8_value;
   ACE_CDR::Short int16_value;
   ACE_CDR::UShort uint16_value;
   ACE_CDR::Long int32_value;
@@ -275,8 +275,8 @@ TEST(JsonValueReader, array_min)
   JsonValueReader<> jvr(ss);
   ACE_CDR::Boolean bool_value;
   ACE_CDR::Octet byte_value;
-  ACE_CDR::Char int8_value;
-  ACE_CDR::Octet uint8_value;
+  ACE_CDR::Int8 int8_value;
+  ACE_CDR::UInt8 uint8_value;
   ACE_CDR::Short int16_value;
   ACE_CDR::UShort uint16_value;
   ACE_CDR::Long int32_value;
@@ -388,8 +388,8 @@ TEST(JsonValueReader, sequence_zero)
   JsonValueReader<> jvr(ss);
   ACE_CDR::Boolean bool_value;
   ACE_CDR::Octet byte_value;
-  ACE_CDR::Char int8_value;
-  ACE_CDR::Octet uint8_value;
+  ACE_CDR::Int8 int8_value;
+  ACE_CDR::UInt8 uint8_value;
   ACE_CDR::Short int16_value;
   ACE_CDR::UShort uint16_value;
   ACE_CDR::Long int32_value;

@@ -107,7 +107,14 @@ operator<<(std::ostream& out,
       be_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 1, \"note\" : { \"presentation\" : { \"type\" : \"bool\" } } }";
       break;
     case AST_PredefinedType::PT_octet:
+      be_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 8, \"unsigned\" : true, "
+        "\"note\" : { \"presentation\" : { \"type\" : \"byte\" } }  }";
+      break;
+    case AST_PredefinedType::PT_uint8:
       be_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 8, \"unsigned\" : true }";
+      break;
+    case AST_PredefinedType::PT_int8:
+      be_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 8 }";
       break;
     case AST_PredefinedType::PT_any:
     case AST_PredefinedType::PT_object:

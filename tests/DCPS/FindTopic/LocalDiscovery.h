@@ -1,4 +1,5 @@
 #include <dds/DCPS/Discovery.h>
+#include <dds/DCPS/GuidUtils.h>
 
 #include <map>
 #include <string>
@@ -13,7 +14,10 @@ private:
   EntityId_t next_topic_id_;
 
   struct TopicDetails {
-    TopicDetails() : refcount_(1) {}
+    TopicDetails()
+      : entity_id_(ENTITYID_UNKNOWN)
+      , refcount_(1)
+    {}
     EntityId_t entity_id_;
     std::string type_;
     int refcount_;

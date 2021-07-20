@@ -5,6 +5,7 @@
 #ifndef OPENDDS_DCPS_RTPS_TYPE_LOOKUP_H
 #define OPENDDS_DCPS_RTPS_TYPE_LOOKUP_H
 
+#include "BaseMessageTypes.h"
 #include "RtpsRpcTypeSupportImpl.h"
 
 #include <dds/DCPS/XTypes/TypeObject.h>
@@ -47,7 +48,9 @@ struct TypeLookup_getTypes_Result { //IDL: union switch (long)
   // case DDS_RETCODE_OK:
   TypeLookup_getTypes_Out result;
 
-  TypeLookup_getTypes_Result() {}
+  TypeLookup_getTypes_Result()
+    : return_code(DDS::RETCODE_OK)
+  {}
 };
 
 struct OctetSeq32 : Sequence<ACE_CDR::Octet> {
@@ -79,7 +82,9 @@ struct TypeLookup_getTypeDependencies_Result { //IDL: union switch (long)
   // case DDS_RETCODE_OK:
   TypeLookup_getTypeDependencies_Out result;
 
-  TypeLookup_getTypeDependencies_Result() {}
+  TypeLookup_getTypeDependencies_Result()
+    : return_code(DDS::RETCODE_OK)
+  {}
 };
 
 struct TypeLookup_Call { //IDL: union switch (long)
@@ -91,7 +96,9 @@ struct TypeLookup_Call { //IDL: union switch (long)
   // case TypeLookup_getDependencies_Hash:
   TypeLookup_getTypeDependencies_In getTypeDependencies;
 
-  TypeLookup_Call() {}
+  TypeLookup_Call()
+    : kind(static_cast<ACE_CDR::Long>(TypeLookup_getTypes_HashId))
+  {}
 };
 
 // @final @RPCRequestType
@@ -99,7 +106,11 @@ struct TypeLookup_Request {
   DDS::RPC::RequestHeader header;
   TypeLookup_Call data;
 
-  TypeLookup_Request() {}
+  TypeLookup_Request()
+  {
+    header.requestId.writer_guid = RTPS::GUID_UNKNOWN;
+    header.requestId.sequence_number = RTPS::SEQUENCENUMBER_UNKNOWN;
+  }
 };
 
 struct TypeLookup_Return { //IDL: union switch (long)
@@ -111,7 +122,9 @@ struct TypeLookup_Return { //IDL: union switch (long)
   // case TypeLookup_getDependencies_Hash:
   TypeLookup_getTypeDependencies_Result getTypeDependencies;
 
-  TypeLookup_Return() {}
+  TypeLookup_Return()
+    : kind(static_cast<ACE_CDR::Long>(TypeLookup_getTypes_HashId))
+  {}
 };
 
 // @final @RPCRequestType
@@ -119,7 +132,12 @@ struct TypeLookup_Reply {
   DDS::RPC::ReplyHeader header;
   TypeLookup_Return _cxx_return;
 
-  TypeLookup_Reply() {}
+  TypeLookup_Reply()
+  {
+    header.relatedRequestId.writer_guid = RTPS::GUID_UNKNOWN;
+    header.relatedRequestId.sequence_number = RTPS::SEQUENCENUMBER_UNKNOWN;
+    header.remoteEx = DDS::RPC::REMOTE_EX_OK;
+  }
 };
 
 } // namespace XTypes
