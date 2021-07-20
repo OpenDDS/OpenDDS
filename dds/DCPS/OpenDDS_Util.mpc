@@ -2,7 +2,7 @@ project: acelib, dds_macros, install {
   requires += no_opendds_safety_profile
   sharedname = OpenDDS_Util
   dynamicflags = OPENDDS_DCPS_BUILD_DLL
-  includes += $(DDS_ROOT) $(DDS_ROOT)/dds
+  includes += $(DDS_ROOT) $(DDS_ROOT)/dds $(TAO_ROOT)
   libout = $(DDS_ROOT)/lib
   pch_header =
   pch_source =

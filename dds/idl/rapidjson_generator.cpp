@@ -7,6 +7,8 @@
 
 #include "be_extern.h"
 
+#include <dds/DCPS/Definitions.h>
+
 #include <utl_identifier.h>
 
 using namespace AstTypeClassification;
@@ -42,12 +44,16 @@ namespace {
         return "String";
       case AST_PredefinedType::PT_boolean:
         return "Bool";
+#if OPENDDS_HAS_EXPLICIT_INTS
       case AST_PredefinedType::PT_int8:
+#endif
       case AST_PredefinedType::PT_short:
       case AST_PredefinedType::PT_long:
         return "Int";
       case AST_PredefinedType::PT_octet:
+#if OPENDDS_HAS_EXPLICIT_INTS
       case AST_PredefinedType::PT_uint8:
+#endif
       case AST_PredefinedType::PT_ushort:
       case AST_PredefinedType::PT_ulong:
         return "Uint";
@@ -155,14 +161,18 @@ namespace {
           // prefix and suffix not needed
           break;
 
+#if OPENDDS_HAS_EXPLICIT_INTS
         case AST_PredefinedType::PT_int8:
+#endif
         case AST_PredefinedType::PT_short:
           prefix = "static_cast<int>(";
           suffix = ")";
           break;
 
         case AST_PredefinedType::PT_octet:
+#if OPENDDS_HAS_EXPLICIT_INTS
         case AST_PredefinedType::PT_uint8:
+#endif
         case AST_PredefinedType::PT_ushort:
           prefix = "static_cast<unsigned int>(";
           suffix = ")";
@@ -311,8 +321,10 @@ namespace {
         case AST_PredefinedType::PT_longlong:
         case AST_PredefinedType::PT_ulonglong:
         case AST_PredefinedType::PT_octet:
+#if OPENDDS_HAS_EXPLICIT_INTS
         case AST_PredefinedType::PT_uint8:
         case AST_PredefinedType::PT_int8:
+#endif
         case AST_PredefinedType::PT_ushort:
         case AST_PredefinedType::PT_short:
         case AST_PredefinedType::PT_ulong:

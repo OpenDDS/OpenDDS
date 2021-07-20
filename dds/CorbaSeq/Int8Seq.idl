@@ -6,11 +6,18 @@
 #ifndef OPENDDS_CORBASEQ_INT8SEQ_IDL
 #define OPENDDS_CORBASEQ_INT8SEQ_IDL
 
-#pragma prefix "omg.org"
+#if defined __TAO_IDL_FEATURES
+#  include __TAO_IDL_FEATURES
+#endif
+
+#if defined TAO_IDL_HAS_EXPLICIT_INTS and TAO_IDL_HAS_EXPLICIT_INTS
+#  pragma prefix "omg.org"
 
 module CORBA
 {
   typedef sequence<int8> Int8Seq;
 };
+
+#endif
 
 #endif /* OPENDDS_CORBASEQ_INT8SEQ_IDL */
