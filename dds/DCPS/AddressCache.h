@@ -55,11 +55,11 @@ public:
 
 #if defined ACE_HAS_CPP11
   typedef OPENDDS_UNORDERED_MAP_T(Key, RcHandle<AddressCacheEntry>) MapType;
-  typedef std::vector<Key> KeyVec;
+  typedef OPENDDS_VECTOR(Key) KeyVec;
   typedef OPENDDS_UNORDERED_MAP_T(GUID_t, KeyVec) IdMapType;
 #else
   typedef OPENDDS_MAP_T(Key, RcHandle<AddressCacheEntry>) MapType;
-  typedef std::vector<Key> KeyVec;
+  typedef OPENDDS_VECTOR(Key) KeVec;
   typedef OPENDDS_MAP_T(GUID_t, KeyVec) IdMapType;
 #endif
 
@@ -77,7 +77,7 @@ public:
         rch_ = make_rch<AddressCacheEntry>();
         cache.map_[key] = rch_;
         GuidSet set;
-        key.contains(set);
+        key.get_contained_guids(set);
         for (GuidSet::const_iterator it = set.begin(); it != set.end(); ++it) {
           cache.id_map_[*it].push_back(key);
         }
@@ -139,7 +139,7 @@ public:
     } else {
       rch = make_rch<AddressCacheEntry>(addrs, expires);
       GuidSet set;
-      key.contains(set);
+      key.get_contained_guids(set);
       for (GuidSet::const_iterator it = set.begin(); it != set.end(); ++it) {
         id_map_[*it].push_back(key);
       }
@@ -151,20 +151,6 @@ public:
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     return map_.erase(key) != 0;
   }
-
-  /*
-  void remove(const Key& start_key, const Key& end_key)
-  {
-    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    typename MapType::iterator start = map_.lower_bound(start_key);
-    if (start != map_.end()) {
-      typename MapType::iterator end = map_.upper_bound(end_key);
-      while (start != end) {
-        map_.erase(start++);
-      }
-    }
-  }
-  */
 
   void remove_id(const GUID_t& val)
   {

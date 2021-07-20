@@ -36,7 +36,7 @@ struct OpenDDS_Rtps_Udp_Export BundlingCacheKey {
 
   bool operator<(const BundlingCacheKey& rhs) const
   {
-    int r = std::memcmp(&dst_guid_, &rhs.dst_guid_, 2 * sizeof (GUID_t));
+    int r = std::memcmp(this, &rhs.dst_guid_, 2 * sizeof (GUID_t));
     if (r < 0) {
       return true;
     } else if (r == 0) {
@@ -60,7 +60,7 @@ struct OpenDDS_Rtps_Udp_Export BundlingCacheKey {
     return *this;
   }
 
-  void contains(GuidSet& set) const
+  void get_contained_guids(GuidSet& set) const
   {
     set = to_guids_;
     set.insert(dst_guid_);

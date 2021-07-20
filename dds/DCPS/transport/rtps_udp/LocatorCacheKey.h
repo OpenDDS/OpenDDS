@@ -54,7 +54,7 @@ struct OpenDDS_Rtps_Udp_Export LocatorCacheKey {
     return *this;
   }
 
-  void contains(GuidSet& set) const
+  void get_contained_guids(GuidSet& set) const
   {
     set.clear();
     set.insert(remote_);

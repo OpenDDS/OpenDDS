@@ -19,7 +19,7 @@ struct TestKey {
   bool operator==(const TestKey& rhs) const {
     return std::memcmp(this, &rhs, sizeof (TestKey)) == 0;
   }
-  void contains(RepoIdSet& set) const {
+  void get_contained_guids(RepoIdSet& set) const {
     set.clear();
     set.insert(from_);
     set.insert(to_);
