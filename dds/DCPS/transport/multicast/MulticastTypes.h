@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_MULTICASTTYPES_H
-#define DCPS_MULTICASTTYPES_H
+#ifndef OPENDDS_DCPS_TRANSPORT_MULTICAST_MULTICASTTYPES_H
+#define OPENDDS_DCPS_TRANSPORT_MULTICAST_MULTICASTTYPES_H
 
 #include "ace/Basic_Types.h"
 #include "dds/Versioned_Namespace.h"

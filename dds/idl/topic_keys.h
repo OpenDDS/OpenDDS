@@ -38,6 +38,7 @@ public:
     StructureType,
     ArrayType,
     UnionType,
+    SequenceType,
     InvalidType
   };
 

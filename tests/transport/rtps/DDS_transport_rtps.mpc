@@ -1,4 +1,4 @@
-project(*pub) : dcpsexe, dcps_test, dcps_rtps_udp {
+project(*pub) : dcpsexe, dcps_test, dcps_rtps_udp, ../TestMsg/TestMsg {
 
   exename = publisher
 
@@ -7,7 +7,7 @@ project(*pub) : dcpsexe, dcps_test, dcps_rtps_udp {
   }
 }
 
-project(*sub) : dcpsexe, dcps_test, dcps_rtps_udp {
+project(*sub) : dcpsexe, dcps_test, dcps_rtps_udp, ../TestMsg/TestMsg {
 
   exename = subscriber
 

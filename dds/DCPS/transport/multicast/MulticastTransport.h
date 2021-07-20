@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_MULTICASTTRANSPORT_H
-#define DCPS_MULTICASTTRANSPORT_H
+#ifndef OPENDDS_DCPS_TRANSPORT_MULTICAST_MULTICASTTRANSPORT_H
+#define OPENDDS_DCPS_TRANSPORT_MULTICAST_MULTICASTTRANSPORT_H
 
 #include "Multicast_Export.h"
 
@@ -45,7 +45,9 @@ protected:
                                               const TransportClient_rch& client);
 
   virtual void stop_accepting_or_connecting(const TransportClient_wrch& client,
-                                            const RepoId& remote_id);
+                                            const RepoId& remote_id,
+                                            bool disassociate,
+                                            bool association_failed);
 
   bool configure_i(MulticastInst& config);
 
@@ -56,6 +58,8 @@ protected:
   virtual void release_datalink(DataLink* link);
 
   virtual std::string transport_type() const { return "multicast"; }
+
+  void client_stop(const RepoId& localId);
 
 private:
 

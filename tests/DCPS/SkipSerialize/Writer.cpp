@@ -97,11 +97,10 @@ Writer::svc()
     }
 
     SkipSerialize::Message message;
-    message.serialized_data.length(4);
-    message.serialized_data[0] = '1';
-    message.serialized_data[1] = '2';
-    message.serialized_data[2] = '3';
-    message.serialized_data[3] = '4';
+    message.serialized_data.length(message_length);
+    for (CORBA::ULong i = 0; i < message.serialized_data.length(); i++) {
+      message.serialized_data[i] = '1';
+    }
 
     for (int i = 0; i < num_messages; i++) {
       DDS::ReturnCode_t error;

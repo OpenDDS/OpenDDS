@@ -1,0 +1,13 @@
+project(*TryConstruct): dcps_test, googletest, msvc_bigobj{
+  requires += no_opendds_safety_profile
+  exename = *
+  Source_Files {
+    TryConstruct.cpp
+  }
+  TypeSupport_Files {
+    TryConstructBaseTypes.idl
+    TryConstruct.idl
+    AnonTypes.idl
+    NestedTrimStruct.idl
+  }
+}

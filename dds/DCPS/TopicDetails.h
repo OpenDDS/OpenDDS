@@ -3,13 +3,14 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DDS_DCPS_TOPICDETAILS_H
-#define OPENDDS_DDS_DCPS_TOPICDETAILS_H
+#ifndef OPENDDS_DCPS_TOPICDETAILS_H
+#define OPENDDS_DCPS_TOPICDETAILS_H
 
-#include "dds/DCPS/TopicCallbacks.h"
-#include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/debug.h"
-#include "dds/DCPS/Definitions.h"
+#include "TopicCallbacks.h"
+#include "GuidUtils.h"
+#include "debug.h"
+#include "Definitions.h"
+#include "XTypes/TypeObject.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -22,19 +23,12 @@ namespace OpenDDS {
 
     struct TopicDetails {
 
-      struct RemoteTopic {
-        RemoteTopic() : data_type_name_(), inconsistent_(false), endpoints_() {}
-        OPENDDS_STRING data_type_name_;
-        bool inconsistent_;
-        RepoIdSet endpoints_;
-      };
-      typedef OPENDDS_MAP_CMP(DCPS::RepoId, RemoteTopic, DCPS::GUID_tKeyLessThan) RemoteTopicMap;
-
       TopicDetails()
         : topic_id_()
         , has_dcps_key_(false)
         , topic_callbacks_(0)
         , inconsistent_topic_count_(0)
+        , assertion_count_(0)
       {}
 
       void init(const OPENDDS_STRING& name,
@@ -46,158 +40,95 @@ namespace OpenDDS {
       void set_local(const OPENDDS_STRING& data_type_name,
                      const DDS::TopicQos& qos,
                      bool has_dcps_key,
-                     TopicCallbacks* topic_callbacks) {
+                     TopicCallbacks* topic_callbacks)
+      {
         OPENDDS_ASSERT(topic_callbacks != 0);
 
         local_data_type_name_ = data_type_name;
         local_qos_ = qos;
         has_dcps_key_ = has_dcps_key;
         topic_callbacks_ = topic_callbacks;
+        ++assertion_count_;
+      }
 
-        endpoints_.clear();
-        inconsistent_topic_count_ = 0;
-
-        for (RemoteTopicMap::iterator pos = remote_topics_.begin(), limit = remote_topics_.end();
-             pos != limit; ++pos) {
-          RemoteTopic& remote = pos->second;
-          remote.inconsistent_ = !remote.data_type_name_.empty() && local_data_type_name_ != remote.data_type_name_;
-          if (!remote.inconsistent_) {
-            remote.data_type_name_.clear();
-          }
-          if (remote.inconsistent_) {
-            ++inconsistent_topic_count_;
-            if (DCPS::DCPS_debug_level) {
-              ACE_DEBUG((LM_WARNING,
-                         ACE_TEXT("(%P|%t) TopicDetails::set_local - WARNING ")
-                         ACE_TEXT("topic %C with data type %C doesn't match discovered data type %C\n"),
-                         name_.c_str(),
-                         local_data_type_name_.c_str(),
-                         remote.data_type_name_.c_str()));
-            }
-          } else {
-            endpoints_.insert(remote.endpoints_.begin(), remote.endpoints_.end());
-          }
-        }
-
-        if (inconsistent_topic_count_ != 0) {
-          topic_callbacks_->inconsistent_topic(inconsistent_topic_count_);
+      void unset_local()
+      {
+        if (--assertion_count_ == 0) {
+          OPENDDS_ASSERT(local_publications_.empty());
+          OPENDDS_ASSERT(local_subscriptions_.empty());
+          topic_callbacks_ = 0;
         }
       }
 
-      void unset_local() {
-        topic_callbacks_ = 0;
-
-        for (RemoteTopicMap::iterator pos = remote_topics_.begin(), limit = remote_topics_.end();
-             pos != limit; ++pos) {
-          RemoteTopic& remote = pos->second;
-          if (remote.data_type_name_.empty()) {
-            remote.data_type_name_ = local_data_type_name_;
-          }
-        }
-      }
-
-      void update(const DDS::TopicQos& qos) {
+      void update(const DDS::TopicQos& qos)
+      {
         local_qos_ = qos;
       }
 
-      // Local
-      void add_pub_sub(const DCPS::RepoId& guid) {
-        endpoints_.insert(guid);
+      void add_local_publication(const DCPS::RepoId& guid)
+      {
+        local_publications_.insert(guid);
       }
 
-      // Remote
-      void add_pub_sub(const DCPS::RepoId& guid,
-                       const OPENDDS_STRING& type_name) {
-        // This function can be called before the local side of the
-        // topic is initialized.  If this happens, the topic will
-        // always be inconsistent meaning the inconsistent count
-        // will be incremented and the guid will not be in the
-        // endpoints.
-
-        RepoId participant_id = guid;
-        participant_id.entityId = ENTITYID_PARTICIPANT;
-
-        endpoints_.insert(guid);
-
-        RemoteTopicMap::iterator remote_topic_iter = remote_topics_.find(participant_id);
-        bool inconsistent_before;
-        if (remote_topic_iter == remote_topics_.end()) {
-          // Insert.
-          remote_topic_iter = remote_topics_.insert(std::make_pair(participant_id, RemoteTopic())).first;
-          inconsistent_before = false;
-        } else {
-          inconsistent_before = remote_topic_iter->second.inconsistent_;
-        }
-
-        // Initialize.
-        RemoteTopic& remote = remote_topic_iter->second;
-        remote.data_type_name_ = type_name;
-        remote.inconsistent_ = topic_callbacks_ && local_data_type_name_ != remote.data_type_name_;
-        if (topic_callbacks_ && !remote.inconsistent_) {
-          remote.data_type_name_.clear();
-        }
-        remote.endpoints_.insert(guid);
-
-        if (!inconsistent_before && remote.inconsistent_) {
-          ++inconsistent_topic_count_;
-          if (DCPS::DCPS_debug_level) {
-            ACE_DEBUG((LM_WARNING,
-                       ACE_TEXT("(%P|%t) TopicDetails::add_pub_sub - WARNING ")
-                       ACE_TEXT("topic %C with data type %C now does not match discovered data type %C\n"),
-                       name_.c_str(),
-                       local_data_type_name_.c_str(),
-                       remote.data_type_name_.c_str()));
-          }
-          if (topic_callbacks_) {
-            topic_callbacks_->inconsistent_topic(inconsistent_topic_count_);
-          }
-        } else if (inconsistent_before && !remote.inconsistent_) {
-          --inconsistent_topic_count_;
-          if (DCPS::DCPS_debug_level) {
-            ACE_DEBUG((LM_WARNING,
-                       ACE_TEXT("(%P|%t) TopicDetails::add_pub_sub - WARNING ")
-                       ACE_TEXT("topic %C with data type %C now matches discovered data type %C\n"),
-                       name_.c_str(),
-                       local_data_type_name_.c_str(),
-                       remote.data_type_name_.c_str()));
-          }
-          if (topic_callbacks_) {
-            topic_callbacks_->inconsistent_topic(inconsistent_topic_count_);
-          }
-        }
-
-        if (remote.inconsistent_) {
-          endpoints_.erase(guid);
-        }
+      void remove_local_publication(const DCPS::RepoId& guid)
+      {
+        local_publications_.erase(guid);
       }
 
-      // Local and remote
-      void remove_pub_sub(const DCPS::RepoId& guid) {
-        endpoints_.erase(guid);
+      const RepoIdSet& local_publications() const
+      {
+        return local_publications_;
+      }
 
-        RepoId participant_id = guid;
-        participant_id.entityId = ENTITYID_PARTICIPANT;
+      void add_local_subscription(const DCPS::RepoId& guid)
+      {
+        local_subscriptions_.insert(guid);
+      }
 
-        RemoteTopicMap::iterator remote_topic_iter = remote_topics_.find(participant_id);
+      void remove_local_subscription(const DCPS::RepoId& guid)
+      {
+        local_subscriptions_.erase(guid);
+      }
 
-        if (remote_topic_iter == remote_topics_.end()) {
-          // It was local.
-          return;
-        }
+      const RepoIdSet& local_subscriptions() const
+      {
+        return local_subscriptions_;
+      }
 
-        RemoteTopic& remote = remote_topic_iter->second;
-        remote.endpoints_.erase(guid);
+      void add_discovered_publication(const DCPS::RepoId& guid)
+      {
+        discovered_publications_.insert(guid);
+      }
 
-        if (remote.inconsistent_) {
-          --inconsistent_topic_count_;
-          if (topic_callbacks_) {
-            topic_callbacks_->inconsistent_topic(inconsistent_topic_count_);
-          }
-        }
+      void remove_discovered_publication(const DCPS::RepoId& guid)
+      {
+        discovered_publications_.erase(guid);
+      }
 
-        if (remote.endpoints_.empty()) {
-          remote_topics_.erase(remote_topic_iter);
-        }
+      const RepoIdSet& discovered_publications() const
+      {
+        return discovered_publications_;
+      }
+
+      void add_discovered_subscription(const DCPS::RepoId& guid)
+      {
+        discovered_subscriptions_.insert(guid);
+      }
+
+      void remove_discovered_subscription(const DCPS::RepoId& guid)
+      {
+        discovered_subscriptions_.erase(guid);
+      }
+
+      const RepoIdSet& discovered_subscriptions() const
+      {
+        return discovered_subscriptions_;
+      }
+
+      void increment_inconsistent()
+      {
+        ++inconsistent_topic_count_;
+        topic_callbacks_->inconsistent_topic(inconsistent_topic_count_);
       }
 
       const OPENDDS_STRING local_data_type_name() const { return local_data_type_name_; }
@@ -205,10 +136,14 @@ namespace OpenDDS {
       const DCPS::RepoId& topic_id() const { return topic_id_; }
       bool has_dcps_key() const { return has_dcps_key_; }
       bool local_is_set() const { return topic_callbacks_; }
-      const RepoIdSet& endpoints() const { return endpoints_; }
 
-      bool is_dead() const {
-        return topic_callbacks_ == 0 && remote_topics_.empty();
+      bool is_dead() const
+      {
+        return topic_callbacks_ == 0 &&
+          local_publications_.empty() &&
+          local_subscriptions_.empty() &&
+          discovered_publications_.empty() &&
+          discovered_subscriptions_.empty();
       }
 
     private:
@@ -218,10 +153,13 @@ namespace OpenDDS {
       DCPS::RepoId topic_id_;
       bool has_dcps_key_;
       TopicCallbacks* topic_callbacks_;
-      RepoIdSet endpoints_;
 
-      RemoteTopicMap remote_topics_;
+      RepoIdSet local_publications_;
+      RepoIdSet local_subscriptions_;
+      RepoIdSet discovered_publications_;
+      RepoIdSet discovered_subscriptions_;
       int inconsistent_topic_count_;
+      int assertion_count_;
     };
 
   } // namespace DCPS

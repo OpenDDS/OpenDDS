@@ -49,4 +49,3 @@ OpenDDS::DCPS::TransportControlElement::owned_by_transport()
 {
   return true;
 }
-

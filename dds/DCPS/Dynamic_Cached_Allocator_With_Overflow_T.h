@@ -5,14 +5,15 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DYNAMIC_CACHED_ALLOCATOR_WITH_OVERFLOW_T_H
-#define DYNAMIC_CACHED_ALLOCATOR_WITH_OVERFLOW_T_H
+#ifndef OPENDDS_DCPS_DYNAMIC_CACHED_ALLOCATOR_WITH_OVERFLOW_T_H
+#define OPENDDS_DCPS_DYNAMIC_CACHED_ALLOCATOR_WITH_OVERFLOW_T_H
 
 #include "debug.h"
 #include "ace/Malloc_Allocator.h"
 #include "ace/Malloc_T.h"
 #include "ace/Free_List.h"
 #include "ace/Guard_T.h"
+#include "ace/Atomic_Op_T.h"
 
 #include "PoolAllocationBase.h"
 
@@ -167,7 +168,7 @@ public:
         if (frees_to_heap_.value() % 500 == 0) {
           ACE_DEBUG((LM_DEBUG,
                      "(%P|%t) Dynamic_Cached_Allocator_With_Overflow::free %@"
-                     " %Lu heap allocs with %Lu oustanding\n",
+                     " %Lu heap allocs with %Lu outstanding\n",
                      this, this->allocs_from_heap_.value(),
                      this->allocs_from_heap_.value() - this->frees_to_heap_.value()));
         }

@@ -1,4 +1,4 @@
-project(InternalThreadStatusPublisher): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dcps_rtps {
+project(InternalThreadStatusPublisher): dcps_test, dcps_cm, dcps_rtps_udp {
 
   requires += no_opendds_safety_profile
   exename   = publisher
@@ -13,7 +13,7 @@ project(InternalThreadStatusPublisher): dcpsexe, dcps_test, dcps_cm, dcps_transp
   }
 }
 
-project(InternalThreadStatusSubscriber): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dcps_rtps {
+project(InternalThreadStatusSubscriber): dcps_test, dcps_cm, dcps_rtps_udp {
 
   requires += no_opendds_safety_profile
   exename   = subscriber

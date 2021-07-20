@@ -49,7 +49,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       ++samples_read_;
       std::cout << "SampleInfo.valid_data = " << si.valid_data << std::endl;
       std::cout << "SampleInfo.sample_rank = " << si.sample_rank << std::endl;
-      std::cout << "SampleInfo.instance_state = " << si.instance_state << std::endl;
+      std::cout << "SampleInfo.instance_state = " << OpenDDS::DCPS::InstanceState::instance_state_string(si.instance_state) << std::endl;
 
       if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance %d is disposed\n"), foo.a_long_value));

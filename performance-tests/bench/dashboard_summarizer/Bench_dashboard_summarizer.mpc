@@ -1,0 +1,3 @@
+project: ../bench_builder_exe, ../bench_exe {
+  exename = dashboard_summarizer
+}

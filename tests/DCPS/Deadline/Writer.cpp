@@ -2,31 +2,27 @@
 //
 
 #include "Writer.h"
-#include "dds/DCPS/Service_Participant.h"
 
+#include <tests/Utils/ExceptionStreams.h>
+
+#include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Qos_Helper.h>
 
 #include <ace/OS_NS_unistd.h>
 #include <ace/streams.h>
-#include "tests/Utils/ExceptionStreams.h"
 
 using namespace Messenger;
 using namespace std;
+using OpenDDS::DCPS::TimeDuration;
 
 static const int num_messages = 10;
 static const TimeDuration write_interval(0, 500000);
-
-// Wait for up to 10 seconds for subscription matched status.
-static const DDS::Duration_t MATCHED_WAIT_MAX_DURATION = {
-  10, // seconds
-  0   // nanoseconds
-};
 
 Writer::Writer(::DDS::DataWriter_ptr writer,
                CORBA::Long key,
                TimeDuration sleep_duration)
 : writer_(::DDS::DataWriter::_duplicate(writer)),
-  condition_(lock_, OpenDDS::DCPS::ConditionAttributesMonotonic()),
+  condition_(lock_),
   associated_(false),
   dwl_servant_(0),
   instance_handle_(::DDS::HANDLE_NIL),
@@ -41,7 +37,7 @@ Writer::Writer(::DDS::DataWriter_ptr writer,
 void
 Writer::start()
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::start \n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::start\n")));
   // Launch threads.
   if (activate(THR_NEW_LWP | THR_JOINABLE, 1) == -1)
   {
@@ -53,7 +49,7 @@ Writer::start()
 void
 Writer::end()
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::end \n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::end\n")));
   wait();
 }
 
@@ -64,8 +60,7 @@ Writer::svc()
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::svc begins.\n")));
 
   try {
-    const MonotonicTimePoint connect_deadline(MonotonicTimePoint::now() + TimeDuration(MATCHED_WAIT_MAX_DURATION));
-    if (dwl_servant_->wait_matched(2, &connect_deadline.value()) != 0) {
+    if (!dwl_servant_->wait_matched(2, OpenDDS::DCPS::TimeDuration(10))) {
       cerr << "ERROR: wait for subscription matching failed." << endl;
       exit(1);
     }
@@ -73,7 +68,7 @@ Writer::svc()
     {
       GuardType guard(this->lock_);
       this->associated_ = true;
-      this->condition_.broadcast();
+      condition_.notify_all();
     }
 
     Messenger::MessageDataWriter_var message_dw =
@@ -113,8 +108,8 @@ Writer::svc()
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Writer::svc, ")
                    ACE_TEXT("%dth write() returned %d.\n"),
-                   i,
-                   -1));
+                   i, ret));
+        return 1;
       }
 
       // Sleep for half a second between writes to allow some deadline
@@ -147,11 +142,6 @@ bool Writer::wait_for_start()
 {
   GuardType guard(this->lock_);
 
-  if (!associated_) {
-    const MonotonicTimePoint abs(MonotonicTimePoint::now() + TimeDuration(10));
-    if (condition_.wait(&abs.value()) == -1) {
-      return false;
-    }
-  }
-  return true;
+  return associated_ ||
+    condition_.wait_for(TimeDuration(10)) == OpenDDS::DCPS::CvStatus_NoTimeout;
 }

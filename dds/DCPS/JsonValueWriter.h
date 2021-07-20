@@ -8,11 +8,15 @@
 #ifndef OPENDDS_DCPS_JSON_VALUE_WRITER_H
 #define OPENDDS_DCPS_JSON_VALUE_WRITER_H
 
+#ifdef OPENDDS_RAPIDJSON
 #ifndef OPENDDS_SAFETY_PROFILE
+
+#define OPENDDS_HAS_JSON_VALUE_WRITER 1
 
 #include "dcps_export.h"
 
 #include "ValueWriter.h"
+#include "RapidJsonWrapper.h"
 
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
 #include "dds/DdsDcpsTopicC.h"
@@ -32,20 +36,30 @@ namespace DCPS {
 
 // Convert values to JSON.
 // Currently, this class does not produce value JSON nor does it adhere to the DDS JSON spec.
-class OpenDDS_Dcps_Export JsonValueWriter : public ValueWriter {
+template <typename Buffer = rapidjson::StringBuffer>
+class JsonValueWriter : public ValueWriter {
 public:
-  explicit JsonValueWriter(std::ostream& out)
-    : out_(out)
+  JsonValueWriter()
+    : buffer_(default_buffer_)
+    , writer_(buffer_)
+  {}
+
+  explicit JsonValueWriter(Buffer& buffer)
+    : buffer_(buffer)
+    , writer_(buffer_)
   {}
 
   void begin_struct();
   void end_struct();
+  void begin_struct_member(const char* name);
+  void end_struct_member();
+
   void begin_union();
   void end_union();
   void begin_discriminator();
   void end_discriminator();
-  void begin_field(const char* name);
-  void end_field();
+  void begin_union_member(const char* name);
+  void end_union_member();
 
   void begin_array();
   void end_array();
@@ -56,8 +70,8 @@ public:
 
   void write_boolean(ACE_CDR::Boolean value);
   void write_byte(ACE_CDR::Octet value);
-  void write_int8(ACE_CDR::Char value);
-  void write_uint8(ACE_CDR::Octet value);
+  void write_int8(ACE_CDR::Int8 value);
+  void write_uint8(ACE_CDR::UInt8 value);
   void write_int16(ACE_CDR::Short value);
   void write_uint16(ACE_CDR::UShort value);
   void write_int32(ACE_CDR::Long value);
@@ -74,46 +88,252 @@ public:
   void write_wstring(const ACE_CDR::WChar* value);
   void write_enum(const char* /*name*/, ACE_CDR::Long value);
 
+  const Buffer& buffer() const { return buffer_; }
+
 private:
-  std::ostream& out_;
-  std::vector<size_t> value_count_; // The number of values written in each scope.
+  Buffer default_buffer_;
+  Buffer& buffer_;
+  rapidjson::Writer<Buffer> writer_;
 };
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::begin_struct()
+{
+  writer_.StartObject();
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::end_struct()
+{
+  writer_.EndObject();
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::begin_struct_member(const char* name)
+{
+  writer_.Key(name);
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::end_struct_member()
+{}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::begin_union()
+{
+  writer_.StartObject();
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::end_union()
+{
+  writer_.EndObject();
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::begin_discriminator()
+{
+  writer_.Key("$discriminator");
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::end_discriminator()
+{}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::begin_union_member(const char* name)
+{
+  writer_.Key(name);
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::end_union_member()
+{}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::begin_array()
+{
+  writer_.StartArray();
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::end_array()
+{
+  writer_.EndArray();
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::begin_sequence()
+{
+  writer_.StartArray();
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::end_sequence()
+{
+  writer_.EndArray();
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::begin_element(size_t /*idx*/)
+{}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::end_element()
+{}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::write_boolean(ACE_CDR::Boolean value)
+{
+  writer_.Bool(value);
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::write_byte(ACE_CDR::Octet value)
+{
+  writer_.Uint(value);
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::write_int8(ACE_CDR::Int8 value)
+{
+  writer_.Int(value);
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::write_uint8(ACE_CDR::UInt8 value)
+{
+  writer_.Uint(value);
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::write_int16(ACE_CDR::Short value)
+{
+  writer_.Int(value);
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::write_uint16(ACE_CDR::UShort value)
+{
+  writer_.Uint(value);
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::write_int32(ACE_CDR::Long value)
+{
+  writer_.Int(value);
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::write_uint32(ACE_CDR::ULong value)
+{
+  writer_.Uint(value);
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::write_int64(ACE_CDR::LongLong value)
+{
+  writer_.Int64(value);
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::write_uint64(ACE_CDR::ULongLong value)
+{
+  writer_.Uint64(value);
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::write_float32(ACE_CDR::Float value)
+{
+  writer_.Double(value);
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::write_float64(ACE_CDR::Double value)
+{
+  writer_.Double(value);
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::write_float128(ACE_CDR::LongDouble value)
+{
+  // TODO
+  writer_.Double(value);
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::write_fixed(const OpenDDS::FaceTypes::Fixed& /*value*/)
+{
+  // TODO
+  writer_.String("fixed");
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::write_char8(ACE_CDR::Char value)
+{
+  writer_.Int(value);
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::write_char16(ACE_CDR::WChar value)
+{
+  writer_.Int(value);
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::write_string(const ACE_CDR::Char* value)
+{
+  writer_.String(value);
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::write_wstring(const ACE_CDR::WChar*)
+{
+  // TODO
+  writer_.String("wide string");
+}
+
+template <typename Buffer>
+void JsonValueWriter<Buffer>::write_enum(const char* name,
+                                         ACE_CDR::Long /*value*/)
+{
+  writer_.String(name);
+}
 
 template<typename T>
 std::string to_json(const T& sample)
 {
-  std::ostringstream str;
-  JsonValueWriter jvw(str);
+  JsonValueWriter<> jvw;
   vwrite(jvw, sample);
-  return str.str();
+  return jvw.buffer().GetString();
 }
 
 template<typename T>
 std::string to_json(const DDS::TopicDescription_ptr topic,
                     const T& sample, const DDS::SampleInfo& sample_info)
 {
-  std::ostringstream str;
-  JsonValueWriter jvw(str);
+  JsonValueWriter<> jvw;
   jvw.begin_struct();
-  jvw.begin_field("topic");
+  jvw.begin_struct_member("topic");
   jvw.begin_struct();
-  jvw.begin_field("name");
+  jvw.begin_struct_member("name");
   CORBA::String_var topic_name = topic->get_name();
   jvw.write_string(topic_name);
-  jvw.end_field();
-  jvw.begin_field("type_name");
-  jvw.write_string(topic->get_type_name());
-  jvw.end_field();
+  jvw.end_struct_member();
+  jvw.begin_struct_member("type_name");
+  CORBA::String_var type_name = topic->get_type_name();
+  jvw.write_string(type_name);
+  jvw.end_struct_member();
   jvw.end_struct();
-  jvw.end_field();
-  jvw.begin_field("sample");
+  jvw.end_struct_member();
+  jvw.begin_struct_member("sample");
   vwrite(jvw, sample);
-  jvw.end_field();
-  jvw.begin_field("sample_info");
+  jvw.end_struct_member();
+  jvw.begin_struct_member("sample_info");
   vwrite(jvw, sample_info);
-  jvw.end_field();
+  jvw.end_struct_member();
   jvw.end_struct();
-  return str.str();
+  return jvw.buffer().GetString();
 }
 
 } // namespace DCPS
@@ -121,6 +341,7 @@ std::string to_json(const DDS::TopicDescription_ptr topic,
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
+#endif
 #endif
 
 #endif  /* OPENDDS_DCPS_JSON_VALUE_WRITER_H */

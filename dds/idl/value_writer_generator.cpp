@@ -57,6 +57,10 @@ namespace {
       return "int16";
     case AST_PredefinedType::PT_ushort:
       return "uint16";
+    case AST_PredefinedType::PT_int8:
+      return "int8";
+    case AST_PredefinedType::PT_uint8:
+      return "uint8";
     case AST_PredefinedType::PT_float:
       return "float32";
     case AST_PredefinedType::PT_double:
@@ -74,7 +78,6 @@ namespace {
     default:
       return "";
     }
-    return "";
   }
 
   void sequence_helper(const std::string& expression, AST_Sequence* sequence,
@@ -133,17 +136,20 @@ namespace {
     }
   }
 
-  std::string branch_helper(const std::string& field_name,
+  std::string branch_helper(const std::string&,
+                            const std::string& field_name,
                             AST_Type* type,
                             const std::string&,
-                            std::string&,
-                            const std::string&)
+                            bool,
+                            Intro&,
+                            const std::string&,
+                            bool)
   {
     be_global->impl_ <<
-      "    value_writer.begin_field(\"" << field_name << "\");\n";
+      "    value_writer.begin_union_member(\"" << field_name << "\");\n";
     generate_write("value." + field_name + "()", type, "i", 2);
     be_global->impl_ <<
-      "    value_writer.end_field();\n";
+      "    value_writer.end_union_member();\n";
     return "";
   }
 }
@@ -219,10 +225,10 @@ bool value_writer_generator::gen_struct(AST_Structure*,
       AST_Field* const field = *pos;
       const std::string field_name = field->local_name()->get_string();
       be_global->impl_ <<
-        "  value_writer.begin_field(\"" << field_name << "\");\n";
+        "  value_writer.begin_struct_member(\"" << field_name << "\");\n";
       generate_write("value." + field_name + accessor_suffix, field->field_type(), "i");
       be_global->impl_ <<
-        "  value_writer.end_field();\n";
+        "  value_writer.end_struct_member();\n";
     }
     be_global->impl_ <<
       "  value_writer.end_struct();\n";
@@ -232,7 +238,7 @@ bool value_writer_generator::gen_struct(AST_Structure*,
 }
 
 
-bool value_writer_generator::gen_union(AST_Union*,
+bool value_writer_generator::gen_union(AST_Union* u,
                                        UTL_ScopedName* name,
                                        const std::vector<AST_UnionBranch*>& branches,
                                        AST_Type* discriminator,
@@ -257,9 +263,9 @@ bool value_writer_generator::gen_union(AST_Union*,
     be_global->impl_ <<
       "  value_writer.end_discriminator();\n";
 
-    generateSwitchForUnion("value._d()", branch_helper, branches, discriminator,
-                           "", "", type_name.c_str(), false, false);
-
+    generateSwitchForUnion(u, "value._d()", branch_helper, branches,
+                           discriminator, "", "", type_name.c_str(),
+                           false, false);
     be_global->impl_ <<
       "  value_writer.end_union();\n";
   }

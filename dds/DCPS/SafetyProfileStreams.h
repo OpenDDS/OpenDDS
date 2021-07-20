@@ -1,19 +1,17 @@
-#ifndef SAFETY_PROFILE_STREAMS_H
-#define SAFETY_PROFILE_STREAMS_H
+#ifndef OPENDDS_DCPS_SAFETYPROFILESTREAMS_H
+#define OPENDDS_DCPS_SAFETYPROFILESTREAMS_H
 
-#include "dds/DCPS/PoolAllocator.h"
 #include "dcps_export.h"
-#include "dds/DdsDcpsInfrastructureC.h"
+#include "PoolAllocator.h"
 
-#include "ace/OS_NS_stdio.h"
-#include "ace/INET_Addr.h"
-#include "tao/Basic_Types.h"
+#include <ace/INET_Addr.h>
+#include <ace/OS_NS_stdio.h>
 
 #ifndef OPENDDS_SAFETY_PROFILE
-#include <fstream>
-#include <iostream>
-#include <iomanip>
-#include <sstream>
+#  include <fstream>
+#  include <iostream>
+#  include <iomanip>
+#  include <sstream>
 #endif //OPENDDS_SAFETY_PROFILE
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -21,16 +19,13 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(::CORBA::UShort to_convert);
+OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(unsigned short to_convert);
 OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(int to_convert);
 OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(unsigned int to_convert, bool as_hex = false);
 OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(long to_convert);
 OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(long long to_convert);
 OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(unsigned long long to_convert, bool as_hex = false);
 OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(unsigned long to_convert, bool as_hex = false);
-OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(const ACE_INET_Addr& addr);
-
-OpenDDS_Dcps_Export const char* retcode_to_string(DDS::ReturnCode_t value);
 
 //@{
 /**
@@ -63,4 +58,4 @@ to_dds_string(const T* to_convert)
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif //SAFETY_PROFILE_STREAMS_H
+#endif // OPENDDS_DCPS_SAFETYPROFILESTREAMS_H

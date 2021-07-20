@@ -64,7 +64,7 @@ int ignore ()
                  ACE_TEXT("(%P|%t) IGNORE_PARTICIPANT,  participant %C ignore participant %C .\n"),
                  participantBuffer.str().c_str(), ignoreBuffer.str().c_str()));
 
-      InstanceHandle_t handle = participant_servant->id_to_handle(ignore_id);
+      InstanceHandle_t handle = participant_servant->lookup_handle(ignore_id);
 
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) IGNORE_PARTICIPANT, ignored participant %C has handle 0x%x.\n"),
@@ -100,7 +100,7 @@ int ignore ()
                  ACE_TEXT("(%P|%t) IGNORE_TOPIC, participant %C ignore topic %C .\n"),
                  participantBuffer.str().c_str(), ignoreBuffer.str().c_str()));
 
-      InstanceHandle_t handle = participant_servant->id_to_handle(ignore_id);
+      InstanceHandle_t handle = participant_servant->lookup_handle(ignore_id);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) IGNORE_TOPIC,  ignored topic %C has handle 0x%x.\n"),
         ignoreBuffer.str().c_str(),
@@ -134,7 +134,7 @@ int ignore ()
                  ACE_TEXT("(%P|%t) IGNORE_PUBLICATION, participant %C ignore publication %C .\n"),
                  participantBuffer.str().c_str(), ignoreBuffer.str().c_str()));
 
-      InstanceHandle_t handle = participant_servant->id_to_handle(ignore_id);
+      InstanceHandle_t handle = participant_servant->lookup_handle(ignore_id);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) IGNORE_PUBLICATION,  ignored topic %C has handle 0x%x.\n"),
         ignoreBuffer.str().c_str(),
@@ -168,7 +168,7 @@ int ignore ()
                  ACE_TEXT("(%P|%t) IGNORE_SUBSCRIPTION, participant %C ignore subscription %C .\n"),
                  participantBuffer.str().c_str(), ignoreBuffer.str().c_str()));
 
-      InstanceHandle_t handle = participant_servant->id_to_handle(ignore_id);
+      InstanceHandle_t handle = participant_servant->lookup_handle(ignore_id);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) IGNORE_SUBSCRIPTION,  ignored topic %C has handle 0x%x.\n"),
         ignoreBuffer.str().c_str(),
@@ -244,7 +244,7 @@ int write ()
 int read (int expect_success)
 {
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) read begins. \n")));
+    ACE_TEXT("(%P|%t) read begins.\n")));
 
   try
   {
@@ -356,4 +356,3 @@ int read (int expect_success)
 
   return 0;
 }
-

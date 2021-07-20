@@ -186,7 +186,7 @@ operator<<(std::wostream& os, const GuidConverter& rhs)
 #endif //OPENDDS_SAFETY_PROFILE
 
 OPENDDS_STRING
-GuidConverter::uniqueId() const
+GuidConverter::uniqueParticipantId() const
 {
   char id[64];
   ACE_OS::snprintf(id, sizeof id,

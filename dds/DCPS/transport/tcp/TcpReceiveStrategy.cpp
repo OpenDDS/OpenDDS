@@ -11,6 +11,7 @@
 #include "TcpTransport.h"
 #include "TcpDataLink.h"
 #include "TcpConnection.h"
+#include <dds/DCPS/LogAddr.h>
 
 #include <sstream>
 
@@ -60,15 +61,15 @@ OpenDDS::DCPS::TcpReceiveStrategy::deliver_sample
   DBG_ENTRY_LVL("TcpReceiveStrategy","deliver_sample",6);
 
   if (sample.header_.message_id_ == GRACEFUL_DISCONNECT) {
-    VDBG((LM_DEBUG, "(%P|%t) DBG:  received GRACEFUL_DISCONNECT \n"));
+    VDBG((LM_DEBUG, "(%P|%t) DBG:  received GRACEFUL_DISCONNECT\n"));
     this->gracefully_disconnected_ = true;
   }
   else if (sample.header_.message_id_ == REQUEST_ACK) {
-    VDBG((LM_DEBUG, "(%P|%t) DBG:  received REQUEST_ACK \n"));
+    VDBG((LM_DEBUG, "(%P|%t) DBG:  received REQUEST_ACK\n"));
     link_.request_ack_received(sample);
   }
   else if (sample.header_.message_id_ == SAMPLE_ACK) {
-    VDBG((LM_DEBUG, "(%P|%t) DBG:  received SAMPLE_ACK \n"));
+    VDBG((LM_DEBUG, "(%P|%t) DBG:  received SAMPLE_ACK\n"));
     link_.ack_received(sample);
   }
   else {
@@ -88,11 +89,10 @@ OpenDDS::DCPS::TcpReceiveStrategy::start_i()
     buffer << link_;
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) TcpReceiveStrategy::start_i() - ")
-               ACE_TEXT("link:\n%C connected to %C:%d ")
+               ACE_TEXT("link:\n%C connected to %C ")
                ACE_TEXT("registering with reactor to receive.\n"),
                buffer.str().c_str(),
-               connection->get_remote_address().get_host_name(),
-               connection->get_remote_address().get_port_number()));
+               LogAddr(connection->get_remote_address()).c_str()));
   }
 
   if (this->reactor_task_->get_reactor()->register_handler

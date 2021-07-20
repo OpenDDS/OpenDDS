@@ -6,7 +6,7 @@
  */
 
 #include "DataCollector_T.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
+#include "SafetyProfileStreams.h"
 
 #if !defined (__ACE_INLINE__)
 #include "DataCollector_T.inl"

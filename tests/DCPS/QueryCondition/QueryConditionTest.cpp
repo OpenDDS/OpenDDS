@@ -6,6 +6,7 @@
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/StaticIncludes.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
+#include "dds/DCPS/DCPS_Utils.h"
 #include "MessengerTypeSupportImpl.h"
 
 #ifdef ACE_AS_STATIC_LIBS
@@ -129,8 +130,7 @@ bool complex_test_setup(const DomainParticipant_var& dp,
   DataWriterQos dw_qos;
   pub->get_default_datawriter_qos(dw_qos);
   dw_qos.history.kind = KEEP_ALL_HISTORY_QOS;
-  dw_qos.durability.kind = TRANSIENT_DURABILITY_QOS;
-  dw_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
+  dw_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
   dw = pub->create_datawriter(topic, dw_qos, 0, DEFAULT_STATUS_MASK);
   if (!dw) {
     cerr << "ERROR: complex_test_setup: create_datawriter failed" << endl;
@@ -159,8 +159,17 @@ bool complex_test_setup(const DomainParticipant_var& dp,
   ws->attach_condition(dw_sc);
   Duration_t infinite = {DURATION_INFINITE_SEC, DURATION_INFINITE_NSEC};
   ConditionSeq active;
-  if (ws->wait(active, infinite) != DDS::RETCODE_OK) {
-    return false;
+  PublicationMatchedStatus status;
+  while (true) {
+    if (dw->get_publication_matched_status(status) != DDS::RETCODE_OK) {
+      return false;
+    }
+    if (status.current_count >= 2) {
+      break;
+    }
+    if (ws->wait(active, infinite) != DDS::RETCODE_OK) {
+      return false;
+    }
   }
   ws->detach_condition(dw_sc);
   return true;
@@ -241,6 +250,7 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
   Message sample;
   sample.key = 1;
+  sample.nest.value = B;
   ReturnCode_t ret = mdw->write(sample, HANDLE_NIL);
   if (ret != RETCODE_OK) {
     cerr << "ERROR: run_filtering_test: write failed: " << retcode_to_string(ret) << endl;
@@ -365,6 +375,7 @@ bool run_complex_filtering_test(const DomainParticipant_var& dp,
 
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
   Message sample;
+  sample.nest.value = A;
   for (CORBA::Long i = 0; i < 6; i++) {
     sample.key = i;
     if (mdw->register_instance(sample) == HANDLE_NIL) {
@@ -558,6 +569,8 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
   Message sample;
   sample.key = 3;
+  sample.name = "data_B";
+  sample.nest.value = A;
   ReturnCode_t ret = mdw->write(sample, HANDLE_NIL);
   if (ret != RETCODE_OK) return false;
   if (!waitForSample(dr)) return false;
@@ -567,26 +580,29 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   ReadCondition_var dr_qc = dr->create_querycondition(ANY_SAMPLE_STATE,
     ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "key = %0", params_empty);
   if (dr_qc) {
-    cerr << "ERROR: Creating QueryCondition with 1 token and 0 parameters should have failed " << endl;
+    cerr << "ERROR: Creating QueryCondition with 1 token and 0 parameters should have failed" << endl;
     return false;
   }
 
-  DDS::StringSeq params_two(2);
-  params_two.length(2);
-  params_two[0] = "2";
-  params_two[1] = "2";
+  DDS::StringSeq params_three(3);
+  params_three.length(3);
+  params_three[0] = "2";
+  params_three[1] = "2";
+  params_three[2] = "2";
   dr_qc = dr->create_querycondition(ANY_SAMPLE_STATE,
-    ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "key = %0", params_two);
+    ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "key = %0", params_three);
   if (dr_qc) {
-    cerr << "ERROR: Creating QueryCondition with 1 token and 2 parameters should have failed " << endl;
+    cerr << "ERROR: Creating QueryCondition with 1 token and 3 parameters should have failed" << endl;
     return false;
   }
 
-  DDS::StringSeq params(1);
-  params.length(1);
+  const char* params1_value = "data_B";
+  DDS::StringSeq params(2);
+  params.length(2);
   params[0] = "2";
+  params[1] = params1_value;
   dr_qc = dr->create_querycondition(ANY_SAMPLE_STATE,
-    ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "key = %0", params);
+    ANY_VIEW_STATE, ALIVE_INSTANCE_STATE, "key = %0 AND name = %1", params);
   if (!dr_qc) {
     cerr << "ERROR: failed to create QueryCondition" << endl;
     return false;
@@ -594,7 +610,7 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
 
   QueryCondition_var query_cond = QueryCondition::_narrow(dr_qc);
   CORBA::String_var expr = query_cond->get_query_expression();
-  if (std::string("key = %0") != expr.in()) {
+  if (std::string("key = %0 AND name = %1") != expr.in()) {
     cerr << "ERROR: get_query_expression() query expression should match " << endl;
     return false;
   }
@@ -604,7 +620,7 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   if (ret != RETCODE_OK) {
     cerr << "ERROR: get_query_parameters() failed " << endl;
     return false;
-  } else if (params.length() != 1 || std::string(params[0]) != "2") {
+  } else if (params.length() != 2 || std::string(params[0]) != "2" || std::string(params[1]) != params1_value) {
     cerr << "ERROR: get_query_parameters() query parameters doesn't match " << endl;
     return false;
   }
@@ -630,18 +646,19 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   }
 
   if (query_cond->set_query_parameters(params_empty) != RETCODE_ERROR) {
-    cerr << "ERROR: Setting 0 parameters for query condition with 1 token should have failed " << endl;
+    cerr << "ERROR: Setting 0 parameters for query condition with 2 tokens should have failed " << endl;
     return false;
   }
 
-  if (query_cond->set_query_parameters(params_two) != RETCODE_ERROR) {
-    cerr << "ERROR: Setting 2 parameters for query condition with 1 token should have failed " << endl;
+  if (query_cond->set_query_parameters(params_three) != RETCODE_ERROR) {
+    cerr << "ERROR: Setting 3 parameters for query condition with 2 tokens should have failed" << endl;
     return false;
   }
 
-  params = DDS::StringSeq(1);
-  params.length(1);
+  params = DDS::StringSeq(2);
+  params.length(2);
   params[0] = "3";
+  params[1] = params1_value;
   ret = query_cond->set_query_parameters(params);
 
   params = DDS::StringSeq();
@@ -649,7 +666,7 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   if (ret != RETCODE_OK) {
     cerr << "ERROR: get_query_parameters() failed " << endl;
     return false;
-  } else if (params.length() != 1 || std::string(params[0]) != "3") {
+  } else if (params.length() != 2 || std::string(params[0]) != "3" || std::string(params[1]) != params1_value) {
     cerr << "ERROR: get_query_parameters() query parameters doesn't match " << endl;
     return false;
   }
@@ -659,6 +676,17 @@ bool run_change_parameter_test(const DomainParticipant_var& dp,
   if (ret != RETCODE_OK) {
     cerr << "ERROR: wait(qc) should not time out" << endl;
     return false;
+  } else {
+    for (CORBA::ULong i(0); i < data.length(); ++i) {
+      cout << "Info:\tinstance_handle = " << infoseq[i].instance_handle <<
+        "\tsample_rank = " << infoseq[i].sample_rank << '\n';
+      if (infoseq[i].valid_data) {
+        cout << "Data:\tkey = " << data[i].key <<
+          " \tname = " << data[i].name <<
+          "\tnest.value = " << data[i].nest.value <<
+          '\n';
+      }
+    }
   }
   ws->detach_condition(dr_qc);
 
@@ -709,6 +737,7 @@ bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
   Message sample;
   sample.key = 0;
   sample.iteration = 0;
+  sample.nest.value = A;
   ret = mdw->write(sample, HANDLE_NIL);
   if (ret != RETCODE_OK) {
     cerr << "ERROR: run_single_dispose_filter_test: write failed: "

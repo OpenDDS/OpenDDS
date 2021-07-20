@@ -6,6 +6,7 @@
  */
 
 #include "DataSampleElement.h"
+
 #include <algorithm>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -130,10 +131,12 @@ ACE_INLINE
 void
 SendStateDataSampleList::remove(DataSampleElement* stale)
 {
-  if (stale->previous_send_sample_)
+  if (stale->previous_send_sample_) {
     stale->previous_send_sample_->next_send_sample_ = stale->next_send_sample_;
-  if (stale->next_send_sample_)
+  }
+  if (stale->next_send_sample_) {
     stale->next_send_sample_->previous_send_sample_ = stale->previous_send_sample_;
+  }
 }
 
 ACE_INLINE

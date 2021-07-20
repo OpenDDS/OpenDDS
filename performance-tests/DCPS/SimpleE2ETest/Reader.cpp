@@ -168,7 +168,7 @@ void
 Reader::start ()
 {
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) Reader::start \n")));
+    ACE_TEXT("(%P|%t) Reader::start\n")));
   if (activate (THR_NEW_LWP | THR_JOINABLE, 1) == -1)
   {
     ACE_ERROR ((LM_ERROR,
@@ -182,7 +182,7 @@ void
 Reader::end ()
 {
   ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) Reader::end \n")));
+             ACE_TEXT("(%P|%t) Reader::end\n")));
   wait ();
 }
 
@@ -191,7 +191,7 @@ int
 Reader::svc ()
 {
   ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("%T Reader::svc begins \n")));
+    ACE_TEXT("%T Reader::svc begins\n")));
 
   int svc_status = 0;
 
@@ -325,4 +325,3 @@ Reader::is_finished () const
 {
   return finished_sending_;
 }
-

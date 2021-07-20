@@ -5,16 +5,20 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_TRANSPORTQUEUEELEMENT_H
-#define OPENDDS_DCPS_TRANSPORTQUEUEELEMENT_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTQUEUEELEMENT_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTQUEUEELEMENT_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/PoolAllocationBase.h"
 #include "dds/DCPS/SequenceNumber.h"
-
 #include <utility>
+#ifdef ACE_HAS_CPP11
+#  include <atomic>
+#else
+#  include <ace/Atomic_Op.h>
+#endif
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;
@@ -156,6 +160,14 @@ public:
 
   virtual bool is_retained_replaced() const { return false; }
 
+  struct OrderBySequenceNumber {
+    bool operator()(const TransportQueueElement* lhs, const TransportQueueElement* rhs) const
+    {
+      const SequenceNumber seq_l = lhs->sequence(), seq_r = rhs->sequence();
+      return seq_l < seq_r || (seq_l == seq_r && lhs < rhs);
+    }
+  };
+
 protected:
 
   /// Ctor.  The initial_count is the number of DataLinks to which
@@ -171,13 +183,16 @@ protected:
   bool was_dropped() const;
 
 private:
-
   /// Common logic for data_dropped() and data_delivered().
   bool decision_made(bool dropped_by_transport);
   friend class TransportCustomizedElement;
 
   /// Counts the number of outstanding sub-loans.
+#ifdef ACE_HAS_CPP11
+  std::atomic<unsigned long> sub_loan_count_;
+#else
   ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> sub_loan_count_;
+#endif
 
   /// Flag flipped to true if any DataLink dropped the sample.
   bool dropped_;

@@ -11,7 +11,7 @@
 #include "UdpSendStrategy.h"
 #include "UdpReceiveStrategy.h"
 
-
+#include <dds/DCPS/LogAddr.h>
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/transport/framework/DirectPriorityMapper.h"
 
@@ -67,8 +67,8 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
       false);
   }
 
-  VDBG((LM_DEBUG, "(%P|%t) UdpDataLink::open: listening on %C:%hu\n",
-        local_address.get_host_addr(), local_address.get_port_number()));
+  VDBG((LM_DEBUG, "(%P|%t) UdpDataLink::open: listening on %C\n",
+        LogAddr(local_address).c_str()));
 
   // If listening on "any" host/port, need to record the actual port number
   // selected by the OS, as well as our actual hostname, into the config_
@@ -128,7 +128,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
         && errno != ENOTSUP) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("UdpDataLink::open: failed to set the receive buffer size to %d errno %m \n"),
+                        ACE_TEXT("UdpDataLink::open: failed to set the receive buffer size to %d errno %m\n"),
                         rcv_size),
                        false);
     }
@@ -151,8 +151,8 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
 
 
     // For the active side, send the blob and wait for a 1 byte ack.
-    VDBG((LM_DEBUG, "(%P|%t) UdpDataLink::open: active connect to %C:%hu\n",
-      remote_address.get_host_addr(), remote_address.get_port_number()));
+    VDBG((LM_DEBUG, "(%P|%t) UdpDataLink::open: active connect to %C\n",
+      LogAddr(remote_address).c_str()));
 
     TransportLocator info;
     impl().connection_info_i(info, CONNINFO_ALL);
@@ -171,7 +171,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
                                      0),
                    0);
 
-    Serializer serializer(data_block);
+    Serializer serializer(data_block, Encoding::KIND_UNALIGNED_CDR);
     serializer << this->transport_priority();
     serializer.write_octet_array(info.data.get_buffer(),
                                  info.data.length());
@@ -182,7 +182,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
       static_cast<ACE_UINT32>(data_block->length());
     ACE_Message_Block* sample_header_block;
     ACE_NEW_RETURN(sample_header_block,
-                   ACE_Message_Block(DataSampleHeader::max_marshaled_size(),
+                   ACE_Message_Block(DataSampleHeader::get_max_serialized_size(),
                                      ACE_Message_Block::MB_DATA,
                                      0, //cont
                                      0, //data
@@ -200,7 +200,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
     ACE_Message_Block* transport_header_block;
     TransportHeader transport_header;
     ACE_NEW_RETURN(transport_header_block,
-                   ACE_Message_Block(TransportHeader::max_marshaled_size(),
+                   ACE_Message_Block(TransportHeader::get_max_serialized_size(),
                                      ACE_Message_Block::MB_DATA,
                                      0,
                                      0,

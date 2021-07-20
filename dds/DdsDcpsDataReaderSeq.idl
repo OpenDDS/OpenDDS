@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_DATAREADERSEQ_IDL
-#define OPENDDS_DCPS_DATAREADERSEQ_IDL
+#ifndef OPENDDS_DDSDCPSDATAREADERSEQ_IDL
+#define OPENDDS_DDSDCPSDATAREADERSEQ_IDL
 
 module DDS {
     local interface DataReader;

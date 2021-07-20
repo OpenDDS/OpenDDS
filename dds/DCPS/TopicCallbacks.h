@@ -8,7 +8,7 @@
 #ifndef OPENDDS_DCPS_TOPICCALLBACKS_H
 #define OPENDDS_DCPS_TOPICCALLBACKS_H
 
-#include "dds/DCPS/RcObject.h"
+#include "RcObject.h"
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */

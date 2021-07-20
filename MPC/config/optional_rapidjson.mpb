@@ -1,0 +1,2 @@
+feature(!no_rapidjson): rapidjson {
+}

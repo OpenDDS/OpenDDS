@@ -9,6 +9,8 @@
 #include "RtpsUdpDataLink.h"
 #include "RtpsUdpInst.h"
 
+#include <dds/DCPS/LogAddr.h>
+
 #include "dds/DCPS/transport/framework/NullSynchStrategy.h"
 #include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
@@ -16,6 +18,7 @@
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 #include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
+#include "dds/DCPS/RTPS/Logging.h"
 
 #include "dds/DCPS/Serializer.h"
 
@@ -33,6 +36,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+namespace {
+  const Encoding encoding_unaligned_native(Encoding::KIND_UNALIGNED_CDR);
+}
+
 RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link,
                                          const GuidPrefix_t& local_prefix)
   : TransportSendStrategy(0, link->impl(),
@@ -48,14 +55,14 @@ RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link,
     rtps_header_mb_(&rtps_header_db_, ACE_Message_Block::DONT_DELETE),
     network_is_unreachable_(false)
 {
-  std::memcpy(rtps_header_.prefix, RTPS::PROTOCOL_RTPS, sizeof RTPS::PROTOCOL_RTPS);
-  rtps_header_.version = OpenDDS::RTPS::PROTOCOLVERSION;
-  rtps_header_.vendorId = OpenDDS::RTPS::VENDORID_OPENDDS;
-  std::memcpy(rtps_header_.guidPrefix, local_prefix,
+  std::memcpy(rtps_message_.hdr.prefix, RTPS::PROTOCOL_RTPS, sizeof RTPS::PROTOCOL_RTPS);
+  rtps_message_.hdr.version = OpenDDS::RTPS::PROTOCOLVERSION;
+  rtps_message_.hdr.vendorId = OpenDDS::RTPS::VENDORID_OPENDDS;
+  std::memcpy(rtps_message_.hdr.guidPrefix, local_prefix,
               sizeof(GuidPrefix_t));
-  Serializer writer(&rtps_header_mb_);
+  Serializer writer(&rtps_header_mb_, encoding_unaligned_native);
   // byte order doesn't matter for the RTPS Header
-  writer << rtps_header_;
+  writer << rtps_message_.hdr;
 }
 
 namespace {
@@ -140,25 +147,38 @@ RtpsUdpSendStrategy::OverrideToken::~OverrideToken()
 bool
 RtpsUdpSendStrategy::marshal_transport_header(ACE_Message_Block* mb)
 {
-  Serializer writer(mb); // byte order doesn't matter for the RTPS Header
+  if (transport_debug.log_messages) {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, rtps_message_mutex_, false);
+    RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", rtps_message_.hdr.guidPrefix, true, rtps_message_);
+    rtps_message_.submessages.length(0);
+  }
+
+  Serializer writer(mb, encoding_unaligned_native); // byte order doesn't matter for the RTPS Header
   return writer.write_octet_array(reinterpret_cast<ACE_CDR::Octet*>(rtps_header_data_),
     RTPS::RTPSHDR_SZ);
 }
 
 namespace {
   struct AMB_Continuation {
-    AMB_Continuation(ACE_Message_Block& head, ACE_Message_Block& tail)
-      : head_(head) { head_.cont(&tail); }
+    AMB_Continuation(ACE_Thread_Mutex& mutex, ACE_Message_Block& head, ACE_Message_Block& tail)
+      : lock_(mutex), head_(head) { head_.cont(&tail); }
     ~AMB_Continuation() { head_.cont(0); }
+    ACE_Guard<ACE_Thread_Mutex> lock_;
     ACE_Message_Block& head_;
   };
 }
 
 void
-RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
+RtpsUdpSendStrategy::send_rtps_control(RTPS::Message& message,
+                                       ACE_Message_Block& submessages,
                                        const ACE_INET_Addr& addr)
 {
-  const AMB_Continuation cont(rtps_header_mb_, submessages);
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, rtps_message_mutex_);
+    message.hdr = rtps_message_.hdr;
+  }
+
+  const AMB_Continuation cont(rtps_header_mb_lock_, rtps_header_mb_, submessages);
 
 #ifdef OPENDDS_SECURITY
   const Message_Block_Ptr alternate(pre_send_packet(&rtps_header_mb_));
@@ -183,10 +203,16 @@ RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
 }
 
 void
-RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
+RtpsUdpSendStrategy::send_rtps_control(RTPS::Message& message,
+                                       ACE_Message_Block& submessages,
                                        const OPENDDS_SET(ACE_INET_Addr)& addrs)
 {
-  const AMB_Continuation cont(rtps_header_mb_, submessages);
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, rtps_message_mutex_);
+    message.hdr = rtps_message_.hdr;
+  }
+
+  const AMB_Continuation cont(rtps_header_mb_lock_, rtps_header_mb_, submessages);
 
 #ifdef OPENDDS_SECURITY
   const Message_Block_Ptr alternate(pre_send_packet(&rtps_header_mb_));
@@ -210,6 +236,15 @@ RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
   }
 }
 
+void
+RtpsUdpSendStrategy::append_submessages(const RTPS::SubmessageSeq& submessages)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, rtps_message_mutex_);
+  for (ACE_CDR::ULong idx = 0; idx != submessages.length(); ++idx) {
+    DCPS::push_back(rtps_message_.submessages, submessages[idx]);
+  }
+}
+
 ssize_t
 RtpsUdpSendStrategy::send_multi_i(const iovec iov[], int n,
                                   const OPENDDS_SET(ACE_INET_Addr)& addrs)
@@ -217,6 +252,9 @@ RtpsUdpSendStrategy::send_multi_i(const iovec iov[], int n,
   ssize_t result = -1;
   typedef OPENDDS_SET(ACE_INET_Addr)::const_iterator iter_t;
   for (iter_t iter = addrs.begin(); iter != addrs.end(); ++iter) {
+    if (*iter == ACE_INET_Addr()) {
+      continue;
+    }
     const ssize_t result_per_dest = send_single_i(iov, n, *iter);
     if (result_per_dest >= 0) {
       result = result_per_dest;
@@ -264,12 +302,10 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
   if (result < 0) {
     const int err = errno;
     if (err != ENETUNREACH || !network_is_unreachable_) {
-      ACE_TCHAR addr_buff[256] = {};
-      addr.addr_to_string(addr_buff, 256);
       errno = err;
       const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
       ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
-                 "destination %s failed send: %m\n", addr_buff));
+                 "destination %C failed send: %m\n", DCPS::LogAddr(addr).c_str()));
       if (errno == EMSGSIZE) {
         for (int i = 0; i < n; ++i) {
           ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i: "
@@ -317,7 +353,7 @@ RtpsUdpSendStrategy::encode_payload(const RepoId& pub_id,
                                     RTPS::SubmessageSeq& submessages)
 {
   const DDS::Security::DatawriterCryptoHandle writer_crypto_handle =
-    link_->writer_crypto_handle(pub_id);
+    link_->handle_registry()->get_local_datawriter_crypto_handle(pub_id);
   DDS::Security::CryptoTransform_var crypto =
     link_->security_config()->get_crypto_transform();
 
@@ -359,7 +395,7 @@ RtpsUdpSendStrategy::encode_payload(const RepoId& pub_id,
           const bool swapPl = iQos[iQosLen - 4] != ACE_CDR_BYTE_ORDER;
           const char* rawIQos = reinterpret_cast<const char*>(iQos.get_buffer());
           ACE_Message_Block mbIQos(rawIQos, iQosLen);
-          Serializer ser(&mbIQos, swapPl, Serializer::ALIGN_CDR);
+          Serializer ser(&mbIQos, Encoding::KIND_XCDR1, swapPl);
 
           RTPS::DataSubmessage& data = submessages[i].data_sm();
           if (!(ser >> data.inlineQos)) { // appends to any existing inlineQos
@@ -435,7 +471,7 @@ namespace {
     DDS::OctetSeq out(size);
     out.length(size);
     ACE_Message_Block mb(reinterpret_cast<const char*>(out.get_buffer()), size);
-    Serializer ser2(&mb, ser1.swap_bytes(), Serializer::ALIGN_CDR);
+    Serializer ser2(&mb, ser1.encoding());
     ser2 << ACE_OutputCDR::from_octet(smHdr.submessageId);
     ser2 << ACE_OutputCDR::from_octet(smHdr.flags);
     ser2 << smHdr.submessageLength;
@@ -486,7 +522,8 @@ RtpsUdpSendStrategy::encode_writer_submessage(const RepoId& receiver,
 
   DatareaderCryptoHandleSeq readerHandles;
   if (std::memcmp(&GUID_UNKNOWN, &receiver, sizeof receiver)) {
-    DatareaderCryptoHandle drch = link_->reader_crypto_handle(receiver);
+    DatareaderCryptoHandle drch =
+      link_->handle_registry()->get_remote_datareader_crypto_handle(receiver);
     if (drch != DDS::HANDLE_NIL) {
       readerHandles.length(1);
       readerHandles[0] = drch;
@@ -529,7 +566,7 @@ RtpsUdpSendStrategy::encode_reader_submessage(const RepoId& receiver,
 
   DatawriterCryptoHandleSeq writerHandles;
   if (std::memcmp(&GUID_UNKNOWN, &receiver, sizeof receiver)) {
-    DatawriterCryptoHandle dwch = link_->writer_crypto_handle(receiver);
+    DatawriterCryptoHandle dwch = link_->handle_registry()->get_remote_datawriter_crypto_handle(receiver);
     if (dwch != DDS::HANDLE_NIL) {
       writerHandles.length(1);
       writerHandles[0] = dwch;
@@ -570,7 +607,7 @@ RtpsUdpSendStrategy::encode_submessages(const ACE_Message_Block* plain,
   bool ok = parser.parseHeader();
 
   RepoId sender = GUID_UNKNOWN;
-  RTPS::assign(sender.guidPrefix, link_->local_prefix());
+  assign(sender.guidPrefix, link_->local_prefix());
 
   RepoId receiver = GUID_UNKNOWN;
 
@@ -621,7 +658,7 @@ RtpsUdpSendStrategy::encode_submessages(const ACE_Message_Block* plain,
       check_stateless_volatile(sender.entityId, stateless_or_volatile);
       DDS::OctetSeq plainSm(toSeq(parser.serializer(), smhdr, dataExtra, receiver.entityId, sender.entityId, remaining));
       if (!encode_writer_submessage(receiver, replacements, crypto, plainSm,
-                                    link_->writer_crypto_handle(sender), submessage_start, smhdr.submessageId)) {
+                                    link_->handle_registry()->get_local_datawriter_crypto_handle(sender), submessage_start, smhdr.submessageId)) {
         ok = false;
       }
       break;
@@ -640,7 +677,7 @@ RtpsUdpSendStrategy::encode_submessages(const ACE_Message_Block* plain,
       check_stateless_volatile(receiver.entityId, stateless_or_volatile);
       DDS::OctetSeq plainSm(toSeq(parser.serializer(), smhdr, 0, sender.entityId, receiver.entityId, remaining));
       if (!encode_reader_submessage(receiver, replacements, crypto, plainSm,
-                                    link_->reader_crypto_handle(sender), submessage_start, smhdr.submessageId)) {
+                                    link_->handle_registry()->get_local_datareader_crypto_handle(sender), submessage_start, smhdr.submessageId)) {
         ok = false;
       }
       break;

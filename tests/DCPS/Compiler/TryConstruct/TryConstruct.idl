@@ -1,0 +1,174 @@
+/*
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#include <TryConstructBaseTypes.idl>
+
+module TryCon {
+
+  @mutable
+  struct StringTest1 {
+    str64 str64_d;
+    str64 str64_ud;
+    str64 str64_t;
+  };
+
+  @mutable
+  struct StringTest2 {
+    @try_construct(DISCARD) str20 str20_d;
+    @try_construct(USE_DEFAULT) str20 str20_ud;
+    @try_construct(TRIM) str20 str20_t;
+  };
+
+  @topic
+  @extensibility(MUTABLE)
+  union BaseDiscrimUnion switch (EnumType2) {
+    case B1: short s1;
+    case B2: short s2;
+    case B3: short s3;
+    case B4: short s4;
+  };
+
+  @topic
+  @extensibility(MUTABLE)
+  union DiscardDiscrimUnion switch (@try_construct(DISCARD) EnumType) {
+    case VALUE1: short s1;
+    case VALUE2: short s2;
+  };
+
+  @topic
+  @extensibility(MUTABLE)
+  union DefaultDiscrimUnion switch (@try_construct(USE_DEFAULT) EnumType) {
+    case VALUE1: short s1;
+    case VALUE2: short s2;
+  };
+
+  @mutable
+  struct DiscardStructString1 {
+    str64 str64_d;
+  };
+
+  @mutable
+  struct DiscardStructString2 {
+    str20 str20_d;
+  };
+
+  @mutable
+  struct DiscardStructWString1 {
+    wstr64 wstr64_d;
+  };
+
+  @mutable
+  struct DiscardStructWString2 {
+    wstr20 wstr20_d;
+  };
+
+  @mutable
+  struct DiscardStructStruct1 {
+    NestedStruct ns;
+  };
+
+  @mutable
+  struct DiscardStructStruct2 {
+    NestedStructTrim ns;
+  };
+
+  @mutable
+  struct DiscardStructArray1 {
+    str64Array sa;
+  };
+
+  @mutable
+  struct DiscardStructArray2 {
+    str20Array sa;
+  };
+
+  typedef sequence<str64> ss_64;
+  typedef sequence<str20> ss_20;
+
+  @mutable
+  struct DiscardStructSequence1 {
+    ss_64 ss64;
+  };
+
+  @mutable
+  struct DiscardStructSequence2 {
+    ss_20 ss20;
+  };
+
+  @mutable
+  struct DiscardStructArrayAnon1 {
+    str64 saa64[3];
+  };
+
+  @mutable
+  struct DiscardStructArrayAnon2 {
+    str20 saa20[3];
+  };
+
+  @mutable
+  struct DiscardStructSequenceAnon1 {
+    sequence<str64> ssa64;
+  };
+
+  @mutable
+  struct DiscardStructSequenceAnon2 {
+    sequence<str20> ssa20;
+  };
+
+  @topic
+  @extensibility(MUTABLE)
+  union BaseUnion switch (@try_construct(DISCARD) short) {
+    case 0: @try_construct(DISCARD) str64 str_d;
+    case 1: @try_construct(USE_DEFAULT) str64 str_ud;
+    case 2: @try_construct(TRIM) str64 str_t;
+    case 3: @try_construct(DISCARD) wstr64 wstr_d;
+    case 4: @try_construct(USE_DEFAULT) wstr64 wstr_ud;
+    case 5: @try_construct(TRIM) wstr64 wstr_t;
+    case 6: @try_construct(DISCARD) str64Array stra_d;
+    case 7: @try_construct(USE_DEFAULT) str64Array stra_ud;
+    case 8: @try_construct(TRIM) str64Array stra_t;
+    case 9: @try_construct(DISCARD) StringSeqBound2 strs_d;
+    case 10: @try_construct(USE_DEFAULT) StringSeqBound2 strs_ud;
+    case 11: @try_construct(TRIM) StringSeqBound2 strs_t;
+    case 12: @try_construct(DISCARD) EnumType2 e_d;
+    case 13: @try_construct(USE_DEFAULT) EnumType2 e_ud;
+    default: @try_construct(TRIM) str64 def;
+  };
+
+  @topic
+  @extensibility(MUTABLE)
+  union DiscardUnion switch (@try_construct(DISCARD) short) {
+    case 0: @try_construct(DISCARD) str20 str_d;
+    case 3: @try_construct(DISCARD) wstr20 wstr_d;
+    case 6: @try_construct(DISCARD) str20Array stra_d;
+    case 9: @try_construct(DISCARD) StringSeqBound strs_d;
+    case 12: @try_construct(DISCARD) EnumType e_d;
+    default: @try_construct(TRIM) str20 def;
+  };
+
+  @topic
+  @extensibility(MUTABLE)
+  union TrimUnion switch (short) {
+    case 2: @try_construct(TRIM) str20 str_t;
+    case 5: @try_construct(TRIM) wstr20 wstr_t;
+    case 8: @try_construct(TRIM) str20ArrayTrim stra_t;
+    case 11: @try_construct(TRIM) StringSeqBound strs_t;
+    default: @try_construct(TRIM) str20 def;
+  };
+
+  @topic
+  @extensibility(MUTABLE)
+  union DefaultUnion switch (@try_construct(USE_DEFAULT) short) {
+    case 1: @try_construct(USE_DEFAULT) str20 str_ud;
+    case 4: @try_construct(USE_DEFAULT) wstr20 wstr_ud;
+    case 7: @try_construct(USE_DEFAULT) str20Array stra_ud;
+    case 10: @try_construct(USE_DEFAULT) StringSeqBound strs_ud;
+    case 13: @try_construct(USE_DEFAULT) EnumType e_ud;
+    default: @try_construct(TRIM) str20 def;
+  };
+
+};

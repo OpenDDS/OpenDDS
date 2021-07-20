@@ -9,6 +9,7 @@
 #include "dds/DCPS/MonitorFactory.h"
 
 #include "dds/DCPS/RTPS/RtpsDiscovery.h"
+#include "dds/DCPS/XTypes/TypeObject.h"
 
 #include "tao/PortableServer/PortableServer.h"
 
@@ -162,6 +163,43 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
       failed = true;
     }
 
+  // "assert" the same topic - may create a new GUID or find the existing one
+  OpenDDS::DCPS::GUID_t secondTopicId = OpenDDS::DCPS::GUID_UNKNOWN;
+  const OpenDDS::DCPS::TopicStatus topicStatus2 = disc->assert_topic(secondTopicId, domain, pubPartId, tname,
+                                                                     dname, topicQos, false, &callbacks);
+  bool removeTopic2 = false;
+  switch (topicStatus2) {
+  case OpenDDS::DCPS::CREATED:
+    if (pubTopicId == secondTopicId) {
+      failed = true;
+      ACE_ERROR((LM_ERROR, "ERROR: Topic assertion (2nd time) CREATED a topic with the same GUID\n"));
+    } else {
+      removeTopic2 = true;
+      ACE_DEBUG((LM_DEBUG, "2nd topic assertion CREATED a topic\n"));
+    }
+    break;
+  case OpenDDS::DCPS::FOUND:
+    if (pubTopicId != secondTopicId) {
+      failed = true;
+      ACE_ERROR((LM_ERROR, "ERROR: Topic assertion (2nd time) FOUND a topic with a different GUID\n"));
+    } else {
+      removeTopic2 = true;
+      ACE_DEBUG((LM_DEBUG, "2nd topic assertion FOUND a topic\n"));
+    }
+    break;
+  default:
+    failed = true;
+    ACE_ERROR((LM_ERROR, "ERROR: Topic assertion (2nd time) failed with status %d\n", static_cast<int>(topicStatus2)));
+  }
+
+  if (removeTopic2) {
+    const OpenDDS::DCPS::TopicStatus topicStatusRemove = disc->remove_topic(domain, pubPartId, secondTopicId);
+    if (topicStatusRemove != OpenDDS::DCPS::REMOVED) {
+      failed = true;
+      ACE_ERROR((LM_ERROR, "ERROR: Topic remove (for 2nd topic) failed with status %d\n", static_cast<int>(topicStatusRemove)));
+    }
+  }
+
   ::DDS::DataWriterQos_var dwQos = new ::DDS::DataWriterQos;
   *dwQos = TheServiceParticipant->initial_DataWriterQos();
   dwQos->reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
@@ -170,15 +208,21 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
   tii.length(1);
   tii[0].transport_type = "fake transport for test";
 
+  OpenDDS::XTypes::TypeInformation type_info;
+  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
+  type_info.minimal.dependent_typeid_count = 0;
+  type_info.complete.dependent_typeid_count = 0;
+
   ::DDS::PublisherQos_var pQos = new ::DDS::PublisherQos;
   *pQos = TheServiceParticipant->initial_PublisherQos();
   pubId = disc->add_publication(domain,
                                 pubPartId,
                                 pubTopicId,
-                                dwImpl.in(),
+                                rchandle_from(dwImpl.in()),
                                 dwQos.in(),
                                 tii,
-                                pQos.in());
+                                pQos.in(),
+                                type_info);
   if (OpenDDS::DCPS::GUID_UNKNOWN == pubId)
     {
       failed = true;
@@ -282,14 +326,20 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
 
   ::DDS::SubscriberQos_var subQos = new ::DDS::SubscriberQos;
   *subQos = TheServiceParticipant->initial_SubscriberQos();
+
+  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
+  type_info.minimal.dependent_typeid_count = 0;
+  type_info.complete.dependent_typeid_count = 0;
+
   subId = disc->add_subscription(domain,
                                  subPartId,
                                  subTopicId,
-                                 &drImpl,
+                                 rchandle_from(&drImpl),
                                  drQos.in(),
                                  tii,
                                  subQos.in(),
-                                 "", "", DDS::StringSeq());
+                                 "", "", DDS::StringSeq(),
+                                 type_info);
   if( OpenDDS::DCPS::GUID_UNKNOWN == subId)
     {
       failed = true;
@@ -305,8 +355,6 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
       failed = true;
     }
 
-  if (use_rtps)
-    expected.push_back(DiscReceivedCalls::ASSOC_COMPLETE);
   if (!dwImpl->received().expect(orb, max_delay, expected))
     {
       failed = true;
@@ -334,13 +382,19 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
 
   pQos = new ::DDS::PublisherQos;
   *pQos = TheServiceParticipant->initial_PublisherQos();
+
+  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
+  type_info.minimal.dependent_typeid_count = 0;
+  type_info.complete.dependent_typeid_count = 0;
+
   pubIncQosId = disc->add_publication(domain,
                                 pubPartId,
                                 pubTopicId,
-                                &dwIncQosImpl,
+                                rchandle_from(&dwIncQosImpl),
                                 dwIncQosQos.in(),
                                 tii,
-                                pQos.in());
+                                pQos.in(),
+                                type_info);
   if (OpenDDS::DCPS::GUID_UNKNOWN == pubIncQosId)
     {
       failed = true;

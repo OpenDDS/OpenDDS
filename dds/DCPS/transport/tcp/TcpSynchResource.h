@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_TCPSYNCHRESOURCE_H
-#define OPENDDS_TCPSYNCHRESOURCE_H
+#ifndef OPENDDS_DCPS_TRANSPORT_TCP_TCPSYNCHRESOURCE_H
+#define OPENDDS_DCPS_TRANSPORT_TCP_TCPSYNCHRESOURCE_H
 
 #include "TcpConnection_rch.h"
 #include "TcpConnection.h"

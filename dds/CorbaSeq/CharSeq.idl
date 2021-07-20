@@ -23,8 +23,8 @@
  *          CharSeq.pidl
  */
 
-#ifndef OPENDDS_CORBA_CHAR_SEQ_IDL
-#define OPENDDS_CORBA_CHAR_SEQ_IDL
+#ifndef OPENDDS_CORBASEQ_CHARSEQ_IDL
+#define OPENDDS_CORBASEQ_CHARSEQ_IDL
 
 #pragma prefix "omg.org"
 

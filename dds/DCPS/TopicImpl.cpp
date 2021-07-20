@@ -6,14 +6,17 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
 #include "TopicImpl.h"
+
 #include "Qos_Helper.h"
 #include "FeatureDisabledQosCheck.h"
 #include "Definitions.h"
 #include "Service_Participant.h"
 #include "DomainParticipantImpl.h"
 #include "MonitorFactory.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
+#include "DCPS_Utils.h"
+#include "transport/framework/TransportExceptions.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -45,9 +48,9 @@ TopicImpl::~TopicImpl()
 {
 }
 
-DDS::ReturnCode_t
-TopicImpl::set_qos(const DDS::TopicQos & qos)
+DDS::ReturnCode_t TopicImpl::set_qos(const DDS::TopicQos& qos_arg)
 {
+  DDS::TopicQos qos = qos_arg;
 
   OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
@@ -74,7 +77,7 @@ TopicImpl::set_qos(const DDS::TopicQos & qos)
       if (!status) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) TopicImpl::set_qos, ")
-                          ACE_TEXT("failed on compatibility check. \n")),
+                          ACE_TEXT("failed on compatibility check.\n")),
                          DDS::RETCODE_ERROR);
       }
     }
@@ -96,6 +99,7 @@ TopicImpl::get_qos(DDS::TopicQos& qos)
 DDS::ReturnCode_t
 TopicImpl::set_listener(DDS::TopicListener_ptr a_listener, DDS::StatusMask mask)
 {
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
   listener_ = DDS::TopicListener::_duplicate(a_listener);
@@ -105,6 +109,7 @@ TopicImpl::set_listener(DDS::TopicListener_ptr a_listener, DDS::StatusMask mask)
 DDS::TopicListener_ptr
 TopicImpl::get_listener()
 {
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   return DDS::TopicListener::_duplicate(listener_.in());
 }
 
@@ -149,8 +154,8 @@ TopicImpl::enable()
       if (DCPS_debug_level >= 1) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: TopicImpl::enable, ")
-                   ACE_TEXT("assert_topic failed with return value %d.\n"),
-                   status));
+                   ACE_TEXT("assert_topic failed with return value <%C>.\n"),
+                   topicstatus_to_string(status)));
       }
       return DDS::RETCODE_ERROR;
     }
@@ -171,7 +176,7 @@ TopicImpl::get_id() const
 DDS::InstanceHandle_t
 TopicImpl::get_instance_handle()
 {
-  return this->participant_->id_to_handle(this->id_);
+  return get_entity_instance_handle(id_, participant_);
 }
 
 const char*
@@ -201,17 +206,55 @@ TopicImpl::inconsistent_topic(int count)
 
   set_status_changed_flag(DDS::INCONSISTENT_TOPIC_STATUS, true);
 
-  DDS::TopicListener_var listener = listener_;
-  if (!listener || !(listener_mask_ & DDS::INCONSISTENT_TOPIC_STATUS)) {
-    listener = participant_->listener_for(DDS::INCONSISTENT_TOPIC_STATUS);
+  DDS::TopicListener_var listener;
+  {
+    ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
+    listener = listener_;
+    if (!listener || !(listener_mask_ & DDS::INCONSISTENT_TOPIC_STATUS)) {
+      g.release();
+      listener = participant_->listener_for(DDS::INCONSISTENT_TOPIC_STATUS);
+    }
   }
-
   if (listener) {
     listener->on_inconsistent_topic(this, inconsistent_topic_status_);
     inconsistent_topic_status_.total_count_change = 0;
   }
 
   notify_status_condition();
+}
+
+bool TopicImpl::check_data_representation(const DDS::DataRepresentationIdSeq& qos_ids, bool is_data_writer)
+{
+  if (!type_support_) {
+    return true;
+  }
+  DDS::DataRepresentationIdSeq type_allowed_reprs;
+  type_support_->representations_allowed_by_type(type_allowed_reprs);
+  //default for blank annotation is to allow all types of data representation
+  if (type_allowed_reprs.length() == 0) {
+    return true;
+  }
+  if (qos_ids.length() == 0) {
+    return false;
+  }
+  //Data Writer will only use the 1st QoS declared
+  if (is_data_writer) {
+    DDS::DataRepresentationId_t id = qos_ids[0];
+    for (CORBA::ULong j = 0; j < type_allowed_reprs.length(); ++j) {
+      if (id == type_allowed_reprs[j]) {
+        return true;
+      }
+    }
+  } else { // if data reader compare both lists for a compatible QoS
+    for (CORBA::ULong i = 0; i < qos_ids.length(); ++i) {
+      for (CORBA::ULong j = 0; j < type_allowed_reprs.length(); ++j) {
+        if (qos_ids[i] == type_allowed_reprs[j]) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
 }
 
 } // namespace DCPS

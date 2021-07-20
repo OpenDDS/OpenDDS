@@ -70,13 +70,13 @@ $Subscriber->Spawn ();
 
 my $PublisherResult = $Publisher->WaitKill ($test_duration);
 if ($PublisherResult != 0) {
-    print STDERR "ERROR: publisher returned $PublisherResult \n";
+    print STDERR "ERROR: publisher returned $PublisherResult\n";
     $status = 1;
 }
 
 my $SubscriberResult = $Subscriber->WaitKill (15);
 if ($SubscriberResult != 0) {
-    print STDERR "ERROR: subscriber returned $SubscriberResult \n";
+    print STDERR "ERROR: subscriber returned $SubscriberResult\n";
     $status = 1;
 }
 
@@ -99,7 +99,7 @@ open(MONOUT,"mon.out");
 my @monout=<MONOUT>;close MONOUT;
 my $mon_count = grep /Report:/,@monout;
 print STDOUT "mon_count=$mon_count\n";
-if ($mon_count < 58) {
+if ($mon_count < 55) {
     print STDERR "ERROR: Insufficient number of monitor messages seen\n";
     $status = 1;
 }

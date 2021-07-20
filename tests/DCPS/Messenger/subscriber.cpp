@@ -1,44 +1,36 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
+#include "DataReaderListener.h"
+#include "MessengerTypeSupportImpl.h"
+#include "Args.h"
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/WaitSet.h>
-
-#include "dds/DCPS/StaticIncludes.h"
+#ifdef OPENDDS_SECURITY
+#  include <dds/DCPS/security/framework/Properties.h>
+#endif
+#include <dds/DCPS/StaticIncludes.h>
 #ifdef ACE_AS_STATIC_LIBS
-# ifndef OPENDDS_SAFETY_PROFILE
-#include <dds/DCPS/transport/udp/Udp.h>
-#include <dds/DCPS/transport/multicast/Multicast.h>
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
-#include <dds/DCPS/transport/shmem/Shmem.h>
-#  ifdef OPENDDS_SECURITY
-#  include "dds/DCPS/security/BuiltInPlugins.h"
+#  ifndef OPENDDS_SAFETY_PROFILE
+#    include <dds/DCPS/transport/udp/Udp.h>
+#    include <dds/DCPS/transport/multicast/Multicast.h>
+#    include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#    include <dds/DCPS/transport/shmem/Shmem.h>
+#    ifdef OPENDDS_SECURITY
+#      include <dds/DCPS/security/BuiltInPlugins.h>
+#    endif
 #  endif
-# endif
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
-#include <dds/DCPS/transport/framework/TransportRegistry.h>
-#include <dds/DCPS/transport/framework/TransportConfig.h>
-#include <dds/DCPS/transport/framework/TransportInst.h>
-
 #include <cstdlib>
-
-#include "DataReaderListener.h"
-#include "MessengerTypeSupportImpl.h"
-#include "Args.h"
-
 #ifdef OPENDDS_SECURITY
-#include <dds/DCPS/security/framework/Properties.h>
-
 const char auth_ca_file_from_tests[] = "security/certs/identity/identity_ca_cert.pem";
 const char perm_ca_file_from_tests[] = "security/certs/permissions/permissions_ca_cert.pem";
 const char id_cert_file_from_tests[] = "security/certs/identity/test_participant_02_cert.pem";
@@ -46,9 +38,6 @@ const char id_key_file_from_tests[] = "security/certs/identity/test_participant_
 const char governance_file[] = "file:./governance_signed.p7s";
 const char permissions_file[] = "file:./permissions_2_signed.p7s";
 #endif
-
-bool reliable = false;
-bool wait_for_acks = false;
 
 void append(DDS::PropertySeq& props, const char* name, const char* value, bool propagate = false)
 {
@@ -58,8 +47,7 @@ void append(DDS::PropertySeq& props, const char* name, const char* value, bool p
   props[len] = prop;
 }
 
-int
-ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   int status = EXIT_SUCCESS;
 
@@ -79,27 +67,29 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     append(props, "OpenDDS.RtpsRelay.Groups", "Messenger", true);
 
 #ifdef OPENDDS_SECURITY
+    using OpenDDS::DCPS::String;
     // Determine the path to the keys
-    OPENDDS_STRING path_to_tests;
+    String path_to_tests;
     const char* dds_root = ACE_OS::getenv("DDS_ROOT");
     if (dds_root && dds_root[0]) {
       // Use DDS_ROOT in case we are one of the CMake tests
-      path_to_tests = OPENDDS_STRING("file:") + dds_root + "/tests/";
+      path_to_tests = String("file:") + dds_root + "/tests/";
     } else {
       // Else if DDS_ROOT isn't defined try to do it relative to the traditional location
       path_to_tests = "file:../../";
     }
-    const OPENDDS_STRING auth_ca_file = path_to_tests + auth_ca_file_from_tests;
-    const OPENDDS_STRING perm_ca_file = path_to_tests + perm_ca_file_from_tests;
-    const OPENDDS_STRING id_cert_file = path_to_tests + id_cert_file_from_tests;
-    const OPENDDS_STRING id_key_file = path_to_tests + id_key_file_from_tests;
+    const String auth_ca_file = path_to_tests + auth_ca_file_from_tests;
+    const String perm_ca_file = path_to_tests + perm_ca_file_from_tests;
+    const String id_cert_file = path_to_tests + id_cert_file_from_tests;
+    const String id_key_file = path_to_tests + id_key_file_from_tests;
     if (TheServiceParticipant->get_security()) {
-      append(props, DDS::Security::Properties::AuthIdentityCA, auth_ca_file.c_str());
-      append(props, DDS::Security::Properties::AuthIdentityCertificate, id_cert_file.c_str());
-      append(props, DDS::Security::Properties::AuthPrivateKey, id_key_file.c_str());
-      append(props, DDS::Security::Properties::AccessPermissionsCA, perm_ca_file.c_str());
-      append(props, DDS::Security::Properties::AccessGovernance, governance_file);
-      append(props, DDS::Security::Properties::AccessPermissions, permissions_file);
+      using namespace DDS::Security::Properties;
+      append(props, AuthIdentityCA, auth_ca_file.c_str());
+      append(props, AuthIdentityCertificate, id_cert_file.c_str());
+      append(props, AuthPrivateKey, id_key_file.c_str());
+      append(props, AccessPermissionsCA, perm_ca_file.c_str());
+      append(props, AccessGovernance, governance_file);
+      append(props, AccessPermissions, permissions_file);
     }
 #endif
 
@@ -109,8 +99,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                               part_qos,
                               DDS::DomainParticipantListener::_nil(),
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil(participant.in())) {
+    if (!participant) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_participant() failed!\n")),
@@ -120,7 +109,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Register Type (Messenger::Message)
     Messenger::MessageTypeSupport_var ts =
       new Messenger::MessageTypeSupportImpl();
-
     if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
@@ -136,8 +124,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                 TOPIC_QOS_DEFAULT,
                                 DDS::TopicListener::_nil(),
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil(topic.in())) {
+    if (!topic) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_topic() failed!\n")),
@@ -149,8 +136,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
                                      DDS::SubscriberListener::_nil(),
                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil(sub.in())) {
+    if (!sub) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_subscriber() failed!\n")),
@@ -173,8 +159,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                              dr_qos,
                              listener.in(),
                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil(reader.in())) {
+    if (!reader) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_datareader() failed!\n")),

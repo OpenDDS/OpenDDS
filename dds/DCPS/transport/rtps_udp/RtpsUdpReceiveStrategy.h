@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_RTPSUDPRECEIVESTRATEGY_H
-#define DCPS_RTPSUDPRECEIVESTRATEGY_H
+#ifndef OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPRECEIVESTRATEGY_H
+#define OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPRECEIVESTRATEGY_H
 
 #include "Rtps_Udp_Export.h"
 #include "RtpsTransportHeader.h"
@@ -78,6 +78,9 @@ public:
                                       RtpsUdpTransport& tport,
                                       bool& stop);
 
+  virtual void begin_transport_header_processing();
+  virtual void end_transport_header_processing();
+
 private:
   bool getDirectedWriteReaders(RepoIdSet& directedWriteReaders, const RTPS::DataSubmessage& ds) const;
 
@@ -92,8 +95,11 @@ private:
   virtual void deliver_sample(ReceivedDataSample& sample,
                               const ACE_INET_Addr& remote_address);
 
+  virtual void finish_message();
+
   void deliver_sample_i(ReceivedDataSample& sample,
-                        const RTPS::Submessage& submessage);
+                        const RTPS::Submessage& submessage,
+                        const ACE_INET_Addr& remote_addr);
 
   virtual int start_i();
   virtual void stop_i();
@@ -109,7 +115,8 @@ private:
   void sec_submsg_to_octets(DDS::OctetSeq& encoded,
                             const RTPS::Submessage& postfix);
 
-  void deliver_from_secure(const RTPS::Submessage& submessage);
+  void deliver_from_secure(const RTPS::Submessage& submessage,
+                           const ACE_INET_Addr& remote_addr);
 
   bool decode_payload(ReceivedDataSample& sample,
                       const RTPS::DataSubmessage& submessage);
@@ -147,6 +154,7 @@ private:
     RTPS::VendorId_t source_vendor_;
     GuidPrefix_t source_guid_prefix_;
     GuidPrefix_t dest_guid_prefix_;
+    bool directed_;
     DCPS::LocatorSeq unicast_reply_locator_list_;
     DCPS::LocatorSeq multicast_reply_locator_list_;
     bool have_timestamp_;
@@ -155,6 +163,7 @@ private:
 
   MessageReceiver receiver_;
   ACE_INET_Addr remote_address_;
+  RTPS::Message message_;
 
 #ifdef OPENDDS_SECURITY
   RTPS::SecuritySubmessage secure_prefix_;

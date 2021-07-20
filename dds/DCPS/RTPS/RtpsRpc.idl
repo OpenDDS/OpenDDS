@@ -1,0 +1,54 @@
+/*
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef OPENDDS_DCPS_RTPS_RTPS_RPC_IDL
+#define OPENDDS_DCPS_RTPS_RTPS_RPC_IDL
+
+#include "RtpsCore.idl"
+
+#include <dds/DdsDcpsGuid.idl>
+
+// Types from DDS-RPC 1.0 section 7.5.1.1.1 reused in XTypes
+
+// Use XCDR2 with final extensibility (DDSXTY14-30)
+
+module DDS {
+
+@final
+struct SampleIdentity {
+  OpenDDS::DCPS::GUID_t writer_guid;
+  OpenDDS::RTPS::SequenceNumber_t sequence_number;
+};
+
+module RPC {
+
+typedef string<255> InstanceName;
+
+enum RemoteExceptionCode_t
+{
+  REMOTE_EX_OK,
+  REMOTE_EX_UNSUPPORTED,
+  REMOTE_EX_INVALID_ARGUMENT,
+  REMOTE_EX_OUT_OF_RESOURCES,
+  REMOTE_EX_UNKNOWN_OPERATION,
+  REMOTE_EX_UNKNOWN_EXCEPTION
+};
+
+@final
+struct RequestHeader {
+  SampleIdentity requestId;
+  InstanceName _instanceName; // DDSRPC11-5
+};
+
+@final
+struct ReplyHeader {
+  SampleIdentity relatedRequestId;
+  RemoteExceptionCode_t remoteEx;
+};
+
+}; // module RPC
+}; // module DDS
+
+#endif /* OPENDDS_DCPS_RTPS_RTPS_RPC_IDL */

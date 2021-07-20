@@ -3,13 +3,12 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_TYPE_SUPPORT_IDL
-#define OPENDDS_DCPS_TYPE_SUPPORT_IDL
+#ifndef OPENDDS_DDSDCPSTYPESUPPORTEXT_IDL
+#define OPENDDS_DDSDCPSTYPESUPPORTEXT_IDL
 
-#include "dds/DdsDcpsTopic.idl"
-#include "dds/DdsDcpsPublication.idl"
-#include "dds/DdsDcpsSubscription.idl"
-
+#include <dds/DdsDcpsTopic.idl>
+#include <dds/DdsDcpsPublication.idl>
+#include <dds/DdsDcpsSubscription.idl>
 
 module OpenDDS {
   module DCPS {
@@ -44,6 +43,9 @@ module OpenDDS {
           in ::DDS::DomainParticipant domain,
           in string type_name);
 
+      /// Get allowed representations defined by IDL annotations
+      void representations_allowed_by_type(
+        inout ::DDS::DataRepresentationIdSeq seq);
     };
   };
 };

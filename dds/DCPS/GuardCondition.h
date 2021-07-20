@@ -14,7 +14,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "dds/DCPS/ConditionImpl.h"
+#include "ConditionImpl.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

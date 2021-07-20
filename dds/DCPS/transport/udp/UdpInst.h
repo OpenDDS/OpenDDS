@@ -5,14 +5,13 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_UDPINST_H
-#define DCPS_UDPINST_H
+#ifndef OPENDDS_DCPS_TRANSPORT_UDP_UDPINST_H
+#define OPENDDS_DCPS_TRANSPORT_UDP_UDPINST_H
 
 #include "Udp_Export.h"
 #include "UdpTransport.h"
 
-#include "ace/INET_Addr.h"
-
+#include <dds/DCPS/LogAddr.h>
 #include "dds/DCPS/transport/framework/TransportInst.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
 
@@ -40,21 +39,19 @@ public:
   ACE_INET_Addr local_address() const { return local_address_; }
   void local_address(const ACE_INET_Addr& addr)
   {
-    char buffer[INET6_ADDRSTRLEN];
-    local_address_config_str_ = addr.get_host_addr(buffer, sizeof buffer);
-    local_address_config_str_ += ':' + to_dds_string(addr.get_port_number());
     local_address_ = addr;
+    local_address_config_str_ = LogAddr(addr).str();
   }
   void local_address(const char* str)
   {
     local_address_config_str_ = str;
-    local_address_.set(str);
+    local_address_ = choose_single_coherent_address(local_address_config_str_, false);
   }
   void local_address(u_short port_number, const char* host_name)
   {
     local_address_config_str_ = host_name;
     local_address_config_str_ += ":" + to_dds_string(port_number);
-    local_address_.set(port_number, host_name);
+    local_address_ = choose_single_coherent_address(local_address_config_str_, false);
   }
   void local_address_set_port(u_short port_number) {
     local_address_.set_port_number(port_number);

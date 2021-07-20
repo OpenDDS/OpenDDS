@@ -11,8 +11,6 @@ use PerlDDS::Run_Test;
 use PerlDDS::Process_Java;
 use strict;
 
-PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
-
 my $status = 0;
 my $debug = '0';
 
@@ -30,19 +28,13 @@ if ($config eq '') {
 my $use_repo = ($config !~ /^rtps_disc/);
 
 my $reliable = '-r';
-my $wait_for_acks = '-w';
 
 if ($config eq 'udp') {
   $reliable = '';
 }
 
-if (($config =~ 'rtps') || ($config =~ 'rtps_uni') ||
-    ($config eq 'rtps_disc') || ($config eq 'udp')) {
-  $wait_for_acks = '';
-}
-
-my $opts = "-DCPSBit 0 -DCPSConfigFile ../$config.ini $reliable $wait_for_acks";
-my $pub_opts = $opts;
+my $opts = "-DCPSBit 0 -DCPSConfigFile ../$config.ini";
+my $pub_opts = "$opts $reliable";
 my $sub_opts = $opts;
 if ($debug ne '0') {
     my $debug_opt = "-ORBDebugLevel $debug -DCPSDebugLevel $debug " .

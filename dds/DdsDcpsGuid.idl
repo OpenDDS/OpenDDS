@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_GUID_IDL
-#define OPENDDS_DCPS_GUID_IDL
+#ifndef OPENDDS_DDSDCPSGUID_IDL
+#define OPENDDS_DDSDCPSGUID_IDL
 
 module OpenDDS
 {
@@ -22,6 +22,7 @@ module OpenDDS
     typedef octet EntityKey_t[3];
 
     // Uniquely identify each entity within a participant.
+    @final
     struct EntityId_t {
       @key EntityKey_t entityKey;
       @key octet entityKind;
@@ -52,6 +53,7 @@ module OpenDDS
     const octet ENTITYKIND_OPENDDS_NIL_WRITER = 0x4e;
 
     // The actual GUID itself.
+    @final
     struct GUID_t {
       @key GuidPrefix_t guidPrefix;
       @key EntityId_t entityId;

@@ -1,0 +1,72 @@
+#include "xcdrbasetypes.idl"
+
+#include <tao/LongSeq.pidl>
+#include <tao/ShortSeq.pidl>
+#include <tao/OctetSeq.pidl>
+
+// Appendable Tests ==========================================================
+
+typedef AppendableStruct NestedStruct;
+
+@appendable
+struct AppendableWithNestedStruct {
+  NestedStruct nested;
+  COMMON_FIELDS
+};
+
+@appendable
+struct AdditionalFieldNestedStruct {
+  COMMON_FIELDS
+  long additional_field;
+};
+
+@appendable
+struct AdditionalFieldAppendableStruct {
+  AdditionalFieldNestedStruct nested;
+  COMMON_FIELDS
+  long additional_field;
+};
+
+@appendable
+struct AppendableWithNestedStruct2 {
+  string string_field;
+  NestedStruct nested;
+};
+
+@appendable
+union AppendableUnion switch (UnionDisc) {
+  COMMON_BRANCHES
+};
+
+@appendable
+union ModifiedAppendableUnion switch (UnionDisc) {
+  COMMON_BRANCHES
+case E_ADDITIONAL_FIELD:
+  long additional_field;
+};
+
+// Mixed Extensibility Tests =================================================
+
+@final
+struct NestingFinalStruct {
+  string string_field;
+  AppendableStruct appendable_nested;
+  sequence<short> sequence_field;
+  MutableStruct mutable_nested;
+};
+
+@appendable
+struct NestingAppendableStruct {
+  string string_field;
+  MutableStruct mutable_nested;
+  sequence<long> sequence_field;
+  FinalStruct final_nested;
+};
+
+@mutable
+struct NestingMutableStruct {
+  string string_field;
+  AppendableStruct appendable_nested;
+  sequence<octet> sequence_field;
+  FinalStruct final_nested;
+};

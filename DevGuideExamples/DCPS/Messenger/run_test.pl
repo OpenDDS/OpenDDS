@@ -19,7 +19,7 @@ my $status = 0;
 my $rtps = 0;
 my $help = 0;
 
-my $help_message = "usage: run_test.pl [--rtps]\n";
+my $help_message = "usage: run_test.pl [-h|--help] [--rtps]\n";
 if (not GetOptions(
   "rtps" => \$rtps,
   "help|h" => \$help
@@ -31,15 +31,17 @@ if ($help) {
   exit 0;
 }
 
-my $common_opts = "-ORBDebugLevel 10 -DCPSDebugLevel 10";
+unlink "subscriber.log";
+unlink "publisher.log";
+
+my $common_opts = "-ORBDebugLevel 10 -DCPSDebugLevel 10 -ORBVerboseLogging 1 -DCPSTransportDebugLevel 6 ";
 
 if ($rtps) {
   $common_opts .= " -DCPSConfigFile rtps.ini";
 }
 
 my $pub_opts = "$common_opts -ORBLogFile publisher.log";
-my $sub_opts = "$common_opts -DCPSTransportDebugLevel 6 " .
-               "-ORBLogFile subscriber.log";
+my $sub_opts = "$common_opts -ORBLogFile subscriber.log";
 
 my $DCPSREPO;
 my $dcpsrepo_ior = "repo.ior";

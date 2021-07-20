@@ -19,6 +19,7 @@
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/BaseMessageTypes.h>
+#include <dds/DCPS/RTPS/BaseMessageUtils.h>
 #include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 #include <dds/DCPS/transport/framework/TransportSendListener.h>
 
@@ -79,10 +80,9 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
     return;
   }
 
-  const bool little_endian = flags & FLAG_E;
   const size_t starting_length = mb.total_length();
-  Serializer ser(&mb, ACE_CDR_BYTE_ORDER != little_endian,
-                 Serializer::ALIGN_CDR);
+  Serializer ser(&mb, Encoding::KIND_XCDR1,
+    (flags & FLAG_E) ? ENDIAN_LITTLE : ENDIAN_BIG);
 
   ACE_CDR::UShort octetsToNextHeader = 0;
 
@@ -147,8 +147,8 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
 
     frag_ = (kind == DATA_FRAG);
 
-    // marshaled_size_ is # of bytes of submessage we have read from "mb"
-    marshaled_size_ = starting_length - mb.total_length();
+    // serialized_size_ is # of bytes of submessage we have read from "mb"
+    serialized_size_ = starting_length - mb.total_length();
 
     const ACE_CDR::UShort remaining = static_cast<ACE_CDR::UShort>(message_length_ - SMHDR_SZ);
 
@@ -168,16 +168,16 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
       // These Submessages have a payload which we haven't deserialized yet.
       // The TransportReceiveStrategy will know this via message_length().
       // octetsToNextHeader does not count the SubmessageHeader (4 bytes)
-      message_length_ = octetsToNextHeader + SMHDR_SZ - marshaled_size_;
+      message_length_ = octetsToNextHeader + SMHDR_SZ - serialized_size_;
     } else {
       // These Submessages _could_ have extra data that we don't know about
       // (from a newer minor version of the RTPS spec).  Either way, indicate
       // to the TransportReceiveStrategy that there is no data payload here.
       message_length_ = 0;
-      ACE_CDR::UShort marshaled = static_cast<ACE_CDR::UShort>(marshaled_size_);
+      ACE_CDR::UShort marshaled = static_cast<ACE_CDR::UShort>(serialized_size_);
       if (octetsToNextHeader + SMHDR_SZ > marshaled) {
         valid_ = ser.skip(octetsToNextHeader + SMHDR_SZ - marshaled);
-        marshaled_size_ = octetsToNextHeader + SMHDR_SZ;
+        serialized_size_ = octetsToNextHeader + SMHDR_SZ;
       }
     }
   }
@@ -244,7 +244,7 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
     const DataSubmessage& rtps = submessage_.data_sm();
     opendds.cdr_encapsulation_ = true;
     opendds.message_length_ = message_length();
-    opendds.sequence_.setValue(rtps.writerSN.high, rtps.writerSN.low);
+    opendds.sequence_ = to_opendds_seqnum(rtps.writerSN);
     opendds.publication_id_.entityId = rtps.writerId;
     opendds.message_id_ = SAMPLE_DATA;
 
@@ -263,7 +263,7 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
         for (CORBA::ULong i = 0; i < rtps.inlineQos.length(); ++i) {
           if (rtps.inlineQos[i]._d() == PID_KEY_HASH) {
             rds.sample_.reset(new ACE_Message_Block(20));
-            // CDR_BE encapsuation scheme (endianness is not used for key hash)
+            // CDR_BE encapsulation scheme (endianness is not used for key hash)
             rds.sample_->copy("\x00\x00\x00\x00", 4);
             const CORBA::Octet* data = rtps.inlineQos[i].key_hash().value;
             rds.sample_->copy(reinterpret_cast<const char*>(data), 16);
@@ -292,6 +292,7 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
     }
 
     if (rtps.smHeader.flags & (FLAG_D | FLAG_K_IN_DATA)) {
+      // TODO(iguessthislldo: Convert to use Encoding
       // Peek at the byte order from the encapsulation containing the payload.
       opendds.byte_order_ = payload_byte_order(rds);
     }
@@ -302,7 +303,7 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
     const DataFragSubmessage& rtps = submessage_.data_frag_sm();
     opendds.cdr_encapsulation_ = true;
     opendds.message_length_ = message_length();
-    opendds.sequence_.setValue(rtps.writerSN.high, rtps.writerSN.low);
+    opendds.sequence_ = to_opendds_seqnum(rtps.writerSN);
     opendds.publication_id_.entityId = rtps.writerId;
     opendds.message_id_ = SAMPLE_DATA;
     opendds.key_fields_only_ = (rtps.smHeader.flags & FLAG_K_IN_FRAG);
@@ -393,7 +394,7 @@ RtpsSampleHeader::populate_data_sample_submessages(
     DATA_OCTETS_TO_IQOS,
     readerId,
     dsle.get_pub_id().entityId,
-    {dsle.get_header().sequence_.getHigh(), dsle.get_header().sequence_.getLow()},
+    RTPS::to_rtps_seqnum(dsle.get_header().sequence_),
     ParameterList()
   };
   const char message_id = dsle.get_header().message_id_;
@@ -461,7 +462,7 @@ RtpsSampleHeader::populate_data_control_submessages(
     DATA_OCTETS_TO_IQOS,
     ENTITYID_UNKNOWN,
     header.publication_id_.entityId,
-    {header.sequence_.getHigh(), header.sequence_.getLow()},
+    RTPS::to_rtps_seqnum(header.sequence_),
     ParameterList()
   };
   switch (header.message_id_) {
@@ -568,7 +569,21 @@ RtpsSampleHeader::populate_inline_qos(
   PROCESS_INLINE_QOS(ownership_strength, default_dw_qos, qos_data.dw_qos);
 #endif
   PROCESS_INLINE_QOS(liveliness, default_dw_qos, qos_data.dw_qos);
-  PROCESS_INLINE_QOS(reliability, default_dw_qos, qos_data.dw_qos);
+  if (qos_data.dw_qos.reliability != default_dw_qos.reliability) {
+    const int qos_len = plist.length();
+    plist.length(qos_len + 1);
+
+    ReliabilityQosPolicyRtps reliability;
+    reliability.max_blocking_time = qos_data.dw_qos.reliability.max_blocking_time;
+
+    if (qos_data.dw_qos.reliability.kind == DDS::BEST_EFFORT_RELIABILITY_QOS) {
+      reliability.kind.value = RTPS::BEST_EFFORT;
+    } else { // default to RELIABLE for writers
+      reliability.kind.value = RTPS::RELIABLE;
+    }
+
+    plist[qos_len].reliability(reliability);
+  }
   PROCESS_INLINE_QOS(transport_priority, default_dw_qos, qos_data.dw_qos);
   PROCESS_INLINE_QOS(lifespan, default_dw_qos, qos_data.dw_qos);
   PROCESS_INLINE_QOS(destination_order, default_dw_qos, qos_data.dw_qos);

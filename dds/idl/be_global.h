@@ -10,6 +10,8 @@
 
 #include "annotations.h"
 
+#include <dds/DCPS/XTypes/TypeObject.h>
+
 #include <utl_scoped_name.h>
 #include <idl_defines.h>
 #ifndef TAO_IDL_HAS_ANNOTATIONS
@@ -125,6 +127,9 @@ public:
   bool no_default_gen() const;
   void no_default_gen(bool b);
 
+  bool filename_only_includes() const;
+  void filename_only_includes(bool b);
+
   bool itl() const;
   void itl(bool b);
 
@@ -136,6 +141,9 @@ public:
 
   bool face_ts() const;
   void face_ts(bool b);
+
+  bool printer() const;
+  void printer(bool b);
 
   ACE_CString java_arg() const;
   void java_arg(const ACE_CString& str);
@@ -155,6 +163,7 @@ public:
 
   bool suppress_idl() const { return suppress_idl_; }
   bool suppress_typecode() const { return suppress_typecode_; }
+  bool suppress_xtypes() const { return suppress_xtypes_; }
 
   static bool writeFile(const char* fileName, const std::string &content);
 
@@ -177,12 +186,12 @@ public:
    * If node has the key annotation, this sets value to the key annotation
    * value and returns true, else this sets value to false and returns false.
    */
-  bool check_key(AST_Field* node, bool& value);
+  bool check_key(AST_Decl* node, bool& value) const;
 
   /**
    * Check if the discriminator in a union has been declared a key.
    */
-  bool has_key(AST_Union* node);
+  bool union_discriminator_is_key(AST_Union* node);
 
   /**
    * Give a warning that looks like one from tao_idl
@@ -197,20 +206,44 @@ public:
   /**
    * Wrapper around built-in annotations, see annotations.h
    */
-  BuiltinAnnotations builtin_annotations_;
+  Annotations builtin_annotations_;
 
   /**
    * If true, warn about #pragma DCPS_DATA_TYPE
    */
   bool warn_about_dcps_data_type();
 
+  ExtensibilityKind extensibility(AST_Decl* node) const;
+  AutoidKind autoid(AST_Decl* node) const;
+  bool id(AST_Decl* node, ACE_CDR::ULong& value) const;
+  bool hashid(AST_Decl* node, std::string& value) const;
+  bool is_optional(AST_Decl* node) const;
+  bool is_must_understand(AST_Decl* node) const;
+  bool is_key(AST_Decl* node) const;
+  bool is_external(AST_Decl* node) const;
+  bool is_plain(AST_Decl* node) const;
+
+  TryConstructFailAction try_construct(AST_Decl* node) const;
+  TryConstructFailAction sequence_element_try_construct(AST_Sequence* node);
+  TryConstructFailAction array_element_try_construct(AST_Array* node);
+  TryConstructFailAction union_discriminator_try_construct(AST_Union* node);
+
+  OpenDDS::DataRepresentation data_representations(AST_Decl* node) const;
+
+  OpenDDS::XTypes::MemberId compute_id(AST_Field* field, AutoidKind auto_id, OpenDDS::XTypes::MemberId& member_id);
+  OpenDDS::XTypes::MemberId get_id(AST_Field* field);
+
+  bool is_nested(AST_Decl* node);
+
 private:
   /// Name of the IDL file we are processing.
   const char* filename_;
 
-  bool java_, suppress_idl_, suppress_typecode_,
+  bool java_, suppress_idl_, suppress_typecode_, suppress_xtypes_,
     no_default_gen_, generate_itl_, generate_v8_,
-    generate_rapidjson_, face_ts_;
+    generate_rapidjson_, face_ts_, printer_;
+
+  bool filename_only_includes_;
 
   ACE_CString export_macro_, export_include_,
     versioning_name_, versioning_begin_, versioning_end_,
@@ -221,9 +254,16 @@ private:
 
   bool root_default_nested_;
   bool warn_about_dcps_data_type_;
+  ExtensibilityKind default_extensibility_;
+  OpenDDS::DataRepresentation default_data_representation_;
+  AutoidKind root_default_autoid_;
+  TryConstructFailAction default_try_construct_;
+  std::set<std::string> platforms_;
+  typedef std::map<AST_Field*, OpenDDS::XTypes::MemberId> MemberIdMap;
+  MemberIdMap member_id_map_;
 
-  bool is_nested(AST_Decl* node);
   bool is_default_nested(UTL_Scope* scope);
+  AutoidKind scoped_autoid(UTL_Scope* scope) const;
 };
 
 class BE_Comment_Guard {

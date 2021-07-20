@@ -6,6 +6,7 @@
  */
 
 #include "DataSampleElement.h"
+
 #include <algorithm>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -58,14 +59,14 @@ WriterDataSampleList::enqueue_tail(const DataSampleElement* sample)
   // changed to accommodate const-correctness throughout.
   DataSampleElement* mSample = const_cast<DataSampleElement*>(sample);
 
-  //sample->previous_writer_sample_ = 0;
-  //sample->next_writer_sample_ = 0;
+  mSample->next_writer_sample_ = 0;
 
   ++size_ ;
 
   if (head_ == 0) {
     // First sample in the list.
     head_ = tail_ = mSample ;
+    mSample->previous_writer_sample_ = 0;
 
   } else {
     // Add to existing list.

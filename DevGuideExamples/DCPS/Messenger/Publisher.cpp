@@ -22,7 +22,6 @@
 
 #include "MessengerTypeSupportImpl.h"
 
-
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -116,6 +115,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::WaitSet_var ws = new DDS::WaitSet;
     ws->attach_condition(condition);
 
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("Block until subscriber is available\n")));
+
     while (true) {
       DDS::PublicationMatchedStatus matches;
       if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
@@ -138,6 +140,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                          1);
       }
     }
+
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("Subscriber is available\n")));
 
     ws->detach_condition(condition);
 

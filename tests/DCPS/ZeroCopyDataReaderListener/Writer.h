@@ -13,7 +13,6 @@
 
 class Writer : public ACE_Task_Base {
 public:
-
   Writer(DDS::DataWriter_ptr writer);
 
   void start();

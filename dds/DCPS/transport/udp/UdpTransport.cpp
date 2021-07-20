@@ -11,19 +11,24 @@
 #include "UdpSendStrategy.h"
 #include "UdpReceiveStrategy.h"
 
-#include "ace/CDR_Base.h"
-#include "ace/Log_Msg.h"
-
+#include <dds/DCPS/LogAddr.h>
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/transport/framework/PriorityKey.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/AssociationData.h"
 
+#include "ace/CDR_Base.h"
+#include "ace/Log_Msg.h"
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
+
+namespace {
+  const Encoding::Kind encoding_kind = Encoding::KIND_UNALIGNED_CDR;
+}
 
 UdpTransport::UdpTransport(UdpInst& inst)
   : TransportImpl(inst)
@@ -73,6 +78,11 @@ UdpTransport::connect_datalink(const RemoteTransport& remote,
   const bool active = true;
   const PriorityKey key = blob_to_key(remote.blob_, attribs.priority_, this->config().local_address(), active);
 
+  VDBG_LVL((LM_DEBUG, "(%P|%t) UdpTransport::connect_datalink PriorityKey "
+            "prio=%d, addr=%C, is_loopback=%d, is_active=%d\n",
+            key.priority(), LogAddr(key.address()).c_str(), key.is_loopback(),
+            key.is_active()), 2);
+
   GuardType guard(client_links_lock_);
   if (this->is_shut_down()) {
     return AcceptConnectResult(AcceptConnectResult::ACR_FAILED);
@@ -106,6 +116,12 @@ UdpTransport::accept_datalink(const RemoteTransport& remote,
   //GuardType guard(connections_lock_);
   const PriorityKey key = blob_to_key(remote.blob_,
                                       attribs.priority_, config().local_address(), false /* !active */);
+
+  VDBG_LVL((LM_DEBUG, "(%P|%t) UdpTransport::accept_datalink PriorityKey "
+            "prio=%d, addr=%C, is_loopback=%d, is_active=%d\n",
+            key.priority(), LogAddr(key.address()).c_str(), key.is_loopback(),
+            key.is_active()), 2);
+
   if (server_link_keys_.count(key)) {
     VDBG((LM_DEBUG, "(%P|%t) UdpTransport::accept_datalink found\n"));
     return AcceptConnectResult(UdpDataLink_rch(server_link_));
@@ -127,7 +143,9 @@ UdpTransport::accept_datalink(const RemoteTransport& remote,
 
 void
 UdpTransport::stop_accepting_or_connecting(const TransportClient_wrch& client,
-                                           const RepoId& remote_id)
+                                           const RepoId& remote_id,
+                                           bool /*disassociate*/,
+                                           bool /*association_failed*/)
 {
   VDBG((LM_DEBUG, "(%P|%t) UdpTransport::stop_accepting_or_connecting\n"));
 
@@ -253,7 +271,7 @@ UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
   CORBA::ULong octet_size =
     static_cast<CORBA::ULong>(data->length() - sizeof(Priority));
   Priority priority;
-  Serializer serializer(data.get());
+  Serializer serializer(data.get(), encoding_kind);
   serializer >> priority;
   TransportBLOB blob(octet_size);
   blob.length(octet_size);

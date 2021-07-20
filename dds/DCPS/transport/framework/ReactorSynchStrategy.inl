@@ -17,4 +17,3 @@ OpenDDS::DCPS::ReactorSynchStrategy::ReactorSynchStrategy(
 {
   DBG_ENTRY_LVL("ReactorSynchStrategy","ReactorSynchStrategy",6);
 }
-

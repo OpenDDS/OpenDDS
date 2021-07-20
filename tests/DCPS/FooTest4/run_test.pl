@@ -50,7 +50,7 @@ elsif ($ARGV[0] eq '') {
   #default test - single datareader single instance.
 }
 else {
-  print STDERR "ERROR: invalid parameter $ARGV[0] \n";
+  print STDERR "ERROR: invalid parameter $ARGV[0]\n";
   exit 1;
 }
 
@@ -87,7 +87,7 @@ $FooTest4->Spawn ();
 $result = $FooTest4->WaitKill (60);
 
 if ($result != 0) {
-    print STDERR "ERROR: FooTest4 returned $result \n";
+    print STDERR "ERROR: FooTest4 returned $result\n";
     $status = 1;
 }
 

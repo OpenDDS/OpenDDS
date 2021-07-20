@@ -6,7 +6,9 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
-#include "tao/ORB_Core.h"
+
+#include "RecorderImpl.h"
+
 #include "SubscriptionInstance.h"
 #include "ReceivedDataElementList.h"
 #include "DomainParticipantImpl.h"
@@ -14,7 +16,6 @@
 #include "Qos_Helper.h"
 #include "FeatureDisabledQosCheck.h"
 #include "GuidConverter.h"
-#include "TopicImpl.h"
 #include "Serializer.h"
 #include "SubscriberImpl.h"
 #include "Transient_Kludge.h"
@@ -23,21 +24,24 @@
 #include "QueryConditionImpl.h"
 #include "ReadConditionImpl.h"
 #include "MonitorFactory.h"
-#include "dds/DCPS/transport/framework/EntryExit.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
-#include "dds/DdsDcpsCoreC.h"
-#include "dds/DdsDcpsGuidTypeSupportImpl.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
-#if !defined (DDS_HAS_MINIMUM_BIT)
-#include "BuiltInTopicUtils.h"
-#include "dds/DdsDcpsCoreTypeSupportC.h"
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
-#include "RecorderImpl.h"
+#include "SafetyProfileStreams.h"
+#include "TypeSupportImpl.h"
 #include "PoolAllocator.h"
+#ifndef DDS_HAS_MINIMUM_BIT
+#  include "BuiltInTopicUtils.h"
+#endif
+#include "transport/framework/EntryExit.h"
+#include "transport/framework/TransportExceptions.h"
 
-#include "ace/Reactor.h"
-#include "ace/Auto_Ptr.h"
-#include "ace/Condition_Recursive_Thread_Mutex.h"
+#include <dds/DdsDcpsCoreC.h>
+#include <dds/DdsDcpsGuidTypeSupportImpl.h>
+#ifndef DDS_HAS_MINIMUM_BIT
+#  include <dds/DdsDcpsCoreTypeSupportC.h>
+#endif
+
+#include <tao/ORB_Core.h>
+
+#include <ace/Reactor.h>
 
 #include <stdexcept>
 
@@ -157,7 +161,7 @@ void RecorderImpl::init(
   if (DCPS_debug_level >= 1) {
 
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) RecorderImpl::init \n")));
+               ACE_TEXT("(%P|%t) RecorderImpl::init\n")));
   }
 
 
@@ -345,7 +349,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
       //   GuidConverter converter(writer_id);
       //   ACE_DEBUG((LM_DEBUG,
       //              "(%P|%t) RecorderImpl::add_association: "
-      //              "inserted writer %C.return %d \n",
+      //              "inserted writer %C.return %d\n",
       //              OPENDDS_STRING(converter).c_str(), bpair.second));
       //
       //   WriterMapType::iterator iter = writers_.find(writer_id);
@@ -373,6 +377,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
     AssociationData data;
     data.remote_id_ = writer.writerId;
     data.remote_data_ = writer.writerTransInfo;
+    data.remote_transport_context_ = writer.transportContext;
     data.publication_transport_priority_ =
       writer.writerQos.transport_priority.value;
     data.remote_reliable_ =
@@ -440,8 +445,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
   //
   if (!is_bit_) {
 
-    DDS::InstanceHandle_t handle =
-      this->participant_servant_->id_to_handle(writer.writerId);
+    const DDS::InstanceHandle_t handle = participant_servant_->assign_handle(writer.writerId);
 
     //
     // We acquire the publication_handle_lock_ for the remainder of our
@@ -502,23 +506,9 @@ RecorderImpl::add_association(const RepoId&            yourId,
     }
   }
 
-  if (!active) {
-    Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
-    disco->association_complete(this->domain_id_,
-                                this->participant_servant_->get_id(),
-                                this->subscription_id_, writer.writerId);
-  }
-
   // if (this->monitor_) {
   //   this->monitor_->report();
   // }
-}
-
-void
-RecorderImpl::association_complete(const RepoId& /*remote_id*/)
-{
-  // For the current DCPSInfoRepo implementation, the DataReader side will
-  // always be passive, so association_complete() will not be called.
 }
 
 void
@@ -535,13 +525,13 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
     GuidConverter writer_converter(writers[0]);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::remove_associations: ")
-               ACE_TEXT("bit %d local %C remote %C num remotes %d \n"),
+               ACE_TEXT("bit %d local %C remote %C num remotes %d\n"),
                is_bit_,
                OPENDDS_STRING(reader_converter).c_str(),
                OPENDDS_STRING(writer_converter).c_str(),
                writers.length()));
   }
-  if (!this->entity_deleted_.value()) {
+  if (!get_deleted()) {
     // stop pending associations for these writer ids
     this->stop_associating(writers.get_buffer(), writers.length());
 
@@ -549,7 +539,7 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
     // be removed immediately
     WriterIdSeq non_active_writers;
     {
-      CORBA::ULong wr_len = writers.length();
+      const CORBA::ULong wr_len = writers.length();
       ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
 
       for (CORBA::ULong i = 0; i < wr_len; i++) {
@@ -600,7 +590,7 @@ RecorderImpl::remove_associations_i(const WriterIdSeq& writers,
     GuidConverter writer_converter(writers[0]);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::remove_associations_i: ")
-               ACE_TEXT("bit %d local %C remote %C num remotes %d \n"),
+               ACE_TEXT("bit %d local %C remote %C num remotes %d\n"),
                is_bit_,
                OPENDDS_STRING(reader_converter).c_str(),
                OPENDDS_STRING(writer_converter).c_str(),
@@ -716,6 +706,10 @@ RecorderImpl::remove_associations_i(const WriterIdSeq& writers,
   // if (this->monitor_) {
   //   this->monitor_->report();
   // }
+
+  for (unsigned int i = 0; i < handles.length(); ++i) {
+    participant_servant_->return_handle(handles[i]);
+  }
 }
 
 void
@@ -746,7 +740,7 @@ RecorderImpl::remove_all_associations()
   }
 
   try {
-    CORBA::Boolean dont_notify_lost = 0;
+    CORBA::Boolean dont_notify_lost = false;
 
     if (0 < size) {
       remove_associations(writers, dont_notify_lost);
@@ -814,7 +808,7 @@ RecorderImpl::signal_liveliness(const RepoId& remote_participant)
     ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
     for (WriterMapType::iterator pos = writers_.lower_bound(prefix),
            limit = writers_.end();
-         pos != limit && GuidPrefixEqual() (pos->first.guidPrefix, prefix.guidPrefix);
+         pos != limit && equal_guid_prefixes(pos->first, prefix);
          ++pos) {
       writers.push_back(std::make_pair(pos->first, pos->second));
     }
@@ -872,7 +866,7 @@ DDS::ReturnCode_t RecorderImpl::set_qos(
       if (!status) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) RecorderImpl::set_qos, ")
-                          ACE_TEXT("qos not updated. \n")),
+                          ACE_TEXT("qos not updated.\n")),
                          DDS::RETCODE_ERROR);
       }
     }
@@ -937,7 +931,7 @@ RecorderImpl::lookup_instance_handles(const WriterIdSeq&       ids,
   hdls.length(num_wrts);
 
   for (CORBA::ULong i = 0; i < num_wrts; ++i) {
-    hdls[i] = this->participant_servant_->id_to_handle(ids[i]);
+    hdls[i] = participant_servant_->lookup_handle(ids[i]);
   }
 }
 
@@ -989,17 +983,24 @@ RecorderImpl::enable()
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::add_subscription\n")));
 
+    XTypes::TypeInformation type_info;
+    type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
+    type_info.minimal.dependent_typeid_count = 0;
+    type_info.complete.typeid_with_size.typeobject_serialized_size = 0;
+    type_info.complete.dependent_typeid_count = 0;
+
     this->subscription_id_ =
       disco->add_subscription(this->domain_id_,
                               this->participant_servant_->get_id(),
                               this->topic_servant_->get_id(),
-                              this,
+                              rchandle_from(this),
                               this->qos_,
                               trans_conf_info,
                               this->subqos_,
                               filterClassName,
                               filterExpression,
-                              exprParams);
+                              exprParams,
+                              type_info);
 
     if (this->subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN) {
       ACE_ERROR((LM_ERROR,
@@ -1015,7 +1016,7 @@ RecorderImpl::enable()
 DDS::InstanceHandle_t
 RecorderImpl::get_instance_handle()
 {
-  return this->participant_servant_->id_to_handle(subscription_id_);
+  return get_entity_instance_handle(subscription_id_, participant_servant_);
 }
 
 void
@@ -1038,10 +1039,10 @@ RecorderImpl::unregister_for_writer(const RepoId& participant,
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 DDS::ReturnCode_t
-RecorderImpl::repoid_to_bit_key(const DCPS::RepoId&     id,
+RecorderImpl::repoid_to_bit_key(const GUID_t& id,
                                 DDS::BuiltinTopicKey_t& key)
 {
-  DDS::InstanceHandle_t const publication_handle = this->participant_servant_->id_to_handle(id);
+  const DDS::InstanceHandle_t publication_handle = participant_servant_->lookup_handle(id);
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,

@@ -7,6 +7,7 @@
 
 #include "OpenDDS_DCPS_TheParticipantFactory.h"
 #include "OpenDDS_DCPS_TheServiceParticipant.h"
+#include "OpenDDS_DCPS_NetworkConfigModifier.h"
 #include "OpenDDS_DCPS_transport_TheTransportRegistry.h"
 #include "OpenDDS_DCPS_transport_TransportConfig.h"
 #include "OpenDDS_DCPS_transport_TcpInst.h"
@@ -42,6 +43,7 @@
 #include "dds/DCPS/EntityImpl.h"
 #include "dds/DCPS/WaitSet.h"
 #include "dds/DCPS/GuardCondition.h"
+#include <dds/DCPS/LogAddr.h>
 
 #include "DdsDcpsDomainJC.h"
 #include "DdsDcpsPublicationJC.h"
@@ -53,6 +55,21 @@
 
 template <typename CppClass>
 CppClass* recoverCppObj(JNIEnv *jni, jobject jThis);
+
+#ifdef ACE_ANDROID
+namespace {
+  static jobject getGlobalContext(JNIEnv *env)
+  {
+    jclass activityThread = findClass(env, "android/app/ActivityThread");
+    jmethodID currentActivityThread = env->GetStaticMethodID(activityThread, "currentActivityThread", "()Landroid/app/ActivityThread;");
+    jobject at = env->CallStaticObjectMethod(activityThread, currentActivityThread);
+
+    jmethodID getApplication = env->GetMethodID(activityThread, "getApplication", "()Landroid/app/Application;");
+    jobject context = env->CallObjectMethod(at, getApplication);
+    return context;
+  }
+}
+#endif
 
 // TheParticipantFactory
 
@@ -67,6 +84,14 @@ jobject JNICALL Java_OpenDDS_DCPS_TheParticipantFactory_WithArgs(JNIEnv *jni,
       TheParticipantFactoryWithArgs(jargv.argc_, jargv.orb_argv());
     jobject j_dpf;
     copyToJava(jni, j_dpf, dpf, true);
+
+#ifdef ACE_ANDROID
+    jobject context = getGlobalContext(jni);
+    jclass anc = findClass(jni, "OpenDDS/DCPS/AndroidNetworkCallback");
+    jmethodID registerMethod = jni->GetStaticMethodID(anc, "register", "(Landroid/content/Context;)V");
+    jni->CallStaticVoidMethod(anc, registerMethod, context);
+#endif
+
     return j_dpf;
 
   } catch (const CORBA::SystemException &se) {
@@ -135,6 +160,57 @@ jstring JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_get_1unique_1id
   return retStr;
 }
 
+jobject JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_network_1config_1modifier
+(JNIEnv * jni, jclass)
+{
+#ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
+  try {
+    OpenDDS::DCPS::NetworkConfigModifier_rch ncm(TheServiceParticipant->network_config_modifier(), OpenDDS::DCPS::inc_count());
+    if (ncm == 0) {
+      return 0;
+    } else {
+      jclass ncmClazz = findClass(jni, "OpenDDS/DCPS/NetworkConfigModifier");
+      jmethodID ctor = jni->GetMethodID(ncmClazz, "<init>", "(J)V");
+      return jni->NewObject(ncmClazz, ctor, reinterpret_cast<jlong>(ncm._retn()));
+    }
+  } catch (const CORBA::SystemException &se) {
+    throw_java_exception(jni, se);
+    return 0;
+  }
+#else
+  ACE_UNUSED_ARG(jni);
+  return 0;
+#endif
+}
+
+// NetworkConfigModifier
+
+// NetworkConfigModifier::_jni_fini
+void JNICALL Java_OpenDDS_DCPS_NetworkConfigModifier__1jni_1fini
+(JNIEnv * jni, jobject jthis)
+{
+#ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
+  OpenDDS::DCPS::NetworkConfigModifier_rch ncm = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS::NetworkConfigModifier>(jni, jthis));
+  ncm->_remove_ref();
+#else
+  ACE_UNUSED_ARG(jni);
+  ACE_UNUSED_ARG(jthis);
+#endif
+}
+
+// NetworkConfigModifier::update_interfaces
+void JNICALL Java_OpenDDS_DCPS_NetworkConfigModifier_update_1interfaces
+(JNIEnv * jni, jobject jthis)
+{
+#ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
+  OpenDDS::DCPS::NetworkConfigModifier* ncm = recoverCppObj<OpenDDS::DCPS::NetworkConfigModifier>(jni, jthis);
+  ncm->update_interfaces();
+#else
+  ACE_UNUSED_ARG(jni);
+  ACE_UNUSED_ARG(jthis);
+#endif
+}
+
 // Exception translation
 
 #define TRANSPORT_EXCEPTION(NAME)                                       \
@@ -195,8 +271,12 @@ jobject constructTransportInst(JNIEnv *jni,
       throw_java_exception(jni, OpenDDS::DCPS::Transport::UnableToCreate());
     }
     jmethodID ctor = jni->GetMethodID(instClazz, "<init>", "(J)V");
-    return jni->NewObject(instClazz, ctor,
+
+    jobject obj = jni->NewObject(instClazz, ctor,
                           reinterpret_cast<jlong>(inst._retn()));
+    jni->DeleteLocalRef(instClazz);
+
+    return obj;
 }
 
 // TheTransportRegistry
@@ -271,8 +351,12 @@ jobject JNICALL Java_OpenDDS_DCPS_transport_TheTransportRegistry_create_1config
     jclass configClazz =
       findClass(jni, "OpenDDS/DCPS/transport/TransportConfig");
     jmethodID ctor = jni->GetMethodID(configClazz, "<init>", "(J)V");
-    return jni->NewObject(configClazz, ctor,
+
+    jobject obj = jni->NewObject(configClazz, ctor,
                           reinterpret_cast<jlong>(config._retn()));
+    jni->DeleteLocalRef(configClazz);
+
+    return obj;
 
   } catch (const CORBA::SystemException &se) {
     throw_java_exception(jni, se);
@@ -296,8 +380,12 @@ jobject JNICALL Java_OpenDDS_DCPS_transport_TheTransportRegistry_get_1config
     jclass configClazz =
       findClass(jni, "OpenDDS/DCPS/transport/TransportConfig");
     jmethodID ctor = jni->GetMethodID(configClazz, "<init>", "(J)V");
-    return jni->NewObject(configClazz, ctor,
+
+    jobject obj = jni->NewObject(configClazz, ctor,
                           reinterpret_cast<jlong>(config._retn()));
+    jni->DeleteLocalRef(configClazz);
+
+    return obj;
 
   } catch (const CORBA::SystemException &se) {
     throw_java_exception(jni, se);
@@ -817,10 +905,7 @@ jstring JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getGroupAddress
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::MulticastInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: MulticastInst>(jni, jthis));
-  ACE_TCHAR buffer[1024];
-  inst->group_address_.addr_to_string(buffer, 1024, 1);
-  std::string addr_str = ACE_TEXT_ALWAYS_CHAR(buffer);
-  return jni->NewStringUTF(addr_str.c_str());
+  return jni->NewStringUTF(OpenDDS::DCPS::LogAddr(inst->group_address_).c_str());
 }
 
 // MulticastInst::setGroupAddress
@@ -1015,10 +1100,7 @@ jstring JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getLocalAddress
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  ACE_TCHAR buffer[1024];
-  inst->local_address().addr_to_string(buffer, 1024, 1);
-  std::string addr_str = ACE_TEXT_ALWAYS_CHAR(buffer);
-  return jni->NewStringUTF(addr_str.c_str());
+  return jni->NewStringUTF(OpenDDS::DCPS::LogAddr(inst->local_address()).c_str());
 }
 
 // RtpsUdpInst::setLocalAddress
@@ -1052,10 +1134,7 @@ jstring JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getMulticastGroupAddress
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  ACE_TCHAR buffer[1024];
-  inst->multicast_group_address().addr_to_string(buffer, 1024, 1);
-  std::string addr_str = ACE_TEXT_ALWAYS_CHAR(buffer);
-  return jni->NewStringUTF(addr_str.c_str());
+  return jni->NewStringUTF(OpenDDS::DCPS::LogAddr(inst->multicast_group_address()).c_str());
 }
 
 // RtpsUdpInst::setMulticastGroupAddress
@@ -1130,22 +1209,6 @@ void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setHeartbeatResponseDelay
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
   inst->heartbeat_response_delay_ = OpenDDS::DCPS::TimeDuration::from_msec(val);
-}
-
-// RtpsUdpInst::getHandshakeTimeout
-jlong JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getHandshakeTimeout
-(JNIEnv * jni, jobject jthis)
-{
-  OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  return inst->handshake_timeout_.value().msec();
-}
-
-// RtpsUdpInst::setHandshakeTimeout
-void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setHandshakeTimeout
-(JNIEnv * jni, jobject jthis, jlong val)
-{
-  OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  inst->handshake_timeout_ = OpenDDS::DCPS::TimeDuration::from_msec(val);
 }
 
 // WaitSet and GuardCondition

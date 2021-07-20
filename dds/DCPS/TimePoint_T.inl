@@ -93,6 +93,14 @@ TimePoint_T<AceClock>::to_dds_time() const
 
 template<typename AceClock>
 ACE_INLINE
+MonotonicTime_t
+TimePoint_T<AceClock>::to_monotonic_time() const
+{
+  return time_value_to_monotonic_time(value_);
+}
+
+template<typename AceClock>
+ACE_INLINE
 TimePoint_T<AceClock>&
 TimePoint_T<AceClock>::operator+=(const TimeDuration& td)
 {

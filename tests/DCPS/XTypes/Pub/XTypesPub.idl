@@ -1,0 +1,164 @@
+#include <tao/OctetSeq.pidl>
+
+@topic
+struct ControlStruct {
+  @key long key;
+};
+
+@topic
+struct PlainCdrStruct {
+  @key long key;
+  long value;
+};
+
+// Final structues
+
+@topic
+@final
+struct FinalStructPub {
+  @key long key;
+};
+
+@topic
+@final
+struct ModifiedFinalStruct {
+  @key long key;
+  long additional_field;
+};
+
+// Appendable structues
+
+@topic
+@appendable
+struct AdditionalPostfixFieldStruct {
+  @key long key;
+  long additional_field;
+};
+
+@topic
+@appendable
+struct AdditionalPrefixFieldStruct {
+  long additional_field;
+  @key long key;
+};
+
+// Mutable structues
+
+@topic
+@mutable
+struct ModifiedMutableStruct {
+  @id(2) long additional_field;
+  @id(1) @key long key;
+};
+
+@topic
+@mutable
+struct ModifiedIdMutableStruct {
+  @id(1) @key long key;
+  @id(3) long additional_field;
+};
+
+@topic
+@mutable
+struct ModifiedTypeMutableStruct {
+  @id(1) @key long key;
+  @id(2) string additional_field;
+};
+
+@topic
+@mutable
+struct ModifiedNameMutableStruct {
+  @id(1) @key long key_modified;
+  @id(2) long additional_field_modified;
+};
+
+
+// Unions
+
+enum UnionDisc {
+  E_KEY,
+  E_OCTET_FIELD,
+  E_ADDITIONAL_FIELD
+};
+
+enum ModifiedUnionDisc {
+  E_KEY_MODIFIED,
+  E_OCTET_FIELD_MODIFIED,
+  E_ADDITIONAL_FIELD_MODIFIED
+};
+
+@topic
+@mutable
+union ModifiedMutableUnion switch (UnionDisc) {
+case E_KEY:
+  @id(6) long key;
+case E_ADDITIONAL_FIELD:
+  @id(12) long additional_field;
+};
+
+@topic
+@mutable
+union ModifiedDiscMutableUnion switch (ModifiedUnionDisc) {
+case E_KEY_MODIFIED:
+  @id(6) long key;
+case E_OCTET_FIELD_MODIFIED:
+  @id(8) octet octet_field;
+case E_ADDITIONAL_FIELD_MODIFIED:
+  @id(12) long additional_field;
+};
+
+@topic
+@mutable
+union ModifiedTypeMutableUnion switch (UnionDisc) {
+case E_KEY:
+  @id(6) string key;
+case E_OCTET_FIELD:
+  @id(8) string octet_field;
+case E_ADDITIONAL_FIELD:
+  @id(12) string additional_field;
+};
+
+@topic
+@mutable
+union ModifiedNameMutableUnion switch (UnionDisc) {
+case E_KEY:
+  @id(6) long key_modified;
+case E_OCTET_FIELD:
+  @id(8) octet octet_field_modified;
+case E_ADDITIONAL_FIELD:
+  @id(12) long additional_field_modified;
+};
+
+
+// Tryconstruct
+
+typedef string<20> str20;
+typedef string<64> str64;
+
+@topic
+@mutable
+struct Trim64Struct {
+  @try_construct(TRIM) str64 trim_string;
+};
+
+// Dependencies
+
+@appendable
+struct NestedStruct {
+  long additional_field;
+};
+
+@topic
+@appendable
+struct AppendableStructWithDependency {
+  @key long key;
+  NestedStruct additional_nested_struct;
+};
+
+// No XTypes Test
+
+@topic
+@appendable
+struct AppendableStructNoXTypes {
+  @key long key;
+};

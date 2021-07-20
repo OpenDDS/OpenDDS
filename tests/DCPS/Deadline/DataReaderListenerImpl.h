@@ -1,8 +1,13 @@
 #ifndef DATAREADER_LISTENER_IMPL
 #define DATAREADER_LISTENER_IMPL
 
+#include <dds/DCPS/LocalObject.h>
+#include <dds/DCPS/ConditionVariable.h>
+#include <dds/DCPS/TimeDuration.h>
+
 #include <dds/DdsDcpsSubscriptionExtC.h>
-#include "dds/DCPS/LocalObject.h"
+
+#include <ace/Thread_Mutex.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -61,7 +66,8 @@ public:
     return num_arrived_;
   }
 
-  int wait_matched(long count, const ACE_Time_Value *abstime) const;
+  bool wait_matched(
+    long count, const OpenDDS::DCPS::TimeDuration& max_wait) const;
 
   CORBA::Long requested_deadline_total_count (void) const;
 
@@ -72,7 +78,7 @@ protected:
 private:
 
   mutable ACE_Thread_Mutex mutex_;
-  mutable ACE_Condition<ACE_Thread_Mutex> matched_condition_;
+  mutable OpenDDS::DCPS::ConditionVariable<ACE_Thread_Mutex> matched_condition_;
   long matched_;
   long num_arrived_;
   CORBA::Long requested_deadline_total_count_;

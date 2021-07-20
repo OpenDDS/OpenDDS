@@ -1,14 +1,13 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #include "rapidjson_generator.h"
+
 #include "be_extern.h"
 
-#include "utl_identifier.h"
+#include <utl_identifier.h>
 
 using namespace AstTypeClassification;
 
@@ -43,10 +42,12 @@ namespace {
         return "String";
       case AST_PredefinedType::PT_boolean:
         return "Bool";
+      case AST_PredefinedType::PT_int8:
       case AST_PredefinedType::PT_short:
       case AST_PredefinedType::PT_long:
         return "Int";
       case AST_PredefinedType::PT_octet:
+      case AST_PredefinedType::PT_uint8:
       case AST_PredefinedType::PT_ushort:
       case AST_PredefinedType::PT_ulong:
         return "Uint";
@@ -56,17 +57,26 @@ namespace {
         return "Uint64";
       case AST_PredefinedType::PT_float:
         return "Float";
-      default:
+      case AST_PredefinedType::PT_double:
+      case AST_PredefinedType::PT_longdouble:
         return "Double";
+      case AST_PredefinedType::PT_any:
+      case AST_PredefinedType::PT_object:
+      case AST_PredefinedType::PT_value:
+      case AST_PredefinedType::PT_abstract:
+      case AST_PredefinedType::PT_void:
+      case AST_PredefinedType::PT_pseudo:
+        be_util::misc_error_and_abort("Unsupported type in getRapidJsonType");
       }
     }
+    be_util::misc_error_and_abort("Unhandled type in getRapidJsonType");
     return "";
   }
 
   bool builtInSeq(AST_Type* type)
   {
     const std::string name = scoped(type->name());
-    static const char PRE[] = "CORBA::";
+    static const char PRE[] = " ::CORBA::";
     if (std::strncmp(name.c_str(), PRE, sizeof(PRE) - 1)) return false;
     return name.rfind("Seq") == name.size() - 3;
   }
@@ -117,40 +127,71 @@ namespace {
           return;
         }
 
-      } else if (pt == AST_PredefinedType::PT_char) {
-        strm <<
-          "  {\n"
-          "    const char str[] = {" << src << ", 0};\n"
-          "    " << tgt_str << op_pre << "&str[0], " << alloc << op_post << ";\n"
-          "  }\n";
-        return;
+      } else {
+        switch (pt) {
+        case AST_PredefinedType::PT_char:
+          strm <<
+            "  {\n"
+            "    const char str[] = {" << src << ", 0};\n"
+            "    " << tgt_str << op_pre << "&str[0], " << alloc << op_post << ";\n"
+            "  }\n";
+          return;
 
-      } else if (pt == AST_PredefinedType::PT_wchar) {
-        strm <<
-          "  {\n"
-          "    const uint16_t str[] = {" << src << ", 0};\n"
-          "    rapidjson::GenericStringStream<rapidjson::UTF16<> > ins(&str[0]);\n"
-          "    rapidjson::GenericStringBuffer<rapidjson::UTF8<> > outs;\n"
-          "    rapidjson::Transcoder<rapidjson::UTF16<>, rapidjson::UTF8<> >::Transcode(ins, outs);\n"
-          "    " << tgt_str << op_pre << "outs.GetString(), " << alloc << op_post << ";\n"
-          "  }\n";
-        return;
+        case AST_PredefinedType::PT_wchar:
+          strm <<
+            "  {\n"
+            "    const uint16_t str[] = {" << src << ", 0};\n"
+            "    rapidjson::GenericStringStream<rapidjson::UTF16<> > ins(&str[0]);\n"
+            "    rapidjson::GenericStringBuffer<rapidjson::UTF8<> > outs;\n"
+            "    rapidjson::Transcoder<rapidjson::UTF16<>, rapidjson::UTF8<> >::Transcode(ins, outs);\n"
+            "    " << tgt_str << op_pre << "outs.GetString(), " << alloc << op_post << ";\n"
+            "  }\n";
+          return;
 
-      } else if (pt == AST_PredefinedType::PT_short) {
-        prefix = "static_cast<int>(";
-        suffix = ")";
-      } else if (pt == AST_PredefinedType::PT_octet || pt == AST_PredefinedType::PT_ushort) {
-        prefix = "static_cast<unsigned int>(";
-        suffix = ")";
-      } else if (pt == AST_PredefinedType::PT_longlong) {
-        prefix = "static_cast<int64_t>(";
-        suffix = ")";
-      } else if (pt == AST_PredefinedType::PT_ulonglong) {
-        prefix = "static_cast<uint64_t>(";
-        suffix = ")";
-      } else if (rapidJsonType == "Double") {
-        prefix = "static_cast<double>(";
-        suffix = ")";
+        case AST_PredefinedType::PT_boolean:
+        case AST_PredefinedType::PT_ulong:
+        case AST_PredefinedType::PT_long:
+        case AST_PredefinedType::PT_float:
+          // prefix and suffix not needed
+          break;
+
+        case AST_PredefinedType::PT_int8:
+        case AST_PredefinedType::PT_short:
+          prefix = "static_cast<int>(";
+          suffix = ")";
+          break;
+
+        case AST_PredefinedType::PT_octet:
+        case AST_PredefinedType::PT_uint8:
+        case AST_PredefinedType::PT_ushort:
+          prefix = "static_cast<unsigned int>(";
+          suffix = ")";
+          break;
+
+        case AST_PredefinedType::PT_longlong:
+          prefix = "static_cast<int64_t>(";
+          suffix = ")";
+          break;
+
+        case AST_PredefinedType::PT_ulonglong:
+          prefix = "static_cast<uint64_t>(";
+          suffix = ")";
+          break;
+
+        case AST_PredefinedType::PT_double:
+        case AST_PredefinedType::PT_longdouble:
+          prefix = "static_cast<double>(";
+          suffix = ")";
+          break;
+
+        case AST_PredefinedType::PT_any:
+        case AST_PredefinedType::PT_object:
+        case AST_PredefinedType::PT_value:
+        case AST_PredefinedType::PT_abstract:
+        case AST_PredefinedType::PT_void:
+        case AST_PredefinedType::PT_pseudo:
+          be_util::misc_error_and_abort("Unsupported predefined type in gen_copyto");
+        }
       }
 
       strm << "  " << tgt_str << op_pre << prefix << src << suffix << op_post << ";\n";
@@ -208,6 +249,12 @@ namespace {
         ip = std::string(8, ' ');
       }
 
+      const std::string underscores =
+        dds_generator::scoped_helper(type->name(), "_"),
+        temp_type = scoped(type->name()),
+        temp_name = "temp_" + underscores;
+      const bool octet_type = (pt == AST_PredefinedType::PT_octet);
+
       if (cls & CL_ENUM) {
         const std::string underscores =
           dds_generator::scoped_helper(type->name(), "_"),
@@ -242,68 +289,87 @@ namespace {
         }
         strm <<
           ip << "}\n";
-      } else if (pt == AST_PredefinedType::PT_char) {
-        strm <<
-          ip << "if (val.IsString()) {\n" <<
-          ip << "  " << propName << assign_prefix << "val.GetString()[0]" << assign_suffix << ";\n" <<
-          ip << "}\n";
-      } else if (pt == AST_PredefinedType::PT_wchar) {
-        strm <<
-          ip << "if (val.IsString()) {\n" <<
-          ip << "  rapidjson::GenericStringStream<rapidjson::UTF8<> > ins(val.GetString());\n" <<
-          ip << "  rapidjson::GenericStringBuffer<rapidjson::UTF16<> > outs;\n" <<
-          ip << "  rapidjson::Transcoder<rapidjson::UTF8<>, rapidjson::UTF16<> >::Transcode(ins, outs);\n" <<
-          ip << "  " << propName << assign_prefix << "outs.GetString()[0]" << assign_suffix << ";\n" <<
-          ip << "}\n";
-      } else if (pt == AST_PredefinedType::PT_longlong
-              || pt == AST_PredefinedType::PT_ulonglong
-              || pt == AST_PredefinedType::PT_octet
-              || pt == AST_PredefinedType::PT_ushort
-              || pt == AST_PredefinedType::PT_short
-              || pt == AST_PredefinedType::PT_ulong
-              || pt == AST_PredefinedType::PT_long) {
-        const std::string underscores =
-          dds_generator::scoped_helper(type->name(), "_"),
-          temp_type = scoped(type->name()),
-          temp_name = "temp_" + underscores;
-        const bool octet_type = (pt == AST_PredefinedType::PT_octet);
-        strm <<
-          ip << "if (val.IsString()) {\n" <<
-          ip << "  std::string ss(val.GetString());\n" <<
-          ip << "  std::istringstream iss(ss);\n" <<
-          ip << "  " << (octet_type ? "uint16_t" : temp_type.c_str()) << " " << temp_name << ";\n" <<
-          ip << "  if (ss.find(\"0x\") != std::string::npos) {\n" <<
-          ip << "    iss >> std::hex >> " << temp_name << ";\n" <<
-          ip << "  } else {\n" <<
-          ip << "    iss >> " << temp_name << ";\n" <<
-          ip << "  }\n" <<
-          ip << "  " << propName << assign_prefix;
-        if (octet_type) {
-          strm << "static_cast<" << temp_type.c_str() << ">(";
-        }
-        strm << temp_name << (octet_type ? ")" : "") << assign_suffix << ";\n" <<
-          ip << "}\n" <<
-          ip << "if (val.IsNumber()) {\n" <<
-          ip << "  " << propName << assign_prefix << "val.Get" << rapidJsonType << "()" << assign_suffix << ";\n" <<
-          ip << "}\n";
-      } else if (pt == AST_PredefinedType::PT_float
-              || pt == AST_PredefinedType::PT_double) {
-        strm <<
-          ip << "if (val.IsNumber()) {\n" <<
-          ip << "  " << propName << assign_prefix << "val.Get" << rapidJsonType << "()" << assign_suffix << ";\n" <<
-          ip << "}\n";
-      } else if (pt == AST_PredefinedType::PT_longdouble) {
-        strm <<
-          ip << "if (val.IsNumber()) {\n" <<
+      } else {
+        switch (pt) {
+        case AST_PredefinedType::PT_char:
+          strm <<
+            ip << "if (val.IsString()) {\n" <<
+            ip << "  " << propName << assign_prefix << "val.GetString()[0]" << assign_suffix << ";\n" <<
+            ip << "}\n";
+          break;
+
+        case AST_PredefinedType::PT_wchar:
+          strm <<
+            ip << "if (val.IsString()) {\n" <<
+            ip << "  rapidjson::GenericStringStream<rapidjson::UTF8<> > ins(val.GetString());\n" <<
+            ip << "  rapidjson::GenericStringBuffer<rapidjson::UTF16<> > outs;\n" <<
+            ip << "  rapidjson::Transcoder<rapidjson::UTF8<>, rapidjson::UTF16<> >::Transcode(ins, outs);\n" <<
+            ip << "  " << propName << assign_prefix << "outs.GetString()[0]" << assign_suffix << ";\n" <<
+            ip << "}\n";
+          break;
+
+        case AST_PredefinedType::PT_longlong:
+        case AST_PredefinedType::PT_ulonglong:
+        case AST_PredefinedType::PT_octet:
+        case AST_PredefinedType::PT_uint8:
+        case AST_PredefinedType::PT_int8:
+        case AST_PredefinedType::PT_ushort:
+        case AST_PredefinedType::PT_short:
+        case AST_PredefinedType::PT_ulong:
+        case AST_PredefinedType::PT_long:
+          strm <<
+            ip << "if (val.IsString()) {\n" <<
+            ip << "  std::string ss(val.GetString());\n" <<
+            ip << "  std::istringstream iss(ss);\n" <<
+            ip << "  " << (octet_type ? "uint16_t" : temp_type.c_str()) << " " << temp_name << ";\n" <<
+            ip << "  if (ss.find(\"0x\") != std::string::npos) {\n" <<
+            ip << "    iss >> std::hex >> " << temp_name << ";\n" <<
+            ip << "  } else {\n" <<
+            ip << "    iss >> " << temp_name << ";\n" <<
+            ip << "  }\n" <<
+            ip << "  " << propName << assign_prefix;
+          if (octet_type) {
+            strm << "static_cast<" << temp_type.c_str() << ">(";
+          }
+          strm << temp_name << (octet_type ? ")" : "") << assign_suffix << ";\n" <<
+            ip << "}\n" <<
+            ip << "if (val.IsNumber()) {\n" <<
+            ip << "  " << propName << assign_prefix << "val.Get" << rapidJsonType << "()" << assign_suffix << ";\n" <<
+            ip << "}\n";
+          break;
+
+        case AST_PredefinedType::PT_float:
+        case AST_PredefinedType::PT_double:
+          strm <<
+            ip << "if (val.IsNumber()) {\n" <<
+            ip << "  " << propName << assign_prefix << "val.Get" << rapidJsonType << "()" << assign_suffix << ";\n" <<
+            ip << "}\n";
+          break;
+
+        case AST_PredefinedType::PT_longdouble:
+          strm <<
+            ip << "if (val.IsNumber()) {\n" <<
             ip << "  ACE_CDR::LongDouble temp;\n" <<
             ip << "  ACE_CDR_LONG_DOUBLE_ASSIGNMENT(temp, val.Get" << rapidJsonType << "());\n" <<
             ip << "  " << propName << assign_prefix << "temp" << assign_suffix << ";\n" <<
-          ip << "}\n";
-      } else if (pt == AST_PredefinedType::PT_boolean) {
-        strm <<
-          ip << "if (val.IsBool()) {\n" <<
-          ip << "  " << propName << assign_prefix << "val.Get" << rapidJsonType << "()" << assign_suffix << ";\n" <<
-          ip << "}\n";
+            ip << "}\n";
+          break;
+
+        case AST_PredefinedType::PT_boolean:
+          strm <<
+            ip << "if (val.IsBool()) {\n" <<
+            ip << "  " << propName << assign_prefix << "val.Get" << rapidJsonType << "()" << assign_suffix << ";\n" <<
+            ip << "}\n";
+          break;
+
+        case AST_PredefinedType::PT_any:
+        case AST_PredefinedType::PT_object:
+        case AST_PredefinedType::PT_value:
+        case AST_PredefinedType::PT_abstract:
+        case AST_PredefinedType::PT_void:
+        case AST_PredefinedType::PT_pseudo:
+          be_util::misc_error_and_abort("Unsupported predefined type in gen_copyfrom");
+        }
       }
 
       if (prop_index) {
@@ -574,9 +640,9 @@ bool rapidjson_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
 }
 
 namespace {
-  std::string branchGenTo(const std::string& name, AST_Type* type,
-                          const std::string&, std::string&,
-                          const std::string&)
+  std::string branchGenTo(const std::string&, const std::string& name, AST_Type* type,
+                          const std::string&, bool, Intro&,
+                          const std::string&, bool)
   {
     const std::string source = "src." + name + "()",
       prop = "\"" + name + "\"";
@@ -585,9 +651,9 @@ namespace {
     gen_copyto("dst", "alloc", source.c_str(), type, prop.c_str(), false, false,  strm);
     return strm.str();
   }
-  std::string branchGenFrom(const std::string& name, AST_Type* type,
-                            const std::string&, std::string&,
-                            const std::string&)
+  std::string branchGenFrom(const std::string&, const std::string& name, AST_Type* type,
+                            const std::string&, bool, Intro&,
+                            const std::string&, bool)
   {
     std::ostringstream strm;
     const Classification cls = classify(type);
@@ -614,7 +680,7 @@ bool rapidjson_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     ctv.addArg("alloc", "rapidjson::Value::AllocatorType&");
     ctv.endArgs();
     gen_copyto("dst", "alloc", "src._d()", discriminator, "\"_d\"");
-    generateSwitchForUnion("src._d()", branchGenTo, branches, discriminator, "", "", clazz.c_str(), false, false);
+    generateSwitchForUnion(node, "src._d()", branchGenTo, branches, discriminator, "", "", clazz.c_str(), false, false);
   }
   {
     Function vtc("copyFromRapidJson", "void");
@@ -622,7 +688,7 @@ bool rapidjson_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     vtc.addArg("out", clazz + '&');
     vtc.endArgs();
     gen_copyfrom("out", "src", discriminator, "_d", false, true);
-    generateSwitchForUnion("out._d()", branchGenFrom, branches, discriminator, "", "", clazz.c_str(), false, false);
+    generateSwitchForUnion(node, "out._d()", branchGenFrom, branches, discriminator, "", "", clazz.c_str(), false, false);
   }
   if (be_global->is_topic_type(node)) {
     gen_type_support(name);

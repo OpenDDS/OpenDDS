@@ -6,12 +6,17 @@
  */
 
 #include "DCPS/DdsDcps_pch.h"
-#include "dds/DCPS/DCPS_Utils.h"
-#include "dds/DCPS/Qos_Helper.h"
-#include "dds/DCPS/Definitions.h"
+#include "DCPS_Utils.h"
 
-#include "ace/ACE.h"  /* For ACE::wild_match() */
-#include "ace/OS_NS_string.h"
+#include "Qos_Helper.h"
+#include "Definitions.h"
+
+#include <ace/ACE.h> /* For ACE::wild_match() */
+#include <ace/OS_NS_string.h>
+
+#ifdef OPENDDS_SECURITY
+#  include "dds/DdsSecurityCoreC.h"
+#endif
 
 #include <cstring>
 
@@ -19,6 +24,76 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
+
+const char* retcode_to_string(DDS::ReturnCode_t value)
+{
+  switch (value) {
+  case DDS::RETCODE_OK:
+    return "OK";
+  case DDS::RETCODE_ERROR:
+    return "Error";
+  case DDS::RETCODE_UNSUPPORTED:
+    return "Unsupported";
+  case DDS::RETCODE_BAD_PARAMETER:
+    return "Bad parameter";
+  case DDS::RETCODE_PRECONDITION_NOT_MET:
+    return "Precondition not met";
+  case DDS::RETCODE_OUT_OF_RESOURCES:
+    return "Out of resources";
+  case DDS::RETCODE_NOT_ENABLED:
+    return "Not enabled";
+  case DDS::RETCODE_IMMUTABLE_POLICY:
+    return "Immutable policy";
+  case DDS::RETCODE_INCONSISTENT_POLICY:
+    return "Inconsistent policy";
+  case DDS::RETCODE_ALREADY_DELETED:
+    return "Already deleted";
+  case DDS::RETCODE_TIMEOUT:
+    return "Timeout";
+  case DDS::RETCODE_NO_DATA:
+    return "No data";
+  case DDS::RETCODE_ILLEGAL_OPERATION:
+    return "Illegal operation";
+#ifdef OPENDDS_SECURITY
+  case DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY:
+    return "Not allowed by security";
+#endif
+  default:
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: retcode_to_string: ")
+      ACE_TEXT("%d is either invalid or not recognized.\n"),
+      value));
+    return "Invalid return code";
+  }
+}
+
+const char* topicstatus_to_string(TopicStatus value)
+{
+  switch (value) {
+  case CREATED:
+    return "Created";
+  case ENABLED:
+    return "Enabled";
+  case FOUND:
+    return "Found";
+  case NOT_FOUND:
+    return "Not found";
+  case REMOVED:
+    return "Removed";
+  case CONFLICTING_TYPENAME:
+    return "Conflicting typename";
+  case PRECONDITION_NOT_MET:
+    return "Precondition not met";
+  case INTERNAL_ERROR:
+    return "Internal error";
+  case TOPIC_DISABLED:
+    return "Topic disabled";
+  default:
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: topicstatus_to_string: ")
+      ACE_TEXT("%d is either invalid or not recognized.\n"),
+      value));
+    return "Invalid topic status";
+  }
+}
 
 bool
 is_wildcard(const char *str)
@@ -212,10 +287,8 @@ compatibleQOS(const DDS::PublisherQos*  pubQos,
 
   // Check the PRESENTATION_QOS_POLICY_ID
   if ((pubQos->presentation.access_scope < subQos->presentation.access_scope)
-      || ((pubQos->presentation.coherent_access == false)
-          &&(subQos->presentation.coherent_access == true))
-      || ((pubQos->presentation.ordered_access  == false)
-          &&(subQos->presentation.ordered_access  == true))) {
+      || (!pubQos->presentation.coherent_access && subQos->presentation.coherent_access)
+      || (!pubQos->presentation.ordered_access && subQos->presentation.ordered_access)) {
     compatible = false;
 
     increment_incompatibility_count(writerStatus,
@@ -309,6 +382,33 @@ compatibleQOS(const DDS::DataWriterQos * writerQos,
                                     DDS::OWNERSHIP_QOS_POLICY_ID);
   }
 
+  {
+    // Find a common data representation
+    bool found = false;
+    DDS::DataRepresentationIdSeq readerIds =
+      get_effective_data_rep_qos(readerQos->representation.value, true);
+    DDS::DataRepresentationIdSeq writerIds =
+      get_effective_data_rep_qos(writerQos->representation.value, false);
+    const CORBA::ULong reader_count = readerIds.length();
+    const CORBA::ULong writer_count = writerIds.length();
+    for (CORBA::ULong wi = 0; !found && wi < writer_count; ++wi) {
+      for (CORBA::ULong ri = 0; !found && ri < reader_count; ++ri) {
+        if (readerIds[ri] == writerIds[wi]) {
+          found = true;
+          break;
+        }
+      }
+    }
+
+    if (!found) {
+      increment_incompatibility_count(writerStatus,
+        DDS::DATA_REPRESENTATION_QOS_POLICY_ID);
+      increment_incompatibility_count(readerStatus,
+        DDS::DATA_REPRESENTATION_QOS_POLICY_ID);
+      compatible = false;
+    }
+  }
+
   return compatible;
 }
 
@@ -355,6 +455,36 @@ bool should_check_association_upon_change(const DDS::DomainParticipantQos & /*qo
   return false;
 }
 
-}}
+bool repr_to_encoding_kind(DDS::DataRepresentationId_t repr, Encoding::Kind& kind)
+{
+  switch(repr) {
+  case DDS::XCDR_DATA_REPRESENTATION:
+    kind = Encoding::KIND_XCDR1;
+    break;
+  case DDS::XCDR2_DATA_REPRESENTATION:
+    kind = Encoding::KIND_XCDR2;
+    break;
+  default:
+    return false;
+  }
+  return true;
+}
+
+DDS::DataRepresentationIdSeq get_effective_data_rep_qos(const DDS::DataRepresentationIdSeq& qos, bool reader)
+{
+  if (qos.length() == 0) {
+    DDS::DataRepresentationIdSeq ids;
+    ids.length(reader ? 2 : 1);
+    ids[0] = DDS::XCDR2_DATA_REPRESENTATION;
+    if (reader) {
+      ids[1] = DDS::XCDR_DATA_REPRESENTATION;
+    }
+    return ids;
+  }
+  return qos;
+}
+
+} // namespace DCPS
+} // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

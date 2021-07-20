@@ -1,0 +1,26 @@
+/*
+*
+*
+* Distributed under the OpenDDS License.
+* See: http://www.opendds.org/license.html
+*/
+#include <tao/LongSeq.pidl>
+
+module my_module {
+  @topic
+  struct my_struct{
+    long my_long;
+  };
+  enum EnumType {B1, B2, B3, B4, BExtra};
+  @topic
+  union my_union switch (EnumType) {
+    case B1: short s1;
+    case B2: short s2;
+    case B3: short s3;
+    case B4: short s4;
+  };
+  typedef sequence<long> my_long_seq_unbound;
+  typedef sequence<long, 10> my_long_seq_bound;
+  typedef long my_long_array[10];
+
+};

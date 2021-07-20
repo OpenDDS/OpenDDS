@@ -10,13 +10,15 @@
 
 #include "PoolAllocator.h"
 #include "PoolAllocationBase.h"
-#include "ace/Reactor.h"
-#include "ace/Thread.h"
-#include "ace/Condition_Thread_Mutex.h"
 #include "RcEventHandler.h"
 #include "dcps_export.h"
 #include "unique_ptr.h"
 #include "RcHandle_T.h"
+#include "ConditionVariable.h"
+
+#include <ace/Reactor.h>
+#include <ace/Thread.h>
+#include <ace/Thread_Mutex.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -31,7 +33,10 @@ public:
   public:
     Command() : executed_(false), condition_(mutex_), reactor_(0) {}
     virtual ~Command() { }
+    virtual bool should_execute() const { return true; }
+    virtual void will_execute() {}
     virtual void execute() = 0;
+    virtual void queue_flushed() {}
 
     void reset()
     {
@@ -51,7 +56,7 @@ public:
     {
       ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
       executed_ = true;
-      condition_.broadcast();
+      condition_.notify_all();
     }
 
   protected:
@@ -64,7 +69,7 @@ public:
 
     bool executed_;
     mutable ACE_Thread_Mutex mutex_;
-    mutable ACE_Condition_Thread_Mutex condition_;
+    mutable ConditionVariable<ACE_Thread_Mutex> condition_;
     ACE_Reactor* reactor_;
   };
   typedef RcHandle<Command> CommandPtr;
@@ -113,7 +118,11 @@ protected:
     const CommandPtr command(c, keep_count());
     {
       ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+      if (!command->should_execute()) {
+        return CommandPtr();
+      }
       command_queue_.push_back(command);
+      command->will_execute();
       if (state_ == NONE) {
         state_ = NOTIFIED;
         do_notify = true;

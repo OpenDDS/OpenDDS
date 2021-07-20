@@ -11,12 +11,13 @@
 
 #include "FileSystemStorage.h"
 
-#include "ace/Dirent.h"
-#include "ace/Vector_T.h"
-#include "ace/OS_NS_sys_stat.h"
-#include "ace/OS_NS_macros.h"
-#include "ace/OS_NS_unistd.h"
-#include "ace/OS_NS_stdio.h"
+#include "DirentWrapper.h"
+
+#include <ace/Vector_T.h>
+#include <ace/OS_NS_sys_stat.h>
+#include <ace/OS_NS_macros.h>
+#include <ace/OS_NS_unistd.h>
+#include <ace/OS_NS_stdio.h>
 
 #include <cstdio>
 #include <cstring>
@@ -126,7 +127,7 @@ int dds_chdir(const ACE_TCHAR* path)
     throw std::runtime_error("GetShortPathNameW failed.");
   }
 
-  ACE_OSCALL_RETURN(::_wchdir(spath), int, -1);
+  return ::_wchdir(spath);
 }
 
 bool is_dir(const ACE_TCHAR* path)

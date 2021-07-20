@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DDSDCPS_PCH_H
-#define DDSDCPS_PCH_H
+#ifndef OPENDDS_DCPS_DDSDCPS_PCH_H
+#define OPENDDS_DCPS_DDSDCPS_PCH_H
 
 #ifdef USING_PCH
 

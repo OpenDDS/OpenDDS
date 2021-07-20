@@ -1,0 +1,4 @@
+project(DDS_tests_transport_testmsg): dcps_test {
+  sharedname = transport_testmsg
+  dynamicflags += TESTMSG_BUILD_DLL
+}

@@ -58,11 +58,11 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
   Messenger::Message message;
   DDS::SampleInfo info;
 
-  DDS::ReturnCode_t error = reader_i->take_next_sample(message, info);
+  const DDS::ReturnCode_t error = reader_i->take_next_sample(message, info);
 
   if (error == DDS::RETCODE_OK) {
     std::cout << "SampleInfo.sample_rank = " << info.sample_rank << std::endl;
-    std::cout << "SampleInfo.instance_state = " << info.instance_state << std::endl;
+    std::cout << "SampleInfo.instance_state = " << OpenDDS::DCPS::InstanceState::instance_state_mask_string(info.instance_state) << std::endl;
 
     if (info.valid_data) {
       std::cout << "Message: subject    = " << message.subject.in() << std::endl

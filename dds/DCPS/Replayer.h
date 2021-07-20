@@ -9,11 +9,13 @@
 #ifndef OPENDDS_DCPS_REPLAYER_H
 #define OPENDDS_DCPS_REPLAYER_H
 
-#include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/RcObject.h"
-#include "dds/DCPS/RcHandle_T.h"
-#include "dds/DCPS/RawDataSample.h"
-#include "dds/DdsDcpsInfrastructureC.h"
+#include "PoolAllocator.h"
+#include "RcObject.h"
+#include "RcHandle_T.h"
+#include "RawDataSample.h"
+#include "LocalObject.h"
+
+#include <dds/DdsDcpsInfrastructureC.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -56,7 +58,7 @@ typedef TAO_Objref_Var_T<Replayer> Replayer_var;
  * a recorder, this allows the data to be replayed to DataReaders.
  */
 class OpenDDS_Dcps_Export Replayer
-  : public virtual RcObject {
+  : public virtual LocalObjectBase {
 public:
   typedef Replayer_ptr _ptr_type;
   typedef Replayer_var _var_type;

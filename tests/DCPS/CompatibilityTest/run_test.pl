@@ -72,7 +72,7 @@ sub run_compatibility_tests {
   my $result = $test->finish($sub_time + 10);
 
   if ($result != 0) {
-    print STDERR "ERROR: test returned $result \n";
+    print STDERR "ERROR: test returned $result\n";
     $status = 1;
   }
 

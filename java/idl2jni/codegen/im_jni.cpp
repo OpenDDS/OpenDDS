@@ -85,7 +85,7 @@ string idl_mapping_jni::taoType(AST_Type *decl)
   case AST_Decl::NT_enum:
     return scoped(decl->name());
   case AST_Decl::NT_interface:
-  case AST_Decl::NT_interface_fwd: // fallthrough
+  case AST_Decl::NT_interface_fwd:
     return scoped(decl->name()) + "_var";
   default:
     break;
@@ -296,11 +296,11 @@ string idl_mapping_jni::jvmSignature(AST_Type *decl)
   }
   case AST_Decl::NT_string:
     return "Ljava/lang/String;";
-  case AST_Decl::NT_enum: // fallthrough
-  case AST_Decl::NT_struct:  // fallthrough
-  case AST_Decl::NT_struct_fwd: // fallthrough
-  case AST_Decl::NT_union: // fallthrough
-  case AST_Decl::NT_interface: // fallthrough
+  case AST_Decl::NT_enum:
+  case AST_Decl::NT_struct:
+  case AST_Decl::NT_struct_fwd:
+  case AST_Decl::NT_union:
+  case AST_Decl::NT_interface:
   case AST_Decl::NT_interface_fwd:
     return "L" + scoped_helper(decl->name(), "/") + ";";
   case AST_Decl::NT_typedef: {
@@ -472,6 +472,7 @@ bool idl_mapping_jni::gen_enum(UTL_ScopedName *name,
   "  jfieldID fid = jni->GetFieldID (clazz, \"_value\", \"I\");\n"
   "  target = static_cast<" << c.cxx
   << "> (jni->GetIntField (source, fid));\n"
+  "  jni->DeleteLocalRef (clazz);\n"
   "}\n\n" <<
   c.sigToJava << "\n"
   "{\n"
@@ -480,6 +481,7 @@ bool idl_mapping_jni::gen_enum(UTL_ScopedName *name,
   "  jmethodID factory = jni->GetStaticMethodID (clazz, \"from_int\", "
   "\"(I)L" << enumJVMsig << ";\");\n"
   "  target = jni->CallStaticObjectMethod (clazz, factory, source);\n"
+  "  jni->DeleteLocalRef (clazz);\n"
   "}\n\n";
   return true;
 }
@@ -565,6 +567,7 @@ bool idl_mapping_jni::gen_struct(UTL_ScopedName *name,
   "{\n"
   "  jclass clazz = jni->GetObjectClass (source);\n" <<
   fieldsToCxx <<
+  "  jni->DeleteLocalRef (clazz);\n"
   "}\n\n" <<
   c.sigToJava << "\n"
   "{\n"
@@ -580,6 +583,7 @@ bool idl_mapping_jni::gen_struct(UTL_ScopedName *name,
   "      clazz = jni->GetObjectClass (target);\n"
   "    }\n" <<
   fieldsToJava <<
+  "  jni->DeleteLocalRef (clazz);\n"
   "}\n\n";
   return true;
 }
@@ -645,7 +649,7 @@ bool idl_mapping_jni::gen_jarray_copies(UTL_ScopedName *name,
 {
   commonSetup c(name, jniArrayType.c_str(), false, !sequence);
   string preLoop, postLoopCxx, postLoopJava, preNewArray, newArrayExtra,
-  loopCxx, loopJava, actualJniType = jniType,
+  postNewArray, loopCxx, loopJava, actualJniType = jniType,
                                      resizeCxx = sequence ? "  target.length (len);\n" : "";
 
   if (jvmSig.size() == 1) { //primitive type
@@ -754,6 +758,11 @@ bool idl_mapping_jni::gen_jarray_copies(UTL_ScopedName *name,
       "      jni->DeleteLocalRef (obj);\n";
   }
 
+  postNewArray = "      jni->DeleteLocalRef (clazz);\n";
+  if (preNewArray.find("jclass clazz") == string::npos) {
+    postNewArray = "";
+  }
+
   ostringstream toJavaBody;
   toJavaBody <<
   "  jsize len = " << length << ";\n"
@@ -764,6 +773,7 @@ bool idl_mapping_jni::gen_jarray_copies(UTL_ScopedName *name,
   "    {\n"
   << preNewArray <<
   "      arr = jni->New" << jniFn << "Array (len" << newArrayExtra << ");\n"
+  << postNewArray <<
   "    }\n"
   "  else\n"
   "    {\n"
@@ -974,6 +984,7 @@ string arg_conversion(const char *name, AST_Type *type,
       + ", \"<init>\", \"()V\");\n"
       "  jobject _j_" + name + " = _jni->NewObject (_hc_" + name
       + ", _hm_" + name + ");\n"
+      "  _jni->DeleteLocalRef (_hc_" + string(name) + ");\n"
       "  holderize (_jni, _j_" + name + ", _n_" + name + ", \"" + jvmSig
       + "\");\n";
 
@@ -991,7 +1002,8 @@ string arg_conversion(const char *name, AST_Type *type,
       "  jmethodID _hm_" + name + " = _jni->GetMethodID (_hc_" + name
       + ", \"<init>\", \"()V\");\n"
       "  jobject _j_" + name + " = _jni->NewObject (_hc_" + name
-      + ", _hm_" + name + ");\n";
+      + ", _hm_" + name + ");\n"
+      "  _jni->DeleteLocalRef (_hc_" + string(name) + ");\n";
     tao_argconv_out +=
       "  " + jni + " _o_" + name + " = deholderize<" + jni + "> (_jni, _j_"
       + name + ", \"" + jvmSig + "\");\n"
@@ -1119,6 +1131,7 @@ void write_native_attribute_r(UTL_ScopedName *name, const char *javaStub,
     "  " << tao_retval << array_cast << "_jni->Call" << jniFn
     << "Method (globalCallback_, _mid" << java_args
     << ((array_cast == "") ? "" : ")") << ");\n"
+    "  _jni->DeleteLocalRef (_clazz);\n"
     "  jthrowable _excep = _jni->ExceptionOccurred ();\n"
     "  if (_excep) throw_cxx_exception (_jni, _excep);\n"
     << tao_argconv_out
@@ -1212,6 +1225,7 @@ void write_native_attribute_w(UTL_ScopedName *name, const char *javaStub,
     "  " << tao_retval << array_cast << "_jni->Call" << jniFn
     << "Method (globalCallback_, _mid" << java_args
     << ((array_cast == "") ? "" : ")") << ");\n"
+    "  _jni->DeleteLocalRef (_clazz);\n"
     "  jthrowable _excep = _jni->ExceptionOccurred ();\n"
     "  if (_excep) throw_cxx_exception (_jni, _excep);\n"
     << tao_argconv_out
@@ -1366,6 +1380,7 @@ void write_native_operation(UTL_ScopedName *name, const char *javaStub,
     "  " << tao_retval << array_cast << "_jni->Call" << jniFn
     << "Method (globalCallback_, _mid" << java_args
     << ((array_cast == "") ? "" : ")") << ");\n"
+    "  _jni->DeleteLocalRef (_clazz);\n"
     "  jthrowable _excep = _jni->ExceptionOccurred ();\n"
     "  if (_excep) throw_cxx_exception (_jni, _excep);\n"
     << tao_argconv_out
@@ -1442,6 +1457,7 @@ bool idl_mapping_jni::gen_interf(UTL_ScopedName *name, bool local,
     "    {\n"
     "      target = new " << name_underscores << "JavaPeer (jni, source);\n"
     "    }\n"
+    "  jni->DeleteLocalRef (taoObjClazz);\n"
     "}\n\n";
 
   else /*!local*/ c.cppfile <<
@@ -1465,6 +1481,7 @@ bool idl_mapping_jni::gen_interf(UTL_ScopedName *name, bool local,
   "  jmethodID ctor = jni->GetMethodID (stubClazz, \"<init>\", \"(J)V\");\n"
   "  target = jni->NewObject (stubClazz, ctor, reinterpret_cast<jlong> (\n"
   "    CORBA::Object::_duplicate (source.in ())));\n"
+  "  jni->DeleteLocalRef (stubClazz);\n"
   "}\n\n";
 
   // implement native_unarrow native method for the Helper class
@@ -1812,6 +1829,11 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
   commonSetup c(name);
   string unionJVMsig = scoped_helper(name, "/");
   bool disc_is_enum(disc_meth == "Object");
+  bool disc_is_bool = false;
+  AST_PredefinedType *pd = dynamic_cast<AST_PredefinedType*>(discriminator);
+  if (pd) {
+    disc_is_bool = pd->pt() == AST_PredefinedType::PT_boolean;
+  }
   string disc_name = disc_is_enum ? "disc_val" : "disc",
     extra_enum1 = disc_is_enum ?
     "  jmethodID mid_disc_val = jni->GetMethodID (jni->GetObjectClass "
@@ -1831,7 +1853,8 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
       "  jmethodID from_int = jni->GetStaticMethodID (dclazz, \"from_int\", "
       "\"(I)" + disc_sig + "\");\n"
       "  jobject jdisc = jni->CallStaticObjectMethod (dclazz, from_int, "
-      "static_cast<jint> (source._d ()));\n";
+      "static_cast<jint> (source._d ()));\n"
+      "  jni->DeleteLocalRef (dclazz);\n";
     explicitDiscCleanup =
       "  jni->DeleteLocalRef (jdisc);\n";
 
@@ -1873,10 +1896,11 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
   "  " << disc_ty << " disc = jni->Call" << disc_meth << "Method (source, "
   "mid_disc);\n" <<
   extra_enum1 <<
-  "  switch (" << disc_name << ")\n"
+  "  switch (" << (disc_is_bool ? "(int)" : "") << disc_name << ")\n"
   "    {\n" <<
   branchesToCxx <<
   "    }\n"
+  "  jni->DeleteLocalRef (clazz);\n"
   "  target._d (" << extra_enum2 << ");\n" //in case the Java side had one of
   "}\n\n" <<                               //the "alternate" labels for 1 br.
   c.sigToJava << "\n"
@@ -1893,7 +1917,7 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
   "      clazz = jni->GetObjectClass (target);\n"
   "    }\n" <<
   explicitDiscSetup <<
-  "  switch (source._d ())\n"
+  "  switch (" << (disc_is_bool ? "(int)" : "") << "source._d ())\n"
   "    {\n" <<
   branchesToJava <<
   "    }\n" <<

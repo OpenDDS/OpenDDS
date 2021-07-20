@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_TRANSPORT_DEBUG_H
-#define OPENDDS_TRANSPORT_DEBUG_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTDEBUG_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTDEBUG_H
 
 #include "dds/DCPS/dcps_export.h"
 
@@ -44,6 +44,16 @@ namespace DCPS {
 /// Transport Logging verbosity level.
 // This needs to be initialized somewhere.
 extern OpenDDS_Dcps_Export unsigned int Transport_debug_level;
+
+class OpenDDS_Dcps_Export TransportDebug {
+public:
+  TransportDebug();
+
+  bool log_messages;
+  bool log_progress;
+  bool log_dropped_messages;
+};
+extern OpenDDS_Dcps_Export TransportDebug transport_debug;
 
 } // namespace OpenDDS
 } // namespace DCPS

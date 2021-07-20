@@ -48,7 +48,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
     if (status == DDS::RETCODE_OK) {
       std::cout << "SampleInfo.sample_rank = " << si.sample_rank << std::endl;
-      std::cout << "SampleInfo.instance_state = " << si.instance_state << std::endl;
+      std::cout << "SampleInfo.instance_state = " << OpenDDS::DCPS::InstanceState::instance_state_string(si.instance_state) << std::endl;
 
       if (si.valid_data) {
 
@@ -137,9 +137,16 @@ void DataReaderListenerImpl::on_liveliness_changed(
 
 void DataReaderListenerImpl::on_subscription_matched(
   DDS::DataReader_ptr,
-  const DDS::SubscriptionMatchedStatus &)
+  const DDS::SubscriptionMatchedStatus& status)
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_subscription_matched()\n")));
+  // For the reverse lease test, the DataReader will rediscover the DataWriter.
+  // The DataWriter may have some unacknowledged samples that it will send again.
+  // Reset the count to avoid interpretting these as duplicates.
+  if (status.current_count_change > 0) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_subscription_matched() - resetting counts\n")));
+    counts_.clear();
+  }
 }
 
 void DataReaderListenerImpl::on_sample_rejected(

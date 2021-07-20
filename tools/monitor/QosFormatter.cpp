@@ -396,5 +396,3 @@ QosToQString<DDS::UserDataQosPolicy>( const DDS::UserDataQosPolicy& value)
 {
   return QosToQString( value.value);
 }
-
-

@@ -21,7 +21,7 @@ extern "C" {
 #include <epan/dissectors/packet-giop.h>
 } // extern "C"
 
-#include "tools/dissector/dissector_export.h"
+#include "dissector_export.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 
 #include <map>

@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_SCHEDULEOUTPUTHANDER_H
-#define OPENDDS_SCHEDULEOUTPUTHANDER_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_SCHEDULEOUTPUTHANDLER_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_SCHEDULEOUTPUTHANDLER_H
 
 #include <ace/Reactor.h>
 #include <ace/Event_Handler.h>

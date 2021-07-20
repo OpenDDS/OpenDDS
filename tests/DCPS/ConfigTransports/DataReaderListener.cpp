@@ -51,7 +51,7 @@ void DataReaderListenerImpl::on_subscription_matched(::DDS::DataReader_ptr reade
   ACE_UNUSED_ARG(status);
 
 //  ACE_DEBUG((LM_DEBUG,
-//             ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_matched \n")));
+//             ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_matched\n")));
   subscription_matched_ = true;
 }
 
@@ -136,4 +136,3 @@ void DataReaderListenerImpl::on_budget_exceeded(::DDS::DataReader_ptr reader,
 {
   ACE_UNUSED_ARG(reader);
 }
-

@@ -1,5 +1,5 @@
-#ifndef OPENDDS_DCPS_TIME_POINT_T_HEADER
-#define OPENDDS_DCPS_TIME_POINT_T_HEADER
+#ifndef OPENDDS_DCPS_TIMEPOINT_T_H
+#define OPENDDS_DCPS_TIMEPOINT_T_H
 
 #include <ace/Time_Value_T.h>
 
@@ -91,6 +91,11 @@ public:
    * time version of this template class, SystemTimePoint.
    */
   DDS::Time_t to_dds_time() const;
+
+  /**
+   * Convert to OpenDDS::DCPS::MonotonicTime_t.
+   */
+  MonotonicTime_t to_monotonic_time() const;
 
   TimePoint_T<AceClock>& operator+=(const TimeDuration& td);
   TimePoint_T<AceClock>& operator-=(const TimeDuration& td);

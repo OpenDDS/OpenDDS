@@ -17,9 +17,9 @@
 #include "Marked_Default_Qos.h"
 #include "TopicImpl.h"
 #include "MonitorFactory.h"
-#include "dds/DCPS/transport/framework/ReceivedDataSample.h"
-#include "dds/DCPS/transport/framework/DataLinkSet.h"
-#include "dds/DCPS/transport/framework/TransportImpl.h"
+#include "transport/framework/ReceivedDataSample.h"
+#include "transport/framework/DataLinkSet.h"
+#include "transport/framework/TransportImpl.h"
 #include "tao/debug.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -53,6 +53,11 @@ PublisherImpl::PublisherImpl(DDS::InstanceHandle_t      handle,
 
 PublisherImpl::~PublisherImpl()
 {
+  const RcHandle<DomainParticipantImpl> participant = participant_.lock();
+  if (participant) {
+    participant->return_handle(handle_);
+  }
+
   //The datawriters should be deleted already before calling delete
   //publisher.
   if (!is_clean()) {
@@ -436,7 +441,7 @@ PublisherImpl::set_qos(const DDS::PublisherQos & qos)
           std::pair<DwIdToQosMap::iterator, bool> pair =
               idToQosMap.insert(DwIdToQosMap::value_type(id, qos));
 
-          if (pair.second == false) {
+          if (!pair.second) {
             GuidConverter converter(id);
             ACE_ERROR_RETURN((LM_ERROR,
                 ACE_TEXT("(%P|%t) ")
@@ -466,7 +471,7 @@ PublisherImpl::set_qos(const DDS::PublisherQos & qos)
         if (!status) {
           ACE_ERROR_RETURN((LM_ERROR,
               ACE_TEXT("(%P|%t) PublisherImpl::set_qos, ")
-              ACE_TEXT("failed. \n")),
+              ACE_TEXT("failed.\n")),
               DDS::RETCODE_ERROR);
         }
 
@@ -492,6 +497,7 @@ DDS::ReturnCode_t
 PublisherImpl::set_listener(DDS::PublisherListener_ptr a_listener,
     DDS::StatusMask            mask)
 {
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
   listener_ = DDS::PublisherListener::_duplicate(a_listener);
@@ -501,6 +507,7 @@ PublisherImpl::set_listener(DDS::PublisherListener_ptr a_listener,
 DDS::PublisherListener_ptr
 PublisherImpl::get_listener()
 {
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   return DDS::PublisherListener::_duplicate(listener_.in());
 }
 
@@ -511,7 +518,7 @@ PublisherImpl::suspend_publications()
     ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("PublisherImpl::suspend_publications, ")
-        ACE_TEXT(" Entity is not enabled. \n")),
+        ACE_TEXT(" Entity is not enabled.\n")),
         DDS::RETCODE_NOT_ENABLED);
   }
 
@@ -540,7 +547,7 @@ PublisherImpl::resume_publications()
     ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("PublisherImpl::resume_publications, ")
-        ACE_TEXT(" Entity is not enabled. \n")),
+        ACE_TEXT(" Entity is not enabled.\n")),
         DDS::RETCODE_NOT_ENABLED);
   }
 
@@ -665,7 +672,7 @@ PublisherImpl::end_coherent_changes()
               WriterCoherentSample(it->second->coherent_samples_,
                   it->second->sequence_number_)));
 
-      if (pair.second == false) {
+      if (!pair.second) {
         ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: PublisherImpl::end_coherent_changes: ")
             ACE_TEXT("failed to insert to GroupCoherentSamples.\n")),
@@ -800,7 +807,7 @@ PublisherImpl::enable()
   }
 
   RcHandle<DomainParticipantImpl> participant = this->participant_.lock();
-  if (!participant || participant->is_enabled() == false) {
+  if (!participant || !participant->is_enabled()) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
@@ -850,7 +857,7 @@ PublisherImpl::writer_enabled(const char*     topic_name,
   std::pair<PublicationMap::iterator, bool> pair =
       publication_map_.insert(PublicationMap::value_type(publication_id, writer));
 
-  if (pair.second == false) {
+  if (!pair.second) {
     GuidConverter converter(publication_id);
     ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
@@ -878,7 +885,9 @@ PublisherImpl::listener_for(DDS::StatusKind kind)
   if (!participant)
     return 0;
 
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   if (CORBA::is_nil(listener_.in()) || (listener_mask_ & kind) == 0) {
+    g.release();
     return participant->listener_for(kind);
 
   } else {
@@ -1000,7 +1009,6 @@ PublisherImpl::validate_datawriter_qos(const DDS::DataWriterQos& qos,
   return true;
 }
 
-OPENDDS_END_VERSIONED_NAMESPACE_DECL
-
 } // namespace DCPS
 } // namespace OpenDDS
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

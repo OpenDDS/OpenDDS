@@ -5,15 +5,15 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_PERCONNECTIONSYNCH_H
-#define OPENDDS_DCPS_PERCONNECTIONSYNCH_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_PERCONNECTIONSYNCH_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_PERCONNECTIONSYNCH_H
 
 #include "ThreadSynch.h"
 
-#include "ace/Condition_T.h"
-#include "ace/Condition_Thread_Mutex.h"
-#include "ace/Synch_Traits.h"
-#include "ace/Task.h"
+#include <dds/DCPS/ConditionVariable.h>
+
+#include <ace/Synch_Traits.h>
+#include <ace/Task.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -42,16 +42,16 @@ protected:
 
 private:
 
-  typedef ACE_SYNCH_MUTEX         LockType;
-  typedef ACE_Guard<LockType>     GuardType;
-  typedef ACE_Condition<LockType> ConditionType;
+  typedef ACE_SYNCH_MUTEX LockType;
+  typedef ACE_Guard<LockType> GuardType;
+  typedef ConditionVariable<LockType> ConditionVariableType;
 
-  LockType      lock_;
-  ConditionType condition_;
-  int           work_available_;
-  int           shutdown_;
-  long          dds_priority_;
-  long          scheduler_;
+  LockType lock_;
+  ConditionVariableType condition_;
+  int work_available_;
+  int shutdown_;
+  long dds_priority_;
+  long scheduler_;
 };
 
 } // namespace DCPS

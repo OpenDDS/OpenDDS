@@ -1,5 +1,5 @@
-#ifndef UNIQUE_PTR_H_18C6F30C
-#define UNIQUE_PTR_H_18C6F30C
+#ifndef OPENDDS_DCPS_UNIQUE_PTR_H
+#define OPENDDS_DCPS_UNIQUE_PTR_H
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
@@ -11,10 +11,10 @@
 #include "ace/config-lite.h"
 
 #ifdef ACE_HAS_CPP11
-#  define HAS_STD_UNIQUE_PTR
+#  define OPENDDS_HAS_STD_UNIQUE_PTR
 #endif
 
-#ifdef HAS_STD_UNIQUE_PTR
+#ifdef OPENDDS_HAS_STD_UNIQUE_PTR
 #  include <memory>
 #else
 #  include "ace/Atomic_Op.h"
@@ -31,7 +31,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-#ifdef HAS_STD_UNIQUE_PTR
+#ifdef OPENDDS_HAS_STD_UNIQUE_PTR
 
 using std::move;
 using std::unique_ptr;
@@ -128,6 +128,11 @@ public:
   void swap(unique_ptr& b) // never throws
   {
     std::swap(ptr_, b.ptr_);
+  }
+
+  bool operator<(const unique_ptr& other) const
+  {
+    return ptr_ < other.ptr_;
   }
 
 private:

@@ -39,18 +39,14 @@ bool operator<(const DDS::Duration_t& t1, const DDS::Duration_t& t2)
   //       maximum values for their corresponding types.
   //       Unfortunately, the OMG DDS specification defines the
   //       infinite nanosec value to be somewhere in the middle.
-  DDS::Duration_t const DDS_DURATION_INFINITY = {
-    DDS::DURATION_INFINITE_SEC,
-    DDS::DURATION_INFINITE_NSEC
-  };
 
   // We assume that either both the DDS::Duration_t::sec and
   // DDS::Duration_t::nanosec fields are INFINITY or neither of them
   // are.  It doesn't make sense for only one of the fields to be
   // INFINITY.
   return
-    t1 != DDS_DURATION_INFINITY
-    && (t2 == DDS_DURATION_INFINITY
+    !is_infinite(t1)
+    && (is_infinite(t2)
         || t1.sec < t2.sec
         || (t1.sec == t2.sec && t1.nanosec < t2.nanosec));
 }
@@ -125,18 +121,36 @@ operator>=(const DDS::Time_t& t1, const DDS::Time_t& t2)
   return t2 <= t1;
 }
 
-ACE_INLINE DDS::Time_t
+ACE_INLINE DDS::Duration_t
 operator-(const DDS::Time_t& t1, const DDS::Time_t& t2)
 {
-  DDS::Time_t t = { t1.sec - t2.sec, t1.nanosec - t2.nanosec };
+  DDS::Duration_t t = { t1.sec - t2.sec, t1.nanosec - t2.nanosec };
 
-  if (t2.nanosec > t1.nanosec)
-    {
+  if (t2.nanosec > t1.nanosec) {
       t.nanosec = (t1.nanosec + ACE_ONE_SECOND_IN_NSECS) - t2.nanosec;
       t.sec = (t1.sec - 1) - t2.sec;
     }
 
   return t;
+}
+
+ACE_INLINE DDS::Duration_t
+operator-(const MonotonicTime_t& t1, const MonotonicTime_t& t2)
+{
+  DDS::Duration_t t = { t1.sec - t2.sec, t1.nanosec - t2.nanosec };
+
+  if (t2.nanosec > t1.nanosec) {
+      t.nanosec = (t1.nanosec + ACE_ONE_SECOND_IN_NSECS) - t2.nanosec;
+      t.sec = (t1.sec - 1) - t2.sec;
+    }
+
+  return t;
+}
+
+ACE_INLINE bool
+operator<(const MonotonicTime_t& t1, const MonotonicTime_t& t2)
+{
+  return t1.sec < t2.sec || (t1.sec == t2.sec && t1.nanosec < t2.nanosec);
 }
 
 ACE_INLINE
@@ -156,9 +170,18 @@ DDS::Time_t time_value_to_time(const ACE_Time_Value& tv)
 }
 
 ACE_INLINE
+MonotonicTime_t time_value_to_monotonic_time(const ACE_Time_Value& tv)
+{
+  MonotonicTime_t t;
+  t.sec = ACE_Utils::truncate_cast<CORBA::Long>(tv.sec());
+  t.nanosec = tv.usec() * 1000;
+  return t;
+}
+
+ACE_INLINE
 ACE_Time_Value duration_to_time_value(const DDS::Duration_t& t)
 {
-  if (t.sec == DDS::DURATION_INFINITE_SEC && t.nanosec == DDS::DURATION_INFINITE_NSEC) {
+  if (is_infinite(t)) {
     return ACE_Time_Value::max_time;
   }
 
@@ -208,21 +231,13 @@ DDS::Duration_t time_to_duration(const DDS::Time_t& t)
 ACE_INLINE
 bool valid_duration(const DDS::Duration_t& t)
 {
-  DDS::Duration_t const DDS_DURATION_INFINITY = {
-    DDS::DURATION_INFINITE_SEC,
-    DDS::DURATION_INFINITE_NSEC
-  };
-
   // Only accept infinite or positive finite durations.  (Zero
   // excluded).
   //
   // Note that it doesn't make much sense for users to set
   // durations less than 10 milliseconds since the underlying
   // timer resolution is generally no better than that.
-  return
-    t == DDS_DURATION_INFINITY
-    || t.sec > 0
-    || (t.sec >= 0 && t.nanosec > 0);
+  return is_infinite(t) || t.sec > 0 || (t.sec >= 0 && t.nanosec > 0);
 }
 
 ACE_INLINE
@@ -256,6 +271,19 @@ ACE_INLINE OpenDDS_Dcps_Export
 ACE_UINT32 microseconds_to_uint32_fractional_seconds(ACE_UINT32 usec)
 {
   return static_cast<ACE_UINT32>((static_cast<ACE_UINT64>(usec) << 32) / 1000000);
+}
+
+bool is_infinite(const DDS::Duration_t& value)
+{
+  return value.sec == DDS::DURATION_INFINITE_SEC &&
+    value.nanosec == DDS::DURATION_INFINITE_NSEC;
+}
+
+ACE_INLINE OpenDDS_Dcps_Export
+const MonotonicTime_t& monotonic_time_zero()
+{
+  static const MonotonicTime_t zero = { 0, 0 };
+  return zero;
 }
 
 } // namespace DCPS

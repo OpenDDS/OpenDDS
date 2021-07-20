@@ -1,0 +1,85 @@
+// Mutable Tests =============================================================
+
+@mutable
+struct MutableStructWithExplicitIDs {
+  @id(4) short short_field;
+  @id(6) long long_field;
+  @id(8) octet octet_field;
+  @id(10) long long long_long_field;
+};
+
+@mutable
+struct ReorderedMutableStruct {
+  @id(6) long long_field;
+  @id(10) long long long_long_field;
+  @id(8) octet octet_field;
+  @id(4) short short_field;
+};
+
+@mutable
+struct AdditionalFieldMutableStruct {
+  @id(6) long long_field;
+  @id(1) long additional_field;
+  @id(10) long long long_long_field;
+  @id(8) octet octet_field;
+  @id(4) short short_field;
+};
+
+@final
+struct Bool3 {
+  boolean a;
+  boolean b;
+  boolean c;
+};
+
+@final
+struct Octet5 {
+  octet a;
+  octet b;
+  octet c;
+  octet d;
+  octet e;
+};
+
+@final
+struct Short3 {
+  short x;
+  short y;
+  short z;
+};
+
+@final
+struct Struct7 {
+  Short3 s3;
+  octet o;
+};
+
+@final
+struct Long3 {
+  long a;
+  long b;
+  long c;
+};
+
+@mutable
+struct LengthCodeStruct { //LC Size
+  @key
+  @id(0) octet o;         // 0    1
+  @id(1) short s;         // 1    2
+  @id(2) long l;          // 2    4
+  @id(3) long long ll;    // 3    8
+
+  @id(4) Bool3 b3;        // 4    3
+  @id(5) Octet5 o5;       // 4    5
+  @key
+  @id(6) Short3 s3;       // 4    6
+  @id(7) Struct7 t7;      // 4    7
+  @id(8) Long3 l3;        // 4   12
+
+  @id(11) string<1> str1; // 4  4+1
+  @id(12) string<2> str2; // 4  4+2
+  @id(13) string<3> str3; // 4  4+3
+  @id(14) string<4> str4; // 3  4+4
+  @key
+  @id(15) string<5> str5; // 4  4+5
+};

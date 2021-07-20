@@ -21,6 +21,11 @@
 #include "TcpDataLink.inl"
 #endif /* __ACE_INLINE__ */
 
+namespace {
+  using OpenDDS::DCPS::Encoding;
+  const Encoding encoding_unaligned_native(Encoding::KIND_UNALIGNED_CDR);
+}
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 OpenDDS::DCPS::TcpDataLink::TcpDataLink(
@@ -284,9 +289,8 @@ OpenDDS::DCPS::TcpDataLink::send_graceful_disconnect_message()
   // not receive the message when the message has no sample data and is sent
   // in a single packet.
 
-  // To work arround this problem, I have to add bogus data to chain with the
+  // To work around this problem, I have to add bogus data to chain with the
   // DataSampleHeader to make the receiving work.
-  size_t max_marshaled_size = header_data.max_marshaled_size();
 
   Message_Block_Ptr data(
     new ACE_Message_Block(20,
@@ -305,7 +309,7 @@ OpenDDS::DCPS::TcpDataLink::send_graceful_disconnect_message()
   header_data.message_length_ = static_cast<ACE_UINT32>(data->length());
 
   Message_Block_Ptr message(
-    new ACE_Message_Block(max_marshaled_size,
+    new ACE_Message_Block(header_data.get_max_serialized_size(),
                           ACE_Message_Block::MB_DATA,
                           data.release(), //cont
                           0, //data
@@ -335,7 +339,11 @@ OpenDDS::DCPS::TcpDataLink::set_release_pending(bool flag)
 bool
 OpenDDS::DCPS::TcpDataLink::is_release_pending() const
 {
+#ifdef ACE_HAS_CPP11
+  return this->release_is_pending_;
+#else
   return this->release_is_pending_.value();
+#endif
 }
 
 bool
@@ -400,7 +408,7 @@ OpenDDS::DCPS::TcpDataLink::request_ack_received(const ReceivedDataSample& sampl
 {
   if (sample.header_.sequence_ == -1 && sample.header_.message_length_ == sizeof(RepoId)) {
     RepoId local;
-    DCPS::Serializer ser(&(*sample.sample_));
+    DCPS::Serializer ser(&(*sample.sample_), encoding_unaligned_native);
     if (ser >> local) {
       invoke_on_start_callbacks(local, sample.header_.publication_id_, true);
     }
@@ -420,10 +428,8 @@ OpenDDS::DCPS::TcpDataLink::request_ack_received(const ReceivedDataSample& sampl
   header_data.publication_id_ = sample.header_.publication_id_;
   header_data.publisher_id_ = sample.header_.publisher_id_;
 
-  size_t max_marshaled_size = header_data.max_marshaled_size();
-
   Message_Block_Ptr message(
-    new ACE_Message_Block(max_marshaled_size,
+    new ACE_Message_Block(header_data.get_max_serialized_size(),
                           ACE_Message_Block::MB_DATA,
                           0, //cont
                           0, //data
@@ -448,9 +454,14 @@ OpenDDS::DCPS::TcpDataLink::request_ack_received(const ReceivedDataSample& sampl
 void
 OpenDDS::DCPS::TcpDataLink::do_association_actions()
 {
+  if (!connection_ || !send_strategy_) {
+    return;
+  }
+
+  // We have a connection.
+  // Invoke callbacks for readers so we can receive messages and let writers know we are ready.
   typedef std::vector<std::pair<RepoId, RepoId> > PairVec;
-  PairVec to_send;
-  PairVec to_call;
+  PairVec to_call_and_send;
 
   {
     GuardType guard(strategy_lock_);
@@ -458,9 +469,8 @@ OpenDDS::DCPS::TcpDataLink::do_association_actions()
     for (OnStartCallbackMap::const_iterator it = on_start_callbacks_.begin(); it != on_start_callbacks_.end(); ++it) {
       for (RepoToClientMap::const_iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
         GuidConverter conv(it2->first);
-        to_send.push_back(std::make_pair(it2->first, it->first));
-        if (!conv.isWriter()) {
-          to_call.push_back(std::make_pair(it2->first, it->first));
+        if (conv.isReader()) {
+          to_call_and_send.push_back(std::make_pair(it2->first, it->first));
         }
       }
     }
@@ -468,11 +478,8 @@ OpenDDS::DCPS::TcpDataLink::do_association_actions()
 
   send_strategy_->link_released(false);
 
-  for (PairVec::const_iterator it = to_call.begin(); it != to_call.end(); ++it) {
+  for (PairVec::const_iterator it = to_call_and_send.begin(); it != to_call_and_send.end(); ++it) {
     invoke_on_start_callbacks(it->first, it->second, true);
-  }
-
-  for (PairVec::const_iterator it = to_send.begin(); it != to_send.end(); ++it) {
     send_association_msg(it->first, it->second);
   }
 }
@@ -488,10 +495,8 @@ OpenDDS::DCPS::TcpDataLink::send_association_msg(const RepoId& local, const Repo
   header_data.publication_id_ = local;
   header_data.publisher_id_ = remote;
 
-  size_t max_marshaled_size = header_data.max_marshaled_size();
-
   Message_Block_Ptr message(
-    new ACE_Message_Block(max_marshaled_size,
+    new ACE_Message_Block(header_data.get_max_serialized_size(),
                           ACE_Message_Block::MB_DATA,
                           0, //cont
                           0, //data
@@ -504,7 +509,7 @@ OpenDDS::DCPS::TcpDataLink::send_association_msg(const RepoId& local, const Repo
                           0));
 
   *message << header_data;
-  DCPS::Serializer ser(message.get());
+  DCPS::Serializer ser(message.get(), encoding_unaligned_native);
   ser << remote;
 
   TransportControlElement* send_element = new TransportControlElement(move(message));
@@ -553,6 +558,7 @@ OpenDDS::DCPS::TcpDataLink::make_reservation(const RepoId& remote_publication_id
 {
   const int result = DataLink::make_reservation(remote_publication_id, local_subscription_id, receive_listener, reliable);
   send_association_msg(local_subscription_id, remote_publication_id);
+
   return result;
 }
 

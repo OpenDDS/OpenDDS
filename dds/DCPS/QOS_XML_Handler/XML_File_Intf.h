@@ -4,11 +4,12 @@
  *
  *
  *  @author Marcel Smit (msmit@remedy.nl)
+ *  @author Danilo C. Zanella (dczanella@gmail.com)
  */
 //================================================================
 
-#ifndef DCPS_CONFIG_XML_FILE_INTF_H
-#define DCPS_CONFIG_XML_FILE_INTF_H
+#ifndef OPENDDS_DCPS_QOS_XML_HANDLER_XML_FILE_INTF_H
+#define OPENDDS_DCPS_QOS_XML_HANDLER_XML_FILE_INTF_H
 #include /**/ "ace/pre.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -16,8 +17,9 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "dds_qos.hpp"
+#include "XML_Intf.h"
 #include "dds/DdsDcpsInfrastructureC.h"
-#include "dds/DCPS/QOS_XML_Handler/XML_QOS_Handler_Export.h"
+#include "OpenDDS_XML_QOS_Handler_Export.h"
 
 namespace XML
 {
@@ -29,7 +31,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-  class XML_QOS_Handler_Export QOS_XML_File_Handler
+  class OpenDDS_XML_QOS_Handler_Export QOS_XML_File_Handler :
+    public QOS_XML_Handler
   {
   public:
     QOS_XML_File_Handler(void);
@@ -49,46 +52,6 @@ namespace DCPS {
     init(const ACE_TCHAR * file);
 
 
-    //@{
-    /**
-     *
-     * These methods will search for the profileQos in
-     * profiles_, using the given profile_name.
-     * If found, these methods will invoke
-     * the corresponding method on the corresponding Handler
-     * class.
-     * These classes are available in the
-     * xxxQos_Handler.h files.
-     *
-     */
-    DDS::ReturnCode_t
-    get_datawriter_qos(::DDS::DataWriterQos& dw_qos,
-                        const ACE_TCHAR * profile_name,
-                        const ACE_TCHAR * topic_name);
-
-    DDS::ReturnCode_t
-    get_datareader_qos(::DDS::DataReaderQos& dr_qos,
-                        const ACE_TCHAR * profile_name,
-                        const ACE_TCHAR * topic_name);
-
-    DDS::ReturnCode_t
-    get_topic_qos(::DDS::TopicQos& tp_qos,
-                    const ACE_TCHAR * profile_name,
-                    const ACE_TCHAR * topic_name);
-
-    DDS::ReturnCode_t
-    get_publisher_qos(::DDS::PublisherQos& pub_qos,
-                        const ACE_TCHAR * profile_name);
-
-    DDS::ReturnCode_t
-    get_subscriber_qos(::DDS::SubscriberQos& sub_qos,
-                        const ACE_TCHAR * profile_name);
-
-    DDS::ReturnCode_t
-    get_participant_qos(::DDS::DomainParticipantQos& sub_qos,
-                          const ACE_TCHAR * profile_name);
-    //@}
-
     /**
      *
      * add_search_path will add a relative path to the XML
@@ -98,19 +61,11 @@ namespace DCPS {
      */
     void
     add_search_path(const ACE_TCHAR *environment,
-                      const ACE_TCHAR *relpath);
+                    const ACE_TCHAR *relpath);
 
   private:
-    ::dds::qosProfile_seq profiles_;
     typedef XML::XML_Typedef XML_Helper_type;
 
-    /**
-     *
-     * Searches for the profile in the XML file, using the given
-     * profile name.
-     *
-     */
-    ::dds::qosProfile * get_profile(const ACE_TCHAR * profile_name);
   };
 }
 }

@@ -1,29 +1,34 @@
-#include "TestMsg.h"
 #include "AppConfig.h"
 
-#include "dds/DCPS/transport/framework/TransportReceiveListener.h"
-#include "dds/DCPS/transport/framework/TransportClient.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
-#include "dds/DCPS/transport/framework/ReceivedDataSample.h"
+#include <TestMsg.h>
 
-#include "dds/DCPS/RTPS/BaseMessageUtils.h"
+#include <dds/DCPS/transport/framework/TransportReceiveListener.h>
+#include <dds/DCPS/transport/framework/TransportClient.h>
+#include <dds/DCPS/transport/framework/TransportExceptions.h>
+#include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 
-#include "dds/DCPS/GuidConverter.h"
-#include "dds/DCPS/AssociationData.h"
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/Qos_Helper.h"
+#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+
+#include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/AssociationData.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Qos_Helper.h>
 
 #include <ace/OS_main.h>
 #include <ace/String_Base.h>
 #include <ace/Get_Opt.h>
 #include <ace/OS_NS_time.h>
-#include "ace/OS_NS_unistd.h"
+#include <ace/OS_NS_unistd.h>
 
 #include <cstdio>
 #include <cstring>
 #include <ctime>
 #include <iostream>
 #include <sstream>
+
+using namespace OpenDDS::DCPS;
+
+const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
 
 class SimpleDataReader : public TransportReceiveListener, public TransportClient
 {
@@ -64,7 +69,7 @@ public:
 
 private:
   bool deserializeEncapsulationHeader(Serializer& s) {
-    ACE_CDR::ULong encap;
+    EncapsulationHeader encap;
     return (s >> encap); // read and ignore 32-bit CDR Encapsulation header
   }
   bool deserializeData(TestMsg& data, Serializer& s) {
@@ -102,9 +107,7 @@ void SimpleDataReader::data_received(const ReceivedDataSample& sample)
     return;
   }
 
-  Serializer ser(sample.sample_.get(),
-                 sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
-                 Serializer::ALIGN_CDR);
+  Serializer ser(sample.sample_.get(), encoding);
   TestMsg data;
   if (!deserializeData(data, ser)) {
     return;
@@ -161,12 +164,15 @@ public:
     locators[0].port = remote_addr.get_port_number();
     address_to_bytes(locators[0].address, remote_addr);
 
-    size_t size_locator = 0, padding_locator = 0;
-    gen_find_size(locators, size_locator, padding_locator);
-    ACE_Message_Block mb_locator(size_locator + padding_locator + 1);
-    Serializer ser_loc(&mb_locator, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
-    ser_loc << locators;
-    ser_loc << ACE_OutputCDR::from_boolean(false); // requires inline QoS
+    const Encoding& locators_encoding = OpenDDS::RTPS::get_locators_encoding();
+    size_t size_locator = 0;
+    serialized_size(locators_encoding, size_locator, locators);
+    ACE_Message_Block mb_locator(size_locator + 1);
+    Serializer ser_loc(&mb_locator, locators_encoding);
+    if (!(ser_loc << locators) ||
+        !(ser_loc << ACE_OutputCDR::from_boolean(false))) { // requires inline QoS
+      std::cerr << "subscriber serialize locators failed\n";
+    }
 
     publication.remote_reliable_ = true;
     publication.remote_data_.length(1);

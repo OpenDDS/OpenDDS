@@ -5,11 +5,12 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_CORE_IDL
-#define OPENDDS_DCPS_CORE_IDL
+#ifndef OPENDDS_DDSDCPSCORE_IDL
+#define OPENDDS_DDSDCPSCORE_IDL
 
 // The includes below are needed to deal with compilers that
 // have ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION_EXPORT
+#include "tao/ShortSeq.pidl"
 #include "tao/StringSeq.pidl"
 #include "tao/LongSeq.pidl"
 
@@ -44,6 +45,7 @@ module DDS {
 
     typedef sequence<octet> OctetSeq;
 
+    @final
     struct Duration_t {
                 long sec;
                 unsigned long nanosec;
@@ -73,24 +75,33 @@ module DDS {
     };
     typedef sequence<BinaryProperty_t> BinaryPropertySeq;
 
-    //@extensibility(APPENDABLE)
+    // This is for when we support XCDR1.
+    // @appendable
     struct PropertyQosPolicy {
         PropertySeq        value;
         BinaryPropertySeq  binary_value;
     };
 
+    // This is for when we support XCDR1.
+    // @appendable
     struct UserDataQosPolicy {
                 OctetSeq value;
                 };
 
+    // This is for when we support XCDR1.
+    // @appendable
     struct GroupDataQosPolicy {
                 OctetSeq value;
                 };
 
+    // This is for when we support XCDR1.
+    // @appendable
     struct TopicDataQosPolicy {
                 OctetSeq value;
                 };
 
+    // This is for when we support XCDR1.
+    // @appendable
     struct PartitionQosPolicy {
                 StringSeq name;
                 };
@@ -107,6 +118,8 @@ module DDS {
                 PERSISTENT_DURABILITY_QOS
                 };
 
+    // This is for when we support XCDR1.
+    // @appendable
     struct DurabilityQosPolicy {
                 DurabilityQosPolicyKind kind;
                 };
@@ -120,10 +133,14 @@ module DDS {
         long                    max_samples_per_instance;
     };
 
+    // This is for when we support XCDR1.
+    // @appendable
     struct DeadlineQosPolicy {
                 Duration_t period;
                 };
 
+    // This is for when we support XCDR1.
+    // @appendable
     struct LatencyBudgetQosPolicy {
                 Duration_t duration;
                 };
@@ -134,6 +151,8 @@ module DDS {
                 MANUAL_BY_TOPIC_LIVELINESS_QOS
                 };
 
+    // This is for when we support XCDR1.
+    // @appendable
     struct LivelinessQosPolicy {
                 LivelinessQosPolicyKind kind;
                 Duration_t lease_duration;
@@ -144,11 +163,15 @@ module DDS {
                 RELIABLE_RELIABILITY_QOS
                 };
 
+    // This is for when we support XCDR1.
+    // @appendable
     struct ReliabilityQosPolicy {
                 ReliabilityQosPolicyKind kind;
                 Duration_t max_blocking_time;
                 };
 
+    // This is for when we support XCDR1.
+    // @appendable
     enum DestinationOrderQosPolicyKind {
                 BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS,
                 BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS
@@ -158,21 +181,29 @@ module DDS {
                 DestinationOrderQosPolicyKind kind;
                 };
 
+    // This is for when we support XCDR1.
+    // @appendable
     struct HistoryQosPolicy {
                 HistoryQosPolicyKind kind;
                 long depth;
                 };
 
+    // This is for when we support XCDR1.
+    // @appendable
     struct ResourceLimitsQosPolicy {
                 long max_samples;
                 long max_instances;
                 long max_samples_per_instance;
                 };
 
+    // This is for when we support XCDR1.
+    // @appendable
     struct TransportPriorityQosPolicy {
                 long value;
                 };
 
+    // This is for when we support XCDR1.
+    // @appendable
     struct LifespanQosPolicy {
                 Duration_t duration;
                 };
@@ -182,10 +213,14 @@ module DDS {
                 EXCLUSIVE_OWNERSHIP_QOS
                 };
 
+    // This is for when we support XCDR1.
+    // @appendable
     struct OwnershipQosPolicy {
                 OwnershipQosPolicyKind kind;
                 };
 
+    // This is for when we support XCDR1.
+    // @appendable
     struct OwnershipStrengthQosPolicy {
                 long value;
                 };
@@ -196,53 +231,109 @@ module DDS {
                 GROUP_PRESENTATION_QOS
                 };
 
+    // This is for when we support XCDR1.
+    // @appendable
     struct PresentationQosPolicy {
                 PresentationQosPolicyAccessScopeKind access_scope;
                 boolean coherent_access;
                 boolean ordered_access;
                 };
 
+    // This is for when we support XCDR1.
+    // @appendable
     struct TimeBasedFilterQosPolicy {
                 Duration_t minimum_separation;
                 };
 
+    typedef short DataRepresentationId_t;
+    /*
+     * Custom representations, which should be negative, are defined in OpenDDS
+     * module below.
+     */
+    const DataRepresentationId_t XCDR_DATA_REPRESENTATION = 0;
+    const DataRepresentationId_t XML_DATA_REPRESENTATION = 1;
+    const DataRepresentationId_t XCDR2_DATA_REPRESENTATION = 2;
+
+    typedef sequence<DataRepresentationId_t> DataRepresentationIdSeq;
+
+    // This is for when we support XCDR1.
+    // @appendable
+    struct DataRepresentationQosPolicy {
+      DataRepresentationIdSeq value;
+    };
+    const QosPolicyId_t DATA_REPRESENTATION_QOS_POLICY_ID = 23;
+    const string DATA_REPRESENTATION_QOS_POLICY_NAME = "DataRepresentation";
+
+    /* TODO
+    @bit_bound(16)
+    enum TypeConsistencyKind {
+      DISALLOW_TYPE_COERCION,
+      ALLOW_TYPE_COERCION
+    };
+    */
+    typedef short TypeConsistencyEnforcementQosPolicyKind_t;
+    const TypeConsistencyEnforcementQosPolicyKind_t DISALLOW_TYPE_COERCION = 1;
+    const TypeConsistencyEnforcementQosPolicyKind_t ALLOW_TYPE_COERCION = 2;
+    /*
+    const QosPolicyId_t TYPE_CONSISTENCY_ENFORCEMENT_QOS_POLICY_ID = 24;
+    const string TYPE_CONSISTENCY_ENFORCEMENT_QOS_POLICY_NAME =
+      "TypeConsistencyEnforcement";
+
+    // This is for when we support XCDR1.
+    // @appendable
+    */
+    struct TypeConsistencyEnforcementQosPolicy {
+      TypeConsistencyEnforcementQosPolicyKind_t kind;
+      boolean ignore_sequence_bounds;
+      boolean ignore_string_bounds;
+      boolean ignore_member_names;
+      boolean prevent_type_widening;
+      boolean force_type_validation;
+    };
+
+    // This is for when we support XCDR1.
+    // @mutable
     struct TopicQos {
-                TopicDataQosPolicy topic_data;
-                DurabilityQosPolicy durability;
-                DurabilityServiceQosPolicy durability_service;
-                DeadlineQosPolicy deadline;
-                LatencyBudgetQosPolicy latency_budget;
-                LivelinessQosPolicy liveliness;
-                ReliabilityQosPolicy reliability;
-                DestinationOrderQosPolicy destination_order;
-                HistoryQosPolicy history;
-                ResourceLimitsQosPolicy resource_limits;
-                TransportPriorityQosPolicy transport_priority;
-                LifespanQosPolicy lifespan;
-                OwnershipQosPolicy ownership;
-                };
+      TopicDataQosPolicy topic_data;
+      DurabilityQosPolicy durability;
+      DurabilityServiceQosPolicy durability_service;
+      DeadlineQosPolicy deadline;
+      LatencyBudgetQosPolicy latency_budget;
+      LivelinessQosPolicy liveliness;
+      ReliabilityQosPolicy reliability;
+      DestinationOrderQosPolicy destination_order;
+      HistoryQosPolicy history;
+      ResourceLimitsQosPolicy resource_limits;
+      TransportPriorityQosPolicy transport_priority;
+      LifespanQosPolicy lifespan;
+      OwnershipQosPolicy ownership;
+      DataRepresentationQosPolicy representation;
+    };
 
     struct WriterDataLifecycleQosPolicy {
                 boolean autodispose_unregistered_instances;
                 };
 
+    // This is for when we support XCDR1.
+    // @mutable
     struct DataWriterQos {
-                DurabilityQosPolicy durability;
-                DurabilityServiceQosPolicy durability_service;
-                DeadlineQosPolicy deadline;
-                LatencyBudgetQosPolicy latency_budget;
-                LivelinessQosPolicy liveliness;
-                ReliabilityQosPolicy reliability;
-                DestinationOrderQosPolicy destination_order;
-                HistoryQosPolicy history;
-                ResourceLimitsQosPolicy resource_limits;
-                TransportPriorityQosPolicy transport_priority;
-                LifespanQosPolicy lifespan;
-                UserDataQosPolicy user_data;
-                OwnershipQosPolicy ownership;
-                OwnershipStrengthQosPolicy ownership_strength;
-                WriterDataLifecycleQosPolicy writer_data_lifecycle;
-                };
+      DurabilityQosPolicy durability;
+      DurabilityServiceQosPolicy durability_service;
+      DeadlineQosPolicy deadline;
+      LatencyBudgetQosPolicy latency_budget;
+      LivelinessQosPolicy liveliness;
+      ReliabilityQosPolicy reliability;
+      DestinationOrderQosPolicy destination_order;
+      HistoryQosPolicy history;
+      ResourceLimitsQosPolicy resource_limits;
+      TransportPriorityQosPolicy transport_priority;
+      LifespanQosPolicy lifespan;
+      UserDataQosPolicy user_data;
+      OwnershipQosPolicy ownership;
+      OwnershipStrengthQosPolicy ownership_strength;
+      WriterDataLifecycleQosPolicy writer_data_lifecycle;
+      DataRepresentationQosPolicy representation;
+    };
 
     struct EntityFactoryQosPolicy {
                 boolean autoenable_created_entities;
@@ -260,20 +351,24 @@ module DDS {
                 Duration_t autopurge_disposed_samples_delay;
                 };
 
+    // This is for when we support XCDR1.
+    // @mutable
     struct DataReaderQos {
-                DurabilityQosPolicy durability;
-                DeadlineQosPolicy deadline;
-                LatencyBudgetQosPolicy latency_budget;
-                LivelinessQosPolicy liveliness;
-                ReliabilityQosPolicy reliability;
-                DestinationOrderQosPolicy destination_order;
-                HistoryQosPolicy history;
-                ResourceLimitsQosPolicy resource_limits;
-                UserDataQosPolicy user_data;
-                OwnershipQosPolicy ownership;
-                TimeBasedFilterQosPolicy time_based_filter;
-                ReaderDataLifecycleQosPolicy reader_data_lifecycle;
-                };
+      DurabilityQosPolicy durability;
+      DeadlineQosPolicy deadline;
+      LatencyBudgetQosPolicy latency_budget;
+      LivelinessQosPolicy liveliness;
+      ReliabilityQosPolicy reliability;
+      DestinationOrderQosPolicy destination_order;
+      HistoryQosPolicy history;
+      ResourceLimitsQosPolicy resource_limits;
+      UserDataQosPolicy user_data;
+      OwnershipQosPolicy ownership;
+      TimeBasedFilterQosPolicy time_based_filter;
+      ReaderDataLifecycleQosPolicy reader_data_lifecycle;
+      DataRepresentationQosPolicy representation;
+      TypeConsistencyEnforcementQosPolicy type_consistency;
+    };
 
     struct SubscriberQos {
                 PresentationQosPolicy presentation;
@@ -293,6 +388,7 @@ module DDS {
                 };
 
     typedef octet OctetArray16[16];
+    // @appendable
     struct BuiltinTopicKey_t {
                 OctetArray16 value;
                 };
@@ -300,74 +396,116 @@ module DDS {
     // ----------------------------------------------------------------------
 
     BUILT_IN_TOPIC_TYPE
+    // This is for when we support XCDR1.
+    // @mutable
     struct ParticipantBuiltinTopicData {
-      BUILT_IN_TOPIC_KEY BuiltinTopicKey_t key;
-      UserDataQosPolicy user_data;
+      BUILT_IN_TOPIC_KEY
+      @id(0x0050) BuiltinTopicKey_t key;
+      @id(0x002c) UserDataQosPolicy user_data;
     };
 
     BUILT_IN_TOPIC_TYPE
+    // This is for when we support XCDR1.
+    // @mutable
     struct PublicationBuiltinTopicData {
-                BUILT_IN_TOPIC_KEY BuiltinTopicKey_t key;
-                BuiltinTopicKey_t participant_key;
-                string topic_name;
-                string type_name;
-                DurabilityQosPolicy durability;
-                DurabilityServiceQosPolicy durability_service;
-                DeadlineQosPolicy deadline;
-                LatencyBudgetQosPolicy latency_budget;
-                LivelinessQosPolicy liveliness;
-                ReliabilityQosPolicy reliability;
-                LifespanQosPolicy lifespan;
-                UserDataQosPolicy user_data;
-                OwnershipQosPolicy ownership;
-                OwnershipStrengthQosPolicy ownership_strength;
-                DestinationOrderQosPolicy destination_order;
-                PresentationQosPolicy presentation;
-                PartitionQosPolicy partition;
-                TopicDataQosPolicy topic_data;
-                GroupDataQosPolicy group_data;
-                };
+      BUILT_IN_TOPIC_KEY
+      @id(0x005A) BuiltinTopicKey_t key;
+      @id(0x0050) BuiltinTopicKey_t participant_key;
+      @id(0x0005) string topic_name;
+      @id(0x0007) string type_name;
+
+      /* TODO
+      // XTYPES 1.1
+      @id(0x0069) @optional TypeIdV1 type_id;
+      @id(0x0072) @optional TypeObjectV1 type;
+      // XTYPES 1.2
+      @id(0x0075) @optional XTypes::TypeInformation type_information;
+      */
+
+      @id(0x001D) DurabilityQosPolicy durability;
+      @id(0x001E) DurabilityServiceQosPolicy durability_service;
+      @id(0x0023) DeadlineQosPolicy deadline;
+      @id(0x0027) LatencyBudgetQosPolicy latency_budget;
+      @id(0x001B) LivelinessQosPolicy liveliness;
+      @id(0x001A) ReliabilityQosPolicy reliability;
+      @id(0x002B) LifespanQosPolicy lifespan;
+      @id(0x002C) UserDataQosPolicy user_data;
+      @id(0x001F) OwnershipQosPolicy ownership;
+      @id(0x0006) OwnershipStrengthQosPolicy ownership_strength;
+      @id(0x0025) DestinationOrderQosPolicy destination_order;
+      @id(0x0021) PresentationQosPolicy presentation;
+      @id(0x0029) PartitionQosPolicy partition;
+      @id(0x002E) TopicDataQosPolicy topic_data;
+      @id(0x002D) GroupDataQosPolicy group_data;
+      @id(0x0073) DataRepresentationQosPolicy representation;
+    };
 
     BUILT_IN_TOPIC_TYPE
+    // This is for when we support XCDR1.
+    // @mutable
     struct SubscriptionBuiltinTopicData {
-                BUILT_IN_TOPIC_KEY BuiltinTopicKey_t key;
-                BuiltinTopicKey_t participant_key;
-                string topic_name;
-                string type_name;
-                DurabilityQosPolicy durability;
-                DeadlineQosPolicy deadline;
-                LatencyBudgetQosPolicy latency_budget;
-                LivelinessQosPolicy liveliness;
-                ReliabilityQosPolicy reliability;
-                OwnershipQosPolicy ownership;
-                DestinationOrderQosPolicy destination_order;
-                UserDataQosPolicy user_data;
-                TimeBasedFilterQosPolicy time_based_filter;
-                PresentationQosPolicy presentation;
-                PartitionQosPolicy partition;
-                TopicDataQosPolicy topic_data;
-                GroupDataQosPolicy group_data;
-                };
+      @id(0x005A) BUILT_IN_TOPIC_KEY BuiltinTopicKey_t key;
+      @id(0x0050) BuiltinTopicKey_t participant_key;
+      @id(0x0005) string topic_name;
+      @id(0x0007) string type_name;
+
+      /* TODO
+      // XTYPES 1.1
+      @id(0x0069) @optional TypeIdV1 type_id;
+      @id(0x0072) @optional TypeObjectV1 type;
+      // XTYPES 1.2
+      @id(0x0075) @optional XTypes::TypeInformation type_information;
+      */
+
+      @id(0x001D) DurabilityQosPolicy durability;
+      @id(0x0023) DeadlineQosPolicy deadline;
+      @id(0x0027) LatencyBudgetQosPolicy latency_budget;
+      @id(0x001B) LivelinessQosPolicy liveliness;
+      @id(0x001A) ReliabilityQosPolicy reliability;
+      @id(0x001F) OwnershipQosPolicy ownership;
+      @id(0x0025) DestinationOrderQosPolicy destination_order;
+      @id(0x002C) UserDataQosPolicy user_data;
+      @id(0x0004) TimeBasedFilterQosPolicy time_based_filter;
+      @id(0x0021) PresentationQosPolicy presentation;
+      @id(0x0029) PartitionQosPolicy partition;
+      @id(0x002E) TopicDataQosPolicy topic_data;
+      @id(0x002D) GroupDataQosPolicy group_data;
+      @id(0x0073) DataRepresentationQosPolicy representation;
+      @id(0x0074) TypeConsistencyEnforcementQosPolicy type_consistency;
+    };
 
     BUILT_IN_TOPIC_TYPE
+    // This is for when we support XCDR1.
+    // @mutable
     struct TopicBuiltinTopicData {
-                BUILT_IN_TOPIC_KEY BuiltinTopicKey_t key;
-                string name;
-                string type_name;
-                DurabilityQosPolicy durability;
-                DurabilityServiceQosPolicy durability_service;
-                DeadlineQosPolicy deadline;
-                LatencyBudgetQosPolicy latency_budget;
-                LivelinessQosPolicy liveliness;
-                ReliabilityQosPolicy reliability;
-                TransportPriorityQosPolicy transport_priority;
-                LifespanQosPolicy lifespan;
-                DestinationOrderQosPolicy destination_order;
-                HistoryQosPolicy history;
-                ResourceLimitsQosPolicy resource_limits;
-                OwnershipQosPolicy ownership;
-                TopicDataQosPolicy topic_data;
-                };
+      BUILT_IN_TOPIC_KEY
+      @id(0x005A) BuiltinTopicKey_t key;
+      @id(0x0005) string name;
+      @id(0x0007) string type_name;
+
+      /* TODO
+      // XTYPES 1.1
+      @id(0x0069) @optional TypeIdV1 type_id;
+      @id(0x0072) @optional TypeObjectV1 type;
+      // XTYPES 1.2
+      @id(0x0075) @optional XTypes::TypeInformation type_information;
+      */
+
+      @id(0x001D) DurabilityQosPolicy durability;
+      @id(0x001E) DurabilityServiceQosPolicy durability_service;
+      @id(0x0023) DeadlineQosPolicy deadline;
+      @id(0x0027) LatencyBudgetQosPolicy latency_budget;
+      @id(0x001B) LivelinessQosPolicy liveliness;
+      @id(0x001A) ReliabilityQosPolicy reliability;
+      @id(0x0049) TransportPriorityQosPolicy transport_priority;
+      @id(0x002B) LifespanQosPolicy lifespan;
+      @id(0x0025) DestinationOrderQosPolicy destination_order;
+      @id(0x0040) HistoryQosPolicy history;
+      @id(0x0041) ResourceLimitsQosPolicy resource_limits;
+      @id(0x001F) OwnershipQosPolicy ownership;
+      @id(0x002E) TopicDataQosPolicy topic_data;
+      @id(0x0073) DataRepresentationQosPolicy representation;
+    };
 
     // Sample states to support reads
     typedef unsigned long SampleStateKind;
@@ -477,9 +615,13 @@ module OpenDDS {
     // status monitoring.
     BUILT_IN_TOPIC_TYPE
     struct InternalThreadBuiltinTopicData {
-            BUILT_IN_TOPIC_KEY DDS::OctetArray16 guid;
-            string thread_id;
-            DDS::Time_t timestamp;
+      BUILT_IN_TOPIC_KEY string thread_id;
+      DDS::OctetArray16 participant_guid;
+    };
+
+    struct MonotonicTime_t {
+      long sec;
+      unsigned long nanosec;
     };
 
   };// End of module DCPS

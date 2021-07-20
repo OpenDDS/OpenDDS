@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_QUEUEREMOVEVISITOR_H
-#define OPENDDS_DCPS_QUEUEREMOVEVISITOR_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_QUEUEREMOVEVISITOR_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_QUEUEREMOVEVISITOR_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/GuidUtils.h"
@@ -27,7 +27,7 @@ class OpenDDS_Dcps_Export QueueRemoveVisitor
   : public BasicQueueVisitor<TransportQueueElement> {
 public:
 
-  explicit QueueRemoveVisitor(const TransportQueueElement::MatchCriteria& mc);
+  explicit QueueRemoveVisitor(const TransportQueueElement::MatchCriteria& mc, bool remove_all = false);
 
   virtual ~QueueRemoveVisitor();
 
@@ -51,6 +51,8 @@ private:
   RemoveResult status_;
 
   size_t removed_bytes_;
+
+  bool remove_all_;
 };
 
 } // namespace DCPS

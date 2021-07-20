@@ -6,8 +6,8 @@
  */
 
 #ifdef OPENDDS_SECURITY
-#ifndef OPENDDS_RTPS_STUN_H
-#define OPENDDS_RTPS_STUN_H
+#ifndef OPENDDS_DCPS_RTPS_ICE_STUN_H
+#define OPENDDS_DCPS_RTPS_ICE_STUN_H
 
 #include "ace/INET_Addr.h"
 #include "dds/DCPS/Serializer.h"
@@ -269,6 +269,8 @@ private:
   void success_response(const ACE_INET_Addr& /*address*/, const Message& /*message*/);
   void error_response(const ACE_INET_Addr& /*address*/, const Message& /*message*/);
 };
+
+const DCPS::Encoding encoding(DCPS::Encoding::KIND_UNALIGNED_CDR, DCPS::ENDIAN_BIG);
 
 } // namespace STUN
 } // namespace OpenDDS

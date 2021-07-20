@@ -363,13 +363,13 @@ sub parse {
     elsif ($str =~ s/^L'(.|\\.|\\[0-7]{1,3}|\\x[a-f\d]{1,2}|\\u[a-f\d]{1,4})'//i) {
       ## Wchar literal
     }
-    elsif ($str =~ s/^@([a-z_]+)(?:\s*\((.*)\))?//) {
-      # Topic Type Annotations
+    elsif ($str =~ s/^@([A-Za-z0-9:_]+)(?:\s*\(([^\)]*)\))?//) {
+      ## Annotation
       my $name = $1;
       if ($name eq 'default_nested' || $name eq 'nested') {
         $cnested = (defined $2 && $2 eq 'FALSE') ? 0 : 1;
       } elsif ($name eq 'topic') {
-        # @topic can have parameters, but we can ignore them here
+        # TODO: Take platform member into consideration
         $cnested = 0;
       }
     }
@@ -925,7 +925,7 @@ sub replace_macros {
                   $usee = $i + 1;
                 }
                 else {
-                  ## This isn't the end of the paramters, so keep going
+                  ## This isn't the end of the parameters, so keep going
                   next;
                 }
               }
@@ -963,7 +963,7 @@ sub replace_macros {
         }
       }
       else {
-        ## There were no macro paramters, so just do a simple search and
+        ## There were no macro parameters, so just do a simple search and
         ## replace.
         $line =~ s/\b$macro\b/$val/g;
       }

@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_MEMORY_POOL_H
-#define OPENDDS_MEMORY_POOL_H
+#ifndef OPENDDS_DCPS_MEMORYPOOL_H
+#define OPENDDS_DCPS_MEMORYPOOL_H
 
 #include "dcps_export.h"
 

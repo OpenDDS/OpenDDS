@@ -5,16 +5,17 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef BUILTINTOPICUTILS_H
-#define BUILTINTOPICUTILS_H
+#ifndef OPENDDS_DCPS_BUILTINTOPICUTILS_H
+#define OPENDDS_DCPS_BUILTINTOPICUTILS_H
 
 #include "dcps_export.h"
-#include "dds/DdsDcpsInfrastructureC.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
-#include "dds/DdsDcpsSubscriptionC.h"
-#include "dds/DdsDcpsCoreC.h"
 #include "Service_Participant.h"
 #include "DomainParticipantImpl.h"
+
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsInfoUtilsC.h>
+#include <dds/DdsDcpsSubscriptionC.h>
+#include <dds/DdsDcpsCoreC.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -33,6 +34,10 @@ OpenDDS_Dcps_Export extern const char* const BUILT_IN_SUBSCRIPTION_TOPIC_TYPE;
 OpenDDS_Dcps_Export extern const char* const BUILT_IN_PUBLICATION_TOPIC;
 OpenDDS_Dcps_Export extern const char* const BUILT_IN_PUBLICATION_TOPIC_TYPE;
 
+// TODO: When the ParticipantLocationTopic is retired, then it may be
+// possible to disable the secure participant writer in the RtpsRelay.
+// If it is disabled, then the is_ps_writer_ flag in the RTPS
+// transport can be removed.
 OpenDDS_Dcps_Export extern const char* const BUILT_IN_PARTICIPANT_LOCATION_TOPIC;
 OpenDDS_Dcps_Export extern const char* const BUILT_IN_PARTICIPANT_LOCATION_TOPIC_TYPE;
 
@@ -155,7 +160,7 @@ DDS::ReturnCode_t instance_handle_to_bit_data(
     } else {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: instance_handle_to_repo_id,")
-                        ACE_TEXT(" timeout. \n")),
+                        ACE_TEXT(" timeout.\n")),
                        DDS::RETCODE_ERROR);
       return DDS::RETCODE_TIMEOUT;
     }
@@ -224,4 +229,4 @@ DDS::BuiltinTopicKey_t keyFromSample(TopicType*)
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif /* BUILTINTOPICUTILS_H  */
+#endif /* OPENDDS_DCPS_BUILTINTOPICUTILS_H  */

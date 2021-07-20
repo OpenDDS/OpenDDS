@@ -215,12 +215,12 @@ create_publisher (::DDS::DomainParticipant_ptr participant,
       // Attach the publisher to the transport.
       if (attach_to_udp)
         {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to udp \n")));
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to udp\n")));
           TheTransportRegistry->bind_config("udp", pub.in());
         }
       else if (attach_to_multicast)
         {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to multicast \n")));
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to multicast\n")));
           TheTransportRegistry->bind_config("multicast", pub.in());
         }
       else if (attach_to_rtps)
@@ -235,7 +235,7 @@ create_publisher (::DDS::DomainParticipant_ptr participant,
         }
       else
         {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to tcp \n")));
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to tcp\n")));
           TheTransportRegistry->bind_config("tcp", pub.in());
         }
 

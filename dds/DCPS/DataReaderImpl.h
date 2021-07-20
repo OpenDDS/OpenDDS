@@ -5,20 +5,16 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_DATAREADER_H
-#define OPENDDS_DCPS_DATAREADER_H
+#ifndef OPENDDS_DCPS_DATAREADERIMPL_H
+#define OPENDDS_DCPS_DATAREADERIMPL_H
 
 #include "dcps_export.h"
 #include "EntityImpl.h"
-#include "dds/DdsDcpsTopicC.h"
-#include "dds/DdsDcpsSubscriptionExtC.h"
-#include "dds/DdsDcpsDomainC.h"
-#include "dds/DdsDcpsTopicC.h"
 #include "Definitions.h"
-#include "dds/DCPS/DataReaderCallbacks.h"
-#include "dds/DCPS/transport/framework/ReceivedDataSample.h"
-#include "dds/DCPS/transport/framework/TransportReceiveListener.h"
-#include "dds/DCPS/transport/framework/TransportClient.h"
+#include "DataReaderCallbacks.h"
+#include "transport/framework/ReceivedDataSample.h"
+#include "transport/framework/TransportReceiveListener.h"
+#include "transport/framework/TransportClient.h"
 #include "DisjointSequence.h"
 #include "SubscriptionInstance.h"
 #include "InstanceState.h"
@@ -31,7 +27,6 @@
 #include "GroupRakeData.h"
 #include "CoherentChangeControl.h"
 #include "AssociationData.h"
-#include "dds/DdsDcpsInfrastructureC.h"
 #include "RcHandle_T.h"
 #include "RcObject.h"
 #include "WriterInfo.h"
@@ -44,12 +39,17 @@
 #include "DomainParticipantImpl.h"
 #include "TimeTypes.h"
 
-#include "ace/String_Base.h"
-#include "ace/Reverse_Lock_T.h"
-#include "ace/Atomic_Op.h"
-#include "ace/Reactor.h"
+#include <dds/DdsDcpsTopicC.h>
+#include <dds/DdsDcpsSubscriptionExtC.h>
+#include <dds/DdsDcpsDomainC.h>
+#include <dds/DdsDcpsTopicC.h>
+#include <dds/DdsDcpsInfrastructureC.h>
 
-#include "dds/DCPS/PoolAllocator.h"
+#include <ace/String_Base.h>
+#include <ace/Reverse_Lock_T.h>
+#include <ace/Atomic_Op.h>
+#include <ace/Reactor.h>
+
 #include <memory>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -73,7 +73,7 @@ class Monitor;
 class DataReaderImpl;
 class FilterEvaluator;
 
-typedef Cached_Allocator_With_Overflow<OpenDDS::DCPS::ReceivedDataElementMemoryBlock, ACE_Null_Mutex>
+typedef Cached_Allocator_With_Overflow<ReceivedDataElementMemoryBlock, ACE_Null_Mutex>
 ReceivedDataAllocator;
 
 enum MarshalingType {
@@ -131,8 +131,8 @@ public:
                                   ACE_thread_t owner,
                                   DataReaderImpl* reader);
 
-  void schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info);
-  void cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info);
+  void schedule_timer(RcHandle<WriterInfo>& info);
+  void cancel_timer(RcHandle<WriterInfo>& info);
 
   // Arg will be PublicationId
   int handle_timeout(const ACE_Time_Value& current_time, const void* arg);
@@ -146,25 +146,25 @@ private:
   ~EndHistoricSamplesMissedSweeper();
 
   WeakRcHandle<DataReaderImpl> reader_;
-  OPENDDS_SET(RcHandle<OpenDDS::DCPS::WriterInfo>) info_set_;
+  OPENDDS_SET(RcHandle<WriterInfo>) info_set_;
 
   class CommandBase : public Command {
   public:
     CommandBase(EndHistoricSamplesMissedSweeper* sweeper,
-                OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+                RcHandle<WriterInfo>& info)
       : sweeper_ (sweeper)
       , info_(info)
     { }
 
   protected:
     EndHistoricSamplesMissedSweeper* sweeper_;
-    OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo> info_;
+    RcHandle<WriterInfo> info_;
   };
 
   class ScheduleCommand : public CommandBase {
   public:
     ScheduleCommand(EndHistoricSamplesMissedSweeper* sweeper,
-                    OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+                    RcHandle<WriterInfo>& info)
       : CommandBase(sweeper, info)
     { }
     virtual void execute();
@@ -173,7 +173,7 @@ private:
   class CancelCommand : public CommandBase {
   public:
     CancelCommand(EndHistoricSamplesMissedSweeper* sweeper,
-                  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+                  RcHandle<WriterInfo>& info)
       : CommandBase(sweeper, info)
     { }
     virtual void execute();
@@ -235,8 +235,6 @@ public:
 
   virtual void transport_assoc_done(int flags, const RepoId& remote_id);
 
-  virtual void association_complete(const RepoId& remote_id);
-
   virtual void remove_associations(const WriterIdSeq& writers, bool callback);
 
   virtual void update_incompatible_qos(const IncompatibleQosStatus& status);
@@ -261,8 +259,7 @@ public:
   /// tell instances when a DataWriter transitions to DEAD
   /// The writer state is inout parameter, the state is set to DEAD
   /// when it returns.
-  void writer_became_dead(WriterInfo& info,
-                          const MonotonicTimePoint& when);
+  void writer_became_dead(WriterInfo& info);
 
   /// tell instance when a DataWriter is removed.
   /// The liveliness status need update.
@@ -347,7 +344,7 @@ public:
 
 #ifndef OPENDDS_SAFETY_PROFILE
   virtual void get_latency_stats(
-    OpenDDS::DCPS::LatencyStatisticsSeq & stats);
+    LatencyStatisticsSeq & stats);
 #endif
 
   virtual void reset_latency_stats();
@@ -437,6 +434,9 @@ public:
   /// Release the instance with the handle.
   void release_instance(DDS::InstanceHandle_t handle);
 
+  /// Release all instances held by the reader.
+  virtual void release_all_instances() = 0;
+
   // Reset time interval for each instance.
   void reschedule_deadline();
 
@@ -479,8 +479,8 @@ public:
   OwnershipManagerPtr ownership_manager() { return OwnershipManagerPtr(this); }
 #endif
 
-  virtual void lookup_instance(const OpenDDS::DCPS::ReceivedDataSample& sample,
-                               OpenDDS::DCPS::SubscriptionInstance_rch& instance) = 0;
+  virtual void lookup_instance(const ReceivedDataSample& sample,
+                               SubscriptionInstance_rch& instance) = 0;
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
@@ -528,10 +528,12 @@ public:
     DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
     DDS::InstanceStateMask instance_states) = 0;
 
-  virtual void set_instance_state(DDS::InstanceHandle_t instance,
-                                  DDS::InstanceStateKind state) = 0;
-
 #endif
+
+  virtual void set_instance_state(DDS::InstanceHandle_t instance,
+                                  DDS::InstanceStateKind state,
+                                  const SystemTimePoint& timestamp = SystemTimePoint::now(),
+                                  const GUID_t& = GUID_UNKNOWN) = 0;
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   void begin_access();
@@ -580,11 +582,21 @@ public:
 
   const RepoId& get_repo_id() const { return this->subscription_id_; }
 
+  void return_handle(DDS::InstanceHandle_t handle);
+
 protected:
+
+  // Perform cast to get extended version of listener (otherwise nil)
+  DataReaderListener_ptr get_ext_listener();
+
   virtual void remove_associations_i(const WriterIdSeq& writers, bool callback);
   void remove_publication(const PublicationId& pub_id);
 
   void prepare_to_delete();
+
+  /// Setup deserialization options
+  DDS::ReturnCode_t setup_deserialization();
+  virtual Extensibility get_max_extensibility() = 0;
 
   RcHandle<SubscriberImpl> get_subscriber_servant();
 
@@ -604,7 +616,6 @@ protected:
   void set_sample_rejected_status(
     const DDS::SampleRejectedStatus& status);
 
-//remove document this!
   SubscriptionInstance_rch get_handle_instance(
     DDS::InstanceHandle_t handle);
 
@@ -696,8 +707,7 @@ private:
   void lookup_instance_handles(const WriterIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
 
-  void instances_liveliness_update(WriterInfo& info,
-                                   const MonotonicTimePoint& when);
+  void instances_liveliness_update(const PublicationId& writer);
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   bool verify_coherent_changes_completion(WriterInfo* writer);
@@ -741,6 +751,7 @@ private:
   friend class ::DDS_TEST; //allows tests to get at private data
 
   DDS::TopicDescription_var    topic_desc_;
+  ACE_Thread_Mutex             listener_mutex_;
   DDS::StatusMask              listener_mask_;
   DDS::DataReaderListener_var  listener_;
   DDS::DomainId_t              domain_id_;
@@ -899,6 +910,10 @@ private:
   unique_ptr<Monitor>  periodic_monitor_;
 
   bool transport_disabled_;
+
+protected:
+  typedef OPENDDS_SET(Encoding::Kind) EncodingKinds;
+  EncodingKinds decoding_modes_;
 };
 
 typedef RcHandle<DataReaderImpl> DataReaderImpl_rch;

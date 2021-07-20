@@ -65,5 +65,3 @@ Monitor::Node::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
   updateEdges();
   QGraphicsItem::mouseReleaseEvent(event);
 }
-
-

@@ -78,7 +78,7 @@ void DataReaderListenerImpl::on_subscription_matched (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_matched \n")));
+      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_matched\n")));
   }
 
   void DataReaderListenerImpl::on_sample_rejected(
@@ -90,7 +90,7 @@ void DataReaderListenerImpl::on_subscription_matched (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_rejected \n")));
+      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_sample_rejected\n")));
   }
 
   void DataReaderListenerImpl::on_data_available(
@@ -180,4 +180,3 @@ void DataReaderListenerImpl::on_subscription_matched (
     )
   {
   }
-

@@ -25,6 +25,11 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+namespace {
+  const Encoding::Kind encoding_kind = Encoding::KIND_UNALIGNED_CDR;
+  const Encoding encoding_unaligned_native(encoding_kind);
+}
+
 NakWatchdog::NakWatchdog(ACE_Reactor* reactor,
                          ACE_thread_t owner,
                          ReliableSession* session)
@@ -311,7 +316,7 @@ ReliableSession::send_naks()
 
   if (DCPS_debug_level > 5) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReliableSession::send_naks local %#08x%08x ")
-                         ACE_TEXT("remote %#08x%08x nak request size %d \n"),
+                         ACE_TEXT("remote %#08x%08x nak request size %d\n"),
                          (unsigned int)(this->link()->local_peer() >> 32),
                          (unsigned int) this->link()->local_peer(),
                          (unsigned int)(this->remote_peer_ >> 32),
@@ -322,7 +327,7 @@ ReliableSession::send_naks()
   if (!(this->nak_sequence_.low() > 1) && !this->nak_sequence_.disjoint()) {
     if (DCPS_debug_level > 5) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReliableSession::send_naks local %#08x%08x ")
-                           ACE_TEXT("remote %#08x%08x nak sequence not disjoint, don't send naks \n"),
+                           ACE_TEXT("remote %#08x%08x nak sequence not disjoint, don't send naks\n"),
                            (unsigned int)(this->link()->local_peer() >> 32),
                            (unsigned int) this->link()->local_peer(),
                            (unsigned int)(this->remote_peer_ >> 32),
@@ -469,7 +474,7 @@ ReliableSession::send_naks()
 
     Message_Block_Ptr data(new ACE_Message_Block(len));
 
-    Serializer serializer(data.get());
+    Serializer serializer(data.get(), encoding_unaligned_native);
 
     serializer << this->remote_peer_;
     serializer << size;
@@ -497,7 +502,7 @@ ReliableSession::send_naks()
 
   if (!sending_naks && DCPS_debug_level > 5){
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReliableSession::send_naks local %#08x%08x ")
-                         ACE_TEXT("remote %#08x%08x received sequence not disjoint, don't send naks \n"),
+                         ACE_TEXT("remote %#08x%08x received sequence not disjoint, don't send naks\n"),
                          (unsigned int)(this->link()->local_peer() >> 32),
                          (unsigned int) this->link()->local_peer(),
                          (unsigned int)(this->remote_peer_ >> 32),
@@ -516,7 +521,7 @@ ReliableSession::nak_received(const Message_Block_Ptr& control)
   const TransportHeader& header =
     this->link_->receive_strategy()->received_header();
 
-  Serializer serializer(control.get(), header.swap_bytes());
+  Serializer serializer(control.get(), encoding_kind, header.swap_bytes());
 
   MulticastPeer local_peer;
   CORBA::ULong size = 0;
@@ -540,7 +545,10 @@ ReliableSession::nak_received(const Message_Block_Ptr& control)
   // Broadcast a MULTICAST_NAKACK control sample before resending to suppress
   // repair requests for unrecoverable samples by providing a
   // new low-water mark for affected peers:
-  if (!send_buffer->empty() && send_buffer->low() > ranges.begin()->first) {
+  SequenceNumber sn = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+  {
+    const SingleSendBuffer::Proxy proxy(*send_buffer);
+    if (!proxy.empty() && proxy.low() > ranges.begin()->first) {
       if (OpenDDS::DCPS::DCPS_debug_level > 0) {
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT ("(%P|%t) ReliableSession::nak_received")
@@ -549,9 +557,13 @@ ReliableSession::nak_received(const Message_Block_Ptr& control)
                     (unsigned int) this->link()->local_peer(),
                     (unsigned int)(this->remote_peer_ >> 32),
                     (unsigned int) this->remote_peer_,
-                    send_buffer->low().getValue()));
+                    proxy.low().getValue()));
       }
-    send_nakack(send_buffer->low());
+      sn = proxy.low();
+    }
+  }
+  if (sn != SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
+    send_nakack(sn);
   }
 
   for (CORBA::ULong i = 0; i < size; ++i) {
@@ -583,7 +595,7 @@ ReliableSession::send_naks(DisjointSequence& received)
 
   Message_Block_Ptr data(new ACE_Message_Block(len));
 
-  Serializer serializer(data.get());
+  Serializer serializer(data.get(), encoding_unaligned_native);
 
   serializer << this->remote_peer_;
   serializer << size;
@@ -617,7 +629,7 @@ ReliableSession::nakack_received(const Message_Block_Ptr& control)
   // Not from the remote peer for this session.
   if (this->remote_peer_ != header.source_) return;
 
-  Serializer serializer(control.get(), header.swap_bytes());
+  Serializer serializer(control.get(), encoding_kind, header.swap_bytes());
 
   SequenceNumber low;
   serializer >> low;
@@ -661,7 +673,7 @@ ReliableSession::send_nakack(SequenceNumber low)
 
   Message_Block_Ptr data(new ACE_Message_Block(len));
 
-  Serializer serializer(data.get());
+  Serializer serializer(data.get(), encoding_unaligned_native);
 
   serializer << low;
   // Broadcast control sample to all peers:
@@ -697,20 +709,6 @@ ReliableSession::start(bool active, bool acked)
                           ACE_TEXT("failed to schedule NAK watchdog!\n")),
                          false);
       }
-    }
-
-    // Active peers schedule a watchdog timer to initiate a 2-way
-    // handshake to verify that passive endpoints can send/receive
-    // data reliably. This process must be executed using the
-    // transport reactor thread to prevent blocking.
-    // Only publisher send syn so just schedule for pub role.
-    if (active && !this->start_syn()) {
-      this->nak_watchdog_->cancel();
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("ReliableSession::start: ")
-                        ACE_TEXT("failed to schedule SYN watchdog!\n")),
-                       false);
     }
   } //Reacquire start_lock_ after releasing unlock_guard with release_start_lock_
 

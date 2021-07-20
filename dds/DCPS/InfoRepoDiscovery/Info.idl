@@ -5,15 +5,15 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_DCPSINFO_IDL
-#define OPENDDS_DCPS_DCPSINFO_IDL
+#ifndef OPENDDS_DCPS_INFOREPODISCOVERY_INFO_IDL
+#define OPENDDS_DCPS_INFOREPODISCOVERY_INFO_IDL
 
 #include "dds/DdsDcpsInfoUtils.idl"
 #include "dds/DdsDcpsPublication.idl"
 #include "dds/DdsDcpsSubscription.idl"
 
-#include "dds/DCPS/InfoRepoDiscovery/DataWriterRemote.idl"
-#include "dds/DCPS/InfoRepoDiscovery/DataReaderRemote.idl"
+#include "DataWriterRemote.idl"
+#include "DataReaderRemote.idl"
 
 module OpenDDS {
   module DCPS {
@@ -89,7 +89,8 @@ module OpenDDS {
                               in DataWriterRemote publication,
                               in ::DDS::DataWriterQos qos,
                               in TransportLocatorSeq transInfo,
-                              in ::DDS::PublisherQos publisherQos)
+                              in ::DDS::PublisherQos publisherQos,
+                              in ::DDS::OctetSeq serializedTypeInfo)
         raises (Invalid_Domain,
                 Invalid_Participant,
                 Invalid_Topic);
@@ -117,7 +118,8 @@ module OpenDDS {
                                in ::DDS::SubscriberQos subscriberQos,
                                in string filterClassName,
                                in string filterExpression,
-                               in ::DDS::StringSeq exprParams)
+                               in ::DDS::StringSeq exprParams,
+                               in ::DDS::OctetSeq serializedTypeInfo)
         raises (Invalid_Domain,
                 Invalid_Participant,
                 Invalid_Topic);
@@ -148,15 +150,6 @@ module OpenDDS {
         raises (Invalid_Domain,
                 Invalid_Participant);
 
-      /// Inform the InfoRepo that the process of creating an association,
-      /// which was started by the Data{Reader,Writer}Remote::add_association()
-      /// operation, has completed.  The peer that was passive
-      /// ("active" parameter == false) calls this after the connection is made.
-      oneway void association_complete(in DDS::DomainId_t domainId,
-                                in RepoId participantId,
-                                in RepoId localId,
-                                in RepoId remoteId);
-
       /// Forces associations to dissolve by participant.
       void disassociate_participant(in DDS::DomainId_t domainId,
                                     in RepoId local_id,
@@ -182,7 +175,7 @@ module OpenDDS {
                Invalid_Participant,
                Invalid_Publication);
 
-      //Note: the ignore_xxx methods are not reversable - per DDS spec.
+      //Note: the ignore_xxx methods are not reversible - per DDS spec.
 
       // ignore participant when matching/associating pubs & subs
       void ignore_domain_participant (in ::DDS::DomainId_t domainId,

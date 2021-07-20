@@ -10,7 +10,7 @@
 #include "Observer.h"
 #include "DataSampleElement.h"
 #include "ReceivedDataElementList.h"
-#include <dds/DCPS/transport/framework/ReceivedDataSample.h>
+#include "transport/framework/ReceivedDataSample.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -49,21 +49,21 @@ void
 vwrite(ValueWriter& vw, const Observer::Sample& sample)
 {
   vw.begin_struct();
-  vw.begin_field("instance");
+  vw.begin_struct_member("instance");
   vw.write_int32(sample.instance);
-  vw.end_field();
-  vw.begin_field("instance_state");
+  vw.end_struct_member();
+  vw.begin_struct_member("instance_state");
   vw.write_uint32(sample.instance_state);
-  vw.end_field();
-  vw.begin_field("timestamp");
+  vw.end_struct_member();
+  vw.begin_struct_member("timestamp");
   vwrite(vw, sample.timestamp);
-  vw.end_field();
-  vw.begin_field("sequence_number");
+  vw.end_struct_member();
+  vw.begin_struct_member("sequence_number");
   vw.write_int64(sample.sequence_number.getValue());
-  vw.end_field();
-  vw.begin_field("data");
+  vw.end_struct_member();
+  vw.begin_struct_member("data");
   sample.data_dispatcher.write(vw, sample.data);
-  vw.end_field();
+  vw.end_struct_member();
   vw.end_struct();
 }
 

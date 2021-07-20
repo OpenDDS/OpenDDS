@@ -9,6 +9,7 @@
 #include "RtpsUdpLoader.h"
 #include "RtpsUdpTransport.h"
 
+#include <dds/DCPS/LogAddr.h>
 #include "dds/DCPS/transport/framework/TransportDefs.h"
 #include "ace/Configuration.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
@@ -35,13 +36,12 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , ttl_(1)
   , max_message_size_(RtpsUdpSendStrategy::UDP_MAX_MESSAGE_SIZE)
   , nak_depth_(0)
-  , max_bundle_size_(TransportSendStrategy::UDP_MAX_MESSAGE_SIZE - RTPS::RTPSHDR_SZ) // default maximum bundled message size is max udp message size (see TransportStrategy) minus RTPS header
-  , quick_reply_ratio_(0.1)
   , nak_response_delay_(0, 200*1000 /*microseconds*/) // default from RTPS
   , heartbeat_period_(1) // no default in RTPS spec
   , heartbeat_response_delay_(0, 500*1000 /*microseconds*/) // default from RTPS
-  , handshake_timeout_(30) // default syn_timeout in OpenDDS_Multicast
-  , durable_data_timeout_(60)
+  , receive_address_duration_(5)
+  , responsive_mode_(false)
+  , send_delay_(0, 10 * 1000)
   , opendds_discovery_guid_(GUID_UNKNOWN)
   , multicast_group_address_(7401, "239.255.0.2")
   , local_address_(u_short(0), "0.0.0.0")
@@ -74,10 +74,35 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
     local_address(addr);
   }
 
+  ACE_TString advertised_address_s;
+  GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("advertised_address"),
+                           advertised_address_s);
+  if (!advertised_address_s.is_empty()) {
+    ACE_INET_Addr addr(advertised_address_s.c_str());
+    advertised_address(addr);
+  }
+
+#ifdef ACE_HAS_IPV6
+  ACE_TString ipv6_local_address_s;
+  GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("ipv6_local_address"),
+                           ipv6_local_address_s);
+  if (!ipv6_local_address_s.is_empty()) {
+    ACE_INET_Addr addr(ipv6_local_address_s.c_str());
+    ipv6_local_address(addr);
+  }
+
+  ACE_TString ipv6_advertised_address_s;
+  GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("ipv6_advertised_address"),
+                           ipv6_advertised_address_s);
+  if (!ipv6_advertised_address_s.is_empty()) {
+    ACE_INET_Addr addr(ipv6_advertised_address_s.c_str());
+    ipv6_advertised_address(addr);
+  }
+#endif
+
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("send_buffer_size"), this->send_buffer_size_, ACE_UINT32);
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("rcv_buffer_size"), this->rcv_buffer_size_, ACE_UINT32);
-
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("use_multicast"), use_multicast_, bool);
 
@@ -100,10 +125,6 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("nak_depth"), nak_depth_, size_t);
 
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("max_bundle_size"), max_bundle_size_, size_t);
-
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("quick_reply_ratio"), quick_reply_ratio_, double);
-
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("ttl"), ttl_, unsigned char);
 
   GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("nak_response_delay"),
@@ -112,8 +133,8 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
                         heartbeat_period_);
   GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("heartbeat_response_delay"),
                         heartbeat_response_delay_);
-  GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("handshake_timeout"),
-                        handshake_timeout_);
+  GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("send_delay"),
+                        send_delay_);
 
   ACE_TString rtps_relay_address_s;
   GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("DataRtpsRelayAddress"),
@@ -141,44 +162,28 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
   }
 #endif
 
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("ResponsiveMode"), responsive_mode_, bool);
+
   return 0;
 }
 
 OPENDDS_STRING
 RtpsUdpInst::dump_to_str() const
 {
-  OPENDDS_STRING ret;
-  // ACE_INET_Addr uses a static buffer for get_host_addr() so we can't
-  // directly call it on both local_address_ and multicast_group_address_,
-  // since the second call could overwrite the result of the first before the
-  // OPENDDS_STRING gets a chance to see it.
-  OPENDDS_STRING local;
-  OPENDDS_STRING multi;
-  const char* loc = local_address().get_host_addr();
-  if (loc) {
-    local = loc;
-  } else {
-    local = "NOT_SUPPORTED";
-  }
-  const char* mul = multicast_group_address_.get_host_addr();
-  if (mul) {
-    multi = mul;
-  } else {
-    multi = "NOT_SUPPORTED";
-  }
-  ret += TransportInst::dump_to_str();
-  ret += formatNameForDump("local_address") + local;
-  ret += ':' + to_dds_string(local_address().get_port_number()) + '\n';
+  OPENDDS_STRING ret = TransportInst::dump_to_str();
+  ret += formatNameForDump("local_address") + LogAddr(local_address()).str() + '\n';
   ret += formatNameForDump("use_multicast") + (use_multicast_ ? "true" : "false") + '\n';
-  ret += formatNameForDump("multicast_group_address") + multi
-      + ':' + to_dds_string(multicast_group_address_.get_port_number()) + '\n';
+  ret += formatNameForDump("multicast_group_address") + LogAddr(multicast_group_address_).str() + '\n';
   ret += formatNameForDump("multicast_interface") + multicast_interface_ + '\n';
   ret += formatNameForDump("nak_depth") + to_dds_string(unsigned(nak_depth_)) + '\n';
-  ret += formatNameForDump("max_bundle_size") + to_dds_string(unsigned(max_bundle_size_)) + '\n';
+  ret += formatNameForDump("max_message_size") + to_dds_string(unsigned(max_message_size_)) + '\n';
   ret += formatNameForDump("nak_response_delay") + to_dds_string(nak_response_delay_.value().msec()) + '\n';
   ret += formatNameForDump("heartbeat_period") + to_dds_string(heartbeat_period_.value().msec()) + '\n';
   ret += formatNameForDump("heartbeat_response_delay") + to_dds_string(heartbeat_response_delay_.value().msec()) + '\n';
-  ret += formatNameForDump("handshake_timeout") + to_dds_string(handshake_timeout_.value().msec()) + '\n';
+  ret += formatNameForDump("send_buffer_size") + to_dds_string(send_buffer_size_) + '\n';
+  ret += formatNameForDump("rcv_buffer_size") + to_dds_string(rcv_buffer_size_) + '\n';
+  ret += formatNameForDump("ttl") + to_dds_string(ttl_) + '\n';
+  ret += formatNameForDump("responsive_mode") + (responsive_mode_ ? "true" : "false") + '\n';
   return ret;
 }
 
@@ -212,7 +217,18 @@ RtpsUdpInst::populate_locator(TransportLocator& info, ConnectionInfoFlags flags)
 
   if (flags & CONNINFO_UNICAST) {
     if (local_address() != ACE_INET_Addr()) {
-      if (local_address().is_any()) {
+      if (advertised_address() != ACE_INET_Addr()) {
+        idx = locators.length();
+        locators.length(idx + 1);
+        locators[idx].kind = address_to_kind(advertised_address());
+        if (advertised_address().get_port_number()) {
+          locators[idx].port = advertised_address().get_port_number();
+        } else {
+          locators[idx].port = local_address().get_port_number();
+        }
+        RTPS::address_to_bytes(locators[idx].address,
+                               advertised_address());
+      } else if (local_address().is_any()) {
         typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
         AddrVector addrs;
         get_interface_addrs(addrs);
@@ -236,7 +252,18 @@ RtpsUdpInst::populate_locator(TransportLocator& info, ConnectionInfoFlags flags)
     }
 #ifdef ACE_HAS_IPV6
     if (ipv6_local_address() != ACE_INET_Addr()) {
-      if (ipv6_local_address().is_any()) {
+      if (ipv6_advertised_address() != ACE_INET_Addr()) {
+        idx = locators.length();
+        locators.length(idx + 1);
+        locators[idx].kind = address_to_kind(ipv6_advertised_address());
+        if (ipv6_advertised_address().get_port_number()) {
+          locators[idx].port = ipv6_advertised_address().get_port_number();
+        } else {
+          locators[idx].port = ipv6_local_address().get_port_number();
+        }
+        RTPS::address_to_bytes(locators[idx].address,
+                               ipv6_advertised_address());
+      } else if (ipv6_local_address().is_any()) {
         typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
         AddrVector addrs;
         get_interface_addrs(addrs);

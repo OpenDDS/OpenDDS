@@ -47,6 +47,8 @@ namespace {
       case AST_PredefinedType::PT_boolean:
         return "Boolean";
       case AST_PredefinedType::PT_octet:
+      case AST_PredefinedType::PT_uint8:
+      case AST_PredefinedType::PT_int8:
       case AST_PredefinedType::PT_ushort:
       case AST_PredefinedType::PT_short:
       case AST_PredefinedType::PT_ulong:
@@ -569,9 +571,9 @@ bool v8_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
 }
 
 namespace {
-  std::string branchGenTo(const std::string& name, AST_Type* type,
-                          const std::string&, std::string&,
-                          const std::string&)
+  std::string branchGenTo(const std::string&, const std::string& name, AST_Type* type,
+                          const std::string&, bool, Intro&,
+                          const std::string&, bool)
   {
     const std::string source = "src." + name + "()",
       prop = "Nan::New<v8::String>(\"" + name + "\").ToLocalChecked()";
@@ -580,9 +582,9 @@ namespace {
     gen_copyto("uni", source.c_str(), type, prop.c_str(), strm);
     return strm.str();
   }
-  std::string branchGenFrom(const std::string& name, AST_Type* type,
-                            const std::string&, std::string&,
-                            const std::string&)
+  std::string branchGenFrom(const std::string&, const std::string& name, AST_Type* type,
+                            const std::string&, bool, Intro&,
+                            const std::string&, bool)
   {
     std::ostringstream strm;
     const Classification cls = classify(type);
@@ -609,7 +611,7 @@ bool v8_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     be_global->impl_ <<
       "  const v8::Local<v8::Object> uni = Nan::New<v8::Object>();\n";
     gen_copyto("uni", "src._d()", discriminator, "Nan::New<v8::String>(\"_d\").ToLocalChecked()");
-    generateSwitchForUnion("src._d()", branchGenTo, branches, discriminator,
+    generateSwitchForUnion(node, "src._d()", branchGenTo, branches, discriminator,
                            "", "", clazz.c_str(), false, false);
     be_global->impl_ <<
       "  return uni;\n";
@@ -620,7 +622,7 @@ bool v8_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     vtc.addArg("out", clazz + '&');
     vtc.endArgs();
     gen_copyfrom("out", "src", discriminator, "_d", false, true);
-    generateSwitchForUnion("out._d()", branchGenFrom, branches, discriminator, "", "", clazz.c_str(), false, false);
+    generateSwitchForUnion(node, "out._d()", branchGenFrom, branches, discriminator, "", "", clazz.c_str(), false, false);
   }
   if (be_global->is_topic_type(node)) {
     gen_type_support(name);

@@ -18,6 +18,13 @@ namespace OpenDDS {
 namespace Security {
 namespace SSL {
 
+namespace {
+  // Assumes both buffers are null-terminated (and that s2_len includes final null, as with sizeof() for a const char[])
+  int compare(const DDS::OctetSeq& s1, const char* s2, const size_t s2_len) {
+    return s1.length() != s2_len ? -1 : std::memcmp(s1.get_buffer(), s2, s2_len);
+  }
+}
+
 struct DH_Handle {
   DH* dh_;
   explicit DH_Handle(EVP_PKEY* key)
@@ -432,12 +439,10 @@ int ECDH_PRIME_256_V1_CEUM::compute_shared_secret(const DDS::OctetSeq& pub_key)
 
 DiffieHellman* DiffieHellman::factory(const DDS::OctetSeq& kagree_algo)
 {
-  if (0 == std::memcmp(kagree_algo.get_buffer(), "DH+MODP-2048-256",
-                       kagree_algo.length())) {
+  if (0 == compare(kagree_algo, DH_2048_MODP_256_PRIME_STR, sizeof (DH_2048_MODP_256_PRIME_STR))) {
     return new DiffieHellman(new DH_2048_MODP_256_PRIME);
 
-  } else if (0 == std::memcmp(kagree_algo.get_buffer(), "ECDH+prime256v1-CEUM",
-                              kagree_algo.length())) {
+  } else if (0 == compare(kagree_algo, ECDH_PRIME_256_V1_CEUM_STR, sizeof (ECDH_PRIME_256_V1_CEUM_STR))) {
     return new DiffieHellman(new ECDH_PRIME_256_V1_CEUM);
 
   } else {

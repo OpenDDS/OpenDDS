@@ -28,34 +28,17 @@ TransportSendBuffer::bind(TransportSendStrategy* strategy)
 ACE_INLINE size_t
 SingleSendBuffer::n_chunks() const
 {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, this->n_chunks_);
   return this->n_chunks_;
 }
 
-ACE_INLINE SequenceNumber
-SingleSendBuffer::low() const
+ACE_INLINE void
+SingleSendBuffer::pre_insert(SequenceNumber sequence)
 {
-  if (this->buffers_.empty()) throw std::exception();
-  return this->buffers_.begin()->first;
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  pre_seq_.insert(sequence);
 }
 
-ACE_INLINE SequenceNumber
-SingleSendBuffer::high() const
-{
-  if (this->buffers_.empty()) throw std::exception();
-  return this->buffers_.rbegin()->first;
-}
-
-ACE_INLINE bool
-SingleSendBuffer::empty() const
-{
-  return this->buffers_.empty();
-}
-
-ACE_INLINE bool
-SingleSendBuffer::contains(const SequenceNumber& seq) const
-{
-  return this->buffers_.count(seq);
-}
 
 } // namespace DCPS
 } // namespace OpenDDS

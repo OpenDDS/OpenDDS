@@ -5,21 +5,27 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DDS_DCPS_INFOREPODISCOVERY_H
-#define OPENDDS_DDS_DCPS_INFOREPODISCOVERY_H
+#ifndef OPENDDS_DCPS_INFOREPODISCOVERY_INFOREPODISCOVERY_H
+#define OPENDDS_DCPS_INFOREPODISCOVERY_INFOREPODISCOVERY_H
 
 #include "dds/DCPS/Discovery.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/InfoRepoDiscovery/DataReaderRemoteC.h"
-#include "dds/DCPS/InfoRepoDiscovery/InfoC.h"
+#include "DataReaderRemoteC.h"
+#include "InfoC.h"
 #include "dds/DCPS/transport/framework/TransportConfig_rch.h"
-
+#include "dds/DCPS/XTypes/TypeObject.h"
+#include "dds/DCPS/TypeSupportImpl.h"
 #include "ace/Task.h"
 
 #include "InfoRepoDiscovery_Export.h"
 
 #include "ace/Thread_Mutex.h"
+#ifdef ACE_HAS_CPP11
+#  include <atomic>
+#else
+#  include <ace/Atomic_Op_T.h>
+#endif /* ACE_HAS_CPP11 */
 
 #include <string>
 
@@ -152,10 +158,11 @@ public:
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& topicId,
-    OpenDDS::DCPS::DataWriterCallbacks* publication,
+    OpenDDS::DCPS::DataWriterCallbacks_rch publication,
     const DDS::DataWriterQos& qos,
     const OpenDDS::DCPS::TransportLocatorSeq& transInfo,
-    const DDS::PublisherQos& publisherQos);
+    const DDS::PublisherQos& publisherQos,
+    const XTypes::TypeInformation& type_info);
 
   virtual bool remove_publication(
     DDS::DomainId_t domainId,
@@ -181,13 +188,14 @@ public:
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& topicId,
-    OpenDDS::DCPS::DataReaderCallbacks* subscription,
+    OpenDDS::DCPS::DataReaderCallbacks_rch subscription,
     const DDS::DataReaderQos& qos,
     const OpenDDS::DCPS::TransportLocatorSeq& transInfo,
     const DDS::SubscriberQos& subscriberQos,
     const char* filterClassName,
     const char* filterExpression,
-    const DDS::StringSeq& exprParams);
+    const DDS::StringSeq& exprParams,
+    const XTypes::TypeInformation& type_info);
 
   virtual bool remove_subscription(
     DDS::DomainId_t domainId,
@@ -211,15 +219,6 @@ public:
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& subscriptionId,
     const DDS::StringSeq& params);
-
-
-  // Managing reader/writer associations:
-
-  virtual void association_complete(
-    DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& participantId,
-    const OpenDDS::DCPS::RepoId& localId,
-    const OpenDDS::DCPS::RepoId& remoteId);
 
 private:
   TransportConfig_rch bit_config();
@@ -249,7 +248,11 @@ private:
     void shutdown();
 
     CORBA::ORB_var orb_;
+#ifdef ACE_HAS_CPP11
+    std::atomic<unsigned long> use_count_;
+#else
     ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> use_count_;
+#endif
   private:
     OrbRunner(const OrbRunner&);
     OrbRunner& operator=(const OrbRunner&);

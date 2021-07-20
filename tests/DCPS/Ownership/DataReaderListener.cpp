@@ -58,7 +58,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
       if (status == DDS::RETCODE_OK) {
         if (si.valid_data) {
-          ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) %s->%s subject_id: %d ")
+          ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) %C->%C subject_id: %d ")
             ACE_TEXT("count: %d strength: %d\n"),
             message.from.in(), this->reader_id_, message.subject_id,
             message.count, message.strength));
@@ -102,7 +102,7 @@ void DataReaderListenerImpl::on_requested_deadline_missed(
   const DDS::RequestedDeadlineMissedStatus & status)
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %s: on_requested_deadline_missed(): ")
-          ACE_TEXT(" handle %d total_count_change %d \n"),
+          ACE_TEXT(" handle %d total_count_change %d\n"),
           this->reader_id_, status.last_instance_handle, status.total_count_change));
 }
 
@@ -117,8 +117,8 @@ void DataReaderListenerImpl::on_liveliness_changed(
   DDS::DataReader_ptr,
   const DDS::LivelinessChangedStatus & status)
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %s: on_liveliness_changed(): ")
-          ACE_TEXT(" last pub handle %d alive_count %d change %d; not_alive_count %d change %d \n"),
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %C: on_liveliness_changed(): ")
+          ACE_TEXT(" last pub handle %d alive_count %d change %d; not_alive_count %d change %d\n"),
           reader_id_, status.last_publication_handle,
           status.alive_count, status.alive_count_change,
           status.not_alive_count, status.not_alive_count_change));

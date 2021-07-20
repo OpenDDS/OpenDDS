@@ -20,6 +20,7 @@
 #include "Transient_Kludge.h"
 #include "DataDurabilityCache.h"
 #include "MonitorFactory.h"
+#include "TypeSupportImpl.h"
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 #include "CoherentChangeControl.h"
 #endif
@@ -31,10 +32,10 @@
 
 #include "Util.h"
 
-#include "dds/DCPS/transport/framework/EntryExit.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
-#include "dds/DCPS/transport/framework/TransportSendElement.h"
-#include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
+#include "transport/framework/EntryExit.h"
+#include "transport/framework/TransportExceptions.h"
+#include "transport/framework/TransportSendElement.h"
+#include "transport/framework/TransportCustomizedElement.h"
 
 #include "ace/Reactor.h"
 #include "ace/Auto_Ptr.h"
@@ -225,7 +226,7 @@ DDS::ReturnCode_t ReplayerImpl::set_qos (const DDS::PublisherQos &  publisher_qo
       if (!status) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) DataWriterImpl::set_qos, ")
-                          ACE_TEXT("qos not updated. \n")),
+                          ACE_TEXT("qos not updated.\n")),
                          DDS::RETCODE_ERROR);
       }
     }
@@ -358,19 +359,28 @@ ReplayerImpl::enable()
 
 
   Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
+
+
+  XTypes::TypeInformation type_info;
+  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
+  type_info.minimal.dependent_typeid_count = 0;
+  type_info.complete.typeid_with_size.typeobject_serialized_size = 0;
+  type_info.complete.dependent_typeid_count = 0;
+
   this->publication_id_ =
     disco->add_publication(this->domain_id_,
                            this->participant_servant_->get_id(),
                            this->topic_servant_->get_id(),
-                           this,
+                           rchandle_from(this),
                            this->qos_,
                            trans_conf_info,
-                           this->publisher_qos_);
+                           this->publisher_qos_,
+                           type_info);
 
   if (this->publication_id_ == GUID_UNKNOWN) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ReplayerImpl::enable, ")
-               ACE_TEXT("add_publication returned invalid id. \n")));
+               ACE_TEXT("add_publication returned invalid id.\n")));
     return DDS::RETCODE_ERROR;
   }
 
@@ -430,6 +440,7 @@ ReplayerImpl::add_association(const RepoId&            yourId,
   AssociationData data;
   data.remote_id_ = reader.readerId;
   data.remote_data_ = reader.readerTransInfo;
+  data.remote_transport_context_ = reader.transportContext;
   data.remote_reliable_ =
     (reader.readerQos.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS);
   data.remote_durable_ =
@@ -448,36 +459,7 @@ ReplayerImpl::add_association(const RepoId&            yourId,
   if (active) {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
-    // Have we already received an association_complete() callback?
-    if (assoc_complete_readers_.count(reader.readerId)) {
-      assoc_complete_readers_.erase(reader.readerId);
-      association_complete_i(reader.readerId);
-
-      // Add to pending_readers_ -> pending means we are waiting
-      // for the association_complete() callback.
-    } else if (OpenDDS::DCPS::insert(pending_readers_, reader.readerId) == -1) {
-      GuidConverter converter(reader.readerId);
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ReplayerImpl::add_association: ")
-                 ACE_TEXT("failed to mark %C as pending.\n"),
-                 OPENDDS_STRING(converter).c_str()));
-
-    } else {
-      if (DCPS_debug_level > 0) {
-        GuidConverter converter(reader.readerId);
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) ReplayerImpl::add_association: ")
-                   ACE_TEXT("marked %C as pending.\n"),
-                   OPENDDS_STRING(converter).c_str()));
-      }
-    }
-  } else {
-    // In the current implementation, DataWriter is always active, so this
-    // code will not be applicable.
-    Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
-    disco->association_complete(this->domain_id_,
-                                this->participant_servant_->get_id(),
-                                this->publication_id_, reader.readerId);
+    association_complete_i(reader.readerId);
   }
 }
 
@@ -497,33 +479,6 @@ ReplayerImpl::ReaderInfo::ReaderInfo(const char*            filter,
 
 ReplayerImpl::ReaderInfo::~ReaderInfo()
 {
-}
-
-
-void
-ReplayerImpl::association_complete(const RepoId& remote_id)
-{
-  DBG_ENTRY_LVL("ReplayerImpl", "association_complete", 6);
-
-  if (DCPS_debug_level >= 1) {
-    GuidConverter writer_converter(this->publication_id_);
-    GuidConverter reader_converter(remote_id);
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) ReplayerImpl::association_complete - ")
-               ACE_TEXT("bit %d local %C remote %C\n"),
-               is_bit_,
-               OPENDDS_STRING(writer_converter).c_str(),
-               OPENDDS_STRING(reader_converter).c_str()));
-  }
-
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
-  if (OpenDDS::DCPS::remove(pending_readers_, remote_id) == -1) {
-    // Not found in pending_readers_, defer calling association_complete_i()
-    // until add_association() resumes and sees this ID in assoc_complete_readers_.
-    assoc_complete_readers_.insert(remote_id);
-  } else {
-    association_complete_i(remote_id);
-  }
 }
 
 void
@@ -548,8 +503,7 @@ ReplayerImpl::association_complete_i(const RepoId& remote_id)
 
   if (!is_bit_) {
 
-    DDS::InstanceHandle_t handle =
-      this->participant_servant_->id_to_handle(remote_id);
+    const DDS::InstanceHandle_t handle = participant_servant_->assign_handle(remote_id);
 
     {
       // protect publication_match_status_ and status changed flags.
@@ -661,17 +615,6 @@ ReplayerImpl::remove_associations(const ReaderIdSeq & readers,
         ++rds_len;
         rds.length(rds_len);
         rds [rds_len - 1] = readers[i];
-
-      } else if (OpenDDS::DCPS::remove(pending_readers_, readers[i]) == 0) {
-        ++rds_len;
-        rds.length(rds_len);
-        rds [rds_len - 1] = readers[i];
-
-        GuidConverter converter(readers[i]);
-        ACE_DEBUG((LM_WARNING,
-                   ACE_TEXT("(%P|%t) WARNING: ReplayerImpl::remove_associations: ")
-                   ACE_TEXT("removing reader %C before association_complete() call.\n"),
-                   OPENDDS_STRING(converter).c_str()));
       }
       reader_info_.erase(readers[i]);
       //else reader is already removed which indicates remove_association()
@@ -735,6 +678,10 @@ ReplayerImpl::remove_associations(const ReaderIdSeq & readers,
   if (notify_lost && handles.length() > 0) {
     this->notify_publication_lost(handles);
   }
+
+  for (unsigned int i = 0; i < handles.length(); ++i) {
+    participant_servant_->return_handle(handles[i]);
+  }
 }
 
 void ReplayerImpl::remove_all_associations()
@@ -743,12 +690,10 @@ void ReplayerImpl::remove_all_associations()
 
   OpenDDS::DCPS::ReaderIdSeq readers;
   CORBA::ULong size;
-  CORBA::ULong num_pending_readers;
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
 
-    num_pending_readers = static_cast<CORBA::ULong>(pending_readers_.size());
-    size = static_cast<CORBA::ULong>(readers_.size()) + num_pending_readers;
+    size = static_cast<CORBA::ULong>(readers_.size());
     readers.length(size);
 
     RepoIdSet::iterator itEnd = readers_.end();
@@ -756,18 +701,6 @@ void ReplayerImpl::remove_all_associations()
 
     for (RepoIdSet::iterator it = readers_.begin(); it != itEnd; ++it) {
       readers[i++] = *it;
-    }
-
-    itEnd = pending_readers_.end();
-    for (RepoIdSet::iterator it = pending_readers_.begin(); it != itEnd; ++it) {
-      readers[i++] = *it;
-    }
-
-    if (num_pending_readers > 0) {
-      ACE_DEBUG((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: ReplayerImpl::remove_all_associations() - ")
-                 ACE_TEXT("%d subscribers were pending and never fully associated.\n"),
-                 num_pending_readers));
     }
   }
 
@@ -867,8 +800,8 @@ ReplayerImpl::data_delivered(const DataSampleElement* sample)
 
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
-    if ((--pending_write_count_) == 0) {
-      empty_condition_.broadcast();
+    if (--pending_write_count_ == 0) {
+      empty_condition_.notify_all();
     }
   }
 }
@@ -892,7 +825,7 @@ ReplayerImpl::data_dropped(const DataSampleElement* sample,
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
     if ((--pending_write_count_) == 0) {
-      empty_condition_.broadcast();
+      empty_condition_.notify_all();
     }
   }
 }
@@ -1027,7 +960,7 @@ ReplayerImpl::create_sample_data_message(Message_Block_Ptr   data,
   header_data.message_id_ = SAMPLE_DATA;
   header_data.coherent_change_ = content_filter;
 
-  header_data.content_filter_ = 0;
+  header_data.content_filter_ = false;
   header_data.cdr_encapsulation_ = this->cdr_encapsulation();
   header_data.message_length_ = static_cast<ACE_UINT32>(data->total_length());
   header_data.sequence_repair_ = need_sequence_repair();
@@ -1049,12 +982,11 @@ ReplayerImpl::create_sample_data_message(Message_Block_Ptr   data,
 
   // header_data.publication_id_ = publication_id_;
   // header_data.publisher_id_ = this->publisher_servant_->publisher_id_;
-  size_t max_marshaled_size = header_data.max_marshaled_size();
   ACE_Message_Block* tmp;
   ACE_NEW_MALLOC_RETURN(tmp,
                         static_cast<ACE_Message_Block*>(
                           mb_allocator_->malloc(sizeof(ACE_Message_Block))),
-                        ACE_Message_Block(max_marshaled_size,
+                        ACE_Message_Block(DataSampleHeader::get_max_serialized_size(),
                                           ACE_Message_Block::MB_DATA,
                                           data.release(),   //cont
                                           0,   //data
@@ -1095,7 +1027,7 @@ ReplayerImpl::lookup_instance_handles(const ReaderIdSeq&       ids,
   hdls.length(num_rds);
 
   for (CORBA::ULong i = 0; i < num_rds; ++i) {
-    hdls[i] = this->participant_servant_->id_to_handle(ids[i]);
+    hdls[i] = participant_servant_->lookup_handle(ids[i]);
   }
 }
 
@@ -1114,7 +1046,7 @@ ReplayerImpl::need_sequence_repair() const
 DDS::InstanceHandle_t
 ReplayerImpl::get_instance_handle()
 {
-  return this->participant_servant_->id_to_handle(publication_id_);
+  return get_entity_instance_handle(publication_id_, participant_servant_);
 }
 
 DDS::ReturnCode_t

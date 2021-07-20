@@ -20,6 +20,7 @@
 #include "ReplayerImpl.h"
 #include "LinuxNetworkConfigMonitor.h"
 #include "StaticDiscovery.h"
+#include "../Version.h"
 #if defined(OPENDDS_SECURITY)
 #include "security/framework/SecurityRegistry.h"
 #endif
@@ -36,6 +37,9 @@
 #include <ace/Sched_Params.h>
 #include <ace/Malloc_Allocator.h>
 #include <ace/OS_NS_unistd.h>
+#include <ace/Version.h>
+
+#include <cstring>
 
 #ifdef OPENDDS_SAFETY_PROFILE
 #include <stdio.h> // <cstdio> after FaceCTS bug 623 is fixed
@@ -161,6 +165,7 @@ static bool got_default_address = false;
 static bool got_bidir_giop = false;
 static bool got_thread_status_interval = false;
 static bool got_monitor = false;
+static bool got_type_object_encoding = false;
 
 Service_Participant::Service_Participant()
   :
@@ -190,7 +195,7 @@ Service_Participant::Service_Participant()
     federation_initial_backoff_seconds_(DEFAULT_FEDERATION_INITIAL_BACKOFF_SECONDS),
     federation_backoff_multiplier_(DEFAULT_FEDERATION_BACKOFF_MULTIPLIER),
     federation_liveliness_(DEFAULT_FEDERATION_LIVELINESS),
-#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
+#if OPENDDS_POOL_ALLOCATOR
     pool_size_(1024*1024*16),
     pool_granularity_(8),
 #endif
@@ -205,7 +210,8 @@ Service_Participant::Service_Participant()
     monitor_enabled_(false),
     shut_down_(false),
     shutdown_listener_(0),
-    default_configuration_file_(ACE_TEXT(""))
+    default_configuration_file_(ACE_TEXT("")),
+    type_object_encoding_(Encoding_Normal)
 {
   initialize();
 }
@@ -216,7 +222,7 @@ Service_Participant::~Service_Participant()
 
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-               "%T (%P|%t) Service_Participant::~Service_Participant()\n"));
+               "(%P|%t) Service_Participant::~Service_Participant()\n"));
   }
 }
 
@@ -404,6 +410,13 @@ Service_Participant::get_domain_participant_factory(int &argc,
         } else {
           ACE_OS::fclose(in);
 
+          if (DCPS_debug_level > 1) {
+            ACE_DEBUG((LM_NOTICE,
+                        ACE_TEXT("(%P|%t) NOTICE: Service_Participant::get_domain_participant_factory ")
+                        ACE_TEXT("Going to load configuration from <%s>\n"),
+                        config_fname.c_str()));
+          }
+
           if (this->load_configuration() != 0) {
             ACE_ERROR((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: Service_Participant::get_domain_participant_factory: ")
@@ -413,10 +426,16 @@ Service_Participant::get_domain_participant_factory(int &argc,
         }
       }
 
-#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
+#if OPENDDS_POOL_ALLOCATOR
       // For non-FACE tests, configure pool
       configure_pool();
 #endif
+
+      if (DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_NOTICE,
+                   "(%P|%t) NOTICE: Service_Participant::get_domain_participant_factory - "
+                   "This is OpenDDS " OPENDDS_VERSION " using ACE " ACE_VERSION "\n"));
+      }
 
       // Establish the default scheduling mechanism and
       // priority here.  Sadly, the ORB is already
@@ -431,7 +450,8 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
       dp_factory_servant_ = make_rch<DomainParticipantFactoryImpl>();
 
-      reactor_task_.open_reactor_task(0, thread_status_interval_, &thread_status_, "Service_Participant");
+      reactor_task_.open_reactor_task(
+        0, thread_status_interval_, &thread_status_manager_, "Service_Participant");
 
       if (this->monitor_enabled_) {
 #if !defined(ACE_AS_STATIC_LIBS)
@@ -643,6 +663,10 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       got_security_flag = true;
 
 #endif
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSTypeObjectEncoding"))) != 0) {
+      type_object_encoding(ACE_TEXT_ALWAYS_CHAR(currentArg));
+      arg_shifter.consume_arg();
+      got_type_object_encoding = true;
 
     } else {
       arg_shifter.ignore_arg();
@@ -719,10 +743,20 @@ Service_Participant::initialize()
 
   initial_WriterDataLifecycleQosPolicy_.autodispose_unregistered_instances = true;
 
+  // Will get interpreted based on how the type was annotated.
+  initial_DataRepresentationQosPolicy_.value.length(0);
+
   initial_ReaderDataLifecycleQosPolicy_.autopurge_nowriter_samples_delay.sec = DDS::DURATION_INFINITE_SEC;
   initial_ReaderDataLifecycleQosPolicy_.autopurge_nowriter_samples_delay.nanosec = DDS::DURATION_INFINITE_NSEC;
   initial_ReaderDataLifecycleQosPolicy_.autopurge_disposed_samples_delay.sec = DDS::DURATION_INFINITE_SEC;
   initial_ReaderDataLifecycleQosPolicy_.autopurge_disposed_samples_delay.nanosec = DDS::DURATION_INFINITE_NSEC;
+
+  initial_TypeConsistencyEnforcementQosPolicy_.kind = DDS::ALLOW_TYPE_COERCION;
+  initial_TypeConsistencyEnforcementQosPolicy_.prevent_type_widening = false;
+  initial_TypeConsistencyEnforcementQosPolicy_.ignore_sequence_bounds = true;
+  initial_TypeConsistencyEnforcementQosPolicy_.ignore_string_bounds = true;
+  initial_TypeConsistencyEnforcementQosPolicy_.ignore_member_names = false;
+  initial_TypeConsistencyEnforcementQosPolicy_.force_type_validation = false;
 
   initial_DomainParticipantQos_.user_data = initial_UserDataQosPolicy_;
   initial_DomainParticipantQos_.entity_factory = initial_EntityFactoryQosPolicy_;
@@ -741,6 +775,7 @@ Service_Participant::initialize()
   initial_TopicQos_.transport_priority = initial_TransportPriorityQosPolicy_;
   initial_TopicQos_.lifespan = initial_LifespanQosPolicy_;
   initial_TopicQos_.ownership = initial_OwnershipQosPolicy_;
+  initial_TopicQos_.representation = initial_DataRepresentationQosPolicy_;
 
   initial_DataWriterQos_.durability = initial_DurabilityQosPolicy_;
   initial_DataWriterQos_.durability_service = initial_DurabilityServiceQosPolicy_;
@@ -764,6 +799,7 @@ Service_Participant::initialize()
   initial_DataWriterQos_.ownership_strength = initial_OwnershipStrengthQosPolicy_;
 #endif
   initial_DataWriterQos_.writer_data_lifecycle = initial_WriterDataLifecycleQosPolicy_;
+  initial_DataWriterQos_.representation = initial_DataRepresentationQosPolicy_;
 
   initial_PublisherQos_.presentation = initial_PresentationQosPolicy_;
   initial_PublisherQos_.partition = initial_PartitionQosPolicy_;
@@ -782,6 +818,8 @@ Service_Participant::initialize()
   initial_DataReaderQos_.time_based_filter = initial_TimeBasedFilterQosPolicy_;
   initial_DataReaderQos_.ownership = initial_OwnershipQosPolicy_;
   initial_DataReaderQos_.reader_data_lifecycle = initial_ReaderDataLifecycleQosPolicy_;
+  initial_DataReaderQos_.representation = initial_DataRepresentationQosPolicy_;
+  initial_DataReaderQos_.type_consistency = initial_TypeConsistencyEnforcementQosPolicy_;
 
   initial_SubscriberQos_.presentation = initial_PresentationQosPolicy_;
   initial_SubscriberQos_.partition = initial_PartitionQosPolicy_;
@@ -897,11 +935,11 @@ Service_Participant::set_repo_ior(const char* ior,
 {
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) Service_Participant::set_repo_ior: Repo[ %C] == %C\n"),
+               ACE_TEXT("(%P|%t) Service_Participant::set_repo_ior: Repo[%C] == %C\n"),
                key.c_str(), ior));
   }
 
-  // This is a global used for the bizzare commandline/configfile
+  // This is a global used for the bizarre commandline/configfile
   // processing done for this class.
   got_info = true;
 
@@ -923,7 +961,7 @@ Service_Participant::set_repo_ior(const char* ior,
     ACE_TString section = REPO_SECTION_NAME;
     section += ACE_TEXT('\\');
     section += ACE_TEXT_CHAR_TO_TCHAR(key.c_str());
-    cf.open_section(cf.root_section(), section.c_str(), 1 /*create*/, sect_key);
+    cf.open_section(cf.root_section(), section.c_str(), true /*create*/, sect_key);
     cf.set_string_value(sect_key, ACE_TEXT("RepositoryIor"),
                         ACE_TEXT_CHAR_TO_TCHAR(ior));
 
@@ -1179,6 +1217,8 @@ Service_Participant::get_default_discovery()
 Discovery_rch
 Service_Participant::get_discovery(const DDS::DomainId_t domain)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->maps_lock_, Discovery_rch());
+
   // Default to the Default InfoRepo-based discovery unless the user has
   // changed defaultDiscovery_ using the API or config file
   Discovery::RepoKey repo = defaultDiscovery_;
@@ -1259,7 +1299,7 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
       ACE_Configuration_Heap cf;
       cf.open();
       ACE_Configuration_Section_Key k;
-      cf.open_section(cf.root_section(), RTPS_SECTION_NAME, 1 /*create*/, k);
+      cf.open_section(cf.root_section(), RTPS_SECTION_NAME, true /*create*/, k);
 
       int status = load_discovery_configuration(cf, RTPS_SECTION_NAME);
 
@@ -1579,7 +1619,7 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
   const ACE_Configuration_Section_Key &root = cf.root_section();
   ACE_Configuration_Section_Key sect;
 
-  if (cf.open_section(root, COMMON_SECTION_NAME, 0, sect) != 0) {
+  if (cf.open_section(root, COMMON_SECTION_NAME, false, sect) != 0) {
     if (DCPS_debug_level > 0) {
       // This is not an error if the configuration file does not have
       // a common section. The code default configuration will be used.
@@ -1630,9 +1670,11 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     }
 
     if (got_chunk_association_multiplier) {
-      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSChunkAssociationMutltiplier")));
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSChunkAssociationMultiplier")));
     } else {
+      // This is legacy support for a misspelling of the config option.
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSChunkAssociationMutltiplier"), this->association_chunk_multiplier_, size_t)
+      GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSChunkAssociationMultiplier"), this->association_chunk_multiplier_, size_t)
     }
 
     if (got_bit_transport_port) {
@@ -1817,13 +1859,23 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSMonitor"), monitor_enabled_, bool)
     }
 
+    if (got_type_object_encoding) {
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSTypeObjectEncoding")));
+    } else {
+      String str;
+      GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("DCPSTypeObjectEncoding"), str);
+      if (!str.empty()) {
+        type_object_encoding(str.c_str());
+      }
+    }
+
     // These are not handled on the command line.
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("FederationRecoveryDuration"), this->federation_recovery_duration_, int)
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("FederationInitialBackoffSeconds"), this->federation_initial_backoff_seconds_, int)
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("FederationBackoffMultiplier"), this->federation_backoff_multiplier_, int)
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("FederationLivelinessDuration"), this->federation_liveliness_, int)
 
-#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
+#if OPENDDS_POOL_ALLOCATOR
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("pool_size"), pool_size_, size_t)
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("pool_granularity"), pool_granularity_, size_t)
 #endif
@@ -1852,12 +1904,12 @@ Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf,
   const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key domain_sect;
 
-  if (cf.open_section(root, DOMAIN_SECTION_NAME, 0, domain_sect) != 0) {
+  if (cf.open_section(root, DOMAIN_SECTION_NAME, false, domain_sect) != 0) {
     if (DCPS_debug_level > 0) {
       // This is not an error if the configuration file does not have
       // any domain (sub)section. The code default configuration will be used.
       ACE_DEBUG((LM_NOTICE,
-                 ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_domain_configuration ")
+                 ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_domain_configuration(): ")
                  ACE_TEXT("failed to open [%s] section - using code default.\n"),
                  DOMAIN_SECTION_NAME));
     }
@@ -1991,13 +2043,13 @@ Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
   const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key domain_range_sect;
 
-  if (cf.open_section(root, DOMAIN_RANGE_SECTION_NAME, 0, domain_range_sect) != 0) {
+  if (cf.open_section(root, DOMAIN_RANGE_SECTION_NAME, false, domain_range_sect) != 0) {
     if (DCPS_debug_level > 0) {
       // This is not an error if the configuration file does not have
       // any domain range (sub)section.
       ACE_DEBUG((LM_NOTICE,
-                 ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_domain_range_configuration ")
-                 ACE_TEXT("failed to open [%s] section.\n"),
+                 ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_domain_ranges(): ")
+                 ACE_TEXT("config does not have a [%s] section.\n"),
                  DOMAIN_RANGE_SECTION_NAME));
     }
 
@@ -2006,7 +2058,7 @@ Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
   } else {
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_NOTICE,
-                   ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_domain_ranges ")
+                   ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_domain_ranges(): ")
                    ACE_TEXT("config has %s sections.\n"),
                    DOMAIN_RANGE_SECTION_NAME));
     }
@@ -2016,8 +2068,9 @@ Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
     if (pullValues(cf, domain_range_sect, vm) > 0) {
       // There are values inside [DomainRange]
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) Service_Participant::load_domain_range_configuration(): ")
-                        ACE_TEXT("[DomainRange] sections must have a subsection range\n")),
+                        ACE_TEXT("(%P|%t) Service_Participant::load_domain_ranges(): ")
+                        ACE_TEXT("[%s] sections must have a subsection range\n"),
+                        DOMAIN_RANGE_SECTION_NAME),
                        -1);
     }
 
@@ -2025,8 +2078,9 @@ Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
     KeyList keys;
     if (processSections(cf, domain_range_sect, keys) != 0) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) Service_Participant::load_domain_range_configuration(): ")
-                        ACE_TEXT("too many nesting layers in the [DomainRange] section.\n")),
+                        ACE_TEXT("(%P|%t) Service_Participant::load_domain_ranges(): ")
+                        ACE_TEXT("too many nesting layers in the [%s] section.\n"),
+                        DOMAIN_RANGE_SECTION_NAME),
                        -1);
     }
 
@@ -2041,8 +2095,9 @@ Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
 
       if (parse_domain_range(domain_range, range_start, range_end) != 0) {
           ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) Service_Participant::load_domain_range_configuration(): ")
-                            ACE_TEXT("Error parsing [DomainRange/%C] section.\n"),
+                            ACE_TEXT("(%P|%t) Service_Participant::load_domain_ranges(): ")
+                            ACE_TEXT("Error parsing [%s/%C] section.\n"),
+                            DOMAIN_RANGE_SECTION_NAME,
                             domain_range.c_str()),
                            -1);
       }
@@ -2060,8 +2115,8 @@ Service_Participant::load_domain_ranges(ACE_Configuration_Heap& cf)
             dt_name = it->second;
             if (DCPS_debug_level > 0) {
               ACE_DEBUG((LM_DEBUG,
-                         ACE_TEXT("(%P|%t) [DomainRange/%C]: DiscoveryTemplate name == %C\n"),
-                         domain_range.c_str(), dt_name.c_str()));
+                         ACE_TEXT("(%P|%t) [%s/%C]: DiscoveryTemplate name == %C\n"),
+                         DOMAIN_RANGE_SECTION_NAME, domain_range.c_str(), dt_name.c_str()));
             }
             range_element.discovery_template_name = dt_name;
           } else if (name == "DefaultTransportConfig") {
@@ -2102,9 +2157,9 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
 
       // create domain instance
       ACE_Configuration_Section_Key dsect;
-      dcf.open_section(root, DOMAIN_SECTION_NAME, 1 /* create */, dsect);
+      dcf.open_section(root, DOMAIN_SECTION_NAME, true /* create */, dsect);
       ACE_Configuration_Section_Key dsub_sect;
-      dcf.open_section(dsect, ACE_TEXT_CHAR_TO_TCHAR(to_dds_string(domainId).c_str()), 1 /* create */, dsub_sect);
+      dcf.open_section(dsect, ACE_TEXT_CHAR_TO_TCHAR(to_dds_string(domainId).c_str()), true /* create */, dsub_sect);
       dcf.set_string_value(dsub_sect, ACE_TEXT("DiscoveryConfig"), ACE_TEXT_CHAR_TO_TCHAR(name.c_str()));
       for (ValueMap::const_iterator it = dr_inst.domain_info.begin();
            it != dr_inst.domain_info.end();
@@ -2113,13 +2168,13 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) Service_Participant::")
-                     ACE_TEXT("configure_domain_range_instance adding %C=%C\n"),
+                     ACE_TEXT("configure_domain_range_instance(): adding %C=%C\n"),
                      it->first.c_str(), it->second.c_str()));
         }
       }
 
       ACE_TString cfg_name;
-      if (get_transport_config_name(domainId, cfg_name)) {
+      if (get_transport_base_config_name(domainId, cfg_name)) {
         if (TransportRegistry::instance()->config_has_transport_template(cfg_name)) {
           // create transport instance add default transport config
           TransportRegistry::instance()->create_transport_template_instance(domainId, cfg_name);
@@ -2129,14 +2184,14 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
           if (DCPS_debug_level > 0) {
             ACE_DEBUG((LM_DEBUG,
                        ACE_TEXT("(%P|%t) Service_Participant::")
-                       ACE_TEXT("configure_domain_range_instance setting DefaultTransportConfig=%C\n"),
+                       ACE_TEXT("configure_domain_range_instance(): setting DefaultTransportConfig=%C\n"),
                        config_instance_name.c_str()));
           }
         }
       } else {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
-                          ACE_TEXT("configure_domain_range_instance ")
+                          ACE_TEXT("configure_domain_range_instance(): ")
                           ACE_TEXT("transport config not found for domain %d\n"),
                           domainId),
                          -1);
@@ -2144,9 +2199,9 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
 
       //create matching discovery instance
       ACE_Configuration_Section_Key sect;
-      dcf.open_section(root, RTPS_SECTION_NAME, 1 /* create */, sect);
+      dcf.open_section(root, RTPS_SECTION_NAME, true /* create */, sect);
       ACE_Configuration_Section_Key sub_sect;
-      dcf.open_section(sect, ACE_TEXT_CHAR_TO_TCHAR(name.c_str()), 1, sub_sect);
+      dcf.open_section(sect, ACE_TEXT_CHAR_TO_TCHAR(name.c_str()), true, sub_sect);
 
       ValueMap discovery_settings;
       if (process_customizations(domainId, dr_inst.discovery_template_name, discovery_settings)) {
@@ -2160,7 +2215,7 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
 
       if (status != 0) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_domain_range_instance ")
+                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_domain_range_instance(): ")
                           ACE_TEXT("load_discovery_configuration() returned %d\n"),
                           status),
                          -1);
@@ -2171,7 +2226,7 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
 
       if (status != 0) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_domain_range_instance ")
+                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_domain_range_instance(): ")
                           ACE_TEXT("load_domain_configuration() returned %d\n"),
                           status),
                          -1);
@@ -2179,7 +2234,7 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
 
       if (DCPS_debug_level > 4) {
         ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) Service_Participant::configure_domain_range_instance: ")
+                 ACE_TEXT("(%P|%t) Service_Participant::configure_domain_range_instance(): ")
                  ACE_TEXT("configure domain %d.\n"),
                  domainId));
       }
@@ -2189,7 +2244,7 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
     // > 9 to limit number of messages.
     if (DCPS_debug_level > 9) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) Service_Participant::configure_domain_range_instance: ")
+                 ACE_TEXT("(%P|%t) Service_Participant::configure_domain_range_instance(): ")
                  ACE_TEXT("domain %d already configured.\n"),
                  domainId));
     }
@@ -2211,7 +2266,7 @@ Service_Participant::belongs_to_domain_range(DDS::DomainId_t domainId) const
 }
 
 bool
-Service_Participant::get_transport_config_name(DDS::DomainId_t domainId, ACE_TString& name) const
+Service_Participant::get_transport_base_config_name(DDS::DomainId_t domainId, ACE_TString& name) const
 {
   OPENDDS_MAP(DDS::DomainId_t, OPENDDS_STRING)::const_iterator it = domain_to_transport_name_map_.find(domainId);
   if ( it != domain_to_transport_name_map_.end()) {
@@ -2231,7 +2286,7 @@ Service_Participant::load_discovery_configuration(ACE_Configuration_Heap& cf,
 {
   const ACE_Configuration_Section_Key &root = cf.root_section();
   ACE_Configuration_Section_Key sect;
-  if (cf.open_section(root, section_name, 0, sect) == 0) {
+  if (cf.open_section(root, section_name, false, sect) == 0) {
 
     const OPENDDS_STRING sect_name = ACE_TEXT_ALWAYS_CHAR(section_name);
     DiscoveryTypes::iterator iter =
@@ -2250,7 +2305,7 @@ Service_Participant::load_discovery_configuration(ACE_Configuration_Heap& cf,
       // No discovery code can be loaded, report an error
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
-                        ACE_TEXT("load_discovery_configuration ")
+                        ACE_TEXT("load_discovery_configuration(): ")
                         ACE_TEXT("Unable to load libraries for %s\n"),
                         section_name),
                        -1);
@@ -2273,15 +2328,15 @@ Service_Participant::configure_discovery_template(DDS::DomainId_t domainId, cons
 
       //create discovery instance
       ACE_Configuration_Section_Key sect;
-      dcf.open_section(root, RTPS_SECTION_NAME, 1 /* create */, sect);
+      dcf.open_section(root, RTPS_SECTION_NAME, true /* create */, sect);
       ACE_Configuration_Section_Key sub_sect;
-      dcf.open_section(sect, ACE_TEXT_CHAR_TO_TCHAR(name.c_str()), 1, sub_sect);
+      dcf.open_section(sect, ACE_TEXT_CHAR_TO_TCHAR(name.c_str()), true, sub_sect);
 
       for (ValueMap::const_iterator ds_it = discovery_settings.begin(); ds_it != discovery_settings.end(); ++ds_it) {
         dcf.set_string_value(sub_sect, ACE_TEXT_CHAR_TO_TCHAR(ds_it->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(ds_it->second.c_str()));
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) Service_Participant::configure_discovery_template ")
+                     ACE_TEXT("(%P|%t) Service_Participant::configure_discovery_template(): ")
                      ACE_TEXT("setting %C = %C\n"),
                      ds_it->first.c_str(), ds_it->second.c_str()));
         }
@@ -2292,7 +2347,7 @@ Service_Participant::configure_discovery_template(DDS::DomainId_t domainId, cons
 
       if (status != 0) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_discovery_template ")
+                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_discovery_template(): ")
                           ACE_TEXT("load_discovery_configuration() returned %d\n"),
                           status),
                          -1);
@@ -2308,7 +2363,7 @@ Service_Participant::configure_discovery_template(DDS::DomainId_t domainId, cons
     }
   } else {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_discovery_template ")
+                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_discovery_template(): ")
                       ACE_TEXT("process_customizations() returned false\n")),
                      -1);
   }
@@ -2325,7 +2380,7 @@ Service_Participant::load_discovery_templates(ACE_Configuration_Heap& cf)
   const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key rtps_sect;
 
-  if (cf.open_section(root, RTPS_SECTION_NAME, 0, rtps_sect) == 0) {
+  if (cf.open_section(root, RTPS_SECTION_NAME, false, rtps_sect) == 0) {
     ValueMap vm;
     if (pullValues(cf, rtps_sect, vm) > 0) {
     // There are values inside [rtps_discovery]
@@ -2357,18 +2412,20 @@ Service_Participant::load_discovery_templates(ACE_Configuration_Heap& cf)
             OPENDDS_STRING customization = it->second;
             if (DCPS_debug_level > 0) {
               ACE_DEBUG((LM_DEBUG,
-                         ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates ")
-                         ACE_TEXT("loading customizations [Customization/%C]\n"),
+                         ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates(): ")
+                         ACE_TEXT("loading customizations [%s/%C]\n"),
+                         CUSTOMIZATION_SECTION_NAME,
                          customization.c_str()));
             }
 
             ACE_Configuration_Section_Key custom_sect;
-            if (cf.open_section(root, CUSTOMIZATION_SECTION_NAME, 0, custom_sect) == 0) {
+            if (cf.open_section(root, CUSTOMIZATION_SECTION_NAME, false, custom_sect) == 0) {
               ValueMap vcm;
               if (pullValues(cf, custom_sect, vcm) > 0) {
                 ACE_ERROR_RETURN((LM_ERROR,
                                   ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates(): ")
-                                  ACE_TEXT("Customization sections must have a subsection name\n")),
+                                  ACE_TEXT("%s sections must have a subsection name\n"),
+                                  CUSTOMIZATION_SECTION_NAME),
                                  -1);
               }
 
@@ -2377,7 +2434,8 @@ Service_Participant::load_discovery_templates(ACE_Configuration_Heap& cf)
               if (processSections(cf, custom_sect, keys) != 0) {
                 ACE_ERROR_RETURN((LM_ERROR,
                                   ACE_TEXT("(%P|%t) Service_Participant::load_discovery_templates(): ")
-                                  ACE_TEXT("too many nesting layers in the [Customization] section.\n")),
+                                  ACE_TEXT("too many nesting layers in the [%s] section.\n"),
+                                  CUSTOMIZATION_SECTION_NAME),
                                  -1);
               }
 
@@ -2413,8 +2471,8 @@ int Service_Participant::parse_domain_range(const OPENDDS_STRING& range, int& st
     start = end = -1;
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) Service_Participant::parse_domain_range(): ")
-                      ACE_TEXT("DomainRange missing '-' in [DomainRange/%C] section.\n"),
-                      range.c_str()),
+                      ACE_TEXT("%s missing '-' in [%s/%C] section.\n"),
+                      DOMAIN_RANGE_SECTION_NAME, DOMAIN_RANGE_SECTION_NAME, range.c_str()),
                      -1);
   }
 
@@ -2422,37 +2480,40 @@ int Service_Participant::parse_domain_range(const OPENDDS_STRING& range, int& st
     start = end = -1;
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) Service_Participant::parse_domain_range(): ")
-                      ACE_TEXT("Illegal integer value for start DomainRange (%C) in [DomainRange/%C] section.\n"),
-                      range.substr(0, dash_pos).c_str(), range.c_str()),
+                      ACE_TEXT("Illegal integer value for start %s (%C) in [%s/%C] section.\n"),
+                      DOMAIN_RANGE_SECTION_NAME, range.substr(0, dash_pos).c_str(),
+                      DOMAIN_RANGE_SECTION_NAME, range.c_str()),
                      -1);
   }
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Service_Participant::parse_domain_range(): ")
-               ACE_TEXT("(%P|%t) [DomainRange/%C]: range_start == %d\n"),
+               ACE_TEXT("(%P|%t) [%s/%C]: range_start == %d\n"),
+               DOMAIN_RANGE_SECTION_NAME,
                range.c_str(), start));
   }
 
   if (!convertToInteger(range.substr(dash_pos + 1), end)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) Service_Participant::parse_domain_range(): ")
-                      ACE_TEXT("Illegal integer value for end DomainRange (%C) in [DomainRange/%C] section.\n"),
-                      range.substr(0, dash_pos).c_str(), range.c_str()),
+                      ACE_TEXT("Illegal integer value for end %s (%C) in [%s/%C] section.\n"),
+                      DOMAIN_RANGE_SECTION_NAME, range.substr(0, dash_pos).c_str(),
+                      DOMAIN_RANGE_SECTION_NAME, range.c_str()),
                      -1);
   }
 
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Service_Participant::parse_domain_range(): ")
-               ACE_TEXT("(%P|%t) [DomainRange/%C]: range_end == %d\n"),
-               range.c_str(), end));
+               ACE_TEXT("(%P|%t) [%s/%C]: range_end == %d\n"),
+               DOMAIN_RANGE_SECTION_NAME, range.c_str(), end));
   }
 
   if (end < start) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) Service_Participant::parse_domain_range(): ")
-                      ACE_TEXT("Range End %d is less than range start %d in [DomainRange/%C] section.\n"),
-                      end, start, range.c_str()),
+                      ACE_TEXT("Range End %d is less than range start %d in [%s/%C] section.\n"),
+                      end, start, DOMAIN_RANGE_SECTION_NAME, range.c_str()),
                      -1);
   }
 
@@ -2480,9 +2541,9 @@ Service_Participant::get_domain_range_info(const DDS::DomainId_t id, DomainRange
 
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) Service_Participant::get_discovery: ")
-                     ACE_TEXT("Domain %d is in [DomainRange/%d-%d]\n"),
-                     id, it->range_start, it->range_end));
+                     ACE_TEXT("(%P|%t) Service_Participant::get_domain_range_info(): ")
+                     ACE_TEXT("Domain %d is in [%s/%d-%d]\n"),
+                     id, DOMAIN_RANGE_SECTION_NAME, it->range_start, it->range_end));
         }
 
         return true;
@@ -2510,7 +2571,7 @@ Service_Participant::process_customizations(DDS::DomainId_t id, const OPENDDS_ST
       if (DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) Service_Participant::")
-                   ACE_TEXT("process_customizations adding config %C=%C\n"),
+                   ACE_TEXT("process_customizations(): adding config %C=%C\n"),
                    i->first.c_str(), i->second.c_str()));
       }
     }
@@ -2526,7 +2587,7 @@ Service_Participant::process_customizations(DDS::DomainId_t id, const OPENDDS_ST
           if (!convertToInteger(custom, val)) {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
-                              ACE_TEXT("process_Customizations ")
+                              ACE_TEXT("process_customizations(): ")
                               ACE_TEXT("could not convert %C to integer\n"),
                               custom.c_str()),
                              false);
@@ -2537,7 +2598,7 @@ Service_Participant::process_customizations(DDS::DomainId_t id, const OPENDDS_ST
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
-                            ACE_TEXT("configure_domain_range_instance ")
+                            ACE_TEXT("process_customizations(): ")
                             ACE_TEXT("could not AddDomainId for %s\n"),
                             customs["InteropMulticastOverride"].c_str()),
                            false);
@@ -2572,7 +2633,7 @@ Service_Participant::is_discovery_template(const OPENDDS_STRING& name)
   return false;
 }
 
-#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
+#if OPENDDS_POOL_ALLOCATOR
 void
 Service_Participant::configure_pool()
 {
@@ -2750,10 +2811,14 @@ Service_Participant::set_thread_status_interval(TimeDuration interval)
   thread_status_interval_ = interval;
 }
 
-ThreadStatus*
-Service_Participant::get_thread_statuses()
+ThreadStatusManager* Service_Participant::get_thread_status_manager()
 {
-  return &thread_status_;
+  return &thread_status_manager_;
+}
+
+ACE_Thread_Mutex& Service_Participant::get_static_xtypes_lock()
+{
+  return xtypes_lock_;
 }
 
 NetworkConfigMonitor_rch Service_Participant::network_config_monitor()
@@ -2764,21 +2829,38 @@ NetworkConfigMonitor_rch Service_Participant::network_config_monitor()
 #ifdef OPENDDS_LINUX_NETWORK_CONFIG_MONITOR
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
-               "%T (%P|%t) Service_Participant::network_config_monitor(). Creating LinuxNetworkConfigMonitor\n"));
+               "(%P|%t) Service_Participant::network_config_monitor(). Creating LinuxNetworkConfigMonitor\n"));
     }
     network_config_monitor_ = make_rch<LinuxNetworkConfigMonitor>(reactor_task_.interceptor());
 #elif defined(OPENDDS_NETWORK_CONFIG_MODIFIER)
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
-               "%T (%P|%t) Service_Participant::network_config_monitor(). Creating NetworkConfigModifier\n"));
+               "(%P|%t) Service_Participant::network_config_monitor(). Creating NetworkConfigModifier\n"));
     }
     network_config_monitor_ = make_rch<NetworkConfigModifier>();
 #endif
-
-    if (network_config_monitor_ && !network_config_monitor_->open()) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Service_Participant::network_config_monitor could not open network config monitor\n ")));
-      network_config_monitor_->close();
-      network_config_monitor_.reset();
+    if (network_config_monitor_) {
+      if (!network_config_monitor_->open()) {
+        bool open_failed = false;
+#ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
+        if (DCPS_debug_level > 0) {
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) Service_Participant::network_config_monitor(). Creating NetworkConfigModifier\n")));
+        }
+        network_config_monitor_ = make_rch<NetworkConfigModifier>();
+        if (network_config_monitor_ && !network_config_monitor_->open()) {
+          open_failed = true;
+        }
+#else
+        open_failed = true;
+#endif
+        if (open_failed) {
+          ACE_ERROR((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR: Service_Participant::network_config_monitor could not open network config monitor\n")));
+          network_config_monitor_->close();
+          network_config_monitor_.reset();
+        }
+      }
     }
   }
 
@@ -2814,6 +2896,28 @@ void
 Service_Participant::bit_autopurge_disposed_samples_delay(const DDS::Duration_t& duration)
 {
   bit_autopurge_disposed_samples_delay_ = duration;
+}
+
+void
+Service_Participant::type_object_encoding(const char* encoding)
+{
+  struct NameValue {
+    const char* name;
+    TypeObjectEncoding value;
+  };
+  static const NameValue entries[] = {
+    {"Normal", Encoding_Normal},
+    {"WriteOldFormat", Encoding_WriteOldFormat},
+    {"ReadOldFormat", Encoding_ReadOldFormat},
+  };
+  for (size_t i = 0; i < sizeof entries / sizeof entries[0]; ++i) {
+    if (0 == std::strcmp(entries[i].name, encoding)) {
+      type_object_encoding(entries[i].value);
+      return;
+    }
+  }
+  ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Service_Participant::type_object_encoding: "
+             "invalid encoding %C\n", encoding));
 }
 
 } // namespace DCPS

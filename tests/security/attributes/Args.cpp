@@ -3,6 +3,7 @@
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/transport/framework/TransportConfig.h>
 #include <dds/DCPS/transport/framework/TransportInst.h>
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
 
 #include <ace/Argv_Type_Converter.h>
 #include <ace/Arg_Shifter.h>
@@ -11,9 +12,6 @@
 #include <ace/OS_NS_stdlib.h>
 
 #include <iostream>
-
-namespace SecurityAttributes
-{
 
 Args::Args()
  : auth_ca_file_("file:../../security/certs/opendds_identity_ca_cert.pem")
@@ -25,11 +23,13 @@ Args::Args()
  , domain_(0)
  , topic_name_("OD_OA_OM_OD")
  , reliable_(false)
- , wait_for_acks_(false)
  , num_messages_(DEFAULT_NUM_MESSAGES)
  , expected_result_(0)
  , timeout_(0)
  , extra_space_(0)
+ , secure_part_user_data_(false)
+ , expect_part_user_data_(false)
+ , expect_blank_part_user_data_(false)
 {
 }
 
@@ -48,6 +48,7 @@ int Args::parse_args(int argc, ACE_TCHAR* argv[], Args& args)
   ACE_Arg_Shifter arg_shifter(argc, argv);
 
   while (arg_shifter.is_anything_left()) {
+    const std::string arg = ACE_TEXT_ALWAYS_CHAR(arg_shifter.get_current());
     const ACE_TCHAR *currentArg = 0;
 
     if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-IdentityCA"))) != 0) {
@@ -78,14 +79,14 @@ int Args::parse_args(int argc, ACE_TCHAR* argv[], Args& args)
       args.topic_name_ = std::string("") + currentArg;
       arg_shifter.consume_arg();
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-Expected"))) != 0) {
-      if (currentArg != NULL && *currentArg == '~') {
+      if (currentArg && *currentArg == '~') {
         args.expected_result_ = -1 * ACE_OS::atoi(++currentArg);
       } else {
         args.expected_result_ = ACE_OS::atoi(currentArg);
       }
       arg_shifter.consume_arg();
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-Timeout"))) != 0) {
-      if (currentArg != NULL && *currentArg == '~') {
+      if (currentArg && *currentArg == '~') {
         args.timeout_ = -1 * ACE_OS::atoi(++currentArg);
       } else {
         args.timeout_ = ACE_OS::atoi(currentArg);
@@ -93,6 +94,15 @@ int Args::parse_args(int argc, ACE_TCHAR* argv[], Args& args)
       arg_shifter.consume_arg();
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-Partition"))) != 0) {
       args.partition_.push_back(ACE_TEXT_ALWAYS_CHAR(currentArg));
+      arg_shifter.consume_arg();
+    } else if (arg == "--secure-part-user-data") {
+      args.secure_part_user_data_ = true;
+      arg_shifter.consume_arg();
+    } else if (arg == "--expect-part-user-data") {
+      args.expect_part_user_data_ = true;
+      arg_shifter.consume_arg();
+    } else if (arg == "--expect-blank-part-user-data") {
+      args.expect_blank_part_user_data_ = true;
       arg_shifter.consume_arg();
     } else {
       arg_shifter.ignore_arg();
@@ -124,9 +134,6 @@ int Args::parse_args(int argc, ACE_TCHAR* argv[], Args& args)
       break;
     case 'r':
       args.reliable_ = true;
-      break;
-    case 'w':
-      args.wait_for_acks_ = true;
       break;
     case '?':
     default:
@@ -164,6 +171,14 @@ int Args::parse_args(int argc, ACE_TCHAR* argv[], Args& args)
     inst->thread_per_connection_ = true;
   }
 
+  if (args.secure_part_user_data_) {
+    using namespace OpenDDS;
+    RTPS::RtpsDiscovery_rch rtps_disc =
+      DCPS::dynamic_rchandle_cast<RTPS::RtpsDiscovery>(
+        TheServiceParticipant->get_discovery(args.domain_));
+    rtps_disc->secure_participant_user_data(true);
+  }
+
   return 0;
 }
 
@@ -175,6 +190,3 @@ void Args::partition_to_qos(DDS::PartitionQosPolicy& policy)
     policy.name[i] = partition_[i].c_str();
   }
 }
-
-}
-

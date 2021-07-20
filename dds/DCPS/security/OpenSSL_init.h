@@ -4,11 +4,11 @@
  */
 
 /**
- * This is seperate from OpenSSL_legacy.h to use in the SSL Unit Test Main.cpp
+ * This is separate from OpenSSL_legacy.h to use in the SSL Unit Test Main.cpp
  */
 
-#ifndef OPENSSL_INIT_H
-#define OPENSSL_INIT_H
+#ifndef OPENDDS_DCPS_SECURITY_OPENSSL_INIT_H
+#define OPENDDS_DCPS_SECURITY_OPENSSL_INIT_H
 
 #include <openssl/evp.h>
 

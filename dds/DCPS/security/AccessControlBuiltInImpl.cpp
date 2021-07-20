@@ -2,23 +2,23 @@
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
+
 #include "AccessControlBuiltInImpl.h"
+
 #include "CommonUtilities.h"
 #include "TokenWriter.h"
-
 #include "SSL/SubjectName.h"
 
-#include "dds/DdsDcpsInfrastructureC.h"
+#include <dds/DCPS/Service_Participant.h>
 
-#include "dds/DCPS/Service_Participant.h"
+#include <dds/DdsDcpsInfrastructureC.h>
 
-#include "ace/ACE.h"
-#include "ace/config-macros.h"
-#include "ace/OS_NS_strings.h"
-#include "ace/Reactor.h"
+#include <ace/ACE.h>
+#include <ace/config-macros.h>
+#include <ace/OS_NS_strings.h>
+#include <ace/Reactor.h>
 
 #include <time.h>
-
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -60,6 +60,12 @@ AccessControlBuiltInImpl::AccessControlBuiltInImpl()
 
 AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 {
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+               ACE_TEXT("AccessControlBuiltInImpl::~AccessControlBuiltInImpl local_ac_perms_ %B local_identity_map_ %B\n"),
+               local_ac_perms_.size(),
+               local_identity_map_.size()));
+  }
 }
 
 ::DDS::Security::PermissionsHandle AccessControlBuiltInImpl::validate_local_permissions(
@@ -158,7 +164,17 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   cache_this.local_access_credential_data = local_access_credential_data;
 
   local_ac_perms_.insert(std::make_pair(perm_handle, cache_this));
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+               ACE_TEXT("AccessControlBuiltInImpl::validate_local_permissions local_ac_perms_ (total %B)\n"),
+               local_ac_perms_.size()));
+  }
   local_identity_map_.insert(std::make_pair(identity, perm_handle));
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+               ACE_TEXT("AccessControlBuiltInImpl::validate_local_permissions local_identity_map_ (total %B)\n"),
+               local_identity_map_.size()));
+  }
 
   return perm_handle;
 }
@@ -270,6 +286,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   const int perm_handle = generate_handle();
   local_ac_perms_.insert(std::make_pair(perm_handle, cache_this));
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+               ACE_TEXT("AccessControlBuiltInImpl::validate_remote_permissions local_ac_perms_ (total %B)\n"),
+               local_ac_perms_.size()));
+  }
   return perm_handle;
 }
 
@@ -1094,6 +1115,13 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   local_ac_perms_.erase(ac_iter);
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+               ACE_TEXT("AccessControlBuiltInImpl::return_permissions_handle local_ac_perms_ (total %B)\n"),
+               local_ac_perms_.size()));
+  }
+  make_task(local_rp_task_)->erase(handle);
+  make_task(remote_rp_task_)->erase(handle);
 
   return true;
 }
@@ -1298,7 +1326,7 @@ AccessControlBuiltInImpl::make_task(RevokePermissionsTask_rch& task)
 }
 
 // NOTE: This function will return the time value as UTC
-// Format from DDS Security spec 1.1 is:
+// Format from DDS Security spec 1.1 is a kind of ISO 8601:
 //   CCYY-MM-DDThh:mm:ss[Z|(+|-)hh:mm]
 time_t AccessControlBuiltInImpl::convert_permissions_time(const std::string& timeString)
 {
@@ -1343,34 +1371,25 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(const std::string& tim
 
     // The only adjustments that need to be made are if the character
     // is a '+' or '-'
-    if (strcmp(temp_str.c_str(), "Z") == 0) {
-      //int hours_adj = 0;
-      //int mins_adj = 0;
-
+    if (temp_str == "Z") {
       temp_str.clear();
       temp_str = timeString.substr(20, 1);
 
-      if (strcmp(temp_str.c_str(), "+") == 0) {
+      if (temp_str == "+") {
         temp_str.clear();
         temp_str = timeString.substr(21, 2);
-        //hours_adj = atoi(temp_str.c_str());
         permission_tm.tm_hour -= atoi(temp_str.c_str());
         temp_str.clear();
         temp_str = timeString.substr(24, 2);
-        //mins_adj = atoi(temp_str.c_str());
         permission_tm.tm_min -= atoi(temp_str.c_str());
-        //permission_time_t -= (hours_adj + mins_adj);
       }
-      else if (strcmp(temp_str.c_str(), "-") == 0) {
+      else if (temp_str == "-") {
         temp_str.clear();
         temp_str = timeString.substr(21, 2);
-        //hours_adj = atoi(temp_str.c_str());
         permission_tm.tm_hour += atoi(temp_str.c_str());
         temp_str.clear();
         temp_str = timeString.substr(24, 2);
-        //mins_adj = atoi(temp_str.c_str());
         permission_tm.tm_min += atoi(temp_str.c_str());
-        //permission_time_t += (hours_adj + mins_adj);
       }
     }
 
@@ -1378,7 +1397,6 @@ time_t AccessControlBuiltInImpl::convert_permissions_time(const std::string& tim
 
   permission_tm.tm_isdst = -1;
 
-  //return permission_time_t;
   return mktime(&permission_tm);
 }
 
@@ -1491,7 +1509,9 @@ CORBA::Boolean AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::Per
 
       if (std::strcmp(topic_name, "DCPSParticipantSecure") == 0 ||
           std::strcmp(topic_name, "DCPSPublicationsSecure") == 0 ||
-          std::strcmp(topic_name, "DCPSSubscriptionsSecure") == 0) {
+          std::strcmp(topic_name, "DCPSSubscriptionsSecure") == 0 ||
+          std::strcmp(topic_name, "TypeLookupServiceRequestSecure") == 0 ||
+          std::strcmp(topic_name, "TypeLookupServiceReplySecure") == 0) {
         attributes.base.is_write_protected = false;
         attributes.base.is_read_protected = false;
         attributes.base.is_liveliness_protected = false;
@@ -1562,7 +1582,7 @@ CORBA::Boolean AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::Per
     }
   }
 
-  CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::get_datawriter_sec_attributes: Invalid topic name");
+  CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::get_sec_attributes: Invalid topic name");
   return false;
 }
 
@@ -1642,12 +1662,18 @@ AccessControlBuiltInImpl::RevokePermissionsTask::RevokePermissionsTask(DCPS::Rea
 
 AccessControlBuiltInImpl::RevokePermissionsTask::~RevokePermissionsTask()
 {
-  cancel_and_wait();
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+               ACE_TEXT("AccessControlBuiltInImpl::RevokePermissionsTask::~RevokePermissionsTask %@ handle_to_expiration_ %B expiration_to_handle_ %B\n"),
+               this,
+               handle_to_expiration_.size(),
+               expiration_to_handle_.size()));
+  }
 }
 
 namespace {
   // Some platforms cannot schedule timers far enough into the future
-  // to accomodate expiration times so the scheduling interval is
+  // to accommodate expiration times so the scheduling interval is
   // capped at an hour.
   const TimeDuration MAX_DURATION = TimeDuration(3600, 0);
 }
@@ -1658,6 +1684,10 @@ AccessControlBuiltInImpl::RevokePermissionsTask::insert(::DDS::Security::Permiss
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
+  if (handle_to_expiration_.count(pm_handle)) {
+    return;
+  }
+
   const time_t current_date_time = time(0);
   tm* current_time_tm = gmtime(&current_date_time);
   const time_t cur_utc_time = mktime(current_time_tm);
@@ -1665,8 +1695,22 @@ AccessControlBuiltInImpl::RevokePermissionsTask::insert(::DDS::Security::Permiss
 
   const bool empty_before = expiration_to_handle_.empty();
 
+  handle_to_expiration_[pm_handle] = expiration;
+
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+               ACE_TEXT("AccessControlBuiltInImpl::RevokePermissionsTask::insert handle_to_expiration_ (total %B)\n"),
+               handle_to_expiration_.size()));
+  }
+
   ExpirationToHandle::const_iterator pos =
     expiration_to_handle_.insert(ExpirationToHandle::value_type(expiration, pm_handle));
+
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+               ACE_TEXT("AccessControlBuiltInImpl::RevokePermissionsTask::insert expiration_to_handle_ (total %B)\n"),
+               expiration_to_handle_.size()));
+  }
 
   if (!empty_before && pos == expiration_to_handle_.begin()) {
     cancel();
@@ -1674,6 +1718,41 @@ AccessControlBuiltInImpl::RevokePermissionsTask::insert(::DDS::Security::Permiss
 
   if (pos == expiration_to_handle_.begin()) {
     schedule(duration);
+  }
+}
+
+void
+AccessControlBuiltInImpl::RevokePermissionsTask::erase(::DDS::Security::PermissionsHandle pm_handle)
+{
+  ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
+
+  HandleToExpiration::iterator iter = handle_to_expiration_.find(pm_handle);
+  if (iter == handle_to_expiration_.end()) {
+    return;
+  }
+
+  const time_t expiration = iter->second;
+
+  std::pair<ExpirationToHandle::iterator, ExpirationToHandle::iterator> er =
+    expiration_to_handle_.equal_range(expiration);
+  while (er.first != er.second) {
+    if (er.first->second == pm_handle) {
+      expiration_to_handle_.erase(er.first++);
+      if (DCPS::security_debug.bookkeeping) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                   ACE_TEXT("AccessControlBuiltInImpl::RevokePermissionsTask::erase expiration_to_handle_ (total %B)\n"),
+                   expiration_to_handle_.size()));
+      }
+    } else {
+      ++er.first;
+    }
+  }
+
+  handle_to_expiration_.erase(pm_handle);
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+               ACE_TEXT("AccessControlBuiltInImpl::RevokePermissionsTask::execute handle_to_expiration_ (total %B)\n"),
+               handle_to_expiration_.size()));
   }
 }
 
@@ -1695,6 +1774,11 @@ AccessControlBuiltInImpl::RevokePermissionsTask::execute(const DCPS::MonotonicTi
                  ACE_TEXT("pm_handle %d not found!\n"), pm_handle));
     }
     impl_.local_ac_perms_.erase(iter);
+    if (DCPS::security_debug.bookkeeping) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                 ACE_TEXT("AccessControlBuiltInImpl::RevokePermissionsTask::execute local_ac_perms_ (total %B)\n"),
+                 impl_.local_ac_perms_.size()));
+    }
 
     // If a listener exists, call on_revoke_permissions
     if (impl_.listener_ptr_ && !impl_.listener_ptr_->on_revoke_permissions(&impl_, pm_handle)) {
@@ -1707,7 +1791,19 @@ AccessControlBuiltInImpl::RevokePermissionsTask::execute(const DCPS::MonotonicTi
                  ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::execute: Completed...\n")));
     }
 
+    handle_to_expiration_.erase(pm_handle);
+    if (DCPS::security_debug.bookkeeping) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                 ACE_TEXT("AccessControlBuiltInImpl::RevokePermissionsTask::execute handle_to_expiration_ (total %B)\n"),
+                 handle_to_expiration_.size()));
+    }
+
     expiration_to_handle_.erase(pos++);
+    if (DCPS::security_debug.bookkeeping) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                 ACE_TEXT("AccessControlBuiltInImpl::RevokePermissionsTask::execute expiration_to_handle_ (total %B)\n"),
+                 expiration_to_handle_.size()));
+    }
   }
 
   if (!expiration_to_handle_.empty()) {

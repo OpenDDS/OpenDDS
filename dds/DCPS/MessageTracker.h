@@ -11,9 +11,9 @@
 #include "dcps_export.h"
 #include "PoolAllocator.h"
 #include "TimeTypes.h"
+#include "ConditionVariable.h"
 
 #include <ace/Thread_Mutex.h>
-#include <ace/Condition_Thread_Mutex.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -74,7 +74,8 @@ namespace DCPS {
     ACE_Thread_Mutex lock_;
 
     /// All messages have been transported condition variable.
-    ACE_Condition_Thread_Mutex done_condition_;
+    typedef ConditionVariable<ACE_Thread_Mutex> ConditionVariableType;
+    ConditionVariableType done_condition_;
   };
 
 } // namespace DCPS
@@ -83,4 +84,3 @@ namespace DCPS {
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif
-

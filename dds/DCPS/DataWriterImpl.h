@@ -5,17 +5,17 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_DATAWRITER_H
-#define OPENDDS_DCPS_DATAWRITER_H
+#ifndef OPENDDS_DCPS_DATAWRITERIMPL_H
+#define OPENDDS_DCPS_DATAWRITERIMPL_H
 
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsTopicC.h"
-#include "dds/DCPS/DataWriterCallbacks.h"
-#include "dds/DCPS/transport/framework/TransportSendListener.h"
-#include "dds/DCPS/transport/framework/TransportClient.h"
-#include "dds/DCPS/MessageTracker.h"
-#include "dds/DCPS/DataBlockLockPool.h"
-#include "dds/DCPS/PoolAllocator.h"
+#include "DataWriterCallbacks.h"
+#include "transport/framework/TransportSendListener.h"
+#include "transport/framework/TransportClient.h"
+#include "MessageTracker.h"
+#include "DataBlockLockPool.h"
+#include "PoolAllocator.h"
 #include "WriteDataContainer.h"
 #include "Definitions.h"
 #include "DataSampleHeader.h"
@@ -107,6 +107,10 @@ public:
     MonotonicTimePoint deadline() const {
       return tstamp_ + TimeDuration(max_wait_);
     }
+
+    bool deadline_is_infinite() const {
+      return max_wait_.sec == DDS::DURATION_INFINITE_SEC && max_wait_.nanosec == DDS::DURATION_INFINITE_NSEC;
+    }
   };
 
   DataWriterImpl();
@@ -173,8 +177,6 @@ public:
                                bool active);
 
   virtual void transport_assoc_done(int flags, const RepoId& remote_id);
-
-  virtual void association_complete(const RepoId& remote_id);
 
   virtual void remove_associations(const ReaderIdSeq & readers,
                                    bool callback);
@@ -428,7 +430,7 @@ public:
 
   /**
    * Set deadline to complete wait_pending by. If 0, then wait_pending will
-   * wait indefinately if needed.
+   * wait indefinitely if needed.
    */
   void set_wait_pending_deadline(const MonotonicTimePoint& deadline);
 
@@ -462,7 +464,12 @@ public:
     return this->publication_id_;
   }
 
+ SequenceNumber get_max_sn() const { return sequence_number_; }
+
 protected:
+
+  // Perform cast to get extended version of listener (otherwise nil)
+  DataWriterListener_ptr get_ext_listener();
 
   DDS::ReturnCode_t wait_for_specific_ack(const AckToken& token);
 
@@ -472,6 +479,11 @@ protected:
   virtual DDS::ReturnCode_t enable_specific() = 0;
 
   virtual const ValueWriterDispatcher* get_value_writer_dispatcher() const { return 0; }
+
+  /**
+   * Setup CDR serialization options in type-specific DataWrtier.
+   */
+  virtual DDS::ReturnCode_t setup_serialization() = 0;
 
   /// The number of chunks for the cached allocator.
   size_t                     n_chunks_;
@@ -564,6 +576,8 @@ private:
 
   void association_complete_i(const RepoId& remote_id);
 
+  void return_handle(DDS::InstanceHandle_t handle);
+
   friend class ::DDS_TEST; // allows tests to get at privates
 
 
@@ -577,6 +591,8 @@ private:
   /// The topic servant.
   TopicDescriptionPtr<TopicImpl>                 topic_servant_;
 
+  /// Mutex to protect listener info
+  ACE_Thread_Mutex                listener_mutex_;
   /// The StatusKind bit mask indicates which status condition change
   /// can be notified by the listener of this entity.
   DDS::StatusMask                 listener_mask_;
@@ -652,8 +668,6 @@ private:
   /// Flag indicates that this datawriter is a builtin topic
   /// datawriter.
   bool is_bit_;
-
-  RepoIdSet pending_readers_, assoc_complete_readers_;
 
   /// The cached available data while suspending and associated transaction ids.
   ACE_UINT64 min_suspended_transaction_id_;

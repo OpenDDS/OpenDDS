@@ -11,12 +11,12 @@
 #include "dcps_export.h"
 #include "ace/Time_Value.h"
 #include "dds/DdsDcpsInfrastructureC.h"
-#include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/ReactorInterceptor.h"
-#include "dds/DCPS/RepoIdTypes.h"
-#include "dds/DCPS/TimeTypes.h"
+#include "Definitions.h"
+#include "GuidUtils.h"
+#include "PoolAllocator.h"
+#include "ReactorInterceptor.h"
+#include "RepoIdTypes.h"
+#include "TimeTypes.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -115,12 +115,14 @@ public:
   /// Remove the instance immediately.
   void release();
 
-  /// tell this instance when a DataWriter transitions to NOT_ALIVE
-  void writer_became_dead(const PublicationId& writer_id,
-                          int num_alive_writers,
-                          const MonotonicTimePoint& when);
+  /// Returns true if the writer is a writer of this instance.
+  bool writes_instance(const PublicationId& writer_id) const
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
+    return writers_.count(writer_id);
+  }
 
-  WeakRcHandle<OpenDDS::DCPS::DataReaderImpl> data_reader() const;
+  WeakRcHandle<DataReaderImpl> data_reader() const;
 
   virtual int handle_timeout(const ACE_Time_Value& current_time,
                              const void* arg);

@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_THREADSYNCHRESOURCE_H
-#define OPENDDS_DCPS_THREADSYNCHRESOURCE_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_THREADSYNCHRESOURCE_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_THREADSYNCHRESOURCE_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/TimeTypes.h"

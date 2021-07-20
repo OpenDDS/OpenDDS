@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_TRANSPORTINST_H
-#define OPENDDS_DCPS_TRANSPORTINST_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTINST_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTINST_H
 
 #include <ace/config.h>
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -106,7 +106,7 @@ public:
   virtual bool is_reliable() const = 0;
 
   /// Does the transport require a CDR-encapsulated data payload?
-  virtual bool requires_cdr() const { return false; }
+  virtual bool requires_cdr_encapsulation() const { return false; }
 
   /// Populate a transport locator sequence.  Return the number of "locators."
   virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info, ConnectionInfoFlags flags) const = 0;

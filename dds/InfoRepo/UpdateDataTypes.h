@@ -124,7 +124,7 @@ struct ContentSubscriptionBin {
   BinSeq exprParams;
 };
 
-template <typename PSQ, typename RWQ, typename C, typename T, typename CSP>
+template <typename PSQ, typename RWQ, typename C, typename T, typename CSP, typename STI>
 struct ActorStrt {
   DomainIdType domainId;
   IdType       actorId;
@@ -135,7 +135,9 @@ struct ActorStrt {
   PSQ          pubsubQos;
   RWQ          drdwQos;
   T            transportInterfaceInfo;
+  ACE_CDR::ULong transportContext;
   CSP          contentSubscriptionProfile;
+  STI          serializedTypeInfo;
 
   ActorStrt(
     DomainIdType dom,
@@ -147,7 +149,9 @@ struct ActorStrt {
     PSQ          pub,
     RWQ          drdw,
     T            trans,
-    CSP          csProf)
+    ACE_CDR::ULong tContext,
+    CSP          csProf,
+    STI          sti)
     : domainId(dom),
       actorId(act),
       topicId(top),
@@ -157,7 +161,9 @@ struct ActorStrt {
       pubsubQos(pub),
       drdwQos(drdw),
       transportInterfaceInfo(trans),
-      contentSubscriptionProfile(csProf)
+      transportContext(tContext),
+      contentSubscriptionProfile(csProf),
+      serializedTypeInfo(sti)
     { };
 };
 typedef struct ActorStrt<
@@ -165,15 +171,18 @@ typedef struct ActorStrt<
       DDS::DataReaderQos&,
       std::string,
       OpenDDS::DCPS::TransportLocatorSeq&,
-      ContentSubscriptionInfo&> URActor;
+      ContentSubscriptionInfo&,
+      DDS::OctetSeq&> URActor;
 typedef struct ActorStrt<
       DDS::PublisherQos&,
       DDS::DataWriterQos&,
       std::string,
       OpenDDS::DCPS::TransportLocatorSeq&,
-      ContentSubscriptionInfo&> UWActor;
+      ContentSubscriptionInfo&,
+      DDS::OctetSeq&> UWActor;
 typedef struct ActorStrt<QosSeq, QosSeq, std::string,
-                         BinSeq, ContentSubscriptionBin> DActor;
+                         BinSeq, ContentSubscriptionBin,
+                         BinSeq> DActor;
 
 template <typename T, typename P, typename A, typename W>
 struct ImageData {

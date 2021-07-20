@@ -34,7 +34,7 @@ public:
     {
       if (OpenDDS::DCPS::DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) SubDriver::SubDriver \n")));
+                   ACE_TEXT("(%P|%t) SubDriver::SubDriver\n")));
       }
 
     }
@@ -43,7 +43,7 @@ public:
     {
       if (OpenDDS::DCPS::DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) SubDriver::~SubDriver \n")));
+                   ACE_TEXT("(%P|%t) SubDriver::~SubDriver\n")));
       }
     }
 
@@ -66,7 +66,7 @@ public:
     {
       if (OpenDDS::DCPS::DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) SubDriver::run \n")));
+               ACE_TEXT("(%P|%t) SubDriver::run\n")));
       }
 
       const std::string topic_name("topic_name");

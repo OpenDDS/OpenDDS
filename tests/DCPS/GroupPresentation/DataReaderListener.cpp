@@ -11,6 +11,7 @@
 #include <dds/DdsDcpsSubscriptionC.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/DCPS_Utils.h>
 
 #include "DataReaderListener.h"
 #include "MessengerTypeSupportC.h"
@@ -132,4 +133,3 @@ void DataReaderListenerImpl::on_sample_lost(
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_sample_lost()\n")));
 }
-

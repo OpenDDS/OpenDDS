@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_MULTICASTDATALINK_H
-#define DCPS_MULTICASTDATALINK_H
+#ifndef OPENDDS_DCPS_TRANSPORT_MULTICAST_MULTICASTDATALINK_H
+#define OPENDDS_DCPS_TRANSPORT_MULTICAST_MULTICASTDATALINK_H
 
 #include "Multicast_Export.h"
 
@@ -78,6 +78,15 @@ public:
   void sample_received(ReceivedDataSample& sample);
 
   bool reassemble(ReceivedDataSample& data, const TransportHeader& header);
+
+  int make_reservation(const RepoId& remote_publication_id,
+                       const RepoId& local_subscription_id,
+                       const TransportReceiveListener_wrch& receive_listener,
+                       bool reliable);
+  void release_reservations_i(const RepoId& remote_id,
+                              const RepoId& local_id);
+
+  void client_stop(const RepoId& localId);
 
 private:
 

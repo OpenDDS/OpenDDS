@@ -4,16 +4,16 @@
  */
 
 #include "langmap_generator.h"
+
 #include "field_info.h"
 #include "be_extern.h"
 
-#include "utl_identifier.h"
-
-#include "ace/Version.h"
-#include "ace/CDR_Base.h"
 #ifdef ACE_HAS_CDR_FIXED
-#include "ast_fixed.h"
+#  include <ast_fixed.h>
 #endif
+#include <utl_identifier.h>
+
+#include <ace/CDR_Base.h>
 
 #include <map>
 #include <iostream>
@@ -23,6 +23,8 @@ using namespace AstTypeClassification;
 struct GeneratorBase;
 
 namespace {
+  std::string string_ns = "::CORBA";
+
   GeneratorBase* generator_ = 0;
 
   std::map<AST_PredefinedType::PredefinedType, std::string> primtype_;
@@ -37,18 +39,26 @@ namespace {
   };
   std::map<Helper, std::string> helpers_;
 
-  std::string exporter() {
+  std::string exporter()
+  {
     return be_global->export_macro().empty() ? ""
       : be_global->export_macro().c_str() + std::string(" ");
   }
 
-  std::string array_dims(AST_Type* type, ACE_CDR::ULong& elems) {
-    AST_Array* const arr = dynamic_cast<AST_Array*>(type);
-    std::string ret;
-    for (ACE_CDR::ULong dim = 0; dim < arr->n_dims(); ++dim) {
-      elems *= arr->dims()[dim]->ev()->u.ulval;
-      if (dim) ret += "[0]";
+  std::string array_zero_indices(AST_Array* arr)
+  {
+    std::string indices;
+    for (ACE_CDR::ULong i = 1; i < arr->n_dims(); ++i) {
+      indices += "[0]";
     }
+    return indices;
+  }
+
+  std::string array_dims(AST_Type* type, ACE_CDR::ULong& elems)
+  {
+    AST_Array* const arr = dynamic_cast<AST_Array*>(type);
+    std::string ret = array_zero_indices(arr);
+    elems *= array_element_count(arr);
     AST_Type* base = resolveActualType(arr->base_type());
     if (dynamic_cast<AST_Array*>(base)) {
       ret += "[0]" + array_dims(base, elems);
@@ -58,7 +68,7 @@ namespace {
 
   void gen_typecode(UTL_ScopedName* name)
   {
-    if (be_global->suppress_typecode()) {
+    if (be_global->suppress_typecode() || be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
       return;
     }
     const char* const nm = name->last_component()->get_string();
@@ -122,8 +132,9 @@ struct GeneratorBase
   std::string map_type(AST_Expression::ExprType type)
   {
     AST_PredefinedType::PredefinedType pt = AST_PredefinedType::PT_void;
-    switch (type)
-    {
+    switch (type) {
+    case AST_Expression::EV_int8: pt = AST_PredefinedType::PT_int8; break;
+    case AST_Expression::EV_uint8: pt = AST_PredefinedType::PT_uint8; break;
     case AST_Expression::EV_short: pt = AST_PredefinedType::PT_short; break;
     case AST_Expression::EV_ushort: pt = AST_PredefinedType::PT_ushort; break;
     case AST_Expression::EV_long: pt = AST_PredefinedType::PT_long; break;
@@ -144,7 +155,8 @@ struct GeneratorBase
       be_global->add_include("FACE/Fixed.h", BE_GlobalData::STREAM_LANG_H);
       return helpers_[HLP_FIXED_CONSTANT];
 #endif
-    default: break;
+    default:
+      be_util::misc_error_and_abort("Unhandled ExprType value in map_type");
     }
 
     if (type == AST_Expression::EV_string || type == AST_Expression::EV_wstring)
@@ -198,6 +210,12 @@ struct GeneratorBase
 
     switch (the_union->udisc_type ())
       {
+      case AST_Expression::EV_int8:
+        first_label << signed(dv.u.char_val);
+        break;
+      case AST_Expression::EV_uint8:
+        first_label << unsigned(dv.u.char_val);
+        break;
       case AST_Expression::EV_short:
         first_label << dv.u.short_val;
         break;
@@ -255,8 +273,7 @@ struct GeneratorBase
         first_label << dv.u.ulonglong_val;
         break;
       default:
-        std::cerr << "Illegal discriminator for union\n";
-        break;
+        be_util::misc_error_and_abort("Unhandled ExprType value in generateDefaultValue");
       }
 
     return first_label.str();
@@ -312,12 +329,12 @@ struct GeneratorBase
           "  }\n"
           "  void " << field_name << " (const " << primtype << "* x) {\n"
           "    _reset();\n"
-          "    this->_u." << field_name << " = ::CORBA::string_dup(x);\n"
+          "    this->_u." << field_name << " = " << string_ns << "::string_dup(x);\n"
           "    _discriminator = " << first_label.str() << ";\n"
           "  }\n"
           "  void " << field_name << " (const " << helper << "& x) {\n"
           "    _reset();\n" <<
-          "    this->_u." << field_name << " = ::CORBA::string_dup(x.in());\n"
+          "    this->_u." << field_name << " = " << string_ns << "::string_dup(x.in());\n"
           "    _discriminator = " << first_label.str() << ";\n"
           "  }\n"
           "  const " << primtype << "* " << field_name << " () const {\n"
@@ -411,9 +428,9 @@ struct GeneratorBase
     }
   }
 
-  static std::string generateCopyCtor(const std::string& name, AST_Type* field_type,
-                                      const std::string&, std::string&,
-                                      const std::string&)
+  static std::string generateCopyCtor(const std::string&, const std::string& name, AST_Type* field_type,
+                                      const std::string&, bool, Intro&,
+                                      const std::string&, bool)
   {
     std::stringstream ss;
     AST_Type* actual_field_type = resolveActualType(field_type);
@@ -424,7 +441,7 @@ struct GeneratorBase
         "    this->_u." << name << " = other._u." << name << ";\n";
     } else if (cls & CL_STRING) {
       ss <<
-        "    this->_u." << name << " = (other._u." << name << ") ? ::CORBA::string_dup(other._u." << name << ") : 0 ;\n";
+        "    this->_u." << name << " = (other._u." << name << ") ? " << string_ns << "::string_dup(other._u." << name << ") : 0 ;\n";
     } else if (cls & CL_ARRAY) {
       ss <<
         "    this->_u." << name << " = (other._u." << name << ") ? " << lang_field_type << "_dup(other._u." << name << ") : 0 ;\n";
@@ -438,9 +455,9 @@ struct GeneratorBase
     return ss.str();
   }
 
-  static std::string generateAssign(const std::string& name, AST_Type* field_type,
-                                    const std::string&, std::string&,
-                                    const std::string&)
+  static std::string generateAssign(const std::string&, const std::string& name, AST_Type* field_type,
+                                    const std::string&, bool, Intro&,
+                                    const std::string&, bool)
   {
     std::stringstream ss;
     AST_Type* actual_field_type = resolveActualType(field_type);
@@ -451,7 +468,7 @@ struct GeneratorBase
         "    this->_u." << name << " = other._u." << name << ";\n";
     } else if (cls & CL_STRING) {
       ss <<
-        "    this->_u." << name << " = (other._u." << name << ") ? ::CORBA::string_dup(other._u." << name << ") : 0 ;\n";
+        "    this->_u." << name << " = (other._u." << name << ") ? " << string_ns << "::string_dup(other._u." << name << ") : 0 ;\n";
     } else if (cls & CL_ARRAY) {
       ss <<
         "    this->_u." << name << " = (other._u." << name << ") ? " << lang_field_type << "_dup(other._u." << name << ") : 0 ;\n";
@@ -465,9 +482,9 @@ struct GeneratorBase
     return ss.str();
   }
 
-  static std::string generateEqual(const std::string& name, AST_Type* field_type,
-                                   const std::string&, std::string&,
-                                   const std::string&)
+  static std::string generateEqual(const std::string&, const std::string& name, AST_Type* field_type,
+                                   const std::string&, bool, Intro&,
+                                   const std::string&, bool)
   {
     std::stringstream ss;
 
@@ -493,9 +510,9 @@ struct GeneratorBase
     return ss.str();
   }
 
-  static std::string generateReset(const std::string& name, AST_Type* field_type,
-                                   const std::string&, std::string&,
-                                   const std::string&)
+  static std::string generateReset(const std::string&, const std::string& name, AST_Type* field_type,
+                                   const std::string&, bool, Intro&,
+                                   const std::string&, bool)
   {
     std::stringstream ss;
 
@@ -505,7 +522,7 @@ struct GeneratorBase
       // Do nothing.
     } else if (cls & CL_STRING) {
       ss <<
-        "    ::CORBA::string_free(this->_u." << name << ");\n"
+        "    " << string_ns << "::string_free(this->_u." << name << ");\n"
         "    this->_u." << name << " = 0;\n";
     } else if (cls & CL_ARRAY) {
       ss <<
@@ -530,7 +547,7 @@ struct GeneratorBase
     struct_decls(name, u->size_type(), "class");
     be_global->lang_header_ <<
       "\n"
-      "class " << exporter() << nm << " \n"
+      "class " << exporter() << nm << "\n"
       "{\n"
       " public:\n"
       "  typedef " << nm << "_var _var_type;\n"
@@ -589,7 +606,7 @@ struct GeneratorBase
         nm << "::" << nm << "(const " << nm << "& other)\n"
         "{\n"
         "  this->_discriminator = other._discriminator;\n";
-      generateSwitchForUnion("this->_discriminator", generateCopyCtor, branches, discriminator, "", "", "", false, false);
+      generateSwitchForUnion(u, "this->_discriminator", generateCopyCtor, branches, discriminator, "", "", "", false, false);
       be_global->impl_ <<
         "}\n\n";
 
@@ -601,7 +618,7 @@ struct GeneratorBase
         "  }\n\n"
         "  _reset();\n"
         "  this->_discriminator = other._discriminator;\n";
-      generateSwitchForUnion("this->_discriminator", generateAssign, branches, discriminator, "", "", "", false, false);
+      generateSwitchForUnion(u, "this->_discriminator", generateAssign, branches, discriminator, "", "", "", false, false);
       be_global->impl_ <<
         "  return *this;\n"
         "}\n\n";
@@ -610,7 +627,7 @@ struct GeneratorBase
         "bool " << nm << "::operator==(const " << nm << "& rhs) const\n"
         "{\n"
         "  if (this->_discriminator != rhs._discriminator) return false;\n";
-      if (generateSwitchForUnion("this->_discriminator", generateEqual, branches, discriminator, "", "", "", false, false)) {
+      if (generateSwitchForUnion(u, "this->_discriminator", generateEqual, branches, discriminator, "", "", "", false, false)) {
         be_global->impl_ <<
           "  return false;\n";
       }
@@ -620,7 +637,7 @@ struct GeneratorBase
       be_global->impl_ <<
         "void " << nm << "::_reset()\n"
         "{\n";
-      generateSwitchForUnion("this->_discriminator", generateReset, branches, discriminator, "", "", "", false, false);
+      generateSwitchForUnion(u, "this->_discriminator", generateReset, branches, discriminator, "", "", "", false, false);
       be_global->impl_ <<
         "}\n\n";
 
@@ -647,13 +664,12 @@ struct GeneratorBase
       forany = HLP_ARR_FORANY;
 
     std::ostringstream bound, nofirst, total;
-    std::string zeros;
+    const std::string zeros = array_zero_indices(arr);
     for (ACE_CDR::ULong dim = 0; dim < arr->n_dims(); ++dim) {
       const ACE_CDR::ULong extent = arr->dims()[dim]->ev()->u.ulval;
       bound << '[' << extent << ']';
       if (dim) {
         nofirst << '[' << extent << ']';
-        zeros += "[0]";
         total << " * ";
       }
       total << extent;
@@ -787,8 +803,7 @@ struct GeneratorBase
   virtual void gen_array_traits(UTL_ScopedName* tdname, AST_Array* arr)
   {
     const std::string nm = scoped(tdname);
-    std::string zeros;
-    for (ACE_CDR::ULong i = 1; i < arr->n_dims(); ++i) zeros += "[0]";
+    const std::string zeros = array_zero_indices(arr);
     be_global->lang_header_ <<
       "TAO_BEGIN_VERSIONED_NAMESPACE_DECL\nnamespace TAO {\n"
       "template <>\n"
@@ -1102,6 +1117,8 @@ struct SafetyProfileGenerator : GeneratorBase
     primtype_[AST_PredefinedType::PT_ulonglong] = "CORBA::UnsignedLongLong";
     primtype_[AST_PredefinedType::PT_short] = "CORBA::Short";
     primtype_[AST_PredefinedType::PT_ushort] = "CORBA::UShort";
+    primtype_[AST_PredefinedType::PT_int8] = "CORBA::Int8";
+    primtype_[AST_PredefinedType::PT_uint8] = "CORBA::UInt8";
     primtype_[AST_PredefinedType::PT_float] = "CORBA::Float";
     primtype_[AST_PredefinedType::PT_double] = "CORBA::Double";
     primtype_[AST_PredefinedType::PT_longdouble] = "CORBA::LongDouble";
@@ -1220,7 +1237,7 @@ struct SafetyProfileGenerator : GeneratorBase
     struct_decls(name, size);
     be_global->lang_header_ <<
       "\n"
-      "struct " << exporter() << nm << " \n"
+      "struct " << exporter() << nm << "\n"
       "{\n"
       "  typedef " << nm << "_var _var_type;\n"
       "  typedef " << nm << "_out _out_type;\n\n";
@@ -1333,6 +1350,8 @@ struct Cxx11Generator : GeneratorBase
     primtype_[AST_PredefinedType::PT_ulonglong] = "uint64_t";
     primtype_[AST_PredefinedType::PT_short] = "int16_t";
     primtype_[AST_PredefinedType::PT_ushort] = "uint16_t";
+    primtype_[AST_PredefinedType::PT_int8] = "int8_t";
+    primtype_[AST_PredefinedType::PT_uint8] = "uint8_t";
     primtype_[AST_PredefinedType::PT_float] = "float";
     primtype_[AST_PredefinedType::PT_double] = "double";
     primtype_[AST_PredefinedType::PT_longdouble] = "long double";
@@ -1360,6 +1379,15 @@ struct Cxx11Generator : GeneratorBase
     helpers_[HLP_ARR_FORANY] = "<<array forany>>";
     helpers_[HLP_FIXED] = "IDL::Fixed_T";
     helpers_[HLP_FIXED_CONSTANT] = "IDL::Fixed_T";
+  }
+
+  static void gen_typecode_ptrs(const std::string& type)
+  {
+    if (!be_global->suppress_typecode()) {
+      be_global->add_include("tao/Basic_Types.h", BE_GlobalData::STREAM_LANG_H);
+      be_global->lang_header_ << "extern const ::CORBA::TypeCode_ptr _tc_" << type << ";\n";
+      be_global->impl_ << "const ::CORBA::TypeCode_ptr _tc_" << type << " = nullptr;\n";
+    }
   }
 
   std::string map_type_string(AST_PredefinedType::PredefinedType chartype, bool)
@@ -1518,7 +1546,6 @@ struct Cxx11Generator : GeneratorBase
       if (i < fields.size() - 1) init_list += "\n  , ";
       swaps += "  swap(lhs._" + fn + ", rhs._" + fn + ");\n";
     }
-
     be_global->lang_header_ << ";\n\n";
     be_global->impl_ << "\n  : " << init_list << "\n{}\n\n";
 
@@ -1528,6 +1555,7 @@ struct Cxx11Generator : GeneratorBase
       "{\n"
       "  using std::swap;\n"
       << swaps << "}\n\n";
+    gen_typecode_ptrs(nm);
     return true;
   }
 
@@ -1594,37 +1622,37 @@ struct Cxx11Generator : GeneratorBase
     }
   }
 
-  static std::string union_copy(const std::string& name, AST_Type*,
-                                const std::string&, std::string&,
-                                const std::string&)
+  static std::string union_copy(const std::string&, const std::string& name, AST_Type*,
+                                const std::string&, bool, Intro&,
+                                const std::string&, bool)
   {
     return "    _" + name + " = rhs._" + name + ";\n";
   }
 
-  static std::string union_move(const std::string& name, AST_Type*,
-                                const std::string&, std::string&,
-                                const std::string&)
+  static std::string union_move(const std::string&, const std::string& name, AST_Type*,
+                                const std::string&, bool, Intro&,
+                                const std::string&, bool)
   {
     return "    _" + name + " = std::move(rhs._" + name + ");\n";
   }
 
-  static std::string union_assign(const std::string& name, AST_Type*,
-                                  const std::string&, std::string&,
-                                  const std::string&)
+  static std::string union_assign(const std::string&, const std::string& name, AST_Type*,
+                                  const std::string&, bool, Intro&,
+                                  const std::string&, bool)
   {
     return "    " + name + "(rhs._" + name + ");\n";
   }
 
-  static std::string union_move_assign(const std::string& name, AST_Type*,
-                                       const std::string&, std::string&,
-                                       const std::string&)
+  static std::string union_move_assign(const std::string&, const std::string& name, AST_Type*,
+                                       const std::string&, bool, Intro&,
+                                       const std::string&, bool)
   {
     return "    " + name + "(std::move(rhs._" + name + "));\n";
   }
 
-  static std::string union_activate(const std::string& name, AST_Type* type,
-                                    const std::string&, std::string&,
-                                    const std::string&)
+  static std::string union_activate(const std::string&, const std::string& name, AST_Type* type,
+                                    const std::string&, bool, Intro&,
+                                    const std::string&, bool)
   {
     AST_Type* actual_field_type = resolveActualType(type);
     const std::string lang_field_type = generator_->map_type(type);
@@ -1635,9 +1663,9 @@ struct Cxx11Generator : GeneratorBase
     return "";
   }
 
-  static std::string union_reset(const std::string& name, AST_Type* type,
-                                 const std::string&, std::string&,
-                                 const std::string&)
+  static std::string union_reset(const std::string&, const std::string& name, AST_Type* type,
+                                 const std::string&, bool, Intro&,
+                                 const std::string&, bool)
   {
     AST_Type* actual_field_type = resolveActualType(type);
     const std::string lang_field_type = generator_->map_type(type);
@@ -1699,13 +1727,13 @@ struct Cxx11Generator : GeneratorBase
       nm << "::" << nm << "(const " << nm << "& rhs)\n"
       "{\n"
       "  _activate(rhs._disc);\n";
-    generateSwitchForUnion("_disc", union_copy, branches, discriminator, "", "", "", false, false);
+    generateSwitchForUnion(u, "_disc", union_copy, branches, discriminator, "", "", "", false, false);
     be_global->impl_ <<
       "}\n\n" <<
       nm << "::" << nm << '(' << nm << "&& rhs)\n"
       "{\n"
       "  _activate(rhs._disc);\n";
-    generateSwitchForUnion("_disc", union_move, branches, discriminator, "", "", "", false, false);
+    generateSwitchForUnion(u, "_disc", union_move, branches, discriminator, "", "", "", false, false);
     be_global->impl_ <<
       "}\n\n" <<
       nm << "& " << nm << "::operator=(const " << nm << "& rhs)\n"
@@ -1713,7 +1741,7 @@ struct Cxx11Generator : GeneratorBase
       "  if (this == &rhs) {\n"
       "    return *this;\n"
       "  }\n";
-    generateSwitchForUnion("rhs._disc", union_assign, branches, discriminator, "", "", "", false, false);
+    generateSwitchForUnion(u, "rhs._disc", union_assign, branches, discriminator, "", "", "", false, false);
     be_global->impl_ <<
       "  _disc = rhs._disc;\n"
       "  return *this;\n"
@@ -1723,7 +1751,7 @@ struct Cxx11Generator : GeneratorBase
       "  if (this == &rhs) {\n"
       "    return *this;\n"
       "  }\n";
-    generateSwitchForUnion("rhs._disc", union_move_assign, branches, discriminator, "", "", "", false, false);
+    generateSwitchForUnion(u, "rhs._disc", union_move_assign, branches, discriminator, "", "", "", false, false);
     be_global->impl_ <<
       "  _disc = rhs._disc;\n"
       "  return *this;\n"
@@ -1733,7 +1761,7 @@ struct Cxx11Generator : GeneratorBase
       "  if (_set && d != _disc) {\n"
       "    _reset();\n"
       "  }\n";
-    generateSwitchForUnion("d", union_activate, branches, discriminator, "", "", "", false, false);
+    generateSwitchForUnion(u, "d", union_activate, branches, discriminator, "", "", "", false, false);
     be_global->impl_ <<
       "  _set = true;\n"
       "  _disc = d;\n"
@@ -1741,7 +1769,7 @@ struct Cxx11Generator : GeneratorBase
       "void " << nm << "::_reset()\n"
       "{\n"
       "  if (!_set) return;\n";
-    generateSwitchForUnion("_disc", union_reset, branches, discriminator, "", "", "", false, false);
+    generateSwitchForUnion(u, "_disc", union_reset, branches, discriminator, "", "", "", false, false);
     be_global->impl_ <<
       "  _set = false;\n"
       "}\n\n"
@@ -1750,6 +1778,7 @@ struct Cxx11Generator : GeneratorBase
       "  std::swap(lhs, rhs);\n"
       "}\n\n";
 
+    gen_typecode_ptrs(nm);
     return true;
   }
 
@@ -1761,14 +1790,17 @@ void langmap_generator::init()
 {
   switch (be_global->language_mapping()) {
   case BE_GlobalData::LANGMAP_FACE_CXX:
+    string_ns = "::FACE";
     generator_ = &FaceGenerator::instance;
     generator_->init();
     break;
   case BE_GlobalData::LANGMAP_SP_CXX:
+    string_ns = "::CORBA";
     generator_ = &SafetyProfileGenerator::instance;
     generator_->init();
     break;
   case BE_GlobalData::LANGMAP_CXX11:
+    string_ns = "::CORBA";
     generator_ = &Cxx11Generator::instance;
     generator_->init();
     break;
@@ -1795,7 +1827,7 @@ bool langmap_generator::gen_const(UTL_ScopedName* name, bool,
       be_global->lang_header_ << type_name << "::"
         << to_string(enumerator->last_component()) << ";\n";
     } else {
-      be_global->lang_header_ << scoped(enumerator) << ";\n";
+      be_global->lang_header_ << dds_generator::scoped_helper(enumerator, "::") << ";\n";
     }
   } else {
     be_global->lang_header_ << *constant->constant_value()->ev() << ";\n";
@@ -1881,8 +1913,14 @@ bool langmap_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
       return false;
 # endif
     default:
-      be_global->lang_header_ <<
-        "typedef " << generator_->map_type(base) << ' ' << nm << ";\n";
+      if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
+        be_global->lang_header_ <<
+          "using "  << nm << " = " << generator_->map_type(base) << ";\n";
+      } else {
+        be_global->lang_header_ <<
+          "typedef " << generator_->map_type(base) << ' ' << nm << ";\n";
+      }
+
       generator_->gen_typedef_varout(nm, base);
 
       AST_Type* actual_base = resolveActualType(base);

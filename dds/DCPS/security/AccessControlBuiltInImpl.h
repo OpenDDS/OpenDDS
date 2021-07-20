@@ -5,31 +5,31 @@
  * See: http://www.OpenDDS.org/license.html
  */
 
+#ifndef OPENDDS_DCPS_SECURITY_ACCESSCONTROLBUILTINIMPL_H
+#define OPENDDS_DCPS_SECURITY_ACCESSCONTROLBUILTINIMPL_H
 
+#include "OpenDDS_Security_Export.h"
+#include "AccessControl/LocalAccessCredentialData.h"
+#include "AccessControl/Governance.h"
+#include "AccessControl/Permissions.h"
+#include "SSL/SubjectName.h"
 
-#ifndef DDS_ACCESS_CONTROL_BUILTIN_IMPL_H
-#define DDS_ACCESS_CONTROL_BUILTIN_IMPL_H
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/TimeTypes.h>
+#include <dds/DCPS/SporadicTask.h>
+#include <dds/Versioned_Namespace.h>
 
-#include "dds/DCPS/security/DdsSecurity_Export.h"
-#include "dds/DdsSecurityCoreC.h"
-#include "dds/Versioned_Namespace.h"
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/TimeTypes.h"
-#include "dds/DCPS/SporadicTask.h"
+#include <dds/DdsSecurityCoreC.h>
 
-#include "ace/Thread_Mutex.h"
-#include "ace/Reactor.h"
+#include <ace/Thread_Mutex.h>
+#include <ace/Reactor.h>
+
 #include <map>
 #include <set>
 #include <list>
 #include <vector>
 #include <string>
 #include <memory>
-
-#include "AccessControl/LocalAccessCredentialData.h"
-#include "AccessControl/Governance.h"
-#include "AccessControl/Permissions.h"
-#include "SSL/SubjectName.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -52,7 +52,7 @@ namespace Security {
 * the interface this class is implementing.
 *
 */
-class DdsSecurity_Export AccessControlBuiltInImpl
+class OpenDDS_Security_Export AccessControlBuiltInImpl
   : public virtual DDS::Security::AccessControl {
 public:
   AccessControlBuiltInImpl();
@@ -237,6 +237,8 @@ public:
 
   static bool pattern_match(const char* string, const char* pattern);
 
+  static time_t convert_permissions_time(const std::string& timeString);
+
 private:
 
   AccessControlBuiltInImpl(const AccessControlBuiltInImpl&);
@@ -263,8 +265,10 @@ private:
                           AccessControlBuiltInImpl& impl);
     virtual ~RevokePermissionsTask();
     void insert(DDS::Security::PermissionsHandle pm_handle, const time_t& expiration);
+    void erase(DDS::Security::PermissionsHandle pm_handle);
 
   private:
+    typedef OPENDDS_MAP(DDS::Security::PermissionsHandle, time_t) HandleToExpiration;
     typedef OPENDDS_MULTIMAP(time_t, DDS::Security::PermissionsHandle) ExpirationToHandle;
 
     virtual void execute(const DCPS::MonotonicTimePoint& now);
@@ -272,6 +276,7 @@ private:
     AccessControlBuiltInImpl& impl_;
 
     mutable ACE_Thread_Mutex lock_;
+    HandleToExpiration handle_to_expiration_;
     ExpirationToHandle expiration_to_handle_;
   };
   typedef DCPS::RcHandle<RevokePermissionsTask> RevokePermissionsTask_rch;
@@ -289,8 +294,6 @@ private:
   DDS::Security::AccessControlListener_ptr listener_ptr_;
 
   RevokePermissionsTask_rch& make_task(RevokePermissionsTask_rch& task);
-
-  time_t convert_permissions_time(const std::string& timeString);
 
   bool validate_date_time(const Permissions::Validity_t& validity,
                           time_t& expiration,
@@ -322,4 +325,4 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif
+#endif // OPENDDS_DCPS_SECURITY_ACCESSCONTROLBUILTINIMPL_H

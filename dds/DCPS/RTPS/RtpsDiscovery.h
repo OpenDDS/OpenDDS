@@ -5,18 +5,18 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_RTPS_RTPSDISCOVERY_H
-#define OPENDDS_RTPS_RTPSDISCOVERY_H
+#ifndef OPENDDS_DCPS_RTPS_RTPSDISCOVERY_H
+#define OPENDDS_DCPS_RTPS_RTPSDISCOVERY_H
 
 
-#include "dds/DCPS/DiscoveryBase.h"
-#include "dds/DCPS/RTPS/GuidGenerator.h"
-#include "dds/DCPS/RTPS/Spdp.h"
+#include "GuidGenerator.h"
+#include "Spdp.h"
 #include "rtps_export.h"
 
-#include "ace/Configuration.h"
+#include <dds/DCPS/DiscoveryBase.h>
+#include <dds/DCPS/PoolAllocator.h>
 
-#include "dds/DCPS/PoolAllocator.h"
+#include <ace/Configuration.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -30,6 +30,9 @@ namespace OpenDDS {
 namespace RTPS {
 
 const char RTPS_DISCOVERY_ENDPOINT_ANNOUNCEMENTS[] = "OpenDDS.RtpsDiscovery.EndpointAnnouncements";
+const char RTPS_DISCOVERY_TYPE_LOOKUP_SERVICE[] = "OpenDDS.RtpsDiscovery.TypeLookupService";
+const char RTPS_RELAY_APPLICATION_PARTICIPANT[] = "OpenDDS.Rtps.RelayApplicationParticipant";
+const char RTPS_REFLECT_HEARTBEAT_COUNT[] = "OpenDDS.Rtps.ReflectHeartbeatCount";
 
 class OpenDDS_Rtps_Export RtpsDiscoveryConfig : public OpenDDS::DCPS::RcObject {
 public:
@@ -58,7 +61,6 @@ public:
     ACE_Guard<ACE_Thread_Mutex> g(lock_);
     quick_resend_ratio_ = ratio;
   }
-
   DCPS::TimeDuration min_resend_delay() const
   {
     ACE_Guard<ACE_Thread_Mutex> g(lock_);
@@ -173,6 +175,21 @@ public:
     }
   }
 
+  ACE_INET_Addr sedp_advertised_address() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
+    return sedp_advertised_address_;
+  }
+  void sedp_advertised_address(const ACE_INET_Addr& mi)
+  {
+    if (mi.get_type() == AF_INET) {
+      ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+      sedp_advertised_address_ = mi;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsDiscoveryConfig::sedp_local_address set failed because address family is not AF_INET\n")));
+    }
+  }
+
   ACE_INET_Addr spdp_local_address() const
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
@@ -253,6 +270,21 @@ public:
       ipv6_sedp_local_address_ = mi;
     } else {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsDiscoveryConfig::ipv6_sedp_local_address set failed because address family is not AF_INET6\n")));
+    }
+  }
+
+  ACE_INET_Addr ipv6_sedp_advertised_address() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
+    return ipv6_sedp_advertised_address_;
+  }
+  void ipv6_sedp_advertised_address(const ACE_INET_Addr& mi)
+  {
+    if (mi.get_type() == AF_INET6) {
+      ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+      ipv6_sedp_advertised_address_ = mi;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsDiscoveryConfig::ipv6_sedp_advertised_address set failed because address family is not AF_INET6\n")));
     }
   }
 
@@ -459,6 +491,105 @@ public:
     periodic_directed_spdp_ = value;
   }
 
+  bool secure_participant_user_data() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
+    return secure_participant_user_data_;
+  }
+  void secure_participant_user_data(bool value)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    secure_participant_user_data_ = value;
+  }
+
+  DCPS::TimeDuration max_type_lookup_service_reply_period() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::TimeDuration());
+    return max_type_lookup_service_reply_period_;
+  }
+  void max_type_lookup_service_reply_period(const DCPS::TimeDuration& x)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    max_type_lookup_service_reply_period_ = x;
+  }
+
+  bool use_xtypes() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
+    return use_xtypes_;
+  }
+  void use_xtypes(bool use_xtypes)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    use_xtypes_ = use_xtypes;
+  }
+
+  DCPS::TimeDuration sedp_heartbeat_period() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::TimeDuration());
+    return sedp_heartbeat_period_;
+  }
+  void sedp_heartbeat_period(const DCPS::TimeDuration& period)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    sedp_heartbeat_period_ = period;
+  }
+
+  DCPS::TimeDuration sedp_nak_response_delay() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::TimeDuration());
+    return sedp_nak_response_delay_;
+  }
+  void sedp_nak_response_delay(const DCPS::TimeDuration& period)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    sedp_nak_response_delay_ = period;
+  }
+
+  DCPS::TimeDuration sedp_send_delay() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::TimeDuration());
+    return sedp_send_delay_;
+  }
+  void sedp_send_delay(const DCPS::TimeDuration& period)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    sedp_send_delay_ = period;
+  }
+
+  DCPS::TimeDuration sedp_passive_connect_duration() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::TimeDuration());
+    return sedp_passive_connect_duration_;
+  }
+  void sedp_passive_connect_duration(const DCPS::TimeDuration& period)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    sedp_passive_connect_duration_ = period;
+  }
+
+  CORBA::ULong participant_flags() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, 0);
+    return participant_flags_;
+  }
+  void participant_flags(CORBA::ULong participant_flags)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    participant_flags_ = participant_flags;
+  }
+
+  bool sedp_responsive_mode() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
+    return sedp_responsive_mode_;
+  }
+  void sedp_responsive_mode(bool sedp_responsive_mode)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    sedp_responsive_mode_ = sedp_responsive_mode;
+  }
+
 private:
   mutable ACE_Thread_Mutex lock_;
   DCPS::TimeDuration resend_period_;
@@ -469,10 +600,10 @@ private:
   unsigned char ttl_;
   bool sedp_multicast_;
   OPENDDS_STRING multicast_interface_;
-  ACE_INET_Addr sedp_local_address_, spdp_local_address_;
+  ACE_INET_Addr sedp_local_address_, sedp_advertised_address_, spdp_local_address_;
   ACE_INET_Addr default_multicast_group_;  /// FUTURE: handle > 1 group.
 #ifdef ACE_HAS_IPV6
-  ACE_INET_Addr ipv6_sedp_local_address_, ipv6_spdp_local_address_;
+  ACE_INET_Addr ipv6_sedp_local_address_, ipv6_sedp_advertised_address_, ipv6_spdp_local_address_;
   ACE_INET_Addr ipv6_default_multicast_group_;
 #endif
   OPENDDS_STRING guid_interface_;
@@ -492,6 +623,16 @@ private:
   size_t sedp_max_message_size_;
   bool undirected_spdp_;
   bool periodic_directed_spdp_;
+  /// Should participant user data QoS only be sent when the message is secure?
+  bool secure_participant_user_data_;
+  DCPS::TimeDuration max_type_lookup_service_reply_period_;
+  bool use_xtypes_;
+  DCPS::TimeDuration sedp_heartbeat_period_;
+  DCPS::TimeDuration sedp_nak_response_delay_;
+  DCPS::TimeDuration sedp_send_delay_;
+  DCPS::TimeDuration sedp_passive_connect_duration_;
+  CORBA::ULong participant_flags_;
+  bool sedp_responsive_mode_;
 };
 
 typedef OpenDDS::DCPS::RcHandle<RtpsDiscoveryConfig> RtpsDiscoveryConfig_rch;
@@ -608,6 +749,18 @@ public:
 
   bool use_ice() const { return config_->use_ice(); }
   void use_ice_now(bool f);
+
+  bool secure_participant_user_data() const
+  {
+    return config_->secure_participant_user_data();
+  }
+  void secure_participant_user_data(bool value)
+  {
+    config_->secure_participant_user_data(value);
+  }
+
+  bool use_xtypes() const { return config_->use_xtypes(); }
+  void use_xtypes(bool xt) { config_->use_xtypes(xt); }
 
   RtpsDiscoveryConfig_rch config() const { return config_; }
 

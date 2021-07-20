@@ -5,8 +5,10 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
+
 #include "DataWriterImpl.h"
+
 #include "FeatureDisabledQosCheck.h"
 #include "DomainParticipantImpl.h"
 #include "PublisherImpl.h"
@@ -18,30 +20,31 @@
 #include "Transient_Kludge.h"
 #include "DataDurabilityCache.h"
 #include "MonitorFactory.h"
-#include "TypeSupportImpl.h"
 #include "SendStateDataSampleList.h"
 #include "DataSampleElement.h"
-
+#include "Util.h"
+#include "DCPS_Utils.h"
+#include "XTypes/TypeObject.h"
+#include "TypeSupportImpl.h"
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-#include "CoherentChangeControl.h"
+#  include "CoherentChangeControl.h"
+#endif
+#include "AssociationData.h"
+#include "transport/framework/EntryExit.h"
+#include "transport/framework/TransportExceptions.h"
+#include "transport/framework/TransportRegistry.h"
+#ifndef DDS_HAS_MINIMUM_BIT
+#  include "BuiltInTopicUtils.h"
 #endif
 
-#include "AssociationData.h"
-#include "dds/DdsDcpsCoreC.h"
-#include "dds/DdsDcpsGuidTypeSupportImpl.h"
-
-#if !defined (DDS_HAS_MINIMUM_BIT)
-#include "BuiltInTopicUtils.h"
-#include "dds/DdsDcpsCoreTypeSupportC.h"
+#ifndef DDS_HAS_MINIMUM_BIT
+#  include <dds/DdsDcpsCoreTypeSupportC.h>
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
+#include <dds/DdsDcpsCoreC.h>
+#include <dds/DdsDcpsGuidTypeSupportImpl.h>
 
-#include "Util.h"
-#include "dds/DCPS/transport/framework/EntryExit.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
-
-#include "ace/Reactor.h"
-#include "ace/Auto_Ptr.h"
+#include <ace/Reactor.h>
+#include <ace/Auto_Ptr.h>
 
 #include <stdexcept>
 
@@ -141,9 +144,7 @@ DataWriterImpl::init(
 
   qos_ = qos;
 
-  //Note: OK to _duplicate(nil).
-  listener_ = DDS::DataWriterListener::_duplicate(a_listener);
-  listener_mask_ = mask;
+  set_listener(a_listener, mask);
 
   // Only store the participant pointer, since it is our "grand"
   // parent, we will exist as long as it does.
@@ -162,21 +163,26 @@ DataWriterImpl::init(
 DDS::InstanceHandle_t
 DataWriterImpl::get_instance_handle()
 {
-  using namespace OpenDDS::DCPS;
-  RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
-  if (participant)
-    return participant->id_to_handle(publication_id_);
-  return DDS::HANDLE_NIL;
+  const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+  return get_entity_instance_handle(publication_id_, participant.get());
 }
 
 DDS::InstanceHandle_t
 DataWriterImpl::get_next_handle()
 {
-  using namespace OpenDDS::DCPS;
   RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
-  if (participant)
-    return participant->id_to_handle(GUID_UNKNOWN);
+  if (participant) {
+    return participant->assign_handle();
+  }
   return DDS::HANDLE_NIL;
+}
+
+void DataWriterImpl::return_handle(DDS::InstanceHandle_t handle)
+{
+  const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+  if (participant) {
+    participant->return_handle(handle);
+  }
 }
 
 DDS::Subscriber_var
@@ -206,7 +212,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
                OPENDDS_STRING(reader_converter).c_str()));
   }
 
-  if (entity_deleted_.value()) {
+  if (get_deleted()) {
     if (DCPS_debug_level)
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterImpl::add_association")
                  ACE_TEXT(" This is a deleted datawriter, ignoring add.\n")));
@@ -239,6 +245,8 @@ DataWriterImpl::add_association(const RepoId& yourId,
   AssociationData data;
   data.remote_id_ = reader.readerId;
   data.remote_data_ = reader.readerTransInfo;
+  data.participant_discovered_at_ = reader.participantDiscoveredAt;
+  data.remote_transport_context_ = reader.transportContext;
   data.remote_reliable_ =
     (reader.readerQos.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS);
   data.remote_durable_ =
@@ -289,38 +297,16 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
 
     // Have we already received an association_complete() callback?
-    if (assoc_complete_readers_.count(remote_id)) {
-      if (DCPS_debug_level) {
-        const GuidConverter writer_conv(publication_id_);
-        const GuidConverter converter(remote_id);
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DataWriterImpl::transport_assoc_done: ")
-                   ACE_TEXT("writer %C found assoc_complete_reader %C, continue with association_complete_i\n"),
-                   OPENDDS_STRING(writer_conv).c_str(),
-                   OPENDDS_STRING(converter).c_str()));
-      }
-      assoc_complete_readers_.erase(remote_id);
-      association_complete_i(remote_id);
-
-      // Add to pending_readers_ -> pending means we are waiting
-      // for the association_complete() callback.
-
-    } else if (OpenDDS::DCPS::insert(pending_readers_, remote_id) == -1) {
+    if (DCPS_debug_level) {
+      const GuidConverter writer_conv(publication_id_);
       const GuidConverter converter(remote_id);
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::transport_assoc_done: ")
-                 ACE_TEXT("failed to mark %C as pending.\n"),
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) DataWriterImpl::transport_assoc_done: ")
+                 ACE_TEXT("writer %C reader %C calling association_complete_i\n"),
+                 OPENDDS_STRING(writer_conv).c_str(),
                  OPENDDS_STRING(converter).c_str()));
-
-    } else {
-      if (DCPS_debug_level) {
-        const GuidConverter converter(remote_id);
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DataWriterImpl::transport_assoc_done: ")
-                   ACE_TEXT("marked %C as pending.\n"),
-                   OPENDDS_STRING(converter).c_str()));
-      }
     }
+    association_complete_i(remote_id);
 
   } else {
     // In the current implementation, DataWriter is always active, so this
@@ -332,9 +318,6 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
                  ACE_TEXT("ERROR: DataWriter (%C) should always be active in current implementation\n"),
                  OPENDDS_STRING(conv).c_str()));
     }
-    Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-    disco->association_complete(domain_id_, dp_id_,
-                                publication_id_, remote_id);
   }
 }
 
@@ -377,45 +360,6 @@ DataWriterImpl::ReaderInfo::~ReaderInfo()
   }
 
 #endif // OPENDDS_NO_CONTENT_FILTERED_TOPIC
-}
-
-void
-DataWriterImpl::association_complete(const RepoId& remote_id)
-{
-  DBG_ENTRY_LVL("DataWriterImpl", "association_complete", 6);
-
-  if (DCPS_debug_level >= 1) {
-    GuidConverter writer_converter(this->publication_id_);
-    GuidConverter reader_converter(remote_id);
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) DataWriterImpl::association_complete - ")
-               ACE_TEXT("bit %d local %C remote %C\n"),
-               is_bit_,
-               OPENDDS_STRING(writer_converter).c_str(),
-               OPENDDS_STRING(reader_converter).c_str()));
-  }
-
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
-
-  if (OpenDDS::DCPS::remove(pending_readers_, remote_id) == -1) {
-    if (DCPS_debug_level) {
-      GuidConverter writer_converter(this->publication_id_);
-      GuidConverter reader_converter(remote_id);
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) DataWriterImpl::association_complete - ")
-                 ACE_TEXT("bit %d local %C did not find pending reader: %C ")
-                 ACE_TEXT("defer association_complete_i until add_association resumes\n"),
-                 is_bit_,
-                 OPENDDS_STRING(writer_converter).c_str(),
-                 OPENDDS_STRING(reader_converter).c_str()));
-    }
-    // Not found in pending_readers_, defer calling association_complete_i()
-    // until add_association() resumes and sees this ID in assoc_complete_readers_.
-    assoc_complete_readers_.insert(remote_id);
-
-  } else {
-    association_complete_i(remote_id);
-  }
 }
 
 void
@@ -476,8 +420,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
     if (!participant)
       return;
 
-    DDS::InstanceHandle_t handle =
-      participant->id_to_handle(remote_id);
+    const DDS::InstanceHandle_t handle = participant->assign_handle(remote_id);
 
     {
       // protect publication_match_status_ and status changed flags.
@@ -573,12 +516,13 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
         ACE_DEBUG((LM_INFO, "(%P|%t) Sending historic samples\n"));
       }
 
-      size_t size = 0, padding = 0;
-      gen_find_size(remote_id, size, padding);
+      const Encoding encoding(Encoding::KIND_UNALIGNED_CDR);
+      size_t size = 0;
+      serialized_size(encoding, size, remote_id);
       Message_Block_Ptr data(
         new ACE_Message_Block(size, ACE_Message_Block::MB_DATA, 0, 0, 0,
                               get_db_lock()));
-      Serializer ser(data.get());
+      Serializer ser(data.get(), encoding);
       ser << remote_id;
 
       DataSampleHeader header;
@@ -660,17 +604,6 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
         ++ rds_len;
         rds.length(rds_len);
         rds [rds_len - 1] = readers[i];
-
-      } else if (OpenDDS::DCPS::remove(pending_readers_, readers[i]) == 0) {
-        ++ rds_len;
-        rds.length(rds_len);
-        rds [rds_len - 1] = readers[i];
-
-        GuidConverter converter(readers[i]);
-        ACE_DEBUG((LM_WARNING,
-                   ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::remove_associations: ")
-                   ACE_TEXT("removing reader %C before association_complete() call.\n"),
-                   OPENDDS_STRING(converter).c_str()));
       }
 
       ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
@@ -735,6 +668,11 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
   // subscription lost.
   if (notify_lost && handles.length() > 0) {
     this->notify_publication_lost(handles);
+  }
+
+  const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+  for (unsigned int i = 0; i < handles.length(); ++i) {
+    participant->return_handle(handles[i]);
   }
 }
 
@@ -811,11 +749,13 @@ void DataWriterImpl::replay_durable_data_for(const RepoId& remote_id)
         ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) DataWriterImpl::replay_durable_data_for: Sending historic samples\n")));
       }
 
-      size_t size = 0, padding = 0;
-      gen_find_size(remote_id, size, padding);
-      Message_Block_Ptr data(new ACE_Message_Block(size, ACE_Message_Block::MB_DATA, 0, 0, 0,
-                                                   get_db_lock()));
-      Serializer ser(data.get());
+      const Encoding encoding(Encoding::KIND_UNALIGNED_CDR);
+      size_t size = 0;
+      serialized_size(encoding, size, remote_id);
+      Message_Block_Ptr data(
+        new ACE_Message_Block(size, ACE_Message_Block::MB_DATA, 0, 0, 0,
+                              get_db_lock()));
+      Serializer ser(data.get(), encoding);
       ser << remote_id;
 
       DataSampleHeader header;
@@ -843,12 +783,10 @@ void DataWriterImpl::remove_all_associations()
 
   OpenDDS::DCPS::ReaderIdSeq readers;
   CORBA::ULong size;
-  CORBA::ULong num_pending_readers;
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
 
-    num_pending_readers = static_cast<CORBA::ULong>(pending_readers_.size());
-    size = static_cast<CORBA::ULong>(readers_.size()) + num_pending_readers;
+    size = static_cast<CORBA::ULong>(readers_.size());
     readers.length(size);
 
     RepoIdSet::iterator itEnd = readers_.end();
@@ -856,19 +794,6 @@ void DataWriterImpl::remove_all_associations()
 
     for (RepoIdSet::iterator it = readers_.begin(); it != itEnd; ++it) {
       readers[i ++] = *it;
-    }
-
-    itEnd = pending_readers_.end();
-
-    for (RepoIdSet::iterator it = pending_readers_.begin(); it != itEnd; ++it) {
-      readers[i ++] = *it;
-    }
-
-    if (num_pending_readers > 0) {
-      ACE_DEBUG((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::remove_all_associations() - ")
-                 ACE_TEXT("%d subscribers were pending and never fully associated.\n"),
-                 num_pending_readers));
     }
   }
 
@@ -984,8 +909,7 @@ DataWriterImpl::update_subscription_params(const RepoId& readerId,
 #endif
 }
 
-DDS::ReturnCode_t
-DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
+DDS::ReturnCode_t DataWriterImpl::set_qos(const DDS::DataWriterQos& qos)
 {
   OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_OWNERSHIP_STRENGTH_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
@@ -1054,6 +978,7 @@ DDS::ReturnCode_t
 DataWriterImpl::set_listener(DDS::DataWriterListener_ptr a_listener,
                              DDS::StatusMask mask)
 {
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
   listener_ = DDS::DataWriterListener::_duplicate(a_listener);
@@ -1063,7 +988,15 @@ DataWriterImpl::set_listener(DDS::DataWriterListener_ptr a_listener,
 DDS::DataWriterListener_ptr
 DataWriterImpl::get_listener()
 {
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   return DDS::DataWriterListener::_duplicate(listener_.in());
+}
+
+DataWriterListener_ptr
+DataWriterImpl::get_ext_listener()
+{
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
+  return DataWriterListener::_narrow(listener_.in());
 }
 
 DDS::Topic_ptr
@@ -1165,7 +1098,7 @@ DataWriterImpl::wait_for_acknowledgments(const DDS::Duration_t& max_wait)
 DDS::ReturnCode_t
 DataWriterImpl::wait_for_specific_ack(const AckToken& token)
 {
-  return this->data_container_->wait_ack_of_seq(token.deadline(), token.sequence_);
+  return this->data_container_->wait_ack_of_seq(token.deadline(), token.deadline_is_infinite(), token.sequence_);
 }
 
 DDS::Publisher_ptr
@@ -1259,7 +1192,7 @@ DataWriterImpl::assert_liveliness()
     }
     break;
   case DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS:
-    if (send_liveliness(MonotonicTimePoint::now()) == false) {
+    if (!send_liveliness(MonotonicTimePoint::now())) {
       return DDS::RETCODE_ERROR;
     }
     break;
@@ -1393,6 +1326,15 @@ DataWriterImpl::enable()
     dp_id_ = participant->get_id();
   }
 
+  if (!topic_servant_->check_data_representation(get_effective_data_rep_qos(qos_.representation.value, false), true)) {
+    if (DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable: ")
+        ACE_TEXT("none of the data representation QoS is allowed by the ")
+        ACE_TEXT("topic type IDL annotations\n")));
+    }
+    return DDS::RETCODE_ERROR;
+  }
+
   // Note: do configuration based on QoS in enable() because
   //       before enable is called the QoS can be changed -- even
   //       for Changeable=NO
@@ -1438,7 +1380,7 @@ DataWriterImpl::enable()
     TheServiceParticipant->get_data_durability_cache(qos_.durability);
 #endif
 
-  //Note: the QoS used to set n_chunks_ is Changable=No so
+  //Note: the QoS used to set n_chunks_ is Changeable=No so
   // it is OK that we cannot change the size of our allocators.
   data_container_ = RcHandle<WriteDataContainer>
     (new WriteDataContainer
@@ -1530,28 +1472,49 @@ DataWriterImpl::enable()
     return DDS::RETCODE_ERROR;
   }
 
+  // Done after enable_transport so we know its swap_bytes.
+  const DDS::ReturnCode_t setup_serialization_result = setup_serialization();
+  if (setup_serialization_result != DDS::RETCODE_OK) {
+    data_container_->shutdown_ = true;
+    return setup_serialization_result;
+  }
+
   const TransportLocatorSeq& trans_conf_info = connection_info();
-
   DDS::PublisherQos pub_qos;
-
   publisher->get_qos(pub_qos);
+
+  TypeSupportImpl* const typesupport =
+    dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
+  XTypes::TypeInformation type_info;
+  typesupport->to_type_info(type_info);
+
+  XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
+  typesupport->add_types(type_lookup_service);
+  typesupport->populate_dependencies(type_lookup_service);
 
   this->publication_id_ =
     disco->add_publication(this->domain_id_,
                            this->dp_id_,
                            this->topic_servant_->get_id(),
-                           this,
+                           rchandle_from(this),
                            this->qos_,
                            trans_conf_info,
-                           pub_qos);
-
-
-  if (!publisher || this->publication_id_ == GUID_UNKNOWN) {
-    ACE_DEBUG((LM_WARNING,
-               ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::enable, ")
-               ACE_TEXT("add_publication returned invalid id.\n")));
+                           pub_qos,
+                           type_info);
+  if (publication_id_ == GUID_UNKNOWN) {
+    if (DCPS_debug_level >= 1) {
+      ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: DataWriterImpl::enable: "
+        "add_publication failed\n"));
+    }
     data_container_->shutdown_ = true;
     return DDS::RETCODE_ERROR;
+  }
+
+  if (DCPS_debug_level >= 2) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriterImpl::enable: "
+      "got GUID %C, publishing to topic name \"%C\" type \"%C\"\n",
+      LogGuid(publication_id_).c_str(),
+      topic_servant_->topic_name(), topic_servant_->type_name()));
   }
 
   this->data_container_->publication_id_ = this->publication_id_;
@@ -2093,7 +2056,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
   header_data.message_id_ = message_id;
   header_data.byte_order_ =
     this->swap_bytes() ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER;
-  header_data.coherent_change_ = 0;
+  header_data.coherent_change_ = false;
 
   if (data) {
     header_data.message_length_ = static_cast<ACE_UINT32>(data->total_length());
@@ -2138,7 +2101,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
                         static_cast<ACE_Message_Block*>(
                           mb_allocator_->malloc(sizeof(ACE_Message_Block))),
                         ACE_Message_Block(
-                          DataSampleHeader::max_marshaled_size(),
+                          DataSampleHeader::get_max_serialized_size(),
                           ACE_Message_Block::MB_DATA,
                           header_data.message_length_ ? data.release() : 0, //cont
                           0, //data
@@ -2233,13 +2196,12 @@ DataWriterImpl::create_sample_data_message(Message_Block_Ptr data,
 
   header_data.publication_id_ = publication_id_;
   header_data.publisher_id_ = publisher->publisher_id_;
-  size_t max_marshaled_size = header_data.max_marshaled_size();
 
   ACE_Message_Block* tmp_message;
   ACE_NEW_MALLOC_RETURN(tmp_message,
                         static_cast<ACE_Message_Block*>(
                           mb_allocator_->malloc(sizeof(ACE_Message_Block))),
-                        ACE_Message_Block(max_marshaled_size,
+                        ACE_Message_Block(DataSampleHeader::get_max_serialized_size(),
                                           ACE_Message_Block::MB_DATA,
                                           data.release(), //cont
                                           0, //data
@@ -2320,10 +2282,16 @@ DataWriterImpl::filter_out(const DataSampleElement& elt,
     if (!elt.get_header().valid_data() && evaluator.has_non_key_fields(meta)) {
       return true;
     }
-    return !evaluator.eval(elt.get_sample()->cont(),
-                           elt.get_header().byte_order_ != ACE_CDR_BYTE_ORDER,
-                           elt.get_header().cdr_encapsulation_, meta,
-                           expression_params);
+    try {
+      return !evaluator.eval(elt.get_sample()->cont(),
+                             elt.get_header().byte_order_ != ACE_CDR_BYTE_ORDER,
+                             elt.get_header().cdr_encapsulation_, meta,
+                             expression_params, typesupport->getExtensibility());
+    } catch (const std::runtime_error&) {
+      //if the eval fails, the throws will do the logging
+      //return false here so that the sample is not filtered
+      return false;
+    }
   }
   else {
     return false;
@@ -2386,18 +2354,16 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
     end_msg.group_coherent_samples_ = group_samples;
   }
 
-  size_t max_marshaled_size = end_msg.max_marshaled_size();
-
   Message_Block_Ptr data(
-    new ACE_Message_Block(max_marshaled_size,
+    new ACE_Message_Block(
+      end_msg.get_max_serialized_size(),
       ACE_Message_Block::MB_DATA,
       0, // cont
       0, // data
       0, // alloc_strategy
       get_db_lock()));
 
-  Serializer serializer(
-    data.get(),
+  Serializer serializer(data.get(), Encoding::KIND_UNALIGNED_CDR,
     this->swap_bytes());
 
   serializer << end_msg;
@@ -2451,7 +2417,9 @@ DataWriterImpl::listener_for(DDS::StatusKind kind)
   if (!publisher)
     return 0;
 
+  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
   if (CORBA::is_nil(listener_.in()) || (listener_mask_ & kind) == 0) {
+    g.release();
     return publisher->listener_for(kind);
 
   } else {
@@ -2472,14 +2440,14 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value& tv,
   if (elapsed >= liveliness_check_interval_) {
     switch (this->qos_.liveliness.kind) {
     case DDS::AUTOMATIC_LIVELINESS_QOS:
-      if (send_liveliness(now) == false) {
+      if (!send_liveliness(now)) {
         liveliness_lost = true;
       }
       break;
 
     case DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS:
       if (liveliness_asserted_) {
-        if (send_liveliness(now) == false) {
+        if (!send_liveliness(now)) {
           liveliness_lost = true;
         }
       }
@@ -2601,8 +2569,7 @@ DataWriterImpl::notify_publication_disconnected(const ReaderIdSeq& subids)
   if (!is_bit_) {
     // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
     // is given to this DataWriter then narrow() fails.
-    DataWriterListener_var the_listener =
-      DataWriterListener::_narrow(this->listener_.in());
+    DataWriterListener_var the_listener = get_ext_listener();
 
     if (!CORBA::is_nil(the_listener.in())) {
       PublicationDisconnectedStatus status;
@@ -2625,8 +2592,7 @@ DataWriterImpl::notify_publication_reconnected(const ReaderIdSeq& subids)
     // Narrow to DDS::DCPS::DataWriterListener. If a
     // DDS::DataWriterListener is given to this DataWriter then
     // narrow() fails.
-    DataWriterListener_var the_listener =
-      DataWriterListener::_narrow(this->listener_.in());
+    DataWriterListener_var the_listener = get_ext_listener();
 
     if (!CORBA::is_nil(the_listener.in())) {
       PublicationDisconnectedStatus status;
@@ -2648,8 +2614,7 @@ DataWriterImpl::notify_publication_lost(const ReaderIdSeq& subids)
     // Narrow to DDS::DCPS::DataWriterListener. If a
     // DDS::DataWriterListener is given to this DataWriter then
     // narrow() fails.
-    DataWriterListener_var the_listener =
-      DataWriterListener::_narrow(this->listener_.in());
+    DataWriterListener_var the_listener = get_ext_listener();
 
     if (!CORBA::is_nil(the_listener.in())) {
       PublicationLostStatus status;
@@ -2672,8 +2637,7 @@ DataWriterImpl::notify_publication_lost(const DDS::InstanceHandleSeq& handles)
     // Narrow to DDS::DCPS::DataWriterListener. If a
     // DDS::DataWriterListener is given to this DataWriter then
     // narrow() fails.
-    DataWriterListener_var the_listener =
-      DataWriterListener::_narrow(this->listener_.in());
+    DataWriterListener_var the_listener = get_ext_listener();
 
     if (!CORBA::is_nil(the_listener.in())) {
       PublicationLostStatus status;
@@ -2719,7 +2683,7 @@ DataWriterImpl::lookup_instance_handles(const ReaderIdSeq& ids,
   hdls.length(num_rds);
 
   for (CORBA::ULong i = 0; i < num_rds; ++i) {
-    hdls[i] = participant->id_to_handle(ids[i]);
+    hdls[i] = participant->lookup_handle(ids[i]);
   }
 }
 

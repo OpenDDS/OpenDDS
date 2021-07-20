@@ -593,7 +593,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
           }
           else {
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l main() - ")
-              ACE_TEXT("wrote sample with key: %d and x: %f y: %f \n"), foo.key, foo.x, foo.y));
+              ACE_TEXT("wrote sample with key: %d and x: %f y: %f\n"), foo.key, foo.x, foo.y));
           }
         }
 
@@ -612,7 +612,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
             }
             else {
               ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l main() - ")
-                ACE_TEXT("wrote sample with key: %d and x: %f y: %f \n"), foo.key, foo.x, foo.y));
+                ACE_TEXT("wrote sample with key: %d and x: %f y: %f\n"), foo.key, foo.x, foo.y));
             }
           }
         }

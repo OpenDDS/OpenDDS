@@ -17,6 +17,7 @@
 #include <dds/DCPS/Qos_Helper.h>
 #include "dds/DCPS/WaitSet.h"
 #include "dds/DCPS/TimeTypes.h"
+#include "dds/DCPS/DCPS_Utils.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 
 #include "dds/DCPS/StaticIncludes.h"
@@ -40,12 +41,6 @@ const static TimeDuration write_interval(0, 500000);
 
 const long NUM_EXPIRATIONS = 2;
 const int NUM_INSTANCE = 2;
-
-// Wait for up to 10 seconds for subscription matched status.
-const static DDS::Duration_t MATCHED_WAIT_MAX_DURATION = {
-  10, // seconds
-  0   // nanoseconds
-};
 
 // Set up a 5 second recurring deadline.
 const static DDS::Duration_t DEADLINE_PERIOD = {
@@ -236,8 +231,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         exit(1);
       }
 
-      const MonotonicTimePoint connect_deadline(MonotonicTimePoint::now() + TimeDuration(MATCHED_WAIT_MAX_DURATION));
-      if (listener_servant->wait_matched(1, &connect_deadline.value()) != 0) {
+      if (!listener_servant->wait_matched(1, OpenDDS::DCPS::TimeDuration(10))) {
         cerr << "ERROR: sub: wait for subscription matching failed." << endl;
         exit(1);
       }
@@ -255,7 +249,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::sleep(SLEEP_DURATION.value());
 
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Subscriber: now verify missed ")
-                           ACE_TEXT("deadline status \n")));
+                           ACE_TEXT("deadline status\n")));
 
       DDS::RequestedDeadlineMissedStatus deadline_status1;
       if (dr1->get_requested_deadline_missed_status(deadline_status1) != ::DDS::RETCODE_OK)
@@ -272,7 +266,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) Subscriber: got missed ")
-                            ACE_TEXT("deadline status \n")));
+                            ACE_TEXT("deadline status\n")));
 
       Messenger::Message message;
       message.subject_id = 99;
@@ -350,7 +344,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::sleep(no_miss_period.value());
 
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Subscriber: now verify missed ")
-                           ACE_TEXT("deadline status \n")));
+                           ACE_TEXT("deadline status\n")));
 
       if ((dr1->get_requested_deadline_missed_status(deadline_status1) != ::DDS::RETCODE_OK)
         || (dr2->get_requested_deadline_missed_status(deadline_status2) != ::DDS::RETCODE_OK))
@@ -360,7 +354,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Subscriber: got missed ")
-                           ACE_TEXT("deadline status \n")));
+                           ACE_TEXT("deadline status\n")));
 
       if (deadline_status1.last_instance_handle != dr1_hd1
         && deadline_status1.last_instance_handle != dr1_hd2)

@@ -94,7 +94,6 @@ SecurityRegistry::close()
 SecurityRegistry::SecurityRegistry()
 {
   DBG_ENTRY_LVL("SecurityRegistry", "SecurityRegistry", 6);
-
   lib_directive_map_[DEFAULT_PLUGIN_NAME] = "dynamic OpenDDS_Security Service_Object * OpenDDS_Security:_make_BuiltInPluginLoader()";
 }
 
@@ -107,7 +106,6 @@ SecurityRegistry::release()
   for (InstMap::iterator iter = registered_plugins_.begin(); iter != registered_plugins_.end(); ++iter) {
     iter->second->shutdown();
   }
-
   registered_plugins_.clear();
   config_map_.clear();
 }
@@ -261,7 +259,8 @@ SecurityRegistry::default_config() const
     CryptoKeyExchange_var c;
     CryptoKeyFactory_var d;
     CryptoTransform_var e;
-    default_config_ = DCPS::make_rch<SecurityConfig>("NoPlugins", a, b, c, d, e, static_cast<Utility*>(0),
+    default_config_ = DCPS::make_rch<SecurityConfig>("NoPlugins", a, b, c, d, e,
+                                                     static_cast<Utility*>(0),
                                                      ConfigPropertyList());
   }
 #endif
@@ -338,7 +337,7 @@ SecurityRegistry::load_security_configuration(ACE_Configuration_Heap& cf)
     if (ACE_OS::strcmp(sect_name.c_str(), ACE_TEXT_CHAR_TO_TCHAR(SECURITY_SECTION_NAME)) == 0) {
       // found the section, now iterate through subsections...
       ACE_Configuration_Section_Key sect;
-      if (cf.open_section(root, sect_name.c_str(), 0, sect) != 0) {
+      if (cf.open_section(root, sect_name.c_str(), false, sect) != 0) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) SecurityRegistry::load_plugin_properties: ")
                           ACE_TEXT("failed to open section %s\n"),

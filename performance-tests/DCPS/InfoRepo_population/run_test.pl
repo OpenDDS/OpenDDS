@@ -100,7 +100,7 @@ if($intermittent) {
   $PublisherResult = $Publisher->WaitKill (300);
 }
 if ($PublisherResult != 0) {
-    print STDERR "ERROR: publisher returned $PublisherResult \n";
+    print STDERR "ERROR: publisher returned $PublisherResult\n";
     $status = 1;
 }
 
@@ -118,7 +118,7 @@ if($intermittent) {
   $PublisherResult2 = $Publisher2->WaitKill (300);
 }
 if ($PublisherResult2 != 0) {
-    print STDERR "ERROR: publisher returned $PublisherResult2 \n";
+    print STDERR "ERROR: publisher returned $PublisherResult2\n";
     $status = 1;
 }
 
@@ -136,7 +136,7 @@ if($intermittent) {
   $SubscriberResult = $Subscriber->WaitKill (15);
 }
 if ($SubscriberResult != 0) {
-    print STDERR "ERROR: subscriber returned $SubscriberResult \n";
+    print STDERR "ERROR: subscriber returned $SubscriberResult\n";
     $status = 1;
 }
 
@@ -174,4 +174,3 @@ if ($status == 0) {
 }
 
 exit $status;
-

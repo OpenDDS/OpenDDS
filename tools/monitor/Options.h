@@ -88,4 +88,3 @@ class Options  {
 } // End of namespace Monitor
 
 #endif // OPTIONS_H
-

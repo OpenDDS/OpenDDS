@@ -1,0 +1,16 @@
+project(Compiler*): dcps_test, googletest, msvc_bigobj, opendds_cxx11 {
+  requires += no_opendds_safety_profile
+  exename = *
+  dcps_ts_flags += -I..
+  idlflags += -I..
+
+  Source_Files {
+    TryConstruct.cpp
+  }
+  TypeSupport_Files {
+    ../TryConstructBaseTypes.idl
+    ../TryConstruct.idl
+    ../AnonTypes.idl
+    ../NestedTrimStruct.idl
+  }
+}

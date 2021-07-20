@@ -5,13 +5,16 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_UTILS_H
-#define DCPS_UTILS_H
+#ifndef OPENDDS_DCPS_DCPS_UTILS_H
+#define OPENDDS_DCPS_DCPS_UTILS_H
 
 #include "dcps_export.h"
-#include "dds/DdsDcpsInfrastructureC.h"
-#include "dds/DdsDcpsPublicationC.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
+
+#include "Serializer.h"
+
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsPublicationC.h>
+#include <dds/DdsDcpsInfoUtilsC.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -22,11 +25,15 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+OpenDDS_Dcps_Export const char* retcode_to_string(DDS::ReturnCode_t value);
+
+OpenDDS_Dcps_Export const char* topicstatus_to_string(TopicStatus value);
+
 OpenDDS_Dcps_Export
 bool
 is_wildcard(const char *str);
 
-/// Increments the count of occurances of the incompatible policy
+/// Increments the count of occurrences of the incompatible policy
 ///  for the status
 OpenDDS_Dcps_Export
 void
@@ -91,8 +98,15 @@ OpenDDS_Dcps_Export
 bool should_check_association_upon_change(const DDS::DomainParticipantQos & qos1,
                                           const DDS::DomainParticipantQos & qos2);
 
-}}
+OpenDDS_Dcps_Export
+bool repr_to_encoding_kind(DDS::DataRepresentationId_t repr, Encoding::Kind& kind);
+
+OpenDDS_Dcps_Export
+DDS::DataRepresentationIdSeq get_effective_data_rep_qos(const DDS::DataRepresentationIdSeq& qos, bool reader);
+
+} // namespace DCPS
+} // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif /* DCPS_UTILS_H */
+#endif /* OPENDDS_DDS_DCPS_DCPS_UTILS_H */

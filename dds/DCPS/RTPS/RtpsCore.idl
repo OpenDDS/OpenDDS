@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef RTPS_RTPSCORE_IDL
-#define RTPS_RTPSCORE_IDL
+#ifndef OPENDDS_DCPS_RTPS_RTPSCORE_IDL
+#define OPENDDS_DCPS_RTPS_RTPSCORE_IDL
 
 #include "dds/DdsDcpsInfoUtils.idl"
 #include "dds/DdsDcpsInfrastructure.idl"
@@ -58,6 +58,7 @@ module OpenDDS {
     };
 
     /* Type used to hold sequence numbers. */
+    @final
     struct SequenceNumber_t {
       long high;
       unsigned long low;
@@ -139,6 +140,11 @@ module OpenDDS {
     const short BEST_EFFORT = 1;
     const short RELIABLE = 2;
 
+    struct ReliabilityQosPolicyRtps {
+      ReliabilityKind_t kind;
+      DDS::Duration_t max_blocking_time;
+    };
+
     struct KeyHash_t {
       DCPS::OctetArray16 value;
     };
@@ -211,6 +217,15 @@ module OpenDDS {
       1 << 10;
     const BuiltinEndpointSet_t BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER =
       1 << 11;
+    // As per chapter 9.3.2 of RTPS spec, bits 12 - 15 are used by XTypes
+    const BuiltinEndpointSet_t BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER =
+      1 << 12;
+    const BuiltinEndpointSet_t BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER =
+      1 << 13;
+    const BuiltinEndpointSet_t BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER =
+      1 << 14;
+    const BuiltinEndpointSet_t BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER =
+      1 << 15;
 
     typedef unsigned long BuiltinEndpointQos_t;
     const BuiltinEndpointQos_t BEST_EFFORT_PARTICIPANT_MESSAGE_DATA_READER =
@@ -283,6 +298,13 @@ module OpenDDS {
     const ParameterId_t PID_COHERENT_SET = 0x0056;
     const ParameterId_t PID_DIRECTED_WRITE = 0x0057;
     const ParameterId_t PID_ORIGINAL_WRITER_INFO = 0x0061;
+    const ParameterId_t PID_DATA_REPRESENTATION = 0x0073;
+
+    // Type Consistency Enforcement QoS Policy 7.6.3.4 XTypes Spec
+    const ParameterId_t PID_XTYPES_TYPE_CONSISTENCY = 0x0074;
+
+    // TypeInformation for XTypes 7.6.3.2.2 XTypes Spec
+    const ParameterId_t PID_XTYPES_TYPE_INFORMATION = 0x0075;
 
     // ParameterId Bitmask values (Table 9.11)
     const ParameterId_t PIDMASK_VENDOR_SPECIFIC = 0x8000;
@@ -296,6 +318,10 @@ module OpenDDS {
     typedef unsigned long OpenDDSParticipantFlagsBits_t;
     const OpenDDSParticipantFlagsBits_t PFLAGS_EMPTY = 0x0;
     const OpenDDSParticipantFlagsBits_t PFLAGS_NO_ASSOCIATED_WRITERS = 0x1;
+    const OpenDDSParticipantFlagsBits_t PFLAGS_DIRECTED_HEARTBEAT = 0x2;
+    // Causes reliable RTPS Readers to use the heartbeat count as the acknack count.
+    const OpenDDSParticipantFlagsBits_t PFLAGS_REFLECT_HEARTBEAT_COUNT = 0x4;
+    const OpenDDSParticipantFlagsBits_t PFLAGS_THIS_VERSION = PFLAGS_DIRECTED_HEARTBEAT | PFLAGS_NO_ASSOCIATED_WRITERS;
 
     struct OpenDDSParticipantFlags_t {
       OpenDDSParticipantFlagsBits_t bits;
@@ -312,7 +338,7 @@ module OpenDDS {
     const ParameterId_t PID_OPENDDS_ICE_GENERAL       = PID_OPENDDS_BASE + 3;
     const ParameterId_t PID_OPENDDS_ICE_CANDIDATE     = PID_OPENDDS_BASE + 4;
     const ParameterId_t PID_OPENDDS_PARTICIPANT_FLAGS = PID_OPENDDS_BASE + 5;
-
+    const ParameterId_t PID_OPENDDS_RTPS_RELAY_APPLICATION_PARTICIPANT = PID_OPENDDS_BASE + 6;
 
     /* Always used inside a ParameterList */
     /* custom de/serializer implemented in opendds_idl */
@@ -339,7 +365,7 @@ module OpenDDS {
       case PID_LIVELINESS:
         DDS::LivelinessQosPolicy liveliness;
       case PID_RELIABILITY:
-        DDS::ReliabilityQosPolicy reliability;
+        ReliabilityQosPolicyRtps reliability;
       case PID_LIFESPAN:
         DDS::LifespanQosPolicy lifespan;
       case PID_DESTINATION_ORDER:
@@ -401,6 +427,9 @@ module OpenDDS {
       case PID_OPENDDS_PARTICIPANT_FLAGS:
         OpenDDSParticipantFlags_t participant_flags;
 
+      case PID_OPENDDS_RTPS_RELAY_APPLICATION_PARTICIPANT:
+        boolean opendds_rtps_relay_application_participant;
+
       case PID_BUILTIN_ENDPOINT_SET:
         BuiltinEndpointSet_t builtin_endpoints;
 
@@ -452,6 +481,9 @@ module OpenDDS {
 
       case DDS::Security::PID_IDENTITY_STATUS_TOKEN:
         DDS::Security::IdentityStatusToken identity_status_token;
+
+      case DDS::Security::PID_EXTENDED_BUILTIN_ENDPOINTS:
+        DDS::Security::ExtendedBuiltinEndpointSet_t extended_builtin_endpoints;
 #endif
 
       case PID_OPENDDS_ICE_GENERAL:
@@ -468,6 +500,15 @@ module OpenDDS {
 
       case PID_BUILTIN_ENDPOINT_QOS:
         BuiltinEndpointQos_t builtinEndpointQos;
+
+      case PID_XTYPES_TYPE_INFORMATION:
+        DDS::OctetSeq type_information;
+
+      case PID_DATA_REPRESENTATION:
+        DDS::DataRepresentationQosPolicy representation;
+
+      case PID_XTYPES_TYPE_CONSISTENCY:
+        DDS::TypeConsistencyEnforcementQosPolicy type_consistency;
 
       default:
         DDS::OctetSeq unknown_data;
@@ -568,6 +609,10 @@ module OpenDDS {
       Count_t manualLivelinessCount;
       DDS::PropertyQosPolicy property;
       OpenDDSParticipantFlags_t opendds_participant_flags;
+      boolean opendds_rtps_relay_application_participant;
+#ifdef OPENDDS_SECURITY
+      DDS::Security::ExtendedBuiltinEndpointSet_t availableExtendedBuiltinEndpoints;
+#endif
     };
 
     // top-level data type for SPDP
@@ -575,6 +620,7 @@ module OpenDDS {
       DDS::ParticipantBuiltinTopicData ddsParticipantData;
       ParticipantProxy_t participantProxy;
       Duration_t leaseDuration;
+      DCPS::MonotonicTime_t discoveredAt;
       BuiltinEndpointSet_t associated_endpoints;
     };
 
@@ -843,6 +889,11 @@ module OpenDDS {
     // top-level data type for SEDPbuiltinTopics
     struct DiscoveredTopicData {
       DDS::TopicBuiltinTopicData ddsTopicData;
+    };
+
+    struct Message {
+      Header hdr;
+      SubmessageSeq submessages;
     };
   };
 };

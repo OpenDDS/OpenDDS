@@ -5,11 +5,12 @@
  * See: http://www.opendds.org/license.html
  */
 
-#if !defined(OPENDDS_RTPS_SECURITY_IDL) && defined(OPENDDS_SECURITY)
-#define OPENDDS_RTPS_SECURITY_IDL
+#ifdef OPENDDS_SECURITY
+#ifndef OPENDDS_DCPS_RTPS_RTPS_SECURITY_IDL
+#define OPENDDS_DCPS_RTPS_RTPS_SECURITY_IDL
 
-#include "dds/DdsSecurityCore.idl"
-#include "dds/DCPS/RTPS/RtpsCore.idl"
+#include <dds/DCPS/RTPS/RtpsCore.idl>
+#include <dds/DdsSecurityCore.idl>
 
 module OpenDDS {
   module Security {
@@ -27,9 +28,12 @@ module OpenDDS {
       DDS::Security::ParticipantBuiltinTopicDataSecure ddsParticipantDataSecure;
       OpenDDS::RTPS::ParticipantProxy_t participantProxy;
       OpenDDS::RTPS::Duration_t leaseDuration;
+      DCPS::MonotonicTime_t discoveredAt;
       OpenDDS::RTPS::BuiltinEndpointSet_t associated_endpoints;
+      DDS::Security::ExtendedBuiltinEndpointSet_t extended_associated_endpoints;
     };
   };
 };
 
+#endif
 #endif

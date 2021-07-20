@@ -3,6 +3,7 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/DCPS_Utils.h>
 #ifdef ACE_AS_STATIC_LIBS
 #  include "dds/DCPS/RTPS/RtpsDiscovery.h"
 #  include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
@@ -256,6 +257,16 @@ basic_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
         i->first.c_str(), retcode_to_string(rc)), false);
     }
   }
+
+  DDS::Duration_t timeout =
+    { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+  rc = writer_i->wait_for_acknowledgments(timeout);
+  if (rc != DDS::RETCODE_OK) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
+      ACE_TEXT("Unable to wait for acknowledgements: %C\n"),
+      retcode_to_string(rc)), false);
+  }
+
   rc = writer_i->dispose(news, DDS::HANDLE_NIL);
   if (rc != DDS::RETCODE_OK) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")

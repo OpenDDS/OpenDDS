@@ -8,11 +8,8 @@
 #ifndef OPENDDS_DCPS_REPLAYERIMPL_H
 #define OPENDDS_DCPS_REPLAYERIMPL_H
 
-#include "dds/DdsDcpsDomainC.h"
-#include "dds/DdsDcpsTopicC.h"
-#include "dds/DCPS/DataWriterCallbacks.h"
-#include "dds/DCPS/transport/framework/TransportSendListener.h"
-#include "dds/DCPS/transport/framework/TransportClient.h"
+#include "Replayer.h"
+#include "DataWriterCallbacks.h"
 #include "WriteDataContainer.h"
 #include "Definitions.h"
 #include "DataSampleHeader.h"
@@ -21,18 +18,21 @@
 #include "CoherentChangeControl.h"
 #include "GuidUtils.h"
 #include "unique_ptr.h"
-
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-#include "FilterEvaluator.h"
+#  include "FilterEvaluator.h"
 #endif
+#include "ConditionVariable.h"
+#include "transport/framework/TransportSendListener.h"
+#include "transport/framework/TransportClient.h"
 
-#include "ace/Event_Handler.h"
-#include "ace/OS_NS_sys_time.h"
-#include "ace/Condition_Recursive_Thread_Mutex.h"
+#include <dds/DdsDcpsDomainC.h>
+#include <dds/DdsDcpsTopicC.h>
+
+#include <ace/Event_Handler.h>
+#include <ace/OS_NS_sys_time.h>
+#include <ace/Recursive_Thread_Mutex.h>
 
 #include <memory>
-
-#include "Replayer.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -107,6 +107,8 @@ public:
   virtual const RepoId& get_repo_id() const;
   DDS::DomainId_t domain_id() const { return this->domain_id_; }
   virtual CORBA::Long get_priority_value(const AssociationData& data) const;
+  SequenceNumber get_max_sn() const { return sequence_number_; }
+
 
   // Implement TransportSendListener
   virtual void data_delivered(const DataSampleElement* sample);
@@ -132,8 +134,6 @@ public:
   virtual void add_association(const RepoId&            yourId,
                                const ReaderAssociation& reader,
                                bool                     active);
-
-  virtual void association_complete(const RepoId& remote_id);
 
   virtual void remove_associations(const ReaderIdSeq& readers,
                                    CORBA::Boolean     callback);
@@ -311,9 +311,7 @@ private:
 
   RepoIdToSequenceMap idToSequence_;
 
-  RepoIdSet pending_readers_, assoc_complete_readers_;
-
-  ACE_Condition<ACE_Recursive_Thread_Mutex> empty_condition_;
+  ConditionVariable<ACE_Recursive_Thread_Mutex> empty_condition_;
   int pending_write_count_;
 };
 

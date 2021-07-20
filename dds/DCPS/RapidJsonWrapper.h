@@ -7,6 +7,8 @@
 #    if __has_warning("-Wclass-memaccess")
 #      pragma GCC diagnostic ignored "-Wclass-memaccess"
 #    endif
+#  elif __GNUC__ > 7
+#    pragma GCC diagnostic ignored "-Wclass-memaccess"
 #  endif
 #endif
 #include <rapidjson/document.h>
@@ -14,6 +16,7 @@
 #include <rapidjson/istreamwrapper.h>
 #include <rapidjson/ostreamwrapper.h>
 #include <rapidjson/writer.h>
+#include <rapidjson/reader.h>
 #include <rapidjson/prettywriter.h>
 #ifdef __GNUC__
 #  pragma GCC diagnostic pop

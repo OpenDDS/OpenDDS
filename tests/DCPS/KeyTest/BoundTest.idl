@@ -42,12 +42,14 @@ module Bound {
     string string_field;
   };
 
+#ifndef OPENDDS_SAFETY_PROFILE
   // wstring field should cause struct to be unbounded
 #pragma DCPS_DATA_TYPE "Bound::WStringMessage"
 
   struct WStringMessage {
     wstring wstring_field;
   };
+#endif
 
   // Struct with all arrays of simple bounded fields should be bounded
 #pragma DCPS_DATA_TYPE "Bound::SimpleBoundedArrayMessage"
@@ -121,6 +123,7 @@ module Bound {
     StringArray string_array;
   };
 
+#ifndef OPENDDS_SAFETY_PROFILE
   // wstring array field should cause struct to be unbounded
 #pragma DCPS_DATA_TYPE "Bound::WStringArrayMessage"
 
@@ -129,6 +132,7 @@ module Bound {
   struct WStringArrayMessage {
     WStringArray wstring_array;
   };
+#endif
 
   // Nested structs resulting in a bounded message
 #pragma DCPS_DATA_TYPE "Bound::BoundedNestedMessage"

@@ -1,0 +1,8 @@
+project: dcps_cm, dcps_rtps_udp, opendds_security {
+
+  exename   = SingleParticipantWithSecurity
+
+  Source_Files {
+    SingleParticipantWithSecurity.cpp
+  }
+}

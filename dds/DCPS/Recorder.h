@@ -9,9 +9,9 @@
 #ifndef OPENDDS_DCPS_RECORDER_H
 #define OPENDDS_DCPS_RECORDER_H
 
-#include "dds/DCPS/LocalObject.h"
-#include "dds/DCPS/RcHandle_T.h"
-#include "dds/DCPS/RawDataSample.h"
+#include "LocalObject.h"
+#include "RcHandle_T.h"
+#include "RawDataSample.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_RTPSUDPTRANSPORT_H
-#define DCPS_RTPSUDPTRANSPORT_H
+#ifndef OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPTRANSPORT_H
+#define OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPTRANSPORT_H
 
 #include "Rtps_Udp_Export.h"
 
@@ -41,6 +41,7 @@ public:
 #ifdef OPENDDS_SECURITY
   ICE::ServerReflexiveStateMachine& relay_srsm() { return relay_srsm_; }
   void process_relay_sra(ICE::ServerReflexiveStateMachine::StateChange);
+  void disable_relay_stun_task();
 #endif
 
   virtual void update_locators(const RepoId& /*remote*/,
@@ -56,7 +57,9 @@ private:
                                               const TransportClient_rch& client);
 
   virtual void stop_accepting_or_connecting(const TransportClient_wrch& client,
-                                            const RepoId& remote_id);
+                                            const RepoId& remote_id,
+                                            bool disassociate,
+                                            bool association_failed);
 
   bool configure_i(RtpsUdpInst& config);
 
@@ -85,9 +88,10 @@ private:
                                      const RepoId& /*writerid*/);
 
   virtual bool connection_info_i(TransportLocator& info, ConnectionInfoFlags flags) const;
-  std::pair<ACE_INET_Addr, ACE_INET_Addr> get_connection_addrs(const TransportBLOB& data,
-                                                               bool* requires_inline_qos = 0,
-                                                               unsigned int* blob_bytes_read = 0) const;
+  std::pair<AddrSet, AddrSet>
+    get_connection_addrs(const TransportBLOB& data,
+                         bool* requires_inline_qos = 0,
+                         unsigned int* blob_bytes_read = 0) const;
 
   virtual void release_datalink(DataLink* link);
 
@@ -95,11 +99,15 @@ private:
 
   RtpsUdpDataLink_rch make_datalink(const GuidPrefix_t& local_prefix);
 
-  void use_datalink(const RepoId& local_id,
+  bool use_datalink(const RepoId& local_id,
                     const RepoId& remote_id,
                     const TransportBLOB& remote_data,
+                    const MonotonicTime_t& participant_discovered_at,
+                    ACE_CDR::ULong participant_flags,
                     bool local_reliable, bool remote_reliable,
-                    bool local_durable, bool remote_durable);
+                    bool local_durable, bool remote_durable,
+                    SequenceNumber max_sn,
+                    const TransportClient_rch& client);
 
 #if defined(OPENDDS_SECURITY)
   void local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch)
@@ -170,6 +178,7 @@ private:
   ICE::ServerReflexiveStateMachine relay_srsm_;
   typedef PmfPeriodicTask<RtpsUdpTransport> Periodic;
   RcHandle<Periodic> relay_stun_task_;
+  mutable ACE_Thread_Mutex relay_stun_mutex_;
   void relay_stun_task(const DCPS::MonotonicTimePoint& now);
 
   void start_ice();

@@ -71,8 +71,7 @@ void DataWriterListenerImpl::on_publication_matched (
     ACE_UNUSED_ARG(status) ;
 
     ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) %T DataWriterListenerImpl::on_publication_matched Repo[ %C] \n"),
+      ACE_TEXT("(%P|%t) %T DataWriterListenerImpl::on_publication_matched Repo[ %C]\n"),
       this->repo_.c_str()
     ));
   }
-

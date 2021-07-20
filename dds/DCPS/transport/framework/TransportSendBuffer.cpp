@@ -228,6 +228,14 @@ SingleSendBuffer::retain_buffer(const RepoId& pub_id, BufferType& buffer)
                               replaced_db_allocator_);
 
   buffer.first->accept_replace_visitor(visitor);
+  if (visitor.status() != REMOVE_ERROR) {
+    // Copy sample's message/data block descriptors:
+    ACE_Message_Block* data = buffer.second;
+    buffer.second = TransportQueueElement::clone_mb(data,
+                                           &retained_mb_allocator_,
+                                           &retained_db_allocator_);
+    data->release();
+  }
   return visitor.status();
 }
 
@@ -241,6 +249,7 @@ SingleSendBuffer::insert(SequenceNumber sequence,
   check_capacity_i(removed);
 
   BufferType& buffer = buffers_[sequence];
+  pre_seq_.erase(sequence);
   insert_buffer(buffer, queue, chain);
 
   if (Transport_debug_level > 5) {
@@ -284,11 +293,7 @@ SingleSendBuffer::insert_buffer(BufferType& buffer,
                            &retained_db_allocator_);
   queue->accept_visitor(visitor);
 
-  // Copy sample's message/data block descriptors:
-  ACE_Message_Block*& data = buffer.second;
-  data = TransportQueueElement::clone_mb(chain,
-                                         &retained_mb_allocator_,
-                                         &retained_db_allocator_);
+  buffer.second = chain->duplicate();
 }
 
 void
@@ -308,6 +313,7 @@ SingleSendBuffer::insert_fragment(SequenceNumber sequence,
                                       static_cast<ACE_Message_Block*>(0));
 
   BufferType& buffer = fragments_[sequence][fragment];
+  pre_seq_.erase(sequence);
   insert_buffer(buffer, queue, chain);
 
   if (Transport_debug_level > 5) {
@@ -356,6 +362,7 @@ bool
 SingleSendBuffer::resend(const SequenceRange& range, DisjointSequence* gaps)
 {
   ACE_GUARD_RETURN(LockType, guard, strategy_lock(), false);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
   return resend_i(range, gaps);
 }
 
@@ -370,12 +377,12 @@ SingleSendBuffer::resend_i(const SequenceRange& range, DisjointSequence* gaps,
                            const RepoId& destination)
 {
   //Special case, nak to make sure it has all history
-  const SequenceNumber lowForAllResent = range.first == SequenceNumber() ? low() : range.first;
+  if (buffers_.empty()) throw std::exception();
+  const SequenceNumber lowForAllResent = range.first == SequenceNumber() ? buffers_.begin()->first : range.first;
   const bool has_dest = destination != GUID_UNKNOWN;
 
   for (SequenceNumber sequence(range.first);
        sequence <= range.second; ++sequence) {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
     // Re-send requested sample if still buffered; missing samples
     // will be scored against the given DisjointSequence:
     BufferMap::iterator it(buffers_.find(sequence));
@@ -411,11 +418,11 @@ SingleSendBuffer::resend_i(const SequenceRange& range, DisjointSequence* gaps,
     }
   }
   // Have we resent all requested data?
-  return lowForAllResent >= low() && range.second <= high();
+  return lowForAllResent >= buffers_.begin()->first && range.second <= buffers_.rbegin()->first;
 }
 
 void
-SingleSendBuffer::resend_fragments_i(const SequenceNumber& seq,
+SingleSendBuffer::resend_fragments_i(SequenceNumber seq,
                                      const DisjointSequence& requested_frags)
 {
   if (fragments_.empty() || requested_frags.empty()) {

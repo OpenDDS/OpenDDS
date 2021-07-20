@@ -5,17 +5,19 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_SUBSCRIBER_H
-#define OPENDDS_DCPS_SUBSCRIBER_H
+#ifndef OPENDDS_DCPS_SUBSCRIBERIMPL_H
+#define OPENDDS_DCPS_SUBSCRIBERIMPL_H
 
-#include "dds/DCPS/DataReaderCallbacks.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
+#include "DataReaderCallbacks.h"
 #include "EntityImpl.h"
 #include "Definitions.h"
 #include "DataCollector_T.h"
 #include "DataReaderImpl.h"
-#include "ace/Recursive_Thread_Mutex.h"
-#include "dds/DCPS/PoolAllocator.h"
+#include "PoolAllocator.h"
+
+#include <dds/DdsDcpsInfoUtilsC.h>
+
+#include <ace/Recursive_Thread_Mutex.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -179,6 +181,7 @@ private:
   DDS::SubscriberQos           qos_;
   DDS::DataReaderQos           default_datareader_qos_;
 
+  ACE_Thread_Mutex             listener_mutex_;
   DDS::StatusMask              listener_mask_;
   DDS::SubscriberListener_var  listener_;
 
@@ -187,7 +190,8 @@ private:
   DataReaderSet                datareader_set_;
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
-  OPENDDS_MAP(OPENDDS_STRING, DDS::DataReader_var) multitopic_reader_map_;
+  typedef OPENDDS_MAP(String, DDS::DataReader_var) MultitopicReaderMap;
+  MultitopicReaderMap multitopic_reader_map_;
 #endif
 
   WeakRcHandle<DomainParticipantImpl> participant_;

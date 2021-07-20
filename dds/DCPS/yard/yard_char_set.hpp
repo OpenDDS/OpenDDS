@@ -4,8 +4,8 @@
 // These are classes for defining set of characters at compile-time, and checking membership
 // with maximum efficiency.
 
-#ifndef YARD_CHAR_SET_HPP
-#define YARD_CHAR_SET_HPP
+#ifndef OPENDDS_DCPS_YARD_YARD_CHAR_SET_HPP
+#define OPENDDS_DCPS_YARD_YARD_CHAR_SET_HPP
 
 namespace yard
 {
@@ -202,5 +202,4 @@ namespace yard
       WhiteSpaceCharSet;
 }
 
-#endif // #ifndef YARD_CHAR_SET_HPP
-
+#endif // OPENDDS_DCPS_YARD_YARD_CHAR_SET_HPP

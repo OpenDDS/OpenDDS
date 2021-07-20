@@ -38,12 +38,15 @@ struct ValueWriter {
 
   virtual void begin_struct() {}
   virtual void end_struct() {}
+  virtual void begin_struct_member(const char* /*name*/) {}
+  virtual void end_struct_member() {}
+
   virtual void begin_union() {}
   virtual void end_union() {}
   virtual void begin_discriminator() {}
   virtual void end_discriminator() {}
-  virtual void begin_field(const char* /*name*/) {}
-  virtual void end_field() {}
+  virtual void begin_union_member(const char* /*name*/) {}
+  virtual void end_union_member() {}
 
   virtual void begin_array() {}
   virtual void end_array() {}
@@ -54,8 +57,8 @@ struct ValueWriter {
 
   virtual void write_boolean(ACE_CDR::Boolean /*value*/) = 0;
   virtual void write_byte(ACE_CDR::Octet /*value*/) = 0;
-  virtual void write_int8(ACE_CDR::Char /*value*/) = 0;
-  virtual void write_uint8(ACE_CDR::Octet /*value*/) = 0;
+  virtual void write_int8(ACE_CDR::Int8 /*value*/) = 0;
+  virtual void write_uint8(ACE_CDR::UInt8 /*value*/) = 0;
   virtual void write_int16(ACE_CDR::Short /*value*/) = 0;
   virtual void write_uint16(ACE_CDR::UShort /*value*/) = 0;
   virtual void write_int32(ACE_CDR::Long /*value*/) = 0;

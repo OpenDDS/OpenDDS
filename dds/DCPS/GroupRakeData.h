@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef GROUPRAKEDATA_H
-#define GROUPRAKEDATA_H
+#ifndef OPENDDS_DCPS_GROUPRAKEDATA_H
+#define OPENDDS_DCPS_GROUPRAKEDATA_H
 
 #include /**/ "ace/pre.h"
 #include "dcps_export.h"

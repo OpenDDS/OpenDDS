@@ -126,7 +126,7 @@ sub usage {
     "                         options. (default perform check)\n" .
     "  --list-all             Same as --list, but show every step regardless of\n" .
     "                         options.\n" .
-    "  --steps                Optional, Steps to perform, default is all\n" .
+    "  --steps STEPS          Optional, Steps to perform, default is all\n" .
     "                         See \"Step Expressions\" Below for what it accepts.\n" .
     "  --remedy               Remediate problems where possible\n" .
     "  --force                Keep going if possible\n" .
@@ -283,6 +283,8 @@ sub run_command ($;$) {
 }
 
 sub yes_no {
+  my $message = shift;
+  print("$message [y/n] ");
   while (<STDIN>) {
     chomp;
     if ($_ eq "n") {
@@ -394,18 +396,15 @@ sub parse_version {
     my $metadata_maybe = $result{metadata} ? "-$result{metadata}" : "";
 
     $result{series_string} = "$result{major}.$result{minor}";
-    $result{series_string_with_metadata} = "$result{series_string}$metadata_maybe";
     $result{release_string} = "$result{series_string}.$result{micro}";
-    $result{release_string_with_metadata} = "$result{release_string}$metadata_maybe";
+    $result{string} = "$result{release_string}$metadata_maybe";
     if ($result{micro} eq "0") {
-      $result{string} = $result{series_string};
+      $result{tag_string} = $result{series_string};
     } else {
-      $result{string} = $result{release_string};
+      $result{tag_string} = $result{release_string};
     }
-    $result{string_with_metadata} = "$result{string}$metadata_maybe";
 
     # For Version Comparison
-    $result{full_string} = $result{release_string_with_metadata};
     my @metadata_fields = split(/\./, $result{metadata});
     $result{metadata_fields} = \@metadata_fields;
   }
@@ -473,7 +472,7 @@ sub version_greater_equal {
 sub version_not_equal {
   my $left = shift();
   my $right = shift();
-  return $left->{full_string} ne $right->{full_string};
+  return $left->{string} ne $right->{string};
 }
 
 sub version_greater {
@@ -514,7 +513,7 @@ sub message_git_remote {
   my $settings = shift;
   my $remote = $settings->{remote};
   my $alt_url = $settings->{alt_url};
-  my $start = "Remote $remote has url $alt_url, \n" .
+  my $start = "Remote $remote has url $alt_url,\n" .
          "which does not match expected URL $settings->{git_url}";
 }
 
@@ -530,7 +529,6 @@ sub override_git_remote {
 ############################################################################
 sub verify_git_status_clean {
   my ($settings, $strict) = @_;
-  my $version = $settings->{version};
   my $clean = 1;
   my $status = open(GITSTATUS, 'git status -s|');
   my $modified = $settings->{modified};
@@ -555,9 +553,11 @@ sub remedy_git_status_clean {
   my $settings = shift();
   my $post_release = shift() || 0;
   my $version = $settings->{version};
-  system("git diff") == 0 or die "Could not execute: git diff";
-  print "Would you like to add and commit these changes [y/n]? ";
-  return 0 if (!yes_no());
+
+  if (!run_command("git --no-pager diff HEAD")) {
+    return 0;
+  }
+  return 0 if (!yes_no("Would you like to add and commit these changes?"));
   if (!$post_release) {
     system("git add docs/history/ChangeLog-$version") == 0
       or die "Could not execute: git add docs/history/ChangeLog-$version";
@@ -565,10 +565,10 @@ sub remedy_git_status_clean {
   system("git add -u") == 0 or die "Could not execute: git add -u";
   my $message;
   if ($post_release) {
-    $message = "OpenDDS Release $version";
+    $message = "OpenDDS Post Release $version";
   }
   else {
-    $message = "OpenDDS Post Release $version";
+    $message = "OpenDDS Release $version";
   }
   system("git commit -m '" . $message . "'") == 0 or die "Could not execute: git commit -m";
   return 1;
@@ -798,6 +798,7 @@ EOF
 }
 ############################################################################
 
+# This section deals with the AUTHORS file
 # See $DDS_ROOT/.mailmap file for how to add individual corrections
 
 my $github_email_re = qr/^(?:\d+\+)?(.*)\@users.noreply.github.com$/;
@@ -895,7 +896,7 @@ sub verify_authors {
   my $settings = shift();
   @global_authors = get_authors() if (!@global_authors);
 
-  my $tmp_authors_path = "$settings->{workspace}/AUTHORS";
+  my $tmp_authors_path = "$settings->{workspace}/temp_authors";
   open(my $file, '>', $tmp_authors_path) or die ("Could not open $tmp_authors_path: $!");
   foreach my $author (@global_authors) {
     print $file "$author->{name} <$author->{email}>\n";
@@ -1054,17 +1055,17 @@ sub verify_update_version_h_file {
 
   my $status = open(VERSION_H, 'dds/Version.h') or die("Opening: $!");
   while (<VERSION_H>) {
-    if ($_ =~ /^#define DDS_MAJOR_VERSION $parsed_version->{major}$/) {
+    if ($_ =~ /^#define OPENDDS_MAJOR_VERSION $parsed_version->{major}$/) {
       ++$matched_major;
-    } elsif ($_ =~ /^#define DDS_MINOR_VERSION $parsed_version->{minor}$/) {
+    } elsif ($_ =~ /^#define OPENDDS_MINOR_VERSION $parsed_version->{minor}$/) {
       ++$matched_minor;
-    } elsif ($_ =~ /^#define DDS_MICRO_VERSION $parsed_version->{micro}$/) {
+    } elsif ($_ =~ /^#define OPENDDS_MICRO_VERSION $parsed_version->{micro}$/) {
       ++$matched_micro;
     } elsif ($_ =~ /^#define OPENDDS_VERSION_METADATA "$metadata"$/) {
       ++$matched_metadata;
     } elsif ($_ =~ /^#define OPENDDS_IS_RELEASE $release$/) {
       ++$matched_release;
-    } elsif ($_ =~ /^#define DDS_VERSION "$metaversion"$/) {
+    } elsif ($_ =~ /^#define OPENDDS_VERSION "$metaversion"$/) {
       ++$matched_version;
     }
   }
@@ -1101,25 +1102,25 @@ sub remedy_update_version_h_file {
   my $corrected_release = 0;
   my $corrected_version = 0;
 
-  my $major_line = "#define DDS_MAJOR_VERSION $parsed_version->{major}";
-  my $minor_line = "#define DDS_MINOR_VERSION $parsed_version->{minor}";
-  my $micro_line = "#define DDS_MICRO_VERSION $parsed_version->{micro}";
+  my $major_line = "#define OPENDDS_MAJOR_VERSION $parsed_version->{major}";
+  my $minor_line = "#define OPENDDS_MINOR_VERSION $parsed_version->{minor}";
+  my $micro_line = "#define OPENDDS_MICRO_VERSION $parsed_version->{micro}";
   my $metadata_line = "#define OPENDDS_VERSION_METADATA \"$parsed_version->{metadata}\"";
   my $release_line = "#define OPENDDS_IS_RELEASE $release";
-  my $version_line = "#define DDS_VERSION \"$version\"";
+  my $version_line = "#define OPENDDS_VERSION \"$version\"";
 
   open(VERSION_H, "+< dds/Version.h") or die "Opening: $!";
 
   my $out = "";
 
   while (<VERSION_H>) {
-    if (s/^#define DDS_MAJOR_VERSION .*$/$major_line/) {
+    if (s/^#define OPENDDS_MAJOR_VERSION .*$/$major_line/) {
       ++$corrected_major;
     }
-    elsif (s/^#define DDS_MINOR_VERSION .*$/$minor_line/) {
+    elsif (s/^#define OPENDDS_MINOR_VERSION .*$/$minor_line/) {
       ++$corrected_minor;
     }
-    elsif (s/^#define DDS_MICRO_VERSION .*$/$micro_line/) {
+    elsif (s/^#define OPENDDS_MICRO_VERSION .*$/$micro_line/) {
       ++$corrected_micro;
     }
     elsif (s/^#define OPENDDS_VERSION_METADATA .*$/$metadata_line/) {
@@ -1128,7 +1129,7 @@ sub remedy_update_version_h_file {
     elsif (s/^#define OPENDDS_IS_RELEASE .*$/$release_line/) {
       ++$corrected_release;
     }
-    elsif (s/^#define DDS_VERSION .*$/$version_line/) {
+    elsif (s/^#define OPENDDS_VERSION .*$/$version_line/) {
       ++$corrected_version;
     }
     $out .= $_;
@@ -1512,23 +1513,27 @@ sub remedy_zip_source {
   return !$result;
 }
 ############################################################################
-sub verify_md5_checksum{
+sub verify_md5_checksum {
   my $settings = shift();
-  my $file = join("/", $settings->{workspace}, $settings->{md5_src});
-  return run_command("md5sum --check --quiet $file");
+  my $orig_dir = getcwd();
+  chdir($settings->{workspace});
+  my $status = run_command("md5sum --check --quiet $settings->{md5_src}");
+  chdir($orig_dir);
+  return $status;
 }
 
-sub message_md5_checksum{
+sub message_md5_checksum {
   return "Generate the MD5 checksum file";
 }
 
-sub remedy_md5_checksum{
+sub remedy_md5_checksum {
   my $settings = shift();
   print "Creating file $settings->{md5_src}\n";
-  my $md5_file = join("/", $settings->{workspace}, $settings->{md5_src});
-  my $tgz_file = join("/", $settings->{workspace}, $settings->{tgz_src});
-  my $zip_file = join("/", $settings->{workspace}, $settings->{zip_src});
-  return run_command("md5sum $tgz_file $zip_file > $md5_file");
+  my $orig_dir = getcwd();
+  chdir($settings->{workspace});
+  my $status = run_command("md5sum $settings->{tgz_src} $settings->{zip_src} > $settings->{md5_src}");
+  chdir($orig_dir);
+  return $status;
 }
 ############################################################################
 
@@ -2047,6 +2052,7 @@ my $skip_doxygen = 0;
 my $skip_website = 0;
 my $skip_ftp = 0;
 my $ftp_active = 0;
+my $ftp_port = 0;
 
 GetOptions(
   'help' => \$print_help,
@@ -2067,6 +2073,7 @@ GetOptions(
   'skip-website' => \$skip_website ,
   'skip-ftp' => \$skip_ftp,
   'ftp-active' => \$ftp_active,
+  'ftp-port=s' => \$ftp_port,
 ) or die "See --help for options.\nStopped";
 
 if (!(scalar(@ARGV) == 0 || scalar(@ARGV) == 2)) {
@@ -2078,7 +2085,7 @@ if ($print_list_all) {
 }
 
 if ($micro) {
-  if (!$print_list && !$branch) {
+  if (!$print_list && $branch eq $default_branch) {
     die "For micro releases, you must define the branch you want to use with --branch.\nStopped";
   }
   $skip_devguide = 1;
@@ -2102,33 +2109,44 @@ my $base_name = "";
 my $release_branch = "";
 if (%parsed_version) {
   $version = $parsed_version{string};
-  $base_name = "${base_name_prefix}${version}";
+  print("Version to release is $version\n");
+  $base_name = "${base_name_prefix}$parsed_version{tag_string}";
   if (!$micro) {
     $release_branch =
       "${release_branch_prefix}${git_name_prefix}$parsed_version{series_string}";
     if ($parsed_version{micro} != 0) {
-      print STDERR "WARNING: " .
-        "version looks like a micro release, but --micro wasn't passed!\n";
+      exit(0) if (!yes_no(
+        "Version looks like a micro release, but --micro wasn't passed! Continue?"));
     }
   }
   elsif ($parsed_version{micro} == 0) {
-    print STDERR "WARNING: " .
-      "version looks like a major or minor release, but --micro was passed!\n";
+    exit(0) if (!yes_no(
+      "Version looks like a major or minor release, but --micro was passed! Continue?"));
   }
   if (!$next_version) {
-    $next_version = sprintf("%s.%d",
-      $parsed_version{major}, int($parsed_version{minor}) + 1);
+    my $next_minor = int($parsed_version{minor}) + ($micro ? 0 : 1);
+    my $next_micro = $micro ? (int($parsed_version{micro}) + 1) : 0;
+    $next_version = sprintf("%s.%d.%d", $parsed_version{major}, $next_minor, $next_micro);
   }
   $next_version .= "-${metadata}";
   %parsed_next_version = parse_version($next_version);
   if (!%parsed_next_version) {
     die "Invalid next version: $next_version\nStopped";
   }
-  $next_version = $parsed_version{string_with_metadata};
+  $next_version = $parsed_next_version{string};
+  print("Next after this version is going to be $next_version\n");
 }
-else {
+elsif (!$print_help) {
   die "Invalid version: $version\nStopped";
 }
+
+if (!$skip_ftp && !$print_help) {
+  die("FTP_USERNAME, FTP_PASSWD, FTP_HOST need to be defined")
+    if (!(defined($ENV{FTP_USERNAME}) && defined($ENV{FTP_PASSWD}) && defined($ENV{FTP_HOST})));
+}
+
+my $release_timestamp = POSIX::strftime($release_timestamp_fmt, gmtime);
+$release_timestamp =~ s/  / /g; # Single digit days of the month result in an extra space
 
 my %global_settings = (
     list         => $print_list,
@@ -2145,7 +2163,7 @@ my %global_settings = (
     next_version => $next_version,
     parsed_next_version => \%parsed_next_version,
     base_name    => $base_name,
-    git_tag      => "${git_name_prefix}${version}",
+    git_tag      => "${git_name_prefix}$parsed_version{tag_string}",
     clone_dir    => join("/", $workspace, ${base_name}),
     tar_src      => "${base_name}.tar",
     tgz_src      => "${base_name}.tar.gz",
@@ -2154,9 +2172,9 @@ my %global_settings = (
     tar_dox      => "${base_name}-doxygen.tar",
     tgz_dox      => "${base_name}-doxygen.tar.gz",
     zip_dox      => "${base_name}-doxygen.zip",
-    devguide_ver => "${base_name}.pdf",
+    devguide_ver => "${base_name_prefix}$parsed_version{series_string}.pdf",
     devguide_lat => "${base_name_prefix}latest.pdf",
-    timestamp    => POSIX::strftime($release_timestamp_fmt, gmtime),
+    timestamp    => $release_timestamp,
     git_url      => "git\@github.com:${github_user}/${repo_name}.git",
     github_repo  => $repo_name,
     github_token => $ENV{GITHUB_TOKEN},
@@ -2182,6 +2200,7 @@ my %global_settings = (
     release_flag_file_path => "$workspace/$release_flag_filename",
     release_flag_file_exists => 0,
     ftp_active => $ftp_active,
+    ftp_port => $ftp_port,
 );
 
 if (verify_release_flag_file(\%global_settings)) {
@@ -2322,6 +2341,16 @@ my @release_steps  = (
     remedy  => sub{remedy_zip_source(@_)}
   },
   {
+    name    => 'Create MD5 Checksum File',
+    prereqs => [
+      'Create Unix Release Archive',
+      'Create Windows Release Archive',
+    ],
+    verify  => sub{verify_md5_checksum(@_)},
+    message => sub{message_md5_checksum(@_)},
+    remedy  => sub{remedy_md5_checksum(@_)},
+  },
+  {
     name    => 'Download OCI ACE/TAO',
     prereqs => ['Create Workspace Directory'],
     verify  => sub{verify_download_ace_tao(@_)},
@@ -2362,16 +2391,6 @@ my @release_steps  = (
     skip    => $global_settings{skip_doxygen},
   },
   {
-    name    => 'Create MD5 Checksum File',
-    prereqs => [
-      'Create Unix Release Archive',
-      'Create Windows Release Archive',
-    ],
-    verify  => sub{verify_md5_checksum(@_)},
-    message => sub{message_md5_checksum(@_)},
-    remedy  => sub{remedy_md5_checksum(@_)},
-  },
-  {
     name    => 'Download Devguide',
     prereqs => ['Create Workspace Directory'],
     verify  => sub{verify_devguide(@_)},
@@ -2402,7 +2421,7 @@ my @release_steps  = (
   {
     name => 'Create Release Flag File',
     verify => sub{verify_release_flag_file(@_)},
-    message => sub{ return "Release flag file needs to be created."},
+    message => sub{return "Release flag file needs to be created."},
     remedy => sub{touch_file("$_[0]->{release_flag_file_path}"); return 0;},
     post_release => 1,
   },
@@ -2456,7 +2475,8 @@ my @release_steps  = (
     name    => 'Email DDS-Release-Announce list',
     verify  => sub{verify_email_list(@_)},
     message => sub{message_email_dds_release_announce(@_)},
-    remedy  => sub{remedy_email_dds_release_announce(@_)}
+    remedy  => sub{remedy_email_dds_release_announce(@_)},
+    post_release => 1,
   },
 );
 
@@ -2508,8 +2528,7 @@ sub run_step {
 
   return if (
     !$settings->{list_all} && ($step->{skip} || $step->{verified} ||
-    ($settings->{release_flag_file_exists} && !$step->{post_release}) ||
-    ($settings->{micro} && $step->{post_release})));
+    ($settings->{release_flag_file_exists} && !$step->{post_release})));
   print "$step_count: $title\n";
   return if $settings->{list};
 
@@ -2561,7 +2580,7 @@ sub run_step {
     print "$divider\n";
   }
 
-  print "  OK!\n";
+  print "  Step $step_count \"$title\" is OK!\n";
 
   $step->{verified} = 1;
 }

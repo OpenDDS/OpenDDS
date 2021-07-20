@@ -29,7 +29,7 @@ extern "C" {
 
 #include <ace/Message_Block.h>
 
-#include "tools/dissector/dissector_export.h"
+#include "dissector_export.h"
 #include "ws_common.h"
 
 #include "FACE/Fixed.h"
@@ -106,7 +106,7 @@ namespace OpenDDS
       guint32 index;
 
       Wireshark_Bundle(
-        char* data, size_t size, bool swap_bytes, Serializer::Alignment align
+        char* data, size_t size, bool swap_bytes, Encoding::Alignment align
       );
       Wireshark_Bundle(const Wireshark_Bundle & other);
 

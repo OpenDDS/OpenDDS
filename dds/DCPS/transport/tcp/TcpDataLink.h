@@ -5,13 +5,18 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_TCPDATALINK_H
-#define OPENDDS_TCPDATALINK_H
+#ifndef OPENDDS_DCPS_TRANSPORT_TCP_TCPDATALINK_H
+#define OPENDDS_DCPS_TRANSPORT_TCP_TCPDATALINK_H
 
 #include "TcpConnection_rch.h"
 #include "TcpTransport.h"
 #include "dds/DCPS/transport/framework/DataLink.h"
 #include "ace/INET_Addr.h"
+#ifdef ACE_HAS_CPP11
+#  include <atomic>
+#else
+#  include <ace/Atomic_Op.h>
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -70,6 +75,8 @@ public:
                        const TransportReceiveListener_wrch& receive_listener,
                        bool reliable);
 
+  void do_association_actions();
+
 protected:
 
   /// Called when the DataLink is self-releasing because all of its
@@ -80,13 +87,16 @@ protected:
 private:
   bool handle_send_request_ack(TransportQueueElement* element);
   void send_graceful_disconnect_message();
-  void do_association_actions();
   void send_association_msg(const RepoId& local, const RepoId& remote);
 
   ACE_INET_Addr           remote_address_;
   WeakRcHandle<TcpConnection> connection_;
   bool graceful_disconnect_sent_;
+#ifdef ACE_HAS_CPP11
+  std::atomic<bool> release_is_pending_;
+#else
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> release_is_pending_;
+#endif
   typedef OPENDDS_VECTOR(TransportQueueElement*) PendingRequestAcks;
   ACE_SYNCH_MUTEX pending_request_acks_lock_;
   PendingRequestAcks pending_request_acks_;

@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_TRANSPORTSENDCONTROLELEMENT_H
-#define OPENDDS_DCPS_TRANSPORTSENDCONTROLELEMENT_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTSENDCONTROLELEMENT_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTSENDCONTROLELEMENT_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/GuidUtils.h"
@@ -45,7 +45,7 @@ public:
 
   virtual ~TransportSendControlElement();
 
-  /// Overriden to always return true for Send Control elements.
+  /// Overridden to always return true for Send Control elements.
   virtual bool requires_exclusive_packet() const;
 
   /// Accessor for the publisher id.

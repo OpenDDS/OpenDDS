@@ -47,7 +47,7 @@ $PUB->Spawn();
 
 my $PublisherResult = $PUB->WaitKill(300);
 if ($PublisherResult != 0) {
-    print STDERR "ERROR: participant returned $PublisherResult \n";
+    print STDERR "ERROR: participant returned $PublisherResult\n";
     $status = 1;
 }
 

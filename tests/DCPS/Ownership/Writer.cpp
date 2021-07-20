@@ -107,7 +107,7 @@ Writer::svc()
 
     for (int i = 0; i < num_messages; i++) {
       message.subject_id = message.count % 2;  // 0 or 1
-      ACE_DEBUG ((LM_DEBUG, "(%P|%t) %s writes instance %d count %d str %d\n",
+      ACE_DEBUG ((LM_DEBUG, "(%P|%t) %C writes instance %d count %d str %d\n",
       ownership_dw_id_.c_str(), message.subject_id, message.count, message.strength));
       DDS::ReturnCode_t error = message_dw->write(message, ::DDS::HANDLE_NIL);
 
@@ -136,7 +136,7 @@ Writer::svc()
           // with previous strength is received by datareader. This helps simplify
           // result verification on subscriber side.
           ACE_OS::sleep (1);
-          ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) %s : reset ownership strength from %d to %d\n"),
+          ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) %C : reset ownership strength from %d to %d\n"),
             ownership_dw_id_.c_str(), old, reset_ownership_strength));
           error = this->writer_->set_qos (qos);
           if (error != ::DDS::RETCODE_OK) {
@@ -164,7 +164,7 @@ Writer::svc()
 
       if ((message.count == 5)
            && reset_delay > ACE_Time_Value::zero) {
-        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) %s : reset delay from %d to %d at sample %d\n"),
+        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) %C : reset delay from %d to %d at sample %d\n"),
           ownership_dw_id_.c_str(), dds_delay.msec(), reset_delay.msec(), message.count));
         ACE_OS::sleep (reset_delay);
       }

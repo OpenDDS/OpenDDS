@@ -10,13 +10,9 @@ general overview of OpenDDS.
 
   - JDK (Java Development Kit) for Java SE 5 and up
 
-    <http://java.sun.com/javase/downloads>
-    Sun distributes the JDK for Windows, Linux, and Solaris.  OpenDDS supports
-    these three platforms in both 32-bit and 64-bit variants.  There is also
-    experimental support for the 32-bit and 64-bit variants of the JDK provided
-    by Apple on macOS.  If you are using a 64-bit JDK, make sure all the
-    native libraries are also built for 64-bit.  Similarly, a 32-bit JDK must
-    be matched with 32-bit native libraries.
+    If you are using a 64-bit JDK, make sure all the native libraries are also
+    built for 64-bit.  Similarly, a 32-bit JDK must be matched with 32-bit
+    native libraries.
 
     If using a recent JDK version (9 and higher) that includes the JPMS
     (Java Platform Module System), disable the MPC feature java_pre_jpms.
@@ -29,38 +25,16 @@ general overview of OpenDDS.
     your chosen platform, namely:
     Windows  => Microsoft Visual C++ <http://msdn.microsoft.com/en-us/visualc>
     Linux    => GNU Compiler Collection (GCC) <http://gcc.gnu.org>
-    Mac OS X => GNU Compiler Collection (GCC) <http://gcc.gnu.org>
-    Solaris  => Sun Studio (SunCC) <http://developers.sun.com/sunstudio>
+    Mac OS   => AppleClang included with Xcode
 
-    Other combinations are possible (gcc on Windows, SunCC on Linux, etc.) but
+    Other combinations are possible (gcc on Windows, for example) but
     these have not been tested and will not be covered by this document.
 
-    The following versions are supported:
-    - Visual C++ 9 SP1 (part of Visual Studio 2008), Visual C++ 10 SP1 (part of
-      Visual Studio 2010), Visual C++ 11 (part of Visual Studio 2012),
-      Visual C++ 12 (part of Visual Studio 2013) and Visual C++ 14 (part of
-      Visual Studio 2015).
-
-      VC++ 9 and later have free "express editions" -- these will work fine,
-      see <http://www.microsoft.com/express/vc/>.
-
-      Note: VC10 (VS2010) and later are supported but there are some issues
-      with dependencies and parallel builds.
-
-      When building with VC10 and later, you may need to build twice - the first
-      fails, and the second builds successfully.
-
-    - GCC 4.0.x or later (earlier versions may work but haven't been tested)
-      Preferably, use the default gcc from your Linux or Mac OS X distribution.
-    - Sun Studio 12 (SunCC 5.9) Earlier versions are known to have problems
-      with some of the code in the OpenDDS Java bindings.
-
-    On Linux and Solaris, GNU make is also required.  It will almost
+    On Linux and Mac OS, GNU Make is also required.  It will almost
     certainly be installed by default on Linux (if not use your
-    platform's package management system).  On Solaris be sure that you are
-    using GNU make, which may be invoked as "gmake".
+    platform's package management system).
 
-    On OS X El Capitan, Yosemite, Mavericks onward, the required build tools
+    On Mac OS El Capitan, Yosemite, Mavericks onward, the required build tools
     can be installed by typing the following command from termial.
 
        xcode-select --install
@@ -140,4 +114,3 @@ general overview of OpenDDS.
 * Next Steps: Developing Java applications with OpenDDS
 
   See the README.md file in this directory.
-

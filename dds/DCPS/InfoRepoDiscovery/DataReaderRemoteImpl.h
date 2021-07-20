@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_DATAREADERREMOTEIMPL_H
-#define OPENDDS_DCPS_DATAREADERREMOTEIMPL_H
+#ifndef OPENDDS_DCPS_INFOREPODISCOVERY_DATAREADERREMOTEIMPL_H
+#define OPENDDS_DCPS_INFOREPODISCOVERY_DATAREADERREMOTEIMPL_H
 
 #include "InfoRepoDiscovery_Export.h"
 #include "DataReaderRemoteS.h"
@@ -42,8 +42,6 @@ public:
   virtual void add_association(const RepoId& yourId,
                                const WriterAssociation& writer,
                                bool active);
-
-  virtual void association_complete(const RepoId& remote_id);
 
   virtual void remove_associations(const WriterIdSeq& writers,
                                    CORBA::Boolean callback);

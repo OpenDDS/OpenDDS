@@ -37,7 +37,7 @@ def cond_eval line
         break
       end
     end
-  end 
+  end
   $cond_false.each do |expr|
     if line.match expr
       $cond_stack.push false

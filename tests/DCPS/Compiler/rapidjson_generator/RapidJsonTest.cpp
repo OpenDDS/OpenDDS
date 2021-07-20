@@ -27,6 +27,8 @@ TEST(RapidJsonTest, ParseTest)
   ASSERT_EQ(sample.enu, Mod::three);
   ASSERT_EQ(sample.enu2, Mod::two);
   ASSERT_EQ(sample.bt.o, 129);
+  ASSERT_EQ(sample.bt.u8, 130);
+  ASSERT_EQ(sample.bt.i8, -50);
   ASSERT_EQ(sample.bt.us, 32777);
   ASSERT_EQ(sample.bt.s, -32765);
   ASSERT_EQ(sample.bt.ul, 2147483690);
@@ -37,7 +39,7 @@ TEST(RapidJsonTest, ParseTest)
   ASSERT_GT(sample.bt.f, 0.00141 - 1e-6);
   ASSERT_LT(sample.bt.d, -0.00000141 + 1e-9);
   ASSERT_GT(sample.bt.d, -0.00000141 - 1e-9);
-  ASSERT_EQ(sample.bt.ld, 1e34);
+  ASSERT_DOUBLE_EQ(double(sample.bt.ld), 1e34);
   ASSERT_EQ(sample.bt.b, false);
   ASSERT_EQ(sample.bt.c, '\r');
   ASSERT_EQ(std::string(sample.bt.str.in()), "The most JSON of rapids");
@@ -102,6 +104,8 @@ TEST(RapidJsonTest, SerializeTest)
   sample.enu = Mod::three;
   sample.enu2 = Mod::two;
   sample.bt.o = 129;
+  sample.bt.u8 = 130;
+  sample.bt.i8 = -50;
   sample.bt.us = 32777u;
   sample.bt.s = -32765;
   sample.bt.ul = 2147483690u;
@@ -160,6 +164,8 @@ TEST(RapidJsonTest, SerializeTest)
   ASSERT_EQ(val["enu"], "three");
   ASSERT_EQ(val["enu2"], "two");
   ASSERT_EQ(val["bt"]["o"], 129);
+  ASSERT_EQ(val["bt"]["u8"], 130);
+  ASSERT_EQ(val["bt"]["i8"], -50);
   ASSERT_EQ(val["bt"]["us"], 32777u);
   ASSERT_EQ(val["bt"]["s"], -32765);
   ASSERT_EQ(val["bt"]["ul"], 2147483690u);

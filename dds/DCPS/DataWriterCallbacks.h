@@ -8,9 +8,9 @@
 #ifndef OPENDDS_DCPS_DATAWRITERCALLBACKS_H
 #define OPENDDS_DCPS_DATAWRITERCALLBACKS_H
 
-#include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/DiscoveryListener.h"
-#include "dds/DCPS/RcObject.h"
+#include "Definitions.h"
+#include "DiscoveryListener.h"
+#include "RcObject.h"
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -43,8 +43,6 @@ public:
                                const ReaderAssociation& reader,
                                bool active) = 0;
 
-  virtual void association_complete(const RepoId& remote_id) = 0;
-
   virtual void remove_associations(const ReaderIdSeq& readers,
                                    CORBA::Boolean callback) = 0;
 
@@ -68,6 +66,9 @@ public:
 
   virtual ICE::Endpoint* get_ice_endpoint() = 0;
 };
+
+typedef RcHandle<DataWriterCallbacks> DataWriterCallbacks_rch;
+typedef WeakRcHandle<DataWriterCallbacks> DataWriterCallbacks_wrch;
 
 } // namespace DCPS
 } // namespace OpenDDS

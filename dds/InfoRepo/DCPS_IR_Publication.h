@@ -47,7 +47,9 @@ public:
                       OpenDDS::DCPS::DataWriterRemote_ptr writer,
                       const DDS::DataWriterQos& qos,
                       const OpenDDS::DCPS::TransportLocatorSeq& info,
-                      const DDS::PublisherQos& publisherQos);
+                      ACE_CDR::ULong transportContext,
+                      const DDS::PublisherQos& publisherQos,
+                      const DDS::OctetSeq & serializedTypeInfo);
 
   ~DCPS_IR_Publication();
 
@@ -57,16 +59,6 @@ public:
   /// This method can mark the participant dead
   /// Returns 0 if added, 1 if already exists, -1 other failure
   int add_associated_subscription(DCPS_IR_Subscription* sub, bool active);
-
-  /// The service participant that contains this Publication has indicated
-  /// that the assocation to peer "remote" is complete.  This method will
-  /// locate the Subscription object for "remote" in order to inform it
-  /// of the completed association.
-  void association_complete(const OpenDDS::DCPS::RepoId& remote);
-
-  /// Invoke the DataWriterRemote::association_complete() callback, passing
-  /// the "remote" parameter (Subscription) to the service participant.
-  void call_association_complete(const OpenDDS::DCPS::RepoId& remote);
 
   /// Remove the associated subscription
   /// Removes the subscription from the list of associated
@@ -136,6 +128,7 @@ public:
   void set_qos(const DDS::PublisherQos& qos);
 
   OpenDDS::DCPS::TransportLocatorSeq get_transportLocatorSeq() const;
+  ACE_CDR::ULong get_transportContext() const { return transportContext_; }
 
   /// Return pointer to the incompatible qos status
   /// Publication retains ownership
@@ -178,6 +171,8 @@ public:
 
   std::string dump_to_string(const std::string& prefix, int depth) const;
 
+  const DDS::OctetSeq& get_serialized_type_info() const;
+
 private:
 
   OpenDDS::DCPS::RepoId id_;
@@ -190,8 +185,9 @@ private:
   OpenDDS::DCPS::DataWriterRemote_var writer_;
   DDS::DataWriterQos qos_;
   OpenDDS::DCPS::TransportLocatorSeq info_;
+  ACE_CDR::ULong transportContext_;
   DDS::PublisherQos publisherQos_;
-
+  DDS::OctetSeq serializedTypeInfo_;
   DCPS_IR_Subscription_Set associations_;
   DCPS_IR_Subscription_Set defunct_;
 

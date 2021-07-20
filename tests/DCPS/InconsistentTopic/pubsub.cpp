@@ -18,7 +18,6 @@
 using namespace Messenger;
 using namespace std;
 
-
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
   try
     {
@@ -48,7 +47,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       }
 
       CORBA::String_var type_name1 = mts1->get_type_name();
-
       DDS::Topic_var topic1 = p1->create_topic(topic,
                           type_name1.in(),
                           TOPIC_QOS_DEFAULT,
@@ -71,8 +69,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       OpenDDS::DCPS::TransportRegistry::instance()->bind_config("config_2", p2);
 
       DDS::Subscriber_var bit_subscriber2 = p2->get_builtin_subscriber() ;
-      DDS::DataReader_var bit_drg2 = bit_subscriber2->lookup_datareader(OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
-      DDS::SubscriptionBuiltinTopicDataDataReader_var bit_dr2 = DDS::SubscriptionBuiltinTopicDataDataReader::_narrow(bit_drg2);
+      DDS::DataReader_var bit_drg2 = bit_subscriber2->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC);
+      DDS::PublicationBuiltinTopicDataDataReader_var bit_dr2 = DDS::PublicationBuiltinTopicDataDataReader::_narrow(bit_drg2);
 
       Message2TypeSupport_var mts2 = new Message2TypeSupportImpl();
 
@@ -82,7 +80,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       }
 
       CORBA::String_var type_name2 = mts2->get_type_name();
-
       DDS::Topic_var topic2 =
         p2->create_topic(topic,
                          type_name2.in(),
@@ -96,70 +93,37 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
 
       // At this point the participants and topics exist but have not
       // been discovered since there are no readers or writers.
-
-      DDS::Subscriber_var sub1 =
-        p1->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                              DDS::SubscriberListener::_nil(),
+      DDS::Publisher_var pub1 =
+        p1->create_publisher(PUBLISHER_QOS_DEFAULT,
+                              DDS::PublisherListener::_nil(),
                               ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-      if (CORBA::is_nil(sub1.in())) {
+      if (CORBA::is_nil(pub1.in())) {
         cerr << "ERROR: Failed to create_subscriber." << endl;
         exit(1);
       }
 
-      DDS::DataReader_var dr1 = sub1->create_datareader(topic1.in(),
-                                                        DATAREADER_QOS_DEFAULT,
-                                                        DDS::DataReaderListener::_nil(),
+      DDS::DataWriter_var dw1 = pub1->create_datawriter(topic1.in(),
+                                                        DATAWRITER_QOS_DEFAULT,
+                                                        DDS::DataWriterListener::_nil(),
                                                         ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-      if (CORBA::is_nil(dr1.in())) {
-        cerr << "ERROR: create_datareader failed." << endl;
+      if (CORBA::is_nil(dw1.in())) {
+        cerr << "ERROR: create_datawriter failed." << endl;
         exit(1);
       }
 
-      // Wait for p2 to see p1's datareader.
-
-      for (;;) {
-        DDS::SubscriptionBuiltinTopicDataSeq sub_data;
-        DDS::SampleInfoSeq infos;
-        DDS::ReturnCode_t ret = bit_dr2->read(sub_data, infos, 1, DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
-        if (ret == DDS::RETCODE_OK) {
-           break;
-        } else {
-          cout << "Waiting for participant 2 to discover topic from participant 1 " << std::endl;
-          ACE_OS::sleep (1);
-         }
-       }
-
-      // At this point, p2 should have an inconsistent topic and p1
-      // will not.
-
-      DDS::InconsistentTopicStatus status;
-      DDS::ReturnCode_t retcode;
-
-      retcode = topic1->get_inconsistent_topic_status(status);
+      // At this point dw1 should not have a publication matched
+      DDS::PublicationMatchedStatus pub_status;
+      DDS::ReturnCode_t retcode = dw1->get_publication_matched_status(pub_status);
       if (retcode != DDS::RETCODE_OK) {
-        cerr << "ERROR: not able to retrieve topic status." << endl;
+        cerr << "ERROR: not able to retrieve publication matched status from dw1." << endl;
         exit(1);
       }
-      if (status.total_count != 0) {
-        cerr << "ERROR: (alpha) participant 1 total_count should be 0 but is " << status.total_count << endl;
+      if (pub_status.total_count != 0) {
+        cerr << "ERROR: dw1 total_count should be 0 but is " << pub_status.total_count << endl;
         test_error = true;
       }
-      if (status.total_count_change != 0) {
-        cerr << "ERROR: (alpha) participant 1 total_count_change should be 0 but is " << status.total_count_change << endl;
-        test_error = true;
-      }
-
-      retcode = topic2->get_inconsistent_topic_status(status);
-      if (retcode != DDS::RETCODE_OK) {
-        cerr << "ERROR: not able to retrieve topic status." << endl;
-        exit(1);
-      }
-      if (status.total_count != 1) {
-        cerr << "ERROR: (alpha) participant 2 total_count should be 1 but is " << status.total_count << endl;
-        test_error = true;
-      }
-      if (status.total_count_change != 1) {
-        cerr << "ERROR: (alpha) participant 2 total_count_change should be 1 but is " << status.total_count_change << endl;
+      if (pub_status.total_count_change != 0) {
+        cerr << "ERROR: dw1 total_count_change should be 0 but is " << pub_status.total_count_change << endl;
         test_error = true;
       }
 
@@ -181,12 +145,24 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
         exit(1);
       }
 
-      // Wait for p1 to see p2's datareader.
+      // Wait for p2 to see p1's datawriter.
+      for (;;) {
+        DDS::PublicationBuiltinTopicDataSeq pub_data;
+        DDS::SampleInfoSeq infos;
+        DDS::ReturnCode_t ret = bit_dr2->read(pub_data, infos, 1, DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+        if (ret == DDS::RETCODE_OK) {
+           break;
+        } else {
+          cout << "Waiting for participant 2 to discover topic from participant 1 " << std::endl;
+          ACE_OS::sleep (1);
+        }
+      }
 
+      // Wait for p1 to see p2's datareader.
       for (;;) {
         DDS::SubscriptionBuiltinTopicDataSeq sub_data;
         DDS::SampleInfoSeq infos;
-        DDS::ReturnCode_t ret = bit_dr1->read(sub_data, infos, 1, DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+        const DDS::ReturnCode_t ret = bit_dr1->read(sub_data, infos, 1, DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
         if (ret == DDS::RETCODE_OK) {
           break;
         } else {
@@ -195,17 +171,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
         }
       }
 
+      // At this point, p2 should have an inconsistent topic and so will p1
+      DDS::InconsistentTopicStatus status;
+
       retcode = topic1->get_inconsistent_topic_status(status);
       if (retcode != DDS::RETCODE_OK) {
         cerr << "ERROR: not able to retrieve topic status." << endl;
         exit(1);
       }
       if (status.total_count != 1) {
-        cerr << "ERROR: (beta) participant 1 total_count should be 1 but is " << status.total_count << endl;
+        cerr << "ERROR: participant 1 total_count should be 1 but is " << status.total_count << endl;
         test_error = true;
       }
       if (status.total_count_change != 1) {
-        cerr << "ERROR: (beta) participant 1 total_count_change should be 1 but is " << status.total_count_change << endl;
+        cerr << "ERROR: participant 1 total_count_change should be 1 but is " << status.total_count_change << endl;
         test_error = true;
       }
 
@@ -215,11 +194,42 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
         exit(1);
       }
       if (status.total_count != 1) {
-        cerr << "ERROR: (beta) participant 2 total_count should be 1 but is " << status.total_count << endl;
+        cerr << "ERROR: participant 2 total_count should be 1 but is " << status.total_count << endl;
         test_error = true;
       }
-      if (status.total_count_change != 0) {
-        cerr << "ERROR: (beta) participant 2 total_count_change should be 0 but is " << status.total_count_change << endl;
+      if (status.total_count_change != 1) {
+        cerr << "ERROR: participant 2 total_count_change should be 1 but is " << status.total_count_change << endl;
+        test_error = true;
+      }
+
+      // At this moment there should be no subscription matched
+      DDS::SubscriptionMatchedStatus sub_status;
+      retcode = dr2->get_subscription_matched_status(sub_status);
+      if (retcode != DDS::RETCODE_OK) {
+        cerr << "ERROR: not able to retrieve subscription matched status from dr2." << endl;
+        exit(1);
+      }
+      if (sub_status.total_count != 0) {
+        cerr << "ERROR: dr2 total_count should be 0 but is " << sub_status.total_count << endl;
+        test_error = true;
+      }
+      if (sub_status.total_count_change != 0) {
+        cerr << "ERROR: dr2 total_count_change should be 0 but is " << sub_status.total_count_change << endl;
+        test_error = true;
+      }
+
+      // At this moment there should be no publication matched
+      retcode = dw1->get_publication_matched_status(pub_status);
+      if (retcode != DDS::RETCODE_OK) {
+        cerr << "ERROR: not able to retrieve publication matched status from dw1." << endl;
+        exit(1);
+      }
+      if (pub_status.total_count != 0) {
+        cerr << "ERROR: dw1 total_count should be 0 but is " << pub_status.total_count << endl;
+        test_error = true;
+      }
+      if (pub_status.total_count_change != 0) {
+        cerr << "ERROR: dw1 total_count_change should be 0 but is " << pub_status.total_count_change << endl;
         test_error = true;
       }
 

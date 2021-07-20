@@ -5,8 +5,9 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "dds/DCPS/ReceivedDataElementList.h"
-#include "ace/Truncate.h"
+#include "ReceivedDataElementList.h"
+
+#include <ace/Truncate.h>
 
 #include <utility>
 #include <algorithm>
@@ -276,8 +277,10 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::assign_ptr(
   OpenDDS::DCPS::ReceivedDataElement* item)
 {
   OPENDDS_ASSERT(is_zero_copy());
-  if (ptrs_[ii])
+  if (ptrs_[ii]) {
+    --ptrs_[ii]->zero_copy_cnt_;
     ptrs_[ii]->dec_ref();
+  }
 
   item->inc_ref();
   ++item->zero_copy_cnt_;

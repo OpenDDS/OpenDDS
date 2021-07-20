@@ -17,7 +17,7 @@ from within Wireshark.
 - [See Also](#see-also)
 - [Building](#building)
 - [Usage](#usage)
-  - [Enviroment Variables](#enviroment-variables)
+  - [Environment Variables](#environment-variables)
   - [Display Filters](#display-filters)
   - [Color Filters](#color-filters)
 - [Sample Dissection](#sample-dissection)
@@ -123,7 +123,7 @@ only library). If RapidJSON is not installed on the system, it must be
 downloaded using: `git submodule update --init --recursive` or equivalent for
 your git client. If OpenDDS isn't a git repository (such as if it was
 downloaded from opendds.org) You can download RapidJSON source and pass it to
-the cofnigure script using `--rapidjson`.
+the configure script using `--rapidjson`.
 
 ### Build
 
@@ -157,7 +157,7 @@ can usually be found somewhere under the "Help" or "Internals" menus.
 The `OpenDDS_Dissector` library we created above should appear in the
 list of plugins or protocols.
 
-<a name="enviroment-variables"></a>
+<a name="environment-variables"></a>
 ### Environment Variables
 
   - `OPENDDS_DISSECTORS`
@@ -405,4 +405,3 @@ opendds.sample.payload.Messenger.Message.u.u_b == 1
       - Mark the OpenDDS packet as malformed, which will be colored red.
       - Fill the sample payload fields with incorrect data, or omit fields
         entirely.
-

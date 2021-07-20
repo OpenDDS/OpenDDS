@@ -11,13 +11,19 @@
 
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsCoreC.h"
-#include "dds/DCPS/PoolAllocator.h"
+#include "PoolAllocator.h"
 #include "RcObject.h"
 #include "Definitions.h"
 #include "CoherentChangeControl.h"
 #include "DisjointSequence.h"
 #include "transport/framework/ReceivedDataSample.h"
 #include "TimeTypes.h"
+
+#ifdef ACE_HAS_CPP11
+#  include <atomic>
+#else
+#  include <ace/Atomic_Op.h>
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -51,8 +57,7 @@ public:
   /// tell instances when a DataWriter transitions to DEAD
   /// The writer state is inout parameter, the state is set to DEAD
   /// when it returns.
-  virtual void writer_became_dead(WriterInfo& info,
-                                  const MonotonicTimePoint& when);
+  virtual void writer_became_dead(WriterInfo& info);
 
   /// tell instance when a DataWriter is removed.
   /// The liveliness status need update.
@@ -157,7 +162,11 @@ public:
   DDS::InstanceHandle_t handle_;
 
   /// Number of received coherent changes in active change set.
+#ifdef ACE_HAS_CPP11
+  std::atomic<uint32_t> coherent_samples_;
+#else
   ACE_Atomic_Op<ACE_Thread_Mutex, ACE_UINT32> coherent_samples_;
+#endif
 
   /// Is this writer evaluated for owner ?
   typedef OPENDDS_MAP(DDS::InstanceHandle_t, bool) OwnerEvaluateFlags;

@@ -5,12 +5,12 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef CONFIGUTILS_H
-#define CONFIGUTILS_H
+#ifndef OPENDDS_DCPS_CONFIGUTILS_H
+#define OPENDDS_DCPS_CONFIGUTILS_H
 
 #include "ace/Configuration.h"
 #include "dcps_export.h"
-#include "dds/DCPS/PoolAllocator.h"
+#include "PoolAllocator.h"
 
 #include <sstream>
 #include <cstdlib>

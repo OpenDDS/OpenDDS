@@ -1,4 +1,4 @@
-#include "dds/DCPS/security/UtilityImpl.h"
+#include "UtilityImpl.h"
 
 #include <openssl/rand.h>
 #include <openssl/hmac.h>

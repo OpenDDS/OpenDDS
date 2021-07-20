@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_RTPSUDPSENDSTRATEGY_H
-#define DCPS_RTPSUDPSENDSTRATEGY_H
+#ifndef OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPSENDSTRATEGY_H
+#define OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPSENDSTRATEGY_H
 
 #include "Rtps_Udp_Export.h"
 
@@ -49,10 +49,13 @@ public:
   OverrideToken override_destinations(
     const OPENDDS_SET(ACE_INET_Addr)& destinations);
 
-  void send_rtps_control(ACE_Message_Block& submessages,
+  void send_rtps_control(RTPS::Message& message,
+                         ACE_Message_Block& submessages,
                          const ACE_INET_Addr& destination);
-  void send_rtps_control(ACE_Message_Block& submessages,
+  void send_rtps_control(RTPS::Message& message,
+                         ACE_Message_Block& submessages,
                          const OPENDDS_SET(ACE_INET_Addr)& destinations);
+  void append_submessages(const RTPS::SubmessageSeq& submessages);
 
 #if defined(OPENDDS_SECURITY)
   void encode_payload(const RepoId& pub_id, Message_Block_Ptr& payload,
@@ -63,19 +66,18 @@ public:
   static const size_t MaxCryptoHeaderSize = 20;
   static const size_t MaxCryptoFooterSize = 20;
   static const size_t MaxSecurePrefixSize = RTPS::SMHDR_SZ + MaxCryptoHeaderSize;
-  static const size_t MaxSecureSuffixSize =
-    (RTPS::SM_ALIGN - 1) /* Max padding after submessage of variable length */ +
-    RTPS::SMHDR_SZ + MaxCryptoFooterSize;
+  static const size_t MaxSubmessagePadding = RTPS::SM_ALIGN - 1;
+  static const size_t MaxSecureSuffixSize = RTPS::SMHDR_SZ + MaxCryptoFooterSize;
   static const size_t MaxSecureSubmessageLeadingSize = MaxSecurePrefixSize;
   static const size_t MaxSecureSubmessageFollowingSize =
     RTPS::SMHDR_SZ /* SEC_BODY */ + MaxSecureSuffixSize;
   static const size_t MaxSecureSubmessageAdditionalSize =
-    MaxSecureSubmessageLeadingSize + MaxSecureSubmessageFollowingSize;
+    MaxSecureSubmessageLeadingSize + MaxSubmessagePadding + MaxSecureSubmessageFollowingSize;
   static const size_t MaxSecureFullMessageLeadingSize =
     RTPS::SMHDR_SZ + RTPS::INFO_SRC_SZ + MaxSecurePrefixSize;
   static const size_t MaxSecureFullMessageFollowingSize = MaxSecureSuffixSize;
   static const size_t MaxSecureFullMessageAdditionalSize =
-    MaxSecureFullMessageLeadingSize + MaxSecureFullMessageFollowingSize;
+    MaxSecureFullMessageLeadingSize + MaxSubmessagePadding + MaxSecureFullMessageFollowingSize;
 
 protected:
   virtual ssize_t send_bytes_i(const iovec iov[], int n);
@@ -132,10 +134,12 @@ private:
   const ACE_INET_Addr* override_single_dest_;
 
   const size_t max_message_size_;
-  RTPS::Header rtps_header_;
+  RTPS::Message rtps_message_;
+  ACE_Thread_Mutex rtps_message_mutex_;
   char rtps_header_data_[RTPS::RTPSHDR_SZ];
   ACE_Data_Block rtps_header_db_;
   ACE_Message_Block rtps_header_mb_;
+  ACE_Thread_Mutex rtps_header_mb_lock_;
   bool network_is_unreachable_;
 };
 

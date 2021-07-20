@@ -1,35 +1,32 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
-
-#include <ace/Log_Msg.h>
-#include <ace/OS_NS_stdlib.h>
-#include <ace/OS_NS_unistd.h>
-
-#include <dds/DdsDcpsPublicationC.h>
-#include <dds/DCPS/WaitSet.h>
-
-#include <cstdlib>
 
 #include "Args.h"
 #include "MessengerTypeSupportC.h"
 #include "Writer.h"
 
-const int num_instances_per_writer = 1;
-bool reliable = false;
-bool wait_for_acks = false;
+#include <dds/DCPS/WaitSet.h>
 
-Writer::Writer(DDS::DataWriter_ptr writer)
-  : writer_(DDS::DataWriter::_duplicate(writer)),
-    finished_instances_(0)
+#include <dds/DdsDcpsPublicationC.h>
+
+#include <ace/Log_Msg.h>
+#include <ace/OS_NS_stdlib.h>
+#include <ace/OS_NS_unistd.h>
+
+#include <cstdlib>
+
+const int num_instances_per_writer = 1;
+
+Writer::Writer(DDS::DataWriter_ptr writer, bool reliable)
+  : writer_(DDS::DataWriter::_duplicate(writer))
+  , finished_instances_(0)
+  , reliable_(reliable)
 {
 }
 
-void
-Writer::start()
+void Writer::start()
 {
   // Lanuch num_instances_per_writer threads. Each thread writes one
   // instance which uses the thread id as the key value.
@@ -41,17 +38,13 @@ Writer::start()
   }
 }
 
-void
-Writer::end()
+void Writer::end()
 {
   wait();
 }
 
-int
-Writer::svc()
+int Writer::svc()
 {
-  DDS::InstanceHandleSeq handles;
-
   try {
     // Block until Subscriber is available
     DDS::StatusCondition_var condition = writer_->get_statuscondition();
@@ -60,7 +53,7 @@ Writer::svc()
     DDS::WaitSet_var ws = new DDS::WaitSet;
     ws->attach_condition(condition);
 
-    DDS::Duration_t timeout =
+    const DDS::Duration_t timeout =
       { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
 
     DDS::ConditionSeq conditions;
@@ -88,8 +81,7 @@ Writer::svc()
     // Write samples
     Messenger::MessageDataWriter_var message_dw
       = Messenger::MessageDataWriter::_narrow(writer_.in());
-
-    if (CORBA::is_nil(message_dw.in())) {
+    if (!message_dw) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("%N:%l: svc()")
                  ACE_TEXT(" ERROR: _narrow failed!\n")));
@@ -99,14 +91,14 @@ Writer::svc()
     Messenger::Message message;
     message.subject_id = 99;
 
-    DDS::InstanceHandle_t handle = message_dw->register_instance(message);
+    const DDS::InstanceHandle_t handle = message_dw->register_instance(message);
 
-    message.from         = "Comic Book Guy";
-    message.subject      = "Review";
-    message.text         = "Worst. Movie. Ever.";
-    message.count        = 0;
+    message.from = "Comic Book Guy";
+    message.subject = "Review";
+    message.text = "Worst. Movie. Ever.";
+    message.count = 0;
 
-    for (int i = 0; i < num_messages; i++) {
+    for (size_t i = 0; i < num_messages; i++) {
       DDS::ReturnCode_t error;
       do {
         error = message_dw->write(message, handle);
@@ -118,6 +110,10 @@ Writer::svc()
                    ACE_TEXT(" ERROR: write returned %d!\n"), error));
       }
 
+      if (!reliable_) {
+        ACE_OS::sleep(ACE_Time_Value(0, 20000));
+      }
+
       message.count++;
     }
 
@@ -125,13 +121,12 @@ Writer::svc()
     e._tao_print_exception("Exception caught in svc():");
   }
 
-  finished_instances_ ++;
+  ++finished_instances_;
 
   return 0;
 }
 
-bool
-Writer::is_finished() const
+bool Writer::is_finished() const
 {
   return finished_instances_ == num_instances_per_writer;
 }

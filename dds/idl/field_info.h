@@ -29,7 +29,7 @@ struct FieldInfo {
   static std::string at_pfx();
   static std::string scoped_type(AST_Type& field_type, const std::string& field_name);
   static std::string underscore(const std::string& scoped);
-  static std::string ref(const std::string& scoped, const std::string& underscored, const std::string& const_s = "const ");
+  static std::string ref(const std::string& scoped, const std::string& const_s = "const ");
 
   AST_Type* type_;
   const std::string name_;

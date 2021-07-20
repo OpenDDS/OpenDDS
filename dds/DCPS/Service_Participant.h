@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DDS_DCPS_SERVICE_PARTICIPANT_H
-#define OPENDDS_DDS_DCPS_SERVICE_PARTICIPANT_H
+#ifndef OPENDDS_DCPS_SERVICE_PARTICIPANT_H
+#define OPENDDS_DCPS_SERVICE_PARTICIPANT_H
 
 #include "Definitions.h"
 #include "MonitorFactory.h"
@@ -68,7 +68,6 @@ public:
  */
 class OpenDDS_Dcps_Export Service_Participant {
 public:
-
   /// Domain value for the default repository IOR.
   enum { ANY_DOMAIN = -1 };
 
@@ -121,39 +120,41 @@ public:
   Discovery_rch get_discovery(const DDS::DomainId_t domain);
 
   /** Accessors of the qos policy initial values. **/
-  DDS::UserDataQosPolicy            initial_UserDataQosPolicy() const;
-  DDS::TopicDataQosPolicy           initial_TopicDataQosPolicy() const;
-  DDS::GroupDataQosPolicy           initial_GroupDataQosPolicy() const;
-  DDS::TransportPriorityQosPolicy   initial_TransportPriorityQosPolicy() const;
-  DDS::LifespanQosPolicy            initial_LifespanQosPolicy() const;
-  DDS::DurabilityQosPolicy          initial_DurabilityQosPolicy() const;
-  DDS::DurabilityServiceQosPolicy   initial_DurabilityServiceQosPolicy() const;
-  DDS::PresentationQosPolicy        initial_PresentationQosPolicy() const;
-  DDS::DeadlineQosPolicy            initial_DeadlineQosPolicy() const;
-  DDS::LatencyBudgetQosPolicy       initial_LatencyBudgetQosPolicy() const;
-  DDS::OwnershipQosPolicy           initial_OwnershipQosPolicy() const;
+  const DDS::UserDataQosPolicy& initial_UserDataQosPolicy() const;
+  const DDS::TopicDataQosPolicy& initial_TopicDataQosPolicy() const;
+  const DDS::GroupDataQosPolicy& initial_GroupDataQosPolicy() const;
+  const DDS::TransportPriorityQosPolicy& initial_TransportPriorityQosPolicy() const;
+  const DDS::LifespanQosPolicy& initial_LifespanQosPolicy() const;
+  const DDS::DurabilityQosPolicy& initial_DurabilityQosPolicy() const;
+  const DDS::DurabilityServiceQosPolicy& initial_DurabilityServiceQosPolicy() const;
+  const DDS::PresentationQosPolicy& initial_PresentationQosPolicy() const;
+  const DDS::DeadlineQosPolicy& initial_DeadlineQosPolicy() const;
+  const DDS::LatencyBudgetQosPolicy& initial_LatencyBudgetQosPolicy() const;
+  const DDS::OwnershipQosPolicy& initial_OwnershipQosPolicy() const;
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-  DDS::OwnershipStrengthQosPolicy   initial_OwnershipStrengthQosPolicy() const;
+  const DDS::OwnershipStrengthQosPolicy& initial_OwnershipStrengthQosPolicy() const;
 #endif
-  DDS::LivelinessQosPolicy          initial_LivelinessQosPolicy() const;
-  DDS::TimeBasedFilterQosPolicy     initial_TimeBasedFilterQosPolicy() const;
-  DDS::PartitionQosPolicy           initial_PartitionQosPolicy() const;
-  DDS::ReliabilityQosPolicy         initial_ReliabilityQosPolicy() const;
-  DDS::DestinationOrderQosPolicy    initial_DestinationOrderQosPolicy() const;
-  DDS::HistoryQosPolicy             initial_HistoryQosPolicy() const;
-  DDS::ResourceLimitsQosPolicy      initial_ResourceLimitsQosPolicy() const;
-  DDS::EntityFactoryQosPolicy       initial_EntityFactoryQosPolicy() const;
-  DDS::WriterDataLifecycleQosPolicy initial_WriterDataLifecycleQosPolicy() const;
-  DDS::ReaderDataLifecycleQosPolicy initial_ReaderDataLifecycleQosPolicy() const;
-  DDS::PropertyQosPolicy            initial_PropertyQosPolicy() const;
+  const DDS::LivelinessQosPolicy& initial_LivelinessQosPolicy() const;
+  const DDS::TimeBasedFilterQosPolicy& initial_TimeBasedFilterQosPolicy() const;
+  const DDS::PartitionQosPolicy& initial_PartitionQosPolicy() const;
+  const DDS::ReliabilityQosPolicy& initial_ReliabilityQosPolicy() const;
+  const DDS::DestinationOrderQosPolicy& initial_DestinationOrderQosPolicy() const;
+  const DDS::HistoryQosPolicy& initial_HistoryQosPolicy() const;
+  const DDS::ResourceLimitsQosPolicy& initial_ResourceLimitsQosPolicy() const;
+  const DDS::EntityFactoryQosPolicy& initial_EntityFactoryQosPolicy() const;
+  const DDS::WriterDataLifecycleQosPolicy& initial_WriterDataLifecycleQosPolicy() const;
+  const DDS::ReaderDataLifecycleQosPolicy& initial_ReaderDataLifecycleQosPolicy() const;
+  const DDS::PropertyQosPolicy& initial_PropertyQosPolicy() const;
+  const DDS::DataRepresentationQosPolicy& initial_DataRepresentationQosPolicy() const;
 
-  DDS::DomainParticipantFactoryQos  initial_DomainParticipantFactoryQos() const;
-  DDS::DomainParticipantQos         initial_DomainParticipantQos() const;
-  DDS::TopicQos                     initial_TopicQos() const;
-  DDS::DataWriterQos                initial_DataWriterQos() const;
-  DDS::PublisherQos                 initial_PublisherQos() const;
-  DDS::DataReaderQos                initial_DataReaderQos() const;
-  DDS::SubscriberQos                initial_SubscriberQos() const;
+  const DDS::DomainParticipantFactoryQos& initial_DomainParticipantFactoryQos() const;
+  const DDS::DomainParticipantQos& initial_DomainParticipantQos() const;
+  const DDS::TopicQos& initial_TopicQos() const;
+  const DDS::DataWriterQos& initial_DataWriterQos() const;
+  const DDS::PublisherQos& initial_PublisherQos() const;
+  const DDS::DataReaderQos& initial_DataReaderQos() const;
+  const DDS::SubscriberQos& initial_SubscriberQos() const;
+  const DDS::TypeConsistencyEnforcementQosPolicy& initial_TypeConsistencyEnforcementQosPolicy() const;
 
   /**
    * This accessor is to provide the configurable number of chunks
@@ -161,27 +162,27 @@ public:
    * the resource limits are infinite.  Has a default, can be set
    * by the @c -DCPSChunks option, or by @c n_chunks() setter.
    */
-  size_t   n_chunks() const;
+  size_t n_chunks() const;
 
   /// Set the value returned by @c n_chunks() accessor.
   /**
    * @see Accessor description.
    */
-  void     n_chunks(size_t chunks);
+  void n_chunks(size_t chunks);
 
   /// This accessor is to provide the multiplier for allocators
   /// that have resources used on a per association basis.
   /// Has a default, can be set by the
-  /// @c -DCPSChunkAssociationMutltiplier
+  /// @c -DCPSChunkAssociationMultiplier
   /// option, or by @c n_association_chunk_multiplier() setter.
-  size_t   association_chunk_multiplier() const;
+  size_t association_chunk_multiplier() const;
 
   /// Set the value returned by
   /// @c n_association_chunk_multiplier() accessor.
   /**
    * See accessor description.
    */
-  void     association_chunk_multiplier(size_t multiplier);
+  void association_chunk_multiplier(size_t multiplier);
 
   /// Set the Liveliness propagation delay factor.
   /// @param factor % of lease period before sending a liveliness
@@ -405,7 +406,7 @@ public:
    */
   bool belongs_to_domain_range(DDS::DomainId_t domainId) const;
 
-  bool get_transport_config_name(DDS::DomainId_t domainId, ACE_TString& name) const;
+  bool get_transport_base_config_name(DDS::DomainId_t domainId, ACE_TString& name) const;
 
 #ifdef OPENDDS_SAFETY_PROFILE
   /**
@@ -432,6 +433,11 @@ public:
 
   DDS::Duration_t bit_autopurge_disposed_samples_delay() const;
   void bit_autopurge_disposed_samples_delay(const DDS::Duration_t& duration);
+
+  enum TypeObjectEncoding { Encoding_Normal, Encoding_WriteOldFormat, Encoding_ReadOldFormat };
+  TypeObjectEncoding type_object_encoding() const;
+  void type_object_encoding(TypeObjectEncoding encoding);
+  void type_object_encoding(const char* encoding);
 
 private:
 
@@ -552,6 +558,7 @@ private:
   DDS::WriterDataLifecycleQosPolicy   initial_WriterDataLifecycleQosPolicy_;
   DDS::ReaderDataLifecycleQosPolicy   initial_ReaderDataLifecycleQosPolicy_;
   DDS::PropertyQosPolicy              initial_PropertyQosPolicy_;
+  DDS::DataRepresentationQosPolicy initial_DataRepresentationQosPolicy_;
 
   DDS::DomainParticipantQos           initial_DomainParticipantQos_;
   DDS::TopicQos                       initial_TopicQos_;
@@ -560,6 +567,7 @@ private:
   DDS::DataReaderQos                  initial_DataReaderQos_;
   DDS::SubscriberQos                  initial_SubscriberQos_;
   DDS::DomainParticipantFactoryQos    initial_DomainParticipantFactoryQos_;
+  DDS::TypeConsistencyEnforcementQosPolicy initial_TypeConsistencyEnforcementQosPolicy_;
 
   /// The configurable value of the number chunks that the
   /// @c DataWriter's cached allocator can allocate.
@@ -643,7 +651,11 @@ public:
   TimeDuration get_thread_status_interval();
   void set_thread_status_interval(TimeDuration interval);
 
-  ThreadStatus* get_thread_statuses();
+  /// getter for lock that protects the static initialization of XTypes related data structures
+  ACE_Thread_Mutex& get_static_xtypes_lock();
+
+  /// Get the service participant's thread status manager.
+  ThreadStatusManager* get_thread_status_manager();
 
   /// Pointer to the monitor factory that is used to create
   /// monitor objects.
@@ -671,7 +683,7 @@ private:
   /// Scheduler time slice from configuration file.
   TimeDuration schedulerQuantum_;
 
-#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
+#if OPENDDS_POOL_ALLOCATOR
   /// Pool size from configuration file.
   size_t pool_size_;
 
@@ -714,7 +726,10 @@ private:
   /// Enable Internal Thread Status Monitoring
   TimeDuration thread_status_interval_;
 
-  ThreadStatus thread_status_;
+  ThreadStatusManager thread_status_manager_;
+
+  /// Thread mutex used to protect the static initialization of XTypes data structures
+  ACE_Thread_Mutex xtypes_lock_;
 
   /// Enable Monitor functionality
   bool monitor_enabled_;
@@ -740,6 +755,8 @@ private:
 
   DDS::Duration_t bit_autopurge_nowriter_samples_delay_;
   DDS::Duration_t bit_autopurge_disposed_samples_delay_;
+
+  TypeObjectEncoding type_object_encoding_;
 };
 
 #define TheServiceParticipant OpenDDS::DCPS::Service_Participant::instance()

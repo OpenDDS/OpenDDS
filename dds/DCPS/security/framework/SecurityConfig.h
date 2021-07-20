@@ -5,26 +5,32 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_SECURTIY_CONFIG_H
-#define OPENDDS_DCPS_SECURTIY_CONFIG_H
+#ifndef OPENDDS_DCPS_SECURITY_FRAMEWORK_SECURITYCONFIG_H
+#define OPENDDS_DCPS_SECURITY_FRAMEWORK_SECURITYCONFIG_H
+
+#include "SecurityConfigPropertyList.h"
+#ifdef OPENDDS_SECURITY
+#  include "HandleRegistry.h"
+#endif
+
+#include <dds/DCPS/dcps_export.h>
+#include <dds/DCPS/RcObject.h>
+#include <dds/DCPS/GuidUtils.h>
+#ifdef OPENDDS_SECURITY
+#  include <dds/DCPS/security/Utility.h>
+#endif
+
+#ifdef OPENDDS_SECURITY
+#  include <dds/DdsSecurityCoreC.h>
+#endif
+#include <dds/DdsDcpsCoreC.h>
 
 #include <ace/config.h>
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
+#  pragma once
 #endif
-
-#include "dds/DCPS/dcps_export.h"
-
-#ifdef OPENDDS_SECURITY
-#include "dds/DdsSecurityCoreC.h"
-#include "dds/DCPS/security/Utility.h"
-#endif
-
-#include "dds/DdsDcpsCoreC.h"
-#include "dds/DCPS/RcObject.h"
-#include "dds/DCPS/security/framework/SecurityConfigPropertyList.h"
-
-#include "ace/Synch_Traits.h"
+#include <ace/Synch_Traits.h>
+#include <ace/Thread_Mutex.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -78,6 +84,42 @@ class OpenDDS_Dcps_Export SecurityConfig : public DCPS::RcObject {
   {
     return utility_plugin_;
   }
+
+  HandleRegistry_rch get_handle_registry(const DCPS::RepoId& participant_id)
+  {
+    HandleRegistry_rch handle_registry;
+
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, handle_registry);
+
+    HandleRegistryMap::const_iterator pos = handle_registry_map_.find(participant_id);
+    if (pos != handle_registry_map_.end()) {
+      handle_registry = pos->second;
+    } else {
+      handle_registry = DCPS::make_rch<HandleRegistry>();
+      handle_registry_map_[participant_id] = handle_registry;
+
+      if (DCPS::security_debug.bookkeeping) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                   ACE_TEXT("SecurityConfig::get_handle_registry handle_registry_map_ (total %B)\n"),
+                   handle_registry_map_.size()));
+      }
+    }
+
+    return handle_registry;
+  }
+
+  void erase_handle_registry(const DCPS::RepoId& participant_id)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+    handle_registry_map_.erase(participant_id);
+
+    if (DCPS::security_debug.bookkeeping) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                 ACE_TEXT("SecurityConfig::erase_handle_registry handle_registry_map_ (total %B)\n"),
+                 handle_registry_map_.size()));
+    }
+  }
+
 #endif
 
   void get_properties(DDS::PropertyQosPolicy& properties) const;
@@ -112,6 +154,9 @@ class OpenDDS_Dcps_Export SecurityConfig : public DCPS::RcObject {
   CryptoKeyFactory_var key_factory_plugin_;
   CryptoTransform_var transform_plugin_;
   Utility* utility_plugin_;
+  typedef OPENDDS_MAP_CMP(DCPS::RepoId, HandleRegistry_rch, DCPS::GUID_tKeyLessThan) HandleRegistryMap;
+  HandleRegistryMap handle_registry_map_;
+  mutable ACE_Thread_Mutex mutex_;
 #endif
 
   ConfigPropertyList properties_;

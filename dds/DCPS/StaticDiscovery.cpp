@@ -1,16 +1,16 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
 #include "StaticDiscovery.h"
-#include "dds/DCPS/debug.h"
-#include "dds/DCPS/ConfigUtils.h"
-#include "dds/DCPS/DomainParticipantImpl.h"
-#include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/SubscriberImpl.h"
-#include "dds/DCPS/BuiltInTopicUtils.h"
-#include "dds/DCPS/Registered_Data_Types.h"
-#include "dds/DCPS/Qos_Helper.h"
-#include "dds/DCPS/DataWriterImpl.h"
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include "debug.h"
+#include "ConfigUtils.h"
+#include "DomainParticipantImpl.h"
+#include "Marked_Default_Qos.h"
+#include "SubscriberImpl.h"
+#include "BuiltInTopicUtils.h"
+#include "Registered_Data_Types.h"
+#include "Qos_Helper.h"
+#include "DataWriterImpl.h"
+#include "transport/framework/TransportRegistry.h"
 
 #include <ctype.h>
 
@@ -77,8 +77,15 @@ StaticEndpointManager::StaticEndpointManager(const RepoId& participant_id,
                                              StaticParticipant& participant)
   : EndpointManager<StaticDiscoveredParticipantData>(participant_id, lock)
   , registry_(registry)
+#ifndef DDS_HAS_MINIMUM_BIT
   , participant_(participant)
-{}
+#endif
+{
+#ifdef DDS_HAS_MINIMUM_BIT
+  ACE_UNUSED_ARG(participant);
+#endif
+  type_lookup_init(TheServiceParticipant->interceptor());
+}
 
 void StaticEndpointManager::init_bit()
 {
@@ -91,7 +98,7 @@ void StaticEndpointManager::init_bit()
     const RepoId& remoteid = pos->first;
     const EndpointRegistry::Writer& writer = pos->second;
 
-    if (!GuidPrefixEqual()(participant_id_.guidPrefix, remoteid.guidPrefix)) {
+    if (!equal_guid_prefixes(participant_id_, remoteid)) {
       const DDS::BuiltinTopicKey_t key = repo_id_to_bit_key(remoteid);
 
       // pos represents a remote.
@@ -119,6 +126,8 @@ void StaticEndpointManager::init_bit()
       // If the TopicQos becomes available, this can be populated.
       //data.topic_data = topic_details.qos_.topic_data;
       data.group_data = writer.publisher_qos.group_data;
+      data.representation = writer.qos.representation;
+
 #ifndef DDS_HAS_MINIMUM_BIT
       OpenDDS::DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
       if (bit) { // bit may be null if the DomainParticipant is shutting down
@@ -135,7 +144,7 @@ void StaticEndpointManager::init_bit()
     const RepoId& remoteid = pos->first;
     const EndpointRegistry::Reader& reader = pos->second;
 
-    if (!GuidPrefixEqual()(participant_id_.guidPrefix, remoteid.guidPrefix)) {
+    if (!equal_guid_prefixes(participant_id_, remoteid)) {
       const DDS::BuiltinTopicKey_t key = repo_id_to_bit_key(remoteid);
 
       // pos represents a remote.
@@ -161,6 +170,7 @@ void StaticEndpointManager::init_bit()
       // // If the TopicQos becomes available, this can be populated.
       //data.topic_data = topic_details.qos_.topic_data;
       data.group_data = reader.subscriber_qos.group_data;
+      data.representation = reader.qos.representation;
 
 #ifndef DDS_HAS_MINIMUM_BIT
       OpenDDS::DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
@@ -204,7 +214,7 @@ void StaticEndpointManager::assign_publication_key(RepoId& rid,
   DDS::DataWriterQos qos3(pos->second.qos);
 
   if (qos2 != qos3) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) WARNING: StaticEndpointManager::assign_publication_key: dynamic and static QoS differ\n")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::assign_publication_key: dynamic and static QoS differ\n")));
   }
 }
 
@@ -232,8 +242,10 @@ void StaticEndpointManager::assign_subscription_key(RepoId& rid,
   // Qos in registry will not have the user data so overwrite.
   qos2.user_data = pos->second.qos.user_data;
 
-  if (qos2 != pos->second.qos) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) WARNING: StaticEndpointManager::assign_subscription_key: dynamic and static QoS differ\n")));
+  DDS::DataReaderQos qos3(pos->second.qos);
+
+  if (qos2 != qos3) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::assign_subscription_key: dynamic and static QoS differ\n")));
   }
 }
 
@@ -273,13 +285,6 @@ StaticEndpointManager::update_subscription_params(const RepoId& /*subId*/,
   ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::update_subscription_qos - ")
              ACE_TEXT("Not allowed\n")));
   return false;
-}
-
-void
-StaticEndpointManager::association_complete(const RepoId& /*localId*/,
-                                            const RepoId& /*remoteId*/)
-{
-  // Do nothing.
 }
 
 bool
@@ -322,10 +327,12 @@ StaticEndpointManager::add_publication_i(const RepoId& writerid,
     ra.exprParams = 0;
 #else
     const ReaderAssociation ra =
-      {reader.trans_info, readerid, reader.subscriber_qos, reader.qos, "", "", 0};
+      {reader.trans_info, 0, readerid, reader.subscriber_qos, reader.qos, "", "", 0, 0, {0, 0}};
 #endif
-    pub.publication_->add_association(writerid, ra, true);
-    pub.publication_->association_complete(readerid);
+    DataWriterCallbacks_rch pl = pub.publication_.lock();
+    if (pl) {
+      pl->add_association(writerid, ra, true);
+    }
   }
 
   for (RepoIdSet::const_iterator pos = writer.reliable_readers.begin(), limit = writer.reliable_readers.end();
@@ -333,7 +340,10 @@ StaticEndpointManager::add_publication_i(const RepoId& writerid,
        ++pos) {
     const RepoId& readerid = *pos;
     const EndpointRegistry::Reader& reader = registry_.reader_map.find(readerid)->second;
-    pub.publication_->register_for_reader(participant_id_, writerid, readerid, reader.trans_info, this);
+    DataWriterCallbacks_rch pl = pub.publication_.lock();
+    if (pl) {
+      pl->register_for_reader(participant_id_, writerid, readerid, reader.trans_info, this);
+    }
   }
 
   return DDS::RETCODE_OK;
@@ -357,7 +367,10 @@ StaticEndpointManager::remove_publication_i(const RepoId& writerid, LocalPublica
         ++pos, ++idx) {
     const RepoId& readerid = *pos;
     ids[idx] = readerid;
-    pub.publication_->unregister_for_reader(participant_id_, writerid, readerid);
+    DataWriterCallbacks_rch pl = pub.publication_.lock();
+    if (pl) {
+      pl->unregister_for_reader(participant_id_, writerid, readerid);
+    }
   }
 
   return DDS::RETCODE_OK;
@@ -384,17 +397,14 @@ StaticEndpointManager::add_subscription_i(const RepoId& readerid,
     const RepoId& writerid = *pos;
     const EndpointRegistry::Writer& writer = registry_.writer_map.find(writerid)->second;
 
-#ifdef __SUNPRO_CC
-    WriterAssociation wa;
-    wa.writerTransInfo = writer.trans_info;
-    wa.writerId = writerid;
-    wa.pubQos = writer.publisher_qos;
-    wa.writerQos = writer.qos;
-#else
-    const WriterAssociation wa =
-      {writer.trans_info, writerid, writer.publisher_qos, writer.qos};
-#endif
-    sub.subscription_->add_association(readerid, wa, false);
+    DDS::OctetSeq type_info;
+    const WriterAssociation wa = {
+      writer.trans_info, 0, writerid, writer.publisher_qos, writer.qos, type_info, {0, 0}
+    };
+    DataReaderCallbacks_rch sl = sub.subscription_.lock();
+    if (sl) {
+      sl->add_association(readerid, wa, false);
+    }
   }
 
   for (RepoIdSet::const_iterator pos = reader.reliable_writers.begin(), limit = reader.reliable_writers.end();
@@ -402,7 +412,10 @@ StaticEndpointManager::add_subscription_i(const RepoId& readerid,
        ++pos) {
     const RepoId& writerid = *pos;
     const EndpointRegistry::Writer& writer = registry_.writer_map.find(writerid)->second;
-    sub.subscription_->register_for_writer(participant_id_, readerid, writerid, writer.trans_info, this);
+    DataReaderCallbacks_rch sl = sub.subscription_.lock();
+    if (sl) {
+      sl->register_for_writer(participant_id_, readerid, writerid, writer.trans_info, this);
+    }
   }
 
   return DDS::RETCODE_OK;
@@ -427,7 +440,10 @@ StaticEndpointManager::remove_subscription_i(const RepoId& readerid,
         ++pos, ++idx) {
     const RepoId& writerid = *pos;
     ids[idx] = writerid;
-    sub.subscription_->unregister_for_writer(participant_id_, readerid, writerid);
+    DataReaderCallbacks_rch sl = sub.subscription_.lock();
+    if (sl) {
+      sl->unregister_for_writer(participant_id_, readerid, writerid);
+    }
   }
 
   return DDS::RETCODE_OK;
@@ -475,23 +491,13 @@ StaticEndpointManager::reader_exists(const RepoId& readerid, const RepoId& write
   EndpointRegistry::ReaderMapType::const_iterator reader_pos = registry_.reader_map.find(readerid);
   if (lp_pos != local_publications_.end() &&
       reader_pos != registry_.reader_map.end()) {
-    DataWriterCallbacks* dwr = lp_pos->second.publication_;
-#ifdef __SUNPRO_CC
-    ReaderAssociation ra;
-    ra.readerTransInfo = reader_pos->second.trans_info;
-    ra.readerId = readerid;
-    ra.subQos = reader_pos->second.subscriber_qos;
-    ra.readerQos = reader_pos->second.qos;
-    ra.filterClassName = "";
-    ra.filterExpression = "";
-    ra.exprParams = 0;
-#else
-    const ReaderAssociation ra =
-      {reader_pos->second.trans_info, readerid, reader_pos->second.subscriber_qos, reader_pos->second.qos, "", "", 0};
-
-#endif
-    dwr->add_association(writerid, ra, true);
-    dwr->association_complete(readerid);
+    DataWriterCallbacks_rch dwr = lp_pos->second.publication_.lock();
+    if (dwr) {
+      const ReaderAssociation ra =
+        {reader_pos->second.trans_info, 0, readerid, reader_pos->second.subscriber_qos, reader_pos->second.qos,
+         "", "", DDS::StringSeq(), DDS::OctetSeq(), {0, 0}};
+      dwr->add_association(writerid, ra, true);
+    }
   }
 }
 
@@ -503,11 +509,13 @@ StaticEndpointManager::reader_does_not_exist(const RepoId& readerid, const RepoI
   EndpointRegistry::ReaderMapType::const_iterator reader_pos = registry_.reader_map.find(readerid);
   if (lp_pos != local_publications_.end() &&
       reader_pos != registry_.reader_map.end()) {
-    DataWriterCallbacks* dwr = lp_pos->second.publication_;
-    ReaderIdSeq ids;
-    ids.length(1);
-    ids[0] = readerid;
-    dwr->remove_associations(ids, true);
+    DataWriterCallbacks_rch dwr = lp_pos->second.publication_.lock();
+    if (dwr) {
+      ReaderIdSeq ids;
+      ids.length(1);
+      ids[0] = readerid;
+      dwr->remove_associations(ids, true);
+    }
   }
 }
 
@@ -519,18 +527,12 @@ StaticEndpointManager::writer_exists(const RepoId& writerid, const RepoId& reade
   EndpointRegistry::WriterMapType::const_iterator writer_pos = registry_.writer_map.find(writerid);
   if (ls_pos != local_subscriptions_.end() &&
       writer_pos != registry_.writer_map.end()) {
-    DataReaderCallbacks* drr = ls_pos->second.subscription_;
-#ifdef __SUNPRO_CC
-    WriterAssociation wa;
-    wa.writerTransInfo = writer_pos->second.trans_info;
-    wa.writerId = writerid;
-    wa.pubQos = writer_pos->second.publisher_qos;
-    wa.writerQos = writer_pos->second.qos;
-#else
-    const WriterAssociation wa =
-      {writer_pos->second.trans_info, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos};
-#endif
-    drr->add_association(readerid, wa, false);
+    DataReaderCallbacks_rch drr = ls_pos->second.subscription_.lock();
+    if (drr) {
+      const WriterAssociation wa =
+        {writer_pos->second.trans_info, 0, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos, DDS::OctetSeq(), {0,0}};
+      drr->add_association(readerid, wa, false);
+    }
   }
 }
 
@@ -542,12 +544,21 @@ StaticEndpointManager::writer_does_not_exist(const RepoId& writerid, const RepoI
   EndpointRegistry::WriterMapType::const_iterator writer_pos = registry_.writer_map.find(writerid);
   if (ls_pos != local_subscriptions_.end() &&
       writer_pos != registry_.writer_map.end()) {
-    DataReaderCallbacks* drr = ls_pos->second.subscription_;
-    WriterIdSeq ids;
-    ids.length(1);
-    ids[0] = writerid;
-    drr->remove_associations(ids, true);
+    DataReaderCallbacks_rch drr = ls_pos->second.subscription_.lock();
+    if (drr) {
+      WriterIdSeq ids;
+      ids.length(1);
+      ids[0] = writerid;
+      drr->remove_associations(ids, true);
+    }
   }
+}
+
+void StaticEndpointManager::cleanup_type_lookup_data(const GuidPrefix_t& /*guid_prefix*/,
+                                                     const XTypes::TypeIdentifier& /*ti*/,
+                                                     bool /*secure*/)
+{
+  // Do nothing.
 }
 
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -779,7 +790,7 @@ StaticDiscovery::parse_topics(ACE_Configuration_Heap& cf)
   const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key section;
 
-  if (cf.open_section(root, TOPIC_SECTION_NAME, 0, section) != 0) {
+  if (cf.open_section(root, TOPIC_SECTION_NAME, false, section) != 0) {
     if (DCPS_debug_level > 0) {
       // This is not an error if the configuration file does not have
       // any topic (sub)section.
@@ -873,7 +884,7 @@ StaticDiscovery::parse_datawriterqos(ACE_Configuration_Heap& cf)
   const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key section;
 
-  if (cf.open_section(root, DATAWRITERQOS_SECTION_NAME, 0, section) != 0) {
+  if (cf.open_section(root, DATAWRITERQOS_SECTION_NAME, false, section) != 0) {
     if (DCPS_debug_level > 0) {
       // This is not an error if the configuration file does not have
       // any datawriterqos (sub)section.
@@ -1056,7 +1067,7 @@ StaticDiscovery::parse_datareaderqos(ACE_Configuration_Heap& cf)
   const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key section;
 
-  if (cf.open_section(root, DATAREADERQOS_SECTION_NAME, 0, section) != 0) {
+  if (cf.open_section(root, DATAREADERQOS_SECTION_NAME, false, section) != 0) {
     if (DCPS_debug_level > 0) {
       // This is not an error if the configuration file does not have
       // any datareaderqos (sub)section.
@@ -1231,7 +1242,7 @@ StaticDiscovery::parse_publisherqos(ACE_Configuration_Heap& cf)
   const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key section;
 
-  if (cf.open_section(root, PUBLISHERQOS_SECTION_NAME, 0, section) != 0) {
+  if (cf.open_section(root, PUBLISHERQOS_SECTION_NAME, false, section) != 0) {
     if (DCPS_debug_level > 0) {
       // This is not an error if the configuration file does not have
       // any publisherqos (sub)section.
@@ -1347,7 +1358,7 @@ StaticDiscovery::parse_subscriberqos(ACE_Configuration_Heap& cf)
   const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key section;
 
-  if (cf.open_section(root, SUBSCRIBERQOS_SECTION_NAME, 0, section) != 0) {
+  if (cf.open_section(root, SUBSCRIBERQOS_SECTION_NAME, false, section) != 0) {
     if (DCPS_debug_level > 0) {
       // This is not an error if the configuration file does not have
       // any subscriberqos (sub)section.
@@ -1462,7 +1473,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
   const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key section;
 
-  if (cf.open_section(root, ENDPOINT_SECTION_NAME, 0, section) != 0) {
+  if (cf.open_section(root, ENDPOINT_SECTION_NAME, false, section) != 0) {
     if (DCPS_debug_level > 0) {
       // This is not an error if the configuration file does not have
       // any endpoint (sub)section.

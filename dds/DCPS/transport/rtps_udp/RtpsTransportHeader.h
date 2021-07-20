@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_RTPSTRANSPORTHEADER_H
-#define DCPS_RTPSTRANSPORTHEADER_H
+#ifndef OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSTRANSPORTHEADER_H
+#define OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSTRANSPORTHEADER_H
 
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/SequenceNumber.h"
@@ -24,7 +24,7 @@ namespace DCPS {
 /// Adapt the TransportReceiveStrategy for RTPS's "transport" (message) Header
 struct RtpsTransportHeader {
 
-  static size_t max_marshaled_size();
+  static size_t get_max_serialized_size();
 
   RtpsTransportHeader();
   explicit RtpsTransportHeader(ACE_Message_Block& mb);
@@ -54,4 +54,3 @@ OPENDDS_END_VERSIONED_NAMESPACE_DECL
 #endif
 
 #endif
-

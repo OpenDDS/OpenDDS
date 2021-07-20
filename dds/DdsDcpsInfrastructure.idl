@@ -5,11 +5,11 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_INFRASTRUCTURE_IDL
-#define OPENDDS_DCPS_INFRASTRUCTURE_IDL
+#ifndef OPENDDS_DDSDCPSINFRASTRUCTURE_IDL
+#define OPENDDS_DDSDCPSINFRASTRUCTURE_IDL
 
-#include "dds/DdsDcpsCore.idl"
-#include "dds/DdsDcpsConditionSeq.idl"
+#include <dds/DdsDcpsCore.idl>
+#include <dds/DdsDcpsConditionSeq.idl>
 
 #define DOMAINID_TYPE_NATIVE long
 #define HANDLE_NIL_NATIVE 0
@@ -313,6 +313,8 @@ module OpenDDS
 
   // DomainIds used by the implementation will be larger than this constant:
   const ::DDS::DomainId_t MAX_USER_DOMAINID = 0x7fffffff;
+
+  const ::DDS::DomainId_t DOMAIN_UNKNOWN = -1;
 
   module DCPS
   {

@@ -15,16 +15,16 @@
 #include "PoolAllocator.h"
 #include "PoolAllocationBase.h"
 #include "Message_Block_Ptr.h"
-#include "TimeTypes.h"
 #include "SporadicTask.h"
+#include "ConditionVariable.h"
+#include "TimeTypes.h"
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsCoreC.h>
 
 #include <ace/Synch_Traits.h>
-#include <ace/Condition_T.h>
-#include <ace/Condition_Thread_Mutex.h>
-#include <ace/Condition_Recursive_Thread_Mutex.h>
+#include <ace/Thread_Mutex.h>
+#include <ace/Recursive_Thread_Mutex.h>
 #include <ace/Reverse_Lock_T.h>
 
 #include <memory>
@@ -339,7 +339,9 @@ public:
   typedef OPENDDS_VECTOR(DDS::InstanceHandle_t) InstanceHandleVec;
   void get_instance_handles(InstanceHandleVec& instance_handles);
 
-  DDS::ReturnCode_t wait_ack_of_seq(const MonotonicTimePoint& abs_deadline, const SequenceNumber& sequence);
+  DDS::ReturnCode_t wait_ack_of_seq(const MonotonicTimePoint& abs_deadline,
+                                    bool deadline_is_infinite,
+                                    const SequenceNumber& sequence);
 
   bool sequence_acknowledged(const SequenceNumber sequence);
 
@@ -487,15 +489,17 @@ private:
   /// same lock will be used by the transport thread to notify
   /// the datawriter the data is delivered. Other internal
   /// operations will not lock.
-  ACE_Recursive_Thread_Mutex                lock_;
-  ACE_Condition<ACE_Recursive_Thread_Mutex> condition_;
-  ACE_Condition<ACE_Recursive_Thread_Mutex> empty_condition_;
+  ACE_Recursive_Thread_Mutex lock_;
+  typedef ConditionVariable<ACE_Recursive_Thread_Mutex> ConditionVariableType;
+  ConditionVariableType condition_;
+  ConditionVariableType empty_condition_;
 
   /// Lock used for wait_for_acks() processing.
   ACE_Thread_Mutex wfa_lock_;
 
+  typedef ConditionVariable<ACE_Thread_Mutex> WfaConditionVariableType;
   /// Used to block in wait_for_acks().
-  ACE_Condition<ACE_Thread_Mutex> wfa_condition_;
+  WfaConditionVariableType wfa_condition_;
 
   /// The number of chunks that sample_list_element_allocator_
   /// needs initialize.

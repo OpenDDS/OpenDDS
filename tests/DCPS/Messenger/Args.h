@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -9,7 +7,6 @@
 #define MESSENGER_TEST_ARGS_H
 
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
-
 #include <dds/DCPS/transport/framework/TransportConfig.h>
 #include <dds/DCPS/transport/framework/TransportInst.h>
 
@@ -21,16 +18,14 @@
 #include <iostream>
 #include <cstdlib>
 
-const int num_messages = 40;
-extern bool reliable;
-extern bool wait_for_acks;
+const size_t num_messages = 40;
 
-inline int
-parse_args(int argc, ACE_TCHAR *argv[])
+inline
+int parse_args(int argc, ACE_TCHAR* argv[])
 {
-  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("t:prw"));
+  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("t:pw"));
 
-  OPENDDS_STRING transport_type;
+  OpenDDS::DCPS::String transport_type;
   int c;
   bool thread_per_connection = false;
   while ((c = get_opts()) != -1) {
@@ -50,12 +45,6 @@ parse_args(int argc, ACE_TCHAR *argv[])
       break;
     case 'p':
       thread_per_connection = true;
-      break;
-    case 'r':
-      reliable = true;
-      break;
-    case 'w':
-      wait_for_acks = true;
       break;
     case '?':
     default:

@@ -7,6 +7,7 @@
 
 #include "RtpsDiscovery.h"
 
+#include <dds/DCPS/LogAddr.h>
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/ConfigUtils.h"
 #include "dds/DCPS/DomainParticipantImpl.h"
@@ -15,6 +16,8 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/Registered_Data_Types.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
+
+#include "dds/DCPS/transport/framework/TransportConfig.h"
 #include "dds/DCPS/transport/framework/TransportSendStrategy.h"
 
 #include "ace/Reactor.h"
@@ -74,6 +77,15 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , sedp_max_message_size_(DCPS::TransportSendStrategy::UDP_MAX_MESSAGE_SIZE)
   , undirected_spdp_(true)
   , periodic_directed_spdp_(false)
+  , secure_participant_user_data_(false)
+  , max_type_lookup_service_reply_period_(5, 0)
+  , use_xtypes_(true)
+  , sedp_heartbeat_period_(1)
+  , sedp_nak_response_delay_(0, 200*1000 /*microseconds*/) // default from RTPS
+  , sedp_send_delay_(0, 10 * 1000)
+  , sedp_passive_connect_duration_(TimeDuration::from_msec(DCPS::TransportConfig::DEFAULT_PASSIVE_CONNECT_DURATION))
+  , participant_flags_(PFLAGS_THIS_VERSION)
+  , sedp_responsive_mode_(false)
 {}
 
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
@@ -127,10 +139,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       // spdpaddr defaults to DCPSDefaultAddress if set
       if (TheServiceParticipant->default_address() != ACE_INET_Addr()) {
         config->spdp_local_address(TheServiceParticipant->default_address());
-        ACE_TCHAR buff[ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 1];
-        TheServiceParticipant->default_address().addr_to_string(static_cast<ACE_TCHAR*>(buff), ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 1);
-        OPENDDS_STRING addr_str(ACE_TEXT_ALWAYS_CHAR(static_cast<const ACE_TCHAR*>(buff)));
-        config->multicast_interface(addr_str.substr(0, addr_str.find_first_of(':')));
+        config->multicast_interface(DCPS::LogAddr::ip(TheServiceParticipant->default_address()));
       }
 
       DCPS::ValueMap values;
@@ -282,6 +291,16 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                              -1);
           }
           config->sedp_local_address(addr);
+        } else if (name == "SedpAdvertisedLocalAddress") {
+          ACE_INET_Addr addr;
+          if (addr.set(it->second.c_str())) {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) ERROR: RtpsDiscovery::Config::discovery_config(): ")
+                              ACE_TEXT("failed to parse SedpAdvertisedLocalAddress %C\n"),
+                              it->second.c_str()),
+                             -1);
+          }
+          config->sedp_advertised_address(addr);
         } else if (name == "SpdpLocalAddress") {
           ACE_INET_Addr addr;
           if (addr.set(u_short(0), it->second.c_str())) {
@@ -579,6 +598,65 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                               ACE_TEXT("[rtps_discovery/%C] section.\n"),
                               string_value.c_str(), rtps_name.c_str()), -1);
           }
+        } else if (name == "SedpHeartbeatPeriod") {
+          const OPENDDS_STRING& string_value = it->second;
+          int value;
+          if (DCPS::convertToInteger(string_value, value)) {
+            config->sedp_heartbeat_period(TimeDuration::from_msec(value));
+          } else {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+                              ACE_TEXT("Invalid entry (%C) for SedpHeartbeatPeriod in ")
+                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                              string_value.c_str(), rtps_name.c_str()), -1);
+          }
+        } else if (name == "SedpNakResponseDelay") {
+          const OPENDDS_STRING& string_value = it->second;
+          int value;
+          if (DCPS::convertToInteger(string_value, value)) {
+            config->sedp_nak_response_delay(TimeDuration::from_msec(value));
+          } else {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+                              ACE_TEXT("Invalid entry (%C) for SedpNakResponseDelay in ")
+                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                              string_value.c_str(), rtps_name.c_str()), -1);
+          }
+        } else if (name == "SedpSendDelay") {
+          const OPENDDS_STRING& string_value = it->second;
+          int value;
+          if (DCPS::convertToInteger(string_value, value)) {
+            config->sedp_send_delay(TimeDuration::from_msec(value));
+          } else {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+                              ACE_TEXT("Invalid entry (%C) for SedpSendDelay in ")
+                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                              string_value.c_str(), rtps_name.c_str()), -1);
+          }
+        } else if (name == "SedpPassiveConnectDuration") {
+          const OPENDDS_STRING& string_value = it->second;
+          int value;
+          if (DCPS::convertToInteger(string_value, value)) {
+            config->sedp_passive_connect_duration(TimeDuration::from_msec(value));
+          } else {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+                              ACE_TEXT("Invalid entry (%C) for SedpPassiveConnectDuration in ")
+                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                              string_value.c_str(), rtps_name.c_str()), -1);
+          }
+        } else if (name == "SecureParticipantUserData") {
+          const OPENDDS_STRING& string_value = it->second;
+          int int_value;
+          if (!DCPS::convertToInteger(string_value, int_value)) {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsDiscovery::Config::discovery_config: ")
+                       ACE_TEXT("Invalid entry (%C) for SecureParticipantUserData in ")
+                       ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                       string_value.c_str(), rtps_name.c_str()));
+            return -1;
+          }
+          config->secure_participant_user_data(int_value);
         } else if (name == "Customization") {
           if (DCPS::DCPS_debug_level > 0) {
             ACE_DEBUG((LM_DEBUG,
@@ -608,6 +686,39 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                               value.c_str(), rtps_name.c_str()), -1);
           }
           config->periodic_directed_spdp(bool(smInt));
+        } else if (name == "TypeLookupServiceReplyTimeout") {
+          const OPENDDS_STRING& value = it->second;
+          int timeout;
+          if (!DCPS::convertToInteger(value, timeout)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+              ACE_TEXT("Invalid entry (%C) for TypeLookupServiceReplyTimeout in ")
+              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->max_type_lookup_service_reply_period(TimeDuration::from_msec(timeout));
+        } else if (name == "UseXTypes") {
+          const OPENDDS_STRING& value = it->second;
+          int smInt;
+          if (!DCPS::convertToInteger(value, smInt)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
+              ACE_TEXT("Invalid entry (%C) for UseXTypes in ")
+              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->use_xtypes(bool(smInt));
+        } else if (name == "SedpResponsiveMode") {
+          const OPENDDS_STRING& value = it->second;
+          int smInt;
+          if (!DCPS::convertToInteger(value, smInt)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
+                              ACE_TEXT("Invalid entry (%C) for SedpResponsiveMode in ")
+                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->sedp_responsive_mode(bool(smInt));
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -670,7 +781,7 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
   guid_gen_.populate(ads.id);
   ads.id.entityId = ENTITYID_PARTICIPANT;
   try {
-    const DCPS::RcHandle<Spdp> spdp (DCPS::make_rch<Spdp>(domain, ref(ads.id), qos, this));
+    const DCPS::RcHandle<Spdp> spdp(DCPS::make_rch<Spdp>(domain, ref(ads.id), qos, this));
     // ads.id may change during Spdp constructor
     participants_[domain][ads.id] = spdp;
   } catch (const std::exception& e) {
@@ -684,17 +795,19 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
 
 #if defined(OPENDDS_SECURITY)
 DCPS::AddDomainStatus
-RtpsDiscovery::add_domain_participant_secure(DDS::DomainId_t domain,
-                                      const DDS::DomainParticipantQos& qos,
-                                      const OpenDDS::DCPS::RepoId& guid,
-                                      DDS::Security::IdentityHandle id,
-                                      DDS::Security::PermissionsHandle perm,
-                                      DDS::Security::ParticipantCryptoHandle part_crypto)
+RtpsDiscovery::add_domain_participant_secure(
+  DDS::DomainId_t domain,
+  const DDS::DomainParticipantQos& qos,
+  const OpenDDS::DCPS::RepoId& guid,
+  DDS::Security::IdentityHandle id,
+  DDS::Security::PermissionsHandle perm,
+  DDS::Security::ParticipantCryptoHandle part_crypto)
 {
   DCPS::AddDomainStatus ads = {guid, false /*federated*/};
   ads.id.entityId = ENTITYID_PARTICIPANT;
   try {
-    const DCPS::RcHandle<Spdp> spdp (DCPS::make_rch<Spdp>(domain, ads.id, qos, this, id, perm, part_crypto));
+    const DCPS::RcHandle<Spdp> spdp(DCPS::make_rch<Spdp>(
+      domain, ads.id, qos, this, id, perm, part_crypto));
     participants_[domain][ads.id] = spdp;
   } catch (const std::exception& e) {
     ads.id = GUID_UNKNOWN;
@@ -844,7 +957,24 @@ RtpsDiscovery::get_ipv6_sedp_port(DDS::DomainId_t domain,
 void
 RtpsDiscovery::spdp_rtps_relay_address(const ACE_INET_Addr& address)
 {
+  const ACE_INET_Addr prev = config_->spdp_rtps_relay_address();
+  if (prev == address) {
+    return;
+  }
+
   config_->spdp_rtps_relay_address(address);
+
+  if (address == ACE_INET_Addr()) {
+    return;
+  }
+
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
+       dom_pos != dom_limit; ++dom_pos) {
+    for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
+      part_pos->second->send_to_relay();
+    }
+  }
 }
 
 void

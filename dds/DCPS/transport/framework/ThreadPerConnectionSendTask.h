@@ -5,19 +5,18 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_THREADPERCONNECTIONSENDER_H
-#define OPENDDS_DCPS_THREADPERCONNECTIONSENDER_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_THREADPERCONNECTIONSENDTASK_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_THREADPERCONNECTIONSENDTASK_H
 
-#include /**/ "ace/pre.h"
-
-#include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/PoolAllocationBase.h"
 #include "BasicQueue_T.h"
 #include "TransportDefs.h"
 
-#include "ace/Condition_T.h"
-#include "ace/Synch_Traits.h"
-#include "ace/Task.h"
+#include <dds/DCPS/dcps_export.h>
+#include <dds/DCPS/PoolAllocationBase.h>
+#include <dds/DCPS/ConditionVariable.h>
+
+#include <ace/Synch_Traits.h>
+#include <ace/Task.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
@@ -83,9 +82,9 @@ private:
   /// Handle the request.
   virtual void execute(SendRequest& req);
 
-  typedef ACE_SYNCH_MUTEX         LockType;
-  typedef ACE_Guard<LockType>     GuardType;
-  typedef ACE_Condition<LockType> ConditionType;
+  typedef ACE_SYNCH_MUTEX LockType;
+  typedef ACE_Guard<LockType> GuardType;
+  typedef ConditionVariable<LockType> ConditionVariableType;
 
   typedef BasicQueue<SendRequest> QueueType;
 
@@ -99,7 +98,7 @@ private:
   /// find a request in the queue_ that needs to be executed.
   /// This condition will be signal()'ed each time a request is
   /// added to the queue_, and also when this task is shutdown.
-  ConditionType work_available_;
+  ConditionVariableType work_available_;
 
   /// Flag used to initiate a shutdown request to all worker threads.
   bool shutdown_initiated_;
@@ -118,7 +117,5 @@ private:
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
-
-#include /**/ "ace/post.h"
 
 #endif /* OPENDDS_DCPS_THREADPERCONNECTIONSENDER_H */

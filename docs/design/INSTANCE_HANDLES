@@ -88,11 +88,6 @@ Entity::get_instance_handle() and DomainParticipant::contains_entity()
 methods, the InstanceHandle_t value represents a local Entity within
 the scope of the DomainParticipant.
 
-NOTE: Even though there is no inheritance from Entity shown for DataReader
-      and DataWriter in the specification, the IDL included there for
-      the PSM clearly shows this relationship, so these are considered
-      Entities.
-
 For the SampleInfo and various Status variable fields, the
 InstanceHandle_t values represent either a DataReader key value
 (instance_handle, last_instance_handle) or an Entity within the entire
@@ -147,7 +142,7 @@ opaque handle values be a CORBA::Long.  OpenDDS follows this suggestion.
 A consequence of maintaining the handle values as unique within a
 participant is that the total number of Entities plus data instances in
 all readers and writers may not exceed the maximum allowed value of the
-handle type.  For OpenDDS this is a 32 bit value.  Note that this
+handle type.  For OpenDDS this is a 32-bit value.  Note that this
 includes all values generated, even if they are no longer actively
 participating in the operation of the middleware (disposed instances,
 destroyed Entities).  OpenDDS does not currently implement a value reuse
@@ -161,22 +156,30 @@ implementation of OpenDDS:
       unique handle values.
 
   DomainParticipantImpl::participant_handles_
-    - Object of InstanceHandleGenerator used as the generating Sequence
+    - Reference to a InstanceHandleGenerator used as the generating Sequence
       for handles.
 
-  DomainParticipantImpl::handles_,handles_protector_
+  InstanceHandle_t = DomainParticipantImpl::assign_handle(GUID_t = GUID_UNKNOWN)
+    - Create a new instance handle either "mapped" from a GUID (if not UNKNOWN)
+      or "unampped" (just a unique integer value).  This instance handle needs
+      to be returned to the Participant using return_handle (see below).
+
+  DomainParticipantImpl::handles_, handles_protector_
     - Mapping of GUID_t values to instance handles and lock for guarding
       access to the container.
 
-  InstanceHandle_t = DomainParticipant::get_handle(GUID_t)
-    - If the GUID_t value represents and Entity, an index is searched for
-      that Entity and any existing handle value returned.  Otherwise a
-      unique new handle value is generated.  The new value is stored in
-      the index if it represents an Entity.
+  InstanceHandle_t = DomainParticipantImpl::lookup_handle(GUID_t)
+    - If the GUID_t value represents an Entity, an index is searched for
+      that Entity and any existing handle value returned.
 
-  InstanceHandle_t = DataWriterImpl::get_next_instance()
-    - Obtains a handle value for unique data key value instances as they
-      are created.
+  DomainParticipantImpl::return_handle(InstanceHandle_t)
+    - The handle that was previously assigned in assign_handle is returned
+      to the pool for potential reuse.  Each successful call to assign_handle
+      should have a corresponding call to return_handle.
+
+  InstanceHandle_t = DataWriterImpl::get_next_handle()
+    - Obtains a handle value for each unique data key value instance as it is
+      created.
 
   InstanceHandle_t = DataReaderImpl::get_next_handle(BuiltinTopicKey_t)
     - If the reader is for a BuiltinTopic Topic, then a handle is
@@ -192,7 +195,7 @@ Instance handles, BIT Keys, and GUIDs (aka RepoIds) are all related:
   - Convert to a GUID using DomainParticipantImpl::get_repoid()
   - Convert to a BIT Key using BIT_Helper_1 or the BIT Data Reader
 - Starting from a GUID (aka RepoId):
-  - Convert to an Instance Handle using DomainParticipantImpl::get_handle()
+  - Convert to an Instance Handle using DomainParticipantImpl::lookup_handle()
   - Direct conversion to a BIT Key is not supported (first get the handle)
 - Starting from a BIT Key:
   - Convert to a GUID using Discovery::bit_key_to_repo_id()

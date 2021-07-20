@@ -1,0 +1,15 @@
+{
+  "name": "Continuous Integration Fan-Out / Fan-In Test",
+  "desc": "This is a small quick test for data fan-out / fan-in capability with large samples (fragmentation)",
+  "any_node": [
+    {
+      "config": "ci_fan_frag_client.json",
+      "count": 1
+    },
+    {
+      "config": "ci_fan_frag_server.json",
+      "count": 10
+    }
+  ],
+  "timeout": 120
+}

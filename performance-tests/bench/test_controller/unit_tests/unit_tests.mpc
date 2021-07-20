@@ -1,0 +1,15 @@
+project (*ScenarioAllocationTest): ../../bench_exe, googletest {
+
+  after += Bench_test_controller
+
+  Source_Files {
+    ../ScenarioManager.cpp
+    ../DdsEntities.cpp
+    ../StatusListener.cpp
+    ../AllocationHelper.cpp
+    ScenarioAllocationTest.cpp
+  }
+
+  libpaths += $(BENCH_ROOT)/lib
+  includes += $(BENCH_ROOT)/builder_idl $(BENCH_ROOT)/builder
+}

@@ -5,25 +5,25 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_TRANSPORT_CLIENT_H
-#define OPENDDS_DCPS_TRANSPORT_CLIENT_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTCLIENT_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTCLIENT_H
 
-#include "dds/DCPS/dcps_export.h"
 #include "TransportConfig_rch.h"
 #include "TransportImpl.h"
 #include "DataLinkSet.h"
 
-#include "dds/DCPS/AssociationData.h"
-#include "dds/DCPS/ReactorInterceptor.h"
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/PoolAllocationBase.h"
-#include "dds/DCPS/DiscoveryListener.h"
-#include "dds/DCPS/RcEventHandler.h"
+#include <dds/DCPS/dcps_export.h>
+#include <dds/DCPS/AssociationData.h>
+#include <dds/DCPS/ReactorInterceptor.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/PoolAllocationBase.h>
+#include <dds/DCPS/DiscoveryListener.h>
+#include <dds/DCPS/RcEventHandler.h>
 
-#include "ace/Time_Value.h"
-#include "ace/Event_Handler.h"
-#include "ace/Reverse_Lock_T.h"
+#include <ace/Time_Value.h>
+#include <ace/Event_Handler.h>
+#include <ace/Reverse_Lock_T.h>
 
 // Forward definition of a test-friendly class in the global name space
 class DDS_TEST;
@@ -33,13 +33,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class EntityImpl;
-class TransportInst;
-class AssocationInfo;
-class ReaderIdSeq;
-class WriterIdSeq;
 class SendStateDataSampleList;
-class SendStateDataSampleListIterator;
 
 /**
  * @brief Mix-in class for DDS entities which directly use the transport layer.
@@ -138,6 +132,9 @@ public:
 
   void terminate_send_if_suspended();
 
+  bool associated_with(const GUID_t& remote) const;
+  bool pending_association_with(const GUID_t& remote) const;
+
 private:
 
   // Implemented by derived classes (DataReaderImpl/DataWriterImpl)
@@ -145,6 +142,7 @@ private:
   virtual DDS::DomainId_t domain_id() const = 0;
   virtual Priority get_priority_value(const AssociationData& data) const = 0;
   virtual void transport_assoc_done(int /*flags*/, const RepoId& /*remote*/) {}
+  virtual SequenceNumber get_max_sn() const { return SequenceNumber::SEQUENCENUMBER_UNKNOWN(); };
 
 
 
@@ -319,7 +317,7 @@ private:
   TransportLocatorSeq conn_info_;
 
   /// Seems to protect accesses to impls_, pending_, links_, data_link_index_
-  ACE_Thread_Mutex lock_;
+  mutable ACE_Thread_Mutex lock_;
 
   typedef ACE_Reverse_Lock<ACE_Thread_Mutex> Reverse_Lock_t;
   Reverse_Lock_t reverse_lock_;

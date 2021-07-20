@@ -5,18 +5,20 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_UDPTRANSPORT_H
-#define DCPS_UDPTRANSPORT_H
-
-#include "Udp_Export.h"
+#ifndef OPENDDS_DCPS_TRANSPORT_UDP_UDPTRANSPORT_H
+#define OPENDDS_DCPS_TRANSPORT_UDP_UDPTRANSPORT_H
 
 #include "UdpDataLink.h"
+
+#include "Udp_Export.h"
 #include "UdpDataLink_rch.h"
 
-#include "dds/DCPS/transport/framework/PriorityKey.h"
-#include "dds/DCPS/transport/framework/TransportImpl.h"
-#include "dds/DCPS/transport/framework/TransportClient.h"
-#include "dds/DCPS/PoolAllocator.h"
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/ConditionVariable.h>
+#include <dds/DCPS/TimeTypes.h>
+#include <dds/DCPS/transport/framework/PriorityKey.h>
+#include <dds/DCPS/transport/framework/TransportImpl.h>
+#include <dds/DCPS/transport/framework/TransportClient.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -42,7 +44,9 @@ protected:
                                               const TransportClient_rch& client);
 
   virtual void stop_accepting_or_connecting(const TransportClient_wrch& client,
-                                            const RepoId& remote_id);
+                                            const RepoId& remote_id,
+                                            bool disassociate,
+                                            bool association_failed);
 
   bool configure_i(UdpInst& config);
 
@@ -62,9 +66,9 @@ private:
   PriorityKey blob_to_key(const TransportBLOB& remote,
                           Priority priority, ACE_INET_Addr local_addr, bool active);
 
-  typedef ACE_SYNCH_MUTEX         LockType;
-  typedef ACE_Guard<LockType>     GuardType;
-  typedef ACE_Condition<LockType> ConditionType;
+  typedef ACE_SYNCH_MUTEX LockType;
+  typedef ACE_Guard<LockType> GuardType;
+  typedef ConditionVariable<LockType> ConditionVariableType;
 
   /// This lock is used to protect the client_links_ data member.
   LockType client_links_lock_;

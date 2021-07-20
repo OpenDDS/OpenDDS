@@ -266,6 +266,8 @@ PubDriver::run()
     std::memcpy(subscription.remote_data_[0].data.get_buffer(),
                 str.c_str(), str.size());
 
+    ACE_OS::sleep(2); // wait for assoc (shmem doesn't support notification-based association)
+
   } else { // tcp
     subscription.remote_data_[0].transport_type = "tcp";
 
@@ -283,7 +285,9 @@ PubDriver::run()
   this->writer_.init(subscription);
 
   // Wait for a fully association establishment and then start sending samples.
-  ACE_OS::sleep(2);
+  while (!writer_.associated()) {
+    ACE_OS::sleep(1);
+  }
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Run our SimplePublisher object.\n"));
@@ -408,7 +412,7 @@ PubDriver::parse_sub_arg(const ACE_TString& arg)
 
   builder.participantId(1);
   builder.entityKey(ACE_OS::atoi(sub_id_str.c_str()));
-  builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
+  builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_READER_WITH_KEY);
 
   // Find the (only) ':' char in the remainder, and make sure it is in
   // a legal spot.

@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_TRANSPORTIMPL_H
-#define OPENDDS_DCPS_TRANSPORTIMPL_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTIMPL_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTIMPL_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject.h"
@@ -127,18 +127,22 @@ public:
     RepoId local_id_;
     Priority priority_;
     bool local_reliable_, local_durable_;
+    SequenceNumber max_sn_;
 
     ConnectionAttribs()
       : local_id_(GUID_UNKNOWN)
       , priority_(0)
       , local_reliable_(false)
       , local_durable_(false)
+      , max_sn_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
     {}
   };
 
   struct RemoteTransport {
     RepoId repo_id_;
     TransportBLOB blob_;
+    MonotonicTime_t participant_discovered_at_;
+    ACE_CDR::ULong context_;
     Priority publication_transport_priority_;
     bool reliable_, durable_;
   };
@@ -195,7 +199,9 @@ protected:
   /// The TransportClient* passed in to accept or connect is not
   /// valid after this method is called.
   virtual void stop_accepting_or_connecting(const TransportClient_wrch& client,
-                                            const RepoId& remote_id) = 0;
+                                            const RepoId& remote_id,
+                                            bool disassociate,
+                                            bool association_failed) = 0;
 
 
   /// Called during the shutdown() method in order to give the

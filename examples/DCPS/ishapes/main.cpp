@@ -66,7 +66,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       TransportRegistry::instance()->create_inst("the_rtps_transport",
                                                  "rtps_udp");
     RtpsUdpInst_rch rui = static_rchandle_cast<RtpsUdpInst>(inst);
-    rui->handshake_timeout_ = 1;
 
     config->instances_.push_back(inst);
     TransportRegistry::instance()->global_config(config);
@@ -74,7 +73,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
     DDS::DomainId_t domain = 0;
     bool multicast = true;
     unsigned int resend = 1;
-    std::string partition, governance, permissions;
+    ShapesDialog::QosConfig qosConfig("", false);
+    std::string governance, permissions;
     int defaultSize = 0;
 
     int curr = 1;
@@ -126,8 +126,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
         disc->dx(temp);
       } else if ((ACE_OS::strcmp(ACE_TEXT("-partition"), argv[curr]) == 0) &&
         (curr + 1 < argc)) {
-        partition = ACE_TEXT_ALWAYS_CHAR(argv[++curr]);
-        std::cout << "Partition[0]: " << partition << std::endl;
+        qosConfig.partition_ = ACE_TEXT_ALWAYS_CHAR(argv[++curr]);
+        std::cout << "Partition[0]: " << qosConfig.partition_ << std::endl;
       } else if ((ACE_OS::strcmp(ACE_TEXT("-defaultSize"), argv[curr]) == 0) &&
         (curr + 1 < argc)) {
         defaultSize = ACE_OS::atoi(argv[++curr]);
@@ -137,6 +137,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       } else if ((ACE_OS::strcmp(ACE_TEXT("-permissions"), argv[curr]) == 0) &&
         (curr + 1 < argc)) {
         permissions = ACE_TEXT_ALWAYS_CHAR(argv[++curr]);
+      } else if ((ACE_OS::strcmp(ACE_TEXT("-xcdr1"), argv[curr]) == 0)) {
+        qosConfig.xcdr1_ = true;
+        std::cout << "XCDR1 encoding" << std::endl;
+      } else if ((ACE_OS::strcmp(ACE_TEXT("-no-xtypes"), argv[curr]) == 0)) {
+        disc->use_xtypes(false);
+        std::cout << "XTypes disabled in discovery" << std::endl;
       } else {
         std::cout << "Ignoring unknown param: " <<
           ACE_TEXT_ALWAYS_CHAR(argv[curr]) << std::endl;
@@ -181,11 +187,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
     QApplication app(argc, atc.get_ASCII_argv());
     Q_INIT_RESOURCE(ishape);
     // create and show your widgets here
-    ShapesDialog shapes(participant, partition, defaultSize);
+    ShapesDialog shapes(participant, qosConfig, defaultSize);
 
 #ifdef OPENDDS_SECURITY
     if (TheServiceParticipant->get_security()) {
-      shapes.setWindowTitle("OpenDDS Security BETA");
+      shapes.setWindowTitle("OpenDDS with DDS Security");
     }
 #endif
 

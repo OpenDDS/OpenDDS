@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_NETWORKCONFIGPUBLISHER_H
-#define OPENDDS_DCPS_NETWORKCONFIGPUBLISHER_H
+#ifndef OPENDDS_DCPS_NETWORKCONFIGMONITOR_H
+#define OPENDDS_DCPS_NETWORKCONFIGMONITOR_H
 
 #include "dcps_export.h"
 
@@ -103,7 +103,7 @@ struct NetworkInterfaceName {
   const OPENDDS_STRING name_;
 };
 
-class NetworkConfigListener : public virtual RcObject {
+class OpenDDS_Dcps_Export NetworkConfigListener : public virtual RcObject {
 public:
   virtual void add_interface(const NetworkInterface& interface)
   {
@@ -170,4 +170,4 @@ typedef RcHandle<NetworkConfigMonitor> NetworkConfigMonitor_rch;
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_DCPS_NETWORKCONFIGPUBLISHER_H
+#endif // OPENDDS_DCPS_NETWORKCONFIGMONITOR_H

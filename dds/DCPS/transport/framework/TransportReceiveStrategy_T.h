@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_TRANSPORTRECEIVESTRATEGY
-#define OPENDDS_DCPS_TRANSPORTRECEIVESTRATEGY
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTRECEIVESTRATEGY_T_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTRECEIVESTRATEGY_T_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "ReceivedDataSample.h"
@@ -40,7 +40,7 @@ public:
   /// Useful as a simpler altnernative to handle_dds_input
   /// when dealing with UDP protocols with maximum packet size.
   /// Behaves the same as handle_dds_input, but only makes use
-  /// of a single recieve buffer and doesn't require message block
+  /// of a single receive buffer and doesn't require message block
   /// chains that need to be updated / maintained
   int handle_simple_dds_input(ACE_HANDLE fd);
 
@@ -77,9 +77,25 @@ protected:
   /// Check the data sample header for suitability.
   virtual bool check_header(const DSH& header);
 
+  /// Begin Current Transport Header Processing
+  virtual void begin_transport_header_processing() {}
+
+  /// End Current Transport Header Processing
+  virtual void end_transport_header_processing() {}
+
+  class ScopedHeaderProcessing {
+  public:
+    explicit ScopedHeaderProcessing(TransportReceiveStrategy& trs) : trs_(trs) { trs_.begin_transport_header_processing(); }
+    ~ScopedHeaderProcessing() { trs_.end_transport_header_processing(); }
+  private:
+    TransportReceiveStrategy& trs_;
+  };
+
   /// Called when there is a ReceivedDataSample to be delivered.
   virtual void deliver_sample(ReceivedDataSample&  sample,
                               const ACE_INET_Addr& remote_address) = 0;
+
+  virtual void finish_message() {}
 
   /// Let the subclass start.
   virtual int start_i() = 0;

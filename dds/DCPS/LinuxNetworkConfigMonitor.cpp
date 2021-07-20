@@ -38,7 +38,14 @@ bool LinuxNetworkConfigMonitor::open()
   ACE_Netlink_Addr addr;
   addr.set(pid, RTMGRP_NOTIFY | RTMGRP_LINK | RTMGRP_IPV4_IFADDR | RTMGRP_IPV6_IFADDR);
   if (socket_.open(addr, AF_NETLINK, NETLINK_ROUTE) != 0) {
+#ifdef ACE_ANDROID
+    if (DCPS_debug_level >= 1) {
+      ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: LinuxNetworkConfigMonitor::open: could not open socket"
+        " this is expected for API30+\n"));
+    }
+#else
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::open: could not open socket: %m\n")));
+#endif
     return false;
   }
 

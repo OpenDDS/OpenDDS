@@ -6,8 +6,8 @@
  */
 
 #ifdef OPENDDS_SECURITY
-#ifndef OPENDDS_RTPS_ICE_CHECKLIST_H
-#define OPENDDS_RTPS_ICE_CHECKLIST_H
+#ifndef OPENDDS_DCPS_RTPS_ICE_CHECKLIST_H
+#define OPENDDS_DCPS_RTPS_ICE_CHECKLIST_H
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -103,7 +103,7 @@ struct ConnectivityCheck {
 
   const CandidatePair& candidate_pair() const
   {
-    return candiate_pair_;
+    return candidate_pair_;
   }
   const STUN::Message& request() const
   {
@@ -126,7 +126,7 @@ struct ConnectivityCheck {
     request_.password = a_password;
   }
 private:
-  CandidatePair candiate_pair_;
+  CandidatePair candidate_pair_;
   STUN::Message request_;
   bool cancelled_;
   DCPS::MonotonicTimePoint expiration_date_;

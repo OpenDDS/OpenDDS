@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DCPS_UDPLOADER_H
-#define DCPS_UDPLOADER_H
+#ifndef OPENDDS_DCPS_TRANSPORT_UDP_UDPLOADER_H
+#define OPENDDS_DCPS_TRANSPORT_UDP_UDPLOADER_H
 
 #include "Udp_Export.h"
 

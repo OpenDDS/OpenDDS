@@ -3,12 +3,14 @@
  * See: http://www.OpenDDS.org/license.html
  */
 
-#ifndef OPENDDS_SECURITY_SSL_DIFFIE_HELLMAN_H
-#define OPENDDS_SECURITY_SSL_DIFFIE_HELLMAN_H
+#ifndef OPENDDS_DCPS_SECURITY_SSL_DIFFIEHELLMAN_H
+#define OPENDDS_DCPS_SECURITY_SSL_DIFFIEHELLMAN_H
 
-#include "dds/DCPS/security/DdsSecurity_Export.h"
-#include "dds/DCPS/unique_ptr.h"
+#include <dds/DCPS/security/OpenDDS_Security_Export.h>
+#include <dds/DCPS/unique_ptr.h>
+
 #include "dds/DdsDcpsCoreC.h"
+
 #include <openssl/evp.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -17,7 +19,10 @@ namespace OpenDDS {
 namespace Security {
 namespace SSL {
 
-class DdsSecurity_Export DHAlgorithm {
+const char DH_2048_MODP_256_PRIME_STR[] = "DH+MODP-2048-256";
+const char ECDH_PRIME_256_V1_CEUM_STR[] = "ECDH+prime256v1-CEUM";
+
+class OpenDDS_Security_Export DHAlgorithm {
 public:
   typedef DCPS::unique_ptr<DHAlgorithm> unique_ptr;
 
@@ -49,7 +54,7 @@ public:
   DDS::OctetSeq shared_secret_;
 };
 
-class DdsSecurity_Export DH_2048_MODP_256_PRIME : public DHAlgorithm {
+class OpenDDS_Security_Export DH_2048_MODP_256_PRIME : public DHAlgorithm {
 public:
   DH_2048_MODP_256_PRIME();
   ~DH_2048_MODP_256_PRIME();
@@ -69,10 +74,10 @@ public:
    */
   int compute_shared_secret(const DDS::OctetSeq& pub_key);
 
-  const char* kagree_algo() const { return "DH+MODP-2048-256"; }
+  const char* kagree_algo() const { return DH_2048_MODP_256_PRIME_STR; }
 };
 
-class DdsSecurity_Export ECDH_PRIME_256_V1_CEUM : public DHAlgorithm {
+class OpenDDS_Security_Export ECDH_PRIME_256_V1_CEUM : public DHAlgorithm {
 public:
   ECDH_PRIME_256_V1_CEUM();
   ~ECDH_PRIME_256_V1_CEUM();
@@ -92,10 +97,10 @@ public:
    */
   int compute_shared_secret(const DDS::OctetSeq& pub_key);
 
-  const char* kagree_algo() const { return "ECDH+prime256v1-CEUM"; }
+  const char* kagree_algo() const { return ECDH_PRIME_256_V1_CEUM_STR; }
 };
 
-class DdsSecurity_Export DiffieHellman {
+class OpenDDS_Security_Export DiffieHellman {
 public:
   typedef DCPS::unique_ptr<DiffieHellman> unique_ptr;
 

@@ -5,10 +5,11 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_INFO_UTILS_IDL
-#define OPENDDS_DCPS_INFO_UTILS_IDL
-#include "dds/DdsDcpsCore.idl"
-#include "dds/DdsDcpsGuid.idl"
+#ifndef OPENDDS_DDSDCPSINFOUTILS_IDL
+#define OPENDDS_DDSDCPSINFOUTILS_IDL
+
+#include <dds/DdsDcpsCore.idl>
+#include <dds/DdsDcpsGuid.idl>
 
 module OpenDDS
 {
@@ -58,19 +59,25 @@ module OpenDDS
 
     struct WriterAssociation {
       TransportLocatorSeq writerTransInfo;
+      unsigned long transportContext;
       RepoId writerId;
       ::DDS::PublisherQos pubQos;
       ::DDS::DataWriterQos writerQos;
+      ::DDS::OctetSeq serializedTypeInfo;
+      MonotonicTime_t participantDiscoveredAt;
     };
 
     struct ReaderAssociation {
       TransportLocatorSeq readerTransInfo;
+      unsigned long transportContext;
       RepoId readerId;
       ::DDS::SubscriberQos subQos;
       ::DDS::DataReaderQos readerQos;
       string filterClassName;
       string filterExpression;
       ::DDS::StringSeq exprParams;
+      ::DDS::OctetSeq serializedTypeInfo;
+      MonotonicTime_t participantDiscoveredAt;
     };
 
     typedef sequence<RepoId> WriterIdSeq;

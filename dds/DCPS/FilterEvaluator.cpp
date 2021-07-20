@@ -7,7 +7,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
-#include "dds/DCPS/Definitions.h"
+#include "Definitions.h"
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
@@ -15,7 +15,7 @@
 #include "FilterExpressionGrammar.h"
 #include "AstNodeWrapper.h"
 #include "Definitions.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
+#include "SafetyProfileStreams.h"
 
 #include <ace/ACE.h>
 
@@ -124,11 +124,26 @@ FilterEvaluator::SerializedForEval::lookup(const char* field) const
   if (iter != cache_.end()) {
     return iter->second;
   }
-  Message_Block_Ptr mb (serialized_->duplicate());
-  Serializer ser(mb.get(), swap_,
-                 cdr_ ? Serializer::ALIGN_CDR : Serializer::ALIGN_NONE);
+  Message_Block_Ptr mb(serialized_->duplicate());
+  Serializer ser(mb.get(), Encoding::KIND_UNALIGNED_CDR, swap_);
   if (cdr_) {
-    ser.skip(4); // CDR encapsulation header
+    EncapsulationHeader encap;
+    if (!(ser >> encap)) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
+        ACE_TEXT("FilterEvaluator::SerializedForEval::lookup: ")
+        ACE_TEXT("deserialization of encapsulation header failed.\n")));
+      throw std::runtime_error("FilterEvaluator::SerializedForEval::lookup:"
+        "deserialization of encapsulation header failed.\n");
+    }
+    Encoding encoding;
+    if (!encap.to_encoding(encoding, exten_)) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
+        ACE_TEXT("FilterEvaluator::SerializedForEval::lookup: ")
+        ACE_TEXT("failed to convert encapsulation header to encoding.\n")));
+      throw std::runtime_error("FilterEvaluator::SerializedForEval::lookup:"
+        "failed to convert encapsulation header to encoding.\n");
+    }
+    ser.encoding(encoding);
   }
   const Value v = meta_.getValue(ser, field);
   cache_.insert(std::make_pair(OPENDDS_STRING(field), v));
@@ -148,11 +163,7 @@ bool FilterEvaluator::has_non_key_fields(const MetaStruct& meta) const
     }
   }
 
-  if (filter_root_->has_non_key_fields(meta)) {
-    return true;
-  }
-
-  return false;
+  return filter_root_->has_non_key_fields(meta);
 }
 
 namespace {

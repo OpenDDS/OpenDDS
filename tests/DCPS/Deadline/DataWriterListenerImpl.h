@@ -4,9 +4,14 @@
 #ifndef DATAWRITER_LISTENER_IMPL
 #define DATAWRITER_LISTENER_IMPL
 
-#include "dds/DdsDcpsPublicationC.h"
-#include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/LocalObject.h"
+#include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/LocalObject.h>
+#include <dds/DCPS/ConditionVariable.h>
+#include <dds/DCPS/TimeTypes.h>
+
+#include <dds/DdsDcpsPublicationC.h>
+
+#include <ace/Thread_Mutex.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -46,7 +51,8 @@ public:
       ::DDS::DataWriter_ptr writer,
       const ::OpenDDS::DCPS::PublicationLostStatus& status);
 
-  int wait_matched(long count, const ACE_Time_Value *abstime) const;
+  bool wait_matched(
+    long count, const OpenDDS::DCPS::TimeDuration& max_wait) const;
 
   CORBA::Long offered_deadline_total_count (void) const;
 
@@ -55,7 +61,7 @@ protected:
 
 private:
   mutable ACE_Thread_Mutex mutex_;
-  mutable ACE_Condition<ACE_Thread_Mutex> matched_condition_;
+  mutable OpenDDS::DCPS::ConditionVariable<ACE_Thread_Mutex> matched_condition_;
   long matched_;
   CORBA::Long offered_deadline_total_count_;
 };

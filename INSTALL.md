@@ -31,8 +31,8 @@ supported platforms.
   OpenDDS has a "configure" script to automate all steps required before
   actually compiling source code.  This script requires Perl 5.10 or newer to be
   installed and available on the system PATH.  Perl 5.8 may be sufficient on
-  Unix systems but [ActiveState Perl](https://www.activestate.com/products/activeperl/)
-  5.10 or newer should be used on Windows.
+  Unix systems. [Strawberry Perl](https://www.strawberryperl.com)
+  is recommended on Windows.
   To start the script simply change to the directory containing this INSTALL
   file, and run:
 
@@ -113,6 +113,9 @@ bin\auto_run_tests.pl
   that's under the installation prefix directory.  It contains the required
   libraries, code generators, header files, IDL files, and associated scripts
   and documentation.
+
+  **NOTE:** If configured with RapidJSON, OpenDDS will install the headers for
+  RapidJSON, which might conflict with an existing installation.
 
 ### Application Development with an Installed OpenDDS
 

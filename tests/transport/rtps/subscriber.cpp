@@ -1,27 +1,28 @@
-#include "dds/DCPS/transport/rtps_udp/RtpsUdpInst.h"
+#include <TestMsg.h>
+
+#include <dds/DCPS/transport/rtps_udp/RtpsUdpInst.h>
 #ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
+#include <dds/DCPS/transport/framework/TransportRegistry.h>
+#include <dds/DCPS/transport/framework/TransportReceiveListener.h>
+#include <dds/DCPS/transport/framework/TransportClient.h>
+#include <dds/DCPS/transport/framework/TransportExceptions.h>
+#include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
-#include "dds/DCPS/transport/framework/TransportReceiveListener.h"
-#include "dds/DCPS/transport/framework/TransportClient.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
-#include "dds/DCPS/transport/framework/ReceivedDataSample.h"
+#include <dds/DCPS/RTPS/BaseMessageUtils.h>
 
-#include "dds/DCPS/RTPS/BaseMessageUtils.h"
-
-#include "dds/DCPS/RepoIdBuilder.h"
-#include "dds/DCPS/GuidConverter.h"
-#include "dds/DCPS/AssociationData.h"
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/Qos_Helper.h"
+#include <dds/DCPS/RepoIdBuilder.h>
+#include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/AssociationData.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Qos_Helper.h>
 
 #include <ace/OS_main.h>
 #include <ace/String_Base.h>
 #include <ace/Get_Opt.h>
 #include <ace/OS_NS_time.h>
-#include "ace/OS_NS_unistd.h"
+#include <ace/OS_NS_unistd.h>
 
 #include <cstdio>
 #include <cstring>
@@ -29,9 +30,9 @@
 #include <iostream>
 #include <sstream>
 
-#include "TestMsg.h"
-
 using namespace OpenDDS::DCPS;
+
+const Encoding encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
 
 class SimpleDataReader : public TransportReceiveListener, public TransportClient
 {
@@ -53,8 +54,8 @@ public:
       pub_id_ = publication.remote_id_;
       return associate(publication, false /* active */);
     } catch (const CORBA::BAD_PARAM& ) {
-        ACE_ERROR((LM_ERROR, "ERROR: caught CORBA::BAD_PARAM exception\n"));
-        return false;
+      ACE_ERROR((LM_ERROR, "ERROR: caught CORBA::BAD_PARAM exception\n"));
+      return false;
     }
   }
 
@@ -69,22 +70,25 @@ public:
 
     switch (sample.header_.message_id_) {
     case SAMPLE_DATA: {
-      Serializer ser(sample.sample_.get(),
-                     sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
-                     Serializer::ALIGN_CDR);
-      bool ok = true;
-      ACE_CDR::ULong encap;
-      ok &= (ser >> encap); // read and ignore 32-bit CDR Encapsulation header
-      TestMsg data;
-      ok &= (ser >> data);
+      Serializer ser(sample.sample_.get(), encoding);
 
-      if (!ok) {
-        ACE_ERROR((LM_ERROR, "ERROR: failed to deserialize data\n"));
+      OpenDDS::DCPS::EncapsulationHeader encap;
+      if (!(ser >> encap)) {
+        ACE_ERROR((LM_ERROR,
+          "ERROR: data_received() seq# = %q: failed to deserialize encap\n",
+          sample.header_.sequence_.getValue()));
+        return;
+      }
+      TestMsg data;
+      if (!(ser >> data)) {
+        ACE_ERROR((LM_ERROR,
+          "ERROR: data_received() seq# = %q: failed to deserialize data\n",
+          sample.header_.sequence_.getValue()));
         return;
       }
 
       if (data.key == 99) {
-        ACE_DEBUG((LM_INFO, "data_received() seq# = %d: terminating sample\n",
+        ACE_DEBUG((LM_INFO, "data_received() seq# = %q: terminating sample\n",
                    sample.header_.sequence_.getValue()));
         done_ = true;
         return;
@@ -124,19 +128,24 @@ public:
     case DISPOSE_INSTANCE:
     case UNREGISTER_INSTANCE:
     case DISPOSE_UNREGISTER_INSTANCE: {
-      OpenDDS::DCPS::Serializer ser(sample.sample_.get(),
-                                    sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
-                                    OpenDDS::DCPS::Serializer::ALIGN_CDR);
-      bool ok = true;
-      ACE_CDR::ULong encap;
-      ok &= (ser >> encap); // read and ignore 32-bit CDR Encapsulation header
-      TestMsg data;
-      ok &= (ser >> OpenDDS::DCPS::KeyOnly<TestMsg>(data));
+      Serializer ser(sample.sample_.get(), encoding);
 
-      if (!ok) {
-        ACE_ERROR((LM_ERROR, "ERROR: failed to deserialize key data\n"));
+      OpenDDS::DCPS::EncapsulationHeader encap;
+      if (!(ser >> encap)) {
+        ACE_ERROR((LM_ERROR,
+          "ERROR: data_received() seq# = %q: failed to deserialize encap\n",
+          sample.header_.sequence_.getValue()));
         return;
       }
+
+      TestMsg data;
+      if (!(ser >> KeyOnly<TestMsg>(data))) {
+        ACE_ERROR((LM_ERROR,
+          "ERROR: data_received() seq# = %q: failed to deserialize key-only data\n",
+          sample.header_.sequence_.getValue()));
+        return;
+      }
+
       if (data.key == 0x04030201) {
         // Good control message
         control_msg_count_++;
@@ -276,12 +285,16 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     locators[0].port = remote_addr.get_port_number();
     address_to_bytes(locators[0].address, remote_addr);
 
-    size_t size_locator = 0, padding_locator = 0;
-    gen_find_size(locators, size_locator, padding_locator);
-    ACE_Message_Block mb_locator(size_locator + padding_locator + 1);
-    Serializer ser_loc(&mb_locator, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
-    ser_loc << locators;
-    ser_loc << ACE_OutputCDR::from_boolean(false); // requires inline QoS
+    const Encoding& locators_encoding = OpenDDS::RTPS::get_locators_encoding();
+    size_t size_locator = 0;
+    serialized_size(locators_encoding, size_locator, locators);
+    ACE_Message_Block mb_locator(size_locator + 1);
+    Serializer ser_loc(&mb_locator, locators_encoding);
+    if (!(ser_loc << locators) ||
+        !(ser_loc << ACE_OutputCDR::from_boolean(false))) { // requires inline QoS
+      std::cerr << "subscriber serialize locators failed\n";
+      return 1;
+    }
 
     AssociationData publication;
     publication.remote_id_ = remote;
@@ -315,7 +328,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ACE_Thread_Manager::instance()->wait();
 
     return 0;
-  } catch (const OpenDDS::DCPS::Transport::NotConfigured& ) {
+  } catch (const Transport::NotConfigured& ) {
     ACE_ERROR((LM_ERROR,
                "ERROR: caught OpenDDS::DCPS::Transport::NotConfigured exception.\n"));
     return 1;

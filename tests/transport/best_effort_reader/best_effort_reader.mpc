@@ -1,22 +1,20 @@
-project(*pub) : dcpsexe, dcps_test, dcps_rtps_udp {
+project(DDS_tests_transport*pub) : dcpsexe, dcps_test, dcps_rtps_udp, ../TestMsg/TestMsg {
 
   exename = publisher
 
   Source_Files {
     AppConfig.cpp
-    TestMsg.cpp
     SocketWriter.cpp
     publisher.cpp
   }
 }
 
-project(*sub) : dcpsexe, dcps_test, dcps_rtps_udp {
+project(DDS_tests_transport*sub) : dcpsexe, dcps_test, dcps_rtps_udp, ../TestMsg/TestMsg {
 
   exename = subscriber
 
   Source_Files {
     AppConfig.cpp
-    TestMsg.cpp
     SimpleDataReader.cpp
     subscriber.cpp
   }

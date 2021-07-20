@@ -5,8 +5,9 @@
  * See: http://www.opendds.org/license.html
  */
 
-#if !defined(DDS_SECURITY_CORE_IDL) && defined(OPENDDS_SECURITY)
-#define DDS_SECURITY_CORE_IDL
+#ifdef OPENDDS_SECURITY
+#ifndef OPENDDS_DDS_SECURITY_CORE_IDL
+#define OPENDDS_DDS_SECURITY_CORE_IDL
 
 // DDS Security 1.1 Normative IDL (ptc/2017-09-26)
 // This file follows the spec IDL but includes changes necessary for OpenDDS.
@@ -118,6 +119,8 @@ module DDS {
       PermissionsToken  permissions_token;
       PropertyQosPolicy property;
       ParticipantSecurityInfo  security_info;
+      // https://issues.omg.org/browse/DDSSEC12-87
+      ExtendedBuiltinEndpointSet_t extended_builtin_endpoints;
     };
 
     //@extensibility(MUTABLE)
@@ -781,3 +784,4 @@ module DDS {
 };
 
 #endif /* DDS_SECURITY_CORE_IDL */
+#endif

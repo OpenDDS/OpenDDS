@@ -34,6 +34,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+namespace {
+  const Encoding::Kind encoding_kind = Encoding::KIND_UNALIGNED_CDR;
+}
+
 MulticastDataLink::MulticastDataLink(MulticastTransport& transport,
                                      const MulticastSessionFactory_rch& session_factory,
                                      MulticastPeer local_peer,
@@ -241,6 +245,36 @@ MulticastDataLink::reassemble(ReceivedDataSample& data,
   return false;
 }
 
+int
+MulticastDataLink::make_reservation(const RepoId& rpi,
+                                    const RepoId& lsi,
+                                    const TransportReceiveListener_wrch& trl,
+                                    bool reliable)
+{
+  int result = DataLink::make_reservation(rpi, lsi, trl, reliable);
+  if (reliable) {
+    const MulticastPeer remote_peer = (ACE_INT64)RepoIdConverter(rpi).federationId() << 32
+      | RepoIdConverter(rpi).participantId();
+    MulticastSession_rch session = find_session(remote_peer);
+    if (session) {
+      session->add_remote(lsi, rpi);
+    }
+  }
+  return result;
+}
+
+void
+MulticastDataLink::release_reservations_i(const RepoId& remote_id,
+                                          const RepoId& local_id)
+{
+  const MulticastPeer remote_peer = (ACE_INT64)RepoIdConverter(remote_id).federationId() << 32
+    | RepoIdConverter(remote_id).participantId();
+  MulticastSession_rch session = find_session(remote_peer);
+  if (session) {
+    session->remove_remote(local_id, remote_id);
+  }
+}
+
 void
 MulticastDataLink::sample_received(ReceivedDataSample& sample)
 {
@@ -340,7 +374,7 @@ MulticastDataLink::syn_received_no_session(MulticastPeer source,
     const Message_Block_Ptr& data,
     bool swap_bytes)
 {
-  Serializer serializer_read(data.get(), swap_bytes);
+  Serializer serializer_read(data.get(), encoding_kind, swap_bytes);
 
   MulticastPeer local_peer;
   serializer_read >> local_peer;
@@ -359,7 +393,7 @@ MulticastDataLink::syn_received_no_session(MulticastPeer source,
 
   Message_Block_Ptr synack_data(new ACE_Message_Block(sizeof(MulticastPeer)));
 
-  Serializer serializer_write(synack_data.get());
+  Serializer serializer_write(synack_data.get(), encoding_kind);
   serializer_write << source;
 
   DataSampleHeader header;
@@ -398,6 +432,15 @@ MulticastDataLink::stop_i()
   this->sessions_.clear();
 
   this->socket_.close();
+}
+
+void
+MulticastDataLink::client_stop(const RepoId& localId)
+{
+  if (send_buffer_) {
+    send_buffer_->retain_all(localId);
+    send_buffer_.reset();
+  }
 }
 
 } // namespace DCPS

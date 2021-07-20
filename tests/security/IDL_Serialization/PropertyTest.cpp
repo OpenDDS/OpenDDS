@@ -15,7 +15,7 @@ public:
 
   SerializePropertyTest()
     : buffer(1024)
-    , serializer(&buffer, false, Serializer::ALIGN_CDR)
+    , serializer(&buffer, OpenDDS::DCPS::Encoding::KIND_XCDR1)
   {}
 
   virtual ~SerializePropertyTest(){}

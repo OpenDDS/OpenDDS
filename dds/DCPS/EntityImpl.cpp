@@ -5,9 +5,12 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
 #include "EntityImpl.h"
+
+#include "DomainParticipantImpl.h"
 #include "StatusConditionImpl.h"
-#include "dds/DCPS/transport/framework/TransportConfig.h"
+#include "transport/framework/TransportConfig.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -21,11 +24,16 @@ EntityImpl::EntityImpl()
   , status_condition_(new StatusConditionImpl(this))
   , observer_()
   , events_(Observer::e_NONE)
+  , instance_handle_(DDS::HANDLE_NIL)
 {
 }
 
 EntityImpl::~EntityImpl()
 {
+  const RcHandle<DomainParticipantImpl> participant = participant_for_instance_handle_.lock();
+  if (participant) {
+    participant->return_handle(instance_handle_);
+  }
 }
 
 DDS::ReturnCode_t
@@ -39,7 +47,11 @@ EntityImpl::set_enabled()
 bool
 EntityImpl::is_enabled() const
 {
+#ifdef ACE_HAS_CPP11
+  return this->enabled_;
+#else
   return this->enabled_.value();
+#endif
 }
 
 DDS::StatusCondition_ptr
@@ -79,7 +91,11 @@ EntityImpl::set_deleted(bool state)
 bool
 EntityImpl::get_deleted()
 {
+#ifdef ACE_HAS_CPP11
+  return this->entity_deleted_;
+#else
   return this->entity_deleted_.value();
+#endif
 }
 
 Observer_rch EntityImpl::get_observer(Observer::Event e)
@@ -120,6 +136,23 @@ void EntityImpl::set_observer(Observer_rch observer, Observer::Event e)
 {
   observer_ = observer;
   events_ = e;
+}
+
+DDS::InstanceHandle_t EntityImpl::get_entity_instance_handle(const GUID_t& id,
+                                                             DomainParticipantImpl* participant)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DDS::HANDLE_NIL);
+
+  if (instance_handle_ != DDS::HANDLE_NIL) {
+    return instance_handle_;
+  }
+
+  if (!participant) {
+    return DDS::HANDLE_NIL;
+  }
+
+  participant_for_instance_handle_ = *participant;
+  return instance_handle_ = participant->assign_handle(id);
 }
 
 } // namespace DCPS

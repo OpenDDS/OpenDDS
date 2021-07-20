@@ -15,8 +15,10 @@
 #include "v8_generator.h"
 #include "rapidjson_generator.h"
 #include "langmap_generator.h"
+#include "value_reader_generator.h"
 #include "value_writer_generator.h"
 #include "topic_keys.h"
+#include "typeobject_generator.h"
 
 #include <ast_argument.h>
 #include <ast_attribute.h>
@@ -63,19 +65,9 @@ namespace {
   v8_generator v8_gen_;
   rapidjson_generator rj_gen_;
   langmap_generator lm_gen_;
+  typeobject_generator to_gen_;
+  value_reader_generator value_reader_generator_;
   value_writer_generator value_writer_generator_;
-
-  template <typename T>
-  void scope2vector(vector<T*>& v, UTL_Scope* s, AST_Decl::NodeType nt)
-  {
-    UTL_ScopeActiveIterator it(s, UTL_Scope::IK_decls);
-    for (; !it.is_done(); it.next()) {
-      AST_Decl* item = it.item();
-      if (item->node_type() == nt) {
-        v.push_back(dynamic_cast<T*>(item));
-      }
-    }
-  }
 
 } // namespace
 
@@ -83,9 +75,12 @@ dds_visitor::dds_visitor(AST_Decl* scope, bool java_ts_only)
   : scope_(scope), error_(false), java_ts_only_(java_ts_only)
 {
   if (!be_global->no_default_gen()) {
+    gen_target_.add_generator(&to_gen_);
+    to_gen_.produce_output(!be_global->suppress_xtypes() && !java_ts_only);
+    gen_target_.add_generator(&value_reader_generator_);
+    gen_target_.add_generator(&value_writer_generator_);
     gen_target_.add_generator(&mar_gen_);
     gen_target_.add_generator(&key_gen_);
-    gen_target_.add_generator(&value_writer_generator_);
     gen_target_.add_generator(&ts_gen_);
     gen_target_.add_generator(&mc_gen_);
   }
