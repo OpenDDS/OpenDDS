@@ -661,10 +661,11 @@ std::ostream& char_helper(std::ostream& o, CharType value)
   case '\a':
     return o << "\\a";
   }
-  if (isprint(char_value(value))) {
+  const unsigned cvalue = char_value(value);
+  if (cvalue <= UCHAR_MAX && isprint(cvalue)) {
     return o << static_cast<char>(value);
   }
-  return hex_value(o << "\\x", char_value<CharType>(value), sizeof(CharType) == 1 ? 1 : 2);
+  return hex_value(o << "\\x", cvalue, sizeof(CharType) == 1 ? 1 : 2);
 }
 
 inline
