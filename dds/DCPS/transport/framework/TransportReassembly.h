@@ -131,7 +131,7 @@ private:
 
   TimeDuration timeout_;
 
-  void expire(const MonotonicTimePoint& now);
+  void check_expirations(const MonotonicTimePoint& now);
 
   static bool insert(OPENDDS_LIST(FragRange)& flist,
                      const SequenceRange& seqRange,

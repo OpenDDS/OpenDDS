@@ -104,7 +104,8 @@ public:
   /// samples. The default value is 32.
   size_t datalink_control_chunks_;
 
-  /// TODO document
+  /// Maximum time to store incoming fragments of incomplete data samples.
+  /// The expiration time is relative to the last received fragment.
   TimeDuration fragment_reassembly_timeout_;
 
   /// Does the transport as configured support RELIABLE_RELIABILITY_QOS?

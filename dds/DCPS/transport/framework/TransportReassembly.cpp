@@ -267,7 +267,7 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
   }
 
   const MonotonicTimePoint now = MonotonicTimePoint::now();
-  expire(now);
+  check_expirations(now);
 
   const FragKey key(data.header_.publication_id_, data.header_.sequence_);
   FragInfoMap::iterator iter = fragments_.find(key);
@@ -316,7 +316,7 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
     if (Transport_debug_level > 5 || transport_debug.log_fragment_storage) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble_i "
                  "removed frag, returning %C with %B fragments\n",
-                 data.sample_ ? "true" : "false", fragments_.size()));
+                 data.sample_ ? "true (complete)" : "false (incomplete)", fragments_.size()));
     }
     return data.sample_.get(); // could be false if we had data_unavailable()
   }
@@ -389,7 +389,7 @@ TransportReassembly::data_unavailable(const SequenceNumber& dataSampleSeq,
   }
 }
 
-void TransportReassembly::expire(const MonotonicTimePoint& now)
+void TransportReassembly::check_expirations(const MonotonicTimePoint& now)
 {
   for (ExpirationQueue::iterator pos = expiration_queue_.begin(), limit = expiration_queue_.upper_bound(now);
        pos != limit;) {
@@ -399,7 +399,7 @@ void TransportReassembly::expire(const MonotonicTimePoint& now)
       if (iter->second.expiration_ <= now) {
         fragments_.erase(iter);
         if (Transport_debug_level > 5 || transport_debug.log_fragment_storage) {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::expire "
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::check_expirations "
                      "purge expired leaving %B fragments\n", fragments_.size()));
         }
       } else {
