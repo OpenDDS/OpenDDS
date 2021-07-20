@@ -36,7 +36,7 @@ struct OpenDDS_Rtps_Udp_Export BundlingCacheKey {
 
   bool operator<(const BundlingCacheKey& rhs) const
   {
-    int r = std::memcmp(this, &rhs.dst_guid_, 2 * sizeof (GUID_t));
+    int r = std::memcmp(this, &rhs, 2 * sizeof (GUID_t));
     if (r < 0) {
       return true;
     } else if (r == 0) {
