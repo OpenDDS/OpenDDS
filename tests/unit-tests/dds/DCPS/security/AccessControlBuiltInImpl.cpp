@@ -307,6 +307,10 @@ public:
     TheServiceParticipant->shutdown();
   }
 
+  static void SetUpTestCase () {
+    openssl_init();
+  }
+
   ~AccessControlTest()
   {
   }
