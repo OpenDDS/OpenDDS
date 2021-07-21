@@ -10,7 +10,7 @@
 #  include __TAO_IDL_FEATURES
 #endif
 
-#if defined TAO_IDL_HAS_EXPLICIT_INTS and TAO_IDL_HAS_EXPLICIT_INTS
+#if defined TAO_IDL_HAS_EXPLICIT_INTS && TAO_IDL_HAS_EXPLICIT_INTS
 #  pragma prefix "omg.org"
 
 module CORBA
