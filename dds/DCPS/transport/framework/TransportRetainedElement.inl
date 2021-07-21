@@ -14,14 +14,12 @@ OpenDDS::DCPS::TransportRetainedElement::TransportRetainedElement(
     ACE_Message_Block*                 message,
     const RepoId&                      pubId
 ) : TransportQueueElement(1),
+    msg_(message),
     publication_id_(pubId),
     mb_allocator_(0),
     db_allocator_(0),
     is_duplicate_(true)
 {
-  if (message != 0) {
-    msg_.reset(message->duplicate());
-  }
 }
 
 ACE_INLINE
@@ -31,29 +29,27 @@ OpenDDS::DCPS::TransportRetainedElement::TransportRetainedElement(
     MessageBlockAllocator*             mb_allocator,
     DataBlockAllocator*                db_allocator
 ) : TransportQueueElement(1),
+    msg_(message ? TransportQueueElement::clone_mb(message,
+                                                   mb_allocator,
+                                                   db_allocator) : 0),
     publication_id_(pubId),
     mb_allocator_(mb_allocator),
     db_allocator_(db_allocator),
     is_duplicate_(false)
 {
-  if (message != 0) {
-    msg_.reset(TransportQueueElement::clone_mb(message,
-                                               mb_allocator_,
-                                               db_allocator_));
-  }
 }
 
 ACE_INLINE
 OpenDDS::DCPS::TransportRetainedElement::TransportRetainedElement(
   const TransportRetainedElement& source
 ) : TransportQueueElement(1),
-    msg_(ACE_Message_Block::duplicate(source.msg())),
+    msg_(source.duplicate_msg()),
     publication_id_(source.publication_id()),
     mb_allocator_(source.mb_allocator_),
     db_allocator_(source.db_allocator_),
     is_duplicate_(source.is_duplicate_)
 {
-  DBG_ENTRY_LVL("TransportRetainedElement","TransportRetainedElement",6);
+  DBG_ENTRY_LVL("TransportRetainedElement", "TransportRetainedElement", 6);
 }
 
 

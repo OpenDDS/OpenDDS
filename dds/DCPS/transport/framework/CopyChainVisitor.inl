@@ -19,12 +19,12 @@ OpenDDS::DCPS::CopyChainVisitor::CopyChainVisitor(
   , status_(0)
   , duplicate_(duplicate)
 {
-  DBG_ENTRY_LVL("CopyChainVisitor","CopyChainVisitor",6);
+  DBG_ENTRY_LVL("CopyChainVisitor", "CopyChainVisitor", 6);
 }
 
 ACE_INLINE
 int
 OpenDDS::DCPS::CopyChainVisitor::status() const
 {
-  return this->status_;
+  return status_;
 }

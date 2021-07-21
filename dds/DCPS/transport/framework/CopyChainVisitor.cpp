@@ -15,13 +15,13 @@
 
 OpenDDS::DCPS::CopyChainVisitor::~CopyChainVisitor()
 {
-  DBG_ENTRY_LVL("CopyChainVisitor","~CopyChainVisitor",6);
+  DBG_ENTRY_LVL("CopyChainVisitor", "~CopyChainVisitor", 6);
 }
 
 int
 OpenDDS::DCPS::CopyChainVisitor::visit_element(TransportQueueElement* element)
 {
-  DBG_ENTRY_LVL("CopyChainVisitor","visit_element",6);
+  DBG_ENTRY_LVL("CopyChainVisitor", "visit_element", 6);
 
   TransportRetainedElement* copiedElement = 0;
   if (duplicate_) {

@@ -61,7 +61,7 @@ protected:
 
 private:
   TransportQueueElement* orig_;
-  const TransportSendElement* ose_;
+  const TransportSendElement* original_send_element_;
   Message_Block_Ptr msg_;
   RepoId publication_id_;
   RepoId subscription_id_;

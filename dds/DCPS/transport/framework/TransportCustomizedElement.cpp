@@ -84,7 +84,7 @@ TransportCustomizedElement::find_original_send_element(TransportQueueElement* or
 const TransportSendElement*
 TransportCustomizedElement::original_send_element() const
 {
-  return ose_;
+  return original_send_element_;
 }
 
 
