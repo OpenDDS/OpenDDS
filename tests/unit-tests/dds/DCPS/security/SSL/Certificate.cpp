@@ -72,7 +72,7 @@ public:
   {
   }
 
-  static void SetUpTestCase () 
+  static void SetUpTestCase()
   {
     openssl_init();
   }
