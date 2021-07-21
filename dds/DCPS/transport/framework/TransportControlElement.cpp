@@ -18,12 +18,12 @@ OpenDDS::DCPS::TransportControlElement::TransportControlElement(
 ) : TransportQueueElement(1),
     msg_( msg_block.release())
 {
-  DBG_ENTRY_LVL("TransportControlElement","TransportControlElement",6);
+  DBG_ENTRY_LVL("TransportControlElement", "TransportControlElement", 6);
 }
 
 OpenDDS::DCPS::TransportControlElement::~TransportControlElement()
 {
-  DBG_ENTRY_LVL("TransportControlElement","~TransportControlElement",6);
+  DBG_ENTRY_LVL("TransportControlElement", "~TransportControlElement", 6);
 }
 
 void

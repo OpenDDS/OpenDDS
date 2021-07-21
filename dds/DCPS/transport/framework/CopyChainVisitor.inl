@@ -11,18 +11,20 @@ ACE_INLINE
 OpenDDS::DCPS::CopyChainVisitor::CopyChainVisitor(
   BasicQueue<TransportQueueElement>& target,
   MessageBlockAllocator* mb_allocator,
-  DataBlockAllocator* db_allocator
-) : target_( target)
+  DataBlockAllocator* db_allocator,
+  bool duplicate
+) : target_(target)
   , mb_allocator_(mb_allocator)
   , db_allocator_(db_allocator)
-  , status_( 0)
+  , status_(0)
+  , duplicate_(duplicate)
 {
-  DBG_ENTRY_LVL("CopyChainVisitor","CopyChainVisitor",6);
+  DBG_ENTRY_LVL("CopyChainVisitor", "CopyChainVisitor", 6);
 }
 
 ACE_INLINE
 int
 OpenDDS::DCPS::CopyChainVisitor::status() const
 {
-  return this->status_;
+  return status_;
 }

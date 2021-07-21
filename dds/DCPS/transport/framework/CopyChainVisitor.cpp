@@ -15,30 +15,36 @@
 
 OpenDDS::DCPS::CopyChainVisitor::~CopyChainVisitor()
 {
-  DBG_ENTRY_LVL("CopyChainVisitor","~CopyChainVisitor",6);
+  DBG_ENTRY_LVL("CopyChainVisitor", "~CopyChainVisitor", 6);
 }
 
 int
 OpenDDS::DCPS::CopyChainVisitor::visit_element(TransportQueueElement* element)
 {
-  DBG_ENTRY_LVL("CopyChainVisitor","visit_element",6);
+  DBG_ENTRY_LVL("CopyChainVisitor", "visit_element", 6);
 
-  // Create a new copy of the current element.
-  // fails.
-  TransportRetainedElement* copiedElement = new
-    TransportRetainedElement(
-      element->msg(),
-      element->publication_id(),
-      this->mb_allocator_,
-      this->db_allocator_
-    );
-
+  TransportRetainedElement* copiedElement = 0;
+  if (duplicate_) {
+    // Create a new copy of the current element.
+    copiedElement = new
+      TransportRetainedElement(
+        element->duplicate_msg(),
+        element->publication_id()
+      );
+  } else {
+    // Create a new copy of the current element.
+    copiedElement = new
+      TransportRetainedElement(
+        element->msg(),
+        element->publication_id(),
+        mb_allocator_,
+        db_allocator_
+      );
+  }
 
   // Add the copy to the target.
-  this->target_.put( copiedElement);
+  target_.put(copiedElement);
 
   // Visit entire queue.
   return 1;
-
-
 }

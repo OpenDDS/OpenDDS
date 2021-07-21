@@ -15,14 +15,14 @@
 
 OpenDDS::DCPS::RemoveAllVisitor::~RemoveAllVisitor()
 {
-  DBG_ENTRY_LVL("RemoveAllVisitor","~RemoveAllVisitor",6);
+  DBG_ENTRY_LVL("RemoveAllVisitor", "~RemoveAllVisitor", 6);
 }
 
 int
 OpenDDS::DCPS::RemoveAllVisitor::visit_element_remove(TransportQueueElement* element,
                                                       int&                   remove)
 {
-  DBG_ENTRY_LVL("RemoveAllVisitor","visit_element_remove",6);
+  DBG_ENTRY_LVL("RemoveAllVisitor", "visit_element_remove", 6);
 
   // Always remove the element passed in. Always set the remove flag
   // to true (1).  The BasicQueue<T> will perform the actual removal
@@ -32,7 +32,7 @@ OpenDDS::DCPS::RemoveAllVisitor::visit_element_remove(TransportQueueElement* ele
   // Add the total_length() of the element->msg() chain to our
   // removed_bytes_ (running) total.
   if (element->msg()) {
-    this->removed_bytes_ += element->msg()->total_length();
+    removed_bytes_ += element->msg()->total_length();
   }
 
   // Inform the element that we've made a decision - and it is
@@ -46,7 +46,7 @@ OpenDDS::DCPS::RemoveAllVisitor::visit_element_remove(TransportQueueElement* ele
 
   // Adjust our status_ to indicate that we actually found (and removed)
   // the sample.
-  this->status_ = 1;
+  status_ = 1;
 
   // Continue visitation.
   return 1;

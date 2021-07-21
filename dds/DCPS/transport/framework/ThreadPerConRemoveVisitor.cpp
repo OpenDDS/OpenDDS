@@ -30,7 +30,7 @@ ThreadPerConRemoveVisitor::visit_element_remove(SendRequest* req,
 {
   DBG_ENTRY("ThreadPerConRemoveVisitor", "visit_element_remove");
 
-  TransportQueueElement::MatchOnDataPayload modp(this->sample_->rd_ptr());
+  TransportQueueElement::MatchOnDataPayload modp(sample_->rd_ptr());
   if ((req->op_ == SEND) && modp.matches(*req->element_)) {
     // We are visiting the element that we want to remove, since the
     // element "matches" our sample_.
@@ -47,7 +47,7 @@ ThreadPerConRemoveVisitor::visit_element_remove(SendRequest* req,
 
     // Adjust our status_ to indicate that we actually found (and removed)
     // the sample.
-    this->status_ = released ? REMOVE_RELEASED : REMOVE_FOUND;
+    status_ = released ? REMOVE_RELEASED : REMOVE_FOUND;
 
     // Stop visitation since we've handled the element that matched
     // our sample_.
