@@ -59,7 +59,7 @@ public:
   typedef OPENDDS_UNORDERED_MAP_T(GUID_t, KeyVec) IdMapType;
 #else
   typedef OPENDDS_MAP_T(Key, RcHandle<AddressCacheEntry>) MapType;
-  typedef OPENDDS_VECTOR(Key) KeVec;
+  typedef OPENDDS_VECTOR(Key) KeyVec;
   typedef OPENDDS_MAP_T(GUID_t, KeyVec) IdMapType;
 #endif
 
