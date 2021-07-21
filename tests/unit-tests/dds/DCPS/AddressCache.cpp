@@ -4,6 +4,11 @@
 
 #include <cstring>
 
+#ifdef ACE_HAS_CPP11
+#include <dds/DCPS/Hash.h>
+#include <functional>
+#endif
+
 using namespace OpenDDS::DCPS;
 
 struct TestKey {
@@ -11,12 +16,23 @@ struct TestKey {
   bool operator<(const TestKey& rhs) const {
     return std::memcmp(this, &rhs, sizeof (TestKey)) < 0;
   }
-  bool contains(const RepoId& id) const {
-    return from_ == id || to_ == id;
+  bool operator==(const TestKey& rhs) const {
+    return std::memcmp(this, &rhs, sizeof (TestKey)) == 0;
+  }
+  void get_contained_guids(RepoIdSet& set) const {
+    set.clear();
+    set.insert(from_);
+    set.insert(to_);
   }
   RepoId from_;
   RepoId to_;
 };
+
+#define NOOP
+
+#ifdef ACE_HAS_CPP11
+OPENDDS_OOAT_STD_HASH(TestKey, NOOP);
+#endif
 
 TEST(address_cache_test, load_fail)
 {
@@ -53,7 +69,7 @@ TEST(address_cache_test, store_remove_load_fail)
   ASSERT_FALSE(test_cache_.load(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs));
 }
 
-TEST(address_cache_test, store_remove_contains_load_fail)
+TEST(address_cache_test, store_remove_id_load_fail)
 {
   AddressCache<TestKey> test_cache_;
   AddrSet addrs;
@@ -62,7 +78,7 @@ TEST(address_cache_test, store_remove_contains_load_fail)
   test_cache_.store(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs);
   addrs.clear();
 
-  test_cache_.remove_contains(GUID_UNKNOWN);
+  test_cache_.remove_id(GUID_UNKNOWN);
 
   ASSERT_FALSE(test_cache_.load(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs));
 }
