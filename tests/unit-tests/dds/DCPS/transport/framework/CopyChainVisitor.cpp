@@ -49,6 +49,7 @@ TEST(copy_chain_visitor, simple_copy)
   ASSERT_EQ(dse->get_sample()->reference_count(), 1);
   ASSERT_EQ(tse_out->msg()->reference_count(), 1);
   ASSERT_NE(dse->get_sample(), tse_out->msg());
+  ASSERT_NE(dse->get_sample()->data_block(), tse_out->msg()->data_block());
 
   RemoveAllVisitor rav_out;
   queue_out.accept_remove_visitor(rav_out);
