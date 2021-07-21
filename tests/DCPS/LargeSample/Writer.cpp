@@ -13,6 +13,7 @@
 
 #include <dds/DdsDcpsPublicationC.h>
 #include <dds/DCPS/WaitSet.h>
+#include <dds/DCPS/DCPS_Utils.h>
 
 #include <ace/Log_Msg.h>
 #include <ace/OS_NS_stdlib.h>
@@ -92,11 +93,12 @@ void Writer::write(bool reliable, int num_messages, unsigned data_field_length_o
 
           if (error != DDS::RETCODE_OK) {
             if (error == DDS::RETCODE_TIMEOUT) {
-              timeout_writes_++;
+              ++timeout_writes_;
             } else {
               ACE_ERROR((LM_ERROR,
                          ACE_TEXT("%N:%l: svc()")
-                         ACE_TEXT(" ERROR: write dw returned %d!\n"), error));
+                         ACE_TEXT(" ERROR: write dw returned %C!\n"),
+                         OpenDDS::DCPS::retcode_to_string(error)));
             }
           }
         } while (error == DDS::RETCODE_TIMEOUT);

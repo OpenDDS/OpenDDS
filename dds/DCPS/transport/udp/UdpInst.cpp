@@ -8,6 +8,7 @@
 #include "UdpInst.h"
 #include "UdpLoader.h"
 
+#include <dds/DCPS/LogAddr.h>
 #include "dds/DCPS/transport/framework/TransportDefs.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 
@@ -66,8 +67,7 @@ UdpInst::dump_to_str() const
   std::ostringstream os;
   os << TransportInst::dump_to_str() << std::endl;
 
-  os << formatNameForDump("local_address") << this->local_address().get_host_addr()
-                                           << ":" << this->local_address().get_port_number() << std::endl;
+  os << formatNameForDump("local_address") << LogAddr(local_address()).str() << std::endl;
   os << formatNameForDump("send_buffer_size") << this->send_buffer_size_ << std::endl;
   os << formatNameForDump("rcv_buffer_size") << this->rcv_buffer_size_ << std::endl;
   return OPENDDS_STRING(os.str());

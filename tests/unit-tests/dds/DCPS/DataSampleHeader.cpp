@@ -16,9 +16,3 @@ TEST(data_sample_header_test, valid_data)
       << "msg_id is " << to_string(msg_id);
   }
 }
-
-int main(int argc, char* argv[])
-{
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}

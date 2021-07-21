@@ -145,7 +145,7 @@ bool DataReaderListenerImpl::verify_message (Messenger::Message& message)
         if (ACE_OS::strcmp (message.string_seq[4], strseq))
         {
           ACE_ERROR_RETURN ((LM_ERROR,
-                      "(%P|%t) ERROR: string_seq(%d) - unexpected string_seq[4]=%s\n", message.count,
+                      "(%P|%t) ERROR: string_seq(%d) - unexpected string_seq[4]=%C\n", message.count,
                       message.string_seq[4].in ()),
                       false);
         }

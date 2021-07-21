@@ -10,6 +10,8 @@
 #include "TypeSupportImpl.h"
 
 #include "Registered_Data_Types.h"
+#include "Service_Participant.h"
+
 #include "XTypes/TypeLookupService.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -58,6 +60,14 @@ void TypeSupportImpl::to_type_info(XTypes::TypeInformation& type_info) const
     type_info.minimal.typeid_with_size.type_id = TypeIdentifier();
     type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
 
+  } else if (TheServiceParticipant->type_object_encoding() == Service_Participant::Encoding_WriteOldFormat) {
+    Encoding encoding = get_typeobject_encoding();
+    encoding.skip_sequence_dheader(true);
+    const TypeObject& minTypeObject = pos->second;
+    type_info.minimal.typeid_with_size.type_id = makeTypeIdentifier(minTypeObject, &encoding);
+    const size_t sz = serialized_size(encoding, minTypeObject);
+    type_info.minimal.typeid_with_size.typeobject_serialized_size = static_cast<unsigned>(sz);
+
   } else {
     const TypeObject& minTypeObject = pos->second;
     type_info.minimal.typeid_with_size.type_id = minTypeId;
@@ -68,6 +78,28 @@ void TypeSupportImpl::to_type_info(XTypes::TypeInformation& type_info) const
   type_info.minimal.dependent_typeid_count = 0;
   type_info.complete.typeid_with_size.typeobject_serialized_size = 0;
   type_info.complete.dependent_typeid_count = 0;
+}
+
+void TypeSupportImpl::add_types(const RcHandle<XTypes::TypeLookupService>& tls) const
+{
+  // TODO(sonndinh): add complete types
+  using namespace XTypes;
+  const TypeMap& minTypeMap = getMinimalTypeMap();
+  tls->add(minTypeMap.begin(), minTypeMap.end());
+  if (TheServiceParticipant->type_object_encoding() != Service_Participant::Encoding_Normal) {
+    // In this mode we need to be able to recognize TypeIdentifiers received over the network
+    // by peers that may have encoded them incorrectly.  Populate the TypeLookupService with
+    // additional entries that map the alternate (wrong) TypeIdentifiers to the same TypeObjects.
+    Encoding encoding = get_typeobject_encoding();
+    encoding.skip_sequence_dheader(true);
+    TypeMap altMap;
+    for (TypeMap::const_iterator iter = minTypeMap.begin(); iter != minTypeMap.end(); ++iter) {
+      const TypeObject& minTypeObject = iter->second;
+      const TypeIdentifier typeId = makeTypeIdentifier(minTypeObject, &encoding);
+      altMap[typeId] = minTypeObject;
+    }
+    tls->add(altMap.begin(), altMap.end());
+  }
 }
 
 void TypeSupportImpl::populate_dependencies_i(const RcHandle<XTypes::TypeLookupService>& tls,

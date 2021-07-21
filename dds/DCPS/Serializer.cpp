@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -54,7 +52,7 @@ void wstring_free(ACE_CDR::WChar* ptr)
 }
 #endif
 
-OPENDDS_STRING endianness_to_string(Endianness endianness)
+String endianness_to_string(Endianness endianness)
 {
   switch (endianness) {
   case ENDIAN_BIG:
@@ -75,28 +73,41 @@ OPENDDS_STRING endianness_to_string(Endianness endianness)
 }
 
 Encoding::Encoding()
-: endianness_(ENDIAN_NATIVE)
+  : endianness_(ENDIAN_NATIVE)
+  , skip_sequence_dheader_(false)
 {
   kind(KIND_XCDR1);
 }
 
-Encoding::Encoding(Encoding::Kind kind, Endianness endianness)
-: endianness_(endianness)
+Encoding::Encoding(Kind k, Endianness endianness)
+  : endianness_(endianness)
+  , skip_sequence_dheader_(false)
 {
-  this->kind(kind);
+  kind(k);
 }
 
-Encoding::Encoding(Encoding::Kind kind, bool swap_bytes)
-: endianness_(swap_bytes ? ENDIAN_NONNATIVE : ENDIAN_NATIVE)
+Encoding::Encoding(Kind k, bool swap_bytes)
+  : endianness_(swap_bytes ? ENDIAN_NONNATIVE : ENDIAN_NATIVE)
+  , skip_sequence_dheader_(false)
 {
-  this->kind(kind);
+  kind(k);
 }
 
-EncapsulationHeader::EncapsulationHeader()
-: kind_(KIND_CDR_BE)
-, options_(0)
+EncapsulationHeader::EncapsulationHeader(Kind kind, ACE_CDR::UShort options)
+  : kind_(kind)
+  , options_(options)
 {
 }
+
+EncapsulationHeader::EncapsulationHeader(const Encoding& enc, Extensibility ext, ACE_CDR::UShort options)
+  : kind_(KIND_INVALID)
+  , options_(options)
+{
+   if (!from_encoding(enc, ext)) {
+     kind_ = KIND_INVALID;
+   }
+}
+
 
 bool EncapsulationHeader::from_encoding(
   const Encoding& encoding, Extensibility extensibility)
@@ -237,7 +248,7 @@ bool EncapsulationHeader::set_encapsulation_options(Message_Block_Ptr& mb)
   return true;
 }
 
-OPENDDS_STRING EncapsulationHeader::to_string() const
+String EncapsulationHeader::to_string() const
 {
   switch (kind_) {
   case KIND_CDR_BE:
@@ -262,6 +273,8 @@ OPENDDS_STRING EncapsulationHeader::to_string() const
     return "XCDR2 Little Endian Parameter List";
   case KIND_XML:
     return "XML";
+  case KIND_INVALID:
+    return "Invalid";
   default:
     return "Unknown: " + to_dds_string(static_cast<unsigned>(kind_), true);
   }
@@ -282,6 +295,9 @@ bool operator>>(Serializer& s, EncapsulationHeader& value)
 
 bool operator<<(Serializer& s, const EncapsulationHeader& value)
 {
+  if (!value.is_good()) {
+    return false;
+  }
   ACE_CDR::Octet data[EncapsulationHeader::serialized_size];
   data[0] = (value.kind() >> 8) & 0xff;
   data[1] = value.kind() & 0xff;
@@ -293,7 +309,7 @@ bool operator<<(Serializer& s, const EncapsulationHeader& value)
   return ok;
 }
 
-OPENDDS_STRING Encoding::kind_to_string(Kind value)
+String Encoding::kind_to_string(Kind value)
 {
   switch (value) {
   case KIND_XCDR1:
@@ -307,9 +323,9 @@ OPENDDS_STRING Encoding::kind_to_string(Kind value)
   }
 }
 
-OPENDDS_STRING Encoding::to_string() const
+String Encoding::to_string() const
 {
-  OPENDDS_STRING rv = Encoding::kind_to_string(kind_) + ", " +
+  String rv = Encoding::kind_to_string(kind_) + ", " +
     endianness_to_string(endianness_);
   if (!zero_init_padding_) {
     rv += ", non-initialized padding";
@@ -319,14 +335,16 @@ OPENDDS_STRING Encoding::to_string() const
 
 const char Serializer::ALIGN_PAD[] = {0};
 
-Serializer::Serializer(ACE_Message_Block* chain, const Encoding& encoding)
+Serializer::Serializer(ACE_Message_Block* chain, const Encoding& enc)
   : current_(chain)
   , good_bit_(true)
+  , construction_status_(ConstructionSuccessful)
   , align_rshift_(0)
   , align_wshift_(0)
-  , pos_(0)
+  , rpos_(0)
+  , wpos_(0)
 {
-  this->encoding(encoding);
+  encoding(enc);
   reset_alignment();
 }
 
@@ -334,9 +352,11 @@ Serializer::Serializer(ACE_Message_Block* chain, Encoding::Kind kind,
   Endianness endianness)
   : current_(chain)
   , good_bit_(true)
+  , construction_status_(ConstructionSuccessful)
   , align_rshift_(0)
   , align_wshift_(0)
-  , pos_(0)
+  , rpos_(0)
+  , wpos_(0)
 {
   encoding(Encoding(kind, endianness));
   reset_alignment();
@@ -346,9 +366,11 @@ Serializer::Serializer(ACE_Message_Block* chain,
   Encoding::Kind kind, bool swap_bytes)
   : current_(chain)
   , good_bit_(true)
+  , construction_status_(ConstructionSuccessful)
   , align_rshift_(0)
   , align_wshift_(0)
-  , pos_(0)
+  , rpos_(0)
+  , wpos_(0)
 {
   encoding(Encoding(kind, swap_bytes));
   reset_alignment();
@@ -356,6 +378,51 @@ Serializer::Serializer(ACE_Message_Block* chain,
 
 Serializer::~Serializer()
 {
+}
+
+Serializer::ScopedAlignmentContext::ScopedAlignmentContext(Serializer& ser, size_t min_read)
+  : ser_(ser)
+  , max_align_(ser.encoding().max_align())
+  , start_rpos_(ser.rpos())
+  , rblock_(max_align_ ? (ptrdiff_t(ser.current_->rd_ptr()) - ser.align_rshift_) % max_align_ : 0)
+  , min_read_(min_read)
+  , start_wpos_(ser.wpos())
+  , wblock_(max_align_ ? (ptrdiff_t(ser.current_->wr_ptr()) - ser.align_wshift_) % max_align_ : 0)
+{
+  ser_.reset_alignment();
+}
+
+void
+Serializer::ScopedAlignmentContext::restore(Serializer& ser) const
+{
+  if (min_read_ != 0 && (ser.rpos() - start_rpos_) < min_read_) {
+    ser.skip(min_read_ - (ser.rpos() - start_rpos_));
+  }
+
+  if (ser.current_ && max_align_) {
+    ser.align_rshift_ = offset(ser.current_->rd_ptr(), ser.rpos() - start_rpos_ + rblock_, max_align_);
+    ser.align_wshift_ = offset(ser.current_->wr_ptr(), ser.wpos() - start_wpos_ + wblock_, max_align_);
+  }
+}
+
+bool
+Serializer::peek(ACE_CDR::ULong& t)
+{
+  // save
+  const size_t rpos = rpos_;
+  const unsigned char align_rshift = align_rshift_;
+  ACE_Message_Block* const current = current_;
+
+  // read
+  if (!peek_helper(current_, 2 * uint32_cdr_size, t)) {
+    return false;
+  }
+
+  // reset
+  current_ = current;
+  align_rshift_ = align_rshift;
+  rpos_ = rpos;
+  return true;
 }
 
 void
@@ -431,7 +498,7 @@ Serializer::swapcpy(char* to, const char* from, size_t n)
   case  0:
     return;
   default:
-    this->good_bit_ = false;
+    good_bit_ = false;
   }
 }
 
@@ -473,21 +540,21 @@ Serializer::read_string(ACE_CDR::Char*& dest,
   //       done here before the allocation even though it will be
   //       checked during the actual read as well.
   //
-  if (length <= this->current_->total_length()) {
+  if (length <= current_->total_length()) {
 
     dest = str_alloc(length - 1);
 
     if (dest == 0) {
-      this->good_bit_ = false;
+      good_bit_ = false;
 
     } else {
       //
       // Extract the string.
       //
-      this->read_char_array(dest, length);
+      read_char_array(dest, length);
     }
 
-    if (!this->good_bit_) {
+    if (!good_bit_) {
       free_string(dest, str_free);
       dest = 0;
     }
@@ -546,28 +613,28 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
   //       checked during the actual read as well.
   //
   ACE_CDR::ULong length = 0;
-  if (bytecount <= this->current_->total_length()) {
+  if (bytecount <= current_->total_length()) {
     length = bytecount / char16_cdr_size;
     dest = str_alloc(length);
 
     if (dest == 0) {
-      this->good_bit_ = false;
+      good_bit_ = false;
       return 0;
     }
 
 #if ACE_SIZEOF_WCHAR == 2
     read_array(reinterpret_cast<char*>(dest), char16_cdr_size, length, swap_bytes());
 #else
-    for (size_t i = 0; i < length && this->good_bit_; ++i) {
+    for (size_t i = 0; i < length && good_bit_; ++i) {
       ACE_UINT16 as_utf16;
       buffer_read(reinterpret_cast<char*>(&as_utf16), char16_cdr_size, swap_bytes());
-      if (this->good_bit_) {
+      if (good_bit_) {
         dest[i] = as_utf16;
       }
     }
 #endif
 
-    if (this->good_bit_) {
+    if (good_bit_) {
       //
       // Null terminate the string.
       //

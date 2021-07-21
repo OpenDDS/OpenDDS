@@ -1299,8 +1299,7 @@ DataReaderImpl::enable()
     typesupport->to_type_info(type_info);
 
     XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
-    type_lookup_service->add_type_objects_to_cache(*typesupport);
-
+    typesupport->add_types(type_lookup_service);
     typesupport->populate_dependencies(type_lookup_service);
 
     this->subscription_id_ =
@@ -3415,7 +3414,7 @@ void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& in
       GuidConverter subscriptionBuffer(subscription_id_);
       GuidConverter publicationBuffer(header.publication_id_);
       ACE_DEBUG((LM_WARNING,
-        ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::data_received() - ")
+        ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::accept_sample_processing - ")
         ACE_TEXT("subscription %C failed to find ")
         ACE_TEXT("publication data for %C.\n"),
         OPENDDS_STRING(subscriptionBuffer).c_str(),

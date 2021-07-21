@@ -168,7 +168,7 @@ public:
         return;
       }
 
-      if (iter != ranges_.begin() && iter == ranges_.end()) {
+      if (!empty() && iter == ranges_.end()) {
         const iter_t last = --ranges_.end();
         if (last->second + T(1) == value) {
           const T first = last->first;

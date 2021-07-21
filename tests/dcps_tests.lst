@@ -45,9 +45,11 @@ tests/DCPS/FooTest3_2/run_test.pl rtps b: !DCPS_MIN RTPS !STATIC !DDS_NO_OWNERSH
 tests/DCPS/LivelinessTest/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
 tests/DCPS/LivelinessTest/run_test.pl take: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
 tests/DCPS/LivelinessTest/run_test.pl udp: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
-tests/DCPS/LivelinessTest/run_test.pl rtps_disc: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE RTPS !GH_ACTIONS
-tests/DCPS/LivelinessTest/run_test.pl rtps_disc take: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE RTPS !GH_ACTIONS
+tests/DCPS/LivelinessTest/run_test.pl rtps_disc: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE RTPS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/LivelinessTest/run_test.pl rtps_disc take: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE RTPS !OPENDDS_SAFETY_PROFILE
 
+tests/DCPS/FindTopic/run_test.pl
+tests/DCPS/FindTopic/run_test.pl rtps: RTPS
 tests/DCPS/Inconsistent_Qos/run_test.pl: RTPS XERCES3 !STATIC !DDS_NO_PERSISTENCE_PROFILE
 tests/DCPS/InconsistentTopic/run_test.pl rtps_disc: RTPS !NO_BUILT_IN_TOPICS
 tests/DCPS/TopicReuse/run_test.pl: RTPS
@@ -70,11 +72,16 @@ tests/DCPS/Compiler/is_topic_type/run_test.pl: !DCPS_MIN
 tests/DCPS/Compiler/rapidjson_generator/run_test.pl: !DCPS_MIN RAPIDJSON CXX11
 tests/DCPS/Compiler/TryConstruct/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Compiler/TryConstruct/C++11/run_test.pl: !DCPS_MIN CXX11 !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Compiler/typeobject_hash_consistency/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Compiler/xcdr/run_test.pl
 tests/DCPS/Compiler/XtypesExtensibility/run_test.pl: !DCPS_MIN
 tests/DCPS/Compiler/typeobject_generator/run_test.pl
 tests/DCPS/Compiler/keywords/run_test.pl classic: !DCPS_MIN
 tests/DCPS/Compiler/keywords/run_test.pl cpp11: !DCPS_MIN CXX11 !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Compiler/explicit_ints/run_test.pl classic: !DCPS_MIN
+tests/DCPS/Compiler/explicit_ints/run_test.pl cpp11: !DCPS_MIN CXX11 !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Compiler/char_literals/run_test.pl classic: !DCPS_MIN
+tests/DCPS/Compiler/char_literals/run_test.pl cpp11: !DCPS_MIN CXX11 !OPENDDS_SAFETY_PROFILE
 
 tests/DCPS/C++11/Messenger/run_test.pl: !DCPS_MIN CXX11 !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
 
@@ -232,16 +239,20 @@ tests/DCPS/RecorderReplayer/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS
 
 examples/DCPS/Messenger_Imr/run_test.pl: !DCPS_MIN !MIN_CORBA !CORBA_E_COMPACT !CORBA_E_MICRO !DDS_NO_ORBSVCS !OPENDDS_SAFETY_PROFILE
 
-tests/DCPS/EntityLifecycleStress/run_test.pl publishers 5 subscribers 5
+tests/DCPS/EntityLifecycleStress/run_test.pl publishers 5 subscribers 5: !OPENDDS_SAFETY_PROFILE
 tests/DCPS/EntityLifecycleStress/run_test.pl rtps_disc publishers 10 subscribers 10: RTPS
 
 tests/DCPS/LivelinessKeepAliveTest/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/LivelinessTimeout/run_test.pl: !DCPS_MIN !GH_ACTIONS
 tests/DCPS/LivelinessTimeout/run_test.pl rtps_disc: !DCPS_MIN RTPS
-tests/DCPS/UnitTests/run_test.pl: !DCPS_MIN !GH_ACTIONS
 tests/DCPS/UnitTests/CompleteToMinimalTypeObject/run_test.pl
-tests/unit-tests/dds/DCPS/run_test_unit.pl: !DCPS_MIN !GH_ACTIONS
 tests/unit-tests/dds/DCPS/transport/framework/run_test_unit.pl
+tests/DCPS/BitDataReader/run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS
+
+tests/unit-tests/run_test.pl: !DCPS_MIN !NO_UNIT_TESTS
+
+tests/stress-tests/dds/DCPS/run_test.pl: !DCPS_MIN !GH_ACTIONS
+
 tests/DCPS/KeyTest/run_test.pl keymarshalling: !DCPS_MIN
 tests/DCPS/KeyTest/run_test.pl isbounded: !DCPS_MIN
 tests/DCPS/KeyTest/run_test.pl md5: !DCPS_MIN
@@ -260,7 +271,7 @@ tests/DCPS/SampleLost/run_test.pl: !DCPS_MIN !DDS_NO_PERSISTENCE_PROFILE !DDS_NO
 tests/DCPS/SetQosDeadline/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !GH_ACTIONS
 tests/DCPS/SetQosDeadline/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS !GH_ACTIONS
 tests/DCPS/SetQosPartition/run_test.pl ini=inforepo_tcp.ini: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
-tests/DCPS/SetQosPartition/run_test.pl ini=rtps_rtps.ini: !DCPS_MIN !NO_MCAST RTPS !GHA_NO_BUILT_IN_TOPICS
+tests/DCPS/SetQosPartition/run_test.pl ini=rtps_rtps.ini: !DCPS_MIN !NO_MCAST RTPS
 tests/DCPS/SetQosPartition/run_test.pl ini=rtps_tcp.ini: !DCPS_MIN !NO_MCAST RTPS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/StringKey/run_test.pl: !DCPS_MIN !GHA_OPENDDS_SAFETY_PROFILE
 tests/DCPS/GuardCondition/run_test.pl: !DCPS_MIN !GH_ACTIONS
@@ -294,38 +305,38 @@ tests/DCPS/WaitForAck/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_
 tests/DCPS/WaitForAck/run_test.pl rtps: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/WaitForAck/run_test.pl --publisher: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
 tests/DCPS/WaitForAck/run_test.pl rtps --publisher: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/Thrasher/run_test.pl single: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl double: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl triangle: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl default: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl low: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl medium: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl high: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl aggressive: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl single rtps: !DCPS_MIN RTPS !LYNXOS !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl double rtps: !DCPS_MIN RTPS !LYNXOS !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl triangle rtps: !DCPS_MIN RTPS !LYNXOS !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl default rtps: !DCPS_MIN RTPS !LYNXOS !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl low rtps: !DCPS_MIN RTPS !LYNXOS !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl medium rtps: !DCPS_MIN RTPS !LYNXOS !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl high rtps: !DCPS_MIN RTPS !LYNXOS !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl aggressive rtps: !DCPS_MIN RTPS !LYNXOS !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl single durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl double durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl triangle durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl default durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl low durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl medium durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl high durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl aggressive durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl single rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl double rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl triangle rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl default rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl low rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl medium rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl high rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS
-tests/DCPS/Thrasher/run_test.pl aggressive rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS
+tests/DCPS/Thrasher/run_test.pl single: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl double: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl triangle: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl default: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl low: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl medium: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl high: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !ASAN
+tests/DCPS/Thrasher/run_test.pl aggressive: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !ASAN
+tests/DCPS/Thrasher/run_test.pl single rtps: !DCPS_MIN RTPS !LYNXOS
+tests/DCPS/Thrasher/run_test.pl double rtps: !DCPS_MIN RTPS !LYNXOS
+tests/DCPS/Thrasher/run_test.pl triangle rtps: !DCPS_MIN RTPS !LYNXOS
+tests/DCPS/Thrasher/run_test.pl default rtps: !DCPS_MIN RTPS !LYNXOS
+tests/DCPS/Thrasher/run_test.pl low rtps: !DCPS_MIN RTPS !LYNXOS
+tests/DCPS/Thrasher/run_test.pl medium rtps: !DCPS_MIN RTPS !LYNXOS
+tests/DCPS/Thrasher/run_test.pl high rtps: !DCPS_MIN RTPS !LYNXOS !ASAN !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl aggressive rtps: !DCPS_MIN RTPS !LYNXOS !ASAN !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl single durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Thrasher/run_test.pl double durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Thrasher/run_test.pl triangle durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Thrasher/run_test.pl default durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Thrasher/run_test.pl low durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Thrasher/run_test.pl medium durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !ASAN
+tests/DCPS/Thrasher/run_test.pl high durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !ASAN
+tests/DCPS/Thrasher/run_test.pl aggressive durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !ASAN
+tests/DCPS/Thrasher/run_test.pl single rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Thrasher/run_test.pl double rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Thrasher/run_test.pl triangle rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Thrasher/run_test.pl default rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Thrasher/run_test.pl low rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS_NO_OWNERSHIP_PROFILE !ASAN
+tests/DCPS/Thrasher/run_test.pl medium rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS_NO_OWNERSHIP_PROFILE !ASAN
+tests/DCPS/Thrasher/run_test.pl high rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS_NO_OWNERSHIP_PROFILE !ASAN !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl aggressive rtps durable: !DCPS_MIN RTPS !LYNXOS !DDS_NO_OWNERSHIP_PROFILE !ASAN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/DPFactoryQos/run_test.pl: !DCPS_MIN
 tests/DCPS/DPFactoryQos/run_test.pl rtps_disc: !DCPS_MIN RTPS
 tests/DCPS/ManualAssertLiveliness/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
@@ -388,6 +399,7 @@ tests/DCPS/ManyTopicMultiProcess/run_test.pl: !DCPS_MIN
 tests/DCPS/Monitor/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !NO_BUILT_IN_TOPICS
 
 tests/DCPS/QoS_XML/dump/run_test.pl: XERCES3
+tests/DCPS/QoS_XML/dumpXMLString/run_test.pl dcps_qos_xml_handler: XERCES3
 tests/DCPS/ManyToMany/run_test.pl tcp 12to12 small: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !LYNXOS
 tests/DCPS/ManyToMany/run_test.pl tcp 12to12 large: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !LYNXOS
 tests/DCPS/ManyToMany/run_test.pl multicast 1to1 small: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
@@ -414,11 +426,7 @@ tests/DCPS/Instances/run_test.pl single_instance multiple_datawriter nokey: !DCP
 tests/DCPS/Instances/run_test.pl multiple_instance multiple_datawriter keyed: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !GHA_OPENDDS_SAFETY_PROFILE
 tests/DCPS/Instances/run_test.pl multiple_instance multiple_datawriter nokey: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !GHA_OPENDDS_SAFETY_PROFILE
 tests/DCPS/SkipSerialize/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
-tests/FACE/Unit/run_test.pl qossettings: !DCPS_MIN !WCHAR !NO_BUILT_IN_TOPICS
-tests/FACE/Unit/run_test.pl memorypool: !DCPS_MIN !WCHAR !NO_BUILT_IN_TOPICS
-tests/unit-tests/dds/DCPS/run_test_safety.pl safetyprofilepool: !DCPS_MIN !WCHAR !NO_BUILT_IN_TOPICS OPENDDS_SAFETY_PROFILE
-tests/FACE/Unit/run_test.pl freeindex: !DCPS_MIN !WCHAR !NO_BUILT_IN_TOPICS
-tests/FACE/Unit/run_test.pl sequences: !DCPS_MIN !WCHAR OPENDDS_SAFETY_PROFILE  !NO_BUILT_IN_TOPICS
+
 tests/FACE/Messenger/run_test.pl: !DCPS_MIN !WCHAR RTPS !NO_BUILT_IN_TOPICS
 tests/FACE/Messenger/run_test.pl callback: !DCPS_MIN !WCHAR RTPS !NO_BUILT_IN_TOPICS
 tests/FACE/Messenger/run_test.pl static: !DCPS_MIN !WCHAR RTPS !NO_BUILT_IN_TOPICS

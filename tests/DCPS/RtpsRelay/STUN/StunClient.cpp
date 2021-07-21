@@ -7,6 +7,7 @@
 
 #include "dds/DCPS/RTPS/ICE/Stun.h"
 #include "dds/DCPS/Message_Block_Ptr.h"
+#include <dds/DCPS/LogAddr.h>
 
 #include "ace/ACE.h"
 #include "ace/Argv_Type_Converter.h"
@@ -19,16 +20,6 @@
 #include <iostream>
 
 #ifdef OPENDDS_SECURITY
-
-std::string addr_to_string(const ACE_INET_Addr& a_addr)
-{
-  std::array<ACE_TCHAR, 256> as_string;
-  if (a_addr.addr_to_string(as_string.data(), as_string.size()) != 0) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: addr_to_string failed to convert address to string")));
-    return "";
-  }
-  return ACE_TEXT_ALWAYS_CHAR(as_string.data());
-}
 
 void generate_transaction_id(OpenDDS::STUN::Message& message)
 {
@@ -137,10 +128,7 @@ bool test_success(int& status,
     status = EXIT_FAILURE;
     retval = false;
   }
-
-  ACE_TCHAR buffer[256];
-  a.addr_to_string(buffer, 256);
-  std::cout << "Mapped address = " << ACE_TEXT_ALWAYS_CHAR(buffer) << std::endl;
+  std::cout << "Mapped address = " << OpenDDS::DCPS::LogAddr(a).str() << std::endl;
 
   if (!response.has_fingerprint()) {
     std::cerr << "ERROR: no fingerprint" << std::endl;
@@ -334,7 +322,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     for (int i = 0; i < server_port_count; ++i) {
       ACE_INET_Addr server_addr(server_addr_base);
       server_addr.set_port_number(server_addr.get_port_number() + i);
-      const std::string name = "pinging server at " + addr_to_string(server_addr);
+      const std::string name = "pinging server at " + OpenDDS::DCPS::LogAddr(server_addr).str();
       test_success(status, socket, server_addr, name.c_str());
     }
     return status;

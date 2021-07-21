@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+  targetNamespace="urn:internal:test:1.0"
+  elementFormDefault="qualified"
+  xmlns:opendds="http://www.omg.org/dds"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns="urn:internal:test:1.0">
+
+  <xs:import namespace="http://www.omg.org/dds" schemaLocation="dds_qos.xsd"></xs:import>
+
+  <xs:complexType name="testType">
+    <xs:sequence minOccurs="1">
+      <xs:element ref="opendds:dds"></xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="test" type="testType"></xs:element>
+
+</xs:schema>

@@ -1,5 +1,5 @@
-project(LivelinessTestPublisher): dcpsexe, dcps_test, dcps_transports_for_test {
-  exename   = publisher
+project(LivelinessTest): dcpsexe, dcps_test, dcps_transports_for_test {
+  exename   = LivelinessTest
   libpaths += ../FooType4
   libpaths += ../common
   libs     +=  common DcpsFooType4
@@ -7,22 +7,8 @@ project(LivelinessTestPublisher): dcpsexe, dcps_test, dcps_transports_for_test {
 
   Source_Files {
     common.cpp
-    publisher.cpp
-    Writer.cpp
-  }
-}
-
-
-project(LivelinessTestSubscriber): dcpsexe, dcps_test, dcps_transports_for_test {
-  exename   = subscriber
-  libpaths += ../FooType4
-  libpaths += ../common
-  libs     +=  common DcpsFooType4
-  after    += DcpsFooType4 common
-
-  Source_Files {
-    common.cpp
-    subscriber.cpp
     DataReaderListener.cpp
+    LivelinessTest.cpp
+    Writer.cpp
   }
 }

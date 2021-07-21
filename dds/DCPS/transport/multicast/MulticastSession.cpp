@@ -97,6 +97,7 @@ MulticastSession::MulticastSession(ACE_Reactor* reactor,
   , reverse_start_lock_(start_lock_)
   , started_(false)
   , active_(true)
+  , reassembly_(link->config().fragment_reassembly_timeout_)
   , acked_(false)
   , syn_watchdog_(make_rch<SynWatchdog> (reactor, owner, this))
 {

@@ -41,7 +41,7 @@ OpenDDS::DCPS::TcpInst::load(ACE_Configuration_Heap& cf,
   std::string local_address;
   GET_CONFIG_STRING_VALUE(cf, trans_sect, ACE_TEXT("local_address"), local_address);
 
-  if (local_address != "") {
+  if (!local_address.empty()) {
     this->local_address(local_address.c_str());
   }
 

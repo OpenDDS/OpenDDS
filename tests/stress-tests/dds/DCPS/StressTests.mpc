@@ -1,0 +1,7 @@
+project(*MultiTask): dcpsexe, dcps_test {
+  exename = *
+
+  Source_Files {
+    MultiTask.cpp
+  }
+}

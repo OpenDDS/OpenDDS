@@ -33,6 +33,11 @@ TransportReassembly::FragRange::FragRange(const SequenceRange& seqRange,
 {
 }
 
+TransportReassembly::TransportReassembly(const TimeDuration& timeout)
+  : timeout_(timeout)
+{
+}
+
 namespace {
   inline void join_err(const char* detail)
   {
@@ -157,22 +162,13 @@ bool
 TransportReassembly::has_frags(const SequenceNumber& seq,
                                const RepoId& pub_id) const
 {
-  const FragInfoMap::const_iterator it = fragments_.find(FragKey(pub_id, seq));
-  return it != fragments_.end() && !it->second.complete_;
+  return fragments_.count(FragKey(pub_id, seq));
 }
 
 void
 TransportReassembly::clear_completed(const RepoId& pub_id)
 {
-  FragInfoMap::iterator begin = fragments_.lower_bound(FragKey(pub_id, SequenceNumber()));
-  const FragInfoMap::iterator end = fragments_.upper_bound(FragKey(pub_id, SequenceNumber(SequenceNumber::MAX_VALUE)));
-  while (begin != end) {
-    if (begin->second.complete_) {
-      fragments_.erase(begin++);
-    } else {
-      ++begin;
-    }
-  }
+  completed_.erase(pub_id);
 }
 
 CORBA::ULong
@@ -187,7 +183,7 @@ TransportReassembly::get_gaps(const SequenceNumber& seq, const RepoId& pub_id,
   }
 
   const FragInfoMap::const_iterator iter = fragments_.find(FragKey(pub_id, seq));
-  if (iter == fragments_.end() || iter->second.complete_) {
+  if (iter == fragments_.end()) {
     // Nothing missing
     return 0;
   }
@@ -264,23 +260,33 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
 {
   if (Transport_debug_level > 5) {
     GuidConverter conv(data.header_.publication_id_);
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble() "
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble_i "
       "tseq %q-%q first %d dseq %q pub %C\n", seqRange.first.getValue(),
       seqRange.second.getValue(), firstFrag ? 1 : 0,
       data.header_.sequence_.getValue(), OPENDDS_STRING(conv).c_str()));
   }
 
-  const FragKey key(data.header_.publication_id_, data.header_.sequence_);
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
+  check_expirations(now);
 
+  const FragKey key(data.header_.publication_id_, data.header_.sequence_);
   FragInfoMap::iterator iter = fragments_.find(key);
+  const MonotonicTimePoint expiration = now + timeout_;
+
   if (iter == fragments_.end()) {
-    fragments_[key] = FragInfo(firstFrag, FragRangeList(1, FragRange(seqRange, data)), total_frags);
+    fragments_[key] = FragInfo(firstFrag, FragRangeList(1, FragRange(seqRange, data)), total_frags, expiration);
+    expiration_queue_.insert(std::make_pair(expiration, key));
     // since this is the first fragment we've seen, it can't possibly be done
-    VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble() "
-      "stored first frag, returning false (incomplete)\n"));
+    if (Transport_debug_level > 5 || transport_debug.log_fragment_storage) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble_i "
+                 "stored first frag, returning false (incomplete) with %B fragments\n",
+                 fragments_.size()));
+    }
     return false;
   } else {
-    if (iter->second.complete_) {
+    const CompletedMap::const_iterator citer = completed_.find(key.publication_);
+    if (citer != completed_.end() && citer->second.contains(key.data_sample_seq_)) {
+      // already completed, not storing or delivering this message
       return false;
     }
     if (firstFrag) {
@@ -289,6 +295,7 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
     if (iter->second.total_frags_ < total_frags) {
       iter->second.total_frags_ = total_frags;
     }
+    iter->second.expiration_ = expiration;
   }
 
   if (!insert(iter->second.range_list_, seqRange, data)) {
@@ -304,14 +311,17 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
       && iter->second.range_list_.size() == 1
       && !iter->second.range_list_.front().rec_ds_.header_.more_fragments_) {
     swap(data, iter->second.range_list_.front().rec_ds_);
-    iter->second.range_list_.clear();
-    iter->second.complete_ = true;
-    VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble() "
-      "removed frag, returning %C\n", data.sample_ ? "true" : "false"));
+    fragments_.erase(iter);
+    completed_[key.publication_].insert(key.data_sample_seq_);
+    if (Transport_debug_level > 5 || transport_debug.log_fragment_storage) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble_i "
+                 "removed frag, returning %C with %B fragments\n",
+                 data.sample_ ? "true (complete)" : "false (incomplete)", fragments_.size()));
+    }
     return data.sample_.get(); // could be false if we had data_unavailable()
   }
 
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble() "
+  VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble_i "
     "returning false (incomplete)\n"));
   return false;
 }
@@ -372,8 +382,32 @@ void
 TransportReassembly::data_unavailable(const SequenceNumber& dataSampleSeq,
                                       const RepoId& pub_id)
 {
-  const FragKey key(pub_id, dataSampleSeq);
-  fragments_.erase(key);
+  if (fragments_.erase(FragKey(pub_id, dataSampleSeq)) &&
+      (Transport_debug_level > 5 || transport_debug.log_fragment_storage)) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::data_unavailable "
+                  "removed leaving %B fragments\n", fragments_.size()));
+  }
+}
+
+void TransportReassembly::check_expirations(const MonotonicTimePoint& now)
+{
+  for (ExpirationQueue::iterator pos = expiration_queue_.begin(), limit = expiration_queue_.upper_bound(now);
+       pos != limit;) {
+    FragInfoMap::iterator iter = fragments_.find(pos->second);
+    if (iter != fragments_.end()) {
+      // FragInfo::expiration_ may have changed after insertion into expiration_queue_
+      if (iter->second.expiration_ <= now) {
+        fragments_.erase(iter);
+        if (Transport_debug_level > 5 || transport_debug.log_fragment_storage) {
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::check_expirations "
+                     "purge expired leaving %B fragments\n", fragments_.size()));
+        }
+      } else {
+        expiration_queue_.insert(std::make_pair(iter->second.expiration_, pos->second));
+      }
+    }
+    expiration_queue_.erase(pos++);
+  }
 }
 
 }

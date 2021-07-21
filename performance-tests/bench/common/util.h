@@ -63,6 +63,43 @@ Bench_Common_Export void consolidate_tagged_stats(std::unordered_map<std::string
   const Builder::StringSeq& reported_tags,
   const std::unordered_set<std::string>& input_tags,
   const Bench::ConstPropertyStatBlock& data);
+
+struct Bench_Common_Export ReportVisitorContext {
+  explicit ReportVisitorContext(const Bench::TestController::NodeReport& nc_report)
+    : nc_report_(&nc_report)
+    , datareader_report_(nullptr)
+    , datawriter_report_(nullptr)
+  {}
+  ReportVisitorContext(const Bench::TestController::NodeReport& nc_report,
+                       const Builder::DataReaderReport& datareader_report)
+    : nc_report_(&nc_report)
+    , datareader_report_(&datareader_report)
+    , datawriter_report_(nullptr)
+  {}
+  ReportVisitorContext(const Bench::TestController::NodeReport& nc_report,
+                       const Builder::DataWriterReport& datawriter_report)
+    : nc_report_(&nc_report)
+    , datareader_report_(nullptr)
+    , datawriter_report_(&datawriter_report)
+  {}
+
+  const Bench::TestController::NodeReport* nc_report_;
+  const Builder::DataReaderReport* datareader_report_;
+  const Builder::DataWriterReport* datawriter_report_;
+};
+
+struct Bench_Common_Export ReportVisitor {
+  virtual ~ReportVisitor() {}
+  virtual void on_node_controller_report(const ReportVisitorContext& context) = 0;
+  virtual void on_datareader_report(const ReportVisitorContext& context) = 0;
+  virtual void on_datawriter_report(const ReportVisitorContext& context) = 0;
+};
+
+Bench_Common_Export void visit_report(const TestController::Report& report, ReportVisitor& visitor);
+
+Bench_Common_Export void gather_stats_and_tags(const TestController::Report& report,
+  std::unordered_set<std::string>& stat_names,
+  std::unordered_set<std::string>& tag_names);
 }
 
 #endif

@@ -23,7 +23,7 @@ project: taolib, java, javah, optional_jni_check, dds_macros, i2jrt_optional, in
   }
 
   verbatim(gnuace, postinstall) {
-"	cp $(DDS_ROOT)/lib/i2jrt.jar $(DESTDIR)$(INSTALL_PREFIX)/lib"
+"	cp $(DDS_ROOT)/lib/i2jrt.jar $(DESTDIR)$(INSTALL_PREFIX)/$(INSTALL_LIB)"
 "	@$(MKDIR) $(DESTDIR)$(INSTALL_PREFIX)/share/dds/java/build_scripts"
 "	cp ../../build_scripts/java?_wrapper.pl $(DESTDIR)$(INSTALL_PREFIX)/share/dds/java/build_scripts"
 "	cp *.h $(DESTDIR)$(INSTALL_PREFIX)/share/dds/java"
