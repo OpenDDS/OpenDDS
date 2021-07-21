@@ -1,7 +1,10 @@
 #include <testTypeSupportImpl.h>
 
+#include <dds/DCPS/Definitions.h>
+
 #include <gtest/gtest.h>
 
+#if OPENDDS_HAS_EXPLICIT_INTS
 TEST(ExplicitInts, min_max)
 {
   EXPECT_EQ(u8_max, 255);
@@ -17,6 +20,7 @@ TEST(ExplicitInts, min_max)
   EXPECT_EQ(i64_min, -9223372036854775807 - 1);
   EXPECT_EQ(i64_max, 9223372036854775807);
 }
+#endif
 
 int main(int argc, char* argv[])
 {

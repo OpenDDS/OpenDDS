@@ -1,5 +1,7 @@
 #include "common.h"
 
+#include <dds/DCPS/Definitions.h>
+
 #include <ace/ACE.h>
 #include <ace/Message_Block.h>
 #include <ace/OS_NS_string.h>
@@ -16,11 +18,15 @@ bool failed = false;
 
 struct Values {
   ACE_CDR::Octet octetValue;
+#if OPENDDS_HAS_EXPLICIT_INTS
   ACE_CDR::Int8 int8Value;
+#endif
   ACE_CDR::Short shortValue;
   ACE_CDR::Long longValue;
   ACE_CDR::LongLong longlongValue;
+#if OPENDDS_HAS_EXPLICIT_INTS
   ACE_CDR::UInt8 uint8Value;
+#endif
   ACE_CDR::UShort ushortValue;
   ACE_CDR::ULong ulongValue;
   ACE_CDR::ULongLong ulonglongValue;
@@ -43,11 +49,15 @@ struct Values {
 
 struct ArrayValues {
   ACE_CDR::Octet octetValue[ARRAYSIZE];
+#if OPENDDS_HAS_EXPLICIT_INTS
   ACE_CDR::Int8 int8Value[ARRAYSIZE];
+#endif
   ACE_CDR::Short shortValue[ARRAYSIZE];
   ACE_CDR::Long longValue[ARRAYSIZE];
   ACE_CDR::LongLong longlongValue[ARRAYSIZE];
+#if OPENDDS_HAS_EXPLICIT_INTS
   ACE_CDR::UInt8 uint8Value[ARRAYSIZE];
+#endif
   ACE_CDR::UShort ushortValue[ARRAYSIZE];
   ACE_CDR::ULong ulongValue[ARRAYSIZE];
   ACE_CDR::ULongLong ulonglongValue[ARRAYSIZE];
@@ -64,11 +74,15 @@ void insertions(ACE_Message_Block* chain, const Values& values,
   Serializer serializer(chain, encoding);
 
   serializer << ACE_OutputCDR::from_octet(values.octetValue);
+#if OPENDDS_HAS_EXPLICIT_INTS
   serializer << ACE_OutputCDR::from_int8(values.int8Value);
+#endif
   serializer << values.shortValue;
   serializer << values.longValue;
   serializer << values.longlongValue;
+#if OPENDDS_HAS_EXPLICIT_INTS
   serializer << ACE_OutputCDR::from_uint8(values.uint8Value);
+#endif
   serializer << values.ushortValue;
   serializer << values.ulongValue;
   serializer << values.ulonglongValue;
@@ -96,11 +110,15 @@ void array_insertions(
   Serializer serializer(chain, encoding);
 
   serializer.write_octet_array(values.octetValue, length);
+#if OPENDDS_HAS_EXPLICIT_INTS
   serializer.write_int8_array(values.int8Value, length);
+#endif
   serializer.write_short_array(values.shortValue, length);
   serializer.write_long_array(values.longValue, length);
   serializer.write_longlong_array(values.longlongValue, length);
+#if OPENDDS_HAS_EXPLICIT_INTS
   serializer.write_uint8_array(values.uint8Value, length);
+#endif
   serializer.write_ushort_array(values.ushortValue, length);
   serializer.write_ulong_array(values.ulongValue, length);
   serializer.write_ulonglong_array(values.ulonglongValue, length);
@@ -150,12 +168,14 @@ bool extractions(Serializer& serializer, Values& values,
     print(pos, expectedPos, prevPos, readPosOk, "octet");
   }
 
+#if OPENDDS_HAS_EXPLICIT_INTS
   serializer >> ACE_InputCDR::to_int8(values.int8Value);
   if (checkPos) {
     expectedPos += OpenDDS::DCPS::int8_cdr_size;
     pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "int8");
   }
+#endif
 
   serializer >> values.shortValue;
   if (checkPos) {
@@ -181,12 +201,14 @@ bool extractions(Serializer& serializer, Values& values,
     print(pos, expectedPos, prevPos, readPosOk, "long long");
   }
 
+#if OPENDDS_HAS_EXPLICIT_INTS
   serializer >> ACE_InputCDR::to_uint8(values.uint8Value);
   if (checkPos) {
     expectedPos += OpenDDS::DCPS::uint8_cdr_size;
     pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "uint8");
   }
+#endif
 
   serializer >> values.ushortValue;
   if (checkPos) {
@@ -297,11 +319,15 @@ void array_extractions(ACE_Message_Block* chain, ArrayValues& values,
   Serializer serializer(chain, encoding);
 
   serializer.read_octet_array(values.octetValue, length);
+#if OPENDDS_HAS_EXPLICIT_INTS
   serializer.read_int8_array(values.int8Value, length);
+#endif
   serializer.read_short_array(values.shortValue, length);
   serializer.read_long_array(values.longValue, length);
   serializer.read_longlong_array(values.longlongValue, length);
+#if OPENDDS_HAS_EXPLICIT_INTS
   serializer.read_uint8_array(values.uint8Value, length);
+#endif
   serializer.read_ushort_array(values.ushortValue, length);
   serializer.read_ulong_array(values.ulongValue, length);
   serializer.read_ulonglong_array(values.ulonglongValue, length);
@@ -387,12 +413,14 @@ checkValues(const Values& expected, const Values& observed)
     std::cout << "(expected: " << expected.octetValue << ", observed: " << observed.octetValue << ")." << std::endl;
     failed = true;
   }
+#if OPENDDS_HAS_EXPLICIT_INTS
   if (expected.int8Value != observed.int8Value) {
     std::cout << "int8 values not correct after insertion and extraction." << std::endl
       << "(expected: " << expected.int8Value << ", observed: " << observed.int8Value
       << ")." << std::endl;
     failed = true;
   }
+#endif
   if (expected.shortValue != observed.shortValue) {
     std::cout << "short values not correct after insertion and extraction." << std::endl;
     std::cout << "(expected: " << expected.shortValue << ", observed: " << observed.shortValue << ")." << std::endl;
@@ -408,12 +436,14 @@ checkValues(const Values& expected, const Values& observed)
     std::cout << "(expected: " << expected.ulongValue << ", observed: " << observed.ulongValue << ")." << std::endl;
     failed = true;
   }
+#if OPENDDS_HAS_EXPLICIT_INTS
   if (expected.uint8Value != observed.uint8Value) {
     std::cout << "uint8 values not correct after insertion and extraction." << std::endl
       << "(expected: " << expected.uint8Value << ", observed: " << observed.uint8Value
       << ")." << std::endl;
     failed = true;
   }
+#endif
   if (expected.ushortValue != observed.ushortValue) {
     std::cout << "ushort values not correct after insertion and extraction." << std::endl;
     std::cout << "(expected: " << expected.ushortValue << ", observed: " << observed.ushortValue << ")." << std::endl;
@@ -586,6 +616,7 @@ checkArrayValues(const ArrayValues& expected, const ArrayValues& observed)
       std::cout << ")." << std::endl;
       failed = true;
     }
+#if OPENDDS_HAS_EXPLICIT_INTS
     if (expected.uint8Value[i] != observed.uint8Value[i]) {
       ACE::format_hexdump((char*)&(expected.uint8Value[i]), sizeof(ACE_CDR::UInt8),
         ebuffer, sizeof(ebuffer));
@@ -610,6 +641,7 @@ checkArrayValues(const ArrayValues& expected, const ArrayValues& observed)
         << ")." << std::endl;
       failed = true;
     }
+#endif
   }
 }
 
@@ -627,7 +659,15 @@ void runTest(const Values& expected, const ArrayValues& expectedArray,
   displayChain(testchain);
   std::cout << "EXTRACTING SINGLE VALUES WITH" << out << " SWAPPING" << std::endl;
   Values observed = {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0,
+#if OPENDDS_HAS_EXPLICIT_INTS
+    0,
+#endif
+    0, 0, 0,
+#if OPENDDS_HAS_EXPLICIT_INTS
+    0,
+#endif
+    0, 0, 0, 0, 0,
     ACE_CDR_LONG_DOUBLE_INITIALIZER, 0, 0, 0
 #ifndef OPENDDS_SAFETY_PROFILE
     , ""
@@ -818,11 +858,15 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
   Values expected = {
     0x01,
+#if OPENDDS_HAS_EXPLICIT_INTS
     0x11,
+#endif
     0x2345,
     0x67abcdef,
     ACE_INT64_LITERAL(0x0123456789abcdef),
+#if OPENDDS_HAS_EXPLICIT_INTS
     0x22,
+#endif
     0x0123,
     0x456789ab,
     ACE_UINT64_LITERAL(0xcdef0123456789ab),
@@ -852,11 +896,15 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   // Initialize the array
   for (size_t i = 0; i < ARRAYSIZE; ++i) {
     expectedArray.octetValue[i] = (0xff&i);
+#if OPENDDS_HAS_EXPLICIT_INTS
     expectedArray.int8Value[i] = (0xdd&i);
+#endif
     expectedArray.shortValue[i] = (0xffff&i);
     expectedArray.longValue[i] = ACE_CDR::Long(0x0f0f0f0f|i);
     expectedArray.longlongValue[i] = ACE_INT64_LITERAL(0x0123456789abcdef);
+#if OPENDDS_HAS_EXPLICIT_INTS
     expectedArray.uint8Value[i] = (0xdd|i);
+#endif
     expectedArray.ushortValue[i] = ACE_CDR::UShort(0xffff|i);
     expectedArray.ulongValue[i] = ACE_CDR::ULong(0xf0f0f0f0|i);
     expectedArray.ulonglongValue[i] = ACE_UINT64_LITERAL(0xcdef0123456789ab);
