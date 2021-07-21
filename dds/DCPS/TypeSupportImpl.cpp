@@ -82,23 +82,33 @@ void TypeSupportImpl::to_type_info(XTypes::TypeInformation& type_info) const
 
 void TypeSupportImpl::add_types(const RcHandle<XTypes::TypeLookupService>& tls) const
 {
-  // TODO(sonndinh): add complete types
   using namespace XTypes;
   const TypeMap& minTypeMap = getMinimalTypeMap();
   tls->add(minTypeMap.begin(), minTypeMap.end());
+  const TypeMap& comTypeMap = getCompleteTypeMap();
+  tls->add(comTypeMap.begin(), comTypeMap.end());
+
   if (TheServiceParticipant->type_object_encoding() != Service_Participant::Encoding_Normal) {
     // In this mode we need to be able to recognize TypeIdentifiers received over the network
     // by peers that may have encoded them incorrectly.  Populate the TypeLookupService with
     // additional entries that map the alternate (wrong) TypeIdentifiers to the same TypeObjects.
     Encoding encoding = get_typeobject_encoding();
     encoding.skip_sequence_dheader(true);
-    TypeMap altMap;
+    TypeMap altMinMap;
     for (TypeMap::const_iterator iter = minTypeMap.begin(); iter != minTypeMap.end(); ++iter) {
       const TypeObject& minTypeObject = iter->second;
       const TypeIdentifier typeId = makeTypeIdentifier(minTypeObject, &encoding);
-      altMap[typeId] = minTypeObject;
+      altMinMap[typeId] = minTypeObject;
     }
-    tls->add(altMap.begin(), altMap.end());
+    tls->add(altMinMap.begin(), altMinMap.end());
+
+    TypeMap altComMap;
+    for (TypeMap::const_iterator iter = comTypeMap.begin(); iter != comTypeMap.end(); ++iter) {
+      const TypeObject& comTypeObject = iter->second;
+      const TypeIdentifier typeId = makeTypeIdentifier(comTypeObject, &encoding);
+      altComMap[typeId] = comTypeObject;
+    }
+    tls->add(altComMap.begin(), altComMap.end());
   }
 }
 

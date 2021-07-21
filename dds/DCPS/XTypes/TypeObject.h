@@ -1682,6 +1682,7 @@ namespace XTypes {
       : collection_flag(a_collection_flag)
       , header(a_header)
       , element(an_element)
+    {}
   };
 
   struct MinimalSequenceType {
