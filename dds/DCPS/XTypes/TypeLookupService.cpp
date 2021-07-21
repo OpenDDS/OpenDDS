@@ -437,12 +437,14 @@ bool TypeLookupService::complete_to_minimal_type_object(const TypeObject& cto, T
 }
 
 DDS::ReturnCode_t TypeLookupService::complete_struct_member_to_member_descriptor(MemberDescriptor*& md,
-  const CompleteStructMember& cm) {
+  const CompleteStructMember& cm)
+{
   md->name = cm.detail.name;
   md->id = cm.common.member_id;
   TypeObject to = get_type_objects_i(cm.common.member_type_id);
   complete_to_dynamic(md->type, to.complete);
   md->default_value = ""; //TODO CLAYTON: Where do we get the default value from CompleteStructMember?
+  md->index; //TODO CLAYTON
   md->label.length(0);
   if (cm.common.member_flags & (1 << 0)) {
     if (cm.common.member_flags & (1 << 1)) {
@@ -464,136 +466,84 @@ DDS::ReturnCode_t TypeLookupService::complete_struct_member_to_member_descriptor
   md->is_default_label = 0;
 }
 
+DDS::ReturnCode_t TypeLookupService::complete_union_member_to_member_descriptor(MemberDescriptor*& md, const CompleteUnionMember& cm)
+{
+  md->name = cm.detail.name;
+  md->id = cm.common.member_id;
+  TypeObject to = get_type_objects_i(cm.common.type_id);
+  complete_to_dynamic(md->type, to.complete);
+  md->default_value = ""; //TODO CLAYTON
+  md->index; //TODO CLAYTON
+  md->label = cm.common.label_seq;
+  if (cm.common.member_flags & (1 << 0)) {
+    if (cm.common.member_flags & (1 << 1)) {
+      md->try_construct_kind = TRIM ;
+    } else {
+      md->try_construct_kind = DISCARD;
+    }
+  } else {
+    if (cm.common.member_flags & (1 << 1)) {
+      md->try_construct_kind = USE_DEFAULT;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("Invalid TryConstruct Kind in complete_union_member_to_member_descriptor\n")));
+    }
+  }
+  md->is_key = 0;
+  md->is_optional = 0;
+  md->is_must_understand = 0;
+  md->is_shared = (cm.common.member_flags & (1 << 2));
+  md->is_default_label = (cm.common.member_flags & (1 << 6));
+}
+
 DDS::ReturnCode_t TypeLookupService::complete_struct_member_to_dynamic_type_member(DynamicTypeMember_rch& dtm,
-  const CompleteStructMember& cm) {
+  const CompleteStructMember& cm)
+{
   complete_struct_member_to_member_descriptor(dtm->descriptor_, cm);
 }
 
-DDS::ReturnCode_t TypeLookupService::complete_to_dynamic(DynamicType_rch& dt, const CompleteTypeObject& cto) {
+DDS::ReturnCode_t TypeLookupService::complete_union_member_to_dynamic_type_member(DynamicTypeMember_rch& dtm,
+  const CompleteUnionMember& cm)
+{
+  complete_union_member_to_member_descriptor(dtm->descriptor_, cm);
+}
+
+DDS::ReturnCode_t TypeLookupService::complete_to_dynamic(DynamicType_rch& dt, const CompleteTypeObject& cto)
+{
+  DynamicType_rch dt_instantiation(new DynamicType, OpenDDS::DCPS::keep_count());
+  dt = dt_instantiation;
   switch (cto.kind) {
-  //primitive TKs
-  case TK_NONE:
-    dt->descriptor_->kind = TK_NONE;
-    dt->descriptor_->name = ""; //TODO CLAYTON
-    dt->descriptor_->bound.length(0);
-    break;
-  case TK_BOOLEAN:
-    dt->descriptor_->kind = TK_BOOLEAN;
-    dt->descriptor_->name = "bool";
-    dt->descriptor_->bound.length(0);
-    break;
-  case TK_BYTE:
-    dt->descriptor_->kind = TK_BYTE;
-    dt->descriptor_->name = "byte";
-    dt->descriptor_->bound.length(0);
-    break;
-  case TK_INT16:
-    dt->descriptor_->kind = TK_INT16;
-    dt->descriptor_->name = "short";
-    dt->descriptor_->bound.length(0);
-    break;
-  case TK_INT32:
-    dt->descriptor_->kind = TK_INT32;
-    dt->descriptor_->name = "long";
-    dt->descriptor_->bound.length(0);
-    break;
-  case TK_INT64:
-    dt->descriptor_->kind = TK_INT64;
-    dt->descriptor_->name = "longlong";
-    dt->descriptor_->bound.length(0);
-    break;
-  case TK_UINT16:
-    dt->descriptor_->kind = TK_UINT16;
-    dt->descriptor_->name = "ushort";
-    dt->descriptor_->bound.length(0);
-    break;
-  case TK_UINT32:
-    dt->descriptor_->kind = TK_UINT32;
-    dt->descriptor_->name = "ulong";
-    dt->descriptor_->bound.length(0);
-    break;
-  case TK_UINT64:
-    dt->descriptor_->kind = TK_UINT64;
-    dt->descriptor_->name = "ulonglong";
-    dt->descriptor_->bound.length(0);
-    break;
-  case TK_FLOAT32:
-    dt->descriptor_->kind = TK_FLOAT32;
-    dt->descriptor_->name = "double";
-    dt->descriptor_->bound.length(0);
-    break;
-  case TK_FLOAT64:
-    dt->descriptor_->kind = TK_FLOAT32;
-    dt->descriptor_->name = "longdouble";
-    dt->descriptor_->bound.length(0);
-    break;
-  case TK_FLOAT128:
-    dt->descriptor_->kind = TK_FLOAT32;
-    dt->descriptor_->name = "longlongdouble";
-    dt->descriptor_->bound.length(0);
-    break;
-  case TK_INT8:
-    dt->descriptor_->kind = TK_INT8;
-    dt->descriptor_->name = ""; // TODO CLAYTON
-    dt->descriptor_->bound.length(0);
-    break;
-  case TK_UINT8:
-    dt->descriptor_->kind = TK_UINT8;
-    dt->descriptor_->name = ""; //TODO CLAYTON
-    dt->descriptor_->bound.length(0);
-    break;
-  case TK_CHAR8:
-    dt->descriptor_->kind = TK_CHAR8;
-    dt->descriptor_->name = ""; //TODO CLAYTON
-    dt->descriptor_->bound.length(0);
-    break;
-  case TK_CHAR16:
-    dt->descriptor_->kind = TK_CHAR16;
-    dt->descriptor_->name = ""; //TODO CLAYTON
-    dt->descriptor_->bound.length(0);
-    break;
-  //string TKs
-  case TK_STRING8:
-    dt->descriptor_->kind = TK_STRING8;
-    dt->descriptor_->name = ""; //TODO CLAYTON
-    dt->descriptor_->bound.length(0);
-    break;
-  case TK_STRING16:
-    dt->descriptor_->kind = TK_STRING16;
-    dt->descriptor_->name = ""; //TODO CLAYTON
-    dt->descriptor_->bound.length(0);
-    break;
   // Constructed/Named types
   case TK_ALIAS:
+    dt->descriptor_->kind = TK_ALIAS;
+    dt->descriptor_->name = cto.alias_type.header.detail.type_name;
+    dt->descriptor_->bound.length(0);
+    type_identifier_to_dynamic(dt->descriptor_->base_type, cto.alias_type.body.common.related_type);
     break;
   // Enumerated TKs
   case TK_ENUM:
     dt->descriptor_->kind = TK_ENUM;
-    dt->descriptor_->name = ""; //TODO CLAYTON
+    dt->descriptor_->name = cto.enumerated_type.header.detail.type_name;
     dt->descriptor_->bound.length(0);
     break;
-  case TK_BITMASK:
+  case TK_BITMASK: {
     dt->descriptor_->kind = TK_BITMASK;
-    dt->descriptor_->name = ""; //TODO CLAYTON
-    dt->descriptor_->bound.length(0);
-    break;
+    dt->descriptor_->name = cto.bitmask_type.header.detail.type_name;
+    dt->descriptor_->bound.length(1);
+    dt->descriptor_->bound[0] = cto.bitmask_type.header.common.bit_bound;
+    type_identifier_to_dynamic(dt->descriptor_->element_type, TypeIdentifier(TK_BOOLEAN));
+  }
+  break;
   // Structured TKs
   case TK_ANNOTATION:
     dt->descriptor_->kind = TK_ANNOTATION;
-    dt->descriptor_->name = ""; //TODO CLAYTON
+    dt->descriptor_->name = cto.annotation_type.header.annotation_name;
     dt->descriptor_->bound.length(0);
     break;
-  case TK_STRUCTURE: {
+  case TK_STRUCTURE:
     dt->descriptor_->kind = TK_STRUCTURE;
     dt->descriptor_->name = cto.struct_type.header.detail.type_name;
-    //dt->descriptor_->discriminator_type = nil
     dt->descriptor_->bound.length(0);
-    
-    TypeObject to = get_type_objects_i(cto.struct_type.header.base_type);
-    complete_to_dynamic(dt->descriptor_->base_type, to.complete);
-    
-    //dt->descriptor_->element_type =  nil
-    //dt->descriptor_->key_element_type =  nil
+    type_identifier_to_dynamic(dt->descriptor_->base_type, cto.struct_type.header.base_type);
     if (cto.struct_type.struct_flags & (1 << 0)) {
       dt->descriptor_->extensibility_kind = FINAL;
     } else if (cto.struct_type.struct_flags & (1 << 1)) {
@@ -609,36 +559,238 @@ DDS::ReturnCode_t TypeLookupService::complete_to_dynamic(DynamicType_rch& dt, co
       complete_struct_member_to_dynamic_type_member(dtm, cto.struct_type.member_seq[i]);
       dt->member_by_index.insert(dt->member_by_index.end(), dtm); //insert at end?
     }
-  }
-  break;
+    break;
   case TK_UNION:
     dt->descriptor_->kind = TK_UNION;
-    dt->descriptor_->name = ""; //TODO CLAYTON
+    dt->descriptor_->name = cto.union_type.header.detail.type_name;
     dt->descriptor_->bound.length(0);
+    type_identifier_to_dynamic(dt->descriptor_->discriminator_type, cto.union_type.discriminator.common.type_id);
+    if (cto.union_type.union_flags & (1 << 0)) {
+      dt->descriptor_->extensibility_kind = FINAL;
+    } else if (cto.union_type.union_flags & (1 << 1)) {
+      dt->descriptor_->extensibility_kind = APPENDABLE;
+    } else if (cto.union_type.union_flags & (1 << 2)) {
+      dt->descriptor_->extensibility_kind = MUTABLE;
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("Invalid extensibility kind in complete_to_dynamic(DynamicType& dt, const CompleteTypeObject& cto)\n")));
+    }
+    dt->descriptor_->is_nested = (cto.union_type.union_flags & (1 << 3));
+    for (ulong i = 0; i < cto.union_type.member_seq.length(); ++i) {
+      DynamicTypeMember_rch dtm(new DynamicTypeMember, OpenDDS::DCPS::keep_count());
+      complete_union_member_to_dynamic_type_member(dtm, cto.union_type.member_seq[i]);
+      dt->member_by_index.insert(dt->member_by_index.end(), dtm); //insert at end?
+    }
     break;
   case TK_BITSET:
     dt->descriptor_->kind = TK_BITSET;
-    dt->descriptor_->name = ""; //TODO CLAYTON
+    dt->descriptor_->name = cto.bitset_type.header.detail.type_name;
     dt->descriptor_->bound.length(0);
     break;
   // Collection TKs
   case TK_SEQUENCE:
     dt->descriptor_->kind = TK_SEQUENCE;
-    dt->descriptor_->name = ""; //TODO CLAYTON
-    dt->descriptor_->bound.length(0);
+    if(cto.sequence_type.header.detail.present == true) {
+      dt->descriptor_->name = cto.sequence_type.header.detail.value.type_name;
+    } else {
+      dt->descriptor_->name = ""; //This value will not be there for anon types
+    }
+    dt->descriptor_->bound.length(1);
+    dt->descriptor_->bound[0] = cto.sequence_type.header.common.bound;
+    type_identifier_to_dynamic(dt->descriptor_->element_type, cto.sequence_type.element.common.type);
     break;
-  case TK_ARRAY:
+  case TK_ARRAY: {
     dt->descriptor_->kind = TK_ARRAY;
-    dt->descriptor_->name = ""; //TODO CLAYTON
-    dt->descriptor_->bound.length(0);
-    break;
+    dt->descriptor_->name = cto.array_type.header.detail.type_name; //TODO CLAYTON: Why is this not optional for arrays but is for sequences
+    dt->descriptor_->bound = cto.array_type.header.common.bound_seq;
+    type_identifier_to_dynamic(dt->descriptor_->element_type, cto.array_type.element.common.type);
+  }
+  break;
   case TK_MAP:
     dt->descriptor_->kind = TK_MAP;
-    dt->descriptor_->name = ""; //TODO CLAYTON
-    dt->descriptor_->bound.length(0);
+    if (cto.map_type.header.detail.present == true) {
+      dt->descriptor_->name = cto.map_type.header.detail.value.type_name;
+    } else {
+      dt->descriptor_->name = ""; //This value will not be there for anon types
+    }
+    dt->descriptor_->bound.length(1);
+    dt->descriptor_->bound[0] = cto.map_type.header.common.bound;
+    type_identifier_to_dynamic(dt->descriptor_->element_type, cto.map_type.element.common.type);
+    type_identifier_to_dynamic(dt->descriptor_->key_element_type, cto.map_type.key.common.type);
     break;
   }
 }
+
+DDS::ReturnCode_t TypeLookupService::type_identifier_to_dynamic(DynamicType_rch& dt, const TypeIdentifier& ti)
+{
+  DynamicType_rch dt_instantiation(new DynamicType, OpenDDS::DCPS::keep_count());
+  dt = dt_instantiation;
+    switch (ti.kind()) {
+      case TK_NONE:
+      // TODO CLAYTON : Return an error?
+      case TK_BOOLEAN:
+        dt->descriptor_->kind = TK_BOOLEAN;
+        dt->descriptor_->name = "bool";
+        dt->descriptor_->bound.length(0);
+        break;
+      case TK_BYTE:
+        dt->descriptor_->kind = TK_BYTE;
+        dt->descriptor_->name = "byte";
+        dt->descriptor_->bound.length(0);
+        break;
+      case TK_INT16:
+        dt->descriptor_->kind = TK_INT16;
+        dt->descriptor_->name = "short";
+        dt->descriptor_->bound.length(0);
+        break;
+      case TK_INT32:
+        dt->descriptor_->kind = TK_INT32;
+        dt->descriptor_->name = "long";
+        dt->descriptor_->bound.length(0);
+        break;
+      case TK_INT64:
+        dt->descriptor_->kind = TK_INT64;
+        dt->descriptor_->name = "long long";
+        dt->descriptor_->bound.length(0);
+        break;
+      case TK_UINT16:
+        dt->descriptor_->kind = TK_UINT16;
+        dt->descriptor_->name = "ushort";
+        dt->descriptor_->bound.length(0);
+        break;
+      case TK_UINT32:
+        dt->descriptor_->kind = TK_UINT32;
+        dt->descriptor_->name = "ulong";
+        dt->descriptor_->bound.length(0);
+        break;
+      case TK_UINT64:
+        dt->descriptor_->kind = TK_UINT64;
+        dt->descriptor_->name = "ulong long";
+        dt->descriptor_->bound.length(0);
+        break;
+      case TK_FLOAT32:
+        dt->descriptor_->kind = TK_FLOAT32;
+        dt->descriptor_->name = "double";
+        dt->descriptor_->bound.length(0);
+        break;
+      case TK_FLOAT64:
+        dt->descriptor_->kind = TK_FLOAT64;
+        dt->descriptor_->name = "long double";
+        dt->descriptor_->bound.length(0);
+        break;
+      case TK_FLOAT128:
+        dt->descriptor_->kind = TK_FLOAT128;
+        dt->descriptor_->name = "long long double";
+        dt->descriptor_->bound.length(0);
+        break;
+      case TK_INT8:
+        dt->descriptor_->kind = TK_INT8;
+        dt->descriptor_->name = "int";
+        dt->descriptor_->bound.length(0);
+        break;
+      case TK_UINT8:
+        dt->descriptor_->kind = TK_UINT8;
+        dt->descriptor_->name = "uint";
+        dt->descriptor_->bound.length(0);
+        break;
+      case TK_CHAR8:
+        dt->descriptor_->kind = TK_CHAR8;
+        dt->descriptor_->name = "char";
+        dt->descriptor_->bound.length(0);
+        break;
+      case TK_CHAR16:
+        dt->descriptor_->kind = TK_CHAR16;
+        dt->descriptor_->name = "wchar";
+        dt->descriptor_->bound.length(0);
+        break;
+      case TI_STRING8_SMALL:
+        dt->descriptor_->kind = TK_STRING8;
+        dt->descriptor_->name = "string";
+        dt->descriptor_->bound.length(1);
+        dt->descriptor_->bound[0] = ti.string_sdefn().bound;
+        type_identifier_to_dynamic(dt->descriptor_->element_type, TypeIdentifier(TK_CHAR8));
+        break;
+      case TI_STRING8_LARGE:
+        dt->descriptor_->kind = TK_STRING8;
+        dt->descriptor_->name = "string";
+        dt->descriptor_->bound.length(1);
+        dt->descriptor_->bound[0] = ti.string_sdefn().bound;
+        type_identifier_to_dynamic(dt->descriptor_->element_type, TypeIdentifier(TK_CHAR8));
+        break;
+      case TI_STRING16_SMALL:
+        dt->descriptor_->kind = TK_STRING16;
+        dt->descriptor_->name = "wstring";
+        dt->descriptor_->bound.length(1);
+        dt->descriptor_->bound[0] = ti.string_ldefn().bound;
+        type_identifier_to_dynamic(dt->descriptor_->element_type, TypeIdentifier(TK_CHAR16));
+        break;
+      case TI_STRING16_LARGE:
+        dt->descriptor_->kind = TK_STRING16;
+        dt->descriptor_->name = "wstring";
+        dt->descriptor_->bound.length(1);
+        dt->descriptor_->bound[0] = ti.string_ldefn().bound;
+        type_identifier_to_dynamic(dt->descriptor_->element_type, TypeIdentifier(TK_CHAR16));
+        break;
+      case TI_PLAIN_SEQUENCE_SMALL:
+        dt->descriptor_->kind = TK_SEQUENCE;
+        dt->descriptor_->name = "plain sequence";
+        dt->descriptor_->bound.length(1);
+        dt->descriptor_->bound[0] = ti.seq_sdefn().bound;
+        type_identifier_to_dynamic(dt->descriptor_->element_type, *ti.seq_sdefn().element_identifier);
+        break;
+      case TI_PLAIN_SEQUENCE_LARGE:
+        dt->descriptor_->kind = TK_SEQUENCE;
+        dt->descriptor_->name = "plain sequence";
+        dt->descriptor_->bound.length(1);
+        dt->descriptor_->bound[0] = ti.seq_ldefn().bound;
+        type_identifier_to_dynamic(dt->descriptor_->element_type, *ti.seq_ldefn().element_identifier);
+        break;
+      case TI_PLAIN_ARRAY_SMALL:
+        dt->descriptor_->kind = TK_ARRAY;
+        dt->descriptor_->name = "plain array";
+        dt->descriptor_->bound.length(ti.array_sdefn().array_bound_seq.length());
+        for (ulong i = 0; i< dt->descriptor_->bound.length(); ++i) {
+          dt->descriptor_->bound[i] = ti.array_sdefn().array_bound_seq[i];
+        }
+        type_identifier_to_dynamic(dt->descriptor_->element_type, *ti.array_sdefn().element_identifier);
+        break;
+      case TI_PLAIN_ARRAY_LARGE:
+        dt->descriptor_->kind = TK_ARRAY;
+        dt->descriptor_->name = "plain array";
+        dt->descriptor_->bound = ti.array_ldefn().array_bound_seq;
+        type_identifier_to_dynamic(dt->descriptor_->element_type, *ti.array_ldefn().element_identifier);
+        break;
+      case TI_PLAIN_MAP_SMALL:
+        dt->descriptor_->kind = TK_MAP;
+        dt->descriptor_->name = "plain map";
+        dt->descriptor_->bound.length(1);
+        dt->descriptor_->bound[0] = ti.map_sdefn().bound;
+        type_identifier_to_dynamic(dt->descriptor_->element_type, *ti.map_sdefn().element_identifier);
+        type_identifier_to_dynamic(dt->descriptor_->key_element_type, *ti.map_sdefn().element_identifier);
+        break;
+      case TI_PLAIN_MAP_LARGE:
+        dt->descriptor_->kind = TK_MAP;
+        dt->descriptor_->name = "plain map";
+        dt->descriptor_->bound.length(1);
+        dt->descriptor_->bound[0] = ti.map_ldefn().bound;
+        type_identifier_to_dynamic(dt->descriptor_->element_type, *ti.map_ldefn().element_identifier);
+        type_identifier_to_dynamic(dt->descriptor_->key_element_type, *ti.map_ldefn().element_identifier);
+      case TI_STRONGLY_CONNECTED_COMPONENT:
+      // TODO CLAYTON
+        break;
+      case EK_COMPLETE:
+         complete_to_dynamic(dt, get_type_objects_i(ti).complete);
+         break;
+      case EK_MINIMAL:
+      // TODO CLAYTON : Return an error?
+        break;
+      case TK_ANNOTATION:
+        dt->descriptor_->kind = TK_ANNOTATION;
+        dt->descriptor_->name = "annotation";
+        dt->descriptor_->bound.length(0);
+        break;
+    }
+}
+
 void TypeLookupService::add_type_dependencies(const TypeIdentifier& type_id,
   const TypeIdentifierWithSizeSeq& dependencies)
 {

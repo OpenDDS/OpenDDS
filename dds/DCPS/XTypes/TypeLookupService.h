@@ -44,12 +44,13 @@ public:
 
   void update_type_identifier_map(const TypeIdentifierPairSeq& tid_pairs);
   bool complete_to_minimal_type_object(const TypeObject& cto, TypeObject& mto) const;
-
+  DDS::ReturnCode_t type_identifier_to_dynamic(DynamicType_rch& dt, const TypeIdentifier& ti);
   DDS::ReturnCode_t complete_to_dynamic(DynamicType_rch& dt, const CompleteTypeObject& cto);
   DDS::ReturnCode_t complete_struct_member_to_dynamic_type_member(DynamicTypeMember_rch& dtm, const CompleteStructMember& cm);
-  DDS::ReturnCode_t complete_struct_member_to_member_descriptor(MemberDescriptor*& md,
+  DDS::ReturnCode_t complete_union_member_to_dynamic_type_member(DynamicTypeMember_rch& dtm, const CompleteUnionMember& cm);
+  DDS::ReturnCode_t complete_struct_member_to_member_descriptor(MemberDescriptor*& md, const CompleteStructMember& cm);
+  DDS::ReturnCode_t complete_union_member_to_member_descriptor(MemberDescriptor*& md, const CompleteUnionMember& cm);
 
-    const CompleteStructMember& cm);
   // For TypeLookup_getTypeDependencies
   bool get_type_dependencies(const TypeIdentifier& type_id,
     TypeIdentifierWithSizeSeq& dependencies) const;
