@@ -1,0 +1,13 @@
+project: idl2jni, dcps_test {
+
+  // This is a compile-only test to make sure that the code generated from
+  // idl2jni will build (both C++ and Java code).
+
+  idlflags     += -DUSE_LOCAL
+  idl2jniflags += -DUSE_LOCAL
+  postclean    += <%rm%> explicit_ints
+
+  specific {
+    jarname     = explicit_ints
+  }
+}

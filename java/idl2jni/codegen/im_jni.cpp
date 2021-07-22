@@ -57,6 +57,10 @@ string idl_mapping_jni::taoType(AST_Type *decl)
       return "CORBA::Char";
     case AST_PredefinedType::PT_wchar:
       return "CORBA::WChar";
+    case AST_PredefinedType::PT_int8:
+      return "CORBA::Int8";
+    case AST_PredefinedType::PT_uint8:
+      return "CORBA::UInt8";
     case AST_PredefinedType::PT_octet:
       return "CORBA::Octet";
     case AST_PredefinedType::PT_short:
@@ -186,6 +190,8 @@ string idl_mapping_jni::type(AST_Type *decl)
     case AST_PredefinedType::PT_char:
     case AST_PredefinedType::PT_wchar:
       return "jchar";
+    case AST_PredefinedType::PT_int8:
+    case AST_PredefinedType::PT_uint8:
     case AST_PredefinedType::PT_octet:
       return "jbyte";
     case AST_PredefinedType::PT_short:
@@ -274,6 +280,8 @@ string idl_mapping_jni::jvmSignature(AST_Type *decl)
     case AST_PredefinedType::PT_char:
     case AST_PredefinedType::PT_wchar:
       return "C";
+    case AST_PredefinedType::PT_int8:
+    case AST_PredefinedType::PT_uint8:
     case AST_PredefinedType::PT_octet:
       return "B";
     case AST_PredefinedType::PT_short:
@@ -343,6 +351,8 @@ string idl_mapping_jni::jniFnName(AST_Type *decl)
     case AST_PredefinedType::PT_char:
     case AST_PredefinedType::PT_wchar:
       return "Char";
+    case AST_PredefinedType::PT_int8:
+    case AST_PredefinedType::PT_uint8:
     case AST_PredefinedType::PT_octet:
       return "Byte";
     case AST_PredefinedType::PT_short:
@@ -1649,8 +1659,10 @@ ostream &operator<< (ostream &o, AST_Expression::AST_ExprValue *ev)
   case AST_Expression::EV_wchar:
     o << "L\'" << ev->u.wcval << '\'';
     break;
+  case AST_Expression::EV_int8:
+  case AST_Expression::EV_uint8:
   case AST_Expression::EV_octet:
-    o << ev->u.oval;
+    o << static_cast<int>(ev->u.oval);
     break;
   case AST_Expression::EV_bool:
     o << boolalpha << static_cast<bool>(ev->u.bval);
@@ -1670,7 +1682,7 @@ ostream &operator<< (ostream &o, AST_Expression::AST_ExprValue *ev)
   case AST_Expression::EV_void:
   case AST_Expression::EV_none:
   default: {
-    cerr << "ERROR - Constant of type " << ev->et
+    cerr << "ERROR - " << __FILE__ << ":" << __LINE__ << " - Constant of type " << ev->et
          << " is not supported\n";
   }
   }

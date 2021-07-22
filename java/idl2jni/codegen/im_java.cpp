@@ -217,6 +217,8 @@ std::string param_type(AST_Type *t, AST_Argument::Direction dir)
     case AST_PredefinedType::PT_boolean:
     case AST_PredefinedType::PT_char:
     case AST_PredefinedType::PT_wchar:
+    case AST_PredefinedType::PT_int8:
+    case AST_PredefinedType::PT_uint8:
     case AST_PredefinedType::PT_octet:
     case AST_PredefinedType::PT_short:
     case AST_PredefinedType::PT_ushort:
@@ -273,6 +275,8 @@ std::string idl_mapping_java::type(AST_Type *decl)
     case AST_PredefinedType::PT_char:
     case AST_PredefinedType::PT_wchar:
       return "char";
+    case AST_PredefinedType::PT_int8:
+    case AST_PredefinedType::PT_uint8:
     case AST_PredefinedType::PT_octet:
       return "byte";
     case AST_PredefinedType::PT_short:
@@ -376,6 +380,8 @@ ostream &operator<< (ostream &o, AST_Expression::AST_ExprValue *ev)
   case AST_Expression::EV_wchar:
     o << ev->u.wcval;
     break;
+  case AST_Expression::EV_int8:
+  case AST_Expression::EV_uint8:
   case AST_Expression::EV_octet:
     o << static_cast<int>(ev->u.oval);
     break;
@@ -397,7 +403,7 @@ ostream &operator<< (ostream &o, AST_Expression::AST_ExprValue *ev)
   case AST_Expression::EV_void:
   case AST_Expression::EV_none:
   default: {
-    cerr << "ERROR - Constant of type " << ev->et
+    cerr << "ERROR - " << __FILE__ << ":" << __LINE__ << " - Constant of type " << ev->et
          << " is not supported\n";
   }
   }
@@ -452,6 +458,8 @@ bool idl_mapping_java::gen_const(UTL_ScopedName *name, bool nestedInInteface,
   case AST_Expression::EV_wchar:
     type_str = "char";
     break;
+  case AST_Expression::EV_int8:
+  case AST_Expression::EV_uint8:
   case AST_Expression::EV_octet:
     type_str = "byte";
     break;
@@ -469,7 +477,7 @@ bool idl_mapping_java::gen_const(UTL_ScopedName *name, bool nestedInInteface,
   case AST_Expression::EV_void:
   case AST_Expression::EV_none:
   default: {
-    cerr << "ERROR - Constant of type " << type
+    cerr << "ERROR - " << __FILE__ << ":" << __LINE__ << " - Constant of type " << ev->et
          << " is not supported\n";
     return false;
   }
