@@ -247,7 +247,7 @@ SubscriberImpl::create_datareader(
 
     if (ret != DDS::RETCODE_OK) {
       if (DCPS_debug_level > 0) {
-        ACE_ERROR((LM_ERROR,
+        ACE_ERROR((LM_WARNING,
                   ACE_TEXT("(%P|%t) ERROR: ")
                   ACE_TEXT("SubscriberImpl::create_datareader, ")
                   ACE_TEXT("enable failed.\n")));
