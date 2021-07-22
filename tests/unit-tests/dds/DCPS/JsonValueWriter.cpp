@@ -3,12 +3,11 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "dds/DCPS/JsonValueWriter.h"
+#include <dds/DCPS/JsonValueWriter.h>
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
-#ifdef OPENDDS_RAPIDJSON
-#ifndef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_HAS_JSON_VALUE_WRITER
 
 using namespace rapidjson;
 using namespace OpenDDS::DCPS;
@@ -41,7 +40,7 @@ TEST(JsonValueWriter, end_struct_member)
   JsonValueWriter<> jvw;
   jvw.begin_struct();
   jvw.begin_struct_member("aField");
-  jvw.write_int8(5);
+  jvw.write_int16(5);
   jvw.end_struct_member();
   EXPECT_STREQ(jvw.buffer().GetString(), "{\"aField\":5");
 }
@@ -66,7 +65,7 @@ TEST(JsonValueWriter, begin_discriminator)
   JsonValueWriter<> jvw;
   jvw.begin_union();
   jvw.begin_discriminator();
-  jvw.write_int8(5);
+  jvw.write_int16(5);
   EXPECT_STREQ(jvw.buffer().GetString(), "{\"$discriminator\":5");
 }
 
@@ -75,7 +74,7 @@ TEST(JsonValueWriter, end_discriminator)
   JsonValueWriter<> jvw;
   jvw.begin_union();
   jvw.begin_discriminator();
-  jvw.write_int8(5);
+  jvw.write_int16(5);
   jvw.end_discriminator();
   EXPECT_STREQ(jvw.buffer().GetString(), "{\"$discriminator\":5");
 }
@@ -93,7 +92,7 @@ TEST(JsonValueWriter, end_union_member)
   JsonValueWriter<> jvw;
   jvw.begin_union();
   jvw.begin_union_member("aField");
-  jvw.write_int8(5);
+  jvw.write_int16(5);
   jvw.end_union_member();
   EXPECT_STREQ(jvw.buffer().GetString(), "{\"aField\":5");
 }
@@ -103,10 +102,10 @@ TEST(JsonValueWriter, complete_struct)
   JsonValueWriter<> jvw;
   jvw.begin_struct();
   jvw.begin_struct_member("aField");
-  jvw.write_int8(5);
+  jvw.write_int16(5);
   jvw.end_struct_member();
   jvw.begin_struct_member("bField");
-  jvw.write_int8(6);
+  jvw.write_int16(6);
   jvw.end_struct_member();
   jvw.end_struct();
   EXPECT_STREQ(jvw.buffer().GetString(), "{\"aField\":5,\"bField\":6}");
@@ -155,7 +154,7 @@ TEST(JsonValueWriter, end_element)
   JsonValueWriter<> jvw;
   jvw.begin_sequence();
   jvw.begin_element(0);
-  jvw.write_int8(5);
+  jvw.write_int16(5);
   jvw.end_element();
   EXPECT_STREQ(jvw.buffer().GetString(), "[5");
 }
@@ -165,10 +164,10 @@ TEST(JsonValueWriter, complete_array)
   JsonValueWriter<> jvw;
   jvw.begin_array();
   jvw.begin_element(0);
-  jvw.write_int8(5);
+  jvw.write_int16(5);
   jvw.end_element();
   jvw.begin_element(1);
-  jvw.write_int8(6);
+  jvw.write_int16(6);
   jvw.end_element();
   jvw.end_array();
   EXPECT_STREQ(jvw.buffer().GetString(), "[5,6]");
@@ -202,6 +201,7 @@ TEST(JsonValueWriter, write_byte)
   }
 }
 
+#if OPENDDS_HAS_EXPLICIT_INTS
 TEST(JsonValueWriter, write_int8)
 {
   {
@@ -229,6 +229,7 @@ TEST(JsonValueWriter, write_uint8)
     EXPECT_STREQ(jvw.buffer().GetString(), "255");
   }
 }
+#endif
 
 TEST(JsonValueWriter, write_int16)
 {
@@ -382,5 +383,4 @@ TEST(JsonValueWriter, write_enum)
   EXPECT_STREQ(jvw.buffer().GetString(), "\"label\"");
 }
 
-#endif
 #endif

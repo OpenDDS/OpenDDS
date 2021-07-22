@@ -15,6 +15,8 @@
 #include "RtpsUdpReceiveStrategy.h"
 #include "RtpsUdpReceiveStrategy_rch.h"
 #include "RtpsCustomizedElement.h"
+#include "LocatorCacheKey.h"
+#include "BundlingCacheKey.h"
 
 #include "ace/Basic_Types.h"
 #include "ace/SOCK_Dgram.h"
@@ -38,12 +40,17 @@
 #include "dds/DCPS/JobQueue.h"
 #include "dds/DCPS/SequenceNumber.h"
 #include "dds/DCPS/AddressCache.h"
+#include "dds/DCPS/Hash.h"
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreC.h"
 #include "dds/DCPS/security/framework/SecurityConfig.h"
 #include "dds/DCPS/security/framework/SecurityConfig_rch.h"
 #include "dds/DCPS/RTPS/ICE/Ice.h"
+#endif
+
+#if defined ACE_HAS_CPP11
+#include <functional>
 #endif
 
 class DDS_TEST;
@@ -65,64 +72,14 @@ typedef RcHandle<RtpsUdpInst> RtpsUdpInst_rch;
 typedef RcHandle<RtpsUdpTransport> RtpsUdpTransport_rch;
 typedef RcHandle<TransportClient> TransportClient_rch;
 
-#pragma pack(push, 1)
-
-struct LocatorCacheKey {
-  LocatorCacheKey(const RepoId& remote, const RepoId& local, bool prefer_unicast)
-    : remote_(remote)
-    , local_(local)
-    , prefer_unicast_(prefer_unicast)
-  {
-  }
-
-  bool operator<(const LocatorCacheKey& rhs) const
-  {
-    return std::memcmp(this, &rhs, sizeof (LocatorCacheKey)) < 0;
-  }
-
-  const RepoId remote_;
-  const RepoId local_;
-  const bool prefer_unicast_;
-};
-typedef AddressCache<LocatorCacheKey> LocatorCache;
-
-struct BundlingCacheKey {
-  BundlingCacheKey(const RepoId& dst_guid, const RepoId& from_guid, const RepoIdSet& to_guids)
-    : dst_guid_(dst_guid)
-    , from_guid_(from_guid)
-    , to_guids_(to_guids)
-  {
-  }
-
-  bool operator<(const BundlingCacheKey& rhs) const
-  {
-    int r = std::memcmp(&dst_guid_, &rhs.dst_guid_, 2 * sizeof (RepoId));
-    if (r < 0) {
-      return true;
-    } else if (r == 0) {
-      return to_guids_ < rhs.to_guids_;
-    }
-    return false;
-  }
-
-  bool contains(const RepoId& id) const
-  {
-    return to_guids_.count(id) != 0;
-  }
-
-  const RepoId dst_guid_;
-  const RepoId from_guid_;
-  const RepoIdSet to_guids_;
-};
-typedef AddressCache<BundlingCacheKey> BundlingCache;
-
-#pragma pack(pop)
-
 struct SeqReaders {
   SequenceNumber seq;
   RepoIdSet readers;
   SeqReaders(const RepoId& id) : seq(0) { readers.insert(id); }
 };
+
+typedef AddressCache<LocatorCacheKey> LocatorCache;
+typedef AddressCache<BundlingCacheKey> BundlingCache;
 
 typedef OPENDDS_MAP_CMP(RepoId, SeqReaders, GUID_tKeyLessThan) WriterToSeqReadersMap;
 
@@ -191,8 +148,8 @@ public:
   void remove_locator_and_bundling_cache(const RepoId& remote_id);
 
   void update_locators(const RepoId& remote_id,
-                       const AddrSet& unicast_addresses,
-                       const AddrSet& multicast_addresses,
+                       AddrSet& unicast_addresses,
+                       AddrSet& multicast_addresses,
                        bool requires_inline_qos,
                        bool add_ref);
 
@@ -216,8 +173,8 @@ public:
                   ACE_CDR::ULong participant_flags,
                   SequenceNumber max_sn,
                   const TransportClient_rch& client,
-                  const AddrSet& unicast_addresses,
-                  const AddrSet& multicast_addresses,
+                  AddrSet& unicast_addresses,
+                  AddrSet& multicast_addresses,
                   bool requires_inline_qos);
 
   void disassociated(const RepoId& local, const RepoId& remote);
@@ -288,8 +245,6 @@ private:
   static bool force_inline_qos_;
   bool requires_inline_qos(const GUIDSeq_var & peers);
 
-  typedef OPENDDS_MAP_CMP(RepoId, OPENDDS_VECTOR(RepoId),GUID_tKeyLessThan) DestToEntityMap;
-
   ReactorTask_rch reactor_task_;
   RcHandle<JobQueue> job_queue_;
 
@@ -310,7 +265,11 @@ private:
     size_t ref_count_;
   };
 
+#ifdef ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP(RepoId, RemoteInfo) RemoteInfoMap;
+#else
   typedef OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan) RemoteInfoMap;
+#endif
   RemoteInfoMap locators_;
 
   void update_last_recv_addr(const RepoId& src, const ACE_INET_Addr& addr);
@@ -407,7 +366,11 @@ private:
   };
 
   typedef RcHandle<ReaderInfo> ReaderInfo_rch;
+#ifdef ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP(RepoId, ReaderInfo_rch) ReaderInfoMap;
+#else
   typedef OPENDDS_MAP_CMP(RepoId, ReaderInfo_rch, GUID_tKeyLessThan) ReaderInfoMap;
+#endif
   typedef OPENDDS_SET(ReaderInfo_rch) ReaderInfoSet;
   struct ReaderInfoSetHolder : RcObject {
     ReaderInfoSet readers;
@@ -552,13 +515,16 @@ private:
     void gather_heartbeats_i(MetaSubmessageVec& meta_submessages);
     void gather_heartbeats(const RepoIdSet& additional_guids,
                            MetaSubmessageVec& meta_submessages);
-    typedef OPENDDS_MAP_CMP(RepoId, SequenceNumber, GUID_tKeyLessThan) ExpectedMap;
 
     RcHandle<SingleSendBuffer> get_send_buff() { return send_buff_; }
   };
   typedef RcHandle<RtpsWriter> RtpsWriter_rch;
 
+#ifdef ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP(RepoId, RtpsWriter_rch) RtpsWriterMap;
+#else
   typedef OPENDDS_MAP_CMP(RepoId, RtpsWriter_rch, GUID_tKeyLessThan) RtpsWriterMap;
+#endif
   RtpsWriterMap writers_;
 
 
@@ -590,7 +556,11 @@ private:
     bool sends_directed_hb() const;
   };
   typedef RcHandle<WriterInfo> WriterInfo_rch;
+#ifdef ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP(RepoId, WriterInfo_rch) WriterInfoMap;
+#else
   typedef OPENDDS_MAP_CMP(RepoId, WriterInfo_rch, GUID_tKeyLessThan) WriterInfoMap;
+#endif
   typedef OPENDDS_SET(WriterInfo_rch) WriterInfoSet;
 
   class RtpsReader : public RcObject {
@@ -660,7 +630,11 @@ private:
   typedef RcHandle<RtpsReader> RtpsReader_rch;
 
   typedef OPENDDS_VECTOR(MetaSubmessageVec::iterator) MetaSubmessageIterVec;
+#ifdef ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP(RepoId, MetaSubmessageIterVec) DestMetaSubmessageMap;
+#else
   typedef OPENDDS_MAP_CMP(RepoId, MetaSubmessageIterVec, GUID_tKeyLessThan) DestMetaSubmessageMap;
+#endif
   typedef OPENDDS_MAP(AddressCacheEntryProxy, DestMetaSubmessageMap) AddrDestMetaSubmessageMap;
   typedef OPENDDS_VECTOR(MetaSubmessageIterVec) MetaSubmessageIterVecVec;
   typedef OPENDDS_SET(CORBA::Long) CountSet;
@@ -694,7 +668,11 @@ private:
 
   RepoIdSet pending_reliable_readers_;
 
+#ifdef ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP(RepoId, RtpsReader_rch) RtpsReaderMap;
+#else
   typedef OPENDDS_MAP_CMP(RepoId, RtpsReader_rch, GUID_tKeyLessThan) RtpsReaderMap;
+#endif
   RtpsReaderMap readers_;
 
   typedef OPENDDS_MULTIMAP_CMP(RepoId, RtpsReader_rch, GUID_tKeyLessThan) RtpsReaderMultiMap;

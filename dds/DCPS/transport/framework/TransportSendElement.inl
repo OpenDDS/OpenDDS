@@ -15,7 +15,7 @@ OpenDDS::DCPS::TransportSendElement::TransportSendElement(int initial_count,
   : TransportQueueElement(initial_count),
     element_(sample)
 {
-  DBG_ENTRY_LVL("TransportSendElement","TransportSendElement",6);
+  DBG_ENTRY_LVL("TransportSendElement", "TransportSendElement", 6);
 }
 
 
@@ -30,14 +30,14 @@ ACE_INLINE
 OpenDDS::DCPS::SequenceNumber
 OpenDDS::DCPS::TransportSendElement::sequence() const
 {
-  return this->element_->get_header().sequence_;
+  return element_->get_header().sequence_;
 }
 
 ACE_INLINE
 const OpenDDS::DCPS::DataSampleElement*
 OpenDDS::DCPS::TransportSendElement::sample() const
 {
-  return this->element_;
+  return element_;
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

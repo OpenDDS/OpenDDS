@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -10,7 +8,9 @@
 
 #include "be_extern.h"
 #include "be_util.h"
-#include "../DCPS/RestoreOutputStreamState.h"
+
+#include <dds/DCPS/RestoreOutputStreamState.h>
+#include <dds/DCPS/Definitions.h>
 
 #include <utl_scoped_name.h>
 #include <utl_identifier.h>
@@ -460,12 +460,14 @@ std::string wrapPrefix(AST_Type* type, WrapDirection wd)
     case AST_PredefinedType::PT_boolean:
       return (wd == WD_OUTPUT)
         ? "ACE_OutputCDR::from_boolean(" : "ACE_InputCDR::to_boolean(";
+#if OPENDDS_HAS_EXPLICIT_INTS
     case AST_PredefinedType::PT_uint8:
       return (wd == WD_OUTPUT)
         ? "ACE_OutputCDR::from_uint8(" : "ACE_InputCDR::to_uint8(";
     case AST_PredefinedType::PT_int8:
       return (wd == WD_OUTPUT)
         ? "ACE_OutputCDR::from_int8(" : "ACE_InputCDR::to_int8(";
+#endif
     default:
       return "";
     }
@@ -520,12 +522,14 @@ inline std::string to_cxx_type(AST_Type* type, std::size_t& size)
     case AST_PredefinedType::PT_ushort:
       size = 2;
       return "ACE_CDR::UShort";
+#if OPENDDS_HAS_EXPLICIT_INTS
     case AST_PredefinedType::PT_int8:
       size = 1;
       return "ACE_CDR::Int8";
     case AST_PredefinedType::PT_uint8:
       size = 1;
       return "ACE_CDR::UInt8";
+#endif
     case AST_PredefinedType::PT_float:
       size = 4;
       return "ACE_CDR::Float";
@@ -661,10 +665,11 @@ std::ostream& char_helper(std::ostream& o, CharType value)
   case '\a':
     return o << "\\a";
   }
-  if (isprint(char_value(value))) {
+  const unsigned cvalue = char_value(value);
+  if (cvalue <= UCHAR_MAX && isprint(cvalue)) {
     return o << static_cast<char>(value);
   }
-  return hex_value(o << "\\x", char_value<CharType>(value), sizeof(CharType) == 1 ? 1 : 2);
+  return hex_value(o << "\\x", cvalue, sizeof(CharType) == 1 ? 1 : 2);
 }
 
 inline
@@ -675,10 +680,12 @@ std::ostream& operator<<(std::ostream& o,
   switch (ev.et) {
   case AST_Expression::EV_octet:
     return hex_value(o << "0x", static_cast<int>(ev.u.oval), 1);
+#if OPENDDS_HAS_EXPLICIT_INTS
   case AST_Expression::EV_int8:
     return o << static_cast<short>(ev.u.int8val);
   case AST_Expression::EV_uint8:
     return o << static_cast<unsigned short>(ev.u.uint8val);
+#endif
   case AST_Expression::EV_short:
     return o << ev.u.sval;
   case AST_Expression::EV_ushort:
@@ -774,8 +781,10 @@ inline bool needSyntheticDefault(AST_Type* disc, size_t n_labels)
   switch (pdt->pt()) {
   case AST_PredefinedType::PT_boolean:
     return n_labels < 2;
+#if OPENDDS_HAS_EXPLICIT_INTS
   case AST_PredefinedType::PT_int8:
   case AST_PredefinedType::PT_uint8:
+#endif
   case AST_PredefinedType::PT_char:
   case AST_PredefinedType::PT_octet:
     return n_labels < ACE_OCTET_MAX;

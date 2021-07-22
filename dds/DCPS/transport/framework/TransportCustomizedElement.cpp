@@ -40,6 +40,13 @@ TransportCustomizedElement::release_element(bool dropped_by_transport)
   }
 }
 
+ACE_Message_Block*
+TransportCustomizedElement::duplicate_msg() const
+{
+  DBG_ENTRY_LVL("TransportCustomizedElement", "duplicate_msg", 6);
+  return msg_->duplicate();
+}
+
 const ACE_Message_Block*
 TransportCustomizedElement::msg() const
 {
@@ -62,17 +69,24 @@ TransportCustomizedElement::msg_payload() const
 }
 
 const TransportSendElement*
-TransportCustomizedElement::original_send_element() const
+TransportCustomizedElement::find_original_send_element(TransportQueueElement* orig)
 {
   const TransportSendElement* ose =
-    dynamic_cast<const TransportSendElement*>(orig_);
+    dynamic_cast<const TransportSendElement*>(orig);
   if (!ose) {
     const TransportCustomizedElement* tce =
-      dynamic_cast<const TransportCustomizedElement*>(orig_);
+      dynamic_cast<const TransportCustomizedElement*>(orig);
     return tce ? tce->original_send_element() : 0;
   }
   return ose;
 }
+
+const TransportSendElement*
+TransportCustomizedElement::original_send_element() const
+{
+  return original_send_element_;
+}
+
 
 } // namespace DCPS
 } // namespace OpenDDS

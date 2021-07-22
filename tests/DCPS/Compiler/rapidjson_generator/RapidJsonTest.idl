@@ -1,3 +1,10 @@
+#if defined __TAO_IDL_FEATURES
+#  include __TAO_IDL_FEATURES
+#  if TAO_IDL_HAS_EXPLICIT_INTS
+#    define EXPLICIT_INTS
+#  endif
+#endif
+
 #include <tao/LongSeq.pidl>
 #include <tao/ShortSeq.pidl>
 #include <tao/StringSeq.pidl>
@@ -8,8 +15,10 @@ module Mod {
 
   struct BasicTypes {
     octet o;
+#ifdef EXPLICIT_INTS
     uint8 u8;
     int8 i8;
+#endif
     unsigned short us;
     short s;
     unsigned long ul;
