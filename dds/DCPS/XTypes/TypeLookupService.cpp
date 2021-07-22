@@ -441,7 +441,7 @@ DDS::ReturnCode_t TypeLookupService::complete_struct_member_to_member_descriptor
 {
   md->name = cm.detail.name;
   md->id = cm.common.member_id;
-  type_identifier_to_dynamic(cm.common.member_type_id);
+  type_identifier_to_dynamic(md->type, cm.common.member_type_id);
   md->default_value = ""; //TODO CLAYTON: Where do we get the default value from CompleteStructMember?
   md->index; //TODO CLAYTON
   md->label.length(0);
@@ -469,7 +469,7 @@ DDS::ReturnCode_t TypeLookupService::complete_union_member_to_member_descriptor(
 {
   md->name = cm.detail.name;
   md->id = cm.common.member_id;
-  type_identifier_to_dynamic(cm.common.type_id);
+  type_identifier_to_dynamic(md->type, cm.common.type_id);
   md->default_value = ""; //TODO CLAYTON
   md->index; //TODO CLAYTON
   md->label = cm.common.label_seq;
