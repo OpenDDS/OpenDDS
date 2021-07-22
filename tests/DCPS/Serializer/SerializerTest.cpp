@@ -897,13 +897,13 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   for (size_t i = 0; i < ARRAYSIZE; ++i) {
     expectedArray.octetValue[i] = (0xff&i);
 #if OPENDDS_HAS_EXPLICIT_INTS
-    expectedArray.int8Value[i] = (0xdd&i);
+    expectedArray.int8Value[i] = static_cast<ACE_CDR::Int8>(0xdd & i);
 #endif
     expectedArray.shortValue[i] = (0xffff&i);
     expectedArray.longValue[i] = ACE_CDR::Long(0x0f0f0f0f|i);
     expectedArray.longlongValue[i] = ACE_INT64_LITERAL(0x0123456789abcdef);
 #if OPENDDS_HAS_EXPLICIT_INTS
-    expectedArray.uint8Value[i] = (0xdd|i);
+    expectedArray.uint8Value[i] = static_cast<ACE_CDR::UInt8>(0xdd | i);
 #endif
     expectedArray.ushortValue[i] = ACE_CDR::UShort(0xffff|i);
     expectedArray.ulongValue[i] = ACE_CDR::ULong(0xf0f0f0f0|i);
