@@ -66,6 +66,35 @@ const char* retcode_to_string(DDS::ReturnCode_t value)
   }
 }
 
+const char* topicstatus_to_string(TopicStatus value)
+{
+  switch (value) {
+  case CREATED:
+    return "Created";
+  case ENABLED:
+    return "Enabled";
+  case FOUND:
+    return "Found";
+  case NOT_FOUND:
+    return "Not found";
+  case REMOVED:
+    return "Removed";
+  case CONFLICTING_TYPENAME:
+    return "Conflicting typename";
+  case PRECONDITION_NOT_MET:
+    return "Precondition not met";
+  case INTERNAL_ERROR:
+    return "Internal error";
+  case TOPIC_DISABLED:
+    return "Topic disabled";
+  default:
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: topicstatus_to_string: ")
+      ACE_TEXT("%d is either invalid or not recognized.\n"),
+      value));
+    return "Invalid topic status";
+  }
+}
+
 bool
 is_wildcard(const char *str)
 {

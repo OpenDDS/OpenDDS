@@ -21,6 +21,7 @@ OpenDDS::DCPS::TransportInst::TransportInst(const char* type,
     thread_per_connection_(0),
     datalink_release_delay_(10000),
     datalink_control_chunks_(32),
+    fragment_reassembly_timeout_(300),
     shutting_down_(false),
     name_(name)
 {

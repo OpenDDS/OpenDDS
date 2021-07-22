@@ -392,12 +392,18 @@ Sedp::init(const RepoId& guid,
   stun_server_address(disco.config()->sedp_stun_server_address());
   rtps_inst->use_ice_ = disco.config()->use_ice();
 
+  if (!disco.config()->sedp_fragment_reassembly_timeout().is_zero()) {
+    rtps_inst->fragment_reassembly_timeout_ = disco.config()->sedp_fragment_reassembly_timeout();
+  }
+
   // Create a config
   OPENDDS_STRING config_name = DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
                             OPENDDS_STRING("_SEDP_TransportCfg_") + key +
                             domainStr;
   transport_cfg_ = TheTransportRegistry->create_config(config_name.c_str());
   transport_cfg_->instances_.push_back(transport_inst_);
+  transport_cfg_->passive_connect_duration_ =
+    static_cast<unsigned long>(disco.config()->sedp_passive_connect_duration().value().get_msec());
 
   rtps_inst->opendds_discovery_default_listener_ = publications_reader_;
   rtps_inst->opendds_discovery_guid_ = guid;

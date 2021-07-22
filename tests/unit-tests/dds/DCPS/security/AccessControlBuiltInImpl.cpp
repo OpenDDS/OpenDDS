@@ -307,6 +307,10 @@ public:
     TheServiceParticipant->shutdown();
   }
 
+  static void SetUpTestCase () {
+    openssl_init();
+  }
+
   ~dds_DCPS_security_AccessControlBuiltInImpl()
   {
   }

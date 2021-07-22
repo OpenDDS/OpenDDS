@@ -1,21 +1,20 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #include "typeobject_generator.h"
 
-#include "utl_identifier.h"
 #include "topic_keys.h"
 #include "dds_visitor.h"
-
 #include "be_extern.h"
 #include "be_util.h"
 
 #include <dds/DCPS/Hash.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/Definitions.h>
+
+#include <utl_identifier.h>
 
 using std::string;
 using namespace AstTypeClassification;
@@ -58,6 +57,12 @@ to_long(const AST_Expression::AST_ExprValue& ev)
   switch (ev.et) {
   case AST_Expression::EV_octet:
     return ev.u.oval;
+#if OPENDDS_HAS_EXPLICIT_INTS
+  case AST_Expression::EV_uint8:
+    return ev.u.uint8val;
+  case AST_Expression::EV_int8:
+    return ev.u.int8val;
+#endif
   case AST_Expression::EV_short:
     return ev.u.sval;
   case AST_Expression::EV_ushort:
@@ -438,6 +443,9 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::TypeIdentifier& ti)
   case OpenDDS::XTypes::TK_BYTE:
     out << "XTypes::TK_BYTE";
     break;
+  case OpenDDS::XTypes::TK_INT8:
+    out << "XTypes::TK_INT8";
+    break;
   case OpenDDS::XTypes::TK_INT16:
     out << "XTypes::TK_INT16";
     break;
@@ -446,6 +454,9 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::TypeIdentifier& ti)
     break;
   case OpenDDS::XTypes::TK_INT64:
     out << "XTypes::TK_INT64";
+    break;
+  case OpenDDS::XTypes::TK_UINT8:
+    out << "XTypes::TK_UINT8";
     break;
   case OpenDDS::XTypes::TK_UINT16:
     out << "XTypes::TK_UINT16";
@@ -1606,6 +1617,14 @@ typeobject_generator::generate_minimal_type_identifier(AST_Type* type, bool forc
       case AST_PredefinedType::PT_ushort:
         minimal_type_identifier_map_[type] = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_UINT16);
         break;
+#if OPENDDS_HAS_EXPLICIT_INTS
+      case AST_PredefinedType::PT_int8:
+        minimal_type_identifier_map_[type] = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_INT8);
+        break;
+      case AST_PredefinedType::PT_uint8:
+        minimal_type_identifier_map_[type] = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_UINT8);
+        break;
+#endif
       case AST_PredefinedType::PT_float:
         minimal_type_identifier_map_[type] = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_FLOAT32);
         break;
