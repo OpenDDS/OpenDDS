@@ -33,8 +33,8 @@ public:
   unsigned long get_member_count();
   DDS::ReturnCode_t get_member_by_index(DynamicTypeMember_rch& member, unsigned long index);
   bool equals(const DynamicType& other);
-  DynamicTypeMembersByName member_by_name;
-  DynamicTypeMembersById member_by_id;
+  DynamicTypeMembersByName member_by_name; //TODO CLAYTON : populate this
+  DynamicTypeMembersById member_by_id; //TODO CLAYTON : populate this
   DynamicTypeMembersByIndex member_by_index;
   TypeDescriptor* descriptor_;
 };

@@ -443,11 +443,10 @@ DDS::ReturnCode_t TypeLookupService::complete_struct_member_to_member_descriptor
   md->id = cm.common.member_id;
   type_identifier_to_dynamic(md->type, cm.common.member_type_id);
   md->default_value = ""; //TODO CLAYTON: Where do we get the default value from CompleteStructMember?
-  md->index; //TODO CLAYTON
   md->label.length(0);
   if (cm.common.member_flags & (1 << 0)) {
     if (cm.common.member_flags & (1 << 1)) {
-      md->try_construct_kind = TRIM ;
+      md->try_construct_kind = TRIM;
     } else {
       md->try_construct_kind = DISCARD;
     }
@@ -471,11 +470,10 @@ DDS::ReturnCode_t TypeLookupService::complete_union_member_to_member_descriptor(
   md->id = cm.common.member_id;
   type_identifier_to_dynamic(md->type, cm.common.type_id);
   md->default_value = ""; //TODO CLAYTON
-  md->index; //TODO CLAYTON
   md->label = cm.common.label_seq;
   if (cm.common.member_flags & (1 << 0)) {
     if (cm.common.member_flags & (1 << 1)) {
-      md->try_construct_kind = TRIM ;
+      md->try_construct_kind = TRIM;
     } else {
       md->try_construct_kind = DISCARD;
     }
@@ -493,22 +491,26 @@ DDS::ReturnCode_t TypeLookupService::complete_union_member_to_member_descriptor(
   md->is_default_label = (cm.common.member_flags & (1 << 6));
 }
 
-DDS::ReturnCode_t TypeLookupService::complete_struct_member_to_dynamic_type_member(DynamicTypeMember_rch& dtm,
-  const CompleteStructMember& cm)
+DDS::ReturnCode_t TypeLookupService::complete_annotation_member_to_member_descriptor(MemberDescriptor*& md, const CompleteAnnotationParameter& cm)
 {
-  complete_struct_member_to_member_descriptor(dtm->descriptor_, cm);
-}
-
-DDS::ReturnCode_t TypeLookupService::complete_union_member_to_dynamic_type_member(DynamicTypeMember_rch& dtm,
-  const CompleteUnionMember& cm)
-{
-  complete_union_member_to_member_descriptor(dtm->descriptor_, cm);
+  md->name = cm.name;
+  type_identifier_to_dynamic(md->type, cm.common.member_type_id);
+  md->default_value = ""; //TODO CLAYTON
+  md->label.length(0);
+  md->try_construct_kind = DISCARD; //Clayton: I don't think TryConstruct kind matters here
+  md->is_key = 0;
+  md->is_optional = 0;
+  md->is_must_understand = 0;
+  md->is_shared = 0;
+  md->is_default_label = 0;
 }
 
 DDS::ReturnCode_t TypeLookupService::complete_to_dynamic(DynamicType_rch& dt, const CompleteTypeObject& cto)
 {
   DynamicType_rch dt_instantiation(new DynamicType, OpenDDS::DCPS::keep_count());
   dt = dt_instantiation;
+  TypeDescriptor* td(new TypeDescriptor);
+  dt->descriptor_ = td;
   switch (cto.kind) {
   // Constructed/Named types
   case TK_ALIAS:
@@ -516,12 +518,23 @@ DDS::ReturnCode_t TypeLookupService::complete_to_dynamic(DynamicType_rch& dt, co
     dt->descriptor_->name = cto.alias_type.header.detail.type_name;
     dt->descriptor_->bound.length(0);
     type_identifier_to_dynamic(dt->descriptor_->base_type, cto.alias_type.body.common.related_type);
+    dt->member_by_index = dt->descriptor_->base_type->member_by_index; //TODO CLAYTON: Test this
     break;
   // Enumerated TKs
   case TK_ENUM:
     dt->descriptor_->kind = TK_ENUM;
     dt->descriptor_->name = cto.enumerated_type.header.detail.type_name;
     dt->descriptor_->bound.length(0);
+    for (ulong i = 0; i < cto.enumerated_type.literal_seq.length(); ++i) {
+      DynamicTypeMember_rch dtm(new DynamicTypeMember, OpenDDS::DCPS::keep_count());
+      MemberDescriptor* md(new MemberDescriptor);
+      dtm->descriptor_ = md;
+      dtm->descriptor_->name = cto.enumerated_type.literal_seq[i].detail.name;
+      dtm->descriptor_->type = dt;
+      dtm->descriptor_->is_default_label = (cto.enumerated_type.literal_seq[i].common.flags & (1 << 6));
+      dt->member_by_index.insert(dt->member_by_index.end(), dtm);
+      dtm->descriptor_->index = i;
+    }
     break;
   case TK_BITMASK: {
     dt->descriptor_->kind = TK_BITMASK;
@@ -529,6 +542,15 @@ DDS::ReturnCode_t TypeLookupService::complete_to_dynamic(DynamicType_rch& dt, co
     dt->descriptor_->bound.length(1);
     dt->descriptor_->bound[0] = cto.bitmask_type.header.common.bit_bound;
     type_identifier_to_dynamic(dt->descriptor_->element_type, TypeIdentifier(TK_BOOLEAN));
+    for (ulong i = 0; i < cto.bitmask_type.flag_seq.length(); ++i) {
+      DynamicTypeMember_rch dtm(new DynamicTypeMember, OpenDDS::DCPS::keep_count());
+      MemberDescriptor* md(new MemberDescriptor);
+      dtm->descriptor_ = md;
+      dtm->descriptor_->name = cto.bitmask_type.flag_seq[i].detail.name;
+      type_identifier_to_dynamic(dtm->descriptor_->type, TypeIdentifier(TK_BOOLEAN));
+      dt->member_by_index.insert(dt->member_by_index.end(), dtm);
+      dtm->descriptor_->index = i;
+    }
   }
   break;
   // Structured TKs
@@ -536,6 +558,15 @@ DDS::ReturnCode_t TypeLookupService::complete_to_dynamic(DynamicType_rch& dt, co
     dt->descriptor_->kind = TK_ANNOTATION;
     dt->descriptor_->name = cto.annotation_type.header.annotation_name;
     dt->descriptor_->bound.length(0);
+    for (ulong i = 0; i < cto.annotation_type.member_seq.length(); ++i) {
+      DynamicTypeMember_rch dtm(new DynamicTypeMember, OpenDDS::DCPS::keep_count());
+      MemberDescriptor* md(new MemberDescriptor);
+      dtm->descriptor_ = md;
+      complete_annotation_member_to_member_descriptor(dtm->descriptor_, cto.annotation_type.member_seq[i]);
+      dt->member_by_index.insert(dt->member_by_index.end(), dtm);
+      dtm->descriptor_->index = i;
+      dtm->descriptor_->id = i; //Clayton: I'm not entirely sure what this should be for annotation
+    }
     break;
   case TK_STRUCTURE:
     dt->descriptor_->kind = TK_STRUCTURE;
@@ -554,8 +585,11 @@ DDS::ReturnCode_t TypeLookupService::complete_to_dynamic(DynamicType_rch& dt, co
     dt->descriptor_->is_nested = (cto.struct_type.struct_flags & (1 << 3));
     for (ulong i = 0; i < cto.struct_type.member_seq.length(); ++i) {
       DynamicTypeMember_rch dtm(new DynamicTypeMember, OpenDDS::DCPS::keep_count());
-      complete_struct_member_to_dynamic_type_member(dtm, cto.struct_type.member_seq[i]);
-      dt->member_by_index.insert(dt->member_by_index.end(), dtm); //insert at end?
+      MemberDescriptor* md(new MemberDescriptor);
+      dtm->descriptor_ = md;
+      complete_struct_member_to_member_descriptor(dtm->descriptor_, cto.struct_type.member_seq[i]);
+      dt->member_by_index.insert(dt->member_by_index.end(), dtm);
+      dtm->descriptor_->index = i;
     }
     break;
   case TK_UNION:
@@ -575,8 +609,11 @@ DDS::ReturnCode_t TypeLookupService::complete_to_dynamic(DynamicType_rch& dt, co
     dt->descriptor_->is_nested = (cto.union_type.union_flags & (1 << 3));
     for (ulong i = 0; i < cto.union_type.member_seq.length(); ++i) {
       DynamicTypeMember_rch dtm(new DynamicTypeMember, OpenDDS::DCPS::keep_count());
-      complete_union_member_to_dynamic_type_member(dtm, cto.union_type.member_seq[i]);
-      dt->member_by_index.insert(dt->member_by_index.end(), dtm); //insert at end?
+      MemberDescriptor* md(new MemberDescriptor);
+      dtm->descriptor_ = md;
+      complete_union_member_to_member_descriptor(dtm->descriptor_, cto.union_type.member_seq[i]);
+      dt->member_by_index.insert(dt->member_by_index.end(), dtm);
+      dtm->descriptor_->index = i;
     }
     break;
   case TK_BITSET:
@@ -624,7 +661,7 @@ DDS::ReturnCode_t TypeLookupService::type_identifier_to_dynamic(DynamicType_rch&
   dt = dt_instantiation;
     switch (ti.kind()) {
       case TK_NONE:
-      // TODO CLAYTON : Return an error?
+        return DDS::RETCODE_ERROR;
       case TK_BOOLEAN:
         dt->descriptor_->kind = TK_BOOLEAN;
         dt->descriptor_->name = "bool";
@@ -779,7 +816,7 @@ DDS::ReturnCode_t TypeLookupService::type_identifier_to_dynamic(DynamicType_rch&
          complete_to_dynamic(dt, get_type_objects_i(ti).complete);
          break;
       case EK_MINIMAL:
-      // TODO CLAYTON : Return an error?
+        return DDS::RETCODE_ERROR;
         break;
       case TK_ANNOTATION:
         dt->descriptor_->kind = TK_ANNOTATION;
