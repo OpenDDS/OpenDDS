@@ -1,9 +1,7 @@
 /*
-*
-*
-* Distributed under the OpenDDS License.
-* See: http://www.opendds.org/license.html
-*/
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 #ifndef OPENDDS_DCPS_RESTORE_OUTPUT_STREAM_STATE_H
 #define OPENDDS_DCPS_RESTORE_OUTPUT_STREAM_STATE_H
@@ -27,27 +25,19 @@ class RestoreOutputStreamState {
 public:
   explicit RestoreOutputStreamState(std::ostream& stream)
     : stream_(stream)
-    , flags_(stream.flags())
-    , fill_(stream.fill())
-    , precision_(stream.precision())
-    , width_(stream.width())
+    , saved_(0)
   {
+    saved_.copyfmt(stream);
   }
 
   ~RestoreOutputStreamState()
   {
-    stream_.flags(flags_);
-    stream_.fill(fill_);
-    stream_.precision(precision_);
-    stream_.width(width_);
+    stream_.copyfmt(saved_);
   }
 
 private:
   std::ostream& stream_;
-  const std::ios_base::fmtflags flags_;
-  const char fill_;
-  const std::streamsize precision_;
-  const std::streamsize width_;
+  std::ios saved_;
 };
 
 } // namespace DCPS

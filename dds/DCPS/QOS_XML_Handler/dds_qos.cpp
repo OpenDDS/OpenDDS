@@ -5012,6 +5012,12 @@ namespace dds
     qos_profile_.push_back (e);
   }
 
+  void qosProfile_seq::
+  del_qos_profile(qosProfile_seq::qos_profile_value_type const& e)
+  {
+    qos_profile_.remove (e);
+  }
+
   size_t qosProfile_seq::
   count_qos_profile(void) const
   {

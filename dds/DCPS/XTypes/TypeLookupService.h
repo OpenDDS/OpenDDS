@@ -9,9 +9,6 @@
 #include "TypeObject.h"
 
 #include <dds/DCPS/RcObject.h>
-#include <dds/DCPS/SequenceNumber.h>
-#include <dds/DCPS/TypeSupportImpl.h>
-#include <dds/DCPS/GuidUtils.h>
 
 #include <ace/Thread_Mutex.h>
 
@@ -31,7 +28,7 @@ public:
 
   // For TypeAssignability
   const TypeObject& get_type_objects(const TypeIdentifier& type_id) const;
-  void add_type_objects_to_cache(const TypeIdentifier& ti, const TypeObject& tobj);
+  void add(const TypeIdentifier& ti, const TypeObject& tobj);
 
   // For TypeLookup_getTypes
   void get_type_objects(const TypeIdentifierSeq& type_ids,
@@ -51,7 +48,7 @@ public:
     const TypeIdentifierWithSizeSeq& dependencies);
 
   // For adding local endpoint types
-  void add_type_objects_to_cache(const DCPS::TypeSupportImpl& typesupport);
+  void add(TypeMap::const_iterator begin, TypeMap::const_iterator end);
 
   bool type_object_in_cache(const TypeIdentifier& ti) const;
   bool extensibility(TypeFlag extensibility_mask, const TypeIdentifier& ti) const;

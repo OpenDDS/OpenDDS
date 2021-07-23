@@ -132,8 +132,9 @@ struct GeneratorBase
   std::string map_type(AST_Expression::ExprType type)
   {
     AST_PredefinedType::PredefinedType pt = AST_PredefinedType::PT_void;
-    switch (type)
-    {
+    switch (type) {
+    case AST_Expression::EV_int8: pt = AST_PredefinedType::PT_int8; break;
+    case AST_Expression::EV_uint8: pt = AST_PredefinedType::PT_uint8; break;
     case AST_Expression::EV_short: pt = AST_PredefinedType::PT_short; break;
     case AST_Expression::EV_ushort: pt = AST_PredefinedType::PT_ushort; break;
     case AST_Expression::EV_long: pt = AST_PredefinedType::PT_long; break;
@@ -154,7 +155,8 @@ struct GeneratorBase
       be_global->add_include("FACE/Fixed.h", BE_GlobalData::STREAM_LANG_H);
       return helpers_[HLP_FIXED_CONSTANT];
 #endif
-    default: break;
+    default:
+      be_util::misc_error_and_abort("Unhandled ExprType value in map_type");
     }
 
     if (type == AST_Expression::EV_string || type == AST_Expression::EV_wstring)
@@ -208,6 +210,12 @@ struct GeneratorBase
 
     switch (the_union->udisc_type ())
       {
+      case AST_Expression::EV_int8:
+        first_label << signed(dv.u.char_val);
+        break;
+      case AST_Expression::EV_uint8:
+        first_label << unsigned(dv.u.char_val);
+        break;
       case AST_Expression::EV_short:
         first_label << dv.u.short_val;
         break;
@@ -265,8 +273,7 @@ struct GeneratorBase
         first_label << dv.u.ulonglong_val;
         break;
       default:
-        std::cerr << "Illegal discriminator for union\n";
-        break;
+        be_util::misc_error_and_abort("Unhandled ExprType value in generateDefaultValue");
       }
 
     return first_label.str();
@@ -1110,6 +1117,8 @@ struct SafetyProfileGenerator : GeneratorBase
     primtype_[AST_PredefinedType::PT_ulonglong] = "CORBA::UnsignedLongLong";
     primtype_[AST_PredefinedType::PT_short] = "CORBA::Short";
     primtype_[AST_PredefinedType::PT_ushort] = "CORBA::UShort";
+    primtype_[AST_PredefinedType::PT_int8] = "CORBA::Int8";
+    primtype_[AST_PredefinedType::PT_uint8] = "CORBA::UInt8";
     primtype_[AST_PredefinedType::PT_float] = "CORBA::Float";
     primtype_[AST_PredefinedType::PT_double] = "CORBA::Double";
     primtype_[AST_PredefinedType::PT_longdouble] = "CORBA::LongDouble";
@@ -1341,6 +1350,8 @@ struct Cxx11Generator : GeneratorBase
     primtype_[AST_PredefinedType::PT_ulonglong] = "uint64_t";
     primtype_[AST_PredefinedType::PT_short] = "int16_t";
     primtype_[AST_PredefinedType::PT_ushort] = "uint16_t";
+    primtype_[AST_PredefinedType::PT_int8] = "int8_t";
+    primtype_[AST_PredefinedType::PT_uint8] = "uint8_t";
     primtype_[AST_PredefinedType::PT_float] = "float";
     primtype_[AST_PredefinedType::PT_double] = "double";
     primtype_[AST_PredefinedType::PT_longdouble] = "long double";

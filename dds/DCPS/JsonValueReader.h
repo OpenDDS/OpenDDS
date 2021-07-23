@@ -64,8 +64,8 @@ public:
 
   bool read_boolean(ACE_CDR::Boolean& value);
   bool read_byte(ACE_CDR::Octet& value);
-  bool read_int8(ACE_CDR::Char& value);
-  bool read_uint8(ACE_CDR::Octet& value);
+  bool read_int8(ACE_CDR::Int8& value);
+  bool read_uint8(ACE_CDR::UInt8& value);
   bool read_int16(ACE_CDR::Short& value);
   bool read_uint16(ACE_CDR::UShort& value);
   bool read_int32(ACE_CDR::Long& value);
@@ -299,7 +299,7 @@ bool JsonValueReader<InputStream>::read_byte(ACE_CDR::Octet& value)
 }
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::read_int8(ACE_CDR::Char& value)
+bool JsonValueReader<InputStream>::read_int8(ACE_CDR::Int8& value)
 {
   switch (peek()) {
   case kInt:
@@ -314,7 +314,7 @@ bool JsonValueReader<InputStream>::read_int8(ACE_CDR::Char& value)
 }
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::read_uint8(ACE_CDR::Octet& value)
+bool JsonValueReader<InputStream>::read_uint8(ACE_CDR::UInt8& value)
 {
   if (peek() == kUint) {
     value = uint_value_;

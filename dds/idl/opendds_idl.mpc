@@ -35,7 +35,7 @@ project: aceexe, dds_macros, crosscompile, install, opendds_util, dds_corbaseq {
 
   verbatim(gnuace, postinstall) {
 "	@$(MKDIR) $(DESTDIR)$(INSTALL_PREFIX)/share/dds/bin"
-"	ln -sf $(INSTALL_PREFIX)/bin/opendds_idl $(DESTDIR)$(INSTALL_PREFIX)/share/dds/bin"
+"	ln -sf ../../../bin/opendds_idl $(DESTDIR)$(INSTALL_PREFIX)/share/dds/bin"
   }
 
 }

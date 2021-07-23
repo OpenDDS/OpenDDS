@@ -749,6 +749,11 @@ private:
                      const DiscoveredSubscription_SecurityWrapper& wrapper);
 #endif
 
+  /// This is a function to unify the notification of liveliness within RTPS
+  /// The local participant map is checked for associated entities and then they are notified
+  /// of liveliness if their QoS is compatible
+  void notify_liveliness(const ParticipantMessageData& pmd);
+
   void data_received(DCPS::MessageId message_id,
                      const ParticipantMessageData& data);
 

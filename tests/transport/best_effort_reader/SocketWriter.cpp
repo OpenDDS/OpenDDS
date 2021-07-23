@@ -10,6 +10,7 @@
 
 #include <dds/DCPS/DataSampleElement.h>
 #include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Message_Block_Ptr.h>
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/SendStateDataSampleList.h>
@@ -33,7 +34,7 @@ using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
 
 const Encoding SocketWriter::encoding(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
-
+const EncapsulationHeader SocketWriter::encap(SocketWriter::encoding, FINAL);
 const double SocketWriter::NTP_FRACTIONAL = 4294.967296; // NTP fractional (2^-32) sec per microsec
 
 Header SocketWriter::header(RepoId id)
@@ -131,7 +132,7 @@ bool SocketWriter::serialize(ACE_Message_Block& mb, const InfoTimestampSubmessag
                              const DataSubmessage& d, const TestMsg& m) const
 {
   Serializer s(&mb, encoding);
-  if (!((s << hdr_) && (s << t) && (s << d) && (s << ENCAP) && (s << m))) {
+  if (!((s << hdr_) && (s << t) && (s << d) && (s << encap) && (s << m))) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to serialize RTPS message:%m\n")), false);
   }
   return true;
@@ -159,7 +160,7 @@ bool SocketWriter::send(const ACE_Message_Block& mb) const
     ssize_t res = socket_.send(mb.rd_ptr(), mb.length(), dest);
     if (res >= 0) {
       ACE_DEBUG((LM_INFO, "SocketWriter %C sent %C (%d bytes)\n",
-                 OPENDDS_STRING(GuidConverter(id_)).c_str(), i->get_host_addr(), res));
+                 OPENDDS_STRING(GuidConverter(id_)).c_str(), LogAddr::ip(*i).c_str(), res));
     } else {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: in socket_.send()%m\n")), false);
     }

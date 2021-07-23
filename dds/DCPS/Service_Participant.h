@@ -173,7 +173,7 @@ public:
   /// This accessor is to provide the multiplier for allocators
   /// that have resources used on a per association basis.
   /// Has a default, can be set by the
-  /// @c -DCPSChunkAssociationMutltiplier
+  /// @c -DCPSChunkAssociationMultiplier
   /// option, or by @c n_association_chunk_multiplier() setter.
   size_t association_chunk_multiplier() const;
 
@@ -445,6 +445,11 @@ public:
    */
   XTypes::TypeObject get_type_object(DDS::DomainParticipant_ptr participant,
                                      const XTypes::TypeIdentifier& ti) const;
+
+  enum TypeObjectEncoding { Encoding_Normal, Encoding_WriteOldFormat, Encoding_ReadOldFormat };
+  TypeObjectEncoding type_object_encoding() const;
+  void type_object_encoding(TypeObjectEncoding encoding);
+  void type_object_encoding(const char* encoding);
 
 private:
 
@@ -762,6 +767,8 @@ private:
 
   DDS::Duration_t bit_autopurge_nowriter_samples_delay_;
   DDS::Duration_t bit_autopurge_disposed_samples_delay_;
+
+  TypeObjectEncoding type_object_encoding_;
 };
 
 #define TheServiceParticipant OpenDDS::DCPS::Service_Participant::instance()

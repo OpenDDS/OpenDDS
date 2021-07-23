@@ -3,6 +3,14 @@
 use Cwd;
 use strict;
 
+my $pattern = "unit";
+
+for my $arg (@ARGV) {
+  if ($arg eq "stress") {
+    $pattern = "stress";
+  }
+}
+
 my @lists = ('tests/dcps_tests.lst');
 push @lists, 'tests/security/security_tests.lst' if has_security();
 
@@ -11,14 +19,14 @@ for my $list (@lists) {
   open my $f, $ENV{'DDS_ROOT'} . '/' . $list or die "Failed to read $list";
   while (<$f>) {
     next if /^\s*#/;
-    if (/unit/i) {
+    if (/$pattern/i) {
       push @lines, $_;
     }
   }
   close $f;
 }
 
-print "$0 running " . scalar @lines . " unit test programs\n";
+print "$0 running " . scalar @lines . " $pattern test programs\n";
 my $start_time = time();
 open my $f, "|$^X $ENV{'DDS_ROOT'}/tests/auto_run_tests.pl -x -l -"
     or die "Failed to launch auto_run_tests";

@@ -8,8 +8,6 @@ project(DDS*idl): dcps_test_idl_only_lib {
   TypeSupport_Files {
     Messenger.idl
   }
-
-
 }
 
 

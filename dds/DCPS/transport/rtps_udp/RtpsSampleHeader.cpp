@@ -263,8 +263,7 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
         for (CORBA::ULong i = 0; i < rtps.inlineQos.length(); ++i) {
           if (rtps.inlineQos[i]._d() == PID_KEY_HASH) {
             rds.sample_.reset(new ACE_Message_Block(20));
-            // TODO(iguessthislldo) Convert to Encoding
-            // CDR_BE encapsuation scheme (endianness is not used for key hash)
+            // CDR_BE encapsulation scheme (endianness is not used for key hash)
             rds.sample_->copy("\x00\x00\x00\x00", 4);
             const CORBA::Octet* data = rtps.inlineQos[i].key_hash().value;
             rds.sample_->copy(reinterpret_cast<const char*>(data), 16);

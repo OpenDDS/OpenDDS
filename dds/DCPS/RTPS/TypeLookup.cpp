@@ -48,13 +48,13 @@ bool operator>>(Serializer& strm, XTypes::TypeLookup_getTypes_In& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   unsigned member_id;
   size_t field_size;
   while (true) {
 
-    if (strm.pos() - start_pos >= total_size) {
+    if (strm.rpos() - start_pos >= total_size) {
       return true;
     }
 
@@ -132,13 +132,13 @@ bool operator>>(Serializer& strm, XTypes::TypeLookup_getTypes_Out& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   unsigned member_id;
   size_t field_size;
   while (true) {
 
-    if (strm.pos() - start_pos >= total_size) {
+    if (strm.rpos() - start_pos >= total_size) {
       return true;
     }
 
@@ -274,12 +274,12 @@ bool operator>>(Serializer& strm, XTypes::TypeLookup_getTypeDependencies_In& str
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
   unsigned member_id;
   size_t field_size;
   while (true) {
 
-    if (strm.pos() - start_pos >= total_size) {
+    if (strm.rpos() - start_pos >= total_size) {
       return true;
     }
 
@@ -362,13 +362,13 @@ bool operator>>(Serializer& strm, XTypes::TypeLookup_getTypeDependencies_Out& st
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
   unsigned member_id;
   size_t field_size;
 
   while (true) {
 
-    if (strm.pos() - start_pos >= total_size) {
+    if (strm.rpos() - start_pos >= total_size) {
       return true;
     }
 

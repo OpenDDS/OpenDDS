@@ -7,6 +7,7 @@
 
 #include "UdpReceiveStrategy.h"
 #include "UdpDataLink.h"
+#include <dds/DCPS/LogAddr.h>
 
 #include "ace/Reactor.h"
 
@@ -85,9 +86,8 @@ UdpReceiveStrategy::start_i()
   if (Transport_debug_level > 5) {
     ACE_INET_Addr addr;
     link_->socket().get_local_addr(addr);
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) UdpReceiveStrategy::start_i: "
-               "listening on %C:%hu\n",
-               addr.get_host_addr(), addr.get_port_number()));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) UdpReceiveStrategy::start_i: listening on %C\n",
+               LogAddr(addr).c_str()));
   }
   return 0;
 }

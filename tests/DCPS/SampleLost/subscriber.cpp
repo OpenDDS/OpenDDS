@@ -24,6 +24,7 @@ using namespace std;
 int
 ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
+  int retval = 0;
   try
     {
       DDS::DomainParticipantFactory_var dpf =
@@ -99,10 +100,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       sub->get_default_datareader_qos (dr_qos);
       dr_qos.reliability.kind  = ::DDS::RELIABLE_RELIABILITY_QOS;
       dr_qos.history.kind  = ::DDS::KEEP_LAST_HISTORY_QOS;
-      dr_qos.history.depth = 10;
-      dr_qos.resource_limits.max_samples = 10;
-      dr_qos.resource_limits.max_instances = 1;
-      dr_qos.resource_limits.max_samples_per_instance = 10;
+      dr_qos.history.depth = 4;
       dr_qos.deadline.period = deadline_time;
 
       DDS::DataReader_var dr = sub->create_datareader (topic.in (),
@@ -115,9 +113,8 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       int const expected = 10;
-      while (listener_servant->num_reads() < expected)
-      {
-        cerr << "Got " << listener_servant->num_reads() << " number of reads" << endl;
+      while (listener_servant->num_data_available() < expected) {
+        cerr << "Got " << listener_servant->num_data_available() << " number of data available callbacks" << endl;
         ACE_OS::sleep (1);
       }
 
@@ -125,6 +122,11 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       cerr << "Got " << listener_servant->num_samples_rejected() << " sample rejected callbacks" << endl;
       if (listener_servant->num_budget_exceeded() > 0) {
         cerr << "ERROR: Got " << listener_servant->num_budget_exceeded() << " budget exceeded callbacks" << endl;
+        ++retval;
+      }
+      if (listener_servant->num_samples_lost() == 0) {
+        cerr << "ERROR: Got no sample lost callbacks" << endl;
+        ++retval;
       }
 
       if (!CORBA::is_nil (participant.in ())) {
@@ -143,5 +145,5 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       return 1;
     }
 
-  return 0;
+  return retval;
 }

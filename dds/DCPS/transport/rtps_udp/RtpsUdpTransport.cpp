@@ -14,6 +14,7 @@
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/DiscoveryBase.h"
+#include <dds/DCPS/LogAddr.h>
 
 #include "dds/DCPS/transport/framework/TransportClient.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
@@ -252,9 +253,10 @@ RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
 void
 RtpsUdpTransport::stop_accepting_or_connecting(const TransportClient_wrch& client,
                                                const RepoId& remote_id,
-                                               bool disassociate)
+                                               bool disassociate,
+                                               bool association_failed)
 {
-  if (disassociate) {
+  if (disassociate || association_failed) {
     GuardThreadType guard_links(links_lock_);
     if (link_) {
       TransportClient_rch c = client.lock();
@@ -289,7 +291,7 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
 {
   bool requires_inline_qos;
   unsigned int blob_bytes_read;
-  std::pair<RtpsUdpDataLink::AddrSet, RtpsUdpDataLink::AddrSet> addrs =
+  std::pair<AddrSet, AddrSet> addrs =
     get_connection_addrs(remote_data, &requires_inline_qos, &blob_bytes_read);
 
   if (link_) {
@@ -302,7 +304,7 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
   return true;
 }
 
-std::pair<RtpsUdpDataLink::AddrSet, RtpsUdpDataLink::AddrSet>
+std::pair<AddrSet, AddrSet>
 RtpsUdpTransport::get_connection_addrs(const TransportBLOB& remote,
                                        bool* requires_inline_qos,
                                        unsigned int* blob_bytes_read) const
@@ -312,11 +314,11 @@ RtpsUdpTransport::get_connection_addrs(const TransportBLOB& remote,
   DDS::ReturnCode_t result =
     blob_to_locators(remote, locators, requires_inline_qos, blob_bytes_read);
   if (result != DDS::RETCODE_OK) {
-    return std::make_pair(RtpsUdpDataLink::AddrSet(), RtpsUdpDataLink::AddrSet());
+    return std::make_pair(AddrSet(), AddrSet());
   }
 
-  RtpsUdpDataLink::AddrSet uc_addrs;
-  RtpsUdpDataLink::AddrSet mc_addrs;
+  AddrSet uc_addrs;
+  AddrSet mc_addrs;
   for (CORBA::ULong i = 0; i < locators.length(); ++i) {
     ACE_INET_Addr addr;
     // If conversion was successful
@@ -419,7 +421,7 @@ RtpsUdpTransport::update_locators(const RepoId& remote,
   if (link_) {
     bool requires_inline_qos;
     unsigned int blob_bytes_read;
-    std::pair<RtpsUdpDataLink::AddrSet, RtpsUdpDataLink::AddrSet> addrs =
+    std::pair<AddrSet, AddrSet> addrs =
       get_connection_addrs(*blob, &requires_inline_qos, &blob_bytes_read);
     link_->update_locators(remote, addrs.first, addrs.second, requires_inline_qos, false);
   }
@@ -435,10 +437,7 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
   }
   if (config.multicast_interface_.empty() &&
     TheServiceParticipant->default_address() != ACE_INET_Addr()) {
-    ACE_TCHAR buff[ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 1];
-    TheServiceParticipant->default_address().addr_to_string(static_cast<ACE_TCHAR*>(buff), ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 1);
-    OPENDDS_STRING addr_str(ACE_TEXT_ALWAYS_CHAR(static_cast<const ACE_TCHAR*>(buff)));
-    config.multicast_interface_ = addr_str.substr(0, addr_str.find_first_of(':'));
+    config.multicast_interface_ = DCPS::LogAddr::ip(TheServiceParticipant->default_address());
   }
 
   // Open the socket here so that any addresses/ports left
@@ -647,12 +646,10 @@ namespace {
     if (result < 0) {
       const int err = errno;
       if (err != ENETUNREACH || !network_is_unreachable) {
-        ACE_TCHAR addr_buff[256] = {};
-        addr.addr_to_string(addr_buff, 256);
         errno = err;
         const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
         ACE_ERROR((prio, "(%P|%t) RtpsUdpTransport.cpp send_single_i() - "
-                   "destination %s failed %p\n", addr_buff, ACE_TEXT("send")));
+                   "destination %C failed %p\n", DCPS::LogAddr(addr).c_str(), ACE_TEXT("send")));
       }
       if (err == ENETUNREACH) {
         network_is_unreachable = true;
@@ -841,12 +838,12 @@ RtpsUdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::StateChang
     break;
   case ICE::ServerReflexiveStateMachine::SRSM_Set:
   case ICE::ServerReflexiveStateMachine::SRSM_Change:
-    connection_record.address = to_dds_string(relay_srsm_.stun_server_address()).c_str();
+    connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();
     deferred_connection_records_.push_back(std::make_pair(true, connection_record));
     break;
   case ICE::ServerReflexiveStateMachine::SRSM_Unset:
     {
-      connection_record.address = to_dds_string(relay_srsm_.unset_stun_server_address()).c_str();
+      connection_record.address = DCPS::LogAddr(relay_srsm_.unset_stun_server_address()).c_str();
       deferred_connection_records_.push_back(std::make_pair(false, connection_record));
       break;
     }
@@ -875,7 +872,7 @@ RtpsUdpTransport::disable_relay_stun_task()
   connection_record.protocol = RTPS_RELAY_STUN_PROTOCOL;
 
   if (relay_srsm_.stun_server_address() != ACE_INET_Addr()) {
-    connection_record.address = to_dds_string(relay_srsm_.stun_server_address()).c_str();
+    connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();
     deferred_connection_records_.push_back(std::make_pair(false, connection_record));
   }
 

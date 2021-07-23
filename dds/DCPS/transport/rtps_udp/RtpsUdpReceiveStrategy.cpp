@@ -15,6 +15,7 @@
 #include "dds/DCPS/RTPS/MessageTypes.h"
 #include "dds/DCPS/RTPS/Logging.h"
 #include "dds/DCPS/GuidUtils.h"
+#include <dds/DCPS/LogAddr.h>
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/transport/framework/TransportDebug.h"
 
@@ -37,6 +38,7 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const Guid
   , last_received_()
   , recvd_sample_(0)
   , total_frags_(0)
+  , reassembly_(link->config().fragment_reassembly_timeout_)
   , receiver_(local_prefix)
 #ifdef OPENDDS_SECURITY
   , secure_sample_(0)
@@ -133,11 +135,10 @@ namespace {
   ssize_t recv_err(const char* msg, const ACE_INET_Addr& remote, const DCPS::RepoId& peer, bool& stop)
   {
     if (security_debug.encdec_warn) {
-      ACE_TCHAR addr_buff[256] = {};
-      remote.addr_to_string(addr_buff, 256);
       GuidConverter gc(peer);
       ACE_ERROR((LM_WARNING, "(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy::receive_bytes - "
-                 "from %s %C secure RTPS processing failed: %C\n", addr_buff, OPENDDS_STRING(gc).c_str(), msg));
+                 "from %C %C secure RTPS processing failed: %C\n",
+                 DCPS::LogAddr(remote).c_str(), OPENDDS_STRING(gc).c_str(), msg));
     }
     stop = true;
     return 0;

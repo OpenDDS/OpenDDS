@@ -1,6 +1,6 @@
 project (*ScenarioAllocationTest): ../../bench_exe, googletest {
 
-  after += test_controller
+  after += Bench_test_controller
 
   Source_Files {
     ../ScenarioManager.cpp

@@ -61,3 +61,6 @@
 /BoundTest2TypeSupportS.h
 /BoundTest2TypeSupportS.inl
 /IsBounded
+/invalid_*TypeSupport.idl
+/invalid_*TypeSupportImpl.cpp
+/invalid_*TypeSupportImpl.h
