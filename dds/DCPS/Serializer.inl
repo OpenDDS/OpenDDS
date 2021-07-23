@@ -18,12 +18,7 @@ namespace DCPS {
 ACE_INLINE
 void align(size_t& value, size_t by)
 {
-  // TODO(iguessthislldo): If this is always alignment by a power of two, it
-  // might benefit from a bitwise version.
-  const size_t offset_by = value % by;
-  if (offset_by) {
-    value += by - offset_by;
-  }
+  value = (value + by - 1) & ~(by - 1);
 }
 
 ACE_INLINE
