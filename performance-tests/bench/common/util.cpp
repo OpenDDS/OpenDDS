@@ -1,5 +1,7 @@
 #include "util.h"
 
+#include "StatsAndTagsVisitor.h"
+
 #include <dds/DCPS/DirentWrapper.h>
 
 #include <ace/Lib_Find.h> // For ACE::get_temp_dir
@@ -182,8 +184,59 @@ void consolidate_tagged_stats(std::unordered_map<std::string, Bench::SimpleStatB
   for (CORBA::ULong i = 0; i < reported_tags.length(); ++i) {
     const std::string tag(reported_tags[i]);
     if (input_tags.find(tag) != input_tags.end()) {
-      stats[tag] = consolidate(stats[tag], data.to_simple_stat_block());
+      Bench::SimpleStatBlock& ssb = stats[tag];
+      ssb = consolidate(ssb, data.to_simple_stat_block());
     }
   }
 }
+
+void visit_report(const TestController::Report& report, ReportVisitor& visitor)
+{
+  for (unsigned int node_index = 0; node_index < report.node_reports.length(); ++node_index) {
+    const Bench::TestController::NodeReport& nc_report = report.node_reports[node_index];
+
+    visitor.on_node_controller_report(ReportVisitorContext(nc_report));
+
+    for (unsigned int worker_index = 0; worker_index < nc_report.worker_reports.length(); ++worker_index) {
+      const Bench::WorkerReport& worker_report = nc_report.worker_reports[worker_index];
+
+      for (unsigned int participant_index = 0; participant_index < worker_report.process_report.participants.length(); ++participant_index) {
+        const Builder::ParticipantReport& participant_report = worker_report.process_report.participants[participant_index];
+
+        for (unsigned int subscriber_index = 0; subscriber_index < participant_report.subscribers.length(); ++subscriber_index) {
+          const Builder::SubscriberReport& subscriber_report = participant_report.subscribers[subscriber_index];
+
+          for (unsigned int datareader_index = 0; datareader_index < subscriber_report.datareaders.length(); ++datareader_index) {
+            const Builder::DataReaderReport& datareader_report = subscriber_report.datareaders[datareader_index];
+
+            visitor.on_datareader_report(ReportVisitorContext(nc_report, datareader_report));
+
+          } // datareader_report
+        } // subscriber_report
+
+        for (unsigned int publisher_index = 0; publisher_index < participant_report.publishers.length(); ++publisher_index) {
+          const Builder::PublisherReport& publisher_report = participant_report.publishers[publisher_index];
+
+          for (unsigned int datawriter_index = 0; datawriter_index < publisher_report.datawriters.length(); ++datawriter_index) {
+            const Builder::DataWriterReport& datawriter_report = publisher_report.datawriters[datawriter_index];
+
+            visitor.on_datawriter_report(ReportVisitorContext(nc_report, datawriter_report));
+
+          } // datawriter_report
+        } // publisher_report
+
+      } // participant_report
+    } // worker_report
+  } // nc_report
+
 }
+
+void gather_stats_and_tags(const TestController::Report& report,
+  std::unordered_set<std::string>& stat_names,
+  std::unordered_set<std::string>& tag_names)
+{
+  StatsAndTagsVisitor visitor(stat_names, tag_names);
+  visit_report(report, visitor);
+}
+
+} // Bench

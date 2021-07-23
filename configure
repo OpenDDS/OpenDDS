@@ -1323,12 +1323,14 @@ sub system_default_install_dir {
 my $build_gtest = 0;
 if (exists $opts{'gtest'} || $tests) {
   my $gtest_sanity = 'include/gtest/gtest.h';
+  my $gtest_root = "";
 
   if ($opts{'gtest'}) {
     die "ERROR: '$gtest_sanity' not found in supplied gtest directory '$opts{'gtest'}'"
       if ! -f File::Spec->catfile($opts{'gtest'}, $gtest_sanity);
 
-    env_from_opt('gtest', 'GTEST_ROOT');
+    $gtest_root = $opts{'gtest'};
+    setEnv('GTEST_ROOT', $gtest_root);
 
   }
   else {
@@ -1339,19 +1341,27 @@ if (exists $opts{'gtest'} || $tests) {
 
     if (-f File::Spec->catfile($sm_src, $gtest_sanity)) {
       # Check for existing build
-      $build_gtest = ! -d File::Spec->catdir($sm_dir, 'build/install');
+      $gtest_root = File::Spec->catdir($sm_dir, 'build', 'install');
+      $build_gtest = ! -d $gtest_root;
       $opts{'gtest'} = $sm_dir;
       # No need to set env. variable with submodule.
     }
     elsif (-f File::Spec->catfile($sys_dir, $gtest_sanity)) {
       $opts{'gtest'} = $sys_dir;
-      env_from_opt('gtest', 'GTEST_ROOT');
+      $gtest_root = $sys_dir;
+      setEnv('GTEST_ROOT', $gtest_root);
     }
     else {
       die "ERROR: Google Test '$gtest_sanity' not found in submodule src '$sm_src' or " .
         "default install dir '$sys_dir', please pass a correct version of Google Test to --gtest\nStopped";
     }
   }
+  if ($is_windows && -d File::Spec->catdir($gtest_root, 'bin')) {
+    push_path(\%targetEnv, $gtest_root . $slash . 'bin');
+  } elsif (!$is_windows && -f File::Spec->catfile($gtest_root, 'lib', 'libgtest.so')) {
+    push_libpath(\%targetEnv, $gtest_root . $slash . 'lib');
+  }
+
 }
 if ($build_gtest && !$has_cmake) {
   die "ERROR: Google Test in $opts{'gtest'} must be built but can't find CMake\nStopped";

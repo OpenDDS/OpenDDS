@@ -127,8 +127,8 @@ struct ValueReader {
 
   virtual bool read_boolean(ACE_CDR::Boolean& value) = 0;
   virtual bool read_byte(ACE_CDR::Octet& value) = 0;
-  virtual bool read_int8(ACE_CDR::Char& value) = 0;
-  virtual bool read_uint8(ACE_CDR::Octet& value) = 0;
+  virtual bool read_int8(ACE_CDR::Int8& value) = 0;
+  virtual bool read_uint8(ACE_CDR::UInt8& value) = 0;
   virtual bool read_int16(ACE_CDR::Short& value) = 0;
   virtual bool read_uint16(ACE_CDR::UShort& value) = 0;
   virtual bool read_int32(ACE_CDR::Long& value) = 0;

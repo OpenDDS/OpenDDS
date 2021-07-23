@@ -11,6 +11,7 @@
 #include "TcpTransport.h"
 #include "TcpDataLink.h"
 #include "TcpConnection.h"
+#include <dds/DCPS/LogAddr.h>
 
 #include <sstream>
 
@@ -88,11 +89,10 @@ OpenDDS::DCPS::TcpReceiveStrategy::start_i()
     buffer << link_;
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) TcpReceiveStrategy::start_i() - ")
-               ACE_TEXT("link:\n%C connected to %C:%d ")
+               ACE_TEXT("link:\n%C connected to %C ")
                ACE_TEXT("registering with reactor to receive.\n"),
                buffer.str().c_str(),
-               connection->get_remote_address().get_host_name(),
-               connection->get_remote_address().get_port_number()));
+               LogAddr(connection->get_remote_address()).c_str()));
   }
 
   if (this->reactor_task_->get_reactor()->register_handler

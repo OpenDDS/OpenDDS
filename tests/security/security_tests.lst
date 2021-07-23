@@ -1,10 +1,4 @@
 tests/security/IDL_Serialization/run_test.pl
-tests/security/SSL/run_test.pl
-tests/unit-tests/dds/DCPS/security/run_test.pl AccessControlBuiltInImpl
-tests/security/unit_tests/run_test.pl OpenDDS_AuthenticationTest
-tests/security/unit_tests/run_test.pl OpenDDS_CryptoKeyFactoryTest
-tests/security/unit_tests/run_test.pl OpenDDS_CryptoKeyExchangeTest
-tests/security/unit_tests/run_test.pl OpenDDS_CryptoTransformTest
 tests/security/attributes/run_test.pl SC0_sec_off
 tests/security/attributes/run_test.pl SC0_sec_sub
 tests/security/attributes/run_test.pl SC0_sec_pub
@@ -47,7 +41,6 @@ tests/security/attributes/run_test.pl unsecure-part-user-data: !NO_BUILT_IN_TOPI
 tests/security/TopicWithoutPermissions/run_test.pl
 tests/security/SingleParticipantWithSecurity/run_test.pl: !DDS_NO_OWNERSHIP_PROFILE
 
-tests/DCPS/RtpsRelay/Unit/run_test.pl: !DCPS_MIN CXX11 !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/RtpsRelay/Smoke/run_test.pl: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE RAPIDJSON
 tests/DCPS/RtpsRelay/Smoke/run_test.pl secure: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE RAPIDJSON
 tests/DCPS/RtpsRelay/Smoke/run_test.pl join: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE RAPIDJSON
@@ -64,9 +57,9 @@ tests/DCPS/RtpsRelay/STUN/run_test.pl: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS 
 tests/DCPS/RtpsRelay/STUN/run_test.pl ipv6: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE IPV6 RAPIDJSON
 
 tests/DCPS/ParticipantLocationTopic/run_test.pl:            !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6 RAPIDJSON
-tests/DCPS/ParticipantLocationTopic/run_test.pl ipv6:       !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE IPV6 RAPIDJSON
+tests/DCPS/ParticipantLocationTopic/run_test.pl ipv6:       !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE IPV6 RAPIDJSON !GH_ACTIONS
 tests/DCPS/ParticipantLocationTopic/run_test.pl noice:      !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !IPV6 RAPIDJSON
-tests/DCPS/ParticipantLocationTopic/run_test.pl noice ipv6: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE IPV6 RAPIDJSON
+tests/DCPS/ParticipantLocationTopic/run_test.pl noice ipv6: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE IPV6 RAPIDJSON !GH_ACTIONS
 
 tests/DCPS/Restart/run_test.pl --secure: !GH_ACTIONS
 tests/DCPS/LargeSample/run_test.pl rtps_disc_sec: !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS

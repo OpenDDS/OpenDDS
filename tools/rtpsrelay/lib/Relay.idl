@@ -135,6 +135,7 @@ module RtpsRelay {
     unsigned long local_active_participants;
     unsigned long new_address_count;
     unsigned long expired_address_count;
+    unsigned long expired_pending_count;
     unsigned long max_queue_size;
     Duration_t max_queue_latency;
   };

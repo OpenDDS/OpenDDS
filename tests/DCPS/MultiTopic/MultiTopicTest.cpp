@@ -343,15 +343,20 @@ struct Writer {
     check_rc(ts_->register_type(dp, ""), "register type", DDSTraits<MessageType>::type_name());
     check_rc(ts_->register_type(other_participant, ""), "register type", DDSTraits<MessageType>::type_name());
     CORBA::String_var type_name = ts_->get_type_name();
-    Topic_var topic = dp->create_topic(topic_name, type_name,
-      TOPIC_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
 
     TopicQos topic_qos;
     other_participant->get_default_topic_qos(topic_qos);
     topic_qos.latency_budget.duration.sec = 1;
     topic_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+    // topic2 is created first so that if the discovery mechanism supports
+    // topic propagation then it's the one seen by the find_topic operation
+    // that's part of creating the MultiTopic reader.  If there is no topic
+    // propagation then the relative order of topic vs. topic2 doesn't matter.
     Topic_var topic2 = other_participant->create_topic(topic_name, type_name,
       topic_qos, 0, DEFAULT_STATUS_MASK);
+
+    Topic_var topic = dp->create_topic(topic_name, type_name,
+      TOPIC_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
 
     dw_ = pub->create_datawriter(topic,
       DATAWRITER_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);

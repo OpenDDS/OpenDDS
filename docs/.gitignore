@@ -2,3 +2,4 @@
 /_build
 /.venv
 /OpenDDS.docset
+/sphinx_extensions/__pycache__

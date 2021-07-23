@@ -45,14 +45,25 @@ namespace {
 
   void extract_type_info_param(const Parameter& param, XTypes::TypeInformation& type_info)
   {
-    XTypes::deserialize_type_info(type_info, param.type_information());
+    if (!XTypes::deserialize_type_info(type_info, param.type_information())) {
+      type_info.minimal.typeid_with_size.type_id = XTypes::TypeIdentifier();
+      type_info.complete.typeid_with_size.type_id = XTypes::TypeIdentifier();
+    }
   }
 
   void add_type_info_param(ParameterList& param_list, const XTypes::TypeInformation& type_info)
   {
     Parameter param;
     DDS::OctetSeq seq;
-    XTypes::serialize_type_info(type_info, seq);
+    if (TheServiceParticipant->type_object_encoding() == DCPS::Service_Participant::Encoding_WriteOldFormat) {
+      DCPS::Encoding encoding = XTypes::get_typeobject_encoding();
+      encoding.skip_sequence_dheader(true);
+      XTypes::serialize_type_info(type_info, seq, &encoding);
+
+    } else {
+      XTypes::serialize_type_info(type_info, seq);
+    }
+
     param.type_information(seq);
     add_param(param_list, param);
   }
@@ -584,6 +595,12 @@ bool to_param_list(const ParticipantProxy_t& proxy,
     add_param(param_list, param_opf);
   }
 
+  if (proxy.opendds_rtps_relay_application_participant) {
+    Parameter param;
+    param.opendds_rtps_relay_application_participant(proxy.opendds_rtps_relay_application_participant);
+    add_param(param_list, param);
+  }
+
   return true;
 }
 
@@ -596,6 +613,8 @@ bool from_param_list(const ParameterList& param_list,
   proxy.availableExtendedBuiltinEndpoints = 0;
 #endif
   proxy.expectsInlineQos = false;
+  proxy.opendds_participant_flags.bits = 0;
+  proxy.opendds_rtps_relay_application_participant = false;
 
   CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
@@ -669,6 +688,9 @@ bool from_param_list(const ParameterList& param_list,
         break;
       case PID_OPENDDS_PARTICIPANT_FLAGS:
         proxy.opendds_participant_flags = param.participant_flags();
+        break;
+      case PID_OPENDDS_RTPS_RELAY_APPLICATION_PARTICIPANT:
+        proxy.opendds_rtps_relay_application_participant = param.opendds_rtps_relay_application_participant();
         break;
       case PID_SENTINEL:
       case PID_PAD:

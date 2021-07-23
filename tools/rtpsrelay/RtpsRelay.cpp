@@ -20,6 +20,7 @@
 
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/DomainParticipantImpl.h>
+#include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 
 #include <dds/DCPS/transport/framework/NetworkAddress.h>
@@ -516,6 +517,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   append(application_properties, OpenDDS::RTPS::RTPS_DISCOVERY_ENDPOINT_ANNOUNCEMENTS, "false");
   append(application_properties, OpenDDS::RTPS::RTPS_DISCOVERY_TYPE_LOOKUP_SERVICE, "false");
   append(application_properties, OpenDDS::RTPS::RTPS_REFLECT_HEARTBEAT_COUNT, "true");
+  append(application_properties, OpenDDS::RTPS::RTPS_RELAY_APPLICATION_PARTICIPANT, "true");
 
 #ifdef OPENDDS_SECURITY
   if (secure) {
@@ -738,12 +740,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SPDP Horizontal listening on %C\n"), addr_to_string(spdp_horizontal_addr).c_str()));
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SEDP Horizontal listening on %C\n"), addr_to_string(sedp_horizontal_addr).c_str()));
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: Data Horizontal listening on %C\n"), addr_to_string(data_horizontal_addr).c_str()));
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SPDP Vertical listening on %C\n"), addr_to_string(spdp_vertical_addr).c_str()));
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SEDP Vertical listening on %C\n"), addr_to_string(sedp_vertical_addr).c_str()));
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: Data Vertical listening on %C\n"), addr_to_string(data_vertical_addr).c_str()));
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SPDP Horizontal listening on %C\n"), OpenDDS::DCPS::LogAddr(spdp_horizontal_addr).c_str()));
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SEDP Horizontal listening on %C\n"), OpenDDS::DCPS::LogAddr(sedp_horizontal_addr).c_str()));
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: Data Horizontal listening on %C\n"), OpenDDS::DCPS::LogAddr(data_horizontal_addr).c_str()));
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SPDP Vertical listening on %C\n"), OpenDDS::DCPS::LogAddr(spdp_vertical_addr).c_str()));
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SEDP Vertical listening on %C\n"), OpenDDS::DCPS::LogAddr(sedp_vertical_addr).c_str()));
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: Data Vertical listening on %C\n"), OpenDDS::DCPS::LogAddr(data_vertical_addr).c_str()));
 
   // Write about the relay.
   DDS::DataWriter_var relay_address_writer_var = relay_publisher->create_datawriter(relay_addresses_topic, writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -761,21 +763,21 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   RelayAddress relay_address;
   relay_address.application_participant_guid(repoid_to_guid(config.application_participant_guid()));
   relay_address.name(HSPDP);
-  relay_address.address(addr_to_string(spdp_horizontal_addr));
+  relay_address.address(OpenDDS::DCPS::LogAddr(spdp_horizontal_addr).str());
   ret = relay_address_writer->write(relay_address, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to write Relay Address\n")));
     return EXIT_FAILURE;
   }
   relay_address.name(HSEDP);
-  relay_address.address(addr_to_string(sedp_horizontal_addr));
+  relay_address.address(OpenDDS::DCPS::LogAddr(sedp_horizontal_addr).str());
   ret = relay_address_writer->write(relay_address, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to write Relay Address\n")));
     return EXIT_FAILURE;
   }
   relay_address.name(HDATA);
-  relay_address.address(addr_to_string(data_horizontal_addr));
+  relay_address.address(OpenDDS::DCPS::LogAddr(data_horizontal_addr).str());
   ret = relay_address_writer->write(relay_address, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to write Relay Address\n")));

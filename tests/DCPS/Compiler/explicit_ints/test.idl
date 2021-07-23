@@ -1,0 +1,106 @@
+#include <tao/Int8Seq.pidl>
+#include <tao/UInt8Seq.pidl>
+#include <tao/OctetSeq.pidl>
+#include <tao/CharSeq.pidl>
+
+const uint8 u8_min = 0;
+const uint8 u8_max = 255;
+const int8 i8_min = -128;
+const int8 i8_max = 127;
+const uint16 u16_max = 65535;
+const int16 i16_min = -32768;
+const int16 i16_max = 32767;
+const uint32 u32_max = 4294967295;
+const int32 i32_min = -2147483648;
+const int32 i32_max = 2147483647;
+const uint64 u64_max = 18446744073709551615;
+const int64 i64_min = -9223372036854775808;
+const int64 i64_max = 9223372036854775807;
+
+typedef uint8 U8arr[3];
+typedef int8 I8arr[3];
+typedef octet Oarr[3];
+typedef char Carr[3];
+typedef sequence<uint8> U8seq;
+typedef sequence<int8> I8seq;
+typedef sequence<octet> Oseq;
+typedef sequence<char> Cseq;
+
+@topic
+struct StructWithInts {
+  @key uint8 u8;
+  @key int8 i8;
+  @key uint16 u16;
+  @key int16 i16;
+  @key uint32 u32;
+  @key int32 i32;
+  @key uint64 u64;
+  @key int64 i64;
+
+  // Make sure there's no conflict between uint8, int8, octet, and char.
+  @key uint8 u8_arr[3];
+  @key int8 i8_arr[3];
+  sequence<uint8> u8_seq;
+  sequence<int8> i8_seq;
+  sequence<octet> o_seq;
+  sequence<char> c_seq;
+
+  @key U8arr td_u8_arr;
+  @key I8arr td_i8_arr;
+  U8seq td_u8_seq;
+  I8seq td_i8_seq;
+  Oseq td_o_seq;
+  Cseq td_c_seq;
+};
+
+@topic
+union UnionOverU8 switch (@key uint8) {
+case 0:
+  uint8 u8;
+case 1:
+  int8 i8;
+/* TODO(iguessthislldo): Anynoumous Types in Union Branches
+case 2:
+  uint8 u8arr[3];
+case 3:
+  int8 i8arr[3];
+case 4:
+  sequence<uint8> u8seq;
+case 5:
+  sequence<int8> i8seq;
+*/
+case 6:
+  U8arr td_u8arr;
+case 7:
+  I8arr td_i8arr;
+case 8:
+  U8seq td_u8seq;
+case 9:
+  I8seq td_i8seq;
+};
+
+@topic
+union UnionOverI8 switch (@key int8) {
+case 0:
+  uint8 u8;
+case 1:
+  int8 i8;
+/* TODO(iguessthislldo): Anynoumous Types in Union Branches
+case 2:
+  uint8 u8arr[3];
+case 3:
+  int8 i8arr[3];
+case 4:
+  sequence<uint8> u8seq;
+case 5:
+  sequence<int8> i8seq;
+*/
+case 6:
+  U8arr td_u8arr;
+case 7:
+  I8arr td_i8arr;
+case 8:
+  U8seq td_u8seq;
+case 9:
+  I8seq td_i8seq;
+};

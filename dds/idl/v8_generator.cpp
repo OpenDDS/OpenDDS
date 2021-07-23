@@ -47,6 +47,8 @@ namespace {
       case AST_PredefinedType::PT_boolean:
         return "Boolean";
       case AST_PredefinedType::PT_octet:
+      case AST_PredefinedType::PT_uint8:
+      case AST_PredefinedType::PT_int8:
       case AST_PredefinedType::PT_ushort:
       case AST_PredefinedType::PT_short:
       case AST_PredefinedType::PT_ulong:

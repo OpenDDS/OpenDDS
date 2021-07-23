@@ -15,43 +15,47 @@ const size_t ARRAYSIZE = 15;
 bool failed = false;
 
 struct Values {
-  ACE_CDR::Octet      octetValue;
-  ACE_CDR::Short      shortValue;
-  ACE_CDR::Long       longValue;
-  ACE_CDR::LongLong   longlongValue;
-  ACE_CDR::UShort     ushortValue;
-  ACE_CDR::ULong      ulongValue;
-  ACE_CDR::ULongLong  ulonglongValue;
-  ACE_CDR::Float      floatValue;
-  ACE_CDR::Double     doubleValue;
+  ACE_CDR::Octet octetValue;
+  ACE_CDR::Int8 int8Value;
+  ACE_CDR::Short shortValue;
+  ACE_CDR::Long longValue;
+  ACE_CDR::LongLong longlongValue;
+  ACE_CDR::UInt8 uint8Value;
+  ACE_CDR::UShort ushortValue;
+  ACE_CDR::ULong ulongValue;
+  ACE_CDR::ULongLong ulonglongValue;
+  ACE_CDR::Float floatValue;
+  ACE_CDR::Double doubleValue;
   ACE_CDR::LongDouble longdoubleValue;
-  ACE_CDR::Char       charValue;
-  ACE_CDR::WChar      wcharValue;
-  ACE_CDR::Char*      stringValue;
+  ACE_CDR::Char charValue;
+  ACE_CDR::WChar wcharValue;
+  ACE_CDR::Char* stringValue;
 #ifndef OPENDDS_SAFETY_PROFILE
-  std::string         stdstringValue;
+  std::string stdstringValue;
 #endif
 #ifdef DDS_HAS_WCHAR
-  ACE_CDR::WChar*     wstringValue;
+  ACE_CDR::WChar* wstringValue;
 #ifndef OPENDDS_SAFETY_PROFILE
-  std::wstring        stdwstringValue;
+  std::wstring stdwstringValue;
 #endif
 #endif
 };
 
 struct ArrayValues {
-  ACE_CDR::Octet      octetValue[ARRAYSIZE];
-  ACE_CDR::Short      shortValue[ARRAYSIZE];
-  ACE_CDR::Long       longValue[ARRAYSIZE];
-  ACE_CDR::LongLong   longlongValue[ARRAYSIZE];
-  ACE_CDR::UShort     ushortValue[ARRAYSIZE];
-  ACE_CDR::ULong      ulongValue[ARRAYSIZE];
-  ACE_CDR::ULongLong  ulonglongValue[ARRAYSIZE];
-  ACE_CDR::Float      floatValue[ARRAYSIZE];
-  ACE_CDR::Double     doubleValue[ARRAYSIZE];
+  ACE_CDR::Octet octetValue[ARRAYSIZE];
+  ACE_CDR::Int8 int8Value[ARRAYSIZE];
+  ACE_CDR::Short shortValue[ARRAYSIZE];
+  ACE_CDR::Long longValue[ARRAYSIZE];
+  ACE_CDR::LongLong longlongValue[ARRAYSIZE];
+  ACE_CDR::UInt8 uint8Value[ARRAYSIZE];
+  ACE_CDR::UShort ushortValue[ARRAYSIZE];
+  ACE_CDR::ULong ulongValue[ARRAYSIZE];
+  ACE_CDR::ULongLong ulonglongValue[ARRAYSIZE];
+  ACE_CDR::Float floatValue[ARRAYSIZE];
+  ACE_CDR::Double doubleValue[ARRAYSIZE];
   ACE_CDR::LongDouble longdoubleValue[ARRAYSIZE];
-  ACE_CDR::Char       charValue[ARRAYSIZE];
-  ACE_CDR::WChar      wcharValue[ARRAYSIZE];
+  ACE_CDR::Char charValue[ARRAYSIZE];
+  ACE_CDR::WChar wcharValue[ARRAYSIZE];
 };
 
 void insertions(ACE_Message_Block* chain, const Values& values,
@@ -60,9 +64,11 @@ void insertions(ACE_Message_Block* chain, const Values& values,
   Serializer serializer(chain, encoding);
 
   serializer << ACE_OutputCDR::from_octet(values.octetValue);
+  serializer << ACE_OutputCDR::from_int8(values.int8Value);
   serializer << values.shortValue;
   serializer << values.longValue;
   serializer << values.longlongValue;
+  serializer << ACE_OutputCDR::from_uint8(values.uint8Value);
   serializer << values.ushortValue;
   serializer << values.ulongValue;
   serializer << values.ulonglongValue;
@@ -90,9 +96,11 @@ void array_insertions(
   Serializer serializer(chain, encoding);
 
   serializer.write_octet_array(values.octetValue, length);
+  serializer.write_int8_array(values.int8Value, length);
   serializer.write_short_array(values.shortValue, length);
   serializer.write_long_array(values.longValue, length);
   serializer.write_longlong_array(values.longlongValue, length);
+  serializer.write_uint8_array(values.uint8Value, length);
   serializer.write_ushort_array(values.ushortValue, length);
   serializer.write_ulong_array(values.ulongValue, length);
   serializer.write_ulonglong_array(values.ulonglongValue, length);
@@ -128,7 +136,7 @@ bool extractions(Serializer& serializer, Values& values,
   const Encoding& encoding, const bool checkPos)
 {
   bool readPosOk = true;
-  size_t pos = serializer.pos(), expectedPos = 0, prevPos = pos;
+  size_t pos = serializer.rpos(), expectedPos = 0, prevPos = pos;
   if (pos != expectedPos) {
     std::cerr << "ERROR: Initial position is" << pos
               << ". It should be 0." << std::endl;
@@ -138,15 +146,22 @@ bool extractions(Serializer& serializer, Values& values,
   serializer >> ACE_InputCDR::to_octet(values.octetValue);
   if (checkPos) {
     expectedPos += 1;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "octet");
+  }
+
+  serializer >> ACE_InputCDR::to_int8(values.int8Value);
+  if (checkPos) {
+    expectedPos += OpenDDS::DCPS::int8_cdr_size;
+    pos = serializer.rpos();
+    print(pos, expectedPos, prevPos, readPosOk, "int8");
   }
 
   serializer >> values.shortValue;
   if (checkPos) {
     expectedPos += skip(pos, OpenDDS::DCPS::int16_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::int16_cdr_size;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "short");
   }
 
@@ -154,7 +169,7 @@ bool extractions(Serializer& serializer, Values& values,
   if (checkPos) {
     expectedPos += skip(pos, OpenDDS::DCPS::int32_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::int32_cdr_size;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "long");
   }
 
@@ -162,15 +177,22 @@ bool extractions(Serializer& serializer, Values& values,
   if (checkPos) {
     expectedPos += skip(pos, OpenDDS::DCPS::int64_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::int64_cdr_size;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "long long");
+  }
+
+  serializer >> ACE_InputCDR::to_uint8(values.uint8Value);
+  if (checkPos) {
+    expectedPos += OpenDDS::DCPS::uint8_cdr_size;
+    pos = serializer.rpos();
+    print(pos, expectedPos, prevPos, readPosOk, "uint8");
   }
 
   serializer >> values.ushortValue;
   if (checkPos) {
     expectedPos += skip(pos, OpenDDS::DCPS::uint16_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::uint16_cdr_size;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "ushort");
   }
 
@@ -178,7 +200,7 @@ bool extractions(Serializer& serializer, Values& values,
   if (checkPos) {
     expectedPos += skip(pos, OpenDDS::DCPS::uint32_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::uint32_cdr_size;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "ulong");
   }
 
@@ -186,7 +208,7 @@ bool extractions(Serializer& serializer, Values& values,
   if (checkPos) {
     expectedPos += skip(pos, OpenDDS::DCPS::uint64_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::uint64_cdr_size;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "ulong long");
   }
 
@@ -194,7 +216,7 @@ bool extractions(Serializer& serializer, Values& values,
   if (checkPos) {
     expectedPos += skip(pos, OpenDDS::DCPS::float32_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::float32_cdr_size;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "float");
   }
 
@@ -202,7 +224,7 @@ bool extractions(Serializer& serializer, Values& values,
   if (checkPos) {
     expectedPos += skip(pos, OpenDDS::DCPS::float64_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::float64_cdr_size;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "double");
   }
 
@@ -210,14 +232,14 @@ bool extractions(Serializer& serializer, Values& values,
   if (checkPos) {
     expectedPos += skip(pos, OpenDDS::DCPS::float128_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::float128_cdr_size;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "long double");
   }
 
   serializer >> values.charValue;
   if (checkPos) {
     expectedPos += OpenDDS::DCPS::char8_cdr_size;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "char");
   }
 
@@ -225,7 +247,7 @@ bool extractions(Serializer& serializer, Values& values,
   if (checkPos) {
     expectedPos += skip(pos, OpenDDS::DCPS::char16_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::char16_cdr_size;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "wchar");
   }
 
@@ -233,7 +255,7 @@ bool extractions(Serializer& serializer, Values& values,
   if (checkPos) {
     expectedPos += skip(pos, OpenDDS::DCPS::uint32_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::uint32_cdr_size + ACE_OS::strlen(values.stringValue) + 1;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "string");
   }
 #ifndef OPENDDS_SAFETY_PROFILE
@@ -241,7 +263,7 @@ bool extractions(Serializer& serializer, Values& values,
   if (checkPos) {
     expectedPos += skip(pos, OpenDDS::DCPS::uint32_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::uint32_cdr_size + values.stdstringValue.size() + 1;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "std string");
   }
 #endif
@@ -251,7 +273,7 @@ bool extractions(Serializer& serializer, Values& values,
     expectedPos += skip(pos, OpenDDS::DCPS::uint32_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::uint32_cdr_size +
       ACE_OS::strlen(values.wstringValue) * OpenDDS::DCPS::char16_cdr_size;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "wstring");
   }
 #ifndef OPENDDS_SAFETY_PROFILE
@@ -260,7 +282,7 @@ bool extractions(Serializer& serializer, Values& values,
     expectedPos += skip(pos, OpenDDS::DCPS::uint32_cdr_size, encoding.max_align()) +
       OpenDDS::DCPS::uint32_cdr_size +
       values.stdwstringValue.size() * OpenDDS::DCPS::char16_cdr_size;
-    pos = serializer.pos();
+    pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "std wstring");
   }
 #endif
@@ -275,9 +297,11 @@ void array_extractions(ACE_Message_Block* chain, ArrayValues& values,
   Serializer serializer(chain, encoding);
 
   serializer.read_octet_array(values.octetValue, length);
+  serializer.read_int8_array(values.int8Value, length);
   serializer.read_short_array(values.shortValue, length);
   serializer.read_long_array(values.longValue, length);
   serializer.read_longlong_array(values.longlongValue, length);
+  serializer.read_uint8_array(values.uint8Value, length);
   serializer.read_ushort_array(values.ushortValue, length);
   serializer.read_ulong_array(values.ulongValue, length);
   serializer.read_ulonglong_array(values.ulonglongValue, length);
@@ -328,62 +352,74 @@ checkValues(const Values& expected, const Values& observed)
 {
   ACE_TCHAR ebuffer[512];
   ACE_TCHAR obuffer[512];
-  if (expected.charValue       != observed.charValue) {
+  if (expected.charValue != observed.charValue) {
     std::cout << "char values not correct after insertion and extraction." << std::endl;
     std::cout << "(expected: " << expected.charValue << ", observed: " << observed.charValue << ")." << std::endl;
     failed = true;
   }
-  if (expected.doubleValue     != observed.doubleValue) {
+  if (expected.doubleValue != observed.doubleValue) {
     std::cout << "double values not correct after insertion and extraction." << std::endl;
     std::cout << "(expected: " << expected.doubleValue << ", observed: " << observed.doubleValue << ")." << std::endl;
     failed = true;
   }
-  if (expected.floatValue      != observed.floatValue) {
+  if (expected.floatValue != observed.floatValue) {
     std::cout << "float values not correct after insertion and extraction." << std::endl;
     std::cout << "(expected: " << expected.floatValue << ", observed: " << observed.floatValue << ")." << std::endl;
     failed = true;
   }
   if (expected.longdoubleValue != observed.longdoubleValue) {
     std::cout << "longdouble values not correct after insertion and extraction." << std::endl;
-    //    std::cout << "(expected: " << expected.longdoubleValue << ", observed: " << observed.longdoubleValue << ")." << std::endl;
+    // std::cout << "(expected: " << expected.longdoubleValue << ", observed: " << observed.longdoubleValue << ")." << std::endl;
     failed = true;
   }
-  if (expected.longlongValue   != observed.longlongValue) {
+  if (expected.longlongValue != observed.longlongValue) {
     std::cout << "longlong values not correct after insertion and extraction." << std::endl;
     //std::cout << "(expected: " << expected.longlongValue << ", observed: " << observed.longlongValue << ")." << std::endl;
     failed = true;
   }
-  if (expected.longValue       != observed.longValue) {
+  if (expected.longValue != observed.longValue) {
     std::cout << "long values not correct after insertion and extraction." << std::endl;
     std::cout << "(expected: " << expected.longValue << ", observed: " << observed.longValue << ")." << std::endl;
     failed = true;
   }
-  if (expected.octetValue      != observed.octetValue) {
+  if (expected.octetValue != observed.octetValue) {
     std::cout << "octet values not correct after insertion and extraction." << std::endl;
     std::cout << "(expected: " << expected.octetValue << ", observed: " << observed.octetValue << ")." << std::endl;
     failed = true;
   }
-  if (expected.shortValue      != observed.shortValue) {
+  if (expected.int8Value != observed.int8Value) {
+    std::cout << "int8 values not correct after insertion and extraction." << std::endl
+      << "(expected: " << expected.int8Value << ", observed: " << observed.int8Value
+      << ")." << std::endl;
+    failed = true;
+  }
+  if (expected.shortValue != observed.shortValue) {
     std::cout << "short values not correct after insertion and extraction." << std::endl;
     std::cout << "(expected: " << expected.shortValue << ", observed: " << observed.shortValue << ")." << std::endl;
     failed = true;
   }
-  if (expected.ulonglongValue  != observed.ulonglongValue) {
+  if (expected.ulonglongValue != observed.ulonglongValue) {
     std::cout << "ulonglong values not correct after insertion and extraction." << std::endl;
     //std::cout << "(expected: " << expected.ulonglongValue << ", observed: " << observed.ulonglongValue << ")." << std::endl;
     failed = true;
   }
-  if (expected.ulongValue      != observed.ulongValue) {
+  if (expected.ulongValue != observed.ulongValue) {
     std::cout << "ulong values not correct after insertion and extraction." << std::endl;
     std::cout << "(expected: " << expected.ulongValue << ", observed: " << observed.ulongValue << ")." << std::endl;
     failed = true;
   }
-  if (expected.ushortValue     != observed.ushortValue) {
+  if (expected.uint8Value != observed.uint8Value) {
+    std::cout << "uint8 values not correct after insertion and extraction." << std::endl
+      << "(expected: " << expected.uint8Value << ", observed: " << observed.uint8Value
+      << ")." << std::endl;
+    failed = true;
+  }
+  if (expected.ushortValue != observed.ushortValue) {
     std::cout << "ushort values not correct after insertion and extraction." << std::endl;
     std::cout << "(expected: " << expected.ushortValue << ", observed: " << observed.ushortValue << ")." << std::endl;
     failed = true;
   }
-  if (expected.wcharValue      != observed.wcharValue) {
+  if (expected.wcharValue != observed.wcharValue) {
     ACE::format_hexdump((char*)&(expected.wcharValue), sizeof(ACE_CDR::WChar), ebuffer, sizeof(ebuffer));
     ACE::format_hexdump((char*)&(observed.wcharValue), sizeof(ACE_CDR::WChar), obuffer, sizeof(obuffer));
     std::cout << "wchar values not correct after insertion and extraction." << std::endl;
@@ -442,7 +478,7 @@ checkArrayValues(const ArrayValues& expected, const ArrayValues& observed)
   ACE_TCHAR ebuffer[512];
   ACE_TCHAR obuffer[512];
   for (size_t i = 0; i < ARRAYSIZE; ++i) {
-    if (expected.charValue[i]       != observed.charValue[i]) {
+    if (expected.charValue[i] != observed.charValue[i]) {
       ACE::format_hexdump((char*)&(expected.charValue[i]), sizeof(ACE_CDR::Char), ebuffer, sizeof(ebuffer));
       ACE::format_hexdump((char*)&(observed.charValue[i]), sizeof(ACE_CDR::Char), obuffer, sizeof(obuffer));
       std::cout << "char[" << i << "] values not correct after insertion and extraction." << std::endl;
@@ -451,7 +487,7 @@ checkArrayValues(const ArrayValues& expected, const ArrayValues& observed)
       std::cout << ")." << std::endl;
       failed = true;
     }
-    if (expected.doubleValue[i]     != observed.doubleValue[i]) {
+    if (expected.doubleValue[i] != observed.doubleValue[i]) {
       ACE::format_hexdump((char*)&(expected.doubleValue[i]), sizeof(ACE_CDR::Double), ebuffer, sizeof(ebuffer));
       ACE::format_hexdump((char*)&(observed.doubleValue[i]), sizeof(ACE_CDR::Double), obuffer, sizeof(obuffer));
       std::cout << "double[" << i << "] values not correct after insertion and extraction." << std::endl;
@@ -460,7 +496,7 @@ checkArrayValues(const ArrayValues& expected, const ArrayValues& observed)
       std::cout << ")." << std::endl;
       failed = true;
     }
-    if (expected.floatValue[i]      != observed.floatValue[i]) {
+    if (expected.floatValue[i] != observed.floatValue[i]) {
       ACE::format_hexdump((char*)&(expected.floatValue[i]), sizeof(ACE_CDR::Float), ebuffer, sizeof(ebuffer));
       ACE::format_hexdump((char*)&(observed.floatValue[i]), sizeof(ACE_CDR::Float), obuffer, sizeof(obuffer));
       std::cout << "float[" << i << "] values not correct after insertion and extraction." << std::endl;
@@ -478,7 +514,7 @@ checkArrayValues(const ArrayValues& expected, const ArrayValues& observed)
       std::cout << ")." << std::endl;
       failed = true;
     }
-    if (expected.longlongValue[i]   != observed.longlongValue[i]) {
+    if (expected.longlongValue[i] != observed.longlongValue[i]) {
       ACE::format_hexdump((char*)&(expected.longlongValue[i]), sizeof(ACE_CDR::LongLong), ebuffer, sizeof(ebuffer));
       ACE::format_hexdump((char*)&(observed.longlongValue[i]), sizeof(ACE_CDR::LongLong), obuffer, sizeof(obuffer));
       std::cout << "longlong[" << i << "] values not correct after insertion and extraction." << std::endl;
@@ -487,7 +523,7 @@ checkArrayValues(const ArrayValues& expected, const ArrayValues& observed)
       //std::cout << ")." << std::endl;
       failed = true;
     }
-    if (expected.longValue[i]       != observed.longValue[i]) {
+    if (expected.longValue[i] != observed.longValue[i]) {
       ACE::format_hexdump((char*)&(expected.longValue[i]), sizeof(ACE_CDR::Long), ebuffer, sizeof(ebuffer));
       ACE::format_hexdump((char*)&(observed.longValue[i]), sizeof(ACE_CDR::Long), obuffer, sizeof(obuffer));
       std::cout << "long[" << i << "] values not correct after insertion and extraction." << std::endl;
@@ -496,7 +532,7 @@ checkArrayValues(const ArrayValues& expected, const ArrayValues& observed)
       std::cout << ")." << std::endl;
       failed = true;
     }
-    if (expected.octetValue[i]      != observed.octetValue[i]) {
+    if (expected.octetValue[i] != observed.octetValue[i]) {
       ACE::format_hexdump((char*)&(expected.octetValue[i]), sizeof(ACE_CDR::Octet), ebuffer, sizeof(ebuffer));
       ACE::format_hexdump((char*)&(observed.octetValue[i]), sizeof(ACE_CDR::Octet), obuffer, sizeof(obuffer));
       std::cout << "octet[" << i << "] values not correct after insertion and extraction." << std::endl;
@@ -505,7 +541,7 @@ checkArrayValues(const ArrayValues& expected, const ArrayValues& observed)
       std::cout << ")." << std::endl;
       failed = true;
     }
-    if (expected.shortValue[i]      != observed.shortValue[i]) {
+    if (expected.shortValue[i] != observed.shortValue[i]) {
       ACE::format_hexdump((char*)&(expected.shortValue[i]), sizeof(ACE_CDR::Short), ebuffer, sizeof(ebuffer));
       ACE::format_hexdump((char*)&(observed.shortValue[i]), sizeof(ACE_CDR::Short), obuffer, sizeof(obuffer));
       std::cout << "short[" << i << "] values not correct after insertion and extraction." << std::endl;
@@ -514,7 +550,7 @@ checkArrayValues(const ArrayValues& expected, const ArrayValues& observed)
       std::cout << ")." << std::endl;
       failed = true;
     }
-    if (expected.ulonglongValue[i]  != observed.ulonglongValue[i]) {
+    if (expected.ulonglongValue[i] != observed.ulonglongValue[i]) {
       ACE::format_hexdump((char*)&(expected.ulonglongValue[i]), sizeof(ACE_CDR::ULongLong), ebuffer, sizeof(ebuffer));
       ACE::format_hexdump((char*)&(observed.ulonglongValue[i]), sizeof(ACE_CDR::ULongLong), obuffer, sizeof(obuffer));
       std::cout << "ulonglong[" << i << "] values not correct after insertion and extraction." << std::endl;
@@ -523,7 +559,7 @@ checkArrayValues(const ArrayValues& expected, const ArrayValues& observed)
       //std::cout << ")." << std::endl;
       failed = true;
     }
-    if (expected.ulongValue[i]      != observed.ulongValue[i]) {
+    if (expected.ulongValue[i] != observed.ulongValue[i]) {
       ACE::format_hexdump((char*)&(expected.ulongValue[i]), sizeof(ACE_CDR::ULong), ebuffer, sizeof(ebuffer));
       ACE::format_hexdump((char*)&(observed.ulongValue[i]), sizeof(ACE_CDR::ULong), obuffer, sizeof(obuffer));
       std::cout << "ulong[" << i << "] values not correct after insertion and extraction." << std::endl;
@@ -532,7 +568,7 @@ checkArrayValues(const ArrayValues& expected, const ArrayValues& observed)
       std::cout << ")." << std::endl;
       failed = true;
     }
-    if (expected.ushortValue[i]     != observed.ushortValue[i]) {
+    if (expected.ushortValue[i] != observed.ushortValue[i]) {
       ACE::format_hexdump((char*)&(expected.ushortValue[i]), sizeof(ACE_CDR::UShort), ebuffer, sizeof(ebuffer));
       ACE::format_hexdump((char*)&(observed.ushortValue[i]), sizeof(ACE_CDR::UShort), obuffer, sizeof(obuffer));
       std::cout << "ushort[" << i << "] values not correct after insertion and extraction." << std::endl;
@@ -541,13 +577,37 @@ checkArrayValues(const ArrayValues& expected, const ArrayValues& observed)
       std::cout << ")." << std::endl;
       failed = true;
     }
-    if (expected.wcharValue[i]      != observed.wcharValue[i]) {
+    if (expected.wcharValue[i] != observed.wcharValue[i]) {
       ACE::format_hexdump((char*)&(expected.wcharValue[i]), sizeof(ACE_CDR::WChar), ebuffer, sizeof(ebuffer));
       ACE::format_hexdump((char*)&(observed.wcharValue[i]), sizeof(ACE_CDR::WChar), obuffer, sizeof(obuffer));
       std::cout << "wchar[" << i << "] values not correct after insertion and extraction." << std::endl;
       std::cout << "(expected: " << expected.wcharValue[i] << "/" << ebuffer;
       std::cout << ", observed: " << observed.wcharValue[i] << "/" << obuffer;
       std::cout << ")." << std::endl;
+      failed = true;
+    }
+    if (expected.uint8Value[i] != observed.uint8Value[i]) {
+      ACE::format_hexdump((char*)&(expected.uint8Value[i]), sizeof(ACE_CDR::UInt8),
+        ebuffer, sizeof(ebuffer));
+      ACE::format_hexdump((char*)&(observed.uint8Value[i]), sizeof(ACE_CDR::UInt8),
+        obuffer, sizeof(obuffer));
+      std::cout
+        << "uint8[" << i << "] values not correct after insertion and extraction." << std::endl
+        << "(expected: " << expected.uint8Value[i] << "/" << ebuffer
+        << ", observed: " << observed.uint8Value[i] << "/" << obuffer
+        << ")." << std::endl;
+      failed = true;
+    }
+    if (expected.int8Value[i] != observed.int8Value[i]) {
+      ACE::format_hexdump((char*)&(expected.int8Value[i]), sizeof(ACE_CDR::Int8),
+        ebuffer, sizeof(ebuffer));
+      ACE::format_hexdump((char*)&(observed.int8Value[i]), sizeof(ACE_CDR::Int8),
+        obuffer, sizeof(obuffer));
+      std::cout
+        << "int8[" << i << "] values not correct after insertion and extraction." << std::endl
+        << "(expected: " << expected.int8Value[i] << "/" << ebuffer
+        << ", observed: " << observed.int8Value[i] << "/" << obuffer
+        << ")." << std::endl;
       failed = true;
     }
   }
@@ -566,18 +626,19 @@ void runTest(const Values& expected, const ArrayValues& expectedArray,
   std::cout << std::endl << "BYTES WRITTEN: " << bytesWritten << std::endl;
   displayChain(testchain);
   std::cout << "EXTRACTING SINGLE VALUES WITH" << out << " SWAPPING" << std::endl;
-  Values observed = {0, 0, 0, 0, 0, 0, 0, 0, 0,
-                     ACE_CDR_LONG_DOUBLE_INITIALIZER, 0, 0, 0
+  Values observed = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ACE_CDR_LONG_DOUBLE_INITIALIZER, 0, 0, 0
 #ifndef OPENDDS_SAFETY_PROFILE
-                     , ""
+    , ""
 #endif
 #ifdef DDS_HAS_WCHAR
-                     , 0
+    , 0
 #ifndef OPENDDS_SAFETY_PROFILE
-                     , L""
+    , L""
 #endif
 #endif
-                    };
+  };
   Serializer serializer(testchain, encoding);
   bool readPosOk = extractions(serializer, observed, encoding, checkPos);
   if (!readPosOk) {
@@ -755,30 +816,33 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 #endif
 #endif
 
-  Values expected = { 0x01,
-                      0x2345,
-                      0x67abcdef,
-                      ACE_INT64_LITERAL(0x0123456789abcdef),
-                      0x0123,
-                      0x456789ab,
-                      ACE_UINT64_LITERAL(0xcdef0123456789ab),
-                      0.1f,
-                      0.2,
+  Values expected = {
+    0x01,
+    0x11,
+    0x2345,
+    0x67abcdef,
+    ACE_INT64_LITERAL(0x0123456789abcdef),
+    0x22,
+    0x0123,
+    0x456789ab,
+    ACE_UINT64_LITERAL(0xcdef0123456789ab),
+    0.1f,
+    0.2,
 #if ACE_SIZEOF_LONG_DOUBLE == 16
-                      0x89abcdef01234567LL,
+    0x89abcdef01234567LL,
 #else
-                      {{0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77}},
+    {{0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77}},
 #endif
-                      0x1a,
-                      0xb2,
-                      const_cast<ACE_CDR::Char*>(string)
+    0x1a,
+    0xb2,
+    const_cast<ACE_CDR::Char*>(string)
 #ifndef OPENDDS_SAFETY_PROFILE
-                      , stdstring
+    , stdstring
 #endif
 #ifdef DDS_HAS_WCHAR
-                      , const_cast<ACE_CDR::WChar*>(wstring)
+    , const_cast<ACE_CDR::WChar*>(wstring)
 #ifndef OPENDDS_SAFETY_PROFILE
-                      , stdwstring
+    , stdwstring
 #endif
 #endif
   };
@@ -788,9 +852,11 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   // Initialize the array
   for (size_t i = 0; i < ARRAYSIZE; ++i) {
     expectedArray.octetValue[i] = (0xff&i);
+    expectedArray.int8Value[i] = (0xdd&i);
     expectedArray.shortValue[i] = (0xffff&i);
     expectedArray.longValue[i] = ACE_CDR::Long(0x0f0f0f0f|i);
     expectedArray.longlongValue[i] = ACE_INT64_LITERAL(0x0123456789abcdef);
+    expectedArray.uint8Value[i] = (0xdd|i);
     expectedArray.ushortValue[i] = ACE_CDR::UShort(0xffff|i);
     expectedArray.ulongValue[i] = ACE_CDR::ULong(0xf0f0f0f0|i);
     expectedArray.ulonglongValue[i] = ACE_UINT64_LITERAL(0xcdef0123456789ab);
@@ -815,7 +881,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   std::cout << "Size of ArrayValues: " << sizeof(ArrayValues) << std::endl;
 
   for (size_t encoding = 0; encoding < encoding_count; ++encoding) {
-    std::cout << "\n\n*** "  << encodings[encoding].to_string() << std::endl;
+    std::cout << "\n\n*** " << encodings[encoding].to_string() << std::endl;
     runTest(expected, expectedArray, encodings[encoding], true);
   }
 

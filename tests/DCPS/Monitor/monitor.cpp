@@ -47,7 +47,7 @@ create_data_reader(DDS::DomainParticipant_ptr participant,
                               DDS::TopicListener::_nil(),
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (CORBA::is_nil(topic)) {
-    ACE_DEBUG((LM_DEBUG, "create_data_reader(): Failed to create topic, name = %s\n", topic_name));
+    ACE_DEBUG((LM_DEBUG, "create_data_reader(): Failed to create topic, name = %C\n", topic_name));
   }
   DDS::DataReader_var reader =
     subscriber->create_datareader(topic.in(),

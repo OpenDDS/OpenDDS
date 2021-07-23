@@ -127,7 +127,7 @@ The configuration file format:
 DCPSDebugLevel=
 DcpsInfo=
 DCPSChunks=
-DCPSChunkAssociationMutltiplier=
+DCPSChunkAssociationMultiplier=
 DCPSBitTransportPort=
 DCPSLivelinessFactor=
 DCPSBitLookupDurationSec=

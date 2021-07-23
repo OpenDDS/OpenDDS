@@ -66,12 +66,12 @@ Test cases are grouped into a *test suite*.
 Test suites are organized into *a test plan*.
 
 We adopt file boundaries for organizing the unit tests for OpenDDS.
-That is, the unit tests for a file group `dds/DCPS/SomeFile.(h|cpp)` will be located in `tests/unit-tests/dds/DCPS/SomeFile.cpp`.
-The file `tests/unit-tests/dds/DCPS/SomeFile.cpp` is a test suite containing all of the test cases for `dds/DCPS/SomeFile.(h|cpp)`.
-The test plan for OpenDDS will execute all of the test suites under `tests/unit-tests`.
+That is, the unit tests for a file group ``dds/DCPS/SomeFile.(h|cpp)`` will be located in ``tests/unit-tests/dds/DCPS/SomeFile.cpp``.
+The file ``tests/unit-tests/dds/DCPS/SomeFile.cpp`` is a test suite containing all of the test cases for ``dds/DCPS/SomeFile.(h|cpp)``.
+The test plan for OpenDDS will execute all of the test suites under :ghfile:`tests/unit-tests`.
 When the complete test plan takes too much time to execute, it will be sub-divided along module boundaries.
 
-In regards to coverage, the coverage of `dds/DCPS/SomeFile.(h|cpp)` is measured by executing the tests in its test suite `tests/unit-tests/dds/DCPS/SomeFile.cpp`.
+In regards to coverage, the coverage of ``dds/DCPS/SomeFile.(h|cpp)`` is measured by executing the tests in its test suite ``tests/unit-tests/dds/DCPS/SomeFile.cpp``.
 The purpose of this is to avoid indirect testing where a piece of code may get full coverage without ever being intentionally tested.
 
 ***************
@@ -128,18 +128,13 @@ The use of a mock assumes that an interface exists for the stand-in.
 Writing a New Unit Test
 ***********************
 
-1. Add the test to ``tests/unit-tests/dds/DCPS`` or the folder under it.
-
+1. Add the test to :ghfile:`tests/unit-tests/dds/DCPS` or the folder under it.
 2. Name the test after the code it is meant to cover.
    For example, the ``AccessControlBuiltInImpl`` unit test covers the ``AccessControlBuiltInImpl.cpp`` file.
-
 3. Add the test to the MPC file in its location.
-
 4. If the test is a safety test, you will need to add it to the ``run_test_safety.pl`` located in ``tests/unit-tests/dds/DCPS``.
-
 5. Add the test to the ``.gitignore`` in its directory.
-
-6. Add the path to the test in either ``tests/dcps_tests.lst`` or ``tests/security/security_tests.lst``.
+6. Add the path to the test in either :ghfile:`tests/dcps_tests.lst` or :ghfile:`tests/security/security_tests.lst`.
 
 
 ***********

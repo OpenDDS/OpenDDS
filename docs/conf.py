@@ -6,22 +6,18 @@
 
 import re
 import sys
+from pathlib import Path
+
+docs_path = Path(__file__).parent
+opendds_root_path = docs_path.parent
+sys.path.append(str((docs_path / 'sphinx_extensions').resolve()))
+github_links_root_path = str(opendds_root_path)
+
 
 # Custom Values ---------------------------------------------------------------
 
 def setup(app):
-    app.add_config_value('is_release', True, True)
-
-
-# -- Path setup --------------------------------------------------------------
-
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+    app.add_config_value('is_release', False, True)
 
 
 # -- Project information -----------------------------------------------------
@@ -30,16 +26,19 @@ needs_sphinx = '2.4'
 master_doc = 'index'
 primary_domain = 'cpp'
 pygments_style = 'manni'
+nitpicky = True
 
 project = 'OpenDDS'
-copyright = '2020, Object Computing, Inc.'
+copyright = '2021, Object Computing, Inc.'
 author = 'Object Computing, Inc.'
+github_links_repo = 'objectcomputing/OpenDDS'
 
 # Get Version Info
-with open('../dds/Version.h') as f:
+with (opendds_root_path / 'dds/Version.h').open() as f:
     version_file = f.read()
 
 def get_version_prop(kind, macro):
+    macro = 'OPENDDS_' + macro.upper()
     if kind is bool:
         regex = r'([01])'
         cast = lambda v: bool(int(v))
@@ -56,9 +55,15 @@ def get_version_prop(kind, macro):
         return cast(m[1])
     raise RuntimeError('Could not find ' + macro)
 
-version = get_version_prop(str, 'OPENDDS_VERSION')
+version = get_version_prop(str, 'version')
 release = version
-is_release = get_version_prop(bool, 'OPENDDS_IS_RELEASE')
+is_release = get_version_prop(bool, 'is_release')
+if is_release:
+    vparts = {p: get_version_prop(int, p + '_version') for p in
+        ('major', 'minor', 'micro')}
+    github_links_release_tag = 'DDS-{major}.{minor}'.format(**vparts)
+    if vparts['micro']:
+        github_links_release_tag += '.' + vparts['micro']
 
 
 # -- General configuration ---------------------------------------------------
@@ -67,8 +72,8 @@ is_release = get_version_prop(bool, 'OPENDDS_IS_RELEASE')
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'recommonmark',
     'sphinx.ext.ifconfig',
+    'github_links',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -83,22 +88,13 @@ exclude_patterns = [
     '.DS_Store',
     'history/**',
     'design/**',
-    'README.md',
-    'android.md',
-    'cmake.md',
-    'dependencies.md',
-    'docker.md',
-    'ios.md',
-    'migrating_to_topic_type_annotations.md',
-    'multirepo.md',
-    'qt.md',
     'OpenDDS.docset/**',
     '.venv',
+    'sphinx_extensions/**',
 ]
 
 source_suffix = {
     '.rst': 'restructuredtext',
-    '.md': 'markdown',
 }
 
 numfig = True
@@ -110,6 +106,8 @@ numfig = True
 # a list of builtin themes.
 #
 html_theme = 'alabaster'
+# See documentation for alabaster here:
+#   https://alabaster.readthedocs.io/en/latest/customization.html
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -121,8 +119,9 @@ html_theme_options = {
     'logo_name': True,
     'extra_nav_links': {
         'Main Website': 'https://opendds.org',
-        'GitHub Repo': 'https://github.com/objectcomputing/OpenDDS',
+        'GitHub Repo': 'https://github.com/' + github_links_repo,
     },
+    'fixed_sidebar': True,
 }
 
 html_favicon = 'logo_32_32.ico'
@@ -131,3 +130,5 @@ html_favicon = 'logo_32_32.ico'
 # -- LaTeX (PDF) output ------------------------------------------------------
 
 latex_logo = 'logo_276_186.png'
+
+# vim: expandtab:ts=4:sw=4

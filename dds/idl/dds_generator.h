@@ -9,6 +9,7 @@
 #define dds_generator_H
 
 #include "be_extern.h"
+#include "be_util.h"
 #include "../DCPS/RestoreOutputStreamState.h"
 
 #include <utl_scoped_name.h>
@@ -28,6 +29,9 @@
 #include <cstring>
 #include <set>
 #include <stdexcept>
+#include <iomanip>
+#include <cctype>
+#include <climits>
 
 /// How to handle IDL underscore escaping. Depends on where the name is
 /// going and where the name came from.
@@ -442,7 +446,7 @@ std::string wrapPrefix(AST_Type* type, WrapDirection wd)
 {
   switch (type->node_type()) {
   case AST_Decl::NT_pre_defined: {
-    AST_PredefinedType* p = dynamic_cast<AST_PredefinedType*>(type);
+    AST_PredefinedType* const p = dynamic_cast<AST_PredefinedType*>(type);
     switch (p->pt()) {
     case AST_PredefinedType::PT_char:
       return (wd == WD_OUTPUT)
@@ -456,6 +460,12 @@ std::string wrapPrefix(AST_Type* type, WrapDirection wd)
     case AST_PredefinedType::PT_boolean:
       return (wd == WD_OUTPUT)
         ? "ACE_OutputCDR::from_boolean(" : "ACE_InputCDR::to_boolean(";
+    case AST_PredefinedType::PT_uint8:
+      return (wd == WD_OUTPUT)
+        ? "ACE_OutputCDR::from_uint8(" : "ACE_InputCDR::to_uint8(";
+    case AST_PredefinedType::PT_int8:
+      return (wd == WD_OUTPUT)
+        ? "ACE_OutputCDR::from_int8(" : "ACE_InputCDR::to_int8(";
     default:
       return "";
     }
@@ -510,6 +520,12 @@ inline std::string to_cxx_type(AST_Type* type, std::size_t& size)
     case AST_PredefinedType::PT_ushort:
       size = 2;
       return "ACE_CDR::UShort";
+    case AST_PredefinedType::PT_int8:
+      size = 1;
+      return "ACE_CDR::Int8";
+    case AST_PredefinedType::PT_uint8:
+      size = 1;
+      return "ACE_CDR::UInt8";
     case AST_PredefinedType::PT_float:
       size = 4;
       return "ACE_CDR::Float";
@@ -531,9 +547,15 @@ inline std::string to_cxx_type(AST_Type* type, std::size_t& size)
     case AST_PredefinedType::PT_octet:
       size = 1;
       return "ACE_CDR::Octet";
-    default:
-      throw std::invalid_argument("Unknown PRIMITIVE type");
+    case AST_PredefinedType::PT_any:
+    case AST_PredefinedType::PT_object:
+    case AST_PredefinedType::PT_value:
+    case AST_PredefinedType::PT_abstract:
+    case AST_PredefinedType::PT_void:
+    case AST_PredefinedType::PT_pseudo:
+      be_util::misc_error_and_abort("Unsupported predefined type in to_cxx_type");
     }
+    be_util::misc_error_and_abort("Unhandled predefined type in to_cxx_type");
   }
   return scoped(type->name());
 }
@@ -568,6 +590,84 @@ std::string getEnumLabel(AST_Expression* label_val, AST_Type* disc)
   return e.replace(colon + 2, std::string::npos, label);
 }
 
+template <typename IntType>
+std::ostream& signed_int_helper(std::ostream& o, IntType value, IntType min)
+{
+  /*
+   * It seems that in C/C++ the minus sign and the bare number are parsed
+   * separately for negative integer literals. This can cause compilers
+   * to complain when using the minimum value of a signed integer because
+   * the number without the minus sign is 1 past the max signed value.
+   *
+   * https://stackoverflow.com/questions/65007935
+   *
+   * Apparently the workaround is to write it as `VALUE_PLUS_ONE - 1`.
+   */
+  const bool min_value = value == min;
+  if (min_value) ++value;
+  o << value;
+  if (min_value) o << " - 1";
+  return o;
+}
+
+inline
+std::ostream& hex_value(std::ostream& o, unsigned value, size_t bytes)
+{
+  OpenDDS::DCPS::RestoreOutputStreamState ross(o);
+  o << std::hex << std::setw(bytes * 2) << std::setfill('0') << value;
+  return o;
+}
+
+template <typename CharType>
+unsigned char_value(CharType value)
+{
+  return value;
+}
+
+#if CHAR_MIN < 0
+/*
+ * If char is signed, then it needs to be reinterpreted as unsigned char or
+ * else static casting '\xff' to a 32-bit unsigned int would result in
+ * 0xffffffff because those are both the signed 2's complement forms of -1.
+ */
+template <>
+inline unsigned char_value<char>(char value)
+{
+  return reinterpret_cast<unsigned char&>(value);
+}
+#endif
+
+template <typename CharType>
+std::ostream& char_helper(std::ostream& o, CharType value)
+{
+  switch (value) {
+  case '\'':
+  case '\"':
+  case '\\':
+  case '\?':
+    return o << '\\' << static_cast<char>(value);
+  case '\n':
+    return o << "\\n";
+  case '\t':
+    return o << "\\t";
+  case '\v':
+    return o << "\\v";
+  case '\b':
+    return o << "\\b";
+  case '\r':
+    return o << "\\r";
+  case '\f':
+    return o << "\\f";
+  case '\a':
+    return o << "\\a";
+  }
+  const unsigned cvalue = char_value(value);
+  if (cvalue <= UCHAR_MAX && isprint(cvalue)) {
+    return o << static_cast<char>(value);
+  }
+  return hex_value(o << "\\x", cvalue, sizeof(CharType) == 1 ? 1 : 2);
+}
+
 inline
 std::ostream& operator<<(std::ostream& o,
                          const AST_Expression::AST_ExprValue& ev)
@@ -575,23 +675,27 @@ std::ostream& operator<<(std::ostream& o,
   OpenDDS::DCPS::RestoreOutputStreamState ross(o);
   switch (ev.et) {
   case AST_Expression::EV_octet:
-    return o << static_cast<int>(ev.u.oval);
+    return hex_value(o << "0x", static_cast<int>(ev.u.oval), 1);
+  case AST_Expression::EV_int8:
+    return o << static_cast<short>(ev.u.int8val);
+  case AST_Expression::EV_uint8:
+    return o << static_cast<unsigned short>(ev.u.uint8val);
   case AST_Expression::EV_short:
     return o << ev.u.sval;
   case AST_Expression::EV_ushort:
     return o << ev.u.usval << 'u';
   case AST_Expression::EV_long:
-    return o << ev.u.lval;
+    return signed_int_helper<ACE_CDR::Long>(o, ev.u.lval, ACE_INT32_MIN);
   case AST_Expression::EV_ulong:
     return o << ev.u.ulval << 'u';
   case AST_Expression::EV_longlong:
-    return o << ev.u.llval << "LL";
+    return signed_int_helper<ACE_CDR::LongLong>(o, ev.u.llval, ACE_INT64_MIN) << "LL";
   case AST_Expression::EV_ulonglong:
     return o << ev.u.ullval << "ULL";
   case AST_Expression::EV_wchar:
-    return o << "L'" << static_cast<char>(ev.u.wcval) << '\'';
+    return char_helper<ACE_CDR::WChar>(o << "L'", ev.u.wcval) << '\'';
   case AST_Expression::EV_char:
-    return o << '\'' << ev.u.cval << '\'';
+    return char_helper<ACE_CDR::Char>(o << '\'', ev.u.cval) << '\'';
   case AST_Expression::EV_bool:
     return o << std::boolalpha << static_cast<bool>(ev.u.bval);
   case AST_Expression::EV_float:
@@ -609,9 +713,18 @@ std::ostream& operator<<(std::ostream& o,
     return o << "\"" << buf << "\"";
   }
 #endif
-  default:
-    return o;
+  case AST_Expression::EV_enum:
+  case AST_Expression::EV_longdouble:
+  case AST_Expression::EV_any:
+  case AST_Expression::EV_object:
+  case AST_Expression::EV_void:
+  case AST_Expression::EV_none:
+    be_util::misc_error_and_abort(
+      "Unsupported ExprType value in operator<<(std::ostream, AST_ExprValue)");
   }
+  be_util::misc_error_and_abort(
+    "Unhandled ExprType value in operator<<(std::ostream, AST_ExprValue)");
+  return o;
 }
 
 inline std::string bounded_arg(AST_Type* type)
@@ -662,10 +775,14 @@ inline bool needSyntheticDefault(AST_Type* disc, size_t n_labels)
   switch (pdt->pt()) {
   case AST_PredefinedType::PT_boolean:
     return n_labels < 2;
+  case AST_PredefinedType::PT_int8:
+  case AST_PredefinedType::PT_uint8:
   case AST_PredefinedType::PT_char:
+  case AST_PredefinedType::PT_octet:
     return n_labels < ACE_OCTET_MAX;
   case AST_PredefinedType::PT_short:
   case AST_PredefinedType::PT_ushort:
+  case AST_PredefinedType::PT_wchar:
     return n_labels < ACE_UINT16_MAX;
   case AST_PredefinedType::PT_long:
   case AST_PredefinedType::PT_ulong:

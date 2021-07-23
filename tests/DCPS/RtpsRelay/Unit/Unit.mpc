@@ -1,4 +1,0 @@
-project(RtpsRelayUnitTests): dcpsexe, rtps_relay_lib {
-
-  exename   = rtps_relay_unit_tests
-}

@@ -39,6 +39,8 @@
 #include <ace/OS_NS_unistd.h>
 #include <ace/Version.h>
 
+#include <cstring>
+
 #ifdef OPENDDS_SAFETY_PROFILE
 #include <stdio.h> // <cstdio> after FaceCTS bug 623 is fixed
 #else
@@ -163,6 +165,7 @@ static bool got_default_address = false;
 static bool got_bidir_giop = false;
 static bool got_thread_status_interval = false;
 static bool got_monitor = false;
+static bool got_type_object_encoding = false;
 
 Service_Participant::Service_Participant()
   :
@@ -207,7 +210,8 @@ Service_Participant::Service_Participant()
     monitor_enabled_(false),
     shut_down_(false),
     shutdown_listener_(0),
-    default_configuration_file_(ACE_TEXT(""))
+    default_configuration_file_(ACE_TEXT("")),
+    type_object_encoding_(Encoding_Normal)
 {
   initialize();
 }
@@ -659,6 +663,10 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       got_security_flag = true;
 
 #endif
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSTypeObjectEncoding"))) != 0) {
+      type_object_encoding(ACE_TEXT_ALWAYS_CHAR(currentArg));
+      arg_shifter.consume_arg();
+      got_type_object_encoding = true;
 
     } else {
       arg_shifter.ignore_arg();
@@ -927,7 +935,7 @@ Service_Participant::set_repo_ior(const char* ior,
 {
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) Service_Participant::set_repo_ior: Repo[ %C] == %C\n"),
+               ACE_TEXT("(%P|%t) Service_Participant::set_repo_ior: Repo[%C] == %C\n"),
                key.c_str(), ior));
   }
 
@@ -1662,9 +1670,11 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     }
 
     if (got_chunk_association_multiplier) {
-      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSChunkAssociationMutltiplier")));
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSChunkAssociationMultiplier")));
     } else {
+      // This is legacy support for a misspelling of the config option.
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSChunkAssociationMutltiplier"), this->association_chunk_multiplier_, size_t)
+      GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSChunkAssociationMultiplier"), this->association_chunk_multiplier_, size_t)
     }
 
     if (got_bit_transport_port) {
@@ -1847,6 +1857,16 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
       ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSMonitor")));
     } else {
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSMonitor"), monitor_enabled_, bool)
+    }
+
+    if (got_type_object_encoding) {
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSTypeObjectEncoding")));
+    } else {
+      String str;
+      GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("DCPSTypeObjectEncoding"), str);
+      if (!str.empty()) {
+        type_object_encoding(str.c_str());
+      }
     }
 
     // These are not handled on the command line.
@@ -2876,6 +2896,28 @@ void
 Service_Participant::bit_autopurge_disposed_samples_delay(const DDS::Duration_t& duration)
 {
   bit_autopurge_disposed_samples_delay_ = duration;
+}
+
+void
+Service_Participant::type_object_encoding(const char* encoding)
+{
+  struct NameValue {
+    const char* name;
+    TypeObjectEncoding value;
+  };
+  static const NameValue entries[] = {
+    {"Normal", Encoding_Normal},
+    {"WriteOldFormat", Encoding_WriteOldFormat},
+    {"ReadOldFormat", Encoding_ReadOldFormat},
+  };
+  for (size_t i = 0; i < sizeof entries / sizeof entries[0]; ++i) {
+    if (0 == std::strcmp(entries[i].name, encoding)) {
+      type_object_encoding(entries[i].value);
+      return;
+    }
+  }
+  ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Service_Participant::type_object_encoding: "
+             "invalid encoding %C\n", encoding));
 }
 
 } // namespace DCPS

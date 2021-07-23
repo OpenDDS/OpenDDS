@@ -243,6 +243,7 @@ private:
   const DDS::DomainId_t domain_;
   DCPS::RepoId guid_;
   const DCPS::MonotonicTime_t participant_discovered_at_;
+  bool is_application_participant_;
 
   void data_received(const DataSubmessage& data, const ParameterList& plist, const ACE_INET_Addr& from);
 
@@ -258,6 +259,8 @@ private:
    * updates should be withheld from the user.
    */
   bool secure_part_user_data() const;
+
+  void update_rtps_relay_application_participant_i(DiscoveredParticipantIter iter);
 
 #ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t send_handshake_message(const DCPS::RepoId& guid,

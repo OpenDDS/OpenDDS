@@ -14,6 +14,7 @@
 #include "Ice.h"
 
 #include "dds/DCPS/Definitions.h"
+#include <dds/DCPS/LogAddr.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -355,9 +356,8 @@ void Checklist::generate_triggered_check(const ACE_INET_Addr& local_address,
   bool flag = get_local_candidate(local_address, local);
   if (!flag) {
     // Network addresses may have changed so that local_address is not valid.
-    ACE_TCHAR addr_buff[256] = {};
-    local_address.addr_to_string(addr_buff, 256);
-    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) Checklist::generate_triggered_check: WARNING local_address %s is no longer a local candidate\n"), addr_buff));
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) Checklist::generate_triggered_check: WARNING local_address %C is no longer a local candidate\n"),
+               DCPS::LogAddr(local_address).c_str()));
     return;
   }
 

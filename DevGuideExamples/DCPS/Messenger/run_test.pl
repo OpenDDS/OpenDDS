@@ -34,15 +34,14 @@ if ($help) {
 unlink "subscriber.log";
 unlink "publisher.log";
 
-my $common_opts = "-ORBDebugLevel 10 -DCPSDebugLevel 10";
+my $common_opts = "-ORBDebugLevel 10 -DCPSDebugLevel 10 -ORBVerboseLogging 1 -DCPSTransportDebugLevel 6 ";
 
 if ($rtps) {
   $common_opts .= " -DCPSConfigFile rtps.ini";
 }
 
 my $pub_opts = "$common_opts -ORBLogFile publisher.log";
-my $sub_opts = "$common_opts -DCPSTransportDebugLevel 6 " .
-               "-ORBLogFile subscriber.log";
+my $sub_opts = "$common_opts -ORBLogFile subscriber.log";
 
 my $DCPSREPO;
 my $dcpsrepo_ior = "repo.ior";

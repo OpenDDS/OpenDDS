@@ -143,9 +143,8 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
     dsle_.get_header().message_length_ = 8;
     dsle_.get_header().byte_order_ = ACE_CDR_BYTE_ORDER;
     payload_.init(dsle_.get_header().message_length_);
-    // TODO(iguessthislldo) Use common encapsulation code
-    const ACE_CDR::ULong encap = 0x00000100, // {CDR_LE, options} in LE format
-      data = 0xDCBADCBA;
+    const EncapsulationHeader encap(encoding, FINAL);
+    const ACE_CDR::ULong data = 0xDCBADCBA;
     Serializer ser(&payload_, encoding);
     if (!(ser << encap && ser << data)) {
       ACE_DEBUG((LM_DEBUG, "ERROR: SimpleDataWriter(): serialization failed\n"));
@@ -254,9 +253,8 @@ struct TestParticipant: ACE_Event_Handler {
     size += 8; // CDR encap header + 4 bytes of data
     ACE_Message_Block mb(size);
     Serializer ser(&mb, encoding);
-    // TODO(iguessthislldo) Use common encapsulation code
-    const ACE_CDR::ULong encap = 0x00000100, // {CDR_LE, options} in BE format
-      data = 0xABCDABCD;
+    const EncapsulationHeader encap(encoding, FINAL);
+    const ACE_CDR::ULong data = 0xABCDABCD;
     if (!(ser << hdr_ && ser << ds && ser << encap && ser << data)) {
       ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize data\n"));
       return false;
@@ -307,8 +305,7 @@ struct TestParticipant: ACE_Event_Handler {
     size += FRAG_SIZE;
     ACE_Message_Block mb(size);
     Serializer ser(&mb, encoding);
-    // TODO(iguessthislldo) Use common encapsulation code
-    const ACE_CDR::ULong encap = 0x00000100; // {CDR_LE, options} in LE format
+    const EncapsulationHeader encap(encoding, FINAL);
     bool ok = (ser << hdr_ && ser << df);
     if (i == 0) ok &= (ser << encap);
     ok &= ser.write_octet_array(data_for_frag_,
