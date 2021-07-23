@@ -100,7 +100,7 @@ namespace OpenDDS {
            it != instance_map_.end(); ++it)
         {
           OpenDDS::DCPS::SubscriptionInstance_rch ptr = get_handle_instance(it->second);
-          this->purge_data(ptr);
+          purge_data(ptr);
         }
       //X SHH release the data samples in the instance_map_.
     }
@@ -120,7 +120,7 @@ namespace OpenDDS {
                    ACE_TEXT("%x with %d chunks\n"),
                    TraitsType::type_name(),
                    data_allocator().get(),
-                   this->get_n_chunks ()));
+                   get_n_chunks ()));
 
       return DDS::RETCODE_OK;
     }
@@ -149,7 +149,7 @@ namespace OpenDDS {
 
       ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                         guard,
-                        this->sample_lock_,
+                        sample_lock_,
                         DDS::RETCODE_ERROR);
 
       return read_i(received_data, info_seq, max_samples, sample_states,
@@ -173,7 +173,7 @@ namespace OpenDDS {
 
       ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                         guard,
-                        this->sample_lock_,
+                        sample_lock_,
                         DDS::RETCODE_ERROR);
 
       return take_i(received_data, info_seq, max_samples, sample_states,
@@ -193,7 +193,7 @@ namespace OpenDDS {
           return precond;
         }
 
-      ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, this->sample_lock_,
+      ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, sample_lock_,
                         DDS::RETCODE_ERROR);
 
       if (!has_readcondition(a_condition))
@@ -225,7 +225,7 @@ namespace OpenDDS {
           return precond;
         }
 
-      ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, this->sample_lock_,
+      ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, sample_lock_,
                         DDS::RETCODE_ERROR);
 
       if (!has_readcondition(a_condition))
@@ -246,7 +246,7 @@ namespace OpenDDS {
     }
 
   virtual DDS::ReturnCode_t read_next_sample(MessageType& received_data,
-                                             DDS::SampleInfo& sample_info)
+                                             DDS::SampleInfo& sample_info_ref)
   {
     bool found_data = false;
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, DDS::RETCODE_ERROR);
@@ -268,12 +268,12 @@ namespace OpenDDS {
           if (item->registered_data_) {
             received_data = *static_cast<MessageType*>(item->registered_data_);
           }
-          ptr->instance_state_->sample_info(sample_info, item);
+          ptr->instance_state_->sample_info(sample_info_ref, item);
           item->sample_state_ = DDS::READ_SAMPLE_STATE;
 
           const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
           if (observer && item->registered_data_ && vwd) {
-            Observer::Sample s(sample_info.instance_handle, sample_info.instance_state, *item, *vwd);
+            Observer::Sample s(sample_info_ref.instance_handle, sample_info_ref.instance_state, *item, *vwd);
             observer->on_sample_read(this, s);
           }
 
@@ -293,7 +293,7 @@ namespace OpenDDS {
         }
         // Get the sample_ranks, generation_ranks, and
         // absolute_generation_ranks for this info_seq
-        this->sample_info(sample_info, ptr->rcvd_samples_.tail_);
+        sample_info(sample_info_ref, ptr->rcvd_samples_.tail_);
 
         break;
       }
@@ -304,7 +304,7 @@ namespace OpenDDS {
   }
 
   virtual DDS::ReturnCode_t take_next_sample(MessageType& received_data,
-                                             DDS::SampleInfo& sample_info)
+                                             DDS::SampleInfo& sample_info_ref)
   {
     bool found_data = false;
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, DDS::RETCODE_ERROR);
@@ -332,12 +332,12 @@ namespace OpenDDS {
           if (item->registered_data_) {
             received_data = *static_cast<MessageType*>(item->registered_data_);
           }
-          ptr->instance_state_->sample_info(sample_info, item);
+          ptr->instance_state_->sample_info(sample_info_ref, item);
           item->sample_state_ = DDS::READ_SAMPLE_STATE;
 
           const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
           if (observer && item->registered_data_ && vwd) {
-            Observer::Sample s(sample_info.instance_handle, sample_info.instance_state, *item, *vwd);
+            Observer::Sample s(sample_info_ref.instance_handle, sample_info_ref.instance_state, *item, *vwd);
             observer->on_sample_taken(this, s);
           }
 
@@ -376,13 +376,13 @@ namespace OpenDDS {
         // absolute_generation_ranks for this info_seq
         //
         if (tail) {
-          this->sample_info(sample_info, tail);
+          sample_info(sample_info_ref, tail);
 
           ptr->rcvd_samples_.remove(tail);
           tail->dec_ref();
 
         } else {
-          this->sample_info(sample_info, ptr->rcvd_samples_.tail_);
+          sample_info(sample_info_ref, ptr->rcvd_samples_.tail_);
         }
 
         break;
@@ -411,7 +411,7 @@ namespace OpenDDS {
 
     ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                       guard,
-                      this->sample_lock_,
+                      sample_lock_,
                       DDS::RETCODE_ERROR);
     return read_instance_i(received_data, info_seq, max_samples, a_handle,
                            sample_states, view_states, instance_states, 0);
@@ -435,7 +435,7 @@ namespace OpenDDS {
 
     ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                       guard,
-                      this->sample_lock_,
+                      sample_lock_,
                       DDS::RETCODE_ERROR);
     return take_instance_i(received_data, info_seq, max_samples, a_handle,
                            sample_states, view_states, instance_states, 0);
@@ -456,7 +456,7 @@ namespace OpenDDS {
         return precond;
       }
 
-    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, this->sample_lock_,
+    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, sample_lock_,
                       DDS::RETCODE_ERROR);
 
     if (!has_readcondition(a_condition))
@@ -496,7 +496,7 @@ namespace OpenDDS {
         return precond;
       }
 
-    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, this->sample_lock_,
+    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, sample_lock_,
                       DDS::RETCODE_ERROR);
 
     if (!has_readcondition(a_condition))
@@ -576,7 +576,7 @@ namespace OpenDDS {
         return precond;
       }
 
-    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, this->sample_lock_,
+    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, sample_lock_,
                       DDS::RETCODE_ERROR);
 
     if (!has_readcondition(a_condition))
@@ -616,7 +616,7 @@ namespace OpenDDS {
         return precond;
       }
 
-    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, this->sample_lock_,
+    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, sample_lock_,
                       DDS::RETCODE_ERROR);
 
     if (!has_readcondition(a_condition))
@@ -671,7 +671,7 @@ namespace OpenDDS {
   {
     ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                       guard,
-                      this->sample_lock_,
+                      sample_lock_,
                       DDS::RETCODE_ERROR);
 
     typename InstanceMap::iterator const the_end = instance_map_.end ();
@@ -710,7 +710,7 @@ namespace OpenDDS {
 
     if (!received_data.release())
       {
-        // this->release_loan(received_data);
+        // release_loan(received_data);
         received_data.length(0);
       }
     return DDS::RETCODE_OK;
@@ -770,7 +770,7 @@ namespace OpenDDS {
     DDS::ReturnCode_t rc;
     ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                       guard,
-                      this->sample_lock_,
+                      sample_lock_,
                       DDS::RETCODE_ERROR);
     {
       rc = read_i(data, gen.info_,
@@ -800,7 +800,7 @@ namespace OpenDDS {
   {
     ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
                       guard,
-                      this->sample_lock_,
+                      sample_lock_,
                       DDS::RETCODE_ERROR);
 
     MessageSequenceType data;
@@ -1083,7 +1083,8 @@ protected:
                                                 OpenDDS::DCPS::SubscriptionInstance_rch& instance,
                                                 bool& just_registered,
                                                 bool& filtered,
-                                                OpenDDS::DCPS::MarshalingType marshaling_type)
+                                                OpenDDS::DCPS::MarshalingType marshaling_type,
+                                                bool full_copy)
   {
     unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator);
     RcHandle<MessageHolder> message_holder;
@@ -1148,7 +1149,9 @@ protected:
       ser_ret = ser >> OpenDDS::DCPS::KeyOnly<MessageType>(*data);
     } else {
       ser_ret = ser >> *data;
-      message_holder = make_rch<MessageHolder_T<MessageType> >(*data);
+      if (full_copy) {
+        message_holder = make_rch<MessageHolder_T<MessageType> >(*data);
+      }
     }
     if (!ser_ret) {
       if (ser.get_construction_status() != Serializer::ConstructionSuccessful) {
@@ -1211,7 +1214,7 @@ protected:
     if (sample.header_.key_fields_only_) {
       marshaling = OpenDDS::DCPS::KEY_ONLY_MARSHALING;
     }
-    this->dds_demarshal(sample, instance, just_registered, filtered, marshaling);
+    dds_demarshal(sample, instance, just_registered, filtered, marshaling, false);
   }
 
   virtual void purge_data(OpenDDS::DCPS::SubscriptionInstance_rch instance)
@@ -1623,7 +1626,7 @@ DDS::ReturnCode_t take_next_instance_i(MessageSequenceType& received_data,
   int)
 #endif
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_, DDS::RETCODE_ERROR);
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, DDS::RETCODE_ERROR);
 
   typename InstanceMap::iterator it;
   const typename InstanceMap::iterator the_end = instance_map_.end ();
@@ -1695,8 +1698,8 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
       ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
       instances_size = instances_.size();
     }
-    if ((this->qos_.resource_limits.max_instances != DDS::LENGTH_UNLIMITED) &&
-      ((::CORBA::Long) instances_size >= this->qos_.resource_limits.max_instances))
+    if ((qos_.resource_limits.max_instances != DDS::LENGTH_UNLIMITED) &&
+      ((::CORBA::Long) instances_size >= qos_.resource_limits.max_instances))
     {
       DDS::DataReaderListener_var listener
         = listener_for (DDS::SAMPLE_REJECTED_STATUS);
@@ -1723,8 +1726,8 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
     SharedInstanceMap_rch inst;
     bool new_handle = true;
-    if (this->is_exclusive_ownership_) {
-      OwnershipManagerPtr owner_manager = this->ownership_manager();
+    if (is_exclusive_ownership_) {
+      OwnershipManagerPtr owner_manager = ownership_manager();
 
       if (!owner_manager || owner_manager->instance_lock_acquire () != 0) {
         ACE_ERROR ((LM_ERROR,
@@ -1736,7 +1739,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
       }
 
       inst = dynamic_rchandle_cast<SharedInstanceMap>(
-        owner_manager->get_instance_map(this->topic_servant_->type_name(), this));
+        owner_manager->get_instance_map(topic_servant_->type_name(), this));
       if (inst != 0) {
         typename InstanceMap::const_iterator const iter = inst->find(*instance_data);
         if (iter != inst->end ()) {
@@ -1757,8 +1760,8 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
     OpenDDS::DCPS::SubscriptionInstance_rch instance =
       OpenDDS::DCPS::make_rch<OpenDDS::DCPS::SubscriptionInstance>(
         this,
-        this->qos_,
-        ref(this->instances_lock_),
+        qos_,
+        ref(instances_lock_),
         handle, owns_handle);
     {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
@@ -1776,13 +1779,13 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
     }
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-    OwnershipManagerPtr owner_manager = this->ownership_manager();
+    OwnershipManagerPtr owner_manager = ownership_manager();
 
     if (owner_manager) {
       if (!inst) {
         inst = make_rch<SharedInstanceMap>();
         owner_manager->set_instance_map(
-          this->topic_servant_->type_name(),
+          topic_servant_->type_name(),
           inst,
           this);
       }
@@ -1843,7 +1846,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
       TimeDuration filter_time_expired;
       if (!filtered && time_based_filter_instance(instance_ptr, filter_time_expired)) {
         filtered = true;
-        if (this->qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS) {
+        if (qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS) {
           filter_delayed_handler_->delay_sample(
             handle, move(instance_data), header, just_registered, filter_time_expired);
         }
@@ -1862,7 +1865,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
   }
   else
   {
-    instance_ptr = this->get_handle_instance(handle);
+    instance_ptr = get_handle_instance(handle);
     instance_ptr->instance_state_->lively(header.publication_id_);
   }
 }
@@ -1870,10 +1873,10 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
 void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data, const DataSampleHeader& header,
   SubscriptionInstance_rch instance_ptr, bool is_dispose_msg, bool is_unregister_msg )
 {
-  if ((this->qos_.resource_limits.max_samples_per_instance !=
+  if ((qos_.resource_limits.max_samples_per_instance !=
         DDS::LENGTH_UNLIMITED) &&
       (instance_ptr->rcvd_samples_.size_ >=
-        this->qos_.resource_limits.max_samples_per_instance)) {
+        qos_.resource_limits.max_samples_per_instance)) {
 
     // According to spec 1.2, Samples that contain no data do not
     // count towards the limits imposed by the RESOURCE_LIMITS QoS policy
@@ -1918,11 +1921,11 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
       item->dec_ref();
     }
   }
-  else if (this->qos_.resource_limits.max_samples != DDS::LENGTH_UNLIMITED)
+  else if (qos_.resource_limits.max_samples != DDS::LENGTH_UNLIMITED)
   {
     CORBA::Long total_samples = 0;
     {
-      ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
       for (OpenDDS::DCPS::DataReaderImpl::SubscriptionInstanceMapType::iterator iter = instances_.begin();
         iter != instances_.end();
         ++iter) {
@@ -1932,7 +1935,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
       }
     }
 
-    if (total_samples >= this->qos_.resource_limits.max_samples)
+    if (total_samples >= qos_.resource_limits.max_samples)
     {
       // According to spec 1.2, Samples that contain no data do not
       // count towards the limits imposed by the RESOURCE_LIMITS QoS policy
@@ -2002,7 +2005,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
 
   ReceivedDataElement* const ptr =
     new (*rd_allocator_.get()) ReceivedDataElementWithType<MessageTypeWithAllocator>(
-      header, instance_data.release(), &this->sample_lock_);
+      header, instance_data.release(), &sample_lock_);
 
   ptr->disposed_generation_count_ =
     instance_ptr->instance_state_->disposed_generation_count();
@@ -2050,7 +2053,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
   if (! ptr->coherent_change_) {
 #endif
     RcHandle<OpenDDS::DCPS::SubscriberImpl> sub = get_subscriber_servant ();
-    if (!sub || this->get_deleted())
+    if (!sub || get_deleted())
       return;
 
     sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, true);
@@ -2059,7 +2062,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
 
     DDS::SubscriberListener_var sub_listener =
         sub->listener_for(DDS::DATA_ON_READERS_STATUS);
-    if (!CORBA::is_nil(sub_listener.in()) && !this->coherent_)
+    if (!CORBA::is_nil(sub_listener.in()) && !coherent_)
       {
         ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 

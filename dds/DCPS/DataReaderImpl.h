@@ -397,7 +397,8 @@ public:
                                                 SubscriptionInstance_rch& instance,
                                                 bool& is_new_instance,
                                                 bool& filtered,
-                                                MarshalingType marshaling_type)= 0;
+                                                MarshalingType marshaling_type,
+                                                bool full_copy) = 0;
 
   virtual void dispose_unregister(const ReceivedDataSample& sample,
                                   SubscriptionInstance_rch& instance);
