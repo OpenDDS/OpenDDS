@@ -2365,6 +2365,7 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVecVecVec& meta_submess
     for (MetaSubmessageVecVec::iterator vit = vvit->begin(); vit != vvit->end(); ++vit) {
       for (MetaSubmessageVec::iterator it = vit->begin(); it != vit->end(); ++it) {
 
+        // This will swap it->to_guids_ so we'll need to refer to key's to_guids_ below
         const BundlingCacheKey key(it->dst_guid_, it->from_guid_, it->to_guids_);
         BundlingCache::ScopedAccess entry(bundling_cache_, key);
         if (entry.is_new_) {
@@ -2378,7 +2379,8 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVecVecVec& meta_submess
           } else {
             addrs = get_addresses_i(it->from_guid_);
           }
-          for (RepoIdSet::iterator it2 = it->to_guids_.begin(); it2 != it->to_guids_.end(); ++it2) {
+          // Need to use key.to_guids_ here since we swapped above
+          for (RepoIdSet::iterator it2 = key.to_guids_.begin(); it2 != key.to_guids_.end(); ++it2) {
             accumulate_addresses(it->from_guid_, *it2, addrs, directed);
           }
 #ifdef OPENDDS_SECURITY
