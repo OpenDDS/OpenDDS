@@ -1,5 +1,5 @@
-#ifndef RTPSRELAY_NAME_H_
-#define RTPSRELAY_NAME_H_
+#ifndef OPENDDS_RTPS_RELAY_LIB_NAME_H
+#define OPENDDS_RTPS_RELAY_LIB_NAME_H
 
 #include "export.h"
 

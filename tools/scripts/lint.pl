@@ -310,7 +310,23 @@ my %path_conditions = (
   },
 
   in_dds_dcps => qr@^dds/DCPS@,
-  in_core_includes => qr@^dds/(?!(idl|InfoRepo)/)@,
+
+  in_public_includes => sub {
+    my $filename = shift;
+    my $full_filename = shift;
+
+    my @patterns = (
+        qr@^dds/(?!(idl|InfoRepo)/)@,
+        qr@^FACE/@,
+        qr@^tools/OpenDDS_RtpsRelayLib/@,
+        qr@^tools/modeling/codegen/@,
+    );
+    for my $pattern (@patterns) {
+      return 1 if $filename =~ $pattern;
+    }
+
+    return 0;
+  },
 
   cpp_header_file => qr/\.(h|hpp)$/,
   cpp_inline_file => qr/\.inl$/,
@@ -368,7 +384,7 @@ my %path_conditions = (
   },
   needs_include_guard => [
     MATCH_ALL,
-    'in_core_includes',
+    'in_public_includes',
     '!export_header',
     [
       'cpp_header_file',
@@ -377,7 +393,7 @@ my %path_conditions = (
   ],
   user_preprocessor_scope => [
     MATCH_ALL,
-    'in_core_includes',
+    'in_public_includes',
     [
       'cpp_public_file',
       'idl_file',
@@ -388,7 +404,11 @@ my %path_conditions = (
 sub valid_include_guard_names {
   my @list;
   my $x = shift;
-  $x =~ s/^dds\///g;
+  $x =~ s@^dds/@@g;
+  $x =~ s@^tools/modeling/codegen/@@g;
+  $x =~ s@^tools/@@g;
+  $x =~ s/^opendds//ig;
+  $x =~ s/^[_]//g;
   $x =~ s/\W+/_/g;
   push(@list, $x);
   $x =~ s/([a-z])([A-Z])/$1_$2/g;
@@ -644,10 +664,10 @@ my %all_checks = (
                   return 0;
                 }
               }
-              # print("$ifndef\n");
-              # foreach my $valid_name (@valid_names) {
-              #   print("$valid_name\n");
-              # }
+              print_error("$filename:$.: First ifndef/define macro is: $ifndef");
+              foreach my $valid_name (@valid_names) {
+                print_error("$filename:$.: $valid_name is valid");
+              }
               if ($fix) {
                 pop(@lines);
                 my $new_guard_name = $valid_names[0];
