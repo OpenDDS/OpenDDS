@@ -3,11 +3,11 @@
 
 #include "Config.h"
 
-#include "lib/PartitionIndex.h"
-#include "lib/RelayTypeSupportImpl.h"
-#include "lib/Utility.h"
+#include <OpenDDS_RtpsRelayLib/PartitionIndex.h>
+#include <OpenDDS_RtpsRelayLib/RelayTypeSupportImpl.h>
+#include <OpenDDS_RtpsRelayLib/Utility.h>
 
-#include "dds/DCPS/GuidConverter.h"
+#include <dds/DCPS/GuidConverter.h>
 
 #include <ace/Thread_Mutex.h>
 

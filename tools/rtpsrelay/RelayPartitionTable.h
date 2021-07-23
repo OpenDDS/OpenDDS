@@ -1,10 +1,10 @@
 #ifndef RTPSRELAY_RELAY_PARTITION_TABLE_H_
 #define RTPSRELAY_RELAY_PARTITION_TABLE_H_
 
-#include "lib/PartitionIndex.h"
-#include "lib/Utility.h"
+#include <OpenDDS_RtpsRelayLib/PartitionIndex.h>
+#include <OpenDDS_RtpsRelayLib/Utility.h>
 
-#include "dds/DCPS/GuidConverter.h"
+#include <dds/DCPS/GuidConverter.h>
 
 #include <ace/Thread_Mutex.h>
 

@@ -1,6 +1,6 @@
 #include "SubscriptionListener.h"
 
-#include "lib/Utility.h"
+#include <OpenDDS_RtpsRelayLib/Utility.h>
 
 #include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/JsonValueWriter.h>

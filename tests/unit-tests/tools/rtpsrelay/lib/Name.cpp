@@ -1,10 +1,10 @@
 #ifdef OPENDDS_HAS_CXX11
 
+#include <OpenDDS_RtpsRelayLib/Name.h>
+
+#include <dds/DCPS/Service_Participant.h>
+
 #include <gtest/gtest.h>
-
-#include "tools/rtpsrelay/lib/Name.h"
-
-#include "dds/DCPS/Service_Participant.h"
 
 #include <iostream>
 

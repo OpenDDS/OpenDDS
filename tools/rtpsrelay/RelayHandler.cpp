@@ -1,6 +1,6 @@
 #include "RelayHandler.h"
 
-#include "lib/RelayTypeSupportImpl.h"
+#include <OpenDDS_RtpsRelayLib/RelayTypeSupportImpl.h>
 
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Message_Block_Ptr.h>
