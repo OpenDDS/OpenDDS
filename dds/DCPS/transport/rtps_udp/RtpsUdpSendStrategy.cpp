@@ -181,13 +181,17 @@ RtpsUdpSendStrategy::send_rtps_control(RTPS::Message& message,
   const AMB_Continuation cont(rtps_header_mb_lock_, rtps_header_mb_, submessages);
 
 #ifdef OPENDDS_SECURITY
-  const Message_Block_Ptr alternate(pre_send_packet(&rtps_header_mb_));
-  if (!alternate) {
-    VDBG((LM_DEBUG, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control () - "
-          "pre_send_packet returned NULL, dropping.\n"));
-    return;
+  const DDS::Security::CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
+  Message_Block_Ptr alternate;
+  if (crypto) {
+    alternate.reset(pre_send_packet(&rtps_header_mb_));
+    if (!alternate) {
+      VDBG((LM_DEBUG, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control () - "
+            "pre_send_packet returned NULL, dropping.\n"));
+      return;
+    }
   }
-  ACE_Message_Block& use_mb = *alternate;
+  ACE_Message_Block& use_mb = alternate ? *alternate : rtps_header_mb_;
 #else
   ACE_Message_Block& use_mb = rtps_header_mb_;
 #endif
@@ -215,13 +219,17 @@ RtpsUdpSendStrategy::send_rtps_control(RTPS::Message& message,
   const AMB_Continuation cont(rtps_header_mb_lock_, rtps_header_mb_, submessages);
 
 #ifdef OPENDDS_SECURITY
-  const Message_Block_Ptr alternate(pre_send_packet(&rtps_header_mb_));
-  if (!alternate) {
-    VDBG((LM_DEBUG, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control () - "
-          "pre_send_packet returned NULL, dropping.\n"));
-    return;
+  const DDS::Security::CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
+  Message_Block_Ptr alternate;
+  if (crypto) {
+    alternate.reset(pre_send_packet(&rtps_header_mb_));
+    if (!alternate) {
+      VDBG((LM_DEBUG, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control () - "
+            "pre_send_packet returned NULL, dropping.\n"));
+      return;
+    }
   }
-  ACE_Message_Block& use_mb = *alternate;
+  ACE_Message_Block& use_mb = alternate ? *alternate : rtps_header_mb_;
 #else
   ACE_Message_Block& use_mb = rtps_header_mb_;
 #endif
@@ -345,6 +353,12 @@ namespace {
     }
     return out;
   }
+}
+
+Security::SecurityConfig_rch
+RtpsUdpSendStrategy::security_config() const
+{
+  return link_->security_config();
 }
 
 void
