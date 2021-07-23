@@ -590,6 +590,8 @@ DDS::ReturnCode_t TypeLookupService::complete_to_dynamic(DynamicType_rch& dt, co
       complete_struct_member_to_member_descriptor(dtm->descriptor_, cto.struct_type.member_seq[i]);
       dt->member_by_index.insert(dt->member_by_index.end(), dtm);
       dtm->descriptor_->index = i;
+      dt->member_by_id.insert(dt->member_by_id.end(), std::make_pair(md->id , dtm));
+      dt->member_by_name.insert(dt->member_by_name.end(), std::make_pair(md->name , dtm));
     }
     break;
   case TK_UNION:
@@ -659,6 +661,8 @@ DDS::ReturnCode_t TypeLookupService::type_identifier_to_dynamic(DynamicType_rch&
 {
   DynamicType_rch dt_instantiation(new DynamicType, OpenDDS::DCPS::keep_count());
   dt = dt_instantiation;
+  TypeDescriptor* td(new TypeDescriptor);
+  dt->descriptor_ = td;
     switch (ti.kind()) {
       case TK_NONE:
         return DDS::RETCODE_ERROR;

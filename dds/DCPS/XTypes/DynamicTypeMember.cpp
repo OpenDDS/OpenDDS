@@ -29,5 +29,31 @@ namespace XTypes {
     return descriptor_->name;
   }
 
+  bool operator==(const DynamicTypeMembersByName& lhs, const DynamicTypeMembersByName rhs) {
+    if (lhs.size() == rhs.size()) {
+      for (DynamicTypeMembersByName::const_iterator it = lhs.begin(); it != lhs.end(); ++it) {
+        if (!(*lhs.find(it->first)->second->descriptor_ == *rhs.find(it->first)->second->descriptor_)) {
+          return false;
+        }
+      }
+    } else {
+      return false;
+    }
+    return true;
+  }
+
+  bool operator==(const DynamicTypeMembersById& lhs, const DynamicTypeMembersById rhs) {
+    if (lhs.size() == rhs.size()) {
+      for (DynamicTypeMembersById::const_iterator it = lhs.begin(); it != lhs.end(); ++it) {
+        if (!(*lhs.find(it->first)->second->descriptor_ == *rhs.find(it->first)->second->descriptor_)) {
+          return false;
+        }
+      }
+    } else {
+      return false;
+    }
+    return true;
+  }
+
 } // namespace XTypes
 } // namespace OpenDDS

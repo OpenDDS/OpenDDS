@@ -1,8 +1,9 @@
 #include "CompleteToDynamicTypeTypeSupportImpl.h"
-
+#include <map>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/XTypes/TypeObject.h>
 #include <dds/DCPS/XTypes/DynamicType.h>
+#include <dds/DCPS/XTypes/DynamicTypeMember.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/TopicDescriptionImpl.h>
 #include <dds/DCPS/PublisherImpl.h>
@@ -26,7 +27,8 @@ void test_conversion(const XTypes::DynamicType_rch& expected_dynamic_type)
   const XTypes::TypeObject& com_to = pos->second;
   XTypes::DynamicType_rch converted_dt(new XTypes::DynamicType, OpenDDS::DCPS::keep_count());
   tls.complete_to_dynamic(converted_dt, com_to.complete);
-  EXPECT_EQ(expected_dynamic_type.in(), converted_dt.in());
+  bool f = (*expected_dynamic_type.in() == *converted_dt.in());
+  EXPECT_EQ(*expected_dynamic_type.in(), *converted_dt.in());
 }
 
 TEST(CompleteToMinimalTypeObject, MyStruct)
@@ -39,6 +41,23 @@ TEST(CompleteToMinimalTypeObject, MyStruct)
   td->extensibility_kind = XTypes::APPENDABLE;
   td->is_nested = 0;
   expected_dt->descriptor_ = td;
+  XTypes::DynamicTypeMember_rch expected_dtm(new XTypes::DynamicTypeMember, OpenDDS::DCPS::keep_count());
+  XTypes::MemberDescriptor* md(new XTypes::MemberDescriptor);
+  expected_dtm->descriptor_ = md;
+  md->name = "l";
+  md->id = 0;
+  md->index = 0;
+  md->try_construct_kind = XTypes::DISCARD;
+  XTypes::DynamicType_rch long_expected_dt(new XTypes::DynamicType, OpenDDS::DCPS::keep_count());
+  XTypes::TypeDescriptor* long_td(new XTypes::TypeDescriptor);
+  long_td->kind = XTypes::TK_INT32;
+  long_td->bound.length(0);
+  long_td->name = "long";
+  long_expected_dt->descriptor_ = long_td;
+  md->type = long_expected_dt;
+  expected_dt->member_by_index.insert(expected_dt->member_by_index.end(), expected_dtm);
+  expected_dt->member_by_id.insert(expected_dt->member_by_id.end(), std::make_pair(md->id , expected_dtm));
+  expected_dt->member_by_name.insert(expected_dt->member_by_name.end(), std::make_pair(md->name , expected_dtm));
   test_conversion<DCPS::MyMod_MyStruct_xtag>(expected_dt);
 }
 

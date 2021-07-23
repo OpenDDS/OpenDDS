@@ -21,7 +21,7 @@ namespace XTypes {
 
 class MemberDescriptor;
 
-class DynamicTypeMember : public OpenDDS::DCPS::RcObject {
+class OpenDDS_Dcps_Export DynamicTypeMember : public OpenDDS::DCPS::RcObject {
 public:
   DynamicTypeMember();
   ~DynamicTypeMember();
@@ -40,30 +40,8 @@ typedef OpenDDS::DCPS::RcHandle<DynamicTypeMember> DynamicTypeMember_rch;
 typedef OPENDDS_MAP(OPENDDS_STRING, DynamicTypeMember_rch) DynamicTypeMembersByName;
 typedef OPENDDS_MAP(MemberId, DynamicTypeMember_rch) DynamicTypeMembersById;
 typedef OPENDDS_VECTOR(DynamicTypeMember_rch) DynamicTypeMembersByIndex;
-
-inline bool operator==(const DynamicTypeMembersByName& lhs, const DynamicTypeMembersByName rhs) {
-  if (lhs.size() == rhs.size()) {
-    for (DynamicTypeMembersByName::const_iterator it = lhs.begin(); it != lhs.end(); ++it) {
-      if (!(lhs.find(it->first)->second == rhs.find(it->first)->second)) {
-        return false;
-      }
-    }
-  } else {
-    return false;
-  }
-}
-
-inline bool operator==(const DynamicTypeMembersById& lhs, const DynamicTypeMembersById rhs) {
-  if (lhs.size() == rhs.size()) {
-    for (DynamicTypeMembersById::const_iterator it = lhs.begin(); it != lhs.end(); ++it) {
-      if (!(lhs.find(it->first)->second == rhs.find(it->first)->second)) {
-        return false;
-      }
-    }
-  } else {
-    return false;
-  }
-}
+OpenDDS_Dcps_Export bool operator==(const DynamicTypeMembersByName& lhs, const DynamicTypeMembersByName rhs);
+OpenDDS_Dcps_Export bool operator==(const DynamicTypeMembersById& lhs, const DynamicTypeMembersById rhs);
 } // namespace XTypes
 } // namespace OpenDDS
 

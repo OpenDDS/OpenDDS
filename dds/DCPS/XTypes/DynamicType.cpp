@@ -33,6 +33,7 @@ namespace XTypes {
   DDS::ReturnCode_t DynamicType::get_member_by_index(DynamicTypeMember_rch& member, unsigned long index) {
     member = member_by_index[index];
   }
+
   bool DynamicType::equals(const DynamicType& other) {
     return (*this == other);
   }

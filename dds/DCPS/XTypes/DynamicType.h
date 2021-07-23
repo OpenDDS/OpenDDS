@@ -21,7 +21,8 @@ namespace XTypes {
 
 class TypeDescriptor;
 
-class DynamicType : public OpenDDS::DCPS::RcObject {
+class OpenDDS_Dcps_Export DynamicType : public OpenDDS::DCPS::RcObject
+{
 public:
   DDS::ReturnCode_t get_descriptor(TypeDescriptor& descriptor);
   OPENDDS_STRING get_name();
@@ -41,10 +42,29 @@ public:
 
 typedef OpenDDS::DCPS::RcHandle<DynamicType> DynamicType_rch;
 
-inline bool operator==(const DynamicType& lhs, const DynamicType& rhs) {
-    return
-      lhs.member_by_name == rhs.member_by_name &&
-      lhs.member_by_id == rhs.member_by_id;
+// inline bool operator==(const DynamicTypeMembersByName& lhs, const DynamicTypeMembersByName& rhs)
+// {
+//   //OPENDDS_MAP(OPENDDS_STRING, DynamicTypeMember_rch)
+//   if (lhs.size() == rhs.size()) {
+//     for (DynamicTypeMembersByName::const_iterator i = lhs.begin() ; i != lhs.end() ; ++i) {
+//       if (!(rhs.find(lhs.value_comp
+//         return false;
+//       }
+//     }
+//     return true;
+//   }
+//   return false;
+    
+//     //for each part of map
+//     //key is same
+//     //member is same
+// }
+
+inline bool operator==(const DynamicType& lhs, const DynamicType& rhs)
+{
+  return
+    lhs.member_by_name == rhs.member_by_name &&
+    lhs.member_by_id == rhs.member_by_id;
 }
 
 } // namespace XTypes
