@@ -1,6 +1,6 @@
 project: dcpslib, opendds_cxx11, install, msvc_bigobj {
-  idlflags      += -Wb,export_macro=RtpsRelayLib_Export -Wb,export_include=export.h -SS
-  dcps_ts_flags += -Wb,export_macro=RtpsRelayLib_Export -Wb,export_include=export.h
+  idlflags      += -Wb,export_macro=OpenDDS_RtpsRelayLib_Export -Wb,export_include=export.h -SS
+  dcps_ts_flags += -Wb,export_macro=OpenDDS_RtpsRelayLib_Export -Wb,export_include=export.h
   dynamicflags  += RTPSRELAYLIB_BUILD_DLL
   sharedname = OpenDDS_RtpsRelay
 
