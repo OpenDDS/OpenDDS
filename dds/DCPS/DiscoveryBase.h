@@ -1016,18 +1016,11 @@ namespace OpenDDS {
         }
 
         const bool reader = GuidConverter(repoId).isReader();
-        // Copy the endpoint set - lock can be released in match()
-        RepoIdSet local_endpoints;
-        RepoIdSet discovered_endpoints;
-        if (reader) {
-          local_endpoints = td.local_publications();
-          discovered_endpoints = td.discovered_publications();
-        } else {
-          local_endpoints = td.local_subscriptions();
-          discovered_endpoints = td.discovered_subscriptions();
-        }
-
         const bool is_remote = !equal_guid_prefixes(repoId, participant_id_);
+
+        const RepoIdSet& local_endpoints = reader ? td.local_publications() : td.local_subscriptions();
+        const RepoIdSet& discovered_endpoints = reader ? td.discovered_publications() : td.discovered_subscriptions();
+
         if (is_remote && local_endpoints.empty()) {
           // Nothing to match.
           return;
@@ -1035,13 +1028,16 @@ namespace OpenDDS {
 
         for (RepoIdSet::const_iterator iter = local_endpoints.begin();
              iter != local_endpoints.end(); ++iter) {
+          // Copy the endpoint - lock can be released below
+          const RepoId endpoint = *iter;
           // check to make sure it's a Reader/Writer or Writer/Reader match
-          if (GuidConverter(*iter).isReader() != reader) {
+          if (GuidConverter(endpoint).isReader() != reader) {
             if (remove) {
-              remove_assoc(*iter, repoId);
+              remove_assoc(endpoint, repoId);
             } else {
-              match(reader ? *iter : repoId, reader ? repoId : *iter);
+              match(reader ? endpoint : repoId, reader ? repoId : endpoint);
             }
+            iter = local_endpoints.lower_bound(endpoint);
           }
         }
 
@@ -1052,13 +1048,16 @@ namespace OpenDDS {
 
         for (RepoIdSet::const_iterator iter = discovered_endpoints.begin();
              iter != discovered_endpoints.end(); ++iter) {
+          // Copy the endpoint - lock can be released below
+          const RepoId endpoint = *iter;
           // check to make sure it's a Reader/Writer or Writer/Reader match
-          if (GuidConverter(*iter).isReader() != reader) {
+          if (GuidConverter(endpoint).isReader() != reader) {
             if (remove) {
-              remove_assoc(*iter, repoId);
+              remove_assoc(endpoint, repoId);
             } else {
-              match(reader ? *iter : repoId, reader ? repoId : *iter);
+              match(reader ? endpoint : repoId, reader ? repoId : endpoint);
             }
+            iter = discovered_endpoints.lower_bound(endpoint);
           }
         }
       }
