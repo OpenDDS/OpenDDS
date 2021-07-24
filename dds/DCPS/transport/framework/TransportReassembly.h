@@ -123,7 +123,8 @@ private:
   typedef OPENDDS_MAP(FragKey, FragInfo) FragInfoMap;
   FragInfoMap fragments_;
 
-  typedef OPENDDS_MULTIMAP(MonotonicTimePoint, FragKey) ExpirationQueue;
+  typedef std::pair<MonotonicTimePoint, FragKey> ElementType;
+  typedef OPENDDS_LIST(ElementType) ExpirationQueue;
   ExpirationQueue expiration_queue_;
 
   typedef OPENDDS_MAP_CMP(PublicationId, DisjointSequence, GUID_tKeyLessThan) CompletedMap;
