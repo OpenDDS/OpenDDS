@@ -1018,13 +1018,14 @@ namespace OpenDDS {
         const bool reader = GuidConverter(repoId).isReader();
         const bool is_remote = !equal_guid_prefixes(repoId, participant_id_);
 
-        const RepoIdSet& local_endpoints = reader ? td.local_publications() : td.local_subscriptions();
-        const RepoIdSet& discovered_endpoints = reader ? td.discovered_publications() : td.discovered_subscriptions();
+        const RepoIdSet& local_endpoints_ref = reader ? td.local_publications() : td.local_subscriptions();
 
-        if (is_remote && local_endpoints.empty()) {
+        if (is_remote && local_endpoints_ref.empty()) {
           // Nothing to match.
           return;
         }
+
+        const RepoIdSet local_endpoints = local_endpoints_ref;
 
         for (RepoIdSet::const_iterator iter = local_endpoints.begin();
              iter != local_endpoints.end(); ++iter) {
@@ -1045,6 +1046,8 @@ namespace OpenDDS {
         if (is_remote) {
           return;
         }
+
+        const RepoIdSet discovered_endpoints = reader ? td.discovered_publications() : td.discovered_subscriptions();
 
         for (RepoIdSet::const_iterator iter = discovered_endpoints.begin();
              iter != discovered_endpoints.end(); ++iter) {
