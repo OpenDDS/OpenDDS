@@ -11,6 +11,8 @@
 #include "utl_identifier.h"
 #include "utl_string.h"
 
+#include <dds/DCPS/Definitions.h>
+
 #include "ace/OS_NS_sys_stat.h"
 #include "ace/OS_NS_string.h"
 #include "ace/Version.h"
@@ -217,8 +219,10 @@ std::string param_type(AST_Type *t, AST_Argument::Direction dir)
     case AST_PredefinedType::PT_boolean:
     case AST_PredefinedType::PT_char:
     case AST_PredefinedType::PT_wchar:
+#if OPENDDS_HAS_EXPLICIT_INTS
     case AST_PredefinedType::PT_int8:
     case AST_PredefinedType::PT_uint8:
+#endif
     case AST_PredefinedType::PT_octet:
     case AST_PredefinedType::PT_short:
     case AST_PredefinedType::PT_ushort:
@@ -275,8 +279,10 @@ std::string idl_mapping_java::type(AST_Type *decl)
     case AST_PredefinedType::PT_char:
     case AST_PredefinedType::PT_wchar:
       return "char";
+#if OPENDDS_HAS_EXPLICIT_INTS
     case AST_PredefinedType::PT_int8:
     case AST_PredefinedType::PT_uint8:
+#endif
     case AST_PredefinedType::PT_octet:
       return "byte";
     case AST_PredefinedType::PT_short:
@@ -331,6 +337,11 @@ std::string idl_mapping_java::type(AST_Type *decl)
 
 namespace { //"ju" helper functions: Java Unsigned type conversion
 
+ACE_CDR::Char ju_c(ACE_CDR::Octet u)
+{
+  return (u > 0x7F) ? -static_cast<ACE_CDR::Char>(~u+1) : u;
+}
+
 ACE_CDR::Short ju_s(ACE_CDR::UShort u)
 {
   return (u > 0x7FFF) ? -static_cast<ACE_CDR::Short>(~u+1) : u;
@@ -381,9 +392,11 @@ ostream &operator<< (ostream &o, AST_Expression::AST_ExprValue *ev)
     o << ev->u.wcval;
     break;
   case AST_Expression::EV_int8:
+    o << static_cast<short>(ev->u.int8val);
+    break;
   case AST_Expression::EV_uint8:
   case AST_Expression::EV_octet:
-    o << static_cast<int>(ev->u.oval);
+    o << static_cast<short>(ju_c(ev->u.oval));
     break;
   case AST_Expression::EV_bool:
     o << boolalpha << static_cast<bool>(ev->u.bval);

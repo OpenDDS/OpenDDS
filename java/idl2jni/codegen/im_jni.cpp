@@ -12,6 +12,8 @@
 #include "utl_string.h"
 #include "fe_private.h"
 
+#include <dds/DCPS/Definitions.h>
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -57,10 +59,12 @@ string idl_mapping_jni::taoType(AST_Type *decl)
       return "CORBA::Char";
     case AST_PredefinedType::PT_wchar:
       return "CORBA::WChar";
+#if OPENDDS_HAS_EXPLICIT_INTS
     case AST_PredefinedType::PT_int8:
       return "CORBA::Int8";
     case AST_PredefinedType::PT_uint8:
       return "CORBA::UInt8";
+#endif
     case AST_PredefinedType::PT_octet:
       return "CORBA::Octet";
     case AST_PredefinedType::PT_short:
@@ -190,8 +194,10 @@ string idl_mapping_jni::type(AST_Type *decl)
     case AST_PredefinedType::PT_char:
     case AST_PredefinedType::PT_wchar:
       return "jchar";
+#if OPENDDS_HAS_EXPLICIT_INTS
     case AST_PredefinedType::PT_int8:
     case AST_PredefinedType::PT_uint8:
+#endif
     case AST_PredefinedType::PT_octet:
       return "jbyte";
     case AST_PredefinedType::PT_short:
@@ -280,8 +286,10 @@ string idl_mapping_jni::jvmSignature(AST_Type *decl)
     case AST_PredefinedType::PT_char:
     case AST_PredefinedType::PT_wchar:
       return "C";
+#if OPENDDS_HAS_EXPLICIT_INTS
     case AST_PredefinedType::PT_int8:
     case AST_PredefinedType::PT_uint8:
+#endif
     case AST_PredefinedType::PT_octet:
       return "B";
     case AST_PredefinedType::PT_short:
@@ -351,8 +359,10 @@ string idl_mapping_jni::jniFnName(AST_Type *decl)
     case AST_PredefinedType::PT_char:
     case AST_PredefinedType::PT_wchar:
       return "Char";
+#if OPENDDS_HAS_EXPLICIT_INTS
     case AST_PredefinedType::PT_int8:
     case AST_PredefinedType::PT_uint8:
+#endif
     case AST_PredefinedType::PT_octet:
       return "Byte";
     case AST_PredefinedType::PT_short:
@@ -1660,9 +1670,11 @@ ostream &operator<< (ostream &o, AST_Expression::AST_ExprValue *ev)
     o << "L\'" << ev->u.wcval << '\'';
     break;
   case AST_Expression::EV_int8:
+    o << static_cast<short>(ev->u.int8val);
+    break;
   case AST_Expression::EV_uint8:
   case AST_Expression::EV_octet:
-    o << static_cast<int>(ev->u.oval);
+    o << static_cast<short>(ev->u.oval);
     break;
   case AST_Expression::EV_bool:
     o << boolalpha << static_cast<bool>(ev->u.bval);
