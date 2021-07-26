@@ -94,8 +94,8 @@ TEST(serializer_test, align_value_add_offset)
 TEST(serializer_test, align_value_smaller_than_by)
 {
   size_t value = 4;
-  align(value, 9);
-  EXPECT_EQ(size_t(9), value);
+  align(value, 8);
+  EXPECT_EQ(size_t(8), value);
 }
 
 TEST(serializer_test, Encoding__is_encapsulated_this_XCDR1)
