@@ -1732,15 +1732,17 @@ TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
   DBG_ENTRY_LVL("TransportSendStrategy", "do_send_packet", 6);
 
 #ifdef OPENDDS_SECURITY
-  const DDS::Security::CryptoTransform_var crypto = security_config()->get_crypto_transform();
-  // pre_send_packet may provide different data that takes the place of the
-  // original "packet" (used for security encryption/authentication)
   Message_Block_Ptr substitute;
-  if (crypto) {
-    substitute.reset(pre_send_packet(packet));
-    if (!substitute) {
-      VDBG((LM_DEBUG, "(%P|%t) DBG:   pre_send_packet returned NULL, dropping.\n"));
-      return packet->total_length();
+  if (security_config()) {
+    const DDS::Security::CryptoTransform_var crypto = security_config()->get_crypto_transform();
+    // pre_send_packet may provide different data that takes the place of the
+    // original "packet" (used for security encryption/authentication)
+    if (crypto) {
+      substitute.reset(pre_send_packet(packet));
+      if (!substitute) {
+        VDBG((LM_DEBUG, "(%P|%t) DBG:   pre_send_packet returned NULL, dropping.\n"));
+        return packet->total_length();
+      }
     }
   }
 #endif
