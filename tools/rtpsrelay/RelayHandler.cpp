@@ -343,7 +343,7 @@ bool GuidAddrSet::ignore(const OpenDDS::DCPS::GUID_t& guid,
   }
 
   pending_.insert(guid);
-  pending_expiration_map_.insert(std::make_pair(now + config_.lifespan(), guid));
+  pending_expiration_map_.insert(std::make_pair(now + config_.pending_timeout(), guid));
 
   return false;
 }

@@ -14,6 +14,7 @@ public:
     , lifespan_(60) // 1 minute
     , static_limit_(0)
     , max_pending_(0)
+    , pending_timeout_(60) // 1 minute
     , application_domain_(1)
     , log_warnings_(false)
     , log_entries_(false)
@@ -59,6 +60,16 @@ public:
   size_t max_pending() const
   {
     return max_pending_;
+  }
+
+  void pending_timeout(const OpenDDS::DCPS::TimeDuration& value)
+  {
+    pending_timeout_ = value;
+  }
+
+  const OpenDDS::DCPS::TimeDuration& pending_timeout() const
+  {
+    return pending_timeout_;
   }
 
   void application_domain(DDS::DomainId_t value)
@@ -196,6 +207,7 @@ private:
   OpenDDS::DCPS::TimeDuration lifespan_;
   size_t static_limit_;
   size_t max_pending_;
+  OpenDDS::DCPS::TimeDuration pending_timeout_;
   DDS::DomainId_t application_domain_;
   bool log_warnings_;
   bool log_entries_;
