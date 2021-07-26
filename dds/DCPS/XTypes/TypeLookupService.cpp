@@ -659,6 +659,10 @@ DDS::ReturnCode_t TypeLookupService::complete_to_dynamic(DynamicType_rch& dt, co
 
 DDS::ReturnCode_t TypeLookupService::type_identifier_to_dynamic(DynamicType_rch& dt, const TypeIdentifier& ti)
 {
+  if (ti.kind() == TK_NONE) {
+    // Leave as dt as nil
+    return DDS::RETCODE_OK;
+  }
   DynamicType_rch dt_instantiation(new DynamicType, OpenDDS::DCPS::keep_count());
   dt = dt_instantiation;
   TypeDescriptor* td(new TypeDescriptor);

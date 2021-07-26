@@ -38,5 +38,13 @@ namespace XTypes {
     return (*this == other);
   }
 
+  bool operator==(const DynamicType& lhs, const DynamicType& rhs)
+  {
+    return
+      *lhs.descriptor_ == *rhs.descriptor_ &&
+      lhs.member_by_name == rhs.member_by_name &&
+      lhs.member_by_id == rhs.member_by_id;
+  }
+
 } // namespace XTypes
 } // namespace OpenDDS

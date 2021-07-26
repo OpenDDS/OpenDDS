@@ -60,12 +60,7 @@ typedef OpenDDS::DCPS::RcHandle<DynamicType> DynamicType_rch;
 //     //member is same
 // }
 
-inline bool operator==(const DynamicType& lhs, const DynamicType& rhs)
-{
-  return
-    lhs.member_by_name == rhs.member_by_name &&
-    lhs.member_by_id == rhs.member_by_id;
-}
+OpenDDS_Dcps_Export bool operator==(const DynamicType& lhs, const DynamicType& rhs);
 
 } // namespace XTypes
 } // namespace OpenDDS

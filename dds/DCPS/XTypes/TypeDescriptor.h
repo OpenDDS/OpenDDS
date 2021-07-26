@@ -53,16 +53,28 @@ inline bool operator==(const LBoundSeq& lhs, const LBoundSeq& rhs) {
 }
 
 inline bool operator==(const TypeDescriptor& lhs, const TypeDescriptor& rhs) {
-  return
-    lhs.kind == rhs.kind &&
-    lhs.name == rhs.name &&
-    lhs.base_type == rhs.base_type &&
-    lhs.discriminator_type == rhs.discriminator_type &&
-    lhs.bound == rhs.bound &&
-    lhs.element_type.in() == rhs.element_type.in() &&
-    lhs.key_element_type.in() == rhs.key_element_type.in() &&
-    lhs.extensibility_kind == rhs.extensibility_kind &&
-    lhs.is_nested == rhs.is_nested;
+    bool a = lhs.kind == rhs.kind;
+    bool b = lhs.name == rhs.name;
+    bool c = lhs.base_type == rhs.base_type;
+    bool d = lhs.discriminator_type == rhs.discriminator_type;
+    bool e = lhs.bound == rhs.bound;
+    bool f = lhs.element_type.in() == rhs.element_type.in();
+    bool g = lhs.key_element_type.in() == rhs.key_element_type.in();
+    bool h = lhs.extensibility_kind == rhs.extensibility_kind;
+    bool i = lhs.is_nested == rhs.is_nested;
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("TypeDescriptor: %b %b %b %b %b %b %b %b %b\n"),
+  a, b, c, d, e, f, g, h, i));
+  return a && b && c && d && e && f && g && h && i;
+  // return
+  //   lhs.kind == rhs.kind &&
+  //   lhs.name == rhs.name &&
+  //   lhs.base_type == rhs.base_type &&
+  //   lhs.discriminator_type == rhs.discriminator_type &&
+  //   lhs.bound == rhs.bound &&
+  //   lhs.element_type.in() == rhs.element_type.in() &&
+  //   lhs.key_element_type.in() == rhs.key_element_type.in() &&
+  //   lhs.extensibility_kind == rhs.extensibility_kind &&
+  //   lhs.is_nested == rhs.is_nested;
 }
 
 } // namespace XTypes

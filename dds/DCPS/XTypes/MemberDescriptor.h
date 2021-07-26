@@ -69,7 +69,7 @@ inline bool operator==(const MemberDescriptor& lhs, const MemberDescriptor& rhs)
   bool j =  lhs.is_must_understand == rhs.is_must_understand;
   bool k =  lhs.is_shared == rhs.is_shared;
   bool l =  lhs.is_default_label == rhs.is_default_label;
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT(" %b %b %b %b %b %b %b %b %b %b %b %b\n"),
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("MemberDescriptor: %b %b %b %b %b %b %b %b %b %b %b %b\n"),
   a, b, c, d, e, f, g, h, i, j, k, l));
   return a && b && c && d && e && f && g && h && i && j && k && l;
   // return

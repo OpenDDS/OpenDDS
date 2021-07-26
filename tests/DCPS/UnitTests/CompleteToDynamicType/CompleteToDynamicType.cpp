@@ -36,9 +36,9 @@ TEST(CompleteToMinimalTypeObject, MyStruct)
   XTypes::DynamicType_rch expected_dt(new XTypes::DynamicType, OpenDDS::DCPS::keep_count());
   XTypes::TypeDescriptor* td(new XTypes::TypeDescriptor);
   td->kind = XTypes::TK_STRUCTURE;
-  td->name = "MyStruct";
+  td->name = "::MyMod::MyStruct";
   td->bound.length(0);
-  td->extensibility_kind = XTypes::APPENDABLE;
+  td->extensibility_kind = XTypes::MUTABLE;
   td->is_nested = 0;
   expected_dt->descriptor_ = td;
   XTypes::DynamicTypeMember_rch expected_dtm(new XTypes::DynamicTypeMember, OpenDDS::DCPS::keep_count());
