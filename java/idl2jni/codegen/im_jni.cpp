@@ -1669,10 +1669,12 @@ ostream &operator<< (ostream &o, AST_Expression::AST_ExprValue *ev)
   case AST_Expression::EV_wchar:
     o << "L\'" << ev->u.wcval << '\'';
     break;
+#if OPENDDS_HAS_EXPLICIT_INTS
   case AST_Expression::EV_int8:
     o << static_cast<short>(ev->u.int8val);
     break;
   case AST_Expression::EV_uint8:
+#endif
   case AST_Expression::EV_octet:
     o << static_cast<short>(ev->u.oval);
     break;
