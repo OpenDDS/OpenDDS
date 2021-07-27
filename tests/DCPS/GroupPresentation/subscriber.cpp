@@ -178,29 +178,41 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::SubscriptionMatchedStatus matches1 = { 0, 0, 0, 0, 0 };
     DDS::SubscriptionMatchedStatus matches2 = { 0, 0, 0, 0, 0 };
     while (true) {
-      if (reader1->get_subscription_matched_status(matches1) != DDS::RETCODE_OK) {
+      ACE_DEBUG((LM_DEBUG,"top of wait loop getting matches1 on thread %t\n"));
+      DDS::ReturnCode_t rc = reader1->get_subscription_matched_status(matches1);
+      if (rc == DDS::RETCODE_TIMEOUT) {
+        ACE_DEBUG ((LM_DEBUG,"Could not acquire lock on reader1\n"));
+      }
+      else if (rc != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("%N:%l main()")
+                          ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), -1);
+      }
+      ACE_DEBUG((LM_DEBUG,"getting matches2 on thread %t\n"));
+      rc = reader2->get_subscription_matched_status(matches2);
+      if (rc == DDS::RETCODE_TIMEOUT) {
+        ACE_DEBUG ((LM_DEBUG,"Could not acquire lock on reader2\n"));
+      }
+      else if (rc != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l main()")
                           ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), -1);
       }
 
-      if (reader2->get_subscription_matched_status(matches2) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), -1);
+      if (matches1.current_count_change != 0 || matches2.current_count_change != 0) {
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("%N:%l main() on thread %t")
+                   ACE_TEXT("\n matches 1: current (%d %d) total (%d %d)")
+                   ACE_TEXT("\n matches 2: current (%d %d) total (%d %d)\n"),
+                   matches1.current_count, matches1.current_count_change, matches1.total_count, matches1.total_count_change,
+                   matches2.current_count, matches2.current_count_change, matches2.total_count, matches2.total_count_change));
       }
-
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("%N:%l main()")
-                 ACE_TEXT(" matches 1: current %d total %d")
-                 ACE_TEXT(" matches 2: current %d total %d\n"),
-                 matches1.current_count, matches1.total_count,
-                 matches2.current_count, matches2.total_count));
-
       if ((matches1.current_count == 0 && matches1.total_count > 0) ||
           (matches2.current_count == 0 && matches2.total_count > 0)) {
+        ACE_DEBUG((LM_DEBUG,"counts are now 0\n"));
         break;
       }
+
       DDS::ReturnCode_t ret = ws->wait(conditions, timeout);
       if (DDS::RETCODE_OK != ret && DDS::RETCODE_TIMEOUT != ret) {
         ACE_ERROR((LM_ERROR,
@@ -208,20 +220,23 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         break;
       }
     }
-
+    ACE_DEBUG((LM_DEBUG,"detach_condition1\n"));
     ws->detach_condition(condition1);
+    ACE_DEBUG((LM_DEBUG,"detach_condition2\n"));
     ws->detach_condition(condition2);
 
     // Clean-up!
+    ACE_DEBUG((LM_DEBUG,"delete_contained_entities\n"));
     participant->delete_contained_entities();
+    ACE_DEBUG((LM_DEBUG,"delete_participant\n"));
     dpf->delete_participant(participant.in());
-
-    TheServiceParticipant->shutdown();
+    ACE_DEBUG((LM_DEBUG,"TSP->shutdown\n"));
+    //TheServiceParticipant->shutdown();
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
     return -1;
   }
-
+  ACE_DEBUG((LM_DEBUG,"main exiting\n"));
   return 0;
 }

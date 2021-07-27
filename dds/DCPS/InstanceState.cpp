@@ -116,7 +116,9 @@ int InstanceState::handle_timeout(const ACE_Time_Value&, const void*)
 
 bool InstanceState::dispose_was_received(const PublicationId& writer_id)
 {
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%d: want instance lock\n", handle_));
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%d: took instance lock\n", handle_));
   writers_.erase(writer_id);
 
   //
@@ -134,12 +136,15 @@ bool InstanceState::dispose_was_received(const PublicationId& writer_id)
 #endif
         instance_state_ = DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE;
         schedule_release();
+        ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%d: releasing instance lock\n", handle_));
+
         return true;
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       }
     }
 #endif
   }
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%d: releasing instance lock\n", handle_));
 
   return false;
 }
@@ -153,7 +158,9 @@ bool InstanceState::unregister_was_received(const PublicationId& writer_id)
     ));
   }
 
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%d: want instance lock\n", handle_));
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%d: took instance lock\n", handle_));
   writers_.erase(writer_id);
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   if (exclusive_) {
@@ -171,9 +178,11 @@ bool InstanceState::unregister_was_received(const PublicationId& writer_id)
   if (writers_.empty() && (instance_state_ & DDS::ALIVE_INSTANCE_STATE)) {
     instance_state_ = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE;
     schedule_release();
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%d: releasing instance lock\n", handle_));
     return true;
   }
 
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%d: releasing instance lock\n", handle_));
   return false;
 }
 

@@ -243,6 +243,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
   }
 
   //Why do we need the publication_handle_lock_ here?  No access to id_to_handle_map_...
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want lock\n", this->get_instance_handle()));
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
 
 
@@ -252,6 +253,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
   //
   {
 
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want lock, nested write guard\n", this->get_instance_handle()));
     ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, writers_lock_);
 
     const PublicationId& writer_id = writer.writerId;
@@ -300,7 +302,10 @@ DataReaderImpl::add_association(const RepoId& yourId,
             OPENDDS_STRING(reader_converter).c_str(),
             OPENDDS_STRING(writer_converter).c_str()));
       }
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing write lock\n", this->get_instance_handle()));
     }
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing lock\n", this->get_instance_handle()));
+
   }
 
   // Propagate the add_associations processing down into the Transport
@@ -324,6 +329,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
   //associate does not access id_to_handle_map_, thus not clear why publication_handle_lock_
   //is held here anyway
   guard.release();
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: lock released\n", this->get_instance_handle()));
 
   if (associate(data, active)) {
     const Observer_rch observer = get_observer(Observer::e_ASSOCIATED);
@@ -354,7 +360,7 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
   }
 
   {
-
+ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want lock\n", this->get_instance_handle()));
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
 
     // LIVELINESS policy timers are managed here.
@@ -369,6 +375,8 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
       // this call will start the timer if it is not already set
       liveliness_timer_->check_liveliness();
     }
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing lock\n", this->get_instance_handle()));
+
   }
   // We no longer hold the publication_handle_lock_.
 
@@ -384,6 +392,8 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
     // We acquire the publication_handle_lock_ for the remainder of our
     // processing.
     {
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want lock\n", this->get_instance_handle()));
+
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
 
       // This insertion is idempotent.
@@ -429,6 +439,8 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
       }
 
       notify_status_condition();
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing lock\n", this->get_instance_handle()));
+
     }
 
     {
@@ -544,6 +556,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
   }
   DDS::InstanceHandleSeq handles;
 
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want lock\n", this->get_instance_handle()));
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
 
   // This is used to hold the list of writers which were actually
@@ -559,6 +572,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
   //We just need remove the writers in the list that have not been
   //removed.
   {
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want nested write lock\n", this->get_instance_handle()));
     ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
 
     wr_len = writers.length();
@@ -587,17 +601,25 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
         push_back(updated_writers, writer_id);
       }
     }
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing nested write lock\n", this->get_instance_handle()));
+
   }
 
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t: removed writers length = %d\n",removed_writers.size()));
   for (WriterMapType::iterator it = removed_writers.begin(); it != removed_writers.end(); ++it) {
     it->second->removed();
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t: removed a writer\n"));
   }
+
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t: clearing removed writers\n"));
   removed_writers.clear();
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t: done with removed writers\n"));
 
   wr_len = updated_writers.length();
 
   // Return now if the supplied writers have been removed already.
   if (wr_len == 0) {
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing lock on wrlen = 0\n", this->get_instance_handle()));
     return;
   }
 
@@ -609,12 +631,14 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
       id_to_handle_map_.erase(updated_writers[i]);
     }
   }
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t: done with is bit (1)\n"));
 
   for (CORBA::ULong i = 0; i < updated_writers.length(); ++i) {
     {
       this->disassociate(updated_writers[i]);
     }
   }
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t: done with updated writers\n"));
 
   // Mirror the add_associations SUBSCRIPTION_MATCHED_STATUS processing.
   if (!this->is_bit_) {
@@ -648,6 +672,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
       notify_status_condition();
     }
   }
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t: done with is bit (2)\n"));
 
   // If this remove_association is invoked when the InfoRepo
   // detects a lost writer then make a callback to notify
@@ -659,6 +684,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
   if (this->monitor_) {
     this->monitor_->report();
   }
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing lock\n", this->get_instance_handle()));
 }
 
 void
@@ -670,9 +696,11 @@ DataReaderImpl::remove_all_associations()
   OpenDDS::DCPS::WriterIdSeq writers;
   int size;
 
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want lock\n", this->get_instance_handle()));
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
 
   {
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want lock, nested read guard\n", this->get_instance_handle()));
     ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
     size = static_cast<int>(writers_.size());
@@ -687,6 +715,8 @@ DataReaderImpl::remove_all_associations()
       writers[i++] = curr_writer->first;
       ++curr_writer;
     }
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing nested read lock\n", this->get_instance_handle()));
+
   }
 
   try {
@@ -700,6 +730,7 @@ DataReaderImpl::remove_all_associations()
   }
 
   transport_stop();
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing lock\n", this->get_instance_handle()));
 }
 
 void
@@ -708,12 +739,14 @@ DataReaderImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
   DDS::DataReaderListener_var listener =
       listener_for(DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS);
 
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want lock\n", this->get_instance_handle()));
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
       guard,
       this->publication_handle_lock_);
 
 
   if (this->requested_incompatible_qos_status_.total_count == status.total_count) {
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing lock\n", this->get_instance_handle()));
     // This test should make the method idempotent.
     return;
   }
@@ -741,6 +774,8 @@ DataReaderImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
   }
 
   notify_status_condition();
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing lock\n", this->get_instance_handle()));
+
 }
 
 void
@@ -1038,6 +1073,7 @@ DataReaderImpl::get_requested_incompatible_qos_status(
     DDS::RequestedIncompatibleQosStatus & status)
 {
 
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want lock\n", this->get_instance_handle()));
   ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(
       this->publication_handle_lock_);
 
@@ -1046,6 +1082,7 @@ DataReaderImpl::get_requested_incompatible_qos_status(
   status = requested_incompatible_qos_status_;
   requested_incompatible_qos_status_.total_count_change = 0;
 
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing lock\n", this->get_instance_handle()));
   return DDS::RETCODE_OK;
 }
 
@@ -1054,13 +1091,18 @@ DataReaderImpl::get_subscription_matched_status(
     DDS::SubscriptionMatchedStatus & status)
 {
 
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want lock\n", this->get_instance_handle()));
   ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(
-      this->publication_handle_lock_);
+      this->publication_handle_lock_, true);
+  if(!justMe.locked()) {
+    ACE_ERROR_RETURN((LM_ERROR,"failed to acquire the lock!\n"),DDS::RETCODE_TIMEOUT);
+  }
 
   set_status_changed_flag(DDS::SUBSCRIPTION_MATCHED_STATUS, false);
   status = subscription_match_status_;
   subscription_match_status_.total_count_change = 0;
   subscription_match_status_.current_count_change = 0;
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing lock\n", this->get_instance_handle()));
 
   return DDS::RETCODE_OK;
 }
@@ -1096,6 +1138,7 @@ DataReaderImpl::get_matched_publications(
         DDS::RETCODE_NOT_ENABLED);
   }
 
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want lock\n", this->get_instance_handle()));
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
       guard,
       this->publication_handle_lock_,
@@ -1111,6 +1154,7 @@ DataReaderImpl::get_matched_publications(
       ++current, ++index) {
     publication_handles[ index] = current->second;
   }
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing lock\n", this->get_instance_handle()));
 
   return DDS::RETCODE_OK;
 }
@@ -1130,6 +1174,7 @@ DataReaderImpl::get_matched_publication_data(
   }
 
 
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want lock\n", this->get_instance_handle()));
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
       guard,
       this->publication_handle_lock_,
@@ -1150,6 +1195,7 @@ DataReaderImpl::get_matched_publication_data(
   if (ret == DDS::RETCODE_OK) {
     publication_data = data[0];
   }
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing lock\n", this->get_instance_handle()));
 
   return ret;
 }
@@ -1753,7 +1799,10 @@ bool DataReaderImpl::have_sample_states(
 {
   //!!!caller should have acquired sample_lock_
   /// @TODO: determine correct failed lock return value.
+
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want instance lock\n", const_cast<DataReaderImpl *>(this)->get_instance_handle()));
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_, false);
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took instance lock\n", const_cast<DataReaderImpl *>(this)->get_instance_handle()));
 
   for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
       iter != instances_.end();
@@ -1763,10 +1812,12 @@ bool DataReaderImpl::have_sample_states(
     for (ReceivedDataElement *item = ptr->rcvd_samples_.head_;
         item != 0; item = item->next_data_sample_) {
       if (item->sample_state_ & sample_states) {
+        ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing instance lock\n", const_cast<DataReaderImpl *>(this)->get_instance_handle()));
         return true;
       }
     }
   }
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing instance lock\n", const_cast<DataReaderImpl *>(this)->get_instance_handle()));
 
   return false;
 }
@@ -1776,7 +1827,9 @@ DataReaderImpl::have_view_states(DDS::ViewStateMask view_states) const
 {
   //!!!caller should have acquired sample_lock_
   /// @TODO: determine correct failed lock return value.
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want instance lock\n", const_cast<DataReaderImpl *>(this)->get_instance_handle()));
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_,false);
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took instance lock\n", const_cast<DataReaderImpl *>(this)->get_instance_handle()));
 
   for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
       iter != instances_.end();
@@ -1784,10 +1837,12 @@ DataReaderImpl::have_view_states(DDS::ViewStateMask view_states) const
     SubscriptionInstance_rch ptr = iter->second;
 
     if (ptr->instance_state_->view_state() & view_states) {
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing instance lock\n", const_cast<DataReaderImpl *>(this)->get_instance_handle()));
       return true;
     }
   }
 
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing instance lock\n", const_cast<DataReaderImpl *>(this)->get_instance_handle()));
   return false;
 }
 
@@ -1796,7 +1851,9 @@ bool DataReaderImpl::have_instance_states(
 {
   //!!!caller should have acquired sample_lock_
   /// @TODO: determine correct failed lock return value.
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want instance lock\n", const_cast<DataReaderImpl *>(this)->get_instance_handle()));
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_,false);
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took instance lock\n", const_cast<DataReaderImpl *>(this)->get_instance_handle()));
 
   for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
       iter != instances_.end();
@@ -1804,10 +1861,12 @@ bool DataReaderImpl::have_instance_states(
     SubscriptionInstance_rch ptr = iter->second;
 
     if (ptr->instance_state_->instance_state() & instance_states) {
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing instance lock\n", const_cast<DataReaderImpl *>(this)->get_instance_handle()));
       return true;
     }
   }
 
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing instance lock\n", const_cast<DataReaderImpl *>(this)->get_instance_handle()));
   return false;
 }
 
@@ -2295,15 +2354,21 @@ DataReaderImpl::writer_became_dead(WriterInfo& info)
 void
 DataReaderImpl::instances_liveliness_update(const PublicationId& writer)
 {
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want sample lock AND instances lock\n", this->get_instance_handle()));
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took sample lock\n", this->get_instance_handle()));
   ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took instances lock, instance map size = %d\n", this->get_instance_handle(),instances_.size()));
   for (SubscriptionInstanceMapType::iterator iter = instances_.begin(), next = iter;
        iter != instances_.end(); iter = next) {
     ++next;
     if (iter->second->instance_state_->writes_instance(writer)) {
       set_instance_state(iter->first, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, SystemTimePoint::now(), writer);
     }
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: iterating over instance map\n", this->get_instance_handle()));
   }
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: released BOTH lock\n", this->get_instance_handle()));
+
 }
 
 void

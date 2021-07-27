@@ -928,7 +928,10 @@ namespace OpenDDS {
                           const GUID_t& publication_id = GUID_UNKNOWN)
   {
     using namespace OpenDDS::DCPS;
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want sample lock\n", this->get_instance_handle()));
+
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took sample lock\n", this->get_instance_handle()));
 
     SubscriptionInstance_rch si = get_handle_instance(instance);
     if (si && state != DDS::ALIVE_INSTANCE_STATE) {
@@ -949,6 +952,7 @@ namespace OpenDDS {
         notify_read_conditions();
       }
     }
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing sample lock\n", this->get_instance_handle()));
   }
 
   virtual void lookup_instance(const OpenDDS::DCPS::ReceivedDataSample& sample,
@@ -1679,11 +1683,13 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
   filtered = false;
 
   DDS::InstanceHandle_t handle(DDS::HANDLE_NIL);
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: store instance data (1)\n", this->get_instance_handle()));
 
   //!!! caller should already have the sample_lock_
   //We will unlock it before calling into listeners
 
   typename InstanceMap::const_iterator const it = instance_map_.find(*instance_data);
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: store instance data (2)\n", this->get_instance_handle()));
 
   if (it == instance_map_.end()) {
     if (is_dispose_msg || is_unregister_msg) {
@@ -1692,8 +1698,10 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
 
     std::size_t instances_size = 0;
     {
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: store instance data want instances lock(2)\n", this->get_instance_handle()));
       ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
       instances_size = instances_.size();
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: store instance data releasing instances lock(3)\n", this->get_instance_handle()));
     }
     if ((this->qos_.resource_limits.max_instances != DDS::LENGTH_UNLIMITED) &&
       ((::CORBA::Long) instances_size >= this->qos_.resource_limits.max_instances))
@@ -1716,7 +1724,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
         sample_rejected_status_.total_count_change = 0;
       }  // do we want to do something if listener is nil???
       notify_status_condition_no_sample_lock();
-
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: store instance data(4)\n", this->get_instance_handle()));
       return;
     }
 
@@ -1725,6 +1733,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
     bool new_handle = true;
     if (this->is_exclusive_ownership_) {
       OwnershipManagerPtr owner_manager = this->ownership_manager();
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: store instance data want owner manager lock(5)\n", this->get_instance_handle()));
 
       if (!owner_manager || owner_manager->instance_lock_acquire () != 0) {
         ACE_ERROR ((LM_ERROR,
@@ -1761,6 +1770,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
         ref(this->instances_lock_),
         handle, owns_handle);
     {
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: store instance data want instances lock(6)\n", this->get_instance_handle()));
       ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
       int ret = OpenDDS::DCPS::bind(instances_, handle, instance);
 
@@ -1773,6 +1783,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
                     ACE_TEXT("insert handle failed, ret = %d.\n"), TraitsType::type_name(), ret));
         return;
       }
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: store instance data releasing instances lock(7)\n", this->get_instance_handle()));
     }
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
@@ -1831,6 +1842,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
     just_registered = false;
     handle = it->second;
   }
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: store instance data(8)\n", this->get_instance_handle()));
 
   if (header.message_id_ != OpenDDS::DCPS::INSTANCE_REGISTRATION)
   {
@@ -1857,6 +1869,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
         return;
       }
     }
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: store instance data calling finish(9)\n", this->get_instance_handle()));
 
     finish_store_instance_data(move(instance_data), header, instance_ptr, is_dispose_msg, is_unregister_msg);
   }
@@ -1865,6 +1878,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
     instance_ptr = this->get_handle_instance(handle);
     instance_ptr->instance_state_->lively(header.publication_id_);
   }
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: store instance data returning(10)\n", this->get_instance_handle()));
 }
 
 void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data, const DataSampleHeader& header,
@@ -1890,8 +1904,10 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
       //       just looking at the head will not be enough.
       DDS::DataReaderListener_var listener
         = listener_for(DDS::SAMPLE_REJECTED_STATUS);
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: calling set_status_changed_flag\n", this->get_instance_handle()));
 
       set_status_changed_flag(DDS::SAMPLE_REJECTED_STATUS, true);
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: set_status_changed_flag returned\n", this->get_instance_handle()));
 
       sample_rejected_status_.last_reason =
         DDS::REJECTED_BY_SAMPLES_PER_INSTANCE_LIMIT;
@@ -1901,16 +1917,22 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
 
       if (!CORBA::is_nil(listener.in()))
       {
+        ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: unlocking sample lock with reverse lock\n", this->get_instance_handle()));
+
         ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
         listener->on_sample_rejected(this, sample_rejected_status_);
         sample_rejected_status_.total_count_change = 0;
+        ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: reacquiring sample lock\n", this->get_instance_handle()));
+
       }  // do we want to do something if listener is nil???
       notify_status_condition_no_sample_lock();
       return;
     }
     else if (!is_dispose_msg && !is_unregister_msg)
     {
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: removing sample\n", this->get_instance_handle()));
+
       // Discard the oldest previously-read sample
       OpenDDS::DCPS::ReceivedDataElement *item =
         instance_ptr->rcvd_samples_.head_;
@@ -1920,8 +1942,10 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
   }
   else if (this->qos_.resource_limits.max_samples != DDS::LENGTH_UNLIMITED)
   {
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: max_samples != unlimited\n", this->get_instance_handle()));
     CORBA::Long total_samples = 0;
     {
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want instance lock\n", this->get_instance_handle()));
       ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
       for (OpenDDS::DCPS::DataReaderImpl::SubscriptionInstanceMapType::iterator iter = instances_.begin();
         iter != instances_.end();
@@ -1930,6 +1954,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
 
         total_samples += (CORBA::Long) ptr->rcvd_samples_.size_;
       }
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing instance lock\n", this->get_instance_handle()));
     }
 
     if (total_samples >= this->qos_.resource_limits.max_samples)
@@ -1959,10 +1984,13 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
         sample_rejected_status_.last_instance_handle = instance_ptr->instance_handle_;
         if (!CORBA::is_nil(listener.in()))
         {
+          ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: unlock sample lock\n", this->get_instance_handle()));
           ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
           listener->on_sample_rejected(this, sample_rejected_status_);
           sample_rejected_status_.total_count_change = 0;
+          ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: relocking sample lock\n", this->get_instance_handle()));
+
         }  // do we want to do something if listener is nil???
         notify_status_condition_no_sample_lock();
 
@@ -1977,6 +2005,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
         item->dec_ref();
       }
     }
+          ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: returning from finish_store_instance_data\n", this->get_instance_handle()));
   }
 
   bool event_notify = false;
@@ -1999,6 +2028,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
   if (!event_notify) {
     return;
   }
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: creating new ReceivedDataElement\n", this->get_instance_handle()));
 
   ReceivedDataElement* const ptr =
     new (*rd_allocator_.get()) ReceivedDataElementWithType<MessageTypeWithAllocator>(
@@ -2016,6 +2046,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
   if (! is_dispose_msg  && ! is_unregister_msg
       && instance_ptr->rcvd_samples_.size_ > get_depth())
     {
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: in finish\n", this->get_instance_handle()));
       OpenDDS::DCPS::ReceivedDataElement* head_ptr =
         instance_ptr->rcvd_samples_.head_;
 
@@ -2023,6 +2054,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
 
       if (head_ptr->sample_state_ == DDS::NOT_READ_SAMPLE_STATE)
         {
+          ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: in finish\n", this->get_instance_handle()));
           DDS::DataReaderListener_var listener
             = listener_for (DDS::SAMPLE_LOST_STATUS);
 
@@ -2033,6 +2065,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
 
           if (!CORBA::is_nil(listener.in()))
             {
+              ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: in finish\n", this->get_instance_handle()));
               ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
               listener->on_sample_lost(this, sample_lost_status_);
@@ -2049,6 +2082,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   if (! ptr->coherent_change_) {
 #endif
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: in finish\n", this->get_instance_handle()));
     RcHandle<OpenDDS::DCPS::SubscriberImpl> sub = get_subscriber_servant ();
     if (!sub || this->get_deleted())
       return;
@@ -2061,13 +2095,18 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
         sub->listener_for(DDS::DATA_ON_READERS_STATUS);
     if (!CORBA::is_nil(sub_listener.in()) && !this->coherent_)
       {
+        ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want reverse sample lock\n", this->get_instance_handle()));
         ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+        ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took reverse sample lock\n", this->get_instance_handle()));
 
         sub_listener->on_data_on_readers(sub.in());
+        ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: in finish\n", this->get_instance_handle()));
         sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, false);
+        ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: released reverse sample lock\n", this->get_instance_handle()));
       }
     else
       {
+        ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: in finish\n", this->get_instance_handle()));
         sub->notify_status_condition();
 
         DDS::DataReaderListener_var listener =
@@ -2075,6 +2114,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
 
         if (!CORBA::is_nil(listener.in()))
           {
+            ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: in finish\n", this->get_instance_handle()));
             ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
             listener->on_data_available(this);
@@ -2083,12 +2123,14 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
           }
         else
           {
+            ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: in finish\n", this->get_instance_handle()));
             notify_status_condition_no_sample_lock();
           }
       }
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   }
 #endif
+ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: finish_store_instance_data returning\n", this->get_instance_handle()));
 }
 
 /// Release sample_lock_ during status notifications in store_instance_data()

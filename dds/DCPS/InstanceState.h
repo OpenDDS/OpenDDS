@@ -118,7 +118,10 @@ public:
   /// Returns true if the writer is a writer of this instance.
   bool writes_instance(const PublicationId& writer_id) const
   {
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%d: want instance lock\n", handle_));
+
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%d: releasing instance lock\n", handle_));
     return writers_.count(writer_id);
   }
 

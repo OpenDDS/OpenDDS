@@ -32,6 +32,7 @@ void
 SubscriberListenerImpl::on_data_on_readers(
   DDS::Subscriber_ptr subs)
 {
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t: on_data_on_readers\n"));
   ::DDS::ReturnCode_t ret = subs->begin_access ();
   if (ret != ::DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR,
@@ -39,6 +40,7 @@ SubscriberListenerImpl::on_data_on_readers(
                   ACE_TEXT(" ERROR: begin_access failed!\n")));
     ACE_OS::exit(-1);
   }
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t: on_data_on_readers\n"));
 
   DDS::SubscriberQos qos;
   ret = subs->get_qos (qos);
@@ -48,13 +50,16 @@ SubscriberListenerImpl::on_data_on_readers(
                   ACE_TEXT(" ERROR: get_qos failed!\n")));
     ACE_OS::exit(-1);
   }
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t: on_data_on_readers\n"));
 
   ::DDS::DataReaderSeq_var readers = new ::DDS::DataReaderSeq(100);
 
   ret = subs->get_datareaders(readers.inout(),
                               ::DDS::NOT_READ_SAMPLE_STATE,
                               ::DDS::ANY_VIEW_STATE,
-                              ::DDS::ANY_INSTANCE_STATE) ;
+                              ::DDS::ANY_INSTANCE_STATE);
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t: on_data_on_readers got data readers\n"));
+
   if (ret != ::DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR,
                   ACE_TEXT("%N:%l: SubscriberListenerImpl::on_data_on_readers()")
@@ -79,7 +84,7 @@ SubscriberListenerImpl::on_data_on_readers(
                     ACE_TEXT(" ERROR: notify_datareaders failed!\n")));
         this->verify_result_ = false;
       }
-
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t: on_data_on_readers return on readers->len == 0\n"));
       return;
     }
 
@@ -91,6 +96,7 @@ SubscriberListenerImpl::on_data_on_readers(
                     len, expecting));
       this->verify_result_ = false;
     }
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: on_data_on_readers\n"));
 
     for (CORBA::ULong i = 0; i < len; ++i) {
       Messenger::MessageDataReader_var message_dr =
@@ -118,26 +124,29 @@ SubscriberListenerImpl::on_data_on_readers(
         ACE_OS::exit(-1);
       }
 
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t: on_data_on_readers\n"));
       this->verify (msg[0], si[0], qos, false);
     }
   }
   else if (qos.presentation.access_scope == ::DDS::TOPIC_PRESENTATION_QOS) {
     ACE_DEBUG((LM_DEBUG,
-                ACE_TEXT("%N:%l: SubscriberListenerImpl::on_data_on_readers() ")
+                ACE_TEXT("%N:%l:%t: SubscriberListenerImpl::on_data_on_readers() ")
                 ACE_TEXT("TOPIC_PRESENTATION_QOS get_datareaders returned %d readers!\n"),
                   len));
 
     // redirect datareader listener to receive DISPOSE and UNREGISTER notifications.
     if (len != 2) {
+      ACE_DEBUG((LM_DEBUG, "%N:%l:%t: notifying datareaders\n"));
       if (subs->notify_datareaders () != ::DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
                     ACE_TEXT("%N:%l: SubscriberListenerImpl::on_data_on_readers()")
                     ACE_TEXT(" ERROR: notify_datareaders failed!\n")));
         this->verify_result_ = false;
       }
-
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t: on_data_on_readers return after notify datareaders\n"));
       return;
     }
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t: len == 2, itrating over datareader list\n"));
 
     for (CORBA::ULong i = 0; i < len; ++i) {
       Messenger::MessageDataReader_var message_dr =
@@ -171,11 +180,13 @@ SubscriberListenerImpl::on_data_on_readers(
 
       CORBA::ULong num_samples = si.length();
       for (CORBA::ULong i = 0; i < num_samples; ++i) {
+        ACE_DEBUG((LM_DEBUG,"%N:%l:%t: on_data_on_readers\n"));
         this->verify (msg[i], si[i], qos, i == num_samples - 1 ? true : false);
       }
     }
   }
   else { //::DDS::INSTANCE_PRESENTATION_QOS
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t: on_data_on_readers\n"));
     subs->notify_datareaders ();
   }
 
@@ -186,7 +197,7 @@ SubscriberListenerImpl::on_data_on_readers(
                   ACE_TEXT(" ERROR: end_access failed!\n")));
     ACE_OS::exit(-1);
   }
-
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t: on_data_on_readers returning at end\n"));
 }
 
 

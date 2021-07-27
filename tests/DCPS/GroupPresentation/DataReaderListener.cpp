@@ -65,7 +65,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
             << "         text       = " << message.text.in()    << std::endl;
          }
       } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l:%t: INFO: instance is disposed\n")));
 
       } else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is unregistered\n")));
@@ -108,16 +108,16 @@ void DataReaderListenerImpl::on_requested_incompatible_qos(
 
 void DataReaderListenerImpl::on_liveliness_changed(
   DDS::DataReader_ptr,
-  const DDS::LivelinessChangedStatus &)
+  const DDS::LivelinessChangedStatus &stat)
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_liveliness_changed()\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_liveliness_changed() on thread %t status = (alive %d %d) (dead %d %d)\n"),stat.alive_count, stat.alive_count_change, stat.not_alive_count, stat.not_alive_count_change));
 }
 
 void DataReaderListenerImpl::on_subscription_matched(
   DDS::DataReader_ptr,
-  const DDS::SubscriptionMatchedStatus &)
+  const DDS::SubscriptionMatchedStatus &stat)
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_subscription_matched()\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_subscription_matched() on thread %t status = (total %d %d) (current %d %d)\n"),stat.total_count, stat.total_count_change, stat.current_count, stat.current_count_change ));
 }
 
 void DataReaderListenerImpl::on_sample_rejected(
