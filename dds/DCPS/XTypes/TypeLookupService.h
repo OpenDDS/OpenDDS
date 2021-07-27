@@ -9,6 +9,7 @@
 #include "TypeObject.h"
 
 #include <dds/DCPS/RcObject.h>
+#include <dds/DCPS/GuidUtils.h>
 
 #include <ace/Thread_Mutex.h>
 

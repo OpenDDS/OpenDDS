@@ -62,9 +62,9 @@ void TypeSupportImpl::to_type_info_i(XTypes::TypeIdentifierWithDependencies& ti_
     ti_with_deps.typeid_with_size.type_id = XTypes::TypeIdentifier();
     ti_with_deps.typeid_with_size.typeobject_serialized_size = 0;
   } else if (TheServiceParticipant->type_object_encoding() == Service_Participant::Encoding_WriteOldFormat) {
-    Encoding encoding = get_typeobject_encoding();
+    Encoding encoding = XTypes::get_typeobject_encoding();
     encoding.skip_sequence_dheader(true);
-    const TypeObject& to = pos->second;
+    const XTypes::TypeObject& to = pos->second;
     ti_with_deps.typeid_with_size.type_id = makeTypeIdentifier(to, &encoding);
     const size_t sz = serialized_size(encoding, to);
     ti_with_deps.typeid_with_size.typeobject_serialized_size = static_cast<unsigned>(sz);
