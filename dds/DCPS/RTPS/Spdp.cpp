@@ -3547,7 +3547,7 @@ Spdp::update_lease_expiration_i(DiscoveredParticipantIter iter,
                                    iter->second.pdata_.participantProxy.protocolVersion,
                                    iter->second.pdata_.participantProxy.vendorId);
 
-  iter->second.lease_expiration_ = now + d;
+  iter->second.lease_expiration_ = now + d + config_->lease_extension();
 
   // Insert.
   const bool cancel = !lease_expirations_.empty() && iter->second.lease_expiration_ < lease_expirations_.begin()->first;
