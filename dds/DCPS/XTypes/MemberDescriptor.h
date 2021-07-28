@@ -27,6 +27,8 @@ enum TryConstructKind {
 
 class MemberDescriptor {
 public:
+  MemberDescriptor() : id(0), index(0), try_construct_kind(DISCARD), is_key(0), is_optional(0), is_must_understand(0), is_shared(0), is_default_label(0)
+  {}
   OPENDDS_STRING name;
   XTypes::MemberId id;
   DynamicType_rch type;
@@ -59,7 +61,7 @@ inline bool operator==(const MemberDescriptor& lhs, const MemberDescriptor& rhs)
   //TODO CLAYTON : Uncomment and delete the code used for debugging upon completion of test
   bool a = lhs.name == rhs.name;
   bool b =  lhs.id == rhs.id;
-  bool c =  *lhs.type.in() == *rhs.type.in();
+  bool c =  is_equivalent(lhs.type, rhs.type);
   bool d =  lhs.default_value == rhs.default_value;
   bool e =  lhs.index == rhs.index;
   bool f =  lhs.label == rhs.label;

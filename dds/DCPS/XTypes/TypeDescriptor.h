@@ -27,6 +27,8 @@ enum ExtensibilityKind {
 
 class TypeDescriptor {
  public:
+  TypeDescriptor() : kind(0), extensibility_kind(FINAL), is_nested(0)
+    {}
   TypeKind kind;
   OPENDDS_STRING name;
   DynamicType_rch base_type;
@@ -55,11 +57,11 @@ inline bool operator==(const LBoundSeq& lhs, const LBoundSeq& rhs) {
 inline bool operator==(const TypeDescriptor& lhs, const TypeDescriptor& rhs) {
     bool a = lhs.kind == rhs.kind;
     bool b = lhs.name == rhs.name;
-    bool c = lhs.base_type == rhs.base_type;
-    bool d = lhs.discriminator_type == rhs.discriminator_type;
+    bool c = is_equivalent(lhs.base_type, rhs.base_type);
+    bool d = is_equivalent(lhs.discriminator_type, rhs.discriminator_type);
     bool e = lhs.bound == rhs.bound;
-    bool f = lhs.element_type.in() == rhs.element_type.in();
-    bool g = lhs.key_element_type.in() == rhs.key_element_type.in();
+    bool f = is_equivalent(lhs.element_type, rhs.element_type);
+    bool g = is_equivalent(lhs.key_element_type, rhs.key_element_type);
     bool h = lhs.extensibility_kind == rhs.extensibility_kind;
     bool i = lhs.is_nested == rhs.is_nested;
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("TypeDescriptor: %b %b %b %b %b %b %b %b %b\n"),

@@ -4,7 +4,38 @@ module MyMod {
 
   @topic
   @mutable
-  struct MyStruct {
+  struct MyInnerStruct {
     long l;
+  };
+
+  @topic
+  @appendable
+  struct MyOuterStruct{
+    MyInnerStruct ms;
+  };
+  
+  typedef MyOuterStruct MyAliasStruct;
+
+  enum PrimitiveKind {
+    TK_INT32,
+    TK_CHAR8
+  };
+
+  @topic
+  union MyUnion switch (PrimitiveKind) {
+  case TK_INT32: long l;
+  case TK_CHAR8: char c;
+  default: short s;
+  };
+
+  typedef long MyInnerArray[2];
+  typedef MyInnerArray MyOuterArray[3][2];
+
+  typedef sequence<long> MySeq;
+  @topic
+  @appendable
+  struct MyAnonStruct {
+    sequence<long, 5> lseq;
+    long larr[3];
   };
 };

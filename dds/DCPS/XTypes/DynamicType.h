@@ -42,25 +42,8 @@ public:
 
 typedef OpenDDS::DCPS::RcHandle<DynamicType> DynamicType_rch;
 
-// inline bool operator==(const DynamicTypeMembersByName& lhs, const DynamicTypeMembersByName& rhs)
-// {
-//   //OPENDDS_MAP(OPENDDS_STRING, DynamicTypeMember_rch)
-//   if (lhs.size() == rhs.size()) {
-//     for (DynamicTypeMembersByName::const_iterator i = lhs.begin() ; i != lhs.end() ; ++i) {
-//       if (!(rhs.find(lhs.value_comp
-//         return false;
-//       }
-//     }
-//     return true;
-//   }
-//   return false;
-    
-//     //for each part of map
-//     //key is same
-//     //member is same
-// }
-
 OpenDDS_Dcps_Export bool operator==(const DynamicType& lhs, const DynamicType& rhs);
+OpenDDS_Dcps_Export bool is_equivalent(const DynamicType_rch& lhs, const DynamicType_rch& rhs);
 
 } // namespace XTypes
 } // namespace OpenDDS

@@ -31,12 +31,16 @@ namespace XTypes {
 
   bool operator==(const DynamicTypeMembersByName& lhs, const DynamicTypeMembersByName rhs) {
     if (lhs.size() == rhs.size()) {
-      for (DynamicTypeMembersByName::const_iterator it = lhs.begin(); it != lhs.end(); ++it) {
-        if (!(*lhs.find(it->first)->second->descriptor_ == *rhs.find(it->first)->second->descriptor_)) {
-          return false;
+      if (lhs.size() > 0) {
+        for (DynamicTypeMembersByName::const_iterator it = lhs.begin(); it != lhs.end(); ++it) {
+          if (!(*lhs.find(it->first)->second->descriptor_ == *rhs.find(it->first)->second->descriptor_)) {
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("DynamicTypeMembersByName: Members are not the same \n")));
+            return false;
+          }
         }
       }
     } else {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("DynamicTypeMembersByName: Member count is different \n")));
       return false;
     }
     return true;
@@ -46,10 +50,12 @@ namespace XTypes {
     if (lhs.size() == rhs.size()) {
       for (DynamicTypeMembersById::const_iterator it = lhs.begin(); it != lhs.end(); ++it) {
         if (!(*lhs.find(it->first)->second->descriptor_ == *rhs.find(it->first)->second->descriptor_)) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("DynamicTypeMembersById: Members are not the same \n")));
           return false;
         }
       }
     } else {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("DynamicTypeMembersById: Member count is different \n")));
       return false;
     }
     return true;

@@ -436,6 +436,14 @@ bool TypeLookupService::complete_to_minimal_type_object(const TypeObject& cto, T
   }
 }
 
+DDS::ReturnCode_t TypeLookupService::insert_dynamic_member(DynamicType_rch& dt, const DynamicTypeMember_rch& dtm)
+{
+  dt->member_by_index.insert(dt->member_by_index.end(), dtm);
+  dt->member_by_id.insert(dt->member_by_id.end(), std::make_pair(dtm->descriptor_->id , dtm));
+  dt->member_by_name.insert(dt->member_by_name.end(), std::make_pair(dtm->descriptor_->name , dtm));
+  return DDS::RETCODE_OK;
+}
+
 DDS::ReturnCode_t TypeLookupService::complete_struct_member_to_member_descriptor(MemberDescriptor*& md,
   const CompleteStructMember& cm)
 {
@@ -518,7 +526,7 @@ DDS::ReturnCode_t TypeLookupService::complete_to_dynamic(DynamicType_rch& dt, co
     dt->descriptor_->name = cto.alias_type.header.detail.type_name;
     dt->descriptor_->bound.length(0);
     type_identifier_to_dynamic(dt->descriptor_->base_type, cto.alias_type.body.common.related_type);
-    dt->member_by_index = dt->descriptor_->base_type->member_by_index; //TODO CLAYTON: Test this
+    dt->member_by_index = dt->descriptor_->base_type->member_by_index;
     break;
   // Enumerated TKs
   case TK_ENUM:
@@ -532,8 +540,8 @@ DDS::ReturnCode_t TypeLookupService::complete_to_dynamic(DynamicType_rch& dt, co
       dtm->descriptor_->name = cto.enumerated_type.literal_seq[i].detail.name;
       dtm->descriptor_->type = dt;
       dtm->descriptor_->is_default_label = (cto.enumerated_type.literal_seq[i].common.flags & (1 << 6));
-      dt->member_by_index.insert(dt->member_by_index.end(), dtm);
       dtm->descriptor_->index = i;
+      insert_dynamic_member(dt, dtm);
     }
     break;
   case TK_BITMASK: {
@@ -548,8 +556,8 @@ DDS::ReturnCode_t TypeLookupService::complete_to_dynamic(DynamicType_rch& dt, co
       dtm->descriptor_ = md;
       dtm->descriptor_->name = cto.bitmask_type.flag_seq[i].detail.name;
       type_identifier_to_dynamic(dtm->descriptor_->type, TypeIdentifier(TK_BOOLEAN));
-      dt->member_by_index.insert(dt->member_by_index.end(), dtm);
       dtm->descriptor_->index = i;
+      insert_dynamic_member(dt, dtm);
     }
   }
   break;
@@ -563,9 +571,9 @@ DDS::ReturnCode_t TypeLookupService::complete_to_dynamic(DynamicType_rch& dt, co
       MemberDescriptor* md(new MemberDescriptor);
       dtm->descriptor_ = md;
       complete_annotation_member_to_member_descriptor(dtm->descriptor_, cto.annotation_type.member_seq[i]);
-      dt->member_by_index.insert(dt->member_by_index.end(), dtm);
       dtm->descriptor_->index = i;
       dtm->descriptor_->id = i; //Clayton: I'm not entirely sure what this should be for annotation
+      insert_dynamic_member(dt, dtm);
     }
     break;
   case TK_STRUCTURE:
@@ -588,10 +596,8 @@ DDS::ReturnCode_t TypeLookupService::complete_to_dynamic(DynamicType_rch& dt, co
       MemberDescriptor* md(new MemberDescriptor);
       dtm->descriptor_ = md;
       complete_struct_member_to_member_descriptor(dtm->descriptor_, cto.struct_type.member_seq[i]);
-      dt->member_by_index.insert(dt->member_by_index.end(), dtm);
       dtm->descriptor_->index = i;
-      dt->member_by_id.insert(dt->member_by_id.end(), std::make_pair(md->id , dtm));
-      dt->member_by_name.insert(dt->member_by_name.end(), std::make_pair(md->name , dtm));
+      insert_dynamic_member(dt, dtm);
     }
     break;
   case TK_UNION:
@@ -614,8 +620,8 @@ DDS::ReturnCode_t TypeLookupService::complete_to_dynamic(DynamicType_rch& dt, co
       MemberDescriptor* md(new MemberDescriptor);
       dtm->descriptor_ = md;
       complete_union_member_to_member_descriptor(dtm->descriptor_, cto.union_type.member_seq[i]);
-      dt->member_by_index.insert(dt->member_by_index.end(), dtm);
       dtm->descriptor_->index = i;
+      insert_dynamic_member(dt, dtm);
     }
     break;
   case TK_BITSET:

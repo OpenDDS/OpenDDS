@@ -44,6 +44,8 @@ public:
 
   void update_type_identifier_map(const TypeIdentifierPairSeq& tid_pairs);
   bool complete_to_minimal_type_object(const TypeObject& cto, TypeObject& mto) const;
+
+  DDS::ReturnCode_t insert_dynamic_member(DynamicType_rch& dt, const DynamicTypeMember_rch& dtm);
   DDS::ReturnCode_t type_identifier_to_dynamic(DynamicType_rch& dt, const TypeIdentifier& ti);
   DDS::ReturnCode_t complete_to_dynamic(DynamicType_rch& dt, const CompleteTypeObject& cto);
   DDS::ReturnCode_t complete_struct_member_to_member_descriptor(MemberDescriptor*& md, const CompleteStructMember& cm);
