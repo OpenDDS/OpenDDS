@@ -202,7 +202,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
               ACE_TEXT("[rtps_discovery/%C] section.\n"),
               value.c_str(), rtps_name.c_str()), -1);
           }
-          config->lease_extension(TimeExtension(extension));
+          config->lease_extension(TimeDuration(extension));
         } else if (name == "PB") {
           const OPENDDS_STRING& value = it->second;
           u_short pb;
