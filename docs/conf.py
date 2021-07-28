@@ -99,6 +99,8 @@ source_suffix = {
 
 numfig = True
 
+highlight_language = 'none'
+
 
 # -- Options for HTML output -------------------------------------------------
 
