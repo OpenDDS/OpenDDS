@@ -178,7 +178,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::SubscriptionMatchedStatus matches1 = { 0, 0, 0, 0, 0 };
     DDS::SubscriptionMatchedStatus matches2 = { 0, 0, 0, 0, 0 };
     while (true) {
-      ACE_DEBUG((LM_DEBUG,"top of wait loop getting matches1 on thread %t\n"));
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t: top of wait loop getting matches1\n"));
       DDS::ReturnCode_t rc = reader1->get_subscription_matched_status(matches1);
       if (rc == DDS::RETCODE_TIMEOUT) {
         ACE_DEBUG ((LM_DEBUG,"Could not acquire lock on reader1\n"));
@@ -188,7 +188,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           ACE_TEXT("%N:%l main()")
                           ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), -1);
       }
-      ACE_DEBUG((LM_DEBUG,"getting matches2 on thread %t\n"));
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t: getting matches2\n"));
       rc = reader2->get_subscription_matched_status(matches2);
       if (rc == DDS::RETCODE_TIMEOUT) {
         ACE_DEBUG ((LM_DEBUG,"Could not acquire lock on reader2\n"));

@@ -77,7 +77,7 @@ enum Coherent_State {
 
 /// Keeps track of a DataWriter's liveliness for a DataReader.
 class OpenDDS_Dcps_Export WriterInfo : public RcObject {
-  friend class WriteInfoListner;
+  friend class WriterInfoListner;
 
 public:
   enum WriterState { NOT_SET, ALIVE, DEAD };

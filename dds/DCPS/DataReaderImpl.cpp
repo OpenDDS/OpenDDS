@@ -572,7 +572,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
   //We just need remove the writers in the list that have not been
   //removed.
   {
-    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want nested write lock\n", this->get_instance_handle()));
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want write lock for writing\n", this->get_instance_handle()));
     ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
 
     wr_len = writers.length();
@@ -601,7 +601,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
         push_back(updated_writers, writer_id);
       }
     }
-    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing nested write lock\n", this->get_instance_handle()));
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing write lock\n", this->get_instance_handle()));
 
   }
 
