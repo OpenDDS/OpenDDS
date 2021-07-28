@@ -90,7 +90,8 @@ public:
                 OpenDDS::DCPS::SubscriptionInstance_rch &,
                 bool&,
                 bool&,
-                OpenDDS::DCPS::MarshalingType)
+                OpenDDS::DCPS::MarshalingType,
+                bool)
   {
     return OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::MessageHolder>();
   }
