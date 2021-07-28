@@ -34,6 +34,14 @@ struct OpenDDS_Rtps_Udp_Export BundlingCacheKey {
   {
   }
 
+  BundlingCacheKey(const GUID_t& dst_guid, const GUID_t& from_guid, GuidSet& to_guids)
+    : dst_guid_(dst_guid)
+    , from_guid_(from_guid)
+    , to_guids_()
+  {
+    const_cast<GuidSet&>(to_guids_).swap(to_guids);
+  }
+
   bool operator<(const BundlingCacheKey& rhs) const
   {
     int r = std::memcmp(this, &rhs, 2 * sizeof (GUID_t));
