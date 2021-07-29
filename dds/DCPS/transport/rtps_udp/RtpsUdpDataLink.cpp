@@ -2380,7 +2380,7 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVecVecVec& meta_submess
             addrs = get_addresses_i(it->from_guid_);
           }
           // Need to use key.to_guids_ here since we swapped above
-          for (RepoIdSet::iterator it2 = key.to_guids_.begin(); it2 != key.to_guids_.end(); ++it2) {
+          for (RepoIdSet::const_iterator it2 = key.to_guids_.begin(); it2 != key.to_guids_.end(); ++it2) {
             accumulate_addresses(it->from_guid_, *it2, addrs, directed);
           }
 #ifdef OPENDDS_SECURITY
