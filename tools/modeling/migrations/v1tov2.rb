@@ -8,7 +8,7 @@ class NullMigrator
   end
 end
 
-class ModelMigrator 
+class ModelMigrator
   def initialize
     @transport_id_re = / transportId=['"]([^'"]*)['"]/
     @transport_config_re = / transportConfig=['"][^'"]*['"]/
@@ -23,7 +23,7 @@ class ModelMigrator
       # if line has transport config attribute, just remove transport id
       if line =~ @transport_config_re
         line.sub @transport_id_re, ''
-      # else line has no transport config attribute, 
+      # else line has no transport config attribute,
       # replace transport id with transport config
       else
         line.sub(@transport_id_re, " transportConfig=\"trans#{transport_id[1]}\"")
@@ -36,7 +36,7 @@ end
 
 class Transport
   attr_accessor :transport_id
-  def initialize id, type 
+  def initialize id, type
     @transport_id = id
     @xmi_id = "_" + UUID.new.generate
     @text = []
@@ -59,9 +59,9 @@ class Transport
 end
 
 class GeneratorMigrator
-  
+
   def initialize
-    # transports is hash from trasnsport ID to 
+    # transports is hash from trasnsport ID to
     # array of [uuid, xml-string]
     @transports = []
 
@@ -160,7 +160,7 @@ class GeneratorMigrator
       else
         puts line.sub(/transport=['"][^'"]*['"]/, "transport=\"_#{results[1]}\"")
       end
-      
+
     elsif @current_transport
       @current_transport << line # save text for later output
     else

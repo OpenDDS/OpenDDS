@@ -1,11 +1,12 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-#include "dds/DdsDcpsCore.idl"
+#ifndef OPENDDS_RTPSRELAYLIB_RELAY_IDL
+#define OPENDDS_RTPSRELAYLIB_RELAY_IDL
+
+#include <dds/DdsDcpsCore.idl>
 
 module RtpsRelay {
 
@@ -152,3 +153,5 @@ module RtpsRelay {
   };
 
 };
+
+#endif

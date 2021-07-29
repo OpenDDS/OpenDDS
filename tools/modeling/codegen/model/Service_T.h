@@ -1,5 +1,5 @@
-#ifndef SERVICE_H
-#define SERVICE_H
+#ifndef OPENDDS_MODEL_SERVICE_T_H
+#define OPENDDS_MODEL_SERVICE_T_H
 
 // Needed here to avoid the pragma below when necessary.
 #include /**/ "ace/pre.h"
