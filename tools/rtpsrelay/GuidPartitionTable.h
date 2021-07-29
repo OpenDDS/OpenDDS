@@ -67,6 +67,10 @@ public:
          pos != limit && std::memcmp(pos->first.guidPrefix, prefix.guidPrefix, sizeof(prefix.guidPrefix)) == 0; ++pos) {
       partitions.insert(pos->second.begin(), pos->second.end());
     }
+
+    if (!config_.allow_empty_partition()) {
+      partitions.erase("");
+    }
   }
 
   template <typename T>
@@ -75,7 +79,9 @@ public:
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
     for (const auto& part : partitions) {
-      partition_index_.lookup(part, guids);
+      if (config_.allow_empty_partition() || !part.empty()) {
+        partition_index_.lookup(part, guids);
+      }
     }
   }
 
@@ -92,7 +98,9 @@ private:
     for (const auto& part : to_add) {
       const auto pos1 = partition_to_guid_.find(part);
       if (pos1 == partition_to_guid_.end()) {
-        spdp_replay.partitions().push_back(part);
+        if (config_.allow_empty_partition() || !part.empty()) {
+          spdp_replay.partitions().push_back(part);
+        }
         continue;
       }
 
@@ -100,7 +108,9 @@ private:
 
       if (pos2 == pos1->second.end() ||
           std::memcmp(pos2->guidPrefix, prefix.guidPrefix, sizeof(prefix.guidPrefix)) != 0) {
-        spdp_replay.partitions().push_back(part);
+        if (config_.allow_empty_partition() || !part.empty()) {
+          spdp_replay.partitions().push_back(part);
+        }
       }
     }
   }

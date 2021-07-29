@@ -15,6 +15,7 @@ public:
     , static_limit_(0)
     , max_pending_(0)
     , application_domain_(1)
+    , allow_empty_partition_(true)
     , log_warnings_(false)
     , log_entries_(false)
     , log_discovery_(false)
@@ -69,6 +70,16 @@ public:
   DDS::DomainId_t application_domain() const
   {
     return application_domain_;
+  }
+
+  void allow_empty_partition(bool flag)
+  {
+    allow_empty_partition_ = flag;
+  }
+
+  bool allow_empty_partition() const
+  {
+    return allow_empty_partition_;
   }
 
   void log_warnings(bool flag)
@@ -197,6 +208,7 @@ private:
   size_t static_limit_;
   size_t max_pending_;
   DDS::DomainId_t application_domain_;
+  bool allow_empty_partition_;
   bool log_warnings_;
   bool log_entries_;
   bool log_discovery_;
