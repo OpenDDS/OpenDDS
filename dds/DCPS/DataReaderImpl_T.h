@@ -896,6 +896,7 @@ namespace OpenDDS {
 
       bool just_registered;
       unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator(sample));
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: calling store_instance_data\n", this->get_instance_handle()));
       store_instance_data(move(data), header, instance, just_registered, filtered);
       if (instance) inst = instance->instance_handle_;
     }
@@ -946,6 +947,7 @@ namespace OpenDDS {
       bool just_registered, filtered;
       unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator);
       get_key_value(*data, instance);
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: calling store_instance_data\n", this->get_instance_handle()));
       store_instance_data(move(data), header, si, just_registered, filtered);
       if (!filtered)
       {
@@ -1098,6 +1100,7 @@ protected:
                    ACE_TEXT("attempting to skip serialize but bad from_message_block. Returning from demarshal.\n")));
         return message_holder;
       }
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: calling store_instance_data\n", this->get_instance_handle()));
       store_instance_data(move(data), sample.header_, instance, just_registered, filtered);
       return message_holder;
     }
@@ -1195,7 +1198,7 @@ protected:
       }
     }
 #endif
-
+ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: calling store_instance_data\n", this->get_instance_handle()));
     store_instance_data(move(data), sample.header_, instance, just_registered, filtered);
     return message_holder;
   }
@@ -1215,6 +1218,7 @@ protected:
     if (sample.header_.key_fields_only_) {
       marshaling = OpenDDS::DCPS::KEY_ONLY_MARSHALING;
     }
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: calling dds_demarshal\n", this->get_instance_handle()));
     this->dds_demarshal(sample, instance, just_registered, filtered, marshaling);
   }
 
@@ -2389,7 +2393,7 @@ private:
         const DataSampleHeader_ptr header = data->second.header;
         const bool new_instance = data->second.new_instance;
 
-        // should not use data iterator anymore, since finish_store_instance_data releases sample_lock_
+        // should not use data iterator anymore, since finish_store_instance_data releases sample_lock
         data_reader_impl->finish_store_instance_data(
           move(data->second.message),
           *header,

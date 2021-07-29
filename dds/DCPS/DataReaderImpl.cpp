@@ -511,8 +511,10 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
         }
       }
     }
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: calling remove_associations_i\n",this->get_instance_handle()));
     remove_associations_i(non_active_writers, notify_lost);
   } else {
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: calling remove_associations_i\n",this->get_instance_handle()));
     remove_associations_i(writers, notify_lost);
   }
 }
@@ -530,6 +532,7 @@ DataReaderImpl::remove_publication(const PublicationId& pub_id)
       push_back(writers, pub_id);
     }
   }
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: calling remove_associations_i\n",this->get_instance_handle()));
   remove_associations_i(writers, notify);
 }
 
@@ -1504,6 +1507,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
     bool is_new_instance = false;
     bool filtered = false;
+
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: calling dds_demarshal\n", this->get_instance_handle()));
     if (sample.header_.key_fields_only_) {
       dds_demarshal(sample, instance, is_new_instance, filtered, KEY_ONLY_MARSHALING);
     } else {
