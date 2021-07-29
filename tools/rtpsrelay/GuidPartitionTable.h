@@ -184,7 +184,7 @@ private:
     OPENDDS_ASSERT(slots_[slot].count(partition_name) != 0);
     OPENDDS_ASSERT(partition_to_slot_[partition_name] == slot);
 
-    const bool full = slots_.size() == MAX_SLOT_SIZE;
+    const bool full = slots_[slot].size() == MAX_SLOT_SIZE;
     slots_[slot].erase(partition_name);
     partition_to_slot_.erase(partition_name);
     if (full) {
