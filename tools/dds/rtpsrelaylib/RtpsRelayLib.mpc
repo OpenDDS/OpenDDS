@@ -7,4 +7,8 @@ project: dcpslib, opendds_cxx11, install, msvc_bigobj {
   TypeSupport_Files {
     Relay.idl
   }
+
+  specific {
+    install_dir = dds/rtpsrelaylib
+  }
 }

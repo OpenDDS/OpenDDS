@@ -19,7 +19,7 @@ project: acelib, dds_macros, install {
   }
 
   specific {
-    install_dir = dds/DCPS
+    install_headers =
   }
 
   Source_Files {

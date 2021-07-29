@@ -3,5 +3,4 @@ project: acelib, dds_macros {
   libs += OpenDDS_Util
   includes += $(DDS_ROOT)
   libpaths += $(DDS_ROOT)/lib
-  macros += OPENDDS_NO_TAO
 }

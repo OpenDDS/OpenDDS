@@ -1,6 +1,6 @@
 #ifdef OPENDDS_HAS_CXX11
 
-#include <OpenDDS_RtpsRelayLib/PartitionIndex.h>
+#include <dds/rtpsrelaylib/PartitionIndex.h>
 
 #include <dds/DCPS/Service_Participant.h>
 

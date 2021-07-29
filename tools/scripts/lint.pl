@@ -318,7 +318,7 @@ my %path_conditions = (
     my @patterns = (
       qr@^dds/(?!(idl|InfoRepo)/)@,
       qr@^FACE/@,
-      qr@^tools/OpenDDS_RtpsRelayLib/@,
+      qr@^tools/dds/@,
       qr@^tools/modeling/codegen/@,
     );
     for my $pattern (@patterns) {
@@ -383,9 +383,9 @@ my %path_conditions = (
 sub valid_include_guard_names {
   my @list;
   my $x = shift;
-  $x =~ s@^dds/@@g;
-  $x =~ s@^tools/modeling/codegen/@@g;
   $x =~ s@^tools/@@g;
+  $x =~ s@^dds/@@g;
+  $x =~ s@^modeling/codegen/@@g;
   $x =~ s/^opendds//ig;
   $x =~ s/^[_]//g;
   $x =~ s/\W+/_/g;

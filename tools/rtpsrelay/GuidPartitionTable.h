@@ -3,9 +3,9 @@
 
 #include "Config.h"
 
-#include <OpenDDS_RtpsRelayLib/PartitionIndex.h>
-#include <OpenDDS_RtpsRelayLib/RelayTypeSupportImpl.h>
-#include <OpenDDS_RtpsRelayLib/Utility.h>
+#include <dds/rtpsrelaylib/PartitionIndex.h>
+#include <dds/rtpsrelaylib/RelayTypeSupportImpl.h>
+#include <dds/rtpsrelaylib/Utility.h>
 
 #include <dds/DCPS/GuidConverter.h>
 

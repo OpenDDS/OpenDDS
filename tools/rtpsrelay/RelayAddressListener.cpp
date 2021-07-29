@@ -1,6 +1,6 @@
 #include "RelayAddressListener.h"
 
-#include <OpenDDS_RtpsRelayLib/RelayTypeSupportImpl.h>
+#include <dds/rtpsrelaylib/RelayTypeSupportImpl.h>
 
 #include <dds/DCPS/DCPS_Utils.h>
 
