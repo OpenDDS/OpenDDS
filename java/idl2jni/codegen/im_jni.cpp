@@ -1698,6 +1698,7 @@ ostream &operator<< (ostream &o, AST_Expression::AST_ExprValue *ev)
   default: {
     cerr << "ERROR - " << __FILE__ << ":" << __LINE__ << " - Constant of type " << ev->et
          << " is not supported\n";
+    BE_abort();
   }
   }
 

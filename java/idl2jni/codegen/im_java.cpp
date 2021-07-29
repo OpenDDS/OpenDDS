@@ -420,6 +420,7 @@ ostream &operator<< (ostream &o, AST_Expression::AST_ExprValue *ev)
   default: {
     cerr << "ERROR - " << __FILE__ << ":" << __LINE__ << " - Constant of type " << ev->et
          << " is not supported\n";
+    BE_abort();
   }
   }
 
@@ -496,7 +497,7 @@ bool idl_mapping_java::gen_const(UTL_ScopedName *name, bool nestedInInteface,
   default: {
     cerr << "ERROR - " << __FILE__ << ":" << __LINE__ << " - Constant of type " << ev->et
          << " is not supported\n";
-    return false;
+    BE_abort();
   }
   }
 
@@ -815,6 +816,7 @@ void writeUnionDefaultValue(ostream &os, AST_Expression::ExprType udisc_type,
     break;
   default:
     cerr << "ERROR - " << __FILE__ << ":" << __LINE__ << " - Bad discriminant type '" << udisc_type << "' (shouldn't happen here)\n";
+    BE_abort();
   }
 }
 }
