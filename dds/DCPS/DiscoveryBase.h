@@ -1289,7 +1289,7 @@ namespace OpenDDS {
               !type_lookup_service_->type_object_in_cache(writer_type_info->complete.typeid_with_size.type_id);
 
             // DEBUG(sonndinh): Begin
-            ACE_DEBUG((LM_DEBUG, "====== EndpointManager::match - %C \n",
+            ACE_DEBUG((LM_DEBUG, "====== EndpointManager::match - %C\n",
                        need_minimal_tobjs ? "Need minimal types from remote writer" : "DON'T need minimal types from remote writer"));
             // DEBUG(sonndinh): End
             if (need_minimal_tobjs || need_complete_tobjs) {
@@ -1317,7 +1317,7 @@ namespace OpenDDS {
               !type_lookup_service_->type_object_in_cache(reader_type_info->complete.typeid_with_size.type_id);
 
             // DEBUG(sonndinh): Begin
-            ACE_DEBUG((LM_DEBUG, "====== EndpointManager::match - %C \n",
+            ACE_DEBUG((LM_DEBUG, "====== EndpointManager::match - %C\n",
                        need_minimal_tobjs ? "Need minimal types from remote reader" : "DON'T need minimal types from remote reader"));
             // DEBUG(sonndinh): End
             if (need_minimal_tobjs || need_complete_tobjs) {
