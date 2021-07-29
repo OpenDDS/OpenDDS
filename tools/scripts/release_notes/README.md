@@ -1,31 +1,38 @@
 # Release Notes Helper Scripts
 
-## Notes
+These are scripts for grabbing and formatting information for the release notes.
 
-These are a couple simple bash scripts for grabbing and formatting release notes information from the git log in order to put into a spreadsheet. They were developed using:
-* Ubuntu 20.04
-* Bash 5.0.17
-* Git 2.25.1
-but can probably be used elsewhere with comparable versions of bash and git.
+## `get_pr_info.sh`
 
-## Usage
+`get_pr_info.sh` gets a list of pull requests from GitHub and turns that into a CSV file that can be edited by the team.
 
-There are two scripts, primarily intended to be used together:
-* get_pr_list_since.sh - This script is intended to get the list of OpenDDS PRs since a particular string / commit in the log.
-  * Examples:
-    * ./get_pr_list_since.sh "Release 3.14"
-    * ./get_pr_list_since.sh
-  * Note: Since there's no way to differentiate which fork a particular PR was submitted against, this script currently filters PR #'s to 4 digits in order to avoid including PRs from forked repos. Eventually, this filter will need to be expanded / improved.
-* get_pr_info.sh - This script is intended to find the commit for a particular PR, by number, and pull relevant information out into a formatted CSV line. The script has commented out various debugging echo statements which may or may not be useful to the user when trying to debug issues with the script or change the output format / include more information.
-  * Examples:
-    ./get_pr_info.sh 2530
-* When used together, these scripts can easily (but not necessarily quickly!) give you a CSV file to use for release notes:
-  * Examples:
-    * ./get_pr_list_since.sh "Release 3.16" | xargs -I {} ./get_pr_info.sh {} | tee release_notes.csv
-    * ./get_pr_list_since.sh 772885787256800fa23910397b96297dd7c34087 | xargs -I {} ./get_pr_info.sh {} > partial_notes.csv
+### Requirements
 
-# `missing-news-prs.py`
+- A Unix-like environment with:
+  - Bash
+  - Git CLI client
+  - Python 3.6+
+  - The [GitHub CLI command(`gh`)](https://cli.github.com/). It should be authorized for a GitHub account.
+  - The [`jq` JSON Processor](https://stedolan.github.io/jq/)
+
+### Usage
+
+`get_pr_info.sh` will always get a list of merged PRs into master on objectcomputing/OpenDDS.
+The main thing to be concerned with how far back this list should go, but the script will try to pick this automatically:
+
+- With no extra files in directory the script will pick the time of the last major release.
+  - It keeps a `releases.json` for this. Remove it to force it to download the releases again.
+- If there is an existing `newest_prs.json`, it will use the time of the newest PR in the list.
+  This means it will be a list of PRs merged since the last time the script was ran.
+- The time can also be mannually specficied using one of the following:
+  - `-t ISO8601` where `ISO8601` is the full ISO 8601 format of the time to use, for example: `2021-07-29T03:14:28+00:00'.
+  - `-c COMMITISH` where `COMMITISH` is a something like a hash or tag of the Git commit whose commit time will be used.
+
+If successful, it will create a `newest_prs.json` that it can use as the starting point next time and a `newest_prs.csv` that can be added to the spreadsheet.
+If there are no new PRs it will say that and won't change any other existing files.
+
+## `missing-news-prs.py`
 
 After a spreadsheet is updated, it can be downloaded as a csv file again and passed to `missing-news-prs.py`.
 `missing-news-prs.py` will print out a list of partially prepared lines that are missing from the NEWS file.
-It just looks for the PR numbers (`#NUMBER`), so it's fine if a PR is completly changed or combined with other PRs as long as the number is there.
+It just looks for the PR numbers (`#NUMBER`), so it's fine if a PR is completely changed or combined with other PRs as long as the number is there.
