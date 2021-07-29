@@ -787,6 +787,14 @@ void writeUnionDefaultValue(ostream &os, AST_Expression::ExprType udisc_type,
   case AST_Expression::EV_ulong:
     os << dv.u.ulong_val;
     break;
+#if OPENDDS_HAS_EXPLICIT_INTS
+  case AST_Expression::EV_int8:
+    os << signed(dv.u.char_val);
+    break;
+  case AST_Expression::EV_uint8:
+    os << unsigned(dv.u.char_val);
+    break;
+#endif
   case AST_Expression::EV_char:
     os << dv.u.char_val;
     break;
@@ -806,7 +814,7 @@ void writeUnionDefaultValue(ostream &os, AST_Expression::ExprType udisc_type,
     os << dv.u.ulonglong_val;
     break;
   default:
-    cerr << "ERROR: Bad discriminant type (shouldn't happen here)\n";
+    cerr << "ERROR - " << __FILE__ << ":" << __LINE__ << " - Bad discriminant type '" << udisc_type << "' (shouldn't happen here)\n";
   }
 }
 }
