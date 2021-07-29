@@ -11,7 +11,7 @@ struct PlainCdrStruct {
   long value;
 };
 
-// Final structues
+// Final structures
 
 @topic
 @final
@@ -26,7 +26,7 @@ struct ModifiedFinalStruct {
   long additional_field;
 };
 
-// Appendable structues
+// Appendable structures
 
 @topic
 @appendable
@@ -42,7 +42,7 @@ struct AdditionalPrefixFieldStruct {
   @key long key;
 };
 
-// Mutable structues
+// Mutable structures
 
 @topic
 @mutable

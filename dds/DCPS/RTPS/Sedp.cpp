@@ -3696,6 +3696,10 @@ void Sedp::Writer::send_sample(const ACE_Message_Block& data,
     }
   }
 
+  // DEBUG(sonndinh): Begin
+  ACE_DEBUG((LM_DEBUG, "====== Sedp::Writer::send_sample - call send_sample_i for seq: %q\n",
+             sequence.getValue()));
+  // DEBUG(sonndinh): End
   send_sample_i(el);
 }
 
@@ -4035,6 +4039,11 @@ bool Sedp::TypeLookupRequestWriter::send_type_lookup_request(
     return false;
   }
 
+  // DEBUG(sonndinh): Begin
+  ACE_DEBUG((LM_DEBUG, "====== Sedp::TypeLookupRequestWriter::send_type_lookup_request - "
+             " populating type lookup request...\n"));
+  // DEBUG(sonndinh): End
+
   XTypes::TypeLookup_Request type_lookup_request;
   type_lookup_request.header.requestId.writer_guid = get_repo_id();
   type_lookup_request.header.requestId.sequence_number = to_rtps_seqnum(rpc_sequence);
@@ -4045,13 +4054,27 @@ bool Sedp::TypeLookupRequestWriter::send_type_lookup_request(
     type_lookup_request.data.getTypes.type_ids = type_ids;
   } else {
     type_lookup_request.data.getTypeDependencies.type_ids = type_ids;
+    // DEBUG(sonndinh): Begin
+    ACE_DEBUG((LM_DEBUG, "====== Sedp::TypeLookupRequestWriter::send_type_lookup_request - "
+               " getting continuation point...\n"));
+    // DEBUG(sonndinh): End
     sedp_.type_lookup_reply_reader_->get_continuation_point(reader.guidPrefix, type_ids[0],
       type_lookup_request.data.getTypeDependencies.continuation_point);
   }
 
+  // DEBUG(sonndinh): Begin
+  ACE_DEBUG((LM_DEBUG, "====== Sedp::TypeLookupRequestWriter::send_type_lookup_request - "
+             " populated type lookup request successfully\n"));
+  // DEBUG(sonndinh): End
+
   // Determine message length
   const size_t size = DCPS::EncapsulationHeader::serialized_size +
     DCPS::serialized_size(type_lookup_encoding, type_lookup_request);
+
+  // DEBUG(sonndinh): Begin
+  ACE_DEBUG((LM_DEBUG, "====== Sedp::TypeLookupRequestWriter::send_type_lookup_request - "
+             " size of request: %d\n", size));
+  // DEBUG(sonndinh): End
 
   // Build and send type lookup message
   ACE_Message_Block payload(DCPS::DataSampleHeader::get_max_serialized_size(),
@@ -4063,6 +4086,10 @@ bool Sedp::TypeLookupRequestWriter::send_type_lookup_request(
   if (encap.from_encoding(serializer.encoding(), DCPS::FINAL) &&
       serializer << encap && serializer << type_lookup_request) {
     DCPS::SequenceNumber sn(seq_++);
+    // DEBUG(sonndinh): Begin
+    ACE_DEBUG((LM_DEBUG, "====== Sedp::TypeLookupRequestWriter::send_type_lookup_request - ",
+               "serialization success, going to send sample\n"));
+    // DEBUG(sonndinh): End
     send_sample(payload, size, reader, sn);
   } else {
     if (DCPS::DCPS_debug_level) {
@@ -4080,6 +4107,12 @@ bool Sedp::TypeLookupReplyWriter::send_type_lookup_reply(
   XTypes::TypeLookup_Reply& type_lookup_reply,
   const DCPS::RepoId& reader)
 {
+  // DEBUG(sonndinh): Begin
+  ACE_DEBUG((LM_DEBUG, "====== Sedp::TypeLookupReplyWriter::send_type_lookup_reply - to %C seq: %q\n",
+             DCPS::LogGuid(reader).c_str(),
+             to_opendds_seqnum(type_lookup_reply.header.relatedRequestId.sequence_number).getValue()));
+  // DEBUG(sonndinh): End
+
   if (DCPS::DCPS_debug_level >= 8) {
     const DDS::SampleIdentity id = type_lookup_reply.header.relatedRequestId;
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyWriter::send_type_lookup_reply: "
@@ -4128,6 +4161,11 @@ bool Sedp::TypeLookupRequestReader::process_type_lookup_request(
     return false;
   }
 
+  // DEBUG(sonndinh): Begin
+  ACE_DEBUG((LM_DEBUG, "====== Sedp::TypeLookupRequestReader::process_type_lookup_request - from %C, request seq: %q\n",
+             DCPS::LogGuid(type_lookup_request.header.requestId.writer_guid).c_str(),
+             to_opendds_seqnum(type_lookup_request.header.requestId.sequence_number).getValue()));
+  // DEBUG(sonndinh): End
   if (DCPS::DCPS_debug_level >= 8) {
     const DDS::SampleIdentity& request_id = type_lookup_request.header.requestId;
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyWriter::process_type_lookup_request: "
@@ -4154,6 +4192,10 @@ bool Sedp::TypeLookupRequestReader::process_get_types_request(
   const XTypes::TypeLookup_Request& type_lookup_request,
   XTypes::TypeLookup_Reply& type_lookup_reply)
 {
+  // DEBUG(sonndinh): Begin
+  ACE_DEBUG((LM_DEBUG, "====== Sedp::TypeLookupRequestReader::process_get_types_request - request seq: %q\n",
+             to_opendds_seqnum(type_lookup_request.header.requestId.sequence_number).getValue()));
+  // DEBUG(sonndinh): End
   sedp_.type_lookup_service_->get_type_objects(type_lookup_request.data.getTypes.type_ids,
     type_lookup_reply._cxx_return.getType.result.types);
   type_lookup_reply._cxx_return.getType.result.complete_to_minimal.length(0);
@@ -4181,6 +4223,11 @@ bool Sedp::TypeLookupRequestReader::process_get_dependencies_request(
   const XTypes::TypeLookup_Request& request,
   XTypes::TypeLookup_Reply& reply)
 {
+  // DEBUG(sonndinh): Begin
+  ACE_DEBUG((LM_DEBUG, "====== Sedp::TypeLookupRequestReader::process_get_dependencies_request - request seq: %q\n",
+             to_opendds_seqnum(request.header.requestId.sequence_number).getValue()));
+  // DEBUG(sonndinh): End
+
   // Send all dependencies (may be empty) of the requested types
   sedp_.type_lookup_service_->get_type_dependencies(request.data.getTypeDependencies.type_ids,
     reply._cxx_return.getTypeDependencies.result.dependent_typeids);
@@ -4195,7 +4242,8 @@ void Sedp::TypeLookupReplyReader::get_continuation_point(const GuidPrefix_t& gui
                                                          const XTypes::TypeIdentifier& remote_ti,
                                                          XTypes::OctetSeq32& cont_point) const
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, sedp_.lock_);
+  // DEBUG(sonndinh): temporarily comment this line out
+  //  ACE_GUARD(ACE_Thread_Mutex, g, sedp_.lock_);
   const GuidPrefixWrapper guid_pref_wrap(guid_prefix);
   const DependenciesMap::const_iterator it = dependencies_.find(guid_pref_wrap);
   if (it == dependencies_.end() || it->second.find(remote_ti) == it->second.end()) {
@@ -4295,6 +4343,12 @@ bool Sedp::TypeLookupReplyReader::process_type_lookup_reply(
             it->second.got_complete = true;
           }
 
+          // DEBUG(sonndinh): Begin
+          ACE_DEBUG((LM_DEBUG, "====== Sedp::TypeLookupReplyReader::process_type_lookup_reply - "
+                     " got_minimal: %C, got_complete: %C\n",
+                     it->second.got_minimal ? "true" : "false",
+                     it->second.got_complete ? "true" : "false"));
+          // DEBUG(sonndinh): End
           if (it->second.got_minimal && it->second.got_complete) {
             // All remote type objects are obtained, continue the matching process
             const RepoId writer = it->first.writer_;
@@ -4839,6 +4893,10 @@ Sedp::TypeLookupRequestReader::data_received_i(const DCPS::ReceivedDataSample& s
   DCPS::Serializer& ser,
   DCPS::Extensibility)
 {
+  // DEBUG(sonndinh): Begin
+  ACE_DEBUG((LM_DEBUG, "====== Sedp::TypeLookupRequestReader::data_received_i: from %C\n",
+             DCPS::LogGuid(sample.header_.publication_id_).c_str()));
+  // DEBUG(sonndinh): End
   if (DCPS::DCPS_debug_level > 8) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupRequestReader::data_received_i: from %C\n",
       DCPS::LogGuid(sample.header_.publication_id_).c_str()));
