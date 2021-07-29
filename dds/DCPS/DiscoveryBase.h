@@ -1550,8 +1550,8 @@ namespace OpenDDS {
           if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE) {
             // DEBUG(sonndinh): Begin
             ACE_DEBUG((LM_DEBUG, "====== EndpointManager::match_continue - Got all TypeObjects, go ahead to compare types\n"));
-            std::string writer_type = writer_local ? td_iter->second.local_data_type_name() : dpi->second.get_type_name();
-            std::string reader_type = reader_local ? td_iter->second.local_data_type_name() : dsi->second.get_type_name();
+            OPENDDS_STRING writer_type = writer_local ? td_iter->second.local_data_type_name() : dpi->second.get_type_name();
+            OPENDDS_STRING reader_type = reader_local ? td_iter->second.local_data_type_name() : dsi->second.get_type_name();
             ACE_DEBUG((LM_DEBUG, "====== EndpointManager::match_continue - Writer type: %C. Reader type: %C\n",
                        writer_type.c_str(), reader_type.c_str()));
             // DEBUG(sonndinh): End
