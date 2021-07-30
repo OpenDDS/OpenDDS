@@ -436,21 +436,20 @@ bool TypeLookupService::complete_to_minimal_type_object(const TypeObject& cto, T
   }
 }
 
-DDS::ReturnCode_t TypeLookupService::insert_dynamic_member(DynamicType_rch& dt, const DynamicTypeMember_rch& dtm)
+void TypeLookupService::insert_dynamic_member(DynamicType_rch& dt, const DynamicTypeMember_rch& dtm)
 {
   dt->member_by_index.insert(dt->member_by_index.end(), dtm);
   dt->member_by_id.insert(dt->member_by_id.end(), std::make_pair(dtm->descriptor_->id , dtm));
   dt->member_by_name.insert(dt->member_by_name.end(), std::make_pair(dtm->descriptor_->name , dtm));
-  return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t TypeLookupService::complete_struct_member_to_member_descriptor(MemberDescriptor*& md,
+void TypeLookupService::complete_struct_member_to_member_descriptor(MemberDescriptor*& md,
   const CompleteStructMember& cm, DynamicTypeMap& dt_map)
 {
   md->name = cm.detail.name;
   md->id = cm.common.member_id;
   type_identifier_to_dynamic(md->type, cm.common.member_type_id, dt_map);
-  md->default_value = ""; //TODO CLAYTON: Where do we get the default value from CompleteStructMember?
+  md->default_value = "";
   md->label.length(0);
   if (cm.common.member_flags & (1 << 0)) {
     if (cm.common.member_flags & (1 << 1)) {
@@ -472,13 +471,13 @@ DDS::ReturnCode_t TypeLookupService::complete_struct_member_to_member_descriptor
   md->is_default_label = 0;
 }
 
-DDS::ReturnCode_t TypeLookupService::complete_union_member_to_member_descriptor(MemberDescriptor*& md,
+void TypeLookupService::complete_union_member_to_member_descriptor(MemberDescriptor*& md,
   const CompleteUnionMember& cm, DynamicTypeMap& dt_map)
 {
   md->name = cm.detail.name;
   md->id = cm.common.member_id;
   type_identifier_to_dynamic(md->type, cm.common.type_id, dt_map);
-  md->default_value = ""; //TODO CLAYTON
+  md->default_value = "";
   md->label = cm.common.label_seq;
   if (cm.common.member_flags & (1 << 0)) {
     if (cm.common.member_flags & (1 << 1)) {
@@ -500,21 +499,22 @@ DDS::ReturnCode_t TypeLookupService::complete_union_member_to_member_descriptor(
   md->is_default_label = (cm.common.member_flags & (1 << 6));
 }
 
-DDS::ReturnCode_t TypeLookupService::complete_annotation_member_to_member_descriptor(MemberDescriptor*& md,
+void TypeLookupService::complete_annotation_member_to_member_descriptor(MemberDescriptor*& md,
   const CompleteAnnotationParameter& cm, DynamicTypeMap& dt_map)
 {
   md->name = cm.name;
   type_identifier_to_dynamic(md->type, cm.common.member_type_id, dt_map);
-  md->default_value = ""; //TODO CLAYTON
+  md->default_value = "";
   md->label.length(0);
-  md->try_construct_kind = DISCARD; //TODO Clayton: I don't think TryConstruct kind matters here
+  md->try_construct_kind = DISCARD;
   md->is_key = 0;
   md->is_optional = 0;
   md->is_must_understand = 0;
   md->is_shared = 0;
   md->is_default_label = 0;
 }
-DDS::ReturnCode_t TypeLookupService::complete_to_dynamic_i(DynamicType_rch& dt,
+
+void TypeLookupService::complete_to_dynamic_i(DynamicType_rch& dt,
   const CompleteTypeObject& cto)
   {
     DynamicType_rch dt_instantiation(new DynamicType, OpenDDS::DCPS::keep_count());
@@ -522,9 +522,10 @@ DDS::ReturnCode_t TypeLookupService::complete_to_dynamic_i(DynamicType_rch& dt,
     TypeDescriptor* td(new TypeDescriptor);
     dt->descriptor_ = td;
     DynamicTypeMap dt_map;
-    return complete_to_dynamic(dt, cto, dt_map);
+    complete_to_dynamic(dt, cto, dt_map);
   }
-DDS::ReturnCode_t TypeLookupService::complete_to_dynamic(DynamicType_rch& dt,
+
+void TypeLookupService::complete_to_dynamic(DynamicType_rch& dt,
   const CompleteTypeObject& cto, DynamicTypeMap& dt_map)
 {
   switch (cto.kind) {
@@ -643,7 +644,7 @@ DDS::ReturnCode_t TypeLookupService::complete_to_dynamic(DynamicType_rch& dt,
     if(cto.sequence_type.header.detail.present == true) {
       dt->descriptor_->name = cto.sequence_type.header.detail.value.type_name;
     } else {
-      dt->descriptor_->name = ""; //This value will not be there for anon types
+      dt->descriptor_->name = "";
     }
     dt->descriptor_->bound.length(1);
     dt->descriptor_->bound[0] = cto.sequence_type.header.common.bound;
@@ -651,7 +652,7 @@ DDS::ReturnCode_t TypeLookupService::complete_to_dynamic(DynamicType_rch& dt,
     break;
   case TK_ARRAY: {
     dt->descriptor_->kind = TK_ARRAY;
-    dt->descriptor_->name = cto.array_type.header.detail.type_name; //TODO CLAYTON: Why is this not optional for arrays but is for sequences
+    dt->descriptor_->name = cto.array_type.header.detail.type_name;
     dt->descriptor_->bound = cto.array_type.header.common.bound_seq;
     type_identifier_to_dynamic(dt->descriptor_->element_type, cto.array_type.element.common.type, dt_map);
   }
@@ -661,7 +662,7 @@ DDS::ReturnCode_t TypeLookupService::complete_to_dynamic(DynamicType_rch& dt,
     if (cto.map_type.header.detail.present == true) {
       dt->descriptor_->name = cto.map_type.header.detail.value.type_name;
     } else {
-      dt->descriptor_->name = ""; //This value will not be there for anon types
+      dt->descriptor_->name = "";
     }
     dt->descriptor_->bound.length(1);
     dt->descriptor_->bound[0] = cto.map_type.header.common.bound;
@@ -671,17 +672,17 @@ DDS::ReturnCode_t TypeLookupService::complete_to_dynamic(DynamicType_rch& dt,
   }
 }
 
-DDS::ReturnCode_t TypeLookupService::type_identifier_to_dynamic(DynamicType_rch& dt,
+void TypeLookupService::type_identifier_to_dynamic(DynamicType_rch& dt,
   const TypeIdentifier& ti, DynamicTypeMap& dt_map)
 {
   if (ti.kind() == TK_NONE) {
     // Leave as dt as nil
-    return DDS::RETCODE_OK;
+    return;
   }
   DynamicTypeMap::iterator ti_found = dt_map.find(ti);
   if (ti_found != dt_map.end()) {
     dt = ti_found->second;
-    return DDS::RETCODE_OK;
+    return;
   }
   DynamicType_rch dt_instantiation(new DynamicType, OpenDDS::DCPS::keep_count());
   dt = dt_instantiation;
@@ -690,7 +691,7 @@ DDS::ReturnCode_t TypeLookupService::type_identifier_to_dynamic(DynamicType_rch&
   dt->descriptor_ = td;
     switch (ti.kind()) {
       case TK_NONE:
-        return DDS::RETCODE_ERROR;
+        return;
       case TK_BOOLEAN:
         dt->descriptor_->kind = TK_BOOLEAN;
         dt->descriptor_->name = "bool";
@@ -838,16 +839,15 @@ DDS::ReturnCode_t TypeLookupService::type_identifier_to_dynamic(DynamicType_rch&
         dt->descriptor_->bound[0] = ti.map_ldefn().bound;
         type_identifier_to_dynamic(dt->descriptor_->element_type, *ti.map_ldefn().element_identifier, dt_map);
         type_identifier_to_dynamic(dt->descriptor_->key_element_type, *ti.map_ldefn().element_identifier, dt_map);
+        break;
       case TI_STRONGLY_CONNECTED_COMPONENT:
          complete_to_dynamic(dt, get_type_objects_i(ti).complete, dt_map);
-      // TODO CLAYTON
         break;
       case EK_COMPLETE:
          complete_to_dynamic(dt, get_type_objects_i(ti).complete, dt_map);
          break;
       case EK_MINIMAL:
-        return DDS::RETCODE_ERROR;
-        break;
+        return;
       case TK_ANNOTATION:
         dt->descriptor_->kind = TK_ANNOTATION;
         dt->descriptor_->name = "annotation";

@@ -19,8 +19,7 @@ class MemberDescriptor {
 public:
   MemberDescriptor()
   : id(0), index(0), try_construct_kind(DISCARD), is_key(0), is_optional(0), is_must_understand(0), is_shared(0), is_default_label(0)
-  {
-  }
+  {}
   OPENDDS_STRING name;
   XTypes::MemberId id;
   DynamicType_rch type;
@@ -33,7 +32,7 @@ public:
   bool is_must_understand;
   bool is_shared;
   bool is_default_label;
-  bool equals(const MemberDescriptor& descriptor);
+  bool equals(const MemberDescriptor& other);
  };
 
 inline bool operator==(const UnionCaseLabelSeq& lhs, const UnionCaseLabelSeq& rhs)

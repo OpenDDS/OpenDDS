@@ -16,11 +16,10 @@ enum ExtensibilityKind {
 };
 
 class TypeDescriptor {
- public:
+public:
   TypeDescriptor()
   : kind(0), extensibility_kind(FINAL), is_nested(0)
-  {
-  }
+  {}
   TypeKind kind;
   OPENDDS_STRING name;
   DynamicType_rch base_type;
@@ -31,7 +30,7 @@ class TypeDescriptor {
   ExtensibilityKind extensibility_kind;
   bool is_nested;
   bool equals(const TypeDescriptor& other);
- };
+};
 
 inline bool operator==(const LBoundSeq& lhs, const LBoundSeq& rhs)
 {

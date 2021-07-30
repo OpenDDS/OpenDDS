@@ -18,15 +18,11 @@ namespace XTypes {
 class MemberDescriptor;
 class DynamicType;
 
-class OpenDDS_Dcps_Export DynamicTypeMember : public OpenDDS::DCPS::RcObject
-{
+class OpenDDS_Dcps_Export DynamicTypeMember : public OpenDDS::DCPS::RcObject {
 public:
   DynamicTypeMember();
   ~DynamicTypeMember();
    DDS::ReturnCode_t get_descriptor(MemberDescriptor& descriptor);
-  //Spec: Two members shall be considered equal if and only if they belong to the same type and all of
-  //their respective properties, as identified in Table 52 above, are equal.
-  //TODO CLAYTON: The only property this type has is annotation which our plan says to ignore?
   bool equals(const DynamicTypeMember& other);
   MemberId get_id();
   OPENDDS_STRING get_name();
@@ -40,6 +36,7 @@ typedef OPENDDS_MAP(OPENDDS_STRING, DynamicTypeMember_rch) DynamicTypeMembersByN
 typedef OPENDDS_MAP(MemberId, DynamicTypeMember_rch) DynamicTypeMembersById;
 typedef OPENDDS_VECTOR(DynamicTypeMember_rch) DynamicTypeMembersByIndex;
 
+OpenDDS_Dcps_Export bool test_equality(const DynamicTypeMember& lhs, const DynamicTypeMember& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
 OpenDDS_Dcps_Export bool test_equality(const DynamicTypeMembersByName& lhs, const DynamicTypeMembersByName& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
 OpenDDS_Dcps_Export bool test_equality(const DynamicTypeMembersById& lhs, const DynamicTypeMembersById& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
 
