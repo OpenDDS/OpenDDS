@@ -21,9 +21,9 @@ namespace XTypes {
   }
   bool DynamicTypeMember::equals(const DynamicTypeMember& other)
   {
-    return
-      //TODO CLAYTON: I feel this is an incomplete implementation despite what the spec says
-      this->descriptor_->type.in() == other.descriptor_->type.in();
+    return true;
+    //TODO CLAYTON
+    //  this->descriptor_->type.in() == other.descriptor_->type.in();
   }
   MemberId DynamicTypeMember::get_id()
   {
@@ -34,14 +34,14 @@ namespace XTypes {
     return descriptor_->name;
   }
 
-  bool operator==(const DynamicTypeMembersByName& lhs, const DynamicTypeMembersByName rhs)
+  bool test_equality(const DynamicTypeMembersByName& lhs, const DynamicTypeMembersByName& rhs, DynamicTypePtrPairSeen& dt_ptr_pair)
   {
     if (lhs.size() == rhs.size()) {
       if (lhs.size() > 0) {
         for (DynamicTypeMembersByName::const_iterator it = lhs.begin(); it != lhs.end(); ++it) {
           if(rhs.find(it->first) != rhs.end()) {
-            if (!(*lhs.find(it->first)->second->descriptor_ == *rhs.find(it->first)->second->descriptor_)) {
-              ACE_DEBUG((LM_DEBUG, ACE_TEXT("DynamicTypeMembersByName: Members are not the same \n")));
+            if (!(test_equality(*lhs.find(it->first)->second->descriptor_, *rhs.find(it->first)->second->descriptor_, dt_ptr_pair))) {
+              ACE_DEBUG((LM_DEBUG, ACE_TEXT("DynamicTypeMembersByName: Members are not the same\n")));
               return false;
             }
           } else {
@@ -50,19 +50,19 @@ namespace XTypes {
         }
       }
     } else {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("DynamicTypeMembersByName: Member count is different \n")));
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("DynamicTypeMembersByName: Member count is different\n")));
       return false;
     }
     return true;
   }
 
-  bool operator==(const DynamicTypeMembersById& lhs, const DynamicTypeMembersById rhs)
+  bool test_equality(const DynamicTypeMembersById& lhs, const DynamicTypeMembersById& rhs, DynamicTypePtrPairSeen& dt_ptr_pair)
   {
     if (lhs.size() == rhs.size()) {
       for (DynamicTypeMembersById::const_iterator it = lhs.begin(); it != lhs.end(); ++it) {
         if(rhs.find(it->first) != rhs.end()) {
-          if (!(*lhs.find(it->first)->second->descriptor_ == *rhs.find(it->first)->second->descriptor_)) {
-            ACE_DEBUG((LM_DEBUG, ACE_TEXT("DynamicTypeMembersById: Members are not the same \n")));
+          if (!(test_equality(*lhs.find(it->first)->second->descriptor_, *rhs.find(it->first)->second->descriptor_, dt_ptr_pair))) {
+            ACE_DEBUG((LM_DEBUG, ACE_TEXT("DynamicTypeMembersById: Members are not the same\n")));
             return false;
           }
         } else {
@@ -70,7 +70,7 @@ namespace XTypes {
         }
       }
     } else {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("DynamicTypeMembersById: Member count is different \n")));
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("DynamicTypeMembersById: Member count is different\n")));
       return false;
     }
     return true;

@@ -38,4 +38,19 @@ module MyMod {
     sequence<long, 5> lseq;
     long larr[3];
   };
+
+  struct CircularStruct2;
+
+  @topic
+  @mutable
+  struct CircularStruct {
+    sequence<CircularStruct2> circular_struct2_seq;
+  };
+
+  @topic
+  @mutable
+  struct CircularStruct2 {
+    sequence<CircularStruct> circular_struct_seq;
+  };
+
 };

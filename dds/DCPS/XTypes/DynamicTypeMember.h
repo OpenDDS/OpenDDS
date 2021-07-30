@@ -16,6 +16,7 @@ namespace OpenDDS {
 namespace XTypes {
 
 class MemberDescriptor;
+class DynamicType;
 
 class OpenDDS_Dcps_Export DynamicTypeMember : public OpenDDS::DCPS::RcObject
 {
@@ -32,13 +33,16 @@ public:
   MemberDescriptor* descriptor_;
 };
 
+typedef std::pair<const DynamicType*, const DynamicType*> DynamicTypePtrPair;
+typedef OPENDDS_SET(DynamicTypePtrPair) DynamicTypePtrPairSeen;
 typedef OpenDDS::DCPS::RcHandle<DynamicTypeMember> DynamicTypeMember_rch;
-
 typedef OPENDDS_MAP(OPENDDS_STRING, DynamicTypeMember_rch) DynamicTypeMembersByName;
 typedef OPENDDS_MAP(MemberId, DynamicTypeMember_rch) DynamicTypeMembersById;
 typedef OPENDDS_VECTOR(DynamicTypeMember_rch) DynamicTypeMembersByIndex;
-OpenDDS_Dcps_Export bool operator==(const DynamicTypeMembersByName& lhs, const DynamicTypeMembersByName rhs);
-OpenDDS_Dcps_Export bool operator==(const DynamicTypeMembersById& lhs, const DynamicTypeMembersById rhs);
+
+OpenDDS_Dcps_Export bool test_equality(const DynamicTypeMembersByName& lhs, const DynamicTypeMembersByName& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
+OpenDDS_Dcps_Export bool test_equality(const DynamicTypeMembersById& lhs, const DynamicTypeMembersById& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
+
 } // namespace XTypes
 } // namespace OpenDDS
 

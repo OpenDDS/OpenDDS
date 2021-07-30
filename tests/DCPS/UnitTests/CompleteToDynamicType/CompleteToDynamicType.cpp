@@ -1,15 +1,16 @@
+/*
+Untested Types:
+Map
+Annotation
+Bitmask
+Bitset
+*/
+
 #include "CompleteToDynamicTypeTypeSupportImpl.h"
-#include <map>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/XTypes/TypeObject.h>
 #include <dds/DCPS/XTypes/DynamicType.h>
 #include <dds/DCPS/XTypes/DynamicTypeMember.h>
-#include <dds/DCPS/Marked_Default_Qos.h>
-#include <dds/DCPS/TopicDescriptionImpl.h>
-#include <dds/DCPS/PublisherImpl.h>
-#include <dds/DCPS/DomainParticipantImpl.h>
-#include <dds/DCPS/Qos_Helper.h>
-#include <dds/DCPS/transport/framework/TransportRegistry.h>
 
 #include <gtest/gtest.h>
 
@@ -26,39 +27,39 @@ void test_conversion(const XTypes::DynamicType_rch& expected_dynamic_type)
   EXPECT_TRUE(pos != com_map.end());
   const XTypes::TypeObject& com_to = pos->second;
   XTypes::DynamicType_rch converted_dt(new XTypes::DynamicType, OpenDDS::DCPS::keep_count());
-  tls.complete_to_dynamic(converted_dt, com_to.complete);
-  EXPECT_EQ(*expected_dynamic_type.in(), *converted_dt.in());
+  tls.complete_to_dynamic_i(converted_dt, com_to.complete);
+  EXPECT_TRUE(test_equality_i(*expected_dynamic_type.in(), *converted_dt.in()));
 }
 
-// TEST(CompleteToDynamicType, MyInnerStruct)
-// {
-//   XTypes::DynamicType_rch expected_dt(new XTypes::DynamicType, OpenDDS::DCPS::keep_count());
-//   XTypes::TypeDescriptor* td(new XTypes::TypeDescriptor);
-//   td->kind = XTypes::TK_STRUCTURE;
-//   td->name = "::MyMod::MyInnerStruct";
-//   td->bound.length(0);
-//   td->extensibility_kind = XTypes::MUTABLE;
-//   td->is_nested = 0;
-//   expected_dt->descriptor_ = td;
-//   XTypes::DynamicTypeMember_rch expected_dtm(new XTypes::DynamicTypeMember, OpenDDS::DCPS::keep_count());
-//   XTypes::MemberDescriptor* md(new XTypes::MemberDescriptor);
-//   expected_dtm->descriptor_ = md;
-//   md->name = "l";
-//   md->id = 0;
-//   md->index = 0;
-//   md->try_construct_kind = XTypes::DISCARD;
-//   XTypes::DynamicType_rch long_expected_dt(new XTypes::DynamicType, OpenDDS::DCPS::keep_count());
-//   XTypes::TypeDescriptor* long_td(new XTypes::TypeDescriptor);
-//   long_td->kind = XTypes::TK_INT32;
-//   long_td->bound.length(0);
-//   long_td->name = "long";
-//   long_expected_dt->descriptor_ = long_td;
-//   md->type = long_expected_dt;
-//   expected_dt->member_by_index.insert(expected_dt->member_by_index.end(), expected_dtm);
-//   expected_dt->member_by_id.insert(expected_dt->member_by_id.end(), std::make_pair(md->id , expected_dtm));
-//   expected_dt->member_by_name.insert(expected_dt->member_by_name.end(), std::make_pair(md->name , expected_dtm));
-//   test_conversion<DCPS::MyMod_MyInnerStruct_xtag>(expected_dt);
-// }
+TEST(CompleteToDynamicType, MyInnerStruct)
+{
+  XTypes::DynamicType_rch expected_dt(new XTypes::DynamicType, OpenDDS::DCPS::keep_count());
+  XTypes::TypeDescriptor* td(new XTypes::TypeDescriptor);
+  td->kind = XTypes::TK_STRUCTURE;
+  td->name = "::MyMod::MyInnerStruct";
+  td->bound.length(0);
+  td->extensibility_kind = XTypes::MUTABLE;
+  td->is_nested = 0;
+  expected_dt->descriptor_ = td;
+  XTypes::DynamicTypeMember_rch expected_dtm(new XTypes::DynamicTypeMember, OpenDDS::DCPS::keep_count());
+  XTypes::MemberDescriptor* md(new XTypes::MemberDescriptor);
+  expected_dtm->descriptor_ = md;
+  md->name = "l";
+  md->id = 0;
+  md->index = 0;
+  md->try_construct_kind = XTypes::DISCARD;
+  XTypes::DynamicType_rch long_expected_dt(new XTypes::DynamicType, OpenDDS::DCPS::keep_count());
+  XTypes::TypeDescriptor* long_td(new XTypes::TypeDescriptor);
+  long_td->kind = XTypes::TK_INT32;
+  long_td->bound.length(0);
+  long_td->name = "long";
+  long_expected_dt->descriptor_ = long_td;
+  md->type = long_expected_dt;
+  expected_dt->member_by_index.insert(expected_dt->member_by_index.end(), expected_dtm);
+  expected_dt->member_by_id.insert(expected_dt->member_by_id.end(), std::make_pair(md->id , expected_dtm));
+  expected_dt->member_by_name.insert(expected_dt->member_by_name.end(), std::make_pair(md->name , expected_dtm));
+  test_conversion<DCPS::MyMod_MyInnerStruct_xtag>(expected_dt);
+}
 
 TEST(CompleteToDynamicType, MyOuterStruct)
 {
@@ -476,6 +477,69 @@ TEST(CompleteToDynamicType, MyAnonStruct)
   expected_dt->member_by_id.insert(expected_dt->member_by_id.end(), std::make_pair(array_md->id , array_dtm));
   expected_dt->member_by_name.insert(expected_dt->member_by_name.end(), std::make_pair(array_md->name , array_dtm));
   test_conversion<DCPS::MyMod_MyAnonStruct_xtag>(expected_dt);
+}
+
+TEST(CompleteToDynamicType, CircularStruct)
+{
+  XTypes::DynamicType_rch struct_expected_dt(new XTypes::DynamicType, OpenDDS::DCPS::keep_count());
+  XTypes::TypeDescriptor* struct_td(new XTypes::TypeDescriptor);
+  struct_td->kind = XTypes::TK_STRUCTURE;
+  struct_td->name = "::MyMod::CircularStruct";
+  struct_td->bound.length(0);
+  struct_td->extensibility_kind = XTypes::MUTABLE;
+  struct_td->is_nested = 0;
+  struct_expected_dt->descriptor_ = struct_td;
+  XTypes::DynamicTypeMember_rch struct_seq_dtm(new XTypes::DynamicTypeMember, OpenDDS::DCPS::keep_count());
+  XTypes::MemberDescriptor* struct_seq_md(new XTypes::MemberDescriptor);
+  struct_seq_dtm->descriptor_ = struct_seq_md;
+  struct_seq_md->name = "circular_struct2_seq";
+  struct_seq_md->id = 0;
+  struct_seq_md->index = 0;
+  struct_seq_md->try_construct_kind = XTypes::DISCARD;
+  XTypes::DynamicType_rch struct_seq_dt(new XTypes::DynamicType, OpenDDS::DCPS::keep_count());
+  XTypes::TypeDescriptor* struct_seq_td(new XTypes::TypeDescriptor);
+  struct_seq_td->kind = XTypes::TK_SEQUENCE;
+  struct_seq_td->bound.length(1);
+  struct_seq_td->bound[0] = UINT32_MAX;
+  struct_seq_td->name = "";
+  struct_seq_dt->descriptor_ = struct_seq_td;
+
+  XTypes::DynamicType_rch struct2_expected_dt(new XTypes::DynamicType, OpenDDS::DCPS::keep_count());
+  XTypes::TypeDescriptor* struct2_td(new XTypes::TypeDescriptor);
+  struct2_td->kind = XTypes::TK_STRUCTURE;
+  struct2_td->name = "::MyMod::CircularStruct2";
+  struct2_td->bound.length(0);
+  struct2_td->extensibility_kind = XTypes::MUTABLE;
+  struct2_td->is_nested = 0;
+  struct2_expected_dt->descriptor_ = struct2_td;
+  XTypes::DynamicTypeMember_rch struct2_seq_dtm(new XTypes::DynamicTypeMember, OpenDDS::DCPS::keep_count());
+  XTypes::MemberDescriptor* struct2_seq_md(new XTypes::MemberDescriptor);
+  struct2_seq_dtm->descriptor_ = struct2_seq_md;
+  struct2_seq_md->name = "circular_struct_seq";
+  struct2_seq_md->id = 0;
+  struct2_seq_md->index = 0;
+  struct2_seq_md->try_construct_kind = XTypes::DISCARD;
+  XTypes::DynamicType_rch struct2_seq_dt(new XTypes::DynamicType, OpenDDS::DCPS::keep_count());
+  XTypes::TypeDescriptor* struct2_seq_td(new XTypes::TypeDescriptor);
+  struct2_seq_td->kind = XTypes::TK_SEQUENCE;
+  struct2_seq_td->bound.length(1);
+  struct2_seq_td->bound[0] = UINT32_MAX;
+  struct2_seq_td->name = "";
+  struct2_seq_dt->descriptor_ = struct2_seq_td;
+
+  struct2_seq_md->type = struct2_seq_dt;
+  struct2_seq_td->element_type = struct_expected_dt;
+  
+  struct_seq_md->type = struct_seq_dt;
+  struct_seq_td->element_type = struct2_expected_dt;
+
+  struct_expected_dt->member_by_index.insert(struct_expected_dt->member_by_index.end(), struct_seq_dtm);
+  struct_expected_dt->member_by_id.insert(struct_expected_dt->member_by_id.end(), std::make_pair(struct_seq_md->id , struct_seq_dtm));
+  struct_expected_dt->member_by_name.insert(struct_expected_dt->member_by_name.end(), std::make_pair(struct_seq_md->name , struct_seq_dtm));
+  struct2_expected_dt->member_by_index.insert(struct2_expected_dt->member_by_index.end(), struct2_seq_dtm);
+  struct2_expected_dt->member_by_id.insert(struct2_expected_dt->member_by_id.end(), std::make_pair(struct2_seq_md->id , struct2_seq_dtm));
+  struct2_expected_dt->member_by_name.insert(struct2_expected_dt->member_by_name.end(), std::make_pair(struct2_seq_md->name , struct2_seq_dtm));
+  test_conversion<DCPS::MyMod_CircularStruct_xtag>(struct_expected_dt);
 }
 
 int main(int argc, char* argv[])

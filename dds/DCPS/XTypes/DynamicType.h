@@ -33,10 +33,13 @@ public:
   TypeDescriptor* descriptor_;
 };
 
+typedef std::pair<const DynamicType*,const DynamicType*> DynamicTypePtrPair;
+typedef OPENDDS_SET(DynamicTypePtrPair) DynamicTypePtrPairSeen;
 typedef OpenDDS::DCPS::RcHandle<DynamicType> DynamicType_rch;
 
-OpenDDS_Dcps_Export bool operator==(const DynamicType& lhs, const DynamicType& rhs);
-OpenDDS_Dcps_Export bool is_equivalent(const DynamicType_rch& lhs, const DynamicType_rch& rhs);
+OpenDDS_Dcps_Export bool test_equality_i(const DynamicType& lhs, const DynamicType& rhs);
+OpenDDS_Dcps_Export bool test_equality(const DynamicType& lhs, const DynamicType& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
+OpenDDS_Dcps_Export bool test_equality(const DynamicType_rch& lhs, const DynamicType_rch& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
 
 } // namespace XTypes
 } // namespace OpenDDS
