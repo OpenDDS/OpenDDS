@@ -1288,10 +1288,6 @@ namespace OpenDDS {
               writer_type_info->complete.typeid_with_size.type_id.kind() != XTypes::TK_NONE &&
               !type_lookup_service_->type_object_in_cache(writer_type_info->complete.typeid_with_size.type_id);
 
-            // DEBUG(sonndinh): Begin
-            ACE_DEBUG((LM_DEBUG, "====== EndpointManager::match - %C\n",
-                       need_minimal_tobjs ? "Need minimal types from remote writer" : "DON'T need minimal types from remote writer"));
-            // DEBUG(sonndinh): End
             if (need_minimal_tobjs || need_complete_tobjs) {
               if (DCPS_debug_level >= 4) {
                 ACE_DEBUG((LM_DEBUG, "(%P|%t) EndpointManager::match: Remote Writer\n"));
@@ -1300,9 +1296,6 @@ namespace OpenDDS {
 #ifdef OPENDDS_SECURITY
               is_discovery_protected = lsi->second.security_attribs_.base.is_discovery_protected;
 #endif
-              // DEBUG(sonndinh) -- Begin
-              ACE_DEBUG((LM_DEBUG, "====== EndpointManager::match - Getting TypeObjects from remote writer...\n"));
-              // DEBUG(sonndinh) -- End
               save_matching_data_and_get_typeobjects(writer_type_info, md,
                                                      MatchingPair(writer, reader),
                                                      writer, is_discovery_protected,
@@ -1316,10 +1309,6 @@ namespace OpenDDS {
               reader_type_info->complete.typeid_with_size.type_id.kind() != XTypes::TK_NONE &&
               !type_lookup_service_->type_object_in_cache(reader_type_info->complete.typeid_with_size.type_id);
 
-            // DEBUG(sonndinh): Begin
-            ACE_DEBUG((LM_DEBUG, "====== EndpointManager::match - %C\n",
-                       need_minimal_tobjs ? "Need minimal types from remote reader" : "DON'T need minimal types from remote reader"));
-            // DEBUG(sonndinh): End
             if (need_minimal_tobjs || need_complete_tobjs) {
               if (DCPS_debug_level >= 4) {
                 ACE_DEBUG((LM_DEBUG, "(%P|%t) EndpointManager::match: Remote Reader\n"));
@@ -1328,9 +1317,6 @@ namespace OpenDDS {
 #ifdef OPENDDS_SECURITY
               is_discovery_protected = lpi->second.security_attribs_.base.is_discovery_protected;
 #endif
-              // DEBUG(sonndinh) -- Begin
-              ACE_DEBUG((LM_DEBUG, "====== Getting TypeObjects from remote reader...\n"));
-              // DEBUG(sonndinh) -- End
               save_matching_data_and_get_typeobjects(reader_type_info, md,
                                                      MatchingPair(writer, reader),
                                                      reader, is_discovery_protected,
@@ -1548,13 +1534,6 @@ namespace OpenDDS {
           const XTypes::TypeIdentifier& writer_type_id = writer_type_info->minimal.typeid_with_size.type_id;
           const XTypes::TypeIdentifier& reader_type_id = reader_type_info->minimal.typeid_with_size.type_id;
           if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE) {
-            // DEBUG(sonndinh): Begin
-            ACE_DEBUG((LM_DEBUG, "====== EndpointManager::match_continue - Got all TypeObjects, go ahead to compare types\n"));
-            OPENDDS_STRING writer_type = writer_local ? td_iter->second.local_data_type_name() : dpi->second.get_type_name();
-            OPENDDS_STRING reader_type = reader_local ? td_iter->second.local_data_type_name() : dsi->second.get_type_name();
-            ACE_DEBUG((LM_DEBUG, "====== EndpointManager::match_continue - Writer type: %C. Reader type: %C\n",
-                       writer_type.c_str(), reader_type.c_str()));
-            // DEBUG(sonndinh): End
             if (!writer_local || !reader_local) {
               const DDS::DataRepresentationIdSeq repIds =
                 get_effective_data_rep_qos(tempDwQos.representation.value, false);
@@ -1584,14 +1563,7 @@ namespace OpenDDS {
               // The two types must be equivalent for DISALLOW_TYPE_COERCION
               consistent = reader_type_id == writer_type_id;
             }
-            // DEBUG(sonndinh): Begin
-            const char* tmp = consistent ? "" : "NOT";
-            ACE_DEBUG((LM_DEBUG, "====== EndpointManager::match_continue - Two types are %C consistent\n", tmp));
-            // DEBUG(sonndinh): End
           } else {
-            // DEBUG(sonndinh): Begin
-            ACE_DEBUG((LM_DEBUG, "====== EndpointManager::match_continue - No TypeInformation provided, fall back to compare type names\n"));
-            // DEBUG(sonndinh): End
             if (drQos->type_consistency.force_type_validation) {
               // Cannot do type validation since not both TypeObjects are available
               consistent = false;
@@ -1844,9 +1816,6 @@ namespace OpenDDS {
                        "remote: %C seq: %q\n",
                        LogGuid(remote_id).c_str(), md.rpc_seqnum_minimal.getValue()));
           }
-          // DEBUG(sonndinh): begin
-          ACE_DEBUG((LM_DEBUG, "====== EndpointManager::save_matching_data_and_get_typeobjects - Getting minimal TypeObjects\n"));
-          // DEBUG(sonndinh): end
           get_remote_type_objects(type_info->minimal, md, true, remote_id, is_discovery_protected);
         }
 
@@ -1858,9 +1827,6 @@ namespace OpenDDS {
                        "remote: %C seq: %q\n",
                        LogGuid(remote_id).c_str(), md.rpc_seqnum_complete.getValue()));
           }
-          // DEBUG(sonndinh): begin
-          ACE_DEBUG((LM_DEBUG, "====== EndpointManager::save_matching_data_and_get_typeobjects - Getting complete TypeObjects\n"));
-          // DEBUG(sonndinh): end
           get_remote_type_objects(type_info->complete, md, false, remote_id, is_discovery_protected);
         }
       }
@@ -1889,9 +1855,6 @@ namespace OpenDDS {
             tid_with_deps.dependent_typeids.length() < (CORBA::ULong)tid_with_deps.dependent_typeid_count) {
           type_ids.append(tid_with_deps.typeid_with_size.type_id);
 
-          // DEBUG(sonndinh): begin
-          ACE_DEBUG((LM_DEBUG, "====== EndpointManager::get_remote_type_objects - Sending getDependencies message first\n"));
-          // DEBUG(sonndinh): end
           // Get dependencies of the topic type. TypeObjects of both topic type and
           // its dependencies are obtained in subsequent type lookup requests.
           send_type_lookup_request(type_ids, remote_id, is_discovery_protected, false);
@@ -1902,9 +1865,6 @@ namespace OpenDDS {
             type_ids[i] = tid_with_deps.dependent_typeids[i - 1].type_id;
           }
 
-          // DEBUG(sonndinh): begin
-          ACE_DEBUG((LM_DEBUG, "====== EndpointManager::get_remote_type_objects - Got all dependencies. Sending getTypes message now\n"));
-          // DEBUG(sonndinh): end
           // Get TypeObjects of topic type and all of its dependencies.
           send_type_lookup_request(type_ids, remote_id, is_discovery_protected, true);
         }
