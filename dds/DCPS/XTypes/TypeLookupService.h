@@ -7,15 +7,14 @@
 #define OPENDDS_DCPS_XTYPES_TYPE_LOOKUP_SERVICE_H
 
 #include "TypeObject.h"
+#include "DynamicType.h"
+#include "DynamicTypeMember.h"
+#include "MemberDescriptor.h"
+#include "TypeDescriptor.h"
 
 #include <dds/DCPS/RcObject.h>
 #include <dds/DCPS/SequenceNumber.h>
 #include <dds/DCPS/TypeSupportImpl.h>
-
-#include <dds/DCPS/XTypes/DynamicType.h>
-#include <dds/DCPS/XTypes/DynamicTypeMember.h>
-#include <dds/DCPS/XTypes/MemberDescriptor.h>
-#include <dds/DCPS/XTypes/TypeDescriptor.h>
 
 #include <ace/Thread_Mutex.h>
 
@@ -45,12 +44,8 @@ public:
   void update_type_identifier_map(const TypeIdentifierPairSeq& tid_pairs);
   bool complete_to_minimal_type_object(const TypeObject& cto, TypeObject& mto) const;
 
-  DDS::ReturnCode_t insert_dynamic_member(DynamicType_rch& dt, const DynamicTypeMember_rch& dtm);
-  DDS::ReturnCode_t type_identifier_to_dynamic(DynamicType_rch& dt, const TypeIdentifier& ti);
-  DDS::ReturnCode_t complete_to_dynamic(DynamicType_rch& dt, const CompleteTypeObject& cto);
-  DDS::ReturnCode_t complete_struct_member_to_member_descriptor(MemberDescriptor*& md, const CompleteStructMember& cm);
-  DDS::ReturnCode_t complete_union_member_to_member_descriptor(MemberDescriptor*& md, const CompleteUnionMember& cm);
-  DDS::ReturnCode_t complete_annotation_member_to_member_descriptor(MemberDescriptor*& md, const CompleteAnnotationParameter& cm);
+  DDS::ReturnCode_t complete_to_dynamic_i(DynamicType_rch& dt, const CompleteTypeObject&);
+
   // For TypeLookup_getTypeDependencies
   bool get_type_dependencies(const TypeIdentifier& type_id,
     TypeIdentifierWithSizeSeq& dependencies) const;
@@ -99,6 +94,13 @@ private:
   bool complete_to_minimal_bitmask(const CompleteBitmaskType& ct, MinimalBitmaskType& mt) const;
   bool complete_to_minimal_bitset(const CompleteBitsetType& ct, MinimalBitsetType& mt) const;
 
+  typedef OPENDDS_MAP(TypeIdentifier, DynamicType_rch) DynamicTypeMap;
+  DDS::ReturnCode_t insert_dynamic_member(DynamicType_rch& dt, const DynamicTypeMember_rch& dtm);
+  DDS::ReturnCode_t complete_struct_member_to_member_descriptor(MemberDescriptor*& md, const CompleteStructMember& cm, DynamicTypeMap& dt_map);
+  DDS::ReturnCode_t complete_union_member_to_member_descriptor(MemberDescriptor*& md, const CompleteUnionMember& cm, DynamicTypeMap& dt_map);
+  DDS::ReturnCode_t complete_annotation_member_to_member_descriptor(MemberDescriptor*& md, const CompleteAnnotationParameter& cm, DynamicTypeMap& dt_map);
+  DDS::ReturnCode_t complete_to_dynamic(DynamicType_rch& dt, const CompleteTypeObject& cto, DynamicTypeMap& dt_map);
+  DDS::ReturnCode_t type_identifier_to_dynamic(DynamicType_rch& dt, const TypeIdentifier& ti, DynamicTypeMap& dt_map);
 };
 
 typedef DCPS::RcHandle<TypeLookupService> TypeLookupService_rch;

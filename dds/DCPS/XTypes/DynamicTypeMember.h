@@ -4,16 +4,12 @@
 
 #include "External.h"
 
-#include <dds/DCPS/PoolAllocationBase.h>
-#include <dds/DCPS/PoolAllocator.h>
-#include <dds/DCPS/Serializer.h>
+#include "TypeObject.h"
+
 #include <dds/DdsDcpsInfrastructureC.h>
-#include <ace/CDR_Base.h>
+
 #include <dds/DCPS/RcObject.h>
 #include <dds/DCPS/RcHandle_T.h>
-#include <dds/DCPS/XTypes/TypeObject.h>
-#include <algorithm>
-#include <cstring>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
@@ -21,7 +17,8 @@ namespace XTypes {
 
 class MemberDescriptor;
 
-class OpenDDS_Dcps_Export DynamicTypeMember : public OpenDDS::DCPS::RcObject {
+class OpenDDS_Dcps_Export DynamicTypeMember : public OpenDDS::DCPS::RcObject
+{
 public:
   DynamicTypeMember();
   ~DynamicTypeMember();

@@ -2,18 +2,11 @@
 #define OPENDDS_DCPS_XTYPES_DYNAMIC_TYPE_H
 
 #include "External.h"
+#include "DynamicTypeMember.h"
 
-#include <dds/DCPS/PoolAllocationBase.h>
-#include <dds/DCPS/PoolAllocator.h>
-#include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/RcHandle_T.h>
 #include <dds/DCPS/RcObject.h>
-#include <ace/CDR_Base.h>
 #include <dds/DCPS/RcHandle_T.h>
-#include <dds/DCPS/XTypes/DynamicTypeMember.h>
-#include <algorithm>
-#include <cstring>
-
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {

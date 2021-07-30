@@ -4,16 +4,7 @@
 
 #include "External.h"
 
-#include <dds/DCPS/PoolAllocationBase.h>
-#include <dds/DCPS/PoolAllocator.h>
-#include <dds/DCPS/Serializer.h>
-
-#include <ace/CDR_Base.h>
-
 #include <dds/DCPS/XTypes/DynamicType.h>
-
-#include <algorithm>
-#include <cstring>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
@@ -27,8 +18,10 @@ enum TryConstructKind {
 
 class MemberDescriptor {
 public:
-  MemberDescriptor() : id(0), index(0), try_construct_kind(DISCARD), is_key(0), is_optional(0), is_must_understand(0), is_shared(0), is_default_label(0)
-  {}
+  MemberDescriptor()
+  : id(0), index(0), try_construct_kind(DISCARD), is_key(0), is_optional(0), is_must_understand(0), is_shared(0), is_default_label(0)
+  {
+  }
   OPENDDS_STRING name;
   XTypes::MemberId id;
   DynamicType_rch type;
@@ -44,7 +37,8 @@ public:
   bool equals(const MemberDescriptor& descriptor);
  };
 
-inline bool operator==(const UnionCaseLabelSeq& lhs, const UnionCaseLabelSeq& rhs) {
+inline bool operator==(const UnionCaseLabelSeq& lhs, const UnionCaseLabelSeq& rhs)
+{
   if (lhs.length() == rhs.length()) {
     for (ulong i = 0 ; i < lhs.length() ; ++i) {
       if (!(lhs[i] == rhs[i])) {
@@ -57,7 +51,8 @@ inline bool operator==(const UnionCaseLabelSeq& lhs, const UnionCaseLabelSeq& rh
   return true;
 }
 
-inline bool operator==(const MemberDescriptor& lhs, const MemberDescriptor& rhs) {
+inline bool operator==(const MemberDescriptor& lhs, const MemberDescriptor& rhs)
+{
   //TODO CLAYTON : Uncomment and delete the code used for debugging upon completion of test
   bool a = lhs.name == rhs.name;
   bool b =  lhs.id == rhs.id;
