@@ -13,7 +13,7 @@ module MyMod {
   struct MyOuterStruct{
     MyInnerStruct ms;
   };
-  
+
   typedef MyOuterStruct MyAliasStruct;
 
   enum PrimitiveKind {

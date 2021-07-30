@@ -1,4 +1,4 @@
-#include <dds/DCPS/XTypes/TypeDescriptor.h>
+#include "TypeDescriptor.h"
 
 namespace OpenDDS {
 namespace XTypes {

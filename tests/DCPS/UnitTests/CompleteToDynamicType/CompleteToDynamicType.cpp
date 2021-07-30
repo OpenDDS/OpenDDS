@@ -529,7 +529,7 @@ TEST(CompleteToDynamicType, CircularStruct)
 
   struct2_seq_md->type = struct2_seq_dt;
   struct2_seq_td->element_type = struct_expected_dt;
-  
+
   struct_seq_md->type = struct_seq_dt;
   struct_seq_td->element_type = struct2_expected_dt;
 
