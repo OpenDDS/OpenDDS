@@ -1782,7 +1782,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
 
       preassociation_writers_.erase(writer);
 
-      const SequenceNumber x = durable_ ? 1 : std::max(hb_first, hb_last);
+      const SequenceNumber x = durable_ ? std::max(SequenceNumber(), std::min(hb_first, hb_last)) : std::max(hb_first, hb_last);
       const SequenceRange sr(zero, x.previous());
       writer->recvd_.insert(sr);
       while (!writer->held_.empty() && writer->held_.begin()->first <= sr.second) {
