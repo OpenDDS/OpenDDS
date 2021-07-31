@@ -1089,6 +1089,38 @@ DataReaderImpl::get_requested_incompatible_qos_status(
   return DDS::RETCODE_OK;
 }
 
+bool DataReaderImpl::check_deadlock(char lid) {
+  bool deadlocked = false;
+  const ACE_TCHAR * name;
+  switch (lid) {
+    case 'i' : {
+      name = ACE_TEXT("instances_lock_");
+      ACE_Guard<ACE_Recursive_Thread_Mutex> guard(this->instances_lock_, false);
+      deadlocked = !guard.locked();
+      break;
+    }
+    case 'p' : {
+      name = ACE_TEXT("publication_handle_lock_");
+      ACE_Guard<ACE_Recursive_Thread_Mutex> guard(this->publication_handle_lock_, false);
+      deadlocked = !guard.locked();
+      break;
+    }
+    case 's' : {
+      name = ACE_TEXT("sample_lock_");
+      ACE_Guard<ACE_Recursive_Thread_Mutex> guard(this->sample_lock_, false);
+      deadlocked = !guard.locked();
+      break;
+    }
+    default:
+      name = ACE_TEXT("unknown lid");
+      deadlocked = true;
+  }
+  if (deadlocked) {
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: DEADLOCK detected on %s\n", this->get_instance_handle(), name));
+  }
+  return deadlocked;
+}
+
 DDS::ReturnCode_t
 DataReaderImpl::get_subscription_matched_status(
     DDS::SubscriptionMatchedStatus & status)

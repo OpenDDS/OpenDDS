@@ -376,6 +376,8 @@ public:
 
   void transport_discovery_change();
 
+  bool check_deadlock(char lid);
+
   virtual bool check_transport_qos(const TransportInst& inst);
 
   bool have_sample_states(DDS::SampleStateMask sample_states) const;

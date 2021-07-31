@@ -496,13 +496,22 @@ SubscriberImpl::get_datareaders(
   DDS::ViewStateMask     view_states,
   DDS::InstanceStateMask instance_states)
 {
-  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want si lock\n", this->get_instance_handle()));
+  DataReaderSet localreaders;
+  {
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want si lock\n", this->get_instance_handle()));
 
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->si_lock_,
-                   DDS::RETCODE_ERROR);
- ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took si lock\n", this->get_instance_handle()));
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     guard,
+                     this->si_lock_,
+                     DDS::RETCODE_ERROR);
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took si lock\n", this->get_instance_handle()));
+    for (DataReaderSet::const_iterator pos = datareader_set_.begin();
+        pos != datareader_set_.end(); ++pos) {
+      (*pos)->check_deadlock('i');
+      localreaders.insert(*pos);
+    }
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing si lock\n", this->get_instance_handle()));
+  }
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   // If access_scope is GROUP and ordered_access is true then return readers as
@@ -516,16 +525,14 @@ SubscriberImpl::get_datareaders(
     if (this->qos_.presentation.ordered_access) {
 
       GroupRakeData data;
-      for (DataReaderSet::const_iterator pos = datareader_set_.begin();
-           pos != datareader_set_.end(); ++pos) {
+      for (DataReaderSet::const_iterator pos = localreaders.begin();
+           pos != localreaders.end(); ++pos) {
         (*pos)->get_ordered_data (data, sample_states, view_states, instance_states);
       }
 
       // Return list of readers in the order of the source timestamp of the received
       // samples from readers.
       data.get_datareaders (readers);
-      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing si lock\n", this->get_instance_handle()));
-
       return DDS::RETCODE_OK;
     }
   }
@@ -533,38 +540,43 @@ SubscriberImpl::get_datareaders(
 
   // Return set of datareaders.
   readers.length(0);
+  for (DataReaderSet::const_iterator pos = localreaders.begin();
+       pos != localreaders.end(); ++pos) {
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: validating datareader\n", this->get_instance_handle()));
+      if ((*pos)->have_sample_states(sample_states) &&
+          (*pos)->have_view_states(view_states) &&
+          (*pos)->have_instance_states(instance_states)) {
+        push_back(readers, DDS::DataReader::_duplicate(pos->in()));
+      }
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: iterating\n", this->get_instance_handle()));
 
-  for (DataReaderSet::const_iterator pos = datareader_set_.begin();
-       pos != datareader_set_.end(); ++pos) {
-   ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: validating datareader\n", this->get_instance_handle()));
-    if ((*pos)->have_sample_states(sample_states) &&
-        (*pos)->have_view_states(view_states) &&
-        (*pos)->have_instance_states(instance_states)) {
-      push_back(readers, DDS::DataReader::_duplicate(pos->in()));
     }
-    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: iterating\n", this->get_instance_handle()));
 
-  }
-  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing si lock\n", this->get_instance_handle()));
-
-  return DDS::RETCODE_OK;
+    return DDS::RETCODE_OK;
 }
 
 DDS::ReturnCode_t
 SubscriberImpl::notify_datareaders()
 {
-  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want si lock\n", this->get_instance_handle()));
-
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->si_lock_,
-                   DDS::RETCODE_ERROR);
- ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took si lock\n", this->get_instance_handle()));
-
+  DataReaderMap localreadermap;
   DataReaderMap::iterator it;
+  {
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want si lock\n", this->get_instance_handle()));
 
-  for (it = datareader_map_.begin(); it != datareader_map_.end(); ++it) {
-    if (it->second->have_sample_states(DDS::NOT_READ_SAMPLE_STATE)) {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                    guard,
+                    this->si_lock_,
+                    DDS::RETCODE_ERROR);
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took si lock\n", this->get_instance_handle()));
+
+    for (it = datareader_map_.begin(); it != datareader_map_.end(); ++it) {
+      it->second->check_deadlock('i');
+      localreadermap.insert(*it);
+    }
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing si lock\n", this->get_instance_handle()));
+  }
+  for (it = localreadermap.begin(); it != localreadermap.end(); ++it) {
+    if ( it->second->have_sample_states(DDS::NOT_READ_SAMPLE_STATE)) {
       DDS::DataReaderListener_var listener = it->second->get_listener();
       if (listener) {
         listener->on_data_available(it->second.in());
@@ -596,7 +608,6 @@ SubscriberImpl::notify_datareaders()
     }
   }
 #endif
-ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing si lock\n", this->get_instance_handle()));
 
   return DDS::RETCODE_OK;
 }
