@@ -505,10 +505,10 @@ SubscriberImpl::get_datareaders(
                      this->si_lock_,
                      DDS::RETCODE_ERROR);
     ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took si lock\n", this->get_instance_handle()));
-    for (DataReaderSet::const_iterator pos = datareader_set_.begin();
-        pos != datareader_set_.end(); ++pos) {
+    localreaders = datareader_set_;
+    for (DataReaderSet::const_iterator pos = localreaders.begin();
+        pos != localreaders.end(); ++pos) {
       (*pos)->check_deadlock('i');
-      localreaders.insert(*pos);
     }
     ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing si lock\n", this->get_instance_handle()));
   }
@@ -569,9 +569,9 @@ SubscriberImpl::notify_datareaders()
                     DDS::RETCODE_ERROR);
     ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took si lock\n", this->get_instance_handle()));
 
-    for (it = datareader_map_.begin(); it != datareader_map_.end(); ++it) {
+    localreadermap = datareader_map_;
+    for (it = localreadermap.begin(); it != localreadermap.end(); ++it) {
       it->second->check_deadlock('i');
-      localreadermap.insert(*it);
     }
     ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing si lock\n", this->get_instance_handle()));
   }
@@ -587,6 +587,15 @@ SubscriberImpl::notify_datareaders()
   }
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
+  MultiTopicReaderMap localmtr;
+  {g
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                    guard,
+                    this->si_lock_,
+                    DDS::RETCODE_ERROR);
+    localmtr = multitopic_reader_map_;
+  }
+
   for (MultitopicReaderMap::iterator it = multitopic_reader_map_.begin();
       it != multitopic_reader_map_.end(); ++it) {
     MultiTopicDataReaderBase* dri =
@@ -866,9 +875,11 @@ SubscriberImpl::enable()
   this->set_enabled();
 
   if (qos_.entity_factory.autoenable_created_entities) {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, si_lock_, DDS::RETCODE_ERROR);
     DataReaderSet readers;
-    readers_not_enabled_.swap(readers);
+    {
+      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, si_lock_, DDS::RETCODE_ERROR);
+      readers_not_enabled_.swap(readers);
+    }
     for (DataReaderSet::iterator it = readers.begin(); it != readers.end(); ++it) {
       (*it)->enable();
     }
