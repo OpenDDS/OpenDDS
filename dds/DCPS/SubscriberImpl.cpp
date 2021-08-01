@@ -587,7 +587,7 @@ SubscriberImpl::notify_datareaders()
   }
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
-  MultiTopicReaderMap localmtr;
+  MultitopicReaderMap localmtr;
   {g
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                     guard,
