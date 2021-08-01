@@ -520,10 +520,14 @@ SubscriberImpl::get_datareaders(
   DDS::ViewStateMask     view_states,
   DDS::InstanceStateMask instance_states)
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->si_lock_,
-                   DDS::RETCODE_ERROR);
+  DataReaderSet localreaders;
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     guard,
+                     this->si_lock_,
+                     DDS::RETCODE_ERROR);
+    localreaders = datareader_set_;
+  }
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   // If access_scope is GROUP and ordered_access is true then return readers as
@@ -537,15 +541,14 @@ SubscriberImpl::get_datareaders(
     if (this->qos_.presentation.ordered_access) {
 
       GroupRakeData data;
-      for (DataReaderSet::const_iterator pos = datareader_set_.begin();
-           pos != datareader_set_.end(); ++pos) {
+      for (DataReaderSet::const_iterator pos = localreaders.begin();
+           pos != localreaders.end(); ++pos) {
         (*pos)->get_ordered_data (data, sample_states, view_states, instance_states);
       }
 
       // Return list of readers in the order of the source timestamp of the received
       // samples from readers.
       data.get_datareaders (readers);
-
       return DDS::RETCODE_OK;
     }
   }
@@ -553,9 +556,8 @@ SubscriberImpl::get_datareaders(
 
   // Return set of datareaders.
   readers.length(0);
-
-  for (DataReaderSet::const_iterator pos = datareader_set_.begin();
-       pos != datareader_set_.end(); ++pos) {
+  for (DataReaderSet::const_iterator pos = localreaders.begin();
+       pos != localreaders.end(); ++pos) {
     if ((*pos)->have_sample_states(sample_states) &&
         (*pos)->have_view_states(view_states) &&
         (*pos)->have_instance_states(instance_states)) {
@@ -569,15 +571,17 @@ SubscriberImpl::get_datareaders(
 DDS::ReturnCode_t
 SubscriberImpl::notify_datareaders()
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->si_lock_,
-                   DDS::RETCODE_ERROR);
-
+  DataReaderMap localreadermap;
   DataReaderMap::iterator it;
-
-  for (it = datareader_map_.begin(); it != datareader_map_.end(); ++it) {
-    if (it->second->have_sample_states(DDS::NOT_READ_SAMPLE_STATE)) {
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                    guard,
+                    this->si_lock_,
+                    DDS::RETCODE_ERROR);
+    localreadermap = datareader_map_;
+  }
+  for (it = localreadermap.begin(); it != localreadermap.end(); ++it) {
+    if ( it->second->have_sample_states(DDS::NOT_READ_SAMPLE_STATE)) {
       DDS::DataReaderListener_var listener = it->second->get_listener();
       if (listener) {
         listener->on_data_available(it->second.in());
@@ -588,8 +592,17 @@ SubscriberImpl::notify_datareaders()
   }
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
-  for (MultitopicReaderMap::iterator it = multitopic_reader_map_.begin();
-      it != multitopic_reader_map_.end(); ++it) {
+  MultiTopicReaderMap localmtr;
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                    guard,
+                    this->si_lock_,
+                    DDS::RETCODE_ERROR);
+    localmtr = multitopic_reader_map_;
+  }
+
+  for (MultitopicReaderMap::iterator it = localmtr.begin();
+      it != localmtr.end(); ++it) {
     MultiTopicDataReaderBase* dri =
       dynamic_cast<MultiTopicDataReaderBase*>(it->second.in());
 
@@ -873,9 +886,11 @@ SubscriberImpl::enable()
   this->set_enabled();
 
   if (qos_.entity_factory.autoenable_created_entities) {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, si_lock_, DDS::RETCODE_ERROR);
     DataReaderSet readers;
-    readers_not_enabled_.swap(readers);
+    {
+      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, si_lock_, DDS::RETCODE_ERROR);
+      readers_not_enabled_.swap(readers);
+    }
     for (DataReaderSet::iterator it = readers.begin(); it != readers.end(); ++it) {
       (*it)->enable();
     }
