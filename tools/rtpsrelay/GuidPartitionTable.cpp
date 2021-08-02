@@ -14,8 +14,9 @@ GuidPartitionTable::Result GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_
     parts.insert("");
   }
 
-  const Result result = guid_to_partitions_.count(guid) == 0 ? ADDED : UPDATED;
-  const auto& x = guid_to_partitions_[guid];
+  const auto r = guid_to_partitions_.insert(std::make_pair(guid, StringSet()));
+  const Result result = r.second ? ADDED : UPDATED;
+  auto& x = r.first->second;
 
   std::vector<std::string> to_add;
   std::set_difference(parts.begin(), parts.end(), x.begin(), x.end(), std::back_inserter(to_add));
@@ -33,8 +34,7 @@ GuidPartitionTable::Result GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_
 
   StringSet globally_new;
   {
-    const auto r = guid_to_partitions_.insert(std::make_pair(guid, StringSet()));
-    r.first->second.insert(to_add.begin(), to_add.end());
+    x.insert(to_add.begin(), to_add.end());
     for (const auto& part : to_add) {
       const auto q = partition_to_guid_.insert(std::make_pair(part, OrderedGuidSet()));
       q.first->second.insert(guid);
@@ -44,14 +44,14 @@ GuidPartitionTable::Result GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_
       }
     }
     for (const auto& part : to_remove) {
-      r.first->second.erase(part);
+      x.erase(part);
       partition_to_guid_[part].erase(guid);
       partition_index_.remove(part, guid);
       if (partition_to_guid_[part].empty()) {
         partition_to_guid_.erase(part);
       }
     }
-    if (r.first->second.empty()) {
+    if (x.empty()) {
       guid_to_partitions_.erase(r.first);
     }
   }
