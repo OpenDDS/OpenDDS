@@ -7,7 +7,9 @@ Bitset
 */
 
 #include "CompleteToDynamicTypeTypeSupportImpl.h"
+
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/XTypes/TypeLookupService.h>
 #include <dds/DCPS/XTypes/TypeObject.h>
 #include <dds/DCPS/XTypes/DynamicType.h>
 #include <dds/DCPS/XTypes/DynamicTypeMember.h>
@@ -16,7 +18,7 @@ Bitset
 
 using namespace OpenDDS;
 
-XTypes::TypeLookupService tls;
+XTypes::TypeLookupService_rch tls(new XTypes::TypeLookupService, OpenDDS::DCPS::keep_count());
 
 template<typename T>
 void test_conversion(const XTypes::DynamicType_rch& expected_dynamic_type)
@@ -27,7 +29,7 @@ void test_conversion(const XTypes::DynamicType_rch& expected_dynamic_type)
   EXPECT_TRUE(pos != com_map.end());
   const XTypes::TypeObject& com_to = pos->second;
   XTypes::DynamicType_rch converted_dt(new XTypes::DynamicType, OpenDDS::DCPS::keep_count());
-  tls.complete_to_dynamic_i(converted_dt, com_to.complete);
+  tls->complete_to_dynamic_i(converted_dt, com_to.complete);
   EXPECT_TRUE(test_equality_i(*expected_dynamic_type.in(), *converted_dt.in()));
 }
 
@@ -592,16 +594,16 @@ int main(int argc, char* argv[])
   anon_struct_tids.type_identifier2 = DCPS::getMinimalTypeIdentifier<DCPS::MyMod_MyAnonStruct_xtag>();
   tid_pairs.append(anon_struct_tids);
 
-  tls.update_type_identifier_map(tid_pairs);
+  tls->update_type_identifier_map(tid_pairs);
 
   OpenDDS::DCPS::TypeSupportImpl* const inner_typesupport = new MyMod::MyInnerStructTypeSupportImpl;
   OpenDDS::DCPS::TypeSupportImpl* const outer_typesupport = new MyMod::MyOuterStructTypeSupportImpl;
   OpenDDS::DCPS::TypeSupportImpl* const union_typesupport = new MyMod::MyUnionTypeSupportImpl;
   OpenDDS::DCPS::TypeSupportImpl* const anon_typesupport = new MyMod::MyAnonStructTypeSupportImpl;
-  tls.add_type_objects_to_cache(*inner_typesupport);
-  tls.add_type_objects_to_cache(*outer_typesupport);
-  tls.add_type_objects_to_cache(*union_typesupport);
-  tls.add_type_objects_to_cache(*anon_typesupport);
+  inner_typesupport->add_types(tls);
+  outer_typesupport->add_types(tls);
+  union_typesupport->add_types(tls);
+  anon_typesupport->add_types(tls);
 
   return RUN_ALL_TESTS();
 }
