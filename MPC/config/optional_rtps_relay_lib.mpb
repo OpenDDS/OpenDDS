@@ -1,0 +1,2 @@
+feature(!no_cxx11): rtps_relay_lib {
+}

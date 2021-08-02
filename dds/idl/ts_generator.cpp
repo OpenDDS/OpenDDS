@@ -392,7 +392,7 @@ namespace java_ts_generator {
     for (UTL_ScopedName* sn = name; sn;
         sn = static_cast<UTL_ScopedName*>(sn->tail())) {
       std::string tmp = sn->head()->get_string();
-      if (tmp != "" && sn->tail()) {
+      if (!tmp.empty() && sn->tail()) {
         jpackage += tmp;
         file += tmp;
         if (ACE_OS::mkdir(file.c_str()) != 0 && errno != EEXIST) {
@@ -405,7 +405,7 @@ namespace java_ts_generator {
         tmp.insert(++i, 1, '1');
       }
       jniclass += tmp;
-      if (jniclass != "" && sn->tail()) {
+      if (!jniclass.empty() && sn->tail()) {
         jniclass += '_';
         jpackage += '.';
         file += '/';

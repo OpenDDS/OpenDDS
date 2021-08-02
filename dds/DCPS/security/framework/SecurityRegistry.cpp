@@ -94,7 +94,6 @@ SecurityRegistry::close()
 SecurityRegistry::SecurityRegistry()
 {
   DBG_ENTRY_LVL("SecurityRegistry", "SecurityRegistry", 6);
-
   lib_directive_map_[DEFAULT_PLUGIN_NAME] = "dynamic OpenDDS_Security Service_Object * OpenDDS_Security:_make_BuiltInPluginLoader()";
 }
 
@@ -107,7 +106,6 @@ SecurityRegistry::release()
   for (InstMap::iterator iter = registered_plugins_.begin(); iter != registered_plugins_.end(); ++iter) {
     iter->second->shutdown();
   }
-
   registered_plugins_.clear();
   config_map_.clear();
 }

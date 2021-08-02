@@ -87,6 +87,11 @@ bool operator==(const TimeStamp& lhs, const TimeStamp& rhs)
   return lhs.sec == rhs.sec && lhs.nsec == rhs.nsec;
 }
 
+bool operator!=(const TimeStamp& lhs, const TimeStamp& rhs)
+{
+  return lhs.sec != rhs.sec || lhs.nsec != rhs.nsec;
+}
+
 std::ostream&
 operator<<(std::ostream& out, const TimeStamp& ts)
 {

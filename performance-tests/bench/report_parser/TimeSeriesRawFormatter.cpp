@@ -1,54 +1,92 @@
 #include "TimeSeriesRawFormatter.h"
 
+#include "SharedSummaryReportVisitor.h"
+
 #include <PropertyStatBlock.h>
 
-int TimeSeriesRawFormatter::format(const Report& report, std::ofstream& output_file_stream)
+namespace Bench {
+
+namespace {
+
+void write_series(const SimpleStatBlockMap& stats, std::ostream& output_stream, size_t rows) {
+  // Write Header
+  for (auto stat_it = stats.begin(); stat_it != stats.end(); ++stat_it) {
+    if (stat_it != stats.begin()) {
+      output_stream << "\t";
+    }
+    output_stream << stat_it->first << " (times)\t" << stat_it->first << " (values)";
+  }
+  output_stream << std::endl;
+
+  // Write Data
+  for (size_t i = 0; i < rows; ++i) {
+    for (auto stat_it = stats.begin(); stat_it != stats.end(); ++stat_it) {
+      if (stat_it != stats.begin()) {
+        output_stream << "\t";
+      }
+      const size_t delta = rows - stat_it->second.median_buffer_.size();
+      output_stream << ((i < delta || stat_it->second.timestamp_buffer_.size() < stat_it->second.median_buffer_.size()) ? Builder::ZERO : stat_it->second.timestamp_buffer_[i - delta]) << "\t";
+      output_stream << (i < delta ? 0 : stat_it->second.median_buffer_[i - delta]);
+    }
+    output_stream << std::endl;
+  }
+}
+
+}
+
+int TimeSeriesRawFormatter::format(const Bench::TestController::Report& report, std::ostream& output_stream, const ParseParameters& parse_parameters)
 {
-  Bench::SimpleStatBlock consolidated_cpu_percent_stats;
-  Bench::SimpleStatBlock consolidated_mem_percent_stats;
-  Bench::SimpleStatBlock consolidated_virtual_mem_percent_stats;
+  SharedSummaryReportVisitor visitor;
 
-  for (unsigned int node_index = 0; node_index < report.node_reports.length(); node_index++) {
-    const Bench::TestController::NodeReport& nc_report = report.node_reports[node_index];
+  if (!parse_parameters.tags.empty()) {
+    visitor.tags_ = parse_parameters.tags;
+  }
 
-    Bench::ConstPropertyStatBlock cpu_percent(nc_report.properties, "cpu_percent");
-    Bench::ConstPropertyStatBlock mem_percent(nc_report.properties, "mem_percent");
-    Bench::ConstPropertyStatBlock virtual_mem_percent(nc_report.properties, "virtual_mem_percent");
+  if (!parse_parameters.stats.empty()) {
+    visitor.stats_ = parse_parameters.stats;
+  }
 
-    consolidated_cpu_percent_stats = consolidate(consolidated_cpu_percent_stats, cpu_percent.to_simple_stat_block());
-    consolidated_mem_percent_stats = consolidate(consolidated_mem_percent_stats, mem_percent.to_simple_stat_block());
-    consolidated_virtual_mem_percent_stats = consolidate(consolidated_virtual_mem_percent_stats, virtual_mem_percent.to_simple_stat_block());
+  visit_report(report, visitor);
 
-    output_file_stream << "CPU median buffer values:" << std::endl;
-    for (size_t i = 0; i != consolidated_cpu_percent_stats.median_buffer_.size(); i++) {
-      output_file_stream << "\t" << consolidated_cpu_percent_stats.median_buffer_[i] << std::endl;
+  const auto& tags = visitor.tags_;
+  const auto& stats = visitor.stats_;
+  const auto& untagged_stat_vecs = visitor.untagged_stat_vecs_;
+  const auto& tagged_stat_vecs = visitor.tagged_stat_vecs_;
+
+  SimpleStatBlockMap untagged_stat_map;
+  std::map<std::string, SimpleStatBlockMap> tagged_stat_map;
+
+  size_t untagged_rows = 0;
+  for (auto stat_it = stats.begin(); stat_it != stats.end(); ++stat_it) {
+    auto stat_pos = untagged_stat_vecs.find(*stat_it);
+    if (stat_pos != untagged_stat_vecs.end()) {
+      untagged_stat_map[*stat_it] = consolidate(stat_pos->second);
+      if (untagged_rows < untagged_stat_map[*stat_it].median_buffer_.size()) {
+        untagged_rows = untagged_stat_map[*stat_it].median_buffer_.size();
+      }
     }
+  }
 
-    output_file_stream << "CPU timestamp buffer values:" << std::endl;
-    for (size_t i = 0; i != consolidated_cpu_percent_stats.timestamp_buffer_.size(); i++) {
-      output_file_stream << "\t" << consolidated_cpu_percent_stats.timestamp_buffer_[i] << std::endl;
-    }
+  write_series(untagged_stat_map, output_stream, untagged_rows);
 
-    output_file_stream << "Mem median buffer values:" << std::endl;
-    for (size_t i = 0; i != consolidated_mem_percent_stats.median_buffer_.size(); i++) {
-      output_file_stream << "\t" << consolidated_mem_percent_stats.median_buffer_[i] << std::endl;
-    }
-
-    output_file_stream << "Mem timestamp buffer values:" << std::endl;
-    for (size_t i = 0; i != consolidated_mem_percent_stats.timestamp_buffer_.size(); i++) {
-      output_file_stream << "\t" << consolidated_mem_percent_stats.timestamp_buffer_[i] << std::endl;
-    }
-
-    output_file_stream << "Virtual mem median buffer values:" << std::endl;
-    for (size_t i = 0; i != consolidated_virtual_mem_percent_stats.median_buffer_.size(); i++) {
-      output_file_stream << "\t" << consolidated_virtual_mem_percent_stats.median_buffer_[i] << std::endl;
-    }
-
-    output_file_stream << "Virtual mem timestamp buffer values:" << std::endl;
-    for (size_t i = 0; i != consolidated_virtual_mem_percent_stats.timestamp_buffer_.size(); i++) {
-      output_file_stream << "\t" << consolidated_virtual_mem_percent_stats.timestamp_buffer_[i] << std::endl;
+  for (auto tags_it = tags.begin(); tags_it != tags.end(); ++tags_it) {
+    auto tag_pos = tagged_stat_vecs.find(*tags_it);
+    if (tag_pos != tagged_stat_vecs.end()) {
+      size_t tagged_rows = 0;
+      for (auto stat_it = stats.begin(); stat_it != stats.end(); ++stat_it) {
+        auto stat_pos = tag_pos->second.find(*stat_it);
+        if (stat_pos != tag_pos->second.end()) {
+          tagged_stat_map[*tags_it][*stat_it] = consolidate(stat_pos->second);
+          if (tagged_rows < tagged_stat_map[*tags_it][*stat_it].median_buffer_.size()) {
+            tagged_rows = tagged_stat_map[*tags_it][*stat_it].median_buffer_.size();
+          }
+        }
+      }
+      write_series(tagged_stat_map[*tags_it], output_stream, tagged_rows);
     }
   }
 
   return EXIT_SUCCESS;
 }
+
+} // namespace Bench

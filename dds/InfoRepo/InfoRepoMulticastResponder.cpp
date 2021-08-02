@@ -7,6 +7,8 @@
 
 #include "InfoRepoMulticastResponder.h"
 #include "dds/DCPS/debug.h"
+#include "dds/DCPS/Definitions.h"
+#include <dds/DCPS/LogAddr.h>
 
 #include "tao/debug.h"
 #include "tao/Object.h"
@@ -209,13 +211,11 @@ InfoRepoMulticastResponder::handle_input(ACE_HANDLE)
                      0);
 
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-    ACE_TCHAR addr[64];
-    remote_addr.addr_to_string(addr, sizeof(addr), 0);
     ACE_DEBUG((LM_DEBUG,
-               "(%P|%t) Received multicast from %s.\n"
-               "Service Name received : %C\n"
+               "(%P|%t) Received multicast from %C.\n"
+               "Service Name received : %s\n"
                "Port received : %u\n",
-               addr,
+               DCPS::LogAddr(remote_addr, DCPS::LogAddr::HostPort).c_str(),
                object_key,
                ACE_NTOHS(remote_port)));
   }
@@ -229,7 +229,6 @@ InfoRepoMulticastResponder::handle_input(ACE_HANDLE)
 
   if (CORBA::is_nil(locator.in())) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("Nil IORTable\n")));
-
   }
 
   std::string ior;
@@ -290,11 +289,8 @@ InfoRepoMulticastResponder::handle_input(ACE_HANDLE)
 #endif /* ACE_HAS_IPV6 */
 
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-    ACE_TCHAR addr[64];
-    peer_addr.addr_to_string(addr, sizeof(addr), 0);
-    ACE_DEBUG((LM_DEBUG,
-               "(%P|%t) Replying to peer %s.\n",
-               addr));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Replying to peer %C.\n",
+               DCPS::LogAddr(peer_addr, DCPS::LogAddr::HostPort).c_str()));
   }
 
   // Connect.
@@ -305,7 +301,7 @@ InfoRepoMulticastResponder::handle_input(ACE_HANDLE)
   // length as the first element, and ior itself as the second.)
 
   // Length of ior to be sent.
-  CORBA::Short data_len = ACE_HTONS(static_cast<CORBA::Short>(ior.length()) + 1);
+  const CORBA::Short data_len = ACE_HTONS(static_cast<CORBA::Short>(ior.length()) + 1);
 
   // Vector to be sent.
   const int cnt = 2;
@@ -319,7 +315,7 @@ InfoRepoMulticastResponder::handle_input(ACE_HANDLE)
   iovp[1].iov_base = const_cast<char*>(ior.c_str());
   iovp[1].iov_len  = static_cast<u_long>(ior.length() + 1);
 
-  ssize_t result = stream.sendv_n(iovp, cnt);
+  const ssize_t result = stream.sendv_n(iovp, cnt);
   // Close the stream.
   stream.close();
 
@@ -330,11 +326,10 @@ InfoRepoMulticastResponder::handle_input(ACE_HANDLE)
   if (OpenDDS::DCPS::DCPS_debug_level > 0)
     ACE_DEBUG((LM_DEBUG,
                "(%P|%t) InfoRepoMulticastResponder::handle_input() ior: <%C>\n"
-               "sent to %C:%u.\n"
+               "sent to %C.\n"
                "result from send = %d\n",
                ior.c_str(),
-               peer_addr.get_host_name(),
-               peer_addr.get_port_number(),
+               DCPS::LogAddr(peer_addr).c_str(),
                result));
 
   return 0;

@@ -28,3 +28,7 @@
 /UShortSeqTypeSupportImpl.h
 /WStringSeqTypeSupportImpl.cpp
 /LongDoubleSeqTypeSupportImpl.h
+/Int8SeqTypeSupportImpl.cpp
+/Int8SeqTypeSupportImpl.h
+/UInt8SeqTypeSupportImpl.cpp
+/UInt8SeqTypeSupportImpl.h

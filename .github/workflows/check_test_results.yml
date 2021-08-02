@@ -79,6 +79,12 @@ jobs:
           export TRIGGERING_COMMIT=$(cat ./SHA)
           echo "TRIGGERING_COMMIT=$TRIGGERING_COMMIT" >> $GITHUB_ENV
 
+      - name: 'Avoid relative paths in XML testcase names'
+        shell: bash
+        run: |
+          sed '/<testcase name="/s/\.\.\///g' -i ${{ matrix.info[0] }}_autobuild_output/Tests_JUnit.xml
+          sed '/<testcase name="/s/\.\///g' -i ${{ matrix.info[0] }}_autobuild_output/Tests_JUnit.xml
+
       - name: 'Publish Unit Test Results'
         uses: simpsont-oci/action-junit-report@v2.2.0.1
         if: always()

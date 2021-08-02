@@ -1,95 +1,93 @@
 /*
-*
-*
-* Distributed under the OpenDDS License.
-* See: http://www.opendds.org/license.html
-*/
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 
 module extensibility {
   @extensibility(FINAL) @topic
   struct struct_final{
-   string member;
+    string member;
   };
 
   @extensibility(APPENDABLE) @topic
   struct struct_appendable {
-   string member;
+    string member;
   };
 
   @extensibility(MUTABLE) @topic
   struct struct_mutable {
-   string member;
+    string member;
   };
 
   @extensibility(FINAL) @topic
   union union_final switch(long) {
-   case 0: long A;
-   case 1: short B;
+    case 0: long A;
+    case 1: short B;
   };
 
   @extensibility(APPENDABLE) @topic
   union union_appendable switch(long) {
-   case 0: long A;
-   case 1: short B;
+    case 0: long A;
+    case 1: short B;
   };
 
   @extensibility(MUTABLE) @topic
   union union_mutable switch(long) {
-   case 0: long A;
-   case 1: short B;
+    case 0: long A;
+    case 1: short B;
   };
 
   @extensibility(FINAL)
   struct struct_final_nested {
-   string member;
+    string member;
   };
 
   @extensibility(APPENDABLE)
   struct struct_appendable_nested {
-   string member;
+    string member;
   };
 
   @extensibility(MUTABLE)
   struct struct_mutable_nested {
-   string member;
+    string member;
   };
 
   @extensibility(FINAL)
   union union_final_nested switch(long) {
-   case 0: long A;
-   case 1: short B;
+    case 0: long A;
+    case 1: short B;
   };
 
   @extensibility(APPENDABLE)
   union union_appendable_nested switch(long) {
-   case 0: long A;
-   case 1: short B;
+    case 0: long A;
+    case 1: short B;
   };
 
   @extensibility(MUTABLE)
   union union_mutable_nested switch(long) {
-   case 0: long A;
-   case 1: short B;
+    case 0: long A;
+    case 1: short B;
   };
 
   @topic
   struct struct_default {
-   string member;
+    string member;
   };
 
   @topic
   union union_default switch(long) {
-   case 0: long A;
-   case 1: short B;
+    case 0: long A;
+    case 1: short B;
   };
 
   struct struct_default_nested {
-   string member;
+    string member;
   };
 
   union union_default_nested switch(long) {
-   case 0: long A;
-   case 1: short B;
+    case 0: long A;
+    case 1: short B;
   };
 
 };

@@ -222,11 +222,11 @@ TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const StronglyConnectedComponen
   sc_component_id() = id;
 }
 
-TypeIdentifier makeTypeIdentifier(const TypeObject& type_object)
+TypeIdentifier makeTypeIdentifier(const TypeObject& type_object, const DCPS::Encoding* encoding_option)
 {
   OPENDDS_ASSERT(type_object.kind == EK_MINIMAL || type_object.kind == EK_COMPLETE);
 
-  const Encoding& encoding = get_typeobject_encoding();
+  const Encoding& encoding = encoding_option ? *encoding_option : get_typeobject_encoding();
   size_t size = serialized_size(encoding, type_object);
   ACE_Message_Block buff(size);
   DCPS::Serializer ser(&buff, encoding);
@@ -1370,13 +1370,13 @@ bool operator>>(Serializer& strm, XTypes::CompleteStructHeader& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.base_type)
     && (strm >> stru.detail);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -1409,13 +1409,13 @@ bool operator>>(Serializer& strm, XTypes::MinimalStructHeader& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.base_type)
     && (strm >> stru.detail);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -1685,14 +1685,14 @@ bool operator>>(Serializer& strm, XTypes::CompleteArrayType& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.collection_flag)
     && (strm >> stru.header)
     && (strm >> stru.element);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -1800,13 +1800,13 @@ bool operator>>(Serializer& strm, XTypes::CompleteEnumeratedHeader& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common)
     && (strm >> stru.detail);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -1836,12 +1836,12 @@ bool operator>>(Serializer& strm, XTypes::MinimalEnumeratedHeader& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -1922,14 +1922,14 @@ bool operator>>(Serializer& strm, XTypes::CompleteBitmaskType& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.bitmask_flags)
     && (strm >> stru.header)
     && (strm >> stru.flag_seq);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -1964,14 +1964,14 @@ bool operator>>(Serializer& strm, XTypes::MinimalBitmaskType& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.bitmask_flags)
     && (strm >> stru.header)
     && (strm >> stru.flag_seq);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -2006,14 +2006,14 @@ bool operator>>(Serializer& strm, XTypes::CompleteBitsetType& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.bitset_flags)
     && (strm >> stru.header)
     && (strm >> stru.field_seq);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -2048,14 +2048,14 @@ bool operator>>(Serializer& strm, XTypes::MinimalBitsetType& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.bitset_flags)
     && (strm >> stru.header)
     && (strm >> stru.field_seq);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -2105,13 +2105,13 @@ bool operator>>(Serializer& strm, XTypes::TypeIdentifierWithSize& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.type_id)
     && (strm >> stru.typeobject_serialized_size);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -2146,14 +2146,14 @@ bool operator>>(Serializer& strm, XTypes::TypeIdentifierWithDependencies& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.typeid_with_size)
     && (strm >> stru.dependent_typeid_count)
     && (strm >> stru.dependent_typeids);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -2186,12 +2186,12 @@ bool operator>>(Serializer& strm, XTypes::AppliedAnnotation& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
   const bool ret = (strm >> stru.annotation_typeid)
     && (strm >> stru.param_seq);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -2222,12 +2222,12 @@ bool operator>>(Serializer& strm, XTypes::AppliedBuiltinTypeAnnotations& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.verbatim);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -2262,14 +2262,14 @@ bool operator>>(Serializer& strm, XTypes::CompleteAliasBody& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common)
     && (strm >> stru.ann_builtin)
     && (strm >> stru.ann_custom);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -2300,12 +2300,12 @@ bool operator>>(Serializer& strm, XTypes::CompleteAliasHeader& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.detail);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -2337,12 +2337,12 @@ bool operator>>(Serializer& strm, XTypes::CompleteAnnotationHeader& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> Serializer::ToBoundedString<char>(stru.annotation_name, 256));
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -2378,14 +2378,14 @@ bool operator>>(Serializer& strm, XTypes::CompleteAnnotationParameter& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common)
     && (strm >> Serializer::ToBoundedString<char>(stru.name, 256))
     && (strm >> stru.default_value);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -2418,13 +2418,13 @@ bool operator>>(Serializer& strm, XTypes::CompleteArrayHeader& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common)
     && (strm >> stru.detail);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -2457,13 +2457,13 @@ bool operator>>(Serializer& strm, XTypes::CompleteBitfield& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common)
     && (strm >> stru.detail);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -2496,13 +2496,13 @@ bool operator>>(Serializer& strm, XTypes::CompleteBitflag& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common)
     && (strm >> stru.detail);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -2533,12 +2533,12 @@ bool operator>>(Serializer& strm, XTypes::CompleteBitsetHeader& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.detail);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -2571,13 +2571,13 @@ bool operator>>(Serializer& strm, XTypes::CompleteCollectionElement& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common)
     && (strm >> stru.detail);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -2610,13 +2610,13 @@ bool operator>>(Serializer& strm, XTypes::CompleteCollectionHeader& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common)
     && (strm >> stru.detail);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -2651,14 +2651,14 @@ bool operator>>(Serializer& strm, XTypes::CompleteDiscriminatorMember& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common)
     && (strm >> stru.ann_builtin)
     && (strm >> stru.ann_custom);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -2691,13 +2691,13 @@ bool operator>>(Serializer& strm, XTypes::CompleteEnumeratedLiteral& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common)
     && (strm >> stru.detail);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -2730,13 +2730,13 @@ bool operator>>(Serializer& strm, XTypes::CompleteStructMember& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common)
     && (strm >> stru.detail);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
 
   return ret;
@@ -2768,12 +2768,12 @@ bool operator>>(Serializer& strm, XTypes::CompleteUnionHeader& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.detail);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -2806,13 +2806,13 @@ bool operator>>(Serializer& strm, XTypes::CompleteUnionMember& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common)
     && (strm >> stru.detail);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -2843,12 +2843,12 @@ bool operator>>(Serializer& strm, XTypes::MinimalAliasBody& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -2920,14 +2920,14 @@ bool operator>>(Serializer& strm, XTypes::MinimalAnnotationParameter& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common)
     && (strm >> stru_name_hash)
     && (strm >> stru.default_value);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -2958,12 +2958,12 @@ bool operator>>(Serializer& strm, XTypes::MinimalArrayHeader& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -2999,13 +2999,13 @@ bool operator>>(Serializer& strm, XTypes::MinimalBitfield& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common)
     && (strm >> stru_name_hash);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -3038,13 +3038,13 @@ bool operator>>(Serializer& strm, XTypes::MinimalBitflag& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common)
     && (strm >> stru.detail);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -3092,12 +3092,12 @@ bool operator>>(Serializer& strm, XTypes::MinimalCollectionElement& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -3128,12 +3128,12 @@ bool operator>>(Serializer& strm, XTypes::MinimalCollectionHeader& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -3164,12 +3164,12 @@ bool operator>>(Serializer& strm, XTypes::MinimalDiscriminatorMember& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -3202,13 +3202,13 @@ bool operator>>(Serializer& strm, XTypes::MinimalEnumeratedLiteral& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common)
     && (strm >> stru.detail);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -3241,13 +3241,13 @@ bool operator>>(Serializer& strm, XTypes::MinimalStructMember& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common)
     && (strm >> stru.detail);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -3278,12 +3278,12 @@ bool operator>>(Serializer& strm, XTypes::MinimalUnionHeader& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.detail);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -3316,13 +3316,13 @@ bool operator>>(Serializer& strm, XTypes::MinimalUnionMember& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common)
     && (strm >> stru.detail);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -3667,14 +3667,14 @@ bool operator>>(Serializer& strm, XTypes::AppliedAnnotationParameter& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   XTypes::NameHash_forany stru_paramname_hash(const_cast<XTypes::NameHash_slice*>(stru.paramname_hash));
   const bool ret = (strm >> stru_paramname_hash)
     && (strm >> stru.value);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -3722,15 +3722,15 @@ bool operator>>(Serializer& strm, XTypes::AppliedBuiltinMemberAnnotations& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.unit)
     && (strm >> stru.min)
     && (strm >> stru.max)
     && (strm >> stru.hash_id);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -3966,13 +3966,13 @@ bool operator>>(Serializer& strm, XTypes::CommonEnumeratedLiteral& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.value)
     && (strm >> stru.flags);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
   return ret;
 }
@@ -4321,7 +4321,7 @@ bool operator>>(Serializer& strm, XTypes::StronglyConnectedComponentId& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   // appendable, but no need to handle truncated streams since
   // this struct is defined in the spec with the following members:
@@ -4329,8 +4329,8 @@ bool operator>>(Serializer& strm, XTypes::StronglyConnectedComponentId& stru)
     && (strm >> stru.scc_length)
     && (strm >> stru.scc_index);
 
-  if (ret && strm.pos() - start_pos < total_size) {
-    strm.skip(total_size - strm.pos() + start_pos);
+  if (ret && strm.rpos() - start_pos < total_size) {
+    strm.skip(total_size - strm.rpos() + start_pos);
   }
 
   return ret;
@@ -4747,13 +4747,13 @@ bool operator>>(Serializer& strm, XTypes::TypeInformation& stru)
     return false;
   }
 
-  const size_t start_pos = strm.pos();
+  const size_t start_pos = strm.rpos();
 
   unsigned member_id;
   size_t field_size;
   while (true) {
 
-    if (strm.pos() - start_pos >= total_size) {
+    if (strm.rpos() - start_pos >= total_size) {
       return true;
     }
 

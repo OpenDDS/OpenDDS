@@ -26,12 +26,11 @@ public:
 
 private:
   static const double NTP_FRACTIONAL; // NTP fractional (2^-32) sec per microsec
-  // TODO(iguessthislldo): convert
-  static const ACE_CDR::ULong ENCAP = 0x00000100; // {CDR_LE, options} in BE format
   static const CORBA::Octet DE  = OpenDDS::RTPS::FLAG_D | OpenDDS::RTPS::FLAG_E;
   static const CORBA::Octet DEQ = OpenDDS::RTPS::FLAG_D | OpenDDS::RTPS::FLAG_E | OpenDDS::RTPS::FLAG_Q;
   static OpenDDS::RTPS::Header header(OpenDDS::DCPS::RepoId id);
   static const OpenDDS::DCPS::Encoding encoding;
+  static const OpenDDS::DCPS::EncapsulationHeader encap;
 
   OpenDDS::RTPS::InfoTimestampSubmessage timeSubMsg() const;
   OpenDDS::RTPS::DataSubmessage dataSubMsg(CORBA::ULong seqN, const TestMsg& msg) const;

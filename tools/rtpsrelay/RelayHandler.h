@@ -137,7 +137,8 @@ public:
 
   void process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now);
 
-  bool ignore(const OpenDDS::DCPS::GUID_t& guid);
+  bool ignore(const OpenDDS::DCPS::GUID_t& guid,
+              const OpenDDS::DCPS::MonotonicTimePoint& now);
 
   void remove(const OpenDDS::DCPS::RepoId& guid);
 
@@ -210,7 +211,8 @@ private:
   typedef std::multimap<OpenDDS::DCPS::MonotonicTimePoint, GuidAddr> ExpirationGuidAddrMap;
   ExpirationGuidAddrMap expiration_guid_addr_map_;
   GuidSet pending_;
-
+  typedef std::multimap<OpenDDS::DCPS::MonotonicTimePoint, OpenDDS::DCPS::GUID_t> PendingExpirationMap;
+  PendingExpirationMap pending_expiration_map_;
   mutable ACE_Thread_Mutex mutex_;
 };
 

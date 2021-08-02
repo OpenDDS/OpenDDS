@@ -21,6 +21,7 @@
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/debug.h"
 #include "dds/DCPS/GuidConverter.h"
+#include <dds/DCPS/LogAddr.h>
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
 #include "dds/DCPS/RcHandle_T.h"
@@ -82,9 +83,8 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
     blob_to_key(remote.blob_, attribs.priority_, true /*active*/);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink PriorityKey "
-            "prio=%d, addr=%C:%hu, is_loopback=%d, is_active=%d\n",
-            key.priority(), key.address().get_host_addr(),
-            key.address().get_port_number(), key.is_loopback(),
+            "prio=%d, addr=%C, is_loopback=%d, is_active=%d\n",
+            key.priority(), LogAddr(key.address()).c_str(), key.is_loopback(),
             key.is_active()), 0);
 
   TcpDataLink_rch link;
@@ -118,9 +118,6 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
   connection->set_datalink(link);
 
   TcpConnection* pConn = connection.in();
-
-  ACE_TCHAR str[64];
-  key.address().addr_to_string(str,sizeof(str)/sizeof(str[0]), 0);
 
   // Can't make this call while holding onto TransportClient::lock_
   ACE_Time_Value conn_timeout;
@@ -233,9 +230,8 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
     blob_to_key(remote.blob_, attribs.priority_, false /* !active */);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink PriorityKey "
-            "prio=%d, addr=%C:%hu, is_loopback=%d, is_active=%d\n", attribs.priority_,
-            key.address().get_host_addr(), key.address().get_port_number(),
-            key.is_loopback(), key.is_active()), 2);
+            "prio=%d, addr=%C, is_loopback=%d, is_active=%d\n", attribs.priority_,
+            LogAddr(key.address()).c_str(), key.is_loopback(), key.is_active()), 2);
 
   TcpDataLink_rch link;
   {
@@ -293,7 +289,8 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
 void
 TcpTransport::stop_accepting_or_connecting(const TransportClient_wrch& client,
                                            const RepoId& remote_id,
-                                           bool /*disassociate*/)
+                                           bool /*disassociate*/,
+                                           bool /*association_failed*/)
 {
   GuidConverter remote_converted(remote_id);
   VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::stop_accepting_or_connecting "
@@ -324,21 +321,21 @@ TcpTransport::configure_i(TcpInst& config)
   // Override with DCPSDefaultAddress.
   if (config.local_address() == ACE_INET_Addr() &&
       TheServiceParticipant->default_address() != ACE_INET_Addr()) {
+    VDBG_LVL((LM_DEBUG,
+              ACE_TEXT("(%P|%t) TcpTransport::configure_i overriding with DCPSDefaultAddress\n")), 2);
+
     config.local_address(TheServiceParticipant->default_address());
   }
 
+  VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::configure_i opening acceptor for %C on %C\n"),
+            config.local_address_string().c_str(), LogAddr(config.local_address()).c_str()), 2);
+
   // Open our acceptor object so that we can accept passive connections
   // on our config.local_address_.
-
   if (this->acceptor_->open(config.local_address(),
                             this->reactor_task()->get_reactor()) != 0) {
-
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Acceptor failed to open %C:%d: %p\n"),
-                      config.local_address().get_host_addr(),
-                      config.local_address().get_port_number(),
-                      ACE_TEXT("open")),
-                     false);
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Acceptor failed to open %C: %p\n"),
+                      LogAddr(config.local_address()).c_str(), ACE_TEXT("open")), false);
   }
 
   // update the port number (incase port zero was given).
@@ -351,17 +348,15 @@ TcpTransport::configure_i(TcpInst& config)
                ACE_TEXT("cannot get local addr\n")));
   }
 
-  OPENDDS_STRING listening_addr(address.get_host_addr());
-  VDBG_LVL((LM_DEBUG,
-            ACE_TEXT("(%P|%t) TcpTransport::configure_i listening on %C:%hu\n"),
-            listening_addr.c_str(), address.get_port_number()), 2);
+  VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::configure_i listening on %C\n"),
+            LogAddr(address).c_str()), 2);
 
-  unsigned short port = address.get_port_number();
+  const unsigned short port = address.get_port_number();
 
   // As default, the acceptor will be listening on INADDR_ANY but advertise with the fully
   // qualified hostname and actual listening port number.
   if (config.local_address().is_any()) {
-    std::string hostname = get_fully_qualified_hostname();
+    const std::string hostname = get_fully_qualified_hostname();
     config.local_address(port, hostname.c_str());
     if (config.local_address() == ACE_INET_Addr()) {
        ACE_ERROR_RETURN((LM_ERROR,
@@ -492,11 +487,10 @@ TcpTransport::release_datalink(DataLink* link)
 
   VDBG_LVL((LM_DEBUG,
             "(%P|%t) TcpTransport::release_datalink link[%@] PriorityKey "
-            "prio=%d, addr=%C:%hu, is_loopback=%d, is_active=%d\n",
+            "prio=%d, addr=%C, is_loopback=%d, is_active=%d\n",
             link,
             tcp_link->transport_priority(),
-            tcp_link->remote_address().get_host_addr(),
-            tcp_link->remote_address().get_port_number(),
+            LogAddr(tcp_link->remote_address()).c_str(),
             (int)tcp_link->is_loopback(),
             (int)tcp_link->is_active()), 2);
 
@@ -590,9 +584,8 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
                         connection->is_connector());
 
   VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::passive_connection() - ")
-            ACE_TEXT("established with %C:%d.\n"),
-            remote_address.get_host_name(),
-            remote_address.get_port_number()), 2);
+            ACE_TEXT("established with %C.\n"),
+            LogAddr(remote_address).c_str()), 2);
 
   GuardType connection_guard(connections_lock_);
   TcpDataLink_rch link;
@@ -629,10 +622,9 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
   if (where != connections_.end()) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) TcpTransport::passive_connection() - ")
-               ACE_TEXT("ERROR: connection with %C:%d at priority %d already exists, ")
+               ACE_TEXT("ERROR: connection with %C at priority %d already exists, ")
                ACE_TEXT("overwriting previously established connection.\n"),
-               remote_address.get_host_name(),
-               remote_address.get_port_number(),
+               LogAddr(remote_address).c_str(),
                connection->transport_priority()));
   }
 
@@ -744,11 +736,10 @@ TcpTransport::unbind_link(DataLink* link)
 
   VDBG_LVL((LM_DEBUG,
             "(%P|%t) TcpTransport::unbind_link link %@ PriorityKey "
-            "prio=%d, addr=%C:%hu, is_loopback=%d, is_active=%d\n",
+            "prio=%d, addr=%C, is_loopback=%d, is_active=%d\n",
             link,
             tcp_link->transport_priority(),
-            tcp_link->remote_address().get_host_addr(),
-            tcp_link->remote_address().get_port_number(),
+            LogAddr(tcp_link->remote_address()).c_str(),
             (int)tcp_link->is_loopback(),
             (int)tcp_link->is_active()), 2);
 
@@ -758,12 +749,11 @@ TcpTransport::unbind_link(DataLink* link)
     ACE_ERROR((LM_ERROR,
                "(%P|%t) TcpTransport::unbind_link INTERNAL ERROR - "
                "Failed to find link %@ tcp_link %@ PriorityKey "
-               "prio=%d, addr=%C:%hu, is_loopback=%d, is_active=%d\n",
+               "prio=%d, addr=%C, is_loopback=%d, is_active=%d\n",
                link,
                tcp_link,
                tcp_link->transport_priority(),
-               tcp_link->remote_address().get_host_addr(),
-               tcp_link->remote_address().get_port_number(),
+               LogAddr(tcp_link->remote_address()).c_str(),
                (int)tcp_link->is_loopback(),
                (int)tcp_link->is_active()));
   }

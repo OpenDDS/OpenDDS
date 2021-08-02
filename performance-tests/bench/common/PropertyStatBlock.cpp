@@ -30,7 +30,7 @@ char my_toupper(char ch)
 }
 }
 
-void SimpleStatBlock::pretty_print(std::ostream& os, const std::string& name, const std::string& indent, size_t indent_level)
+void SimpleStatBlock::pretty_print(std::ostream& os, const std::string& name, const std::string& indent, size_t indent_level) const
 {
   std::string i1, i2;
   for (size_t i = 0; i < indent_level; ++i) {
@@ -62,6 +62,23 @@ void SimpleStatBlock::pretty_print(std::ostream& os, const std::string& name, co
   }
 }
 
+void SimpleStatBlock::to_json_summary(const std::string& name, rapidjson::Value& dst, rapidjson::Value::AllocatorType& alloc) const
+{
+  rapidjson::Value& stat_val = dst.AddMember(rapidjson::StringRef(name.c_str()), rapidjson::Value(0).Move(), alloc)[name.c_str()].SetObject();
+  stat_val.AddMember("sample_count", rapidjson::Value(static_cast<uint64_t>(sample_count_)).Move(), alloc);
+  if (sample_count_) {
+    stat_val.AddMember("min", rapidjson::Value(min_).Move(), alloc);
+    stat_val.AddMember("max", rapidjson::Value(max_).Move(), alloc);
+    stat_val.AddMember("mean", rapidjson::Value(mean_).Move(), alloc);
+    const double stdev = sample_count_ ? std::sqrt(var_x_sample_count_ / static_cast<double>(sample_count_)) : 0.0;
+    stat_val.AddMember("stdev", rapidjson::Value(stdev).Move(), alloc);
+    stat_val.AddMember("median", rapidjson::Value(median_).Move(), alloc);
+    stat_val.AddMember("madev", rapidjson::Value(median_absolute_deviation_).Move(), alloc);
+    stat_val.AddMember("median_sample_count", rapidjson::Value(static_cast<uint64_t>(median_sample_count_)).Move(), alloc);
+    stat_val.AddMember("median_sample_overflow", rapidjson::Value(static_cast<uint64_t>(median_sample_overflow_)).Move(), alloc);
+  }
+}
+
 SimpleStatBlock consolidate(const SimpleStatBlock& sb1, const SimpleStatBlock& sb2)
 {
   SimpleStatBlock result;
@@ -84,23 +101,105 @@ SimpleStatBlock consolidate(const SimpleStatBlock& sb1, const SimpleStatBlock& s
   // Consolidate median buffers (no need to include unused / invalid values beyond median sample count)
   result.median_sample_count_ = sb1.median_sample_count_ + sb2.median_sample_count_;
   result.median_buffer_.resize(result.median_sample_count_);
-  for (size_t i = 0; i < sb1.median_sample_count_; ++i) {
-    result.median_buffer_[i] = sb1.median_buffer_[i];
+  if (sb1.median_sample_count_) {
+    memcpy(&result.median_buffer_[0], &sb1.median_buffer_[0], sb1.median_sample_count_ * sizeof (double));
   }
-  for (size_t i = 0; i < sb2.median_sample_count_; ++i) {
-    result.median_buffer_[sb1.median_sample_count_ + i] = sb2.median_buffer_[i];
+  if (sb2.median_sample_count_) {
+    memcpy(&result.median_buffer_[sb1.median_sample_count_], &sb2.median_buffer_[0], sb2.median_sample_count_ * sizeof (double));
   }
   result.median_sample_overflow_ = result.sample_count_ - result.median_sample_count_;
 
   // Consolidate timestamp buffers
-  size_t sb1_timestamp_buffer_count = sb1.timestamp_buffer_.size() ? sb1.median_sample_count_ : 0;
-  size_t sb2_timestamp_buffer_count = sb2.timestamp_buffer_.size() ? sb2.median_sample_count_ : 0;
-  result.timestamp_buffer_.resize(sb1_timestamp_buffer_count + sb2_timestamp_buffer_count);
-  for (size_t i = 0; i < sb1_timestamp_buffer_count; ++i) {
-    result.timestamp_buffer_[i] = sb1.timestamp_buffer_[i];
+  result.timestamp_buffer_.resize(result.median_sample_count_);
+  if (sb1.timestamp_buffer_.size()) {
+    memcpy(&result.timestamp_buffer_[0], &sb1.timestamp_buffer_[0], sb1.median_sample_count_ * sizeof (Builder::TimeStamp));
+  } else if (sb1.median_sample_count_) {
+    memset(&result.timestamp_buffer_[0], 0, sb1.median_sample_count_ * sizeof (Builder::TimeStamp));
   }
-  for (size_t i = 0; i < sb2_timestamp_buffer_count; ++i) {
-    result.timestamp_buffer_[sb1_timestamp_buffer_count + i] = sb2.timestamp_buffer_[i];
+  if (sb2.timestamp_buffer_.size()) {
+    memcpy(&result.timestamp_buffer_[sb1.median_sample_count_], &sb2.timestamp_buffer_[0], sb2.median_sample_count_ * sizeof (Builder::TimeStamp));
+  } else if (sb2.median_sample_count_) {
+    memset(&result.timestamp_buffer_[sb1.median_sample_count_], 0, sb2.median_sample_count_ * sizeof (Builder::TimeStamp));
+  }
+
+  if (result.median_sample_count_) {
+    // Calculate consolidated median from consolidated median buffer
+    {
+      std::vector<double> median_buffer = result.median_buffer_;
+      std::sort(&median_buffer[0], &median_buffer[0] + result.median_sample_count_);
+      if (result.median_sample_count_ % 2 == 0) {
+        // even, but not zero
+        result.median_ = (median_buffer[(result.median_sample_count_ / 2) - 1] + median_buffer[result.median_sample_count_ / 2]) / 2.0;
+      } else {
+        // odd
+        result.median_ = median_buffer[result.median_sample_count_ / 2];
+      }
+    }
+
+    // Calculate consolidated median absolute deviation from consolidated median buffer
+    {
+      std::vector<double> mad_buffer = result.median_buffer_;
+      for (size_t i = 0; i < mad_buffer.size(); ++i) {
+        mad_buffer[i] = fabs(mad_buffer[i] - result.median_);
+      }
+      std::sort(&mad_buffer[0], &mad_buffer[0] + result.median_sample_count_);
+      if (result.median_sample_count_ % 2 == 0) {
+        result.median_absolute_deviation_ = (mad_buffer[(result.median_sample_count_ / 2) - 1] + mad_buffer[result.median_sample_count_ / 2]) / 2.0;
+      } else {
+        result.median_absolute_deviation_ = mad_buffer[result.median_sample_count_ / 2];
+      }
+    }
+  }
+
+  return result;
+}
+
+SimpleStatBlock consolidate(const std::vector<SimpleStatBlock>& vec)
+{
+  SimpleStatBlock result;
+
+  // Do this in two passes: normal stats and then buffers
+  // This is an optimization, since incremental median calculations (from buffers) are wasteful
+
+  for (auto it = vec.begin(); it != vec.end(); ++it) {
+    size_t old_sample_count = result.sample_count_;
+    result.sample_count_ += it->sample_count_;
+    if (it == vec.begin()) {
+      result.min_ = it->min_;
+      result.max_ = it->max_;
+      result.mean_ = it->mean_;
+      result.var_x_sample_count_ = it->var_x_sample_count_;
+      result.median_sample_count_ = it->median_sample_count_;
+    } else {
+      result.min_ = std::min(result.min_, it->min_);
+      result.max_ = std::max(result.max_, it->max_);
+      if (result.sample_count_ > 0) {
+        result.mean_ = (result.mean_ * static_cast<double>(old_sample_count) + it->mean_ * static_cast<double>(it->sample_count_)) / result.sample_count_;
+      }
+      result.var_x_sample_count_ += it->var_x_sample_count_;
+      result.median_sample_count_ += it->median_sample_count_;
+    }
+  }
+
+  result.median_buffer_.resize(result.median_sample_count_);
+  result.median_sample_overflow_ = result.sample_count_ - result.median_sample_count_;
+
+  result.timestamp_buffer_.resize(result.median_sample_count_);
+
+  size_t median_buffer_pos = 0;
+  for (auto it = vec.begin(); it != vec.end(); ++it) {
+    OPENDDS_ASSERT(it->median_sample_count_ <= it->median_buffer_.size());
+    OPENDDS_ASSERT(it->timestamp_buffer_.size() == 0 || it->median_sample_count_ <= it->timestamp_buffer_.size());
+    OPENDDS_ASSERT(it->timestamp_buffer_.size() == 0 || it->median_buffer_.size() == it->timestamp_buffer_.size());
+
+    // Consolidate median buffers (no need to include unused / invalid values beyond median sample count)
+    memcpy(&result.median_buffer_[median_buffer_pos], &it->median_buffer_[0], it->median_sample_count_ * sizeof (double));
+    if (it->timestamp_buffer_.size()) {
+      memcpy(&result.timestamp_buffer_[median_buffer_pos], &it->timestamp_buffer_[0], it->median_sample_count_ * sizeof (Builder::TimeStamp));
+    } else {
+      memset(&result.timestamp_buffer_[median_buffer_pos], 0, it->median_sample_count_ * sizeof (Builder::TimeStamp));
+    }
+    median_buffer_pos += it->median_sample_count_;
   }
 
   if (result.median_sample_count_) {
@@ -255,7 +354,12 @@ void PropertyStatBlock::finalize()
 SimpleStatBlock PropertyStatBlock::to_simple_stat_block() const
 {
   SimpleStatBlock result;
+  to_simple_stat_block(result);
+  return result;
+}
 
+void PropertyStatBlock::to_simple_stat_block(SimpleStatBlock& result) const
+{
   result.sample_count_ = static_cast<size_t>(sample_count_->value.ull_prop());
   result.min_ = min_->value.double_prop();
   result.max_ = max_->value.double_prop();
@@ -267,8 +371,6 @@ SimpleStatBlock PropertyStatBlock::to_simple_stat_block() const
   result.median_sample_count_ = static_cast<size_t>(median_sample_count_->value.ull_prop());
   result.median_ = median_->value.double_prop();
   result.median_absolute_deviation_ = median_absolute_deviation_->value.double_prop();
-
-  return result;
 }
 
 ConstPropertyStatBlock::ConstPropertyStatBlock(const Builder::PropertySeq& seq, const std::string& prefix)
@@ -311,7 +413,12 @@ ConstPropertyStatBlock::ConstPropertyStatBlock(const Builder::PropertySeq& seq, 
 SimpleStatBlock ConstPropertyStatBlock::to_simple_stat_block() const
 {
   SimpleStatBlock result;
+  to_simple_stat_block(result);
+  return result;
+}
 
+void ConstPropertyStatBlock::to_simple_stat_block(SimpleStatBlock& result) const
+{
   if (sample_count_) {
     result.sample_count_ = static_cast<size_t>(sample_count_->value.ull_prop());
     result.min_ = min_->value.double_prop();
@@ -324,9 +431,9 @@ SimpleStatBlock ConstPropertyStatBlock::to_simple_stat_block() const
     result.median_sample_count_ = static_cast<size_t>(median_sample_count_->value.ull_prop());
     result.median_ = median_->value.double_prop();
     result.median_absolute_deviation_ = median_absolute_deviation_->value.double_prop();
+  } else {
+    result = SimpleStatBlock();
   }
-
-  return result;
 }
 
 }

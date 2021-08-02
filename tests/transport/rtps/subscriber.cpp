@@ -72,15 +72,13 @@ public:
     case SAMPLE_DATA: {
       Serializer ser(sample.sample_.get(), encoding);
 
-      // TODO(iguessthislldo): Convert
-      ACE_CDR::ULong encap;
+      OpenDDS::DCPS::EncapsulationHeader encap;
       if (!(ser >> encap)) {
         ACE_ERROR((LM_ERROR,
           "ERROR: data_received() seq# = %q: failed to deserialize encap\n",
           sample.header_.sequence_.getValue()));
         return;
       }
-
       TestMsg data;
       if (!(ser >> data)) {
         ACE_ERROR((LM_ERROR,
@@ -132,8 +130,7 @@ public:
     case DISPOSE_UNREGISTER_INSTANCE: {
       Serializer ser(sample.sample_.get(), encoding);
 
-      // TODO(iguessthislldo): Convert
-      ACE_CDR::ULong encap;
+      OpenDDS::DCPS::EncapsulationHeader encap;
       if (!(ser >> encap)) {
         ACE_ERROR((LM_ERROR,
           "ERROR: data_received() seq# = %q: failed to deserialize encap\n",

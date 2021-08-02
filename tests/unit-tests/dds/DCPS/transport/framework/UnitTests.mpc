@@ -1,6 +1,0 @@
-project(*NetworkAddress): dcps_test, dcps_transports_for_test, googletest {
-  exename = *
-  Source_Files {
-    NetworkAddress.cpp
-  }
-}

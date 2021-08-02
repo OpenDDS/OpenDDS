@@ -22,6 +22,9 @@ DataWriter::DataWriter(const DataWriterConfig& config, DataWriterReport& report,
   Log::log() << "Creating datawriter: '" << name_ << "' with topic name '" << topic_name_
     << "' and listener type name '" << listener_type_name_ << "'" << std::endl;
 
+  // Associate user tags to the report
+  report_.tags = config.tags;
+
   auto topic_ptr = topics->get_topic_by_name(topic_name_);
   if (!topic_ptr) {
     std::stringstream ss;

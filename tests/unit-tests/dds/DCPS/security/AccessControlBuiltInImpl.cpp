@@ -1,3 +1,5 @@
+#ifdef OPENDDS_SECURITY
+
 #include <dds/DCPS/security/AccessControlBuiltInImpl.h>
 #include <dds/DCPS/security/OpenSSL_init.h>
 #include <dds/DCPS/security/framework/Properties.h>
@@ -34,8 +36,8 @@ using namespace testing;
 static const char* Expected_Permissions_Token_Class_Id ="DDS:Access:Permissions:1.0";
 static const char* Expected_Permissions_Cred_Token_Class_Id ="DDS:Access:PermissionsCredential";
 //static const char* identity_ca_file = "certs/opendds_identity_ca_cert.pem";
-static const char* mock_1_cert_file = "../../../../security/certs/identity/test_participant_01_cert.pem";
-static const char* perm_mock_1_join_p7s_file = "../../../../security/permissions/permissions_test_participant_01_JoinDomain_signed.p7s";
+static const char* mock_1_cert_file = "../security/certs/identity/test_participant_01_cert.pem";
+static const char* perm_mock_1_join_p7s_file = "../security/permissions/permissions_test_participant_01_JoinDomain_signed.p7s";
 static const char* remote_subject_name = "/C=US/ST=CO/O=Object Computing/CN=CN_TEST_DDS-SECURITY_OCI_OPENDDS/emailAddress=support@objectcomputing.com";
 
 
@@ -223,65 +225,65 @@ public:
   , test_class_()
   {
     perm_ca_.name = DDS::Security::Properties::AccessPermissionsCA;
-    perm_ca_.value = "file:../../../../security/certs/permissions/permissions_ca_cert.pem";
+    perm_ca_.value = "file:../security/certs/permissions/permissions_ca_cert.pem";
     perm_ca_.propagate = false;
 
     gov_0_p7s_.name = DDS::Security::Properties::AccessGovernance;
-    gov_0_p7s_.value = "file:../../../../security/governance/governance_SC0_SecurityDisabled_signed.p7s";
+    gov_0_p7s_.value = "file:../security/governance/governance_SC0_SecurityDisabled_signed.p7s";
     gov_0_p7s_.propagate = false;
 
     gov_1_p7s_.name = DDS::Security::Properties::AccessGovernance;
-    gov_1_p7s_.value = "file:../../../../security/governance/governance_SC1_ProtectedDomain1_signed.p7s";
+    gov_1_p7s_.value = "file:../security/governance/governance_SC1_ProtectedDomain1_signed.p7s";
     gov_1_p7s_.propagate = false;
 
     gov_2_p7s_.name = DDS::Security::Properties::AccessGovernance;
-    gov_2_p7s_.value = "file:../../../../security/governance/governance_SC2_ProtectedDomain2_signed.p7s";
+    gov_2_p7s_.value = "file:../security/governance/governance_SC2_ProtectedDomain2_signed.p7s";
     gov_2_p7s_.propagate = false;
 
     gov_3_p7s_.name = DDS::Security::Properties::AccessGovernance;
-    gov_3_p7s_.value = "file:../../../../security/governance/governance_SC3_ProtectedDomain3_signed.p7s";
+    gov_3_p7s_.value = "file:../security/governance/governance_SC3_ProtectedDomain3_signed.p7s";
     gov_3_p7s_.propagate = false;
 
     gov_4_p7s_.name = DDS::Security::Properties::AccessGovernance;
-    gov_4_p7s_.value = "file:../../../../security/governance/governance_SC4_ProtectedDomain4_signed.p7s";
+    gov_4_p7s_.value = "file:../security/governance/governance_SC4_ProtectedDomain4_signed.p7s";
     gov_4_p7s_.propagate = false;
 
     gov_5_p7s_.name = DDS::Security::Properties::AccessGovernance;
-    gov_5_p7s_.value = "file:../../../../security/governance/governance_SC5_ProtectedDomain5_signed.p7s";
+    gov_5_p7s_.value = "file:../security/governance/governance_SC5_ProtectedDomain5_signed.p7s";
     gov_5_p7s_.propagate = false;
 
     gov_6_p7s_.name = DDS::Security::Properties::AccessGovernance;
-    gov_6_p7s_.value = "file:../../../../security/governance/governance_SC6_ProtectedDomain6_signed.p7s";
+    gov_6_p7s_.value = "file:../security/governance/governance_SC6_ProtectedDomain6_signed.p7s";
     gov_6_p7s_.propagate = false;
 
     perm_allowall_p7s_.name = DDS::Security::Properties::AccessPermissions;
-    perm_allowall_p7s_.value = "file:../../../../security/permissions/permissions_test_participant_01_JoinDomain_signed.p7s";
+    perm_allowall_p7s_.value = "file:../security/permissions/permissions_test_participant_01_JoinDomain_signed.p7s";
     perm_allowall_p7s_.propagate = false;
 
     perm_topic_p7s_.name = DDS::Security::Properties::AccessPermissions;
-    perm_topic_p7s_.value = "file:../../../../security/permissions/permissions_test_participant_01_TopicLevel_signed.p7s";
+    perm_topic_p7s_.value = "file:../security/permissions/permissions_test_participant_01_TopicLevel_signed.p7s";
     perm_topic_p7s_.propagate = false;
 
     perm_topic2_p7s_.name = DDS::Security::Properties::AccessPermissions;
-    perm_topic2_p7s_.value = "file:../../../../security/permissions/permissions_test_participant_01_TopicLevel_2_signed.p7s";
+    perm_topic2_p7s_.value = "file:../security/permissions/permissions_test_participant_01_TopicLevel_2_signed.p7s";
     perm_topic2_p7s_.propagate = false;
 
     perm_date_p7s_.name = DDS::Security::Properties::AccessPermissions;
-    perm_date_p7s_.value = "file:../../../../security/permissions/permissions_test_participant_01_NotBefore_signed.p7s";
+    perm_date_p7s_.value = "file:../security/permissions/permissions_test_participant_01_NotBefore_signed.p7s";
     perm_date_p7s_.propagate = false;
 
     perm_dateoffset_p7s_.name = DDS::Security::Properties::AccessPermissions;
-    perm_dateoffset_p7s_.value = "file:../../../../security/permissions/permissions_test_participant_01_NotBeforeOffset_signed.p7s";
+    perm_dateoffset_p7s_.value = "file:../security/permissions/permissions_test_participant_01_NotBeforeOffset_signed.p7s";
     perm_dateoffset_p7s_.propagate = false;
 
     perm_parts_p7s_.name = DDS::Security::Properties::AccessPermissions;
     perm_parts_p7s_.value =
-      "file:../../../../security/permissions/permissions_test_participant_01_TopicLevel_Partitions_Default_signed.p7s";
+      "file:../security/permissions/permissions_test_participant_01_TopicLevel_Partitions_Default_signed.p7s";
     perm_parts_p7s_.propagate = false;
 
     perm_two_partitions_p7s_.name = DDS::Security::Properties::AccessPermissions;
     perm_two_partitions_p7s_.value =
-      "file:../../../../security/attributes/permissions/permissions_test_participant_01_partitions_signed.p7s";
+      "file:../security/attributes/permissions/permissions_test_participant_01_partitions_signed.p7s";
     perm_two_partitions_p7s_.propagate = false;
 
     add_property(perm_ca_);
@@ -1432,10 +1434,4 @@ TEST_F(AccessControlTest, return_datareader_sec_attributes)
   EXPECT_TRUE(get_inst().return_datareader_sec_attributes(attributes, ex));
 }
 
-
-int main(int argc, char** argv)
-{
-  openssl_init();
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+#endif

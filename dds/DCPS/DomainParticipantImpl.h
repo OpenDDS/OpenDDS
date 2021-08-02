@@ -120,7 +120,9 @@ public:
     CORBA::ULong client_refs_;
   };
 
-  typedef OPENDDS_MAP(OPENDDS_STRING, RefCounted_Topic) TopicMap;
+  typedef OPENDDS_MULTIMAP(OPENDDS_STRING, RefCounted_Topic) TopicMap;
+  typedef TopicMap::iterator TopicMapIterator;
+  typedef std::pair<TopicMapIterator, TopicMapIterator> TopicMapIteratorPair;
 
   typedef OPENDDS_MAP(OPENDDS_STRING, DDS::TopicDescription_var) TopicDescriptionMap;
 
