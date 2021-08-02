@@ -11,7 +11,7 @@ OpenDDS 3.18.0-dev is currently in development, so this list might change.
 - RTPS:
   - Added the `LeaseExtension` RTPS discovery config option that extends the lease of discovered participants (#2869)
   - Added the `SedpPassiveConnectDuration` RTPS discovery config option (#2847)
-  - Improved reassembly of fragments by having them expire (#2848)
+  - Improved reassembly of fragments by adding an expiration to them (#2848)
     - Added the `SedpFragmentReassemblyTimeout` RTPS discovery config option to control this.
 - The QoS XML Handler can now take input from a string (#2439)
 - Additions to the Sphinx-based documentation:
