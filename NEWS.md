@@ -4,13 +4,26 @@
 OpenDDS 3.18.0-dev is currently in development, so this list might change.
 
 ### Additions:
-- TODO: Add your features here
+- IDL4 explicitly-named integer types (#2814, #2857, #2862)
+  - The existing IDL integer types, `short`, `long`, and `long long`, now have new aliases, which are `int16`, `int32`, and `int64` respectively, along with unsigned versions of them like `uint32`.
+  - There are also two new distinct integer types: `int8` and `uint8`.
+  - These must be supported by the ACE/TAO being used
 
 ### Fixes:
-- TODO: Add your fixes here
+- RTPS:
+  - Fixed `RtpsUdpDataLink` leaking remote writers on failed associations (#2812)
+  - Fixed `TypeObject` hash being inconsistent (#2804)
+  - Fixed local/local RTPS associations not properly notifying liveliness (#2783)
+  - Fixed a mistake in the XCDR2 encoding used for `TypeObject` (#2749)
+  - Fixed durable data not being delivered in the right order (#2728) (TODO: REWORD?)
+  - `RtpsUdpDataLink` will no longer purge durable data (#2690)
+- Fixed `Topic`s returned from `find_topic` not being distinct entities (#2731)
+- Fixed `configure --wireshark-cmake` not working on Linux (#2679)
+- Fixed an invalid memory write in `SporadicTask` (#2685)
 
 ### Notes:
-- TODO: Add your notes here
+- Fixed a spelling error for the `DCPSChunkAssociationMultiplier` config option (#2723)
+  - The old spelling, `DCPSChunkAssociationMutltiplier` (with an extra "t" in "Multiplier"), will continue to also be accepted for the time being.
 
 ## Version 3.17.0 of OpenDDS
 OpenDDS 3.17.0 was released on May 18 2021.
