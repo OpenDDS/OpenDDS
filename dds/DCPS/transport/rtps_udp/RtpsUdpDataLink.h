@@ -434,8 +434,8 @@ private:
 
     typedef PmfSporadicTask<RtpsWriter> Sporadic;
 
-    Sporadic heartbeat_;
-    Sporadic nack_response_;
+    RcHandle<Sporadic> heartbeat_;
+    RcHandle<Sporadic> nack_response_;
 
     void send_heartbeats(const MonotonicTimePoint& now);
     void send_nack_responses(const MonotonicTimePoint& now);
@@ -570,7 +570,7 @@ private:
       , id_(id)
       , stopping_(false)
       , nackfrag_count_(0)
-      , preassociation_task_(link->reactor_task_->interceptor(), *this, &RtpsReader::send_preassociation_acknacks)
+      , preassociation_task_(new RtpsReader::Sporadic(link->reactor_task_->interceptor(), *this, &RtpsReader::send_preassociation_acknacks), keep_count())
     {}
 
     ~RtpsReader();
@@ -625,7 +625,7 @@ private:
     bool stopping_;
     CORBA::Long nackfrag_count_;
     typedef PmfSporadicTask<RtpsReader> Sporadic;
-    Sporadic preassociation_task_;
+    RcHandle<Sporadic> preassociation_task_;
   };
   typedef RcHandle<RtpsReader> RtpsReader_rch;
 
@@ -663,7 +663,7 @@ private:
   ThreadSendQueueMap thread_send_queues_;
   MetaSubmessageVecVecVec send_queue_;
   typedef PmfSporadicTask<RtpsUdpDataLink> Sporadic;
-  Sporadic flush_send_queue_task_;
+  RcHandle<Sporadic> flush_send_queue_task_;
   void flush_send_queue(const MonotonicTimePoint& now);
 
   RepoIdSet pending_reliable_readers_;
