@@ -7,19 +7,32 @@ OpenDDS 3.18.0-dev is currently in development, so this list might change.
 - IDL4 explicitly-named integer types (#2814, #2857, #2862)
   - The existing IDL integer types, `short`, `long`, and `long long`, now have new aliases, which are `int16`, `int32`, and `int64` respectively, along with unsigned versions of them like `uint32`.
   - There are also two new distinct integer types: `int8` and `uint8`.
-  - These must be supported by the ACE/TAO being used
+  - This must be supported by the ACE/TAO being used.
+- RTPS:
+  - Added the `LeaseExtension` RTPS discovery config option that extends the lease of discovered participants (#2869)
+  - Added the `SedpPassiveConnectDuration` RTPS discovery config option (#2847)
+  - Improved reassembly of fragments by having them expire (#2848)
+    - Added the `SedpFragmentReassemblyTimeout` RTPS discovery config option to control this.
+- The QoS XML Handler can now take input from a string (#2439)
+- Additions to the Sphinx-based documentation:
+  - `docs/internal/github_actions.rst`: describes GitHub actions and how OpenDDS is using it (#2750)
+  - `docs/internal/running_tests.rst`: describes how to run OpenDDS tests (#2767)
+  - `docs/internal/docs.rst`: describes how to build and extend the documentation ($2767)
 
 ### Fixes:
 - RTPS:
   - Fixed `RtpsUdpDataLink` leaking remote writers on failed associations (#2812)
-  - Fixed `TypeObject` hash being inconsistent (#2804)
+  - Fixed `TypeObject` encoding compatibly and consistency issues (#2749, #2804)
   - Fixed local/local RTPS associations not properly notifying liveliness (#2783)
-  - Fixed a mistake in the XCDR2 encoding used for `TypeObject` (#2749)
-  - Fixed durable data not being delivered in the right order (#2728) (TODO: REWORD?)
+  - Fixed durable data not being delivered in the right order (#2728)
   - `RtpsUdpDataLink` will no longer purge durable data (#2690)
 - Fixed `Topic`s returned from `find_topic` not being distinct entities (#2731)
 - Fixed `configure --wireshark-cmake` not working on Linux (#2679)
 - Fixed an invalid memory write in `SporadicTask` (#2685)
+- `make install`:
+  - Use `$(INSTALL_LIB)` instead of hardcoded `lib` for Java-related files (#2740)
+  - Use relative links in `$(INSTALL_PREFIX)/share` (#2780)
+  - Fix headers unnecessarily getting installed to `$(INSTALL_PREFIX)/include/DCPS` (#2864)
 
 ### Notes:
 - Fixed a spelling error for the `DCPSChunkAssociationMultiplier` config option (#2723)
