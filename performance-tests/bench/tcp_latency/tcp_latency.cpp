@@ -1,3 +1,5 @@
+#include "BenchC.h"
+
 #include "ace/OS_NS_string.h"
 #include "ace/OS_NS_sys_wait.h"
 #include "ace/Thread.h"
@@ -10,6 +12,7 @@
 #include "ace/OS_NS_unistd.h"
 #include "ace/OS_NS_time.h"
 #include "ace/Get_Opt.h"
+
 #include <numeric>
 #include <iostream>
 #include <fstream>
@@ -82,7 +85,7 @@ Statistics get_stat(const std::vector<double>& data)
 }
 
 static void
-recevier(ACE_SOCK_Stream& cli_stream)
+receiver(ACE_SOCK_Stream& cli_stream)
 {
   ACE_INET_Addr peer_addr;
   DataSample data;
@@ -253,7 +256,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR ** argv)
                              ACE_TEXT("thread create failed")),
                              1);
 
-      recevier(cli_stream);
+      receiver(cli_stream);
       cli_stream.close();
     }
     return 0;

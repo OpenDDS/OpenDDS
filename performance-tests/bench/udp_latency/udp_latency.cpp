@@ -1,3 +1,5 @@
+#include "BenchC.h"
+
 #include "ace/OS_NS_string.h"
 #include "ace/OS_NS_sys_wait.h"
 #include "ace/Thread.h"
@@ -8,6 +10,7 @@
 #include "ace/OS_NS_unistd.h"
 #include "ace/OS_NS_time.h"
 #include "ace/Get_Opt.h"
+
 #include <numeric>
 #include <iostream>
 #include <fstream>
@@ -27,7 +30,6 @@ struct DataSample {
   ACE_hrtime_t sending_time_;
   char padding_[max_buffer_size - sizeof(ACE_hrtime_t) ];
 };
-
 
 static void *
 sender (void *arg)
@@ -81,7 +83,7 @@ Statistics get_stat(const std::vector<double>& data)
 
 
 static void
-recevier(ACE_SOCK_Dgram& cli_dgram)
+receiver(ACE_SOCK_Dgram& cli_dgram)
 {
   ACE_INET_Addr peer_addr;
   DataSample data;
@@ -245,7 +247,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR ** argv)
                              ACE_TEXT("thread create failed")),
                              1);
 
-      recevier(cli_dgram);
+      receiver(cli_dgram);
       cli_dgram.close();
     }
     return 0;
