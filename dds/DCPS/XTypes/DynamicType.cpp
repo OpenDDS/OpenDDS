@@ -3,6 +3,7 @@
 #include "MemberDescriptor.h"
 #include "TypeDescriptor.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
@@ -87,3 +88,5 @@ bool test_equality(const DynamicType_rch& lhs, const DynamicType_rch& rhs, Dynam
 
 } // namespace XTypes
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

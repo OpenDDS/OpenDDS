@@ -1,6 +1,7 @@
 #include "DynamicTypeMember.h"
 #include "MemberDescriptor.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
@@ -84,3 +85,5 @@ bool test_equality(const DynamicTypeMembersById& lhs, const DynamicTypeMembersBy
 
 } // namespace XTypes
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

@@ -1,5 +1,6 @@
 #include "MemberDescriptor.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
@@ -28,3 +29,5 @@ bool test_equality(const MemberDescriptor& lhs, const MemberDescriptor& rhs, Dyn
 
 } // namespace XTypes
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

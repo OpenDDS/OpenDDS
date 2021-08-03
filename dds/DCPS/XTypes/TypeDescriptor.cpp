@@ -1,5 +1,6 @@
 #include "TypeDescriptor.h"
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
@@ -25,3 +26,5 @@ bool test_equality(const TypeDescriptor& lhs, const TypeDescriptor& rhs, Dynamic
 
 } // namespace XTypes
 } // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL

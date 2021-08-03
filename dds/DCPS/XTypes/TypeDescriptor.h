@@ -35,7 +35,7 @@ public:
 inline bool operator==(const LBoundSeq& lhs, const LBoundSeq& rhs)
 {
   if (lhs.length() == rhs.length()) {
-    for (ulong i = 0 ; i < lhs.length() ; ++i) {
+    for (unsigned long i = 0 ; i < lhs.length() ; ++i) {
       if (!(lhs[i] == rhs[i])) {
         return false;
       }
