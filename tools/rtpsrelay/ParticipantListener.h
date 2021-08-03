@@ -23,7 +23,7 @@ private:
   GuidAddrSet& guid_addr_set_;
   OpenDDS::DCPS::DomainParticipantImpl* participant_;
   DomainStatisticsReporter& stats_reporter_;
-  std::unordered_set<OpenDDS::DCPS::GUID_t> guids_;
+  std::unordered_set<OpenDDS::DCPS::GUID_t, GuidHash> guids_;
 };
 
 }
