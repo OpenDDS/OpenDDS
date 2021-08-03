@@ -84,7 +84,7 @@ receiver(ACE_SOCK_Stream& cli_stream)
     rcv_cnt = cli_stream.recv_n (&data,
                                  message_size);
     if (rcv_cnt > 0) {
-      round_trip_latency_stat_block->update(1E-9 * (ACE_OS::gethrtime() - data.sending_time_));
+      round_trip_latency_stat_block->update(5E-10 * (ACE_OS::gethrtime() - data.sending_time_));
     }
     else if (rcv_cnt < 0) {
       ACE_ERROR((LM_ERROR,
