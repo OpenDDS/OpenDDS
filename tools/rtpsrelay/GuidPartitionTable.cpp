@@ -1,9 +1,9 @@
 #include "GuidPartitionTable.h"
 namespace RtpsRelay {
 
-void GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_t& guid, const DDS::StringSeq& partitions)
+GuidPartitionTable::Result GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_t& guid, const DDS::StringSeq& partitions)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, NO_CHANGE);
 
   StringSet parts;
   for (CORBA::ULong idx = 0; idx != partitions.length(); ++idx) {
@@ -14,7 +14,9 @@ void GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_t& guid, const DDS::St
     parts.insert("");
   }
 
-  const auto& x = guid_to_partitions_[guid];
+  const auto r = guid_to_partitions_.insert(std::make_pair(guid, StringSet()));
+  const Result result = r.second ? ADDED : UPDATED;
+  auto& x = r.first->second;
 
   std::vector<std::string> to_add;
   std::set_difference(parts.begin(), parts.end(), x.begin(), x.end(), std::back_inserter(to_add));
@@ -24,7 +26,7 @@ void GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_t& guid, const DDS::St
 
   if (to_add.empty() && to_remove.empty()) {
     // No change.
-    return;
+    return NO_CHANGE;
   }
 
   SpdpReplay spdp_replay;
@@ -32,8 +34,7 @@ void GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_t& guid, const DDS::St
 
   StringSet globally_new;
   {
-    const auto r = guid_to_partitions_.insert(std::make_pair(guid, StringSet()));
-    r.first->second.insert(to_add.begin(), to_add.end());
+    x.insert(to_add.begin(), to_add.end());
     for (const auto& part : to_add) {
       const auto q = partition_to_guid_.insert(std::make_pair(part, OrderedGuidSet()));
       q.first->second.insert(guid);
@@ -43,14 +44,14 @@ void GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_t& guid, const DDS::St
       }
     }
     for (const auto& part : to_remove) {
-      r.first->second.erase(part);
+      x.erase(part);
       partition_to_guid_[part].erase(guid);
       partition_index_.remove(part, guid);
       if (partition_to_guid_[part].empty()) {
         partition_to_guid_.erase(part);
       }
     }
-    if (r.first->second.empty()) {
+    if (x.empty()) {
       guid_to_partitions_.erase(r.first);
     }
   }
@@ -60,6 +61,8 @@ void GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_t& guid, const DDS::St
   if (!spdp_replay.partitions().empty() && spdp_replay_writer_->write(spdp_replay, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to write Relay Partitions\n")));
   }
+
+  return result;
 }
 
 }

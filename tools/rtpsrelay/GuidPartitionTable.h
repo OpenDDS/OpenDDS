@@ -18,6 +18,12 @@ const size_t MAX_SLOT_SIZE = 64;
 
 class GuidPartitionTable {
 public:
+  enum Result {
+    ADDED,
+    UPDATED,
+    NO_CHANGE
+  };
+
   GuidPartitionTable(const Config& config,
                      RelayPartitionsDataWriter_var relay_partitions_writer,
                      SpdpReplayDataWriter_var spdp_replay_writer)
@@ -27,7 +33,7 @@ public:
   {}
 
   // Insert a reader/writer guid and its partitions.
-  void insert(const OpenDDS::DCPS::GUID_t& guid, const DDS::StringSeq& partitions);
+  Result insert(const OpenDDS::DCPS::GUID_t& guid, const DDS::StringSeq& partitions);
 
   void remove(const OpenDDS::DCPS::GUID_t& guid)
   {
