@@ -535,7 +535,7 @@ TEST(serializer_test, Serializer_align_context_2_buff_diff_walign_read)
   ASSERT_TRUE(ser << d);
 
   ACE_CDR::UShort c_out = 0;
-  ACE_CDR::ULongLong d_out = 0.0;
+  ACE_CDR::ULongLong d_out = 0;
 
   Serializer rser(amb.get(), enc);
 
@@ -581,7 +581,7 @@ TEST(serializer_test, Serializer_align_context_2_buff_diff_walign_read_with_min)
   ASSERT_TRUE(ser << d);
 
   ACE_CDR::UShort c_out = 0;
-  ACE_CDR::ULongLong d_out = 0.0;
+  ACE_CDR::ULongLong d_out = 0;
 
   Serializer rser(amb.get(), enc);
 
