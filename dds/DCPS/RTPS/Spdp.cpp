@@ -2056,8 +2056,10 @@ Spdp::remove_discovered_participant_i(DiscoveredParticipantIter& iter)
 void
 Spdp::init_bit(const DDS::Subscriber_var& bit_subscriber)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  bit_subscriber_ = bit_subscriber;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    bit_subscriber_ = bit_subscriber;
+  }
 
   // This is here to make sure thread status gets a valid BIT Subscriber
   tport_->enable_periodic_tasks();
