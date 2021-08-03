@@ -1,3 +1,4 @@
+#include "DCPS/DdsDcps_pch.h"
 #include "TypeDescriptor.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

@@ -1,3 +1,4 @@
+#include "DCPS/DdsDcps_pch.h"
 #include "DynamicType.h"
 
 #include "MemberDescriptor.h"

@@ -1,4 +1,6 @@
+#include "DCPS/DdsDcps_pch.h"
 #include "DynamicTypeMember.h"
+
 #include "MemberDescriptor.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
