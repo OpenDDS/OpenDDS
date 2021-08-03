@@ -88,10 +88,12 @@ SubscriberImpl::get_instance_handle()
 bool
 SubscriberImpl::contains_reader(DDS::InstanceHandle_t a_handle)
 {
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want si lock\n", this->get_instance_handle()));
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
                    this->si_lock_,
                    false);
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took si lock\n", this->get_instance_handle()));
 
   for (DataReaderMap::iterator it(datareader_map_.begin());
        it != datareader_map_.end(); ++it) {
@@ -99,7 +101,7 @@ SubscriberImpl::contains_reader(DDS::InstanceHandle_t a_handle)
       return true;
     }
   }
-
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing si lock\n", this->get_instance_handle()));
   return false;
 }
 
@@ -241,8 +243,11 @@ SubscriberImpl::create_datareader(
       return DDS::DataReader::_nil();
     }
   } else {
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want si lock\n", this->get_instance_handle()));
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, si_lock_, 0);
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took si lock\n", this->get_instance_handle()));
     readers_not_enabled_.insert(rchandle_from(dr_servant));
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing si lock\n", this->get_instance_handle()));
   }
 
   // add created data reader to this' data reader container -
@@ -303,7 +308,6 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
       if (it->second == dr_servant) {
         break;
       }
-      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing si lock\n", this->get_instance_handle()));
     }
 
     if (it == datareader_map_.end()) {
@@ -348,6 +352,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
 
     datareader_map_.erase(it);
     datareader_set_.erase(dr_servant);
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing si lock\n", this->get_instance_handle()));
   }
 
   if (this->monitor_) {
@@ -391,14 +396,17 @@ SubscriberImpl::delete_contained_entities()
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
   {
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want si lock\n", this->get_instance_handle()));
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                      guard,
                      this->si_lock_,
                      DDS::RETCODE_ERROR);
+                     ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took si lock\n", this->get_instance_handle()));
     for (MultitopicReaderMap::iterator mt_iter = multitopic_reader_map_.begin();
          mt_iter != multitopic_reader_map_.end(); ++mt_iter) {
       drs.push_back(mt_iter->second);
     }
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing si lock\n", this->get_instance_handle()));
   }
 
   for (size_t i = 0; i < drs.size(); ++i) {
@@ -457,10 +465,12 @@ DDS::DataReader_ptr
 SubscriberImpl::lookup_datareader(
   const char * topic_name)
 {
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want si lock\n", this->get_instance_handle()));
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
                    this->si_lock_,
                    DDS::DataReader::_nil());
+                   ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took si lock\n", this->get_instance_handle()));
 
   // If multiple entries whose key is "topic_name" then which one is
   // returned ? Spec does not limit which one should give.
@@ -470,6 +480,7 @@ SubscriberImpl::lookup_datareader(
 #ifndef OPENDDS_NO_MULTI_TOPIC
     MultitopicReaderMap::iterator mt_iter = multitopic_reader_map_.find(topic_name);
     if (mt_iter != multitopic_reader_map_.end()) {
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing si lock\n", this->get_instance_handle()));
       return DDS::DataReader::_duplicate(mt_iter->second);
     }
 #endif
@@ -482,9 +493,11 @@ SubscriberImpl::lookup_datareader(
                  topic_name));
     }
 
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing si lock\n", this->get_instance_handle()));
     return DDS::DataReader::_nil();
 
   } else {
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing si lock\n", this->get_instance_handle()));
     return DDS::DataReader::_duplicate(it->second.in());
   }
 }
@@ -588,12 +601,15 @@ SubscriberImpl::notify_datareaders()
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
   MultitopicReaderMap localmtr;
-  {g
+  {
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want si lock\n", this->get_instance_handle()));
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                     guard,
                     this->si_lock_,
                     DDS::RETCODE_ERROR);
+                    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took si lock\n", this->get_instance_handle()));
     localmtr = multitopic_reader_map_;
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing si lock\n", this->get_instance_handle()));
   }
 
   for (MultitopicReaderMap::iterator it = multitopic_reader_map_.begin();
@@ -641,10 +657,12 @@ SubscriberImpl::set_qos(
 
       DrIdToQosMap idToQosMap;
       {
+        ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want si lock\n", this->get_instance_handle()));
         ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                          guard,
                          this->si_lock_,
                          DDS::RETCODE_ERROR);
+                         ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took si lock\n", this->get_instance_handle()));
         // after FaceCTS bug 619 is fixed, make endIter and iter const iteratorsx
         DataReaderMap::iterator endIter = datareader_map_.end();
 
@@ -877,8 +895,11 @@ SubscriberImpl::enable()
   if (qos_.entity_factory.autoenable_created_entities) {
     DataReaderSet readers;
     {
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want si lock\n", this->get_instance_handle()));
       ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, si_lock_, DDS::RETCODE_ERROR);
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took si lock\n", this->get_instance_handle()));
       readers_not_enabled_.swap(readers);
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing si lock\n", this->get_instance_handle()));
     }
     for (DataReaderSet::iterator it = readers.begin(); it != readers.end(); ++it) {
       (*it)->enable();
@@ -908,6 +929,7 @@ SubscriberImpl::data_received(DataReaderImpl* reader)
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
             guard,
             this->si_lock_);
+            ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took si lock\n", this->get_instance_handle()));
   datareader_set_.insert(rchandle_from(reader));
   ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing si lock\n", this->get_instance_handle()));
 }
@@ -922,8 +944,9 @@ SubscriberImpl::reader_enabled(const char*     topic_name,
                ACE_TEXT("datareader(topic_name=%C) enabled\n"),
                topic_name));
   }
-
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want si lock\n", this->get_instance_handle()));
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, si_lock_, DDS::RETCODE_ERROR);
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took si lock\n", this->get_instance_handle()));
   DataReaderImpl_rch reader = rchandle_from(reader_ptr);
   readers_not_enabled_.erase(reader);
 
@@ -932,7 +955,7 @@ SubscriberImpl::reader_enabled(const char*     topic_name,
   if (this->monitor_) {
     this->monitor_->report();
   }
-
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing si lock\n", this->get_instance_handle()));
   return DDS::RETCODE_OK;
 }
 
@@ -951,6 +974,7 @@ SubscriberImpl::remove_from_datareader_set(DataReaderImpl* reader)
 {
   ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want si lock\n", this->get_instance_handle()));
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, si_lock_);
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took si lock\n", this->get_instance_handle()));
   datareader_set_.erase(rchandle_from(reader));
   ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing si lock\n", this->get_instance_handle()));
 }
@@ -991,10 +1015,12 @@ SubscriberImpl::raw_latency_buffer_type()
 void
 SubscriberImpl::get_subscription_ids(SubscriptionIdVec& subs)
 {
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want si lock\n", this->get_instance_handle()));
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
                    this->si_lock_,
                    );
+                   ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took si lock\n", this->get_instance_handle()));
 
   subs.reserve(datareader_map_.size());
   for (DataReaderMap::iterator iter = datareader_map_.begin();
@@ -1002,6 +1028,7 @@ SubscriberImpl::get_subscription_ids(SubscriptionIdVec& subs)
        ++iter) {
     subs.push_back(iter->second->get_repo_id());
   }
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing si lock\n", this->get_instance_handle()));
 }
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
@@ -1009,10 +1036,12 @@ void
 SubscriberImpl::update_ownership_strength (const PublicationId& pub_id,
                                            const CORBA::Long&   ownership_strength)
 {
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want si lock\n", this->get_instance_handle()));
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
                    this->si_lock_,
                    );
+                   ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took si lock\n", this->get_instance_handle()));
 
   for (DataReaderMap::iterator iter = datareader_map_.begin();
        iter != datareader_map_.end();
@@ -1021,6 +1050,7 @@ SubscriberImpl::update_ownership_strength (const PublicationId& pub_id,
       iter->second->update_ownership_strength(pub_id, ownership_strength);
     }
   }
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing si lock\n", this->get_instance_handle()));
 }
 #endif
 
@@ -1031,9 +1061,11 @@ SubscriberImpl::coherent_change_received (RepoId&         publisher_id,
                                           DataReaderImpl* reader,
                                           Coherent_State& group_state)
 {
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want si lock\n", this->get_instance_handle()));
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
             guard,
             this->si_lock_);
+            ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took si lock\n", this->get_instance_handle()));
 
   // Verify if all readers complete the coherent changes. The result
   // is either COMPLETED or REJECTED.
@@ -1071,6 +1103,7 @@ SubscriberImpl::coherent_change_received (RepoId&         publisher_id,
       (*iter)->reset_coherent_info (writerId, publisher_id);
     }
   }
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing si lock\n", this->get_instance_handle()));
 }
 #endif
 

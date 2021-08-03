@@ -166,8 +166,8 @@ SubscriberListenerImpl::on_data_on_readers(
       if (msg.length() != num_messages || si.length() != num_messages) {
         ACE_ERROR((LM_ERROR,
                     ACE_TEXT("%N:%l: SubscriberListenerImpl::on_data_on_readers()")
-                    ACE_TEXT(" ERROR: MessageSeq %d SampleInfoSeq %d !\n"),
-                    msg.length(), si.length()));
+                    ACE_TEXT(" ERROR: MessageSeq %d SampleInfoSeq %d != %d\n"),
+                    msg.length(), si.length(), num_messages));
         this->verify_result_ = false;
       }
 
