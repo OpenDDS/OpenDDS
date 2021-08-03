@@ -61,29 +61,6 @@ sender (void *arg)
   return 0;
 }
 
-struct Statistics
-{
-  double mean, variance;
-  double max, min;
-};
-
-Statistics get_stat(const std::vector<double>& data)
-{
-  Statistics result = {0.0, 0.0, 0, data[0]};
-
-  for (std::size_t  i =0; i < data.size(); ++i) {
-    result.mean = (data[i])/(i+1) + ( result.mean / (i+1) * i);
-    result.max = std::max(result.max, data[i]);
-    result.min = std::min(result.min, data[i]);
-  }
-
-  for (std::size_t i= 0; i < data.size(); ++i) {
-    double delta = result.mean - data[i];
-    result.variance = (delta*delta) /(i+1) + result.variance/(i+1) *i;
-  }
-  return result;
-}
-
 static void
 receiver(ACE_SOCK_Dgram& cli_dgram)
 {
@@ -217,7 +194,7 @@ int parse_args(int argc, ACE_TCHAR ** argv)
 
   if (!ok) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("usage: %s [-c server_address [-d test_duration_in_sec] [-f frequency] [-m message_size] [-r report_file] | -s server_port] \n"),
+      ACE_TEXT("usage: %s [-c server_address [-d test_duration_in_sec] [-f frequency] [-m message_size] [-r report_file] | -s server_port]\n"),
       argv[0]));
     return 1;
   }
