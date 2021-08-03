@@ -1,4 +1,7 @@
 #include "BenchC.h"
+#include "PropertyStatBlock.h"
+
+#include <json_conversion.h>
 
 #include "ace/OS_NS_string.h"
 #include "ace/OS_NS_sys_wait.h"
@@ -25,6 +28,7 @@ int frequency = 100; // messages per second
 int message_size = 100;
 int test_duration = 120; // seconds
 int server_port = 0;
+std::string report_file_name;
 
 struct DataSample {
   ACE_hrtime_t sending_time_;
@@ -57,7 +61,6 @@ sender (void *arg)
   return 0;
 }
 
-
 struct Statistics
 {
   double mean, variance;
@@ -81,7 +84,6 @@ Statistics get_stat(const std::vector<double>& data)
   return result;
 }
 
-
 static void
 receiver(ACE_SOCK_Dgram& cli_dgram)
 {
@@ -90,8 +92,15 @@ receiver(ACE_SOCK_Dgram& cli_dgram)
   ACE_Time_Value timeout(2,0);
   ssize_t rcv_cnt = 1;
 
-  std::vector<double> latencies;
-  latencies.reserve(frequency * test_duration);
+  Bench::WorkerReport report{};
+  report.process_report.participants.length(1);
+  report.process_report.participants[0].subscribers.length(1);
+  report.process_report.participants[0].subscribers[0].datareaders.length(1);
+  Builder::PropertySeq& properties = report.process_report.participants[0].subscribers[0].datareaders[0].properties;
+
+  const size_t buffer_size = 1.1 * frequency * test_duration;
+
+  auto round_trip_latency_stat_block = std::make_shared<Bench::PropertyStatBlock>(properties, "round_trip_latency", buffer_size);
 
   while (rcv_cnt) {
     rcv_cnt = cli_dgram.recv (&data,
@@ -100,7 +109,7 @@ receiver(ACE_SOCK_Dgram& cli_dgram)
                               0,
                               &timeout);
     if (rcv_cnt > 0) {
-      latencies.push_back(1E-9* (ACE_OS::gethrtime()-data.sending_time_));
+      round_trip_latency_stat_block->update(1E-9 * (ACE_OS::gethrtime() - data.sending_time_));
     }
     else if (rcv_cnt < 0) {
       ACE_ERROR((LM_ERROR,
@@ -110,22 +119,17 @@ receiver(ACE_SOCK_Dgram& cli_dgram)
     }
   }
 
-  Statistics result = get_stat(latencies) ;
+  round_trip_latency_stat_block->finalize();
 
+  if (!report_file_name.empty()) {
+    ofstream report_file(report_file_name);
+    if (report_file.good()) {
+      idl_2_json(report, report_file, 9u);
+    }
+  }
 
-  std::cout << " --- full path statistical summary --\n"
-            << "     samples: " << latencies.size() << "\n"
-            << "        mean: " << result.mean << "\n"
-            << "     mininum: " << result.min << "\n"
-            << "     maximum: " << result.max << "\n"
-            << "    variance: " << result.variance << "\n\n"
-            << " --- full path statistical data --\n";
-
-
-  std::copy(latencies.begin(), latencies.end(), std::ostream_iterator<double>(std::cout, "\n"));
   return;
 }
-
 
 int echo_server(int port)
 {
@@ -177,7 +181,7 @@ int parse_args(int argc, ACE_TCHAR ** argv)
 {
   int c;
 
-  ACE_Get_Opt getopt(argc, argv, "c:d:f:m:s:");
+  ACE_Get_Opt getopt(argc, argv, "c:d:f:m:s:r:");
   bool ok = true;
 
   while (ok && (c = getopt()) != -1) {
@@ -201,6 +205,10 @@ int parse_args(int argc, ACE_TCHAR ** argv)
         server_port = ACE_OS::atoi(getopt.opt_arg());
         ok = (server_port != 0);
         break;
+      case 'r':
+        report_file_name = getopt.opt_arg();
+        ok = (!report_file_name.empty());
+        break;
     }
   }
 
@@ -209,14 +217,13 @@ int parse_args(int argc, ACE_TCHAR ** argv)
 
   if (!ok) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("usage: %s [-c server_address [-d test_duration_in_sec] [-f frequency] [-m message_size] | -s server_port] \n"),
+      ACE_TEXT("usage: %s [-c server_address [-d test_duration_in_sec] [-f frequency] [-m message_size] [-r report_file] | -s server_port] \n"),
       argv[0]));
     return 1;
   }
 
   return !ok ;
 }
-
 
 int ACE_TMAIN (int argc, ACE_TCHAR ** argv)
 {
