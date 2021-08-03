@@ -35,7 +35,7 @@ public:
 inline bool operator==(const LBoundSeq& lhs, const LBoundSeq& rhs)
 {
   if (lhs.length() == rhs.length()) {
-    for (unsigned long i = 0 ; i < lhs.length() ; ++i) {
+    for (ACE_CDR::ULong i = 0 ; i < lhs.length() ; ++i) {
       if (!(lhs[i] == rhs[i])) {
         return false;
       }

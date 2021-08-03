@@ -538,7 +538,7 @@ void TypeLookupService::complete_to_dynamic(DynamicType_rch& dt,
     dt->descriptor_->kind = TK_ENUM;
     dt->descriptor_->name = cto.enumerated_type.header.detail.type_name;
     dt->descriptor_->bound.length(0);
-    for (ulong i = 0; i < cto.enumerated_type.literal_seq.length(); ++i) {
+    for (ACE_CDR::ULong i = 0; i < cto.enumerated_type.literal_seq.length(); ++i) {
       DynamicTypeMember_rch dtm(new DynamicTypeMember, OpenDDS::DCPS::keep_count());
       MemberDescriptor* md(new MemberDescriptor);
       dtm->descriptor_ = md;
@@ -555,7 +555,7 @@ void TypeLookupService::complete_to_dynamic(DynamicType_rch& dt,
     dt->descriptor_->bound.length(1);
     dt->descriptor_->bound[0] = cto.bitmask_type.header.common.bit_bound;
     type_identifier_to_dynamic(dt->descriptor_->element_type, TypeIdentifier(TK_BOOLEAN), dt_map);
-    for (ulong i = 0; i < cto.bitmask_type.flag_seq.length(); ++i) {
+    for (ACE_CDR::ULong i = 0; i < cto.bitmask_type.flag_seq.length(); ++i) {
       DynamicTypeMember_rch dtm(new DynamicTypeMember, OpenDDS::DCPS::keep_count());
       MemberDescriptor* md(new MemberDescriptor);
       dtm->descriptor_ = md;
@@ -571,7 +571,7 @@ void TypeLookupService::complete_to_dynamic(DynamicType_rch& dt,
     dt->descriptor_->kind = TK_ANNOTATION;
     dt->descriptor_->name = cto.annotation_type.header.annotation_name;
     dt->descriptor_->bound.length(0);
-    for (ulong i = 0; i < cto.annotation_type.member_seq.length(); ++i) {
+    for (ACE_CDR::ULong i = 0; i < cto.annotation_type.member_seq.length(); ++i) {
       DynamicTypeMember_rch dtm(new DynamicTypeMember, OpenDDS::DCPS::keep_count());
       MemberDescriptor* md(new MemberDescriptor);
       dtm->descriptor_ = md;
@@ -596,7 +596,7 @@ void TypeLookupService::complete_to_dynamic(DynamicType_rch& dt,
       ACE_ERROR((LM_ERROR, ACE_TEXT("Invalid extensibility kind in complete_to_dynamic(DynamicType& dt, const CompleteTypeObject& cto)\n")));
     }
     dt->descriptor_->is_nested = (cto.struct_type.struct_flags & (1 << 3));
-    for (ulong i = 0; i < cto.struct_type.member_seq.length(); ++i) {
+    for (ACE_CDR::ULong i = 0; i < cto.struct_type.member_seq.length(); ++i) {
       DynamicTypeMember_rch dtm(new DynamicTypeMember, OpenDDS::DCPS::keep_count());
       MemberDescriptor* md(new MemberDescriptor);
       dtm->descriptor_ = md;
@@ -620,7 +620,7 @@ void TypeLookupService::complete_to_dynamic(DynamicType_rch& dt,
       ACE_ERROR((LM_ERROR, ACE_TEXT("Invalid extensibility kind in complete_to_dynamic(DynamicType& dt, const CompleteTypeObject& cto)\n")));
     }
     dt->descriptor_->is_nested = (cto.union_type.union_flags & (1 << 3));
-    for (ulong i = 0; i < cto.union_type.member_seq.length(); ++i) {
+    for (ACE_CDR::ULong i = 0; i < cto.union_type.member_seq.length(); ++i) {
       DynamicTypeMember_rch dtm(new DynamicTypeMember, OpenDDS::DCPS::keep_count());
       MemberDescriptor* md(new MemberDescriptor);
       dtm->descriptor_ = md;
@@ -809,7 +809,7 @@ void TypeLookupService::type_identifier_to_dynamic(DynamicType_rch& dt,
         dt->descriptor_->kind = TK_ARRAY;
         dt->descriptor_->name = "plain array";
         dt->descriptor_->bound.length(ti.array_sdefn().array_bound_seq.length());
-        for (ulong i = 0; i< dt->descriptor_->bound.length(); ++i) {
+        for (ACE_CDR::ULong i = 0; i< dt->descriptor_->bound.length(); ++i) {
           dt->descriptor_->bound[i] = ti.array_sdefn().array_bound_seq[i];
         }
         type_identifier_to_dynamic(dt->descriptor_->element_type, *ti.array_sdefn().element_identifier, dt_map);
