@@ -17,15 +17,15 @@ class TypeDescriptor;
 class OpenDDS_Dcps_Export DynamicType : public OpenDDS::DCPS::RcObject
 {
 public:
-  DDS::ReturnCode_t get_descriptor(TypeDescriptor& descriptor);
+  void get_descriptor(TypeDescriptor& descriptor);
   OPENDDS_STRING get_name();
   TypeKind get_kind();
-  DDS::ReturnCode_t get_member_by_name(DynamicTypeMember_rch& member, const OPENDDS_STRING& name);
-  DDS::ReturnCode_t get_all_members_by_name(DynamicTypeMembersByName& member);
-  DDS::ReturnCode_t get_member(DynamicTypeMember_rch& member, const MemberId& id);
-  DDS::ReturnCode_t get_all_members(DynamicTypeMembersById& member);
+  void get_member_by_name(DynamicTypeMember_rch& member, const OPENDDS_STRING& name);
+  void get_all_members_by_name(DynamicTypeMembersByName& member);
+  void get_member(DynamicTypeMember_rch& member, const MemberId& id);
+  void get_all_members(DynamicTypeMembersById& member);
   unsigned long get_member_count();
-  DDS::ReturnCode_t get_member_by_index(DynamicTypeMember_rch& member, unsigned long index);
+  void get_member_by_index(DynamicTypeMember_rch& member, unsigned long index);
   bool equals(const DynamicType& other);
   DynamicTypeMembersByName member_by_name;
   DynamicTypeMembersById member_by_id;
