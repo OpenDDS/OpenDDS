@@ -1078,6 +1078,7 @@ SubscriberImpl::coherent_change_received (RepoId&         publisher_id,
     (*iter)->coherent_change_received (publisher_id, state);
     if (state == NOT_COMPLETED_YET) {
       group_state = NOT_COMPLETED_YET;
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing si lock\n", this->get_instance_handle()));
       return;
     }
     else if (state == REJECTED) {
