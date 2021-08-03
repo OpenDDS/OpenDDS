@@ -1,9 +1,13 @@
 To generate new data and image files based on a scoreboard test run directory:
 
+1) Run:
+
 ./generate-test-results.sh <TEST_RUN_DIR>
 
-which will create "<TEST_RUN_DIR>/data" with relevant data files (including json for website)
+which will create "<TEST_RUN_DIR>/data" with relevant data files (including json for website). And then,
+
+2) Run:
 
 ./plot-test_results.sh <TEST_RUN_DIR> <OUTPUT_DIR>
 
-where <OUTPUT_DIR> already exists... will generate PNG files for website
+where <OUTPUT_DIR> already exists... which will generate PNG files for website
