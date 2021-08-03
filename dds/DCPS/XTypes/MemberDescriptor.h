@@ -18,38 +18,39 @@ enum TryConstructKind {
 class MemberDescriptor {
 public:
   MemberDescriptor()
-  : id(0), index(0), try_construct_kind(DISCARD), is_key(0), is_optional(0), is_must_understand(0), is_shared(0), is_default_label(0)
+    : id(0), index(0), try_construct_kind(DISCARD), is_key(false), is_optional(false), is_must_understand(false), is_shared(false), is_default_label(false)
   {}
+
+  bool equals(const MemberDescriptor& other);
+
   OPENDDS_STRING name;
-  XTypes::MemberId id;
+  MemberId id;
   DynamicType_rch type;
   OPENDDS_STRING default_value;
-  unsigned long index;
-  XTypes::UnionCaseLabelSeq label;
+  ACE_CDR::ULong index;
+  UnionCaseLabelSeq label;
   TryConstructKind try_construct_kind;
   bool is_key;
   bool is_optional;
   bool is_must_understand;
   bool is_shared;
   bool is_default_label;
-  bool equals(const MemberDescriptor& other);
  };
 
 inline bool operator==(const UnionCaseLabelSeq& lhs, const UnionCaseLabelSeq& rhs)
 {
   if (lhs.length() == rhs.length()) {
     for (ACE_CDR::ULong i = 0 ; i < lhs.length() ; ++i) {
-      if (!(lhs[i] == rhs[i])) {
+      if (lhs[i] != rhs[i]) {
         return false;
       }
     }
-  } else {
-    return false;
+    return true;
   }
-  return true;
+  return false;
 }
 
-OpenDDS_Dcps_Export bool test_equality(const MemberDescriptor& lhs, const MemberDescriptor& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
+bool test_equality(const MemberDescriptor& lhs, const MemberDescriptor& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
 
 } // namespace XTypes
 } // namespace OpenDDS

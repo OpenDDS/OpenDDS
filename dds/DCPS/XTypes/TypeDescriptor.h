@@ -18,8 +18,11 @@ enum ExtensibilityKind {
 class TypeDescriptor {
 public:
   TypeDescriptor()
-  : kind(0), extensibility_kind(FINAL), is_nested(0)
+    : kind(TK_NONE), extensibility_kind(FINAL), is_nested(false)
   {}
+
+  bool equals(const TypeDescriptor& other);
+
   TypeKind kind;
   OPENDDS_STRING name;
   DynamicType_rch base_type;
@@ -29,24 +32,22 @@ public:
   DynamicType_rch key_element_type;
   ExtensibilityKind extensibility_kind;
   bool is_nested;
-  bool equals(const TypeDescriptor& other);
 };
 
 inline bool operator==(const LBoundSeq& lhs, const LBoundSeq& rhs)
 {
   if (lhs.length() == rhs.length()) {
     for (ACE_CDR::ULong i = 0 ; i < lhs.length() ; ++i) {
-      if (!(lhs[i] == rhs[i])) {
+      if (lhs[i] != rhs[i]) {
         return false;
       }
     }
-  } else {
-    return false;
-  }
-  return true;
+    return true;
+  } 
+  return false;
 }
 
-OpenDDS_Dcps_Export bool test_equality(const TypeDescriptor& lhs, const TypeDescriptor& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
+bool test_equality(const TypeDescriptor& lhs, const TypeDescriptor& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
 
 } // namespace XTypes
 } // namespace OpenDDS

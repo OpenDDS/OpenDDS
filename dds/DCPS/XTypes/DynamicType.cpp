@@ -1,6 +1,5 @@
 #include "DCPS/DdsDcps_pch.h"
 #include "DynamicType.h"
-
 #include "MemberDescriptor.h"
 #include "TypeDescriptor.h"
 
@@ -8,16 +7,22 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
-void DynamicType::get_descriptor(TypeDescriptor& descriptor)
+void DynamicType::get_descriptor(TypeDescriptor& descriptor) const
 {
   descriptor = *descriptor_;
 }
 
-void DynamicType::get_member_by_name(DynamicTypeMember_rch& member, const OPENDDS_STRING& name)
+DDS::ReturnCode_t DynamicType::get_member_by_name(DynamicTypeMember_rch& member, const OPENDDS_STRING& name)
 {
   //We have a map of members in member_by_name which takes a string and gives 0 or 1 type DTMs
   //this should use the string as the key and put the returned DTM into member.
-  member = member_by_name.find(name)->second;
+  DynamicTypeMembersByName::const_iterator pos = member_by_name.find(name);
+  if (pos != member_by_name.end()) {
+    member = pos->second;
+    return DDS::RETCODE_OK;
+  } else {
+    return DDS::RETCODE_ERROR;
+  }
 }
 
 void DynamicType::get_all_members_by_name(DynamicTypeMembersByName& member)
@@ -25,9 +30,15 @@ void DynamicType::get_all_members_by_name(DynamicTypeMembersByName& member)
   member = member_by_name;
 }
 
-void DynamicType::get_member(DynamicTypeMember_rch& member, const MemberId& id)
+DDS::ReturnCode_t DynamicType::get_member(DynamicTypeMember_rch& member, MemberId id)
 {
-  member = member_by_id.find(id)->second;
+  DynamicTypeMembersById::const_iterator pos = member_by_id.find(id);
+  if (pos != member_by_id.end()) {
+    member = pos->second;
+    return DDS::RETCODE_OK;
+  } else {
+    return DDS::RETCODE_ERROR;
+  }
 }
 
 void DynamicType::get_all_members(DynamicTypeMembersById& member)
@@ -35,14 +46,20 @@ void DynamicType::get_all_members(DynamicTypeMembersById& member)
   member = member_by_id;
 }
 
-unsigned long DynamicType::get_member_count()
+ACE_CDR::ULong DynamicType::get_member_count()
 {
   return member_by_name.size();
 }
 
-void DynamicType::get_member_by_index(DynamicTypeMember_rch& member, unsigned long index)
+DDS::ReturnCode_t DynamicType::get_member_by_index(DynamicTypeMember_rch& member, ACE_CDR::ULong index)
 {
-  member = member_by_index[index];
+  
+  if (index < member_by_index.size()) {
+    member = member_by_index[index];
+    return DDS::RETCODE_OK;
+  } else {
+    return DDS::RETCODE_ERROR;
+  }
 }
 
 bool DynamicType::equals(const DynamicType& other)
@@ -52,6 +69,11 @@ bool DynamicType::equals(const DynamicType& other)
 
 bool test_equality_i(const DynamicType& lhs, const DynamicType& rhs)
 {
+//7.5.2.8.4 Operation: equals
+//Two types shall be considered equal if and only if all of their respective properties, as identified
+//in Table 54 above, are equal.
+
+//Note: We are comparing the TypeDescriptor even though the spec seems to say not to
   DynamicTypePtrPairSeen dt_ptr_pair;
   return test_equality(lhs, rhs, dt_ptr_pair);
 }
@@ -60,7 +82,7 @@ bool test_equality(const DynamicType& lhs, const DynamicType& rhs, DynamicTypePt
 {
   //check pair seen
   DynamicTypePtrPair this_pair = std::make_pair(&lhs, &rhs);
-  DynamicTypePtrPairSeen::iterator have_seen = dt_ptr_pair.find(this_pair);
+  DynamicTypePtrPairSeen::const_iterator have_seen = dt_ptr_pair.find(this_pair);
   if (have_seen == dt_ptr_pair.end()) {
     dt_ptr_pair.insert(this_pair);
     return

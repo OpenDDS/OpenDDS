@@ -6,7 +6,6 @@
 
 #include <dds/DCPS/RcHandle_T.h>
 #include <dds/DCPS/RcObject.h>
-#include <dds/DCPS/RcHandle_T.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
@@ -17,29 +16,28 @@ class TypeDescriptor;
 class OpenDDS_Dcps_Export DynamicType : public OpenDDS::DCPS::RcObject
 {
 public:
-  void get_descriptor(TypeDescriptor& descriptor);
+  void get_descriptor(TypeDescriptor& descriptor) const;
   OPENDDS_STRING get_name();
   TypeKind get_kind();
-  void get_member_by_name(DynamicTypeMember_rch& member, const OPENDDS_STRING& name);
+  DDS::ReturnCode_t get_member_by_name(DynamicTypeMember_rch& member, const OPENDDS_STRING& name);
   void get_all_members_by_name(DynamicTypeMembersByName& member);
-  void get_member(DynamicTypeMember_rch& member, const MemberId& id);
+  DDS::ReturnCode_t get_member(DynamicTypeMember_rch& member, MemberId id);
   void get_all_members(DynamicTypeMembersById& member);
-  unsigned long get_member_count();
-  void get_member_by_index(DynamicTypeMember_rch& member, unsigned long index);
+  ACE_CDR::ULong get_member_count();
+  DDS::ReturnCode_t get_member_by_index(DynamicTypeMember_rch& member, ACE_CDR::ULong index);
   bool equals(const DynamicType& other);
+
   DynamicTypeMembersByName member_by_name;
   DynamicTypeMembersById member_by_id;
   DynamicTypeMembersByIndex member_by_index;
   TypeDescriptor* descriptor_;
 };
 
-typedef std::pair<const DynamicType*,const DynamicType*> DynamicTypePtrPair;
-typedef OPENDDS_SET(DynamicTypePtrPair) DynamicTypePtrPairSeen;
 typedef OpenDDS::DCPS::RcHandle<DynamicType> DynamicType_rch;
 
 OpenDDS_Dcps_Export bool test_equality_i(const DynamicType& lhs, const DynamicType& rhs);
-OpenDDS_Dcps_Export bool test_equality(const DynamicType& lhs, const DynamicType& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
-OpenDDS_Dcps_Export bool test_equality(const DynamicType_rch& lhs, const DynamicType_rch& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
+bool test_equality(const DynamicType& lhs, const DynamicType& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
+bool test_equality(const DynamicType_rch& lhs, const DynamicType_rch& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
 
 } // namespace XTypes
 } // namespace OpenDDS

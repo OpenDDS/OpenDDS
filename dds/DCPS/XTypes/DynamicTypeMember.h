@@ -3,7 +3,6 @@
 #define OPENDDS_DCPS_XTYPES_DYNAMIC_TYPE_MEMBER_H
 
 #include "External.h"
-
 #include "TypeObject.h"
 
 #include <dds/DdsDcpsInfrastructureC.h>
@@ -22,10 +21,12 @@ class OpenDDS_Dcps_Export DynamicTypeMember : public OpenDDS::DCPS::RcObject {
 public:
   DynamicTypeMember();
   ~DynamicTypeMember();
-   DDS::ReturnCode_t get_descriptor(MemberDescriptor& descriptor);
+
+  DDS::ReturnCode_t get_descriptor(MemberDescriptor& descriptor) const;
   bool equals(const DynamicTypeMember& other);
   MemberId get_id();
   OPENDDS_STRING get_name();
+
   MemberDescriptor* descriptor_;
 };
 
@@ -36,9 +37,9 @@ typedef OPENDDS_MAP(OPENDDS_STRING, DynamicTypeMember_rch) DynamicTypeMembersByN
 typedef OPENDDS_MAP(MemberId, DynamicTypeMember_rch) DynamicTypeMembersById;
 typedef OPENDDS_VECTOR(DynamicTypeMember_rch) DynamicTypeMembersByIndex;
 
-OpenDDS_Dcps_Export bool test_equality(const DynamicTypeMember& lhs, const DynamicTypeMember& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
-OpenDDS_Dcps_Export bool test_equality(const DynamicTypeMembersByName& lhs, const DynamicTypeMembersByName& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
-OpenDDS_Dcps_Export bool test_equality(const DynamicTypeMembersById& lhs, const DynamicTypeMembersById& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
+bool test_equality(const DynamicTypeMember& lhs, const DynamicTypeMember& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
+bool test_equality(const DynamicTypeMembersByName& lhs, const DynamicTypeMembersByName& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
+bool test_equality(const DynamicTypeMembersById& lhs, const DynamicTypeMembersById& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
 
 } // namespace XTypes
 } // namespace OpenDDS
