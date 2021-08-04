@@ -14,10 +14,6 @@ OpenDDS 3.18.0-dev is currently in development, so this list might change.
   - Improved reassembly of fragments by adding an expiration to them (#2848)
     - Added the `SedpFragmentReassemblyTimeout` RTPS discovery config option to control this.
 - The QoS XML Handler can now take input from a string (#2439)
-- Additions to the Sphinx-based documentation:
-  - `docs/internal/github_actions.rst`: describes GitHub actions and how OpenDDS is using it (#2750)
-  - `docs/internal/running_tests.rst`: describes how to run OpenDDS tests (#2767)
-  - `docs/internal/docs.rst`: describes how to build and extend the documentation ($2767)
 
 ### Fixes:
 - RTPS:
@@ -27,6 +23,7 @@ OpenDDS 3.18.0-dev is currently in development, so this list might change.
   - Fixed durable data not being delivered in the right order (#2728)
   - `RtpsUdpDataLink` will no longer purge durable data (#2690)
 - Fixed `Topic`s returned from `find_topic` not being distinct entities (#2731)
+- Try to workaround faulty DNS when getting the FQDN (#2677)
 - Fixed `configure --wireshark-cmake` not working on Linux (#2679)
 - Fixed an invalid memory write in `SporadicTask` (#2685)
 - `make install`:
