@@ -572,7 +572,6 @@ DDS::ReturnCode_t
 SubscriberImpl::notify_datareaders()
 {
   DataReaderMap localreadermap;
-  DataReaderMap::iterator it;
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                     guard,
@@ -580,8 +579,8 @@ SubscriberImpl::notify_datareaders()
                     DDS::RETCODE_ERROR);
     localreadermap = datareader_map_;
   }
-  for (it = localreadermap.begin(); it != localreadermap.end(); ++it) {
-    if ( it->second->have_sample_states(DDS::NOT_READ_SAMPLE_STATE)) {
+  for (DataReaderMap::iterator it = localreadermap.begin(); it != localreadermap.end(); ++it) {
+    if (it->second->have_sample_states(DDS::NOT_READ_SAMPLE_STATE)) {
       DDS::DataReaderListener_var listener = it->second->get_listener();
       if (listener) {
         listener->on_data_available(it->second.in());
