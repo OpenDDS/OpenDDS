@@ -29,6 +29,8 @@ GuidPartitionTable::Result GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_
     return NO_CHANGE;
   }
 
+  remove_from_cache(guid);
+
   SpdpReplay spdp_replay;
   populate_replay(spdp_replay, guid, to_add);
 

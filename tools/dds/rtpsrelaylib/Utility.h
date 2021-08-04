@@ -15,7 +15,7 @@
 
 namespace RtpsRelay {
 
-typedef std::set<std::string> StringSet;
+typedef std::unordered_set<std::string> StringSet;
 
 inline std::string guid_to_string(const OpenDDS::DCPS::GUID_t& a_guid)
 {
@@ -54,11 +54,11 @@ struct AddrPort {
 };
 
 struct GuidAddr {
-  OpenDDS::DCPS::RepoId guid;
+  OpenDDS::DCPS::GUID_t guid;
   AddrPort address;
 
   GuidAddr() : guid(OpenDDS::DCPS::GUID_UNKNOWN) {}
-  GuidAddr(const OpenDDS::DCPS::RepoId& a_guid, const AddrPort& a_address)
+  GuidAddr(const OpenDDS::DCPS::GUID_t& a_guid, const AddrPort& a_address)
     : guid(a_guid)
     , address(a_address)
   {}
@@ -89,7 +89,7 @@ inline void assign(EntityId_t& eid, const OpenDDS::DCPS::EntityId_t& a_eid)
   eid.entityKind(a_eid.entityKind);
 }
 
-inline void assign(GUID_t& guid, const OpenDDS::DCPS::RepoId& a_guid)
+inline void assign(GUID_t& guid, const OpenDDS::DCPS::GUID_t& a_guid)
 {
   std::memcpy(&guid._guidPrefix[0], a_guid.guidPrefix, sizeof(a_guid.guidPrefix));
   assign(guid.entityId(), a_guid.entityId);
@@ -112,14 +112,14 @@ inline bool operator<(const Duration_t& x, const Duration_t& y)
   return x.nanosec() < y.nanosec();
 }
 
-inline OpenDDS::DCPS::RepoId guid_to_repoid(const GUID_t& a_guid)
+inline OpenDDS::DCPS::GUID_t guid_to_repoid(const GUID_t& a_guid)
 {
-  OpenDDS::DCPS::RepoId retval;
-  std::memcpy(&retval, &a_guid, sizeof(OpenDDS::DCPS::RepoId));
+  OpenDDS::DCPS::GUID_t retval;
+  std::memcpy(&retval, &a_guid, sizeof(OpenDDS::DCPS::GUID_t));
   return retval;
 }
 
-inline GUID_t repoid_to_guid(const OpenDDS::DCPS::RepoId& a_guid)
+inline GUID_t repoid_to_guid(const OpenDDS::DCPS::GUID_t& a_guid)
 {
   GUID_t retval;
   std::memcpy(&retval.guidPrefix(), a_guid.guidPrefix, sizeof(a_guid.guidPrefix));
@@ -129,7 +129,7 @@ inline GUID_t repoid_to_guid(const OpenDDS::DCPS::RepoId& a_guid)
 }
 
 struct GuidHash {
-  std::size_t operator() (const OpenDDS::DCPS::RepoId& guid) const
+  std::size_t operator() (const OpenDDS::DCPS::GUID_t& guid) const
   {
     return
       (std::hash<::CORBA::Octet>{}(guid.guidPrefix[0]) << 15) ^
@@ -150,7 +150,7 @@ struct GuidHash {
       (std::hash<::CORBA::Octet>{}(guid.entityId.entityKind) << 0);
   }
 };
-typedef std::unordered_set<OpenDDS::DCPS::RepoId, GuidHash> GuidSet;
+typedef std::unordered_set<OpenDDS::DCPS::GUID_t, GuidHash> GuidSet;
 
 }
 

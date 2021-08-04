@@ -55,6 +55,7 @@ public:
         }
       }
       guid_to_partitions_.erase(pos);
+      remove_from_cache(guid);
     }
 
     remove_defunct(defunct);
@@ -66,16 +67,25 @@ public:
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
     // Match on the prefix.
-    OpenDDS::DCPS::RepoId prefix(from);
-    prefix.entityId = OpenDDS::DCPS::ENTITYID_UNKNOWN;
+    const OpenDDS::DCPS::GUID_t prefix = make_id(from, OpenDDS::DCPS::ENTITYID_UNKNOWN);
+
+    const auto p = guid_to_partitions_cache_.find(prefix);
+    if (p != guid_to_partitions_cache_.end()) {
+      partitions.insert(p->second.begin(), p->second.end());
+      return;
+    }
+
+    auto& c = guid_to_partitions_cache_[prefix];
 
     for (auto pos = guid_to_partitions_.lower_bound(prefix), limit = guid_to_partitions_.end();
          pos != limit && std::memcmp(pos->first.guidPrefix, prefix.guidPrefix, sizeof(prefix.guidPrefix)) == 0; ++pos) {
       partitions.insert(pos->second.begin(), pos->second.end());
+      c.insert(pos->second.begin(), pos->second.end());
     }
 
     if (!config_.allow_empty_partition()) {
       partitions.erase("");
+      c.erase("");
     }
   }
 
@@ -92,6 +102,13 @@ public:
   }
 
 private:
+  void remove_from_cache(const OpenDDS::DCPS::GUID_t guid)
+  {
+    // Invalidate the cache.
+    const OpenDDS::DCPS::GUID_t prefix = make_id(guid, OpenDDS::DCPS::ENTITYID_UNKNOWN);
+    guid_to_partitions_cache_.erase(prefix);
+  }
+
   void populate_replay(SpdpReplay& spdp_replay,
                        const OpenDDS::DCPS::GUID_t& guid,
                        const std::vector<std::string>& to_add) const
@@ -123,7 +140,7 @@ private:
 
   void add_new(const StringSet& partitions)
   {
-    std::set<size_t> slots_to_write;
+    std::unordered_set<size_t> slots_to_write;
     for (const auto& partition : partitions) {
       const size_t slot = get_free_slot();
       add_to_slot(slot, partition);
@@ -135,7 +152,7 @@ private:
 
   void remove_defunct(const StringSet& partitions)
   {
-    std::set<size_t> slots_to_write;
+    std::unordered_set<size_t> slots_to_write;
     for (const auto& partition : partitions) {
       const size_t slot = partition_to_slot_[partition];
       remove_from_slot(slot, partition);
@@ -145,7 +162,7 @@ private:
     write_slots(slots_to_write);
   }
 
-  void write_slots(const std::set<size_t>& slots_to_write)
+  void write_slots(const std::unordered_set<size_t>& slots_to_write)
   {
     RelayPartitions relay_partitions;
     relay_partitions.application_participant_guid(repoid_to_guid(config_.application_participant_guid()));
@@ -210,11 +227,13 @@ private:
 
   SpdpReplayDataWriter_var spdp_replay_writer_;
 
-  typedef std::map<OpenDDS::DCPS::RepoId, StringSet, OpenDDS::DCPS::GUID_tKeyLessThan> GuidToPartitions;
+  typedef std::map<OpenDDS::DCPS::GUID_t, StringSet, OpenDDS::DCPS::GUID_tKeyLessThan> GuidToPartitions;
   GuidToPartitions guid_to_partitions_;
+  typedef std::unordered_map<OpenDDS::DCPS::GUID_t, StringSet, GuidHash> GuidToPartitionsCache;
+  mutable GuidToPartitionsCache guid_to_partitions_cache_;
 
   typedef std::set<OpenDDS::DCPS::GUID_t, OpenDDS::DCPS::GUID_tKeyLessThan> OrderedGuidSet;
-  typedef std::map<std::string, OrderedGuidSet> PartitionToGuid;
+  typedef std::unordered_map<std::string, OrderedGuidSet> PartitionToGuid;
   PartitionToGuid partition_to_guid_;
   PartitionIndex partition_index_;
 

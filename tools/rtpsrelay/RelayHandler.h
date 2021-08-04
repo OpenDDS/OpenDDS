@@ -81,7 +81,7 @@ public:
 
   Port port() const { return port_; }
 
-  virtual void purge(const OpenDDS::DCPS::RepoId& /*guid*/) {}
+  virtual void purge(const OpenDDS::DCPS::GUID_t& /*guid*/) {}
 
 protected:
   RelayHandler(const Config& config,
@@ -131,7 +131,7 @@ protected:
 
 class GuidAddrSet {
 public:
-  typedef std::map<OpenDDS::DCPS::RepoId, AddrSetStats, OpenDDS::DCPS::GUID_tKeyLessThan> GuidAddrSetMap;
+  typedef std::unordered_map<OpenDDS::DCPS::GUID_t, AddrSetStats, GuidHash> GuidAddrSetMap;
 
   GuidAddrSet(const Config& config,
               RelayStatisticsReporter& relay_stats_reporter)
@@ -162,9 +162,9 @@ public:
   bool ignore(const OpenDDS::DCPS::GUID_t& guid,
               const OpenDDS::DCPS::MonotonicTimePoint& now);
 
-  void remove(const OpenDDS::DCPS::RepoId& guid);
+  void remove(const OpenDDS::DCPS::GUID_t& guid);
 
-  void remove_pending(const OpenDDS::DCPS::RepoId& guid)
+  void remove_pending(const OpenDDS::DCPS::GUID_t& guid)
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
     pending_.erase(guid);
@@ -183,7 +183,7 @@ public:
       gas_.mutex_.release();
     }
 
-    GuidAddrSetMap::iterator find(const OpenDDS::DCPS::RepoId& guid)
+    GuidAddrSetMap::iterator find(const OpenDDS::DCPS::GUID_t& guid)
     {
       return gas_.guid_addr_set_map_.find(guid);
     }
@@ -196,12 +196,12 @@ public:
     ParticipantStatisticsReporter&
     record_activity(const AddrPort& remote_address,
                     const OpenDDS::DCPS::MonotonicTimePoint& now,
-                    const OpenDDS::DCPS::RepoId& src_guid,
+                    const OpenDDS::DCPS::GUID_t& src_guid,
                     const size_t& msg_len,
                     RelayHandler& handler);
 
     ParticipantStatisticsReporter&
-    participant_statistics_reporter(const OpenDDS::DCPS::RepoId& guid,
+    participant_statistics_reporter(const OpenDDS::DCPS::GUID_t& guid,
                                     Port port)
     {
       return *gas_.guid_addr_set_map_[guid].select_stats_reporter(port);
@@ -216,7 +216,7 @@ private:
   ParticipantStatisticsReporter&
   record_activity(const AddrPort& remote_address,
                   const OpenDDS::DCPS::MonotonicTimePoint& now,
-                  const OpenDDS::DCPS::RepoId& src_guid,
+                  const OpenDDS::DCPS::GUID_t& src_guid,
                   const size_t& msg_len,
                   RelayHandler& handler);
 
@@ -266,11 +266,9 @@ public:
                         const OpenDDS::DCPS::MonotonicTimePoint& now);
 
 protected:
-  typedef std::map<ACE_INET_Addr, GuidSet> AddressMap;
-
   virtual bool do_normal_processing(GuidAddrSet::Proxy& /*proxy*/,
                                     const ACE_INET_Addr& /*remote*/,
-                                    const OpenDDS::DCPS::RepoId& /*src_guid*/,
+                                    const OpenDDS::DCPS::GUID_t& /*src_guid*/,
                                     const GuidSet& /*to*/,
                                     bool& /*send_to_application_participant*/,
                                     const OpenDDS::DCPS::Message_Block_Shared_Ptr& /*msg*/,
@@ -283,10 +281,10 @@ protected:
   ParticipantStatisticsReporter& record_activity(GuidAddrSet::Proxy& proxy,
                                                  const AddrPort& remote_address,
                                                  const OpenDDS::DCPS::MonotonicTimePoint& now,
-                                                 const OpenDDS::DCPS::RepoId& src_guid,
+                                                 const OpenDDS::DCPS::GUID_t& src_guid,
                                                  const size_t& msg_len);
   CORBA::ULong send(GuidAddrSet::Proxy& proxy,
-                    const OpenDDS::DCPS::RepoId& src_guid,
+                    const OpenDDS::DCPS::GUID_t& src_guid,
                     const StringSet& to_partitions,
                     const GuidSet& to_guids,
                     bool send_to_application_participant,
@@ -308,7 +306,7 @@ protected:
 private:
   bool parse_message(OpenDDS::RTPS::MessageParser& message_parser,
                      const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
-                     OpenDDS::DCPS::RepoId& src_guid,
+                     OpenDDS::DCPS::GUID_t& src_guid,
                      GuidSet& to,
                      bool check_submessages,
                      const OpenDDS::DCPS::MonotonicTimePoint& now);
@@ -365,7 +363,7 @@ public:
   void replay(const StringSequence& partitions);
 
 private:
-  typedef std::map<OpenDDS::DCPS::RepoId, OpenDDS::DCPS::Message_Block_Shared_Ptr, OpenDDS::DCPS::GUID_tKeyLessThan> SpdpMessages;
+  typedef std::unordered_map<OpenDDS::DCPS::GUID_t, OpenDDS::DCPS::Message_Block_Shared_Ptr, GuidHash> SpdpMessages;
   SpdpMessages spdp_messages_;
   ACE_Thread_Mutex spdp_messages_mutex_;
 
@@ -374,14 +372,14 @@ private:
 
   bool do_normal_processing(GuidAddrSet::Proxy& proxy,
                             const ACE_INET_Addr& remote,
-                            const OpenDDS::DCPS::RepoId& src_guid,
+                            const OpenDDS::DCPS::GUID_t& src_guid,
                             const GuidSet& to,
                             bool& send_to_application_participant,
                             const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
                             const OpenDDS::DCPS::MonotonicTimePoint& now,
                             CORBA::ULong& sent) override;
 
-  void purge(const OpenDDS::DCPS::RepoId& guid) override;
+  void purge(const OpenDDS::DCPS::GUID_t& guid) override;
   int handle_exception(ACE_HANDLE fd) override;
 };
 
@@ -402,7 +400,7 @@ public:
 private:
   bool do_normal_processing(GuidAddrSet::Proxy& proxy,
                             const ACE_INET_Addr& remote,
-                            const OpenDDS::DCPS::RepoId& src_guid,
+                            const OpenDDS::DCPS::GUID_t& src_guid,
                             const GuidSet& to,
                             bool& send_to_application_participant,
                             const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,

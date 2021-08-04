@@ -227,7 +227,7 @@ void RelayHandler::enqueue_message(const ACE_INET_Addr& addr,
 ParticipantStatisticsReporter&
 GuidAddrSet::Proxy::record_activity(const AddrPort& remote_address,
                                     const OpenDDS::DCPS::MonotonicTimePoint& now,
-                                    const OpenDDS::DCPS::RepoId& src_guid,
+                                    const OpenDDS::DCPS::GUID_t& src_guid,
                                     const size_t& msg_len,
                                     RelayHandler& handler)
 {
@@ -237,7 +237,7 @@ GuidAddrSet::Proxy::record_activity(const AddrPort& remote_address,
 ParticipantStatisticsReporter&
 GuidAddrSet::record_activity(const AddrPort& remote_address,
                              const OpenDDS::DCPS::MonotonicTimePoint& now,
-                             const OpenDDS::DCPS::RepoId& src_guid,
+                             const OpenDDS::DCPS::GUID_t& src_guid,
                              const size_t& msg_len,
                              RelayHandler& handler)
 {
@@ -360,7 +360,7 @@ bool GuidAddrSet::ignore(const OpenDDS::DCPS::GUID_t& guid,
   return false;
 }
 
-void GuidAddrSet::remove(const OpenDDS::DCPS::RepoId& guid)
+void GuidAddrSet::remove(const OpenDDS::DCPS::GUID_t& guid)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
@@ -436,7 +436,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
   const auto msg_len = msg->length();
   if (msg_len >= 4 && ACE_OS::memcmp(msg->rd_ptr(), "RTPS", 4) == 0) {
     OpenDDS::RTPS::MessageParser mp(*msg);
-    OpenDDS::DCPS::RepoId src_guid;
+    OpenDDS::DCPS::GUID_t src_guid;
     GuidSet to;
 
     if (!parse_message(mp, msg, src_guid, to, true, now)) {
@@ -489,7 +489,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
     }
 
     bool has_guid = false;
-    OpenDDS::DCPS::RepoId src_guid;
+    OpenDDS::DCPS::GUID_t src_guid;
     if (message.get_guid_prefix(src_guid.guidPrefix)) {
       src_guid.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
       has_guid = true;
@@ -547,7 +547,7 @@ ParticipantStatisticsReporter&
 VerticalHandler::record_activity(GuidAddrSet::Proxy& proxy,
                                  const AddrPort& remote_address,
                                  const OpenDDS::DCPS::MonotonicTimePoint& now,
-                                 const OpenDDS::DCPS::RepoId& src_guid,
+                                 const OpenDDS::DCPS::GUID_t& src_guid,
                                  const size_t& msg_len)
 {
   return proxy.record_activity(remote_address, now, src_guid, msg_len, *this);
@@ -555,7 +555,7 @@ VerticalHandler::record_activity(GuidAddrSet::Proxy& proxy,
 
 bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser,
                                     const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
-                                    OpenDDS::DCPS::RepoId& src_guid,
+                                    OpenDDS::DCPS::GUID_t& src_guid,
                                     GuidSet& to,
                                     bool check_submessages,
                                     const OpenDDS::DCPS::MonotonicTimePoint& now)
@@ -580,7 +580,7 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
     // Check that every non-info submessage has a "valid" (not unknown) destination.
     switch (submessage_header.submessageId) {
     case OpenDDS::RTPS::INFO_DST: {
-      OpenDDS::DCPS::RepoId dest = OpenDDS::DCPS::GUID_UNKNOWN;
+      OpenDDS::DCPS::GUID_t dest = OpenDDS::DCPS::GUID_UNKNOWN;
       OpenDDS::DCPS::GuidPrefix_t_forany guidPrefix(dest.guidPrefix);
       if (!(message_parser >> guidPrefix)) {
         HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: VerticalHandler::parse_message %C failed to deserialize INFO_DST from %C\n"), name_.c_str(), guid_to_string(src_guid).c_str()));
@@ -694,7 +694,7 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
 }
 
 CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
-                                   const OpenDDS::DCPS::RepoId& src_guid,
+                                   const OpenDDS::DCPS::GUID_t& src_guid,
                                    const StringSet& to_partitions,
                                    const GuidSet& to_guids,
                                    bool send_to_application_participant,
@@ -888,7 +888,7 @@ SpdpHandler::SpdpHandler(const Config& config,
 
 bool SpdpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
                                        const ACE_INET_Addr& remote,
-                                       const OpenDDS::DCPS::RepoId& src_guid,
+                                       const OpenDDS::DCPS::GUID_t& src_guid,
                                        const GuidSet& to,
                                        bool& send_to_application_participant,
                                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
@@ -937,7 +937,7 @@ bool SpdpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
   return true;
 }
 
-void SpdpHandler::purge(const OpenDDS::DCPS::RepoId& guid)
+void SpdpHandler::purge(const OpenDDS::DCPS::GUID_t& guid)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, spdp_messages_mutex_);
   const auto pos = spdp_messages_.find(guid);
@@ -998,7 +998,7 @@ SedpHandler::SedpHandler(const Config& config,
 
 bool SedpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
                                        const ACE_INET_Addr& remote,
-                                       const OpenDDS::DCPS::RepoId& src_guid,
+                                       const OpenDDS::DCPS::GUID_t& src_guid,
                                        const GuidSet& to,
                                        bool& send_to_application_participant,
                                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
