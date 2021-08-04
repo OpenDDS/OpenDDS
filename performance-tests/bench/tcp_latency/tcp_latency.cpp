@@ -76,7 +76,7 @@ receiver(ACE_SOCK_Stream& cli_stream)
   report.process_report.participants[0].subscribers[0].datareaders.length(1);
   Builder::PropertySeq& properties = report.process_report.participants[0].subscribers[0].datareaders[0].properties;
 
-  const size_t buffer_size = 1.1 * frequency * test_duration;
+  const size_t buffer_size = static_cast<size_t>(1.1 * frequency * test_duration);
 
   auto round_trip_latency_stat_block = std::make_shared<Bench::PropertyStatBlock>(properties, "round_trip_latency", buffer_size);
 
@@ -191,7 +191,7 @@ int parse_args(int argc, ACE_TCHAR ** argv)
         ok = (server_port != 0);
         break;
       case 'r':
-        report_file_name = getopt.opt_arg();
+        report_file_name = ACE_TEXT_ALWAYS_CHAR(getopt.opt_arg());
         ok = (!report_file_name.empty());
         break;
     }
