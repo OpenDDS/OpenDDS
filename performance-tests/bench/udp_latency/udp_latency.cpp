@@ -115,8 +115,7 @@ int echo_server(int port)
   server_addr.set (port);
   ACE_SOCK_Dgram server_dgram;
 
-  if (server_dgram.open (server_addr) == -1)
-  {
+  if (server_dgram.open (server_addr) == -1) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) %p\n"),
                ACE_TEXT("server_dgram.open")));
@@ -137,7 +136,7 @@ int echo_server(int port)
     if (rcv_cnt >= 0) {
       if (server_dgram.send(&data,
                             rcv_cnt,
-                            peer_addr) < 0){
+                            peer_addr) < 0) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) %p\n"),
                    ACE_TEXT("server_dgram.send")));
@@ -214,22 +213,21 @@ int ACE_TMAIN (int argc, ACE_TCHAR ** argv)
 
       ACE_SOCK_Dgram cli_dgram;
 
-      if (cli_dgram.open (ACE_Addr::sap_any, server_addr.get_type ()) == -1)
-        {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) %p\n"),
-                     ACE_TEXT("cli_dgram.open")));
-        }
-
+      if (cli_dgram.open (ACE_Addr::sap_any, server_addr.get_type ()) == -1) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) %p\n"),
+                   ACE_TEXT("cli_dgram.open")));
+      }
 
         if (ACE_Thread_Manager::instance ()->spawn
             (ACE_THR_FUNC (sender),
-             (void *) &cli_dgram,
-             THR_NEW_LWP | THR_DETACHED) == -1)
+            (void *) &cli_dgram,
+            THR_NEW_LWP | THR_DETACHED) == -1) {
           ACE_ERROR_RETURN ((LM_ERROR,
                              ACE_TEXT("(%P|%t) %p\n"),
                              ACE_TEXT("thread create failed")),
                              1);
+        }
 
       receiver(cli_dgram);
       cli_dgram.close();

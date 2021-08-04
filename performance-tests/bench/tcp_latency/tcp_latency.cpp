@@ -117,16 +117,14 @@ int echo_server(int port)
   server_addr.set (port);
   ACE_SOCK_Stream server_stream;
 
-  if (peer_acceptor.open (server_addr) == -1)
-  {
+  if (peer_acceptor.open (server_addr) == -1) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) %p\n"),
                ACE_TEXT("peer_acceptor.open")));
     return 1;
   }
 
-  if (peer_acceptor.accept (server_stream, &cli_addr) == -1)
-  {
+  if (peer_acceptor.accept (server_stream, &cli_addr) == -1) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) %p\n"),
                ACE_TEXT("peer_acceptor.accept")));
@@ -142,20 +140,18 @@ int echo_server(int port)
                                     message_size);
     if (rcv_cnt > 0) {
       if (server_stream.send_n(&data,
-                               message_size) < 0){
+                               message_size) < 0) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) %p\n"),
                    ACE_TEXT("server_stream.send_n")));
         return 1;
       }
-    }
-    else if (rcv_cnt < 0) {
+    } else if (rcv_cnt < 0) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) %p\n"),
                  ACE_TEXT("server_stream.recv_n")));
       return 1;
-    }
-    else {
+    } else {
       server_stream.close_writer();
     }
   }
@@ -224,22 +220,21 @@ int ACE_TMAIN (int argc, ACE_TCHAR ** argv)
       ACE_SOCK_Stream cli_stream;
       ACE_SOCK_Connector con;
 
-      if (con.connect (cli_stream, server_addr, 0) == -1)
-        {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) %p\n"),
-                     ACE_TEXT("con.connect")));
-        }
-
+      if (con.connect (cli_stream, server_addr, 0) == -1) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) %p\n"),
+                   ACE_TEXT("con.connect")));
+      }
 
         if (ACE_Thread_Manager::instance ()->spawn
             (ACE_THR_FUNC (sender),
-             (void *) &cli_stream,
-             THR_NEW_LWP | THR_DETACHED) == -1)
+            (void *) &cli_stream,
+            THR_NEW_LWP | THR_DETACHED) == -1) {
           ACE_ERROR_RETURN ((LM_ERROR,
                              ACE_TEXT("(%P|%t) %p\n"),
                              ACE_TEXT("thread create failed")),
                              1);
+        }
 
       receiver(cli_stream);
       cli_stream.close();
