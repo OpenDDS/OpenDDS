@@ -23,12 +23,12 @@ public:
     , log_activity_(false)
   {}
 
-  void application_participant_guid(const OpenDDS::DCPS::RepoId& value)
+  void application_participant_guid(const OpenDDS::DCPS::GUID_t& value)
   {
     application_participant_guid_ = value;
   }
 
-  const OpenDDS::DCPS::RepoId& application_participant_guid() const
+  const OpenDDS::DCPS::GUID_t& application_participant_guid() const
   {
     return application_participant_guid_;
   }
@@ -214,7 +214,7 @@ public:
   }
 
 private:
-  OpenDDS::DCPS::RepoId application_participant_guid_;
+  OpenDDS::DCPS::GUID_t application_participant_guid_;
   OpenDDS::DCPS::TimeDuration lifespan_;
   size_t static_limit_;
   size_t max_pending_;
