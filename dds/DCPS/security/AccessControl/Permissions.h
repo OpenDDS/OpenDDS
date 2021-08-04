@@ -6,19 +6,19 @@
 #ifndef OPENDDS_DCPS_SECURITY_ACCESSCONTROL_PERMISSIONS_H
 #define OPENDDS_DCPS_SECURITY_ACCESSCONTROL_PERMISSIONS_H
 
-#include "dds/DCPS/security/SSL/SignedDocument.h"
-#include "dds/DCPS/security/SSL/SubjectName.h"
+#include <dds/DCPS/security/SSL/SignedDocument.h>
+#include <dds/DCPS/security/SSL/SubjectName.h>
+#include <dds/DCPS/RcHandle_T.h>
+#include <dds/DCPS/RcObject.h>
 
-#include "dds/DdsDcpsCoreC.h"
-#include "dds/DdsSecurityCoreC.h"
-#include "dds/DdsSecurityParamsC.h"
-
-#include "dds/DCPS/RcHandle_T.h"
-#include "dds/DCPS/RcObject.h"
+#include <dds/DdsDcpsCoreC.h>
+#include <dds/DdsSecurityCoreC.h>
+#include <dds/DdsSecurityParamsC.h>
 
 #include <set>
 #include <string>
 #include <vector>
+#include <ctime>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -40,8 +40,8 @@ struct Permissions : DCPS::RcObject {
   };
 
   struct Validity_t {
-    std::string not_before;
-    std::string not_after;
+    time_t not_before;
+    time_t not_after;
   };
 
   struct Action {

@@ -412,8 +412,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions grant not found");
   }
 
-  time_t expiration;
-  if (!validate_date_time(grant->validity, expiration, ex)) {
+  if (!validate_date_time(grant->validity, ex)) {
     return false;
   }
 
@@ -421,7 +420,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  make_task(local_rp_task_)->insert(permissions_handle, expiration);
+  make_task(local_rp_task_)->insert(permissions_handle, grant->validity.not_after);
 
   return true;
 }
@@ -476,8 +475,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions grant not found");
   }
 
-  time_t expiration;
-  if (!validate_date_time(grant->validity, expiration, ex)) {
+  if (!validate_date_time(grant->validity, ex)) {
     return false;
   }
 
@@ -485,7 +483,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  make_task(local_rp_task_)->insert(permissions_handle, expiration);
+  make_task(local_rp_task_)->insert(permissions_handle, grant->validity.not_after);
 
   return true;
 }
@@ -543,8 +541,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_topic: grant not found");
   }
 
-  time_t expiration;
-  if (!validate_date_time(grant->validity, expiration, ex)) {
+  if (!validate_date_time(grant->validity, ex)) {
     return false;
   }
 
@@ -750,8 +747,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter: Permissions grant not found");
   }
 
-  time_t expiration;
-  if (!validate_date_time(grant->validity, expiration, ex)) {
+  if (!validate_date_time(grant->validity, ex)) {
     return false;
   }
 
@@ -761,7 +757,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  make_task(remote_rp_task_)->insert(permissions_handle, expiration);
+  make_task(remote_rp_task_)->insert(permissions_handle, grant->validity.not_after);
 
   return true;
 }
@@ -811,8 +807,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datareader: Permissions grant not found");
   }
 
-  time_t expiration;
-  if (!validate_date_time(grant->validity, expiration, ex)) {
+  if (!validate_date_time(grant->validity, ex)) {
     return false;
   }
 
@@ -822,7 +817,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  make_task(remote_rp_task_)->insert(permissions_handle, expiration);
+  make_task(remote_rp_task_)->insert(permissions_handle, grant->validity.not_after);
 
   return true;
 }
@@ -913,8 +908,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: grant not found");
   }
 
-  time_t expiration;
-  if (!validate_date_time(grant->validity, expiration, ex)) {
+  if (!validate_date_time(grant->validity, ex)) {
     return false;
   }
 
@@ -1325,118 +1319,39 @@ AccessControlBuiltInImpl::make_task(RevokePermissionsTask_rch& task)
   return task;
 }
 
-// NOTE: This function will return the time value as UTC
-// Format from DDS Security spec 1.1 is a kind of ISO 8601:
-//   CCYY-MM-DDThh:mm:ss[Z|(+|-)hh:mm]
-time_t AccessControlBuiltInImpl::convert_permissions_time(const std::string& timeString)
-{
-  // Check for a valid length time string, which is 19 characters (up through seconds)
-  if (timeString.length() < 19) {
-    return 0;
-  }
-
-  //time_t permission_time_t;
-  tm permission_tm;
-  std::string temp_str;
-
-  memset(&permission_tm, 0, sizeof(tm));
-  // Year
-  temp_str = timeString.substr(0, 4);
-  permission_tm.tm_year = (atoi(temp_str.c_str()) - 1900);
-  temp_str.clear();
-  // Month
-  temp_str = timeString.substr(5, 2);
-  permission_tm.tm_mon = (atoi(temp_str.c_str()) - 1);
-  temp_str.clear();
-  // Day
-  temp_str = timeString.substr(8, 2);
-  permission_tm.tm_mday = atoi(temp_str.c_str());
-  temp_str.clear();
-  // Hour
-  temp_str = timeString.substr(11, 2);
-  permission_tm.tm_hour = atoi(temp_str.c_str());
-  temp_str.clear();
-  // Minutes
-  temp_str = timeString.substr(14, 2);
-  permission_tm.tm_min = atoi(temp_str.c_str());
-  temp_str.clear();
-  // Seconds
-  temp_str = timeString.substr(17, 2);
-  permission_tm.tm_sec = atoi(temp_str.c_str());
-
-  // Check if there is time zone information in the string, Z is in the 20th character
-  if (timeString.length() > 20) {
-    temp_str.clear();
-    temp_str = timeString.substr(19, 1);
-
-    // The only adjustments that need to be made are if the character
-    // is a '+' or '-'
-    if (temp_str == "Z") {
-      temp_str.clear();
-      temp_str = timeString.substr(20, 1);
-
-      if (temp_str == "+") {
-        temp_str.clear();
-        temp_str = timeString.substr(21, 2);
-        permission_tm.tm_hour -= atoi(temp_str.c_str());
-        temp_str.clear();
-        temp_str = timeString.substr(24, 2);
-        permission_tm.tm_min -= atoi(temp_str.c_str());
-      }
-      else if (temp_str == "-") {
-        temp_str.clear();
-        temp_str = timeString.substr(21, 2);
-        permission_tm.tm_hour += atoi(temp_str.c_str());
-        temp_str.clear();
-        temp_str = timeString.substr(24, 2);
-        permission_tm.tm_min += atoi(temp_str.c_str());
-      }
-    }
-
-  }
-
-  permission_tm.tm_isdst = -1;
-
-  return mktime(&permission_tm);
-}
-
 bool AccessControlBuiltInImpl::validate_date_time(
   const Permissions::Validity_t& validity,
-  time_t& expiration,
   DDS::Security::SecurityException& ex)
 {
-  time_t after_time = 0, cur_utc_time = 0;
-  const time_t current_date_time = time(0);
-
-  const time_t before_time = convert_permissions_time(validity.not_before);
-
-  if (before_time == 0) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_date_time: Permissions not_before time is invalid.");
+  if (validity.not_before == 0) {
+    CommonUtilities::set_security_error(ex, -1, 0,
+      "AccessControlBuiltInImpl::validate_date_time: Permissions not_before time is invalid.");
     return false;
   }
 
-  // Adjust the current time to UTC/GMT
-  tm *current_time_tm = gmtime(&current_date_time);
-  cur_utc_time = mktime(current_time_tm);
-
-  if (cur_utc_time < before_time) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_date_time: Permissions grant hasn't started yet.");
+  if (validity.not_after == 0) {
+    CommonUtilities::set_security_error(ex, -1, 0,
+      "AccessControlBuiltInImpl::validate_date_time: Permissions not_after time is invalid.");
     return false;
   }
 
-  after_time = convert_permissions_time(validity.not_after);
+  // Get the current time as UTC
+  const time_t now = std::time(0);
+  std::tm* const now_utc_tm = std::gmtime(&now);
+  const time_t now_utc = std::mktime(now_utc_tm);
 
-  if (after_time == 0) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_date_time: Permissions not_after time is invalid.");
+  if (now_utc < validity.not_before) {
+    CommonUtilities::set_security_error(ex, -1, 0,
+      "AccessControlBuiltInImpl::validate_date_time: Permissions grant hasn't started yet.");
     return false;
   }
 
-  if (cur_utc_time > after_time) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_date_time: Permissions grant has expired.");
+  if (now_utc > validity.not_after) {
+    CommonUtilities::set_security_error(ex, -1, 0,
+      "AccessControlBuiltInImpl::validate_date_time: Permissions grant has expired.");
     return false;
   }
 
-  expiration = after_time;
   return true;
 }
 
