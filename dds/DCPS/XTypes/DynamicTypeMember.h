@@ -25,7 +25,7 @@ public:
   DDS::ReturnCode_t get_descriptor(MemberDescriptor& descriptor) const;
   bool equals(const DynamicTypeMember& other);
   MemberId get_id();
-  OPENDDS_STRING get_name();
+  DCPS::String get_name();
 
   MemberDescriptor* descriptor_;
 };
@@ -33,7 +33,7 @@ public:
 typedef std::pair<const DynamicType*, const DynamicType*> DynamicTypePtrPair;
 typedef OPENDDS_SET(DynamicTypePtrPair) DynamicTypePtrPairSeen;
 typedef OpenDDS::DCPS::RcHandle<DynamicTypeMember> DynamicTypeMember_rch;
-typedef OPENDDS_MAP(OPENDDS_STRING, DynamicTypeMember_rch) DynamicTypeMembersByName;
+typedef OPENDDS_MAP(DCPS::String, DynamicTypeMember_rch) DynamicTypeMembersByName;
 typedef OPENDDS_MAP(MemberId, DynamicTypeMember_rch) DynamicTypeMembersById;
 typedef OPENDDS_VECTOR(DynamicTypeMember_rch) DynamicTypeMembersByIndex;
 

@@ -23,10 +23,10 @@ public:
 
   bool equals(const MemberDescriptor& other);
 
-  OPENDDS_STRING name;
+  DCPS::String name;
   MemberId id;
   DynamicType_rch type;
-  OPENDDS_STRING default_value;
+  DCPS::String default_value;
   ACE_CDR::ULong index;
   UnionCaseLabelSeq label;
   TryConstructKind try_construct_kind;

@@ -17,9 +17,9 @@ class OpenDDS_Dcps_Export DynamicType : public OpenDDS::DCPS::RcObject
 {
 public:
   void get_descriptor(TypeDescriptor& descriptor) const;
-  OPENDDS_STRING get_name();
-  TypeKind get_kind();
-  DDS::ReturnCode_t get_member_by_name(DynamicTypeMember_rch& member, const OPENDDS_STRING& name);
+  DCPS::String get_name() const;
+  TypeKind get_kind() const;
+  DDS::ReturnCode_t get_member_by_name(DynamicTypeMember_rch& member, const DCPS::String& name);
   void get_all_members_by_name(DynamicTypeMembersByName& member);
   DDS::ReturnCode_t get_member(DynamicTypeMember_rch& member, MemberId id);
   void get_all_members(DynamicTypeMembersById& member);

@@ -12,7 +12,17 @@ void DynamicType::get_descriptor(TypeDescriptor& descriptor) const
   descriptor = *descriptor_;
 }
 
-DDS::ReturnCode_t DynamicType::get_member_by_name(DynamicTypeMember_rch& member, const OPENDDS_STRING& name)
+DCPS::String DynamicType::get_name() const
+{
+  return this->descriptor_->name;
+}
+
+TypeKind DynamicType::get_kind() const
+{
+  return this->descriptor_->kind;
+}
+
+DDS::ReturnCode_t DynamicType::get_member_by_name(DynamicTypeMember_rch& member, const DCPS::String& name)
 {
   //We have a map of members in member_by_name which takes a string and gives 0 or 1 type DTMs
   //this should use the string as the key and put the returned DTM into member.
@@ -53,7 +63,6 @@ ACE_CDR::ULong DynamicType::get_member_count()
 
 DDS::ReturnCode_t DynamicType::get_member_by_index(DynamicTypeMember_rch& member, ACE_CDR::ULong index)
 {
-  
   if (index < member_by_index.size()) {
     member = member_by_index[index];
     return DDS::RETCODE_OK;

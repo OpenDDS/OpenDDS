@@ -39,7 +39,7 @@ MemberId DynamicTypeMember::get_id()
   return descriptor_->id;
 }
 
-OPENDDS_STRING DynamicTypeMember::get_name()
+DCPS::String DynamicTypeMember::get_name()
 {
   return descriptor_->name;
 }

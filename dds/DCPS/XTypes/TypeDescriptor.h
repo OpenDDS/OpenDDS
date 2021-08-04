@@ -24,7 +24,7 @@ public:
   bool equals(const TypeDescriptor& other);
 
   TypeKind kind;
-  OPENDDS_STRING name;
+  DCPS::String name;
   DynamicType_rch base_type;
   DynamicType_rch discriminator_type;
   LBoundSeq bound;
@@ -43,7 +43,7 @@ inline bool operator==(const LBoundSeq& lhs, const LBoundSeq& rhs)
       }
     }
     return true;
-  } 
+  }
   return false;
 }
 
