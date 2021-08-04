@@ -551,8 +551,8 @@ PublisherImpl::suspend_publications()
   }
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-      guard,
-      this->pi_lock_,
+      suspend_guard,
+      this->pi_suspended_lock_,
       DDS::RETCODE_ERROR);
   ++suspend_depth_count_;
   return DDS::RETCODE_OK;
@@ -562,8 +562,8 @@ bool
 PublisherImpl::is_suspended() const
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-      guard,
-      this->pi_lock_,
+      suspend_guard,
+      this->pi_suspended_lock_,
       false);
   return suspend_depth_count_;
 }
@@ -581,24 +581,32 @@ PublisherImpl::resume_publications()
     return DDS::RETCODE_NOT_ENABLED;
   }
 
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-      guard,
-      this->pi_lock_,
-      DDS::RETCODE_ERROR);
+  PublicationMap publication_map_copy;
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+        suspend_guard,
+        this->pi_suspended_lock_,
+        DDS::RETCODE_ERROR);
+    --suspend_depth_count_;
 
-  --suspend_depth_count_;
+    if (suspend_depth_count_ < 0) {
+      suspend_depth_count_ = 0;
+      return DDS::RETCODE_PRECONDITION_NOT_MET;
+    }
+    if (suspend_depth_count_ == 0) {
+      suspend_guard.release();
+      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+          guard,
+          this->pi_lock_,
+          DDS::RETCODE_ERROR);
 
-  if (suspend_depth_count_ < 0) {
-    suspend_depth_count_ = 0;
-    return DDS::RETCODE_PRECONDITION_NOT_MET;
+      publication_map_copy = publication_map_;
+    }
   }
 
-  if (suspend_depth_count_ == 0) {
-
-    for (PublicationMap::iterator it = this->publication_map_.begin();
-        it != this->publication_map_.end(); ++it) {
-      it->second->send_suspended_data();
-    }
+  for (PublicationMap::const_iterator it = publication_map_copy.begin();
+      it != publication_map_copy.end(); ++it) {
+    it->second->send_suspended_data();
   }
 
   return DDS::RETCODE_OK;
