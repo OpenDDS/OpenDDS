@@ -2921,7 +2921,7 @@ Service_Participant::get_type_object(DDS::DomainParticipant_ptr participant,
   if (participant_servant) {
     XTypes::TypeLookupService_rch tls = participant_servant->get_type_lookup_service();
     if (tls) {
-      return tls->get_type_objects(ti);
+      return tls->get_type_object(ti);
     }
   }
 
