@@ -6,7 +6,7 @@ project: acelib, dds_macros, install {
   libout = $(DDS_ROOT)/lib
   pch_header =
   pch_source =
-  macros += NOTAO
+  macros += OPENDDS_NO_TAO
 
   Header_Files {
     Hash.h
@@ -16,6 +16,10 @@ project: acelib, dds_macros, install {
     debug.h
     XTypes/External.h
     XTypes/TypeObject.h
+  }
+
+  specific {
+    install_headers =
   }
 
   Source_Files {

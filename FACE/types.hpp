@@ -1,5 +1,5 @@
-#ifndef FACE_TYPES_HPP_HEADER_FILE
-#define FACE_TYPES_HPP_HEADER_FILE
+#ifndef OPENDDS_FACE_TYPES_HPP
+#define OPENDDS_FACE_TYPES_HPP
 
 #include <ace/CDR_Base.h>
 #include "OpenDDS_FACE_Export.h"

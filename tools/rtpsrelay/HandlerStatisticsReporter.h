@@ -4,8 +4,8 @@
 #include "Config.h"
 #include "RelayStatisticsReporter.h"
 
-#include "lib/RelayTypeSupportImpl.h"
-#include "lib/Utility.h"
+#include <dds/rtpsrelaylib/RelayTypeSupportImpl.h>
+#include <dds/rtpsrelaylib/Utility.h>
 
 #include <dds/DCPS/JsonValueWriter.h>
 

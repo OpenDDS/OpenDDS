@@ -1732,12 +1732,18 @@ TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
   DBG_ENTRY_LVL("TransportSendStrategy", "do_send_packet", 6);
 
 #ifdef OPENDDS_SECURITY
-  // pre_send_packet may provide different data that takes the place of the
-  // original "packet" (used for security encryption/authentication)
-  Message_Block_Ptr substitute(pre_send_packet(packet));
-  if (!substitute) {
-    VDBG((LM_DEBUG, "(%P|%t) DBG:   pre_send_packet returned NULL, dropping.\n"));
-    return packet->total_length();
+  Message_Block_Ptr substitute;
+  if (security_config()) {
+    const DDS::Security::CryptoTransform_var crypto = security_config()->get_crypto_transform();
+    // pre_send_packet may provide different data that takes the place of the
+    // original "packet" (used for security encryption/authentication)
+    if (crypto) {
+      substitute.reset(pre_send_packet(packet));
+      if (!substitute) {
+        VDBG((LM_DEBUG, "(%P|%t) DBG:   pre_send_packet returned NULL, dropping.\n"));
+        return packet->total_length();
+      }
+    }
   }
 #endif
 
@@ -1747,7 +1753,7 @@ TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
   iovec iov[MAX_SEND_BLOCKS];
 
 #ifdef OPENDDS_SECURITY
-  const int num_blocks = mb_to_iov(*substitute, iov);
+  const int num_blocks = mb_to_iov(substitute ? *substitute : *packet, iov);
 #else
   const int num_blocks = mb_to_iov(*packet, iov);
 #endif
@@ -1766,7 +1772,7 @@ TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
             num_bytes_sent), 5);
 
 #ifdef OPENDDS_SECURITY
-  if (num_bytes_sent > 0 && packet->data_block() != substitute->data_block()) {
+  if (num_bytes_sent > 0 && substitute && packet->data_block() != substitute->data_block()) {
     // Although the "substitute" data took the place of "packet", the rest
     // of the framework needs to account for the bytes in "packet" being taken
     // care of, as if they were actually sent.

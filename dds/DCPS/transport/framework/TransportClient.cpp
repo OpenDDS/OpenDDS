@@ -1034,7 +1034,7 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
     // The reason that the send_links_ set is cleared is because we continually
     // reuse the same send_links_ object over and over for each call to this
     // send method.
-    RepoId pub_id(repo_id_);
+    RepoId pub_id = repo_id();
     send_links.send_stop(pub_id);
     if (transaction_id != 0) {
       expected_transaction_id_ = max_transaction_id_seen_ + 1;

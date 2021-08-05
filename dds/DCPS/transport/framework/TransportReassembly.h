@@ -91,6 +91,10 @@ private:
     SequenceNumber data_sample_seq_;
   };
 
+#if defined ACE_HAS_CPP11
+  OPENDDS_OOAT_CUSTOM_HASH(FragKey, OpenDDS_Dcps_Export, FragKeyHash);
+#endif
+
   // A FragRange represents a chunk of a partially-reassembled message.
   // The transport_seq_ range is the range of transport sequence numbers
   // that were used to send the given chunk of data.
@@ -120,10 +124,15 @@ private:
     MonotonicTimePoint expiration_;
   };
 
+#ifdef ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP_CHASH(FragKey, FragInfo, FragKeyHash) FragInfoMap;
+#else
   typedef OPENDDS_MAP(FragKey, FragInfo) FragInfoMap;
+#endif
   FragInfoMap fragments_;
 
-  typedef OPENDDS_MULTIMAP(MonotonicTimePoint, FragKey) ExpirationQueue;
+  typedef std::pair<MonotonicTimePoint, FragKey> ElementType;
+  typedef OPENDDS_LIST(ElementType) ExpirationQueue;
   ExpirationQueue expiration_queue_;
 
   typedef OPENDDS_MAP_CMP(PublicationId, DisjointSequence, GUID_tKeyLessThan) CompletedMap;

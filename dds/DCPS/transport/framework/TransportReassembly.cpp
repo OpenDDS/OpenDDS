@@ -275,7 +275,7 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
 
   if (iter == fragments_.end()) {
     fragments_[key] = FragInfo(firstFrag, FragRangeList(1, FragRange(seqRange, data)), total_frags, expiration);
-    expiration_queue_.insert(std::make_pair(expiration, key));
+    expiration_queue_.push_back(std::make_pair(expiration, key));
     // since this is the first fragment we've seen, it can't possibly be done
     if (Transport_debug_level > 5 || transport_debug.log_fragment_storage) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble_i "
@@ -391,9 +391,8 @@ TransportReassembly::data_unavailable(const SequenceNumber& dataSampleSeq,
 
 void TransportReassembly::check_expirations(const MonotonicTimePoint& now)
 {
-  for (ExpirationQueue::iterator pos = expiration_queue_.begin(), limit = expiration_queue_.upper_bound(now);
-       pos != limit;) {
-    FragInfoMap::iterator iter = fragments_.find(pos->second);
+  while (!expiration_queue_.empty() && expiration_queue_.front().first <= now) {
+    FragInfoMap::iterator iter = fragments_.find(expiration_queue_.front().second);
     if (iter != fragments_.end()) {
       // FragInfo::expiration_ may have changed after insertion into expiration_queue_
       if (iter->second.expiration_ <= now) {
@@ -403,10 +402,10 @@ void TransportReassembly::check_expirations(const MonotonicTimePoint& now)
                      "purge expired leaving %B fragments\n", fragments_.size()));
         }
       } else {
-        expiration_queue_.insert(std::make_pair(iter->second.expiration_, pos->second));
+        expiration_queue_.push_back(std::make_pair(iter->second.expiration_, iter->first));
       }
     }
-    expiration_queue_.erase(pos++);
+    expiration_queue_.pop_front();
   }
 }
 

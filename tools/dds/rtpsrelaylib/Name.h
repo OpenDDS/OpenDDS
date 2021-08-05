@@ -1,5 +1,5 @@
-#ifndef RTPSRELAY_NAME_H_
-#define RTPSRELAY_NAME_H_
+#ifndef OPENDDS_RTPSRELAYLIB_NAME_H
+#define OPENDDS_RTPSRELAYLIB_NAME_H
 
 #include "export.h"
 
@@ -9,7 +9,7 @@
 
 namespace RtpsRelay {
 
-class RtpsRelayLib_Export Atom {
+class OpenDDS_RtpsRelayLib_Export Atom {
 public:
   enum Kind {
     CHARACTER,
@@ -88,9 +88,9 @@ private:
   std::set<char> characters_; // For CHARACTER_CLASS and NEGATED_CHARACTER_CLASS.
 };
 
-RtpsRelayLib_Export std::ostream& operator<<(std::ostream& out, const Atom& atom);
+OpenDDS_RtpsRelayLib_Export std::ostream& operator<<(std::ostream& out, const Atom& atom);
 
-class RtpsRelayLib_Export Name {
+class OpenDDS_RtpsRelayLib_Export Name {
 public:
   typedef std::vector<Atom> Atoms;
   typedef Atoms::const_iterator const_iterator;
@@ -145,7 +145,7 @@ private:
   static void parse_character_or_range(Name& name, const std::string& buffer, size_t& idx, std::set<char>& characters);
 };
 
-RtpsRelayLib_Export std::ostream& operator<<(std::ostream& out, const Name& name);
+OpenDDS_RtpsRelayLib_Export std::ostream& operator<<(std::ostream& out, const Name& name);
 
 }
 

@@ -310,7 +310,23 @@ my %path_conditions = (
   },
 
   in_dds_dcps => qr@^dds/DCPS@,
-  in_core_includes => qr@^dds/(?!(idl|InfoRepo)/)@,
+
+  in_public_includes => sub {
+    my $filename = shift;
+    my $full_filename = shift;
+
+    my @patterns = (
+      qr@^dds/(?!(idl|InfoRepo)/)@,
+      qr@^FACE/@,
+      qr@^tools/dds/@,
+      qr@^tools/modeling/codegen/@,
+    );
+    for my $pattern (@patterns) {
+      return 1 if $filename =~ $pattern;
+    }
+
+    return 0;
+  },
 
   cpp_header_file => qr/\.(h|hpp)$/,
   cpp_inline_file => qr/\.inl$/,
@@ -346,30 +362,9 @@ my %path_conditions = (
     'cmake_file',
     qr/\.(py|pl|rb|java)$/,
   ],
-  export_header => sub {
-    my $filename = shift;
-    my $full_filename = shift;
-
-    if (!-f $full_filename || $filename !~ /export.*\.h$/i) {
-      return 0;
-    }
-
-    my $is_export = 0;
-    open(my $fd, $full_filename);
-    while (my $line = <$fd>) {
-      if ($line =~ /This file is generated automatically by generate_export_file\.pl/) {
-        $is_export = 1;
-        last;
-      }
-    }
-    close($fd);
-
-    return $is_export;
-  },
   needs_include_guard => [
     MATCH_ALL,
-    'in_core_includes',
-    '!export_header',
+    'in_public_includes',
     [
       'cpp_header_file',
       'idl_file',
@@ -377,7 +372,7 @@ my %path_conditions = (
   ],
   user_preprocessor_scope => [
     MATCH_ALL,
-    'in_core_includes',
+    'in_public_includes',
     [
       'cpp_public_file',
       'idl_file',
@@ -388,11 +383,16 @@ my %path_conditions = (
 sub valid_include_guard_names {
   my @list;
   my $x = shift;
-  $x =~ s/^dds\///g;
+  $x =~ s@^tools/@@g;
+  $x =~ s@^dds/@@g;
+  $x =~ s@^modeling/codegen/@@g;
+  $x =~ s/^opendds//ig;
+  $x =~ s/^[_]//g;
   $x =~ s/\W+/_/g;
   push(@list, $x);
+  my $first = $x;
   $x =~ s/([a-z])([A-Z])/$1_$2/g;
-  push(@list, $x);
+  push(@list, $x) if ($x ne $first);
   return map {'OPENDDS_' . uc($_)} @list;
 }
 
@@ -631,6 +631,7 @@ my %all_checks = (
       my @lines;
       my $ifndef = '';
       my $fixed = 0;
+      my $is_export = 0;
       open(my $fd, $full_filename) or die("${\error()} $filename: $!");
       while (my $line = <$fd>) {
         if (length($ifndef)) {
@@ -638,16 +639,25 @@ my %all_checks = (
             my $indent = $1;
             my $define = $2;
             if ($define eq $ifndef) {
+              if ($is_export) {
+                close($fd);
+                if ($ifndef =~ /^OPENDDS_/) {
+                  return 0;
+                }
+                print_error("$filename:$.: Export include guard names needs to at least " .
+                    "start with OPENDDS_");
+                return 1;
+              }
               foreach my $valid_name (@valid_names) {
                 if ($ifndef eq $valid_name) {
                   close($fd);
                   return 0;
                 }
               }
-              # print("$ifndef\n");
-              # foreach my $valid_name (@valid_names) {
-              #   print("$valid_name\n");
-              # }
+              print_error("$filename:$.: First ifndef/define macro is: $ifndef");
+              foreach my $valid_name (@valid_names) {
+                print_error("$filename:$.: $valid_name is valid");
+              }
               if ($fix) {
                 pop(@lines);
                 my $new_guard_name = $valid_names[0];
@@ -662,6 +672,9 @@ my %all_checks = (
         if (length($ifndef) == 0) {
           if ($line =~ /^#\s*ifndef (\w+)$/) {
             $ifndef = $1;
+          }
+          elsif ($line =~ /This file is generated automatically by generate_export_file\.pl/) {
+            $is_export = 1;
           }
         }
         if ($fix) {

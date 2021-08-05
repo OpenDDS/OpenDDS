@@ -3,11 +3,11 @@
 
 #include "Config.h"
 
-#include "lib/PartitionIndex.h"
-#include "lib/RelayTypeSupportImpl.h"
-#include "lib/Utility.h"
+#include <dds/rtpsrelaylib/PartitionIndex.h>
+#include <dds/rtpsrelaylib/RelayTypeSupportImpl.h>
+#include <dds/rtpsrelaylib/Utility.h>
 
-#include "dds/DCPS/GuidConverter.h"
+#include <dds/DCPS/GuidConverter.h>
 
 #include <ace/Thread_Mutex.h>
 
@@ -18,6 +18,12 @@ const size_t MAX_SLOT_SIZE = 64;
 
 class GuidPartitionTable {
 public:
+  enum Result {
+    ADDED,
+    UPDATED,
+    NO_CHANGE
+  };
+
   GuidPartitionTable(const Config& config,
                      RelayPartitionsDataWriter_var relay_partitions_writer,
                      SpdpReplayDataWriter_var spdp_replay_writer)
@@ -27,7 +33,7 @@ public:
   {}
 
   // Insert a reader/writer guid and its partitions.
-  void insert(const OpenDDS::DCPS::GUID_t& guid, const DDS::StringSeq& partitions);
+  Result insert(const OpenDDS::DCPS::GUID_t& guid, const DDS::StringSeq& partitions);
 
   void remove(const OpenDDS::DCPS::GUID_t& guid)
   {
@@ -67,6 +73,10 @@ public:
          pos != limit && std::memcmp(pos->first.guidPrefix, prefix.guidPrefix, sizeof(prefix.guidPrefix)) == 0; ++pos) {
       partitions.insert(pos->second.begin(), pos->second.end());
     }
+
+    if (!config_.allow_empty_partition()) {
+      partitions.erase("");
+    }
   }
 
   template <typename T>
@@ -75,7 +85,9 @@ public:
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
     for (const auto& part : partitions) {
-      partition_index_.lookup(part, guids);
+      if (config_.allow_empty_partition() || !part.empty()) {
+        partition_index_.lookup(part, guids);
+      }
     }
   }
 
@@ -92,7 +104,9 @@ private:
     for (const auto& part : to_add) {
       const auto pos1 = partition_to_guid_.find(part);
       if (pos1 == partition_to_guid_.end()) {
-        spdp_replay.partitions().push_back(part);
+        if (config_.allow_empty_partition() || !part.empty()) {
+          spdp_replay.partitions().push_back(part);
+        }
         continue;
       }
 
@@ -100,7 +114,9 @@ private:
 
       if (pos2 == pos1->second.end() ||
           std::memcmp(pos2->guidPrefix, prefix.guidPrefix, sizeof(prefix.guidPrefix)) != 0) {
-        spdp_replay.partitions().push_back(part);
+        if (config_.allow_empty_partition() || !part.empty()) {
+          spdp_replay.partitions().push_back(part);
+        }
       }
     }
   }
@@ -174,7 +190,7 @@ private:
     OPENDDS_ASSERT(slots_[slot].count(partition_name) != 0);
     OPENDDS_ASSERT(partition_to_slot_[partition_name] == slot);
 
-    const bool full = slots_.size() == MAX_SLOT_SIZE;
+    const bool full = slots_[slot].size() == MAX_SLOT_SIZE;
     slots_[slot].erase(partition_name);
     partition_to_slot_.erase(partition_name);
     if (full) {

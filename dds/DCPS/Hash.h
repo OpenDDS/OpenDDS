@@ -59,4 +59,15 @@ OPENDDS_END_VERSIONED_NAMESPACE_DECL
   }
 #endif
 
+#ifdef ACE_HAS_CPP11
+#define OPENDDS_OOAT_CUSTOM_HASH(Key, Export, Name) \
+  struct Export Name \
+  { \
+    std::size_t operator()(const Key& val) const noexcept \
+    { \
+      return static_cast<size_t>(OpenDDS::DCPS::one_at_a_time_hash(reinterpret_cast<const uint8_t*>(&val), sizeof (Key))); \
+    } \
+  };
+#endif
+
 #endif // OPENDDS_DCPS_HASH_H

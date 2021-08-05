@@ -1,6 +1,6 @@
 #include "RelayPartitionsListener.h"
 
-#include "lib/RelayTypeSupportImpl.h"
+#include <dds/rtpsrelaylib/RelayTypeSupportImpl.h>
 
 #include <dds/DCPS/DCPS_Utils.h>
 

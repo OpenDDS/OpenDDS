@@ -2056,7 +2056,10 @@ Spdp::remove_discovered_participant_i(DiscoveredParticipantIter& iter)
 void
 Spdp::init_bit(const DDS::Subscriber_var& bit_subscriber)
 {
-  bit_subscriber_ = bit_subscriber;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    bit_subscriber_ = bit_subscriber;
+  }
 
   // This is here to make sure thread status gets a valid BIT Subscriber
   tport_->enable_periodic_tasks();
@@ -2070,8 +2073,12 @@ public:
 void
 Spdp::fini_bit()
 {
-  bit_subscriber_ = 0;
-  DCPS::ReactorTask_rch reactor_task = sedp_->reactor_task();
+  DCPS::ReactorTask_rch reactor_task;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    bit_subscriber_ = 0;
+    reactor_task = sedp_->reactor_task();
+  }
   if (!reactor_task->is_shut_down()) {
     DCPS::ReactorInterceptor::CommandPtr command = reactor_task->interceptor()->execute_or_enqueue(new Noop());
     command->wait();
@@ -3547,7 +3554,7 @@ Spdp::update_lease_expiration_i(DiscoveredParticipantIter iter,
                                    iter->second.pdata_.participantProxy.protocolVersion,
                                    iter->second.pdata_.participantProxy.vendorId);
 
-  iter->second.lease_expiration_ = now + d;
+  iter->second.lease_expiration_ = now + d + config_->lease_extension();
 
   // Insert.
   const bool cancel = !lease_expirations_.empty() && iter->second.lease_expiration_ < lease_expirations_.begin()->first;
