@@ -60,7 +60,7 @@ process_latency_test ()
 
   for sz in 50 100 250 500 1000 2500 5000 8000 16000 32000
   do
-    for protocol in tcp udp multicast-be multicast-rel rtps # raw-udp raw-tcp
+    for protocol in tcp udp multicast-be multicast-rel rtps raw-udp raw-tcp
     do
       $BENCH_ROOT/report_parser/report_parser --input-file "$TEST_RUN_DIR/b1_latency_${protocol}_${sz}.json" --output-file "$DATA_DIR/latency-$protocol-$sz.data" --output-type time-series --output-format gnuplot --stats round_trip_latency
       $SCRIPT_DIR/reduce-latency-data.pl "$DATA_DIR/latency-$protocol-$sz.data" > "$DATA_DIR/latency-$protocol-$sz.gpd"
