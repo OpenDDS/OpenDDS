@@ -107,6 +107,8 @@ public:
   void populate_dependencies(const RcHandle<XTypes::TypeLookupService>& tls) const;
 
 private:
+  static const ACE_CDR::Long TYPE_INFO_DEPENDENT_COUNT_NOT_PROVIDED;
+
   virtual const char* default_type_name() const = 0;
 
   void to_type_info_i(XTypes::TypeIdentifierWithDependencies& ti_with_deps,

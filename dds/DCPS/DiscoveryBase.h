@@ -1176,6 +1176,10 @@ namespace OpenDDS {
 
 
       struct MatchingData {
+        MatchingData()
+          : got_minimal(false), got_complete(false)
+        {}
+
         // Sequence number of the first request for remote minimal types.
         SequenceNumber rpc_seqnum_minimal;
 
@@ -1281,13 +1285,9 @@ namespace OpenDDS {
         // endpoint's TypeInformation, then the "complete" part also is not included.
         if ((writer_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE) &&
             (reader_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE)) {
+          bool need_minimal_tobjs, need_complete_tobjs;
           if (!writer_local && reader_local) {
-            const bool need_minimal_tobjs = type_lookup_service_ &&
-              !type_lookup_service_->type_object_in_cache(writer_type_info->minimal.typeid_with_size.type_id);
-            const bool need_complete_tobjs = type_lookup_service_ && use_xtypes_complete_ &&
-              writer_type_info->complete.typeid_with_size.type_id.kind() != XTypes::TK_NONE &&
-              !type_lookup_service_->type_object_in_cache(writer_type_info->complete.typeid_with_size.type_id);
-
+            need_minimal_and_or_complete_types(writer_type_info, need_minimal_tobjs, need_complete_tobjs);
             if (need_minimal_tobjs || need_complete_tobjs) {
               if (DCPS_debug_level >= 4) {
                 ACE_DEBUG((LM_DEBUG, "(%P|%t) EndpointManager::match: Remote Writer\n"));
@@ -1303,12 +1303,7 @@ namespace OpenDDS {
               return;
             }
           } else if (!reader_local && writer_local) {
-            const bool need_minimal_tobjs = type_lookup_service_ &&
-              !type_lookup_service_->type_object_in_cache(reader_type_info->minimal.typeid_with_size.type_id);
-            const bool need_complete_tobjs = type_lookup_service_ && use_xtypes_complete_ &&
-              reader_type_info->complete.typeid_with_size.type_id.kind() != XTypes::TK_NONE &&
-              !type_lookup_service_->type_object_in_cache(reader_type_info->complete.typeid_with_size.type_id);
-
+            need_minimal_and_or_complete_types(reader_type_info, need_minimal_tobjs, need_complete_tobjs);
             if (need_minimal_tobjs || need_complete_tobjs) {
               if (DCPS_debug_level >= 4) {
                 ACE_DEBUG((LM_DEBUG, "(%P|%t) EndpointManager::match: Remote Reader\n"));
@@ -1327,6 +1322,18 @@ namespace OpenDDS {
         }
 
         match_continue(writer, reader);
+      }
+
+      void need_minimal_and_or_complete_types(const XTypes::TypeInformation& type_info,
+                                              bool& need_minimal,
+                                              bool& need_complete) const
+      {
+        need_minimal = type_lookup_service_ &&
+          !type_lookup_service_->type_object_in_cache(type_info->minimal.typeid_with_size.type_id);
+
+        need_complete = use_xtypes_complete_ && type_lookup_service_ &&
+          type_info->complete.typeid_with_size.type_id.kind() != XTypes::TK_NONE &&
+          !type_lookup_service_->type_object_in_cache(type_info->complete.typeid_with_size.type_id);
       }
 
       void

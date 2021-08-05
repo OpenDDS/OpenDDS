@@ -38,13 +38,13 @@ void TypeLookupService::get_type_objects(const TypeIdentifierSeq& type_ids,
   }
 }
 
-const TypeObject& TypeLookupService::get_type_objects(const TypeIdentifier& type_id) const
+const TypeObject& TypeLookupService::get_type_object(const TypeIdentifier& type_id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, to_empty_);
-  return get_type_objects_i(type_id);
+  return get_type_object_i(type_id);
 }
 
-const TypeObject& TypeLookupService::get_type_objects_i(const TypeIdentifier& type_id) const
+const TypeObject& TypeLookupService::get_type_object_i(const TypeIdentifier& type_id) const
 {
   const TypeMap::const_iterator pos = type_map_.find(type_id);
   if (pos != type_map_.end()) {
@@ -473,7 +473,7 @@ bool TypeLookupService::extensibility(TypeFlag extensibility_mask, const TypeIde
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
   bool result = false;
-  const TypeObject& to = get_type_objects_i(type_id);
+  const TypeObject& to = get_type_object_i(type_id);
   TypeKind tk = to.kind == EK_MINIMAL ? to.minimal.kind : to.complete.kind;
 
   if (TK_UNION == tk) {
@@ -496,7 +496,7 @@ bool TypeLookupService::extensibility(TypeFlag extensibility_mask, const TypeIde
   get_type_dependencies_i(type_ids, dependencies);
 
   for (unsigned i = 0; i < dependencies.length(); ++i) {
-    const TypeObject& dep_to = get_type_objects_i(dependencies[i].type_id);
+    const TypeObject& dep_to = get_type_object_i(dependencies[i].type_id);
     tk = dep_to.kind == EK_MINIMAL ? dep_to.minimal.kind : dep_to.complete.kind;
 
     if (TK_UNION == tk) {

@@ -19,6 +19,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+const ACE_CDR::Long TypeSupportImpl::TYPE_INFO_DEPENDENT_COUNT_NOT_PROVIDED = -1;
+
 TypeSupportImpl::~TypeSupportImpl()
 {}
 
@@ -75,7 +77,7 @@ void TypeSupportImpl::to_type_info_i(XTypes::TypeIdentifierWithDependencies& ti_
     ti_with_deps.typeid_with_size.typeobject_serialized_size = static_cast<unsigned>(sz);
   }
 
-  ti_with_deps.dependent_typeid_count = -1;
+  ti_with_deps.dependent_typeid_count = TYPE_INFO_DEPENDENT_COUNT_NOT_PROVIDED;
 }
 
 void TypeSupportImpl::to_type_info(XTypes::TypeInformation& type_info) const

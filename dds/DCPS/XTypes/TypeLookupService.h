@@ -28,7 +28,7 @@ public:
   ~TypeLookupService();
 
   // For TypeAssignability
-  const TypeObject& get_type_objects(const TypeIdentifier& type_id) const;
+  const TypeObject& get_type_object(const TypeIdentifier& type_id) const;
   void add(const TypeIdentifier& ti, const TypeObject& tobj);
 
   // For TypeLookup_getTypes
@@ -59,7 +59,7 @@ public:
   const TypeInformation& get_type_info(const DDS::BuiltinTopicKey_t& key) const;
 
 private:
-  const TypeObject& get_type_objects_i(const TypeIdentifier& type_id) const;
+  const TypeObject& get_type_object_i(const TypeIdentifier& type_id) const;
   void get_type_dependencies_i(const TypeIdentifierSeq& type_ids,
     TypeIdentifierWithSizeSeq& dependencies) const;
 

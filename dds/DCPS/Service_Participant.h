@@ -441,7 +441,7 @@ public:
                                                const DDS::BuiltinTopicKey_t& key) const;
 
   /**
-   * Get TypeObject of a remote entity given the corresponding TypeIdentifier.
+   * Get TypeObject for a given TypeIdentifier.
    */
   XTypes::TypeObject get_type_object(DDS::DomainParticipant_ptr participant,
                                      const XTypes::TypeIdentifier& ti) const;
