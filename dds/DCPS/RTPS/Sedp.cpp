@@ -4345,7 +4345,7 @@ bool Sedp::TypeLookupReplyReader::process_get_types_reply(const XTypes::TypeLook
   sedp_.type_lookup_service_->add_type_objects_to_cache(reply._cxx_return.getType.result.types);
 
   if (reply._cxx_return.getType.result.complete_to_minimal.length() != 0) {
-    if (DCPS::DCPS_debug_level > 1) {
+    if (DCPS::DCPS_debug_level >= 4) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyReader::process_get_types_reply - "
                  "received reply with non-empty complete to minimal map\n"));
     }
