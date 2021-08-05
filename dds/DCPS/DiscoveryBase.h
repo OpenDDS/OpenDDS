@@ -1324,7 +1324,7 @@ namespace OpenDDS {
         match_continue(writer, reader);
       }
 
-      void need_minimal_and_or_complete_types(const XTypes::TypeInformation& type_info,
+      void need_minimal_and_or_complete_types(const XTypes::TypeInformation* type_info,
                                               bool& need_minimal,
                                               bool& need_complete) const
       {
