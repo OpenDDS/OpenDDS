@@ -25,12 +25,12 @@ void test_invalid(const std::string& s)
 
 TEST(Name, maintest)
 {
-  std::set<char> digits;
+  std::unordered_set<char> digits;
   for (char c = '0'; c <= '9'; ++c) {
     digits.insert(c);
   }
 
-  std::set<char> abc;
+  std::unordered_set<char> abc;
   for (char c = 'a'; c <= 'c'; ++c) {
     abc.insert(c);
   }

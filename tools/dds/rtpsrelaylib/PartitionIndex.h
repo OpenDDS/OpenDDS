@@ -48,7 +48,7 @@ public:
   }
 
 private:
-  typedef std::map<Atom, NodePtr> ChildrenType;
+  typedef std::unordered_map<Atom, NodePtr, AtomHash> ChildrenType;
   ChildrenType children_;
   GuidSet guids_;
 
