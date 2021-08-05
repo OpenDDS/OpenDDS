@@ -21,8 +21,8 @@ public:
   {
     DDS::Topic_var topic = writer_->get_topic();
     topic_name_ = topic->get_name();
-    log_domain_statistics_.application_participant_guid(repoid_to_guid(config_.application_participant_guid()));
-    publish_domain_statistics_.application_participant_guid(repoid_to_guid(config_.application_participant_guid()));
+    log_domain_statistics_.application_participant_guid(rtps_guid_to_relay_guid(config_.application_participant_guid()));
+    publish_domain_statistics_.application_participant_guid(rtps_guid_to_relay_guid(config_.application_participant_guid()));
   }
 
   void add_local_participant(const OpenDDS::DCPS::MonotonicTimePoint& now)

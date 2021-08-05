@@ -165,7 +165,7 @@ private:
   void write_slots(const std::unordered_set<size_t>& slots_to_write)
   {
     RelayPartitions relay_partitions;
-    relay_partitions.application_participant_guid(repoid_to_guid(config_.application_participant_guid()));
+    relay_partitions.application_participant_guid(rtps_guid_to_relay_guid(config_.application_participant_guid()));
     for (const auto slot : slots_to_write) {
       relay_partitions.slot(static_cast<CORBA::ULong>(slot));
       relay_partitions.partitions().assign(slots_[slot].begin(), slots_[slot].end());

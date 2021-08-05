@@ -766,7 +766,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   RelayAddress relay_address;
-  relay_address.application_participant_guid(repoid_to_guid(config.application_participant_guid()));
+  relay_address.application_participant_guid(rtps_guid_to_relay_guid(config.application_participant_guid()));
   relay_address.name(HSPDP);
   relay_address.address(addr_to_string(spdp_horizontal_addr));
   ret = relay_address_writer->write(relay_address, DDS::HANDLE_NIL);
@@ -802,7 +802,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   RelayInstance relay_instance;
-  relay_instance.application_participant_guid(repoid_to_guid(config.application_participant_guid()));
+  relay_instance.application_participant_guid(rtps_guid_to_relay_guid(config.application_participant_guid()));
   relay_instance.application_participant_user_data().value.length(static_cast<CORBA::ULong>(user_data.length()));
   std::memcpy(relay_instance.application_participant_user_data().value.get_buffer(), user_data.data(), user_data.length());
 

@@ -122,14 +122,14 @@ inline bool operator<(const Duration_t& x, const Duration_t& y)
   return x.nanosec() < y.nanosec();
 }
 
-inline OpenDDS::DCPS::GUID_t guid_to_repoid(const GUID_t& a_guid)
+inline OpenDDS::DCPS::GUID_t relay_guid_to_rtps_guid(const GUID_t& a_guid)
 {
   OpenDDS::DCPS::GUID_t retval;
   std::memcpy(&retval, &a_guid, sizeof(OpenDDS::DCPS::GUID_t));
   return retval;
 }
 
-inline GUID_t repoid_to_guid(const OpenDDS::DCPS::GUID_t& a_guid)
+inline GUID_t rtps_guid_to_relay_guid(const OpenDDS::DCPS::GUID_t& a_guid)
 {
   GUID_t retval;
   std::memcpy(&retval.guidPrefix(), a_guid.guidPrefix, sizeof(a_guid.guidPrefix));

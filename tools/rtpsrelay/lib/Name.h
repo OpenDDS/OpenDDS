@@ -105,7 +105,6 @@ public:
   const_iterator begin() const { return atoms_.begin(); }
   const_iterator end() const { return atoms_.end(); }
 
-  //bool operator<(const Name& other) const { return atoms_ < other.atoms_; }
   bool operator==(const Name& other) const
   {
     return is_pattern_ == other.is_pattern_ &&

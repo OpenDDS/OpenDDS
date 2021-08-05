@@ -250,7 +250,7 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
       const auto after = guid_addr_set_map_.size();
       if (before != after) {
         relay_stats_reporter_.local_active_participants(after, now);
-        *guid_addr_set_map_[src_guid].select_stats_reporter(remote_address.port) = ParticipantStatisticsReporter(repoid_to_guid(src_guid), handler.name());
+        *guid_addr_set_map_[src_guid].select_stats_reporter(remote_address.port) = ParticipantStatisticsReporter(rtps_guid_to_relay_guid(src_guid), handler.name());
       }
 
       const GuidAddr ga(src_guid, remote_address);
@@ -792,7 +792,7 @@ void HorizontalHandler::enqueue_message(const ACE_INET_Addr& addr,
   }
   auto& tg = relay_header.to_guids();
   for (const auto& g : to_guids) {
-    tg.push_back(repoid_to_guid(g));
+    tg.push_back(rtps_guid_to_relay_guid(g));
   }
 
   size_t size = 0;
@@ -837,7 +837,7 @@ CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr& from,
 
   if (!relay_header.to_guids().empty()) {
     for (const auto& guid : relay_header.to_guids()) {
-      const auto p = proxy.find(guid_to_repoid(guid));
+      const auto p = proxy.find(relay_guid_to_rtps_guid(guid));
       if (p != proxy.end()) {
         for (const auto& addr : *p->second.select_addr_set(port())) {
           vertical_handler_->venqueue_message(addr.first.addr, *p->second.select_stats_reporter(port()), msg, now);

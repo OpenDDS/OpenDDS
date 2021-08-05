@@ -21,8 +21,8 @@ public:
   {
     DDS::Topic_var topic = writer_->get_topic();
     topic_name_ = topic->get_name();
-    log_relay_statistics_.application_participant_guid(repoid_to_guid(config.application_participant_guid()));
-    publish_relay_statistics_.application_participant_guid(repoid_to_guid(config.application_participant_guid()));
+    log_relay_statistics_.application_participant_guid(rtps_guid_to_relay_guid(config.application_participant_guid()));
+    publish_relay_statistics_.application_participant_guid(rtps_guid_to_relay_guid(config.application_participant_guid()));
   }
 
   void input_message(size_t byte_count,
