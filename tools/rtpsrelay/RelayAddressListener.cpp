@@ -38,14 +38,14 @@ void RelayAddressListener::on_data_available(DDS::DataReader_ptr reader)
     switch (info.instance_state) {
     case DDS::ALIVE_INSTANCE_STATE:
       if (info.valid_data) {
-        relay_partition_table_.insert(guid_to_repoid(data.application_participant_guid()),
+        relay_partition_table_.insert(relay_guid_to_rtps_guid(data.application_participant_guid()),
                                       data.name(),
                                       ACE_INET_Addr(data.address().c_str()));
       }
       break;
     case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
     case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
-      relay_partition_table_.remove(guid_to_repoid(data.application_participant_guid()),
+      relay_partition_table_.remove(relay_guid_to_rtps_guid(data.application_participant_guid()),
                                     data.name());
       break;
     }
