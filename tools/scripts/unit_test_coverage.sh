@@ -75,14 +75,17 @@ do
     done
 
     # Collect data.
-    lcov --capture --directory . --output-file coverage.info --no-external &&
-    lcov --extract coverage.info --output-file coverage.info "*${unit_name}.*" &&
-    if [ -e coverage-total.info ]
-    then
-        lcov --add-tracefile coverage.info --add-tracefile coverage-total.info --output-file coverage-total.info
-    else
-        mv coverage.info coverage-total.info
-    fi
+    rm -f coverage.info
+    { lcov --capture --directory . --output-file coverage.info --no-external &&
+          lcov --extract coverage.info --output-file coverage.info "*${unit_name}.*" &&
+          [ -s coverage.info ] &&
+          if [ -e coverage-total.info ]
+          then
+              lcov --add-tracefile coverage.info --add-tracefile coverage-total.info --output-file coverage-total.info
+          else
+              mv coverage.info coverage-total.info
+          fi ;
+    } || true
 done
 
 lcov --remove coverage-total.info --output-file coverage-total.info '*/tests/unit-tests/*'
