@@ -1037,16 +1037,18 @@ SubscriberImpl::coherent_change_received (RepoId&         publisher_id,
                                           DataReaderImpl* reader,
                                           Coherent_State& group_state)
 {
-  ACE_GUARD(ACE_Recursive_Thread_Mutex,
-            guard,
-            this->si_lock_);
-
+  DataReaderSet localdrs;
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex,
+              guard,
+              this->si_lock_);
+     localdrs = datareader_set_;
+  }
   // Verify if all readers complete the coherent changes. The result
   // is either COMPLETED or REJECTED.
   group_state = COMPLETED;
-  DataReaderSet::const_iterator endIter = datareader_set_.end();
-  for (DataReaderSet::const_iterator iter = datareader_set_.begin();
-       iter != endIter; ++iter) {
+  for (DataReaderSet::const_iterator iter = localdrs.begin();
+       iter != localdrs.end(); ++iter) {
 
     Coherent_State state = COMPLETED;
     (*iter)->coherent_change_received (publisher_id, state);
@@ -1060,8 +1062,8 @@ SubscriberImpl::coherent_change_received (RepoId&         publisher_id,
   }
 
   PublicationId writerId = GUID_UNKNOWN;
-  for (DataReaderSet::const_iterator iter = datareader_set_.begin();
-       iter != endIter; ++iter) {
+  for (DataReaderSet::const_iterator iter = localdrs.begin();
+       iter != localdrs.end(); ++iter) {
     if (group_state == COMPLETED) {
       (*iter)->accept_coherent (writerId, publisher_id);
     }
@@ -1071,8 +1073,8 @@ SubscriberImpl::coherent_change_received (RepoId&         publisher_id,
   }
 
   if (group_state == COMPLETED) {
-    for (DataReaderSet::const_iterator iter = datareader_set_.begin();
-         iter != endIter; ++iter) {
+    for (DataReaderSet::const_iterator iter = localdrs.begin();
+         iter != localdrs.end(); ++iter) {
       (*iter)->coherent_changes_completed (reader);
       (*iter)->reset_coherent_info (writerId, publisher_id);
     }
