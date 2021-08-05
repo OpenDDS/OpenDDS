@@ -15,7 +15,7 @@
 
 namespace RtpsRelay {
 
-typedef std::unordered_set<std::string> StringSet;
+typedef std::set<std::string> StringSet;
 
 inline std::string addr_to_string(const ACE_INET_Addr& a_addr)
 {
