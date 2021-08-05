@@ -15,7 +15,7 @@
 
 namespace RtpsRelay {
 
-typedef std::unordered_set<std::string> StringSet;
+typedef std::set<std::string> StringSet;
 
 inline std::string guid_to_string(const OpenDDS::DCPS::GUID_t& a_guid)
 {
