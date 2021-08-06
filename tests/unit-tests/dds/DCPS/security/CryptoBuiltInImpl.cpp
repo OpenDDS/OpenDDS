@@ -227,7 +227,7 @@ protected:
   DDS::Security::SharedSecretHandle_var secret_handle_;
 };
 
-TEST(dds_DCPS_security_CryptoBuiltInImpl, NullInputHandles)
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoKeyFactoryFixture, NullInputHandles)
 {
   DDS::Security::CryptoKeyFactory_var test_class = new CryptoBuiltInImpl;
   DDS::Security::IdentityHandle part_id_handle = 1;
