@@ -270,6 +270,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
       info->waiting_for_end_historic_samples_ = true;
     }
 
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x:canceling sweeper\n",this->get_instance_handle()));
     remove_association_sweeper_->cancel_timer(writer_id);
 
     this->statistics_.insert(
@@ -505,6 +506,7 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
         WriterMapType::iterator it = this->writers_.find(writer_id);
         if (it != this->writers_.end() &&
             it->second->active()) {
+              ACE_DEBUG((LM_DEBUG, "%N:%l:%t:%x: scheduling sweeper\n",this->get_instance_handle()));
           remove_association_sweeper_->schedule_timer(it->second, notify_lost);
         } else {
           push_back(non_active_writers, writer_id);
@@ -543,6 +545,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
   DBG_ENTRY_LVL("DataReaderImpl", "remove_associations_i", 6);
 
   if (writers.length() == 0) {
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: return due to 0 writers\n", this->get_instance_handle()));
     return;
   }
 
@@ -558,9 +561,10 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
         writers.length()));
   }
   DDS::InstanceHandleSeq handles;
-
+  check_deadlock('p');
   ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want lock\n", this->get_instance_handle()));
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took lock\n", this->get_instance_handle()));
 
   // This is used to hold the list of writers which were actually
   // removed, which is a proper subset of the writers which were
@@ -577,6 +581,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
   {
     ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want write lock for writing\n", this->get_instance_handle()));
     ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took write lock\n", this->get_instance_handle()));
 
     wr_len = writers.length();
 
@@ -587,6 +592,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
 
       if (it != this->writers_.end()) {
         removed_writers.insert(*it);
+        ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x:canceling sweeper\n",this->get_instance_handle()));
         end_historic_sweeper_->cancel_timer(it->second);
         remove_association_sweeper_->cancel_timer(it->second);
       }
@@ -608,15 +614,15 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
 
   }
 
-  ACE_DEBUG((LM_DEBUG,"%N:%l:%t: removed writers length = %d\n",removed_writers.size()));
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: removed writers length = %d\n",this->get_instance_handle(),removed_writers.size()));
   for (WriterMapType::iterator it = removed_writers.begin(); it != removed_writers.end(); ++it) {
     it->second->removed();
-    ACE_DEBUG((LM_DEBUG,"%N:%l:%t: removed a writer\n"));
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: removed a writer\n",this->get_instance_handle()));
   }
 
-  ACE_DEBUG((LM_DEBUG,"%N:%l:%t: clearing removed writers\n"));
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: clearing removed writers\n",this->get_instance_handle()));
   removed_writers.clear();
-  ACE_DEBUG((LM_DEBUG,"%N:%l:%t: done with removed writers\n"));
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: done with removed writers\n",this->get_instance_handle()));
 
   wr_len = updated_writers.length();
 
@@ -634,14 +640,14 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
       id_to_handle_map_.erase(updated_writers[i]);
     }
   }
-  ACE_DEBUG((LM_DEBUG,"%N:%l:%t: done with is bit (1)\n"));
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: done with is bit (1)\n",this->get_instance_handle()));
 
   for (CORBA::ULong i = 0; i < updated_writers.length(); ++i) {
     {
       this->disassociate(updated_writers[i]);
     }
   }
-  ACE_DEBUG((LM_DEBUG,"%N:%l:%t: done with updated writers\n"));
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: done with updated writers\n",this->get_instance_handle()));
 
   // Mirror the add_associations SUBSCRIPTION_MATCHED_STATUS processing.
   if (!this->is_bit_) {
@@ -675,7 +681,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
       notify_status_condition();
     }
   }
-  ACE_DEBUG((LM_DEBUG,"%N:%l:%t: done with is bit (2)\n"));
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: done with is bit (2)\n"));
 
   // If this remove_association is invoked when the InfoRepo
   // detects a lost writer then make a callback to notify
@@ -700,6 +706,7 @@ DataReaderImpl::remove_all_associations()
   int size;
 
   ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want lock\n", this->get_instance_handle()));
+  check_deadlock('p');
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
 
   {
@@ -1092,23 +1099,33 @@ DataReaderImpl::get_requested_incompatible_qos_status(
 bool DataReaderImpl::check_deadlock(char lid) {
   bool deadlocked = false;
   const ACE_TCHAR * name;
+  int depth = 0;
   switch (lid) {
     case 'i' : {
       name = ACE_TEXT("instances_lock_");
       ACE_Guard<ACE_Recursive_Thread_Mutex> guard(this->instances_lock_, false);
       deadlocked = !guard.locked();
+      if (!deadlocked) {
+        depth = this->instances_lock_.get_nesting_level();
+      }
       break;
     }
     case 'p' : {
       name = ACE_TEXT("publication_handle_lock_");
       ACE_Guard<ACE_Recursive_Thread_Mutex> guard(this->publication_handle_lock_, false);
       deadlocked = !guard.locked();
+      if (!deadlocked) {
+        depth = this->instances_lock_.get_nesting_level();
+      }
       break;
     }
     case 's' : {
       name = ACE_TEXT("sample_lock_");
       ACE_Guard<ACE_Recursive_Thread_Mutex> guard(this->sample_lock_, false);
       deadlocked = !guard.locked();
+      if (!deadlocked) {
+        depth = this->instances_lock_.get_nesting_level();
+      }
       break;
     }
     default:
@@ -1117,6 +1134,8 @@ bool DataReaderImpl::check_deadlock(char lid) {
   }
   if (deadlocked) {
     ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: DEADLOCK detected on %s\n", this->get_instance_handle(), name));
+  } else if (depth > 1) {
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: lock recursion to depth %d on %s\n", this->get_instance_handle(), depth, name));
   }
   return deadlocked;
 }
@@ -2233,6 +2252,7 @@ DataReaderImpl::writer_removed(WriterInfo& info)
   }
 
   liveliness_changed_status_.last_publication_handle = info.handle_;
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: writer removed, calling liveliness update\n", this->get_instance_handle()));
   instances_liveliness_update(info.writer_id_);
 
   if (liveliness_changed) {
@@ -2378,7 +2398,7 @@ DataReaderImpl::writer_became_dead(WriterInfo& info)
         liveliness_changed_status_.not_alive_count));
     return;
   }
-
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: writer died, calling liveliness update\n", this->get_instance_handle()));
   instances_liveliness_update(info.writer_id_);
 
   // Call listener only when there are liveliness status changes.
@@ -2391,21 +2411,28 @@ DataReaderImpl::writer_became_dead(WriterInfo& info)
 void
 DataReaderImpl::instances_liveliness_update(const PublicationId& writer)
 {
-  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want sample lock AND instances lock\n", this->get_instance_handle()));
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
-  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took sample lock\n", this->get_instance_handle()));
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
-  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took instances lock, instance map size = %d\n", this->get_instance_handle(),instances_.size()));
-  for (SubscriptionInstanceMapType::iterator iter = instances_.begin(), next = iter;
-       iter != instances_.end(); iter = next) {
-    ++next;
-    if (iter->second->instance_state_->writes_instance(writer)) {
-      set_instance_state(iter->first, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, SystemTimePoint::now(), writer);
+  InstanceSet localinsts;
+  {
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: want instances lock\n", this->get_instance_handle()));
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: took instances lock, instance map size = %d\n", this->get_instance_handle(),instances_.size()));
+    if (instances_.size() == 0) {
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing instances lock\n", this->get_instance_handle()));
+      return;
     }
-    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: iterating over instance map\n", this->get_instance_handle()));
+    for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
+         iter != instances_.end(); ++iter) {
+      if (iter->second->instance_state_->writes_instance(writer)) {
+        localinsts.insert(iter->first);
+      }
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: iterating over instance map\n", this->get_instance_handle()));
+    }
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing instances lock\n", this->get_instance_handle()));
   }
-  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: released BOTH lock\n", this->get_instance_handle()));
-
+  for (InstanceSet::iterator iter = localinsts.begin(); iter != localinsts.end(); ++iter) {
+    set_instance_state(*iter, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, SystemTimePoint::now(), writer);
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: iterating over local instance set\n", this->get_instance_handle()));
+  }
 }
 
 void

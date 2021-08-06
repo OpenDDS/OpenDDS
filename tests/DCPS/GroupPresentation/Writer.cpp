@@ -65,7 +65,7 @@ Writer::svc()
 
     DDS::ConditionSeq conditions;
     DDS::PublicationMatchedStatus matches = {0, 0, 0, 0, 0};
-
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t: waiting for subscribers\n"));
     do {
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
@@ -95,6 +95,7 @@ Writer::svc()
                    ACE_TEXT(" ERROR: _narrow failed!\n")));
         ACE_OS::exit(-1);
     }
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t: begin coherent changes\n"));
 
     ::DDS::ReturnCode_t ret = this->publisher_->begin_coherent_changes ();
     if (ret != ::DDS::RETCODE_OK) {
@@ -112,6 +113,7 @@ Writer::svc()
     message.from       = CORBA::string_dup("Comic Book Guy");
     message.subject    = CORBA::string_dup("Review");
     message.text       = CORBA::string_dup("Worst. Movie. Ever.");
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t: writing %d messages\n", num_messages));
 
     for (int i = 0; i < num_messages; i++) {
       message.count      = this->next_count ();
@@ -129,6 +131,7 @@ Writer::svc()
 
       ACE_OS::sleep (1);
     }
+    ACE_DEBUG((LM_DEBUG,"%N:%l:%t: ending coherent changes\n"));
 
     ret = this->publisher_->end_coherent_changes ();
     if (ret != ::DDS::RETCODE_OK) {

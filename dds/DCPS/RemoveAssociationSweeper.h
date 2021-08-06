@@ -206,7 +206,7 @@ int RemoveAssociationSweeper<T>::handle_timeout(
                OPENDDS_STRING(sub_repo).c_str(),
                OPENDDS_STRING(pub_repo).c_str()));
   }
-
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t: handle timeout calling remove_publication\n"));
   reader->remove_publication(pub_id);
   return 0;
 }

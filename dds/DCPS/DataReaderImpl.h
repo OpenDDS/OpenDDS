@@ -219,7 +219,7 @@ public:
   friend class SubscriberImpl;
 
   typedef OPENDDS_MAP(DDS::InstanceHandle_t, SubscriptionInstance_rch) SubscriptionInstanceMapType;
-
+  typedef OPENDDS_SET(DDS::InstanceHandle_t) InstanceSet;
   /// Type of collection of statistics for writers to this reader.
   typedef OPENDDS_MAP_CMP(PublicationId, WriterStats, GUID_tKeyLessThan) StatsMapType;
 

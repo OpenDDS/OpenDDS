@@ -949,9 +949,11 @@ namespace OpenDDS {
       get_key_value(*data, instance);
       ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: calling store_instance_data\n", this->get_instance_handle()));
       store_instance_data(move(data), header, si, just_registered, filtered);
+      ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: calling notify read conditions if 0 == %d\n", this->get_instance_handle(), filtered));
       if (!filtered)
       {
         notify_read_conditions();
+        ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: notify read conditions complete\n", this->get_instance_handle()));
       }
     }
     ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing sample lock\n", this->get_instance_handle()));
