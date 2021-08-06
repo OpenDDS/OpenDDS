@@ -18,7 +18,7 @@ enum TryConstructKind {
 class MemberDescriptor {
 public:
   MemberDescriptor()
-    : id(0), index(0), try_construct_kind(DISCARD), is_key(false), is_optional(false), is_must_understand(false), is_shared(false), is_default_label(false)
+    : id(MEMBER_ID_INVALID), index(0), try_construct_kind(DISCARD), is_key(false), is_optional(false), is_must_understand(false), is_shared(false), is_default_label(false)
   {}
 
   bool equals(const MemberDescriptor& other);
@@ -50,7 +50,7 @@ inline bool operator==(const UnionCaseLabelSeq& lhs, const UnionCaseLabelSeq& rh
   return false;
 }
 
-bool test_equality(const MemberDescriptor& lhs, const MemberDescriptor& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
+bool test_equality_i(const MemberDescriptor& lhs, const MemberDescriptor& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
 
 } // namespace XTypes
 } // namespace OpenDDS

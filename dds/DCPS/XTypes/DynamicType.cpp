@@ -7,6 +7,15 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
+DynamicType::DynamicType()
+  : descriptor_(new TypeDescriptor())
+{}
+
+DynamicType::~DynamicType()
+{
+  delete descriptor_;
+}
+
 void DynamicType::get_descriptor(TypeDescriptor& descriptor) const
 {
   descriptor = *descriptor_;
@@ -73,10 +82,10 @@ DDS::ReturnCode_t DynamicType::get_member_by_index(DynamicTypeMember_rch& member
 
 bool DynamicType::equals(const DynamicType& other)
 {
-  return test_equality_i(*this, other);
+  return test_equality(*this, other);
 }
 
-bool test_equality_i(const DynamicType& lhs, const DynamicType& rhs)
+bool test_equality(const DynamicType& lhs, const DynamicType& rhs)
 {
 //7.5.2.8.4 Operation: equals
 //Two types shall be considered equal if and only if all of their respective properties, as identified
@@ -84,10 +93,10 @@ bool test_equality_i(const DynamicType& lhs, const DynamicType& rhs)
 
 //Note: We are comparing the TypeDescriptor even though the spec seems to say not to
   DynamicTypePtrPairSeen dt_ptr_pair;
-  return test_equality(lhs, rhs, dt_ptr_pair);
+  return test_equality_i(lhs, rhs, dt_ptr_pair);
 }
 
-bool test_equality(const DynamicType& lhs, const DynamicType& rhs, DynamicTypePtrPairSeen& dt_ptr_pair)
+bool test_equality_i(const DynamicType& lhs, const DynamicType& rhs, DynamicTypePtrPairSeen& dt_ptr_pair)
 {
   //check pair seen
   DynamicTypePtrPair this_pair = std::make_pair(&lhs, &rhs);
@@ -95,21 +104,21 @@ bool test_equality(const DynamicType& lhs, const DynamicType& rhs, DynamicTypePt
   if (have_seen == dt_ptr_pair.end()) {
     dt_ptr_pair.insert(this_pair);
     return
-      test_equality(*lhs.descriptor_, *rhs.descriptor_, dt_ptr_pair) &&
-      test_equality(lhs.member_by_name, rhs.member_by_name, dt_ptr_pair) &&
-      test_equality(lhs.member_by_id, rhs.member_by_id, dt_ptr_pair);
+      test_equality_i(*lhs.descriptor_, *rhs.descriptor_, dt_ptr_pair) &&
+      test_equality_i(lhs.member_by_name, rhs.member_by_name, dt_ptr_pair) &&
+      test_equality_i(lhs.member_by_id, rhs.member_by_id, dt_ptr_pair);
   }
   return true;
 }
 
-bool test_equality(const DynamicType_rch& lhs, const DynamicType_rch& rhs, DynamicTypePtrPairSeen& dt_ptr_pair)
+bool test_equality_i(const DynamicType_rch& lhs, const DynamicType_rch& rhs, DynamicTypePtrPairSeen& dt_ptr_pair)
 {
   if (lhs.in() == rhs.in()) {
     return true;
   } else if (lhs.in() == 0 || rhs.in() == 0) {
     return false;
   } else {
-    return test_equality(*lhs.in(), *rhs.in(), dt_ptr_pair);
+    return test_equality_i(*lhs.in(), *rhs.in(), dt_ptr_pair);
   }
 }
 

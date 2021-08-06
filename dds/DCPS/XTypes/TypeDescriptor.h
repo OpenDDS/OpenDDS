@@ -47,7 +47,7 @@ inline bool operator==(const LBoundSeq& lhs, const LBoundSeq& rhs)
   return false;
 }
 
-bool test_equality(const TypeDescriptor& lhs, const TypeDescriptor& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
+bool test_equality_i(const TypeDescriptor& lhs, const TypeDescriptor& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
 
 } // namespace XTypes
 } // namespace OpenDDS

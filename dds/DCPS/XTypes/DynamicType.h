@@ -16,6 +16,9 @@ class TypeDescriptor;
 class OpenDDS_Dcps_Export DynamicType : public OpenDDS::DCPS::RcObject
 {
 public:
+  DynamicType();
+  ~DynamicType();
+
   void get_descriptor(TypeDescriptor& descriptor) const;
   DCPS::String get_name() const;
   TypeKind get_kind() const;
@@ -35,9 +38,9 @@ public:
 
 typedef OpenDDS::DCPS::RcHandle<DynamicType> DynamicType_rch;
 
-OpenDDS_Dcps_Export bool test_equality_i(const DynamicType& lhs, const DynamicType& rhs);
-bool test_equality(const DynamicType& lhs, const DynamicType& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
-bool test_equality(const DynamicType_rch& lhs, const DynamicType_rch& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
+OpenDDS_Dcps_Export bool test_equality(const DynamicType& lhs, const DynamicType& rhs);
+bool test_equality_i(const DynamicType& lhs, const DynamicType& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
+bool test_equality_i(const DynamicType_rch& lhs, const DynamicType_rch& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
 
 } // namespace XTypes
 } // namespace OpenDDS

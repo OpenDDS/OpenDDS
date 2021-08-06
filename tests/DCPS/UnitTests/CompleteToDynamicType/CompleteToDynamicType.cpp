@@ -29,8 +29,8 @@ void test_conversion(const XTypes::DynamicType_rch& expected_dynamic_type)
   EXPECT_TRUE(pos != com_map.end());
   const XTypes::TypeObject& com_to = pos->second;
   XTypes::DynamicType_rch converted_dt(new XTypes::DynamicType, OpenDDS::DCPS::keep_count());
-  tls->complete_to_dynamic_i(converted_dt, com_to.complete);
-  EXPECT_TRUE(test_equality_i(*expected_dynamic_type.in(), *converted_dt.in()));
+  tls->complete_to_dynamic(converted_dt, com_to.complete);
+  EXPECT_TRUE(test_equality(*expected_dynamic_type.in(), *converted_dt.in()));
 }
 
 TEST(CompleteToDynamicType, MyInnerStruct)
@@ -41,20 +41,20 @@ TEST(CompleteToDynamicType, MyInnerStruct)
   td->name = "::MyMod::MyInnerStruct";
   td->bound.length(0);
   td->extensibility_kind = XTypes::MUTABLE;
-  td->is_nested = 0;
+  td->is_nested = false;
   expected_dt->descriptor_ = td;
   XTypes::DynamicTypeMember_rch expected_dtm(new XTypes::DynamicTypeMember, OpenDDS::DCPS::keep_count());
   XTypes::MemberDescriptor* md(new XTypes::MemberDescriptor);
   expected_dtm->descriptor_ = md;
   md->name = "l";
-  md->id = 0;
-  md->index = 0;
+  md->id = false;
+  md->index = false;
   md->try_construct_kind = XTypes::DISCARD;
   XTypes::DynamicType_rch long_expected_dt(new XTypes::DynamicType, OpenDDS::DCPS::keep_count());
   XTypes::TypeDescriptor* long_td(new XTypes::TypeDescriptor);
   long_td->kind = XTypes::TK_INT32;
   long_td->bound.length(0);
-  long_td->name = "long";
+  long_td->name = "Int32";
   long_expected_dt->descriptor_ = long_td;
   md->type = long_expected_dt;
   expected_dt->member_by_index.insert(expected_dt->member_by_index.end(), expected_dtm);
@@ -99,7 +99,7 @@ TEST(CompleteToDynamicType, MyOuterStruct)
   XTypes::TypeDescriptor* long_td(new XTypes::TypeDescriptor);
   long_td->kind = XTypes::TK_INT32;
   long_td->bound.length(0);
-  long_td->name = "long";
+  long_td->name = "Int32";
   long_expected_inner_dt->descriptor_ = long_td;
   inner_md->type = long_expected_inner_dt;
   outer_md->type = expected_inner_dt;
@@ -156,7 +156,7 @@ TEST(CompleteToDynamicType, MyAliasStruct)
   XTypes::TypeDescriptor* long_td(new XTypes::TypeDescriptor);
   long_td->kind = XTypes::TK_INT32;
   long_td->bound.length(0);
-  long_td->name = "long";
+  long_td->name = "Int32";
   long_expected_inner_dt->descriptor_ = long_td;
   inner_md->type = long_expected_inner_dt;
   outer_md->type = expected_inner_dt;
@@ -167,6 +167,9 @@ TEST(CompleteToDynamicType, MyAliasStruct)
   expected_outer_dt->member_by_index.insert(expected_outer_dt->member_by_index.end(), expected_outer_dtm);
   expected_outer_dt->member_by_id.insert(expected_outer_dt->member_by_id.end(), std::make_pair(outer_md->id , expected_outer_dtm));
   expected_outer_dt->member_by_name.insert(expected_outer_dt->member_by_name.end(), std::make_pair(outer_md->name , expected_outer_dtm));
+  expected_alias_dt->member_by_index = expected_outer_dt->member_by_index;
+  expected_alias_dt->member_by_id = expected_outer_dt->member_by_id;
+  expected_alias_dt->member_by_name = expected_outer_dt->member_by_name;
   test_conversion<DCPS::MyMod_MyAliasStruct_xtag>(expected_alias_dt);
 }
 
@@ -184,7 +187,7 @@ TEST(CompleteToDynamicType, PrimitiveKind)
   XTypes::MemberDescriptor* first_md(new XTypes::MemberDescriptor);
   first_expected_dtm->descriptor_ = first_md;
   first_md->name = "TK_INT32";
-  first_md->id = 0;
+  first_md->id = UINT32_MAX;
   first_md->index = 0;
   first_md->is_default_label = 1;
   first_md->try_construct_kind = XTypes::DISCARD;
@@ -192,16 +195,14 @@ TEST(CompleteToDynamicType, PrimitiveKind)
   XTypes::MemberDescriptor* second_md(new XTypes::MemberDescriptor);
   second_expected_dtm->descriptor_ = second_md;
   second_md->name = "TK_CHAR8";
-  second_md->id = 0;
+  second_md->id = UINT32_MAX;
   second_md->index = 1;
   second_md->try_construct_kind = XTypes::DISCARD;
   first_md->type = expected_dt;
   second_md->type = expected_dt;
   expected_dt->member_by_index.insert(expected_dt->member_by_index.end(), first_expected_dtm);
-  expected_dt->member_by_id.insert(expected_dt->member_by_id.end(), std::make_pair(first_md->id , first_expected_dtm));
   expected_dt->member_by_name.insert(expected_dt->member_by_name.end(), std::make_pair(first_md->name , first_expected_dtm));
   expected_dt->member_by_index.insert(expected_dt->member_by_index.end(), second_expected_dtm);
-  expected_dt->member_by_id.insert(expected_dt->member_by_id.end(), std::make_pair(second_md->id , second_expected_dtm));
   expected_dt->member_by_name.insert(expected_dt->member_by_name.end(), std::make_pair(second_md->name , second_expected_dtm));
   test_conversion<DCPS::MyMod_PrimitiveKind_xtag>(expected_dt);
 }
@@ -249,7 +250,7 @@ TEST(CompleteToDynamicType, MyUnion)
   long_td->kind = XTypes::TK_INT32;
   long_td->bound.length(0);
   long_td->extensibility_kind = XTypes::FINAL;
-  long_td->name = "long";
+  long_td->name = "Int32";
   long_expected_dt->descriptor_ = long_td;
   long_md->type = long_expected_dt;
   XTypes::DynamicType_rch char_expected_dt(new XTypes::DynamicType, OpenDDS::DCPS::keep_count());
@@ -257,7 +258,7 @@ TEST(CompleteToDynamicType, MyUnion)
   char_td->kind = XTypes::TK_CHAR8;
   char_td->bound.length(0);
   char_td->extensibility_kind = XTypes::FINAL;
-  char_td->name = "char";
+  char_td->name = "Char8";
   char_expected_dt->descriptor_ = char_td;
   char_md->type = char_expected_dt;
   XTypes::DynamicType_rch short_expected_dt(new XTypes::DynamicType, OpenDDS::DCPS::keep_count());
@@ -265,7 +266,7 @@ TEST(CompleteToDynamicType, MyUnion)
   short_td->kind = XTypes::TK_INT16;
   short_td->bound.length(0);
   short_td->extensibility_kind = XTypes::FINAL;
-  short_td->name = "short";
+  short_td->name = "Int16";
   short_expected_dt->descriptor_ = short_td;
   short_md->type = short_expected_dt;
   XTypes::DynamicType_rch expected_enum_dt(new XTypes::DynamicType, OpenDDS::DCPS::keep_count());
@@ -280,7 +281,7 @@ TEST(CompleteToDynamicType, MyUnion)
   XTypes::MemberDescriptor* first_md(new XTypes::MemberDescriptor);
   first_expected_dtm->descriptor_ = first_md;
   first_md->name = "TK_INT32";
-  first_md->id = 0;
+  first_md->id = UINT32_MAX;
   first_md->index = 0;
   first_md->is_default_label = 1;
   first_md->try_construct_kind = XTypes::DISCARD;
@@ -288,7 +289,7 @@ TEST(CompleteToDynamicType, MyUnion)
   XTypes::MemberDescriptor* second_md(new XTypes::MemberDescriptor);
   second_expected_dtm->descriptor_ = second_md;
   second_md->name = "TK_CHAR8";
-  second_md->id = 0;
+  second_md->id = UINT32_MAX;
   second_md->index = 1;
   second_md->try_construct_kind = XTypes::DISCARD;
   first_md->type = expected_enum_dt;
@@ -298,10 +299,8 @@ TEST(CompleteToDynamicType, MyUnion)
   short_md->type = short_expected_dt;
   expected_union_dt->descriptor_->discriminator_type = expected_enum_dt;
   expected_enum_dt->member_by_index.insert(expected_enum_dt->member_by_index.end(), first_expected_dtm);
-  expected_enum_dt->member_by_id.insert(expected_enum_dt->member_by_id.end(), std::make_pair(first_md->id , first_expected_dtm));
   expected_enum_dt->member_by_name.insert(expected_enum_dt->member_by_name.end(), std::make_pair(first_md->name , first_expected_dtm));
   expected_enum_dt->member_by_index.insert(expected_enum_dt->member_by_index.end(), second_expected_dtm);
-  expected_enum_dt->member_by_id.insert(expected_enum_dt->member_by_id.end(), std::make_pair(second_md->id , second_expected_dtm));
   expected_enum_dt->member_by_name.insert(expected_enum_dt->member_by_name.end(), std::make_pair(second_md->name , second_expected_dtm));
   expected_union_dt->member_by_index.insert(expected_union_dt->member_by_index.end(), long_expected_dtm);
   expected_union_dt->member_by_id.insert(expected_union_dt->member_by_id.end(), std::make_pair(long_md->id , long_expected_dtm));
@@ -327,7 +326,7 @@ TEST(CompleteToDynamicType, MyInnerArray)
   XTypes::DynamicType_rch inner_expected_dt(new XTypes::DynamicType, OpenDDS::DCPS::keep_count());
   XTypes::TypeDescriptor* inner_td(new XTypes::TypeDescriptor);
   inner_td->kind = XTypes::TK_ARRAY;
-  inner_td->name = "plain array";
+  inner_td->name = "ArraySmall";
   inner_td->bound.length(1);
   inner_td->bound[0] = 2;
   inner_td->extensibility_kind = XTypes::FINAL;
@@ -336,7 +335,7 @@ TEST(CompleteToDynamicType, MyInnerArray)
   XTypes::TypeDescriptor* long_td(new XTypes::TypeDescriptor);
   long_td->kind = XTypes::TK_INT32;
   long_td->bound.length(0);
-  long_td->name = "long";
+  long_td->name = "Int32";
   long_td->extensibility_kind = XTypes::FINAL;
   long_expected_dt->descriptor_ = long_td;
   inner_td->element_type = long_expected_dt;
@@ -356,7 +355,7 @@ TEST(CompleteToDynamicType, MyOuterArray)
   XTypes::DynamicType_rch outer_expected_dt(new XTypes::DynamicType, OpenDDS::DCPS::keep_count());
   XTypes::TypeDescriptor* outer_td(new XTypes::TypeDescriptor);
   outer_td->kind = XTypes::TK_ARRAY;
-  outer_td->name = "plain array";
+  outer_td->name = "ArraySmall";
   outer_td->bound.length(2);
   outer_td->bound[0] = 3;
   outer_td->bound[1] = 2;
@@ -372,7 +371,7 @@ TEST(CompleteToDynamicType, MyOuterArray)
   XTypes::DynamicType_rch inner_expected_dt(new XTypes::DynamicType, OpenDDS::DCPS::keep_count());
   XTypes::TypeDescriptor* inner_td(new XTypes::TypeDescriptor);
   inner_td->kind = XTypes::TK_ARRAY;
-  inner_td->name = "plain array";
+  inner_td->name = "ArraySmall";
   inner_td->bound.length(1);
   inner_td->bound[0] = 2;
   inner_td->extensibility_kind = XTypes::FINAL;
@@ -381,7 +380,7 @@ TEST(CompleteToDynamicType, MyOuterArray)
   XTypes::TypeDescriptor* long_td(new XTypes::TypeDescriptor);
   long_td->kind = XTypes::TK_INT32;
   long_td->bound.length(0);
-  long_td->name = "long";
+  long_td->name = "Int32";
   long_td->extensibility_kind = XTypes::FINAL;
   long_expected_dt->descriptor_ = long_td;
 
@@ -404,7 +403,7 @@ TEST(CompleteToDynamicType, MySeq)
   XTypes::DynamicType_rch expected_dt(new XTypes::DynamicType, OpenDDS::DCPS::keep_count());
   XTypes::TypeDescriptor* td(new XTypes::TypeDescriptor);
   td->kind = XTypes::TK_SEQUENCE;
-  td->name = "plain sequence";
+  td->name = "SequenceLarge";
   td->bound.length(1);
   td->bound[0] = UINT32_MAX;
   td->extensibility_kind = XTypes::FINAL;
@@ -413,7 +412,7 @@ TEST(CompleteToDynamicType, MySeq)
   XTypes::TypeDescriptor* long_td(new XTypes::TypeDescriptor);
   long_td->kind = XTypes::TK_INT32;
   long_td->bound.length(0);
-  long_td->name = "long";
+  long_td->name = "Int32";
   long_td->extensibility_kind = XTypes::FINAL;
   long_expected_dt->descriptor_ = long_td;
   td->element_type = long_expected_dt;
@@ -448,7 +447,7 @@ TEST(CompleteToDynamicType, MyAnonStruct)
   XTypes::DynamicType_rch sequence_expected_dt(new XTypes::DynamicType, OpenDDS::DCPS::keep_count());
   XTypes::TypeDescriptor* sequence_td(new XTypes::TypeDescriptor);
   sequence_td->kind = XTypes::TK_SEQUENCE;
-  sequence_td->name = "plain sequence";
+  sequence_td->name = "SequenceSmall";
   sequence_td->bound.length(1);
   sequence_td->bound[0] = 5;
   sequence_td->extensibility_kind = XTypes::FINAL;
@@ -456,7 +455,7 @@ TEST(CompleteToDynamicType, MyAnonStruct)
   XTypes::DynamicType_rch array_expected_dt(new XTypes::DynamicType, OpenDDS::DCPS::keep_count());
   XTypes::TypeDescriptor* array_td(new XTypes::TypeDescriptor);
   array_td->kind = XTypes::TK_ARRAY;
-  array_td->name = "plain array";
+  array_td->name = "ArraySmall";
   array_td->bound.length(1);
   array_td->bound[0] = 3;
   array_td->extensibility_kind = XTypes::FINAL;
@@ -465,7 +464,7 @@ TEST(CompleteToDynamicType, MyAnonStruct)
   XTypes::TypeDescriptor* long_td(new XTypes::TypeDescriptor);
   long_td->kind = XTypes::TK_INT32;
   long_td->bound.length(0);
-  long_td->name = "long";
+  long_td->name = "Int32";
   long_td->extensibility_kind = XTypes::FINAL;
   long_expected_dt->descriptor_ = long_td;
   sequence_td->element_type = long_expected_dt;

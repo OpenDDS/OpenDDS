@@ -8,15 +8,15 @@ namespace XTypes {
 bool MemberDescriptor::equals(const MemberDescriptor& other)
 {
   DynamicTypePtrPairSeen dt_ptr_pair;
-  return test_equality(*this, other, dt_ptr_pair);
+  return test_equality_i(*this, other, dt_ptr_pair);
 }
 
-bool test_equality(const MemberDescriptor& lhs, const MemberDescriptor& rhs, DynamicTypePtrPairSeen& dt_ptr_pair)
+bool test_equality_i(const MemberDescriptor& lhs, const MemberDescriptor& rhs, DynamicTypePtrPairSeen& dt_ptr_pair)
 {
   return
     lhs.name == rhs.name &&
     lhs.id == rhs.id &&
-    test_equality(lhs.type, rhs.type, dt_ptr_pair) &&
+    test_equality_i(lhs.type, rhs.type, dt_ptr_pair) &&
     lhs.default_value == rhs.default_value &&
     lhs.index == rhs.index &&
     lhs.label == rhs.label &&
