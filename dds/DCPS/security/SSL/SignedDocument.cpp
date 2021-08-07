@@ -178,7 +178,7 @@ public:
     if (!store_ctx_) {
       OPENDDS_SSL_LOG_ERR("X509_STORE_CTX_new failed");
     }
-    if (reader_) {
+    if (!reader_) {
       OPENDDS_SSL_LOG_ERR("BIO_new failed");
     }
   }

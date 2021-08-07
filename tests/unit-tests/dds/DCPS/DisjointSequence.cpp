@@ -993,3 +993,34 @@ TEST(DisjointSequence, maintest)
     EXPECT_TRUE(ir.has(8));
   }
 }
+
+TEST(DisjointSequence_OrderedRanges, insert_out_of_order)
+{
+  typedef DisjointSequence::OrderedRanges<int> IntRanges;
+
+  IntRanges ir;
+  ir.add(1);
+  ir.add(4);
+  ir.add(2);
+  EXPECT_TRUE(ir.has(1, 2));
+  EXPECT_TRUE(!ir.has(3));
+  EXPECT_TRUE(ir.has(4));
+  EXPECT_EQ(ir.size(), 2UL);
+}
+
+TEST(DisjointSequence_OrderedRanges, insert_ranges)
+{
+  typedef DisjointSequence::OrderedRanges<int> IntRanges;
+
+  IntRanges ir;
+  ir.add(1, 2);
+  ir.add(4);
+  ir.add(6, 9);
+  ir.add(13);
+  ir.add(3, 8);
+  ir.add(11, 12);
+  EXPECT_TRUE(ir.has(1, 9));
+  EXPECT_TRUE(!ir.has(10));
+  EXPECT_TRUE(ir.has(11, 13));
+  EXPECT_EQ(ir.size(), 2UL);
+}

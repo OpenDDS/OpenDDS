@@ -5,11 +5,15 @@
 
 #include "XmlUtils.h"
 
+#include <dds/DCPS/debug.h>
+
 #include <ace/OS_NS_strings.h>
+#include <ace/OS_NS_time.h>
 
 #include <xercesc/util/XMLDateTime.hpp>
 #include <xercesc/framework/MemBufInputSource.hpp>
 #include <xercesc/util/PlatformUtils.hpp>
+#include <xercesc/util/XercesVersion.hpp>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -18,16 +22,19 @@ namespace Security {
 namespace XmlUtils {
 
 using DDS::Security::DomainId_t;
+using OpenDDS::DCPS::security_debug;
 
-ParserPtr get_parser(const std::string& xml, const std::string& filename)
+ParserPtr get_parser(const std::string& filename, const std::string& xml)
 {
   try {
     xercesc::XMLPlatformUtils::Initialize();
 
   } catch (const xercesc::XMLException& ex) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: get_parser: "
-      "XMLPlatformUtils::Initialize XMLException: %C\n",
-      to_string(ex).c_str()));
+    if (security_debug.access_error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: get_parser: "
+        "XMLPlatformUtils::Initialize XMLException: %C\n",
+        to_string(ex).c_str()));
+    }
     return ParserPtr();
   }
 
@@ -43,28 +50,36 @@ ParserPtr get_parser(const std::string& xml, const std::string& filename)
     parser->parse(contentbuf);
 
   } catch (const xercesc::XMLException& ex) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: get_parser: "
-      "XMLException while parsing \"%C\": %C\n",
-      filename.c_str(), to_string(ex).c_str()));
+    if (security_debug.access_error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: get_parser: "
+        "XMLException while parsing \"%C\": %C\n",
+        filename.c_str(), to_string(ex).c_str()));
+    }
     return ParserPtr();
 
   } catch (const xercesc::DOMException& ex) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: get_parser: "
-      "DOMException while parsing \"%C\": %C\n",
-      filename.c_str(), to_string(ex).c_str()));
+    if (security_debug.access_error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: get_parser: "
+        "DOMException while parsing \"%C\": %C\n",
+        filename.c_str(), to_string(ex).c_str()));
+    }
     return ParserPtr();
 
   } catch (...) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: get_parser: "
-      "Unexpected exception while parsing \"%C\"",
-      filename.c_str()));
+    if (security_debug.access_error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: get_parser: "
+        "Unexpected exception while parsing \"%C\"",
+        filename.c_str()));
+    }
     return ParserPtr();
   }
 
   if (!parser->getDocument()->getDocumentElement()) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: get_parser: "
-      "XML document \"%C\" is empty\n",
-      filename.c_str()));
+    if (security_debug.access_error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: get_parser: "
+        "XML document \"%C\" is empty\n",
+        filename.c_str()));
+    }
     return ParserPtr();
   }
 
@@ -79,7 +94,7 @@ std::string to_string(const XMLCh* in)
   return s;
 }
 
-bool to_bool(const XMLCh* in, bool& value)
+bool parse_bool(const XMLCh* in, bool& value)
 {
   /*
    * The security spec specifies the XML schema spec's boolean type, but the
@@ -97,26 +112,59 @@ bool to_bool(const XMLCh* in, bool& value)
   return true;
 }
 
-bool to_time(const XMLCh* in, time_t& value)
+bool parse_time(const XMLCh* in, time_t& value)
 {
+  xercesc::XMLDateTime xdt(in);
   try {
-    xercesc::XMLDateTime xdt(in);
     xdt.parseDateTime();
-    value = xdt.getEpoch();
   } catch (const xercesc::XMLException& ex) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: to_time: failed to parse date/time: %C\n",
-      to_string(ex).c_str()));
+    if (security_debug.access_error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: parse_time: failed to parse date/time \"%C\": %C\n",
+        to_string(in).c_str(), to_string(ex).c_str()));
+    }
     return false;
   }
-  return true;
+
+#if _XERCES_VERSION >= 30200
+  value = xdt.getEpoch();
+#else
+  std::tm xdt_tm;
+  xdt_tm.tm_year = xdt.getYear() - 1900;
+  xdt_tm.tm_mon = xdt.getMonth() - 1;
+  xdt_tm.tm_mday = xdt.getDay();
+  xdt_tm.tm_hour = xdt.getHour();
+  xdt_tm.tm_min = xdt.getMinute();
+  xdt_tm.tm_sec = xdt.getSecond();
+  xdt_tm.tm_isdst = 0;
+  value = std::mktime(&xdt_tm);
+  if (value == time_t(-1)) {
+    if (security_debug.access_error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: parse_time: failed to convert to time_t \"%C\"\n",
+        to_string(in).c_str()));
+    }
+    return false;
+  }
+
+  const time_t the_timezone = static_cast<time_t>(ace_timezone());
+  if (the_timezone == 0 && errno == ENOTSUP) {
+    if (security_debug.access_error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: parse_time: ace_timezone not supported\n"));
+    }
+    return false;
+  }
+  value -= the_timezone;
+#endif
+
+  return value;
 }
 
 namespace {
-  bool to_domain_id(const xercesc::DOMNode* node, DomainId_t& value)
+  bool parse_domain_id(const xercesc::DOMNode* node, DomainId_t& value)
   {
     // NOTE: DomainId_t is a signed type, but a domain id actually can't be a negative value.
     unsigned int i = 0;
-    const bool success = xercesc::XMLString::textToBin(node->getTextContent(), i);
+    const bool success = xercesc::XMLString::textToBin(node->getTextContent(), i) &&
+      i <= domain_id_max;
     if (success) {
       value = static_cast<DomainId_t>(i);
     }
@@ -124,7 +172,7 @@ namespace {
   }
 }
 
-bool to_domain_id_set(const xercesc::DOMNode* node, DomainIdSet& domain_id_set)
+bool parse_domain_id_set(const xercesc::DOMNode* node, Security::DomainIdSet& domain_id_set)
 {
   const xercesc::DOMNodeList* const domainIdNodes = node->getChildNodes();
   for (XMLSize_t did = 0, did_len = domainIdNodes->getLength(); did < did_len; ++did) {
@@ -135,62 +183,84 @@ bool to_domain_id_set(const xercesc::DOMNode* node, DomainIdSet& domain_id_set)
     const std::string domainIdNodeName = to_string(domainIdNode->getNodeName());
     if (domainIdNodeName == "id") {
       DomainId_t domain_id;
-      if (!to_domain_id(domainIdNode, domain_id)) {
-        ACE_ERROR((LM_ERROR,
-          "(%P|%t) ERROR: to_domain_id_set: Invalid domain ID \"%C\" in id\n",
-          to_string(domainIdNode).c_str()));
+      if (!parse_domain_id(domainIdNode, domain_id)) {
+        if (security_debug.access_error) {
+          ACE_ERROR((LM_ERROR,
+            "(%P|%t) ERROR: parse_domain_id_set: Invalid domain ID \"%C\" in id\n",
+            to_string(domainIdNode).c_str()));
+        }
         return false;
       }
-      domain_id_set.insert(domain_id);
+      domain_id_set.add(domain_id);
 
     } else if (domainIdNodeName == "id_range") {
-      DomainId_t min_value = 0;
-      DomainId_t max_value = 0;
       const xercesc::DOMNodeList* const domRangeIdNodes = domainIdNode->getChildNodes();
-      for (XMLSize_t drid = 0, drid_len = domRangeIdNodes->getLength(); drid < drid_len; ++drid) {
+      DomainId_t min_value = domain_id_min;
+      bool has_min = false;
+      DomainId_t max_value = domain_id_max;
+      bool has_max = false;
+      const XMLSize_t drid_len = domRangeIdNodes->getLength();
+      for (XMLSize_t drid = 0; drid < drid_len; ++drid) {
         const xercesc::DOMNode* const domRangeIdNode = domRangeIdNodes->item(drid);
         if (!is_element(domRangeIdNode)) {
           continue;
         }
-        const std::string domRangeIdNodeName = to_string(domainIdNode->getNodeName());
-        if ("min" == domRangeIdNodeName) {
-          if (!to_domain_id(domRangeIdNode, min_value)) {
-            ACE_ERROR((LM_ERROR,
-              "(%P|%t) ERROR: to_domain_id_set: Invalid domain ID \"%C\" in min_value\n",
-              to_string(domainIdNode).c_str()));
+        const std::string domRangeIdNodeName = to_string(domRangeIdNode->getNodeName());
+        if ("min" == domRangeIdNodeName && !has_min) {
+          if (!parse_domain_id(domRangeIdNode, min_value)) {
+            if (security_debug.access_error) {
+              ACE_ERROR((LM_ERROR,
+                "(%P|%t) ERROR: parse_domain_id_set: Invalid domain ID \"%C\" in min_value\n",
+                to_string(domRangeIdNode).c_str()));
+            }
             return false;
           }
+          has_min = true;
 
-        } else if ("max" == domRangeIdNodeName) {
-          if (!to_domain_id(domRangeIdNode, max_value)) {
-            ACE_ERROR((LM_ERROR,
-              "(%P|%t) ERROR: to_domain_id_set: Invalid domain ID \"%C\" in max_value\n",
-              to_string(domainIdNode).c_str()));
+        } else if ("max" == domRangeIdNodeName && !has_max) {
+          if (!parse_domain_id(domRangeIdNode, max_value)) {
+            if (security_debug.access_error) {
+              ACE_ERROR((LM_ERROR,
+                "(%P|%t) ERROR: parse_domain_id_set: Invalid domain ID \"%C\" in max_value\n",
+                to_string(domRangeIdNode).c_str()));
+            }
             return false;
           }
-
-          if (min_value > max_value || min_value == 0) {
-            ACE_ERROR((LM_ERROR,
-              "(%P|%t) ERROR: to_domain_id_set: Permission XML Domain Range invalid.\n"));
+          if (min_value > max_value) {
+            if (security_debug.access_error) {
+              ACE_ERROR((LM_ERROR,
+                "(%P|%t) ERROR: parse_domain_id_set: Permission XML Domain Range invalid.\n"));
+            }
             return false;
           }
+          has_max = true;
 
-          for (DomainId_t i = min_value; i <= max_value; ++i) {
-            domain_id_set.insert(i);
+        } else {
+          if (security_debug.access_error) {
+            ACE_ERROR((LM_ERROR,
+              "(%P|%t) ERROR: parse_domain_id_set: Invalid tag \"%C\" in id_range\n",
+              domRangeIdNodeName.c_str()));
           }
+          return false;
         }
       }
 
+      domain_id_set.add(min_value, max_value);
+
     } else {
-      ACE_ERROR((LM_ERROR,
-        "(%P|%t) ERROR: to_domain_id_set: Invalid tag \"%C\" in domain ID set: \"%C\"\n",
-        domainIdNodeName.c_str(), to_string(domainIdNode).c_str()));
+      if (security_debug.access_error) {
+        ACE_ERROR((LM_ERROR,
+          "(%P|%t) ERROR: parse_domain_id_set: Invalid tag \"%C\" in domain ID set\n",
+          domainIdNodeName.c_str()));
+      }
       return false;
     }
   }
 
   if (domain_id_set.empty()) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: to_domain_id_set: empty domain ID set\n"));
+    if (security_debug.access_error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: parse_domain_id_set: empty domain ID set\n"));
+    }
     return false;
   }
 

@@ -343,7 +343,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   for (gov_iter giter = begin; giter != end; ++giter) {
 
-    if (giter->domain_list.count(domain_id)) {
+    if (giter->domains.has(domain_id)) {
       Governance::TopicAccessRules::iterator tr_iter;
 
       for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
@@ -392,7 +392,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   for (gov_iter giter = begin; giter != end; ++giter) {
 
-    if (giter->domain_list.count(domain_id)) {
+    if (giter->domains.has(domain_id)) {
       Governance::TopicAccessRules::iterator tr_iter;
 
       for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
@@ -455,7 +455,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   for (gov_iter giter = begin; giter != end; ++giter) {
 
-    if (giter->domain_list.count(domain_id)) {
+    if (giter->domains.has(domain_id)) {
       Governance::TopicAccessRules::iterator tr_iter;
 
       for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
@@ -523,7 +523,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   for (gov_iter giter = begin; giter != end; ++giter) {
 
-    if (giter->domain_list.count(domain_to_find)) {
+    if (giter->domains.has(domain_to_find)) {
       Governance::TopicAccessRules::iterator tr_iter;
 
       for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
@@ -550,7 +550,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   // Iterate over allow / deny rules
   for (perm_topic_rules_iter ptr_iter = grant->rules.begin(); ptr_iter != grant->rules.end(); ++ptr_iter) {
 
-    if (ptr_iter->domains.count(domain_to_find)) {
+    if (ptr_iter->domains.has(domain_to_find)) {
 
       perm_topic_actions_iter tpsr_iter;
       for (tpsr_iter = ptr_iter->actions.begin(); tpsr_iter != ptr_iter->actions.end(); ++tpsr_iter) {
@@ -642,7 +642,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   gov_iter end = ac_iter->second.gov->access_rules().end();
 
   for (gov_iter giter = begin; giter != end; ++giter) {
-    if (giter->domain_list.count(domain_id) && !giter->domain_attrs.is_access_protected) {
+    if (giter->domains.has(domain_id) && !giter->domain_attrs.is_access_protected) {
       return true;
     }
   }
@@ -690,7 +690,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   for (perm_topic_rules_iter ptr_iter = grant->rules.begin(); ptr_iter != grant->rules.end(); ++ptr_iter) {
-    if (ptr_iter->domains.count(domain_id) && ptr_iter->ad_type == Permissions::ALLOW) {
+    if (ptr_iter->domains.has(domain_id) && ptr_iter->ad_type == Permissions::ALLOW) {
       return true;
     }
   }
@@ -729,7 +729,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   for (gov_iter giter = begin; giter != end; ++giter) {
 
-    if (giter->domain_list.count(domain_id)) {
+    if (giter->domains.has(domain_id)) {
       Governance::TopicAccessRules::iterator tr_iter;
 
       for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
@@ -789,7 +789,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   for (gov_iter giter = begin; giter != end; ++giter) {
 
-    if (giter->domain_list.count(domain_id)) {
+    if (giter->domains.has(domain_id)) {
       Governance::TopicAccessRules::iterator tr_iter;
 
       for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
@@ -890,7 +890,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   for (gov_iter giter = begin; giter != end; ++giter) {
 
-    if (giter->domain_list.count(domain_id)) {
+    if (giter->domains.has(domain_id)) {
       Governance::TopicAccessRules::iterator tr_iter;
 
       for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
@@ -916,7 +916,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   bool found_deny = false;
   for (perm_topic_rules_iter ptr_iter = grant->rules.begin(); ptr_iter != grant->rules.end(); ++ptr_iter) {
 
-    if (ptr_iter->domains.count(domain_id)) {
+    if (ptr_iter->domains.has(domain_id)) {
 
       // Iterate over pub / sub rules
       perm_topic_actions_iter tpsr_iter;
@@ -1164,7 +1164,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   for (gov_iter giter = begin; giter != end; ++giter) {
 
-    if (giter->domain_list.count(ac_iter->second.domain_id)) {
+    if (giter->domains.has(ac_iter->second.domain_id)) {
       attributes = giter->domain_attrs;
       return true;
     }
@@ -1205,7 +1205,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   for (gov_iter giter = begin; giter != end; ++giter) {
 
-    if (giter->domain_list.count(piter->second.domain_id)) {
+    if (giter->domains.has(piter->second.domain_id)) {
       Governance::TopicAccessRules::iterator tr_iter;
 
       for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
@@ -1362,24 +1362,18 @@ CORBA::Boolean AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::Per
                                                             ::DDS::Security::EndpointSecurityAttributes & attributes,
                                                             ::DDS::Security::SecurityException & ex)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_mutex_, 1);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_mutex_, false);
 
-  ACPermsMap::iterator ac_iter = local_ac_perms_.find(permissions_handle);
-
+  const ACPermsMap::iterator ac_iter = local_ac_perms_.find(permissions_handle);
   if (ac_iter == local_ac_perms_.end()) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::get_datawriter_sec_attributes: No matching permissions handle present");
     return false;
   }
 
-  ::DDS::Security::DomainId_t domain_to_find = ac_iter->second.domain_id;
-
-  gov_iter begin = ac_iter->second.gov->access_rules().begin();
-  gov_iter end = ac_iter->second.gov->access_rules().end();
-
+  const gov_iter begin = ac_iter->second.gov->access_rules().begin();
+  const gov_iter end = ac_iter->second.gov->access_rules().end();
   for (gov_iter giter = begin; giter != end; ++giter) {
-    size_t d = giter->domain_list.count(domain_to_find);
-
-    if (d > 0) {
+    if (giter->domains.has(ac_iter->second.domain_id)) {
       if (std::strcmp(topic_name, "DCPSParticipantVolatileMessageSecure") == 0) {
         attributes.base.is_write_protected = false;
         attributes.base.is_read_protected = false;
@@ -1510,7 +1504,7 @@ bool AccessControlBuiltInImpl::search_permissions(
   DDS::Security::SecurityException& ex)
 {
   for (Permissions::Rules::const_iterator rit = grant.rules.begin(); rit != grant.rules.end(); ++rit) {
-    if (rit->domains.count(domain_id)) {
+    if (rit->domains.has(domain_id)) {
       for (Permissions::Actions::const_iterator ait = rit->actions.begin(); ait != rit->actions.end(); ++ait) {
         if (ait->ps_type == pub_or_sub &&
             ait->topic_matches(topic_name) &&

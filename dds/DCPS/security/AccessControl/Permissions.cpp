@@ -21,7 +21,7 @@ int Permissions::load(const SSL::SignedDocument& doc)
 
   std::string xml;
   doc.get_original_minus_smime(xml);
-  ParserPtr parser(get_parser(xml, doc.filename()));
+  ParserPtr parser(get_parser(doc.filename(), xml));
   if (!parser) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Permissions::load: get_parser failed\n"));
     return -1;
@@ -58,13 +58,13 @@ int Permissions::load(const SSL::SignedDocument& doc)
           const xercesc::DOMNode* validityNode = validityNodes->item(vn);
           const XStr v_tag = validityNode->getNodeName();
           if (v_tag == ACE_TEXT("not_before")) {
-            if (!to_time(validityNode->getTextContent(), grant->validity.not_before)) {
+            if (!parse_time(validityNode->getTextContent(), grant->validity.not_before)) {
               ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Permissions::load: "
                 "invalid datetime in not_before\n"));
               return -1;
             }
           } else if (v_tag == ACE_TEXT("not_after")) {
-            if (!to_time(validityNode->getTextContent(), grant->validity.not_after)) {
+            if (!parse_time(validityNode->getTextContent(), grant->validity.not_after)) {
               ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Permissions::load: "
                 "invalid datetime in not_after\n"));
               return -1;
@@ -113,13 +113,13 @@ int Permissions::load(const SSL::SignedDocument& doc)
           const xercesc::DOMNode* const adNodeChild = adNodeChildren->item(anc);
           const XStr anc_tag = adNodeChild->getNodeName();
           if (anc_tag == ACE_TEXT("domains")) {
-            if (!to_domain_id_set(adNodeChild, rule.domains)) {
+            if (!parse_domain_id_set(adNodeChild, rule.domains)) {
               ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Permissions::load: "
-                "failed to load domain set\n"));
+                "failed to parse domain set\n"));
               return -1;
             }
 
-          } else if (anc_tag == ACE_TEXT("publish") || anc_tag == ACE_TEXT("subscribe")) {   // pub sub nodes
+          } else if (anc_tag == ACE_TEXT("publish") || anc_tag == ACE_TEXT("subscribe")) {
             Action action;
 
             action.ps_type = (anc_tag == ACE_TEXT("publish")) ? PUBLISH : SUBSCRIBE;

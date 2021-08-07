@@ -35,10 +35,10 @@ namespace {
   bool get_bool_tag_value(const SSL::SignedDocument& doc, const xercesc::DOMNode* node,
     const ACE_TCHAR* name, bool& value)
   {
-    if (!to_bool(node, value)) {
+    if (!parse_bool(node, value)) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Governance::load: "
         "\"%s\" value, \"%C\", in \"%C\" is not a valid boolean value\n",
-        name, to_string(node).c_str(), doc.filename()));
+        name, to_string(node).c_str(), doc.filename().c_str()));
       return false;
     }
 
@@ -51,8 +51,8 @@ namespace {
     const xercesc::DOMNodeList* const nodes = parent->getElementsByTagName(XStr(name));
     if (nodes->getLength() != 1) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Governance::load: "
-        "expected 1 boolean value \"%s\" in parent element in \"%C\", found %b\n",
-        name, doc.filename(), nodes->getLength()));
+        "expected 1 boolean value \"%s\" in parent element in \"%C\", found %B\n",
+        name, doc.filename().c_str(), nodes->getLength()));
       return false;
     }
 
@@ -66,8 +66,8 @@ namespace {
     const xercesc::DOMNodeList* const nodes = parent->getElementsByTagName(XStr(name));
     if (nodes->getLength() != 1) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Governance::load: "
-        "expected 1 proctection kind value named \"%s\" in parent element in \"%C\", found %b\n",
-        name, doc.filename(), nodes->getLength()));
+        "expected 1 proctection kind value named \"%s\" in parent element in \"%C\", found %B\n",
+        name, doc.filename().c_str(), nodes->getLength()));
       return false;
     }
 
@@ -89,7 +89,7 @@ namespace {
       attributes |= oa_attr;
     } else {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Governance::load: invalid %s, \"%C\", in \"%s\"\n",
-        name, value.c_str(), doc.filename()));
+        name, value.c_str(), doc.filename().c_str()));
       return false;
     }
 
@@ -101,7 +101,7 @@ int Governance::load(const SSL::SignedDocument& doc)
 {
   std::string xml;
   doc.get_original_minus_smime(xml);
-  ParserPtr parser(get_parser(xml, doc.filename()));
+  ParserPtr parser(get_parser(doc.filename(), xml));
   if (!parser) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Governance::load: get_parser failed\n"));
     return -1;
@@ -122,7 +122,7 @@ int Governance::load(const SSL::SignedDocument& doc)
       const xercesc::DOMNode* const ruleNode = ruleNodes->item(rn);
       const XStr dn_tag = ruleNode->getNodeName();
       if (ACE_TEXT("domains") == dn_tag) {
-        if (!to_domain_id_set(ruleNode, domain_rule.domain_list)) {
+        if (!parse_domain_id_set(ruleNode, domain_rule.domains)) {
           ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Governance::load: "
             "failed to process domain ids in \"%C\"\n",
             doc.filename().c_str()));

@@ -1,11 +1,9 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
 
 #include "debug.h"
 
@@ -47,6 +45,7 @@ SecurityDebug::set_all_flags_to(bool value)
   new_entity_error = value;
   new_entity_warn = value;
   cleanup_error = value;
+  access_error = value;
   access_warn = value;
   bookkeeping = value;
   showkeys = value;
@@ -56,11 +55,11 @@ SecurityDebug::set_all_flags_to(bool value)
 void
 SecurityDebug::parse_flags(const ACE_TCHAR* flags)
 {
-  OPENDDS_STRING s(ACE_TEXT_ALWAYS_CHAR(flags));
-  const OPENDDS_STRING delim(",");
+  String s(ACE_TEXT_ALWAYS_CHAR(flags));
+  const String delim(",");
   while (true) {
     const size_t pos = s.find(delim);
-    const OPENDDS_STRING flag = s.substr(0, pos);
+    const String flag = s.substr(0, pos);
     if (flag.length()) {
       if (flag == "all") {
         set_all_flags_to(true);
@@ -80,6 +79,8 @@ SecurityDebug::parse_flags(const ACE_TCHAR* flags)
         new_entity_warn = true;
       } else if (flag == "cleanup_error") {
         cleanup_error = true;
+      } else if (flag == "access_error") {
+        access_error = true;
       } else if (flag == "access_warn") {
         access_warn = true;
       } else if (flag == "bookkeeping") {
@@ -89,11 +90,11 @@ SecurityDebug::parse_flags(const ACE_TCHAR* flags)
       } else if (flag == "chlookup") {
         chlookup = true;
       } else {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) SecurityDebug::parse_flags: ")
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SecurityDebug::parse_flags: ")
           ACE_TEXT("Unknown Security Debug Category: \"%C\"\n"), flag.c_str()));
       }
     }
-    if (pos == OPENDDS_STRING::npos) {
+    if (pos == String::npos) {
       break;
     }
     s.erase(0, pos + delim.length());
@@ -103,7 +104,8 @@ SecurityDebug::parse_flags(const ACE_TCHAR* flags)
 void
 SecurityDebug::set_debug_level(unsigned level)
 {
-  access_warn = new_entity_error = cleanup_error = level >= 1;
+  access_error = new_entity_error = cleanup_error = level >= 1;
+  access_warn = level >= 2;
   auth_warn = encdec_error = level >= 3;
   new_entity_warn = level >= 3;
   auth_debug = encdec_warn = bookkeeping = level >= 4;

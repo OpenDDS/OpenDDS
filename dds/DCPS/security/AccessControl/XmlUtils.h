@@ -6,12 +6,12 @@
 #ifndef OPENDDS_DCPS_SECURITY_ACCESS_CONTROL_XML_UTILS_H
 #define OPENDDS_DCPS_SECURITY_ACCESS_CONTROL_XML_UTILS_H
 
+#include "DomainIdSet.h"
+
 #include <dds/Versioned_Namespace.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
 #include <dds/DCPS/unique_ptr.h>
 #include <dds/DCPS/security/OpenDDS_Security_Export.h>
-
-#include <dds/DdsSecurityCoreC.h>
 
 #include <ace/XML_Utils/XercesString.h>
 
@@ -20,7 +20,7 @@
 #include <xercesc/parsers/XercesDOMParser.hpp>
 
 #include <string>
-#include <set>
+#include <ctime>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -31,23 +31,23 @@ namespace XmlUtils {
 typedef DCPS::unique_ptr<xercesc::XercesDOMParser> ParserPtr;
 
 OpenDDS_Security_Export
-ParserPtr get_parser(const std::string& xml, const std::string& filename);
+ParserPtr get_parser(const std::string& filename, const std::string& xml);
 
 OpenDDS_Security_Export
 std::string to_string(const XMLCh* in);
 
 OpenDDS_Security_Export
-bool to_bool(const XMLCh* in, bool& value);
+bool parse_bool(const XMLCh* in, bool& value);
 
 OpenDDS_Security_Export
-bool to_time(const XMLCh* in, time_t& value);
+bool parse_time(const XMLCh* in, time_t& value);
 
 inline std::string to_string(const xercesc::XMLException& ex)
 {
   std::string msg = to_string(ex.getMessage());
   const std::string filename = ex.getSrcFile();
   if (filename.size()) {
-    msg = filename + ":" + DCPS::to_dds_string(ex.getSrcLine());
+    msg = filename + ":" + DCPS::to_dds_string(ex.getSrcLine()) + ": " + msg;
   }
   return msg;
 }
@@ -62,24 +62,22 @@ inline std::string to_string(const xercesc::DOMNode* node)
   return to_string(node->getTextContent());
 }
 
-inline bool to_bool(const xercesc::DOMNode* node, bool& value)
+inline bool parse_bool(const xercesc::DOMNode* node, bool& value)
 {
-  return to_bool(node->getTextContent(), value);
+  return parse_bool(node->getTextContent(), value);
 }
 
-inline bool to_time(const xercesc::DOMNode* node, time_t& value)
+inline bool parse_time(const xercesc::DOMNode* node, time_t& value)
 {
-  return to_time(node->getTextContent(), value);
+  return parse_time(node->getTextContent(), value);
 }
-
-typedef std::set<DDS::Security::DomainId_t> DomainIdSet;
 
 /**
  * Convert a node that's a DomainIdSet in the permissions and governance XML
  * Schema in the security spec to a std::set of domain ids.
  */
 OpenDDS_Security_Export
-bool to_domain_id_set(const xercesc::DOMNode* node, DomainIdSet& domain_id_set);
+bool parse_domain_id_set(const xercesc::DOMNode* node, Security::DomainIdSet& domain_id_set);
 
 inline bool is_element(const xercesc::DOMNode* node)
 {
