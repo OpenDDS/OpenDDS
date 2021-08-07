@@ -271,7 +271,7 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
 
 void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  GuidAddrSet::Proxy proxy(*this);
 
   while (!expiration_guid_addr_queue_.empty() && expiration_guid_addr_queue_.front().first <= now) {
     const OpenDDS::DCPS::MonotonicTimePoint expiration = expiration_guid_addr_queue_.front().first;
@@ -311,9 +311,9 @@ void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& n
       guid_addr_set_map_.erase(ga.guid);
       pending_.erase(ga.guid);
       relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
-      spdp_vertical_handler_->purge(ga.guid);
-      sedp_vertical_handler_->purge(ga.guid);
-      data_vertical_handler_->purge(ga.guid);
+      spdp_vertical_handler_->purge(proxy, ga.guid);
+      sedp_vertical_handler_->purge(proxy, ga.guid);
+      data_vertical_handler_->purge(proxy, ga.guid);
       if (config_.log_activity()) {
         ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C removed total=%B/%B pending=%B/%B\n"), guid_to_string(ga.guid).c_str(), guid_addr_set_map_.size(), config_.static_limit(), pending_.size(), config_.max_pending()));
       }
@@ -362,7 +362,7 @@ bool GuidAddrSet::ignore(const OpenDDS::DCPS::GUID_t& guid,
 
 void GuidAddrSet::remove(const OpenDDS::DCPS::GUID_t& guid)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  GuidAddrSet::Proxy proxy(*this);
 
   const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
@@ -374,9 +374,9 @@ void GuidAddrSet::remove(const OpenDDS::DCPS::GUID_t& guid)
   guid_addr_set_map_.erase(guid);
   pending_.erase(guid);
   relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
-  spdp_vertical_handler_->purge(guid);
-  sedp_vertical_handler_->purge(guid);
-  data_vertical_handler_->purge(guid);
+  spdp_vertical_handler_->purge(proxy, guid);
+  sedp_vertical_handler_->purge(proxy, guid);
+  data_vertical_handler_->purge(proxy, guid);
 
   if (config_.log_activity()) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::remove %C removed total=%B/%B pending=%B/%B\n"), guid_to_string(guid).c_str(), guid_addr_set_map_.size(), config_.static_limit(), pending_.size(), config_.max_pending()));
@@ -937,7 +937,8 @@ bool SpdpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
   return true;
 }
 
-void SpdpHandler::purge(const OpenDDS::DCPS::GUID_t& guid)
+void SpdpHandler::purge(GuidAddrSet::Proxy& /*proxy*/,
+                        const OpenDDS::DCPS::GUID_t& guid)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, spdp_messages_mutex_);
   const auto pos = spdp_messages_.find(guid);
@@ -970,11 +971,12 @@ int SpdpHandler::handle_exception(ACE_HANDLE /*fd*/)
   GuidSet guids;
   guid_partition_table_.lookup(guids, q);
 
+  GuidAddrSet::Proxy proxy(guid_addr_set_);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, spdp_messages_mutex_, 0);
+
   for (const auto& guid : guids) {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, spdp_messages_mutex_, 0);
     const auto pos = spdp_messages_.find(guid);
     if (pos != spdp_messages_.end()) {
-      GuidAddrSet::Proxy proxy(guid_addr_set_);
       send(proxy, guid, q, GuidSet(), false, pos->second, now);
     }
   }
