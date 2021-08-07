@@ -1,3 +1,5 @@
+#ifdef OPENDDS_SECURITY
+
 #include <dds/DCPS/security/AccessControl/XmlUtils.h>
 #include <dds/DCPS/debug.h>
 
@@ -291,3 +293,5 @@ TEST(XmlUtils, parse_domain_id_set)
     EXPECT_TRUE(value.has(99999));
   }
 }
+
+#endif // OPENDDS_SECURITY
