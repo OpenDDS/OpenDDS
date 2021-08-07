@@ -73,61 +73,7 @@ struct AddrSetStats {
   }
 };
 
-class RelayHandler : public ACE_Event_Handler {
-public:
-  int open(const ACE_INET_Addr& address);
-
-  const std::string& name() const { return name_; }
-
-  Port port() const { return port_; }
-
-  virtual void purge(const OpenDDS::DCPS::GUID_t& /*guid*/) {}
-
-protected:
-  RelayHandler(const Config& config,
-               const std::string& name,
-               Port port,
-               ACE_Reactor* reactor,
-               HandlerStatisticsReporter& stats_reporter);
-
-  int handle_input(ACE_HANDLE handle) override;
-  int handle_output(ACE_HANDLE handle) override;
-
-  void enqueue_message(const ACE_INET_Addr& addr,
-                       const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
-                       const OpenDDS::DCPS::MonotonicTimePoint& now);
-
-  ACE_HANDLE get_handle() const override { return socket_.get_handle(); }
-
-  virtual CORBA::ULong process_message(const ACE_INET_Addr& remote,
-                                       const OpenDDS::DCPS::MonotonicTimePoint& now,
-                                       const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) = 0;
-
-private:
-  ACE_SOCK_Dgram socket_;
-  struct Element {
-    ACE_INET_Addr address;
-    OpenDDS::DCPS::Message_Block_Shared_Ptr message_block;
-    OpenDDS::DCPS::MonotonicTimePoint timestamp;
-
-    Element(const ACE_INET_Addr& a_address,
-            OpenDDS::DCPS::Message_Block_Shared_Ptr a_message_block,
-            const OpenDDS::DCPS::MonotonicTimePoint& a_timestamp)
-      : address(a_address)
-      , message_block(a_message_block)
-      , timestamp(a_timestamp)
-    {}
-  };
-  typedef std::queue<Element> OutgoingType;
-  OutgoingType outgoing_;
-  mutable ACE_Thread_Mutex outgoing_mutex_;
-
-protected:
-  const Config& config_;
-  const std::string name_;
-  const Port port_;
-  HandlerStatisticsReporter& stats_reporter_;
-};
+class RelayHandler;
 
 class GuidAddrSet {
 public:
@@ -232,6 +178,63 @@ private:
   typedef std::list<std::pair<OpenDDS::DCPS::MonotonicTimePoint, OpenDDS::DCPS::GUID_t> > PendingExpirationQueue;
   PendingExpirationQueue pending_expiration_queue_;
   mutable ACE_Thread_Mutex mutex_;
+};
+
+class RelayHandler : public ACE_Event_Handler {
+public:
+  int open(const ACE_INET_Addr& address);
+
+  const std::string& name() const { return name_; }
+
+  Port port() const { return port_; }
+
+  virtual void purge(GuidAddrSet::Proxy& /*proxy*/,
+                     const OpenDDS::DCPS::GUID_t& /*guid*/) {}
+
+protected:
+  RelayHandler(const Config& config,
+               const std::string& name,
+               Port port,
+               ACE_Reactor* reactor,
+               HandlerStatisticsReporter& stats_reporter);
+
+  int handle_input(ACE_HANDLE handle) override;
+  int handle_output(ACE_HANDLE handle) override;
+
+  void enqueue_message(const ACE_INET_Addr& addr,
+                       const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
+                       const OpenDDS::DCPS::MonotonicTimePoint& now);
+
+  ACE_HANDLE get_handle() const override { return socket_.get_handle(); }
+
+  virtual CORBA::ULong process_message(const ACE_INET_Addr& remote,
+                                       const OpenDDS::DCPS::MonotonicTimePoint& now,
+                                       const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) = 0;
+
+private:
+  ACE_SOCK_Dgram socket_;
+  struct Element {
+    ACE_INET_Addr address;
+    OpenDDS::DCPS::Message_Block_Shared_Ptr message_block;
+    OpenDDS::DCPS::MonotonicTimePoint timestamp;
+
+    Element(const ACE_INET_Addr& a_address,
+            OpenDDS::DCPS::Message_Block_Shared_Ptr a_message_block,
+            const OpenDDS::DCPS::MonotonicTimePoint& a_timestamp)
+      : address(a_address)
+      , message_block(a_message_block)
+      , timestamp(a_timestamp)
+    {}
+  };
+  typedef std::queue<Element> OutgoingType;
+  OutgoingType outgoing_;
+  mutable ACE_Thread_Mutex outgoing_mutex_;
+
+protected:
+  const Config& config_;
+  const std::string name_;
+  const Port port_;
+  HandlerStatisticsReporter& stats_reporter_;
 };
 
 class HorizontalHandler;
@@ -379,7 +382,8 @@ private:
                             const OpenDDS::DCPS::MonotonicTimePoint& now,
                             CORBA::ULong& sent) override;
 
-  void purge(const OpenDDS::DCPS::GUID_t& guid) override;
+  void purge(GuidAddrSet::Proxy& proxy,
+             const OpenDDS::DCPS::GUID_t& guid) override;
   int handle_exception(ACE_HANDLE fd) override;
 };
 
