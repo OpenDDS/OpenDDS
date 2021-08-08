@@ -2429,10 +2429,12 @@ DataReaderImpl::instances_liveliness_update(const PublicationId& writer)
     }
     ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: releasing instances lock\n", this->get_instance_handle()));
   }
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: instance liveliness update start\n", this->get_instance_handle()));
   for (InstanceSet::iterator iter = localinsts.begin(); iter != localinsts.end(); ++iter) {
     set_instance_state(*iter, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, SystemTimePoint::now(), writer);
     ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: iterating over local instance set\n", this->get_instance_handle()));
   }
+  ACE_DEBUG((LM_DEBUG,"%N:%l:%t:%x: instance liveliness update done\n", this->get_instance_handle()));
 }
 
 void

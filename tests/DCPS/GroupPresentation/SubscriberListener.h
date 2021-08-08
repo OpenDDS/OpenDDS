@@ -54,10 +54,6 @@ public:
     DDS::DataReader_ptr reader,
     const DDS::SampleLostStatus& status);
 
-  bool verify_result () const {
-    return verify_result_;
-  }
-
 private:
 
   void verify (const Messenger::Message& msg,
