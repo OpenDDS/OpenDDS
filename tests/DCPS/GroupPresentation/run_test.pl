@@ -3,12 +3,12 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
     if 0;
 
 # -*- perl -*-
-
 use Env (DDS_ROOT);
 use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
+use DateTime;
 
 $status = 0;
 $debuglevel = 0;
@@ -58,18 +58,21 @@ $Publisher->Spawn ();
 
 print $Subscriber->CommandLine() . "\n";
 $Subscriber->Spawn ();
-
+print "starting wait at " . DateTime->now . "\n";
+$SubscriberResult = $Subscriber->Wait(30);
+print "ending wait at " . DateTime->now . " res = $SubscriberResult\n";
+if ($SubscriberResult != 0) {
+    my $gdbcommand = "sudo gdb subscriber `ps -a | grep subscriber | awk '{print $1}'` < gdbinput.txt > gdboutput.txt";
+    print "executing command $gdbcommand\n";
+    system($gdbcommand);
+    print STDERR "ERROR: subscriber returned $SubscriberResult\n";
+    $status = 1;
+}
+$Subscriber->Kill();
 
 $PublisherResult = $Publisher->WaitKill (60);
 if ($PublisherResult != 0) {
     print STDERR "ERROR: publisher returned $PublisherResult\n";
-    $status = 1;
-}
-
-
-$SubscriberResult = $Subscriber->WaitKill (60);
-if ($SubscriberResult != 0) {
-    print STDERR "ERROR: subscriber returned $SubscriberResult\n";
     $status = 1;
 }
 

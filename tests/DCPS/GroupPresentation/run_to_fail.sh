@@ -19,7 +19,14 @@ while [ "$res" == "test PASSED." ]; do
   grep -q "failed to find" test.out
   if [ $? == 0 ]; then
     echo premature disconnect detected on run $count
-    break;
+    cp test.out pd$count.out
+  fi
+  grep -q "map size = 2" test.out
+  if [ $? == 0 ]; then
+    echo instance map size = 2 detected on run $count
+    if [ `ls ms2-*.out 2> /dev/null | wc -l` == 0 ]; then
+      cp test.out ms2-$count.out;
+    fi
   fi
   if [ `expr $count % 10` == 0 ]; then
     echo passed $count runs
