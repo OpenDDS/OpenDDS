@@ -114,34 +114,30 @@ bool parse_bool(const XMLCh* in, bool& value)
   return true;
 }
 
-#define XMLDATETIME_HAS_GETEPOCH _XERCES_VERSION >= 30200
-#if !XMLDATETIME_HAS_GETEPOCH
+#if _XERCES_VERSION >= 30200
+#  define XMLDATETIME_HAS_GETEPOCH 1
+#else
+#  define XMLDATETIME_HAS_GETEPOCH 0
 namespace {
   bool parse_time_string(
     const std::string& whole, size_t& pos, std::string& value, size_t width = std::string::npos)
   {
     const bool to_end = width == std::string::npos;
-    if (pos >= whole.size() || (!to_end && pos + width > whole.size())) {
+    const size_t size = whole.size();
+    if (pos >= size || (!to_end && pos + width > size)) {
       return false;
     }
-    try {
-      value = whole.substr(pos, width);
-    } catch (const std::out_of_range& e) {
-      return false;
-    }
-    if (!to_end) {
-      pos += width;
-    }
+    value = whole.substr(pos, width);
+    pos = to_end ? size : pos + width;
     return true;
   }
 
   bool parse_time_field(
-    const std::string& whole, size_t& pos, int& value, size_t width = 2, int offset = 0)
+    const std::string& whole, size_t& pos, int& value, size_t width = 2)
   {
     std::string string;
     if (parse_time_string(whole, pos, string, width)) {
       if (OpenDDS::DCPS::convertToInteger(string, value) && string[0] != '-') {
-        value += offset;
         return true;
       }
     }
@@ -255,16 +251,18 @@ bool parse_time(const XMLCh* in, time_t& value)
   size_t pos = 0;
 
   // Year
-  if (!parse_time_field(str, pos, dttm.tm_year, 4, -1900)) {
+  if (!parse_time_field(str, pos, dttm.tm_year, 4)) {
     return false;
   }
+  dttm.tm_year -= 1900;
   if (!parse_time_char(str, pos, "-")) {
     return false;
   }
   // Month
-  if (!parse_time_field(str, pos, dttm.tm_mon, 2, -1)) {
+  if (!parse_time_field(str, pos, dttm.tm_mon)) {
     return false;
   }
+  --dttm.tm_mon;
   if (!parse_time_char(str, pos, "-")) {
     return false;
   }
@@ -324,18 +322,17 @@ bool parse_time(const XMLCh* in, time_t& value)
     }
 
     /*
-     * We will have to do the reverse of the sign to convert the time timezone
-     * to the UTC. For example 00:00:00+00:00 (Midnight UTC) is 06:00:00-06:00
-     * (6 AM CST).
+     * We will have to do the reverse of the sign to convert the local time to
+     * UTC. For example 00:00:00-06:00 (12AM CST) is 06:00:00+00:00 (6AM UTC).
      */
     const int timezone_offset_sign = tz_char == '+' ? -1 : 1;
 
     /*
      * We could modify the tm struct here to account for the timezone, but then
-     * we'd have to also have adjust the hour if the minutes carried over and
-     * the date fields if the hour carried over to another date. Instead we're
-     * going calculate the number of seconds in the offset and add that to the
-     * time_t value later.
+     * we'd also have to adjust the hour if the minutes carried over and the
+     * date fields if the hour carried over to another date. Instead we're
+     * going to calculate the number of seconds in the offset and add that to
+     * the time_t value later.
      */
     timezone_offset = timezone_offset_sign * (tz_hour * 60 * 60 + tz_min * 60);
   }
