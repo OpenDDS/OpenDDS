@@ -711,15 +711,19 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           config->max_type_lookup_service_reply_period(TimeDuration::from_msec(timeout));
         } else if (name == "UseXTypes") {
           const OPENDDS_STRING& value = it->second;
-          int smInt;
-          if (!DCPS::convertToInteger(value, smInt) || smInt < 0 || smInt > 2) {
-            ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
-              ACE_TEXT("Invalid entry (%C) for UseXTypes in ")
-              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-              value.c_str(), rtps_name.c_str()), -1);
+          if (value.size() == 1) {
+            int smInt;
+            if (!DCPS::convertToInteger(value, smInt) || smInt < 0 || smInt > 2) {
+              ACE_ERROR_RETURN((LM_ERROR,
+                                ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
+                                ACE_TEXT("Invalid entry (%C) for UseXTypes in ")
+                                ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                                value.c_str(), rtps_name.c_str()), -1);
+            }
+            config->use_xtypes(static_cast<RtpsDiscoveryConfig::UseXTypes>(smInt));
+          } else {
+            config->use_xtypes(value.c_str());
           }
-          config->use_xtypes(static_cast<RtpsDiscoveryConfig::UseXTypes>(smInt));
         } else if (name == "SedpResponsiveMode") {
           const OPENDDS_STRING& value = it->second;
           int smInt;

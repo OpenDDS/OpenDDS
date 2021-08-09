@@ -529,6 +529,28 @@ public:
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     use_xtypes_ = use_xtypes;
   }
+  void use_xtypes(const char* str)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    struct NameValue {
+      const char* name;
+      UseXTypes value;
+    };
+    static const NameValue entries[] = {
+      {"no", XTYPES_NONE},
+      {"minimal", XTYPES_MINIMAL},
+      {"complete", XTYPES_COMPLETE}
+    };
+
+    for (size_t i = 0; i < sizeof entries / sizeof entries[0]; ++i) {
+      if (0 == std::strcmp(entries[i].name, str)) {
+        use_xtypes(entries[i].value);
+        return;
+      }
+    }
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsDiscoveryConfig::use_xtypes -")
+               ACE_TEXT(" invalid XTypes configuration: %C\n"), str));
+  }
   bool use_xtypes_complete() const
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
@@ -783,6 +805,7 @@ public:
   }
 
   bool use_xtypes() const { return config_->use_xtypes(); }
+  void use_xtypes(RtpsDiscoveryConfig::UseXTypes val) { return config_->use_xtypes(val); }
   bool use_xtypes_complete() const { return config_->use_xtypes_complete(); }
 
   RtpsDiscoveryConfig_rch config() const { return config_; }
