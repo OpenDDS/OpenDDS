@@ -44,12 +44,7 @@ bool parse_time(const XMLCh* in, time_t& value);
 
 inline std::string to_string(const xercesc::XMLException& ex)
 {
-  std::string msg = to_string(ex.getMessage());
-  const std::string filename = ex.getSrcFile();
-  if (filename.size()) {
-    msg = filename + ":" + DCPS::to_dds_string(ex.getSrcLine()) + ": " + msg;
-  }
-  return msg;
+  return to_string(ex.getMessage());
 }
 
 inline std::string to_string(const xercesc::DOMException& ex)

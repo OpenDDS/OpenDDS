@@ -94,6 +94,7 @@ TEST(XmlUtils, parse_time)
     "  <invalid1></invalid1>\n"
     "  <invalid2>2001/9/9</invalid2>\n"
     "  <invalid3>2001-09-09T01:46:40Z+00:00</invalid3>\n"
+    "  <leftover>2001-09-09T01:46:40.000+00:00123hello</leftover>\n"
 
     "  <valid>2001-09-09T01:46:40</valid>\n"
     "  <valid_z>2001-09-09T01:46:40Z</valid_z>\n"
@@ -102,6 +103,9 @@ TEST(XmlUtils, parse_time)
     "  <valid_frac_sec_z>2001-09-09T01:46:40.999Z</valid_frac_sec_z>\n"
     "  <valid_frac_sec_0>2001-09-09T01:46:40.999+00:00</valid_frac_sec_0>\n"
 
+    "  <tz_plus_one>2001-09-09T02:46:40+01:00</tz_plus_one>\n"
+    "  <tz_minus_one>2001-09-09T00:46:40-01:00</tz_minus_one>\n"
+    "  <tz_carry>1999-12-31T23:00:00-01:00</tz_carry>\n"
     "  <valid_plus_1min>2001-09-09T01:46:40+00:01</valid_plus_1min>\n"
     "  <valid_minus_1min>2001-09-09T01:46:40-00:01</valid_minus_1min>\n"
     "</root>\n");
@@ -110,6 +114,11 @@ TEST(XmlUtils, parse_time)
   parse_time_checker(parser, ACE_TEXT("invalid1"), false);
   parse_time_checker(parser, ACE_TEXT("invalid2"), false);
   parse_time_checker(parser, ACE_TEXT("invalid3"), false);
+  parse_time_checker(parser, ACE_TEXT("leftover"), false);
+
+  OpenDDS::DCPS::DebugRestore debug_restore;
+  security_debug.access_warn = true;
+  security_debug.access_error = true;
 
   parse_time_checker(parser, ACE_TEXT("valid"), true, 1000000000);
   parse_time_checker(parser, ACE_TEXT("valid_z"), true, 1000000000);
@@ -118,6 +127,9 @@ TEST(XmlUtils, parse_time)
   parse_time_checker(parser, ACE_TEXT("valid_frac_sec_z"), true, 1000000000);
   parse_time_checker(parser, ACE_TEXT("valid_frac_sec_0"), true, 1000000000);
 
+  parse_time_checker(parser, ACE_TEXT("tz_plus_one"), true, 1000000000);
+  parse_time_checker(parser, ACE_TEXT("tz_minus_one"), true, 1000000000);
+  parse_time_checker(parser, ACE_TEXT("tz_carry"), true, 946684800);
   parse_time_checker(parser, ACE_TEXT("valid_plus_1min"), true, 999999940);
   parse_time_checker(parser, ACE_TEXT("valid_minus_1min"), true, 1000000060);
 }

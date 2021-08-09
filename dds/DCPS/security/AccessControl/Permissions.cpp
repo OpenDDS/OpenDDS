@@ -14,6 +14,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace Security {
 
+using OpenDDS::DCPS::security_debug;
+
 int Permissions::load(const SSL::SignedDocument& doc)
 {
   using XML::XStr;
@@ -23,7 +25,10 @@ int Permissions::load(const SSL::SignedDocument& doc)
   doc.get_original_minus_smime(xml);
   ParserPtr parser(get_parser(doc.filename(), xml));
   if (!parser) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Permissions::load: get_parser failed\n"));
+    if (security_debug.access_error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} Permissions::load: "
+        "get_parser failed\n"));
+    }
     return -1;
   }
 
@@ -59,14 +64,18 @@ int Permissions::load(const SSL::SignedDocument& doc)
           const XStr v_tag = validityNode->getNodeName();
           if (v_tag == ACE_TEXT("not_before")) {
             if (!parse_time(validityNode->getTextContent(), grant->validity.not_before)) {
-              ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Permissions::load: "
-                "invalid datetime in not_before\n"));
+              if (security_debug.access_error) {
+                ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} Permissions::load: "
+                  "invalid datetime in not_before\n"));
+              }
               return -1;
             }
           } else if (v_tag == ACE_TEXT("not_after")) {
             if (!parse_time(validityNode->getTextContent(), grant->validity.not_after)) {
-              ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Permissions::load: "
-                "invalid datetime in not_after\n"));
+              if (security_debug.access_error) {
+                ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} Permissions::load: "
+                  "invalid datetime in not_after\n"));
+              }
               return -1;
             }
           }
@@ -80,16 +89,20 @@ int Permissions::load(const SSL::SignedDocument& doc)
         } else if (def == "DENY") {
           grant->default_permission = DENY;
         } else {
-          ACE_ERROR((LM_ERROR, ACE_TEXT(
-            "(%P|%t) ERROR: Permissions::load: <default> must be ALLOW or DENY\n")));
+          if (security_debug.access_error) {
+            ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} Permissions::load: "
+              "<default> must be ALLOW or DENY\n"));
+          }
           return -1;
         }
       }
     }
 
     if (!valid_default) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT(
-        "(%P|%t) ERROR: Permissions::load: <default> is required\n")));
+      if (security_debug.access_error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} Permissions::load: "
+          "<default> is required\n"));
+      }
       return -1;
     }
 
@@ -114,8 +127,10 @@ int Permissions::load(const SSL::SignedDocument& doc)
           const XStr anc_tag = adNodeChild->getNodeName();
           if (anc_tag == ACE_TEXT("domains")) {
             if (!parse_domain_id_set(adNodeChild, rule.domains)) {
-              ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Permissions::load: "
-                "failed to parse domain set\n"));
+              if (security_debug.access_error) {
+                ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} Permissions::load: "
+                  "failed to parse domain set\n"));
+              }
               return -1;
             }
 
@@ -164,13 +179,13 @@ int Permissions::load(const SSL::SignedDocument& doc)
     }
 
     if (!valid_subject) {
-      if (DCPS::security_debug.access_warn) {
-        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {access_warn} Permissions::load: ")
+      if (security_debug.access_warn) {
+        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: {access_warn} Permissions::load: ")
           ACE_TEXT("Unable to parse subject name, ignoring grant.\n")));
       }
     } else if (find_grant(grant->subject)) {
-      if (DCPS::security_debug.access_warn) {
-        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {access_warn} Permissions::load: ")
+      if (security_debug.access_warn) {
+        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: {access_warn} Permissions::load: ")
           ACE_TEXT("Ignoring grant with duplicate subject name.\n")));
       }
     } else {

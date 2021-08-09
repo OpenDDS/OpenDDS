@@ -15,6 +15,8 @@
 #include <xercesc/util/PlatformUtils.hpp>
 #include <xercesc/util/XercesVersion.hpp>
 
+#include <stdexcept>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -31,7 +33,7 @@ ParserPtr get_parser(const std::string& filename, const std::string& xml)
 
   } catch (const xercesc::XMLException& ex) {
     if (security_debug.access_error) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: get_parser: "
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} get_parser: "
         "XMLPlatformUtils::Initialize XMLException: %C\n",
         to_string(ex).c_str()));
     }
@@ -51,7 +53,7 @@ ParserPtr get_parser(const std::string& filename, const std::string& xml)
 
   } catch (const xercesc::XMLException& ex) {
     if (security_debug.access_error) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: get_parser: "
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} get_parser: "
         "XMLException while parsing \"%C\": %C\n",
         filename.c_str(), to_string(ex).c_str()));
     }
@@ -59,7 +61,7 @@ ParserPtr get_parser(const std::string& filename, const std::string& xml)
 
   } catch (const xercesc::DOMException& ex) {
     if (security_debug.access_error) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: get_parser: "
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} get_parser: "
         "DOMException while parsing \"%C\": %C\n",
         filename.c_str(), to_string(ex).c_str()));
     }
@@ -67,7 +69,7 @@ ParserPtr get_parser(const std::string& filename, const std::string& xml)
 
   } catch (...) {
     if (security_debug.access_error) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: get_parser: "
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} get_parser: "
         "Unexpected exception while parsing \"%C\"",
         filename.c_str()));
     }
@@ -76,7 +78,7 @@ ParserPtr get_parser(const std::string& filename, const std::string& xml)
 
   if (!parser->getDocument()->getDocumentElement()) {
     if (security_debug.access_error) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: get_parser: "
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} get_parser: "
         "XML document \"%C\" is empty\n",
         filename.c_str()));
     }
@@ -112,6 +114,87 @@ bool parse_bool(const XMLCh* in, bool& value)
   return true;
 }
 
+#define XMLDATETIME_HAS_GETEPOCH _XERCES_VERSION >= 30200
+#if !XMLDATETIME_HAS_GETEPOCH
+namespace {
+  bool parse_time_string(
+    const std::string& whole, size_t& pos, std::string& value, size_t width = std::string::npos)
+  {
+    const bool to_end = width == std::string::npos;
+    if (pos >= whole.size() || (!to_end && pos + width > whole.size())) {
+      return false;
+    }
+    try {
+      value = whole.substr(pos, width);
+    } catch (const std::out_of_range& e) {
+      return false;
+    }
+    if (!to_end) {
+      pos += width;
+    }
+    return true;
+  }
+
+  bool parse_time_field(
+    const std::string& whole, size_t& pos, int& value, size_t width = 2, int offset = 0)
+  {
+    std::string string;
+    if (parse_time_string(whole, pos, string, width)) {
+      if (OpenDDS::DCPS::convertToInteger(string, value) && string[0] != '-') {
+        value += offset;
+        return true;
+      }
+    }
+    if (security_debug.access_error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} parse_time_field: "
+        "failed to get field at pos %B in \"%C\"\n",
+        pos, whole.c_str()));
+    }
+    return false;
+  }
+
+  bool parse_time_char_or_end(
+    const std::string& whole, size_t& pos, const std::string& choices, char& c, bool& end)
+  {
+    std::string string;
+    if (parse_time_string(whole, pos, string, 1)) {
+      end = false;
+      c = string[0];
+      if (choices.find(c) != std::string::npos) {
+        return true;
+      }
+      if (security_debug.access_error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} parse_time_char_or_end: "
+          "failed to find one of \"%C\" at pos %B in \"%C\"\n",
+          choices.c_str(), pos, whole.c_str()));
+      }
+      return false;
+    }
+    end = true;
+    return true;
+  }
+
+  bool parse_time_char(
+    const std::string& whole, size_t& pos, const std::string& choices)
+  {
+    char c;
+    bool end;
+    if (!parse_time_char_or_end(whole, pos, choices, c, end)) {
+      return false;
+    }
+    if (end) {
+      if (security_debug.access_error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} parse_time_char: "
+          "failed to find one of \"%C\" at end of \"%C\"\n",
+          choices.c_str(), whole.c_str()));
+      }
+      return false;
+    }
+    return true;
+  }
+}
+#endif // XMLDATETIME_HAS_GETEPOCH
+
 bool parse_time(const XMLCh* in, time_t& value)
 {
   xercesc::XMLDateTime xdt(in);
@@ -119,41 +202,180 @@ bool parse_time(const XMLCh* in, time_t& value)
     xdt.parseDateTime();
   } catch (const xercesc::XMLException& ex) {
     if (security_debug.access_error) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: parse_time: failed to parse date/time \"%C\": %C\n",
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} parse_time: "
+        "failed to parse date/time \"%C\": %C\n",
         to_string(in).c_str(), to_string(ex).c_str()));
     }
     return false;
   }
 
-#if _XERCES_VERSION >= 30200
+#if XMLDATETIME_HAS_GETEPOCH
   value = xdt.getEpoch();
 #else
-  std::tm xdt_tm;
-  xdt_tm.tm_year = xdt.getYear() - 1900;
-  xdt_tm.tm_mon = xdt.getMonth() - 1;
-  xdt_tm.tm_mday = xdt.getDay();
-  xdt_tm.tm_hour = xdt.getHour();
-  xdt_tm.tm_min = xdt.getMinute();
-  xdt_tm.tm_sec = xdt.getSecond();
-  xdt_tm.tm_isdst = 0;
-  value = std::mktime(&xdt_tm);
+  /*
+   * Doesn't seem like older Xerces' actually have a way to get the information
+   * from XMLDateTime, so we have to do it ourselves.
+   *
+   * For this we'll follow https://www.w3.org/TR/xmlschema-2/#dateTime, which
+   * is basically the same as ISO8601.
+   * The exceptions are:
+   * - We won't accept a negative datetime (-0001 is the year 2BCE), since the
+   *   standard library might not be able to handle such a far back and we're
+   *   certainly not expecting it.
+   * - The Schema spec says that times without timezone info should be
+   *   interpreted as "local", but seems it be intentionally vague as what that
+   *   means. The DDS Security 1.1 spec explicitly says in 9.4.1.3.2.2 that it
+   *   would be UTC. Xerces getEpoch values match up with this in the unit test
+   *   for this code, so it's also interpreting them as UTC instead of
+   *   something like the local system timezone.
+   * - Since we use time_t we will accept but ignore fractional seconds.
+   *   NOTE: The security spec is missing fractional seconds in a format
+   *   description in a comment in example XML. This comment has been copied
+   *   into many permissions files sitting in OpenDDS.
+   */
+
+  const std::string str = to_string(in);
+  if (str[0] == '-') {
+    if (security_debug.access_error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} parse_time: "
+        "date/time can't be negative: \"%C\"\n",
+        str.c_str()));
+    }
+    return false;
+  }
+
+  /*
+   * After this the expected lexical format given by the Schema spec is:
+   *   yyyy '-' mm '-' dd 'T' hh ':' mm ':' ss ('.' s+)? ((('+' | '-') hh ':' mm) | 'Z')?
+   * or alternatively as the Security spec says, except with fractional seconds:
+   *   CCYY-MM-DDThh:mm:ss[.fffff...][Z|(+|-)hh:mm]
+   * See unit tests for this code for examples
+   */
+  std::tm dttm;
+  size_t pos = 0;
+
+  // Year
+  if (!parse_time_field(str, pos, dttm.tm_year, 4, -1900)) {
+    return false;
+  }
+  if (!parse_time_char(str, pos, "-")) {
+    return false;
+  }
+  // Month
+  if (!parse_time_field(str, pos, dttm.tm_mon, 2, -1)) {
+    return false;
+  }
+  if (!parse_time_char(str, pos, "-")) {
+    return false;
+  }
+  // Day
+  if (!parse_time_field(str, pos, dttm.tm_mday)) {
+    return false;
+  }
+  if (!parse_time_char(str, pos, "T")) {
+    return false;
+  }
+  // Hour
+  if (!parse_time_field(str, pos, dttm.tm_hour)) {
+    return false;
+  }
+  if (!parse_time_char(str, pos, ":")) {
+    return false;
+  }
+  // Minutes
+  if (!parse_time_field(str, pos, dttm.tm_min)) {
+    return false;
+  }
+  if (!parse_time_char(str, pos, ":")) {
+    return false;
+  }
+  // Seconds
+  if (!parse_time_field(str, pos, dttm.tm_sec)) {
+    return false;
+  }
+
+  // Ignore Fractional Seconds
+  if (str[pos] == '.') {
+    ++pos;
+    for (; str[pos] >= '0' && str[pos] <= '9'; ++pos) {
+    }
+  }
+
+  // Optional Timezone Info
+  time_t timezone_offset = 0;
+  char tz_char;
+  bool end;
+  if (!parse_time_char_or_end(str, pos, "+-Z", tz_char, end)) {
+    return false;
+  }
+  if (!end && tz_char != 'Z') {
+    int tz_hour;
+    if (!parse_time_field(str, pos, tz_hour)) {
+      return false;
+    }
+
+    if (!parse_time_char(str, pos, ":")) {
+      return false;
+    }
+
+    int tz_min;
+    if (!parse_time_field(str, pos, tz_min)) {
+      return false;
+    }
+
+    /*
+     * We will have to do the reverse of the sign to convert the time timezone
+     * to the UTC. For example 00:00:00+00:00 (Midnight UTC) is 06:00:00-06:00
+     * (6 AM CST).
+     */
+    const int timezone_offset_sign = tz_char == '+' ? -1 : 1;
+
+    /*
+     * We could modify the tm struct here to account for the timezone, but then
+     * we'd have to also have adjust the hour if the minutes carried over and
+     * the date fields if the hour carried over to another date. Instead we're
+     * going calculate the number of seconds in the offset and add that to the
+     * time_t value later.
+     */
+    timezone_offset = timezone_offset_sign * (tz_hour * 60 * 60 + tz_min * 60);
+  }
+
+  std::string leftover;
+  if (parse_time_string(str, pos, leftover)) {
+    if (security_debug.access_error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} parse_time: "
+        "leftover characters in \"%C\": \"%C\"\n",
+        str.c_str(), leftover.c_str()));
+    }
+    return false;
+  }
+
+  dttm.tm_isdst = 0; // Don't try to do anything with DST
+  value = std::mktime(&dttm);
   if (value == time_t(-1)) {
     if (security_debug.access_error) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: parse_time: failed to convert to time_t \"%C\"\n",
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} parse_time: "
+        "failed to convert to time_t \"%C\"\n",
         to_string(in).c_str()));
     }
     return false;
   }
 
-  const time_t the_timezone = static_cast<time_t>(ace_timezone());
-  if (the_timezone == 0 && errno == ENOTSUP) {
+  // mktime assumes the tm struct is in the local time, so we need to correct
+  // for that.
+  const time_t local_timezone = static_cast<time_t>(ace_timezone());
+  if (local_timezone == 0 && errno == ENOTSUP) {
     if (security_debug.access_error) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: parse_time: ace_timezone not supported\n"));
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} parse_time: "
+        "ace_timezone not supported\n"));
     }
     return false;
   }
-  value -= the_timezone;
-#endif
+  value -= local_timezone;
+
+  // Adjust for the timezone specified in the string if there was one.
+  value += timezone_offset;
+#endif // XMLDATETIME_HAS_GETEPOCH
 
   return value;
 }
@@ -185,8 +407,8 @@ bool parse_domain_id_set(const xercesc::DOMNode* node, Security::DomainIdSet& do
       DomainId_t domain_id;
       if (!parse_domain_id(domainIdNode, domain_id)) {
         if (security_debug.access_error) {
-          ACE_ERROR((LM_ERROR,
-            "(%P|%t) ERROR: parse_domain_id_set: Invalid domain ID \"%C\" in id\n",
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} parse_domain_id_set: "
+            "Invalid domain ID \"%C\" in id\n",
             to_string(domainIdNode).c_str()));
         }
         return false;
@@ -209,8 +431,8 @@ bool parse_domain_id_set(const xercesc::DOMNode* node, Security::DomainIdSet& do
         if ("min" == domRangeIdNodeName && !has_min) {
           if (!parse_domain_id(domRangeIdNode, min_value)) {
             if (security_debug.access_error) {
-              ACE_ERROR((LM_ERROR,
-                "(%P|%t) ERROR: parse_domain_id_set: Invalid domain ID \"%C\" in min_value\n",
+              ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} parse_domain_id_set: "
+                "Invalid domain ID \"%C\" in min_value\n",
                 to_string(domRangeIdNode).c_str()));
             }
             return false;
@@ -220,16 +442,16 @@ bool parse_domain_id_set(const xercesc::DOMNode* node, Security::DomainIdSet& do
         } else if ("max" == domRangeIdNodeName && !has_max) {
           if (!parse_domain_id(domRangeIdNode, max_value)) {
             if (security_debug.access_error) {
-              ACE_ERROR((LM_ERROR,
-                "(%P|%t) ERROR: parse_domain_id_set: Invalid domain ID \"%C\" in max_value\n",
+              ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} parse_domain_id_set: "
+                "Invalid domain ID \"%C\" in max_value\n",
                 to_string(domRangeIdNode).c_str()));
             }
             return false;
           }
           if (min_value > max_value) {
             if (security_debug.access_error) {
-              ACE_ERROR((LM_ERROR,
-                "(%P|%t) ERROR: parse_domain_id_set: Permission XML Domain Range invalid.\n"));
+              ACE_ERROR((LM_ERROR,"(%P|%t) ERROR: {access_error} parse_domain_id_set: "
+                "Permission XML Domain Range invalid.\n"));
             }
             return false;
           }
@@ -237,8 +459,8 @@ bool parse_domain_id_set(const xercesc::DOMNode* node, Security::DomainIdSet& do
 
         } else {
           if (security_debug.access_error) {
-            ACE_ERROR((LM_ERROR,
-              "(%P|%t) ERROR: parse_domain_id_set: Invalid tag \"%C\" in id_range\n",
+            ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} parse_domain_id_set: "
+              "Invalid tag \"%C\" in id_range\n",
               domRangeIdNodeName.c_str()));
           }
           return false;
@@ -249,8 +471,8 @@ bool parse_domain_id_set(const xercesc::DOMNode* node, Security::DomainIdSet& do
 
     } else {
       if (security_debug.access_error) {
-        ACE_ERROR((LM_ERROR,
-          "(%P|%t) ERROR: parse_domain_id_set: Invalid tag \"%C\" in domain ID set\n",
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} parse_domain_id_set: "
+          "Invalid tag \"%C\" in domain ID set\n",
           domainIdNodeName.c_str()));
       }
       return false;
@@ -259,7 +481,8 @@ bool parse_domain_id_set(const xercesc::DOMNode* node, Security::DomainIdSet& do
 
   if (domain_id_set.empty()) {
     if (security_debug.access_error) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: parse_domain_id_set: empty domain ID set\n"));
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} parse_domain_id_set: "
+        "empty domain ID set\n"));
     }
     return false;
   }
