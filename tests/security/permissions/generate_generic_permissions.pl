@@ -30,6 +30,7 @@ my $template_after_subject = << "EOF";
       </validity>
       <allow_rule>
         <domains>
+          <min>0</min>
         </domains>
         <publish>
           <topics>

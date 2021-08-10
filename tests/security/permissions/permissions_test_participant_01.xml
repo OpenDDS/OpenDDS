@@ -10,6 +10,7 @@
       </validity>
       <allow_rule>
         <domains>
+          <min>0</min>
         </domains>
         <publish>
           <topics>
