@@ -111,15 +111,22 @@ private:
   // least one value in it.  If a FragRange in the list has a sample_ with
   // a null ACE_Message_Block*, it's one that was data_unavailable().
   typedef OPENDDS_LIST(FragRange) FragRangeList;
+  typedef OPENDDS_MAP(SequenceNumber::Value, FragRangeList::iterator) FragRangeIterMap;
 
   struct FragInfo {
     FragInfo()
       : have_first_(false), range_list_(), total_frags_(0) {}
     FragInfo(bool hf, const FragRangeList& rl, ACE_UINT32 tf, const MonotonicTimePoint& expiration)
-      : have_first_(hf), range_list_(rl), total_frags_(tf), expiration_(expiration) {}
+      : have_first_(hf), range_list_(rl), total_frags_(tf), expiration_(expiration)
+    {
+      for (FragRangeList::iterator it = range_list_.begin(); it != range_list_.end(); ++it) {
+        range_finder_[it->transport_seq_.second.getValue()] = it;
+      }
+    }
 
     bool have_first_;
     FragRangeList range_list_;
+    FragRangeIterMap range_finder_;
     ACE_UINT32 total_frags_;
     MonotonicTimePoint expiration_;
   };
@@ -142,7 +149,8 @@ private:
 
   void check_expirations(const MonotonicTimePoint& now);
 
-  static bool insert(OPENDDS_LIST(FragRange)& flist,
+  static bool insert(FragRangeList& flist,
+                     FragRangeIterMap& fri_map,
                      const SequenceRange& seqRange,
                      ReceivedDataSample& data);
 };
