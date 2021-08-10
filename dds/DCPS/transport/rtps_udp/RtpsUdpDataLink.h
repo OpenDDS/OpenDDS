@@ -286,6 +286,14 @@ private:
   OPENDDS_SET(OPENDDS_STRING) ipv6_joined_interfaces_;
 #endif
 
+  MessageBlockAllocator mb_allocator_;
+  DataBlockAllocator db_allocator_;
+  Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex> custom_allocator_;
+  Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex> bundle_allocator_;
+
+  ACE_Message_Block* alloc_msgblock(size_t size, ACE_Allocator* data_allocator);
+  ACE_Message_Block* submsgs_to_msgblock(const RTPS::SubmessageSeq& subm);
+
   RcHandle<SingleSendBuffer> get_writer_send_buffer(const RepoId& pub_id);
 
   struct MultiSendBuffer : TransportSendBuffer {
