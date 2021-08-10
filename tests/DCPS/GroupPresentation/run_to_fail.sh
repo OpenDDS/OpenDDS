@@ -1,6 +1,7 @@
 #! /bin/bash
 rm -f t*out
-export count=0;
+export ACE_TEST_LOG_STUCK_STACKS=1
+export count=0
 export res="test PASSED."
 while [ "$res" == "test PASSED." ]; do
   count=`expr $count + 1`
@@ -20,13 +21,6 @@ while [ "$res" == "test PASSED." ]; do
   if [ $? == 0 ]; then
     echo premature disconnect detected on run $count
     cp test.out pd$count.out
-  fi
-  grep -q "map size = 2" test.out
-  if [ $? == 0 ]; then
-    echo instance map size = 2 detected on run $count
-    if [ `ls ms2-*.out 2> /dev/null | wc -l` == 0 ]; then
-      cp test.out ms2-$count.out;
-    fi
   fi
   if [ `expr $count % 10` == 0 ]; then
     echo passed $count runs

@@ -171,14 +171,15 @@ SubscriberListenerImpl::on_data_on_readers(DDS::Subscriber_ptr subs)
         }
         ACE_DEBUG((LM_DEBUG,"%N:%l:%t: message_dr->take returned\n"));
 
-        if (si[0].instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE
-           || si[0].instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
-             ACE_DEBUG((LM_DEBUG,"%N:%l:%t: not alive state detected\n"));
-             this->verify(msg[0], si[0], qos, false);
-             continue;
-           }
+        if (si[0].instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE ||
+            si[0].instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
+           ACE_DEBUG((LM_DEBUG,"%N:%l:%t: not alive state detected\n"));
+           this->verify(msg[0], si[0], qos, false);
+           subs->notify_datareaders();
+           return;
+        }
 
-        if (msg.length() != num_messages || si.length() != num_messages) {
+        if (msg.length() != num_messages * 2 || si.length() != num_messages * 2) {
           ACE_ERROR((LM_ERROR,
                       ACE_TEXT("%N:%l: SubscriberListenerImpl::on_data_on_readers()")
                       ACE_TEXT(" ERROR: MessageSeq %d SampleInfoSeq %d != %d\n"),

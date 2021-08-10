@@ -1,3 +1,0 @@
-thread apply all bt
-quit
-y
