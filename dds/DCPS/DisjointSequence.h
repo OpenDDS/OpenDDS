@@ -168,8 +168,8 @@ public:
       for (typename Container::iterator i = lower_bound(lower - 1);
           i != ranges_.end() && (i->first <= above || i->second <= above);
           /* iterate in loop because of removal */) {
-        lower = std::min(lower, i->first);
-        upper = std::max(upper, i->second);
+        lower = (std::min)(lower, i->first);
+        upper = (std::max)(upper, i->second);
         ranges_.erase(i++);
       }
 
