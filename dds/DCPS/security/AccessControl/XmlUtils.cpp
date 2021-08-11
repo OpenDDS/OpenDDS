@@ -41,7 +41,7 @@ namespace {
   public:
     void warning(const xercesc::SAXParseException& ex)
     {
-      if (security_debug.access_error) {
+      if (security_debug.access_warn) {
         ACE_ERROR((LM_ERROR, "(%P|%t) WARNING: {access_warn} "
           "XmlUtils::ErrorHandler: %C\n",
           to_string(ex).c_str()));
@@ -50,7 +50,7 @@ namespace {
 
     void error(const xercesc::SAXParseException& ex)
     {
-      if (security_debug.access_warn) {
+      if (security_debug.access_error) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} "
           "XmlUtils::ErrorHandler: %C\n",
           to_string(ex).c_str()));
