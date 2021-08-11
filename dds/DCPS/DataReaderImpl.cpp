@@ -2295,16 +2295,26 @@ DataReaderImpl::writer_became_dead(WriterInfo& info)
 void
 DataReaderImpl::instances_liveliness_update(const PublicationId& writer)
 {
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
-  for (SubscriptionInstanceMapType::iterator iter = instances_.begin(), next = iter;
-       iter != instances_.end(); iter = next) {
-    ++next;
-    if (iter->second->instance_state_->writes_instance(writer)) {
-      set_instance_state(iter->first, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, SystemTimePoint::now(), writer);
+  InstanceSet localinsts;
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
+    if (instances_.size() == 0) {
+      return;
+    }
+    for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
+         iter != instances_.end(); ++iter) {
+      if (iter->second->instance_state_->writes_instance(writer)) {
+        localinsts.insert(iter->first);
+      }
     }
   }
+
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+  for (InstanceSet::iterator iter = localinsts.begin(); iter != localinsts.end(); ++iter) {
+    set_instance_state(*iter, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, SystemTimePoint::now(), writer);
+  }
 }
+
 
 void
 DataReaderImpl::set_sample_lost_status(
@@ -2997,14 +3007,18 @@ void DataReaderImpl::accept_coherent (PublicationId& writer_id,
         OPENDDS_STRING(writer).c_str(),
         OPENDDS_STRING(publisher).c_str()));
   }
-
+  SubscriptionInstanceSet localsubs;
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
+    for (SubscriptionInstanceMapType::iterator iter = this->instances_.begin();
+         iter != this->instances_.end(); ++iter) {
+      localsubs.insert(iter->second);
+    }
+  }
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
-
-  for (SubscriptionInstanceMapType::iterator iter = this->instances_.begin();
-      iter != this->instances_.end(); ++iter) {
-    iter->second->rcvd_strategy_->accept_coherent(
-        writer_id, publisher_id);
+  for (SubscriptionInstanceSet::iterator iter = localsubs.begin();
+       iter != localsubs.end(); iter++) {
+    (*iter)->rcvd_strategy_->accept_coherent(writer_id, publisher_id);
   }
 }
 
@@ -3024,13 +3038,18 @@ void DataReaderImpl::reject_coherent (PublicationId& writer_id,
         OPENDDS_STRING(publisher).c_str()));
   }
 
+  SubscriptionInstanceSet localsubs;
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
+    for (SubscriptionInstanceMapType::iterator iter = this->instances_.begin();
+         iter != this->instances_.end(); ++iter) {
+      localsubs.insert(iter->second);
+    }
+  }
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
-
-  for (SubscriptionInstanceMapType::iterator iter = this->instances_.begin();
-      iter != this->instances_.end(); ++iter) {
-    iter->second->rcvd_strategy_->reject_coherent(
-        writer_id, publisher_id);
+  for (SubscriptionInstanceSet::iterator iter = localsubs.begin();
+       iter != localsubs.end(); iter++) {
+    (*iter)->rcvd_strategy_->reject_coherent(writer_id, publisher_id);
   }
   this->reset_coherent_info (writer_id, publisher_id);
 }
