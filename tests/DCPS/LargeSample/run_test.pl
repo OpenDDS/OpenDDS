@@ -36,7 +36,10 @@ elsif ($test->flag('multicast_async')) {
 }
 elsif ($test->flag('rtps_disc_sec')) {
   $is_rtps = 1;
-  push(@common_opts, "-DCPSConfigFile", "rtps_disc_sec.ini");
+  push(@common_opts,
+    "-DCPSConfigFile", "rtps_disc_sec.ini",
+    "-DCPSSecurityDebugLevel", "1",
+  );
 }
 push(@common_opts, "-r $reliable -w $writers_per_process -s $samples_per_writer -o $data_length_offset");
 

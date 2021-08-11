@@ -11,7 +11,7 @@ using OpenDDS::DCPS::security_debug;
 using OpenDDS::Security::DomainIdSet;
 using OpenDDS::Security::domain_id_max;
 
-TEST(XmlUtils, get_parser)
+TEST(dds_DCPS_security_AccessControl_XmlUtils, get_parser)
 {
   EXPECT_FALSE(get_parser("empty string", ""));
   EXPECT_FALSE(get_parser("invalid xml", ">What I'm writing isn't valid XML<"));
@@ -44,7 +44,7 @@ namespace {
   }
 }
 
-TEST(XmlUtils, parse_bool)
+TEST(dds_DCPS_security_AccessControl_XmlUtils, parse_bool)
 {
   ParserPtr parser = get_parser("parse_bool",
     "<root>\n"
@@ -87,7 +87,7 @@ namespace {
   }
 }
 
-TEST(XmlUtils, parse_time)
+TEST(dds_DCPS_security_AccessControl_XmlUtils, parse_time)
 {
   ParserPtr parser = get_parser("parse_time",
     "<root>\n"
@@ -160,7 +160,7 @@ namespace {
   }
 }
 
-TEST(XmlUtils, parse_domain_id_set)
+TEST(dds_DCPS_security_AccessControl_XmlUtils, parse_domain_id_set)
 {
   ParserPtr parser = get_parser("parse_time",
     "<root>\n"

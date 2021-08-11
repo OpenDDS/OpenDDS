@@ -18,6 +18,7 @@
 #include <xercesc/dom/DOM.hpp>
 #include <xercesc/util/XMLDateTime.hpp>
 #include <xercesc/parsers/XercesDOMParser.hpp>
+#include <xercesc/sax/SAXParseException.hpp>
 
 #include <string>
 #include <ctime>
@@ -41,6 +42,9 @@ bool parse_bool(const XMLCh* in, bool& value);
 
 OpenDDS_Security_Export
 bool parse_time(const XMLCh* in, time_t& value);
+
+OpenDDS_Security_Export
+std::string to_string(const xercesc::SAXParseException& ex);
 
 inline std::string to_string(const xercesc::XMLException& ex)
 {

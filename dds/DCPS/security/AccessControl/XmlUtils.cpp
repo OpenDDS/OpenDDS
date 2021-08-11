@@ -10,8 +10,9 @@
 #include <ace/OS_NS_strings.h>
 #include <ace/OS_NS_time.h>
 
-#include <xercesc/util/XMLDateTime.hpp>
 #include <xercesc/framework/MemBufInputSource.hpp>
+#include <xercesc/sax/ErrorHandler.hpp>
+#include <xercesc/util/XMLDateTime.hpp>
 #include <xercesc/util/PlatformUtils.hpp>
 #include <xercesc/util/XercesVersion.hpp>
 
@@ -25,6 +26,47 @@ namespace XmlUtils {
 
 using DDS::Security::DomainId_t;
 using OpenDDS::DCPS::security_debug;
+
+std::string to_string(const xercesc::SAXParseException& ex)
+{
+  return
+    to_string(ex.getSystemId()) +
+    ":" + DCPS::to_dds_string(ex.getLineNumber()) +
+    ":" + DCPS::to_dds_string(ex.getColumnNumber()) +
+    ": " + to_string(ex.getMessage());
+}
+
+namespace {
+  class ErrorHandler : public xercesc::ErrorHandler {
+  public:
+    void warning(const xercesc::SAXParseException& ex)
+    {
+      if (security_debug.access_error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) WARNING: {access_warn} "
+          "XmlUtils::ErrorHandler: %C\n",
+          to_string(ex).c_str()));
+      }
+    }
+
+    void error(const xercesc::SAXParseException& ex)
+    {
+      if (security_debug.access_warn) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} "
+          "XmlUtils::ErrorHandler: %C\n",
+          to_string(ex).c_str()));
+      }
+    }
+
+    void fatalError(const xercesc::SAXParseException& ex)
+    {
+      error(ex);
+    }
+
+    void resetErrors()
+    {
+    }
+  };
+}
 
 ParserPtr get_parser(const std::string& filename, const std::string& xml)
 {
@@ -41,10 +83,14 @@ ParserPtr get_parser(const std::string& filename, const std::string& xml)
   }
 
   ParserPtr parser(new xercesc::XercesDOMParser());
-  parser->setValidationScheme(xercesc::XercesDOMParser::Val_Always);
+
   parser->setDoNamespaces(true);
-  parser->setCreateCommentNodes(false);
   parser->setIncludeIgnorableWhitespace(false);
+  parser->setCreateCommentNodes(false);
+
+  ErrorHandler error_handler;
+  parser->setErrorHandler(&error_handler);
+
   xercesc::MemBufInputSource contentbuf(
     reinterpret_cast<const XMLByte*>(xml.c_str()), xml.size(), filename.c_str());
 
