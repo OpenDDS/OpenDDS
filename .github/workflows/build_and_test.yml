@@ -8740,6 +8740,11 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: disable ntp
+      shell: bash
+      run: |
+        sudo systemsetup -setusingnetworktime off
+        sudo rm -rf /etc/ntp.conf
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -9018,6 +9023,11 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: disable ntp
+      shell: bash
+      run: |
+        sudo systemsetup -setusingnetworktime off
+        sudo rm -rf /etc/ntp.conf
     - name: run OpenDDS tests
       shell: bash
       run: |
