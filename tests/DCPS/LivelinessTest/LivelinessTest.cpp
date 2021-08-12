@@ -283,6 +283,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     dcs->wait_for("driver", LOCAL_MANUAL_DATAREADER, "LIVELINESS_LOST_" + OpenDDS::DCPS::to_dds_string(i));
   }
 
+
+  while (automatic_drl_servant->samples_handled() < 1) {
+    ACE_OS::sleep(0.25);
+  }
+
   delete writer;
   pub->delete_contained_entities();
   dp->delete_publisher(pub);
