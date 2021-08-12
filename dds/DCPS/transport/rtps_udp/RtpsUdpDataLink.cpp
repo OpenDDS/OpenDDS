@@ -83,7 +83,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
   , job_queue_(make_rch<JobQueue>(reactor_task->get_reactor()))
   , mb_allocator_(TheServiceParticipant->association_chunk_multiplier())
   , db_allocator_(TheServiceParticipant->association_chunk_multiplier())
-  , custom_allocator_(TheServiceParticipant->association_chunk_multiplier(), config.max_message_size_)
+  , custom_allocator_(TheServiceParticipant->association_chunk_multiplier() * config.anticipated_fragments_, RtpsSampleHeader::FRAG_SIZE)
   , bundle_allocator_(TheServiceParticipant->association_chunk_multiplier(), config.max_message_size_)
   , multi_buff_(this, config.nak_depth_)
   , flush_send_queue_task_(make_rch<Sporadic>(reactor_task->interceptor(), *this, &RtpsUdpDataLink::flush_send_queue))
@@ -1116,8 +1116,8 @@ RtpsUdpDataLink::submsgs_to_msgblock(const RTPS::SubmessageSeq& subm)
 
   ACE_Message_Block* hdr = alloc_msgblock(size, &custom_allocator_);
 
+  Serializer ser(hdr, encoding);
   for (CORBA::ULong i = 0; i < subm.length(); ++i) {
-    Serializer ser(hdr, encoding);
     ser << subm[i];
     ser.align_w(RTPS::SMHDR_SZ);
   }
