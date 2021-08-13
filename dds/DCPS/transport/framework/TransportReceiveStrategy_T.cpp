@@ -24,7 +24,7 @@ TransportReceiveStrategy<TH, DSH>::TransportReceiveStrategy()
     receive_sample_remaining_(0),
     mb_allocator_(MESSAGE_BLOCKS),
     db_allocator_(DATA_BLOCKS),
-    data_allocator_(DATA_BLOCKS),
+    data_allocator_(RECEIVE_BUFFERS * 2),
     buffer_index_(0),
     payload_(0),
     good_pdu_(true),
