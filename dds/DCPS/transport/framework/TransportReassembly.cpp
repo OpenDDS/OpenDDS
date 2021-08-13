@@ -68,8 +68,8 @@ TransportReassembly::insert(FragRangeList& flist,
       }
     } else {
       start = flist.end();
-      start--;
-      fit--;
+      --start;
+      --fit;
     }
   }
 
