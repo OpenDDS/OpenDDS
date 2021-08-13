@@ -5,21 +5,20 @@
 
 #include "Governance.h"
 
-#include "xercesc/parsers/XercesDOMParser.hpp"
-#include "xercesc/dom/DOM.hpp"
-#include "xercesc/sax/HandlerBase.hpp"
-#include "xercesc/framework/MemBufInputSource.hpp"
-#include "xercesc/util/PlatformUtils.hpp"
+#include "XmlUtils.h"
 
-#include "ace/OS_NS_strings.h"
-#include "ace/XML_Utils/XercesString.h"
-
-#include <stdexcept>
+#include <ace/OS_NS_strings.h>
+#include <ace/XML_Utils/XercesString.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace Security {
+
+using XML::XStr;
+using namespace XmlUtils;
+using namespace DDS::Security;
+using OpenDDS::DCPS::security_debug;
 
 Governance::TopicAccessRule::TopicAccessRule()
 {
@@ -33,250 +32,199 @@ Governance::Governance()
 {
 }
 
+namespace {
+  bool get_bool_tag_value(const SSL::SignedDocument& doc, const xercesc::DOMNode* node,
+    const ACE_TCHAR* name, bool& value)
+  {
+    if (!parse_bool(node, value)) {
+      if (security_debug.access_error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} Governance::load: "
+          "\"%s\" value, \"%C\", in \"%C\" is not a valid boolean value\n",
+          name, to_string(node).c_str(), doc.filename().c_str()));
+      }
+      return false;
+    }
+
+    return true;
+  }
+
+  bool get_bool_tag(const SSL::SignedDocument& doc, const xercesc::DOMElement* parent,
+    const ACE_TCHAR* name, bool& value)
+  {
+    const xercesc::DOMNodeList* const nodes = parent->getElementsByTagName(XStr(name));
+    if (nodes->getLength() != 1) {
+      if (security_debug.access_error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} Governance::load: "
+          "expected 1 boolean value \"%s\" in parent element in \"%C\", found %B\n",
+          name, doc.filename().c_str(), nodes->getLength()));
+      }
+      return false;
+    }
+
+    return get_bool_tag_value(doc, nodes->item(0), name, value);
+  }
+
+  bool get_protection_kind(const SSL::SignedDocument& doc, const xercesc::DOMElement* parent,
+    const ACE_TCHAR* name, bool& is_protected, CORBA::ULong& attributes,
+    CORBA::ULong enc_attr, CORBA::ULong oa_attr)
+  {
+    const xercesc::DOMNodeList* const nodes = parent->getElementsByTagName(XStr(name));
+    if (nodes->getLength() != 1) {
+      if (security_debug.access_error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} Governance::load: "
+          "expected 1 proctection kind value named \"%s\" in parent element in \"%C\", found %B\n",
+          name, doc.filename().c_str(), nodes->getLength()));
+      }
+      return false;
+    }
+
+    const xercesc::DOMNode* const node = nodes->item(0);
+    const std::string value = to_string(node);
+    if (ACE_OS::strcasecmp(value.c_str(), "NONE") == 0) {
+      is_protected = false;
+    } else if (ACE_OS::strcasecmp(value.c_str(), "SIGN") == 0) {
+      is_protected = true;
+    } else if (ACE_OS::strcasecmp(value.c_str(), "ENCRYPT") == 0) {
+      is_protected = true;
+      attributes |= enc_attr;
+    } else if (ACE_OS::strcasecmp(value.c_str(), "SIGN_WITH_ORIGIN_AUTHENTICATION") == 0) {
+      is_protected = true;
+      attributes |= oa_attr;
+    } else if (ACE_OS::strcasecmp(value.c_str(), "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") == 0) {
+      is_protected = true;
+      attributes |= enc_attr;
+      attributes |= oa_attr;
+    } else {
+      if (security_debug.access_error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} Governance::load: "
+          "invalid %s, \"%C\", in \"%s\"\n",
+          name, value.c_str(), doc.filename().c_str()));
+      }
+      return false;
+    }
+
+    return true;
+  }
+}
+
 int Governance::load(const SSL::SignedDocument& doc)
 {
-  using XML::XStr;
-  static const char* gMemBufId = "gov buffer id";
-
-  xercesc::XMLPlatformUtils::Initialize();
-  DCPS::unique_ptr<xercesc::XercesDOMParser> parser(new xercesc::XercesDOMParser());
-
+  std::string xml;
+  doc.get_original_minus_smime(xml);
+  ParserPtr parser(get_parser(doc.filename(), xml));
   if (!parser) {
-    ACE_DEBUG((LM_ERROR, ACE_TEXT(
-      "(%P|%t) AccessControlBuiltInImpl::load_governance_file: Governance XML DOMParser Exception.\n")));
+    if (security_debug.access_error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} Governance::load: "
+        "get_parser failed\n"));
+    }
     return -1;
-  }
-
-  parser->setValidationScheme(xercesc::XercesDOMParser::Val_Always);
-  parser->setDoNamespaces(true);    // optional
-  parser->setCreateCommentNodes(false);
-
-  DCPS::unique_ptr<xercesc::ErrorHandler> errHandler((xercesc::ErrorHandler*) new xercesc::HandlerBase());
-  parser->setErrorHandler(errHandler.get());
-
-  // buffer for parsing
-
-  std::string cleaned;
-  doc.get_original_minus_smime(cleaned);
-
-  xercesc::MemBufInputSource contentbuf((const XMLByte*) cleaned.c_str(),
-                                        cleaned.size(),
-                                        gMemBufId);
-
-  try {
-    parser->parse(contentbuf);
-
-  } catch (const xercesc::XMLException& toCatch) {
-    char* message = xercesc::XMLString::transcode(toCatch.getMessage());
-    ACE_DEBUG((LM_ERROR, ACE_TEXT(
-        "(%P|%t) AccessControlBuiltInImpl::load_governance_file: Exception message is %C.\n"), message));
-    xercesc::XMLString::release(&message);
-    return -1;
-
-  } catch (const xercesc::DOMException& toCatch) {
-    char* message = xercesc::XMLString::transcode(toCatch.msg);
-    ACE_DEBUG((LM_ERROR, ACE_TEXT(
-        "(%P|%t) AccessControlBuiltInImpl::load_governance_file: Exception message is %C.\n"), message));
-    xercesc::XMLString::release(&message);
-    return -1;
-
-  } catch (...) {
-    ACE_DEBUG((LM_ERROR, ACE_TEXT(
-        "(%P|%t) AccessControlBuiltInImpl::load_governance_file: Unexpected Governance XML Parser Exception.\n")));
-    return -1;
-  }
-
-  // Successfully parsed the governance file
-
-  const xercesc::DOMDocument* xmlDoc = parser->getDocument();
-
-  const xercesc::DOMElement* elementRoot = xmlDoc->getDocumentElement();
-  if (!elementRoot) {
-    throw std::runtime_error("empty XML document");
   }
 
   // Find the domain rules
-  const xercesc::DOMNodeList* domainRules = xmlDoc->getElementsByTagName(XStr(ACE_TEXT("domain_rule")));
-
+  const xercesc::DOMNodeList* const domainRules = parser->getDocument()->getDocumentElement()->
+    getElementsByTagName(XStr(ACE_TEXT("domain_rule")));
   for (XMLSize_t r = 0, dr_len = domainRules->getLength(); r < dr_len; ++r) {
-    Governance::DomainRule rule_holder_;
-    rule_holder_.domain_attrs.plugin_participant_attributes = 0;
+    Governance::DomainRule domain_rule;
+    domain_rule.domain_attrs.plugin_participant_attributes = 0;
+    const xercesc::DOMElement* const domain_rule_el =
+      dynamic_cast<const xercesc::DOMElement*>(domainRules->item(r));
 
-    const xercesc::DOMNode* domainRule = domainRules->item(r);
-
-    // Pull out domain ids used in the rule. We are NOT supporting ranges at this time
-    const xercesc::DOMNodeList* ruleNodes = domainRule->getChildNodes();
-
+    // Process domain ids this domain rule applies to
+    const xercesc::DOMNodeList* const ruleNodes = domain_rule_el->getChildNodes();
     for (XMLSize_t rn = 0, rn_len = ruleNodes->getLength(); rn < rn_len; rn++) {
-
-      const xercesc::DOMNode* ruleNode = ruleNodes->item(rn);
-
+      const xercesc::DOMNode* const ruleNode = ruleNodes->item(rn);
       const XStr dn_tag = ruleNode->getNodeName();
-
       if (ACE_TEXT("domains") == dn_tag) {
-        const xercesc::DOMNodeList* domainIdNodes = ruleNode->getChildNodes();
-
-        for (XMLSize_t did = 0, did_len = domainIdNodes->getLength(); did < did_len; did++) {
-
-          const xercesc::DOMNode* domainIdNode = domainIdNodes->item(did);
-
-          if (ACE_TEXT("id") == XStr(domainIdNode->getNodeName())) {
-            const XMLCh* t = domainIdNode->getTextContent();
-            unsigned int i;
-            if (xercesc::XMLString::textToBin(t, i)) {
-              rule_holder_.domain_list.insert(i);
-            }
-          } else if (ACE_TEXT("id_range") == XStr(domainIdNode->getNodeName())) {
-            int min_value = 0;
-            int max_value = 0;
-
-            const xercesc::DOMNodeList* domRangeIdNodes = domainIdNode->getChildNodes();
-
-            for (XMLSize_t drid = 0, drid_len = domRangeIdNodes->getLength(); drid < drid_len; drid++) {
-
-              const xercesc::DOMNode* domRangeIdNode = domRangeIdNodes->item(drid);
-
-              if (ACE_OS::strcmp("min", xercesc::XMLString::transcode(domRangeIdNode->getNodeName())) == 0) {
-                min_value = atoi(xercesc::XMLString::transcode(domRangeIdNode->getTextContent()));
-              } else if (strcmp("max", xercesc::XMLString::transcode(domRangeIdNode->getNodeName())) == 0) {
-                max_value = atoi(xercesc::XMLString::transcode(domRangeIdNode->getTextContent()));
-
-                if (min_value > max_value) {
-                  ACE_DEBUG((LM_ERROR, ACE_TEXT(
-                      "(%P|%t) AccessControlBuiltInImpl::load_governance_file: Governance XML Domain Range invalid.\n")));
-                  return -1;
-                }
-
-                for (int i = min_value; i <= max_value; ++i) {
-                  rule_holder_.domain_list.insert(i);
-                }
-              }
-            }
+        if (!parse_domain_id_set(ruleNode, domain_rule.domains)) {
+          if (security_debug.access_error) {
+            ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} Governance::load: "
+              "failed to process domain ids in \"%C\"\n",
+              doc.filename().c_str()));
           }
+          return -1;
         }
-
       }
     }
 
     // Process allow_unauthenticated_participants
-    const xercesc::DOMNodeList* allow_unauthenticated_participants_ =
-              xmlDoc->getElementsByTagName(XStr(ACE_TEXT("allow_unauthenticated_participants")));
-    char* attr_aup = xercesc::XMLString::transcode(allow_unauthenticated_participants_->item(0)->getTextContent());
-    rule_holder_.domain_attrs.allow_unauthenticated_participants = (ACE_OS::strcasecmp(attr_aup,"false") == 0 ? false : true);
-    xercesc::XMLString::release(&attr_aup);
+    if (!get_bool_tag(doc, domain_rule_el, ACE_TEXT("allow_unauthenticated_participants"),
+        domain_rule.domain_attrs.allow_unauthenticated_participants)) {
+      return -1;
+    }
 
     // Process enable_join_access_control
-    const xercesc::DOMNodeList* enable_join_access_control_ =
-             xmlDoc->getElementsByTagName(XStr(ACE_TEXT("enable_join_access_control")));
-    char* attr_ejac = xercesc::XMLString::transcode(enable_join_access_control_->item(0)->getTextContent());
-    rule_holder_.domain_attrs.is_access_protected = ACE_OS::strcasecmp(attr_ejac, "false") == 0 ? false : true;
-    xercesc::XMLString::release(&attr_ejac);
+    if (!get_bool_tag(doc, domain_rule_el, ACE_TEXT("enable_join_access_control"),
+        domain_rule.domain_attrs.is_access_protected)) {
+      return -1;
+    }
 
     // Process discovery_protection_kind
-    const xercesc::DOMNodeList* discovery_protection_kind_ =
-             xmlDoc->getElementsByTagName(XStr(ACE_TEXT("discovery_protection_kind")));
-    char* attr_dpk = xercesc::XMLString::transcode(discovery_protection_kind_->item(0)->getTextContent());
-    if (ACE_OS::strcasecmp(attr_dpk, "NONE") == 0) {
-      rule_holder_.domain_attrs.is_discovery_protected = false;
-    } else if (ACE_OS::strcasecmp(attr_dpk, "SIGN") == 0) {
-      rule_holder_.domain_attrs.is_discovery_protected = true;
-    } else if (ACE_OS::strcasecmp(attr_dpk, "ENCRYPT") == 0) {
-      rule_holder_.domain_attrs.is_discovery_protected = true;
-      rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_BUILTIN_IS_DISCOVERY_ENCRYPTED;
-    } else if (ACE_OS::strcasecmp(attr_dpk, "SIGN_WITH_ORIGIN_AUTHENTICATION") == 0) {
-      rule_holder_.domain_attrs.is_discovery_protected = true;
-      rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_ORIGIN_AUTHENTICATED;
-    } else if (ACE_OS::strcasecmp(attr_dpk, "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") == 0) {
-      rule_holder_.domain_attrs.is_discovery_protected = true;
-      rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_BUILTIN_IS_DISCOVERY_ENCRYPTED;
-      rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_ORIGIN_AUTHENTICATED;
+    if (!get_protection_kind(doc, domain_rule_el, ACE_TEXT("discovery_protection_kind"),
+        domain_rule.domain_attrs.is_discovery_protected,
+        domain_rule.domain_attrs.plugin_participant_attributes,
+        PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_BUILTIN_IS_DISCOVERY_ENCRYPTED,
+        PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_ORIGIN_AUTHENTICATED)) {
+      return -1;
     }
-    xercesc::XMLString::release(&attr_dpk);
 
     // Process liveliness_protection_kind
-    const xercesc::DOMNodeList* liveliness_protection_kind_ =
-             xmlDoc->getElementsByTagName(XStr(ACE_TEXT("liveliness_protection_kind")));
-    char* attr_lpk = xercesc::XMLString::transcode(liveliness_protection_kind_->item(0)->getTextContent());
-    if (ACE_OS::strcasecmp(attr_lpk, "NONE") == 0) {
-      rule_holder_.domain_attrs.is_liveliness_protected = false;
-    } else if (ACE_OS::strcasecmp(attr_lpk, "SIGN") == 0) {
-      rule_holder_.domain_attrs.is_liveliness_protected = true;
-    } else if (ACE_OS::strcasecmp(attr_lpk, "ENCRYPT") == 0) {
-      rule_holder_.domain_attrs.is_liveliness_protected = true;
-      rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ENCRYPTED;
-    } else if (ACE_OS::strcasecmp(attr_lpk, "SIGN_WITH_ORIGIN_AUTHENTICATION") == 0) {
-      rule_holder_.domain_attrs.is_liveliness_protected = true;
-      rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ORIGIN_AUTHENTICATED;
-    } else if (ACE_OS::strcasecmp(attr_lpk, "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") == 0) {
-      rule_holder_.domain_attrs.is_liveliness_protected = true;
-      rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ENCRYPTED;
-      rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ORIGIN_AUTHENTICATED;
+    if (!get_protection_kind(doc, domain_rule_el, ACE_TEXT("liveliness_protection_kind"),
+        domain_rule.domain_attrs.is_liveliness_protected,
+        domain_rule.domain_attrs.plugin_participant_attributes,
+        PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ENCRYPTED,
+        PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_ORIGIN_AUTHENTICATED)) {
+      return -1;
     }
-    xercesc::XMLString::release(&attr_lpk);
 
     // Process rtps_protection_kind
-    const xercesc::DOMNodeList* rtps_protection_kind_ =
-             xmlDoc->getElementsByTagName(XStr(ACE_TEXT("rtps_protection_kind")));
-    char* attr_rpk = xercesc::XMLString::transcode(rtps_protection_kind_->item(0)->getTextContent());
-
-    if (ACE_OS::strcasecmp(attr_rpk, "NONE") == 0) {
-      rule_holder_.domain_attrs.is_rtps_protected = false;
-    } else if (ACE_OS::strcasecmp(attr_rpk, "SIGN") == 0) {
-      rule_holder_.domain_attrs.is_rtps_protected = true;
-    } else if (ACE_OS::strcasecmp(attr_rpk, "ENCRYPT") == 0) {
-      rule_holder_.domain_attrs.is_rtps_protected = true;
-      rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_ENCRYPTED;
-    } else if (ACE_OS::strcasecmp(attr_rpk, "SIGN_WITH_ORIGIN_AUTHENTICATION") == 0) {
-      rule_holder_.domain_attrs.is_rtps_protected = true;
-      rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_ORIGIN_AUTHENTICATED;
-    } else if (ACE_OS::strcasecmp(attr_rpk, "ENCRYPT_WITH_ORIGIN_AUTHENTICATION") == 0) {
-      rule_holder_.domain_attrs.is_rtps_protected = true;
-      rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_ENCRYPTED;
-      rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_ORIGIN_AUTHENTICATED;
+    if (!get_protection_kind(doc, domain_rule_el, ACE_TEXT("rtps_protection_kind"),
+        domain_rule.domain_attrs.is_rtps_protected,
+        domain_rule.domain_attrs.plugin_participant_attributes,
+        PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_ENCRYPTED,
+        PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_ORIGIN_AUTHENTICATED)) {
+      return -1;
     }
-    xercesc::XMLString::release(&attr_rpk);
 
-    rule_holder_.domain_attrs.plugin_participant_attributes |= ::DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID;
+    domain_rule.domain_attrs.plugin_participant_attributes |=
+      PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID;
 
     // Process topic rules
-
-    const xercesc::DOMNodeList* topic_rules = xmlDoc->getElementsByTagName(XStr(ACE_TEXT("topic_rule")));
-
+    const xercesc::DOMNodeList* topic_rules =
+      domain_rule_el->getElementsByTagName(XStr(ACE_TEXT("topic_rule")));
     for (XMLSize_t tr = 0, tr_len = topic_rules->getLength(); tr < tr_len; tr++) {
-
       const xercesc::DOMNode* topic_rule = topic_rules->item(tr);
-
       const xercesc::DOMNodeList* topic_rule_nodes = topic_rule->getChildNodes();
       Governance::TopicAccessRule t_rules;
-
       for (XMLSize_t trn = 0, trn_len = topic_rule_nodes->getLength(); trn < trn_len; trn++) {
-
         const xercesc::DOMNode* topic_rule_node = topic_rule_nodes->item(trn);
+        const std::string name = to_string(topic_rule_node->getNodeName());
 
-        const XStr tr_tag = topic_rule_node->getNodeName();
-        char* tr_val = xercesc::XMLString::transcode(topic_rule_node->getTextContent());
-
-        if (tr_tag == ACE_TEXT("topic_expression")) {
-          t_rules.topic_expression = tr_val;
-        } else if (tr_tag == ACE_TEXT("enable_discovery_protection")) {
-          t_rules.topic_attrs.is_discovery_protected = ACE_OS::strcasecmp(tr_val, "false") == 0 ? false : true;
-        } else if (tr_tag == ACE_TEXT("enable_liveliness_protection")) {
-          t_rules.topic_attrs.is_liveliness_protected = ACE_OS::strcasecmp(tr_val, "false") == 0 ? false : true;
-        } else if (tr_tag == ACE_TEXT("enable_read_access_control")) {
-          t_rules.topic_attrs.is_read_protected = ACE_OS::strcasecmp(tr_val, "false") == 0 ? false : true;
-        } else if (tr_tag == ACE_TEXT("enable_write_access_control")) {
-          t_rules.topic_attrs.is_write_protected = ACE_OS::strcasecmp(tr_val, "false") == 0 ? false : true;
-        } else if (tr_tag == ACE_TEXT("metadata_protection_kind")) {
-          t_rules.metadata_protection_kind.assign(tr_val);
-        } else if (tr_tag == ACE_TEXT("data_protection_kind")) {
-          t_rules.data_protection_kind.assign(tr_val);
+        bool* bool_value = 0;
+        if (name == "topic_expression") {
+          t_rules.topic_expression = to_string(topic_rule_node);
+        } else if (name == "enable_discovery_protection") {
+          bool_value = &t_rules.topic_attrs.is_discovery_protected;
+        } else if (name == "enable_liveliness_protection") {
+          bool_value = &t_rules.topic_attrs.is_liveliness_protected;
+        } else if (name == "enable_read_access_control") {
+          bool_value = &t_rules.topic_attrs.is_read_protected;
+        } else if (name == "enable_write_access_control") {
+          bool_value = &t_rules.topic_attrs.is_write_protected;
+        } else if (name == "metadata_protection_kind") {
+          t_rules.metadata_protection_kind = to_string(topic_rule_node);
+        } else if (name == "data_protection_kind") {
+          t_rules.data_protection_kind = to_string(topic_rule_node);
         }
-        xercesc::XMLString::release(&tr_val);
+
+        if (bool_value && !get_bool_tag_value(doc, topic_rule_node,
+            ACE_TEXT_CHAR_TO_TCHAR(name.c_str()), *bool_value)) {
+          return -1;
+        }
       }
-      rule_holder_.topic_rules.push_back(t_rules);
+      domain_rule.topic_rules.push_back(t_rules);
     }
 
-    access_rules_.push_back(rule_holder_);
+    access_rules_.push_back(domain_rule);
   } // domain_rule
 
   return 0;
