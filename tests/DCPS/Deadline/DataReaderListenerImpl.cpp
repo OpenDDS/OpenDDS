@@ -9,10 +9,12 @@
 using namespace Messenger;
 
 DataReaderListenerImpl::DataReaderListenerImpl()
-  : mutex_()
-  , matched_condition_(mutex_)
+  : matched_mutex_()
+  , matched_condition_(matched_mutex_)
   , matched_(0)
+  , arrived_mutex_()
   , num_arrived_(0)
+  , count_mutex_()
   , requested_deadline_total_count_(0)
 {
 }
@@ -24,7 +26,7 @@ DataReaderListenerImpl::~DataReaderListenerImpl()
 bool DataReaderListenerImpl::wait_matched(long count, const OpenDDS::DCPS::TimeDuration& max_wait) const
 {
   using namespace OpenDDS::DCPS;
-  Lock lock(mutex_);
+  Lock lock(matched_mutex_);
   if (!lock.locked()) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataReaderListenerImpl::wait_matched: failed to lock\n"));
     return false;
@@ -49,20 +51,36 @@ bool DataReaderListenerImpl::wait_matched(long count, const OpenDDS::DCPS::TimeD
   return true;
 }
 
-CORBA::Long DataReaderListenerImpl::requested_deadline_total_count() const
+void DataReaderListenerImpl::on_subscription_matched(DDS::DataReader_ptr, const DDS::SubscriptionMatchedStatus& status)
 {
-  return requested_deadline_total_count_;
+  Lock lock(matched_mutex_);
+  matched_ = status.current_count;
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_matched %d\n"), matched_));
+  matched_condition_.notify_all();
+}
+
+long DataReaderListenerImpl::num_arrived() const
+{
+  Lock lock(arrived_mutex_);
+  return num_arrived_;
 }
 
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
 {
-  Lock lock(mutex_);
+  Lock lock(arrived_mutex_);
   ++num_arrived_;
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_data_available %d\n"), num_arrived_));
 }
 
+CORBA::Long DataReaderListenerImpl::requested_deadline_total_count() const
+{
+  Lock lock(count_mutex_);
+  return requested_deadline_total_count_;
+}
+
 void DataReaderListenerImpl::on_requested_deadline_missed(DDS::DataReader_ptr, const DDS::RequestedDeadlineMissedStatus& status)
 {
+  Lock lock(count_mutex_);
   if ((requested_deadline_total_count_ + status.total_count_change) != status.total_count) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_requested_deadline_missed: ")
@@ -75,14 +93,6 @@ void DataReaderListenerImpl::on_requested_deadline_missed(DDS::DataReader_ptr, c
       status.total_count, status.total_count_change, status.last_instance_handle));
   }
   requested_deadline_total_count_ += status.total_count_change;
-}
-
-void DataReaderListenerImpl::on_subscription_matched(DDS::DataReader_ptr, const DDS::SubscriptionMatchedStatus& status)
-{
-  Lock lock(mutex_);
-  matched_ = status.current_count;
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_matched %d\n"), matched_));
-  matched_condition_.notify_all();
 }
 
 void DataReaderListenerImpl::on_requested_incompatible_qos(DDS::DataReader_ptr, const DDS::RequestedIncompatibleQosStatus&)
