@@ -78,16 +78,18 @@ Publisher::Publisher(int argc, ACE_TCHAR* argv[]) : domain_(argc, argv, "Publish
 
 int Publisher::run()
 {
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Publisher::run uses dw_ to create 2 threads for 2 instances\n")));
-  OpenDDS::DCPS::unique_ptr<Writer> writer(new Writer(dw_));
   if (!set_deadline_qos()) {
     return 1;
   }
-  if (!writer->start()) {
+
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Publisher::run: wait_matched\n")));
+  if (!listener_i_->wait_matched(2, OpenDDS::DCPS::TimeDuration(10))) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Publisher::run wait_matched failed.\n")));
     return 1;
   }
-  if (!writer->wait_matched()) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Publisher::run took too long to associate.\n")));
+
+  OpenDDS::DCPS::unique_ptr<Writer> writer(new Writer(dw_));
+  if (!writer->start()) {
     return 1;
   }
 

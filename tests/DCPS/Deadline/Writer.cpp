@@ -16,12 +16,8 @@ const OpenDDS::DCPS::TimeDuration Writer::sWriteInterval(0, 500000);
 
 Writer::Writer(const DDS::DataWriter_var& dw)
   : mdw_()
-  , dw_listener_i_(0)
   , key_mutex_()
   , key_n_(0)
-  , match_mutex_()
-  , condition_(match_mutex_)
-  , associated_(false)
 {
   if (!dw) {
     throw std::runtime_error("Writer::Writer DataWriter is null.\n");
@@ -29,11 +25,6 @@ Writer::Writer(const DDS::DataWriter_var& dw)
   mdw_ = Messenger::MessageDataWriter::_narrow(dw.in());
   if (!mdw_) {
     throw std::runtime_error("Writer::Writer DataWriter could not be narrowed.\n");
-  }
-  DDS::DataWriterListener_var dwl = dw->get_listener();
-  dw_listener_i_ = dynamic_cast<DataWriterListenerImpl*>(dwl.in());
-  if (!dw_listener_i_) {
-    throw std::runtime_error("Writer::Writer dw_listener_i_ is null.\n");
   }
 }
 
@@ -58,15 +49,6 @@ int Writer::svc()
   const int key = get_key();
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Writer::svc key%d begins.\n"), key));
   try {
-    if (dw_listener_i_->wait_matched(2, OpenDDS::DCPS::TimeDuration(10))) {
-      Lock lock(match_mutex_);
-      associated_ = true;
-      condition_.notify_all();
-    } else {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Writer::svc key%d wait_matched failed.\n"), key));
-      return 1;
-    }
-
     Messenger::Message msg;
     msg.subject_id = key;
     DDS::InstanceHandle_t instance = mdw_->register_instance(msg);
@@ -97,12 +79,6 @@ int Writer::svc()
   }
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::svc key%d finished.\n"), key));
   return 0;
-}
-
-bool Writer::wait_matched()
-{
-  Lock lock(match_mutex_);
-  return associated_ || condition_.wait_for(OpenDDS::DCPS::TimeDuration(10)) == OpenDDS::DCPS::CvStatus_NoTimeout;
 }
 
 int Writer::get_key()

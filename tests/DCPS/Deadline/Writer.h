@@ -20,7 +20,6 @@ public:
   bool start(); // Launch 2 threads
   void end();
   virtual int svc();
-  bool wait_matched();
 
 private:
   typedef ACE_SYNCH_MUTEX Mutex;
@@ -29,12 +28,8 @@ private:
   int get_key();
 
   Messenger::MessageDataWriter_var mdw_;
-  DataWriterListenerImpl* dw_listener_i_;
   Mutex key_mutex_;
   int key_n_;
-  Mutex match_mutex_;
-  OpenDDS::DCPS::ConditionVariable<Mutex> condition_;
-  bool associated_;
 };
 
 #endif /* WRITER_H */
