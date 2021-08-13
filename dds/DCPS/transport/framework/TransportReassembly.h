@@ -124,6 +124,26 @@ private:
       }
     }
 
+    FragInfo(const FragInfo& val)
+    {
+      *this = val;
+    }
+
+    FragInfo& operator=(const FragInfo& rhs)
+    {
+      if (this != &rhs) {
+        have_first_ = rhs.have_first_;
+        range_list_ = rhs.range_list_;
+        total_frags_ = rhs.total_frags_;
+        expiration_ = rhs.expiration_;
+        range_finder_.clear();
+        for (FragRangeList::iterator it = range_list_.begin(); it != range_list_.end(); ++it) {
+          range_finder_[it->transport_seq_.second.getValue()] = it;
+        }
+      }
+      return *this;
+    }
+
     bool have_first_;
     FragRangeList range_list_;
     FragRangeIterMap range_finder_;
