@@ -26,8 +26,8 @@ class OpenDDS_Security_Export SignedDocument {
 public:
   typedef DCPS::unique_ptr<SignedDocument> unique_ptr;
 
-  friend OpenDDS_Security_Export bool operator==(const SignedDocument& lhs,
-                                            const SignedDocument& rhs);
+  friend OpenDDS_Security_Export bool operator==(
+    const SignedDocument& lhs, const SignedDocument& rhs);
 
   explicit SignedDocument(const std::string& uri);
 
@@ -77,13 +77,16 @@ public:
    */
   int deserialize(const std::string& src);
 
- private:
+  const std::string filename() const
+  {
+    return filename_;
+  }
+
+private:
 
   bool loaded()
   {
-    return (doc_ != NULL) &&
-      (0 < original_.length()) &&
-      (0 < verifiable_.length());
+    return doc_ && original_.length() && verifiable_.length();
   }
 
   /**
@@ -100,10 +103,11 @@ public:
   PKCS7* doc_;
   DDS::OctetSeq original_;
   std::string verifiable_;
+  std::string filename_;
 };
 
-OpenDDS_Security_Export bool operator==(const SignedDocument& lhs,
-                                   const SignedDocument& rhs);
+OpenDDS_Security_Export bool operator==(
+  const SignedDocument& lhs, const SignedDocument& rhs);
 
 }  // namespace SSL
 }  // namespace Security

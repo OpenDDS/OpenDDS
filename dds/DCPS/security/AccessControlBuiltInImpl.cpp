@@ -343,7 +343,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   for (gov_iter giter = begin; giter != end; ++giter) {
 
-    if (giter->domain_list.count(domain_id)) {
+    if (giter->domains.has(domain_id)) {
       Governance::TopicAccessRules::iterator tr_iter;
 
       for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
@@ -392,7 +392,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   for (gov_iter giter = begin; giter != end; ++giter) {
 
-    if (giter->domain_list.count(domain_id)) {
+    if (giter->domains.has(domain_id)) {
       Governance::TopicAccessRules::iterator tr_iter;
 
       for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
@@ -412,8 +412,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datawriter: Permissions grant not found");
   }
 
-  time_t expiration;
-  if (!validate_date_time(grant->validity, expiration, ex)) {
+  if (!validate_date_time(grant->validity, ex)) {
     return false;
   }
 
@@ -421,7 +420,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  make_task(local_rp_task_)->insert(permissions_handle, expiration);
+  make_task(local_rp_task_)->insert(permissions_handle, grant->validity.not_after);
 
   return true;
 }
@@ -456,7 +455,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   for (gov_iter giter = begin; giter != end; ++giter) {
 
-    if (giter->domain_list.count(domain_id)) {
+    if (giter->domains.has(domain_id)) {
       Governance::TopicAccessRules::iterator tr_iter;
 
       for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
@@ -476,8 +475,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_datareader: Permissions grant not found");
   }
 
-  time_t expiration;
-  if (!validate_date_time(grant->validity, expiration, ex)) {
+  if (!validate_date_time(grant->validity, ex)) {
     return false;
   }
 
@@ -485,7 +483,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  make_task(local_rp_task_)->insert(permissions_handle, expiration);
+  make_task(local_rp_task_)->insert(permissions_handle, grant->validity.not_after);
 
   return true;
 }
@@ -525,7 +523,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   for (gov_iter giter = begin; giter != end; ++giter) {
 
-    if (giter->domain_list.count(domain_to_find)) {
+    if (giter->domains.has(domain_to_find)) {
       Governance::TopicAccessRules::iterator tr_iter;
 
       for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
@@ -543,8 +541,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_create_topic: grant not found");
   }
 
-  time_t expiration;
-  if (!validate_date_time(grant->validity, expiration, ex)) {
+  if (!validate_date_time(grant->validity, ex)) {
     return false;
   }
 
@@ -553,7 +550,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   // Iterate over allow / deny rules
   for (perm_topic_rules_iter ptr_iter = grant->rules.begin(); ptr_iter != grant->rules.end(); ++ptr_iter) {
 
-    if (ptr_iter->domains.count(domain_to_find)) {
+    if (ptr_iter->domains.has(domain_to_find)) {
 
       perm_topic_actions_iter tpsr_iter;
       for (tpsr_iter = ptr_iter->actions.begin(); tpsr_iter != ptr_iter->actions.end(); ++tpsr_iter) {
@@ -645,7 +642,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   gov_iter end = ac_iter->second.gov->access_rules().end();
 
   for (gov_iter giter = begin; giter != end; ++giter) {
-    if (giter->domain_list.count(domain_id) && !giter->domain_attrs.is_access_protected) {
+    if (giter->domains.has(domain_id) && !giter->domain_attrs.is_access_protected) {
       return true;
     }
   }
@@ -693,7 +690,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   for (perm_topic_rules_iter ptr_iter = grant->rules.begin(); ptr_iter != grant->rules.end(); ++ptr_iter) {
-    if (ptr_iter->domains.count(domain_id) && ptr_iter->ad_type == Permissions::ALLOW) {
+    if (ptr_iter->domains.has(domain_id) && ptr_iter->ad_type == Permissions::ALLOW) {
       return true;
     }
   }
@@ -732,7 +729,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   for (gov_iter giter = begin; giter != end; ++giter) {
 
-    if (giter->domain_list.count(domain_id)) {
+    if (giter->domains.has(domain_id)) {
       Governance::TopicAccessRules::iterator tr_iter;
 
       for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
@@ -750,8 +747,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter: Permissions grant not found");
   }
 
-  time_t expiration;
-  if (!validate_date_time(grant->validity, expiration, ex)) {
+  if (!validate_date_time(grant->validity, ex)) {
     return false;
   }
 
@@ -761,7 +757,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  make_task(remote_rp_task_)->insert(permissions_handle, expiration);
+  make_task(remote_rp_task_)->insert(permissions_handle, grant->validity.not_after);
 
   return true;
 }
@@ -793,7 +789,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   for (gov_iter giter = begin; giter != end; ++giter) {
 
-    if (giter->domain_list.count(domain_id)) {
+    if (giter->domains.has(domain_id)) {
       Governance::TopicAccessRules::iterator tr_iter;
 
       for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
@@ -811,8 +807,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datareader: Permissions grant not found");
   }
 
-  time_t expiration;
-  if (!validate_date_time(grant->validity, expiration, ex)) {
+  if (!validate_date_time(grant->validity, ex)) {
     return false;
   }
 
@@ -822,7 +817,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  make_task(remote_rp_task_)->insert(permissions_handle, expiration);
+  make_task(remote_rp_task_)->insert(permissions_handle, grant->validity.not_after);
 
   return true;
 }
@@ -895,7 +890,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   for (gov_iter giter = begin; giter != end; ++giter) {
 
-    if (giter->domain_list.count(domain_id)) {
+    if (giter->domains.has(domain_id)) {
       Governance::TopicAccessRules::iterator tr_iter;
 
       for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
@@ -913,8 +908,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_topic: grant not found");
   }
 
-  time_t expiration;
-  if (!validate_date_time(grant->validity, expiration, ex)) {
+  if (!validate_date_time(grant->validity, ex)) {
     return false;
   }
 
@@ -922,7 +916,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   bool found_deny = false;
   for (perm_topic_rules_iter ptr_iter = grant->rules.begin(); ptr_iter != grant->rules.end(); ++ptr_iter) {
 
-    if (ptr_iter->domains.count(domain_id)) {
+    if (ptr_iter->domains.has(domain_id)) {
 
       // Iterate over pub / sub rules
       perm_topic_actions_iter tpsr_iter;
@@ -1170,7 +1164,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   for (gov_iter giter = begin; giter != end; ++giter) {
 
-    if (giter->domain_list.count(ac_iter->second.domain_id)) {
+    if (giter->domains.has(ac_iter->second.domain_id)) {
       attributes = giter->domain_attrs;
       return true;
     }
@@ -1211,7 +1205,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   for (gov_iter giter = begin; giter != end; ++giter) {
 
-    if (giter->domain_list.count(piter->second.domain_id)) {
+    if (giter->domains.has(piter->second.domain_id)) {
       Governance::TopicAccessRules::iterator tr_iter;
 
       for (tr_iter = giter->topic_rules.begin(); tr_iter != giter->topic_rules.end(); ++tr_iter) {
@@ -1325,118 +1319,39 @@ AccessControlBuiltInImpl::make_task(RevokePermissionsTask_rch& task)
   return task;
 }
 
-// NOTE: This function will return the time value as UTC
-// Format from DDS Security spec 1.1 is a kind of ISO 8601:
-//   CCYY-MM-DDThh:mm:ss[Z|(+|-)hh:mm]
-time_t AccessControlBuiltInImpl::convert_permissions_time(const std::string& timeString)
-{
-  // Check for a valid length time string, which is 19 characters (up through seconds)
-  if (timeString.length() < 19) {
-    return 0;
-  }
-
-  //time_t permission_time_t;
-  tm permission_tm;
-  std::string temp_str;
-
-  memset(&permission_tm, 0, sizeof(tm));
-  // Year
-  temp_str = timeString.substr(0, 4);
-  permission_tm.tm_year = (atoi(temp_str.c_str()) - 1900);
-  temp_str.clear();
-  // Month
-  temp_str = timeString.substr(5, 2);
-  permission_tm.tm_mon = (atoi(temp_str.c_str()) - 1);
-  temp_str.clear();
-  // Day
-  temp_str = timeString.substr(8, 2);
-  permission_tm.tm_mday = atoi(temp_str.c_str());
-  temp_str.clear();
-  // Hour
-  temp_str = timeString.substr(11, 2);
-  permission_tm.tm_hour = atoi(temp_str.c_str());
-  temp_str.clear();
-  // Minutes
-  temp_str = timeString.substr(14, 2);
-  permission_tm.tm_min = atoi(temp_str.c_str());
-  temp_str.clear();
-  // Seconds
-  temp_str = timeString.substr(17, 2);
-  permission_tm.tm_sec = atoi(temp_str.c_str());
-
-  // Check if there is time zone information in the string, Z is in the 20th character
-  if (timeString.length() > 20) {
-    temp_str.clear();
-    temp_str = timeString.substr(19, 1);
-
-    // The only adjustments that need to be made are if the character
-    // is a '+' or '-'
-    if (temp_str == "Z") {
-      temp_str.clear();
-      temp_str = timeString.substr(20, 1);
-
-      if (temp_str == "+") {
-        temp_str.clear();
-        temp_str = timeString.substr(21, 2);
-        permission_tm.tm_hour -= atoi(temp_str.c_str());
-        temp_str.clear();
-        temp_str = timeString.substr(24, 2);
-        permission_tm.tm_min -= atoi(temp_str.c_str());
-      }
-      else if (temp_str == "-") {
-        temp_str.clear();
-        temp_str = timeString.substr(21, 2);
-        permission_tm.tm_hour += atoi(temp_str.c_str());
-        temp_str.clear();
-        temp_str = timeString.substr(24, 2);
-        permission_tm.tm_min += atoi(temp_str.c_str());
-      }
-    }
-
-  }
-
-  permission_tm.tm_isdst = -1;
-
-  return mktime(&permission_tm);
-}
-
 bool AccessControlBuiltInImpl::validate_date_time(
   const Permissions::Validity_t& validity,
-  time_t& expiration,
   DDS::Security::SecurityException& ex)
 {
-  time_t after_time = 0, cur_utc_time = 0;
-  const time_t current_date_time = time(0);
-
-  const time_t before_time = convert_permissions_time(validity.not_before);
-
-  if (before_time == 0) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_date_time: Permissions not_before time is invalid.");
+  if (validity.not_before == 0) {
+    CommonUtilities::set_security_error(ex, -1, 0,
+      "AccessControlBuiltInImpl::validate_date_time: Permissions not_before time is invalid.");
     return false;
   }
 
-  // Adjust the current time to UTC/GMT
-  tm *current_time_tm = gmtime(&current_date_time);
-  cur_utc_time = mktime(current_time_tm);
-
-  if (cur_utc_time < before_time) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_date_time: Permissions grant hasn't started yet.");
+  if (validity.not_after == 0) {
+    CommonUtilities::set_security_error(ex, -1, 0,
+      "AccessControlBuiltInImpl::validate_date_time: Permissions not_after time is invalid.");
     return false;
   }
 
-  after_time = convert_permissions_time(validity.not_after);
+  // Get the current time as UTC
+  const time_t now = std::time(0);
+  std::tm* const now_utc_tm = std::gmtime(&now);
+  const time_t now_utc = std::mktime(now_utc_tm);
 
-  if (after_time == 0) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_date_time: Permissions not_after time is invalid.");
+  if (now_utc < validity.not_before) {
+    CommonUtilities::set_security_error(ex, -1, 0,
+      "AccessControlBuiltInImpl::validate_date_time: Permissions grant hasn't started yet.");
     return false;
   }
 
-  if (cur_utc_time > after_time) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_date_time: Permissions grant has expired.");
+  if (now_utc > validity.not_after) {
+    CommonUtilities::set_security_error(ex, -1, 0,
+      "AccessControlBuiltInImpl::validate_date_time: Permissions grant has expired.");
     return false;
   }
 
-  expiration = after_time;
   return true;
 }
 
@@ -1447,24 +1362,18 @@ CORBA::Boolean AccessControlBuiltInImpl::get_sec_attributes(::DDS::Security::Per
                                                             ::DDS::Security::EndpointSecurityAttributes & attributes,
                                                             ::DDS::Security::SecurityException & ex)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_mutex_, 1);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_mutex_, false);
 
-  ACPermsMap::iterator ac_iter = local_ac_perms_.find(permissions_handle);
-
+  const ACPermsMap::iterator ac_iter = local_ac_perms_.find(permissions_handle);
   if (ac_iter == local_ac_perms_.end()) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::get_datawriter_sec_attributes: No matching permissions handle present");
     return false;
   }
 
-  ::DDS::Security::DomainId_t domain_to_find = ac_iter->second.domain_id;
-
-  gov_iter begin = ac_iter->second.gov->access_rules().begin();
-  gov_iter end = ac_iter->second.gov->access_rules().end();
-
+  const gov_iter begin = ac_iter->second.gov->access_rules().begin();
+  const gov_iter end = ac_iter->second.gov->access_rules().end();
   for (gov_iter giter = begin; giter != end; ++giter) {
-    size_t d = giter->domain_list.count(domain_to_find);
-
-    if (d > 0) {
+    if (giter->domains.has(ac_iter->second.domain_id)) {
       if (std::strcmp(topic_name, "DCPSParticipantVolatileMessageSecure") == 0) {
         attributes.base.is_write_protected = false;
         attributes.base.is_read_protected = false;
@@ -1595,7 +1504,7 @@ bool AccessControlBuiltInImpl::search_permissions(
   DDS::Security::SecurityException& ex)
 {
   for (Permissions::Rules::const_iterator rit = grant.rules.begin(); rit != grant.rules.end(); ++rit) {
-    if (rit->domains.count(domain_id)) {
+    if (rit->domains.has(domain_id)) {
       for (Permissions::Actions::const_iterator ait = rit->actions.begin(); ait != rit->actions.end(); ++ait) {
         if (ait->ps_type == pub_or_sub &&
             ait->topic_matches(topic_name) &&

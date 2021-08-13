@@ -21,7 +21,7 @@ TEST(DisjointSequence, maintest)
     EXPECT_TRUE(sequence.empty());
 
     // ASSERT sequence is not disjoint:
-    EXPECT_TRUE(!sequence.disjoint());
+    EXPECT_FALSE(sequence.disjoint());
   }
 
   // Insert single value
@@ -37,10 +37,10 @@ TEST(DisjointSequence, maintest)
     EXPECT_TRUE(sequence.low() == sequence.high());
 
     // ASSERT sequence is not disjoint:
-    EXPECT_TRUE(!sequence.disjoint());
+    EXPECT_FALSE(sequence.disjoint());
 
     // ASSERT sequence is not empty:
-    EXPECT_TRUE(!sequence.empty());
+    EXPECT_FALSE(sequence.empty());
   }
 
   // Skipping values
@@ -61,7 +61,7 @@ TEST(DisjointSequence, maintest)
     EXPECT_TRUE(sequence.low() == sequence.high());
 
     // ASSERT sequence is not disjoint:
-    EXPECT_TRUE(!sequence.disjoint());
+    EXPECT_FALSE(sequence.disjoint());
   }
 
   // Updating values
@@ -74,7 +74,7 @@ TEST(DisjointSequence, maintest)
 
     EXPECT_TRUE(sequence.cumulative_ack() == SequenceNumber(2));
     EXPECT_TRUE(sequence.cumulative_ack() == sequence.high());
-    EXPECT_TRUE(!sequence.disjoint());
+    EXPECT_FALSE(sequence.disjoint());
 
     // ASSERT insert of value > low + 1 creates discontiguity:
     sequence.reset();
@@ -102,18 +102,18 @@ TEST(DisjointSequence, maintest)
     EXPECT_TRUE(sequence.last_ack() == SequenceNumber(3));
     EXPECT_TRUE(sequence.disjoint());
     EXPECT_TRUE(sequence.contains(1));
-    EXPECT_TRUE(!sequence.contains(2));
+    EXPECT_FALSE(sequence.contains(2));
     EXPECT_TRUE(sequence.contains(3));
     EXPECT_TRUE(sequence.contains(4));
     EXPECT_TRUE(sequence.contains(5));
     EXPECT_TRUE(sequence.contains(6));
-    EXPECT_TRUE(!sequence.contains(7));
+    EXPECT_FALSE(sequence.contains(7));
 
     sequence.insert(2);
 
     EXPECT_TRUE(sequence.cumulative_ack() == SequenceNumber(6));
     EXPECT_TRUE(sequence.high() == SequenceNumber(6));
-    EXPECT_TRUE(!sequence.disjoint());
+    EXPECT_FALSE(sequence.disjoint());
 
     // ASSERT insert of low + 1 updates the cumulative_ack
     //        and preserves existing discontiguities:
@@ -246,7 +246,7 @@ TEST(DisjointSequence, maintest)
     DisjointSequence sequence;
     sequence.insert(SequenceRange(3, 5));
     sequence.insert(SequenceRange(2, 4));
-    EXPECT_TRUE(!sequence.disjoint());
+    EXPECT_FALSE(sequence.disjoint());
     EXPECT_TRUE(sequence.low() == 2);
     EXPECT_TRUE(sequence.high() == 5);
   }
@@ -254,7 +254,7 @@ TEST(DisjointSequence, maintest)
     DisjointSequence sequence;
     SequenceNumber zero = SequenceNumber::ZERO();
     sequence.insert(SequenceRange(zero, zero));
-    EXPECT_TRUE(!sequence.empty() && !sequence.disjoint());
+    EXPECT_FALSE(sequence.empty() && !sequence.disjoint());
     EXPECT_TRUE(zero == sequence.low() && zero == sequence.high());
     sequence.insert(2);
     OPENDDS_VECTOR(SequenceRange) ranges = sequence.missing_sequence_ranges();
@@ -263,11 +263,11 @@ TEST(DisjointSequence, maintest)
     sequence.reset();
     sequence.insert(SequenceRange(zero, zero));
     sequence.insert(SequenceRange(1, 2));
-    EXPECT_TRUE(!sequence.disjoint());
+    EXPECT_FALSE(sequence.disjoint());
     sequence.reset();
     sequence.insert(SequenceRange(1, 2));
     sequence.insert(SequenceRange(zero, zero));
-    EXPECT_TRUE(!sequence.disjoint());
+    EXPECT_FALSE(sequence.disjoint());
   }
   {
     DisjointSequence sequence;
@@ -306,7 +306,7 @@ TEST(DisjointSequence, maintest)
 
     OPENDDS_VECTOR(SequenceRange) dropped;
     EXPECT_TRUE(sequence.insert(SequenceRange(sequence.low(), 12), dropped));
-    EXPECT_TRUE(!sequence.disjoint());
+    EXPECT_FALSE(sequence.disjoint());
     EXPECT_TRUE(dropped.size() == 3);
     EXPECT_TRUE(dropped[0] == SequenceRange(3, 4));
     EXPECT_TRUE(dropped[1] == SequenceRange(7, 8));
@@ -377,21 +377,21 @@ TEST(DisjointSequence, maintest)
     DisjointSequence sequence;
     ACE_CDR::Long bits[] = { 3 << 30 }; // high bit is logical index '0'
     EXPECT_TRUE(sequence.insert(0, 2 /*num_bits*/, bits));
-    EXPECT_TRUE(!sequence.empty() && !sequence.disjoint());
+    EXPECT_FALSE(sequence.empty() && !sequence.disjoint());
     EXPECT_TRUE(sequence.low() == 0 && sequence.high() == 1);
   }
   {
     DisjointSequence sequence;
     ACE_CDR::Long bits[] = { 3 << 29 }; // high bit is logical index '0'
     EXPECT_TRUE(sequence.insert(0, 3 /*num_bits*/, bits));
-    EXPECT_TRUE(!sequence.empty() && !sequence.disjoint());
+    EXPECT_FALSE(sequence.empty() && !sequence.disjoint());
     EXPECT_TRUE(sequence.low() == 1 && sequence.high() == 2);
   }
   {
     DisjointSequence sequence;
     ACE_CDR::Long bits[] = { 1 << 31 }; // high bit is logical index '0'
     EXPECT_TRUE(sequence.insert(5, 1 /*num_bits*/, bits));
-    EXPECT_TRUE(!sequence.empty() && !sequence.disjoint());
+    EXPECT_FALSE(sequence.empty() && !sequence.disjoint());
     EXPECT_TRUE(sequence.low() == 5 && sequence.high() == 5);
   }
   {
@@ -399,7 +399,7 @@ TEST(DisjointSequence, maintest)
     sequence.insert(3);
     ACE_CDR::Long bits[] = { 1 << 31 }; // high bit is logical index '0'
     EXPECT_TRUE(sequence.insert(5, 1 /*num_bits*/, bits));
-    EXPECT_TRUE(!sequence.empty() && sequence.disjoint());
+    EXPECT_FALSE(sequence.empty() && sequence.disjoint());
     EXPECT_TRUE(sequence.low() == 3 && sequence.high() == 5);
 
     ACE_CDR::Long bitmap; // 4:2/01 = (5,5)
@@ -414,7 +414,7 @@ TEST(DisjointSequence, maintest)
     sequence.insert(7);
     ACE_CDR::Long bits[] = { 1 << 31 }; // high bit is logical index '0'
     EXPECT_TRUE(sequence.insert(5, 1 /*num_bits*/, bits));
-    EXPECT_TRUE(!sequence.empty() && sequence.disjoint());
+    EXPECT_FALSE(sequence.empty() && sequence.disjoint());
     EXPECT_TRUE(sequence.low() == 3 && sequence.high() == 7);
     EXPECT_TRUE(sequence.present_sequence_ranges()[1] == SequenceRange(5, 5));
 
@@ -435,7 +435,7 @@ TEST(DisjointSequence, maintest)
     sequence.insert(3);
     ACE_CDR::Long bits[] = { (1 << 31) | (1 << 29) };
     EXPECT_TRUE(sequence.insert(5, 12 /*num_bits*/, bits));
-    EXPECT_TRUE(!sequence.empty() && sequence.disjoint());
+    EXPECT_FALSE(sequence.empty() && sequence.disjoint());
     EXPECT_TRUE(sequence.low() == 3 && sequence.high() == 7);
     EXPECT_TRUE(sequence.present_sequence_ranges()[1] == SequenceRange(5, 5));
   }
@@ -444,7 +444,7 @@ TEST(DisjointSequence, maintest)
     sequence.insert(4);
     ACE_CDR::Long bits[] = { (1 << 31) | (1 << 30) };
     EXPECT_TRUE(sequence.insert(5, 12 /*num_bits*/, bits));
-    EXPECT_TRUE(!sequence.disjoint());
+    EXPECT_FALSE(sequence.disjoint());
     EXPECT_TRUE(sequence.low() == 4 && sequence.high() == 6);
   }
   {
@@ -454,7 +454,7 @@ TEST(DisjointSequence, maintest)
     ACE_CDR::Long bits[] = { (1 << 30) | (1 << 29) | (1 << 28) |
                              (1 << 27) | (1 << 26) }; // 1/6:011111 = (2,6)
     EXPECT_TRUE(sequence.insert(1, 6 /*num_bits*/, bits));
-    EXPECT_TRUE(!sequence.disjoint());
+    EXPECT_FALSE(sequence.disjoint());
     EXPECT_TRUE(sequence.low() == 2 && sequence.high() == 6);
   }
   {
@@ -488,7 +488,7 @@ TEST(DisjointSequence, maintest)
     ACE_CDR::Long bits[] = { (1 << 30) | (1 << 29) | (1 << 28) |
                              (1 << 27) | (1 << 26) }; // 4/6:011111 = (5,9)
     EXPECT_TRUE(sequence.insert(4, 6 /*num_bits*/, bits));
-    EXPECT_TRUE(!sequence.disjoint());
+    EXPECT_FALSE(sequence.disjoint());
     EXPECT_TRUE(sequence.low() == 3 && sequence.high() == 10);
   }
   {
@@ -497,7 +497,7 @@ TEST(DisjointSequence, maintest)
     sequence.insert(SequenceRange(8, 10));
     ACE_CDR::Long bits[] = { (1 << 30) | (1 << 29) | (1 << 28) };
     EXPECT_TRUE(sequence.insert(4, 4 /*num_bits*/, bits)); // 4/4:0111 = (5,7)
-    EXPECT_TRUE(!sequence.disjoint());
+    EXPECT_FALSE(sequence.disjoint());
     EXPECT_TRUE(sequence.low() == 3 && sequence.high() == 10);
   }
   {
@@ -515,7 +515,7 @@ TEST(DisjointSequence, maintest)
     ACE_CDR::ULong num_bits;
     EXPECT_TRUE(sequence.to_bitmap(bitmap, 2, num_bits));
     EXPECT_TRUE(num_bits == 37);
-    EXPECT_TRUE(!bitmap[0] && ((bitmap[1] & 0xF8000000) == 0xF8000000));
+    EXPECT_FALSE(bitmap[0] && ((bitmap[1] & 0xF8000000) == 0xF8000000));
 
     ACE_CDR::Long anti_bitmap; // 4:32/{32x1} = (4,35)
     ACE_CDR::ULong anti_num_bits;
@@ -555,7 +555,7 @@ TEST(DisjointSequence, maintest)
     ACE_CDR::Long anti_bitmap[] = { 0x55555555, 0x55555555 }; // 2:61/101010...
     ACE_CDR::ULong anti_num_bits;
     // doesn't fit in 1 Long, verify that it returns false
-    EXPECT_TRUE(!sequence.to_bitmap(anti_bitmap, 1, anti_num_bits, true));
+    EXPECT_FALSE(sequence.to_bitmap(anti_bitmap, 1, anti_num_bits, true));
     EXPECT_TRUE(sequence.to_bitmap(anti_bitmap, 2, anti_num_bits, true));
     EXPECT_TRUE(anti_num_bits == 61);
     EXPECT_TRUE(static_cast<unsigned int>(anti_bitmap[0]) == 0xAAAAAAAA);
@@ -716,7 +716,7 @@ TEST(DisjointSequence, maintest)
     sequence.insert(SequenceRange(32 + 63, 32 + 66));
     ACE_CDR::Long bitmap[2];
     ACE_CDR::ULong num_bits;
-    EXPECT_TRUE(!sequence.to_bitmap(bitmap, 2, num_bits));
+    EXPECT_FALSE(sequence.to_bitmap(bitmap, 2, num_bits));
     EXPECT_TRUE(num_bits == 64);
     EXPECT_TRUE(bitmap[0] == 0x003FF000);
     EXPECT_TRUE(bitmap[1] == 0x00000001);
@@ -877,7 +877,7 @@ TEST(DisjointSequence, maintest)
     sequence.insert(SequenceRange(2001, 2580));
     ACE_CDR::Long bitmap[8];
     ACE_CDR::ULong num_bits = 0;
-    EXPECT_TRUE(!sequence.to_bitmap(bitmap, 8, num_bits));
+    EXPECT_FALSE(sequence.to_bitmap(bitmap, 8, num_bits));
     EXPECT_TRUE(num_bits == 256);
     EXPECT_TRUE(bitmap[0] == 0x555557FF);
     EXPECT_TRUE(bitmap[1] == (int) 0xFFFFFFFF);
@@ -917,79 +917,119 @@ TEST(DisjointSequence, maintest)
       plain_set.erase(values[remove_idx]);
       ds_set.erase(values[remove_idx]);
       // Check.
-      EXPECT_TRUE(!ds_set.contains(values[remove_idx]));
+      EXPECT_FALSE(ds_set.contains(values[remove_idx]));
       for (std::set<SequenceNumber>::const_iterator pos = plain_set.begin(), limit = plain_set.end();
            pos != limit; ++pos) {
         EXPECT_TRUE(ds_set.contains(*pos));
       }
     }
   }
-  typedef DisjointSequence::OrderedRanges<int> IntRanges;
-  {
-    IntRanges ir;
-    ir.add(1);
-    EXPECT_TRUE(ir.has(1));
-    EXPECT_TRUE(!ir.has(2));
+}
 
-    EXPECT_TRUE(ir.pop_front() == 1);
-    EXPECT_TRUE(ir.empty());
+typedef DisjointSequence::OrderedRanges<int> IntRanges;
 
-    ir.add(3);
-    EXPECT_TRUE(ir.has(3));
-    ir.remove(3);
-    EXPECT_TRUE(ir.empty());
+TEST(dds_DCPS_DisjointSequence, OrderedRanges_main_test)
+{
+  IntRanges ir;
+  ir.add(1);
+  EXPECT_TRUE(ir.has(1));
+  EXPECT_FALSE(ir.has(2));
+  EXPECT_FALSE(ir.empty());
 
-    ir.add(3);
-    ir.add(5);
-    EXPECT_TRUE(ir.has(3));
-    EXPECT_TRUE(ir.has(5));
-    EXPECT_TRUE(ir.size() == 2);
-    ir.add(4);
-    EXPECT_TRUE(ir.has(4));
-    EXPECT_TRUE(ir.size() == 1);
-    ir.clear();
-    EXPECT_TRUE(ir.size() == 0);
+  EXPECT_EQ(ir.pop_front(), 1);
+  EXPECT_TRUE(ir.empty());
 
-    ir.add(1);
-    ir.add(2);
-    EXPECT_TRUE(ir.has(1));
-    EXPECT_TRUE(ir.has(2));
-    EXPECT_TRUE(ir.size() == 1);
-    ir.clear();
-    EXPECT_TRUE(ir.size() == 0);
+  ir.add(3);
+  EXPECT_TRUE(ir.has(3));
+  ir.remove(3);
+  EXPECT_TRUE(ir.empty());
 
-    ir.add(2);
-    ir.add(1);
-    EXPECT_TRUE(ir.has(1));
-    EXPECT_TRUE(ir.has(2));
-    EXPECT_TRUE(ir.size() == 1);
-    ir.add(3);
-    EXPECT_TRUE(ir.has(1));
-    EXPECT_TRUE(ir.has(2));
-    EXPECT_TRUE(ir.has(3));
-    EXPECT_TRUE(ir.size() == 1);
-    ir.add(4);
-    EXPECT_TRUE(ir.has(1));
-    EXPECT_TRUE(ir.has(2));
-    EXPECT_TRUE(ir.has(3));
-    EXPECT_TRUE(ir.has(4));
-    EXPECT_TRUE(ir.size() == 1);
-    ir.add(7);
-    ir.add(8);
-    EXPECT_TRUE(ir.has(1));
-    EXPECT_TRUE(ir.has(2));
-    EXPECT_TRUE(ir.has(3));
-    EXPECT_TRUE(ir.has(4));
-    EXPECT_TRUE(ir.has(7));
-    EXPECT_TRUE(ir.has(8));
-    EXPECT_TRUE(ir.size() == 2);
-    EXPECT_TRUE(ir.pop_front() == 1);
-    EXPECT_TRUE(ir.size() == 2);
-    EXPECT_TRUE(!ir.has(1));
-    EXPECT_TRUE(ir.has(2));
-    EXPECT_TRUE(ir.has(3));
-    EXPECT_TRUE(ir.has(4));
-    EXPECT_TRUE(ir.has(7));
-    EXPECT_TRUE(ir.has(8));
-  }
+  ir.add(3);
+  ir.add(5);
+  EXPECT_TRUE(ir.has(3));
+  EXPECT_TRUE(ir.has(5));
+  EXPECT_EQ(ir.size(), 2UL);
+  EXPECT_FALSE(ir.empty());
+  ir.add(4);
+  EXPECT_TRUE(ir.has(4));
+  EXPECT_EQ(ir.size(), 1UL);
+  EXPECT_FALSE(ir.empty());
+  ir.clear();
+  EXPECT_EQ(ir.size(), 0UL);
+  EXPECT_TRUE(ir.empty());
+
+  ir.add(1);
+  ir.add(2);
+  EXPECT_TRUE(ir.has(1));
+  EXPECT_TRUE(ir.has(2));
+  EXPECT_EQ(ir.size(), 1UL);
+  ir.clear();
+  EXPECT_EQ(ir.size(), 0UL);
+  EXPECT_TRUE(ir.empty());
+
+  ir.add(2);
+  ir.add(1);
+  EXPECT_TRUE(ir.has(1));
+  EXPECT_TRUE(ir.has(2));
+  EXPECT_EQ(ir.size(), 1UL);
+  EXPECT_FALSE(ir.empty());
+  ir.add(3);
+  EXPECT_TRUE(ir.has(1));
+  EXPECT_TRUE(ir.has(2));
+  EXPECT_TRUE(ir.has(3));
+  EXPECT_EQ(ir.size(), 1UL);
+  EXPECT_FALSE(ir.empty());
+  ir.add(4);
+  EXPECT_TRUE(ir.has(1));
+  EXPECT_TRUE(ir.has(2));
+  EXPECT_TRUE(ir.has(3));
+  EXPECT_TRUE(ir.has(4));
+  EXPECT_EQ(ir.size(), 1UL);
+  EXPECT_FALSE(ir.empty());
+  ir.add(7);
+  ir.add(8);
+  EXPECT_TRUE(ir.has(1));
+  EXPECT_TRUE(ir.has(2));
+  EXPECT_TRUE(ir.has(3));
+  EXPECT_TRUE(ir.has(4));
+  EXPECT_TRUE(ir.has(7));
+  EXPECT_TRUE(ir.has(8));
+  EXPECT_EQ(ir.size(), 2UL);
+  EXPECT_FALSE(ir.empty());
+  EXPECT_EQ(ir.pop_front(), 1);
+  EXPECT_EQ(ir.size(), 2UL);
+  EXPECT_FALSE(ir.empty());
+  EXPECT_FALSE(ir.has(1));
+  EXPECT_TRUE(ir.has(2));
+  EXPECT_TRUE(ir.has(3));
+  EXPECT_TRUE(ir.has(4));
+  EXPECT_TRUE(ir.has(7));
+  EXPECT_TRUE(ir.has(8));
+}
+
+TEST(dds_DCPS_DisjointSequence, OrderedRanges_insert_out_of_order)
+{
+  IntRanges ir;
+  ir.add(1);
+  ir.add(4);
+  ir.add(2);
+  EXPECT_TRUE(ir.has(1, 2));
+  EXPECT_FALSE(ir.has(3));
+  EXPECT_TRUE(ir.has(4));
+  EXPECT_EQ(ir.size(), 2UL);
+}
+
+TEST(dds_DCPS_DisjointSequence, OrderedRanges_insert_ranges)
+{
+  IntRanges ir;
+  ir.add(1, 2);
+  ir.add(4);
+  ir.add(6, 9);
+  ir.add(13);
+  ir.add(3, 8);
+  ir.add(11, 12);
+  EXPECT_TRUE(ir.has(1, 9));
+  EXPECT_FALSE(ir.has(10));
+  EXPECT_TRUE(ir.has(11, 13));
+  EXPECT_EQ(ir.size(), 2UL);
 }
