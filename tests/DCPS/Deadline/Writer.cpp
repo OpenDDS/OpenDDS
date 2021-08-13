@@ -2,6 +2,7 @@
 //
 
 #include "Writer.h"
+#include "Domain.h"
 
 #include <tests/Utils/ExceptionStreams.h>
 
@@ -11,137 +12,101 @@
 #include <ace/OS_NS_unistd.h>
 #include <ace/streams.h>
 
-using namespace Messenger;
-using namespace std;
-using OpenDDS::DCPS::TimeDuration;
+const OpenDDS::DCPS::TimeDuration Writer::sWriteInterval(0, 500000);
 
-static const int num_messages = 10;
-static const TimeDuration write_interval(0, 500000);
-
-Writer::Writer(::DDS::DataWriter_ptr writer,
-               CORBA::Long key,
-               TimeDuration sleep_duration)
-: writer_(::DDS::DataWriter::_duplicate(writer)),
-  condition_(lock_),
-  associated_(false),
-  dwl_servant_(0),
-  instance_handle_(::DDS::HANDLE_NIL),
-  key_(key),
-  sleep_duration_(sleep_duration)
+Writer::Writer(const DDS::DataWriter_var& dw)
+  : mdw_()
+  , dw_listener_i_(0)
+  , key_mutex_()
+  , key_n_(0)
+  , match_mutex_()
+  , condition_(match_mutex_)
+  , associated_(false)
 {
-  ::DDS::DataWriterListener_var dwl = writer->get_listener();
-  dwl_servant_ =
-    dynamic_cast<DataWriterListenerImpl*>(dwl.in());
-}
-
-void
-Writer::start()
-{
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::start\n")));
-  // Launch threads.
-  if (activate(THR_NEW_LWP | THR_JOINABLE, 1) == -1)
-  {
-    cerr << "Writer::start(): activate failed" << endl;
-    exit(1);
+  if (!dw) {
+    throw std::runtime_error("Writer::Writer DataWriter is null.\n");
+  }
+  mdw_ = Messenger::MessageDataWriter::_narrow(dw.in());
+  if (!mdw_) {
+    throw std::runtime_error("Writer::Writer DataWriter could not be narrowed.\n");
+  }
+  DDS::DataWriterListener_var dwl = dw->get_listener();
+  dw_listener_i_ = dynamic_cast<DataWriterListenerImpl*>(dwl.in());
+  if (!dw_listener_i_) {
+    throw std::runtime_error("Writer::Writer dw_listener_i_ is null.\n");
   }
 }
 
-void
-Writer::end()
+bool Writer::start()
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::end\n")));
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Writer::start: activate 2 threads\n")));
+  if (activate(THR_NEW_LWP | THR_JOINABLE, 2) != 0) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Writer::start activate failed.\n")));
+    return false;
+  }
+  return true;
+}
+
+void Writer::end()
+{
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Writer::end\n")));
   wait();
 }
 
-
-int
-Writer::svc()
+int Writer::svc()
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::svc begins.\n")));
-
+  const int key = get_key();
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Writer::svc key%d begins.\n"), key));
   try {
-    if (!dwl_servant_->wait_matched(2, OpenDDS::DCPS::TimeDuration(10))) {
-      cerr << "ERROR: wait for subscription matching failed." << endl;
-      exit(1);
-    }
-
-    {
-      GuardType guard(this->lock_);
-      this->associated_ = true;
+    if (dw_listener_i_->wait_matched(2, OpenDDS::DCPS::TimeDuration(10))) {
+      Lock lock(match_mutex_);
+      associated_ = true;
       condition_.notify_all();
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Writer::svc key%d wait_matched failed.\n"), key));
+      return 1;
     }
 
-    Messenger::MessageDataWriter_var message_dw =
-      Messenger::MessageDataWriter::_narrow(writer_.in());
-    if (CORBA::is_nil(message_dw.in())) {
-      cerr << "Data Writer could not be narrowed"<< endl;
-      exit(1);
-    }
+    Messenger::Message msg;
+    msg.subject_id = key;
+    DDS::InstanceHandle_t instance = mdw_->register_instance(msg);
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Writer::svc key%d instance%d\n"), key, instance));
+    msg.from    = CORBA::string_dup("Comic Book Guy");
+    msg.subject = CORBA::string_dup("Review");
+    msg.text    = CORBA::string_dup("Worst. Movie. Ever.");
 
-    Messenger::Message message;
-    message.subject_id = this->key_;
-    this->instance_handle_ = message_dw->register_instance(message);
-
-    message.from       = CORBA::string_dup("Comic Book Guy");
-    message.subject    = CORBA::string_dup("Review");
-    message.text       = CORBA::string_dup("Worst. Movie. Ever.");
-    message.count      = 0;
-
-    ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) Writer::svc sleep for %d seconds.\n"),
-              sleep_duration_.value().sec()));
-
-    ACE_OS::sleep(sleep_duration_.value());
-
-    for (int i = 0; i < num_messages; ++i)
-    {
-      ++message.count;
-
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Writer::svc write sample %d to instance %d.\n"),
-        message.count, this->instance_handle_));
-
-      ::DDS::ReturnCode_t const ret = message_dw->write(message, this->instance_handle_);
-
-      if (ret != ::DDS::RETCODE_OK)
-      {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: Writer::svc, ")
-                   ACE_TEXT("%dth write() returned %d.\n"),
-                   i, ret));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Writer::svc key%d sleep %d seconds\n"), key, Domain::W_Sleep.value().sec()));
+    ACE_OS::sleep(Domain::W_Sleep.value());
+    for (msg.count = 1; msg.count <= Domain::N_Msg; ++msg.count) {
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) write msg%d instance%d\n"), msg.count, instance));
+      const DDS::ReturnCode_t r = mdw_->write(msg, instance);
+      if (r != DDS::RETCODE_OK) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: write msg%d instance%d returned %d\n"), msg.count, instance, r));
         return 1;
       }
-
-      // Sleep for half a second between writes to allow some deadline
-      // periods to expire.  Missed deadline should not occur since
-      // the time between writes should be less than the offered
-      // deadline period.
-      ACE_OS::sleep(write_interval.value());
+      // Sleep for half a second between writes to allow some deadline periods to expire.
+      // Missed deadline should not occur since the time between writes < the offered deadline period.
+      ACE_OS::sleep(sWriteInterval.value());
     }
+  } catch (const CORBA::Exception& e) {
+    e._tao_print_exception(ACE_TEXT("(%P|%t) ERROR: Writer::svc:"));
+    return 1;
+  } catch (...) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Writer::svc ...\n")));
+    return 1;
   }
-  catch (CORBA::Exception& e)
-  {
-    cerr << "Exception caught in svc:" << endl
-         << e << endl;
-  }
-
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::svc finished.\n")));
-
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::svc key%d finished.\n"), key));
   return 0;
 }
 
-
-::DDS::InstanceHandle_t
-Writer::get_instance_handle()
+bool Writer::wait_matched()
 {
-  return this->instance_handle_;
+  Lock lock(match_mutex_);
+  return associated_ || condition_.wait_for(OpenDDS::DCPS::TimeDuration(10)) == OpenDDS::DCPS::CvStatus_NoTimeout;
 }
 
-
-bool Writer::wait_for_start()
+int Writer::get_key()
 {
-  GuardType guard(this->lock_);
-
-  return associated_ ||
-    condition_.wait_for(TimeDuration(10)) == OpenDDS::DCPS::CvStatus_NoTimeout;
+  Lock lock(key_mutex_);
+  return (++key_n_ == 1) ? Domain::sKey1 : Domain::sKey2;
 }
