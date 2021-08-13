@@ -16,7 +16,6 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Qos_Helper.h>
-#include <dds/DCPS/unique_ptr.h>
 #include <dds/DCPS/StaticIncludes.h>
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
@@ -88,8 +87,8 @@ int Publisher::run()
     return 1;
   }
 
-  OpenDDS::DCPS::unique_ptr<Writer> writer(new Writer(dw_));
-  if (!writer->start()) {
+  Writer writer(dw_);
+  if (!writer.start()) {
     return 1;
   }
 
@@ -100,7 +99,7 @@ int Publisher::run()
     return 1;
   }
 
-  writer->end();
+  writer.end();
 
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Publisher::run sleep for %d milliseconds\n"), Domain::W_Sleep.value().msec()));
   ACE_OS::sleep(Domain::W_Sleep.value()); // wait for another set of deadline periods to expire
