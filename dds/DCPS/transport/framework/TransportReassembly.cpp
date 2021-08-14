@@ -48,18 +48,36 @@ namespace {
 }
 
 bool
-TransportReassembly::insert(OPENDDS_LIST(FragRange)& flist,
+TransportReassembly::insert(FragRangeList& flist,
+                            FragRangeIterMap& fri_map,
                             const SequenceRange& seqRange,
                             ReceivedDataSample& data)
 {
   const SequenceNumber::Value prev = seqRange.first.getValue() - 1,
     next = seqRange.second.getValue() + 1;
 
-  for (OPENDDS_LIST(FragRange)::iterator it = flist.begin(); it != flist.end(); ++it) {
+  FragRangeList::iterator start = flist.begin();
+  FragRangeIterMap::iterator fit = fri_map.begin();
+  if (!flist.empty()) {
+    fit = fri_map.lower_bound(prev);
+    if (fit != fri_map.end()) {
+      start = fit->second;
+      if (start->transport_seq_.second.getValue() != prev && start != flist.begin()) {
+        --start;
+        --fit;
+      }
+    } else {
+      start = flist.end();
+      --start;
+      --fit;
+    }
+  }
+
+  for (FragRangeList::iterator it = start; it != flist.end(); ++it) {
     FragRange& fr = *it;
     if (next < fr.transport_seq_.first.getValue()) {
       // insert before 'it'
-      flist.insert(it, FragRange(seqRange, data));
+      fri_map[seqRange.second.getValue()] = flist.insert(it, FragRange(seqRange, data));
       VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::insert() "
         "inserted on left\n"));
       return true;
@@ -107,7 +125,12 @@ TransportReassembly::insert(OPENDDS_LIST(FragRange)& flist,
         data.sample_.reset();
       }
 
+      fri_map.erase(fit++);
       fr.transport_seq_.second = seqRange.second;
+
+      bool needs_insert = true;
+      const FragRangeList::iterator bookmark = it;
+
       VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::insert() "
         "combined on right\n"));
 
@@ -137,11 +160,16 @@ TransportReassembly::insert(OPENDDS_LIST(FragRange)& flist,
             for (last = fr.rec_ds_.sample_.get(); last->cont(); last = last->cont()) ;
             last->cont(it->rec_ds_.sample_.release());
           }
+          fit->second = bookmark;
+          needs_insert = false;
           fr.transport_seq_.second = it->transport_seq_.second;
           flist.erase(it);
           VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::insert() "
             "coalesced on right\n"));
         }
+      }
+      if (needs_insert) {
+        fri_map[fr.transport_seq_.second.getValue()] = bookmark;
       }
       return true;
     } else if (fr.transport_seq_.first <= seqRange.first && fr.transport_seq_.second >= seqRange.second) {
@@ -149,10 +177,11 @@ TransportReassembly::insert(OPENDDS_LIST(FragRange)& flist,
         "duplicate fragment range, dropping\n"));
       return false;
     }
+    ++fit;
   }
 
   // add to end of list
-  flist.push_back(FragRange(seqRange, data));
+  fri_map[seqRange.second.getValue()] = flist.insert(flist.end(), FragRange(seqRange, data));
   VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::insert() "
     "inserted at end of list\n"));
   return true;
@@ -298,7 +327,7 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
     iter->second.expiration_ = expiration;
   }
 
-  if (!insert(iter->second.range_list_, seqRange, data)) {
+  if (!insert(iter->second.range_list_, iter->second.range_finder_, seqRange, data)) {
     // error condition, already logged by insert()
     return false;
   }
@@ -336,7 +365,8 @@ TransportReassembly::data_unavailable(const SequenceRange& dropped)
   for (FragInfoMap::iterator iter = fragments_.begin(); iter != fragments_.end();
        ++iter) {
     const FragKey& key = iter->first;
-    OPENDDS_LIST(FragRange)& flist = iter->second.range_list_;
+    FragRangeList& flist = iter->second.range_list_;
+    FragRangeIterMap& fri_map = iter->second.range_finder_;
 
     ReceivedDataSample dummy(0);
     dummy.header_.sequence_ = key.data_sample_seq_;
@@ -347,7 +377,7 @@ TransportReassembly::data_unavailable(const SequenceRange& dropped)
     if (dropped.second.getValue() == prev && !iter->second.have_first_) {
       iter->second.have_first_ = true;
       dummy.header_.more_fragments_ = true;
-      insert(flist, dropped, dummy);
+      insert(flist, fri_map, dropped, dummy);
       continue;
     }
 
@@ -363,7 +393,7 @@ TransportReassembly::data_unavailable(const SequenceRange& dropped)
       if (dropped.first > fr1.transport_seq_.second
           && dropped.second < fr2.transport_seq_.first) {
         dummy.header_.more_fragments_ = true;
-        insert(flist, dropped, dummy);
+        insert(flist, fri_map, dropped, dummy);
         break;
       }
     }
@@ -373,7 +403,7 @@ TransportReassembly::data_unavailable(const SequenceRange& dropped)
       ++SequenceNumber(flist.back().transport_seq_.second);
     if (dropped.first == next) {
       flist.back().rec_ds_.header_.more_fragments_ = true;
-      insert(flist, dropped, dummy);
+      insert(flist, fri_map, dropped, dummy);
     }
   }
 }
