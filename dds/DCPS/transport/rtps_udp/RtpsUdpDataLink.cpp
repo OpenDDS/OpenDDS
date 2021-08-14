@@ -81,6 +81,10 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
              false)     // is_active
   , reactor_task_(reactor_task)
   , job_queue_(make_rch<JobQueue>(reactor_task->get_reactor()))
+  , mb_allocator_(TheServiceParticipant->association_chunk_multiplier())
+  , db_allocator_(TheServiceParticipant->association_chunk_multiplier())
+  , custom_allocator_(TheServiceParticipant->association_chunk_multiplier() * config.anticipated_fragments_, RtpsSampleHeader::FRAG_SIZE)
+  , bundle_allocator_(TheServiceParticipant->association_chunk_multiplier(), config.max_message_size_)
   , multi_buff_(this, config.nak_depth_)
   , flush_send_queue_task_(make_rch<Sporadic>(reactor_task->interceptor(), *this, &RtpsUdpDataLink::flush_send_queue))
   , best_effort_heartbeat_count_(0)
@@ -1078,27 +1082,46 @@ RtpsUdpDataLink::MultiSendBuffer::insert(SequenceNumber /*transport_seq*/,
   }
 }
 
-// Support for the send() data handling path
-namespace {
-  ACE_Message_Block* submsgs_to_msgblock(const RTPS::SubmessageSeq& subm)
-  {
-    // byte swapping is handled in the operator<<() implementation
-    const Encoding encoding(Encoding::KIND_XCDR1);
-    size_t size = 0;
-    for (CORBA::ULong i = 0; i < subm.length(); ++i) {
-      encoding.align(size, RTPS::SMHDR_SZ);
-      serialized_size(encoding, size, subm[i]);
-    }
+ACE_Message_Block*
+RtpsUdpDataLink::alloc_msgblock(size_t size, ACE_Allocator* data_allocator) {
+  ACE_Message_Block* result;
+  ACE_NEW_MALLOC_RETURN(result,
+    static_cast<ACE_Message_Block*>(
+      mb_allocator_.malloc(sizeof(ACE_Message_Block))),
+    ACE_Message_Block(size,
+                      ACE_Message_Block::MB_DATA,
+                      0, // cont
+                      0, // data
+                      data_allocator,
+                      0, // locking_strategy
+                      ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                      ACE_Time_Value::zero,
+                      ACE_Time_Value::max_time,
+                      &db_allocator_,
+                      &mb_allocator_),
+    0);
+  return result;
+}
 
-    ACE_Message_Block* hdr = new ACE_Message_Block(size);
-
-    for (CORBA::ULong i = 0; i < subm.length(); ++i) {
-      Serializer ser(hdr, encoding);
-      ser << subm[i];
-      ser.align_w(RTPS::SMHDR_SZ);
-    }
-    return hdr;
+ACE_Message_Block*
+RtpsUdpDataLink::submsgs_to_msgblock(const RTPS::SubmessageSeq& subm)
+{
+  // byte swapping is handled in the operator<<() implementation
+  const Encoding encoding(Encoding::KIND_XCDR1);
+  size_t size = 0;
+  for (CORBA::ULong i = 0; i < subm.length(); ++i) {
+    encoding.align(size, RTPS::SMHDR_SZ);
+    serialized_size(encoding, size, subm[i]);
   }
+
+  ACE_Message_Block* hdr = alloc_msgblock(size, &custom_allocator_);
+
+  Serializer ser(hdr, encoding);
+  for (CORBA::ULong i = 0; i < subm.length(); ++i) {
+    ser << subm[i];
+    ser.align_w(RTPS::SMHDR_SZ);
+  }
+  return hdr;
 }
 
 TransportQueueElement*
@@ -1211,7 +1234,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
     link->send_strategy()->append_submessages(subm);
   }
 
-  Message_Block_Ptr hdr(submsgs_to_msgblock(subm));
+  Message_Block_Ptr hdr(link->submsgs_to_msgblock(subm));
   hdr->cont(data.release());
   RtpsCustomizedElement* rtps =
     new RtpsCustomizedElement(element, move(hdr));
@@ -2700,8 +2723,8 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVecVecVec& meta_subme
   for (size_t i = 0; i < meta_submessage_bundles.size(); ++i) {
     RTPS::Message rtps_message;
     prev_dst = GUID_UNKNOWN;
-    ACE_Message_Block mb_bundle(meta_submessage_bundle_sizes[i]); //FUTURE: allocators?
-    Serializer ser(&mb_bundle, encoding);
+    Message_Block_Ptr mb_bundle(alloc_msgblock(meta_submessage_bundle_sizes[i], &bundle_allocator_));
+    Serializer ser(mb_bundle.get(), encoding);
     for (MetaSubmessageIterVec::const_iterator it = meta_submessage_bundles[i].begin();
         it != meta_submessage_bundles[i].end(); ++it) {
       MetaSubmessage& res = **it;
@@ -2738,7 +2761,7 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVecVecVec& meta_subme
       }
       prev_dst = dst;
     }
-    send_strategy()->send_rtps_control(rtps_message, mb_bundle, meta_submessage_bundle_addrs[i].entry_->addrs_);
+    send_strategy()->send_rtps_control(rtps_message, *(mb_bundle.get()), meta_submessage_bundle_addrs[i].entry_->addrs_);
     if (transport_debug.log_messages) {
       RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", rtps_message.hdr.guidPrefix, true, rtps_message);
     }
