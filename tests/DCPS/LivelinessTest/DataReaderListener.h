@@ -82,6 +82,11 @@ public:
     return last_status_.alive_count == 0 && last_status_.not_alive_count == 0;
   }
 
+  int samples_handled() const
+  {
+    return samples_handled_;
+  }
+
 private:
   DistributedConditionSet_rch dcs_;
   const OPENDDS_STRING actor_;
@@ -90,6 +95,7 @@ private:
   int liveliness_gained_count_;
 
   int liveliness_changed_count_;
+  int samples_handled_;
   ::DDS::SampleInfo last_si_;
   ::DDS::LivelinessChangedStatus last_status_;
 };

@@ -18,6 +18,7 @@ DataReaderListenerImpl::DataReaderListenerImpl(DistributedConditionSet_rch dcs,
   , liveliness_lost_count_(0)
   , liveliness_gained_count_(0)
   , liveliness_changed_count_(0)
+  , samples_handled_(0)
   {
     last_status_.alive_count = 0;
     last_status_.not_alive_count = 0;
@@ -195,6 +196,7 @@ void DataReaderListenerImpl::on_subscription_matched(
           use_take ? "took": "read", i, foo[i].x, foo[i].y, foo[i].key));
         PrintSampleInfo(si[i]) ;
         last_si_ = si[i] ;
+        ++samples_handled_;
       }
     } else if (status == ::DDS::RETCODE_NO_DATA) {
       ACE_OS::fprintf (stderr, "read returned ::DDS::RETCODE_NO_DATA\n") ;
