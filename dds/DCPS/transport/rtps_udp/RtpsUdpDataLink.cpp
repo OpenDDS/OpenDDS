@@ -1469,12 +1469,13 @@ RtpsUdpDataLink::RtpsWriter::send_heartbeats(const MonotonicTimePoint& /*now*/)
   gather_heartbeats_i(meta_submessages);
 
   if (!preassociation_readers_.empty() || !lagging_readers_.empty()) {
-    heartbeat_->schedule(link->config().heartbeat_period_);
+    heartbeat_->schedule(fallback_.get());
   }
 
   g.release();
 
   link->queue_submessages(meta_submessages);
+  fallback_.advance();
 }
 
 void
@@ -2058,7 +2059,7 @@ RtpsUdpDataLink::RtpsWriter::add_reader(const ReaderInfo_rch& reader)
       return false;
     }
 
-    heartbeat_->schedule(link->config().heartbeat_period_);
+    heartbeat_->schedule(fallback_.get());
     if (link->config().responsive_mode_) {
       MetaSubmessageVec meta_submessages;
       MetaSubmessage meta_submessage(id_, GUID_UNKNOWN);
@@ -3096,6 +3097,8 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     }
   }
 
+  fallback_.reset();
+
   const bool is_final = acknack.smHeader.flags & RTPS::FLAG_F;
   const bool is_postassociation = count_is_not_zero && (is_final || bitmapNonEmpty(acknack.readerSNState) || ack != 1);
 
@@ -3147,7 +3150,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
       snris_insert(acked_sn == max_sn ? leading_readers_ : lagging_readers_, reader);
       previous_acked_sn = acked_sn;
       check_leader_lagger();
-      heartbeat_->schedule(link->config().heartbeat_period_);
+      heartbeat_->schedule(fallback_.get());
 
       if (reader->durable_) {
         if (Transport_debug_level > 5) {
@@ -3662,7 +3665,7 @@ RtpsUdpDataLink::RtpsWriter::make_leader_lagger(const RepoId& reader_id,
             lagging_readers_[previous_max_sn] = leading_pos->second;
           }
           leading_readers_.erase(leading_pos);
-          heartbeat_->schedule(link->config().heartbeat_period_);
+          heartbeat_->schedule(fallback_.get());
         }
       }
 #ifdef OPENDDS_SECURITY
@@ -3685,7 +3688,7 @@ RtpsUdpDataLink::RtpsWriter::make_leader_lagger(const RepoId& reader_id,
       if (acked_sn == previous_max_sn && previous_max_sn != max_sn_) {
         snris_erase(leading_readers_, acked_sn, reader);
         snris_insert(lagging_readers_, reader);
-        heartbeat_->schedule(link->config().heartbeat_period_);
+        heartbeat_->schedule(fallback_.get());
       }
     }
 #endif
@@ -3713,7 +3716,7 @@ RtpsUdpDataLink::RtpsWriter::make_lagger_leader(const ReaderInfo_rch& reader,
   snris_erase(previous_acked_sn == previous_max_sn ? leading_readers_ : lagging_readers_, previous_acked_sn, reader);
   snris_insert(acked_sn == max_sn ? leading_readers_ : lagging_readers_, reader);
   if (acked_sn != max_sn) {
-    heartbeat_->schedule(link->config().heartbeat_period_);
+    heartbeat_->schedule(fallback_.get());
   }
 }
 
@@ -4251,6 +4254,7 @@ RtpsUdpDataLink::RtpsWriter::RtpsWriter(RcHandle<RtpsUdpDataLink> link, const Re
 #endif
  , heartbeat_(make_rch<RtpsWriter::Sporadic>(link->reactor_task_->interceptor(), *this, &RtpsWriter::send_heartbeats))
  , nack_response_(make_rch<RtpsWriter::Sporadic>(link->reactor_task_->interceptor(), *this, &RtpsWriter::send_nack_responses))
+ , fallback_(link->config().heartbeat_period_)
 {
   send_buff_->bind(link->send_strategy());
 }
