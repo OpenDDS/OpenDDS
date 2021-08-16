@@ -8,6 +8,7 @@
 #include <ace/Log_Msg.h>
 #include <ace/OS_NS_stdlib.h>
 
+#include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DdsDcpsSubscriptionC.h>
 #include <dds/DCPS/Service_Participant.h>
 
@@ -21,6 +22,7 @@ extern unsigned int num_messages;
 
 SubscriberListenerImpl::SubscriberListenerImpl()
   : verify_result_ (true)
+  , listener_lock_()
 {
 }
 
@@ -31,8 +33,16 @@ SubscriberListenerImpl::~SubscriberListenerImpl()
 void
 SubscriberListenerImpl::on_data_on_readers(DDS::Subscriber_ptr subs)
 {
+  ::DDS::ReturnCode_t ret = subs->begin_access ();
+  if (ret != ::DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("%N:%l: SubscriberListenerImpl::on_data_on_readers()")
+    ACE_TEXT(" ERROR: begin_access failed!\n")));
+    ACE_OS::exit(-1);
+  }
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, listener_lock_);
   DDS::SubscriberQos qos;
-  ::DDS::ReturnCode_t ret = subs->get_qos (qos);
+  ret = subs->get_qos (qos);
   if (ret != ::DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR,
                   ACE_TEXT("%N:%l: SubscriberListenerImpl::on_data_on_readers()")
@@ -56,13 +66,6 @@ SubscriberListenerImpl::on_data_on_readers(DDS::Subscriber_ptr subs)
   CORBA::ULong len = readers->length ();
 
   if (qos.presentation.access_scope == ::DDS::GROUP_PRESENTATION_QOS) {
-    ret = subs->begin_access ();
-    if (ret != ::DDS::RETCODE_OK) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("%N:%l: SubscriberListenerImpl::on_data_on_readers()")
-      ACE_TEXT(" ERROR: begin_access failed!\n")));
-      ACE_OS::exit(-1);
-    }
     ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("%N:%l: SubscriberListenerImpl::on_data_on_readers() ")
                 ACE_TEXT("GROUP_PRESENTATION_QOS get_datareaders returned %d readers!\n"),
@@ -117,13 +120,6 @@ SubscriberListenerImpl::on_data_on_readers(DDS::Subscriber_ptr subs)
 
       this->verify (msg[0], si[0], qos, false);
     }
-    ret = subs->end_access ();
-    if (ret != ::DDS::RETCODE_OK) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("%N:%l: SubscriberListenerImpl::on_data_on_readers()")
-      ACE_TEXT(" ERROR: end_access failed!\n")));
-      ACE_OS::exit(-1);
-    }
   }
   else if (qos.presentation.access_scope == ::DDS::TOPIC_PRESENTATION_QOS) {
     ACE_DEBUG((LM_DEBUG,
@@ -131,51 +127,51 @@ SubscriberListenerImpl::on_data_on_readers(DDS::Subscriber_ptr subs)
                 ACE_TEXT("TOPIC_PRESENTATION_QOS get_datareaders returned %d readers!\n"),
                   len));
 
-    // redirect datareader listener to receive DISPOSE and UNREGISTER notifications.
-    if (len != 2) {
-      if (subs->notify_datareaders () != ::DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR,
-                    ACE_TEXT("%N:%l: SubscriberListenerImpl::on_data_on_readers()")
-                    ACE_TEXT(" ERROR: notify_datareaders failed!\n")));
-        this->verify_result_ = false;
-      }
-    }
-    else {
-      for (CORBA::ULong i = 0; i < len; ++i) {
-        Messenger::MessageDataReader_var message_dr =
-          Messenger::MessageDataReader::_narrow(readers[i]);
+    for (CORBA::ULong i = 0; i < len; ++i) {
+      Messenger::MessageDataReader_var message_dr =
+        Messenger::MessageDataReader::_narrow(readers[i]);
 
-        Messenger::MessageSeq msg;
-        ::DDS::SampleInfoSeq si;
-        ret = message_dr->take(msg, si, DDS::LENGTH_UNLIMITED,
-                               ::DDS::NOT_READ_SAMPLE_STATE,
-                               ::DDS::ANY_VIEW_STATE,
-                               ::DDS::ANY_INSTANCE_STATE);
-        if (ret != DDS::RETCODE_OK) {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("%N:%l:%t: SubscriberListenerImpl::on_data_on_readers()")
-          ACE_TEXT(" ERROR: read failed!\n")));
+      Messenger::MessageSeq msg;
+      ::DDS::SampleInfoSeq si;
+      ret = message_dr->take(msg, si, DDS::LENGTH_UNLIMITED,
+                             ::DDS::NOT_READ_SAMPLE_STATE,
+                             ::DDS::ANY_VIEW_STATE,
+                             ::DDS::ANY_INSTANCE_STATE);
+      if (ret != DDS::RETCODE_OK) {
+        if (ret == DDS::RETCODE_NO_DATA) {
+          ACE_ERROR((LM_ERROR,ACE_TEXT("%N:%l:%t: data reader[%d] has no data\n"),readers[i]->get_instance_handle()));
           continue;
         }
-        ACE_DEBUG((LM_DEBUG,"%N:%l:%t: message_dr->take returned\n"));
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("%N:%l:%t: SubscriberListenerImpl::on_data_on_readers()")
+          ACE_TEXT(" ERROR: reader[%d] failed with %C\n"),
+                     readers[i]->get_instance_handle(), OpenDDS::DCPS::retcode_to_string(ret)));
+          ACE_OS::exit(-1);
+      }
 
-        CORBA::ULong num_samples = si.length();
-        if (num_samples > 1 && (msg.length() != num_samples || num_samples != num_messages * 2)) {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("%N:%l: SubscriberListenerImpl::on_data_on_readers()")
-          ACE_TEXT(" ERROR: MessageSeq %d SampleInfoSeq %d != %d\n"),
-                     msg.length(), si.length(), num_messages));
-          this->verify_result_ = false;
-        }
+      CORBA::ULong num_samples = si.length();
+      if (num_samples > 1 && (msg.length() != num_samples || num_samples < num_messages * 2)) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("%N:%l: SubscriberListenerImpl::on_data_on_readers()")
+        ACE_TEXT(" ERROR: MessageSeq %d SampleInfoSeq %d != %d\n"),
+                   msg.length(), si.length(), num_messages));
+        this->verify_result_ = false;
+      }
 
-        for (CORBA::ULong i = 0; i < num_samples; ++i) {
-          this->verify (msg[i], si[i], qos, i == (num_samples - 1));
-        }
+      for (CORBA::ULong i = 0; i < num_samples; ++i) {
+        this->verify (msg[i], si[i], qos, i == (num_samples - 1));
       }
     }
   }
   else { //::DDS::INSTANCE_PRESENTATION_QOS
     subs->notify_datareaders ();
+  }
+  ret = subs->end_access ();
+  if (ret != ::DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("%N:%l: SubscriberListenerImpl::on_data_on_readers()")
+    ACE_TEXT(" ERROR: end_access failed!\n")));
+    ACE_OS::exit(-1);
   }
 }
 

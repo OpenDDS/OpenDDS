@@ -10,7 +10,7 @@
 
 #include <dds/DdsDcpsSubscriptionC.h>
 #include "MessengerC.h"
-
+#include <ace/Recursive_Thread_Mutex.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -67,6 +67,7 @@ private:
 
   DDS::Subscriber_var subscriber_;
   bool  verify_result_;
+  ACE_Recursive_Thread_Mutex listener_lock_;
 };
 
 #endif /* SUBSCRIBER_LISTENER_IMPL  */
