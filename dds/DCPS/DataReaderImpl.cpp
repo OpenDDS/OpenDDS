@@ -1535,6 +1535,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       it->second->set_group_info (control);
     }
 
+    guard.release();
     if (this->verify_coherent_changes_completion(writer.in())) {
       this->notify_read_conditions();
     }
@@ -1762,7 +1763,11 @@ bool DataReaderImpl::have_sample_states(
 
     for (ReceivedDataElement *item = ptr->rcvd_samples_.head_;
         item != 0; item = item->next_data_sample_) {
-      if (item->sample_state_ & sample_states) {
+      if (item->sample_state_ & sample_states
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+          && !item->coherent_change_
+#endif
+                 ) {
         return true;
       }
     }
@@ -3167,17 +3172,23 @@ void DataReaderImpl::get_ordered_data(GroupRakeData& data,
     DDS::ViewStateMask view_states,
     DDS::InstanceStateMask instance_states)
 {
+  SubscriptionInstanceSet localsubs;
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
+    for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
+         iter != instances_.end(); ++iter) {
+      localsubs.insert(iter->second);
+    }
+  }
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
 
-  for (SubscriptionInstanceMapType::iterator iter = instances_.begin(); iter != instances_.end(); ++iter) {
-    SubscriptionInstance_rch ptr = iter->second;
-    if (ptr->instance_state_->match(view_states, instance_states)) {
+  for (SubscriptionInstanceSet::iterator iter = localsubs.begin(); iter != localsubs.end(); ++iter) {
+    if ((*iter)->instance_state_->match(view_states, instance_states)) {
       size_t i(0);
-      for (ReceivedDataElement* item = ptr->rcvd_samples_.head_; item != 0; item = item->next_data_sample_) {
+      for (ReceivedDataElement* item = (*iter)->rcvd_samples_.head_; item != 0; item = item->next_data_sample_) {
         if ((item->sample_state_ & sample_states) && !item->coherent_change_) {
-          data.insert_sample(item, ptr, ++i);
-          group_coherent_ordered_data_.insert_sample(item, ptr, ++i);
+          data.insert_sample(item, *iter, ++i);
+          group_coherent_ordered_data_.insert_sample(item, *iter, ++i);
         }
       }
     }
@@ -3403,7 +3414,9 @@ DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
   return DDS::RETCODE_OK;
 }
 
-void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& instance, const DataSampleHeader& header, bool is_new_instance)
+void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& instance,
+                                              const DataSampleHeader& header,
+                                              bool is_new_instance)
 {
   bool accepted = true;
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE

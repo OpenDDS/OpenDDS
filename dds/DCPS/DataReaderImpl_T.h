@@ -253,9 +253,10 @@ namespace OpenDDS {
 
     const Observer_rch observer = get_observer(Observer::e_SAMPLE_READ);
 
-    const typename InstanceMap::iterator the_end = instance_map_.end();
-    for (typename InstanceMap::iterator it = instance_map_.begin(); it != the_end; ++it) {
-      const SubscriptionInstance_rch ptr = get_handle_instance(it->second);
+    for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
+        iter != instances_.end();
+        ++iter) {
+      SubscriptionInstance_rch ptr = iter->second;
 
       bool most_recent_generation = false;
 
@@ -311,10 +312,10 @@ namespace OpenDDS {
 
     const Observer_rch observer = get_observer(Observer::e_SAMPLE_TAKEN);
 
-    const typename InstanceMap::iterator the_end = instance_map_.end();
-    for (typename InstanceMap::iterator it = instance_map_.begin(); it != the_end; ++it) {
-      DDS::InstanceHandle_t handle = it->second;
-      OpenDDS::DCPS::SubscriptionInstance_rch ptr = get_handle_instance(handle);
+    for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
+         iter != instances_.end();
+         ++iter) {
+      SubscriptionInstance_rch ptr = iter->second;
 
       bool most_recent_generation = false;
 
@@ -1386,10 +1387,11 @@ DDS::ReturnCode_t take_i(MessageSequenceType& received_data,
   if (!group_coherent_ordered) {
 #endif
 
-    for (typename InstanceMap::iterator it = instance_map_.begin(), the_end = instance_map_.end(); it != the_end; ++it) {
-
-      const DDS::InstanceHandle_t handle = it->second;
-      const SubscriptionInstance_rch inst = get_handle_instance(handle);
+    for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
+         iter != instances_.end();
+         ++iter) {
+      DDS::InstanceHandle_t handle = iter->first;
+      SubscriptionInstance_rch inst = iter->second;
 
       if (inst->instance_state_->match(view_states, instance_states)) {
         size_t i(0);
