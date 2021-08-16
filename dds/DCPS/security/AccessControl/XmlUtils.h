@@ -29,6 +29,8 @@ namespace OpenDDS {
 namespace Security {
 namespace XmlUtils {
 
+using DCPS::move;
+
 typedef DCPS::unique_ptr<xercesc::XercesDOMParser> ParserPtr;
 
 OpenDDS_Security_Export

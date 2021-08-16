@@ -347,7 +347,7 @@ bool parse_time(const XMLCh* in, time_t& value)
 
   // Optional Timezone Info
   time_t timezone_offset = 0;
-  char tz_char;
+  char tz_char = '\0';
   bool end;
   if (!parse_time_char_or_end(str, pos, "+-Z", tz_char, end)) {
     return false;

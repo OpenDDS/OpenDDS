@@ -23,7 +23,7 @@ int Permissions::load(const SSL::SignedDocument& doc)
 
   std::string xml;
   doc.get_original_minus_smime(xml);
-  ParserPtr parser(get_parser(doc.filename(), xml));
+  ParserPtr parser(move(get_parser(doc.filename(), xml)));
   if (!parser) {
     if (security_debug.access_error) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} Permissions::load: "
