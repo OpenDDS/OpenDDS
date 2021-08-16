@@ -1174,8 +1174,13 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
     if (RtpsSampleHeader::control_message_supported(tsce->header().message_id_)) {
       data.reset(msg->cont()->duplicate());
       // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
+      bool prompt_heartbeat = false;
       RtpsSampleHeader::populate_data_control_submessages(
-        subm, *tsce, requires_inline_qos);
+        subm, *tsce, requires_inline_qos, prompt_heartbeat);
+      if (prompt_heartbeat) {
+        send_heartbeats_manual_i(meta_submessages);
+        deliver_after_send = true;
+      }
       record_directed(element->subscription_id(), seq);
     } else if (tsce->header().message_id_ == END_HISTORIC_SAMPLES) {
       end_historic_samples_i(tsce->header(), msg->cont());
@@ -1290,8 +1295,9 @@ RtpsUdpDataLink::customize_queue_element_non_reliable_i(
     if (RtpsSampleHeader::control_message_supported(tsce->header().message_id_)) {
       data.reset(msg->cont()->duplicate());
       // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
+      bool unused = false;
       RtpsSampleHeader::populate_data_control_submessages(
-                subm, *tsce, requires_inline_qos);
+                subm, *tsce, requires_inline_qos, unused);
     } else if (tsce->header().message_id_ == DATAWRITER_LIVELINESS) {
       send_heartbeats_manual_i(tsce, meta_submessages);
       deliver_after_send = true;

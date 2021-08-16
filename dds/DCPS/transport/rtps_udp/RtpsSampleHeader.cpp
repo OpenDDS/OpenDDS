@@ -445,7 +445,8 @@ void
 RtpsSampleHeader::populate_data_control_submessages(
   OpenDDS::RTPS::SubmessageSeq& subm,
   const TransportSendControlElement& tsce,
-  bool requires_inline_qos)
+  bool requires_inline_qos,
+  bool& prompt_heartbeat)
 {
   using namespace OpenDDS::RTPS;
 
@@ -484,6 +485,7 @@ RtpsSampleHeader::populate_data_control_submessages(
     if (header.publication_id_.entityId.entityKind == BUILT_IN_WRITER) {
       add_key_hash(data.inlineQos, tsce.msg_payload());
     }
+    prompt_heartbeat = true;
     break;
   }
   case DISPOSE_INSTANCE: {
@@ -494,6 +496,7 @@ RtpsSampleHeader::populate_data_control_submessages(
     if (header.publication_id_.entityId.entityKind == BUILT_IN_WRITER) {
       add_key_hash(data.inlineQos, tsce.msg_payload());
     }
+    prompt_heartbeat = true;
     break;
   }
   case DISPOSE_UNREGISTER_INSTANCE: {
@@ -504,6 +507,7 @@ RtpsSampleHeader::populate_data_control_submessages(
     if (header.publication_id_.entityId.entityKind == BUILT_IN_WRITER) {
       add_key_hash(data.inlineQos, tsce.msg_payload());
     }
+    prompt_heartbeat = true;
     break;
   }
   // update control_message_supported() when adding new cases here

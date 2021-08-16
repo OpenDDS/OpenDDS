@@ -84,7 +84,8 @@ public:
                                                bool requires_inline_qos);
   static void populate_data_control_submessages(RTPS::SubmessageSeq& subm,
                                                 const TransportSendControlElement& tsce,
-                                                bool requires_inline_qos);
+                                                bool requires_inline_qos,
+                                                bool& prompt_heartbeat);
   static void populate_inline_qos(const TransportSendListener::InlineQosData& qos_data,
                                   RTPS::ParameterList& plist);
   static bool control_message_supported(char message_id);
