@@ -1535,7 +1535,6 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       it->second->set_group_info (control);
     }
 
-    guard.release();
     if (this->verify_coherent_changes_completion(writer.in())) {
       this->notify_read_conditions();
     }
