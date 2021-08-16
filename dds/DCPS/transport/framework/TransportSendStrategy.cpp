@@ -1483,10 +1483,10 @@ TransportSendStrategy::direct_send(bool do_relink)
     } else if ((outcome == OUTCOME_PEER_LOST) ||
                (outcome == OUTCOME_SEND_ERROR)) {
       if (outcome == OUTCOME_SEND_ERROR) {
-        VDBG((LM_WARNING,
-              "(%P|%t) WARNING: Problem detected in "
-              "send buffer management: %p.\n",
-              "send_bytes"));
+        VDBG_LVL((LM_WARNING,
+                  "(%P|%t) WARNING: Problem detected in "
+                  "send buffer management: %p.\n",
+                  "send_bytes"), 1);
 
         if (Transport_debug_level > 0) {
           transport_.config().dump();
