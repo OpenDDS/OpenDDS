@@ -111,8 +111,8 @@ int Governance::load(const SSL::SignedDocument& doc)
 {
   std::string xml;
   doc.get_original_minus_smime(xml);
-  ParserPtr parser(get_parser(doc.filename(), xml));
-  if (!parser) {
+  ParserPtr parser;
+  if (!get_parser(parser, doc.filename(), xml)) {
     if (security_debug.access_error) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} Governance::load: "
         "get_parser failed\n"));
@@ -128,6 +128,13 @@ int Governance::load(const SSL::SignedDocument& doc)
     domain_rule.domain_attrs.plugin_participant_attributes = 0;
     const xercesc::DOMElement* const domain_rule_el =
       dynamic_cast<const xercesc::DOMElement*>(domainRules->item(r));
+    if (!domain_rule_el) {
+      if (security_debug.access_error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} Governance::load: "
+          "domain_rule_el is null\n"));
+      }
+      return -1;
+    }
 
     // Process domain ids this domain rule applies to
     const xercesc::DOMNodeList* const ruleNodes = domain_rule_el->getChildNodes();

@@ -68,7 +68,7 @@ namespace {
   };
 }
 
-ParserPtr get_parser(const std::string& filename, const std::string& xml)
+bool get_parser(ParserPtr& parser, const std::string& filename, const std::string& xml)
 {
   try {
     xercesc::XMLPlatformUtils::Initialize();
@@ -79,10 +79,11 @@ ParserPtr get_parser(const std::string& filename, const std::string& xml)
         "XMLPlatformUtils::Initialize XMLException: %C\n",
         to_string(ex).c_str()));
     }
-    return ParserPtr();
+    parser.reset();
+    return false;
   }
 
-  ParserPtr parser(new xercesc::XercesDOMParser());
+  parser.reset(new xercesc::XercesDOMParser());
 
   parser->setDoNamespaces(true);
   parser->setIncludeIgnorableWhitespace(false);
@@ -103,7 +104,8 @@ ParserPtr get_parser(const std::string& filename, const std::string& xml)
         "XMLException while parsing \"%C\": %C\n",
         filename.c_str(), to_string(ex).c_str()));
     }
-    return ParserPtr();
+    parser.reset();
+    return false;
 
   } catch (const xercesc::DOMException& ex) {
     if (security_debug.access_error) {
@@ -111,7 +113,8 @@ ParserPtr get_parser(const std::string& filename, const std::string& xml)
         "DOMException while parsing \"%C\": %C\n",
         filename.c_str(), to_string(ex).c_str()));
     }
-    return ParserPtr();
+    parser.reset();
+    return false;
 
   } catch (...) {
     if (security_debug.access_error) {
@@ -119,7 +122,8 @@ ParserPtr get_parser(const std::string& filename, const std::string& xml)
         "Unexpected exception while parsing \"%C\"",
         filename.c_str()));
     }
-    return ParserPtr();
+    parser.reset();
+    return false;
   }
 
   if (!parser->getDocument()->getDocumentElement()) {
@@ -128,10 +132,11 @@ ParserPtr get_parser(const std::string& filename, const std::string& xml)
         "XML document \"%C\" is empty\n",
         filename.c_str()));
     }
-    return ParserPtr();
+    parser.reset();
+    return false;
   }
 
-  return parser;
+  return true;
 }
 
 std::string to_string(const XMLCh* in)
@@ -347,7 +352,7 @@ bool parse_time(const XMLCh* in, time_t& value)
 
   // Optional Timezone Info
   time_t timezone_offset = 0;
-  char tz_char;
+  char tz_char = '\0';
   bool end;
   if (!parse_time_char_or_end(str, pos, "+-Z", tz_char, end)) {
     return false;

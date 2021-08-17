@@ -32,7 +32,7 @@ namespace XmlUtils {
 typedef DCPS::unique_ptr<xercesc::XercesDOMParser> ParserPtr;
 
 OpenDDS_Security_Export
-ParserPtr get_parser(const std::string& filename, const std::string& xml);
+bool get_parser(ParserPtr& parser, const std::string& filename, const std::string& xml);
 
 OpenDDS_Security_Export
 std::string to_string(const XMLCh* in);
