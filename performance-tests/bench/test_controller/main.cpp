@@ -506,7 +506,6 @@ int handle_report(const Bench::TestController::Report& report,
   uint64_t total_out_of_order_data_count = 0;
   uint64_t total_duplicate_data_count = 0;
   uint64_t total_missing_data_count = 0;
-  Builder::TimeStamp max_discovery_time_delta = ZERO;
 
   std::vector<Bench::SimpleStatBlock> discovery_delta_stats;
   std::vector<Bench::SimpleStatBlock> latency_stats;
@@ -536,7 +535,6 @@ int handle_report(const Bench::TestController::Report& report,
 
     total_undermatched_readers += worker_report.undermatched_readers;
     total_undermatched_writers += worker_report.undermatched_writers;
-    max_discovery_time_delta = std::max(max_discovery_time_delta, worker_report.max_discovery_time_delta);
 
     const Builder::ProcessReport& process_report = worker_report.process_report;
 

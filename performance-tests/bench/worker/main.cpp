@@ -75,26 +75,6 @@ using Bench::get_option_argument;
 const size_t DEFAULT_MAX_DECIMAL_PLACES = 9u;
 const size_t DEFAULT_THREAD_POOL_SIZE = 4u;
 
-double weighted_median(std::vector<double> medians, std::vector<size_t> weights, double default_value) {
-  typedef std::multiset<std::pair<double, size_t> > WMMS;
-  WMMS wmms;
-  size_t total_weight = 0;
-  assert(medians.size() == weights.size());
-  for (size_t i = 0; i < medians.size(); ++i) {
-    wmms.insert(WMMS::value_type(medians[i], weights[i]));
-    total_weight += weights[i];
-  }
-  size_t mid_weight = total_weight / 2;
-  for (auto it = wmms.begin(); it != wmms.end(); ++it) {
-    if (mid_weight > it->second) {
-      mid_weight -= it->second;
-    } else {
-      return it->first;
-    }
-  }
-  return default_value;
-}
-
 void do_wait(const Builder::TimeStamp& ts, const std::string& ts_name, bool zero_equals_key_press = true) {
   if (zero_equals_key_press && ts == ZERO) {
     std::stringstream ss;
@@ -496,60 +476,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   worker_report.destruction_time = process_destruction_end_time - process_destruction_begin_time;
   worker_report.undermatched_readers = 0;
   worker_report.undermatched_writers = 0;
-  worker_report.max_discovery_time_delta = ZERO;
-
-  worker_report.latency_sample_count = 0;
-  worker_report.latency_min = std::numeric_limits<double>::max();
-  worker_report.latency_max = std::numeric_limits<double>::min();
-  worker_report.latency_mean = 0.0;
-  worker_report.latency_var_x_sample_count = 0.0;
-  worker_report.latency_stdev = 0.0;
-  worker_report.latency_weighted_median = 0.0;
-  worker_report.latency_weighted_median_overflow = 0;
-
-  worker_report.jitter_sample_count = 0;
-  worker_report.jitter_min = std::numeric_limits<double>::max();
-  worker_report.jitter_max = std::numeric_limits<double>::min();
-  worker_report.jitter_mean = 0.0;
-  worker_report.jitter_var_x_sample_count = 0.0;
-  worker_report.jitter_stdev = 0.0;
-  worker_report.jitter_weighted_median = 0.0;
-  worker_report.jitter_weighted_median_overflow = 0;
-
-  worker_report.round_trip_latency_sample_count = 0;
-  worker_report.round_trip_latency_min = std::numeric_limits<double>::max();
-  worker_report.round_trip_latency_max = std::numeric_limits<double>::min();
-  worker_report.round_trip_latency_mean = 0.0;
-  worker_report.round_trip_latency_var_x_sample_count = 0.0;
-  worker_report.round_trip_latency_stdev = 0.0;
-  worker_report.round_trip_latency_weighted_median = 0.0;
-  worker_report.round_trip_latency_weighted_median_overflow = 0;
-
-  worker_report.round_trip_jitter_sample_count = 0;
-  worker_report.round_trip_jitter_min = std::numeric_limits<double>::max();
-  worker_report.round_trip_jitter_max = std::numeric_limits<double>::min();
-  worker_report.round_trip_jitter_mean = 0.0;
-  worker_report.round_trip_jitter_var_x_sample_count = 0.0;
-  worker_report.round_trip_jitter_stdev = 0.0;
-  worker_report.round_trip_jitter_weighted_median = 0.0;
-  worker_report.round_trip_jitter_weighted_median_overflow = 0;
-
-  std::vector<double> latency_medians;
-  std::vector<size_t> latency_median_counts;
-
-  std::vector<double> jitter_medians;
-  std::vector<size_t> jitter_median_counts;
-
-  std::vector<double> round_trip_latency_medians;
-  std::vector<size_t> round_trip_latency_median_counts;
-
-  std::vector<double> round_trip_jitter_medians;
-  std::vector<size_t> round_trip_jitter_median_counts;
-
-  Bench::SimpleStatBlock consolidated_latency_stats;
-  Bench::SimpleStatBlock consolidated_jitter_stats;
-  Bench::SimpleStatBlock consolidated_round_trip_latency_stats;
-  Bench::SimpleStatBlock consolidated_round_trip_jitter_stats;
 
   try {
     for (CORBA::ULong i = 0; i < process_report.participants.length(); ++i) {
@@ -562,24 +488,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
           const Builder::TimeStamp dr_last_discovery_time =
             get_or_create_property(dr_report.properties, "last_discovery_time", Builder::PVK_TIME)->value.time_prop();
 
-          if (ZERO < dr_enable_time && ZERO < dr_last_discovery_time) {
-            auto delta = dr_last_discovery_time - dr_enable_time;
-            if (worker_report.max_discovery_time_delta < delta) {
-              worker_report.max_discovery_time_delta = delta;
-            }
-          } else {
+          if (!(ZERO < dr_enable_time && ZERO < dr_last_discovery_time)) {
             ++worker_report.undermatched_readers;
           }
-
-          Bench::ConstPropertyStatBlock dr_latency(dr_report.properties, "latency");
-          Bench::ConstPropertyStatBlock dr_jitter(dr_report.properties, "jitter");
-          Bench::ConstPropertyStatBlock dr_round_trip_latency(dr_report.properties, "round_trip_latency");
-          Bench::ConstPropertyStatBlock dr_round_trip_jitter(dr_report.properties, "round_trip_jitter");
-
-          consolidated_latency_stats = consolidate(consolidated_latency_stats, dr_latency.to_simple_stat_block());
-          consolidated_jitter_stats = consolidate(consolidated_jitter_stats, dr_jitter.to_simple_stat_block());
-          consolidated_round_trip_latency_stats = consolidate(consolidated_round_trip_latency_stats, dr_round_trip_latency.to_simple_stat_block());
-          consolidated_round_trip_jitter_stats = consolidate(consolidated_round_trip_jitter_stats, dr_round_trip_jitter.to_simple_stat_block());
         }
       }
 
@@ -592,12 +503,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
           const Builder::TimeStamp dw_last_discovery_time =
             get_or_create_property(dw_report.properties, "last_discovery_time", Builder::PVK_TIME)->value.time_prop();
 
-          if (ZERO < dw_enable_time && ZERO < dw_last_discovery_time) {
-            auto delta = dw_last_discovery_time - dw_enable_time;
-            if (worker_report.max_discovery_time_delta < delta) {
-              worker_report.max_discovery_time_delta = delta;
-            }
-          } else {
+        if (!(ZERO < dw_enable_time && ZERO < dw_last_discovery_time)) {
             ++worker_report.undermatched_writers;
           }
         }
@@ -607,70 +513,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     std::cerr << "Unknown exception caught trying to consolidate statistics" << std::endl;
     return 5;
   }
-
-  worker_report.latency_sample_count = consolidated_latency_stats.sample_count_;
-  worker_report.latency_min = consolidated_latency_stats.min_;
-  worker_report.latency_max = consolidated_latency_stats.max_;
-  worker_report.latency_mean = consolidated_latency_stats.mean_;
-  worker_report.latency_var_x_sample_count = consolidated_latency_stats.var_x_sample_count_;
-  worker_report.latency_stdev = 0.0;
-  worker_report.latency_weighted_median = consolidated_latency_stats.median_;
-  worker_report.latency_weighted_median_overflow = consolidated_latency_stats.median_sample_overflow_;
-
-  if (worker_report.latency_sample_count) {
-    worker_report.latency_stdev =
-      std::sqrt(worker_report.latency_var_x_sample_count / static_cast<double>(worker_report.latency_sample_count));
-  }
-  worker_report.latency_weighted_median = weighted_median(latency_medians, latency_median_counts, 0.0);
-
-  worker_report.jitter_sample_count = consolidated_jitter_stats.sample_count_;
-  worker_report.jitter_min = consolidated_jitter_stats.min_;
-  worker_report.jitter_max = consolidated_jitter_stats.max_;
-  worker_report.jitter_mean = consolidated_jitter_stats.mean_;
-  worker_report.jitter_var_x_sample_count = consolidated_jitter_stats.var_x_sample_count_;
-  worker_report.jitter_stdev = 0.0;
-  worker_report.jitter_weighted_median = consolidated_jitter_stats.median_;
-  worker_report.jitter_weighted_median_overflow = consolidated_jitter_stats.median_sample_overflow_;
-
-  if (worker_report.jitter_sample_count) {
-    worker_report.jitter_stdev =
-      std::sqrt(worker_report.jitter_var_x_sample_count / static_cast<double>(worker_report.jitter_sample_count));
-  }
-  worker_report.jitter_weighted_median = weighted_median(jitter_medians, jitter_median_counts, 0.0);
-
-  worker_report.round_trip_latency_sample_count = consolidated_round_trip_latency_stats.sample_count_;
-  worker_report.round_trip_latency_min = consolidated_round_trip_latency_stats.min_;
-  worker_report.round_trip_latency_max = consolidated_round_trip_latency_stats.max_;
-  worker_report.round_trip_latency_mean = consolidated_round_trip_latency_stats.mean_;
-  worker_report.round_trip_latency_var_x_sample_count = consolidated_round_trip_latency_stats.var_x_sample_count_;
-  worker_report.round_trip_latency_stdev = 0.0;
-  worker_report.round_trip_latency_weighted_median = consolidated_round_trip_latency_stats.median_;
-  worker_report.round_trip_latency_weighted_median_overflow = consolidated_round_trip_latency_stats.median_sample_overflow_;
-
-  if (worker_report.round_trip_latency_sample_count) {
-    worker_report.round_trip_latency_stdev =
-      std::sqrt(worker_report.round_trip_latency_var_x_sample_count /
-        static_cast<double>(worker_report.round_trip_latency_sample_count));
-  }
-  worker_report.round_trip_latency_weighted_median =
-    weighted_median(round_trip_latency_medians, round_trip_latency_median_counts, 0.0);
-
-  worker_report.round_trip_jitter_sample_count = consolidated_round_trip_jitter_stats.sample_count_;
-  worker_report.round_trip_jitter_min = consolidated_round_trip_jitter_stats.min_;
-  worker_report.round_trip_jitter_max = consolidated_round_trip_jitter_stats.max_;
-  worker_report.round_trip_jitter_mean = consolidated_round_trip_jitter_stats.mean_;
-  worker_report.round_trip_jitter_var_x_sample_count = consolidated_round_trip_jitter_stats.var_x_sample_count_;
-  worker_report.round_trip_jitter_stdev = 0.0;
-  worker_report.round_trip_jitter_weighted_median = consolidated_round_trip_jitter_stats.median_;
-  worker_report.round_trip_jitter_weighted_median_overflow = consolidated_round_trip_jitter_stats.median_sample_overflow_;
-
-  if (worker_report.round_trip_jitter_sample_count) {
-    worker_report.round_trip_jitter_stdev =
-      std::sqrt(worker_report.round_trip_jitter_var_x_sample_count /
-        static_cast<double>(worker_report.round_trip_jitter_sample_count));
-  }
-  worker_report.round_trip_jitter_weighted_median =
-    weighted_median(round_trip_jitter_medians, round_trip_jitter_median_counts, 0.0);
 
   // If requested, write out worker report to file
 
@@ -692,57 +534,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
   Log::log() << "undermatched readers: " << worker_report.undermatched_readers << std::endl;
   Log::log() << "undermatched writers: " << worker_report.undermatched_writers << std::endl << std::endl;
-  Log::log() << "max discovery time delta: " << worker_report.max_discovery_time_delta << std::endl;
-
-  if (worker_report.latency_sample_count > 0) {
-    Log::log() << std::endl << "--- Latency Statistics ---" << std::endl << std::endl;
-
-    Log::log() << "total (latency) sample count: " << worker_report.latency_sample_count << std::endl;
-    Log::log() << "minimum latency: " << std::fixed << std::setprecision(6) << worker_report.latency_min << " seconds" << std::endl;
-    Log::log() << "maximum latency: " << std::fixed << std::setprecision(6) << worker_report.latency_max << " seconds" << std::endl;
-    Log::log() << "mean latency: " << std::fixed << std::setprecision(6) << worker_report.latency_mean << " seconds" << std::endl;
-    Log::log() << "latency standard deviation: " << std::fixed << std::setprecision(6) << worker_report.latency_stdev << " seconds" << std::endl;
-    Log::log() << "latency weighted median: " << std::fixed << std::setprecision(6) << worker_report.latency_weighted_median << " seconds" << std::endl;
-    Log::log() << "latency weighted median overflow: " << worker_report.latency_weighted_median_overflow << std::endl;
-  }
-
-  if (worker_report.jitter_sample_count > 0) {
-    Log::log() << std::endl << "--- Jitter Statistics ---" << std::endl << std::endl;
-
-    Log::log() << "total (jitter) sample count: " << worker_report.jitter_sample_count << std::endl;
-    Log::log() << "minimum jitter: " << std::fixed << std::setprecision(6) << worker_report.jitter_min << " seconds" << std::endl;
-    Log::log() << "maximum jitter: " << std::fixed << std::setprecision(6) << worker_report.jitter_max << " seconds" << std::endl;
-    Log::log() << "mean jitter: " << std::fixed << std::setprecision(6) << worker_report.jitter_mean << " seconds" << std::endl;
-    Log::log() << "jitter standard deviation: " << std::fixed << std::setprecision(6) << worker_report.jitter_stdev << " seconds" << std::endl;
-    Log::log() << "jitter weighted median: " << std::fixed << std::setprecision(6) << worker_report.jitter_weighted_median << " seconds" << std::endl;
-    Log::log() << "jitter weighted median overflow: " << worker_report.jitter_weighted_median_overflow << std::endl;
-    Log::log() << std::endl;
-  }
-
-  if (worker_report.round_trip_latency_sample_count > 0) {
-    Log::log() << std::endl << "--- Round-Trip Latency Statistics ---" << std::endl << std::endl;
-
-    Log::log() << "total (round_trip_latency) sample count: " << worker_report.round_trip_latency_sample_count << std::endl;
-    Log::log() << "minimum round_trip_latency: " << std::fixed << std::setprecision(6) << worker_report.round_trip_latency_min << " seconds" << std::endl;
-    Log::log() << "maximum round_trip_latency: " << std::fixed << std::setprecision(6) << worker_report.round_trip_latency_max << " seconds" << std::endl;
-    Log::log() << "mean round_trip_latency: " << std::fixed << std::setprecision(6) << worker_report.round_trip_latency_mean << " seconds" << std::endl;
-    Log::log() << "round_trip_latency standard deviation: " << std::fixed << std::setprecision(6) << worker_report.round_trip_latency_stdev << " seconds" << std::endl;
-    Log::log() << "round_trip_latency weighted median: " << std::fixed << std::setprecision(6) << worker_report.round_trip_latency_weighted_median << " seconds" << std::endl;
-    Log::log() << "round_trip_latency weighted median overflow: " << worker_report.round_trip_latency_weighted_median_overflow << std::endl;
-  }
-
-  if (worker_report.round_trip_jitter_sample_count > 0) {
-    Log::log() << std::endl << "--- Round-Trip Jitter Statistics ---" << std::endl << std::endl;
-
-    Log::log() << "total (round_trip_jitter) sample count: " << worker_report.round_trip_jitter_sample_count << std::endl;
-    Log::log() << "minimum round_trip_jitter: " << std::fixed << std::setprecision(6) << worker_report.round_trip_jitter_min << " seconds" << std::endl;
-    Log::log() << "maximum round_trip_jitter: " << std::fixed << std::setprecision(6) << worker_report.round_trip_jitter_max << " seconds" << std::endl;
-    Log::log() << "mean round_trip_jitter: " << std::fixed << std::setprecision(6) << worker_report.round_trip_jitter_mean << " seconds" << std::endl;
-    Log::log() << "round_trip_jitter standard deviation: " << std::fixed << std::setprecision(6) << worker_report.round_trip_jitter_stdev << " seconds" << std::endl;
-    Log::log() << "round_trip_jitter weighted median: " << std::fixed << std::setprecision(6) << worker_report.round_trip_jitter_weighted_median << " seconds" << std::endl;
-    Log::log() << "round_trip_jitter weighted median overflow: " << worker_report.round_trip_jitter_weighted_median_overflow << std::endl;
-    Log::log() << std::endl;
-  }
 
   return 0;
 }

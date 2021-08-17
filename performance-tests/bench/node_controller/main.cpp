@@ -72,6 +72,23 @@ std::string create_config(const std::string& file_base_name, const char* content
   return filename;
 }
 
+void read_file(std::ifstream& ifs, ::TAO::String_Manager& str)
+{
+  ifs.seekg(0, ios::end);
+  const std::ifstream::pos_type end_pos = ifs.tellg();
+  ifs.seekg(0, ios::beg);
+  const std::ifstream::pos_type beg_pos = ifs.tellg();
+
+  const auto file_length = end_pos - beg_pos;
+
+  std::vector<char> temp(file_length + 1);
+  ifs.read(temp.data(), file_length);
+  temp[file_length] = '\0';
+
+  const char* ptr = temp.data();
+  str = ptr;
+}
+
 class SpawnedProcess {
 public:
   SpawnedProcess() = delete;
@@ -127,14 +144,12 @@ public:
     if (!report.failed) {
       std::ifstream report_file(report_filename_);
       if (report_file.good()) {
-        std::string str((std::istreambuf_iterator<char>(report_file)), std::istreambuf_iterator<char>());
-        report.details = str.c_str();
+        read_file(report_file, report.details);
       }
     }
     std::ifstream log_file(log_filename_);
     if (log_file.good()) {
-      std::string str((std::istreambuf_iterator<char>(log_file)), std::istreambuf_iterator<char>());
-      report.log = str.c_str();
+      read_file(log_file, report.log);
     }
   }
 
@@ -288,7 +303,7 @@ public:
       all_spawned_processes = all_spawned_processes_;
     }
 
-    for (auto spawned_process_i : all_spawned_processes) {
+    for (auto& spawned_process_i : all_spawned_processes) {
       auto& spawned_process = spawned_process_i.second;
       if (spawned_process->running()) {
 #ifndef ACE_WIN32
@@ -311,7 +326,7 @@ public:
     // Spawn Processes
     {
       std::lock_guard<std::mutex> guard(mutex_);
-      for (auto spawned_process_i : all_spawned_processes_) {
+      for (auto& spawned_process_i : all_spawned_processes_) {
         auto& spawned_process = spawned_process_i.second;
         ACE_HANDLE log_handle = ACE_INVALID_HANDLE;
         std::shared_ptr<ACE_Process_Options> proc_opts = spawned_process->get_proc_opts(log_handle);
@@ -352,7 +367,7 @@ public:
         double mem_sum = 0.0;
         double virtual_mem_sum = 0.0;
 
-        for (auto it = spawned_process_process_stat_collectors_.begin(); it != spawned_process_process_stat_collectors_.end(); it++) {
+        for (auto it = spawned_process_process_stat_collectors_.cbegin(); it != spawned_process_process_stat_collectors_.cend(); it++) {
           cpu_sum += it->second->get_cpu_usage();
           mem_sum += it->second->get_mem_usage();
           virtual_mem_sum += it->second->get_virtual_mem_usage();
