@@ -34,6 +34,8 @@ The time can also be manually specified using one of the following options:
 If successful, it will create a `newest_prs.json` that it can use as the starting point next time and a `newest_prs.csv` that can be added to the spreadsheet.
 If there are no new PRs it will say that and won't change any other existing files.
 
+If a new `newest_prs.csv` was created, then it can be appended a Google Sheets spreadsheet by going to "File" -> "Import" -> "Upload", adding the file, then make sure to set "Import location" to "Append to current sheet".
+
 ## `missing-news-prs.py`
 
 After a spreadsheet is updated, it can be downloaded as a csv file again and passed to `missing-news-prs.py`.

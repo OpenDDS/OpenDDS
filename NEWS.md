@@ -7,12 +7,13 @@ OpenDDS 3.18.0-dev is currently in development, so this list might change.
 - IDL4 explicitly-named integer types (#2814, #2857, #2862)
   - The existing IDL integer types, `short`, `long`, and `long long`, now have new aliases, which are `int16`, `int32`, and `int64` respectively, along with unsigned versions of them like `uint32`.
   - There are also two new distinct integer types: `int8` and `uint8`.
-  - This must be supported by the ACE/TAO being used.
 - RTPS:
   - Added the `LeaseExtension` RTPS discovery config option that extends the lease of discovered participants (#2869)
   - Added the `SedpPassiveConnectDuration` RTPS discovery config option (#2847)
   - Improved reassembly of fragments by adding an expiration to them (#2848)
     - Added the `SedpFragmentReassemblyTimeout` RTPS discovery config option to control this.
+  - Use preallocated buffers in `RtpsUdpDataLink` (#2901)
+    - Added the `anticipated_fragments` RTPS transport config option to scale how much memory is preallocated for packet customization and fragments buffers.
 - The QoS XML Handler can now take input from a string (#2439)
 
 ### Fixes:
@@ -22,6 +23,12 @@ OpenDDS 3.18.0-dev is currently in development, so this list might change.
   - Fixed local/local RTPS associations not properly notifying liveliness (#2783)
   - Fixed durable data not being delivered in the right order (#2728)
   - `RtpsUdpDataLink` will no longer purge durable data (#2690)
+  - Fixed issues with security permissions and governance XML file parsing (#2896, #2912)
+    - `<id_range>`s in domain id sets can now omit `<max>` in permissions and governance files.
+      - This means `<id_range><min>0</min></id_range>` will now mean all domains.
+    - Fix date/time in `<not_before>` and `<not_after>` in permissions grants always being interpreted as local time and fix issues with parsing time zone offsets.
+    - Fixed settings for multiple `<domain_rule>`s in governance files ending up just being copies of the first domain rule.
+    - Allow using `1`/`0` in addition to `TRUE`/`FALSE` and `true`/`false` for boolean values.
 - Fixed `Topic`s returned from `find_topic` not being distinct entities (#2731)
 - Try to workaround faulty DNS when getting the FQDN (#2677)
 - Fixed `configure --wireshark-cmake` not working on Linux (#2679)

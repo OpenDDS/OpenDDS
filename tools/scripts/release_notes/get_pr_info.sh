@@ -2,6 +2,12 @@
 
 set -e
 
+if [ ! -f mkcsv.py ]
+then
+  echo "ERROR: This script needs to be ran from tools/scripts/release_notes" 1>&2
+  exit 1
+fi
+
 function usage {
   echo "Usage: get_pr_info.sh [-t ISO8601] [-c COMMITISH]"
   echo "See README.md for details"
