@@ -688,7 +688,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
       if (rr == readers_.end()) {
         pending_reliable_readers_.erase(local_id);
         RtpsUdpDataLink_rch link(this, inc_count());
-        RtpsReader_rch reader = make_rch<RtpsReader>(link, local_id);
+        RtpsReader_rch reader = make_rch<RtpsReader>(link, local_id, local_durable);
         rr = readers_.insert(RtpsReaderMap::value_type(local_id, reader)).first;
       }
       RtpsReader_rch reader = rr->second;
@@ -4323,7 +4323,10 @@ RtpsUdpDataLink::RtpsReader::deliver_held_data(const RepoId& src)
     const SequenceNumber ca = wi->second->recvd_.cumulative_ack();
     const WriterInfo::HeldMap::iterator end = wi->second->held_.upper_bound(ca);
     for (WriterInfo::HeldMap::iterator it = wi->second->held_.begin(); it != end; /*increment in loop body*/) {
-      to_deliver.push_back(it->second);
+      const DCPS::SystemTimePoint source_time(ACE_Time_Value(it->second.header_.source_timestamp_sec_, it->second.header_.source_timestamp_nanosec_ / 1000));
+      if (durable_ || wi->second->discovery_time_ < source_time) {
+        to_deliver.push_back(it->second);
+      }
       wi->second->held_.erase(it++);
     }
   }
