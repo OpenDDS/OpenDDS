@@ -1,4 +1,5 @@
 #include "DataReaderListenerImpl.h"
+#include "Domain.h"
 
 #include "MessengerTypeSupportC.h"
 #include "MessengerTypeSupportImpl.h"
@@ -10,10 +11,11 @@ using namespace Messenger;
 
 DataReaderListenerImpl::DataReaderListenerImpl()
   : matched_mutex_()
-  , matched_condition_(matched_mutex_)
+  , matched_cv_(matched_mutex_)
   , matched_(0)
-  , arrived_mutex_()
-  , num_arrived_(0)
+  , received_mutex_()
+  , received_cv_(received_mutex_)
+  , received_(0)
   , count_mutex_()
   , requested_deadline_total_count_(0)
 {
@@ -23,7 +25,7 @@ DataReaderListenerImpl::~DataReaderListenerImpl()
 {
 }
 
-bool DataReaderListenerImpl::wait_matched(long count, const OpenDDS::DCPS::TimeDuration& max_wait) const
+bool DataReaderListenerImpl::wait_matched(int count, const OpenDDS::DCPS::TimeDuration& max_wait) const
 {
   using namespace OpenDDS::DCPS;
   Lock lock(matched_mutex_);
@@ -33,7 +35,7 @@ bool DataReaderListenerImpl::wait_matched(long count, const OpenDDS::DCPS::TimeD
   }
   const MonotonicTimePoint deadline = MonotonicTimePoint::now() + max_wait;
   while (count != matched_) {
-    switch (matched_condition_.wait_until(deadline)) {
+    switch (matched_cv_.wait_until(deadline)) {
     case CvStatus_NoTimeout:
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) DataReaderListenerImpl::wait_matched: %d\n"), matched_));
       break;
@@ -56,20 +58,25 @@ void DataReaderListenerImpl::on_subscription_matched(DDS::DataReader_ptr, const 
   Lock lock(matched_mutex_);
   matched_ = status.current_count;
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_matched %d\n"), matched_));
-  matched_condition_.notify_all();
+  matched_cv_.notify_all();
 }
 
-long DataReaderListenerImpl::num_arrived() const
+void DataReaderListenerImpl::wait_all_received() const
 {
-  Lock lock(arrived_mutex_);
-  return num_arrived_;
+  Lock lock(received_mutex_);
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) DataReaderListenerImpl::wait_all_received\n")));
+  while (received_ < Domain::N_Msg) {
+    received_cv_.wait();
+  }
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) DataReaderListenerImpl::wait_all_received returns\n")));
 }
 
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
 {
-  Lock lock(arrived_mutex_);
-  ++num_arrived_;
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_data_available %d\n"), num_arrived_));
+  if (all_received()) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) received_cv_.notify_all\n")));
+    received_cv_.notify_all();
+  }
 }
 
 CORBA::Long DataReaderListenerImpl::requested_deadline_total_count() const
@@ -93,6 +100,14 @@ void DataReaderListenerImpl::on_requested_deadline_missed(DDS::DataReader_ptr, c
       status.total_count, status.total_count_change, status.last_instance_handle));
   }
   requested_deadline_total_count_ += status.total_count_change;
+}
+
+bool DataReaderListenerImpl::all_received()
+{
+  Lock lock(received_mutex_);
+  ++received_;
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) received %d\n"), received_));
+  return received_ >= (Domain::N_Msg * Domain::N_Instance);
 }
 
 void DataReaderListenerImpl::on_requested_incompatible_qos(DDS::DataReader_ptr, const DDS::RequestedIncompatibleQosStatus&)

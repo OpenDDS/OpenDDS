@@ -99,7 +99,7 @@ Subscriber::Subscriber(int argc, ACE_TCHAR* argv[]) : domain_(argc, argv, "Subsc
 int Subscriber::run()
 {
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Subscriber::run wait_matched\n")));
-  if (!listener_i_->wait_matched(1, OpenDDS::DCPS::TimeDuration(10))) { //??
+  if (!listener_i_->wait_matched(1, OpenDDS::DCPS::TimeDuration(10))) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Subscriber wait_matched failed.\n")));
     return 1;
   }
@@ -122,7 +122,7 @@ int Subscriber::run()
     return 1;
   }
 
-  const OpenDDS::DCPS::TimeDuration no_miss_period = Domain::R_Sleep + (Domain::N_Msg * WriteInterval); //??
+  const OpenDDS::DCPS::TimeDuration no_miss_period = Domain::R_Sleep + (Domain::N_Msg * WriteInterval);
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Subscriber sleep for %d msec\n"), no_miss_period.value().msec()));
   // Wait for another set of deadline periods(5 + 11 secs).
   // During this period, the writers continue to write all samples with .5 second interval.
@@ -131,9 +131,7 @@ int Subscriber::run()
     return 1;
   }
 
-  while (listener_i_->num_arrived() < Domain::N_Msg) {
-    ACE_OS::sleep(1);
-  }
+  listener_i_->wait_all_received();
   return 0;
 }
 
@@ -218,11 +216,8 @@ bool Subscriber::check_status(const DDS::InstanceHandle_t& i1r1, const DDS::Inst
       !check_instance(2, s2.last_instance_handle, i1r2, i2r2)) {
     return false;
   }
-  //?? always valid?
-  //The reader deadline period is 5 seconds and writer writes
-  //each instance every 9 seconds, so after Domain::R_Sleep(11secs),
-  //the deadline missed should be 1 per instance
-  //?? ERROR: missed requested deadline (2 or 0) != (2)
+  // Writer writes each instance after 9 seconds. Reader deadline period is 5 seconds.
+  // After Domain::R_Sleep (11 seconds), the deadline missed should be 1 per instance.
   if (s1.total_count != expected || s2.total_count != expected) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: missed requested deadline (%d or %d) != (%d)\n"),
                s1.total_count, s2.total_count, expected));
