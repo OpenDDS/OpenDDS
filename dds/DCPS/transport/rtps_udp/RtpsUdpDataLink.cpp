@@ -1470,12 +1470,14 @@ RtpsUdpDataLink::RtpsWriter::send_heartbeats(const MonotonicTimePoint& /*now*/)
 
   if (!preassociation_readers_.empty() || !lagging_readers_.empty()) {
     heartbeat_->schedule(fallback_.get());
+    fallback_.advance();
+  } else {
+    fallback_.reset();
   }
 
   g.release();
 
   link->queue_submessages(meta_submessages);
-  fallback_.advance();
 }
 
 void
