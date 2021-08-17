@@ -23,22 +23,22 @@ public:
     if (f_n_minus_1_ == T(0)) {
       return f1_;
     } else {
-      T f = f_n_minus_1_ + f_n_minus_2_;
-      return f;
+      T f_n = f_n_minus_1_ + f_n_minus_2_;
+      return f_n;
     }
   }
 
   void advance()
   {
-    T f = f_n_minus_1_ == T(0) ? f1_ : f_n_minus_1_ + f_n_minus_2_;
+    T f_n = f_n_minus_1_ == T(0) ? f1_ : f_n_minus_1_ + f_n_minus_2_;
     f_n_minus_2_ = f_n_minus_1_;
-    f_n_minus_1_ = f;
+    f_n_minus_1_ = f_n;
   }
 
   void reset()
   {
-    f_n_minus_1_ = f1_;
-    f_n_minus_2_ = f1_ + f1_;
+    f_n_minus_1_ = T(0);
+    f_n_minus_2_ = T(0);
   }
 
 private:
