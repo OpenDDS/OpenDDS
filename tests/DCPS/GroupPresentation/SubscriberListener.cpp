@@ -37,10 +37,10 @@ SubscriberListenerImpl::on_data_on_readers(DDS::Subscriber_ptr subs)
   if (ret != ::DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("%N:%l: SubscriberListenerImpl::on_data_on_readers()")
-    ACE_TEXT(" ERROR: begin_access failed!\n")));
+               ACE_TEXT(" ERROR: begin_access failed!\n")));
     ACE_OS::exit(-1);
   }
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, listener_lock_);
+  ACE_GUARD(ACE_Thread_Mutex, guard, listener_lock_);
   DDS::SubscriberQos qos;
   ret = subs->get_qos (qos);
   if (ret != ::DDS::RETCODE_OK) {
@@ -139,12 +139,12 @@ SubscriberListenerImpl::on_data_on_readers(DDS::Subscriber_ptr subs)
                              ::DDS::ANY_INSTANCE_STATE);
       if (ret != DDS::RETCODE_OK) {
         if (ret == DDS::RETCODE_NO_DATA) {
-          ACE_ERROR((LM_ERROR,ACE_TEXT("%N:%l:%t: data reader[%d] has no data\n"),readers[i]->get_instance_handle()));
+          ACE_ERROR((LM_ERROR,ACE_TEXT("%N:%l:%t: data reader[%d] has no data\n"), readers[i]->get_instance_handle()));
           continue;
         }
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l:%t: SubscriberListenerImpl::on_data_on_readers()")
-          ACE_TEXT(" ERROR: reader[%d] failed with %C\n"),
+                   ACE_TEXT(" ERROR: reader[%d] failed with %C\n"),
                      readers[i]->get_instance_handle(), OpenDDS::DCPS::retcode_to_string(ret)));
           ACE_OS::exit(-1);
       }
@@ -153,7 +153,7 @@ SubscriberListenerImpl::on_data_on_readers(DDS::Subscriber_ptr subs)
       if (num_samples > 1 && (msg.length() != num_samples || num_samples < num_messages * 2)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l: SubscriberListenerImpl::on_data_on_readers()")
-        ACE_TEXT(" ERROR: MessageSeq %d SampleInfoSeq %d != %d\n"),
+                   ACE_TEXT(" ERROR: MessageSeq %d SampleInfoSeq %d != %d\n"),
                    msg.length(), si.length(), num_messages));
         this->verify_result_ = false;
       }
@@ -170,7 +170,7 @@ SubscriberListenerImpl::on_data_on_readers(DDS::Subscriber_ptr subs)
   if (ret != ::DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("%N:%l: SubscriberListenerImpl::on_data_on_readers()")
-    ACE_TEXT(" ERROR: end_access failed!\n")));
+               ACE_TEXT(" ERROR: end_access failed!\n")));
     ACE_OS::exit(-1);
   }
 }

@@ -256,7 +256,7 @@ namespace OpenDDS {
     for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
         iter != instances_.end();
         ++iter) {
-      SubscriptionInstance_rch ptr = iter->second;
+      const SubscriptionInstance_rch ptr = iter->second;
 
       bool most_recent_generation = false;
 
@@ -1390,8 +1390,8 @@ DDS::ReturnCode_t take_i(MessageSequenceType& received_data,
     for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
          iter != instances_.end();
          ++iter) {
-      DDS::InstanceHandle_t handle = iter->first;
-      SubscriptionInstance_rch inst = iter->second;
+      const DDS::InstanceHandle_t handle = iter->first;
+      const SubscriptionInstance_rch inst = iter->second;
 
       if (inst->instance_state_->match(view_states, instance_states)) {
         size_t i(0);
