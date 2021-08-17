@@ -37,6 +37,7 @@
 #include "dds/DCPS/RcEventHandler.h"
 #include "dds/DCPS/JobQueue.h"
 #include "dds/DCPS/SequenceNumber.h"
+#include "dds/DCPS/FibonacciSequence.h"
 
 #ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreC.h"
@@ -416,6 +417,8 @@ private:
 
     Sporadic heartbeat_;
     Sporadic nack_response_;
+
+    FibonacciSequence<TimeDuration> fallback_;
 
     void send_heartbeats(const MonotonicTimePoint& now);
     void send_nack_responses(const MonotonicTimePoint& now);
