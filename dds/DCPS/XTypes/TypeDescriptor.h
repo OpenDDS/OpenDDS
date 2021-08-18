@@ -21,7 +21,7 @@ public:
     : kind(TK_NONE), extensibility_kind(FINAL), is_nested(false)
   {}
 
-  bool equals(const TypeDescriptor& other);
+  bool equals(const TypeDescriptor& other) const;
 
   TypeKind kind;
   DCPS::String name;

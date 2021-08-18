@@ -23,19 +23,17 @@ void DynamicType::get_descriptor(TypeDescriptor& descriptor) const
 
 DCPS::String DynamicType::get_name() const
 {
-  return this->descriptor_->name;
+  return descriptor_->name;
 }
 
 TypeKind DynamicType::get_kind() const
 {
-  return this->descriptor_->kind;
+  return descriptor_->kind;
 }
 
-DDS::ReturnCode_t DynamicType::get_member_by_name(DynamicTypeMember_rch& member, const DCPS::String& name)
+DDS::ReturnCode_t DynamicType::get_member_by_name(DynamicTypeMember_rch& member, const DCPS::String& name) const
 {
-  //We have a map of members in member_by_name which takes a string and gives 0 or 1 type DTMs
-  //this should use the string as the key and put the returned DTM into member.
-  DynamicTypeMembersByName::const_iterator pos = member_by_name.find(name);
+  const DynamicTypeMembersByName::const_iterator pos = member_by_name.find(name);
   if (pos != member_by_name.end()) {
     member = pos->second;
     return DDS::RETCODE_OK;
@@ -49,7 +47,7 @@ void DynamicType::get_all_members_by_name(DynamicTypeMembersByName& member)
   member = member_by_name;
 }
 
-DDS::ReturnCode_t DynamicType::get_member(DynamicTypeMember_rch& member, MemberId id)
+DDS::ReturnCode_t DynamicType::get_member(DynamicTypeMember_rch& member, MemberId id) const
 {
   DynamicTypeMembersById::const_iterator pos = member_by_id.find(id);
   if (pos != member_by_id.end()) {
@@ -65,12 +63,12 @@ void DynamicType::get_all_members(DynamicTypeMembersById& member)
   member = member_by_id;
 }
 
-ACE_CDR::ULong DynamicType::get_member_count()
+ACE_CDR::ULong DynamicType::get_member_count() const
 {
-  return member_by_name.size();
+  return CORBA::ULong(member_by_index.size());
 }
 
-DDS::ReturnCode_t DynamicType::get_member_by_index(DynamicTypeMember_rch& member, ACE_CDR::ULong index)
+DDS::ReturnCode_t DynamicType::get_member_by_index(DynamicTypeMember_rch& member, ACE_CDR::ULong index) const
 {
   if (index < member_by_index.size()) {
     member = member_by_index[index];
@@ -80,12 +78,36 @@ DDS::ReturnCode_t DynamicType::get_member_by_index(DynamicTypeMember_rch& member
   }
 }
 
-bool DynamicType::equals(const DynamicType& other)
+bool DynamicType::equals(const DynamicType& other) const
 {
-  return test_equality(*this, other);
+  return *this == other;
 }
 
-bool test_equality(const DynamicType& lhs, const DynamicType& rhs)
+void DynamicType::insert_dynamic_member(const DynamicTypeMember_rch& dtm)
+{
+  member_by_index.push_back(dtm);
+  if (dtm->descriptor_->id != MEMBER_ID_INVALID) {
+    member_by_id.insert(std::make_pair(dtm->descriptor_->id , dtm));
+  }
+  member_by_name.insert(std::make_pair(dtm->descriptor_->name , dtm));
+}
+
+bool DynamicType::test_equality_i(const DynamicType& rhs, DynamicTypePtrPairSeen& dt_ptr_pair) const
+{
+  //check pair seen
+  DynamicTypePtrPair this_pair = std::make_pair(this, &rhs);
+  DynamicTypePtrPairSeen::const_iterator have_seen = dt_ptr_pair.find(this_pair);
+  if (have_seen == dt_ptr_pair.end()) {
+    dt_ptr_pair.insert(this_pair);
+    return
+      OpenDDS::XTypes::test_equality_i(*this->descriptor_, *rhs.descriptor_, dt_ptr_pair) &&
+      OpenDDS::XTypes::test_equality_i(this->member_by_name, rhs.member_by_name, dt_ptr_pair) &&
+      OpenDDS::XTypes::test_equality_i(this->member_by_id, rhs.member_by_id, dt_ptr_pair);
+  }
+  return true;
+}
+
+bool operator==(const DynamicType& lhs, const DynamicType& rhs)
 {
 //7.5.2.8.4 Operation: equals
 //Two types shall be considered equal if and only if all of their respective properties, as identified
@@ -93,22 +115,7 @@ bool test_equality(const DynamicType& lhs, const DynamicType& rhs)
 
 //Note: We are comparing the TypeDescriptor even though the spec seems to say not to
   DynamicTypePtrPairSeen dt_ptr_pair;
-  return test_equality_i(lhs, rhs, dt_ptr_pair);
-}
-
-bool test_equality_i(const DynamicType& lhs, const DynamicType& rhs, DynamicTypePtrPairSeen& dt_ptr_pair)
-{
-  //check pair seen
-  DynamicTypePtrPair this_pair = std::make_pair(&lhs, &rhs);
-  DynamicTypePtrPairSeen::const_iterator have_seen = dt_ptr_pair.find(this_pair);
-  if (have_seen == dt_ptr_pair.end()) {
-    dt_ptr_pair.insert(this_pair);
-    return
-      test_equality_i(*lhs.descriptor_, *rhs.descriptor_, dt_ptr_pair) &&
-      test_equality_i(lhs.member_by_name, rhs.member_by_name, dt_ptr_pair) &&
-      test_equality_i(lhs.member_by_id, rhs.member_by_id, dt_ptr_pair);
-  }
-  return true;
+  return lhs.test_equality_i(rhs, dt_ptr_pair);
 }
 
 bool test_equality_i(const DynamicType_rch& lhs, const DynamicType_rch& rhs, DynamicTypePtrPairSeen& dt_ptr_pair)
@@ -118,7 +125,7 @@ bool test_equality_i(const DynamicType_rch& lhs, const DynamicType_rch& rhs, Dyn
   } else if (lhs.in() == 0 || rhs.in() == 0) {
     return false;
   } else {
-    return test_equality_i(*lhs.in(), *rhs.in(), dt_ptr_pair);
+    return lhs->test_equality_i(*rhs.in(), dt_ptr_pair);
   }
 }
 

@@ -22,24 +22,18 @@ DDS::ReturnCode_t DynamicTypeMember::get_descriptor(MemberDescriptor& descriptor
   return DDS::RETCODE_OK;
 }
 
-bool DynamicTypeMember::equals(const DynamicTypeMember& other)
+bool DynamicTypeMember::equals(const DynamicTypeMember& other) const
 {
-//7.5.2.6.3 Operation: equals
-//Two members shall be considered equal if and only if they belong to the same type and all of
-//their respective properties, as identified in Table 52 above, are equal.
-
-//This spec implementation is not currently possible so I have done what I consider to be a deep compare
-//8/3/2021 Clayton Calabrese
   DynamicTypePtrPairSeen dt_ptr_pair;
   return test_equality_i(*this, other, dt_ptr_pair);
 }
 
-MemberId DynamicTypeMember::get_id()
+MemberId DynamicTypeMember::get_id() const
 {
   return descriptor_->id;
 }
 
-DCPS::String DynamicTypeMember::get_name()
+DCPS::String DynamicTypeMember::get_name() const
 {
   return descriptor_->name;
 }
@@ -53,19 +47,16 @@ bool test_equality_i(const DynamicTypeMembersByName& lhs, const DynamicTypeMembe
 {
   if (lhs.size() == rhs.size()) {
     for (DynamicTypeMembersByName::const_iterator it = lhs.begin(); it != lhs.end(); ++it) {
-      if(rhs.find(it->first) != rhs.end()) {
+      if (rhs.find(it->first) != rhs.end()) {
         if (!test_equality_i(*lhs.find(it->first)->second->descriptor_, *rhs.find(it->first)->second->descriptor_, dt_ptr_pair)) {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("test_equality_i: DynamicTypeMembersByName - Members are not the same\n")));
           return false;
         }
       } else {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("test_equality_i: DynamicTypeMembersByName - Member from lhs not found in rhs\n")));
         return false;
       }
     }
     return true;
   } else {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("test_equality_i: DynamicTypeMembersByName - Member count is different\n")));
     return false;
   }
 }
@@ -76,17 +67,14 @@ bool test_equality_i(const DynamicTypeMembersById& lhs, const DynamicTypeMembers
     for (DynamicTypeMembersById::const_iterator it = lhs.begin(); it != lhs.end(); ++it) {
       if(rhs.find(it->first) != rhs.end()) {
         if (!test_equality_i(*lhs.find(it->first)->second->descriptor_, *rhs.find(it->first)->second->descriptor_, dt_ptr_pair)) {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("test_equality_i: DynamicTypeMembersById - Members are not the same\n")));
           return false;
         }
       } else {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("test_equality_i: DynamicTypeMembersById - Member from lhs not found in rhs\n")));
         return false;
       }
     }
     return true;
   } else {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("test_equality_i: DynamicTypeMembersById - Member count is different\n")));
     return false;
   }
 }

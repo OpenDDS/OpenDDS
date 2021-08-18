@@ -23,9 +23,9 @@ public:
   ~DynamicTypeMember();
 
   DDS::ReturnCode_t get_descriptor(MemberDescriptor& descriptor) const;
-  bool equals(const DynamicTypeMember& other);
-  MemberId get_id();
-  DCPS::String get_name();
+  bool equals(const DynamicTypeMember& other) const;
+  MemberId get_id() const;
+  DCPS::String get_name() const;
 
   MemberDescriptor* descriptor_;
 };

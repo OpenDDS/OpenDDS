@@ -21,7 +21,7 @@ public:
     : id(MEMBER_ID_INVALID), index(0), try_construct_kind(DISCARD), is_key(false), is_optional(false), is_must_understand(false), is_shared(false), is_default_label(false)
   {}
 
-  bool equals(const MemberDescriptor& other);
+  bool equals(const MemberDescriptor& other) const;
 
   DCPS::String name;
   MemberId id;
@@ -40,7 +40,7 @@ public:
 inline bool operator==(const UnionCaseLabelSeq& lhs, const UnionCaseLabelSeq& rhs)
 {
   if (lhs.length() == rhs.length()) {
-    for (ACE_CDR::ULong i = 0 ; i < lhs.length() ; ++i) {
+    for (ACE_CDR::ULong i = 0; i < lhs.length(); ++i) {
       if (lhs[i] != rhs[i]) {
         return false;
       }

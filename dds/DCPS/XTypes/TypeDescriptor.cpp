@@ -5,7 +5,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
-bool TypeDescriptor::equals(const TypeDescriptor& other)
+bool TypeDescriptor::equals(const TypeDescriptor& other) const
 {
   DynamicTypePtrPairSeen dt_ptr_pair;
   return test_equality_i(*this, other, dt_ptr_pair);
