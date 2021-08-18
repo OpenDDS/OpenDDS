@@ -12,9 +12,6 @@
 
 #include <ace/Configuration.h>
 
-#include <sstream>
-#include <cstdlib>
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
