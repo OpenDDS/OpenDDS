@@ -3637,7 +3637,7 @@ namespace {
       extraction.endArgs();
       be_global->impl_ <<
         "  ACE_CDR::UShort disc, size;\n"
-        "  if (!(strm >> disc) || !(strm >> size)) {\n"
+        "  if (!(strm >> disc) || !(strm >> size) || size == 0) {\n"
         "    return false;\n"
         "  }\n"
         "  if (disc == OpenDDS::RTPS::PID_SENTINEL) {\n"
