@@ -2017,6 +2017,7 @@ RtpsUdpDataLink::RtpsWriter::add_reader(const ReaderInfo_rch& reader)
       return false;
     }
 
+    fallback_.reset();
     heartbeat_.schedule(fallback_.get());
     if (link->config().responsive_mode_) {
       MetaSubmessageVec meta_submessages;
