@@ -1,4 +1,7 @@
+// -*- C++ -*-
 /*
+ *
+ *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -6,19 +9,11 @@
 #ifndef _SAMPLE_DISSECTOR_H_
 #define _SAMPLE_DISSECTOR_H_
 
+
 extern "C" {
+
 #include "ws_config.h"
-}
-#include "dissector_export.h"
-#include "ws_common.h"
 
-#include <FACE/Fixed.h>
-#include <dds/DCPS/Serializer.h>
-#include <dds/DCPS/DataSampleHeader.h>
-
-#include <ace/Message_Block.h>
-
-extern "C" {
 #include <glib.h>
 #include <gmodule.h>
 
@@ -31,7 +26,15 @@ extern "C" {
 #include <string>
 #include <map>
 #include <exception>
-#include <sstream>
+
+#include <ace/Message_Block.h>
+
+#include "dissector_export.h"
+#include "ws_common.h"
+
+#include "FACE/Fixed.h"
+#include "dds/DCPS/Serializer.h"
+#include "dds/DCPS/DataSampleHeader.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
