@@ -141,6 +141,11 @@ public:
     return repo_id_;
   }
 
+  SystemTimePoint creation_time() const {
+    ACE_Guard<ACE_Thread_Mutex> guard(lock_);
+    return creation_time_;
+  }
+
 private:
 
   // Implemented by derived classes (DataReaderImpl/DataWriterImpl)
@@ -329,6 +334,7 @@ private:
   Reverse_Lock_t reverse_lock_;
 
   RepoId repo_id_;
+  const SystemTimePoint creation_time_;
 };
 
 typedef RcHandle<TransportClient> TransportClient_rch;

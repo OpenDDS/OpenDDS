@@ -580,13 +580,14 @@ private:
 
   class RtpsReader : public RcObject {
   public:
-    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable)
+    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable, const SystemTimePoint& creation_time)
       : link_(link)
       , id_(id)
       , durable_(durable)
       , stopping_(false)
       , nackfrag_count_(0)
       , preassociation_task_(make_rch<RtpsReader::Sporadic>(link->reactor_task_->interceptor(), *this, &RtpsReader::send_preassociation_acknacks))
+      , creation_time_(creation_time)
     {}
 
     ~RtpsReader();
@@ -643,6 +644,7 @@ private:
     CORBA::Long nackfrag_count_;
     typedef PmfSporadicTask<RtpsReader> Sporadic;
     RcHandle<Sporadic> preassociation_task_;
+    SystemTimePoint creation_time_;
   };
   typedef RcHandle<RtpsReader> RtpsReader_rch;
 
