@@ -7,27 +7,26 @@
 #include <dds/DCPS/StaticIncludes.h>
 #include <dds/DCPS/unique_ptr.h>
 #ifndef ACE_HAS_CPP11
-#include <dds/DCPS/ConditionVariable.h>
+#  include <dds/DCPS/ConditionVariable.h>
 #endif
-
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
-#include "tests/Utils/ExceptionStreams.h"
-#include "tests/Utils/StatusMatching.h"
+#include <tests/Utils/ExceptionStreams.h>
+#include <tests/Utils/StatusMatching.h>
 
 #include <ace/streams.h>
 #include <ace/Get_Opt.h>
 #include <ace/OS_NS_unistd.h>
 
 #include <memory>
-
+#include <sstream>
 #ifdef ACE_HAS_CPP11
-#include <condition_variable>
-#include <mutex>
-#include <thread>
+#  include <condition_variable>
+#  include <mutex>
+#  include <thread>
 #endif
 
 using namespace Messenger;

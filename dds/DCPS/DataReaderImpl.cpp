@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -31,13 +29,13 @@
 #include "SafetyProfileStreams.h"
 #include "TypeSupportImpl.h"
 #include "XTypes/TypeObject.h"
-#if !defined (DDS_HAS_MINIMUM_BIT)
-#include "BuiltInTopicUtils.h"
+#ifndef DDS_HAS_MINIMUM_BIT
+#  include "BuiltInTopicUtils.h"
 #endif
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#ifndef DDS_HAS_MINIMUM_BIT
 #  include <dds/DdsDcpsCoreTypeSupportC.h>
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 #include <dds/DdsDcpsCoreC.h>
 #include <dds/DdsDcpsGuidTypeSupportImpl.h>
 
@@ -47,10 +45,13 @@
 
 #include <cstdio>
 #include <stdexcept>
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#  include <sstream>
+#endif
 
-#if !defined (__ACE_INLINE__)
-# include "DataReaderImpl.inl"
-#endif /* !__ACE_INLINE__ */
+#ifndef __ACE_INLINE__
+#  include "DataReaderImpl.inl"
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
