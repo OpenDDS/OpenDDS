@@ -36,6 +36,9 @@ public:
   SequenceNumber sequence() const;
   void set_sequence(const SequenceNumber& value);
 
+  SystemTimePoint source_timestamp() const;
+  void set_source_timestamp(const SystemTimePoint& time);
+
   virtual ACE_Message_Block* duplicate_msg() const;
 
   virtual const ACE_Message_Block* msg() const;
@@ -66,6 +69,7 @@ private:
   RepoId publication_id_;
   RepoId subscription_id_;
   SequenceNumber sequence_;
+  SystemTimePoint source_timestamp_;
   bool fragment_, exclusive_;
 };
 

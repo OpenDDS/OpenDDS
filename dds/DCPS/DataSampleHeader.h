@@ -260,6 +260,11 @@ struct OpenDDS_Dcps_Export DataSampleHeader : public PoolAllocationBase {
     }
   }
 
+  ACE_Time_Value get_source_timestamp() const
+  {
+    return ACE_Time_Value(source_timestamp_sec_, source_timestamp_nanosec_ / 1000);
+  }
+
 private:
   /// Keep track of the amount of data read from a buffer.
   size_t serialized_size_;

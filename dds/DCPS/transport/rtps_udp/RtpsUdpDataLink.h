@@ -345,6 +345,7 @@ private:
     ACE_CDR::Long required_acknack_count_;
     OPENDDS_MAP(SequenceNumber, TransportQueueElement*) durable_data_;
     MonotonicTimePoint durable_timestamp_;
+    SystemTimePoint discovery_time_;
 #ifdef OPENDDS_SECURITY
     SequenceNumber max_pvs_sn_;
     DisjointSequence pvs_outstanding_;
@@ -362,6 +363,7 @@ private:
       , durable_(durable)
       , participant_flags_(participant_flags)
       , required_acknack_count_(0)
+      , discovery_time_(SystemTimePoint::now())
 #ifdef OPENDDS_SECURITY
       , max_pvs_sn_(SequenceNumber::ZERO())
 #endif
