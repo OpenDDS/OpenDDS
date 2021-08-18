@@ -537,7 +537,6 @@ SubscriberImpl::get_datareaders(
     if (this->access_depth_ == 0 && this->qos_.presentation.coherent_access) {
       return ::DDS::RETCODE_PRECONDITION_NOT_MET;
     }
-
     if (this->qos_.presentation.ordered_access) {
 
       GroupRakeData data;
