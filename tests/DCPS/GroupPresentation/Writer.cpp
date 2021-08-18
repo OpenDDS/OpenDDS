@@ -143,7 +143,6 @@ Writer::svc()
   }
 
   finished_instances_ ++;
-  ACE_OS::sleep (1);
   return 0;
 }
 
