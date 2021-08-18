@@ -31,7 +31,7 @@ extern "C" {
 #include <string>
 #include <map>
 #include <exception>
-#include <stringstream>
+#include <sstream>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
