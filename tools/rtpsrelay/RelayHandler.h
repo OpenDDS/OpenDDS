@@ -38,6 +38,11 @@ struct AddrSetStats {
   ParticipantStatisticsReporter spdp_stats_reporter;
   ParticipantStatisticsReporter sedp_stats_reporter;
   ParticipantStatisticsReporter data_stats_reporter;
+  const OpenDDS::DCPS::MonotonicTimePoint first_activity;
+
+  AddrSetStats()
+    : first_activity(OpenDDS::DCPS::MonotonicTimePoint::now())
+  {}
 
   bool empty() const
   {
@@ -83,6 +88,7 @@ public:
               RelayStatisticsReporter& relay_stats_reporter)
     : config_(config)
     , relay_stats_reporter_(relay_stats_reporter)
+    , expected_discovery_time_(config.lifespan() / 10)
   {}
 
   void spdp_vertical_handler(RelayHandler* spdp_vertical_handler)
@@ -110,10 +116,20 @@ public:
 
   void remove(const OpenDDS::DCPS::GUID_t& guid);
 
-  void remove_pending(const OpenDDS::DCPS::GUID_t& guid)
+  void remove_pending(const OpenDDS::DCPS::GUID_t& guid,
+                      const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
     pending_.erase(guid);
+
+    const auto pos = guid_addr_set_map_.find(guid);
+    if (pos != guid_addr_set_map_.end()) {
+      const auto time_to_discovery = now - pos->second.first_activity;
+      expected_discovery_time_ = .99 * expected_discovery_time_ + .01 * time_to_discovery;
+      if (config_.log_activity()) {
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::remove_pending %C expected discovery time %d.%d total=%B/%B pending=%B/%B\n"), guid_to_string(guid).c_str(), expected_discovery_time_.value().sec(), expected_discovery_time_.value().usec(), guid_addr_set_map_.size(), config_.static_limit(), pending_.size(), config_.max_pending()));
+      }
+    }
   }
 
   class Proxy {
@@ -177,6 +193,7 @@ private:
   GuidSet pending_;
   typedef std::list<std::pair<OpenDDS::DCPS::MonotonicTimePoint, OpenDDS::DCPS::GUID_t> > PendingExpirationQueue;
   PendingExpirationQueue pending_expiration_queue_;
+  OpenDDS::DCPS::TimeDuration expected_discovery_time_;
   mutable ACE_Thread_Mutex mutex_;
 };
 

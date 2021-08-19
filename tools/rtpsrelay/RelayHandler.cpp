@@ -355,7 +355,7 @@ bool GuidAddrSet::ignore(const OpenDDS::DCPS::GUID_t& guid,
   }
 
   pending_.insert(guid);
-  pending_expiration_queue_.push_back(std::make_pair(now + config_.pending_timeout(), guid));
+  pending_expiration_queue_.push_back(std::make_pair(now + expected_discovery_time_ * 10, guid));
 
   return false;
 }
