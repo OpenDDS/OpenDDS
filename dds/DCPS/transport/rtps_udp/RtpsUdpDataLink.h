@@ -345,7 +345,7 @@ private:
     ACE_CDR::Long required_acknack_count_;
     OPENDDS_MAP(SequenceNumber, TransportQueueElement*) durable_data_;
     MonotonicTimePoint durable_timestamp_;
-    SystemTimePoint discovery_time_;
+    const SystemTimePoint discovery_time_;
 #ifdef OPENDDS_SECURITY
     SequenceNumber max_pvs_sn_;
     DisjointSequence pvs_outstanding_;
@@ -553,7 +553,7 @@ private:
     OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumber_t) frags_;
     CORBA::Long heartbeat_recvd_count_, hb_frag_recvd_count_;
     const ACE_CDR::ULong participant_flags_;
-    SystemTimePoint discovery_time_;
+    const SystemTimePoint discovery_time_;
 
     WriterInfo(const RepoId& id,
                const MonotonicTime_t& participant_discovered_at,
@@ -644,7 +644,7 @@ private:
     CORBA::Long nackfrag_count_;
     typedef PmfSporadicTask<RtpsReader> Sporadic;
     RcHandle<Sporadic> preassociation_task_;
-    SystemTimePoint creation_time_;
+    const SystemTimePoint creation_time_;
   };
   typedef RcHandle<RtpsReader> RtpsReader_rch;
 
