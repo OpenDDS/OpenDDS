@@ -24,7 +24,6 @@ public:
 private:
   typedef ACE_SYNCH_MUTEX Mutex;
   typedef ACE_Guard<Mutex> Lock;
-  static const OpenDDS::DCPS::TimeDuration sWriteInterval;
   int get_key();
 
   Messenger::MessageDataWriter_var mdw_;

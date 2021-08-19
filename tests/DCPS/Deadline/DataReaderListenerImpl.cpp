@@ -1,4 +1,5 @@
 #include "DataReaderListenerImpl.h"
+
 #include "Domain.h"
 
 #include "MessengerTypeSupportC.h"
@@ -61,14 +62,19 @@ void DataReaderListenerImpl::on_subscription_matched(DDS::DataReader_ptr, const 
   matched_cv_.notify_all();
 }
 
-void DataReaderListenerImpl::wait_all_received() const
+int DataReaderListenerImpl::wait_all_received() const
 {
   Lock lock(received_mutex_);
+  if (!lock.locked()) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DataReaderListenerImpl::wait_all_received failed to get lock.\n")));
+    return 1;
+  }
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) DataReaderListenerImpl::wait_all_received\n")));
-  while (received_ < Domain::N_Msg) {
+  while (received_ < Domain::n_msg) {
     received_cv_.wait();
   }
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) DataReaderListenerImpl::wait_all_received returns\n")));
+  return 0;
 }
 
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
@@ -107,7 +113,7 @@ bool DataReaderListenerImpl::all_received()
   Lock lock(received_mutex_);
   ++received_;
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) received %d\n"), received_));
-  return received_ >= (Domain::N_Msg * Domain::N_Instance);
+  return received_ >= (Domain::n_msg * Domain::n_instance);
 }
 
 void DataReaderListenerImpl::on_requested_incompatible_qos(DDS::DataReader_ptr, const DDS::RequestedIncompatibleQosStatus&)

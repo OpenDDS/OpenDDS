@@ -38,7 +38,6 @@ public:
   int run();
 
 private:
-  static const OpenDDS::DCPS::TimeDuration WriteInterval;
   void cleanup();
   void wait_incompatible_qos_status(DDS::StatusCondition_var cond) const;
   void test_incompatible_deadline_qos();
@@ -56,8 +55,6 @@ private:
   DDS::DataReader_var dr1_;
   DDS::DataReader_var dr2_;
 };
-
-const OpenDDS::DCPS::TimeDuration Subscriber::WriteInterval(0, 500000);
 
 Subscriber::Subscriber(int argc, ACE_TCHAR* argv[]) : domain_(argc, argv, "Subscriber")
 {
@@ -78,8 +75,8 @@ Subscriber::Subscriber(int argc, ACE_TCHAR* argv[]) : domain_(argc, argv, "Subsc
 
     DDS::DataReaderQos qos;
     sub_->get_default_datareader_qos(qos);
-    qos.deadline.period.sec = Domain::R_Deadline.sec;
-    qos.deadline.period.nanosec = Domain::R_Deadline.nanosec;
+    qos.deadline.period.sec = Domain::r_deadline.sec;
+    qos.deadline.period.nanosec = Domain::r_deadline.nanosec;
     qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) create 2 readers with deadline.period (%d sec)\n"), qos.deadline.period.sec));
@@ -104,35 +101,34 @@ int Subscriber::run()
     return 1;
   }
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Subscriber sleep for %d milliseconds\n"), Domain::R_Sleep.value().msec()));
-  ACE_OS::sleep(Domain::R_Sleep.value()); // Wait for deadline periods to expire
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Subscriber sleep for %d milliseconds\n"), Domain::r_sleep.value().msec()));
+  ACE_OS::sleep(Domain::r_sleep.value()); // Wait for deadline periods to expire
 
   Messenger::MessageDataReader_var mdr1 = Messenger::MessageDataReader::_narrow(dr1_.in());
   Messenger::MessageDataReader_var mdr2 = Messenger::MessageDataReader::_narrow(dr2_.in());
   Messenger::Message msg;
-  msg.subject_id = Domain::sKey1;
+  msg.subject_id = Domain::s_key1;
   const DDS::InstanceHandle_t ins1r1 = mdr1->lookup_instance(msg);
   const DDS::InstanceHandle_t ins1r2 = mdr2->lookup_instance(msg);
-  msg.subject_id = Domain::sKey2;
+  msg.subject_id = Domain::s_key2;
   const DDS::InstanceHandle_t ins2r1 = mdr1->lookup_instance(msg);
   const DDS::InstanceHandle_t ins2r2 = mdr2->lookup_instance(msg);
 
   CORBA::Long delta1 = 0;
-  if (!check_status(ins1r1, ins1r2, ins2r1, ins2r2, Domain::N_Instance, delta1)) {
+  if (!check_status(ins1r1, ins1r2, ins2r1, ins2r2, Domain::n_instance, delta1)) {
     return 1;
   }
 
-  const OpenDDS::DCPS::TimeDuration no_miss_period = Domain::R_Sleep + (Domain::N_Msg * WriteInterval);
+  const OpenDDS::DCPS::TimeDuration no_miss_period = Domain::r_sleep + Domain::n_msg * Domain::w_interval;
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Subscriber sleep for %d msec\n"), no_miss_period.value().msec()));
   // Wait for another set of deadline periods(5 + 11 secs).
   // During this period, the writers continue to write all samples with .5 second interval.
   ACE_OS::sleep(no_miss_period.value());
-  if (!check_status(ins1r1, ins1r2, ins2r1, ins2r2, 3 * Domain::N_Instance, delta1)) {
+  if (!check_status(ins1r1, ins1r2, ins2r1, ins2r2, 3 * Domain::n_instance, delta1)) {
     return 1;
   }
 
-  listener_i_->wait_all_received();
-  return 0;
+  return listener_i_->wait_all_received();
 }
 
 void Subscriber::cleanup()
@@ -217,7 +213,7 @@ bool Subscriber::check_status(const DDS::InstanceHandle_t& i1r1, const DDS::Inst
     return false;
   }
   // Writer writes each instance after 9 seconds. Reader deadline period is 5 seconds.
-  // After Domain::R_Sleep (11 seconds), the deadline missed should be 1 per instance.
+  // After Domain::r_sleep (11 seconds), the deadline missed should be 1 per instance.
   if (s1.total_count != expected || s2.total_count != expected) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: missed requested deadline (%d or %d) != (%d)\n"),
                s1.total_count, s2.total_count, expected));
@@ -280,7 +276,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   } catch (...) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("Subscriber ERROR: ...\n")));
   }
-  ACE_OS::sleep(2); //??
   TheServiceParticipant->shutdown();
   return ret;
 }

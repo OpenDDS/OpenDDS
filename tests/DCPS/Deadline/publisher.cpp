@@ -60,7 +60,7 @@ Publisher::Publisher(int argc, ACE_TCHAR* argv[]) : domain_(argc, argv, "Publish
 
     listener_i_ = new DataWriterListenerImpl;
     listener_ = listener_i_;
-    if (!listener_){
+    if (!listener_) {
       throw std::runtime_error("DataWriterListenerImpl is null.");
     }
 
@@ -92,18 +92,18 @@ int Publisher::run()
     return 1;
   }
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Publisher::run sleep for %d milliseconds\n"), Domain::W_Sleep.value().msec()));
-  ACE_OS::sleep(Domain::W_Sleep.value()); // wait for a set of deadline periods to expire
-  CORBA::Long expected = Domain::N_Expiration * N_WriteThread;
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Publisher::run sleep for %d milliseconds\n"), Domain::w_sleep.value().msec()));
+  ACE_OS::sleep(Domain::w_sleep.value()); // wait for a set of deadline periods to expire
+  CORBA::Long expected = Domain::n_expiration * N_WriteThread;
   if (!check_status(expected)) {
     return 1;
   }
 
   writer.end();
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Publisher::run sleep for %d milliseconds\n"), Domain::W_Sleep.value().msec()));
-  ACE_OS::sleep(Domain::W_Sleep.value()); // wait for another set of deadline periods to expire
-  expected = (Domain::N_Expiration + 2) * N_WriteThread;
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Publisher::run sleep for %d milliseconds\n"), Domain::w_sleep.value().msec()));
+  ACE_OS::sleep(Domain::w_sleep.value()); // wait for another set of deadline periods to expire
+  expected = (Domain::n_expiration + 2) * N_WriteThread;
   if (!check_status(expected)) {
     return 1;
   }
@@ -129,11 +129,11 @@ void Publisher::cleanup()
 
 bool Publisher::set_deadline_qos()
 {
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Publisher::set_deadline_qos (%d sec)\n"), Domain::W_Deadline.sec));
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Publisher::set_deadline_qos (%d sec)\n"), Domain::w_deadline.sec));
   DDS::DataWriterQos qos;
   pub_->get_default_datawriter_qos(qos);
-  qos.deadline.period.sec = Domain::W_Deadline.sec;
-  qos.deadline.period.nanosec = Domain::W_Deadline.nanosec;
+  qos.deadline.period.sec = Domain::w_deadline.sec;
+  qos.deadline.period.nanosec = Domain::w_deadline.nanosec;
   if (dw_->set_qos(qos) != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: dw_->set_qos failed.\n")));
     return false;

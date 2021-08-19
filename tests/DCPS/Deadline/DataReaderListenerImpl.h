@@ -22,7 +22,7 @@ public:
   bool wait_matched(int count, const OpenDDS::DCPS::TimeDuration& max_wait) const;
   virtual void on_subscription_matched(DDS::DataReader_ptr reader, const DDS::SubscriptionMatchedStatus& status);
 
-  void wait_all_received() const;
+  int wait_all_received() const;
   virtual void on_data_available(DDS::DataReader_ptr reader);
 
   CORBA::Long requested_deadline_total_count() const;
