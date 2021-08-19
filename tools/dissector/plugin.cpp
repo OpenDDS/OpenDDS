@@ -1,25 +1,18 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-extern "C" {
-
-#include "ws_config.h"
-
-#include <glib.h>
-#include <gmodule.h>
-
-} // extern "C"
-
-#include <dds/Version.h>
+#include "ws-wrapper-headers/config.h"
 #include "dissector_export.h"
-
 #include "packet-opendds.h"
 #include "packet-repo.h"
 #include "packet-datawriter.h"
+
+#include <dds/Version.h>
+
+#include <glib.h>
+#include <gmodule.h>
 
 #include <fstream>
 

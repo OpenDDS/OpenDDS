@@ -1,12 +1,14 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #include "sample_manager.h"
 #include "ws_common.h"
+
+#ifndef NO_ITL
+#  include <itl/itl.hpp>
+#endif
 
 #include <dds/DCPS/DirentWrapper.h>
 
@@ -17,10 +19,6 @@
 #include <ace/ACE.h>
 #include <ace/Configuration.h>
 #include <ace/Configuration_Import_Export.h>
-
-#ifndef NO_ITL
-#include <itl/itl.hpp>
-#endif
 
 #include <algorithm>
 #include <iomanip>

@@ -1,25 +1,22 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #include "giop_base.h"
+
 #include "ws_common.h"
 
+#include <dds/DCPS/GuidConverter.h>
 
-#include "dds/DCPS/GuidConverter.h"
-
-#include "ace/Basic_Types.h"
-#include "ace/CDR_Base.h"
-#include "ace/Message_Block.h"
-#include "ace/Log_Msg.h"
-#include "ace/OS_NS_string.h"
-#include "ace/ACE.h"
+#include <ace/Basic_Types.h>
+#include <ace/CDR_Base.h>
+#include <ace/Message_Block.h>
+#include <ace/Log_Msg.h>
+#include <ace/OS_NS_string.h>
+#include <ace/ACE.h>
 
 #include <cstring>
-
 #include <algorithm>
 #include <iomanip>
 #include <sstream>
