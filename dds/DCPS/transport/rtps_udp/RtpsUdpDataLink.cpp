@@ -1197,7 +1197,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
     // {DataSampleHeader} -> {Data Payload}
     data.reset(msg->cont()->duplicate());
     const DataSampleElement* dsle = tse->sample();
-    source_time = SystemTimePoint(dsle->get_header().get_source_timestamp());
+    source_time = dsle->get_header().get_source_timestamp();
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
     RtpsSampleHeader::populate_data_sample_submessages(
       subm, *dsle, requires_inline_qos);
@@ -1208,7 +1208,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
     // {DataSampleHeader} -> {Content Filtering GUIDs} -> {Data Payload}
     data.reset(msg->cont()->cont()->duplicate());
     const DataSampleElement* dsle = tce->original_send_element()->sample();
-    source_time = SystemTimePoint(dsle->get_header().get_source_timestamp());
+    source_time = dsle->get_header().get_source_timestamp();
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
     RtpsSampleHeader::populate_data_sample_submessages(
       subm, *dsle, requires_inline_qos);
@@ -4331,7 +4331,7 @@ RtpsUdpDataLink::RtpsReader::deliver_held_data(const RepoId& src)
     const SequenceNumber ca = wi->second->recvd_.cumulative_ack();
     const WriterInfo::HeldMap::iterator end = wi->second->held_.upper_bound(ca);
     for (WriterInfo::HeldMap::iterator it = wi->second->held_.begin(); it != end; /*increment in loop body*/) {
-      const DCPS::SystemTimePoint source_time(it->second.header_.get_source_timestamp());
+      const DCPS::SystemTimePoint source_time = it->second.header_.get_source_timestamp();
       if (durable_ || creation_time_ < source_time) {
         to_deliver.push_back(it->second);
       }
