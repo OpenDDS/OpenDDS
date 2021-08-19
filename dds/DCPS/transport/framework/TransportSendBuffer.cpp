@@ -394,12 +394,14 @@ SingleSendBuffer::resend_i(const SequenceRange& range, DisjointSequence* gaps,
       continue;
     }
 
-    const SystemTimePoint source_timestamp = it->second.first->peek()->source_timestamp();
-    if (source_timestamp < not_before) {
-      if (gaps) {
-        gaps->insert(sequence);
+    if (it->second.first && it->second.second) {
+      const SystemTimePoint source_timestamp = it->second.first->peek()->source_timestamp();
+      if (source_timestamp < not_before) {
+        if (gaps) {
+          gaps->insert(sequence);
+        }
+        continue;
       }
-      continue;
     }
 
     DestinationMap::iterator dest_data;
@@ -427,6 +429,20 @@ SingleSendBuffer::resend_i(const SequenceRange& range, DisjointSequence* gaps,
     } else {
       const FragmentMap::iterator fm_it = fragments_.find(it->first);
       if (fm_it != fragments_.end()) {
+        if (fm_it->second.begin() != fm_it->second.end()) {
+          const SystemTimePoint source_timestamp = fm_it->second.begin()->second.first->peek()->source_timestamp();
+          if (source_timestamp < not_before) {
+            if (gaps) {
+              gaps->insert(sequence);
+            }
+            continue;
+          }
+        } else {
+          if (gaps) {
+            gaps->insert(sequence);
+          }
+          continue;
+        }
         for (BufferMap::iterator bm_it = fm_it->second.begin();
               bm_it != fm_it->second.end(); ++bm_it) {
           resend_one(bm_it->second);
