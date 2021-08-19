@@ -12,15 +12,15 @@ namespace OpenDDS {
 namespace XTypes {
 
 class TypeDescriptor;
+typedef OpenDDS::DCPS::RcHandle<TypeDescriptor> TypeDescriptor_rch;
 
 class OpenDDS_Dcps_Export DynamicType : public OpenDDS::DCPS::RcObject
 {
 public:
   DynamicType();
-  ~DynamicType();
 
-  void get_descriptor(TypeDescriptor& descriptor) const;
-  TypeDescriptor* get_descriptor() { return descriptor_; }
+  void get_descriptor(TypeDescriptor_rch& descriptor) const;
+  TypeDescriptor_rch get_descriptor();
   DCPS::String get_name() const;
   TypeKind get_kind() const;
   DDS::ReturnCode_t get_member_by_name(DynamicTypeMember_rch& member, const DCPS::String& name) const;
@@ -36,7 +36,7 @@ private:
   DynamicTypeMembersByName member_by_name;
   DynamicTypeMembersById member_by_id;
   DynamicTypeMembersByIndex member_by_index;
-  TypeDescriptor* descriptor_;
+  TypeDescriptor_rch descriptor_;
 };
 
 typedef DCPS::RcHandle<DynamicType> DynamicType_rch;

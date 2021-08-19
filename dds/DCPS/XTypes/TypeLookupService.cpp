@@ -432,7 +432,7 @@ bool TypeLookupService::complete_to_minimal_type_object(const TypeObject& cto, T
   }
 }
 
-void TypeLookupService::handle_tryconstruct_flags(MemberDescriptor*& md, MemberFlag mf)
+void TypeLookupService::handle_tryconstruct_flags(MemberDescriptor_rch& md, MemberFlag mf)
 {
   if (mf & TRY_CONSTRUCT1) {
     if (mf & TRY_CONSTRUCT2) {
@@ -450,7 +450,7 @@ void TypeLookupService::handle_tryconstruct_flags(MemberDescriptor*& md, MemberF
   }
 }
 
-void TypeLookupService::complete_struct_member_to_member_descriptor(MemberDescriptor*& md,
+void TypeLookupService::complete_struct_member_to_member_descriptor(MemberDescriptor_rch& md,
   const CompleteStructMember& cm, DynamicTypeMap& dt_map)
 {
   md->name = cm.detail.name;
@@ -466,7 +466,7 @@ void TypeLookupService::complete_struct_member_to_member_descriptor(MemberDescri
   md->is_default_label = false;
 }
 
-void TypeLookupService::complete_union_member_to_member_descriptor(MemberDescriptor*& md,
+void TypeLookupService::complete_union_member_to_member_descriptor(MemberDescriptor_rch& md,
   const CompleteUnionMember& cm, DynamicTypeMap& dt_map)
 {
   md->name = cm.detail.name;
@@ -482,7 +482,7 @@ void TypeLookupService::complete_union_member_to_member_descriptor(MemberDescrip
   md->is_default_label = cm.common.member_flags & IS_DEFAULT;
 }
 
-void TypeLookupService::complete_annotation_member_to_member_descriptor(MemberDescriptor*& md,
+void TypeLookupService::complete_annotation_member_to_member_descriptor(MemberDescriptor_rch& md,
   const CompleteAnnotationParameter& cm, DynamicTypeMap& dt_map)
 {
   md->name = cm.name;

@@ -8,18 +8,12 @@ namespace OpenDDS {
 namespace XTypes {
 
 DynamicTypeMember::DynamicTypeMember()
-  : descriptor_(new MemberDescriptor())
+  : descriptor_(DCPS::make_rch<XTypes::MemberDescriptor>())
 {}
 
-DynamicTypeMember::~DynamicTypeMember()
+void DynamicTypeMember::get_descriptor(MemberDescriptor_rch& descriptor) const
 {
-  delete descriptor_;
-}
-
-DDS::ReturnCode_t DynamicTypeMember::get_descriptor(MemberDescriptor& descriptor) const
-{
-  descriptor = *descriptor_;
-  return DDS::RETCODE_OK;
+  descriptor = descriptor_;
 }
 
 bool DynamicTypeMember::equals(const DynamicTypeMember& other) const

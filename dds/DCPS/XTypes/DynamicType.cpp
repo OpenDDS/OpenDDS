@@ -8,17 +8,17 @@ namespace OpenDDS {
 namespace XTypes {
 
 DynamicType::DynamicType()
-  : descriptor_(new TypeDescriptor())
+  : descriptor_(DCPS::make_rch<XTypes::TypeDescriptor>())
 {}
 
-DynamicType::~DynamicType()
+void DynamicType::get_descriptor(TypeDescriptor_rch& descriptor) const
 {
-  delete descriptor_;
+  descriptor = descriptor_;
 }
 
-void DynamicType::get_descriptor(TypeDescriptor& descriptor) const
+TypeDescriptor_rch DynamicType::get_descriptor()
 {
-  descriptor = *descriptor_;
+  return descriptor_;
 }
 
 DCPS::String DynamicType::get_name() const

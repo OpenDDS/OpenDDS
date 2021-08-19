@@ -16,18 +16,18 @@ namespace XTypes {
 
 class MemberDescriptor;
 class DynamicType;
+typedef OpenDDS::DCPS::RcHandle<MemberDescriptor> MemberDescriptor_rch;
 
 class OpenDDS_Dcps_Export DynamicTypeMember : public OpenDDS::DCPS::RcObject {
 public:
   DynamicTypeMember();
-  ~DynamicTypeMember();
 
-  DDS::ReturnCode_t get_descriptor(MemberDescriptor& descriptor) const;
+  void get_descriptor(MemberDescriptor_rch& descriptor) const;
   bool equals(const DynamicTypeMember& other) const;
   MemberId get_id() const;
   DCPS::String get_name() const;
 
-  MemberDescriptor* descriptor_;
+  MemberDescriptor_rch descriptor_;
 };
 
 typedef std::pair<const DynamicType*, const DynamicType*> DynamicTypePtrPair;

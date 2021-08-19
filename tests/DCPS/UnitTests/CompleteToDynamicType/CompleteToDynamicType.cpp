@@ -36,7 +36,7 @@ void test_conversion(const XTypes::DynamicType_rch& expected_dynamic_type)
 TEST(CompleteToDynamicType, MyInnerStruct)
 {
   XTypes::DynamicType_rch expected_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* td = expected_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch td = expected_dt->get_descriptor();
   td->kind = XTypes::TK_STRUCTURE;
   td->name = "::MyMod::MyInnerStruct";
   td->bound.length(0);
@@ -48,7 +48,7 @@ TEST(CompleteToDynamicType, MyInnerStruct)
   expected_dtm->descriptor_->index = false;
   expected_dtm->descriptor_->try_construct_kind = XTypes::DISCARD;
   XTypes::DynamicType_rch long_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* long_td = long_expected_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch long_td = long_expected_dt->get_descriptor();
   long_td->kind = XTypes::TK_INT32;
   long_td->bound.length(0);
   long_td->name = "Int32";
@@ -61,7 +61,7 @@ TEST(CompleteToDynamicType, MyInnerStruct)
 TEST(CompleteToDynamicType, MyOuterStruct)
 {
   XTypes::DynamicType_rch expected_outer_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* outer_td = expected_outer_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch outer_td = expected_outer_dt->get_descriptor();
   outer_td->kind = XTypes::TK_STRUCTURE;
   outer_td->name = "::MyMod::MyOuterStruct";
   outer_td->bound.length(0);
@@ -73,7 +73,7 @@ TEST(CompleteToDynamicType, MyOuterStruct)
   expected_outer_dtm->descriptor_->index = 0;
   expected_outer_dtm->descriptor_->try_construct_kind = XTypes::DISCARD;
   XTypes::DynamicType_rch expected_inner_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* inner_td = expected_inner_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch inner_td = expected_inner_dt->get_descriptor();
   inner_td->kind = XTypes::TK_STRUCTURE;
   inner_td->name = "::MyMod::MyInnerStruct";
   inner_td->bound.length(0);
@@ -85,7 +85,7 @@ TEST(CompleteToDynamicType, MyOuterStruct)
   expected_inner_dtm->descriptor_->index = 0;
   expected_inner_dtm->descriptor_->try_construct_kind = XTypes::DISCARD;
   XTypes::DynamicType_rch long_expected_inner_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* long_td = long_expected_inner_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch long_td = long_expected_inner_dt->get_descriptor();
   long_td->kind = XTypes::TK_INT32;
   long_td->bound.length(0);
   long_td->name = "Int32";
@@ -99,14 +99,14 @@ TEST(CompleteToDynamicType, MyOuterStruct)
 TEST(CompleteToDynamicType, MyAliasStruct)
 {
   XTypes::DynamicType_rch expected_alias_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* alias_td = expected_alias_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch alias_td = expected_alias_dt->get_descriptor();
   alias_td->kind = XTypes::TK_ALIAS;
   alias_td->name = "::MyMod::MyAliasStruct";
   alias_td->bound.length(0);
   alias_td->extensibility_kind = XTypes::FINAL;
   alias_td->is_nested = 0;
   XTypes::DynamicType_rch expected_outer_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* outer_td = expected_outer_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch outer_td = expected_outer_dt->get_descriptor();
   outer_td->kind = XTypes::TK_STRUCTURE;
   outer_td->name = "::MyMod::MyOuterStruct";
   outer_td->bound.length(0);
@@ -118,7 +118,7 @@ TEST(CompleteToDynamicType, MyAliasStruct)
   expected_outer_dtm->descriptor_->index = 0;
   expected_outer_dtm->descriptor_->try_construct_kind = XTypes::DISCARD;
   XTypes::DynamicType_rch expected_inner_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* inner_td = expected_inner_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch inner_td = expected_inner_dt->get_descriptor();
   inner_td->kind = XTypes::TK_STRUCTURE;
   inner_td->name = "::MyMod::MyInnerStruct";
   inner_td->bound.length(0);
@@ -130,7 +130,7 @@ TEST(CompleteToDynamicType, MyAliasStruct)
   expected_inner_dtm->descriptor_->index = 0;
   expected_inner_dtm->descriptor_->try_construct_kind = XTypes::DISCARD;
   XTypes::DynamicType_rch long_expected_inner_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* long_td = long_expected_inner_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch long_td = long_expected_inner_dt->get_descriptor();
   long_td->kind = XTypes::TK_INT32;
   long_td->bound.length(0);
   long_td->name = "Int32";
@@ -150,7 +150,7 @@ TEST(CompleteToDynamicType, MyAliasStruct)
 TEST(CompleteToDynamicType, PrimitiveKind)
 {
   XTypes::DynamicType_rch expected_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* td = expected_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch td = expected_dt->get_descriptor();
   td->kind = XTypes::TK_ENUM;
   td->name = "::MyMod::PrimitiveKind";
   td->bound.length(0);
@@ -177,7 +177,7 @@ TEST(CompleteToDynamicType, PrimitiveKind)
 TEST(CompleteToDynamicType, MyUnion)
 {
   XTypes::DynamicType_rch expected_union_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* td = expected_union_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch td = expected_union_dt->get_descriptor();
   td->kind = XTypes::TK_UNION;
   td->name = "::MyMod::MyUnion";
   td->bound.length(0);
@@ -206,28 +206,28 @@ TEST(CompleteToDynamicType, MyUnion)
   short_expected_dtm->descriptor_->try_construct_kind = XTypes::DISCARD;
   short_expected_dtm->descriptor_->is_default_label = 1;
   XTypes::DynamicType_rch long_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* long_td = long_expected_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch long_td = long_expected_dt->get_descriptor();
   long_td->kind = XTypes::TK_INT32;
   long_td->bound.length(0);
   long_td->extensibility_kind = XTypes::FINAL;
   long_td->name = "Int32";
   long_expected_dtm->descriptor_->type = long_expected_dt;
   XTypes::DynamicType_rch char_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* char_td = char_expected_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch char_td = char_expected_dt->get_descriptor();
   char_td->kind = XTypes::TK_CHAR8;
   char_td->bound.length(0);
   char_td->extensibility_kind = XTypes::FINAL;
   char_td->name = "Char8";
   char_expected_dtm->descriptor_->type = char_expected_dt;
   XTypes::DynamicType_rch short_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* short_td = short_expected_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch short_td = short_expected_dt->get_descriptor();
   short_td->kind = XTypes::TK_INT16;
   short_td->bound.length(0);
   short_td->extensibility_kind = XTypes::FINAL;
   short_td->name = "Int16";
   short_expected_dtm->descriptor_->type = short_expected_dt;
   XTypes::DynamicType_rch expected_enum_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* enum_td = expected_enum_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch enum_td = expected_enum_dt->get_descriptor();
   enum_td->kind = XTypes::TK_ENUM;
   enum_td->name = "::MyMod::PrimitiveKind";
   enum_td->bound.length(0);
@@ -261,20 +261,20 @@ TEST(CompleteToDynamicType, MyUnion)
 TEST(CompleteToDynamicType, MyInnerArray)
 {
   XTypes::DynamicType_rch alias_inner_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* alias_inner_td = alias_inner_expected_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch alias_inner_td = alias_inner_expected_dt->get_descriptor();
   alias_inner_td->kind = XTypes::TK_ALIAS;
   alias_inner_td->name = "::MyMod::MyInnerArray";
   alias_inner_td->bound.length(0);
   alias_inner_td->extensibility_kind = XTypes::FINAL;
   XTypes::DynamicType_rch inner_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* inner_td = inner_expected_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch inner_td = inner_expected_dt->get_descriptor();
   inner_td->kind = XTypes::TK_ARRAY;
   inner_td->name = "ArraySmall";
   inner_td->bound.length(1);
   inner_td->bound[0] = 2;
   inner_td->extensibility_kind = XTypes::FINAL;
   XTypes::DynamicType_rch long_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* long_td = long_expected_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch long_td = long_expected_dt->get_descriptor();
   long_td->kind = XTypes::TK_INT32;
   long_td->bound.length(0);
   long_td->name = "Int32";
@@ -287,13 +287,13 @@ TEST(CompleteToDynamicType, MyInnerArray)
 TEST(CompleteToDynamicType, MyOuterArray)
 {
   XTypes::DynamicType_rch alias_outer_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* alias_outer_td = alias_outer_expected_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch alias_outer_td = alias_outer_expected_dt->get_descriptor();
   alias_outer_td->kind = XTypes::TK_ALIAS;
   alias_outer_td->name = "::MyMod::MyOuterArray";
   alias_outer_td->bound.length(0);
   alias_outer_td->extensibility_kind = XTypes::FINAL;
   XTypes::DynamicType_rch outer_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* outer_td = outer_expected_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch outer_td = outer_expected_dt->get_descriptor();
   outer_td->kind = XTypes::TK_ARRAY;
   outer_td->name = "ArraySmall";
   outer_td->bound.length(2);
@@ -301,20 +301,20 @@ TEST(CompleteToDynamicType, MyOuterArray)
   outer_td->bound[1] = 2;
   outer_td->extensibility_kind = XTypes::FINAL;
   XTypes::DynamicType_rch alias_inner_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* alias_inner_td = alias_inner_expected_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch alias_inner_td = alias_inner_expected_dt->get_descriptor();
   alias_inner_td->kind = XTypes::TK_ALIAS;
   alias_inner_td->name = "::MyMod::MyInnerArray";
   alias_inner_td->bound.length(0);
   alias_inner_td->extensibility_kind = XTypes::FINAL;
   XTypes::DynamicType_rch inner_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* inner_td = inner_expected_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch inner_td = inner_expected_dt->get_descriptor();
   inner_td->kind = XTypes::TK_ARRAY;
   inner_td->name = "ArraySmall";
   inner_td->bound.length(1);
   inner_td->bound[0] = 2;
   inner_td->extensibility_kind = XTypes::FINAL;
   XTypes::DynamicType_rch long_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* long_td = long_expected_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch long_td = long_expected_dt->get_descriptor();
   long_td->kind = XTypes::TK_INT32;
   long_td->bound.length(0);
   long_td->name = "Int32";
@@ -330,20 +330,20 @@ TEST(CompleteToDynamicType, MyOuterArray)
 TEST(CompleteToDynamicType, MySeq)
 {
   XTypes::DynamicType_rch alias_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* alias_td = alias_expected_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch alias_td = alias_expected_dt->get_descriptor();
   alias_td->kind = XTypes::TK_ALIAS;
   alias_td->name = "::MyMod::MySeq";
   alias_td->bound.length(0);
   alias_td->extensibility_kind = XTypes::FINAL;
   XTypes::DynamicType_rch expected_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* td = expected_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch td = expected_dt->get_descriptor();
   td->kind = XTypes::TK_SEQUENCE;
   td->name = "SequenceLarge";
   td->bound.length(1);
   td->bound[0] = UINT32_MAX;
   td->extensibility_kind = XTypes::FINAL;
   XTypes::DynamicType_rch long_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* long_td = long_expected_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch long_td = long_expected_dt->get_descriptor();
   long_td->kind = XTypes::TK_INT32;
   long_td->bound.length(0);
   long_td->name = "Int32";
@@ -356,7 +356,7 @@ TEST(CompleteToDynamicType, MySeq)
 TEST(CompleteToDynamicType, MyAnonStruct)
 {
   XTypes::DynamicType_rch expected_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* td = expected_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch td = expected_dt->get_descriptor();
   td->kind = XTypes::TK_STRUCTURE;
   td->name = "::MyMod::MyAnonStruct";
   td->bound.length(0);
@@ -373,21 +373,21 @@ TEST(CompleteToDynamicType, MyAnonStruct)
   array_dtm->descriptor_->index = 1;
   array_dtm->descriptor_->try_construct_kind = XTypes::DISCARD;
   XTypes::DynamicType_rch sequence_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* sequence_td = sequence_expected_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch sequence_td = sequence_expected_dt->get_descriptor();
   sequence_td->kind = XTypes::TK_SEQUENCE;
   sequence_td->name = "SequenceSmall";
   sequence_td->bound.length(1);
   sequence_td->bound[0] = 5;
   sequence_td->extensibility_kind = XTypes::FINAL;
   XTypes::DynamicType_rch array_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* array_td = array_expected_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch array_td = array_expected_dt->get_descriptor();
   array_td->kind = XTypes::TK_ARRAY;
   array_td->name = "ArraySmall";
   array_td->bound.length(1);
   array_td->bound[0] = 3;
   array_td->extensibility_kind = XTypes::FINAL;
   XTypes::DynamicType_rch long_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* long_td = long_expected_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch long_td = long_expected_dt->get_descriptor();
   long_td->kind = XTypes::TK_INT32;
   long_td->bound.length(0);
   long_td->name = "Int32";
@@ -404,7 +404,7 @@ TEST(CompleteToDynamicType, MyAnonStruct)
 TEST(CompleteToDynamicType, CircularStruct)
 {
   XTypes::DynamicType_rch struct_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* struct_td = struct_expected_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch struct_td = struct_expected_dt->get_descriptor();
   struct_td->kind = XTypes::TK_STRUCTURE;
   struct_td->name = "::MyMod::CircularStruct";
   struct_td->bound.length(0);
@@ -416,13 +416,13 @@ TEST(CompleteToDynamicType, CircularStruct)
   struct_seq_dtm->descriptor_->index = 0;
   struct_seq_dtm->descriptor_->try_construct_kind = XTypes::DISCARD;
   XTypes::DynamicType_rch struct_seq_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* struct_seq_td = struct_seq_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch struct_seq_td = struct_seq_dt->get_descriptor();
   struct_seq_td->kind = XTypes::TK_SEQUENCE;
   struct_seq_td->bound.length(1);
   struct_seq_td->bound[0] = UINT32_MAX;
   struct_seq_td->name = "";
   XTypes::DynamicType_rch struct2_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* struct2_td = struct2_expected_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch struct2_td = struct2_expected_dt->get_descriptor();
   struct2_td->kind = XTypes::TK_STRUCTURE;
   struct2_td->name = "::MyMod::CircularStruct2";
   struct2_td->bound.length(0);
@@ -434,7 +434,7 @@ TEST(CompleteToDynamicType, CircularStruct)
   struct2_seq_dtm->descriptor_->index = 0;
   struct2_seq_dtm->descriptor_->try_construct_kind = XTypes::DISCARD;
   XTypes::DynamicType_rch struct2_seq_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeDescriptor* struct2_seq_td = struct2_seq_dt->get_descriptor();
+  XTypes::TypeDescriptor_rch struct2_seq_td = struct2_seq_dt->get_descriptor();
   struct2_seq_td->kind = XTypes::TK_SEQUENCE;
   struct2_seq_td->bound.length(1);
   struct2_seq_td->bound[0] = UINT32_MAX;

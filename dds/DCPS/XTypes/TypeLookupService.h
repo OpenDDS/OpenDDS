@@ -93,11 +93,11 @@ private:
   bool complete_to_minimal_bitset(const CompleteBitsetType& ct, MinimalBitsetType& mt) const;
 
   typedef OPENDDS_MAP(TypeIdentifier, DynamicType_rch) DynamicTypeMap;
-  void handle_tryconstruct_flags(MemberDescriptor*& md, MemberFlag mf);
+  void handle_tryconstruct_flags(MemberDescriptor_rch& md, MemberFlag mf);
   void insert_dynamic_member(DynamicType_rch& dt, const DynamicTypeMember_rch& dtm);
-  void complete_struct_member_to_member_descriptor(MemberDescriptor*& md, const CompleteStructMember& cm, DynamicTypeMap& dt_map);
-  void complete_union_member_to_member_descriptor(MemberDescriptor*& md, const CompleteUnionMember& cm, DynamicTypeMap& dt_map);
-  void complete_annotation_member_to_member_descriptor(MemberDescriptor*& md, const CompleteAnnotationParameter& cm, DynamicTypeMap& dt_map);
+  void complete_struct_member_to_member_descriptor(MemberDescriptor_rch& md, const CompleteStructMember& cm, DynamicTypeMap& dt_map);
+  void complete_union_member_to_member_descriptor(MemberDescriptor_rch& md, const CompleteUnionMember& cm, DynamicTypeMap& dt_map);
+  void complete_annotation_member_to_member_descriptor(MemberDescriptor_rch& md, const CompleteAnnotationParameter& cm, DynamicTypeMap& dt_map);
   void complete_to_dynamic_i(DynamicType_rch& dt, const CompleteTypeObject& cto, DynamicTypeMap& dt_map);
   void type_identifier_to_dynamic(DynamicType_rch& dt, const TypeIdentifier& ti, DynamicTypeMap& dt_map);
 };

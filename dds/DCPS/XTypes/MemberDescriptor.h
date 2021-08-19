@@ -15,7 +15,7 @@ enum TryConstructKind {
  TRIM
 };
 
-class MemberDescriptor {
+class MemberDescriptor : public OpenDDS::DCPS::RcObject {
 public:
   MemberDescriptor()
     : id(MEMBER_ID_INVALID), index(0), try_construct_kind(DISCARD), is_key(false), is_optional(false), is_must_understand(false), is_shared(false), is_default_label(false)
