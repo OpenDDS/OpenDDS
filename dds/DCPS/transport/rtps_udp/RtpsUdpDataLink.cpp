@@ -1234,7 +1234,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
   }
 
   if (source_time == SystemTimePoint::zero_value) {
-    source_time == SystemTimePoint::now();
+    source_time = SystemTimePoint::now();
   }
 
   if (transport_debug.log_messages) {
