@@ -9,6 +9,7 @@
 #include "TypeObject.h"
 
 #include <dds/DCPS/RcObject.h>
+#include <dds/DCPS/GuidUtils.h>
 
 #include <ace/Thread_Mutex.h>
 
@@ -27,7 +28,7 @@ public:
   ~TypeLookupService();
 
   // For TypeAssignability
-  const TypeObject& get_type_objects(const TypeIdentifier& type_id) const;
+  const TypeObject& get_type_object(const TypeIdentifier& type_id) const;
   void add(const TypeIdentifier& ti, const TypeObject& tobj);
 
   // For TypeLookup_getTypes
@@ -35,6 +36,7 @@ public:
     TypeIdentifierTypeObjectPairSeq& types) const;
   void add_type_objects_to_cache(const TypeIdentifierTypeObjectPairSeq& types);
 
+  // For converting between complete to minimal TypeObject of remote types
   void update_type_identifier_map(const TypeIdentifierPairSeq& tid_pairs);
   bool complete_to_minimal_type_object(const TypeObject& cto, TypeObject& mto) const;
 
@@ -52,8 +54,12 @@ public:
   bool type_object_in_cache(const TypeIdentifier& ti) const;
   bool extensibility(TypeFlag extensibility_mask, const TypeIdentifier& ti) const;
 
+  // For caching and retrieving TypeInformation of remote endpoints
+  void cache_type_info(const DDS::BuiltinTopicKey_t& key, const TypeInformation& type_info);
+  const TypeInformation& get_type_info(const DDS::BuiltinTopicKey_t& key) const;
+
 private:
-  const TypeObject& get_type_objects_i(const TypeIdentifier& type_id) const;
+  const TypeObject& get_type_object_i(const TypeIdentifier& type_id) const;
   void get_type_dependencies_i(const TypeIdentifierSeq& type_ids,
     TypeIdentifierWithSizeSeq& dependencies) const;
 
@@ -85,6 +91,13 @@ private:
   bool complete_to_minimal_enumerated(const CompleteEnumeratedType& ct, MinimalEnumeratedType& mt) const;
   bool complete_to_minimal_bitmask(const CompleteBitmaskType& ct, MinimalBitmaskType& mt) const;
   bool complete_to_minimal_bitset(const CompleteBitsetType& ct, MinimalBitsetType& mt) const;
+
+  // Map from BuiltinTopicKey_t of remote endpoint to its TypeInformation.
+  typedef OPENDDS_MAP_CMP(DDS::BuiltinTopicKey_t, TypeInformation,
+                          DCPS::BuiltinTopicKey_tKeyLessThan) TypeInformationMap;
+  TypeInformationMap type_info_map_;
+
+  TypeInformation type_info_empty_;
 };
 
 typedef DCPS::RcHandle<TypeLookupService> TypeLookupService_rch;

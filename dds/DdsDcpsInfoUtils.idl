@@ -132,7 +132,7 @@ module OpenDDS
       WriterProxy_t writerProxy;
     };
 
-  }; // module DDS
+  }; // module DCPS
 }; // module OpenDDS
 
 #endif /* OPENDDS_DCPS_INFO_UTILS_IDL */

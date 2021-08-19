@@ -38,6 +38,12 @@ class OpenDDS_Rtps_Export RtpsDiscoveryConfig : public OpenDDS::DCPS::RcObject {
 public:
   typedef OPENDDS_VECTOR(OPENDDS_STRING) AddrVec;
 
+  enum UseXTypes {
+    XTYPES_NONE = 0, // Turn off support for XTypes
+    XTYPES_MINIMAL, // Only use minimal TypeObjects
+    XTYPES_COMPLETE // Use both minimal and complete TypeObjects
+  };
+
   RtpsDiscoveryConfig();
 
   DCPS::TimeDuration resend_period() const
@@ -516,12 +522,39 @@ public:
   bool use_xtypes() const
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
-    return use_xtypes_;
+    return use_xtypes_ != XTYPES_NONE;
   }
-  void use_xtypes(bool use_xtypes)
+  void use_xtypes(UseXTypes use_xtypes)
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     use_xtypes_ = use_xtypes;
+  }
+  void use_xtypes(const char* str)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    struct NameValue {
+      const char* name;
+      UseXTypes value;
+    };
+    static const NameValue entries[] = {
+      {"no", XTYPES_NONE},
+      {"minimal", XTYPES_MINIMAL},
+      {"complete", XTYPES_COMPLETE}
+    };
+
+    for (size_t i = 0; i < sizeof entries / sizeof entries[0]; ++i) {
+      if (0 == std::strcmp(entries[i].name, str)) {
+        use_xtypes(entries[i].value);
+        return;
+      }
+    }
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsDiscoveryConfig::use_xtypes -")
+               ACE_TEXT(" invalid XTypes configuration: %C\n"), str));
+  }
+  bool use_xtypes_complete() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
+    return use_xtypes_ == XTYPES_COMPLETE;
   }
 
   DCPS::TimeDuration sedp_heartbeat_period() const
@@ -637,7 +670,7 @@ private:
   /// Should participant user data QoS only be sent when the message is secure?
   bool secure_participant_user_data_;
   DCPS::TimeDuration max_type_lookup_service_reply_period_;
-  bool use_xtypes_;
+  UseXTypes use_xtypes_;
   DCPS::TimeDuration sedp_heartbeat_period_;
   DCPS::TimeDuration sedp_nak_response_delay_;
   DCPS::TimeDuration sedp_send_delay_;
@@ -772,7 +805,8 @@ public:
   }
 
   bool use_xtypes() const { return config_->use_xtypes(); }
-  void use_xtypes(bool xt) { config_->use_xtypes(xt); }
+  void use_xtypes(RtpsDiscoveryConfig::UseXTypes val) { return config_->use_xtypes(val); }
+  bool use_xtypes_complete() const { return config_->use_xtypes_complete(); }
 
   RtpsDiscoveryConfig_rch config() const { return config_; }
 

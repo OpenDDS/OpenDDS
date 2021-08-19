@@ -841,17 +841,17 @@ private:
 
 
   DDS::ReturnCode_t write_subscription_data(const DCPS::RepoId& rid,
-                                            LocalSubscription& pub,
+                                            LocalSubscription& sub,
                                             const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 
 #ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t write_subscription_data_secure(const DCPS::RepoId& rid,
-                                                   LocalSubscription& pub,
+                                                   LocalSubscription& sub,
                                                    const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 #endif
 
   DDS::ReturnCode_t write_subscription_data_unsecure(const DCPS::RepoId& rid,
-                                                     LocalSubscription& pub,
+                                                     LocalSubscription& sub,
                                                      const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 
   DDS::ReturnCode_t write_participant_message_data(const DCPS::RepoId& rid,
