@@ -7,12 +7,14 @@
 #include <ace/INET_Addr.h>
 #include <ace/OS_NS_stdio.h>
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#ifdef OPENDDS_SAFETY_PROFILE
+#  include <cstdlib> // For strto*
+#else
 #  include <fstream>
 #  include <iostream>
 #  include <iomanip>
 #  include <sstream>
-#endif //OPENDDS_SAFETY_PROFILE
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
