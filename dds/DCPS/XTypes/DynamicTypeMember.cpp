@@ -18,6 +18,14 @@ void DynamicTypeMember::get_descriptor(MemberDescriptor_rch& descriptor) const
 
 bool DynamicTypeMember::equals(const DynamicTypeMember& other) const
 {
+  //7.5.2.6.3 Operation: equals
+  //Two members shall be considered equal if and only if they belong to the same type and all of
+  //their respective properties, as identified in Table 52 above, are equal.
+
+  //In addition to what the spec says to compare, we will be comparing the MemberDescriptors of both
+  //DynamicTypeMemberss. The spec seems to assume this is the case, despite not listing the MemberDescriptor
+  //as a property in table 52. If this were not the case, any two members within a type would be considered
+  //equal, regardless of whether they are actually the same member.
   DynamicTypePtrPairSeen dt_ptr_pair;
   return test_equality_i(*this, other, dt_ptr_pair);
 }
@@ -34,7 +42,7 @@ DCPS::String DynamicTypeMember::get_name() const
 
 bool test_equality_i(const DynamicTypeMember& lhs, const DynamicTypeMember& rhs, DynamicTypePtrPairSeen& dt_ptr_pair)
 {
-  return test_equality_i(*lhs.descriptor_, *rhs.descriptor_, dt_ptr_pair);
+  return test_equality_i(*lhs.descriptor_.in(), *rhs.descriptor_.in(), dt_ptr_pair);
 }
 
 bool test_equality_i(const DynamicTypeMembersByName& lhs, const DynamicTypeMembersByName& rhs, DynamicTypePtrPairSeen& dt_ptr_pair)

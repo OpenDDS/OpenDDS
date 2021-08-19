@@ -16,9 +16,9 @@ namespace XTypes {
 
 class MemberDescriptor;
 class DynamicType;
-typedef OpenDDS::DCPS::RcHandle<MemberDescriptor> MemberDescriptor_rch;
+typedef DCPS::RcHandle<MemberDescriptor> MemberDescriptor_rch;
 
-class OpenDDS_Dcps_Export DynamicTypeMember : public OpenDDS::DCPS::RcObject {
+class OpenDDS_Dcps_Export DynamicTypeMember : public DCPS::RcObject {
 public:
   DynamicTypeMember();
 
@@ -32,7 +32,7 @@ public:
 
 typedef std::pair<const DynamicType*, const DynamicType*> DynamicTypePtrPair;
 typedef OPENDDS_SET(DynamicTypePtrPair) DynamicTypePtrPairSeen;
-typedef OpenDDS::DCPS::RcHandle<DynamicTypeMember> DynamicTypeMember_rch;
+typedef DCPS::RcHandle<DynamicTypeMember> DynamicTypeMember_rch;
 typedef OPENDDS_MAP(DCPS::String, DynamicTypeMember_rch) DynamicTypeMembersByName;
 typedef OPENDDS_MAP(MemberId, DynamicTypeMember_rch) DynamicTypeMembersById;
 typedef OPENDDS_VECTOR(DynamicTypeMember_rch) DynamicTypeMembersByIndex;

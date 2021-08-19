@@ -15,7 +15,7 @@ enum ExtensibilityKind {
  MUTABLE
 };
 
-class TypeDescriptor : public OpenDDS::DCPS::RcObject {
+class TypeDescriptor : public DCPS::RcObject {
 public:
   TypeDescriptor()
     : kind(TK_NONE), extensibility_kind(FINAL), is_nested(false)

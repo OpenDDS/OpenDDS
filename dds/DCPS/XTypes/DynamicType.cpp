@@ -80,6 +80,14 @@ DDS::ReturnCode_t DynamicType::get_member_by_index(DynamicTypeMember_rch& member
 
 bool DynamicType::equals(const DynamicType& other) const
 {
+  //7.5.2.8.4 Operation: equals
+  //Two types shall be considered equal if and only if all of their respective properties, as identified
+  //in Table 54 above, are equal.
+
+  //In addition to what the spec says to compare, we will be comparing the TypeDescriptors of both
+  //DynamicTypes. The spec seems to assume this is the case, despite not listing the TypeDescriptor
+  //as a property in table 54. This is done to allow the recursive comparison required by the changes
+  //to DynamicTypeMember::equals.
   return *this == other;
 }
 
@@ -100,7 +108,7 @@ bool DynamicType::test_equality_i(const DynamicType& rhs, DynamicTypePtrPairSeen
   if (have_seen == dt_ptr_pair.end()) {
     dt_ptr_pair.insert(this_pair);
     return
-      OpenDDS::XTypes::test_equality_i(*this->descriptor_, *rhs.descriptor_, dt_ptr_pair) &&
+      OpenDDS::XTypes::test_equality_i(*this->descriptor_.in(), *rhs.descriptor_.in(), dt_ptr_pair) &&
       OpenDDS::XTypes::test_equality_i(this->member_by_name, rhs.member_by_name, dt_ptr_pair) &&
       OpenDDS::XTypes::test_equality_i(this->member_by_id, rhs.member_by_id, dt_ptr_pair);
   }
@@ -109,11 +117,6 @@ bool DynamicType::test_equality_i(const DynamicType& rhs, DynamicTypePtrPairSeen
 
 bool operator==(const DynamicType& lhs, const DynamicType& rhs)
 {
-//7.5.2.8.4 Operation: equals
-//Two types shall be considered equal if and only if all of their respective properties, as identified
-//in Table 54 above, are equal.
-
-//Note: We are comparing the TypeDescriptor even though the spec seems to say not to
   DynamicTypePtrPairSeen dt_ptr_pair;
   return lhs.test_equality_i(rhs, dt_ptr_pair);
 }

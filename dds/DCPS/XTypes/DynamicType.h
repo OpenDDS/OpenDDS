@@ -12,9 +12,9 @@ namespace OpenDDS {
 namespace XTypes {
 
 class TypeDescriptor;
-typedef OpenDDS::DCPS::RcHandle<TypeDescriptor> TypeDescriptor_rch;
+typedef DCPS::RcHandle<TypeDescriptor> TypeDescriptor_rch;
 
-class OpenDDS_Dcps_Export DynamicType : public OpenDDS::DCPS::RcObject
+class OpenDDS_Dcps_Export DynamicType : public DCPS::RcObject
 {
 public:
   DynamicType();
