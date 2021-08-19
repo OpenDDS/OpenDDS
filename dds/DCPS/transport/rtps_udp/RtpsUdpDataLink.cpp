@@ -1560,12 +1560,21 @@ void RtpsUdpDataLink::update_last_recv_addr(const RepoId& src, const ACE_INET_Ad
     const RemoteInfoMap::iterator pos = locators_.find(src);
     if (pos != locators_.end()) {
 #ifdef ACE_HAS_IPV6
-      remove_cache = pos->second.last_recv_addr_ != addr && (pos->second.last_recv_addr_.get_type() == AF_INET || addr.get_type() == AF_INET6);
+      const bool allow_update =
+        addr.get_type() == AF_INET6 ||
+        pos->second.last_recv_addr_.get_type() == AF_INET ||
+        pos->second.last_recv_addr_ == ACE_INET_Addr();
+
+      if (allow_update) {
+        remove_cache = pos->second.last_recv_addr_ != addr;
+        pos->second.last_recv_addr_ = addr;
+        pos->second.last_recv_time_ = MonotonicTimePoint::now();
+      }
 #else
       remove_cache = pos->second.last_recv_addr_ != addr;
-#endif
       pos->second.last_recv_addr_ = addr;
       pos->second.last_recv_time_ = MonotonicTimePoint::now();
+#endif
     }
   }
   if (remove_cache) {
@@ -4460,7 +4469,28 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
     } else if (prefer_unicast && !pos->second.unicast_addrs_.empty()) {
       normal_addrs = pos->second.unicast_addrs_;
     } else if (!pos->second.multicast_addrs_.empty()) {
+#ifdef ACE_HAS_IPV6
+      if (pos->second.last_recv_addr_ != NO_ADDR) {
+        const AddrSet& mc_addrs = pos->second.multicast_addrs_;
+        if (pos->second.last_recv_addr_.get_type() == AF_INET6) {
+          for (AddrSet::const_iterator it = mc_addrs.begin(); it != mc_addrs.end(); ++it) {
+            if (it->get_type() == AF_INET6) {
+              normal_addrs.insert(*it);
+            }
+          }
+        } else {
+          for (AddrSet::const_iterator it = mc_addrs.begin(); it != mc_addrs.end(); ++it) {
+            if (it->get_type() == AF_INET) {
+              normal_addrs.insert(*it);
+            }
+          }
+        }
+      } else {
+        normal_addrs = pos->second.multicast_addrs_;
+      }
+#else
       normal_addrs = pos->second.multicast_addrs_;
+#endif
     } else if (pos->second.last_recv_addr_ != NO_ADDR) {
       normal_addrs.insert(pos->second.last_recv_addr_);
       normal_addrs_expires = pos->second.last_recv_time_ + config().receive_address_duration_;
