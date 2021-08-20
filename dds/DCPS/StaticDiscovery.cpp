@@ -656,8 +656,10 @@ StaticDiscovery::generate_participant_guid()
 
 AddDomainStatus
 StaticDiscovery::add_domain_participant(DDS::DomainId_t domain,
-                                        const DDS::DomainParticipantQos& qos)
+                                        const DDS::DomainParticipantQos& qos,
+                                        XTypes::TypeLookupService_rch /*tls*/)
 {
+  // TODO(sonndinh): initialize type lookup service.
   AddDomainStatus ads = {RepoId(), false /*federated*/};
 
   if (qos.user_data.value.length() != BYTES_IN_PARTICIPANT) {

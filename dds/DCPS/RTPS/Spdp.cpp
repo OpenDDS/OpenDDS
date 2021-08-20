@@ -147,7 +147,8 @@ namespace {
 void Spdp::init(DDS::DomainId_t /*domain*/,
                 DCPS::RepoId& guid,
                 const DDS::DomainParticipantQos& qos,
-                RtpsDiscovery* disco)
+                RtpsDiscovery* disco,
+                XTypes::TypeLookupService_rch tls)
 {
   bool enable_endpoint_announcements = true;
   bool enable_type_lookup_service = config_->use_xtypes();
@@ -224,7 +225,7 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
 
   guid = guid_; // may have changed in SpdpTransport constructor
   sedp_->ignore(guid);
-  sedp_->init(guid_, *disco, domain_);
+  sedp_->init(guid_, *disco, domain_, tls);
   tport_->open(sedp_->reactor_task());
 
 #ifdef OPENDDS_SECURITY
@@ -240,7 +241,8 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
 Spdp::Spdp(DDS::DomainId_t domain,
            RepoId& guid,
            const DDS::DomainParticipantQos& qos,
-           RtpsDiscovery* disco)
+           RtpsDiscovery* disco,
+           XTypes::TypeLookupService_rch tls)
 
   : DCPS::LocalParticipant<Sedp>(qos)
   , disco_(disco)
@@ -267,7 +269,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  init(domain, guid, qos, disco);
+  init(domain, guid, qos, disco, tls);
 
 #ifdef OPENDDS_SECURITY
   init_participant_sec_attributes(participant_sec_attr_);

@@ -780,7 +780,8 @@ RtpsDiscovery::generate_participant_guid() {
 
 DCPS::AddDomainStatus
 RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
-                                      const DDS::DomainParticipantQos& qos)
+                                      const DDS::DomainParticipantQos& qos,
+                                      XTypes::TypeLookupService_rch tls)
 {
   DCPS::AddDomainStatus ads = {OpenDDS::DCPS::RepoId(), false /*federated*/};
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ads);
@@ -797,9 +798,10 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
   guid_gen_.populate(ads.id);
   ads.id.entityId = ENTITYID_PARTICIPANT;
   try {
-    const DCPS::RcHandle<Spdp> spdp(DCPS::make_rch<Spdp>(domain, ref(ads.id), qos, this));
+    const DCPS::RcHandle<Spdp> spdp(DCPS::make_rch<Spdp>(domain, ref(ads.id), qos, this, tls));
     // ads.id may change during Spdp constructor
     participants_[domain][ads.id] = spdp;
+    //    spdp->type_lookup_service(tls);
   } catch (const std::exception& e) {
     ads.id = GUID_UNKNOWN;
     ACE_ERROR((LM_ERROR, "(%P|%t) RtpsDiscovery::add_domain_participant() - "

@@ -702,7 +702,8 @@ public:
 
   virtual OpenDDS::DCPS::AddDomainStatus add_domain_participant(
     DDS::DomainId_t domain,
-    const DDS::DomainParticipantQos& qos);
+    const DDS::DomainParticipantQos& qos,
+    XTypes::TypeLookupService_rch tls);
 
 #if defined(OPENDDS_SECURITY)
 #  if defined __GNUC__ && ((__GNUC__ == 5 && __GNUC_MINOR__ < 3) || __GNUC__ < 5) && ! defined __clang__

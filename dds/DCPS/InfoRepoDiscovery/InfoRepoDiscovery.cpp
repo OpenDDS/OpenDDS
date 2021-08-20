@@ -443,8 +443,10 @@ InfoRepoDiscovery::generate_participant_guid()
 
 DCPS::AddDomainStatus
 InfoRepoDiscovery::add_domain_participant(DDS::DomainId_t domainId,
-                                          const DDS::DomainParticipantQos& qos)
+                                          const DDS::DomainParticipantQos& qos,
+                                          XTypes::TypeLookupService_rch /*tls*/)
 {
+  // TODO(sonndinh): initialize type lookup service
   try {
     const DCPSInfo_var info = get_dcps_info();
     if (!CORBA::is_nil(info)) {

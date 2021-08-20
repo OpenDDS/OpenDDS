@@ -1792,7 +1792,7 @@ DomainParticipantImpl::enable()
   } else {
 #endif
 
-    value = disco->add_domain_participant(domain_id_, qos_);
+    value = disco->add_domain_participant(domain_id_, qos_, type_lookup_service_);
 
     if (value.id == GUID_UNKNOWN) {
       if (DCPS_debug_level > 0) {
@@ -1810,7 +1810,8 @@ DomainParticipantImpl::enable()
   dp_id_ = value.id;
   federated_ = value.federated;
 
-  disco->set_type_lookup_service(domain_id_, dp_id_, type_lookup_service_);
+  // (sonndinh): Trying to fix null type lookup service error
+  //  disco->set_type_lookup_service(domain_id_, dp_id_, type_lookup_service_);
 
   if (monitor_) {
     monitor_->report();

@@ -72,7 +72,8 @@ public:
   Spdp(DDS::DomainId_t domain,
        DCPS::RepoId& guid,
        const DDS::DomainParticipantQos& qos,
-       RtpsDiscovery* disco);
+       RtpsDiscovery* disco,
+       XTypes::TypeLookupService_rch tls);
 
 #ifdef OPENDDS_SECURITY
   Spdp(DDS::DomainId_t domain,
@@ -234,7 +235,8 @@ private:
   void init(DDS::DomainId_t domain,
             DCPS::RepoId& guid,
             const DDS::DomainParticipantQos& qos,
-            RtpsDiscovery* disco);
+            RtpsDiscovery* disco,
+            XTypes::TypeLookupService_rch tls);
 
   RtpsDiscovery* disco_;
   DCPS::RcHandle<RtpsDiscoveryConfig> config_;
