@@ -541,7 +541,7 @@ void TypeLookupService::complete_to_dynamic_i(DynamicType_rch& dt,
     for (ACE_CDR::ULong i = 0; i < dt->get_descriptor()->base_type->get_member_count(); ++i) {
       DynamicTypeMember_rch dtm;
       dt->get_descriptor()->base_type->get_member_by_index(dtm, i);
-      dtm->get_parent()= dt;
+      dtm->get_parent() = dt;
       dt->insert_dynamic_member(dtm);
     }
     break;
