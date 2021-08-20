@@ -3175,7 +3175,7 @@ Sedp::received_participant_message_data_secure(DCPS::MessageId /*message_id*/,
   }
 
   const GUID_t& guid = data.participantGuid;
-  const GUID_tguid_participant = make_part_guid(guid);
+  const GUID_t guid_participant = make_part_guid(guid);
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
