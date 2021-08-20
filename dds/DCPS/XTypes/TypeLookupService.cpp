@@ -17,6 +17,9 @@ TypeLookupService::TypeLookupService()
 {
   to_empty_.minimal.kind = TK_NONE;
   to_empty_.complete.kind = TK_NONE;
+
+  type_info_empty_.minimal.typeid_with_size.type_id = TypeIdentifier(TK_NONE);
+  type_info_empty_.complete.typeid_with_size.type_id = TypeIdentifier(TK_NONE);
 }
 
 TypeLookupService::~TypeLookupService()
@@ -35,13 +38,13 @@ void TypeLookupService::get_type_objects(const TypeIdentifierSeq& type_ids,
   }
 }
 
-const TypeObject& TypeLookupService::get_type_objects(const TypeIdentifier& type_id) const
+const TypeObject& TypeLookupService::get_type_object(const TypeIdentifier& type_id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, to_empty_);
-  return get_type_objects_i(type_id);
+  return get_type_object_i(type_id);
 }
 
-const TypeObject& TypeLookupService::get_type_objects_i(const TypeIdentifier& type_id) const
+const TypeObject& TypeLookupService::get_type_object_i(const TypeIdentifier& type_id) const
 {
   const TypeMap::const_iterator pos = type_map_.find(type_id);
   if (pos != type_map_.end()) {
@@ -127,6 +130,25 @@ void TypeLookupService::update_type_identifier_map(const TypeIdentifierPairSeq& 
     const TypeIdentifierPair& pair = tid_pairs[i];
     complete_to_minimal_ti_map_.insert(std::make_pair(pair.type_identifier1, pair.type_identifier2));
   }
+}
+
+void TypeLookupService::cache_type_info(const DDS::BuiltinTopicKey_t& key,
+                                        const TypeInformation& type_info)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  if (type_info_map_.find(key) == type_info_map_.end()) {
+    type_info_map_.insert(std::make_pair(key, type_info));
+  }
+}
+
+const TypeInformation& TypeLookupService::get_type_info(const DDS::BuiltinTopicKey_t& key) const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, type_info_empty_);
+  const TypeInformationMap::const_iterator it = type_info_map_.find(key);
+  if (it != type_info_map_.end()) {
+    return it->second;
+  }
+  return type_info_empty_;
 }
 
 DCPS::String TypeLookupService::equivalence_hash_to_string(const EquivalenceHash& hash) const
@@ -822,10 +844,10 @@ void TypeLookupService::type_identifier_to_dynamic(DynamicType_rch& dt,
       type_identifier_to_dynamic(dt->get_descriptor()->key_element_type, *ti.map_ldefn().element_identifier, dt_map);
       break;
     case TI_STRONGLY_CONNECTED_COMPONENT:
-        complete_to_dynamic_i(dt, get_type_objects_i(ti).complete, dt_map);
+        complete_to_dynamic_i(dt, get_type_object_i(ti).complete, dt_map);
       break;
     case EK_COMPLETE:
-        complete_to_dynamic_i(dt, get_type_objects_i(ti).complete, dt_map);
+        complete_to_dynamic_i(dt, get_type_object_i(ti).complete, dt_map);
         break;
     case EK_MINIMAL:
       return;
@@ -856,7 +878,7 @@ bool TypeLookupService::extensibility(TypeFlag extensibility_mask, const TypeIde
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
   bool result = false;
-  const TypeObject& to = get_type_objects_i(type_id);
+  const TypeObject& to = get_type_object_i(type_id);
   TypeKind tk = to.kind == EK_MINIMAL ? to.minimal.kind : to.complete.kind;
 
   if (TK_UNION == tk) {
@@ -879,7 +901,7 @@ bool TypeLookupService::extensibility(TypeFlag extensibility_mask, const TypeIde
   get_type_dependencies_i(type_ids, dependencies);
 
   for (unsigned i = 0; i < dependencies.length(); ++i) {
-    const TypeObject& dep_to = get_type_objects_i(dependencies[i].type_id);
+    const TypeObject& dep_to = get_type_object_i(dependencies[i].type_id);
     tk = dep_to.kind == EK_MINIMAL ? dep_to.minimal.kind : dep_to.complete.kind;
 
     if (TK_UNION == tk) {
