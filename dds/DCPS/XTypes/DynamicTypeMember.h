@@ -17,16 +17,21 @@ namespace XTypes {
 class MemberDescriptor;
 class DynamicType;
 typedef DCPS::RcHandle<MemberDescriptor> MemberDescriptor_rch;
+typedef DCPS::RcHandle<DynamicType> DynamicType_rch;
 
 class OpenDDS_Dcps_Export DynamicTypeMember : public DCPS::RcObject {
 public:
   DynamicTypeMember();
 
   void get_descriptor(MemberDescriptor_rch& descriptor) const;
+  MemberDescriptor_rch& get_descriptor();
+  DynamicType_rch get_parent();
   bool equals(const DynamicTypeMember& other) const;
   MemberId get_id() const;
   DCPS::String get_name() const;
 
+private:
+  DynamicType_rch parent_;
   MemberDescriptor_rch descriptor_;
 };
 
@@ -37,7 +42,6 @@ typedef OPENDDS_MAP(DCPS::String, DynamicTypeMember_rch) DynamicTypeMembersByNam
 typedef OPENDDS_MAP(MemberId, DynamicTypeMember_rch) DynamicTypeMembersById;
 typedef OPENDDS_VECTOR(DynamicTypeMember_rch) DynamicTypeMembersByIndex;
 
-bool test_equality_i(const DynamicTypeMember& lhs, const DynamicTypeMember& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
 bool test_equality_i(const DynamicTypeMembersByName& lhs, const DynamicTypeMembersByName& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
 bool test_equality_i(const DynamicTypeMembersById& lhs, const DynamicTypeMembersById& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
 

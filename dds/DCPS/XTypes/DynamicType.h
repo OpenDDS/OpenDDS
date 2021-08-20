@@ -39,7 +39,6 @@ private:
   TypeDescriptor_rch descriptor_;
 };
 
-typedef DCPS::RcHandle<DynamicType> DynamicType_rch;
 
 OpenDDS_Dcps_Export bool operator==(const DynamicType& lhs, const DynamicType& rhs);
 bool test_equality_i(const DynamicType_rch& lhs, const DynamicType_rch& rhs, DynamicTypePtrPairSeen& dt_ptr_pair);

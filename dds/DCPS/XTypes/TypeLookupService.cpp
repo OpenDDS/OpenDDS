@@ -519,6 +519,7 @@ void TypeLookupService::complete_to_dynamic_i(DynamicType_rch& dt,
     for (ACE_CDR::ULong i = 0; i < dt->get_descriptor()->base_type->get_member_count(); ++i) {
       DynamicTypeMember_rch dtm;
       dt->get_descriptor()->base_type->get_member_by_index(dtm, i);
+      dtm->get_parent()= dt;
       dt->insert_dynamic_member(dtm);
     }
     break;
@@ -529,10 +530,11 @@ void TypeLookupService::complete_to_dynamic_i(DynamicType_rch& dt,
     dt->get_descriptor()->bound.length(0);
     for (ACE_CDR::ULong i = 0; i < cto.enumerated_type.literal_seq.length(); ++i) {
       DynamicTypeMember_rch dtm = DCPS::make_rch<DynamicTypeMember>();
-      dtm->descriptor_->name = cto.enumerated_type.literal_seq[i].detail.name;
-      dtm->descriptor_->type = dt;
-      dtm->descriptor_->is_default_label = (cto.enumerated_type.literal_seq[i].common.flags & IS_DEFAULT);
-      dtm->descriptor_->index = i;
+      dtm->get_descriptor()->name = cto.enumerated_type.literal_seq[i].detail.name;
+      dtm->get_descriptor()->type = dt;
+      dtm->get_descriptor()->is_default_label = (cto.enumerated_type.literal_seq[i].common.flags & IS_DEFAULT);
+      dtm->get_descriptor()->index = i;
+      dtm->get_parent() = dt;
       dt->insert_dynamic_member(dtm);
     }
     break;
@@ -544,9 +546,10 @@ void TypeLookupService::complete_to_dynamic_i(DynamicType_rch& dt,
     type_identifier_to_dynamic(dt->get_descriptor()->element_type, TypeIdentifier(TK_BOOLEAN), dt_map);
     for (ACE_CDR::ULong i = 0; i < cto.bitmask_type.flag_seq.length(); ++i) {
       DynamicTypeMember_rch dtm = DCPS::make_rch<DynamicTypeMember>();
-      dtm->descriptor_->name = cto.bitmask_type.flag_seq[i].detail.name;
-      type_identifier_to_dynamic(dtm->descriptor_->type, TypeIdentifier(TK_BOOLEAN), dt_map);
-      dtm->descriptor_->index = i;
+      dtm->get_descriptor()->name = cto.bitmask_type.flag_seq[i].detail.name;
+      type_identifier_to_dynamic(dtm->get_descriptor()->type, TypeIdentifier(TK_BOOLEAN), dt_map);
+      dtm->get_descriptor()->index = i;
+      dtm->get_parent() = dt;
       dt->insert_dynamic_member(dtm);
     }
   }
@@ -558,9 +561,10 @@ void TypeLookupService::complete_to_dynamic_i(DynamicType_rch& dt,
     dt->get_descriptor()->bound.length(0);
     for (ACE_CDR::ULong i = 0; i < cto.annotation_type.member_seq.length(); ++i) {
       DynamicTypeMember_rch dtm = DCPS::make_rch<DynamicTypeMember>();
-      complete_annotation_member_to_member_descriptor(dtm->descriptor_, cto.annotation_type.member_seq[i], dt_map);
-      dtm->descriptor_->index = i;
-      dtm->descriptor_->id = i;
+      complete_annotation_member_to_member_descriptor(dtm->get_descriptor(), cto.annotation_type.member_seq[i], dt_map);
+      dtm->get_descriptor()->index = i;
+      dtm->get_descriptor()->id = i;
+      dtm->get_parent() = dt;
       dt->insert_dynamic_member(dtm);
     }
     break;
@@ -582,8 +586,9 @@ void TypeLookupService::complete_to_dynamic_i(DynamicType_rch& dt,
     dt->get_descriptor()->is_nested = cto.struct_type.struct_flags & IS_NESTED;
     for (ACE_CDR::ULong i = 0; i < cto.struct_type.member_seq.length(); ++i) {
       DynamicTypeMember_rch dtm = DCPS::make_rch<DynamicTypeMember>();
-      complete_struct_member_to_member_descriptor(dtm->descriptor_, cto.struct_type.member_seq[i], dt_map);
-      dtm->descriptor_->index = i;
+      complete_struct_member_to_member_descriptor(dtm->get_descriptor(), cto.struct_type.member_seq[i], dt_map);
+      dtm->get_descriptor()->index = i;
+      dtm->get_parent() = dt;
       dt->insert_dynamic_member(dtm);
     }
     break;
@@ -605,8 +610,9 @@ void TypeLookupService::complete_to_dynamic_i(DynamicType_rch& dt,
     dt->get_descriptor()->is_nested = cto.union_type.union_flags & IS_NESTED;
     for (ACE_CDR::ULong i = 0; i < cto.union_type.member_seq.length(); ++i) {
       DynamicTypeMember_rch dtm = DCPS::make_rch<DynamicTypeMember>();
-      complete_union_member_to_member_descriptor(dtm->descriptor_, cto.union_type.member_seq[i], dt_map);
-      dtm->descriptor_->index = i;
+      complete_union_member_to_member_descriptor(dtm->get_descriptor(), cto.union_type.member_seq[i], dt_map);
+      dtm->get_descriptor()->index = i;
+      dtm->get_parent() = dt;
       dt->insert_dynamic_member(dtm);
     }
     break;

@@ -94,10 +94,10 @@ bool DynamicType::equals(const DynamicType& other) const
 void DynamicType::insert_dynamic_member(const DynamicTypeMember_rch& dtm)
 {
   member_by_index.push_back(dtm);
-  if (dtm->descriptor_->id != MEMBER_ID_INVALID) {
-    member_by_id.insert(std::make_pair(dtm->descriptor_->id , dtm));
+  if (dtm->get_descriptor()->id != MEMBER_ID_INVALID) {
+    member_by_id.insert(std::make_pair(dtm->get_descriptor()->id , dtm));
   }
-  member_by_name.insert(std::make_pair(dtm->descriptor_->name , dtm));
+  member_by_name.insert(std::make_pair(dtm->get_descriptor()->name , dtm));
 }
 
 bool DynamicType::test_equality_i(const DynamicType& rhs, DynamicTypePtrPairSeen& dt_ptr_pair) const
