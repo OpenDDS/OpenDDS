@@ -29,6 +29,7 @@ The main thing to be concerned with is how far back this list should go, but the
 The time can also be manually specified using one of the following options:
 
 - `-t ISO8601` where `ISO8601` is the full ISO 8601 format of the time to use, for example: `2021-07-29T03:14:28+00:00`.
+- `-p PR` where `PR` is the number of a merged PR.
 - `-c COMMITISH` where `COMMITISH` is something like a hash or tag of the Git commit whose commit time will be used.
 
 If successful, it will create a `newest_prs.json` that it can use as the starting point next time and a `newest_prs.csv` that can be added to the spreadsheet.
