@@ -143,7 +143,6 @@ public:
 
   SystemTimePoint creation_time() const
   {
-    ACE_Guard<ACE_Thread_Mutex> guard(lock_);
     return creation_time_;
   }
 
