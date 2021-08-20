@@ -4472,17 +4472,9 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
 #ifdef ACE_HAS_IPV6
       if (pos->second.last_recv_addr_ != NO_ADDR) {
         const AddrSet& mc_addrs = pos->second.multicast_addrs_;
-        if (pos->second.last_recv_addr_.get_type() == AF_INET6) {
-          for (AddrSet::const_iterator it = mc_addrs.begin(); it != mc_addrs.end(); ++it) {
-            if (it->get_type() == AF_INET6) {
-              normal_addrs.insert(*it);
-            }
-          }
-        } else {
-          for (AddrSet::const_iterator it = mc_addrs.begin(); it != mc_addrs.end(); ++it) {
-            if (it->get_type() == AF_INET) {
-              normal_addrs.insert(*it);
-            }
+        for (AddrSet::const_iterator it = mc_addrs.begin(); it != mc_addrs.end(); ++it) {
+          if (it->get_type() == pos->second.last_recv_addr_.get_type()) {
+            normal_addrs.insert(*it);
           }
         }
       } else {
