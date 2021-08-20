@@ -1167,7 +1167,9 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
 
   const ACE_Message_Block* msg = element->msg();
   const RepoId pub_id = element->publication_id();
+
   DCPS::SystemTimePoint source_time = SystemTimePoint::zero_value;
+  bool needs_timestamp = true;
 
   // Based on the type of 'element', find and duplicate the data payload
   // continuation block.
@@ -1198,6 +1200,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
     data.reset(msg->cont()->duplicate());
     const DataSampleElement* dsle = tse->sample();
     source_time = dsle->get_header().get_source_timestamp();
+    needs_timestamp = false;
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
     RtpsSampleHeader::populate_data_sample_submessages(
       subm, *dsle, requires_inline_qos);
@@ -1209,6 +1212,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
     data.reset(msg->cont()->cont()->duplicate());
     const DataSampleElement* dsle = tce->original_send_element()->sample();
     source_time = dsle->get_header().get_source_timestamp();
+    needs_timestamp = false;
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
     RtpsSampleHeader::populate_data_sample_submessages(
       subm, *dsle, requires_inline_qos);
@@ -1233,7 +1237,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
     return 0;
   }
 
-  if (source_time == SystemTimePoint::zero_value) {
+  if (needs_timestamp) {
     source_time = SystemTimePoint::now();
   }
 
