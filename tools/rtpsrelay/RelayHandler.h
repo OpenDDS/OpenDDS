@@ -88,7 +88,7 @@ public:
               RelayStatisticsReporter& relay_stats_reporter)
     : config_(config)
     , relay_stats_reporter_(relay_stats_reporter)
-    , expected_discovery_time_(config.lifespan() / 10)
+    , expected_discovery_time_(config.lifespan() * 0.1)
   {}
 
   void spdp_vertical_handler(RelayHandler* spdp_vertical_handler)
