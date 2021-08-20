@@ -23,7 +23,7 @@ OpenDDS 3.18.0-dev is currently in development, so this list might change.
   - Fixed local/local RTPS associations not properly notifying liveliness (#2783)
   - Fixed durable data not being delivered in the right order (#2728)
   - `RtpsUdpDataLink` will no longer purge durable data (#2690)
-  - Fixed issues with security permissions and governance XML file parsing (#2896, #2912)
+  - Fixed issues with security permissions and governance XML file parsing (#2896, #2912, #2916)
     - `<id_range>`s in domain id sets can now omit `<max>` in permissions and governance files.
       - This means `<id_range><min>0</min></id_range>` will now mean all domains.
     - Fix date/time in `<not_before>` and `<not_after>` in permissions grants always being interpreted as local time and fix issues with parsing time zone offsets.
