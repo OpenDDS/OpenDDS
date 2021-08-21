@@ -191,13 +191,15 @@ protected:
 
   void enqueue_message(const ACE_INET_Addr& addr,
                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
-                       const OpenDDS::DCPS::MonotonicTimePoint& now);
+                       const OpenDDS::DCPS::MonotonicTimePoint& now,
+                       MessageType type);
 
   ACE_HANDLE get_handle() const override { return socket_.get_handle(); }
 
   virtual CORBA::ULong process_message(const ACE_INET_Addr& remote,
                                        const OpenDDS::DCPS::MonotonicTimePoint& now,
-                                       const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) = 0;
+                                       const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
+                                       MessageType& type) = 0;
 
 private:
   ACE_SOCK_Dgram socket_;
@@ -205,13 +207,16 @@ private:
     ACE_INET_Addr address;
     OpenDDS::DCPS::Message_Block_Shared_Ptr message_block;
     OpenDDS::DCPS::MonotonicTimePoint timestamp;
+    MessageType type;
 
     Element(const ACE_INET_Addr& a_address,
             OpenDDS::DCPS::Message_Block_Shared_Ptr a_message_block,
-            const OpenDDS::DCPS::MonotonicTimePoint& a_timestamp)
+            const OpenDDS::DCPS::MonotonicTimePoint& a_timestamp,
+            MessageType type)
       : address(a_address)
       , message_block(a_message_block)
       , timestamp(a_timestamp)
+      , type(type)
     {}
   };
   typedef std::queue<Element> OutgoingType;
@@ -254,7 +259,8 @@ public:
   void venqueue_message(const ACE_INET_Addr& addr,
                         ParticipantStatisticsReporter& stats_reporter,
                         const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
-                        const OpenDDS::DCPS::MonotonicTimePoint& now);
+                        const OpenDDS::DCPS::MonotonicTimePoint& now,
+                        MessageType type);
 
 protected:
   virtual bool do_normal_processing(GuidAddrSet::Proxy& /*proxy*/,
@@ -268,7 +274,8 @@ protected:
 
   CORBA::ULong process_message(const ACE_INET_Addr& remote,
                                const OpenDDS::DCPS::MonotonicTimePoint& now,
-                               const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) override;
+                               const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
+                               MessageType& type) override;
   ParticipantStatisticsReporter& record_activity(GuidAddrSet::Proxy& proxy,
                                                  const AddrPort& remote_address,
                                                  const OpenDDS::DCPS::MonotonicTimePoint& now,
@@ -334,7 +341,8 @@ private:
   VerticalHandler* vertical_handler_;
   CORBA::ULong process_message(const ACE_INET_Addr& remote,
                                const OpenDDS::DCPS::MonotonicTimePoint& now,
-                               const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) override;
+                               const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
+                               MessageType& type) override;
 };
 
 class SpdpHandler : public VerticalHandler {

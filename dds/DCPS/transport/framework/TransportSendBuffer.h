@@ -172,9 +172,9 @@ public:
     }
 
     bool resend_i(const SequenceRange& range, DisjointSequence* gaps,
-                  const RepoId& destination)
+                  const RepoId& destination, const SystemTimePoint& not_before)
     {
-      return ssb_.resend_i(range, gaps, destination);
+      return ssb_.resend_i(range, gaps, destination, not_before);
     }
 
     void resend_fragments_i(SequenceNumber sequence,
@@ -201,7 +201,7 @@ private:
   // caller must already have the send strategy lock
   bool resend_i(const SequenceRange& range, DisjointSequence* gaps = 0);
   bool resend_i(const SequenceRange& range, DisjointSequence* gaps,
-                const RepoId& destination);
+                const RepoId& destination, const SystemTimePoint& not_before);
   void resend_fragments_i(SequenceNumber sequence,
                           const DisjointSequence& fragments);
 

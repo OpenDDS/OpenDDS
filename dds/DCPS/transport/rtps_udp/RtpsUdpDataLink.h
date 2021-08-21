@@ -345,6 +345,7 @@ private:
     ACE_CDR::Long required_acknack_count_;
     OPENDDS_MAP(SequenceNumber, TransportQueueElement*) durable_data_;
     MonotonicTimePoint durable_timestamp_;
+    const SystemTimePoint discovery_time_;
 #ifdef OPENDDS_SECURITY
     SequenceNumber max_pvs_sn_;
     DisjointSequence pvs_outstanding_;
@@ -362,6 +363,7 @@ private:
       , durable_(durable)
       , participant_flags_(participant_flags)
       , required_acknack_count_(0)
+      , discovery_time_(SystemTimePoint::now())
 #ifdef OPENDDS_SECURITY
       , max_pvs_sn_(SequenceNumber::ZERO())
 #endif
@@ -551,6 +553,7 @@ private:
     OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumber_t) frags_;
     CORBA::Long heartbeat_recvd_count_, hb_frag_recvd_count_;
     const ACE_CDR::ULong participant_flags_;
+    const SystemTimePoint discovery_time_;
 
     WriterInfo(const RepoId& id,
                const MonotonicTime_t& participant_discovered_at,
@@ -561,6 +564,7 @@ private:
       , heartbeat_recvd_count_(0)
       , hb_frag_recvd_count_(0)
       , participant_flags_(participant_flags)
+      , discovery_time_(SystemTimePoint::now())
     { }
 
     bool should_nack() const;
@@ -576,12 +580,14 @@ private:
 
   class RtpsReader : public RcObject {
   public:
-    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id)
+    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable, const SystemTimePoint& creation_time)
       : link_(link)
       , id_(id)
+      , durable_(durable)
       , stopping_(false)
       , nackfrag_count_(0)
       , preassociation_task_(make_rch<RtpsReader::Sporadic>(link->reactor_task_->interceptor(), *this, &RtpsReader::send_preassociation_acknacks))
+      , creation_time_(creation_time)
     {}
 
     ~RtpsReader();
@@ -631,12 +637,14 @@ private:
     mutable ACE_Thread_Mutex mutex_;
     WeakRcHandle<RtpsUdpDataLink> link_;
     const RepoId id_;
+    const bool durable_;
     WriterInfoMap remote_writers_;
     WriterInfoSet preassociation_writers_;
     bool stopping_;
     CORBA::Long nackfrag_count_;
     typedef PmfSporadicTask<RtpsReader> Sporadic;
     RcHandle<Sporadic> preassociation_task_;
+    const SystemTimePoint creation_time_;
   };
   typedef RcHandle<RtpsReader> RtpsReader_rch;
 
