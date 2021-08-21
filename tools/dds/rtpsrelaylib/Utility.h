@@ -30,6 +30,12 @@ enum Port {
   DATA
 };
 
+enum class MessageType {
+  Unknown,
+  Rtps,
+  Stun,
+};
+
 struct AddrPort {
   ACE_INET_Addr addr;
   Port port;
