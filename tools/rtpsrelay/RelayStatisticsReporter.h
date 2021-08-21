@@ -2,6 +2,7 @@
 #define RTPSRELAY_RELAY_STATISTICS_REPORTER_H_
 
 #include "Config.h"
+#include "CommonIoStatsReportHelper.h"
 
 #include "lib/RelayTypeSupportImpl.h"
 #include "lib/Utility.h"
@@ -13,10 +14,10 @@ namespace RtpsRelay {
 class RelayStatisticsReporter {
 public:
   RelayStatisticsReporter(const Config& config,
-                            RelayStatisticsDataWriter_var writer)
+                          RelayStatisticsDataWriter_var writer)
     : config_(config)
-    , log_last_report_(OpenDDS::DCPS::MonotonicTimePoint::now())
-    , publish_last_report_(OpenDDS::DCPS::MonotonicTimePoint::now())
+    , log_helper_(log_relay_statistics_)
+    , publish_helper_(publish_relay_statistics_)
     , writer_(writer)
   {
     DDS::Topic_var topic = writer_->get_topic();
@@ -27,63 +28,48 @@ public:
 
   void input_message(size_t byte_count,
                      const OpenDDS::DCPS::TimeDuration& time,
-                     const OpenDDS::DCPS::MonotonicTimePoint& now)
+                     const OpenDDS::DCPS::MonotonicTimePoint& now,
+                     MessageType type)
   {
-    log_relay_statistics_.bytes_in() += byte_count;
-    ++log_relay_statistics_.messages_in();
-    log_input_processing_time_ += time;
-    publish_relay_statistics_.bytes_in() += byte_count;
-    ++publish_relay_statistics_.messages_in();
-    publish_input_processing_time_ += time;
+    log_helper_.input_message(byte_count, time, type);
+    publish_helper_.input_message(byte_count, time, type);
     report(now);
   }
 
   void ignored_message(size_t byte_count,
-                     const OpenDDS::DCPS::MonotonicTimePoint& now)
+                       const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    log_relay_statistics_.bytes_ignored() += byte_count;
-    ++log_relay_statistics_.messages_ignored();
-    publish_relay_statistics_.bytes_ignored() += byte_count;
-    ++publish_relay_statistics_.messages_ignored();
+    log_helper_.ignored_message(byte_count);
+    publish_helper_.ignored_message(byte_count);
     report(now);
   }
 
   void output_message(size_t byte_count,
                       const OpenDDS::DCPS::TimeDuration& time,
                       const OpenDDS::DCPS::TimeDuration& queue_latency,
-                      const OpenDDS::DCPS::MonotonicTimePoint& now)
+                      const OpenDDS::DCPS::MonotonicTimePoint& now,
+                      MessageType type)
   {
-    log_relay_statistics_.bytes_out() += byte_count;
-    ++log_relay_statistics_.messages_out();
-    log_output_processing_time_ += time;
-    log_max_queue_latency_ = std::max(log_max_queue_latency_, queue_latency);
-    publish_relay_statistics_.bytes_out() += byte_count;
-    ++publish_relay_statistics_.messages_out();
-    publish_output_processing_time_ += time;
-    publish_max_queue_latency_ = std::max(publish_max_queue_latency_, queue_latency);
+    log_helper_.output_message(byte_count, time, queue_latency, type);
+    publish_helper_.output_message(byte_count, time, queue_latency, type);
     report(now);
   }
 
   void dropped_message(size_t byte_count,
                        const OpenDDS::DCPS::TimeDuration& time,
                        const OpenDDS::DCPS::TimeDuration& queue_latency,
-                       const OpenDDS::DCPS::MonotonicTimePoint& now)
+                       const OpenDDS::DCPS::MonotonicTimePoint& now,
+                       MessageType type)
   {
-    log_relay_statistics_.bytes_dropped() += byte_count;
-    ++log_relay_statistics_.messages_dropped();
-    log_output_processing_time_ += time;
-    log_max_queue_latency_ = std::max(log_max_queue_latency_, queue_latency);
-    publish_relay_statistics_.bytes_dropped() += byte_count;
-    ++publish_relay_statistics_.messages_dropped();
-    publish_output_processing_time_ += time;
-    publish_max_queue_latency_ = std::max(publish_max_queue_latency_, queue_latency);
+    log_helper_.dropped_message(byte_count, time, queue_latency, type);
+    publish_helper_.dropped_message(byte_count, time, queue_latency, type);
     report(now);
   }
 
   void max_gain(size_t value, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    log_relay_statistics_.max_gain() = std::max(log_relay_statistics_.max_gain(), static_cast<uint32_t>(value));
-    publish_relay_statistics_.max_gain() = std::max(publish_relay_statistics_.max_gain(), static_cast<uint32_t>(value));
+    log_helper_.max_gain(value);
+    publish_helper_.max_gain(value);
     report(now);
   }
 
@@ -96,8 +82,8 @@ public:
 
   void error(const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    ++log_relay_statistics_.error_count();
-    ++publish_relay_statistics_.error_count();
+    log_helper_.error();
+    publish_helper_.error();
     report(now);
   }
 
@@ -124,8 +110,8 @@ public:
 
   void max_queue_size(size_t size, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    log_relay_statistics_.max_queue_size() = std::max(log_relay_statistics_.max_queue_size(), static_cast<ACE_CDR::ULong>(size));
-    publish_relay_statistics_.max_queue_size() = std::max(publish_relay_statistics_.max_queue_size(), static_cast<ACE_CDR::ULong>(size));
+    log_helper_.max_queue_size(size);
+    publish_helper_.max_queue_size(size);
     report(now);
   }
 
@@ -146,99 +132,46 @@ private:
   void log_report(const OpenDDS::DCPS::MonotonicTimePoint& now,
                   bool force)
   {
-    if (config_.log_relay_statistics().is_zero()) {
+    if (!log_helper_.prepare_report(now, force, config_.log_relay_statistics())) {
       return;
     }
-
-    const auto d = now - log_last_report_;
-    if (!force && d < config_.log_relay_statistics()) {
-      return;
-    }
-
-    log_relay_statistics_.interval(time_diff_to_duration(d));
-    log_relay_statistics_.input_processing_time(time_diff_to_duration(log_input_processing_time_));
-    log_relay_statistics_.output_processing_time(time_diff_to_duration(log_output_processing_time_));
-    log_relay_statistics_.max_queue_latency(time_diff_to_duration(log_max_queue_latency_));
 
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name_.in(), OpenDDS::DCPS::to_json(log_relay_statistics_).c_str()));
 
-    log_last_report_ = now;
-
-    log_relay_statistics_.messages_in(0);
-    log_relay_statistics_.bytes_in(0);
-    log_relay_statistics_.messages_ignored(0);
-    log_relay_statistics_.bytes_ignored(0);
-    log_relay_statistics_.messages_out(0);
-    log_relay_statistics_.bytes_out(0);
-    log_relay_statistics_.messages_dropped(0);
-    log_relay_statistics_.bytes_dropped(0);
-    log_relay_statistics_.max_gain(0);
-    log_relay_statistics_.error_count(0);
+    log_helper_.reset(now);
     log_relay_statistics_.new_address_count(0);
     log_relay_statistics_.expired_address_count(0);
     log_relay_statistics_.expired_pending_count(0);
-    log_relay_statistics_.max_queue_size(0);
-    log_input_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
-    log_output_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
-    log_max_queue_latency_ = OpenDDS::DCPS::TimeDuration::zero_value;
   }
 
   void publish_report(const OpenDDS::DCPS::MonotonicTimePoint& now,
                       bool force)
   {
-    if (config_.publish_relay_statistics().is_zero()) {
+    if (!publish_helper_.prepare_report(now, force, config_.publish_relay_statistics())) {
       return;
     }
-
-    const auto d = now - publish_last_report_;
-    if (!force && d < config_.publish_relay_statistics()) {
-      return;
-    }
-
-    publish_relay_statistics_.interval(time_diff_to_duration(d));
-    publish_relay_statistics_.input_processing_time(time_diff_to_duration(publish_input_processing_time_));
-    publish_relay_statistics_.output_processing_time(time_diff_to_duration(publish_output_processing_time_));
-    publish_relay_statistics_.max_queue_latency(time_diff_to_duration(publish_max_queue_latency_));
 
     const auto ret = writer_->write(publish_relay_statistics_, DDS::HANDLE_NIL);
     if (ret != DDS::RETCODE_OK) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RelayStatisticsReporter::report failed to write relay statistics\n")));
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
+        "RelayStatisticsReporter::publish_report failed to write relay statistics\n"));
     }
 
-    publish_last_report_ = now;
-
-    publish_relay_statistics_.messages_in(0);
-    publish_relay_statistics_.bytes_in(0);
-    publish_relay_statistics_.messages_ignored(0);
-    publish_relay_statistics_.bytes_ignored(0);
-    publish_relay_statistics_.messages_out(0);
-    publish_relay_statistics_.bytes_out(0);
-    publish_relay_statistics_.messages_dropped(0);
-    publish_relay_statistics_.bytes_dropped(0);
-    publish_relay_statistics_.max_gain(0);
-    publish_relay_statistics_.error_count(0);
+    publish_helper_.reset(now);
     publish_relay_statistics_.new_address_count(0);
     publish_relay_statistics_.expired_address_count(0);
     publish_relay_statistics_.expired_pending_count(0);
-    publish_relay_statistics_.max_queue_size(0);
-    publish_input_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
-    publish_output_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
-    publish_max_queue_latency_ = OpenDDS::DCPS::TimeDuration::zero_value;
   }
 
   const Config& config_;
 
-  OpenDDS::DCPS::MonotonicTimePoint log_last_report_;
-  RelayStatistics log_relay_statistics_;
-  OpenDDS::DCPS::TimeDuration log_input_processing_time_;
-  OpenDDS::DCPS::TimeDuration log_output_processing_time_;
-  OpenDDS::DCPS::TimeDuration log_max_queue_latency_;
+  typedef CommonIoStatsReportHelper<RelayStatistics> Helper;
 
-  OpenDDS::DCPS::MonotonicTimePoint publish_last_report_;
+  RelayStatistics log_relay_statistics_;
+  Helper log_helper_;
+
   RelayStatistics publish_relay_statistics_;
-  OpenDDS::DCPS::TimeDuration publish_input_processing_time_;
-  OpenDDS::DCPS::TimeDuration publish_output_processing_time_;
-  OpenDDS::DCPS::TimeDuration publish_max_queue_latency_;
+  Helper publish_helper_;
 
   RelayStatisticsDataWriter_var writer_;
   CORBA::String_var topic_name_;
