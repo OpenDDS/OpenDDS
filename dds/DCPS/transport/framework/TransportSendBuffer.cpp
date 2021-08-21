@@ -83,6 +83,7 @@ SingleSendBuffer::release_acked(SequenceNumber seq) {
   if (buffer_iter != buffers_.end()) {
     release_i(buffer_iter);
   }
+  minimum_sn_allowed_ = std::max(minimum_sn_allowed_, seq + 1);
 }
 
 void
@@ -92,6 +93,7 @@ SingleSendBuffer::remove_acked(SequenceNumber seq, BufferVec& removed) {
   if (buffer_iter != buffers_.end()) {
     remove_i(buffer_iter, removed);
   }
+  minimum_sn_allowed_ = std::max(minimum_sn_allowed_, seq + 1);
 }
 
 void
@@ -246,6 +248,9 @@ SingleSendBuffer::insert(SequenceNumber sequence,
 {
   BufferVec removed;
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  if (sequence < minimum_sn_allowed_) {
+    return;
+  }
   check_capacity_i(removed);
 
   BufferType& buffer = buffers_[sequence];
@@ -305,6 +310,9 @@ SingleSendBuffer::insert_fragment(SequenceNumber sequence,
 {
   BufferVec removed;
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  if (sequence < minimum_sn_allowed_) {
+    return;
+  }
   check_capacity_i(removed);
 
   // Insert into buffers_ so that the overall capacity is maintained
@@ -438,6 +446,9 @@ SingleSendBuffer::resend_fragments_i(SequenceNumber seq,
 
   BufferMap::const_iterator it = buffers.lower_bound(psr.front().first);
   BufferMap::const_iterator end = buffers.lower_bound(psr.back().second);
+  if (psr.back().second < end->first) {
+    return;
+  }
   if (end != buffers.end()) {
     ++end;
   }

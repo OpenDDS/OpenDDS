@@ -893,6 +893,8 @@ RtpsUdpDataLink::RtpsWriter::pre_stop_helper(TqeVector& to_drop, bool true_stop)
     }
   }
 
+  send_buff_->pre_clear();
+
   g2.release();
   g.release();
 
@@ -2348,7 +2350,7 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(const WriterInfo_rch& writer,
     meta_submessages.push_back(meta_submessage);
 
     if (should_nack_frags) {
-      generate_nack_frags_i(meta_submessages, meta_submessage, writer, reader_id, writer_id);
+      generate_nack_frags_i(meta_submessages, writer, reader_id, writer_id);
     }
   } else if (heartbeat_was_non_final) {
     using namespace OpenDDS::RTPS;
@@ -2774,7 +2776,6 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVecVecVec& meta_subme
 
 void
 RtpsUdpDataLink::RtpsReader::generate_nack_frags_i(MetaSubmessageVec& meta_submessages,
-                                                   MetaSubmessage& meta_submessage,
                                                    const WriterInfo_rch& wi,
                                                    EntityId_t reader_id,
                                                    EntityId_t writer_id)
@@ -2846,9 +2847,10 @@ RtpsUdpDataLink::RtpsReader::generate_nack_frags_i(MetaSubmessageVec& meta_subme
     {0} // count set below
   };
 
-  meta_submessage.sm_.nack_frag_sm(nackfrag_prototype);
 
   for (size_t i = 0; i < frag_info.size(); ++i) {
+    MetaSubmessage meta_submessage(id_, wi->id_);
+    meta_submessage.sm_.nack_frag_sm(nackfrag_prototype);
     RTPS::NackFragSubmessage& nackfrag = meta_submessage.sm_.nack_frag_sm();
     nackfrag.writerSN = to_rtps_seqnum(frag_info[i].first);
     nackfrag.fragmentNumberState = frag_info[i].second;
@@ -3399,9 +3401,9 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
           reader->requests_.reset();
         } else {
           const OPENDDS_VECTOR(SequenceRange) psr = reader->requests_.present_sequence_ranges();
-          for (OPENDDS_VECTOR(SequenceRange)::const_iterator pos = psr.begin(), limit = psr.end();
-               pos != limit && pos->first <= dd_last; ++pos) {
-            for (SequenceNumber s = pos->first; s <= pos->second; ++s) {
+          for (OPENDDS_VECTOR(SequenceRange)::const_iterator iter = psr.begin(), limit = psr.end();
+               iter != limit && iter->first <= dd_last; ++iter) {
+            for (SequenceNumber s = iter->first; s <= iter->second; ++s) {
               if (s <= dd_last) {
                 const OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator dd_iter = reader->durable_data_.find(s);
                 if (dd_iter != reader->durable_data_.end()) {
@@ -3447,9 +3449,9 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
     }
 
     const OPENDDS_VECTOR(SequenceRange) ranges = reader->requests_.present_sequence_ranges();
-    for (OPENDDS_VECTOR(SequenceRange)::const_iterator pos = ranges.begin(), limit = ranges.end();
-         pos != limit; ++pos) {
-      for (SequenceNumber seq = pos->first; seq <= pos->second; ++seq) {
+    for (OPENDDS_VECTOR(SequenceRange)::const_iterator iter = ranges.begin(), limit = ranges.end();
+         iter != limit; ++iter) {
+      for (SequenceNumber seq = iter->first; seq <= iter->second; ++seq) {
         RepoId destination;
         if (proxy.contains(seq, destination)) {
           if (destination == GUID_UNKNOWN) {

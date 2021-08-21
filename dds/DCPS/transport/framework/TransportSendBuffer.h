@@ -188,6 +188,11 @@ public:
     OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(Proxy)
   };
 
+  void pre_clear()
+  {
+    pre_seq_.clear();
+  }
+
 private:
   void check_capacity_i(BufferVec& removed);
   void release_i(BufferMap::iterator buffer_iter);
@@ -222,6 +227,8 @@ private:
 
   typedef OPENDDS_SET(SequenceNumber) SequenceNumberSet;
   SequenceNumberSet pre_seq_;
+
+  SequenceNumber minimum_sn_allowed_;
 
   mutable ACE_Thread_Mutex mutex_;
 };

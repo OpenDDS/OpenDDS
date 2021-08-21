@@ -233,7 +233,7 @@ TransportReassembly::get_gaps(const SequenceNumber& seq, const RepoId& pub_id,
     DisjointSequence::fill_bitmap_range(0, first.getLow() - 2,
                                         bitmap, length, numBits);
   } else if (flist.size() == 1) {
-    // No gaps, but we know there is (at least 1) more_framents
+    // No gaps, but we know there are (at least 1) more_fragments
     if (iter->second.total_frags_ == 0) {
       DisjointSequence::fill_bitmap_range(0, 0, bitmap, length, numBits);
     } else {

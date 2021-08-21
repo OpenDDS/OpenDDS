@@ -623,7 +623,6 @@ private:
                             bool heartbeat_was_non_final,
                             MetaSubmessageVec& meta_submessages);
     void generate_nack_frags_i(MetaSubmessageVec& meta_submessages,
-                               MetaSubmessage& meta_submessage,
                                const WriterInfo_rch& wi,
                                EntityId_t reader_id,
                                EntityId_t writer_id);
