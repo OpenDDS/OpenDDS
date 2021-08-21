@@ -101,8 +101,6 @@ module RtpsRelay {
     Duration_t interval;
     unsigned long messages_in;
     unsigned long long bytes_in;
-    unsigned long messages_ignored;
-    unsigned long long bytes_ignored;
     Duration_t input_processing_time;
     unsigned long messages_out;
     unsigned long long bytes_out;
@@ -123,8 +121,6 @@ module RtpsRelay {
     Duration_t interval;
     unsigned long messages_in;
     unsigned long long bytes_in;
-    unsigned long messages_ignored;
-    unsigned long long bytes_ignored;
     Duration_t input_processing_time;
     unsigned long messages_out;
     unsigned long long bytes_out;
@@ -136,7 +132,6 @@ module RtpsRelay {
     unsigned long local_active_participants;
     unsigned long new_address_count;
     unsigned long expired_address_count;
-    unsigned long expired_pending_count;
     unsigned long max_queue_size;
     Duration_t max_queue_latency;
   };

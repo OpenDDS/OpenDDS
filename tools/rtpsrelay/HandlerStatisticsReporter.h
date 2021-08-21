@@ -45,17 +45,6 @@ public:
     report(now);
   }
 
-  void ignored_message(size_t byte_count,
-                       const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    relay_statistics_reporter_.ignored_message(byte_count, now);
-    log_handler_statistics_.bytes_ignored() += byte_count;
-    ++log_handler_statistics_.messages_ignored();
-    publish_handler_statistics_.bytes_ignored() += byte_count;
-    ++publish_handler_statistics_.messages_ignored();
-    report(now);
-  }
-
   void output_message(size_t byte_count,
                       const OpenDDS::DCPS::TimeDuration& time,
                       const OpenDDS::DCPS::TimeDuration& queue_latency,
@@ -151,8 +140,6 @@ private:
 
     log_handler_statistics_.messages_in(0);
     log_handler_statistics_.bytes_in(0);
-    log_handler_statistics_.messages_ignored(0);
-    log_handler_statistics_.bytes_ignored(0);
     log_handler_statistics_.messages_out(0);
     log_handler_statistics_.bytes_out(0);
     log_handler_statistics_.messages_dropped(0);
@@ -191,8 +178,6 @@ private:
 
     publish_handler_statistics_.messages_in(0);
     publish_handler_statistics_.bytes_in(0);
-    publish_handler_statistics_.messages_ignored(0);
-    publish_handler_statistics_.bytes_ignored(0);
     publish_handler_statistics_.messages_out(0);
     publish_handler_statistics_.bytes_out(0);
     publish_handler_statistics_.messages_dropped(0);

@@ -48,8 +48,6 @@ void ParticipantListener::on_data_available(DDS::DataReader_ptr reader)
       if (info.valid_data) {
         const auto repoid = participant_->get_repoid(info.instance_handle);
 
-        guid_addr_set_.remove_pending(repoid);
-
         const auto p = guids_.insert(repoid);
         if (p.second) {
           if (config_.log_discovery()) {

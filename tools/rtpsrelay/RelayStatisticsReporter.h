@@ -38,16 +38,6 @@ public:
     report(now);
   }
 
-  void ignored_message(size_t byte_count,
-                     const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    log_relay_statistics_.bytes_ignored() += byte_count;
-    ++log_relay_statistics_.messages_ignored();
-    publish_relay_statistics_.bytes_ignored() += byte_count;
-    ++publish_relay_statistics_.messages_ignored();
-    report(now);
-  }
-
   void output_message(size_t byte_count,
                       const OpenDDS::DCPS::TimeDuration& time,
                       const OpenDDS::DCPS::TimeDuration& queue_latency,
@@ -115,13 +105,6 @@ public:
     report(now);
   }
 
-  void expired_pending(const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    ++log_relay_statistics_.expired_pending_count();
-    ++publish_relay_statistics_.expired_pending_count();
-    report(now);
-  }
-
   void max_queue_size(size_t size, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     log_relay_statistics_.max_queue_size() = std::max(log_relay_statistics_.max_queue_size(), static_cast<ACE_CDR::ULong>(size));
@@ -166,8 +149,6 @@ private:
 
     log_relay_statistics_.messages_in(0);
     log_relay_statistics_.bytes_in(0);
-    log_relay_statistics_.messages_ignored(0);
-    log_relay_statistics_.bytes_ignored(0);
     log_relay_statistics_.messages_out(0);
     log_relay_statistics_.bytes_out(0);
     log_relay_statistics_.messages_dropped(0);
@@ -176,7 +157,6 @@ private:
     log_relay_statistics_.error_count(0);
     log_relay_statistics_.new_address_count(0);
     log_relay_statistics_.expired_address_count(0);
-    log_relay_statistics_.expired_pending_count(0);
     log_relay_statistics_.max_queue_size(0);
     log_input_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
     log_output_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
@@ -209,8 +189,6 @@ private:
 
     publish_relay_statistics_.messages_in(0);
     publish_relay_statistics_.bytes_in(0);
-    publish_relay_statistics_.messages_ignored(0);
-    publish_relay_statistics_.bytes_ignored(0);
     publish_relay_statistics_.messages_out(0);
     publish_relay_statistics_.bytes_out(0);
     publish_relay_statistics_.messages_dropped(0);
@@ -219,7 +197,6 @@ private:
     publish_relay_statistics_.error_count(0);
     publish_relay_statistics_.new_address_count(0);
     publish_relay_statistics_.expired_address_count(0);
-    publish_relay_statistics_.expired_pending_count(0);
     publish_relay_statistics_.max_queue_size(0);
     publish_input_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
     publish_output_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
