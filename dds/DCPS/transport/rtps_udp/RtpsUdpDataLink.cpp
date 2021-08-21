@@ -688,7 +688,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
       if (rr == readers_.end()) {
         pending_reliable_readers_.erase(local_id);
         RtpsUdpDataLink_rch link(this, inc_count());
-        RtpsReader_rch reader = make_rch<RtpsReader>(link, local_id);
+        RtpsReader_rch reader = make_rch<RtpsReader>(link, local_id, local_durable, client->creation_time());
         rr = readers_.insert(RtpsReaderMap::value_type(local_id, reader)).first;
       }
       RtpsReader_rch reader = rr->second;
@@ -1168,6 +1168,9 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
   const ACE_Message_Block* msg = element->msg();
   const RepoId pub_id = element->publication_id();
 
+  DCPS::SystemTimePoint source_time = SystemTimePoint::zero_value;
+  bool needs_timestamp = true;
+
   // Based on the type of 'element', find and duplicate the data payload
   // continuation block.
   if (tsce) {        // Control message
@@ -1196,6 +1199,8 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
     // {DataSampleHeader} -> {Data Payload}
     data.reset(msg->cont()->duplicate());
     const DataSampleElement* dsle = tse->sample();
+    source_time = dsle->get_header().get_source_timestamp();
+    needs_timestamp = false;
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
     RtpsSampleHeader::populate_data_sample_submessages(
       subm, *dsle, requires_inline_qos);
@@ -1206,6 +1211,8 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
     // {DataSampleHeader} -> {Content Filtering GUIDs} -> {Data Payload}
     data.reset(msg->cont()->cont()->duplicate());
     const DataSampleElement* dsle = tce->original_send_element()->sample();
+    source_time = dsle->get_header().get_source_timestamp();
+    needs_timestamp = false;
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
     RtpsSampleHeader::populate_data_sample_submessages(
       subm, *dsle, requires_inline_qos);
@@ -1230,6 +1237,10 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
     return 0;
   }
 
+  if (needs_timestamp) {
+    source_time = SystemTimePoint::now();
+  }
+
   if (transport_debug.log_messages) {
     link->send_strategy()->append_submessages(subm);
   }
@@ -1238,6 +1249,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
   hdr->cont(data.release());
   RtpsCustomizedElement* rtps =
     new RtpsCustomizedElement(element, move(hdr));
+  rtps->set_source_timestamp(source_time);
 
   // Handle durability resends
   if (durable) {
@@ -3468,7 +3480,7 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
             // Directed at the reader.
             const RtpsUdpSendStrategy::OverrideToken ot =
               link->send_strategy()->override_destinations(addrs);
-            proxy.resend_i(SequenceRange(seq, seq), 0, reader->id_);
+            proxy.resend_i(SequenceRange(seq, seq), 0, reader->id_, reader->durable_ ? SystemTimePoint::zero_value : reader->discovery_time_);
             continue;
           }
         } else if (proxy.pre_contains(seq)) {
@@ -4326,7 +4338,10 @@ RtpsUdpDataLink::RtpsReader::deliver_held_data(const RepoId& src)
     const SequenceNumber ca = wi->second->recvd_.cumulative_ack();
     const WriterInfo::HeldMap::iterator end = wi->second->held_.upper_bound(ca);
     for (WriterInfo::HeldMap::iterator it = wi->second->held_.begin(); it != end; /*increment in loop body*/) {
-      to_deliver.push_back(it->second);
+      const DCPS::SystemTimePoint source_time = it->second.header_.get_source_timestamp();
+      if (durable_ || creation_time_ < source_time) {
+        to_deliver.push_back(it->second);
+      }
       wi->second->held_.erase(it++);
     }
   }

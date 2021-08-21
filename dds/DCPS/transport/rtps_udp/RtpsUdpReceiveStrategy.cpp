@@ -394,6 +394,11 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
 
   case DATA: {
     receiver_.fill_header(sample.header_);
+    if (sample.header_.source_timestamp_sec_ == 0) {
+      const DDS::Time_t now = SystemTimePoint::now().to_dds_time();
+      sample.header_.source_timestamp_sec_ = now.sec;
+      sample.header_.source_timestamp_nanosec_ = now.nanosec;
+    }
     const DataSubmessage& data = submessage.data_sm();
     if (!check_encoded(data.writerId)) {
       if (transport_debug.log_dropped_messages) {
