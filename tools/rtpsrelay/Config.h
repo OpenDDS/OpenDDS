@@ -15,6 +15,11 @@ public:
     , static_limit_(0)
     , max_pending_(0)
     , pending_timeout_(60) // 1 minute
+#ifdef ACE_DEFAULT_MAX_SOCKET_BUFSIZ
+    , buffer_size_(ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
+#else
+    , buffer_size_(16384)
+#endif
     , application_domain_(1)
     , allow_empty_partition_(true)
     , log_warnings_(false)
@@ -71,6 +76,16 @@ public:
   const OpenDDS::DCPS::TimeDuration& pending_timeout() const
   {
     return pending_timeout_;
+  }
+
+  void buffer_size(int value)
+  {
+    buffer_size_ = value;
+  }
+
+  int buffer_size() const
+  {
+    return buffer_size_;
   }
 
   void application_domain(DDS::DomainId_t value)
@@ -219,6 +234,7 @@ private:
   size_t static_limit_;
   size_t max_pending_;
   OpenDDS::DCPS::TimeDuration pending_timeout_;
+  int buffer_size_;
   DDS::DomainId_t application_domain_;
   bool allow_empty_partition_;
   bool log_warnings_;

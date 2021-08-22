@@ -82,17 +82,23 @@ int RelayHandler::open(const ACE_INET_Addr& address)
     return -1;
   }
 
-  int send_buffer_size = 16384;
-#ifdef ACE_DEFAULT_MAX_SOCKET_BUFSIZ
-  send_buffer_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
-#endif
+  const int buffer_size = config_.buffer_size();
 
   if (socket_.set_option(SOL_SOCKET,
                          SO_SNDBUF,
-                         (void *) &send_buffer_size,
-                         sizeof(send_buffer_size)) < 0
+                         (void *) &buffer_size,
+                         sizeof(buffer_size)) < 0
       && errno != ENOTSUP) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RelayHandler::open %C failed to set the send buffer size to %d errno %m\n"), name_.c_str(), send_buffer_size));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RelayHandler::open %C failed to set the send buffer size to %d errno %m\n"), name_.c_str(), buffer_size));
+    return -1;
+  }
+
+  if (socket_.set_option(SOL_SOCKET,
+                         SO_RCVBUF,
+                         (void *) &buffer_size,
+                         sizeof(buffer_size)) < 0
+      && errno != ENOTSUP) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RelayHandler::open %C failed to set the receive buffer size to %d errno %m\n"), name_.c_str(), buffer_size));
     return -1;
   }
 
