@@ -31,7 +31,7 @@ bool DataReaderListenerImpl::wait_matched(int count, const OpenDDS::DCPS::TimeDu
   using namespace OpenDDS::DCPS;
   Lock lock(matched_mutex_);
   if (!lock.locked()) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataReaderListenerImpl::wait_matched: failed to lock\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderListenerImpl::wait_matched: failed to lock\n")));
     return false;
   }
   const MonotonicTimePoint deadline = MonotonicTimePoint::now() + max_wait;
@@ -57,6 +57,10 @@ bool DataReaderListenerImpl::wait_matched(int count, const OpenDDS::DCPS::TimeDu
 void DataReaderListenerImpl::on_subscription_matched(DDS::DataReader_ptr, const DDS::SubscriptionMatchedStatus& status)
 {
   Lock lock(matched_mutex_);
+  if (!lock.locked()) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderListenerImpl::on_subscription_matched: failed to lock\n")));
+    return;
+  }
   matched_ = status.current_count;
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_matched %d\n"), matched_));
   matched_cv_.notify_all();
@@ -66,7 +70,7 @@ int DataReaderListenerImpl::wait_all_received() const
 {
   Lock lock(received_mutex_);
   if (!lock.locked()) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DataReaderListenerImpl::wait_all_received failed to get lock.\n")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderListenerImpl::wait_all_received: failed to lock\n")));
     return 1;
   }
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) DataReaderListenerImpl::wait_all_received\n")));
@@ -88,12 +92,20 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
 CORBA::Long DataReaderListenerImpl::requested_deadline_total_count() const
 {
   Lock lock(count_mutex_);
+  if (!lock.locked()) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderListenerImpl::requested_deadline_total_count: failed to lock\n")));
+    return 0;
+  }
   return requested_deadline_total_count_;
 }
 
 void DataReaderListenerImpl::on_requested_deadline_missed(DDS::DataReader_ptr, const DDS::RequestedDeadlineMissedStatus& status)
 {
   Lock lock(count_mutex_);
+  if (!lock.locked()) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderListenerImpl::on_requested_deadline_missed: failed to lock\n")));
+    return;
+  }
   if ((requested_deadline_total_count_ + status.total_count_change) != status.total_count) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_requested_deadline_missed: ")
@@ -111,6 +123,10 @@ void DataReaderListenerImpl::on_requested_deadline_missed(DDS::DataReader_ptr, c
 bool DataReaderListenerImpl::all_received()
 {
   Lock lock(received_mutex_);
+  if (!lock.locked()) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderListenerImpl::all_received: failed to lock\n")));
+    return false;
+  }
   ++received_;
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) received %d\n"), received_));
   return received_ >= (Domain::n_msg * Domain::n_instance);

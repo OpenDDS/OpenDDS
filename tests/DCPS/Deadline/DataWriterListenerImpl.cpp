@@ -24,7 +24,7 @@ bool DataWriterListenerImpl::wait_matched(long count, const OpenDDS::DCPS::TimeD
   using namespace OpenDDS::DCPS;
   Lock lock(mutex_);
   if (!lock.locked()) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataWriterListenerImpl::wait_matched: failed to lock\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataWriterListenerImpl::wait_matched: failed to lock\n")));
     return false;
   }
   const MonotonicTimePoint deadline = MonotonicTimePoint::now() + max_wait;
@@ -70,6 +70,10 @@ void DataWriterListenerImpl::on_offered_deadline_missed(DDS::DataWriter_ptr , co
 void DataWriterListenerImpl::on_publication_matched(DDS::DataWriter_ptr, const DDS::PublicationMatchedStatus& status)
 {
   Lock lock(mutex_);
+  if (!lock.locked()) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataWriterListenerImpl::on_publication_matched: failed to lock\n")));
+    return;
+  }
   matched_ = status.current_count;
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_publication_matched %d\n"), matched_));
   matched_condition_.notify_all();

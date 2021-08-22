@@ -83,5 +83,9 @@ int Writer::svc()
 int Writer::get_key()
 {
   Lock lock(key_mutex_);
+  if (!lock.locked()) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Writer::get_key: failed to lock\n")));
+    return 0;
+  }
   return ++key_n_ == 1 ? Domain::s_key1 : Domain::s_key2;
 }
