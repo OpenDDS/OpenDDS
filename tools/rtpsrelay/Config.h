@@ -12,6 +12,11 @@ public:
   Config()
     : application_participant_guid_(OpenDDS::DCPS::GUID_UNKNOWN)
     , lifespan_(60) // 1 minute
+#ifdef ACE_DEFAULT_MAX_SOCKET_BUFSIZ
+    , buffer_size_(ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
+#else
+    , buffer_size_(16384)
+#endif
     , application_domain_(1)
     , allow_empty_partition_(true)
     , log_warnings_(false)
@@ -38,6 +43,16 @@ public:
   const OpenDDS::DCPS::TimeDuration& lifespan() const
   {
     return lifespan_;
+  }
+
+  void buffer_size(int value)
+  {
+    buffer_size_ = value;
+  }
+
+  int buffer_size() const
+  {
+    return buffer_size_;
   }
 
   void application_domain(DDS::DomainId_t value)
@@ -183,6 +198,7 @@ public:
 private:
   OpenDDS::DCPS::GUID_t application_participant_guid_;
   OpenDDS::DCPS::TimeDuration lifespan_;
+  int buffer_size_;
   DDS::DomainId_t application_domain_;
   bool allow_empty_partition_;
   bool log_warnings_;
