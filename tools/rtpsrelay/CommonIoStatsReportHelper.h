@@ -140,8 +140,6 @@ public:
     last_report_ = now;
     statistics_.messages_in(0);
     statistics_.bytes_in(0);
-    statistics_.messages_ignored(0);
-    statistics_.bytes_ignored(0);
     statistics_.messages_out(0);
     statistics_.bytes_out(0);
     statistics_.messages_dropped(0);

@@ -2,6 +2,7 @@
 
 #include "lib/RelayTypeSupportImpl.h"
 
+#include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Message_Block_Ptr.h>
 #include <dds/DCPS/RTPS/BaseMessageTypes.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
@@ -255,7 +256,7 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
     const auto res = guid_addr_set_map_[src_guid].select_addr_set(remote_address.port)->insert(std::make_pair(remote_address, expiration));
     if (res.second) {
       if (config_.log_activity()) {
-        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity %C %C is at %C total=%B/%B pending=%B/%B\n"), handler.name().c_str(), guid_to_string(src_guid).c_str(), addr_to_string(remote_address.addr).c_str(), guid_addr_set_map_.size(), config_.static_limit(), pending_.size(), config_.max_pending()));
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity %C %C is at %C total=%B\n"), handler.name().c_str(), guid_to_string(src_guid).c_str(), OpenDDS::DCPS::LogAddr(remote_address.addr).c_str(), guid_addr_set_map_.size()));
       }
       relay_stats_reporter_.new_address(now);
       const auto after = guid_addr_set_map_.size();
@@ -307,7 +308,7 @@ void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& n
 
     // Address actually expired.
     if (config_.log_activity()) {
-          ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C %C expired at %d.%d now=%d.%d total=%B/%B pending=%B/%B\n"), guid_to_string(ga.guid).c_str(), addr_to_string(ga.address.addr).c_str(), expiration.value().sec(), expiration.value().usec(), now.value().sec(), now.value().usec(), guid_addr_set_map_.size(), config_.static_limit(), pending_.size(), config_.max_pending()));
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C %C expired at %d.%d now=%d.%d total=%B\n"), guid_to_string(ga.guid).c_str(), OpenDDS::DCPS::LogAddr(ga.address.addr).c_str(), expiration.value().sec(), expiration.value().usec(), now.value().sec(), now.value().usec(), guid_addr_set_map_.size()));
     }
     relay_stats_reporter_.expired_address(now);
 
@@ -316,55 +317,15 @@ void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& n
       addr_stats.sedp_stats_reporter.report(now, true);
       addr_stats.data_stats_reporter.report(now, true);
       guid_addr_set_map_.erase(ga.guid);
-      pending_.erase(ga.guid);
       relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
       spdp_vertical_handler_->purge(proxy, ga.guid);
       sedp_vertical_handler_->purge(proxy, ga.guid);
       data_vertical_handler_->purge(proxy, ga.guid);
       if (config_.log_activity()) {
-        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C removed total=%B/%B pending=%B/%B\n"), guid_to_string(ga.guid).c_str(), guid_addr_set_map_.size(), config_.static_limit(), pending_.size(), config_.max_pending()));
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C removed total=%B\n"), guid_to_string(ga.guid).c_str(), guid_addr_set_map_.size()));
       }
     }
   }
-
-  while (!pending_expiration_queue_.empty() && pending_expiration_queue_.front().first <= now) {
-    const auto& expiration = pending_expiration_queue_.front().first;
-    const auto& guid = pending_expiration_queue_.front().second;
-    if (config_.log_activity()) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C pending expired at %d.%d now=%d.%d total=%B/%B pending=%B/%B\n"), guid_to_string(guid).c_str(), expiration.value().sec(), expiration.value().usec(), now.value().sec(), now.value().usec(), guid_addr_set_map_.size(), config_.static_limit(), pending_.size(), config_.max_pending()));
-    }
-    relay_stats_reporter_.expired_pending(now);
-    pending_.erase(guid);
-    pending_expiration_queue_.pop_front();
-  }
-}
-
-bool GuidAddrSet::ignore(const OpenDDS::DCPS::GUID_t& guid,
-                         const OpenDDS::DCPS::MonotonicTimePoint& now)
-{
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
-
-  // Client has already been admitted.
-  if (guid_addr_set_map_.count(guid) != 0) {
-    return false;
-  }
-
-  if (config_.static_limit() != 0 &&
-      guid_addr_set_map_.size() >= config_.static_limit()) {
-    // Too many clients to admit another.
-    return true;
-  }
-
-  if (config_.max_pending() != 0 &&
-      pending_.size() >= config_.max_pending()) {
-    // Too many new clients to admit another.
-    return true;
-  }
-
-  pending_.insert(guid);
-  pending_expiration_queue_.push_back(std::make_pair(now + config_.pending_timeout(), guid));
-
-  return false;
 }
 
 void GuidAddrSet::remove(const OpenDDS::DCPS::GUID_t& guid)
@@ -379,14 +340,13 @@ void GuidAddrSet::remove(const OpenDDS::DCPS::GUID_t& guid)
   addr_stats.data_stats_reporter.report(now, true);
 
   guid_addr_set_map_.erase(guid);
-  pending_.erase(guid);
   relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
   spdp_vertical_handler_->purge(proxy, guid);
   sedp_vertical_handler_->purge(proxy, guid);
   data_vertical_handler_->purge(proxy, guid);
 
   if (config_.log_activity()) {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::remove %C removed total=%B/%B pending=%B/%B\n"), guid_to_string(guid).c_str(), guid_addr_set_map_.size(), config_.static_limit(), pending_.size(), config_.max_pending()));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::remove %C removed total=%B\n"), guid_to_string(guid).c_str(), guid_addr_set_map_.size()));
   }
 }
 
@@ -455,11 +415,6 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
       return 0;
     }
 
-    if (guid_addr_set_.ignore(src_guid, now)) {
-      stats_reporter_.ignored_message(msg_len, now);
-      return 0;
-    }
-
     GuidAddrSet::Proxy proxy(guid_addr_set_);
     record_activity(proxy, addr_port, now, src_guid, msg_len);
     bool send_to_application_participant = false;
@@ -502,11 +457,6 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
     if (message.get_guid_prefix(src_guid.guidPrefix)) {
       src_guid.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
       has_guid = true;
-
-      if (guid_addr_set_.ignore(src_guid, now)) {
-        stats_reporter_.ignored_message(msg_len, now);
-        return 0;
-      }
     }
 
     size_t bytes_sent = 0;
