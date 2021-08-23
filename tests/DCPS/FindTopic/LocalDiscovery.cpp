@@ -42,7 +42,7 @@ RepoId LocalDiscovery::generate_participant_guid()
 AddDomainStatus LocalDiscovery::add_domain_participant(
   DDS::DomainId_t,
   const DDS::DomainParticipantQos&,
-  XTypes::TypeLookupService_rch)
+  OpenDDS::XTypes::TypeLookupService_rch)
 {
   const AddDomainStatus ads = {make_guid(ENTITYID_PARTICIPANT), false};
   return ads;
@@ -52,7 +52,7 @@ AddDomainStatus LocalDiscovery::add_domain_participant(
 AddDomainStatus LocalDiscovery::add_domain_participant_secure(
   DDS::DomainId_t,
   const DDS::DomainParticipantQos&,
-  XTypes::TypeLookupService_rch,
+  OpenDDS::XTypes::TypeLookupService_rch,
   const RepoId&,
   DDS::Security::IdentityHandle,
   DDS::Security::PermissionsHandle,

@@ -43,13 +43,13 @@ private:
   AddDomainStatus add_domain_participant(
     DDS::DomainId_t domain,
     const DDS::DomainParticipantQos& qos,
-    XTypes::TypeLookupService_rch tls);
+    OpenDDS::XTypes::TypeLookupService_rch tls);
 
 #ifdef OPENDDS_SECURITY
   AddDomainStatus add_domain_participant_secure(
     DDS::DomainId_t domain,
     const DDS::DomainParticipantQos& qos,
-    XTypes::TypeLookupService_rch tls,
+    OpenDDS::XTypes::TypeLookupService_rch tls,
     const RepoId& guid,
     DDS::Security::IdentityHandle id,
     DDS::Security::PermissionsHandle perm,
