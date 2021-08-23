@@ -446,7 +446,6 @@ InfoRepoDiscovery::add_domain_participant(DDS::DomainId_t domainId,
                                           const DDS::DomainParticipantQos& qos,
                                           XTypes::TypeLookupService_rch /*tls*/)
 {
-  // TODO(sonndinh): initialize type lookup service
   try {
     const DCPSInfo_var info = get_dcps_info();
     if (!CORBA::is_nil(info)) {
@@ -464,6 +463,7 @@ DCPS::AddDomainStatus
 InfoRepoDiscovery::add_domain_participant_secure(
   DDS::DomainId_t /*domain*/,
   const DDS::DomainParticipantQos& /*qos*/,
+  XTypes::TypeLookupService_rch /*tls*/,
   const OpenDDS::DCPS::RepoId& /*guid*/,
   DDS::Security::IdentityHandle /*id*/,
   DDS::Security::PermissionsHandle /*perm*/,

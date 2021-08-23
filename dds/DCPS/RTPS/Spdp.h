@@ -80,6 +80,7 @@ public:
        const DCPS::RepoId& guid,
        const DDS::DomainParticipantQos& qos,
        RtpsDiscovery* disco,
+       XTypes::TypeLookupService_rch tls,
        DDS::Security::IdentityHandle id_handle,
        DDS::Security::PermissionsHandle perm_handle,
        DDS::Security::ParticipantCryptoHandle crypto_handle);

@@ -657,9 +657,8 @@ StaticDiscovery::generate_participant_guid()
 AddDomainStatus
 StaticDiscovery::add_domain_participant(DDS::DomainId_t domain,
                                         const DDS::DomainParticipantQos& qos,
-                                        XTypes::TypeLookupService_rch /*tls*/)
+                                        XTypes::TypeLookupService_rch tls)
 {
-  // TODO(sonndinh): initialize type lookup service.
   AddDomainStatus ads = {RepoId(), false /*federated*/};
 
   if (qos.user_data.value.length() != BYTES_IN_PARTICIPANT) {
@@ -686,6 +685,8 @@ StaticDiscovery::add_domain_participant(DDS::DomainId_t domain,
     participants_[domain][id] = participant;
   }
 
+  participant->type_lookup_service(tls);
+
   ads.id = id;
   return ads;
 }
@@ -695,6 +696,7 @@ AddDomainStatus
 StaticDiscovery::add_domain_participant_secure(
   DDS::DomainId_t /*domain*/,
   const DDS::DomainParticipantQos& /*qos*/,
+  XTypes::TypeLookupService_rch /*tls*/,
   const OpenDDS::DCPS::RepoId& /*guid*/,
   DDS::Security::IdentityHandle /*id*/,
   DDS::Security::PermissionsHandle /*perm*/,
