@@ -3299,6 +3299,30 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
     throw std::runtime_error("failed to set TTL");
   }
 
+  const int send_buffer_size = outer->config()->send_buffer_size();
+  if (send_buffer_size > 0) {
+    if (unicast_socket_.set_option(SOL_SOCKET,
+                                   SO_SNDBUF,
+                                   (void *) &send_buffer_size,
+                                   sizeof(send_buffer_size)) < 0
+        && errno != ENOTSUP) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket() - failed to set the send buffer size to %d errno %m\n"), send_buffer_size));
+      throw std::runtime_error("failed to set send buffer size");
+    }
+  }
+
+  const int recv_buffer_size = outer->config()->recv_buffer_size();
+  if (recv_buffer_size > 0) {
+    if (unicast_socket_.set_option(SOL_SOCKET,
+                                   SO_RCVBUF,
+                                   (void *) &recv_buffer_size,
+                                   sizeof(recv_buffer_size)) < 0
+        && errno != ENOTSUP) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket() - failed to set the recv buffer size to %d errno %m\n"), recv_buffer_size));
+      throw std::runtime_error("failed to set recv buffer size");
+    }
+  }
+
 #ifdef ACE_RECVPKTINFO
   int sockopt = 1;
   if (unicast_socket_.set_option(IPPROTO_IP, ACE_RECVPKTINFO, &sockopt, sizeof sockopt) == -1) {
@@ -3363,6 +3387,30 @@ Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port)
                ACE_TEXT("for port:%hu %p\n"),
                outer->config_->ttl(), ipv6_uni_port_, ACE_TEXT("DCPS::set_socket_multicast_ttl:")));
     throw std::runtime_error("failed to set TTL");
+  }
+
+  const int send_buffer_size = outer->config()->send_buffer_size();
+  if (send_buffer_size > 0) {
+    if (unicast_ipv6_socket_.set_option(SOL_SOCKET,
+                                        SO_SNDBUF,
+                                        (void *) &send_buffer_size,
+                                        sizeof(send_buffer_size)) < 0
+        && errno != ENOTSUP) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_ipv6_socket() - failed to set the send buffer size to %d errno %m\n"), send_buffer_size));
+      throw std::runtime_error("failed to set send buffer size");
+    }
+  }
+
+  const int recv_buffer_size = outer->config()->recv_buffer_size();
+  if (recv_buffer_size > 0) {
+    if (unicast_ipv6_socket_.set_option(SOL_SOCKET,
+                                        SO_RCVBUF,
+                                        (void *) &recv_buffer_size,
+                                        sizeof(recv_buffer_size)) < 0
+        && errno != ENOTSUP) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_ipv6_socket() - failed to set the recv buffer size to %d errno %m\n"), recv_buffer_size));
+      throw std::runtime_error("failed to set recv buffer size");
+    }
   }
 
 #ifdef ACE_RECVPKTINFO6

@@ -57,6 +57,13 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , d1_(10)
   , dx_(2)
   , ttl_(1)
+#if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
+  , send_buffer_size_(ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
+  , recv_buffer_size_(ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
+#else
+  , send_buffer_size_(0)
+  , recv_buffer_size_(0)
+#endif
   , sedp_multicast_(true)
   , sedp_local_address_(u_short(0), "0.0.0.0")
   , spdp_local_address_(u_short(0), "0.0.0.0")
@@ -282,6 +289,28 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                value.c_str(), rtps_name.c_str()), -1);
           }
           config->ttl(static_cast<unsigned char>(ttl_us));
+        } else if (name == "SendBufferSize") {
+          const OPENDDS_STRING& value = it->second;
+          ACE_INT32 send_buffer_size;
+          if (!DCPS::convertToInteger(value, send_buffer_size)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+               ACE_TEXT("Invalid entry (%C) for SendBufferSize in ")
+               ACE_TEXT("[rtps_discovery/%C] section.\n"),
+               value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->send_buffer_size(send_buffer_size);
+        } else if (name == "RecvBufferSize") {
+          const OPENDDS_STRING& value = it->second;
+          ACE_INT32 recv_buffer_size;
+          if (!DCPS::convertToInteger(value, recv_buffer_size)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+               ACE_TEXT("Invalid entry (%C) for RecvBufferSize in ")
+               ACE_TEXT("[rtps_discovery/%C] section.\n"),
+               value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->recv_buffer_size(recv_buffer_size);
         } else if (name == "SedpMulticast") {
           const OPENDDS_STRING& value = it->second;
           int smInt;
