@@ -613,7 +613,7 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
 bool check_discovered_participants(DomainParticipant_var& dp,
                                    InstanceHandle_t& handle)
 {
-  InstanceHandle_t my_handle    = dp->get_instance_handle();
+  InstanceHandle_t my_handle = dp->get_instance_handle();
 
   DDS::InstanceHandleSeq part_handles;
   DDS::ReturnCode_t stat = dp->get_discovered_participants(part_handles);
@@ -625,7 +625,7 @@ bool check_discovered_participants(DomainParticipant_var& dp,
   if (stat == RETCODE_OK) {
     CORBA::ULong len = part_handles.length();
     if (len != 1) {
-      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %P expected to discover")
+      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %P expected to discover ")
                                   ACE_TEXT("one other participant handle but ")
                                   ACE_TEXT("found %d\n"), len), false);
     } else if (part_handles[0] == my_handle) {
