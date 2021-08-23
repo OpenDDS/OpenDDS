@@ -672,7 +672,11 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     }
 
     // add a new participant
-    std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq)));
+#ifdef OPENDDS_SECURITY
+    std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq, config_->auth_resend_period())));
+#else
+    std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq, TimeDuration())));
+#endif
     iter = p.first;
     iter->second.discovered_at_ = now;
     update_lease_expiration_i(iter, now);
@@ -1655,6 +1659,7 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
+  bool processor_needs_cancel = false;
   for (TimeQueue::iterator pos = handshake_resends_.begin(), limit = handshake_resends_.end();
        pos != limit && pos->first <= now;) {
 
@@ -1662,7 +1667,7 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
     if (pit != participants_.end() &&
         pit->second.stateless_msg_deadline_ <= now) {
       const RepoId reader = make_id(pit->first, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER);
-      pit->second.stateless_msg_deadline_ = now + config_->auth_resend_period();
+      pit->second.stateless_msg_deadline_ = now + pit->second.handshake_resend_falloff_.get();
 
       // Send the auth req first to reset the remote if necessary.
       if (pit->second.have_auth_req_msg_) {
@@ -1694,15 +1699,22 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
                        OPENDDS_STRING(DCPS::GuidConverter(pit->first)).c_str()));
           }
         }
+        pit->second.handshake_resend_falloff_.advance();
       }
 
       handshake_resends_.insert(std::make_pair(pit->second.stateless_msg_deadline_, pit->first));
+      if (pit->second.stateless_msg_deadline_ < handshake_resends_.begin()->first) {
+        processor_needs_cancel = true;
+      }
     }
 
     handshake_resends_.erase(pos++);
   }
 
   if (!handshake_resends_.empty()) {
+    if (processor_needs_cancel) {
+      tport_->handshake_resend_processor_->cancel();
+    }
     tport_->handshake_resend_processor_->schedule(handshake_resends_.begin()->first - now);
   }
 }
@@ -1787,6 +1799,9 @@ MonotonicTimePoint Spdp::schedule_handshake_resend(const TimeDuration& time, con
 {
   const MonotonicTimePoint deadline = MonotonicTimePoint::now() + time;
   handshake_resends_.insert(std::make_pair(deadline, guid));
+  if (deadline < handshake_resends_.begin()->first) {
+    tport_->handshake_resend_processor_->cancel();
+  }
   tport_->handshake_resend_processor_->schedule(time);
   return deadline;
 }
@@ -4259,6 +4274,7 @@ void Spdp::purge_handshake_resends(DiscoveredParticipantIter iter)
 
   iter->second.have_auth_req_msg_ = false;
   iter->second.have_handshake_msg_ = false;
+  iter->second.handshake_resend_falloff_.reset();
 
   std::pair<TimeQueue::iterator, TimeQueue::iterator> range = handshake_resends_.equal_range(iter->second.stateless_msg_deadline_);
   for (; range.first != range.second; ++range.first) {
