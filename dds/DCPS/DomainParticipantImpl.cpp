@@ -1778,7 +1778,8 @@ DomainParticipantImpl::enable()
       part_crypto_handle_ = DDS::HANDLE_NIL;
     }
 
-    value = disco->add_domain_participant_secure(domain_id_, qos_, dp_id_, id_handle_, perm_handle_, part_crypto_handle_);
+    value = disco->add_domain_participant_secure(domain_id_, qos_, type_lookup_service_,
+                                                 dp_id_, id_handle_, perm_handle_, part_crypto_handle_);
 
     if (value.id == GUID_UNKNOWN) {
       if (DCPS::security_debug.new_entity_error) {
