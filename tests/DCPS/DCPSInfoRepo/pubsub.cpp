@@ -95,7 +95,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
 
   ::DDS::DomainParticipantQos_var partQos = new ::DDS::DomainParticipantQos;
   *partQos = TheServiceParticipant->initial_DomainParticipantQos();
-  OpenDDS::DCPS::AddDomainStatus value = disc->add_domain_participant(domain, partQos.in());
+  OpenDDS::DCPS::AddDomainStatus value = disc->add_domain_participant(domain, partQos.in(), XTypes::TypeLookupService_rch());
   pubPartId = value.id;
   if (OpenDDS::DCPS::GUID_UNKNOWN == pubPartId)
     {
@@ -269,7 +269,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
   if (use_rtps)
     drImpl.disco_ = disc.in();
 
-  value = disc->add_domain_participant(domain, partQos.in());
+  value = disc->add_domain_participant(domain, partQos.in(), XTypes::TypeLookupService_rch());
   subPartId = value.id;
   if( OpenDDS::DCPS::GUID_UNKNOWN == subPartId)
     {

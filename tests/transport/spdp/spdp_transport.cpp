@@ -261,7 +261,7 @@ bool run_test()
   const DDS::DomainId_t domain = 0;
   const DDS::DomainParticipantQos qos = TheServiceParticipant->initial_DomainParticipantQos();
   RepoId id = rd.generate_participant_guid();
-  const RcHandle<Spdp> spdp(make_rch<Spdp>(domain, ref(id), qos, &rd));
+  const RcHandle<Spdp> spdp(make_rch<Spdp>(domain, ref(id), qos, &rd, XTypes::TypeLookupService_rch()));
 
   const DDS::Subscriber_var sVar;
   spdp->init_bit(sVar);
