@@ -16,19 +16,36 @@
 class Writer : public ACE_Task_Base
 {
 public:
-  Writer(const DDS::DataWriter_var& dw);
-  bool start(); // Launch 2 threads
-  void end();
-  virtual int svc();
+
+  Writer(::DDS::DataWriter_ptr writer,
+         CORBA::Long key,
+         OpenDDS::DCPS::TimeDuration sleep_duration);
+
+  void start ();
+
+  void end ();
+
+  /** Lanch a thread to write. **/
+  virtual int svc ();
+
+  ::DDS::InstanceHandle_t get_instance_handle();
+
+  bool wait_for_start ();
 
 private:
-  typedef ACE_SYNCH_MUTEX Mutex;
-  typedef ACE_Guard<Mutex> Lock;
-  int get_key();
 
-  Messenger::MessageDataWriter_var mdw_;
-  Mutex key_mutex_;
-  int key_n_;
+  ::DDS::DataWriter_var writer_;
+  typedef ACE_SYNCH_MUTEX     LockType;
+  typedef ACE_Guard<LockType> GuardType;
+
+  LockType lock_;
+  OpenDDS::DCPS::ConditionVariable<ACE_SYNCH_MUTEX> condition_;
+
+  bool associated_;
+  DataWriterListenerImpl* dwl_servant_;
+  ::DDS::InstanceHandle_t instance_handle_;
+  CORBA::Long key_;
+  OpenDDS::DCPS::TimeDuration sleep_duration_;
 };
 
 #endif /* WRITER_H */
