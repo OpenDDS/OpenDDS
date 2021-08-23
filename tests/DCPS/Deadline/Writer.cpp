@@ -13,6 +13,8 @@
 #include <ace/OS_NS_unistd.h>
 #include <ace/streams.h>
 
+#include <stdexcept>
+
 Writer::Writer(const DDS::DataWriter_var& dw)
   : mdw_()
   , key_mutex_()

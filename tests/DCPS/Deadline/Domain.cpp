@@ -4,6 +4,8 @@
 
 #include <tests/DCPS/ConsolidatedMessengerIdl/MessengerTypeSupportImpl.h>
 
+#include <stdexcept>
+
 const char* Domain::s_topic = "DeadlineTestTopic";
 const char* Domain::s_topic_type  = "DeadlineTestTopicType";
 const DDS::Duration_t Domain::w_deadline = {4, 0}; //writer deadline period 4 second (required .sec > 1)

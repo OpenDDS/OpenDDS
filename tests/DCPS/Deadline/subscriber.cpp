@@ -30,6 +30,8 @@
 #include <ace/Time_Value.h>
 #include <ace/OS_NS_unistd.h>
 
+#include <stdexcept>
+
 class Subscriber
 {
 public:
