@@ -171,6 +171,28 @@ public:
     ttl_ = time_to_live;
   }
 
+  ACE_INT32 send_buffer_size() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, 0);
+    return send_buffer_size_;
+  }
+  void send_buffer_size(ACE_INT32 buffer_size)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    send_buffer_size_ = buffer_size;
+  }
+
+  ACE_INT32 recv_buffer_size() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, 0);
+    return recv_buffer_size_;
+  }
+  void recv_buffer_size(ACE_INT32 buffer_size)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    recv_buffer_size_ = buffer_size;
+  }
+
   ACE_INET_Addr sedp_local_address() const
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
@@ -621,6 +643,8 @@ private:
   DCPS::TimeDuration lease_extension_;
   u_short pb_, dg_, pg_, d0_, d1_, dx_;
   unsigned char ttl_;
+  ACE_INT32 send_buffer_size_;
+  ACE_INT32 recv_buffer_size_;
   bool sedp_multicast_;
   OPENDDS_STRING multicast_interface_;
   ACE_INET_Addr sedp_local_address_, sedp_advertised_address_, spdp_local_address_;
