@@ -1,6 +1,6 @@
 # OpenDDS Releases
 
-## Version 3.18.0-dev of OpenDDS
+## Version 3.18.0 of OpenDDS
 OpenDDS 3.18.0-dev is currently in development, so this list might change.
 
 ### Additions:
