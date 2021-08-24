@@ -79,6 +79,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
   , reactor_task_(reactor_task)
   , job_queue_(DCPS::make_rch<DCPS::JobQueue>(reactor_task->get_reactor()))
   , multi_buff_(this, config.nak_depth_)
+  , zero_init_acknak_(config.zero_init_acknak_)
   , best_effort_heartbeat_count_(0)
   , nack_reply_(this, &RtpsUdpDataLink::send_nack_replies,
                 config.nak_response_delay_)
@@ -1068,9 +1069,10 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
   const SequenceNumber seq = element->sequence();
   if (seq != SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
     max_sn_ = std::max(max_sn_, seq);
+    const bool prev_max_sn_cond = link->zero_init_acknak_ ? previous_max_sn < max_sn_.previous() : previous_max_sn != max_sn_.previous();
     if (!durable_ && !is_pvs_writer() &&
         element->subscription_id() == GUID_UNKNOWN &&
-        previous_max_sn < max_sn_.previous()) {
+        prev_max_sn_cond) {
       add_gap_submsg_i(subm, previous_max_sn + 1);
     }
   }
@@ -1637,15 +1639,20 @@ RtpsUdpDataLink::RtpsReader::process_gap_i(const RTPS::GapSubmessage& gap,
   const SequenceNumber start = to_opendds_seqnum(gap.gapStart);
   const SequenceNumber base = to_opendds_seqnum(gap.gapList.bitmapBase);
 
-  if (start < base) {
+  if (link->zero_init_acknak_) {
+    if (start < base) {
+      writer->recvd_.insert(SequenceRange(start, base.previous()));
+    } else if (start != base) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::RtpsReader::process_gap_i - ERROR - Incoming GAP has inverted start (%q) & base (%q) values, ignoring start value\n", start.getValue(), base.getValue()));
+    }
+  } else {
     writer->recvd_.insert(SequenceRange(start, base.previous()));
-  } else if (start != base) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::RtpsReader::process_gap_i - ERROR - Incoming GAP has inverted start (%q) & base (%q) values, ignoring start value\n", start.getValue(), base.getValue()));
   }
+
   writer->recvd_.insert(base, gap.gapList.numBits, gap.gapList.bitmap.get_buffer());
 
   DisjointSequence gaps;
-  if (start < base) {
+  if (!link->zero_init_acknak_ || start < base) {
     gaps.insert(SequenceRange(start, base.previous()));
   }
   gaps.insert(base, gap.gapList.numBits, gap.gapList.bitmap.get_buffer());
@@ -2007,10 +2014,12 @@ RtpsUdpDataLink::RtpsReader::gather_preassociation_ack_nack_i(MetaSubmessageVec&
 {
   using namespace OpenDDS::RTPS;
 
+  RtpsUdpDataLink_rch link = link_.lock();
   const DisjointSequence& recvd = writer->recvd_;
   const CORBA::ULong num_bits = 0;
   const LongSeq8 bitmap;
-  const SequenceNumber ack = recvd.empty() ? 0 : ++SequenceNumber(recvd.cumulative_ack());
+  const ACE_INT64 acknak_initial = link->zero_init_acknak_ ? 0 : 1;
+  const SequenceNumber ack = recvd.empty() ? acknak_initial : ++SequenceNumber(recvd.cumulative_ack());
   const EntityId_t reader_id = id_.entityId;
   const EntityId_t writer_id = writer->id_.entityId;
 
@@ -2791,15 +2800,16 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   if (!compare_and_update_counts(acknack.count.value, reader->acknack_recvd_count_)) {
     VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
       "WARNING Count indicates duplicate, dropping\n"));
-    return;
+      return;
   }
 
   const bool is_final = acknack.smHeader.flags & RTPS::FLAG_F;
+  const bool low_bound = link->zero_init_acknak_ ? acknack.readerSNState.bitmapBase.low <= 1 : acknack.readerSNState.bitmapBase.low == 1;
   const bool is_postassociation =
     is_final ||
     bitmapNonEmpty(acknack.readerSNState) ||
     !(acknack.readerSNState.bitmapBase.high == 0 &&
-      acknack.readerSNState.bitmapBase.low <= 1);
+      low_bound);
 
   if (preassociation_readers_.count(reader)) {
     if (is_postassociation) {

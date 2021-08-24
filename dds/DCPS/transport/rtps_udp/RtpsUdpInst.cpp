@@ -35,6 +35,7 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , ttl_(1)
   , max_message_size_(RtpsUdpSendStrategy::UDP_MAX_MESSAGE_SIZE)
   , nak_depth_(0)
+  , zero_init_acknak_(false)
   , quick_reply_ratio_(0.1)
   , nak_response_delay_(0, 200*1000 /*microseconds*/) // default from RTPS
   , heartbeat_period_(1) // no default in RTPS spec
@@ -101,6 +102,8 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("quick_reply_ratio"), quick_reply_ratio_, double);
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("ttl"), ttl_, unsigned char);
+
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("zero_init_acknak"), zero_init_acknak_, bool);
 
   GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("nak_response_delay"),
                         nak_response_delay_);
