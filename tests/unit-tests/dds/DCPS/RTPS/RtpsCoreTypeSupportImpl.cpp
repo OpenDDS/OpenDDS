@@ -15,11 +15,6 @@
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
 
-#ifdef OPENDDS_SECURITY
-using namespace DDS::Security;
-using namespace OpenDDS::Security;
-#endif
-
 void set_Parameter_user_data(Parameter& p, const std::string& user_data)
 {
   DDS::UserDataQosPolicy ud_qos;
@@ -39,14 +34,14 @@ bool insert_Parameter_user_data(Serializer& s, const std::string& user_data)
 
 void extract_Parameter_user_data(const std::string& user_data, const Encoding encoding = Encoding(Encoding::KIND_XCDR2))
 {
-  ACE_Message_Block mb(512);
+  const CORBA::ULong length = static_cast<CORBA::ULong>(user_data.length());
+  ACE_Message_Block mb(length + 128);
   Serializer s(&mb, encoding);
   ASSERT_TRUE(insert_Parameter_user_data(s, user_data));
 
   Parameter p;
   ASSERT_TRUE(s >> p);
 
-  const CORBA::ULong length = static_cast<CORBA::ULong>(user_data.length());
   DDS::UserDataQosPolicy ud_qos = p.user_data();
   EXPECT_EQ(ud_qos.value.length(), length);
   for (CORBA::ULong i = 0; i < length; ++i) {
