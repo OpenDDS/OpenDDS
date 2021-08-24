@@ -2800,7 +2800,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   if (!compare_and_update_counts(acknack.count.value, reader->acknack_recvd_count_)) {
     VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
       "WARNING Count indicates duplicate, dropping\n"));
-      return;
+    return;
   }
 
   const bool is_final = acknack.smHeader.flags & RTPS::FLAG_F;
