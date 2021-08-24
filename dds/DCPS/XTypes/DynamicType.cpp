@@ -65,7 +65,7 @@ void DynamicType::get_all_members(DynamicTypeMembersById& member)
 
 ACE_CDR::ULong DynamicType::get_member_count() const
 {
-  return CORBA::ULong(member_by_index.size());
+  return ACE_CDR::ULong(member_by_index.size());
 }
 
 DDS::ReturnCode_t DynamicType::get_member_by_index(DynamicTypeMember_rch& member, ACE_CDR::ULong index) const
@@ -108,9 +108,9 @@ bool DynamicType::test_equality_i(const DynamicType& rhs, DynamicTypePtrPairSeen
   if (have_seen == dt_ptr_pair.end()) {
     dt_ptr_pair.insert(this_pair);
     return
-      OpenDDS::XTypes::test_equality_i(*this->descriptor_.in(), *rhs.descriptor_.in(), dt_ptr_pair) &&
-      OpenDDS::XTypes::test_equality_i(this->member_by_name, rhs.member_by_name, dt_ptr_pair) &&
-      OpenDDS::XTypes::test_equality_i(this->member_by_id, rhs.member_by_id, dt_ptr_pair);
+      OpenDDS::XTypes::test_equality_i(*descriptor_, *rhs.descriptor_, dt_ptr_pair) &&
+      OpenDDS::XTypes::test_equality_i(member_by_name, rhs.member_by_name, dt_ptr_pair) &&
+      OpenDDS::XTypes::test_equality_i(member_by_id, rhs.member_by_id, dt_ptr_pair);
   }
   return true;
 }
@@ -128,7 +128,7 @@ bool test_equality_i(const DynamicType_rch& lhs, const DynamicType_rch& rhs, Dyn
   } else if (lhs.in() == 0 || rhs.in() == 0) {
     return false;
   } else {
-    return lhs->test_equality_i(*rhs.in(), dt_ptr_pair);
+    return lhs->test_equality_i(*rhs, dt_ptr_pair);
   }
 }
 

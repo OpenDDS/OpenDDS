@@ -39,8 +39,8 @@ bool DynamicTypeMember::equals(const DynamicTypeMember& other) const
   //equal, regardless of whether they are actually the same member.
   DynamicTypePtrPairSeen dt_ptr_pair;
   return
-    test_equality_i(this->parent_, other.parent_, dt_ptr_pair) &&
-    OpenDDS::XTypes::test_equality_i(*this->descriptor_.in(), *other.descriptor_.in(), dt_ptr_pair);
+    test_equality_i(parent_, other.parent_, dt_ptr_pair) &&
+    OpenDDS::XTypes::test_equality_i(*descriptor_, *other.descriptor_, dt_ptr_pair);
 }
 
 MemberId DynamicTypeMember::get_id() const
