@@ -27,7 +27,6 @@ OpenDDS 3.18.0-dev is currently in development, so this list might change.
   - `RtpsUdpDataLink` will no longer purge durable data (#2690)
   - Fixed writers of fragmented data samples having issues reconnecting with readers (#2930)
   - Fixed non-durable readers receiving historical samples (#2914)
-  - Fixed occasional deadlocks in `DataReaderImpl` and `SubscriberImpl` associated with presentation QoS (#2886, #2903)
   - Fixed issues with security permissions and governance XML file parsing (#2896, #2912, #2916)
     - `<id_range>`s in domain id sets can now omit `<max>` in permissions and governance files.
       - This means `<id_range><min>0</min></id_range>` will now mean all domains.
@@ -39,6 +38,7 @@ OpenDDS 3.18.0-dev is currently in development, so this list might change.
 - Try to workaround faulty DNS when getting the FQDN (#2677)
 - Fixed `configure --wireshark-cmake` not working on Linux (#2679)
 - Fixed an invalid memory write in `SporadicTask` (#2685)
+- Fixed occasional deadlocks in `DataReaderImpl` and `SubscriberImpl` associated with presentation QoS (#2886, #2903)
 - `make install`:
   - Use `$(INSTALL_LIB)` instead of hardcoded `lib` for Java-related files (#2740)
   - Use relative links in `$(INSTALL_PREFIX)/share` (#2780)
