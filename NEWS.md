@@ -1,7 +1,7 @@
 # OpenDDS Releases
 
 ## Version 3.18.0 of OpenDDS
-OpenDDS 3.18.0-dev is currently in development, so this list might change.
+OpenDDS 3.18.0 was released on Aug 24 2021.
 
 ### Additions:
 - IDL4 explicitly-named integer types (#2814, #2857, #2862)
