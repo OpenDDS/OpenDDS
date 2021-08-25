@@ -2759,14 +2759,6 @@ namespace OpenDDS {
         get_part(domainId, partId)->update_subscription_locators(subId, transInfo);
       }
 
-
-      virtual void set_type_lookup_service(DDS::DomainId_t domainId,
-                                           const RepoId& participantId,
-                                           XTypes::TypeLookupService_rch type_lookup_service)
-      {
-        get_part(domainId, participantId)->type_lookup_service(type_lookup_service);
-      }
-
     protected:
 
       typedef RcHandle<Participant> ParticipantHandle;
