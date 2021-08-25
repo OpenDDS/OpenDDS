@@ -906,12 +906,14 @@ public:
   virtual GUID_t generate_participant_guid();
 
   virtual AddDomainStatus add_domain_participant(DDS::DomainId_t domain,
-                                                 const DDS::DomainParticipantQos& qos);
+                                                 const DDS::DomainParticipantQos& qos,
+                                                 XTypes::TypeLookupService_rch tls);
 
 #if defined(OPENDDS_SECURITY)
   virtual AddDomainStatus add_domain_participant_secure(
     DDS::DomainId_t domain,
     const DDS::DomainParticipantQos& qos,
+    XTypes::TypeLookupService_rch tls,
     const GUID_t& guid,
     DDS::Security::IdentityHandle id,
     DDS::Security::PermissionsHandle perm,

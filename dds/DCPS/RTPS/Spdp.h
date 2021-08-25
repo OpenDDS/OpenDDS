@@ -220,13 +220,15 @@ public:
   Spdp(DDS::DomainId_t domain,
        DCPS::RepoId& guid,
        const DDS::DomainParticipantQos& qos,
-       RtpsDiscovery* disco);
+       RtpsDiscovery* disco,
+       XTypes::TypeLookupService_rch tls);
 
 #ifdef OPENDDS_SECURITY
   Spdp(DDS::DomainId_t domain,
        const DCPS::RepoId& guid,
        const DDS::DomainParticipantQos& qos,
        RtpsDiscovery* disco,
+       XTypes::TypeLookupService_rch tls,
        DDS::Security::IdentityHandle id_handle,
        DDS::Security::PermissionsHandle perm_handle,
        DDS::Security::ParticipantCryptoHandle crypto_handle);
@@ -562,7 +564,8 @@ private:
   void init(DDS::DomainId_t domain,
             DCPS::RepoId& guid,
             const DDS::DomainParticipantQos& qos,
-            RtpsDiscovery* disco);
+            RtpsDiscovery* disco,
+            XTypes::TypeLookupService_rch tls);
 
   mutable ACE_Thread_Mutex lock_;
   DDS::Subscriber_var bit_subscriber_;
