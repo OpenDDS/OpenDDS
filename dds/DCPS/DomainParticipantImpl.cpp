@@ -1796,7 +1796,8 @@ DomainParticipantImpl::enable()
       part_crypto_handle_ = DDS::HANDLE_NIL;
     }
 
-    value = disco->add_domain_participant_secure(domain_id_, qos_, dp_id_, id_handle_, perm_handle_, part_crypto_handle_);
+    value = disco->add_domain_participant_secure(domain_id_, qos_, type_lookup_service_,
+                                                 dp_id_, id_handle_, perm_handle_, part_crypto_handle_);
 
     if (value.id == GUID_UNKNOWN) {
       if (DCPS::security_debug.new_entity_error) {
@@ -1810,7 +1811,7 @@ DomainParticipantImpl::enable()
   } else {
 #endif
 
-    value = disco->add_domain_participant(domain_id_, qos_);
+    value = disco->add_domain_participant(domain_id_, qos_, type_lookup_service_);
 
     if (value.id == GUID_UNKNOWN) {
       if (DCPS_debug_level > 0) {
@@ -1827,8 +1828,6 @@ DomainParticipantImpl::enable()
 
   dp_id_ = value.id;
   federated_ = value.federated;
-
-  disco->set_type_lookup_service(domain_id_, dp_id_, type_lookup_service_);
 
   if (monitor_) {
     monitor_->report();

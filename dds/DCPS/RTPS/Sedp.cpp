@@ -356,8 +356,11 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
 DDS::ReturnCode_t
 Sedp::init(const RepoId& guid,
            const RtpsDiscovery& disco,
-           DDS::DomainId_t domainId)
+           DDS::DomainId_t domainId,
+           XTypes::TypeLookupService_rch tls)
 {
+  type_lookup_service_ = tls;
+
   char domainStr[16];
   ACE_OS::snprintf(domainStr, 16, "%d", domainId);
 
