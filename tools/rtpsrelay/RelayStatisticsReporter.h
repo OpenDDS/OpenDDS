@@ -36,6 +36,14 @@ public:
     report(now);
   }
 
+  void ignored_message(size_t byte_count,
+                       const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    log_helper_.ignored_message(byte_count);
+    publish_helper_.ignored_message(byte_count);
+    report(now);
+  }
+
   void output_message(size_t byte_count,
                       const OpenDDS::DCPS::TimeDuration& time,
                       const OpenDDS::DCPS::TimeDuration& queue_latency,
@@ -93,6 +101,13 @@ public:
     report(now);
   }
 
+  void expired_pending(const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ++log_relay_statistics_.expired_pending_count();
+    ++publish_relay_statistics_.expired_pending_count();
+    report(now);
+  }
+
   void max_queue_size(size_t size, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     log_helper_.max_queue_size(size);
@@ -126,6 +141,7 @@ private:
     log_helper_.reset(now);
     log_relay_statistics_.new_address_count(0);
     log_relay_statistics_.expired_address_count(0);
+    log_relay_statistics_.expired_pending_count(0);
   }
 
   void publish_report(const OpenDDS::DCPS::MonotonicTimePoint& now,
@@ -144,6 +160,7 @@ private:
     publish_helper_.reset(now);
     publish_relay_statistics_.new_address_count(0);
     publish_relay_statistics_.expired_address_count(0);
+    publish_relay_statistics_.expired_pending_count(0);
   }
 
   const Config& config_;

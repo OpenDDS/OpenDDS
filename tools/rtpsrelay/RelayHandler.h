@@ -108,7 +108,17 @@ public:
   void process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now);
 
   OpenDDS::DCPS::MonotonicTimePoint get_first_spdp(const OpenDDS::DCPS::GUID_t& guid);
+
+  bool ignore(const OpenDDS::DCPS::GUID_t& guid,
+              const OpenDDS::DCPS::MonotonicTimePoint& now);
+
   void remove(const OpenDDS::DCPS::GUID_t& guid);
+
+  void remove_pending(const OpenDDS::DCPS::GUID_t& guid)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+    pending_.erase(guid);
+  }
 
   class Proxy {
   public:
@@ -168,6 +178,9 @@ private:
   GuidAddrSetMap guid_addr_set_map_;
   typedef std::list<std::pair<OpenDDS::DCPS::MonotonicTimePoint, GuidAddr> > ExpirationGuidAddrQueue;
   ExpirationGuidAddrQueue expiration_guid_addr_queue_;
+  GuidSet pending_;
+  typedef std::list<std::pair<OpenDDS::DCPS::MonotonicTimePoint, OpenDDS::DCPS::GUID_t> > PendingExpirationQueue;
+  PendingExpirationQueue pending_expiration_queue_;
   mutable ACE_Thread_Mutex mutex_;
 };
 
