@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - gh-pages
+  workflow_dispatch:
 
 jobs:
   jekyll:
