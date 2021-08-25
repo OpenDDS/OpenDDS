@@ -2041,7 +2041,7 @@ bool operator>>(Serializer& strm, XTypes::Sequence<T>& seq)
   if (!(strm >> length)) {
     return false;
   }
-  if (sizeof(T) * length > strm.length()) {
+  if (length > strm.length()) {
     // if encoded incorrectly, the first 4 bytes of the elements were read
     // as if they were the length - this may end up being larger than the
     // number of bytes remaining in the Serializer

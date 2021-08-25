@@ -994,8 +994,7 @@ namespace {
       if ((elem_cls & CL_INTERFACE) == 0) {
         be_global->impl_ <<
           "  const Encoding& encoding = strm.encoding();\n"
-          "  ACE_UNUSED_ARG(encoding);\n"
-          "  const size_t element_size = sizeof(" << base_wrapper.type_name_ << "::element_type);\n";
+          "  ACE_UNUSED_ARG(encoding);\n";
         marshal_generator::generate_dheader_code(
           "    if (!strm.read_delimiter(total_size)) {\n"
           "      return false;\n"
@@ -1008,7 +1007,7 @@ namespace {
           "  CORBA::ULong length;\n"
           << streamAndCheck(">> length");
         be_global->impl_ <<
-          "  if (element_size * length > strm.length()) {\n"
+          "  if (length > strm.length()) {\n"
           "    return false;\n"
           "  }\n";
       }
