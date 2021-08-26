@@ -1639,20 +1639,16 @@ RtpsUdpDataLink::RtpsReader::process_gap_i(const RTPS::GapSubmessage& gap,
   const SequenceNumber start = to_opendds_seqnum(gap.gapStart);
   const SequenceNumber base = to_opendds_seqnum(gap.gapList.bitmapBase);
 
-  if (link->zero_init_acknak_) {
-    if (start < base) {
-      writer->recvd_.insert(SequenceRange(start, base.previous()));
-    } else if (start != base) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::RtpsReader::process_gap_i - ERROR - Incoming GAP has inverted start (%q) & base (%q) values, ignoring start value\n", start.getValue(), base.getValue()));
-    }
-  } else {
+  if (start < base) {
     writer->recvd_.insert(SequenceRange(start, base.previous()));
+  } else if (start != base) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::RtpsReader::process_gap_i - ERROR - Incoming GAP has inverted start (%q) & base (%q) values, ignoring start value\n", start.getValue(), base.getValue()));
   }
 
   writer->recvd_.insert(base, gap.gapList.numBits, gap.gapList.bitmap.get_buffer());
 
   DisjointSequence gaps;
-  if (!link->zero_init_acknak_ || start < base) {
+  if (start < base) {
     gaps.insert(SequenceRange(start, base.previous()));
   }
   gaps.insert(base, gap.gapList.numBits, gap.gapList.bitmap.get_buffer());
