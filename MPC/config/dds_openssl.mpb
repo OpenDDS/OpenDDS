@@ -3,13 +3,18 @@ feature(openssl): openssl {
   // the Java Android API, so we must:
   //   1. Statically link OpenSSL to this library
   //   2. Keep our OpenSSL symbols internal
-  // Number 1 is described in android.md. We are doing number 2 here.
+  // Number 1 is described in android.md. We are doing number 2 here.  The
+  // contents are broken up comma and exclude_openssl_libs because of how make
+  // expands expressions. exclude_openssl_libs_on_android is there because
+  // putting the if statement into linkflags directly causes gnuace to butcher
+  // an $(if ...) statement before it.
   verbatim (gnuace, top, 1) {
     comma := ,
     exclude_openssl_libs := -Wl$(comma)--exclude-libs$(comma)libcrypto.a -Wl$(comma)--exclude-libs$(comma)libssl.a
+    exclude_openssl_libs_on_android := $(if $(ANDROID_ABI),$(exclude_openssl_libs))
   }
   specific (gnuace) {
-    compile_flags += $(if $(ANDROID_ABI),$(exclude_openssl_libs))
+    linkflags += $(exclude_openssl_libs_on_android)
   }
 }
 
