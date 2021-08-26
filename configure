@@ -25,8 +25,7 @@ use warnings;
 ## Version of OCI's TAO to download
 my $oci_tao_version = '2.2a';
 ## Version of DOC Group ACE/TAO to download, uses the ACE version number
-my $doc_tao2_version = '6.5.14';
-my $doc_tao3_version = '7.0.3';
+my $doc_tao_version = '7.0.3';
 
 my $backup_timestamp = strftime "%Y-%m-%d-%H-%M-%S", localtime time;
 
@@ -191,8 +190,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'ace=s', 'ACE (use ACE_ROOT, ACE_wrappers, or download)',
     'tao=s', 'TAO (use TAO_ROOT, ACE_ROOT/TAO, or download)',
     'mpc=s', 'MPC (use MPC_ROOT, ACE_ROOT/MPC, or download)',
-    'doc-group|doc_group!', 'Use the DOC Group release of TAO 2.5.x (no)',
-    'doc-group3|doc_group3!', 'Use the DOC Group release of TAO 3.x (no)',
+    'doc-group|doc_group!', 'Use the DOC Group release of TAO 3.x (no)',
     'ace-github-latest!', 'Clone latest ACE/TAO/MPC from GitHub (no)',
     'force-ace-tao', 'Force configuration of ACE/TAO (no)',
    ],
@@ -811,18 +809,10 @@ if (!$ace_src || !$tao_src) {
     my($urlbase, $file, $download_message);
 
     if ($opts{'doc-group'}) {
-      my $github_url_tao_version = $doc_tao2_version;
+      my $github_url_tao_version = $doc_tao_version;
       $github_url_tao_version =~ s/\./_/g;
       $urlbase = 'https://github.com/DOCGroup/ACE_TAO/releases/download/ACE%2BTAO-' . $github_url_tao_version . '/';
-      $file = 'ACE+TAO-src-' . $doc_tao2_version . '.'
-        . ($is_windows ? 'zip' : 'tar.gz');
-      $download_message = "Downloading $file";
-    }
-    elsif ($opts{'doc-group3'}) {
-      my $github_url_tao_version = $doc_tao3_version;
-      $github_url_tao_version =~ s/\./_/g;
-      $urlbase = 'https://github.com/DOCGroup/ACE_TAO/releases/download/ACE%2BTAO-' . $github_url_tao_version . '/';
-      $file = 'ACE+TAO-src-' . $doc_tao3_version . '.'
+      $file = 'ACE+TAO-src-' . $doc_tao_version . '.'
         . ($is_windows ? 'zip' : 'tar.gz');
       $download_message = "Downloading $file";
     }
