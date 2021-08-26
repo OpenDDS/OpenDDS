@@ -70,7 +70,6 @@ RecorderImpl::RecorderImpl()
                                          this)),
   is_bit_(false)
 {
-
   requested_incompatible_qos_status_.total_count = 0;
   requested_incompatible_qos_status_.total_count_change = 0;
   requested_incompatible_qos_status_.last_policy_id = 0;
@@ -80,9 +79,7 @@ RecorderImpl::RecorderImpl()
   subscription_match_status_.total_count_change = 0;
   subscription_match_status_.current_count = 0;
   subscription_match_status_.current_count_change = 0;
-  subscription_match_status_.last_publication_handle =
-    DDS::HANDLE_NIL;
-
+  subscription_match_status_.last_publication_handle = DDS::HANDLE_NIL;
 }
 
 // This method is called when there are no longer any reference to the
@@ -259,7 +256,6 @@ void RecorderImpl::notify_subscription_disconnected(const WriterIdSeq&)
 
 void RecorderImpl::notify_subscription_reconnected(const WriterIdSeq&)
 {
-
 }
 
 void
@@ -269,9 +265,7 @@ RecorderImpl::notify_subscription_lost(const DDS::InstanceHandleSeq&)
 
 void RecorderImpl::notify_subscription_lost(const WriterIdSeq&)
 {
-
 }
-
 
 void
 RecorderImpl::add_association(const RepoId&            yourId,
@@ -755,8 +749,6 @@ RecorderImpl::remove_all_associations()
 void
 RecorderImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
 {
-
-
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
             guard,
             this->publication_handle_lock_);
@@ -826,7 +818,6 @@ DDS::ReturnCode_t RecorderImpl::set_qos(
   const DDS::SubscriberQos & subscriber_qos,
   const DDS::DataReaderQos & qos)
 {
-
   OPENDDS_NO_OBJECT_MODEL_PROFILE_COMPATIBILITY_CHECK(subscriber_qos, DDS::RETCODE_UNSUPPORTED);
 
   if (Qos_Helper::valid(subscriber_qos) && Qos_Helper::consistent(subscriber_qos)) {
@@ -939,7 +930,6 @@ DDS::ReturnCode_t
 RecorderImpl::enable()
 {
   if (DCPS_debug_level >= 1) {
-
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::enable\n")));
   }
@@ -957,7 +947,6 @@ RecorderImpl::enable()
 
   // if (topic_servant_ && !transport_disabled_) {
   if (topic_servant_) {
-
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::enable_transport\n")));
 
