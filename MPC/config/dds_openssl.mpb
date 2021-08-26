@@ -6,10 +6,10 @@ feature(openssl): openssl {
   // Number 1 is described in android.md. We are doing number 2 here.
   //
   // The contents are broken up into comma and exclude_openssl_libs because
-  // otherwise make will think it's argument separator.
+  // otherwise make will think the comma is an argument separator.
   // exclude_openssl_libs_on_android is there because putting the if statement
-  // into linkflags directly causes MPC/gnuace to butcher an $(if ...)
-  // statement (-llog from ACE) before it.
+  // into linkflags directly causes MPC/gnuace to butcher a preceding $(if ...)
+  // statement, ($(if $(android_abi),-llog) from ACE to be specific.
   verbatim (gnuace, top, 1) {
     comma := ,
     exclude_openssl_libs := -Wl$(comma)--exclude-libs$(comma)libcrypto.a -Wl$(comma)--exclude-libs$(comma)libssl.a
