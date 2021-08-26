@@ -8,8 +8,8 @@ namespace OpenDDS {
 namespace XTypes {
 
 DynamicTypeMember::DynamicTypeMember()
-  : parent_(DCPS::make_rch<XTypes::DynamicType>()),
-    descriptor_(DCPS::make_rch<XTypes::MemberDescriptor>())
+  : parent_(DCPS::make_rch<XTypes::DynamicType>())
+  , descriptor_(DCPS::make_rch<XTypes::MemberDescriptor>())
 {}
 
 void DynamicTypeMember::get_descriptor(MemberDescriptor_rch& descriptor) const
@@ -56,9 +56,10 @@ DCPS::String DynamicTypeMember::get_name() const
 bool test_equality_i(const DynamicTypeMembersByName& lhs, const DynamicTypeMembersByName& rhs, DynamicTypePtrPairSeen& dt_ptr_pair)
 {
   if (lhs.size() == rhs.size()) {
-    for (DynamicTypeMembersByName::const_iterator it = lhs.begin(); it != lhs.end(); ++it) {
-      if (rhs.find(it->first) != rhs.end()) {
-        if (!test_equality_i(*lhs.find(it->first)->second->get_descriptor(), *rhs.find(it->first)->second->get_descriptor(), dt_ptr_pair)) {
+    for (DynamicTypeMembersByName::const_iterator lhs_it = lhs.begin(); lhs_it != lhs.end(); ++lhs_it) {
+      DynamicTypeMembersByName::const_iterator rhs_it = rhs.find(lhs_it->first);
+      if (rhs_it != rhs.end()) {
+        if (!test_equality_i(*lhs_it->second->get_descriptor(), *rhs_it->second->get_descriptor(), dt_ptr_pair)) {
           return false;
         }
       } else {
@@ -74,9 +75,10 @@ bool test_equality_i(const DynamicTypeMembersByName& lhs, const DynamicTypeMembe
 bool test_equality_i(const DynamicTypeMembersById& lhs, const DynamicTypeMembersById& rhs, DynamicTypePtrPairSeen& dt_ptr_pair)
 {
   if (lhs.size() == rhs.size()) {
-    for (DynamicTypeMembersById::const_iterator it = lhs.begin(); it != lhs.end(); ++it) {
-      if(rhs.find(it->first) != rhs.end()) {
-        if (!test_equality_i(*lhs.find(it->first)->second->get_descriptor(), *rhs.find(it->first)->second->get_descriptor(), dt_ptr_pair)) {
+    for (DynamicTypeMembersById::const_iterator lhs_it = lhs.begin(); lhs_it != lhs.end(); ++lhs_it) {
+      DynamicTypeMembersById::const_iterator rhs_it = rhs.find(lhs_it->first);
+      if (rhs_it != rhs.end()) {
+        if (!test_equality_i(*lhs_it->second->get_descriptor(), *rhs_it->second->get_descriptor(), dt_ptr_pair)) {
           return false;
         }
       } else {

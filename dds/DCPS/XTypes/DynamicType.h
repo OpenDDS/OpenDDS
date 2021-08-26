@@ -1,7 +1,6 @@
 #ifndef OPENDDS_DCPS_XTYPES_DYNAMIC_TYPE_H
 #define OPENDDS_DCPS_XTYPES_DYNAMIC_TYPE_H
 
-#include "External.h"
 #include "DynamicTypeMember.h"
 
 #include <dds/DCPS/RcHandle_T.h>

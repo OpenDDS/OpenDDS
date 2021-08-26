@@ -29,7 +29,7 @@ void test_conversion(const XTypes::DynamicType_rch& expected_dynamic_type)
   EXPECT_TRUE(pos != com_map.end());
   const XTypes::TypeObject& com_to = pos->second;
   XTypes::DynamicType_rch converted_dt = DCPS::make_rch<XTypes::DynamicType>();
-  tls->complete_to_dynamic(converted_dt, com_to.complete);
+  converted_dt = tls->complete_to_dynamic(com_to.complete);
   EXPECT_EQ(*expected_dynamic_type, *converted_dt);
 }
 

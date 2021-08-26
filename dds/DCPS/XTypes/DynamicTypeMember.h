@@ -2,7 +2,6 @@
 #ifndef OPENDDS_DCPS_XTYPES_DYNAMIC_TYPE_MEMBER_H
 #define OPENDDS_DCPS_XTYPES_DYNAMIC_TYPE_MEMBER_H
 
-#include "External.h"
 #include "TypeObject.h"
 
 #include <dds/DdsDcpsInfrastructureC.h>

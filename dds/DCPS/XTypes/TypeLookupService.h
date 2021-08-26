@@ -44,7 +44,7 @@ public:
   void update_type_identifier_map(const TypeIdentifierPairSeq& tid_pairs);
   bool complete_to_minimal_type_object(const TypeObject& cto, TypeObject& mto) const;
 
-  void complete_to_dynamic(DynamicType_rch& dt, const CompleteTypeObject&);
+  DynamicType_rch complete_to_dynamic(const CompleteTypeObject&) const;
 
   // For TypeLookup_getTypeDependencies
   bool get_type_dependencies(const TypeIdentifier& type_id,
@@ -99,13 +99,11 @@ private:
   bool complete_to_minimal_bitset(const CompleteBitsetType& ct, MinimalBitsetType& mt) const;
 
   typedef OPENDDS_MAP(TypeIdentifier, DynamicType_rch) DynamicTypeMap;
-  void handle_tryconstruct_flags(MemberDescriptor_rch& md, MemberFlag mf);
-  void insert_dynamic_member(DynamicType_rch& dt, const DynamicTypeMember_rch& dtm);
-  void complete_struct_member_to_member_descriptor(MemberDescriptor_rch& md, const CompleteStructMember& cm, DynamicTypeMap& dt_map);
-  void complete_union_member_to_member_descriptor(MemberDescriptor_rch& md, const CompleteUnionMember& cm, DynamicTypeMap& dt_map);
-  void complete_annotation_member_to_member_descriptor(MemberDescriptor_rch& md, const CompleteAnnotationParameter& cm, DynamicTypeMap& dt_map);
-  void complete_to_dynamic_i(DynamicType_rch& dt, const CompleteTypeObject& cto, DynamicTypeMap& dt_map);
-  void type_identifier_to_dynamic(DynamicType_rch& dt, const TypeIdentifier& ti, DynamicTypeMap& dt_map);
+  void complete_struct_member_to_member_descriptor(MemberDescriptor_rch& md, const CompleteStructMember& cm, DynamicTypeMap& dt_map) const;
+  void complete_union_member_to_member_descriptor(MemberDescriptor_rch& md, const CompleteUnionMember& cm, DynamicTypeMap& dt_map) const;
+  void complete_annotation_member_to_member_descriptor(MemberDescriptor_rch& md, const CompleteAnnotationParameter& cm, DynamicTypeMap& dt_map) const;
+  void complete_to_dynamic_i(DynamicType_rch& dt, const CompleteTypeObject& cto, DynamicTypeMap& dt_map) const;
+  DynamicType_rch type_identifier_to_dynamic(const TypeIdentifier& ti, DynamicTypeMap& dt_map) const;
 
   // Map from BuiltinTopicKey_t of remote endpoint to its TypeInformation.
   typedef OPENDDS_MAP_CMP(DDS::BuiltinTopicKey_t, TypeInformation,
