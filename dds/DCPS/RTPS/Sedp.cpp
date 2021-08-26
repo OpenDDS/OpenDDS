@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -10,42 +8,38 @@
 #include "MessageTypes.h"
 #include "ParameterListConverter.h"
 #include "RtpsDiscovery.h"
-#include "RtpsCoreTypeSupportImpl.h"
-
+#include "Spdp.h"
 #ifdef OPENDDS_SECURITY
-#include "SecurityHelpers.h"
+#  include "SecurityHelpers.h"
 #endif
 
-#include "Spdp.h"
-
-#include "dds/DCPS/transport/framework/ReceivedDataSample.h"
-#include "dds/DCPS/transport/rtps_udp/RtpsUdpInst.h"
-#include "dds/DCPS/transport/rtps_udp/RtpsUdpInst_rch.h"
-
-#include "dds/DCPS/Serializer.h"
-#include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/GuidConverter.h"
-#include "dds/DCPS/GuidUtils.h"
-#include "dds/DdsDcpsGuidTypeSupportImpl.h"
-#include "dds/DCPS/AssociationData.h"
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/Qos_Helper.h"
-#include "dds/DCPS/DataSampleHeader.h"
-#include "dds/DCPS/SendStateDataSampleList.h"
-#include "dds/DCPS/DataReaderCallbacks.h"
-#include "dds/DCPS/DataWriterCallbacks.h"
-#include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/BuiltInTopicUtils.h"
-#include "dds/DCPS/DCPS_Utils.h"
-#include "dds/DCPS/transport/framework/NetworkAddress.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
-#include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/XTypes/TypeLookupService.h"
-#include "dds/DCPS/Logging.h"
-
+#include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/AssociationData.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/DataSampleHeader.h>
+#include <dds/DCPS/SendStateDataSampleList.h>
+#include <dds/DCPS/DataReaderCallbacks.h>
+#include <dds/DCPS/DataWriterCallbacks.h>
+#include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/BuiltInTopicUtils.h>
+#include <dds/DCPS/DCPS_Utils.h>
+#include <dds/DCPS/Logging.h>
+#include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/transport/framework/NetworkAddress.h>
+#include <dds/DCPS/transport/framework/ReceivedDataSample.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdpInst.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdpInst_rch.h>
+#include <dds/DCPS/XTypes/TypeLookupService.h>
 #ifdef OPENDDS_SECURITY
-#include "dds/DdsSecurityCoreTypeSupportImpl.h"
-#include "dds/DCPS/security/framework/HandleRegistry.h"
+#  include <dds/DCPS/security/framework/HandleRegistry.h>
+#endif
+
+#include <dds/DdsDcpsGuidTypeSupportImpl.h>
+#ifdef OPENDDS_SECURITY
+#  include <dds/DdsSecurityCoreTypeSupportImpl.h>
 #endif
 
 #include <ace/Reverse_Lock_T.h>
@@ -252,6 +246,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace RTPS {
+using DCPS::GUID_t;
 using DCPS::RepoId;
 using DCPS::make_rch;
 using DCPS::TimeDuration;
@@ -342,8 +337,11 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
 DDS::ReturnCode_t
 Sedp::init(const RepoId& guid,
            const RtpsDiscovery& disco,
-           DDS::DomainId_t domainId)
+           DDS::DomainId_t domainId,
+           XTypes::TypeLookupService_rch tls)
 {
+  type_lookup_service_ = tls;
+
   char domainStr[16];
   ACE_OS::snprintf(domainStr, 16, "%d", domainId);
 
@@ -362,6 +360,8 @@ Sedp::init(const RepoId& guid,
   rtps_inst->nak_response_delay_ = disco.config()->sedp_nak_response_delay();
   rtps_inst->responsive_mode_ = disco.config()->sedp_responsive_mode();
   rtps_inst->send_delay_ = disco.config()->sedp_send_delay();
+  rtps_inst->send_buffer_size_ = disco.config()->send_buffer_size();
+  rtps_inst->rcv_buffer_size_ = disco.config()->recv_buffer_size();
 
   if (disco.sedp_multicast()) {
     // Bind to a specific multicast group
@@ -3151,18 +3151,16 @@ void
 Sedp::data_received(DCPS::MessageId /*message_id*/,
                     const ParticipantMessageData& data)
 {
-  if (!spdp_.initialized() || spdp_.shutting_down()) { return; }
+  if (!spdp_.initialized() || spdp_.shutting_down()) {
+    return;
+  }
 
-  const RepoId& guid = data.participantGuid;
-  RepoId guid_participant = guid;
-  guid_participant.entityId = ENTITYID_PARTICIPANT;
-  RepoId prefix = data.participantGuid;
-  prefix.entityId = EntityId_t(); // Clear the entityId so lower bound will work.
+  const GUID_t& guid = data.participantGuid;
+  const GUID_t guid_participant = make_part_guid(guid);
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  if (ignoring(guid)
-      || ignoring(guid_participant)) {
+  if (ignoring(guid) || ignoring(guid_participant)) {
     return;
   }
 
@@ -3175,15 +3173,15 @@ Sedp::data_received(DCPS::MessageId /*message_id*/,
 #ifdef OPENDDS_SECURITY
 void
 Sedp::received_participant_message_data_secure(DCPS::MessageId /*message_id*/,
-            const ParticipantMessageData& data)
+  const ParticipantMessageData& data)
 {
   if (spdp_.shutting_down()) {
-      return;
+    return;
   }
 
-  const RepoId& guid = data.participantGuid;
-  RepoId guid_participant = guid;
-  guid_participant.entityId = ENTITYID_PARTICIPANT;
+  const GUID_t& guid = data.participantGuid;
+  const GUID_t guid_participant = make_part_guid(guid);
+
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
   if (ignoring(guid) || ignoring(guid_participant)) {
@@ -3199,7 +3197,6 @@ Sedp::received_participant_message_data_secure(DCPS::MessageId /*message_id*/,
 
 bool Sedp::should_drop_stateless_message(const DDS::Security::ParticipantGenericMessage& msg)
 {
-  using DCPS::GUID_t;
   using DCPS::GUID_UNKNOWN;
 
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, true);
@@ -3227,7 +3224,6 @@ bool Sedp::should_drop_stateless_message(const DDS::Security::ParticipantGeneric
 
 bool Sedp::should_drop_volatile_message(const DDS::Security::ParticipantGenericMessage& msg)
 {
-  using DCPS::GUID_t;
   using DCPS::GUID_UNKNOWN;
 
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, true);

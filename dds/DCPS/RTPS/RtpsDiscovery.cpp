@@ -58,6 +58,13 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , d1_(10)
   , dx_(2)
   , ttl_(1)
+#if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
+  , send_buffer_size_(ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
+  , recv_buffer_size_(ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
+#else
+  , send_buffer_size_(0)
+  , recv_buffer_size_(0)
+#endif
   , sedp_multicast_(true)
   , sedp_local_address_(u_short(0), "0.0.0.0")
   , spdp_local_address_(u_short(0), "0.0.0.0")
@@ -280,6 +287,28 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                value.c_str(), rtps_name.c_str()), -1);
           }
           config->ttl(static_cast<unsigned char>(ttl_us));
+        } else if (name == "SendBufferSize") {
+          const OPENDDS_STRING& value = it->second;
+          ACE_INT32 send_buffer_size;
+          if (!DCPS::convertToInteger(value, send_buffer_size)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+               ACE_TEXT("Invalid entry (%C) for SendBufferSize in ")
+               ACE_TEXT("[rtps_discovery/%C] section.\n"),
+               value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->send_buffer_size(send_buffer_size);
+        } else if (name == "RecvBufferSize") {
+          const OPENDDS_STRING& value = it->second;
+          ACE_INT32 recv_buffer_size;
+          if (!DCPS::convertToInteger(value, recv_buffer_size)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+               ACE_TEXT("Invalid entry (%C) for RecvBufferSize in ")
+               ACE_TEXT("[rtps_discovery/%C] section.\n"),
+               value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->recv_buffer_size(recv_buffer_size);
         } else if (name == "SedpMulticast") {
           const OPENDDS_STRING& value = it->second;
           int smInt;
@@ -768,14 +797,15 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
 // Participant operations:
 
 OpenDDS::DCPS::RepoId
-RtpsDiscovery::generate_participant_guid() {
+RtpsDiscovery::generate_participant_guid()
+{
   OpenDDS::DCPS::RepoId id = GUID_UNKNOWN;
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, id);
   const OPENDDS_STRING guid_interface = config_->guid_interface();
   if (!guid_interface.empty()) {
     if (guid_gen_.interfaceName(guid_interface.c_str()) != 0) {
       if (DCPS::DCPS_debug_level) {
-        ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsDiscovery::add_domain_participant()"
+        ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsDiscovery::generate_participant_guid()"
                    " - attempt to use specific network interface's MAC addr for"
                    " GUID generation failed.\n"));
       }
@@ -788,7 +818,8 @@ RtpsDiscovery::generate_participant_guid() {
 
 DCPS::AddDomainStatus
 RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
-                                      const DDS::DomainParticipantQos& qos)
+                                      const DDS::DomainParticipantQos& qos,
+                                      XTypes::TypeLookupService_rch tls)
 {
   DCPS::AddDomainStatus ads = {OpenDDS::DCPS::RepoId(), false /*federated*/};
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ads);
@@ -805,7 +836,7 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
   guid_gen_.populate(ads.id);
   ads.id.entityId = ENTITYID_PARTICIPANT;
   try {
-    const DCPS::RcHandle<Spdp> spdp(DCPS::make_rch<Spdp>(domain, ref(ads.id), qos, this));
+    const DCPS::RcHandle<Spdp> spdp(DCPS::make_rch<Spdp>(domain, ref(ads.id), qos, this, tls));
     // ads.id may change during Spdp constructor
     participants_[domain][ads.id] = spdp;
   } catch (const std::exception& e) {
@@ -822,6 +853,7 @@ DCPS::AddDomainStatus
 RtpsDiscovery::add_domain_participant_secure(
   DDS::DomainId_t domain,
   const DDS::DomainParticipantQos& qos,
+  XTypes::TypeLookupService_rch tls,
   const OpenDDS::DCPS::RepoId& guid,
   DDS::Security::IdentityHandle id,
   DDS::Security::PermissionsHandle perm,
@@ -831,7 +863,7 @@ RtpsDiscovery::add_domain_participant_secure(
   ads.id.entityId = ENTITYID_PARTICIPANT;
   try {
     const DCPS::RcHandle<Spdp> spdp(DCPS::make_rch<Spdp>(
-      domain, ads.id, qos, this, id, perm, part_crypto));
+      domain, ads.id, qos, this, tls, id, perm, part_crypto));
     participants_[domain][ads.id] = spdp;
   } catch (const std::exception& e) {
     ads.id = GUID_UNKNOWN;

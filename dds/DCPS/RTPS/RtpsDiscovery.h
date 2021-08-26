@@ -171,6 +171,28 @@ public:
     ttl_ = time_to_live;
   }
 
+  ACE_INT32 send_buffer_size() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, 0);
+    return send_buffer_size_;
+  }
+  void send_buffer_size(ACE_INT32 buffer_size)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    send_buffer_size_ = buffer_size;
+  }
+
+  ACE_INT32 recv_buffer_size() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, 0);
+    return recv_buffer_size_;
+  }
+  void recv_buffer_size(ACE_INT32 buffer_size)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    recv_buffer_size_ = buffer_size;
+  }
+
   ACE_INET_Addr sedp_local_address() const
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
@@ -621,6 +643,8 @@ private:
   DCPS::TimeDuration lease_extension_;
   u_short pb_, dg_, pg_, d0_, d1_, dx_;
   unsigned char ttl_;
+  ACE_INT32 send_buffer_size_;
+  ACE_INT32 recv_buffer_size_;
   bool sedp_multicast_;
   OPENDDS_STRING multicast_interface_;
   ACE_INET_Addr sedp_local_address_, sedp_advertised_address_, spdp_local_address_;
@@ -681,7 +705,8 @@ public:
 
   virtual OpenDDS::DCPS::AddDomainStatus add_domain_participant(
     DDS::DomainId_t domain,
-    const DDS::DomainParticipantQos& qos);
+    const DDS::DomainParticipantQos& qos,
+    XTypes::TypeLookupService_rch tls);
 
 #if defined(OPENDDS_SECURITY)
 #  if defined __GNUC__ && ((__GNUC__ == 5 && __GNUC_MINOR__ < 3) || __GNUC__ < 5) && ! defined __clang__
@@ -693,6 +718,7 @@ public:
   virtual OpenDDS::DCPS::AddDomainStatus add_domain_participant_secure(
     DDS::DomainId_t domain,
     const DDS::DomainParticipantQos& qos,
+    XTypes::TypeLookupService_rch tls,
     const OpenDDS::DCPS::RepoId& guid,
     DDS::Security::IdentityHandle id,
     DDS::Security::PermissionsHandle perm,

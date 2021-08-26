@@ -83,6 +83,7 @@ SingleSendBuffer::release_acked(SequenceNumber seq) {
   if (buffer_iter != buffers_.end()) {
     release_i(buffer_iter);
   }
+  minimum_sn_allowed_ = std::max(minimum_sn_allowed_, seq + 1);
 }
 
 void
@@ -92,6 +93,7 @@ SingleSendBuffer::remove_acked(SequenceNumber seq, BufferVec& removed) {
   if (buffer_iter != buffers_.end()) {
     remove_i(buffer_iter, removed);
   }
+  minimum_sn_allowed_ = std::max(minimum_sn_allowed_, seq + 1);
 }
 
 void
@@ -246,6 +248,9 @@ SingleSendBuffer::insert(SequenceNumber sequence,
 {
   BufferVec removed;
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  if (sequence < minimum_sn_allowed_) {
+    return;
+  }
   check_capacity_i(removed);
 
   BufferType& buffer = buffers_[sequence];
@@ -305,6 +310,9 @@ SingleSendBuffer::insert_fragment(SequenceNumber sequence,
 {
   BufferVec removed;
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  if (sequence < minimum_sn_allowed_) {
+    return;
+  }
   check_capacity_i(removed);
 
   // Insert into buffers_ so that the overall capacity is maintained
@@ -370,12 +378,12 @@ SingleSendBuffer::resend(const SequenceRange& range, DisjointSequence* gaps)
 bool
 SingleSendBuffer::resend_i(const SequenceRange& range, DisjointSequence* gaps)
 {
-  return resend_i(range, gaps, GUID_UNKNOWN);
+  return resend_i(range, gaps, GUID_UNKNOWN, SystemTimePoint::zero_value);
 }
 
 bool
 SingleSendBuffer::resend_i(const SequenceRange& range, DisjointSequence* gaps,
-                           const RepoId& destination)
+                           const RepoId& destination, const SystemTimePoint& not_before)
 {
   //Special case, nak to make sure it has all history
   if (buffers_.empty()) throw std::exception();
@@ -387,33 +395,65 @@ SingleSendBuffer::resend_i(const SequenceRange& range, DisjointSequence* gaps,
     // Re-send requested sample if still buffered; missing samples
     // will be scored against the given DisjointSequence:
     BufferMap::iterator it(buffers_.find(sequence));
-    DestinationMap::iterator dest_data;
-    if (has_dest) {
-      dest_data = destinations_.find(sequence);
-    }
-    if (it == buffers_.end() || (has_dest && (dest_data == destinations_.end() ||
-                                              dest_data->second != destination))) {
+    if (it == buffers_.end()) {
       if (gaps) {
         gaps->insert(sequence);
       }
-    } else {
-      if (Transport_debug_level > 5) {
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) SingleSendBuffer::resend() - ")
-                   ACE_TEXT("resending PDU: %q, (0x%@,0x%@)\n"),
-                   sequence.getValue(),
-                   it->second.first,
-                   it->second.second));
+      continue;
+    }
+
+    if (it->second.first && it->second.second) {
+      const SystemTimePoint source_timestamp = it->second.first->peek()->source_timestamp();
+      if (source_timestamp < not_before) {
+        if (gaps) {
+          gaps->insert(sequence);
+        }
+        continue;
       }
-      if (it->second.first && it->second.second) {
-        resend_one(it->second);
-      } else {
-        const FragmentMap::iterator fm_it = fragments_.find(it->first);
-        if (fm_it != fragments_.end()) {
-          for (BufferMap::iterator bm_it = fm_it->second.begin();
-                bm_it != fm_it->second.end(); ++bm_it) {
-            resend_one(bm_it->second);
+    }
+
+    DestinationMap::iterator dest_data;
+    if (has_dest) {
+      dest_data = destinations_.find(sequence);
+      if (dest_data == destinations_.end() || dest_data->second != destination) {
+        if (gaps) {
+          gaps->insert(sequence);
+        }
+        continue;
+      }
+    }
+
+    if (Transport_debug_level > 5) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) SingleSendBuffer::resend() - ")
+                 ACE_TEXT("resending PDU: %q, (0x%@,0x%@)\n"),
+                 sequence.getValue(),
+                 it->second.first,
+                 it->second.second));
+    }
+
+    if (it->second.first && it->second.second) {
+      resend_one(it->second);
+    } else {
+      const FragmentMap::iterator fm_it = fragments_.find(it->first);
+      if (fm_it != fragments_.end()) {
+        if (fm_it->second.begin() != fm_it->second.end()) {
+          const SystemTimePoint source_timestamp = fm_it->second.begin()->second.first->peek()->source_timestamp();
+          if (source_timestamp < not_before) {
+            if (gaps) {
+              gaps->insert(sequence);
+            }
+            continue;
           }
+        } else {
+          if (gaps) {
+            gaps->insert(sequence);
+          }
+          continue;
+        }
+        for (BufferMap::iterator bm_it = fm_it->second.begin();
+              bm_it != fm_it->second.end(); ++bm_it) {
+          resend_one(bm_it->second);
         }
       }
     }
@@ -438,6 +478,9 @@ SingleSendBuffer::resend_fragments_i(SequenceNumber seq,
 
   BufferMap::const_iterator it = buffers.lower_bound(psr.front().first);
   BufferMap::const_iterator end = buffers.lower_bound(psr.back().second);
+  if (psr.back().second < end->first) {
+    return;
+  }
   if (end != buffers.end()) {
     ++end;
   }

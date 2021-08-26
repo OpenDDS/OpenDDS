@@ -165,7 +165,7 @@ public:
       }
 
       const T above = upper + 1;
-      for (typename Container::iterator i = lower_bound(lower - 1);
+      for (typename Container::iterator i = lower_bound_i(lower - 1);
           i != ranges_.end() && (i->first <= above || i->second <= above);
           /* iterate in loop because of removal */) {
         lower = (std::min)(lower, i->first);
@@ -183,7 +183,7 @@ public:
 
     void remove(T value)
     {
-      const typename Container::iterator iter = ranges_.lower_bound(TPair(T() /*ignored*/, value));
+      const typename Container::iterator iter = lower_bound_i(value);
       if (iter == end() || value < iter->first) {
         return;
       }
@@ -231,6 +231,12 @@ public:
     const_iterator lower_bound(const TPair& p) const { return ranges_.lower_bound(p); }
 
     const_iterator lower_bound(T t) const
+    {
+      return ranges_.lower_bound(TPair(T() /*ignored*/, t));
+    }
+
+    // explicitly get a non-const iterator for use with methods like erase()
+    typename Container::iterator lower_bound_i(T t)
     {
       return ranges_.lower_bound(TPair(T() /*ignored*/, t));
     }

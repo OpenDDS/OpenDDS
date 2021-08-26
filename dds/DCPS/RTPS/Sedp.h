@@ -78,7 +78,8 @@ public:
 
   DDS::ReturnCode_t init(const DCPS::RepoId& guid,
                          const RtpsDiscovery& disco,
-                         DDS::DomainId_t domainId);
+                         DDS::DomainId_t domainId,
+                         XTypes::TypeLookupService_rch tls);
 
 #ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t init_security(DDS::Security::IdentityHandle id_handle,

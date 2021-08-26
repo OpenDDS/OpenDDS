@@ -8,8 +8,8 @@
 #include <dds/DCPS/unique_ptr.h>
 
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
 #include <tests/Utils/ExceptionStreams.h>
@@ -20,6 +20,7 @@
 #include <ace/OS_NS_unistd.h>
 
 #include <memory>
+#include <sstream>
 
 using namespace Messenger;
 using namespace std;

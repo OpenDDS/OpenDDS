@@ -13,6 +13,8 @@
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/PoolAllocationBase.h"
 #include "dds/DCPS/SequenceNumber.h"
+#include "dds/DCPS/TimeTypes.h"
+
 #include <utility>
 #ifdef ACE_HAS_CPP11
 #  include <atomic>
@@ -118,6 +120,10 @@ public:
 
   virtual SequenceNumber sequence() const {
     return SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+  }
+
+  virtual SystemTimePoint source_timestamp() const {
+    return SystemTimePoint::zero_value;
   }
 
   /// A reference-incremented duplicate of the marshalled sample (sample header + sample data)

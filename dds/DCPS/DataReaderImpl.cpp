@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -31,13 +29,13 @@
 #include "SafetyProfileStreams.h"
 #include "TypeSupportImpl.h"
 #include "XTypes/TypeObject.h"
-#if !defined (DDS_HAS_MINIMUM_BIT)
-#include "BuiltInTopicUtils.h"
+#ifndef DDS_HAS_MINIMUM_BIT
+#  include "BuiltInTopicUtils.h"
 #endif
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#ifndef DDS_HAS_MINIMUM_BIT
 #  include <dds/DdsDcpsCoreTypeSupportC.h>
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 #include <dds/DdsDcpsCoreC.h>
 #include <dds/DdsDcpsGuidTypeSupportImpl.h>
 
@@ -47,10 +45,13 @@
 
 #include <cstdio>
 #include <stdexcept>
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#  include <sstream>
+#endif
 
-#if !defined (__ACE_INLINE__)
-# include "DataReaderImpl.inl"
-#endif /* !__ACE_INLINE__ */
+#ifndef __ACE_INLINE__
+#  include "DataReaderImpl.inl"
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -491,8 +492,7 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
         statistics_.erase(writer_id);
 
         WriterMapType::iterator it = this->writers_.find(writer_id);
-        if (it != this->writers_.end() &&
-            it->second->active()) {
+        if (it != this->writers_.end()) {
           remove_association_sweeper_->schedule_timer(it->second, notify_lost);
         } else {
           push_back(non_active_writers, writer_id);
@@ -1762,7 +1762,11 @@ bool DataReaderImpl::have_sample_states(
 
     for (ReceivedDataElement *item = ptr->rcvd_samples_.head_;
         item != 0; item = item->next_data_sample_) {
-      if (item->sample_state_ & sample_states) {
+      if (item->sample_state_ & sample_states
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+          && !item->coherent_change_
+#endif
+                 ) {
         return true;
       }
     }
@@ -2295,16 +2299,26 @@ DataReaderImpl::writer_became_dead(WriterInfo& info)
 void
 DataReaderImpl::instances_liveliness_update(const PublicationId& writer)
 {
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
-  for (SubscriptionInstanceMapType::iterator iter = instances_.begin(), next = iter;
-       iter != instances_.end(); iter = next) {
-    ++next;
-    if (iter->second->instance_state_->writes_instance(writer)) {
-      set_instance_state(iter->first, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, SystemTimePoint::now(), writer);
+  InstanceSet localinsts;
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
+    if (instances_.size() == 0) {
+      return;
+    }
+    for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
+         iter != instances_.end(); ++iter) {
+      if (iter->second->instance_state_->writes_instance(writer)) {
+        localinsts.insert(iter->first);
+      }
     }
   }
+
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+  for (InstanceSet::iterator iter = localinsts.begin(); iter != localinsts.end(); ++iter) {
+    set_instance_state(*iter, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, SystemTimePoint::now(), writer);
+  }
 }
+
 
 void
 DataReaderImpl::set_sample_lost_status(
@@ -2997,14 +3011,18 @@ void DataReaderImpl::accept_coherent (PublicationId& writer_id,
         OPENDDS_STRING(writer).c_str(),
         OPENDDS_STRING(publisher).c_str()));
   }
-
+  SubscriptionInstanceSet localsubs;
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
+    for (SubscriptionInstanceMapType::iterator iter = this->instances_.begin();
+         iter != this->instances_.end(); ++iter) {
+      localsubs.insert(iter->second);
+    }
+  }
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
-
-  for (SubscriptionInstanceMapType::iterator iter = this->instances_.begin();
-      iter != this->instances_.end(); ++iter) {
-    iter->second->rcvd_strategy_->accept_coherent(
-        writer_id, publisher_id);
+  for (SubscriptionInstanceSet::iterator iter = localsubs.begin();
+       iter != localsubs.end(); iter++) {
+    (*iter)->rcvd_strategy_->accept_coherent(writer_id, publisher_id);
   }
 }
 
@@ -3024,13 +3042,18 @@ void DataReaderImpl::reject_coherent (PublicationId& writer_id,
         OPENDDS_STRING(publisher).c_str()));
   }
 
+  SubscriptionInstanceSet localsubs;
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
+    for (SubscriptionInstanceMapType::iterator iter = this->instances_.begin();
+         iter != this->instances_.end(); ++iter) {
+      localsubs.insert(iter->second);
+    }
+  }
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
-
-  for (SubscriptionInstanceMapType::iterator iter = this->instances_.begin();
-      iter != this->instances_.end(); ++iter) {
-    iter->second->rcvd_strategy_->reject_coherent(
-        writer_id, publisher_id);
+  for (SubscriptionInstanceSet::iterator iter = localsubs.begin();
+       iter != localsubs.end(); iter++) {
+    (*iter)->rcvd_strategy_->reject_coherent(writer_id, publisher_id);
   }
   this->reset_coherent_info (writer_id, publisher_id);
 }
@@ -3148,17 +3171,23 @@ void DataReaderImpl::get_ordered_data(GroupRakeData& data,
     DDS::ViewStateMask view_states,
     DDS::InstanceStateMask instance_states)
 {
+  SubscriptionInstanceSet localsubs;
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
+    for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
+         iter != instances_.end(); ++iter) {
+      localsubs.insert(iter->second);
+    }
+  }
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
 
-  for (SubscriptionInstanceMapType::iterator iter = instances_.begin(); iter != instances_.end(); ++iter) {
-    SubscriptionInstance_rch ptr = iter->second;
-    if (ptr->instance_state_->match(view_states, instance_states)) {
+  for (SubscriptionInstanceSet::iterator iter = localsubs.begin(); iter != localsubs.end(); ++iter) {
+    if ((*iter)->instance_state_->match(view_states, instance_states)) {
       size_t i(0);
-      for (ReceivedDataElement* item = ptr->rcvd_samples_.head_; item != 0; item = item->next_data_sample_) {
+      for (ReceivedDataElement* item = (*iter)->rcvd_samples_.head_; item != 0; item = item->next_data_sample_) {
         if ((item->sample_state_ & sample_states) && !item->coherent_change_) {
-          data.insert_sample(item, ptr, ++i);
-          group_coherent_ordered_data_.insert_sample(item, ptr, ++i);
+          data.insert_sample(item, *iter, ++i);
+          group_coherent_ordered_data_.insert_sample(item, *iter, ++i);
         }
       }
     }
@@ -3384,7 +3413,9 @@ DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
   return DDS::RETCODE_OK;
 }
 
-void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& instance, const DataSampleHeader& header, bool is_new_instance)
+void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& instance,
+                                              const DataSampleHeader& header,
+                                              bool is_new_instance)
 {
   bool accepted = true;
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE

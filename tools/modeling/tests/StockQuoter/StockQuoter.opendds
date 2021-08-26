@@ -4,13 +4,14 @@
     <domains xmi:id="_EzwWQGH9EeC_I986asR8iw" name="abc" domainId="987987"/>
     <participants xmi:id="_GO9I8GH9EeC_I986asR8iw" name="part1" domain="_EzwWQGH9EeC_I986asR8iw">
       <publishers xsi:type="opendds:publisher" xmi:id="_KDX1wGH9EeC_I986asR8iw" name="pub" transportConfig="trans1">
-        <writers xmi:id="_KDX1wWH9EeC_I986asR8iw" name="writer" copyFromTopicQos="false" topic="_LXkokGH9EeC_I986asR8iw"/>
+        <writers xmi:id="_KDX1wWH9EeC_I986asR8iw" name="writer" copyFromTopicQos="false" history="_VML9cALrEeCRmKs-7z8NWA" topic="_LXkokGH9EeC_I986asR8iw"/>
       </publishers>
       <subscribers xsi:type="opendds:subscriber" xmi:id="_JAuF8GH9EeC_I986asR8iw" name="sub" transportConfig="trans1">
-        <readers xmi:id="_JAutAGH9EeC_I986asR8iw" name="reader" copyFromTopicQos="false" topic="_LXkokGH9EeC_I986asR8iw"/>
+        <readers xmi:id="_JAutAGH9EeC_I986asR8iw" name="reader" copyFromTopicQos="false" history="_VML9cALrEeCRmKs-7z8NWA" topic="_LXkokGH9EeC_I986asR8iw"/>
       </subscribers>
     </participants>
     <topicDescriptions xsi:type="topics:Topic" xmi:id="_LXkokGH9EeC_I986asR8iw" name="Topic" datatype="_rjO0wF-tEeCJbdy4hB_w4A"/>
+    <policies xsi:type="opendds:historyQosPolicy" xmi:id="_VML9cALrEeCRmKs-7z8NWA" name="keep_last_ten" depth="10" kind="KEEP_LAST"/>
   </libs>
   <packages xmi:id="_y7hGYF-sEeCJbdy4hB_w4A" name="data1">
     <libs xsi:type="types:DataLib" xmi:id="_55vcwF-sEeCJbdy4hB_w4A" name="StockQuoter">

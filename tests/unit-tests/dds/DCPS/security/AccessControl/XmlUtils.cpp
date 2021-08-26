@@ -13,13 +13,17 @@ using OpenDDS::Security::domain_id_max;
 
 TEST(dds_DCPS_security_AccessControl_XmlUtils, get_parser)
 {
-  EXPECT_FALSE(get_parser("empty string", ""));
-  EXPECT_FALSE(get_parser("invalid xml", ">What I'm writing isn't valid XML<"));
-  EXPECT_TRUE(get_parser("valid xml",
+  ParserPtr p;
+  EXPECT_FALSE(get_parser(p, "empty string", ""));
+  EXPECT_FALSE(p);
+  EXPECT_FALSE(get_parser(p, "invalid xml", ">What I'm writing isn't valid XML<"));
+  EXPECT_FALSE(p);
+  EXPECT_TRUE(get_parser(p, "valid xml",
     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
     "<root>\n"
     "  <content>Hello!</content>"
     "</root>\n"));
+  EXPECT_TRUE(p);
 }
 
 namespace {
@@ -46,7 +50,8 @@ namespace {
 
 TEST(dds_DCPS_security_AccessControl_XmlUtils, parse_bool)
 {
-  ParserPtr parser = get_parser("parse_bool",
+  ParserPtr parser;
+  ASSERT_TRUE(get_parser(parser, "parse_bool",
     "<root>\n"
     "  <invalid></invalid>\n"
     "  <invalid>YES</invalid>\n"
@@ -59,7 +64,7 @@ TEST(dds_DCPS_security_AccessControl_XmlUtils, parse_bool)
     "  <false>FALSE</false>\n"
     "  <false>false</false>\n"
     "  <false>0</false>\n"
-    "</root>\n");
+    "</root>\n"));
   ASSERT_TRUE(parser);
 
   parse_bool_checker(parser, ACE_TEXT("invalid"), false);
@@ -89,7 +94,8 @@ namespace {
 
 TEST(dds_DCPS_security_AccessControl_XmlUtils, parse_time)
 {
-  ParserPtr parser = get_parser("parse_time",
+  ParserPtr parser;
+  ASSERT_TRUE(get_parser(parser, "parse_time",
     "<root>\n"
     "  <invalid1></invalid1>\n"
     "  <invalid2>2001/9/9</invalid2>\n"
@@ -108,7 +114,7 @@ TEST(dds_DCPS_security_AccessControl_XmlUtils, parse_time)
     "  <tz_carry>1999-12-31T23:00:00-01:00</tz_carry>\n"
     "  <valid_plus_1min>2001-09-09T01:46:40+00:01</valid_plus_1min>\n"
     "  <valid_minus_1min>2001-09-09T01:46:40-00:01</valid_minus_1min>\n"
-    "</root>\n");
+    "</root>\n"));
   ASSERT_TRUE(parser);
 
   parse_time_checker(parser, ACE_TEXT("invalid1"), false);
@@ -162,7 +168,8 @@ namespace {
 
 TEST(dds_DCPS_security_AccessControl_XmlUtils, parse_domain_id_set)
 {
-  ParserPtr parser = get_parser("parse_time",
+  ParserPtr parser;
+  ASSERT_TRUE(get_parser(parser, "parse_domain_id_set",
     "<root>\n"
     "  <empty></empty>\n"
 
@@ -239,7 +246,7 @@ TEST(dds_DCPS_security_AccessControl_XmlUtils, parse_domain_id_set)
     "      <min>0</min>\n"
     "    </id_range>\n"
     "  </has_all>\n"
-    "</root>\n");
+    "</root>\n"));
   ASSERT_TRUE(parser);
 
   parse_domain_id_set_checker(parser, ACE_TEXT("empty"));

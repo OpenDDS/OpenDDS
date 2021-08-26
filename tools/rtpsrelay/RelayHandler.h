@@ -38,6 +38,8 @@ struct AddrSetStats {
   ParticipantStatisticsReporter spdp_stats_reporter;
   ParticipantStatisticsReporter sedp_stats_reporter;
   ParticipantStatisticsReporter data_stats_reporter;
+  OpenDDS::DCPS::Message_Block_Shared_Ptr spdp_message;
+  OpenDDS::DCPS::MonotonicTimePoint first_spdp;
 
   bool empty() const
   {
@@ -105,16 +107,8 @@ public:
 
   void process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now);
 
-  bool ignore(const OpenDDS::DCPS::GUID_t& guid,
-              const OpenDDS::DCPS::MonotonicTimePoint& now);
-
+  OpenDDS::DCPS::MonotonicTimePoint get_first_spdp(const OpenDDS::DCPS::GUID_t& guid);
   void remove(const OpenDDS::DCPS::GUID_t& guid);
-
-  void remove_pending(const OpenDDS::DCPS::GUID_t& guid)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-    pending_.erase(guid);
-  }
 
   class Proxy {
   public:
@@ -174,9 +168,6 @@ private:
   GuidAddrSetMap guid_addr_set_map_;
   typedef std::list<std::pair<OpenDDS::DCPS::MonotonicTimePoint, GuidAddr> > ExpirationGuidAddrQueue;
   ExpirationGuidAddrQueue expiration_guid_addr_queue_;
-  GuidSet pending_;
-  typedef std::list<std::pair<OpenDDS::DCPS::MonotonicTimePoint, OpenDDS::DCPS::GUID_t> > PendingExpirationQueue;
-  PendingExpirationQueue pending_expiration_queue_;
   mutable ACE_Thread_Mutex mutex_;
 };
 
@@ -187,9 +178,6 @@ public:
   const std::string& name() const { return name_; }
 
   Port port() const { return port_; }
-
-  virtual void purge(GuidAddrSet::Proxy& /*proxy*/,
-                     const OpenDDS::DCPS::GUID_t& /*guid*/) {}
 
 protected:
   RelayHandler(const Config& config,
@@ -203,13 +191,15 @@ protected:
 
   void enqueue_message(const ACE_INET_Addr& addr,
                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
-                       const OpenDDS::DCPS::MonotonicTimePoint& now);
+                       const OpenDDS::DCPS::MonotonicTimePoint& now,
+                       MessageType type);
 
   ACE_HANDLE get_handle() const override { return socket_.get_handle(); }
 
   virtual CORBA::ULong process_message(const ACE_INET_Addr& remote,
                                        const OpenDDS::DCPS::MonotonicTimePoint& now,
-                                       const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) = 0;
+                                       const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
+                                       MessageType& type) = 0;
 
 private:
   ACE_SOCK_Dgram socket_;
@@ -217,13 +207,16 @@ private:
     ACE_INET_Addr address;
     OpenDDS::DCPS::Message_Block_Shared_Ptr message_block;
     OpenDDS::DCPS::MonotonicTimePoint timestamp;
+    MessageType type;
 
     Element(const ACE_INET_Addr& a_address,
             OpenDDS::DCPS::Message_Block_Shared_Ptr a_message_block,
-            const OpenDDS::DCPS::MonotonicTimePoint& a_timestamp)
+            const OpenDDS::DCPS::MonotonicTimePoint& a_timestamp,
+            MessageType type)
       : address(a_address)
       , message_block(a_message_block)
       , timestamp(a_timestamp)
+      , type(type)
     {}
   };
   typedef std::queue<Element> OutgoingType;
@@ -266,7 +259,8 @@ public:
   void venqueue_message(const ACE_INET_Addr& addr,
                         ParticipantStatisticsReporter& stats_reporter,
                         const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
-                        const OpenDDS::DCPS::MonotonicTimePoint& now);
+                        const OpenDDS::DCPS::MonotonicTimePoint& now,
+                        MessageType type);
 
 protected:
   virtual bool do_normal_processing(GuidAddrSet::Proxy& /*proxy*/,
@@ -280,7 +274,8 @@ protected:
 
   CORBA::ULong process_message(const ACE_INET_Addr& remote,
                                const OpenDDS::DCPS::MonotonicTimePoint& now,
-                               const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) override;
+                               const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
+                               MessageType& type) override;
   ParticipantStatisticsReporter& record_activity(GuidAddrSet::Proxy& proxy,
                                                  const AddrPort& remote_address,
                                                  const OpenDDS::DCPS::MonotonicTimePoint& now,
@@ -346,7 +341,8 @@ private:
   VerticalHandler* vertical_handler_;
   CORBA::ULong process_message(const ACE_INET_Addr& remote,
                                const OpenDDS::DCPS::MonotonicTimePoint& now,
-                               const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg) override;
+                               const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
+                               MessageType& type) override;
 };
 
 class SpdpHandler : public VerticalHandler {
@@ -366,10 +362,6 @@ public:
   void replay(const StringSequence& partitions);
 
 private:
-  typedef std::unordered_map<OpenDDS::DCPS::GUID_t, OpenDDS::DCPS::Message_Block_Shared_Ptr, GuidHash> SpdpMessages;
-  SpdpMessages spdp_messages_;
-  ACE_Thread_Mutex spdp_messages_mutex_;
-
   StringSet replay_queue_;
   ACE_Thread_Mutex replay_queue_mutex_;
 
@@ -382,8 +374,6 @@ private:
                             const OpenDDS::DCPS::MonotonicTimePoint& now,
                             CORBA::ULong& sent) override;
 
-  void purge(GuidAddrSet::Proxy& proxy,
-             const OpenDDS::DCPS::GUID_t& guid) override;
   int handle_exception(ACE_HANDLE fd) override;
 };
 
