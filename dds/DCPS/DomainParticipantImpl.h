@@ -38,7 +38,6 @@
 #include <ace/Null_Mutex.h>
 #include <ace/Thread_Mutex.h>
 #include <ace/Recursive_Thread_Mutex.h>
-#include <ace/Condition_Thread_Mutex.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -315,7 +314,7 @@ public:
    * but will coorindate with assign_handle when a desired handle has not yet
    * been mapped, but is expected to be.
    */
-  DDS::InstanceHandle_t await_handle(const GUID_t& id);
+  DDS::InstanceHandle_t await_handle(const GUID_t& id) const;
 
   /**
    * Return a previously-assigned handle.
@@ -495,14 +494,11 @@ private:
   typedef std::pair<DDS::InstanceHandle_t, unsigned int> HandleWithCounter;
   typedef OPENDDS_MAP_CMP(GUID_t, HandleWithCounter, GUID_tKeyLessThan) CountedHandleMap;
   typedef OPENDDS_MAP(DDS::InstanceHandle_t, RepoId) RepoIdMap;
-  typedef OPENDDS_MAP_CMP(GUID_t, ACE_Condition_Thread_Mutex *, GUID_tKeyLessThan) HandleWaitMap;
 
   /// Instance handles assigned which are mapped to GUIDs (use handle_protector_)
   CountedHandleMap handles_;
   /// By-handle lookup of instance handles assigned to GUIDs (use handle_protector_)
   RepoIdMap repoIds_;
-
-  HandleWaitMap handle_waiters_;
 
   typedef OPENDDS_MAP_CMP(GUID_t, DDS::InstanceHandle_t, GUID_tKeyLessThan) HandleMap;
 
@@ -518,6 +514,9 @@ private:
   ACE_Recursive_Thread_Mutex topics_protector_;
   /// Protect the handle collection.
   mutable ACE_Thread_Mutex handle_protector_;
+
+  mutable ConditionVariable<ACE_Thread_Mutex> handle_waiters_;
+
   /// Protect the shutdown.
   ACE_Thread_Mutex shutdown_mutex_;
   ConditionVariable<ACE_Thread_Mutex> shutdown_condition_;
