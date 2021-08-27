@@ -1,0 +1,78 @@
+Fri Aug 27 20:24:33 UTC 2021  ClaytonCalabrese  <calabresec@objectcomputing.com>
+        commit 9a25e71d27633ac333bb11030cf164a1b05932ec
+
+          Merge pull request #2955 from ClaytonCalabrese/branch-DDS-3.16
+
+          OpenDDS 3.16.1 News
+
+Fri Aug 27 20:09:41 UTC 2021  Clayton Calabrese  <calabreseclayton@gmail.com>
+        commit 54f4e4398de35a96ba1148ee12d1920015bee954
+
+        * NEWS.md:
+
+          add news blurb for OpenDDS 3.16.1
+
+Fri Aug 27 01:55:16 UTC 2021  ClaytonCalabrese  <calabresec@objectcomputing.com>
+        commit 01f58b5befc56ffd1fdb4faccaa6aca168ef2ffc
+
+          Merge pull request #2940 from ClaytonCalabrese/clayton/zero_base
+
+          OpenDDS 3.16 : zero_init_acknak rtps_udp transport config option
+
+Thu Aug 26 16:35:14 UTC 2021  Clayton Calabrese  <calabreseclayton@gmail.com>
+        commit 362bfb4de0aacad60d1c93cc5eba74785e940ef8
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          unblock some portions of code as per pr feedback
+
+Tue Aug 24 20:07:20 UTC 2021  Clayton Calabrese  <calabreseclayton@gmail.com>
+        commit 81c31592d9a4fe35f0c418ab09d65cedaf5cf5f0
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          accidental indent removed
+
+Tue Aug 24 20:02:43 UTC 2021  Clayton Calabrese  <calabreseclayton@gmail.com>
+        commit 05ef474b4c0324e043028e9a1d13f7c046297a7a
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+
+          put zero initialation of preassociation acknaks behind a config
+          option called zero_init_acknak
+
+Fri Jul 30 21:25:59 UTC 2021  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit ba7246057bd83db0aa8f0e39614aa8e72d89c954
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          modfy durable low end association values
+
+Sat May 01 07:42:35 UTC 2021  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit bf10b9e7cc10d7dafb9466fabd9253ad4fa0eff5
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Adding another guard, preventing inverted gaps
+
+Fri Apr 30 20:10:57 UTC 2021  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 5abe197fc53c3e7fbf12f5147b2f8d02efda7278
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Prevent exception from inverted GAP sequence ranges
+
+Thu Apr 29 22:11:03 UTC 2021  Timothy Simpson  <simpsont@objectcomputing.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Attempt move to zero-value bitmapBase preassociation ACKNACKs
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:
