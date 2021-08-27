@@ -76,18 +76,6 @@ void TransportCustomizedElement::set_sequence(const SequenceNumber& value)
 }
 
 ACE_INLINE
-SystemTimePoint TransportCustomizedElement::source_timestamp() const
-{
-  return source_timestamp_;
-}
-
-ACE_INLINE
-void TransportCustomizedElement::set_source_timestamp(const SystemTimePoint& time)
-{
-  source_timestamp_ = time;
-}
-
-ACE_INLINE
 void TransportCustomizedElement::set_fragment(TransportQueueElement* orig)
 {
   fragment_ = true;
