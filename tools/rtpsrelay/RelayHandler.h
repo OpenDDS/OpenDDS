@@ -38,6 +38,8 @@ struct AddrSetStats {
   ParticipantStatisticsReporter spdp_stats_reporter;
   ParticipantStatisticsReporter sedp_stats_reporter;
   ParticipantStatisticsReporter data_stats_reporter;
+  OpenDDS::DCPS::Message_Block_Shared_Ptr spdp_message;
+  OpenDDS::DCPS::MonotonicTimePoint first_spdp;
 
   bool empty() const
   {
@@ -105,6 +107,7 @@ public:
 
   void process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now);
 
+  OpenDDS::DCPS::MonotonicTimePoint get_first_spdp(const OpenDDS::DCPS::GUID_t& guid);
   void remove(const OpenDDS::DCPS::GUID_t& guid);
 
   class Proxy {
@@ -175,9 +178,6 @@ public:
   const std::string& name() const { return name_; }
 
   Port port() const { return port_; }
-
-  virtual void purge(GuidAddrSet::Proxy& /*proxy*/,
-                     const OpenDDS::DCPS::GUID_t& /*guid*/) {}
 
 protected:
   RelayHandler(const Config& config,
@@ -362,10 +362,6 @@ public:
   void replay(const StringSequence& partitions);
 
 private:
-  typedef std::unordered_map<OpenDDS::DCPS::GUID_t, OpenDDS::DCPS::Message_Block_Shared_Ptr, GuidHash> SpdpMessages;
-  SpdpMessages spdp_messages_;
-  ACE_Thread_Mutex spdp_messages_mutex_;
-
   StringSet replay_queue_;
   ACE_Thread_Mutex replay_queue_mutex_;
 
@@ -378,8 +374,6 @@ private:
                             const OpenDDS::DCPS::MonotonicTimePoint& now,
                             CORBA::ULong& sent) override;
 
-  void purge(GuidAddrSet::Proxy& proxy,
-             const OpenDDS::DCPS::GUID_t& guid) override;
   int handle_exception(ACE_HANDLE fd) override;
 };
 

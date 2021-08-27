@@ -7,18 +7,15 @@
  *
  */
 // ============================================================================
-
-#include "MessengerTypeSupportImpl.h"
-#include "Writer.h"
+#include "Domain.h"
 #include "DataWriterListenerImpl.h"
+#include "Writer.h"
 
 #include <tests/Utils/ExceptionStreams.h>
 
-#include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Qos_Helper.h>
-#include <dds/DCPS/unique_ptr.h>
 #include <dds/DCPS/StaticIncludes.h>
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
@@ -29,263 +26,157 @@
 #include <ace/OS_NS_unistd.h>
 #include <ace/Get_Opt.h>
 
+#include <iostream>
 #include <memory>
-#include <assert.h>
+#include <stdexcept>
 
-using namespace Messenger;
-using namespace std;
-
-// Set up a 4 second recurring deadline.
-static DDS::Duration_t const DEADLINE_PERIOD =
+class Publisher
 {
-  4,  // seconds
-  0   // nanoseconds
+public:
+  Publisher(int argc, ACE_TCHAR* argv[]);
+  ~Publisher() { cleanup(); }
+  int run();
+
+private:
+  static const int N_WriteThread = 2;
+  void cleanup();
+  bool set_deadline_qos();
+  bool check_status(const CORBA::Long count);
+
+  Domain domain_;
+  DDS::Publisher_var pub_;
+  DataWriterListenerImpl* listener_i_;
+  DDS::DataWriterListener_var listener_;
+  DDS::DataWriter_var dw_;
 };
 
-static int NUM_EXPIRATIONS = 2;
+Publisher::Publisher(int argc, ACE_TCHAR* argv[]) : domain_(argc, argv, "Publisher")
+{
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Publisher::Publisher\n")));
+  try {
+    pub_ = domain_.dp()->create_publisher(PUBLISHER_QOS_DEFAULT, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    if (!pub_) {
+      throw std::runtime_error("create_publisher failed.");
+    }
 
-// Time to sleep waiting for deadline periods to expire
-const static OpenDDS::DCPS::TimeDuration SLEEP_DURATION(DEADLINE_PERIOD.sec * NUM_EXPIRATIONS + 1);
+    listener_i_ = new DataWriterListenerImpl;
+    listener_ = listener_i_;
+    if (!listener_) {
+      throw std::runtime_error("DataWriterListenerImpl is null.");
+    }
 
-static int NUM_WRITE_THREADS = 2;
-
-int ACE_TMAIN(int argc, ACE_TCHAR *argv[]){
-  try
-    {
-      DDS::DomainParticipantFactory_var dpf =
-        TheParticipantFactoryWithArgs(argc, argv);
-      DDS::DomainParticipant_var participant =
-        dpf->create_participant(11,
-                                PARTICIPANT_QOS_DEFAULT,
-                                DDS::DomainParticipantListener::_nil(),
-                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-      if (CORBA::is_nil(participant.in())) {
-        cerr << "create_participant failed." << endl;
-        return 1;
-      }
-
-      MessageTypeSupportImpl::_var_type servant = new MessageTypeSupportImpl();
-
-      if (DDS::RETCODE_OK != servant->register_type(participant.in(), "")) {
-        cerr << "register_type failed." << endl;
-        exit(1);
-      }
-
-      CORBA::String_var type_name = servant->get_type_name();
-
-      DDS::TopicQos topic_qos;
-      participant->get_default_topic_qos(topic_qos);
-      DDS::Topic_var topic =
-        participant->create_topic("Movie Discussion List",
-                                  type_name.in(),
-                                  topic_qos,
-                                  DDS::TopicListener::_nil(),
-                                  ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-      if (CORBA::is_nil(topic.in())) {
-        cerr << "create_topic failed." << endl;
-        exit(1);
-      }
-
-      DDS::Publisher_var pub =
-        participant->create_publisher(PUBLISHER_QOS_DEFAULT,
-        DDS::PublisherListener::_nil(), ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-      if (CORBA::is_nil(pub.in())) {
-        cerr << "create_publisher failed." << endl;
-        exit(1);
-      }
-
-      // ----------------------------------------------
-
-      // Create the listener.
-      DataWriterListenerImpl* typed_listener_ptr = new DataWriterListenerImpl;
-      DDS::DataWriterListener_var listener(typed_listener_ptr);
-      if (CORBA::is_nil(listener.in()))
-      {
-        cerr << "ERROR: listener is nil." << endl;
-        exit(1);
-      }
-
-      DDS::DataWriterQos dw_qos; // Good QoS.
-      pub->get_default_datawriter_qos(dw_qos);
-
-      assert(DEADLINE_PERIOD.sec > 1); // Requirement for the test.
-
-      // First data writer will have a listener to test listener
-      // callback on deadline expiration.
-      DDS::DataWriter_var dw =
-        pub->create_datawriter(topic.in(),
-                               dw_qos,
-                               listener.in(),
-                               ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-      if (CORBA::is_nil(dw.in()))
-      {
-        cerr << "ERROR: create_datawriter failed." << endl;
-        exit(1);
-      }
-
-      {
-        // Two threads use same datawriter to write different instances.
-        OpenDDS::DCPS::unique_ptr<Writer> writer1(new Writer(dw.in(), 99, SLEEP_DURATION));
-        OpenDDS::DCPS::unique_ptr<Writer> writer2(new Writer(dw.in(), 100, SLEEP_DURATION));
-
-        dw_qos.deadline.period.sec     = DEADLINE_PERIOD.sec;
-        dw_qos.deadline.period.nanosec = DEADLINE_PERIOD.nanosec;
-
-        cerr << "Setting datawriter deadline QOS" << endl;
-
-        // Set qos with deadline. The watch dog starts now.
-        if (dw->set_qos(dw_qos) != ::DDS::RETCODE_OK)
-        {
-          cerr << "ERROR: set deadline qos failed." << endl;
-          exit(1);
-        }
-
-        writer1->start();
-        writer2->start();
-        // ----------------------------------------------
-
-        // Wait for fully associate with DataReaders.
-        if (writer1->wait_for_start() == false || writer2->wait_for_start() == false) {
-          cerr << "ERROR: took too long to associate." << endl;
-          exit(1);
-        }
-
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Publisher: sleep for %d milliseconds\n"),
-                             SLEEP_DURATION.value().msec()));
-
-        // Wait for a set of deadline periods to expire.
-        ACE_OS::sleep(SLEEP_DURATION.value());
-
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Publisher: now verify missed ")
-                             ACE_TEXT("deadline status\n")));
-
-        ::DDS::InstanceHandle_t handle1 = writer1->get_instance_handle();
-        ::DDS::InstanceHandle_t handle2 = writer2->get_instance_handle();
-
-        DDS::OfferedDeadlineMissedStatus deadline_status;
-        if (dw->get_offered_deadline_missed_status(deadline_status) != ::DDS::RETCODE_OK)
-        {
-           cerr << "ERROR: Failed to get offered deadline missed status" << endl;
-           exit(1);
-        }
-
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Publisher: got missed ")
-                             ACE_TEXT("deadline status\n")));
-
-        CORBA::Long expected = NUM_EXPIRATIONS * NUM_WRITE_THREADS;
-        if (deadline_status.total_count != expected)
-        {
-          cerr << "ERROR: Unexpected number of missed offered "
-            << "deadlines (" << deadline_status.total_count << ") "
-            << "instead of " << expected
-            << endl;
-
-          exit(1);
-        }
-
-        // Check if the total count changed is correctly giving the change between
-        // the last time our listener got invoked and our manual call now
-        expected =
-          deadline_status.total_count - typed_listener_ptr->offered_deadline_total_count();
-        if (deadline_status.total_count_change != expected) {
-          cerr << "ERROR: Incorrect missed offered "
-            << "deadline count change ("
-            << deadline_status.total_count_change
-            << ") instead of " << expected
-            << endl;
-
-          exit(1);
-        }
-
-        if (deadline_status.last_instance_handle != handle1
-          && deadline_status.last_instance_handle != handle2)
-        {
-          cerr << "ERROR: Unexpected last instance handle "
-            << deadline_status.last_instance_handle << " instead of "
-            << handle1 << " or "
-            << handle2 << endl;
-          exit(1);
-        }
-
-        writer1->wait();
-        writer2->wait();
-
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Publisher: sleep for %d milliseconds\n"),
-                             SLEEP_DURATION.value().msec()));
-
-        // Wait for another set of deadline periods to expire.
-        ACE_OS::sleep(SLEEP_DURATION.value());
-
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Publisher: now verify missed ")
-                             ACE_TEXT("deadline status\n")));
-
-        if (dw->get_offered_deadline_missed_status(deadline_status) != ::DDS::RETCODE_OK)
-        {
-           cerr << "ERROR: Failed to get offered deadline missed status" << endl;
-           exit(1);
-        }
-
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Publisher: got missed ")
-                             ACE_TEXT("deadline status\n")));
-
-        expected = (NUM_EXPIRATIONS + 2) * NUM_WRITE_THREADS;
-        if (deadline_status.total_count != expected) {
-          cerr << "ERROR: Unexpected number of missed offered "
-            << "deadlines (" << deadline_status.total_count << ") "
-            << "instead of " << expected
-            << endl;
-
-          exit(1);
-        }
-
-        // Check if the total count changed is correctly giving the change between
-        // the last time our listener got invoked and our manual call now
-        expected =
-          deadline_status.total_count - typed_listener_ptr->offered_deadline_total_count();
-        if (deadline_status.total_count_change != expected) {
-          cerr << "ERROR: Incorrect missed offered "
-            << "deadline count change ("
-            << deadline_status.total_count_change
-            << ") instead of " << expected
-            << endl;
-
-          exit(1);
-        }
-
-        if (deadline_status.last_instance_handle != handle1
-          && deadline_status.last_instance_handle != handle2)
-        {
-          cerr << "ERROR: Unexpected last instance handle "
-            << deadline_status.last_instance_handle << " instead of "
-            << handle1 << " or "
-            << handle2 << endl;
-          exit(1);
-        }
-
-
-        // Wait for datareader finish.
-        while (1)
-        {
-          ::DDS::InstanceHandleSeq handles;
-          dw->get_matched_subscriptions(handles);
-          if (handles.length() == 0)
-            break;
-          else
-            ACE_OS::sleep(1);
-        }
-      }
-
-      participant->delete_contained_entities();
-      dpf->delete_participant(participant.in());
-      TheServiceParticipant->shutdown();
+    dw_ = pub_->create_datawriter(domain_.topic().in(), DATAWRITER_QOS_DEFAULT, listener_.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    if (!dw_) {
+      throw std::runtime_error("create_datawriter is null.");
+    }
+  } catch (...) {
+    ACE_ERROR((LM_ERROR, "ERROR: Publisher::Publisher failed"));
+    cleanup();
+    throw;
   }
-  catch (CORBA::Exception& e)
-  {
-    cerr << "PUB: Exception caught in main.cpp:" << endl
-         << e << endl;
-    exit(1);
+}
+
+int Publisher::run()
+{
+  if (!set_deadline_qos()) {
+    return 1;
   }
 
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Publisher::run: wait_matched\n")));
+  if (!listener_i_->wait_matched(2, OpenDDS::DCPS::TimeDuration(10))) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Publisher::run wait_matched failed.\n")));
+    return 1;
+  }
+
+  Writer writer(dw_);
+  if (!writer.start()) {
+    return 1;
+  }
+
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Publisher::run sleep for %d milliseconds\n"), Domain::w_sleep.value().msec()));
+  ACE_OS::sleep(Domain::w_sleep.value()); // wait for a set of deadline periods to expire
+  CORBA::Long expected = Domain::n_expiration * N_WriteThread;
+  if (!check_status(expected)) {
+    return 1;
+  }
+
+  writer.end();
+
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Publisher::run sleep for %d milliseconds\n"), Domain::w_sleep.value().msec()));
+  ACE_OS::sleep(Domain::w_sleep.value()); // wait for another set of deadline periods to expire
+  expected = (Domain::n_expiration + 2) * N_WriteThread;
+  if (!check_status(expected)) {
+    return 1;
+  }
+
+  // Wait for datareader finish.
+  while (1) {
+    DDS::InstanceHandleSeq handles;
+    dw_->get_matched_subscriptions(handles);
+    if (handles.length() == 0)
+      break;
+    else
+      ACE_OS::sleep(1);
+  }
   return 0;
+}
+
+void Publisher::cleanup()
+{
+  if (dw_) dw_ = 0;
+  if (listener_) listener_ = 0;
+  if (pub_) pub_ = 0;
+}
+
+bool Publisher::set_deadline_qos()
+{
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Publisher::set_deadline_qos (%d sec)\n"), Domain::w_deadline.sec));
+  DDS::DataWriterQos qos;
+  pub_->get_default_datawriter_qos(qos);
+  qos.deadline.period.sec = Domain::w_deadline.sec;
+  qos.deadline.period.nanosec = Domain::w_deadline.nanosec;
+  if (dw_->set_qos(qos) != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: dw_->set_qos failed.\n")));
+    return false;
+  }
+  return true;
+}
+
+bool Publisher::check_status(const CORBA::Long count)
+{
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Publisher::check_status count(%d)\n"), count));
+  DDS::OfferedDeadlineMissedStatus s;
+  if (dw_->get_offered_deadline_missed_status(s) != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: get_offered_deadline_missed_status failed.\n")));
+    return false;
+  }
+  if (s.total_count != count) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: offered_deadline_missed (%d) != (%d)\n"), s.total_count, count));
+    return false;
+  }
+  // Check if the total count changed is correctly giving the change between
+  // the last time our listener got invoked and our manual call now
+  const CORBA::Long change = s.total_count - listener_i_->offered_deadline_total_count();
+  if (s.total_count_change != change) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: offered_deadline_missed change (%d) != (%d)\n"), s.total_count_change, change));
+    return false;
+  }
+  return true;
+}
+
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+{
+  int ret = 1;
+  try {
+    Publisher pub(argc, argv);
+    ret = pub.run();
+  } catch (const CORBA::Exception& e) {
+    e._tao_print_exception("Publisher ERROR: ");
+  } catch (const std::exception& e) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Publisher ERROR: %C\n"), e.what()));
+  } catch (...) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Publisher ERROR: ...\n")));
+  }
+  TheServiceParticipant->shutdown();
+  return ret;
 }
