@@ -1,5 +1,13 @@
 # OpenDDS Releases
 
+## Version 3.16.1 of OpenDDS
+
+### Additions:
+- Transport (#2940)
+  - Added a new configuration option for rtps_udp transport called `zero_init_acknak`.
+    When this enabled in the ini file, preassociation acknaks will start at 0. This is
+    a feature added to allow interoperability with RTI-DDS.
+
 ## Version 3.16 of OpenDDS
 OpenDDS 3.16 was released on Jan 27 2021.
 
