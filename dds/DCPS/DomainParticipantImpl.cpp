@@ -1278,7 +1278,6 @@ DomainParticipantImpl::ignore_topic(
   }
 
   RepoId ignoreId = get_repoid(handle);
-
   HandleMap::const_iterator location = this->ignored_topics_.find(ignoreId);
 
   if (location == this->ignored_topics_.end()) {
@@ -1901,7 +1900,6 @@ DDS::InstanceHandle_t DomainParticipantImpl::assign_handle(const GUID_t& id)
     handles_[id] = std::make_pair(handle, 1);
     repoIds_[handle] = id;
     handle_waiters_.notify_all();
-
     return handle;
   }
 
@@ -1929,12 +1927,7 @@ DDS::InstanceHandle_t DomainParticipantImpl::await_handle(const GUID_t& id) cons
 DDS::InstanceHandle_t DomainParticipantImpl::lookup_handle(const GUID_t& id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, DDS::HANDLE_NIL);
-
   const CountedHandleMap::const_iterator iter = handles_.find(id);
-  if (iter == handles_.end()) {
-    std::stringstream buf;
-    buf << ::OpenDDS::DCPS::to_string(id);
-  }
   return iter == handles_.end() ? DDS::HANDLE_NIL : iter->second.first;
 }
 
