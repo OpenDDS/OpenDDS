@@ -695,6 +695,7 @@ private:
   void send_heartbeat_replies(const DCPS::MonotonicTimePoint& now);
   void check_heartbeats(const DCPS::MonotonicTimePoint& now);
 
+  bool zero_init_acknak_;
   CORBA::Long best_effort_heartbeat_count_;
 
   typedef void (RtpsUdpDataLink::*PMF)();

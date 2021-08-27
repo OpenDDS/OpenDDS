@@ -38,6 +38,7 @@ public:
 
   size_t max_message_size_;
   size_t nak_depth_;
+  bool zero_init_acknak_;
   double quick_reply_ratio_;
   TimeDuration nak_response_delay_, heartbeat_period_,
     heartbeat_response_delay_, handshake_timeout_, durable_data_timeout_;
