@@ -965,7 +965,7 @@ namespace OpenDDS {
     if (encapsulated) {
       EncapsulationHeader encap;
       if (!(ser >> encap)) {
-        if (DCPS_debug_level > 1) {
+        if (DCPS_debug_level > 0) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
             ACE_TEXT("%CDataReaderImpl::lookup_instance: ")
             ACE_TEXT("deserialization of encapsulation header failed.\n"),
