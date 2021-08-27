@@ -326,7 +326,7 @@ private:
     ACE_CDR::Long required_acknack_count_;
     OPENDDS_MAP(SequenceNumber, TransportQueueElement*) durable_data_;
     MonotonicTimePoint durable_timestamp_;
-    SequenceNumber start_sn_;
+    const SequenceNumber start_sn_;
 #ifdef OPENDDS_SECURITY
     SequenceNumber max_pvs_sn_;
     DisjointSequence pvs_outstanding_;
@@ -335,7 +335,8 @@ private:
     ReaderInfo(const RepoId& id,
                bool durable,
                const MonotonicTime_t& participant_discovered_at,
-               ACE_CDR::ULong participant_flags)
+               ACE_CDR::ULong participant_flags,
+               const SequenceNumber& start_sn)
       : id_(id)
       , participant_discovered_at_(participant_discovered_at)
       , acknack_recvd_count_(0)
@@ -344,6 +345,7 @@ private:
       , durable_(durable)
       , participant_flags_(participant_flags)
       , required_acknack_count_(0)
+      , start_sn_(start_sn)
 #ifdef OPENDDS_SECURITY
       , max_pvs_sn_(SequenceNumber::ZERO())
 #endif
@@ -480,7 +482,7 @@ private:
     ~RtpsWriter();
     SequenceNumber max_data_seq(const SingleSendBuffer::Proxy& proxy,
                                 const ReaderInfo_rch&) const;
-    void update_max_sn(const RepoId& reader, SequenceNumber seq);
+    SequenceNumber update_max_sn(const RepoId& reader, SequenceNumber seq);
     void add_elem_awaiting_ack(TransportQueueElement* element);
 
     RemoveResult remove_sample(const DataSampleElement* sample);
