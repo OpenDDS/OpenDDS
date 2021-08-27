@@ -171,7 +171,7 @@ GitHub Actions runners.
 
 * tests/DCPS/SharedTransport/run_test.pl multicast
 
-  * Multicast times out waiting for remote peer. Fails on ``test_u20_p1_j8_FM-1f`` and ``test_u20_p1_sec`.
+  * Multicast times out waiting for remote peer. Fails on ``test_u20_p1_j8_FM-1f`` and ``test_u20_p1_sec``.
 
 * tests/DCPS/StringKey/run_test.pl
 
