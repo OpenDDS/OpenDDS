@@ -2007,6 +2007,7 @@ RtpsUdpDataLink::RtpsWriter::add_reader(const ReaderInfo_rch& reader)
       reader->max_pvs_sn_ = max_sn_;
     }
 #endif
+    reader->start_sn_ = max_sn_ + 1;
     remote_readers_.insert(ReaderInfoMap::value_type(reader->id_, reader));
     preassociation_readers_.insert(reader);
     log_remote_counts("add_reader");
@@ -3960,7 +3961,7 @@ RtpsUdpDataLink::RtpsWriter::gather_directed_heartbeat_i(const SingleSendBuffer:
                                                          MetaSubmessage& meta_submessage,
                                                          const ReaderInfo_rch& reader)
 {
-  const SequenceNumber first_sn = reader->durable_ ? 1 : non_durable_first_sn(proxy);
+  const SequenceNumber first_sn = reader->durable_ ? 1 : std::max(non_durable_first_sn(proxy), reader->start_sn_);
   SequenceNumber last_sn = expected_max_sn(reader);
 #ifdef OPENDDS_SECURITY
   if (is_pvs_writer_ && last_sn < first_sn.previous()) {
