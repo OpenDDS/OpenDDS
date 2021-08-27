@@ -1277,6 +1277,7 @@ DomainParticipantImpl::ignore_topic(
   }
 
   RepoId ignoreId = get_repoid(handle);
+
   HandleMap::const_iterator location = this->ignored_topics_.find(ignoreId);
 
   if (location == this->ignored_topics_.end()) {
@@ -1898,6 +1899,10 @@ DDS::InstanceHandle_t DomainParticipantImpl::assign_handle(const GUID_t& id)
     }
     handles_[id] = std::make_pair(handle, 1);
     repoIds_[handle] = id;
+    HandleWaitMap::iterator wi = handle_waiters_.find(id);
+    if (wi != handle_waiters_.end()) {
+      wi->second->broadcast();
+    }
     return handle;
   }
 
@@ -1911,10 +1916,41 @@ DDS::InstanceHandle_t DomainParticipantImpl::assign_handle(const GUID_t& id)
   return mapped.first;
 }
 
+DDS::InstanceHandle_t DomainParticipantImpl::await_handle(const GUID_t& id)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, DDS::HANDLE_NIL);
+  CountedHandleMap::const_iterator iter = handles_.find(id);
+  if (iter != handles_.end()) {
+    return iter->second.first;
+  }
+  HandleWaitMap::iterator wi = handle_waiters_.find(id);
+  ACE_Condition_Thread_Mutex *waitcond = 0;
+  if (wi != handle_waiters_.end()) {
+    waitcond = wi->second;
+  } else {
+    waitcond = new ACE_Condition_Thread_Mutex(handle_protector_);
+    handle_waiters_[id] = waitcond;
+  }
+  waitcond->wait();
+
+  wi = handle_waiters_.find(id);
+  if (wi != handle_waiters_.end()) {
+    delete wi->second;
+    handle_waiters_.erase(id);
+  }
+  iter = handles_.find(id);
+  return iter == handles_.end() ? DDS::HANDLE_NIL : iter->second.first;
+}
+
 DDS::InstanceHandle_t DomainParticipantImpl::lookup_handle(const GUID_t& id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, DDS::HANDLE_NIL);
+
   const CountedHandleMap::const_iterator iter = handles_.find(id);
+  if (iter == handles_.end()) {
+    std::stringstream buf;
+    buf << ::OpenDDS::DCPS::to_string(id);
+  }
   return iter == handles_.end() ? DDS::HANDLE_NIL : iter->second.first;
 }
 

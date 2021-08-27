@@ -38,6 +38,7 @@
 #include <ace/Null_Mutex.h>
 #include <ace/Thread_Mutex.h>
 #include <ace/Recursive_Thread_Mutex.h>
+#include <ace/Condition_Thread_Mutex.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -310,6 +311,13 @@ public:
   DDS::InstanceHandle_t lookup_handle(const GUID_t& id) const;
 
   /**
+   * Similar to lookup_handle in that it will return a previously mapped handle,
+   * but will coorindate with assign_handle when a desired handle has not yet
+   * been mapped, but is expected to be.
+   */
+  DDS::InstanceHandle_t await_handle(const GUID_t& id);
+
+  /**
    * Return a previously-assigned handle.
    */
   void return_handle(DDS::InstanceHandle_t handle);
@@ -487,11 +495,14 @@ private:
   typedef std::pair<DDS::InstanceHandle_t, unsigned int> HandleWithCounter;
   typedef OPENDDS_MAP_CMP(GUID_t, HandleWithCounter, GUID_tKeyLessThan) CountedHandleMap;
   typedef OPENDDS_MAP(DDS::InstanceHandle_t, RepoId) RepoIdMap;
+  typedef OPENDDS_MAP_CMP(GUID_t, ACE_Condition_Thread_Mutex *, GUID_tKeyLessThan) HandleWaitMap;
 
   /// Instance handles assigned which are mapped to GUIDs (use handle_protector_)
   CountedHandleMap handles_;
   /// By-handle lookup of instance handles assigned to GUIDs (use handle_protector_)
   RepoIdMap repoIds_;
+
+  HandleWaitMap handle_waiters_;
 
   typedef OPENDDS_MAP_CMP(GUID_t, DDS::InstanceHandle_t, GUID_tKeyLessThan) HandleMap;
 
