@@ -32,7 +32,7 @@ bool insert_Parameter_user_data(Serializer& s, const std::string& user_data)
   return s << p;
 }
 
-void extract_Parameter_user_data(const std::string& user_data, const Encoding encoding = Encoding(Encoding::KIND_XCDR2))
+void extract_Parameter_user_data(const std::string& user_data, const Encoding encoding = Encoding(Encoding::KIND_XCDR1))
 {
   const CORBA::ULong length = static_cast<CORBA::ULong>(user_data.length());
   ACE_Message_Block mb(length + 128);
@@ -42,8 +42,9 @@ void extract_Parameter_user_data(const std::string& user_data, const Encoding en
   Parameter p;
   ASSERT_TRUE(s >> p);
 
+  ASSERT_EQ(p._d(), PID_USER_DATA);
   DDS::UserDataQosPolicy ud_qos = p.user_data();
-  EXPECT_EQ(ud_qos.value.length(), length);
+  ASSERT_EQ(ud_qos.value.length(), length);
   for (CORBA::ULong i = 0; i < length; ++i) {
     EXPECT_EQ(ud_qos.value[i], user_data[i]);
   }
@@ -52,7 +53,7 @@ void extract_Parameter_user_data(const std::string& user_data, const Encoding en
 TEST(RtpsCoreTypeSupportImpl, InsertParameter)
 {
   ACE_Message_Block mb(512);
-  const Encoding encoding(Encoding::KIND_XCDR2);
+  const Encoding encoding(Encoding::KIND_XCDR1);
   Serializer s(&mb, encoding);
   EXPECT_TRUE(insert_Parameter_user_data(s, ""));
   EXPECT_TRUE(insert_Parameter_user_data(s, "insert_Parameter_user_data"));
