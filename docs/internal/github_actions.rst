@@ -153,6 +153,40 @@ These blocks are necessary because certain tests cannot properly run on GitHub A
   :doc:`running_tests`
     For how ``auto_run_tests.pl`` works in general.
 
+Blocked Tests
+=============
+
+Certain tests are blocked from GitHub actions because their failures are either unfixable, or are not represented on the
+scoreboard. If this is the case, we have to assume that the failure is due to some sort of limitation caused by the
+GitHub Actions runners.
+
+* performance-tests/bench/run_test.pl fan_frag show-logs
+
+  * Fails due to no available nodes discovered during wait. Fails on ``test_m10_o1d0_sec``.
+
+* tests/DCPS/Instances/run_test.pl single_instance multiple_datawriter keyed
+
+  * The instances tests in general are problematic on safety builds. This in one particular fails for CI but not on the current
+  scoreboard run. Fails on ``u18_esafe_js0`` and ``u18_bsafe_js0_FM-1f``.
+
+* tests/DCPS/SharedTransport/run_test.pl multicast
+
+  * Multicast times out waiting for remote peer. Fails on ``test_u20_p1_j8_FM-1f`` and ``test_u20_p1_sec`.
+
+* tests/DCPS/StringKey/run_test.pl
+
+  * A timeout occurs during the writer writing.  Fails on ``u18_bsafe_js0_FM-1f``.
+
+* tests/DCPS/Thrasher/run_test.pl high/aggressive/medium XXXX XXXX
+
+  * The more intense thrasher tests cause consistent failures due to the increased load from ASAN. GitHub Actions fails
+  these tests very consistently compared to the scoreboard which is more intermittent. Fails on ``test_u20_p1_asan_sec``.
+
+* tests/stress-tests/dds/DCPS/run_test.pl
+
+  * This test fails due to only getting ``17 of the expected >=19 total_count``.  Fails on ``test_m10_i0_j_FM-1f`` and
+  ``test_m10_o1d0_sec``.
+
 Test Results
 ============
 
