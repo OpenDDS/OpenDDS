@@ -167,7 +167,7 @@ GitHub Actions runners.
 * tests/DCPS/Instances/run_test.pl single_instance multiple_datawriter keyed
 
   * The instances tests in general are problematic on safety builds. This in one particular fails for CI but not on the current
-  scoreboard run. Fails on ``u18_esafe_js0`` and ``u18_bsafe_js0_FM-1f``.
+    scoreboard run. Fails on ``u18_esafe_js0`` and ``u18_bsafe_js0_FM-1f``.
 
 * tests/DCPS/SharedTransport/run_test.pl multicast
 
@@ -180,12 +180,12 @@ GitHub Actions runners.
 * tests/DCPS/Thrasher/run_test.pl high/aggressive/medium XXXX XXXX
 
   * The more intense thrasher tests cause consistent failures due to the increased load from ASAN. GitHub Actions fails
-  these tests very consistently compared to the scoreboard which is more intermittent. Fails on ``test_u20_p1_asan_sec``.
+    these tests very consistently compared to the scoreboard which is more intermittent. Fails on ``test_u20_p1_asan_sec``.
 
 * tests/stress-tests/dds/DCPS/run_test.pl
 
   * This test fails due to only getting ``17 of the expected >=19 total_count``.  Fails on ``test_m10_i0_j_FM-1f`` and
-  ``test_m10_o1d0_sec``.
+    ``test_m10_o1d0_sec``.
 
 Test Results
 ============
