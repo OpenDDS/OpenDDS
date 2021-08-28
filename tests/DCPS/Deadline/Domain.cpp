@@ -6,8 +6,14 @@
 
 #include <stdexcept>
 
+const int Domain::s_id = 11;
 const char* Domain::s_topic = "DeadlineTestTopic";
 const char* Domain::s_topic_type  = "DeadlineTestTopicType";
+const int Domain::s_key1 = 11;
+const int Domain::s_key2 = 13;
+const int Domain::n_msg = 10;
+const int Domain::n_instance = 2;
+const int Domain::n_expiration = 2;
 const DDS::Duration_t Domain::w_deadline = {4, 0}; //writer deadline period 4 second (required .sec > 1)
 const DDS::Duration_t Domain::r_deadline = {5, 0}; //reader deadline period 5 second (required .sec > 1)
 const OpenDDS::DCPS::TimeDuration Domain::w_sleep(w_deadline.sec * n_expiration + 1);

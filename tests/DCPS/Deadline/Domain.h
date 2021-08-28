@@ -6,14 +6,14 @@
 
 class Domain {
 public:
-  static const int s_id = 11;
+  static const int s_id;
   static const char* s_topic;
   static const char* s_topic_type;
-  static const int s_key1 = 11;
-  static const int s_key2 = 13;
-  static const int n_msg = 10;
-  static const int n_instance = 2;
-  static const int n_expiration = 2;
+  static const int s_key1;
+  static const int s_key2;
+  static const int n_msg;
+  static const int n_instance;
+  static const int n_expiration;
   static const DDS::Duration_t w_deadline;
   static const DDS::Duration_t r_deadline;
   static const OpenDDS::DCPS::TimeDuration w_sleep;
