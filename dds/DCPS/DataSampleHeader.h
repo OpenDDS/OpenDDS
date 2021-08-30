@@ -14,8 +14,6 @@
 #include "SequenceNumber.h"
 #include "RepoIdTypes.h"
 #include "Message_Block_Ptr.h"
-#include "TimeTypes.h"
-
 #include <iosfwd>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -260,11 +258,6 @@ struct OpenDDS_Dcps_Export DataSampleHeader : public PoolAllocationBase {
     default:
       return DDS::ALIVE_INSTANCE_STATE;
     }
-  }
-
-  SystemTimePoint get_source_timestamp() const
-  {
-    return SystemTimePoint(ACE_Time_Value(source_timestamp_sec_, source_timestamp_nanosec_ / 1000));
   }
 
 private:
