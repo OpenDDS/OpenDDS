@@ -17,6 +17,8 @@ static const ::DDS::Security::DatareaderCryptoHandle Local_Reader = 4;
 static const ::DDS::Security::DatawriterCryptoHandle Remote_Writer = 5;
 static const ::DDS::Security::DatareaderCryptoHandle Remote_Reader = 6;
 
+namespace {
+
 class dds_DCPS_security_CryptoBuiltInImpl : public Test
 {
 public:
@@ -38,6 +40,8 @@ private:
 
   CryptoBuiltInImpl test_class_;
 };
+
+}
 
 // In general the actual use of the internal interface isn't
 // important, it is just being used to drive test cases, so
@@ -116,6 +120,8 @@ TEST_F(dds_DCPS_security_CryptoBuiltInImpl, SetRemoteDataReaderTokens)
   ::DDS::Security::SecurityException ex;
   EXPECT_TRUE(get_inst().set_remote_datareader_crypto_tokens(Local_Writer, Remote_Reader, tokens, ex));
 }
+
+namespace {
 
 struct FakeSharedSecret
   : OpenDDS::DCPS::LocalObject<DDS::Security::SharedSecretHandle> {
@@ -226,6 +232,8 @@ private:
 protected:
   DDS::Security::SharedSecretHandle_var secret_handle_;
 };
+
+}
 
 TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoKeyFactoryFixture, NullInputHandles)
 {
@@ -561,6 +569,8 @@ TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoKeyFactoryFixture, UnRegisterDa
   //EXPECT_FALSE(GetFactory().unregister_datareader(4322, ex));
 }
 
+namespace {
+
 class dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest : public Test
 {
 public:
@@ -652,6 +662,7 @@ protected:
   } shared_secret_;
 };
 
+}
 
 TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest, encode_serialized_payload_NullHandle)
 {

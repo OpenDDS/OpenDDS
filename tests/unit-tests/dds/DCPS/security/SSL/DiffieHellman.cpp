@@ -13,6 +13,7 @@
 using namespace OpenDDS::Security::SSL;
 using OpenDDS::DCPS::move;
 
+namespace {
 
 class dds_DCPS_security_SSL_DiffieHellman : public ::testing::Test
 {
@@ -36,6 +37,8 @@ public:
   DiffieHellman dh3;
   DiffieHellman dh4;
 };
+
+}
 
 TEST_F(dds_DCPS_security_SSL_DiffieHellman, DH_SharedSecret_GenerationAndComparison)
 {

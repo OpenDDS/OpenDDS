@@ -9,6 +9,9 @@
 
 using namespace OpenDDS::DCPS;
 
+namespace OpenDDS {
+namespace Test {
+
 class MemoryPoolTest {
 public:
   // Allocate a block
@@ -1114,7 +1117,6 @@ FreeIndexTest()
 
 }
 
-
 void test_setup() {
   FreeIndex index(largest_free_);
   setup(index, 1024*5);
@@ -1390,11 +1392,16 @@ private:
 unsigned char
 FreeIndexTest::pool_ptr_[1024*1024];
 
+}
+
+}
+
 TEST(dds_DCPS_MemoryPool, maintest)
 {
   {
-    MemoryPoolTest test;
+    OpenDDS::Test::MemoryPoolTest test;
 
+    // TODO:  Each of these should be a TEST or TEST_F.
     test.test_pool_alloc();
     test.test_pool_allocs();
     test.test_pool_alloc_odd_size();
@@ -1446,10 +1453,11 @@ TEST(dds_DCPS_MemoryPool, maintest)
   }
 
   {
-    FreeIndexTest test;
+    OpenDDS::Test::FreeIndexTest test;
 
     test.test_setup();
 
+    // TODO:  Each of these should be a TEST or TEST_F.
     test.test_index_lookup();
 
     test.test_add();

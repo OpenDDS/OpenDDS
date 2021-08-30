@@ -19,6 +19,7 @@ using namespace OpenDDS::DCPS;
 using namespace OpenDDS::Security;
 using namespace testing;
 
+namespace {
 
 class dds_DCPS_security_framework_SecurityConfig : public Test
 {
@@ -50,6 +51,8 @@ public:
 
   static ACE_Configuration_Heap cf_;
 };
+
+}
 
 ACE_Configuration_Heap dds_DCPS_security_framework_SecurityConfig::cf_;
 

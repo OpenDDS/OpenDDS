@@ -14,6 +14,8 @@
 
 using namespace OpenDDS::Security::SSL;
 
+namespace {
+
 class dds_DCPS_security_SSL_SubjectName : public ::testing::Test
 {
 public:
@@ -36,6 +38,8 @@ public:
   SubjectName sn_ldap_cmp_;
   SubjectName sn_dce_cmp_;
 };
+
+}
 
 TEST_F(dds_DCPS_security_SSL_SubjectName, Parse_LDAPv3_Single_Success)
 {

@@ -13,6 +13,8 @@
 
 using namespace OpenDDS::Security::SSL;
 
+namespace {
+
 class dds_DCPS_security_SSL_PrivateKey : public ::testing::Test
 {
 public:
@@ -127,6 +129,8 @@ public:
   DDS::OctetSeq world_;
   const DDS::OctetSeq empty_;
 };
+
+}
 
 TEST_F(dds_DCPS_security_SSL_PrivateKey, SignAndVerify_Success)
 {

@@ -12,6 +12,8 @@
 
 using namespace OpenDDS::Security::SSL;
 
+namespace {
+
 class dds_DCPS_security_SSL_Certificate : public ::testing::Test
 {
 public:
@@ -84,6 +86,8 @@ public:
   Certificate signed_ec_;
   Certificate not_signed_;
 };
+
+}
 
 TEST_F(dds_DCPS_security_SSL_Certificate, Validate_RSASSA_PSS_SHA256_Success)
 {

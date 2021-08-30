@@ -15,6 +15,8 @@
 
 using namespace OpenDDS::Security::SSL;
 
+namespace {
+
 class dds_DCPS_security_SSL_SignedDocument : public ::testing::Test
 {
 public:
@@ -56,6 +58,8 @@ public:
   Certificate ca_data_;
   SignedDocument doc_;
 };
+
+}
 
 TEST_F(dds_DCPS_security_SSL_SignedDocument, GetContent_Success)
 {
