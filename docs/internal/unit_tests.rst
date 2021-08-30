@@ -131,7 +131,7 @@ Writing a New Unit Test
 1. Add the test to the appropriate file under :ghfile:`tests/unit-tests`.
 2. Name the test after the code it is meant to cover.
    For example, the ``tests/unit-tests/dds/DCPS/security/AccessControlBuiltInImpl.cpp`` unit test covers the ``dds/DCPS/security/AccessControlBuiltInImpl.(h|cpp)`` files.
-3. Update the ``tests/unit-tests/UnitTests.mpc`` file if necessary.
+3. Update the :ghfile:`tests/unit-tests/UnitTests.mpc` file if necessary.
 
 ***********
 Using GTest
@@ -149,7 +149,7 @@ A basic unit test has the following form
   }
 
 All tests in a unit test source file must have the same TestModule which is name of the unit under test with underscores, e.g., ``dds_DCPS_security_AccessControlBuiltInImpl``.
-This naming covention is required for inentional unit test coverage.
+This naming convention is required for intentional unit test coverage.
 The TestSubmodule can be any identifier, however, it should typical describe the class, function, or scenario being tested.
 
 Each tests contains evaluators.
