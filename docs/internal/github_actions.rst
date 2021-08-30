@@ -160,10 +160,6 @@ Certain tests are blocked from GitHub actions because their failures are either 
 scoreboard. If this is the case, we have to assume that the failure is due to some sort of limitation caused by the
 GitHub Actions runners.
 
-* performance-tests/bench/run_test.pl fan_frag show-logs
-
-  * Fails due to no available nodes discovered during wait. Fails on ``test_m10_o1d0_sec``.
-
 * tests/DCPS/Instances/run_test.pl single_instance multiple_datawriter keyed
 
   * The instances tests in general are problematic on safety builds. This in one particular fails for CI but not on the current
