@@ -151,6 +151,8 @@ private:
     MonotonicTimePoint expiration_;
   };
 
+  mutable ACE_Thread_Mutex mutex_;
+
 #ifdef ACE_HAS_CPP11
   typedef OPENDDS_UNORDERED_MAP_CHASH(FragKey, FragInfo, FragKeyHash) FragInfoMap;
 #else
