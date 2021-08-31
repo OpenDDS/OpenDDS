@@ -65,7 +65,6 @@ namespace DCPS {
 
   private:
     typedef XML::XML_Typedef XML_Helper_type;
-
   };
 }
 }

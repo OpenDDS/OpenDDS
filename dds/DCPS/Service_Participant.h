@@ -558,7 +558,7 @@ private:
   DDS::WriterDataLifecycleQosPolicy   initial_WriterDataLifecycleQosPolicy_;
   DDS::ReaderDataLifecycleQosPolicy   initial_ReaderDataLifecycleQosPolicy_;
   DDS::PropertyQosPolicy              initial_PropertyQosPolicy_;
-  DDS::DataRepresentationQosPolicy initial_DataRepresentationQosPolicy_;
+  DDS::DataRepresentationQosPolicy    initial_DataRepresentationQosPolicy_;
 
   DDS::DomainParticipantQos           initial_DomainParticipantQos_;
   DDS::TopicQos                       initial_TopicQos_;
