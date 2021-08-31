@@ -99,9 +99,9 @@ private:
   bool complete_to_minimal_bitset(const CompleteBitsetType& ct, MinimalBitsetType& mt) const;
 
   typedef OPENDDS_MAP(TypeIdentifier, DynamicType_rch) DynamicTypeMap;
-  void complete_struct_member_to_member_descriptor(MemberDescriptor_rch& md, const CompleteStructMember& cm, DynamicTypeMap& dt_map) const;
-  void complete_union_member_to_member_descriptor(MemberDescriptor_rch& md, const CompleteUnionMember& cm, DynamicTypeMap& dt_map) const;
-  void complete_annotation_member_to_member_descriptor(MemberDescriptor_rch& md, const CompleteAnnotationParameter& cm, DynamicTypeMap& dt_map) const;
+  MemberDescriptor_rch complete_struct_member_to_member_descriptor(const CompleteStructMember& cm, DynamicTypeMap& dt_map) const;
+  MemberDescriptor_rch complete_union_member_to_member_descriptor(const CompleteUnionMember& cm, DynamicTypeMap& dt_map) const;
+  MemberDescriptor_rch complete_annotation_member_to_member_descriptor(const CompleteAnnotationParameter& cm, DynamicTypeMap& dt_map) const;
   void complete_to_dynamic_i(DynamicType_rch& dt, const CompleteTypeObject& cto, DynamicTypeMap& dt_map) const;
   DynamicType_rch type_identifier_to_dynamic(const TypeIdentifier& ti, DynamicTypeMap& dt_map) const;
 
