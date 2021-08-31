@@ -11,6 +11,7 @@
 #include "dcps_export.h"
 #include "PoolAllocator.h"
 #include "Serializer.h"
+#include "Hash.h"
 
 #include <dds/DdsDcpsGuidC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
@@ -269,5 +270,9 @@ bit_key_to_repo_id(const DDS::BuiltinTopicKey_t& key)
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
+#if defined ACE_HAS_CPP11
+OPENDDS_OOAT_STD_HASH(OpenDDS::DCPS::GUID_t, OpenDDS_Dcps_Export);
+#endif
 
 #endif /* OPENDDS_DDS_DCPS_GUIDUTILS_H */

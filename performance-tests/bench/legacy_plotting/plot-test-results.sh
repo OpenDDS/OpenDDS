@@ -62,8 +62,8 @@ parse_input ()
 #
 ###############################################################################
 
-declare -a protocols=("tcp" "udp" "multi-be" "multi-re" "rtps" ) #"raw-tcp" "raw-udp")
-declare -a protocol_descs=('TCP' 'UDP' 'Best Effort Multicast' 'Reliable Multicast' 'RTPS') #'Raw TCP' 'Raw UDP')
+declare -a protocols=("tcp" "udp" "multicast-be" "multicast-rel" "rtps" "raw-tcp" "raw-udp")
+declare -a protocol_descs=('TCP' 'UDP' 'Best Effort Multicast' 'Reliable Multicast' 'RTPS' 'Raw TCP' 'Raw UDP')
 
 plot_latency_results ()
 {

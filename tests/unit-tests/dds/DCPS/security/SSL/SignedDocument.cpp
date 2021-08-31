@@ -5,13 +5,16 @@
 
 #ifdef OPENDDS_SECURITY
 
-#include "gtest/gtest.h"
-#include "dds/DCPS/security/OpenSSL_init.h"
-#include "dds/DCPS/security/SSL/SignedDocument.h"
-#include "dds/DCPS/security/SSL/Certificate.h"
-#include "dds/DCPS/SequenceIterator.h"
+#include <dds/DCPS/security/OpenSSL_init.h>
+#include <dds/DCPS/security/SSL/SignedDocument.h>
+#include <dds/DCPS/security/SSL/Certificate.h>
+#include <dds/DCPS/SequenceIterator.h>
+
+#include <gtest/gtest.h>
+
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 using namespace OpenDDS::Security::SSL;
 

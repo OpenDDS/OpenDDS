@@ -1,5 +1,5 @@
-#ifndef SYNC_H
-#define SYNC_H
+#ifndef OPENDDS_MODEL_SYNC_H
+#define OPENDDS_MODEL_SYNC_H
 
 #include "model_export.h"
 #include "dds/DdsDcpsC.h"

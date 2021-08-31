@@ -87,7 +87,7 @@ TransportSendStrategy::TransportSendStrategy(
 
   // Create a ThreadSynch object just for us.
   DirectPriorityMapper mapper(priority);
-  this->synch_.reset(thread_sync_strategy->create_synch_object(
+  synch_.reset(thread_sync_strategy->create_synch_object(
                    synch_resource,
 #ifdef ACE_WIN32
                    ACE_DEFAULT_THREAD_PRIORITY,
@@ -100,7 +100,7 @@ TransportSendStrategy::TransportSendStrategy(
   // don't want to keep asking for it over and over.
   max_header_size_ = TransportHeader::get_max_serialized_size();
 
-  delayed_delivered_notification_queue_.reserve(this->max_samples_);
+  delayed_delivered_notification_queue_.reserve(max_samples_);
 }
 
 TransportSendStrategy::~TransportSendStrategy()
@@ -108,16 +108,16 @@ TransportSendStrategy::~TransportSendStrategy()
   DBG_ENTRY_LVL("TransportSendStrategy","~TransportSendStrategy",6);
 
 
-  this->delayed_delivered_notification_queue_.clear();
+  delayed_delivered_notification_queue_.clear();
 }
 
 void
 TransportSendStrategy::send_buffer(TransportSendBuffer* send_buffer)
 {
-  this->send_buffer_ = send_buffer;
+  send_buffer_ = send_buffer;
 
-  if (this->send_buffer_ != 0) {
-    this->send_buffer_->bind(this);
+  if (send_buffer_ != 0) {
+    send_buffer_->bind(this);
   }
 }
 
@@ -129,12 +129,12 @@ TransportSendStrategy::perform_work()
   SendPacketOutcome outcome;
   bool no_more_work = false;
 
-  { // scope for the guard(this->lock_);
-    GuardType guard(this->lock_);
+  { // scope for the guard(lock_);
+    GuardType guard(lock_);
 
-    VDBG_LVL((LM_DEBUG, "(%P|%t) DBG: perform_work mode: %C\n", mode_as_str(this->mode_)), 5);
+    VDBG_LVL((LM_DEBUG, "(%P|%t) DBG: perform_work mode: %C\n", mode_as_str(mode_)), 5);
 
-    if (this->mode_ == MODE_TERMINATED) {
+    if (mode_ == MODE_TERMINATED) {
       VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                 "Entered perform_work() and mode_ is MODE_TERMINATED - "
                 "we lost connection and could not reconnect, just return "
@@ -158,10 +158,10 @@ TransportSendStrategy::perform_work()
     // WORK_OUTCOME_NO_MORE_TO_DO to tell our caller that we really don't
     // see a need for it to call our perform_work() again (at least not
     // right now).
-    if (this->mode_ != MODE_QUEUE && this->mode_ != MODE_SUSPEND) {
+    if (mode_ != MODE_QUEUE && mode_ != MODE_SUSPEND) {
       VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                 "Entered perform_work() and mode_ is %C - just return "
-                "WORK_OUTCOME_NO_MORE_TO_DO.\n", mode_as_str(this->mode_)), 5);
+                "WORK_OUTCOME_NO_MORE_TO_DO.\n", mode_as_str(mode_)), 5);
       return WORK_OUTCOME_NO_MORE_TO_DO;
     }
 
@@ -173,7 +173,7 @@ TransportSendStrategy::perform_work()
     // packet.  When we find the current packet in the "partially sent" state,
     // we will not touch the queue_ - we will just try to send the unsent
     // bytes in the current (partially sent) packet.
-    const size_t header_length = this->header_.length_;
+    const size_t header_length = header_.length_;
 
     if (header_length == 0) {
       VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
@@ -186,7 +186,7 @@ TransportSendStrategy::perform_work()
 
       // Before we build the packet from the queue_, let's make sure that
       // there is actually something on the queue_ to build from.
-      if (this->queue_.size() == 0) {
+      if (queue_.size() == 0) {
         VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                   "But the queue is empty.  We have cleared the "
                   "backpressure situation.\n"),5);
@@ -200,7 +200,7 @@ TransportSendStrategy::perform_work()
                   "WORK_OUTCOME_NO_MORE_TO_DO.\n"), 5);
 
         // Flip the mode back to MODE_DIRECT.
-        this->mode_ = MODE_DIRECT;
+        mode_ = MODE_DIRECT;
 
         // And return WORK_OUTCOME_NO_MORE_TO_DO to tell our caller that
         // perform_work() doesn't need to be called again (at this time).
@@ -213,13 +213,13 @@ TransportSendStrategy::perform_work()
 
       // There is stuff in the queue_ if we get to this point in the logic.
       // Build-up the current packet using element(s) from the queue_.
-      this->get_packet_elems_from_queue();
+      get_packet_elems_from_queue();
 
       VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                 "Prepare the packet from the packet elems_.\n"), 5);
 
       // Now we can prepare the new packet to be sent.
-      this->prepare_packet();
+      prepare_packet();
 
       VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                 "Packet has been prepared from packet elems_.\n"), 5);
@@ -237,20 +237,20 @@ TransportSendStrategy::perform_work()
     // from the queue_ (and subsequently prepared for sending) - it doesn't
     // matter.  Just attempt to send as many of the "unsent" bytes in the
     // packet as possible.
-    outcome = this->send_packet();
+    outcome = send_packet();
 
     // If we sent the whole packet (eg, partial_send is false), and the queue_
     // is now empty, then we've cleared the backpressure situation.
-    if ((outcome == OUTCOME_COMPLETE_SEND) && (this->queue_.size() == 0)) {
+    if ((outcome == OUTCOME_COMPLETE_SEND) && (queue_.size() == 0)) {
       VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                 "Flip the mode to MODE_DIRECT, and then return "
                 "WORK_OUTCOME_NO_MORE_TO_DO.\n"), 5);
 
       // Revert back to MODE_DIRECT mode.
-      this->mode_ = MODE_DIRECT;
+      mode_ = MODE_DIRECT;
       no_more_work = true;
     }
-  } // End of scope for guard(this->lock_);
+  } // End of scope for guard(lock_);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
             "The outcome of the send_packet() was %d.\n", outcome), 5);
@@ -282,9 +282,9 @@ TransportSendStrategy::perform_work()
               "Now flip to MODE_SUSPEND before we try to reconnect.\n"), 5);
 
     bool do_suspend = true;
-    this->relink(do_suspend);
+    relink(do_suspend);
 
-    if (this->mode_ == MODE_SUSPEND) {
+    if (mode_ == MODE_SUSPEND) {
       VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                 "The reconnect has not done yet and we are still in MODE_SUSPEND. "
                 "Return WORK_OUTCOME_CLOGGED_RESOURCE.\n"), 5);
@@ -292,7 +292,7 @@ TransportSendStrategy::perform_work()
       // don't desire another call to this perform_work() method.
       return WORK_OUTCOME_NO_MORE_TO_DO;
 
-    } else if (this->mode_ == MODE_TERMINATED) {
+    } else if (mode_ == MODE_TERMINATED) {
       VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                 "Reconnect failed, now we are in MODE_TERMINATED\n"), 5);
       return WORK_OUTCOME_BROKEN_RESOURCE;
@@ -304,7 +304,7 @@ TransportSendStrategy::perform_work()
       // If the datalink is re-established then notify the synch
       // thread to perform work.  We do not hold the object lock at
       // this point.
-      this->synch_->work_available();
+      synch_->work_available();
     }
   }
 
@@ -374,7 +374,7 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent)
         "Peek at the element at the front of the packet elems_.\n"));
 
   // This is the element currently at the front of elems_.
-  TransportQueueElement* element = this->elems_.peek();
+  TransportQueueElement* element = elems_.peek();
 
   if(!element){
     ACE_DEBUG((LM_INFO, "(%P|%t) WARNING: adjust_packet_after_send skipping due to NULL element\n"));
@@ -406,7 +406,7 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent)
             "At top of 'num bytes left' loop.  num_bytes_left == [%d].\n",
             num_bytes_left));
 
-      const int block_length = static_cast<int>(this->pkt_chain_->length());
+      const int block_length = static_cast<int>(pkt_chain_->length());
 
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
             "Length of block at front of pkt_chain_ is [%d].\n",
@@ -423,12 +423,12 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent)
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "Extract the fully sent block from the pkt_chain_.\n"));
 
-        ACE_Message_Block* fully_sent_block = this->pkt_chain_;
+        ACE_Message_Block* fully_sent_block = pkt_chain_;
 
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "Set pkt_chain_ to pkt_chain_->cont().\n"));
 
-        this->pkt_chain_ = this->pkt_chain_->cont();
+        pkt_chain_ = pkt_chain_->cont();
 
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "Set the fully sent block's cont() to 0.\n"));
@@ -445,7 +445,7 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent)
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "Now, num_bytes_left == [%d].\n", num_bytes_left));
 
-        if (!this->header_complete_) {
+        if (!header_complete_) {
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                 "Since the header_complete_ flag is false, it means "
                 "that the packet header block was still in the "
@@ -457,7 +457,7 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent)
 
           // That was the packet header block.  And now we know that it
           // has been completely sent.
-          this->header_complete_ = true;
+          header_complete_ = true;
 
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                 "Release the fully sent block.\n"));
@@ -513,21 +513,21 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent)
                   "the packet elems_ (we were just peeking).\n"));
 
             // Extract the element from the elems_ collection
-            element = this->elems_.get();
+            element = elems_.get();
 
             VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                   "Tell the element that a decision has been made "
                   "regarding its fate - data_delivered().\n"));
 
             // Inform the element that the data has been delivered.
-            this->add_delayed_notification(element);
+            add_delayed_notification(element);
 
             VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                   "Peek at the next element in the packet "
                   "elems_.\n"));
 
             // Set up for the next element in elems_ by peek()'ing.
-            element = this->elems_.peek();
+            element = elems_.peek();
 
             if (element != 0) {
               VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -586,9 +586,9 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent)
               "by the num_bytes_left (%d).\n", num_bytes_left));
 
         // Only part of the current block was sent.
-        this->pkt_chain_->rd_ptr(num_bytes_left);
+        pkt_chain_->rd_ptr(num_bytes_left);
 
-        if (this->header_complete_) {
+        if (header_complete_) {
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                 "And since the packet header block has already been "
                 "completely sent, add num_bytes_left to the "
@@ -625,18 +625,18 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent)
         "num_non_header_bytes_sent.\n"));
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Before, header_.length_ == %d.\n",
-        this->header_.length_));
+        header_.length_));
 
   // Adjust the packet header_.length_ to indicate how many non header
   // bytes are left to send.
-  this->header_.length_ -= static_cast<ACE_UINT32>(num_non_header_bytes_sent);
+  header_.length_ -= static_cast<ACE_UINT32>(num_non_header_bytes_sent);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "After, header_.length_ == %d.\n",
-        this->header_.length_));
+        header_.length_));
 
   // Returns 0 if the entire packet was sent, and returns 1 otherwise.
-  int rc = (this->header_.length_ == 0) ? 0 : 1;
+  int rc = (header_.length_ == 0) ? 0 : 1;
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Adjustments all done.  Returning [%d].  0 means entire packet "
@@ -696,7 +696,7 @@ TransportSendStrategy::send_delayed_notifications(const TransportQueueElement::M
   if (!found_element)
     return false;
 
-  bool transport_shutdown = this->transport_.is_shut_down();
+  bool transport_shutdown = transport_.is_shut_down();
 
   if (num_delayed_notifications == 1) {
     // optimization for the common case
@@ -735,13 +735,13 @@ TransportSendStrategy::terminate_send(bool graceful_disconnecting)
   bool reset_flag = true;
 
   {
-    GuardType guard(this->lock_);
+    GuardType guard(lock_);
 
     // If the terminate_send call due to a non-graceful disconnection before
     // a datalink shutdown then we will not try to send the graceful disconnect
     // message.
-    if ((this->mode_ == MODE_TERMINATED || this->mode_ == MODE_SUSPEND)
-        && !this->graceful_disconnecting_) {
+    if ((mode_ == MODE_TERMINATED || mode_ == MODE_SUSPEND)
+        && !graceful_disconnecting_) {
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
             "It was already terminated non gracefully, will not set to graceful disconnecting\n"));
       reset_flag = false;
@@ -750,11 +750,11 @@ TransportSendStrategy::terminate_send(bool graceful_disconnecting)
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:  Now flip to MODE_TERMINATED\n"));
 
-  this->clear(MODE_TERMINATED);
+  clear(MODE_TERMINATED);
 
   if (reset_flag) {
-    GuardType guard(this->lock_);
-    this->graceful_disconnecting_ = graceful_disconnecting;
+    GuardType guard(lock_);
+    graceful_disconnecting_ = graceful_disconnecting;
   }
 }
 
@@ -772,16 +772,16 @@ TransportSendStrategy::clear(SendMode new_mode, SendMode old_mode)
   QueueType elems;
   QueueType queue;
   {
-    GuardType guard(this->lock_);
+    GuardType guard(lock_);
 
-    if (old_mode != MODE_NOT_SET && this->mode_ != old_mode)
+    if (old_mode != MODE_NOT_SET && mode_ != old_mode)
       return;
 
-    if (this->header_.length_ > 0) {
+    if (header_.length_ > 0) {
       // Clear the messages in the pkt_chain_ that is partially sent.
       // We just reuse these functions for normal partial send except actual sending.
-      int num_bytes_left = static_cast<int>(this->pkt_chain_->total_length());
-      int result = this->adjust_packet_after_send(num_bytes_left);
+      int num_bytes_left = static_cast<int>(pkt_chain_->total_length());
+      int result = adjust_packet_after_send(num_bytes_left);
 
       if (result == 0) {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -793,15 +793,15 @@ TransportSendStrategy::clear(SendMode new_mode, SendMode old_mode)
       }
     }
 
-    elems.swap(this->elems_);
-    queue.swap(this->queue_);
+    elems.swap(elems_);
+    queue.swap(queue_);
 
-    this->header_.length_ = 0;
-    this->pkt_chain_ = 0;
-    this->header_complete_ = false;
-    this->start_counter_ = 0;
-    this->mode_ = new_mode;
-    this->mode_before_suspend_ = MODE_NOT_SET;
+    header_.length_ = 0;
+    pkt_chain_ = 0;
+    header_complete_ = false;
+    start_counter_ = 0;
+    mode_ = new_mode;
+    mode_before_suspend_ = MODE_NOT_SET;
   }
 
   // We need remove the queued elements outside the lock,
@@ -821,9 +821,9 @@ TransportSendStrategy::start()
   DBG_ENTRY_LVL("TransportSendStrategy","start",6);
 
   {
-    GuardType guard(this->lock_);
+    GuardType guard(lock_);
 
-    if (!this->start_i()) {
+    if (!start_i()) {
       return -1;
     }
   }
@@ -832,15 +832,15 @@ TransportSendStrategy::start()
 
   // If a secondary send buffer is bound, sent headers should
   // be cached to properly maintain the buffer:
-  if (this->send_buffer_ != 0) {
-    header_chunks += this->send_buffer_->capacity();
+  if (send_buffer_ != 0) {
+    header_chunks += send_buffer_->capacity();
 
   } else {
     header_chunks += 1;
   }
 
-  this->header_db_allocator_.reset( new TransportDataBlockAllocator(header_chunks));
-  this->header_mb_allocator_.reset( new TransportMessageBlockAllocator(header_chunks));
+  header_db_allocator_.reset( new TransportDataBlockAllocator(header_chunks));
+  header_mb_allocator_.reset( new TransportMessageBlockAllocator(header_chunks));
 
   // Since we (the TransportSendStrategy object) are a reference-counted
   // object, but the synch_ object doesn't necessarily know this, we need
@@ -848,7 +848,7 @@ TransportSendStrategy::start()
   // We will do the reverse when we unregister ourselves (as a worker) from
   // the synch_ object.
 
-  if (this->synch_->register_worker(*this) == -1) {
+  if (synch_->register_worker(*this) == -1) {
 
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ERROR: TransportSendStrategy failed to register "
@@ -929,13 +929,13 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
   DBG_ENTRY_LVL("TransportSendStrategy", "send", 6);
 
   {
-    GuardType guard(this->lock_);
+    GuardType guard(lock_);
 
-    if (this->link_released_) {
-      this->add_delayed_notification(element);
+    if (link_released_) {
+      add_delayed_notification(element);
 
     } else {
-      if (this->mode_ == MODE_TERMINATED && !this->graceful_disconnecting_) {
+      if (mode_ == MODE_TERMINATED && !graceful_disconnecting_) {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "TransportSendStrategy::send: mode is MODE_TERMINATED and not in "
               "graceful disconnecting, so discard message.\n"));
@@ -950,22 +950,22 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
             element_length));
 
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "this->max_header_size_ == [%d].\n",
-            this->max_header_size_));
+            "max_header_size_ == [%d].\n",
+            max_header_size_));
 
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "this->max_size_ == [%d].\n",
-            this->max_size_));
+            "max_size_ == [%d].\n",
+            max_size_));
 
-      const size_t max_message_size = this->max_message_size();
+      const size_t max_msg_size = max_message_size();
 
       // Really an assert.  We can't accept any element that wouldn't fit into
       // a transport packet by itself (ie, it would be the only element in the
       // packet).  This max_size_ is the user-configurable maximum, not based
-      // on the transport's inherent maximum message size.  If max_message_size
+      // on the transport's inherent maximum message size.  If max_msg_size
       // is non-zero, we will fragment so max_size_ doesn't apply per-element.
-      if (max_message_size == 0 &&
-          this->max_header_size_ + element_length > this->max_size_) {
+      if (max_msg_size == 0 &&
+          max_header_size_ + element_length > max_size_) {
         ACE_ERROR((LM_ERROR,
                    "(%P|%t) ERROR: Element too large (%Q) "
                    "- won't fit into packet.\n", ACE_UINT64(element_length)));
@@ -973,22 +973,22 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
       }
 
       // Check the mode_ to see if we simply put the element on the queue.
-      if (this->mode_ == MODE_QUEUE || this->mode_ == MODE_SUSPEND) {
+      if (mode_ == MODE_QUEUE || mode_ == MODE_SUSPEND) {
         VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
-                  "this->mode_ == %C, so queue elem and leave.\n",
-                  mode_as_str(this->mode_)), 5);
+                  "mode_ == %C, so queue elem and leave.\n",
+                  mode_as_str(mode_)), 5);
 
-        this->queue_.put(element);
+        queue_.put(element);
 
-        if (this->mode_ != MODE_SUSPEND) {
-          this->synch_->work_available();
+        if (mode_ != MODE_SUSPEND) {
+          synch_->work_available();
         }
 
         return;
       }
 
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "this->mode_ == MODE_DIRECT.\n"));
+            "mode_ == MODE_DIRECT.\n"));
 
       // We are in the MODE_DIRECT send mode.  When in this mode, the send()
       // calls will "build up" the transport packet to be sent directly when it
@@ -1020,11 +1020,11 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
           ));
 
       const size_t space_needed =
-        (max_message_size > 0)
+        (max_msg_size > 0)
         ? /* fragmenting */ DataSampleHeader::get_max_serialized_size() + MIN_FRAG
         : /* not fragmenting */ element_length;
 
-      if ((exclusive && (this->elems_.size() != 0))
+      if ((exclusive && (elems_.size() != 0))
           || (current_space_available() < space_needed)) {
 
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -1033,22 +1033,22 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
 
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "max_header_size_: %d, header_.length_: %d, element_length: %d\n"
-              , this->max_header_size_, this->header_.length_, element_length));
+              , max_header_size_, header_.length_, element_length));
 
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "Tot possible length: %d, max_len: %d\n"
-              , this->max_header_size_ + this->header_.length_ + element_length
-              , this->max_size_));
+              , max_header_size_ + header_.length_ + element_length
+              , max_size_));
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "current elem size: %d\n"
-              , this->elems_.size()));
+              , elems_.size()));
 
         // Send the current packet, and deal with the current element
         // afterwards.
         // The invocation's relink status should dictate the direct_send's
-        // relink. We don't want a (relink == false) invocation to end up
+        // do_relink. We don't want a (relink == false) invocation to end up
         // doing a relink. Think of (relink == false) as a non-blocking call.
-        this->direct_send(relink);
+        direct_send(relink);
 
         // Now check to see if we flipped into MODE_QUEUE, which would mean
         // that the direct_send() experienced backpressure, and the
@@ -1058,13 +1058,13 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
         // Otherwise, if the mode_ is still MODE_DIRECT, we can just
         // "drop" through to the next step in the logic where we append the
         // current element to the current packet.
-        if (this->mode_ == MODE_QUEUE) {
+        if (mode_ == MODE_QUEUE) {
           VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                     "We experienced backpressure on that direct send, as "
                     "the mode_ is now MODE_QUEUE or MODE_SUSPEND.  "
                     "Queue elem and leave.\n"), 5);
-          this->queue_.put(element);
-          this->synch_->work_available();
+          queue_.put(element);
+          synch_->work_available();
 
           return;
         }
@@ -1074,17 +1074,17 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
       bool first_pkt = true; // enter the loop 1st time through unconditionally
       for (TransportQueueElement* next_fragment = 0;
            (first_pkt || next_fragment)
-           && (this->mode_ == MODE_DIRECT || this->mode_ == MODE_TERMINATED);) {
+           && (mode_ == MODE_DIRECT || mode_ == MODE_TERMINATED);) {
            // We do need to send in MODE_TERMINATED (GRACEFUL_DISCONNECT msg)
 
         if (next_fragment) {
           element = next_fragment;
           element_length = next_fragment->msg()->total_length();
-          this->header_.first_fragment_ = false;
+          header_.first_fragment_ = false;
         }
 
-        this->header_.last_fragment_ = false;
-        if (max_message_size) { // fragmentation enabled
+        header_.last_fragment_ = false;
+        if (max_msg_size) { // fragmentation enabled
           const size_t avail = current_space_available();
           if (element_length > avail) {
             VDBG_LVL((LM_TRACE, "(%P|%t) DBG:   Fragmenting %B > %B\n", element_length, avail), 0);
@@ -1097,11 +1097,11 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
             element = ep.first;
             element_length = element->msg()->total_length();
             next_fragment = ep.second;
-            this->header_.first_fragment_ = first_pkt;
+            header_.first_fragment_ = first_pkt;
           } else if (next_fragment) {
             // We are sending the "tail" element of a previous fragment()
             // operation, and this element didn't itself require fragmentation
-            this->header_.last_fragment_ = true;
+            header_.last_fragment_ = true;
             next_fragment = 0;
           }
         }
@@ -1118,15 +1118,15 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
         // the current packet.
 
         // Add the current element to the collection of packet elements.
-        this->elems_.put(element);
+        elems_.put(element);
 
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "Before, the header_.length_ == [%d].\n",
-              this->header_.length_));
+              header_.length_));
 
         // Adjust the header_.length_ to account for the length of the element.
-        this->header_.length_ += static_cast<ACE_UINT32>(element_length);
-        const size_t message_length = this->header_.length_;
+        header_.length_ += static_cast<ACE_UINT32>(element_length);
+        const size_t message_length = header_.length_;
 
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "After adding element's length, the header_.length_ == [%d].\n",
@@ -1146,25 +1146,25 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
         // - The current element (currently part of the packet elems_)
         //   requires an exclusive packet.
         //
-        if (next_fragment || (this->elems_.size() >= this->max_samples_)
-            || (this->max_header_size_ + message_length > this->optimum_size_)
+        if (next_fragment || (elems_.size() >= max_samples_)
+            || (max_header_size_ + message_length > optimum_size_)
             || exclusive) {
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                 "Now the current packet looks full - send it (directly).\n"));
 
-          this->direct_send(relink);
+          direct_send(relink);
 
-          if (next_fragment && this->mode_ != MODE_DIRECT) {
-            if (this->mode_ == MODE_QUEUE) {
-              this->queue_.put(next_fragment);
-              this->synch_->work_available();
+          if (next_fragment && mode_ != MODE_DIRECT) {
+            if (mode_ == MODE_QUEUE) {
+              queue_.put(next_fragment);
+              synch_->work_available();
 
             } else {
               next_fragment->data_dropped(true /* dropped by transport */);
             }
           } else if (mode_ == MODE_QUEUE) {
             // Background thread handles packets in progress
-            this->synch_->work_available();
+            synch_->work_available();
           }
 
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -1172,7 +1172,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
 
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                 "And we %C as a result of the direct_send() call.\n",
-                ((this->mode_ == MODE_QUEUE) ? "flipped into MODE_QUEUE"
+                ((mode_ == MODE_QUEUE) ? "flipped into MODE_QUEUE"
                                              : "stayed in MODE_DIRECT")));
 
         } else {
@@ -1180,15 +1180,15 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
                 "Packet not sent. Send conditions weren't satisfied.\n"));
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                 "elems_.size(): %d, max_samples_: %d\n",
-                int(this->elems_.size()), int(this->max_samples_)));
+                int(elems_.size()), int(max_samples_)));
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                 "header_size_: %d, optimum_size_: %d\n",
-                int(this->max_header_size_ + message_length),
-                int(this->optimum_size_)));
+                int(max_header_size_ + message_length),
+                int(optimum_size_)));
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                 "element_requires_exclusive_packet: %d\n", int(exclusive)));
 
-          if (this->mode_ == MODE_QUEUE) {
+          if (mode_ == MODE_QUEUE) {
             VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                   "We flipped into MODE_QUEUE.\n"));
 
@@ -1209,28 +1209,28 @@ TransportSendStrategy::send_stop(RepoId /*repoId*/)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","send_stop",6);
   {
-    GuardType guard(this->lock_);
+    GuardType guard(lock_);
 
-    if (this->link_released_)
+    if (link_released_)
       return;
 
-    if (this->start_counter_ == 0) {
+    if (start_counter_ == 0) {
       // This is an indication of a logic error.  This is more of an assert.
       VDBG_LVL((LM_ERROR,
                 "(%P|%t) ERROR: Received unexpected send_stop() call.\n"), 5);
       return;
     }
 
-    --this->start_counter_;
+    --start_counter_;
 
-    if (this->start_counter_ != 0) {
+    if (start_counter_ != 0) {
       // This wasn't the last send_stop() that we are expecting.  We only
       // really honor the first send_start() and the last send_stop().
       // We can return without doing anything else in this case.
       return;
     }
 
-    if (this->mode_ == MODE_TERMINATED && !this->graceful_disconnecting_) {
+    if (mode_ == MODE_TERMINATED && !graceful_disconnecting_) {
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
             "TransportSendStrategy::send_stop: dont try to send current packet "
             "since mode is MODE_TERMINATED and not in graceful disconnecting.\n"));
@@ -1253,16 +1253,16 @@ TransportSendStrategy::send_stop(RepoId /*repoId*/)
     // MODE_DIRECT.  It means that we may have some sample(s) in the
     // current packet that have never been sent.  This is our
     // opportunity to send the current packet directly if this is the case.
-    if (this->mode_ == MODE_QUEUE || this->mode_ == MODE_SUSPEND) {
+    if (mode_ == MODE_QUEUE || mode_ == MODE_SUSPEND) {
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
             "But since we are in %C, we don't have to do "
             "anything more in this important send_stop().\n",
-            mode_as_str(this->mode_)));
+            mode_as_str(mode_)));
       // We don't do anything if we are in MODE_QUEUE.  Just leave.
       return;
     }
 
-    size_t header_length = this->header_.length_;
+    size_t header_length = header_.length_;
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "We are in MODE_DIRECT in an important send_stop() - "
           "header_.length_ == [%d].\n", header_length));
@@ -1270,24 +1270,24 @@ TransportSendStrategy::send_stop(RepoId /*repoId*/)
     // Only attempt to send the current packet (directly) if the current
     // packet actually contains something (it could be empty).
     if ((header_length > 0) &&
-        //(this->elems_.size ()+this->not_yet_pac_q_->size() > 0))
-        (this->elems_.size() > 0)) {
+        //(elems_.size ()+not_yet_pac_q_->size() > 0))
+        (elems_.size() > 0)) {
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
             "There is something in the current packet - attempt to send "
             "it (directly) now.\n"));
       // If a relink needs to be done for this packet to be sent, do it.
-      this->direct_send(true);
+      direct_send(true);
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
             "Back from the attempt to send leftover packet directly.\n"));
 
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
             "But we %C as a result.\n",
-            ((this->mode_ == MODE_QUEUE)? "flipped into MODE_QUEUE":
+            ((mode_ == MODE_QUEUE)? "flipped into MODE_QUEUE":
                                           "stayed in MODE_DIRECT" )));
-      if (this->mode_ == MODE_QUEUE  && this->mode_ != MODE_SUSPEND) {
+      if (mode_ == MODE_QUEUE  && mode_ != MODE_SUSPEND) {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "Notify Synch thread of work availability\n"));
-        this->synch_->work_available();
+        synch_->work_available();
       }
     }
   }
@@ -1303,12 +1303,12 @@ TransportSendStrategy::remove_all_msgs(const RepoId& pub_id)
   const TransportQueueElement::MatchOnPubId match(pub_id);
   send_delayed_notifications(&match);
 
-  GuardType guard(this->lock_);
+  GuardType guard(lock_);
 
-  if (this->send_buffer_ != 0) {
+  if (send_buffer_ != 0) {
     // If a secondary send buffer is bound, removed samples must
     // be retained in order to properly maintain the buffer:
-    this->send_buffer_->retain_all(pub_id);
+    send_buffer_->retain_all(pub_id);
   }
 
   do_remove_sample(pub_id, match, true);
@@ -1338,7 +1338,7 @@ TransportSendStrategy::remove_sample(const DataSampleElement* sample)
     return REMOVE_RELEASED;
   }
 
-  GuardType guard(this->lock_);
+  GuardType guard(lock_);
   return do_remove_sample(pub_id, modp);
 }
 
@@ -1349,12 +1349,12 @@ TransportSendStrategy::do_remove_sample(const RepoId&,
   DBG_ENTRY_LVL("TransportSendStrategy", "do_remove_sample", 6);
 
   //ciju: Tim had the idea that we could do the following check
-  // if ((this->mode_ == MODE_DIRECT) ||
-  //     ((this->pkt_chain_ == 0) && (queue_ == empty)))
+  // if ((mode_ == MODE_DIRECT) ||
+  //     ((pkt_chain_ == 0) && (queue_ == empty)))
   // then we can assume that the sample can be safely removed (no need for
   // replacement) from the elems_ queue.
-  if ((this->mode_ == MODE_DIRECT)
-      || ((this->pkt_chain_ == 0) && (this->queue_.size() == 0))) {
+  if ((mode_ == MODE_DIRECT)
+      || ((pkt_chain_ == 0) && (queue_.size() == 0))) {
     //ciju: I believe this is the only mode where a safe
     // assumption can be made that the samples
     // in the elems_ queue aren't part of a packet.
@@ -1363,12 +1363,12 @@ TransportSendStrategy::do_remove_sample(const RepoId&,
           "transport packet is in progress.\n"));
 
     QueueRemoveVisitor simple_rem_vis(criteria, remove_all);
-    this->elems_.accept_remove_visitor(simple_rem_vis);
+    elems_.accept_remove_visitor(simple_rem_vis);
 
     const RemoveResult status = simple_rem_vis.status();
 
     if (status == REMOVE_RELEASED || status == REMOVE_FOUND) {
-      this->header_.length_ -= simple_rem_vis.removed_bytes();
+      header_.length_ -= simple_rem_vis.removed_bytes();
 
     } else if (status == REMOVE_NOT_FOUND) {
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -1382,7 +1382,7 @@ TransportSendStrategy::do_remove_sample(const RepoId&,
         "Visit the queue_ with the RemoveElementVisitor.\n"));
 
   QueueRemoveVisitor simple_rem_vis(criteria, remove_all);
-  this->queue_.accept_remove_visitor(simple_rem_vis);
+  queue_.accept_remove_visitor(simple_rem_vis);
 
   RemoveResult status = simple_rem_vis.status();
 
@@ -1419,13 +1419,13 @@ TransportSendStrategy::do_remove_sample(const RepoId&,
         "Visit our elems_ with the PacketRemoveVisitor.\n"));
 
   PacketRemoveVisitor pac_rem_vis(criteria,
-                                  this->pkt_chain_,
-                                  this->header_block_,
-                                  this->replaced_element_mb_allocator_,
-                                  this->replaced_element_db_allocator_,
+                                  pkt_chain_,
+                                  header_block_,
+                                  replaced_element_mb_allocator_,
+                                  replaced_element_db_allocator_,
                                   remove_all);
 
-  this->elems_.accept_replace_visitor(pac_rem_vis);
+  elems_.accept_replace_visitor(pac_rem_vis);
 
   status = pac_rem_vis.status();
 
@@ -1446,7 +1446,7 @@ TransportSendStrategy::do_remove_sample(const RepoId&,
 }
 
 void
-TransportSendStrategy::direct_send(bool relink)
+TransportSendStrategy::direct_send(bool do_relink)
 {
   DBG_ENTRY_LVL("TransportSendStrategy", "direct_send", 6);
 
@@ -1454,7 +1454,7 @@ TransportSendStrategy::direct_send(bool relink)
         "Prepare the current packet for a direct send attempt.\n"));
 
   // Prepare the packet for sending.
-  this->prepare_packet();
+  prepare_packet();
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Now attempt to send the packet.\n"));
@@ -1463,7 +1463,7 @@ TransportSendStrategy::direct_send(bool relink)
   // is re-established.  Only loops if the "continue" line is hit.
   while (true) {
     // Attempt to send the packet
-    const SendPacketOutcome outcome = this->send_packet();
+    const SendPacketOutcome outcome = send_packet();
 
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "The outcome of the send_packet() was %d.\n", outcome));
@@ -1478,18 +1478,18 @@ TransportSendStrategy::direct_send(bool relink)
                 "Flip into the MODE_QUEUE mode_.\n"), 5);
 
       // We encountered backpressure, or only sent part of the packet.
-      this->mode_ = MODE_QUEUE;
+      mode_ = MODE_QUEUE;
 
     } else if ((outcome == OUTCOME_PEER_LOST) ||
                (outcome == OUTCOME_SEND_ERROR)) {
       if (outcome == OUTCOME_SEND_ERROR) {
-        ACE_ERROR((LM_WARNING,
-                   ACE_TEXT("(%P|%t) WARNING: Problem detected in ")
-                   ACE_TEXT("send buffer management: %p.\n"),
-                   ACE_TEXT("send_bytes")));
+        VDBG_LVL((LM_WARNING,
+                  "(%P|%t) WARNING: Problem detected in "
+                  "send buffer management: %p.\n",
+                  "send_bytes"), 1);
 
         if (Transport_debug_level > 0) {
-          this->transport_.config().dump();
+          transport_.config().dump();
         }
       } else {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -1500,21 +1500,21 @@ TransportSendStrategy::direct_send(bool relink)
       VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                 "Now flip to MODE_SUSPEND before we try to reconnect.\n"), 5);
 
-      if (this->mode_ != MODE_SUSPEND) {
-        this->mode_before_suspend_ = this->mode_;
-        this->mode_ = MODE_SUSPEND;
+      if (mode_ != MODE_SUSPEND) {
+        mode_before_suspend_ = mode_;
+        mode_ = MODE_SUSPEND;
       }
 
-      if (relink) {
+      if (do_relink) {
         bool do_suspend = false;
-        this->relink(do_suspend);
+        relink(do_suspend);
 
-        if (this->mode_ == MODE_SUSPEND) {
+        if (mode_ == MODE_SUSPEND) {
           VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                     "The reconnect has not done yet and we are "
                     "still in MODE_SUSPEND.\n"), 5);
 
-        } else if (this->mode_ == MODE_TERMINATED) {
+        } else if (mode_ == MODE_TERMINATED) {
           VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                     "Reconnect failed, we are in MODE_TERMINATED\n"), 5);
 
@@ -1547,8 +1547,8 @@ TransportSendStrategy::get_packet_elems_from_queue()
 {
   DBG_ENTRY_LVL("TransportSendStrategy", "get_packet_elems_from_queue", 6);
 
-  for (TransportQueueElement* element = this->queue_.peek(); element != 0;
-       element = this->queue_.peek()) {
+  for (TransportQueueElement* element = queue_.peek(); element != 0;
+       element = queue_.peek()) {
 
     // Total number of bytes in the current element's message block chain.
     size_t element_length = element->msg()->total_length();
@@ -1561,8 +1561,8 @@ TransportSendStrategy::get_packet_elems_from_queue()
     bool frag = false;
     if (element_length > avail) {
       // The current element won't fit into the current packet
-      if (this->max_message_size()) { // fragmentation enabled
-        this->header_.first_fragment_ = !element->is_fragment();
+      if (max_message_size()) { // fragmentation enabled
+        header_.first_fragment_ = !element->is_fragment();
         VDBG_LVL((LM_TRACE, "(%P|%t) DBG:   Fragmenting from queue\n"), 0);
         const TqePair ep = element->fragment(avail);
         if (ep == null_tqe_pair) {
@@ -1572,7 +1572,7 @@ TransportSendStrategy::get_packet_elems_from_queue()
         }
         element = ep.first;
         element_length = element->msg()->total_length();
-        this->queue_.replace_head(ep.second);
+        queue_.replace_head(ep.second);
         frag = true; // queue_ is already taken care of, don't get() later
       } else {
         break;
@@ -1582,16 +1582,16 @@ TransportSendStrategy::get_packet_elems_from_queue()
     // If exclusive and the current packet is empty, we won't violate the
     // exclusive_packet requirement by put()'ing the element
     // into the elems_ collection.
-    if ((exclusive_packet && this->elems_.size() == 0)
+    if ((exclusive_packet && elems_.size() == 0)
         || !exclusive_packet) {
       // At this point, we have passed all of the pre-conditions and we can
       // now extract the current element from the queue_, put it into the
       // packet elems_, and adjust the packet header_.length_.
-      this->elems_.put(frag ? element : this->queue_.get());
-      if (this->header_.length_ == 0) {
-        this->header_.last_fragment_ = !frag && element->is_fragment();
+      elems_.put(frag ? element : queue_.get());
+      if (header_.length_ == 0) {
+        header_.last_fragment_ = !frag && element->is_fragment();
       }
-      this->header_.length_ += static_cast<ACE_UINT32>(element_length);
+      header_.length_ += static_cast<ACE_UINT32>(element_length);
       VDBG_LVL((LM_TRACE, "(%P|%t) DBG:   Packetizing from queue\n"), 0);
     }
 
@@ -1605,10 +1605,10 @@ TransportSendStrategy::get_packet_elems_from_queue()
     if (exclusive_packet || frag
         // If the current number of packet elems_ has reached the maximum
         // number of samples per packet, then we are done.
-        || this->elems_.size() == this->max_samples_
+        || elems_.size() == max_samples_
         // If the current value of the header_.length_ exceeds (or equals)
         // the optimum_size_ for a packet, then we are done.
-        || this->header_.length_ >= this->optimum_size_) {
+        || header_.length_ >= optimum_size_) {
       break;
     }
   }
@@ -1620,11 +1620,11 @@ TransportSendStrategy::prepare_header()
   DBG_ENTRY_LVL("TransportSendStrategy", "prepare_header", 6);
 
   // Increment header sequence for packet:
-  this->header_.sequence_ = ++this->header_sequence_;
+  header_.sequence_ = ++header_sequence_;
 
   // Allow the specific implementation the opportunity to set
   // values in the packet header.
-  this->prepare_header_i();
+  prepare_header_i();
 }
 
 void
@@ -1641,18 +1641,18 @@ TransportSendStrategy::prepare_packet()
   DBG_ENTRY_LVL("TransportSendStrategy", "prepare_packet", 6);
 
   // Prepare the header for sending.
-  this->prepare_header();
+  prepare_header();
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Marshal the packet header.\n"));
 
-  if (this->header_block_ != 0) {
-    this->header_block_->release();
+  if (header_block_ != 0) {
+    header_block_->release();
   }
 
-  ACE_NEW_MALLOC(this->header_block_,
-    static_cast<ACE_Message_Block*>(this->header_mb_allocator_->malloc()),
-    ACE_Message_Block(this->max_header_size_,
+  ACE_NEW_MALLOC(header_block_,
+    static_cast<ACE_Message_Block*>(header_mb_allocator_->malloc()),
+    ACE_Message_Block(max_header_size_,
                       ACE_Message_Block::MB_DATA,
                       0,
                       0,
@@ -1661,12 +1661,12 @@ TransportSendStrategy::prepare_packet()
                       ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
                       ACE_Time_Value::zero,
                       ACE_Time_Value::max_time,
-                      this->header_db_allocator_.get(),
-                      this->header_mb_allocator_.get()));
+                      header_db_allocator_.get(),
+                      header_mb_allocator_.get()));
 
-  marshal_transport_header(this->header_block_);
+  marshal_transport_header(header_block_);
 
-  this->pkt_chain_ = this->header_block_->duplicate();
+  pkt_chain_ = header_block_->duplicate();
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Use a BuildChainVisitor to visit the packet elems_.\n"));
@@ -1675,21 +1675,21 @@ TransportSendStrategy::prepare_packet()
   // held by each element (in elems_), and then chaining the new duplicate
   // blocks together to form one long chain.
   BuildChainVisitor visitor;
-  this->elems_.accept_visitor(visitor);
+  elems_.accept_visitor(visitor);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Attach the visitor's chain of blocks to the lone (packet "
         "header) block currently in the pkt_chain_.\n"));
 
   // Attach the visitor's chain of blocks to the packet header block.
-  this->pkt_chain_->cont(visitor.chain());
+  pkt_chain_->cont(visitor.chain());
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Increment header sequence for next packet.\n"));
 
   // Allow the specific implementation the opportunity to process the
   // newly prepared packet.
-  this->prepare_packet_i();
+  prepare_packet_i();
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Set the header_complete_ flag to false.\n"));
@@ -1697,13 +1697,13 @@ TransportSendStrategy::prepare_packet()
   // Set the header_complete_ to false to indicate
   // that the first block in the pkt_chain_ is the packet header block
   // (actually a duplicate() of the packet header_block_).
-  this->header_complete_ = false;
+  header_complete_ = false;
 }
 
 bool
 TransportSendStrategy::marshal_transport_header(ACE_Message_Block* mb)
 {
-  return *mb << this->header_;
+  return *mb << header_;
 }
 
 void
@@ -1717,7 +1717,7 @@ TransportSendStrategy::prepare_packet_i()
 void
 TransportSendStrategy::set_graceful_disconnecting(bool flag)
 {
-  this->graceful_disconnecting_ = flag;
+  graceful_disconnecting_ = flag;
 }
 
 ssize_t
@@ -1732,12 +1732,18 @@ TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
   DBG_ENTRY_LVL("TransportSendStrategy", "do_send_packet", 6);
 
 #ifdef OPENDDS_SECURITY
-  // pre_send_packet may provide different data that takes the place of the
-  // original "packet" (used for security encryption/authentication)
-  Message_Block_Ptr substitute(pre_send_packet(packet));
-  if (!substitute) {
-    VDBG((LM_DEBUG, "(%P|%t) DBG:   pre_send_packet returned NULL, dropping.\n"));
-    return packet->total_length();
+  Message_Block_Ptr substitute;
+  if (security_config()) {
+    const DDS::Security::CryptoTransform_var crypto = security_config()->get_crypto_transform();
+    // pre_send_packet may provide different data that takes the place of the
+    // original "packet" (used for security encryption/authentication)
+    if (crypto) {
+      substitute.reset(pre_send_packet(packet));
+      if (!substitute) {
+        VDBG((LM_DEBUG, "(%P|%t) DBG:   pre_send_packet returned NULL, dropping.\n"));
+        return packet->total_length();
+      }
+    }
   }
 #endif
 
@@ -1747,7 +1753,7 @@ TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
   iovec iov[MAX_SEND_BLOCKS];
 
 #ifdef OPENDDS_SECURITY
-  const int num_blocks = mb_to_iov(*substitute, iov);
+  const int num_blocks = mb_to_iov(substitute ? *substitute : *packet, iov);
 #else
   const int num_blocks = mb_to_iov(*packet, iov);
 #endif
@@ -1759,14 +1765,14 @@ TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
             "Attempt to send_bytes() now.\n"), 5);
 
-  const ssize_t num_bytes_sent = this->send_bytes(iov, num_blocks, bp);
+  const ssize_t num_bytes_sent = send_bytes(iov, num_blocks, bp);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
             "The send_bytes() said that num_bytes_sent == [%d].\n",
             num_bytes_sent), 5);
 
 #ifdef OPENDDS_SECURITY
-  if (num_bytes_sent > 0 && packet->data_block() != substitute->data_block()) {
+  if (num_bytes_sent > 0 && substitute && packet->data_block() != substitute->data_block()) {
     // Although the "substitute" data took the place of "packet", the rest
     // of the framework needs to account for the bytes in "packet" being taken
     // care of, as if they were actually sent.
@@ -1785,7 +1791,7 @@ TransportSendStrategy::send_packet()
 
   int bp_flag = 0;
   const ssize_t num_bytes_sent =
-    this->do_send_packet(this->pkt_chain_, bp_flag);
+    do_send_packet(pkt_chain_, bp_flag);
 
   if (num_bytes_sent == 0) {
     VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
@@ -1820,11 +1826,11 @@ TransportSendStrategy::send_packet()
     return OUTCOME_SEND_ERROR;
   }
 
-  if (this->send_buffer_ != 0) {
+  if (send_buffer_ != 0) {
     // If a secondary send buffer is bound, sent samples must
     // be inserted in order to properly maintain the buffer:
-    this->send_buffer_->insert(this->header_.sequence_,
-      &this->elems_, this->pkt_chain_);
+    send_buffer_->insert(header_.sequence_,
+      &elems_, pkt_chain_);
   }
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
@@ -1834,7 +1840,7 @@ TransportSendStrategy::send_packet()
   // We sent some bytes - adjust the current packet (elems_ and pkt_chain_)
   // to account for the bytes that have been sent.
   const int result =
-    this->adjust_packet_after_send(num_bytes_sent);
+    adjust_packet_after_send(num_bytes_sent);
 
   if (result == 0) {
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -1854,7 +1860,7 @@ ssize_t
 TransportSendStrategy::non_blocking_send(const iovec iov[], int n, int& bp)
 {
   int val = 0;
-  ACE_HANDLE handle = this->get_handle();
+  ACE_HANDLE handle = get_handle();
 
   if (handle == ACE_INVALID_HANDLE)
     return -1;
@@ -1867,7 +1873,7 @@ TransportSendStrategy::non_blocking_send(const iovec iov[], int n, int& bp)
   // Clear errno
   errno = 0;
 
-  ssize_t result = this->send_bytes_i(iov, n);
+  ssize_t result = send_bytes_i(iov, n);
 
   if (result == -1) {
     if ((errno == EWOULDBLOCK) || (errno == ENOBUFS)) {
@@ -1901,20 +1907,20 @@ void
 TransportSendStrategy::add_delayed_notification(TransportQueueElement* element)
 {
   if (Transport_debug_level) {
-    size_t size = this->delayed_delivered_notification_queue_.size();
-    if ((size > 0) && (size % this->max_samples_ == 0)) {
+    size_t size = delayed_delivered_notification_queue_.size();
+    if ((size > 0) && (size % max_samples_ == 0)) {
       ACE_DEBUG((LM_DEBUG,
                  "(%P|%t) Transport send strategy notification queue threshold, size=%d\n",
                  size));
     }
   }
 
-  this->delayed_delivered_notification_queue_.push_back(std::make_pair(element, this->mode_));
+  delayed_delivered_notification_queue_.push_back(std::make_pair(element, mode_));
 }
 
 void TransportSendStrategy::deliver_ack_request(TransportQueueElement* element)
 {
-  GuardType guard(this->lock_);
+  GuardType guard(lock_);
   element->data_delivered();
 }
 

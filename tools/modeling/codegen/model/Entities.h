@@ -1,7 +1,7 @@
 // -*- C++ -*-
 //
-#ifndef ENTITIES_H
-#define ENTITIES_H
+#ifndef OPENDDS_MODEL_ENTITIES_H
+#define OPENDDS_MODEL_ENTITIES_H
 
 // Needed here to avoid the pragma below when necessary.
 #include /**/ "ace/pre.h"

@@ -182,6 +182,20 @@ void postprocess(const char* fn, ostringstream& content,
   case BE_GlobalData::STREAM_LANG_H: {
     macrofied = to_macro(fn);
     out << "#ifndef " << macrofied << "\n#define " << macrofied << '\n';
+    if (which == BE_GlobalData::STREAM_H) {
+      out <<
+        "\n"
+        "#include <dds/Version.h>\n"
+        "#if !OPENDDS_VERSION_EXACTLY(" << OPENDDS_MAJOR_VERSION
+          << ", " << OPENDDS_MINOR_VERSION
+          << ", " << OPENDDS_MICRO_VERSION << ")\n"
+        "#  error \"This file should be regenerated with opendds_idl\"\n"
+        "#endif\n"
+        "#include <dds/DCPS/Definitions.h>\n"
+        "\n"
+        "#include <dds/DdsDcpsC.h>\n"
+        "\n";
+    }
     if (which == BE_GlobalData::STREAM_LANG_H) {
       if (be_global->language_mapping() == BE_GlobalData::LANGMAP_FACE_CXX ||
           be_global->language_mapping() == BE_GlobalData::LANGMAP_SP_CXX) {
@@ -191,18 +205,17 @@ void postprocess(const char* fn, ostringstream& content,
     } else {
       string taoheader = be_global->header_name_.c_str();
       taoheader.replace(taoheader.find("TypeSupportImpl.h"), 17, "C.h");
-      out << "#include \"" << be_global->tao_inc_pre_ << taoheader << "\"\n";
-    }
-    if (which == BE_GlobalData::STREAM_H) {
-      out << "#include \"dds/DCPS/Definitions.h\"\n";
-      out << "#include \"dds/DdsDcpsC.h\"\n";
-      out << "#include \"dds/Version.h\"\n";
-      out << "#if DDS_MAJOR_VERSION != " << DDS_MAJOR_VERSION
-          << " || DDS_MINOR_VERSION != " << DDS_MINOR_VERSION
-          << " || DDS_MICRO_VERSION != " << DDS_MICRO_VERSION
-          << "\n";
-      out << "#error This file should be regenerated with opendds_idl\n";
-      out << "#endif\n";
+      const bool explicit_ints = be_global->tao_inc_pre_.length()
+        && (taoheader == "Int8SeqC.h" || taoheader == "UInt8SeqC.h");
+      std::string indent;
+      if (explicit_ints) {
+        out << "#if OPENDDS_HAS_EXPLICIT_INTS\n";
+        indent = "  ";
+      }
+      out << "#" << indent << "include \"" << be_global->tao_inc_pre_ << taoheader << "\"\n";
+      if (explicit_ints) {
+        out << "#endif\n";
+      }
     }
   }
   break;
@@ -313,9 +326,7 @@ BE_produce()
         base_name.assign(included.c_str(), len - 5);
 
       } else {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%N:%l) BE_produce - included ")
-                   ACE_TEXT("file must end in .idl or .pidl\n")));
-        BE_abort();
+        continue;
       }
 
       string stb_inc = base_name + "C.h";

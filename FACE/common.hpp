@@ -1,5 +1,5 @@
-#ifndef FACE_COMMON_HPP_HEADER_FILE
-#define FACE_COMMON_HPP_HEADER_FILE
+#ifndef OPENDDS_FACE_COMMON_HPP
+#define OPENDDS_FACE_COMMON_HPP
 #include "types.hpp"
 
 namespace FACE {

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 //
-#ifndef NULLWRITERLISTENER_H
-#define NULLWRITERLISTENER_H
+#ifndef OPENDDS_MODEL_NULLWRITERLISTENER_H
+#define OPENDDS_MODEL_NULLWRITERLISTENER_H
 
 #include "model_export.h"
 #include "dds/DdsDcpsPublicationC.h"

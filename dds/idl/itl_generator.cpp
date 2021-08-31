@@ -1,17 +1,17 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #include "itl_generator.h"
+
 #include "be_extern.h"
 #include "global_extern.h"
 
-#include "utl_identifier.h"
-#include "utl_labellist.h"
+#include <dds/DCPS/Definitions.h>
 
+#include <utl_identifier.h>
+#include <utl_labellist.h>
 #include <ast_fixed.h>
 
 using namespace AstTypeClassification;
@@ -110,12 +110,14 @@ operator<<(std::ostream& out,
       be_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 8, \"unsigned\" : true, "
         "\"note\" : { \"presentation\" : { \"type\" : \"byte\" } }  }";
       break;
+#if OPENDDS_HAS_EXPLICIT_INTS
     case AST_PredefinedType::PT_uint8:
       be_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 8, \"unsigned\" : true }";
       break;
     case AST_PredefinedType::PT_int8:
       be_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 8 }";
       break;
+#endif
     case AST_PredefinedType::PT_any:
     case AST_PredefinedType::PT_object:
     case AST_PredefinedType::PT_value:
