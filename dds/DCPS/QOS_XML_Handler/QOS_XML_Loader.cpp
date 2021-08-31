@@ -8,7 +8,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-  QOS_XML_Loader::QOS_XML_Loader()
+  QOS_XML_Loader::QOS_XML_Loader(XML::XML_Error_Handler* error_handler)
+    : xml_file_ (error_handler)
   {
   }
 

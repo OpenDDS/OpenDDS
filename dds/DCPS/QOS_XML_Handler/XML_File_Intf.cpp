@@ -1,4 +1,3 @@
-
 #include "XML_File_Intf.h"
 #include "ace/XML_Utils/XML_Typedefs.h"
 #include "ace/XML_Utils/XMLSchema/id_map.hpp"
@@ -10,13 +9,18 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-  QOS_XML_File_Handler::QOS_XML_File_Handler() :
-    QOS_XML_Handler()
+  QOS_XML_File_Handler::QOS_XML_File_Handler(XML::XML_Error_Handler* error_handler) :
+    QOS_XML_Handler(),
+    res_(new XML::XML_Schema_Resolver<XML::Environment_Resolver>()),
+    eh_(error_handler ? error_handler : new XML::XML_Error_Handler()),
+    helper_(res_,eh_)
   {
   }
 
   QOS_XML_File_Handler::~QOS_XML_File_Handler()
   {
+    delete res_;
+    delete eh_;
   }
 
   DDS::ReturnCode_t
@@ -25,7 +29,7 @@ namespace DCPS {
     DDS::ReturnCode_t retcode = DDS::RETCODE_OK;
     try
       {
-        if (!XML_Helper_type::XML_HELPER.is_initialized())
+        if (!helper_.is_initialized())
           {
             ACE_ERROR((LM_ERROR,
               ACE_TEXT("QOS_XML_File_Handler::init - ")
@@ -41,7 +45,7 @@ namespace DCPS {
           }
 
         XERCES_CPP_NAMESPACE::DOMDocument *dom =
-          XML_Helper_type::XML_HELPER.create_dom(file);
+          helper_.create_dom(file);
 
         if (dom == 0)
           {
@@ -93,9 +97,8 @@ namespace DCPS {
   QOS_XML_File_Handler::add_search_path(const ACE_TCHAR *environment,
                                         const ACE_TCHAR *relpath)
   {
-    XML_Helper_type::XML_HELPER.get_resolver().get_resolver().add_path(environment, relpath);
+    helper_.get_resolver().get_resolver().add_path(environment, relpath);
   }
-
 }
 }
 
