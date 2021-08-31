@@ -17,11 +17,11 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-  QOS_XML_Handler::QOS_XML_Handler(void)
+  QOS_XML_Handler::QOS_XML_Handler()
   {
   }
 
-  QOS_XML_Handler::~QOS_XML_Handler(void)
+  QOS_XML_Handler::~QOS_XML_Handler()
   {
   }
 

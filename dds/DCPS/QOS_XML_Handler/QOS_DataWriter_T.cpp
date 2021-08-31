@@ -5,12 +5,12 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 template <typename XML_QOS_TYPE, typename DDS_QOS_TYPE>
-QOS_DataWriter_T<XML_QOS_TYPE, DDS_QOS_TYPE>::QOS_DataWriter_T(void)
+QOS_DataWriter_T<XML_QOS_TYPE, DDS_QOS_TYPE>::QOS_DataWriter_T()
 {
 }
 
 template <typename XML_QOS_TYPE, typename DDS_QOS_TYPE>
-QOS_DataWriter_T<XML_QOS_TYPE, DDS_QOS_TYPE>::~QOS_DataWriter_T(void)
+QOS_DataWriter_T<XML_QOS_TYPE, DDS_QOS_TYPE>::~QOS_DataWriter_T()
 {
 }
 

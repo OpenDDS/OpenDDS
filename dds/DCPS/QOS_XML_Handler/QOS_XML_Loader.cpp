@@ -16,7 +16,6 @@ namespace DCPS {
   {
   }
 
-
   ACE_TString
   QOS_XML_Loader::get_xml_file_name(const ACE_TCHAR* qos_profile)
   {

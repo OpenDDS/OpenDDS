@@ -1,9 +1,7 @@
 /**
  * @author Marcel Smit (msmit@remedy.nl)
  *
- *
  * Starting point for QOS XML parsing library.
- *
  */
 #ifndef OPENDDS_DCPS_QOS_XML_HANDLER_QOS_XML_LOADER_H
 #define OPENDDS_DCPS_QOS_XML_HANDLER_QOS_XML_LOADER_H
