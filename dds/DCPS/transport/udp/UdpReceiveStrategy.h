@@ -60,7 +60,7 @@ private:
   SequenceNumber expected_;
   ACE_INET_Addr remote_address_; // of the current datagram
 
-  typedef std::pair<TransportReassembly, SequenceNumber> ReassemblyInfo;
+  typedef std::pair<TransportReassembly_rch, SequenceNumber> ReassemblyInfo;
   typedef OPENDDS_MAP(ACE_INET_Addr, ReassemblyInfo) ReassemblyMap;
   ReassemblyMap reassembly_;
 };

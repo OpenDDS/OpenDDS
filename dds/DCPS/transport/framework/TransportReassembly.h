@@ -14,6 +14,7 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/DisjointSequence.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/TimeTypes.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -21,7 +22,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export TransportReassembly {
+class OpenDDS_Dcps_Export TransportReassembly : public RcObject {
 public:
   explicit TransportReassembly(const TimeDuration& timeout = TimeDuration(300));
 
@@ -176,6 +177,8 @@ private:
                      const SequenceRange& seqRange,
                      ReceivedDataSample& data);
 };
+
+typedef RcHandle<TransportReassembly> TransportReassembly_rch;
 
 }
 }
