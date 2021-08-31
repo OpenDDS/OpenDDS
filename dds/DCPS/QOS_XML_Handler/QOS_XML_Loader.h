@@ -20,8 +20,8 @@ namespace DCPS {
   class OpenDDS_XML_QOS_Handler_Export QOS_XML_Loader
   {
   public:
-    QOS_XML_Loader (void);
-    ~QOS_XML_Loader (void);
+    QOS_XML_Loader ();
+    ~QOS_XML_Loader ();
 
     /**
      * init
@@ -33,7 +33,6 @@ namespace DCPS {
      * Init parses this string and will append ".xml" to
      * qos_base_file_name_without_extension. It'll than invoke
      * the init method on the XML_File_Intf class.
-     *
      */
     DDS::ReturnCode_t
     init (const ACE_TCHAR * qos_profile);

@@ -8,11 +8,11 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-  QOS_XML_Loader::QOS_XML_Loader(void)
+  QOS_XML_Loader::QOS_XML_Loader()
   {
   }
 
-  QOS_XML_Loader::~QOS_XML_Loader(void)
+  QOS_XML_Loader::~QOS_XML_Loader()
   {
   }
 
@@ -98,7 +98,7 @@ namespace DCPS {
         return ::DDS::RETCODE_BAD_PARAMETER;
       }
 
-    ACE_TString filename = get_xml_file_name(qos_profile);
+    const ACE_TString filename = get_xml_file_name(qos_profile);
 
     if (filename.empty())
       {
@@ -140,7 +140,7 @@ namespace DCPS {
         return DDS::RETCODE_OK;
       }
 
-    ACE_TString profile_name = get_profile_name(qos_profile);
+    const ACE_TString profile_name = get_profile_name(qos_profile);
 
     if (profile_name.empty())
       {
@@ -195,7 +195,7 @@ namespace DCPS {
         return DDS::RETCODE_OK;
       }
 
-    ACE_TString profile_name = get_profile_name(qos_profile);
+    const ACE_TString profile_name = get_profile_name(qos_profile);
 
     if (profile_name.empty())
       {
@@ -249,7 +249,7 @@ namespace DCPS {
         return DDS::RETCODE_OK;
       }
 
-    ACE_TString profile_name = get_profile_name(qos_profile);
+    const ACE_TString profile_name = get_profile_name(qos_profile);
 
     if (profile_name.empty())
       {
@@ -301,7 +301,7 @@ namespace DCPS {
         return DDS::RETCODE_OK;
       }
 
-    ACE_TString profile_name = get_profile_name(qos_profile);
+    const ACE_TString profile_name = get_profile_name(qos_profile);
 
     if (profile_name.empty())
       {
@@ -354,7 +354,7 @@ namespace DCPS {
         return DDS::RETCODE_OK;
       }
 
-    ACE_TString profile_name = get_profile_name(qos_profile);
+    const ACE_TString profile_name = get_profile_name(qos_profile);
 
     if (profile_name.empty())
       {
@@ -408,7 +408,7 @@ namespace DCPS {
         return DDS::RETCODE_OK;
       }
 
-    ACE_TString profile_name = get_profile_name(qos_profile);
+    const ACE_TString profile_name = get_profile_name(qos_profile);
 
     if (profile_name.empty())
       {
