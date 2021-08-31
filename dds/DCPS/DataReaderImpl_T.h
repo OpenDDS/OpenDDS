@@ -965,7 +965,7 @@ namespace OpenDDS {
     if (encapsulated) {
       EncapsulationHeader encap;
       if (!(ser >> encap)) {
-        if (DCPS_debug_level > 1) {
+        if (DCPS_debug_level > 0) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
             ACE_TEXT("%CDataReaderImpl::lookup_instance: ")
             ACE_TEXT("deserialization of encapsulation header failed.\n"),
@@ -1015,7 +1015,7 @@ namespace OpenDDS {
                      TraitsType::type_name()));
         }
       } else {
-        if (DCPS_debug_level > 1) {
+        if (DCPS_debug_level > 0) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %CDataReaderImpl::lookup_instance ")
                     ACE_TEXT("deserialization failed.\n"),
                     TraitsType::type_name()));
@@ -1096,7 +1096,7 @@ protected:
 
     if (marshal_skip_serialize_) {
       if (!MarshalTraitsType::from_message_block(*data, *sample.sample_)) {
-        if (DCPS_debug_level > 1) {
+        if (DCPS_debug_level > 0) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::dds_demarshal: ")
                     ACE_TEXT("attempting to skip serialize but bad from_message_block. Returning from demarshal.\n")));
         }
@@ -1115,7 +1115,7 @@ protected:
     if (encapsulated) {
       EncapsulationHeader encap;
       if (!(ser >> encap)) {
-        if (DCPS_debug_level > 1) {
+        if (DCPS_debug_level > 0) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
             ACE_TEXT("%CDataReaderImpl::dds_demarshal: ")
             ACE_TEXT("deserialization of encapsulation header failed.\n"),
@@ -1170,7 +1170,7 @@ protected:
                      TraitsType::type_name()));
         }
       } else {
-        if (DCPS_debug_level > 1) {
+        if (DCPS_debug_level > 0) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR %CDataReaderImpl::dds_demarshal ")
                     ACE_TEXT("deserialization failed, dropping sample.\n"),
                     TraitsType::type_name()));
@@ -1187,7 +1187,7 @@ protected:
     if (!sample.header_.content_filter_ && content_filtered_topic_) {
       const bool sample_only_has_key_fields = !sample.header_.valid_data();
       if (key_only_marshaling != sample_only_has_key_fields) {
-        if (DCPS_debug_level > 1) {
+        if (DCPS_debug_level > 0) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
             ACE_TEXT("%CDataReaderImpl::dds_demarshal: ")
             ACE_TEXT("Mismatch between the key only and valid data properties ")
@@ -1744,7 +1744,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
       OwnershipManagerPtr owner_manager = ownership_manager();
 
       if (!owner_manager || owner_manager->instance_lock_acquire () != 0) {
-        if (DCPS_debug_level > 1) {
+        if (DCPS_debug_level > 0) {
           ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) ")
                       ACE_TEXT("%CDataReaderImpl::")
@@ -1785,7 +1785,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
 
       if (ret != 0)
       {
-        if (DCPS_debug_level > 1) {
+        if (DCPS_debug_level > 0) {
           ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) ")
                       ACE_TEXT("%CDataReaderImpl::")
@@ -1814,7 +1814,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
             handle));
         if (bpair.second == false)
         {
-          if (DCPS_debug_level > 1) {
+          if (DCPS_debug_level > 0) {
             ACE_ERROR ((LM_ERROR,
                         ACE_TEXT("(%P|%t) ")
                         ACE_TEXT("%CDataReaderImpl::")
@@ -1826,7 +1826,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
       }
 
       if (owner_manager->instance_lock_release () != 0) {
-        if (DCPS_debug_level > 1) {
+        if (DCPS_debug_level > 0) {
           ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) ")
                       ACE_TEXT("%CDataReaderImpl::")
@@ -1843,7 +1843,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
         handle));
     if (bpair.second == false)
     {
-      if (DCPS_debug_level > 1) {
+      if (DCPS_debug_level > 0) {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT("(%P|%t) ")
                     ACE_TEXT("%CDataReaderImpl::")
