@@ -48,6 +48,9 @@
           { "name": "max_bundle_size",
             "value": "1430"
           },
+          { "name": "anticipated_fragments",
+            "value": "5120"
+          },
           { "name": "heartbeat_period",
             "value": "100"
           },

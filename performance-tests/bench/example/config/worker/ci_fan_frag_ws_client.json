@@ -48,6 +48,9 @@
           { "name": "max_bundle_size",
             "value": "1430"
           },
+          { "name": "anticipated_fragments",
+            "value": "5120"
+          },
           { "name": "heartbeat_period",
             "value": "100"
           },
@@ -154,6 +157,9 @@
         },
         { "name": "write_frequency",
           "value": { "_d": "PVK_DOUBLE", "double_prop": 1.0 }
+        },
+        { "name": "final_wait_for_ack",
+          "value": { "_d": "PVK_DOUBLE", "double_prop": 10.0 }
         }
       ]
     },
