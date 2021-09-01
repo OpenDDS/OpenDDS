@@ -187,22 +187,27 @@ SimpleStatBlock consolidate(const std::vector<SimpleStatBlock>& vec)
   result.timestamp_buffer_.resize(result.median_sample_count_);
 
   size_t median_buffer_pos = 0;
-  for (auto it = vec.begin(); it != vec.end(); ++it) {
-    OPENDDS_ASSERT(it->median_sample_count_ <= it->median_buffer_.size());
-    OPENDDS_ASSERT(it->timestamp_buffer_.size() == 0 || it->median_sample_count_ <= it->timestamp_buffer_.size());
-    OPENDDS_ASSERT(it->timestamp_buffer_.size() == 0 || it->median_buffer_.size() == it->timestamp_buffer_.size());
-
-    // Consolidate median buffers (no need to include unused / invalid values beyond median sample count)
-    memcpy(&result.median_buffer_[median_buffer_pos], &it->median_buffer_[0], it->median_sample_count_ * sizeof (double));
-    if (it->timestamp_buffer_.size()) {
-      memcpy(&result.timestamp_buffer_[median_buffer_pos], &it->timestamp_buffer_[0], it->median_sample_count_ * sizeof (Builder::TimeStamp));
-    } else {
-      memset(&result.timestamp_buffer_[median_buffer_pos], 0, it->median_sample_count_ * sizeof (Builder::TimeStamp));
-    }
-    median_buffer_pos += it->median_sample_count_;
-  }
 
   if (result.median_sample_count_) {
+
+    // Copy individual buffers into larger buffer
+    for (auto it = vec.begin(); it != vec.end(); ++it) {
+      OPENDDS_ASSERT(it->median_sample_count_ <= it->median_buffer_.size());
+      OPENDDS_ASSERT(it->timestamp_buffer_.size() == 0 || it->median_sample_count_ <= it->timestamp_buffer_.size());
+      OPENDDS_ASSERT(it->timestamp_buffer_.size() == 0 || it->median_buffer_.size() == it->timestamp_buffer_.size());
+
+      // Consolidate median buffers (no need to include unused / invalid values beyond median sample count)
+      if (it->median_buffer_.size()) {
+        memcpy(&result.median_buffer_[median_buffer_pos], &it->median_buffer_[0], it->median_sample_count_ * sizeof(double));
+      }
+      if (it->timestamp_buffer_.size()) {
+        memcpy(&result.timestamp_buffer_[median_buffer_pos], &it->timestamp_buffer_[0], it->median_sample_count_ * sizeof(Builder::TimeStamp));
+      } else {
+        memset(&result.timestamp_buffer_[median_buffer_pos], 0, it->median_sample_count_ * sizeof(Builder::TimeStamp));
+      }
+      median_buffer_pos += it->median_sample_count_;
+    }
+
     // Calculate consolidated median from consolidated median buffer
     {
       std::vector<double> median_buffer = result.median_buffer_;
