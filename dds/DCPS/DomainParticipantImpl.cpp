@@ -25,6 +25,7 @@
 #include "BitPubListenerImpl.h"
 #include "ContentFilteredTopicImpl.h"
 #include "MultiTopicImpl.h"
+#include "Service_Participant.h"
 #include "transport/framework/TransportRegistry.h"
 #include "transport/framework/TransportExceptions.h"
 
@@ -1913,15 +1914,18 @@ DDS::InstanceHandle_t DomainParticipantImpl::assign_handle(const GUID_t& id)
   return mapped.first;
 }
 
-DDS::InstanceHandle_t DomainParticipantImpl::await_handle(const GUID_t& id) const
+DDS::InstanceHandle_t DomainParticipantImpl::await_handle(const GUID_t& id,
+                                                          TimeDuration max_wait) const
 {
+  MonotonicTimePoint expire_at = MonotonicTimePoint::now() + max_wait;
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, DDS::HANDLE_NIL);
   CountedHandleMap::const_iterator iter = handles_.find(id);
-  while (iter == handles_.end()) {
-    handle_waiters_.wait();
+  CvStatus res = CvStatus_NoTimeout;
+  while (res == CvStatus_NoTimeout && iter == handles_.end()) {
+    res = max_wait.is_zero() ? handle_waiters_.wait() : handle_waiters_.wait_until(expire_at);
     iter = handles_.find(id);
   }
-  return iter->second.first;
+  return iter == handles_.end() ? DDS::HANDLE_NIL : iter->second.first;
 }
 
 DDS::InstanceHandle_t DomainParticipantImpl::lookup_handle(const GUID_t& id) const

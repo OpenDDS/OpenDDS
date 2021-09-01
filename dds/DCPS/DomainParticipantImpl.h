@@ -312,9 +312,11 @@ public:
   /**
    * Similar to lookup_handle in that it will return a previously mapped handle,
    * but will coorindate with assign_handle when a desired handle has not yet
-   * been mapped, but is expected to be.
+   * been mapped, but is expected to be. The optional max_wait argument can be
+   * supplied to limit the time spent waiting for a handle. It the wait times out
+   * a value of HANDLE_NIL is returned.
    */
-  DDS::InstanceHandle_t await_handle(const GUID_t& id) const;
+  DDS::InstanceHandle_t await_handle(const GUID_t& id, TimeDuration max_wait = TimeDuration::zero_value) const;
 
   /**
    * Return a previously-assigned handle.
