@@ -1339,9 +1339,12 @@ namespace {
       extraction.addArg("strm", "Serializer&");
       extraction.addArg("arr", wrapper.wrapped_type_name());
       extraction.endArgs();
-      be_global->impl_ <<
-        "  bool discard_flag = false;\n"
-        "  const Encoding& encoding = strm.encoding();\n"
+	  
+	  if (!primitive) {
+          be_global->impl_ << "  bool discard_flag = false;\n";
+	  }
+	  be_global->impl_ << 
+	    "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
       marshal_generator::generate_dheader_code(
         "    if (!strm.read_delimiter(total_size)) {\n"
@@ -1353,7 +1356,7 @@ namespace {
       }
 
       const std::string accessor = wrapper.value_access() + (use_cxx11 ? ".data()" : ".out()");
-      if (elem_cls & CL_PRIMITIVE) {
+      if (primitive) {
         string suffix;
         for (unsigned int i = 1; i < arr->n_dims(); ++i)
           suffix += use_cxx11 ? "->data()" : "[0]";
@@ -1428,12 +1431,14 @@ namespace {
         be_global->impl_ <<
           indent << "}\n";
       }
-      be_global->impl_ <<
-        "  if (discard_flag) {\n"
-        "    strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
-        "    return false;\n"
-        "  }\n"
-        "  return true;\n";
+	  if (!primitive) {
+          be_global->impl_ <<
+            "  if (discard_flag) {\n"
+            "    strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+            "    return false;\n"
+            "  }\n"
+            "  return true;\n";
+	  }
     }
   }
 
