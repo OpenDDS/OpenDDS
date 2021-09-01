@@ -40,7 +40,6 @@ namespace Security {
 class OpenDDS_Security_Export TokenReader
 {
 public:
-
   explicit TokenReader(const DDS::Security::Token& token_ref);
   virtual ~TokenReader();
 
