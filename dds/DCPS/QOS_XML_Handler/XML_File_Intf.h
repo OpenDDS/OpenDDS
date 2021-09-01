@@ -42,7 +42,7 @@ namespace DCPS {
     /// Pass an optional @error_handler which is called back when
     /// there are any errors parsing the input XML. The QOS_XML_File_Handler
     /// will assume ownership when a pointer is passed
-    QOS_XML_File_Handler(XML::XML_Error_Handler* error_handler = 0);
+    explicit QOS_XML_File_Handler(XML::XML_Error_Handler* error_handler = 0);
 
     ~QOS_XML_File_Handler();
 
