@@ -4,7 +4,7 @@
 #include "xercesc/parsers/XercesDOMParser.hpp"
 #include "xercesc/sax/SAXParseException.hpp"
 #include "xercesc/util/TransService.hpp"
-#include "ace/XML_Utils/XML_Typedefs.h"
+#include "ace/XML_Utils/XML_Helper.h"
 #include "ace/XML_Utils/XML_Schema_Resolver.h"
 #include "ace/XML_Utils/XML_Error_Handler.h"
 

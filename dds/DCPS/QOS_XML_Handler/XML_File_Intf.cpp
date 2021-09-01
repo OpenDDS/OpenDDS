@@ -1,5 +1,5 @@
 #include "XML_File_Intf.h"
-#include "ace/XML_Utils/XML_Typedefs.h"
+#include "ace/XML_Utils/XML_Helper.h"
 #include "ace/XML_Utils/XMLSchema/id_map.hpp"
 
 #include "dds/DCPS/debug.h"
