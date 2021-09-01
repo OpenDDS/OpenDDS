@@ -42,9 +42,9 @@ namespace DCPS {
     public QOS_XML_Handler
   {
   public:
-    QOS_XML_String_Handler(void);
+    QOS_XML_String_Handler();
 
-    ~QOS_XML_String_Handler(void);
+    ~QOS_XML_String_Handler();
 
     /**
      *
@@ -82,7 +82,6 @@ namespace DCPS {
     // Final DOMDocument that should be passed to
     // dds::reader::dds method
     XERCES_CPP_NAMESPACE::DOMDocument * finalDoc_;
-
   };
 }
 }

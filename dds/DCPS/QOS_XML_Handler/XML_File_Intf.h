@@ -35,9 +35,9 @@ namespace DCPS {
     public QOS_XML_Handler
   {
   public:
-    QOS_XML_File_Handler(void);
+    QOS_XML_File_Handler();
 
-    ~QOS_XML_File_Handler(void);
+    ~QOS_XML_File_Handler();
 
     /**
      *
@@ -50,7 +50,6 @@ namespace DCPS {
      */
     DDS::ReturnCode_t
     init(const ACE_TCHAR * file);
-
 
     /**
      *

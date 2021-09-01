@@ -241,7 +241,6 @@ namespace DCPS {
       retcode = DDS::RETCODE_ERROR;
     }
     return retcode;
-
   }
 
   void
