@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -18,40 +16,42 @@
 #include "LocatorCacheKey.h"
 #include "BundlingCacheKey.h"
 
-#include "ace/Basic_Types.h"
-#include "ace/SOCK_Dgram.h"
-#include "ace/SOCK_Dgram_Mcast.h"
-
-#include "dds/DCPS/transport/framework/DataLink.h"
-#include "dds/DCPS/ReactorTask.h"
-#include "dds/DCPS/ReactorTask_rch.h"
-#include "dds/DCPS/PeriodicTask.h"
-#include "dds/DCPS/SporadicTask.h"
-#include "dds/DCPS/transport/framework/TransportSendBuffer.h"
-#include "dds/DCPS/NetworkConfigMonitor.h"
-
-#include "dds/DCPS/DataSampleElement.h"
-#include "dds/DCPS/DisjointSequence.h"
-#include "dds/DCPS/GuidConverter.h"
-#include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/DiscoveryListener.h"
-#include "dds/DCPS/ReactorInterceptor.h"
-#include "dds/DCPS/RcEventHandler.h"
-#include "dds/DCPS/JobQueue.h"
-#include "dds/DCPS/SequenceNumber.h"
-#include "dds/DCPS/AddressCache.h"
-#include "dds/DCPS/Hash.h"
-#include "dds/DCPS/FibonacciSequence.h"
+#include <dds/DCPS/transport/framework/DataLink.h>
+#include <dds/DCPS/ReactorTask.h>
+#include <dds/DCPS/ReactorTask_rch.h>
+#include <dds/DCPS/PeriodicTask.h>
+#include <dds/DCPS/SporadicTask.h>
+#include <dds/DCPS/transport/framework/TransportSendBuffer.h>
+#include <dds/DCPS/NetworkConfigMonitor.h>
+#include <dds/DCPS/DataSampleElement.h>
+#include <dds/DCPS/DisjointSequence.h>
+#include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/DiscoveryListener.h>
+#include <dds/DCPS/ReactorInterceptor.h>
+#include <dds/DCPS/RcEventHandler.h>
+#include <dds/DCPS/JobQueue.h>
+#include <dds/DCPS/SequenceNumber.h>
+#include <dds/DCPS/AddressCache.h>
+#include <dds/DCPS/Hash.h>
+#include <dds/DCPS/FibonacciSequence.h>
 
 #ifdef OPENDDS_SECURITY
-#include "dds/DdsSecurityCoreC.h"
-#include "dds/DCPS/security/framework/SecurityConfig.h"
-#include "dds/DCPS/security/framework/SecurityConfig_rch.h"
-#include "dds/DCPS/RTPS/ICE/Ice.h"
+#  include <dds/DCPS/security/framework/SecurityConfig.h>
+#  include <dds/DCPS/security/framework/SecurityConfig_rch.h>
+#  include <dds/DCPS/RTPS/ICE/Ice.h>
 #endif
 
-#if defined ACE_HAS_CPP11
-#include <functional>
+#ifdef OPENDDS_SECURITY
+#  include <dds/DdsSecurityCoreC.h>
+#endif
+
+#include <ace/Basic_Types.h>
+#include <ace/SOCK_Dgram.h>
+#include <ace/SOCK_Dgram_Mcast.h>
+
+#ifdef ACE_HAS_CPP11
+#  include <functional>
 #endif
 
 class DDS_TEST;
@@ -416,15 +416,16 @@ private:
   class RtpsWriter : public RcObject {
   private:
     ReaderInfoMap remote_readers_;
-    // Preassociation readers require a non-final heartbeat.
+    /// Preassociation readers require a non-final heartbeat.
     ReaderInfoSet preassociation_readers_;
-    // These readers have not acked everything they are supposed to have acked.
+    /// These readers have not acked everything they are supposed to have
+    /// acked.
     SNRIS lagging_readers_;
-    // These reader have acked everything they are supposed to have acked.
+    /// These reader have acked everything they are supposed to have acked.
     SNRIS leading_readers_;
-    // These readers have sent a nack and are expecting data.
+    /// These readers have sent a nack and are expecting data.
     ReaderInfoSet readers_expecting_data_;
-    // These readers have sent a non-final ack are are expecting a heartbeat.
+    /// These readers have sent a non-final ack are are expecting a heartbeat.
     ReaderInfoSet readers_expecting_heartbeat_;
     RcHandle<SingleSendBuffer> send_buff_;
     SequenceNumber max_sn_;
@@ -437,8 +438,10 @@ private:
     bool stopping_;
     CORBA::Long heartbeat_count_;
 #ifdef OPENDDS_SECURITY
-    const bool is_pvs_writer_; // Participant Volatile Secure writer
-    const bool is_ps_writer_; // Partcicipant Secure (Reliable SPDP) writer
+    /// Participant Volatile Secure writer
+    const bool is_pvs_writer_;
+    /// Partcicipant Secure (Reliable SPDP) writer
+    const bool is_ps_writer_;
 #endif
     mutable ACE_Thread_Mutex mutex_;
     mutable ACE_Thread_Mutex elems_not_acked_mutex_;
@@ -492,6 +495,8 @@ private:
                                      MetaSubmessageVec& meta_submessages,
                                      MetaSubmessage& meta_submessage,
                                      const ReaderInfo_rch& reader);
+
+    void log_remote_counts(const char* funcname);
 
   public:
     RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable,
@@ -618,6 +623,8 @@ private:
     void deliver_held_data(const RepoId& src);
 
     const RepoId& id() const { return id_; }
+
+    void log_remote_counts(const char* funcname);
 
   private:
     void send_preassociation_acknacks(const MonotonicTimePoint& now);
