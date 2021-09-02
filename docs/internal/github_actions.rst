@@ -145,7 +145,16 @@ The last list file used by ``build_and_test.yml`` is :ghfile:`tools/modeling/tes
 
 To disable a test in GitHub Actions, ``!GH_ACTIONS`` must be added next to the test in the .lst file.
 These tests will not run when ``-Config GH_ACTIONS`` is passed alongside the lst file.
-There are similar test blockers which only block for specific github actions configurations: ``!GHA_OPENDDS_SAFETY_PROFILE`` blocks Safety Profile builds from running a test.
+There are similar test blockers which only block for specific github actions configurations from running marked tests:
+
+* ``!GH_ACTIONS_OPENDDS_SAFETY_PROFILE`` blocks Safety Profile builds
+
+* ``!GH_ACTIONS_M10`` blocks the MacOS10 runners
+
+* ``!GH_ACTIONS_ASAN`` blocks the Address Sanitizer builds
+
+* ``!GH_ACTIONS_W16`` blocks the Windows2016 runner
+
 These blocks are necessary because certain tests cannot properly run on GitHub Actions due to how the runners are configured.
 
 .. seealso::
@@ -159,6 +168,9 @@ Blocked Tests
 Certain tests are blocked from GitHub actions because their failures are either unfixable, or are not represented on the
 scoreboard. If this is the case, we have to assume that the failure is due to some sort of limitation caused by the
 GitHub Actions runners.
+
+Only Failing on CI
+------------------
 
 * tests/DCPS/Instances/run_test.pl single_instance multiple_datawriter keyed
 
@@ -182,6 +194,83 @@ GitHub Actions runners.
 
   * This test fails due to only getting ``17 of the expected >=19 total_count``.  Fails on ``test_m10_i0_j_FM-1f`` and
     ``test_m10_o1d0_sec``.
+
+* tests/DCPS/StaticDiscoveryReconnect/run_test.pl
+
+  * This test fails due to ``<StaticDiscoveryTest> failed: No such file or directory``. Fails on ``test_m10_i0_j_FM-1f``
+    and ``test_m10_o1d0_sec``.
+
+Failing Both CI and scoreboard
+------------------------------
+
+These tests fail on the CI as well as the scoreboard, but will remain blocked on the CI until fixed. Each test has a list
+of the builds it was failing on before being blocked.
+
+* tests/DCPS/BuiltInTopicTest/run_test.pl
+
+  * u18_esafe_js0
+
+* tests/DCPS/CompatibilityTest/run_test.pl rtps_disc
+
+  * test_m10_o1d0_sec
+
+* tests/DCPS/Deadline/run_test.pl rtps_disc
+
+  * test_u20_p1_asan_sec
+
+  * test_m10_o1d0_sec
+
+* tests/DCPS/Federation/run_test.pl
+
+  * test_u18_w1_sec
+
+  * test_u18_j_cft0_FM-37
+
+  * test_u18_w1_j_FM-2f
+
+  * test_u20_ace7_j_qt_ws_sec
+
+  * test_u20_p1_asan_sec
+
+  * test_u20_p1_asan_sec
+
+* tests/DCPS/Instances/run_test.pl [Multiple Configurations]
+
+  * u18_bsafe_js0_FM-1f
+
+  * u18_esafe_js0
+
+* tests/DCPS/MultiDPTest/run_test.pl
+
+  * u18_bsafe_js0_FM-1f
+
+  * u18_esafe_js0
+
+* tests/DCPS/NotifyTest/run_test.pl
+
+* tests/DCPS/Reconnect/run_test.pl restart_pub
+
+  * test_w16_x86_i0_sec
+
+* tests/DCPS/Reconnect/run_test.pl restart_sub
+
+  * test_w16_x86_i0_sec
+
+* tests/DCPS/ReliableBestEffortReaders/run_test.pl
+
+  * test_u18_w1_j_FM-2f
+
+  * test_u18_j_cft0_FM-37
+
+  * test_u20_p1_j8_FM-1f
+
+  * test_m10_o1d0_sec
+
+* tests/DCPS/TimeBasedFilter/run_test.pl -reliable
+
+  * u18_bsafe_js0_FM-1f
+
+  * u18_esafe_js0
 
 Test Results
 ============
