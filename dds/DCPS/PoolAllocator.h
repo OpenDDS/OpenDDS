@@ -21,6 +21,9 @@
 #include <vector>
 #include <queue>
 #include <set>
+#ifdef ACE_HAS_CPP11
+#include <unordered_map>
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -142,6 +145,16 @@ typedef std::basic_string<wchar_t, std::char_traits<wchar_t>, OPENDDS_ALLOCATOR(
           OpenDDS::DCPS::PoolAllocator<T > >
 #define OPENDDS_QUEUE(T) std::queue<T, std::deque<T, \
           OpenDDS::DCPS::PoolAllocator<T > > >
+#ifdef ACE_HAS_CPP11
+#define OPENDDS_UNORDERED_MAP(K, V) std::unordered_map<K, V, std::hash<K >, std::equal_to<K >, \
+          OpenDDS::DCPS::PoolAllocator<std::pair<OpenDDS::DCPS::add_const<K >::type, V > > >
+#define OPENDDS_UNORDERED_MAP_CHASH(K, V, C) std::unordered_map<K, V, C, std::equal_to<K >, \
+          OpenDDS::DCPS::PoolAllocator<std::pair<OpenDDS::DCPS::add_const<K >::type, V > > >
+#define OPENDDS_UNORDERED_MAP_T(K, V) std::unordered_map<K, V, std::hash<K >, std::equal_to<K >, \
+          OpenDDS::DCPS::PoolAllocator<std::pair<typename OpenDDS::DCPS::add_const<K >::type, V > > >
+#define OPENDDS_UNORDERED_MAP_CHASH_T(K, V, C) std::unordered_map<K, V, C, std::equal_to<K >, \
+          OpenDDS::DCPS::PoolAllocator<std::pair<typename OpenDDS::DCPS::add_const<K >::type, V > > >
+#endif
 
 #else // (!OPENDDS_POOL_ALLOCATOR)
 #define OPENDDS_ALLOCATOR(T) std::allocator<T >
@@ -162,6 +175,12 @@ typedef std::wstring WString;
 #define OPENDDS_LIST(T) std::list<T >
 #define OPENDDS_DEQUE(T) std::deque<T >
 #define OPENDDS_QUEUE(T) std::queue<T >
+#ifdef ACE_HAS_CPP11
+#define OPENDDS_UNORDERED_MAP(K, V) std::unordered_map<K, V >
+#define OPENDDS_UNORDERED_MAP_CHASH(K, V, C) std::unordered_map<K, V, C >
+#define OPENDDS_UNORDERED_MAP_T OPENDDS_UNORDERED_MAP
+#define OPENDDS_UNORDERED_MAP_CHASH_T OPENDDS_UNORDERED_MAP_CHASH
+#endif
 
 #endif // OPENDDS_POOL_ALLOCATOR
 

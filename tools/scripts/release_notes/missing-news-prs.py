@@ -14,7 +14,7 @@ if len(possible_files) != 1:
 news_path = possible_files[0]
 
 # Get PRs from News file
-pr_re = re.compile('#(\d+)')
+pr_re = re.compile(r'#(\d+)')
 news_prs = set()
 with open(news_path) as f:
     for line in f:
@@ -31,8 +31,11 @@ with open(sys.argv[1]) as f:
     for row in rows:
         # print(' '.join(['[{}]'.format(c) for c in row]))
         if row[4] in ('yes', 'maybe'):
+            m = pr_re.search(row[1])
+            if not m:
+              sys.exit('Could not find PR number in ' + repr(row[1]))
             # Number, Name, Notes
-            prs.append((row[1], row[2], row[8]))
+            prs.append((m.group(1), row[2], row[8]))
 
 # Print Missing PRs
 for pr in reversed(prs):

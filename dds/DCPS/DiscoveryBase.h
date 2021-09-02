@@ -23,6 +23,7 @@
 #ifdef OPENDDS_SECURITY
 #  include "Ice.h"
 #  include "security/framework/HandleRegistry.h"
+#  include "FibonacciSequence.h"
 #endif
 #include "XTypes/TypeAssignability.h"
 
@@ -2299,7 +2300,8 @@ namespace OpenDDS {
 
         DiscoveredParticipant(
           const DiscoveredParticipantData& p,
-          const SequenceNumber& seq)
+          const SequenceNumber& seq,
+          const TimeDuration& resend_period)
         : pdata_(p)
         , location_ih_(DDS::HANDLE_NIL)
         , bit_ih_(DDS::HANDLE_NIL)
@@ -2310,6 +2312,7 @@ namespace OpenDDS {
         , have_sedp_info_(false)
         , have_auth_req_msg_(false)
         , have_handshake_msg_(false)
+        , handshake_resend_falloff_(resend_period)
         , auth_state_(AUTH_STATE_HANDSHAKE)
         , handshake_state_(HANDSHAKE_STATE_BEGIN_HANDSHAKE_REQUEST)
         , is_requester_(false)
@@ -2341,6 +2344,8 @@ namespace OpenDDS {
 #ifdef OPENDDS_SECURITY
           security_info_.participant_security_attributes = 0;
           security_info_.plugin_participant_security_attributes = 0;
+#else
+          ACE_UNUSED_ARG(resend_period);
 #endif
         }
 
@@ -2375,6 +2380,7 @@ namespace OpenDDS {
         DDS::Security::ParticipantStatelessMessage auth_req_msg_;
         bool have_handshake_msg_;
         DDS::Security::ParticipantStatelessMessage handshake_msg_;
+        FibonacciSequence<TimeDuration> handshake_resend_falloff_;
         MonotonicTimePoint stateless_msg_deadline_;
 
         MonotonicTimePoint handshake_deadline_;
@@ -2808,14 +2814,6 @@ namespace OpenDDS {
                                                 const TransportLocatorSeq& transInfo)
       {
         get_part(domainId, partId)->update_subscription_locators(subId, transInfo);
-      }
-
-
-      virtual void set_type_lookup_service(DDS::DomainId_t domainId,
-                                           const RepoId& participantId,
-                                           XTypes::TypeLookupService_rch type_lookup_service)
-      {
-        get_part(domainId, participantId)->type_lookup_service(type_lookup_service);
       }
 
     protected:

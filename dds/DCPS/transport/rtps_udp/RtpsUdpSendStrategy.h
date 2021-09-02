@@ -79,6 +79,10 @@ public:
   static const size_t MaxSecureFullMessageAdditionalSize =
     MaxSecureFullMessageLeadingSize + MaxSubmessagePadding + MaxSecureFullMessageFollowingSize;
 
+#ifdef OPENDDS_SECURITY
+  virtual Security::SecurityConfig_rch security_config() const;
+#endif
+
 protected:
   virtual ssize_t send_bytes_i(const iovec iov[], int n);
   ssize_t send_bytes_i_helper(const iovec iov[], int n);

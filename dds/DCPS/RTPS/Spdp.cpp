@@ -147,7 +147,8 @@ namespace {
 void Spdp::init(DDS::DomainId_t /*domain*/,
                 DCPS::RepoId& guid,
                 const DDS::DomainParticipantQos& qos,
-                RtpsDiscovery* disco)
+                RtpsDiscovery* disco,
+                XTypes::TypeLookupService_rch tls)
 {
   bool enable_endpoint_announcements = true;
   bool enable_type_lookup_service = config_->use_xtypes();
@@ -224,7 +225,7 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
 
   guid = guid_; // may have changed in SpdpTransport constructor
   sedp_->ignore(guid);
-  sedp_->init(guid_, *disco, domain_);
+  sedp_->init(guid_, *disco, domain_, tls);
   tport_->open(sedp_->reactor_task());
 
 #ifdef OPENDDS_SECURITY
@@ -240,7 +241,8 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
 Spdp::Spdp(DDS::DomainId_t domain,
            RepoId& guid,
            const DDS::DomainParticipantQos& qos,
-           RtpsDiscovery* disco)
+           RtpsDiscovery* disco,
+           XTypes::TypeLookupService_rch tls)
 
   : DCPS::LocalParticipant<Sedp>(qos)
   , disco_(disco)
@@ -267,7 +269,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  init(domain, guid, qos, disco);
+  init(domain, guid, qos, disco, tls);
 
 #ifdef OPENDDS_SECURITY
   init_participant_sec_attributes(participant_sec_attr_);
@@ -280,6 +282,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
            const DCPS::RepoId& guid,
            const DDS::DomainParticipantQos& qos,
            RtpsDiscovery* disco,
+           XTypes::TypeLookupService_rch tls,
            DDS::Security::IdentityHandle identity_handle,
            DDS::Security::PermissionsHandle perm_handle,
            DDS::Security::ParticipantCryptoHandle crypto_handle)
@@ -308,7 +311,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  init(domain, guid_, qos, disco);
+  init(domain, guid_, qos, disco, tls);
 
   DDS::Security::Authentication_var auth = security_config_->get_authentication();
   DDS::Security::AccessControl_var access = security_config_->get_access_control();
@@ -672,7 +675,11 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     }
 
     // add a new participant
-    std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq)));
+#ifdef OPENDDS_SECURITY
+    std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq, config_->auth_resend_period())));
+#else
+    std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq, TimeDuration())));
+#endif
     iter = p.first;
     iter->second.discovered_at_ = now;
     update_lease_expiration_i(iter, now);
@@ -1655,6 +1662,7 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
+  bool processor_needs_cancel = false;
   for (TimeQueue::iterator pos = handshake_resends_.begin(), limit = handshake_resends_.end();
        pos != limit && pos->first <= now;) {
 
@@ -1662,7 +1670,7 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
     if (pit != participants_.end() &&
         pit->second.stateless_msg_deadline_ <= now) {
       const RepoId reader = make_id(pit->first, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER);
-      pit->second.stateless_msg_deadline_ = now + config_->auth_resend_period();
+      pit->second.stateless_msg_deadline_ = now + pit->second.handshake_resend_falloff_.get();
 
       // Send the auth req first to reset the remote if necessary.
       if (pit->second.have_auth_req_msg_) {
@@ -1694,15 +1702,22 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
                        OPENDDS_STRING(DCPS::GuidConverter(pit->first)).c_str()));
           }
         }
+        pit->second.handshake_resend_falloff_.advance();
       }
 
       handshake_resends_.insert(std::make_pair(pit->second.stateless_msg_deadline_, pit->first));
+      if (pit->second.stateless_msg_deadline_ < handshake_resends_.begin()->first) {
+        processor_needs_cancel = true;
+      }
     }
 
     handshake_resends_.erase(pos++);
   }
 
   if (!handshake_resends_.empty()) {
+    if (processor_needs_cancel) {
+      tport_->handshake_resend_processor_->cancel();
+    }
     tport_->handshake_resend_processor_->schedule(handshake_resends_.begin()->first - now);
   }
 }
@@ -1787,6 +1802,9 @@ MonotonicTimePoint Spdp::schedule_handshake_resend(const TimeDuration& time, con
 {
   const MonotonicTimePoint deadline = MonotonicTimePoint::now() + time;
   handshake_resends_.insert(std::make_pair(deadline, guid));
+  if (deadline < handshake_resends_.begin()->first) {
+    tport_->handshake_resend_processor_->cancel();
+  }
   tport_->handshake_resend_processor_->schedule(time);
   return deadline;
 }
@@ -2056,7 +2074,10 @@ Spdp::remove_discovered_participant_i(DiscoveredParticipantIter& iter)
 void
 Spdp::init_bit(const DDS::Subscriber_var& bit_subscriber)
 {
-  bit_subscriber_ = bit_subscriber;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    bit_subscriber_ = bit_subscriber;
+  }
 
   // This is here to make sure thread status gets a valid BIT Subscriber
   tport_->enable_periodic_tasks();
@@ -2070,8 +2091,12 @@ public:
 void
 Spdp::fini_bit()
 {
-  bit_subscriber_ = 0;
-  DCPS::ReactorTask_rch reactor_task = sedp_->reactor_task();
+  DCPS::ReactorTask_rch reactor_task;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    bit_subscriber_ = 0;
+    reactor_task = sedp_->reactor_task();
+  }
   if (!reactor_task->is_shut_down()) {
     DCPS::ReactorInterceptor::CommandPtr command = reactor_task->interceptor()->execute_or_enqueue(new Noop());
     command->wait();
@@ -3241,6 +3266,30 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
     throw std::runtime_error("failed to set TTL");
   }
 
+  const int send_buffer_size = outer->config()->send_buffer_size();
+  if (send_buffer_size > 0) {
+    if (unicast_socket_.set_option(SOL_SOCKET,
+                                   SO_SNDBUF,
+                                   (void *) &send_buffer_size,
+                                   sizeof(send_buffer_size)) < 0
+        && errno != ENOTSUP) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket() - failed to set the send buffer size to %d errno %m\n"), send_buffer_size));
+      throw std::runtime_error("failed to set send buffer size");
+    }
+  }
+
+  const int recv_buffer_size = outer->config()->recv_buffer_size();
+  if (recv_buffer_size > 0) {
+    if (unicast_socket_.set_option(SOL_SOCKET,
+                                   SO_RCVBUF,
+                                   (void *) &recv_buffer_size,
+                                   sizeof(recv_buffer_size)) < 0
+        && errno != ENOTSUP) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket() - failed to set the recv buffer size to %d errno %m\n"), recv_buffer_size));
+      throw std::runtime_error("failed to set recv buffer size");
+    }
+  }
+
 #ifdef ACE_RECVPKTINFO
   int sockopt = 1;
   if (unicast_socket_.set_option(IPPROTO_IP, ACE_RECVPKTINFO, &sockopt, sizeof sockopt) == -1) {
@@ -3300,6 +3349,30 @@ Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port)
                ACE_TEXT("for port:%hu %p\n"),
                outer->config_->ttl(), ipv6_uni_port_, ACE_TEXT("DCPS::set_socket_multicast_ttl:")));
     throw std::runtime_error("failed to set TTL");
+  }
+
+  const int send_buffer_size = outer->config()->send_buffer_size();
+  if (send_buffer_size > 0) {
+    if (unicast_ipv6_socket_.set_option(SOL_SOCKET,
+                                        SO_SNDBUF,
+                                        (void *) &send_buffer_size,
+                                        sizeof(send_buffer_size)) < 0
+        && errno != ENOTSUP) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_ipv6_socket() - failed to set the send buffer size to %d errno %m\n"), send_buffer_size));
+      throw std::runtime_error("failed to set send buffer size");
+    }
+  }
+
+  const int recv_buffer_size = outer->config()->recv_buffer_size();
+  if (recv_buffer_size > 0) {
+    if (unicast_ipv6_socket_.set_option(SOL_SOCKET,
+                                        SO_RCVBUF,
+                                        (void *) &recv_buffer_size,
+                                        sizeof(recv_buffer_size)) < 0
+        && errno != ENOTSUP) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_ipv6_socket() - failed to set the recv buffer size to %d errno %m\n"), recv_buffer_size));
+      throw std::runtime_error("failed to set recv buffer size");
+    }
   }
 
 #ifdef ACE_RECVPKTINFO6
@@ -3547,7 +3620,7 @@ Spdp::update_lease_expiration_i(DiscoveredParticipantIter iter,
                                    iter->second.pdata_.participantProxy.protocolVersion,
                                    iter->second.pdata_.participantProxy.vendorId);
 
-  iter->second.lease_expiration_ = now + d;
+  iter->second.lease_expiration_ = now + d + config_->lease_extension();
 
   // Insert.
   const bool cancel = !lease_expirations_.empty() && iter->second.lease_expiration_ < lease_expirations_.begin()->first;
@@ -4204,6 +4277,7 @@ void Spdp::purge_handshake_resends(DiscoveredParticipantIter iter)
 
   iter->second.have_auth_req_msg_ = false;
   iter->second.have_handshake_msg_ = false;
+  iter->second.handshake_resend_falloff_.reset();
 
   std::pair<TimeQueue::iterator, TimeQueue::iterator> range = handshake_resends_.equal_range(iter->second.stateless_msg_deadline_);
   for (; range.first != range.second; ++range.first) {

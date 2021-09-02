@@ -30,6 +30,10 @@ namespace {
     path.append(prefix);
     path.append("Template.txt");
     std::ifstream ifs(path.c_str());
+    if (!ifs) {
+      ACE_ERROR((LM_ERROR, "Error - Couldn't open %C\n", path.c_str()));
+      return "";
+    }
     std::ostringstream oss;
     oss << ifs.rdbuf();
     return oss.str();
@@ -63,6 +67,11 @@ ts_generator::ts_generator()
 
 bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
 {
+  if (idl_template_.empty()) {
+    // error reported in read_template
+    return false;
+  }
+
   AST_Structure* struct_node = 0;
   AST_Union* union_node = 0;
   if (!node || !name) {

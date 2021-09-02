@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -9,11 +7,12 @@
 #define OPENDDS_DCPS_DEBUG_H
 
 #include "dcps_export.h"
-#include "ace/ace_wchar.h"
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#include <ace/ace_wchar.h>
+
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -79,6 +78,7 @@ public:
   bool cleanup_error;
 
   /// Permissions and Governance
+  bool access_error;
   bool access_warn;
 
   /// Generation and Tracking of Crypto Handles and Keys
@@ -106,6 +106,31 @@ public:
 };
 extern OpenDDS_Dcps_Export SecurityDebug security_debug;
 #endif
+
+class DebugRestore {
+public:
+  DebugRestore()
+    : orig_dcps_debug_level_(DCPS_debug_level)
+#ifdef OPENDDS_SECURITY
+    , orig_security_debug_(security_debug)
+#endif
+  {
+  }
+
+  ~DebugRestore()
+  {
+    DCPS_debug_level = orig_dcps_debug_level_;
+#ifdef OPENDDS_SECURITY
+    security_debug = orig_security_debug_;
+#endif
+  }
+
+private:
+  unsigned orig_dcps_debug_level_;
+#ifdef OPENDDS_SECURITY
+  SecurityDebug orig_security_debug_;
+#endif
+};
 
 } // namespace OpenDDS
 } // namespace DCPS

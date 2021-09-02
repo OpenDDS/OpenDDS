@@ -1,0 +1,16 @@
+{
+  "name": "Having The Node Controller Launch A Raw TCP Latency Checker",
+  "desc": "This is an example of being able to call the legacy Bench v1 tcp_latency application with a parseable Bench v2 report file",
+  "any_node": [
+    {
+      "command": "%bench_root%%ds%delay_command.sh 0.002 %bench_root%%ds%tcp_latency%ds%tcp_latency -c localhost:5678 -d 30 -f 10 -m 50 -r %report%",
+      "count": 1
+    },
+    {
+      "command": "%bench_root%%ds%tcp_latency%ds%tcp_latency -s 5678 -d 30 -m 50 -r %report%",
+      "no_report": true,
+      "count": 1
+    }
+  ],
+  "timeout": 120
+}

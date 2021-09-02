@@ -1,21 +1,20 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #include "typeobject_generator.h"
 
-#include "utl_identifier.h"
 #include "topic_keys.h"
 #include "dds_visitor.h"
-
 #include "be_extern.h"
 #include "be_util.h"
 
 #include <dds/DCPS/Hash.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/Definitions.h>
+
+#include <utl_identifier.h>
 
 using std::string;
 using namespace AstTypeClassification;
@@ -58,10 +57,12 @@ to_long(const AST_Expression::AST_ExprValue& ev)
   switch (ev.et) {
   case AST_Expression::EV_octet:
     return ev.u.oval;
+#if OPENDDS_HAS_EXPLICIT_INTS
   case AST_Expression::EV_uint8:
     return ev.u.uint8val;
   case AST_Expression::EV_int8:
     return ev.u.int8val;
+#endif
   case AST_Expression::EV_short:
     return ev.u.sval;
   case AST_Expression::EV_ushort:
@@ -1879,7 +1880,10 @@ typeobject_generator::generate_struct_type_identifier(AST_Type* type)
 
   complete_to.complete.struct_type.struct_flags = minimal_to.minimal.struct_type.struct_flags;
   complete_to.complete.struct_type.header.base_type = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_NONE);
-  complete_to.complete.struct_type.header.detail.type_name = type->name()->get_string_copy();
+  const char* name = type->name()->get_string_copy();
+  complete_to.complete.struct_type.header.detail.type_name = name;
+  delete[] name;
+  name = 0;
   // @verbatim and custom annotations are not supported.
 
   for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
@@ -1961,7 +1965,10 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
   complete_to.complete.kind = OpenDDS::XTypes::TK_UNION;
   complete_to.complete.union_type.union_flags = minimal_to.minimal.union_type.union_flags;
 
-  complete_to.complete.union_type.header.detail.type_name = type->name()->get_string_copy();
+  const char* name = type->name()->get_string_copy();
+  complete_to.complete.union_type.header.detail.type_name = name;
+  delete[] name;
+  name = 0;
 
   complete_to.complete.union_type.discriminator.common.member_flags =
     minimal_to.minimal.union_type.discriminator.common.member_flags;
@@ -2046,7 +2053,10 @@ typeobject_generator::generate_enum_type_identifier(AST_Type* type)
   complete_to.kind = OpenDDS::XTypes::EK_COMPLETE;
   complete_to.complete.kind = OpenDDS::XTypes::TK_ENUM;
   complete_to.complete.enumerated_type.header.common.bit_bound = 32;
-  complete_to.complete.enumerated_type.header.detail.type_name = type->name()->get_string_copy();
+  const char* name = type->name()->get_string_copy();
+  complete_to.complete.enumerated_type.header.detail.type_name = name;
+  delete[] name;
+  name = 0;
 
   for (size_t i = 0; i != contents.size(); ++i) {
     OpenDDS::XTypes::MinimalEnumeratedLiteral minimal_lit;
@@ -2147,7 +2157,10 @@ typeobject_generator::generate_array_type_identifier(AST_Type* type, bool force_
     complete_to.kind = OpenDDS::XTypes::EK_COMPLETE;
     complete_to.complete.kind = OpenDDS::XTypes::TK_ARRAY;
     complete_to.complete.array_type.header.common.bound_seq = minimal_to.minimal.array_type.header.common.bound_seq;
-    complete_to.complete.array_type.header.detail.type_name = type->name()->get_string_copy();
+    const char* name = type->name()->get_string_copy();
+    complete_to.complete.array_type.header.detail.type_name = name;
+    delete[] name;
+    name = 0;
 
     complete_to.complete.array_type.element.common.element_flags = cef;
     complete_to.complete.array_type.element.common.type = complete_elem_ti;
@@ -2250,7 +2263,10 @@ typeobject_generator::generate_alias_type_identifier(AST_Type* type)
 
   complete_to.kind = OpenDDS::XTypes::EK_COMPLETE;
   complete_to.complete.kind = OpenDDS::XTypes::TK_ALIAS;
-  complete_to.complete.alias_type.header.detail.type_name = type->name()->get_string_copy();
+  const char* name = type->name()->get_string_copy();
+  complete_to.complete.alias_type.header.detail.type_name = name;
+  delete[] name;
+  name = 0;
   complete_to.complete.alias_type.body.common.related_type = get_complete_type_identifier(n->base_type());
 
   update_maps(type, minimal_to, complete_to);
@@ -2279,12 +2295,14 @@ typeobject_generator::generate_primitive_type_identifier(AST_Type* type)
   case AST_PredefinedType::PT_ushort:
     fully_desc_type_identifier_map_[type] = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_UINT16);
     break;
+#if OPENDDS_HAS_EXPLICIT_INTS
   case AST_PredefinedType::PT_int8:
     fully_desc_type_identifier_map_[type] = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_INT8);
     break;
   case AST_PredefinedType::PT_uint8:
     fully_desc_type_identifier_map_[type] = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_UINT8);
     break;
+#endif
   case AST_PredefinedType::PT_float:
     fully_desc_type_identifier_map_[type] = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_FLOAT32);
     break;

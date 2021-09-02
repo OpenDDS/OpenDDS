@@ -143,7 +143,6 @@ Writer::svc()
   }
 
   finished_instances_ ++;
-
   return 0;
 }
 

@@ -4,9 +4,13 @@
  */
 
 #include "SignedDocument.h"
-#include "dds/DCPS/security/CommonUtilities.h"
+
 #include "Err.h"
+
+#include <dds/DCPS/security/CommonUtilities.h>
+
 #include <openssl/pem.h>
+
 #include <cstring>
 #include <sstream>
 #include <iterator>
@@ -19,8 +23,16 @@ namespace OpenDDS {
 namespace Security {
 namespace SSL {
 
+namespace {
+  const char* const default_filename = "<no filename: not loaded>";
+  const char* const data_filename = "<no filename: data uri>";
+}
+
 SignedDocument::SignedDocument(const std::string& uri)
-  : doc_(NULL), original_(), verifiable_("")
+  : doc_(0)
+  , original_()
+  , verifiable_("")
+  , filename_(default_filename)
 {
   DDS::Security::SecurityException ex;
   if (!load(uri, ex)) {
@@ -29,18 +41,27 @@ SignedDocument::SignedDocument(const std::string& uri)
 }
 
 SignedDocument::SignedDocument()
-  : doc_(NULL), original_(), verifiable_("")
+  : doc_(0)
+  , original_()
+  , verifiable_("")
+  , filename_(default_filename)
 {
 }
 
 SignedDocument::SignedDocument(const DDS::OctetSeq& src)
-  : doc_(NULL), original_(), verifiable_("")
+  : doc_(0)
+  , original_()
+  , verifiable_("")
+  , filename_(data_filename)
 {
   deserialize(src);
 }
 
 SignedDocument::SignedDocument(const SignedDocument& rhs)
-  : doc_(NULL), original_(), verifiable_("")
+  : doc_(0)
+  , original_()
+  , verifiable_("")
+  , filename_(rhs.filename_)
 {
   if (0 < rhs.original_.length()) {
     deserialize(rhs.original_);
@@ -60,6 +81,7 @@ SignedDocument& SignedDocument::operator=(const SignedDocument& rhs)
     if (0 < rhs.original_.length()) {
       deserialize(rhs.original_);
     }
+    filename_ = rhs.filename_;
   }
   return *this;
 }
@@ -78,10 +100,12 @@ bool SignedDocument::load(const std::string& uri, DDS::Security::SecurityExcepti
   switch (uri_info.scheme) {
   case URI::URI_FILE:
     PKCS7_from_SMIME_file(uri_info.everything_else);
+    filename_ = uri_info.everything_else;
     break;
 
   case URI::URI_DATA:
     deserialize(uri_info.everything_else);
+    filename_ = data_filename;
     break;
 
   case URI::URI_PKCS11:
@@ -142,19 +166,19 @@ class verify_signature_impl
 {
 public:
   verify_signature_impl(PKCS7* doc, const std::string& content)
-    : doc_(doc),
-      content_(content),
-      store_(NULL),
-      store_ctx_(NULL),
-      reader_(NULL)
+    : doc_(doc)
+    , content_(content)
+    , store_(X509_STORE_new())
+    , store_ctx_(X509_STORE_CTX_new())
+    , reader_(BIO_new(BIO_s_mem()))
   {
-    if (NULL == (store_ = X509_STORE_new())) {
+    if (!store_) {
       OPENDDS_SSL_LOG_ERR("X509_STORE_new failed");
     }
-    if (NULL == (store_ctx_ = X509_STORE_CTX_new())) {
+    if (!store_ctx_) {
       OPENDDS_SSL_LOG_ERR("X509_STORE_CTX_new failed");
     }
-    if (NULL == (reader_ = BIO_new(BIO_s_mem()))) {
+    if (!reader_) {
       OPENDDS_SSL_LOG_ERR("BIO_new failed");
     }
   }
@@ -300,7 +324,7 @@ PKCS7* SignedDocument::PKCS7_from_SMIME_file(const std::string& path)
                "(%P|%t) SignedDocument::PKCS7_from_SMIME_file:"
                "WARNING: Failed to load file '%C'; '%m'\n",
                path.c_str()));
-    return NULL;
+    return 0;
   }
 
   const std::ifstream::pos_type begin = in.tellg();
@@ -316,7 +340,7 @@ PKCS7* SignedDocument::PKCS7_from_SMIME_file(const std::string& path)
                "(%P|%t) SignedDocument::PKCS7_from_SMIME_file:"
                "WARNING: Failed to load file '%C'; '%m'\n",
                path.c_str()));
-    return NULL;
+    return 0;
   }
 
   // To appease the other DDS security implementations
@@ -332,7 +356,7 @@ PKCS7* SignedDocument::PKCS7_from_data(const DDS::OctetSeq& s_mime_data)
     ACE_ERROR((LM_WARNING,
                "(%P|%t) SignedDocument::PKCS7_from_data: "
                "WARNING: document has already been constructed\n"));
-    return NULL;
+    return 0;
   }
 
   BIO* filebuf = BIO_new(BIO_s_mem());
@@ -343,7 +367,7 @@ PKCS7* SignedDocument::PKCS7_from_data(const DDS::OctetSeq& s_mime_data)
       OPENDDS_SSL_LOG_ERR("BIO_write failed");
     }
 
-    BIO* cache_this = NULL;
+    BIO* cache_this = 0;
 
     doc_ = SMIME_read_PKCS7(filebuf, &cache_this);
 

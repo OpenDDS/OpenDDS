@@ -206,6 +206,7 @@ private:
   /// The recursive lock to protect datawriter map and suspend count.
   mutable lock_type                   pi_lock_;
   reverse_lock_type                   reverse_pi_lock_;
+  mutable lock_type                   pi_suspended_lock_;
 
   /// Monitor object for this entity
   unique_ptr<Monitor> monitor_;

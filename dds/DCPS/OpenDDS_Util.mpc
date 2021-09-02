@@ -2,11 +2,11 @@ project: acelib, dds_macros, install {
   requires += no_opendds_safety_profile
   sharedname = OpenDDS_Util
   dynamicflags = OPENDDS_DCPS_BUILD_DLL
-  includes += $(DDS_ROOT) $(DDS_ROOT)/dds
+  includes += $(DDS_ROOT) $(DDS_ROOT)/dds $(TAO_ROOT)
   libout = $(DDS_ROOT)/lib
   pch_header =
   pch_source =
-  macros += NOTAO
+  macros += OPENDDS_NO_TAO
 
   Header_Files {
     Hash.h
@@ -16,6 +16,10 @@ project: acelib, dds_macros, install {
     debug.h
     XTypes/External.h
     XTypes/TypeObject.h
+  }
+
+  specific {
+    install_headers =
   }
 
   Source_Files {

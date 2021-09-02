@@ -36,6 +36,7 @@ public:
   unsigned char ttl_;
   OPENDDS_STRING multicast_interface_;
 
+  size_t anticipated_fragments_;
   size_t max_message_size_;
   size_t nak_depth_;
   TimeDuration nak_response_delay_;

@@ -1,8 +1,2 @@
 /RtpsRelay
-.obj
-.depend.*
-GNUmakefile*
-*~
-README.html
-RelayC.*
-RelayTypeSupport*
+/README.html

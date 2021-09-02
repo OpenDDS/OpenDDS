@@ -2540,7 +2540,6 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        export ASAN_OPTIONS=detect_leaks=0
         cd ACE_TAO/ACE
         make -j4
         cd ../TAO
@@ -2612,7 +2611,6 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        export ASAN_OPTIONS=detect_leaks=0
         make -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
@@ -4044,7 +4042,7 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_stat_qt_ws_sec
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
     - name: install xerces
@@ -4604,9 +4602,9 @@ jobs:
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
+        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -4658,9 +4656,9 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
+        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -4745,9 +4743,9 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
+        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -4870,9 +4868,9 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
+        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -5020,15 +5018,9 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_p1_stat_js0
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
-    - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v6
-      with:
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x64-windows
     - name: checkout MPC
       uses: actions/checkout@v2
       with:
@@ -5097,7 +5089,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Compiler
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features no_cxx11=0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -5165,9 +5157,9 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
+        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -5331,9 +5323,9 @@ jobs:
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
+        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -5385,9 +5377,9 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
+        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -5472,9 +5464,9 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
+        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -5597,9 +5589,9 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
+        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -5747,15 +5739,9 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_p1_stat_FM-08
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
-    - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v6
-      with:
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x64-windows
     - name: checkout MPC
       uses: actions/checkout@v2
       with:
@@ -5824,7 +5810,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Compiler
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -5891,9 +5877,9 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
+        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -6057,9 +6043,9 @@ jobs:
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
+        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -6111,9 +6097,9 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
+        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -6335,9 +6321,9 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
+        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -6485,13 +6471,13 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_o1p1_sec
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
+        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -6629,9 +6615,9 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
+        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -6786,10 +6772,10 @@ jobs:
     - name: install vcpkg packages
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       id: runvcpkg
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
         vcpkgDirectory: '${{ github.workspace }}/vcpkg-qt'
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
+        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
         vcpkgArguments: --recurse qt5-winextras qt5-tools qt5-svg qt5-multimedia qt5-declarative
         vcpkgTriplet: x64-windows
     - name: checkout WinFlexBison
@@ -6870,9 +6856,9 @@ jobs:
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
+        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -6934,9 +6920,9 @@ jobs:
         rm -f wireshark_w19-release.tar.xz
     - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
+        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -7143,9 +7129,9 @@ jobs:
 
     steps:
     - name: install xerces-c
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
+        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
         vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -7293,13 +7279,13 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_j_ws_FM-1f
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
     - name: install xerces-c
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
+        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
         vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -7437,9 +7423,9 @@ jobs:
 
     steps:
     - name: install xerces-c
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
+        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
         vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -7610,9 +7596,9 @@ jobs:
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
+        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x86-windows
     - name: checkout MPC
@@ -7666,9 +7652,9 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
+        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x86-windows
     - name: ls
@@ -7775,9 +7761,9 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
+        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x86-windows
     - name: checkout MPC
@@ -7907,9 +7893,9 @@ jobs:
 
     steps:
     - name: install xerces-c
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
+        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
         vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x86-windows
     - name: checkout MPC
@@ -8000,9 +7986,9 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v6
+      uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 5568f110b509a9fd90711978a7cb76bae75bb092
+        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x86-windows
     - name: checkout MPC
@@ -8754,6 +8740,11 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: disable ntp
+      shell: bash
+      run: |
+        sudo systemsetup -setusingnetworktime off
+        sudo rm -rf /etc/ntp.conf
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -9032,6 +9023,11 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: disable ntp
+      shell: bash
+      run: |
+        sudo systemsetup -setusingnetworktime off
+        sudo rm -rf /etc/ntp.conf
     - name: run OpenDDS tests
       shell: bash
       run: |

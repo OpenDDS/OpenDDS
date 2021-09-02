@@ -1,5 +1,5 @@
-#ifndef MODEL_EXCEPTIONS_H
-#define MODEL_EXCEPTIONS_H
+#ifndef OPENDDS_MODEL_EXCEPTIONS_H
+#define OPENDDS_MODEL_EXCEPTIONS_H
 
 // Needed here to avoid the pragma below when necessary.
 #include /**/ "ace/pre.h"

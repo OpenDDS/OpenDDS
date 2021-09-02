@@ -38,6 +38,9 @@ make_path( "${dest}/bin", "${dest}/lib" );
 my @bins = ('node_controller/node_controller',
             'test_controller/test_controller',
             'worker/worker',
+            'udp_latency/udp_latency',
+            'tcp_latency/tcp_latency',
+            'delay_command.sh',
             'report_parser/report_parser',
             'dashboard_summarizer/dashboard_summarizer');
 

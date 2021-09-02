@@ -1,5 +1,5 @@
-#ifndef RTPSRELAY_PARTITION_INDEX_H_
-#define RTPSRELAY_PARTITION_INDEX_H_
+#ifndef OPENDDS_RTPSRELAYLIB_PARTITION_INDEX_H
+#define OPENDDS_RTPSRELAYLIB_PARTITION_INDEX_H
 
 #include "Name.h"
 #include "Utility.h"
@@ -48,7 +48,7 @@ public:
   }
 
 private:
-  typedef std::map<Atom, NodePtr> ChildrenType;
+  typedef std::unordered_map<Atom, NodePtr, AtomHash> ChildrenType;
   ChildrenType children_;
   GuidSet guids_;
 

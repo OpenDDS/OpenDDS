@@ -1,15 +1,15 @@
-#ifndef RTPSRELAY_NAME_H_
-#define RTPSRELAY_NAME_H_
+#ifndef OPENDDS_RTPSRELAYLIB_NAME_H
+#define OPENDDS_RTPSRELAYLIB_NAME_H
 
 #include "export.h"
 
-#include <set>
+#include <unordered_set>
 #include <string>
 #include <vector>
 
 namespace RtpsRelay {
 
-class RtpsRelayLib_Export Atom {
+class OpenDDS_RtpsRelayLib_Export Atom {
 public:
   enum Kind {
     CHARACTER,
@@ -21,7 +21,7 @@ public:
 
   explicit Atom(Kind kind) : kind_(kind), character_(0) {}
   explicit Atom(char c) : kind_(CHARACTER), character_(c) {}
-  Atom(bool negated, const std::set<char>& characters)
+  Atom(bool negated, const std::unordered_set<char>& characters)
     : kind_(negated ? NEGATED_CHARACTER_CLASS : CHARACTER_CLASS)
     , character_(0)
     , characters_(characters) {}
@@ -30,23 +30,7 @@ public:
 
   char character() const { return character_; }
 
-  const std::set<char>& characters() const { return characters_; }
-
-  bool operator<(const Atom& other) const
-  {
-    if (kind_ != other.kind_) {
-      return kind_ < other.kind_;
-    }
-    switch (kind_) {
-    case CHARACTER:
-      return character_ < other.character_;
-    case CHARACTER_CLASS:
-    case NEGATED_CHARACTER_CLASS:
-      return characters_ < other.characters_;
-    default:
-      return false;
-    }
-  }
+  const std::unordered_set<char>& characters() const { return characters_; }
 
   bool operator==(const Atom& other) const
   {
@@ -85,12 +69,24 @@ public:
 private:
   Kind kind_;
   char character_;            // For CHARACTER.
-  std::set<char> characters_; // For CHARACTER_CLASS and NEGATED_CHARACTER_CLASS.
+  std::unordered_set<char> characters_; // For CHARACTER_CLASS and NEGATED_CHARACTER_CLASS.
 };
 
-RtpsRelayLib_Export std::ostream& operator<<(std::ostream& out, const Atom& atom);
+struct AtomHash {
+  std::size_t operator() (const Atom& atom) const
+  {
+    std::size_t result = atom.kind();
+    result ^= (atom.character() << 8);
+    for (const auto c : atom.characters()) {
+      result ^= (c << 16);
+    }
+    return result;
+  }
+};
 
-class RtpsRelayLib_Export Name {
+OpenDDS_RtpsRelayLib_Export std::ostream& operator<<(std::ostream& out, const Atom& atom);
+
+class OpenDDS_RtpsRelayLib_Export Name {
 public:
   typedef std::vector<Atom> Atoms;
   typedef Atoms::const_iterator const_iterator;
@@ -109,7 +105,6 @@ public:
   const_iterator begin() const { return atoms_.begin(); }
   const_iterator end() const { return atoms_.end(); }
 
-  bool operator<(const Name& other) const { return atoms_ < other.atoms_; }
   bool operator==(const Name& other) const
   {
     return is_pattern_ == other.is_pattern_ &&
@@ -141,11 +136,11 @@ private:
   static Atom::Kind parse_pattern(Name& name, const std::string& buffer, size_t& idx, char expected, Atom::Kind kind);
   static char parse_character(Name& name, const std::string& buffer, size_t& idx);
   static Atom parse_character_class(Name& name, const std::string& buffer, size_t& idx);
-  static void parse_character_class_tail(Name& name, const std::string& buffer, size_t& idx, std::set<char>& characters);
-  static void parse_character_or_range(Name& name, const std::string& buffer, size_t& idx, std::set<char>& characters);
+  static void parse_character_class_tail(Name& name, const std::string& buffer, size_t& idx, std::unordered_set<char>& characters);
+  static void parse_character_or_range(Name& name, const std::string& buffer, size_t& idx, std::unordered_set<char>& characters);
 };
 
-RtpsRelayLib_Export std::ostream& operator<<(std::ostream& out, const Name& name);
+OpenDDS_RtpsRelayLib_Export std::ostream& operator<<(std::ostream& out, const Name& name);
 
 }
 

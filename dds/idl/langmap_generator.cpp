@@ -8,6 +8,8 @@
 #include "field_info.h"
 #include "be_extern.h"
 
+#include <dds/DCPS/Definitions.h>
+
 #ifdef ACE_HAS_CDR_FIXED
 #  include <ast_fixed.h>
 #endif
@@ -133,8 +135,10 @@ struct GeneratorBase
   {
     AST_PredefinedType::PredefinedType pt = AST_PredefinedType::PT_void;
     switch (type) {
+#if OPENDDS_HAS_EXPLICIT_INTS
     case AST_Expression::EV_int8: pt = AST_PredefinedType::PT_int8; break;
     case AST_Expression::EV_uint8: pt = AST_PredefinedType::PT_uint8; break;
+#endif
     case AST_Expression::EV_short: pt = AST_PredefinedType::PT_short; break;
     case AST_Expression::EV_ushort: pt = AST_PredefinedType::PT_ushort; break;
     case AST_Expression::EV_long: pt = AST_PredefinedType::PT_long; break;
@@ -210,12 +214,14 @@ struct GeneratorBase
 
     switch (the_union->udisc_type ())
       {
+#if OPENDDS_HAS_EXPLICIT_INTS
       case AST_Expression::EV_int8:
         first_label << signed(dv.u.char_val);
         break;
       case AST_Expression::EV_uint8:
         first_label << unsigned(dv.u.char_val);
         break;
+#endif
       case AST_Expression::EV_short:
         first_label << dv.u.short_val;
         break;
@@ -1117,8 +1123,10 @@ struct SafetyProfileGenerator : GeneratorBase
     primtype_[AST_PredefinedType::PT_ulonglong] = "CORBA::UnsignedLongLong";
     primtype_[AST_PredefinedType::PT_short] = "CORBA::Short";
     primtype_[AST_PredefinedType::PT_ushort] = "CORBA::UShort";
+#if OPENDDS_HAS_EXPLICIT_INTS
     primtype_[AST_PredefinedType::PT_int8] = "CORBA::Int8";
     primtype_[AST_PredefinedType::PT_uint8] = "CORBA::UInt8";
+#endif
     primtype_[AST_PredefinedType::PT_float] = "CORBA::Float";
     primtype_[AST_PredefinedType::PT_double] = "CORBA::Double";
     primtype_[AST_PredefinedType::PT_longdouble] = "CORBA::LongDouble";
@@ -1350,8 +1358,10 @@ struct Cxx11Generator : GeneratorBase
     primtype_[AST_PredefinedType::PT_ulonglong] = "uint64_t";
     primtype_[AST_PredefinedType::PT_short] = "int16_t";
     primtype_[AST_PredefinedType::PT_ushort] = "uint16_t";
+#if OPENDDS_HAS_EXPLICIT_INTS
     primtype_[AST_PredefinedType::PT_int8] = "int8_t";
     primtype_[AST_PredefinedType::PT_uint8] = "uint8_t";
+#endif
     primtype_[AST_PredefinedType::PT_float] = "float";
     primtype_[AST_PredefinedType::PT_double] = "double";
     primtype_[AST_PredefinedType::PT_longdouble] = "long double";
