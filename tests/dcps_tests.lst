@@ -143,7 +143,7 @@ tests/DCPS/Reconnect/run_test.pl sub_init_crash: !DCPS_MIN !OPENDDS_SAFETY_PROFI
 tests/DCPS/Restart/run_test.pl: RTPS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/sub_init_loop/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/TimeBasedFilter/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/TimeBasedFilter/run_test.pl -reliable: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/TimeBasedFilter/run_test.pl -reliable: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS_OPENDDS_SAFETY_PROFILE
 tests/DCPS/TcpReconnect/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 
 tests/DCPS/BuiltInTopic/run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
@@ -151,7 +151,7 @@ tests/DCPS/BuiltInTopic/run_test.pl ignore_part: !DCPS_MIN !NO_BUILT_IN_TOPICS !
 tests/DCPS/BuiltInTopic/run_test.pl ignore_topic: !DCPS_MIN !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/BuiltInTopic/run_test.pl ignore_pub: !DCPS_MIN !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/BuiltInTopic/run_test.pl ignore_sub: !DCPS_MIN !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
-tests/DCPS/BuiltInTopicTest/run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS !DDS_NO_OWNERSHIP_PROFILE !TARGET
+tests/DCPS/BuiltInTopicTest/run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS !DDS_NO_OWNERSHIP_PROFILE !TARGET !GH_ACTIONS_OPENDDS_SAFETY_PROFILE
 tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 
 tests/DCPS/CorbaSeq/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
@@ -259,7 +259,7 @@ tests/DCPS/CompatibilityTest/run_test.pl rtps_disc: !DCPS_MIN RTPS !GH_ACTIONS_M
 tests/DCPS/CompatibilityTest/run_test.pl rtps_disc_tcp: !DCPS_MIN RTPS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Partition/run_test.pl: !DCPS_MIN
 tests/DCPS/Deadline/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
-tests/DCPS/Deadline/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS
+tests/DCPS/Deadline/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS !GH_ACTIONS
 tests/DCPS/Lifespan/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Lifespan/run_test.pl rtps_disc: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE RTPS
 tests/DCPS/TransientDurability/run_test.pl: !DCPS_MIN !DDS_NO_PERSISTENCE_PROFILE !DDS_NO_OWNERSHIP_PROFILE
