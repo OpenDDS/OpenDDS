@@ -55,7 +55,7 @@ BE_GlobalData::BE_GlobalData()
   , face_ts_(false)
   , printer_(false)
   , filename_only_includes_(false)
-  , seq_("Seq")
+  , sequence_suffix_("Seq")
   , language_mapping_(LANGMAP_NONE)
   , root_default_nested_(true)
   , warn_about_dcps_data_type_(true)
@@ -183,12 +183,12 @@ BE_GlobalData::LanguageMapping BE_GlobalData::language_mapping() const
 
 void BE_GlobalData::sequence_suffix(const ACE_CString& str)
 {
-  this->seq_ = str;
+  this->sequence_suffix_ = str;
 }
 
 ACE_CString BE_GlobalData::sequence_suffix() const
 {
-  return this->seq_;
+  return this->sequence_suffix_;
 }
 
 void BE_GlobalData::java(bool b)
@@ -337,7 +337,7 @@ BE_GlobalData::spawn_options()
 void invalid_option(char* option)
 {
   ACE_ERROR((LM_ERROR,
-    ACE_TEXT("IDL: I don't understand the '%C' option\n"), option));
+    ACE_TEXT("opendds_idl: I don't understand the '%C' option\n"), option));
   idl_global->parse_args_exit(1);
 }
 
@@ -347,6 +347,9 @@ BE_GlobalData::parse_args(long& i, char** av)
   // This flag is provided for CIAO compatibility
   static const char EXPORT_FLAG[] = "--export=";
   static const size_t EXPORT_FLAG_SIZE = sizeof(EXPORT_FLAG) - 1;
+
+  static const char TYPESEQUENCESUFFIC_FLAG[] = "--typeSequenceSuffix=";
+  static const size_t TYPESEQUENCESUFFIC_FLAG_SIZE = sizeof(TYPESEQUENCESUFFIC_FLAG) - 1;
 
   static const char DEFAULT_NESTED_FLAG[] = "--default-nested";
   static const size_t DEFAULT_NESTED_FLAG_SIZE = sizeof(DEFAULT_NESTED_FLAG) - 1;
@@ -435,6 +438,8 @@ BE_GlobalData::parse_args(long& i, char** av)
   case '-':
     if (!ACE_OS::strncasecmp(av[i], EXPORT_FLAG, EXPORT_FLAG_SIZE)) {
       this->export_macro(av[i] + EXPORT_FLAG_SIZE);
+    } else if (!ACE_OS::strncasecmp(av[i], TYPESEQUENCESUFFIC_FLAG, TYPESEQUENCESUFFIC_FLAG_SIZE)) {
+      this->sequence_suffix(av[i] + TYPESEQUENCESUFFIC_FLAG_SIZE);
     } else if (!ACE_OS::strncasecmp(av[i], DEFAULT_NESTED_FLAG, DEFAULT_NESTED_FLAG_SIZE)) {
       root_default_nested_ = true;
     } else if (!ACE_OS::strncasecmp(av[i], NO_DEFAULT_NESTED_FLAG, NO_DEFAULT_NESTED_FLAG_SIZE)) {
@@ -598,7 +603,7 @@ namespace {
     } else if (len >= 6 &&
         0 == ACE_OS::strcasecmp(idl.c_str() + len - 5, ".pidl")) {
       base_name.assign(idl.c_str(), len - 5);
-      size_t slash = base_name.find_last_of("/\\");
+      const size_t slash = base_name.find_last_of("/\\");
       if (slash != std::string::npos && slash >= 3 && base_name.size() > 3
           && base_name.substr(slash - 3, 3) == "tao"
           && base_name.substr(base_name.size() - 3) == "Seq") {
@@ -622,7 +627,7 @@ namespace {
 
         if (filename_only_includes) {
           size_t loc = rel.rfind('/', rel.length());
-          size_t locw = rel.rfind('\\', rel.length());
+          const size_t locw = rel.rfind('\\', rel.length());
 
           if (loc != string::npos && locw != string::npos) {
             // path may contain both '/' and '\'. choose the last one.

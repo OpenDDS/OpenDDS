@@ -1,0 +1,7 @@
+project(DDS*): dcpsexe, dcps_test {
+  idlflags += -SS
+  dcps_ts_flags += --typeSequenceSuffix=OpenDDSSeq
+  TypeSupport_Files {
+    sequence.idl
+  }
+}
