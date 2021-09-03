@@ -348,7 +348,7 @@ BE_GlobalData::parse_args(long& i, char** av)
   static const char EXPORT_FLAG[] = "--export=";
   static const size_t EXPORT_FLAG_SIZE = sizeof(EXPORT_FLAG) - 1;
 
-  static const char TYPESEQUENCESUFFIC_FLAG[] = "--typeSequenceSuffix=";
+  static const char TYPESEQUENCESUFFIC_FLAG[] = "--type-sequence-suffix=";
   static const size_t TYPESEQUENCESUFFIC_FLAG_SIZE = sizeof(TYPESEQUENCESUFFIC_FLAG) - 1;
 
   static const char DEFAULT_NESTED_FLAG[] = "--default-nested";
