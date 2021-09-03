@@ -1,43 +1,39 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #include "RtpsUdpDataLink.h"
+
 #include "RtpsUdpTransport.h"
 #include "RtpsUdpInst.h"
 #include "RtpsUdpSendStrategy.h"
 #include "RtpsUdpReceiveStrategy.h"
 
-#include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
-#include "dds/DCPS/transport/framework/TransportSendElement.h"
-#include "dds/DCPS/transport/framework/TransportSendControlElement.h"
-#include "dds/DCPS/transport/framework/NetworkAddress.h"
-#include "dds/DCPS/transport/framework/RemoveAllVisitor.h"
-
-#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
-#include "dds/DCPS/RTPS/BaseMessageUtils.h"
-#include "dds/DCPS/RTPS/BaseMessageTypes.h"
-#include "dds/DCPS/RTPS/MessageTypes.h"
-#include "dds/DCPS/RTPS/Logging.h"
-
+#include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/Util.h>
+#include <dds/DCPS/Logging.h>
+#include <dds/DCPS/transport/framework/TransportCustomizedElement.h>
+#include <dds/DCPS/transport/framework/TransportSendElement.h>
+#include <dds/DCPS/transport/framework/TransportSendControlElement.h>
+#include <dds/DCPS/transport/framework/NetworkAddress.h>
+#include <dds/DCPS/transport/framework/RemoveAllVisitor.h>
+#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+#include <dds/DCPS/RTPS/BaseMessageTypes.h>
+#include <dds/DCPS/RTPS/MessageTypes.h>
+#include <dds/DCPS/RTPS/Logging.h>
 #ifdef OPENDDS_SECURITY
-#include "dds/DCPS/RTPS/SecurityHelpers.h"
-#include "dds/DCPS/security/framework/SecurityRegistry.h"
+#  include <dds/DCPS/RTPS/SecurityHelpers.h>
+#  include <dds/DCPS/security/framework/SecurityRegistry.h>
 #endif
 
-#include "dds/DdsDcpsCoreTypeSupportImpl.h"
+#include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
+#include <dds/DdsDcpsCoreTypeSupportImpl.h>
 
-#include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/Util.h"
-#include "dds/DCPS/Logging.h"
-
-#include "ace/Default_Constants.h"
-#include "ace/Log_Msg.h"
-#include "ace/Message_Block.h"
-#include "ace/Reactor.h"
+#include <ace/Default_Constants.h>
+#include <ace/Log_Msg.h>
+#include <ace/Message_Block.h>
+#include <ace/Reactor.h>
 
 #include <string.h>
 
@@ -1578,6 +1574,7 @@ RtpsUdpDataLink::RtpsReader::pre_stop_helper()
   stopping_ = true;
 
   preassociation_writers_.clear();
+  log_remote_counts("pre_stop_helper");
 
   RtpsUdpDataLink_rch link = link_.lock();
 
@@ -1939,6 +1936,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
       if (transport_debug.log_progress) {
         DCPS::log_progress("RTPS reader/writer association complete", id_, writer->id_, writer->participant_discovered_at_);
       }
+      log_remote_counts("process_heartbeat_i");
 
       const SequenceRange sr(zero, hb_first.previous());
       writer->recvd_.insert(sr);
@@ -2011,6 +2009,7 @@ RtpsUdpDataLink::RtpsWriter::add_reader(const ReaderInfo_rch& reader)
 #endif
     remote_readers_.insert(ReaderInfoMap::value_type(reader->id_, reader));
     preassociation_readers_.insert(reader);
+    log_remote_counts("add_reader");
 
     RtpsUdpDataLink_rch link = link_.lock();
     if (!link) {
@@ -2060,6 +2059,7 @@ RtpsUdpDataLink::RtpsWriter::remove_reader(const RepoId& id)
       check_leader_lagger();
       remote_readers_.erase(it);
       result = true;
+      log_remote_counts("remove_reader");
     }
   }
   typedef OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator iter_t;
@@ -2089,6 +2089,7 @@ RtpsUdpDataLink::RtpsReader::add_writer(const WriterInfo_rch& writer)
   if (iter == remote_writers_.end()) {
     remote_writers_[writer->id_] = writer;
     preassociation_writers_.insert(writer);
+    log_remote_counts("add_writer");
 
     RtpsUdpDataLink_rch link = link_.lock();
     if (!link) {
@@ -2123,6 +2124,7 @@ RtpsUdpDataLink::RtpsReader::remove_writer(const RepoId& id)
   if (pos != remote_writers_.end()) {
     preassociation_writers_.erase(pos->second);
     remote_writers_.erase(pos);
+    log_remote_counts("remove_writer");
     return true;
   }
 
@@ -3057,6 +3059,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
       if (transport_debug.log_progress) {
         DCPS::log_progress("RTPS writer/reader association complete", id_, reader->id_, reader->participant_discovered_at_);
       }
+      log_remote_counts("process_acknack");
 
       const SequenceNumber max_sn = expected_max_sn(reader);
       const SequenceNumber acked_sn = reader->acked_sn();
@@ -3077,7 +3080,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
 
   if (Transport_debug_level > 5) {
     GuidConverter local_conv(id_), remote_conv(src);
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::RtpsWriter::process_acknack "
                "local %C remote %C ack %q\n", OPENDDS_STRING(local_conv).c_str(),
                OPENDDS_STRING(remote_conv).c_str(), ack.getValue()));
   }
@@ -4431,6 +4434,28 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
 ICE::Endpoint*
 RtpsUdpDataLink::get_ice_endpoint() const {
   return impl().get_ice_endpoint();
+}
+
+void RtpsUdpDataLink::RtpsWriter::log_remote_counts(const char* funcname)
+{
+  if (transport_debug.log_remote_counts) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_remote_counts} "
+      "RtpsUdpDataLink::RtpsWriter::%C: "
+      "%C pre: %b assoc: %b\n",
+      funcname, LogGuid(id_).c_str(),
+      preassociation_readers_.size(), remote_readers_.size()));
+  }
+}
+
+void RtpsUdpDataLink::RtpsReader::log_remote_counts(const char* funcname)
+{
+  if (transport_debug.log_remote_counts) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_remote_counts} "
+      "RtpsUdpDataLink::RtpsReader::%C: "
+      "%C pre: %b assoc: %b\n",
+      funcname, LogGuid(id_).c_str(),
+      preassociation_writers_.size(), remote_writers_.size()));
+  }
 }
 
 } // namespace DCPS
