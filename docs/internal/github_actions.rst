@@ -172,11 +172,6 @@ GitHub Actions runners.
 Only Failing on CI
 ------------------
 
-* tests/DCPS/Instances/run_test.pl single_instance multiple_datawriter keyed
-
-  * The instances tests in general are problematic on safety builds. This in one particular fails for CI but not on the current
-    scoreboard run. Fails on ``u18_esafe_js0`` and ``u18_bsafe_js0_FM-1f``.
-
 * tests/DCPS/SharedTransport/run_test.pl multicast
 
   * Multicast times out waiting for remote peer. Fails on ``test_u20_p1_j8_FM-1f`` and ``test_u20_p1_sec``.
