@@ -71,7 +71,7 @@ class FilterEvaluator;
  * for publisher, subscriber and topic. It also acts as a container
  * for the publisher, subscriber and topic objects.
  *
- * See the DDS specification, OMG formal/04-12-02, for a description of
+ * See the DDS specification, OMG formal/2015-04-10, for a description of
  * the interface this class is implementing.
  */
 class OpenDDS_Dcps_Export DomainParticipantImpl
