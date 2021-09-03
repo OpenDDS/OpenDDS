@@ -1339,14 +1339,14 @@ namespace {
       extraction.addArg("strm", "Serializer&");
       extraction.addArg("arr", wrapper.wrapped_type_name());
       extraction.endArgs();
-	  
-	  if (!primitive) {
+
+      if (!primitive) {
           be_global->impl_ << "  bool discard_flag = false;\n";
-	  }
-	  be_global->impl_ << 
-	    "  const Encoding& encoding = strm.encoding();\n"
+       }
+       be_global->impl_ << 
+        "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
-      marshal_generator::generate_dheader_code(
+       marshal_generator::generate_dheader_code(
         "    if (!strm.read_delimiter(total_size)) {\n"
         "      return false;\n"
         "    }\n", !primitive);
@@ -1429,16 +1429,13 @@ namespace {
         }
         indent.erase(0, 2);
         be_global->impl_ <<
-          indent << "}\n";
-      }
-	  if (!primitive) {
-          be_global->impl_ <<
+          indent << "}\n"
             "  if (discard_flag) {\n"
             "    strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
             "    return false;\n"
             "  }\n"
             "  return true;\n";
-	  }
+      }
     }
   }
 
