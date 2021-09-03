@@ -93,7 +93,7 @@ bool extract_sequence_with_unverified_length(const CORBA::ULong length = 0)
 void extract_FilterResult_t(const std::vector<CORBA::Long>& v)
 {
   const CORBA::ULong length = static_cast<CORBA::ULong>(v.size());
-  ACE_Message_Block mb(length * 32 + 128);
+  ACE_Message_Block mb(length * sizeof(CORBA::Long) + 128);
   Serializer s(&mb, Encoding(Encoding::KIND_XCDR1));
   ASSERT_TRUE((insert_sequence<FilterResult_t, CORBA::Long>(s, v)));
 
