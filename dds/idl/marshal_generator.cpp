@@ -1343,7 +1343,7 @@ namespace {
       if (!primitive) {
           be_global->impl_ << "  bool discard_flag = false;\n";
        }
-       be_global->impl_ << 
+       be_global->impl_ <<
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
        marshal_generator::generate_dheader_code(
