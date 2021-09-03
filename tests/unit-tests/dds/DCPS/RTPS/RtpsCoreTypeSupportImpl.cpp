@@ -54,7 +54,7 @@ void extract_Parameter_user_data(const std::string& user_data)
 
 // ---------- ---------- ---------- ---------- ----------
 template <typename Seq, typename Element>
-bool insert_sequence(Serializer& s, const std::vector<Element> v)
+bool insert_sequence(Serializer& s, const std::vector<Element>& v)
 {
   const CORBA::ULong length = static_cast<CORBA::ULong>(v.size());
   Seq seq;
@@ -66,7 +66,7 @@ bool insert_sequence(Serializer& s, const std::vector<Element> v)
 }
 
 template <typename Seq, typename Element>
-void extract_sequence(Serializer& s, const std::vector<Element> v)
+void extract_sequence(Serializer& s, const std::vector<Element>& v)
 {
   const CORBA::ULong length = static_cast<CORBA::ULong>(v.size());
   Seq seq;
@@ -90,7 +90,7 @@ bool extract_sequence_with_unverified_length(const CORBA::ULong length = 0)
 }
 
 // ---------- ---------- ---------- ---------- ----------
-void extract_FilterResult_t(const std::vector<CORBA::Long> v)
+void extract_FilterResult_t(const std::vector<CORBA::Long>& v)
 {
   const CORBA::ULong length = static_cast<CORBA::ULong>(v.size());
   ACE_Message_Block mb(length * 32 + 128);
