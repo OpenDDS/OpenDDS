@@ -46,7 +46,7 @@
       a.innerHTML = previous_releases[i].name;
       a.href = previous_releases[i].url;
       li.appendChild(a);
-      li.innerHTML += " ";
+      add_release_date(li, previous_releases[i]);
       ul.appendChild(li);
     }
     previous_release_list.appendChild(ul);
