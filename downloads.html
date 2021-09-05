@@ -5,23 +5,13 @@ categories: [opendds]
 tags: []
 order: 91
 ---
+{% include latest_releases.html %}
 <div id="contenttext">
   <div class="bodytext" align="justify">
     <span class="headertext">Latest Release</span>
-    <p>The latest release is available at the OpenDDS download site: <a href="https://download.objectcomputing.com/OpenDDS/">https://download.objectcomputing.com/OpenDDS/</a> and from GitHub: <ul>
-{% assign sorted_rel = site.github.releases | where: "prerelease", false | sort: "created_at" | reverse %}
-{% assign latest_rel = sorted_rel | first %}
-{% assign assets = latest_rel.assets | sort: "name" | reverse %}
-{% for a in assets %}{% capture tn %}Open{{latest_rel.tag_name}}{% endcapture %}
-{% assign ext = a.name | remove: tn %}
-{% if ext == '.zip' %}
-  {% assign note = 'Windows' %}
-{% else %}
-  {% assign note = 'Linux/macOS' %}
-{% endif %}
-<li> <a href="{{a.browser_download_url}}">{{a.name}}</a> ({{note}})</li>
-{% endfor %}
-</ul></p>
+    <p>The latest release is available at the OpenDDS download site: <a href="https://download.objectcomputing.com/OpenDDS/">https://download.objectcomputing.com/OpenDDS/</a> and from <a href="{{site.github.releases_url}}">GitHub</a>:
+      {{ latest_release_downloads }}
+    </p>
     <span class="headertext">Previous Releases</span>
     <p style="text-align: left;">Previous releases are available in the previous releases section of the OpenDDS download site: <a href="https://download.objectcomputing.com/OpenDDS/previous-releases/">https://download.objectcomputing.com/OpenDDS/previous-releases/</a> or on the <a href="{{site.github.releases_url}}">GitHub releases page</a>. </p>
 

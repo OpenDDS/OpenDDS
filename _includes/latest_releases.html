@@ -1,0 +1,118 @@
+{% comment %}
+We want to sort releases by version, but it doesn't seem like we can do that
+easily by just using Jekyll templates because Github Pages blocks custom Jekyll
+plugins, so use Javascript here.
+
+There are some minor limitations here:
+- This won't work at all if the browser won't or can't run the Javascript, so
+  the pages that use that should be prepared to not use this.
+- If the highest versioned release is more than 10 releases ago, then it won't
+  show up like it otherwise should.
+- If there are 10 or more releases of the same major/minor version in a row,
+  then no releases will show up in the previous releases list because they will
+  be condensed down to the latest patch release.
+{% endcomment %}
+
+<script>
+  var release_name_regex = /OpenDDS (\d+)\.(\d+)(?:\.(\d+))?/;
+  function get_release_version(name) {
+    var parts = name.match(release_name_regex);
+    if (parts === null) {
+      return [0, 0, 0];
+    }
+    parts.splice(0, 1);
+    if (parts[2] === undefined) {
+      parts[2] = "0";
+    }
+    for (var i = 0; i < parts.length; ++i) {
+      parts[i] = parseInt(parts[i]);
+    }
+    return parts;
+  }
+
+  {% assign releases = site.github.releases | where: "prerelease", false | sort: "created_at" | reverse %}
+  var releases = [
+  {% for release in releases limit: 10 %}
+    {
+      "name": {{ release.name | jsonify }},
+      "date": {{ release.published_at | date_to_long_string | jsonify }},
+      "url": {{ release.html_url | jsonify }},
+      "downloads": [
+        {% comment %}Reverse sort to put zip files first.{% endcomment %}
+        {% assign rev_assets = release.assets | sort: "name" | reverse %}
+        {% for asset in rev_assets %}
+          {
+            "name": {{ asset.name | jsonify }},
+            "url": {{ asset.browser_download_url | jsonify }},
+          },
+        {% endfor %}
+      ],
+      "version": get_release_version({{ release.name | jsonify }}),
+    },
+  {% endfor %}
+  ];
+
+  function compare_release_fields(a, b, i) {
+    if (i >= a.length) {
+      return 0;
+    }
+    if (a[i] == b[i]) {
+      return compare_release_fields(a, b, i + 1);
+    } else if (a[i] < b[i]) {
+      return 1;
+    }
+    return -1;
+  }
+
+  function compare_releases(a, b) {
+    return compare_release_fields(a.version, b.version, 0);
+  }
+
+  releases.sort(compare_releases);
+  var latest_release = releases.splice(0, 1)[0];
+
+  var previous_releases = [];
+  var major = latest_release.version[0];
+  var minor = latest_release.version[1];
+  for (var i = 0; i < releases.length && previous_releases.length < 5; ++i) {
+    if (releases[i].version[0] != major || releases[i].version[1] != minor) {
+      previous_releases.push(releases[i]);
+      major = releases[i].version[0];
+      minor = releases[i].version[1];
+    }
+  }
+</script>
+
+{% capture latest_release_downloads %}
+  <div id="latest_release_downloads">
+  </div>
+  <script>
+    if (!String.prototype.endsWith) {
+      String.prototype.endsWith = function(search, this_len) {
+        if (this_len === undefined || this_len > this.length) {
+          this_len = this.length;
+        }
+        return this.substring(this_len - search.length, this_len) === search;
+      };
+    }
+
+    if (typeof latest_release !== 'undefined') {
+      var latest_release_downloads = document.getElementById("latest_release_downloads");
+      var ul = document.createElement("ul");
+      for (var i = 0; i < latest_release.downloads.length; ++i) {
+        var li = document.createElement("li");
+        var a = document.createElement("a");
+        a.innerHTML = latest_release.downloads[i].name;
+        a.href = latest_release.downloads[i].url;
+        li.appendChild(a);
+        li.innerHTML += " ";
+        var note = document.createElement("span");
+        note.className = "download-note"
+        note.innerHTML = latest_release.downloads[i].name.endsWith("zip") ? "(Windows)" : "(Linux/macOS)";
+        li.appendChild(note);
+        ul.appendChild(li);
+      }
+      latest_release_downloads.appendChild(ul);
+    }
+  </script>
+{% endcapture %}
