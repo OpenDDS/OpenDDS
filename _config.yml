@@ -16,3 +16,5 @@ liquid:
 
 exclude:
   - README.md
+  - Gemfile
+  - Gemfile.lock
