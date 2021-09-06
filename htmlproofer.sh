@@ -14,6 +14,9 @@ url_ignore_arg="${url_ignore_arg:1}"
 
 # NOTE: $(:) is a nop command that can be used like an inline comment.
 exec htmlproofer _site \
+  --check-html \
+  --check-img-http \
+  $(: TODO: --enforce-https \ ) \
   --file-ignore "$file_ignore_arg" \
   --url-ignore "$url_ignore_arg" \
   $(: 'Removing this adds almost 500 errors. Ignore for the time being.') \
