@@ -28,6 +28,7 @@ file_ignore_arg="${file_ignore_arg:1}"
 
 url_ignore_list=(
   '/zoom\.us\//'
+  '/brighttalk\.com\//'
 )
 url_ignore_arg="$(printf ",%s" "${url_ignore_list[@]}")"
 url_ignore_arg="${url_ignore_arg:1}"
