@@ -24,11 +24,11 @@ jobs:
         with:
           enable_cache: true
 
-      - name: Run htmlproofer
-        run: bash htmlproofer.sh
-
       - name: Upload
         uses: actions/upload-artifact@v2
         with:
           name: Site
           path: _site
+
+      - name: Run htmlproofer
+        run: bash htmlproofer.sh
