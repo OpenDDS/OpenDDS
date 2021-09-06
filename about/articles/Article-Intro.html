@@ -21,7 +21,7 @@ design time, and may change through the execution lifetime of the
 application. Typically, the data-centric paradigm is most
 efficiently realized by a publish/subscribe communication model
 rather than a request/response model.</p>
-<p>The OMG <a href="http://www.omg.org/docs/formal/05-12-04">Data Distribution
+<p>The OMG <a href="{{ site.data.omg.dds_spec_url }}">Data Distribution
 Service (DDS) for Real-Time Systems</a> addresses the performance requirements and hard real-time
 requirements of distributed data-centric applications.
 DDS increases the range of publish/subscribe options available to
@@ -34,7 +34,7 @@ decides on the underlying communication mechanism that moves data from a
 publisher to a subscriber -- via TCP, UDP, UDP multicast, shared memory,
 etc. An implementation of the DDS specification is not required to use
 CORBA or the IIOP protocol to transfer data from a publisher to a subscriber.</p>
-<p><a href="..">OpenDDS</a> is an open source, C++ implementation of the OMG Data Distribution
+<p><a href="{{ site.baseurl }}">OpenDDS</a> is an open source, C++ implementation of the OMG Data Distribution
 Service specification. OpenDDS includes a file-based configuration mechanism. Through a
 configuration file, an OpenDDS user may configure a publisher's or
 subscriber's transport(s), debugging output, memory allocation, the
@@ -191,9 +191,6 @@ service can use to meet other QoS requirements<br>
     </tr>
   </tbody>
 </table>
-<p>See the Object Management Group's <a href="http://www.omg.org/news/whitepapers/Intro_To_DDS.pdf">Introduction to DDS</a> Whitepaper,
-Appendix A, for a more complete list of Quality-of-Service policies and
-more detailed Quality-of-Service definitions.</p>
 <h3>Data-Local Reconstruction Layer - DLRL
 </h3>
 <p>The Data-Local Reconstruction Layer (DLRL) is an object-oriented layer
@@ -1717,14 +1714,14 @@ transport required no code changes.
 <p><a href="#Table_of_Contents">Table of Contents</a></p>
 <h2><a name="Summary"></a>Summary</h2>
 <p>
-The <a href="http://www.omg.org/docs/formal/07-05-02.pdf">OMG Data Distribution Service (DDS) for Real-Time Systems</a>
+The <a href="{{ site.data.omg.dds_spec_url }}">OMG Data Distribution Service (DDS) for Real-Time Systems</a>
 is a specification for a high-performance, type-safe,
 publish-and-subscribe communication middleware. DDS addresses
 data-centric applications, i.e. those for which dissemination of
 application data is a significant requirement.
 </p>
 <p>
-<a href="..">OpenDDS</a> is an open source implementation of the OMG Data Distribution
+<a href="{{ site.baseurl }}">OpenDDS</a> is an open source implementation of the OMG Data Distribution
 Service specification, providing users with an efficient
 publish-and-subscribe framework with the advantages of the open-source
 software development model.
@@ -1739,10 +1736,10 @@ without making any code changes.
 <h2><a name="References"></a>References</h2>
 <ul>
 <li>Sample Code is located in the OpenDDS source code distribution at examples/DCPS/IntroductionToOpenDDS</li>
-<li>OMG Data Distribution Service (DDS) for Real-Time Systems (<a href="https://www.omg.org/spec/DDS/">https://www.omg.org/spec/DDS/</a>)</li>
+<li>OMG Data Distribution Service (DDS) for Real-Time Systems (<a href="{{ site.data.omg.dds_spec_url }}">{{ site.data.omg.dds_spec_url }}</a>)</li>
 <li>OMG DDS Portal (<a href="https://www.omgwiki.org/dds/#">https://www.omgwiki.org/dds</a>)</li>
-<li>OpenDDS Home Page (<a href="..">http://www.opendds.org</a>)</li>
-<li>TAO Developer's Guide Home Page (<a href="http://www.theaceorb.com/product/index.html#TAO%20Developers%20Guide">http://www.theaceorb.com/product/index.html</a></li>
+<li>OpenDDS Home Page (<a href="{{ site.baseurl }}">http://www.opendds.org</a>)</li>
+<li>TAO Developer's Guide Home Page (<a href="{{ site.data.oci.tao_devguide_url }}">{{ site.data.oci.tao_devguide_url }}</a></li>
 <li>OpenDDS Developer's Guide (<a href="{{ site.data.opendds.latest_devguide_url }}">{{ site.data.opendds.latest_devguide_url }}</a>)</li>
 <li>MPC (<a href="https://github.com/objectcomputing/MPC">https://github.com/objectcomputing/MPC</a>)</li>
 </ul>

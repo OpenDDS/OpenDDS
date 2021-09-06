@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - gh-pages
+      - website-next-release
   workflow_dispatch:
 
 jobs:
@@ -22,6 +23,9 @@ jobs:
         uses: limjh16/jekyll-action-ts@v2
         with:
           enable_cache: true
+
+      - name: Run htmlproofer
+        run: bash htmlproofer.sh
 
       - name: Upload
         uses: actions/upload-artifact@v2
