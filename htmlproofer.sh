@@ -3,7 +3,7 @@ site_dir="${site_dir:-_site}"
 # Absolute URLs to the website with a domain wont work unless we are serving
 # from that address at the same time. Use --url-swap to replace the URLs with
 # just an absolute path.
-url_swap_list=()
+url_swap_list=() # Format is REGEX:REPLACE_STRING
 if grep -RI --quiet 'href="/pages/objectcomputing/OpenDDS/' "$site_dir"
 then
   url_swap_list+=(
@@ -18,10 +18,13 @@ fi
 url_swap_arg="$(printf ",%s" "${url_swap_list[@]}")"
 url_swap_arg="${url_swap_arg:1}"
 
+# Format is path string or regex within //
+# Paths start at the directory containing the website, $site_dir
 file_ignore_list=(
   "$site_dir/documents/ExcelRTD/userguide.html"
   "$site_dir/documents/Monitor/userguide.html"
   "$site_dir/documents/Bench/userguide.html"
+  "/^$site_dir\/perf\//"
 )
 file_ignore_arg="$(printf ",%s" "${file_ignore_list[@]}")"
 file_ignore_arg="${file_ignore_arg:1}"
