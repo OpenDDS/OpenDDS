@@ -946,9 +946,11 @@ Spdp::data_received(const DataSubmessage& data,
 #endif
 
   if (!ParameterListConverter::from_param_list(plist, pdata)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::data_received - ")
-      ACE_TEXT("failed to convert from ParameterList to ")
-      ACE_TEXT("SPDPdiscoveredParticipantData\n")));
+    if (DCPS::DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::data_received - ")
+        ACE_TEXT("failed to convert from ParameterList to ")
+        ACE_TEXT("SPDPdiscoveredParticipantData\n")));
+    }
     return;
   }
 
@@ -1118,16 +1120,20 @@ DDS::OctetSeq Spdp::local_participant_data_as_octets() const
   set_participant_guid(guid_, plist);
 
   if (!ParameterListConverter::to_param_list(pbtds.base, plist)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::local_participant_data_as_octets() - ")
-               ACE_TEXT("Failed to convert from ParticipantBuiltinTopicData to ParameterList\n")));
+    if (DCPS::DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::local_participant_data_as_octets() - ")
+                ACE_TEXT("Failed to convert from ParticipantBuiltinTopicData to ParameterList\n")));
+    }
     return DDS::OctetSeq();
   }
 
   ACE_Message_Block temp_buff(DCPS::serialized_size(encoding_plain_big, plist));
   DCPS::Serializer ser(&temp_buff, encoding_plain_big);
   if (!(ser << plist)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::local_participant_data_as_octets() - ")
-               ACE_TEXT("Failed to serialize parameter list.\n")));
+    if (DCPS::DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::local_participant_data_as_octets() - ")
+                ACE_TEXT("Failed to serialize parameter list.\n")));
+    }
     return DDS::OctetSeq();
   }
 
@@ -2148,10 +2154,12 @@ ParticipantData_t Spdp::build_local_pdata(
   const DCPS::LocatorSeq multicast_locators = sedp_->multicast_locators();
 
   if (unicast_locators.length() == 0 && multicast_locators.length() == 0) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("Spdp::build_local_pdata: ")
-               ACE_TEXT("no locators\n")));
+    if (DCPS::DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR,
+                ACE_TEXT("(%P|%t) ERROR: ")
+                ACE_TEXT("Spdp::build_local_pdata: ")
+                ACE_TEXT("no locators\n")));
+    }
   }
 
 #ifdef OPENDDS_SECURITY
@@ -2502,9 +2510,11 @@ Spdp::SpdpTransport::dispose_unregister()
   CORBA::UShort options = 0;
   if (!(ser << hdr_) || !(ser << data_) || !(ser << encap_LE) || !(ser << options)
       || !(ser << plist)) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::dispose_unregister() - ")
-      ACE_TEXT("failed to serialize headers for dispose/unregister\n")));
+    if (DCPS::DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::dispose_unregister() - ")
+        ACE_TEXT("failed to serialize headers for dispose/unregister\n")));
+    }
     return;
   }
 
@@ -2618,10 +2628,12 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
 
   ParameterList plist;
   if (!ParameterListConverter::to_param_list(pdata, plist)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-      ACE_TEXT("Spdp::SpdpTransport::write() - ")
-      ACE_TEXT("failed to convert from SPDPdiscoveredParticipantData ")
-      ACE_TEXT("to ParameterList\n")));
+    if (DCPS::DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Spdp::SpdpTransport::write() - ")
+        ACE_TEXT("failed to convert from SPDPdiscoveredParticipantData ")
+        ACE_TEXT("to ParameterList\n")));
+    }
     return;
   }
 
@@ -2638,10 +2650,12 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
     }
 
     if (!ParameterListConverter::to_param_list(ai_map, plist)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("Spdp::SpdpTransport::write() - ")
-                 ACE_TEXT("failed to convert from ICE::AgentInfo ")
-                 ACE_TEXT("to ParameterList\n")));
+      if (DCPS::DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                  ACE_TEXT("Spdp::SpdpTransport::write() - ")
+                  ACE_TEXT("failed to convert from ICE::AgentInfo ")
+                  ACE_TEXT("to ParameterList\n")));
+      }
       return;
     }
   }
@@ -2652,9 +2666,11 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
   DCPS::Serializer ser(&wbuff_, encoding_plain_native);
   if (!(ser << hdr_) || !(ser << data_) || !(ser << encap_LE) || !(ser << options)
       || !(ser << plist)) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write() - ")
-      ACE_TEXT("failed to serialize headers for SPDP\n")));
+    if (DCPS::DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write() - ")
+        ACE_TEXT("failed to serialize headers for SPDP\n")));
+    }
     return;
   }
 
@@ -2720,10 +2736,12 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, const ACE_INET_Addr& loca
 
   ParameterList plist;
   if (!ParameterListConverter::to_param_list(pdata, plist)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-      ACE_TEXT("Spdp::SpdpTransport::write_i() - ")
-      ACE_TEXT("failed to convert from SPDPdiscoveredParticipantData ")
-      ACE_TEXT("to ParameterList\n")));
+    if (DCPS::DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Spdp::SpdpTransport::write_i() - ")
+        ACE_TEXT("failed to convert from SPDPdiscoveredParticipantData ")
+        ACE_TEXT("to ParameterList\n")));
+    }
     return;
   }
 
@@ -2760,9 +2778,11 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, const ACE_INET_Addr& loca
   DCPS::Serializer ser(&wbuff_, encoding_plain_native);
   if (!(ser << hdr_) || !(ser << info_dst) || !(ser << data_) || !(ser << encap_LE) || !(ser << options)
       || !(ser << plist)) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write_i() - ")
-      ACE_TEXT("failed to serialize headers for SPDP\n")));
+    if (DCPS::DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write_i() - ")
+        ACE_TEXT("failed to serialize headers for SPDP\n")));
+    }
     return;
   }
 
@@ -2823,9 +2843,11 @@ Spdp::SpdpTransport::send(const ACE_INET_Addr& addr)
     const int err = errno;
     if (err != ENETUNREACH || !network_is_unreachable_) {
       errno = err;
-      ACE_ERROR((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: Spdp::SpdpTransport::send() - ")
-                 ACE_TEXT("destination %C failed send: %m\n"), DCPS::LogAddr(addr).c_str()));
+      if (DCPS::DCPS_debug_level > 0) {
+        ACE_ERROR((LM_WARNING,
+                  ACE_TEXT("(%P|%t) WARNING: Spdp::SpdpTransport::send() - ")
+                  ACE_TEXT("destination %C failed send: %m\n"), DCPS::LogAddr(addr).c_str()));
+      }
     }
     if (err == ENETUNREACH) {
       network_is_unreachable_ = true;
@@ -2914,9 +2936,11 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
     DCPS::Serializer ser(&buff_, encoding_plain_native);
     Header header;
     if (!(ser >> header)) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
-                 ACE_TEXT("failed to deserialize RTPS header for SPDP\n")));
+      if (DCPS::DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
+                  ACE_TEXT("failed to deserialize RTPS header for SPDP\n")));
+      }
       return 0;
     }
 
@@ -2933,9 +2957,11 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
       case DATA: {
         DataSubmessage data;
         if (!(ser >> data)) {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
-                     ACE_TEXT("failed to deserialize DATA header for SPDP\n")));
+          if (DCPS::DCPS_debug_level > 0) {
+            ACE_ERROR((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
+                      ACE_TEXT("failed to deserialize DATA header for SPDP\n")));
+          }
           return 0;
         }
         submessageLength = data.smHeader.submessageLength;
@@ -2955,18 +2981,22 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
           ser.swap_bytes(!ACE_CDR_BYTE_ORDER); // read "encap" itself in LE
           CORBA::UShort encap, options;
           if (!(ser >> encap) || (encap != encap_LE && encap != encap_BE)) {
-            ACE_ERROR((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
-                       ACE_TEXT("failed to deserialize encapsulation header for SPDP\n")));
+            if (DCPS::DCPS_debug_level > 0) {
+              ACE_ERROR((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
+                        ACE_TEXT("failed to deserialize encapsulation header for SPDP\n")));
+            }
             return 0;
           }
           ser >> options;
           // bit 8 in encap is on if it's PL_CDR_LE
           ser.swap_bytes(((encap & 0x100) >> 8) != ACE_CDR_BYTE_ORDER);
           if (!(ser >> plist)) {
-            ACE_ERROR((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
-                       ACE_TEXT("failed to deserialize data payload for SPDP\n")));
+            if (DCPS::DCPS_debug_level > 0) {
+              ACE_ERROR((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
+                        ACE_TEXT("failed to deserialize data payload for SPDP\n")));
+            }
             return 0;
           }
         } else {
@@ -2987,9 +3017,11 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
         if (DCPS::transport_debug.log_messages) {
           InfoDestinationSubmessage sm;
           if (!(ser >> sm)) {
-            ACE_ERROR((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
-                       ACE_TEXT("failed to deserialize INFO_DST header for SPDP\n")));
+            if (DCPS::DCPS_debug_level > 0) {
+              ACE_ERROR((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
+                        ACE_TEXT("failed to deserialize INFO_DST header for SPDP\n")));
+            }
             return 0;
           }
           submessageLength = sm.smHeader.submessageLength;
@@ -3001,9 +3033,11 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
       default:
         SubmessageHeader smHeader;
         if (!(ser >> smHeader)) {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
-                     ACE_TEXT("failed to deserialize SubmessageHeader for SPDP\n")));
+          if (DCPS::DCPS_debug_level > 0) {
+            ACE_ERROR((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
+                      ACE_TEXT("failed to deserialize SubmessageHeader for SPDP\n")));
+          }
           return 0;
         }
         submessageLength = smHeader.submessageLength;
@@ -3014,9 +3048,11 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
         if (read < static_cast<size_t>(submessageLength + SMHDR_SZ)) {
           if (!ser.skip(static_cast<CORBA::UShort>(submessageLength + SMHDR_SZ
                                                    - read))) {
-            ACE_ERROR((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
-                       ACE_TEXT("failed to skip sub message length\n")));
+            if (DCPS::DCPS_debug_level > 0) {
+              ACE_ERROR((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
+                        ACE_TEXT("failed to skip sub message length\n")));
+            }
             return 0;
           }
         }
@@ -3156,9 +3192,11 @@ Spdp::SendStun::execute()
     const int err = errno;
     if (err != ENETUNREACH || !tport->network_is_unreachable_) {
       errno = err;
-      ACE_ERROR((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: Spdp::SendStun::execute() - ")
-                 ACE_TEXT("destination %C failed send: %m\n"), DCPS::LogAddr(address_).c_str()));
+      if (DCPS::DCPS_debug_level > 0) {
+        ACE_ERROR((LM_WARNING,
+                  ACE_TEXT("(%P|%t) WARNING: Spdp::SendStun::execute() - ")
+                  ACE_TEXT("destination %C failed send: %m\n"), DCPS::LogAddr(address_).c_str()));
+      }
     }
     if (err == ENETUNREACH) {
       tport->network_is_unreachable_ = true;
@@ -3234,10 +3272,12 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
 
   if (unicast_socket_.open(local_addr, PF_INET) != 0) {
     if (fixed_port) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")
-                 ACE_TEXT("failed to open %C %p.\n"),
-                 DCPS::LogAddr(local_addr).c_str(), ACE_TEXT("ACE_SOCK_Dgram::open")));
+      if (DCPS::DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")
+                  ACE_TEXT("failed to open %C %p.\n"),
+                  DCPS::LogAddr(local_addr).c_str(), ACE_TEXT("ACE_SOCK_Dgram::open")));
+      }
       throw std::runtime_error("failed to open unicast port for SPDP");
     }
     if (DCPS::DCPS_debug_level > 3) {
@@ -3258,11 +3298,13 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
   }
 
   if (!DCPS::set_socket_multicast_ttl(unicast_socket_, outer->config_->ttl())) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket() - ")
-               ACE_TEXT("failed to set TTL value to %d ")
-               ACE_TEXT("for port:%hu %p\n"),
-               outer->config_->ttl(), uni_port_, ACE_TEXT("DCPS::set_socket_multicast_ttl:")));
+    if (DCPS::DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR,
+                ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket() - ")
+                ACE_TEXT("failed to set TTL value to %d ")
+                ACE_TEXT("for port:%hu %p\n"),
+                outer->config_->ttl(), uni_port_, ACE_TEXT("DCPS::set_socket_multicast_ttl:")));
+    }
     throw std::runtime_error("failed to set TTL");
   }
 
@@ -3273,7 +3315,9 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
                                    (void *) &send_buffer_size,
                                    sizeof(send_buffer_size)) < 0
         && errno != ENOTSUP) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket() - failed to set the send buffer size to %d errno %m\n"), send_buffer_size));
+      if (DCPS::DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket() - failed to set the send buffer size to %d errno %m\n"), send_buffer_size));
+      }
       throw std::runtime_error("failed to set send buffer size");
     }
   }
@@ -3285,7 +3329,9 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
                                    (void *) &recv_buffer_size,
                                    sizeof(recv_buffer_size)) < 0
         && errno != ENOTSUP) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket() - failed to set the recv buffer size to %d errno %m\n"), recv_buffer_size));
+      if (DCPS::DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket() - failed to set the recv buffer size to %d errno %m\n"), recv_buffer_size));
+      }
       throw std::runtime_error("failed to set recv buffer size");
     }
   }
@@ -3319,10 +3365,12 @@ Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port)
 
   if (unicast_ipv6_socket_.open(local_addr, PF_INET6) != 0) {
     if (fixed_port) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
-                 ACE_TEXT("failed to open %C %p.\n"),
-                 DCPS::LogAddr(local_addr).c_str(), ACE_TEXT("ACE_SOCK_Dgram::open")));
+      if (DCPS::DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
+                  ACE_TEXT("failed to open %C %p.\n"),
+                  DCPS::LogAddr(local_addr).c_str(), ACE_TEXT("ACE_SOCK_Dgram::open")));
+      }
       throw std::runtime_error("failed to open ipv6 unicast port for SPDP");
     }
     if (DCPS::DCPS_debug_level > 3) {
@@ -3343,11 +3391,13 @@ Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port)
   }
 
   if (!DCPS::set_socket_multicast_ttl(unicast_ipv6_socket_, outer->config_->ttl())) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
-               ACE_TEXT("failed to set TTL value to %d ")
-               ACE_TEXT("for port:%hu %p\n"),
-               outer->config_->ttl(), ipv6_uni_port_, ACE_TEXT("DCPS::set_socket_multicast_ttl:")));
+    if (DCPS::DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR,
+                ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_ipv6_socket() - ")
+                ACE_TEXT("failed to set TTL value to %d ")
+                ACE_TEXT("for port:%hu %p\n"),
+                outer->config_->ttl(), ipv6_uni_port_, ACE_TEXT("DCPS::set_socket_multicast_ttl:")));
+    }
     throw std::runtime_error("failed to set TTL");
   }
 
@@ -3358,7 +3408,9 @@ Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port)
                                         (void *) &send_buffer_size,
                                         sizeof(send_buffer_size)) < 0
         && errno != ENOTSUP) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_ipv6_socket() - failed to set the send buffer size to %d errno %m\n"), send_buffer_size));
+      if (DCPS::DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_ipv6_socket() - failed to set the send buffer size to %d errno %m\n"), send_buffer_size));
+      }
       throw std::runtime_error("failed to set send buffer size");
     }
   }
@@ -3370,7 +3422,9 @@ Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port)
                                         (void *) &recv_buffer_size,
                                         sizeof(recv_buffer_size)) < 0
         && errno != ENOTSUP) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_ipv6_socket() - failed to set the recv buffer size to %d errno %m\n"), recv_buffer_size));
+      if (DCPS::DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_ipv6_socket() - failed to set the recv buffer size to %d errno %m\n"), recv_buffer_size));
+      }
       throw std::runtime_error("failed to set recv buffer size");
     }
   }
@@ -3413,18 +3467,22 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
 
       if (reactor()->register_handler(multicast_socket_.get_handle(),
                                     this, ACE_Event_Handler::READ_MASK) != 0) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Spdp::SpdpTransport::join_multicast_group failed to register multicast input handler\n")));
+        if (DCPS::DCPS_debug_level > 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Spdp::SpdpTransport::join_multicast_group failed to register multicast input handler\n")));
+        }
         return;
       }
 
       shorten_local_sender_delay_i();
     } else {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::join_multicast_group() - ")
-                 ACE_TEXT("failed to join multicast group %C on %C: %p\n"),
-                 DCPS::LogAddr(multicast_address_).c_str(),
-                 all_interfaces ? "all interfaces" : nic.name().c_str(),
-                 ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
+      if (DCPS::DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::join_multicast_group() - ")
+                  ACE_TEXT("failed to join multicast group %C on %C: %p\n"),
+                  DCPS::LogAddr(multicast_address_).c_str(),
+                  all_interfaces ? "all interfaces" : nic.name().c_str(),
+                  ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
+      }
     }
   }
 
@@ -3446,18 +3504,22 @@ Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface& nic,
 
       if (reactor()->register_handler(multicast_ipv6_socket_.get_handle(),
                                     this, ACE_Event_Handler::READ_MASK) != 0) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Spdp::SpdpTransport::join_multicast_group failed to register multicast ipv6 input handler\n")));
+        if (DCPS::DCPS_debug_level > 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Spdp::SpdpTransport::join_multicast_group failed to register multicast ipv6 input handler\n")));
+        }
         return;
       }
 
       shorten_local_sender_delay_i();
     } else {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::join_multicast_group() - ")
-                 ACE_TEXT("failed to join multicast group %C on %C: %p\n"),
-                 DCPS::LogAddr(multicast_ipv6_address_).c_str(),
-                 all_interfaces ? "all interfaces" : nic.name().c_str(),
-                 ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
+      if (DCPS::DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::join_multicast_group() - ")
+                  ACE_TEXT("failed to join multicast group %C on %C: %p\n"),
+                  DCPS::LogAddr(multicast_ipv6_address_).c_str(),
+                  all_interfaces ? "all interfaces" : nic.name().c_str(),
+                  ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
+      }
     }
   }
 #endif
@@ -3481,12 +3543,14 @@ Spdp::SpdpTransport::leave_multicast_group(const DCPS::NetworkInterface& nic)
     }
 
     if (0 != multicast_socket_.leave(multicast_address_, ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::leave_multicast_group() - ")
-                 ACE_TEXT("failed to leave multicast group %C on %C: %p\n"),
-                 DCPS::LogAddr(multicast_address_).c_str(),
-                 nic.name().c_str(),
-                 ACE_TEXT("ACE_SOCK_Dgram_Mcast::leave")));
+      if (DCPS::DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::leave_multicast_group() - ")
+                  ACE_TEXT("failed to leave multicast group %C on %C: %p\n"),
+                  DCPS::LogAddr(multicast_address_).c_str(),
+                  nic.name().c_str(),
+                  ACE_TEXT("ACE_SOCK_Dgram_Mcast::leave")));
+      }
     }
     joined_interfaces_.erase(nic.name());
   }
@@ -3502,12 +3566,14 @@ Spdp::SpdpTransport::leave_multicast_group(const DCPS::NetworkInterface& nic)
     }
 
     if (0 != multicast_ipv6_socket_.leave(multicast_ipv6_address_, ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::leave_multicast_group() - ")
-                 ACE_TEXT("failed to leave multicast ipv6 group %C on %C: %p\n"),
-                 DCPS::LogAddr(multicast_ipv6_address_).c_str(),
-                 nic.name().c_str(),
-                 ACE_TEXT("ACE_SOCK_Dgram_Mcast::leave")));
+      if (DCPS::DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::leave_multicast_group() - ")
+                  ACE_TEXT("failed to leave multicast ipv6 group %C on %C: %p\n"),
+                  DCPS::LogAddr(multicast_ipv6_address_).c_str(),
+                  nic.name().c_str(),
+                  ACE_TEXT("ACE_SOCK_Dgram_Mcast::leave")));
+      }
     }
     joined_ipv6_interfaces_.erase(nic.name());
   }
@@ -3698,9 +3764,11 @@ Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
   const DCPS::RepoId peer = make_id(id, ENTITYID_PARTICIPANT);
   const DiscoveredParticipantConstIter iter = participants_.find(peer);
   if (iter == participants_.end()) {
-    const DCPS::GuidConverter conv(peer);
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::send_participant_crypto_tokens() - ")
-               ACE_TEXT("Discovered participant %C not found.\n"), OPENDDS_STRING(conv).c_str()));
+    if (DCPS::DCPS_debug_level > 0) {
+      const DCPS::GuidConverter conv(peer);
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::send_participant_crypto_tokens() - ")
+                ACE_TEXT("Discovered participant %C not found.\n"), OPENDDS_STRING(conv).c_str()));
+    }
     return;
   }
 
@@ -3720,8 +3788,10 @@ Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
     msg.message_data = reinterpret_cast<const DDS::Security::DataHolderSeq&>(pcts);
 
     if (sedp_->write_volatile_message(msg, reader) != DDS::RETCODE_OK) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::send_participant_crypto_tokens() - ")
-        ACE_TEXT("Unable to write volatile message.\n")));
+      if (DCPS::DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::send_participant_crypto_tokens() - ")
+          ACE_TEXT("Unable to write volatile message.\n")));
+      }
     }
   }
 }
@@ -4202,10 +4272,11 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
     StatusMap running;
     StatusMap removed;
     if (!local_thread_status_manager_.sync_with_parent(
-          *global_thread_status_manager_, running, removed) &&
-        DCPS::DCPS_debug_level) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Spdp::SpdpTransport::thread_status_task: "
-        "syncing with global thread status manager failed\n"));
+          *global_thread_status_manager_, running, removed)) {
+      if (DCPS::DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Spdp::SpdpTransport::thread_status_task: "
+          "syncing with global thread status manager failed\n"));
+      }
       return;
     }
     if (bit) {
@@ -4294,9 +4365,11 @@ void Spdp::process_participant_ice(const ParameterList& plist,
 {
   ICE::AgentInfoMap ai_map;
   if (!ParameterListConverter::from_param_list(plist, ai_map)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::process_participant_ice - ")
-               ACE_TEXT("failed to convert from ParameterList to ")
-               ACE_TEXT("ICE::AgentInfo\n")));
+    if (DCPS::DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::process_participant_ice - ")
+                ACE_TEXT("failed to convert from ParameterList to ")
+                ACE_TEXT("ICE::AgentInfo\n")));
+    }
     return;
   }
   ICE::AgentInfoMap::const_iterator sedp_pos = ai_map.find(SEDP_AGENT_INFO_KEY);
