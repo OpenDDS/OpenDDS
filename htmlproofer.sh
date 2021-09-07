@@ -41,6 +41,9 @@ exec bundle exec htmlproofer "$site_dir" \
   --check-html \
   --check-img-http \
   $(: TODO: --enforce-https \ ) \
+  --report-invalid-tags \
+  --report-eof-tags \
+  --report-mismatched-tags \
   --url-swap "$url_swap_arg" \
   --file-ignore "$file_ignore_arg" \
   --url-ignore "$url_ignore_arg" \

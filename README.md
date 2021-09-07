@@ -9,14 +9,14 @@ Pushing to the `gh-pages` branch causes Github to update opendds.org. It can
 also be built and viewed locally. To do this make sure Ruby is installed and
 then run these commands in this directory to install the dependencies:
 
-```Shell
+```
 gem install bundler
 bundle install
 ```
 
 Then to generate the website and start a web server for it, run:
 
-```Shell
+```
 bundle exec jekyll serve
 ```
 
@@ -38,7 +38,7 @@ usage.
 The token can be used by assigning it to the `JEKYLL_GITHUB_TOKEN` environment
 variable. For example:
 
-```Shell
+```
 JEKYLL_GITHUB_TOKEN=... bundle exec jekyll serve
 ```
 

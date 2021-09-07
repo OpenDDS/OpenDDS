@@ -42,7 +42,8 @@
 {% endcomment %}
       <ul class="trigger">
         {% assign sorted_pages = site.pages | where_exp:"item", "item.sitemap != false" | sort: "order" %}
-        {% assign level = 2 %}
+        {% assign start_level = 2 %}
+        {% assign level = start_level %}
         {% assign counter = 0 %}
         {% for p in sorted_pages %}
           {% assign slash = p.url | split: '/' %}
@@ -110,6 +111,9 @@
             {% assign level = slash.size %}
           {% endunless %}
         {% endfor %}
+        <!-- {{ level | minus: start_level }} -->
+        {% assign terminate_ul_count = level | minus: start_level %}
+        {% for i in (0..terminate_ul_count) %}</ul>{% endfor %}
       </ul>
     </nav>
   </div>

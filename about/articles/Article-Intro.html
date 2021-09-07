@@ -1622,7 +1622,7 @@ subscriber with built-in-topic on which is the default case. We can
 also run these processes with the built-in-topic off. The <code>-NOBITS</code>
 is used by DCPSInfoRepo to turn off built-in-topic and the <code>"-DCPSBit 0"</code>
 is used by other DDS applications. The command lines are as follows:
-
+</p>
 <pre>$DDS_ROOT/bin/DCPSInfoRepo -NOBITS -ORBListenEndpoints iiop://localhost:12345
 
 subscriber -DCPSBit 0 -DCPSConfigFile dds_tcp_conf.ini
@@ -1631,7 +1631,7 @@ subscriber -DCPSBit 0 -DCPSConfigFile dds_tcp_conf.ini
 
 publisher -DCPSBit 0 -DCPSConfigFile dds_tcp_conf.ini
 </pre>
-</p>
+
 <p>The publisher publishes 20 stock quotes for each the SPY and MDY
 ticker symbols, and each subscriber receives them. When the publisher
 is finished, it publishes a "TRADING_CLOSED" message, which causes the
@@ -1693,7 +1693,7 @@ publisher -DCPSConfigFile dds_udp_conf.ini
 <p>
 We can also run each process with the built-in-topic off.
 The command-lines are as follows:
-
+</p>
 <pre>$DDS_ROOT/bin/DCPSInfoRepo -NOBITS -ORBListenEndpoints iiop://localhost:12345
 
 subscriber -DCPSBit 0 -DCPSConfigFile dds_udp_conf.ini
@@ -1702,7 +1702,7 @@ subscriber -DCPSBit 0 -DCPSConfigFile dds_udp_conf.ini
 
 publisher -DCPSBit 0 -DCPSConfigFile dds_udp_conf.ini
 </pre>
-</p>
+
 <p>
 As before, the publisher publishes 20 stock quotes for each the SPY and
 MDY ticker symbols, and each subscriber receives them. When the
