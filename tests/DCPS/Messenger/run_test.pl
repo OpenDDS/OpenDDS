@@ -11,6 +11,9 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
+print STDERR "ERROR: Fail on purpose\n";
+exit 1;
+
 my $status = 0;
 
 my $test = new PerlDDS::TestFramework();
