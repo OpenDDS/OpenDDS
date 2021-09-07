@@ -20,11 +20,17 @@ my $rtps = 0;
 my $help = 0;
 
 my $help_message = "usage: run_test.pl [-h|--help] [--rtps]\n";
-if (not GetOptions(
+my $invalid_args = not GetOptions(
   "rtps" => \$rtps,
-  "help|h" => \$help
-)) {
-  print STDERR ("Invalid Command Line Argument(s)\n$help_message");
+  "help|h" => \$help,
+);
+if (scalar(@ARGV)) {
+  print STDERR ("ERROR: Invalid positional argument(s) passed: ", join(' ', @ARGV), "\n");
+  $invalid_args = 1;
+}
+if ($invalid_args) {
+  print STDERR ("ERROR: Invalid Command Line Argument(s)\n$help_message");
+  exit 1;
 }
 if ($help) {
   print $help_message;
