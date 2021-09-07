@@ -1,5 +1,5 @@
-#ifndef APPLICATION_H
-#define APPLICATION_H
+#ifndef OPENDDS_MODEL_APPLICATION_H
+#define OPENDDS_MODEL_APPLICATION_H
 
 // Needed here to avoid the pragma below when necessary.
 #include /**/ "ace/pre.h"

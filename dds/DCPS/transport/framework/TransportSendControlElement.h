@@ -51,13 +51,15 @@ public:
   /// Accessor for the publisher id.
   virtual RepoId publication_id() const;
 
+  virtual ACE_Message_Block* duplicate_msg() const;
+
   /// Accessor for the ACE_Message_Block
   virtual const ACE_Message_Block* msg() const;
 
-  const DataSampleHeader& header() const { return this->header_; }
+  const DataSampleHeader& header() const { return header_; }
   // Only allow const access to the header.  Modifying the header
   // would require remarshaling.
-  //DataSampleHeader& header() { return this->header_; }
+  //DataSampleHeader& header() { return header_; }
 
   const TransportSendListener* listener() const { return listener_; }
 

@@ -1,11 +1,12 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-#include "dds/DdsDcpsCore.idl"
+#ifndef OPENDDS_RTPSRELAYLIB_RELAY_IDL
+#define OPENDDS_RTPSRELAYLIB_RELAY_IDL
+
+#include <dds/DdsDcpsCore.idl>
 
 module RtpsRelay {
 
@@ -100,14 +101,14 @@ module RtpsRelay {
     Duration_t interval;
     unsigned long messages_in;
     unsigned long long bytes_in;
-    unsigned long messages_ignored;
-    unsigned long long bytes_ignored;
-    Duration_t input_processing_time;
+    Duration_t rtps_input_processing_time;
+    Duration_t stun_input_processing_time;
     unsigned long messages_out;
     unsigned long long bytes_out;
     unsigned long messages_dropped;
     unsigned long long bytes_dropped;
-    Duration_t output_processing_time;
+    Duration_t rtps_output_processing_time;
+    Duration_t stun_output_processing_time;
     unsigned long max_gain;
     unsigned long error_count;
     unsigned long max_queue_size;
@@ -122,20 +123,19 @@ module RtpsRelay {
     Duration_t interval;
     unsigned long messages_in;
     unsigned long long bytes_in;
-    unsigned long messages_ignored;
-    unsigned long long bytes_ignored;
-    Duration_t input_processing_time;
+    Duration_t rtps_input_processing_time;
+    Duration_t stun_input_processing_time;
     unsigned long messages_out;
     unsigned long long bytes_out;
     unsigned long messages_dropped;
     unsigned long long bytes_dropped;
-    Duration_t output_processing_time;
+    Duration_t rtps_output_processing_time;
+    Duration_t stun_output_processing_time;
     unsigned long max_gain;
     unsigned long error_count;
     unsigned long local_active_participants;
     unsigned long new_address_count;
     unsigned long expired_address_count;
-    unsigned long expired_pending_count;
     unsigned long max_queue_size;
     Duration_t max_queue_latency;
   };
@@ -152,3 +152,5 @@ module RtpsRelay {
   };
 
 };
+
+#endif

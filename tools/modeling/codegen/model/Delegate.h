@@ -1,5 +1,5 @@
-#ifndef DELEGATE_H
-#define DELEGATE_H
+#ifndef OPENDDS_MODEL_DELEGATE_H
+#define OPENDDS_MODEL_DELEGATE_H
 
 // Needed here to avoid the pragma below when necessary.
 #include /**/ "ace/pre.h"

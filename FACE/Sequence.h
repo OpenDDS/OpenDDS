@@ -1,5 +1,5 @@
-#ifndef OPENDDS_FACE_SEQUENCE_HEADER
-#define OPENDDS_FACE_SEQUENCE_HEADER
+#ifndef OPENDDS_FACE_SEQUENCE_H
+#define OPENDDS_FACE_SEQUENCE_H
 
 #include "types.hpp"
 #include "StringManager.h"

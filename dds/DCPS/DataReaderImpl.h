@@ -219,7 +219,8 @@ public:
   friend class SubscriberImpl;
 
   typedef OPENDDS_MAP(DDS::InstanceHandle_t, SubscriptionInstance_rch) SubscriptionInstanceMapType;
-
+  typedef OPENDDS_SET(DDS::InstanceHandle_t) InstanceSet;
+  typedef OPENDDS_SET(SubscriptionInstance_rch) SubscriptionInstanceSet;
   /// Type of collection of statistics for writers to this reader.
   typedef OPENDDS_MAP_CMP(PublicationId, WriterStats, GUID_tKeyLessThan) StatsMapType;
 
@@ -397,7 +398,8 @@ public:
                                                 SubscriptionInstance_rch& instance,
                                                 bool& is_new_instance,
                                                 bool& filtered,
-                                                MarshalingType marshaling_type)= 0;
+                                                MarshalingType marshaling_type,
+                                                bool full_copy) = 0;
 
   virtual void dispose_unregister(const ReceivedDataSample& sample,
                                   SubscriptionInstance_rch& instance);

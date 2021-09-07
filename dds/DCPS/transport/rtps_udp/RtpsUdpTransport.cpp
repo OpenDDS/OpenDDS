@@ -289,23 +289,25 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
                                SequenceNumber max_sn,
                                const TransportClient_rch& client)
 {
+  AddrSet uc_addrs, mc_addrs;
   bool requires_inline_qos;
   unsigned int blob_bytes_read;
-  std::pair<AddrSet, AddrSet> addrs =
-    get_connection_addrs(remote_data, &requires_inline_qos, &blob_bytes_read);
+  get_connection_addrs(remote_data, &uc_addrs, &mc_addrs, &requires_inline_qos, &blob_bytes_read);
 
   if (link_) {
     return link_->associated(local_id, remote_id, local_reliable, remote_reliable,
                              local_durable, remote_durable,
                              participant_discovered_at, participant_flags, max_sn, client,
-                             addrs.first, addrs.second, requires_inline_qos);
+                             uc_addrs, mc_addrs, requires_inline_qos);
   }
 
   return true;
 }
 
-std::pair<AddrSet, AddrSet>
+void
 RtpsUdpTransport::get_connection_addrs(const TransportBLOB& remote,
+                                       AddrSet* uc_addrs,
+                                       AddrSet* mc_addrs,
                                        bool* requires_inline_qos,
                                        unsigned int* blob_bytes_read) const
 {
@@ -314,26 +316,22 @@ RtpsUdpTransport::get_connection_addrs(const TransportBLOB& remote,
   DDS::ReturnCode_t result =
     blob_to_locators(remote, locators, requires_inline_qos, blob_bytes_read);
   if (result != DDS::RETCODE_OK) {
-    return std::make_pair(AddrSet(), AddrSet());
+    return;
   }
 
-  AddrSet uc_addrs;
-  AddrSet mc_addrs;
   for (CORBA::ULong i = 0; i < locators.length(); ++i) {
     ACE_INET_Addr addr;
     // If conversion was successful
     if (locator_to_address(addr, locators[i], false) == 0) {
       if (addr.is_multicast()) {
-        if (config().use_multicast_) {
-          mc_addrs.insert(addr);
+        if (config().use_multicast_ && mc_addrs) {
+          mc_addrs->insert(addr);
         }
-      } else {
-        uc_addrs.insert(addr);
+      } else if (uc_addrs) {
+        uc_addrs->insert(addr);
       }
     }
   }
-
-  return std::make_pair(uc_addrs, mc_addrs);
 }
 
 bool
@@ -361,8 +359,9 @@ RtpsUdpTransport::register_for_reader(const RepoId& participant,
     link_ = make_datalink(participant.guidPrefix);
   }
 
-  link_->register_for_reader(writerid, readerid, get_connection_addrs(*blob).first,
-                             listener);
+  AddrSet uc_addrs;
+  get_connection_addrs(*blob, &uc_addrs);
+  link_->register_for_reader(writerid, readerid, uc_addrs, listener);
 }
 
 void
@@ -393,8 +392,9 @@ RtpsUdpTransport::register_for_writer(const RepoId& participant,
     link_ = make_datalink(participant.guidPrefix);
   }
 
-  link_->register_for_writer(readerid, writerid, get_connection_addrs(*blob).first,
-                             listener);
+  AddrSet uc_addrs;
+  get_connection_addrs(*blob, &uc_addrs);
+  link_->register_for_writer(readerid, writerid, uc_addrs, listener);
 }
 
 void
@@ -419,11 +419,11 @@ RtpsUdpTransport::update_locators(const RepoId& remote,
   GuardThreadType guard_links(links_lock_);
 
   if (link_) {
+    AddrSet uc_addrs, mc_addrs;
     bool requires_inline_qos;
     unsigned int blob_bytes_read;
-    std::pair<AddrSet, AddrSet> addrs =
-      get_connection_addrs(*blob, &requires_inline_qos, &blob_bytes_read);
-    link_->update_locators(remote, addrs.first, addrs.second, requires_inline_qos, false);
+    get_connection_addrs(*blob, &uc_addrs, &mc_addrs, &requires_inline_qos, &blob_bytes_read);
+    link_->update_locators(remote, uc_addrs, mc_addrs, requires_inline_qos, false);
   }
 }
 

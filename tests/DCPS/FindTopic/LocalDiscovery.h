@@ -1,5 +1,6 @@
 #include <dds/DCPS/Discovery.h>
 #include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/XTypes/TypeLookupService.h>
 
 #include <map>
 #include <string>
@@ -41,12 +42,14 @@ private:
 
   AddDomainStatus add_domain_participant(
     DDS::DomainId_t domain,
-    const DDS::DomainParticipantQos& qos);
+    const DDS::DomainParticipantQos& qos,
+    OpenDDS::XTypes::TypeLookupService_rch tls);
 
 #ifdef OPENDDS_SECURITY
   AddDomainStatus add_domain_participant_secure(
     DDS::DomainId_t domain,
     const DDS::DomainParticipantQos& qos,
+    OpenDDS::XTypes::TypeLookupService_rch tls,
     const RepoId& guid,
     DDS::Security::IdentityHandle id,
     DDS::Security::PermissionsHandle perm,

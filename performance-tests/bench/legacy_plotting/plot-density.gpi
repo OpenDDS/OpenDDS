@@ -28,7 +28,7 @@ set format y "%.0f%%"
 set xtics out nomirror rotate by 15 offset -5,-1
 
 list = "50 100 250 500 1000 2500 5000 8000 16000 32000"
-protocols = "tcp udp multi-be multi-re rtps raw-tcp raw-udp"
+protocols = "tcp udp multicast-be multicast-re rtps raw-tcp raw-udp"
 protocol_descs = "'TCP' 'UDP' 'Best Effort Multicast' 'Reliable Multicast' 'RTPS' 'Raw TCP' 'Raw UDP'"
 
 do for [j=1:words(protocols)] {

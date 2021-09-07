@@ -72,6 +72,11 @@ public:
   {
   }
 
+  static void SetUpTestCase()
+  {
+    openssl_init();
+  }
+
   Certificate ca_;
   Certificate ca_data_;
   Certificate signed_;

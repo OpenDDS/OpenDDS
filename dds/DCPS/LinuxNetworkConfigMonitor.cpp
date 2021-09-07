@@ -142,7 +142,7 @@ void LinuxNetworkConfigMonitor::read_messages()
     }
 
     for (const nlmsghdr* header = reinterpret_cast<const nlmsghdr*>(buffer);
-         buffer_length >= 0 && NLMSG_OK(header, buffer_length);
+         buffer_length >= 0 && NLMSG_OK(header, static_cast<size_t>(buffer_length));
          header = NLMSG_NEXT(header, buffer_length)) {
       process_message(header);
     }

@@ -112,14 +112,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-Lifespan"))) {
       config.lifespan(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-StaticLimit"))) {
-      config.static_limit(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-MaxPending"))) {
-      config.max_pending(ACE_OS::atoi(arg));
+    } else if ((arg = args.get_the_parameter("-BufferSize"))) {
+      config.buffer_size(ACE_OS::atoi(arg));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-UserData"))) {
       user_data = arg;
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-AllowEmptyPartition"))) {
+      config.allow_empty_partition(ACE_OS::atoi(arg));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-LogWarnings"))) {
       config.log_warnings(ACE_OS::atoi(arg));
@@ -634,13 +634,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   HandlerStatisticsReporter spdp_horizontal_reporter(config, HSPDP, handler_statistics_writer, relay_statistics_reporter);
   spdp_horizontal_reporter.report();
-  HorizontalHandler spdp_horizontal_handler(config, HSPDP, reactor, guid_partition_table, spdp_horizontal_reporter);
+  HorizontalHandler spdp_horizontal_handler(config, HSPDP, SPDP, reactor, guid_partition_table, spdp_horizontal_reporter);
   HandlerStatisticsReporter sedp_horizontal_reporter(config, HSEDP, handler_statistics_writer, relay_statistics_reporter);
   sedp_horizontal_reporter.report();
-  HorizontalHandler sedp_horizontal_handler(config, HSEDP, reactor, guid_partition_table, sedp_horizontal_reporter);
+  HorizontalHandler sedp_horizontal_handler(config, HSEDP, SEDP, reactor, guid_partition_table, sedp_horizontal_reporter);
   HandlerStatisticsReporter data_horizontal_reporter(config, HDATA, handler_statistics_writer, relay_statistics_reporter);
   data_horizontal_reporter.report();
-  HorizontalHandler data_horizontal_handler(config, HDATA, reactor, guid_partition_table, data_horizontal_reporter);
+  HorizontalHandler data_horizontal_handler(config, HDATA, DATA, reactor, guid_partition_table, data_horizontal_reporter);
 
   spdp_horizontal_handler.vertical_handler(&spdp_vertical_handler);
   sedp_horizontal_handler.vertical_handler(&sedp_vertical_handler);
@@ -761,7 +761,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   RelayAddress relay_address;
-  relay_address.application_participant_guid(repoid_to_guid(config.application_participant_guid()));
+  relay_address.application_participant_guid(rtps_guid_to_relay_guid(config.application_participant_guid()));
   relay_address.name(HSPDP);
   relay_address.address(OpenDDS::DCPS::LogAddr(spdp_horizontal_addr).str());
   ret = relay_address_writer->write(relay_address, DDS::HANDLE_NIL);
@@ -797,7 +797,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   RelayInstance relay_instance;
-  relay_instance.application_participant_guid(repoid_to_guid(config.application_participant_guid()));
+  relay_instance.application_participant_guid(rtps_guid_to_relay_guid(config.application_participant_guid()));
   relay_instance.application_participant_user_data().value.length(static_cast<CORBA::ULong>(user_data.length()));
   std::memcpy(relay_instance.application_participant_user_data().value.get_buffer(), user_data.data(), user_data.length());
 

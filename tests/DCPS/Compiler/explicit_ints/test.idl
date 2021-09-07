@@ -1,9 +1,11 @@
-#include <tao/Int8Seq.pidl>
-#include <tao/UInt8Seq.pidl>
-#include <tao/OctetSeq.pidl>
-#include <tao/CharSeq.pidl>
+#if defined __TAO_IDL_FEATURES
+#  include __TAO_IDL_FEATURES
+#  if TAO_IDL_HAS_EXPLICIT_INTS
+#    include <tao/Int8Seq.pidl>
+#    include <tao/UInt8Seq.pidl>
+#    include <tao/OctetSeq.pidl>
+#    include <tao/CharSeq.pidl>
 
-const uint8 u8_min = 0;
 const uint8 u8_max = 255;
 const int8 i8_min = -128;
 const int8 i8_max = 127;
@@ -40,6 +42,7 @@ struct StructWithInts {
   // Make sure there's no conflict between uint8, int8, octet, and char.
   @key uint8 u8_arr[3];
   @key int8 i8_arr[3];
+  // TODO(iguessthislldo): Support key sequences
   sequence<uint8> u8_seq;
   sequence<int8> i8_seq;
   sequence<octet> o_seq;
@@ -104,3 +107,6 @@ case 8:
 case 9:
   I8seq td_i8seq;
 };
+
+#  endif
+#endif

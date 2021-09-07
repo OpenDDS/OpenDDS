@@ -11,10 +11,11 @@ namespace {
 
 Value& find_or_create(Value& parent, const std::string& name, Type type, Document::AllocatorType& alloc)
 {
-  Value::MemberIterator pos = parent.FindMember(Value(name.c_str(), name.length()));
+  const SizeType length = static_cast<SizeType>(name.length());
+  Value::MemberIterator pos = parent.FindMember(Value(name.c_str(), length));
   if (pos == parent.MemberEnd()) {
-    parent.AddMember(Value(name.c_str(), name.length(), alloc).Move(), Value(type).Move(), alloc);
-    pos = parent.FindMember(Value(name.c_str(), name.length()));
+    parent.AddMember(Value(name.c_str(), length, alloc).Move(), Value(type).Move(), alloc);
+    pos = parent.FindMember(Value(name.c_str(), length));
     assert(pos != parent.MemberEnd());
   }
   assert(pos->value.GetType() == type);
@@ -24,7 +25,8 @@ Value& find_or_create(Value& parent, const std::string& name, Type type, Documen
 void transfer_double(Value& out, Document::AllocatorType& alloc, const Value& in, const std::string& in_name, const std::string out_name)
 {
   double to_write = 0.0;
-  auto pos = in.FindMember(Value(in_name.c_str(), in_name.length()));
+  const SizeType length = static_cast<SizeType>(in_name.length());
+  auto pos = in.FindMember(Value(in_name.c_str(), length));
   if (pos != in.MemberEnd() && pos->value.IsDouble()) {
     to_write = pos->value.GetDouble();
   }
@@ -37,7 +39,8 @@ void transfer_double(Value& out, Document::AllocatorType& alloc, const Value& in
 void transfer_uint64(Value& out, Document::AllocatorType& alloc, const Value& in, const std::string& in_name, const std::string out_name)
 {
   uint64_t to_write = 0;
-  auto pos = in.FindMember(Value(in_name.c_str(), in_name.length()));
+  const SizeType length = static_cast<SizeType>(in_name.length());
+  auto pos = in.FindMember(Value(in_name.c_str(), length));
   if (pos != in.MemberEnd() && pos->value.IsUint64()) {
     to_write = pos->value.GetUint64();
   }

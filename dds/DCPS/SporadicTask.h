@@ -177,7 +177,7 @@ class PmfSporadicTask : public SporadicTask {
 public:
   typedef void (Delegate::*PMF)(const MonotonicTimePoint&);
 
-  PmfSporadicTask(RcHandle<ReactorInterceptor> interceptor, Delegate& delegate, PMF function)
+  PmfSporadicTask(RcHandle<ReactorInterceptor> interceptor, const Delegate& delegate, PMF function)
     : SporadicTask(interceptor)
     , delegate_(delegate)
     , function_(function)

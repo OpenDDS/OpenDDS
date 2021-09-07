@@ -1,7 +1,7 @@
 // -*- C++ -*-
 //
-#ifndef NULLTOPICLISTENER_H
-#define NULLTOPICLISTENER_H
+#ifndef OPENDDS_MODEL_NULLTOPICLISTENER_H
+#define OPENDDS_MODEL_NULLTOPICLISTENER_H
 
 #include "model_export.h"
 #include "dds/DdsDcpsTopicC.h"

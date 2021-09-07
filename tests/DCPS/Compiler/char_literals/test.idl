@@ -1,3 +1,10 @@
+#if defined __TAO_IDL_FEATURES
+#  include __TAO_IDL_FEATURES
+#  define WCHAR_DISC TAO_IDL_HAS_OCTET_AND_WCHAR_UNION_DISCS
+#else
+#  define WCHAR_DISC 0
+#endif
+
 const char c_a = 'a';
 const char c_newline = '\n';
 const char c_tab = '\t';
@@ -79,7 +86,7 @@ const wchar wc_hex_254 = L'\xfe';
 const wchar wc_u_escape = L'\u203C'; // (Double Exclamation Mark: ‼)
 #endif
 
-/* TODO(iguessthislldo): Support for 7.4.13.4.2 in TAO_IDL
+#if WCHAR_DISC
 @topic
 union WcharUnion switch (@key wchar) {
 case L'a':
@@ -119,7 +126,7 @@ case L'\u203C':
 default:
   long defualt_member;
 }
-*/
+#endif
 
 /* TODO(iguessthislldo): config-linux.h doesn't seem to have ACE_HAS_WCHAR
  * defined, which makes WChar typedef to ACE_UINT16, which doesn't seem to

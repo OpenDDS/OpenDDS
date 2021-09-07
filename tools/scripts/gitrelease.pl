@@ -56,7 +56,7 @@ ENDOUT
 
 sub get_news_post_release_msg {
   my $settings = shift();
-  my $ver = $settings->{parsed_next_version}->{string};
+  my $ver = $settings->{parsed_next_version}->{release_string};
   return "OpenDDS $ver is currently in development, so this list might change.";
 }
 my $news_post_release_msg_re =
@@ -73,7 +73,7 @@ sub insert_news_template($$) {
   my $post_release = shift();
 
   my $version = ($post_release ?
-    $settings->{parsed_next_version} : $settings->{parsed_version})->{string};
+    $settings->{parsed_next_version} : $settings->{parsed_version})->{release_string};
   my $release_msg = $post_release ?
     get_news_post_release_msg($settings) : get_news_release_msg($settings);
 

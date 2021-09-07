@@ -28,6 +28,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 typedef OPENDDS_SET(ACE_INET_Addr) AddrSet;
+typedef OPENDDS_SET_CMP(GUID_t, GUID_tKeyLessThan) GuidSet;
 
 struct AddressCacheEntry : public virtual RcObject {
 
@@ -52,7 +53,15 @@ template <typename Key>
 class AddressCache {
 public:
 
+#if defined ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP_T(Key, RcHandle<AddressCacheEntry>) MapType;
+  typedef OPENDDS_VECTOR(Key) KeyVec;
+  typedef OPENDDS_UNORDERED_MAP_T(GUID_t, KeyVec) IdMapType;
+#else
   typedef OPENDDS_MAP_T(Key, RcHandle<AddressCacheEntry>) MapType;
+  typedef OPENDDS_VECTOR(Key) KeyVec;
+  typedef OPENDDS_MAP_T(GUID_t, KeyVec) IdMapType;
+#endif
 
   AddressCache() {}
   virtual ~AddressCache() {}
@@ -67,6 +76,11 @@ public:
       if (pos == cache.map_.end()) {
         rch_ = make_rch<AddressCacheEntry>();
         cache.map_[key] = rch_;
+        GuidSet set;
+        key.get_contained_guids(set);
+        for (GuidSet::const_iterator it = set.begin(); it != set.end(); ++it) {
+          cache.id_map_[*it].push_back(key);
+        }
         is_new_ = true;
       } else {
         rch_ = pos->second;
@@ -124,6 +138,11 @@ public:
       rch->expires_ = expires;
     } else {
       rch = make_rch<AddressCacheEntry>(addrs, expires);
+      GuidSet set;
+      key.get_contained_guids(set);
+      for (GuidSet::const_iterator it = set.begin(); it != set.end(); ++it) {
+        id_map_[*it].push_back(key);
+      }
     }
   }
 
@@ -133,28 +152,15 @@ public:
     return map_.erase(key) != 0;
   }
 
-  void remove(const Key& start_key, const Key& end_key)
+  void remove_id(const GUID_t& val)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    typename MapType::iterator start = map_.lower_bound(start_key);
-    if (start != map_.end()) {
-      typename MapType::iterator end = map_.upper_bound(end_key);
-      while (start != end) {
-        map_.erase(start++);
+    typename IdMapType::iterator pos = id_map_.find(val);
+    if (pos != id_map_.end()) {
+      for (typename KeyVec::iterator it = pos->second.begin(); it != pos->second.end(); ++it) {
+        map_.erase(*it);
       }
-    }
-  }
-
-  template <typename T>
-  void remove_contains(const T& val)
-  {
-    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    for (typename MapType::iterator it = map_.begin(); it != map_.end(); /* inc in loop */) {
-      if (it->first.contains(val)) {
-        map_.erase(it++);
-      } else {
-        ++it;
-      }
+      id_map_.erase(pos);
     }
   }
 
@@ -162,6 +168,7 @@ private:
 
   mutable ACE_Thread_Mutex mutex_;
   MapType map_;
+  IdMapType id_map_;
 };
 
 } // namespace DCPS

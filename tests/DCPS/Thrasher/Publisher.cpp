@@ -167,7 +167,7 @@ void Publisher::configure_transport()
     ACE_OS::snprintf(config_name, 64, "cfg_%d", thread_index_);
     ACE_OS::snprintf(inst_name, 64, "rtps_%d", thread_index_);
     // The 2 is a safety factor to allow for control messages.
-    ACE_OS::snprintf(nak_depth, 8, ACE_TEXT("%lu"), 2 * samples_per_thread_);
+    ACE_OS::snprintf(nak_depth, 8, ACE_SIZE_T_FORMAT_SPECIFIER, 2 * samples_per_thread_);
     ACE_DEBUG((LM_INFO, (pfx_ + "->transport %C\n").c_str(), config_name));
     OpenDDS::DCPS::TransportConfig_rch config = TheTransportRegistry->create_config(config_name);
     OpenDDS::DCPS::TransportInst_rch inst = TheTransportRegistry->create_inst(inst_name, "rtps_udp");
