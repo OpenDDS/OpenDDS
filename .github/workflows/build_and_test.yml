@@ -2764,7 +2764,7 @@ jobs:
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install clang-12
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      run: sudo apt-get -y install clang12
+      run: sudo apt-get -y install clang-12
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
