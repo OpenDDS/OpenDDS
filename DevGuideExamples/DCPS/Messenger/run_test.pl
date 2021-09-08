@@ -24,7 +24,7 @@ my $invalid_args = not GetOptions(
   "rtps" => \$rtps,
   "help|h" => \$help,
 );
-if (scalar(@ARGV)) {
+if (scalar(grep {length($_)} @ARGV)) {
   print STDERR ("ERROR: Invalid positional argument(s) passed: ", join(' ', @ARGV), "\n");
   $invalid_args = 1;
 }
