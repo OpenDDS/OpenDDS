@@ -2988,7 +2988,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
           if (valid_size(remote)) {
             outer->data_received(data, plist, remote);
           } else {
-             ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - valid address size\n")));
+             ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - invalid address size\n")));
             return 0;
           }
         }
