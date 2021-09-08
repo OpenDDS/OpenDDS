@@ -1006,9 +1006,7 @@ namespace {
         be_global->impl_ <<
           "  CORBA::ULong length;\n"
           << streamAndCheck(">> length");
-        //Since the element size may differ between C++ representation and CDR stream,
-        //checking 'if (sizeof(T) * length > strm.length())' may not always work.
-        //The check here is to prevent very large sequences from being allocated.
+        // The check here is to prevent very large sequences from being allocated.
         be_global->impl_ <<
           "  if (length > strm.length()) {\n"
           "    if (DCPS_debug_level >= 8) {\n"
