@@ -456,7 +456,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
     }
 
     if (guid_addr_set_.ignore(src_guid, now)) {
-      stats_reporter_.ignored_message(msg_len, now);
+      stats_reporter_.ignored_message(msg_len, now, type);
       return 0;
     }
 
@@ -507,7 +507,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
       has_guid = true;
 
       if (guid_addr_set_.ignore(src_guid, now)) {
-        stats_reporter_.ignored_message(msg_len, now);
+        stats_reporter_.ignored_message(msg_len, now, type);
         return 0;
       }
     }
