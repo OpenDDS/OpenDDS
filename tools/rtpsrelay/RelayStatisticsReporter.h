@@ -115,6 +115,27 @@ public:
     report(now);
   }
 
+  void local_participants(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    log_relay_statistics_.local_participants() = static_cast<uint32_t>(count);
+    publish_relay_statistics_.local_participants() = static_cast<uint32_t>(count);
+    report(now);
+  }
+
+  void local_writers(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    log_relay_statistics_.local_writers() = static_cast<uint32_t>(count);
+    publish_relay_statistics_.local_writers() = static_cast<uint32_t>(count);
+    report(now);
+  }
+
+  void local_readers(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    log_relay_statistics_.local_readers() = static_cast<uint32_t>(count);
+    publish_relay_statistics_.local_readers() = static_cast<uint32_t>(count);
+    report(now);
+  }
+
   void report()
   {
     report(OpenDDS::DCPS::MonotonicTimePoint::now(), true);

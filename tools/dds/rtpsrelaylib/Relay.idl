@@ -82,6 +82,8 @@ module RtpsRelay {
   const string PARTICIPANT_STATISTICS_TOPIC_NAME = "Participant Statistics";
 
   @topic
+  @mutable
+  @autoid(HASH)
   struct ParticipantStatistics {
     @key GUID_t guid;
     @key string name;
@@ -95,6 +97,8 @@ module RtpsRelay {
   const string HANDLER_STATISTICS_TOPIC_NAME = "Handler Statistics";
 
   @topic
+  @mutable
+  @autoid(HASH)
   struct HandlerStatistics {
     @key GUID_t application_participant_guid;
     @key string name;
@@ -120,6 +124,8 @@ module RtpsRelay {
   const string RELAY_STATISTICS_TOPIC_NAME = "Relay Statistics";
 
   @topic
+  @mutable
+  @autoid(HASH)
   struct RelayStatistics {
     @key GUID_t application_participant_guid;
     Duration_t interval;
@@ -143,19 +149,10 @@ module RtpsRelay {
     unsigned long expired_pending_count;
     unsigned long max_queue_size;
     Duration_t max_queue_latency;
-  };
-
-  const string DOMAIN_STATISTICS_TOPIC_NAME = "Domain Statistics";
-
-  @topic
-  struct DomainStatistics {
-    @key GUID_t application_participant_guid;
-    Duration_t interval;
     unsigned long local_participants;
     unsigned long local_writers;
     unsigned long local_readers;
   };
-
 };
 
 #endif

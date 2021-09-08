@@ -167,16 +167,6 @@ public:
     return log_participant_statistics_;
   }
 
-  void log_domain_statistics(OpenDDS::DCPS::TimeDuration value)
-  {
-    log_domain_statistics_ = value;
-  }
-
-  OpenDDS::DCPS::TimeDuration log_domain_statistics() const
-  {
-    return log_domain_statistics_;
-  }
-
   void publish_relay_statistics(OpenDDS::DCPS::TimeDuration value)
   {
     publish_relay_statistics_ = value;
@@ -207,16 +197,6 @@ public:
     return publish_participant_statistics_;
   }
 
-  void publish_domain_statistics(OpenDDS::DCPS::TimeDuration value)
-  {
-    publish_domain_statistics_ = value;
-  }
-
-  OpenDDS::DCPS::TimeDuration publish_domain_statistics() const
-  {
-    return publish_domain_statistics_;
-  }
-
 private:
   OpenDDS::DCPS::GUID_t application_participant_guid_;
   OpenDDS::DCPS::TimeDuration lifespan_;
@@ -232,11 +212,9 @@ private:
   OpenDDS::DCPS::TimeDuration log_relay_statistics_;
   OpenDDS::DCPS::TimeDuration log_handler_statistics_;
   OpenDDS::DCPS::TimeDuration log_participant_statistics_;
-  OpenDDS::DCPS::TimeDuration log_domain_statistics_;
   OpenDDS::DCPS::TimeDuration publish_relay_statistics_;
   OpenDDS::DCPS::TimeDuration publish_handler_statistics_;
   OpenDDS::DCPS::TimeDuration publish_participant_statistics_;
-  OpenDDS::DCPS::TimeDuration publish_domain_statistics_;
 };
 
 }
