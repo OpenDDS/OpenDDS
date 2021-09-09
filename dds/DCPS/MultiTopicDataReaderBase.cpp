@@ -245,6 +245,12 @@ void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
   using namespace DDS;
 
   const OPENDDS_STRING topic = topicNameFor(reader);
+  if (!topic.empty()) {
+    QueryPlan& qp = query_plans_[topic];
+    if (CORBA::is_nil(qp.data_reader_)) {
+      qp.data_reader_ = DDS::DataReader::_duplicate(reader);
+    }
+  }
   DataReaderImpl* dri = dynamic_cast<DataReaderImpl*>(reader);
   if (!dri) {
     throw runtime_error("Incoming DataReader for " + topic +
