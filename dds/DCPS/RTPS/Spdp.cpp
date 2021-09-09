@@ -2855,8 +2855,8 @@ Spdp::SpdpTransport::choose_recv_socket(ACE_HANDLE h) const
 
 bool valid_size(const ACE_INET_Addr& a)
 {
-  const int max_size = 16;
-  return a.get_size() <= max_size;
+  const int ipv6_size = 16;
+  return a.get_size() <= ipv6_size;
 }
 
 int
@@ -2890,6 +2890,11 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
 #endif
                                     );
 #endif
+
+  if (!valid_size(remote)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - invalid address size\n")));
+    return 0;
+  }
 
   if (bytes > 0) {
     buff_.wr_ptr(bytes);
@@ -2983,14 +2988,8 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
         }
 
         DCPS::RcHandle<Spdp> outer = outer_.lock();
-
         if (outer) {
-          if (valid_size(remote)) {
-            outer->data_received(data, plist, remote);
-          } else {
-             ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - invalid address size\n")));
-            return 0;
-          }
+          outer->data_received(data, plist, remote);
         }
         break;
       }
