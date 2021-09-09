@@ -152,7 +152,7 @@ All tests in a unit test source file must have the same TestModule which is name
 This naming convention is required for intentional unit test coverage.
 The TestSubmodule can be any identifier, however, it should typical describe the class, function, or scenario being tested.
 
-Each tests contains evaluators.
+Each test contains evaluators.
 The most common evaluators are ``EXPECT_EQ``, ``EXPECT_TRUE``, ``EXPECT_FALSE``.
 
 .. code-block:: cpp
