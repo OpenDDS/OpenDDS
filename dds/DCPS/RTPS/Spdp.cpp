@@ -2855,8 +2855,7 @@ Spdp::SpdpTransport::choose_recv_socket(ACE_HANDLE h) const
 
 bool valid_size(const ACE_INET_Addr& a)
 {
-  const int ipv6_size = 16;
-  return a.get_size() <= ipv6_size;
+  return a.get_size() <= a.get_addr_size();
 }
 
 int
