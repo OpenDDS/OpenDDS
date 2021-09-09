@@ -37,10 +37,11 @@ public:
   }
 
   void ignored_message(size_t byte_count,
-                       const OpenDDS::DCPS::MonotonicTimePoint& now)
+                       const OpenDDS::DCPS::MonotonicTimePoint& now,
+                       MessageType type)
   {
-    log_helper_.ignored_message(byte_count);
-    publish_helper_.ignored_message(byte_count);
+    log_helper_.ignored_message(byte_count, type);
+    publish_helper_.ignored_message(byte_count, type);
     report(now);
   }
 
@@ -112,6 +113,27 @@ public:
   {
     log_helper_.max_queue_size(size);
     publish_helper_.max_queue_size(size);
+    report(now);
+  }
+
+  void local_participants(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    log_relay_statistics_.local_participants() = static_cast<uint32_t>(count);
+    publish_relay_statistics_.local_participants() = static_cast<uint32_t>(count);
+    report(now);
+  }
+
+  void local_writers(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    log_relay_statistics_.local_writers() = static_cast<uint32_t>(count);
+    publish_relay_statistics_.local_writers() = static_cast<uint32_t>(count);
+    report(now);
+  }
+
+  void local_readers(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    log_relay_statistics_.local_readers() = static_cast<uint32_t>(count);
+    publish_relay_statistics_.local_readers() = static_cast<uint32_t>(count);
     report(now);
   }
 

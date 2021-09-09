@@ -5,7 +5,6 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "DomainStatisticsReporter.h"
 #include "GuidPartitionTable.h"
 #include "ParticipantListener.h"
 #include "ParticipantStatisticsReporter.h"
@@ -147,9 +146,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-LogParticipantStatistics"))) {
       config.log_participant_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-LogDomainStatistics"))) {
-      config.log_domain_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
     } else if ((arg = args.get_the_parameter("-PublishRelayStatistics"))) {
       config.publish_relay_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
@@ -158,9 +154,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-PublishParticipantStatistics"))) {
       config.publish_participant_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-PublishDomainStatistics"))) {
-      config.publish_domain_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
 #ifdef OPENDDS_SECURITY
     } else if ((arg = args.get_the_parameter("-IdentityCA"))) {
@@ -370,24 +363,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  DomainStatisticsTypeSupport_var domain_statistics_ts = new DomainStatisticsTypeSupportImpl;
-  if (domain_statistics_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to register DomainStatistics type\n")));
-    return EXIT_FAILURE;
-  }
-  CORBA::String_var domain_statistics_type_name = domain_statistics_ts->get_type_name();
-
-  DDS::Topic_var domain_statistics_topic =
-    relay_participant->create_topic(DOMAIN_STATISTICS_TOPIC_NAME.c_str(),
-                                    domain_statistics_type_name,
-                                    TOPIC_QOS_DEFAULT, nullptr,
-                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-  if (!domain_statistics_topic) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Domain Statistics topic\n")));
-    return EXIT_FAILURE;
-  }
-
   ParticipantStatisticsTypeSupport_var participant_statistics_ts = new ParticipantStatisticsTypeSupportImpl;
   if (participant_statistics_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to register ParticipantStatistics type\n")));
@@ -464,18 +439,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   RelayStatisticsDataWriter_var relay_statistics_writer = RelayStatisticsDataWriter::_narrow(relay_statistics_writer_var);
   if (!relay_statistics_writer) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to narrow Relay Statistics data writer\n")));
-    return EXIT_FAILURE;
-  }
-
-  DDS::DataWriter_var domain_statistics_writer_var = relay_publisher->create_datawriter(domain_statistics_topic, writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-  if (!domain_statistics_writer_var) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Domain Statistics data writer\n")));
-    return EXIT_FAILURE;
-  }
-
-  DomainStatisticsDataWriter_var domain_statistics_writer = DomainStatisticsDataWriter::_narrow(domain_statistics_writer_var);
-  if (!domain_statistics_writer) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to narrow Domain Statistics data writer\n")));
     return EXIT_FAILURE;
   }
 
@@ -662,8 +625,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DDS::Subscriber_var bit_subscriber = application_participant->get_builtin_subscriber();
 
   DDS::DataReader_var participant_reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC);
-  DomainStatisticsReporter domain_statistics_reporter(config, domain_statistics_writer);
-  domain_statistics_reporter.report();
 
   DDS::DataReaderListener_var relay_partition_listener = new RelayPartitionsListener(relay_partition_table);
   DDS::DataReader_var relay_partition_reader_var =
@@ -708,7 +669,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   ParticipantListener* participant_listener =
-    new ParticipantListener(config, guid_addr_set, application_participant_impl, domain_statistics_reporter);
+    new ParticipantListener(config, guid_addr_set, application_participant_impl, relay_statistics_reporter);
   DDS::DataReaderListener_var participant_listener_var(participant_listener);
   DDS::ReturnCode_t ret = participant_reader->set_listener(participant_listener_var, DDS::DATA_AVAILABLE_STATUS);
   if (ret != DDS::RETCODE_OK) {
@@ -718,7 +679,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DDS::DataReader_var subscription_reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
   SubscriptionListener* subscription_listener =
-    new SubscriptionListener(config, application_participant_impl, guid_partition_table, domain_statistics_reporter);
+    new SubscriptionListener(config, application_participant_impl, guid_partition_table, relay_statistics_reporter);
   DDS::DataReaderListener_var subscription_listener_var(subscription_listener);
   ret = subscription_reader->set_listener(subscription_listener_var, DDS::DATA_AVAILABLE_STATUS);
   if (ret != DDS::RETCODE_OK) {
@@ -728,7 +689,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DDS::DataReader_var publication_reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC);
   PublicationListener* publication_listener =
-    new PublicationListener(config, application_participant_impl, guid_partition_table, domain_statistics_reporter);
+    new PublicationListener(config, application_participant_impl, guid_partition_table, relay_statistics_reporter);
   DDS::DataReaderListener_var publication_listener_var(publication_listener);
   ret = publication_reader->set_listener(publication_listener_var, DDS::DATA_AVAILABLE_STATUS);
   if (ret != DDS::RETCODE_OK) {

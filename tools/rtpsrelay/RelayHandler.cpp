@@ -256,7 +256,7 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
     const auto res = guid_addr_set_map_[src_guid].select_addr_set(remote_address.port)->insert(std::make_pair(remote_address, expiration));
     if (res.second) {
       if (config_.log_activity()) {
-        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity %C %C is at %C total=%B pending=%B/%B\n"), handler.name().c_str(), guid_to_string(src_guid).c_str(), addr_to_string(remote_address.addr).c_str(), guid_addr_set_map_.size(), pending_.size(), config_.max_pending()));
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity %C %C is at %C total=%B pending=%B/%B\n"), handler.name().c_str(), guid_to_string(src_guid).c_str(), OpenDDS::DCPS::LogAddr(remote_address.addr).c_str(), guid_addr_set_map_.size(), pending_.size(), config_.max_pending()));
       }
       relay_stats_reporter_.new_address(now);
       const auto after = guid_addr_set_map_.size();
@@ -308,7 +308,7 @@ void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& n
 
     // Address actually expired.
     if (config_.log_activity()) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C %C expired at %:.%d now=%:.%d total=%B pending=%B/%B\n"), guid_to_string(ga.guid).c_str(), addr_to_string(ga.address.addr).c_str(), expiration.value().sec(), expiration.value().usec(), now.value().sec(), now.value().usec(), guid_addr_set_map_.size(), pending_.size(), config_.max_pending()));
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C %C expired at %:.%d now=%:.%d total=%B pending=%B/%B\n"), guid_to_string(ga.guid).c_str(), OpenDDS::DCPS::LogAddr(ga.address.addr).c_str(), expiration.value().sec(), expiration.value().usec(), now.value().sec(), now.value().usec(), guid_addr_set_map_.size(), pending_.size(), config_.max_pending()));
     }
     relay_stats_reporter_.expired_address(now);
 
@@ -456,6 +456,11 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
       return 0;
     }
 
+    if (guid_addr_set_.ignore(src_guid, now)) {
+      stats_reporter_.ignored_message(msg_len, now, type);
+      return 0;
+    }
+
     GuidAddrSet::Proxy proxy(guid_addr_set_);
     record_activity(proxy, addr_port, now, src_guid, msg_len);
     bool send_to_application_participant = false;
@@ -500,7 +505,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
       has_guid = true;
 
       if (guid_addr_set_.ignore(src_guid, now)) {
-        stats_reporter_.ignored_message(msg_len, now);
+        stats_reporter_.ignored_message(msg_len, now, type);
         return 0;
       }
     }

@@ -11,7 +11,7 @@ namespace RtpsRelay {
 ParticipantListener::ParticipantListener(const Config& config,
                                          GuidAddrSet& guid_addr_set,
                                          OpenDDS::DCPS::DomainParticipantImpl* participant,
-                                         DomainStatisticsReporter& stats_reporter)
+                                         RelayStatisticsReporter& stats_reporter)
   : config_(config)
   , guid_addr_set_(guid_addr_set)
   , participant_(participant)
@@ -59,7 +59,7 @@ void ParticipantListener::on_data_available(DDS::DataReader_ptr reader)
             ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: ParticipantListener::on_data_available add local participant %C %C discovery time %:.%d\n"), guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str(), d.value().sec(), static_cast<int>(d.value().usec())));
           }
 
-          stats_reporter_.add_local_participant(now);
+          stats_reporter_.local_participants(guids_.size(), now);
         }
       }
       break;
@@ -74,8 +74,8 @@ void ParticipantListener::on_data_available(DDS::DataReader_ptr reader)
           ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: ParticipantListener::on_data_available remove local participant %C\n"), guid_to_string(repoid).c_str()));
         }
 
-        stats_reporter_.remove_local_participant(now);
         guids_.erase(repoid);
+        stats_reporter_.local_participants(guids_.size(), now);
       }
       break;
     }
