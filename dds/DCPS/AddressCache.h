@@ -46,6 +46,10 @@ struct AddressCacheEntryProxy {
     return (rhs.entry_ && (!entry_ || (entry_->addrs_ < rhs.entry_->addrs_)));
   }
 
+  bool contains(const ACE_INET_Addr& addr) const {
+    return (entry_ && entry_->addrs_.count(addr));
+  }
+
   RcHandle<AddressCacheEntry> entry_;
 };
 

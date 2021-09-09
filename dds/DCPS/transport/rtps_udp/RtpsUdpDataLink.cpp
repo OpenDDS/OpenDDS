@@ -2560,6 +2560,9 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
   };
 
+  const ACE_INET_Addr& relay_address = config().rtps_relay_address();
+  const bool check_for_relay_address = relay_address != ACE_INET_Addr();
+
   BundleHelper helper(encoding, max_bundle_size_, meta_submessage_bundle_sizes);
   RepoId prev_dst; // used to determine when we need to write a new info_dst
   for (AddrDestMetaSubmessageMap::iterator addr_it = adr_map.begin(); addr_it != adr_map.end(); ++addr_it) {
@@ -2572,6 +2575,13 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
 
     for (DestMetaSubmessageMap::iterator dest_it = addr_it->second.begin(); dest_it != addr_it->second.end(); ++dest_it) {
       for (MetaSubmessageIterVec::iterator resp_it = dest_it->second.begin(); resp_it != dest_it->second.end(); ++resp_it) {
+
+        // If we're sending to the relay, send separate messages per destination guid
+        if (check_for_relay_address && addr_it->first.contains(relay_address)) {
+          meta_submessage_bundles.push_back(MetaSubmessageIterVec());
+          meta_submessage_bundle_addrs.push_back(addr_it->first);
+        }
+
         // Check before every meta_submessage to see if we need to prefix a INFO_DST
         if (dest_it->first != prev_dst) {
           // If adding an INFO_DST prefix bumped us over the limit, push the
@@ -2582,6 +2592,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
             meta_submessage_bundle_addrs.push_back(addr_it->first);
           }
         }
+
         // Attempt to add the submessage meta_submessage to the bundle
         bool result = false, unique = false;
         ACE_UNUSED_ARG(unique);
