@@ -1702,8 +1702,8 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
                        OPENDDS_STRING(DCPS::GuidConverter(pit->first)).c_str()));
           }
         }
-        pit->second.handshake_resend_falloff_.advance();
       }
+      pit->second.handshake_resend_falloff_.advance();
 
       handshake_resends_.insert(std::make_pair(pit->second.stateless_msg_deadline_, pit->first));
       if (pit->second.stateless_msg_deadline_ < handshake_resends_.begin()->first) {
