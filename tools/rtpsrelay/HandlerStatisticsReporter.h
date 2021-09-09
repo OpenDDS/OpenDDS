@@ -43,15 +43,6 @@ public:
   }
 
   void ignored_message(size_t byte_count,
-                       const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    relay_statistics_reporter_.ignored_message(byte_count, now);
-    log_helper_.ignored_message(byte_count);
-    publish_helper_.ignored_message(byte_count);
-    report(now);
-  }
-
-  void ignored_message(size_t byte_count,
                        const OpenDDS::DCPS::MonotonicTimePoint& now,
                        MessageType type)
   {
