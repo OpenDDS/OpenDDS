@@ -30,7 +30,6 @@
 #include <dds/DCPS/RcEventHandler.h>
 #include <dds/DCPS/JobQueue.h>
 #include <dds/DCPS/SequenceNumber.h>
-#include <dds/DCPS/AddressCache.h>
 #include <dds/DCPS/Hash.h>
 #include <dds/DCPS/FibonacciSequence.h>
 
