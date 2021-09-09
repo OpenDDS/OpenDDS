@@ -74,11 +74,16 @@ OpenDDS::DCPS::DataLinkSet::send_control(DataSampleElement* sample)
 {
   DBG_ENTRY_LVL("DataLinkSet", "send_control", 6);
   VDBG((LM_DEBUG, "(%P|%t) DBG: DataLinkSet::send_control %@.\n", sample));
-  GuardType guard(this->lock_);
-  TransportSendControlElement* send_element =
-    new TransportSendControlElement(static_cast<int>(map_.size()), sample);
+  MapType map_copy;
+  {
+    GuardType guard(lock_);
+    map_copy = map_;
+  }
 
-  for (MapType::iterator itr = map_.begin(); itr != map_.end(); ++itr) {
+  TransportSendControlElement* send_element =
+    new TransportSendControlElement(static_cast<int>(map_copy.size()), sample);
+
+  for (MapType::iterator itr = map_copy.begin(); itr != map_copy.end(); ++itr) {
     itr->second->send(send_element);
   }
 }
@@ -153,10 +158,13 @@ ACE_INLINE bool
 OpenDDS::DCPS::DataLinkSet::remove_sample(const DataSampleElement* sample)
 {
   DBG_ENTRY_LVL("DataLinkSet", "remove_sample", 6);
-  GuardType guard(this->lock_);
-  const MapType::iterator end = this->map_.end();
-  for (MapType::iterator itr = this->map_.begin(); itr != end; ++itr) {
-
+  MapType map_copy;
+  {
+    GuardType guard(lock_);
+    map_copy = map_;
+  }
+  const MapType::iterator end = map_copy.end();
+  for (MapType::iterator itr = map_copy.begin(); itr != end; ++itr) {
     if (itr->second->remove_sample(sample) == REMOVE_RELEASED) {
       return true;
     }
@@ -169,9 +177,13 @@ ACE_INLINE bool
 OpenDDS::DCPS::DataLinkSet::remove_all_msgs(const RepoId& pub_id)
 {
   DBG_ENTRY_LVL("DataLinkSet", "remove_all_msgs", 6);
-  GuardType guard(this->lock_);
-  const MapType::iterator end = this->map_.end();
-  for (MapType::iterator itr = this->map_.begin(); itr != end; ++itr) {
+  MapType map_copy;
+  {
+    GuardType guard(lock_);
+    map_copy = map_;
+  }
+  const MapType::iterator end = map_copy.end();
+  for (MapType::iterator itr = map_copy.begin(); itr != end; ++itr) {
     itr->second->remove_all_msgs(pub_id);
   }
 
