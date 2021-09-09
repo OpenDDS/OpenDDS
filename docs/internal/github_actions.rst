@@ -165,9 +165,8 @@ These blocks are necessary because certain tests cannot properly run on GitHub A
 Blocked Tests
 =============
 
-Certain tests are blocked from GitHub actions because their failures are either unfixable, or are not represented on the
-scoreboard. If this is the case, we have to assume that the failure is due to some sort of limitation caused by the
-GitHub Actions runners.
+Certain tests are blocked from GitHub actions because their failures are either unfixable, or are not represented on the scoreboard.
+If this is the case, we have to assume that the failure is due to some sort of limitation caused by the GitHub Actions runners.
 
 Only Failing on CI
 ------------------
@@ -182,24 +181,25 @@ Only Failing on CI
 
 * tests/DCPS/Thrasher/run_test.pl high/aggressive/medium XXXX XXXX
 
-  * The more intense thrasher tests cause consistent failures due to the increased load from ASAN. GitHub Actions fails
-    these tests very consistently compared to the scoreboard which is more intermittent. Fails on ``test_u20_p1_asan_sec``.
+  * The more intense thrasher tests cause consistent failures due to the increased load from ASAN.
+    GitHub Actions fails these tests very consistently compared to the scoreboard which is more intermittent.
+    Fails on ``test_u20_p1_asan_sec``.
 
 * tests/stress-tests/dds/DCPS/run_test.pl
 
-  * This test fails due to only getting ``17 of the expected >=19 total_count``.  Fails on ``test_m10_i0_j_FM-1f`` and
-    ``test_m10_o1d0_sec``.
+  * This test fails due to only getting ``17 of the expected >=19 total_count``.
+    Fails on ``test_m10_i0_j_FM-1f`` and ``test_m10_o1d0_sec``.
 
 * tests/DCPS/StaticDiscoveryReconnect/run_test.pl
 
-  * This test fails due to ``<StaticDiscoveryTest> failed: No such file or directory``. Fails on ``test_m10_i0_j_FM-1f``
-    and ``test_m10_o1d0_sec``.
+  * This test fails due to ``<StaticDiscoveryTest> failed: No such file or directory``.
+    Fails on ``test_m10_i0_j_FM-1f`` and ``test_m10_o1d0_sec``.
 
 Failing Both CI and scoreboard
 ------------------------------
 
-These tests fail on the CI as well as the scoreboard, but will remain blocked on the CI until fixed. Each test has a list
-of the builds it was failing on before being blocked.
+These tests fail on the CI as well as the scoreboard, but will remain blocked on the CI until fixed.
+Each test has a list of the builds it was failing on before being blocked.
 
 * tests/DCPS/BuiltInTopicTest/run_test.pl
 
