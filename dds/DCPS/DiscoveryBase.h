@@ -1198,7 +1198,7 @@ namespace OpenDDS {
       RcHandle<EndpointManagerSporadic> type_lookup_reply_deadline_processor_;
       TimeDuration max_type_lookup_service_reply_period_;
       DCPS::SequenceNumber type_lookup_service_sequence_number_;
-      bool use_xtypes_;
+      ACE_Atomic_Op<ACE_Thread_Mutex, bool> use_xtypes_;
 
       void
       match(const RepoId& writer, const RepoId& reader)
