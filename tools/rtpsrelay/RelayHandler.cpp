@@ -22,6 +22,7 @@
 #ifdef OPENDDS_SECURITY
 #include <dds/DCPS/security/framework/SecurityRegistry.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h>
+#include <dds/DCPS/security/AuthenticationBuiltInImpl.h>
 #endif
 
 namespace RtpsRelay {
@@ -907,6 +908,87 @@ SpdpHandler::SpdpHandler(const Config& config,
 : VerticalHandler(config, name, SPDP, address, reactor, guid_partition_table, relay_partition_table, guid_addr_set, rtps_discovery, crypto, application_participant_addr, stats_reporter)
 {}
 
+#ifdef OPENDDS_SECURITY
+namespace {
+  std::string extract_common_name(const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
+  {
+    const CORBA::UShort encap_LE = 0x0300; // {PL_CDR_LE} in LE
+    const CORBA::UShort encap_BE = 0x0200; // {PL_CDR_BE} in LE
+
+    OpenDDS::RTPS::MessageParser message_parser(*msg);
+    message_parser.parseHeader();
+
+    while (message_parser.parseSubmessageHeader()) {
+      const auto submessage_header = message_parser.submessageHeader();
+      if (submessage_header.submessageId == OpenDDS::RTPS::DATA) {
+        unsigned short extraFlags;
+        unsigned short octetsToInlineQos;
+        OpenDDS::DCPS::EntityId_t readerId;
+        OpenDDS::DCPS::EntityId_t writerId;
+        OpenDDS::RTPS::SequenceNumber_t writerSequenceNumber;
+
+        if (!(message_parser >> extraFlags) ||
+            !(message_parser >> octetsToInlineQos) ||
+            !(message_parser >> readerId) ||
+            !(message_parser >> writerId) ||
+            !(message_parser >> writerSequenceNumber)) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: extract_common_name() could not parse submessage\n")));
+          return "";
+        }
+
+        if (writerId != OpenDDS::DCPS::ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER) {
+          // Not our message: this could be the same multicast group used
+          // for SEDP and other traffic.
+          break;
+        }
+
+        if (submessage_header.flags & (OpenDDS::RTPS::FLAG_D)) {
+          OpenDDS::RTPS::ParameterList plist;
+
+          message_parser.serializer().swap_bytes(!ACE_CDR_BYTE_ORDER); // read "encap" itself in LE
+          CORBA::UShort encap, options;
+          if (!(message_parser >> encap) || (encap != encap_LE && encap != encap_BE)) {
+            ACE_ERROR((LM_ERROR,
+                       ACE_TEXT("(%P|%t) ERROR: extract_common_name() - ")
+                       ACE_TEXT("failed to deserialize encapsulation header for SPDP\n")));
+            return "";
+          }
+          message_parser >> options;
+          // bit 8 in encap is on if it's PL_CDR_LE
+          message_parser.serializer().swap_bytes(((encap & 0x100) >> 8) != ACE_CDR_BYTE_ORDER);
+          if (!(message_parser >> plist)) {
+            ACE_ERROR((LM_ERROR,
+                       ACE_TEXT("(%P|%t) ERROR: extract_common_name() - ")
+                       ACE_TEXT("failed to deserialize data payload for SPDP\n")));
+            return "";
+          }
+
+          for (CORBA::ULong i = 0; i != plist.length(); ++i) {
+            const OpenDDS::RTPS::Parameter& param = plist[i];
+            if (param._d() == DDS::Security::PID_IDENTITY_TOKEN) {
+              const DDS::Security::IdentityToken& idt = param.identity_token();
+              if (OpenDDS::Security::Identity_Status_Token_Class_Id == idt.class_id.in()) {
+                for (CORBA::ULong j = 0; j != idt.properties.length(); ++j) {
+                  const DDS::Property_t& prop = idt.properties[j];
+                  if (OpenDDS::Security::dds_cert_sn == prop.name.in()) {
+                    return std::string(prop.value.in());
+                  }
+                }
+              }
+            }
+          }
+
+        }
+      }
+
+      message_parser.skipSubmessageContent();
+    }
+
+    return "";
+  }
+}
+#endif
+
 bool SpdpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
                                        const ACE_INET_Addr& remote,
                                        const OpenDDS::DCPS::GUID_t& src_guid,
@@ -956,6 +1038,12 @@ bool SpdpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
     if (pos != proxy.end()) {
       if (!pos->second.spdp_message) {
         pos->second.first_spdp = now;
+#ifdef OPENDDS_SECURITY
+        pos->second.common_name = extract_common_name(msg);
+        if (config_.log_activity() && !pos->second.common_name.empty()) {
+          ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SpdpHandler::do_normal_processing %C dds.cert.sn %C\n"), guid_to_string(src_guid).c_str(), pos->second.common_name.c_str()));
+        }
+#endif
       }
       pos->second.spdp_message = msg;
     }

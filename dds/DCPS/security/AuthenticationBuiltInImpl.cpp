@@ -46,8 +46,6 @@ const std::string Auth_Plugin_Name("DDS:Auth:PKI-DH");
 const std::string Auth_Plugin_Major_Version("1");
 const std::string Auth_Plugin_Minor_Version("0");
 
-const std::string Identity_Status_Token_Class_Id("DDS:Auth:PKI-DH:1.0");
-const std::string Auth_Peer_Cred_Token_Class_Id("DDS:Auth:PKI-DH:1.0");
 const std::string Auth_Request_Class_Ext("AuthReq");
 const std::string Handshake_Request_Class_Ext("Req");
 const std::string Handshake_Reply_Class_Ext("Reply");
@@ -171,15 +169,15 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
 
     std::string tmp;
 
-    OpenDDS::Security::TokenWriter identity_wrapper(identity_token, "DDS:Auth:PKI-DH:1.0");
+    OpenDDS::Security::TokenWriter identity_wrapper(identity_token, Identity_Status_Token_Class_Id);
 
     pcert.subject_name_to_str(tmp);
-    identity_wrapper.add_property("dds.cert.sn", tmp.c_str());
-    identity_wrapper.add_property("dds.cert.algo", pcert.keypair_algo());
+    identity_wrapper.add_property(dds_cert_sn.c_str(), tmp.c_str());
+    identity_wrapper.add_property(dds_cert_algo.c_str(), pcert.keypair_algo());
 
     cacert.subject_name_to_str(tmp);
-    identity_wrapper.add_property("dds.ca.sn", tmp.c_str());
-    identity_wrapper.add_property("dds.ca.algo", cacert.keypair_algo());
+    identity_wrapper.add_property(dds_ca_sn.c_str(), tmp.c_str());
+    identity_wrapper.add_property(dds_ca_algo.c_str(), cacert.keypair_algo());
 
     status = true;
 

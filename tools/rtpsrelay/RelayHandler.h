@@ -40,6 +40,9 @@ struct AddrSetStats {
   ParticipantStatisticsReporter data_stats_reporter;
   OpenDDS::DCPS::Message_Block_Shared_Ptr spdp_message;
   OpenDDS::DCPS::MonotonicTimePoint first_spdp;
+#ifdef OPENDDS_SECURITY
+  std::string common_name;
+#endif
 
   bool empty() const
   {
