@@ -121,8 +121,8 @@ TEST(dds_DCPS_transport_framework_NetworkAddress, choose_single_coherent_address
 {
   //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
 
-  ACE_INET_Addr addr1 = choose_single_coherent_address("www.bing.com:80", false);
-  ACE_INET_Addr addr2 = choose_single_coherent_address("www.bing.com:80", false);
+  ACE_INET_Addr addr1 = choose_single_coherent_address("www.bizinta.com:80", false);
+  ACE_INET_Addr addr2 = choose_single_coherent_address("www.bizinta.com:80", false);
 
   // Since tihs test winds up doing real DNS lookups which might fail, allow the result to be be empty but expect it to be consistant
 
