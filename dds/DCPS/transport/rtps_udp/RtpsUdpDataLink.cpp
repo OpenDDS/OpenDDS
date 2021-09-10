@@ -2579,6 +2579,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
         helper.end_bundle();
         meta_submessage_bundles.push_back(MetaSubmessageIterVec());
         meta_submessage_bundle_addrs.push_back(addr_it->first);
+        prev_dst = GUID_UNKNOWN;
       }
 
       for (MetaSubmessageIterVec::iterator resp_it = dest_it->second.begin(); resp_it != dest_it->second.end(); ++resp_it) {
