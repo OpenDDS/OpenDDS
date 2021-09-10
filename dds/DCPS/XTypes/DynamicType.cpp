@@ -1,34 +1,40 @@
 #include "DCPS/DdsDcps_pch.h"
 #include "DynamicType.h"
-#include "MemberDescriptor.h"
-#include "TypeDescriptor.h"
+#include "DynamicTypeMember.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
 DynamicType::DynamicType()
-  : descriptor_(DCPS::make_rch<XTypes::TypeDescriptor>())
 {}
 
-void DynamicType::get_descriptor(TypeDescriptor_rch& descriptor) const
+DynamicType::~DynamicType()
+{}
+
+void DynamicType::set_descriptor(const TypeDescriptor& descriptor)
+{
+  descriptor_ = descriptor;
+}
+
+void DynamicType::get_descriptor(TypeDescriptor& descriptor) const
 {
   descriptor = descriptor_;
 }
 
-TypeDescriptor_rch DynamicType::get_descriptor()
+TypeDescriptor DynamicType::get_descriptor()
 {
   return descriptor_;
 }
 
 DCPS::String DynamicType::get_name() const
 {
-  return descriptor_->name;
+  return descriptor_.name;
 }
 
 TypeKind DynamicType::get_kind() const
 {
-  return descriptor_->kind;
+  return descriptor_.kind;
 }
 
 DDS::ReturnCode_t DynamicType::get_member_by_name(DynamicTypeMember_rch& member, const DCPS::String& name) const
@@ -94,10 +100,10 @@ bool DynamicType::equals(const DynamicType& other) const
 void DynamicType::insert_dynamic_member(const DynamicTypeMember_rch& dtm)
 {
   member_by_index.push_back(dtm);
-  if (dtm->get_descriptor()->id != MEMBER_ID_INVALID) {
-    member_by_id.insert(std::make_pair(dtm->get_descriptor()->id , dtm));
+  if (dtm->get_descriptor().id != MEMBER_ID_INVALID) {
+    member_by_id.insert(std::make_pair(dtm->get_descriptor().id , dtm));
   }
-  member_by_name.insert(std::make_pair(dtm->get_descriptor()->name , dtm));
+  member_by_name.insert(std::make_pair(dtm->get_descriptor().name , dtm));
 }
 
 bool DynamicType::test_equality_i(const DynamicType& rhs, DynamicTypePtrPairSeen& dt_ptr_pair) const
@@ -108,7 +114,7 @@ bool DynamicType::test_equality_i(const DynamicType& rhs, DynamicTypePtrPairSeen
   if (have_seen == dt_ptr_pair.end()) {
     dt_ptr_pair.insert(this_pair);
     return
-      OpenDDS::XTypes::test_equality_i(*descriptor_, *rhs.descriptor_, dt_ptr_pair) &&
+      OpenDDS::XTypes::test_equality_i(descriptor_, rhs.descriptor_, dt_ptr_pair) &&
       OpenDDS::XTypes::test_equality_i(member_by_name, rhs.member_by_name, dt_ptr_pair) &&
       OpenDDS::XTypes::test_equality_i(member_by_id, rhs.member_by_id, dt_ptr_pair);
   }

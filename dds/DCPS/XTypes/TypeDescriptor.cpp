@@ -1,9 +1,17 @@
 #include "DCPS/DdsDcps_pch.h"
 #include "TypeDescriptor.h"
+#include "DynamicType.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
+
+TypeDescriptor::TypeDescriptor()
+  : kind(TK_NONE), extensibility_kind(FINAL), is_nested(false)
+{}
+
+TypeDescriptor::~TypeDescriptor()
+{}
 
 bool TypeDescriptor::equals(const TypeDescriptor& other) const
 {

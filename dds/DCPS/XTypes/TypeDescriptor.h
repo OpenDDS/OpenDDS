@@ -1,12 +1,25 @@
-
 #ifndef OPENDDS_DCPS_XTYPES_TYPE_DESCRIPTOR_H
 #define OPENDDS_DCPS_XTYPES_TYPE_DESCRIPTOR_H
 
-#include "DynamicType.h"
+#include "TypeObject.h"
+#include <dds/DdsDcpsInfrastructureC.h>
+
+#include <dds/DCPS/RcObject.h>
+#include <dds/DCPS/RcHandle_T.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
+
+class DynamicType;
+class DynamicTypeMember;
+typedef DCPS::RcHandle<DynamicTypeMember> DynamicTypeMember_rch;
+typedef OPENDDS_MAP(DCPS::String, DynamicTypeMember_rch) DynamicTypeMembersByName;
+typedef OPENDDS_MAP(MemberId, DynamicTypeMember_rch) DynamicTypeMembersById;
+typedef OPENDDS_VECTOR(DynamicTypeMember_rch) DynamicTypeMembersByIndex;
+typedef std::pair<const DynamicType*, const DynamicType*> DynamicTypePtrPair;
+typedef OPENDDS_SET(DynamicTypePtrPair) DynamicTypePtrPairSeen;
+typedef DCPS::RcHandle<DynamicType> DynamicType_rch;
 
 enum ExtensibilityKind {
  FINAL,
@@ -14,11 +27,11 @@ enum ExtensibilityKind {
  MUTABLE
 };
 
-class TypeDescriptor : public DCPS::RcObject {
+class OpenDDS_Dcps_Export TypeDescriptor {
 public:
-  TypeDescriptor()
-    : kind(TK_NONE), extensibility_kind(FINAL), is_nested(false)
-  {}
+  TypeDescriptor();
+
+  ~TypeDescriptor();
 
   bool equals(const TypeDescriptor& other) const;
 

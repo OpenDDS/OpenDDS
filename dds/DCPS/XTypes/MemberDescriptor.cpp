@@ -1,9 +1,17 @@
 #include "DCPS/DdsDcps_pch.h"
 #include "MemberDescriptor.h"
+#include "DynamicType.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
+
+MemberDescriptor::MemberDescriptor()
+  : id(MEMBER_ID_INVALID), index(0), try_construct_kind(DISCARD), is_key(false), is_optional(false), is_must_understand(false), is_shared(false), is_default_label(false)
+{}
+
+MemberDescriptor::~MemberDescriptor()
+{}
 
 bool MemberDescriptor::equals(const MemberDescriptor& other) const
 {

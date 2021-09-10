@@ -1,7 +1,6 @@
 #include "DCPS/DdsDcps_pch.h"
+#include "DynamicType.h"
 #include "DynamicTypeMember.h"
-
-#include "MemberDescriptor.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
@@ -9,17 +8,29 @@ namespace XTypes {
 
 DynamicTypeMember::DynamicTypeMember()
   : parent_(DCPS::make_rch<XTypes::DynamicType>())
-  , descriptor_(DCPS::make_rch<XTypes::MemberDescriptor>())
 {}
 
-void DynamicTypeMember::get_descriptor(MemberDescriptor_rch& descriptor) const
+DynamicTypeMember::~DynamicTypeMember()
+{}
+
+void DynamicTypeMember::set_descriptor(const MemberDescriptor& descriptor)
+{
+  descriptor_ = descriptor;
+}
+
+void DynamicTypeMember::get_descriptor(MemberDescriptor& descriptor) const
 {
   descriptor = descriptor_;
 }
 
-MemberDescriptor_rch& DynamicTypeMember::get_descriptor()
+MemberDescriptor DynamicTypeMember::get_descriptor()
 {
   return descriptor_;
+}
+
+void DynamicTypeMember::set_parent(const DynamicType_rch& dt)
+{
+  parent_ = dt;
 }
 
 DynamicType_rch DynamicTypeMember::get_parent()
@@ -40,17 +51,17 @@ bool DynamicTypeMember::equals(const DynamicTypeMember& other) const
   DynamicTypePtrPairSeen dt_ptr_pair;
   return
     test_equality_i(parent_, other.parent_, dt_ptr_pair) &&
-    OpenDDS::XTypes::test_equality_i(*descriptor_, *other.descriptor_, dt_ptr_pair);
+    OpenDDS::XTypes::test_equality_i(descriptor_, other.descriptor_, dt_ptr_pair);
 }
 
 MemberId DynamicTypeMember::get_id() const
 {
-  return descriptor_->id;
+  return descriptor_.id;
 }
 
 DCPS::String DynamicTypeMember::get_name() const
 {
-  return descriptor_->name;
+  return descriptor_.name;
 }
 
 bool test_equality_i(const DynamicTypeMembersByName& lhs, const DynamicTypeMembersByName& rhs, DynamicTypePtrPairSeen& dt_ptr_pair)
@@ -59,7 +70,7 @@ bool test_equality_i(const DynamicTypeMembersByName& lhs, const DynamicTypeMembe
     for (DynamicTypeMembersByName::const_iterator lhs_it = lhs.begin(); lhs_it != lhs.end(); ++lhs_it) {
       DynamicTypeMembersByName::const_iterator rhs_it = rhs.find(lhs_it->first);
       if (rhs_it != rhs.end()) {
-        if (!test_equality_i(*lhs_it->second->get_descriptor(), *rhs_it->second->get_descriptor(), dt_ptr_pair)) {
+        if (!test_equality_i(lhs_it->second->get_descriptor(), rhs_it->second->get_descriptor(), dt_ptr_pair)) {
           return false;
         }
       } else {
@@ -78,7 +89,7 @@ bool test_equality_i(const DynamicTypeMembersById& lhs, const DynamicTypeMembers
     for (DynamicTypeMembersById::const_iterator lhs_it = lhs.begin(); lhs_it != lhs.end(); ++lhs_it) {
       DynamicTypeMembersById::const_iterator rhs_it = rhs.find(lhs_it->first);
       if (rhs_it != rhs.end()) {
-        if (!test_equality_i(*lhs_it->second->get_descriptor(), *rhs_it->second->get_descriptor(), dt_ptr_pair)) {
+        if (!test_equality_i(lhs_it->second->get_descriptor(), rhs_it->second->get_descriptor(), dt_ptr_pair)) {
           return false;
         }
       } else {

@@ -1,7 +1,8 @@
 #ifndef OPENDDS_DCPS_XTYPES_DYNAMIC_TYPE_H
 #define OPENDDS_DCPS_XTYPES_DYNAMIC_TYPE_H
 
-#include "DynamicTypeMember.h"
+#include "TypeDescriptor.h"
+#include "MemberDescriptor.h"
 
 #include <dds/DCPS/RcHandle_T.h>
 #include <dds/DCPS/RcObject.h>
@@ -10,16 +11,15 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
-class TypeDescriptor;
-typedef DCPS::RcHandle<TypeDescriptor> TypeDescriptor_rch;
-
 class OpenDDS_Dcps_Export DynamicType : public DCPS::RcObject
 {
 public:
   DynamicType();
+  ~DynamicType();
 
-  void get_descriptor(TypeDescriptor_rch& descriptor) const;
-  TypeDescriptor_rch get_descriptor();
+  void set_descriptor(const TypeDescriptor& descriptor);
+  void get_descriptor(TypeDescriptor& descriptor) const;
+  TypeDescriptor get_descriptor();
   DCPS::String get_name() const;
   TypeKind get_kind() const;
   DDS::ReturnCode_t get_member_by_name(DynamicTypeMember_rch& member, const DCPS::String& name) const;
@@ -35,7 +35,7 @@ private:
   DynamicTypeMembersByName member_by_name;
   DynamicTypeMembersById member_by_id;
   DynamicTypeMembersByIndex member_by_index;
-  TypeDescriptor_rch descriptor_;
+  TypeDescriptor descriptor_;
 };
 
 

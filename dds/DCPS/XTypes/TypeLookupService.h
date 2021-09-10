@@ -7,10 +7,10 @@
 #define OPENDDS_DCPS_XTYPES_TYPE_LOOKUP_SERVICE_H
 
 #include "TypeObject.h"
-#include "DynamicType.h"
 #include "DynamicTypeMember.h"
 #include "MemberDescriptor.h"
 #include "TypeDescriptor.h"
+#include "DynamicType.h"
 
 #include <dds/DCPS/RcObject.h>
 #include <dds/DCPS/GuidUtils.h>
@@ -99,9 +99,9 @@ private:
   bool complete_to_minimal_bitset(const CompleteBitsetType& ct, MinimalBitsetType& mt) const;
 
   typedef OPENDDS_MAP(TypeIdentifier, DynamicType_rch) DynamicTypeMap;
-  MemberDescriptor_rch complete_struct_member_to_member_descriptor(const CompleteStructMember& cm, DynamicTypeMap& dt_map) const;
-  MemberDescriptor_rch complete_union_member_to_member_descriptor(const CompleteUnionMember& cm, DynamicTypeMap& dt_map) const;
-  MemberDescriptor_rch complete_annotation_member_to_member_descriptor(const CompleteAnnotationParameter& cm, DynamicTypeMap& dt_map) const;
+  MemberDescriptor complete_struct_member_to_member_descriptor(const CompleteStructMember& cm, DynamicTypeMap& dt_map) const;
+  MemberDescriptor complete_union_member_to_member_descriptor(const CompleteUnionMember& cm, DynamicTypeMap& dt_map) const;
+  MemberDescriptor complete_annotation_member_to_member_descriptor(const CompleteAnnotationParameter& cm, DynamicTypeMap& dt_map) const;
   void complete_to_dynamic_i(DynamicType_rch& dt, const CompleteTypeObject& cto, DynamicTypeMap& dt_map) const;
   DynamicType_rch type_identifier_to_dynamic(const TypeIdentifier& ti, DynamicTypeMap& dt_map) const;
 
