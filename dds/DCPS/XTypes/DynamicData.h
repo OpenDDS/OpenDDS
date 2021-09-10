@@ -161,17 +161,20 @@ public:
   DDS::ReturnCode_t get_wstring_values(WStringSeq& value, MemberId id) const;
   DDS::ReturnCode_t set_wstring_values(MemberId id, const WStringSeq& value);
 
-  // Get the number of bytes to skip over this member, including any paddings beginning.
-  //  size_t num_bytesto_skip(MemberId id) const;
+private:
 
   // Skip a member at the given index of a final or appendable type.
+  // Assuming that when the method is called, the read position of the stream
+  // is at the beginning of the member.
   bool skip_member(ACE_CDR::ULong index);
 
   // Skip all members of this type. Called by a containing type when it wants to skip
   // a member of this type.
   bool skip_all();
 
-private:
+  bool skip_sequence_member(DynamicType_rch member_type);
+  DynamicType_rch get_base_type(DynamicType_rch alias_type) const;
+
   Serializer& strm_;
   DynamicType_rch type_;
   OPENDDS_MAP<MemberId, size_t> offset_lookup_table_;
