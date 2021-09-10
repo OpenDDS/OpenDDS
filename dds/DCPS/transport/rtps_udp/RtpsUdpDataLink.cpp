@@ -659,8 +659,8 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
       }
       RtpsWriter_rch writer = rw->second;
       g.release();
-      writer->update_max_sn(remote_id, max_sn);
-      writer->add_reader(make_rch<ReaderInfo>(remote_id, remote_durable, participant_discovered_at, participant_flags));
+      const SequenceNumber writer_max_sn = writer->update_max_sn(remote_id, max_sn);
+      writer->add_reader(make_rch<ReaderInfo>(remote_id, remote_durable, participant_discovered_at, participant_flags, writer_max_sn + 1));
     }
     invoke_on_start_callbacks(local_id, remote_id, true);
   } else if (conv.isReader()) {
@@ -3960,7 +3960,7 @@ RtpsUdpDataLink::RtpsWriter::gather_directed_heartbeat_i(const SingleSendBuffer:
                                                          MetaSubmessage& meta_submessage,
                                                          const ReaderInfo_rch& reader)
 {
-  const SequenceNumber first_sn = reader->durable_ ? 1 : non_durable_first_sn(proxy);
+  const SequenceNumber first_sn = reader->durable_ ? 1 : std::max(non_durable_first_sn(proxy), reader->start_sn_);
   SequenceNumber last_sn = expected_max_sn(reader);
 #ifdef OPENDDS_SECURITY
   if (is_pvs_writer_ && last_sn < first_sn.previous()) {
@@ -4236,7 +4236,7 @@ RtpsUdpDataLink::RtpsWriter::max_data_seq(const SingleSendBuffer::Proxy& proxy,
   return std::max(durable_max, std::max(pre_max, data_max));
 }
 
-void
+SequenceNumber
 RtpsUdpDataLink::RtpsWriter::update_max_sn(const RepoId& reader, SequenceNumber seq)
 {
   ACE_Guard<ACE_Thread_Mutex> g(mutex_);
@@ -4244,6 +4244,7 @@ RtpsUdpDataLink::RtpsWriter::update_max_sn(const RepoId& reader, SequenceNumber 
   max_sn_ = std::max(max_sn_, seq);
   make_leader_lagger(reader, previous_max_sn);
   check_leader_lagger();
+  return max_sn_;
 }
 
 void
