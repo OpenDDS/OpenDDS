@@ -1,6 +1,8 @@
-#include "DCPS/DdsDcps_pch.h"
 #include "DynamicType.h"
+
 #include "DynamicTypeMember.h"
+
+#include "DCPS/DdsDcps_pch.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
@@ -35,7 +37,7 @@ void DynamicTypeMember::set_parent(const DynamicType_rch& dt)
 
 DynamicType_rch DynamicTypeMember::get_parent()
 {
-  return parent_;
+  return parent_.lock();
 }
 
 bool DynamicTypeMember::equals(const DynamicTypeMember& other) const
@@ -50,7 +52,7 @@ bool DynamicTypeMember::equals(const DynamicTypeMember& other) const
   //equal, regardless of whether they are actually the same member.
   DynamicTypePtrPairSeen dt_ptr_pair;
   return
-    test_equality_i(parent_, other.parent_, dt_ptr_pair) &&
+    test_equality_i(parent_.lock(), other.parent_.lock(), dt_ptr_pair) &&
     OpenDDS::XTypes::test_equality_i(descriptor_, other.descriptor_, dt_ptr_pair);
 }
 

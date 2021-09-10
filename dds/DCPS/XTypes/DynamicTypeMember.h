@@ -4,6 +4,8 @@
 
 #include "DynamicType.h"
 
+#include <dds/DCPS/RcObject.h>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
@@ -22,7 +24,7 @@ public:
   DCPS::String get_name() const;
 
 private:
-  DynamicType_rch parent_;
+  DCPS::WeakRcHandle<DynamicType> parent_;
   MemberDescriptor descriptor_;
 };
 

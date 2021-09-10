@@ -2,6 +2,7 @@
 #define OPENDDS_DCPS_XTYPES_TYPE_DESCRIPTOR_H
 
 #include "TypeObject.h"
+
 #include <dds/DdsDcpsInfrastructureC.h>
 
 #include <dds/DCPS/RcObject.h>
