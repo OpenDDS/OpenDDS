@@ -588,6 +588,10 @@ int main(int argc, char* argv[])
   outer_typesupport->add_types(tls);
   union_typesupport->add_types(tls);
   anon_typesupport->add_types(tls);
+  delete inner_typesupport;
+  delete outer_typesupport;
+  delete union_typesupport;
+  delete anon_typesupport;
 
   return RUN_ALL_TESTS();
 }
