@@ -356,7 +356,7 @@ public:
   // ciju: Seems this is no longer being used.
   // Was wrong. Still required.
   ACE_INLINE
-  ACE_Recursive_Thread_Mutex& get_lock() {
+  ACE_Recursive_Thread_Mutex& get_lock() const {
     return data_container_->lock_;
   }
 
@@ -452,19 +452,23 @@ public:
     return db_lock_pool_->get_lock();
   }
 
- /**
-  *  Attempt to locate an existing instance for the given handle.
-  */
- PublicationInstance_rch get_handle_instance(
-   DDS::InstanceHandle_t handle);
+  /**
+   *  Attempt to locate an existing instance for the given handle.
+   */
+  PublicationInstance_rch get_handle_instance(
+    DDS::InstanceHandle_t handle);
 
- virtual ICE::Endpoint* get_ice_endpoint();
+  virtual ICE::Endpoint* get_ice_endpoint();
 
- const RepoId& get_repo_id() const {
-    return this->publication_id_;
+  const RepoId& get_repo_id() const {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(get_lock());
+    return publication_id_;
   }
 
- SequenceNumber get_max_sn() const { return sequence_number_; }
+  SequenceNumber get_max_sn() const {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(get_lock());
+    return sequence_number_;
+  }
 
 protected:
 
@@ -614,10 +618,10 @@ private:
   /// coherent change set.
   ACE_UINT32                      coherent_samples_;
   /// The sample data container.
-  RcHandle<WriteDataContainer>  data_container_;
+  RcHandle<WriteDataContainer>    data_container_;
   /// The lock to protect the activate subscriptions
   /// and status changes.
-  ACE_Recursive_Thread_Mutex      lock_;
+  mutable ACE_Recursive_Thread_Mutex lock_;
 
   typedef OPENDDS_MAP_CMP(RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan) RepoIdToHandleMap;
 
