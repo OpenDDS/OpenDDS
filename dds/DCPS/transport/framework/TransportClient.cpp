@@ -548,13 +548,18 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
 
     if (pend->active_ && pend->initiate_connect(this, guard)) {
       VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::use_datalink_i "
-                          "TransportClient(%@) using datalink[%@] link is nil, since this is active side, initiate_connect\n",
+                          "TransportClient(%@) using datalink[%@] link is nil, since this is active side, initiate_connect to remote %C\n",
                           this,
                           link.in(),
                           OPENDDS_STRING(peerId_conv).c_str()), 0);
       return;
     }
 
+    VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::use_datalink_i "
+              "TransportClient(%@) using datalink[%@] link is nil, since this is passive side, connection to remote %C timed out\n",
+              this,
+              link.in(),
+              OPENDDS_STRING(peerId_conv).c_str()), 0);
   } else { // link is ready to use
     VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::use_datalink_i "
               "TransportClient(%@) about to add_link[%@] to remote: %C\n",
