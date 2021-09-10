@@ -18,7 +18,10 @@ namespace DCPS {
   class OpenDDS_XML_QOS_Handler_Export QOS_XML_Loader
   {
   public:
-    QOS_XML_Loader ();
+    /// Pass an optional @error_handler which is called back when
+    /// there are any errors parsing the input XML. The QOS_XML_Loader
+    /// will assume ownership when a pointer is passed
+    QOS_XML_Loader (XML::XML_Error_Handler* error_handler = 0);
     ~QOS_XML_Loader ();
 
     /**

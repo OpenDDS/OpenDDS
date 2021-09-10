@@ -42,45 +42,42 @@ namespace DCPS {
     public QOS_XML_Handler
   {
   public:
-    QOS_XML_String_Handler();
+    /// Pass an optional @error_handler which is called back when
+    /// there are any errors parsing the input XML. The QOS_XML_String_Handler
+    /// will assume ownership when a pointer is passed
+    explicit QOS_XML_String_Handler(XML::XML_Error_Handler* error_handler = 0);
 
     ~QOS_XML_String_Handler();
 
     /**
-     *
-     * init
-     *
      * The init method will open the file and will validate
      * it against the schema. It returns RETCODE_ERROR
      * when any error occurs during parsing
-     *
      */
     DDS::ReturnCode_t
     init(const ACE_TCHAR * membuf);
 
     /**
-     *
      * add_search_path will add a relative path to the XML
      * parsing library. The XML parsing library will use
      * this path to search for the schema
-     *
      */
     void
     add_search_path(const ACE_TCHAR *environment,
                     const ACE_TCHAR *relpath);
 
   private:
-    // Schema resolver
+    /// Schema resolver
     XML::XML_Schema_Resolver<XML::Environment_Resolver> * res_;
 
-    // Error handler
+    /// Error handler
     XML::XML_Error_Handler * eh_;
 
-    // Parser
+    /// Parser
     XERCES_CPP_NAMESPACE::XercesDOMParser * parser_;
 
-    // Final DOMDocument that should be passed to
-    // dds::reader::dds method
+    /// Final DOMDocument that should be passed to
+    /// dds::reader::dds method
     XERCES_CPP_NAMESPACE::DOMDocument * finalDoc_;
   };
 }
