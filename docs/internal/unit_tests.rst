@@ -128,35 +128,19 @@ The use of a mock assumes that an interface exists for the stand-in.
 Writing a New Unit Test
 ***********************
 
-1. Add the test to :ghfile:`tests/unit-tests/dds/DCPS` or the folder under it.
+1. Add the test to the appropriate file under :ghfile:`tests/unit-tests`.
 2. Name the test after the code it is meant to cover.
-   For example, the ``AccessControlBuiltInImpl`` unit test covers the ``AccessControlBuiltInImpl.cpp`` file.
-3. Add the test to the MPC file in its location.
-4. If the test is a safety test, you will need to add it to the ``run_test_safety.pl`` located in ``tests/unit-tests/dds/DCPS``.
-5. Add the test to the ``.gitignore`` in its directory.
-6. Add the path to the test in either :ghfile:`tests/dcps_tests.lst` or :ghfile:`tests/security/security_tests.lst`.
-
+   For example, the ``tests/unit-tests/dds/DCPS/security/AccessControlBuiltInImpl.cpp`` unit test covers the ``dds/DCPS/security/AccessControlBuiltInImpl.(h|cpp)`` files.
+3. Update the :ghfile:`tests/unit-tests/UnitTests.mpc` file if necessary.
 
 ***********
 Using GTest
 ***********
 
-To use GTest in a test, add ``#include <gtest/gtest.h>``.
-Then add the ``googletest`` dependency to the MPC project for your test.
-This provides you with many helpful tools to simplify the writing of tests.
-When creating your test, the first step is to create a normal ``int main`` function.
-Inside the function we need to initialize google tests, then we set the return value as ``RUN_ALL_TESTS();``.
-
-.. code-block:: cpp
-
-  int main(int argc, char* argv[])
-  {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-  }
-
-This return value will automatically run all test modules and output a series of values corresponding to each test.
-Speaking of test modules, you can create an individual test module with the following declaration
+The main unit test driver is based on GTest.
+GTest provides you with many helpful tools to simplify the writing of unit tests.
+To use GTest in a test, add ``#include <gtest/gtest.h>`` to the unit test source file.
+A basic unit test has the following form
 
 .. code-block:: cpp
 
@@ -164,7 +148,11 @@ Speaking of test modules, you can create an individual test module with the foll
   {
   }
 
-Each of these tests contain evaluators.
+All tests in a unit test source file must have the same TestModule which is name of the unit under test with underscores, e.g., ``dds_DCPS_security_AccessControlBuiltInImpl``.
+This naming convention is required for intentional unit test coverage.
+The TestSubmodule can be any identifier, however, it should typical describe the class, function, or scenario being tested.
+
+Each test contains evaluators.
 The most common evaluators are ``EXPECT_EQ``, ``EXPECT_TRUE``, ``EXPECT_FALSE``.
 
 .. code-block:: cpp
@@ -194,6 +182,16 @@ The difference between EXPECT and ASSERT is that an ASSERT will cease the test u
 For example if you have multiple ``EXPECT_EQ``, they will all always run.
 
 For more information, visit the google test documentation: https://github.com/google/googletest/blob/master/docs/primer.md.
+
+*************
+Code Coverage
+*************
+
+To enable code coverage, one needs to disable the `dds_non_coverage` feature, e.g., ``./configure ... --features=dds_non_coverage=0``.
+
+The script ``$DDS_ROOT/tools/scripts/unit_test_coverage.sh`` will execute unit tests and generate an intentional unit test coverage report.
+It can be called with no arguments to generate a report for all of the units or it can be called with a list of units to test.
+For example, ``$DDS_ROOT/tools/scripts/unit_test_coverage.sh dds/DCPS/Serializer``.
 
 **********
 Final Word

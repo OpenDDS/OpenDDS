@@ -1091,7 +1091,7 @@ void test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_
   EXPECT_TRUE(1000 == qos.reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec);
 }
 
-TEST(QosSettings, maintest)
+TEST(dds_FACE_config_QosSettings, maintest)
 {
   // Publisher QOS
   test_set_publisher_single_partition();

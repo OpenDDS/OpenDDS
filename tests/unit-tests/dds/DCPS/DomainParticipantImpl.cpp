@@ -42,7 +42,7 @@ namespace {
   }
 };
 
-TEST(DomainParticipantImpl, maintest)
+TEST(dds_DCPS_DomainParticipantImpl, maintest)
 {
   { // First sequence should be 1
     RepoId repoId;
