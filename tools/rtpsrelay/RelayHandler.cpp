@@ -942,7 +942,18 @@ namespace {
           break;
         }
 
-        if (submessage_header.flags & (OpenDDS::RTPS::FLAG_D)) {
+        if (!message_parser.serializer().skip(octetsToInlineQos - 16)) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: extract_common_name() could not parse submessage\n")));
+          return "";
+        }
+
+        OpenDDS::RTPS::ParameterList inlineQos;
+        if ((submessage_header.flags & OpenDDS::RTPS::FLAG_Q) && !(message_parser >> inlineQos)) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: extract_common_name() could not parse submessage\n")));
+          return "";
+        }
+
+        if (submessage_header.flags & OpenDDS::RTPS::FLAG_D) {
           OpenDDS::RTPS::ParameterList plist;
 
           message_parser.serializer().swap_bytes(!ACE_CDR_BYTE_ORDER); // read "encap" itself in LE
@@ -967,10 +978,10 @@ namespace {
             const OpenDDS::RTPS::Parameter& param = plist[i];
             if (param._d() == DDS::Security::PID_IDENTITY_TOKEN) {
               const DDS::Security::IdentityToken& idt = param.identity_token();
-              if (OpenDDS::Security::Identity_Status_Token_Class_Id == idt.class_id.in()) {
+              if (std::strcmp(OpenDDS::Security::Identity_Status_Token_Class_Id, idt.class_id.in()) == 0) {
                 for (CORBA::ULong j = 0; j != idt.properties.length(); ++j) {
                   const DDS::Property_t& prop = idt.properties[j];
-                  if (OpenDDS::Security::dds_cert_sn == prop.name.in()) {
+                  if (std::strcmp(OpenDDS::Security::dds_cert_sn, prop.name.in()) == 0) {
                     return std::string(prop.value.in());
                   }
                 }

@@ -172,12 +172,12 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
     OpenDDS::Security::TokenWriter identity_wrapper(identity_token, Identity_Status_Token_Class_Id);
 
     pcert.subject_name_to_str(tmp);
-    identity_wrapper.add_property(dds_cert_sn.c_str(), tmp.c_str());
-    identity_wrapper.add_property(dds_cert_algo.c_str(), pcert.keypair_algo());
+    identity_wrapper.add_property(dds_cert_sn, tmp.c_str());
+    identity_wrapper.add_property(dds_cert_algo, pcert.keypair_algo());
 
     cacert.subject_name_to_str(tmp);
-    identity_wrapper.add_property(dds_ca_sn.c_str(), tmp.c_str());
-    identity_wrapper.add_property(dds_ca_algo.c_str(), cacert.keypair_algo());
+    identity_wrapper.add_property(dds_ca_sn, tmp.c_str());
+    identity_wrapper.add_property(dds_ca_algo, cacert.keypair_algo());
 
     status = true;
 
