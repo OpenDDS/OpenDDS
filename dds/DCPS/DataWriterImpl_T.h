@@ -18,7 +18,7 @@ namespace DCPS {
 /**
  * Servant for DataWriter interface of the Traits::MessageType data type.
  *
- * See the DDS specification, OMG formal/04-12-02, for a description of
+ * See the DDS specification, OMG formal/2015-04-10, for a description of
  * this interface.
  */
 template <typename MessageType>
