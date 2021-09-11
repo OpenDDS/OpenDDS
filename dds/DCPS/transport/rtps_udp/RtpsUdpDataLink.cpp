@@ -2575,7 +2575,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
     for (DestMetaSubmessageMap::iterator dest_it = addr_it->second.begin(); dest_it != addr_it->second.end(); ++dest_it) {
 
       // Check to see if we're sending separate messages per destination guid
-      if (new_bundle_per_dest_guid) {
+      if (new_bundle_per_dest_guid && meta_submessage_bundles.back().size()) {
         helper.end_bundle();
         meta_submessage_bundles.push_back(MetaSubmessageIterVec());
         meta_submessage_bundle_addrs.push_back(addr_it->first);
