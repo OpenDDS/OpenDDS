@@ -2,7 +2,7 @@
 #define RTPSRELAY_PARTICIPANT_LISTENER_H_
 
 #include "ListenerBase.h"
-#include "DomainStatisticsReporter.h"
+#include "RelayStatisticsReporter.h"
 #include "RelayHandler.h"
 
 #include <dds/DCPS/DomainParticipantImpl.h>
@@ -14,7 +14,7 @@ public:
   ParticipantListener(const Config& config,
                       GuidAddrSet& guid_addr_set,
                       OpenDDS::DCPS::DomainParticipantImpl* participant,
-                      DomainStatisticsReporter& stats_reporter);
+                      RelayStatisticsReporter& stats_reporter);
 
 private:
   void on_data_available(DDS::DataReader_ptr reader) override;
@@ -22,7 +22,7 @@ private:
   const Config& config_;
   GuidAddrSet& guid_addr_set_;
   OpenDDS::DCPS::DomainParticipantImpl* participant_;
-  DomainStatisticsReporter& stats_reporter_;
+  RelayStatisticsReporter& stats_reporter_;
   std::unordered_set<OpenDDS::DCPS::GUID_t> guids_;
 };
 

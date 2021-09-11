@@ -19,7 +19,7 @@ namespace {
   const SequenceNumber::Value SN_SEAM  = ACE_UINT32_MAX;
 }
 
-TEST(SequenceNumber, maintest)
+TEST(dds_DCPS_SequenceNumber, maintest)
 {
   // Construction (default)
   EXPECT_TRUE(SequenceNumber(INITIAL) == SequenceNumber());
