@@ -163,17 +163,25 @@ public:
 
 private:
 
+  void skip(const char* func_name, const char* description, size_t n, int size = 1);
+
   // Skip a member at the given index of a final or appendable type.
   // Assuming that when the method is called, the read position of the stream
   // is at the beginning of the member.
   bool skip_member(ACE_CDR::ULong index);
 
+  bool skip_sequence_member(DynamicType_rch type);
+  bool skip_array_member(DynamicType_rch type);
+  bool skip_map_member(DynamicType_rch type);
+  bool skip_collection_member(TypeKind tk);
+
   // Skip all members of this type. Called by a containing type when it wants to skip
   // a member of this type.
   bool skip_all();
 
-  bool skip_sequence_member(DynamicType_rch member_type);
+  // These helper methods can be moved to DynamicType class.
   DynamicType_rch get_base_type(DynamicType_rch alias_type) const;
+  bool is_primitive(DynamicType_rch type, ACE_CDR::ULong& size) const;
 
   Serializer& strm_;
   DynamicType_rch type_;
