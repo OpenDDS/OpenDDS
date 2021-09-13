@@ -4,7 +4,7 @@
 #include "xercesc/parsers/XercesDOMParser.hpp"
 #include "xercesc/sax/SAXParseException.hpp"
 #include "xercesc/util/TransService.hpp"
-#include "ace/XML_Utils/XML_Typedefs.h"
+#include "ace/XML_Utils/XML_Helper.h"
 #include "ace/XML_Utils/XML_Schema_Resolver.h"
 #include "ace/XML_Utils/XML_Error_Handler.h"
 
@@ -16,10 +16,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-  QOS_XML_String_Handler::QOS_XML_String_Handler(void) :
+  QOS_XML_String_Handler::QOS_XML_String_Handler(XML::XML_Error_Handler* error_handler) :
     QOS_XML_Handler(),
     res_(new XML::XML_Schema_Resolver<XML::Environment_Resolver>()),
-    eh_(new XML::XML_Error_Handler()),
+    eh_(error_handler ? error_handler : new XML::XML_Error_Handler()),
     parser_(0),
     finalDoc_(0)
   {
@@ -46,7 +46,6 @@ namespace DCPS {
       XMLString::release(&qualifiedName);
 
     } catch (const XMLException& toCatch) {
-
       char* message = XMLString::transcode(toCatch.getMessage());
       ACE_ERROR ((LM_ERROR,
         ACE_TEXT ("QOS_XML_String_Handler::QOS_XML_String_Handler - ")
@@ -56,7 +55,7 @@ namespace DCPS {
     }
   }
 
-  QOS_XML_String_Handler::~QOS_XML_String_Handler(void)
+  QOS_XML_String_Handler::~QOS_XML_String_Handler()
   {
     if (finalDoc_ != 0)
       finalDoc_->release();

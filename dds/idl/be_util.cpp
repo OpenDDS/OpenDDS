@@ -151,7 +151,7 @@ be_util::usage()
     ACE_TEXT(" -Wb,tao_include_prefix=<path>\t\tprefix for including the TAO-")
     ACE_TEXT("generated header file.\n")
     ACE_TEXT(" -Wb,ts_cpp_include=<include>\t\tadd <include> to *TypeSupportImpl.cpp\n")
-    ACE_TEXT(" -Wb,opendds_sequence_suffix=<postfix>\tset the implied DDS sequence postfix ")
+    ACE_TEXT(" -Wb,opendds_sequence_suffix=<suffix>\tset the implied DDS sequence suffix ")
     ACE_TEXT("(default is 'Seq')\n")
     ));
 }

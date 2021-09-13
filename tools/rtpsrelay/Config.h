@@ -12,6 +12,8 @@ public:
   Config()
     : application_participant_guid_(OpenDDS::DCPS::GUID_UNKNOWN)
     , lifespan_(60) // 1 minute
+    , max_pending_(0)
+    , pending_timeout_(60) // 1 minute
 #ifdef ACE_DEFAULT_MAX_SOCKET_BUFSIZ
     , buffer_size_(ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
 #else
@@ -43,6 +45,26 @@ public:
   const OpenDDS::DCPS::TimeDuration& lifespan() const
   {
     return lifespan_;
+  }
+
+  void max_pending(size_t value)
+  {
+    max_pending_ = value;
+  }
+
+  size_t max_pending() const
+  {
+    return max_pending_;
+  }
+
+  void pending_timeout(const OpenDDS::DCPS::TimeDuration& value)
+  {
+    pending_timeout_ = value;
+  }
+
+  const OpenDDS::DCPS::TimeDuration& pending_timeout() const
+  {
+    return pending_timeout_;
   }
 
   void buffer_size(int value)
@@ -145,16 +167,6 @@ public:
     return log_participant_statistics_;
   }
 
-  void log_domain_statistics(OpenDDS::DCPS::TimeDuration value)
-  {
-    log_domain_statistics_ = value;
-  }
-
-  OpenDDS::DCPS::TimeDuration log_domain_statistics() const
-  {
-    return log_domain_statistics_;
-  }
-
   void publish_relay_statistics(OpenDDS::DCPS::TimeDuration value)
   {
     publish_relay_statistics_ = value;
@@ -185,19 +197,11 @@ public:
     return publish_participant_statistics_;
   }
 
-  void publish_domain_statistics(OpenDDS::DCPS::TimeDuration value)
-  {
-    publish_domain_statistics_ = value;
-  }
-
-  OpenDDS::DCPS::TimeDuration publish_domain_statistics() const
-  {
-    return publish_domain_statistics_;
-  }
-
 private:
   OpenDDS::DCPS::GUID_t application_participant_guid_;
   OpenDDS::DCPS::TimeDuration lifespan_;
+  size_t max_pending_;
+  OpenDDS::DCPS::TimeDuration pending_timeout_;
   int buffer_size_;
   DDS::DomainId_t application_domain_;
   bool allow_empty_partition_;
@@ -208,11 +212,9 @@ private:
   OpenDDS::DCPS::TimeDuration log_relay_statistics_;
   OpenDDS::DCPS::TimeDuration log_handler_statistics_;
   OpenDDS::DCPS::TimeDuration log_participant_statistics_;
-  OpenDDS::DCPS::TimeDuration log_domain_statistics_;
   OpenDDS::DCPS::TimeDuration publish_relay_statistics_;
   OpenDDS::DCPS::TimeDuration publish_handler_statistics_;
   OpenDDS::DCPS::TimeDuration publish_participant_statistics_;
-  OpenDDS::DCPS::TimeDuration publish_domain_statistics_;
 };
 
 }

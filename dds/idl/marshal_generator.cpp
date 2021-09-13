@@ -1006,6 +1006,14 @@ namespace {
         be_global->impl_ <<
           "  CORBA::ULong length;\n"
           << streamAndCheck(">> length");
+        // The check here is to prevent very large sequences from being allocated.
+        be_global->impl_ <<
+          "  if (length > strm.length()) {\n"
+          "    if (DCPS_debug_level >= 8) {\n"
+          "      ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) Invalid sequence length (%u)\\n\"), length));\n"
+          "    }\n"
+          "    return false;\n"
+          "  }\n";
       }
 
       AST_PredefinedType* predef = dynamic_cast<AST_PredefinedType*>(elem);
