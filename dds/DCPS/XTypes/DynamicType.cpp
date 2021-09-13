@@ -1,8 +1,8 @@
+#include "DCPS/DdsDcps_pch.h"
+
 #include "DynamicType.h"
 
 #include "DynamicTypeMember.h"
-
-#include "DCPS/DdsDcps_pch.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
