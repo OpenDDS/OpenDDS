@@ -2064,6 +2064,7 @@ RtpsUdpDataLink::RtpsWriter::add_reader(const ReaderInfo_rch& reader)
 #endif
     remote_readers_.insert(ReaderInfoMap::value_type(reader->id_, reader));
     preassociation_readers_.insert(reader);
+    preassociation_reader_start_sns_.insert(reader->start_sn_);
     log_remote_counts("add_reader");
 
     RtpsUdpDataLink_rch link = link_.lock();
@@ -2105,7 +2106,7 @@ RtpsUdpDataLink::RtpsWriter::remove_reader(const RepoId& id)
     if (it != remote_readers_.end()) {
       const ReaderInfo_rch& reader = it->second;
       reader->swap_durable_data(dd);
-      preassociation_readers_.erase(reader);
+      remove_preassociation_reader(reader);
       const SequenceNumber acked_sn = reader->acked_sn();
       const SequenceNumber max_sn = expected_max_sn(reader);
       readers_expecting_data_.erase(reader);
@@ -3133,7 +3134,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
 
   if (preassociation_readers_.count(reader)) {
     if (is_postassociation) {
-      preassociation_readers_.erase(reader);
+      remove_preassociation_reader(reader);
       if (transport_debug.log_progress) {
         DCPS::log_progress("RTPS writer/reader association complete", id_, reader->id_, reader->participant_discovered_at_);
       }
@@ -3842,15 +3843,12 @@ RtpsUdpDataLink::RtpsWriter::acked_by_all_helper_i(TqeSet& to_deliver)
     return;
   }
 
-  // Prevent changes to the send buffer so new readers can get
-  // associated and find the start of their reliable range.
-  if (!preassociation_readers_.empty()) {
-    return;
-  }
-
   //start with the max sequence number writer knows about and decrease
   //by what the min over all readers is
   SequenceNumber all_readers_ack = SequenceNumber::MAX_VALUE;
+  if (!preassociation_readers_.empty()) {
+    all_readers_ack = std::min(all_readers_ack, *preassociation_reader_start_sns_.begin());
+  }
   if (!lagging_readers_.empty()) {
     all_readers_ack = std::min(all_readers_ack, lagging_readers_.begin()->first + 1);
   }
