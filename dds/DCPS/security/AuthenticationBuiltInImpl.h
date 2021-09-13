@@ -36,6 +36,14 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace Security {
 
+const char Identity_Status_Token_Class_Id[] = "DDS:Auth:PKI-DH:1.0";
+const char Auth_Peer_Cred_Token_Class_Id[] = "DDS:Auth:PKI-DH:1.0";
+
+const char dds_cert_sn[] = "dds.cert.sn";
+const char dds_cert_algo[] = "dds.cert.algo";
+
+const char dds_ca_sn[] = "dds.ca.sn";
+const char dds_ca_algo[] = "dds.ca.algo";
 
 /**
 * @class AuthenticationBuiltInImpl
