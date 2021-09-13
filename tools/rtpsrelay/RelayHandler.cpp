@@ -355,6 +355,11 @@ bool GuidAddrSet::ignore_rtps(const OpenDDS::DCPS::GUID_t& guid,
     return false;
   }
 
+  if (config_.max_pending() == 0) {
+    pos->second.allow_rtps = true;
+    return false;
+  }
+
   if (!is_spdp) {
     // Discovery won't start until we have the SPDP message so wait for it.
     return true;
@@ -365,8 +370,7 @@ bool GuidAddrSet::ignore_rtps(const OpenDDS::DCPS::GUID_t& guid,
     return true;
   }
 
-  if (config_.max_pending() != 0 &&
-      pending_.size() >= config_.max_pending()) {
+  if (pending_.size() >= config_.max_pending()) {
     // Too many new clients to admit another.
     return true;
   }
