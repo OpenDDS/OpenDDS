@@ -46,6 +46,8 @@ be_util::prep_be_arg(char* arg)
   static const size_t SZ_WB_V8 = sizeof(WB_V8) - 1;
   static const char WB_TS_CPP_INCLUDE[] = "ts_cpp_include=";
   static const size_t SZ_WB_TS_CPP_INCLUDE = sizeof(WB_TS_CPP_INCLUDE) - 1;
+  static const char WB_DDS_SEQ_SUFFIX[] = "opendds_sequence_suffix=";
+  static const size_t SZ_WB_DDS_SEQ_SUFFIX = sizeof(WB_DDS_SEQ_SUFFIX) - 1;
 
   if (0 == ACE_OS::strncasecmp(arg, WB_EXPORT_MACRO, SZ_WB_EXPORT_MACRO)) {
     be_global->export_macro(arg + SZ_WB_EXPORT_MACRO);
@@ -87,6 +89,8 @@ be_util::prep_be_arg(char* arg)
   } else if (0 == ACE_OS::strncasecmp(arg, WB_TS_CPP_INCLUDE, SZ_WB_TS_CPP_INCLUDE)) {
     be_global->add_include(arg + SZ_WB_TS_CPP_INCLUDE, BE_GlobalData::STREAM_CPP);
 
+  } else if (0 == ACE_OS::strncasecmp(arg, WB_DDS_SEQ_SUFFIX, SZ_WB_DDS_SEQ_SUFFIX)) {
+    be_global->sequence_suffix(arg + SZ_WB_DDS_SEQ_SUFFIX);
   }
 }
 
@@ -125,7 +129,6 @@ be_util::usage()
     ACE_TEXT("\t\t\t\t\t(sequential if not set)\n")
     ACE_TEXT(" --default-try-construct\t\tset default XTypes try-construct behavior to ")
     ACE_TEXT("discard, use-default, or trim\n\t\t\t\t\t(discard if not set)\n")
-    ACE_TEXT(" --type-sequence-suffix=<postfix>\tset the implied DDS sequence postfix (default is 'Seq')\n")
     ACE_TEXT(" -Wb,export_macro=<macro name>\t\tset export macro ")
     ACE_TEXT("for all files\n")
     ACE_TEXT("\t\t\t\t\t\t--export=<macro name> is an alternative form for this option\n")
@@ -148,6 +151,8 @@ be_util::usage()
     ACE_TEXT(" -Wb,tao_include_prefix=<path>\t\tprefix for including the TAO-")
     ACE_TEXT("generated header file.\n")
     ACE_TEXT(" -Wb,ts_cpp_include=<include>\t\tadd <include> to *TypeSupportImpl.cpp\n")
+    ACE_TEXT(" -Wb,opendds_sequence_suffix=<postfix>\tset the implied DDS sequence postfix ")
+    ACE_TEXT("(default is 'Seq')\n")
     ));
 }
 

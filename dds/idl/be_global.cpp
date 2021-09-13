@@ -348,9 +348,6 @@ BE_GlobalData::parse_args(long& i, char** av)
   static const char EXPORT_FLAG[] = "--export=";
   static const size_t EXPORT_FLAG_SIZE = sizeof(EXPORT_FLAG) - 1;
 
-  static const char TYPESEQUENCESUFFIX_FLAG[] = "--type-sequence-suffix=";
-  static const size_t TYPESEQUENCESUFFIX_FLAG_SIZE = sizeof(TYPESEQUENCESUFFIX_FLAG) - 1;
-
   static const char DEFAULT_NESTED_FLAG[] = "--default-nested";
   static const size_t DEFAULT_NESTED_FLAG_SIZE = sizeof(DEFAULT_NESTED_FLAG) - 1;
 
@@ -438,8 +435,6 @@ BE_GlobalData::parse_args(long& i, char** av)
   case '-':
     if (!ACE_OS::strncasecmp(av[i], EXPORT_FLAG, EXPORT_FLAG_SIZE)) {
       this->export_macro(av[i] + EXPORT_FLAG_SIZE);
-    } else if (!ACE_OS::strncasecmp(av[i], TYPESEQUENCESUFFIX_FLAG, TYPESEQUENCESUFFIX_FLAG_SIZE)) {
-      this->sequence_suffix(av[i] + TYPESEQUENCESUFFIX_FLAG_SIZE);
     } else if (!ACE_OS::strncasecmp(av[i], DEFAULT_NESTED_FLAG, DEFAULT_NESTED_FLAG_SIZE)) {
       root_default_nested_ = true;
     } else if (!ACE_OS::strncasecmp(av[i], NO_DEFAULT_NESTED_FLAG, NO_DEFAULT_NESTED_FLAG_SIZE)) {
