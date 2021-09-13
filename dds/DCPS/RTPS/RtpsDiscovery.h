@@ -83,6 +83,17 @@ public:
     lease_duration_ = period;
   }
 
+  DCPS::TimeDuration max_lease_duration() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::TimeDuration());
+    return max_lease_duration_;
+  }
+  void max_lease_duration(const DCPS::TimeDuration& period)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    max_lease_duration_ = period;
+  }
+
   DCPS::TimeDuration lease_extension() const
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::TimeDuration());
@@ -640,6 +651,7 @@ private:
   double quick_resend_ratio_;
   DCPS::TimeDuration min_resend_delay_;
   DCPS::TimeDuration lease_duration_;
+  DCPS::TimeDuration max_lease_duration_;
   DCPS::TimeDuration lease_extension_;
   u_short pb_, dg_, pg_, d0_, d1_, dx_;
   unsigned char ttl_;
