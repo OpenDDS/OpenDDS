@@ -5,6 +5,7 @@
 
 #include "AccessControlBuiltInImpl.h"
 
+#include "AuthenticationBuiltInImpl.h"
 #include "CommonUtilities.h"
 #include "TokenWriter.h"
 #include "SSL/SubjectName.h"
@@ -128,7 +129,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   TokenReader tr(id_token);
-  const char* id_sn = tr.get_property_value("dds.cert.sn");
+  const char* id_sn = tr.get_property_value(dds_cert_sn);
 
   OpenDDS::Security::SSL::SubjectName sn_id;
 
