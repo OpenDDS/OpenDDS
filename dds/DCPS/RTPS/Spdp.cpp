@@ -613,6 +613,21 @@ Spdp::get_ice_endpoint_if_added()
   return tport_->ice_endpoint_added_ ? tport_->get_ice_endpoint() : 0;
 }
 
+bool address_in_locator_list(const ACE_INET_Addr& from, const DCPS::LocatorSeq& locatorSeq)
+{
+  bool locator_found = false;
+  for (CORBA::ULong i = 0; i < locatorSeq.length(); ++i) {
+    ACE_INET_Addr addr;
+    if (locator_to_address(addr, locatorSeq[i], false) == 0) {
+      if (from == addr) {
+        locator_found = true;
+        break;
+      }
+    }
+  }
+  return locator_found;
+}
+
 void
 Spdp::handle_participant_data(DCPS::MessageId id,
                               const ParticipantData_t& cpdata,
@@ -657,6 +672,12 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     if (id == DCPS::DISPOSE_INSTANCE || id == DCPS::DISPOSE_UNREGISTER_INSTANCE) {
       return;
     }
+/*
+    if (!from_sedp && !address_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList)) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Spdp::handle_participant_data - address not in locator list: %C\n"), DCPS::LogAddr(from).c_str()));
+      return;
+    }
+*/
 
     partBitData(pdata).key = repo_id_to_bit_key(guid);
 
@@ -963,6 +984,11 @@ Spdp::data_received(const DataSubmessage& data,
   if (guid == guid_) {
     // About us, stop.
     return;
+  }
+
+  if (!address_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList)) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Spdp::data_received - address not in locator list: %C\n"), DCPS::LogAddr(from).c_str()));
+    //return; //?? not working
   }
 
   handle_participant_data(
