@@ -526,10 +526,9 @@ MemberDescriptor TypeLookupService::complete_annotation_member_to_member_descrip
   return md;
 }
 
-DynamicType_rch TypeLookupService::complete_to_dynamic(const CompleteTypeObject& cto) const
+DynamicType_rch TypeLookupService::complete_to_dynamic(const CompleteTypeObject& cto, DynamicTypeMap& dt_map) const
 {
   DynamicType_rch dt = DCPS::make_rch<DynamicType>();
-  DynamicTypeMap dt_map;
   complete_to_dynamic_i(dt, cto, dt_map);
   return dt;
 }

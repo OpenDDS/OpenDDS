@@ -44,7 +44,8 @@ public:
   void update_type_identifier_map(const TypeIdentifierPairSeq& tid_pairs);
   bool complete_to_minimal_type_object(const TypeObject& cto, TypeObject& mto) const;
 
-  DynamicType_rch complete_to_dynamic(const CompleteTypeObject&) const;
+  typedef OPENDDS_MAP(TypeIdentifier, DynamicType_rch) DynamicTypeMap;
+  DynamicType_rch complete_to_dynamic(const CompleteTypeObject&, DynamicTypeMap& dt_map) const;
 
   // For TypeLookup_getTypeDependencies
   bool get_type_dependencies(const TypeIdentifier& type_id,
@@ -98,7 +99,6 @@ private:
   bool complete_to_minimal_bitmask(const CompleteBitmaskType& ct, MinimalBitmaskType& mt) const;
   bool complete_to_minimal_bitset(const CompleteBitsetType& ct, MinimalBitsetType& mt) const;
 
-  typedef OPENDDS_MAP(TypeIdentifier, DynamicType_rch) DynamicTypeMap;
   MemberDescriptor complete_struct_member_to_member_descriptor(const CompleteStructMember& cm, DynamicTypeMap& dt_map) const;
   MemberDescriptor complete_union_member_to_member_descriptor(const CompleteUnionMember& cm, DynamicTypeMap& dt_map) const;
   MemberDescriptor complete_annotation_member_to_member_descriptor(const CompleteAnnotationParameter& cm, DynamicTypeMap& dt_map) const;
