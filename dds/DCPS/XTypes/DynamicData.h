@@ -20,8 +20,11 @@ class DynamicData {
 public:
   DynamicData(Serializer& strm, DynamicType_rch type)
     : strm_(strm)
+    , start_rpos_(strm_.rpos())
     , type_(type)
-  {}
+  {
+    type_->get_descriptor(descriptor_);
+  }
 
   DDS::ReturnCode_t get_descriptor(MemberDescriptor& value, MemberId id) const;
   DDS::ReturnCode_t set_descriptor(MemberId id, const MemberDescriptor& value);
@@ -161,9 +164,17 @@ public:
   DDS::ReturnCode_t get_wstring_values(WStringSeq& value, MemberId id) const;
   DDS::ReturnCode_t set_wstring_values(MemberId id, const WStringSeq& value);
 
+  // Skip the whole part of the data stream that corresponds to this type.
+  // This is called by a containing type when it wants to skip a member which
+  // is an object of this type.
+  bool skip_all();
+
 private:
 
-  void skip(const char* func_name, const char* description, size_t n, int size = 1);
+  // Reset the read pointer to point to the beginning of the stream.
+  void reset_stream();
+
+  bool skip(const char* func_name, const char* description, size_t n, int size = 1);
 
   // Skip a member at the given index of a final or appendable type.
   // Assuming that when the method is called, the read position of the stream
@@ -173,18 +184,25 @@ private:
   bool skip_sequence_member(DynamicType_rch type);
   bool skip_array_member(DynamicType_rch type);
   bool skip_map_member(DynamicType_rch type);
+
+  // Skip a non-primitive collection member. That is, sequences of non-primitive elements,
+  // arrays of non-primitive elements, or maps with at least either key type or value type
+  // is non-primitive.
   bool skip_collection_member(TypeKind tk);
 
-  // Skip all members of this type. Called by a containing type when it wants to skip
-  // a member of this type.
-  bool skip_all();
+  bool skip_struct_member(DynamicType_rch type);
+  bool skip_union_member(DynamicType_rch type);
 
   // These helper methods can be moved to DynamicType class.
   DynamicType_rch get_base_type(DynamicType_rch alias_type) const;
   bool is_primitive(DynamicType_rch type, ACE_CDR::ULong& size) const;
 
   Serializer& strm_;
+  const size_t start_rpos_;
+
   DynamicType_rch type_;
+  TypeDescriptor descriptor_;
+
   OPENDDS_MAP<MemberId, size_t> offset_lookup_table_;
 };
 

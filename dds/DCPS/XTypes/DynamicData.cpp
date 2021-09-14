@@ -73,8 +73,7 @@ DDS::ReturnCode_t DynamicData::get_int32_value(ACE_CDR::Long& value, MemberId id
       }
     }
 
-    // TODO(sonndinh): Move the read pointer back to the beginning of the sample.
-
+    reset_rpos();
     return DDS::RETCODE_OK;
   }
 
@@ -137,7 +136,7 @@ DDS::ReturnCode_t DynamicData::get_int32_value(ACE_CDR::Long& value, MemberId id
       // Skip preceding members until reach the requested member.
       ACE_CDR::ULong i = 0;
       while (i < md.index) {
-        if (!strm_.skip_member(i)) {
+        if (!skip_member(i)) {
           if (DCPS_debug_level >= 10) {
             ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_int32_value -")
                        ACE_TEXT(" Failed to skip member at index %d\n"), i));
@@ -198,9 +197,7 @@ DDS::ReturnCode_t DynamicData::get_int32_value(ACE_CDR::Long& value, MemberId id
     return DDS::RETCODE_UNSUPPORTED;
   }
 
-  // TODO(sonndinh): After done with getting this member's value, need to go back to the beginning
-  // of the stream so that the next call to some get_*_value() method can work.
-
+  reset_rpos();
   return DDS::RETCODE_OK;
 }
 
@@ -550,6 +547,11 @@ DDS::ReturnCode_t DynamicData::set_wstring_values(MemberId id, const WStringSeq&
   return DDS::RETCODE_UNSUPPORTED;
 }
 
+void DynamicData::reset_rpos()
+{
+  // TODO(sonndinh): Move the read pointer to the beginning of the stream.
+}
+
 bool DynamicData::skip_member(ACE_CDR::ULong index)
 {
   DynamicTypeMember_rch member;
@@ -646,18 +648,15 @@ bool DynamicData::skip_member(ACE_CDR::ULong index)
       break;
     }
   case TK_STRUCTURE:
-    // TODO(sonndinh)
+    return skip_struct_member(member_type);
   case TK_UNION:
-    // TODO(sonndinh)
+    return skip_union_member(member_type);
   case TK_SEQUENCE:
-    skip_sequence_member(member_type);
-    break;
+    return skip_sequence_member(member_type);
   case TK_ARRAY:
-    skip_array_member(member_type);
-    break;
+    return skip_array_member(member_type);
   case TK_MAP:
-    skip_map_member(member_type);
-    break;
+    return skip_map_member(member_type);
   default:
     {
       DCPS::String kind;
@@ -771,7 +770,6 @@ bool DynamicData::skip_map_member(DynamicType_rch map_type)
   ACE_CDR::ULong key_primitive_size = 0, elem_primitive_size = 0;
   if (is_primitive(key_type, key_primitive_size) &&
       is_primitive(elem_type, elem_primitive_size)) {
-    // TODO(sonndinh): Deserialize primitive map.
     ACE_CDR::ULong length;
     if (!(strm_ >> length)) {
       if (DCPS_debug_level >= 10) {
@@ -780,6 +778,18 @@ bool DynamicData::skip_map_member(DynamicType_rch map_type)
       }
       return false;
     }
+
+    for (unsigned i = 0; i < length; ++i) {
+      if (!skip("skip_map_member", "Failed to skip a key of a primitive map member",
+                1, key_primitive_size)) {
+        return false;
+      }
+      if (!skip("skip_map_member", "Failed to skip an element of a primitive map member",
+                1, elem_primitive_size)) {
+        return false;
+      }
+    }
+    return true;
   } else {
     return skip_collection_member(TK_MAP);
   }
@@ -817,10 +827,106 @@ bool DynamicData::skip_collection_member(TypeKind kind)
   return true;
 }
 
-bool DynamicData::skip_all()
+bool DynamicData::skip_struct_member(DynamicType_rch struct_type)
+{
+  // TODO(sonndinh): The internal data buffer must be shared between the current DynamicData
+  // object and the struct_data DynamicData object.
+  DynamicData struct_data(strm_, struct_type);
+  return struct_data.skip_all();
+}
+
+bool DynamicData::skip_union_member(DynamicType_rch union_type)
 {
   // TODO(sonndinh)
-  return true;
+  DynamicData union_data(strm_, union_type);
+  return union_data.skip_all();
+}
+
+bool DynamicData::skip_all()
+{
+  ExtensibilityKind extensibility = descriptor_.extensibility_kind;
+
+  if (extensibility == APPENDABLE || extensibility == MUTABLE) {
+    ACE_CdR::ULong dheader;
+    if (!(strm_ >> dheader)) {
+      if (DCPS_debug_level >= 10) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::skip_all - Failed to read")
+                   ACE_TEXT(" DHEADER of the sample\n")));
+        return false;
+      }
+    }
+    return skip("skip_all", "Failed to skip the whole sample\n", dheader);
+
+  } else {
+    const TypeKind tk = type_->get_kind();
+    if (tk == TK_STRUCTURE) {
+      // In case of final, we skip all members one by one.
+      const ACE_CDR::ULong member_count = type_->get_member_count();
+      for (ACE_CDR::ULong i = 0; i < member_count; ++i) {
+        if (!skip_member(i)) {
+          return false;
+        }
+      }
+      return true;
+    } else if (tk == TK_UNION) {
+      // TODO(sonndinh) Skip discriminator.
+      DynamicType_rch disc_type = descriptor_.discriminator_type;
+      if (disc_type->get_kind() == TK_ALIAS) {
+        disc_type = get_base_type(disc_type);
+      }
+      ACE_CDR::Long label = -1;
+
+      switch (disc_type->get_kind()) {
+      case TK_BOOLEAN:
+        {
+          ACE_CDR::Boolean value;
+          strm_ >> ACE_InputCDR::to_boolean(value);
+          label = std::static_cast<ACE_CDR::Long>(value);
+          break;
+        }
+      case TK_BYTE:
+        {
+          ACE_CDR::Octet value;
+          strm_ >> ACE_InputCDR::to_octet(value);
+          label = std::static_cast<ACE_CDR::Long>(value);
+          break;
+        }
+      case TK_CHAR8:
+        {
+          ACE_CDR::Char value;
+          strm_ >> ACE_InputCDR::to_char(value);
+          label = std::static_cast<ACE_CDR::Long>(value);
+          break;
+        }
+      case TK_CHAR16:
+        {
+          ACE_CDR::WChar value;
+          strm_ >> ACE_InputCDR::to_wchar(value);
+          label = std::static_cast<ACE_CDR::Long>(value);
+          break;
+        }
+      case TK_INT8:
+      case TK_UINT8:
+      case TK_INT16:
+      case TK_UINT16:
+      case TK_INT32:
+      case TK_UINT32:
+      case TK_INT64:
+      case TK_UINT64:
+      case TK_ENUM:
+      default:
+        {
+          if (DCPS_debug_level >= 10) {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::skip_all - Union type has")
+                       ACE_TEXT(" unsupported type for discriminator\n")));
+            return false;
+          }
+        }
+      }
+
+      // TODO(sonndinh) Then skip the selected member.
+    }
+  }
 }
 
 bool DynamicData::skip(const char* func_name, const char* description, size_t n, int size)
