@@ -667,7 +667,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         pdata.leaseDuration.seconds, DCPS::LogAddr(from).c_str(), participants_.size()));
     }
     ::CORBA::Long maxLeaseDuration = config_->max_lease_duration().to_dds_duration().sec;
-    if (pdata.leaseDuration.seconds > maxLeaseDuration) {
+    if (maxLeaseDuration && pdata.leaseDuration.seconds > maxLeaseDuration) {
       if (DCPS::DCPS_debug_level >= 2) {
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) Spdp::handle_participant_data - overwriting %C lease %ds from %C with %ds\n"),
