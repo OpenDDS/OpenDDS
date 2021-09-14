@@ -60,7 +60,6 @@ TEST(CompleteToDynamicType, MyInnerStruct)
   expected_dt->set_descriptor(expected_td);
   expected_dtm->set_descriptor(expected_md);
   long_expected_dt->set_descriptor(long_td);
-  XTypes::DynamicTypeMembersByIndex dtmbi;
   expected_dt->insert_dynamic_member(expected_dtm);
   test_conversion<DCPS::MyMod_MyInnerStruct_xtag>(expected_dt);
 }

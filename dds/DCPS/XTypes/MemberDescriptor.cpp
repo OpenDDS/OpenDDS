@@ -15,6 +15,15 @@ MemberDescriptor::MemberDescriptor()
 MemberDescriptor::~MemberDescriptor()
 {}
 
+DynamicType_rch MemberDescriptor::get_type() const
+{
+  DynamicType_rch strong_type = type.lock();
+  if (strong_type.in() == 0) {
+    ACE_ERROR((LM_ERROR, "MemberDescriptor::get_type(): grabbing of lock failed\n"));
+  }
+  return strong_type;
+}
+
 bool MemberDescriptor::equals(const MemberDescriptor& other) const
 {
   DynamicTypePtrPairSeen dt_ptr_pair;
@@ -23,10 +32,12 @@ bool MemberDescriptor::equals(const MemberDescriptor& other) const
 
 bool test_equality_i(const MemberDescriptor& lhs, const MemberDescriptor& rhs, DynamicTypePtrPairSeen& dt_ptr_pair)
 {
+  DynamicType_rch lhs_type = lhs.get_type();
+  DynamicType_rch rhs_type = rhs.get_type();
   return
     lhs.name == rhs.name &&
     lhs.id == rhs.id &&
-    test_equality_i(lhs.type, rhs.type, dt_ptr_pair) &&
+    test_equality_i(lhs_type, rhs_type, dt_ptr_pair) &&
     lhs.default_value == rhs.default_value &&
     lhs.index == rhs.index &&
     lhs.label == rhs.label &&

@@ -31,14 +31,14 @@ enum TryConstructKind {
 class OpenDDS_Dcps_Export MemberDescriptor {
 public:
   MemberDescriptor();
-
   ~MemberDescriptor();
 
+  DynamicType_rch get_type() const;
   bool equals(const MemberDescriptor& other) const;
 
   DCPS::String name;
   MemberId id;
-  DynamicType_rch type;
+  DCPS::WeakRcHandle<DynamicType> type;
   DCPS::String default_value;
   ACE_CDR::ULong index;
   UnionCaseLabelSeq label;
