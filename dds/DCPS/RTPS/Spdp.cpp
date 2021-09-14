@@ -980,7 +980,8 @@ Spdp::data_received(const DataSubmessage& data,
     return;
   }
 
-  if (!ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList)) {
+  const bool from_relay = from == config_->spdp_rtps_relay_address();
+  if (!from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList)) {
     if (DCPS::DCPS_debug_level) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Spdp::data_received - IP not in locator list: %C\n"), DCPS::LogAddr(from).c_str()));
     }
