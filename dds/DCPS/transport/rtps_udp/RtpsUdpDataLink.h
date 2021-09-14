@@ -495,10 +495,11 @@ private:
 
     void remove_preassociation_reader(const ReaderInfo_rch& reader)
     {
-      preassociation_readers_.erase(reader);
-      SequenceNumberMultiset::iterator pos = preassociation_reader_start_sns_.find(reader->start_sn_);
-      OPENDDS_ASSERT(pos != preassociation_reader_start_sns_.end());
-      preassociation_reader_start_sns_.erase(pos);
+      if (preassociation_readers_.erase(reader)) {
+        SequenceNumberMultiset::iterator pos = preassociation_reader_start_sns_.find(reader->start_sn_);
+        OPENDDS_ASSERT(pos != preassociation_reader_start_sns_.end());
+        preassociation_reader_start_sns_.erase(pos);
+      }
     }
 
     void initialize_heartbeat(const SingleSendBuffer::Proxy& proxy,
