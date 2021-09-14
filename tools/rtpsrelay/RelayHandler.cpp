@@ -341,24 +341,43 @@ void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& n
   }
 }
 
-bool GuidAddrSet::ignore(const OpenDDS::DCPS::GUID_t& guid,
-                         const OpenDDS::DCPS::MonotonicTimePoint& now)
+bool GuidAddrSet::ignore_rtps(const OpenDDS::DCPS::GUID_t& guid,
+                              const OpenDDS::DCPS::MonotonicTimePoint& now,
+                              bool is_spdp)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
+  const auto pos = guid_addr_set_map_.find(guid);
+  if (pos == guid_addr_set_map_.end()) {
+    return true;
+  }
 
-  // Client has already been admitted.
-  if (guid_addr_set_map_.count(guid) != 0) {
+  if (pos->second.allow_rtps) {
+    // Client has already been admitted.
     return false;
   }
 
-  if (config_.max_pending() != 0 &&
-      pending_.size() >= config_.max_pending()) {
+  if (config_.max_pending() == 0) {
+    pos->second.allow_rtps = true;
+    return false;
+  }
+
+  if (!is_spdp) {
+    // Discovery won't start until we have the SPDP message so wait for it.
+    return true;
+  }
+
+  if (pos->second.spdp_addr_set.empty() || pos->second.sedp_addr_set.empty()) {
+    // Don't have the necessary addresses to complete discovery.
+    return true;
+  }
+
+  if (pending_.size() >= config_.max_pending()) {
     // Too many new clients to admit another.
     return true;
   }
 
   pending_.insert(guid);
   pending_expiration_queue_.push_back(std::make_pair(now + config_.pending_timeout(), guid));
+  pos->second.allow_rtps = true;
 
   return false;
 }
@@ -408,6 +427,7 @@ VerticalHandler::VerticalHandler(const Config& config,
   , guid_addr_set_(guid_addr_set)
   , horizontal_handler_(nullptr)
   , application_participant_addr_(application_participant_addr)
+  , is_spdp_(false)
   , horizontal_address_(horizontal_address)
   , horizontal_address_str_(OpenDDS::DCPS::LogAddr(horizontal_address).c_str())
   , rtps_discovery_(rtps_discovery)
@@ -456,16 +476,16 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
       return 0;
     }
 
-    if (guid_addr_set_.ignore(src_guid, now)) {
+    GuidAddrSet::Proxy proxy(guid_addr_set_);
+    record_activity(proxy, addr_port, now, src_guid, msg_len);
+
+    if (proxy.ignore_rtps(src_guid, now, is_spdp_)) {
       stats_reporter_.ignored_message(msg_len, now, type);
       return 0;
     }
 
-    GuidAddrSet::Proxy proxy(guid_addr_set_);
-    record_activity(proxy, addr_port, now, src_guid, msg_len);
-    bool send_to_application_participant = false;
-
     CORBA::ULong sent = 0;
+    bool send_to_application_participant = false;
     if (do_normal_processing(proxy, remote_address, src_guid, to, send_to_application_participant, msg, now, sent)) {
       StringSet to_partitions;
       guid_partition_table_.lookup(to_partitions, src_guid);
@@ -506,11 +526,6 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
     if (message.get_guid_prefix(src_guid.guidPrefix)) {
       src_guid.entityId = OpenDDS::DCPS::ENTITYID_PARTICIPANT;
       has_guid = true;
-
-      if (guid_addr_set_.ignore(src_guid, now)) {
-        stats_reporter_.ignored_message(msg_len, now, type);
-        return 0;
-      }
     }
 
     size_t bytes_sent = 0;
@@ -906,7 +921,9 @@ SpdpHandler::SpdpHandler(const Config& config,
                          const ACE_INET_Addr& application_participant_addr,
                          HandlerStatisticsReporter& stats_reporter)
 : VerticalHandler(config, name, SPDP, address, reactor, guid_partition_table, relay_partition_table, guid_addr_set, rtps_discovery, crypto, application_participant_addr, stats_reporter)
-{}
+{
+  is_spdp_ = true;
+}
 
 #ifdef OPENDDS_SECURITY
 namespace {
