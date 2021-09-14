@@ -132,6 +132,8 @@ typedef std::basic_string<wchar_t, std::char_traits<wchar_t>, OPENDDS_ALLOCATOR(
           OpenDDS::DCPS::PoolAllocator<K > >
 #define OPENDDS_SET_CMP(K, C) std::set<K, C, \
           OpenDDS::DCPS::PoolAllocator<K > >
+#define OPENDDS_MULTISET(K) std::multiset<K, std::less<K >, \
+          OpenDDS::DCPS::PoolAllocator<K > >
 #define OPENDDS_MULTISET_CMP(K, C) std::multiset<K, C, \
           OpenDDS::DCPS::PoolAllocator<K > >
 #define OPENDDS_VECTOR(T) std::vector<T, \
@@ -157,6 +159,7 @@ typedef std::wstring WString;
 #define OPENDDS_MULTIMAP_CMP_T OPENDDS_MULTIMAP_CMP
 #define OPENDDS_SET(K) std::set<K >
 #define OPENDDS_SET_CMP(K, C) std::set<K, C >
+#define OPENDDS_MULTISET(K) std::multiset<K >
 #define OPENDDS_MULTISET_CMP(K, C) std::multiset<K, C >
 #define OPENDDS_VECTOR(T) std::vector<T >
 #define OPENDDS_LIST(T) std::list<T >

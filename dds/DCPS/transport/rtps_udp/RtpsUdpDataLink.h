@@ -396,6 +396,8 @@ private:
     ReaderInfoMap remote_readers_;
     /// Preassociation readers require a non-final heartbeat.
     ReaderInfoSet preassociation_readers_;
+    typedef OPENDDS_MULTISET(OpenDDS::DCPS::SequenceNumber) SequenceNumberMultiset;
+    SequenceNumberMultiset preassociation_reader_start_sns_;
     /// These readers have not acked everything they are supposed to have
     /// acked.
     SNRIS lagging_readers_;
@@ -467,6 +469,16 @@ private:
       }
       return max_sn_ + 1;
     }
+
+    void remove_preassociation_reader(const ReaderInfo_rch& reader)
+    {
+      if (preassociation_readers_.erase(reader)) {
+        SequenceNumberMultiset::iterator pos = preassociation_reader_start_sns_.find(reader->start_sn_);
+        OPENDDS_ASSERT(pos != preassociation_reader_start_sns_.end());
+        preassociation_reader_start_sns_.erase(pos);
+      }
+    }
+
     void initialize_heartbeat(const SingleSendBuffer::Proxy& proxy,
                               MetaSubmessage& meta_submessage);
     void gather_directed_heartbeat_i(const SingleSendBuffer::Proxy& proxy,
