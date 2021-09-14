@@ -3399,12 +3399,12 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
       continue;
     }
 
+    const SequenceNumber first_sn = std::max(non_durable_first_sn(proxy), reader->start_sn_);
     if (!reader->requests_.empty() &&
-        !proxy.empty() &&
-        reader->requests_.high() < proxy.low()) {
+        reader->requests_.high() < first_sn) {
       // The reader is not going to get any data.
       // Send a gap that is going to to catch them up.
-      gaps.insert(SequenceRange(reader->requests_.low(), proxy.low().previous()));
+      gaps.insert(SequenceRange(reader->requests_.low(), first_sn.previous()));
       reader->requests_.reset();
     }
 
