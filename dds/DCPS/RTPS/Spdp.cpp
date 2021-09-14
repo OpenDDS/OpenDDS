@@ -613,13 +613,13 @@ Spdp::get_ice_endpoint_if_added()
   return tport_->ice_endpoint_added_ ? tport_->get_ice_endpoint() : 0;
 }
 
-bool ip_in_locator_list(const OpenDDS::DCPS::String& ip, const DCPS::LocatorSeq& locators)
+bool ip_in_locator_list(const ACE_INET_Addr& from, const DCPS::LocatorSeq& locators)
 {
   bool locator_found = false;
   for (CORBA::ULong i = 0; i < locators.length(); ++i) {
     ACE_INET_Addr addr;
     if (locator_to_address(addr, locators[i], true) == 0) {
-      if (ip == DCPS::LogAddr::ip(addr)) {
+      if (from.is_ip_equal(addr)) {
         locator_found = true;
         break;
       }
@@ -980,8 +980,10 @@ Spdp::data_received(const DataSubmessage& data,
     return;
   }
 
-  if (!ip_in_locator_list(DCPS::LogAddr::ip(from), pdata.participantProxy.metatrafficUnicastLocatorList)) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Spdp::data_received - IP not in locator list: %C\n"), DCPS::LogAddr(from).c_str()));
+  if (!ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList)) {
+    if (DCPS::DCPS_debug_level) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Spdp::data_received - IP not in locator list: %C\n"), DCPS::LogAddr(from).c_str()));
+    }
     return;
   }
 
