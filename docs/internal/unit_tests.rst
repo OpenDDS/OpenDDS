@@ -30,7 +30,7 @@ The more frequently the tests are run, the smaller the increment of development 
 Thus, unit tests should execute quickly.
 
 Code that is difficult to test will most likely be difficult to use.
-Code that is difficult to use correctly will lead to bugs in code that use it.
+Code that is difficult to use correctly will lead to bugs in code that uses it.
 Consequently, unit tests are vital to the design of useful software as developing a unit test provides feedback on the design of the code under test.
 Often, when developing a unit test, one will find parts of the design that can be improved.
 
