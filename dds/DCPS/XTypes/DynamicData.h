@@ -179,7 +179,8 @@ private:
   // Skip a member at the given index of a final or appendable type.
   // Assuming that when the method is called, the read position of the stream
   // is at the beginning of the member.
-  bool skip_member(ACE_CDR::ULong index);
+  bool skip_member_by_index(ACE_CDR::ULong index);
+  bool skip_member(DynamicType_rch type);
 
   bool skip_sequence_member(DynamicType_rch type);
   bool skip_array_member(DynamicType_rch type);
@@ -203,6 +204,8 @@ private:
   DynamicType_rch type_;
   TypeDescriptor descriptor_;
 
+  // Cache the offset from the point in the stream where the data of this DynamicData object
+  // starts to the point where a member with a given ID starts.
   OPENDDS_MAP<MemberId, size_t> offset_lookup_table_;
 };
 
