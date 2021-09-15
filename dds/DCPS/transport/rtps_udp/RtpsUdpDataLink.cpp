@@ -3789,7 +3789,11 @@ RtpsUdpDataLink::RtpsWriter::acked_by_all_helper_i(TqeSet& to_deliver)
     all_readers_ack = std::min(all_readers_ack, lagging_readers_.begin()->first + 1);
   }
   if (!leading_readers_.empty()) {
-    all_readers_ack = std::min(all_readers_ack, leading_readers_.begin()->first + 1);
+    // When is_pvs_writer_ is true, the leading_readers_ will all be
+    // at different sequence numbers.  The minimum could actually be
+    // before the preassociation readers or lagging readers.  Use the
+    // largest sequence number to avoid holding onto samples.
+    all_readers_ack = std::min(all_readers_ack, leading_readers_.rbegin()->first + 1);
   }
 
   if (all_readers_ack == SequenceNumber::MAX_VALUE) {
