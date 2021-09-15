@@ -666,7 +666,7 @@ namespace OpenDDS {
                                           const DDS::DataWriterQos& qos,
                                           const DDS::PublisherQos& publisherQos) = 0;
 
-      void update_publication_locators(const RepoId publicationId,
+      void update_publication_locators(const RepoId& publicationId,
                                        const TransportLocatorSeq& transInfo)
       {
         ACE_GUARD(ACE_Thread_Mutex, g, lock_);
@@ -2204,7 +2204,7 @@ namespace OpenDDS {
         endpoint_manager().update_subscription_locators(subId, transInfo);
       }
 
-      DDS::Subscriber_var bit_subscriber() const { return bit_subscriber_.value(); }
+      DDS::Subscriber_var bit_subscriber() const { return bit_subscriber_; }
 
       void type_lookup_service(const XTypes::TypeLookupService_rch type_lookup_service)
       {
@@ -2419,47 +2419,51 @@ namespace OpenDDS {
 #ifndef DDS_HAS_MINIMUM_BIT
     DCPS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit()
     {
-      if (!bit_subscriber_.value().in())
+      DDS::Subscriber_var bit_sub(bit_subscriber());
+      if (!bit_sub.in())
         return 0;
 
       DDS::DataReader_var d =
-        bit_subscriber_.value()->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
+        bit_sub->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
       return dynamic_cast<ParticipantBuiltinTopicDataDataReaderImpl*>(d.in());
     }
 
     DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* part_loc_bit()
     {
-      if (!bit_subscriber_.value().in())
+      DDS::Subscriber_var bit_sub(bit_subscriber());
+      if (!bit_sub.in())
         return 0;
 
       DDS::DataReader_var d =
-        bit_subscriber_.value()->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
+        bit_sub->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
       return dynamic_cast<ParticipantLocationBuiltinTopicDataDataReaderImpl*>(d.in());
     }
 
     DCPS::ConnectionRecordDataReaderImpl* connection_record_bit()
     {
-      if (!bit_subscriber_.value().in())
+      DDS::Subscriber_var bit_sub(bit_subscriber());
+      if (!bit_sub.in())
         return 0;
 
       DDS::DataReader_var d =
-        bit_subscriber_.value()->lookup_datareader(DCPS::BUILT_IN_CONNECTION_RECORD_TOPIC);
+        bit_sub->lookup_datareader(DCPS::BUILT_IN_CONNECTION_RECORD_TOPIC);
       return dynamic_cast<ConnectionRecordDataReaderImpl*>(d.in());
     }
 
     DCPS::InternalThreadBuiltinTopicDataDataReaderImpl* internal_thread_bit()
     {
-      if (!bit_subscriber_.value().in())
+      DDS::Subscriber_var bit_sub(bit_subscriber());
+      if (!bit_sub.in())
         return 0;
 
       DDS::DataReader_var d =
-        bit_subscriber_.value()->lookup_datareader(DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC);
+        bit_sub->lookup_datareader(DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC);
       return dynamic_cast<InternalThreadBuiltinTopicDataDataReaderImpl*>(d.in());
     }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
       mutable ACE_Thread_Mutex lock_;
-      ACE_Atomic_Op<ACE_Thread_Mutex, DDS::Subscriber_var> bit_subscriber_;
+      DDS::Subscriber_var bit_subscriber_;
       DDS::DomainParticipantQos qos_;
       DiscoveredParticipantMap participants_;
     };
@@ -2752,8 +2756,8 @@ namespace OpenDDS {
       }
 
       virtual void update_subscription_locators(DDS::DomainId_t domainId,
-                                                const RepoId partId,
-                                                const RepoId subId,
+                                                const RepoId& partId,
+                                                const RepoId& subId,
                                                 const TransportLocatorSeq& transInfo)
       {
         get_part(domainId, partId)->update_subscription_locators(subId, transInfo);

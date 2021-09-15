@@ -3568,10 +3568,12 @@ void DataReaderImpl::transport_discovery_change()
 {
   populate_connection_info();
   const TransportLocatorSeq& trans_conf_info = connection_info();
+  const RepoId dp_id_copy = dp_id_;
+  const RepoId subscription_id_copy = subscription_id_;
   Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
   disco->update_subscription_locators(domain_id_,
-                                      dp_id_,
-                                      subscription_id_,
+                                      dp_id_copy,
+                                      subscription_id_copy,
                                       trans_conf_info);
 }
 
