@@ -21,6 +21,7 @@
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/Ice.h>
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Logging.h>
 #include <dds/DCPS/Qos_Helper.h>
@@ -628,6 +629,39 @@ bool ip_in_locator_list(const ACE_INET_Addr& from, const DCPS::LocatorSeq& locat
   return locator_found;
 }
 
+#ifdef OPENDDS_SECURITY
+bool ip_in_AgentInfo(const ACE_INET_Addr& from, const ParameterList& plist)
+{
+  bool found = false;
+  ICE::AgentInfoMap ai_map;
+  if (!ParameterListConverter::from_param_list(plist, ai_map)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ip_in_AgentInfo - failed to convert ParameterList to AgentInfoMap\n")));
+    return found;
+  }
+  ICE::AgentInfoMap::const_iterator sedp_i = ai_map.find(SEDP_AGENT_INFO_KEY);
+  if (sedp_i != ai_map.end()) {
+    const ICE::AgentInfo::CandidatesType& cs = sedp_i->second.candidates;
+    for (ICE::AgentInfo::const_iterator i = cs.begin(); i != cs.end(); ++i) {
+      if (from.is_ip_equal(i->address)) {
+        found = true;
+        break;
+      }
+    }
+  }
+  ICE::AgentInfoMap::const_iterator spdp_i = ai_map.find(SPDP_AGENT_INFO_KEY);
+  if (!found && spdp_i != ai_map.end()) {
+    const ICE::AgentInfo::CandidatesType& cs = spdp_i->second.candidates;
+    for (ICE::AgentInfo::const_iterator i = cs.begin(); i != cs.end(); ++i) {
+      if (from.is_ip_equal(i->address)) {
+        found = true;
+        break;
+      }
+    }
+  }
+  return found;
+}
+#endif
+
 void
 Spdp::handle_participant_data(DCPS::MessageId id,
                               const ParticipantData_t& cpdata,
@@ -988,16 +1022,22 @@ Spdp::data_received(const DataSubmessage& data,
     return;
   }
 
+#ifdef OPENDDS_SECURITY
+  if (!is_security_enabled()) {
+    if (!ip_in_AgentInfo(from, plist)) {
+      if (DCPS::DCPS_debug_level) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Spdp::data_received - IP not in AgentInfo: %C\n"), DCPS::LogAddr(from).c_str()));
+      }
+      return;
+    }
+    process_participant_ice(plist, pdata, guid);
+  }
+#endif
+
   handle_participant_data(
     (data.inlineQos.length() && disposed(data.inlineQos)) ?
       DCPS::DISPOSE_INSTANCE : DCPS::SAMPLE_DATA,
     pdata, to_opendds_seqnum(data.writerSN), from, false);
-
-#ifdef OPENDDS_SECURITY
-  if (!is_security_enabled()) {
-    process_participant_ice(plist, pdata, guid);
-  }
-#endif
 }
 
 void
