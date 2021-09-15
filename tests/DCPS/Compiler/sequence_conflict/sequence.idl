@@ -1,0 +1,14 @@
+module Xyz
+{
+  @nested(FALSE)
+  @appendable
+  struct My_msg2 {
+    long myl;
+  };
+  typedef sequence<Xyz::My_msg2> My_msg2Seq;
+  @nested(FALSE)
+  @appendable
+  struct My_msg3 {
+    My_msg2Seq myseq;
+  };
+};
