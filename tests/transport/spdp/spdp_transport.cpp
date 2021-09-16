@@ -26,13 +26,16 @@
 #include <ace/Reactor.h>
 #include <ace/SOCK_Dgram.h>
 
+#include <arpa/inet.h>
 #include <exception>
 #include <iostream>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <stdio.h>
 #include <string>
-#include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
+#include <unistd.h>
 
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
@@ -256,27 +259,20 @@ struct ReactorTask : ACE_Task_Base {
   }
 };
 
-std::string get_local_ip()
+bool get_local_ip(OpenDDS::DCPS::OctetArray16 address)
 {
-  std::string ip;
   char hostname[256];
   if (gethostname(hostname, sizeof(hostname)) == 0) {
     struct hostent* host_entry = gethostbyname(hostname);
     if (host_entry) {
-      ip = inet_ntoa(*((struct in_addr*)host_entry->h_addr_list[0]));
+      struct in_addr& ina = *(struct in_addr*)(host_entry->h_addr_list[0]);
+      const char* ip = inet_ntoa(ina);
+      std::memset(address, 0, 12);
+      sscanf(ip, "%hhu.%hhu.%hhu.%hhu", &address[12], &address[13], &address[14], &address[15]);
+      return true;
     }
   }
-  return ip;
-}
-
-void ip_to_address(const std::string& ip, OpenDDS::DCPS::OctetArray16 address)
-{
-  std::memset(address, 0, 12);
-  std::string::size_type i = 0, e = ip.find(".");
-  address[12] = std::stoi(ip.substr(i, e - i)); i = e + 1; e = ip.find(".", i);
-  address[13] = std::stoi(ip.substr(i, e - i)); i = e + 1; e = ip.find(".", i);
-  address[14] = std::stoi(ip.substr(i, e - i)); i = e + 1;
-  address[15] = std::stoi(ip.substr(i));
+  return false;
 }
 
 bool run_test()
@@ -363,16 +359,14 @@ bool run_test()
   nonEmptyList[0].address[14] = 0;
   nonEmptyList[0].address[15] = 1;
 
-  const std::string local_ip = get_local_ip();
-  if (local_ip.empty()) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: spdp_transport:run_test - get_local_ip failed\n")));
-    return false;
-  }
   OpenDDS::DCPS::LocatorSeq unicastLocators(1);
   unicastLocators.length(1);
   unicastLocators[0].port = 54321;
   unicastLocators[0].kind = LOCATOR_KIND_UDPv4;
-  ip_to_address(local_ip, unicastLocators[0].address);
+  if (!get_local_ip(unicastLocators[0].address)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: spdp_transport:run_test - get_local_ip failed\n")));
+    return false;
+  }
 
   const OpenDDS::RTPS::SPDPdiscoveredParticipantData pdata = {
     {DDS::BuiltinTopicKey_t(), qos.user_data},
