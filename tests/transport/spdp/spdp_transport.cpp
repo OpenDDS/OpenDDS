@@ -28,9 +28,8 @@
 
 #include <exception>
 #include <iostream>
-#include <netdb.h>
-#include <netinet/in.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -262,12 +261,10 @@ bool get_local_ip(OpenDDS::DCPS::OctetArray16 address)
 {
   char hostname[256];
   if (gethostname(hostname, sizeof(hostname)) == 0) {
-    struct hostent* host_entry = gethostbyname(hostname);
-    if (host_entry) {
-      struct in_addr& ina = *(struct in_addr*)(host_entry->h_addr_list[0]);
-      const char* ip = inet_ntoa(ina);
+    struct hostent* host = gethostbyname(hostname);
+    if (host) {
       std::memset(address, 0, 12);
-      sscanf(ip, "%hhu.%hhu.%hhu.%hhu", &address[12], &address[13], &address[14], &address[15]);
+      std::memcpy(&address[12], &(((struct in_addr*)(host->h_addr_list[0]))->s_addr), 4);
       return true;
     }
   }
