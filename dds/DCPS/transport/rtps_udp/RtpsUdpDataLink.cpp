@@ -2513,6 +2513,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
         helper.end_bundle();
         meta_submessage_bundles.push_back(MetaSubmessageIterVec());
         meta_submessage_bundle_addrs.push_back(addr_it->first);
+        ERASE_BUNDLING_PLACEHOLDER();
         prev_dst = GUID_UNKNOWN;
       }
 
@@ -4377,7 +4378,9 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
   OPENDDS_ASSERT(remote != GUID_UNKNOWN);
 
   if (config().rtps_relay_only()) {
-    addresses.insert(config().rtps_relay_address());
+    if (config().rtps_relay_address() != ACE_INET_Addr()) {
+      addresses.insert(config().rtps_relay_address());
+    }
     return;
   }
 
