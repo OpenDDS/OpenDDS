@@ -98,8 +98,6 @@ void DataReaderListenerImpl::on_liveliness_changed(
       dcs_->post(actor_, "LIVELINESS_LOST_" + OpenDDS::DCPS::to_dds_string(liveliness_gained_count_));
     }
 
-    ++liveliness_changed_count_;
-
     if (liveliness_changed_count_ > 1) {
       if (last_status_.alive_count == 0 && last_status_.not_alive_count == 0) {
         ACE_ERROR ((LM_ERROR,
@@ -135,8 +133,8 @@ void DataReaderListenerImpl::on_liveliness_changed(
     last_status_ = status;
     ACE_DEBUG((LM_DEBUG,
       "(%P|%t) %T DataReaderListenerImpl::on_liveliness_changed %d\n"
-      "alive_count %d not_alive_count %d alive_count_change %d not_alive_count_change %d\n",
-      liveliness_changed_count_, status.alive_count, status.not_alive_count,
+      "%C alive_count %d not_alive_count %d alive_count_change %d not_alive_count_change %d\n",
+      liveliness_changed_count_, actor_.c_str(), status.alive_count, status.not_alive_count,
       status.alive_count_change, status.not_alive_count_change));
   }
 
