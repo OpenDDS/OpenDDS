@@ -19,7 +19,7 @@ DynamicType_rch MemberDescriptor::get_type() const
 {
   DynamicType_rch strong_type = type.lock();
   if (strong_type.in() == 0) {
-    ACE_ERROR((LM_ERROR, "MemberDescriptor::get_type(): grabbing of lock failed\n"));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) MemberDescriptor::get_type(): grabbing of lock failed\n")));
   }
   return strong_type;
 }

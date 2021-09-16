@@ -37,7 +37,11 @@ void DynamicTypeMember::set_parent(const DynamicType_rch& dt)
 
 DynamicType_rch DynamicTypeMember::get_parent()
 {
-  return parent_.lock();
+  DynamicType_rch strong_type = parent_.lock();
+  if (strong_type.in() == 0) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicTypeMember::get_parent(): grabbing of lock failed\n")));
+  }
+  return strong_type;
 }
 
 bool DynamicTypeMember::equals(const DynamicTypeMember& other) const
