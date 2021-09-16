@@ -50,7 +50,7 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , quick_resend_ratio_(0.1)
   , min_resend_delay_(TimeDuration::from_msec(100))
   , lease_duration_(300)
-  , max_lease_duration_(600)
+  , max_lease_duration_(300)
   , lease_extension_(0)
   , pb_(7400) // see RTPS v2.1 9.6.1.3 for PB, DG, PG, D0, D1 defaults
   , dg_(250)
