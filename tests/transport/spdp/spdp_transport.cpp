@@ -28,6 +28,11 @@
 
 #include <exception>
 #include <iostream>
+#include <string>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
@@ -251,6 +256,29 @@ struct ReactorTask : ACE_Task_Base {
   }
 };
 
+std::string get_local_ip()
+{
+  std::string ip;
+  char hostname[256];
+  if (gethostname(hostname, sizeof(hostname)) == 0) {
+    struct hostent* host_entry = gethostbyname(hostname);
+    if (host_entry) {
+      ip = inet_ntoa(*((struct in_addr*)host_entry->h_addr_list[0]));
+    }
+  }
+  return ip;
+}
+
+void ip_to_address(const std::string& ip, OpenDDS::DCPS::OctetArray16 address)
+{
+  std::memset(address, 0, 12);
+  std::string::size_type i = 0, e = ip.find(".");
+  address[12] = std::stoi(ip.substr(i, e - i)); i = e + 1; e = ip.find(".", i);
+  address[13] = std::stoi(ip.substr(i, e - i)); i = e + 1; e = ip.find(".", i);
+  address[14] = std::stoi(ip.substr(i, e - i)); i = e + 1;
+  address[15] = std::stoi(ip.substr(i));
+}
+
 bool run_test()
 {
   // Create and initialize RtpsDiscovery
@@ -303,7 +331,6 @@ bool run_test()
 
   // Create a Parameter List
   OpenDDS::RTPS::ParameterList plist;
-
   const BuiltinEndpointSet_t availableBuiltinEndpoints =
     DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER |
     DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR |
@@ -316,8 +343,7 @@ bool run_test()
     BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER |
     BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER |
     BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER |
-    BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER
-  ;
+    BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER;
 
 #ifdef OPENDDS_SECURITY
   const DDS::Security::ExtendedBuiltinEndpointSet_t availableExtendedBuiltinEndpoints =
@@ -330,7 +356,6 @@ bool run_test()
   OpenDDS::DCPS::LocatorSeq nonEmptyList(1);
   nonEmptyList.length(1);
   nonEmptyList[0].port = 12345;
-
   nonEmptyList[0].kind = LOCATOR_KIND_UDPv4;
   std::memset(nonEmptyList[0].address, 0, 12);
   nonEmptyList[0].address[12] = 127;
@@ -338,26 +363,33 @@ bool run_test()
   nonEmptyList[0].address[14] = 0;
   nonEmptyList[0].address[15] = 1;
 
+  const std::string local_ip = get_local_ip();
+  if (local_ip.empty()) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: spdp_transport:run_test - get_local_ip failed\n")));
+    return false;
+  }
+  OpenDDS::DCPS::LocatorSeq unicastLocators(1);
+  unicastLocators.length(1);
+  unicastLocators[0].port = 54321;
+  unicastLocators[0].kind = LOCATOR_KIND_UDPv4;
+  ip_to_address(local_ip, unicastLocators[0].address);
+
   const OpenDDS::RTPS::SPDPdiscoveredParticipantData pdata = {
-    {
-      DDS::BuiltinTopicKey_t(),
-      qos.user_data
-    },
+    {DDS::BuiltinTopicKey_t(), qos.user_data},
     {
       domain
       , ""
       , PROTOCOLVERSION
-      , {gp[0], gp[1], gp[2], gp[3], gp[4], gp[5],
-       gp[6], gp[7], gp[8], gp[9], gp[10], gp[11]}
+      , {gp[0], gp[1], gp[2], gp[3], gp[4], gp[5], gp[6], gp[7], gp[8], gp[9], gp[10], gp[11]}
       , VENDORID_OPENDDS
-      , false /*expectsIQoS*/
+      , false // expectsIQoS
       , availableBuiltinEndpoints
       , 0
-      , nonEmptyList /* sedp_multicast */
-      , nonEmptyList /* sedp_unicast */
-      , nonEmptyList /*defaultMulticastLocatorList*/
-      , nonEmptyList /*defaultUnicastLocatorList*/
-      , { 0 /*manualLivelinessCount*/ }
+      , unicastLocators // metatrafficUnicastLocatorList
+      , nonEmptyList    // metatrafficMulticastLocatorList
+      , nonEmptyList    // defaultMulticastLocatorList
+      , nonEmptyList    // defaultUnicastLocatorList
+      , {0} // manualLivelinessCount
       , qos.property
       , {PFLAGS_THIS_VERSION} // opendds_participant_flags
       , false // opendds_rtps_relay_application_participant
@@ -365,12 +397,9 @@ bool run_test()
       , availableExtendedBuiltinEndpoints
 #endif
     },
-    { // Duration_t (leaseDuration)
-      static_cast<CORBA::Long>((rd.resend_period() * 10).value().sec()),
-      0 // we are not supporting fractional seconds in the lease duration
-    },
-    { 0, 0},
-    0
+    // Duration_t (leaseDuration - we are not supporting fractional seconds)
+    {static_cast<CORBA::Long>((rd.resend_period() * 10).value().sec()), 0},
+    {0, 0}, 0
   };
 
   if (!OpenDDS::RTPS::ParameterListConverter::to_param_list(pdata, plist)) {
@@ -418,8 +447,7 @@ bool run_test()
     }
   }
 
-  // Sequence number starts at 8 and reverts to 6 to verify default reset
-  // limits.
+  // Sequence number starts at 8 and reverts to 6 to verify default reset limits.
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("Reset Within Limits Test\n")));
   bfirst = true;
   expect_participant = true;
@@ -487,7 +515,6 @@ bool run_test()
 
     if (seq.low == ACE_UINT32_MAX) {
       ++seq.high;
-
       if (seq.high < 0) {
         seq.high = 0;
       }
@@ -503,7 +530,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     ::DDS::DomainParticipantFactory_var dpf =
         TheServiceParticipant->get_domain_participant_factory();
   } catch (const CORBA::BAD_PARAM& ex) {
-    ex._tao_print_exception("Exception caught in rtps_reliability.cpp:");
+    ex._tao_print_exception("Exception caught in spdp_transport.cpp:");
     return 1;
   }
 
