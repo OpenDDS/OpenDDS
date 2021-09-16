@@ -1,4 +1,4 @@
-#include "DCPS/DdsDcps_pch.h"
+#include <DCPS/DdsDcps_pch.h>
 
 #include "TypeDescriptor.h"
 
@@ -9,7 +9,9 @@ namespace OpenDDS {
 namespace XTypes {
 
 TypeDescriptor::TypeDescriptor()
-  : kind(TK_NONE), extensibility_kind(FINAL), is_nested(false)
+  : kind(TK_NONE)
+  , extensibility_kind(FINAL)
+  , is_nested(false)
 {}
 
 TypeDescriptor::~TypeDescriptor()

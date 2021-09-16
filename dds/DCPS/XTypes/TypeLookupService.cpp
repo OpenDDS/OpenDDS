@@ -2,7 +2,7 @@
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
-#include "DCPS/DdsDcps_pch.h"
+#include <DCPS/DdsDcps_pch.h>
 
 #include "TypeLookupService.h"
 
@@ -563,7 +563,7 @@ void TypeLookupService::complete_to_dynamic_i(DynamicType_rch& dt,
       dt->insert_dynamic_member(dtm);
     }
     break;
-  case TK_BITMASK: {
+  case TK_BITMASK:
     td.kind = TK_BITMASK;
     td.name = cto.bitmask_type.header.detail.type_name;
     td.bound.length(1);
@@ -579,8 +579,7 @@ void TypeLookupService::complete_to_dynamic_i(DynamicType_rch& dt,
       dtm->set_parent(dt);
       dt->insert_dynamic_member(dtm);
     }
-  }
-  break;
+    break;
   // Structured TKs
   case TK_ANNOTATION:
     td.kind = TK_ANNOTATION;
@@ -654,7 +653,7 @@ void TypeLookupService::complete_to_dynamic_i(DynamicType_rch& dt,
   // Collection TKs
   case TK_SEQUENCE:
     td.kind = TK_SEQUENCE;
-    if(cto.sequence_type.header.detail.present == true) {
+    if (cto.sequence_type.header.detail.present) {
       td.name = cto.sequence_type.header.detail.value.type_name;
     } else {
       td.name = "";
@@ -663,16 +662,15 @@ void TypeLookupService::complete_to_dynamic_i(DynamicType_rch& dt,
     td.bound[0] = cto.sequence_type.header.common.bound;
     td.element_type = type_identifier_to_dynamic(cto.sequence_type.element.common.type, dt_map);
     break;
-  case TK_ARRAY: {
+  case TK_ARRAY:
     td.kind = TK_ARRAY;
     td.name = cto.array_type.header.detail.type_name;
     td.bound = cto.array_type.header.common.bound_seq;
     td.element_type = type_identifier_to_dynamic(cto.array_type.element.common.type, dt_map);
-  }
-  break;
+    break;
   case TK_MAP:
     td.kind = TK_MAP;
-    if (cto.map_type.header.detail.present == true) {
+    if (cto.map_type.header.detail.present) {
       td.name = cto.map_type.header.detail.value.type_name;
     } else {
       td.name = "";

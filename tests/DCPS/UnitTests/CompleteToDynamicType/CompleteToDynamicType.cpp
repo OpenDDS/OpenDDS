@@ -1,5 +1,5 @@
 /*
-Untested Types:
+TODO Untested Types:
 Map
 Annotation
 Bitmask
@@ -580,18 +580,14 @@ int main(int argc, char* argv[])
 
   tls->update_type_identifier_map(tid_pairs);
 
-  OpenDDS::DCPS::TypeSupportImpl* const inner_typesupport = new MyMod::MyInnerStructTypeSupportImpl;
-  OpenDDS::DCPS::TypeSupportImpl* const outer_typesupport = new MyMod::MyOuterStructTypeSupportImpl;
-  OpenDDS::DCPS::TypeSupportImpl* const union_typesupport = new MyMod::MyUnionTypeSupportImpl;
-  OpenDDS::DCPS::TypeSupportImpl* const anon_typesupport = new MyMod::MyAnonStructTypeSupportImpl;
-  inner_typesupport->add_types(tls);
-  outer_typesupport->add_types(tls);
-  union_typesupport->add_types(tls);
-  anon_typesupport->add_types(tls);
-  delete inner_typesupport;
-  delete outer_typesupport;
-  delete union_typesupport;
-  delete anon_typesupport;
+  MyMod::MyInnerStructTypeSupportImpl inner_typesupport;
+  MyMod::MyOuterStructTypeSupportImpl outer_typesupport;
+  MyMod::MyUnionTypeSupportImpl union_typesupport;
+  MyMod::MyAnonStructTypeSupportImpl anon_typesupport;
+  inner_typesupport.add_types(tls);
+  outer_typesupport.add_types(tls);
+  union_typesupport.add_types(tls);
+  anon_typesupport.add_types(tls);
 
   return RUN_ALL_TESTS();
 }

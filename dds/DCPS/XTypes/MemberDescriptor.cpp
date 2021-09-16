@@ -1,4 +1,4 @@
-#include "DCPS/DdsDcps_pch.h"
+#include <DCPS/DdsDcps_pch.h>
 
 #include "MemberDescriptor.h"
 
@@ -9,7 +9,13 @@ namespace OpenDDS {
 namespace XTypes {
 
 MemberDescriptor::MemberDescriptor()
-  : id(MEMBER_ID_INVALID), index(0), try_construct_kind(DISCARD), is_key(false), is_optional(false), is_must_understand(false), is_shared(false), is_default_label(false)
+  : id(MEMBER_ID_INVALID)
+  , index(0)
+  , try_construct_kind(DISCARD)
+  , is_key(false), is_optional(false)
+  , is_must_understand(false)
+  , is_shared(false)
+  , is_default_label(false)
 {}
 
 MemberDescriptor::~MemberDescriptor()
