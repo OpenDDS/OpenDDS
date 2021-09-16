@@ -26,7 +26,6 @@
 #include <ace/Reactor.h>
 #include <ace/SOCK_Dgram.h>
 
-#include <arpa/inet.h>
 #include <exception>
 #include <iostream>
 #include <netdb.h>
