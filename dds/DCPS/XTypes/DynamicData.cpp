@@ -58,135 +58,27 @@ DynamicData DynamicData::clone() const
 {
 }
 
-DDS::ReturnCode_t DynamicData::get_int32_value(ACE_CDR::Long& value, MemberId id) const
+template <typename ValueType, typename TypeKindCode>
+DDS::ReturnCode_t DynamicData::get_individual_value(ValueType& value, MemberId id)
 {
-  const OPENDDS_MAP<MemberId, size_t>::const_iterator it = offset_lookup_table_.find(id);
-  if (it != offset_lookup_table_.cend()) {
-    size_t offset = it->second;
-    std::ostringstream err_msg;
-    err_msg << "Failed to skip to the member with ID " << id;
-    if (!skip("get_int32_value", err_msg.str().c_str(), offset)) {
-      return DDS::RETCODE_ERROR;
-    }
-
-    if (!(strm_ >> value)) {
-      if (DCPS_debug_level >= 10) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_int32_value -")
-                   ACE_TEXT(" Failed to read an int32 member with ID %d\n"), id));
-      }
-      return DDS::RETCODE_ERROR;
-    }
-
+  DDS::ReturnCode_t retcode;
+  if (!find_member(id, TypeKindCode)) {
     reset_rpos();
-    return DDS::RETCODE_OK;
-  }
-
-  DynamicTypeMember_rch member;
-  DDS::ReturnCode_t retcode = type_->get_member(member, id);
-  if (retcode != DDS::RETCODE_OK) {
-    if (DCPS_debug_level >= 10) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_int32_value -")
-                 ACE_TEXT(" Failed to get DynamicTypeMember with ID %d\n"), id));
-    }
-    return retcode;
-  }
-
-  MemberDescriptor member_desc;
-  member->get_descriptor(member_desc);
-
-  if (member_desc.type->get_kind() != TK_INT32) {
-    if (DCPS_debug_level >= 10) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_int32_value -")
-                 ACE_TEXT(" Member with ID %d is not an int32\n"), id));
-    }
     return DDS::RETCODE_ERROR;
   }
 
-  ExtensibilityKind ek = descriptor_.extensibility_kind;
-  const Encoding& encoding = ser_.encoding();
-  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
-    if (ek == FINAL || ek == APPENDABLE) {
-      if (ek == APPENDABLE) {
-        size_t dheader = 0;
-        if (!strm_.read_delimiter(dheader)) {
-          if (DCPS_debug_level >= 10) {
-            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_int32_value -")
-                       ACE_TEXT(" Failed to read DHEADER for member ID %d\n"), id));
-          }
-          return DDS::RETCODE_ERROR;
-        }
-      }
-
-      // Skip preceding members until reach the requested member.
-      ACE_CDR::ULong i = 0;
-      while (i < member_desc.index) {
-        if (!skip_member_by_index(i)) {
-          if (DCPS_debug_level >= 10) {
-            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_int32_value -")
-                       ACE_TEXT(" Failed to skip member at index %d\n"), i));
-          }
-          return DDS::RETCODE_ERROR;
-        }
-        ++i;
-      }
-    } else {
-      size_t dheader = 0;
-      if (!strm_.read_delimiter(dheader)) {
-        if (DCPS_debug_level >= 10) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_int32_value -")
-                     ACE_TEXT(" Failed to read DHEADER for member ID %d\n"), id));
-        }
-        return DDS::RETCODE_ERROR;
-      }
-
-      const size_t end_of_sample = strm_.rpos() + dheader;
-      ACE_CDR::ULong member_id;
-      size_t member_size;
-      while (true) {
-        if (strm_.rpos() >= end_of_sample) {
-          if (DCPS_debug_level >= 10) {
-            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_int32_value -")
-                       ACE_TEXT(" Could not find an int32 member with ID %d\n"), id));
-          }
-          return DDS::RETCODE_ERROR;
-        }
-
-        bool must_understand = false;
-        if (!strm_.read_parameter_id(member_id, member_size, must_understand)) {
-          if (DCPS_debug_level >= 10) {
-            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_int32_value -")
-                       ACE_TEXT(" Failed to read EMHEADER while finding member ID %d\n"), id));
-          }
-          return DDS::RETCODE_ERROR;
-        }
-
-        if (member_id == id) {
-          break;
-        } else {
-          std::ostringstream err_msg;
-          err_msg << "Failed to skip a member with ID " << member_id;
-          if (!skip("get_int32_value", err_msg.str().c_str(), member_size)) {
-            return DDS::RETCODE_ERROR;
-          }
-        }
-      }
-    }
-
-    offset_lookup_table_[id] = strm_.rpos() - start_rpos_;
-    if (!(strm_ >> value)) {
-      if (DCPS_debug_level >= 10) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_int32_value -")
-                   ACE_TEXT(" Failed to read the int32 member with ID %d\n"), id));
-      }
-      return DDS::RETCODE_ERROR;
-    }
-  } else {
-    // TODO: Support encodings other than XCDR2?
-    return DDS::RETCODE_UNSUPPORTED;
+  bool good = strm_ >> value;
+  if (!good) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_int32_value -")
+               ACE_TEXT(" Failed to read a member with ID %d\n"), id));
   }
-
   reset_rpos();
-  return DDS::RETCODE_OK;
+  return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
+}
+
+DDS::ReturnCode_t DynamicData::get_int32_value(ACE_CDR::Long& value, MemberId id)
+{
+  return get_individual_value<ACE_CDR::Long, TK_INT32>(value, id);
 }
 
 DDS::ReturnCode_t DynamicData::set_int32_value(MemberId id, ACE_CDR::Long value)
@@ -195,8 +87,9 @@ DDS::ReturnCode_t DynamicData::set_int32_value(MemberId id, ACE_CDR::Long value)
   return DDS::RETCODE_UNSUPPORTED;
 }
 
-DDS::ReturnCode_t DynamicData::get_uint32_value(ACE_CDR::ULong& value, MemberId id) const
+DDS::ReturnCode_t DynamicData::get_uint32_value(ACE_CDR::ULong& value, MemberId id)
 {
+  return get_individual_value<ACE_CDR::ULong, TK_UINT32>(value, id);
 }
 
 DDS::ReturnCode_t DynamicData::set_uint32_value(MemberId id, ACE_CDR::ULong value)
@@ -205,8 +98,9 @@ DDS::ReturnCode_t DynamicData::set_uint32_value(MemberId id, ACE_CDR::ULong valu
   return DDS::RETCODE_UNSUPPORTED;
 }
 
-DDS::ReturnCode_t DynamicData::get_int8_value(ACE_CDR::Int8& value, MemberId id) const
+DDS::ReturnCode_t DynamicData::get_int8_value(ACE_CDR::Int8& value, MemberId id)
 {
+  return get_individual_value<ACE_CDR::Int8, TK_INT8>(value, id);
 }
 
 DDS::ReturnCode_t DynamicData::set_int8_value(MemberId id, ACE_CDR::Int8 value)
@@ -215,8 +109,9 @@ DDS::ReturnCode_t DynamicData::set_int8_value(MemberId id, ACE_CDR::Int8 value)
   return DDS::RETCODE_UNSUPPORTED;
 }
 
-DDS::ReturnCode_t DynamicData::get_uint8_value(ACE_CDR::UInt8& value, MemberId id) const
+DDS::ReturnCode_t DynamicData::get_uint8_value(ACE_CDR::UInt8& value, MemberId id)
 {
+  return get_individual_value<ACE_CDR::UInt8, TK_UINT8>(value, id);
 }
 
 DDS::ReturnCode_t DynamicData::set_uint8_value(MemberId id, ACE_CDR::UInt8 value)
@@ -225,8 +120,9 @@ DDS::ReturnCode_t DynamicData::set_uint8_value(MemberId id, ACE_CDR::UInt8 value
   return DDS::RETCODE_UNSUPPORTED;
 }
 
-DDS::ReturnCode_t DynamicData::get_int16_value(ACE_CDR::Short& value, MemberId id) const
+DDS::ReturnCode_t DynamicData::get_int16_value(ACE_CDR::Short& value, MemberId id)
 {
+  return get_individual_value<ACE_CDR::Short, TK_INT16>(value, id);
 }
 
 DDS::ReturnCode_t DynamicData::set_int16_value(MemberId id, ACE_CDR::Short value)
@@ -235,8 +131,9 @@ DDS::ReturnCode_t DynamicData::set_int16_value(MemberId id, ACE_CDR::Short value
   return DDS::RETCODE_UNSUPPORTED;
 }
 
-DDS::ReturnCode_t DynamicData::get_uint16_value(ACE_CDR::UShort& value, MemberId id) const
+DDS::ReturnCode_t DynamicData::get_uint16_value(ACE_CDR::UShort& value, MemberId id)
 {
+  return get_individual_value<ACE_CDR::UShort, TK_UINT16>(value, id);
 }
 
 DDS::ReturnCode_t DynamicData::set_uint16_value(MemberId id, ACE_CDR::UShort value)
@@ -245,8 +142,9 @@ DDS::ReturnCode_t DynamicData::set_uint16_value(MemberId id, ACE_CDR::UShort val
   return DDS::RETCODE_UNSUPPORTED;
 }
 
-DDS::ReturnCode_t DynamicData::get_int64_value(ACE_CDR::LongLong& value, MemberId id) const
+DDS::ReturnCode_t DynamicData::get_int64_value(ACE_CDR::LongLong& value, MemberId id)
 {
+  return get_individual_value<ACE_CDR::LongLong, TK_INT64>(value, id);
 }
 
 DDS::ReturnCode_t DynamicData::set_int64_value(MemberId id, ACE_CDR::LongLong value)
@@ -255,8 +153,9 @@ DDS::ReturnCode_t DynamicData::set_int64_value(MemberId id, ACE_CDR::LongLong va
   return DDS::RETCODE_UNSUPPORTED;
 }
 
-DDS::ReturnCode_t DynamicData::get_uint64_value(ACE_CDR::ULongLong& value, MemberId id) const
+DDS::ReturnCode_t DynamicData::get_uint64_value(ACE_CDR::ULongLong& value, MemberId id)
 {
+  return get_individual_value<ACE_CDR::ULongLong, TK_UINT64>(value, id);
 }
 
 DDS::ReturnCode_t DynamicData::set_uint64_value(MemberId id, ACE_CDR::ULongLong value)
@@ -265,8 +164,9 @@ DDS::ReturnCode_t DynamicData::set_uint64_value(MemberId id, ACE_CDR::ULongLong 
   return DDS::RETCODE_UNSUPPORTED;
 }
 
-DDS::ReturnCode_t DynamicData::get_float32_value(ACE_CDR::Float& value, MemberId id) const
+DDS::ReturnCode_t DynamicData::get_float32_value(ACE_CDR::Float& value, MemberId id)
 {
+  return get_individual_value<ACE_CDR::Float, TK_FLOAT32>(value, id);
 }
 
 DDS::ReturnCode_t DynamicData::set_float32_value(MemberId id, ACE_CDR::Float value)
@@ -275,8 +175,9 @@ DDS::ReturnCode_t DynamicData::set_float32_value(MemberId id, ACE_CDR::Float val
   return DDS::RETCODE_UNSUPPORTED;
 }
 
-DDS::ReturnCode_t DynamicData::get_float64_value(ACE_CDR::Double& value, MemberId id) const
+DDS::ReturnCode_t DynamicData::get_float64_value(ACE_CDR::Double& value, MemberId id)
 {
+  return get_individual_value<ACE_CDR::Double, TK_FLOAT64>(value, id);
 }
 
 DDS::ReturnCode_t DynamicData::set_float64_value(MemberId id, ACE_CDR::Double value)
@@ -285,8 +186,9 @@ DDS::ReturnCode_t DynamicData::set_float64_value(MemberId id, ACE_CDR::Double va
   return DDS::RETCODE_UNSUPPORTED;
 }
 
-DDS::ReturnCode_t DynamicData::get_float128_value(ACE_CDR::LongDouble& value, MemberId id) const
+DDS::ReturnCode_t DynamicData::get_float128_value(ACE_CDR::LongDouble& value, MemberId id)
 {
+  return get_individual_value<ACE_CDR::LongDouble, TK_FLOAT128>(value, id);
 }
 
 DDS::ReturnCode_t DynamicData::set_float128_value(MemberId id, ACE_CDR::LongDouble value)
@@ -295,8 +197,9 @@ DDS::ReturnCode_t DynamicData::set_float128_value(MemberId id, ACE_CDR::LongDoub
   return DDS::RETCODE_UNSUPPORTED;
 }
 
-DDS::ReturnCode_t DynamicData::get_char8_value(ACE_CDR::Char& value, MemberId id) const
+DDS::ReturnCode_t DynamicData::get_char8_value(ACE_CDR::Char& value, MemberId id)
 {
+  return get_individual_value<ACE_CDR::Char, TK_CHAR8>(value, id);
 }
 
 DDS::ReturnCode_t DynamicData::set_char8_value(MemberId id, ACE_CDR::Char value)
@@ -305,8 +208,9 @@ DDS::ReturnCode_t DynamicData::set_char8_value(MemberId id, ACE_CDR::Char value)
   return DDS::RETCODE_UNSUPPORTED;
 }
 
-DDS::ReturnCode_t DynamicData::get_char16_value(ACE_CDR::WChar& value, MemberId id) const
+DDS::ReturnCode_t DynamicData::get_char16_value(ACE_CDR::WChar& value, MemberId id)
 {
+  return get_individual_value<ACE_CDR::WChar, TK_CHAR16>(value, id);
 }
 
 DDS::ReturnCode_t DynamicData::set_char16_value(MemberId id, ACE_CDR::WChar value)
@@ -315,8 +219,9 @@ DDS::ReturnCode_t DynamicData::set_char16_value(MemberId id, ACE_CDR::WChar valu
   return DDS::RETCODE_UNSUPPORTED;
 }
 
-DDS::ReturnCode_t DynamicData::get_byte_value(ACE_CDR::Octet& value, MemberId id) const
+DDS::ReturnCode_t DynamicData::get_byte_value(ACE_CDR::Octet& value, MemberId id)
 {
+  return get_individual_value<ACE_CDR::Octet, TK_BYTE>(value, id);
 }
 
 DDS::ReturnCode_t DynamicData::set_byte_value(MemberId id, ACE_CDR::Octet value)
@@ -325,8 +230,9 @@ DDS::ReturnCode_t DynamicData::set_byte_value(MemberId id, ACE_CDR::Octet value)
   return DDS::RETCODE_UNSUPPORTED;
 }
 
-DDS::ReturnCode_t DynamicData::get_boolean_value(ACE_CDR::Boolean& value, MemberId id) const
+DDS::ReturnCode_t DynamicData::get_boolean_value(ACE_CDR::Boolean& value, MemberId id)
 {
+  return get_individual_value<ACE_CDR::Boolean, TK_BOOLEAN>(value, id);
 }
 
 DDS::ReturnCode_t DynamicData::set_boolean_value(MemberId id, ACE_CDR::Boolean value)
@@ -335,8 +241,9 @@ DDS::ReturnCode_t DynamicData::set_boolean_value(MemberId id, ACE_CDR::Boolean v
   return DDS::RETCODE_UNSUPPORTED;
 }
 
-DDS::ReturnCode_t DynamicData::get_string_value(DCPS::String& value, MemberId id) const
+DDS::ReturnCode_t DynamicData::get_string_value(DCPS::String& value, MemberId id)
 {
+  return get_individual_value<DCPS::String, TK_STRING8>(value, id);
 }
 
 DDS::ReturnCode_t DynamicData::set_string_value(MemberId id, DCPS::String value)
@@ -345,8 +252,9 @@ DDS::ReturnCode_t DynamicData::set_string_value(MemberId id, DCPS::String value)
   return DDS::RETCODE_UNSUPPORTED;
 }
 
-DDS::ReturnCode_t DynamicData::get_wstring_value(DCPS::WString& value, MemberId id) const
+DDS::ReturnCode_t DynamicData::get_wstring_value(DCPS::WString& value, MemberId id)
 {
+  return get_individual_value<DCPS::WString, TK_STRING16>(value, id);
 }
 
 DDS::ReturnCode_t DynamicData::set_wstring_value(MemberId id, DCPS::WString value)
@@ -355,7 +263,7 @@ DDS::ReturnCode_t DynamicData::set_wstring_value(MemberId id, DCPS::WString valu
   return DDS::RETCODE_UNSUPPORTED;
 }
 
-DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id) const
+DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id)
 {
 }
 
@@ -535,6 +443,122 @@ DDS::ReturnCode_t DynamicData::set_wstring_values(MemberId id, const WStringSeq&
   return DDS::RETCODE_UNSUPPORTED;
 }
 
+bool DynamicData::find_member(MemberId id, TypeKind kind)
+{
+  const OPENDDS_MAP<MemberId, size_t>::const_iterator it = offset_lookup_table_.find(id);
+  if (it != offset_lookup_table_.end()) {
+    const size_t offset = it->second;
+    std::ostringstream err_msg;
+    err_msg << "Failed to skip to the member with ID " << id;
+    if (!skip("find_member", err_msg.str().c_str(), offset)) {
+      return false;
+    }
+    return true;
+  }
+
+  DynamicTypeMember_rch member;
+  const DDS::ReturnCode_t retcode = type_->get_member(member, id);
+  if (retcode != DDS::RETCODE_OK) {
+    if (DCPS_debug_level >= 10) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::find_member -")
+                 ACE_TEXT(" Failed to get DynamicTypeMember for member with ID %d\n"), id));
+    }
+    return false;
+  }
+
+  MemberDescriptor member_desc;
+  member->get_descriptor(member_desc);
+  const TypeKind member_kind = member_desc.type->get_kind();
+
+  if (member_kind != kind) {
+    if (DCPS_debug_level >= 10) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::find_member -")
+                 ACE_TEXT(" Member with ID %d has kind %C, not %C\n"),
+                 id, typekind_to_string(member_kind), typekind_to_string(kind)));
+    }
+    return false;
+  }
+
+  const ExtensibilityKind ek = descriptor_.extensibility_kind;
+  const Encoding& encoding = ser_.encoding();
+  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
+    if (ek == FINAL || ek == APPENDABLE) {
+      if (ek == APPENDABLE) {
+        size_t dheader = 0;
+        if (!strm_.read_delimiter(dheader)) {
+          if (DCPS_debug_level >= 10) {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::find_member -")
+                       ACE_TEXT(" Failed to read DHEADER for member ID %d\n"), id));
+          }
+          return false;
+        }
+      }
+
+      // Skip preceding members until reach the requested member.
+      ACE_CDR::ULong i = 0;
+      while (i < member_desc.index) {
+        if (!skip_member_by_index(i)) {
+          if (DCPS_debug_level >= 10) {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::find_member -")
+                       ACE_TEXT(" Failed to skip member at index %d\n"), i));
+          }
+          return false;
+        }
+        ++i;
+      }
+    } else {
+      size_t dheader = 0;
+      if (!strm_.read_delimiter(dheader)) {
+        if (DCPS_debug_level >= 10) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::find_member -")
+                     ACE_TEXT(" Failed to read DHEADER for member ID %d\n"), id));
+        }
+        return false;
+      }
+
+      const size_t end_of_sample = strm_.rpos() + dheader;
+      ACE_CDR::ULong member_id;
+      size_t member_size;
+      while (true) {
+        if (strm_.rpos() >= end_of_sample) {
+          if (DCPS_debug_level >= 10) {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::find_member -")
+                       ACE_TEXT(" Could not find a member of kind %C with ID %d\n"),
+                       typekind_to_string(kind), id));
+          }
+          return false;
+        }
+
+        bool must_understand = false;
+        if (!strm_.read_parameter_id(member_id, member_size, must_understand)) {
+          if (DCPS_debug_level >= 10) {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::find_member -")
+                       ACE_TEXT(" Failed to read EMHEADER while finding member ID %d\n"), id));
+          }
+          return false;
+        }
+
+        if (member_id == id) {
+          break;
+        } else {
+          std::ostringstream err_msg;
+          err_msg << "Failed to skip a member with ID " << member_id;
+          if (!skip("find_member", err_msg.str().c_str(), member_size)) {
+            return false;
+          }
+        }
+      }
+    }
+    offset_lookup_table_[id] = strm_.rpos() - start_rpos_;
+
+  } else {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DynamicData::find_member - The sample has")
+               ACE_TEXT(" unsupported encoding type %C"),
+               encoding.xcdr_version() == Encoding::XCDR_VERSION_1 ? "XCDR1" : "Non-XCDR"));
+    return false;
+  }
+}
+
 void DynamicData::reset_rpos()
 {
   // TODO(sonndinh): Move the read pointer to the beginning of the stream.
@@ -553,9 +577,7 @@ bool DynamicData::skip_member_by_index(ACE_CDR::ULong index)
 
   MemberDescriptor member_descriptor;
   member->get_descriptor(member_descriptor);
-  DynamicType_rch member_type = member_descriptor.type;
-
-  return skip_member(member_type);
+  return skip_member(member_descriptor.type);
 }
 
 bool DynamicData::skip_member(DynamicType_rch member_type)
@@ -669,27 +691,9 @@ bool DynamicData::skip_member(DynamicType_rch member_type)
     return skip_map_member(member_type);
   default:
     {
-      const char* kind = 0;
-      switch (member_kind) {
-      case TK_ANNOTATION:
-        // Annotation can't be a member of another type.
-        kind = "TK_ANNOTATION";
-        break;
-      case TK_BITSET:
-        // The spec doesn't give enough information on bitset.
-        kind = "TK_BITSET";
-        break;
-      case TK_NONE:
-        kind = "TK_NONE";
-        break;
-      default:
-        kind = "Unknown";
-        break;
-      }
-
       if (DCPS_debug_level >= 10) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::skip_member -")
-                   ACE_TEXT(" Found a member with kind %C\n"), kind));
+                   ACE_TEXT(" Found a member of kind %C\n"), typekind_to_string(member_kind)));
       }
       return false;
     }
@@ -794,16 +798,10 @@ bool DynamicData::skip_map_member(DynamicType_rch map_type)
 
 bool DynamicData::skip_collection_member(TypeKind kind)
 {
-  const char* kind_str = 0;
-  if (kind == TK_SEQUENCE) {
-    kind_str = "sequence";
-  } else if (kind == TK_ARRAY) {
-    kind_str = "array";
-  } else if (kind == TK_MAP) {
-    kind_str = "map";
-  } else {
+  if (kind != TK_SEQUENCE && kind != TK_ARRAY && kind != TK_MAP) {
     return false;
   }
+  const char* kind_str = typekind_to_string(kind);
 
   ACE_CDR::ULong dheader;
   if (!(strm_ >> dheader)) {
@@ -837,10 +835,10 @@ bool DynamicData::skip_union_member(DynamicType_rch union_type)
 
 bool DynamicData::skip_all()
 {
-  ExtensibilityKind extensibility = descriptor_.extensibility_kind;
+  const ExtensibilityKind extensibility = descriptor_.extensibility_kind;
 
   if (extensibility == APPENDABLE || extensibility == MUTABLE) {
-    ACE_CdR::ULong dheader;
+    ACE_CDR::ULong dheader;
     if (!(strm_ >> dheader)) {
       if (DCPS_debug_level >= 10) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::skip_all - Failed to read")
@@ -971,13 +969,11 @@ bool DynamicData::skip_all()
           break;
         }
       default:
-        {
-          if (DCPS_debug_level >= 10) {
-            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::skip_all - Union type has")
-                       ACE_TEXT(" unsupported discriminator type\n")));
-          }
-          return false;
+        if (DCPS_debug_level >= 10) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::skip_all - Union type has")
+                     ACE_TEXT(" unsupported discriminator type\n")));
         }
+        return false;
       }
 
       // Then, skip the selected member.
@@ -1060,6 +1056,68 @@ bool DynamicData::is_primitive(DynamicType_rch type, ACE_CDR::ULong& size) const
     return false;
   }
   return true;
+}
+
+const char* typekind_to_string(TypeKind tk) const
+{
+  switch (tk) {
+  case TK_BOOLEAN:
+    return "boolean";
+  case TK_BYTE:
+    return "byte";
+  case TK_INT16:
+    return "int16";
+  case TK_INT32:
+    return "int32";
+  case TK_INT64:
+    return "int64";
+  case TK_UINT16:
+    return "uint16";
+  case TK_UINT32:
+    return "uint32";
+  case TK_UINT64:
+    return "uint64";
+  case TK_FLOAT32:
+    return "float32";
+  case TK_FLOAT64:
+    return "float64";
+  case TK_FLOAT128:
+    return "float128";
+  case TK_INT8:
+    return "int8";
+  case TK_UINT8:
+    return "uint8";
+  case TK_CHAR8:
+    return "char8";
+  case TK_CHAR16:
+    return "char16";
+  case TK_STRING8:
+    return "string";
+  case TK_STRING16:
+    return "wstring";
+  case TK_ALIAS:
+    return "alias";
+  case TK_ENUM:
+    return "enum";
+  case TK_BITMASK:
+    return "bitmask";
+  case TK_ANNOTATION:
+    return "annotation";
+  case TK_STRUCTURE:
+    return "structure";
+  case TK_UNION:
+    return "union";
+  case TK_BITSET:
+    return "bitset";
+  case TK_SEQUENCE:
+    return "sequence";
+  case TK_ARRAY:
+    return "array";
+  case TK_MAP:
+    return "map";
+  default:
+    return "unknown";
+  }
 }
 
 } // namespace XTypes

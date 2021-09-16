@@ -164,21 +164,27 @@ public:
   DDS::ReturnCode_t get_wstring_values(WStringSeq& value, MemberId id) const;
   DDS::ReturnCode_t set_wstring_values(MemberId id, const WStringSeq& value);
 
-  // Skip the whole part of the data stream that corresponds to this type.
-  // This is called by a containing type when it wants to skip a member which
-  // is an object of this type.
+  /// Skip the whole part of the data stream that corresponds to this type.
+  /// This is called by a containing type when it wants to skip a member which
+  /// is an object of this type.
   bool skip_all();
 
 private:
 
-  // Reset the read pointer to point to the beginning of the stream.
-  void reset_stream();
+  template <typename ValueType, typename TypeKindCode>
+  DDS::ReturnCode_t get_individual_value(ValueType& value, MemberId id);
+
+  /// Move the read pointer to the member with a given ID and type kind.
+  bool find_member(MemberId id, TypeKind kind);
+
+  /// Reset the read pointer to point to the beginning of the stream.
+  void reset_rpos();
 
   bool skip(const char* func_name, const char* description, size_t n, int size = 1);
 
-  // Skip a member at the given index of a final or appendable type.
-  // Assuming that when the method is called, the read position of the stream
-  // is at the beginning of the member.
+  /// Skip a member at the given index of a final or appendable type.
+  /// When the method is called, the read position of the stream
+  /// must be at the beginning of the member.
   bool skip_member_by_index(ACE_CDR::ULong index);
   bool skip_member(DynamicType_rch type);
 
@@ -186,9 +192,8 @@ private:
   bool skip_array_member(DynamicType_rch type);
   bool skip_map_member(DynamicType_rch type);
 
-  // Skip a non-primitive collection member. That is, sequences of non-primitive elements,
-  // arrays of non-primitive elements, or maps with at least either key type or value type
-  // is non-primitive.
+  /// Skip a non-primitive collection member. That is, a sequence or an array of non-primitive
+  /// elements, or a map with at least either key type or value type is non-primitive.
   bool skip_collection_member(TypeKind tk);
 
   bool skip_struct_member(DynamicType_rch type);
@@ -197,6 +202,7 @@ private:
   // These helper methods can be moved to DynamicType class.
   DynamicType_rch get_base_type(DynamicType_rch alias_type) const;
   bool is_primitive(DynamicType_rch type, ACE_CDR::ULong& size) const;
+  const char* typekind_to_string(TypeKind tk) const;
 
   Serializer& strm_;
   const size_t start_rpos_;
@@ -204,8 +210,8 @@ private:
   DynamicType_rch type_;
   TypeDescriptor descriptor_;
 
-  // Cache the offset from the point in the stream where the data of this DynamicData object
-  // starts to the point where a member with a given ID starts.
+  /// Cache the offset from the point in the stream where the data of this DynamicData object
+  /// starts to the point where a member with a given ID starts.
   OPENDDS_MAP<MemberId, size_t> offset_lookup_table_;
 };
 
