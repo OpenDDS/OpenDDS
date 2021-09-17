@@ -29,12 +29,12 @@
 #include <exception>
 #include <iostream>
 #include <string>
-#include <unistd.h>
 
-#ifdef _WIN32
+#if defined _WIN64 || defined _WIN32
 #include <winsock.h>
 #else
 #include <arpa/inet.h>
+#include <unistd.h>
 #endif
 
 using namespace OpenDDS::DCPS;
