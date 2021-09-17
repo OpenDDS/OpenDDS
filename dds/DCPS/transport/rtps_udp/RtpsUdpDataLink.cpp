@@ -3231,38 +3231,40 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
 
   // Process the nack.
   bool schedule_nack_response = false;
-  if (count_is_not_zero) {
-    reader->requests_.reset();
-    {
-      const SingleSendBuffer::Proxy proxy(*send_buff_);
-      if ((acknack.readerSNState.numBits == 0 ||
-           (acknack.readerSNState.numBits == 1 && !(acknack.readerSNState.bitmap[0] & 1)))
-          && ack == max_data_seq(proxy, reader)) {
-        // Since there is an entry in requested_changes_, the DR must have
-        // sent a non-final AckNack.  If the base value is the high end of
-        // the heartbeat range, treat it as a request for that seq#.
-        if (reader->durable_data_.count(ack) || proxy.contains(ack) || proxy.pre_contains(ack)) {
-          reader->requests_.insert(ack);
+  if (!dont_schedule_nack_response) {
+    if (count_is_not_zero) {
+      reader->requests_.reset();
+      {
+        const SingleSendBuffer::Proxy proxy(*send_buff_);
+        if ((acknack.readerSNState.numBits == 0 ||
+             (acknack.readerSNState.numBits == 1 && !(acknack.readerSNState.bitmap[0] & 1)))
+            && ack == max_data_seq(proxy, reader)) {
+          // Since there is an entry in requested_changes_, the DR must have
+          // sent a non-final AckNack.  If the base value is the high end of
+          // the heartbeat range, treat it as a request for that seq#.
+          if (reader->durable_data_.count(ack) || proxy.contains(ack) || proxy.pre_contains(ack)) {
+            reader->requests_.insert(ack);
+          }
+        } else {
+          reader->requests_.insert(ack, acknack.readerSNState.numBits, acknack.readerSNState.bitmap.get_buffer());
         }
-      } else {
-        reader->requests_.insert(ack, acknack.readerSNState.numBits, acknack.readerSNState.bitmap.get_buffer());
-      }
 
-      if (!reader->requests_.empty()) {
-        readers_expecting_data_.insert(reader);
-        if (link->config().responsive_mode_) {
-          readers_expecting_heartbeat_.insert(reader);
+        if (!reader->requests_.empty()) {
+          readers_expecting_data_.insert(reader);
+          if (link->config().responsive_mode_) {
+            readers_expecting_heartbeat_.insert(reader);
+          }
+          schedule_nack_response = true;
+        } else {
+          readers_expecting_data_.erase(reader);
         }
-        schedule_nack_response = true;
-      } else {
-        readers_expecting_data_.erase(reader);
       }
     }
-  }
 
-  if (!is_final) {
-    readers_expecting_heartbeat_.insert(reader);
-    schedule_nack_response = true;
+    if (!is_final) {
+      readers_expecting_heartbeat_.insert(reader);
+      schedule_nack_response = true;
+    }
   }
 
   if (preassociation_readers_.count(reader) == 0) {
