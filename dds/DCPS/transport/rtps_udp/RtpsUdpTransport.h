@@ -191,6 +191,7 @@ private:
 #endif
 
   RelayMessageCounts relay_message_counts_;
+  ACE_Thread_Mutex relay_message_counts_mutex_;
 
   friend class RtpsUdpSendStrategy;
   friend class RtpsUdpReceiveStrategy;

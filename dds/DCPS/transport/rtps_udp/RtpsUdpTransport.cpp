@@ -430,8 +430,9 @@ RtpsUdpTransport::update_locators(const RepoId& remote,
 void
 RtpsUdpTransport::get_and_reset_relay_message_counts(RelayMessageCounts& counts)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, relay_message_counts_mutex_);
   counts = relay_message_counts_;
-  counts.reset();
+  relay_message_counts_.reset();
 }
 
 bool
@@ -728,6 +729,7 @@ void
 RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN::Message& message)
 {
   if (destination == transport.config().rtps_relay_address()) {
+    ACE_GUARD(ACE_Thread_Mutex, g, transport.relay_message_counts_mutex_);
     ++transport.relay_message_counts_.stun_send;
   }
 
@@ -741,10 +743,16 @@ RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN
   iovec iov[MAX_SEND_BLOCKS];
   const int num_blocks = RtpsUdpSendStrategy::mb_to_iov(block, iov);
   const ssize_t result = send_single_i(socket, iov, num_blocks, destination, network_is_unreachable_);
-  if (result < 0 && !network_is_unreachable_) {
-    const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
-    ACE_ERROR((prio, "(%P|%t) RtpsUdpTransport::send() - "
-               "failed to send STUN message\n"));
+  if (result < 0) {
+    if (destination == transport.config().rtps_relay_address()) {
+      ACE_GUARD(ACE_Thread_Mutex, g, transport.relay_message_counts_mutex_);
+      ++transport.relay_message_counts_.stun_send_fail;
+    }
+    if (!network_is_unreachable_) {
+      const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
+      ACE_ERROR((prio, "(%P|%t) RtpsUdpTransport::send() - "
+                 "failed to send STUN message\n"));
+    }
   }
 }
 

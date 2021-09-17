@@ -251,8 +251,10 @@ static const ConnectionInfoFlags CONNINFO_ALL = static_cast<ConnectionInfoFlags>
 
 struct RelayMessageCounts {
   unsigned long rtps_send;
+  unsigned long rtps_send_fail;
   unsigned long rtps_recv;
   unsigned long stun_send;
+  unsigned long stun_send_fail;
   unsigned long stun_recv;
 
   RelayMessageCounts()
@@ -263,8 +265,10 @@ struct RelayMessageCounts {
   void reset()
   {
     rtps_send = 0;
+    rtps_send_fail = 0;
     rtps_recv = 0;
     stun_send = 0;
+    stun_send_fail = 0;
     stun_recv = 0;
   }
 };

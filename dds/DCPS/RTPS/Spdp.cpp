@@ -2723,9 +2723,11 @@ void
 Spdp::get_and_reset_relay_message_counts(DCPS::RelayMessageCounts& spdp,
                                          DCPS::RelayMessageCounts& sedp)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  spdp = tport_->relay_message_counts_;
-  tport_->relay_message_counts_.reset();
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    spdp = tport_->relay_message_counts_;
+    tport_->relay_message_counts_.reset();
+  }
   sedp_->get_and_reset_relay_message_counts(sedp);
 }
 
@@ -2828,8 +2830,11 @@ Spdp::SpdpTransport::send(WriteFlags flags, const ACE_INET_Addr& local_address)
   const ACE_INET_Addr relay_address = outer->config_->spdp_rtps_relay_address();
   if (((flags & SEND_RELAY) || outer->config_->rtps_relay_only()) &&
       relay_address != ACE_INET_Addr()) {
-    send(relay_address);
+    ssize_t res = send(relay_address);
     ++relay_message_counts_.rtps_send;
+    if (res < 0) {
+      ++relay_message_counts_.rtps_send_fail;
+    }
   }
 }
 
@@ -2845,7 +2850,7 @@ Spdp::SpdpTransport::choose_send_socket(const ACE_INET_Addr& addr) const
   return unicast_socket_;
 }
 
-void
+ssize_t
 Spdp::SpdpTransport::send(const ACE_INET_Addr& addr)
 {
   const ACE_SOCK_Dgram& socket = choose_send_socket(addr);
@@ -2866,6 +2871,8 @@ Spdp::SpdpTransport::send(const ACE_INET_Addr& addr)
   } else {
     network_is_unreachable_ = false;
   }
+
+  return res;
 }
 
 const ACE_SOCK_Dgram&
@@ -2968,6 +2975,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
     }
 
     if (from_relay) {
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, outer->lock_, -1);
       ++relay_message_counts_.rtps_recv;
     }
 
@@ -3115,6 +3123,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
   message.block = &buff_;
   if (serializer >> message) {
     if (from_relay) {
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, outer->lock_, -1);
       ++relay_message_counts_.stun_recv;
     }
 
@@ -3219,6 +3228,7 @@ Spdp::SendStun::execute()
   const ssize_t res = socket.send(tport->wbuff_.rd_ptr(), tport->wbuff_.length(), address_);
 
   if (address_ == outer->config_->spdp_stun_server_address()) {
+    // Have the lock.
     ++tport->relay_message_counts_.stun_send;
   }
 
