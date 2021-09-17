@@ -1368,7 +1368,7 @@ namespace {
           string indent = "  ";
           NestedForLoops nfl("CORBA::ULong", "i", arr, indent);
           const std::string elem_access = wrapper.value_access() + nfl.index_;
-    
+
           Intro intro;
           std::string stream;
           std::string classic_array_copy;
@@ -1386,7 +1386,7 @@ namespace {
           intro.join(be_global->impl_, indent);
           be_global->impl_ <<
             indent << "if (!" << stream << ") {\n";
-    
+
           indent += "  ";
           if (try_construct == tryconstructfailaction_use_default) {
             be_global->impl_ <<
