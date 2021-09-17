@@ -28,12 +28,14 @@
 
 #include <exception>
 #include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string>
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <unistd.h>
+
+#ifdef _WIN32
+#include <winsock.h>
+#else
+#include <arpa/inet.h>
+#endif
 
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
@@ -257,18 +259,12 @@ struct ReactorTask : ACE_Task_Base {
   }
 };
 
-bool get_local_ip(OpenDDS::DCPS::OctetArray16 address)
+void get_local_ip(OpenDDS::DCPS::OctetArray16 address)
 {
-  char hostname[256];
-  if (gethostname(hostname, sizeof(hostname)) == 0) {
-    struct hostent* host = gethostbyname(hostname);
-    if (host) {
-      std::memset(address, 0, 12);
-      std::memcpy(&address[12], &(((struct in_addr*)(host->h_addr_list[0]))->s_addr), 4);
-      return true;
-    }
-  }
-  return false;
+  const String hostname = get_fully_qualified_hostname();
+  const ACE_INET_Addr addr = choose_single_coherent_address(hostname + ":54321", false);
+  std::memset(address, 0, 12);
+  *(ACE_UINT32*)(&address[12]) = ntohl(addr.get_ip_address());
 }
 
 bool run_test()
@@ -359,10 +355,7 @@ bool run_test()
   unicastLocators.length(1);
   unicastLocators[0].port = 54321;
   unicastLocators[0].kind = LOCATOR_KIND_UDPv4;
-  if (!get_local_ip(unicastLocators[0].address)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: spdp_transport:run_test - get_local_ip failed\n")));
-    return false;
-  }
+  get_local_ip(unicastLocators[0].address);
 
   const OpenDDS::RTPS::SPDPdiscoveredParticipantData pdata = {
     {DDS::BuiltinTopicKey_t(), qos.user_data},
