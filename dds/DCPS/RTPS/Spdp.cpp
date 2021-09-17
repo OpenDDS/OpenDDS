@@ -1015,22 +1015,22 @@ Spdp::data_received(const DataSubmessage& data,
   }
 
   const bool from_relay = from == config_->spdp_rtps_relay_address();
+#ifdef OPENDDS_SECURITY
+  if (!from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList) && !ip_in_AgentInfo(from, plist)) {
+    if (DCPS::DCPS_debug_level) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Spdp::data_received - dropped IP: %C\n"), DCPS::LogAddr(from).c_str()));
+    }
+    return;
+  }
+  if (!is_security_enabled()) {
+    process_participant_ice(plist, pdata, guid);
+  }
+#else
   if (!from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList)) {
     if (DCPS::DCPS_debug_level) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Spdp::data_received - IP not in locator list: %C\n"), DCPS::LogAddr(from).c_str()));
     }
     return;
-  }
-
-#ifdef OPENDDS_SECURITY
-  if (!is_security_enabled()) {
-    if (!ip_in_AgentInfo(from, plist)) {
-      if (DCPS::DCPS_debug_level) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Spdp::data_received - IP not in AgentInfo: %C\n"), DCPS::LogAddr(from).c_str()));
-      }
-      return;
-    }
-    process_participant_ice(plist, pdata, guid);
   }
 #endif
 
