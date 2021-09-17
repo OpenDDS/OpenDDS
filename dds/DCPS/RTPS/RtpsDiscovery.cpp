@@ -51,6 +51,9 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , min_resend_delay_(TimeDuration::from_msec(100))
   , lease_duration_(300)
   , max_lease_duration_(300)
+#ifdef OPENDDS_SECURITY
+  , security_unsecure_lease_duration_(30)
+#endif
   , lease_extension_(0)
   , pb_(7400) // see RTPS v2.1 9.6.1.3 for PB, DG, PG, D0, D1 defaults
   , dg_(250)
@@ -211,6 +214,19 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
               value.c_str(), rtps_name.c_str()), -1);
           }
           config->max_lease_duration(TimeDuration(duration));
+#ifdef OPENDDS_SECURITY
+        } else if (name == "SecurityUnsecureLeaseDuration") {
+          const OPENDDS_STRING& value = it->second;
+          int duration;
+          if (!DCPS::convertToInteger(value, duration)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+              ACE_TEXT("Invalid entry (%C) for SecurityUnsecureLeaseDuration in ")
+              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->security_unsecure_lease_duration(TimeDuration(duration));
+#endif
         } else if (name == "LeaseExtension") {
           const OPENDDS_STRING& value = it->second;
           int extension;
