@@ -1433,11 +1433,11 @@ namespace {
             indent << "}\n";
         }
         be_global->impl_ <<
-            "  if (discard_flag) {\n"
-            "    strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
-            "    return false;\n"
-            "  }\n"
-            "  return true;\n";
+          "  if (discard_flag) {\n"
+          "    strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+          "    return false;\n"
+          "  }\n"
+          "  return true;\n";
       }
     }
   }
