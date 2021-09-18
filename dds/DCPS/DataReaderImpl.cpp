@@ -247,7 +247,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
     if (GUID_UNKNOWN == subscription_id_) {
       subscription_id_ = yourId;
       has_subscription_id_ = true;
-      subscription_id_condition_.broadcast();
+      subscription_id_condition_.notify_all();
     }
   }
 
@@ -1327,7 +1327,7 @@ DataReaderImpl::enable()
       ACE_Guard<ACE_Thread_Mutex> guard(subscription_id_mutex_);
       subscription_id_ = subscription_id;
       has_subscription_id_ = true;
-      subscription_id_condition_.broadcast();
+      subscription_id_condition_.notify_all();
     }
 
     if (subscription_id == GUID_UNKNOWN) {

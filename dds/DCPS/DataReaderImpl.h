@@ -670,7 +670,7 @@ protected:
 
   bool has_subscription_id_;
   mutable ACE_Thread_Mutex subscription_id_mutex_;
-  mutable ACE_Condition<ACE_Thread_Mutex> subscription_id_condition_;
+  mutable ConditionVariable<ACE_Thread_Mutex> subscription_id_condition_;
 
   unique_ptr<ReceivedDataAllocator> rd_allocator_;
   DDS::DataReaderQos qos_;
