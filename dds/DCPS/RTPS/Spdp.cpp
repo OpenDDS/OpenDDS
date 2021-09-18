@@ -667,6 +667,26 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         pdata.leaseDuration.seconds, DCPS::LogAddr(from).c_str(), participants_.size()));
     }
 
+    if (!from_sedp) {
+#ifdef OPENDDS_SECURITY
+      if (is_security_enabled()) {
+        pdata.leaseDuration.seconds = config_->security_unsecure_lease_duration().to_dds_duration().sec;
+      } else {
+#endif
+        ::CORBA::Long maxLeaseDuration = config_->max_lease_duration().to_dds_duration().sec;
+        if (maxLeaseDuration && pdata.leaseDuration.seconds > maxLeaseDuration) {
+          if (DCPS::DCPS_debug_level >= 2) {
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) Spdp::handle_participant_data - overwriting %C lease %ds from %C with %ds\n"),
+              DCPS::LogGuid(guid).c_str(),
+              pdata.leaseDuration.seconds, DCPS::LogAddr(from).c_str(), maxLeaseDuration));
+          }
+          pdata.leaseDuration.seconds = maxLeaseDuration;
+        }
+#ifdef OPENDDS_SECURITY
+      }
+#endif
+    }
     if (tport_->directed_sender_) {
       if (tport_->directed_guids_.empty()) {
         tport_->directed_sender_->schedule(TimeDuration::zero_value);
