@@ -2962,9 +2962,15 @@ jobs:
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
-        echo "leak:getaddrinfo" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
-        export LSAN_OPTIONS=suppressions=$GITHUB_WORKSPACE/OpenDDS/suppr.txt
-        export ASAN_OPTIONS=detect_leaks=1:fast_unwind_on_malloc=0
+        echo "deadlock:ACE_Data_Block::release_no_delete" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        echo "deadlock:CORBA::ORB_init" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        echo "deadlock:TAO_IIOP_Connection_Handler" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        echo "race:ACE_Event_Handler::reactor" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        echo "race:ACE_Thread_Exit::instance" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        echo "race:TAO_IIOP_Connection_Handler" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        echo "race:TAO_Leader_Follower" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        echo "race:TAO_ORB_Core" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        export TSAN_OPTIONS=suppressions=$GITHUB_WORKSPACE/OpenDDS/suppr.txt
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v2

@@ -189,7 +189,7 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
 
   GuardThreadType guard_links(links_lock_);
 
-  if (is_shut_down_) {
+  if (is_shut_down()) {
     return AcceptConnectResult();
   }
 
@@ -224,7 +224,7 @@ RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
 
   GuardThreadType guard_links(links_lock_);
 
-  if (is_shut_down_) {
+  if (is_shut_down()) {
     return AcceptConnectResult();
   }
 
@@ -349,7 +349,7 @@ RtpsUdpTransport::register_for_reader(const RepoId& participant,
                                       OpenDDS::DCPS::DiscoveryListener* listener)
 {
   const TransportBLOB* blob = config().get_blob(locators);
-  if (!blob || is_shut_down_) {
+  if (!blob || is_shut_down()) {
     return;
   }
 
@@ -382,7 +382,7 @@ RtpsUdpTransport::register_for_writer(const RepoId& participant,
                                       DiscoveryListener* listener)
 {
   const TransportBLOB* blob = config().get_blob(locators);
-  if (!blob || is_shut_down_) {
+  if (!blob || is_shut_down()) {
     return;
   }
 
@@ -412,7 +412,7 @@ RtpsUdpTransport::update_locators(const RepoId& remote,
                                   const TransportLocatorSeq& locators)
 {
   const TransportBLOB* blob = config().get_blob(locators);
-  if (!blob || is_shut_down_) {
+  if (!blob || is_shut_down()) {
     return;
   }
 

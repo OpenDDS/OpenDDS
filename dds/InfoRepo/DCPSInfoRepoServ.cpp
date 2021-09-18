@@ -57,6 +57,7 @@ InfoRepo::InfoRepo(int argc, ACE_TCHAR *argv[])
 , cond_(lock_)
 , shutdown_complete_(false)
 , dispatch_cleanup_delay_(30,0)
+, shutdown_signal_(0)
 {
   try {
     this->init();
@@ -113,6 +114,12 @@ InfoRepo::finalize()
 int
 InfoRepo::handle_exception(ACE_HANDLE /* fd */)
 {
+  if (shutdown_signal_) {
+    ACE_DEBUG((LM_DEBUG,
+             "InfoRepo_Shutdown: shutting down on signal %d\n",
+             shutdown_signal_));
+  }
+
   // these should occur before ORB::shutdown() since they use the ORB/reactor
   this->info_servant_->finalize();
   this->federator_.finalize();
@@ -121,6 +128,12 @@ InfoRepo::handle_exception(ACE_HANDLE /* fd */)
 
   this->orb_->shutdown(true);
   return 0;
+}
+
+void
+InfoRepo::set_shutdown_signal(int which_signal)
+{
+  shutdown_signal_ = which_signal;
 }
 
 void
@@ -480,8 +493,6 @@ InfoRepo_Shutdown::InfoRepo_Shutdown(InfoRepo &ir)
 void
 InfoRepo_Shutdown::operator()(int which_signal)
 {
-  ACE_DEBUG((LM_DEBUG,
-             "InfoRepo_Shutdown: shutting down on signal %d\n",
-             which_signal));
-  this->ir_.shutdown();
+  ir_.set_shutdown_signal(which_signal);
+  ir_.shutdown();
 }
