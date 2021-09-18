@@ -2231,11 +2231,6 @@ Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
   , wbuff_(64 * 1024)
   , network_is_unreachable_(false)
   , ice_endpoint_added_(false)
-  , last_relay_report_(MonotonicTimePoint::now())
-  , relay_rtps_send_count_(0)
-  , relay_rtps_recv_count_(0)
-  , relay_stun_send_count_(0)
-  , relay_stun_recv_count_(0)
 {
   hdr_.prefix[0] = 'R';
   hdr_.prefix[1] = 'T';
@@ -2703,6 +2698,18 @@ Spdp::send_to_relay()
 }
 
 void
+Spdp::get_and_reset_relay_message_counts(DCPS::RelayMessageCounts& spdp,
+                                         DCPS::RelayMessageCounts& sedp)
+{
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    spdp = tport_->relay_message_counts_;
+    tport_->relay_message_counts_.reset();
+  }
+  sedp_->get_and_reset_relay_message_counts(sedp);
+}
+
+void
 Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, const ACE_INET_Addr& local_address, WriteFlags flags)
 {
   DCPS::RcHandle<Spdp> outer = outer_.lock();
@@ -2797,27 +2804,11 @@ Spdp::SpdpTransport::send(WriteFlags flags, const ACE_INET_Addr& local_address)
   const ACE_INET_Addr relay_address = outer->config_->spdp_rtps_relay_address();
   if (((flags & SEND_RELAY) || outer->config_->rtps_relay_only()) &&
       relay_address != ACE_INET_Addr()) {
-    send(relay_address);
-    ++relay_rtps_send_count_;
-    report_relay();
-  }
-}
-
-void
-Spdp::SpdpTransport::report_relay()
-{
-  const DCPS::MonotonicTimePoint now = DCPS::MonotonicTimePoint::now();
-  if (DCPS::DCPS_debug_level >= 4 && now > last_relay_report_ + DCPS::TimeDuration(300)) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) SPDP <-> relay RTPS sent %B RTPS recv %B STUN sent %B STUN recv %B\n",
-               relay_rtps_send_count_,
-               relay_rtps_recv_count_,
-               relay_stun_send_count_,
-               relay_stun_recv_count_));
-    last_relay_report_ = now;
-    relay_rtps_send_count_ = 0;
-    relay_rtps_recv_count_ = 0;
-    relay_stun_send_count_ = 0;
-    relay_stun_recv_count_ = 0;
+    ssize_t res = send(relay_address);
+    ++relay_message_counts_.rtps_send;
+    if (res < 0) {
+      ++relay_message_counts_.rtps_send_fail;
+    }
   }
 }
 
@@ -2833,7 +2824,7 @@ Spdp::SpdpTransport::choose_send_socket(const ACE_INET_Addr& addr) const
   return unicast_socket_;
 }
 
-void
+ssize_t
 Spdp::SpdpTransport::send(const ACE_INET_Addr& addr)
 {
   ssize_t res;
@@ -2857,6 +2848,8 @@ Spdp::SpdpTransport::send(const ACE_INET_Addr& addr)
   } else {
     network_is_unreachable_ = false;
   }
+
+  return res;
 }
 
 const ACE_SOCK_Dgram&
@@ -2947,8 +2940,8 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
     }
 
     if (from_relay) {
-      ++relay_rtps_recv_count_;
-      report_relay();
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, outer->lock_, -1);
+      ++relay_message_counts_.rtps_recv;
     }
 
     if (DCPS::transport_debug.log_messages) {
@@ -3084,8 +3077,8 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
   message.block = &buff_;
   if (serializer >> message) {
     if (from_relay) {
-      ++relay_stun_recv_count_;
-      report_relay();
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, outer->lock_, -1);
+      ++relay_message_counts_.stun_recv;
     }
 
     if (relay_srsm_.is_response(message)) {
@@ -3189,8 +3182,8 @@ Spdp::SendStun::execute()
   const ssize_t res = socket.send(tport->wbuff_.rd_ptr(), tport->wbuff_.length(), address_);
 
   if (address_ == outer->config_->spdp_stun_server_address()) {
-    ++tport->relay_stun_send_count_;
-    tport->report_relay();
+    // Have the lock.
+    ++tport->relay_message_counts_.stun_send;
   }
 
   if (res < 0) {

@@ -38,11 +38,6 @@ RtpsUdpTransport::RtpsUdpTransport(RtpsUdpInst& inst)
 #ifdef OPENDDS_SECURITY
   , ice_endpoint_(*this)
 #endif
-  , last_relay_report_(MonotonicTimePoint::now())
-  , relay_rtps_send_count_(0)
-  , relay_rtps_recv_count_(0)
-  , relay_stun_send_count_(0)
-  , relay_stun_recv_count_(0)
 {
   assign(local_prefix_, GUIDPREFIX_UNKNOWN);
   if (! (configure_i(inst) && open())) {
@@ -431,6 +426,14 @@ RtpsUdpTransport::update_locators(const RepoId& remote,
   }
 }
 
+void
+RtpsUdpTransport::get_and_reset_relay_message_counts(RelayMessageCounts& counts)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, relay_message_counts_mutex_);
+  counts = relay_message_counts_;
+  relay_message_counts_.reset();
+}
+
 bool
 RtpsUdpTransport::configure_i(RtpsUdpInst& config)
 {
@@ -730,8 +733,8 @@ void
 RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN::Message& message)
 {
   if (destination == transport.config().rtps_relay_address()) {
-    ++transport.relay_stun_send_count_;
-    transport.report_relay();
+    ACE_GUARD(ACE_Thread_Mutex, g, transport.relay_message_counts_mutex_);
+    ++transport.relay_message_counts_.stun_send;
   }
 
   ACE_SOCK_Dgram& socket = choose_send_socket(destination);
@@ -744,10 +747,16 @@ RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN
   iovec iov[MAX_SEND_BLOCKS];
   const int num_blocks = RtpsUdpSendStrategy::mb_to_iov(block, iov);
   const ssize_t result = send_single_i(socket, iov, num_blocks, destination, network_is_unreachable_);
-  if (result < 0 && !network_is_unreachable_) {
-    const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
-    ACE_ERROR((prio, "(%P|%t) RtpsUdpTransport::send() - "
-               "failed to send STUN message\n"));
+  if (result < 0) {
+    if (destination == transport.config().rtps_relay_address()) {
+      ACE_GUARD(ACE_Thread_Mutex, g, transport.relay_message_counts_mutex_);
+      ++transport.relay_message_counts_.stun_send_fail;
+    }
+    if (!network_is_unreachable_) {
+      const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
+      ACE_ERROR((prio, "(%P|%t) RtpsUdpTransport::send() - "
+                 "failed to send STUN message\n"));
+    }
   }
 }
 
@@ -903,25 +912,6 @@ RtpsUdpTransport::disable_relay_stun_task()
 
 #endif
 
-void
-RtpsUdpTransport::report_relay()
-{
-  const DCPS::MonotonicTimePoint now = DCPS::MonotonicTimePoint::now();
-  if (DCPS::DCPS_debug_level >= 4 && now > last_relay_report_ + DCPS::TimeDuration(300)) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) %C <-> relay RTPS sent %B RTPS recv %B STUN sent %B STUN recv %B\n",
-               config().name().c_str(),
-               relay_rtps_send_count_,
-               relay_rtps_recv_count_,
-               relay_stun_send_count_,
-               relay_stun_recv_count_));
-    last_relay_report_ = now;
-    relay_rtps_send_count_ = 0;
-    relay_rtps_recv_count_ = 0;
-    relay_stun_send_count_ = 0;
-    relay_stun_recv_count_ = 0;
-
-  }
-}
 
 } // namespace DCPS
 } // namespace OpenDDS

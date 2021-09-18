@@ -136,6 +136,8 @@ public:
   void update_locators(const RepoId& remote_id,
                        const TransportLocatorSeq& locators);
 
+  void get_and_reset_relay_message_counts(RelayMessageCounts& counts);
+
 private:
   friend class RtpsUdpType;
   template <typename T, typename U>

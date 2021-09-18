@@ -47,6 +47,8 @@ public:
   virtual void update_locators(const RepoId& /*remote*/,
                                const TransportLocatorSeq& /*locators*/);
 
+  void get_and_reset_relay_message_counts(RelayMessageCounts& counts);
+
 private:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
                                                const ConnectionAttribs& attribs,
@@ -186,12 +188,8 @@ private:
 
 #endif
 
-  void report_relay();
-  DCPS::MonotonicTimePoint last_relay_report_;
-  size_t relay_rtps_send_count_;
-  size_t relay_rtps_recv_count_;
-  size_t relay_stun_send_count_;
-  size_t relay_stun_recv_count_;
+  RelayMessageCounts relay_message_counts_;
+  ACE_Thread_Mutex relay_message_counts_mutex_;
 
   friend class RtpsUdpSendStrategy;
   friend class RtpsUdpReceiveStrategy;
