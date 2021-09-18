@@ -184,6 +184,8 @@ public:
 
   DCPS::JobQueue_rch job_queue() const { return job_queue_; }
 
+  void get_and_reset_relay_message_counts(DCPS::RelayMessageCounts& counts);
+
 private:
 
   Spdp& spdp_;

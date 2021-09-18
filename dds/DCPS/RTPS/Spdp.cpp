@@ -2720,6 +2720,18 @@ Spdp::send_to_relay()
 }
 
 void
+Spdp::get_and_reset_relay_message_counts(DCPS::RelayMessageCounts& spdp,
+                                         DCPS::RelayMessageCounts& sedp)
+{
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    spdp = tport_->relay_message_counts_;
+    tport_->relay_message_counts_.reset();
+  }
+  sedp_->get_and_reset_relay_message_counts(sedp);
+}
+
+void
 Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, const ACE_INET_Addr& local_address, WriteFlags flags)
 {
   DCPS::RcHandle<Spdp> outer = outer_.lock();
@@ -2818,7 +2830,11 @@ Spdp::SpdpTransport::send(WriteFlags flags, const ACE_INET_Addr& local_address)
   const ACE_INET_Addr relay_address = outer->config_->spdp_rtps_relay_address();
   if (((flags & SEND_RELAY) || outer->config_->rtps_relay_only()) &&
       relay_address != ACE_INET_Addr()) {
-    send(relay_address);
+    ssize_t res = send(relay_address);
+    ++relay_message_counts_.rtps_send;
+    if (res < 0) {
+      ++relay_message_counts_.rtps_send_fail;
+    }
   }
 }
 
@@ -2834,7 +2850,7 @@ Spdp::SpdpTransport::choose_send_socket(const ACE_INET_Addr& addr) const
   return unicast_socket_;
 }
 
-void
+ssize_t
 Spdp::SpdpTransport::send(const ACE_INET_Addr& addr)
 {
   const ACE_SOCK_Dgram& socket = choose_send_socket(addr);
@@ -2855,6 +2871,8 @@ Spdp::SpdpTransport::send(const ACE_INET_Addr& addr)
   } else {
     network_is_unreachable_ = false;
   }
+
+  return res;
 }
 
 const ACE_SOCK_Dgram&
@@ -2933,9 +2951,11 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
 
   DCPS::RcHandle<Spdp> outer = outer_.lock();
 
-    // Ignore messages from the relay when not using it.
+  const bool from_relay = remote == outer->config_->spdp_rtps_relay_address();
+
+  // Ignore messages from the relay when not using it.
   if (outer &&
-      remote == outer->config_->spdp_rtps_relay_address() &&
+      from_relay &&
       !(outer->config_->rtps_relay_only() || outer->config_->use_rtps_relay())) {
     return 0;
   }
@@ -2952,6 +2972,11 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
                   ACE_TEXT("failed to deserialize RTPS header for SPDP\n")));
       }
       return 0;
+    }
+
+    if (from_relay) {
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, outer->lock_, -1);
+      ++relay_message_counts_.rtps_recv;
     }
 
     if (DCPS::transport_debug.log_messages) {
@@ -3097,6 +3122,11 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
   STUN::Message message;
   message.block = &buff_;
   if (serializer >> message) {
+    if (from_relay) {
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, outer->lock_, -1);
+      ++relay_message_counts_.stun_recv;
+    }
+
     if (relay_srsm_.is_response(message)) {
       process_relay_sra(relay_srsm_.receive(message));
     } else {
@@ -3196,6 +3226,11 @@ Spdp::SendStun::execute()
 
   const ACE_SOCK_Dgram& socket = tport->choose_send_socket(address_);
   const ssize_t res = socket.send(tport->wbuff_.rd_ptr(), tport->wbuff_.length(), address_);
+
+  if (address_ == outer->config_->spdp_stun_server_address()) {
+    // Have the lock.
+    ++tport->relay_message_counts_.stun_send;
+  }
 
   if (res < 0) {
     const int err = errno;

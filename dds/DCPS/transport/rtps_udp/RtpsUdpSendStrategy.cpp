@@ -8,6 +8,7 @@
 #include "RtpsUdpSendStrategy.h"
 #include "RtpsUdpDataLink.h"
 #include "RtpsUdpInst.h"
+#include "RtpsUdpTransport.h"
 
 #include <dds/DCPS/LogAddr.h>
 
@@ -293,6 +294,11 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
 {
   OPENDDS_ASSERT(addr != ACE_INET_Addr());
 
+  if (addr == link_->transport().config().rtps_relay_address()) {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, link_->transport().relay_message_counts_mutex_, -1);
+    ++link_->transport().relay_message_counts_.rtps_send;
+  }
+
   const ACE_SOCK_Dgram& socket = choose_send_socket(addr);
 
 #ifdef ACE_LACKS_SENDMSG
@@ -312,6 +318,10 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
   const ssize_t result = socket.send(iov, n, addr);
 #endif
   if (result < 0) {
+    if (addr == link_->transport().config().rtps_relay_address()) {
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, link_->transport().relay_message_counts_mutex_, -1);
+      ++link_->transport().relay_message_counts_.rtps_send_fail;
+    }
     const int err = errno;
     if (err != ENETUNREACH || !network_is_unreachable_) {
       errno = err;

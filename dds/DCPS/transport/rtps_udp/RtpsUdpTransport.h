@@ -47,6 +47,8 @@ public:
   virtual void update_locators(const RepoId& /*remote*/,
                                const TransportLocatorSeq& /*locators*/);
 
+  void get_and_reset_relay_message_counts(RelayMessageCounts& counts);
+
 private:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
                                                const ConnectionAttribs& attribs,
@@ -187,6 +189,12 @@ private:
   void stop_ice();
 
 #endif
+
+  RelayMessageCounts relay_message_counts_;
+  ACE_Thread_Mutex relay_message_counts_mutex_;
+
+  friend class RtpsUdpSendStrategy;
+  friend class RtpsUdpReceiveStrategy;
 };
 
 } // namespace DCPS

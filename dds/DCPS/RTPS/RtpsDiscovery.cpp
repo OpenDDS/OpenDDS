@@ -1067,6 +1067,19 @@ RtpsDiscovery::sedp_stun_server_address(const ACE_INET_Addr& address)
   }
 }
 
+void
+RtpsDiscovery::get_and_reset_relay_message_counts(DDS::DomainId_t domain,
+                                                  const DCPS::RepoId& local_participant,
+                                                  DCPS::RelayMessageCounts& spdp,
+                                                  DCPS::RelayMessageCounts& sedp)
+{
+  ParticipantHandle p = get_part(domain, local_participant);
+  if (p) {
+    p->get_and_reset_relay_message_counts(spdp, sedp);
+  }
+}
+
+
 } // namespace DCPS
 } // namespace OpenDDS
 

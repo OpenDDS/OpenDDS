@@ -66,8 +66,6 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
                                              RtpsUdpTransport& tport,
                                              bool& stop)
 {
-  ACE_UNUSED_ARG(tport);
-
   ACE_INET_Addr local_address;
   const ssize_t ret = socket.recv(iov, n, remote_address, 0
 #if defined(ACE_RECVPKTINFO) || defined(ACE_RECVPKTINFO6)
@@ -80,6 +78,10 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
   }
 
   if (n > 0 && ret > 0 && iov[0].iov_len >= 4 && std::memcmp(iov[0].iov_base, "RTPS", 4) == 0) {
+    if (remote_address == tport.config().rtps_relay_address()) {
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, tport.relay_message_counts_mutex_, -1);
+      ++tport.relay_message_counts_.rtps_recv;
+    }
     return ret;
   }
 
@@ -114,6 +116,11 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
   STUN::Message message;
   message.block = head;
   if (serializer >> message) {
+    if (remote_address == tport.config().rtps_relay_address()) {
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, tport.relay_message_counts_mutex_, -1);
+      ++tport.relay_message_counts_.stun_recv;
+    }
+
     if (tport.relay_srsm().is_response(message)) {
       tport.process_relay_sra(tport.relay_srsm().receive(message));
     } else if (endpoint) {
