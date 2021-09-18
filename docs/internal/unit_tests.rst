@@ -47,7 +47,7 @@ The following metrics can be generated to measure the utility of the unit tests:
 * Test compilation time
 * Test execution time
 * Test code size vs. code size
-* Defect rate vs. code coverage (Are bugs appearing is code that is not tested as well?)
+* Defect rate vs. code coverage (Are bugs appearing in code that is not tested as well?)
 
 **********************
 Unit Test Organization
