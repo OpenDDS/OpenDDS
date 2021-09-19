@@ -1920,7 +1920,6 @@ TransportSendStrategy::add_delayed_notification(TransportQueueElement* element)
 
 void TransportSendStrategy::deliver_ack_request(TransportQueueElement* element)
 {
-  GuardType guard(lock_);
   element->data_delivered();
 }
 
