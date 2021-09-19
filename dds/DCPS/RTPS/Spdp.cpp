@@ -1014,14 +1014,12 @@ Spdp::data_received(const DataSubmessage& data,
 
   const bool from_relay = from == config_->spdp_rtps_relay_address();
 #ifdef OPENDDS_SECURITY
-#ifndef OPENDDS_SAFETY_PROFILE in the #ifdef OPENDDS_SECURITY
   if (!from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList) && !ip_in_AgentInfo(from, plist)) {
     if (DCPS::DCPS_debug_level) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Spdp::data_received - dropped IP: %C\n"), DCPS::LogAddr(from).c_str()));
     }
     return;
   }
-#endif
   if (!is_security_enabled()) {
     process_participant_ice(plist, pdata, guid);
   }
