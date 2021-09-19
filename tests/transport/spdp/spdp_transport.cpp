@@ -1,41 +1,36 @@
 // Test for the mini-transport in SPDP (sequence number handling)
 
-#include "dds/DCPS/transport/rtps_udp/RtpsUdpInst.h"
+#include <dds/DCPS/transport/rtps_udp/RtpsUdpInst.h>
 #ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
+#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
-#include "dds/DCPS/transport/framework/NetworkAddress.h"
+#include <dds/DCPS/transport/framework/NetworkAddress.h>
 
-#include "dds/DCPS/RTPS/BaseMessageTypes.h"
-#include "dds/DCPS/RTPS/GuidGenerator.h"
-#include "dds/DCPS/RTPS/MessageTypes.h"
-#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
-#include "dds/DCPS/RTPS/RtpsDiscovery.h"
-#include "dds/DCPS/RTPS/ParameterListConverter.h"
-#include "dds/DCPS/RTPS/Spdp.h"
+#include <dds/DCPS/RTPS/BaseMessageTypes.h>
+#include <dds/DCPS/RTPS/GuidGenerator.h>
+#include <dds/DCPS/RTPS/MessageTypes.h>
+#include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#include <dds/DCPS/RTPS/ParameterListConverter.h>
+#include <dds/DCPS/RTPS/Spdp.h>
 
-#include "dds/DCPS/Service_Participant.h"
+#include <dds/DCPS/Service_Participant.h>
 
-#include "ace/Configuration.h"
-#include "ace/Reactor.h"
-#include "ace/Select_Reactor.h"
+#include <ace/Configuration.h>
+#include <ace/Reactor.h>
+#include <ace/Select_Reactor.h>
 
 #include <ace/OS_main.h>
 #include <ace/Thread_Manager.h>
 #include <ace/Reactor.h>
 #include <ace/SOCK_Dgram.h>
+#include <ace/OS_NS_arpa_inet.h>
+#include <ace/OS_NS_unistd.h>
 
 #include <exception>
 #include <iostream>
 #include <string>
-
-#if defined _WIN64 || defined _WIN32
-#include <winsock.h>
-#else
-#include <arpa/inet.h>
-#include <unistd.h>
-#endif
 
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
