@@ -2965,6 +2965,7 @@ jobs:
         echo "deadlock:ACE_Data_Block::release_no_delete" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
         echo "deadlock:CORBA::ORB_init" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
         echo "deadlock:TAO_IIOP_Connection_Handler" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        echo "race:ACE_Dynamic::instance" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
         echo "race:ACE_Event_Handler::reactor" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
         echo "race:ACE_Thread_Exit::instance" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
         echo "race:TAO_IIOP_Connection_Handler" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt

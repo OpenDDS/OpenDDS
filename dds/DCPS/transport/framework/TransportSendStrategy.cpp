@@ -1920,6 +1920,7 @@ TransportSendStrategy::add_delayed_notification(TransportQueueElement* element)
 
 void TransportSendStrategy::deliver_ack_request(TransportQueueElement* element)
 {
+  TransportSendStrategy_rch safeguard = rchandle_from(this);
   element->data_delivered();
 }
 
