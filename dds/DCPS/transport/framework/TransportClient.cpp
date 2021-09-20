@@ -693,9 +693,9 @@ TransportClient::disassociate(const RepoId& peerId)
 
   if (DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
-	       ACE_TEXT("(%P|%t) TransportClient::disassociate: ")
-	       ACE_TEXT("about to release_reservations for link[%@]\n"),
-	       link.in()));
+               ACE_TEXT("(%P|%t) TransportClient::disassociate: ")
+               ACE_TEXT("about to release_reservations for link[%@]\n"),
+               link.in()));
   }
 
   link->release_reservations(peerId, repo_id_, released);

@@ -253,7 +253,7 @@ void
 RtpsUdpTransport::stop_accepting_or_connecting(const TransportClient_wrch& client,
                                                const RepoId& remote_id,
                                                bool disassociate,
-					       bool association_failed)
+                                               bool association_failed)
 {
   if (disassociate || association_failed) {
     GuardThreadType guard_links(links_lock_);

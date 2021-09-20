@@ -276,7 +276,7 @@ void
 MulticastTransport::stop_accepting_or_connecting(const TransportClient_wrch& client,
                                                  const RepoId& remote_id,
                                                  bool /*disassociate*/,
-						 bool /*association_failed*/)
+                                                 bool /*association_failed*/)
 {
   VDBG((LM_DEBUG, "(%P|%t) MulticastTransport::stop_accepting_or_connecting\n"));
 

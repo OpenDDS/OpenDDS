@@ -202,7 +202,7 @@ protected:
   virtual void stop_accepting_or_connecting(const TransportClient_wrch& client,
                                             const RepoId& remote_id,
                                             bool disassociate,
-					    bool association_failed) = 0;
+                                            bool association_failed) = 0;
 
 
   /// Called during the shutdown() method in order to give the

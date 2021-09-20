@@ -290,7 +290,7 @@ void
 TcpTransport::stop_accepting_or_connecting(const TransportClient_wrch& client,
                                            const RepoId& remote_id,
                                            bool /*disassociate*/,
-					   bool /*association_failed*/)
+                                           bool /*association_failed*/)
 {
   GuidConverter remote_converted(remote_id);
   VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::stop_accepting_or_connecting "
