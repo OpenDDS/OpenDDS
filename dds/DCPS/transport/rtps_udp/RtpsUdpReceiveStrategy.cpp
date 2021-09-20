@@ -77,6 +77,11 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
     return ret;
   }
 
+  if (remote_address.get_size() > remote_address.get_addr_size()) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpReceiveStrategy::receive_bytes_helper - invalid address size\n"));
+    return 0;
+  }
+
   if (n > 0 && ret > 0 && iov[0].iov_len >= 4 && std::memcmp(iov[0].iov_base, "RTPS", 4) == 0) {
     if (remote_address == tport.config().rtps_relay_address()) {
       ACE_GUARD_RETURN(ACE_Thread_Mutex, g, tport.relay_message_counts_mutex_, -1);
