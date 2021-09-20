@@ -139,6 +139,7 @@ protected:
   typedef MultiTopicImpl::SubjectFieldSpec SubjectFieldSpec;
 
   struct QueryPlan {
+    mutable ACE_RW_Thread_Mutex lock_;
     DDS::DataReader_var data_reader_;
     std::vector<SubjectFieldSpec> projection_;
     std::vector<OPENDDS_STRING> keys_projected_out_;
