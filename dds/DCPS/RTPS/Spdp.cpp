@@ -623,7 +623,7 @@ bool ip_in_locator_list(const ACE_INET_Addr& from, const DCPS::LocatorSeq& locat
       return false;
     }
     if (DCPS::DCPS_debug_level) {
-      const long k = locators[i].kind;
+      const CORBA::Long& k = locators[i].kind;
       const std::string s = (k == LOCATOR_KIND_UDPv4) ? "LOCATOR_KIND_UDPv4" :
                             (k == LOCATOR_KIND_UDPv6) ? "LOCATOR_KIND_UDPv6" : "LOCATOR_KIND_INVALID";
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ip_in_locator_list - locator.kind: %C\n"), s.c_str()));
