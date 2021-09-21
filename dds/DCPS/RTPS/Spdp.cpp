@@ -614,21 +614,27 @@ Spdp::get_ice_endpoint_if_added()
   return tport_->ice_endpoint_added_ ? tport_->get_ice_endpoint() : 0;
 }
 
+bool is_ip_equal(const ACE_INET_Addr& a, const DCPS::Locator_t& locator)
+{
+  const ACE_UINT32 a_ip = ntohl(a.get_ip_address());
+  const ACE_UINT32 l_ip = (ACE_UINT32)(*(ACE_UINT32*)(&locator.address[12]));
+  if (DCPS::DCPS_debug_level) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) is_ip_equal - a_ip:%d l_ip:%d\n"), a_ip, l_ip));
+  }
+  return a_ip == l_ip;
+}
+
 bool ip_in_locator_list(const ACE_INET_Addr& from, const DCPS::LocatorSeq& locators)
 {
   for (CORBA::ULong i = 0; i < locators.length(); ++i) {
-    ACE_INET_Addr addr;
-    if (locator_to_address(addr, locators[i], false) == 0) {
-      if (DCPS::DCPS_debug_level) {
-        const long k = locators[i].kind;
-        const std::string s = (k == LOCATOR_KIND_UDPv4) ? "LOCATOR_KIND_UDPv4" :
-                              (k == LOCATOR_KIND_UDPv6) ? "LOCATOR_KIND_UDPv6" : "LOCATOR_KIND_INVALID";
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ip_in_locator_list - locator.kind: %C\n"), s.c_str()));
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ip_in_locator_list - addr: %C\n"), DCPS::LogAddr(addr).c_str()));
-      }
-      if (from.is_ip_equal(addr)) {
-        return true;
-      }
+    if (DCPS::DCPS_debug_level) {
+      const CORBA::Long& k = locators[i].kind;
+      const std::string s = (k == LOCATOR_KIND_UDPv4) ? "LOCATOR_KIND_UDPv4" :
+                            (k == LOCATOR_KIND_UDPv6) ? "LOCATOR_KIND_UDPv6" : "LOCATOR_KIND_INVALID";
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ip_in_locator_list - locator.kind: %C\n"), s.c_str()));
+    }
+    if (is_ip_equal(from, locators[i])) {
+      return true;
     }
   }
   return false;
