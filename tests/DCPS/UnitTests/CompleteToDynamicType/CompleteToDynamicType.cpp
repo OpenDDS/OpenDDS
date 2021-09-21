@@ -175,7 +175,7 @@ TEST(CompleteToDynamicType, PrimitiveKind)
   td.kind = XTypes::TK_ENUM;
   td.name = "::MyMod::PrimitiveKind";
   td.bound.length(1);
-  td.bound[0] = 32; 
+  td.bound[0] = 32;
   td.extensibility_kind = XTypes::FINAL;
   td.is_nested = 0;
   XTypes::DynamicTypeMember_rch first_expected_dtm = DCPS::make_rch<XTypes::DynamicTypeMember>();
