@@ -619,6 +619,9 @@ bool ip_in_locator_list(const ACE_INET_Addr& from, const DCPS::LocatorSeq& locat
   for (CORBA::ULong i = 0; i < locators.length(); ++i) {
     ACE_INET_Addr addr;
     if (locator_to_address(addr, locators[i], true) == 0) {
+      if (DCPS::DCPS_debug_level) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ip_in_locator_list - addr: %C\n"), DCPS::LogAddr(addr).c_str()));
+      }
       if (from.is_ip_equal(addr)) {
         return true;
       }
@@ -1013,6 +1016,10 @@ Spdp::data_received(const DataSubmessage& data,
   }
 
   const bool from_relay = from == config_->spdp_rtps_relay_address();
+  if (DCPS::DCPS_debug_level) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Spdp::data_received -  from: %C\n"), DCPS::LogAddr(from).c_str()));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Spdp::data_received - relay: %C\n"), DCPS::LogAddr(config_->spdp_rtps_relay_address()).c_str()));
+  }
 #ifdef OPENDDS_SECURITY
   if (!from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList) && !ip_in_AgentInfo(from, plist)) {
     if (DCPS::DCPS_debug_level) {
