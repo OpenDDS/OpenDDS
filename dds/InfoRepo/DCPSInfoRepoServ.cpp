@@ -56,8 +56,8 @@ InfoRepo::InfoRepo(int argc, ACE_TCHAR *argv[])
 , lock_()
 , cond_(lock_)
 , shutdown_complete_(false)
-, dispatch_cleanup_delay_(30,0)
 , shutdown_signal_(0)
+, dispatch_cleanup_delay_(30,0)
 {
   try {
     this->init();

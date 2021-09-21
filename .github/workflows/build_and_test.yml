@@ -2968,6 +2968,7 @@ jobs:
         echo "race:ACE_Dynamic::instance" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
         echo "race:ACE_Event_Handler::reactor" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
         echo "race:ACE_Thread_Exit::instance" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        echo "race:TAO::Invocation_Adapter::invoke" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
         echo "race:TAO_IIOP_Connection_Handler" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
         echo "race:TAO_Leader_Follower" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
         echo "race:TAO_ORB_Core" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
