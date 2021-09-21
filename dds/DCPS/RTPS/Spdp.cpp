@@ -618,7 +618,7 @@ bool ip_in_locator_list(const ACE_INET_Addr& from, const DCPS::LocatorSeq& locat
 {
   for (CORBA::ULong i = 0; i < locators.length(); ++i) {
     ACE_INET_Addr addr;
-    if (locator_to_address(addr, locators[i], true) == 0) {
+    if (locator_to_address(addr, locators[i], false) == 0) {
       if (DCPS::DCPS_debug_level) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ip_in_locator_list - addr: %C\n"), DCPS::LogAddr(addr).c_str()));
       }
