@@ -206,7 +206,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::process_joins(
   const MetaStruct& resulting_meta = getResultingMeta();
   OPENDDS_STRING this_topic;
   {
-    ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, qp.lock_);
+    ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, qp_lock_);
     this_topic = topicNameFor(qp.data_reader_);
   }
   typedef multimap<OPENDDS_STRING, OPENDDS_STRING>::const_iterator iter_t;

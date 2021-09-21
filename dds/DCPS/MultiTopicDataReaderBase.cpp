@@ -138,7 +138,7 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
 
     QueryPlan& qp = query_plans_[selection[i]];
     {
-      ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, qp.lock_);
+      ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, qp_lock_);
       qp.data_reader_ =
         parent->create_datareader(t, DATAREADER_QOS_USE_TOPIC_QOS,
                                   listener_.get(), ALL_STATUS_MASK);

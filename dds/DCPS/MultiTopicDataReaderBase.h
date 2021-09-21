@@ -139,7 +139,6 @@ protected:
   typedef MultiTopicImpl::SubjectFieldSpec SubjectFieldSpec;
 
   struct QueryPlan {
-    mutable ACE_RW_Thread_Mutex lock_;
     DDS::DataReader_var data_reader_;
     std::vector<SubjectFieldSpec> projection_;
     std::vector<OPENDDS_STRING> keys_projected_out_;
@@ -147,6 +146,7 @@ protected:
     std::set<std::pair<DDS::InstanceHandle_t /*of this data_reader_*/,
       DDS::InstanceHandle_t /*of the resulting DR*/> > instances_;
   };
+  mutable ACE_RW_Thread_Mutex qp_lock_;
 
   // key: topicName for this reader
   OPENDDS_MAP(OPENDDS_STRING, QueryPlan) query_plans_;
