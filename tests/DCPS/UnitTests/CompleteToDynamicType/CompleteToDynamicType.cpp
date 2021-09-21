@@ -174,7 +174,8 @@ TEST(CompleteToDynamicType, PrimitiveKind)
   XTypes::TypeDescriptor td;
   td.kind = XTypes::TK_ENUM;
   td.name = "::MyMod::PrimitiveKind";
-  td.bound.length(0);
+  td.bound.length(1);
+  td.bound[0] = 32; 
   td.extensibility_kind = XTypes::FINAL;
   td.is_nested = 0;
   XTypes::DynamicTypeMember_rch first_expected_dtm = DCPS::make_rch<XTypes::DynamicTypeMember>();
@@ -264,7 +265,8 @@ TEST(CompleteToDynamicType, MyUnion)
   XTypes::TypeDescriptor enum_td;
   enum_td.kind = XTypes::TK_ENUM;
   enum_td.name = "::MyMod::PrimitiveKind";
-  enum_td.bound.length(0);
+  enum_td.bound.length(1);
+  enum_td.bound[0] = 32;
   enum_td.extensibility_kind = XTypes::FINAL;
   enum_td.is_nested = 0;
   XTypes::DynamicTypeMember_rch first_expected_dtm = DCPS::make_rch<XTypes::DynamicTypeMember>();
