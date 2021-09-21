@@ -617,7 +617,7 @@ Spdp::get_ice_endpoint_if_added()
 bool is_ip_equal(const ACE_INET_Addr& a, const DCPS::Locator_t& locator)
 {
   const ACE_UINT32 a_ip = ntohl(a.get_ip_address());
-  const ACE_UINT32 l_ip = (ACE_UINT32)(*(ACE_UINT32*)(&locator.address[12]));
+  const ACE_UINT32 l_ip = *(ACE_UINT32*)(&locator.address[12]);
   if (DCPS::DCPS_debug_level) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) is_ip_equal - a_ip:%d l_ip:%d\n"), a_ip, l_ip));
   }
