@@ -638,11 +638,6 @@ bool cmp_ip6(const ACE_INET_Addr& a, const DCPS::Locator_t& locator)
 
 bool is_ip_equal(const ACE_INET_Addr& a, const DCPS::Locator_t& locator)
 {
-  if (DCPS::DCPS_debug_level) {
-    const CORBA::Long& k = locator.kind;
-    const std::string s = (k == LOCATOR_KIND_UDPv4) ? "UDPv4" : (k == LOCATOR_KIND_UDPv6) ? "UDPv6" : "INVALID";
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) is_ip_equal - locator.kind: %C\n"), s.c_str()));
-  }
 #ifdef ACE_HAS_IPV6
   if (a.get_type() == AF_INET6) {
     return cmp_ip6(a, locator);
@@ -1047,10 +1042,6 @@ Spdp::data_received(const DataSubmessage& data,
   }
 
   const bool from_relay = from == config_->spdp_rtps_relay_address();
-  if (DCPS::DCPS_debug_level) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Spdp::data_received - from (type %d): %C\n"), from.get_type(), DCPS::LogAddr(from).c_str()));
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Spdp::data_received - relay: %C\n"), DCPS::LogAddr(config_->spdp_rtps_relay_address()).c_str()));
-  }
 #ifdef OPENDDS_SECURITY
   if (!from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList) && !ip_in_AgentInfo(from, plist)) {
     if (DCPS::DCPS_debug_level) {
