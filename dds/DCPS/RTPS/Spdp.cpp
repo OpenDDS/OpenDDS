@@ -614,22 +614,48 @@ Spdp::get_ice_endpoint_if_added()
   return tport_->ice_endpoint_added_ ? tport_->get_ice_endpoint() : 0;
 }
 
+bool cmp_ip4(const ACE_INET_Addr& a, const DCPS::Locator_t& locator)
+{
+  struct sockaddr_in* sa = static_cast<struct sockaddr_in*>(a.get_addr());
+  if (sa->sin_family == AF_INET && locator.kind == LOCATOR_KIND_UDPv4) {
+    const char* ip = reinterpret_cast<const char*>(&sa->sin_addr);
+    return ACE_OS::memcmp(ip, locator.address + 12, 4) == 0;
+  }
+  return false;
+}
+
+#if defined (ACE_HAS_IPV6)
+bool cmp_ip6(const ACE_INET_Addr& a, const DCPS::Locator_t& locator)
+{
+  struct sockaddr_in6* in6 = static_cast<struct sockaddr_in6*>(a.get_addr());
+  if (in6->sin_family == AF_INET6 && locator.kind == LOCATOR_KIND_UDPv6) {
+    const char* ip = reinterpret_cast<const char*>(&in6->sin6_addr);
+    return ACE_OS::memcmp(ip, locator.address, 16) == 0;
+  }
+  return false;
+}
+#endif // ACE_HAS_IPV6
+
+bool is_ip_equal(const ACE_INET_Addr& a, const DCPS::Locator_t& locator)
+{
+  if (DCPS::DCPS_debug_level) {
+    const CORBA::Long& k = locator.kind;
+    const std::string s = (k == LOCATOR_KIND_UDPv4) ? "UDPv4" : (k == LOCATOR_KIND_UDPv6) ? "UDPv6" : "INVALID";
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) is_ip_equal - addr type: %d ip: %C\n"), a.get_type(), DCPS::LogAddr(a).c_str()));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) is_ip_equal - locator.kind: %C\n"), s.c_str()));
+  }
+#ifdef ACE_HAS_IPV6
+  if (a.get_type() == AF_INET6) {
+    return cmp_ip6(a, locator);
+  }
+#endif
+  return cmp_ip4(a, locator);
+}
+
 bool ip_in_locator_list(const ACE_INET_Addr& from, const DCPS::LocatorSeq& locators)
 {
   for (CORBA::ULong i = 0; i < locators.length(); ++i) {
-    ACE_INET_Addr a;
-    if (locator_to_address(a, locators[i], false) != 0) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ip_in_locator_list - locator_to_address failed\n")));
-      return false;
-    }
-    if (DCPS::DCPS_debug_level) {
-      const CORBA::Long& k = locators[i].kind;
-      const std::string s = (k == LOCATOR_KIND_UDPv4) ? "LOCATOR_KIND_UDPv4" :
-                            (k == LOCATOR_KIND_UDPv6) ? "LOCATOR_KIND_UDPv6" : "LOCATOR_KIND_INVALID";
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ip_in_locator_list - locator.kind: %C\n"), s.c_str()));
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ip_in_locator_list - addr: %C\n"), DCPS::LogAddr(a).c_str()));
-    }
-    if (from.is_ip_equal(a)) {
+    if (is_ip_equal(from, locators[i])) {
       return true;
     }
   }
