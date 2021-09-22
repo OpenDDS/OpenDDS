@@ -628,7 +628,7 @@ bool cmp_ip4(const ACE_INET_Addr& a, const DCPS::Locator_t& locator)
 bool cmp_ip6(const ACE_INET_Addr& a, const DCPS::Locator_t& locator)
 {
   struct sockaddr_in6* in6 = static_cast<struct sockaddr_in6*>(a.get_addr());
-  if (in6->sin_family == AF_INET6 && locator.kind == LOCATOR_KIND_UDPv6) {
+  if (in6->sin6_family == AF_INET6 && locator.kind == LOCATOR_KIND_UDPv6) {
     const char* ip = reinterpret_cast<const char*>(&in6->sin6_addr);
     return ACE_OS::memcmp(ip, locator.address, 16) == 0;
   }
