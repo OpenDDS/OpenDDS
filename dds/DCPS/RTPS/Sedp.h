@@ -311,6 +311,7 @@ private:
       DCPS::SequenceNumber& sequence);
 
     void end_historic_samples(const DCPS::RepoId& reader);
+    void request_ack(const DCPS::RepoId& reader);
 
     void send_deferred_samples(const GUID_t& reader);
 
