@@ -7,15 +7,18 @@ use Time::Piece;
 use POSIX;
 use Cwd;
 use LWP::Simple;
+use Net::FTP::File;
 use File::Basename;
 use File::stat;
+use File::Temp qw/tempdir/;
+use File::Path qw/make_path/;
+use Getopt::Long;
+use JSON::PP;
+
+use Pithub;
+
 use lib dirname (__FILE__) . "/modules";
 use ConvertFiles;
-use Pithub::Repos::Releases;
-use Net::FTP::File;
-use File::Temp qw/ tempdir /;
-use File::Path qw(make_path);
-use Getopt::Long;
 
 my $base_name_prefix = "OpenDDS-";
 my $default_github_user = "objectcomputing";
@@ -29,7 +32,7 @@ my $ace_tao_url = "http://download.ociweb.com/TAO-2.2a/$ace_tao_filename";
 my $ace_root = "ACE_wrappers";
 my $git_name_prefix = "DDS-";
 my $default_post_release_metadata = "dev";
-my $release_flag_filename = "release_occurred";
+my $workspace_info_filename = "info.json";
 
 $ENV{TZ} = "UTC";
 Time::Piece::_tzset;
@@ -248,8 +251,6 @@ sub email_announce_contents {
 
   $result .=
     "Updates in this version:\n" .
-    "(This is an excerpt of the NEWS, for full change information " .
-      "see ChangeLog within the source distribution)\n" .
     news_contents_excerpt($settings->{version});
 
   return $result;
@@ -305,6 +306,107 @@ sub touch_file {
   else {
     my $t = time();
     utime($t, $t, ($path,)) || die "Couldn't touch file $path: $!\nStopped";
+  }
+}
+
+sub new_pithub {
+  my $settings = shift();
+
+  if (!defined($settings->{github_token})) {
+    die("GITHUB_TOKEN must be defined");
+  }
+
+  return Pithub->new(
+      user => $settings->{github_user},
+      repo => $settings->{github_repo},
+      token => $settings->{github_token},
+  );
+}
+
+sub read_json_file {
+  my $path = shift();
+
+  open my $f, '<', $path or die("Can't open JSON file $path: $!");
+  local $/;
+  my $text = <$f>;
+  close $f;
+
+  return decode_json($text);
+}
+
+sub write_json_file {
+  my $path = shift();
+  my $what = shift();
+
+  open my $f, '>', $path or die("Can't open JSON file $path: $!");
+  print $f encode_json($what);
+  close $f;
+}
+
+sub read_workspace_info {
+  my $settings = shift();
+
+  return read_json_file($settings->{workspace_info_file_path})
+}
+
+sub write_workspace_info {
+  my $settings = shift();
+  my $what = shift();
+
+  write_json_file($settings->{workspace_info_file_path}, {
+    version => $settings->{version},
+    next_version => $settings->{next_version},
+    is_highest_version => $settings->{is_highest_version},
+    release_occurred => $settings->{release_occurred},
+  });
+}
+
+sub compare_workspace_info {
+  my $settings = shift();
+  my $info = shift();
+  my $key = shift();
+
+  if ($settings->{$key} ne $info->{$key}) {
+    print STDERR "Workspace has \"$info->{$key}\" for $key, but we expected \"$settings->{$key}\"\n";
+    return 1;
+  }
+  return 0;
+}
+
+sub check_workspace {
+  my $settings = shift();
+
+  return if $settings->{list};
+
+  if (!-d $settings->{workspace}) {
+    print("Creating workspace directory \"$settings->{workspace}\"\n");
+    if (!make_path($settings->{workspace})) {
+      die("Failed to create workspace: \"$settings->{workspace}\"");
+    }
+  }
+
+  if (-f $settings->{workspace_info_file_path}) {
+    my $info = read_workspace_info($settings);
+
+    my $invalid = 0;
+    $invalid |= compare_workspace_info($settings, $info, 'version');
+    $invalid |= compare_workspace_info($settings, $info, 'next_version');
+    if ($invalid) {
+      die("Inconsistent info in workspace");
+    }
+
+    if ($info->{release_occurred}) {
+      print("Release occurred flag set, assuming $info->{version} was released!\n");
+    }
+
+    $settings->{is_highest_version} = $info->{is_highest_version};
+    $settings->{release_occurred} = $info->{release_occurred};
+  }
+  else {
+    my @releases = get_releases($settings);
+    $settings->{is_highest_version} = version_greater_equal($settings->{parsed_version}, $releases[-1]);
+    $settings->{release_occurred} = 0;
+    write_workspace_info($settings);
   }
 }
 
@@ -487,6 +589,46 @@ sub version_lesser {
   return !version_greater_equal($left, $right);
 }
 
+sub version_cmp {
+  my $left = shift();
+  my $right = shift();
+
+  return 0 if $left->{string} eq $right->{string};
+  return version_lesser($left, $right) ? -1 : 1;
+}
+
+sub parse_release_tag {
+  my $tag = shift();
+
+  my %parsed = ();
+  if ($tag =~ /^DDS-(.*)$/) {
+    %parsed = parse_version($1) if $1;
+    $parsed{tag_name} = $tag if %parsed;
+  }
+  return %parsed;
+}
+
+sub get_releases {
+  my $settings = shift();
+
+  my $release_list = $settings->{pithub}->repos->releases->list();
+  unless ($release_list->success) {
+    die("error accessing github: $release_list->response->status_line");
+  }
+
+  my @releases = ();
+  while (my $row = $release_list->next) {
+    my $tag = $row->{tag_name};
+    my %parsed = parse_release_tag($tag);
+    if (!%parsed) {
+      die("Invalid release tag name: $tag");
+    }
+    push(@releases, \%parsed);
+  }
+
+  return sort { version_cmp($a, $b) } @releases;
+}
+
 ############################################################################
 sub verify_git_remote {
   my $result = 0;
@@ -511,19 +653,11 @@ sub verify_git_remote {
 
 sub message_git_remote {
   my $settings = shift;
-  my $remote = $settings->{remote};
-  my $alt_url = $settings->{alt_url};
-  my $start = "Remote $remote has url $alt_url,\n" .
-         "which does not match expected URL $settings->{git_url}";
-}
-
-sub override_git_remote {
-  my $settings = shift;
-  my $remote = $settings->{remote};
-  $settings->{git_url} = $settings->{alt_url};
-  print "  Overriding remote $remote, url $settings->{alt_url}\n";
-  # Reverify
-  verify_git_remote($settings);
+  return "Remote $settings->{remote} in git repo has url $settings->{alt_url}\n" .
+    "  this is different from what the script is expecting: $settings->{git_url}\n" .
+    "  This must be resolved by either making sure the local git repo has the\n" .
+    "  correct remote, or by changing what the script is expecting by using the\n" .
+    "  --remote and --github-user options.";
 }
 
 ############################################################################
@@ -1249,7 +1383,7 @@ sub message_git_changes_pushed {
 
 sub remedy_git_changes_pushed {
   my $settings = shift();
-  my $push_latest_release = shift();
+  my $push_latest_release = shift() // $settings->{is_highest_version};
   my $remote = $settings->{remote};
   print "pushing code\n";
   my $result = system("git push $remote $settings->{branch}");
@@ -1698,12 +1832,12 @@ sub get_release_files {
       $settings->{md5_src},
   );
   if (!$settings->{skip_devguide}) {
-    push(@files , $settings->{devguide_ver});
-    push(@files , $settings->{devguide_lat});
+    push(@files, $settings->{devguide_ver});
+    push(@files, $settings->{devguide_lat}) if ($settings{is_highest_version});
   }
   if (!$settings->{skip_doxygen}) {
-    push(@files , $settings->{tgz_dox});
-    push(@files , $settings->{zip_dox});
+    push(@files, $settings->{tgz_dox});
+    push(@files, $settings->{zip_dox});
   }
   return @files;
 }
@@ -1743,49 +1877,58 @@ sub remedy_ftp_upload {
     Passive => !$settings->{ftp_active},
   ) or die "Cannot connect to $settings->{ftp_host}: $@";
   $ftp->login($settings->{ftp_user}, $settings->{ftp_password})
-      or die "Cannot login ", $ftp->message;
+    or die "Cannot login ", $ftp->message();
   $ftp->cwd($FTP_DIR)
-      or die "Cannot change dir to $FTP_DIR ", $ftp->message;
+    or die "Cannot change dir to $FTP_DIR ", $ftp->message();
   my @current_release_files = $ftp->ls()
-      or die "Cannot ls() $FTP_DIR ", $ftp->message;
-  $ftp->binary;
+    or die "Cannot ls() $FTP_DIR ", $ftp->message();
+  $ftp->binary();
 
   my @new_release_files = get_release_files($settings);
-  my %release_file_map = map { $_ => 1 } @new_release_files;
 
-  # Identify Old Versioned Release Files Using the New Ones
-  my @release_file_re = ();
-  my $quoted_base_name_prefix = quotemeta($base_name_prefix);
-  my $version_re = qr/\d+\.\d+(.\d+)?/;
-  foreach my $file (@new_release_files) {
-    my $re;
-    my $versioned;
-    if ($file =~ m/^${quoted_base_name_prefix}${version_re}(.*)$/) {
-      my $suffix = ${2} || "";
-      $re = qr/^${quoted_base_name_prefix}${version_re}${suffix}$/;
-      $versioned = 1;
-    } else {
-      $re = qr/^$file$/;
-      $versioned = 0;
+  if ($settings{is_highest_version}) {
+    # Identify Old Versioned Release Files Using the New Ones
+    my @release_file_re = ();
+    my $quoted_base_name_prefix = quotemeta($base_name_prefix);
+    my $version_re = qr/\d+\.\d+(.\d+)?/;
+    foreach my $file (@new_release_files) {
+      my $re;
+      my $versioned;
+      if ($file =~ m/^${quoted_base_name_prefix}${version_re}(.*)$/) {
+        my $suffix = ${2} || "";
+        $re = qr/^${quoted_base_name_prefix}${version_re}${suffix}$/;
+        $versioned = 1;
+      }
+      else {
+        $re = qr/^$file$/;
+        $versioned = 0;
+      }
+      push(@release_file_re, {re => $re, versioned => $versioned});
     }
-    push(@release_file_re, {re => $re, versioned => $versioned});
-  }
 
-  # And Move or Delete Them
-  foreach my $file (@current_release_files) {
-    foreach my $file_info (@release_file_re) {
-      if ($file =~ $file_info->{re}) {
-        if ($file_info->{versioned}) {
-          my $new_path = $PRIOR_RELEASE_PATH . $file;
-          print "moving $file to $new_path\n";
-          $ftp->rename($file, $new_path) or die "Could not rename $file to $new_path: " . $ftp->message;
-        } else {
-          print "deleting $file\n";
-          $ftp->delete($file) or die "Could not delete $file: " . $ftp->message;
+    # And Move or Delete Them
+    foreach my $file (@current_release_files) {
+      foreach my $file_info (@release_file_re) {
+        if ($file =~ $file_info->{re}) {
+          if ($file_info->{versioned}) {
+            my $new_path = $PRIOR_RELEASE_PATH . $file;
+            print "moving $file to $new_path\n";
+            $ftp->rename($file, $new_path)
+              or die "Could not rename $file to $new_path: " . $ftp->message();
+          }
+          else {
+            print "deleting $file\n";
+            $ftp->delete($file) or die "Could not delete $file: " . $ftp->message();
+          }
+          last;
         }
-        last;
       }
     }
+  }
+  else {
+    print "Not highest version release, cd-ing to $PRIOR_RELEASE_PATH\n";
+    $ftp->cwd($PRIOR_RELEASE_PATH)
+      or die "Cannot change dir to $PRIOR_RELEASE_PATH ", $ftp->message();
   }
 
   # upload new release files
@@ -1795,7 +1938,7 @@ sub remedy_ftp_upload {
     $ftp->put($local_file, $file) or die "Failed to upload $file: " . $ftp->message();
   }
 
-  $ftp->quit;
+  $ftp->quit();
   return 1;
 }
 
@@ -1804,11 +1947,7 @@ sub verify_github_upload {
   my $settings = shift();
   my $verified = 0;
 
-  my $r = Pithub::Repos::Releases->new;
-  my $release_list = $r->list(
-      user => $settings->{github_user},
-      repo => $settings->{github_repo},
-  );
+  my $release_list = $settings->{pithub}->repos->releases->list();
   unless ( $release_list->success ) {
     printf "error accessing github: %s\n", $release_list->response->status_line;
   } else {
@@ -1832,16 +1971,12 @@ sub remedy_github_upload {
 
   my $rc = 1;
 
-  my $ph = Pithub::Repos::Releases->new(
-      user => $settings->{github_user},
-      repo => $settings->{github_repo},
-      token => $settings->{github_token}
-  );
+  my $releases = $settings->{pithub}->repos->releases;
   my $text =
     "**Download $settings->{zip_src} (Windows) or $settings->{tgz_src} (Linux/macOS) " .
       "instead of \"Source code (zip)\" or \"Source code (tar.gz)\".**\n\n" .
     news_contents_excerpt($settings->{version});
-  my $release = $ph->create(
+  my $release = $releases->create(
       data => {
           name => 'OpenDDS ' . $settings->{version},
           tag_name => $settings->{git_tag},
@@ -1861,7 +1996,7 @@ sub remedy_github_upload {
       my $data;
       read $fh, $data, $size or die "Can't read";
       my $mime = ($f =~ /\.gz$/) ? 'application/gzip' : 'application/x-zip-compressed';
-      my $asset = $ph->assets->create(
+      my $asset = $releases->assets->create(
           release_id => $release->content->{id},
           name => $f,
           content_type => $mime,
@@ -2025,8 +2160,19 @@ sub remedy_news_template_file_section {
 
 ############################################################################
 
-sub verify_release_flag_file {
-  return -f $_[0]->{release_flag_file_path};
+sub verify_release_occurred_flag {
+  my $settings = shift();
+
+  return $settings->{release_occurred};
+}
+
+sub remedy_release_occurred_flag {
+  my $settings = shift();
+
+  $settings->{release_occurred} = 1;
+  write_workspace_info($settings);
+
+  return 1;
 }
 
 ############################################################################
@@ -2075,6 +2221,11 @@ GetOptions(
   'ftp-active' => \$ftp_active,
   'ftp-port=s' => \$ftp_port,
 ) or die "See --help for options.\nStopped";
+
+if ($print_help) {
+  print usage();
+  exit(0);
+}
 
 if (!(scalar(@ARGV) == 0 || scalar(@ARGV) == 2)) {
   die "Expecting 0 or 2 positional arguments. See --help.\nStopped";
@@ -2136,11 +2287,11 @@ if (%parsed_version) {
   $next_version = $parsed_next_version{string};
   print("Next after this version is going to be $next_version\n");
 }
-elsif (!$print_help) {
+else {
   die "Invalid version: $version\nStopped";
 }
 
-if (!$skip_ftp && !$print_help) {
+if (!$skip_ftp) {
   die("FTP_USERNAME, FTP_PASSWD, FTP_HOST need to be defined")
     if (!(defined($ENV{FTP_USERNAME}) && defined($ENV{FTP_PASSWD}) && defined($ENV{FTP_HOST})));
 }
@@ -2188,35 +2339,24 @@ my %global_settings = (
         "VERSION.txt" => 1,
         "dds/Version.h" => 1,
         "docs/history/ChangeLog-$version" => 1,
-        "tools/scripts/gitrelease.pl" => 1,
     },
     skip_ftp     => $skip_ftp,
     skip_devguide=> $skip_devguide,
     skip_doxygen => $skip_doxygen,
     skip_website => $skip_website,
     workspace    => $workspace,
+    workspace_info_file_path => "$workspace/$workspace_info_filename",
     download_url => $download_url,
     ace_root     => "$workspace/$ace_root",
-    release_flag_file_path => "$workspace/$release_flag_filename",
-    release_flag_file_exists => 0,
     ftp_active => $ftp_active,
     ftp_port => $ftp_port,
 );
 
-if (verify_release_flag_file(\%global_settings)) {
-  $global_settings{release_flag_file_exists} = 1;
-  print
-    "Release flag file found, assuming release is done! Remove the\n" .
-    "\"$release_flag_filename\" file in the workspace if that is not the case.\n";
-}
+$global_settings{pithub} = new_pithub(\%global_settings);
+
+check_workspace(\%global_settings);
 
 my @release_steps  = (
-  {
-    name => 'Create Workspace Directory',
-    verify => sub{return -d $_[0]->{workspace};},
-    message => sub{return "Workspace directory needs to be created."},
-    remedy => sub{return make_path($_[0]->{workspace});},
-  },
   {
     name    => 'Update VERSION.txt File',
     verify  => sub{verify_update_version_file(@_)},
@@ -2242,7 +2382,6 @@ my @release_steps  = (
     name    => 'Verify Remote',
     verify  => sub{verify_git_remote(@_)},
     message => sub{message_git_remote(@_)},
-    remedy  => sub{override_git_remote(@_)},
   },
   {
     name    => 'Create ChangeLog File',
@@ -2253,7 +2392,6 @@ my @release_steps  = (
   },
   {
     name    => 'Update AUTHORS File',
-    prereqs => ['Create Workspace Directory'],
     verify  => sub{verify_authors(@_)},
     message => sub{message_authors(@_)},
     remedy  => sub{remedy_authors(@_)},
@@ -2296,7 +2434,7 @@ my @release_steps  = (
     prereqs => ['Verify Remote'],
     verify  => sub{verify_git_changes_pushed(@_, 1)},
     message => sub{message_git_changes_pushed(@_)},
-    remedy  => sub{remedy_git_changes_pushed(@_, 1)}
+    remedy  => sub{remedy_git_changes_pushed(@_)}
   },
   {
     name    => 'Create Release Branch',
@@ -2328,14 +2466,12 @@ my @release_steps  = (
   },
   {
     name    => 'Create Unix Release Archive',
-    prereqs => ['Create Workspace Directory'],
     verify  => sub{verify_tgz_source(@_)},
     message => sub{message_tgz_source(@_)},
     remedy  => sub{remedy_tgz_source(@_)}
   },
   {
     name    => 'Create Windows Release Archive',
-    prereqs => ['Create Workspace Directory'],
     verify  => sub{verify_zip_source(@_)},
     message => sub{message_zip_source(@_)},
     remedy  => sub{remedy_zip_source(@_)}
@@ -2352,7 +2488,6 @@ my @release_steps  = (
   },
   {
     name    => 'Download OCI ACE/TAO',
-    prereqs => ['Create Workspace Directory'],
     verify  => sub{verify_download_ace_tao(@_)},
     message => sub{message_download_ace_tao(@_)},
     remedy  => sub{remedy_download_ace_tao(@_)},
@@ -2392,7 +2527,6 @@ my @release_steps  = (
   },
   {
     name    => 'Download Devguide',
-    prereqs => ['Create Workspace Directory'],
     verify  => sub{verify_devguide(@_)},
     message => sub{message_devguide(@_)},
     remedy  => sub{remedy_devguide(@_)},
@@ -2419,11 +2553,10 @@ my @release_steps  = (
     skip    => $global_settings{skip_website},
   },
   {
-    name => 'Create Release Flag File',
-    verify => sub{verify_release_flag_file(@_)},
-    message => sub{return "Release flag file needs to be created."},
-    remedy => sub{touch_file("$_[0]->{release_flag_file_path}"); return 0;},
-    post_release => 1,
+    name => 'Record that the Release Occurred',
+    verify => sub{verify_release_occurred_flag(@_)},
+    message => sub{return "Release ouccured flag needs to be set"},
+    remedy => sub{remedy_release_occurred_flag(@_)},
   },
   {
     name    => 'Update NEWS for Post-Release',
@@ -2528,7 +2661,7 @@ sub run_step {
 
   return if (
     !$settings->{list_all} && ($step->{skip} || $step->{verified} ||
-    ($settings->{release_flag_file_exists} && !$step->{post_release})));
+    ($settings->{release_occurred} && !$step->{post_release})));
   print "$step_count: $title\n";
   return if $settings->{list};
 
@@ -2546,7 +2679,7 @@ sub run_step {
     print "  " . $step->{message}($settings) . "\n";
 
     my $remedied = 0;
-    my $forced  = 0;
+    my $forced = 0;
     # If a remedy is available and --remedy specified
     if ($step->{remedy} && $settings->{remedy}) {
       # Try remediation
@@ -2568,11 +2701,21 @@ sub run_step {
     }
 
     if (!($remedied || $forced)) {
-      if ($step->{remedy} && !$settings->{remedy}) {
-        print "  Use --remedy to attempt a fix\n";
+      if ($step->{remedy}) {
+        if (!$settings->{remedy}) {
+          print "  Use --remedy to attempt a fix\n";
+        }
       }
-      if ($step->{force} && !$settings->{force}) {
-        print "  Use --force to force past this step\n";
+      else {
+        print "  Step can NOT be automatically resolved using --remedy\n";
+      }
+      if ($step->{can_force}) {
+        if (!$settings->{force}) {
+          print "  Use --force to force past this step\n";
+        }
+      }
+      else {
+        print "  Step can NOT be forced using --force\n";
       }
     }
 
@@ -2585,10 +2728,7 @@ sub run_step {
   $step->{verified} = 1;
 }
 
-if ($print_help) {
-  print usage();
-}
-elsif ($global_settings{list} || ($workspace && %parsed_version)) {
+if ($global_settings{list} || ($workspace && %parsed_version)) {
   my @steps_to_do;
   my $no_steps = scalar(@release_steps);
   if ($step_expr) {
