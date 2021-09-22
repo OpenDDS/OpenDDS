@@ -12,7 +12,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-
 RawDataSample::RawDataSample()
   : message_id_(SAMPLE_DATA)
   , publication_id_(GUID_UNKNOWN)
@@ -23,8 +22,8 @@ RawDataSample::RawDataSample()
 }
 
 RawDataSample::RawDataSample(MessageId          mid,
-                             ACE_INT32            sec,
-                             ACE_UINT32           nano_sec,
+                             ACE_INT32          sec,
+                             ACE_UINT32         nano_sec,
                              PublicationId      pid,
                              bool               byte_order,
                              ACE_Message_Block* blk)
