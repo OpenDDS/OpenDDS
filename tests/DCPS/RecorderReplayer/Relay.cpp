@@ -92,7 +92,7 @@ public:
 
     if (replayer_listener->connected_readers_.size()) {
       // get the instance handle of one of the connected reader
-      DDS::InstanceHandle_t reader_handle = *(replayer_listener->connected_readers_.begin());
+      const DDS::InstanceHandle_t reader_handle = *(replayer_listener->connected_readers_.begin());
 
       // Send to only one connected reader. To send to all readers, use
       // replayer_->write(sample)

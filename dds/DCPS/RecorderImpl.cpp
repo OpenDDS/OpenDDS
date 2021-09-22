@@ -247,7 +247,6 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
   if (listener_.in()) {
     listener_->on_sample_data_received(this, rawSample);
   }
-
 }
 
 void RecorderImpl::notify_subscription_disconnected(const WriterIdSeq&)
