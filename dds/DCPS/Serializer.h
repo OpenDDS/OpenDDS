@@ -345,7 +345,6 @@ private:
  */
 class OpenDDS_Dcps_Export Serializer {
 public:
-
   /// Flags and reserved ids used in parameter list ids.
   ///@{
   static const ACE_CDR::UShort pid_extended = 0x3f01;
@@ -553,7 +552,7 @@ public:
     FromBoundedString(const string_t& str, ACE_CDR::ULong bound)
       : str_(str), bound_(bound) {}
     const string_t& str_;
-    ACE_CDR::ULong bound_;
+    const ACE_CDR::ULong bound_;
   };
 
   friend OpenDDS_Dcps_Export
@@ -628,7 +627,7 @@ public:
     ToBoundedString(string_t& str, ACE_CDR::ULong bound)
       : str_(str), bound_(bound) {}
     string_t& str_;
-    ACE_CDR::ULong bound_;
+    const ACE_CDR::ULong bound_;
   };
 
   friend OpenDDS_Dcps_Export
