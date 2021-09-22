@@ -79,7 +79,7 @@ protected:
 
   void set_deleted(bool state);
 
-  bool get_deleted();
+  bool get_deleted() const;
 
   DDS::InstanceHandle_t get_entity_instance_handle(const GUID_t& id, DomainParticipantImpl* participant);
 

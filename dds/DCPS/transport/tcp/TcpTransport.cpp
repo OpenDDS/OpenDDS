@@ -241,6 +241,7 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
       VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink found datalink link[%@]\n", link.in()), 0);
       link->add_on_start_callback(client, remote.repo_id_);
       add_pending_connection(client, link);
+      guard.release();
       link->do_association_actions();
       return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
     }

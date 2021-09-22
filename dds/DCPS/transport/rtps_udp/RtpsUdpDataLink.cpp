@@ -447,7 +447,7 @@ RtpsUdpDataLink::join_multicast_group(const NetworkInterface& nic,
       joined_interfaces_.insert(nic.name());
 
       if (get_reactor()->register_handler(multicast_socket_.get_handle(),
-                                          receive_strategy(),
+                                          receive_strategy().in(),
                                           ACE_Event_Handler::READ_MASK) != 0) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group failed to register multicast input handler\n")));
       }
@@ -472,7 +472,7 @@ RtpsUdpDataLink::join_multicast_group(const NetworkInterface& nic,
       ipv6_joined_interfaces_.insert(nic.name());
 
       if (get_reactor()->register_handler(ipv6_multicast_socket_.get_handle(),
-                                          receive_strategy(),
+                                          receive_strategy().in(),
                                           ACE_Event_Handler::READ_MASK) != 0) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group failed to register ipv6 multicast input handler\n")));
       }
@@ -1365,8 +1365,8 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     guard.release();
     result = writer->customize_queue_element_helper(element, require_iq, meta_submessages, deliver_after_send);
   } else {
-    result = customize_queue_element_non_reliable_i(element, require_iq, meta_submessages, deliver_after_send, guard);
     guard.release();
+    result = customize_queue_element_non_reliable_i(element, require_iq, meta_submessages, deliver_after_send, guard);
   }
 
   queue_submessages(meta_submessages);
@@ -1588,7 +1588,7 @@ RtpsUdpDataLink::received(const RTPS::DataSubmessage& data,
       }
       if (!pending_reliable_readers_.empty()) {
         GuardType guard(strategy_lock_);
-        RtpsUdpReceiveStrategy* trs = receive_strategy();
+        RtpsUdpReceiveStrategy_rch trs = receive_strategy();
         if (trs) {
           for (RepoIdSet::const_iterator it = pending_reliable_readers_.begin();
                it != pending_reliable_readers_.end(); ++it)
@@ -1603,7 +1603,7 @@ RtpsUdpDataLink::received(const RTPS::DataSubmessage& data,
         to_call.push_back(rr->second);
       } else if (pending_reliable_readers_.count(local)) {
         GuardType guard(strategy_lock_);
-        RtpsUdpReceiveStrategy* trs = receive_strategy();
+        RtpsUdpReceiveStrategy_rch trs = receive_strategy();
         if (trs) {
           trs->withhold_data_from(local);
         }
@@ -4290,7 +4290,7 @@ RtpsUdpDataLink::RtpsWriter::RtpsWriter(RcHandle<RtpsUdpDataLink> link, const Re
  , nack_response_(make_rch<RtpsWriter::Sporadic>(link->reactor_task_->interceptor(), *this, &RtpsWriter::send_nack_responses))
  , fallback_(link->config().heartbeat_period_)
 {
-  send_buff_->bind(link->send_strategy());
+  send_buff_->bind(link->send_strategy().in());
 }
 
 RtpsUdpDataLink::RtpsWriter::~RtpsWriter()
@@ -4392,16 +4392,16 @@ RtpsUdpDataLink::transport()
   return static_cast<RtpsUdpTransport&>(impl());
 }
 
-RtpsUdpSendStrategy*
+RtpsUdpSendStrategy_rch
 RtpsUdpDataLink::send_strategy()
 {
-  return static_cast<RtpsUdpSendStrategy*>(send_strategy_.in());
+  return dynamic_rchandle_cast<RtpsUdpSendStrategy>(send_strategy_);
 }
 
-RtpsUdpReceiveStrategy*
+RtpsUdpReceiveStrategy_rch
 RtpsUdpDataLink::receive_strategy()
 {
-  return static_cast<RtpsUdpReceiveStrategy*>(receive_strategy_.in());
+  return dynamic_rchandle_cast<RtpsUdpReceiveStrategy>(receive_strategy_);
 }
 
 AddrSet
