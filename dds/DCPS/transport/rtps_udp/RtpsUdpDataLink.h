@@ -204,10 +204,16 @@ public:
 
 #ifdef OPENDDS_SECURITY
   Security::SecurityConfig_rch security_config() const
-  { return security_config_; }
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(security_mutex_);
+    return security_config_;
+  }
 
   Security::HandleRegistry_rch handle_registry() const
-  { return handle_registry_; }
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(security_mutex_);
+    return handle_registry_;
+  }
 
   DDS::Security::ParticipantCryptoHandle local_crypto_handle() const;
   void local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch);
@@ -249,8 +255,8 @@ private:
   ReactorTask_rch reactor_task_;
   RcHandle<JobQueue> job_queue_;
 
-  RtpsUdpSendStrategy* send_strategy();
-  RtpsUdpReceiveStrategy* receive_strategy();
+  RtpsUdpSendStrategy_rch send_strategy();
+  RtpsUdpReceiveStrategy_rch receive_strategy();
 
   GuidPrefix_t local_prefix_;
 
@@ -883,6 +889,7 @@ private:
   };
 
 #ifdef OPENDDS_SECURITY
+  mutable ACE_Thread_Mutex security_mutex_;
   Security::SecurityConfig_rch security_config_;
   Security::HandleRegistry_rch handle_registry_;
   DDS::Security::ParticipantCryptoHandle local_crypto_handle_;

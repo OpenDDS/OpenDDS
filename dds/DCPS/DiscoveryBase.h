@@ -1198,7 +1198,7 @@ namespace OpenDDS {
       RcHandle<EndpointManagerSporadic> type_lookup_reply_deadline_processor_;
       TimeDuration max_type_lookup_service_reply_period_;
       DCPS::SequenceNumber type_lookup_service_sequence_number_;
-      bool use_xtypes_;
+      const bool use_xtypes_;
 
       void
       match(const RepoId& writer, const RepoId& reader)
@@ -2419,41 +2419,45 @@ namespace OpenDDS {
 #ifndef DDS_HAS_MINIMUM_BIT
     DCPS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit()
     {
-      if (!bit_subscriber_.in())
+      DDS::Subscriber_var bit_sub(bit_subscriber());
+      if (!bit_sub.in())
         return 0;
 
       DDS::DataReader_var d =
-        bit_subscriber_->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
+        bit_sub->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
       return dynamic_cast<ParticipantBuiltinTopicDataDataReaderImpl*>(d.in());
     }
 
     DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* part_loc_bit()
     {
-      if (!bit_subscriber_.in())
+      DDS::Subscriber_var bit_sub(bit_subscriber());
+      if (!bit_sub.in())
         return 0;
 
       DDS::DataReader_var d =
-        bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
+        bit_sub->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
       return dynamic_cast<ParticipantLocationBuiltinTopicDataDataReaderImpl*>(d.in());
     }
 
     DCPS::ConnectionRecordDataReaderImpl* connection_record_bit()
     {
-      if (!bit_subscriber_.in())
+      DDS::Subscriber_var bit_sub(bit_subscriber());
+      if (!bit_sub.in())
         return 0;
 
       DDS::DataReader_var d =
-        bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_CONNECTION_RECORD_TOPIC);
+        bit_sub->lookup_datareader(DCPS::BUILT_IN_CONNECTION_RECORD_TOPIC);
       return dynamic_cast<ConnectionRecordDataReaderImpl*>(d.in());
     }
 
     DCPS::InternalThreadBuiltinTopicDataDataReaderImpl* internal_thread_bit()
     {
-      if (!bit_subscriber_.in())
+      DDS::Subscriber_var bit_sub(bit_subscriber());
+      if (!bit_sub.in())
         return 0;
 
       DDS::DataReader_var d =
-        bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC);
+        bit_sub->lookup_datareader(DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC);
       return dynamic_cast<InternalThreadBuiltinTopicDataDataReaderImpl*>(d.in());
     }
 #endif /* DDS_HAS_MINIMUM_BIT */

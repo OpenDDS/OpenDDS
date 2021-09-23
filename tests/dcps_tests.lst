@@ -240,6 +240,7 @@ examples/DCPS/Messenger_Imr/run_test.pl: !DCPS_MIN !MIN_CORBA !CORBA_E_COMPACT !
 
 tests/DCPS/EntityLifecycleStress/run_test.pl publishers 5 subscribers 5: !OPENDDS_SAFETY_PROFILE
 tests/DCPS/EntityLifecycleStress/run_test.pl rtps_disc publishers 10 subscribers 10: RTPS
+tests/DCPS/EntityLifecycleStress/run_test.pl rtps_disc_tcp publishers 10 subscribers 10: RTPS !OPENDDS_SAFETY_PROFILE
 
 tests/DCPS/LivelinessKeepAliveTest/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/LivelinessTimeout/run_test.pl: !DCPS_MIN
