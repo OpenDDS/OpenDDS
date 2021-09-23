@@ -31,9 +31,10 @@ void test_conversion(const XTypes::DynamicType_rch& expected_dynamic_type)
   EXPECT_TRUE(pos != com_map.end());
   const XTypes::TypeObject& com_to = pos->second;
   XTypes::DynamicType_rch converted_dt = DCPS::make_rch<XTypes::DynamicType>();
-  XTypes::TypeLookupService::DynamicTypeMap dtm;
-  converted_dt = tls->complete_to_dynamic(com_to.complete, dtm);
+  DCPS::GUID_t fake_guid;
+  converted_dt = tls->complete_to_dynamic(com_to.complete, fake_guid);
   EXPECT_EQ(*expected_dynamic_type, *converted_dt);
+  //tls->remove_guid_from_dynamic_map(fake_guid);
 }
 
 TEST(CompleteToDynamicType, MyInnerStruct)
