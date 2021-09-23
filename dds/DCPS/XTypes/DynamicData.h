@@ -18,13 +18,11 @@ namespace XTypes {
 
 class DynamicData {
 public:
-  DynamicData(Serializer& strm, DynamicType_rch type)
-    : strm_(strm)
-    , start_rpos_(strm_.rpos())
-    , type_(type)
-  {
-    type_->get_descriptor(descriptor_);
-  }
+  // DynamicData can be constructed for any type kinds, except TK_ANNOTATION (since
+  // data for annotations won't be serialized independently in a sample) and TK_BITSET
+  // (the spec doesn't have enough information on how to handle bitsets).
+  DynamicData(Serializer& strm, DynamicType_rch type);
+  ~DynamicData() {}
 
   DDS::ReturnCode_t get_descriptor(MemberDescriptor& value, MemberId id) const;
   DDS::ReturnCode_t set_descriptor(MemberId id, const MemberDescriptor& value);
@@ -42,98 +40,98 @@ public:
   DDS::ReturnCode_t return_loaned_value(const DynamicData& value);
   DynamicData clone() const;
 
-  DDS::ReturnCode_t get_int32_value(ACE_CDR::Long& value, MemberId id) const;
+  DDS::ReturnCode_t get_int32_value(ACE_CDR::Long& value, MemberId id);
   DDS::ReturnCode_t set_int32_value(MemberId id, ACE_CDR::Long value);
 
-  DDS::ReturnCode_t get_uint32_value(ACE_CDR::ULong& value, MemberId id) const;
+  DDS::ReturnCode_t get_uint32_value(ACE_CDR::ULong& value, MemberId id);
   DDS::ReturnCode_t set_uint32_value(MemberId id, ACE_CDR::ULong value);
 
-  DDS::ReturnCode_t get_int8_value(ACE_CDR::Int8& value, MemberId id) const;
+  DDS::ReturnCode_t get_int8_value(ACE_CDR::Int8& value, MemberId id);
   DDS::ReturnCode_t set_int8_value(MemberId id, ACE_CDR::Int8 value);
 
-  DDS::ReturnCode_t get_uint8_value(ACE_CDR::UInt8& value, MemberId id) const;
+  DDS::ReturnCode_t get_uint8_value(ACE_CDR::UInt8& value, MemberId id);
   DDS::ReturnCode_t set_uint8_value(MemberId id, ACE_CDR::UInt8 value);
 
-  DDS::ReturnCode_t get_int16_value(ACE_CDR::Short& value, MemberId id) const;
+  DDS::ReturnCode_t get_int16_value(ACE_CDR::Short& value, MemberId id);
   DDS::ReturnCode_t set_int16_value(MemberId id, ACE_CDR::Short value);
 
-  DDS::ReturnCode_t get_uint16_value(ACE_CDR::UShort& value, MemberId id) const;
+  DDS::ReturnCode_t get_uint16_value(ACE_CDR::UShort& value, MemberId id);
   DDS::ReturnCode_t set_uint16_value(MemberId id, ACE_CDR::UShort value);
 
-  DDS::ReturnCode_t get_int64_value(ACE_CDR::LongLong& value, MemberId id) const;
+  DDS::ReturnCode_t get_int64_value(ACE_CDR::LongLong& value, MemberId id);
   DDS::ReturnCode_t set_int64_value(MemberId id, ACE_CDR::LongLong value);
 
-  DDS::ReturnCode_t get_uint64_value(ACE_CDR::ULongLong& value, MemberId id) const;
+  DDS::ReturnCode_t get_uint64_value(ACE_CDR::ULongLong& value, MemberId id);
   DDS::ReturnCode_t set_uint64_value(MemberId id, ACE_CDR::ULongLong value);
 
-  DDS::ReturnCode_t get_float32_value(ACE_CDR::Float& value, MemberId id) const;
+  DDS::ReturnCode_t get_float32_value(ACE_CDR::Float& value, MemberId id);
   DDS::ReturnCode_t set_float32_value(MemberId id, ACE_CDR::Float value);
 
-  DDS::ReturnCode_t get_float64_value(ACE_CDR::Double& value, MemberId id) const;
+  DDS::ReturnCode_t get_float64_value(ACE_CDR::Double& value, MemberId id);
   DDS::ReturnCode_t set_float64_value(MemberId id, ACE_CDR::Double value);
 
-  DDS::ReturnCode_t get_float128_value(ACE_CDR::LongDouble& value, MemberId id) const;
+  DDS::ReturnCode_t get_float128_value(ACE_CDR::LongDouble& value, MemberId id);
   DDS::ReturnCode_t set_float128_value(MemberId id, ACE_CDR::LongDouble value);
 
-  DDS::ReturnCode_t get_char8_value(ACE_CDR::Char& value, MemberId id) const;
+  DDS::ReturnCode_t get_char8_value(ACE_CDR::Char& value, MemberId id);
   DDS::ReturnCode_t set_char8_value(MemberId id, ACE_CDR::Char value);
 
-  DDS::ReturnCode_t get_char16_value(ACE_CDR::WChar& value, MemberId id) const;
+  DDS::ReturnCode_t get_char16_value(ACE_CDR::WChar& value, MemberId id);
   DDS::ReturnCode_t set_char16_value(MemberId id, ACE_CDR::WChar value);
 
-  DDS::ReturnCode_t get_byte_value(ACE_CDR::Octet& value, MemberId id) const;
+  DDS::ReturnCode_t get_byte_value(ACE_CDR::Octet& value, MemberId id);
   DDS::ReturnCode_t set_byte_value(MemberId id, ACE_CDR::Octet value);
 
-  DDS::ReturnCode_t get_boolean_value(ACE_CDR::Boolean& value, MemberId id) const;
+  DDS::ReturnCode_t get_boolean_value(ACE_CDR::Boolean& value, MemberId id);
   DDS::ReturnCode_t set_boolean_value(MemberId id, ACE_CDR::Boolean value);
 
-  DDS::ReturnCode_t get_string_value(DCPS::String& value, MemberId id) const;
+  DDS::ReturnCode_t get_string_value(DCPS::String& value, MemberId id);
   DDS::ReturnCode_t set_string_value(MemberId id, DCPS::String value);
 
-  DDS::ReturnCode_t get_wstring_value(DCPS::WString& value, MemberId id) const;
+  DDS::ReturnCode_t get_wstring_value(DCPS::WString& value, MemberId id);
   DDS::ReturnCode_t set_wstring_value(MemberId id, DCPS::WString value);
 
-  DDS::ReturnCode_t get_complex_value(DynamicData& value, MemberId id) const;
+  DDS::ReturnCode_t get_complex_value(DynamicData& value, MemberId id);
   DDS::ReturnCode_t set_complex_value(MemberId id, DynamicData value);
 
   typedef Sequence<ACE_CDR::Long> Int32Seq;
-  DDS::ReturnCode_t get_int32_values(Int32Seq& value, MemberId id) const;
+  DDS::ReturnCode_t get_int32_values(Int32Seq& value, MemberId id);
   DDS::ReturnCode_t set_int32_values(MemberId id, const Int32Seq& value);
 
   typedef Sequence<ACE_CDR::ULong> UInt32Seq;
-  DDS::ReturnCode_t get_uint32_values(UInt32Seq& value, MemberId id) const;
+  DDS::ReturnCode_t get_uint32_values(UInt32Seq& value, MemberId id);
   DDS::ReturnCode_t set_uint32_values(MemberId id, const UInt32Seq& value);
 
   typedef Sequence<ACE_CDR::Int8> Int8Seq;
-  DDS::ReturnCode_t get_int8_values(Int8Seq& value, MemberId id) const;
+  DDS::ReturnCode_t get_int8_values(Int8Seq& value, MemberId id);
   DDS::ReturnCode_t set_int8_values(MemberId id, const Int8Seq& value);
 
   typedef Sequence<ACE_CDR::UInt8> UInt8Seq;
-  DDS::ReturnCode_t get_uint8_values(UInt8Seq& value, MemberId id) const;
+  DDS::ReturnCode_t get_uint8_values(UInt8Seq& value, MemberId id);
   DDS::ReturnCode_t set_uint8_values(MemberId id, const UInt8Seq& value);
 
   typedef Sequence<ACE_CDR::Short> Int16Seq;
-  DDS::ReturnCode_t get_int16_values(Int16Seq& value, MemberId id) const;
+  DDS::ReturnCode_t get_int16_values(Int16Seq& value, MemberId id);
   DDS::ReturnCode_t set_int16_values(MemberId id, const Int16Seq& value);
 
   typedef Sequence<ACE_CDR::UShort> UInt16Seq;
-  DDS::ReturnCode_t get_uint16_values(UInt16Seq& value, MemberId id) const;
+  DDS::ReturnCode_t get_uint16_values(UInt16Seq& value, MemberId id);
   DDS::ReturnCode_t set_uint16_values(MemberId id, const UInt16Seq& value);
 
   typedef Sequence<ACE_CDR::LongLong> Int64Seq;
-  DDS::ReturnCode_t get_int64_values(Int64Seq& value, MemberId id) const;
+  DDS::ReturnCode_t get_int64_values(Int64Seq& value, MemberId id);
   DDS::ReturnCode_t set_int64_values(MemberId id, const Int64Seq& value);
 
   typedef Sequence<ACE_CDR::ULongLong> UInt64Seq;
-  DDS::ReturnCode_t get_uint64_values(UInt64Seq& value, MemberId id) const;
+  DDS::ReturnCode_t get_uint64_values(UInt64Seq& value, MemberId id);
   DDS::ReturnCode_t set_uint64_values(MemberId id, const UInt64Seq& value);
 
   typedef Sequence<ACE_CDR::Float> Float32Seq;
-  DDS::ReturnCode_t get_float32_values(Float32Seq& value, MemberId id) const;
+  DDS::ReturnCode_t get_float32_values(Float32Seq& value, MemberId id);
   DDS::ReturnCode_t set_float32_values(MemberId id, const Float32Seq& value);
 
   typedef Sequence<ACE_CDR::Double> Float64Seq;
-  DDS::ReturnCode_t get_float64_values(Float64Seq& value, MemberId id) const;
+  DDS::ReturnCode_t get_float64_values(Float64Seq& value, MemberId id);
   DDS::ReturnCode_t set_float64_values(MemberId id, const Float64Seq& value);
 
   typedef Sequence<ACE_CDR::LongDouble> Float128Seq;
@@ -171,11 +169,28 @@ public:
 
 private:
 
-  template <typename ValueType, typename TypeKindCode>
-  DDS::ReturnCode_t get_individual_value(ValueType& value, MemberId id);
+  // Templates for reading a single value of type primitive or string or wstring.
+  template<typename MemberType, typename MemberTypeKind>
+  DDS::ReturnCode_t get_value_from_struct(MemberType& value, MemberId id);
 
-  /// Move the read pointer to the member with a given ID and type kind.
-  bool find_member(MemberId id, TypeKind kind);
+  template<typename MemberType, typename MemberTypeKind>
+  bool get_value_from_union(MemberType& value, MemberId id);
+
+  template<typename ElementType, typename ElementTypeKind>
+  bool get_value_from_sequence(ElementType& value, MemberId id);
+
+  template<typename ElementType, typename ElementTypeKind>
+  bool get_value_from_array(ElementType& value, MemberId id);
+
+  // Templates for reading a value sequence where element type is primitive or string or wstring.
+  template<typename SequenceType, typename ElementTypeKind>
+  DDS::ReturnCode_t get_values_from_struct(SequenceType& value, MemberId id);
+
+  /// Move the read pointer to the member with a given ID.
+  /// In case the member is not a sequence, @a kind is the type kind of the member.
+  /// Else if the requested member is a sequence, @a kind is the type kind of the
+  /// elements of the sequence.
+  bool find_member(MemberId id, TypeKind kind, bool is_sequence = false);
 
   /// Reset the read pointer to point to the beginning of the stream.
   void reset_rpos();
@@ -201,7 +216,7 @@ private:
 
   // These helper methods can be moved to DynamicType class.
   DynamicType_rch get_base_type(DynamicType_rch alias_type) const;
-  bool is_primitive(DynamicType_rch type, ACE_CDR::ULong& size) const;
+  bool is_primitive(TypeKind tk, ACE_CDR::ULong& size) const;
   const char* typekind_to_string(TypeKind tk) const;
 
   Serializer& strm_;
