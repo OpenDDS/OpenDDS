@@ -903,15 +903,19 @@ ReplayerImpl::write (const RawDataSample*   samples,
                             PublicationInstance_rch()),
       DDS::RETCODE_ERROR);
 
-    element->get_header().byte_order_ = samples[i].sample_byte_order_;
+    element->get_header().byte_order_ = samples[i].header_.byte_order_;
     element->get_header().publication_id_ = this->publication_id_;
     list.enqueue_tail(element);
     Message_Block_Ptr temp;
     Message_Block_Ptr sample(samples[i].sample_->duplicate());
+    const DDS::Time_t source_timestamp = {
+      samples[i].header_.source_timestamp_sec_,
+      samples[i].header_.source_timestamp_nanosec_
+    };
     DDS::ReturnCode_t ret = create_sample_data_message(move(sample),
                                                        element->get_header(),
                                                        temp,
-                                                       samples[i].source_timestamp_,
+                                                       source_timestamp,
                                                        false);
     element->set_sample(move(temp));
     if (reader_ih_ptr) {

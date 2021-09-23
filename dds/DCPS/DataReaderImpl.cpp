@@ -1716,9 +1716,10 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   }
 
   if (observer && real_data && vwd) {
-    DDS::Time_t timestamp;
-    timestamp.sec = sample.header_.source_timestamp_sec_;
-    timestamp.nanosec = sample.header_.source_timestamp_nanosec_;
+      const DDS::Time_t timestamp = {
+        sample.header_.source_timestamp_sec_,
+        sample.header_.source_timestamp_nanosec_
+      };
     Observer::Sample s(instance ? instance->instance_handle_ : DDS::HANDLE_NIL, sample.header_.instance_state(), timestamp, sample.header_.sequence_, real_data->get(), *vwd);
     observer->on_sample_received(this, s);
   }
