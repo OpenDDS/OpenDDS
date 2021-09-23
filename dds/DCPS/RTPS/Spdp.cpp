@@ -1045,7 +1045,7 @@ Spdp::data_received(const DataSubmessage& data,
 #ifdef OPENDDS_SECURITY
   if (!from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList) && !ip_in_AgentInfo(from, plist)) {
     if (DCPS::DCPS_debug_level) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Spdp::data_received - dropped IP: %C\n"), DCPS::LogAddr(from).c_str()));
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) Spdp::data_received - dropped IP: %C\n"), DCPS::LogAddr(from).c_str()));
     }
     return;
   }
@@ -1055,7 +1055,7 @@ Spdp::data_received(const DataSubmessage& data,
 #elif !defined OPENDDS_SAFETY_PROFILE
   if (!from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList)) {
     if (DCPS::DCPS_debug_level) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Spdp::data_received - IP not in locator list: %C\n"), DCPS::LogAddr(from).c_str()));
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) Spdp::data_received - IP not in locator list: %C\n"), DCPS::LogAddr(from).c_str()));
     }
     return;
   }
