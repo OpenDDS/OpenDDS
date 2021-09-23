@@ -1094,7 +1094,7 @@ bool Qos_Helper::valid(const DDS::DataRepresentationQosPolicy& qos)
 {
   const CORBA::ULong count = qos.value.length();
   for (CORBA::ULong i = 0; i < count; ++i) {
-    CORBA::Short value = qos.value[i];
+    const CORBA::Short value = qos.value[i];
     switch (value) {
     case DDS::XCDR_DATA_REPRESENTATION:
     case DDS::XML_DATA_REPRESENTATION:
