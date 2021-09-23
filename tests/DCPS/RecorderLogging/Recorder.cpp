@@ -52,7 +52,7 @@ public:
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("MessengerRecorderListener::on_sample_data_received\n")));
 
-    // inspect the received raw data sample
+    // Inspect the received raw data sample
     const bool encapsulated = sample.header_.cdr_encapsulation_;
     OpenDDS::DCPS::Serializer ser(
       sample.sample_.get(),
@@ -63,9 +63,7 @@ public:
       OpenDDS::DCPS::EncapsulationHeader encap;
       if (!(ser >> encap)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
-          ACE_TEXT("DataReaderImpl::lookup_instance: ")
-          ACE_TEXT("deserialization of encapsulation header failed.\n")
-          ));
+          ACE_TEXT("deserialization of encapsulation header failed.\n")));
         return;
       }
       OpenDDS::DCPS::Encoding encoding;
@@ -73,18 +71,9 @@ public:
         return;
       }
 
-      if (decoding_modes_.find(encoding.kind()) == decoding_modes_.end()) {
-        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING ")
-          ACE_TEXT("DataReaderImpl::lookup_instance: ")
-          ACE_TEXT("Encoding kind of the received sample (%C) does not ")
-          ACE_TEXT("match the ones specified by DataReader.\n"),
-          OpenDDS::DCPS::Encoding::kind_to_string(encoding.kind()).c_str()));
-        return;
-      }
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
-        ACE_TEXT("DataReaderImpl::lookup_instance: ")
-        ACE_TEXT("Deserializing with encoding kind %C.\n"),
-        OpenDDS::DCPS::Encoding::kind_to_string(encoding.kind()).c_str()));
+         ACE_TEXT("Deserializing with encoding kind %C.\n"),
+         OpenDDS::DCPS::Encoding::kind_to_string(encoding.kind()).c_str()));
 
       ser.encoding(encoding);
     }
