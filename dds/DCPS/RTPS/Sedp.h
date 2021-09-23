@@ -49,13 +49,13 @@
 #  include <dds/DdsSecurityCoreC.h>
 #endif
 
-#ifdef ACE_HAS_CPP11
+#ifndef ACE_HAS_CPP11
 #  include <ace/Atomic_Op_T.h>
 #endif
 #include <ace/Task_Ex_T.h>
 #include <ace/Thread_Mutex.h>
 
-#ifndef ACE_HAS_CPP11
+#ifdef ACE_HAS_CPP11
 #  include <atomic>
 #endif
 
@@ -1467,8 +1467,10 @@ protected:
   TypeLookupReplyReader_rch type_lookup_reply_secure_reader_;
 #endif
 
+#ifdef OPENDDS_SECURITY
   PublicationAgentInfoListener publication_agent_info_listener_;
   SubscriptionAgentInfoListener subscription_agent_info_listener_;
+#endif
 };
 
 bool locators_changed(const ParticipantProxy_t& x,

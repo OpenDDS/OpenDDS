@@ -6674,7 +6674,7 @@ void Sedp::update_subscription_locators(
   }
 }
 
-
+#ifdef OPENDDS_SECURITY
 void Sedp::cleanup_secure_writer(const GUID_t& publicationId)
 {
   using namespace DDS::Security;
@@ -6728,6 +6728,7 @@ void Sedp::cleanup_secure_reader(const GUID_t& subscriptionId)
   }
   handle_registry->erase_local_datareader_crypto_handle(subscriptionId);
 }
+#endif
 
 // TODO: This is perhaps too generic since the context probably has the details this function computes.
 void Sedp::match_endpoints(GUID_t repoId, const DCPS::TopicDetails& td, bool remove)
@@ -7522,7 +7523,6 @@ void Sedp::match_continue_security_enabled(
   }
 }
 #endif
-
 
 } // namespace RTPS
 } // namespace OpenDDS
