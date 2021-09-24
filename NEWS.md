@@ -1,7 +1,7 @@
 # OpenDDS Releases
 
 ## Version 3.18.1 of OpenDDS
-OpenDDS 3.18.1 is currently in development, so this list might change.
+OpenDDS 3.18.1 was released on Sep 24 2021.
 
 ### Fixes:
 - Improve RTPS messaging behaviors under IPv6 (#2923)
