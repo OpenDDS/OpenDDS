@@ -2115,9 +2115,6 @@ RtpsUdpDataLink::RtpsWriter::remove_reader(const RepoId& id)
       readers_expecting_heartbeat_.erase(reader);
       snris_erase(acked_sn == max_sn ? leading_readers_ : lagging_readers_, acked_sn, reader);
       check_leader_lagger();
-      remote_readers_.erase(it);
-      result = true;
-      log_remote_counts("remove_reader");
 
 #ifdef OPENDDS_SECURITY
       if (is_pvs_writer_ &&
@@ -2137,6 +2134,9 @@ RtpsUdpDataLink::RtpsWriter::remove_reader(const RepoId& id)
       }
 #endif
 
+      remote_readers_.erase(it);
+      result = true;
+      log_remote_counts("remove_reader");
     }
   }
   typedef OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator iter_t;
