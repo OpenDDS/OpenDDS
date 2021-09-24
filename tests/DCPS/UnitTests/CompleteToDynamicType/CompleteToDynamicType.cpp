@@ -41,7 +41,7 @@ TEST(CompleteToDynamicType, MyInnerStruct)
   XTypes::DynamicType_rch expected_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor expected_td;
   expected_td.kind = XTypes::TK_STRUCTURE;
-  expected_td.name = "::MyMod::MyInnerStruct";
+  expected_td.name = " ::MyMod::MyInnerStruct";
   expected_td.bound.length(0);
   expected_td.extensibility_kind = XTypes::MUTABLE;
   expected_td.is_nested = false;
@@ -70,7 +70,7 @@ TEST(CompleteToDynamicType, MyOuterStruct)
   XTypes::DynamicType_rch expected_outer_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor outer_td;
   outer_td.kind = XTypes::TK_STRUCTURE;
-  outer_td.name = "::MyMod::MyOuterStruct";
+  outer_td.name = " ::MyMod::MyOuterStruct";
   outer_td.bound.length(0);
   outer_td.extensibility_kind = XTypes::APPENDABLE;
   outer_td.is_nested = 0;
@@ -84,7 +84,7 @@ TEST(CompleteToDynamicType, MyOuterStruct)
   XTypes::DynamicType_rch expected_inner_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor inner_td;
   inner_td.kind = XTypes::TK_STRUCTURE;
-  inner_td.name = "::MyMod::MyInnerStruct";
+  inner_td.name = " ::MyMod::MyInnerStruct";
   inner_td.bound.length(0);
   inner_td.extensibility_kind = XTypes::MUTABLE;
   inner_td.is_nested = 0;
@@ -117,14 +117,14 @@ TEST(CompleteToDynamicType, MyAliasStruct)
   XTypes::DynamicType_rch expected_alias_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor alias_td;
   alias_td.kind = XTypes::TK_ALIAS;
-  alias_td.name = "::MyMod::MyAliasStruct";
+  alias_td.name = " ::MyMod::MyAliasStruct";
   alias_td.bound.length(0);
   alias_td.extensibility_kind = XTypes::FINAL;
   alias_td.is_nested = 0;
   XTypes::DynamicType_rch expected_outer_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor outer_td;
   outer_td.kind = XTypes::TK_STRUCTURE;
-  outer_td.name = "::MyMod::MyOuterStruct";
+  outer_td.name = " ::MyMod::MyOuterStruct";
   outer_td.bound.length(0);
   outer_td.extensibility_kind = XTypes::APPENDABLE;
   outer_td.is_nested = 0;
@@ -138,7 +138,7 @@ TEST(CompleteToDynamicType, MyAliasStruct)
   XTypes::DynamicType_rch expected_inner_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor inner_td;
   inner_td.kind = XTypes::TK_STRUCTURE;
-  inner_td.name = "::MyMod::MyInnerStruct";
+  inner_td.name = " ::MyMod::MyInnerStruct";
   inner_td.bound.length(0);
   inner_td.extensibility_kind = XTypes::MUTABLE;
   inner_td.is_nested = 0;
@@ -173,7 +173,7 @@ TEST(CompleteToDynamicType, PrimitiveKind)
   XTypes::DynamicType_rch expected_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor td;
   td.kind = XTypes::TK_ENUM;
-  td.name = "::MyMod::PrimitiveKind";
+  td.name = " ::MyMod::PrimitiveKind";
   td.bound.length(1);
   td.bound[0] = 32;
   td.extensibility_kind = XTypes::FINAL;
@@ -208,7 +208,7 @@ TEST(CompleteToDynamicType, MyUnion)
   XTypes::DynamicType_rch expected_union_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor td;
   td.kind = XTypes::TK_UNION;
-  td.name = "::MyMod::MyUnion";
+  td.name = " ::MyMod::MyUnion";
   td.bound.length(0);
   td.extensibility_kind = XTypes::APPENDABLE;
   td.is_nested = 0;
@@ -264,7 +264,7 @@ TEST(CompleteToDynamicType, MyUnion)
   XTypes::DynamicType_rch expected_enum_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor enum_td;
   enum_td.kind = XTypes::TK_ENUM;
-  enum_td.name = "::MyMod::PrimitiveKind";
+  enum_td.name = " ::MyMod::PrimitiveKind";
   enum_td.bound.length(1);
   enum_td.bound[0] = 32;
   enum_td.extensibility_kind = XTypes::FINAL;
@@ -313,7 +313,7 @@ TEST(CompleteToDynamicType, MyInnerArray)
   XTypes::DynamicType_rch alias_inner_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor alias_inner_td;
   alias_inner_td.kind = XTypes::TK_ALIAS;
-  alias_inner_td.name = "::MyMod::MyInnerArray";
+  alias_inner_td.name = " ::MyMod::MyInnerArray";
   alias_inner_td.bound.length(0);
   alias_inner_td.extensibility_kind = XTypes::FINAL;
   XTypes::DynamicType_rch inner_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
@@ -342,7 +342,7 @@ TEST(CompleteToDynamicType, MyOuterArray)
   XTypes::DynamicType_rch alias_outer_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor alias_outer_td;
   alias_outer_td.kind = XTypes::TK_ALIAS;
-  alias_outer_td.name = "::MyMod::MyOuterArray";
+  alias_outer_td.name = " ::MyMod::MyOuterArray";
   alias_outer_td.bound.length(0);
   alias_outer_td.extensibility_kind = XTypes::FINAL;
   XTypes::DynamicType_rch outer_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
@@ -356,7 +356,7 @@ TEST(CompleteToDynamicType, MyOuterArray)
   XTypes::DynamicType_rch alias_inner_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor alias_inner_td;
   alias_inner_td.kind = XTypes::TK_ALIAS;
-  alias_inner_td.name = "::MyMod::MyInnerArray";
+  alias_inner_td.name = " ::MyMod::MyInnerArray";
   alias_inner_td.bound.length(0);
   alias_inner_td.extensibility_kind = XTypes::FINAL;
   XTypes::DynamicType_rch inner_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
@@ -389,7 +389,7 @@ TEST(CompleteToDynamicType, MySeq)
   XTypes::DynamicType_rch alias_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor alias_td;
   alias_td.kind = XTypes::TK_ALIAS;
-  alias_td.name = "::MyMod::MySeq";
+  alias_td.name = " ::MyMod::MySeq";
   alias_td.bound.length(0);
   alias_td.extensibility_kind = XTypes::FINAL;
   XTypes::DynamicType_rch expected_dt = DCPS::make_rch<XTypes::DynamicType>();
@@ -418,7 +418,7 @@ TEST(CompleteToDynamicType, MyAnonStruct)
   XTypes::DynamicType_rch expected_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor td;
   td.kind = XTypes::TK_STRUCTURE;
-  td.name = "::MyMod::MyAnonStruct";
+  td.name = " ::MyMod::MyAnonStruct";
   td.bound.length(0);
   td.extensibility_kind = XTypes::APPENDABLE;
   td.is_nested = 0;
@@ -476,7 +476,7 @@ TEST(CompleteToDynamicType, CircularStruct)
   XTypes::DynamicType_rch struct_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor struct_td;
   struct_td.kind = XTypes::TK_STRUCTURE;
-  struct_td.name = "::MyMod::CircularStruct";
+  struct_td.name = " ::MyMod::CircularStruct";
   struct_td.bound.length(0);
   struct_td.extensibility_kind = XTypes::MUTABLE;
   struct_td.is_nested = 0;
@@ -496,7 +496,7 @@ TEST(CompleteToDynamicType, CircularStruct)
   XTypes::DynamicType_rch struct2_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor struct2_td;
   struct2_td.kind = XTypes::TK_STRUCTURE;
-  struct2_td.name = "::MyMod::CircularStruct2";
+  struct2_td.name = " ::MyMod::CircularStruct2";
   struct2_td.bound.length(0);
   struct2_td.extensibility_kind = XTypes::MUTABLE;
   struct2_td.is_nested = 0;

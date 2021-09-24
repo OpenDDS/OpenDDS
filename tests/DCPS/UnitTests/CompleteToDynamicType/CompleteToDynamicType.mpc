@@ -1,5 +1,5 @@
 project(completetodynamictype) : dcps_test, googletest {
-  dcps_ts_flags += -Gxcom
+  dcps_ts_flags += -Gxtypes-complete
 
   TypeSupport_Files {
     CompleteToDynamicType.idl
