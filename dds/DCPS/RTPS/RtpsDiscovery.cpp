@@ -53,6 +53,7 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , max_lease_duration_(300)
 #ifdef OPENDDS_SECURITY
   , security_unsecure_lease_duration_(30)
+  , max_participants_in_discovery_(1) //?? to be determined
 #endif
   , lease_extension_(0)
   , pb_(7400) // see RTPS v2.1 9.6.1.3 for PB, DG, PG, D0, D1 defaults
@@ -226,6 +227,17 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
               value.c_str(), rtps_name.c_str()), -1);
           }
           config->security_unsecure_lease_duration(TimeDuration(duration));
+        } else if (name == "MaxParticipantsInDiscovery") {
+          const OPENDDS_STRING& value = it->second;
+          unsigned int max_participants;
+          if (!DCPS::convertToInteger(value, max_participants)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+              ACE_TEXT("Invalid entry (%C) for MaxParticipantsInDiscovery in ")
+              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->max_participants_in_discovery(max_participants);
 #endif
         } else if (name == "LeaseExtension") {
           const OPENDDS_STRING& value = it->second;

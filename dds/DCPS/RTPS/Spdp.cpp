@@ -772,6 +772,12 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
     // add a new participant
 #ifdef OPENDDS_SECURITY
+    if (config_->max_participants_in_discovery() <= participants_.size()) {
+      if (DCPS::DCPS_debug_level) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Spdp::handle_participant_data - reached max_participants_in_discovery\n")));
+      }
+      return;
+    }
     std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq, config_->auth_resend_period())));
 #else
     std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq, TimeDuration())));

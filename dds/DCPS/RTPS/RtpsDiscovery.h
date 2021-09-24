@@ -105,6 +105,17 @@ public:
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     security_unsecure_lease_duration_ = period;
   }
+
+  unsigned int max_participants_in_discovery() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> g(lock_);
+    return max_participants_in_discovery_;
+  }
+  void max_participants_in_discovery(unsigned int m)
+  {
+    ACE_Guard<ACE_Thread_Mutex> g(lock_);
+    max_participants_in_discovery_ = m;
+  }
 #endif
 
   DCPS::TimeDuration lease_extension() const
@@ -667,6 +678,7 @@ private:
   DCPS::TimeDuration max_lease_duration_;
 #ifdef OPENDDS_SECURITY
   DCPS::TimeDuration security_unsecure_lease_duration_;
+  unsigned int max_participants_in_discovery_;
 #endif
   DCPS::TimeDuration lease_extension_;
   u_short pb_, dg_, pg_, d0_, d1_, dx_;
