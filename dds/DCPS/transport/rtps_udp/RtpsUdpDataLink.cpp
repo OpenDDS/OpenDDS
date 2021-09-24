@@ -2044,6 +2044,8 @@ bool
 RtpsUdpDataLink::RtpsWriter::remove_reader(const RepoId& id)
 {
   OPENDDS_MAP(SequenceNumber, TransportQueueElement*) dd;
+  TqeSet to_drop;
+
   bool result = false;
   {
     ACE_Guard<ACE_Thread_Mutex> g(mutex_);
@@ -2058,6 +2060,25 @@ RtpsUdpDataLink::RtpsWriter::remove_reader(const RepoId& id)
       readers_expecting_heartbeat_.erase(reader);
       snris_erase(acked_sn == max_sn ? leading_readers_ : lagging_readers_, acked_sn, reader);
       check_leader_lagger();
+
+#ifdef OPENDDS_SECURITY
+      if (is_pvs_writer_ &&
+          !reader->pvs_outstanding_.empty()) {
+        const OPENDDS_VECTOR(SequenceRange) psr = reader->pvs_outstanding_.present_sequence_ranges();
+        for (OPENDDS_VECTOR(SequenceRange)::const_iterator pos = psr.begin(), limit = psr.end(); pos != limit; ++pos) {
+          ACE_GUARD_RETURN(ACE_Thread_Mutex, g, elems_not_acked_mutex_, result);
+          for (SequenceNumber seq = pos->first; seq <= pos->second; ++seq) {
+            OPENDDS_MULTIMAP(SequenceNumber, TransportQueueElement*)::iterator iter = elems_not_acked_.find(seq);
+            if (iter != elems_not_acked_.end()) {
+              send_buff_->release_acked(iter->first);
+              to_drop.insert(iter->second);
+              elems_not_acked_.erase(iter);
+            }
+          }
+        }
+      }
+#endif
+
       remote_readers_.erase(it);
       result = true;
       log_remote_counts("remove_reader");
@@ -2067,6 +2088,11 @@ RtpsUdpDataLink::RtpsWriter::remove_reader(const RepoId& id)
   for (iter_t it = dd.begin(); it != dd.end(); ++it) {
     it->second->data_dropped();
   }
+
+  for (TqeSet::iterator pos = to_drop.begin(), limit = to_drop.end(); pos != limit; ++pos) {
+    (*pos)->data_dropped();
+  }
+
   return result;
 }
 
