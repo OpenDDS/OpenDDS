@@ -3942,6 +3942,28 @@ Sedp::Writer::end_historic_samples(const RepoId& reader)
 }
 
 void
+Sedp::Writer::request_ack(const RepoId& reader)
+{
+  DCPS::Message_Block_Ptr mb(
+    new ACE_Message_Block(
+      DCPS::DataSampleHeader::get_max_serialized_size(),
+      ACE_Message_Block::MB_DATA,
+      new ACE_Message_Block(
+        reinterpret_cast<const char*>(&reader),
+        sizeof(reader))));
+  if (mb.get()) {
+    mb->cont()->wr_ptr(sizeof(reader));
+    // 'mb' would contain the DSHeader, but we skip it. mb.cont() has the data
+    write_control_msg(move(mb), sizeof(reader), DCPS::REQUEST_ACK,
+                      DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN());
+  } else {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: Sedp::Writer::request_ack")
+               ACE_TEXT(" - Failed to allocate message block message\n")));
+  }
+}
+
+void
 Sedp::Writer::write_control_msg(DCPS::Message_Block_Ptr payload,
                                 size_t size,
                                 DCPS::MessageId id,
@@ -3966,7 +3988,7 @@ Sedp::Writer::set_header_fields(DCPS::DataSampleHeader& dsh,
   dsh.message_length_ = static_cast<ACE_UINT32>(size);
   dsh.publication_id_ = repo_id_;
 
-  if (id != DCPS::END_HISTORIC_SAMPLES &&
+  if (id != DCPS::END_HISTORIC_SAMPLES && id != DCPS::REQUEST_ACK &&
       (reader == GUID_UNKNOWN ||
        sequence == DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())) {
     sequence = seq_++;
