@@ -72,47 +72,79 @@ DynamicData DynamicData::clone() const
 }
 
 template<typename MemberType, typename MemberTypeKind>
-DDS::ReturnCode_t DynamicData::get_value_from_struct(MemberType& value, MemberId id)
+bool DynamicData::get_value_from_struct(MemberType& value, MemberId id)
 {
-  DDS::ReturnCode_t retcode;
   if (!find_member(id, MemberTypeKind)) {
-    reset_rpos();
-    return DDS::RETCODE_ERROR;
+    return false;
   }
 
-  bool good = true;
-  ACE_CDR::ULong size;
-  if (is_primitive(MemberTypeKind, size) ||
+  ACE_CDR::ULong primitive_size;
+  if (is_primitive(MemberTypeKind, primitive_size) ||
       MemberTypeKind == TK_STRING8 || MemberTypeKind == TK_STRING16) {
-    good = (strm_ >> value);
-    if (!good) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_%C_value -")
-                 ACE_TEXT(" Failed to read a member with ID %d\n"),
-                 typekind_to_string(MemberTypeKind), id));
-    }
+    return (strm_ >> value);
   } else {
     if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_individual_value -")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_value_from_struct -")
                  ACE_TEXT(" Called on an unsupported type kind %C\n"),
                  typekind_to_string(MemberTypeKind)));
     }
-    good = false;
+    return false;
   }
-
-  reset_rpos();
-  return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
 
 template<typename MemberType, typename MemberTypeKind>
-DDS::ReturnCode_t DynamicData::get_value_from_union(MemberType& value, MemberId id)
+bool DynamicData::get_value_from_union(MemberType& value, MemberId id)
 {
-  // TODO(sonndinh)
+  // 1. Read discriminator value to get the label of selected member.
+  DynamicType_rch disc_type = get_base_type(descriptor_.discriminator_type);
+  ACE_CDR::Long label;
+  if (!read_discriminator(disc_type->get_kind(), label)) {
+    return false;
+  }
+
+  // 2. Loop through the labels of each members to find the selected member.
+  DynamicTypeMembersById members;
+  type_->get_all_members(members);
+
+  DynamicTypeMembersById::const_iterator it = members.begin();
+  for (; it != members.end(); ++it) {
+    MemberDescriptor md = it->second->get_descriptor();
+    const UnionCaseLabelSeq& labels = md.label;
+    for (ACE_CDR::ULong i = 0; i < labels.size(); ++i) {
+      if (label == labels[i]) {
+        // 3. Verify that ID matches.
+        if (md.id != id) {
+          if (DCPS_debug_level >= 1) {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_value_from_union -")
+                       ACE_TEXT(" ID of the selected member (%d) is not the requested ID (%d)"),
+                       md.id, id));
+          }
+          return false;
+        }
+
+        // 4. Verify that type kind of the requested member matches.
+        if (md.type->get_kind() != MemberTypeKind) {
+          if (DCPS_debug_level >= 1) {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_value_from_union -")
+                       ACE_TEXT(" The selected member has type %C, not %C"),
+                       typekind_to_string(md.type->get_kind()), typekind_to_string(MemberTypeKind)));
+          }
+          return false;
+        }
+
+        // TODO(sonndinh) 5. Use the type of the selected member to deserialize its data.
+        // Need to update this method to consider different extensibility types.
+
+      }
+    }
+  }
+  return false;
 }
 
 template<typename ElementType, typename ElementTypeKind>
 bool DynamicData::get_value_from_sequence(ElementType& value, MemberId id)
 {
-  const TypeKind elem_tk = descriptor_.element_type->get_kind();
+  const TypeKind elem_tk = get_base_type(descriptor_.element_type)->get_kind();
   if (elem_tk != ElementTypeKind) {
     if (DCPS_debug_level >= 1) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_%C_value -")
@@ -129,7 +161,7 @@ bool DynamicData::get_value_from_sequence(ElementType& value, MemberId id)
       get_index_from_id(id, index, length) &&
       strm_.skip(index, primitive_size) &&
       (strm_ >> value);
-  } else {
+  } else if (ElementTypeKind == TK_STRING8 || ElementTypeKind == TK_STRING16) {
     ACE_CDR::ULong dheader, length, index;
     if (!(strm_ >> dheader) || !(strm_ >> length) || !get_index_from_id(id, index, length)) {
       return false;
@@ -142,13 +174,20 @@ bool DynamicData::get_value_from_sequence(ElementType& value, MemberId id)
       }
     }
     return (strm_ >> value);
+  } else {
+    if (DCPS_debug_level >= 1) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_value_from_sequence -")
+                 ACE_TEXT(" Called on an unsupported type kind %C\n"),
+                 typekind_to_string(ElementTypeKind)));
+    }
+    return false;
   }
 }
 
 template<typename ElementType, typename ElementTypeKind>
 bool DynamicData::get_value_from_array(ElementType& value, MemberId id)
 {
-  const TypeKind elem_tk = descriptor_.element_type->get_kind();
+  const TypeKind elem_tk = get_base_type(descriptor_.element_type)->get_kind();
   if (elem_tk != ElementTypeKind) {
     if (DCPS_debug_level >= 1) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_%C_value -")
@@ -169,7 +208,7 @@ bool DynamicData::get_value_from_array(ElementType& value, MemberId id)
     return get_index_from_id(id, index, length) &&
       strm_.skip(index, primitive_size) &&
       (strm_ >> value);
-  } else {
+  } else if (ElementTypeKind == TK_STRING8 || ElementTypeKind == TK_STRING16) {
     ACE_CDR::ULong dheader;
     if (!(strm_ >> dheader) || !get_index_from_id(id, index, length)) {
       return false;
@@ -182,6 +221,75 @@ bool DynamicData::get_value_from_array(ElementType& value, MemberId id)
       }
     }
     return (strm_ >> value);
+  } else {
+    if (DCPS_debug_level >= 1) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_value_from_array -")
+                 ACE_TEXT(" Called on an unsupported type kind %C\n"),
+                 typekind_to_string(ElementTypeKind)));
+    }
+    return false;
+  }
+}
+
+template<typename ElementType, typename ElementTypeKind>
+bool DynamicData::get_value_from_map(ElementType& value, MemberId id)
+{
+  const TypeKind elem_tk = get_base_type(descriptor_.element_type)->get_kind();
+  if (elem_tk != ElementTypeKind) {
+    if (DCPS_debug_level >= 1) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_%C_value -")
+                 ACE_TEXT(" Called on map with element type %C\n"),
+                 typekind_to_string(ElementTypeKind), typekind_to_string(elem_tk)));
+    }
+    return false;
+  }
+
+  const TypeKind key_tk = get_base_type(descriptor_.key_element_type)->get_kind();
+  ACE_CDR::ULong elem_primitive_size, key_primitive_size;
+  const bool primitive_elem = is_primitive(elem_tk, elem_primitive_size);
+
+  if (is_primitive(key_tk, key_primitive_size) && primitive_elem) {
+    ACE_CDR::ULong length, index;
+    if (!(strm_ >> length) || !get_index_from_id(id, index, length)) {
+      return false;
+    }
+    ACE_CDR::ULong i = 0;
+    while (i++ < index) {
+      if (!strm_.skip(1, key_primitive_size) || !strm_.skip(1, elem_primitive_size)) {
+        return false;
+      }
+    }
+    return strm_.skip(1, key_primitive_size) && (strm_ >> value);
+  } else if (ElementTypeKind == TK_STRING8 || ElementTypeKind == TK_STRING16) {
+    ACE_CDR::ULong dheader;
+    if (!(strm_ >> dheader) || !get_index_from_id(id, index, ACE_UINT32_MAX)) {
+      return false;
+    }
+    size_t end_of_map = strm_.rpos() + dheader;
+    ACE_CDR::ULong i = 0;
+
+    while (i++ < index) {
+      if (strm_.rpos() >= end_of_map) {
+        return false;
+      }
+      // TODO(sonndinh): Implement skip_map_key() to skip a key from a map. A key in this
+      // case can be of any type, not just primitive or string or wstring.
+      if (!skip_map_key()) { return false; }
+      if (primitive_elem) {
+        if (!strm_.skip(1, elem_primitive_size)) { return false; }
+      } else {
+        ACE_CDR::ULong bytes;
+        if (!(strm_ >> bytes) || !strm_.skip(bytes)) { return false; }
+      }
+    }
+    return (strm_.rpos() < end_of_map) && skip_map_key() && (strm_ >> value);
+  } else {
+    if (DCPS_debug_level >= 1) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_value_from_map -")
+                 ACE_TEXT(" Called on an unsupported type kind %C\n"),
+                 typekind_to_string(ElementTypeKind)));
+    }
+    return false;
   }
 }
 
@@ -267,9 +375,11 @@ DDS::ReturnCode_t DynamicData::get_int32_value(ACE_CDR::Long& value, MemberId id
     }
     break;
   case TK_STRUCTURE:
-    return get_value_from_struct<ACE_CDR::Long, TK_INT32>(value, id);
+    good = get_value_from_struct<ACE_CDR::Long, TK_INT32>(value, id);
+    break;
   case TK_UNION:
-    return get_value_from_union<ACE_CDR::Long, TK_INT32>(value, id);
+    good = get_value_from_union<ACE_CDR::Long, TK_INT32>(value, id);
+    break;
   case TK_SEQUENCE:
     good = get_value_from_sequence<ACE_CDR::Long, TK_INT32>(value, id);
     break;
@@ -277,34 +387,14 @@ DDS::ReturnCode_t DynamicData::get_int32_value(ACE_CDR::Long& value, MemberId id
     good = get_value_from_array<ACE_CDR::Long, TK_INT32>(value, id);
     break;
   case TK_MAP:
-    const TypeKind elem_tk = descriptor_.element_type->get_kind();
-    if (elem_tk == TK_INT32) {
-      ACE_CDR::ULong index, length;
-      strm_ >> length;
-      if (get_index_from_id(id, index, length)) {
-        ACE_CDR::ULong i = 0;
-        while (i++ < length) {
-          skip_map_key(); // TODO(sonndinh)
-          strm_.skip(1, 4);
-        }
-        skip_map_key();
-        strm_ >> value;
-        break;
-      }
-    } else if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_int32_value -")
-                 ACE_TEXT(" Called on map with element type %C\n"),
-                 typekind_to_string(elem_tk)));
-    }
-    good = false;
+    good = get_value_from_map<ACE_CDR::Long, TK_INT32>(value, id);
     break;
   default:
     if (DCPS_debug_level >= 1) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_int32_value -")
                  ACE_TEXT(" Called on an incompatible type %C\n"), typekind_to_string(tk)));
     }
-    good = false;
-    break;
+    return DDS::RETCODE_ERROR;
   }
 
   reset_rpos();
@@ -1146,6 +1236,115 @@ bool DynamicData::skip_union_member(DynamicType_rch union_type)
   return union_data.skip_all();
 }
 
+// This assumes any header ahead of the actual discriminator value is already read or skipped.
+bool DynamicData::read_discriminator(TypeKind disc_tk, ACE_CDR::Long& label)
+{
+  switch (disc_tk) {
+  case TK_BOOLEAN:
+    {
+      ACE_CDR::Boolean value;
+      if (!(strm_ >> ACE_InputCDR::to_boolean(value))) { return false; }
+      label = std::static_cast<ACE_CDR::Long>(value);
+      return true;
+    }
+  case TK_BYTE:
+    {
+      ACE_CDR::Octet value;
+      if (!(strm_ >> ACE_InputCDR::to_octet(value))) { return false; }
+      label = std::static_cast<ACE_CDR::Long>(value);
+      return true;
+    }
+  case TK_CHAR8:
+    {
+      ACE_CDR::Char value;
+      if (!(strm_ >> ACE_InputCDR::to_char(value))) { return false; }
+      label = std::static_cast<ACE_CDR::Long>(value);
+      return true;
+    }
+  case TK_CHAR16:
+    {
+      ACE_CDR::WChar value;
+      if (!(strm_ >> ACE_InputCDR::to_wchar(value))) { return false; }
+      label = std::static_cast<ACE_CDR::Long>(value);
+      return true;
+    }
+  case TK_INT8:
+    {
+      ACE_CDR::Int8 value;
+      if (!(strm_ >> ACE_InputCDR::to_int8(value))) { return false; }
+      label = std::static_cast<ACE_CDR::Long>(value);
+      return true;
+    }
+  case TK_UINT8:
+    {
+      ACE_CDR::UInt8 value;
+      if (!(strm_ >> ACE_InputCDR::to_uint8(value))) { return false; }
+      label = std::static_cast<ACE_CDR::Long>(value);
+      return true;
+    }
+  case TK_INT16:
+    {
+      ACE_CDR::Short value;
+      if (!(strm_ >> value)) { return false; }
+      label = std::static_cast<ACE_CDR::Long>(value);
+      return true;
+    }
+  case TK_UINT16:
+    {
+      ACE_CDR::UShort value;
+      if (!(strm_ >> value)) { return false; }
+      label = std::static_cast<ACE_CDR::Long>(value);
+      return true;
+    }
+  case TK_INT32:
+    return (strm_ >> label);
+  case TK_UINT32:
+    {
+      ACE_CDR::ULong value;
+      if (!(strm_ >> value)) { return false; }
+      label = std::static_cast<ACE_CDR::Long>(value);
+      return true;
+    }
+  case TK_INT64:
+    {
+      ACE_CDR::LongLong value;
+      if (!(strm_ >> value)) { return false; }
+      label = std::static_cast<ACE_CDR::Long>(value);
+      return true;
+    }
+  case TK_UINT64:
+    {
+      ACE_CDR::ULongLong value;
+      if (!(strm_ >> value)) { return false; }
+      label = std::static_cast<ACE_CDR::Long>(value);
+      return true;
+    }
+  case TK_ENUM:
+    {
+      TypeDescriptor disc_td = disc_type->get_descriptor();
+      const ACE_CDR::ULong bit_bound = disc_td.bound[0];
+      if (bit_bound >= 1 && bit_bound <= 8) {
+        ACE_CDR::Int8 value;
+        if (!(strm_ >> ACE_InputCDR::to_int8(value))) { return false; }
+        label = std::static_cast<ACE_CDR::Long>(value);
+      } else if (bit_bound >= 9 && bit_bound <= 16) {
+        ACE_CDR::Short value;
+        if (!(strm_ >> value)) { return false; }
+        label = std::static_cast<ACE_CDR::Long>(value);
+      } else {
+        return (strm_ >> label);
+      }
+      return true;
+    }
+  default:
+    if (DCPS_debug_level >= 1) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::read_discriminator - Union has")
+                 ACE_TEXT(" unsupported discriminator type\n")));
+    }
+    return false;
+  }
+}
+
 bool DynamicData::skip_all()
 {
   const ExtensibilityKind extensibility = descriptor_.extensibility_kind;
@@ -1172,135 +1371,22 @@ bool DynamicData::skip_all()
       }
       return true;
     } else if (tk == TK_UNION) {
-      // Read the discriminator.
-      DynamicType_rch disc_type = descriptor_.discriminator_type;
-      if (disc_type->get_kind() == TK_ALIAS) {
-        disc_type = get_base_type(disc_type);
-      }
+      DynamicType_rch disc_type = get_base_type(descriptor_.discriminator_type);
       ACE_CDR::Long label;
-
-      switch (disc_type->get_kind()) {
-      case TK_BOOLEAN:
-        {
-          ACE_CDR::Boolean value;
-          strm_ >> ACE_InputCDR::to_boolean(value);
-          label = std::static_cast<ACE_CDR::Long>(value);
-          break;
-        }
-      case TK_BYTE:
-        {
-          ACE_CDR::Octet value;
-          strm_ >> ACE_InputCDR::to_octet(value);
-          label = std::static_cast<ACE_CDR::Long>(value);
-          break;
-        }
-      case TK_CHAR8:
-        {
-          ACE_CDR::Char value;
-          strm_ >> ACE_InputCDR::to_char(value);
-          label = std::static_cast<ACE_CDR::Long>(value);
-          break;
-        }
-      case TK_CHAR16:
-        {
-          ACE_CDR::WChar value;
-          strm_ >> ACE_InputCDR::to_wchar(value);
-          label = std::static_cast<ACE_CDR::Long>(value);
-          break;
-        }
-      case TK_INT8:
-        {
-          ACE_CDR::Int8 value;
-          strm_ >> ACE_InputCDR::to_int8(value);
-          label = std::static_cast<ACE_CDR::Long>(value);
-          break;
-        }
-      case TK_UINT8:
-        {
-          ACE_CDR::UInt8 value;
-          strm_ >> ACE_InputCDR::to_uint8(value);
-          label = std::static_cast<ACE_CDR::Long>(value);
-          break;
-        }
-      case TK_INT16:
-        {
-          ACE_CDR::Short value;
-          strm_ >> value;
-          label = std::static_cast<ACE_CDR::Long>(value);
-          break;
-        }
-      case TK_UINT16:
-        {
-          ACE_CDR::UShort value;
-          strm_ >> value;
-          label = std::static_cast<ACE_CDR::Long>(value);
-          break;
-        }
-      case TK_INT32:
-        {
-          strm_ >> label;
-          break;
-        }
-      case TK_UINT32:
-        {
-          ACE_CDR::ULong value;
-          strm_ >> value;
-          label = std::static_cast<ACE_CDR::Long>(value);
-          break;
-        }
-      case TK_INT64:
-        {
-          ACE_CDR::LongLong value;
-          strm_ >> value;
-          label = std::static_cast<ACE_CDR::Long>(value);
-          break;
-        }
-      case TK_UINT64:
-        {
-          ACE_CDR::ULongLong value;
-          strm_ >> value;
-          label = std::static_cast<ACE_CDR::Long>(value);
-          break;
-        }
-      case TK_ENUM:
-        {
-          TypeDescriptor disc_td;
-          disc_type->get_descriptor(disc_td);
-          const ACE_CDR::ULong bit_bound = disc_td.bound[0];
-
-          if (bit_bound >= 1 && bit_bound <= 8) {
-            ACE_CDR::Int8 value;
-            strm_ >> ACE_InputCDR::to_int8(value);
-            label = std::static_cast<ACE_CDR::Long>(value);
-          } else if (bit_bound >= 9 && bit_bound <= 16) {
-            ACE_CDR::Short value;
-            strm_ >> value;
-            label = std::static_cast<ACE_CDR::Long>(value);
-          } else {
-            strm_ >> label;
-          }
-          break;
-        }
-      default:
-        if (DCPS_debug_level >= 10) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::skip_all - Union type has")
-                     ACE_TEXT(" unsupported discriminator type\n")));
-        }
+      if (!read_discriminator(disc_type->get_kind(), label)) {
         return false;
       }
 
-      // Then, skip the selected member.
       DynamicTypeMembersById members;
       type_->get_all_members(members);
 
       DynamicTypeMembersById::const_iterator it = members.begin();
       for (; it != members.end(); ++it) {
-        MemberDescriptor md;
-        it->second->get_descriptor(md);
+        MemberDescriptor md = it->second->get_descriptor();
         const UnionCaseLabelSeq& labels = md.label;
         for (ACE_CDR::ULong i = 0; i < labels.size(); ++i) {
           if (label == labels[i]) {
-            return skip_member(md.type)
+            return skip_member(md.type);
           }
         }
       }
@@ -1330,8 +1416,7 @@ DynamicType_rch DynamicData::get_base_type(DynamicType_rch type) const
     return type;
   }
 
-  TypeDescriptor descriptor;
-  type->get_descriptor(descriptor);
+  TypeDescriptor descriptor = type->get_descriptor();
   return get_base_type(descriptor.base_type);
 }
 

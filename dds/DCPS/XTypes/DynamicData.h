@@ -171,7 +171,7 @@ private:
 
   // Templates for reading a single value of type primitive or string or wstring.
   template<typename MemberType, typename MemberTypeKind>
-  DDS::ReturnCode_t get_value_from_struct(MemberType& value, MemberId id);
+  bool get_value_from_struct(MemberType& value, MemberId id);
 
   template<typename MemberType, typename MemberTypeKind>
   bool get_value_from_union(MemberType& value, MemberId id);
