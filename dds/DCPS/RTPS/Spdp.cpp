@@ -21,6 +21,7 @@
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/Ice.h>
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Logging.h>
 #include <dds/DCPS/Qos_Helper.h>
@@ -613,6 +614,81 @@ Spdp::get_ice_endpoint_if_added()
   return tport_->ice_endpoint_added_ ? tport_->get_ice_endpoint() : 0;
 }
 
+bool cmp_ip4(const ACE_INET_Addr& a, const DCPS::Locator_t& locator)
+{
+  struct sockaddr_in* sa = static_cast<struct sockaddr_in*>(a.get_addr());
+  if (sa->sin_family == AF_INET && locator.kind == LOCATOR_KIND_UDPv4) {
+    const char* ip = reinterpret_cast<const char*>(&sa->sin_addr);
+    return ACE_OS::memcmp(ip, locator.address + 12, 4) == 0;
+  }
+  return false;
+}
+
+#if defined (ACE_HAS_IPV6)
+bool cmp_ip6(const ACE_INET_Addr& a, const DCPS::Locator_t& locator)
+{
+  struct sockaddr_in6* in6 = static_cast<struct sockaddr_in6*>(a.get_addr());
+  if (in6->sin6_family == AF_INET6 && locator.kind == LOCATOR_KIND_UDPv6) {
+    const char* ip = reinterpret_cast<const char*>(&in6->sin6_addr);
+    return ACE_OS::memcmp(ip, locator.address, 16) == 0;
+  }
+  return false;
+}
+#endif // ACE_HAS_IPV6
+
+bool is_ip_equal(const ACE_INET_Addr& a, const DCPS::Locator_t& locator)
+{
+#ifdef ACE_HAS_IPV6
+  if (a.get_type() == AF_INET6) {
+    return cmp_ip6(a, locator);
+  }
+#endif
+  return cmp_ip4(a, locator);
+}
+
+bool ip_in_locator_list(const ACE_INET_Addr& from, const DCPS::LocatorSeq& locators)
+{
+  for (CORBA::ULong i = 0; i < locators.length(); ++i) {
+    if (is_ip_equal(from, locators[i])) {
+      return true;
+    }
+  }
+  return false;
+}
+
+#ifdef OPENDDS_SECURITY
+bool ip_in_AgentInfo(const ACE_INET_Addr& from, const ParameterList& plist)
+{
+  bool found = false;
+  ICE::AgentInfoMap ai_map;
+  if (!ParameterListConverter::from_param_list(plist, ai_map)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ip_in_AgentInfo - failed to convert ParameterList to AgentInfoMap\n")));
+    return found;
+  }
+  ICE::AgentInfoMap::const_iterator sedp_i = ai_map.find(SEDP_AGENT_INFO_KEY);
+  if (sedp_i != ai_map.end()) {
+    const ICE::AgentInfo::CandidatesType& cs = sedp_i->second.candidates;
+    for (ICE::AgentInfo::const_iterator i = cs.begin(); i != cs.end(); ++i) {
+      if (from.is_ip_equal(i->address)) {
+        found = true;
+        break;
+      }
+    }
+  }
+  ICE::AgentInfoMap::const_iterator spdp_i = ai_map.find(SPDP_AGENT_INFO_KEY);
+  if (!found && spdp_i != ai_map.end()) {
+    const ICE::AgentInfo::CandidatesType& cs = spdp_i->second.candidates;
+    for (ICE::AgentInfo::const_iterator i = cs.begin(); i != cs.end(); ++i) {
+      if (from.is_ip_equal(i->address)) {
+        found = true;
+        break;
+      }
+    }
+  }
+  return found;
+}
+#endif
+
 void
 Spdp::handle_participant_data(DCPS::MessageId id,
                               const ParticipantData_t& cpdata,
@@ -985,16 +1061,30 @@ Spdp::data_received(const DataSubmessage& data,
     return;
   }
 
+  const bool from_relay = from == config_->spdp_rtps_relay_address();
+#ifdef OPENDDS_SECURITY
+  if (!from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList) && !ip_in_AgentInfo(from, plist)) {
+    if (DCPS::DCPS_debug_level) {
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) Spdp::data_received - dropped IP: %C\n"), DCPS::LogAddr(from).c_str()));
+    }
+    return;
+  }
+  if (!is_security_enabled()) {
+    process_participant_ice(plist, pdata, guid);
+  }
+#elif !defined OPENDDS_SAFETY_PROFILE
+  if (!from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList)) {
+    if (DCPS::DCPS_debug_level) {
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) Spdp::data_received - IP not in locator list: %C\n"), DCPS::LogAddr(from).c_str()));
+    }
+    return;
+  }
+#endif
+
   handle_participant_data(
     (data.inlineQos.length() && disposed(data.inlineQos)) ?
       DCPS::DISPOSE_INSTANCE : DCPS::SAMPLE_DATA,
     pdata, to_opendds_seqnum(data.writerSN), from, false);
-
-#ifdef OPENDDS_SECURITY
-  if (!is_security_enabled()) {
-    process_participant_ice(plist, pdata, guid);
-  }
-#endif
 }
 
 void
