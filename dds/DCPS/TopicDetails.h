@@ -159,6 +159,7 @@ namespace OpenDDS {
       int inconsistent_topic_count_;
     };
 
+    typedef OPENDDS_MAP(String, TopicDetails) TopicDetailsMap;
   } // namespace DCPS
 } // namespace OpenDDS
 
