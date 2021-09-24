@@ -27,20 +27,22 @@ public:
   TypeLookupService();
   ~TypeLookupService();
 
-  // For TypeAssignability
+  /// For TypeAssignability
   const TypeObject& get_type_object(const TypeIdentifier& type_id) const;
   void add(const TypeIdentifier& ti, const TypeObject& tobj);
 
-  // For TypeLookup_getTypes
+  /// For TypeLookup_getTypes
   void get_type_objects(const TypeIdentifierSeq& type_ids,
     TypeIdentifierTypeObjectPairSeq& types) const;
   void add_type_objects_to_cache(const TypeIdentifierTypeObjectPairSeq& types);
 
-  // For converting between complete to minimal TypeObject of remote types
+  /// For converting between complete to minimal TypeObject of remote types
+  ///@{
   void update_type_identifier_map(const TypeIdentifierPairSeq& tid_pairs);
   bool complete_to_minimal_type_object(const TypeObject& cto, TypeObject& mto) const;
+  ///@}
 
-  // For TypeLookup_getTypeDependencies
+  /// For TypeLookup_getTypeDependencies
   bool get_type_dependencies(const TypeIdentifier& type_id,
     TypeIdentifierWithSizeSeq& dependencies) const;
   void get_type_dependencies(const TypeIdentifierSeq& type_ids,
@@ -48,13 +50,13 @@ public:
   void add_type_dependencies(const TypeIdentifier& type_id,
     const TypeIdentifierWithSizeSeq& dependencies);
 
-  // For adding local endpoint types
+  /// For adding local endpoint types
   void add(TypeMap::const_iterator begin, TypeMap::const_iterator end);
 
   bool type_object_in_cache(const TypeIdentifier& ti) const;
   bool extensibility(TypeFlag extensibility_mask, const TypeIdentifier& ti) const;
 
-  // For caching and retrieving TypeInformation of remote endpoints
+  /// For caching and retrieving TypeInformation of remote endpoints
   void cache_type_info(const DDS::BuiltinTopicKey_t& key, const TypeInformation& type_info);
   const TypeInformation& get_type_info(const DDS::BuiltinTopicKey_t& key) const;
 
@@ -63,10 +65,10 @@ private:
   void get_type_dependencies_i(const TypeIdentifierSeq& type_ids,
     TypeIdentifierWithSizeSeq& dependencies) const;
 
-  // Contains both minimal and complete type mapping.
+  /// Contains both minimal and complete type mapping.
   TypeMap type_map_;
 
-  // For dependencies of local types
+  /// For dependencies of local types
   typedef OPENDDS_MAP(TypeIdentifier, TypeIdentifierWithSizeSeq) TypeIdentifierWithSizeSeqMap;
   TypeIdentifierWithSizeSeqMap type_dependencies_map_;
 
@@ -74,11 +76,10 @@ private:
 
   TypeObject to_empty_;
 
-  // Mapping from complete to minimal TypeIdentifiers of dependencies of remote types.
+  /// Mapping from complete to minimal TypeIdentifiers of dependencies of remote types.
   typedef OPENDDS_MAP(TypeIdentifier, TypeIdentifier) TypeIdentifierMap;
   TypeIdentifierMap complete_to_minimal_ti_map_;
 
-  DCPS::String equivalence_hash_to_string(const EquivalenceHash& hash) const;
   bool get_minimal_type_identifier(const TypeIdentifier& ct, TypeIdentifier& mt) const;
 
   bool complete_to_minimal_struct(const CompleteStructType& ct, MinimalStructType& mt) const;
@@ -92,13 +93,15 @@ private:
   bool complete_to_minimal_bitmask(const CompleteBitmaskType& ct, MinimalBitmaskType& mt) const;
   bool complete_to_minimal_bitset(const CompleteBitsetType& ct, MinimalBitsetType& mt) const;
 
-  // Map from BuiltinTopicKey_t of remote endpoint to its TypeInformation.
+  /// Map from BuiltinTopicKey_t of remote endpoint to its TypeInformation.
   typedef OPENDDS_MAP_CMP(DDS::BuiltinTopicKey_t, TypeInformation,
                           DCPS::BuiltinTopicKey_tKeyLessThan) TypeInformationMap;
   TypeInformationMap type_info_map_;
 
   TypeInformation type_info_empty_;
 };
+
+const DCPS::String equivalence_hash_to_string(const EquivalenceHash& hash);
 
 typedef DCPS::RcHandle<TypeLookupService> TypeLookupService_rch;
 

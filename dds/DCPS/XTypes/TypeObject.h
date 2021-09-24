@@ -1066,17 +1066,17 @@ namespace XTypes {
 
   // --- Aggregate types: ------------------------------------------------
   struct AppliedBuiltinMemberAnnotations {
-    Optional<OPENDDS_STRING> unit; // @unit("<unit>")
+    Optional<DCPS::String> unit; // @unit("<unit>")
     Optional<AnnotationParameterValue> min; // @min , @range
     Optional<AnnotationParameterValue> max; // @max , @range
-    Optional<OPENDDS_STRING> hash_id; // @hash_id("<membername>")
+    Optional<DCPS::String> hash_id; // @hash_id("<membername>")
 
     AppliedBuiltinMemberAnnotations() {}
 
-    AppliedBuiltinMemberAnnotations(const Optional<OPENDDS_STRING>& a_unit,
+    AppliedBuiltinMemberAnnotations(const Optional<DCPS::String>& a_unit,
                                     const Optional<AnnotationParameterValue>& a_min,
                                     const Optional<AnnotationParameterValue>& a_max,
-                                    const Optional<OPENDDS_STRING>& a_hash_id)
+                                    const Optional<DCPS::String>& a_hash_id)
       : unit(a_unit)
       , min(a_min)
       , max(a_max)
