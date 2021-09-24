@@ -399,7 +399,7 @@ BE_GlobalData::parse_args(long& i, char** av)
       rapidjson(true);
     } else if (0 == ACE_OS::strcasecmp(av[i], "-Gprinter")) {
       printer(true);
-    } else if (0 == ACE_OS::strcasecmp(av[i], "-Gxcom")) {
+    } else if (0 == ACE_OS::strcasecmp(av[i], "-Gxtypes-complete")) {
       xtypes_complete(true);
     } else {
       invalid_option(av[i]);

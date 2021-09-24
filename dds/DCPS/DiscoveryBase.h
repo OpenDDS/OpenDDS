@@ -1181,17 +1181,17 @@ namespace OpenDDS {
           : got_minimal(false), got_complete(false)
         {}
 
-        // Sequence number of the first request for remote minimal types.
+        /// Sequence number of the first request for remote minimal types.
         SequenceNumber rpc_seqnum_minimal;
 
-        // Whether all minimal types are obtained.
+        /// Whether all minimal types are obtained.
         bool got_minimal;
 
-        // Sequence number of the first request for remote complete types.
-        // Set to SEQUENCENUMBER_UNKNOWN if there is no such request.
+        /// Sequence number of the first request for remote complete types.
+        /// Set to SEQUENCENUMBER_UNKNOWN if there is no such request.
         SequenceNumber rpc_seqnum_complete;
 
-        // Whether all complete types are obtained.
+        /// Whether all complete types are obtained.
         bool got_complete;
 
         MonotonicTimePoint time_added_to_map;
