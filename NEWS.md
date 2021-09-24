@@ -1,16 +1,21 @@
 # OpenDDS Releases
 
-## Version 3.19.0 of OpenDDS
-OpenDDS 3.19.0 is currently in development, so this list might change.
-
-### Additions:
-- TODO: Add your features here
+## Version 3.18.1 of OpenDDS
+OpenDDS 3.18.1 is currently in development, so this list might change.
 
 ### Fixes:
-- TODO: Add your fixes here
-
-### Notes:
-- TODO: Add your notes here
+- Improve RTPS messaging behaviors under IPv6 (#2923)
+- Fixed a few rtps_udp transport issues (#2954, #2997, #2998, #3009, #3013, #3027)
+- Configurable parameters for RTPS Discovery lease durations (#2999)
+- Auth resend backs off (more delay over time) (#2937, #2984)
+- Input validity check for RTPS Parameters (#2917), sequences (#2944), addresses (#2981, #3016), locators (#3000)
+- Fragment reassembly fixes (#2960)
+- Type lookup service fixes (#2941)
+- Fixed generation of unreachable code in operator<< (#2962)
+- RtpsRelay logging and related changes (#2936, #2980, #2979, #2978, 2987, #2996, #2832)
+- XML QoS loader can now use custom error handlers (#2961)
+- CMake: Prevent Duplicate BUILD_DLL creation (#2977)
+- CMake: Assign runtime library tao_idl on MSVC (#2990)
 
 ## Version 3.18.0 of OpenDDS
 OpenDDS 3.18.0 was released on Aug 24 2021.
