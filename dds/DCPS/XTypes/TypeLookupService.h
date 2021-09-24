@@ -46,9 +46,8 @@ public:
 
   typedef OPENDDS_MAP(TypeIdentifier, DynamicType_rch) DynamicTypeMap;
   typedef OPENDDS_MAP(DCPS::GUID_t, DynamicTypeMap) GuidTypeMap;
-  //typedef OPENDDS_MULTIMAP_CMP(std::pair<DCPS::GUID_t, TypeIdentifier>, DynamicType_rch) DynamicTypeMap;
   DynamicType_rch complete_to_dynamic(const CompleteTypeObject& cto, const DCPS::GUID_t& guid);
-  void remove_guid_from_dynamic_map(DCPS::GUID_t guid);
+  void remove_guid_from_dynamic_map(const DCPS::GUID_t guid);
 
   // For TypeLookup_getTypeDependencies
   bool get_type_dependencies(const TypeIdentifier& type_id,
@@ -114,7 +113,6 @@ private:
   GuidTypeMap gt_map_;
   //typedef OPENDDS_VECTOR(DynamicType_rch) DtVector;
   //DtVector dt_vec_;
-  ACE_Thread_Mutex tls_mutex_;
   TypeInformation type_info_empty_;
 };
 

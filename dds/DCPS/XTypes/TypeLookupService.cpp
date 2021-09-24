@@ -691,28 +691,21 @@ DynamicType_rch TypeLookupService::type_identifier_to_dynamic(const TypeIdentifi
   }
   DynamicType_rch dt = DCPS::make_rch<DynamicType>();
   TypeDescriptor td;
-  DynamicTypeMap dt_map;
-  //TODO CLAYTON: LOCK DYNAMIC TYPE MAP
   {
-    //ACE_Guard<ACE_Thread_Mutex> guard(tls_mutex_);
-    const GuidTypeMap::const_iterator guid_found = gt_map_.find(guid);
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    GuidTypeMap::iterator guid_found = gt_map_.find(guid);
     if (guid_found != gt_map_.end()) {
-      //guid found
       const DynamicTypeMap::const_iterator ti_found = guid_found->second.find(ti);
       if (ti_found != guid_found->second.end()) {
-        //type was found
         return ti_found->second;
       } else {
-        //type was not found
-        dt_map.insert(std::make_pair(ti, dt));
-        dt_map = guid_found->second;
+        guid_found->second.insert(std::make_pair(ti, dt));
       }
     } else {
-      //guid not found
+      DynamicTypeMap dt_map;
       dt_map.insert(std::make_pair(ti, dt));
       gt_map_.insert(std::make_pair(guid, dt_map));
     }
-    //dt_vec_.push_back(dt);
   }
   switch (ti.kind()) {
   case TK_BOOLEAN:
@@ -976,9 +969,8 @@ bool TypeLookupService::extensibility(TypeFlag extensibility_mask, const TypeIde
 
 void TypeLookupService::remove_guid_from_dynamic_map(DCPS::GUID_t guid)
 {
-  //TODO CLAYTON: LOCK DYNAMIC TYPE MAP
-  //ACE_Guard<ACE_Thread_Mutex> guard(tls_mutex_);
-  const GuidTypeMap::const_iterator g_found = gt_map_.find(guid);
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  GuidTypeMap::iterator g_found = gt_map_.find(guid);
   if (g_found != gt_map_.end()) {
     gt_map_.erase(g_found);
     if(DCPS::DCPS_debug_level >= 4) {
