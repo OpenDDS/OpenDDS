@@ -1,29 +1,26 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #include "RtpsUdpTransport.h"
+
 #include "RtpsUdpInst.h"
 #include "RtpsUdpInst_rch.h"
 #include "RtpsUdpSendStrategy.h"
 #include "RtpsUdpReceiveStrategy.h"
 
-#include "dds/DCPS/AssociationData.h"
-#include "dds/DCPS/BuiltInTopicUtils.h"
-#include "dds/DCPS/DiscoveryBase.h"
+#include <dds/DCPS/AssociationData.h>
+#include <dds/DCPS/BuiltInTopicUtils.h>
+#include <dds/DCPS/transport/framework/TransportClient.h>
+#include <dds/DCPS/transport/framework/TransportExceptions.h>
+#include <dds/DCPS/RTPS/BaseMessageUtils.h>
 
-#include "dds/DCPS/transport/framework/TransportClient.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
+#include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 
-#include "dds/DCPS/RTPS/BaseMessageUtils.h"
-#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
-
-#include "ace/CDR_Base.h"
-#include "ace/Log_Msg.h"
-#include "ace/Sock_Connect.h"
+#include <ace/CDR_Base.h>
+#include <ace/Log_Msg.h>
+#include <ace/Sock_Connect.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -40,7 +37,7 @@ RtpsUdpTransport::RtpsUdpTransport(RtpsUdpInst& inst)
 #endif
 {
   assign(local_prefix_, GUIDPREFIX_UNKNOWN);
-  if (! (configure_i(inst) && open())) {
+  if (!(configure_i(inst) && open())) {
     throw Transport::UnableToCreate();
   }
 }

@@ -113,7 +113,8 @@ struct OpenDDS_Dcps_Export EntityId_tKeyLessThan {
   }
 };
 
-typedef OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) RepoIdSet;
+typedef OPENDDS_SET_CMP(GUID_t, GUID_tKeyLessThan) GuidSet;
+typedef GuidSet RepoIdSet;
 
 const size_t guid_cdr_size = 16;
 
@@ -168,6 +169,13 @@ inline void assign(EntityId_t& dest, const EntityId_t& src)
   std::memcpy(&dest, &src, sizeof(EntityId_t));
 }
 
+inline void assign(EntityKey_t& dest, unsigned src)
+{
+  dest[0] = static_cast<CORBA::Octet>(src);
+  dest[1] = static_cast<CORBA::Octet>(src >> 8);
+  dest[2] = static_cast<CORBA::Octet>(src >> 16);
+}
+
 OpenDDS_Dcps_Export OPENDDS_STRING
 to_string(const GUID_t& guid);
 
@@ -199,17 +207,17 @@ inline void assign(OctetArray16& dest, const GUID_t& src)
   std::memcpy(&dest[0], &src, sizeof(src));
 }
 
-inline RepoId make_id(const GuidPrefix_t& prefix, const EntityId_t& entity)
+inline GUID_t make_id(const GuidPrefix_t& prefix, const EntityId_t& entity)
 {
-  RepoId id;
+  GUID_t id;
   assign(id.guidPrefix, prefix);
   id.entityId = entity;
   return id;
 }
 
-inline RepoId make_id(const RepoId& participant_id, const EntityId_t& entity)
+inline GUID_t make_id(const GUID_t& participant_id, const EntityId_t& entity)
 {
-  RepoId id = participant_id;
+  GUID_t id = participant_id;
   id.entityId = entity;
   return id;
 }
@@ -239,20 +247,20 @@ GUID_t make_unknown_guid(const GUID_t& guid)
 }
 
 OpenDDS_Dcps_Export
-void intersect(const RepoIdSet& a, const RepoIdSet& b, RepoIdSet& result);
+void intersect(const GuidSet& a, const GuidSet& b, GuidSet& result);
 
-OpenDDS_Dcps_Export inline DDS::BuiltinTopicKey_t
-repo_id_to_bit_key(const RepoId& guid)
+OpenDDS_Dcps_Export inline
+DDS::BuiltinTopicKey_t repo_id_to_bit_key(const GUID_t& guid)
 {
   DDS::BuiltinTopicKey_t key;
   std::memcpy(key.value, &guid, sizeof(key.value));
   return key;
 }
 
-OpenDDS_Dcps_Export inline RepoId
-bit_key_to_repo_id(const DDS::BuiltinTopicKey_t& key)
+OpenDDS_Dcps_Export inline
+GUID_t bit_key_to_repo_id(const DDS::BuiltinTopicKey_t& key)
 {
-  RepoId id;
+  GUID_t id;
   std::memcpy(&id, key.value, sizeof(id));
   return id;
 }
