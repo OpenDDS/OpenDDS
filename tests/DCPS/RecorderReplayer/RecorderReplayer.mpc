@@ -23,7 +23,7 @@ project(DDS*Subscriber): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
   }
 }
 
-project(DDS*Relay) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
+project(DDS*Relay) : dcpsexe, dcps_test, dcps_transports_for_test {
   exename   = relay
 
   Idl_Files {

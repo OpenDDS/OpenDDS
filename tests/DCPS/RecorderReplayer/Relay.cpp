@@ -23,7 +23,6 @@
 #include <dds/DCPS/transport/framework/TransportConfig.h>
 #include <dds/DCPS/transport/framework/TransportInst.h>
 
-#include "MessengerTypeSupportImpl.h"
 #include "Args.h"
 
 #include "dds/DCPS/Replayer.h"
@@ -94,19 +93,6 @@ public:
     if (replayer_listener->connected_readers_.size()) {
       // get the instance handle of one of the connected reader
       const DDS::InstanceHandle_t reader_handle = *(replayer_listener->connected_readers_.begin());
-
-//       // inspect the received raw data sample
-//       OpenDDS::DCPS::Serializer ser(
-//         sample.sample_.get(),
-//         OpenDDS::DCPS::Encoding::KIND_UNALIGNED_CDR,
-//         static_cast<OpenDDS::DCPS::Endianness>(sample.sample_byte_order_));
-//       Messenger::Message data;
-//       bool ser_ret = (ser >> data);
-//       if (!ser_ret) {
-//         ACE_ERROR((LM_ERROR, "Relay can't deserialize RawDataSample\n"));
-//       } else {
-//         ACE_DEBUG((LM_DEBUG, "Relay received <%C>\n", data.subject.in()));
-//       }
 
       // Send to only one connected reader. To send to all readers, use
       // replayer_->write(sample)
