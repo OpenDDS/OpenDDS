@@ -112,8 +112,6 @@ private:
                           DCPS::BuiltinTopicKey_tKeyLessThan) TypeInformationMap;
   TypeInformationMap type_info_map_;
   GuidTypeMap gt_map_;
-  //typedef OPENDDS_VECTOR(DynamicType_rch) DtVector;
-  //DtVector dt_vec_;
   TypeInformation type_info_empty_;
 };
 
