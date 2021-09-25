@@ -169,7 +169,8 @@ public:
 
 private:
 
-  // Templates for reading a single value of type primitive or string or wstring.
+  // Templates for reading a single value of type primitive or string or
+  // wstring from a corresponding containing type.
   template<typename MemberType, typename MemberTypeKind>
   bool get_value_from_struct(MemberType& value, MemberId id);
 
@@ -182,7 +183,21 @@ private:
   template<typename ElementType, typename ElementTypeKind>
   bool get_value_from_array(ElementType& value, MemberId id);
 
-  // Templates for reading a value sequence where element type is primitive or string or wstring.
+  template<typename ElementType, typename ElementTypeKind>
+  bool get_value_from_map(ElementType& value, MemberId id);
+
+  template<typename ValueType, typename ValueTypeKind>
+  DDS::ReturnCode_t get_value_excluding_enum_bitmask(ValueType& value, MemberId id);
+
+  template<typename ValueType, typename ValueTypeKind, typename EnumeratedTypeKind>
+  DDS::ReturnCode_t get_value_including_enum_bitmask(ValueType& value, MemberId id,
+                                                     LBound lower, LBound upper)
+
+  template<typename UIntType>
+  bool get_boolean_from_bitmask(ACE_CDR::ULong index, ACE_CDR::Boolean& value);
+
+  // Templates for reading a sequence of values where the element type is primitive
+  // or string or wstring from a corresponding containing type.
   template<typename SequenceType, typename ElementTypeKind>
   DDS::ReturnCode_t get_values_from_struct(SequenceType& value, MemberId id);
 
@@ -192,10 +207,9 @@ private:
   /// elements of the sequence.
   bool find_member(MemberId id, TypeKind kind, bool is_sequence = false);
 
-  /// Reset the read pointer to point to the beginning of the stream.
-  void reset_rpos();
-
   bool skip(const char* func_name, const char* description, size_t n, int size = 1);
+
+  bool read_discriminator(TypeKind disc_tk, ExtensibilityKind union_ek, ACE_CDR::Long& label);
 
   /// Skip a member at the given index of a final or appendable type.
   /// When the method is called, the read position of the stream
@@ -214,10 +228,15 @@ private:
   bool skip_struct_member(DynamicType_rch type);
   bool skip_union_member(DynamicType_rch type);
 
+  bool skip_map_key();
+
   // These helper methods can be moved to DynamicType class.
   DynamicType_rch get_base_type(DynamicType_rch alias_type) const;
   bool is_primitive(TypeKind tk, ACE_CDR::ULong& size) const;
   const char* typekind_to_string(TypeKind tk) const;
+
+  /// Reset the read pointer to point to the beginning of the stream.
+  void reset_rpos();
 
   Serializer& strm_;
   const size_t start_rpos_;
