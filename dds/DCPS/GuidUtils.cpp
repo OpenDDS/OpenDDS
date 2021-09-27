@@ -57,7 +57,7 @@ to_string(const GUID_t& guid)
     '.' + to_string(guid.entityId);
 }
 
-void intersect(const RepoIdSet& a, const RepoIdSet& b, RepoIdSet& result)
+void intersect(const GuidSet& a, const GuidSet& b, GuidSet& result)
 {
   result.clear();
   intersect_sorted_ranges(a.begin(), a.end(), b.begin(), b.end(),
