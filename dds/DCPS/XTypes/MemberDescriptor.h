@@ -23,9 +23,9 @@ typedef OPENDDS_SET(DynamicTypePtrPair) DynamicTypePtrPairSeen;
 typedef DCPS::RcHandle<DynamicType> DynamicType_rch;
 
 enum TryConstructKind {
- USE_DEFAULT,
- DISCARD,
- TRIM
+  USE_DEFAULT,
+  DISCARD,
+  TRIM
 };
 
 class OpenDDS_Dcps_Export MemberDescriptor {

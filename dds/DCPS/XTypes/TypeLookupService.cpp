@@ -46,7 +46,7 @@ TypeLookupService::~TypeLookupService()
 void TypeLookupService::get_type_objects(const TypeIdentifierSeq& type_ids,
                                          TypeIdentifierTypeObjectPairSeq& types) const
 {
-  //ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   for (unsigned i = 0; i < type_ids.length(); ++i) {
     TypeMap::const_iterator pos = type_map_.find(type_ids[i]);
     if (pos != type_map_.end()) {

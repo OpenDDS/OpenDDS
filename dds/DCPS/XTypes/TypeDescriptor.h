@@ -23,9 +23,9 @@ typedef OPENDDS_SET(DynamicTypePtrPair) DynamicTypePtrPairSeen;
 typedef DCPS::RcHandle<DynamicType> DynamicType_rch;
 
 enum ExtensibilityKind {
- FINAL,
- APPENDABLE,
- MUTABLE
+  FINAL,
+  APPENDABLE,
+  MUTABLE
 };
 
 class OpenDDS_Dcps_Export TypeDescriptor {
