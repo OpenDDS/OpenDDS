@@ -165,7 +165,25 @@ if ($secure) {
     "NoXTypesNoMatchTypeNames" => {reader_type => "AppendableStructNoXTypes", writer_type => "AppendableStructNoXTypes",
                                    r_reg_type => "ReaderTypeName", w_reg_type => "WriterTypeName",
                                    expect_to_fail => 1, topic => "NoXTypesNoMatchTypeNames_nn", key_val => 1,
-                                   r_ini => "rtps_disc_no_xtypes.ini", w_ini => "rtps_disc_no_xtypes.ini"}
+                                   r_ini => "rtps_disc_no_xtypes.ini", w_ini => "rtps_disc_no_xtypes.ini"},
+    "Tcp_AppendableMatch"         => {reader_type => "AppendableStruct", writer_type => "AdditionalPostfixFieldStruct",
+                                  expect_to_fail => 0, topic => "AppendableStructT", key_val => 4,
+                                  r_ini => "tcp.ini", w_ini => "tcp.ini"},
+    "Tcp_AppendableNoMatch"       => {reader_type => "AppendableStruct", writer_type => "AdditionalPrefixFieldStruct",
+                                  expect_to_fail => 1, topic => "AppendableStructT_NoMatch", key_val => 5,
+                                  r_ini => "tcp.ini", w_ini => "tcp.ini"},
+    "Tcp_MutableStruct"           => {reader_type => "MutableStruct", writer_type => "ModifiedMutableStruct",
+                                  expect_to_fail => 0, topic => "MutableStructT", key_val => 6,
+                                  r_ini => "tcp.ini", w_ini => "tcp.ini"},
+    "Tcp_MutableStructNoMatchName"=> {reader_type => "MutableStruct", writer_type => "ModifiedNameMutableStruct",
+                                  expect_to_fail => 1, topic => "MutableStructT_NoMatchName", key_val => 9,
+                                  r_ini => "tcp.ini", w_ini => "tcp.ini"},
+    "Tcp_MutableUnion"            => {reader_type => "MutableUnion", writer_type => "ModifiedMutableUnion",
+                                  expect_to_fail => 0, topic => "MutableUnionT", key_val => 10,
+                                  r_ini => "tcp.ini", w_ini => "tcp.ini"},
+    "Tcp_MutableUnionNoMatchDisc" => {reader_type => "MutableUnion", writer_type => "ModifiedDiscMutableUnion",
+                                  expect_to_fail => 1, topic => "MutableUnionT_NoMatchDisc", key_val => 11,
+                                  r_ini => "tcp.ini", w_ini => "tcp.ini"}
   );
 }
 

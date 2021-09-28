@@ -87,6 +87,12 @@ public:
   /// The default is 5 seconds (5000 millseconds).
   int active_conn_timeout_period_;
 
+  /// Enables CDR encapsulation on all types passed through the
+  /// transport.
+  /// The default is false.
+  bool requires_cdr_encapsulation_;
+
+  bool requires_cdr_encapsulation() const { return requires_cdr_encapsulation_; }
 
   bool is_reliable() const { return true; }
 
