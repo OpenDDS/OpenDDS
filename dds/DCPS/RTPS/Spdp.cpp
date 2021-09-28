@@ -266,6 +266,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , identity_handle_(DDS::HANDLE_NIL)
   , permissions_handle_(DDS::HANDLE_NIL)
   , crypto_handle_(DDS::HANDLE_NIL)
+  , n_participants_in_handshake_(0)
 #endif
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
@@ -309,6 +310,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , identity_handle_(identity_handle)
   , permissions_handle_(perm_handle)
   , crypto_handle_(crypto_handle)
+  , n_participants_in_handshake_(0)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
@@ -734,6 +736,15 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       return;
     }
 
+#ifdef OPENDDS_SECURITY
+    if (config_->max_participants_in_discovery() <= n_participants_in_handshake_) {
+      if (DCPS::DCPS_debug_level) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Spdp::handle_participant_data - reached max_participants_in_discovery\n")));
+      }
+      return;
+    }
+#endif
+
     partBitData(pdata).key = repo_id_to_bit_key(guid);
 
     if (DCPS::DCPS_debug_level) {
@@ -772,12 +783,6 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
     // add a new participant
 #ifdef OPENDDS_SECURITY
-    if (config_->max_participants_in_discovery() <= participants_.size()) {
-      if (DCPS::DCPS_debug_level) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Spdp::handle_participant_data - reached max_participants_in_discovery\n")));
-      }
-      return;
-    }
     std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq, config_->auth_resend_period())));
 #else
     std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq, TimeDuration())));
@@ -1339,6 +1344,12 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
     return;
   }
 
+  ++n_participants_in_handshake_;
+  if (DCPS::security_debug.auth_debug) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) {auth_debug} DEBUG: Spdp::attempt_authentication %d participants in handshake\n",
+      n_participants_in_handshake_));
+  }
+
   // Reset.
   purge_handshake_deadlines(iter);
   dp.handshake_deadline_ = DCPS::MonotonicTimePoint::now() + config_->max_auth_time();
@@ -1385,6 +1396,7 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
   case DDS::Security::VALIDATION_OK: {
     dp.auth_state_ = DCPS::AUTH_STATE_AUTHENTICATED;
     dp.handshake_state_ = DCPS::HANDSHAKE_STATE_DONE;
+    --n_participants_in_handshake_;
     purge_handshake_deadlines(iter);
     return;
   }
@@ -1416,6 +1428,7 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
     }
     dp.auth_state_ = DCPS::AUTH_STATE_UNAUTHENTICATED;
     dp.handshake_state_ = DCPS::HANDSHAKE_STATE_DONE;
+    --n_participants_in_handshake_;
     purge_handshake_deadlines(iter);
     return;
   }
@@ -1427,6 +1440,7 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
     }
     dp.auth_state_ = DCPS::AUTH_STATE_UNAUTHENTICATED;
     dp.handshake_state_ = DCPS::HANDSHAKE_STATE_DONE;
+    --n_participants_in_handshake_;
     purge_handshake_deadlines(iter);
     return;
   }
