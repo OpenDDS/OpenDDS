@@ -162,7 +162,7 @@ public:
   DDS::ReturnCode_t get_wstring_values(WStringSeq& value, MemberId id) const;
   DDS::ReturnCode_t set_wstring_values(MemberId id, const WStringSeq& value);
 
-  /// Skip the whole part of the data stream that corresponds to this type.
+  /// Skip the whole data corresponding to this type if it is a struct or union.
   /// This is called by a containing type when it wants to skip a member which
   /// is an object of this type.
   bool skip_all();
@@ -211,12 +211,14 @@ private:
 
   bool read_discriminator(TypeKind disc_tk, ExtensibilityKind union_ek, ACE_CDR::Long& label);
 
-  /// Skip a member at the given index of a final or appendable type.
-  /// When the method is called, the read position of the stream
-  /// must be at the beginning of the member.
-  bool skip_member_by_index(ACE_CDR::ULong index);
-  bool skip_member(DynamicType_rch type);
+  /// Skip a member of a final or appendable struct at the given index.
+  bool skip_struct_member_by_index(ACE_CDR::ULong index);
 
+  /// Skip a member of the given type. The member can be a part of any containing type,
+  /// such as a member in a struct or union, an element in a sequence or array, etc.
+  bool skip_member(DynamicType_rch member_type);
+
+  /// Skip a member which is a sequence, array, or map.
   bool skip_sequence_member(DynamicType_rch type);
   bool skip_array_member(DynamicType_rch type);
   bool skip_map_member(DynamicType_rch type);
@@ -225,14 +227,17 @@ private:
   /// elements, or a map with at least either key type or value type is non-primitive.
   bool skip_collection_member(TypeKind tk);
 
+  /// Skip a member which is a structure.
   bool skip_struct_member(DynamicType_rch type);
+
+  /// Skip a member which is an union.
   bool skip_union_member(DynamicType_rch type);
 
-  bool skip_map_key();
-
-  // These helper methods can be moved to DynamicType class.
+  // These methods can be moved to DynamicType-related classes.
   DynamicType_rch get_base_type(DynamicType_rch alias_type) const;
   bool is_primitive(TypeKind tk, ACE_CDR::ULong& size) const;
+
+  bool get_index_from_id(MemberId id, ACE_CDR::ULong& index, ACE_CDR::ULong bound) const;
   const char* typekind_to_string(TypeKind tk) const;
 
   /// Reset the read pointer to point to the beginning of the stream.
