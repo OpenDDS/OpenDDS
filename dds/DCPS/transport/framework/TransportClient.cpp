@@ -159,7 +159,6 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
 #endif
 
         cdr_encapsulation_ |= inst->requires_cdr_encapsulation();
-        ACE_DEBUG((LM_DEBUG, "CDR_ENCAPSULATION: %d\n", cdr_encapsulation_));
       }
     }
   }
