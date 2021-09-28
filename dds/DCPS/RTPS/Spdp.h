@@ -546,7 +546,7 @@ private:
   void purge_handshake_resends(DiscoveredParticipantIter iter);
   TimeQueue handshake_resends_;
 
-  unsigned int n_participants_in_handshake_;
+  unsigned int n_participants_in_authentication_;
 #endif
 
   friend class ::DDS_TEST;
