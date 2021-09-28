@@ -203,7 +203,7 @@ private:
 
   /// Move the read pointer to the member with a given ID.
   /// In case the member is not a sequence, @a kind is the type kind of the member.
-  /// Else if the requested member is a sequence, @a kind is the type kind of the
+  /// If the requested member is a sequence, @a kind is the type kind of the
   /// elements of the sequence.
   bool find_member(MemberId id, TypeKind kind, bool is_sequence = false);
 
@@ -216,6 +216,9 @@ private:
 
   /// Skip a member of the given type. The member can be a part of any containing type,
   /// such as a member in a struct or union, an element in a sequence or array, etc.
+  /// Note that this assumes any header preceding this type, e.g. EMHEADER if this is
+  /// a member of a mutable struct, is already consumed, and the read pointer is pointing
+  /// to the actual data of the member.
   bool skip_member(DynamicType_rch member_type);
 
   /// Skip a member which is a sequence, array, or map.
