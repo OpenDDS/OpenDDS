@@ -400,7 +400,7 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::EquivalenceHash& equivalenc
 {
   return out
     << "XTypes::EquivalenceHashWrapper("
-    << equivalence_hash_to_string(equivalence_hash)
+    << OpenDDS::XTypes::equivalence_hash_to_string(equivalence_hash)
     << ")";
 }
 
