@@ -53,7 +53,9 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , rtps_relay_only_(false)
   , use_rtps_relay_(false)
   , use_ice_(false)
-{}
+{
+  requires_cdr_encapsulation_ = true;
+}
 
 TransportImpl_rch
 RtpsUdpInst::new_impl()

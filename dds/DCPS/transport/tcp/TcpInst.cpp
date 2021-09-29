@@ -68,9 +68,6 @@ OpenDDS::DCPS::TcpInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_VALUE(cf, trans_sect, ACE_TEXT("active_conn_timeout_period"),
                    this->active_conn_timeout_period_, int)
 
-  GET_CONFIG_VALUE(cf, trans_sect, ACE_TEXT("requires_cdr_encapsulation"),
-                   this->requires_cdr_encapsulation_, bool)
-
   return 0;
 }
 
@@ -89,7 +86,6 @@ OpenDDS::DCPS::TcpInst::dump_to_str() const
   os << formatNameForDump("passive_reconnect_duration")    << this->passive_reconnect_duration_ << std::endl;
   os << formatNameForDump("max_output_pause_period")       << this->max_output_pause_period_ << std::endl;
   os << formatNameForDump("active_conn_timeout_period")    << this->active_conn_timeout_period_ << std::endl;
-  os << formatNameForDump("requires_cdr_encapsulation")    << this->requires_cdr_encapsulation_ << std::endl;
   return OPENDDS_STRING(os.str());
 }
 
