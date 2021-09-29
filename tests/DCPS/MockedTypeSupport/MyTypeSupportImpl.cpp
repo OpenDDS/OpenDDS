@@ -1,88 +1,70 @@
-// -*- C++ -*-
-//
-
 #include "MyTypeSupportImpl.h"
-#include "dds/DCPS/Registered_Data_Types.h"
-#include "dds/DdsDcpsDomainC.h"
-#include "dds/DCPS/Service_Participant.h"
 
-#include "dds/DCPS/DataWriterImpl.h"
-#include "dds/DCPS/DataReaderImpl.h"
+#include <dds/DCPS/Registered_Data_Types.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/DataWriterImpl.h>
+#include <dds/DCPS/DataReaderImpl.h>
+
+#include <dds/DdsDcpsDomainC.h>
 
 #include <stdexcept>
 
-MyTypeSupportImpl::MyTypeSupportImpl (void)
-  {
-  }
+MyTypeSupportImpl::MyTypeSupportImpl()
+{
+}
 
-MyTypeSupportImpl::~MyTypeSupportImpl (void)
-  {
-  }
+MyTypeSupportImpl::~MyTypeSupportImpl()
+{
+}
 
-DDS::ReturnCode_t
-MyTypeSupportImpl::register_type (
-    ::DDS::DomainParticipant_ptr participant,
-    const char * type_name
-  )
+DDS::ReturnCode_t MyTypeSupportImpl::register_type(
+  DDS::DomainParticipant* participant,
+  const char* type_name)
 {
   CORBA::String_var tn;
-  if (type_name == 0 || type_name[0] == '\0')
-     tn = this->get_type_name ();
-  else
-     tn = CORBA::string_dup (type_name);
+  if (type_name == 0 || type_name[0] == '\0') {
+   tn = get_type_name();
+  } else {
+   tn = CORBA::string_dup(type_name);
+  }
 
-  return ::OpenDDS::DCPS::Registered_Data_Types->register_type(participant,
-                                                           tn.in (),
-                                                           this);
+  return Registered_Data_Types->register_type(participant, tn.in(), this);
 }
 
 
-DDS::ReturnCode_t
-MyTypeSupportImpl::unregister_type (
-    ::DDS::DomainParticipant_ptr participant,
-    const char * type_name
-  )
+DDS::ReturnCode_t MyTypeSupportImpl::unregister_type (
+  DDS::DomainParticipant* participant,
+  const char* type_name)
 {
   if (type_name == 0 || type_name[0] == '\0') {
-     return DDS::RETCODE_BAD_PARAMETER;
-  }
-  else {
-     return ::OpenDDS::DCPS::Registered_Data_Types->unregister_type(participant,
-                                                            type_name,
-                                                            this);
+   return DDS::RETCODE_BAD_PARAMETER;
+  } else {
+   return Registered_Data_Types->unregister_type(participant, type_name, this);
   }
 }
 
 
-char *
-MyTypeSupportImpl::get_type_name (
-  )
+char* MyTypeSupportImpl::get_type_name()
 {
-  return CORBA::string_dup (this->_interface_repository_id());
+  return CORBA::string_dup(this->_interface_repository_id());
 }
 
 
-::DDS::DataWriter_ptr MyTypeSupportImpl::create_datawriter (
-  )
-  {
-    MyDataWriterImpl* writer_impl;
-    ACE_NEW_RETURN(writer_impl,
-                   MyDataWriterImpl(),
-                   ::DDS::DataWriter::_nil());
+::DDS::DataWriter_ptr MyTypeSupportImpl::create_datawriter()
+{
+  MyDataWriterImpl* writer_impl;
+  ACE_NEW_RETURN(writer_impl, MyDataWriterImpl(), ::DDS::DataWriter::_nil());
 
-    return writer_impl;
-  }
+  return writer_impl;
+}
 
-::DDS::DataReader_ptr MyTypeSupportImpl::create_datareader (
-  )
-  {
-    MyDataReaderImpl* reader_impl;
-    ACE_NEW_RETURN(reader_impl,
-                   MyDataReaderImpl(),
-                   ::DDS::DataReader::_nil());
+::DDS::DataReader_ptr MyTypeSupportImpl::create_datareader()
+{
+  MyDataReaderImpl* reader_impl;
+  ACE_NEW_RETURN(reader_impl, MyDataReaderImpl(), ::DDS::DataReader::_nil());
 
-    return reader_impl;
-  }
+  return reader_impl;
+}
 
 void MyTypeSupportImpl::representations_allowed_by_type(
   DDS::DataRepresentationIdSeq& seq)
@@ -91,8 +73,7 @@ void MyTypeSupportImpl::representations_allowed_by_type(
 }
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
-::DDS::DataReader_ptr
-MyTypeSupportImpl::create_multitopic_datareader()
+::DDS::DataReader_ptr MyTypeSupportImpl::create_multitopic_datareader()
 {
   return 0;
 }

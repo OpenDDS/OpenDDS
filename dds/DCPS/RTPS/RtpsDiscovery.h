@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -8,19 +6,17 @@
 #ifndef OPENDDS_DCPS_RTPS_RTPSDISCOVERY_H
 #define OPENDDS_DCPS_RTPS_RTPSDISCOVERY_H
 
-
 #include "GuidGenerator.h"
 #include "Spdp.h"
 #include "rtps_export.h"
 
-#include <dds/DCPS/DiscoveryBase.h>
 #include <dds/DCPS/PoolAllocator.h>
 
 #include <ace/Configuration.h>
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
 class DDS_TEST;
 
@@ -28,6 +24,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace RTPS {
+
+typedef RcHandle<Spdp> ParticipantHandle;
+typedef OPENDDS_MAP_CMP(GUID_t, ParticipantHandle, GUID_tKeyLessThan) ParticipantMap;
+typedef OPENDDS_MAP(DDS::DomainId_t, ParticipantMap) DomainParticipantMap;
 
 const char RTPS_DISCOVERY_ENDPOINT_ANNOUNCEMENTS[] = "OpenDDS.RtpsDiscovery.EndpointAnnouncements";
 const char RTPS_DISCOVERY_TYPE_LOOKUP_SERVICE[] = "OpenDDS.RtpsDiscovery.TypeLookupService";
@@ -734,7 +734,7 @@ typedef OpenDDS::DCPS::RcHandle<RtpsDiscoveryConfig> RtpsDiscoveryConfig_rch;
  * discovery.
  *
  */
-class OpenDDS_Rtps_Export RtpsDiscovery : public OpenDDS::DCPS::PeerDiscovery<Spdp> {
+class OpenDDS_Rtps_Export RtpsDiscovery : public DCPS::Discovery {
 public:
   typedef RtpsDiscoveryConfig::AddrVec AddrVec;
 
@@ -883,7 +883,127 @@ public:
                                           DCPS::RelayMessageCounts& spdp,
                                           DCPS::RelayMessageCounts& sedp);
 
+  DDS::Subscriber_ptr init_bit(DCPS::DomainParticipantImpl* participant);
+
+  void fini_bit(DCPS::DomainParticipantImpl* participant);
+
+  bool attach_participant(DDS::DomainId_t domainId, const GUID_t& participantId);
+
+  bool remove_domain_participant(DDS::DomainId_t domain_id, const GUID_t& participantId);
+
+  bool ignore_domain_participant(DDS::DomainId_t domain, const GUID_t& myParticipantId,
+    const GUID_t& ignoreId);
+
+  bool update_domain_participant_qos(DDS::DomainId_t domain, const GUID_t& participant,
+    const DDS::DomainParticipantQos& qos);
+
+  DCPS::TopicStatus assert_topic(
+    GUID_t& topicId,
+    DDS::DomainId_t domainId,
+    const GUID_t& participantId,
+    const char* topicName,
+    const char* dataTypeName,
+    const DDS::TopicQos& qos,
+    bool hasDcpsKey,
+    DCPS::TopicCallbacks* topic_callbacks);
+
+  DCPS::TopicStatus find_topic(
+    DDS::DomainId_t domainId,
+    const GUID_t& participantId,
+    const char* topicName,
+    CORBA::String_out dataTypeName,
+    DDS::TopicQos_out qos,
+    GUID_t& topicId);
+
+  DCPS::TopicStatus remove_topic(
+    DDS::DomainId_t domainId,
+    const GUID_t& participantId,
+    const GUID_t& topicId);
+
+  bool ignore_topic(DDS::DomainId_t domainId,
+    const GUID_t& myParticipantId, const GUID_t& ignoreId);
+
+  bool update_topic_qos(const GUID_t& topicId, DDS::DomainId_t domainId,
+    const GUID_t& participantId, const DDS::TopicQos& qos);
+
+  GUID_t add_publication(
+    DDS::DomainId_t domainId,
+    const GUID_t& participantId,
+    const GUID_t& topicId,
+    DCPS::DataWriterCallbacks_rch publication,
+    const DDS::DataWriterQos& qos,
+    const DCPS::TransportLocatorSeq& transInfo,
+    const DDS::PublisherQos& publisherQos,
+    const XTypes::TypeInformation& type_info);
+
+  bool remove_publication(DDS::DomainId_t domainId, const GUID_t& participantId,
+    const GUID_t& publicationId);
+
+  bool ignore_publication(DDS::DomainId_t domainId, const GUID_t& participantId,
+    const GUID_t& ignoreId);
+
+  bool update_publication_qos(
+    DDS::DomainId_t domainId,
+    const GUID_t& partId,
+    const GUID_t& dwId,
+    const DDS::DataWriterQos& qos,
+    const DDS::PublisherQos& publisherQos);
+
+  void update_publication_locators(
+    DDS::DomainId_t domainId,
+    const GUID_t& partId,
+    const GUID_t& dwId,
+    const DCPS::TransportLocatorSeq& transInfo);
+
+  GUID_t add_subscription(
+    DDS::DomainId_t domainId,
+    const GUID_t& participantId,
+    const GUID_t& topicId,
+    DCPS::DataReaderCallbacks_rch subscription,
+    const DDS::DataReaderQos& qos,
+    const DCPS::TransportLocatorSeq& transInfo,
+    const DDS::SubscriberQos& subscriberQos,
+    const char* filterClassName,
+    const char* filterExpr,
+    const DDS::StringSeq& params,
+    const XTypes::TypeInformation& type_info);
+
+  bool remove_subscription(DDS::DomainId_t domainId, const GUID_t& participantId,
+    const GUID_t& subscriptionId);
+
+  bool ignore_subscription(DDS::DomainId_t domainId, const GUID_t& participantId,
+    const GUID_t& ignoreId);
+
+  bool update_subscription_qos(
+    DDS::DomainId_t domainId,
+    const GUID_t& partId,
+    const GUID_t& drId,
+    const DDS::DataReaderQos& qos,
+    const DDS::SubscriberQos& subQos);
+
+  bool update_subscription_params(
+    DDS::DomainId_t domainId,
+    const GUID_t& partId,
+    const GUID_t& subId,
+    const DDS::StringSeq& params);
+
+  void update_subscription_locators(
+    DDS::DomainId_t domainId,
+    const GUID_t& partId,
+    const GUID_t& subId,
+    const DCPS::TransportLocatorSeq& transInfo);
+
 private:
+  ParticipantHandle get_part(const DDS::DomainId_t domain_id, const GUID_t& part_id) const;
+
+  void create_bit_dr(DDS::TopicDescription_ptr topic, const char* type,
+                     DCPS::SubscriberImpl* sub,
+                     const DDS::DataReaderQos& qos);
+
+  mutable ACE_Thread_Mutex lock_;
+
+  DomainParticipantMap participants_;
+
   RtpsDiscoveryConfig_rch config_;
 
   /// Guids will be unique within this RTPS configuration

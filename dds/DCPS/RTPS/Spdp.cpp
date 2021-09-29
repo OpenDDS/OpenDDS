@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -18,7 +16,6 @@
 #endif
 
 #include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/Ice.h>
@@ -244,8 +241,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
            const DDS::DomainParticipantQos& qos,
            RtpsDiscovery* disco,
            XTypes::TypeLookupService_rch tls)
-
-  : DCPS::LocalParticipant<Sedp>(qos)
+  : qos_(qos)
   , disco_(disco)
   , config_(disco_->config())
   , domain_(domain)
@@ -288,8 +284,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
            DDS::Security::IdentityHandle identity_handle,
            DDS::Security::PermissionsHandle perm_handle,
            DDS::Security::ParticipantCryptoHandle crypto_handle)
-
-  : DCPS::LocalParticipant<Sedp>(qos)
+  : qos_(qos)
   , disco_(disco)
   , config_(disco_->config())
   , domain_(domain)
@@ -839,7 +834,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
           }
           participants_.erase(guid);
         } else { // allow_unauthenticated_participants == true
-          iter->second.auth_state_ = DCPS::AUTH_STATE_UNAUTHENTICATED;
+          iter->second.auth_state_ = AUTH_STATE_UNAUTHENTICATED;
           match_unauthenticated(guid, iter);
         }
       } else {
@@ -854,7 +849,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
         attempt_authentication(iter, true);
 
-        if (iter->second.auth_state_ == DCPS::AUTH_STATE_UNAUTHENTICATED) {
+        if (iter->second.auth_state_ == AUTH_STATE_UNAUTHENTICATED) {
           if (participant_sec_attr_.allow_unauthenticated_participants == false) {
             if (DCPS::security_debug.auth_debug) {
               ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::handle_participant_data - ")
@@ -863,10 +858,10 @@ Spdp::handle_participant_data(DCPS::MessageId id,
             }
             participants_.erase(guid);
           } else { // allow_unauthenticated_participants == true
-            iter->second.auth_state_ = DCPS::AUTH_STATE_UNAUTHENTICATED;
+            iter->second.auth_state_ = AUTH_STATE_UNAUTHENTICATED;
             match_unauthenticated(guid, iter);
           }
-        } else if (iter->second.auth_state_ == DCPS::AUTH_STATE_AUTHENTICATED) {
+        } else if (iter->second.auth_state_ == AUTH_STATE_AUTHENTICATED) {
           if (match_authenticated(guid, iter) == false) {
             participants_.erase(guid);
           }
@@ -874,7 +869,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         // otherwise just return, since we're waiting for input to finish authentication
       }
     } else {
-      iter->second.auth_state_ = DCPS::AUTH_STATE_UNAUTHENTICATED;
+      iter->second.auth_state_ = AUTH_STATE_UNAUTHENTICATED;
       match_unauthenticated(guid, iter);
     }
 #else
@@ -894,7 +889,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #ifdef OPENDDS_SECURITY
     // Non-secure updates for authenticated participants are used for liveliness but
     // are otherwise ignored. Non-secure dispose messages are ignored completely.
-    if (is_security_enabled() && iter->second.auth_state_ == DCPS::AUTH_STATE_AUTHENTICATED && !from_sedp) {
+    if (is_security_enabled() && iter->second.auth_state_ == AUTH_STATE_AUTHENTICATED && !from_sedp) {
       update_lease_expiration_i(iter, now);
       if (!from_relay && from != ACE_INET_Addr()) {
         iter->second.local_address_ = from;
@@ -1268,7 +1263,7 @@ DDS::OctetSeq Spdp::local_participant_data_as_octets() const
 void
 Spdp::send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
 {
-  OPENDDS_ASSERT(dp.handshake_state_ == DCPS::HANDSHAKE_STATE_BEGIN_HANDSHAKE_REQUEST);
+  OPENDDS_ASSERT(dp.handshake_state_ == HANDSHAKE_STATE_BEGIN_HANDSHAKE_REQUEST);
 
   Security::Authentication_var auth = security_config_->get_authentication();
   DDS::Security::SecurityException se = {"", 0, 0};
@@ -1302,7 +1297,7 @@ Spdp::send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp
     return;
   }
 
-  dp.handshake_state_ = DCPS::HANDSHAKE_STATE_PROCESS_HANDSHAKE;
+  dp.handshake_state_ = HANDSHAKE_STATE_PROCESS_HANDSHAKE;
 
   DDS::Security::ParticipantStatelessMessage msg;
   msg.message_identity.source_guid = guid_;
@@ -1340,7 +1335,7 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
       dp.auth_state_, dp.handshake_state_));
   }
 
-  if (!from_discovery && dp.handshake_state_ != DCPS::HANDSHAKE_STATE_DONE) {
+  if (!from_discovery && dp.handshake_state_ != HANDSHAKE_STATE_DONE) {
     // Ignore auth reqs when already in progress.
     return;
   }
@@ -1395,8 +1390,8 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
 
   switch (vr) {
   case DDS::Security::VALIDATION_OK: {
-    dp.auth_state_ = DCPS::AUTH_STATE_AUTHENTICATED;
-    dp.handshake_state_ = DCPS::HANDSHAKE_STATE_DONE;
+    dp.auth_state_ = AUTH_STATE_AUTHENTICATED;
+    dp.handshake_state_ = HANDSHAKE_STATE_DONE;
     --n_participants_in_authentication_;
     purge_handshake_deadlines(iter);
     return;
@@ -1407,7 +1402,7 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
                  ACE_TEXT("Attempting authentication (expecting request) for participant: %C\n"),
                  OPENDDS_STRING(DCPS::GuidConverter(guid)).c_str()));
     }
-    dp.handshake_state_ = DCPS::HANDSHAKE_STATE_BEGIN_HANDSHAKE_REPLY;
+    dp.handshake_state_ = HANDSHAKE_STATE_BEGIN_HANDSHAKE_REPLY;
     dp.is_requester_ = true;
     return; // We'll need to wait for an inbound handshake request from the remote participant
   }
@@ -1417,7 +1412,7 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
                  ACE_TEXT("Attempting authentication (sending request/expecting reply) for participant: %C\n"),
                  OPENDDS_STRING(DCPS::GuidConverter(guid)).c_str()));
     }
-    dp.handshake_state_ = DCPS::HANDSHAKE_STATE_BEGIN_HANDSHAKE_REQUEST;
+    dp.handshake_state_ = HANDSHAKE_STATE_BEGIN_HANDSHAKE_REQUEST;
     send_handshake_request(guid, dp);
     return;
   }
@@ -1427,8 +1422,8 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
                  ACE_TEXT("Remote participant identity is invalid. Security Exception[%d.%d]: %C\n"),
                  se.code, se.minor_code, se.message.in()));
     }
-    dp.auth_state_ = DCPS::AUTH_STATE_UNAUTHENTICATED;
-    dp.handshake_state_ = DCPS::HANDSHAKE_STATE_DONE;
+    dp.auth_state_ = AUTH_STATE_UNAUTHENTICATED;
+    dp.handshake_state_ = HANDSHAKE_STATE_DONE;
     --n_participants_in_authentication_;
     purge_handshake_deadlines(iter);
     return;
@@ -1439,8 +1434,8 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
                  ACE_TEXT("Unexpected return value while validating remote identity. Security Exception[%d.%d]: %C\n"),
                  se.code, se.minor_code, se.message.in()));
     }
-    dp.auth_state_ = DCPS::AUTH_STATE_UNAUTHENTICATED;
-    dp.handshake_state_ = DCPS::HANDSHAKE_STATE_DONE;
+    dp.auth_state_ = AUTH_STATE_UNAUTHENTICATED;
+    dp.handshake_state_ = HANDSHAKE_STATE_DONE;
     --n_participants_in_authentication_;
     purge_handshake_deadlines(iter);
     return;
@@ -1508,7 +1503,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   // we don't need to send the auth req.
   dp.have_auth_req_msg_ = false;
 
-  if (dp.handshake_state_ == DCPS::HANDSHAKE_STATE_DONE && !dp.is_requester_) {
+  if (dp.handshake_state_ == HANDSHAKE_STATE_DONE && !dp.is_requester_) {
     // Remote is still sending a reply, so resend the final.
     const RepoId reader = make_id(iter->first, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER);
     if (sedp_->write_stateless_message(dp.handshake_msg_, reader) != DDS::RETCODE_OK) {
@@ -1532,11 +1527,11 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   iter->second.handshake_sequence_number_ = msg.message_identity.sequence_number;
 
   switch (dp.handshake_state_) {
-  case DCPS::HANDSHAKE_STATE_DONE:
+  case HANDSHAKE_STATE_DONE:
     // Handled above.
     return;
 
-  case DCPS::HANDSHAKE_STATE_BEGIN_HANDSHAKE_REQUEST: {
+  case HANDSHAKE_STATE_BEGIN_HANDSHAKE_REQUEST: {
     if (DCPS::security_debug.auth_warn) {
       ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) {auth_warn} Spdp::handle_handshake_message() - ")
@@ -1545,7 +1540,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     return;
   }
 
-  case DCPS::HANDSHAKE_STATE_BEGIN_HANDSHAKE_REPLY: {
+  case HANDSHAKE_STATE_BEGIN_HANDSHAKE_REPLY: {
     DDS::Security::ParticipantStatelessMessage reply;
     reply.message_identity.source_guid = guid_;
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
@@ -1582,8 +1577,8 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     switch (vr) {
     case DDS::Security::VALIDATION_OK: {
       // Theoretically, this shouldn't happen unless handshakes can involve fewer than 3 messages
-      dp.auth_state_ = DCPS::AUTH_STATE_AUTHENTICATED;
-      dp.handshake_state_ = DCPS::HANDSHAKE_STATE_DONE;
+      dp.auth_state_ = AUTH_STATE_AUTHENTICATED;
+      dp.handshake_state_ = HANDSHAKE_STATE_DONE;
       purge_handshake_deadlines(iter);
       match_authenticated(src_participant, iter);
       return;
@@ -1624,7 +1619,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
                      OPENDDS_STRING(DCPS::GuidConverter(src_participant)).c_str()));
         }
       }
-      dp.handshake_state_ = DCPS::HANDSHAKE_STATE_PROCESS_HANDSHAKE;
+      dp.handshake_state_ = HANDSHAKE_STATE_PROCESS_HANDSHAKE;
       return;
     }
     case DDS::Security::VALIDATION_OK_FINAL_MESSAGE: {
@@ -1642,8 +1637,8 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
                      OPENDDS_STRING(DCPS::GuidConverter(src_participant)).c_str()));
         }
       }
-      dp.auth_state_ = DCPS::AUTH_STATE_AUTHENTICATED;
-      dp.handshake_state_ = DCPS::HANDSHAKE_STATE_PROCESS_HANDSHAKE;
+      dp.auth_state_ = AUTH_STATE_AUTHENTICATED;
+      dp.handshake_state_ = HANDSHAKE_STATE_PROCESS_HANDSHAKE;
       purge_handshake_deadlines(iter);
       match_authenticated(src_participant, iter);
       return;
@@ -1652,7 +1647,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     return;
   }
 
-  case DCPS::HANDSHAKE_STATE_PROCESS_HANDSHAKE: {
+  case HANDSHAKE_STATE_PROCESS_HANDSHAKE: {
     DDS::Security::ParticipantStatelessMessage reply;
     reply.message_identity.source_guid = guid_;
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
@@ -1709,8 +1704,8 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
       return;
     }
     case DDS::Security::VALIDATION_OK_FINAL_MESSAGE: {
-      dp.auth_state_ = DCPS::AUTH_STATE_AUTHENTICATED;
-      dp.handshake_state_ = DCPS::HANDSHAKE_STATE_DONE;
+      dp.auth_state_ = AUTH_STATE_AUTHENTICATED;
+      dp.handshake_state_ = HANDSHAKE_STATE_DONE;
       // Install the shared secret before sending the final so that
       // we are prepared to receive the crypto tokens from the
       // replier.
@@ -1735,8 +1730,8 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
       return;
     }
     case DDS::Security::VALIDATION_OK: {
-      dp.auth_state_ = DCPS::AUTH_STATE_AUTHENTICATED;
-      dp.handshake_state_ = DCPS::HANDSHAKE_STATE_DONE;
+      dp.auth_state_ = AUTH_STATE_AUTHENTICATED;
+      dp.handshake_state_ = HANDSHAKE_STATE_DONE;
       purge_handshake_deadlines(iter);
       match_authenticated(src_participant, iter);
       return;
@@ -1777,8 +1772,8 @@ Spdp::process_handshake_deadlines(const DCPS::MonotonicTimePoint& now)
         remove_discovered_participant(pit);
       } else {
         purge_handshake_resends(pit);
-        pit->second.auth_state_ = DCPS::AUTH_STATE_UNAUTHENTICATED;
-        pit->second.handshake_state_ = DCPS::HANDSHAKE_STATE_DONE;
+        pit->second.auth_state_ = AUTH_STATE_UNAUTHENTICATED;
+        pit->second.handshake_state_ = HANDSHAKE_STATE_DONE;
         handshake_deadlines_.erase(pos);
         match_unauthenticated(part_id, pit);
       }
@@ -3984,15 +3979,14 @@ Spdp::lookup_participant_permissions(const DCPS::RepoId& id) const
   return result;
 }
 
-DCPS::AuthState
-Spdp::lookup_participant_auth_state(const DCPS::RepoId& id) const
+AuthState Spdp::lookup_participant_auth_state(const GUID_t& id) const
 {
   ACE_Guard<ACE_Thread_Mutex> g(lock_, false);
   DiscoveredParticipantConstIter pi = participants_.find(id);
   if (pi != participants_.end()) {
     return pi->second.auth_state_;
   }
-  return DCPS::AUTH_STATE_HANDSHAKE;
+  return AUTH_STATE_HANDSHAKE;
 }
 #endif
 
@@ -4802,6 +4796,90 @@ DDS::ParticipantBuiltinTopicData Spdp::get_part_bit_data(bool secure) const
   bit_data.key = DDS::BuiltinTopicKey_t();
   bit_data.user_data = include_user_data ? qos_.user_data : DDS::UserDataQosPolicy();
   return bit_data;
+}
+
+void Spdp::ignore_domain_participant(const GUID_t& ignoreId)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  endpoint_manager().ignore(ignoreId);
+
+  DiscoveredParticipantIter iter = participants_.find(ignoreId);
+  if (iter != participants_.end()) {
+    remove_discovered_participant(iter);
+  }
+}
+
+bool Spdp::update_domain_participant_qos(const DDS::DomainParticipantQos& qos)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
+  qos_ = qos;
+  return announce_domain_participant_qos();
+}
+
+DCPS::TopicStatus Spdp::assert_topic(GUID_t& topicId, const char* topicName,
+  const char* dataTypeName, const DDS::TopicQos& qos,
+  bool hasDcpsKey, DCPS::TopicCallbacks* topic_callbacks)
+{
+  if (std::strlen(topicName) > 256 || std::strlen(dataTypeName) > 256) {
+    if (DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR LocalParticipant::assert_topic() - ")
+                 ACE_TEXT("topic or type name length limit (256) exceeded\n")));
+    }
+    return DCPS::PRECONDITION_NOT_MET;
+  }
+
+  return endpoint_manager().assert_topic(topicId, topicName, dataTypeName, qos, hasDcpsKey, topic_callbacks);
+}
+
+void Spdp::remove_discovered_participant(DiscoveredParticipantIter& iter)
+{
+  if (iter == participants_.end()) {
+    return;
+  }
+  GUID_t part_id = iter->first;
+  bool removed = endpoint_manager().disassociate(iter->second.pdata_);
+  iter = participants_.find(part_id); // refresh iter after disassociate, which can unlock
+  if (iter == participants_.end()) {
+    return;
+  }
+  if (removed) {
+#ifndef DDS_HAS_MINIMUM_BIT
+    DCPS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
+    DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* loc_bit = part_loc_bit();
+    // bit may be null if the DomainParticipant is shutting down
+    if ((bit && iter->second.bit_ih_ != DDS::HANDLE_NIL) ||
+        (loc_bit && iter->second.location_ih_ != DDS::HANDLE_NIL)) {
+      {
+        const DDS::InstanceHandle_t bit_ih = iter->second.bit_ih_;
+        const DDS::InstanceHandle_t location_ih = iter->second.location_ih_;
+
+        ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+        ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
+        if (bit && bit_ih != DDS::HANDLE_NIL) {
+          bit->set_instance_state(bit_ih,
+                                  DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+        }
+        if (loc_bit && location_ih != DDS::HANDLE_NIL) {
+          loc_bit->set_instance_state(location_ih,
+                                      DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+        }
+      }
+      iter = participants_.find(part_id);
+      if (iter == participants_.end()) {
+        return;
+      }
+    }
+#endif /* DDS_HAS_MINIMUM_BIT */
+    if (DCPS_debug_level > 3) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) LocalParticipant::remove_discovered_participant: "
+        "erasing %C (%B)\n",
+        LogGuid(iter->first).c_str(), participants_.size()));
+    }
+
+    remove_discovered_participant_i(iter);
+
+    participants_.erase(iter);
+  }
 }
 
 } // namespace RTPS
