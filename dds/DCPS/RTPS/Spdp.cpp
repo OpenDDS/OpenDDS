@@ -641,9 +641,24 @@ bool is_ip_equal(const ACE_INET_Addr& a, const DCPS::Locator_t& locator)
   return cmp_ip4(a, locator);
 }
 
+void print_locator(const CORBA::ULong i, const DCPS::Locator_t& o){
+  const unsigned char* a = reinterpret_cast<const unsigned char*>(o.address);
+  ACE_INET_Addr addr;
+  bool b = locator_to_address(addr, o, false) == 0;
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("locator%d[%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d] locator_to_address:%C\n"),
+    i, a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15],
+    (b ? DCPS::LogAddr(addr).c_str() : "failed")));
+}
+
 bool ip_in_locator_list(const ACE_INET_Addr& from, const DCPS::LocatorSeq& locators)
 {
+  if (DCPS::DCPS_debug_level) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ip_in_locator_list - from (type %d): %C\n"), from.get_type(), DCPS::LogAddr(from).c_str()));
+  }
   for (CORBA::ULong i = 0; i < locators.length(); ++i) {
+    if (DCPS::DCPS_debug_level) {
+      print_locator(i, locators[i]);
+    }
     if (is_ip_equal(from, locators[i])) {
       return true;
     }
