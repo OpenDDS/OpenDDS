@@ -398,14 +398,10 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::PlainMapLTypeDefn& map_ldef
 std::ostream&
 operator<<(std::ostream& out, const OpenDDS::XTypes::EquivalenceHash& equivalence_hash)
 {
-  out << "XTypes::EquivalenceHashWrapper(";
-  for (size_t i = 0; i < sizeof equivalence_hash; ++i) {
-    out << int(equivalence_hash[i]);
-    if (i < sizeof equivalence_hash - 1) {
-      out << ", ";
-    }
-  }
-  return out << ')';
+  return out
+    << "XTypes::EquivalenceHashWrapper("
+    << equivalence_hash_to_string(equivalence_hash)
+    << ")";
 }
 
 std::ostream&

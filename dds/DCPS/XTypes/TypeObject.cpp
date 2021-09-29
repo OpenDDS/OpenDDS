@@ -24,6 +24,18 @@ const Encoding& get_typeobject_encoding()
   return encoding;
 }
 
+const DCPS::String equivalence_hash_to_string(const EquivalenceHash& equivalence_hash)
+{
+  std::ostringstream out;
+  for (size_t i = 0; i < sizeof equivalence_hash; ++i) {
+    out << int(equivalence_hash[i]);
+    if (i < sizeof equivalence_hash - 1) {
+      out << ", ";
+    }
+  }
+  return out.str().c_str();
+}
+
 MinimalMemberDetail::MinimalMemberDetail(const OPENDDS_STRING& name)
 {
   unsigned char result[16];

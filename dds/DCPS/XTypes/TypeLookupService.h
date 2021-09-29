@@ -101,8 +101,6 @@ private:
   TypeInformation type_info_empty_;
 };
 
-const DCPS::String equivalence_hash_to_string(const EquivalenceHash& hash);
-
 typedef DCPS::RcHandle<TypeLookupService> TypeLookupService_rch;
 
 } // namespace XTypes
