@@ -6961,7 +6961,7 @@ void Sedp::remove_expired_endpoints(const MonotonicTimePoint& /*now*/)
   }
 
   // Clean up internal data used by getTypeDependencies
-  for (typename OrigSeqNumberMap::iterator it = orig_seq_numbers_.begin(); it != orig_seq_numbers_.end();) {
+  for (OrigSeqNumberMap::iterator it = orig_seq_numbers_.begin(); it != orig_seq_numbers_.end();) {
     if (now - it->second.time_started >= max_type_lookup_service_reply_period_) {
       if (DCPS_debug_level >= 4) {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) EndpointManager::remove_expired_endpoints: "
