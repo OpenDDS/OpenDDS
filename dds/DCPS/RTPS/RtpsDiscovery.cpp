@@ -1175,11 +1175,11 @@ bool RtpsDiscovery::remove_domain_participant(
   // does not get deleted until lock as been released.
   ParticipantHandle participant;
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-  typename DomainParticipantMap::iterator domain = participants_.find(domain_id);
+  DomainParticipantMap::iterator domain = participants_.find(domain_id);
   if (domain == participants_.end()) {
     return false;
   }
-  typename ParticipantMap::iterator part = domain->second.find(participantId);
+  ParticipantMap::iterator part = domain->second.find(participantId);
   if (part == domain->second.end()) {
     return false;
   }
@@ -1364,11 +1364,11 @@ void RtpsDiscovery::update_subscription_locators(
 ParticipantHandle RtpsDiscovery::get_part(const DDS::DomainId_t domain_id, const GUID_t& part_id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ParticipantHandle());
-  typename DomainParticipantMap::const_iterator domain = participants_.find(domain_id);
+  DomainParticipantMap::const_iterator domain = participants_.find(domain_id);
   if (domain == participants_.end()) {
     return ParticipantHandle();
   }
-  typename ParticipantMap::const_iterator part = domain->second.find(part_id);
+  ParticipantMap::const_iterator part = domain->second.find(part_id);
   if (part == domain->second.end()) {
     return ParticipantHandle();
   }
