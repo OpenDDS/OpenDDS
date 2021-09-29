@@ -39,9 +39,9 @@ public:
   typedef OPENDDS_VECTOR(OPENDDS_STRING) AddrVec;
 
   enum UseXTypes {
-    XTYPES_NONE = 0, // Turn off support for XTypes
-    XTYPES_MINIMAL, // Only use minimal TypeObjects
-    XTYPES_COMPLETE // Use both minimal and complete TypeObjects
+    XTYPES_NONE = 0, ///< Turn off support for XTypes
+    XTYPES_MINIMAL, ///< Only use minimal TypeObjects
+    XTYPES_COMPLETE ///< Use both minimal and complete TypeObjects
   };
 
   RtpsDiscoveryConfig();

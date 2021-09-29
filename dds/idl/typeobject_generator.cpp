@@ -642,8 +642,8 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::AnnotationParameterValue& p
     break;
   case OpenDDS::XTypes::TK_INT16:
     out << "static_cast<ACE_CDR::Short>(";
-     signed_int_helper<ACE_CDR::Short>(out, param_value.int16_value, ACE_INT16_MIN);
-     out << ")";
+    signed_int_helper<ACE_CDR::Short>(out, param_value.int16_value, ACE_INT16_MIN);
+    out << ")";
     break;
   case OpenDDS::XTypes::TK_UINT16:
     out << "static_cast<ACE_CDR::UShort>(" << param_value.uint16_value << ")";
@@ -690,16 +690,7 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::AnnotationParameterValue& p
     out << "String(\"" << param_value.string8_value << "\")";
     break;
   case OpenDDS::XTypes::TK_STRING16:
-    // Assuming each wide character can be converted to a single byte character.
-    size_t length = param_value.string16_value.size() + 1;
-    char* dst = new char[length];
-    size_t ret = wcstombs(dst, param_value.string16_value.c_str(), length);
-    if (ret == (size_t)-1) {
-      delete[] dst;
-      be_util::misc_error_and_abort("Failed to convert wide string to multibyte character string");
-    }
-    out << "WString(L\"" << dst << "\")";
-    delete[] dst;
+    be_util::misc_error_and_abort("WideString annotations are not supported");
   }
   out << ")";
   return out;
