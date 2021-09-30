@@ -111,9 +111,7 @@ public:
   /// Does the transport as configured support RELIABLE_RELIABILITY_QOS?
   virtual bool is_reliable() const = 0;
 
-  /// Does the transport require a CDR-encapsulated data payload?
-  bool requires_cdr_encapsulation_;
-  bool requires_cdr_encapsulation() const { return requires_cdr_encapsulation_; }
+  virtual bool requires_cdr_encapsulation() const { return false; }
 
   /// Populate a transport locator sequence.  Return the number of "locators."
   virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info, ConnectionInfoFlags flags) const = 0;

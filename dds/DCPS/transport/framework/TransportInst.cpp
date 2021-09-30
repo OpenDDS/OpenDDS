@@ -39,8 +39,7 @@ OpenDDS::DCPS::TransportInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("optimum_packet_size"), optimum_packet_size_, ACE_UINT32)
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("thread_per_connection"), thread_per_connection_, bool)
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("datalink_release_delay"), datalink_release_delay_, int)
-  GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("fragment_reassembly_timeout"), fragment_reassembly_timeout_)
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("requires_cdr_encapsulation"), requires_cdr_encapsulation_, bool);
+  GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("fragment_reassembly_timeout"), fragment_reassembly_timeout_);
 
   // Undocumented - this option is not in the Developer's Guide
   // Controls the number of chunks in the allocators used by the datalink

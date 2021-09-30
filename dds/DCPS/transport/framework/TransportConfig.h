@@ -36,6 +36,7 @@ public:
   InstancesType instances_;
 
   bool swap_bytes_;
+  bool cdr_encapsulation_;
 
   /// The time period in milliseconds for the acceptor side
   /// of a connection to wait for the connection.
