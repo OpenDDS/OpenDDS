@@ -111,6 +111,7 @@ public:
   /// Does the transport as configured support RELIABLE_RELIABILITY_QOS?
   virtual bool is_reliable() const = 0;
 
+  /// Does the transport require a CDR-encapsulated data payload?
   virtual bool requires_cdr_encapsulation() const { return false; }
 
   /// Populate a transport locator sequence.  Return the number of "locators."
