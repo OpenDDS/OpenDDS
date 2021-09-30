@@ -2524,7 +2524,7 @@ Spdp::SpdpTransport::dispose_unregister()
 
   wbuff_.reset();
   DCPS::Serializer ser(&wbuff_, encoding_plain_native);
-  DCPS::EncapsulationHeader encap(encoding_plain_native, DCPS::MUTABLE);
+  DCPS::EncapsulationHeader encap(ser.encoding(), DCPS::MUTABLE);
   if (!(ser << hdr_) || !(ser << data_) || !(ser << encap) || !(ser << plist)) {
     if (DCPS::DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
@@ -2678,9 +2678,8 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
 #endif
 
   wbuff_.reset();
-  CORBA::UShort options = 0;
   DCPS::Serializer ser(&wbuff_, encoding_plain_native);
-  DCPS::EncapsulationHeader encap(encoding_plain_native, DCPS::MUTABLE);
+  DCPS::EncapsulationHeader encap(ser.encoding(), DCPS::MUTABLE);
   if (!(ser << hdr_) || !(ser << data_) || !(ser << encap) || !(ser << plist)) {
     if (DCPS::DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
@@ -2803,7 +2802,7 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, const ACE_INET_Addr& loca
 
   wbuff_.reset();
   DCPS::Serializer ser(&wbuff_, encoding_plain_native);
-  DCPS::EncapsulationHeader encap(encoding_plain_native, DCPS::MUTABLE);
+  DCPS::EncapsulationHeader encap(ser.encoding(), DCPS::MUTABLE);
   if (!(ser << hdr_) || !(ser << info_dst) || !(ser << data_) || !(ser << encap)
       || !(ser << plist)) {
     if (DCPS::DCPS_debug_level > 0) {
@@ -3030,8 +3029,8 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
         ParameterList plist;
         if (data.smHeader.flags & (FLAG_D | FLAG_K_IN_DATA)) {
           DCPS::EncapsulationHeader encap;
-          if (!(ser >> encap) || (encap.kind() != DCPS::EncapsulationHeader::KIND_PL_CDR_LE &&
-                                  encap.kind() != DCPS::EncapsulationHeader::KIND_PL_CDR_BE)) {
+          DCPS::Encoding enc;
+          if (!(ser >> encap) || !encap.to_encoding(enc, DCPS::MUTABLE) || enc.kind() != Encoding::KIND_XCDR1) {
             if (DCPS::DCPS_debug_level > 0) {
               ACE_ERROR((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
@@ -3039,6 +3038,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
             }
             return 0;
           }
+          ser.encoding(enc);
           if (!(ser >> plist)) {
 
             if (DCPS::DCPS_debug_level > 0) {
