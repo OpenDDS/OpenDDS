@@ -213,9 +213,8 @@ public:
 
   typedef OPENDDS_MAP_CMP(GUID_t, DiscoveredParticipant,
                           GUID_tKeyLessThan) DiscoveredParticipantMap;
-  typedef typename DiscoveredParticipantMap::iterator DiscoveredParticipantIter;
-  typedef typename DiscoveredParticipantMap::const_iterator
-    DiscoveredParticipantConstIter;
+  typedef DiscoveredParticipantMap::iterator DiscoveredParticipantIter;
+  typedef DiscoveredParticipantMap::const_iterator DiscoveredParticipantConstIter;
 
 
   Spdp(DDS::DomainId_t domain,
