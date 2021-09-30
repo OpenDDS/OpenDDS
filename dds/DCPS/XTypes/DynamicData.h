@@ -196,6 +196,20 @@ private:
   template<typename UIntType>
   bool get_boolean_from_bitmask(ACE_CDR::ULong index, ACE_CDR::Boolean& value);
 
+  /// Skip to a member with a given ID in a struct.
+  bool skip_to_struct_member(const MemberDescriptor& member_desc, MemberId id);
+
+  /// Find member descriptor for the selected member from a union data.
+  bool get_union_selected_member(MemberDescriptor& out_md);
+
+  /// Skip to an element with a given ID in a sequence or array.
+  bool skip_to_sequence_element(MemberId id);
+  bool skip_to_array_element(MemberId id);
+
+  /// Skip to an element with a given ID in a map. The key associated with that
+  /// element is also skipped.
+  bool skip_to_map_element(MemberId id);
+
   // Templates for reading a sequence of values where the element type is primitive
   // or string or wstring from a corresponding containing type.
   template<typename SequenceType, typename ElementTypeKind>
@@ -205,7 +219,7 @@ private:
   /// In case the member is not a sequence, @a kind is the type kind of the member.
   /// If the requested member is a sequence, @a kind is the type kind of the
   /// elements of the sequence.
-  bool find_member(MemberId id, TypeKind kind, bool is_sequence = false);
+  bool find_struct_member(MemberId id, TypeKind kind, bool is_sequence = false);
 
   bool skip(const char* func_name, const char* description, size_t n, int size = 1);
 
