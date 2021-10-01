@@ -1106,9 +1106,6 @@ void StaticEndpointManager::match(const GUID_t& writer, const GUID_t& reader)
           ACE_DEBUG((LM_DEBUG, "(%P|%t) EndpointManager::match: Remote Writer\n"));
         }
         bool is_discovery_protected = false;
-#ifdef OPENDDS_SECURITY
-        is_discovery_protected = lsi->second.security_attribs_.base.is_discovery_protected;
-#endif
         save_matching_data_and_get_typeobjects(writer_type_info, md,
                                                 MatchingPair(writer, reader),
                                                 writer, is_discovery_protected,
@@ -1122,9 +1119,6 @@ void StaticEndpointManager::match(const GUID_t& writer, const GUID_t& reader)
           ACE_DEBUG((LM_DEBUG, "(%P|%t) EndpointManager::match: Remote Reader\n"));
         }
         bool is_discovery_protected = false;
-#ifdef OPENDDS_SECURITY
-        is_discovery_protected = lpi->second.security_attribs_.base.is_discovery_protected;
-#endif
         save_matching_data_and_get_typeobjects(reader_type_info, md,
                                                 MatchingPair(writer, reader),
                                                 reader, is_discovery_protected,
@@ -1654,11 +1648,6 @@ void StaticEndpointManager::get_remote_type_objects(const XTypes::TypeIdentifier
   const SequenceNumber& orig_seqnum = get_minimal ? md.rpc_seqnum_minimal : md.rpc_seqnum_complete;
   orig_req_data.seq_number = orig_seqnum;
   orig_req_data.secure = false;
-#ifdef OPENDDS_SECURITY
-  if (is_security_enabled() && is_discovery_protected) {
-    orig_req_data.secure = true;
-  }
-#endif
   orig_req_data.time_started = md.time_added_to_map;
   orig_seq_numbers_.insert(std::make_pair(orig_seqnum, orig_req_data));
 
