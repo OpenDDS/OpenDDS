@@ -20,6 +20,7 @@
 DataReaderListenerImpl::DataReaderListenerImpl()
   : num_reads_(0)
   , valid_(true)
+  , rediscovered_(false)
 {}
 
 DataReaderListenerImpl::~DataReaderListenerImpl()

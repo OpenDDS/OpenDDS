@@ -65,7 +65,6 @@ class OpenDDS_Dcps_Export ReplayerImpl : public Replayer,
   public EntityImpl
 {
 public:
-
   ReplayerImpl();
   ~ReplayerImpl();
 
@@ -168,7 +167,6 @@ public:
   virtual DDS::InstanceHandle_t get_instance_handle();
 
 private:
-
   void notify_publication_lost(const DDS::InstanceHandleSeq& handles);
 
   DDS::ReturnCode_t write (const RawDataSample* sample_array, int array_size, DDS::InstanceHandle_t* reader);

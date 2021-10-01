@@ -669,7 +669,7 @@ Parameter get(const ParameterList& param_list,
 }
 
 #ifdef OPENDDS_SECURITY
-TEST(ToParamListTest, From_SPDPdiscoveredParticipantData_IdentityStatusToken)
+TEST(dds_DCPS_RTPS_ParameterListConverter, From_SPDPdiscoveredParticipantData_IdentityStatusToken)
 {
   OpenDDS::Security::SPDPdiscoveredParticipantData w1, w2;
 
@@ -692,7 +692,7 @@ TEST(ToParamListTest, From_SPDPdiscoveredParticipantData_IdentityStatusToken)
 }
 #endif
 
-TEST(ParameterListConverter, maintest)
+TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 {
   { // Should encode participant data with 1 locator to param list properly
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data = Factory::default_participant_data();

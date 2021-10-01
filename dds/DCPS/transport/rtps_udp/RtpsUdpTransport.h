@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -8,20 +6,17 @@
 #ifndef OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPTRANSPORT_H
 #define OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPTRANSPORT_H
 
-#include "Rtps_Udp_Export.h"
-
 #include "RtpsUdpDataLink.h"
 #include "RtpsUdpDataLink_rch.h"
+#include "Rtps_Udp_Export.h"
 
-#include "dds/DCPS/transport/framework/TransportImpl.h"
-#include "dds/DCPS/transport/framework/TransportClient.h"
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/ConnectionRecords.h>
+#include <dds/DCPS/transport/framework/TransportImpl.h>
+#include <dds/DCPS/transport/framework/TransportClient.h>
+#include <dds/DCPS/RTPS/ICE/Ice.h>
 
-#include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/ConnectionRecords.h"
-
-#include "dds/DCPS/RTPS/RtpsCoreC.h"
-
-#include "dds/DCPS/RTPS/ICE/Ice.h"
+#include <dds/DCPS/RTPS/RtpsCoreC.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -47,6 +42,8 @@ public:
   virtual void update_locators(const RepoId& /*remote*/,
                                const TransportLocatorSeq& /*locators*/);
 
+  void get_and_reset_relay_message_counts(RelayMessageCounts& counts);
+
 private:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
                                                const ConnectionAttribs& attribs,
@@ -71,7 +68,7 @@ private:
                                    const RepoId& writerid,
                                    const RepoId& readerid,
                                    const TransportLocatorSeq& locators,
-                                   OpenDDS::DCPS::DiscoveryListener* listener);
+                                   DiscoveryListener* listener);
 
   virtual void unregister_for_reader(const RepoId& participant,
                                      const RepoId& writerid,
@@ -147,7 +144,7 @@ private:
 #endif
   TransportClient_wrch default_listener_;
 
-  DCPS::JobQueue_rch job_queue_;
+  JobQueue_rch job_queue_;
 
 #if defined(OPENDDS_SECURITY)
   DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
@@ -156,7 +153,7 @@ private:
 #ifdef OPENDDS_SECURITY
 
 #ifndef DDS_HAS_MINIMUM_BIT
-  DCPS::ConnectionRecords deferred_connection_records_;
+  ConnectionRecords deferred_connection_records_;
 #endif
 
   struct IceEndpoint : public ACE_Event_Handler, public ICE::Endpoint {
@@ -181,12 +178,18 @@ private:
   typedef PmfPeriodicTask<RtpsUdpTransport> Periodic;
   RcHandle<Periodic> relay_stun_task_;
   mutable ACE_Thread_Mutex relay_stun_mutex_;
-  void relay_stun_task(const DCPS::MonotonicTimePoint& now);
+  void relay_stun_task(const MonotonicTimePoint& now);
 
   void start_ice();
   void stop_ice();
 
 #endif
+
+  RelayMessageCounts relay_message_counts_;
+  ACE_Thread_Mutex relay_message_counts_mutex_;
+
+  friend class RtpsUdpSendStrategy;
+  friend class RtpsUdpReceiveStrategy;
 };
 
 } // namespace DCPS

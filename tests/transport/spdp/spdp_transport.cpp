@@ -1,33 +1,36 @@
 // Test for the mini-transport in SPDP (sequence number handling)
 
-#include "dds/DCPS/transport/rtps_udp/RtpsUdpInst.h"
+#include <dds/DCPS/transport/rtps_udp/RtpsUdpInst.h>
 #ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
+#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
-#include "dds/DCPS/transport/framework/NetworkAddress.h"
+#include <dds/DCPS/transport/framework/NetworkAddress.h>
 
-#include "dds/DCPS/RTPS/BaseMessageTypes.h"
-#include "dds/DCPS/RTPS/GuidGenerator.h"
-#include "dds/DCPS/RTPS/MessageTypes.h"
-#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
-#include "dds/DCPS/RTPS/RtpsDiscovery.h"
-#include "dds/DCPS/RTPS/ParameterListConverter.h"
-#include "dds/DCPS/RTPS/Spdp.h"
+#include <dds/DCPS/RTPS/BaseMessageTypes.h>
+#include <dds/DCPS/RTPS/GuidGenerator.h>
+#include <dds/DCPS/RTPS/MessageTypes.h>
+#include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#include <dds/DCPS/RTPS/ParameterListConverter.h>
+#include <dds/DCPS/RTPS/Spdp.h>
 
-#include "dds/DCPS/Service_Participant.h"
+#include <dds/DCPS/Service_Participant.h>
 
-#include "ace/Configuration.h"
-#include "ace/Reactor.h"
-#include "ace/Select_Reactor.h"
+#include <ace/Configuration.h>
+#include <ace/Reactor.h>
+#include <ace/Select_Reactor.h>
 
 #include <ace/OS_main.h>
 #include <ace/Thread_Manager.h>
 #include <ace/Reactor.h>
 #include <ace/SOCK_Dgram.h>
+#include <ace/OS_NS_arpa_inet.h>
+#include <ace/OS_NS_unistd.h>
 
 #include <exception>
 #include <iostream>
+#include <string>
 
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
@@ -251,12 +254,29 @@ struct ReactorTask : ACE_Task_Base {
   }
 };
 
+void get_local_ip(OpenDDS::DCPS::OctetArray16 address)
+{
+  const String hostname = get_fully_qualified_hostname();
+  const ACE_INET_Addr addr = choose_single_coherent_address(hostname + ":54321", false);
+  std::memset(address, 0, 12);
+  *(ACE_UINT32*)(&address[12]) = ntohl(addr.get_ip_address());
+}
+
+void set_unicast_locators(LocatorSeq& unicast, const Locator_t& loopback)
+{
+  unicast.length(2);
+  unicast[0].port = 54321;
+  unicast[0].kind = LOCATOR_KIND_UDPv4;
+  get_local_ip(unicast[0].address);
+  unicast[1] = loopback;
+}
+
 bool run_test()
 {
   // Create and initialize RtpsDiscovery
   RtpsDiscovery rd("test");
   rd.config()->use_ncm(false);
-  ACE_INET_Addr local_addr(u_short(7575), "0.0.0.0");
+  const ACE_INET_Addr local_addr(u_short(7575), "0.0.0.0");
   rd.config()->spdp_local_address(local_addr);
   const DDS::DomainId_t domain = 0;
   const DDS::DomainParticipantQos qos = TheServiceParticipant->initial_DomainParticipantQos();
@@ -303,7 +323,6 @@ bool run_test()
 
   // Create a Parameter List
   OpenDDS::RTPS::ParameterList plist;
-
   const BuiltinEndpointSet_t availableBuiltinEndpoints =
     DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER |
     DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR |
@@ -316,8 +335,7 @@ bool run_test()
     BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER |
     BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER |
     BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER |
-    BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER
-  ;
+    BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER;
 
 #ifdef OPENDDS_SECURITY
   const DDS::Security::ExtendedBuiltinEndpointSet_t availableExtendedBuiltinEndpoints =
@@ -330,7 +348,6 @@ bool run_test()
   OpenDDS::DCPS::LocatorSeq nonEmptyList(1);
   nonEmptyList.length(1);
   nonEmptyList[0].port = 12345;
-
   nonEmptyList[0].kind = LOCATOR_KIND_UDPv4;
   std::memset(nonEmptyList[0].address, 0, 12);
   nonEmptyList[0].address[12] = 127;
@@ -338,26 +355,25 @@ bool run_test()
   nonEmptyList[0].address[14] = 0;
   nonEmptyList[0].address[15] = 1;
 
+  OpenDDS::DCPS::LocatorSeq unicastLocators(2);
+  set_unicast_locators(unicastLocators, nonEmptyList[0]);
+
   const OpenDDS::RTPS::SPDPdiscoveredParticipantData pdata = {
-    {
-      DDS::BuiltinTopicKey_t(),
-      qos.user_data
-    },
+    {DDS::BuiltinTopicKey_t(), qos.user_data},
     {
       domain
       , ""
       , PROTOCOLVERSION
-      , {gp[0], gp[1], gp[2], gp[3], gp[4], gp[5],
-       gp[6], gp[7], gp[8], gp[9], gp[10], gp[11]}
+      , {gp[0], gp[1], gp[2], gp[3], gp[4], gp[5], gp[6], gp[7], gp[8], gp[9], gp[10], gp[11]}
       , VENDORID_OPENDDS
-      , false /*expectsIQoS*/
+      , false // expectsIQoS
       , availableBuiltinEndpoints
       , 0
-      , nonEmptyList /* sedp_multicast */
-      , nonEmptyList /* sedp_unicast */
-      , nonEmptyList /*defaultMulticastLocatorList*/
-      , nonEmptyList /*defaultUnicastLocatorList*/
-      , { 0 /*manualLivelinessCount*/ }
+      , unicastLocators // metatrafficUnicastLocatorList
+      , nonEmptyList    // metatrafficMulticastLocatorList
+      , nonEmptyList    // defaultMulticastLocatorList
+      , nonEmptyList    // defaultUnicastLocatorList
+      , {0} // manualLivelinessCount
       , qos.property
       , {PFLAGS_THIS_VERSION} // opendds_participant_flags
       , false // opendds_rtps_relay_application_participant
@@ -369,7 +385,7 @@ bool run_test()
       static_cast<CORBA::Long>((rd.resend_period() * 10).value().sec()),
       0 // we are not supporting fractional seconds in the lease duration
     },
-    { 0, 0},
+    {0, 0},
     0
   };
 
@@ -418,8 +434,7 @@ bool run_test()
     }
   }
 
-  // Sequence number starts at 8 and reverts to 6 to verify default reset
-  // limits.
+  // Sequence number starts at 8 and reverts to 6 to verify default reset limits.
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("Reset Within Limits Test\n")));
   bfirst = true;
   expect_participant = true;
@@ -487,7 +502,6 @@ bool run_test()
 
     if (seq.low == ACE_UINT32_MAX) {
       ++seq.high;
-
       if (seq.high < 0) {
         seq.high = 0;
       }
@@ -502,8 +516,9 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   try {
     ::DDS::DomainParticipantFactory_var dpf =
         TheServiceParticipant->get_domain_participant_factory();
+    set_DCPS_debug_level(1);
   } catch (const CORBA::BAD_PARAM& ex) {
-    ex._tao_print_exception("Exception caught in rtps_reliability.cpp:");
+    ex._tao_print_exception("Exception caught in spdp_transport.cpp:");
     return 1;
   }
 

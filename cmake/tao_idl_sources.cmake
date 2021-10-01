@@ -1,21 +1,20 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 
-macro(_tao_append_lib_dir_to_path dst)
+macro(_tao_append_runtime_lib_dir_to_path dst)
   if (MSVC)
     set(${dst} "PATH=")
     if (DEFINED ENV{PATH})
       set(${dst} "${${dst}}$ENV{PATH};")
     endif()
-
+    set(${dst} "${${dst}}${TAO_BIN_DIR}")
   else()
     set(${dst} "LD_LIBRARY_PATH=")
     if (DEFINED ENV{LD_LIBRARY_PATH})
       set(${dst} "${${dst}}$ENV{LD_LIBRARY_PATH}:")
     endif()
+    set(${dst} "${${dst}}${TAO_LIB_DIR}")
   endif()
-
-  set(${dst} "${${dst}}${TAO_LIB_DIR}")
 endmacro()
 
 set(TAO_VERSIONING_IDL_FLAGS
@@ -174,7 +173,7 @@ function(tao_idl_command name)
       ${_SKEL_CPP_FILES}
       ${_ANYOP_CPP_FILES})
 
-    _tao_append_lib_dir_to_path(_tao_extra_lib_dirs)
+    _tao_append_runtime_lib_dir_to_path(_tao_extra_lib_dirs)
 
     add_custom_command(
       OUTPUT ${_OUTPUT_FILES}

@@ -5,7 +5,7 @@
 
 using namespace OpenDDS::DCPS;
 
-TEST(network_config_modifier_test, add_remove)
+TEST(dds_DCPS_NetworkConfigModifier, add_remove)
 {
   NetworkConfigModifier mod;
   mod.add_interface("eth0");

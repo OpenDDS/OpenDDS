@@ -32,6 +32,7 @@ namespace RtpsRelay {
 typedef std::map<AddrPort, OpenDDS::DCPS::MonotonicTimePoint> AddrSet;
 
 struct AddrSetStats {
+  bool allow_rtps;
   AddrSet spdp_addr_set;
   AddrSet sedp_addr_set;
   AddrSet data_addr_set;
@@ -40,6 +41,13 @@ struct AddrSetStats {
   ParticipantStatisticsReporter data_stats_reporter;
   OpenDDS::DCPS::Message_Block_Shared_Ptr spdp_message;
   OpenDDS::DCPS::MonotonicTimePoint first_spdp;
+#ifdef OPENDDS_SECURITY
+  std::string common_name;
+#endif
+
+  AddrSetStats()
+    : allow_rtps(false)
+  {}
 
   bool empty() const
   {
@@ -108,7 +116,14 @@ public:
   void process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now);
 
   OpenDDS::DCPS::MonotonicTimePoint get_first_spdp(const OpenDDS::DCPS::GUID_t& guid);
+
   void remove(const OpenDDS::DCPS::GUID_t& guid);
+
+  void remove_pending(const OpenDDS::DCPS::GUID_t& guid)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+    pending_.erase(guid);
+  }
 
   class Proxy {
   public:
@@ -147,6 +162,14 @@ public:
       return *gas_.guid_addr_set_map_[guid].select_stats_reporter(port);
     }
 
+    bool ignore_rtps(const OpenDDS::DCPS::GUID_t& guid,
+                     const OpenDDS::DCPS::MonotonicTimePoint& now,
+                     bool is_spdp)
+    {
+      return gas_.ignore_rtps(guid, now, is_spdp);
+    }
+
+
   private:
     GuidAddrSet& gas_;
     OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(Proxy)
@@ -160,6 +183,10 @@ private:
                   const size_t& msg_len,
                   RelayHandler& handler);
 
+  bool ignore_rtps(const OpenDDS::DCPS::GUID_t& guid,
+                   const OpenDDS::DCPS::MonotonicTimePoint& now,
+                   bool is_spdp);
+
   const Config& config_;
   RelayStatisticsReporter& relay_stats_reporter_;
   RelayHandler* spdp_vertical_handler_;
@@ -168,6 +195,9 @@ private:
   GuidAddrSetMap guid_addr_set_map_;
   typedef std::list<std::pair<OpenDDS::DCPS::MonotonicTimePoint, GuidAddr> > ExpirationGuidAddrQueue;
   ExpirationGuidAddrQueue expiration_guid_addr_queue_;
+  GuidSet pending_;
+  typedef std::list<std::pair<OpenDDS::DCPS::MonotonicTimePoint, OpenDDS::DCPS::GUID_t> > PendingExpirationQueue;
+  PendingExpirationQueue pending_expiration_queue_;
   mutable ACE_Thread_Mutex mutex_;
 };
 
@@ -300,6 +330,7 @@ protected:
   GuidAddrSet& guid_addr_set_;
   HorizontalHandler* horizontal_handler_;
   const ACE_INET_Addr application_participant_addr_;
+  bool is_spdp_;
 
 private:
   bool parse_message(OpenDDS::RTPS::MessageParser& message_parser,

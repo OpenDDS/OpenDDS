@@ -97,47 +97,7 @@ void DataReaderListenerImpl::on_liveliness_changed(
       ++liveliness_lost_count_;
       dcs_->post(actor_, "LIVELINESS_LOST_" + OpenDDS::DCPS::to_dds_string(liveliness_gained_count_));
     }
-
-    ++liveliness_changed_count_;
-
-    if (liveliness_changed_count_ > 1) {
-      if (last_status_.alive_count == 0 && last_status_.not_alive_count == 0) {
-        ACE_ERROR ((LM_ERROR,
-          "ERROR: DataReaderListenerImpl::on_liveliness_changed"
-          " Both alive_count and not_alive_count 0 should not happen at liveliness_changed_count %d\n",
-          liveliness_changed_count_));
-      } else if (status.alive_count == 0 && status.not_alive_count == 0) {
-        ACE_DEBUG ((LM_DEBUG, "(%P|%t) DataReaderListenerImpl::on_liveliness_changed - this is the time callback\n"));
-      } else {
-        ::DDS::LivelinessChangedStatus expected_status;
-        // expect the alive_count either 0 or 1
-        expected_status.alive_count = 1 - last_status_.alive_count;
-        expected_status.not_alive_count = 1 - last_status_.not_alive_count;
-        expected_status.alive_count_change = status.alive_count - last_status_.alive_count;
-        expected_status.not_alive_count_change = status.not_alive_count - last_status_.not_alive_count;
-
-        if (status.alive_count != expected_status.alive_count ||
-            status.not_alive_count != expected_status.not_alive_count ||
-            status.alive_count_change != expected_status.alive_count_change ||
-            status.not_alive_count_change != expected_status.not_alive_count_change) {
-          ACE_ERROR ((LM_ERROR,
-            "ERROR: DataReaderListenerImpl::on_liveliness_changed"
-            " expected/got alive_count %d/%d not_alive_count %d/%d"
-            " alive_count_change %d/%d not_alive_count_change %d/%d\n",
-            expected_status.alive_count, status.alive_count,
-            expected_status.not_alive_count, status.not_alive_count,
-            expected_status.alive_count_change, status.alive_count_change,
-            expected_status.not_alive_count_change, status.not_alive_count_change ));
-        }
-      }
-    }
-
     last_status_ = status;
-    ACE_DEBUG((LM_DEBUG,
-      "(%P|%t) %T DataReaderListenerImpl::on_liveliness_changed %d\n"
-      "alive_count %d not_alive_count %d alive_count_change %d not_alive_count_change %d\n",
-      liveliness_changed_count_, status.alive_count, status.not_alive_count,
-      status.alive_count_change, status.not_alive_count_change));
   }
 
 void DataReaderListenerImpl::on_subscription_matched(

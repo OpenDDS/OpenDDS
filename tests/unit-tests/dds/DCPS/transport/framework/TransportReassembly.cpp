@@ -352,7 +352,7 @@ bool check_reassembled(const ACE_Message_Block& data)
   return true;
 }
 
-TEST(TransportReassembly, maintest)
+TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
 {
   DataSampleHeader dsh;
   const size_t N = 300;

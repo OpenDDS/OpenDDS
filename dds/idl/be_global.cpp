@@ -56,7 +56,7 @@ BE_GlobalData::BE_GlobalData()
   , face_ts_(false)
   , printer_(false)
   , filename_only_includes_(false)
-  , seq_("Seq")
+  , sequence_suffix_("Seq")
   , language_mapping_(LANGMAP_NONE)
   , root_default_nested_(true)
   , warn_about_dcps_data_type_(true)
@@ -184,12 +184,12 @@ BE_GlobalData::LanguageMapping BE_GlobalData::language_mapping() const
 
 void BE_GlobalData::sequence_suffix(const ACE_CString& str)
 {
-  this->seq_ = str;
+  this->sequence_suffix_ = str;
 }
 
 ACE_CString BE_GlobalData::sequence_suffix() const
 {
-  return this->seq_;
+  return this->sequence_suffix_;
 }
 
 void BE_GlobalData::java(bool b)
@@ -348,7 +348,7 @@ BE_GlobalData::spawn_options()
 void invalid_option(char* option)
 {
   ACE_ERROR((LM_ERROR,
-    ACE_TEXT("IDL: I don't understand the '%C' option\n"), option));
+    ACE_TEXT("opendds_idl: I don't understand the '%C' option\n"), option));
   idl_global->parse_args_exit(1);
 }
 
@@ -611,7 +611,7 @@ namespace {
     } else if (len >= 6 &&
         0 == ACE_OS::strcasecmp(idl.c_str() + len - 5, ".pidl")) {
       base_name.assign(idl.c_str(), len - 5);
-      size_t slash = base_name.find_last_of("/\\");
+      const size_t slash = base_name.find_last_of("/\\");
       if (slash != std::string::npos && slash >= 3 && base_name.size() > 3
           && base_name.substr(slash - 3, 3) == "tao"
           && base_name.substr(base_name.size() - 3) == "Seq") {
@@ -635,7 +635,7 @@ namespace {
 
         if (filename_only_includes) {
           size_t loc = rel.rfind('/', rel.length());
-          size_t locw = rel.rfind('\\', rel.length());
+          const size_t locw = rel.rfind('\\', rel.length());
 
           if (loc != string::npos && locw != string::npos) {
             // path may contain both '/' and '\'. choose the last one.

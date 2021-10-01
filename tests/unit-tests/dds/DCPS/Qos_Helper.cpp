@@ -22,7 +22,7 @@ lease_greater_than (::DDS::LivelinessQosPolicy const & qos1,
   return qos1.lease_duration > qos2.lease_duration;
 }
 
-TEST(Qos_Helper, maintest)
+TEST(dds_DCPS_Qos_Helper, maintest)
 {
   // verify that if dw is infinite, that it is always greater
   // (except when dr is also infinite, covered next)
