@@ -467,7 +467,11 @@ private:
     void add_gap_submsg_i(RTPS::SubmessageSeq& msg,
                           SequenceNumber gap_start);
     void end_historic_samples_i(const DataSampleHeader& header,
-                                ACE_Message_Block* body);
+                                ACE_Message_Block* body,
+                                MetaSubmessageVec& meta_submessages);
+    void request_ack_i(const DataSampleHeader& header,
+                       ACE_Message_Block* body,
+                       MetaSubmessageVec& meta_submessages);
     void send_heartbeats_manual_i(MetaSubmessageVec& meta_submessages);
     void gather_gaps_i(const ReaderInfo_rch& reader,
                        const DisjointSequence& gaps,

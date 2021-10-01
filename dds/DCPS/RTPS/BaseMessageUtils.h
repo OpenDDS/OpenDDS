@@ -18,6 +18,8 @@
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/TypeSupportImpl.h>
 #include <dds/DCPS/SequenceNumber.h>
+#include <dds/DCPS/TimeTypes.h>
+#include <dds/DCPS/GuidConverter.h>
 
 #include <dds/DdsDcpsInfoUtilsC.h>
 #include <dds/DdsDcpsInfoUtilsTypeSupportImpl.h>
@@ -34,10 +36,21 @@ namespace RTPS {
 
 using DCPS::GuidPrefix_t;
 using DCPS::GUID_t;
+using DCPS::assign;
 using DCPS::EntityId_t;
+using DCPS::GUID_tKeyLessThan;
+using DCPS::LogGuid;
+using DCPS::String;
+using DCPS::SequenceNumber;
+using DCPS::TimeDuration;
+using DCPS::MonotonicTimePoint;
+using DCPS::SystemTimePoint;
+using DCPS::DCPS_debug_level;
+using DCPS::RcHandle;
 
 template <typename T>
-void marshal_key_hash(const T& msg, KeyHash_t& hash) {
+void marshal_key_hash(const T& msg, KeyHash_t& hash)
+{
   using DCPS::Serializer;
   using DCPS::Encoding;
   typedef DCPS::MarshalTraits<T> Traits;
@@ -84,14 +97,6 @@ inline void assign(DCPS::OctetArray16& dest,
   dest[14] = ipv4addr_be >> 8;
   dest[15] = ipv4addr_be;
 }
-
-inline void assign(DCPS::EntityKey_t& lhs, unsigned int rhs)
-{
-  lhs[0] = static_cast<CORBA::Octet>(rhs);
-  lhs[1] = static_cast<CORBA::Octet>(rhs >> 8);
-  lhs[2] = static_cast<CORBA::Octet>(rhs >> 16);
-}
-
 
 inline void
 address_to_bytes(DCPS::OctetArray16& dest, const ACE_INET_Addr& addr)

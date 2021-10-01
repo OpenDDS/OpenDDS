@@ -81,7 +81,7 @@ private:
   ParticipantMap participants_;
 };
 
-#define Registered_Data_Types Data_Types_Register::instance()
+#define Registered_Data_Types OpenDDS::DCPS::Data_Types_Register::instance()
 
 } // namespace DCPS
 } // namespace OpenDDS

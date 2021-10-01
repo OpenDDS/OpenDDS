@@ -162,6 +162,7 @@ namespace OpenDDS {
       int assertion_count_;
     };
 
+    typedef OPENDDS_MAP(String, TopicDetails) TopicDetailsMap;
   } // namespace DCPS
 } // namespace OpenDDS
 
