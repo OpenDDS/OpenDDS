@@ -250,7 +250,7 @@ bool TypeLookupService::get_minimal_type_identifier(const TypeIdentifier& ct, Ty
                ACE_TEXT("complete TypeIdentifier not found.\n")));
     if (ct.kind() == EK_COMPLETE) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TypeLookupService::get_minimal_type_identifier: ")
-                 ACE_TEXT(" Kind: EK_COMPLETE. Hash: %C\n"),
+                 ACE_TEXT(" Kind: EK_COMPLETE. Hash: (%C)\n"),
                  equivalence_hash_to_string(ct.equivalence_hash()).c_str()));
     } else if (ct.kind() == TI_STRONGLY_CONNECTED_COMPONENT) {
       const EquivalenceKind ek = ct.sc_component_id().sc_component_id.kind;
@@ -261,7 +261,7 @@ bool TypeLookupService::get_minimal_type_identifier(const TypeIdentifier& ct, Ty
       const DCPS::String ek_str = ek == EK_COMPLETE ? "EK_COMPLETE" : "EK_MINIMAL";
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TypeLookupService::get_minimal_type_identifier: ")
                  ACE_TEXT("Kind: TI_STRONGLY_CONNECTED_COMPONENT. ")
-                 ACE_TEXT("Equivalence kind: %C. Hash: %C. Scc length: %d. Scc index: %d\n"),
+                 ACE_TEXT("Equivalence kind: %C. Hash: (%C). Scc length: %d. Scc index: %d\n"),
                  ek_str.c_str(),
                  equivalence_hash_to_string(ct.sc_component_id().sc_component_id.hash).c_str(),
                  ct.sc_component_id().scc_length,
@@ -966,21 +966,6 @@ void TypeLookupService::remove_guid_from_dynamic_map(DCPS::GUID_t guid)
         "Alerted to removal of %s, removing GUID from GuidTypeMap.\n", DCPS::to_string(guid).c_str()));
     }
   }
-}
-
-const DCPS::String equivalence_hash_to_string(const EquivalenceHash& hash)
-{
-  std::ostringstream out;
-  out << "(";
-  for (unsigned i = 0; i < sizeof(EquivalenceHash); ++i) {
-    out << hash[i];
-    if (i < sizeof(EquivalenceHash) - 1) {
-      out << ", ";
-    } else {
-      out << ")";
-    }
-  }
-  return out.str().c_str();
 }
 
 } // namespace XTypes

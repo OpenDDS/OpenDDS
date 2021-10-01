@@ -106,13 +106,15 @@ DataLink::add_on_start_callback(const TransportClient_wrch& client, const RepoId
 {
   const DataLink_rch link(this, inc_count());
 
+  TransportClient_rch client_lock = client.lock();
+  const RepoId client_id = client_lock ? client_lock->get_repo_id() : GUID_UNKNOWN;
+
   GuardType guard(strategy_lock_);
 
-  TransportClient_rch client_lock = client.lock();
   if (client_lock) {
     PendingOnStartsMap::iterator it = pending_on_starts_.find(remote);
     if (it != pending_on_starts_.end()) {
-      RepoIdSet::iterator it2 = it->second.find(client_lock->get_repo_id());
+      RepoIdSet::iterator it2 = it->second.find(client_id);
       if (it2 != it->second.end()) {
         it->second.erase(it2);
         if (it->second.empty()) {
@@ -121,10 +123,10 @@ DataLink::add_on_start_callback(const TransportClient_wrch& client, const RepoId
         guard.release();
         interceptor_.execute_or_enqueue(new ImmediateStart(link, client, remote));
       } else {
-        on_start_callbacks_[remote][client_lock->get_repo_id()] = client;
+        on_start_callbacks_[remote][client_id] = client;
       }
     } else {
-      on_start_callbacks_[remote][client_lock->get_repo_id()] = client;
+      on_start_callbacks_[remote][client_id] = client;
     }
   }
 

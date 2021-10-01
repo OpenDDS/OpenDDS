@@ -191,12 +191,14 @@ bool
 TransportReassembly::has_frags(const SequenceNumber& seq,
                                const RepoId& pub_id) const
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   return fragments_.count(FragKey(pub_id, seq));
 }
 
 void
 TransportReassembly::clear_completed(const RepoId& pub_id)
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   completed_.erase(pub_id);
 }
 
@@ -205,6 +207,7 @@ TransportReassembly::get_gaps(const SequenceNumber& seq, const RepoId& pub_id,
                               CORBA::Long bitmap[], CORBA::ULong length,
                               CORBA::ULong& numBits) const
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   // length is number of (allocated) words in bitmap, max of 8
   // numBits is number of valid bits in the bitmap, <= length * 32, to account for partial words
   if (length == 0) {
@@ -268,6 +271,7 @@ TransportReassembly::reassemble(const SequenceRange& seqRange,
                                 ReceivedDataSample& data,
                                 ACE_UINT32 total_frags)
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   return reassemble_i(seqRange, seqRange.first == 1, data, total_frags);
 }
 
@@ -277,6 +281,7 @@ TransportReassembly::reassemble(const SequenceNumber& transportSeq,
                                 ReceivedDataSample& data,
                                 ACE_UINT32 total_frags)
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   return reassemble_i(SequenceRange(transportSeq, transportSeq),
                       firstFrag, data, total_frags);
 }
@@ -358,6 +363,7 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
 void
 TransportReassembly::data_unavailable(const SequenceRange& dropped)
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::data_unavailable() "
     "dropped %q-%q\n", dropped.first.getValue(), dropped.second.getValue()));
   typedef OPENDDS_LIST(FragRange)::iterator list_iterator;
@@ -412,6 +418,7 @@ void
 TransportReassembly::data_unavailable(const SequenceNumber& dataSampleSeq,
                                       const RepoId& pub_id)
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   if (fragments_.erase(FragKey(pub_id, dataSampleSeq)) &&
       (Transport_debug_level > 5 || transport_debug.log_fragment_storage)) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::data_unavailable "

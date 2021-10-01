@@ -38,6 +38,8 @@ public:
   /// ShutdownInterface used to schedule a shutdown.
   virtual void shutdown();
 
+  void set_shutdown_signal(int which_signal);
+
   /// shutdown() and wait for it to complete: cannot be called from the reactor
   /// thread.
   void sync_shutdown();
@@ -75,6 +77,8 @@ private:
   ACE_Thread_Mutex lock_;
   ACE_Condition_Thread_Mutex cond_;
   bool shutdown_complete_;
+
+  int shutdown_signal_;
 
   ACE_Time_Value dispatch_cleanup_delay_;
 };

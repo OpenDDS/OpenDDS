@@ -1,30 +1,27 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #include "RtpsUdpTransport.h"
+
 #include "RtpsUdpInst.h"
 #include "RtpsUdpInst_rch.h"
 #include "RtpsUdpSendStrategy.h"
 #include "RtpsUdpReceiveStrategy.h"
 
-#include "dds/DCPS/AssociationData.h"
-#include "dds/DCPS/BuiltInTopicUtils.h"
-#include "dds/DCPS/DiscoveryBase.h"
+#include <dds/DCPS/AssociationData.h>
+#include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/LogAddr.h>
+#include <dds/DCPS/transport/framework/TransportClient.h>
+#include <dds/DCPS/transport/framework/TransportExceptions.h>
+#include <dds/DCPS/RTPS/BaseMessageUtils.h>
 
-#include "dds/DCPS/transport/framework/TransportClient.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
+#include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 
-#include "dds/DCPS/RTPS/BaseMessageUtils.h"
-#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
-
-#include "ace/CDR_Base.h"
-#include "ace/Log_Msg.h"
-#include "ace/Sock_Connect.h"
+#include <ace/CDR_Base.h>
+#include <ace/Log_Msg.h>
+#include <ace/Sock_Connect.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -41,7 +38,7 @@ RtpsUdpTransport::RtpsUdpTransport(RtpsUdpInst& inst)
 #endif
 {
   assign(local_prefix_, GUIDPREFIX_UNKNOWN);
-  if (! (configure_i(inst) && open())) {
+  if (!(configure_i(inst) && open())) {
     throw Transport::UnableToCreate();
   }
 }
@@ -189,7 +186,7 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
 
   GuardThreadType guard_links(links_lock_);
 
-  if (is_shut_down_) {
+  if (is_shut_down()) {
     return AcceptConnectResult();
   }
 
@@ -224,7 +221,7 @@ RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
 
   GuardThreadType guard_links(links_lock_);
 
-  if (is_shut_down_) {
+  if (is_shut_down()) {
     return AcceptConnectResult();
   }
 
@@ -349,7 +346,7 @@ RtpsUdpTransport::register_for_reader(const RepoId& participant,
                                       OpenDDS::DCPS::DiscoveryListener* listener)
 {
   const TransportBLOB* blob = config().get_blob(locators);
-  if (!blob || is_shut_down_) {
+  if (!blob || is_shut_down()) {
     return;
   }
 
@@ -382,7 +379,7 @@ RtpsUdpTransport::register_for_writer(const RepoId& participant,
                                       DiscoveryListener* listener)
 {
   const TransportBLOB* blob = config().get_blob(locators);
-  if (!blob || is_shut_down_) {
+  if (!blob || is_shut_down()) {
     return;
   }
 
@@ -412,7 +409,7 @@ RtpsUdpTransport::update_locators(const RepoId& remote,
                                   const TransportLocatorSeq& locators)
 {
   const TransportBLOB* blob = config().get_blob(locators);
-  if (!blob || is_shut_down_) {
+  if (!blob || is_shut_down()) {
     return;
   }
 
@@ -425,6 +422,14 @@ RtpsUdpTransport::update_locators(const RepoId& remote,
     get_connection_addrs(*blob, &uc_addrs, &mc_addrs, &requires_inline_qos, &blob_bytes_read);
     link_->update_locators(remote, uc_addrs, mc_addrs, requires_inline_qos, false);
   }
+}
+
+void
+RtpsUdpTransport::get_and_reset_relay_message_counts(RelayMessageCounts& counts)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, relay_message_counts_mutex_);
+  counts = relay_message_counts_;
+  relay_message_counts_.reset();
 }
 
 bool
@@ -720,6 +725,11 @@ RtpsUdpTransport::IceEndpoint::choose_send_socket(const ACE_INET_Addr& destinati
 void
 RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN::Message& message)
 {
+  if (destination == transport.config().rtps_relay_address()) {
+    ACE_GUARD(ACE_Thread_Mutex, g, transport.relay_message_counts_mutex_);
+    ++transport.relay_message_counts_.stun_send;
+  }
+
   ACE_SOCK_Dgram& socket = choose_send_socket(destination);
 
   ACE_Message_Block block(20 + message.length());
@@ -730,10 +740,16 @@ RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN
   iovec iov[MAX_SEND_BLOCKS];
   const int num_blocks = RtpsUdpSendStrategy::mb_to_iov(block, iov);
   const ssize_t result = send_single_i(socket, iov, num_blocks, destination, network_is_unreachable_);
-  if (result < 0 && !network_is_unreachable_) {
-    const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
-    ACE_ERROR((prio, "(%P|%t) RtpsUdpTransport::send() - "
-               "failed to send STUN message\n"));
+  if (result < 0) {
+    if (destination == transport.config().rtps_relay_address()) {
+      ACE_GUARD(ACE_Thread_Mutex, g, transport.relay_message_counts_mutex_);
+      ++transport.relay_message_counts_.stun_send_fail;
+    }
+    if (!network_is_unreachable_) {
+      const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
+      ACE_ERROR((prio, "(%P|%t) RtpsUdpTransport::send() - "
+                 "failed to send STUN message\n"));
+    }
   }
 }
 

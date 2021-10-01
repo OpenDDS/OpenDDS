@@ -204,7 +204,11 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::process_joins(
 {
   using namespace std;
   const MetaStruct& resulting_meta = getResultingMeta();
-  const OPENDDS_STRING this_topic = topicNameFor(qp.data_reader_);
+  OPENDDS_STRING this_topic;
+  {
+    ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, qp_lock_);
+    this_topic = topicNameFor(qp.data_reader_);
+  }
   typedef multimap<OPENDDS_STRING, OPENDDS_STRING>::const_iterator iter_t;
   for (iter_t iter = qp.adjacent_joins_.begin();
        iter != qp.adjacent_joins_.end();) { // for each topic we're joining
@@ -212,7 +216,6 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::process_joins(
     iter_t range_end = qp.adjacent_joins_.upper_bound(other_topic);
     const QueryPlan& other_qp = query_plans_[other_topic];
     DDS::DataReader_ptr other_dr = other_qp.data_reader_;
-
     try {
       const MetaStruct& other_meta = metaStructFor(other_dr);
 

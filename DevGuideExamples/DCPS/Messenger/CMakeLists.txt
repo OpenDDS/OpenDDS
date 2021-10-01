@@ -7,8 +7,9 @@ find_package(OpenDDS REQUIRED)
 # Make sure the MPC-generated headers are gone so the CMake build will use the
 # right ones. This is not needed in a real project.
 file(GLOB headers "*.h")
-list(REMOVE_ITEM headers "DataReaderListenerImpl.h")
-list(LENGTH _headers header_count)
+file(GLOB listener_header "DataReaderListenerImpl.h")
+list(REMOVE_ITEM headers ${listener_header})
+list(LENGTH headers header_count)
 if(header_count GREATER 0)
   file(REMOVE ${headers})
 endif()

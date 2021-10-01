@@ -23,7 +23,7 @@ void test_invalid(const std::string& s)
   EXPECT_TRUE(!actual.is_valid());
 }
 
-TEST(Name, maintest)
+TEST(tools_rtpsrelay_lib_Name, maintest)
 {
   std::unordered_set<char> digits;
   for (char c = '0'; c <= '9'; ++c) {

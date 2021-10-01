@@ -16,7 +16,7 @@
 
 using namespace OpenDDS::DCPS;
 
-TEST(Time_Helper, maintest)
+TEST(dds_DCPS_Time_Helper, maintest)
 {
   DDS::Duration_t duration;
   duration.sec = ::DDS::DURATION_INFINITE_SEC;

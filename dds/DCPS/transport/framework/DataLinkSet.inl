@@ -24,16 +24,20 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleElement* sample)
   DBG_ENTRY_LVL("DataLinkSet", "send", 6);
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG: DataLinkSet::send element %@.\n",
             sample), 5);
-  GuardType guard(this->lock_);
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   const bool customHeader =
     DataSampleHeader::test_flag(CONTENT_FILTER_FLAG, sample->get_sample());
 #endif
 
-  TransportSendElement* send_element = new TransportSendElement(static_cast<int>(map_.size()), sample);
+  MapType map_copy;
+  {
+    GuardType guard(lock_);
+    map_copy = map_;
+  }
+  TransportSendElement* send_element = new TransportSendElement(static_cast<int>(map_copy.size()), sample);
 
-  for (MapType::iterator itr = map_.begin(); itr != map_.end(); ++itr) {
+  for (MapType::iterator itr = map_copy.begin(); itr != map_copy.end(); ++itr) {
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
     if (customHeader) {
@@ -74,11 +78,16 @@ OpenDDS::DCPS::DataLinkSet::send_control(DataSampleElement* sample)
 {
   DBG_ENTRY_LVL("DataLinkSet", "send_control", 6);
   VDBG((LM_DEBUG, "(%P|%t) DBG: DataLinkSet::send_control %@.\n", sample));
-  GuardType guard(this->lock_);
-  TransportSendControlElement* send_element =
-    new TransportSendControlElement(static_cast<int>(map_.size()), sample);
+  MapType map_copy;
+  {
+    GuardType guard(lock_);
+    map_copy = map_;
+  }
 
-  for (MapType::iterator itr = map_.begin(); itr != map_.end(); ++itr) {
+  TransportSendControlElement* send_element =
+    new TransportSendControlElement(static_cast<int>(map_copy.size()), sample);
+
+  for (MapType::iterator itr = map_copy.begin(); itr != map_copy.end(); ++itr) {
     itr->second->send(send_element);
   }
 }
@@ -153,10 +162,13 @@ ACE_INLINE bool
 OpenDDS::DCPS::DataLinkSet::remove_sample(const DataSampleElement* sample)
 {
   DBG_ENTRY_LVL("DataLinkSet", "remove_sample", 6);
-  GuardType guard(this->lock_);
-  const MapType::iterator end = this->map_.end();
-  for (MapType::iterator itr = this->map_.begin(); itr != end; ++itr) {
-
+  MapType map_copy;
+  {
+    GuardType guard(lock_);
+    map_copy = map_;
+  }
+  const MapType::iterator end = map_copy.end();
+  for (MapType::iterator itr = map_copy.begin(); itr != end; ++itr) {
     if (itr->second->remove_sample(sample) == REMOVE_RELEASED) {
       return true;
     }
@@ -169,9 +181,13 @@ ACE_INLINE bool
 OpenDDS::DCPS::DataLinkSet::remove_all_msgs(const RepoId& pub_id)
 {
   DBG_ENTRY_LVL("DataLinkSet", "remove_all_msgs", 6);
-  GuardType guard(this->lock_);
-  const MapType::iterator end = this->map_.end();
-  for (MapType::iterator itr = this->map_.begin(); itr != end; ++itr) {
+  MapType map_copy;
+  {
+    GuardType guard(lock_);
+    map_copy = map_;
+  }
+  const MapType::iterator end = map_copy.end();
+  for (MapType::iterator itr = map_copy.begin(); itr != end; ++itr) {
     itr->second->remove_all_msgs(pub_id);
   }
 
@@ -179,31 +195,39 @@ OpenDDS::DCPS::DataLinkSet::remove_all_msgs(const RepoId& pub_id)
 }
 
 ACE_INLINE void
-OpenDDS::DCPS::DataLinkSet::send_start(DataLinkSet* link_set)
+OpenDDS::DCPS::DataLinkSet::send_start(DataLinkSet* in)
 {
   DBG_ENTRY_LVL("DataLinkSet","send_start",6);
-  GuardType guard1(this->lock_);
-  GuardType guard2(link_set->lock_);
-  for (MapType::iterator itr = link_set->map_.begin();
-       itr != link_set->map_.end();
-       ++itr) {
-    // Attempt to add the current DataLink to this set.
-    int result = OpenDDS::DCPS::bind(map_, itr->first, itr->second);
 
-    if (result == 0) {
-      // We successfully added the current DataLink to this set,
-      // meaning that it wasn't already a member.  We should tell
-      // the DataLink about the send_start() event.
-      itr->second->send_start();
+  typedef OPENDDS_VECTOR(DataLink_rch) SendStartVec;
+  SendStartVec send_start_vec;
 
-    } else if (result == -1) {
-      ACE_ERROR((LM_ERROR,
-                 "(%P|%t) ERROR: Failed to bind data link into set.\n"));
+  {
+    GuardType guard1(lock_);
+    GuardType guard2(in->lock_);
+    for (MapType::iterator itr = in->map_.begin(); itr != in->map_.end(); ++itr) {
+      // Attempt to add the current DataLink to this set.
+      int result = OpenDDS::DCPS::bind(map_, itr->first, itr->second);
+
+      if (result == 0) {
+        // We successfully added the current DataLink to this set,
+        // meaning that it wasn't already a member.  We should tell
+        // the DataLink about the send_start() event.
+        send_start_vec.push_back(itr->second);
+
+      } else if (result == -1) {
+        ACE_ERROR((LM_ERROR,
+                   "(%P|%t) ERROR: Failed to bind data link into set.\n"));
+      }
+
+      // Note that there is a possibility that the result == 1, which
+      // means that the DataLink already exists in our map_->  We skip
+      // all of these cases.
     }
+  }
 
-    // Note that there is a possibility that the result == 1, which
-    // means that the DataLink already exists in our map_->  We skip
-    // all of these cases.
+  for (SendStartVec::iterator it = send_start_vec.begin(); it != send_start_vec.end(); ++it) {
+    (*it)->send_start();
   }
 }
 
@@ -212,14 +236,16 @@ OpenDDS::DCPS::DataLinkSet::send_stop(RepoId repoId)
 {
   DBG_ENTRY_LVL("DataLinkSet","send_stop",6);
   // Iterate over our map_ and tell each DataLink about the send_stop() event.
-  GuardType guard(this->lock_);
-  for (MapType::iterator itr = map_.begin();
-       itr != map_.end();
-       ++itr) {
-    itr->second->send_stop(repoId);
+  MapType map_copy;
+  {
+    GuardType guard(lock_);
+    map_copy = map_;
+    map_.clear();
   }
 
-  map_.clear();
+  for (MapType::iterator itr = map_copy.begin(); itr != map_copy.end(); ++itr) {
+    itr->second->send_stop(repoId);
+  }
 }
 
 ACE_INLINE void
@@ -229,6 +255,7 @@ OpenDDS::DCPS::DataLinkSet::copy_map_to(MapType& target)
 
   // Lock the existing map
   GuardType guard(this->lock_);
+
 
   // Copy to target
   for (MapType::iterator itr = map_.begin();
@@ -241,12 +268,14 @@ OpenDDS::DCPS::DataLinkSet::copy_map_to(MapType& target)
 ACE_INLINE void
 OpenDDS::DCPS::DataLinkSet::send_final_acks(const RepoId& readerid)
 {
-  GuardType guard(this->lock_);
-  for (MapType::iterator itr = map_.begin();
-       itr != map_.end();
-       ++itr) {
-    itr->second->send_final_acks(readerid);
+  MapType map_copy;
+  {
+    GuardType guard(lock_);
+    map_copy = map_;
+    map_.clear();
   }
 
-  map_.clear();
+  for (MapType::iterator itr = map_copy.begin(); itr != map_copy.end(); ++itr) {
+    itr->second->send_final_acks(readerid);
+  }
 }

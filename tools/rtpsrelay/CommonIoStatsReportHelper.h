@@ -33,25 +33,39 @@ public:
                      const OpenDDS::DCPS::TimeDuration& time,
                      MessageType type)
   {
-    statistics_.bytes_in() += byte_count;
-    ++statistics_.messages_in();
     switch (type) {
     case MessageType::Rtps:
+      statistics_.rtps().bytes_in() += byte_count;
+      ++statistics_.rtps().messages_in();
       rtps_input_processing_time_ += time;
       break;
     case MessageType::Stun:
+      statistics_.stun().bytes_in() += byte_count;
+      ++statistics_.stun().messages_in();
       stun_input_processing_time_ += time;
       break;
     case MessageType::Unknown:
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: CommonIoStatsReportHelper::input_message: "
-        "MessageType is Unknown\n"));
+                 "MessageType is Unknown\n"));
     }
   }
 
-  void ignored_message(size_t byte_count)
+  void ignored_message(size_t byte_count,
+                       MessageType type)
   {
-    statistics_.bytes_ignored() += byte_count;
-    ++statistics_.messages_ignored();
+    switch (type) {
+    case MessageType::Rtps:
+      statistics_.rtps().bytes_ignored() += byte_count;
+      ++statistics_.rtps().messages_ignored();
+      break;
+    case MessageType::Stun:
+      statistics_.stun().bytes_ignored() += byte_count;
+      ++statistics_.stun().messages_ignored();
+      break;
+    case MessageType::Unknown:
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: CommonIoStatsReportHelper::ignored_message: "
+                 "MessageType is Unknown\n"));
+    }
   }
 
   void output_message(size_t byte_count,
@@ -59,14 +73,16 @@ public:
                       const OpenDDS::DCPS::TimeDuration& queue_latency,
                       MessageType type)
   {
-    statistics_.bytes_out() += byte_count;
-    ++statistics_.messages_out();
     max_queue_latency_ = std::max(max_queue_latency_, queue_latency);
     switch (type) {
     case MessageType::Rtps:
+      statistics_.rtps().bytes_out() += byte_count;
+      ++statistics_.rtps().messages_out();
       rtps_output_processing_time_ += time;
       break;
     case MessageType::Stun:
+      statistics_.stun().bytes_out() += byte_count;
+      ++statistics_.stun().messages_out();
       stun_output_processing_time_ += time;
       break;
     case MessageType::Unknown:
@@ -80,13 +96,15 @@ public:
                        const OpenDDS::DCPS::TimeDuration& queue_latency,
                        MessageType type)
   {
-    statistics_.bytes_dropped() += byte_count;
-    ++statistics_.messages_dropped();
     switch (type) {
     case MessageType::Rtps:
+      statistics_.rtps().bytes_dropped() += byte_count;
+      ++statistics_.rtps().messages_dropped();
       rtps_output_processing_time_ += time;
       break;
     case MessageType::Stun:
+      statistics_.stun().bytes_dropped() += byte_count;
+      ++statistics_.stun().messages_dropped();
       stun_output_processing_time_ += time;
       break;
     case MessageType::Unknown:
@@ -126,10 +144,10 @@ public:
     }
 
     statistics_.interval(time_diff_to_duration(interval));
-    statistics_.rtps_input_processing_time(time_diff_to_duration(rtps_input_processing_time_));
-    statistics_.rtps_output_processing_time(time_diff_to_duration(rtps_output_processing_time_));
-    statistics_.stun_input_processing_time(time_diff_to_duration(stun_input_processing_time_));
-    statistics_.stun_output_processing_time(time_diff_to_duration(stun_output_processing_time_));
+    statistics_.rtps().input_processing_time(time_diff_to_duration(rtps_input_processing_time_));
+    statistics_.rtps().output_processing_time(time_diff_to_duration(rtps_output_processing_time_));
+    statistics_.stun().input_processing_time(time_diff_to_duration(stun_input_processing_time_));
+    statistics_.stun().output_processing_time(time_diff_to_duration(stun_output_processing_time_));
     statistics_.max_queue_latency(time_diff_to_duration(max_queue_latency_));
 
     return true;
@@ -138,12 +156,22 @@ public:
   void reset(const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     last_report_ = now;
-    statistics_.messages_in(0);
-    statistics_.bytes_in(0);
-    statistics_.messages_out(0);
-    statistics_.bytes_out(0);
-    statistics_.messages_dropped(0);
-    statistics_.bytes_dropped(0);
+    statistics_.rtps().messages_in(0);
+    statistics_.stun().messages_in(0);
+    statistics_.rtps().bytes_in(0);
+    statistics_.stun().bytes_in(0);
+    statistics_.rtps().messages_ignored(0);
+    statistics_.stun().messages_ignored(0);
+    statistics_.rtps().bytes_ignored(0);
+    statistics_.stun().bytes_ignored(0);
+    statistics_.rtps().messages_out(0);
+    statistics_.stun().messages_out(0);
+    statistics_.rtps().bytes_out(0);
+    statistics_.stun().bytes_out(0);
+    statistics_.rtps().messages_dropped(0);
+    statistics_.stun().messages_dropped(0);
+    statistics_.rtps().bytes_dropped(0);
+    statistics_.stun().bytes_dropped(0);
     statistics_.max_gain(0);
     statistics_.error_count(0);
     statistics_.max_queue_size(0);

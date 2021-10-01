@@ -23,8 +23,8 @@ template <typename XML_QOS_TYPE, typename DDS_QOS_TYPE>
 class QOS_DwDrTp_Base_T
 {
 public:
-  QOS_DwDrTp_Base_T (void);
-  ~QOS_DwDrTp_Base_T (void);
+  QOS_DwDrTp_Base_T ();
+  ~QOS_DwDrTp_Base_T ();
 
   void read_qos (DDS_QOS_TYPE&, const XML_QOS_TYPE);
 };

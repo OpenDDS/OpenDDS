@@ -77,8 +77,8 @@ endif()
 include(${CMAKE_CURRENT_LIST_DIR}/init.cmake)
 
 set(_dds_bin_hints ${OPENDDS_BIN_DIR})
-set(_tao_bin_hints ${ACE_BIN_DIR})
-set(_ace_bin_hints ${TAO_BIN_DIR})
+set(_ace_bin_hints ${ACE_BIN_DIR})
+set(_tao_bin_hints ${TAO_BIN_DIR})
 
 find_program(PERL perl)
 

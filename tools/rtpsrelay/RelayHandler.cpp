@@ -22,6 +22,7 @@
 #ifdef OPENDDS_SECURITY
 #include <dds/DCPS/security/framework/SecurityRegistry.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h>
+#include <dds/DCPS/security/AuthenticationBuiltInImpl.h>
 #endif
 
 namespace RtpsRelay {
@@ -259,7 +260,7 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
     const auto res = guid_addr_set_map_[src_guid].select_addr_set(remote_address.port)->insert(std::make_pair(remote_address, expiration));
     if (res.second) {
       if (config_.log_activity()) {
-        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity %C %C is at %C total=%B\n"), handler.name().c_str(), guid_to_string(src_guid).c_str(), OpenDDS::DCPS::LogAddr(remote_address.addr).c_str(), guid_addr_set_map_.size()));
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity %C %C is at %C total=%B pending=%B/%B\n"), handler.name().c_str(), guid_to_string(src_guid).c_str(), OpenDDS::DCPS::LogAddr(remote_address.addr).c_str(), guid_addr_set_map_.size(), pending_.size(), config_.max_pending()));
       }
       relay_stats_reporter_.new_address(now);
       const auto after = guid_addr_set_map_.size();
@@ -311,7 +312,7 @@ void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& n
 
     // Address actually expired.
     if (config_.log_activity()) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C %C expired at %:.%d now=%:.%d total=%B\n"), guid_to_string(ga.guid).c_str(), OpenDDS::DCPS::LogAddr(ga.address.addr).c_str(), expiration.value().sec(), expiration.value().usec(), now.value().sec(), static_cast<int>(now.value().usec()), guid_addr_set_map_.size()));
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C %C expired at %:.%d now=%:.%d total=%B pending=%B/%B\n"), guid_to_string(ga.guid).c_str(), OpenDDS::DCPS::LogAddr(ga.address.addr).c_str(), expiration.value().sec(), expiration.value().usec(), now.value().sec(), now.value().usec(), guid_addr_set_map_.size(), pending_.size(), config_.max_pending()));
     }
     relay_stats_reporter_.expired_address(now);
 
@@ -320,12 +321,65 @@ void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& n
       addr_stats.sedp_stats_reporter.report(now, true);
       addr_stats.data_stats_reporter.report(now, true);
       guid_addr_set_map_.erase(ga.guid);
+      pending_.erase(ga.guid);
       relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
       if (config_.log_activity()) {
-        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C removed total=%B\n"), guid_to_string(ga.guid).c_str(), guid_addr_set_map_.size()));
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C removed total=%B pending=%B/%B\n"), guid_to_string(ga.guid).c_str(), guid_addr_set_map_.size(), pending_.size(), config_.max_pending()));
       }
     }
   }
+
+  while (!pending_expiration_queue_.empty() && pending_expiration_queue_.front().first <= now) {
+    const auto& expiration = pending_expiration_queue_.front().first;
+    const auto& guid = pending_expiration_queue_.front().second;
+    if (config_.log_activity()) {
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C pending expired at %d.%d now=%d.%d total=%B pending=%B/%B\n"), guid_to_string(guid).c_str(), expiration.value().sec(), expiration.value().usec(), now.value().sec(), now.value().usec(), guid_addr_set_map_.size(), pending_.size(), config_.max_pending()));
+    }
+    relay_stats_reporter_.expired_pending(now);
+    pending_.erase(guid);
+    pending_expiration_queue_.pop_front();
+  }
+}
+
+bool GuidAddrSet::ignore_rtps(const OpenDDS::DCPS::GUID_t& guid,
+                              const OpenDDS::DCPS::MonotonicTimePoint& now,
+                              bool is_spdp)
+{
+  const auto pos = guid_addr_set_map_.find(guid);
+  if (pos == guid_addr_set_map_.end()) {
+    return true;
+  }
+
+  if (pos->second.allow_rtps) {
+    // Client has already been admitted.
+    return false;
+  }
+
+  if (config_.max_pending() == 0) {
+    pos->second.allow_rtps = true;
+    return false;
+  }
+
+  if (!is_spdp) {
+    // Discovery won't start until we have the SPDP message so wait for it.
+    return true;
+  }
+
+  if (pos->second.spdp_addr_set.empty() || pos->second.sedp_addr_set.empty()) {
+    // Don't have the necessary addresses to complete discovery.
+    return true;
+  }
+
+  if (pending_.size() >= config_.max_pending()) {
+    // Too many new clients to admit another.
+    return true;
+  }
+
+  pending_.insert(guid);
+  pending_expiration_queue_.push_back(std::make_pair(now + config_.pending_timeout(), guid));
+  pos->second.allow_rtps = true;
+
+  return false;
 }
 
 OpenDDS::DCPS::MonotonicTimePoint GuidAddrSet::get_first_spdp(const OpenDDS::DCPS::GUID_t& guid)
@@ -347,10 +401,11 @@ void GuidAddrSet::remove(const OpenDDS::DCPS::GUID_t& guid)
   addr_stats.data_stats_reporter.report(now, true);
 
   guid_addr_set_map_.erase(guid);
+  pending_.erase(guid);
   relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
 
   if (config_.log_activity()) {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::remove %C removed total=%B\n"), guid_to_string(guid).c_str(), guid_addr_set_map_.size()));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::remove %C removed total=%B pending=%B/%B\n"), guid_to_string(guid).c_str(), guid_addr_set_map_.size(), pending_.size(), config_.max_pending()));
   }
 }
 
@@ -372,6 +427,7 @@ VerticalHandler::VerticalHandler(const Config& config,
   , guid_addr_set_(guid_addr_set)
   , horizontal_handler_(nullptr)
   , application_participant_addr_(application_participant_addr)
+  , is_spdp_(false)
   , horizontal_address_(horizontal_address)
   , horizontal_address_str_(OpenDDS::DCPS::LogAddr(horizontal_address).c_str())
   , rtps_discovery_(rtps_discovery)
@@ -422,9 +478,14 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
 
     GuidAddrSet::Proxy proxy(guid_addr_set_);
     record_activity(proxy, addr_port, now, src_guid, msg_len);
-    bool send_to_application_participant = false;
+
+    if (proxy.ignore_rtps(src_guid, now, is_spdp_)) {
+      stats_reporter_.ignored_message(msg_len, now, type);
+      return 0;
+    }
 
     CORBA::ULong sent = 0;
+    bool send_to_application_participant = false;
     if (do_normal_processing(proxy, remote_address, src_guid, to, send_to_application_participant, msg, now, sent)) {
       StringSet to_partitions;
       guid_partition_table_.lookup(to_partitions, src_guid);
@@ -860,7 +921,101 @@ SpdpHandler::SpdpHandler(const Config& config,
                          const ACE_INET_Addr& application_participant_addr,
                          HandlerStatisticsReporter& stats_reporter)
 : VerticalHandler(config, name, SPDP, address, reactor, guid_partition_table, relay_partition_table, guid_addr_set, rtps_discovery, crypto, application_participant_addr, stats_reporter)
-{}
+{
+  is_spdp_ = true;
+}
+
+#ifdef OPENDDS_SECURITY
+namespace {
+  std::string extract_common_name(const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
+  {
+    const CORBA::UShort encap_LE = 0x0300; // {PL_CDR_LE} in LE
+    const CORBA::UShort encap_BE = 0x0200; // {PL_CDR_BE} in LE
+
+    OpenDDS::RTPS::MessageParser message_parser(*msg);
+    message_parser.parseHeader();
+
+    while (message_parser.parseSubmessageHeader()) {
+      const auto submessage_header = message_parser.submessageHeader();
+      if (submessage_header.submessageId == OpenDDS::RTPS::DATA) {
+        unsigned short extraFlags;
+        unsigned short octetsToInlineQos;
+        OpenDDS::DCPS::EntityId_t readerId;
+        OpenDDS::DCPS::EntityId_t writerId;
+        OpenDDS::RTPS::SequenceNumber_t writerSequenceNumber;
+
+        if (!(message_parser >> extraFlags) ||
+            !(message_parser >> octetsToInlineQos) ||
+            !(message_parser >> readerId) ||
+            !(message_parser >> writerId) ||
+            !(message_parser >> writerSequenceNumber)) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: extract_common_name() could not parse submessage\n")));
+          return "";
+        }
+
+        if (writerId != OpenDDS::DCPS::ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER) {
+          // Not our message: this could be the same multicast group used
+          // for SEDP and other traffic.
+          break;
+        }
+
+        if (!message_parser.serializer().skip(octetsToInlineQos - 16)) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: extract_common_name() could not parse submessage\n")));
+          return "";
+        }
+
+        OpenDDS::RTPS::ParameterList inlineQos;
+        if ((submessage_header.flags & OpenDDS::RTPS::FLAG_Q) && !(message_parser >> inlineQos)) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: extract_common_name() could not parse submessage\n")));
+          return "";
+        }
+
+        if (submessage_header.flags & OpenDDS::RTPS::FLAG_D) {
+          OpenDDS::RTPS::ParameterList plist;
+
+          message_parser.serializer().swap_bytes(!ACE_CDR_BYTE_ORDER); // read "encap" itself in LE
+          CORBA::UShort encap, options;
+          if (!(message_parser >> encap) || (encap != encap_LE && encap != encap_BE)) {
+            ACE_ERROR((LM_ERROR,
+                       ACE_TEXT("(%P|%t) ERROR: extract_common_name() - ")
+                       ACE_TEXT("failed to deserialize encapsulation header for SPDP\n")));
+            return "";
+          }
+          message_parser >> options;
+          // bit 8 in encap is on if it's PL_CDR_LE
+          message_parser.serializer().swap_bytes(((encap & 0x100) >> 8) != ACE_CDR_BYTE_ORDER);
+          if (!(message_parser >> plist)) {
+            ACE_ERROR((LM_ERROR,
+                       ACE_TEXT("(%P|%t) ERROR: extract_common_name() - ")
+                       ACE_TEXT("failed to deserialize data payload for SPDP\n")));
+            return "";
+          }
+
+          for (CORBA::ULong i = 0; i != plist.length(); ++i) {
+            const OpenDDS::RTPS::Parameter& param = plist[i];
+            if (param._d() == DDS::Security::PID_IDENTITY_TOKEN) {
+              const DDS::Security::IdentityToken& idt = param.identity_token();
+              if (std::strcmp(OpenDDS::Security::Identity_Status_Token_Class_Id, idt.class_id.in()) == 0) {
+                for (CORBA::ULong j = 0; j != idt.properties.length(); ++j) {
+                  const DDS::Property_t& prop = idt.properties[j];
+                  if (std::strcmp(OpenDDS::Security::dds_cert_sn, prop.name.in()) == 0) {
+                    return std::string(prop.value.in());
+                  }
+                }
+              }
+            }
+          }
+
+        }
+      }
+
+      message_parser.skipSubmessageContent();
+    }
+
+    return "";
+  }
+}
+#endif
 
 bool SpdpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
                                        const ACE_INET_Addr& remote,
@@ -911,6 +1066,12 @@ bool SpdpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
     if (pos != proxy.end()) {
       if (!pos->second.spdp_message) {
         pos->second.first_spdp = now;
+#ifdef OPENDDS_SECURITY
+        pos->second.common_name = extract_common_name(msg);
+        if (config_.log_activity() && !pos->second.common_name.empty()) {
+          ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SpdpHandler::do_normal_processing %C dds.cert.sn %C\n"), guid_to_string(src_guid).c_str(), pos->second.common_name.c_str()));
+        }
+#endif
       }
       pos->second.spdp_message = msg;
     }

@@ -199,7 +199,7 @@ private:
 *
 * @brief Implements the DDS::DataReader interface.
 *
-* See the DDS specification, OMG formal/04-12-02, for a description of
+* See the DDS specification, OMG formal/2015-04-10, for a description of
 * the interface this class is implementing.
 *
 * This class must be inherited by the type-specific datareader which
@@ -582,7 +582,14 @@ public:
 
   virtual ICE::Endpoint* get_ice_endpoint();
 
-  const RepoId& get_repo_id() const { return this->subscription_id_; }
+  const RepoId& get_repo_id() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(subscription_id_mutex_);
+    while (!has_subscription_id_ && !get_deleted()) {
+      subscription_id_condition_.wait();
+    }
+    return this->subscription_id_;
+  }
 
   void return_handle(DDS::InstanceHandle_t handle);
 
@@ -660,6 +667,10 @@ protected:
 
   /// Data has arrived into the cache, unblock waiting ReadConditions
   void notify_read_conditions();
+
+  bool has_subscription_id_;
+  mutable ACE_Thread_Mutex subscription_id_mutex_;
+  mutable ConditionVariable<ACE_Thread_Mutex> subscription_id_condition_;
 
   unique_ptr<ReceivedDataAllocator> rd_allocator_;
   DDS::DataReaderQos qos_;

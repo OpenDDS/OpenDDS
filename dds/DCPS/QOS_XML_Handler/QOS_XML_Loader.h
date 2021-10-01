@@ -1,9 +1,7 @@
 /**
  * @author Marcel Smit (msmit@remedy.nl)
  *
- *
  * Starting point for QOS XML parsing library.
- *
  */
 #ifndef OPENDDS_DCPS_QOS_XML_HANDLER_QOS_XML_LOADER_H
 #define OPENDDS_DCPS_QOS_XML_HANDLER_QOS_XML_LOADER_H
@@ -20,8 +18,11 @@ namespace DCPS {
   class OpenDDS_XML_QOS_Handler_Export QOS_XML_Loader
   {
   public:
-    QOS_XML_Loader (void);
-    ~QOS_XML_Loader (void);
+    /// Pass an optional @error_handler which is called back when
+    /// there are any errors parsing the input XML. The QOS_XML_Loader
+    /// will assume ownership when a pointer is passed
+    QOS_XML_Loader (XML::XML_Error_Handler* error_handler = 0);
+    ~QOS_XML_Loader ();
 
     /**
      * init
@@ -33,7 +34,6 @@ namespace DCPS {
      * Init parses this string and will append ".xml" to
      * qos_base_file_name_without_extension. It'll than invoke
      * the init method on the XML_File_Intf class.
-     *
      */
     DDS::ReturnCode_t
     init (const ACE_TCHAR * qos_profile);

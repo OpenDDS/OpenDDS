@@ -462,9 +462,9 @@ int handle_report(const Bench::TestController::Report& report,
   int result = EXIT_SUCCESS;
   using Builder::ZERO;
 
-  Bench::SimpleStatBlock consolidated_cpu_percent_stats;
-  Bench::SimpleStatBlock consolidated_mem_percent_stats;
-  Bench::SimpleStatBlock consolidated_virtual_mem_percent_stats;
+  std::vector<Bench::SimpleStatBlock> cpu_percent_stats;
+  std::vector<Bench::SimpleStatBlock> mem_percent_stats;
+  std::vector<Bench::SimpleStatBlock> virtual_mem_percent_stats;
 
   std::vector<const Bench::WorkerReport*> parsed_reports;
   for (CORBA::ULong n = 0; n < report.node_reports.length(); ++n) {
@@ -474,13 +474,17 @@ int handle_report(const Bench::TestController::Report& report,
     Bench::ConstPropertyStatBlock mem_percent(nc_report.properties, "mem_percent");
     Bench::ConstPropertyStatBlock virtual_mem_percent(nc_report.properties, "virtual_mem_percent");
 
-    consolidated_cpu_percent_stats = consolidate(consolidated_cpu_percent_stats, cpu_percent.to_simple_stat_block());
-    consolidated_mem_percent_stats = consolidate(consolidated_mem_percent_stats, mem_percent.to_simple_stat_block());
-    consolidated_virtual_mem_percent_stats = consolidate(consolidated_virtual_mem_percent_stats, virtual_mem_percent.to_simple_stat_block());
+    cpu_percent_stats.push_back(cpu_percent.to_simple_stat_block());
+    mem_percent_stats.push_back(mem_percent.to_simple_stat_block());
+    virtual_mem_percent_stats.push_back(virtual_mem_percent.to_simple_stat_block());
     for (CORBA::ULong w = 0; w < nc_report.worker_reports.length(); ++w) {
       parsed_reports.push_back(&nc_report.worker_reports[w]);
     }
   }
+
+  Bench::SimpleStatBlock consolidated_cpu_percent_stats = consolidate(cpu_percent_stats);
+  Bench::SimpleStatBlock consolidated_mem_percent_stats = consolidate(mem_percent_stats);
+  Bench::SimpleStatBlock consolidated_virtual_mem_percent_stats = consolidate(virtual_mem_percent_stats);
 
   Builder::TimeStamp max_construction_time = ZERO;
   Builder::TimeStamp max_enable_time = ZERO;
@@ -497,13 +501,13 @@ int handle_report(const Bench::TestController::Report& report,
   uint64_t total_missing_data_count = 0;
   Builder::TimeStamp max_discovery_time_delta = ZERO;
 
-  Bench::SimpleStatBlock consolidated_discovery_delta_stats;
-  Bench::SimpleStatBlock consolidated_latency_stats;
-  Bench::SimpleStatBlock consolidated_jitter_stats;
-  Bench::SimpleStatBlock consolidated_throughput_stats;
-  Bench::SimpleStatBlock consolidated_round_trip_latency_stats;
-  Bench::SimpleStatBlock consolidated_round_trip_jitter_stats;
-  Bench::SimpleStatBlock consolidated_round_trip_throughput_stats;
+  std::vector<Bench::SimpleStatBlock> discovery_delta_stats;
+  std::vector<Bench::SimpleStatBlock> latency_stats;
+  std::vector<Bench::SimpleStatBlock> jitter_stats;
+  std::vector<Bench::SimpleStatBlock> throughput_stats;
+  std::vector<Bench::SimpleStatBlock> round_trip_latency_stats;
+  std::vector<Bench::SimpleStatBlock> round_trip_jitter_stats;
+  std::vector<Bench::SimpleStatBlock> round_trip_throughput_stats;
 
   bool missing_durable_data = false;
 
@@ -598,13 +602,13 @@ int handle_report(const Bench::TestController::Report& report,
             update_stats_for_tags(missing_data_counts, dr_report.tags, tags, missing_data_count_prop);
           }
 
-          consolidated_discovery_delta_stats = consolidate(consolidated_discovery_delta_stats, dr_discovery_delta.to_simple_stat_block());
-          consolidated_latency_stats = consolidate(consolidated_latency_stats, dr_latency.to_simple_stat_block());
-          consolidated_jitter_stats = consolidate(consolidated_jitter_stats, dr_jitter.to_simple_stat_block());
-          consolidated_throughput_stats = consolidate(consolidated_throughput_stats, dr_throughput.to_simple_stat_block());
-          consolidated_round_trip_latency_stats = consolidate(consolidated_round_trip_latency_stats, dr_round_trip_latency.to_simple_stat_block());
-          consolidated_round_trip_jitter_stats = consolidate(consolidated_round_trip_jitter_stats, dr_round_trip_jitter.to_simple_stat_block());
-          consolidated_round_trip_throughput_stats = consolidate(consolidated_round_trip_throughput_stats, dr_round_trip_throughput.to_simple_stat_block());
+          discovery_delta_stats.push_back(dr_discovery_delta.to_simple_stat_block());
+          latency_stats.push_back(dr_latency.to_simple_stat_block());
+          jitter_stats.push_back(dr_jitter.to_simple_stat_block());
+          throughput_stats.push_back(dr_throughput.to_simple_stat_block());
+          round_trip_latency_stats.push_back(dr_round_trip_latency.to_simple_stat_block());
+          round_trip_jitter_stats.push_back(dr_round_trip_jitter.to_simple_stat_block());
+          round_trip_throughput_stats.push_back(dr_round_trip_throughput.to_simple_stat_block());
 
           consolidate_tagged_stats(tagged_discovery_delta_stats, dr_report.tags, tags, dr_discovery_delta);
           consolidate_tagged_stats(tagged_latency_stats, dr_report.tags, tags, dr_latency);
@@ -621,11 +625,19 @@ int handle_report(const Bench::TestController::Report& report,
           const Builder::DataWriterReport& dw_report = process_report.participants[i].publishers[j].datawriters[k];
 
           Bench::ConstPropertyStatBlock dw_discovery_delta(dw_report.properties, "discovery_delta");
-          consolidated_discovery_delta_stats = consolidate(consolidated_discovery_delta_stats, dw_discovery_delta.to_simple_stat_block());
+          discovery_delta_stats.push_back(dw_discovery_delta.to_simple_stat_block());
         }
       }
     }
   }
+
+  Bench::SimpleStatBlock consolidated_discovery_delta_stats = consolidate(discovery_delta_stats);
+  Bench::SimpleStatBlock consolidated_latency_stats = consolidate(latency_stats);
+  Bench::SimpleStatBlock consolidated_jitter_stats = consolidate(jitter_stats);
+  Bench::SimpleStatBlock consolidated_throughput_stats = consolidate(throughput_stats);
+  Bench::SimpleStatBlock consolidated_round_trip_latency_stats = consolidate(round_trip_latency_stats);
+  Bench::SimpleStatBlock consolidated_round_trip_jitter_stats = consolidate(round_trip_jitter_stats);
+  Bench::SimpleStatBlock consolidated_round_trip_throughput_stats = consolidate(round_trip_throughput_stats);
 
   result_out << std::endl;
 
