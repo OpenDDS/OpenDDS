@@ -29,6 +29,13 @@ ThreadSynch* TransportSendStrategy::synch() const
 }
 
 ACE_INLINE
+void TransportSendStrategy::set_header_source(ACE_INT64 source)
+{
+  GuardType guard(lock_);
+  header_.source_ = source;
+}
+
+ACE_INLINE
 void TransportSendStrategy::send_start()
 {
   DBG_ENTRY_LVL("TransportSendStrategy","send_start",6);
