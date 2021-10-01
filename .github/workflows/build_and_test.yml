@@ -2596,7 +2596,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --std=c++11 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --std=c++11 --ipv6 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -2844,7 +2844,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --compiler=clang++-12 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=clang++-12 --ipv6 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -3095,7 +3095,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --ipv6 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
