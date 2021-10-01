@@ -283,7 +283,6 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
             } else if (name == "cdr_encapsulation") {
               if ((value == "1") || (value == "true")) {
                 config->cdr_encapsulation_ = true;
-                ACE_DEBUG((LM_DEBUG, "HELLO WORLD\n\n"));
               } else if ((value != "0") && (value != "false")) {
                 ACE_ERROR_RETURN((LM_ERROR,
                                   ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
