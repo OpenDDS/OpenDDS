@@ -51,9 +51,6 @@ using DCPS::ENDIAN_BIG;
 using DCPS::ENDIAN_LITTLE;
 
 namespace {
-  const CORBA::UShort encap_LE = 0x0300; // {PL_CDR_LE} in LE
-  const CORBA::UShort encap_BE = 0x0200; // {PL_CDR_BE} in LE
-
   const Encoding encoding_plain_big(Encoding::KIND_XCDR1, ENDIAN_BIG);
   const Encoding encoding_plain_native(Encoding::KIND_XCDR1);
 
@@ -2612,9 +2609,8 @@ Spdp::SpdpTransport::dispose_unregister()
 
   wbuff_.reset();
   DCPS::Serializer ser(&wbuff_, encoding_plain_native);
-  CORBA::UShort options = 0;
-  if (!(ser << hdr_) || !(ser << data_) || !(ser << encap_LE) || !(ser << options)
-      || !(ser << plist)) {
+  DCPS::EncapsulationHeader encap(ser.encoding(), DCPS::MUTABLE);
+  if (!(ser << hdr_) || !(ser << data_) || !(ser << encap) || !(ser << plist)) {
     if (DCPS::DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::dispose_unregister() - ")
@@ -2767,10 +2763,9 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
 #endif
 
   wbuff_.reset();
-  CORBA::UShort options = 0;
   DCPS::Serializer ser(&wbuff_, encoding_plain_native);
-  if (!(ser << hdr_) || !(ser << data_) || !(ser << encap_LE) || !(ser << options)
-      || !(ser << plist)) {
+  DCPS::EncapsulationHeader encap(ser.encoding(), DCPS::MUTABLE);
+  if (!(ser << hdr_) || !(ser << data_) || !(ser << encap) || !(ser << plist)) {
     if (DCPS::DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write() - ")
@@ -2891,9 +2886,9 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, const ACE_INET_Addr& loca
   DCPS::assign(info_dst.guidPrefix, guid.guidPrefix);
 
   wbuff_.reset();
-  CORBA::UShort options = 0;
   DCPS::Serializer ser(&wbuff_, encoding_plain_native);
-  if (!(ser << hdr_) || !(ser << info_dst) || !(ser << data_) || !(ser << encap_LE) || !(ser << options)
+  DCPS::EncapsulationHeader encap(ser.encoding(), DCPS::MUTABLE);
+  if (!(ser << hdr_) || !(ser << info_dst) || !(ser << data_) || !(ser << encap)
       || !(ser << plist)) {
     if (DCPS::DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
@@ -3118,9 +3113,9 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
 
         ParameterList plist;
         if (data.smHeader.flags & (FLAG_D | FLAG_K_IN_DATA)) {
-          ser.swap_bytes(!ACE_CDR_BYTE_ORDER); // read "encap" itself in LE
-          CORBA::UShort encap, options;
-          if (!(ser >> encap) || (encap != encap_LE && encap != encap_BE)) {
+          DCPS::EncapsulationHeader encap;
+          DCPS::Encoding enc;
+          if (!(ser >> encap) || !encap.to_encoding(enc, DCPS::MUTABLE) || enc.kind() != Encoding::KIND_XCDR1) {
             if (DCPS::DCPS_debug_level > 0) {
               ACE_ERROR((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
@@ -3128,10 +3123,9 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
             }
             return 0;
           }
-          ser >> options;
-          // bit 8 in encap is on if it's PL_CDR_LE
-          ser.swap_bytes(((encap & 0x100) >> 8) != ACE_CDR_BYTE_ORDER);
+          ser.encoding(enc);
           if (!(ser >> plist)) {
+
             if (DCPS::DCPS_debug_level > 0) {
               ACE_ERROR((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")

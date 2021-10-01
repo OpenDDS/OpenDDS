@@ -929,9 +929,6 @@ SpdpHandler::SpdpHandler(const Config& config,
 namespace {
   std::string extract_common_name(const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
   {
-    const CORBA::UShort encap_LE = 0x0300; // {PL_CDR_LE} in LE
-    const CORBA::UShort encap_BE = 0x0200; // {PL_CDR_BE} in LE
-
     OpenDDS::RTPS::MessageParser message_parser(*msg);
     message_parser.parseHeader();
 
@@ -972,18 +969,16 @@ namespace {
 
         if (submessage_header.flags & OpenDDS::RTPS::FLAG_D) {
           OpenDDS::RTPS::ParameterList plist;
-
-          message_parser.serializer().swap_bytes(!ACE_CDR_BYTE_ORDER); // read "encap" itself in LE
-          CORBA::UShort encap, options;
-          if (!(message_parser >> encap) || (encap != encap_LE && encap != encap_BE)) {
+          OpenDDS::DCPS::EncapsulationHeader encap;
+          OpenDDS::DCPS::Encoding enc;
+          if (!(message_parser >> encap) || !encap.to_encoding(enc, OpenDDS::DCPS::MUTABLE)
+                                         || enc.kind() != OpenDDS::DCPS::Encoding::KIND_XCDR1) {
             ACE_ERROR((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: extract_common_name() - ")
                        ACE_TEXT("failed to deserialize encapsulation header for SPDP\n")));
             return "";
           }
-          message_parser >> options;
-          // bit 8 in encap is on if it's PL_CDR_LE
-          message_parser.serializer().swap_bytes(((encap & 0x100) >> 8) != ACE_CDR_BYTE_ORDER);
+          message_parser.serializer().encoding(enc);
           if (!(message_parser >> plist)) {
             ACE_ERROR((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: extract_common_name() - ")

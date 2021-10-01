@@ -138,9 +138,7 @@ struct TestParticipant: ACE_Event_Handler {
     ACE_Message_Block mb(size);
     Serializer ser(&mb, encoding);
 
-    // TODO(iguessthislldo) Use common encapsulation code, NOTE that 3 is "PL_CDR_LE", not "CDR_LE"
-    const ACE_CDR::ULong encap = 0x00000300; // {CDR_LE, options} in BE format
-
+    const EncapsulationHeader encap (encoding, MUTABLE);
     if (!(ser << hdr_ && ser << ds && ser << encap)) {
       ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize headers\n"));
       return false;
