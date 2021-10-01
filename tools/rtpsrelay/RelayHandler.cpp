@@ -970,13 +970,15 @@ namespace {
         if (submessage_header.flags & OpenDDS::RTPS::FLAG_D) {
           OpenDDS::RTPS::ParameterList plist;
           OpenDDS::DCPS::EncapsulationHeader encap;
-          if (!(message_parser >> encap) || (encap.kind() != OpenDDS::DCPS::EncapsulationHeader::KIND_PL_CDR_LE &&
-                                             encap.kind() != OpenDDS::DCPS::EncapsulationHeader::KIND_PL_CDR_BE)) {
+          OpenDDS::DCPS::Encoding enc;
+          if (!(message_parser >> encap) || !encap.to_encoding(enc, OpenDDS::DCPS::MUTABLE)
+                                         || enc.kind() != OpenDDS::DCPS::Encoding::KIND_XCDR1) {
             ACE_ERROR((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: extract_common_name() - ")
                        ACE_TEXT("failed to deserialize encapsulation header for SPDP\n")));
             return "";
           }
+          message_parser.serializer().encoding(enc);
           if (!(message_parser >> plist)) {
             ACE_ERROR((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: extract_common_name() - ")
