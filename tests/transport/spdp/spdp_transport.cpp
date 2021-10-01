@@ -15,6 +15,7 @@
 #include <dds/DCPS/RTPS/ParameterListConverter.h>
 #include <dds/DCPS/RTPS/Spdp.h>
 
+#include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Service_Participant.h>
 
 #include <ace/Configuration.h>
@@ -254,10 +255,8 @@ struct ReactorTask : ACE_Task_Base {
   }
 };
 
-void get_local(Locator_t& locator)
+void to_locator(const ACE_INET_Addr& addr, Locator_t& locator)
 {
-  const String hostname = get_fully_qualified_hostname();
-  const ACE_INET_Addr addr = choose_single_coherent_address(hostname + ":54321");
 #ifdef ACE_HAS_IPV6
   if (addr.get_type() == AF_INET6) {
     locator.kind = LOCATOR_KIND_UDPv6;
@@ -357,10 +356,27 @@ bool run_test()
   nonEmptyList[0].address[14] = 0;
   nonEmptyList[0].address[15] = 1;
 
-  OpenDDS::DCPS::LocatorSeq unicastLocators(2);
-  unicastLocators.length(2);
-  get_local(unicastLocators[0]);
-  unicastLocators[1] = nonEmptyList[0];
+  size_t addr_count;
+  ACE_INET_Addr* addr_array = 0;
+  const int ret = ACE::get_ip_interfaces(addr_count, addr_array);
+  struct Addr_Deleter {
+    Addr_Deleter(ACE_INET_Addr* ptr) : ptr_(ptr) {}
+    ~Addr_Deleter() { delete [] ptr_; }
+    ACE_INET_Addr* const ptr_;
+  } addr_deleter(addr_array);
+  if (ret != 0 || addr_count < 1) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ACE::get_ip_interfaces failed.\n")));
+    return false;
+  }
+
+  OpenDDS::DCPS::LocatorSeq unicastLocators(addr_count);
+  unicastLocators.length(addr_count);
+  for (size_t i = 0; i < addr_count; ++i) {
+    if (DCPS_debug_level) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) spdp_transport.cpp:run_test() addr_array[%d]: %C\n"), i, LogAddr(addr_array[i]).c_str()));
+    }
+    to_locator(addr_array[i], unicastLocators[i]);
+  }
 
   const OpenDDS::RTPS::SPDPdiscoveredParticipantData pdata = {
     {DDS::BuiltinTopicKey_t(), qos.user_data},
