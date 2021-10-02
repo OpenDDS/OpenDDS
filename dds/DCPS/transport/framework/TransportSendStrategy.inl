@@ -31,7 +31,6 @@ ThreadSynch* TransportSendStrategy::synch() const
 ACE_INLINE
 void TransportSendStrategy::set_header_source(ACE_INT64 source)
 {
-  GuardType guard(lock_);
   header_.source_ = source;
 }
 
