@@ -14,6 +14,12 @@ DynamicData::DynamicData(Serializer& ser, DynamicType_rch type)
   : strm_(ser)
   , start_rpos_(strm_.rpos())
 {
+  Encoding::XcdrVersion xcdr_ver = strm_.encoding().xcdr_version();
+  if (xcdr_ver != Encoding::XCDR_VERSION_2) {
+    const String xcdr_str = (xcdr_ver == Encoding::XCDR_VERSION_1) ? "XCDR1" : "Non-XCDR";
+    throw std::runtime_error("Only support XCDR2, but constructed with " + xcdr_str + " stream");
+  }
+
   if (type->get_kind() == TK_ALIAS) {
     type_ = get_base_type(type);
   } else {
@@ -71,17 +77,23 @@ DynamicData DynamicData::clone() const
 {
 }
 
+bool DynamicData::is_type_supported(TypeKind tk, const char* func_name)
+{
+  ACE_CDR::ULong size;
+  if (!is_primitive(tk, size) && tk != TK_STRING8 && tk != TK_STRING16) {
+    if (DCPS_debug_level >= 1) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::%C -")
+                 ACE_TEXT(" Called on an unsupported type (%C)\n"), func_name, typekind_to_string(tk)));
+    }
+    return false;
+  }
+  return true;
+}
+
 template<typename MemberType, typename MemberTypeKind>
 bool DynamicData::get_value_from_struct(MemberType& value, MemberId id)
 {
-  ACE_CDR::ULong primitive_size;
-  if (!is_primitive(MemberTypeKind, primitive_size) &&
-      MemberTypeKind != TK_STRING8 && MemberTypeKind != TK_STRING16) {
-    if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_value_from_struct -")
-                 ACE_TEXT(" Called on an unsupported type (%C)\n"),
-                 typekind_to_string(MemberTypeKind)));
-    }
+  if (!is_type_supported(MemberTypeKind, "get_value_from_struct")) {
     return false;
   }
 
@@ -117,35 +129,37 @@ bool DynamicData::get_union_selected_member(MemberDescriptor& out_md)
   return false;
 }
 
-template<typename MemberType, typename MemberTypeKind>
-bool DynamicData::get_value_from_union(MemberType& value, MemberId id)
+bool DynamicData::get_from_union_common_checks(TypeKind tk, MemberId id,
+                                               const char* func_name, MemberDescriptor& md)
 {
-  ACE_CDR::ULong primitive_size;
-  if (!is_primitive(MemberTypeKind, primitive_size) &&
-      MemberTypeKind != TK_STRING8 && MemberTypeKind != TK_STRING16) {
-    if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_value_from_union -")
-                 ACE_TEXT(" Called on an unsupported type (%C)\n"),
-                 typekind_to_string(MemberTypeKind)));
-    }
+  if (!is_type_supported(tk, func_name)) {
     return false;
   }
 
-  MemberDescriptor md;
   if (!get_union_selected_member(md)) {
     if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_value_from_union -")
-                 ACE_TEXT(" Could not find MemberDescriptor for the selected union member\n")));
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::%C - Could not find")
+                 ACE_TEXT(" MemberDescriptor for the selected union member\n"), func_name));
     }
     return false;
   }
 
   if (md.id != id) {
     if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_value_from_union -")
-                 ACE_TEXT(" ID of the selected member (%d) is not the requested ID (%d)"),
-                 md.id, id));
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::%C -")
+                 ACE_TEXT(" ID of the selected member (%d) is not the requested ID (%d)\n"),
+                 func_name, md.id, id));
     }
+    return false;
+  }
+  return true;
+}
+
+template<typename MemberType, typename MemberTypeKind>
+bool DynamicData::get_value_from_union(MemberType& value, MemberId id)
+{
+  MemberDescriptor md;
+  if (!get_from_union_common_checks(MemberTypeKind, id, "get_value_from_union", md)) {
     return false;
   }
 
@@ -153,17 +167,17 @@ bool DynamicData::get_value_from_union(MemberType& value, MemberId id)
   if (selected_tk != MemberTypeKind) {
     if (DCPS_debug_level >= 1) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_value_from_union -")
-                 ACE_TEXT(" The selected member has type %C, not %C"),
+                 ACE_TEXT(" The selected member has type %C, not %C\n"),
                  typekind_to_string(selected_tk), typekind_to_string(MemberTypeKind)));
     }
     return false;
   }
 
   if (ek == MUTABLE) {
-    unsigned id;
-    size_t size;
+    unsigned member_id;
+    size_t member_size;
     bool must_understand;
-    if (!strm_.read_parameter_id(id, size, must_understand)) { return false; }
+    if (!strm_.read_parameter_id(member_id, member_size, must_understand)) { return false; }
   }
   return (strm_ >> value);
 }
@@ -205,12 +219,7 @@ bool DynamicData::get_value_from_sequence(ElementType& value, MemberId id)
     return false;
   }
 
-  ACE_CDR::ULong size;
-  if (!is_primitive(elem_tk, size) && elem_tk != TK_STRING8 && elem_tk != TK_STRING16) {
-    if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_value_from_sequence -")
-                 ACE_TEXT(" Called on an unsupported type (%C)\n"), typekind_to_string(elem_tk)));
-    }
+  if (!is_type_supported(elem_tk, "get_value_from_sequence")) {
     return false;
   }
 
@@ -257,12 +266,7 @@ bool DynamicData::get_value_from_array(ElementType& value, MemberId id)
     return false;
   }
 
-  ACE_CDR::ULong size;
-  if (!is_primitive(elem_tk, size) && elem_tk != TK_STRING8 && elem_tk != TK_STRING16) {
-    if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_value_from_array -")
-                 ACE_TEXT(" Called on an unsupported type (%C)\n"), typekind_to_string(elem_tk)));
-    }
+  if (!is_type_supported(elem_tk, "get_value_from_array")) {
     return false;
   }
 
@@ -318,12 +322,7 @@ bool DynamicData::get_value_from_map(ElementType& value, MemberId id)
     return false;
   }
 
-  ACE_CDR::ULong size;
-  if (!is_primitive(elem_tk, size) && elem_tk != TK_STRING8 && elem_tk != TK_STRING16) {
-    if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_value_from_map -")
-                 ACE_TEXT(" Called on an unsupported type (%C)\n"), typekind_to_string(elem_tk)));
-    }
+  if (!is_type_supported(elem_tk, "get_value_from_map")) {
     return false;
   }
 
@@ -336,7 +335,7 @@ DDS::ReturnCode_t DynamicData::get_value_excluding_enum_bitmask(ValueType& value
   const TypeKind tk = type_->get_kind();
   bool good = true;
 
-  switch(tk) {
+  switch (tk) {
   case ValueTypeKind:
     good = (strm_ >> value);
     break;
@@ -850,49 +849,109 @@ DDS::ReturnCode_t DynamicData::set_complex_value(MemberId id, DynamicData value)
 
 
 template<typename SequenceType, typename ElementTypeKind>
-DDS::ReturnCode_t DynamicData::get_values_from_struct(SequenceType& sequence, MemberId id)
+bool DynamicData::read_values(SequenceType& value)
 {
-  DDS::ReturnCode_t retcode;
-  if (!find_member(id, ElementTypeKind, true)) {
-    reset_rpos();
-    return DDS::RETCODE_ERROR;
+  ACE_CDR::ULong size, len;
+  if (ElementTypeKind == TK_STRING8 || ElementTypeKind == TK_STRING16) {
+    if (!strm_.skip(1, 4)) {
+      return false;
+    }
   }
 
-  bool good = true;
-  ACE_CDR::ULong size;
-  bool primitive = is_primitive(ElementTypeKind, size);
+  if (!(strm_ >> len)) {
+    return false;
+  }
 
-  if (primitive || ElementTypeKind == TK_STRING8 || ElementTypeKind == TK_STRING16) {
-    ACE_CDR::ULong len;
-    if (primitive) {
-      good = (strm_ >> len);
-    } else {
-      ACE_CDR::ULong dheader;
-      good = (strm_ >> dheader) && (strm_ >> len);
+  value.length(len);
+  for (ACE_CDR::ULong i = 0; i < len; ++i) {
+    if (!(strm_ >> value[i])) {
+      return false;
     }
+  }
+  return true;
+}
 
-    if (good) {
-      sequence.length(len);
-      for (ACE_CDR::ULong i = 0; i < len; ++i) {
-        good = (strm_ >> sequence[i]);
-        if (!good) { break; }
-      }
-    }
-  } else {
+template<typename SequenceType, typename ElementTypeKind>
+bool DynamicData::get_values_from_struct(SequenceType& value, MemberId id)
+{
+  if (!is_type_supported(ElementTypeKind, "get_values_from_struct")) {
+    return false;
+  }
+
+  return find_struct_member(id, ElementTypeKind, true) &&
+    read_values<SequenceType, ElementTypeKind>(value);
+}
+
+template<typename SequenceType, typename ElementTypeKind>
+bool DynamicData::get_values_from_union(SequenceType& value, MemberId id)
+{
+  MemberDescriptor md;
+  if (!get_from_union_common_checks(ElementTypeKind, id, "get_values_from_union", md)) {
+    return false;
+  }
+
+  const DynamicType_rch selected_type = get_base_type(md.type);
+  const TypeKind selected_tk = selected_type->get_kind();
+  if (selected_tk != TK_SEQUENCE) {
     if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_sequence_values -")
-                 ACE_TEXT(" Called on a sequence of unsupported type (%C)\n"),
-                 typekind_to_string(ElementTypeKind)));
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_values_from_union -")
+                 ACE_TEXT(" The selected member is not a sequence, but %C\n"),
+                 typekind_to_string(selected_tk)));
     }
-    reset_rpos();
+    return false;
+  }
+
+  const TypeKind elem_tk = selected_type->get_descriptor().element_type->get_kind();
+  if (elem_tk != ElementTypeKind) {
+    if (DCPS_debug_level >= 1) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_values_from_union -")
+                 ACE_TEXT(" The element type is %C, not %C\n"),
+                 typekind_to_string(elem_tk), typekind_to_string(ElementTypeKind)));
+    }
+    return false;
+  }
+
+  if (ek == MUTABLE) {
+    unsigned member_id;
+    size_t member_size;
+    bool must_understand;
+    if (!strm_.read_parameter_id(member_id, member_size, must_understand)) { return false; }
+  }
+  return read_values<SequenceType, ElementTypeKind>(value);
+}
+
+template<typename SequenceType, typename ElementTypeKind>
+DDS::ReturnCode_t DynamicData::get_sequence_values(SequenceType& value, MemberId id)
+{
+  const TypeKind tk = type_->get_kind();
+  bool good = true;
+
+  switch (tk) {
+  case TK_STRUCTURE:
+    good = get_values_from_struct<SequenceType, ElementTypeKind>(value, id);
+    break;
+  case TK_UNION:
+    good = get_values_from_union<SequenceType, ElementTypeKind>(value, id);
+    break;
+  case TK_SEQUENCE:
+
+  case TK_ARRAY:
+  case TK_MAP:
+  default:
+    if (DCPS_debug_level >= 1) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_%C_values -")
+                 ACE_TEXT(" Called on an imcompatible type %C"),
+                 typekind_to_string(ElementTypeKind), typekind_to_string(tk)));
+    }
     return DDS::RETCODE_ERROR;
   }
 
   if (!good && DCPS_debug_level >= 1) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_%C_%values -")
-               ACE_TEXT(" Failed to read a sequence member with ID %d\n"),
-               typekind_to_string(ElementTypeKind), id));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Dynamic::get_%C_values -")
+               ACE_TEXT(" Failed to read DynamicData object of type %C\n"),
+               typekind_to_string(ElementTypeKind), typekind_to_string(tk)));
   }
+
   reset_rpos();
   return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
@@ -1159,19 +1218,14 @@ bool DynamicData::find_struct_member(MemberId id, TypeKind kind, bool is_sequenc
   const OPENDDS_MAP<MemberId, size_t>::const_iterator it = offset_lookup_table_.find(id);
   if (it != offset_lookup_table_.end()) {
     const size_t offset = it->second;
-    std::ostringstream err_msg;
-    err_msg << "Failed to skip to the member with ID " << id;
-    if (!skip("find_member", err_msg.str().c_str(), offset)) {
-      return false;
-    }
-    return true;
+    return strm_.skip(offset);
   }
 
   DynamicTypeMember_rch member;
   const DDS::ReturnCode_t retcode = type_->get_member(member, id);
   if (retcode != DDS::RETCODE_OK) {
     if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::find_member -")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::find_struct_member -")
                  ACE_TEXT(" Failed to get DynamicTypeMember for member with ID %d\n"), id));
     }
     return false;
@@ -1180,10 +1234,9 @@ bool DynamicData::find_struct_member(MemberId id, TypeKind kind, bool is_sequenc
   const MemberDescriptor member_desc = member->get_descriptor();
   const TypeKind member_kind = member_desc.type->get_kind();
 
-  if ((!is_sequence && member_kind != kind) ||
-      (is_sequence && member_kind != TK_SEQUENCE)) {
+  if ((!is_sequence && member_kind != kind) || (is_sequence && member_kind != TK_SEQUENCE)) {
     if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::find_member -")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::find_struct_member -")
                  ACE_TEXT(" Member with ID %d has kind %C, not %C\n"),
                  id, typekind_to_string(member_kind),
                  is_sequence ? typekind_to_string(TK_SEQUENCE) : typekind_to_string(kind)));
@@ -1196,7 +1249,7 @@ bool DynamicData::find_struct_member(MemberId id, TypeKind kind, bool is_sequenc
     const TypeKind elem_kind = member_td.element_type->get_kind();
     if (elem_kind != kind) {
       if (DCPS_debug_level >= 1) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::find_member -")
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::find_struct_member -")
                    ACE_TEXT(" Member with ID is a sequence of %C, not %C\n"),
                    id, typekind_to_string(elem_kind), typekind_to_string(kind)));
       }

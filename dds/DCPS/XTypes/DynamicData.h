@@ -169,8 +169,11 @@ public:
 
 private:
 
-  // Templates for reading a single value of type primitive or string or
-  // wstring from a corresponding containing type.
+  /// Verify that a given type is primitive or string or wstring.
+  bool is_type_supported(TypeKind tk, const char* func_name);
+
+  /// Templates for reading a single value of type primitive or string or
+  /// wstring from a corresponding containing type.
   template<typename MemberType, typename MemberTypeKind>
   bool get_value_from_struct(MemberType& value, MemberId id);
 
@@ -202,6 +205,8 @@ private:
   /// Find member descriptor for the selected member from a union data.
   bool get_union_selected_member(MemberDescriptor& out_md);
 
+  bool get_from_union_common_checks(TypeKind tk, MemberId id, const char* func_name, MemberDescriptor& md);
+
   /// Skip to an element with a given ID in a sequence or array.
   bool skip_to_sequence_element(MemberId id);
   bool skip_to_array_element(MemberId id);
@@ -210,10 +215,21 @@ private:
   /// element is also skipped.
   bool skip_to_map_element(MemberId id);
 
-  // Templates for reading a sequence of values where the element type is primitive
-  // or string or wstring from a corresponding containing type.
+  /// Read a sequence of a primitive type or string or wstring.
   template<typename SequenceType, typename ElementTypeKind>
-  DDS::ReturnCode_t get_values_from_struct(SequenceType& value, MemberId id);
+  bool read_values(SequenceType& value);
+
+  // Templates for reading a sequence of primitives or strings or wstrings
+  // as a member (or an element) of a given containing type.
+  template<typename SequenceType, typename ElementTypeKind>
+  bool get_values_from_struct(SequenceType& value, MemberId id);
+
+  template<typename SequenceType, typename ElementTypeKind>
+  bool get_values_from_union(SequenceType& value, MemberId id);
+
+  /// Template that reads sequence of values from all valid containing types.
+  template<typename SequenceType, typename ElementTypeKind>
+  DDS::ReturnCode_t get_sequence_values(SequenceType& value, MemberId id);
 
   /// Move the read pointer to the member with a given ID.
   /// In case the member is not a sequence, @a kind is the type kind of the member.
