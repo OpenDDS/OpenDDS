@@ -364,9 +364,9 @@ OpenDDS::DCPS::TcpDataLink::handle_send_request_ack(TransportQueueElement* eleme
 void
 OpenDDS::DCPS::TcpDataLink::ack_received(const ReceivedDataSample& sample)
 {
-  SequenceNumber sequence = sample.header_.sequence_;
+  const SequenceNumber sequence = sample.header_.sequence_;
 
-  if (sample.header_.sequence_ == -1) {
+  if (sequence == -1) {
     return;
   }
 
