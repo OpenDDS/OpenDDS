@@ -80,8 +80,6 @@ StaticEndpointManager::StaticEndpointManager(const RepoId& participant_id,
                                              StaticParticipant& participant)
   : lock_(lock)
   , participant_id_(participant_id)
-  , publication_counter_(0)
-  , subscription_counter_(0)
   , topic_counter_(0)
   , registry_(registry)
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -89,7 +87,6 @@ StaticEndpointManager::StaticEndpointManager(const RepoId& participant_id,
 #endif
   , max_type_lookup_service_reply_period_(0)
   , type_lookup_service_sequence_number_(0)
-  , use_xtypes_(true)
 {
 #ifdef DDS_HAS_MINIMUM_BIT
   ACE_UNUSED_ARG(participant);
