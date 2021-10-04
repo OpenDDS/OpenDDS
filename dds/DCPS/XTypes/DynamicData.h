@@ -205,7 +205,7 @@ private:
   /// Find member descriptor for the selected member from a union data.
   bool get_union_selected_member(MemberDescriptor& out_md);
 
-  bool get_from_union_common_checks(TypeKind tk, MemberId id, const char* func_name, MemberDescriptor& md);
+  bool get_from_union_common_checks(MemberId id, const char* func_name, MemberDescriptor& md);
 
   /// Skip to an element with a given ID in a sequence or array.
   bool skip_to_sequence_element(MemberId id);
@@ -226,6 +226,15 @@ private:
 
   template<typename SequenceType, typename ElementTypeKind>
   bool get_values_from_union(SequenceType& value, MemberId id);
+
+  template<typename SequenceType, typename ElementTypeKind>
+  bool get_values_from_sequence(SequenceType& value, MemberId id);
+
+  template<typename SequenceType, typename ElementTypeKind>
+  bool get_values_from_array(SequenceType& value, MemberId id);
+
+  template<typename SequenceType, typename ElementTypeKind>
+  bool get_values_from_map(SequenceType& value, MemberId id);
 
   /// Template that reads sequence of values from all valid containing types.
   template<typename SequenceType, typename ElementTypeKind>
