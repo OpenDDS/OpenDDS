@@ -422,11 +422,13 @@ private:
   // amount of private state is shared between both classes.
   friend class TransportSendBuffer;
 
+  /// Current transport packet header.
+  TransportHeader header_;
+
 protected:
   ThreadSynch* synch() const;
 
-  /// Current transport packet header.
-  TransportHeader header_;
+  void set_header_source(ACE_INT64 source);
 };
 
 } // namespace DCPS

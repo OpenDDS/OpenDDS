@@ -51,9 +51,6 @@ using DCPS::ENDIAN_BIG;
 using DCPS::ENDIAN_LITTLE;
 
 namespace {
-  const CORBA::UShort encap_LE = 0x0300; // {PL_CDR_LE} in LE
-  const CORBA::UShort encap_BE = 0x0200; // {PL_CDR_BE} in LE
-
   const Encoding encoding_plain_big(Encoding::KIND_XCDR1, ENDIAN_BIG);
   const Encoding encoding_plain_native(Encoding::KIND_XCDR1);
 
@@ -615,8 +612,9 @@ bool cmp_ip4(const ACE_INET_Addr& a, const DCPS::Locator_t& locator)
 {
   struct sockaddr_in* sa = static_cast<struct sockaddr_in*>(a.get_addr());
   if (sa->sin_family == AF_INET && locator.kind == LOCATOR_KIND_UDPv4) {
-    const char* ip = reinterpret_cast<const char*>(&sa->sin_addr);
-    return ACE_OS::memcmp(ip, locator.address + 12, 4) == 0;
+    const unsigned char* ip = reinterpret_cast<const unsigned char*>(&sa->sin_addr);
+    const unsigned char* la = reinterpret_cast<const unsigned char*>(locator.address) + 12;
+    return ACE_OS::memcmp(ip, la, 4) == 0;
   }
   return false;
 }
@@ -626,8 +624,9 @@ bool cmp_ip6(const ACE_INET_Addr& a, const DCPS::Locator_t& locator)
 {
   struct sockaddr_in6* in6 = static_cast<struct sockaddr_in6*>(a.get_addr());
   if (in6->sin6_family == AF_INET6 && locator.kind == LOCATOR_KIND_UDPv6) {
-    const char* ip = reinterpret_cast<const char*>(&in6->sin6_addr);
-    return ACE_OS::memcmp(ip, locator.address, 16) == 0;
+    const unsigned char* ip = reinterpret_cast<const unsigned char*>(&in6->sin6_addr);
+    const unsigned char* la = reinterpret_cast<const unsigned char*>(locator.address);
+    return ACE_OS::memcmp(ip, la, 16) == 0;
   }
   return false;
 }
@@ -643,9 +642,24 @@ bool is_ip_equal(const ACE_INET_Addr& a, const DCPS::Locator_t& locator)
   return cmp_ip4(a, locator);
 }
 
+void print_locator(const CORBA::ULong i, const DCPS::Locator_t& o){
+  const unsigned char* a = reinterpret_cast<const unsigned char*>(o.address);
+  ACE_INET_Addr addr;
+  bool b = locator_to_address(addr, o, false) == 0;
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("locator%d(kind:%d)[%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d] locator_to_address:%C\n"),
+    i, o.kind, a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15],
+    (b ? DCPS::LogAddr(addr).c_str() : "failed")));
+}
+
 bool ip_in_locator_list(const ACE_INET_Addr& from, const DCPS::LocatorSeq& locators)
 {
+  if (DCPS::DCPS_debug_level) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ip_in_locator_list - from (type %d): %C\n"), from.get_type(), DCPS::LogAddr(from).c_str()));
+  }
   for (CORBA::ULong i = 0; i < locators.length(); ++i) {
+    if (DCPS::DCPS_debug_level) {
+      print_locator(i, locators[i]);
+    }
     if (is_ip_equal(from, locators[i])) {
       return true;
     }
@@ -2633,9 +2647,8 @@ Spdp::SpdpTransport::dispose_unregister()
 
   wbuff_.reset();
   DCPS::Serializer ser(&wbuff_, encoding_plain_native);
-  CORBA::UShort options = 0;
-  if (!(ser << hdr_) || !(ser << data_) || !(ser << encap_LE) || !(ser << options)
-      || !(ser << plist)) {
+  DCPS::EncapsulationHeader encap(ser.encoding(), DCPS::MUTABLE);
+  if (!(ser << hdr_) || !(ser << data_) || !(ser << encap) || !(ser << plist)) {
     if (DCPS::DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::dispose_unregister() - ")
@@ -2788,10 +2801,9 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
 #endif
 
   wbuff_.reset();
-  CORBA::UShort options = 0;
   DCPS::Serializer ser(&wbuff_, encoding_plain_native);
-  if (!(ser << hdr_) || !(ser << data_) || !(ser << encap_LE) || !(ser << options)
-      || !(ser << plist)) {
+  DCPS::EncapsulationHeader encap(ser.encoding(), DCPS::MUTABLE);
+  if (!(ser << hdr_) || !(ser << data_) || !(ser << encap) || !(ser << plist)) {
     if (DCPS::DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write() - ")
@@ -2912,9 +2924,9 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, const ACE_INET_Addr& loca
   DCPS::assign(info_dst.guidPrefix, guid.guidPrefix);
 
   wbuff_.reset();
-  CORBA::UShort options = 0;
   DCPS::Serializer ser(&wbuff_, encoding_plain_native);
-  if (!(ser << hdr_) || !(ser << info_dst) || !(ser << data_) || !(ser << encap_LE) || !(ser << options)
+  DCPS::EncapsulationHeader encap(ser.encoding(), DCPS::MUTABLE);
+  if (!(ser << hdr_) || !(ser << info_dst) || !(ser << data_) || !(ser << encap)
       || !(ser << plist)) {
     if (DCPS::DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
@@ -3139,9 +3151,9 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
 
         ParameterList plist;
         if (data.smHeader.flags & (FLAG_D | FLAG_K_IN_DATA)) {
-          ser.swap_bytes(!ACE_CDR_BYTE_ORDER); // read "encap" itself in LE
-          CORBA::UShort encap, options;
-          if (!(ser >> encap) || (encap != encap_LE && encap != encap_BE)) {
+          DCPS::EncapsulationHeader encap;
+          DCPS::Encoding enc;
+          if (!(ser >> encap) || !encap.to_encoding(enc, DCPS::MUTABLE) || enc.kind() != Encoding::KIND_XCDR1) {
             if (DCPS::DCPS_debug_level > 0) {
               ACE_ERROR((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
@@ -3149,10 +3161,9 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
             }
             return 0;
           }
-          ser >> options;
-          // bit 8 in encap is on if it's PL_CDR_LE
-          ser.swap_bytes(((encap & 0x100) >> 8) != ACE_CDR_BYTE_ORDER);
+          ser.encoding(enc);
           if (!(ser >> plist)) {
+
             if (DCPS::DCPS_debug_level > 0) {
               ACE_ERROR((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")

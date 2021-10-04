@@ -444,7 +444,7 @@ private:
       return false;
     }
   };
-  typedef OPENDDS_MAP_T(MatchingPair, MatchingData) MatchingDataMap;
+  typedef OPENDDS_MAP(MatchingPair, MatchingData) MatchingDataMap;
   typedef MatchingDataMap::iterator MatchingDataIter;
 
   void match(const GUID_t& writer, const GUID_t& reader);
@@ -474,7 +474,7 @@ private:
   ACE_Thread_Mutex& lock_;
   GUID_t participant_id_;
   RepoIdSet ignored_guids_;
-  unsigned int publication_counter_, subscription_counter_, topic_counter_;
+  unsigned int topic_counter_;
   LocalPublicationMap local_publications_;
   LocalSubscriptionMap local_subscriptions_;
   DiscoveredPublicationMap discovered_publications_;
@@ -494,7 +494,6 @@ private:
   RcHandle<StaticEndpointManagerSporadic> type_lookup_reply_deadline_processor_;
   TimeDuration max_type_lookup_service_reply_period_;
   SequenceNumber type_lookup_service_sequence_number_;
-  const bool use_xtypes_;
 
   struct TypeIdOrigSeqNumber {
     GuidPrefix_t participant; // Prefix of remote participant

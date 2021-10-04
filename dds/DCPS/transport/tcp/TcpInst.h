@@ -87,7 +87,6 @@ public:
   /// The default is 5 seconds (5000 millseconds).
   int active_conn_timeout_period_;
 
-
   bool is_reliable() const { return true; }
 
   /// The public address is our publicly advertised address.
