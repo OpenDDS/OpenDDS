@@ -801,11 +801,11 @@ DDS::ReturnCode_t DynamicData::set_complex_value(MemberId id, DynamicData value)
 }
 
 
-template<typename SequenceType, typename ElementTypeKind>
-bool DynamicData::read_values(SequenceType& value)
+template<typename SequenceType>
+bool DynamicData::read_values(SequenceType& value, TypeKind element_typekind)
 {
   ACE_CDR::ULong size, len;
-  if (!is_primitive(ElementTypeKind, size)) {
+  if (!is_primitive(element_typekind, size)) {
     if (!strm_.skip(1, 4)) {
       return false;
     }
@@ -825,14 +825,25 @@ bool DynamicData::read_values(SequenceType& value)
 }
 
 template<typename SequenceType, typename ElementTypeKind>
-bool DynamicData::get_values_from_struct(SequenceType& value, MemberId id)
+bool DynamicData::get_values_from_struct(SequenceType& value, MemberId id,
+                                         TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
-  return find_struct_member(id, ElementTypeKind, true) &&
-    read_values<SequenceType, ElementTypeKind>(value);
+  MemberDescriptor md;
+  if (get_from_struct_common_checks(md, id, ElementTypeKind, true)) {
+    return skip_to_struct_member(md, id) && read_values<SequenceType>(value, ElementTypeKind);
+  } else if (get_from_struct_common_checks(md, id, enum_or_bitmask, true)) {
+    const LBound bit_bound = md.element_type->get_descriptor().bound[0];
+    if (bit_bound >= lower && bit_bound <= upper) {
+      skip_to_struct_member(md, id) && read_values<SequenceType>(value, enum_or_bitmask);
+    }
+  }
+
+  return false;
 }
 
 template<typename SequenceType, typename ElementTypeKind>
-bool DynamicData::get_values_from_union(SequenceType& value, MemberId id)
+bool DynamicData::get_values_from_union(SequenceType& value, MemberId id,
+                                        TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   MemberDescriptor md;
   if (!get_from_union_common_checks(ElementTypeKind, id, "get_values_from_union", md)) {
@@ -850,12 +861,13 @@ bool DynamicData::get_values_from_union(SequenceType& value, MemberId id)
     return false;
   }
 
-  const TypeKind elem_tk = get_base_type(selected_type->get_descriptor().element_type)->get_kind();
-  if (elem_tk != ElementTypeKind) {
+  const DynamicType_rch elem_type = get_base_type(selected_type->get_descriptor().element_type);
+  const TypeKind elem_tk = elem_type->get_kind();
+  if (elem_tk != ElementTypeKind && elem_tk != enum_or_bitmask) {
     if (DCPS_debug_level >= 1) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_values_from_union -")
-                 ACE_TEXT(" The selected member is a sequence<%C>, not a sequence<%C>\n"),
-                 typekind_to_string(elem_tk), typekind_to_string(ElementTypeKind)));
+                 ACE_TEXT(" Failed to read a sequence of %C from a sequence of %C\n"),
+                 typekind_to_string(ElementTypeKind), typekind_to_string(elem_tk)));
     }
     return false;
   }
@@ -864,9 +876,20 @@ bool DynamicData::get_values_from_union(SequenceType& value, MemberId id)
     unsigned member_id;
     size_t member_size;
     bool must_understand;
-    if (!strm_.read_parameter_id(member_id, member_size, must_understand)) { return false; }
+    if (!strm_.read_parameter_id(member_id, member_size, must_understand)) {
+      return false;
+    }
   }
-  return read_values<SequenceType, ElementTypeKind>(value);
+
+  if (elem_tk == ElementTypeKind) {
+    return read_values<SequenceType>(value, elem_tk);
+  }
+
+  const LBound bit_bound = elem_type->get_descriptor().bound[0];
+  if (bit_bound >= lower && bit_bound <= upper) {
+    return read_values<SequenceType>(value, elem_tk);
+  }
+  return false;
 }
 
 template<typename SequenceType, typename ElementTypeKind>
@@ -876,41 +899,42 @@ bool DynamicData::get_values_from_sequence(SequenceType& value, MemberId id,
   const DynamicType_rch elem_type = get_base_type(descriptor_.element_type);
   const TypeKind elem_tk = elem_type->get_kind();
 
-  // TODO(sonndinh): Review this and update read_values signature.
   if (elem_tk == ElementTypeKind) {
-    return read_values<SequenceType, ElementTypeKind>(value);
+    return read_values<SequenceType>(value, elem_tk);
   } else if (elem_tk == enum_or_bitmask) {
     // Read from a sequence of enums or bitmasks.
     const LBound bit_bound = elem_type->get_descriptor().bound[0];
     if (bit_bound >= lower && bit_bound <= upper) {
       return read_values<SequenceType>(value, elem_tk);
     }
+    return false;
   } else if (elem_tk == TK_SEQUENCE) {
-    // Read from a sequence of sequence<ElementTypeKind>.
     const DynamicType_rch nested_elem_type = get_base_type(elem_type->get_descriptor().element_type);
     const TypeKind nested_elem_tk = nested_elem_type->get_kind();
     if (nested_elem_tk == ElementTypeKind) {
-      return skip_to_sequence_element(id) && read_values<SequenceType, ElementTypeKind>(value);
+      // Read from a sequence of sequence of ElementTypeKind.
+      return skip_to_sequence_element(id) && read_values<SequenceType>(value, nested_elem_tk);
     } else if (nested_elem_tk == enum_or_bitmask) {
       // Read from a sequence of sequence of enums or bitmasks.
       const LBound bit_bound = nested_elem_type->get_descriptor().bound[0];
       if (bit_bound >= lower && bit_bound <= upper) {
         return skip_to_sequence_element(id) && read_values<SequenceType>(value, nested_elem_tk);
       }
+      return false;
     }
   }
 
   if (DCPS_debug_level >= 1) {
     const char* const etk = typekind_to_string(ElementTypeKind);
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_values_from_sequence -")
-               ACE_TEXT(" Getting sequence<%C> from a type that is not a sequence<%C>")
-               ACE_TEXT(" or a sequence<sequence<%C>>\n"), etk, etk, etk));
+               ACE_TEXT(" Getting sequence<%C> from an incompatible type\n"), etk));
   }
   return false;
 }
 
 template<typename SequenceType, typename ElementTypeKind>
-bool DynamicData::get_values_from_array(SequenceType& value, MemberId id)
+bool DynamicData::get_values_from_array(SequenceType& value, MemberId id,
+                                        TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   const DynamicType_rch elem_type = get_base_type(descriptor_.element_type);
   if (elem_type->get_kind() != TK_SEQUENCE) {
@@ -922,21 +946,28 @@ bool DynamicData::get_values_from_array(SequenceType& value, MemberId id)
     return false;
   }
 
-  const TypeKind nested_elem_tk = get_base_type(elem_type->get_descriptor().element_type)->get_kind();
-  if (nested_elem_tk != ElementTypeKind) {
-    if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_values_from_array -")
-                 ACE_TEXT(" Getting sequence<%C> from an array of sequence<%C>\n"),
-                 typekind_to_string(ElementTypeKind), typekind_to_string(nested_elem_tk)));
+  const DynamicType_rch nested_elem_type = get_base_type(elem_type->get_descriptor().element_type);
+  const TypeKind nested_elem_tk = nested_elem_type->get_kind();
+  if (nested_elem_tk == ElementTypeKind) {
+    return skip_to_array_element(id) && read_values<SequenceType>(value, nested_elem_tk);
+  } else if (nested_elem_tk == enum_or_bitmask) {
+    const LBound bit_bound = nested_elem_type->get_descriptor().bound[0];
+    if (bit_bound >= lower && bit_bound <= upper) {
+      return skip_to_array_element(id) && read_values<SequenceType>(value, nested_elem_tk);
     }
-    return false;
   }
 
-  return skip_to_array_element(id) && read_values<SequenceType, ElementTypeKind>(value);
+  if (DCPS_debug_level >= 1) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_values_from_array -")
+               ACE_TEXT(" Getting sequence<%C> from an array of sequence<%C>\n"),
+               typekind_to_string(ElementTypeKind), typekind_to_string(nested_elem_tk)));
+  }
+  return false;
 }
 
 template<typename SequenceType, typename ElementTypeKind>
-bool DynamicData::get_values_from_map(SequenceType& value, MemberId id)
+bool DynamicData::get_values_from_map(SequenceType& value, MemberId id,
+                                      TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   const DynamicType_rch elem_type = get_base_type(descriptor_.element_type);
   if (elem_type->get_kind() != TK_SEQUENCE) {
@@ -948,17 +979,23 @@ bool DynamicData::get_values_from_map(SequenceType& value, MemberId id)
     return false;
   }
 
-  const TypeKind nested_elem_tk = get_base_type(elem_type->get_descriptor().element_type)->get_kind();
-  if (nested_elem_tk != ElementTypeKind) {
-    if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_values_from_map -")
-                 ACE_TEXT(" Getting sequence<%C> from a map with element type sequence<%C>\n"),
-                 typekind_to_string(ElementTypeKind), typekind_to_string(nested_elem_tk)));
+  const DynamicType_rch nested_elem_type = get_base_type(elem_type->get_descriptor().element_type);
+  const TypeKind nested_elem_tk = nested_elem_type->get_kind();
+  if (nested_elem_tk == ElementTypeKind) {
+    return skip_to_map_element(id) && read_values<SequenceType>(value, nested_elem_tk);
+  } else if (nested_elem_tk == enum_or_bitmask) {
+    const LBound bit_bound = nested_elem_type->get_descriptor().bound[0];
+    if (bit_bound >= lower && bit_bound <= upper) {
+      return skip_to_map_element(id) && read_values<SequenceType>(value, nested_elem_tk);
     }
-    return false;
   }
 
-  return skip_to_map_element(id) && read_values<SequenceType, ElementTypeKind>(value);
+  if (DCPS_debug_level >= 1) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_values_from_map -")
+               ACE_TEXT(" Getting sequence<%C> from a map with element type sequence<%C>\n"),
+               typekind_to_string(ElementTypeKind), typekind_to_string(nested_elem_tk)));
+  }
+  return false;
 }
 
 template<typename SequenceType, typename ElementTypeKind>
@@ -975,19 +1012,19 @@ DDS::ReturnCode_t DynamicData::get_sequence_values(SequenceType& value, MemberId
 
   switch (tk) {
   case TK_STRUCTURE:
-    good = get_values_from_struct<SequenceType, ElementTypeKind>(value, id);
+    good = get_values_from_struct<SequenceType, ElementTypeKind>(value, id, enum_or_bitmask, lower, upper);
     break;
   case TK_UNION:
-    good = get_values_from_union<SequenceType, ElementTypeKind>(value, id);
+    good = get_values_from_union<SequenceType, ElementTypeKind>(value, id, enum_or_bitmask, lower, upper);
     break;
   case TK_SEQUENCE:
     good = get_values_from_sequence<SequenceType, ElementTypeKind>(value, id, enum_or_bitmask, lower, upper);
     break;
   case TK_ARRAY:
-    good = get_values_from_array<SequenceType, ElementTypeKind>(value, id);
+    good = get_values_from_array<SequenceType, ElementTypeKind>(value, id, enum_or_bitmask, lower, upper);
     break;
   case TK_MAP:
-    good = get_values_from_map<SequenceType, ElementTypeKind>(value, id);
+    good = get_values_from_map<SequenceType, ElementTypeKind>(value, id, enum_or_bitmask, lower, upper);
     break;
   default:
     if (DCPS_debug_level >= 1) {
@@ -1021,7 +1058,7 @@ DDS::ReturnCode_t DynamicData::set_int32_values(MemberId id, const Int32Seq& val
 
 DDS::ReturnCode_t DynamicData::get_uint32_values(UInt32Seq& value, MemberId id)
 {
-  return get_sequence_values<UInt32Seq, TK_UINT32>(value, id);
+  return get_sequence_values<UInt32Seq, TK_UINT32>(value, id, TK_BITMASK, 17, 32);
 }
 
 DDS::ReturnCode_t DynamicData::set_uint32_values(MemberId id, const UInt32Seq& value)
@@ -1032,7 +1069,7 @@ DDS::ReturnCode_t DynamicData::set_uint32_values(MemberId id, const UInt32Seq& v
 
 DDS::ReturnCode_t DynamicData::get_int8_values(Int8Seq& value, MemberId id)
 {
-  return get_sequence_values<Int8Seq, TK_INT8>(value, id);
+  return get_sequence_values<Int8Seq, TK_INT8>(value, id, TK_ENUM, 1, 8);
 }
 
 DDS::ReturnCode_t DynamicData::set_int8_values(MemberId id, const Int8Seq& value)
@@ -1043,7 +1080,7 @@ DDS::ReturnCode_t DynamicData::set_int8_values(MemberId id, const Int8Seq& value
 
 DDS::ReturnCode_t DynamicData::get_uint8_values(UInt8Seq& value, MemberId id)
 {
-  return get_sequence_values<UInt8Seq, TK_UINT8>(value, id);
+  return get_sequence_values<UInt8Seq, TK_UINT8>(value, id, TK_BITMASK, 1, 8);
 }
 
 DDS::ReturnCode_t DynamicData::set_uint8_values(MemberId id, const UInt8Seq& value)
@@ -1054,7 +1091,7 @@ DDS::ReturnCode_t DynamicData::set_uint8_values(MemberId id, const UInt8Seq& val
 
 DDS::ReturnCode_t DynamicData::get_int16_values(Int16Seq& value, MemberId id)
 {
-  return get_sequence_values<Int16Seq, TK_INT16>(value, id);
+  return get_sequence_values<Int16Seq, TK_INT16>(value, id, TK_ENUM, 9, 16);
 }
 
 DDS::ReturnCode_t DynamicData::set_int16_values(MemberId id, const Int16Seq& value)
@@ -1065,7 +1102,7 @@ DDS::ReturnCode_t DynamicData::set_int16_values(MemberId id, const Int16Seq& val
 
 DDS::ReturnCode_t DynamicData::get_uint16_values(UInt16Seq& value, MemberId id)
 {
-  return get_sequence_values<UInt16Seq, TK_UINT16>(value, id);
+  return get_sequence_values<UInt16Seq, TK_UINT16>(value, id, TK_BITMASK, 9, 16);
 }
 
 DDS::ReturnCode_t DynamicData::set_uint16_values(MemberId id, const UInt16Seq& value)
@@ -1087,7 +1124,7 @@ DDS::ReturnCode_t DynamicData::set_int64_values(MemberId id, const Int64Seq& val
 
 DDS::ReturnCode_t DynamicData::get_uint64_values(UInt64Seq& value, MemberId id)
 {
-  return get_sequence_values<UInt64Seq, TK_UINT64>(value, id);
+  return get_sequence_values<UInt64Seq, TK_UINT64>(value, id, TK_BITMASK, 33, 64);
 }
 
 DDS::ReturnCode_t DynamicData::set_uint64_values(MemberId id, const UInt64Seq& value)
@@ -1265,31 +1302,25 @@ bool DynamicData::skip_to_struct_member(const MemberDescriptor& member_desc, Mem
   }
 }
 
-bool DynamicData::find_struct_member(MemberId id, TypeKind kind, bool is_sequence)
+bool DynamicData::get_from_struct_common_checks(MemberDescriptor& md, MemberId id, TypeKind kind, bool is_sequence)
 {
-  const OPENDDS_MAP<MemberId, size_t>::const_iterator it = offset_lookup_table_.find(id);
-  if (it != offset_lookup_table_.end()) {
-    const size_t offset = it->second;
-    return strm_.skip(offset);
-  }
-
   DynamicTypeMember_rch member;
   const DDS::ReturnCode_t retcode = type_->get_member(member, id);
   if (retcode != DDS::RETCODE_OK) {
     if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::find_struct_member -")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_from_struct_common_checks -")
                  ACE_TEXT(" Failed to get DynamicTypeMember for member with ID %d\n"), id));
     }
     return false;
   }
 
-  const MemberDescriptor member_desc = member->get_descriptor();
-  const DynamicType_rch member_type = get_base_type(member_desc.type);
+  md = member->get_descriptor();
+  const DynamicType_rch member_type = get_base_type(md.type);
   const TypeKind member_kind = member_type->get_kind();
 
   if ((!is_sequence && member_kind != kind) || (is_sequence && member_kind != TK_SEQUENCE)) {
     if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::find_struct_member -")
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DynamicData::get_from_struct_common_checks -")
                  ACE_TEXT(" Member with ID %d has kind %C, not %C\n"),
                  id, typekind_to_string(member_kind),
                  is_sequence ? typekind_to_string(TK_SEQUENCE) : typekind_to_string(kind)));
@@ -1302,7 +1333,7 @@ bool DynamicData::find_struct_member(MemberId id, TypeKind kind, bool is_sequenc
     const TypeKind elem_kind = get_base_type(member_td.element_type)->get_kind();
     if (elem_kind != kind) {
       if (DCPS_debug_level >= 1) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::find_struct_member -")
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DynamicData::get_from_struct_common_checks -")
                    ACE_TEXT(" Member with ID is a sequence of %C, not %C\n"),
                    id, typekind_to_string(elem_kind), typekind_to_string(kind)));
       }
@@ -1310,10 +1341,24 @@ bool DynamicData::find_struct_member(MemberId id, TypeKind kind, bool is_sequenc
     }
   }
 
-  if (!skip_to_struct_member(member_desc, id)) {
+  return true;
+}
+
+bool DynamicData::find_struct_member(MemberId id, TypeKind kind, bool is_sequence)
+{
+  MemberDescriptor md;
+  if (!get_from_struct_common_checks(md, id, kind, is_sequence) ||
+      !skip_to_struct_member(member_desc, id)) {
     return false;
   }
+
+  const OPENDDS_MAP<MemberId, size_t>::const_iterator it = offset_lookup_table_.find(id);
+  if (it != offset_lookup_table_.end()) {
+    const size_t offset = it->second;
+    return strm_.skip(offset);
+  }
   offset_lookup_table_[id] = strm_.rpos() - start_rpos_;
+
   return true;
 }
 

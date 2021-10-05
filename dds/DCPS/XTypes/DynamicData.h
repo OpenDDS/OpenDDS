@@ -218,29 +218,32 @@ private:
   /// element is also skipped.
   bool skip_to_map_element(MemberId id);
 
-  /// Read a sequence of a primitive type or string or wstring.
-  template<typename SequenceType, typename ElementTypeKind>
-  bool read_values(SequenceType& value);
+  /// Read a sequence with element type @a element_typekind and store in @a value,
+  /// which is a sequence of primitives or strings or wstrings.
+  template<typename SequenceType>
+  bool read_values(SequenceType& value, TypeKind element_typekind);
 
   // Templates for reading a sequence of primitives or strings or wstrings
   // as a member (or an element) of a given containing type.
   template<typename SequenceType, typename ElementTypeKind>
-  bool get_values_from_struct(SequenceType& value, MemberId id);
+  bool get_values_from_struct(SequenceType& value, MemberId id,
+                              TypeKind enum_or_bitmask, LBound lower, LBound upper);
 
   template<typename SequenceType, typename ElementTypeKind>
-  bool get_values_from_union(SequenceType& value, MemberId id);
+  bool get_values_from_union(SequenceType& value, MemberId id,
+                             TypeKind enum_or_bitmask, LBound lower, LBound upper);
 
   template<typename SequenceType, typename ElementTypeKind>
   bool get_values_from_sequence(SequenceType& value, MemberId id,
-                                TypeKind enum_or_bitmask,
-                                LBound lower,
-                                LBound upper);
+                                TypeKind enum_or_bitmask, LBound lower, LBound upper);
 
   template<typename SequenceType, typename ElementTypeKind>
-  bool get_values_from_array(SequenceType& value, MemberId id);
+  bool get_values_from_array(SequenceType& value, MemberId id,
+                             TypeKind enum_or_bitmask, LBound lower, LBound upper);
 
   template<typename SequenceType, typename ElementTypeKind>
-  bool get_values_from_map(SequenceType& value, MemberId id);
+  bool get_values_from_map(SequenceType& value, MemberId id,
+                           TypeKind enum_or_bitmask, LBound lower, LBound upper);
 
   /// Template that reads sequence of values from all valid containing types.
   template<typename SequenceType, typename ElementTypeKind>
