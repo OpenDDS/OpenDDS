@@ -45,7 +45,7 @@ DDS::ReturnCode_t DynamicType::get_member_by_name(DynamicTypeMember_rch& member,
   if (pos != member_by_name.end()) {
     member = pos->second;
     return DDS::RETCODE_OK;
-  } 
+  }
   return DDS::RETCODE_ERROR;
 }
 
