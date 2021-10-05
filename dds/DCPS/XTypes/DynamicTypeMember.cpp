@@ -91,7 +91,7 @@ bool test_equality_i(const DynamicTypeMembersById& lhs, const DynamicTypeMembers
     for (DynamicTypeMembersById::const_iterator lhs_it = lhs.begin(); lhs_it != lhs.end(); ++lhs_it) {
       DynamicTypeMembersById::const_iterator rhs_it = rhs.find(lhs_it->first);
       if (rhs_it == rhs.end() ||
-         !test_equality_i(lhs_it->second->get_descriptor(), rhs_it->second->get_descriptor(), dt_ptr_pair)) {
+          !test_equality_i(lhs_it->second->get_descriptor(), rhs_it->second->get_descriptor(), dt_ptr_pair)) {
         return false;
       }
     }
