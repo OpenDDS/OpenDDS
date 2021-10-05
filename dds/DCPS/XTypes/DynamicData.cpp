@@ -805,7 +805,7 @@ template<typename SequenceType, typename ElementTypeKind>
 bool DynamicData::read_values(SequenceType& value)
 {
   ACE_CDR::ULong size, len;
-  if (ElementTypeKind == TK_STRING8 || ElementTypeKind == TK_STRING16) {
+  if (!is_primitive(ElementTypeKind, size)) {
     if (!strm_.skip(1, 4)) {
       return false;
     }
@@ -870,18 +870,33 @@ bool DynamicData::get_values_from_union(SequenceType& value, MemberId id)
 }
 
 template<typename SequenceType, typename ElementTypeKind>
-bool DynamicData::get_values_from_sequence(SequenceType& value, MemberId id)
+bool DynamicData::get_values_from_sequence(SequenceType& value, MemberId id,
+                                           TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   const DynamicType_rch elem_type = get_base_type(descriptor_.element_type);
   const TypeKind elem_tk = elem_type->get_kind();
 
+  // TODO(sonndinh): Review this and update read_values signature.
   if (elem_tk == ElementTypeKind) {
     return read_values<SequenceType, ElementTypeKind>(value);
+  } else if (elem_tk == enum_or_bitmask) {
+    // Read from a sequence of enums or bitmasks.
+    const LBound bit_bound = elem_type->get_descriptor().bound[0];
+    if (bit_bound >= lower && bit_bound <= upper) {
+      return read_values<SequenceType>(value, elem_tk);
+    }
   } else if (elem_tk == TK_SEQUENCE) {
-    // Reading from a sequence of sequence<ElementTypeKind>.
-    const TypeKind nested_elem_tk = get_base_type(elem_type->get_descriptor().element_type)->get_kind();
+    // Read from a sequence of sequence<ElementTypeKind>.
+    const DynamicType_rch nested_elem_type = get_base_type(elem_type->get_descriptor().element_type);
+    const TypeKind nested_elem_tk = nested_elem_type->get_kind();
     if (nested_elem_tk == ElementTypeKind) {
       return skip_to_sequence_element(id) && read_values<SequenceType, ElementTypeKind>(value);
+    } else if (nested_elem_tk == enum_or_bitmask) {
+      // Read from a sequence of sequence of enums or bitmasks.
+      const LBound bit_bound = nested_elem_type->get_descriptor().bound[0];
+      if (bit_bound >= lower && bit_bound <= upper) {
+        return skip_to_sequence_element(id) && read_values<SequenceType>(value, nested_elem_tk);
+      }
     }
   }
 
@@ -947,7 +962,9 @@ bool DynamicData::get_values_from_map(SequenceType& value, MemberId id)
 }
 
 template<typename SequenceType, typename ElementTypeKind>
-DDS::ReturnCode_t DynamicData::get_sequence_values(SequenceType& value, MemberId id)
+DDS::ReturnCode_t DynamicData::get_sequence_values(SequenceType& value, MemberId id,
+                                                   TypeKind enum_or_bitmask, LBound lower, LBound upper)
+
 {
   if (!is_type_supported(ElementTypeKind, "get_sequence_values")) {
     return DDS::RETCODE_ERROR;
@@ -964,7 +981,7 @@ DDS::ReturnCode_t DynamicData::get_sequence_values(SequenceType& value, MemberId
     good = get_values_from_union<SequenceType, ElementTypeKind>(value, id);
     break;
   case TK_SEQUENCE:
-    good = get_values_from_sequence<SequenceType, ElementTypeKind>(value, id);
+    good = get_values_from_sequence<SequenceType, ElementTypeKind>(value, id, enum_or_bitmask, lower, upper);
     break;
   case TK_ARRAY:
     good = get_values_from_array<SequenceType, ElementTypeKind>(value, id);
@@ -974,16 +991,16 @@ DDS::ReturnCode_t DynamicData::get_sequence_values(SequenceType& value, MemberId
     break;
   default:
     if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_%C_values -")
-                 ACE_TEXT(" Called on an imcompatible type %C"),
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_sequence_values -")
+                 ACE_TEXT(" A sequence<%C> can't be read as a member of type %C"),
                  typekind_to_string(ElementTypeKind), typekind_to_string(tk)));
     }
     return DDS::RETCODE_ERROR;
   }
 
   if (!good && DCPS_debug_level >= 1) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Dynamic::get_%C_values -")
-               ACE_TEXT(" Failed to read DynamicData object of type %C\n"),
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_sequence_values -")
+               ACE_TEXT(" Failed to read sequence<%C> from a DynamicData object of type %C\n"),
                typekind_to_string(ElementTypeKind), typekind_to_string(tk)));
   }
 
@@ -993,7 +1010,7 @@ DDS::ReturnCode_t DynamicData::get_sequence_values(SequenceType& value, MemberId
 
 DDS::ReturnCode_t DynamicData::get_int32_values(Int32Seq& value, MemberId id)
 {
-  return get_sequence_values<Int32Seq, TK_INT32>(value, id);
+  return get_sequence_values<Int32Seq, TK_INT32>(value, id, TK_ENUM, 17, 32);
 }
 
 DDS::ReturnCode_t DynamicData::set_int32_values(MemberId id, const Int32Seq& value)

@@ -169,9 +169,6 @@ public:
 
 private:
 
-  /// Determine if a primitive type can be read from an enum or bitmask.
-  enum FromEnumeratedType { None, Enum, Bitmask };
-
   /// Verify that a given type is primitive or string or wstring.
   bool is_type_supported(TypeKind tk, const char* func_name);
 
@@ -234,7 +231,10 @@ private:
   bool get_values_from_union(SequenceType& value, MemberId id);
 
   template<typename SequenceType, typename ElementTypeKind>
-  bool get_values_from_sequence(SequenceType& value, MemberId id);
+  bool get_values_from_sequence(SequenceType& value, MemberId id,
+                                TypeKind enum_or_bitmask,
+                                LBound lower,
+                                LBound upper);
 
   template<typename SequenceType, typename ElementTypeKind>
   bool get_values_from_array(SequenceType& value, MemberId id);
@@ -244,7 +244,10 @@ private:
 
   /// Template that reads sequence of values from all valid containing types.
   template<typename SequenceType, typename ElementTypeKind>
-  DDS::ReturnCode_t get_sequence_values(SequenceType& value, MemberId id);
+  DDS::ReturnCode_t get_sequence_values(SequenceType& value, MemberId id,
+                                        TypeKind enum_or_bitmask = TK_NONE,
+                                        LBound lower = 0,
+                                        LBound upper = 0);
 
   /// Move the read pointer to the member with a given ID.
   /// In case the member is not a sequence, @a kind is the type kind of the member.
