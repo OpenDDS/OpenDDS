@@ -25,7 +25,7 @@ void DynamicTypeMember::get_descriptor(MemberDescriptor& descriptor) const
   descriptor = descriptor_;
 }
 
-MemberDescriptor DynamicTypeMember::get_descriptor()
+MemberDescriptor DynamicTypeMember::get_descriptor() const
 {
   return descriptor_;
 }
@@ -57,7 +57,7 @@ bool DynamicTypeMember::equals(const DynamicTypeMember& other) const
   DynamicTypePtrPairSeen dt_ptr_pair;
   return
     test_equality_i(parent_.lock(), other.parent_.lock(), dt_ptr_pair) &&
-    OpenDDS::XTypes::test_equality_i(descriptor_, other.descriptor_, dt_ptr_pair);
+    test_equality_i(descriptor_, other.descriptor_, dt_ptr_pair);
 }
 
 MemberId DynamicTypeMember::get_id() const
@@ -74,19 +74,15 @@ bool test_equality_i(const DynamicTypeMembersByName& lhs, const DynamicTypeMembe
 {
   if (lhs.size() == rhs.size()) {
     for (DynamicTypeMembersByName::const_iterator lhs_it = lhs.begin(); lhs_it != lhs.end(); ++lhs_it) {
-      DynamicTypeMembersByName::const_iterator rhs_it = rhs.find(lhs_it->first);
-      if (rhs_it != rhs.end()) {
-        if (!test_equality_i(lhs_it->second->get_descriptor(), rhs_it->second->get_descriptor(), dt_ptr_pair)) {
-          return false;
-        }
-      } else {
+      const DynamicTypeMembersByName::const_iterator rhs_it = rhs.find(lhs_it->first);
+      if (rhs_it == rhs.end() ||
+          !test_equality_i(lhs_it->second->get_descriptor(), rhs_it->second->get_descriptor(), dt_ptr_pair)) {
         return false;
       }
     }
     return true;
-  } else {
-    return false;
   }
+  return false;
 }
 
 bool test_equality_i(const DynamicTypeMembersById& lhs, const DynamicTypeMembersById& rhs, DynamicTypePtrPairSeen& dt_ptr_pair)
@@ -94,18 +90,14 @@ bool test_equality_i(const DynamicTypeMembersById& lhs, const DynamicTypeMembers
   if (lhs.size() == rhs.size()) {
     for (DynamicTypeMembersById::const_iterator lhs_it = lhs.begin(); lhs_it != lhs.end(); ++lhs_it) {
       DynamicTypeMembersById::const_iterator rhs_it = rhs.find(lhs_it->first);
-      if (rhs_it != rhs.end()) {
-        if (!test_equality_i(lhs_it->second->get_descriptor(), rhs_it->second->get_descriptor(), dt_ptr_pair)) {
-          return false;
-        }
-      } else {
+      if (rhs_it == rhs.end() ||
+         !test_equality_i(lhs_it->second->get_descriptor(), rhs_it->second->get_descriptor(), dt_ptr_pair)) {
         return false;
       }
     }
     return true;
-  } else {
-    return false;
   }
+  return false;
 }
 
 } // namespace XTypes

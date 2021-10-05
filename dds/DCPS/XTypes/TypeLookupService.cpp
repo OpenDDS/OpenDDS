@@ -681,7 +681,7 @@ DynamicType_rch TypeLookupService::type_identifier_to_dynamic(const TypeIdentifi
   TypeDescriptor td;
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    GuidTypeMap::iterator guid_found = gt_map_.find(guid);
+    const GuidTypeMap::iterator guid_found = gt_map_.find(guid);
     if (guid_found != gt_map_.end()) {
       const DynamicTypeMap::const_iterator ti_found = guid_found->second.find(ti);
       if (ti_found != guid_found->second.end()) {
@@ -958,7 +958,7 @@ bool TypeLookupService::extensibility(TypeFlag extensibility_mask, const TypeIde
 void TypeLookupService::remove_guid_from_dynamic_map(DCPS::GUID_t guid)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  GuidTypeMap::iterator g_found = gt_map_.find(guid);
+  const GuidTypeMap::iterator g_found = gt_map_.find(guid);
   if (g_found != gt_map_.end()) {
     gt_map_.erase(g_found);
     if(DCPS::DCPS_debug_level >= 4) {

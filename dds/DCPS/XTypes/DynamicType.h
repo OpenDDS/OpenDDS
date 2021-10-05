@@ -19,13 +19,13 @@ public:
 
   void set_descriptor(const TypeDescriptor& descriptor);
   void get_descriptor(TypeDescriptor& descriptor) const;
-  TypeDescriptor get_descriptor();
+  TypeDescriptor get_descriptor() const;
   DCPS::String get_name() const;
   TypeKind get_kind() const;
   DDS::ReturnCode_t get_member_by_name(DynamicTypeMember_rch& member, const DCPS::String& name) const;
-  void get_all_members_by_name(DynamicTypeMembersByName& member);
+  void get_all_members_by_name(DynamicTypeMembersByName& member) const;
   DDS::ReturnCode_t get_member(DynamicTypeMember_rch& member, MemberId id) const;
-  void get_all_members(DynamicTypeMembersById& member);
+  void get_all_members(DynamicTypeMembersById& member) const;
   ACE_CDR::ULong get_member_count() const;
   DDS::ReturnCode_t get_member_by_index(DynamicTypeMember_rch& member, ACE_CDR::ULong index) const;
   bool equals(const DynamicType& other) const;

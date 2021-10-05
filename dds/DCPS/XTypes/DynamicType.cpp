@@ -24,7 +24,7 @@ void DynamicType::get_descriptor(TypeDescriptor& descriptor) const
   descriptor = descriptor_;
 }
 
-TypeDescriptor DynamicType::get_descriptor()
+TypeDescriptor DynamicType::get_descriptor() const
 {
   return descriptor_;
 }
@@ -45,12 +45,11 @@ DDS::ReturnCode_t DynamicType::get_member_by_name(DynamicTypeMember_rch& member,
   if (pos != member_by_name.end()) {
     member = pos->second;
     return DDS::RETCODE_OK;
-  } else {
-    return DDS::RETCODE_ERROR;
-  }
+  } 
+  return DDS::RETCODE_ERROR;
 }
 
-void DynamicType::get_all_members_by_name(DynamicTypeMembersByName& member)
+void DynamicType::get_all_members_by_name(DynamicTypeMembersByName& member) const
 {
   member = member_by_name;
 }
@@ -61,12 +60,11 @@ DDS::ReturnCode_t DynamicType::get_member(DynamicTypeMember_rch& member, MemberI
   if (pos != member_by_id.end()) {
     member = pos->second;
     return DDS::RETCODE_OK;
-  } else {
-    return DDS::RETCODE_ERROR;
   }
+  return DDS::RETCODE_ERROR;
 }
 
-void DynamicType::get_all_members(DynamicTypeMembersById& member)
+void DynamicType::get_all_members(DynamicTypeMembersById& member) const
 {
   member = member_by_id;
 }
@@ -81,9 +79,8 @@ DDS::ReturnCode_t DynamicType::get_member_by_index(DynamicTypeMember_rch& member
   if (index < member_by_index.size()) {
     member = member_by_index[index];
     return DDS::RETCODE_OK;
-  } else {
-    return DDS::RETCODE_ERROR;
   }
+  return DDS::RETCODE_ERROR;
 }
 
 bool DynamicType::equals(const DynamicType& other) const

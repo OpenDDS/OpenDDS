@@ -16,7 +16,7 @@ public:
   ~DynamicTypeMember();
   void set_descriptor(const MemberDescriptor& descriptor);
   void get_descriptor(MemberDescriptor& descriptor) const;
-  MemberDescriptor get_descriptor();
+  MemberDescriptor get_descriptor() const;
   void set_parent(const DynamicType_rch& dt);
   DynamicType_rch get_parent();
   bool equals(const DynamicTypeMember& other) const;
