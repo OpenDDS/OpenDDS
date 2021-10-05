@@ -169,6 +169,9 @@ public:
 
 private:
 
+  /// Determine if a primitive type can be read from an enum or bitmask.
+  enum FromEnumeratedType { None, Enum, Bitmask };
+
   /// Verify that a given type is primitive or string or wstring.
   bool is_type_supported(TypeKind tk, const char* func_name);
 
@@ -188,6 +191,9 @@ private:
 
   template<typename ElementType, typename ElementTypeKind>
   bool get_value_from_map(ElementType& value, MemberId id);
+
+  template<typename ValueType, typename ValueTypeKind>
+  bool get_value_common(TypeKind tk, ValueType& value, MemberId id);
 
   template<typename ValueType, typename ValueTypeKind>
   DDS::ReturnCode_t get_value_excluding_enum_bitmask(ValueType& value, MemberId id);

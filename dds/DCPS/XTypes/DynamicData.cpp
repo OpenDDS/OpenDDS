@@ -309,6 +309,31 @@ bool DynamicData::get_value_from_map(ElementType& value, MemberId id)
 }
 
 template<typename ValueType, typename ValueTypeKind>
+bool DynamicData::get_value_common(TypeKind tk, ValueType& value, MemberId id)
+{
+  switch (tk) {
+  case ValueTypeKind:
+    // Per XTypes spec, the value of a DynamicData object of primitive type or TK_ENUM is
+    // accessed with MEMBER_ID_INVALID Id. However, there is only a single value in such
+    // a DynamicData object, and checking for MEMBER_ID_INVALID from the input is perhaps
+    // unnecessary. So, we read the value immediately here.
+    return (strm_ >> value);
+  case TK_STRUCTURE:
+    return get_value_from_struct<ValueType, ValueTypeKind>(value, id);
+  case TK_UNION:
+    return get_value_from_union<ValueType, ValueTypeKind>(value, id);
+  case TK_SEQUENCE:
+    return get_value_from_sequence<ValueType, ValueTypeKind>(value, id);
+  case TK_ARRAY:
+    return get_value_from_array<ValueType, ValueTypeKind>(value, id);
+  case TK_MAP:
+    return get_value_from_map<ValueType, ValueTypeKind>(value, id);
+  default:
+    return false;
+  }
+}
+
+template<typename ValueType, typename ValueTypeKind>
 DDS::ReturnCode_t DynamicData::get_value_excluding_enum_bitmask(ValueType& value, MemberId id)
 {
   if (!is_type_supported(ValueTypeKind, "get_value_excluding_enum_bitmask")) {
@@ -316,40 +341,9 @@ DDS::ReturnCode_t DynamicData::get_value_excluding_enum_bitmask(ValueType& value
   }
 
   const TypeKind tk = type_->get_kind();
-  bool good = true;
-
-  switch (tk) {
-  case ValueTypeKind:
-    good = (strm_ >> value);
-    break;
-  case TK_STRUCTURE:
-    good = get_value_from_struct<ValueType, ValueTypeKind>(value, id);
-    break;
-  case TK_UNION:
-    good = get_value_from_union<ValueType, ValueTypeKind>(value, id);
-    break;
-  case TK_SEQUENCE:
-    good = get_value_from_sequence<ValueType, ValueTypeKind>(value, id);
-    break;
-  case TK_ARRAY:
-    good = get_value_from_array<ValueType, ValueTypeKind>(value, id);
-    break;
-  case TK_MAP:
-    good = get_value_from_map<ValueType, ValueTypeKind>(value, id);
-    break;
-  default:
-    if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_%C_value -")
-                 ACE_TEXT(" Called on an incompatible type %C\n"),
-                 typekind_to_string(ValueTypeKind), typekind_to_string(tk)));
-    }
-    return DDS::RETCODE_ERROR;
-  }
-
-  if (!good && DCPS_debug_level >= 1) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Dynamic::get_%C_value -")
-               ACE_TEXT(" Failed to read DynamicData object of type %C\n"),
-               typekind_to_string(ValueTypeKind), typekind_to_string(tk)));
+  if (!get_value_common<ValueType, ValueTypeKind>(tk, value, id) && DCPS_debug_level >= 1) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_value_excluding_enum_bitmask -")
+               ACE_TEXT(" Failed to read DynamicData object of type %C\n"), typekind_to_string(tk)));
   }
 
   reset_rpos();
@@ -367,53 +361,25 @@ DDS::ReturnCode_t DynamicData::get_value_including_enum_bitmask(ValueType& value
   const TypeKind tk = type_->get_kind();
   bool good = true;
 
-  switch (tk) {
-  case ValueTypeKind:
-  case EnumeratedTypeKind:
-    // XTypes spec says the value of a DynamicData object of primitive type or TK_ENUM is
-    // accessed with ID MEMBER_ID_INVALID. However, there is only a single value in this
-    // DynamicData object, so checking ID is perhaps unnecessary.
-    if (tk == EnumeratedTypeKind) {
-      const LBound bit_bound = descriptor_.bound[0];
-      if (!(bit_bound >= lower && bit_bound <= upper)) {
-        if (DCPS_debug_level >= 1) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_%C_value -")
-                     ACE_TEXT(" Called on %C type with bit_bound %d\n"),
-                     typekind_to_string(ValueTypeKind), typekind_to_string(EnumeratedTypeKind), bit_bound));
-        }
-        good = false;
-        break;
+  if (tk == EnumeratedTypeKind) {
+    const LBound bit_bound = descriptor_.bound[0];
+    if (!(bit_bound >= lower && bit_bound <= upper)) {
+      if (DCPS_debug_level >= 1) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_value_including_enum_bitmask -")
+                   ACE_TEXT(" Getting %C from a %C type with bit_bound %d\n"),
+                   typekind_to_string(ValueTypeKind), typekind_to_string(EnumeratedTypeKind), bit_bound));
       }
+      good = false;
+    } else {
+      good = (strm_ >> value);
     }
-    good = (strm_ >> value);
-    break;
-  case TK_STRUCTURE:
-    good = get_value_from_struct<ValueType, ValueTypeKind>(value, id);
-    break;
-  case TK_UNION:
-    good = get_value_from_union<ValueType, ValueTypeKind>(value, id);
-    break;
-  case TK_SEQUENCE:
-    good = get_value_from_sequence<ValueType, ValueTypeKind>(value, id);
-    break;
-  case TK_ARRAY:
-    good = get_value_from_array<ValueType, ValueTypeKind>(value, id);
-    break;
-  case TK_MAP:
-    good = get_value_from_map<ValueType, ValueTypeKind>(value, id);
-    break;
-  default:
-    if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_%C_value -")
-                 ACE_TEXT(" Called on an incompatible type %C\n"),
-                 typekind_to_string(ValueTypeKind), typekind_to_string(tk)));
-    }
-    return DDS::RETCODE_ERROR;
+  } else {
+    good = get_value_common<ValueType, ValueTypeKind>(tk, value, id);
   }
 
   if (!good && DCPS_debug_level >= 1) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Dynamic::get_%C_value -")
-               ACE_TEXT(" Failed to read DynamicData object of type %C\n"),
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Dynamic::get_value_including_enum_bitmask -")
+               ACE_TEXT(" Failed to read %C from a DynamicData object of type %C\n"),
                typekind_to_string(ValueTypeKind), typekind_to_string(tk)));
   }
 
