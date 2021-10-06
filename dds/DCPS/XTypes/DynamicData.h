@@ -175,29 +175,22 @@ private:
   /// Templates for reading a single value of type primitive or string or
   /// wstring from a corresponding containing type.
   template<typename MemberType, typename MemberTypeKind>
-  bool get_value_from_struct(MemberType& value, MemberId id);
+  bool get_value_from_struct(MemberType& value, MemberId id,
+                             TypeKind enum_or_bitmask, LBound lower, LBound upper);
 
   template<typename MemberType, typename MemberTypeKind>
-  bool get_value_from_union(MemberType& value, MemberId id);
+  bool get_value_from_union(MemberType& value, MemberId id,
+                            TypeKind enum_or_bitmask, LBound lower, LBound upper);
 
   template<typename ElementType, typename ElementTypeKind>
-  bool get_value_from_sequence(ElementType& value, MemberId id);
-
-  template<typename ElementType, typename ElementTypeKind>
-  bool get_value_from_array(ElementType& value, MemberId id);
-
-  template<typename ElementType, typename ElementTypeKind>
-  bool get_value_from_map(ElementType& value, MemberId id);
+  bool get_value_from_collection(ElementType& value, MemberId id, TypeKind collection_tk,
+                                 TypeKind enum_or_bitmask, LBound lower, LBound upper);
 
   template<typename ValueType, typename ValueTypeKind>
-  bool get_value_common(TypeKind tk, ValueType& value, MemberId id);
-
-  template<typename ValueType, typename ValueTypeKind>
-  DDS::ReturnCode_t get_value_excluding_enum_bitmask(ValueType& value, MemberId id);
-
-  template<typename ValueType, typename ValueTypeKind, typename EnumeratedTypeKind>
-  DDS::ReturnCode_t get_value_including_enum_bitmask(ValueType& value, MemberId id,
-                                                     LBound lower, LBound upper)
+  bool get_single_value(ValueType& value, MemberId id,
+                        TypeKind enum_or_bitmask = TK_NONE,
+                        LBound lower = 0,
+                        LBound upper = 0);
 
   template<typename UIntType>
   bool get_boolean_from_bitmask(ACE_CDR::ULong index, ACE_CDR::Boolean& value);
@@ -305,7 +298,7 @@ private:
 
   /// Cache the offset from the point in the stream where the data of this DynamicData object
   /// starts to the point where a member with a given ID starts.
-  OPENDDS_MAP<MemberId, size_t> offset_lookup_table_;
+  //  OPENDDS_MAP<MemberId, size_t> offset_lookup_table_;
 };
 
 } // namespace XTypes
