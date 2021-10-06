@@ -96,7 +96,7 @@ will be using the `configure` script for OpenDDS (see the
 [`INSTALL.md`](INSTALL.md) file for details), you do not need to download TAO
 first -- the `configure` script will download it for you.
 
-There are two distributions of ACE/TAO that can be used with OpenDDS:
+There are three distributions of ACE/TAO that can be used with OpenDDS:
 
 * OCI ACE/TAO 2.2a patch 21 or later
   * This will be automatically downloaded by default when using the configure
@@ -111,6 +111,12 @@ There are two distributions of ACE/TAO that can be used with OpenDDS:
       also downloads the `master` branch of MPC as is.
   * Can be manually downloaded from:
     * https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-6_5_14
+* DOC Group ACE 7.0.4 / TAO 3.0.4 or later in the ACE 7.x / TAO 3.x series. 
+  This distribution requires a C++11 capable compiler
+  * When using the configure script, DOC Group ACE/TAO can be downloaded using:
+    * `--doc-group3` for the latest release
+  * Can be manually downloaded from:
+    * https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-7_0_4
 
 The TAO Developer's Guide book can be requested for free from
 https://objectcomputing.com/products/tao/tao-developers-guide
