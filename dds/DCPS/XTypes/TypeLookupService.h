@@ -7,6 +7,10 @@
 #define OPENDDS_DCPS_XTYPES_TYPE_LOOKUP_SERVICE_H
 
 #include "TypeObject.h"
+#include "DynamicTypeMember.h"
+#include "MemberDescriptor.h"
+#include "TypeDescriptor.h"
+#include "DynamicType.h"
 
 #include <dds/DCPS/RcObject.h>
 #include <dds/DCPS/GuidUtils.h>
@@ -41,6 +45,11 @@ public:
   void update_type_identifier_map(const TypeIdentifierPairSeq& tid_pairs);
   bool complete_to_minimal_type_object(const TypeObject& cto, TypeObject& mto) const;
   ///@}
+
+  typedef OPENDDS_MAP(TypeIdentifier, DynamicType_rch) DynamicTypeMap;
+  typedef OPENDDS_MAP(DCPS::GUID_t, DynamicTypeMap) GuidTypeMap;
+  DynamicType_rch complete_to_dynamic(const CompleteTypeObject& cto, const DCPS::GUID_t& guid);
+  void remove_guid_from_dynamic_map(const DCPS::GUID_t guid);
 
   /// For TypeLookup_getTypeDependencies
   bool get_type_dependencies(const TypeIdentifier& type_id,
@@ -93,11 +102,16 @@ private:
   bool complete_to_minimal_bitmask(const CompleteBitmaskType& ct, MinimalBitmaskType& mt) const;
   bool complete_to_minimal_bitset(const CompleteBitsetType& ct, MinimalBitsetType& mt) const;
 
+  MemberDescriptor complete_struct_member_to_member_descriptor(const CompleteStructMember& cm, const DCPS::GUID_t& guid);
+  MemberDescriptor complete_union_member_to_member_descriptor(const CompleteUnionMember& cm, const DCPS::GUID_t& guid);
+  MemberDescriptor complete_annotation_member_to_member_descriptor(const CompleteAnnotationParameter& cm, const DCPS::GUID_t& guid);
+  void complete_to_dynamic_i(DynamicType_rch& dt, const CompleteTypeObject& cto, const DCPS::GUID_t& guid);
+  DynamicType_rch type_identifier_to_dynamic(const TypeIdentifier& ti, const DCPS::GUID_t& guid);
   /// Map from BuiltinTopicKey_t of remote endpoint to its TypeInformation.
   typedef OPENDDS_MAP_CMP(DDS::BuiltinTopicKey_t, TypeInformation,
                           DCPS::BuiltinTopicKey_tKeyLessThan) TypeInformationMap;
   TypeInformationMap type_info_map_;
-
+  GuidTypeMap gt_map_;
   TypeInformation type_info_empty_;
 };
 
