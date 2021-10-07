@@ -2,6 +2,7 @@
 #define RTPSRELAY_PARTICIPANT_STATISTICS_REPORTER_H_
 
 #include "Config.h"
+#include "CommonIoStatsReportHelper.h"
 
 #include <dds/rtpsrelaylib/RelayTypeSupportImpl.h>
 #include <dds/rtpsrelaylib/Utility.h>
@@ -12,16 +13,24 @@ namespace RtpsRelay {
 
 class ParticipantStatisticsReporter {
 public:
+  using Helper = ProtocolStatisticsReportHelper<ParticipantStatistics>;
+
   static const Config* config;
   static ParticipantStatisticsDataWriter_var writer;
   static CORBA::String_var topic_name;
 
-  ParticipantStatisticsReporter() {}
+  ParticipantStatisticsReporter()
+    : log_helper_(log_participant_statistics_)
+    , publish_helper_(publish_participant_statistics_)
+  {
+  }
 
   ParticipantStatisticsReporter(const GUID_t& guid,
                                 const std::string& name)
     : log_last_report_(OpenDDS::DCPS::MonotonicTimePoint::now())
+    , log_helper_(log_participant_statistics_)
     , publish_last_report_(OpenDDS::DCPS::MonotonicTimePoint::now())
+    , publish_helper_(publish_participant_statistics_)
   {
     log_participant_statistics_.guid(guid);
     log_participant_statistics_.name(name);
@@ -29,21 +38,30 @@ public:
     publish_participant_statistics_.name(name);
   }
 
-  void message_from(size_t byte_count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  ParticipantStatisticsReporter& operator=(const ParticipantStatisticsReporter& other)
   {
-    log_participant_statistics_.bytes_from() += byte_count;
-    ++log_participant_statistics_.messages_from();
-    publish_participant_statistics_.bytes_from() += byte_count;
-    ++publish_participant_statistics_.messages_from();
+    log_last_report_ = other.log_last_report_;
+    log_participant_statistics_ = other.log_participant_statistics_;
+    publish_last_report_ = other.publish_last_report_;
+    publish_participant_statistics_ = other.publish_participant_statistics_;
+    return *this;
+  }
+
+  void input_message(size_t byte_count, const OpenDDS::DCPS::MonotonicTimePoint& now,
+    MessageType type)
+  {
+    const auto& time = OpenDDS::DCPS::TimeDuration::zero_value;
+    log_helper_.input_message(byte_count, time, type);
+    publish_helper_.input_message(byte_count, time, type);
     report(now);
   }
 
-  void message_to(size_t byte_count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  void output_message(size_t byte_count, const OpenDDS::DCPS::MonotonicTimePoint& now,
+    MessageType type)
   {
-    log_participant_statistics_.bytes_to() += byte_count;
-    ++log_participant_statistics_.messages_to();
-    publish_participant_statistics_.bytes_to() += byte_count;
-    ++publish_participant_statistics_.messages_to();
+    const auto& time = OpenDDS::DCPS::TimeDuration::zero_value;
+    log_helper_.output_message(byte_count, time, type);
+    publish_helper_.output_message(byte_count, time, type);
     report(now);
   }
 
@@ -57,40 +75,28 @@ public:
   void log_report(const OpenDDS::DCPS::MonotonicTimePoint& now,
                   bool force)
   {
-    if (config->log_participant_statistics().is_zero()) {
+    if (!(config->log_discovery() || force)) {
       return;
     }
 
-    const auto d = now - log_last_report_;
-    if (!force && d < config->log_participant_statistics()) {
-      return;
-    }
-
-    log_participant_statistics_.interval(time_diff_to_duration(d));
+    log_helper_.prepare_report();
+    log_participant_statistics_.interval(time_diff_to_duration(now - log_last_report_));
 
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name.in(), OpenDDS::DCPS::to_json(log_participant_statistics_).c_str()));
 
     log_last_report_ = now;
-
-    log_participant_statistics_.messages_from(0);
-    log_participant_statistics_.bytes_from(0);
-    log_participant_statistics_.messages_to(0);
-    log_participant_statistics_.bytes_to(0);
+    log_helper_.reset();
   }
 
   void publish_report(const OpenDDS::DCPS::MonotonicTimePoint& now,
-                      bool force)
+                      bool end_session = false, bool force = false)
   {
-    if (config->publish_participant_statistics().is_zero()) {
+    if (!((config->publish_participant_statistics() && end_session) || force)) {
       return;
     }
 
-    const auto d = now - publish_last_report_;
-    if (!force && d < config->publish_participant_statistics()) {
-      return;
-    }
-
-    publish_participant_statistics_.interval(time_diff_to_duration(d));
+    publish_helper_.prepare_report();
+    publish_participant_statistics_.interval(time_diff_to_duration(now - publish_last_report_));
 
     const auto ret = writer->write(publish_participant_statistics_, DDS::HANDLE_NIL);
     if (ret != DDS::RETCODE_OK) {
@@ -98,19 +104,17 @@ public:
     }
 
     publish_last_report_ = now;
-
-    publish_participant_statistics_.messages_from(0);
-    publish_participant_statistics_.bytes_from(0);
-    publish_participant_statistics_.messages_to(0);
-    publish_participant_statistics_.bytes_to(0);
+    publish_helper_.reset();
   }
 
 private:
   OpenDDS::DCPS::MonotonicTimePoint log_last_report_;
   ParticipantStatistics log_participant_statistics_;
+  Helper log_helper_;
 
   OpenDDS::DCPS::MonotonicTimePoint publish_last_report_;
   ParticipantStatistics publish_participant_statistics_;
+  Helper publish_helper_;
 };
 
 }

@@ -240,16 +240,18 @@ ParticipantStatisticsReporter&
 GuidAddrSet::Proxy::record_activity(const AddrPort& remote_address,
                                     const OpenDDS::DCPS::MonotonicTimePoint& now,
                                     const OpenDDS::DCPS::GUID_t& src_guid,
+                                    MessageType msg_type,
                                     const size_t& msg_len,
                                     RelayHandler& handler)
 {
-  return gas_.record_activity(remote_address, now, src_guid, msg_len, handler);
+  return gas_.record_activity(remote_address, now, src_guid, msg_type, msg_len, handler);
 }
 
 ParticipantStatisticsReporter&
 GuidAddrSet::record_activity(const AddrPort& remote_address,
                              const OpenDDS::DCPS::MonotonicTimePoint& now,
                              const OpenDDS::DCPS::GUID_t& src_guid,
+                             MessageType msg_type,
                              const size_t& msg_len,
                              RelayHandler& handler)
 {
@@ -276,7 +278,7 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
   }
 
   ParticipantStatisticsReporter& stats_reporter = *guid_addr_set_map_[src_guid].select_stats_reporter(remote_address.port);
-  stats_reporter.message_from(msg_len, now);
+  stats_reporter.input_message(msg_len, now, msg_type);
 
   return stats_reporter;
 }
@@ -451,7 +453,7 @@ void VerticalHandler::venqueue_message(const ACE_INET_Addr& addr,
                                        MessageType type)
 {
   enqueue_message(addr, msg, now, type);
-  to_psr.message_to(msg->length(), now);
+  to_psr.output_message(msg->length(), now, type);
 }
 
 CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
@@ -477,7 +479,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
     }
 
     GuidAddrSet::Proxy proxy(guid_addr_set_);
-    record_activity(proxy, addr_port, now, src_guid, msg_len);
+    record_activity(proxy, addr_port, now, src_guid, type, msg_len);
 
     if (proxy.ignore_rtps(src_guid, now, is_spdp_)) {
       stats_reporter_.ignored_message(msg_len, now, type);
@@ -561,9 +563,10 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
 
     if (has_guid) {
       GuidAddrSet::Proxy proxy(guid_addr_set_);
-      ParticipantStatisticsReporter& from_psr = record_activity(proxy, addr_port, now, src_guid, msg_len);
+      ParticipantStatisticsReporter& from_psr =
+        record_activity(proxy, addr_port, now, src_guid, type, msg_len);
       if (bytes_sent) {
-        from_psr.message_to(bytes_sent, now);
+        from_psr.output_message(bytes_sent, now, type);
       }
     }
 
@@ -576,9 +579,10 @@ VerticalHandler::record_activity(GuidAddrSet::Proxy& proxy,
                                  const AddrPort& remote_address,
                                  const OpenDDS::DCPS::MonotonicTimePoint& now,
                                  const OpenDDS::DCPS::GUID_t& src_guid,
+                                 MessageType msg_type,
                                  const size_t& msg_len)
 {
-  return proxy.record_activity(remote_address, now, src_guid, msg_len, *this);
+  return proxy.record_activity(remote_address, now, src_guid, msg_type, msg_len, *this);
 }
 
 bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser,

@@ -152,6 +152,7 @@ public:
     record_activity(const AddrPort& remote_address,
                     const OpenDDS::DCPS::MonotonicTimePoint& now,
                     const OpenDDS::DCPS::GUID_t& src_guid,
+                    MessageType msg_type,
                     const size_t& msg_len,
                     RelayHandler& handler);
 
@@ -180,6 +181,7 @@ private:
   record_activity(const AddrPort& remote_address,
                   const OpenDDS::DCPS::MonotonicTimePoint& now,
                   const OpenDDS::DCPS::GUID_t& src_guid,
+                  MessageType msg_type,
                   const size_t& msg_len,
                   RelayHandler& handler);
 
@@ -310,6 +312,7 @@ protected:
                                                  const AddrPort& remote_address,
                                                  const OpenDDS::DCPS::MonotonicTimePoint& now,
                                                  const OpenDDS::DCPS::GUID_t& src_guid,
+                                                 MessageType msg_type,
                                                  const size_t& msg_len);
   CORBA::ULong send(GuidAddrSet::Proxy& proxy,
                     const OpenDDS::DCPS::GUID_t& src_guid,

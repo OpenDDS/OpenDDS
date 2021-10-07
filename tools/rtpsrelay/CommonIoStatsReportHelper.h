@@ -10,21 +10,19 @@
 namespace RtpsRelay {
 
 /**
- * Helper class for working with the common I/O statistics fields of
- * HandlerStatistics and RelayStatistics.
+ * Helper class for working with statistics report structs with rtps and stun
+ * ProtocolStatisticsReport fields.
  */
 template <typename StatisticsType>
-class CommonIoStatsReportHelper {
+class ProtocolStatisticsReportHelper {
 public:
-  OpenDDS::DCPS::MonotonicTimePoint last_report_ = OpenDDS::DCPS::MonotonicTimePoint::now();
   StatisticsType& statistics_;
   OpenDDS::DCPS::TimeDuration rtps_input_processing_time_;
   OpenDDS::DCPS::TimeDuration rtps_output_processing_time_;
   OpenDDS::DCPS::TimeDuration stun_input_processing_time_;
   OpenDDS::DCPS::TimeDuration stun_output_processing_time_;
-  OpenDDS::DCPS::TimeDuration max_queue_latency_;
 
-  CommonIoStatsReportHelper(StatisticsType& statistics)
+  explicit ProtocolStatisticsReportHelper(StatisticsType& statistics)
     : statistics_(statistics)
   {
   }
@@ -45,7 +43,7 @@ public:
       stun_input_processing_time_ += time;
       break;
     case MessageType::Unknown:
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: CommonIoStatsReportHelper::input_message: "
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ProtocolStatisticsReportHelper::input_message: "
                  "MessageType is Unknown\n"));
     }
   }
@@ -63,17 +61,15 @@ public:
       ++statistics_.stun().messages_ignored();
       break;
     case MessageType::Unknown:
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: CommonIoStatsReportHelper::ignored_message: "
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ProtocolStatisticsReportHelper::ignored_message: "
                  "MessageType is Unknown\n"));
     }
   }
 
   void output_message(size_t byte_count,
                       const OpenDDS::DCPS::TimeDuration& time,
-                      const OpenDDS::DCPS::TimeDuration& queue_latency,
                       MessageType type)
   {
-    max_queue_latency_ = std::max(max_queue_latency_, queue_latency);
     switch (type) {
     case MessageType::Rtps:
       statistics_.rtps().bytes_out() += byte_count;
@@ -86,14 +82,13 @@ public:
       stun_output_processing_time_ += time;
       break;
     case MessageType::Unknown:
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: CommonIoStatsReportHelper::output_message: "
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ProtocolStatisticsReportHelper::output_message: "
         "MessageType is Unknown\n"));
     }
   }
 
   void dropped_message(size_t byte_count,
                        const OpenDDS::DCPS::TimeDuration& time,
-                       const OpenDDS::DCPS::TimeDuration& queue_latency,
                        MessageType type)
   {
     switch (type) {
@@ -108,29 +103,82 @@ public:
       stun_output_processing_time_ += time;
       break;
     case MessageType::Unknown:
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: CommonIoStatsReportHelper::dropped_message: "
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ProtocolStatisticsReportHelper::dropped_message: "
         "MessageType is Unknown\n"));
     }
+  }
+
+  void prepare_report()
+  {
+    statistics_.rtps().input_processing_time(time_diff_to_duration(rtps_input_processing_time_));
+    statistics_.rtps().output_processing_time(time_diff_to_duration(rtps_output_processing_time_));
+    statistics_.stun().input_processing_time(time_diff_to_duration(stun_input_processing_time_));
+    statistics_.stun().output_processing_time(time_diff_to_duration(stun_output_processing_time_));
+  }
+
+  void reset()
+  {
+    OpenDDS::DCPS::set_default(statistics_.rtps());
+    OpenDDS::DCPS::set_default(statistics_.stun());
+    rtps_input_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
+    rtps_output_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
+    stun_input_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
+    stun_output_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
+  }
+
+};
+
+/**
+ * Helper class for working with the common I/O statistics fields of
+ * HandlerStatistics and RelayStatistics.
+ */
+template <typename StatisticsType>
+class CommonIoStatsReportHelper : public ProtocolStatisticsReportHelper<StatisticsType> {
+public:
+  using Helper = ProtocolStatisticsReportHelper<StatisticsType>;
+  OpenDDS::DCPS::MonotonicTimePoint last_report_ = OpenDDS::DCPS::MonotonicTimePoint::now();
+  OpenDDS::DCPS::TimeDuration max_queue_latency_;
+
+  explicit CommonIoStatsReportHelper(StatisticsType& statistics)
+    : Helper(statistics)
+  {
+  }
+
+  void output_message(size_t byte_count,
+                      const OpenDDS::DCPS::TimeDuration& time,
+                      const OpenDDS::DCPS::TimeDuration& queue_latency,
+                      MessageType type)
+  {
+    max_queue_latency_ = std::max(max_queue_latency_, queue_latency);
+    Helper::output_message(byte_count, time, type);
+  }
+
+  void dropped_message(size_t byte_count,
+                       const OpenDDS::DCPS::TimeDuration& time,
+                       const OpenDDS::DCPS::TimeDuration& queue_latency,
+                       MessageType type)
+  {
+    Helper::dropped_message(byte_count, time, type);
     max_queue_latency_ = std::max(max_queue_latency_, queue_latency);
   }
 
   void max_gain(size_t value)
   {
-    statistics_.max_gain() = std::max(statistics_.max_gain(), static_cast<uint32_t>(value));
+    this->statistics_.max_gain() = std::max(this->statistics_.max_gain(), static_cast<uint32_t>(value));
   }
 
   void error()
   {
-    ++statistics_.error_count();
+    ++this->statistics_.error_count();
   }
 
   void max_queue_size(size_t size)
   {
-    statistics_.max_queue_size() = std::max(
-      statistics_.max_queue_size(), static_cast<ACE_CDR::ULong>(size));
+    this->statistics_.max_queue_size() = std::max(
+      this->statistics_.max_queue_size(), static_cast<ACE_CDR::ULong>(size));
   }
 
-  /// Returns false if the report if it's not time to make a report.
+  /// Returns false if it's not time to make a report.
   bool prepare_report(const OpenDDS::DCPS::MonotonicTimePoint& now, bool force,
     const OpenDDS::DCPS::TimeDuration& min_interval)
   {
@@ -143,42 +191,20 @@ public:
       return false;
     }
 
-    statistics_.interval(time_diff_to_duration(interval));
-    statistics_.rtps().input_processing_time(time_diff_to_duration(rtps_input_processing_time_));
-    statistics_.rtps().output_processing_time(time_diff_to_duration(rtps_output_processing_time_));
-    statistics_.stun().input_processing_time(time_diff_to_duration(stun_input_processing_time_));
-    statistics_.stun().output_processing_time(time_diff_to_duration(stun_output_processing_time_));
-    statistics_.max_queue_latency(time_diff_to_duration(max_queue_latency_));
+    Helper::prepare_report();
+    this->statistics_.interval(time_diff_to_duration(interval));
+    this->statistics_.max_queue_latency(time_diff_to_duration(max_queue_latency_));
 
     return true;
   }
 
   void reset(const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
+    Helper::reset();
     last_report_ = now;
-    statistics_.rtps().messages_in(0);
-    statistics_.stun().messages_in(0);
-    statistics_.rtps().bytes_in(0);
-    statistics_.stun().bytes_in(0);
-    statistics_.rtps().messages_ignored(0);
-    statistics_.stun().messages_ignored(0);
-    statistics_.rtps().bytes_ignored(0);
-    statistics_.stun().bytes_ignored(0);
-    statistics_.rtps().messages_out(0);
-    statistics_.stun().messages_out(0);
-    statistics_.rtps().bytes_out(0);
-    statistics_.stun().bytes_out(0);
-    statistics_.rtps().messages_dropped(0);
-    statistics_.stun().messages_dropped(0);
-    statistics_.rtps().bytes_dropped(0);
-    statistics_.stun().bytes_dropped(0);
-    statistics_.max_gain(0);
-    statistics_.error_count(0);
-    statistics_.max_queue_size(0);
-    rtps_input_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
-    rtps_output_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
-    stun_input_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
-    stun_output_processing_time_ = OpenDDS::DCPS::TimeDuration::zero_value;
+    this->statistics_.max_gain(0);
+    this->statistics_.error_count(0);
+    this->statistics_.max_queue_size(0);
     max_queue_latency_ = OpenDDS::DCPS::TimeDuration::zero_value;
   }
 };
