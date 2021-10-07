@@ -801,7 +801,11 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     }
 #endif
 
-    sedp_->associate(iter->second, participant_sec_attr_);
+    sedp_->associate(iter->second
+#ifdef OPENDDS_SECURITY
+                     , participant_sec_attr_
+#endif
+                     );
 
     // Since we've just seen a new participant, let's send out our
     // own announcement, so they don't have to wait.

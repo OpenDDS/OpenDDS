@@ -975,6 +975,7 @@ create_association_data_proto(DCPS::AssociationData& proto,
   populate_locators(proto.remote_data_, pdata);
 }
 
+#ifdef OPENDDS_SECURITY
 void Sedp::generate_remote_matched_crypto_handle(const BuiltinAssociationRecord& record)
 {
   if (DCPS::GuidConverter(record.remote_id()).isWriter()) {
@@ -983,27 +984,34 @@ void Sedp::generate_remote_matched_crypto_handle(const BuiltinAssociationRecord&
     generate_remote_matched_reader_crypto_handle(record.remote_id(), record.local_id(), false);
   }
 }
+#endif
 
 bool Sedp::ready(const DiscoveredParticipant& participant,
                  const GUID_t& local_id,
                  const GUID_t& remote_id,
                  bool local_tokens_sent) const
 {
+  ACE_UNUSED_ARG(participant);
+  ACE_UNUSED_ARG(local_tokens_sent);
+
   return remote_knows_about_local_i(local_id, remote_id)
+#ifdef OPENDDS_SECURITY
     && remote_is_authenticated_i(local_id, participant)
     && local_has_remote_participant_token_i(local_id, remote_id)
     && remote_has_local_participant_token_i(local_id, remote_id, participant)
     && local_has_remote_endpoint_token_i(local_id, remote_id)
-    && remote_has_local_endpoint_token_i(local_id, local_tokens_sent, remote_id);
+    && remote_has_local_endpoint_token_i(local_id, local_tokens_sent, remote_id)
+#endif
+    ;
 }
 
-#ifdef OPENDDS_SECURITY
 void
-Sedp::associate(DiscoveredParticipant& participant,
-                const DDS::Security::ParticipantSecurityAttributes& participant_sec_attr)
+Sedp::associate(DiscoveredParticipant& participant
+#ifdef OPENDDS_SECURITY
+                , const DDS::Security::ParticipantSecurityAttributes& participant_sec_attr
+#endif
+                )
 {
-  using namespace DDS::Security;
-
   const BuiltinEndpointSet_t local_available = spdp_.available_builtin_endpoints();
   const BuiltinEndpointSet_t remote_available = participant.pdata_.participantProxy.availableBuiltinEndpoints;
   const BuiltinEndpointQos_t& beq = participant.pdata_.participantProxy.builtinEndpointQos;
@@ -1084,8 +1092,8 @@ Sedp::associate(DiscoveredParticipant& participant,
 
   //FUTURE: if/when topic propagation is supported, add it here
 
+#ifdef OPENDDS_SECURITY
   if (spdp_.is_security_enabled()) {
-
     using namespace DDS::Security;
 
     const ExtendedBuiltinEndpointSet_t local_available_extended = spdp_.available_extended_builtin_endpoints();
@@ -1221,6 +1229,7 @@ Sedp::associate(DiscoveredParticipant& participant,
       participant.builtin_pending_records_.push_back(record);
     }
   }
+#endif
 
   // Process deferred publications and subscriptions.
   const GUID_t lower = make_id(participant.pdata_.participantProxy.guidPrefix, ENTITYID_UNKNOWN);
@@ -1303,6 +1312,7 @@ void Sedp::process_association_records_i(DiscoveredParticipant& participant)
   }
 }
 
+#ifdef OPENDDS_SECURITY
 void Sedp::generate_remote_matched_crypto_handles(DiscoveredParticipant& participant)
 {
   for (DiscoveredParticipant::BuiltinAssociationRecords::iterator pos = participant.builtin_pending_records_.begin(),
@@ -1313,10 +1323,6 @@ void Sedp::generate_remote_matched_crypto_handles(DiscoveredParticipant& partici
     }
   }
 }
-
-#endif
-
-#ifdef OPENDDS_SECURITY
 
 void Sedp::disassociate_volatile(DiscoveredParticipant& participant)
 {
@@ -3082,11 +3088,14 @@ Sedp::association_complete_i(const RepoId& localId,
 void Sedp::data_acked_i(const DCPS::RepoId& local_id,
                         const DCPS::RepoId& remote_id)
 {
-  if (local_id.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER ||
-      local_id.entityId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER ||
-      local_id.entityId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER ||
-      local_id.entityId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER ||
-      local_id.entityId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
+  if (local_id.entityId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER ||
+      local_id.entityId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER
+#ifdef OPENDDS_SECURITY
+      || local_id.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER
+      || local_id.entityId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER
+      || local_id.entityId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER
+#endif
+      ) {
     const GUID_t remote_part = make_id(remote_id, ENTITYID_PARTICIPANT);
     Spdp::DiscoveredParticipantIter iter = spdp_.participants_.find(remote_part);
     if (iter != spdp_.participants_.end()) {
@@ -6391,11 +6400,15 @@ bool Sedp::remote_knows_about_local_i(const GUID_t& local, const GUID_t& remote)
   if (gc.isWriter()) {
     LocalPublicationCIter pub = local_publications_.find(local);
     if (pub != local_publications_.end()) {
+#ifdef OPENDDS_SECURITY
       if (pub->second.security_attribs_.base.is_discovery_protected) {
         return publications_secure_writer_->is_leading(make_id(remote, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER));
       } else {
         return publications_writer_->is_leading(make_id(remote, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER));
       }
+#else
+      return publications_writer_->is_leading(make_id(remote, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER));
+#endif
     } else {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Sedp::remote_knows_about_local_i - could not find local publication %C\n"), LogGuid(local).c_str()));
       return false;
@@ -6403,11 +6416,15 @@ bool Sedp::remote_knows_about_local_i(const GUID_t& local, const GUID_t& remote)
   } else {
     LocalSubscriptionCIter pub = local_subscriptions_.find(local);
     if (pub != local_subscriptions_.end()) {
+#ifdef OPENDDS_SECURITY
       if (pub->second.security_attribs_.base.is_discovery_protected) {
         return subscriptions_secure_writer_->is_leading(make_id(remote, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER));
       } else {
         return subscriptions_writer_->is_leading(make_id(remote, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER));
       }
+#else
+      return subscriptions_writer_->is_leading(make_id(remote, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER));
+#endif
     } else {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Sedp::remote_knows_about_local_i - could not find local subscription %C\n"), LogGuid(local).c_str()));
       return false;
@@ -6415,6 +6432,7 @@ bool Sedp::remote_knows_about_local_i(const GUID_t& local, const GUID_t& remote)
   }
 }
 
+#ifdef OPENDDS_SECURITY
 bool Sedp::remote_is_authenticated_i(const GUID_t& local, const DiscoveredParticipant& participant) const
 {
   if (local.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER ||
@@ -6434,9 +6452,10 @@ bool Sedp::remote_is_authenticated_i(const GUID_t& local, const DiscoveredPartic
   } else {
     return participant.auth_state_ == AUTH_STATE_AUTHENTICATED;
   }
-
 }
+#endif
 
+#ifdef OPENDDS_SECURITY
 bool Sedp::local_has_remote_participant_token_i(const GUID_t& local, const GUID_t& remote) const
 {
   const GUID_t remote_part = make_id(remote, ENTITYID_PARTICIPANT);
@@ -6535,7 +6554,6 @@ bool Sedp::remote_has_local_endpoint_token_i(const GUID_t& local, bool local_tok
   }
 }
 
-#ifdef OPENDDS_SECURITY
 void Sedp::cleanup_secure_writer(const GUID_t& publicationId)
 {
   using namespace DDS::Security;

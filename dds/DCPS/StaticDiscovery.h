@@ -444,7 +444,7 @@ private:
       return false;
     }
   };
-  typedef OPENDDS_MAP(MatchingPair, MatchingData) MatchingDataMap;
+  typedef OPENDDS_MAP_T(MatchingPair, MatchingData) MatchingDataMap;
   typedef MatchingDataMap::iterator MatchingDataIter;
 
   void match(const GUID_t& writer, const GUID_t& reader);

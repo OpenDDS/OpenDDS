@@ -100,14 +100,14 @@ typedef OPENDDS_MAP_CMP(GUID_t, DDS::Security::DatareaderCryptoTokenSeq, GUID_tK
   DatareaderCryptoTokenSeqMap;
 typedef OPENDDS_MAP_CMP(GUID_t, DDS::Security::DatawriterCryptoTokenSeq, GUID_tKeyLessThan)
   DatawriterCryptoTokenSeqMap;
-#endif
-
-using DCPS::RepoIdSet;
 
 inline bool has_security_data(Security::DiscoveredParticipantDataKind kind)
 {
   return kind == Security::DPDK_ENHANCED || kind == Security::DPDK_SECURE;
 }
+#endif
+
+using DCPS::RepoIdSet;
 
 const int AC_EMPTY = 0;
 const int AC_REMOTE_RELIABLE = 1 << 0;
@@ -498,8 +498,11 @@ public:
 #endif
   const ACE_INET_Addr& multicast_group() const;
 
-  void associate(DiscoveredParticipant& participant,
-                 const DDS::Security::ParticipantSecurityAttributes& participant_sec_attr);
+  void associate(DiscoveredParticipant& participant
+#ifdef OPENDDS_SECURITY
+                 , const DDS::Security::ParticipantSecurityAttributes& participant_sec_attr
+#endif
+                 );
   void generate_remote_matched_crypto_handle(const BuiltinAssociationRecord& record);
   bool ready(const DiscoveredParticipant& participant,
              const GUID_t& local_id,
@@ -655,12 +658,14 @@ public:
 
 private:
   bool remote_knows_about_local_i(const GUID_t& local, const GUID_t& remote) const;
+#ifdef OPENDDS_SECURITY
   bool remote_is_authenticated_i(const GUID_t& local, const DiscoveredParticipant& participant) const;
   bool local_has_remote_participant_token_i(const GUID_t& local, const GUID_t& remote) const;
   bool remote_has_local_participant_token_i(const GUID_t& local, const GUID_t& remote, const DiscoveredParticipant& participant) const;
   bool local_has_remote_endpoint_token_i(const GUID_t& local, const GUID_t& remote) const;
   bool remote_has_local_endpoint_token_i(const GUID_t& local, bool local_tokens_sent,
                                          const GUID_t& remote) const;
+#endif
 
   void type_lookup_init(DCPS::ReactorInterceptor_rch reactor_interceptor)
   {
@@ -1549,7 +1554,7 @@ protected:
     }
   };
 
-  typedef OPENDDS_MAP(MatchingPair, MatchingData) MatchingDataMap;
+  typedef OPENDDS_MAP_T(MatchingPair, MatchingData) MatchingDataMap;
   typedef MatchingDataMap::iterator MatchingDataIter;
 
   typedef DCPS::PmfSporadicTask<Sedp> EndpointManagerSporadic;
