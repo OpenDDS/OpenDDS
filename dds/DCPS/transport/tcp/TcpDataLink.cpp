@@ -531,12 +531,14 @@ OpenDDS::DCPS::TcpDataLink::drop_pending_request_acks()
 OpenDDS::DCPS::TcpSendStrategy_rch
 OpenDDS::DCPS::TcpDataLink::send_strategy()
 {
+  GuardType guard(strategy_lock_);
   return static_rchandle_cast<OpenDDS::DCPS::TcpSendStrategy>(send_strategy_);
 }
 
 OpenDDS::DCPS::TcpReceiveStrategy_rch
 OpenDDS::DCPS::TcpDataLink::receive_strategy()
 {
+  GuardType guard(strategy_lock_);
   return static_rchandle_cast<OpenDDS::DCPS::TcpReceiveStrategy>(receive_strategy_);
 }
 int
