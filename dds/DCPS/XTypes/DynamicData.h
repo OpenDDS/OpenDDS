@@ -22,6 +22,7 @@ public:
   // data for annotations won't be serialized independently in a sample) and TK_BITSET
   // (the spec doesn't have enough information on how to handle bitsets).
   DynamicData(Serializer& strm, DynamicType_rch type);
+  DynamicData() {}
   ~DynamicData() {}
 
   DDS::ReturnCode_t get_descriptor(MemberDescriptor& value, MemberId id) const;

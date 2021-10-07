@@ -31,50 +31,74 @@ DynamicData::DynamicData(Serializer& ser, DynamicType_rch type)
 
 DDS::ReturnCode_t DynamicData::get_descriptor(MemberDescriptor& value, MemberId id) const
 {
+  // TODO
+  return DDS::RETCODE_ERROR;
 }
 
 DDS::ReturnCode_t DynamicData::set_descriptor(MemberId id, const MemberDescriptor& value)
 {
+  // TODO
+  return DDS::RETCODE_ERROR;
 }
 
 bool DynamicData::equals(const DynamicData& other) const
 {
+  // TODO
+  return false;
 }
 
 MemberId DynamicData::get_member_id_by_name(String name) const
 {
+  // TODO
+  return 0;
 }
 
 MemberId DynamicData::get_member_id_at_index(ACE_CDR::ULong) const
 {
+  // TODO
+  return 0;
 }
 
 ACE_CDR::ULong DynamicData::get_item_count() const
 {
+  // TODO
+  return 0;
 }
 
 DDS::ReturnCode_t DynamicData::clear_all_values()
 {
+  // TODO
+  return DDS::RETCODE_ERROR;
 }
 
 DDS::ReturnCode_t DynamicData::clear_nonkey_values()
 {
+  // TODO
+  return DDS::RETCODE_ERROR;
 }
 
 DDS::ReturnCode_t DynamicData::clear_value(MemberId id)
 {
+  // TODO
+  return DDS::RETCODE_ERROR;
 }
 
 DynamicData DynamicData::loan_value(MemberId id)
 {
+  // TODO
+  return DynamicData();
 }
 
 DDS::ReturnCode_t DynamicData::return_loaned_value(const DynamicData& value)
 {
+  // TODO
+  return DDS::RETCODE_ERROR;
 }
 
 DynamicData DynamicData::clone() const
 {
+  // TODO
+  return DynamicData();
 }
 
 bool DynamicData::is_type_supported(TypeKind tk, const char* func_name)
