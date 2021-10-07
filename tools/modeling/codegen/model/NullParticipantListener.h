@@ -1,7 +1,7 @@
 // -*- C++ -*-
 //
-#ifndef NULLPARTICIPANTLISTENER_H
-#define NULLPARTICIPANTLISTENER_H
+#ifndef OPENDDS_MODEL_NULLPARTICIPANTLISTENER_H
+#define OPENDDS_MODEL_NULLPARTICIPANTLISTENER_H
 
 #include "model_export.h"
 #include "dds/DdsDcpsDomainC.h"

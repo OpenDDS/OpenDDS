@@ -67,7 +67,7 @@ void matches(const DataFragSubmessage& df, const DataFragSubmessage& expected)
   }
 }
 
-TEST(BaseMessageUtils, maintest)
+TEST(dds_DCPS_RTPS_BaseMessageUtils, maintest)
 {
   const VendorId_t SomeoneElse = { { '\x04', '\x02' } };
 

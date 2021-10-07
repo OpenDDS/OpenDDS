@@ -119,7 +119,10 @@ private:
                                XTypes::EquivalenceKind ek) const;
 
   OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(TypeSupportImpl)
+
 };
+
+const char* kind_to_string(const XTypes::EquivalenceKind ek);
 
 } // namespace DCPS
 } // namespace OpenDDS

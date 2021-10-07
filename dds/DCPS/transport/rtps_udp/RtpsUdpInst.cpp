@@ -34,6 +34,7 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
 #endif
   , use_multicast_(true)
   , ttl_(1)
+  , anticipated_fragments_(RtpsUdpSendStrategy::UDP_MAX_MESSAGE_SIZE / RtpsSampleHeader::FRAG_SIZE)
   , max_message_size_(RtpsUdpSendStrategy::UDP_MAX_MESSAGE_SIZE)
   , nak_depth_(0)
   , nak_response_delay_(0, 200*1000 /*microseconds*/) // default from RTPS
@@ -121,6 +122,8 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("multicast_interface"),
                           multicast_interface_);
 
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("anticipated_fragments"), anticipated_fragments_, size_t);
+
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("max_message_size"), max_message_size_, size_t);
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("nak_depth"), nak_depth_, size_t);
@@ -176,6 +179,7 @@ RtpsUdpInst::dump_to_str() const
   ret += formatNameForDump("multicast_group_address") + LogAddr(multicast_group_address_).str() + '\n';
   ret += formatNameForDump("multicast_interface") + multicast_interface_ + '\n';
   ret += formatNameForDump("nak_depth") + to_dds_string(unsigned(nak_depth_)) + '\n';
+  ret += formatNameForDump("anticipated_fragments") + to_dds_string(unsigned(anticipated_fragments_)) + '\n';
   ret += formatNameForDump("max_message_size") + to_dds_string(unsigned(max_message_size_)) + '\n';
   ret += formatNameForDump("nak_response_delay") + to_dds_string(nak_response_delay_.value().msec()) + '\n';
   ret += formatNameForDump("heartbeat_period") + to_dds_string(heartbeat_period_.value().msec()) + '\n';
@@ -314,6 +318,16 @@ RtpsUdpInst::update_locators(const RepoId& remote_id,
   if (imp) {
     RtpsUdpTransport_rch rtps_impl = static_rchandle_cast<RtpsUdpTransport>(imp);
     rtps_impl->update_locators(remote_id, locators);
+  }
+}
+
+void
+RtpsUdpInst::get_and_reset_relay_message_counts(RelayMessageCounts& counts)
+{
+  TransportImpl_rch imp = impl();
+  if (imp) {
+    RtpsUdpTransport_rch rtps_impl = static_rchandle_cast<RtpsUdpTransport>(imp);
+    rtps_impl->get_and_reset_relay_message_counts(counts);
   }
 }
 

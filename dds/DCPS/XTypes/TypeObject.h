@@ -217,6 +217,7 @@ namespace XTypes {
   struct EquivalenceHash_tag {};
   typedef ACE_CDR::Octet EquivalenceHash_slice;
   typedef Fake_TAO_Array_Forany_T<EquivalenceHash, EquivalenceHash_slice, EquivalenceHash_tag> EquivalenceHash_forany;
+  OpenDDS_Dcps_Export const DCPS::String equivalence_hash_to_string(const EquivalenceHash& hash);
 
   // First 4 bytes of MD5 of of a member name converted to bytes
   // using UTF-8 encoding and without a 'nul' terminator.
@@ -826,6 +827,7 @@ namespace XTypes {
 
   // ID of a type member
   typedef ACE_CDR::ULong MemberId;
+  const ACE_CDR::ULong MEMBER_ID_INVALID = UINT32_MAX;
   const ACE_CDR::ULong ANNOTATION_STR_VALUE_MAX_LEN = 128;
   const ACE_CDR::ULong ANNOTATION_OCTETSEC_VALUE_MAX_LEN = 128;
 
@@ -1066,17 +1068,17 @@ namespace XTypes {
 
   // --- Aggregate types: ------------------------------------------------
   struct AppliedBuiltinMemberAnnotations {
-    Optional<OPENDDS_STRING> unit; // @unit("<unit>")
+    Optional<DCPS::String> unit; // @unit("<unit>")
     Optional<AnnotationParameterValue> min; // @min , @range
     Optional<AnnotationParameterValue> max; // @max , @range
-    Optional<OPENDDS_STRING> hash_id; // @hash_id("<membername>")
+    Optional<DCPS::String> hash_id; // @hash_id("<membername>")
 
     AppliedBuiltinMemberAnnotations() {}
 
-    AppliedBuiltinMemberAnnotations(const Optional<OPENDDS_STRING>& a_unit,
+    AppliedBuiltinMemberAnnotations(const Optional<DCPS::String>& a_unit,
                                     const Optional<AnnotationParameterValue>& a_min,
                                     const Optional<AnnotationParameterValue>& a_max,
-                                    const Optional<OPENDDS_STRING>& a_hash_id)
+                                    const Optional<DCPS::String>& a_hash_id)
       : unit(a_unit)
       , min(a_min)
       , max(a_max)

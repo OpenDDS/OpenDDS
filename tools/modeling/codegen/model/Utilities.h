@@ -1,5 +1,5 @@
-#ifndef UTILITIES_H
-#define UTILITIES_H
+#ifndef OPENDDS_MODEL_UTILITIES_H
+#define OPENDDS_MODEL_UTILITIES_H
 
 #include <ace/config-macros.h>
 
@@ -25,5 +25,3 @@ namespace OpenDDS { namespace Model {
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* UTILITIES_H */
-
-

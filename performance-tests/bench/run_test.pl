@@ -129,6 +129,14 @@ elsif ($test->flag('valgrind')) {
   $tc_opts .= " valgrind";
   $is_rtps_disc = 1;
 }
+elsif ($test->flag('udp_latency')) {
+  $tc_opts .= " udp_latency";
+  $is_rtps_disc = 1;
+}
+elsif ($test->flag('tcp_latency')) {
+  $tc_opts .= " tcp_latency";
+  $is_rtps_disc = 1;
+}
 else {
   $flag_found = 0;
   $tc_opts .= " showtime_mixed_10";

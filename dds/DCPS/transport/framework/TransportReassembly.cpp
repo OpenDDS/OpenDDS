@@ -48,18 +48,36 @@ namespace {
 }
 
 bool
-TransportReassembly::insert(OPENDDS_LIST(FragRange)& flist,
+TransportReassembly::insert(FragRangeList& flist,
+                            FragRangeIterMap& fri_map,
                             const SequenceRange& seqRange,
                             ReceivedDataSample& data)
 {
   const SequenceNumber::Value prev = seqRange.first.getValue() - 1,
     next = seqRange.second.getValue() + 1;
 
-  for (OPENDDS_LIST(FragRange)::iterator it = flist.begin(); it != flist.end(); ++it) {
+  FragRangeList::iterator start = flist.begin();
+  FragRangeIterMap::iterator fit = fri_map.begin();
+  if (!flist.empty()) {
+    fit = fri_map.lower_bound(prev);
+    if (fit != fri_map.end()) {
+      start = fit->second;
+      if (start->transport_seq_.second.getValue() != prev && start != flist.begin()) {
+        --start;
+        --fit;
+      }
+    } else {
+      start = flist.end();
+      --start;
+      --fit;
+    }
+  }
+
+  for (FragRangeList::iterator it = start; it != flist.end(); ++it) {
     FragRange& fr = *it;
     if (next < fr.transport_seq_.first.getValue()) {
       // insert before 'it'
-      flist.insert(it, FragRange(seqRange, data));
+      fri_map[seqRange.second.getValue()] = flist.insert(it, FragRange(seqRange, data));
       VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::insert() "
         "inserted on left\n"));
       return true;
@@ -107,7 +125,12 @@ TransportReassembly::insert(OPENDDS_LIST(FragRange)& flist,
         data.sample_.reset();
       }
 
+      fri_map.erase(fit++);
       fr.transport_seq_.second = seqRange.second;
+
+      bool needs_insert = true;
+      const FragRangeList::iterator bookmark = it;
+
       VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::insert() "
         "combined on right\n"));
 
@@ -137,11 +160,16 @@ TransportReassembly::insert(OPENDDS_LIST(FragRange)& flist,
             for (last = fr.rec_ds_.sample_.get(); last->cont(); last = last->cont()) ;
             last->cont(it->rec_ds_.sample_.release());
           }
+          fit->second = bookmark;
+          needs_insert = false;
           fr.transport_seq_.second = it->transport_seq_.second;
           flist.erase(it);
           VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::insert() "
             "coalesced on right\n"));
         }
+      }
+      if (needs_insert) {
+        fri_map[fr.transport_seq_.second.getValue()] = bookmark;
       }
       return true;
     } else if (fr.transport_seq_.first <= seqRange.first && fr.transport_seq_.second >= seqRange.second) {
@@ -149,10 +177,11 @@ TransportReassembly::insert(OPENDDS_LIST(FragRange)& flist,
         "duplicate fragment range, dropping\n"));
       return false;
     }
+    ++fit;
   }
 
   // add to end of list
-  flist.push_back(FragRange(seqRange, data));
+  fri_map[seqRange.second.getValue()] = flist.insert(flist.end(), FragRange(seqRange, data));
   VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::insert() "
     "inserted at end of list\n"));
   return true;
@@ -162,12 +191,14 @@ bool
 TransportReassembly::has_frags(const SequenceNumber& seq,
                                const RepoId& pub_id) const
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   return fragments_.count(FragKey(pub_id, seq));
 }
 
 void
 TransportReassembly::clear_completed(const RepoId& pub_id)
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   completed_.erase(pub_id);
 }
 
@@ -176,6 +207,7 @@ TransportReassembly::get_gaps(const SequenceNumber& seq, const RepoId& pub_id,
                               CORBA::Long bitmap[], CORBA::ULong length,
                               CORBA::ULong& numBits) const
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   // length is number of (allocated) words in bitmap, max of 8
   // numBits is number of valid bits in the bitmap, <= length * 32, to account for partial words
   if (length == 0) {
@@ -204,7 +236,7 @@ TransportReassembly::get_gaps(const SequenceNumber& seq, const RepoId& pub_id,
     DisjointSequence::fill_bitmap_range(0, first.getLow() - 2,
                                         bitmap, length, numBits);
   } else if (flist.size() == 1) {
-    // No gaps, but we know there is (at least 1) more_framents
+    // No gaps, but we know there are (at least 1) more_fragments
     if (iter->second.total_frags_ == 0) {
       DisjointSequence::fill_bitmap_range(0, 0, bitmap, length, numBits);
     } else {
@@ -239,6 +271,7 @@ TransportReassembly::reassemble(const SequenceRange& seqRange,
                                 ReceivedDataSample& data,
                                 ACE_UINT32 total_frags)
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   return reassemble_i(seqRange, seqRange.first == 1, data, total_frags);
 }
 
@@ -248,6 +281,7 @@ TransportReassembly::reassemble(const SequenceNumber& transportSeq,
                                 ReceivedDataSample& data,
                                 ACE_UINT32 total_frags)
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   return reassemble_i(SequenceRange(transportSeq, transportSeq),
                       firstFrag, data, total_frags);
 }
@@ -275,7 +309,7 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
 
   if (iter == fragments_.end()) {
     fragments_[key] = FragInfo(firstFrag, FragRangeList(1, FragRange(seqRange, data)), total_frags, expiration);
-    expiration_queue_.insert(std::make_pair(expiration, key));
+    expiration_queue_.push_back(std::make_pair(expiration, key));
     // since this is the first fragment we've seen, it can't possibly be done
     if (Transport_debug_level > 5 || transport_debug.log_fragment_storage) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble_i "
@@ -298,7 +332,7 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
     iter->second.expiration_ = expiration;
   }
 
-  if (!insert(iter->second.range_list_, seqRange, data)) {
+  if (!insert(iter->second.range_list_, iter->second.range_finder_, seqRange, data)) {
     // error condition, already logged by insert()
     return false;
   }
@@ -329,6 +363,7 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
 void
 TransportReassembly::data_unavailable(const SequenceRange& dropped)
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::data_unavailable() "
     "dropped %q-%q\n", dropped.first.getValue(), dropped.second.getValue()));
   typedef OPENDDS_LIST(FragRange)::iterator list_iterator;
@@ -336,7 +371,8 @@ TransportReassembly::data_unavailable(const SequenceRange& dropped)
   for (FragInfoMap::iterator iter = fragments_.begin(); iter != fragments_.end();
        ++iter) {
     const FragKey& key = iter->first;
-    OPENDDS_LIST(FragRange)& flist = iter->second.range_list_;
+    FragRangeList& flist = iter->second.range_list_;
+    FragRangeIterMap& fri_map = iter->second.range_finder_;
 
     ReceivedDataSample dummy(0);
     dummy.header_.sequence_ = key.data_sample_seq_;
@@ -347,7 +383,7 @@ TransportReassembly::data_unavailable(const SequenceRange& dropped)
     if (dropped.second.getValue() == prev && !iter->second.have_first_) {
       iter->second.have_first_ = true;
       dummy.header_.more_fragments_ = true;
-      insert(flist, dropped, dummy);
+      insert(flist, fri_map, dropped, dummy);
       continue;
     }
 
@@ -363,7 +399,7 @@ TransportReassembly::data_unavailable(const SequenceRange& dropped)
       if (dropped.first > fr1.transport_seq_.second
           && dropped.second < fr2.transport_seq_.first) {
         dummy.header_.more_fragments_ = true;
-        insert(flist, dropped, dummy);
+        insert(flist, fri_map, dropped, dummy);
         break;
       }
     }
@@ -373,7 +409,7 @@ TransportReassembly::data_unavailable(const SequenceRange& dropped)
       ++SequenceNumber(flist.back().transport_seq_.second);
     if (dropped.first == next) {
       flist.back().rec_ds_.header_.more_fragments_ = true;
-      insert(flist, dropped, dummy);
+      insert(flist, fri_map, dropped, dummy);
     }
   }
 }
@@ -382,6 +418,7 @@ void
 TransportReassembly::data_unavailable(const SequenceNumber& dataSampleSeq,
                                       const RepoId& pub_id)
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   if (fragments_.erase(FragKey(pub_id, dataSampleSeq)) &&
       (Transport_debug_level > 5 || transport_debug.log_fragment_storage)) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::data_unavailable "
@@ -391,9 +428,8 @@ TransportReassembly::data_unavailable(const SequenceNumber& dataSampleSeq,
 
 void TransportReassembly::check_expirations(const MonotonicTimePoint& now)
 {
-  for (ExpirationQueue::iterator pos = expiration_queue_.begin(), limit = expiration_queue_.upper_bound(now);
-       pos != limit;) {
-    FragInfoMap::iterator iter = fragments_.find(pos->second);
+  while (!expiration_queue_.empty() && expiration_queue_.front().first <= now) {
+    FragInfoMap::iterator iter = fragments_.find(expiration_queue_.front().second);
     if (iter != fragments_.end()) {
       // FragInfo::expiration_ may have changed after insertion into expiration_queue_
       if (iter->second.expiration_ <= now) {
@@ -403,10 +439,10 @@ void TransportReassembly::check_expirations(const MonotonicTimePoint& now)
                      "purge expired leaving %B fragments\n", fragments_.size()));
         }
       } else {
-        expiration_queue_.insert(std::make_pair(iter->second.expiration_, pos->second));
+        expiration_queue_.push_back(std::make_pair(iter->second.expiration_, iter->first));
       }
     }
-    expiration_queue_.erase(pos++);
+    expiration_queue_.pop_front();
   }
 }
 

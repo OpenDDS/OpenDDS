@@ -8,6 +8,7 @@
 #include "RtpsUdpSendStrategy.h"
 #include "RtpsUdpDataLink.h"
 #include "RtpsUdpInst.h"
+#include "RtpsUdpTransport.h"
 
 #include <dds/DCPS/LogAddr.h>
 
@@ -181,13 +182,19 @@ RtpsUdpSendStrategy::send_rtps_control(RTPS::Message& message,
   const AMB_Continuation cont(rtps_header_mb_lock_, rtps_header_mb_, submessages);
 
 #ifdef OPENDDS_SECURITY
-  const Message_Block_Ptr alternate(pre_send_packet(&rtps_header_mb_));
-  if (!alternate) {
-    VDBG((LM_DEBUG, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control () - "
-          "pre_send_packet returned NULL, dropping.\n"));
-    return;
+  Message_Block_Ptr alternate;
+  if (security_config()) {
+    const DDS::Security::CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
+    if (crypto) {
+      alternate.reset(pre_send_packet(&rtps_header_mb_));
+      if (!alternate) {
+        VDBG((LM_DEBUG, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control () - "
+              "pre_send_packet returned NULL, dropping.\n"));
+        return;
+      }
+    }
   }
-  ACE_Message_Block& use_mb = *alternate;
+  ACE_Message_Block& use_mb = alternate ? *alternate : rtps_header_mb_;
 #else
   ACE_Message_Block& use_mb = rtps_header_mb_;
 #endif
@@ -195,7 +202,7 @@ RtpsUdpSendStrategy::send_rtps_control(RTPS::Message& message,
   iovec iov[MAX_SEND_BLOCKS];
   const int num_blocks = mb_to_iov(use_mb, iov);
   const ssize_t result = send_single_i(iov, num_blocks, addr);
-  if (result < 0 && !network_is_unreachable_) {
+  if (result < 0 && !network_is_unreachable_.value()) {
     const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
     ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control() - "
       "failed to send RTPS control message\n"));
@@ -215,13 +222,19 @@ RtpsUdpSendStrategy::send_rtps_control(RTPS::Message& message,
   const AMB_Continuation cont(rtps_header_mb_lock_, rtps_header_mb_, submessages);
 
 #ifdef OPENDDS_SECURITY
-  const Message_Block_Ptr alternate(pre_send_packet(&rtps_header_mb_));
-  if (!alternate) {
-    VDBG((LM_DEBUG, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control () - "
-          "pre_send_packet returned NULL, dropping.\n"));
-    return;
+  Message_Block_Ptr alternate;
+  if (security_config()) {
+    const DDS::Security::CryptoTransform_var crypto = link_->security_config()->get_crypto_transform();
+    if (crypto) {
+      alternate.reset(pre_send_packet(&rtps_header_mb_));
+      if (!alternate) {
+        VDBG((LM_DEBUG, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control () - "
+              "pre_send_packet returned NULL, dropping.\n"));
+        return;
+      }
+    }
   }
-  ACE_Message_Block& use_mb = *alternate;
+  ACE_Message_Block& use_mb = alternate ? *alternate : rtps_header_mb_;
 #else
   ACE_Message_Block& use_mb = rtps_header_mb_;
 #endif
@@ -229,7 +242,7 @@ RtpsUdpSendStrategy::send_rtps_control(RTPS::Message& message,
   iovec iov[MAX_SEND_BLOCKS];
   const int num_blocks = mb_to_iov(use_mb, iov);
   const ssize_t result = send_multi_i(iov, num_blocks, addrs);
-  if (result < 0 && !network_is_unreachable_) {
+  if (result < 0 && !network_is_unreachable_.value()) {
     const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
     ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control() - "
       "failed to send RTPS control message\n"));
@@ -281,6 +294,11 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
 {
   OPENDDS_ASSERT(addr != ACE_INET_Addr());
 
+  if (addr == link_->transport().config().rtps_relay_address()) {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, link_->transport().relay_message_counts_mutex_, -1);
+    ++link_->transport().relay_message_counts_.rtps_send;
+  }
+
   const ACE_SOCK_Dgram& socket = choose_send_socket(addr);
 
 #ifdef ACE_LACKS_SENDMSG
@@ -300,8 +318,12 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
   const ssize_t result = socket.send(iov, n, addr);
 #endif
   if (result < 0) {
+    if (addr == link_->transport().config().rtps_relay_address()) {
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, link_->transport().relay_message_counts_mutex_, -1);
+      ++link_->transport().relay_message_counts_.rtps_send_fail;
+    }
     const int err = errno;
-    if (err != ENETUNREACH || !network_is_unreachable_) {
+    if (err != ENETUNREACH || !network_is_unreachable_.value()) {
       errno = err;
       const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
       ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
@@ -345,6 +367,12 @@ namespace {
     }
     return out;
   }
+}
+
+Security::SecurityConfig_rch
+RtpsUdpSendStrategy::security_config() const
+{
+  return link_->security_config();
 }
 
 void

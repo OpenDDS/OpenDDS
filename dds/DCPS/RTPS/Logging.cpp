@@ -36,7 +36,7 @@ void log_message(const char* format,
                  bool send,
                  const Message& message)
 {
-#ifdef OPENDDS_HAS_JSON_VALUE_WRITER
+#if OPENDDS_HAS_JSON_VALUE_WRITER
   DCPS::JsonValueWriter<> jvw;
   jvw.begin_struct();
   jvw.begin_struct_member("guidPrefix");

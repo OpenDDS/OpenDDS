@@ -120,6 +120,9 @@ public:
     return SequenceNumber::SEQUENCENUMBER_UNKNOWN();
   }
 
+  /// A reference-incremented duplicate of the marshalled sample (sample header + sample data)
+  virtual ACE_Message_Block* duplicate_msg() const = 0;
+
   /// The marshalled sample (sample header + sample data)
   virtual const ACE_Message_Block* msg() const = 0;
 

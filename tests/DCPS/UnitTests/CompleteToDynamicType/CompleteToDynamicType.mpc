@@ -1,0 +1,10 @@
+project(completetodynamictype) : dcps_test, googletest {
+  dcps_ts_flags += -Gxtypes-complete
+
+  TypeSupport_Files {
+    CompleteToDynamicType.idl
+  }
+  Source_Files {
+    CompleteToDynamicType.cpp
+  }
+}

@@ -1,6 +1,6 @@
 
 #include "XML_Intf.h"
-#include "ace/XML_Utils/XML_Typedefs.h"
+#include "ace/XML_Utils/XML_Helper.h"
 #include "ace/XML_Utils/XMLSchema/id_map.hpp"
 
 #include "DataReaderQos_Handler.h"
@@ -17,11 +17,11 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-  QOS_XML_Handler::QOS_XML_Handler(void)
+  QOS_XML_Handler::QOS_XML_Handler()
   {
   }
 
-  QOS_XML_Handler::~QOS_XML_Handler(void)
+  QOS_XML_Handler::~QOS_XML_Handler()
   {
   }
 

@@ -169,7 +169,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       message.count      = 0;
 
       for (int i = 0; i < 10; ++i) {
-        DDS::ReturnCode_t error = message_writer->write(message, DDS::HANDLE_NIL);
+        const DDS::ReturnCode_t error = message_writer->write(message, DDS::HANDLE_NIL);
         ++message.count;
         ++message.subject_id;
 

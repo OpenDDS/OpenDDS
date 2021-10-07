@@ -1,21 +1,20 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #include "typeobject_generator.h"
 
-#include "utl_identifier.h"
 #include "topic_keys.h"
 #include "dds_visitor.h"
-
 #include "be_extern.h"
 #include "be_util.h"
 
 #include <dds/DCPS/Hash.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/Definitions.h>
+
+#include <utl_identifier.h>
 
 using std::string;
 using namespace AstTypeClassification;
@@ -58,10 +57,12 @@ to_long(const AST_Expression::AST_ExprValue& ev)
   switch (ev.et) {
   case AST_Expression::EV_octet:
     return ev.u.oval;
+#if OPENDDS_HAS_EXPLICIT_INTS
   case AST_Expression::EV_uint8:
     return ev.u.uint8val;
   case AST_Expression::EV_int8:
     return ev.u.int8val;
+#endif
   case AST_Expression::EV_short:
     return ev.u.sval;
   case AST_Expression::EV_ushort:
@@ -397,14 +398,10 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::PlainMapLTypeDefn& map_ldef
 std::ostream&
 operator<<(std::ostream& out, const OpenDDS::XTypes::EquivalenceHash& equivalence_hash)
 {
-  out << "XTypes::EquivalenceHashWrapper(";
-  for (size_t i = 0; i < sizeof equivalence_hash; ++i) {
-    out << int(equivalence_hash[i]);
-    if (i < sizeof equivalence_hash - 1) {
-      out << ", ";
-    }
-  }
-  return out << ')';
+  return out
+    << "XTypes::EquivalenceHashWrapper("
+    << OpenDDS::XTypes::equivalence_hash_to_string(equivalence_hash)
+    << ")";
 }
 
 std::ostream&
@@ -644,19 +641,25 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::AnnotationParameterValue& p
     out << "static_cast<ACE_CDR::Octet>(" << param_value.byte_value << ")";
     break;
   case OpenDDS::XTypes::TK_INT16:
-    out << "static_cast<ACE_CDR::Short>(" << param_value.int16_value << ")";
+    out << "static_cast<ACE_CDR::Short>(";
+    signed_int_helper<ACE_CDR::Short>(out, param_value.int16_value, ACE_INT16_MIN);
+    out << ")";
     break;
   case OpenDDS::XTypes::TK_UINT16:
     out << "static_cast<ACE_CDR::UShort>(" << param_value.uint16_value << ")";
     break;
   case OpenDDS::XTypes::TK_INT32:
-    out << "static_cast<ACE_CDR::Long>(" << param_value.int32_value << ")";
+    out << "static_cast<ACE_CDR::Long>(";
+    signed_int_helper<ACE_CDR::Long>(out, param_value.int32_value, ACE_INT32_MIN);
+    out << ")";
     break;
   case OpenDDS::XTypes::TK_UINT32:
     out << "static_cast<ACE_CDR::ULong>(" << param_value.uint32_value << ")";
     break;
   case OpenDDS::XTypes::TK_INT64:
-    out << "static_cast<ACE_CDR::LongLong>(" << param_value.int64_value << ")";
+    out << "static_cast<ACE_CDR::LongLong>(";
+    signed_int_helper<ACE_CDR::LongLong>(out, param_value.int64_value, ACE_INT64_MIN);
+    out << ")";
     break;
   case OpenDDS::XTypes::TK_UINT64:
     out << "static_cast<ACE_CDR::ULongLong>(" << param_value.uint64_value << ")";
@@ -671,28 +674,23 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::AnnotationParameterValue& p
     out << "static_cast<ACE_CDR::LongDouble>(" << param_value.float128_value << ")";
     break;
   case OpenDDS::XTypes::TK_CHAR8:
-    out << "static_cast<ACE_CDR::Char>(" << param_value.char_value << ")";
+    out << "static_cast<ACE_CDR::Char>(";
+    char_helper<ACE_CDR::Char>(out << "'", param_value.char_value);
+    out << "')";
     break;
   case OpenDDS::XTypes::TK_CHAR16:
-    out << "XTypes::AnnotationParameterValue::WCharValue(" << param_value.wchar_value << "))";
+    out << "XTypes::AnnotationParameterValue::WCharValue(";
+    char_helper<ACE_CDR::WChar>(out << "L'", param_value.wchar_value);
+    out << "')";
     break;
   case OpenDDS::XTypes::TK_ENUM:
-    out << "XTypes::AnnotationParameterValue::EnumValue(" << param_value.enumerated_value << "))";
+    out << "XTypes::AnnotationParameterValue::EnumValue(" << param_value.enumerated_value << ")";
     break;
   case OpenDDS::XTypes::TK_STRING8:
-    out << "String(" << param_value.string8_value << ")";
+    out << "String(\"" << param_value.string8_value << "\")";
     break;
   case OpenDDS::XTypes::TK_STRING16:
-    // Assuming each wide character can be converted to a single byte character.
-    size_t length = param_value.string16_value.size() + 1;
-    char* dst = new char[length];
-    size_t ret = wcstombs(dst, param_value.string16_value.c_str(), length);
-    if (ret == (size_t)-1) {
-      delete[] dst;
-      be_util::misc_error_and_abort("Failed to convert wide string to multibyte character string");
-    }
-    out << "WString(L\"" << dst << "\")";
-    delete[] dst;
+    be_util::misc_error_and_abort("WideString annotations are not supported");
   }
   out << ")";
   return out;
@@ -1879,7 +1877,8 @@ typeobject_generator::generate_struct_type_identifier(AST_Type* type)
 
   complete_to.complete.struct_type.struct_flags = minimal_to.minimal.struct_type.struct_flags;
   complete_to.complete.struct_type.header.base_type = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_NONE);
-  complete_to.complete.struct_type.header.detail.type_name = type->name()->get_string_copy();
+  OpenDDS::DCPS::String name = "::" + scoped_helper(type->name(), "::", EscapeContext_StripEscapes);
+  complete_to.complete.struct_type.header.detail.type_name = name;
   // @verbatim and custom annotations are not supported.
 
   for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
@@ -1961,7 +1960,8 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
   complete_to.complete.kind = OpenDDS::XTypes::TK_UNION;
   complete_to.complete.union_type.union_flags = minimal_to.minimal.union_type.union_flags;
 
-  complete_to.complete.union_type.header.detail.type_name = type->name()->get_string_copy();
+  OpenDDS::DCPS::String name = "::" + scoped_helper(type->name(), "::", EscapeContext_StripEscapes);
+  complete_to.complete.union_type.header.detail.type_name = name;
 
   complete_to.complete.union_type.discriminator.common.member_flags =
     minimal_to.minimal.union_type.discriminator.common.member_flags;
@@ -2046,7 +2046,8 @@ typeobject_generator::generate_enum_type_identifier(AST_Type* type)
   complete_to.kind = OpenDDS::XTypes::EK_COMPLETE;
   complete_to.complete.kind = OpenDDS::XTypes::TK_ENUM;
   complete_to.complete.enumerated_type.header.common.bit_bound = 32;
-  complete_to.complete.enumerated_type.header.detail.type_name = type->name()->get_string_copy();
+  OpenDDS::DCPS::String name = "::" + scoped_helper(type->name(), "::", EscapeContext_StripEscapes);
+  complete_to.complete.enumerated_type.header.detail.type_name = name;
 
   for (size_t i = 0; i != contents.size(); ++i) {
     OpenDDS::XTypes::MinimalEnumeratedLiteral minimal_lit;
@@ -2147,7 +2148,8 @@ typeobject_generator::generate_array_type_identifier(AST_Type* type, bool force_
     complete_to.kind = OpenDDS::XTypes::EK_COMPLETE;
     complete_to.complete.kind = OpenDDS::XTypes::TK_ARRAY;
     complete_to.complete.array_type.header.common.bound_seq = minimal_to.minimal.array_type.header.common.bound_seq;
-    complete_to.complete.array_type.header.detail.type_name = type->name()->get_string_copy();
+    OpenDDS::DCPS::String name = "::" + scoped_helper(type->name(), "::", EscapeContext_StripEscapes);
+    complete_to.complete.array_type.header.detail.type_name = name;
 
     complete_to.complete.array_type.element.common.element_flags = cef;
     complete_to.complete.array_type.element.common.type = complete_elem_ti;
@@ -2161,12 +2163,7 @@ typeobject_generator::generate_sequence_type_identifier(AST_Type* type, bool for
 {
   AST_Sequence* const n = dynamic_cast<AST_Sequence*>(type);
 
-  ACE_CDR::ULong bound;
-  if (!n->unbounded()) {
-    bound = n->max_size()->ev()->u.ulval;
-  } else {
-    bound = ACE_UINT32_MAX;
-  }
+  const ACE_CDR::ULong bound = n->unbounded() ? ACE_UINT32_MAX : n->max_size()->ev()->u.ulval;
 
   const TryConstructFailAction trycon = be_global->try_construct(n->base_type());
   OpenDDS::XTypes::CollectionElementFlag cef = try_construct_to_member_flag(trycon);
@@ -2250,7 +2247,8 @@ typeobject_generator::generate_alias_type_identifier(AST_Type* type)
 
   complete_to.kind = OpenDDS::XTypes::EK_COMPLETE;
   complete_to.complete.kind = OpenDDS::XTypes::TK_ALIAS;
-  complete_to.complete.alias_type.header.detail.type_name = type->name()->get_string_copy();
+  OpenDDS::DCPS::String name = "::" + scoped_helper(type->name(), "::", EscapeContext_StripEscapes);
+  complete_to.complete.alias_type.header.detail.type_name = name;
   complete_to.complete.alias_type.body.common.related_type = get_complete_type_identifier(n->base_type());
 
   update_maps(type, minimal_to, complete_to);
@@ -2279,12 +2277,14 @@ typeobject_generator::generate_primitive_type_identifier(AST_Type* type)
   case AST_PredefinedType::PT_ushort:
     fully_desc_type_identifier_map_[type] = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_UINT16);
     break;
+#if OPENDDS_HAS_EXPLICIT_INTS
   case AST_PredefinedType::PT_int8:
     fully_desc_type_identifier_map_[type] = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_INT8);
     break;
   case AST_PredefinedType::PT_uint8:
     fully_desc_type_identifier_map_[type] = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_UINT8);
     break;
+#endif
   case AST_PredefinedType::PT_float:
     fully_desc_type_identifier_map_[type] = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_FLOAT32);
     break;

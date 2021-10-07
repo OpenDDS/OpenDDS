@@ -1,7 +1,7 @@
 // -*- C++ -*-
 //
-#ifndef NULLSUBSCRIBERLISTENER_H
-#define NULLSUBSCRIBERLISTENER_H
+#ifndef OPENDDS_MODEL_NULLSUBSCRIBERLISTENER_H
+#define OPENDDS_MODEL_NULLSUBSCRIBERLISTENER_H
 
 #include "model_export.h"
 #include <dds/DdsDcpsSubscriptionC.h>

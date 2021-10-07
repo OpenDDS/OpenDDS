@@ -175,7 +175,7 @@ macro(OPENDDS_TARGET_SOURCES target)
 
       string(TOUPPER "${target}" _target_upper)
       target_compile_definitions(${target}
-        PUBLIC
+        PRIVATE
           ${_target_upper}_BUILD_DLL)
     endif()
 

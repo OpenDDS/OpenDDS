@@ -12,7 +12,22 @@ Building
 
 Run :ghfile:`docs/build.py`, passing the kinds of documentation desired.
 Multiple kinds can be passed, and they are documented in the following sections.
+
+Requirements
+============
+
 The script requires Python 3.6 or later and an internet connection if the script needs to download dependencies or check the validity of external links.
+
+You might receive a message like this when running for the first time::
+
+    build.py: Creating venv...
+    The virtual environment was not created successfully because ensurepip is not
+    available.  On Debian/Ubuntu systems, you need to install the python3-venv
+    package using the following command.
+
+        apt install python3.9-venv
+
+If you do, then follow the directions it gives, remove the ``docs/.venv`` directory, and try again.
 
 HTML
 ====

@@ -11,7 +11,7 @@ ACE_INLINE
 bool
 OpenDDS::DCPS::TransportControlElement::requires_exclusive_packet() const
 {
-  DBG_ENTRY_LVL("TransportControlElement","requires_exclusive_packet",6);
+  DBG_ENTRY_LVL("TransportControlElement", "requires_exclusive_packet", 6);
   return true;
 }
 
@@ -19,7 +19,7 @@ ACE_INLINE
 void
 OpenDDS::DCPS::TransportControlElement::data_delivered()
 {
-  DBG_ENTRY_LVL("TransportControlElement","data_delivered",6);
+  DBG_ENTRY_LVL("TransportControlElement", "data_delivered", 6);
 }
 
 ACE_INLINE
@@ -30,17 +30,24 @@ OpenDDS::DCPS::TransportControlElement::publication_id() const
 }
 
 ACE_INLINE
+ACE_Message_Block*
+OpenDDS::DCPS::TransportControlElement::duplicate_msg() const
+{
+  return msg_->duplicate();
+}
+
+ACE_INLINE
 const ACE_Message_Block*
 OpenDDS::DCPS::TransportControlElement::msg() const
 {
-  return this->msg_.get();
+  return msg_.get();
 }
 
 ACE_INLINE
 const ACE_Message_Block*
 OpenDDS::DCPS::TransportControlElement::msg_payload() const
 {
-  return this->msg_->cont();
+  return msg_->cont();
 }
 
 ACE_INLINE

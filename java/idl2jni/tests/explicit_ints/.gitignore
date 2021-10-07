@@ -1,0 +1,16 @@
+/explicit_ints
+/*.vcproj
+/*.user
+/*.ilk
+/classes
+/explicit_ints.jar
+/explicit_intsC.h
+/explicit_intsJC.cpp
+/explicit_intsJC.h
+/explicit_intsS.cpp
+/explicit_intsS.inl
+/explicit_intsS.h
+/explicit_intsJS.cpp
+/explicit_intsJS.h
+/explicit_intsC.cpp
+/explicit_intsC.inl

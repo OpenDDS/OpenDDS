@@ -19,17 +19,17 @@ using DDS::Property_t;
 using DDS::PropertySeq;
 using OpenDDS::Security::TokenWriter;
 
-struct LocalAuthCredentialDataTest : public ::testing::Test
+struct dds_DCPS_security_Authentication_LocalAuthCredentialData : public ::testing::Test
 {
   PropertySeq properties;
   OpenDDS::Security::LocalAuthCredentialData credential_data;
 
-  LocalAuthCredentialDataTest()
+  dds_DCPS_security_Authentication_LocalAuthCredentialData()
   {
 
   }
 
-  ~LocalAuthCredentialDataTest()
+  ~dds_DCPS_security_Authentication_LocalAuthCredentialData()
   {
   }
 
@@ -42,7 +42,7 @@ struct LocalAuthCredentialDataTest : public ::testing::Test
 };
 
 
-TEST_F(LocalAuthCredentialDataTest, LoadAccessPermissions_Success)
+TEST_F(dds_DCPS_security_Authentication_LocalAuthCredentialData, LoadAccessPermissions_Success)
 {
   std::string path("../security/permissions/permissions_test_participant_01_JoinDomain_signed.p7s");
   DDS::Security::SecurityException ex;
@@ -69,7 +69,7 @@ TEST_F(LocalAuthCredentialDataTest, LoadAccessPermissions_Success)
                            access_bytes.length()));
 }
 
-TEST_F(LocalAuthCredentialDataTest, LoadIdentityCa_Success)
+TEST_F(dds_DCPS_security_Authentication_LocalAuthCredentialData, LoadIdentityCa_Success)
 {
   Property_t idca;
   idca.name = "dds.sec.auth.identity_ca";
@@ -82,7 +82,7 @@ TEST_F(LocalAuthCredentialDataTest, LoadIdentityCa_Success)
   ASSERT_TRUE(1); // TODO
 }
 
-TEST_F(LocalAuthCredentialDataTest, LoadPrivateKey_Success)
+TEST_F(dds_DCPS_security_Authentication_LocalAuthCredentialData, LoadPrivateKey_Success)
 {
   Property_t pkey;
   pkey.name = "dds.sec.auth.private_key";
@@ -101,7 +101,7 @@ TEST_F(LocalAuthCredentialDataTest, LoadPrivateKey_Success)
   ASSERT_TRUE(1); // TODO
 }
 
-TEST_F(LocalAuthCredentialDataTest, LoadIdentityCert_Success)
+TEST_F(dds_DCPS_security_Authentication_LocalAuthCredentialData, LoadIdentityCert_Success)
 {
   Property_t idcert;
   idcert.name = "dds.sec.auth.identity_certificate";

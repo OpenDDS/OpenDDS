@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -8,18 +6,21 @@
 #ifndef OPENDDS_DCPS_JSON_VALUE_WRITER_H
 #define OPENDDS_DCPS_JSON_VALUE_WRITER_H
 
-#ifdef OPENDDS_RAPIDJSON
-#ifndef OPENDDS_SAFETY_PROFILE
+#if defined OPENDDS_RAPIDJSON && !defined OPENDDS_SAFETY_PROFILE
+#  define OPENDDS_HAS_JSON_VALUE_WRITER 1
+#else
+#  define OPENDDS_HAS_JSON_VALUE_WRITER 0
+#endif
 
-#define OPENDDS_HAS_JSON_VALUE_WRITER 1
-
-#include "dcps_export.h"
+#if OPENDDS_HAS_JSON_VALUE_WRITER
 
 #include "ValueWriter.h"
 #include "RapidJsonWrapper.h"
+#include "dcps_export.h"
+#include "Definitions.h"
 
-#include "dds/DdsDcpsCoreTypeSupportImpl.h"
-#include "dds/DdsDcpsTopicC.h"
+#include <dds/DdsDcpsCoreTypeSupportImpl.h>
+#include <dds/DdsDcpsTopicC.h>
 
 #include <iosfwd>
 #include <sstream>
@@ -34,8 +35,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-// Convert values to JSON.
-// Currently, this class does not produce value JSON nor does it adhere to the DDS JSON spec.
+/// Convert values to JSON.
+/// Currently, this class does not produce value JSON nor does it adhere to the DDS JSON spec.
 template <typename Buffer = rapidjson::StringBuffer>
 class JsonValueWriter : public ValueWriter {
 public:
@@ -70,8 +71,10 @@ public:
 
   void write_boolean(ACE_CDR::Boolean value);
   void write_byte(ACE_CDR::Octet value);
+#if OPENDDS_HAS_EXPLICIT_INTS
   void write_int8(ACE_CDR::Int8 value);
   void write_uint8(ACE_CDR::UInt8 value);
+#endif
   void write_int16(ACE_CDR::Short value);
   void write_uint16(ACE_CDR::UShort value);
   void write_int32(ACE_CDR::Long value);
@@ -194,6 +197,7 @@ void JsonValueWriter<Buffer>::write_byte(ACE_CDR::Octet value)
   writer_.Uint(value);
 }
 
+#if OPENDDS_HAS_EXPLICIT_INTS
 template <typename Buffer>
 void JsonValueWriter<Buffer>::write_int8(ACE_CDR::Int8 value)
 {
@@ -205,6 +209,7 @@ void JsonValueWriter<Buffer>::write_uint8(ACE_CDR::UInt8 value)
 {
   writer_.Uint(value);
 }
+#endif
 
 template <typename Buffer>
 void JsonValueWriter<Buffer>::write_int16(ACE_CDR::Short value)
@@ -341,7 +346,6 @@ std::string to_json(const DDS::TopicDescription_ptr topic,
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif
 #endif
 
 #endif  /* OPENDDS_DCPS_JSON_VALUE_WRITER_H */

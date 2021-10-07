@@ -56,12 +56,14 @@ RtpsUdpDataLink::ipv6_multicast_socket()
 ACE_INLINE DDS::Security::ParticipantCryptoHandle
 RtpsUdpDataLink::local_crypto_handle() const
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(security_mutex_);
   return local_crypto_handle_;
 }
 
 ACE_INLINE void
 RtpsUdpDataLink::local_crypto_handle(DDS::Security::ParticipantCryptoHandle h)
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(security_mutex_);
   local_crypto_handle_ = h;
 }
 #endif

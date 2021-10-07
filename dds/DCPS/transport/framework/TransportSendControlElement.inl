@@ -21,7 +21,7 @@ ACE_INLINE
 SequenceNumber
 TransportSendControlElement::sequence() const
 {
-  return this->header_.sequence_;
+  return header_.sequence_;
 }
 
 }

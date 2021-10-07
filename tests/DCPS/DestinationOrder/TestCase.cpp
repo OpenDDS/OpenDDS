@@ -75,8 +75,10 @@ TestCase::test()
 
   DDS::InstanceHandle_t instance;
 
-  DDS::Time_t t1 = { 10, 0 };
-  DDS::Time_t t2 = {  0, 0 };
+  const CORBA::Long now_sec = static_cast<CORBA::Long>(OpenDDS::DCPS::SystemTimePoint::now().value().sec());
+
+  DDS::Time_t t1 = { now_sec + 10, 0 };
+  DDS::Time_t t2 = { now_sec +  0, 0 };
 
   TestMessage m1 = { 0, "FIRST"  };
   TestMessage m2 = { 0, "SECOND" };

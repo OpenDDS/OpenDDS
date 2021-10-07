@@ -1,0 +1,153 @@
+/*
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef OPENDDS_RTPSRELAYLIB_RELAY_IDL
+#define OPENDDS_RTPSRELAYLIB_RELAY_IDL
+
+#include <dds/DdsDcpsCore.idl>
+
+module RtpsRelay {
+
+  const string HSPDP = "HSPDP";
+  const string HSEDP = "HSEDP";
+  const string HDATA = "HDATA";
+  const string VSPDP = "VSPDP";
+  const string VSEDP = "VSEDP";
+  const string VDATA = "VDATA";
+
+  // GUID prefix bytes - uniquely specify the participant.
+  typedef octet GuidPrefix_t[12];
+
+  // Key portion of Entity identifier.
+  typedef octet EntityKey_t[3];
+
+  // Uniquely identify each entity within a participant.
+  @final
+  struct EntityId_t {
+    @key EntityKey_t entityKey;
+    @key octet entityKind;
+  };
+
+  // The actual GUID itself.
+  @final
+  struct GUID_t {
+    @key GuidPrefix_t guidPrefix;
+    @key EntityId_t entityId;
+  };
+
+  typedef sequence<string> StringSequence;
+  typedef sequence<GUID_t> GuidSequence;
+
+  const string RELAY_PARTITIONS_TOPIC_NAME = "Relay Partitions";
+  @topic
+  struct RelayPartitions {
+    @key GUID_t application_participant_guid;
+    @key unsigned long slot;
+    StringSequence partitions;
+  };
+
+  const string RELAY_ADDRESSES_TOPIC_NAME = "Relay Addresses";
+  @topic
+  struct RelayAddress {
+    @key GUID_t application_participant_guid;
+    @key string name;
+    string address;
+  };
+
+  const string RELAY_INSTANCES_TOPIC_NAME = "Relay Instances";
+  @topic
+  struct RelayInstance {
+    @key GUID_t application_participant_guid;
+    DDS::UserDataQosPolicy application_participant_user_data;
+  };
+
+  const string SPDP_REPLAY_TOPIC_NAME = "SPDP Replay";
+  @topic
+  struct SpdpReplay {
+    StringSequence partitions;
+  };
+
+  struct RelayHeader {
+    StringSequence to_partitions;
+    GuidSequence to_guids;
+  };
+
+  struct Duration_t {
+    long sec;
+    unsigned long nanosec;
+  };
+
+  const string PARTICIPANT_STATISTICS_TOPIC_NAME = "Participant Statistics";
+
+  @topic
+  @mutable
+  @autoid(HASH)
+  struct ParticipantStatistics {
+    @key GUID_t guid;
+    @key string name;
+    Duration_t interval;
+    unsigned long messages_from;
+    unsigned long long bytes_from;
+    unsigned long messages_to;
+    unsigned long long bytes_to;
+  };
+
+  @mutable
+  @autoid(HASH)
+  struct ProtocolStatistics {
+    unsigned long messages_in;
+    unsigned long long bytes_in;
+    unsigned long messages_ignored;
+    unsigned long long bytes_ignored;
+    Duration_t input_processing_time;
+    unsigned long messages_out;
+    unsigned long long bytes_out;
+    unsigned long messages_dropped;
+    unsigned long long bytes_dropped;
+    Duration_t output_processing_time;
+  };
+
+  const string HANDLER_STATISTICS_TOPIC_NAME = "Handler Statistics";
+
+  @topic
+  @mutable
+  @autoid(HASH)
+  struct HandlerStatistics {
+    @key GUID_t application_participant_guid;
+    @key string name;
+    Duration_t interval;
+    ProtocolStatistics rtps;
+    ProtocolStatistics stun;
+    unsigned long max_gain;
+    unsigned long error_count;
+    unsigned long max_queue_size;
+    Duration_t max_queue_latency;
+  };
+
+  const string RELAY_STATISTICS_TOPIC_NAME = "Relay Statistics";
+
+  @topic
+  @mutable
+  @autoid(HASH)
+  struct RelayStatistics {
+    @key GUID_t application_participant_guid;
+    Duration_t interval;
+    ProtocolStatistics rtps;
+    ProtocolStatistics stun;
+    unsigned long max_gain;
+    unsigned long error_count;
+    unsigned long local_active_participants;
+    unsigned long new_address_count;
+    unsigned long expired_address_count;
+    unsigned long expired_pending_count;
+    unsigned long max_queue_size;
+    Duration_t max_queue_latency;
+    unsigned long local_participants;
+    unsigned long local_writers;
+    unsigned long local_readers;
+  };
+};
+
+#endif
