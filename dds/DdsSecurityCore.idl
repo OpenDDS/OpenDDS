@@ -655,11 +655,21 @@ module DDS {
         inout SecurityException          ex);
 
       boolean
+      have_local_participant_crypto_tokens(
+        in    ParticipantCryptoHandle    local_participant_crypto,
+        in    ParticipantCryptoHandle    remote_participant_crypto);
+
+      boolean
       set_remote_participant_crypto_tokens(
         in    ParticipantCryptoHandle    local_participant_crypto,
         in    ParticipantCryptoHandle    remote_participant_crypto,
         in    ParticipantCryptoTokenSeq  remote_participant_tokens,
         inout SecurityException          ex);
+
+      boolean
+      have_remote_participant_crypto_tokens(
+        in    ParticipantCryptoHandle    local_participant_crypto,
+        in    ParticipantCryptoHandle    remote_participant_crypto);
 
       boolean
       create_local_datawriter_crypto_tokens(
@@ -669,11 +679,21 @@ module DDS {
         inout SecurityException         ex);
 
       boolean
+      have_local_datawriter_crypto_tokens(
+        in    DatawriterCryptoHandle    local_datawriter_crypto,
+        in    DatareaderCryptoHandle    remote_datareader_crypto);
+
+      boolean
       set_remote_datawriter_crypto_tokens(
         in    DatareaderCryptoHandle    local_datareader_crypto,
         in    DatawriterCryptoHandle    remote_datawriter_crypto,
         in    DatawriterCryptoTokenSeq  remote_datawriter_tokens,
         inout SecurityException         ex);
+
+      boolean
+      have_remote_datawriter_crypto_tokens(
+        in    DatareaderCryptoHandle    local_datareader_crypto,
+        in    DatawriterCryptoHandle    remote_datawriter_crypto);
 
       boolean
       create_local_datareader_crypto_tokens(
@@ -683,11 +703,21 @@ module DDS {
         inout SecurityException         ex);
 
       boolean
+      have_local_datareader_crypto_tokens(
+        in    DatareaderCryptoHandle    local_datareader_crypto,
+        in    DatawriterCryptoHandle    remote_datawriter_crypto);
+
+      boolean
       set_remote_datareader_crypto_tokens(
         in    DatawriterCryptoHandle    local_datawriter_crypto,
         in    DatareaderCryptoHandle    remote_datareader_crypto,
         in    DatareaderCryptoTokenSeq  remote_datareader_tokens,
         inout SecurityException         ex);
+
+      boolean
+      have_remote_datareader_crypto_tokens(
+        in    DatawriterCryptoHandle    local_datawriter_crypto,
+        in    DatareaderCryptoHandle    remote_datareader_crypto);
 
       boolean
       return_crypto_tokens(

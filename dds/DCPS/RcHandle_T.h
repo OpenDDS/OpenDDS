@@ -309,6 +309,24 @@ RcHandle<T> make_rch(U0 const& u0, U1 const& u1, U2 const& u2, U3 const& u3, U4 
   return RcHandle<T>(new T(unwrap_reference(u0), unwrap_reference(u1), unwrap_reference(u2), unwrap_reference(u3), unwrap_reference(u4), unwrap_reference(u5), unwrap_reference(u6), unwrap_reference(u7)), keep_count());
 }
 
+template <typename T, typename U0, typename U1, typename U2, typename U3, typename U4, typename U5, typename U6, typename U7, typename U8>
+RcHandle<T> make_rch(U0 const& u0, U1 const& u1, U2 const& u2, U3 const& u3, U4 const& u4, U5 const& u5, U6 const& u6, U7 const& u7, U8 const& u8)
+{
+  return RcHandle<T>(new T(unwrap_reference(u0), unwrap_reference(u1), unwrap_reference(u2), unwrap_reference(u3), unwrap_reference(u4), unwrap_reference(u5), unwrap_reference(u6), unwrap_reference(u7), unwrap_reference(u8)), keep_count());
+}
+
+template <typename T, typename U0, typename U1, typename U2, typename U3, typename U4, typename U5, typename U6, typename U7, typename U8, typename U9>
+RcHandle<T> make_rch(U0 const& u0, U1 const& u1, U2 const& u2, U3 const& u3, U4 const& u4, U5 const& u5, U6 const& u6, U7 const& u7, U8 const& u8, U9 const& u9)
+{
+  return RcHandle<T>(new T(unwrap_reference(u0), unwrap_reference(u1), unwrap_reference(u2), unwrap_reference(u3), unwrap_reference(u4), unwrap_reference(u5), unwrap_reference(u6), unwrap_reference(u7), unwrap_reference(u8), unwrap_reference(u9)), keep_count());
+}
+
+template <typename T, typename U0, typename U1, typename U2, typename U3, typename U4, typename U5, typename U6, typename U7, typename U8, typename U9, typename U10>
+RcHandle<T> make_rch(U0 const& u0, U1 const& u1, U2 const& u2, U3 const& u3, U4 const& u4, U5 const& u5, U6 const& u6, U7 const& u7, U8 const& u8, U9 const& u9, U10 const& u10)
+{
+  return RcHandle<T>(new T(unwrap_reference(u0), unwrap_reference(u1), unwrap_reference(u2), unwrap_reference(u3), unwrap_reference(u4), unwrap_reference(u5), unwrap_reference(u6), unwrap_reference(u7), unwrap_reference(u8), unwrap_reference(u9), unwrap_reference(u10)), keep_count());
+}
+
 template<typename T>
 RcHandle<T> rchandle_from(T* pointer)
 {
