@@ -23,4 +23,12 @@ if ($retcode != 0) {
     exit 1;
 }
 
+$test = new PerlDDS::TestFramework();
+$test->process("StressTests_SporadicTask", "StressTests_SporadicTask", "");
+$test->start_process("StressTests_SporadicTask");
+my $retcode = $test->finish(60);
+if ($retcode != 0) {
+    exit 1;
+}
+
 exit 0;

@@ -150,7 +150,7 @@ private:
 
       if (timer == -1) {
         ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: SporadicTask::enable")
+                   ACE_TEXT("(%P|%t) ERROR: SporadicTask::schedule")
                    ACE_TEXT(" failed to schedule timer %p\n"),
                    ACE_TEXT("")));
       } else {
