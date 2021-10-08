@@ -50,8 +50,7 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , max_lease_duration_(300)
 #ifdef OPENDDS_SECURITY
   , security_unsecure_lease_duration_(30)
-  , max_participants_in_authentication_(1) //?? to be replaced by below
-//, max_participants_in_authentication_(std::numeric_limits<unsigned int>::max())
+  , max_participants_in_authentication_(std::numeric_limits<unsigned int>::max())
 #endif
   , lease_extension_(0)
   , pb_(7400) // see RTPS v2.1 9.6.1.3 for PB, DG, PG, D0, D1 defaults

@@ -747,7 +747,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
 #ifdef OPENDDS_SECURITY
     if (n_participants_in_authentication_ > config_->max_participants_in_authentication()) {
-      if (DCPS::DCPS_debug_level) {
+      if (DCPS::DCPS_debug_level >= 8) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Spdp::handle_participant_data - participants_in_authentication:%d > max:%d\n"),
           n_participants_in_authentication_, config_->max_participants_in_authentication()));
       }
