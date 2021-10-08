@@ -458,7 +458,7 @@ private:
       return false;
     }
   };
-  typedef OPENDDS_MAP_T(MatchingPair, MatchingData) MatchingDataMap;
+  typedef OPENDDS_MAP(MatchingPair, MatchingData) MatchingDataMap;
   typedef MatchingDataMap::iterator MatchingDataIter;
 
   void match(const GUID_t& writer, const GUID_t& reader);
@@ -493,7 +493,7 @@ private:
   ACE_Thread_Mutex& lock_;
   GUID_t participant_id_;
   RepoIdSet ignored_guids_;
-  unsigned int publication_counter_, subscription_counter_, topic_counter_;
+  unsigned int topic_counter_;
   LocalPublicationMap local_publications_;
   LocalSubscriptionMap local_subscriptions_;
   DiscoveredPublicationMap discovered_publications_;

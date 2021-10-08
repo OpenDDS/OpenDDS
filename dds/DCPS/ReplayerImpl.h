@@ -85,9 +85,7 @@ public:
     OpenDDS::DCPS::DomainParticipantImpl* participant_servant,
     const DDS::PublisherQos&              publisher_qos);
 
-
-  // implement Replayer
-
+  // Implement Replayer
   virtual DDS::ReturnCode_t write (const RawDataSample& sample );
   virtual DDS::ReturnCode_t write_to_reader (DDS::InstanceHandle_t subscription,
                                              const RawDataSample&  sample );

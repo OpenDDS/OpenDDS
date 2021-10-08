@@ -80,8 +80,6 @@ StaticEndpointManager::StaticEndpointManager(const RepoId& participant_id,
                                              StaticParticipant& participant)
   : lock_(lock)
   , participant_id_(participant_id)
-  , publication_counter_(0)
-  , subscription_counter_(0)
   , topic_counter_(0)
   , registry_(registry)
 #ifndef DDS_HAS_MINIMUM_BIT
