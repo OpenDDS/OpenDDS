@@ -1554,7 +1554,7 @@ protected:
     }
   };
 
-  typedef OPENDDS_MAP_T(MatchingPair, MatchingData) MatchingDataMap;
+  typedef OPENDDS_MAP(MatchingPair, MatchingData) MatchingDataMap;
   typedef MatchingDataMap::iterator MatchingDataIter;
 
   typedef DCPS::PmfSporadicTask<Sedp> EndpointManagerSporadic;

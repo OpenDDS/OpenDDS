@@ -654,6 +654,7 @@ module DDS {
         in    ParticipantCryptoHandle    remote_participant_crypto,
         inout SecurityException          ex);
 
+      // Not in spec.
       boolean
       have_local_participant_crypto_tokens(
         in    ParticipantCryptoHandle    local_participant_crypto,
@@ -666,6 +667,7 @@ module DDS {
         in    ParticipantCryptoTokenSeq  remote_participant_tokens,
         inout SecurityException          ex);
 
+      // Not in spec.
       boolean
       have_remote_participant_crypto_tokens(
         in    ParticipantCryptoHandle    local_participant_crypto,
@@ -678,6 +680,7 @@ module DDS {
         in    DatareaderCryptoHandle    remote_datareader_crypto,
         inout SecurityException         ex);
 
+      // Not in spec.
       boolean
       have_local_datawriter_crypto_tokens(
         in    DatawriterCryptoHandle    local_datawriter_crypto,
@@ -690,6 +693,7 @@ module DDS {
         in    DatawriterCryptoTokenSeq  remote_datawriter_tokens,
         inout SecurityException         ex);
 
+      // Not in spec.
       boolean
       have_remote_datawriter_crypto_tokens(
         in    DatareaderCryptoHandle    local_datareader_crypto,
@@ -702,6 +706,7 @@ module DDS {
         in    DatawriterCryptoHandle    remote_datawriter_crypto,
         inout SecurityException         ex);
 
+      // Not in spec.
       boolean
       have_local_datareader_crypto_tokens(
         in    DatareaderCryptoHandle    local_datareader_crypto,
@@ -714,6 +719,7 @@ module DDS {
         in    DatareaderCryptoTokenSeq  remote_datareader_tokens,
         inout SecurityException         ex);
 
+      // Not in spec.
       boolean
       have_remote_datareader_crypto_tokens(
         in    DatawriterCryptoHandle    local_datawriter_crypto,

@@ -1129,7 +1129,7 @@ void TransportClient::data_acked(const GUID_t& remote)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(lock_);
   if (!guard.locked()) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TransportClient::pending_association_with: "
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TransportClient::data_acked: "
       "lock failed\n"));
     return;
   }

@@ -6435,6 +6435,10 @@ bool Sedp::remote_knows_about_local_i(const GUID_t& local, const GUID_t& remote)
 #ifdef OPENDDS_SECURITY
 bool Sedp::remote_is_authenticated_i(const GUID_t& local, const DiscoveredParticipant& participant) const
 {
+  if (spdp_.crypto_handle_ == DDS::HANDLE_NIL) {
+    return true;
+  }
+
   if (local.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER ||
       local.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER) {
     // Don't need authentication.
@@ -6458,6 +6462,10 @@ bool Sedp::remote_is_authenticated_i(const GUID_t& local, const DiscoveredPartic
 #ifdef OPENDDS_SECURITY
 bool Sedp::local_has_remote_participant_token_i(const GUID_t& local, const GUID_t& remote) const
 {
+  if (spdp_.crypto_handle_ == DDS::HANDLE_NIL) {
+    return true;
+  }
+
   const GUID_t remote_part = make_id(remote, ENTITYID_PARTICIPANT);
 
   if (local.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER ||
@@ -6478,6 +6486,10 @@ bool Sedp::local_has_remote_participant_token_i(const GUID_t& local, const GUID_
 
 bool Sedp::remote_has_local_participant_token_i(const GUID_t& local, const GUID_t& remote, const DiscoveredParticipant& participant) const
 {
+  if (spdp_.crypto_handle_ == DDS::HANDLE_NIL) {
+    return true;
+  }
+
   const GUID_t remote_part = make_id(remote, ENTITYID_PARTICIPANT);
 
   if (local.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER ||
@@ -6499,6 +6511,10 @@ bool Sedp::remote_has_local_participant_token_i(const GUID_t& local, const GUID_
 
 bool Sedp::local_has_remote_endpoint_token_i(const GUID_t& local, const GUID_t& remote) const
 {
+  if (spdp_.crypto_handle_ == DDS::HANDLE_NIL) {
+    return true;
+  }
+
   if (local.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER ||
       local.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER ||
       local.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER ||
@@ -6528,6 +6544,10 @@ bool Sedp::local_has_remote_endpoint_token_i(const GUID_t& local, const GUID_t& 
 bool Sedp::remote_has_local_endpoint_token_i(const GUID_t& local, bool local_tokens_sent,
                                              const GUID_t& remote) const
 {
+  if (spdp_.crypto_handle_ == DDS::HANDLE_NIL) {
+    return true;
+  }
+
   if (local.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER ||
       local.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER ||
       local.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER ||
@@ -6678,10 +6698,10 @@ void Sedp::cleanup_writer_association(DCPS::DataWriterCallbacks_wrch callbacks,
       }
     }
 
-    for (DiscoveredParticipant::WriterAssociationRecords::iterator pos = part_iter->second.writer_pending_records_.begin(), limit = part_iter->second.writer_pending_records_.end(); pos != limit; ++pos) {
+    for (DiscoveredParticipant::WriterAssociationRecords::iterator pos = part_iter->second.writer_associated_records_.begin(), limit = part_iter->second.writer_associated_records_.end(); pos != limit; ++pos) {
       if (pos->writer_id() == writer && pos->reader_id() == reader) {
         job_queue_->enqueue(DCPS::make_rch<WriterRemoveAssociations>(*pos));
-        part_iter->second.writer_pending_records_.erase(pos);
+        part_iter->second.writer_associated_records_.erase(pos);
         break;
       }
     }
@@ -6705,10 +6725,10 @@ void Sedp::cleanup_reader_association(DCPS::DataReaderCallbacks_wrch callbacks,
       }
     }
 
-    for (DiscoveredParticipant::ReaderAssociationRecords::iterator pos = part_iter->second.reader_pending_records_.begin(), limit = part_iter->second.reader_pending_records_.end(); pos != limit; ++pos) {
+    for (DiscoveredParticipant::ReaderAssociationRecords::iterator pos = part_iter->second.reader_associated_records_.begin(), limit = part_iter->second.reader_associated_records_.end(); pos != limit; ++pos) {
       if (pos->reader_id() == reader && pos->writer_id() == writer) {
         job_queue_->enqueue(DCPS::make_rch<ReaderRemoveAssociations>(*pos));
-        part_iter->second.reader_pending_records_.erase(pos);
+        part_iter->second.reader_associated_records_.erase(pos);
         break;
       }
     }
