@@ -9,6 +9,7 @@
 #include "TypeObject.h"
 #include "DynamicType.h"
 
+#include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/PoolAllocator.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -21,15 +22,14 @@ public:
   // DynamicData can be constructed for any type kinds, except TK_ANNOTATION (since
   // data for annotations won't be serialized independently in a sample) and TK_BITSET
   // (the spec doesn't have enough information on how to handle bitsets).
-  DynamicData(Serializer& strm, DynamicType_rch type);
-  DynamicData() {}
+  DynamicData(DCPS::Serializer& strm, DynamicType_rch type);
   ~DynamicData() {}
 
   DDS::ReturnCode_t get_descriptor(MemberDescriptor& value, MemberId id) const;
   DDS::ReturnCode_t set_descriptor(MemberId id, const MemberDescriptor& value);
   bool equals(const DynamicData& other) const;
 
-  MemberId get_member_id_by_name(String name) const;
+  MemberId get_member_id_by_name(DCPS::String name) const;
   MemberId get_member_id_at_index(ACE_CDR::ULong) const;
   ACE_CDR::ULong get_item_count() const;
 
@@ -136,31 +136,31 @@ public:
   DDS::ReturnCode_t set_float64_values(MemberId id, const Float64Seq& value);
 
   typedef Sequence<ACE_CDR::LongDouble> Float128Seq;
-  DDS::ReturnCode_t get_float128_values(Float128Seq& value, MemberId id) const;
+  DDS::ReturnCode_t get_float128_values(Float128Seq& value, MemberId id);
   DDS::ReturnCode_t set_float128_values(MemberId id, const Float128Seq& value);
 
   typedef Sequence<ACE_CDR::Char> CharSeq;
-  DDS::ReturnCode_t get_char8_values(CharSeq& value, MemberId id) const;
+  DDS::ReturnCode_t get_char8_values(CharSeq& value, MemberId id);
   DDS::ReturnCode_t set_char8_values(MemberId id, const CharSeq& value);
 
   typedef Sequence<ACE_CDR::WChar> WCharSeq;
-  DDS::ReturnCode_t get_char16_values(WCharSeq& value, MemberId id) const;
+  DDS::ReturnCode_t get_char16_values(WCharSeq& value, MemberId id);
   DDS::ReturnCode_t set_char16_values(MemberId id, const WCharSeq& value);
 
   typedef Sequence<ACE_CDR::Octet> ByteSeq;
-  DDS::ReturnCode_t get_byte_values(ByteSeq& value, MemberId id) const;
+  DDS::ReturnCode_t get_byte_values(ByteSeq& value, MemberId id);
   DDS::ReturnCode_t set_byte_values(MemberId id, const ByteSeq& value);
 
   typedef Sequence<ACE_CDR::Boolean> BooleanSeq;
-  DDS::ReturnCode_t get_boolean_values(BooleanSeq& value, MemberId id) const;
+  DDS::ReturnCode_t get_boolean_values(BooleanSeq& value, MemberId id);
   DDS::ReturnCode_t set_boolean_values(MemberId id, const BooleanSeq& value);
 
   typedef Sequence<DCPS::String> StringSeq;
-  DDS::ReturnCode_t get_string_values(StringSeq& value, MemberId id) const;
+  DDS::ReturnCode_t get_string_values(StringSeq& value, MemberId id);
   DDS::ReturnCode_t set_string_values(MemberId id, const StringSeq& value);
 
   typedef Sequence<DCPS::WString> WStringSeq;
-  DDS::ReturnCode_t get_wstring_values(WStringSeq& value, MemberId id) const;
+  DDS::ReturnCode_t get_wstring_values(WStringSeq& value, MemberId id);
   DDS::ReturnCode_t set_wstring_values(MemberId id, const WStringSeq& value);
 
   /// Skip the whole data corresponding to this type if it is a struct or union.
@@ -175,29 +175,34 @@ private:
 
   /// Templates for reading a single value of type primitive or string or
   /// wstring from a corresponding containing type.
-  template<typename MemberType, typename MemberTypeKind>
+  template<typename MemberType, TypeKind MemberTypeKind>
   bool get_value_from_struct(MemberType& value, MemberId id,
                              TypeKind enum_or_bitmask, LBound lower, LBound upper);
 
-  template<typename MemberType, typename MemberTypeKind>
+  template<typename MemberType, TypeKind MemberTypeKind>
   bool get_value_from_union(MemberType& value, MemberId id,
                             TypeKind enum_or_bitmask, LBound lower, LBound upper);
 
-  template<typename ElementType, typename ElementTypeKind>
+  template<typename ElementType, TypeKind ElementTypeKind>
   bool get_value_from_collection(ElementType& value, MemberId id, TypeKind collection_tk,
-                                 TypeKind enum_or_bitmask, LBound lower, LBound upper);
+                                 TypeKind enum_or_bitmask = TK_NONE,
+                                 LBound lower = 0,
+                                 LBound upper = 0);
 
-  template<typename ValueType, typename ValueTypeKind>
-  bool get_single_value(ValueType& value, MemberId id,
-                        TypeKind enum_or_bitmask = TK_NONE,
-                        LBound lower = 0,
-                        LBound upper = 0);
+  template<typename ValueType, TypeKind ValueTypeKind>
+  DDS::ReturnCode_t get_single_value(ValueType& value, MemberId id,
+                                     TypeKind enum_or_bitmask = TK_NONE,
+                                     LBound lower = 0,
+                                     LBound upper = 0);
 
   template<typename UIntType>
   bool get_boolean_from_bitmask(ACE_CDR::ULong index, ACE_CDR::Boolean& value);
 
   /// Skip to a member with a given ID in a struct.
   bool skip_to_struct_member(const MemberDescriptor& member_desc, MemberId id);
+
+  bool get_from_struct_common_checks(MemberDescriptor& md, MemberId id,
+                                     TypeKind kind, bool is_sequence = false);
 
   /// Find member descriptor for the selected member from a union data.
   bool get_union_selected_member(MemberDescriptor& out_md);
@@ -219,28 +224,28 @@ private:
 
   // Templates for reading a sequence of primitives or strings or wstrings
   // as a member (or an element) of a given containing type.
-  template<typename SequenceType, typename ElementTypeKind>
+  template<typename SequenceType, TypeKind ElementTypeKind>
   bool get_values_from_struct(SequenceType& value, MemberId id,
                               TypeKind enum_or_bitmask, LBound lower, LBound upper);
 
-  template<typename SequenceType, typename ElementTypeKind>
+  template<typename SequenceType, TypeKind ElementTypeKind>
   bool get_values_from_union(SequenceType& value, MemberId id,
                              TypeKind enum_or_bitmask, LBound lower, LBound upper);
 
-  template<typename SequenceType, typename ElementTypeKind>
+  template<typename SequenceType, TypeKind ElementTypeKind>
   bool get_values_from_sequence(SequenceType& value, MemberId id,
                                 TypeKind enum_or_bitmask, LBound lower, LBound upper);
 
-  template<typename SequenceType, typename ElementTypeKind>
+  template<typename SequenceType, TypeKind ElementTypeKind>
   bool get_values_from_array(SequenceType& value, MemberId id,
                              TypeKind enum_or_bitmask, LBound lower, LBound upper);
 
-  template<typename SequenceType, typename ElementTypeKind>
+  template<typename SequenceType, TypeKind ElementTypeKind>
   bool get_values_from_map(SequenceType& value, MemberId id,
                            TypeKind enum_or_bitmask, LBound lower, LBound upper);
 
   /// Template that reads sequence of values from all valid containing types.
-  template<typename SequenceType, typename ElementTypeKind>
+  template<typename SequenceType, TypeKind ElementTypeKind>
   DDS::ReturnCode_t get_sequence_values(SequenceType& value, MemberId id,
                                         TypeKind enum_or_bitmask = TK_NONE,
                                         LBound lower = 0,
@@ -291,7 +296,7 @@ private:
   /// Reset the read pointer to point to the beginning of the stream.
   void reset_rpos();
 
-  Serializer& strm_;
+  DCPS::Serializer& strm_;
   const size_t start_rpos_;
 
   DynamicType_rch type_;
