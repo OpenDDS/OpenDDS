@@ -2351,7 +2351,7 @@ bool Spdp::announce_domain_participant_qos()
   return true;
 }
 
-#if !defined _MSC_VER || _MSC_VER > 1700
+#if !defined _MSC_VER || _MSC_VER >= 1900
 const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_MULTICAST;
 const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_RELAY;
 const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_DIRECT;
