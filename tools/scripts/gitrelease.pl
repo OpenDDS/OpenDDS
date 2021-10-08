@@ -2386,7 +2386,6 @@ else {
       arg_error("For micro releases, you must define the branch you want to use with --branch");
     }
     $skip_devguide = 1;
-    $skip_doxygen = 1;
     $skip_website = 1;
   }
 
