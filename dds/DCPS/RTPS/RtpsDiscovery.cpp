@@ -829,8 +829,8 @@ RtpsDiscovery::generate_participant_guid()
     if (guid_gen_.interfaceName(guid_interface.c_str()) != 0) {
       if (DCPS::DCPS_debug_level) {
         ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsDiscovery::generate_participant_guid()"
-                   " - attempt to use specific network interface %C MAC addr for"
-                   " GUID generation failed.\n"), guid_interface.c_str());
+                   " - attempt to use network interface %C MAC addr for"
+                   " GUID generation failed.\n", guid_interface.c_str()));
       }
     }
   }
