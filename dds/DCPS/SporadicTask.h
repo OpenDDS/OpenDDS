@@ -30,6 +30,14 @@ public:
 
   void schedule(const TimeDuration& delay)
   {
+    bool worth_passing_along = false;
+    {
+      ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+      worth_passing_along = (!scheduled_) || ((MonotonicTimePoint::now() + delay) < next_time_);
+    }
+    if (!worth_passing_along) {
+      return;
+    }
     RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
     if (interceptor) {
       interceptor->execute_or_enqueue(new ScheduleCommand(this, delay));
@@ -77,6 +85,8 @@ private:
     SPORADIC_TASK_SCHEDULE,
     SPORADIC_TASK_CANCEL
   } last_command_;
+  MonotonicTimePoint next_time_;
+  mutable ACE_Thread_Mutex mutex_;
 
   struct ScheduleCommand : public ReactorInterceptor::Command {
     ScheduleCommand(SporadicTask* hb, const TimeDuration& delay)
@@ -138,13 +148,18 @@ private:
   int handle_timeout(const ACE_Time_Value& tv, const void*)
   {
     const MonotonicTimePoint now(tv);
-    scheduled_ = false;
+    {
+      ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+      scheduled_ = false;
+    }
     execute(now);
     return 0;
   }
 
   void schedule_i(const TimeDuration& delay)
   {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const MonotonicTimePoint now = MonotonicTimePoint::now();
     if (!scheduled_) {
       const long timer = reactor()->schedule_timer(this, 0, delay.value());
 
@@ -154,6 +169,7 @@ private:
                    ACE_TEXT(" failed to schedule timer %p\n"),
                    ACE_TEXT("")));
       } else {
+        next_time_ = now + delay;
         scheduled_ = true;
       }
     }
@@ -162,6 +178,7 @@ private:
   void
   cancel_i()
   {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     if (scheduled_) {
       scheduled_ = false;
       reactor()->cancel_timer(this);
