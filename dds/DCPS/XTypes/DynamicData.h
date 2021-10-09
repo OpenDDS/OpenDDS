@@ -173,15 +173,23 @@ private:
   /// Verify that a given type is primitive or string or wstring.
   bool is_type_supported(TypeKind tk, const char* func_name);
 
+  /// Wrapper for reading a single value as a given type.
+  template<typename ValueType>
+  bool read_value(ValueType& value, TypeKind tk);
+
   /// Templates for reading a single value of type primitive or string or
   /// wstring from a corresponding containing type.
   template<typename MemberType, TypeKind MemberTypeKind>
   bool get_value_from_struct(MemberType& value, MemberId id,
-                             TypeKind enum_or_bitmask, LBound lower, LBound upper);
+                             TypeKind enum_or_bitmask = TK_NONE,
+                             LBound lower = 0,
+                             LBound upper = 0);
 
   template<typename MemberType, TypeKind MemberTypeKind>
   bool get_value_from_union(MemberType& value, MemberId id,
-                            TypeKind enum_or_bitmask, LBound lower, LBound upper);
+                            TypeKind enum_or_bitmask = TK_NONE,
+                            LBound lower = 0,
+                            LBound upper = 0);
 
   template<typename ElementType, TypeKind ElementTypeKind>
   bool get_value_from_collection(ElementType& value, MemberId id, TypeKind collection_tk,
@@ -195,7 +203,7 @@ private:
                                      LBound lower = 0,
                                      LBound upper = 0);
 
-  template<typename UIntType>
+  template<typename UIntType, TypeKind UIntTypeKind>
   bool get_boolean_from_bitmask(ACE_CDR::ULong index, ACE_CDR::Boolean& value);
 
   /// Skip to a member with a given ID in a struct.
@@ -259,7 +267,7 @@ private:
 
   bool skip(const char* func_name, const char* description, size_t n, int size = 1);
 
-  bool read_discriminator(TypeKind disc_tk, ExtensibilityKind union_ek, ACE_CDR::Long& label);
+  bool read_discriminator(const DynamicType_rch& disc_type, ExtensibilityKind union_ek, ACE_CDR::Long& label);
 
   /// Skip a member of a final or appendable struct at the given index.
   bool skip_struct_member_by_index(ACE_CDR::ULong index);
