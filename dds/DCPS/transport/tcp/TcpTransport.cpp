@@ -164,7 +164,7 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
 void
 TcpTransport::async_connect_failed(const PriorityKey& key)
 {
-  ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Failed to make active connection.\n"));
+  ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: Failed to make active connection.\n"));
   GuardType guard(links_lock_);
   TcpDataLink_rch link;
   links_.find(key, link);
