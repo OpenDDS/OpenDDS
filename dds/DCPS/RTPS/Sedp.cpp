@@ -242,6 +242,7 @@ bool checkAndAssignLocators(OpenDDS::DCPS::ReaderProxy_t& x,
   return false;
 }
 
+#ifdef OPENDDS_SECURITY
 bool is_stateless(const OpenDDS::DCPS::GUID_t& guid)
 {
   return guid.entityId == OpenDDS::RTPS::ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER ||
@@ -258,6 +259,7 @@ bool is_stateless_or_volatile(const OpenDDS::DCPS::GUID_t& guid)
 {
   return is_stateless(guid) || is_volatile(guid);
 }
+#endif
 
 }
 
