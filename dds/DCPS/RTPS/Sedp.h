@@ -181,7 +181,7 @@ private:
 class WriterAssociationRecord {
 public:
   WriterAssociationRecord(DCPS::DataWriterCallbacks_wrch callbacks,
-                          const GUID_t writer_id,
+                          const GUID_t& writer_id,
                           const DCPS::ReaderAssociation& reader_association)
     : callbacks_(callbacks)
     , writer_id_(writer_id)
@@ -199,7 +199,7 @@ public:
 class ReaderAssociationRecord {
 public:
   ReaderAssociationRecord(DCPS::DataReaderCallbacks_wrch callbacks,
-                          const GUID_t reader_id,
+                          const GUID_t& reader_id,
                           const DCPS::WriterAssociation& writer_association)
     : callbacks_(callbacks)
     , reader_id_(reader_id)
@@ -244,8 +244,7 @@ struct DiscoveredParticipant {
 #endif
   }
 
-  DiscoveredParticipant(
-                        const ParticipantData_t& p,
+  DiscoveredParticipant(const ParticipantData_t& p,
                         const SequenceNumber& seq,
                         const TimeDuration& resend_period)
     : pdata_(p)
@@ -1308,16 +1307,6 @@ private:
                                         const DDS::Security::ParticipantVolatileMessageSecure& data);
 #endif
 
-  typedef std::pair<DCPS::MessageId, DiscoveredPublication> MsgIdWtrDataPair;
-  typedef OPENDDS_MAP_CMP(DCPS::RepoId, MsgIdWtrDataPair,
-                   DCPS::GUID_tKeyLessThan) DeferredPublicationMap;
-  DeferredPublicationMap deferred_publications_;  // Publications that Spdp has not discovered.
-
-  typedef std::pair<DCPS::MessageId, DiscoveredSubscription> MsgIdRdrDataPair;
-  typedef OPENDDS_MAP_CMP(DCPS::RepoId, MsgIdRdrDataPair,
-                   DCPS::GUID_tKeyLessThan) DeferredSubscriptionMap;
-  DeferredSubscriptionMap deferred_subscriptions_; // Subscriptions that Sedp has not discovered.
-
   void assign_bit_key(DiscoveredPublication& pub);
   void assign_bit_key(DiscoveredSubscription& sub);
 
@@ -1758,9 +1747,9 @@ protected:
                                   const GUID_t& writer);
 
 
-  class WriterAddAssociation  : public DCPS::JobQueue::Job {
+  class WriterAddAssociation : public DCPS::JobQueue::Job {
   public:
-    WriterAddAssociation(const WriterAssociationRecord& record)
+    explicit WriterAddAssociation(const WriterAssociationRecord& record)
       : record_(record)
     {}
 
@@ -1770,9 +1759,9 @@ protected:
     const WriterAssociationRecord record_;
   };
 
-  class WriterRemoveAssociations  : public DCPS::JobQueue::Job {
+  class WriterRemoveAssociations : public DCPS::JobQueue::Job {
   public:
-    WriterRemoveAssociations(const WriterAssociationRecord& record)
+    explicit WriterRemoveAssociations(const WriterAssociationRecord& record)
       : record_(record)
     {}
 
@@ -1782,9 +1771,9 @@ protected:
     const WriterAssociationRecord record_;
   };
 
-  class ReaderAddAssociation  : public DCPS::JobQueue::Job {
+  class ReaderAddAssociation : public DCPS::JobQueue::Job {
   public:
-    ReaderAddAssociation(const ReaderAssociationRecord& record)
+    explicit ReaderAddAssociation(const ReaderAssociationRecord& record)
       : record_(record)
     {}
 
@@ -1794,9 +1783,9 @@ protected:
     const ReaderAssociationRecord record_;
   };
 
-  class ReaderRemoveAssociations  : public DCPS::JobQueue::Job {
+  class ReaderRemoveAssociations : public DCPS::JobQueue::Job {
   public:
-    ReaderRemoveAssociations(const ReaderAssociationRecord& record)
+    explicit ReaderRemoveAssociations(const ReaderAssociationRecord& record)
       : record_(record)
     {}
 
