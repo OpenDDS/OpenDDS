@@ -23,6 +23,7 @@ public:
   // data for annotations won't be serialized independently in a sample) and TK_BITSET
   // (the spec doesn't have enough information on how to handle bitsets).
   DynamicData(DCPS::Serializer& strm, DynamicType_rch type);
+  DynamicData& operator=(const DynamicData& other);
   ~DynamicData() {}
 
   DDS::ReturnCode_t get_descriptor(MemberDescriptor& value, MemberId id) const;
@@ -99,6 +100,7 @@ public:
   DDS::ReturnCode_t get_int32_values(Int32Seq& value, MemberId id);
   DDS::ReturnCode_t set_int32_values(MemberId id, const Int32Seq& value);
 
+  /*
   typedef Sequence<ACE_CDR::ULong> UInt32Seq;
   DDS::ReturnCode_t get_uint32_values(UInt32Seq& value, MemberId id);
   DDS::ReturnCode_t set_uint32_values(MemberId id, const UInt32Seq& value);
@@ -162,7 +164,7 @@ public:
   typedef Sequence<DCPS::WString> WStringSeq;
   DDS::ReturnCode_t get_wstring_values(WStringSeq& value, MemberId id);
   DDS::ReturnCode_t set_wstring_values(MemberId id, const WStringSeq& value);
-
+  */
   /// Skip the whole data corresponding to this type if it is a struct or union.
   /// This is called by a containing type when it wants to skip a member which
   /// is an object of this type.

@@ -33,6 +33,12 @@ DynamicData::DynamicData(DCPS::Serializer& ser, DynamicType_rch type)
   descriptor_ = type_->get_descriptor();
 }
 
+DynamicData& DynamicData::operator=(const DynamicData& other)
+{
+  // TODO(sonndinh): Copy the Serializer and DynamicType objects from other.
+  return *this;
+}
+
 DDS::ReturnCode_t DynamicData::get_descriptor(MemberDescriptor& value, MemberId id) const
 {
   // TODO
@@ -123,7 +129,37 @@ bool DynamicData::read_value(ValueType& value, TypeKind tk)
 {
   switch (tk) {
   case TK_INT32:
+    return (strm_ >> value);
+  default:
+    return false;
+  }
+
+  /*
+  switch (tk) {
+  case TK_INT32:
+    {
+      ACE_CDR::Long val;
+      if (!(strm_ >> val)) {
+        return false;
+      }
+      value = val;
+      return true;
+    }
+  default:
+    return false;
+  }
+  */
+  /*
   case TK_UINT32:
+    {
+      ACE_CDR::ULong val;
+      if (!(strm_ >> val)) {
+        return false;
+      }
+      value = val;
+      return true;
+    }
+
   case TK_INT16:
   case TK_UINT16:
   case TK_INT64:
@@ -131,31 +167,76 @@ bool DynamicData::read_value(ValueType& value, TypeKind tk)
   case TK_FLOAT32:
   case TK_FLOAT64:
   case TK_FLOAT128:
-    return (strm_ >> value);
-  case TK_INT8:
-    return (strm_ >> ACE_InputCDR::to_int8(value));
-  case TK_UINT8:
-    return (strm_ >> ACE_InputCDR::to_uint8(value));
-  case TK_CHAR8:
-    return (strm_ >> ACE_InputCDR::to_char(value));
-  case TK_CHAR16:
-    return (strm_ >> ACE_InputCDR::to_wchar(value));
-  case TK_BYTE:
-    return (strm_ >> ACE_InputCDR::to_octet(value));
-  case TK_BOOLEAN:
-    return (strm_ >> ACE_InputCDR::to_boolean(value));
   case TK_STRING8:
-    {
-      // TODO(sonndinh)
-      return (strm_ >> ACE_InputCDR::to_string(value));
-    }
   case TK_STRING16:
     {
-      // TODO(sonndinh)
+      //      ValueType val;
+      //      if (!(strm_ >> val)) {
+      //        return false;
+      //      }
+      //      value = val;
+      //      return true;
+      return (strm_ >> value);
+    }
+
+  case TK_INT8:
+    {
+      ACE_CDR::Int8 val;
+      if (!(strm_ >> ACE_InputCDR::to_int8(val))) {
+        return false;
+      }
+      value = val;
+      return true;
+    }
+  case TK_UINT8:
+    {
+      ACE_CDR::UInt8 val;
+      if (!(strm_ >> ACE_InputCDR::to_uint8(val))) {
+        return false;
+      }
+      value = val;
+      return true;
+    }
+  case TK_CHAR8:
+    {
+      ACE_CDR::Char val;
+      if (!(strm_ >> ACE_InputCDR::to_char(val))) {
+        return false;
+      }
+      value = val;
+      return true;
+    }
+  case TK_CHAR16:
+    {
+      ACE_CDR::WChar val;
+      if (!(strm_ >> ACE_InputCDR::to_wchar(val))) {
+        return false;
+      }
+      value = val;
+      return true;
+    }
+  case TK_BYTE:
+    {
+      ACE_CDR::Octet val;
+      if (!(strm_ >> ACE_InputCDR::to_octet(val))) {
+        return false;
+      }
+      value = val;
+      return true;
+    }
+  case TK_BOOLEAN:
+    {
+      ACE_CDR::Boolean val;
+      if (!(strm_ >> ACE_InputCDR::to_boolean(val))) {
+        return false;
+      }
+      value = val;
+      return true;
     }
   default:
     return false;
   }
+  */
 }
 
 template<typename MemberType, TypeKind MemberTypeKind>
@@ -164,11 +245,11 @@ bool DynamicData::get_value_from_struct(MemberType& value, MemberId id,
 {
   MemberDescriptor md;
   if (get_from_struct_common_checks(md, id, MemberTypeKind)) {
-    return skip_to_struct_member(md, id) && read_value(value, MemberTypeKind);
+    return skip_to_struct_member(md, id) && read_value<MemberType>(value, MemberTypeKind);
   } else if (get_from_struct_common_checks(md, id, enum_or_bitmask)) {
-    const LBound bit_bound = md.type->get_descriptor().bound[0];
+    const LBound bit_bound = md.type.lock()->get_descriptor().bound[0];
     return bit_bound >= lower && bit_bound <= upper &&
-      skip_to_struct_member(md, id) && read_value(value, MemberTypeKind);
+      skip_to_struct_member(md, id) && read_value<MemberType>(value, MemberTypeKind);
   }
 
   return false;
@@ -233,7 +314,7 @@ bool DynamicData::get_value_from_union(MemberType& value, MemberId id,
     return false;
   }
 
-  const DynamicType_rch selected_type = get_base_type(md.type);
+  const DynamicType_rch selected_type = get_base_type(md.type.lock());
   const TypeKind selected_tk = selected_type->get_kind();
   if (selected_tk != MemberTypeKind && selected_tk != enum_or_bitmask) {
     if (DCPS::DCPS_debug_level >= 1) {
@@ -254,11 +335,12 @@ bool DynamicData::get_value_from_union(MemberType& value, MemberId id,
   }
 
   if (selected_tk == MemberTypeKind) {
-    return read_value(value, MemberTypeKind);
+    return read_value<MemberType>(value, MemberTypeKind);
   }
 
   const LBound bit_bound = selected_type->get_descriptor().bound[0];
-  return bit_bound >= lower && bit_bound <= upper && read_value(value, MemberTypeKind);
+  return bit_bound >= lower && bit_bound <= upper &&
+    read_value<MemberType>(value, MemberTypeKind);
 }
 
 bool DynamicData::skip_to_sequence_element(MemberId id)
@@ -406,7 +488,7 @@ bool DynamicData::get_value_from_collection(ElementType& value, MemberId id, Typ
     return false;
   }
 
-  return read_value(value, ElementTypeKind);
+  return read_value<ElementType>(value, ElementTypeKind);
 }
 
 template<typename ValueType, TypeKind ValueTypeKind>
@@ -422,7 +504,8 @@ DDS::ReturnCode_t DynamicData::get_single_value(ValueType& value, MemberId id,
 
   if (tk == enum_or_bitmask) {
     const LBound bit_bound = descriptor_.bound[0];
-    good = bit_bound >= lower && bit_bound <= upper && read_value(value, ValueTypeKind);
+    good = bit_bound >= lower && bit_bound <= upper &&
+      read_value<ValueType>(value, ValueTypeKind);
   } else {
     switch (tk) {
     case ValueTypeKind:
@@ -430,7 +513,7 @@ DDS::ReturnCode_t DynamicData::get_single_value(ValueType& value, MemberId id,
       // accessed with MEMBER_ID_INVALID Id. However, there is only a single value in such
       // a DynamicData object, and checking for MEMBER_ID_INVALID from the input is perhaps
       // unnecessary. So, we read the value immediately here.
-      good = read_value(value, ValueTypeKind);
+      good = read_value<ValueType>(value, ValueTypeKind);
       break;
     case TK_STRUCTURE:
       good = get_value_from_struct<ValueType, ValueTypeKind>(value, id,
@@ -469,7 +552,7 @@ DDS::ReturnCode_t DynamicData::get_int32_value(ACE_CDR::Long& value, MemberId id
                                                    static_cast<LBound>(32));
 }
 
-DDS::ReturnCode_t DynamicData::set_int32_value(MemberId /*id*/, ACE_CDR::Long /*value*/)
+DDS::ReturnCode_t DynamicData::set_int32_value(MemberId, ACE_CDR::Long)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -482,7 +565,7 @@ DDS::ReturnCode_t DynamicData::get_uint32_value(ACE_CDR::ULong& value, MemberId 
                                                      static_cast<LBound>(32));
 }
 
-DDS::ReturnCode_t DynamicData::set_uint32_value(MemberId /*id*/, ACE_CDR::ULong /*value*/)
+DDS::ReturnCode_t DynamicData::set_uint32_value(MemberId, ACE_CDR::ULong)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -493,7 +576,7 @@ DDS::ReturnCode_t DynamicData::get_int8_value(ACE_CDR::Int8& value, MemberId id)
   return get_single_value<ACE_CDR::Int8, TK_INT8>(value, id, TK_ENUM, 1, 8);
 }
 
-DDS::ReturnCode_t DynamicData::set_int8_value(MemberId /*id*/, ACE_CDR::Int8 /*value*/)
+DDS::ReturnCode_t DynamicData::set_int8_value(MemberId, ACE_CDR::Int8)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -504,7 +587,7 @@ DDS::ReturnCode_t DynamicData::get_uint8_value(ACE_CDR::UInt8& value, MemberId i
   return get_single_value<ACE_CDR::UInt8, TK_UINT8>(value, id, TK_BITMASK, 1, 8);
 }
 
-DDS::ReturnCode_t DynamicData::set_uint8_value(MemberId /*id*/, ACE_CDR::UInt8 /*value*/)
+DDS::ReturnCode_t DynamicData::set_uint8_value(MemberId, ACE_CDR::UInt8)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -515,7 +598,7 @@ DDS::ReturnCode_t DynamicData::get_int16_value(ACE_CDR::Short& value, MemberId i
   return get_single_value<ACE_CDR::Short, TK_INT16>(value, id, TK_ENUM, 9, 16);
 }
 
-DDS::ReturnCode_t DynamicData::set_int16_value(MemberId /*id*/, ACE_CDR::Short /*value*/)
+DDS::ReturnCode_t DynamicData::set_int16_value(MemberId, ACE_CDR::Short)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -526,7 +609,7 @@ DDS::ReturnCode_t DynamicData::get_uint16_value(ACE_CDR::UShort& value, MemberId
   return get_single_value<ACE_CDR::UShort, TK_UINT16>(value, id, TK_BITMASK, 9, 16);
 }
 
-DDS::ReturnCode_t DynamicData::set_uint16_value(MemberId /*id*/, ACE_CDR::UShort /*value*/)
+DDS::ReturnCode_t DynamicData::set_uint16_value(MemberId, ACE_CDR::UShort)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -537,7 +620,7 @@ DDS::ReturnCode_t DynamicData::get_int64_value(ACE_CDR::LongLong& value, MemberI
   return get_single_value<ACE_CDR::LongLong, TK_INT64>(value, id);
 }
 
-DDS::ReturnCode_t DynamicData::set_int64_value(MemberId /*id*/, ACE_CDR::LongLong /*value*/)
+DDS::ReturnCode_t DynamicData::set_int64_value(MemberId, ACE_CDR::LongLong)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -548,7 +631,7 @@ DDS::ReturnCode_t DynamicData::get_uint64_value(ACE_CDR::ULongLong& value, Membe
   return get_single_value<ACE_CDR::ULongLong, TK_UINT64>(value, id, TK_BITMASK, 33, 64);
 }
 
-DDS::ReturnCode_t DynamicData::set_uint64_value(MemberId /*id*/, ACE_CDR::ULongLong /*value*/)
+DDS::ReturnCode_t DynamicData::set_uint64_value(MemberId, ACE_CDR::ULongLong)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -559,7 +642,7 @@ DDS::ReturnCode_t DynamicData::get_float32_value(ACE_CDR::Float& value, MemberId
   return get_single_value<ACE_CDR::Float, TK_FLOAT32>(value, id);
 }
 
-DDS::ReturnCode_t DynamicData::set_float32_value(MemberId /*id*/, ACE_CDR::Float /*value*/)
+DDS::ReturnCode_t DynamicData::set_float32_value(MemberId, ACE_CDR::Float)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -570,7 +653,7 @@ DDS::ReturnCode_t DynamicData::get_float64_value(ACE_CDR::Double& value, MemberI
   return get_single_value<ACE_CDR::Double, TK_FLOAT64>(value, id);
 }
 
-DDS::ReturnCode_t DynamicData::set_float64_value(MemberId /*id*/, ACE_CDR::Double /*value*/)
+DDS::ReturnCode_t DynamicData::set_float64_value(MemberId, ACE_CDR::Double)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -581,7 +664,7 @@ DDS::ReturnCode_t DynamicData::get_float128_value(ACE_CDR::LongDouble& value, Me
   return get_single_value<ACE_CDR::LongDouble, TK_FLOAT128>(value, id);
 }
 
-DDS::ReturnCode_t DynamicData::set_float128_value(MemberId /*id*/, ACE_CDR::LongDouble /*value*/)
+DDS::ReturnCode_t DynamicData::set_float128_value(MemberId, ACE_CDR::LongDouble)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -596,7 +679,7 @@ DDS::ReturnCode_t DynamicData::get_char8_value(ACE_CDR::Char& value, MemberId id
   return get_single_value<ACE_CDR::Char, TK_CHAR8>(value, id);
 }
 
-DDS::ReturnCode_t DynamicData::set_char8_value(MemberId /*id*/, ACE_CDR::Char /*value*/)
+DDS::ReturnCode_t DynamicData::set_char8_value(MemberId, ACE_CDR::Char)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -663,7 +746,7 @@ DDS::ReturnCode_t DynamicData::get_char16_value(ACE_CDR::WChar& value, MemberId 
   return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
 
-DDS::ReturnCode_t DynamicData::set_char16_value(MemberId /*id*/, ACE_CDR::WChar /*value*/)
+DDS::ReturnCode_t DynamicData::set_char16_value(MemberId, ACE_CDR::WChar)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -674,7 +757,7 @@ DDS::ReturnCode_t DynamicData::get_byte_value(ACE_CDR::Octet& value, MemberId id
   return get_single_value<ACE_CDR::Octet, TK_BYTE>(value, id);
 }
 
-DDS::ReturnCode_t DynamicData::set_byte_value(MemberId /*id*/, ACE_CDR::Octet /*value*/)
+DDS::ReturnCode_t DynamicData::set_byte_value(MemberId, ACE_CDR::Octet)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -684,7 +767,7 @@ template<typename UIntType, TypeKind UIntTypeKind>
 bool DynamicData::get_boolean_from_bitmask(ACE_CDR::ULong index, ACE_CDR::Boolean& value)
 {
   UIntType bitmask;
-  if (!read_value(bitmask, UIntTypeKind)) {
+  if (!read_value<UIntType>(bitmask, UIntTypeKind)) {
     return false;
   }
 
@@ -759,7 +842,7 @@ DDS::ReturnCode_t DynamicData::get_boolean_value(ACE_CDR::Boolean& value, Member
   return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
 
-DDS::ReturnCode_t DynamicData::set_boolean_value(MemberId /*id*/, ACE_CDR::Boolean /*value*/)
+DDS::ReturnCode_t DynamicData::set_boolean_value(MemberId, ACE_CDR::Boolean)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -770,7 +853,7 @@ DDS::ReturnCode_t DynamicData::get_string_value(DCPS::String& value, MemberId id
   return get_single_value<DCPS::String, TK_STRING8>(value, id);
 }
 
-DDS::ReturnCode_t DynamicData::set_string_value(MemberId /*id*/, DCPS::String /*value*/)
+DDS::ReturnCode_t DynamicData::set_string_value(MemberId, DCPS::String)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -781,7 +864,7 @@ DDS::ReturnCode_t DynamicData::get_wstring_value(DCPS::WString& value, MemberId 
   return get_single_value<DCPS::WString, TK_STRING16>(value, id);
 }
 
-DDS::ReturnCode_t DynamicData::set_wstring_value(MemberId /*id*/, DCPS::WString /*value*/)
+DDS::ReturnCode_t DynamicData::set_wstring_value(MemberId, DCPS::WString)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -813,7 +896,7 @@ DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id
         if (!skip_to_struct_member(md, id)) {
           return DDS::RETCODE_ERROR;
         }
-        value = DynamicData(strm_, md.type);
+        value = DynamicData(strm_, md.type.lock());
       } else {
         MemberDescriptor md;
         if (!get_union_selected_member(md)) {
@@ -841,7 +924,7 @@ DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id
             return DDS::RETCODE_ERROR;
           }
         }
-        value = DynamicData(strm_, md.type);
+        value = DynamicData(strm_, md.type.lock());
       }
       break;
     }
@@ -889,12 +972,33 @@ bool DynamicData::read_values(SequenceType& value, TypeKind element_typekind)
     return false;
   }
 
+  /*
+  switch (element_typekind) {
+  case TK_INT32:
+    {
+      Int32Seq val;
+      val.length(len);
+      for (ACE_CDR::ULong i = 0; i < len; ++i) {
+        if (!read_value<ACE_CDR::Long>(val[i], element_typekind)) {
+          return false;
+        }
+      }
+      value = val;
+      return true;
+    }
+  default:
+    return false;
+  }
+  */
+
+  /*
   value.length(len);
   for (ACE_CDR::ULong i = 0; i < len; ++i) {
     if (!read_value(value[i], element_typekind)) {
       return false;
     }
   }
+  */
   return true;
 }
 
@@ -906,7 +1010,7 @@ bool DynamicData::get_values_from_struct(SequenceType& value, MemberId id,
   if (get_from_struct_common_checks(md, id, ElementTypeKind, true)) {
     return skip_to_struct_member(md, id) && read_values<SequenceType>(value, ElementTypeKind);
   } else if (get_from_struct_common_checks(md, id, enum_or_bitmask, true)) {
-    const LBound bit_bound = md.type->get_descriptor().element_type->get_descriptor().bound[0];
+    const LBound bit_bound = md.type.lock()->get_descriptor().element_type->get_descriptor().bound[0];
     return bit_bound >= lower && bit_bound <= upper &&
       skip_to_struct_member(md, id) && read_values<SequenceType>(value, enum_or_bitmask);
   }
@@ -919,11 +1023,11 @@ bool DynamicData::get_values_from_union(SequenceType& value, MemberId id,
                                         TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   MemberDescriptor md;
-  if (!get_from_union_common_checks(ElementTypeKind, id, "get_values_from_union", md)) {
+  if (!get_from_union_common_checks(id, "get_values_from_union", md)) {
     return false;
   }
 
-  const DynamicType_rch selected_type = get_base_type(md.type);
+  const DynamicType_rch selected_type = get_base_type(md.type.lock());
   const TypeKind selected_tk = selected_type->get_kind();
   if (selected_tk != TK_SEQUENCE) {
     if (DCPS::DCPS_debug_level >= 1) {
@@ -945,7 +1049,7 @@ bool DynamicData::get_values_from_union(SequenceType& value, MemberId id,
     return false;
   }
 
-  if (ek == MUTABLE) {
+  if (descriptor_.extensibility_kind == MUTABLE) {
     unsigned member_id;
     size_t member_size;
     bool must_understand;
@@ -1119,12 +1223,13 @@ DDS::ReturnCode_t DynamicData::set_int32_values(MemberId /*id*/, const Int32Seq&
   return DDS::RETCODE_UNSUPPORTED;
 }
 
+/*
 DDS::ReturnCode_t DynamicData::get_uint32_values(UInt32Seq& value, MemberId id)
 {
   return get_sequence_values<UInt32Seq, TK_UINT32>(value, id, TK_BITMASK, 17, 32);
 }
 
-DDS::ReturnCode_t DynamicData::set_uint32_values(MemberId /*id*/, const UInt32Seq& /*value*/)
+DDS::ReturnCode_t DynamicData::set_uint32_values(MemberId, const UInt32Seq&)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -1135,7 +1240,7 @@ DDS::ReturnCode_t DynamicData::get_int8_values(Int8Seq& value, MemberId id)
   return get_sequence_values<Int8Seq, TK_INT8>(value, id, TK_ENUM, 1, 8);
 }
 
-DDS::ReturnCode_t DynamicData::set_int8_values(MemberId /*id*/, const Int8Seq& /*value*/)
+DDS::ReturnCode_t DynamicData::set_int8_values(MemberId, const Int8Seq&)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -1146,7 +1251,7 @@ DDS::ReturnCode_t DynamicData::get_uint8_values(UInt8Seq& value, MemberId id)
   return get_sequence_values<UInt8Seq, TK_UINT8>(value, id, TK_BITMASK, 1, 8);
 }
 
-DDS::ReturnCode_t DynamicData::set_uint8_values(MemberId /*id*/, const UInt8Seq& /*value*/)
+DDS::ReturnCode_t DynamicData::set_uint8_values(MemberId, const UInt8Seq&)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -1157,7 +1262,7 @@ DDS::ReturnCode_t DynamicData::get_int16_values(Int16Seq& value, MemberId id)
   return get_sequence_values<Int16Seq, TK_INT16>(value, id, TK_ENUM, 9, 16);
 }
 
-DDS::ReturnCode_t DynamicData::set_int16_values(MemberId /*id*/, const Int16Seq& /*value*/)
+DDS::ReturnCode_t DynamicData::set_int16_values(MemberId, const Int16Seq&)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -1168,7 +1273,7 @@ DDS::ReturnCode_t DynamicData::get_uint16_values(UInt16Seq& value, MemberId id)
   return get_sequence_values<UInt16Seq, TK_UINT16>(value, id, TK_BITMASK, 9, 16);
 }
 
-DDS::ReturnCode_t DynamicData::set_uint16_values(MemberId /*id*/, const UInt16Seq& /*value*/)
+DDS::ReturnCode_t DynamicData::set_uint16_values(MemberId, const UInt16Seq&)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -1179,7 +1284,7 @@ DDS::ReturnCode_t DynamicData::get_int64_values(Int64Seq& value, MemberId id)
   return get_sequence_values<Int64Seq, TK_INT64>(value, id);
 }
 
-DDS::ReturnCode_t DynamicData::set_int64_values(MemberId /*id*/, const Int64Seq& /*value*/)
+DDS::ReturnCode_t DynamicData::set_int64_values(MemberId, const Int64Seq&)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -1190,7 +1295,7 @@ DDS::ReturnCode_t DynamicData::get_uint64_values(UInt64Seq& value, MemberId id)
   return get_sequence_values<UInt64Seq, TK_UINT64>(value, id, TK_BITMASK, 33, 64);
 }
 
-DDS::ReturnCode_t DynamicData::set_uint64_values(MemberId /*id*/, const UInt64Seq& /*value*/)
+DDS::ReturnCode_t DynamicData::set_uint64_values(MemberId, const UInt64Seq&)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -1201,7 +1306,7 @@ DDS::ReturnCode_t DynamicData::get_float32_values(Float32Seq& value, MemberId id
   return get_sequence_values<Float32Seq, TK_FLOAT32>(value, id);
 }
 
-DDS::ReturnCode_t DynamicData::set_float32_values(MemberId /*id*/, const Float32Seq& /*value*/)
+DDS::ReturnCode_t DynamicData::set_float32_values(MemberId, const Float32Seq&)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -1212,7 +1317,7 @@ DDS::ReturnCode_t DynamicData::get_float64_values(Float64Seq& value, MemberId id
   return get_sequence_values<Float64Seq, TK_FLOAT64>(value, id);
 }
 
-DDS::ReturnCode_t DynamicData::set_float64_values(MemberId /*id*/, const Float64Seq& /*value*/)
+DDS::ReturnCode_t DynamicData::set_float64_values(MemberId, const Float64Seq&)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -1223,7 +1328,7 @@ DDS::ReturnCode_t DynamicData::get_float128_values(Float128Seq& value, MemberId 
   return get_sequence_values<Float128Seq, TK_FLOAT128>(value, id);
 }
 
-DDS::ReturnCode_t DynamicData::set_float128_values(MemberId /*id*/, const Float128Seq& /*value*/)
+DDS::ReturnCode_t DynamicData::set_float128_values(MemberId, const Float128Seq&)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -1234,7 +1339,7 @@ DDS::ReturnCode_t DynamicData::get_char8_values(CharSeq& value, MemberId id)
   return get_sequence_values<CharSeq, TK_CHAR8>(value, id);
 }
 
-DDS::ReturnCode_t DynamicData::set_char8_values(MemberId /*id*/, const CharSeq& /*value*/)
+DDS::ReturnCode_t DynamicData::set_char8_values(MemberId, const CharSeq&)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -1245,7 +1350,7 @@ DDS::ReturnCode_t DynamicData::get_char16_values(WCharSeq& value, MemberId id)
   return get_sequence_values<WCharSeq, TK_CHAR16>(value, id);
 }
 
-DDS::ReturnCode_t DynamicData::set_char16_values(MemberId /*id*/, const WCharSeq& /*value*/)
+DDS::ReturnCode_t DynamicData::set_char16_values(MemberId, const WCharSeq&)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -1256,7 +1361,7 @@ DDS::ReturnCode_t DynamicData::get_byte_values(ByteSeq& value, MemberId id)
   return get_sequence_values<ByteSeq, TK_BYTE>(value, id);
 }
 
-DDS::ReturnCode_t DynamicData::set_byte_values(MemberId /*id*/, const ByteSeq& /*value*/)
+DDS::ReturnCode_t DynamicData::set_byte_values(MemberId, const ByteSeq&)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -1267,7 +1372,7 @@ DDS::ReturnCode_t DynamicData::get_boolean_values(BooleanSeq& value, MemberId id
   return get_sequence_values<BooleanSeq, TK_BOOLEAN>(value, id);
 }
 
-DDS::ReturnCode_t DynamicData::set_boolean_values(MemberId /*id*/, const BooleanSeq& /*value*/)
+DDS::ReturnCode_t DynamicData::set_boolean_values(MemberId, const BooleanSeq&)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -1278,7 +1383,7 @@ DDS::ReturnCode_t DynamicData::get_string_values(StringSeq& value, MemberId id)
   return get_sequence_values<StringSeq, TK_STRING8>(value, id);
 }
 
-DDS::ReturnCode_t DynamicData::set_string_values(MemberId /*id*/, const StringSeq& /*value*/)
+DDS::ReturnCode_t DynamicData::set_string_values(MemberId, const StringSeq&)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -1289,11 +1394,12 @@ DDS::ReturnCode_t DynamicData::get_wstring_values(WStringSeq& value, MemberId id
   return get_sequence_values<WStringSeq, TK_STRING16>(value, id);
 }
 
-DDS::ReturnCode_t DynamicData::set_wstring_values(MemberId /*id*/, const WStringSeq& /*value*/)
+DDS::ReturnCode_t DynamicData::set_wstring_values(MemberId, const WStringSeq&)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
 }
+*/
 
 bool DynamicData::skip_to_struct_member(const MemberDescriptor& member_desc, MemberId id)
 {
@@ -1379,7 +1485,7 @@ bool DynamicData::get_from_struct_common_checks(MemberDescriptor& md, MemberId i
   }
 
   md = member->get_descriptor();
-  const DynamicType_rch member_type = get_base_type(md.type);
+  const DynamicType_rch member_type = get_base_type(md.type.lock());
   const TypeKind member_kind = member_type->get_kind();
 
   if ((!is_sequence && member_kind != kind) || (is_sequence && member_kind != TK_SEQUENCE)) {
@@ -1425,7 +1531,7 @@ bool DynamicData::skip_struct_member_by_index(ACE_CDR::ULong index)
   }
 
   const MemberDescriptor md = member->get_descriptor();
-  return skip_member(md.type);
+  return skip_member(md.type.lock());
 }
 
 bool DynamicData::skip_member(DynamicType_rch member_type)
@@ -1583,7 +1689,7 @@ bool DynamicData::skip_array_member(DynamicType_rch array_type)
     }
 
     return skip("skip_array_member", "Failed to skip a primitive array member",
-                num_elems, primitive_size)
+                num_elems, primitive_size);
   } else {
     return skip_collection_member(TK_ARRAY);
   }
@@ -1817,7 +1923,7 @@ bool DynamicData::skip_all()
         const UnionCaseLabelSeq& labels = md.label;
         for (ACE_CDR::ULong i = 0; i < labels.length(); ++i) {
           if (label == labels[i]) {
-            return skip_member(md.type);
+            return skip_member(md.type.lock());
           }
         }
       }
