@@ -51,7 +51,7 @@ public:
   bool sample_byte_order_;
   /// The data in unspecified format
   Message_Block_Ptr sample_;
-  /// The enum representing the kind that the sample was serialized with
+  /// The bool labeling whether there is an encapsulation header
   bool is_cdr_encapsulated_;
 
 };

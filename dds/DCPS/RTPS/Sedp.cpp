@@ -7063,12 +7063,12 @@ void Sedp::match(const GUID_t& writer, const GUID_t& reader)
       }
       bool is_discovery_protected = false;
 #ifdef OPENDDS_SECURITY
-        is_discovery_protected = lsi->second.security_attribs_.base.is_discovery_protected;
+      is_discovery_protected = lsi->second.security_attribs_.base.is_discovery_protected;
 #endif
-        save_matching_data_and_get_typeobjects(writer_type_info, md,
-                                               MatchingPair(writer, reader),
-                                               writer, is_discovery_protected,
-                                               need_minimal_tobjs, need_complete_tobjs);
+      save_matching_data_and_get_typeobjects(writer_type_info, md,
+                                             MatchingPair(writer, reader),
+                                             writer, is_discovery_protected,
+                                             need_minimal_tobjs, need_complete_tobjs);
       return;
     }
   }
