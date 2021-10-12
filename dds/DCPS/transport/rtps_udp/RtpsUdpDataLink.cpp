@@ -4521,8 +4521,10 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
   }
 
   if (config().rtps_relay_only()) {
-    addresses.insert(config().rtps_relay_address());
-    entry.value().addrs_.insert(config().rtps_relay_address());
+    if (config().rtps_relay_address() != ACE_INET_Addr()) {
+      addresses.insert(config().rtps_relay_address());
+      entry.value().addrs_.insert(config().rtps_relay_address());
+    }
     return;
   }
 
