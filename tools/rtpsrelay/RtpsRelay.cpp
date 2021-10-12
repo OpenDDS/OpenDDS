@@ -75,6 +75,12 @@ namespace {
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
+  DDS::DomainParticipantFactory_var factory = TheParticipantFactoryWithArgs(argc, argv);
+  if (!factory) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Failed to initialize participant factory\n")));
+    return EXIT_FAILURE;
+  }
+
   DDS::DomainId_t relay_domain = 0;
   ACE_INET_Addr nic_horizontal, nic_vertical;
   std::string user_data;
@@ -94,6 +100,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   int argc_copy = argc;
   ACE_Argv_Type_Converter atc(argc_copy, argv);
   ACE_Arg_Shifter_T<char> args(atc.get_argc(), atc.get_ASCII_argv());
+  args.ignore_arg(); // argv[0] is the program name
   while (args.is_anything_left()) {
     const char* arg = nullptr;
     if ((arg = args.get_the_parameter("-HorizontalAddress"))) {
@@ -180,7 +187,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       args.consume_arg();
 #endif
     } else {
-      args.ignore_arg();
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Invalid option: %s\n", args.get_current()));
+      return 1;
     }
   }
 
@@ -220,12 +228,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   }
 #endif
-
-  DDS::DomainParticipantFactory_var factory = TheParticipantFactoryWithArgs(argc, argv);
-  if (!factory) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Failed to initialize participant factory\n")));
-    return EXIT_FAILURE;
-  }
 
 #ifdef OPENDDS_SECURITY
   if (secure && !TheServiceParticipant->get_security()) {
