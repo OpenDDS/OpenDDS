@@ -1017,7 +1017,7 @@ bool Sedp::ready(const DiscoveredParticipant& participant,
 
   return remote_knows_about_local_i(local_id, remote_id)
 #ifdef OPENDDS_SECURITY
-    && remote_is_authenticated_i(local_id, participant)
+    && remote_is_authenticated_i(local_id, remote_id, participant)
     && local_has_remote_participant_token_i(local_id, remote_id)
     && remote_has_local_participant_token_i(local_id, remote_id, participant)
     && local_has_remote_endpoint_token_i(local_id, remote_id)
@@ -1388,8 +1388,6 @@ void Sedp::associate_volatile(DiscoveredParticipant& participant)
                                     AC_REMOTE_RELIABLE | AC_GENERATE_REMOTE_MATCHED_CRYPTO_HANDLE);
     participant.builtin_pending_records_.push_back(record);
   }
-
-  process_association_records_i(participant);
 }
 #endif // OPENDDS_SECURITY
 
@@ -1509,6 +1507,15 @@ Sedp::send_builtin_crypto_tokens(const DCPS::RepoId& remoteId)
 
   for (DiscoveredParticipant::BuiltinAssociationRecords::iterator pos = iter->second.builtin_pending_records_.begin(),
          limit = iter->second.builtin_pending_records_.end(); pos != limit; ++pos) {
+    BuiltinAssociationRecord& record = *pos;
+    if (record.send_local_token()) {
+      send_builtin_crypto_tokens(record.remote_id(), record.local_id());
+      record.local_tokens_sent(true);
+    }
+  }
+
+  for (DiscoveredParticipant::BuiltinAssociationRecords::iterator pos = iter->second.builtin_associated_records_.begin(),
+         limit = iter->second.builtin_associated_records_.end(); pos != limit; ++pos) {
     BuiltinAssociationRecord& record = *pos;
     if (record.send_local_token()) {
       send_builtin_crypto_tokens(record.remote_id(), record.local_id());
@@ -6389,6 +6396,12 @@ void Sedp::update_subscription_locators(
 
 bool Sedp::remote_knows_about_local_i(const GUID_t& local, const GUID_t& remote) const
 {
+  if (DCPS_debug_level > 6) {
+    ACE_DEBUG((LM_INFO,
+               ACE_TEXT("(%P|%t) Sedp::remote_knows_about_local_i: local %C remote %C\n"),
+               LogGuid(local).c_str(), LogGuid(remote).c_str()));
+  }
+
   const DCPS::GuidConverter gc(local);
   if (gc.isBuiltinDomainEntity()) {
     OPENDDS_ASSERT(DCPS::GuidConverter(remote).isBuiltinDomainEntity());
@@ -6434,8 +6447,14 @@ bool Sedp::remote_knows_about_local_i(const GUID_t& local, const GUID_t& remote)
 }
 
 #ifdef OPENDDS_SECURITY
-bool Sedp::remote_is_authenticated_i(const GUID_t& local, const DiscoveredParticipant& participant) const
+bool Sedp::remote_is_authenticated_i(const GUID_t& local, const GUID_t& remote, const DiscoveredParticipant& participant) const
 {
+  if (DCPS_debug_level > 6) {
+    ACE_DEBUG((LM_INFO,
+               ACE_TEXT("(%P|%t) Sedp::remote_is_authenticated_i: local %C remote %C\n"),
+               LogGuid(local).c_str(), LogGuid(remote).c_str()));
+  }
+
   if (!spdp_.is_security_enabled()) {
     return true;
   }
@@ -6456,6 +6475,12 @@ bool Sedp::remote_is_authenticated_i(const GUID_t& local, const DiscoveredPartic
 #ifdef OPENDDS_SECURITY
 bool Sedp::local_has_remote_participant_token_i(const GUID_t& local, const GUID_t& remote) const
 {
+  if (DCPS_debug_level > 6) {
+    ACE_DEBUG((LM_INFO,
+               ACE_TEXT("(%P|%t) Sedp::local_has_remote_participant_token_i: local %C remote %C\n"),
+               LogGuid(local).c_str(), LogGuid(remote).c_str()));
+  }
+
   if (spdp_.crypto_handle_ == DDS::HANDLE_NIL) {
     return true;
   }
@@ -6477,6 +6502,12 @@ bool Sedp::local_has_remote_participant_token_i(const GUID_t& local, const GUID_
 
 bool Sedp::remote_has_local_participant_token_i(const GUID_t& local, const GUID_t& remote, const DiscoveredParticipant& participant) const
 {
+  if (DCPS_debug_level > 6) {
+    ACE_DEBUG((LM_INFO,
+               ACE_TEXT("(%P|%t) Sedp::remote_has_local_participant_token_i: local %C remote %C\n"),
+               LogGuid(local).c_str(), LogGuid(remote).c_str()));
+  }
+
   if (spdp_.crypto_handle_ == DDS::HANDLE_NIL) {
     return true;
   }
@@ -6499,6 +6530,12 @@ bool Sedp::remote_has_local_participant_token_i(const GUID_t& local, const GUID_
 
 bool Sedp::local_has_remote_endpoint_token_i(const GUID_t& local, const GUID_t& remote) const
 {
+  if (DCPS_debug_level > 6) {
+    ACE_DEBUG((LM_INFO,
+               ACE_TEXT("(%P|%t) Sedp::local_has_remote_endpoint_token_i: local %C remote %C\n"),
+               LogGuid(local).c_str(), LogGuid(remote).c_str()));
+  }
+
   if (spdp_.crypto_handle_ == DDS::HANDLE_NIL) {
     return true;
   }
@@ -6512,16 +6549,26 @@ bool Sedp::local_has_remote_endpoint_token_i(const GUID_t& local, const GUID_t& 
   if (DCPS::GuidConverter(local).isWriter()) {
     const DDS::Security::DatawriterCryptoHandle local_crypto_handle =
       get_handle_registry()->get_local_datawriter_crypto_handle(local);
+    if (local_crypto_handle == DDS::HANDLE_NIL) {
+      return true;
+    }
     const DDS::Security::DatareaderCryptoHandle remote_crypto_handle =
       get_handle_registry()->get_remote_datareader_crypto_handle(remote);
-    return !key_exchange->have_local_datawriter_crypto_tokens(local_crypto_handle, remote_crypto_handle) ||
+    const DDS::Security::EndpointSecurityAttributes attribs =
+      get_handle_registry()->get_remote_datareader_security_attributes(remote);
+    return !attribs.is_submessage_protected ||
       key_exchange->have_remote_datareader_crypto_tokens(local_crypto_handle, remote_crypto_handle);
   } else {
     const DDS::Security::DatareaderCryptoHandle local_crypto_handle =
       get_handle_registry()->get_local_datareader_crypto_handle(local);
+    if (local_crypto_handle == DDS::HANDLE_NIL) {
+      return true;
+    }
     const DDS::Security::DatawriterCryptoHandle remote_crypto_handle =
       get_handle_registry()->get_remote_datawriter_crypto_handle(remote);
-    return !key_exchange->have_local_datareader_crypto_tokens(local_crypto_handle, remote_crypto_handle) ||
+    const DDS::Security::EndpointSecurityAttributes attribs =
+      get_handle_registry()->get_remote_datawriter_security_attributes(remote);
+    return (!attribs.is_submessage_protected && !attribs.is_payload_protected) ||
       key_exchange->have_remote_datawriter_crypto_tokens(local_crypto_handle, remote_crypto_handle);
   }
 }
@@ -6529,6 +6576,12 @@ bool Sedp::local_has_remote_endpoint_token_i(const GUID_t& local, const GUID_t& 
 bool Sedp::remote_has_local_endpoint_token_i(const GUID_t& local, bool local_tokens_sent,
                                              const GUID_t& remote) const
 {
+  if (DCPS_debug_level > 6) {
+    ACE_DEBUG((LM_INFO,
+               ACE_TEXT("(%P|%t) Sedp::remote_has_local_endpoint_token_i: local %C remote %C\n"),
+               LogGuid(local).c_str(), LogGuid(remote).c_str()));
+  }
+
   if (spdp_.crypto_handle_ == DDS::HANDLE_NIL) {
     return true;
   }

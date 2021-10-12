@@ -32,8 +32,6 @@ const GuidVendorId_t VENDORID_OCI = { 0x01, 0x03 };
 /// Nil value for the GUID prefix (participant identifier).
 const GuidPrefix_t GUIDPREFIX_UNKNOWN = { 0 };
 
-const EntityId_t ENTITYID_MAX                                    = { {0xff,0xff,0xff}, 0xff};
-
 ///@{
 /// Entity Id values specified in Version 2.1 of RTPS specification.
 const EntityId_t ENTITYID_UNKNOWN                                = { {0x00,0x00,0x00}, 0x00};

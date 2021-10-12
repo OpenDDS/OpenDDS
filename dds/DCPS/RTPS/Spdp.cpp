@@ -1955,6 +1955,8 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
     sedp_->disassociate_volatile(iter->second);
     sedp_->cleanup_volatile_crypto(iter->first);
     sedp_->associate_volatile(iter->second);
+    sedp_->generate_remote_matched_crypto_handles(iter->second);
+    sedp_->process_association_records_i(iter->second);
 
     if (!auth->return_handshake_handle(iter->second.handshake_handle_, se)) {
       if (DCPS::security_debug.auth_warn) {

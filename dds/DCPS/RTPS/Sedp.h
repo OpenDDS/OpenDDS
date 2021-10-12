@@ -658,7 +658,7 @@ public:
 private:
   bool remote_knows_about_local_i(const GUID_t& local, const GUID_t& remote) const;
 #ifdef OPENDDS_SECURITY
-  bool remote_is_authenticated_i(const GUID_t& local, const DiscoveredParticipant& participant) const;
+  bool remote_is_authenticated_i(const GUID_t& local, const GUID_t& remote, const DiscoveredParticipant& participant) const;
   bool local_has_remote_participant_token_i(const GUID_t& local, const GUID_t& remote) const;
   bool remote_has_local_participant_token_i(const GUID_t& local, const GUID_t& remote, const DiscoveredParticipant& participant) const;
   bool local_has_remote_endpoint_token_i(const GUID_t& local, const GUID_t& remote) const;
