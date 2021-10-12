@@ -25,11 +25,13 @@ RawDataSample::RawDataSample(const DataSampleHeader& header,
                              ACE_UINT32 nano_sec,
                              PublicationId pid,
                              bool byte_order,
+                             bool cdr_encapsulated,
                              ACE_Message_Block* blk)
   : header_(header)
   , message_id_(mid)
   , publication_id_(pid)
   , sample_byte_order_(byte_order)
+  , is_cdr_encapsulated_(cdr_encapsulated)
   , sample_(blk->duplicate())
 {
   source_timestamp_.sec = sec;
@@ -46,6 +48,7 @@ RawDataSample::RawDataSample(const RawDataSample& other)
   , source_timestamp_(other.source_timestamp_)
   , publication_id_(other.publication_id_)
   , sample_byte_order_(other.sample_byte_order_)
+  , is_cdr_encapsulated_(other.is_cdr_encapsulated_)
   , sample_(other.sample_->duplicate())
 {
 }
@@ -66,6 +69,7 @@ void swap(RawDataSample& lhs, RawDataSample& rhs)
   swap(lhs.source_timestamp_, rhs.source_timestamp_);
   swap(lhs.publication_id_, rhs.publication_id_);
   swap(lhs.sample_byte_order_, rhs.sample_byte_order_);
+  swap(lhs.is_cdr_encapsulated_, rhs.is_cdr_encapsulated_);
   swap(lhs.sample_, rhs.sample_);
 }
 

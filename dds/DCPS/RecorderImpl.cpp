@@ -170,7 +170,7 @@ void RecorderImpl::init(
   CORBA::String_var topic_name = a_topic_desc->get_name();
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
-  CORBA::String_var type_name = a_topic_desc->get_type_name();
+  CORBA::String_var type_name = "";
   is_bit_ = topicIsBIT(topic_name.in(), type_name);
 #endif   // !defined (DDS_HAS_MINIMUM_BIT)
 
@@ -240,6 +240,7 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
                             sample.header_.source_timestamp_nanosec_,
                             sample.header_.publication_id_,
                             sample.header_.byte_order_,
+                            sample.header_.cdr_encapsulation_,
                             sample.sample_.get());
     listener_->on_sample_data_received(this, rawSample);
   }
@@ -430,6 +431,15 @@ RecorderImpl::add_association(const RepoId&            yourId,
   // We only do the following processing for readers that are *not*
   // readers of Builtin Topics.
   //
+  XTypes::TypeLookupService_rch tls = participant_servant_->get_type_lookup_service();
+  XTypes::TypeInformation type_info;
+  if (!XTypes::deserialize_type_info(type_info, writer.serializedTypeInfo)){
+    ACE_ERROR((LM_ERROR,
+               "(%P|%t) RecorderImpl::add_association:"
+               " Failed to deserialize TypeInformation\n"));
+  }
+  XTypes::TypeObject cto = tls->get_type_object(type_info.complete.typeid_with_size.type_id);
+  dt_ = tls->complete_to_dynamic(cto.complete, writer.writerId);
   if (!is_bit_) {
 
     const DDS::InstanceHandle_t handle = participant_servant_->assign_handle(writer.writerId);
@@ -964,10 +974,6 @@ RecorderImpl::enable()
                ACE_TEXT("(%P|%t) RecorderImpl::add_subscription\n")));
 
     XTypes::TypeInformation type_info;
-    type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-    type_info.minimal.dependent_typeid_count = 0;
-    type_info.complete.typeid_with_size.typeobject_serialized_size = 0;
-    type_info.complete.dependent_typeid_count = 0;
 
     this->subscription_id_ =
       disco->add_subscription(this->domain_id_,

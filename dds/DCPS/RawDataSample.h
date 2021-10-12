@@ -31,6 +31,7 @@ public:
                 ACE_UINT32         nano_sec,
                 PublicationId      pid,
                 bool               byte_order,
+                bool               cdr_encapsulated,
                 ACE_Message_Block* blk);
 
   RawDataSample(const RawDataSample&);
@@ -50,6 +51,9 @@ public:
   bool sample_byte_order_;
   /// The data in unspecified format
   Message_Block_Ptr sample_;
+  /// The enum representing the kind that the sample was serialized with
+  bool is_cdr_encapsulated_;
+
 };
 
 void swap(RawDataSample& lhs, RawDataSample& rhs);

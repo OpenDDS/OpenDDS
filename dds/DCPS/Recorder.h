@@ -14,6 +14,9 @@
 #include "RawDataSample.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 
+#include "XTypes/TypeObject.h"
+#include "XTypes/DynamicType.h"
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -98,6 +101,8 @@ public:
    *
    */
   virtual RecorderListener_rch get_listener() = 0;
+
+  XTypes::DynamicType_rch dt_;
 };
 
 }
