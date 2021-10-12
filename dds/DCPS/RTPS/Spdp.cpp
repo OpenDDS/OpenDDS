@@ -731,33 +731,39 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
     partBitData(pdata).key = repo_id_to_bit_key(guid);
 
+    TimeDuration effective_lease(pdata.leaseDuration.seconds);
+
     if (DCPS::DCPS_debug_level) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Spdp::handle_participant_data - %C discovered %C lease %ds from %C (%B)\n"),
+        ACE_TEXT("(%P|%t) Spdp::handle_participant_data - %C discovered %C lease %C from %C (%B)\n"),
         DCPS::LogGuid(guid_).c_str(), DCPS::LogGuid(guid).c_str(),
-        pdata.leaseDuration.seconds, DCPS::LogAddr(from).c_str(), participants_.size()));
+        effective_lease.str(0).c_str(), DCPS::LogAddr(from).c_str(),
+        participants_.size()));
     }
 
     if (!from_sedp) {
 #ifdef OPENDDS_SECURITY
       if (is_security_enabled()) {
-        pdata.leaseDuration.seconds = config_->security_unsecure_lease_duration().to_dds_duration().sec;
+        effective_lease = config_->security_unsecure_lease_duration();
       } else {
 #endif
-        ::CORBA::Long maxLeaseDuration = config_->max_lease_duration().to_dds_duration().sec;
-        if (maxLeaseDuration && pdata.leaseDuration.seconds > maxLeaseDuration) {
+        const TimeDuration maxLeaseDuration = config_->max_lease_duration();
+        if (maxLeaseDuration && effective_lease > maxLeaseDuration) {
           if (DCPS::DCPS_debug_level >= 2) {
             ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) Spdp::handle_participant_data - overwriting %C lease %ds from %C with %ds\n"),
-              DCPS::LogGuid(guid).c_str(),
-              pdata.leaseDuration.seconds, DCPS::LogAddr(from).c_str(), maxLeaseDuration));
+              ACE_TEXT("(%P|%t) Spdp::handle_participant_data - overwriting %C lease %C from %C with %C\n"),
+              DCPS::LogGuid(guid).c_str(), effective_lease.str(0).c_str(),
+              DCPS::LogAddr(from).c_str(), maxLeaseDuration.str(0).c_str()));
           }
-          pdata.leaseDuration.seconds = maxLeaseDuration;
+          effective_lease = maxLeaseDuration;
         }
 #ifdef OPENDDS_SECURITY
       }
 #endif
     }
+
+    pdata.leaseDuration.seconds = effective_lease.value().sec();
+
     if (tport_->directed_sender_) {
       if (tport_->directed_guids_.empty()) {
         tport_->directed_sender_->schedule(TimeDuration::zero_value);
@@ -766,11 +772,13 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     }
 
     // add a new participant
+    std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq,
 #ifdef OPENDDS_SECURITY
-    std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq, config_->auth_resend_period())));
+      config_->auth_resend_period()
 #else
-    std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq, TimeDuration())));
+      TimeDuration()
 #endif
+    )));
     iter = p.first;
     iter->second.discovered_at_ = now;
     update_lease_expiration_i(iter, now);

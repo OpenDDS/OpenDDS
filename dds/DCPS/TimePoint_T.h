@@ -76,6 +76,11 @@ public:
    */
   bool is_zero() const;
 
+  operator bool() const
+  {
+    return *this != zero_value;
+  }
+
   /**
    * Is the object equal to the maximum possible value, max_value?
    */

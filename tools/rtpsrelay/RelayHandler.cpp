@@ -314,7 +314,12 @@ void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& n
 
     // Address actually expired.
     if (config_.log_activity()) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C %C expired at %:.%d now=%:.%d total=%B pending=%B/%B\n"), guid_to_string(ga.guid).c_str(), OpenDDS::DCPS::LogAddr(ga.address.addr).c_str(), expiration.value().sec(), expiration.value().usec(), now.value().sec(), now.value().usec(), guid_addr_set_map_.size(), pending_.size(), config_.max_pending()));
+      const auto ago = now - expiration;
+      ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::process_expirations "
+        "%C %C expired %C ago total=%B pending=%B/%B\n",
+        guid_to_string(ga.guid).c_str(), OpenDDS::DCPS::LogAddr(ga.address.addr).c_str(),
+        ago.str().c_str(), guid_addr_set_map_.size(), pending_.size(),
+        config_.max_pending()));
     }
     relay_stats_reporter_.expired_address(now);
 

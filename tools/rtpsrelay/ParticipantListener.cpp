@@ -56,7 +56,10 @@ void ParticipantListener::on_data_available(DDS::DataReader_ptr reader)
         if (p.second) {
           if (config_.log_discovery()) {
             const auto d = now - guid_addr_set_.get_first_spdp(repoid);
-            ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: ParticipantListener::on_data_available add local participant %C %C discovery time %:.%d\n"), guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str(), d.value().sec(), static_cast<int>(d.value().usec())));
+            ACE_DEBUG((LM_INFO, "(%P|%t) INFO: ParticipantListener::on_data_available "
+              "add local participant %C %C discovery time %C\n",
+              guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str(),
+              d.str().c_str()));
           }
 
           stats_reporter_.local_participants(guids_.size(), now);

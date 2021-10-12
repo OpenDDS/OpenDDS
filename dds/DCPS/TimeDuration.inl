@@ -106,6 +106,13 @@ TimeDuration::operator*=(double other)
 }
 
 ACE_INLINE
+TimeDuration& TimeDuration::operator/=(double other)
+{
+  value(value_ * (1.0l / other));
+  return *this;
+}
+
+ACE_INLINE
 TimeDuration&
 TimeDuration::operator=(const TimeDuration& other)
 {
@@ -154,6 +161,12 @@ TimeDuration
 operator*(const TimeDuration& x, double y)
 {
   return TimeDuration(x.value() * y);
+}
+
+ACE_INLINE
+TimeDuration operator/(const TimeDuration& x, double y)
+{
+  return TimeDuration(x.value() * (1.0l / y));
 }
 
 ACE_INLINE
