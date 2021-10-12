@@ -7045,9 +7045,9 @@ void Sedp::match(const GUID_t& writer, const GUID_t& reader)
       is_discovery_protected = lpi->second.security_attribs_.base.is_discovery_protected;
 #endif
       save_matching_data_and_get_typeobjects(reader_type_info, md,
-                                            MatchingPair(writer, reader),
-                                            reader, is_discovery_protected,
-                                            need_minimal_tobjs, need_complete_tobjs);
+                                             MatchingPair(writer, reader),
+                                             reader, is_discovery_protected,
+                                             need_minimal_tobjs, need_complete_tobjs);
       return;
     }
   } else if (reader_local &&
@@ -7066,9 +7066,9 @@ void Sedp::match(const GUID_t& writer, const GUID_t& reader)
         is_discovery_protected = lsi->second.security_attribs_.base.is_discovery_protected;
 #endif
         save_matching_data_and_get_typeobjects(writer_type_info, md,
-                                            MatchingPair(writer, reader),
-                                            writer, is_discovery_protected,
-                                            need_minimal_tobjs, need_complete_tobjs);
+                                               MatchingPair(writer, reader),
+                                               writer, is_discovery_protected,
+                                               need_minimal_tobjs, need_complete_tobjs);
       return;
     }
   }
