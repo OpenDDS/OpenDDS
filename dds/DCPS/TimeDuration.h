@@ -2,6 +2,7 @@
 #define OPENDDS_DCPS_TIMEDURATION_H
 
 #include "PoolAllocator.h"
+#include "SafeBool_T.h"
 
 #include <dds/DdsDcpsCoreC.h>
 
@@ -24,7 +25,7 @@ namespace DCPS {
  * See the "Time" section in docs/guidelines.md for background and reasoning
  * for this class.
  */
-class OpenDDS_Dcps_Export TimeDuration {
+class OpenDDS_Dcps_Export TimeDuration : public SafeBool_T<TimeDuration> {
 public:
   const static TimeDuration zero_value;
   const static TimeDuration max_value;
@@ -67,7 +68,7 @@ public:
   bool is_max() const;
   DDS::Duration_t to_dds_duration() const;
 
-  operator bool() const
+  bool boolean_test() const
   {
     return value_ != zero_value.value();
   }
