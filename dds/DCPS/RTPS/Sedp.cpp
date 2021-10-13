@@ -6417,12 +6417,9 @@ bool Sedp::remote_knows_about_local_i(const GUID_t& local, const GUID_t& remote)
 #ifdef OPENDDS_SECURITY
       if (pub->second.security_attribs_.base.is_discovery_protected) {
         return publications_secure_writer_->is_leading(make_id(remote, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER));
-      } else {
-        return publications_writer_->is_leading(make_id(remote, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER));
       }
-#else
-      return publications_writer_->is_leading(make_id(remote, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER));
 #endif
+      return publications_writer_->is_leading(make_id(remote, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER));
     } else {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Sedp::remote_knows_about_local_i - could not find local publication %C\n"), LogGuid(local).c_str()));
       return false;
@@ -6433,12 +6430,9 @@ bool Sedp::remote_knows_about_local_i(const GUID_t& local, const GUID_t& remote)
 #ifdef OPENDDS_SECURITY
       if (pub->second.security_attribs_.base.is_discovery_protected) {
         return subscriptions_secure_writer_->is_leading(make_id(remote, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER));
-      } else {
-        return subscriptions_writer_->is_leading(make_id(remote, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER));
       }
-#else
-      return subscriptions_writer_->is_leading(make_id(remote, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER));
 #endif
+      return subscriptions_writer_->is_leading(make_id(remote, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER));
     } else {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Sedp::remote_knows_about_local_i - could not find local subscription %C\n"), LogGuid(local).c_str()));
       return false;
