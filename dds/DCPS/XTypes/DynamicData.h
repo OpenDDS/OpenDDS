@@ -177,13 +177,6 @@ private:
   /// Wrappers for reading a single value as a given type.
   template<typename ValueType>
   bool read_value(ValueType& value, TypeKind tk);
-
-  //  bool read_value(ACE_CDR::Int8& value, TypeKind);
-  //  bool read_value(ACE_CDR::UInt8& value, TypeKind);
-  //  bool read_value(ACE_CDR::Char& value, TypeKind);
-  //  bool read_value(ACE_CDR::WChar& value, TypeKind);
-  //  bool read_value(ACE_CDR::Octet& value, TypeKind);
-  //  bool read_value(ACE_CDR::Boolean& value, TypeKind);
   bool read_value(DCPS::String& value, TypeKind);
   bool read_value(DCPS::WString& value, TypeKind);
 
@@ -239,24 +232,6 @@ private:
   /// which is a sequence of primitives or strings or wstrings.
   template<typename SequenceType>
   bool read_values(SequenceType& value, TypeKind element_typekind);
-
-  /*
-  bool read_values(Int32Seq& value);
-  bool read_values(UInt32Seq& value);
-  bool read_values(Int8Seq& value);
-  bool read_values(UInt8Seq& value);
-  bool read_values(Int16Seq& value);
-  bool read_values(UInt16Seq& value);
-  bool read_values(Int64Seq& value);
-  bool read_values(UInt64Seq& value);
-  bool read_values(Float32Seq& value);
-  bool read_values(Float64Seq& value);
-  bool read_values(Float128Seq& value);
-  bool read_values(CharSeq& value);
-  bool read_values(WCharSeq& value);
-  bool read_values(OctetSeq& value);
-  bool read_values(BooleanSeq& value);
-  */
   bool read_values(StringSeq& value, TypeKind);
   bool read_values(WStringSeq& value, TypeKind);
 
