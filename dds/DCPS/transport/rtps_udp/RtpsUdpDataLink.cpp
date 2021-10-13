@@ -4646,14 +4646,18 @@ RtpsUdpDataLink::get_ice_endpoint() const {
 bool RtpsUdpDataLink::is_leading(const GUID_t& writer_id,
                                  const GUID_t& reader_id) const
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, writers_lock_, false);
+  RtpsWriterMap::mapped_type writer;
 
-  RtpsWriterMap::const_iterator pos = writers_.find(writer_id);
-  if (pos != writers_.end()) {
-    return pos->second->is_leading(reader_id);
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, writers_lock_, false);
+    RtpsWriterMap::const_iterator pos = writers_.find(writer_id);
+    if (pos == writers_.end()) {
+      return false;
+    }
+    writer = pos->second;
   }
 
-  return false;
+  return writer->is_leading(reader_id);
 }
 
 void RtpsUdpDataLink::RtpsWriter::log_remote_counts(const char* funcname)
