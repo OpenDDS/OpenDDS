@@ -40,13 +40,18 @@ struct AddrSetStats {
   ParticipantStatisticsReporter sedp_stats_reporter;
   ParticipantStatisticsReporter data_stats_reporter;
   OpenDDS::DCPS::Message_Block_Shared_Ptr spdp_message;
+  OpenDDS::DCPS::MonotonicTimePoint session_start;
   OpenDDS::DCPS::MonotonicTimePoint first_spdp;
 #ifdef OPENDDS_SECURITY
   std::string common_name;
 #endif
 
-  AddrSetStats()
+  AddrSetStats(const OpenDDS::DCPS::MonotonicTimePoint& session_start)
     : allow_rtps(false)
+    , spdp_stats_reporter(session_start)
+    , sedp_stats_reporter(session_start)
+    , data_stats_reporter(session_start)
+    , session_start(session_start)
   {}
 
   bool empty() const
@@ -125,6 +130,21 @@ public:
     pending_.erase(guid);
   }
 
+  using CreatedAddrSetStats = std::pair<bool, AddrSetStats&>;
+
+  CreatedAddrSetStats find_or_create(const OpenDDS::DCPS::GUID_t& guid,
+    const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    auto it = guid_addr_set_map_.find(guid);
+    const bool create = it == guid_addr_set_map_.end();
+    if (create) {
+      const auto it_bool_pair =
+        guid_addr_set_map_.insert(std::make_pair(guid, AddrSetStats(now)));
+      it = it_bool_pair.first;
+    }
+    return CreatedAddrSetStats(create, it->second);
+  }
+
   class Proxy {
   public:
     Proxy(GuidAddrSet& gas)
@@ -158,9 +178,10 @@ public:
 
     ParticipantStatisticsReporter&
     participant_statistics_reporter(const OpenDDS::DCPS::GUID_t& guid,
+                                    const OpenDDS::DCPS::MonotonicTimePoint& now,
                                     Port port)
     {
-      return *gas_.guid_addr_set_map_[guid].select_stats_reporter(port);
+      return *gas_.find_or_create(guid, now).second.select_stats_reporter(port);
     }
 
     bool ignore_rtps(const OpenDDS::DCPS::GUID_t& guid,

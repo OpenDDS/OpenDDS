@@ -19,15 +19,18 @@ public:
   static ParticipantStatisticsDataWriter_var writer;
   static CORBA::String_var topic_name;
 
-  ParticipantStatisticsReporter()
-    : log_helper_(log_participant_statistics_)
+  ParticipantStatisticsReporter(const OpenDDS::DCPS::MonotonicTimePoint& session_start)
+    : session_start_(session_start)
+    , log_helper_(log_participant_statistics_)
     , publish_helper_(publish_participant_statistics_)
   {
   }
 
   ParticipantStatisticsReporter(const GUID_t& guid,
-                                const std::string& name)
-    : log_last_report_(OpenDDS::DCPS::MonotonicTimePoint::now())
+                                const std::string& name,
+                                const OpenDDS::DCPS::MonotonicTimePoint& session_start)
+    : session_start_(session_start)
+    , log_last_report_(OpenDDS::DCPS::MonotonicTimePoint::now())
     , log_helper_(log_participant_statistics_)
     , publish_last_report_(OpenDDS::DCPS::MonotonicTimePoint::now())
     , publish_helper_(publish_participant_statistics_)
@@ -40,6 +43,7 @@ public:
 
   ParticipantStatisticsReporter& operator=(const ParticipantStatisticsReporter& other)
   {
+    session_start_ = other.session_start_;
     log_last_report_ = other.log_last_report_;
     log_participant_statistics_ = other.log_participant_statistics_;
     publish_last_report_ = other.publish_last_report_;
@@ -81,6 +85,7 @@ public:
 
     log_helper_.prepare_report();
     log_participant_statistics_.interval(time_diff_to_duration(now - log_last_report_));
+    log_participant_statistics_.session_time(time_diff_to_duration(now - session_start_));
 
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name.in(), OpenDDS::DCPS::to_json(log_participant_statistics_).c_str()));
 
@@ -97,6 +102,7 @@ public:
 
     publish_helper_.prepare_report();
     publish_participant_statistics_.interval(time_diff_to_duration(now - publish_last_report_));
+    publish_participant_statistics_.session_time(time_diff_to_duration(now - session_start_));
 
     const auto ret = writer->write(publish_participant_statistics_, DDS::HANDLE_NIL);
     if (ret != DDS::RETCODE_OK) {
@@ -108,6 +114,8 @@ public:
   }
 
 private:
+  OpenDDS::DCPS::MonotonicTimePoint session_start_;
+
   OpenDDS::DCPS::MonotonicTimePoint log_last_report_;
   ParticipantStatistics log_participant_statistics_;
   Helper log_helper_;

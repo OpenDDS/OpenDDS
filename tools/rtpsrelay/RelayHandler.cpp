@@ -256,19 +256,23 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
                              RelayHandler& handler)
 {
   const auto expiration = now + config_.lifespan();
+  const auto cass = find_or_create(src_guid, now);
+  const bool created = cass.first;
+  AddrSetStats& addr_set_stats = cass.second;
 
   {
-    const auto before = guid_addr_set_map_.size();
-    const auto res = guid_addr_set_map_[src_guid].select_addr_set(remote_address.port)->insert(std::make_pair(remote_address, expiration));
+    const auto res = addr_set_stats.select_addr_set(remote_address.port)->insert(
+      std::make_pair(remote_address, expiration));
     if (res.second) {
       if (config_.log_activity()) {
         ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity %C %C is at %C total=%B pending=%B/%B\n"), handler.name().c_str(), guid_to_string(src_guid).c_str(), OpenDDS::DCPS::LogAddr(remote_address.addr).c_str(), guid_addr_set_map_.size(), pending_.size(), config_.max_pending()));
       }
       relay_stats_reporter_.new_address(now);
-      const auto after = guid_addr_set_map_.size();
-      if (before != after) {
-        relay_stats_reporter_.local_active_participants(after, now);
-        *guid_addr_set_map_[src_guid].select_stats_reporter(remote_address.port) = ParticipantStatisticsReporter(rtps_guid_to_relay_guid(src_guid), handler.name());
+      if (created) {
+        relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
+        *addr_set_stats.select_stats_reporter(remote_address.port) =
+          ParticipantStatisticsReporter(
+            rtps_guid_to_relay_guid(src_guid), handler.name(), addr_set_stats.session_start);
       }
 
       const GuidAddr ga(src_guid, remote_address);
@@ -277,7 +281,8 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
     res.first->second = expiration;
   }
 
-  ParticipantStatisticsReporter& stats_reporter = *guid_addr_set_map_[src_guid].select_stats_reporter(remote_address.port);
+  ParticipantStatisticsReporter& stats_reporter =
+    *addr_set_stats.select_stats_reporter(remote_address.port);
   stats_reporter.input_message(msg_len, now, msg_type);
 
   return stats_reporter;
@@ -392,8 +397,11 @@ bool GuidAddrSet::ignore_rtps(const OpenDDS::DCPS::GUID_t& guid,
 OpenDDS::DCPS::MonotonicTimePoint GuidAddrSet::get_first_spdp(const OpenDDS::DCPS::GUID_t& guid)
 {
   GuidAddrSet::Proxy proxy(*this);
-  AddrSetStats& addr_stats = guid_addr_set_map_[guid];
-  return addr_stats.first_spdp;
+  const auto it = guid_addr_set_map_.find(guid);
+  if (it == guid_addr_set_map_.end()) {
+    return OpenDDS::DCPS::MonotonicTimePoint::zero_value;
+  }
+  return it->second.first_spdp;
 }
 
 void GuidAddrSet::remove(const OpenDDS::DCPS::GUID_t& guid)
@@ -402,7 +410,12 @@ void GuidAddrSet::remove(const OpenDDS::DCPS::GUID_t& guid)
 
   const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
-  AddrSetStats& addr_stats = guid_addr_set_map_[guid];
+  const auto it = guid_addr_set_map_.find(guid);
+  if (it == guid_addr_set_map_.end()) {
+    return;
+  }
+
+  AddrSetStats& addr_stats = it->second;
   addr_stats.spdp_stats_reporter.report(now, true);
   addr_stats.sedp_stats_reporter.report(now, true);
   addr_stats.data_stats_reporter.report(now, true);
@@ -785,7 +798,7 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
 
   if (send_to_application_participant) {
     venqueue_message(application_participant_addr_,
-      proxy.participant_statistics_reporter(config_.application_participant_guid(), port()),
+      proxy.participant_statistics_reporter(config_.application_participant_guid(), now, port()),
       msg, now, type);
     ++sent;
   }
