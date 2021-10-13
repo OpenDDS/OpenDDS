@@ -100,7 +100,6 @@ public:
   DDS::ReturnCode_t get_int32_values(Int32Seq& value, MemberId id);
   DDS::ReturnCode_t set_int32_values(MemberId id, const Int32Seq& value);
 
-  /*
   typedef Sequence<ACE_CDR::ULong> UInt32Seq;
   DDS::ReturnCode_t get_uint32_values(UInt32Seq& value, MemberId id);
   DDS::ReturnCode_t set_uint32_values(MemberId id, const UInt32Seq& value);
@@ -149,9 +148,9 @@ public:
   DDS::ReturnCode_t get_char16_values(WCharSeq& value, MemberId id);
   DDS::ReturnCode_t set_char16_values(MemberId id, const WCharSeq& value);
 
-  typedef Sequence<ACE_CDR::Octet> ByteSeq;
-  DDS::ReturnCode_t get_byte_values(ByteSeq& value, MemberId id);
-  DDS::ReturnCode_t set_byte_values(MemberId id, const ByteSeq& value);
+  typedef Sequence<ACE_CDR::Octet> OctetSeq;
+  DDS::ReturnCode_t get_byte_values(OctetSeq& value, MemberId id);
+  DDS::ReturnCode_t set_byte_values(MemberId id, const OctetSeq& value);
 
   typedef Sequence<ACE_CDR::Boolean> BooleanSeq;
   DDS::ReturnCode_t get_boolean_values(BooleanSeq& value, MemberId id);
@@ -164,7 +163,7 @@ public:
   typedef Sequence<DCPS::WString> WStringSeq;
   DDS::ReturnCode_t get_wstring_values(WStringSeq& value, MemberId id);
   DDS::ReturnCode_t set_wstring_values(MemberId id, const WStringSeq& value);
-  */
+
   /// Skip the whole data corresponding to this type if it is a struct or union.
   /// This is called by a containing type when it wants to skip a member which
   /// is an object of this type.
@@ -175,9 +174,18 @@ private:
   /// Verify that a given type is primitive or string or wstring.
   bool is_type_supported(TypeKind tk, const char* func_name);
 
-  /// Wrapper for reading a single value as a given type.
+  /// Wrappers for reading a single value as a given type.
   template<typename ValueType>
   bool read_value(ValueType& value, TypeKind tk);
+
+  //  bool read_value(ACE_CDR::Int8& value, TypeKind);
+  //  bool read_value(ACE_CDR::UInt8& value, TypeKind);
+  //  bool read_value(ACE_CDR::Char& value, TypeKind);
+  //  bool read_value(ACE_CDR::WChar& value, TypeKind);
+  //  bool read_value(ACE_CDR::Octet& value, TypeKind);
+  //  bool read_value(ACE_CDR::Boolean& value, TypeKind);
+  bool read_value(DCPS::String& value, TypeKind);
+  bool read_value(DCPS::WString& value, TypeKind);
 
   /// Templates for reading a single value of type primitive or string or
   /// wstring from a corresponding containing type.
@@ -231,6 +239,26 @@ private:
   /// which is a sequence of primitives or strings or wstrings.
   template<typename SequenceType>
   bool read_values(SequenceType& value, TypeKind element_typekind);
+
+  /*
+  bool read_values(Int32Seq& value);
+  bool read_values(UInt32Seq& value);
+  bool read_values(Int8Seq& value);
+  bool read_values(UInt8Seq& value);
+  bool read_values(Int16Seq& value);
+  bool read_values(UInt16Seq& value);
+  bool read_values(Int64Seq& value);
+  bool read_values(UInt64Seq& value);
+  bool read_values(Float32Seq& value);
+  bool read_values(Float64Seq& value);
+  bool read_values(Float128Seq& value);
+  bool read_values(CharSeq& value);
+  bool read_values(WCharSeq& value);
+  bool read_values(OctetSeq& value);
+  bool read_values(BooleanSeq& value);
+  */
+  bool read_values(StringSeq& value, TypeKind);
+  bool read_values(WStringSeq& value, TypeKind);
 
   // Templates for reading a sequence of primitives or strings or wstrings
   // as a member (or an element) of a given containing type.

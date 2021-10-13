@@ -124,17 +124,32 @@ bool DynamicData::is_type_supported(TypeKind tk, const char* func_name)
   return true;
 }
 
+/*
 template<typename ValueType>
 bool DynamicData::read_value(ValueType& value, TypeKind tk)
 {
   switch (tk) {
   case TK_INT32:
+  case TK_UINT32:
+  case TK_INT16:
+  case TK_UINT16:
+  case TK_INT64:
+  case TK_UINT64:
+  case TK_FLOAT32:
+  case TK_FLOAT64:
+  case TK_FLOAT128:
+  case TK_STRING8:
+  case TK_STRING16:
     return (strm_ >> value);
   default:
     return false;
   }
+}
+*/
 
-  /*
+template<typename ValueType>
+bool DynamicData::read_value(ValueType& value, TypeKind tk)
+{
   switch (tk) {
   case TK_INT32:
     {
@@ -145,11 +160,6 @@ bool DynamicData::read_value(ValueType& value, TypeKind tk)
       value = val;
       return true;
     }
-  default:
-    return false;
-  }
-  */
-  /*
   case TK_UINT32:
     {
       ACE_CDR::ULong val;
@@ -159,26 +169,69 @@ bool DynamicData::read_value(ValueType& value, TypeKind tk)
       value = val;
       return true;
     }
-
   case TK_INT16:
-  case TK_UINT16:
-  case TK_INT64:
-  case TK_UINT64:
-  case TK_FLOAT32:
-  case TK_FLOAT64:
-  case TK_FLOAT128:
-  case TK_STRING8:
-  case TK_STRING16:
     {
-      //      ValueType val;
-      //      if (!(strm_ >> val)) {
-      //        return false;
-      //      }
-      //      value = val;
-      //      return true;
-      return (strm_ >> value);
+      ACE_CDR::Short val;
+      if (!(strm_ >> val)) {
+        return false;
+      }
+      value = val;
+      return true;
     }
-
+  case TK_UINT16:
+    {
+      ACE_CDR::UShort val;
+      if (!(strm_ >> val)) {
+        return false;
+      }
+      value = val;
+      return true;
+    }
+  case TK_INT64:
+    {
+      ACE_CDR::LongLong val;
+      if (!(strm_ >> val)) {
+        return false;
+      }
+      value = val;
+      return true;
+    }
+  case TK_UINT64:
+    {
+      ACE_CDR::ULongLong val;
+      if (!(strm_ >> val)) {
+        return false;
+      }
+      value = val;
+      return true;
+    }
+  case TK_FLOAT32:
+    {
+      ACE_CDR::Float val;
+      if (!(strm_ >> val)) {
+        return false;
+      }
+      value = val;
+      return true;
+    }
+  case TK_FLOAT64:
+    {
+      ACE_CDR::Double val;
+      if (!(strm_ >> val)) {
+        return false;
+      }
+      value = val;
+      return true;
+    }
+  case TK_FLOAT128:
+    {
+      ACE_CDR::LongDouble val;
+      if (!(strm_ >> val)) {
+        return false;
+      }
+      value = val;
+      return true;
+    }
   case TK_INT8:
     {
       ACE_CDR::Int8 val;
@@ -236,7 +289,48 @@ bool DynamicData::read_value(ValueType& value, TypeKind tk)
   default:
     return false;
   }
-  */
+}
+
+/*
+bool DynamicData::read_value(ACE_CDR::Int8& value, TypeKind)
+{
+  return (strm_ >> ACE_InputCDR::to_int8(value));
+}
+
+bool DynamicData::read_value(ACE_CDR::UInt8& value, TypeKind)
+{
+  return (strm_ >> ACE_InputCDR::to_uint8(value));
+}
+
+bool DynamicData::read_value(ACE_CDR::Char& value, TypeKind)
+{
+  return (strm_ >> ACE_InputCDR::to_char(value));
+}
+
+bool DynamicData::read_value(ACE_CDR::WChar& value, TypeKind)
+{
+  return (strm_ >> ACE_InputCDR::to_wchar(value));
+}
+
+bool DynamicData::read_value(ACE_CDR::Octet& value, TypeKind)
+{
+  return (strm_ >> ACE_InputCDR::to_octet(value));
+}
+
+bool DynamicData::read_value(ACE_CDR::Boolean& value, TypeKind)
+{
+  return (strm_ >> ACE_InputCDR::to_boolean(value));
+}
+*/
+
+bool DynamicData::read_value(DCPS::String& value, TypeKind)
+{
+  return (strm_ >> value);
+}
+
+bool DynamicData::read_value(DCPS::WString& value, TypeKind)
+{
+  return (strm_ >> value);
 }
 
 template<typename MemberType, TypeKind MemberTypeKind>
@@ -245,11 +339,11 @@ bool DynamicData::get_value_from_struct(MemberType& value, MemberId id,
 {
   MemberDescriptor md;
   if (get_from_struct_common_checks(md, id, MemberTypeKind)) {
-    return skip_to_struct_member(md, id) && read_value<MemberType>(value, MemberTypeKind);
+    return skip_to_struct_member(md, id) && read_value(value, MemberTypeKind);
   } else if (get_from_struct_common_checks(md, id, enum_or_bitmask)) {
     const LBound bit_bound = md.type.lock()->get_descriptor().bound[0];
     return bit_bound >= lower && bit_bound <= upper &&
-      skip_to_struct_member(md, id) && read_value<MemberType>(value, MemberTypeKind);
+      skip_to_struct_member(md, id) && read_value(value, MemberTypeKind);
   }
 
   return false;
@@ -335,12 +429,12 @@ bool DynamicData::get_value_from_union(MemberType& value, MemberId id,
   }
 
   if (selected_tk == MemberTypeKind) {
-    return read_value<MemberType>(value, MemberTypeKind);
+    return read_value(value, MemberTypeKind);
   }
 
   const LBound bit_bound = selected_type->get_descriptor().bound[0];
   return bit_bound >= lower && bit_bound <= upper &&
-    read_value<MemberType>(value, MemberTypeKind);
+    read_value(value, MemberTypeKind);
 }
 
 bool DynamicData::skip_to_sequence_element(MemberId id)
@@ -488,7 +582,7 @@ bool DynamicData::get_value_from_collection(ElementType& value, MemberId id, Typ
     return false;
   }
 
-  return read_value<ElementType>(value, ElementTypeKind);
+  return read_value(value, ElementTypeKind);
 }
 
 template<typename ValueType, TypeKind ValueTypeKind>
@@ -505,7 +599,7 @@ DDS::ReturnCode_t DynamicData::get_single_value(ValueType& value, MemberId id,
   if (tk == enum_or_bitmask) {
     const LBound bit_bound = descriptor_.bound[0];
     good = bit_bound >= lower && bit_bound <= upper &&
-      read_value<ValueType>(value, ValueTypeKind);
+      read_value(value, ValueTypeKind);
   } else {
     switch (tk) {
     case ValueTypeKind:
@@ -513,7 +607,7 @@ DDS::ReturnCode_t DynamicData::get_single_value(ValueType& value, MemberId id,
       // accessed with MEMBER_ID_INVALID Id. However, there is only a single value in such
       // a DynamicData object, and checking for MEMBER_ID_INVALID from the input is perhaps
       // unnecessary. So, we read the value immediately here.
-      good = read_value<ValueType>(value, ValueTypeKind);
+      good = read_value(value, ValueTypeKind);
       break;
     case TK_STRUCTURE:
       good = get_value_from_struct<ValueType, ValueTypeKind>(value, id,
@@ -767,7 +861,7 @@ template<typename UIntType, TypeKind UIntTypeKind>
 bool DynamicData::get_boolean_from_bitmask(ACE_CDR::ULong index, ACE_CDR::Boolean& value)
 {
   UIntType bitmask;
-  if (!read_value<UIntType>(bitmask, UIntTypeKind)) {
+  if (!read_value(bitmask, UIntTypeKind)) {
     return false;
   }
 
@@ -951,7 +1045,7 @@ DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id
   return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t DynamicData::set_complex_value(MemberId /*id*/, DynamicData /*value*/)
+DDS::ReturnCode_t DynamicData::set_complex_value(MemberId, DynamicData)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -959,46 +1053,343 @@ DDS::ReturnCode_t DynamicData::set_complex_value(MemberId /*id*/, DynamicData /*
 
 
 template<typename SequenceType>
-bool DynamicData::read_values(SequenceType& value, TypeKind element_typekind)
+bool DynamicData::read_values(SequenceType& value, TypeKind elem_tk)
 {
-  ACE_CDR::ULong size, len;
-  if (!is_primitive(element_typekind, size)) {
-    if (!strm_.skip(1, 4)) {
-      return false;
-    }
-  }
+  //  ACE_CDR::ULong size;
+  //  if (!is_primitive(elem_tk, size)) {
+  //    if (!strm_.skip(1, 4)) {
+  //      return false;
+  //    }
+  //  }
 
+  ACE_CDR::ULong len;
   if (!(strm_ >> len)) {
     return false;
   }
 
-  /*
-  switch (element_typekind) {
+  switch (elem_tk) {
   case TK_INT32:
     {
-      Int32Seq val;
-      val.length(len);
+      ACE_CDR::Long val;
       for (ACE_CDR::ULong i = 0; i < len; ++i) {
-        if (!read_value<ACE_CDR::Long>(val[i], element_typekind)) {
+        if (!read_value(val, elem_tk)) {
           return false;
         }
+        value.append(val);
       }
-      value = val;
+      return true;
+    }
+  case TK_UINT32:
+    {
+      ACE_CDR::ULong val;
+      for (ACE_CDR::ULong i = 0; i < len; ++i) {
+        if (!read_value(val, elem_tk)) {
+          return false;
+        }
+        value.append(val);
+      }
+      return true;
+    }
+  case TK_INT16:
+    {
+      ACE_CDR::Short val;
+      for (ACE_CDR::ULong i = 0; i < len; ++i) {
+        if (!read_value(val, elem_tk)) {
+          return false;
+        }
+        value.append(val);
+      }
+      return true;
+    }
+  case TK_UINT16:
+    {
+      ACE_CDR::UShort val;
+      for (ACE_CDR::ULong i = 0; i < len; ++i) {
+        if (!read_value(val, elem_tk)) {
+          return false;
+        }
+        value.append(val);
+      }
+      return true;
+    }
+  case TK_INT64:
+    {
+      ACE_CDR::LongLong val;
+      for (ACE_CDR::ULong i = 0; i < len; ++i) {
+        if (!read_value(val, elem_tk)) {
+          return false;
+        }
+        value.append(val);
+      }
+      return true;
+    }
+  case TK_UINT64:
+    {
+      ACE_CDR::ULongLong val;
+      for (ACE_CDR::ULong i = 0; i < len; ++i) {
+        if (!read_value(val, elem_tk)) {
+          return false;
+        }
+        value.append(val);
+      }
+      return true;
+    }
+  case TK_FLOAT32:
+    {
+      ACE_CDR::Float val;
+      for (ACE_CDR::ULong i = 0; i < len; ++i) {
+        if (!read_value(val, elem_tk)) {
+          return false;
+        }
+        value.append(val);
+      }
+      return true;
+    }
+  case TK_FLOAT64:
+    {
+      ACE_CDR::Double val;
+      for (ACE_CDR::ULong i = 0; i < len; ++i) {
+        if (!read_value(val, elem_tk)) {
+          return false;
+        }
+        value.append(val);
+      }
+      return true;
+    }
+  case TK_FLOAT128:
+    {
+      ACE_CDR::LongDouble val;
+      for (ACE_CDR::ULong i = 0; i < len; ++i) {
+        if (!read_value(val, elem_tk)) {
+          return false;
+        }
+        value.append(val);
+      }
+      return true;
+    }
+  case TK_INT8:
+    {
+      ACE_CDR::Int8 val;
+      for (ACE_CDR::ULong i = 0; i < len; ++i) {
+        if (!read_value(val, elem_tk)) {
+          return false;
+        }
+        value.append(val);
+      }
+      return true;
+    }
+  case TK_UINT8:
+    {
+      ACE_CDR::UInt8 val;
+      for (ACE_CDR::ULong i = 0; i < len; ++i) {
+        if (!read_value(val, elem_tk)) {
+          return false;
+        }
+        value.append(val);
+      }
+      return true;
+    }
+  case TK_CHAR8:
+    {
+      ACE_CDR::Char val;
+      for (ACE_CDR::ULong i = 0; i < len; ++i) {
+        if (!read_value(val, elem_tk)) {
+          return false;
+        }
+        value.append(val);
+      }
+      return true;
+    }
+  case TK_CHAR16:
+    {
+      ACE_CDR::WChar val;
+      for (ACE_CDR::ULong i = 0; i < len; ++i) {
+        if (!read_value(val, elem_tk)) {
+          return false;
+        }
+        value.append(val);
+      }
+      return true;
+    }
+  case TK_BYTE:
+    {
+      ACE_CDR::Octet val;
+      for (ACE_CDR::ULong i = 0; i < len; ++i) {
+        if (!read_value(val, elem_tk)) {
+          return false;
+        }
+        value.append(val);
+      }
+      return true;
+    }
+  case TK_BOOLEAN:
+    {
+      ACE_CDR::Boolean val;
+      for (ACE_CDR::ULong i = 0; i < len; ++i) {
+        if (!read_value(val, elem_tk)) {
+          return false;
+        }
+        value.append(val);
+      }
       return true;
     }
   default:
     return false;
   }
-  */
+}
 
-  /*
+/*
+bool DynamicData::read_values(Int32Seq& value)
+{
+  ACE_CDR::ULong len;
+  if (!(strm_ >> len)) {
+    return false;
+  }
+
   value.length(len);
   for (ACE_CDR::ULong i = 0; i < len; ++i) {
-    if (!read_value(value[i], element_typekind)) {
+    if (!read_value(value[i], TK_INT32)) {
       return false;
     }
   }
-  */
+  return true;
+}
+
+bool DynamicData::read_values(UInt32Seq& value)
+{
+  ACE_CDR::ULong len;
+  if (!(strm_ >> len)) {
+    return false;
+  }
+
+  value.length(len);
+  for (ACE_CDR::ULong i = 0; i < len; ++i) {
+    if (!read_value(value[i], TK_UINT32)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool DynamicData::read_values(Int8Seq& value)
+{
+  ACE_CDR::ULong len;
+  if (!(strm_ >> len)) {
+    return false;
+  }
+
+  value.length(len);
+  for (ACE_CDR::ULong i = 0; i < len; ++i) {
+    if (!read_value(value[i], TK_INT8)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool DynamicData::read_values(UInt8Seq& value)
+{
+  ACE_CDR::ULong len;
+  if (!(strm_ >> len)) {
+    return false;
+  }
+
+  value.length(len);
+  for (ACE_CDR::ULong i = 0; i < len; ++i) {
+    if (!read_value(value[i], TK_UINT8)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool DynamicData::read_values(Int16Seq& value)
+{
+  return true;
+}
+
+bool DynamicData::read_values(UInt16Seq& value)
+{
+  return true;
+}
+
+bool DynamicData::read_values(Int64Seq& value)
+{
+  return true;
+}
+
+bool DynamicData::read_values(UInt64Seq& value)
+{
+  return true;
+}
+
+bool DynamicData::read_values(Float32Seq& value)
+{
+  return true;
+}
+
+bool DynamicData::read_values(Float64Seq& value)
+{
+  return true;
+}
+
+bool DynamicData::read_values(Float128Seq& value)
+{
+  return true;
+}
+
+bool DynamicData::read_values(CharSeq& value)
+{
+  return true;
+}
+
+bool DynamicData::read_values(WCharSeq& value)
+{
+  return true;
+}
+
+bool DynamicData::read_values(OctetSeq& value)
+{
+  return true;
+}
+
+bool DynamicData::read_values(BooleanSeq& value)
+{
+  return true;
+}
+*/
+
+bool DynamicData::read_values(StringSeq& value, TypeKind)
+{
+  ACE_CDR::ULong len;
+  if (!strm_.skip(1, 4) || !(strm_ >> len)) {
+    return false;
+  }
+
+  DCPS::String val;
+  for (ACE_CDR::ULong i = 0; i < len; ++i) {
+    if (!read_value(val, TK_STRING8)) {
+      return false;
+    }
+    value.append(val);
+  }
+  return true;
+}
+
+bool DynamicData::read_values(WStringSeq& value, TypeKind)
+{
+  ACE_CDR::ULong len;
+  if (!strm_.skip(1, 4) || !(strm_ >> len)) {
+    return false;
+  }
+
+  DCPS::WString val;
+  for (ACE_CDR::ULong i = 0; i < len; ++i) {
+    if (!read_value(val, TK_STRING16)) {
+      return false;
+    }
+    value.append(val);
+  }
   return true;
 }
 
@@ -1008,11 +1399,11 @@ bool DynamicData::get_values_from_struct(SequenceType& value, MemberId id,
 {
   MemberDescriptor md;
   if (get_from_struct_common_checks(md, id, ElementTypeKind, true)) {
-    return skip_to_struct_member(md, id) && read_values<SequenceType>(value, ElementTypeKind);
+    return skip_to_struct_member(md, id) && /*read_values(value);*/read_values(value, ElementTypeKind);
   } else if (get_from_struct_common_checks(md, id, enum_or_bitmask, true)) {
     const LBound bit_bound = md.type.lock()->get_descriptor().element_type->get_descriptor().bound[0];
     return bit_bound >= lower && bit_bound <= upper &&
-      skip_to_struct_member(md, id) && read_values<SequenceType>(value, enum_or_bitmask);
+      skip_to_struct_member(md, id) && /*read_values(value);*/read_values(value, enum_or_bitmask);
   }
 
   return false;
@@ -1059,11 +1450,11 @@ bool DynamicData::get_values_from_union(SequenceType& value, MemberId id,
   }
 
   if (elem_tk == ElementTypeKind) {
-    return read_values<SequenceType>(value, elem_tk);
+    return /*read_values(value);*/read_values(value, elem_tk);
   }
 
   const LBound bit_bound = elem_type->get_descriptor().bound[0];
-  return bit_bound >= lower && bit_bound <= upper && read_values<SequenceType>(value, elem_tk);
+  return bit_bound >= lower && bit_bound <= upper && /*read_values(value);*/read_values(value, elem_tk);
 }
 
 template<typename SequenceType, TypeKind ElementTypeKind>
@@ -1074,22 +1465,22 @@ bool DynamicData::get_values_from_sequence(SequenceType& value, MemberId id,
   const TypeKind elem_tk = elem_type->get_kind();
 
   if (elem_tk == ElementTypeKind) {
-    return read_values<SequenceType>(value, elem_tk);
+    return /*read_values(value);*/read_values(value, elem_tk);
   } else if (elem_tk == enum_or_bitmask) {
     // Read from a sequence of enums or bitmasks.
     const LBound bit_bound = elem_type->get_descriptor().bound[0];
-    return bit_bound >= lower && bit_bound <= upper && read_values<SequenceType>(value, elem_tk);
+    return bit_bound >= lower && bit_bound <= upper && /*read_values(value);*/read_values(value, elem_tk);
   } else if (elem_tk == TK_SEQUENCE) {
     const DynamicType_rch nested_elem_type = get_base_type(elem_type->get_descriptor().element_type);
     const TypeKind nested_elem_tk = nested_elem_type->get_kind();
     if (nested_elem_tk == ElementTypeKind) {
       // Read from a sequence of sequence of ElementTypeKind.
-      return skip_to_sequence_element(id) && read_values<SequenceType>(value, nested_elem_tk);
+      return skip_to_sequence_element(id) && /*read_values(value);*/read_values(value, nested_elem_tk);
     } else if (nested_elem_tk == enum_or_bitmask) {
       // Read from a sequence of sequence of enums or bitmasks.
       const LBound bit_bound = nested_elem_type->get_descriptor().bound[0];
       return bit_bound >= lower && bit_bound <= upper &&
-        skip_to_sequence_element(id) && read_values<SequenceType>(value, nested_elem_tk);
+        skip_to_sequence_element(id) && /*read_values(value);*/read_values(value, nested_elem_tk);
     }
   }
 
@@ -1118,11 +1509,11 @@ bool DynamicData::get_values_from_array(SequenceType& value, MemberId id,
   const DynamicType_rch nested_elem_type = get_base_type(elem_type->get_descriptor().element_type);
   const TypeKind nested_elem_tk = nested_elem_type->get_kind();
   if (nested_elem_tk == ElementTypeKind) {
-    return skip_to_array_element(id) && read_values<SequenceType>(value, nested_elem_tk);
+    return skip_to_array_element(id) && /*read_values(value);*/read_values(value, nested_elem_tk);
   } else if (nested_elem_tk == enum_or_bitmask) {
     const LBound bit_bound = nested_elem_type->get_descriptor().bound[0];
     return bit_bound >= lower && bit_bound <= upper &&
-      skip_to_array_element(id) && read_values<SequenceType>(value, nested_elem_tk);
+      skip_to_array_element(id) && /*read_values(value);*/read_values(value, nested_elem_tk);
   }
 
   if (DCPS::DCPS_debug_level >= 1) {
@@ -1150,11 +1541,11 @@ bool DynamicData::get_values_from_map(SequenceType& value, MemberId id,
   const DynamicType_rch nested_elem_type = get_base_type(elem_type->get_descriptor().element_type);
   const TypeKind nested_elem_tk = nested_elem_type->get_kind();
   if (nested_elem_tk == ElementTypeKind) {
-    return skip_to_map_element(id) && read_values<SequenceType>(value, nested_elem_tk);
+    return skip_to_map_element(id) && /*read_values(value);*/read_values(value, nested_elem_tk);
   } else if (nested_elem_tk == enum_or_bitmask) {
     const LBound bit_bound = nested_elem_type->get_descriptor().bound[0];
     return bit_bound >= lower && bit_bound <= upper &&
-      skip_to_map_element(id) && read_values<SequenceType>(value, nested_elem_tk);
+      skip_to_map_element(id) && /*read_values(value);*/read_values(value, nested_elem_tk);
   }
 
   if (DCPS::DCPS_debug_level >= 1) {
@@ -1223,7 +1614,6 @@ DDS::ReturnCode_t DynamicData::set_int32_values(MemberId /*id*/, const Int32Seq&
   return DDS::RETCODE_UNSUPPORTED;
 }
 
-/*
 DDS::ReturnCode_t DynamicData::get_uint32_values(UInt32Seq& value, MemberId id)
 {
   return get_sequence_values<UInt32Seq, TK_UINT32>(value, id, TK_BITMASK, 17, 32);
@@ -1356,12 +1746,12 @@ DDS::ReturnCode_t DynamicData::set_char16_values(MemberId, const WCharSeq&)
   return DDS::RETCODE_UNSUPPORTED;
 }
 
-DDS::ReturnCode_t DynamicData::get_byte_values(ByteSeq& value, MemberId id)
+DDS::ReturnCode_t DynamicData::get_byte_values(OctetSeq& value, MemberId id)
 {
-  return get_sequence_values<ByteSeq, TK_BYTE>(value, id);
+  return get_sequence_values<OctetSeq, TK_BYTE>(value, id);
 }
 
-DDS::ReturnCode_t DynamicData::set_byte_values(MemberId, const ByteSeq&)
+DDS::ReturnCode_t DynamicData::set_byte_values(MemberId, const OctetSeq&)
 {
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
@@ -1399,7 +1789,6 @@ DDS::ReturnCode_t DynamicData::set_wstring_values(MemberId, const WStringSeq&)
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
 }
-*/
 
 bool DynamicData::skip_to_struct_member(const MemberDescriptor& member_desc, MemberId id)
 {
