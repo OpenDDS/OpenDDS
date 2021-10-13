@@ -153,7 +153,7 @@ private:
   typedef OPENDDS_MAP_CMP(GUID_t, DiscoveredSubscription,
                           GUID_tKeyLessThan) DiscoveredSubscriptionMap;
 
-  typedef typename DiscoveredSubscriptionMap::iterator DiscoveredSubscriptionIter;
+  typedef DiscoveredSubscriptionMap::iterator DiscoveredSubscriptionIter;
 
   struct DiscoveredPublication : PoolAllocationBase {
     DiscoveredPublication()
@@ -203,7 +203,7 @@ private:
 
   typedef OPENDDS_MAP_CMP(GUID_t, DiscoveredPublication,
                           GUID_tKeyLessThan) DiscoveredPublicationMap;
-  typedef typename DiscoveredPublicationMap::iterator DiscoveredPublicationIter;
+  typedef DiscoveredPublicationMap::iterator DiscoveredPublicationIter;
 
 public:
   Sedp(const DCPS::RepoId& participant_id,
@@ -469,15 +469,15 @@ private:
 
   typedef OPENDDS_MAP_CMP(GUID_t, LocalPublication,
                           GUID_tKeyLessThan) LocalPublicationMap;
-  typedef typename LocalPublicationMap::iterator LocalPublicationIter;
-  typedef typename LocalPublicationMap::const_iterator LocalPublicationCIter;
+  typedef LocalPublicationMap::iterator LocalPublicationIter;
+  typedef LocalPublicationMap::const_iterator LocalPublicationCIter;
 
   typedef OPENDDS_MAP_CMP(GUID_t, LocalSubscription,
                           GUID_tKeyLessThan) LocalSubscriptionMap;
-  typedef typename LocalSubscriptionMap::iterator LocalSubscriptionIter;
-  typedef typename LocalSubscriptionMap::const_iterator LocalSubscriptionCIter;
+  typedef LocalSubscriptionMap::iterator LocalSubscriptionIter;
+  typedef LocalSubscriptionMap::const_iterator LocalSubscriptionCIter;
 
-  typedef typename OPENDDS_MAP_CMP(GUID_t, String, GUID_tKeyLessThan) TopicNameMap;
+  typedef OPENDDS_MAP_CMP(GUID_t, String, GUID_tKeyLessThan) TopicNameMap;
 
   struct TypeIdOrigSeqNumber {
     GuidPrefix_t participant; // Prefix of remote participant
@@ -1279,8 +1279,8 @@ protected:
     }
   };
 
-  typedef OPENDDS_MAP_T(MatchingPair, MatchingData) MatchingDataMap;
-  typedef typename MatchingDataMap::iterator MatchingDataIter;
+  typedef OPENDDS_MAP(MatchingPair, MatchingData) MatchingDataMap;
+  typedef MatchingDataMap::iterator MatchingDataIter;
 
   typedef DCPS::PmfSporadicTask<Sedp> EndpointManagerSporadic;
 

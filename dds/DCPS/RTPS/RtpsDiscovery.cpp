@@ -819,7 +819,6 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
 }
 
 // Participant operations:
-
 OpenDDS::DCPS::RepoId
 RtpsDiscovery::generate_participant_guid()
 {
@@ -830,8 +829,8 @@ RtpsDiscovery::generate_participant_guid()
     if (guid_gen_.interfaceName(guid_interface.c_str()) != 0) {
       if (DCPS::DCPS_debug_level) {
         ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsDiscovery::generate_participant_guid()"
-                   " - attempt to use specific network interface's MAC addr for"
-                   " GUID generation failed.\n"));
+                   " - attempt to use network interface %C MAC addr for"
+                   " GUID generation failed.\n", guid_interface.c_str()));
       }
     }
   }
@@ -852,8 +851,8 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
     if (guid_gen_.interfaceName(guid_interface.c_str()) != 0) {
       if (DCPS::DCPS_debug_level) {
         ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsDiscovery::add_domain_participant()"
-                   " - attempt to use specific network interface's MAC addr for"
-                   " GUID generation failed.\n"));
+                   " - attempt to use specific network interface %C MAC addr for"
+                   " GUID generation failed.\n", guid_interface.c_str()));
       }
     }
   }
@@ -1204,11 +1203,11 @@ bool RtpsDiscovery::remove_domain_participant(
   // does not get deleted until lock as been released.
   ParticipantHandle participant;
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-  typename DomainParticipantMap::iterator domain = participants_.find(domain_id);
+  DomainParticipantMap::iterator domain = participants_.find(domain_id);
   if (domain == participants_.end()) {
     return false;
   }
-  typename ParticipantMap::iterator part = domain->second.find(participantId);
+  ParticipantMap::iterator part = domain->second.find(participantId);
   if (part == domain->second.end()) {
     return false;
   }
@@ -1393,11 +1392,11 @@ void RtpsDiscovery::update_subscription_locators(
 ParticipantHandle RtpsDiscovery::get_part(const DDS::DomainId_t domain_id, const GUID_t& part_id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ParticipantHandle());
-  typename DomainParticipantMap::const_iterator domain = participants_.find(domain_id);
+  DomainParticipantMap::const_iterator domain = participants_.find(domain_id);
   if (domain == participants_.end()) {
     return ParticipantHandle();
   }
-  typename ParticipantMap::const_iterator part = domain->second.find(part_id);
+  ParticipantMap::const_iterator part = domain->second.find(part_id);
   if (part == domain->second.end()) {
     return ParticipantHandle();
   }

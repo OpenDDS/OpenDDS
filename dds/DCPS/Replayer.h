@@ -72,7 +72,7 @@ public:
    *
    * @note Only samples of type SAMPLE_DATA should be sent.
    */
-  virtual DDS::ReturnCode_t write (const RawDataSample& sample )=0;
+  virtual DDS::ReturnCode_t write (const RawDataSample& sample) = 0;
 
   /**
    * Send the sample to the specified DataReader.

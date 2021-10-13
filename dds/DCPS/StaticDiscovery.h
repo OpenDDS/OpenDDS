@@ -169,7 +169,7 @@ protected:
   typedef OPENDDS_MAP_CMP(GUID_t, DiscoveredSubscription,
                           GUID_tKeyLessThan) DiscoveredSubscriptionMap;
 
-  typedef typename DiscoveredSubscriptionMap::iterator DiscoveredSubscriptionIter;
+  typedef DiscoveredSubscriptionMap::iterator DiscoveredSubscriptionIter;
 
   struct DiscoveredPublication : PoolAllocationBase {
     DiscoveredPublication()
@@ -207,7 +207,7 @@ protected:
 
   typedef OPENDDS_MAP_CMP(GUID_t, DiscoveredPublication,
                           GUID_tKeyLessThan) DiscoveredPublicationMap;
-  typedef typename DiscoveredPublicationMap::iterator DiscoveredPublicationIter;
+  typedef DiscoveredPublicationMap::iterator DiscoveredPublicationIter;
 
   struct LocalEndpoint {
     LocalEndpoint()
@@ -243,15 +243,15 @@ protected:
 
   typedef OPENDDS_MAP_CMP(GUID_t, LocalPublication,
                           GUID_tKeyLessThan) LocalPublicationMap;
-  typedef typename LocalPublicationMap::iterator LocalPublicationIter;
-  typedef typename LocalPublicationMap::const_iterator LocalPublicationCIter;
+  typedef LocalPublicationMap::iterator LocalPublicationIter;
+  typedef LocalPublicationMap::const_iterator LocalPublicationCIter;
 
   typedef OPENDDS_MAP_CMP(GUID_t, LocalSubscription,
                           GUID_tKeyLessThan) LocalSubscriptionMap;
-  typedef typename LocalSubscriptionMap::iterator LocalSubscriptionIter;
-  typedef typename LocalSubscriptionMap::const_iterator LocalSubscriptionCIter;
+  typedef LocalSubscriptionMap::iterator LocalSubscriptionIter;
+  typedef LocalSubscriptionMap::const_iterator LocalSubscriptionCIter;
 
-  typedef typename OPENDDS_MAP_CMP(GUID_t, String, GUID_tKeyLessThan) TopicNameMap;
+  typedef OPENDDS_MAP_CMP(GUID_t, String, GUID_tKeyLessThan) TopicNameMap;
 
   static DDS::BuiltinTopicKey_t get_key(const DiscoveredPublication& pub)
   {
@@ -444,8 +444,8 @@ private:
       return false;
     }
   };
-  typedef OPENDDS_MAP_T(MatchingPair, MatchingData) MatchingDataMap;
-  typedef typename MatchingDataMap::iterator MatchingDataIter;
+  typedef OPENDDS_MAP(MatchingPair, MatchingData) MatchingDataMap;
+  typedef MatchingDataMap::iterator MatchingDataIter;
 
   void match(const GUID_t& writer, const GUID_t& reader);
   void remove_expired_endpoints(const MonotonicTimePoint& /*now*/);
@@ -474,7 +474,7 @@ private:
   ACE_Thread_Mutex& lock_;
   GUID_t participant_id_;
   RepoIdSet ignored_guids_;
-  unsigned int publication_counter_, subscription_counter_, topic_counter_;
+  unsigned int topic_counter_;
   LocalPublicationMap local_publications_;
   LocalSubscriptionMap local_subscriptions_;
   DiscoveredPublicationMap discovered_publications_;
@@ -494,7 +494,6 @@ private:
   RcHandle<StaticEndpointManagerSporadic> type_lookup_reply_deadline_processor_;
   TimeDuration max_type_lookup_service_reply_period_;
   SequenceNumber type_lookup_service_sequence_number_;
-  const bool use_xtypes_;
 
   struct TypeIdOrigSeqNumber {
     GuidPrefix_t participant; // Prefix of remote participant
@@ -833,8 +832,8 @@ private:
 
   typedef OPENDDS_MAP_CMP(GUID_t, DiscoveredParticipant,
                           GUID_tKeyLessThan) DiscoveredParticipantMap;
-  typedef typename DiscoveredParticipantMap::iterator DiscoveredParticipantIter;
-  typedef typename DiscoveredParticipantMap::const_iterator
+  typedef DiscoveredParticipantMap::iterator DiscoveredParticipantIter;
+  typedef DiscoveredParticipantMap::const_iterator
     DiscoveredParticipantConstIter;
 
   void remove_discovered_participant(DiscoveredParticipantIter& iter);
