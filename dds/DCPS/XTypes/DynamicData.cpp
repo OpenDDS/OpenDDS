@@ -207,6 +207,7 @@ bool DynamicData::read_value(ValueType& value, TypeKind tk)
       value = val;
       return true;
     }
+    /*
   case TK_FLOAT128:
     {
       ACE_CDR::LongDouble val;
@@ -216,6 +217,7 @@ bool DynamicData::read_value(ValueType& value, TypeKind tk)
       value = val;
       return true;
     }
+    */
   case TK_INT8:
     {
       ACE_CDR::Int8 val;
@@ -273,6 +275,11 @@ bool DynamicData::read_value(ValueType& value, TypeKind tk)
   default:
     return false;
   }
+}
+
+bool DynamicData::read_value(ACE_CDR::LongDouble& value, TypeKind)
+{
+  return (strm_ >> value);
 }
 
 bool DynamicData::read_value(DCPS::String& value, TypeKind)
@@ -1050,7 +1057,7 @@ bool DynamicData::read_values(SequenceType& value, TypeKind elem_tk)
         }
         value.append(val);
       }
-      return true;
+       return true;
     }
   case TK_UINT16:
     {
@@ -1187,6 +1194,23 @@ bool DynamicData::read_values(SequenceType& value, TypeKind elem_tk)
   default:
     return false;
   }
+}
+
+bool DynamicData::read_values(Float128Seq& value, TypeKind)
+{
+  ACE_CDR::ULong len;
+  if (!(strm_ >> len)) {
+    return false;
+  }
+
+  ACE_CDR::LongDouble val;
+  for (ACE_CDR::ULong i = 0; i < len; ++i) {
+    if (!read_value(val, TK_FLOAT128)) {
+      return false;
+    }
+    value.append(val);
+  }
+  return true;
 }
 
 bool DynamicData::read_values(StringSeq& value, TypeKind)

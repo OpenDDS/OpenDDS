@@ -181,6 +181,7 @@ private:
   /// Wrappers for reading a single value as a given type.
   template<typename ValueType>
   bool read_value(ValueType& value, TypeKind tk);
+  bool read_value(ACE_CDR::LongDouble& value, TypeKind);
   bool read_value(DCPS::String& value, TypeKind);
 #ifdef DDS_HAS_WCHAR
   bool read_value(DCPS::WString& value, TypeKind);
@@ -238,6 +239,7 @@ private:
   /// which is a sequence of primitives or strings or wstrings.
   template<typename SequenceType>
   bool read_values(SequenceType& value, TypeKind element_typekind);
+  bool read_values(Float128Seq& value, TypeKind);
   bool read_values(StringSeq& value, TypeKind);
 #ifdef DDS_HAS_WCHAR
   bool read_values(WStringSeq& value, TypeKind);
