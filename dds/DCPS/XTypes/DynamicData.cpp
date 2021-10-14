@@ -22,10 +22,8 @@ DynamicData::DynamicData(ACE_Message_Block* chain,
                          const DynamicType_rch& type)
   : strm_(chain, encoding)
 {
-  DCPS::Encoding::XcdrVersion xcdr_ver = strm_.encoding().xcdr_version();
-  if (xcdr_ver != DCPS::Encoding::XCDR_VERSION_2) {
-    const DCPS::String xcdr_str = (xcdr_ver == DCPS::Encoding::XCDR_VERSION_1) ? "XCDR1" : "Non-XCDR";
-    throw std::runtime_error("Only support XCDR2, but constructed with " + xcdr_str + " stream");
+  if (encoding.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
+    throw std::runtime_error("DynamicData only supports XCDR2 at this time");
   }
 
   if (type->get_kind() == TK_ALIAS) {
@@ -35,7 +33,6 @@ DynamicData::DynamicData(ACE_Message_Block* chain,
   }
 
   strm_.get_rdstate(orig_rdstate_);
-
   descriptor_ = type_->get_descriptor();
 }
 
@@ -283,10 +280,12 @@ bool DynamicData::read_value(DCPS::String& value, TypeKind)
   return (strm_ >> value);
 }
 
+#ifdef DDS_HAS_WCHAR
 bool DynamicData::read_value(DCPS::WString& value, TypeKind)
 {
   return (strm_ >> value);
 }
+#endif
 
 template<typename MemberType, TypeKind MemberTypeKind>
 bool DynamicData::get_value_from_struct(MemberType& value, MemberId id,
@@ -724,7 +723,6 @@ DDS::ReturnCode_t DynamicData::get_char8_value(ACE_CDR::Char& value, MemberId id
   // String of kind TK_STRING8 is encoded with UTF-8 where each character can take more
   // than 1 byte. So we can't read a Char8 object, which has size exactly 1 byte,
   // from such a string as its member.
-  //  return get_value_excluding_enum_bitmask<ACE_CDR::Char, TK_CHAR8>(value, id);
   return get_single_value<ACE_CDR::Char, TK_CHAR8>(value, id);
 }
 
@@ -743,6 +741,7 @@ DDS::ReturnCode_t DynamicData::get_char16_value(ACE_CDR::WChar& value, MemberId 
   case TK_CHAR16:
     good = (strm_ >> ACE_InputCDR::to_wchar(value));
     break;
+#ifdef DDS_HAS_WCHAR
   case TK_STRING16:
     {
       DCPS::WString str;
@@ -767,6 +766,7 @@ DDS::ReturnCode_t DynamicData::get_char16_value(ACE_CDR::WChar& value, MemberId 
       }
       break;
     }
+#endif
   case TK_STRUCTURE:
     good = get_value_from_struct<ACE_CDR::WChar, TK_CHAR16>(value, id);
     break;
@@ -902,6 +902,7 @@ DDS::ReturnCode_t DynamicData::set_string_value(MemberId, DCPS::String)
   return DDS::RETCODE_UNSUPPORTED;
 }
 
+#ifdef DDS_HAS_WCHAR
 DDS::ReturnCode_t DynamicData::get_wstring_value(DCPS::WString& value, MemberId id)
 {
   return get_single_value<DCPS::WString, TK_STRING16>(value, id);
@@ -912,6 +913,7 @@ DDS::ReturnCode_t DynamicData::set_wstring_value(MemberId, DCPS::WString)
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
 }
+#endif
 
 DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id)
 {
@@ -1204,6 +1206,7 @@ bool DynamicData::read_values(StringSeq& value, TypeKind)
   return true;
 }
 
+#ifdef DDS_HAS_WCHAR
 bool DynamicData::read_values(WStringSeq& value, TypeKind)
 {
   ACE_CDR::ULong len;
@@ -1220,6 +1223,7 @@ bool DynamicData::read_values(WStringSeq& value, TypeKind)
   }
   return true;
 }
+#endif
 
 template<typename SequenceType, TypeKind ElementTypeKind>
 bool DynamicData::get_values_from_struct(SequenceType& value, MemberId id,
@@ -1607,6 +1611,7 @@ DDS::ReturnCode_t DynamicData::set_string_values(MemberId, const StringSeq&)
   return DDS::RETCODE_UNSUPPORTED;
 }
 
+#ifdef DDS_HAS_WCHAR
 DDS::ReturnCode_t DynamicData::get_wstring_values(WStringSeq& value, MemberId id)
 {
   return get_sequence_values<WStringSeq, TK_STRING16>(value, id);
@@ -1617,6 +1622,7 @@ DDS::ReturnCode_t DynamicData::set_wstring_values(MemberId, const WStringSeq&)
   // TODO: Implement this.
   return DDS::RETCODE_UNSUPPORTED;
 }
+#endif
 
 bool DynamicData::skip_to_struct_member(const MemberDescriptor& member_desc, MemberId id)
 {

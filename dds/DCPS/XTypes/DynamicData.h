@@ -90,10 +90,12 @@ public:
   DDS::ReturnCode_t get_string_value(DCPS::String& value, MemberId id);
   DDS::ReturnCode_t set_string_value(MemberId id, DCPS::String value);
 
+#ifdef DDS_HAS_WCHAR
   DDS::ReturnCode_t get_wstring_value(DCPS::WString& value, MemberId id);
   DDS::ReturnCode_t set_wstring_value(MemberId id, DCPS::WString value);
+#endif
 
-  DDS::ReturnCode_t get_complex_value(DynamicData& value, MemberId id);
+DDS::ReturnCode_t get_complex_value(DynamicData& value, MemberId id);
   DDS::ReturnCode_t set_complex_value(MemberId id, DynamicData value);
 
   typedef Sequence<ACE_CDR::Long> Int32Seq;
@@ -160,11 +162,13 @@ public:
   DDS::ReturnCode_t get_string_values(StringSeq& value, MemberId id);
   DDS::ReturnCode_t set_string_values(MemberId id, const StringSeq& value);
 
+#ifdef DDS_HAS_WCHAR
   typedef Sequence<DCPS::WString> WStringSeq;
   DDS::ReturnCode_t get_wstring_values(WStringSeq& value, MemberId id);
   DDS::ReturnCode_t set_wstring_values(MemberId id, const WStringSeq& value);
+#endif
 
-  /// Skip the whole data corresponding to this type if it is a struct or union.
+/// Skip the whole data corresponding to this type if it is a struct or union.
   /// This is called by a containing type when it wants to skip a member which
   /// is an object of this type.
   bool skip_all();
@@ -178,7 +182,9 @@ private:
   template<typename ValueType>
   bool read_value(ValueType& value, TypeKind tk);
   bool read_value(DCPS::String& value, TypeKind);
+#ifdef DDS_HAS_WCHAR
   bool read_value(DCPS::WString& value, TypeKind);
+#endif
 
   /// Templates for reading a single value of type primitive or string or
   /// wstring from a corresponding containing type.
@@ -233,7 +239,9 @@ private:
   template<typename SequenceType>
   bool read_values(SequenceType& value, TypeKind element_typekind);
   bool read_values(StringSeq& value, TypeKind);
+#ifdef DDS_HAS_WCHAR
   bool read_values(WStringSeq& value, TypeKind);
+#endif
 
   // Templates for reading a sequence of primitives or strings or wstrings
   // as a member (or an element) of a given containing type.
