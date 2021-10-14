@@ -3,11 +3,14 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include <DCPS/DdsDcps_pch.h>
+
 #include "DynamicData.h"
 
 #include "DynamicTypeMember.h"
 
 #include <sstream>
+#include <stdexcept>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

@@ -17,7 +17,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
-class DynamicData {
+class OpenDDS_Dcps_Export DynamicData {
 public:
 
   DynamicData(ACE_Message_Block* chain,
