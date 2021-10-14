@@ -1,3 +1,11 @@
+project(*SporadicTask): dcpsexe, dcps_test {
+  exename = *
+
+  Source_Files {
+    SporadicTask.cpp
+  }
+}
+
 project(*MultiTask): dcpsexe, dcps_test {
   exename = *
 
