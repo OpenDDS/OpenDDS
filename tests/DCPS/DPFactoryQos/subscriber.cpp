@@ -159,6 +159,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       dr_qos.user_data.value.length(1);
       dr_qos.user_data.value[0] = 0x42;
 
+      dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+
       if (dr->set_qos(dr_qos) != ::DDS::RETCODE_OK)
       {
         cerr << "DataReader failed to set_qos when not enabled." << endl;
