@@ -125,11 +125,6 @@ namespace {
     attr.ac_endpoint_properties.length(0);
   }
 
-  inline bool has_security_data(Security::DiscoveredParticipantDataKind kind)
-  {
-    return kind == Security::DPDK_ENHANCED || kind == Security::DPDK_SECURE;
-  }
-
 #endif
 
   inline bool prop_to_bool(const DDS::Property_t& prop)
@@ -709,8 +704,6 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
   // Make a (non-const) copy so we can tweak values below
   ParticipantData_t pdata(cpdata);
-  pdata.associated_endpoints =
-    DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR | DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER;
 
   const GUID_t guid = DCPS::make_part_guid(pdata.participantProxy.guidPrefix);
 
@@ -808,12 +801,11 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     }
 #endif
 
+    sedp_->associate(iter->second
 #ifdef OPENDDS_SECURITY
-    if (is_security_enabled()) {
-      // Associate the stateless reader / writer for handshakes & auth requests
-      sedp_->associate_preauth(iter->second.pdata_);
-    }
+                     , participant_sec_attr_
 #endif
+                     );
 
     // Since we've just seen a new participant, let's send out our
     // own announcement, so they don't have to wait.
@@ -834,6 +826,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
               ACE_TEXT("Incompatible security attributes in discovered participant: %C\n"),
               OPENDDS_STRING(DCPS::GuidConverter(guid)).c_str()));
           }
+          // FUTURE: This is probably not a good idea since it will just get rediscovered.
           participants_.erase(guid);
         } else { // allow_unauthenticated_participants == true
           iter->second.auth_state_ = AUTH_STATE_UNAUTHENTICATED;
@@ -966,10 +959,6 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         if (locators_changed(iter->second.pdata_.participantProxy, pdata.participantProxy)) {
           sedp_->update_locators(pdata);
         }
-        pdata.associated_endpoints = iter->second.pdata_.associated_endpoints;
-#ifdef OPENDDS_SECURITY
-        pdata.extended_associated_endpoints = iter->second.pdata_.extended_associated_endpoints;
-#endif
         const DCPS::MonotonicTime_t da = iter->second.pdata_.discoveredAt;
         iter->second.pdata_ = pdata;
         iter->second.pdata_.discoveredAt = da;
@@ -1044,11 +1033,7 @@ Spdp::data_received(const DataSubmessage& data,
   ParticipantData_t pdata;
 
   pdata.participantProxy.domainId = domain_;
-  pdata.associated_endpoints = 0;
   pdata.discoveredAt = MonotonicTimePoint::now().to_monotonic_time();
-#ifdef OPENDDS_SECURITY
-  pdata.extended_associated_endpoints = 0;
-#endif
 
   if (!ParameterListConverter::from_param_list(plist, pdata)) {
     if (DCPS::DCPS_debug_level > 0) {
@@ -1121,10 +1106,6 @@ Spdp::match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter&
 #else
   ACE_UNUSED_ARG(guid);
 #endif /* DDS_HAS_MINIMUM_BIT */
-
-  // notify Sedp of association
-  // Sedp may call has_discovered_participant, which is why the participant must be added before this call to associate.
-  sedp_->associate(dp_iter->second.pdata_);
 
   dp_iter->second.bit_ih_ = bit_instance_handle;
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -1902,8 +1883,7 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
     return false;
   }
 
-  sedp_->associate(iter->second.pdata_);
-  sedp_->associate_secure_endpoints(iter->second.pdata_, participant_sec_attr_);
+  sedp_->process_association_records_i(iter->second);
 
   return true;
 }
@@ -1972,9 +1952,11 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
       return false;
     }
 
-    sedp_->disassociate_volatile(iter->second.pdata_);
+    sedp_->disassociate_volatile(iter->second);
     sedp_->cleanup_volatile_crypto(iter->first);
-    sedp_->associate_volatile(iter->second.pdata_);
+    sedp_->associate_volatile(iter->second);
+    sedp_->generate_remote_matched_crypto_handles(iter->second);
+    sedp_->process_association_records_i(iter->second);
 
     if (!auth->return_handshake_handle(iter->second.handshake_handle_, se)) {
       if (DCPS::security_debug.auth_warn) {
@@ -2087,17 +2069,10 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
     }
   }
 
-  // notify Sedp of association Sedp may call
-  // has_discovered_participant, which is the participant must be
-  // added before these calls to associate.
+  sedp_->generate_remote_matched_crypto_handles(iter->second);
 
-  if (iter->second.crypto_tokens_.length() == 0) {
-    sedp_->associate(iter->second.pdata_);
-    sedp_->associate_secure_endpoints(iter->second.pdata_, participant_sec_attr_);
-  }
-
-  sedp_->generate_remote_crypto_handles(iter->second.pdata_);
-  sedp_->associate_volatile(iter->second.pdata_);
+  // Auth is now complete.
+  sedp_->process_association_records_i(iter->second);
 
 #ifndef DDS_HAS_MINIMUM_BIT
   process_location_updates_i(iter);
@@ -2329,10 +2304,6 @@ ParticipantData_t Spdp::build_local_pdata(
       0 // we are not supporting fractional seconds in the lease duration
     },
     participant_discovered_at_
-    , 0 // associated_endpoints
-#ifdef OPENDDS_SECURITY
-    , 0 // extended_associated_endpoints
-#endif
   };
 
   return pdata;
@@ -3922,7 +3893,7 @@ void
 Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
 {
   const DCPS::RepoId peer = make_id(id, ENTITYID_PARTICIPANT);
-  const DiscoveredParticipantConstIter iter = participants_.find(peer);
+  const DiscoveredParticipantIter iter = participants_.find(peer);
   if (iter == participants_.end()) {
     if (DCPS::DCPS_debug_level > 0) {
       const DCPS::GuidConverter conv(peer);
@@ -3954,6 +3925,8 @@ Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
       }
     }
   }
+
+  iter->second.participant_tokens_sent_ = true;
 }
 
 DDS::Security::PermissionsHandle
@@ -4827,7 +4800,7 @@ void Spdp::remove_discovered_participant(DiscoveredParticipantIter& iter)
     return;
   }
   GUID_t part_id = iter->first;
-  bool removed = endpoint_manager().disassociate(iter->second.pdata_);
+  bool removed = endpoint_manager().disassociate(iter->second);
   iter = participants_.find(part_id); // refresh iter after disassociate, which can unlock
   if (iter == participants_.end()) {
     return;

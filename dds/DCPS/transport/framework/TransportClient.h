@@ -141,7 +141,11 @@ public:
     return repo_id_;
   }
 
-private:
+  void data_acked(const GUID_t& remote);
+
+  bool is_leading(const GUID_t& reader_id) const;
+
+ private:
 
   // Implemented by derived classes (DataReaderImpl/DataWriterImpl)
   virtual bool check_transport_qos(const TransportInst& inst) = 0;
