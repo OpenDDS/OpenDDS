@@ -196,6 +196,9 @@ public:
 
   virtual ICE::Endpoint* get_ice_endpoint() const;
 
+  virtual bool is_leading(const GUID_t& writer_id,
+                          const GUID_t& reader_id) const;
+
 #ifdef OPENDDS_SECURITY
   Security::SecurityConfig_rch security_config() const
   { return security_config_; }
@@ -412,6 +415,7 @@ private:
     typedef OPENDDS_SET_CMP(TransportQueueElement*, TransportQueueElement::OrderBySequenceNumber) TqeSet;
     typedef OPENDDS_MULTIMAP(SequenceNumber, TransportQueueElement*) SnToTqeMap;
     SnToTqeMap elems_not_acked_;
+    WeakRcHandle<TransportClient> client_;
     WeakRcHandle<RtpsUdpDataLink> link_;
     const RepoId id_;
     const bool durable_;
@@ -454,6 +458,7 @@ private:
     void make_leader_lagger(const RepoId& reader, SequenceNumber previous_max_sn);
     void make_lagger_leader(const ReaderInfo_rch& reader, const SequenceNumber previous_acked_sn);
     bool is_lagging(const ReaderInfo_rch& reader) const;
+    bool is_leading(const ReaderInfo_rch& reader) const;
     void check_leader_lagger() const;
     void record_directed(const RepoId& reader, SequenceNumber seq);
 
@@ -493,7 +498,8 @@ private:
     void log_remote_counts(const char* funcname);
 
   public:
-    RtpsWriter(RcHandle<RtpsUdpDataLink> link, const RepoId& id, bool durable,
+    RtpsWriter(TransportClient_rch client, RcHandle<RtpsUdpDataLink> link,
+               const RepoId& id, bool durable,
                SequenceNumber max_sn, CORBA::Long heartbeat_count, size_t capacity);
     ~RtpsWriter();
     SequenceNumber max_data_seq(const SingleSendBuffer::Proxy& proxy,
@@ -506,6 +512,7 @@ private:
 
     bool add_reader(const ReaderInfo_rch& reader);
     bool has_reader(const RepoId& id) const;
+    bool is_leading(const RepoId& id) const;
     bool remove_reader(const RepoId& id);
     size_t reader_count() const;
     CORBA::Long inc_heartbeat_count();

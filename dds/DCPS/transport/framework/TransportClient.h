@@ -135,6 +135,16 @@ public:
   bool associated_with(const GUID_t& remote) const;
   bool pending_association_with(const GUID_t& remote) const;
 
+  RepoId repo_id() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(lock_);
+    return repo_id_;
+  }
+
+  void data_acked(const GUID_t& remote);
+
+  bool is_leading(const GUID_t& reader_id) const;
+
 private:
 
   // Implemented by derived classes (DataReaderImpl/DataWriterImpl)
