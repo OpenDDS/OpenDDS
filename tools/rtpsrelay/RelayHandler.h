@@ -132,19 +132,6 @@ public:
 
   using CreatedAddrSetStats = std::pair<bool, AddrSetStats&>;
 
-  CreatedAddrSetStats find_or_create(const OpenDDS::DCPS::GUID_t& guid,
-    const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    auto it = guid_addr_set_map_.find(guid);
-    const bool create = it == guid_addr_set_map_.end();
-    if (create) {
-      const auto it_bool_pair =
-        guid_addr_set_map_.insert(std::make_pair(guid, AddrSetStats(now)));
-      it = it_bool_pair.first;
-    }
-    return CreatedAddrSetStats(create, it->second);
-  }
-
   class Proxy {
   public:
     Proxy(GuidAddrSet& gas)
@@ -168,6 +155,12 @@ public:
       return gas_.guid_addr_set_map_.end();
     }
 
+    CreatedAddrSetStats find_or_create(const OpenDDS::DCPS::GUID_t& guid,
+      const OpenDDS::DCPS::MonotonicTimePoint& now)
+    {
+      return gas_.find_or_create(guid, now);
+    }
+
     ParticipantStatisticsReporter&
     record_activity(const AddrPort& remote_address,
                     const OpenDDS::DCPS::MonotonicTimePoint& now,
@@ -181,7 +174,7 @@ public:
                                     const OpenDDS::DCPS::MonotonicTimePoint& now,
                                     Port port)
     {
-      return *gas_.find_or_create(guid, now).second.select_stats_reporter(port);
+      return *find_or_create(guid, now).second.select_stats_reporter(port);
     }
 
     bool ignore_rtps(const OpenDDS::DCPS::GUID_t& guid,
@@ -191,13 +184,25 @@ public:
       return gas_.ignore_rtps(guid, now, is_spdp);
     }
 
-
   private:
     GuidAddrSet& gas_;
     OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(Proxy)
   };
 
 private:
+  CreatedAddrSetStats find_or_create(const OpenDDS::DCPS::GUID_t& guid,
+    const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    auto it = guid_addr_set_map_.find(guid);
+    const bool create = it == guid_addr_set_map_.end();
+    if (create) {
+      const auto it_bool_pair =
+        guid_addr_set_map_.insert(std::make_pair(guid, AddrSetStats(now)));
+      it = it_bool_pair.first;
+    }
+    return CreatedAddrSetStats(create, it->second);
+  }
+
   ParticipantStatisticsReporter&
   record_activity(const AddrPort& remote_address,
                   const OpenDDS::DCPS::MonotonicTimePoint& now,
