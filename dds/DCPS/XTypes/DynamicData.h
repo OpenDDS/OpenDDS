@@ -19,11 +19,11 @@ namespace XTypes {
 
 class DynamicData {
 public:
-  // DynamicData can be constructed for any type kinds, except TK_ANNOTATION (since
-  // data for annotations won't be serialized independently in a sample) and TK_BITSET
-  // (the spec doesn't have enough information on how to handle bitsets).
-  DynamicData(DCPS::Serializer& strm, DynamicType_rch type);
-  DynamicData& operator=(const DynamicData& other);
+
+  DynamicData(ACE_Message_Block* chain,
+              const DCPS::Encoding& encoding,
+              const DynamicType_rch& type);
+
   ~DynamicData() {}
 
   DDS::ReturnCode_t get_descriptor(MemberDescriptor& value, MemberId id) const;
@@ -294,30 +294,28 @@ private:
   bool skip_collection_member(TypeKind tk);
 
   /// Skip a member which is a structure.
-  bool skip_struct_member(DynamicType_rch type);
+  bool skip_struct_member(const DynamicType_rch& type);
 
   /// Skip a member which is an union.
-  bool skip_union_member(DynamicType_rch type);
+  bool skip_union_member(const DynamicType_rch& type);
 
   // These methods can be moved to DynamicType-related classes.
-  DynamicType_rch get_base_type(DynamicType_rch alias_type) const;
+  DynamicType_rch get_base_type(const DynamicType_rch& alias_type) const;
   bool is_primitive(TypeKind tk, ACE_CDR::ULong& size) const;
 
   bool get_index_from_id(MemberId id, ACE_CDR::ULong& index, ACE_CDR::ULong bound) const;
   const char* typekind_to_string(TypeKind tk) const;
 
-  /// Reset the read pointer to point to the beginning of the stream.
-  void reset_rpos();
+  /// Reset the reading state of the stream to when it was first given to this DynamicData object.
+  void reset_stream();
 
-  DCPS::Serializer& strm_;
-  const size_t start_rpos_;
+  DCPS::Serializer strm_;
+
+  /// Original reading state of the data stream.
+  DCPS::Serializer::RdState orig_rdstate_;
 
   DynamicType_rch type_;
   TypeDescriptor descriptor_;
-
-  /// Cache the offset from the point in the stream where the data of this DynamicData object
-  /// starts to the point where a member with a given ID starts.
-  //  OPENDDS_MAP<MemberId, size_t> offset_lookup_table_;
 };
 
 } // namespace XTypes
