@@ -13,6 +13,9 @@ TEST(dds_DCPS_TimeDuration, str)
   EXPECT_EQ(one_sec.str(1), "1.0 s");
   EXPECT_EQ(one_sec.str(2), "1.00 s");
   EXPECT_EQ(one_sec.str(3), "1.000 s");
+  EXPECT_EQ(TimeDuration(-1).str(0), "-1 s");
+  EXPECT_EQ(TimeDuration(-1, -123000).str(3), "-1.123 s");
+  EXPECT_EQ(TimeDuration(0, -123000).str(3), "-0.123 s");
 
   // Seconds turn into hours and minutes; Fields are padded if they're not
   // first.
@@ -44,4 +47,8 @@ TEST(dds_DCPS_TimeDuration, str)
 
   // Hours are the highest unit
   EXPECT_EQ(TimeDuration(100 * 60 * 60).str(0), "100:00:00");
+
+  // just_sec and sec_str force just seconds
+  EXPECT_EQ(TimeDuration(100).str(0, true), "100 s");
+  EXPECT_EQ(TimeDuration(100).sec_str(0), "100 s");
 }

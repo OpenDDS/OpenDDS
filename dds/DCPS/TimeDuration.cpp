@@ -23,12 +23,12 @@ const TimeDuration TimeDuration::max_value(ACE_Numeric_Limits<time_t>::max(), AC
 #endif /* ACE_HAS_CPP11 */
 
 namespace {
-  inline unsigned long usec_to_rounded_frac(
-    suseconds_t value, unsigned decimal_places, unsigned long& carry)
+  inline time_t usec_to_rounded_frac(
+    suseconds_t value, unsigned decimal_places, time_t& carry)
   {
-    const float frac = static_cast<float>(value) / ACE_ONE_SECOND_IN_USECS;
-    const float denominator = std::pow(10.0f, decimal_places);
-    const unsigned long numerator = std::floor(frac * denominator + 0.5f);
+    const double frac = static_cast<double>(value) / ACE_ONE_SECOND_IN_USECS;
+    const double denominator = std::pow(10.0l, decimal_places);
+    const double numerator = std::floor(frac * denominator + 0.5l);
     if (numerator == denominator) {
       carry = 1;
       return 0;
@@ -37,38 +37,55 @@ namespace {
     return numerator;
   }
 
-  String to_zero_pad_str(unsigned long value, unsigned len = 2)
+  inline String to_zero_pad_str(time_t value, unsigned len = 2)
   {
-    String str(len, '\0');
-    std::snprintf(&str[0], str.size() + 1, "%0*lu", len, value);
-    return str;
+    const String nopad = to_dds_string(value);
+    if (len > nopad.size()) {
+      return String(len - nopad.size(), '0') + nopad;
+    }
+    return nopad;
   }
 }
 
-String TimeDuration::str(unsigned decimal_places) const
+String TimeDuration::str(unsigned decimal_places, bool just_sec) const
 {
   String rv;
-  unsigned long carry;
-  const unsigned long numerator = usec_to_rounded_frac(value().usec(), decimal_places, carry);
-  const unsigned long seconds_total = value().sec() + carry;
-  const unsigned long minutes_total = seconds_total / 60;
-  const unsigned long seconds = seconds_total % 60;
-  if (minutes_total > 0) {
-    const unsigned long hours = minutes_total / 60;
-    const unsigned long minutes = minutes_total % 60;
+  time_t sec = value().sec();
+  suseconds_t usec = value().usec();
+  bool negative = false;
+  if (sec < 0) {
+    negative = true;
+    sec = -sec;
+  }
+  if (usec < 0) {
+    negative = true;
+    usec = -usec;
+  }
+  if (negative) {
+    rv += "-";
+  }
+  time_t carry;
+  const time_t numerator = usec_to_rounded_frac(usec, decimal_places, carry);
+  const time_t seconds_total = sec + carry;
+  const time_t minutes_total = seconds_total / 60;
+  just_sec = just_sec || minutes_total == 0;
+  if (just_sec) {
+    rv += to_dds_string(seconds_total);
+  } else {
+    const time_t seconds = seconds_total % 60;
+    const time_t minutes = minutes_total % 60;
+    const time_t hours = minutes_total / 60;
     if (hours > 0) {
       rv += to_dds_string(hours) + ":" + to_zero_pad_str(minutes);
     } else {
       rv += to_dds_string(minutes);
     }
     rv += ":" + to_zero_pad_str(seconds);
-  } else {
-    rv += to_dds_string(seconds);
   }
   if (decimal_places > 0) {
     rv += "." + to_zero_pad_str(numerator, decimal_places);
   }
-  if (minutes_total == 0) {
+  if (just_sec) {
     rv += " s";
   }
   return rv;

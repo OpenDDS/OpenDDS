@@ -76,13 +76,18 @@ public:
   /**
    * Convert to a string in a humanized format:
    *    SECONDS.FRACTIONAL s
-   * if the time is less than a minute, else:
+   * if the time is less than a minute or just_sec is true, else:
    *    [[HOURS:]MINUTES:]SECONDS.FRACTIONAL
    *
    * decimal_places is the number of decimal places to round to in the
    * fractional seconds.
    */
-  String str(unsigned decimal_places = 3) const;
+  String str(unsigned decimal_places = 3, bool just_sec = false) const;
+
+  String sec_str(unsigned decimal_places = 3) const
+  {
+    return str(decimal_places, true);
+  }
 
   TimeDuration& operator+=(const TimeDuration& other);
   TimeDuration& operator-=(const TimeDuration& other);

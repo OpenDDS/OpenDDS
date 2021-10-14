@@ -776,7 +776,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #endif
     }
 
-    pdata.leaseDuration.seconds = effective_lease.value().sec();
+    pdata.leaseDuration.seconds = static_cast<ACE_CDR::Long>(effective_lease.value().sec());
 
     if (tport_->directed_sender_) {
       if (tport_->directed_guids_.empty()) {
