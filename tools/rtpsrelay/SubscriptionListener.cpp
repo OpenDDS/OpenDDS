@@ -8,10 +8,12 @@
 namespace RtpsRelay {
 
 SubscriptionListener::SubscriptionListener(const Config& config,
+                                           GuidAddrSet& guid_addr_set,
                                            OpenDDS::DCPS::DomainParticipantImpl* participant,
                                            GuidPartitionTable& guid_partition_table,
                                            RelayStatisticsReporter& stats_reporter)
   : config_(config)
+  , guid_addr_set_(guid_addr_set)
   , participant_(participant)
   , guid_partition_table_(guid_partition_table)
   , stats_reporter_(stats_reporter)
@@ -20,6 +22,8 @@ SubscriptionListener::SubscriptionListener(const Config& config,
 
 void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
 {
+  const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
+
   DDS::SubscriptionBuiltinTopicDataDataReader_var dr = DDS::SubscriptionBuiltinTopicDataDataReader::_narrow(reader);
   if (!dr) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SubscriptionListener::on_data_available failed to narrow SubscriptionBuiltinTopicDataDataReader\n")));
@@ -43,6 +47,8 @@ void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
     const auto& data = datas[idx];
     const auto& info = infos[idx];
 
+    using OpenDDS::DCPS::make_part_guid;
+
     switch (infos[idx].instance_state) {
     case DDS::ALIVE_INSTANCE_STATE:
       if (info.valid_data) {
@@ -51,6 +57,10 @@ void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
 
         if (r == GuidPartitionTable::ADDED) {
           if (config_.log_discovery()) {
+            ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SubscriptionListener::on_data_available "
+              "add local reader %C %C into session\n",
+              guid_to_string(repoid).c_str(),
+              guid_addr_set_.get_session_time(make_part_guid(repoid), now).sec_str().c_str()));
             ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SubscriptionListener::on_data_available add local reader %C %C\n"), guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str()));
           }
 
@@ -68,7 +78,10 @@ void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
         const auto repoid = participant_->get_repoid(info.instance_handle);
 
         if (config_.log_discovery()) {
-          ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SubscriptionListener::on_data_available remove local reader %C\n"), guid_to_string(repoid).c_str()));
+          ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SubscriptionListener::on_data_available "
+            "remove local reader %C %C into session\n",
+            guid_to_string(repoid).c_str(),
+            guid_addr_set_.get_session_time(make_part_guid(repoid), now).sec_str().c_str()));
         }
 
         guid_partition_table_.remove(repoid);

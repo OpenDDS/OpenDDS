@@ -679,7 +679,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DDS::DataReader_var subscription_reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
   SubscriptionListener* subscription_listener =
-    new SubscriptionListener(config, application_participant_impl, guid_partition_table, relay_statistics_reporter);
+    new SubscriptionListener(config, guid_addr_set, application_participant_impl, guid_partition_table, relay_statistics_reporter);
   DDS::DataReaderListener_var subscription_listener_var(subscription_listener);
   ret = subscription_reader->set_listener(subscription_listener_var, DDS::DATA_AVAILABLE_STATUS);
   if (ret != DDS::RETCODE_OK) {
@@ -689,7 +689,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DDS::DataReader_var publication_reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC);
   PublicationListener* publication_listener =
-    new PublicationListener(config, application_participant_impl, guid_partition_table, relay_statistics_reporter);
+    new PublicationListener(config, guid_addr_set, application_participant_impl, guid_partition_table, relay_statistics_reporter);
   DDS::DataReaderListener_var publication_listener_var(publication_listener);
   ret = publication_reader->set_listener(publication_listener_var, DDS::DATA_AVAILABLE_STATUS);
   if (ret != DDS::RETCODE_OK) {

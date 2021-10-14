@@ -260,10 +260,24 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
   const bool created = cass.first;
   AddrSetStats& addr_set_stats = cass.second;
 
+  if (created && config_.log_discovery()) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity ")
+      ACE_TEXT("%C was added 0.000 s into session\n"),
+      guid_to_string(src_guid).c_str()));
+  }
+
   {
     const auto res = addr_set_stats.select_addr_set(remote_address.port)->insert(
       std::make_pair(remote_address, expiration));
     if (res.second) {
+      if (config_.log_discovery()) {
+        const auto session_time = now - addr_set_stats.session_start;
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity ")
+          ACE_TEXT("%C added address %C %C into session\n"),
+          guid_to_string(src_guid).c_str(),
+          OpenDDS::DCPS::LogAddr(remote_address.addr).c_str(),
+          session_time.sec_str().c_str()));
+      }
       if (config_.log_activity()) {
         ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity %C %C is at %C total=%B pending=%B/%B\n"), handler.name().c_str(), guid_to_string(src_guid).c_str(), OpenDDS::DCPS::LogAddr(remote_address.addr).c_str(), guid_addr_set_map_.size(), pending_.size(), config_.max_pending()));
       }
@@ -318,6 +332,12 @@ void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& n
     }
 
     // Address actually expired.
+    if (config_.log_discovery()) {
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations ")
+        ACE_TEXT("%C expired effective %C into session\n"),
+        guid_to_string(ga.guid).c_str(),
+        proxy.get_session_time(ga.guid, now).sec_str().c_str()));
+    }
     if (config_.log_activity()) {
       const auto ago = now - expiration;
       ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::process_expirations "
@@ -335,6 +355,12 @@ void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& n
       guid_addr_set_map_.erase(ga.guid);
       pending_.erase(ga.guid);
       relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
+      if (config_.log_discovery()) {
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations ")
+          ACE_TEXT("%C is pending expiration %C into session\n"),
+          guid_to_string(ga.guid).c_str(),
+          proxy.get_session_time(ga.guid, now).sec_str().c_str()));
+      }
       if (config_.log_activity()) {
         ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C removed total=%B pending=%B/%B\n"), guid_to_string(ga.guid).c_str(), guid_addr_set_map_.size(), pending_.size(), config_.max_pending()));
       }
@@ -344,6 +370,12 @@ void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& n
   while (!pending_expiration_queue_.empty() && pending_expiration_queue_.front().first <= now) {
     const auto& expiration = pending_expiration_queue_.front().first;
     const auto& guid = pending_expiration_queue_.front().second;
+    if (config_.log_discovery()) {
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations ")
+        ACE_TEXT("%C is pending expiration %C into session\n"),
+        guid_to_string(guid).c_str(),
+        proxy.get_session_time(guid, now).sec_str().c_str()));
+    }
     if (config_.log_activity()) {
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C pending expired at %d.%d now=%d.%d total=%B pending=%B/%B\n"), guid_to_string(guid).c_str(), expiration.value().sec(), expiration.value().usec(), now.value().sec(), now.value().usec(), guid_addr_set_map_.size(), pending_.size(), config_.max_pending()));
     }
@@ -390,6 +422,14 @@ bool GuidAddrSet::ignore_rtps(const OpenDDS::DCPS::GUID_t& guid,
   pending_.insert(guid);
   pending_expiration_queue_.push_back(std::make_pair(now + config_.pending_timeout(), guid));
   pos->second.allow_rtps = true;
+
+  if (config_.log_discovery()) {
+    const auto session_time = now - pos->second.session_start;
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity ")
+      ACE_TEXT("%C was admitted %C into session\n"),
+      guid_to_string(guid).c_str(),
+      session_time.sec_str().c_str()));
+  }
 
   return false;
 }
@@ -1083,6 +1123,13 @@ bool SpdpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
     if (pos != proxy.end()) {
       if (!pos->second.spdp_message) {
         pos->second.first_spdp = now;
+        if (config_.log_discovery()) {
+          const auto session_time = now - pos->second.session_start;
+          ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SpdpHandler::do_normal_processing ")
+            ACE_TEXT("%C got first SPDP %C into session\n"),
+            guid_to_string(src_guid).c_str(),
+            session_time.sec_str().c_str()));
+        }
 #ifdef OPENDDS_SECURITY
         pos->second.common_name = extract_common_name(msg);
         if (config_.log_activity() && !pos->second.common_name.empty()) {

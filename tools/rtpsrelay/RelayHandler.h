@@ -130,6 +130,13 @@ public:
     pending_.erase(guid);
   }
 
+  OpenDDS::DCPS::TimeDuration get_session_time(
+    const OpenDDS::DCPS::GUID_t& guid, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    GuidAddrSet::Proxy proxy(*this);
+    return proxy.get_session_time(guid, now);
+  }
+
   using CreatedAddrSetStats = std::pair<bool, AddrSetStats&>;
 
   class Proxy {
@@ -182,6 +189,14 @@ public:
                      bool is_spdp)
     {
       return gas_.ignore_rtps(guid, now, is_spdp);
+    }
+
+    OpenDDS::DCPS::TimeDuration get_session_time(
+      const OpenDDS::DCPS::GUID_t& guid, const OpenDDS::DCPS::MonotonicTimePoint& now)
+    {
+      const auto it = find(guid);
+      return it == end() ? OpenDDS::DCPS::TimeDuration::zero_value :
+        (now - it->second.session_start);
     }
 
   private:
