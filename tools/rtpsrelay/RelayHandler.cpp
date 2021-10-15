@@ -362,7 +362,7 @@ bool GuidAddrSet::ignore_rtps(bool from_application_participant,
   }
 
   if (pos->second.spdp_addr_set.empty() || pos->second.sedp_addr_set.empty() || !pos->second.spdp_message) {
-    // Don't have the necessary addresses or message complete discovery.
+    // Don't have the necessary addresses or message to complete discovery.
     return true;
   }
 
@@ -1179,14 +1179,12 @@ bool SedpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
                                        const ACE_INET_Addr& remote,
                                        const OpenDDS::DCPS::GUID_t& src_guid,
                                        const GuidSet& to,
-                                       bool admitted,
+                                       bool /*admitted*/,
                                        bool& send_to_application_participant,
                                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
                                        const OpenDDS::DCPS::MonotonicTimePoint& now,
                                        CORBA::ULong& sent)
 {
-  ACE_UNUSED_ARG(admitted);
-
   if (src_guid == config_.application_participant_guid()) {
     if (remote != application_participant_addr_) {
       // Something is impersonating our application participant.
