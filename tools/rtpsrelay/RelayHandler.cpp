@@ -1096,14 +1096,13 @@ int SpdpHandler::handle_exception(ACE_HANDLE /*fd*/)
 
   const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
-  // Fan in refers to the idea that the SPDP messages for participants
+  // Fan-in refers to the idea that the SPDP messages for participants
   // in a common partition need to go to the guid in the replay
-  // message.  Fan out refers to the idea that the SPDP message of the
+  // message.  Fan-out refers to the idea that the SPDP message of the
   // guid in the replay message needs to go out to the other
   // participants in a common partition.
 
   for (const auto& r : q) {
-    bool do_fan_out = false;
     const ACE_INET_Addr fan_in_replay_address(r.address().c_str());
     const auto fan_in_to_guid = relay_guid_to_rtps_guid(r.guid());
     GuidSet fan_in_to_guid_set;
@@ -1112,6 +1111,7 @@ int SpdpHandler::handle_exception(ACE_HANDLE /*fd*/)
     GuidSet fan_in_from_guids;
     guid_partition_table_.lookup(fan_in_from_guids, r.partitions());
 
+    bool do_fan_out = false;
     for (const auto& fan_in_from_guid : fan_in_from_guids) {
       if (fan_in_from_guid == fan_in_to_guid) {
         do_fan_out = true;
