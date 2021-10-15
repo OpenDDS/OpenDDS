@@ -8,11 +8,27 @@
 
 namespace RtpsRelay {
 
+struct GuidTransformer {
+  OpenDDS::DCPS::GUID_t operator()(const OpenDDS::DCPS::GUID_t& x) const
+  {
+    return OpenDDS::DCPS::make_part_guid(x);
+  }
+};
+
+struct StringTransformer {
+  std::string operator()(const std::string& x) const
+  {
+    return x;
+  }
+};
+
+
+template<typename T, typename Transformer>
 class TrieNode {
 public:
   typedef std::shared_ptr<TrieNode> NodePtr;
 
-  static void insert(NodePtr node, const Name& name, const OpenDDS::DCPS::GUID_t& guid)
+  static void insert(NodePtr node, const Name& name, const typename T::value_type& guid)
   {
     for (const auto& atom : name) {
       const auto iter = node->children_.find(atom);
@@ -28,7 +44,7 @@ public:
     node->guids_.insert(guid);
   }
 
-  static void remove(NodePtr node, const Name& name, const OpenDDS::DCPS::GUID_t& guid)
+  static void remove(NodePtr node, const Name& name, const typename T::value_type& guid)
   {
     remove(node, name.begin(), name.end(), guid);
   }
@@ -38,7 +54,7 @@ public:
     return guids_.empty() && children_.empty();
   }
 
-  static void lookup(NodePtr node, const Name& name, GuidSet& guids)
+  static void lookup(NodePtr node, const Name& name, T& guids)
   {
     if (name.is_literal()) {
       lookup_literal(node, name.begin(), name.end(), false, guids);
@@ -50,27 +66,19 @@ public:
 private:
   typedef std::unordered_map<Atom, NodePtr, AtomHash> ChildrenType;
   ChildrenType children_;
-  GuidSet guids_;
-
-  struct Transformer {
-    OpenDDS::DCPS::GUID_t operator()(const OpenDDS::DCPS::GUID_t& x) const
-    {
-      return OpenDDS::DCPS::make_part_guid(x);
-    }
-  };
+  T guids_;
 
   static void insert_guids(NodePtr node,
-                           GuidSet& guids)
+                           T& guids)
   {
     std::transform(node->guids_.begin(), node->guids_.end(), std::inserter(guids, guids.begin()), Transformer());
   }
-
 
   static void lookup_literal(NodePtr node,
                              Name::const_iterator begin,
                              Name::const_iterator end,
                              bool glob_only,
-                             GuidSet& guids)
+                             T& guids)
   {
     if (begin == end) {
       insert_guids(node, guids);
@@ -113,7 +121,7 @@ private:
   }
 
   static void lookup_globs(NodePtr node,
-                           GuidSet& guids)
+                           T& guids)
   {
     for (const auto& pos : node->children_) {
       if (pos.first.kind() == Atom::GLOB) {
@@ -126,7 +134,7 @@ private:
   static void lookup_pattern(NodePtr node,
                              Name::const_iterator begin,
                              Name::const_iterator end,
-                             GuidSet& guids)
+                             T& guids)
   {
     if (begin == end) {
       insert_guids(node, guids);
@@ -181,7 +189,7 @@ private:
   static void remove(NodePtr node,
                      Name::const_iterator begin,
                      Name::const_iterator end,
-                     const OpenDDS::DCPS::GUID_t& guid)
+                     const typename T::value_type& guid)
   {
     if (begin == end) {
       node->guids_.erase(guid);
@@ -199,25 +207,28 @@ private:
   }
 };
 
+template <typename T, typename Transformer>
 class PartitionIndex {
 public:
+  typedef TrieNode<T, Transformer> TrieNode;
+
   PartitionIndex()
     : root_(new TrieNode())
   {}
 
-  void insert(const std::string& name, const OpenDDS::DCPS::GUID_t& guid)
+  void insert(const std::string& name, const typename T::value_type& guid)
   {
     TrieNode::insert(root_, Name(name), guid);
     cache_.clear();
   }
 
-  void remove(const std::string& name, const OpenDDS::DCPS::GUID_t& guid)
+  void remove(const std::string& name, const typename T::value_type& guid)
   {
     TrieNode::remove(root_, Name(name), guid);
     cache_.clear();
   }
 
-  void lookup(const std::string& name, GuidSet& guids) const
+  void lookup(const std::string& name, T& guids) const
   {
     const auto pos = cache_.find(name);
     if (pos != cache_.end()) {
@@ -229,8 +240,8 @@ public:
   }
 
 private:
-  TrieNode::NodePtr root_;
-  typedef std::unordered_map<std::string, GuidSet> Cache;
+  typename TrieNode::NodePtr root_;
+  typedef std::unordered_map<std::string, T> Cache;
   mutable Cache cache_;
 };
 

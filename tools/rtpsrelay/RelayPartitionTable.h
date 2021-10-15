@@ -11,12 +11,12 @@
 namespace RtpsRelay {
 
 typedef std::set<ACE_INET_Addr> AddressSet;
-typedef std::pair<OpenDDS::DCPS::GUID_t, size_t> SlotKey;
+typedef std::pair<std::string, size_t> SlotKey;
 
 struct SlotKeyHash {
   std::size_t operator() (const SlotKey& slot_key) const
   {
-    return GuidHash()(slot_key.first) ^ slot_key.second;
+    return std::hash<std::string>()(slot_key.first) ^ std::hash<std::size_t>()(slot_key.second);
   }
 };
 
@@ -26,21 +26,21 @@ public:
     : complete_(relay_to_address_)
   {}
 
-  void insert(const OpenDDS::DCPS::GUID_t& application_participant_guid,
+  void insert(const std::string& relay_id,
               const std::string& name,
               const ACE_INET_Addr& address)
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
-    relay_to_address_[application_participant_guid][name] = address;
+    relay_to_address_[relay_id][name] = address;
   }
 
-  void remove(const OpenDDS::DCPS::GUID_t& application_participant_guid,
+  void remove(const std::string& relay_id,
               const std::string& name)
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
-    const auto pos1 = relay_to_address_.find(application_participant_guid);
+    const auto pos1 = relay_to_address_.find(relay_id);
     if (pos1 != relay_to_address_.end()) {
       pos1->second.erase(name);
       if (pos1->second.empty()) {
@@ -66,7 +66,7 @@ public:
 
 private:
   typedef std::unordered_map<std::string, ACE_INET_Addr> NameToAddress;
-  typedef std::unordered_map<OpenDDS::DCPS::GUID_t, NameToAddress, GuidHash> RelayToAddress;
+  typedef std::unordered_map<std::string, NameToAddress> RelayToAddress;
   RelayToAddress relay_to_address_;
 
   struct Map {
@@ -111,10 +111,10 @@ private:
     void lookup(AddressSet& address_set, const StringSet& partitions, const std::string& name) const
     {
       for (const auto& partition : partitions) {
-        GuidSet guids;
-        partition_index_.lookup(partition, guids);
-        for (const auto& guid : guids) {
-          const auto pos2 = relay_to_address_.find(guid);
+        StringSet relay_ids;
+        partition_index_.lookup(partition, relay_ids);
+        for (const auto& relay_id : relay_ids) {
+          const auto pos2 = relay_to_address_.find(relay_id);
           if (pos2 != relay_to_address_.end()) {
             const auto pos3 = pos2->second.find(name);
             if (pos3 != pos2->second.end()) {
@@ -127,7 +127,7 @@ private:
 
     RelayToAddress& relay_to_address_;
 
-    PartitionIndex partition_index_;
+    PartitionIndex<StringSet, StringTransformer> partition_index_;
 
     typedef std::unordered_map<SlotKey, StringSet, SlotKeyHash> RelayToPartitions;
     RelayToPartitions relay_to_partitions_;

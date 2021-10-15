@@ -27,6 +27,16 @@ public:
     , log_activity_(false)
   {}
 
+  void relay_id(const std::string& value)
+  {
+    relay_id_ = value;
+  }
+
+  const std::string& relay_id() const
+  {
+    return relay_id_;
+  }
+
   void application_participant_guid(const OpenDDS::DCPS::GUID_t& value)
   {
     application_participant_guid_ = value;
@@ -197,7 +207,28 @@ public:
     return publish_participant_statistics_;
   }
 
+  void publish_relay_status(OpenDDS::DCPS::TimeDuration value)
+  {
+    publish_relay_status_ = value;
+  }
+
+  OpenDDS::DCPS::TimeDuration publish_relay_status() const
+  {
+    return publish_relay_status_;
+  }
+
+  void publish_relay_status_liveliness(OpenDDS::DCPS::TimeDuration value)
+  {
+    publish_relay_status_liveliness_ = value;
+  }
+
+  OpenDDS::DCPS::TimeDuration publish_relay_status_liveliness() const
+  {
+    return publish_relay_status_liveliness_;
+  }
+
 private:
+  std::string relay_id_;
   OpenDDS::DCPS::GUID_t application_participant_guid_;
   OpenDDS::DCPS::TimeDuration lifespan_;
   size_t max_pending_;
@@ -215,6 +246,8 @@ private:
   OpenDDS::DCPS::TimeDuration publish_relay_statistics_;
   OpenDDS::DCPS::TimeDuration publish_handler_statistics_;
   bool publish_participant_statistics_;
+  OpenDDS::DCPS::TimeDuration publish_relay_status_;
+  OpenDDS::DCPS::TimeDuration publish_relay_status_liveliness_;
 };
 
 }
