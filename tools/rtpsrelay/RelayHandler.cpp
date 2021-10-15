@@ -1070,11 +1070,11 @@ bool SpdpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
   return true;
 }
 
-void SpdpHandler::replay(const StringSequence& partitions)
+void SpdpHandler::replay(const SpdpReplay& spdp_replay)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, replay_queue_mutex_);
   bool notify = replay_queue_.empty();
-  replay_queue_.insert(partitions.begin(), partitions.end());
+  replay_queue_.push_back(spdp_replay);
   if (notify) {
     reactor()->notify(this);
   }
@@ -1082,7 +1082,7 @@ void SpdpHandler::replay(const StringSequence& partitions)
 
 int SpdpHandler::handle_exception(ACE_HANDLE /*fd*/)
 {
-  StringSet q;
+  ReplayQueue q;
 
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, replay_queue_mutex_, 0);
@@ -1091,15 +1091,45 @@ int SpdpHandler::handle_exception(ACE_HANDLE /*fd*/)
 
   const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
-  GuidSet guids;
-  guid_partition_table_.lookup(guids, q);
+  // Fan-in refers to the idea that the SPDP messages for participants
+  // in a common partition need to go to the guid in the replay
+  // message.  Fan-out refers to the idea that the SPDP message of the
+  // guid in the replay message needs to go out to the other
+  // participants in a common partition.
 
-  GuidAddrSet::Proxy proxy(guid_addr_set_);
+  for (const auto& r : q) {
+    const ACE_INET_Addr fan_in_replay_address(r.address().c_str());
+    const auto fan_in_to_guid = relay_guid_to_rtps_guid(r.guid());
+    GuidSet fan_in_to_guid_set;
+    fan_in_to_guid_set.insert(fan_in_to_guid);
 
-  for (const auto& guid : guids) {
-    const auto pos = proxy.find(guid);
-    if (pos != proxy.end() && pos->second.spdp_message) {
-      send(proxy, guid, q, GuidSet(), false, pos->second.spdp_message, now);
+    GuidSet fan_in_from_guids;
+    guid_partition_table_.lookup(fan_in_from_guids, r.partitions());
+
+    bool do_fan_out = false;
+    for (const auto& fan_in_from_guid : fan_in_from_guids) {
+      if (fan_in_from_guid == fan_in_to_guid) {
+        do_fan_out = true;
+        continue;
+      }
+
+      GuidAddrSet::Proxy proxy(guid_addr_set_);
+      const auto pos = proxy.find(fan_in_from_guid);
+      if (pos != proxy.end() && pos->second.spdp_message) {
+        // Send the SPDP message horizontally.  We may be sending to ourselves which is okay.
+        horizontal_handler_->enqueue_message(fan_in_replay_address, StringSet(), fan_in_to_guid_set, pos->second.spdp_message, now);
+      }
+    }
+
+    if (do_fan_out) {
+      GuidAddrSet::Proxy proxy(guid_addr_set_);
+      const auto pos = proxy.find(fan_in_to_guid);
+      if (pos != proxy.end() && pos->second.spdp_message) {
+        // The partitions in the replay message may be a subset of the actual partitions.
+        StringSet to_partitions;
+        guid_partition_table_.lookup(to_partitions, fan_in_to_guid);
+        send(proxy, fan_in_to_guid, to_partitions, GuidSet(), false, pos->second.spdp_message, now);
+      }
     }
   }
 

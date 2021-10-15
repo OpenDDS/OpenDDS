@@ -331,6 +331,8 @@ protected:
   HorizontalHandler* horizontal_handler_;
   const ACE_INET_Addr application_participant_addr_;
   bool is_spdp_;
+  const ACE_INET_Addr horizontal_address_;
+  const std::string horizontal_address_str_;
 
 private:
   bool parse_message(OpenDDS::RTPS::MessageParser& message_parser,
@@ -339,9 +341,6 @@ private:
                      GuidSet& to,
                      bool check_submessages,
                      const OpenDDS::DCPS::MonotonicTimePoint& now);
-
-  const ACE_INET_Addr horizontal_address_;
-  const std::string horizontal_address_str_;
 
   OpenDDS::RTPS::RtpsDiscovery_rch rtps_discovery_;
 #ifdef OPENDDS_SECURITY
@@ -390,10 +389,11 @@ public:
               const ACE_INET_Addr& application_participant_addr,
               HandlerStatisticsReporter& stats_reporter);
 
-  void replay(const StringSequence& partitions);
+  void replay(const SpdpReplay& spdp_replay);
 
 private:
-  StringSet replay_queue_;
+  typedef std::vector<SpdpReplay> ReplayQueue;
+  ReplayQueue replay_queue_;
   ACE_Thread_Mutex replay_queue_mutex_;
 
   bool do_normal_processing(GuidAddrSet::Proxy& proxy,
