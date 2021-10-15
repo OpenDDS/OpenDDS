@@ -51,12 +51,12 @@ if ($test->flag('join')) {
     $test->start_process("subscriber");
     sleep 3;
     $test->start_process("relay1");
-    sleep 3;
+    sleep 10;
     $test->start_process("publisher");
 } else {
     $test->start_process("relay1");
     $test->start_process("relay2");
-    sleep 3;
+    sleep 10;
     $test->start_process("publisher");
     sleep 1;
     $test->start_process("subscriber");
