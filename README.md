@@ -119,7 +119,8 @@ There are three distributions of ACE/TAO that can be used with OpenDDS:
     * https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-7_0_4
 
 The TAO Developer's Guide book can be requested for free from
-https://objectcomputing.com/products/tao/tao-developers-guide
+https://objectcomputing.com/products/tao/tao-developers-guide and the CORBA Programmers
+Guide can be downloaded for free from https://www.remedy.nl/opensource/corbapg.html.
 
 ### Perl
 
