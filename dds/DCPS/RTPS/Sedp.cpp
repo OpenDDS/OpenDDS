@@ -7029,27 +7029,6 @@ void Sedp::match(const GUID_t& writer, const GUID_t& reader)
         return;
       }
     }
-  } else if (writer_local &&
-             !reader_local &&
-             use_xtypes_ &&
-             reader_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE) {
-    //We are a replayer trying to associate with a remote xtypes reader
-    bool need_minimal_tobjs, need_complete_tobjs;
-    need_minimal_and_or_complete_types(reader_type_info, need_minimal_tobjs, need_complete_tobjs);
-    if (need_minimal_tobjs || need_complete_tobjs) {
-      if (DCPS_debug_level >= 4) {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::match: Replayer\n"));
-      }
-      bool is_discovery_protected = false;
-#ifdef OPENDDS_SECURITY
-      is_discovery_protected = lpi->second.security_attribs_.base.is_discovery_protected;
-#endif
-      save_matching_data_and_get_typeobjects(reader_type_info, md,
-                                             MatchingPair(writer, reader),
-                                             reader, is_discovery_protected,
-                                             need_minimal_tobjs, need_complete_tobjs);
-      return;
-    }
   } else if (reader_local &&
              !writer_local &&
              use_xtypes_ &&
@@ -7059,7 +7038,7 @@ void Sedp::match(const GUID_t& writer, const GUID_t& reader)
     need_minimal_and_or_complete_types(writer_type_info, need_minimal_tobjs, need_complete_tobjs);
     if (need_minimal_tobjs || need_complete_tobjs) {
       if (DCPS_debug_level >= 4) {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::match: Recorder\n"));
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::match: Local Recorder matching Remote Writer\n"));
       }
       bool is_discovery_protected = false;
 #ifdef OPENDDS_SECURITY
@@ -7342,8 +7321,8 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
         } else {
           reader_type_name = dsi->second.get_type_name();
         }
-        if (writer_type_name == "" || reader_type_name == "") {
-          // force consistency with replayer or recorder
+        if (reader_type_name == "") {
+          // force consistency with recorder
           consistent = true;
         } else {
           consistent = writer_type_name == reader_type_name;

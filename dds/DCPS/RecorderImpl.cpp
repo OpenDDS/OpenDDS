@@ -437,6 +437,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
     ACE_ERROR((LM_ERROR,
                "(%P|%t) RecorderImpl::add_association:"
                " Failed to deserialize TypeInformation\n"));
+    return;
   }
   XTypes::TypeObject cto = tls->get_type_object(type_info.complete.typeid_with_size.type_id);
   dt_ = tls->complete_to_dynamic(cto.complete, writer.writerId);
