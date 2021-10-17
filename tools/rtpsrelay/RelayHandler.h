@@ -162,11 +162,12 @@ public:
       return *gas_.guid_addr_set_map_[guid].select_stats_reporter(port);
     }
 
-    bool ignore_rtps(const OpenDDS::DCPS::GUID_t& guid,
+    bool ignore_rtps(bool from_application_participant,
+                     const OpenDDS::DCPS::GUID_t& guid,
                      const OpenDDS::DCPS::MonotonicTimePoint& now,
-                     bool is_spdp)
+                     bool& admitted)
     {
-      return gas_.ignore_rtps(guid, now, is_spdp);
+      return gas_.ignore_rtps(from_application_participant, guid, now, admitted);
     }
 
 
@@ -183,9 +184,10 @@ private:
                   const size_t& msg_len,
                   RelayHandler& handler);
 
-  bool ignore_rtps(const OpenDDS::DCPS::GUID_t& guid,
+  bool ignore_rtps(bool from_application_participant,
+                   const OpenDDS::DCPS::GUID_t& guid,
                    const OpenDDS::DCPS::MonotonicTimePoint& now,
-                   bool is_spdp);
+                   bool& admitted);
 
   const Config& config_;
   RelayStatisticsReporter& relay_stats_reporter_;
@@ -261,6 +263,7 @@ protected:
 };
 
 class HorizontalHandler;
+class SpdpHandler;
 
 // Sends to and receives from peers.
 class VerticalHandler : public RelayHandler {
@@ -281,6 +284,8 @@ public:
 
   void horizontal_handler(HorizontalHandler* horizontal_handler) { horizontal_handler_ = horizontal_handler; }
 
+  void spdp_handler(SpdpHandler* spdp_handler) { spdp_handler_ = spdp_handler; }
+
   GuidAddrSet& guid_addr_set()
   {
     return guid_addr_set_;
@@ -293,10 +298,17 @@ public:
                         MessageType type);
 
 protected:
+  virtual void cache_message(GuidAddrSet::Proxy& /*proxy*/,
+                             const OpenDDS::DCPS::GUID_t& /*src_guid*/,
+                             const GuidSet& /*to*/,
+                             const OpenDDS::DCPS::Message_Block_Shared_Ptr& /*msg*/,
+                             const OpenDDS::DCPS::MonotonicTimePoint& /*now*/) {}
+
   virtual bool do_normal_processing(GuidAddrSet::Proxy& /*proxy*/,
                                     const ACE_INET_Addr& /*remote*/,
                                     const OpenDDS::DCPS::GUID_t& /*src_guid*/,
                                     const GuidSet& /*to*/,
+                                    bool /*admitted*/,
                                     bool& /*send_to_application_participant*/,
                                     const OpenDDS::DCPS::Message_Block_Shared_Ptr& /*msg*/,
                                     const OpenDDS::DCPS::MonotonicTimePoint& /*now*/,
@@ -329,8 +341,8 @@ protected:
   const RelayPartitionTable& relay_partition_table_;
   GuidAddrSet& guid_addr_set_;
   HorizontalHandler* horizontal_handler_;
+  SpdpHandler* spdp_handler_;
   const ACE_INET_Addr application_participant_addr_;
-  bool is_spdp_;
   const ACE_INET_Addr horizontal_address_;
   const std::string horizontal_address_str_;
 
@@ -391,15 +403,26 @@ public:
 
   void replay(const SpdpReplay& spdp_replay);
 
+  CORBA::ULong send_to_application_participant(GuidAddrSet::Proxy& proxy,
+                                               const OpenDDS::DCPS::GUID_t& guid,
+                                               const OpenDDS::DCPS::MonotonicTimePoint& now);
+
 private:
   typedef std::vector<SpdpReplay> ReplayQueue;
   ReplayQueue replay_queue_;
   ACE_Thread_Mutex replay_queue_mutex_;
 
+  void cache_message(GuidAddrSet::Proxy& proxy,
+                     const OpenDDS::DCPS::GUID_t& src_guid,
+                     const GuidSet& to,
+                     const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
+                     const OpenDDS::DCPS::MonotonicTimePoint& now) override;
+
   bool do_normal_processing(GuidAddrSet::Proxy& proxy,
                             const ACE_INET_Addr& remote,
                             const OpenDDS::DCPS::GUID_t& src_guid,
                             const GuidSet& to,
+                            bool admitted,
                             bool& send_to_application_participant,
                             const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
                             const OpenDDS::DCPS::MonotonicTimePoint& now,
@@ -427,6 +450,7 @@ private:
                             const ACE_INET_Addr& remote,
                             const OpenDDS::DCPS::GUID_t& src_guid,
                             const GuidSet& to,
+                            bool admitted,
                             bool& send_to_application_participant,
                             const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
                             const OpenDDS::DCPS::MonotonicTimePoint& now,
