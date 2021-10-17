@@ -622,6 +622,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   guid_addr_set.sedp_vertical_handler(&sedp_vertical_handler);
   guid_addr_set.data_vertical_handler(&data_vertical_handler);
 
+  spdp_vertical_handler.spdp_handler(&spdp_vertical_handler);
+  sedp_vertical_handler.spdp_handler(&spdp_vertical_handler);
+
   DDS::Subscriber_var bit_subscriber = application_participant->get_builtin_subscriber();
 
   DDS::DataReader_var participant_reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC);
