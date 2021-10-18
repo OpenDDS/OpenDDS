@@ -8,6 +8,7 @@
 #include <dds/rtpsrelaylib/Utility.h>
 
 #include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/LogAddr.h>
 
 #include <ace/Thread_Mutex.h>
 
@@ -28,10 +29,12 @@ public:
 
   GuidPartitionTable(const Config& config,
                      GuidAddrSet& guid_addr_set,
+                     const ACE_INET_Addr& address,
                      RelayPartitionsDataWriter_var relay_partitions_writer,
                      SpdpReplayDataWriter_var spdp_replay_writer)
     : config_(config)
     , guid_addr_set_(guid_addr_set)
+    , address_(OpenDDS::DCPS::LogAddr(address).c_str())
     , relay_partitions_writer_(relay_partitions_writer)
     , spdp_replay_writer_(spdp_replay_writer)
   {}
@@ -239,7 +242,7 @@ private:
 
   const Config& config_;
   GuidAddrSet& guid_addr_set_;
-
+  const std::string address_;
   RelayPartitionsDataWriter_var relay_partitions_writer_;
 
   typedef std::vector<StringSet> Slots;

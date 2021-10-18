@@ -589,7 +589,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   GuidAddrSet guid_addr_set(config, relay_statistics_reporter);
   ACE_Reactor reactor_(new ACE_Select_Reactor, true);
   const auto reactor = &reactor_;
-  GuidPartitionTable guid_partition_table(config, guid_addr_set, relay_partitions_writer, spdp_replay_writer);
+  GuidPartitionTable guid_partition_table(config, guid_addr_set, spdp_horizontal_addr, relay_partitions_writer, spdp_replay_writer);
   RelayPartitionTable relay_partition_table;
   relay_statistics_reporter.report();
 
@@ -624,6 +624,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   guid_addr_set.spdp_vertical_handler(&spdp_vertical_handler);
   guid_addr_set.sedp_vertical_handler(&sedp_vertical_handler);
   guid_addr_set.data_vertical_handler(&data_vertical_handler);
+
+  spdp_vertical_handler.spdp_handler(&spdp_vertical_handler);
+  sedp_vertical_handler.spdp_handler(&spdp_vertical_handler);
 
   DDS::Subscriber_var bit_subscriber = application_participant->get_builtin_subscriber();
 
@@ -709,6 +712,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: Application Participant GUID %C\n"), OpenDDS::DCPS::LogGuid(config.application_participant_guid()).c_str()));
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SPDP Horizontal listening on %C\n"), OpenDDS::DCPS::LogAddr(spdp_horizontal_addr).c_str()));
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SEDP Horizontal listening on %C\n"), OpenDDS::DCPS::LogAddr(sedp_horizontal_addr).c_str()));
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: Data Horizontal listening on %C\n"), OpenDDS::DCPS::LogAddr(data_horizontal_addr).c_str()));
