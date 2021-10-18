@@ -3673,7 +3673,6 @@ namespace {
         "    ::DDS::PropertyQosPolicy tmp;\n"
         "    if (strm2 >> tmp) {\n"
         "      uni.property(tmp);\n"
-        "      uni._d(disc);\n"
         "      return true;\n"
         "    } else {\n"
         "      return false;\n"
