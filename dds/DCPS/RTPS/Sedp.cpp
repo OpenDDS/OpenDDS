@@ -3494,7 +3494,8 @@ Sedp::signal_liveliness_unsecure(DDS::LivelinessQosPolicyKind kind)
 bool Sedp::send_type_lookup_request(const XTypes::TypeIdentifierSeq& type_ids,
                                     const DCPS::RepoId& reader,
                                     bool is_discovery_protected,
-                                    bool send_get_types)
+                                    bool send_get_types,
+                                    const SequenceNumber& seq_num)
 {
   TypeLookupRequestWriter_rch writer = type_lookup_request_writer_;
   DCPS::RepoId remote_reader = make_id(reader, ENTITYID_TL_SVC_REQ_READER);
@@ -3508,7 +3509,7 @@ bool Sedp::send_type_lookup_request(const XTypes::TypeIdentifierSeq& type_ids,
 #endif
 
   return writer->send_type_lookup_request(
-    type_ids, remote_reader, type_lookup_service_sequence_number_,
+    type_ids, remote_reader, seq_num,
     send_get_types ?
       XTypes::TypeLookup_getTypes_HashId : XTypes::TypeLookup_getDependencies_HashId);
 }
@@ -4389,7 +4390,7 @@ bool Sedp::TypeLookupReplyReader::process_get_dependencies_reply(
   const DCPS::SequenceNumber& seq_num, bool is_discovery_protected)
 {
   if (DCPS::DCPS_debug_level > 8) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyReader::process_get_dependencies_reply - ",
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyReader::process_get_dependencies_reply - "
       "seq %q\n", seq_num.getValue()));
   }
 
@@ -4420,13 +4421,14 @@ bool Sedp::TypeLookupReplyReader::process_get_dependencies_reply(
   dependencies_[guid_pref][remote_ti].first = data.continuation_point;
 
   // Update internal data
-  sedp_.orig_seq_numbers_.insert(std::make_pair(++sedp_.type_lookup_service_sequence_number_,
+  SequenceNumber new_seq_num = ++sedp_.type_lookup_service_sequence_number_;
+  sedp_.orig_seq_numbers_.insert(std::make_pair(new_seq_num,
                                                 sedp_.orig_seq_numbers_[seq_num]));
   sedp_.orig_seq_numbers_.erase(seq_num);
 
   if (data.continuation_point.length() == 0) { // Get all type objects
     deps.append(remote_ti);
-    if (!sedp_.send_type_lookup_request(deps, remote_id, is_discovery_protected, true)) {
+    if (!sedp_.send_type_lookup_request(deps, remote_id, is_discovery_protected, true, new_seq_num)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_get_dependencies_reply - ")
         ACE_TEXT("failed to send getTypes request\n")));
       return false;
@@ -4434,7 +4436,7 @@ bool Sedp::TypeLookupReplyReader::process_get_dependencies_reply(
   } else { // Get more dependencies
     XTypes::TypeIdentifierSeq type_ids;
     type_ids.append(remote_ti);
-    if (!sedp_.send_type_lookup_request(type_ids, remote_id, is_discovery_protected, false)) {
+    if (!sedp_.send_type_lookup_request(type_ids, remote_id, is_discovery_protected, false, new_seq_num)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_get_dependencies_reply - ")
         ACE_TEXT("failed to send getTypeDependencies request\n")));
       return false;
@@ -7574,7 +7576,7 @@ void Sedp::get_remote_type_objects(const XTypes::TypeIdentifierWithDependencies&
 
     // Get dependencies of the topic type. TypeObjects of both topic type and
     // its dependencies are obtained in subsequent type lookup requests.
-    send_type_lookup_request(type_ids, remote_id, is_discovery_protected, false);
+    send_type_lookup_request(type_ids, remote_id, is_discovery_protected, false, orig_req_data.seq_number);
   } else {
     type_ids.length(tid_with_deps.dependent_typeid_count + 1);
     type_ids[0] = tid_with_deps.typeid_with_size.type_id;
@@ -7583,7 +7585,7 @@ void Sedp::get_remote_type_objects(const XTypes::TypeIdentifierWithDependencies&
     }
 
     // Get TypeObjects of topic type and all of its dependencies.
-    send_type_lookup_request(type_ids, remote_id, is_discovery_protected, true);
+    send_type_lookup_request(type_ids, remote_id, is_discovery_protected, true, orig_req_data.seq_number);
   }
   type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
 }
