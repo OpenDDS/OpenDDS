@@ -102,7 +102,6 @@ module RtpsRelay {
   struct ParticipantStatistics {
     @key GUID_t guid;
     @key string name;
-    Duration_t interval;
     Duration_t session_time;
     ProtocolStatistics rtps;
     ProtocolStatistics stun;

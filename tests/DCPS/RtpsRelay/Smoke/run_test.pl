@@ -52,7 +52,7 @@ sub get_relay_args {
     "-VerticalAddress ${port_digit}444",
     "-HorizontalAddress 127.0.0.1:11${port_digit}44",
     "-UserData relay${n}",
-    "-PublishParticipantStatistics 1",
+    "-LogParticipantStatistics 1",
   );
 }
 

@@ -46,12 +46,13 @@ struct AddrSetStats {
   std::string common_name;
 #endif
 
-  AddrSetStats(const OpenDDS::DCPS::MonotonicTimePoint& session_start)
+  AddrSetStats(const OpenDDS::DCPS::GUID_t& guid,
+               const OpenDDS::DCPS::MonotonicTimePoint& a_session_start)
     : allow_rtps(false)
-    , spdp_stats_reporter(session_start)
-    , sedp_stats_reporter(session_start)
-    , data_stats_reporter(session_start)
-    , session_start(session_start)
+    , spdp_stats_reporter(rtps_guid_to_relay_guid(guid), "SPDP")
+    , sedp_stats_reporter(rtps_guid_to_relay_guid(guid), "SEDP")
+    , data_stats_reporter(rtps_guid_to_relay_guid(guid), "DATA")
+    , session_start(a_session_start)
   {}
 
   bool empty() const
@@ -122,7 +123,8 @@ public:
 
   OpenDDS::DCPS::MonotonicTimePoint get_first_spdp(const OpenDDS::DCPS::GUID_t& guid);
 
-  void remove(const OpenDDS::DCPS::GUID_t& guid);
+  void remove(const OpenDDS::DCPS::GUID_t& guid,
+              const OpenDDS::DCPS::MonotonicTimePoint& now);
 
   void remove_pending(const OpenDDS::DCPS::GUID_t& guid)
   {
@@ -212,7 +214,7 @@ private:
     const bool create = it == guid_addr_set_map_.end();
     if (create) {
       const auto it_bool_pair =
-        guid_addr_set_map_.insert(std::make_pair(guid, AddrSetStats(now)));
+        guid_addr_set_map_.insert(std::make_pair(guid, AddrSetStats(guid, now)));
       it = it_bool_pair.first;
     }
     return CreatedAddrSetStats(create, it->second);
@@ -229,6 +231,10 @@ private:
   bool ignore_rtps(const OpenDDS::DCPS::GUID_t& guid,
                    const OpenDDS::DCPS::MonotonicTimePoint& now,
                    bool is_spdp);
+
+  void remove_i(const OpenDDS::DCPS::GUID_t& guid,
+                GuidAddrSetMap::iterator it,
+                const OpenDDS::DCPS::MonotonicTimePoint& now);
 
   const Config& config_;
   RelayStatisticsReporter& relay_stats_reporter_;

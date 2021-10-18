@@ -18,8 +18,6 @@ public:
                             HandlerStatisticsDataWriter_var writer,
                             RelayStatisticsReporter& relay_statistics_reporter)
     : config_(config)
-    , log_helper_(log_handler_statistics_)
-    , publish_helper_(publish_handler_statistics_)
     , writer_(writer)
     , relay_statistics_reporter_(relay_statistics_reporter)
   {
@@ -37,8 +35,8 @@ public:
                      MessageType type)
   {
     relay_statistics_reporter_.input_message(byte_count, time, now, type);
-    log_helper_.input_message(byte_count, time, type);
-    publish_helper_.input_message(byte_count, time, type);
+    log_helper_.input_message(log_handler_statistics_, byte_count, time, type);
+    publish_helper_.input_message(publish_handler_statistics_, byte_count, time, type);
     report(now);
   }
 
@@ -47,8 +45,8 @@ public:
                        MessageType type)
   {
     relay_statistics_reporter_.ignored_message(byte_count, now, type);
-    log_helper_.ignored_message(byte_count, type);
-    publish_helper_.ignored_message(byte_count, type);
+    log_helper_.ignored_message(log_handler_statistics_, byte_count, type);
+    publish_helper_.ignored_message(publish_handler_statistics_, byte_count, type);
     report(now);
   }
 
@@ -59,8 +57,8 @@ public:
                       MessageType type)
   {
     relay_statistics_reporter_.output_message(byte_count, time, queue_latency, now, type);
-    log_helper_.output_message(byte_count, time, queue_latency, type);
-    publish_helper_.output_message(byte_count, time, queue_latency, type);
+    log_helper_.output_message(log_handler_statistics_, byte_count, time, queue_latency, type);
+    publish_helper_.output_message(publish_handler_statistics_, byte_count, time, queue_latency, type);
     report(now);
   }
 
@@ -71,32 +69,32 @@ public:
                        MessageType type)
   {
     relay_statistics_reporter_.dropped_message(byte_count, time, queue_latency, now, type);
-    log_helper_.dropped_message(byte_count, time, queue_latency, type);
-    publish_helper_.dropped_message(byte_count, time, queue_latency, type);
+    log_helper_.dropped_message(log_handler_statistics_, byte_count, time, queue_latency, type);
+    publish_helper_.dropped_message(publish_handler_statistics_, byte_count, time, queue_latency, type);
     report(now);
   }
 
   void max_gain(size_t value, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     relay_statistics_reporter_.max_gain(value, now);
-    log_helper_.max_gain(value);
-    publish_helper_.max_gain(value);
+    log_helper_.max_gain(log_handler_statistics_, value);
+    publish_helper_.max_gain(publish_handler_statistics_, value);
     report(now);
   }
 
   void error(const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     relay_statistics_reporter_.error(now);
-    log_helper_.error();
-    publish_helper_.error();
+    log_helper_.error(log_handler_statistics_);
+    publish_helper_.error(publish_handler_statistics_);
     report(now);
   }
 
   void max_queue_size(size_t size, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     relay_statistics_reporter_.max_queue_size(size, now);
-    log_helper_.max_queue_size(size);
-    publish_helper_.max_queue_size(size);
+    log_helper_.max_queue_size(log_handler_statistics_, size);
+    publish_helper_.max_queue_size(publish_handler_statistics_, size);
     report(now);
   }
 
@@ -117,19 +115,19 @@ private:
   void log_report(const OpenDDS::DCPS::MonotonicTimePoint& now,
                   bool force)
   {
-    if (!log_helper_.prepare_report(now, force, config_.log_handler_statistics())) {
+    if (!log_helper_.prepare_report(log_handler_statistics_, now, force, config_.log_handler_statistics())) {
       return;
     }
 
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name_.in(), OpenDDS::DCPS::to_json(log_handler_statistics_).c_str()));
 
-    log_helper_.reset(now);
+    log_helper_.reset(log_handler_statistics_, now);
   }
 
   void publish_report(const OpenDDS::DCPS::MonotonicTimePoint& now,
                       bool force)
   {
-    if (!publish_helper_.prepare_report(now, force, config_.publish_handler_statistics())) {
+    if (!publish_helper_.prepare_report(publish_handler_statistics_, now, force, config_.publish_handler_statistics())) {
       return;
     }
 
@@ -140,7 +138,7 @@ private:
         publish_handler_statistics_.name().c_str()));
     }
 
-    publish_helper_.reset(now);
+    publish_helper_.reset(publish_handler_statistics_, now);
   }
 
   const Config& config_;

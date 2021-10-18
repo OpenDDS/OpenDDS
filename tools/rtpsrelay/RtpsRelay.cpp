@@ -151,6 +151,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-LogHandlerStatistics"))) {
       config.log_handler_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-LogParticipantStatistics"))) {
+      config.log_participant_statistics(ACE_OS::atoi(arg));
+      args.consume_arg();
     } else if ((arg = args.get_the_parameter("-PublishRelayStatistics"))) {
       config.publish_relay_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
@@ -583,11 +586,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   RelayStatisticsReporter relay_statistics_reporter(config, relay_statistics_writer);
+  GuidAddrSet guid_addr_set(config, relay_statistics_reporter);
   ACE_Reactor reactor_(new ACE_Select_Reactor, true);
   const auto reactor = &reactor_;
-  GuidPartitionTable guid_partition_table(config, relay_partitions_writer, spdp_replay_writer);
+  GuidPartitionTable guid_partition_table(config, guid_addr_set, relay_partitions_writer, spdp_replay_writer);
   RelayPartitionTable relay_partition_table;
-  GuidAddrSet guid_addr_set(config, relay_statistics_reporter);
   relay_statistics_reporter.report();
 
   HandlerStatisticsReporter spdp_vertical_reporter(config, VSPDP, handler_statistics_writer, relay_statistics_reporter);
