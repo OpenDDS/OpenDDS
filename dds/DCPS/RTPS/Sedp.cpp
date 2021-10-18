@@ -4421,7 +4421,7 @@ bool Sedp::TypeLookupReplyReader::process_get_dependencies_reply(
   dependencies_[guid_pref][remote_ti].first = data.continuation_point;
 
   // Update internal data
-  SequenceNumber new_seq_num = ++sedp_.type_lookup_service_sequence_number_;
+  const SequenceNumber new_seq_num = ++sedp_.type_lookup_service_sequence_number_;
   sedp_.orig_seq_numbers_.insert(std::make_pair(new_seq_num,
                                                 sedp_.orig_seq_numbers_[seq_num]));
   sedp_.orig_seq_numbers_.erase(seq_num);
