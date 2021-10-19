@@ -51,17 +51,18 @@ if ($test->flag('join')) {
     $test->start_process("subscriber");
     sleep 3;
     $test->start_process("relay1");
-    sleep 3;
+    sleep 10;
     $test->start_process("publisher");
 } else {
     $test->start_process("relay1");
     $test->start_process("relay2");
-    sleep 3;
-    $test->start_process("subscriber");
+    sleep 10;
     $test->start_process("publisher");
+    sleep 1;
+    $test->start_process("subscriber");
 }
 
-$test->stop_process(180, "subscriber");
+$test->stop_process(20, "subscriber");
 $test->stop_process(5, "publisher");
 
 $test->kill_process(5, "relay1");
