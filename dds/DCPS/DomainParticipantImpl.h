@@ -71,7 +71,7 @@ class FilterEvaluator;
  * for publisher, subscriber and topic. It also acts as a container
  * for the publisher, subscriber and topic objects.
  *
- * See the DDS specification, OMG formal/04-12-02, for a description of
+ * See the DDS specification, OMG formal/2015-04-10, for a description of
  * the interface this class is implementing.
  */
 class OpenDDS_Dcps_Export DomainParticipantImpl
@@ -310,6 +310,15 @@ public:
   DDS::InstanceHandle_t lookup_handle(const GUID_t& id) const;
 
   /**
+   * Similar to lookup_handle in that it will return a previously mapped handle,
+   * but will coorindate with assign_handle when a desired handle has not yet
+   * been mapped, but is expected to be. The optional max_wait argument can be
+   * supplied to limit the time spent waiting for a handle. If the wait times out,
+   * a value of HANDLE_NIL is returned.
+   */
+  DDS::InstanceHandle_t await_handle(const GUID_t& id, TimeDuration max_wait = TimeDuration::zero_value) const;
+
+  /**
    * Return a previously-assigned handle.
    */
   void return_handle(DDS::InstanceHandle_t handle);
@@ -507,6 +516,9 @@ private:
   ACE_Recursive_Thread_Mutex topics_protector_;
   /// Protect the handle collection.
   mutable ACE_Thread_Mutex handle_protector_;
+
+  mutable ConditionVariable<ACE_Thread_Mutex> handle_waiters_;
+
   /// Protect the shutdown.
   ACE_Thread_Mutex shutdown_mutex_;
   ConditionVariable<ACE_Thread_Mutex> shutdown_condition_;

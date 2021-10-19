@@ -61,9 +61,10 @@ is_release = get_version_prop(bool, 'is_release')
 if is_release:
     vparts = {p: get_version_prop(int, p + '_version') for p in
         ('major', 'minor', 'micro')}
-    github_links_release_tag = 'DDS-{major}.{minor}'.format(**vparts)
-    if vparts['micro']:
-        github_links_release_tag += '.' + vparts['micro']
+    fmt_str = 'DDS-{major}.{minor}'
+    if vparts['micro'] > 0:
+        fmt_str += '.{micro}'
+    github_links_release_tag = fmt_str.format(**vparts)
 
 
 # -- General configuration ---------------------------------------------------
@@ -98,6 +99,8 @@ source_suffix = {
 }
 
 numfig = True
+
+highlight_language = 'none'
 
 
 # -- Options for HTML output -------------------------------------------------

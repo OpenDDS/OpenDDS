@@ -5,7 +5,7 @@
 using namespace OpenDDS::DCPS;
 
 // Test DataSampleHeader::valid_data()
-TEST(data_sample_header_test, valid_data)
+TEST(dds_DCPS_DataSampleHeader, valid_data)
 {
   const size_t message_id_count = MESSAGE_ID_MAX;
   for (size_t i = 0; i < message_id_count; ++i) {

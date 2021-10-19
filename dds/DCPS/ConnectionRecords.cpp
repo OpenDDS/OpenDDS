@@ -1,18 +1,16 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
 
 #ifndef DDS_HAS_MINIMUM_BIT
 
 #include "ConnectionRecords.h"
 
 #include "BuiltInTopicUtils.h"
-#include "DiscoveryBase.h"
+#include "BuiltInTopicDataReaderImpls.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -21,12 +19,12 @@ namespace DCPS {
 
 void WriteConnectionRecords::execute()
 {
-  DDS::DataReader_var d = bit_sub_->lookup_datareader(DCPS::BUILT_IN_CONNECTION_RECORD_TOPIC);
+  DDS::DataReader_var d = bit_sub_->lookup_datareader(BUILT_IN_CONNECTION_RECORD_TOPIC);
   if (!d) {
     return;
   }
 
-  DCPS::ConnectionRecordDataReaderImpl* dr = dynamic_cast<ConnectionRecordDataReaderImpl*>(d.in());
+  ConnectionRecordDataReaderImpl* dr = dynamic_cast<ConnectionRecordDataReaderImpl*>(d.in());
   if (!dr) {
     return;
   }

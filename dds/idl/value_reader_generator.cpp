@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -9,6 +7,8 @@
 
 #include "be_extern.h"
 #include "be_util.h"
+
+#include <dds/DCPS/Definitions.h>
 
 #include <global_extern.h>
 #include <utl_identifier.h>
@@ -59,10 +59,12 @@ namespace {
       return "int16";
     case AST_PredefinedType::PT_ushort:
       return "uint16";
+#if OPENDDS_HAS_EXPLICIT_INTS
     case AST_PredefinedType::PT_int8:
       return "int8";
     case AST_PredefinedType::PT_uint8:
       return "uint8";
+#endif
     case AST_PredefinedType::PT_float:
       return "float32";
     case AST_PredefinedType::PT_double:

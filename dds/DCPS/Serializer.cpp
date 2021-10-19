@@ -3,7 +3,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
+
 #include "Serializer.h"
 
 #if !defined (__ACE_INLINE__)
@@ -12,8 +13,8 @@
 
 #include "SafetyProfileStreams.h"
 
-#ifndef NOTAO
-#include <tao/String_Alloc.h>
+#ifndef OPENDDS_NO_TAO
+#  include <tao/String_Alloc.h>
 #endif
 
 #include <ace/OS_NS_string.h>
@@ -26,7 +27,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-#ifdef NOTAO
+#ifdef OPENDDS_NO_TAO
 namespace {
 
 ACE_CDR::Char* string_alloc(ACE_CDR::ULong size)
@@ -508,7 +509,7 @@ Serializer::read_string(ACE_CDR::Char*& dest,
                         StrFree str_free)
 {
   if (str_alloc == 0) {
-#ifdef NOTAO
+#ifdef OPENDDS_NO_TAO
     str_alloc = string_alloc;
 #else
     str_alloc = CORBA::string_alloc;
@@ -571,7 +572,7 @@ Serializer::free_string(ACE_CDR::Char* str,
                         StrFree str_free)
 {
   if (str_free == 0) {
-#ifdef NOTAO
+#ifdef OPENDDS_NO_TAO
     str_free = string_free;
 #else
     str_free = CORBA::string_free;
@@ -586,7 +587,7 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
                         WStrFree str_free)
 {
   if (str_alloc == 0) {
-#ifdef NOTAO
+#ifdef OPENDDS_NO_TAO
     str_alloc = wstring_alloc;
 #else
     str_alloc = CORBA::wstring_alloc;
@@ -657,7 +658,7 @@ Serializer::free_string(ACE_CDR::WChar* str,
                         WStrFree str_free)
 {
   if (str_free == 0) {
-#ifdef NOTAO
+#ifdef OPENDDS_NO_TAO
     str_free = wstring_free;
 #else
     str_free = CORBA::wstring_free;

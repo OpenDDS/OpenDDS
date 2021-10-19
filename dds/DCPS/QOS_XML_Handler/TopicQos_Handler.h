@@ -27,14 +27,14 @@ public:
    * based on the given name.
    */
   static bool get_topic_qos (::DDS::TopicQos& tp_qos,
-                                  ::dds::qosProfile * profile,
-                                  const ACE_TCHAR * name = 0);
+                             ::dds::qosProfile * profile,
+                             const ACE_TCHAR * name = 0);
 private:
   /**
    * Start parsing the QOS XML, using the template classes.
    */
   static bool get_topic_qos (DDS::TopicQos& tp_qos,
-                                  dds::topicQos * tp);
+                             dds::topicQos * tp);
 };
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

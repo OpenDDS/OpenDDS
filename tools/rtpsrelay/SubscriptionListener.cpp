@@ -1,6 +1,6 @@
 #include "SubscriptionListener.h"
 
-#include "lib/Utility.h"
+#include <dds/rtpsrelaylib/Utility.h>
 
 #include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/JsonValueWriter.h>
@@ -10,11 +10,12 @@ namespace RtpsRelay {
 SubscriptionListener::SubscriptionListener(const Config& config,
                                            OpenDDS::DCPS::DomainParticipantImpl* participant,
                                            GuidPartitionTable& guid_partition_table,
-                                           DomainStatisticsReporter& stats_reporter)
+                                           RelayStatisticsReporter& stats_reporter)
   : config_(config)
   , participant_(participant)
   , guid_partition_table_(guid_partition_table)
   , stats_reporter_(stats_reporter)
+  , count_(0)
 {}
 
 void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
@@ -46,14 +47,19 @@ void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
     case DDS::ALIVE_INSTANCE_STATE:
       if (info.valid_data) {
         const auto repoid = participant_->get_repoid(info.instance_handle);
+        const auto r = guid_partition_table_.insert(repoid, data.partition.name);
 
-        if (config_.log_discovery()) {
-          ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SubscriptionListener::on_data_available add local reader %C %C\n"), guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str()));
+        if (r == GuidPartitionTable::ADDED) {
+          if (config_.log_discovery()) {
+            ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SubscriptionListener::on_data_available add local reader %C %C\n"), guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str()));
+          }
+
+          stats_reporter_.local_readers(++count_, OpenDDS::DCPS::MonotonicTimePoint::now());
+        } else if (r == GuidPartitionTable::UPDATED) {
+          if (config_.log_discovery()) {
+            ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SubscriptionListener::on_data_available update local reader %C %C\n"), guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str()));
+          }
         }
-
-        guid_partition_table_.insert(repoid, data.partition.name);
-
-        stats_reporter_.add_local_reader(OpenDDS::DCPS::MonotonicTimePoint::now());
       }
       break;
     case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
@@ -67,7 +73,7 @@ void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
 
         guid_partition_table_.remove(repoid);
 
-        stats_reporter_.remove_local_reader(OpenDDS::DCPS::MonotonicTimePoint::now());
+        stats_reporter_.local_readers(--count_, OpenDDS::DCPS::MonotonicTimePoint::now());
       }
       break;
     }

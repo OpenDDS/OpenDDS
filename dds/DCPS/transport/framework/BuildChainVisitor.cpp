@@ -15,29 +15,29 @@
 
 OpenDDS::DCPS::BuildChainVisitor::~BuildChainVisitor()
 {
-  DBG_ENTRY_LVL("BuildChainVisitor","~BuildChainVisitor",6);
+  DBG_ENTRY_LVL("BuildChainVisitor", "~BuildChainVisitor", 6);
 }
 
 int
 OpenDDS::DCPS::BuildChainVisitor::visit_element(TransportQueueElement* element)
 {
-  DBG_ENTRY_LVL("BuildChainVisitor","visit_element",6);
+  DBG_ENTRY_LVL("BuildChainVisitor", "visit_element", 6);
 
-  if (this->head_ == 0) {
+  if (head_ == 0) {
     // This is the first element that we have visited.
-    this->head_ = element->msg()->duplicate();
-    this->tail_ = this->head_;
+    head_ = element->msg()->duplicate();
+    tail_ = head_;
 
-    while (this->tail_->cont() != 0) {
-      this->tail_ = this->tail_->cont();
+    while (tail_->cont() != 0) {
+      tail_ = tail_->cont();
     }
 
   } else {
     // This is not the first element that we have visited.
-    this->tail_->cont(element->msg()->duplicate());
+    tail_->cont(element->msg()->duplicate());
 
-    while (this->tail_->cont() != 0) {
-      this->tail_ = this->tail_->cont();
+    while (tail_->cont() != 0) {
+      tail_ = tail_->cont();
     }
   }
 

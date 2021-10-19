@@ -7,8 +7,7 @@
 
 #include <gtest/gtest.h>
 
-#ifdef OPENDDS_RAPIDJSON
-#ifndef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_HAS_JSON_VALUE_READER
 
 using namespace rapidjson;
 using namespace OpenDDS::DCPS;
@@ -70,7 +69,7 @@ static const ListEnumHelper::Pair enum_pairs[] = {
 
 static const ListEnumHelper enum_helper(enum_pairs);
 
-TEST(JsonValueReader, struct_empty)
+TEST(dds_DCPS_JsonValueReader, struct_empty)
 {
   const char json[] = "{}";
   StringStream ss(json);
@@ -79,7 +78,7 @@ TEST(JsonValueReader, struct_empty)
   EXPECT_TRUE(jvr.end_struct());
 }
 
-TEST(JsonValueReader, array_empty)
+TEST(dds_DCPS_JsonValueReader, array_empty)
 {
   const char json[] = "[]";
   StringStream ss(json);
@@ -88,7 +87,7 @@ TEST(JsonValueReader, array_empty)
   EXPECT_TRUE(jvr.end_array());
 }
 
-TEST(JsonValueReader, sequence_empty)
+TEST(dds_DCPS_JsonValueReader, sequence_empty)
 {
   const char json[] = "[]";
   StringStream ss(json);
@@ -98,14 +97,16 @@ TEST(JsonValueReader, sequence_empty)
   EXPECT_TRUE(jvr.end_sequence());
 }
 
-TEST(JsonValueReader, struct_max)
+TEST(dds_DCPS_JsonValueReader, struct_max)
 {
   const char json[] =
     "{"
     "\"bool\":true,"
     "\"byte\":255,"
+#if OPENDDS_HAS_EXPLICIT_INTS
     "\"int8\":127,"
     "\"uint8\":255,"
+#endif
     "\"int16\":32767,"
     "\"uint16\":65535,"
     "\"int32\":2147483647,"
@@ -125,8 +126,10 @@ TEST(JsonValueReader, struct_max)
   MemberId member_id;
   ACE_CDR::Boolean bool_value;
   ACE_CDR::Octet byte_value;
+#if OPENDDS_HAS_EXPLICIT_INTS
   ACE_CDR::Int8 int8_value;
   ACE_CDR::UInt8 uint8_value;
+#endif
   ACE_CDR::Short int16_value;
   ACE_CDR::UShort uint16_value;
   ACE_CDR::Long int32_value;
@@ -155,6 +158,7 @@ TEST(JsonValueReader, struct_max)
   EXPECT_EQ(byte_value, 255);
   EXPECT_TRUE(jvr.end_struct_member());
 
+#if OPENDDS_HAS_EXPLICIT_INTS
   EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
   EXPECT_EQ(member_id, INT8_MEMBER_ID);
   EXPECT_TRUE(jvr.read_int8(int8_value));
@@ -166,6 +170,7 @@ TEST(JsonValueReader, struct_max)
   EXPECT_TRUE(jvr.read_uint8(uint8_value));
   EXPECT_EQ(uint8_value, 255);
   EXPECT_TRUE(jvr.end_struct_member());
+#endif
 
   EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
   EXPECT_EQ(member_id, INT16_MEMBER_ID);
@@ -248,7 +253,7 @@ TEST(JsonValueReader, struct_max)
   EXPECT_TRUE(jvr.end_struct());
 }
 
-TEST(JsonValueReader, a_union)
+TEST(dds_DCPS_JsonValueReader, a_union)
 {
   const char json[] = "{\"$discriminator\":5,\"5\":true}";
   StringStream ss(json);
@@ -268,15 +273,21 @@ TEST(JsonValueReader, a_union)
   EXPECT_TRUE(jvr.end_union());
 }
 
-TEST(JsonValueReader, array_min)
+TEST(dds_DCPS_JsonValueReader, array_min)
 {
-  const char json[] = "[false,0,-128,0,-32768,0,-2147483648,0,-9223372036854775808,0,-1.25,-1.25,-1.25,97,97,\"a string\",\"kValue2\"]";
+  const char json[] = "[false,0,"
+#if OPENDDS_HAS_EXPLICIT_INTS
+    "-128,0,"
+#endif
+    "-32768,0,-2147483648,0,-9223372036854775808,0,-1.25,-1.25,-1.25,97,97,\"a string\",\"kValue2\"]";
   StringStream ss(json);
   JsonValueReader<> jvr(ss);
   ACE_CDR::Boolean bool_value;
   ACE_CDR::Octet byte_value;
+#if OPENDDS_HAS_EXPLICIT_INTS
   ACE_CDR::Int8 int8_value;
   ACE_CDR::UInt8 uint8_value;
+#endif
   ACE_CDR::Short int16_value;
   ACE_CDR::UShort uint16_value;
   ACE_CDR::Long int32_value;
@@ -303,6 +314,7 @@ TEST(JsonValueReader, array_min)
   EXPECT_EQ(byte_value, 0);
   EXPECT_TRUE(jvr.end_element());
 
+#if OPENDDS_HAS_EXPLICIT_INTS
   EXPECT_TRUE(jvr.begin_element());
   EXPECT_TRUE(jvr.read_int8(int8_value));
   EXPECT_EQ(int8_value, -128);
@@ -312,6 +324,7 @@ TEST(JsonValueReader, array_min)
   EXPECT_TRUE(jvr.read_uint8(uint8_value));
   EXPECT_EQ(uint8_value, 0);
   EXPECT_TRUE(jvr.end_element());
+#endif
 
   EXPECT_TRUE(jvr.begin_element());
   EXPECT_TRUE(jvr.read_int16(int16_value));
@@ -381,15 +394,21 @@ TEST(JsonValueReader, array_min)
   EXPECT_TRUE(jvr.end_array());
 }
 
-TEST(JsonValueReader, sequence_zero)
+TEST(dds_DCPS_JsonValueReader, sequence_zero)
 {
-  const char json[] = "[false,0,0,0,0,0,0,0,0,0,0,0,0,0,0,\"\",\"kValue1\"]";
+  const char json[] = "[false,0,"
+#if OPENDDS_HAS_EXPLICIT_INTS
+    "0,0,"
+#endif
+    "0,0,0,0,0,0,0,0,0,0,0,\"\",\"kValue1\"]";
   StringStream ss(json);
   JsonValueReader<> jvr(ss);
   ACE_CDR::Boolean bool_value;
   ACE_CDR::Octet byte_value;
+#if OPENDDS_HAS_EXPLICIT_INTS
   ACE_CDR::Int8 int8_value;
   ACE_CDR::UInt8 uint8_value;
+#endif
   ACE_CDR::Short int16_value;
   ACE_CDR::UShort uint16_value;
   ACE_CDR::Long int32_value;
@@ -418,6 +437,7 @@ TEST(JsonValueReader, sequence_zero)
   EXPECT_EQ(byte_value, 0);
   EXPECT_TRUE(jvr.end_element());
 
+#if OPENDDS_HAS_EXPLICIT_INTS
   EXPECT_TRUE(jvr.elements_remaining());
   EXPECT_TRUE(jvr.begin_element());
   EXPECT_TRUE(jvr.read_int8(int8_value));
@@ -429,6 +449,7 @@ TEST(JsonValueReader, sequence_zero)
   EXPECT_TRUE(jvr.read_uint8(uint8_value));
   EXPECT_EQ(uint8_value, 0);
   EXPECT_TRUE(jvr.end_element());
+#endif
 
   EXPECT_TRUE(jvr.elements_remaining());
   EXPECT_TRUE(jvr.begin_element());
@@ -543,7 +564,7 @@ void set_default(MyStruct& value)
 }
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-TEST(JsonValueReader, from_json)
+TEST(dds_DCPS_JsonValueReader, from_json)
 {
   const char json[] = "{\"bool\":true}";
   StringStream ss(json);
@@ -551,5 +572,4 @@ TEST(JsonValueReader, from_json)
   EXPECT_TRUE(from_json(s, ss));
 }
 
-#endif
 #endif

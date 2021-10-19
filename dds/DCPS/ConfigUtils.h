@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -8,12 +6,11 @@
 #ifndef OPENDDS_DCPS_CONFIGUTILS_H
 #define OPENDDS_DCPS_CONFIGUTILS_H
 
-#include "ace/Configuration.h"
 #include "dcps_export.h"
 #include "PoolAllocator.h"
+#include "SafetyProfileStreams.h"
 
-#include <sstream>
-#include <cstdlib>
+#include <ace/Configuration.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -24,48 +21,6 @@ namespace DCPS {
   typedef OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) ValueMap;
   typedef std::pair<OPENDDS_STRING, ACE_Configuration_Section_Key> SubsectionPair;
   typedef OPENDDS_LIST(SubsectionPair) KeyList;
-
-
-  /**
-   * Convert string s to value of integral type T.
-   *
-   * Returns true for success, false for error
-   */
-  template <typename T>
-  bool convertToInteger(const OPENDDS_STRING& s, T& value)
-  {
-#ifdef OPENDDS_SAFETY_PROFILE
-    char* end;
-    const long conv = std::strtol(s.c_str(), &end, 10);
-    if (end == s.c_str()) return false;
-    value = static_cast<T>(conv);
-#else
-    std::stringstream istr(s.c_str());
-    if (!(istr >> value) || (istr.peek() != EOF)) return false;
-#endif
-    return true;
-  }
-
-  /**
-   * Convert string s to value of double type T.
-   *
-   * Returns true for success, false for error
-   */
-  template <typename T>
-  bool convertToDouble(const OPENDDS_STRING& s, T& value)
-  {
-#ifdef OPENDDS_SAFETY_PROFILE
-    char* end;
-    const double conv = std::strtod(s.c_str(), &end);
-    if (end == s.c_str()) return false;
-    value = static_cast<T>(conv);
-#else
-    std::stringstream istr(s.c_str());
-    if (!(istr >> value) || (istr.peek() != EOF)) return false;
-#endif
-    return true;
-  }
-
 
   ///     Function that pulls all the values from the
   ///     specified ACE Configuration Section and places them in a

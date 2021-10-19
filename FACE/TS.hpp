@@ -1,5 +1,5 @@
-#ifndef FACE_TS_HPP_HEADER_FILE
-#define FACE_TS_HPP_HEADER_FILE
+#ifndef OPENDDS_FACE_TS_HPP
+#define OPENDDS_FACE_TS_HPP
 #include "common.hpp"
 #include "TS_common.hpp"
 #include "OpenDDS_FACE_Export.h"

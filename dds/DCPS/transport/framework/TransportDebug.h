@@ -52,6 +52,8 @@ public:
   bool log_messages;
   bool log_progress;
   bool log_dropped_messages;
+  bool log_fragment_storage;
+  bool log_remote_counts;
 };
 extern OpenDDS_Dcps_Export TransportDebug transport_debug;
 

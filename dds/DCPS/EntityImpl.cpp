@@ -89,7 +89,7 @@ EntityImpl::set_deleted(bool state)
 }
 
 bool
-EntityImpl::get_deleted()
+EntityImpl::get_deleted() const
 {
 #ifdef ACE_HAS_CPP11
   return this->entity_deleted_;

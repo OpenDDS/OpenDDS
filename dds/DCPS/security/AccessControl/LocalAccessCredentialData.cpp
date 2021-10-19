@@ -20,7 +20,6 @@ LocalAccessCredentialData::LocalAccessCredentialData()
 
 LocalAccessCredentialData::~LocalAccessCredentialData()
 {
-
 }
 
 bool LocalAccessCredentialData::load(const DDS::PropertySeq& props,

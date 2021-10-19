@@ -47,7 +47,7 @@ public:
   {
   }
 
-  virtual void on_replayer_matched(OpenDDS::DCPS::                         Replayer*,
+  virtual void on_replayer_matched(OpenDDS::DCPS::Replayer*,
                                    const ::DDS::PublicationMatchedStatus & status)
   {
     if (status.current_count > 0 ) {
@@ -81,7 +81,7 @@ public:
   {
   }
 
-  virtual void on_sample_data_received(OpenDDS::DCPS::                     Recorder*,
+  virtual void on_sample_data_received(OpenDDS::DCPS::Recorder*,
                                        const OpenDDS::DCPS::RawDataSample& sample)
   {
     ACE_DEBUG((LM_DEBUG,
@@ -92,17 +92,19 @@ public:
 
     if (replayer_listener->connected_readers_.size()) {
       // get the instance handle of one of the connected reader
-      DDS::InstanceHandle_t reader_handle = *(replayer_listener->connected_readers_.begin());
+      const DDS::InstanceHandle_t reader_handle = *(replayer_listener->connected_readers_.begin());
 
       // Send to only one connected reader. To send to all readers, use
       // replayer_->write(sample)
       if (DDS::RETCODE_ERROR == replayer_->write_to_reader(reader_handle, sample)) {
-        ACE_DEBUG((LM_DEBUG, "Write Sample Error\n"));
+        ACE_ERROR((LM_ERROR, "Write Sample Error\n"));
+      } else {
+        ACE_DEBUG((LM_DEBUG, "Relay write sample to reader\n"));
       }
     }
   }
 
-  virtual void on_recorder_matched(OpenDDS::DCPS::                         Recorder*,
+  virtual void on_recorder_matched(OpenDDS::DCPS::Recorder*,
                                    const ::DDS::SubscriptionMatchedStatus& status )
   {
     if (status.current_count == 1) {
@@ -184,9 +186,7 @@ int run_test(int argc, ACE_TCHAR *argv[]){
       my_partition2[0] = "Two";
       pub_qos.partition.name = my_partition2;
 
-
       RcHandle<MessengerReplayerListener> replayer_listener = make_rch<MessengerReplayerListener>();
-
 
       ACE_DEBUG((LM_DEBUG, "Creating replayer\n"));
 

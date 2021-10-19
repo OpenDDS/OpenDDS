@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -8,9 +6,10 @@
 #ifndef OPENDDS_DCPS_VALUE_READER_H
 #define OPENDDS_DCPS_VALUE_READER_H
 
-
-#include "FACE/Fixed.h"
+#include "Definitions.h"
 #include "XTypes/TypeObject.h"
+
+#include <FACE/Fixed.h>
 #include <dds/Versioned_Namespace.h>
 
 #include <ace/CDR_Base.h>
@@ -22,16 +21,15 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-// A ValueReader produces events and values for the recitation of a
-// value.  To use it, one manually or automatically, e.g., code
-// generation in the IDL compiler, defines a vread function for a
-// given type V.
-//
-//   bool vread(ValueReader& vw, V& value)
-//
-// The vread function should invoke the appropriate methods of the
-// ValueReader and dispatch to other vread functions.
-
+/// A ValueReader produces events and values for the recitation of a
+/// value.  To use it, one manually or automatically, e.g., code
+/// generation in the IDL compiler, defines a vread function for a
+/// given type V.
+///
+///   bool vread(ValueReader& vw, V& value)
+///
+/// The vread function should invoke the appropriate methods of the
+/// ValueReader and dispatch to other vread functions.
 class MemberHelper {
 public:
   virtual ~MemberHelper() {}
@@ -127,8 +125,10 @@ struct ValueReader {
 
   virtual bool read_boolean(ACE_CDR::Boolean& value) = 0;
   virtual bool read_byte(ACE_CDR::Octet& value) = 0;
+#if OPENDDS_HAS_EXPLICIT_INTS
   virtual bool read_int8(ACE_CDR::Int8& value) = 0;
   virtual bool read_uint8(ACE_CDR::UInt8& value) = 0;
+#endif
   virtual bool read_int16(ACE_CDR::Short& value) = 0;
   virtual bool read_uint16(ACE_CDR::UShort& value) = 0;
   virtual bool read_int32(ACE_CDR::Long& value) = 0;

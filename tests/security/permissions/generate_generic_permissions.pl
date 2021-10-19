@@ -15,6 +15,7 @@ my $permissions_ca_path = "$output_path/../certs/permissions";
 
 my $template_before_subject = << "EOF";
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Don't edit and sign these by hand, edit and run generate_generic_permissions.pl! -->
 <dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.omg.org/spec/DDS-SECURITY/20160303/omg_shared_ca_permissions.xsd">
   <permissions>
     <grant name="TheGrant">
@@ -30,6 +31,9 @@ my $template_after_subject = << "EOF";
       </validity>
       <allow_rule>
         <domains>
+          <id_range>
+            <min>0</min>
+          </id_range>
         </domains>
         <publish>
           <topics>

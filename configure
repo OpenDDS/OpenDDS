@@ -25,8 +25,8 @@ use warnings;
 ## Version of OCI's TAO to download
 my $oci_tao_version = '2.2a';
 ## Version of DOC Group ACE/TAO to download, uses the ACE version number
-my $doc_tao2_version = '6.5.13';
-my $doc_tao3_version = '7.0.2';
+my $doc_tao2_version = '6.5.15';
+my $doc_tao3_version = '7.0.4';
 
 my $backup_timestamp = strftime "%Y-%m-%d-%H-%M-%S", localtime time;
 

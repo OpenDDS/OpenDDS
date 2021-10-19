@@ -3,8 +3,8 @@
 
 #include "Config.h"
 
-#include "lib/RelayTypeSupportImpl.h"
-#include "lib/Utility.h"
+#include <dds/rtpsrelaylib/RelayTypeSupportImpl.h>
+#include <dds/rtpsrelaylib/Utility.h>
 
 #include <dds/DCPS/JsonValueWriter.h>
 
@@ -94,7 +94,7 @@ public:
 
     const auto ret = writer->write(publish_participant_statistics_, DDS::HANDLE_NIL);
     if (ret != DDS::RETCODE_OK) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: writing participant %C statistics\n"), guid_to_string(guid_to_repoid(publish_participant_statistics_.guid())).c_str()));
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: writing participant %C statistics\n"), guid_to_string(relay_guid_to_rtps_guid(publish_participant_statistics_.guid())).c_str()));
     }
 
     publish_last_report_ = now;

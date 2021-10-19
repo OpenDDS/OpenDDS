@@ -1,0 +1,14 @@
+project: dcpslib, opendds_cxx11, install, msvc_bigobj, coverage_optional {
+  idlflags      += -Wb,export_macro=OpenDDS_RtpsRelayLib_Export -Wb,export_include=export.h -SS
+  dcps_ts_flags += -Wb,export_macro=OpenDDS_RtpsRelayLib_Export -Wb,export_include=export.h
+  dynamicflags  += OPENDDS_RTPSRELAYLIB_BUILD_DLL
+  sharedname = OpenDDS_RtpsRelay
+
+  TypeSupport_Files {
+    Relay.idl
+  }
+
+  specific {
+    install_dir = dds/rtpsrelaylib
+  }
+}

@@ -25,6 +25,7 @@
 #include "BitPubListenerImpl.h"
 #include "ContentFilteredTopicImpl.h"
 #include "MultiTopicImpl.h"
+#include "Service_Participant.h"
 #include "transport/framework/TransportRegistry.h"
 #include "transport/framework/TransportExceptions.h"
 
@@ -109,6 +110,7 @@ DomainParticipantImpl::DomainParticipantImpl(
     domain_id_(domain_id),
     dp_id_(GUID_UNKNOWN),
     federated_(false),
+    handle_waiters_(handle_protector_),
     shutdown_condition_(shutdown_mutex_),
     shutdown_complete_(false),
     participant_handles_(handle_generator),
@@ -1066,7 +1068,7 @@ DomainParticipantImpl::delete_contained_entities()
 
   bit_subscriber_ = DDS::Subscriber::_nil();
 
-  OpenDDS::DCPS::Registered_Data_Types->unregister_participant(this);
+  Registered_Data_Types->unregister_participant(this);
 
   // the participant can now start creating new contained entities
   set_deleted(false);
@@ -1778,7 +1780,8 @@ DomainParticipantImpl::enable()
       part_crypto_handle_ = DDS::HANDLE_NIL;
     }
 
-    value = disco->add_domain_participant_secure(domain_id_, qos_, dp_id_, id_handle_, perm_handle_, part_crypto_handle_);
+    value = disco->add_domain_participant_secure(domain_id_, qos_, type_lookup_service_,
+                                                 dp_id_, id_handle_, perm_handle_, part_crypto_handle_);
 
     if (value.id == GUID_UNKNOWN) {
       if (DCPS::security_debug.new_entity_error) {
@@ -1792,7 +1795,7 @@ DomainParticipantImpl::enable()
   } else {
 #endif
 
-    value = disco->add_domain_participant(domain_id_, qos_);
+    value = disco->add_domain_participant(domain_id_, qos_, type_lookup_service_);
 
     if (value.id == GUID_UNKNOWN) {
       if (DCPS_debug_level > 0) {
@@ -1809,8 +1812,6 @@ DomainParticipantImpl::enable()
 
   dp_id_ = value.id;
   federated_ = value.federated;
-
-  disco->set_type_lookup_service(domain_id_, dp_id_, type_lookup_service_);
 
   if (monitor_) {
     monitor_->report();
@@ -1898,6 +1899,7 @@ DDS::InstanceHandle_t DomainParticipantImpl::assign_handle(const GUID_t& id)
     }
     handles_[id] = std::make_pair(handle, 1);
     repoIds_[handle] = id;
+    handle_waiters_.notify_all();
     return handle;
   }
 
@@ -1909,6 +1911,20 @@ DDS::InstanceHandle_t DomainParticipantImpl::assign_handle(const GUID_t& id)
                mapped.first, mapped.second));
   }
   return mapped.first;
+}
+
+DDS::InstanceHandle_t DomainParticipantImpl::await_handle(const GUID_t& id,
+                                                          TimeDuration max_wait) const
+{
+  MonotonicTimePoint expire_at = MonotonicTimePoint::now() + max_wait;
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, DDS::HANDLE_NIL);
+  CountedHandleMap::const_iterator iter = handles_.find(id);
+  CvStatus res = CvStatus_NoTimeout;
+  while (res == CvStatus_NoTimeout && iter == handles_.end()) {
+    res = max_wait.is_zero() ? handle_waiters_.wait() : handle_waiters_.wait_until(expire_at);
+    iter = handles_.find(id);
+  }
+  return iter == handles_.end() ? DDS::HANDLE_NIL : iter->second.first;
 }
 
 DDS::InstanceHandle_t DomainParticipantImpl::lookup_handle(const GUID_t& id) const

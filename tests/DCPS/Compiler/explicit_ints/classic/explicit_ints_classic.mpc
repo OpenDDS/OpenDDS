@@ -5,7 +5,7 @@ project: dcps_test, googletest, msvc_bigobj {
   Source_Files {
     ../main.cpp
   }
-  idlflags += -I..
+  idlflags += -I.. -Sa -St
   IDL_Files {
     ../test.idl
   }

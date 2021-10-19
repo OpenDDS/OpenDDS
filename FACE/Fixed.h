@@ -1,5 +1,5 @@
-#ifndef FACE_FIXED_HEADER_FILE
-#define FACE_FIXED_HEADER_FILE
+#ifndef OPENDDS_FACE_FIXED_H
+#define OPENDDS_FACE_FIXED_H
 
 #include "types.hpp"
 

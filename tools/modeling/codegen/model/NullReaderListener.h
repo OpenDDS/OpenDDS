@@ -1,7 +1,7 @@
 // -*- C++ -*-
 //
-#ifndef NULLREADERLISTENER_H
-#define NULLREADERLISTENER_H
+#ifndef OPENDDS_MODEL_NULLREADERLISTENER_H
+#define OPENDDS_MODEL_NULLREADERLISTENER_H
 
 #include <ace/config-macros.h>
 

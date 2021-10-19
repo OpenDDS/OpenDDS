@@ -21,6 +21,12 @@
 #include "ThreadSynchStrategy_rch.h"
 #include "ace/Synch_Traits.h"
 
+#if defined(OPENDDS_SECURITY)
+#include "dds/DdsSecurityCoreC.h"
+#include "dds/DCPS/security/framework/SecurityConfig.h"
+#include "dds/DCPS/security/framework/SecurityConfig_rch.h"
+#endif
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -202,6 +208,10 @@ protected:
   /// either a certain individual packet or a publication id.
   /// Returns true if anything in the delayed notification list matched.
   bool send_delayed_notifications(const TransportQueueElement::MatchCriteria* match = 0);
+
+#ifdef OPENDDS_SECURITY
+  virtual Security::SecurityConfig_rch security_config() const { return Security::SecurityConfig_rch(); }
+#endif
 
 private:
 
@@ -412,11 +422,13 @@ private:
   // amount of private state is shared between both classes.
   friend class TransportSendBuffer;
 
+  /// Current transport packet header.
+  TransportHeader header_;
+
 protected:
   ThreadSynch* synch() const;
 
-  /// Current transport packet header.
-  TransportHeader header_;
+  void set_header_source(ACE_INT64 source);
 };
 
 } // namespace DCPS

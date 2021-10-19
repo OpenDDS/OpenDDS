@@ -18,12 +18,7 @@ namespace DCPS {
 ACE_INLINE
 void align(size_t& value, size_t by)
 {
-  // TODO(iguessthislldo): If this is always alignment by a power of two, it
-  // might benefit from a bitwise version.
-  const size_t offset_by = value % by;
-  if (offset_by) {
-    value += by - offset_by;
-  }
+  value = (value + by - 1) & ~(by - 1);
 }
 
 ACE_INLINE
@@ -222,7 +217,6 @@ Endianness Serializer::endianness() const
 {
   return encoding_.endianness();
 }
-
 
 // NOTE: I use the ternary operators in here for conditionals to help
 //       the compiler inline the code -- and it does end up fairly
@@ -563,6 +557,7 @@ Serializer::read_octet_array(ACE_CDR::Octet* x, ACE_CDR::ULong length)
   return good_bit();
 }
 
+#if OPENDDS_HAS_EXPLICIT_INTS
 ACE_INLINE
 bool Serializer::read_int8_array(ACE_CDR::Int8* x, ACE_CDR::ULong length)
 {
@@ -576,6 +571,7 @@ bool Serializer::read_uint8_array(ACE_CDR::UInt8* x, ACE_CDR::ULong length)
   read_array(reinterpret_cast<char*>(x), uint8_cdr_size, length);
   return good_bit();
 }
+#endif
 
 ACE_INLINE bool
 Serializer::read_short_array(ACE_CDR::Short* x, ACE_CDR::ULong length)
@@ -700,6 +696,7 @@ Serializer::write_octet_array(const ACE_CDR::Octet* x, ACE_CDR::ULong length)
   return good_bit();
 }
 
+#if OPENDDS_HAS_EXPLICIT_INTS
 ACE_INLINE
 bool Serializer::write_int8_array(const ACE_CDR::Int8* x, ACE_CDR::ULong length)
 {
@@ -713,6 +710,7 @@ bool Serializer::write_uint8_array(const ACE_CDR::UInt8* x, ACE_CDR::ULong lengt
   write_array(reinterpret_cast<const char*>(x), uint8_cdr_size, length);
   return good_bit();
 }
+#endif
 
 ACE_INLINE bool
 Serializer::write_short_array(const ACE_CDR::Short* x, ACE_CDR::ULong length)
@@ -1188,6 +1186,7 @@ operator<<(Serializer& s, ACE_OutputCDR::from_wstring x)
   return s.good_bit() && ((x.bound_ == 0) || (stringlen <= x.bound_));
 }
 
+#if OPENDDS_HAS_EXPLICIT_INTS
 ACE_INLINE
 bool operator<<(Serializer& s, ACE_OutputCDR::from_uint8 x)
 {
@@ -1201,6 +1200,7 @@ bool operator<<(Serializer& s, ACE_OutputCDR::from_int8 x)
   s.buffer_write(reinterpret_cast<const char*>(&x.val_), int8_cdr_size, false);
   return s.good_bit();
 }
+#endif
 
 //
 // The following extraction operators are done in the style of the
@@ -1398,6 +1398,7 @@ operator>>(Serializer& s, ACE_InputCDR::to_wstring x)
   return s.good_bit();
 }
 
+#if OPENDDS_HAS_EXPLICIT_INTS
 ACE_INLINE
 bool operator>>(Serializer& s, ACE_InputCDR::to_uint8 x)
 {
@@ -1411,6 +1412,7 @@ bool operator>>(Serializer& s, ACE_InputCDR::to_int8 x)
   s.buffer_read(reinterpret_cast<char*>(&x.ref_), int8_cdr_size, false);
   return s.good_bit();
 }
+#endif
 
 ACE_INLINE bool
 operator>>(Serializer& s, String& x)
@@ -1591,6 +1593,7 @@ bool primitive_serialized_size(
   return true;
 }
 
+#if OPENDDS_HAS_EXPLICIT_INTS
 ACE_INLINE
 bool primitive_serialized_size(
   const Encoding& /*encoding*/, size_t& size,
@@ -1608,6 +1611,7 @@ bool primitive_serialized_size(
   size += int8_cdr_size * count;
   return true;
 }
+#endif
 
 // predefined type method explicit disambiguators.
 
@@ -1648,6 +1652,7 @@ void primitive_serialized_size_ulong(const Encoding& encoding, size_t& size,
   size += uint32_cdr_size * count;
 }
 
+#if OPENDDS_HAS_EXPLICIT_INTS
 ACE_INLINE
 void primitive_serialized_size_uint8(const Encoding& /*encoding*/, size_t& size,
   size_t count)
@@ -1661,6 +1666,7 @@ void primitive_serialized_size_int8(const Encoding& /*encoding*/, size_t& size,
 {
   size += int8_cdr_size * count;
 }
+#endif
 
 ACE_INLINE
 void serialized_size_delimiter(const Encoding& encoding, size_t& size)

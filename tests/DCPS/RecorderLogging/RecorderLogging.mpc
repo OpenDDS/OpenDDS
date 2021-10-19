@@ -1,0 +1,19 @@
+project(DDS*Publisher): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
+  exename   = publisher
+  Idl_Files {
+  }
+
+  Source_Files {
+    Publisher.cpp
+  }
+}
+
+project(DDS*Recorder) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
+  exename   = recorder
+  Idl_Files {
+  }
+
+  Source_Files {
+    Recorder.cpp
+  }
+}

@@ -17,8 +17,8 @@ class QOS_Topic_T
   : public QOS_DwDrTp_Base_T<XML_QOS_TYPE, DDS_QOS_TYPE>
 {
 public:
-  QOS_Topic_T (void);
-  ~QOS_Topic_T (void);
+  QOS_Topic_T ();
+  ~QOS_Topic_T ();
 
   void read_qos (DDS_QOS_TYPE&, const XML_QOS_TYPE);
 

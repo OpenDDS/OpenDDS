@@ -22,7 +22,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 class QosCommon
 {
 public:
-
   //@{
   /** Operations which convert QOS XML kinds to QOS IDL kinds. */
 
@@ -59,7 +58,6 @@ public:
    *
    */
   static ::CORBA::Long get_qos_long (const ACE_TCHAR * value);
-
 };
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

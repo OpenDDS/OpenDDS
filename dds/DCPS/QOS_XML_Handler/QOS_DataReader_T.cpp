@@ -5,12 +5,12 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 template <typename XML_QOS_TYPE, typename DDS_QOS_TYPE>
-QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::QOS_DataReader_T(void)
+QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::QOS_DataReader_T()
 {
 }
 
 template <typename XML_QOS_TYPE, typename DDS_QOS_TYPE>
-QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::~QOS_DataReader_T(void)
+QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::~QOS_DataReader_T()
 {
 }
 

@@ -247,7 +247,7 @@ private:
 
   ACE_CString export_macro_, export_include_,
     versioning_name_, versioning_begin_, versioning_end_,
-    pch_include_, java_arg_, seq_;
+    pch_include_, java_arg_, sequence_suffix_;
   std::set<std::string> cpp_includes_;
 
   LanguageMapping language_mapping_;
