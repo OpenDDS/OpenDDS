@@ -302,7 +302,8 @@ public:
 
   bool send_type_lookup_request(const XTypes::TypeIdentifierSeq& type_ids,
                                 const DCPS::RepoId& reader,
-                                bool is_discovery_protected, bool send_get_types);
+                                bool is_discovery_protected, bool send_get_types,
+                                const SequenceNumber& seq_num);
 
 #ifdef OPENDDS_SECURITY
   void signal_liveliness_secure(DDS::LivelinessQosPolicyKind kind);
