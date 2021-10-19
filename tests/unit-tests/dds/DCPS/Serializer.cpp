@@ -676,3 +676,29 @@ TEST(serializer_test, Serializer_test_peek_depth)
   ASSERT_TRUE(res == c);
 }
 
+TEST(serializer_test, Serializer_test_trim)
+{
+  OpenDDS::DCPS::Message_Block_Ptr amb(new ACE_Message_Block(1));
+  ACE_Message_Block* cont = amb.get();
+  for (size_t i = 0; i < 9; ++i) {
+    cont->cont(new ACE_Message_Block(1));
+    cont = cont->cont();
+  }
+
+  const Encoding enc;
+  Serializer ser_w(amb.get(), enc);
+  ACE_CDR::Octet x[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+  ASSERT_TRUE(ser_w.write_octet_array(x, sizeof x));
+
+  Serializer ser(amb.get(), enc);
+  ASSERT_FALSE(ser.trim(11));
+
+  ASSERT_TRUE(ser.read_octet_array(x, 3));
+  OpenDDS::DCPS::Message_Block_Ptr subset(ser.trim(3));
+  ASSERT_EQ(subset->total_length(), 3);
+  ASSERT_EQ(subset->length(), 1);
+  ASSERT_EQ(subset->rd_ptr()[0], 3);
+  ASSERT_TRUE(subset->cont());
+  ASSERT_TRUE(subset->cont()->cont());
+  ASSERT_FALSE(subset->cont()->cont()->cont());
+}
