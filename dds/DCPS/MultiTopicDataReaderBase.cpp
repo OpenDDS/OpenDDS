@@ -136,18 +136,20 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
     }
 
 
-    DDS::DataReader_var incoming =
-      parent->create_datareader(t, DATAREADER_QOS_USE_TOPIC_QOS,
-                                listener_.get(), ALL_STATUS_MASK);
-    if (!incoming.in()) {
+    QueryPlan& qp = query_plans_[selection[i]];
+    {
+      ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, qp_lock_);
+      qp.data_reader_ =
+        parent->create_datareader(t, DATAREADER_QOS_USE_TOPIC_QOS,
+                                  listener_.get(), ALL_STATUS_MASK);
+    }
+    if (!qp.data_reader_.in()) {
       throw runtime_error("Could not create incoming DataReader "
         + selection[i]);
     }
 
-    QueryPlan& qp = query_plans_[selection[i]];
-    qp.data_reader_ = incoming;
     try {
-      const MetaStruct& meta = metaStructFor(incoming);
+      const MetaStruct& meta = metaStructFor(qp.data_reader_);
 
       for (const char** names = meta.getFieldNames(); *names; ++names) {
         if (fieldToTopic.count(*names)) { // already seen this field name

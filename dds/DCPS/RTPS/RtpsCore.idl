@@ -621,7 +621,6 @@ module OpenDDS {
       ParticipantProxy_t participantProxy;
       Duration_t leaseDuration;
       DCPS::MonotonicTime_t discoveredAt;
-      BuiltinEndpointSet_t associated_endpoints;
     };
 
     /* Type used to hold data exchanged between Participants.

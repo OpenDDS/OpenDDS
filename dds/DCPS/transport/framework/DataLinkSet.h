@@ -87,6 +87,9 @@ public:
 
   void terminate_send_if_suspended();
 
+  bool is_leading(const GUID_t& writer_id,
+                  const GUID_t& reader_id) const;
+
 private:
 
   /// Hash map for DataLinks.
@@ -94,7 +97,7 @@ private:
 
   /// This lock will protect critical sections of code that play a
   /// role in the sending of data.
-  LockType lock_;
+  mutable LockType lock_;
 
   /// Listener for TransportSendControlElements created in send_response
   SendResponseListener send_response_listener_;

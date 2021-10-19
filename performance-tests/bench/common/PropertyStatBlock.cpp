@@ -199,11 +199,11 @@ SimpleStatBlock consolidate(const std::vector<SimpleStatBlock>& vec)
       // Consolidate median buffers (no need to include unused / invalid values beyond median sample count)
       if (it->median_buffer_.size()) {
         memcpy(&result.median_buffer_[median_buffer_pos], &it->median_buffer_[0], it->median_sample_count_ * sizeof(double));
-      }
-      if (it->timestamp_buffer_.size()) {
-        memcpy(&result.timestamp_buffer_[median_buffer_pos], &it->timestamp_buffer_[0], it->median_sample_count_ * sizeof(Builder::TimeStamp));
-      } else {
-        memset(&result.timestamp_buffer_[median_buffer_pos], 0, it->median_sample_count_ * sizeof(Builder::TimeStamp));
+        if (it->timestamp_buffer_.size()) {
+          memcpy(&result.timestamp_buffer_[median_buffer_pos], &it->timestamp_buffer_[0], it->median_sample_count_ * sizeof(Builder::TimeStamp));
+        } else {
+          memset(&result.timestamp_buffer_[median_buffer_pos], 0, it->median_sample_count_ * sizeof(Builder::TimeStamp));
+        }
       }
       median_buffer_pos += it->median_sample_count_;
     }

@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -23,6 +21,7 @@
 #include <dds/DCPS/MultiTask.h>
 #include <dds/DCPS/JobQueue.h>
 #include <dds/DCPS/NetworkConfigMonitor.h>
+#include <dds/DCPS/BuiltInTopicDataReaderImpls.h>
 #include <dds/DCPS/security/framework/SecurityConfig_rch.h>
 #ifdef OPENDDS_SECURITY
 #  include <dds/DCPS/security/framework/SecurityConfig.h>
@@ -35,18 +34,22 @@
 #include <dds/DdsDcpsInfoUtilsC.h>
 #include <dds/DdsDcpsCoreTypeSupportImpl.h>
 
-#ifdef ACE_HAS_CPP11
-#  include <atomic>
-#else
+#ifndef ACE_HAS_CPP11
 #  include <ace/Atomic_Op.h>
 #endif
 #include <ace/SOCK_Dgram.h>
 #include <ace/SOCK_Dgram_Mcast.h>
 #include <ace/Thread_Mutex.h>
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#ifdef ACE_HAS_CPP11
+#  include <atomic>
+#endif
+
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
+
+/* ParticipantData_t */
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -62,12 +65,17 @@ const char SEDP_AGENT_INFO_KEY[] = "SEDP";
 /// Each instance of class Spdp represents the implementation of the RTPS
 /// Simple Participant Discovery Protocol for a single local DomainParticipant.
 class OpenDDS_Rtps_Export Spdp
-  : public DCPS::LocalParticipant<Sedp>
+  : public DCPS::RcObject
 #ifdef OPENDDS_SECURITY
   , public ICE::AgentInfoListener
 #endif
 {
 public:
+  typedef OPENDDS_MAP_CMP(GUID_t, DiscoveredParticipant,
+                          GUID_tKeyLessThan) DiscoveredParticipantMap;
+  typedef DiscoveredParticipantMap::iterator DiscoveredParticipantIter;
+  typedef DiscoveredParticipantMap::const_iterator DiscoveredParticipantConstIter;
+
 
   Spdp(DDS::DomainId_t domain,
        DCPS::RepoId& guid,
@@ -170,7 +178,7 @@ public:
   DDS::DomainId_t get_domain_id() const { return domain_; }
   DDS::Security::PermissionsHandle lookup_participant_permissions(const DCPS::RepoId& id) const;
 
-  DCPS::AuthState lookup_participant_auth_state(const DCPS::RepoId& id) const;
+  AuthState lookup_participant_auth_state(const GUID_t& id) const;
 
   void process_participant_ice(const ParameterList& plist,
                                const ParticipantData_t& pdata,
@@ -222,8 +230,130 @@ public:
   void get_and_reset_relay_message_counts(DCPS::RelayMessageCounts& spdp,
                                           DCPS::RelayMessageCounts& sedp);
 
+  void ignore_domain_participant(const GUID_t& ignoreId);
+
+  bool update_domain_participant_qos(const DDS::DomainParticipantQos& qos);
+
+  DCPS::TopicStatus assert_topic(GUID_t& topicId, const char* topicName,
+    const char* dataTypeName, const DDS::TopicQos& qos,
+    bool hasDcpsKey, DCPS::TopicCallbacks* topic_callbacks);
+
+  DCPS::TopicStatus find_topic(
+    const char* topicName,
+    CORBA::String_out dataTypeName,
+    DDS::TopicQos_out qos,
+    GUID_t& topicId)
+  {
+    return endpoint_manager().find_topic(topicName, dataTypeName, qos, topicId);
+  }
+
+  DCPS::TopicStatus remove_topic(const GUID_t& topicId)
+  {
+    return endpoint_manager().remove_topic(topicId);
+  }
+
+  void ignore_topic(const GUID_t& ignoreId)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    endpoint_manager().ignore(ignoreId);
+  }
+
+  bool update_topic_qos(const GUID_t& topicId, const DDS::TopicQos& qos)
+  {
+    return endpoint_manager().update_topic_qos(topicId, qos);
+  }
+
+  GUID_t add_publication(
+    const GUID_t& topicId,
+    DCPS::DataWriterCallbacks_rch publication,
+    const DDS::DataWriterQos& qos,
+    const DCPS::TransportLocatorSeq& transInfo,
+    const DDS::PublisherQos& publisherQos,
+    const XTypes::TypeInformation& type_info)
+  {
+    return endpoint_manager().add_publication(topicId, publication, qos,
+                                              transInfo, publisherQos, type_info);
+  }
+
+  void remove_publication(const GUID_t& publicationId)
+  {
+    endpoint_manager().remove_publication(publicationId);
+  }
+
+  void ignore_publication(const GUID_t& ignoreId)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    return endpoint_manager().ignore(ignoreId);
+  }
+
+  bool update_publication_qos(
+    const GUID_t& publicationId,
+    const DDS::DataWriterQos& qos,
+    const DDS::PublisherQos& publisherQos)
+  {
+    return endpoint_manager().update_publication_qos(publicationId, qos, publisherQos);
+  }
+
+  void update_publication_locators(const GUID_t& publicationId,
+                                   const DCPS::TransportLocatorSeq& transInfo)
+  {
+    endpoint_manager().update_publication_locators(publicationId, transInfo);
+  }
+
+  GUID_t add_subscription(
+    const GUID_t& topicId,
+    DCPS::DataReaderCallbacks_rch subscription,
+    const DDS::DataReaderQos& qos,
+    const DCPS::TransportLocatorSeq& transInfo,
+    const DDS::SubscriberQos& subscriberQos,
+    const char* filterClassName,
+    const char* filterExpr,
+    const DDS::StringSeq& params,
+    const XTypes::TypeInformation& type_info)
+  {
+    return endpoint_manager().add_subscription(topicId, subscription, qos, transInfo,
+      subscriberQos, filterClassName, filterExpr, params, type_info);
+  }
+
+  void remove_subscription(const GUID_t& subscriptionId)
+  {
+    endpoint_manager().remove_subscription(subscriptionId);
+  }
+
+  void ignore_subscription(const GUID_t& ignoreId)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    return endpoint_manager().ignore(ignoreId);
+  }
+
+  bool update_subscription_qos(
+    const GUID_t& subscriptionId,
+    const DDS::DataReaderQos& qos,
+    const DDS::SubscriberQos& subscriberQos)
+  {
+    return endpoint_manager().update_subscription_qos(subscriptionId, qos, subscriberQos);
+  }
+
+  bool update_subscription_params(const GUID_t& subId, const DDS::StringSeq& params)
+  {
+    return endpoint_manager().update_subscription_params(subId, params);
+  }
+
+  void update_subscription_locators(const GUID_t& subId, const DCPS::TransportLocatorSeq& transInfo)
+  {
+    endpoint_manager().update_subscription_locators(subId, transInfo);
+  }
+
+  DDS::Subscriber_var bit_subscriber() const
+  {
+    return bit_subscriber_;
+  }
+
 protected:
   Sedp& endpoint_manager() { return *sedp_; }
+
+  void remove_discovered_participant(DiscoveredParticipantIter& iter);
+
   void remove_discovered_participant_i(DiscoveredParticipantIter& iter);
 
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -234,7 +364,62 @@ protected:
 
   bool announce_domain_participant_qos();
 
+  void type_lookup_service(const XTypes::TypeLookupService_rch type_lookup_service)
+  {
+    endpoint_manager().type_lookup_service(type_lookup_service);
+  }
+
 private:
+#ifndef DDS_HAS_MINIMUM_BIT
+  DCPS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit()
+  {
+    DDS::Subscriber_var bit_sub(bit_subscriber());
+    if (!bit_sub.in())
+      return 0;
+
+    DDS::DataReader_var d =
+      bit_sub->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_TOPIC);
+    return dynamic_cast<DCPS::ParticipantBuiltinTopicDataDataReaderImpl*>(d.in());
+  }
+
+  DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* part_loc_bit()
+  {
+    DDS::Subscriber_var bit_sub(bit_subscriber());
+    if (!bit_sub.in())
+      return 0;
+
+    DDS::DataReader_var d =
+      bit_sub->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
+    return dynamic_cast<DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl*>(d.in());
+  }
+
+  DCPS::ConnectionRecordDataReaderImpl* connection_record_bit()
+  {
+    DDS::Subscriber_var bit_sub(bit_subscriber());
+    if (!bit_sub.in())
+      return 0;
+
+    DDS::DataReader_var d =
+      bit_sub->lookup_datareader(DCPS::BUILT_IN_CONNECTION_RECORD_TOPIC);
+    return dynamic_cast<DCPS::ConnectionRecordDataReaderImpl*>(d.in());
+  }
+
+  DCPS::InternalThreadBuiltinTopicDataDataReaderImpl* internal_thread_bit()
+  {
+    DDS::Subscriber_var bit_sub(bit_subscriber());
+    if (!bit_sub.in())
+      return 0;
+
+    DDS::DataReader_var d =
+      bit_sub->lookup_datareader(DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC);
+    return dynamic_cast<DCPS::InternalThreadBuiltinTopicDataDataReaderImpl*>(d.in());
+  }
+#endif /* DDS_HAS_MINIMUM_BIT */
+
+#ifdef OPENDDS_SECURITY
+  typedef OPENDDS_MAP_CMP(GUID_t, DDS::Security::AuthRequestMessageToken, GUID_tKeyLessThan)
+    PendingRemoteAuthTokenMap;
+#endif
 
   void init(DDS::DomainId_t domain,
             DCPS::RepoId& guid,
@@ -242,6 +427,11 @@ private:
             RtpsDiscovery* disco,
             XTypes::TypeLookupService_rch tls);
 
+  mutable ACE_Thread_Mutex lock_;
+  DDS::Subscriber_var bit_subscriber_;
+  DDS::DomainParticipantQos qos_;
+  friend class Sedp;
+  DiscoveredParticipantMap participants_;
   RtpsDiscovery* disco_;
   DCPS::RcHandle<RtpsDiscoveryConfig> config_;
 
@@ -550,8 +740,8 @@ private:
   friend class ::DDS_TEST;
 };
 
-}
-}
+} // namespace RTPS
+} // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 

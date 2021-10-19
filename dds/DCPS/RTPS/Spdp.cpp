@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -18,7 +16,6 @@
 #endif
 
 #include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/Ice.h>
@@ -54,9 +51,6 @@ using DCPS::ENDIAN_BIG;
 using DCPS::ENDIAN_LITTLE;
 
 namespace {
-  const CORBA::UShort encap_LE = 0x0300; // {PL_CDR_LE} in LE
-  const CORBA::UShort encap_BE = 0x0200; // {PL_CDR_BE} in LE
-
   const Encoding encoding_plain_big(Encoding::KIND_XCDR1, ENDIAN_BIG);
   const Encoding encoding_plain_native(Encoding::KIND_XCDR1);
 
@@ -129,11 +123,6 @@ namespace {
     attr.is_liveliness_protected = false;
     attr.plugin_participant_attributes = 0;
     attr.ac_endpoint_properties.length(0);
-  }
-
-  inline bool has_security_data(Security::DiscoveredParticipantDataKind kind)
-  {
-    return kind == Security::DPDK_ENHANCED || kind == Security::DPDK_SECURE;
   }
 
 #endif
@@ -244,8 +233,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
            const DDS::DomainParticipantQos& qos,
            RtpsDiscovery* disco,
            XTypes::TypeLookupService_rch tls)
-
-  : DCPS::LocalParticipant<Sedp>(qos)
+  : qos_(qos)
   , disco_(disco)
   , config_(disco_->config())
   , domain_(domain)
@@ -287,8 +275,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
            DDS::Security::IdentityHandle identity_handle,
            DDS::Security::PermissionsHandle perm_handle,
            DDS::Security::ParticipantCryptoHandle crypto_handle)
-
-  : DCPS::LocalParticipant<Sedp>(qos)
+  : qos_(qos)
   , disco_(disco)
   , config_(disco_->config())
   , domain_(domain)
@@ -618,8 +605,9 @@ bool cmp_ip4(const ACE_INET_Addr& a, const DCPS::Locator_t& locator)
 {
   struct sockaddr_in* sa = static_cast<struct sockaddr_in*>(a.get_addr());
   if (sa->sin_family == AF_INET && locator.kind == LOCATOR_KIND_UDPv4) {
-    const char* ip = reinterpret_cast<const char*>(&sa->sin_addr);
-    return ACE_OS::memcmp(ip, locator.address + 12, 4) == 0;
+    const unsigned char* ip = reinterpret_cast<const unsigned char*>(&sa->sin_addr);
+    const unsigned char* la = reinterpret_cast<const unsigned char*>(locator.address) + 12;
+    return ACE_OS::memcmp(ip, la, 4) == 0;
   }
   return false;
 }
@@ -629,8 +617,9 @@ bool cmp_ip6(const ACE_INET_Addr& a, const DCPS::Locator_t& locator)
 {
   struct sockaddr_in6* in6 = static_cast<struct sockaddr_in6*>(a.get_addr());
   if (in6->sin6_family == AF_INET6 && locator.kind == LOCATOR_KIND_UDPv6) {
-    const char* ip = reinterpret_cast<const char*>(&in6->sin6_addr);
-    return ACE_OS::memcmp(ip, locator.address, 16) == 0;
+    const unsigned char* ip = reinterpret_cast<const unsigned char*>(&in6->sin6_addr);
+    const unsigned char* la = reinterpret_cast<const unsigned char*>(locator.address);
+    return ACE_OS::memcmp(ip, la, 16) == 0;
   }
   return false;
 }
@@ -646,9 +635,24 @@ bool is_ip_equal(const ACE_INET_Addr& a, const DCPS::Locator_t& locator)
   return cmp_ip4(a, locator);
 }
 
+void print_locator(const CORBA::ULong i, const DCPS::Locator_t& o){
+  const unsigned char* a = reinterpret_cast<const unsigned char*>(o.address);
+  ACE_INET_Addr addr;
+  bool b = locator_to_address(addr, o, false) == 0;
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("locator%d(kind:%d)[%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d.%d] locator_to_address:%C\n"),
+    i, o.kind, a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15],
+    (b ? DCPS::LogAddr(addr).c_str() : "failed")));
+}
+
 bool ip_in_locator_list(const ACE_INET_Addr& from, const DCPS::LocatorSeq& locators)
 {
+  if (DCPS::DCPS_debug_level) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ip_in_locator_list - from (type %d): %C\n"), from.get_type(), DCPS::LogAddr(from).c_str()));
+  }
   for (CORBA::ULong i = 0; i < locators.length(); ++i) {
+    if (DCPS::DCPS_debug_level) {
+      print_locator(i, locators[i]);
+    }
     if (is_ip_equal(from, locators[i])) {
       return true;
     }
@@ -700,8 +704,6 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
   // Make a (non-const) copy so we can tweak values below
   ParticipantData_t pdata(cpdata);
-  pdata.associated_endpoints =
-    DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR | DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER;
 
   const GUID_t guid = DCPS::make_part_guid(pdata.participantProxy.guidPrefix);
 
@@ -799,12 +801,11 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     }
 #endif
 
+    sedp_->associate(iter->second
 #ifdef OPENDDS_SECURITY
-    if (is_security_enabled()) {
-      // Associate the stateless reader / writer for handshakes & auth requests
-      sedp_->associate_preauth(iter->second.pdata_);
-    }
+                     , participant_sec_attr_
 #endif
+                     );
 
     // Since we've just seen a new participant, let's send out our
     // own announcement, so they don't have to wait.
@@ -825,9 +826,10 @@ Spdp::handle_participant_data(DCPS::MessageId id,
               ACE_TEXT("Incompatible security attributes in discovered participant: %C\n"),
               OPENDDS_STRING(DCPS::GuidConverter(guid)).c_str()));
           }
+          // FUTURE: This is probably not a good idea since it will just get rediscovered.
           participants_.erase(guid);
         } else { // allow_unauthenticated_participants == true
-          iter->second.auth_state_ = DCPS::AUTH_STATE_UNAUTHENTICATED;
+          iter->second.auth_state_ = AUTH_STATE_UNAUTHENTICATED;
           match_unauthenticated(guid, iter);
         }
       } else {
@@ -842,7 +844,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
         attempt_authentication(iter, true);
 
-        if (iter->second.auth_state_ == DCPS::AUTH_STATE_UNAUTHENTICATED) {
+        if (iter->second.auth_state_ == AUTH_STATE_UNAUTHENTICATED) {
           if (participant_sec_attr_.allow_unauthenticated_participants == false) {
             if (DCPS::security_debug.auth_debug) {
               ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::handle_participant_data - ")
@@ -851,10 +853,10 @@ Spdp::handle_participant_data(DCPS::MessageId id,
             }
             participants_.erase(guid);
           } else { // allow_unauthenticated_participants == true
-            iter->second.auth_state_ = DCPS::AUTH_STATE_UNAUTHENTICATED;
+            iter->second.auth_state_ = AUTH_STATE_UNAUTHENTICATED;
             match_unauthenticated(guid, iter);
           }
-        } else if (iter->second.auth_state_ == DCPS::AUTH_STATE_AUTHENTICATED) {
+        } else if (iter->second.auth_state_ == AUTH_STATE_AUTHENTICATED) {
           if (match_authenticated(guid, iter) == false) {
             participants_.erase(guid);
           }
@@ -862,7 +864,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         // otherwise just return, since we're waiting for input to finish authentication
       }
     } else {
-      iter->second.auth_state_ = DCPS::AUTH_STATE_UNAUTHENTICATED;
+      iter->second.auth_state_ = AUTH_STATE_UNAUTHENTICATED;
       match_unauthenticated(guid, iter);
     }
 #else
@@ -882,7 +884,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #ifdef OPENDDS_SECURITY
     // Non-secure updates for authenticated participants are used for liveliness but
     // are otherwise ignored. Non-secure dispose messages are ignored completely.
-    if (is_security_enabled() && iter->second.auth_state_ == DCPS::AUTH_STATE_AUTHENTICATED && !from_sedp) {
+    if (is_security_enabled() && iter->second.auth_state_ == AUTH_STATE_AUTHENTICATED && !from_sedp) {
       update_lease_expiration_i(iter, now);
       if (!from_relay && from != ACE_INET_Addr()) {
         iter->second.local_address_ = from;
@@ -957,10 +959,6 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         if (locators_changed(iter->second.pdata_.participantProxy, pdata.participantProxy)) {
           sedp_->update_locators(pdata);
         }
-        pdata.associated_endpoints = iter->second.pdata_.associated_endpoints;
-#ifdef OPENDDS_SECURITY
-        pdata.extended_associated_endpoints = iter->second.pdata_.extended_associated_endpoints;
-#endif
         const DCPS::MonotonicTime_t da = iter->second.pdata_.discoveredAt;
         iter->second.pdata_ = pdata;
         iter->second.pdata_.discoveredAt = da;
@@ -1035,11 +1033,7 @@ Spdp::data_received(const DataSubmessage& data,
   ParticipantData_t pdata;
 
   pdata.participantProxy.domainId = domain_;
-  pdata.associated_endpoints = 0;
   pdata.discoveredAt = MonotonicTimePoint::now().to_monotonic_time();
-#ifdef OPENDDS_SECURITY
-  pdata.extended_associated_endpoints = 0;
-#endif
 
   if (!ParameterListConverter::from_param_list(plist, pdata)) {
     if (DCPS::DCPS_debug_level > 0) {
@@ -1064,7 +1058,7 @@ Spdp::data_received(const DataSubmessage& data,
   const bool from_relay = from == config_->spdp_rtps_relay_address();
 #ifdef OPENDDS_SECURITY
   if (!from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList) && !ip_in_AgentInfo(from, plist)) {
-    if (DCPS::DCPS_debug_level) {
+    if (DCPS::DCPS_debug_level >= 8) {
       ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) Spdp::data_received - dropped IP: %C\n"), DCPS::LogAddr(from).c_str()));
     }
     return;
@@ -1074,7 +1068,7 @@ Spdp::data_received(const DataSubmessage& data,
   }
 #elif !defined OPENDDS_SAFETY_PROFILE
   if (!from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList)) {
-    if (DCPS::DCPS_debug_level) {
+    if (DCPS::DCPS_debug_level >= 8) {
       ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) Spdp::data_received - IP not in locator list: %C\n"), DCPS::LogAddr(from).c_str()));
     }
     return;
@@ -1112,10 +1106,6 @@ Spdp::match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter&
 #else
   ACE_UNUSED_ARG(guid);
 #endif /* DDS_HAS_MINIMUM_BIT */
-
-  // notify Sedp of association
-  // Sedp may call has_discovered_participant, which is why the participant must be added before this call to associate.
-  sedp_->associate(dp_iter->second.pdata_);
 
   dp_iter->second.bit_ih_ = bit_instance_handle;
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -1256,7 +1246,7 @@ DDS::OctetSeq Spdp::local_participant_data_as_octets() const
 void
 Spdp::send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
 {
-  OPENDDS_ASSERT(dp.handshake_state_ == DCPS::HANDSHAKE_STATE_BEGIN_HANDSHAKE_REQUEST);
+  OPENDDS_ASSERT(dp.handshake_state_ == HANDSHAKE_STATE_BEGIN_HANDSHAKE_REQUEST);
 
   Security::Authentication_var auth = security_config_->get_authentication();
   DDS::Security::SecurityException se = {"", 0, 0};
@@ -1290,7 +1280,7 @@ Spdp::send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp
     return;
   }
 
-  dp.handshake_state_ = DCPS::HANDSHAKE_STATE_PROCESS_HANDSHAKE;
+  dp.handshake_state_ = HANDSHAKE_STATE_PROCESS_HANDSHAKE;
 
   DDS::Security::ParticipantStatelessMessage msg;
   msg.message_identity.source_guid = guid_;
@@ -1328,7 +1318,7 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
       dp.auth_state_, dp.handshake_state_));
   }
 
-  if (!from_discovery && dp.handshake_state_ != DCPS::HANDSHAKE_STATE_DONE) {
+  if (!from_discovery && dp.handshake_state_ != HANDSHAKE_STATE_DONE) {
     // Ignore auth reqs when already in progress.
     return;
   }
@@ -1377,8 +1367,8 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
 
   switch (vr) {
   case DDS::Security::VALIDATION_OK: {
-    dp.auth_state_ = DCPS::AUTH_STATE_AUTHENTICATED;
-    dp.handshake_state_ = DCPS::HANDSHAKE_STATE_DONE;
+    dp.auth_state_ = AUTH_STATE_AUTHENTICATED;
+    dp.handshake_state_ = HANDSHAKE_STATE_DONE;
     purge_handshake_deadlines(iter);
     return;
   }
@@ -1388,7 +1378,7 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
                  ACE_TEXT("Attempting authentication (expecting request) for participant: %C\n"),
                  OPENDDS_STRING(DCPS::GuidConverter(guid)).c_str()));
     }
-    dp.handshake_state_ = DCPS::HANDSHAKE_STATE_BEGIN_HANDSHAKE_REPLY;
+    dp.handshake_state_ = HANDSHAKE_STATE_BEGIN_HANDSHAKE_REPLY;
     dp.is_requester_ = true;
     return; // We'll need to wait for an inbound handshake request from the remote participant
   }
@@ -1398,7 +1388,7 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
                  ACE_TEXT("Attempting authentication (sending request/expecting reply) for participant: %C\n"),
                  OPENDDS_STRING(DCPS::GuidConverter(guid)).c_str()));
     }
-    dp.handshake_state_ = DCPS::HANDSHAKE_STATE_BEGIN_HANDSHAKE_REQUEST;
+    dp.handshake_state_ = HANDSHAKE_STATE_BEGIN_HANDSHAKE_REQUEST;
     send_handshake_request(guid, dp);
     return;
   }
@@ -1408,8 +1398,8 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
                  ACE_TEXT("Remote participant identity is invalid. Security Exception[%d.%d]: %C\n"),
                  se.code, se.minor_code, se.message.in()));
     }
-    dp.auth_state_ = DCPS::AUTH_STATE_UNAUTHENTICATED;
-    dp.handshake_state_ = DCPS::HANDSHAKE_STATE_DONE;
+    dp.auth_state_ = AUTH_STATE_UNAUTHENTICATED;
+    dp.handshake_state_ = HANDSHAKE_STATE_DONE;
     purge_handshake_deadlines(iter);
     return;
   }
@@ -1419,8 +1409,8 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
                  ACE_TEXT("Unexpected return value while validating remote identity. Security Exception[%d.%d]: %C\n"),
                  se.code, se.minor_code, se.message.in()));
     }
-    dp.auth_state_ = DCPS::AUTH_STATE_UNAUTHENTICATED;
-    dp.handshake_state_ = DCPS::HANDSHAKE_STATE_DONE;
+    dp.auth_state_ = AUTH_STATE_UNAUTHENTICATED;
+    dp.handshake_state_ = HANDSHAKE_STATE_DONE;
     purge_handshake_deadlines(iter);
     return;
   }
@@ -1487,7 +1477,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   // we don't need to send the auth req.
   dp.have_auth_req_msg_ = false;
 
-  if (dp.handshake_state_ == DCPS::HANDSHAKE_STATE_DONE && !dp.is_requester_) {
+  if (dp.handshake_state_ == HANDSHAKE_STATE_DONE && !dp.is_requester_) {
     // Remote is still sending a reply, so resend the final.
     const RepoId reader = make_id(iter->first, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER);
     if (sedp_->write_stateless_message(dp.handshake_msg_, reader) != DDS::RETCODE_OK) {
@@ -1511,11 +1501,11 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   iter->second.handshake_sequence_number_ = msg.message_identity.sequence_number;
 
   switch (dp.handshake_state_) {
-  case DCPS::HANDSHAKE_STATE_DONE:
+  case HANDSHAKE_STATE_DONE:
     // Handled above.
     return;
 
-  case DCPS::HANDSHAKE_STATE_BEGIN_HANDSHAKE_REQUEST: {
+  case HANDSHAKE_STATE_BEGIN_HANDSHAKE_REQUEST: {
     if (DCPS::security_debug.auth_warn) {
       ACE_DEBUG((LM_WARNING,
                  ACE_TEXT("(%P|%t) {auth_warn} Spdp::handle_handshake_message() - ")
@@ -1524,7 +1514,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     return;
   }
 
-  case DCPS::HANDSHAKE_STATE_BEGIN_HANDSHAKE_REPLY: {
+  case HANDSHAKE_STATE_BEGIN_HANDSHAKE_REPLY: {
     DDS::Security::ParticipantStatelessMessage reply;
     reply.message_identity.source_guid = guid_;
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
@@ -1561,8 +1551,8 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     switch (vr) {
     case DDS::Security::VALIDATION_OK: {
       // Theoretically, this shouldn't happen unless handshakes can involve fewer than 3 messages
-      dp.auth_state_ = DCPS::AUTH_STATE_AUTHENTICATED;
-      dp.handshake_state_ = DCPS::HANDSHAKE_STATE_DONE;
+      dp.auth_state_ = AUTH_STATE_AUTHENTICATED;
+      dp.handshake_state_ = HANDSHAKE_STATE_DONE;
       purge_handshake_deadlines(iter);
       match_authenticated(src_participant, iter);
       return;
@@ -1603,7 +1593,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
                      OPENDDS_STRING(DCPS::GuidConverter(src_participant)).c_str()));
         }
       }
-      dp.handshake_state_ = DCPS::HANDSHAKE_STATE_PROCESS_HANDSHAKE;
+      dp.handshake_state_ = HANDSHAKE_STATE_PROCESS_HANDSHAKE;
       return;
     }
     case DDS::Security::VALIDATION_OK_FINAL_MESSAGE: {
@@ -1621,8 +1611,8 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
                      OPENDDS_STRING(DCPS::GuidConverter(src_participant)).c_str()));
         }
       }
-      dp.auth_state_ = DCPS::AUTH_STATE_AUTHENTICATED;
-      dp.handshake_state_ = DCPS::HANDSHAKE_STATE_PROCESS_HANDSHAKE;
+      dp.auth_state_ = AUTH_STATE_AUTHENTICATED;
+      dp.handshake_state_ = HANDSHAKE_STATE_PROCESS_HANDSHAKE;
       purge_handshake_deadlines(iter);
       match_authenticated(src_participant, iter);
       return;
@@ -1631,7 +1621,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     return;
   }
 
-  case DCPS::HANDSHAKE_STATE_PROCESS_HANDSHAKE: {
+  case HANDSHAKE_STATE_PROCESS_HANDSHAKE: {
     DDS::Security::ParticipantStatelessMessage reply;
     reply.message_identity.source_guid = guid_;
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
@@ -1688,8 +1678,8 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
       return;
     }
     case DDS::Security::VALIDATION_OK_FINAL_MESSAGE: {
-      dp.auth_state_ = DCPS::AUTH_STATE_AUTHENTICATED;
-      dp.handshake_state_ = DCPS::HANDSHAKE_STATE_DONE;
+      dp.auth_state_ = AUTH_STATE_AUTHENTICATED;
+      dp.handshake_state_ = HANDSHAKE_STATE_DONE;
       // Install the shared secret before sending the final so that
       // we are prepared to receive the crypto tokens from the
       // replier.
@@ -1714,8 +1704,8 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
       return;
     }
     case DDS::Security::VALIDATION_OK: {
-      dp.auth_state_ = DCPS::AUTH_STATE_AUTHENTICATED;
-      dp.handshake_state_ = DCPS::HANDSHAKE_STATE_DONE;
+      dp.auth_state_ = AUTH_STATE_AUTHENTICATED;
+      dp.handshake_state_ = HANDSHAKE_STATE_DONE;
       purge_handshake_deadlines(iter);
       match_authenticated(src_participant, iter);
       return;
@@ -1756,8 +1746,8 @@ Spdp::process_handshake_deadlines(const DCPS::MonotonicTimePoint& now)
         remove_discovered_participant(pit);
       } else {
         purge_handshake_resends(pit);
-        pit->second.auth_state_ = DCPS::AUTH_STATE_UNAUTHENTICATED;
-        pit->second.handshake_state_ = DCPS::HANDSHAKE_STATE_DONE;
+        pit->second.auth_state_ = AUTH_STATE_UNAUTHENTICATED;
+        pit->second.handshake_state_ = HANDSHAKE_STATE_DONE;
         handshake_deadlines_.erase(pos);
         match_unauthenticated(part_id, pit);
       }
@@ -1893,8 +1883,7 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
     return false;
   }
 
-  sedp_->associate(iter->second.pdata_);
-  sedp_->associate_secure_endpoints(iter->second.pdata_, participant_sec_attr_);
+  sedp_->process_association_records_i(iter->second);
 
   return true;
 }
@@ -1963,9 +1952,11 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
       return false;
     }
 
-    sedp_->disassociate_volatile(iter->second.pdata_);
+    sedp_->disassociate_volatile(iter->second);
     sedp_->cleanup_volatile_crypto(iter->first);
-    sedp_->associate_volatile(iter->second.pdata_);
+    sedp_->associate_volatile(iter->second);
+    sedp_->generate_remote_matched_crypto_handles(iter->second);
+    sedp_->process_association_records_i(iter->second);
 
     if (!auth->return_handshake_handle(iter->second.handshake_handle_, se)) {
       if (DCPS::security_debug.auth_warn) {
@@ -2078,17 +2069,10 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
     }
   }
 
-  // notify Sedp of association Sedp may call
-  // has_discovered_participant, which is the participant must be
-  // added before these calls to associate.
+  sedp_->generate_remote_matched_crypto_handles(iter->second);
 
-  if (iter->second.crypto_tokens_.length() == 0) {
-    sedp_->associate(iter->second.pdata_);
-    sedp_->associate_secure_endpoints(iter->second.pdata_, participant_sec_attr_);
-  }
-
-  sedp_->generate_remote_crypto_handles(iter->second.pdata_);
-  sedp_->associate_volatile(iter->second.pdata_);
+  // Auth is now complete.
+  sedp_->process_association_records_i(iter->second);
 
 #ifndef DDS_HAS_MINIMUM_BIT
   process_location_updates_i(iter);
@@ -2320,10 +2304,6 @@ ParticipantData_t Spdp::build_local_pdata(
       0 // we are not supporting fractional seconds in the lease duration
     },
     participant_discovered_at_
-    , 0 // associated_endpoints
-#ifdef OPENDDS_SECURITY
-    , 0 // extended_associated_endpoints
-#endif
   };
 
   return pdata;
@@ -2342,7 +2322,7 @@ bool Spdp::announce_domain_participant_qos()
   return true;
 }
 
-#if !defined _MSC_VER || _MSC_VER > 1700
+#if !defined _MSC_VER || _MSC_VER >= 1900
 const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_MULTICAST;
 const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_RELAY;
 const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_DIRECT;
@@ -2617,9 +2597,8 @@ Spdp::SpdpTransport::dispose_unregister()
 
   wbuff_.reset();
   DCPS::Serializer ser(&wbuff_, encoding_plain_native);
-  CORBA::UShort options = 0;
-  if (!(ser << hdr_) || !(ser << data_) || !(ser << encap_LE) || !(ser << options)
-      || !(ser << plist)) {
+  DCPS::EncapsulationHeader encap(ser.encoding(), DCPS::MUTABLE);
+  if (!(ser << hdr_) || !(ser << data_) || !(ser << encap) || !(ser << plist)) {
     if (DCPS::DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::dispose_unregister() - ")
@@ -2772,10 +2751,9 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
 #endif
 
   wbuff_.reset();
-  CORBA::UShort options = 0;
   DCPS::Serializer ser(&wbuff_, encoding_plain_native);
-  if (!(ser << hdr_) || !(ser << data_) || !(ser << encap_LE) || !(ser << options)
-      || !(ser << plist)) {
+  DCPS::EncapsulationHeader encap(ser.encoding(), DCPS::MUTABLE);
+  if (!(ser << hdr_) || !(ser << data_) || !(ser << encap) || !(ser << plist)) {
     if (DCPS::DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write() - ")
@@ -2896,9 +2874,9 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, const ACE_INET_Addr& loca
   DCPS::assign(info_dst.guidPrefix, guid.guidPrefix);
 
   wbuff_.reset();
-  CORBA::UShort options = 0;
   DCPS::Serializer ser(&wbuff_, encoding_plain_native);
-  if (!(ser << hdr_) || !(ser << info_dst) || !(ser << data_) || !(ser << encap_LE) || !(ser << options)
+  DCPS::EncapsulationHeader encap(ser.encoding(), DCPS::MUTABLE);
+  if (!(ser << hdr_) || !(ser << info_dst) || !(ser << data_) || !(ser << encap)
       || !(ser << plist)) {
     if (DCPS::DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
@@ -3123,9 +3101,9 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
 
         ParameterList plist;
         if (data.smHeader.flags & (FLAG_D | FLAG_K_IN_DATA)) {
-          ser.swap_bytes(!ACE_CDR_BYTE_ORDER); // read "encap" itself in LE
-          CORBA::UShort encap, options;
-          if (!(ser >> encap) || (encap != encap_LE && encap != encap_BE)) {
+          DCPS::EncapsulationHeader encap;
+          DCPS::Encoding enc;
+          if (!(ser >> encap) || !encap.to_encoding(enc, DCPS::MUTABLE) || enc.kind() != Encoding::KIND_XCDR1) {
             if (DCPS::DCPS_debug_level > 0) {
               ACE_ERROR((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
@@ -3133,10 +3111,9 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
             }
             return 0;
           }
-          ser >> options;
-          // bit 8 in encap is on if it's PL_CDR_LE
-          ser.swap_bytes(((encap & 0x100) >> 8) != ACE_CDR_BYTE_ORDER);
+          ser.encoding(enc);
           if (!(ser >> plist)) {
+
             if (DCPS::DCPS_debug_level > 0) {
               ACE_ERROR((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
@@ -3916,7 +3893,7 @@ void
 Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
 {
   const DCPS::RepoId peer = make_id(id, ENTITYID_PARTICIPANT);
-  const DiscoveredParticipantConstIter iter = participants_.find(peer);
+  const DiscoveredParticipantIter iter = participants_.find(peer);
   if (iter == participants_.end()) {
     if (DCPS::DCPS_debug_level > 0) {
       const DCPS::GuidConverter conv(peer);
@@ -3948,6 +3925,8 @@ Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
       }
     }
   }
+
+  iter->second.participant_tokens_sent_ = true;
 }
 
 DDS::Security::PermissionsHandle
@@ -3963,15 +3942,14 @@ Spdp::lookup_participant_permissions(const DCPS::RepoId& id) const
   return result;
 }
 
-DCPS::AuthState
-Spdp::lookup_participant_auth_state(const DCPS::RepoId& id) const
+AuthState Spdp::lookup_participant_auth_state(const GUID_t& id) const
 {
   ACE_Guard<ACE_Thread_Mutex> g(lock_, false);
   DiscoveredParticipantConstIter pi = participants_.find(id);
   if (pi != participants_.end()) {
     return pi->second.auth_state_;
   }
-  return DCPS::AUTH_STATE_HANDSHAKE;
+  return AUTH_STATE_HANDSHAKE;
 }
 #endif
 
@@ -4781,6 +4759,90 @@ DDS::ParticipantBuiltinTopicData Spdp::get_part_bit_data(bool secure) const
   bit_data.key = DDS::BuiltinTopicKey_t();
   bit_data.user_data = include_user_data ? qos_.user_data : DDS::UserDataQosPolicy();
   return bit_data;
+}
+
+void Spdp::ignore_domain_participant(const GUID_t& ignoreId)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  endpoint_manager().ignore(ignoreId);
+
+  DiscoveredParticipantIter iter = participants_.find(ignoreId);
+  if (iter != participants_.end()) {
+    remove_discovered_participant(iter);
+  }
+}
+
+bool Spdp::update_domain_participant_qos(const DDS::DomainParticipantQos& qos)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
+  qos_ = qos;
+  return announce_domain_participant_qos();
+}
+
+DCPS::TopicStatus Spdp::assert_topic(GUID_t& topicId, const char* topicName,
+  const char* dataTypeName, const DDS::TopicQos& qos,
+  bool hasDcpsKey, DCPS::TopicCallbacks* topic_callbacks)
+{
+  if (std::strlen(topicName) > 256 || std::strlen(dataTypeName) > 256) {
+    if (DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR LocalParticipant::assert_topic() - ")
+                 ACE_TEXT("topic or type name length limit (256) exceeded\n")));
+    }
+    return DCPS::PRECONDITION_NOT_MET;
+  }
+
+  return endpoint_manager().assert_topic(topicId, topicName, dataTypeName, qos, hasDcpsKey, topic_callbacks);
+}
+
+void Spdp::remove_discovered_participant(DiscoveredParticipantIter& iter)
+{
+  if (iter == participants_.end()) {
+    return;
+  }
+  GUID_t part_id = iter->first;
+  bool removed = endpoint_manager().disassociate(iter->second);
+  iter = participants_.find(part_id); // refresh iter after disassociate, which can unlock
+  if (iter == participants_.end()) {
+    return;
+  }
+  if (removed) {
+#ifndef DDS_HAS_MINIMUM_BIT
+    DCPS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
+    DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* loc_bit = part_loc_bit();
+    // bit may be null if the DomainParticipant is shutting down
+    if ((bit && iter->second.bit_ih_ != DDS::HANDLE_NIL) ||
+        (loc_bit && iter->second.location_ih_ != DDS::HANDLE_NIL)) {
+      {
+        const DDS::InstanceHandle_t bit_ih = iter->second.bit_ih_;
+        const DDS::InstanceHandle_t location_ih = iter->second.location_ih_;
+
+        ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+        ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
+        if (bit && bit_ih != DDS::HANDLE_NIL) {
+          bit->set_instance_state(bit_ih,
+                                  DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+        }
+        if (loc_bit && location_ih != DDS::HANDLE_NIL) {
+          loc_bit->set_instance_state(location_ih,
+                                      DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
+        }
+      }
+      iter = participants_.find(part_id);
+      if (iter == participants_.end()) {
+        return;
+      }
+    }
+#endif /* DDS_HAS_MINIMUM_BIT */
+    if (DCPS_debug_level > 3) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) LocalParticipant::remove_discovered_participant: "
+        "erasing %C (%B)\n",
+        LogGuid(iter->first).c_str(), participants_.size()));
+    }
+
+    remove_discovered_participant_i(iter);
+
+    participants_.erase(iter);
+  }
 }
 
 } // namespace RTPS

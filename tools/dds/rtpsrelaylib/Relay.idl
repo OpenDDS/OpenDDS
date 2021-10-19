@@ -67,6 +67,8 @@ module RtpsRelay {
   @topic
   struct SpdpReplay {
     StringSequence partitions;
+    string address;
+    GUID_t guid;
   };
 
   struct RelayHeader {

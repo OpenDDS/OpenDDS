@@ -1,7 +1,7 @@
 #ifndef OPENDDS_DCPS_DATAREADERIMPL_T_H
 #define OPENDDS_DCPS_DATAREADERIMPL_T_H
 
-#include "ace/config-lite.h"
+#include <ace/config-lite.h>
 
 #ifdef ACE_HAS_CPP11
 #  define OPENDDS_HAS_STD_SHARED_PTR
@@ -17,12 +17,14 @@
 #include "dcps_export.h"
 #include "GuidConverter.h"
 
-#ifdef OPENDDS_HAS_STD_SHARED_PTR
-#include <memory>
-#else
-#include <ace/Bound_Ptr.h>
+#ifndef OPENDDS_HAS_STD_SHARED_PTR
+#  include <ace/Bound_Ptr.h>
 #endif
 #include <ace/Time_Value.h>
+
+#ifndef OPENDDS_HAS_STD_SHARED_PTR
+#  include <memory>
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

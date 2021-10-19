@@ -1068,7 +1068,7 @@ DomainParticipantImpl::delete_contained_entities()
 
   bit_subscriber_ = DDS::Subscriber::_nil();
 
-  OpenDDS::DCPS::Registered_Data_Types->unregister_participant(this);
+  Registered_Data_Types->unregister_participant(this);
 
   // the participant can now start creating new contained entities
   set_deleted(false);

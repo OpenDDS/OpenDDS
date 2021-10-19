@@ -45,6 +45,8 @@ public:
   virtual void data_dropped(const DataSampleElement* sample,
                             bool dropped_by_transport);
 
+  virtual void data_acked(const GUID_t&) {}
+
   virtual void control_delivered(const Message_Block_Ptr& sample);
   virtual void control_dropped(const Message_Block_Ptr& sample,
                                bool dropped_by_transport);

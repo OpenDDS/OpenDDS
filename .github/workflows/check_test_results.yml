@@ -17,14 +17,14 @@ jobs:
     steps:
       - name: 'Get Autobuild Artifact Info'
         id: get-info
-        uses: actions/github-script@v4
+        uses: actions/github-script@v5
         with:
           script: |
             var page = 1;
             var artifacts;
             var temp_artifacts;
             while (page == 1 || page * 100 <= temp_artifacts.data.total_count) {
-              temp_artifacts = await github.actions.listWorkflowRunArtifacts({
+              temp_artifacts = await github.rest.actions.listWorkflowRunArtifacts({
                  owner: context.repo.owner,
                  repo: context.repo.repo,
                  run_id: ${{ github.event.workflow_run.id }},
@@ -58,11 +58,11 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion != 'cancelled' }}
     steps:
       - name: 'Download Autobuild Artifact'
-        uses: actions/github-script@v4
+        uses: actions/github-script@v5
         with:
           script: |
             var fs = require('fs');
-            var download = await github.actions.downloadArtifact({
+            var download = await github.rest.actions.downloadArtifact({
                owner: context.repo.owner,
                repo: context.repo.repo,
                artifact_id: '${{ matrix.info[1] }}',
