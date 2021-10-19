@@ -40,13 +40,19 @@ struct AddrSetStats {
   ParticipantStatisticsReporter sedp_stats_reporter;
   ParticipantStatisticsReporter data_stats_reporter;
   OpenDDS::DCPS::Message_Block_Shared_Ptr spdp_message;
+  OpenDDS::DCPS::MonotonicTimePoint session_start;
   OpenDDS::DCPS::MonotonicTimePoint first_spdp;
 #ifdef OPENDDS_SECURITY
   std::string common_name;
 #endif
 
-  AddrSetStats()
+  AddrSetStats(const OpenDDS::DCPS::GUID_t& guid,
+               const OpenDDS::DCPS::MonotonicTimePoint& a_session_start)
     : allow_rtps(false)
+    , spdp_stats_reporter(rtps_guid_to_relay_guid(guid), "SPDP")
+    , sedp_stats_reporter(rtps_guid_to_relay_guid(guid), "SEDP")
+    , data_stats_reporter(rtps_guid_to_relay_guid(guid), "DATA")
+    , session_start(a_session_start)
   {}
 
   bool empty() const
@@ -117,13 +123,23 @@ public:
 
   OpenDDS::DCPS::MonotonicTimePoint get_first_spdp(const OpenDDS::DCPS::GUID_t& guid);
 
-  void remove(const OpenDDS::DCPS::GUID_t& guid);
+  void remove(const OpenDDS::DCPS::GUID_t& guid,
+              const OpenDDS::DCPS::MonotonicTimePoint& now);
 
   void remove_pending(const OpenDDS::DCPS::GUID_t& guid)
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
     pending_.erase(guid);
   }
+
+  OpenDDS::DCPS::TimeDuration get_session_time(
+    const OpenDDS::DCPS::GUID_t& guid, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    GuidAddrSet::Proxy proxy(*this);
+    return proxy.get_session_time(guid, now);
+  }
+
+  using CreatedAddrSetStats = std::pair<bool, AddrSetStats&>;
 
   class Proxy {
   public:
@@ -148,18 +164,26 @@ public:
       return gas_.guid_addr_set_map_.end();
     }
 
+    CreatedAddrSetStats find_or_create(const OpenDDS::DCPS::GUID_t& guid,
+      const OpenDDS::DCPS::MonotonicTimePoint& now)
+    {
+      return gas_.find_or_create(guid, now);
+    }
+
     ParticipantStatisticsReporter&
     record_activity(const AddrPort& remote_address,
                     const OpenDDS::DCPS::MonotonicTimePoint& now,
                     const OpenDDS::DCPS::GUID_t& src_guid,
+                    MessageType msg_type,
                     const size_t& msg_len,
                     RelayHandler& handler);
 
     ParticipantStatisticsReporter&
     participant_statistics_reporter(const OpenDDS::DCPS::GUID_t& guid,
+                                    const OpenDDS::DCPS::MonotonicTimePoint& now,
                                     Port port)
     {
-      return *gas_.guid_addr_set_map_[guid].select_stats_reporter(port);
+      return *find_or_create(guid, now).second.select_stats_reporter(port);
     }
 
     bool ignore_rtps(bool from_application_participant,
@@ -170,6 +194,13 @@ public:
       return gas_.ignore_rtps(from_application_participant, guid, now, admitted);
     }
 
+    OpenDDS::DCPS::TimeDuration get_session_time(
+      const OpenDDS::DCPS::GUID_t& guid, const OpenDDS::DCPS::MonotonicTimePoint& now)
+    {
+      const auto it = find(guid);
+      return it == end() ? OpenDDS::DCPS::TimeDuration::zero_value :
+        (now - it->second.session_start);
+    }
 
   private:
     GuidAddrSet& gas_;
@@ -177,10 +208,24 @@ public:
   };
 
 private:
+  CreatedAddrSetStats find_or_create(const OpenDDS::DCPS::GUID_t& guid,
+    const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    auto it = guid_addr_set_map_.find(guid);
+    const bool create = it == guid_addr_set_map_.end();
+    if (create) {
+      const auto it_bool_pair =
+        guid_addr_set_map_.insert(std::make_pair(guid, AddrSetStats(guid, now)));
+      it = it_bool_pair.first;
+    }
+    return CreatedAddrSetStats(create, it->second);
+  }
+
   ParticipantStatisticsReporter&
   record_activity(const AddrPort& remote_address,
                   const OpenDDS::DCPS::MonotonicTimePoint& now,
                   const OpenDDS::DCPS::GUID_t& src_guid,
+                  MessageType msg_type,
                   const size_t& msg_len,
                   RelayHandler& handler);
 
@@ -188,6 +233,10 @@ private:
                    const OpenDDS::DCPS::GUID_t& guid,
                    const OpenDDS::DCPS::MonotonicTimePoint& now,
                    bool& admitted);
+
+  void remove_i(const OpenDDS::DCPS::GUID_t& guid,
+                GuidAddrSetMap::iterator it,
+                const OpenDDS::DCPS::MonotonicTimePoint& now);
 
   const Config& config_;
   RelayStatisticsReporter& relay_stats_reporter_;
@@ -322,6 +371,7 @@ protected:
                                                  const AddrPort& remote_address,
                                                  const OpenDDS::DCPS::MonotonicTimePoint& now,
                                                  const OpenDDS::DCPS::GUID_t& src_guid,
+                                                 MessageType msg_type,
                                                  const size_t& msg_len);
   CORBA::ULong send(GuidAddrSet::Proxy& proxy,
                     const OpenDDS::DCPS::GUID_t& src_guid,

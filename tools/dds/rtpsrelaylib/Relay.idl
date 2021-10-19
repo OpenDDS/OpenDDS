@@ -81,21 +81,6 @@ module RtpsRelay {
     unsigned long nanosec;
   };
 
-  const string PARTICIPANT_STATISTICS_TOPIC_NAME = "Participant Statistics";
-
-  @topic
-  @mutable
-  @autoid(HASH)
-  struct ParticipantStatistics {
-    @key GUID_t guid;
-    @key string name;
-    Duration_t interval;
-    unsigned long messages_from;
-    unsigned long long bytes_from;
-    unsigned long messages_to;
-    unsigned long long bytes_to;
-  };
-
   @mutable
   @autoid(HASH)
   struct ProtocolStatistics {
@@ -109,6 +94,19 @@ module RtpsRelay {
     unsigned long messages_dropped;
     unsigned long long bytes_dropped;
     Duration_t output_processing_time;
+  };
+
+  const string PARTICIPANT_STATISTICS_TOPIC_NAME = "Participant Statistics";
+
+  @topic
+  @mutable
+  @autoid(HASH)
+  struct ParticipantStatistics {
+    @key GUID_t guid;
+    @key string name;
+    Duration_t session_time;
+    ProtocolStatistics rtps;
+    ProtocolStatistics stun;
   };
 
   const string HANDLER_STATISTICS_TOPIC_NAME = "Handler Statistics";

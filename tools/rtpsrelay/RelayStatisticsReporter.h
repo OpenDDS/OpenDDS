@@ -16,8 +16,6 @@ public:
   RelayStatisticsReporter(const Config& config,
                           RelayStatisticsDataWriter_var writer)
     : config_(config)
-    , log_helper_(log_relay_statistics_)
-    , publish_helper_(publish_relay_statistics_)
     , writer_(writer)
   {
     DDS::Topic_var topic = writer_->get_topic();
@@ -31,8 +29,8 @@ public:
                      const OpenDDS::DCPS::MonotonicTimePoint& now,
                      MessageType type)
   {
-    log_helper_.input_message(byte_count, time, type);
-    publish_helper_.input_message(byte_count, time, type);
+    log_helper_.input_message(log_relay_statistics_, byte_count, time, type);
+    publish_helper_.input_message(publish_relay_statistics_, byte_count, time, type);
     report(now);
   }
 
@@ -40,8 +38,8 @@ public:
                        const OpenDDS::DCPS::MonotonicTimePoint& now,
                        MessageType type)
   {
-    log_helper_.ignored_message(byte_count, type);
-    publish_helper_.ignored_message(byte_count, type);
+    log_helper_.ignored_message(log_relay_statistics_, byte_count, type);
+    publish_helper_.ignored_message(publish_relay_statistics_, byte_count, type);
     report(now);
   }
 
@@ -51,8 +49,8 @@ public:
                       const OpenDDS::DCPS::MonotonicTimePoint& now,
                       MessageType type)
   {
-    log_helper_.output_message(byte_count, time, queue_latency, type);
-    publish_helper_.output_message(byte_count, time, queue_latency, type);
+    log_helper_.output_message(log_relay_statistics_, byte_count, time, queue_latency, type);
+    publish_helper_.output_message(publish_relay_statistics_, byte_count, time, queue_latency, type);
     report(now);
   }
 
@@ -62,15 +60,15 @@ public:
                        const OpenDDS::DCPS::MonotonicTimePoint& now,
                        MessageType type)
   {
-    log_helper_.dropped_message(byte_count, time, queue_latency, type);
-    publish_helper_.dropped_message(byte_count, time, queue_latency, type);
+    log_helper_.dropped_message(log_relay_statistics_, byte_count, time, queue_latency, type);
+    publish_helper_.dropped_message(publish_relay_statistics_, byte_count, time, queue_latency, type);
     report(now);
   }
 
   void max_gain(size_t value, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    log_helper_.max_gain(value);
-    publish_helper_.max_gain(value);
+    log_helper_.max_gain(log_relay_statistics_, value);
+    publish_helper_.max_gain(publish_relay_statistics_, value);
     report(now);
   }
 
@@ -83,8 +81,8 @@ public:
 
   void error(const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    log_helper_.error();
-    publish_helper_.error();
+    log_helper_.error(log_relay_statistics_);
+    publish_helper_.error(publish_relay_statistics_);
     report(now);
   }
 
@@ -111,8 +109,8 @@ public:
 
   void max_queue_size(size_t size, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
-    log_helper_.max_queue_size(size);
-    publish_helper_.max_queue_size(size);
+    log_helper_.max_queue_size(log_relay_statistics_, size);
+    publish_helper_.max_queue_size(publish_relay_statistics_, size);
     report(now);
   }
 
@@ -154,13 +152,13 @@ private:
   void log_report(const OpenDDS::DCPS::MonotonicTimePoint& now,
                   bool force)
   {
-    if (!log_helper_.prepare_report(now, force, config_.log_relay_statistics())) {
+    if (!log_helper_.prepare_report(log_relay_statistics_, now, force, config_.log_relay_statistics())) {
       return;
     }
 
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name_.in(), OpenDDS::DCPS::to_json(log_relay_statistics_).c_str()));
 
-    log_helper_.reset(now);
+    log_helper_.reset(log_relay_statistics_, now);
     log_relay_statistics_.new_address_count(0);
     log_relay_statistics_.expired_address_count(0);
     log_relay_statistics_.expired_pending_count(0);
@@ -169,7 +167,7 @@ private:
   void publish_report(const OpenDDS::DCPS::MonotonicTimePoint& now,
                       bool force)
   {
-    if (!publish_helper_.prepare_report(now, force, config_.publish_relay_statistics())) {
+    if (!publish_helper_.prepare_report(publish_relay_statistics_, now, force, config_.publish_relay_statistics())) {
       return;
     }
 
@@ -179,7 +177,7 @@ private:
         "RelayStatisticsReporter::publish_report failed to write relay statistics\n"));
     }
 
-    publish_helper_.reset(now);
+    publish_helper_.reset(publish_relay_statistics_, now);
     publish_relay_statistics_.new_address_count(0);
     publish_relay_statistics_.expired_address_count(0);
     publish_relay_statistics_.expired_pending_count(0);
