@@ -25,6 +25,7 @@ public:
     , log_entries_(false)
     , log_discovery_(false)
     , log_activity_(false)
+    , restart_detection_(false)
   {}
 
   void relay_id(const std::string& value)
@@ -227,6 +228,16 @@ public:
     return publish_relay_status_liveliness_;
   }
 
+  void restart_detection(bool flag)
+  {
+    restart_detection_ = flag;
+  }
+
+  bool restart_detection() const
+  {
+    return restart_detection_;
+  }
+
 private:
   std::string relay_id_;
   OpenDDS::DCPS::GUID_t application_participant_guid_;
@@ -248,6 +259,7 @@ private:
   bool publish_participant_statistics_;
   OpenDDS::DCPS::TimeDuration publish_relay_status_;
   OpenDDS::DCPS::TimeDuration publish_relay_status_liveliness_;
+  bool restart_detection_;
 };
 
 }

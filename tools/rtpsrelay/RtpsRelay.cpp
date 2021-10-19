@@ -104,10 +104,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   args.ignore_arg(); // argv[0] is the program name
   while (args.is_anything_left()) {
     const char* arg = nullptr;
-    if ((arg = args.get_the_parameter("-Id"))) {
-      config.relay_id(arg);
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-HorizontalAddress"))) {
+    if ((arg = args.get_the_parameter("-HorizontalAddress"))) {
       nic_horizontal = ACE_INET_Addr(arg);
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-VerticalAddress"))) {
@@ -173,6 +170,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-PublishRelayStatus"))) {
       config.publish_relay_status(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-RestartDetection"))) {
+      config.restart_detection(ACE_OS::atoi(arg));
+      args.consume_arg();
 #ifdef OPENDDS_SECURITY
     } else if ((arg = args.get_the_parameter("-IdentityCA"))) {
       identity_ca_file = file + arg;
@@ -199,6 +199,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       secure = true;
       args.consume_arg();
 #endif
+    } else if ((arg = args.get_the_parameter("-Id"))) {
+      config.relay_id(arg);
+      args.consume_arg();
     } else {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Invalid option: %C\n", args.get_current()));
       return 1;
@@ -607,7 +610,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   RelayStatisticsReporter relay_statistics_reporter(config, relay_statistics_writer);
-  GuidAddrSet guid_addr_set(config, relay_statistics_reporter);
+  GuidAddrSet guid_addr_set(config, rtps_discovery, relay_statistics_reporter);
   ACE_Reactor reactor_(new ACE_Select_Reactor, true);
   const auto reactor = &reactor_;
   GuidPartitionTable guid_partition_table(config, guid_addr_set, spdp_horizontal_addr, relay_partitions_writer, spdp_replay_writer);

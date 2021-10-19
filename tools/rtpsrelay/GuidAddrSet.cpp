@@ -19,7 +19,7 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
   const bool created = cass.first;
   AddrSetStats& addr_set_stats = cass.second;
 
-  {
+  if (config_.restart_detection()) {
     Remote remote(remote_address.addr, src_guid);
     const auto result = remote_map_.insert(std::make_pair(remote, src_guid));
     if (!result.second && result.first->second != src_guid) {
@@ -200,8 +200,6 @@ OpenDDS::DCPS::MonotonicTimePoint GuidAddrSet::get_first_spdp(const OpenDDS::DCP
 void GuidAddrSet::remove(const OpenDDS::DCPS::GUID_t& guid,
                          const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
-  GuidAddrSet::Proxy proxy(*this);
-
   const auto it = guid_addr_set_map_.find(guid);
   if (it == guid_addr_set_map_.end()) {
     return;
@@ -215,6 +213,7 @@ void GuidAddrSet::remove_i(const OpenDDS::DCPS::GUID_t& guid,
                            const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
   AddrSetStats& addr_stats = it->second;
+  const auto session_time = now - addr_stats.session_start;
   addr_stats.spdp_stats_reporter.report(addr_stats.session_start, now);
   addr_stats.sedp_stats_reporter.report(addr_stats.session_start, now);
   addr_stats.data_stats_reporter.report(addr_stats.session_start, now);
@@ -224,7 +223,7 @@ void GuidAddrSet::remove_i(const OpenDDS::DCPS::GUID_t& guid,
   relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
 
   if (config_.log_activity()) {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::remove_i %C removed %C into session total=%B pending=%B/%B\n"), guid_to_string(guid).c_str(), get_session_time(guid, now).sec_str().c_str(), guid_addr_set_map_.size(), pending_.size(), config_.max_pending()));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::remove_i %C removed %C into session total=%B pending=%B/%B\n"), guid_to_string(guid).c_str(), session_time.sec_str().c_str(), guid_addr_set_map_.size(), pending_.size(), config_.max_pending()));
   }
 }
 

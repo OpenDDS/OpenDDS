@@ -57,10 +57,11 @@ void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
 
         if (r == GuidPartitionTable::ADDED) {
           if (config_.log_discovery()) {
+            GuidAddrSet::Proxy proxy(guid_addr_set_);
             ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SubscriptionListener::on_data_available "
               "add local reader %C %C into session\n",
               guid_to_string(repoid).c_str(),
-              guid_addr_set_.get_session_time(make_part_guid(repoid), now).sec_str().c_str()));
+              proxy.get_session_time(make_part_guid(repoid), now).sec_str().c_str()));
             ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SubscriptionListener::on_data_available add local reader %C %C\n"), guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str()));
           }
 
@@ -78,10 +79,11 @@ void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
         const auto repoid = participant_->get_repoid(info.instance_handle);
 
         if (config_.log_discovery()) {
+          GuidAddrSet::Proxy proxy(guid_addr_set_);
           ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SubscriptionListener::on_data_available "
             "remove local reader %C %C into session\n",
             guid_to_string(repoid).c_str(),
-            guid_addr_set_.get_session_time(make_part_guid(repoid), now).sec_str().c_str()));
+            proxy.get_session_time(make_part_guid(repoid), now).sec_str().c_str()));
         }
 
         guid_partition_table_.remove(repoid);

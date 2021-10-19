@@ -7,6 +7,7 @@
 #include <dds/rtpsrelaylib/Utility.h>
 
 #include <dds/DCPS/TimeTypes.h>
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
 
 namespace RtpsRelay {
 
@@ -70,6 +71,38 @@ struct AddrSetStats {
   }
 };
 
+struct Remote {
+  ACE_INET_Addr addr_;
+  unsigned char guid_prefix_prefix_[6];
+
+  Remote(const ACE_INET_Addr& addr,
+         const OpenDDS::DCPS::GUID_t& guid)
+    : addr_(addr)
+  {
+    addr_.set_port_number(0);
+    std::memcpy(&guid_prefix_prefix_[0], &guid.guidPrefix[0], sizeof(guid_prefix_prefix_));
+  }
+
+  bool operator==(const Remote& other) const
+  {
+    return addr_ == other.addr_ &&
+      std::memcmp(&guid_prefix_prefix_[0], &other.guid_prefix_prefix_[0], sizeof(guid_prefix_prefix_)) == 0;
+  }
+};
+
+struct RemoteHash {
+  size_t operator() (const Remote& remote) const
+  {
+    return remote.addr_.hash() ^
+      ((static_cast<size_t>(remote.guid_prefix_prefix_[0]) << 0) |
+       (static_cast<size_t>(remote.guid_prefix_prefix_[1]) << 8) |
+       (static_cast<size_t>(remote.guid_prefix_prefix_[2]) << 16) |
+       (static_cast<size_t>(remote.guid_prefix_prefix_[3]) << 24)) ^
+      ((static_cast<size_t>(remote.guid_prefix_prefix_[4]) << 0) |
+       (static_cast<size_t>(remote.guid_prefix_prefix_[5]) << 8));
+  }
+};
+
 class RelayHandler;
 
 class GuidAddrSet {
@@ -77,8 +110,10 @@ public:
   typedef std::unordered_map<OpenDDS::DCPS::GUID_t, AddrSetStats, GuidHash> GuidAddrSetMap;
 
   GuidAddrSet(const Config& config,
+              OpenDDS::RTPS::RtpsDiscovery_rch rtps_discovery,
               RelayStatisticsReporter& relay_stats_reporter)
     : config_(config)
+    , rtps_discovery_(rtps_discovery)
     , relay_stats_reporter_(relay_stats_reporter)
   {}
 
@@ -104,26 +139,10 @@ public:
 
   OpenDDS::DCPS::MonotonicTimePoint get_first_spdp(const OpenDDS::DCPS::GUID_t& guid);
 
-  void remove(const OpenDDS::DCPS::GUID_t& guid,
-              const OpenDDS::DCPS::MonotonicTimePoint& now);
-
-  void remove_pending(const OpenDDS::DCPS::GUID_t& guid)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-    pending_.erase(guid);
-  }
-
   bool admitting() const
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
     return admitting_i();
-  }
-
-  OpenDDS::DCPS::TimeDuration get_session_time(const OpenDDS::DCPS::GUID_t& guid,
-                                               const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    GuidAddrSet::Proxy proxy(*this);
-    return proxy.get_session_time(guid, now);
   }
 
   using CreatedAddrSetStats = std::pair<bool, AddrSetStats&>;
@@ -192,6 +211,17 @@ public:
         (now - it->second.session_start);
     }
 
+    void remove_pending(const OpenDDS::DCPS::GUID_t& guid)
+    {
+      gas_.pending_.erase(guid);
+    }
+
+    void remove(const OpenDDS::DCPS::GUID_t& guid,
+                const OpenDDS::DCPS::MonotonicTimePoint& now)
+    {
+      gas_.remove(guid, now);
+    }
+
   private:
     GuidAddrSet& gas_;
     OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(Proxy)
@@ -229,16 +259,22 @@ private:
                    const OpenDDS::DCPS::MonotonicTimePoint& now,
                    bool& admitted);
 
+  void remove(const OpenDDS::DCPS::GUID_t& guid,
+              const OpenDDS::DCPS::MonotonicTimePoint& now);
+
   void remove_i(const OpenDDS::DCPS::GUID_t& guid,
                 GuidAddrSetMap::iterator it,
                 const OpenDDS::DCPS::MonotonicTimePoint& now);
 
   const Config& config_;
+  OpenDDS::RTPS::RtpsDiscovery_rch rtps_discovery_;
   RelayStatisticsReporter& relay_stats_reporter_;
   RelayHandler* spdp_vertical_handler_;
   RelayHandler* sedp_vertical_handler_;
   RelayHandler* data_vertical_handler_;
   GuidAddrSetMap guid_addr_set_map_;
+  typedef std::unordered_map<Remote, OpenDDS::DCPS::GUID_t, RemoteHash> RemoteMap;
+  RemoteMap remote_map_;
   typedef std::list<std::pair<OpenDDS::DCPS::MonotonicTimePoint, GuidAddr> > ExpirationGuidAddrQueue;
   ExpirationGuidAddrQueue expiration_guid_addr_queue_;
   GuidSet pending_;
