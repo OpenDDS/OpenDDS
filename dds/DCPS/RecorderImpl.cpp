@@ -168,12 +168,6 @@ void RecorderImpl::init(
   }
 
   CORBA::String_var topic_name = a_topic_desc->get_name();
-
-#if !defined (DDS_HAS_MINIMUM_BIT)
-  CORBA::String_var type_name = "";
-  is_bit_ = topicIsBIT(topic_name.in(), type_name);
-#endif   // !defined (DDS_HAS_MINIMUM_BIT)
-
   qos_ = qos;
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
@@ -440,7 +434,8 @@ RecorderImpl::add_association(const RepoId&            yourId,
     return;
   }
   XTypes::TypeObject cto = tls->get_type_object(type_info.complete.typeid_with_size.type_id);
-  dt_ = tls->complete_to_dynamic(cto.complete, writer.writerId);
+  XTypes::DynamicType_rch dt = tls->complete_to_dynamic(cto.complete, writer.writerId);
+  dt_map_.insert(std::make_pair(writer.writerId, dt));
   if (!is_bit_) {
 
     const DDS::InstanceHandle_t handle = participant_servant_->assign_handle(writer.writerId);
