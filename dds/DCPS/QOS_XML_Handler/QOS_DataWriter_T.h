@@ -16,8 +16,8 @@ class QOS_DataWriter_T
   : public QOS_DwTp_Base_T<XML_QOS_TYPE, DDS_QOS_TYPE>
 {
 public:
-  QOS_DataWriter_T (void);
-  ~QOS_DataWriter_T (void);
+  QOS_DataWriter_T ();
+  ~QOS_DataWriter_T ();
 
   void read_qos (DDS_QOS_TYPE&, const XML_QOS_TYPE);
 

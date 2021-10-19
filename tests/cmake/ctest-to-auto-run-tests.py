@@ -23,7 +23,7 @@ template = '''\
 ==============================================================================
 auto_run_tests: {art_name}
 The CMake name of this test is "{cmake_name}"
-The reported command was {command}
+The reported command was: {command}
 The following is the actual output:
 {output}
 auto_run_tests_finished: {art_name} Time:{art_time}s Result:{art_result}
@@ -118,9 +118,10 @@ def generate_test_results(build_path, source_path, debug=False):
         cmakelists = abs_test_path / 'CMakeLists.txt'
         if not cmakelists.is_file():
             raise FileNotFoundError('"{}" was not found'.format(cmakelists))
-        test_path = test_path_prefix / relative_to(abs_test_path, source_path)
+        cmakelists = str(relative_to(cmakelists, root).as_posix())
 
         command_parts = [s.strip('"') for s in results['command'].split(' ')[1:]]
+        command_parts = [p for p in command_parts if p]
         try:
             # Remove -ExeSubDir DIR to make the output consistent
             index = command_parts.index('-ExeSubDir')
@@ -128,7 +129,7 @@ def generate_test_results(build_path, source_path, debug=False):
             command_parts.pop(index)
         except ValueError: # from index, no -ExeSubDir
             pass
-        results['art_name'] = '{}/{}'.format(test_path.as_posix(), ' '.join(command_parts))
+        results['art_name'] = '{} {}'.format(cmakelists, ' '.join(command_parts))
         # Exit Value isn't included if the test passed
         results['art_result'] = 0 if results['passed'] else results['exit_value']
         results['art_time'] = time=int(results['exec_time'])

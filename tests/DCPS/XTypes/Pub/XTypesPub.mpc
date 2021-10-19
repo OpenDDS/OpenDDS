@@ -1,4 +1,4 @@
-project(XTypes_Publisher): dcps_test, dcps_rtps_udp, msvc_bigobj {
+project(XTypes_Publisher): dcps_test, dcps_rtps_udp, msvc_bigobj, dcps_transports_for_test {
 
   exename   = xtypes_publisher
 

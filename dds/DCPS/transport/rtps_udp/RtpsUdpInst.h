@@ -36,6 +36,7 @@ public:
   unsigned char ttl_;
   OPENDDS_STRING multicast_interface_;
 
+  size_t anticipated_fragments_;
   size_t max_message_size_;
   size_t nak_depth_;
   TimeDuration nak_response_delay_;
@@ -135,6 +136,8 @@ public:
 
   void update_locators(const RepoId& remote_id,
                        const TransportLocatorSeq& locators);
+
+  void get_and_reset_relay_message_counts(RelayMessageCounts& counts);
 
 private:
   friend class RtpsUdpType;

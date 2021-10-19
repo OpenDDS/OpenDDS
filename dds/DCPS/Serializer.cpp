@@ -1,11 +1,10 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
+
 #include "Serializer.h"
 
 #if !defined (__ACE_INLINE__)
@@ -14,8 +13,8 @@
 
 #include "SafetyProfileStreams.h"
 
-#ifndef NOTAO
-#include <tao/String_Alloc.h>
+#ifndef OPENDDS_NO_TAO
+#  include <tao/String_Alloc.h>
 #endif
 
 #include <ace/OS_NS_string.h>
@@ -28,7 +27,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-#ifdef NOTAO
+#ifdef OPENDDS_NO_TAO
 namespace {
 
 ACE_CDR::Char* string_alloc(ACE_CDR::ULong size)
@@ -54,7 +53,7 @@ void wstring_free(ACE_CDR::WChar* ptr)
 }
 #endif
 
-OPENDDS_STRING endianness_to_string(Endianness endianness)
+String endianness_to_string(Endianness endianness)
 {
   switch (endianness) {
   case ENDIAN_BIG:
@@ -75,35 +74,35 @@ OPENDDS_STRING endianness_to_string(Endianness endianness)
 }
 
 Encoding::Encoding()
-: endianness_(ENDIAN_NATIVE)
-, skip_sequence_dheader_(false)
+  : endianness_(ENDIAN_NATIVE)
+  , skip_sequence_dheader_(false)
 {
   kind(KIND_XCDR1);
 }
 
-Encoding::Encoding(Encoding::Kind kind, Endianness endianness)
-: endianness_(endianness)
-, skip_sequence_dheader_(false)
+Encoding::Encoding(Kind k, Endianness endianness)
+  : endianness_(endianness)
+  , skip_sequence_dheader_(false)
 {
-  this->kind(kind);
+  kind(k);
 }
 
-Encoding::Encoding(Encoding::Kind kind, bool swap_bytes)
-: endianness_(swap_bytes ? ENDIAN_NONNATIVE : ENDIAN_NATIVE)
-, skip_sequence_dheader_(false)
+Encoding::Encoding(Kind k, bool swap_bytes)
+  : endianness_(swap_bytes ? ENDIAN_NONNATIVE : ENDIAN_NATIVE)
+  , skip_sequence_dheader_(false)
 {
-  this->kind(kind);
+  kind(k);
 }
 
-EncapsulationHeader::EncapsulationHeader(EncapsulationHeader::Kind k, ACE_UINT16 o)
-: kind_(k)
-, options_(o)
+EncapsulationHeader::EncapsulationHeader(Kind kind, ACE_CDR::UShort options)
+  : kind_(kind)
+  , options_(options)
 {
 }
 
-EncapsulationHeader::EncapsulationHeader(const Encoding& enc, Extensibility ext, ACE_UINT16 o)
-: kind_(KIND_INVALID)
-, options_(o)
+EncapsulationHeader::EncapsulationHeader(const Encoding& enc, Extensibility ext, ACE_CDR::UShort options)
+  : kind_(KIND_INVALID)
+  , options_(options)
 {
    if (!from_encoding(enc, ext)) {
      kind_ = KIND_INVALID;
@@ -250,7 +249,7 @@ bool EncapsulationHeader::set_encapsulation_options(Message_Block_Ptr& mb)
   return true;
 }
 
-OPENDDS_STRING EncapsulationHeader::to_string() const
+String EncapsulationHeader::to_string() const
 {
   switch (kind_) {
   case KIND_CDR_BE:
@@ -311,7 +310,7 @@ bool operator<<(Serializer& s, const EncapsulationHeader& value)
   return ok;
 }
 
-OPENDDS_STRING Encoding::kind_to_string(Kind value)
+String Encoding::kind_to_string(Kind value)
 {
   switch (value) {
   case KIND_XCDR1:
@@ -325,9 +324,9 @@ OPENDDS_STRING Encoding::kind_to_string(Kind value)
   }
 }
 
-OPENDDS_STRING Encoding::to_string() const
+String Encoding::to_string() const
 {
-  OPENDDS_STRING rv = Encoding::kind_to_string(kind_) + ", " +
+  String rv = Encoding::kind_to_string(kind_) + ", " +
     endianness_to_string(endianness_);
   if (!zero_init_padding_) {
     rv += ", non-initialized padding";
@@ -337,7 +336,7 @@ OPENDDS_STRING Encoding::to_string() const
 
 const char Serializer::ALIGN_PAD[] = {0};
 
-Serializer::Serializer(ACE_Message_Block* chain, const Encoding& encoding)
+Serializer::Serializer(ACE_Message_Block* chain, const Encoding& enc)
   : current_(chain)
   , good_bit_(true)
   , construction_status_(ConstructionSuccessful)
@@ -346,7 +345,7 @@ Serializer::Serializer(ACE_Message_Block* chain, const Encoding& encoding)
   , rpos_(0)
   , wpos_(0)
 {
-  this->encoding(encoding);
+  encoding(enc);
   reset_alignment();
 }
 
@@ -500,7 +499,7 @@ Serializer::swapcpy(char* to, const char* from, size_t n)
   case  0:
     return;
   default:
-    this->good_bit_ = false;
+    good_bit_ = false;
   }
 }
 
@@ -510,7 +509,7 @@ Serializer::read_string(ACE_CDR::Char*& dest,
                         StrFree str_free)
 {
   if (str_alloc == 0) {
-#ifdef NOTAO
+#ifdef OPENDDS_NO_TAO
     str_alloc = string_alloc;
 #else
     str_alloc = CORBA::string_alloc;
@@ -542,21 +541,21 @@ Serializer::read_string(ACE_CDR::Char*& dest,
   //       done here before the allocation even though it will be
   //       checked during the actual read as well.
   //
-  if (length <= this->current_->total_length()) {
+  if (length <= current_->total_length()) {
 
     dest = str_alloc(length - 1);
 
     if (dest == 0) {
-      this->good_bit_ = false;
+      good_bit_ = false;
 
     } else {
       //
       // Extract the string.
       //
-      this->read_char_array(dest, length);
+      read_char_array(dest, length);
     }
 
-    if (!this->good_bit_) {
+    if (!good_bit_) {
       free_string(dest, str_free);
       dest = 0;
     }
@@ -573,7 +572,7 @@ Serializer::free_string(ACE_CDR::Char* str,
                         StrFree str_free)
 {
   if (str_free == 0) {
-#ifdef NOTAO
+#ifdef OPENDDS_NO_TAO
     str_free = string_free;
 #else
     str_free = CORBA::string_free;
@@ -588,7 +587,7 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
                         WStrFree str_free)
 {
   if (str_alloc == 0) {
-#ifdef NOTAO
+#ifdef OPENDDS_NO_TAO
     str_alloc = wstring_alloc;
 #else
     str_alloc = CORBA::wstring_alloc;
@@ -615,28 +614,28 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
   //       checked during the actual read as well.
   //
   ACE_CDR::ULong length = 0;
-  if (bytecount <= this->current_->total_length()) {
+  if (bytecount <= current_->total_length()) {
     length = bytecount / char16_cdr_size;
     dest = str_alloc(length);
 
     if (dest == 0) {
-      this->good_bit_ = false;
+      good_bit_ = false;
       return 0;
     }
 
 #if ACE_SIZEOF_WCHAR == 2
     read_array(reinterpret_cast<char*>(dest), char16_cdr_size, length, swap_bytes());
 #else
-    for (size_t i = 0; i < length && this->good_bit_; ++i) {
+    for (size_t i = 0; i < length && good_bit_; ++i) {
       ACE_UINT16 as_utf16;
       buffer_read(reinterpret_cast<char*>(&as_utf16), char16_cdr_size, swap_bytes());
-      if (this->good_bit_) {
+      if (good_bit_) {
         dest[i] = as_utf16;
       }
     }
 #endif
 
-    if (this->good_bit_) {
+    if (good_bit_) {
       //
       // Null terminate the string.
       //
@@ -659,7 +658,7 @@ Serializer::free_string(ACE_CDR::WChar* str,
                         WStrFree str_free)
 {
   if (str_free == 0) {
-#ifdef NOTAO
+#ifdef OPENDDS_NO_TAO
     str_free = wstring_free;
 #else
     str_free = CORBA::wstring_free;

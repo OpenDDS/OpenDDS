@@ -1,5 +1,10 @@
 #ifdef OPENDDS_SECURITY
 
+#if defined (ACE_AS_STATIC_LIBS)
+#include <dds/DCPS/security/BuiltInPlugins.h>
+#include <dds/DCPS/security/BuiltInPluginLoader.h>
+#include <ace/Dynamic_Service.h>
+#endif
 #include "dds/DCPS/security/framework/SecurityConfig.h"
 #include "dds/DCPS/security/framework/SecurityRegistry.h"
 #include "dds/DCPS/security/framework/SecurityPluginInst_rch.h"
@@ -14,20 +19,30 @@ using namespace OpenDDS::DCPS;
 using namespace OpenDDS::Security;
 using namespace testing;
 
+namespace {
 
-class SecurityConfigTest : public Test
+class dds_DCPS_security_framework_SecurityConfig : public Test
 {
 public:
-   SecurityConfigTest()
+   dds_DCPS_security_framework_SecurityConfig()
   {
   }
 
-  ~SecurityConfigTest()
+  ~dds_DCPS_security_framework_SecurityConfig()
   {
   }
 
   static void SetUpTestCase()
   {
+#if defined(ACE_AS_STATIC_LIBS)
+    BuiltInPluginLoader *loader =
+    ACE_Dynamic_Service<BuiltInPluginLoader>::instance("OpenDDS_Security");
+    if (loader == 0) {
+      ACE_ERROR ((LM_ERROR,"could not locate BuiltIn plugin loader\n"));
+    } else {
+      loader->init(0,0);
+    }
+#endif
     cf_.open();
     ACE_Ini_ImpExp import(cf_);
     ASSERT_EQ(0, import.import_config(ACE_TEXT("dds/DCPS/security/framework/test1.ini")));
@@ -37,16 +52,18 @@ public:
   static ACE_Configuration_Heap cf_;
 };
 
-ACE_Configuration_Heap SecurityConfigTest::cf_;
+}
 
-TEST_F(SecurityConfigTest, UnknownSecurityConfig)
+ACE_Configuration_Heap dds_DCPS_security_framework_SecurityConfig::cf_;
+
+TEST_F(dds_DCPS_security_framework_SecurityConfig, UnknownSecurityConfig)
 {
         // Ask it for a configuration that it does not have
         SecurityConfig_rch config = TheSecurityRegistry->create_config("TestConfig");
         EXPECT_TRUE(config.is_nil());
 }
 
-TEST_F(SecurityConfigTest, TestConfig1)
+TEST_F(dds_DCPS_security_framework_SecurityConfig, TestConfig1)
 {
         SecurityConfig_rch config = TheSecurityRegistry->create_config("test_config_1");
         EXPECT_FALSE(config.is_nil());
@@ -70,7 +87,7 @@ TEST_F(SecurityConfigTest, TestConfig1)
         EXPECT_STREQ("prop2_value", property_data.value[1].value);
 }
 
-TEST_F(SecurityConfigTest, TestConfig2)
+TEST_F(dds_DCPS_security_framework_SecurityConfig, TestConfig2)
 {
         SecurityConfig_rch config = TheSecurityRegistry->create_config("test_config_2");
         EXPECT_FALSE(config.is_nil());
@@ -96,7 +113,7 @@ TEST_F(SecurityConfigTest, TestConfig2)
         EXPECT_STREQ("C", property_data.value[2].value);
 }
 
-TEST_F(SecurityConfigTest, TestConfig_NoProperties)
+TEST_F(dds_DCPS_security_framework_SecurityConfig, TestConfig_NoProperties)
 {
         SecurityConfig_rch config = TheSecurityRegistry->create_config("test_config_empty");
         EXPECT_FALSE(config.is_nil());

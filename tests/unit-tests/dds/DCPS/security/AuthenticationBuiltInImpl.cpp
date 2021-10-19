@@ -100,15 +100,15 @@ struct MockParticipantData
 unsigned char MockParticipantData::next_guid_modifier = 0x01;
 
 
-struct AuthenticationTest : public ::testing::Test
+struct dds_DCPS_security_AuthenticationBuiltInImpl : public ::testing::Test
 {
 
-  virtual ~AuthenticationTest()
+  virtual ~dds_DCPS_security_AuthenticationBuiltInImpl()
   {
 
   }
 
-  AuthenticationTest() {
+  dds_DCPS_security_AuthenticationBuiltInImpl() {
     init_mock_participant_1();
     init_mock_participant_2();
   }
@@ -241,9 +241,9 @@ struct AuthenticationTest : public ::testing::Test
   MockParticipantData mp2;
 };
 
-DDS::OctetSeq AuthenticationTest::EmptySequence = DDS::OctetSeq();
+DDS::OctetSeq dds_DCPS_security_AuthenticationBuiltInImpl::EmptySequence = DDS::OctetSeq();
 
-TEST_F(AuthenticationTest, ValidateLocalIdentity_MultipleParticipants_NoClash)
+TEST_F(dds_DCPS_security_AuthenticationBuiltInImpl, ValidateLocalIdentity_MultipleParticipants_NoClash)
 {
   AuthenticationBuiltInImpl auth;
   auth.validate_local_identity(mp1.id_handle, mp1.guid_adjusted, mp1.domain_id, mp1.qos, mp1.guid, mp1.ex);
@@ -260,7 +260,7 @@ TEST_F(AuthenticationTest, ValidateLocalIdentity_MultipleParticipants_NoClash)
   ASSERT_NE(0, std::strcmp(subject1, subject2));
 }
 
-TEST_F(AuthenticationTest, ValidateLocalIdentity_Success)
+TEST_F(dds_DCPS_security_AuthenticationBuiltInImpl, ValidateLocalIdentity_Success)
 {
   AuthenticationBuiltInImpl auth;
   IdentityHandle h;
@@ -270,7 +270,7 @@ TEST_F(AuthenticationTest, ValidateLocalIdentity_Success)
   ASSERT_EQ(r, DDS::Security::VALIDATION_OK);
 }
 
-TEST_F(AuthenticationTest, GetIdentityToken_Success)
+TEST_F(dds_DCPS_security_AuthenticationBuiltInImpl, GetIdentityToken_Success)
 {
   // From this cmd:  openssl x509 -noout -subject -in certs/identity/test_participant_01_cert.pem
   std::string cert_sn("C = AU, ST = Some-State, O = Internet Widgits Pty Ltd, CN = Ozzie Ozmann");
@@ -291,7 +291,7 @@ TEST_F(AuthenticationTest, GetIdentityToken_Success)
   ASSERT_EQ(std::string("RSA-2048"), value_of("dds.ca.algo", mp1.id_token.properties));
 }
 
-TEST_F(AuthenticationTest, ValidateRemoteIdentity_UsingLocalAuthRequestToken_PendingHandshakeRequest)
+TEST_F(dds_DCPS_security_AuthenticationBuiltInImpl, ValidateRemoteIdentity_UsingLocalAuthRequestToken_PendingHandshakeRequest)
 {
   AuthenticationBuiltInImpl auth;
   SecurityException ex;
@@ -323,7 +323,7 @@ TEST_F(AuthenticationTest, ValidateRemoteIdentity_UsingLocalAuthRequestToken_Pen
   ASSERT_EQ(DDS::Security::VALIDATION_PENDING_HANDSHAKE_REQUEST, r);
 }
 
-TEST_F(AuthenticationTest, ValidateRemoteIdentity_LocalAuthRequestTokenNil_PendingHandshakeMessage)
+TEST_F(dds_DCPS_security_AuthenticationBuiltInImpl, ValidateRemoteIdentity_LocalAuthRequestTokenNil_PendingHandshakeMessage)
 {
   AuthenticationBuiltInImpl auth;
   SecurityException ex;
@@ -376,7 +376,7 @@ TEST_F(AuthenticationTest, ValidateRemoteIdentity_LocalAuthRequestTokenNil_Pendi
   ASSERT_EQ(DDS::Security::VALIDATION_PENDING_HANDSHAKE_MESSAGE, r);
 }
 
-TEST_F(AuthenticationTest, BeginHandshakeRequest_UsingLocalAuthRequestToken_Success)
+TEST_F(dds_DCPS_security_AuthenticationBuiltInImpl, BeginHandshakeRequest_UsingLocalAuthRequestToken_Success)
 {
   AuthenticationBuiltInImpl auth;
   SecurityException ex;
@@ -472,16 +472,16 @@ TEST_F(AuthenticationTest, BeginHandshakeRequest_UsingLocalAuthRequestToken_Succ
 
 }
 
-struct BeginHandshakeReplyTest : public AuthenticationTest
+struct dds_DCPS_security_AuthenticationBuiltInImpl_BeginHandshakeReplyTest : public dds_DCPS_security_AuthenticationBuiltInImpl
 {
-  BeginHandshakeReplyTest()
+  dds_DCPS_security_AuthenticationBuiltInImpl_BeginHandshakeReplyTest()
   {
 
   }
 
 };
 
-TEST_F(BeginHandshakeReplyTest, BeginHandshakeReply_PendingHandshakeMessage_Success)
+TEST_F(dds_DCPS_security_AuthenticationBuiltInImpl_BeginHandshakeReplyTest, BeginHandshakeReply_PendingHandshakeMessage_Success)
 {
   AuthenticationBuiltInImpl auth;
   SecurityException ex;
@@ -570,7 +570,7 @@ TEST_F(BeginHandshakeReplyTest, BeginHandshakeReply_PendingHandshakeMessage_Succ
   ASSERT_EQ(mp2_handshake_handle, mp2.handshake_handle);
 }
 
-TEST_F(AuthenticationTest, BeginHandshakeRequest_BeginHandshakeReply_ProcessHandshake_Success)
+TEST_F(dds_DCPS_security_AuthenticationBuiltInImpl, BeginHandshakeRequest_BeginHandshakeReply_ProcessHandshake_Success)
 {
   AuthenticationBuiltInImpl auth;
   SecurityException ex;
@@ -663,7 +663,7 @@ TEST_F(AuthenticationTest, BeginHandshakeRequest_BeginHandshakeReply_ProcessHand
   ASSERT_EQ(r, DDS::Security::VALIDATION_OK);
 }
 
-TEST_F(AuthenticationTest, SeparateAuthImpls_BeginHandshakeRequest_BeginHandshakeReply_ProcessHandshake_Success)
+TEST_F(dds_DCPS_security_AuthenticationBuiltInImpl, SeparateAuthImpls_BeginHandshakeRequest_BeginHandshakeReply_ProcessHandshake_Success)
 {
   // The goal here is not only to test having two separate Auth impl objects, but to make sure the info available to each side is cleanly separated
   // With the obvious exception of the data that is passed in messages
@@ -764,7 +764,7 @@ TEST_F(AuthenticationTest, SeparateAuthImpls_BeginHandshakeRequest_BeginHandshak
   ASSERT_EQ(r, DDS::Security::VALIDATION_OK);
 }
 
-TEST_F(AuthenticationTest, SeparateAuthImpls_FullHandshake_NoAuthTokenTransfer_Success)
+TEST_F(dds_DCPS_security_AuthenticationBuiltInImpl, SeparateAuthImpls_FullHandshake_NoAuthTokenTransfer_Success)
 {
   // The goal here is not only to test having two separate Auth impl objects, but to make sure the info available to each side is cleanly separated
   // With the obvious exception of the data that is passed in messages
@@ -864,7 +864,7 @@ TEST_F(AuthenticationTest, SeparateAuthImpls_FullHandshake_NoAuthTokenTransfer_S
   ASSERT_EQ(r, DDS::Security::VALIDATION_OK);
 }
 
-TEST_F(AuthenticationTest, GetAuthenticationPeerCredentialToken_InitiatorAndReplier_Success)
+TEST_F(dds_DCPS_security_AuthenticationBuiltInImpl, GetAuthenticationPeerCredentialToken_InitiatorAndReplier_Success)
 {
   // The goal here is not only to test having two separate Auth impl objects, but to make sure the info available to each side is cleanly separated
   // With the obvious exception of the data that is passed in messages
@@ -986,7 +986,7 @@ TEST_F(AuthenticationTest, GetAuthenticationPeerCredentialToken_InitiatorAndRepl
 
 }
 
-TEST_F(AuthenticationTest, GetSharedSecret_InitiatorAndReplier_Match)
+TEST_F(dds_DCPS_security_AuthenticationBuiltInImpl, GetSharedSecret_InitiatorAndReplier_Match)
 {
   // The goal here is not only to test having two separate Auth impl objects, but to make sure the info available to each side is cleanly separated
   // With the obvious exception of the data that is passed in messages

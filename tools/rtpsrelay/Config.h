@@ -12,21 +12,27 @@ public:
   Config()
     : application_participant_guid_(OpenDDS::DCPS::GUID_UNKNOWN)
     , lifespan_(60) // 1 minute
-    , static_limit_(0)
     , max_pending_(0)
+    , pending_timeout_(60) // 1 minute
+#ifdef ACE_DEFAULT_MAX_SOCKET_BUFSIZ
+    , buffer_size_(ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
+#else
+    , buffer_size_(16384)
+#endif
     , application_domain_(1)
+    , allow_empty_partition_(true)
     , log_warnings_(false)
     , log_entries_(false)
     , log_discovery_(false)
     , log_activity_(false)
   {}
 
-  void application_participant_guid(const OpenDDS::DCPS::RepoId& value)
+  void application_participant_guid(const OpenDDS::DCPS::GUID_t& value)
   {
     application_participant_guid_ = value;
   }
 
-  const OpenDDS::DCPS::RepoId& application_participant_guid() const
+  const OpenDDS::DCPS::GUID_t& application_participant_guid() const
   {
     return application_participant_guid_;
   }
@@ -41,16 +47,6 @@ public:
     return lifespan_;
   }
 
-  void static_limit(size_t value)
-  {
-    static_limit_ = value;
-  }
-
-  size_t static_limit() const
-  {
-    return static_limit_;
-  }
-
   void max_pending(size_t value)
   {
     max_pending_ = value;
@@ -61,6 +57,26 @@ public:
     return max_pending_;
   }
 
+  void pending_timeout(const OpenDDS::DCPS::TimeDuration& value)
+  {
+    pending_timeout_ = value;
+  }
+
+  const OpenDDS::DCPS::TimeDuration& pending_timeout() const
+  {
+    return pending_timeout_;
+  }
+
+  void buffer_size(int value)
+  {
+    buffer_size_ = value;
+  }
+
+  int buffer_size() const
+  {
+    return buffer_size_;
+  }
+
   void application_domain(DDS::DomainId_t value)
   {
     application_domain_ = value;
@@ -69,6 +85,16 @@ public:
   DDS::DomainId_t application_domain() const
   {
     return application_domain_;
+  }
+
+  void allow_empty_partition(bool flag)
+  {
+    allow_empty_partition_ = flag;
+  }
+
+  bool allow_empty_partition() const
+  {
+    return allow_empty_partition_;
   }
 
   void log_warnings(bool flag)
@@ -141,16 +167,6 @@ public:
     return log_participant_statistics_;
   }
 
-  void log_domain_statistics(OpenDDS::DCPS::TimeDuration value)
-  {
-    log_domain_statistics_ = value;
-  }
-
-  OpenDDS::DCPS::TimeDuration log_domain_statistics() const
-  {
-    return log_domain_statistics_;
-  }
-
   void publish_relay_statistics(OpenDDS::DCPS::TimeDuration value)
   {
     publish_relay_statistics_ = value;
@@ -181,22 +197,14 @@ public:
     return publish_participant_statistics_;
   }
 
-  void publish_domain_statistics(OpenDDS::DCPS::TimeDuration value)
-  {
-    publish_domain_statistics_ = value;
-  }
-
-  OpenDDS::DCPS::TimeDuration publish_domain_statistics() const
-  {
-    return publish_domain_statistics_;
-  }
-
 private:
-  OpenDDS::DCPS::RepoId application_participant_guid_;
+  OpenDDS::DCPS::GUID_t application_participant_guid_;
   OpenDDS::DCPS::TimeDuration lifespan_;
-  size_t static_limit_;
   size_t max_pending_;
+  OpenDDS::DCPS::TimeDuration pending_timeout_;
+  int buffer_size_;
   DDS::DomainId_t application_domain_;
+  bool allow_empty_partition_;
   bool log_warnings_;
   bool log_entries_;
   bool log_discovery_;
@@ -204,11 +212,9 @@ private:
   OpenDDS::DCPS::TimeDuration log_relay_statistics_;
   OpenDDS::DCPS::TimeDuration log_handler_statistics_;
   OpenDDS::DCPS::TimeDuration log_participant_statistics_;
-  OpenDDS::DCPS::TimeDuration log_domain_statistics_;
   OpenDDS::DCPS::TimeDuration publish_relay_statistics_;
   OpenDDS::DCPS::TimeDuration publish_handler_statistics_;
   OpenDDS::DCPS::TimeDuration publish_participant_statistics_;
-  OpenDDS::DCPS::TimeDuration publish_domain_statistics_;
 };
 
 }

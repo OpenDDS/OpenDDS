@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -8,13 +6,19 @@
 #ifndef OPENDDS_DCPS_JSON_VALUE_READER_H
 #define OPENDDS_DCPS_JSON_VALUE_READER_H
 
-#ifdef OPENDDS_RAPIDJSON
-#ifndef OPENDDS_SAFETY_PROFILE
+#if defined OPENDDS_RAPIDJSON && !defined OPENDDS_SAFETY_PROFILE
+#  define OPENDDS_HAS_JSON_VALUE_READER 1
+#else
+#  define OPENDDS_HAS_JSON_VALUE_READER 0
+#endif
+
+#if OPENDDS_HAS_JSON_VALUE_READER
 
 #include "dcps_export.h"
 #include "ValueReader.h"
 #include "RapidJsonWrapper.h"
 #include "TypeSupportImpl.h"
+#include "Definitions.h"
 
 #include <iosfwd>
 #include <sstream>
@@ -28,8 +32,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-// Convert values to JSON.
-// Currently, this class does not produce value JSON nor does it adhere to the DDS JSON spec.
+/// Convert values to JSON.
+/// Currently, this class does not produce value JSON nor does it adhere to the DDS JSON spec.
 template <typename InputStream = rapidjson::StringStream>
 class JsonValueReader
   : public ValueReader,
@@ -64,8 +68,10 @@ public:
 
   bool read_boolean(ACE_CDR::Boolean& value);
   bool read_byte(ACE_CDR::Octet& value);
-  bool read_int8(ACE_CDR::Char& value);
-  bool read_uint8(ACE_CDR::Octet& value);
+#if OPENDDS_HAS_EXPLICIT_INTS
+  bool read_int8(ACE_CDR::Int8& value);
+  bool read_uint8(ACE_CDR::UInt8& value);
+#endif
   bool read_int16(ACE_CDR::Short& value);
   bool read_uint16(ACE_CDR::UShort& value);
   bool read_int32(ACE_CDR::Long& value);
@@ -298,8 +304,9 @@ bool JsonValueReader<InputStream>::read_byte(ACE_CDR::Octet& value)
   return false;
 }
 
+#if OPENDDS_HAS_EXPLICIT_INTS
 template <typename InputStream>
-bool JsonValueReader<InputStream>::read_int8(ACE_CDR::Char& value)
+bool JsonValueReader<InputStream>::read_int8(ACE_CDR::Int8& value)
 {
   switch (peek()) {
   case kInt:
@@ -314,7 +321,7 @@ bool JsonValueReader<InputStream>::read_int8(ACE_CDR::Char& value)
 }
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::read_uint8(ACE_CDR::Octet& value)
+bool JsonValueReader<InputStream>::read_uint8(ACE_CDR::UInt8& value)
 {
   if (peek() == kUint) {
     value = uint_value_;
@@ -322,6 +329,7 @@ bool JsonValueReader<InputStream>::read_uint8(ACE_CDR::Octet& value)
   }
   return false;
 }
+#endif
 
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_int16(ACE_CDR::Short& value)
@@ -577,7 +585,6 @@ bool from_json(T& value, InputStream& sample)
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif
 #endif
 
 #endif  /* OPENDDS_DCPS_JSON_VALUE_READER_H */

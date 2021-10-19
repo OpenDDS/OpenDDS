@@ -27,9 +27,9 @@ namespace DCPS {
   class OpenDDS_XML_QOS_Handler_Export QOS_XML_Handler
   {
   public:
-    QOS_XML_Handler(void);
+    QOS_XML_Handler();
 
-    ~QOS_XML_Handler(void);
+    ~QOS_XML_Handler();
 
     //@{
     /**

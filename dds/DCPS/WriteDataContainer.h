@@ -489,7 +489,7 @@ private:
   /// same lock will be used by the transport thread to notify
   /// the datawriter the data is delivered. Other internal
   /// operations will not lock.
-  ACE_Recursive_Thread_Mutex lock_;
+  mutable ACE_Recursive_Thread_Mutex lock_;
   typedef ConditionVariable<ACE_Recursive_Thread_Mutex> ConditionVariableType;
   ConditionVariableType condition_;
   ConditionVariableType empty_condition_;

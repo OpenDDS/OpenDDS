@@ -8,18 +8,23 @@
 #ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTREASSEMBLY_H
 #define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTREASSEMBLY_H
 
+#include "ReceivedDataSample.h"
+
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/Definitions.h"
-#include "ReceivedDataSample.h"
+#include "dds/DCPS/DisjointSequence.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/RcObject.h"
+#include "dds/DCPS/TimeTypes.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export TransportReassembly {
+class OpenDDS_Dcps_Export TransportReassembly : public RcObject {
 public:
+  explicit TransportReassembly(const TimeDuration& timeout = TimeDuration(300));
 
   /// Called by TransportReceiveStrategy if the fragmentation header flag
   /// is set.  Returns true/false to indicate if data should be delivered to
@@ -72,10 +77,24 @@ private:
       return this->data_sample_seq_ < rhs.data_sample_seq_;
     }
 
+    bool operator==(const FragKey& other) const
+    {
+      return publication_ == other.publication_ && data_sample_seq_ == other.data_sample_seq_;
+    }
+
+    bool operator!=(const FragKey& other) const
+    {
+      return !(*this == other);
+    }
+
     static GUID_tKeyLessThan compare_;
     PublicationId publication_;
     SequenceNumber data_sample_seq_;
   };
+
+#if defined ACE_HAS_CPP11
+  OPENDDS_OOAT_CUSTOM_HASH(FragKey, OpenDDS_Dcps_Export, FragKeyHash);
+#endif
 
   // A FragRange represents a chunk of a partially-reassembled message.
   // The transport_seq_ range is the range of transport sequence numbers
@@ -93,26 +112,73 @@ private:
   // least one value in it.  If a FragRange in the list has a sample_ with
   // a null ACE_Message_Block*, it's one that was data_unavailable().
   typedef OPENDDS_LIST(FragRange) FragRangeList;
+  typedef OPENDDS_MAP(SequenceNumber::Value, FragRangeList::iterator) FragRangeIterMap;
 
   struct FragInfo {
     FragInfo()
-      : complete_(false), have_first_(false), range_list_(), total_frags_(0) {}
-    FragInfo(bool hf, const FragRangeList& rl, ACE_UINT32 tf)
-      : complete_(false), have_first_(hf), range_list_(rl), total_frags_(tf) {}
+      : have_first_(false), range_list_(), total_frags_(0) {}
+    FragInfo(bool hf, const FragRangeList& rl, ACE_UINT32 tf, const MonotonicTimePoint& expiration)
+      : have_first_(hf), range_list_(rl), total_frags_(tf), expiration_(expiration)
+    {
+      for (FragRangeList::iterator it = range_list_.begin(); it != range_list_.end(); ++it) {
+        range_finder_[it->transport_seq_.second.getValue()] = it;
+      }
+    }
 
-    bool complete_;
+    FragInfo(const FragInfo& val)
+    {
+      *this = val;
+    }
+
+    FragInfo& operator=(const FragInfo& rhs)
+    {
+      if (this != &rhs) {
+        have_first_ = rhs.have_first_;
+        range_list_ = rhs.range_list_;
+        total_frags_ = rhs.total_frags_;
+        expiration_ = rhs.expiration_;
+        range_finder_.clear();
+        for (FragRangeList::iterator it = range_list_.begin(); it != range_list_.end(); ++it) {
+          range_finder_[it->transport_seq_.second.getValue()] = it;
+        }
+      }
+      return *this;
+    }
+
     bool have_first_;
     FragRangeList range_list_;
+    FragRangeIterMap range_finder_;
     ACE_UINT32 total_frags_;
+    MonotonicTimePoint expiration_;
   };
 
+  mutable ACE_Thread_Mutex mutex_;
+
+#ifdef ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP_CHASH(FragKey, FragInfo, FragKeyHash) FragInfoMap;
+#else
   typedef OPENDDS_MAP(FragKey, FragInfo) FragInfoMap;
+#endif
   FragInfoMap fragments_;
 
-  static bool insert(OPENDDS_LIST(FragRange)& flist,
+  typedef std::pair<MonotonicTimePoint, FragKey> ElementType;
+  typedef OPENDDS_LIST(ElementType) ExpirationQueue;
+  ExpirationQueue expiration_queue_;
+
+  typedef OPENDDS_MAP_CMP(PublicationId, DisjointSequence, GUID_tKeyLessThan) CompletedMap;
+  CompletedMap completed_;
+
+  TimeDuration timeout_;
+
+  void check_expirations(const MonotonicTimePoint& now);
+
+  static bool insert(FragRangeList& flist,
+                     FragRangeIterMap& fri_map,
                      const SequenceRange& seqRange,
                      ReceivedDataSample& data);
 };
+
+typedef RcHandle<TransportReassembly> TransportReassembly_rch;
 
 }
 }

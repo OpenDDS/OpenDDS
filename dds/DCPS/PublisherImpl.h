@@ -32,7 +32,7 @@ class Monitor;
 *
 * This class acts as a factory and container of the datawriter.
 *
-* See the DDS specification, OMG formal/04-12-02, for a description of
+* See the DDS specification, OMG formal/2015-04-10, for a description of
 * the interface this class is implementing.
 */
 class OpenDDS_Dcps_Export PublisherImpl
@@ -206,6 +206,7 @@ private:
   /// The recursive lock to protect datawriter map and suspend count.
   mutable lock_type                   pi_lock_;
   reverse_lock_type                   reverse_pi_lock_;
+  mutable lock_type                   pi_suspended_lock_;
 
   /// Monitor object for this entity
   unique_ptr<Monitor> monitor_;

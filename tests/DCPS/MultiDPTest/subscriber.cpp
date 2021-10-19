@@ -237,7 +237,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     FILE* readers_ready = ACE_OS::fopen(sub_ready_filename.c_str(), ACE_TEXT("w"));
     if (readers_ready == 0) {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Unable to create subscriber completed file\n")));
+        ACE_TEXT("(%P|%t) ERROR: Unable to create subscriber ready file\n")));
     }
 
     // Wait for the publisher to be ready

@@ -17,6 +17,8 @@
 #include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/ReactorTask_rch.h"
+#include "dds/DCPS/TimeDuration.h"
+
 #include "TransportDefs.h"
 #include "TransportImpl_rch.h"
 #include "TransportImpl.h"
@@ -102,6 +104,10 @@ public:
   /// samples. The default value is 32.
   size_t datalink_control_chunks_;
 
+  /// Maximum time to store incoming fragments of incomplete data samples.
+  /// The expiration time is relative to the last received fragment.
+  TimeDuration fragment_reassembly_timeout_;
+
   /// Does the transport as configured support RELIABLE_RELIABILITY_QOS?
   virtual bool is_reliable() const = 0;
 
@@ -118,6 +124,8 @@ public:
 
   virtual void update_locators(const RepoId& /*remote_id*/,
                                const TransportLocatorSeq& /*locators*/) {}
+
+  virtual void get_and_reset_relay_message_counts(RelayMessageCounts& /*counts*/) {}
 
   ReactorTask_rch reactor_task();
 

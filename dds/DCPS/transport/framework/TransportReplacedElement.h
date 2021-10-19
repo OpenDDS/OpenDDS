@@ -30,6 +30,8 @@ public:
   /// Accessor for the publisher id.
   virtual RepoId publication_id() const;
 
+  virtual ACE_Message_Block* duplicate_msg() const;
+
   /// Accessor for the ACE_Message_Block
   virtual const ACE_Message_Block* msg() const;
 

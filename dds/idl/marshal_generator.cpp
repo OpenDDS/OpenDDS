@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -11,7 +9,9 @@
 #include "field_info.h"
 #include "topic_keys.h"
 #include "be_util.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
+
+#include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/Definitions.h>
 
 #include <utl_identifier.h>
 
@@ -510,6 +510,12 @@ namespace {
       return "primitive_serialized_size_wchar(" + first_args + ", " + count_expr + ")";
     case AST_PredefinedType::PT_boolean:
       return "primitive_serialized_size_boolean(" + first_args + ", " + count_expr + ")";
+#if OPENDDS_HAS_EXPLICIT_INTS
+    case AST_PredefinedType::PT_uint8:
+      return "primitive_serialized_size_uint8(" + first_args + ", " + count_expr + ")";
+    case AST_PredefinedType::PT_int8:
+      return "primitive_serialized_size_int8(" + first_args + ", " + count_expr + ")";
+#endif
     default:
       return "primitive_serialized_size(" + first_args + ", " +
         scoped(type->name()) + "(), " + count_expr + ")";
@@ -527,6 +533,12 @@ namespace {
       return "short";
     case AST_PredefinedType::PT_ushort:
       return "ushort";
+#if OPENDDS_HAS_EXPLICIT_INTS
+    case AST_PredefinedType::PT_int8:
+      return "int8";
+    case AST_PredefinedType::PT_uint8:
+      return "uint8";
+#endif
     case AST_PredefinedType::PT_octet:
       return "octet";
     case AST_PredefinedType::PT_char:
@@ -994,6 +1006,14 @@ namespace {
         be_global->impl_ <<
           "  CORBA::ULong length;\n"
           << streamAndCheck(">> length");
+        // The check here is to prevent very large sequences from being allocated.
+        be_global->impl_ <<
+          "  if (length > strm.length()) {\n"
+          "    if (DCPS_debug_level >= 8) {\n"
+          "      ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) Invalid sequence length (%u)\\n\"), length));\n"
+          "    }\n"
+          "    return false;\n"
+          "  }\n";
       }
 
       AST_PredefinedType* predef = dynamic_cast<AST_PredefinedType*>(elem);
@@ -1327,8 +1347,11 @@ namespace {
       extraction.addArg("strm", "Serializer&");
       extraction.addArg("arr", wrapper.wrapped_type_name());
       extraction.endArgs();
+
+      if (!primitive) {
+        be_global->impl_ << "  bool discard_flag = false;\n";
+      }
       be_global->impl_ <<
-        "  bool discard_flag = false;\n"
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
       marshal_generator::generate_dheader_code(
@@ -1341,7 +1364,7 @@ namespace {
       }
 
       const std::string accessor = wrapper.value_access() + (use_cxx11 ? ".data()" : ".out()");
-      if (elem_cls & CL_PRIMITIVE) {
+      if (primitive) {
         string suffix;
         for (unsigned int i = 1; i < arr->n_dims(); ++i)
           suffix += use_cxx11 ? "->data()" : "[0]";
@@ -1349,79 +1372,81 @@ namespace {
           "  return strm.read_" << getSerializerName(elem)
           << "_array(" << accessor << suffix << ", " << n_elems << ");\n";
       } else { // Enum, String, Struct, Array, Sequence, Union
-        string indent = "  ";
-        NestedForLoops nfl("CORBA::ULong", "i", arr, indent);
-        const std::string elem_access = wrapper.value_access() + nfl.index_;
+        {
+          string indent = "  ";
+          NestedForLoops nfl("CORBA::ULong", "i", arr, indent);
+          const std::string elem_access = wrapper.value_access() + nfl.index_;
 
-        Intro intro;
-        std::string stream;
-        std::string classic_array_copy;
-        if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
-          Wrapper classic_array_wrapper(
-            arr->base_type(), scoped(arr->base_type()->name()), wrapper.value_access() + nfl.index_);
-          classic_array_wrapper.classic_array_copy_ = true;
-          classic_array_wrapper.done(&intro);
-          classic_array_copy = classic_array_wrapper.classic_array_copy();
-          stream = "(strm >> " + classic_array_wrapper.ref() + ")";
-        } else {
-          stream = streamCommon(
-            indent, "", arr->base_type(), ">> " + elem_access, nested_key_only, intro);
-        }
-        intro.join(be_global->impl_, indent);
-        be_global->impl_ <<
-          indent << "if (!" << stream << ") {\n";
-
-        indent += "  ";
-        if (try_construct == tryconstructfailaction_use_default) {
+          Intro intro;
+          std::string stream;
+          std::string classic_array_copy;
+          if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
+            Wrapper classic_array_wrapper(
+              arr->base_type(), scoped(arr->base_type()->name()), wrapper.value_access() + nfl.index_);
+            classic_array_wrapper.classic_array_copy_ = true;
+            classic_array_wrapper.done(&intro);
+            classic_array_copy = classic_array_wrapper.classic_array_copy();
+            stream = "(strm >> " + classic_array_wrapper.ref() + ")";
+          } else {
+            stream = streamCommon(
+              indent, "", arr->base_type(), ">> " + elem_access, nested_key_only, intro);
+          }
+          intro.join(be_global->impl_, indent);
           be_global->impl_ <<
-            type_to_default(indent, elem, elem_access) <<
-            indent << "strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
-        } else if ((try_construct == tryconstructfailaction_trim) && (elem_cls & CL_BOUNDED) &&
-                   (elem_cls & (CL_STRING | CL_SEQUENCE))) {
-          if (elem_cls & CL_STRING) {
-            const std::string check_not_empty =
-              use_cxx11 ? "!" + elem_access + ".empty()" : elem_access + ".in()";
-            const std::string get_length =
-              use_cxx11 ? elem_access + ".length()" : "ACE_OS::strlen(" + elem_access + ".in())";
-            const string inout = use_cxx11 ? "" : ".inout()";
+            indent << "if (!" << stream << ") {\n";
+
+          indent += "  ";
+          if (try_construct == tryconstructfailaction_use_default) {
             be_global->impl_ <<
-              indent << "if (" << construct_bound_fail << " && " <<
-                check_not_empty << " && (" << bounded_arg(elem) << " < " << get_length << ")) {\n" <<
-              indent << "  " << wrapper.value_access() + nfl.index_ << inout <<
-                (use_cxx11 ? (".resize(" + bounded_arg(elem) +  ")") : ("[" + bounded_arg(elem) + "] = 0")) << ";\n" <<
-              indent << "  strm.set_construction_status(Serializer::ConstructionSuccessful);\n" <<
-              indent << "} else {\n";
+              type_to_default(indent, elem, elem_access) <<
+              indent << "strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
+          } else if ((try_construct == tryconstructfailaction_trim) && (elem_cls & CL_BOUNDED) &&
+                     (elem_cls & (CL_STRING | CL_SEQUENCE))) {
+            if (elem_cls & CL_STRING) {
+              const std::string check_not_empty =
+                use_cxx11 ? "!" + elem_access + ".empty()" : elem_access + ".in()";
+              const std::string get_length =
+                use_cxx11 ? elem_access + ".length()" : "ACE_OS::strlen(" + elem_access + ".in())";
+              const string inout = use_cxx11 ? "" : ".inout()";
+              be_global->impl_ <<
+                indent << "if (" << construct_bound_fail << " && " <<
+                  check_not_empty << " && (" << bounded_arg(elem) << " < " << get_length << ")) {\n" <<
+                indent << "  " << wrapper.value_access() + nfl.index_ << inout <<
+                  (use_cxx11 ? (".resize(" + bounded_arg(elem) +  ")") : ("[" + bounded_arg(elem) + "] = 0")) << ";\n" <<
+                indent << "  strm.set_construction_status(Serializer::ConstructionSuccessful);\n" <<
+                indent << "} else {\n";
+              skip_to_end_array(indent);
+              be_global->impl_ <<
+                indent << "}\n";
+            } else if (elem_cls & CL_SEQUENCE) {
+              be_global->impl_ <<
+                indent << "if (" + construct_elem_fail + ") {\n";
+              skip_to_end_array(indent);
+              be_global->impl_ <<
+                indent << "} else {\n" <<
+                indent << "  strm.set_construction_status(Serializer::ConstructionSuccessful);\n" <<
+                indent << "}\n";
+            }
+          } else {
+            //discard/default
             skip_to_end_array(indent);
-            be_global->impl_ <<
-              indent << "}\n";
-          } else if (elem_cls & CL_SEQUENCE) {
-            be_global->impl_ <<
-              indent << "if (" + construct_elem_fail + ") {\n";
-            skip_to_end_array(indent);
+          }
+          if (classic_array_copy.size()) {
             be_global->impl_ <<
               indent << "} else {\n" <<
-              indent << "  strm.set_construction_status(Serializer::ConstructionSuccessful);\n" <<
-              indent << "}\n";
+              indent << "  " << classic_array_copy << "\n";
           }
-        } else {
-          //discard/default
-          skip_to_end_array(indent);
-        }
-        if (classic_array_copy.size()) {
+          indent.erase(0, 2);
           be_global->impl_ <<
-            indent << "} else {\n" <<
-            indent << "  " << classic_array_copy << "\n";
+            indent << "}\n";
         }
-        indent.erase(0, 2);
         be_global->impl_ <<
-          indent << "}\n";
+          "  if (discard_flag) {\n"
+          "    strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+          "    return false;\n"
+          "  }\n"
+          "  return true;\n";
       }
-      be_global->impl_ <<
-        "  if (discard_flag) {\n"
-        "    strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
-        "    return false;\n"
-        "  }\n"
-        "  return true;\n";
     }
   }
 
@@ -1742,6 +1767,10 @@ namespace {
       case AST_PredefinedType::PT_char:
       case AST_PredefinedType::PT_boolean:
       case AST_PredefinedType::PT_octet:
+#if OPENDDS_HAS_EXPLICIT_INTS
+      case AST_PredefinedType::PT_uint8:
+      case AST_PredefinedType::PT_int8:
+#endif
         size += 1;
         break;
       case AST_PredefinedType::PT_short:
@@ -3628,6 +3657,10 @@ namespace {
         "    uni._d(OpenDDS::RTPS::PID_SENTINEL);\n"
         "    return true;\n"
         "  }\n"
+        "  if (size == 0) {\n"
+        "    uni._d(disc);\n"
+        "    return true;\n"
+        "  }\n"
         "  const Serializer::ScopedAlignmentContext sac(strm, size);\n"
         "  if (disc == RTPS::PID_XTYPES_TYPE_INFORMATION) {\n"
         "    DDS::OctetSeq type_info(size);\n"
@@ -3865,6 +3898,10 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         if (ul->label_kind() != AST_UnionLabel::UL_default) {
           AST_Expression::AST_ExprValue* ev = branch->label(i)->label_val()->ev();
           if ((ev->et == AST_Expression::EV_enum && ev->u.eval == default_enum_val) ||
+#if OPENDDS_HAS_EXPLICIT_INTS
+              (ev->et == AST_Expression::EV_uint8 && ev->u.uint8val == 0) ||
+              (ev->et == AST_Expression::EV_int8 && ev->u.int8val == 0) ||
+#endif
               (ev->et == AST_Expression::EV_short && ev->u.sval == 0) ||
               (ev->et == AST_Expression::EV_ushort && ev->u.usval == 0) ||
               (ev->et == AST_Expression::EV_long && ev->u.lval == 0) ||

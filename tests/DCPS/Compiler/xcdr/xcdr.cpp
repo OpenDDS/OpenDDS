@@ -12,6 +12,7 @@
 #include <string>
 #include <cstring>
 #include <vector>
+#include <sstream>
 
 using namespace OpenDDS::DCPS;
 

@@ -1,10 +1,10 @@
 #ifndef RTPSRELAY_RELAY_PARTITION_TABLE_H_
 #define RTPSRELAY_RELAY_PARTITION_TABLE_H_
 
-#include "lib/PartitionIndex.h"
-#include "lib/Utility.h"
+#include <dds/rtpsrelaylib/PartitionIndex.h>
+#include <dds/rtpsrelaylib/Utility.h>
 
-#include "dds/DCPS/GuidConverter.h"
+#include <dds/DCPS/GuidConverter.h>
 
 #include <ace/Thread_Mutex.h>
 
@@ -12,6 +12,13 @@ namespace RtpsRelay {
 
 typedef std::set<ACE_INET_Addr> AddressSet;
 typedef std::pair<OpenDDS::DCPS::GUID_t, size_t> SlotKey;
+
+struct SlotKeyHash {
+  std::size_t operator() (const SlotKey& slot_key) const
+  {
+    return GuidHash()(slot_key.first) ^ slot_key.second;
+  }
+};
 
 class RelayPartitionTable {
 public:
@@ -58,8 +65,8 @@ public:
   }
 
 private:
-  typedef std::map<std::string, ACE_INET_Addr> NameToAddress;
-  typedef std::map<OpenDDS::DCPS::GUID_t, NameToAddress> RelayToAddress;
+  typedef std::unordered_map<std::string, ACE_INET_Addr> NameToAddress;
+  typedef std::unordered_map<OpenDDS::DCPS::GUID_t, NameToAddress, GuidHash> RelayToAddress;
   RelayToAddress relay_to_address_;
 
   struct Map {
@@ -122,7 +129,7 @@ private:
 
     PartitionIndex partition_index_;
 
-    typedef std::map<SlotKey, StringSet> RelayToPartitions;
+    typedef std::unordered_map<SlotKey, StringSet, SlotKeyHash> RelayToPartitions;
     RelayToPartitions relay_to_partitions_;
   };
 

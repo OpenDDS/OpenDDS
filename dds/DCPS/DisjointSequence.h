@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -11,7 +9,6 @@
 #include "dcps_export.h"
 #include "Definitions.h"
 #include "SequenceNumber.h"
-
 #include "PoolAllocator.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -160,42 +157,33 @@ public:
     size_type size() const { return ranges_.size(); }
     void clear() { ranges_.clear(); }
 
-    void add(T value)
+    void add(T lower, T upper)
     {
-      typedef typename Container::iterator iter_t; // underlying iterator type, not const_iterator
-      const iter_t iter = ranges_.lower_bound(TPair(T() /*ignored*/, value));
-      if (iter != ranges_.end() && !(value < iter->first)) {
+      OPENDDS_ASSERT(upper >= lower);
+      if (has(lower, upper)) {
         return;
       }
 
-      if (iter != ranges_.begin() && iter == ranges_.end()) {
-        const iter_t last = --ranges_.end();
-        if (last->second + T(1) == value) {
-          const T first = last->first;
-          ranges_.erase(last);
-          ranges_.insert(TPair(first, value));
-          return;
-        }
-      } else if (!empty() && value + T(1) == iter->first) {
-        const T second = iter->second;
-        iter_t prev(iter);
-        const bool combine_left = iter != ranges_.begin() && (--prev)->second + T(1) == value;
-        ranges_.erase(iter);
-        if (combine_left) {
-          const TPair combined(prev->first, second);
-          ranges_.erase(prev);
-          ranges_.insert(combined);
-        } else {
-          ranges_.insert(TPair(value, second));
-        }
-        return;
+      const T above = upper + 1;
+      for (typename Container::iterator i = lower_bound_i(lower - 1);
+          i != ranges_.end() && (i->first <= above || i->second <= above);
+          /* iterate in loop because of removal */) {
+        lower = (std::min)(lower, i->first);
+        upper = (std::max)(upper, i->second);
+        ranges_.erase(i++);
       }
-      ranges_.insert(TPair(value, value));
+
+      ranges_.insert(TPair(lower, upper));
+    }
+
+    void add(T value)
+    {
+      add(value, value);
     }
 
     void remove(T value)
     {
-      const typename Container::iterator iter = ranges_.lower_bound(TPair(T() /*ignored*/, value));
+      const typename Container::iterator iter = lower_bound_i(value);
       if (iter == end() || value < iter->first) {
         return;
       }
@@ -209,17 +197,35 @@ public:
       return value;
     }
 
+    bool has(T lower, T upper) const
+    {
+      const const_iterator iter = lower_bound(upper);
+      return iter != end() && !(lower < iter->first);
+    }
+
+    bool has(const TPair& range) const
+    {
+      return has(range.first, range.second);
+    }
+
     bool has(T value) const
     {
-      const const_iterator iter = lower_bound(value);
-      return iter != end() && !(value < iter->first);
+      return has(value, value);
+    }
+
+    bool has_any(T lower, T upper) const
+    {
+      const const_iterator iter = lower_bound(lower);
+      return iter != end() && !(upper < iter->first);
     }
 
     bool has_any(const TPair& range) const
     {
-      const const_iterator iter = lower_bound(range.first);
-      return iter != end() && !(range.second < iter->first);
+      return has_any(range.first, range.second);
     }
+
+    template <typename Type> friend
+    bool operator==(const OrderedRanges<Type>& a, const OrderedRanges<Type>& b);
 
   private:
     const_iterator lower_bound(const TPair& p) const { return ranges_.lower_bound(p); }
@@ -227,6 +233,19 @@ public:
     const_iterator lower_bound(T t) const
     {
       return ranges_.lower_bound(TPair(T() /*ignored*/, t));
+    }
+
+    // explicitly get a non-const iterator for use with methods like erase()
+    typename Container::iterator lower_bound_i(T t)
+    {
+      return ranges_.lower_bound(TPair(T() /*ignored*/, t));
+    }
+
+    const_iterator upper_bound(const TPair& p) const { return ranges_.upper_bound(p); }
+
+    const_iterator upper_bound(T t) const
+    {
+      return ranges_.upper_bound(TPair(T() /*ignored*/, t));
     }
 
     // 'iter' must be a valid iterator to a range that contains 'value'
@@ -271,6 +290,13 @@ public:
   /// sequence numbers between low and high, inclusive (maximum 8 longs).
   static ACE_CDR::ULong bitmap_num_longs(const SequenceNumber& low, const SequenceNumber& high);
 };
+
+template <typename T>
+bool operator==(
+  const DisjointSequence::OrderedRanges<T>& a, const DisjointSequence::OrderedRanges<T>& b)
+{
+  return a.ranges_ == b.ranges_;
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

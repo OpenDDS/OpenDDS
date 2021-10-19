@@ -10,6 +10,8 @@
 
 #include "idl2jni_jni.h"
 
+#include <dds/DCPS/LogAddr.h>
+
 #include "ace/Basic_Types.h"
 #include "ace/INET_Addr.h"
 #include "ace/SString.h"
@@ -200,9 +202,7 @@ struct InetAddrField : Field<C, std::string, jvmSig::STRING> {
     if (this->member_ptr_ != 0) {
       str = jni->NewStringUTF((cxx.*(this->member_ptr_)).c_str());
     } else {
-      char buf[64];
-      (cxx.*addr_).addr_to_string(buf, sizeof(buf));
-      str = jni->NewStringUTF(buf);
+      str = jni->NewStringUTF(OpenDDS::DCPS::LogAddr(cxx.*addr_).c_str());
     }
     jni->SetObjectField(obj, fid, str);
     jni->DeleteLocalRef(str);

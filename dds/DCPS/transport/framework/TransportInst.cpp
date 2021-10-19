@@ -39,6 +39,7 @@ OpenDDS::DCPS::TransportInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("optimum_packet_size"), optimum_packet_size_, ACE_UINT32)
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("thread_per_connection"), thread_per_connection_, bool)
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("datalink_release_delay"), datalink_release_delay_, int)
+  GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("fragment_reassembly_timeout"), fragment_reassembly_timeout_);
 
   // Undocumented - this option is not in the Developer's Guide
   // Controls the number of chunks in the allocators used by the datalink
@@ -98,6 +99,7 @@ OpenDDS::DCPS::TransportInst::dump_to_str() const
   ret += formatNameForDump("thread_per_connection")   + (thread_per_connection_ ? "true" : "false") + '\n';
   ret += formatNameForDump("datalink_release_delay")  + to_dds_string(datalink_release_delay_) + '\n';
   ret += formatNameForDump("datalink_control_chunks") + to_dds_string(unsigned(datalink_control_chunks_)) + '\n';
+  ret += formatNameForDump("fragment_reassembly_timeout") + to_dds_string(fragment_reassembly_timeout_.value().msec()) + '\n';
   return ret;
 }
 

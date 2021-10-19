@@ -22,11 +22,10 @@ template <typename XML_QOS_TYPE, typename DDS_QOS_TYPE>
 class QOS_PubSub_T
 {
 public:
-  QOS_PubSub_T (void);
-  ~QOS_PubSub_T (void);
+  QOS_PubSub_T ();
+  ~QOS_PubSub_T ();
 
   void read_qos (DDS_QOS_TYPE&, const XML_QOS_TYPE);
-
 };
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

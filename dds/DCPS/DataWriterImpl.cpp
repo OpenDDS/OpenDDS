@@ -2796,10 +2796,12 @@ void DataWriterImpl::transport_discovery_change()
 {
   populate_connection_info();
   const TransportLocatorSeq& trans_conf_info = connection_info();
+  const RepoId dp_id_copy = dp_id_;
+  const RepoId publication_id_copy = publication_id_;
   Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
   disco->update_publication_locators(domain_id_,
-                                     dp_id_,
-                                     publication_id_,
+                                     dp_id_copy,
+                                     publication_id_copy,
                                      trans_conf_info);
 }
 

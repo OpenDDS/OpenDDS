@@ -1,0 +1,15 @@
+project: dcps_test, googletest, msvc_bigobj {
+  exename = explicit-ints-classic
+  includes += .
+  macros += CPP11_MAPPING=0
+  Source_Files {
+    ../main.cpp
+  }
+  idlflags += -I.. -Sa -St
+  IDL_Files {
+    ../test.idl
+  }
+  TypeSupport_Files {
+    ../test.idl
+  }
+}
