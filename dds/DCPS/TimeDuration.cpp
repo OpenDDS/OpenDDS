@@ -34,7 +34,7 @@ namespace {
       return 0;
     }
     carry = 0;
-    return static_cast<time_t>(numerator;
+    return static_cast<time_t>(numerator);
   }
 
   String to_zero_pad_str(time_t value, unsigned len = 2)
