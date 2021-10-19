@@ -53,4 +53,5 @@ target_link_libraries(ishapes
   OpenDDS::Udp
   OpenDDS::Multicast
   OpenDDS::Rtps_Udp
+  OpenDDS::InfoRepoDiscovery
 )
