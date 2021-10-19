@@ -18,6 +18,7 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Logging.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/ConnectionRecords.h>
@@ -651,13 +652,14 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
     partBitData(pdata).key = repo_id_to_bit_key(guid);
 
+    const TimeDuration effective_lease(pdata.leaseDuration.seconds);
+
     if (DCPS::DCPS_debug_level) {
-      ACE_TCHAR addr_buff[DCPS::AddrToStringSize] = {};
-      from.addr_to_string(addr_buff, DCPS::AddrToStringSize);
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) Spdp::handle_participant_data - %C discovered %C lease %ds from %s (%B)\n"),
-                 DCPS::LogGuid(guid_).c_str(), DCPS::LogGuid(guid).c_str(),
-                 pdata.leaseDuration.seconds, addr_buff, participants_.size()));
+        ACE_TEXT("(%P|%t) Spdp::handle_participant_data - %C discovered %C lease %C from %C (%B)\n"),
+        DCPS::LogGuid(guid_).c_str(), DCPS::LogGuid(guid).c_str(),
+        effective_lease.str(0).c_str(), DCPS::LogAddr(from).c_str(),
+        participants_.size()));
     }
 
     if (tport_->directed_sender_) {
@@ -668,11 +670,13 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     }
 
     // add a new participant
+    std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq,
 #ifdef OPENDDS_SECURITY
-    std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq, config_->auth_resend_period())));
+      config_->auth_resend_period()
 #else
-    std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq, TimeDuration())));
+      TimeDuration()
 #endif
+    )));
     iter = p.first;
     iter->second.discovered_at_ = now;
     update_lease_expiration_i(iter, now);

@@ -17,6 +17,8 @@ namespace RtpsRelay {
 // FUTURE: Make this configurable, adaptive, etc.
 const size_t MAX_SLOT_SIZE = 64;
 
+class GuidAddrSet;
+
 class GuidPartitionTable {
 public:
   enum Result {
@@ -26,17 +28,21 @@ public:
   };
 
   GuidPartitionTable(const Config& config,
+                     GuidAddrSet& guid_addr_set,
                      const ACE_INET_Addr& address,
                      RelayPartitionsDataWriter_var relay_partitions_writer,
                      SpdpReplayDataWriter_var spdp_replay_writer)
     : config_(config)
+    , guid_addr_set_(guid_addr_set)
     , address_(OpenDDS::DCPS::LogAddr(address).c_str())
     , relay_partitions_writer_(relay_partitions_writer)
     , spdp_replay_writer_(spdp_replay_writer)
   {}
 
   // Insert a reader/writer guid and its partitions.
-  Result insert(const OpenDDS::DCPS::GUID_t& guid, const DDS::StringSeq& partitions);
+  Result insert(const OpenDDS::DCPS::GUID_t& guid,
+                const DDS::StringSeq& partitions,
+                const OpenDDS::DCPS::MonotonicTimePoint& now);
 
   void remove(const OpenDDS::DCPS::GUID_t& guid)
   {
@@ -235,6 +241,7 @@ private:
   }
 
   const Config& config_;
+  GuidAddrSet& guid_addr_set_;
   const std::string address_;
   RelayPartitionsDataWriter_var relay_partitions_writer_;
 

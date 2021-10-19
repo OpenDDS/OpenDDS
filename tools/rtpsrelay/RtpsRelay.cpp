@@ -74,6 +74,12 @@ namespace {
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
+  DDS::DomainParticipantFactory_var factory = TheParticipantFactoryWithArgs(argc, argv);
+  if (!factory) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Failed to initialize participant factory\n")));
+    return EXIT_FAILURE;
+  }
+
   DDS::DomainId_t relay_domain = 0;
   ACE_INET_Addr nic_horizontal, nic_vertical;
   std::string user_data;
@@ -93,6 +99,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   int argc_copy = argc;
   ACE_Argv_Type_Converter atc(argc_copy, argv);
   ACE_Arg_Shifter_T<char> args(atc.get_argc(), atc.get_ASCII_argv());
+  args.ignore_arg(); // argv[0] is the program name
   while (args.is_anything_left()) {
     const char* arg = nullptr;
     if ((arg = args.get_the_parameter("-HorizontalAddress"))) {
@@ -144,7 +151,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       config.log_handler_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-LogParticipantStatistics"))) {
-      config.log_participant_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
+      config.log_participant_statistics(ACE_OS::atoi(arg));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-PublishRelayStatistics"))) {
       config.publish_relay_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
@@ -153,7 +160,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       config.publish_handler_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-PublishParticipantStatistics"))) {
-      config.publish_participant_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
+      config.publish_participant_statistics(ACE_OS::atoi(arg));
       args.consume_arg();
 #ifdef OPENDDS_SECURITY
     } else if ((arg = args.get_the_parameter("-IdentityCA"))) {
@@ -182,7 +189,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       args.consume_arg();
 #endif
     } else {
-      args.ignore_arg();
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Invalid option: %C\n", args.get_current()));
+      return 1;
     }
   }
 
@@ -222,12 +230,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   }
 #endif
-
-  DDS::DomainParticipantFactory_var factory = TheParticipantFactoryWithArgs(argc, argv);
-  if (!factory) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Failed to initialize participant factory\n")));
-    return EXIT_FAILURE;
-  }
 
 #ifdef OPENDDS_SECURITY
   if (secure && !TheServiceParticipant->get_security()) {
@@ -583,11 +585,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   RelayStatisticsReporter relay_statistics_reporter(config, relay_statistics_writer);
+  GuidAddrSet guid_addr_set(config, relay_statistics_reporter);
   ACE_Reactor reactor_(new ACE_Select_Reactor, true);
   const auto reactor = &reactor_;
-  GuidPartitionTable guid_partition_table(config, spdp_horizontal_addr, relay_partitions_writer, spdp_replay_writer);
+  GuidPartitionTable guid_partition_table(config, guid_addr_set, spdp_horizontal_addr, relay_partitions_writer, spdp_replay_writer);
   RelayPartitionTable relay_partition_table;
-  GuidAddrSet guid_addr_set(config, relay_statistics_reporter);
   relay_statistics_reporter.report();
 
   HandlerStatisticsReporter spdp_vertical_reporter(config, VSPDP, handler_statistics_writer, relay_statistics_reporter);
@@ -682,7 +684,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DDS::DataReader_var subscription_reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
   SubscriptionListener* subscription_listener =
-    new SubscriptionListener(config, application_participant_impl, guid_partition_table, relay_statistics_reporter);
+    new SubscriptionListener(config, guid_addr_set, application_participant_impl, guid_partition_table, relay_statistics_reporter);
   DDS::DataReaderListener_var subscription_listener_var(subscription_listener);
   ret = subscription_reader->set_listener(subscription_listener_var, DDS::DATA_AVAILABLE_STATUS);
   if (ret != DDS::RETCODE_OK) {
@@ -692,7 +694,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DDS::DataReader_var publication_reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC);
   PublicationListener* publication_listener =
-    new PublicationListener(config, application_participant_impl, guid_partition_table, relay_statistics_reporter);
+    new PublicationListener(config, guid_addr_set, application_participant_impl, guid_partition_table, relay_statistics_reporter);
   DDS::DataReaderListener_var publication_listener_var(publication_listener);
   ret = publication_reader->set_listener(publication_listener_var, DDS::DATA_AVAILABLE_STATUS);
   if (ret != DDS::RETCODE_OK) {

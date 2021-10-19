@@ -1,7 +1,14 @@
 #include "GuidPartitionTable.h"
+
+#include "RelayHandler.h"
+
+#include <dds/DCPS/JsonValueWriter.h>
+
 namespace RtpsRelay {
 
-GuidPartitionTable::Result GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_t& guid, const DDS::StringSeq& partitions)
+GuidPartitionTable::Result GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_t& guid,
+                                                      const DDS::StringSeq& partitions,
+                                                      const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
   Result result;
   std::vector<RelayPartitions> relay_partitions;
@@ -76,6 +83,11 @@ GuidPartitionTable::Result GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to write Relay Partitions\n")));
       }
     }
+  }
+
+  if (config_.log_activity()) {
+    const auto part_guid = make_id(guid, OpenDDS::DCPS::ENTITYID_PARTICIPANT);
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidPartitionTable::insert %C add partitions %C %C into session\n"), guid_to_string(part_guid).c_str(), OpenDDS::DCPS::to_json(spdp_replay).c_str(), guid_addr_set_.get_session_time(part_guid, now).sec_str().c_str()));
   }
 
   return result;
