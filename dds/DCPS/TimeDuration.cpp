@@ -23,21 +23,21 @@ const TimeDuration TimeDuration::max_value(ACE_Numeric_Limits<time_t>::max(), AC
 #endif /* ACE_HAS_CPP11 */
 
 namespace {
-  inline time_t usec_to_rounded_frac(
+  time_t usec_to_rounded_frac(
     suseconds_t value, unsigned decimal_places, time_t& carry)
   {
     const double frac = static_cast<double>(value) / ACE_ONE_SECOND_IN_USECS;
-    const double denominator = std::pow(10.0l, decimal_places);
-    const double numerator = std::floor(frac * denominator + 0.5l);
+    const double denominator = std::pow(10.0, decimal_places);
+    const double numerator = std::floor(frac * denominator + 0.5);
     if (numerator == denominator) {
       carry = 1;
       return 0;
     }
     carry = 0;
-    return numerator;
+    return static_cast<time_t>(numerator;
   }
 
-  inline String to_zero_pad_str(time_t value, unsigned len = 2)
+  String to_zero_pad_str(time_t value, unsigned len = 2)
   {
     const String nopad = to_dds_string(value);
     if (len > nopad.size()) {

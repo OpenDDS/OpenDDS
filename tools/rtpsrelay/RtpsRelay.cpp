@@ -190,7 +190,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       args.consume_arg();
 #endif
     } else {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Invalid option: %s\n", args.get_current()));
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Invalid option: %C\n", args.get_current()));
       return 1;
     }
   }
