@@ -22,7 +22,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-typedef OPENDDS_MAP(PublicationId, XTypes::DynamicTypeMember_rch) DynamicTypeByPubId;
+typedef OPENDDS_MAP(PublicationId, XTypes::DynamicType_rch) DynamicTypeByPubId;
 
 class Recorder;
 
