@@ -4421,14 +4421,13 @@ bool Sedp::TypeLookupReplyReader::process_get_dependencies_reply(
   dependencies_[guid_pref][remote_ti].first = data.continuation_point;
 
   // Update internal data
-  const SequenceNumber new_seq_num = ++sedp_.type_lookup_service_sequence_number_;
-  sedp_.orig_seq_numbers_.insert(std::make_pair(new_seq_num,
+  sedp_.orig_seq_numbers_.insert(std::make_pair(++sedp_.type_lookup_service_sequence_number_,
                                                 sedp_.orig_seq_numbers_[seq_num]));
   sedp_.orig_seq_numbers_.erase(seq_num);
 
   if (data.continuation_point.length() == 0) { // Get all type objects
     deps.append(remote_ti);
-    if (!sedp_.send_type_lookup_request(deps, remote_id, is_discovery_protected, true, new_seq_num)) {
+    if (!sedp_.send_type_lookup_request(deps, remote_id, is_discovery_protected, true, sedp_.type_lookup_service_sequence_number_)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_get_dependencies_reply - ")
         ACE_TEXT("failed to send getTypes request\n")));
       return false;
@@ -4436,7 +4435,7 @@ bool Sedp::TypeLookupReplyReader::process_get_dependencies_reply(
   } else { // Get more dependencies
     XTypes::TypeIdentifierSeq type_ids;
     type_ids.append(remote_ti);
-    if (!sedp_.send_type_lookup_request(type_ids, remote_id, is_discovery_protected, false, new_seq_num)) {
+    if (!sedp_.send_type_lookup_request(type_ids, remote_id, is_discovery_protected, false, sedp_.type_lookup_service_sequence_number_)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupReplyReader::process_get_dependencies_reply - ")
         ACE_TEXT("failed to send getTypeDependencies request\n")));
       return false;
