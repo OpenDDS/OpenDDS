@@ -16,18 +16,20 @@ namespace OpenDDS {
 namespace DCPS {
 
 const TimeDuration TimeDuration::zero_value(0, 0);
+const TimeDuration TimeDuration::max_value(
 #ifdef ACE_HAS_CPP11
-const TimeDuration TimeDuration::max_value(std::numeric_limits<time_t>::max(), ACE_ONE_SECOND_IN_USECS - 1);
+  std::numeric_limits<time_t>::max(),
 #else
-const TimeDuration TimeDuration::max_value(ACE_Numeric_Limits<time_t>::max(), ACE_ONE_SECOND_IN_USECS - 1);
-#endif /* ACE_HAS_CPP11 */
+  ACE_Numeric_Limits<time_t>::max(),
+#endif
+  ACE_ONE_SECOND_IN_USECS - 1);
 
 namespace {
   time_t usec_to_rounded_frac(
     suseconds_t value, unsigned decimal_places, time_t& carry)
   {
     const double frac = static_cast<double>(value) / ACE_ONE_SECOND_IN_USECS;
-    const double denominator = std::pow(10.0, decimal_places);
+    const double denominator = std::pow(10.0, static_cast<double>(decimal_places));
     const double numerator = std::floor(frac * denominator + 0.5);
     if (numerator == denominator) {
       carry = 1;
