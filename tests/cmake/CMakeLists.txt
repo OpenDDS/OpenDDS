@@ -11,6 +11,12 @@ add_subdirectory(
   "../../DevGuideExamples/DCPS/Messenger"
   "${CMAKE_CURRENT_SOURCE_DIR}/../../DevGuideExamples/DCPS/Messenger/build")
 
+if (OPENDDS_QT AND OPENDDS_CXX11)
+  add_subdirectory(
+    "../../examples/DCPS/ishapes"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../examples/DCPS/ishapes/build")
+endif()
+
 if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8.2")
   if(OPENDDS_OWNERSHIP_PROFILE)
     add_subdirectory(Messenger)
