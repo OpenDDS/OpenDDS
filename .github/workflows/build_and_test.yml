@@ -4792,7 +4792,7 @@ jobs:
 #      if: steps.cache-artifact.outputs.cache-hit != 'true'
 #      run: |
 #        cd OpenDDS
-#        ./configure --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl/
+#        ./configure --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl@1.1
 #    - name: build ACE and TAO
 #      if: steps.cache-artifact.outputs.cache-hit != 'true'
 #      run: |
@@ -4857,7 +4857,7 @@ jobs:
 #    - name: configure OpenDDS
 #      run: |
 #        cd OpenDDS
-#        ./configure --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl/
+#        ./configure --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl@1.1
 #    - name: check build configuration
 #      shell: bash
 #      run: |
@@ -5225,7 +5225,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl/
+        ./configure --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl@1.1
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -5290,7 +5290,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl/
+        ./configure --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl@1.1
     - name: check build configuration
       shell: bash
       run: |
