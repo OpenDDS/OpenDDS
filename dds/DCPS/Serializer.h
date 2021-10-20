@@ -433,6 +433,14 @@ public:
   /// future versions of the spec which may have additional optional fields.
   bool skip(size_t n, int size = 1);
 
+  /// Return a duplicated Message Block (chain) which starts at the current
+  /// read position (rpos) and extends for n bytes.
+  /// This can be used to treat a subset of the original message as if it
+  /// was itself a full message, for example the SerializedPayload or the
+  /// Parameter value inside a ParameterList.
+  /// The returned object should be release()'d (use Message_Block_Ptr)
+  ACE_Message_Block* trim(size_t n) const;
+
   const char* pos_rd() const { return current_ ? current_->rd_ptr() : 0; }
   const char* pos_wr() const { return current_ ? current_->wr_ptr() : 0; }
 
