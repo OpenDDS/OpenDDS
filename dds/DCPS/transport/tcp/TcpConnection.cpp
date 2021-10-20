@@ -485,34 +485,39 @@ OpenDDS::DCPS::TcpConnection::on_active_connection_established()
 
   ACE_UINT32 nlen = htonl(len);
 
-  if (this->peer().send_n(&nlen,
-                          sizeof(ACE_UINT32)) == -1) {
-    ACE_ERROR_RETURN((LM_WARNING,
-                      "(%P|%t) WARNING: TcpConnection::on_active_connection_established: "
-                      "Unable to send address string length to "
-                      "the passive side to complete the active connection "
-                      "establishment.\n"),
-                     -1);
+  if (this->peer().send_n(&nlen, sizeof(ACE_UINT32)) == -1) {
+    if (DCPS_debug_level >= 2) {
+      ACE_DEBUG((LM_WARNING,
+                 "(%P|%t) WARNING: TcpConnection::on_active_connection_established: "
+                 "Unable to send address string length to "
+                 "the passive side to complete the active connection "
+                 "establishment.\n"));
+    }
+    return -1;
   }
 
   if (this->peer().send_n(address.c_str(), len)  == -1) {
-    ACE_ERROR_RETURN((LM_WARNING,
-                      "(%P|%t) WARNING: TcpConnection::on_active_connection_established: "
-                      "Unable to send our address to "
-                      "the passive side to complete the active connection "
-                      "establishment.\n"),
-                     -1);
+    if (DCPS_debug_level >= 2) {
+      ACE_DEBUG((LM_WARNING,
+                 "(%P|%t) WARNING: TcpConnection::on_active_connection_established: "
+                 "Unable to send our address to "
+                 "the passive side to complete the active connection "
+                 "establishment.\n"));
+    }
+    return -1;
   }
 
   ACE_UINT32 npriority = htonl(this->transport_priority_);
 
   if (this->peer().send_n(&npriority, sizeof(ACE_UINT32)) == -1) {
-    ACE_ERROR_RETURN((LM_WARNING,
-                      "(%P|%t) WARNING: TcpConnection::on_active_connection_established: "
-                      "Unable to send publication priority to "
-                      "the passive side to complete the active connection "
-                      "establishment.\n"),
-                     -1);
+    if (DCPS_debug_level >= 2) {
+      ACE_DEBUG((LM_WARNING,
+                 "(%P|%t) WARNING: TcpConnection::on_active_connection_established: "
+                 "Unable to send publication priority to "
+                 "the passive side to complete the active connection "
+                 "establishment.\n"));
+    }
+    return -1;
   }
 
   return 0;
