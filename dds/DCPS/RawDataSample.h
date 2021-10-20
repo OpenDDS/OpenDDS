@@ -25,7 +25,8 @@ class OpenDDS_Dcps_Export RawDataSample
 {
 public:
   RawDataSample();
-  RawDataSample(MessageId,
+  RawDataSample(const DataSampleHeader& header,
+                MessageId,
                 ACE_INT32          sec,
                 ACE_UINT32         nano_sec,
                 PublicationId      pid,
@@ -36,6 +37,8 @@ public:
   ~RawDataSample();
   RawDataSample& operator=(const RawDataSample&);
 
+  /// The sample data header
+  DataSampleHeader header_;
   /// The enum indicating the message type
   MessageId message_id_;
   /// The timestamp the sender put on the sample
