@@ -210,21 +210,21 @@ private:
 template <typename T, typename Transformer>
 class PartitionIndex {
 public:
-  typedef TrieNode<T, Transformer> TrieNode;
+  typedef TrieNode<T, Transformer> TrieNodeT;
 
   PartitionIndex()
-    : root_(new TrieNode())
+    : root_(new TrieNodeT())
   {}
 
   void insert(const std::string& name, const typename T::value_type& guid)
   {
-    TrieNode::insert(root_, Name(name), guid);
+    TrieNodeT::insert(root_, Name(name), guid);
     cache_.clear();
   }
 
   void remove(const std::string& name, const typename T::value_type& guid)
   {
-    TrieNode::remove(root_, Name(name), guid);
+    TrieNodeT::remove(root_, Name(name), guid);
     cache_.clear();
   }
 
@@ -235,12 +235,12 @@ public:
       guids = pos->second;
       return;
     }
-    TrieNode::lookup(root_, Name(name), guids);
+    TrieNodeT::lookup(root_, Name(name), guids);
     cache_[name] = guids;
   }
 
 private:
-  typename TrieNode::NodePtr root_;
+  typename TrieNodeT::NodePtr root_;
   typedef std::unordered_map<std::string, T> Cache;
   mutable Cache cache_;
 };
