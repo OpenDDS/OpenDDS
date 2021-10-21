@@ -57,10 +57,11 @@ void PublicationListener::on_data_available(DDS::DataReader_ptr reader)
 
           if (r == GuidPartitionTable::ADDED) {
             if (config_.log_discovery()) {
+              GuidAddrSet::Proxy proxy(guid_addr_set_);
               ACE_DEBUG((LM_INFO, "(%P|%t) INFO: PublicationListener::on_data_available "
-                "add local writer %C %C %C into session\n",
-                guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str(),
-                guid_addr_set_.get_session_time(make_part_guid(repoid), now).sec_str().c_str()));
+                         "add local writer %C %C %C into session\n",
+                         guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str(),
+                         proxy.get_session_time(make_part_guid(repoid), now).sec_str().c_str()));
             }
             stats_reporter_.local_writers(++count_, OpenDDS::DCPS::MonotonicTimePoint::now());
           } else if (r == GuidPartitionTable::UPDATED) {
@@ -79,10 +80,11 @@ void PublicationListener::on_data_available(DDS::DataReader_ptr reader)
         const auto repoid = participant_->get_repoid(info.instance_handle);
 
         if (config_.log_discovery()) {
+          GuidAddrSet::Proxy proxy(guid_addr_set_);
           ACE_DEBUG((LM_INFO, "(%P|%t) INFO: PublicationListener::on_data_available "
-            "remove local writer %C %C into session\n",
-            guid_to_string(repoid).c_str(),
-            guid_addr_set_.get_session_time(make_part_guid(repoid), now).sec_str().c_str()));
+                     "remove local writer %C %C into session\n",
+                     guid_to_string(repoid).c_str(),
+                     proxy.get_session_time(make_part_guid(repoid), now).sec_str().c_str()));
         }
         guid_partition_table_.remove(repoid);
         stats_reporter_.local_writers(--count_, OpenDDS::DCPS::MonotonicTimePoint::now());
