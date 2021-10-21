@@ -28,7 +28,6 @@ DynamicData::DynamicData(ACE_Message_Block* chain,
     throw std::runtime_error("DynamicData only supports XCDR2 at this time");
   }
 
-  //  strm_.rdstate(orig_rdstate_);
   descriptor_ = type_->get_descriptor();
 }
 
@@ -567,8 +566,6 @@ DDS::ReturnCode_t DynamicData::get_single_value(ValueType& value, MemberId id,
                ACE_TEXT(" Failed to read a value of %C from a DynamicData object of type %C\n"),
                typekind_to_string(ValueTypeKind), typekind_to_string(tk)));
   }
-
-  //  reset_stream();
   return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
 
@@ -697,8 +694,6 @@ DDS::ReturnCode_t DynamicData::get_char16_value(ACE_CDR::WChar& value, MemberId 
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Dynamic::get_char16_value -")
                ACE_TEXT(" Failed to read DynamicData object of type %C\n"), typekind_to_string(tk)));
   }
-
-  //  reset_stream();
   return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
 
@@ -781,8 +776,6 @@ DDS::ReturnCode_t DynamicData::get_boolean_value(ACE_CDR::Boolean& value, Member
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Dynamic::get_boolean_value -")
                ACE_TEXT(" Failed to read DynamicData object of type %C\n"), typekind_to_string(tk)));
   }
-
-  //  reset_stream();
   return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
 
@@ -884,8 +877,6 @@ DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id
     good = false;
     break;
   }
-
-  //  reset_stream();
   return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
 
@@ -1295,6 +1286,9 @@ DDS::ReturnCode_t DynamicData::get_sequence_values(SequenceType& value, MemberId
     return DDS::RETCODE_ERROR;
   }
 
+  DCPS::Message_Block_Ptr dup(chain_->duplicate());
+  strm_ = DCPS::Serializer(dup.get(), encoding_);
+
   const TypeKind tk = type_->get_kind();
   bool good = true;
 
@@ -1328,8 +1322,6 @@ DDS::ReturnCode_t DynamicData::get_sequence_values(SequenceType& value, MemberId
                ACE_TEXT(" Failed to read sequence<%C> from a DynamicData object of type %C\n"),
                typekind_to_string(ElementTypeKind), typekind_to_string(tk)));
   }
-
-  reset_stream();
   return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
 
@@ -1531,11 +1523,6 @@ bool DynamicData::get_from_struct_common_checks(MemberDescriptor& md, MemberId i
   }
 
   return true;
-}
-
-void DynamicData::reset_stream()
-{
-  //  strm_.rdstate(orig_rdstate_);
 }
 
 bool DynamicData::skip_struct_member_by_index(ACE_CDR::ULong index)

@@ -259,16 +259,9 @@ private:
   bool get_index_from_id(MemberId id, ACE_CDR::ULong& index, ACE_CDR::ULong bound) const;
   const char* typekind_to_string(TypeKind tk) const;
 
-  /// Reset the reading state of the stream to when it was first given to this DynamicData object.
-  void reset_stream();
-
   ACE_Message_Block* chain_;
   DCPS::Encoding encoding_;
   DCPS::Serializer strm_;
-
-  /// Original reading state of the data stream.
-//  DCPS::Serializer::RdState orig_rdstate_;
-
   DynamicType_rch type_;
   TypeDescriptor descriptor_;
 };

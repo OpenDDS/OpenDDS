@@ -442,11 +442,6 @@ public:
   /// Examine the logical writing position of the stream.
   size_t wpos() const { return wpos_; }
 
-  ACE_Message_Block* get_current() const
-  {
-    return current_;
-  }
-
   /**
    * Read basic IDL types arrays
    * The buffer @a x must be large enough to contain @a length
@@ -758,29 +753,6 @@ public:
   }
 
   bool peek(ACE_CDR::ULong& t);
-
-  struct OpenDDS_Dcps_Export RdState {
-    ACE_Message_Block* msg_block;
-    char* rd_ptr;
-    size_t rpos;
-    unsigned char align_rshift;
-  };
-
-  void rdstate(RdState& state) const
-  {
-    state.msg_block = current_;
-    state.rd_ptr = current_->rd_ptr();
-    state.rpos = rpos_;
-    state.align_rshift = align_rshift_;
-  }
-
-  void rdstate(const RdState& state)
-  {
-    current_ = state.msg_block;
-    current_->rd_ptr(state.rd_ptr);
-    rpos_ = state.rpos;
-    align_rshift_ = state.align_rshift;
-  }
 
 private:
   ///@{
