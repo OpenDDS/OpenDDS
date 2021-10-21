@@ -3,55 +3,22 @@
 
 {% include latest_releases.html %}
 
-<div id="latest_release_link"></div>
-<script>
-  if (typeof latest_release !== 'undefined') {
-    var latest_release_link = document.getElementById("latest_release_link");
-    var h3 = document.createElement("h3");
-    var a = document.createElement("a");
-    a.innerHTML = latest_release.name;
-    a.href = latest_release.url;
-    h3.appendChild(a);
-    latest_release_link.appendChild(h3);
-  }
-</script>
+<h3><a href="{{ latest_release.html_url }}">OpenDDS {{ latest_release.version }}</a></h3>
 
 {{ latest_release_downloads }}
 
-<div id="latest_release_date"></div>
-<script>
-  function add_release_date(parent_element, release) {
-    var i = document.createElement("i");
-    i.className = "post-date";
-    i.innerHTML = "Released on " + release.date;
-    parent_element.appendChild(i);
-  }
+<i class="post-date">Released on {{ latest_release.published_at | date_to_long_string }}</i>
 
-  if (typeof latest_release !== 'undefined') {
-    add_release_date(document.getElementById("latest_release_date"), latest_release);
-  }
-</script>
+<h3>Previous Releases:</h3>
 
-<div id="previous_release_list"></div>
-<script>
-  if (typeof previous_releases !== 'undefined' && previous_releases.length > 0) {
-    var previous_release_list = document.getElementById("previous_release_list");
-    var h3 = document.createElement("h3");
-    h3.innerHTML = "Previous Releases:";
-    previous_release_list.appendChild(h3);
-    var ul = document.createElement("ul");
-    for (var i = 0; i < previous_releases.length; ++i) {
-      var li = document.createElement("li");
-      var a = document.createElement("a");
-      a.innerHTML = previous_releases[i].name;
-      a.href = previous_releases[i].url;
-      li.appendChild(a);
-      add_release_date(li, previous_releases[i]);
-      ul.appendChild(li);
-    }
-    previous_release_list.appendChild(ul);
-  }
-</script>
+<ul>
+{% for release in previous_releases %}
+  <li>
+    <a href="{{ release.html_url }}">OpenDDS {{ release.version }}</a>
+    <i class="post-date">Released on {{ release.published_at | date_to_long_string }}</i>
+  </li>
+{% endfor %}
+</ul>
 
 <p><a href="{{ site.github.releases_url }}">See all releases on GitHub</a></p>
 
