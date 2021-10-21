@@ -1,0 +1,228 @@
+enum SomeEnum {
+  INT32,
+  UINT32,
+  INT8,
+  UINT8,
+  INT16,
+  UINT16,
+  INT64,
+  UINT64,
+  FLOAT32,
+  FLOAT64,
+  FLOAT128,
+  CHAR8,
+  CHAR16,
+  BYTE,
+  BOOL,
+  STRING8,
+  STRING16
+};
+
+typedef sequence<SomeEnum> SomeEnumSeq;
+typedef sequence<long> Int32Seq;
+typedef sequence<unsigned long> UInt32Seq;
+typedef sequence<int8> Int8Seq;
+typedef sequence<uint8> UInt8Seq;
+typedef sequence<short> Int16Seq;
+typedef sequence<unsigned short> UInt16Seq;
+typedef sequence<long long> Int64Seq;
+typedef sequence<unsigned long long> UInt64Seq;
+typedef sequence<float> Float32Seq;
+typedef sequence<double> Float64Seq;
+typedef sequence<long double> Float128Seq;
+typedef sequence<char> Char8Seq;
+typedef sequence<wchar> Char16Seq;
+typedef sequence<octet> ByteSeq;
+typedef sequence<boolean> BoolSeq;
+typedef sequence<string> StringSeq;
+typedef sequence<wstring> WStringSeq;
+
+// Reading single value from struct.
+@mutable
+struct SingleValueStruct {
+  @id(1) SomeEnum my_enum;
+  @id(2) long int_32;
+  @id(3) unsigned long uint_32;
+  @id(4) int8 int_8;
+  @id(5) uint8 uint_8;
+  @id(6) short int_16;
+  @id(7) unsigned short uint_16;
+  @id(8) long long int_64;
+  @id(9) unsigned long long uint_64;
+  @id(10) float float_32;
+  @id(11) double float_64;
+  @id(12) long double float_128;
+  @id(13) char char_8;
+  @id(14) wchar char_16;
+  @id(15) octet byte;
+  @id(16) boolean bool;
+  @id(17) string str;
+  @id(18) wstring wstr;
+};
+
+// Reading single value from union.
+@mutable
+union SingleValueUnion switch (SomeEnum) {
+ case INT32:
+   long int_32;
+ case UINT32:
+   unsigned long uint_32;
+ case INT8:
+   int8 int_8;
+ case UINT8:
+   uint8 uint_8;
+ case INT16:
+   short int_16;
+ case UINT16:
+   unsigned short uint_16;
+ case INT64:
+   long long int_64;
+ case UINT64:
+   unsigned long long uint_64;
+ case FLOAT32:
+   float float_32;
+ case FLOAT64:
+   double float_64;
+ case FLOAT128:
+   long double float_128;
+ case CHAR8:
+   char char_8;
+ case CHAR16:
+   wchar char_16;
+ case BYTE:
+   octet byte_;
+ case BOOL:
+   boolean bool_;
+ case STRING8:
+   string str;
+ case STRING16:
+   wstring wstr;
+};
+
+// Reading single value from array.
+@mutable
+struct ArrayStruct {
+  long int_32a[2];
+  unsigned long uint_32a[2];
+  int8 int_8a[2];
+  uint8 uint_8a[2];
+  short int_16a[2];
+  unsigned short uint_16a[2];
+  long long int_64a[2];
+  unsigned long long uint_64a[2];
+  float float_32a[2];
+  double float_64a[2];
+  long double float_128a[2];
+  char char_8a[2];
+  wchar char_16a[2];
+  octet byte_a[2];
+  boolean bool_a[2];
+  string str_a[2];
+  wstring wstr_a[2];
+};
+
+// Reading single value from sequence and reading sequence from struct.
+@mutable
+struct SequenceStruct {
+  SomeEnumSeq my_enums;
+  Int32Seq int_32s;
+  UInt32Seq uint_32s;
+  Int8Seq int_8s;
+  UInt8Seq uint_8s;
+  Int16Seq int_16s;
+  UInt16Seq uint_16s;
+  Int64Seq int_64s;
+  UInt64Seq uint_64s;
+  Float32Seq float_32s;
+  Float64Seq float_64s;
+  Float128Seq float_128s;
+  Char8Seq char_8s;
+  Char16Seq char_16s;
+  ByteSeq byte_s;
+  BoolSeq bool_s;
+  StringSeq str_s;
+  WStringSeq wstr_s;
+};
+
+// Reading sequence from union.
+@mutable
+union SequenceUnion switch (SomeEnum) {
+ case INT32:
+   Int32Seq int_32s;
+ case UINT32:
+   UInt32Seq uint_32s;
+ case INT8:
+   Int8Seq int_8s;
+ case UINT8:
+   UInt8Seq uint_8s;
+ case INT16:
+   Int16Seq int_16s;
+ case UINT16:
+   UInt16Seq uint_16s;
+ case INT64:
+   Int64Seq int_64s;
+ case UINT64:
+   UInt64Seq uint_64s;
+ case FLOAT32:
+   Float32Seq float_32s;
+ case FLOAT64:
+   Float64Seq float_64s;
+ case FLOAT128:
+   Float128Seq float_128s;
+ case CHAR8:
+   Char8Seq char_8s;
+ case CHAR16:
+   Char16Seq char_16s;
+ case BYTE:
+   ByteSeq byte_s;
+ case BOOL:
+   BoolSeq bool_s;
+ case STRING8:
+   StringSeq str_s;
+ case STRING16:
+   WStringSeq wstr_s;
+};
+
+// Reading nested sequence from another sequence.
+@mutable
+struct SequenceInSequenceStruct {
+  sequence<Int32Seq> int_32ss;
+  sequence<UInt32Seq> uint_32ss;
+  sequence<Int8Seq> int_8ss;
+  sequence<UInt8Seq> uint_8ss;
+  sequence<Int16Seq> int_16ss;
+  sequence<UInt16Seq> uint_16ss;
+  sequence<Int64Seq> int_64ss;
+  sequence<UInt64Seq> uint_64ss;
+  sequence<Float32Seq> float_32ss;
+  sequence<Float64Seq> float_64ss;
+  sequence<Float128Seq> float_128ss;
+  sequence<Char8Seq> char_8ss;
+  sequence<Char16Seq> char_16ss;
+  sequence<ByteSeq> byte_ss;
+  sequence<BoolSeq> bool_ss;
+  sequence<StringSeq> str_ss;
+  sequence<WStringSeq> wstr_ss;
+};
+
+// Reading nested sequence from an array.
+@mutable
+struct SequenceInArrayStruct {
+  Int32Seq int_32as[2];
+  UInt32Seq uint_32as[2];
+  Int8Seq int_8as[2];
+  UInt8Seq uint_8as[2];
+  Int16Seq int_16as[2];
+  UInt16Seq uint_16as[2];
+  Int64Seq int_64as[2];
+  UInt64Seq uint_64as[2];
+  Float32Seq float_32as[2];
+  Float64Seq float_64as[2];
+  Float128Seq float_128as[2];
+  Char8Seq char_8as[2];
+  Char16Seq char_16as[2];
+  ByteSeq byte_as[2];
+  BoolSeq bool_as[2];
+  StringSeq str_as[2];
+  WStringSeq wstr_as[2];
+};

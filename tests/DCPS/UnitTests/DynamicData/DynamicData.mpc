@@ -1,0 +1,11 @@
+project: dcps_test, googletest {
+  dcps_ts_flags += -Gxtypes-complete --idl-version 4
+
+  TypeSupport_Files {
+    DynamicData.idl
+  }
+
+  Source_Files {
+    DynamicData.cpp
+  }
+}
