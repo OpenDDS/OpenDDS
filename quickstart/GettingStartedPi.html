@@ -103,7 +103,9 @@ The goal of this guide is help you download and compile OpenDDS for Linux on the
     <li>In <code>$BUILD_ROOT</code>, download and extract the
       <a href="https://www.openssl.org/source/">
         OpenSSL source archive</a>, and change to that extracted
-      directory.</li>
+      directory. See <a href="https://github.com/objectcomputing/OpenDDS/blob/latest-release/docs/dependencies.md#openssl">
+      here</a> for any version requriements for OpenSSL.
+    </li>
     <li><code>./Configure --cross-compile-prefix=/opt/cross-pi-gcc/bin/arm-linux-gnueabihf-
         linux-armv4</code></li>
     <li><code>make</code></li>
@@ -126,7 +128,9 @@ set(THREADS_PTHREAD_ARG 2)</pre></li>
     <li>In <code>$BUILD_ROOT</code>, download and extract the
       <a href="https://xerces.apache.org/xerces-c/download.cgi">
         Xerces-C++ source archive</a>, and change to that extracted
-      directory.</li>
+      directory. See <a href="https://github.com/objectcomputing/OpenDDS/blob/latest-release/docs/dependencies.md#xerces">
+      here</a> for any version requriements for Xerces.
+    </li>
     <li><code>mkdir build-pi; cd build-pi</code></li>
     <li><code>cmake -DCMAKE_TOOLCHAIN_FILE=$BUILD_ROOT/PiToolchain.cmake
         -DCMAKE_INSTALL_PREFIX=$BUILD_ROOT/pi-xerces ..</code></li>

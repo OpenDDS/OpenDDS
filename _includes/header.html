@@ -111,7 +111,6 @@
             {% assign level = slash.size %}
           {% endunless %}
         {% endfor %}
-        <!-- {{ level | minus: start_level }} -->
         {% assign terminate_ul_count = level | minus: start_level %}
         {% for i in (0..terminate_ul_count) %}</ul>{% endfor %}
       </ul>

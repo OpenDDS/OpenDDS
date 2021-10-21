@@ -1,6 +1,6 @@
 site_dir="${site_dir:-_site}"
 
-# Absolute URLs to the website with a domain wont work unless we are serving
+# Absolute URLs to the website with a domain won't work unless we are serving
 # from that address at the same time. Use --url-swap to replace the URLs with
 # just an absolute path.
 url_swap_list=() # Format is REGEX:REPLACE_STRING
