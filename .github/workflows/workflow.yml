@@ -22,7 +22,7 @@ jobs:
       - name: Jekyll
         uses: limjh16/jekyll-action-ts@v2
         with:
-          enable_cache: true
+          enable_cache: false
 
       - name: Upload
         uses: actions/upload-artifact@v2
