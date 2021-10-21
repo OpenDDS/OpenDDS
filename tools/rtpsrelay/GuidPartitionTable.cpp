@@ -87,7 +87,8 @@ GuidPartitionTable::Result GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_
 
   if (config_.log_activity()) {
     const auto part_guid = make_id(guid, OpenDDS::DCPS::ENTITYID_PARTICIPANT);
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidPartitionTable::insert %C add partitions %C %C into session\n"), guid_to_string(part_guid).c_str(), OpenDDS::DCPS::to_json(spdp_replay).c_str(), guid_addr_set_.get_session_time(part_guid, now).sec_str().c_str()));
+    GuidAddrSet::Proxy proxy(guid_addr_set_);
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidPartitionTable::insert %C add partitions %C %C into session\n"), guid_to_string(part_guid).c_str(), OpenDDS::DCPS::to_json(spdp_replay).c_str(), proxy.get_session_time(part_guid, now).sec_str().c_str()));
   }
 
   return result;
