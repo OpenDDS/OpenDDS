@@ -262,7 +262,7 @@ private:
   typedef std::set<OpenDDS::DCPS::GUID_t, OpenDDS::DCPS::GUID_tKeyLessThan> OrderedGuidSet;
   typedef std::unordered_map<std::string, OrderedGuidSet> PartitionToGuid;
   PartitionToGuid partition_to_guid_;
-  PartitionIndex<GuidSet, GuidTransformer> partition_index_;
+  PartitionIndex<GuidSet, GuidToParticipantGuid> partition_index_;
 
   mutable ACE_Thread_Mutex mutex_;
   mutable ACE_Thread_Mutex write_mutex_;

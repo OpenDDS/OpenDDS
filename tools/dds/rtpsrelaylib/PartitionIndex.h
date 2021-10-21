@@ -8,14 +8,14 @@
 
 namespace RtpsRelay {
 
-struct GuidTransformer {
+struct GuidToParticipantGuid {
   OpenDDS::DCPS::GUID_t operator()(const OpenDDS::DCPS::GUID_t& x) const
   {
     return OpenDDS::DCPS::make_part_guid(x);
   }
 };
 
-struct StringTransformer {
+struct Identity {
   std::string operator()(const std::string& x) const
   {
     return x;

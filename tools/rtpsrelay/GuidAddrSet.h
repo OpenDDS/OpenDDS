@@ -72,8 +72,10 @@ struct AddrSetStats {
 };
 
 struct Remote {
+  static const size_t GUID_PREFIX_PREFIX_LENGTH = 6;
+
   ACE_INET_Addr addr_;
-  unsigned char guid_prefix_prefix_[6];
+  unsigned char guid_prefix_prefix_[GUID_PREFIX_PREFIX_LENGTH];
 
   Remote(const ACE_INET_Addr& addr,
          const OpenDDS::DCPS::GUID_t& guid)
@@ -224,7 +226,6 @@ public:
 
   private:
     GuidAddrSet& gas_;
-    OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(Proxy)
   };
 
 private:

@@ -127,7 +127,7 @@ private:
 
     RelayToAddress& relay_to_address_;
 
-    PartitionIndex<StringSet, StringTransformer> partition_index_;
+    PartitionIndex<StringSet, Identity> partition_index_;
 
     typedef std::unordered_map<SlotKey, StringSet, SlotKeyHash> RelayToPartitions;
     RelayToPartitions relay_to_partitions_;

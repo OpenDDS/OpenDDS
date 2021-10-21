@@ -16,7 +16,7 @@ RelayStatusReporter::RelayStatusReporter(const Config& config,
     this->reactor()->schedule_timer(this, 0, ACE_Time_Value(), config.publish_relay_status().value());
   }
 
-};
+}
 
 int RelayStatusReporter::handle_timeout(const ACE_Time_Value& /*now*/, const void* /*token*/)
 {
