@@ -11,14 +11,14 @@ namespace RtpsRelay {
 class RelayStatusReporter : public ACE_Event_Handler {
 public:
   RelayStatusReporter(const Config& config,
-                      const GuidAddrSet& guid_addr_set,
+                      GuidAddrSet& guid_addr_set,
                       RelayStatusDataWriter_var writer,
                       ACE_Reactor* reactor);
 
   int handle_timeout(const ACE_Time_Value& now, const void* token) override;
 
 private:
-  const GuidAddrSet& guid_addr_set_;
+  GuidAddrSet& guid_addr_set_;
   RelayStatusDataWriter_var writer_;
   RelayStatus relay_status_;
 };

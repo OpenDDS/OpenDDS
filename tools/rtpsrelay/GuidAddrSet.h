@@ -22,7 +22,6 @@ struct AddrSetStats {
   ParticipantStatisticsReporter sedp_stats_reporter;
   ParticipantStatisticsReporter data_stats_reporter;
   OpenDDS::DCPS::Message_Block_Shared_Ptr spdp_message;
-  OpenDDS::DCPS::MonotonicTimePoint first_spdp;
   OpenDDS::DCPS::MonotonicTimePoint session_start;
 #ifdef OPENDDS_SECURITY
   std::string common_name;
@@ -68,6 +67,11 @@ struct AddrSetStats {
     }
 
     return 0;
+  }
+
+  OpenDDS::DCPS::TimeDuration get_session_time(const OpenDDS::DCPS::MonotonicTimePoint& now) const
+  {
+    return now - session_start;
   }
 };
 
@@ -137,16 +141,6 @@ public:
     data_vertical_handler_ = data_vertical_handler;
   }
 
-  void process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now);
-
-  OpenDDS::DCPS::MonotonicTimePoint get_first_spdp(const OpenDDS::DCPS::GUID_t& guid);
-
-  bool admitting() const
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
-    return admitting_i();
-  }
-
   using CreatedAddrSetStats = std::pair<bool, AddrSetStats&>;
 
   class Proxy {
@@ -208,9 +202,7 @@ public:
     OpenDDS::DCPS::TimeDuration get_session_time(const OpenDDS::DCPS::GUID_t& guid,
                                                  const OpenDDS::DCPS::MonotonicTimePoint& now)
     {
-      const auto it = find(guid);
-      return it == end() ? OpenDDS::DCPS::TimeDuration::zero_value :
-        (now - it->second.session_start);
+      return gas_.get_session_time(guid, now);
     }
 
     void remove_pending(const OpenDDS::DCPS::GUID_t& guid)
@@ -221,11 +213,27 @@ public:
     void remove(const OpenDDS::DCPS::GUID_t& guid,
                 const OpenDDS::DCPS::MonotonicTimePoint& now)
     {
-      gas_.remove(guid, now);
+      const auto it = find(guid);
+      if (it == end()) {
+        return;
+      }
+
+      gas_.remove(guid, it, now);
+    }
+
+    void process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now)
+    {
+      gas_.process_expirations(now);
+    }
+
+    bool admitting() const
+    {
+      return gas_.admitting();
     }
 
   private:
     GuidAddrSet& gas_;
+    OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(Proxy)
   };
 
 private:
@@ -250,7 +258,9 @@ private:
                   const size_t& msg_len,
                   RelayHandler& handler);
 
-  bool admitting_i() const
+  void process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now);
+
+  bool admitting() const
   {
     return pending_.size() < config_.max_pending();
   }
@@ -261,11 +271,16 @@ private:
                    bool& admitted);
 
   void remove(const OpenDDS::DCPS::GUID_t& guid,
+              GuidAddrSetMap::iterator it,
               const OpenDDS::DCPS::MonotonicTimePoint& now);
 
-  void remove_i(const OpenDDS::DCPS::GUID_t& guid,
-                GuidAddrSetMap::iterator it,
-                const OpenDDS::DCPS::MonotonicTimePoint& now);
+  OpenDDS::DCPS::TimeDuration get_session_time(const OpenDDS::DCPS::GUID_t& guid,
+                                               const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    const auto it = guid_addr_set_map_.find(guid);
+    return it == guid_addr_set_map_.end() ? OpenDDS::DCPS::TimeDuration::zero_value :
+      it->second.get_session_time(now);
+  }
 
   const Config& config_;
   OpenDDS::RTPS::RtpsDiscovery_rch rtps_discovery_;

@@ -285,7 +285,11 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
                                               const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
                                               MessageType& type)
 {
-  guid_addr_set_.process_expirations(now);
+  {
+    GuidAddrSet::Proxy proxy(guid_addr_set_);
+    proxy.process_expirations(now);
+  }
+
   AddrPort addr_port(remote_address, port());
 
   const auto msg_len = msg->length();
@@ -872,13 +876,11 @@ void SpdpHandler::cache_message(GuidAddrSet::Proxy& proxy,
     const auto pos = proxy.find(src_guid);
     if (pos != proxy.end()) {
       if (!pos->second.spdp_message) {
-        pos->second.first_spdp = now;
         if (config_.log_activity()) {
-          const auto session_time = now - pos->second.session_start;
           ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SpdpHandler::cache_message ")
                      ACE_TEXT("%C got first SPDP %C into session\n"),
                      guid_to_string(src_guid).c_str(),
-                     session_time.sec_str().c_str()));
+                     pos->second.get_session_time(now).sec_str().c_str()));
         }
 #ifdef OPENDDS_SECURITY
         pos->second.common_name = extract_common_name(msg);

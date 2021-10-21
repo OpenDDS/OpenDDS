@@ -82,9 +82,9 @@ void PublicationListener::on_data_available(DDS::DataReader_ptr reader)
         if (config_.log_discovery()) {
           GuidAddrSet::Proxy proxy(guid_addr_set_);
           ACE_DEBUG((LM_INFO, "(%P|%t) INFO: PublicationListener::on_data_available "
-            "remove local writer %C %C into session\n",
-            guid_to_string(repoid).c_str(),
-            proxy.get_session_time(make_part_guid(repoid), now).sec_str().c_str()));
+                     "remove local writer %C %C into session\n",
+                     guid_to_string(repoid).c_str(),
+                     proxy.get_session_time(make_part_guid(repoid), now).sec_str().c_str()));
         }
         guid_partition_table_.remove(repoid);
         stats_reporter_.local_writers(--count_, OpenDDS::DCPS::MonotonicTimePoint::now());
