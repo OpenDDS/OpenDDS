@@ -19,14 +19,16 @@ namespace XTypes {
 DynamicData::DynamicData(ACE_Message_Block* chain,
                          const DCPS::Encoding& encoding,
                          const DynamicType_rch& type)
-  : strm_(chain, encoding)
+  : chain_(chain)
+  , encoding_(encoding)
+  , strm_(chain, encoding)
   , type_(get_base_type(type))
 {
   if (encoding.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
     throw std::runtime_error("DynamicData only supports XCDR2 at this time");
   }
 
-  strm_.get_rdstate(orig_rdstate_);
+  //  strm_.rdstate(orig_rdstate_);
   descriptor_ = type_->get_descriptor();
 }
 
@@ -521,6 +523,9 @@ DDS::ReturnCode_t DynamicData::get_single_value(ValueType& value, MemberId id,
     return DDS::RETCODE_ERROR;
   }
 
+  DCPS::Message_Block_Ptr dup(chain_->duplicate());
+  strm_ = DCPS::Serializer(dup.get(), encoding_);
+
   const TypeKind tk = type_->get_kind();
   bool good = true;
 
@@ -563,7 +568,7 @@ DDS::ReturnCode_t DynamicData::get_single_value(ValueType& value, MemberId id,
                typekind_to_string(ValueTypeKind), typekind_to_string(tk)));
   }
 
-  reset_stream();
+  //  reset_stream();
   return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
 
@@ -636,6 +641,9 @@ DDS::ReturnCode_t DynamicData::get_char8_value(ACE_CDR::Char& value, MemberId id
 
 DDS::ReturnCode_t DynamicData::get_char16_value(ACE_CDR::WChar& value, MemberId id)
 {
+  DCPS::Message_Block_Ptr dup(chain_->duplicate());
+  strm_ = DCPS::Serializer(dup.get(), encoding_);
+
   const TypeKind tk = type_->get_kind();
   bool good = true;
 
@@ -690,7 +698,7 @@ DDS::ReturnCode_t DynamicData::get_char16_value(ACE_CDR::WChar& value, MemberId 
                ACE_TEXT(" Failed to read DynamicData object of type %C\n"), typekind_to_string(tk)));
   }
 
-  reset_stream();
+  //  reset_stream();
   return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
 
@@ -717,6 +725,9 @@ bool DynamicData::get_boolean_from_bitmask(ACE_CDR::ULong index, ACE_CDR::Boolea
 
 DDS::ReturnCode_t DynamicData::get_boolean_value(ACE_CDR::Boolean& value, MemberId id)
 {
+  DCPS::Message_Block_Ptr dup(chain_->duplicate());
+  strm_ = DCPS::Serializer(dup.get(), encoding_);
+
   const TypeKind tk = type_->get_kind();
   bool good = true;
 
@@ -771,7 +782,7 @@ DDS::ReturnCode_t DynamicData::get_boolean_value(ACE_CDR::Boolean& value, Member
                ACE_TEXT(" Failed to read DynamicData object of type %C\n"), typekind_to_string(tk)));
   }
 
-  reset_stream();
+  //  reset_stream();
   return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
 
@@ -789,6 +800,9 @@ DDS::ReturnCode_t DynamicData::get_wstring_value(DCPS::WString& value, MemberId 
 
 DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id)
 {
+  DCPS::Message_Block_Ptr dup(chain_->duplicate());
+  strm_ = DCPS::Serializer(dup.get(), encoding_);
+
   const TypeKind tk = type_->get_kind();
   bool good = true;
 
@@ -871,7 +885,7 @@ DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id
     break;
   }
 
-  reset_stream();
+  //  reset_stream();
   return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
 
@@ -1521,7 +1535,7 @@ bool DynamicData::get_from_struct_common_checks(MemberDescriptor& md, MemberId i
 
 void DynamicData::reset_stream()
 {
-  strm_.set_rdstate(orig_rdstate_);
+  //  strm_.rdstate(orig_rdstate_);
 }
 
 bool DynamicData::skip_struct_member_by_index(ACE_CDR::ULong index)
@@ -1593,8 +1607,8 @@ bool DynamicData::skip_member(DynamicType_rch member_type)
         return false;
       }
 
-      const DCPS::String err_msg = "Failed to skip a " + str_kind + " member";
-      if (!skip("skip_member", err_msg.str().c_str(), bytes)) {
+      const DCPS::String err_msg = DCPS::String("Failed to skip a ") + str_kind + " member";
+      if (!skip("skip_member", err_msg.c_str(), bytes)) {
         return false;
       }
       break;
@@ -1750,8 +1764,8 @@ bool DynamicData::skip_collection_member(TypeKind kind)
     return false;
   }
 
-  const DCPS::String err_msg = "Failed to skip a non-primitive " + kind_str + " member";
-  return skip("skip_collection_member", err_msg.str().c_str(), dheader);
+  const DCPS::String err_msg = DCPS::String("Failed to skip a non-primitive ") + kind_str + " member";
+  return skip("skip_collection_member", err_msg.c_str(), dheader);
 }
 
 bool DynamicData::skip_struct_member(const DynamicType_rch& struct_type)

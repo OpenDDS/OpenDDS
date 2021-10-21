@@ -761,20 +761,23 @@ public:
 
   struct OpenDDS_Dcps_Export RdState {
     ACE_Message_Block* msg_block;
+    char* rd_ptr;
     size_t rpos;
     unsigned char align_rshift;
   };
 
-  void get_rdstate(RdState& state) const
+  void rdstate(RdState& state) const
   {
     state.msg_block = current_;
+    state.rd_ptr = current_->rd_ptr();
     state.rpos = rpos_;
     state.align_rshift = align_rshift_;
   }
 
-  void set_rdstate(const RdState& state)
+  void rdstate(const RdState& state)
   {
     current_ = state.msg_block;
+    current_->rd_ptr(state.rd_ptr);
     rpos_ = state.rpos;
     align_rshift_ = state.align_rshift;
   }
