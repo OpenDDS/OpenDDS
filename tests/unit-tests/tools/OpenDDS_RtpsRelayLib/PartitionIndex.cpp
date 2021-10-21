@@ -29,7 +29,7 @@ TEST(tools_rtpsrelay_lib_PartitionIndex, maintest)
 
   {
     // Test the empty string.
-    PartitionIndex<GuidSet, GuidTransformer> pi;
+    PartitionIndex<GuidSet, GuidToParticipantGuid> pi;
     pi.insert("", guid1);
 
     GuidSet expected;
@@ -62,7 +62,7 @@ TEST(tools_rtpsrelay_lib_PartitionIndex, maintest)
 
   {
     // Test a literal.
-    PartitionIndex<GuidSet, GuidTransformer> pi;
+    PartitionIndex<GuidSet, GuidToParticipantGuid> pi;
     pi.insert("apple", guid1);
 
     GuidSet expected;
@@ -99,7 +99,7 @@ TEST(tools_rtpsrelay_lib_PartitionIndex, maintest)
 
   {
     // Test a pattern.
-    PartitionIndex<GuidSet, GuidTransformer> pi;
+    PartitionIndex<GuidSet, GuidToParticipantGuid> pi;
     pi.insert("**a[pq][!rs]?**", guid1);
 
     GuidSet expected;
@@ -136,7 +136,7 @@ TEST(tools_rtpsrelay_lib_PartitionIndex, maintest)
 
   {
     // Test multiple literals and patterns.
-    PartitionIndex<GuidSet, GuidTransformer> pi;
+    PartitionIndex<GuidSet, GuidToParticipantGuid> pi;
     pi.insert("apple", guid1);
     pi.insert("orange", guid2);
     pi.insert("*a*e*", guid3);
