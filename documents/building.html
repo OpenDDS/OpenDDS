@@ -24,13 +24,13 @@ order: 103
             https://github.com/DOCGroup/ACE_TAO/releases</a>. For responsive support from OCI it
           is recommended that the latest version of the OCI release of TAO used for OpenDDS
           development and testing be used.
+        </p>
           <ul>
             <li>
               OCI TAO 2.2a patch 21</li>
             <li>
               DOC Group TAO 2.5.14</li>
           </ul>
-        </p>
         <br />
       </li>
       <li>
@@ -89,9 +89,8 @@ order: 103
 
   <div class="bodytext" align="justify">
     <a name="DetailedInstructions"><span class="headertext">Detailed Instructions</span></a>
-{% assign latest_rel = site.github.releases | where: "prerelease", false | sort: "created_at" | last %}
-    <p>Please see the file <a href="http://raw.githubusercontent.com/objectcomputing/OpenDDS/{{latest_rel.tag_name}}/INSTALL.md"><code>INSTALL.md</code></a> for detailed instructions
-      on building DDS on a number of platforms.</p>
+    <p>Please see the file <a href="{{ site.github.repository_url }}/blob/latest-release/INSTALL.md"><code>INSTALL.md</code></a> for detailed instructions
+      on building OpenDDS on a number of platforms.</p>
   </div>
 
 </div>

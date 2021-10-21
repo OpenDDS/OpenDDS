@@ -25,16 +25,16 @@ Remedy IT also offers [training courses](https://www.remedy.nl/training/overview
 
 Visit [OCI's OpenDDS resources page](https://objectcomputing.com/products/opendds/resources) to subscribe to the OpenDDS mailing list and receive regular updates, invitations to webinars and events, and more.
 
-DDS mailing lists are also available through the [SourceForge project page](http://sourceforge.net/projects/opendds/). Archives of previous messages are searchable.
+DDS mailing lists are also available through the [SourceForge project page]({{ site.opendds.mailing_list_uri }}). Archives of previous messages are searchable.
 
 ### GitHub Issues
 
-View the [GitHub issues list](https://github.com/objectcomputing/OpenDDS/issues) for the OpenDDS project. Please search the list to see if your issue has already been reported before submitting a new one.
+View the [GitHub issues list]({{ site.github.issues_url }}) for the OpenDDS project. Please search the list to see if your issue has already been reported before submitting a new one.
 
 ### Online Documentation
 
 View the [online documentation](documentation.html) for the OpenDDS project.
-				
+
 ### The Code
 
 The code is commented. Take a look in the header and class files; also see the [doxygen](doxygen/index.html).

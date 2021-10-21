@@ -42,7 +42,8 @@
 {% endcomment %}
       <ul class="trigger">
         {% assign sorted_pages = site.pages | where_exp:"item", "item.sitemap != false" | sort: "order" %}
-        {% assign level = 2 %}
+        {% assign start_level = 2 %}
+        {% assign level = start_level %}
         {% assign counter = 0 %}
         {% for p in sorted_pages %}
           {% assign slash = p.url | split: '/' %}
@@ -86,7 +87,7 @@
                   <ul class="sub-menu">
                 {% if p.title == 'Documentation' %}
                     <li><a class="page-link" href="/documents/">All Documentation</a></li>
-                    <li><a class="page-link" href="{{ site.data.oci.download_uri }}/OpenDDS/OpenDDS-latest.pdf">Developer's Guide [PDF]</a></li>
+                    <li><a class="page-link" href="{{ site.data.opendds.latest_devguide_url }}">Developer's Guide [PDF]</a></li>
                 {% else %}
                     <li class="mobile">
                       <a class="page-link" href="{{p.url | prepend: site.baseurl}}">                      
@@ -110,6 +111,8 @@
             {% assign level = slash.size %}
           {% endunless %}
         {% endfor %}
+        {% assign terminate_ul_count = level | minus: start_level %}
+        {% for i in (0..terminate_ul_count) %}</ul>{% endfor %}
       </ul>
     </nav>
   </div>

@@ -10,3 +10,13 @@ theme: minima
 # github-metadata
 repository: objectcomputing/OpenDDS
 plugins: ['jekyll-github-metadata', 'jekyll-redirect-from']
+
+liquid:
+  error_mode: strict
+
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - htmlproofer.sh

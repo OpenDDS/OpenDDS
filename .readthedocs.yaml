@@ -1,0 +1,15 @@
+# This is for the dummy Sphinx project in .readthedocs-dummy that just keeps
+# ReadTheDocs from reporting an error in PRs.
+# .readthedocs.yaml
+# Read the Docs configuration file
+# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
+
+version: 2
+
+sphinx:
+   configuration: .readthedocs-dummy/conf.py
+
+python:
+   version: "3.7"
+   install:
+   - requirements: .readthedocs-dummy/requirements.txt

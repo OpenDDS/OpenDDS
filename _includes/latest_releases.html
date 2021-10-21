@@ -1,0 +1,19 @@
+{% assign latest_release= site.data.releases | first %}
+{% assign previous_releases = site.data.releases | where: "latest_in_series", 1 | slice: 1, 4 %}
+
+{% capture latest_release_downloads %}
+  <ul>
+    {% for asset in latest_release.assets %}
+      {% assign ext = asset.name | remove: tn %}
+      {% if ext == '.zip' %}
+        {% assign note = 'Windows' %}
+      {% else %}
+        {% assign note = 'Linux/macOS' %}
+      {% endif %}
+      <li>
+        <a href="{{ asset.browser_download_url }}">{{ asset.name }}</a>
+        <span class="download-note">({{note}})</span>
+      </li>
+    {% endfor %}
+  </ul>
+{% endcapture %}

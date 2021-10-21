@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - gh-pages
+      - website-next-release
   workflow_dispatch:
 
 jobs:
@@ -28,3 +29,6 @@ jobs:
         with:
           name: Site
           path: _site
+
+      - name: Run htmlproofer
+        run: bash htmlproofer.sh
