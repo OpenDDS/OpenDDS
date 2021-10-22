@@ -185,7 +185,7 @@ private:
     size_t idx = 0;
     relay_partitions.resize(slots_to_write.size());
     for (const auto slot : slots_to_write) {
-      relay_partitions[idx].application_participant_guid(rtps_guid_to_relay_guid(config_.application_participant_guid()));
+      relay_partitions[idx].relay_id(config_.relay_id());
       relay_partitions[idx].slot(static_cast<CORBA::ULong>(slot));
       relay_partitions[idx].partitions().assign(slots_[slot].begin(), slots_[slot].end());
     }
@@ -262,7 +262,7 @@ private:
   typedef std::set<OpenDDS::DCPS::GUID_t, OpenDDS::DCPS::GUID_tKeyLessThan> OrderedGuidSet;
   typedef std::unordered_map<std::string, OrderedGuidSet> PartitionToGuid;
   PartitionToGuid partition_to_guid_;
-  PartitionIndex partition_index_;
+  PartitionIndex<GuidSet, GuidToParticipantGuid> partition_index_;
 
   mutable ACE_Thread_Mutex mutex_;
   mutable ACE_Thread_Mutex write_mutex_;

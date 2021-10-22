@@ -4604,6 +4604,16 @@ void Spdp::ignore_domain_participant(const GUID_t& ignoreId)
   }
 }
 
+void Spdp::remove_domain_participant(const GUID_t& removeId)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+  DiscoveredParticipantIter iter = participants_.find(removeId);
+  if (iter != participants_.end()) {
+    remove_discovered_participant(iter);
+  }
+}
+
 bool Spdp::update_domain_participant_qos(const DDS::DomainParticipantQos& qos)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);

@@ -1203,6 +1203,13 @@ bool RtpsDiscovery::ignore_domain_participant(
   return true;
 }
 
+bool RtpsDiscovery::remove_domain_participant(
+  DDS::DomainId_t domain, const GUID_t& myParticipantId, const GUID_t& removeId)
+{
+  get_part(domain, myParticipantId)->remove_domain_participant(removeId);
+  return true;
+}
+
 bool RtpsDiscovery::update_domain_participant_qos(
   DDS::DomainId_t domain, const GUID_t& participant, const DDS::DomainParticipantQos& qos)
 {
