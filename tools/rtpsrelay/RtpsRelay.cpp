@@ -14,6 +14,7 @@
 #include "RelayPartitionTable.h"
 #include "RelayPartitionsListener.h"
 #include "RelayStatisticsReporter.h"
+#include "RelayStatusReporter.h"
 #include "SpdpReplayListener.h"
 #include "SubscriptionListener.h"
 
@@ -163,6 +164,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-PublishParticipantStatistics"))) {
       config.publish_participant_statistics(ACE_OS::atoi(arg));
       args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-PublishRelayStatusLiveliness"))) {
+      config.publish_relay_status_liveliness(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-PublishRelayStatus"))) {
+      config.publish_relay_status(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-RestartDetection"))) {
+      config.restart_detection(ACE_OS::atoi(arg));
+      args.consume_arg();
 #ifdef OPENDDS_SECURITY
     } else if ((arg = args.get_the_parameter("-IdentityCA"))) {
       identity_ca_file = file + arg;
@@ -189,6 +199,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       secure = true;
       args.consume_arg();
 #endif
+    } else if ((arg = args.get_the_parameter("-Id"))) {
+      config.relay_id(arg);
+      args.consume_arg();
     } else {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Invalid option: %C\n", args.get_current()));
       return 1;
@@ -201,6 +214,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   if (nic_vertical == ACE_INET_Addr()) {
     nic_vertical = ACE_INET_Addr(7400);
+  }
+
+  if (config.relay_id().empty()) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: -Id is empty\n")));
+    return EXIT_FAILURE;
+  }
+
+  if (config.publish_relay_status() != OpenDDS::DCPS::TimeDuration::zero_value &&
+      config.publish_relay_status() > config.publish_relay_status_liveliness()) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: -PublishRelayStatus is greater than -PublishRelayStatusLiveliness\n")));
+    return EXIT_FAILURE;
   }
 
 #ifdef OPENDDS_SECURITY
@@ -294,20 +318,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  RelayInstanceTypeSupport_var relay_instance_ts = new RelayInstanceTypeSupportImpl;
-  if (relay_instance_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to register RelayInstance type\n")));
+  RelayStatusTypeSupport_var relay_status_ts = new RelayStatusTypeSupportImpl;
+  if (relay_status_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to register RelayStatus type\n")));
     return EXIT_FAILURE;
   }
-  CORBA::String_var relay_instance_type_name = relay_instance_ts->get_type_name();
+  CORBA::String_var relay_status_type_name = relay_status_ts->get_type_name();
 
-  DDS::Topic_var relay_instances_topic =
-    relay_participant->create_topic(RELAY_INSTANCES_TOPIC_NAME.c_str(),
-                                    relay_instance_type_name,
+  DDS::Topic_var relay_statuss_topic =
+    relay_participant->create_topic(RELAY_STATUS_TOPIC_NAME.c_str(),
+                                    relay_status_type_name,
                                     TOPIC_QOS_DEFAULT, nullptr,
                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-  if (!relay_instances_topic) {
+  if (!relay_statuss_topic) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Instances topic\n")));
     return EXIT_FAILURE;
   }
@@ -586,7 +610,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   RelayStatisticsReporter relay_statistics_reporter(config, relay_statistics_writer);
-  GuidAddrSet guid_addr_set(config, relay_statistics_reporter);
+  GuidAddrSet guid_addr_set(config, rtps_discovery, relay_statistics_reporter);
   ACE_Reactor reactor_(new ACE_Select_Reactor, true);
   const auto reactor = &reactor_;
   GuidPartitionTable guid_partition_table(config, guid_addr_set, spdp_horizontal_addr, relay_partitions_writer, spdp_replay_writer);
@@ -734,7 +758,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   RelayAddress relay_address;
-  relay_address.application_participant_guid(rtps_guid_to_relay_guid(config.application_participant_guid()));
+  relay_address.relay_id(config.relay_id());
   relay_address.name(HSPDP);
   relay_address.address(OpenDDS::DCPS::LogAddr(spdp_horizontal_addr).str());
   ret = relay_address_writer->write(relay_address, DDS::HANDLE_NIL);
@@ -757,28 +781,31 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  DDS::DataWriter_var relay_instance_writer_var = relay_publisher->create_datawriter(relay_instances_topic, writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-  if (!relay_instance_writer_var) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Instance data writer\n")));
+  DDS::DataWriterQos relay_status_writer_qos;
+  relay_publisher->get_default_datawriter_qos(relay_status_writer_qos);
+
+  relay_status_writer_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
+  relay_status_writer_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  relay_status_writer_qos.history.kind = DDS::KEEP_LAST_HISTORY_QOS;
+  relay_status_writer_qos.history.depth = 1;
+  if (config.publish_relay_status_liveliness() != OpenDDS::DCPS::TimeDuration::zero_value) {
+    relay_status_writer_qos.liveliness.lease_duration = config.publish_relay_status_liveliness().to_dds_duration();
+    relay_status_writer_qos.liveliness.kind = DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS;
+  }
+
+  DDS::DataWriter_var relay_status_writer_var = relay_publisher->create_datawriter(relay_statuss_topic, relay_status_writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  if (!relay_status_writer_var) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Status data writer\n")));
     return EXIT_FAILURE;
   }
 
-  RelayInstanceDataWriter_var relay_instance_writer = RelayInstanceDataWriter::_narrow(relay_instance_writer_var);
-  if (!relay_instance_writer) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to narrow Relay Instance data writer\n")));
+  RelayStatusDataWriter_var relay_status_writer = RelayStatusDataWriter::_narrow(relay_status_writer_var);
+  if (!relay_status_writer) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to narrow Relay Status data writer\n")));
     return EXIT_FAILURE;
   }
 
-  RelayInstance relay_instance;
-  relay_instance.application_participant_guid(rtps_guid_to_relay_guid(config.application_participant_guid()));
-  relay_instance.application_participant_user_data().value.length(static_cast<CORBA::ULong>(user_data.length()));
-  std::memcpy(relay_instance.application_participant_user_data().value.get_buffer(), user_data.data(), user_data.length());
-
-  ret = relay_instance_writer->write(relay_instance, DDS::HANDLE_NIL);
-  if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to write Relay Instance\n")));
-    return EXIT_FAILURE;
-  }
+  RelayStatusReporter relay_status_reporter(config, guid_addr_set, relay_status_writer, reactor);
 
   reactor->run_reactor_event_loop();
 

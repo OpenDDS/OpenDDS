@@ -232,6 +232,8 @@ public:
 
   void ignore_domain_participant(const GUID_t& ignoreId);
 
+  void remove_domain_participant(const GUID_t& removeId);
+
   bool update_domain_participant_qos(const DDS::DomainParticipantQos& qos);
 
   DCPS::TopicStatus assert_topic(GUID_t& topicId, const char* topicName,

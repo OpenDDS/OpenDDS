@@ -43,16 +43,17 @@ sub get_relay_args {
   my $n = shift;
   my $port_digit = 3 + $n;
   return join(' ',
+    "-Id relay${n}",
+    "-UserData relay${n}",
     "-DCPSDebugLevel 1",
     "-LogDiscovery 1",
     "-LogActivity 1",
     "-LogRelayStatistics 3",
+    "-LogParticipantStatistics 1",
     "-DCPSConfigFile relay${n}.ini",
     "-ApplicationDomain 42",
     "-VerticalAddress ${port_digit}444",
     "-HorizontalAddress 127.0.0.1:11${port_digit}44",
-    "-UserData relay${n}",
-    "-LogParticipantStatistics 1",
   );
 }
 

@@ -23,9 +23,9 @@ public:
   {
     DDS::Topic_var topic = writer->get_topic();
     topic_name_ = topic->get_name();
-    log_handler_statistics_.application_participant_guid(rtps_guid_to_relay_guid(config.application_participant_guid()));
+    log_handler_statistics_.relay_id(config.relay_id());
     log_handler_statistics_.name(name);
-    publish_handler_statistics_.application_participant_guid(rtps_guid_to_relay_guid(config.application_participant_guid()));
+    publish_handler_statistics_.relay_id(config.relay_id());
     publish_handler_statistics_.name(name);
   }
 
