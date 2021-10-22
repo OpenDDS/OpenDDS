@@ -613,8 +613,8 @@ RecorderImpl::remove_associations_i(const WriterIdSeq& writers,
       WriterMapType::iterator it = this->writers_.find(writer_id);
       if (dt_map_.erase(writer_id) == 0) {
         if (DCPS_debug_level >= 4) {
-          ACE_DEBUG((LM_DEBUG, "remove_associations_i: -"
-            "failed to find writer_id in the DynamicTypeByPubId map."));
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) RecorderImpl::remove_associations_i: -"
+            "failed to find writer_id in the DynamicTypeByPubId map.\n"));
         }
       }
       if (it != this->writers_.end()) {
