@@ -7029,20 +7029,19 @@ void Sedp::match(const GUID_t& writer, const GUID_t& reader)
         return;
       }
     }
-  } else if (reader_local &&
-             !writer_local &&
-             use_xtypes_ &&
+  } else if (reader_local && !writer_local && use_xtypes_ &&
              writer_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE) {
-    //We are a recorder trying to associate with a remote xtypes writer
+    // We are a recorder trying to associate with a remote xtypes writer
     bool need_minimal_tobjs, need_complete_tobjs;
     need_minimal_and_or_complete_types(writer_type_info, need_minimal_tobjs, need_complete_tobjs);
     if (need_minimal_tobjs || need_complete_tobjs) {
       if (DCPS_debug_level >= 4) {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::match: Local Recorder matching Remote Writer\n"));
       }
-      bool is_discovery_protected = false;
 #ifdef OPENDDS_SECURITY
-      is_discovery_protected = lsi->second.security_attribs_.base.is_discovery_protected;
+      const bool is_discovery_protected = lsi->second.security_attribs_.base.is_discovery_protected;
+#else
+      const bool is_discovery_protected = false;
 #endif
       save_matching_data_and_get_typeobjects(writer_type_info, md,
                                              MatchingPair(writer, reader),
@@ -7321,12 +7320,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
         } else {
           reader_type_name = dsi->second.get_type_name();
         }
-        if (reader_type_name == "") {
-          // force consistency with recorder
-          consistent = true;
-        } else {
-          consistent = writer_type_name == reader_type_name;
-        }
+        consistent = reader_type_name == "" || writer_type_name == reader_type_name;
       }
     }
 

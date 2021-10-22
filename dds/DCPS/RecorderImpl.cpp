@@ -234,7 +234,6 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
                             sample.header_.source_timestamp_nanosec_,
                             sample.header_.publication_id_,
                             sample.header_.byte_order_,
-                            sample.header_.cdr_encapsulation_,
                             sample.sample_.get());
     listener_->on_sample_data_received(this, rawSample);
   }
@@ -427,7 +426,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
   //
   XTypes::TypeLookupService_rch tls = participant_servant_->get_type_lookup_service();
   XTypes::TypeInformation type_info;
-  if (!XTypes::deserialize_type_info(type_info, writer.serializedTypeInfo)){
+  if (!XTypes::deserialize_type_info(type_info, writer.serializedTypeInfo)) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) RecorderImpl::add_association:"
                " Failed to deserialize TypeInformation\n"));

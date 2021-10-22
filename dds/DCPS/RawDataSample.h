@@ -31,7 +31,6 @@ public:
                 ACE_UINT32         nano_sec,
                 PublicationId      pid,
                 bool               byte_order,
-                bool               cdr_encapsulated,
                 ACE_Message_Block* blk);
 
   RawDataSample(const RawDataSample&);
@@ -49,8 +48,6 @@ public:
   /// false -  Message encoded using big-endian byte order. (see ace/CDR_Base.h)
   /// true -  Message encoded using little-endian byte order.
   bool sample_byte_order_;
-  /// The bool labeling whether there is an encapsulation header
-  bool is_cdr_encapsulated_;
   /// The data in unspecified format
   Message_Block_Ptr sample_;
 
