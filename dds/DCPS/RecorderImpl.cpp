@@ -610,13 +610,13 @@ RecorderImpl::remove_associations_i(const WriterIdSeq& writers,
     for (CORBA::ULong i = 0; i < wr_len; i++) {
       PublicationId writer_id = writers[i];
 
-      WriterMapType::iterator it = this->writers_.find(writer_id);
       if (dt_map_.erase(writer_id) == 0) {
         if (DCPS_debug_level >= 4) {
           ACE_DEBUG((LM_DEBUG, "(%P|%t) RecorderImpl::remove_associations_i: -"
             "failed to find writer_id in the DynamicTypeByPubId map.\n"));
         }
       }
+      WriterMapType::iterator it = this->writers_.find(writer_id);
       if (it != this->writers_.end()) {
         it->second->removed();
         remove_association_sweeper_->cancel_timer(it->second);
