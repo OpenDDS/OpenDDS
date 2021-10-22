@@ -1601,7 +1601,7 @@ if ($opts{'openssl'} && $opts{'openssl'} ne 'skip_version_check') {
     if (/^\s*#\s*define\s*OPENSSL_VERSION_TEXT\s*"([^"]*)"/) {
       my $ver = $1;
       if ($ver =~ /OpenSSL[\W]+1\.1/ || $ver =~ /OpenSSL[\W]+3\./) {
-        push(@features, 'openssl11=1') if $1 ;
+        push(@features, 'openssl11=1') if $1;
       }
       last;
     }
