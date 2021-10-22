@@ -4,8 +4,8 @@
 {% capture latest_release_downloads %}
   <ul>
     {% for asset in latest_release.assets %}
-      {% assign ext = asset.name | remove: tn %}
-      {% if ext == '.zip' %}
+      {% assign ext = asset.name | split: '.' | last %}
+      {% if ext == 'zip' %}
         {% assign note = 'Windows' %}
       {% else %}
         {% assign note = 'Linux/macOS' %}
