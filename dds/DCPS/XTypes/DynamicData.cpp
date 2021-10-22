@@ -16,12 +16,18 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
+DynamicData::DynamicData()
+  : chain_(0)
+  , encoding_(DCPS::Encoding::KIND_XCDR2)
+  , strm_(chain_, encoding_)
+{}
+
 DynamicData::DynamicData(ACE_Message_Block* chain,
                          const DCPS::Encoding& encoding,
                          const DynamicType_rch& type)
   : chain_(chain)
   , encoding_(encoding)
-  , strm_(chain, encoding)
+  , strm_(chain_, encoding_)
   , type_(get_base_type(type))
 {
   if (encoding.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
@@ -79,7 +85,7 @@ ACE_CDR::ULong DynamicData::get_item_count() const
 
 DynamicData DynamicData::clone() const
 {
-  return DynamicData(strm_.get_current()->duplicate(), strm_.encoding(), type_);
+  return DynamicData(strm_.current()->duplicate(), strm_.encoding(), type_);
 }
 
 bool DynamicData::is_type_supported(TypeKind tk, const char* func_name)
@@ -529,16 +535,16 @@ DDS::ReturnCode_t DynamicData::get_single_value(ValueType& value, MemberId id,
   bool good = true;
 
   if (tk == enum_or_bitmask) {
+    // Per XTypes spec, the value of a DynamicData object of primitive type or TK_ENUM is
+    // accessed with MEMBER_ID_INVALID Id. However, there is only a single value in such
+    // a DynamicData object, and checking for MEMBER_ID_INVALID from the input is perhaps
+    // unnecessary. So, we read the value immediately here.
     const LBound bit_bound = descriptor_.bound[0];
     good = bit_bound >= lower && bit_bound <= upper &&
       read_value(value, ValueTypeKind);
   } else {
     switch (tk) {
     case ValueTypeKind:
-      // Per XTypes spec, the value of a DynamicData object of primitive type or TK_ENUM is
-      // accessed with MEMBER_ID_INVALID Id. However, there is only a single value in such
-      // a DynamicData object, and checking for MEMBER_ID_INVALID from the input is perhaps
-      // unnecessary. So, we read the value immediately here.
       good = read_value(value, ValueTypeKind);
       break;
     case TK_STRUCTURE:
@@ -819,7 +825,9 @@ DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id
         if (!skip_to_struct_member(md, id)) {
           good = false;
         } else {
-          value = DynamicData(strm_.get_current()->duplicate(), strm_.encoding(), md.type.lock());
+          // TODO(sonndinh): Need to release the duplicated ACE_Message_Block chain.
+          // Perhaps passing a flag saying the returned DynamicData object should do the release.
+          value = DynamicData(strm_.current()->duplicate(), strm_.encoding(), md.type.lock());
         }
         break;
       } else {
@@ -852,7 +860,7 @@ DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id
             break;
           }
         }
-        value = DynamicData(strm_.get_current()->duplicate(), strm_.encoding(), md.type.lock());
+        value = DynamicData(strm_.current()->duplicate(), strm_.encoding(), md.type.lock());
         break;
       }
     }
@@ -865,7 +873,7 @@ DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id
           (tk == TK_MAP && !skip_to_map_element(id))) {
         good = false;
       } else {
-        value = DynamicData(strm_.get_current()->duplicate(), strm_.encoding(), descriptor_.element_type);
+        value = DynamicData(strm_.current()->duplicate(), strm_.encoding(), descriptor_.element_type);
       }
       break;
     }
@@ -1757,13 +1765,13 @@ bool DynamicData::skip_collection_member(TypeKind kind)
 
 bool DynamicData::skip_struct_member(const DynamicType_rch& struct_type)
 {
-  DynamicData struct_data(strm_.get_current(), strm_.encoding(), struct_type);
+  DynamicData struct_data(strm_.current(), strm_.encoding(), struct_type);
   return struct_data.skip_all();
 }
 
 bool DynamicData::skip_union_member(const DynamicType_rch& union_type)
 {
-  DynamicData union_data(strm_.get_current(), strm_.encoding(), union_type);
+  DynamicData union_data(strm_.current(), strm_.encoding(), union_type);
   return union_data.skip_all();
 }
 

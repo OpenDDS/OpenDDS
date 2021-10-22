@@ -40,63 +40,65 @@ typedef sequence<wstring> WStringSeq;
 // Reading single value from struct.
 @mutable
 struct SingleValueStruct {
-  @id(1) SomeEnum my_enum;
-  @id(2) long int_32;
-  @id(3) unsigned long uint_32;
-  @id(4) int8 int_8;
-  @id(5) uint8 uint_8;
-  @id(6) short int_16;
-  @id(7) unsigned short uint_16;
-  @id(8) long long int_64;
-  @id(9) unsigned long long uint_64;
-  @id(10) float float_32;
-  @id(11) double float_64;
-  @id(12) long double float_128;
-  @id(13) char char_8;
-  @id(14) wchar char_16;
-  @id(15) octet byte;
-  @id(16) boolean bool;
-  @id(17) string str;
-  @id(18) wstring wstr;
+  @id(0) SomeEnum my_enum;
+  @id(1) long int_32;
+  @id(2) unsigned long uint_32;
+  @id(3) int8 int_8;
+  @id(4) uint8 uint_8;
+  @id(5) short int_16;
+  @id(6) unsigned short uint_16;
+  @id(7) long long int_64;
+  @id(8) unsigned long long uint_64;
+  @id(9) float float_32;
+  @id(10) double float_64;
+  @id(11) long double float_128;
+  @id(12) char char_8;
+  @id(13) wchar char_16;
+  @id(14) octet byte;
+  @id(15) boolean bool;
+  @id(16) string str;
+  @id(17) wstring wstr;
 };
 
 // Reading single value from union.
 @mutable
 union SingleValueUnion switch (SomeEnum) {
  case INT32:
-   long int_32;
+   @id(1) long int_32;
  case UINT32:
-   unsigned long uint_32;
+   @id(2) unsigned long uint_32;
  case INT8:
-   int8 int_8;
+   @id(3) int8 int_8;
  case UINT8:
-   uint8 uint_8;
+   @id(4) uint8 uint_8;
  case INT16:
-   short int_16;
+   @id(5) short int_16;
  case UINT16:
-   unsigned short uint_16;
+   @id(6) unsigned short uint_16;
  case INT64:
-   long long int_64;
+   @id(7) long long int_64;
  case UINT64:
-   unsigned long long uint_64;
+   @id(8) unsigned long long uint_64;
  case FLOAT32:
-   float float_32;
+   @id(9) float float_32;
  case FLOAT64:
-   double float_64;
+   @id(10) double float_64;
  case FLOAT128:
-   long double float_128;
+   @id(11) long double float_128;
  case CHAR8:
-   char char_8;
+   @id(12) char char_8;
  case CHAR16:
-   wchar char_16;
+   @id(13) wchar char_16;
  case BYTE:
-   octet byte_;
+   @id(14) octet byte_;
  case BOOL:
-   boolean bool_;
+   @id(15) boolean bool_;
  case STRING8:
-   string str;
+   @id(16) string str;
  case STRING16:
-   wstring wstr;
+   @id(17) wstring wstr;
+ default:
+   @id(18) SomeEnum my_enum;
 };
 
 // Reading single value from array.

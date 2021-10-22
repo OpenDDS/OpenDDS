@@ -19,7 +19,7 @@ namespace XTypes {
 
 class OpenDDS_Dcps_Export DynamicData {
 public:
-
+  DynamicData();
   DynamicData(ACE_Message_Block* chain,
               const DCPS::Encoding& encoding,
               const DynamicType_rch& type);
