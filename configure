@@ -1905,7 +1905,7 @@ sub get_default_features {
       $row =~ s/^\s+//;
       $row =~ s/\s+$//;
       next if $row eq '';
-      my ($key, $value) = split(/=/, $row);
+      my ($key, $value) = split(/\s*=\s*/, $row);
       $default_features{$key} = $value;
     }
   }
