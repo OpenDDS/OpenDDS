@@ -2516,7 +2516,10 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+    - name: install clang-12
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      run: sudo apt-get -y install clang-12
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -2530,7 +2533,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --std=c++11 --ipv6 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=clang++-12 --ipv6 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
         echo "CPPFLAGS += -ggdb -O1 -fsanitize=address -fno-omit-frame-pointer" >> ACE_TAO/ACE/include/makeinclude/platform_macros.GNU
         echo "LDFLAGS += -ggdb -fsanitize=address" >> ACE_TAO/ACE/include/makeinclude/platform_macros.GNU
     - name: build ACE and TAO
@@ -2538,6 +2541,7 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
+        export ASAN_OPTIONS=detect_leaks=0
         cd ACE_TAO/ACE
         make -j4
         cd ../TAO
@@ -2565,6 +2569,8 @@ jobs:
     needs: ACE_TAO_u20_p1_asan
 
     steps:
+    - name: install clang-12
+      run: sudo apt-get -y install clang-12
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -2596,7 +2602,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --std=c++11 --ipv6 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=clang++-12 --std=c++11 --ipv6 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -2609,6 +2615,7 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
+        export ASAN_OPTIONS=detect_leaks=0
         make -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
@@ -2761,7 +2768,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install clang-12
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install clang-12
@@ -2813,6 +2820,8 @@ jobs:
     needs: ACE_TAO_u20_p1_tsan
 
     steps:
+    - name: install clang-12
+      run: sudo apt-get -y install clang-12
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC

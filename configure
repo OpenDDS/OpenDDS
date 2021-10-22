@@ -661,15 +661,22 @@ EOF
       if $opts{'verbose'};
   }
   elsif ($opts{'compiler'} =~ /g\+\+/) {
+    my $version_string = `$opts{'compiler'} --version`;
     if ($opts{'std'}) {
       push(@{$opts{'macros'}}, 'CCFLAGS += -std=' . $opts{'std'});
       print "Added platform_macros for -std=$opts{std}\n" if $opts{'verbose'};
     }
-    else {
-      my $ver = `$opts{'compiler'} --version`;
-      if ($ver =~ /\(.*\) (\d+)\.\d+/ && $1 >= 6) {
+    elsif (!($opts{'compiler'} =~ /clang/)) {
+      if ($version_string =~ /\(.*\) (\d+)\.\d+/ && $1 >= 6) {
         $opts{'std'} = 'gnu++14';
         print "Detected GCC >=6, default -std=gnu++14\n" if $opts{'verbose'};
+      }
+    }
+
+    if ($opts{'compiler'} =~ /clang/ && $version_string =~ /(\d+)\.(\d+)\.(\d+)/) {
+      if ($1 > 3 || ($1 == 3 && $2 >= 3)) {
+        push(@{$opts{'features'}}, 'no_cxx11=0');
+        print "Compiler has C++11 support\n" if $opts{'verbose'};
       }
     }
 
