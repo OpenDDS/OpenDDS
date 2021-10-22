@@ -616,6 +616,7 @@ RecorderImpl::remove_associations_i(const WriterIdSeq& writers,
             "failed to find writer_id in the DynamicTypeByPubId map.\n"));
         }
       }
+
       WriterMapType::iterator it = this->writers_.find(writer_id);
       if (it != this->writers_.end()) {
         it->second->removed();
