@@ -50,7 +50,6 @@ public:
   bool sample_byte_order_;
   /// The data in unspecified format
   Message_Block_Ptr sample_;
-
 };
 
 void swap(RawDataSample& lhs, RawDataSample& rhs);

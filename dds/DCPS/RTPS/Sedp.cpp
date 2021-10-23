@@ -7320,7 +7320,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
         } else {
           reader_type_name = dsi->second.get_type_name();
         }
-        consistent = reader_type_name == "" || writer_type_name == reader_type_name;
+        consistent = reader_type_name.empty() || writer_type_name == reader_type_name;
       }
     }
 
