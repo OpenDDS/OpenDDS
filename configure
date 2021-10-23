@@ -1604,8 +1604,15 @@ if ($opts{'openssl'} && $opts{'openssl'} ne 'skip_version_check') {
   open my $fh, '<', $ssl_version_file
     or die "ERROR: Failed to open '$ssl_version_file' for OpenSSL version detection.\nStopped";
 
-  push(@features, 'openssl11=1')
-    if grep m/OpenSSL[\W]+1.1/, <$fh>;
+  while (<$fh>) {
+    if (/^\s*#\s*define\s*OPENSSL_VERSION_TEXT\s*"([^"]*)"/) {
+      my $ver = $1;
+      if ($ver =~ /OpenSSL[\W]+1\.1/ || $ver =~ /OpenSSL[\W]+3\./) {
+        push(@features, 'openssl11=1') if $1;
+      }
+      last;
+    }
+  }
 }
 
 sub win32_cmake_generator {
@@ -1912,7 +1919,7 @@ sub get_default_features {
       $row =~ s/^\s+//;
       $row =~ s/\s+$//;
       next if $row eq '';
-      my ($key, $value) = split(/=/, $row);
+      my ($key, $value) = split(/\s*=\s*/, $row);
       $default_features{$key} = $value;
     }
   }
