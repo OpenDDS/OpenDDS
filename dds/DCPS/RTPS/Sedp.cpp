@@ -6839,7 +6839,7 @@ void Sedp::cleanup_secure_reader(const GUID_t& subscriptionId)
 void Sedp::match_endpoints(GUID_t repoId, const DCPS::TopicDetails& td, bool remove)
 {
   if (DCPS_debug_level >= 4) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) EndpointManager::match_endpoints %C%C\n",
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::match_endpoints %C%C\n",
       remove ? "remove " : "", LogGuid(repoId).c_str()));
   }
 
@@ -6942,7 +6942,7 @@ void Sedp::remove_assoc(const GUID_t& remove_from, const GUID_t& removing)
 void Sedp::match(const GUID_t& writer, const GUID_t& reader)
 {
   if (DCPS_debug_level >= 4) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) EndpointManager::match: w: %C r: %C\n",
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::match: w: %C r: %C\n",
       LogGuid(writer).c_str(), LogGuid(reader).c_str()));
   }
 
@@ -6960,7 +6960,7 @@ void Sedp::match(const GUID_t& writer, const GUID_t& reader)
     writer_type_info = &dpi->second.type_info_;
   } else {
     if (DCPS_debug_level >= 4) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) EndpointManager::match: Undiscovered Writer\n"));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::match: Undiscovered Writer\n"));
     }
     return; // Possible and ok, since lock is released
   }
@@ -6979,7 +6979,7 @@ void Sedp::match(const GUID_t& writer, const GUID_t& reader)
     reader_type_info = &dsi->second.type_info_;
   } else {
     if (DCPS_debug_level >= 4) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) EndpointManager::match: Undiscovered Reader\n"));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::match: Undiscovered Reader\n"));
     }
     return; // Possible and ok, since lock is released
   }
@@ -7001,34 +7001,54 @@ void Sedp::match(const GUID_t& writer, const GUID_t& reader)
       need_minimal_and_or_complete_types(writer_type_info, need_minimal_tobjs, need_complete_tobjs);
       if (need_minimal_tobjs || need_complete_tobjs) {
         if (DCPS_debug_level >= 4) {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) EndpointManager::match: Remote Writer\n"));
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::match: Remote Writer\n"));
         }
         bool is_discovery_protected = false;
 #ifdef OPENDDS_SECURITY
         is_discovery_protected = lsi->second.security_attribs_.base.is_discovery_protected;
 #endif
         save_matching_data_and_get_typeobjects(writer_type_info, md,
-                                                MatchingPair(writer, reader),
-                                                writer, is_discovery_protected,
-                                                need_minimal_tobjs, need_complete_tobjs);
+                                               MatchingPair(writer, reader),
+                                               writer, is_discovery_protected,
+                                               need_minimal_tobjs, need_complete_tobjs);
         return;
       }
     } else if (!reader_local && writer_local) {
       need_minimal_and_or_complete_types(reader_type_info, need_minimal_tobjs, need_complete_tobjs);
       if (need_minimal_tobjs || need_complete_tobjs) {
         if (DCPS_debug_level >= 4) {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) EndpointManager::match: Remote Reader\n"));
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::match: Remote Reader\n"));
         }
         bool is_discovery_protected = false;
 #ifdef OPENDDS_SECURITY
         is_discovery_protected = lpi->second.security_attribs_.base.is_discovery_protected;
 #endif
         save_matching_data_and_get_typeobjects(reader_type_info, md,
-                                                MatchingPair(writer, reader),
-                                                reader, is_discovery_protected,
-                                                need_minimal_tobjs, need_complete_tobjs);
+                                               MatchingPair(writer, reader),
+                                               reader, is_discovery_protected,
+                                               need_minimal_tobjs, need_complete_tobjs);
         return;
       }
+    }
+  } else if (reader_local && !writer_local && use_xtypes_ &&
+             writer_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE) {
+    // We are a recorder trying to associate with a remote xtypes writer
+    bool need_minimal_tobjs, need_complete_tobjs;
+    need_minimal_and_or_complete_types(writer_type_info, need_minimal_tobjs, need_complete_tobjs);
+    if (need_minimal_tobjs || need_complete_tobjs) {
+      if (DCPS_debug_level >= 4) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::match: Local Recorder matching Remote Writer\n"));
+      }
+#ifdef OPENDDS_SECURITY
+      const bool is_discovery_protected = lsi->second.security_attribs_.base.is_discovery_protected;
+#else
+      const bool is_discovery_protected = false;
+#endif
+      save_matching_data_and_get_typeobjects(writer_type_info, md,
+                                             MatchingPair(writer, reader),
+                                             writer, is_discovery_protected,
+                                             need_minimal_tobjs, need_complete_tobjs);
+      return;
     }
   }
 
@@ -7057,7 +7077,7 @@ void Sedp::remove_expired_endpoints(const MonotonicTimePoint& /*now*/)
     // Do not try to simplify increment: "associative container erase idiom"
     if (now - iter->second.time_added_to_map >= max_type_lookup_service_reply_period_) {
       if (DCPS_debug_level >= 4) {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) EndpointManager::remove_expired_endpoints: "
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::remove_expired_endpoints: "
           "clean up pending pair w: %C r: %C\n",
           LogGuid(iter->first.writer_).c_str(), LogGuid(iter->first.reader_).c_str()));
       }
@@ -7071,7 +7091,7 @@ void Sedp::remove_expired_endpoints(const MonotonicTimePoint& /*now*/)
   for (OrigSeqNumberMap::iterator it = orig_seq_numbers_.begin(); it != orig_seq_numbers_.end();) {
     if (now - it->second.time_started >= max_type_lookup_service_reply_period_) {
       if (DCPS_debug_level >= 4) {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) EndpointManager::remove_expired_endpoints: "
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::remove_expired_endpoints: "
           "clean up type lookup data for %C\n",
           LogGuid(it->second.participant).c_str()));
       }
@@ -7086,7 +7106,7 @@ void Sedp::remove_expired_endpoints(const MonotonicTimePoint& /*now*/)
 void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
 {
   if (DCPS_debug_level >= 4) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) EndpointManager::match_continue: w: %C r: %C\n",
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::match_continue: w: %C r: %C\n",
       LogGuid(writer).c_str(), LogGuid(reader).c_str()));
   }
 
@@ -7243,7 +7263,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
   DCPS::TopicDetailsMap::iterator td_iter = topics_.find(topic_name);
   if (td_iter == topics_.end()) {
     ACE_ERROR((LM_ERROR,
-              ACE_TEXT("(%P|%t) EndpointManager::match_continue - ERROR ")
+              ACE_TEXT("(%P|%t) Sedp::match_continue - ERROR ")
               ACE_TEXT("Didn't find topic for consistency check\n")));
     return;
   } else {
@@ -7262,7 +7282,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
           if (type_lookup_service_->extensibility(extensibility_mask, writer_type_id)) {
             if (OpenDDS::DCPS::DCPS_debug_level) {
               ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: "
-                "EndpointManager::match_continue: "
+                "Sedp::match_continue: "
                 "Encountered unsupported combination of XCDR1 encoding and appendable "
                 "extensibility\n"));
             }
@@ -7301,7 +7321,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
         } else {
           reader_type_name = dsi->second.get_type_name();
         }
-        consistent = writer_type_name == reader_type_name;
+        consistent = reader_type_name.empty() || writer_type_name == reader_type_name;
       }
     }
 
@@ -7309,7 +7329,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
       td_iter->second.increment_inconsistent();
       if (DCPS::DCPS_debug_level) {
         ACE_DEBUG((LM_WARNING,
-                  ACE_TEXT("(%P|%t) EndpointManager::match_continue - WARNING ")
+                  ACE_TEXT("(%P|%t) Sedp::match_continue - WARNING ")
                   ACE_TEXT("Data types of topic %C does not match (inconsistent)\n"),
                   topic_name.c_str()));
       }
@@ -7407,7 +7427,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
 
     if (call_writer) {
       if (DCPS_debug_level > 3) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match_continue - ")
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::match_continue - ")
           ACE_TEXT("adding writer %C association for reader %C\n"), LogGuid(writer).c_str(),
           LogGuid(reader).c_str()));
       }
@@ -7427,7 +7447,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
       }
     } else if (call_reader) {
       if (DCPS_debug_level > 3) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match_continue - ")
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::match_continue - ")
           ACE_TEXT("adding reader %C association for writer %C\n"),
           LogGuid(reader).c_str(), LogGuid(writer).c_str()));
       }
@@ -7481,7 +7501,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
     ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
     if (writer_local && writerStatus.count_since_last_send) {
       if (DCPS_debug_level > 3) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match - ")
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::match - ")
                    ACE_TEXT("writer incompatible\n")));
       }
       DCPS::DataWriterCallbacks_rch dwr_lock = dwr.lock();
@@ -7491,7 +7511,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
     }
     if (reader_local && readerStatus.count_since_last_send) {
       if (DCPS_debug_level > 3) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match - ")
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::match - ")
                    ACE_TEXT("reader incompatible\n")));
       }
       DCPS::DataReaderCallbacks_rch drr_lock = drr.lock();
@@ -7530,7 +7550,7 @@ void Sedp::save_matching_data_and_get_typeobjects(const XTypes::TypeInformation*
   if (get_minimal) {
     if (DCPS_debug_level >= 4) {
       ACE_DEBUG((LM_DEBUG,
-                  "(%P|%t) EndpointManager::save_matching_data_and_get_typeobjects: "
+                  "(%P|%t) Sedp::save_matching_data_and_get_typeobjects: "
                   "remote: %C seq: %q\n",
                   LogGuid(remote_id).c_str(), md.rpc_seqnum_minimal.getValue()));
     }
@@ -7541,7 +7561,7 @@ void Sedp::save_matching_data_and_get_typeobjects(const XTypes::TypeInformation*
   if (get_complete) {
     if (DCPS_debug_level >= 4) {
       ACE_DEBUG((LM_DEBUG,
-                  "(%P|%t) EndpointManager::save_matching_data_and_get_typeobjects: "
+                  "(%P|%t) Sedp::save_matching_data_and_get_typeobjects: "
                   "remote: %C seq: %q\n",
                   LogGuid(remote_id).c_str(), md.rpc_seqnum_complete.getValue()));
     }
