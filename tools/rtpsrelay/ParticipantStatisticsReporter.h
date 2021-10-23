@@ -2,10 +2,12 @@
 #define RTPSRELAY_PARTICIPANT_STATISTICS_REPORTER_H_
 
 #include "Config.h"
-#include "CommonIoStatsReportHelper.h"
 
 #include "lib/RelayTypeSupportImpl.h"
 #include "lib/Utility.h"
+
+// after RelayTypeSupportImpl.h so that set_default is available
+#include "CommonIoStatsReportHelper.h"
 
 #include <dds/DCPS/JsonValueWriter.h>
 
