@@ -12,6 +12,24 @@
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/PoolAllocator.h>
 
+#include <tao/LongSeqC.h>
+#include <tao/ULongSeqC.h>
+#include <tao/Int8SeqC.h>
+#include <tao/UInt8SeqC.h>
+#include <tao/ShortSeqC.h>
+#include <tao/UShortSeqC.h>
+#include <tao/LongLongSeqC.h>
+#include <tao/ULongLongSeqC.h>
+#include <tao/FloatSeqC.h>
+#include <tao/DoubleSeqC.h>
+#include <tao/LongDoubleSeqC.h>
+#include <tao/CharSeqC.h>
+#include <tao/WCharSeqC.h>
+#include <tao/OctetSeqC.h>
+#include <tao/BooleanSeqC.h>
+#include <tao/StringSeqC.h>
+#include <tao/WStringSeqC.h>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -52,61 +70,64 @@ public:
   DDS::ReturnCode_t get_byte_value(ACE_CDR::Octet& value, MemberId id);
   DDS::ReturnCode_t get_boolean_value(ACE_CDR::Boolean& value, MemberId id);
   DDS::ReturnCode_t get_string_value(DCPS::String& value, MemberId id);
+  //  DDS::ReturnCode_t get_string_value(TAO::String_Manager& value, MemberId id);
 #ifdef DDS_HAS_WCHAR
   DDS::ReturnCode_t get_wstring_value(DCPS::WString& value, MemberId id);
 #endif
 
   DDS::ReturnCode_t get_complex_value(DynamicData& value, MemberId id);
 
-  typedef Sequence<ACE_CDR::Long> Int32Seq;
+  typedef CORBA::LongSeq Int32Seq;
   DDS::ReturnCode_t get_int32_values(Int32Seq& value, MemberId id);
 
-  typedef Sequence<ACE_CDR::ULong> UInt32Seq;
+  typedef CORBA::ULongSeq UInt32Seq;
   DDS::ReturnCode_t get_uint32_values(UInt32Seq& value, MemberId id);
 
-  typedef Sequence<ACE_CDR::Int8> Int8Seq;
+  typedef CORBA::Int8Seq Int8Seq;
   DDS::ReturnCode_t get_int8_values(Int8Seq& value, MemberId id);
 
-  typedef Sequence<ACE_CDR::UInt8> UInt8Seq;
+  typedef CORBA::UInt8Seq UInt8Seq;
   DDS::ReturnCode_t get_uint8_values(UInt8Seq& value, MemberId id);
 
-  typedef Sequence<ACE_CDR::Short> Int16Seq;
+  typedef CORBA::ShortSeq Int16Seq;
   DDS::ReturnCode_t get_int16_values(Int16Seq& value, MemberId id);
 
-  typedef Sequence<ACE_CDR::UShort> UInt16Seq;
+  typedef CORBA::UShortSeq UInt16Seq;
   DDS::ReturnCode_t get_uint16_values(UInt16Seq& value, MemberId id);
 
-  typedef Sequence<ACE_CDR::LongLong> Int64Seq;
+  typedef CORBA::LongLongSeq Int64Seq;
   DDS::ReturnCode_t get_int64_values(Int64Seq& value, MemberId id);
 
-  typedef Sequence<ACE_CDR::ULongLong> UInt64Seq;
+  typedef CORBA::ULongLongSeq UInt64Seq;
   DDS::ReturnCode_t get_uint64_values(UInt64Seq& value, MemberId id);
 
-  typedef Sequence<ACE_CDR::Float> Float32Seq;
+  typedef CORBA::FloatSeq Float32Seq;
   DDS::ReturnCode_t get_float32_values(Float32Seq& value, MemberId id);
 
-  typedef Sequence<ACE_CDR::Double> Float64Seq;
+  typedef CORBA::DoubleSeq Float64Seq;
   DDS::ReturnCode_t get_float64_values(Float64Seq& value, MemberId id);
 
-  typedef Sequence<ACE_CDR::LongDouble> Float128Seq;
+  typedef CORBA::LongDoubleSeq Float128Seq;
   DDS::ReturnCode_t get_float128_values(Float128Seq& value, MemberId id);
 
-  typedef Sequence<ACE_CDR::Char> CharSeq;
+  typedef CORBA::CharSeq CharSeq;
   DDS::ReturnCode_t get_char8_values(CharSeq& value, MemberId id);
 
-  typedef Sequence<ACE_CDR::WChar> WCharSeq;
+  typedef CORBA::WCharSeq WCharSeq;
   DDS::ReturnCode_t get_char16_values(WCharSeq& value, MemberId id);
 
-  typedef Sequence<ACE_CDR::Octet> OctetSeq;
+  typedef CORBA::OctetSeq OctetSeq;
   DDS::ReturnCode_t get_byte_values(OctetSeq& value, MemberId id);
 
-  typedef Sequence<ACE_CDR::Boolean> BooleanSeq;
+  typedef CORBA::BooleanSeq BooleanSeq;
   DDS::ReturnCode_t get_boolean_values(BooleanSeq& value, MemberId id);
 
+  //  typedef CORBA::StringSeq StringSeq;
   typedef Sequence<DCPS::String> StringSeq;
   DDS::ReturnCode_t get_string_values(StringSeq& value, MemberId id);
 
 #ifdef DDS_HAS_WCHAR
+  //  typedef CORBA::WStringSeq WStringSeq;
   typedef Sequence<DCPS::WString> WStringSeq;
   DDS::ReturnCode_t get_wstring_values(WStringSeq& value, MemberId id);
 #endif
@@ -121,14 +142,9 @@ private:
   /// Verify that a given type is primitive or string or wstring.
   bool is_type_supported(TypeKind tk, const char* func_name);
 
-  /// Wrappers for reading a single value as a given type.
+  /// Overloads for reading a single value as a given type.
   template<typename ValueType>
   bool read_value(ValueType& value, TypeKind tk);
-  bool read_value(ACE_CDR::LongDouble& value, TypeKind);
-  bool read_value(DCPS::String& value, TypeKind);
-#ifdef DDS_HAS_WCHAR
-  bool read_value(DCPS::WString& value, TypeKind);
-#endif
 
   /// Templates for reading a single value of type primitive or string or
   /// wstring from a corresponding containing type.
@@ -182,11 +198,56 @@ private:
   /// which is a sequence of primitives or strings or wstrings.
   template<typename SequenceType>
   bool read_values(SequenceType& value, TypeKind element_typekind);
-  bool read_values(Float128Seq& value, TypeKind);
-  bool read_values(StringSeq& value, TypeKind);
-#ifdef DDS_HAS_WCHAR
-  bool read_values(WStringSeq& value, TypeKind);
-#endif
+
+  struct Int8SeqWrapper {
+    Int8SeqWrapper(Int8Seq& ref)
+      : ref_(ref) {}
+
+    Int8Seq& ref_;
+  };
+  bool read_values(Int8SeqWrapper& value, TypeKind);
+
+  struct UInt8SeqWrapper {
+    UInt8SeqWrapper(UInt8Seq& ref)
+      : ref_(ref) {}
+
+    UInt8Seq& ref_;
+  };
+  bool read_values(UInt8SeqWrapper& value, TypeKind);
+
+  struct CharSeqWrapper {
+    CharSeqWrapper(CharSeq& ref)
+      : ref_(ref) {}
+
+    CharSeq& ref_;
+  };
+  bool read_values(CharSeqWrapper& value, TypeKind);
+
+  struct WCharSeqWrapper {
+    WCharSeqWrapper(WCharSeq& ref)
+      : ref_(ref) {}
+
+    WCharSeq& ref_;
+  };
+  bool read_values(WCharSeqWrapper& value, TypeKind);
+
+  struct OctetSeqWrapper {
+    OctetSeqWrapper(OctetSeq& ref)
+      : ref_(ref) {}
+
+    OctetSeq& ref_;
+  };
+  bool read_values(OctetSeqWrapper& value, TypeKind);
+
+  struct BooleanSeqWrapper {
+    BooleanSeqWrapper(BooleanSeq& ref)
+      : ref_(ref) {}
+
+    BooleanSeq& ref_;
+  };
+  bool read_values(BooleanSeqWrapper& value, TypeKind);
+  //  bool read_values(StringSeq& value, TypeKind);
+  //  bool read_values(WStringSeq& value, TypeKind);
 
   // Templates for reading a sequence of primitives or strings or wstrings
   // as a member (or an element) of a given containing type.

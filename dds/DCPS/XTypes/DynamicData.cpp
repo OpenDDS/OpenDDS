@@ -106,152 +106,29 @@ bool DynamicData::read_value(ValueType& value, TypeKind tk)
 {
   switch (tk) {
   case TK_INT32:
-    {
-      ACE_CDR::Long val;
-      if (!(strm_ >> val)) {
-        return false;
-      }
-      value = val;
-      return true;
-    }
   case TK_UINT32:
-    {
-      ACE_CDR::ULong val;
-      if (!(strm_ >> val)) {
-        return false;
-      }
-      value = val;
-      return true;
-    }
   case TK_INT16:
-    {
-      ACE_CDR::Short val;
-      if (!(strm_ >> val)) {
-        return false;
-      }
-      value = val;
-      return true;
-    }
   case TK_UINT16:
-    {
-      ACE_CDR::UShort val;
-      if (!(strm_ >> val)) {
-        return false;
-      }
-      value = val;
-      return true;
-    }
   case TK_INT64:
-    {
-      ACE_CDR::LongLong val;
-      if (!(strm_ >> val)) {
-        return false;
-      }
-      value = val;
-      return true;
-    }
   case TK_UINT64:
-    {
-      ACE_CDR::ULongLong val;
-      if (!(strm_ >> val)) {
-        return false;
-      }
-      value = val;
-      return true;
-    }
   case TK_FLOAT32:
-    {
-      ACE_CDR::Float val;
-      if (!(strm_ >> val)) {
-        return false;
-      }
-      value = val;
-      return true;
-    }
   case TK_FLOAT64:
-    {
-      ACE_CDR::Double val;
-      if (!(strm_ >> val)) {
-        return false;
-      }
-      value = val;
-      return true;
-    }
+  case TK_FLOAT128:
   case TK_INT8:
-    {
-      ACE_CDR::Int8 val;
-      if (!(strm_ >> ACE_InputCDR::to_int8(val))) {
-        return false;
-      }
-      value = val;
-      return true;
-    }
   case TK_UINT8:
-    {
-      ACE_CDR::UInt8 val;
-      if (!(strm_ >> ACE_InputCDR::to_uint8(val))) {
-        return false;
-      }
-      value = val;
-      return true;
-    }
   case TK_CHAR8:
-    {
-      ACE_CDR::Char val;
-      if (!(strm_ >> ACE_InputCDR::to_char(val))) {
-        return false;
-      }
-      value = val;
-      return true;
-    }
   case TK_CHAR16:
-    {
-      ACE_CDR::WChar val;
-      if (!(strm_ >> ACE_InputCDR::to_wchar(val))) {
-        return false;
-      }
-      value = val;
-      return true;
-    }
   case TK_BYTE:
-    {
-      ACE_CDR::Octet val;
-      if (!(strm_ >> ACE_InputCDR::to_octet(val))) {
-        return false;
-      }
-      value = val;
-      return true;
-    }
   case TK_BOOLEAN:
-    {
-      ACE_CDR::Boolean val;
-      if (!(strm_ >> ACE_InputCDR::to_boolean(val))) {
-        return false;
-      }
-      value = val;
-      return true;
-    }
+  case TK_STRING8:
+#ifdef DDS_HAS_WCHAR
+  case TK_STRING16:
+#endif
+    return strm_ >> value;
   default:
     return false;
   }
 }
-
-bool DynamicData::read_value(ACE_CDR::LongDouble& value, TypeKind)
-{
-  return strm_ >> value;
-}
-
-bool DynamicData::read_value(DCPS::String& value, TypeKind)
-{
-  return strm_ >> value;
-}
-
-#ifdef DDS_HAS_WCHAR
-bool DynamicData::read_value(DCPS::WString& value, TypeKind)
-{
-  return strm_ >> value;
-}
-#endif
 
 template<typename MemberType, TypeKind MemberTypeKind>
 bool DynamicData::get_value_from_struct(MemberType& value, MemberId id,
@@ -591,12 +468,14 @@ DDS::ReturnCode_t DynamicData::get_uint32_value(ACE_CDR::ULong& value, MemberId 
 
 DDS::ReturnCode_t DynamicData::get_int8_value(ACE_CDR::Int8& value, MemberId id)
 {
-  return get_single_value<ACE_CDR::Int8, TK_INT8>(value, id, TK_ENUM, 1, 8);
+  ACE_InputCDR::to_int8 to_int8(value);
+  return get_single_value<ACE_InputCDR::to_int8, TK_INT8>(to_int8, id, TK_ENUM, 1, 8);
 }
 
 DDS::ReturnCode_t DynamicData::get_uint8_value(ACE_CDR::UInt8& value, MemberId id)
 {
-  return get_single_value<ACE_CDR::UInt8, TK_UINT8>(value, id, TK_BITMASK, 1, 8);
+  ACE_InputCDR::to_uint8 to_uint8(value);
+  return get_single_value<ACE_InputCDR::to_uint8, TK_UINT8>(to_uint8, id, TK_BITMASK, 1, 8);
 }
 
 DDS::ReturnCode_t DynamicData::get_int16_value(ACE_CDR::Short& value, MemberId id)
@@ -639,7 +518,8 @@ DDS::ReturnCode_t DynamicData::get_char8_value(ACE_CDR::Char& value, MemberId id
   // String of kind TK_STRING8 is encoded with UTF-8 where each character can take more
   // than 1 byte. So we can't read a Char8 object, which has size exactly 1 byte,
   // from such a string as its member.
-  return get_single_value<ACE_CDR::Char, TK_CHAR8>(value, id);
+  ACE_InputCDR::to_char to_char(value);
+  return get_single_value<ACE_InputCDR::to_char, TK_CHAR8>(to_char, id);
 }
 
 DDS::ReturnCode_t DynamicData::get_char16_value(ACE_CDR::WChar& value, MemberId id)
@@ -681,16 +561,25 @@ DDS::ReturnCode_t DynamicData::get_char16_value(ACE_CDR::WChar& value, MemberId 
     }
 #endif
   case TK_STRUCTURE:
-    good = get_value_from_struct<ACE_CDR::WChar, TK_CHAR16>(value, id);
-    break;
+    {
+      ACE_InputCDR::to_wchar to_wchar(value);
+      good = get_value_from_struct<ACE_InputCDR::to_wchar, TK_CHAR16>(to_wchar, id);
+      break;
+    }
   case TK_UNION:
-    good = get_value_from_union<ACE_CDR::WChar, TK_CHAR16>(value, id);
-    break;
+    {
+      ACE_InputCDR::to_wchar to_wchar(value);
+      good = get_value_from_union<ACE_InputCDR::to_wchar, TK_CHAR16>(to_wchar, id);
+      break;
+    }
   case TK_SEQUENCE:
   case TK_ARRAY:
   case TK_MAP:
-    good = get_value_from_collection<ACE_CDR::WChar, TK_CHAR16>(value, id, tk);
-    break;
+    {
+      ACE_InputCDR::to_wchar to_wchar(value);
+      good = get_value_from_collection<ACE_InputCDR::to_wchar, TK_CHAR16>(to_wchar, id, tk);
+      break;
+    }
   default:
     good = false;
     break;
@@ -705,7 +594,8 @@ DDS::ReturnCode_t DynamicData::get_char16_value(ACE_CDR::WChar& value, MemberId 
 
 DDS::ReturnCode_t DynamicData::get_byte_value(ACE_CDR::Octet& value, MemberId id)
 {
-  return get_single_value<ACE_CDR::Octet, TK_BYTE>(value, id);
+  ACE_InputCDR::to_octet to_octet(value);
+  return get_single_value<ACE_InputCDR::to_octet, TK_BYTE>(to_octet, id);
 }
 
 template<typename UIntType, TypeKind UIntTypeKind>
@@ -716,11 +606,7 @@ bool DynamicData::get_boolean_from_bitmask(ACE_CDR::ULong index, ACE_CDR::Boolea
     return false;
   }
 
-  if ((1 << index) & bitmask) {
-    value = true;
-  } else {
-    value = false;
-  }
+  value = ((1 << index) & bitmask) ? true : false;
   return true;
 }
 
@@ -752,7 +638,13 @@ DDS::ReturnCode_t DynamicData::get_boolean_value(ACE_CDR::Boolean& value, Member
 
       // Bit with index 0 is the least-significant bit of the representing integer.
       if (bit_bound >= 1 && bit_bound <= 8) {
-        good = get_boolean_from_bitmask<ACE_CDR::UInt8, TK_UINT8>(index, value);
+        ACE_CDR::UInt8 bitmask;
+        ACE_InputCDR::to_uint8 to_uint8(bitmask);
+        if (!read_value(to_uint8, TK_UINT8)) {
+          good = false;
+        } else {
+          value = ((1 << index) & bitmask) ? true : false;
+        }
       } else if (bit_bound >= 9 && bit_bound <= 16) {
         good = get_boolean_from_bitmask<ACE_CDR::UInt16, TK_UINT16>(index, value);
       } else if (bit_bound >= 17 && bit_bound <= 33) {
@@ -763,16 +655,25 @@ DDS::ReturnCode_t DynamicData::get_boolean_value(ACE_CDR::Boolean& value, Member
       break;
     }
   case TK_STRUCTURE:
-    good = get_value_from_struct<ACE_CDR::Boolean, TK_BOOLEAN>(value, id);
-    break;
+    {
+      ACE_InputCDR::to_boolean to_bool(value);
+      good = get_value_from_struct<ACE_InputCDR::to_boolean, TK_BOOLEAN>(to_bool, id);
+      break;
+    }
   case TK_UNION:
-    good = get_value_from_union<ACE_CDR::Boolean, TK_BOOLEAN>(value, id);
-    break;
+    {
+      ACE_InputCDR::to_boolean to_bool(value);
+      good = get_value_from_union<ACE_InputCDR::to_boolean, TK_BOOLEAN>(to_bool, id);
+      break;
+    }
   case TK_SEQUENCE:
   case TK_ARRAY:
   case TK_MAP:
-    good = get_value_from_collection<ACE_CDR::Boolean, TK_BOOLEAN>(value, id, tk);
-    break;
+    {
+      ACE_InputCDR::to_boolean to_bool(value);
+      good = get_value_from_collection<ACE_InputCDR::to_boolean, TK_BOOLEAN>(to_bool, id, tk);
+      break;
+    }
   default:
     good = false;
     break;
@@ -786,8 +687,10 @@ DDS::ReturnCode_t DynamicData::get_boolean_value(ACE_CDR::Boolean& value, Member
 }
 
 DDS::ReturnCode_t DynamicData::get_string_value(DCPS::String& value, MemberId id)
+//DDS::ReturnCode_t DynamicData::get_string_value(TAO::String_Manager& value, MemberId id)
 {
   return get_single_value<DCPS::String, TK_STRING8>(value, id);
+  //  return get_single_value<TAO::String_Manager, TK_STRING8>(value, id);
 }
 
 #ifdef DDS_HAS_WCHAR
@@ -888,178 +791,45 @@ DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id
   return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
 
-
 template<typename SequenceType>
 bool DynamicData::read_values(SequenceType& value, TypeKind elem_tk)
 {
-  ACE_CDR::ULong len;
-  if (!(strm_ >> len)) {
-    return false;
+  if (elem_tk == TK_STRING8
+#ifdef DDS_HAS_WCHAR
+      || elem_tk == TK_STRING16
+#endif
+      ) {
+    size_t size;
+    if (!strm_.read_delimiter(size)) {
+      return false;
+    }
   }
 
   switch (elem_tk) {
   case TK_INT32:
-    {
-      ACE_CDR::Long val;
-      for (ACE_CDR::ULong i = 0; i < len; ++i) {
-        if (!read_value(val, elem_tk)) {
-          return false;
-        }
-        value.append(val);
-      }
-      return true;
-    }
   case TK_UINT32:
-    {
-      ACE_CDR::ULong val;
-      for (ACE_CDR::ULong i = 0; i < len; ++i) {
-        if (!read_value(val, elem_tk)) {
-          return false;
-        }
-        value.append(val);
-      }
-      return true;
-    }
   case TK_INT16:
-    {
-      ACE_CDR::Short val;
-      for (ACE_CDR::ULong i = 0; i < len; ++i) {
-        if (!read_value(val, elem_tk)) {
-          return false;
-        }
-        value.append(val);
-      }
-       return true;
-    }
   case TK_UINT16:
-    {
-      ACE_CDR::UShort val;
-      for (ACE_CDR::ULong i = 0; i < len; ++i) {
-        if (!read_value(val, elem_tk)) {
-          return false;
-        }
-        value.append(val);
-      }
-      return true;
-    }
   case TK_INT64:
-    {
-      ACE_CDR::LongLong val;
-      for (ACE_CDR::ULong i = 0; i < len; ++i) {
-        if (!read_value(val, elem_tk)) {
-          return false;
-        }
-        value.append(val);
-      }
-      return true;
-    }
   case TK_UINT64:
-    {
-      ACE_CDR::ULongLong val;
-      for (ACE_CDR::ULong i = 0; i < len; ++i) {
-        if (!read_value(val, elem_tk)) {
-          return false;
-        }
-        value.append(val);
-      }
-      return true;
-    }
   case TK_FLOAT32:
-    {
-      ACE_CDR::Float val;
-      for (ACE_CDR::ULong i = 0; i < len; ++i) {
-        if (!read_value(val, elem_tk)) {
-          return false;
-        }
-        value.append(val);
-      }
-      return true;
-    }
   case TK_FLOAT64:
-    {
-      ACE_CDR::Double val;
-      for (ACE_CDR::ULong i = 0; i < len; ++i) {
-        if (!read_value(val, elem_tk)) {
-          return false;
-        }
-        value.append(val);
-      }
-      return true;
-    }
   case TK_FLOAT128:
+  case TK_STRING8:
+#ifdef DDS_HAS_WCHAR
+  case TK_STRING16:
+#endif
     {
-      ACE_CDR::LongDouble val;
-      for (ACE_CDR::ULong i = 0; i < len; ++i) {
-        if (!read_value(val, elem_tk)) {
-          return false;
-        }
-        value.append(val);
+      ACE_CDR::ULong len;
+      if (!(strm_ >> len)) {
+        return false;
       }
-      return true;
-    }
-  case TK_INT8:
-    {
-      ACE_CDR::Int8 val;
+
+      value.length(len);
       for (ACE_CDR::ULong i = 0; i < len; ++i) {
-        if (!read_value(val, elem_tk)) {
+        if (!(strm_ >> value[i])) {
           return false;
         }
-        value.append(val);
-      }
-      return true;
-    }
-  case TK_UINT8:
-    {
-      ACE_CDR::UInt8 val;
-      for (ACE_CDR::ULong i = 0; i < len; ++i) {
-        if (!read_value(val, elem_tk)) {
-          return false;
-        }
-        value.append(val);
-      }
-      return true;
-    }
-  case TK_CHAR8:
-    {
-      ACE_CDR::Char val;
-      for (ACE_CDR::ULong i = 0; i < len; ++i) {
-        if (!read_value(val, elem_tk)) {
-          return false;
-        }
-        value.append(val);
-      }
-      return true;
-    }
-  case TK_CHAR16:
-    {
-      ACE_CDR::WChar val;
-      for (ACE_CDR::ULong i = 0; i < len; ++i) {
-        if (!read_value(val, elem_tk)) {
-          return false;
-        }
-        value.append(val);
-      }
-      return true;
-    }
-  case TK_BYTE:
-    {
-      ACE_CDR::Octet val;
-      for (ACE_CDR::ULong i = 0; i < len; ++i) {
-        if (!read_value(val, elem_tk)) {
-          return false;
-        }
-        value.append(val);
-      }
-      return true;
-    }
-  case TK_BOOLEAN:
-    {
-      ACE_CDR::Boolean val;
-      for (ACE_CDR::ULong i = 0; i < len; ++i) {
-        if (!read_value(val, elem_tk)) {
-          return false;
-        }
-        value.append(val);
       }
       return true;
     }
@@ -1068,60 +838,115 @@ bool DynamicData::read_values(SequenceType& value, TypeKind elem_tk)
   }
 }
 
-bool DynamicData::read_values(Float128Seq& value, TypeKind)
+bool DynamicData::read_values(Int8SeqWrapper& value, TypeKind)
 {
   ACE_CDR::ULong len;
   if (!(strm_ >> len)) {
     return false;
   }
 
-  ACE_CDR::LongDouble val;
+  value.ref_.length(len);
   for (ACE_CDR::ULong i = 0; i < len; ++i) {
-    if (!read_value(val, TK_FLOAT128)) {
+    if (!(strm_ >> ACE_InputCDR::to_int8(value.ref_[i]))) {
       return false;
     }
-    value.append(val);
   }
   return true;
 }
 
+bool DynamicData::read_values(UInt8SeqWrapper& value, TypeKind)
+{
+  ACE_CDR::ULong len;
+  if (!(strm_ >> len)) {
+    return false;
+  }
+
+  value.ref_.length(len);
+  for (ACE_CDR::ULong i = 0; i < len; ++i) {
+    if (!(strm_ >> ACE_InputCDR::to_uint8(value.ref_[i]))) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool DynamicData::read_values(CharSeqWrapper& value, TypeKind)
+{
+  ACE_CDR::ULong len;
+  if (!(strm_ >> len)) {
+    return false;
+  }
+
+  value.ref_.length(len);
+  for (ACE_CDR::ULong i = 0; i < len; ++i) {
+    if (!(strm_ >> ACE_InputCDR::to_char(value.ref_[i]))) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool DynamicData::read_values(WCharSeqWrapper& value, TypeKind)
+{
+  ACE_CDR::ULong len;
+  if (!(strm_ >> len)) {
+    return false;
+  }
+
+  value.ref_.length(len);
+  for (ACE_CDR::ULong i = 0; i < len; ++i) {
+    if (!(strm_ >> ACE_InputCDR::to_wchar(value.ref_[i]))) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool DynamicData::read_values(OctetSeqWrapper& value, TypeKind)
+{
+  ACE_CDR::ULong len;
+  if (!(strm_ >> len)) {
+    return false;
+  }
+
+  value.ref_.length(len);
+  for (ACE_CDR::ULong i = 0; i < len; ++i) {
+    if (!(strm_ >> ACE_InputCDR::to_octet(value.ref_[i]))) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool DynamicData::read_values(BooleanSeqWrapper& value, TypeKind)
+{
+  ACE_CDR::ULong len;
+  if (!(strm_ >> len)) {
+    return false;
+  }
+
+  value.ref_.length(len);
+  for (ACE_CDR::ULong i = 0; i < len; ++i) {
+    if (!(strm_ >> ACE_InputCDR::to_boolean(value.ref_[i]))) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/*
 bool DynamicData::read_values(StringSeq& value, TypeKind)
 {
-  size_t size;
-  ACE_CDR::ULong len;
-  if (!strm_.read_delimiter(size) || !(strm_ >> len)) {
-    return false;
-  }
-
-  DCPS::String val;
-  for (ACE_CDR::ULong i = 0; i < len; ++i) {
-    if (!read_value(val, TK_STRING8)) {
-      return false;
-    }
-    value.append(val);
-  }
+  // TODO
   return true;
 }
 
-#ifdef DDS_HAS_WCHAR
 bool DynamicData::read_values(WStringSeq& value, TypeKind)
 {
-  size_t size;
-  ACE_CDR::ULong len;
-  if (!strm_.read_delimiter(size) || !(strm_ >> len)) {
-    return false;
-  }
-
-  DCPS::WString val;
-  for (ACE_CDR::ULong i = 0; i < len; ++i) {
-    if (!read_value(val, TK_STRING16)) {
-      return false;
-    }
-    value.append(val);
-  }
+  // TODO
   return true;
 }
-#endif
+*/
 
 template<typename SequenceType, TypeKind ElementTypeKind>
 bool DynamicData::get_values_from_struct(SequenceType& value, MemberId id,
@@ -1345,12 +1170,14 @@ DDS::ReturnCode_t DynamicData::get_uint32_values(UInt32Seq& value, MemberId id)
 
 DDS::ReturnCode_t DynamicData::get_int8_values(Int8Seq& value, MemberId id)
 {
-  return get_sequence_values<Int8Seq, TK_INT8>(value, id, TK_ENUM, 1, 8);
+  Int8SeqWrapper wrap(value);
+  return get_sequence_values<Int8SeqWrapper, TK_INT8>(wrap, id, TK_ENUM, 1, 8);
 }
 
 DDS::ReturnCode_t DynamicData::get_uint8_values(UInt8Seq& value, MemberId id)
 {
-  return get_sequence_values<UInt8Seq, TK_UINT8>(value, id, TK_BITMASK, 1, 8);
+  UInt8SeqWrapper wrap(value);
+  return get_sequence_values<UInt8SeqWrapper, TK_UINT8>(wrap, id, TK_BITMASK, 1, 8);
 }
 
 DDS::ReturnCode_t DynamicData::get_int16_values(Int16Seq& value, MemberId id)
@@ -1390,22 +1217,26 @@ DDS::ReturnCode_t DynamicData::get_float128_values(Float128Seq& value, MemberId 
 
 DDS::ReturnCode_t DynamicData::get_char8_values(CharSeq& value, MemberId id)
 {
-  return get_sequence_values<CharSeq, TK_CHAR8>(value, id);
+  CharSeqWrapper wrap(value);
+  return get_sequence_values<CharSeqWrapper, TK_CHAR8>(wrap, id);
 }
 
 DDS::ReturnCode_t DynamicData::get_char16_values(WCharSeq& value, MemberId id)
 {
-  return get_sequence_values<WCharSeq, TK_CHAR16>(value, id);
+  WCharSeqWrapper wrap(value);
+  return get_sequence_values<WCharSeqWrapper, TK_CHAR16>(wrap, id);
 }
 
 DDS::ReturnCode_t DynamicData::get_byte_values(OctetSeq& value, MemberId id)
 {
-  return get_sequence_values<OctetSeq, TK_BYTE>(value, id);
+  OctetSeqWrapper wrap(value);
+  return get_sequence_values<OctetSeqWrapper, TK_BYTE>(wrap, id);
 }
 
 DDS::ReturnCode_t DynamicData::get_boolean_values(BooleanSeq& value, MemberId id)
 {
-  return get_sequence_values<BooleanSeq, TK_BOOLEAN>(value, id);
+  BooleanSeqWrapper wrap(value);
+  return get_sequence_values<BooleanSeqWrapper, TK_BOOLEAN>(wrap, id);
 }
 
 DDS::ReturnCode_t DynamicData::get_string_values(StringSeq& value, MemberId id)
