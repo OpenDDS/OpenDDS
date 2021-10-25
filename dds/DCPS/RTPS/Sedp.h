@@ -1503,7 +1503,7 @@ protected:
 
     if (topic_counter_ == 0x1000000) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: EndpointManager::assign_topic_key: ")
+                 ACE_TEXT("(%P|%t) ERROR: Sedp::assign_topic_key: ")
                  ACE_TEXT("Exceeded Maximum number of topic entity keys!")
                  ACE_TEXT("Next key will be a duplicate!\n")));
       topic_counter_ = 0;
