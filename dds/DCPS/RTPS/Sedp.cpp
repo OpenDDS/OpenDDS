@@ -7324,7 +7324,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
     ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
     if (writer_local && writerStatus.count_since_last_send) {
       if (DCPS_debug_level > 3) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::match - ")
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::match_continue - ")
                    ACE_TEXT("writer incompatible\n")));
       }
       DCPS::DataWriterCallbacks_rch dwr_lock = dwr.lock();
@@ -7334,7 +7334,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
     }
     if (reader_local && readerStatus.count_since_last_send) {
       if (DCPS_debug_level > 3) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::match - ")
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::match_continue - ")
                    ACE_TEXT("reader incompatible\n")));
       }
       DCPS::DataReaderCallbacks_rch drr_lock = drr.lock();
