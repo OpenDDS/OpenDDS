@@ -11,24 +11,23 @@
 
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/PoolAllocator.h>
-
-#include <tao/LongSeqC.h>
-#include <tao/ULongSeqC.h>
-#include <tao/Int8SeqC.h>
-#include <tao/UInt8SeqC.h>
-#include <tao/ShortSeqC.h>
-#include <tao/UShortSeqC.h>
-#include <tao/LongLongSeqC.h>
-#include <tao/ULongLongSeqC.h>
-#include <tao/FloatSeqC.h>
-#include <tao/DoubleSeqC.h>
-#include <tao/LongDoubleSeqC.h>
-#include <tao/CharSeqC.h>
-#include <tao/WCharSeqC.h>
-#include <tao/OctetSeqC.h>
-#include <tao/BooleanSeqC.h>
-#include <tao/StringSeqC.h>
-#include <tao/WStringSeqC.h>
+#include <dds/CorbaSeq/LongSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/ULongSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/Int8SeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/UInt8SeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/ShortSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/UShortSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/LongLongSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/ULongLongSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/FloatSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/DoubleSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/LongDoubleSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/CharSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/WCharSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/OctetSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/BooleanSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/StringSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/WStringSeqTypeSupportImpl.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -49,7 +48,7 @@ public:
   bool equals(const DynamicData& other) const;
 
   MemberId get_member_id_by_name(DCPS::String name) const;
-  MemberId get_member_id_at_index(ACE_CDR::ULong) const;
+  MemberId get_member_id_at_index(ACE_CDR::ULong index) const;
   ACE_CDR::ULong get_item_count() const;
 
   DynamicData clone() const;
@@ -69,68 +68,27 @@ public:
   DDS::ReturnCode_t get_char16_value(ACE_CDR::WChar& value, MemberId id);
   DDS::ReturnCode_t get_byte_value(ACE_CDR::Octet& value, MemberId id);
   DDS::ReturnCode_t get_boolean_value(ACE_CDR::Boolean& value, MemberId id);
-  DDS::ReturnCode_t get_string_value(DCPS::String& value, MemberId id);
-  //  DDS::ReturnCode_t get_string_value(TAO::String_Manager& value, MemberId id);
-#ifdef DDS_HAS_WCHAR
-  DDS::ReturnCode_t get_wstring_value(DCPS::WString& value, MemberId id);
-#endif
-
+  DDS::ReturnCode_t get_string_value(ACE_CDR::Char*& value, MemberId id);
+  DDS::ReturnCode_t get_wstring_value(ACE_CDR::WChar*& value, MemberId id);
   DDS::ReturnCode_t get_complex_value(DynamicData& value, MemberId id);
 
-  typedef CORBA::LongSeq Int32Seq;
-  DDS::ReturnCode_t get_int32_values(Int32Seq& value, MemberId id);
-
-  typedef CORBA::ULongSeq UInt32Seq;
-  DDS::ReturnCode_t get_uint32_values(UInt32Seq& value, MemberId id);
-
-  typedef CORBA::Int8Seq Int8Seq;
-  DDS::ReturnCode_t get_int8_values(Int8Seq& value, MemberId id);
-
-  typedef CORBA::UInt8Seq UInt8Seq;
-  DDS::ReturnCode_t get_uint8_values(UInt8Seq& value, MemberId id);
-
-  typedef CORBA::ShortSeq Int16Seq;
-  DDS::ReturnCode_t get_int16_values(Int16Seq& value, MemberId id);
-
-  typedef CORBA::UShortSeq UInt16Seq;
-  DDS::ReturnCode_t get_uint16_values(UInt16Seq& value, MemberId id);
-
-  typedef CORBA::LongLongSeq Int64Seq;
-  DDS::ReturnCode_t get_int64_values(Int64Seq& value, MemberId id);
-
-  typedef CORBA::ULongLongSeq UInt64Seq;
-  DDS::ReturnCode_t get_uint64_values(UInt64Seq& value, MemberId id);
-
-  typedef CORBA::FloatSeq Float32Seq;
-  DDS::ReturnCode_t get_float32_values(Float32Seq& value, MemberId id);
-
-  typedef CORBA::DoubleSeq Float64Seq;
-  DDS::ReturnCode_t get_float64_values(Float64Seq& value, MemberId id);
-
-  typedef CORBA::LongDoubleSeq Float128Seq;
-  DDS::ReturnCode_t get_float128_values(Float128Seq& value, MemberId id);
-
-  typedef CORBA::CharSeq CharSeq;
-  DDS::ReturnCode_t get_char8_values(CharSeq& value, MemberId id);
-
-  typedef CORBA::WCharSeq WCharSeq;
-  DDS::ReturnCode_t get_char16_values(WCharSeq& value, MemberId id);
-
-  typedef CORBA::OctetSeq OctetSeq;
-  DDS::ReturnCode_t get_byte_values(OctetSeq& value, MemberId id);
-
-  typedef CORBA::BooleanSeq BooleanSeq;
-  DDS::ReturnCode_t get_boolean_values(BooleanSeq& value, MemberId id);
-
-  //  typedef CORBA::StringSeq StringSeq;
-  typedef Sequence<DCPS::String> StringSeq;
-  DDS::ReturnCode_t get_string_values(StringSeq& value, MemberId id);
-
-#ifdef DDS_HAS_WCHAR
-  //  typedef CORBA::WStringSeq WStringSeq;
-  typedef Sequence<DCPS::WString> WStringSeq;
-  DDS::ReturnCode_t get_wstring_values(WStringSeq& value, MemberId id);
-#endif
+  DDS::ReturnCode_t get_int32_values(CORBA::LongSeq& value, MemberId id);
+  DDS::ReturnCode_t get_uint32_values(CORBA::ULongSeq& value, MemberId id);
+  DDS::ReturnCode_t get_int8_values(CORBA::Int8Seq& value, MemberId id);
+  DDS::ReturnCode_t get_uint8_values(CORBA::UInt8Seq& value, MemberId id);
+  DDS::ReturnCode_t get_int16_values(CORBA::ShortSeq& value, MemberId id);
+  DDS::ReturnCode_t get_uint16_values(CORBA::UShortSeq& value, MemberId id);
+  DDS::ReturnCode_t get_int64_values(CORBA::LongLongSeq& value, MemberId id);
+  DDS::ReturnCode_t get_uint64_values(CORBA::ULongLongSeq& value, MemberId id);
+  DDS::ReturnCode_t get_float32_values(CORBA::FloatSeq& value, MemberId id);
+  DDS::ReturnCode_t get_float64_values(CORBA::DoubleSeq& value, MemberId id);
+  DDS::ReturnCode_t get_float128_values(CORBA::LongDoubleSeq& value, MemberId id);
+  DDS::ReturnCode_t get_char8_values(CORBA::CharSeq& value, MemberId id);
+  DDS::ReturnCode_t get_char16_values(CORBA::WCharSeq& value, MemberId id);
+  DDS::ReturnCode_t get_byte_values(CORBA::OctetSeq& value, MemberId id);
+  DDS::ReturnCode_t get_boolean_values(CORBA::BooleanSeq& value, MemberId id);
+  DDS::ReturnCode_t get_string_values(CORBA::StringSeq& value, MemberId id);
+  DDS::ReturnCode_t get_wstring_values(CORBA::WStringSeq& value, MemberId id);
 
   /// Skip the whole data corresponding to this type if it is a struct or union.
   /// This is called by a containing type when it wants to skip a member which
@@ -148,25 +106,25 @@ private:
 
   /// Templates for reading a single value of type primitive or string or
   /// wstring from a corresponding containing type.
-  template<typename MemberType, TypeKind MemberTypeKind>
+  template<TypeKind MemberTypeKind, typename MemberType>
   bool get_value_from_struct(MemberType& value, MemberId id,
                              TypeKind enum_or_bitmask = TK_NONE,
                              LBound lower = 0,
                              LBound upper = 0);
 
-  template<typename MemberType, TypeKind MemberTypeKind>
+  template<TypeKind MemberTypeKind, typename MemberType>
   bool get_value_from_union(MemberType& value, MemberId id,
                             TypeKind enum_or_bitmask = TK_NONE,
                             LBound lower = 0,
                             LBound upper = 0);
 
-  template<typename ElementType, TypeKind ElementTypeKind>
+  template<TypeKind ElementTypeKind, typename ElementType>
   bool get_value_from_collection(ElementType& value, MemberId id, TypeKind collection_tk,
                                  TypeKind enum_or_bitmask = TK_NONE,
                                  LBound lower = 0,
                                  LBound upper = 0);
 
-  template<typename ValueType, TypeKind ValueTypeKind>
+  template<TypeKind ValueTypeKind, typename ValueType>
   DDS::ReturnCode_t get_single_value(ValueType& value, MemberId id,
                                      TypeKind enum_or_bitmask = TK_NONE,
                                      LBound lower = 0,
@@ -199,80 +157,30 @@ private:
   template<typename SequenceType>
   bool read_values(SequenceType& value, TypeKind element_typekind);
 
-  struct Int8SeqWrapper {
-    Int8SeqWrapper(Int8Seq& ref)
-      : ref_(ref) {}
-
-    Int8Seq& ref_;
-  };
-  bool read_values(Int8SeqWrapper& value, TypeKind);
-
-  struct UInt8SeqWrapper {
-    UInt8SeqWrapper(UInt8Seq& ref)
-      : ref_(ref) {}
-
-    UInt8Seq& ref_;
-  };
-  bool read_values(UInt8SeqWrapper& value, TypeKind);
-
-  struct CharSeqWrapper {
-    CharSeqWrapper(CharSeq& ref)
-      : ref_(ref) {}
-
-    CharSeq& ref_;
-  };
-  bool read_values(CharSeqWrapper& value, TypeKind);
-
-  struct WCharSeqWrapper {
-    WCharSeqWrapper(WCharSeq& ref)
-      : ref_(ref) {}
-
-    WCharSeq& ref_;
-  };
-  bool read_values(WCharSeqWrapper& value, TypeKind);
-
-  struct OctetSeqWrapper {
-    OctetSeqWrapper(OctetSeq& ref)
-      : ref_(ref) {}
-
-    OctetSeq& ref_;
-  };
-  bool read_values(OctetSeqWrapper& value, TypeKind);
-
-  struct BooleanSeqWrapper {
-    BooleanSeqWrapper(BooleanSeq& ref)
-      : ref_(ref) {}
-
-    BooleanSeq& ref_;
-  };
-  bool read_values(BooleanSeqWrapper& value, TypeKind);
-  //  bool read_values(StringSeq& value, TypeKind);
-  //  bool read_values(WStringSeq& value, TypeKind);
-
   // Templates for reading a sequence of primitives or strings or wstrings
   // as a member (or an element) of a given containing type.
-  template<typename SequenceType, TypeKind ElementTypeKind>
+  template<TypeKind ElementTypeKind, typename SequenceType>
   bool get_values_from_struct(SequenceType& value, MemberId id,
                               TypeKind enum_or_bitmask, LBound lower, LBound upper);
 
-  template<typename SequenceType, TypeKind ElementTypeKind>
+  template<TypeKind ElementTypeKind, typename SequenceType>
   bool get_values_from_union(SequenceType& value, MemberId id,
                              TypeKind enum_or_bitmask, LBound lower, LBound upper);
 
-  template<typename SequenceType, TypeKind ElementTypeKind>
+  template<TypeKind ElementTypeKind, typename SequenceType>
   bool get_values_from_sequence(SequenceType& value, MemberId id,
                                 TypeKind enum_or_bitmask, LBound lower, LBound upper);
 
-  template<typename SequenceType, TypeKind ElementTypeKind>
+  template<TypeKind ElementTypeKind, typename SequenceType>
   bool get_values_from_array(SequenceType& value, MemberId id,
                              TypeKind enum_or_bitmask, LBound lower, LBound upper);
 
-  template<typename SequenceType, TypeKind ElementTypeKind>
+  template<TypeKind ElementTypeKind, typename SequenceType>
   bool get_values_from_map(SequenceType& value, MemberId id,
                            TypeKind enum_or_bitmask, LBound lower, LBound upper);
 
   /// Template that reads sequence of values from all valid containing types.
-  template<typename SequenceType, TypeKind ElementTypeKind>
+  template<TypeKind ElementTypeKind, typename SequenceType>
   DDS::ReturnCode_t get_sequence_values(SequenceType& value, MemberId id,
                                         TypeKind enum_or_bitmask = TK_NONE,
                                         LBound lower = 0,
@@ -313,7 +221,7 @@ private:
   /// Skip a member which is an union.
   bool skip_union_member(const DynamicType_rch& type);
 
-  // These methods can be moved to DynamicType-related classes.
+  // TODO: This method can be moved to DynamicType-related classes.
   DynamicType_rch get_base_type(const DynamicType_rch& alias_type) const;
   bool is_primitive(TypeKind tk, ACE_CDR::ULong& size) const;
 

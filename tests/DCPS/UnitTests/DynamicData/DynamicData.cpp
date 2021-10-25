@@ -262,29 +262,27 @@ TEST(Mutable, ReadValueFromStruct)
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected._cxx_bool, bool_);
 
-  DCPS::String str;
+  ACE_CDR::Char* str;
   ret = data.get_string_value(str, 16);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  EXPECT_STREQ(expected.str.in(), str.c_str());
+  EXPECT_STREQ(expected.str.in(), str);
 
   ret = data.get_complex_value(nested_dd, 16);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd.get_string_value(str, random_id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  EXPECT_STREQ(expected.str.in(), str.c_str());
+  EXPECT_STREQ(expected.str.in(), str);
 
-#ifdef DDS_HAS_WCHAR
-  DCPS::WString wstr;
+  ACE_CDR::WChar* wstr;
   ret = data.get_wstring_value(wstr, 17);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  EXPECT_STREQ(expected.wstr.in(), wstr.c_str());
+  EXPECT_STREQ(expected.wstr.in(), wstr);
 
   ret = data.get_complex_value(nested_dd, 17);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd.get_wstring_value(wstr, random_id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  EXPECT_STREQ(expected.wstr.in(), wstr.c_str());
-#endif
+  EXPECT_STREQ(expected.wstr.in(), wstr);
 }
 
 TEST(Mutable, ReadValueFromUnion)
