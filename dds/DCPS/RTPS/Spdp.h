@@ -354,9 +354,9 @@ public:
 protected:
   Sedp& endpoint_manager() { return *sedp_; }
 
-  void remove_discovered_participant(DiscoveredParticipantIter& iter);
+  void remove_discovered_participant(const DiscoveredParticipantIter& iter);
 
-  void remove_discovered_participant_i(DiscoveredParticipantIter& iter);
+  void remove_discovered_participant_i(const DiscoveredParticipantIter& iter);
 
 #ifndef DDS_HAS_MINIMUM_BIT
   void enqueue_location_update_i(DiscoveredParticipantIter iter, DCPS::ParticipantLocation mask, const ACE_INET_Addr& from);
@@ -694,8 +694,6 @@ private:
 #else
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> shutdown_flag_; // Spdp shutting down
 #endif
-
-  void get_discovered_participant_ids(DCPS::RepoIdSet& results) const;
 
   BuiltinEndpointSet_t available_builtin_endpoints_;
   DCPS::RcHandle<Sedp> sedp_;

@@ -2120,140 +2120,133 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
 #endif
 
     if (iter == discovered_publications_.end()) { // add new
-      { // Reduce scope of pub and td
-        DiscoveredPublication prepub(wdata);
-        prepub.participant_discovered_at_ = spdp_.get_participant_discovered_at(participant_id);
-        prepub.transport_context_ = spdp_.get_participant_flags(participant_id);
-        prepub.type_info_ = type_info;
+      DiscoveredPublication prepub(wdata);
+      prepub.participant_discovered_at_ = spdp_.get_participant_discovered_at(participant_id);
+      prepub.transport_context_ = spdp_.get_participant_flags(participant_id);
+      prepub.type_info_ = type_info;
 
 #ifdef OPENDDS_SECURITY
-        prepub.have_ice_agent_info_ = have_ice_agent_info;
-        prepub.ice_agent_info_ = ice_agent_info;
+      prepub.have_ice_agent_info_ = have_ice_agent_info;
+      prepub.ice_agent_info_ = ice_agent_info;
 #endif
-        topic_name = prepub.get_topic_name();
+      topic_name = prepub.get_topic_name();
 
 #ifdef OPENDDS_SECURITY
-        if (is_security_enabled()) {
+      if (is_security_enabled()) {
 
-          DDS::Security::SecurityException ex = {"", 0, 0};
+        DDS::Security::SecurityException ex = {"", 0, 0};
 
-          DDS::TopicBuiltinTopicData data;
-          data.key = wdata.ddsPublicationData.key;
-          data.name = wdata.ddsPublicationData.topic_name;
-          data.type_name = wdata.ddsPublicationData.type_name;
-          data.durability = wdata.ddsPublicationData.durability;
-          data.durability_service = wdata.ddsPublicationData.durability_service;
-          data.deadline = wdata.ddsPublicationData.deadline;
-          data.latency_budget = wdata.ddsPublicationData.latency_budget;
-          data.liveliness = wdata.ddsPublicationData.liveliness;
-          data.reliability = wdata.ddsPublicationData.reliability;
-          data.lifespan = wdata.ddsPublicationData.lifespan;
-          data.destination_order = wdata.ddsPublicationData.destination_order;
-          data.ownership = wdata.ddsPublicationData.ownership;
-          data.topic_data = wdata.ddsPublicationData.topic_data;
+        DDS::TopicBuiltinTopicData data;
+        data.key = wdata.ddsPublicationData.key;
+        data.name = wdata.ddsPublicationData.topic_name;
+        data.type_name = wdata.ddsPublicationData.type_name;
+        data.durability = wdata.ddsPublicationData.durability;
+        data.durability_service = wdata.ddsPublicationData.durability_service;
+        data.deadline = wdata.ddsPublicationData.deadline;
+        data.latency_budget = wdata.ddsPublicationData.latency_budget;
+        data.liveliness = wdata.ddsPublicationData.liveliness;
+        data.reliability = wdata.ddsPublicationData.reliability;
+        data.lifespan = wdata.ddsPublicationData.lifespan;
+        data.destination_order = wdata.ddsPublicationData.destination_order;
+        data.ownership = wdata.ddsPublicationData.ownership;
+        data.topic_data = wdata.ddsPublicationData.topic_data;
 
-          AuthState auth_state = spdp_.lookup_participant_auth_state(participant_id);
-          if (auth_state == AUTH_STATE_AUTHENTICATED) {
+        AuthState auth_state = spdp_.lookup_participant_auth_state(participant_id);
+        if (auth_state == AUTH_STATE_AUTHENTICATED) {
 
-            DDS::Security::PermissionsHandle remote_permissions = spdp_.lookup_participant_permissions(participant_id);
+          DDS::Security::PermissionsHandle remote_permissions = spdp_.lookup_participant_permissions(participant_id);
 
-            if (participant_sec_attr_.is_access_protected &&
-                !get_access_control()->check_remote_topic(remote_permissions, spdp_.get_domain_id(), data, ex))
+          if (participant_sec_attr_.is_access_protected &&
+              !get_access_control()->check_remote_topic(remote_permissions, spdp_.get_domain_id(), data, ex))
             {
               ACE_ERROR((LM_WARNING,
-                ACE_TEXT("(%P|%t) WARNING: ")
-                ACE_TEXT("Sedp::process_discovered_writer_data - ")
-                ACE_TEXT("Unable to check remote topic '%C'. SecurityException[%d.%d]: %C\n"),
-                topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+                         ACE_TEXT("(%P|%t) WARNING: ")
+                         ACE_TEXT("Sedp::process_discovered_writer_data - ")
+                         ACE_TEXT("Unable to check remote topic '%C'. SecurityException[%d.%d]: %C\n"),
+                         topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
               return;
             }
 
-            DDS::Security::TopicSecurityAttributes topic_sec_attr;
-            if (!get_access_control()->get_topic_sec_attributes(remote_permissions, topic_name.data(), topic_sec_attr, ex))
+          DDS::Security::TopicSecurityAttributes topic_sec_attr;
+          if (!get_access_control()->get_topic_sec_attributes(remote_permissions, topic_name.data(), topic_sec_attr, ex))
             {
               ACE_ERROR((LM_WARNING,
-                ACE_TEXT("(%P|%t) WARNING: ")
-                ACE_TEXT("Sedp::process_discovered_writer_data - ")
-                ACE_TEXT("Unable to get security attributes for remote topic '%C'. SecurityException[%d.%d]: %C\n"),
-                topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+                         ACE_TEXT("(%P|%t) WARNING: ")
+                         ACE_TEXT("Sedp::process_discovered_writer_data - ")
+                         ACE_TEXT("Unable to get security attributes for remote topic '%C'. SecurityException[%d.%d]: %C\n"),
+                         topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
               return;
             }
 
-            DDS::Security::PublicationBuiltinTopicDataSecure pub_data_sec;
-            pub_data_sec.base.base = wdata.ddsPublicationData;
+          DDS::Security::PublicationBuiltinTopicDataSecure pub_data_sec;
+          pub_data_sec.base.base = wdata.ddsPublicationData;
 
-            if (security_info != NULL) {
-              pub_data_sec.base.security_info.endpoint_security_attributes =
-                security_info->endpoint_security_attributes;
-              pub_data_sec.base.security_info.plugin_endpoint_security_attributes =
-                security_info->plugin_endpoint_security_attributes;
-            }
+          if (security_info != NULL) {
+            pub_data_sec.base.security_info.endpoint_security_attributes =
+              security_info->endpoint_security_attributes;
+            pub_data_sec.base.security_info.plugin_endpoint_security_attributes =
+              security_info->plugin_endpoint_security_attributes;
+          }
 
-            if (topic_sec_attr.is_write_protected &&
+          if (topic_sec_attr.is_write_protected &&
               !get_access_control()->check_remote_datawriter(remote_permissions, spdp_.get_domain_id(), pub_data_sec, ex))
             {
               ACE_ERROR((LM_WARNING,
-                ACE_TEXT("(%P|%t) WARNING: ")
-                ACE_TEXT("Sedp::process_discovered_writer_data - ")
-                ACE_TEXT("Unable to check remote datawriter '%C'. SecurityException[%d.%d]: %C\n"),
-                topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+                         ACE_TEXT("(%P|%t) WARNING: ")
+                         ACE_TEXT("Sedp::process_discovered_writer_data - ")
+                         ACE_TEXT("Unable to check remote datawriter '%C'. SecurityException[%d.%d]: %C\n"),
+                         topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
               return;
             }
-          } else if (auth_state != AUTH_STATE_UNAUTHENTICATED) {
-            ACE_ERROR((LM_WARNING,
-              ACE_TEXT("(%P|%t) WARNING: ")
-              ACE_TEXT("Sedp::process_discovered_writer_data - ")
-              ACE_TEXT("Unsupported remote participant authentication state for discovered datawriter '%C'. ")
-              ACE_TEXT("SecurityException[%d.%d]: %C\n"),
-              topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
-            return;
-          }
+        } else if (auth_state != AUTH_STATE_UNAUTHENTICATED) {
+          ACE_ERROR((LM_WARNING,
+                     ACE_TEXT("(%P|%t) WARNING: ")
+                     ACE_TEXT("Sedp::process_discovered_writer_data - ")
+                     ACE_TEXT("Unsupported remote participant authentication state for discovered datawriter '%C'. ")
+                     ACE_TEXT("SecurityException[%d.%d]: %C\n"),
+                     topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+          return;
         }
+      }
 #endif
 
-        DiscoveredPublication& pub = discovered_publications_[guid] = prepub;
+      DiscoveredPublication& pub = discovered_publications_[guid] = prepub;
 
-        // Create a topic if necessary.
-        TopicDetailsMap::iterator top_it = topics_.find(topic_name);
-        if (top_it == topics_.end()) {
-          top_it = topics_.insert(std::make_pair(topic_name, TopicDetails())).first;
-          DCPS::RepoId topic_id = make_topic_guid();
-          top_it->second.init(topic_name, topic_id);
-          topic_names_[topic_id] = topic_name;
-        }
+      // Create a topic if necessary.
+      TopicDetailsMap::iterator top_it = topics_.find(topic_name);
+      if (top_it == topics_.end()) {
+        top_it = topics_.insert(std::make_pair(topic_name, TopicDetails())).first;
+        DCPS::RepoId topic_id = make_topic_guid();
+        top_it->second.init(topic_name, topic_id);
+        topic_names_[topic_id] = topic_name;
+      }
 
-        TopicDetails& td = top_it->second;
+      TopicDetails& td = top_it->second;
 
-        // Upsert the remote topic.
-        td.add_discovered_publication(guid);
+      // Upsert the remote topic.
+      td.add_discovered_publication(guid);
 
-        assign_bit_key(pub);
-        wdata_copy = pub.writer_data_;
+      assign_bit_key(pub);
+      wdata_copy = pub.writer_data_;
 
 #ifndef DDS_HAS_MINIMUM_BIT
-        DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
-        if (bit) { // bit may be null if the DomainParticipant is shutting down
-          pub.bit_ih_ =
-            bit->store_synthetic_data(wdata_copy.ddsPublicationData,
-                                      DDS::NEW_VIEW_STATE);
-        }
-        if (spdp_.shutting_down()) { return; }
+      DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
+      if (bit) { // bit may be null if the DomainParticipant is shutting down
+        pub.bit_ih_ =
+          bit->store_synthetic_data(wdata_copy.ddsPublicationData,
+                                    DDS::NEW_VIEW_STATE);
+      }
+      if (spdp_.shutting_down()) { return; }
 #endif /* DDS_HAS_MINIMUM_BIT */
-      }
 
-      // TODO: Do we need to re-find?
-      TopicDetailsMap::iterator top_it = topics_.find(topic_name);
-      if (top_it != topics_.end()) {
-        if (DCPS::DCPS_debug_level > 3) {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::process_discovered_writer_data - ")
-                     ACE_TEXT("calling match_endpoints new\n")));
-        }
-        if (DCPS::transport_debug.log_progress) {
-          DCPS::log_progress("discovered writer data new", participant_id_, participant_id, spdp_.get_participant_discovered_at(participant_id), guid);
-        }
-        match_endpoints(guid, top_it->second);
+      if (DCPS::DCPS_debug_level > 3) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::process_discovered_writer_data - ")
+                   ACE_TEXT("calling match_endpoints new\n")));
       }
-
+      if (DCPS::transport_debug.log_progress) {
+        DCPS::log_progress("discovered writer data new", participant_id_, participant_id, spdp_.get_participant_discovered_at(participant_id), guid);
+      }
+      match_endpoints(guid, top_it->second);
     } else {
       if (checkAndAssignQos(iter->second.writer_data_.ddsPublicationData,
                             wdata.ddsPublicationData)) { // update existing
@@ -2432,146 +2425,139 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
 #endif
 
     if (iter == discovered_subscriptions_.end()) { // add new
-      { // Reduce scope of sub and td
-        DiscoveredSubscription presub(rdata);
-        presub.participant_discovered_at_ = spdp_.get_participant_discovered_at(participant_id);
-        presub.transport_context_ = spdp_.get_participant_flags(participant_id);
-        presub.type_info_ = type_info;
+      DiscoveredSubscription presub(rdata);
+      presub.participant_discovered_at_ = spdp_.get_participant_discovered_at(participant_id);
+      presub.transport_context_ = spdp_.get_participant_flags(participant_id);
+      presub.type_info_ = type_info;
 #ifdef OPENDDS_SECURITY
-        presub.have_ice_agent_info_ = have_ice_agent_info;
-        presub.ice_agent_info_ = ice_agent_info;
+      presub.have_ice_agent_info_ = have_ice_agent_info;
+      presub.ice_agent_info_ = ice_agent_info;
 #endif
 
-        topic_name = presub.get_topic_name();
+      topic_name = presub.get_topic_name();
 
 #ifdef OPENDDS_SECURITY
-        if (is_security_enabled()) {
+      if (is_security_enabled()) {
 
-          DDS::Security::SecurityException ex = {"", 0, 0};
+        DDS::Security::SecurityException ex = {"", 0, 0};
 
-          DDS::TopicBuiltinTopicData data;
-          data.key = rdata.ddsSubscriptionData.key;
-          data.name = rdata.ddsSubscriptionData.topic_name;
-          data.type_name = rdata.ddsSubscriptionData.type_name;
-          data.durability = rdata.ddsSubscriptionData.durability;
-          data.deadline = rdata.ddsSubscriptionData.deadline;
-          data.latency_budget = rdata.ddsSubscriptionData.latency_budget;
-          data.liveliness = rdata.ddsSubscriptionData.liveliness;
-          data.reliability = rdata.ddsSubscriptionData.reliability;
-          data.destination_order = rdata.ddsSubscriptionData.destination_order;
-          data.ownership = rdata.ddsSubscriptionData.ownership;
-          data.topic_data = rdata.ddsSubscriptionData.topic_data;
+        DDS::TopicBuiltinTopicData data;
+        data.key = rdata.ddsSubscriptionData.key;
+        data.name = rdata.ddsSubscriptionData.topic_name;
+        data.type_name = rdata.ddsSubscriptionData.type_name;
+        data.durability = rdata.ddsSubscriptionData.durability;
+        data.deadline = rdata.ddsSubscriptionData.deadline;
+        data.latency_budget = rdata.ddsSubscriptionData.latency_budget;
+        data.liveliness = rdata.ddsSubscriptionData.liveliness;
+        data.reliability = rdata.ddsSubscriptionData.reliability;
+        data.destination_order = rdata.ddsSubscriptionData.destination_order;
+        data.ownership = rdata.ddsSubscriptionData.ownership;
+        data.topic_data = rdata.ddsSubscriptionData.topic_data;
 
-          AuthState auth_state = spdp_.lookup_participant_auth_state(participant_id);
-          if (auth_state == AUTH_STATE_AUTHENTICATED) {
+        AuthState auth_state = spdp_.lookup_participant_auth_state(participant_id);
+        if (auth_state == AUTH_STATE_AUTHENTICATED) {
 
-            DDS::Security::PermissionsHandle remote_permissions = spdp_.lookup_participant_permissions(participant_id);
+          DDS::Security::PermissionsHandle remote_permissions = spdp_.lookup_participant_permissions(participant_id);
 
-            if (participant_sec_attr_.is_access_protected &&
-                !get_access_control()->check_remote_topic(remote_permissions, spdp_.get_domain_id(), data, ex))
+          if (participant_sec_attr_.is_access_protected &&
+              !get_access_control()->check_remote_topic(remote_permissions, spdp_.get_domain_id(), data, ex))
             {
               ACE_ERROR((LM_WARNING,
-                ACE_TEXT("(%P|%t) WARNING: ")
-                ACE_TEXT("Sedp::process_discovered_reader_data - ")
-                ACE_TEXT("Unable to check remote topic '%C'. SecurityException[%d.%d]: %C\n"),
-                topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+                         ACE_TEXT("(%P|%t) WARNING: ")
+                         ACE_TEXT("Sedp::process_discovered_reader_data - ")
+                         ACE_TEXT("Unable to check remote topic '%C'. SecurityException[%d.%d]: %C\n"),
+                         topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
               return;
             }
 
-            DDS::Security::TopicSecurityAttributes topic_sec_attr;
-            if (!get_access_control()->get_topic_sec_attributes(remote_permissions, topic_name.data(), topic_sec_attr, ex))
+          DDS::Security::TopicSecurityAttributes topic_sec_attr;
+          if (!get_access_control()->get_topic_sec_attributes(remote_permissions, topic_name.data(), topic_sec_attr, ex))
             {
               ACE_ERROR((LM_WARNING,
-                ACE_TEXT("(%P|%t) WARNING: ")
-                ACE_TEXT("Sedp::process_discovered_reader_data - ")
-                ACE_TEXT("Unable to get security attributes for remote topic '%C'. SecurityException[%d.%d]: %C\n"),
-                topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+                         ACE_TEXT("(%P|%t) WARNING: ")
+                         ACE_TEXT("Sedp::process_discovered_reader_data - ")
+                         ACE_TEXT("Unable to get security attributes for remote topic '%C'. SecurityException[%d.%d]: %C\n"),
+                         topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
               return;
             }
 
-            DDS::Security::SubscriptionBuiltinTopicDataSecure sub_data_sec;
-            sub_data_sec.base.base = rdata.ddsSubscriptionData;
+          DDS::Security::SubscriptionBuiltinTopicDataSecure sub_data_sec;
+          sub_data_sec.base.base = rdata.ddsSubscriptionData;
 
-            if (security_info != NULL) {
-              sub_data_sec.base.security_info.endpoint_security_attributes =
-                security_info->endpoint_security_attributes;
-              sub_data_sec.base.security_info.plugin_endpoint_security_attributes =
-                security_info->plugin_endpoint_security_attributes;
-            }
-
-            bool relay_only = false;
-            if (topic_sec_attr.is_read_protected &&
-                !get_access_control()->check_remote_datareader(
-                  remote_permissions, spdp_.get_domain_id(), sub_data_sec, relay_only, ex))
-            {
-              ACE_ERROR((LM_WARNING,
-                ACE_TEXT("(%P|%t) WARNING: ")
-                ACE_TEXT("Sedp::process_discovered_reader_data - ")
-                ACE_TEXT("Unable to check remote datareader '%C'. SecurityException[%d.%d]: %C\n"),
-                topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
-              return;
-            }
-
-            if (relay_only) {
-              relay_only_readers_.insert(guid);
-            } else {
-              relay_only_readers_.erase(guid);
-            }
-          } else if (auth_state != AUTH_STATE_UNAUTHENTICATED) {
-            ACE_ERROR((LM_WARNING,
-              ACE_TEXT("(%P|%t) WARNING: ")
-              ACE_TEXT("Sedp::process_discovered_reader_data - ")
-              ACE_TEXT("Unsupported remote participant authentication state for discovered datareader '%C'. ")
-              ACE_TEXT("SecurityException[%d.%d]: %C\n"),
-              topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
-            return;
+          if (security_info != NULL) {
+            sub_data_sec.base.security_info.endpoint_security_attributes =
+              security_info->endpoint_security_attributes;
+            sub_data_sec.base.security_info.plugin_endpoint_security_attributes =
+              security_info->plugin_endpoint_security_attributes;
           }
+
+          bool relay_only = false;
+          if (topic_sec_attr.is_read_protected &&
+              !get_access_control()->check_remote_datareader(
+                                                             remote_permissions, spdp_.get_domain_id(), sub_data_sec, relay_only, ex))
+            {
+              ACE_ERROR((LM_WARNING,
+                         ACE_TEXT("(%P|%t) WARNING: ")
+                         ACE_TEXT("Sedp::process_discovered_reader_data - ")
+                         ACE_TEXT("Unable to check remote datareader '%C'. SecurityException[%d.%d]: %C\n"),
+                         topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+              return;
+            }
+
+          if (relay_only) {
+            relay_only_readers_.insert(guid);
+          } else {
+            relay_only_readers_.erase(guid);
+          }
+        } else if (auth_state != AUTH_STATE_UNAUTHENTICATED) {
+          ACE_ERROR((LM_WARNING,
+                     ACE_TEXT("(%P|%t) WARNING: ")
+                     ACE_TEXT("Sedp::process_discovered_reader_data - ")
+                     ACE_TEXT("Unsupported remote participant authentication state for discovered datareader '%C'. ")
+                     ACE_TEXT("SecurityException[%d.%d]: %C\n"),
+                     topic_name.data(), ex.code, ex.minor_code, ex.message.in()));
+          return;
         }
+      }
 #endif
 
-        DiscoveredSubscription& sub = discovered_subscriptions_[guid] = presub;
+      DiscoveredSubscription& sub = discovered_subscriptions_[guid] = presub;
 
-        // Create a topic if necessary.
-        TopicDetailsMap::iterator top_it = topics_.find(topic_name);
-        if (top_it == topics_.end()) {
-          top_it = topics_.insert(std::make_pair(topic_name, TopicDetails())).first;
-          DCPS::RepoId topic_id = make_topic_guid();
-          top_it->second.init(topic_name, topic_id);
-          topic_names_[topic_id] = topic_name;
-        }
+      // Create a topic if necessary.
+      TopicDetailsMap::iterator top_it = topics_.find(topic_name);
+      if (top_it == topics_.end()) {
+        top_it = topics_.insert(std::make_pair(topic_name, TopicDetails())).first;
+        DCPS::RepoId topic_id = make_topic_guid();
+        top_it->second.init(topic_name, topic_id);
+        topic_names_[topic_id] = topic_name;
+      }
 
-        TopicDetails& td = top_it->second;
+      TopicDetails& td = top_it->second;
 
-        // Upsert the remote topic.
-        td.add_discovered_subscription(guid);
+      // Upsert the remote topic.
+      td.add_discovered_subscription(guid);
 
-        assign_bit_key(sub);
-        rdata_copy = sub.reader_data_;
+      assign_bit_key(sub);
+      rdata_copy = sub.reader_data_;
 
 #ifndef DDS_HAS_MINIMUM_BIT
-        DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
-        if (bit) { // bit may be null if the DomainParticipant is shutting down
-          sub.bit_ih_ =
-            bit->store_synthetic_data(rdata_copy.ddsSubscriptionData,
-                                      DDS::NEW_VIEW_STATE);
-        }
-        if (spdp_.shutting_down()) { return; }
+      DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
+      if (bit) { // bit may be null if the DomainParticipant is shutting down
+        sub.bit_ih_ =
+          bit->store_synthetic_data(rdata_copy.ddsSubscriptionData,
+                                    DDS::NEW_VIEW_STATE);
+      }
+      if (spdp_.shutting_down()) { return; }
 #endif /* DDS_HAS_MINIMUM_BIT */
-      }
 
-      // TODO: Do we need to re-find?
-      TopicDetailsMap::iterator top_it = topics_.find(topic_name);
-      if (top_it != topics_.end()) {
-        if (DCPS::DCPS_debug_level > 3) {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::process_discovered_reader_data - ")
-                     ACE_TEXT("calling match_endpoints new\n")));
-        }
-        if (DCPS::transport_debug.log_progress) {
-          DCPS::log_progress("discovered reader data new", participant_id_, participant_id, spdp_.get_participant_discovered_at(participant_id), guid);
-        }
-        match_endpoints(guid, top_it->second);
+      if (DCPS::DCPS_debug_level > 3) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::process_discovered_reader_data - ")
+                   ACE_TEXT("calling match_endpoints new\n")));
       }
-
+      if (DCPS::transport_debug.log_progress) {
+        DCPS::log_progress("discovered reader data new", participant_id_, participant_id, spdp_.get_participant_discovered_at(participant_id), guid);
+      }
+      match_endpoints(guid, top_it->second);
     } else { // update existing
       if (checkAndAssignQos(iter->second.reader_data_.ddsSubscriptionData,
                             rdata.ddsSubscriptionData)) {

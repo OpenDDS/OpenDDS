@@ -928,8 +928,8 @@ protected:
   typedef OPENDDS_SET(Encoding::Kind) EncodingKinds;
   EncodingKinds decoding_modes_;
 
- public:
-    class OnDataOnReaders : public JobQueue::Job {
+public:
+  class OnDataOnReaders : public JobQueue::Job {
   public:
     OnDataOnReaders(WeakRcHandle<SubscriberImpl> subscriber,
                     DDS::SubscriberListener_var sub_listener,

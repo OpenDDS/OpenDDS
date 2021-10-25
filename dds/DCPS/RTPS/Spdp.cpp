@@ -378,31 +378,23 @@ Spdp::shutdown()
     }
 #endif
 
-    // Iterate through a copy of the repo Ids, rather than the map
-    //   as it gets unlocked in remove_discovered_participant()
-    // TODO: This is not true anymore.
-    DCPS::RepoIdSet participant_ids;
-    get_discovered_participant_ids(participant_ids);
-    for (DCPS::RepoIdSet::iterator participant_id = participant_ids.begin();
-         participant_id != participant_ids.end();
-         ++participant_id)
+    for (DiscoveredParticipantIter part = participants_.begin();
+         part != participants_.end();
+         /* Update in loop*/)
     {
-      DiscoveredParticipantIter part = participants_.find(*participant_id);
-      if (part != participants_.end()) {
 #ifdef OPENDDS_SECURITY
-        ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
-        if (sedp_endpoint) {
-          stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints,
-                   part->second.pdata_.participantProxy.availableExtendedBuiltinEndpoints);
-        }
-        ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
-        if (spdp_endpoint) {
-          ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, part->first);
-        }
-        purge_handshake_deadlines(part);
-#endif
-        remove_discovered_participant(part);
+      ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
+      if (sedp_endpoint) {
+        stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints,
+                 part->second.pdata_.participantProxy.availableExtendedBuiltinEndpoints);
       }
+      ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
+      if (spdp_endpoint) {
+        ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, part->first);
+      }
+      purge_handshake_deadlines(part);
+#endif
+      remove_discovered_participant(part++);
     }
   }
 
@@ -1071,7 +1063,7 @@ Spdp::match_unauthenticated(const DiscoveredParticipantIter& dp_iter)
 
   process_location_updates_i(dp_iter);
 #else
-  ACE_UNUSED_ARG(guid);
+  ACE_UNUSED_ARG(dp_iter);
 #endif /* DDS_HAS_MINIMUM_BIT */
 }
 
@@ -2057,7 +2049,7 @@ void Spdp::remove_agent_info(const DCPS::RepoId&)
 #endif
 
 void
-Spdp::remove_discovered_participant_i(DiscoveredParticipantIter& iter)
+Spdp::remove_discovered_participant_i(const DiscoveredParticipantIter& iter)
 {
 
   remove_lease_expiration_i(iter);
@@ -3745,16 +3737,6 @@ ACE_CDR::ULong Spdp::get_participant_flags(const DCPS::RepoId& guid) const
 }
 
 void
-Spdp::get_discovered_participant_ids(DCPS::RepoIdSet& results) const
-{
-  DiscoveredParticipantMap::const_iterator idx;
-  for (idx = participants_.begin(); idx != participants_.end(); ++idx)
-  {
-    results.insert(idx->first);
-  }
-}
-
-void
 Spdp::remove_lease_expiration_i(DiscoveredParticipantIter iter)
 {
   for (std::pair<TimeQueue::iterator, TimeQueue::iterator> x = lease_expirations_.equal_range(iter->second.lease_expiration_);
@@ -4558,16 +4540,11 @@ Spdp::rtps_relay_only_now(bool flag)
       DCPS::LOCATION_ICE |
       DCPS::LOCATION_ICE6;
 
-    DCPS::RepoIdSet participant_ids;
-    get_discovered_participant_ids(participant_ids);
-    for (DCPS::RepoIdSet::iterator participant_id = participant_ids.begin();
-         participant_id != participant_ids.end();
-         ++participant_id) {
-      DiscoveredParticipantIter iter = participants_.find(*participant_id);
-      if (iter != participants_.end()) {
-        enqueue_location_update_i(iter, mask, ACE_INET_Addr());
-        process_location_updates_i(iter);
-      }
+    for (DiscoveredParticipantIter iter = participants_.begin();
+         iter != participants_.end();
+         ++iter) {
+      enqueue_location_update_i(iter, mask, ACE_INET_Addr());
+      process_location_updates_i(iter);
     }
 #endif
   } else {
@@ -4613,16 +4590,11 @@ Spdp::use_rtps_relay_now(bool f)
       DCPS::LOCATION_RELAY |
       DCPS::LOCATION_RELAY6;
 
-    DCPS::RepoIdSet participant_ids;
-    get_discovered_participant_ids(participant_ids);
-    for (DCPS::RepoIdSet::iterator participant_id = participant_ids.begin();
-         participant_id != participant_ids.end();
-         ++participant_id) {
-      DiscoveredParticipantIter iter = participants_.find(*participant_id);
-      if (iter != participants_.end()) {
-        enqueue_location_update_i(iter, mask, ACE_INET_Addr());
-        process_location_updates_i(iter);
-      }
+    for (DiscoveredParticipantIter iter = participants_.begin();
+         iter != participants_.end();
+         ++iter) {
+      enqueue_location_update_i(iter, mask, ACE_INET_Addr());
+      process_location_updates_i(iter);
     }
 #endif
 
@@ -4673,16 +4645,11 @@ Spdp::use_ice_now(bool flag)
       DCPS::LOCATION_ICE |
       DCPS::LOCATION_ICE6;
 
-    DCPS::RepoIdSet participant_ids;
-    get_discovered_participant_ids(participant_ids);
-    for (DCPS::RepoIdSet::iterator participant_id = participant_ids.begin();
-         participant_id != participant_ids.end();
-         ++participant_id) {
-      DiscoveredParticipantIter iter = participants_.find(*participant_id);
-      if (iter != participants_.end()) {
-        enqueue_location_update_i(iter, mask, ACE_INET_Addr());
-        process_location_updates_i(iter);
-      }
+    for (DiscoveredParticipantIter part = participants_.begin();
+         part != participants_.end();
+         ++part) {
+      enqueue_location_update_i(part, mask, ACE_INET_Addr());
+      process_location_updates_i(part);
     }
 #endif
   }
@@ -4761,7 +4728,7 @@ DCPS::TopicStatus Spdp::assert_topic(GUID_t& topicId, const char* topicName,
   return endpoint_manager().assert_topic(topicId, topicName, dataTypeName, qos, hasDcpsKey, topic_callbacks);
 }
 
-void Spdp::remove_discovered_participant(DiscoveredParticipantIter& iter)
+void Spdp::remove_discovered_participant(const DiscoveredParticipantIter& iter)
 {
   if (iter == participants_.end()) {
     return;
@@ -4789,7 +4756,7 @@ void Spdp::remove_discovered_participant(DiscoveredParticipantIter& iter)
       }
     }
 #endif /* DDS_HAS_MINIMUM_BIT */
-    if (true || DCPS_debug_level > 3) {
+    if (DCPS_debug_level > 3) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) LocalParticipant::remove_discovered_participant: "
         "erasing %C (%B)\n",
         LogGuid(iter->first).c_str(), participants_.size()));
