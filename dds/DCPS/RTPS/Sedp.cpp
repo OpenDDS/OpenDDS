@@ -44,9 +44,6 @@
 #  include <dds/DdsSecurityCoreTypeSupportImpl.h>
 #endif
 
-#include <ace/Reverse_Lock_T.h>
-#include <ace/Auto_Ptr.h>
-
 #include <cstring>
 
 namespace {
@@ -1817,9 +1814,6 @@ void
 Sedp::remove_from_bit_i(const DiscoveredPublication& pub)
 {
 #ifndef DDS_HAS_MINIMUM_BIT
-  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
-  ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
-
   DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
   // bit may be null if the DomainParticipant is shutting down
   if (bit && pub.bit_ih_ != DDS::HANDLE_NIL) {
@@ -1835,9 +1829,6 @@ void
 Sedp::remove_from_bit_i(const DiscoveredSubscription& sub)
 {
 #ifndef DDS_HAS_MINIMUM_BIT
-  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
-  ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
-
   DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
   // bit may be null if the DomainParticipant is shutting down
   if (bit && sub.bit_ih_ != DDS::HANDLE_NIL) {
@@ -2129,9 +2120,6 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
 #endif
 
     if (iter == discovered_publications_.end()) { // add new
-      // Must unlock when calling into pub_bit() as it may call back into us
-      ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
-
       { // Reduce scope of pub and td
         DiscoveredPublication prepub(wdata);
         prepub.participant_discovered_at_ = spdp_.get_participant_discovered_at(participant_id);
@@ -2241,41 +2229,29 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
 
         assign_bit_key(pub);
         wdata_copy = pub.writer_data_;
-      }
 
-      // Iter no longer valid once lock released
-      iter = discovered_publications_.end();
-
-      DDS::InstanceHandle_t instance_handle = DDS::HANDLE_NIL;
 #ifndef DDS_HAS_MINIMUM_BIT
-      {
-        // Release lock for call into pub_bit
         DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
         if (bit) { // bit may be null if the DomainParticipant is shutting down
-          ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
-          instance_handle =
+          pub.bit_ih_ =
             bit->store_synthetic_data(wdata_copy.ddsPublicationData,
                                       DDS::NEW_VIEW_STATE);
         }
-      }
-      if (spdp_.shutting_down()) { return; }
+        if (spdp_.shutting_down()) { return; }
 #endif /* DDS_HAS_MINIMUM_BIT */
+      }
 
-      // Publication may have been removed while lock released
-      iter = discovered_publications_.find(guid);
-      if (iter != discovered_publications_.end()) {
-        iter->second.bit_ih_ = instance_handle;
-        TopicDetailsMap::iterator top_it = topics_.find(topic_name);
-        if (top_it != topics_.end()) {
-          if (DCPS::DCPS_debug_level > 3) {
-            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::process_discovered_writer_data - ")
-                                 ACE_TEXT("calling match_endpoints new\n")));
-          }
-          if (DCPS::transport_debug.log_progress) {
-            DCPS::log_progress("discovered writer data new", participant_id_, participant_id, spdp_.get_participant_discovered_at(participant_id), guid);
-          }
-          match_endpoints(guid, top_it->second);
+      // TODO: Do we need to re-find?
+      TopicDetailsMap::iterator top_it = topics_.find(topic_name);
+      if (top_it != topics_.end()) {
+        if (DCPS::DCPS_debug_level > 3) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::process_discovered_writer_data - ")
+                     ACE_TEXT("calling match_endpoints new\n")));
         }
+        if (DCPS::transport_debug.log_progress) {
+          DCPS::log_progress("discovered writer data new", participant_id_, participant_id, spdp_.get_participant_discovered_at(participant_id), guid);
+        }
+        match_endpoints(guid, top_it->second);
       }
 
     } else {
@@ -2286,8 +2262,6 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
         DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
         if (bit) { // bit may be null if the DomainParticipant is shutting down
           wdata_copy = iter->second.writer_data_;
-          ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
-          ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
           bit->store_synthetic_data(wdata_copy.ddsPublicationData,
                                     DDS::NOT_NEW_VIEW_STATE);
         }
@@ -2436,9 +2410,6 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
   // Find the subscripion - iterator valid only as long as we hold the lock
   DiscoveredSubscriptionIter iter = discovered_subscriptions_.find(guid);
 
-  // Must unlock when calling into sub_bit() as it may call back into us
-  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
-
   if (message_id == DCPS::SAMPLE_DATA) {
     DCPS::DiscoveredReaderData rdata_copy;
 
@@ -2576,41 +2547,29 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
 
         assign_bit_key(sub);
         rdata_copy = sub.reader_data_;
-      }
 
-      // Iter no longer valid once lock released
-      iter = discovered_subscriptions_.end();
-
-      DDS::InstanceHandle_t instance_handle = DDS::HANDLE_NIL;
 #ifndef DDS_HAS_MINIMUM_BIT
-      {
-        // Release lock for call into sub_bit
         DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
         if (bit) { // bit may be null if the DomainParticipant is shutting down
-          ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
-          instance_handle =
+          sub.bit_ih_ =
             bit->store_synthetic_data(rdata_copy.ddsSubscriptionData,
                                       DDS::NEW_VIEW_STATE);
         }
-      }
-      if (spdp_.shutting_down()) { return; }
+        if (spdp_.shutting_down()) { return; }
 #endif /* DDS_HAS_MINIMUM_BIT */
+      }
 
-      // Subscription may have been removed while lock released
-      iter = discovered_subscriptions_.find(guid);
-      if (iter != discovered_subscriptions_.end()) {
-        iter->second.bit_ih_ = instance_handle;
-        TopicDetailsMap::iterator top_it = topics_.find(topic_name);
-        if (top_it != topics_.end()) {
-          if (DCPS::DCPS_debug_level > 3) {
-            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::process_discovered_reader_data - ")
-                                 ACE_TEXT("calling match_endpoints new\n")));
-          }
-          if (DCPS::transport_debug.log_progress) {
-            DCPS::log_progress("discovered reader data new", participant_id_, participant_id, spdp_.get_participant_discovered_at(participant_id), guid);
-          }
-          match_endpoints(guid, top_it->second);
+      // TODO: Do we need to re-find?
+      TopicDetailsMap::iterator top_it = topics_.find(topic_name);
+      if (top_it != topics_.end()) {
+        if (DCPS::DCPS_debug_level > 3) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::process_discovered_reader_data - ")
+                     ACE_TEXT("calling match_endpoints new\n")));
         }
+        if (DCPS::transport_debug.log_progress) {
+          DCPS::log_progress("discovered reader data new", participant_id_, participant_id, spdp_.get_participant_discovered_at(participant_id), guid);
+        }
+        match_endpoints(guid, top_it->second);
       }
 
     } else { // update existing
@@ -2620,8 +2579,6 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
         DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
         if (bit) { // bit may be null if the DomainParticipant is shutting down
           rdata_copy = iter->second.reader_data_;
-          ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
-          ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
           bit->store_synthetic_data(rdata_copy.ddsSubscriptionData,
                                     DDS::NOT_NEW_VIEW_STATE);
         }
@@ -7188,11 +7145,6 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
     }
   }
 
-  // Need to release lock, below, for callbacks into DCPS which could
-  // call into Spdp/Sedp.  Note that this doesn't unlock, it just constructs
-  // an ACE object which will be used below for unlocking.
-  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
-
   // 4. Check transport and QoS compatibility
 
   // Copy entries from local publication and local subscription maps
@@ -7321,7 +7273,6 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
       cleanup_reader_association(drr, reader, writer);
     }
   } else { // something was incompatible
-    ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
     if (writer_local && writerStatus.count_since_last_send) {
       if (DCPS_debug_level > 3) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) EndpointManager::match - ")

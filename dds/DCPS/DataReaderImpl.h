@@ -927,6 +927,58 @@ private:
 protected:
   typedef OPENDDS_SET(Encoding::Kind) EncodingKinds;
   EncodingKinds decoding_modes_;
+
+ public:
+    class OnDataOnReaders : public JobQueue::Job {
+  public:
+    OnDataOnReaders(WeakRcHandle<SubscriberImpl> subscriber,
+                    DDS::SubscriberListener_var sub_listener,
+                    WeakRcHandle<DataReaderImpl> data_reader,
+                    bool call,
+                    bool set_reader_status)
+      : subscriber_(subscriber)
+      , sub_listener_(sub_listener)
+      , data_reader_(data_reader)
+      , call_(call)
+      , set_reader_status_(set_reader_status)
+    {}
+
+  private:
+    virtual void execute();
+
+    WeakRcHandle<SubscriberImpl> subscriber_;
+    DDS::SubscriberListener_var sub_listener_;
+    WeakRcHandle<DataReaderImpl> data_reader_;
+    const bool call_;
+    const bool set_reader_status_;
+  };
+
+  class OnDataAvailable : public JobQueue::Job {
+  public:
+    OnDataAvailable(WeakRcHandle<SubscriberImpl> subscriber,
+                    DDS::DataReaderListener_var listener,
+                    WeakRcHandle<DataReaderImpl> data_reader,
+                    bool call,
+                    bool set_reader_status,
+                    bool set_subscriber_status)
+      : subscriber_(subscriber)
+      , listener_(listener)
+      , data_reader_(data_reader)
+      , call_(call)
+      , set_reader_status_(set_reader_status)
+      , set_subscriber_status_(set_subscriber_status)
+    {}
+
+  private:
+    virtual void execute();
+
+    WeakRcHandle<SubscriberImpl> subscriber_;
+    DDS::DataReaderListener_var listener_;
+    WeakRcHandle<DataReaderImpl> data_reader_;
+    const bool call_;
+    const bool set_reader_status_;
+    const bool set_subscriber_status_;
+  };
 };
 
 typedef RcHandle<DataReaderImpl> DataReaderImpl_rch;

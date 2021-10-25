@@ -261,6 +261,12 @@ Service_Participant::interceptor() const
   return reactor_task_.interceptor();
 }
 
+JobQueue_rch
+Service_Participant::job_queue() const
+{
+  return job_queue_;
+}
+
 void
 Service_Participant::shutdown()
 {
@@ -454,6 +460,8 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
       reactor_task_.open_reactor_task(
         0, thread_status_interval_, &thread_status_manager_, "Service_Participant");
+
+      job_queue_ = make_rch<JobQueue>(reactor_task_.get_reactor());
 
       if (this->monitor_enabled_) {
 #if !defined(ACE_AS_STATIC_LIBS)
