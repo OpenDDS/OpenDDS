@@ -150,7 +150,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       return EXIT_FAILURE;
     }
 
-    InternalThreadStatusListenerImpl* listener = new InternalThreadStatusListenerImpl("Publisher");
+    DistributedConditionSet_rch dcs = OpenDDS::DCPS::make_rch<InMemoryDistributedConditionSet>();
+    InternalThreadStatusListenerImpl* listener = new InternalThreadStatusListenerImpl("Publisher", dcs);
     DDS::DataReaderListener_var listener_var(listener);
 
     const DDS::ReturnCode_t retcode =
@@ -224,7 +225,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     InternalThreadStatusListenerImpl* listener2 =
-      new InternalThreadStatusListenerImpl("Publisher part2");
+      new InternalThreadStatusListenerImpl("Publisher part2", dcs);
     DDS::DataReaderListener_var listener2_var(listener2);
     if (thread_reader2->set_listener(listener2, OpenDDS::DCPS::DEFAULT_STATUS_MASK) != DDS::RETCODE_OK) {
       std::cerr << "ERROR: set_listener for " << OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC
@@ -248,15 +249,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     std::cerr << "publisher deleting participant" << std::endl;
     dpf->delete_participant(participant.in());
 
+
+
     // Wait for disposes to come in to 2nd thread reader
     if (!wait_for_samples(thread_reader2, true)) {
       ACE_ERROR((LM_ERROR, "ERROR: wait for part2 thread status disposes failed\n"));
       status = EXIT_FAILURE;
     }
-    if (listener2->disposes() == 0) {
-      ACE_ERROR((LM_ERROR, "ERROR: 2nd thread listener has no disposes after 1st participant delete\n"));
-      return EXIT_FAILURE;
-    }
+
+    dcs->wait_for("DRIVER", listener2->id(), DISPOSE_RECEIVED);
 
     // Finish cleaning up
     dpf->delete_participant(part2);

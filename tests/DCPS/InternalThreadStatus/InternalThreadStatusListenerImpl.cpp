@@ -14,9 +14,10 @@
 #include <ace/streams.h>
 
 // Implementation skeleton constructor
-InternalThreadStatusListenerImpl::InternalThreadStatusListenerImpl(
-  const OpenDDS::DCPS::String& id)
+InternalThreadStatusListenerImpl::InternalThreadStatusListenerImpl(const OpenDDS::DCPS::String& id,
+                                                                   DistributedConditionSet_rch dcs)
 : id_(id)
+, dcs_(dcs)
 , count_(0)
 , disposes_(0)
 {
@@ -54,6 +55,7 @@ void InternalThreadStatusListenerImpl::on_data_available(DDS::DataReader_ptr rea
     } else if (si.instance_state & DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
       std::cout << " DISPOSE" << std::endl;
       ++disposes_;
+      dcs_->post(id_, DISPOSE_RECEIVED);
     }
 
     std::cout
