@@ -3625,7 +3625,7 @@ void DataReaderImpl::OnDataAvailable::execute()
     return;
   }
 
-  if (call_) {
+  if (call_ && (data_reader->get_status_changes() & ::DDS::DATA_AVAILABLE_STATUS)) {
     listener_->on_data_available(data_reader.in());
   }
 
