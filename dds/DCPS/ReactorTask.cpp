@@ -174,9 +174,11 @@ int ReactorTask::svc()
     ACE_ERROR((LM_ERROR,
                "(%P|%t) ERROR: ReactorTask::svc caught exception - %C.\n",
                e.what()));
+    throw;
   } catch (...) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) ERROR: ReactorTask::svc caught exception.\n"));
+    throw;
   }
 
   if (update_thread_status) {

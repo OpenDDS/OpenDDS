@@ -2363,8 +2363,7 @@ void DataReaderImpl::dispose_unregister(const ReceivedDataSample&,
 
 void DataReaderImpl::process_latency(const ReceivedDataSample& sample)
 {
-  StatsMapType::iterator location
-  = this->statistics_.find(sample.header_.publication_id_);
+  StatsMapType::iterator location = this->statistics_.find(sample.header_.publication_id_);
 
   if (location != this->statistics_.end()) {
     const DDS::Duration_t zero = { DDS::DURATION_ZERO_SEC, DDS::DURATION_ZERO_NSEC };
@@ -2386,9 +2385,8 @@ void DataReaderImpl::process_latency(const ReceivedDataSample& sample)
       if (DCPS_debug_level > 9) {
         ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) DataReaderImpl::process_latency() - ")
-            ACE_TEXT("measured latency of %dS, %dmS for current sample.\n"),
-            latency.value().sec(),
-            latency.value().msec()));
+            ACE_TEXT("measured latency of %C for current sample.\n"),
+            latency.str().c_str()));
       }
 
       if (this->qos_.latency_budget.duration > zero) {

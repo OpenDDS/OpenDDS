@@ -8,7 +8,7 @@
 #include "ace/OS_NS_unistd.h"
 
 #include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/MultiTask.h"
+#include "dds/DCPS/SporadicTask.h"
 #include "dds/DCPS/ReactorTask.h"
 
 #include "../../../DCPS/common/TestSupport.h"
@@ -19,19 +19,19 @@ ACE_Atomic_Op<ACE_Thread_Mutex, unsigned int> total_count = 0;
 
 struct TestObj : RcObject
 {
-  TestObj() : multi_(0), do_enable_(false) {}
+  TestObj() : sporadic_(0), do_enable_(false) {}
 
   void execute(const MonotonicTimePoint&) {
     ACE_DEBUG((LM_DEBUG, "TestObj::execute() called at %T\n"));
     ++total_count;
     if (do_enable_.value()) {
-      multi_->enable(TimeDuration::from_msec(100));
+      sporadic_->schedule(TimeDuration::from_msec(100));
     }
   }
 
   void set_do_enable(bool do_enable) { do_enable_ = do_enable; }
 
-  PmfMultiTask<TestObj>* multi_;
+  PmfSporadicTask<TestObj>* sporadic_;
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> do_enable_;
 };
 
@@ -43,20 +43,20 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   reactor_task.open(0);
   TestObj obj;
   {
-    PmfMultiTask<TestObj> multi(reactor_task.interceptor(), TimeDuration::from_msec(2000), obj, &TestObj::execute);
-    obj.multi_ = &multi;
-    multi.enable(TimeDuration::from_msec(2000));
+    PmfSporadicTask<TestObj> sporadic(reactor_task.interceptor(), obj, &TestObj::execute);
+    obj.sporadic_ = &sporadic;
+    sporadic.schedule(TimeDuration::from_msec(2000));
     ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
     TEST_CHECK(total_count == 0);
     ACE_OS::sleep(5);
     ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
-    TEST_CHECK(total_count == 2);
+    TEST_CHECK(total_count == 1);
     obj.set_do_enable(true);
     const MonotonicTimePoint deadline = MonotonicTimePoint::now() + TimeDuration::from_msec(2000);
     size_t enable_calls = 0;
     while (MonotonicTimePoint::now() < deadline) {
       ++enable_calls;
-      multi.enable(TimeDuration::from_msec(100));
+      sporadic.schedule(TimeDuration::from_msec(100));
       ACE_OS::sleep(ACE_Time_Value(0, 1000));
     }
     obj.set_do_enable(false);
@@ -67,8 +67,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     const unsigned int prev_total_count = total_count.value();
     ACE_OS::sleep(5);
     ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
-    TEST_CHECK(total_count == prev_total_count + 3);
-    multi.disable_and_wait();
+    TEST_CHECK(total_count == prev_total_count + 1);
+    sporadic.cancel_and_wait();
   }
   reactor_task.stop();
   return 0;

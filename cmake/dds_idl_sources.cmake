@@ -34,15 +34,15 @@ function(opendds_target_generated_dependencies target idl_file scope)
       PROPERTIES
         HEADER_FILE_ONLY ON)
 
-    set_source_files_properties(${cpp_files}
+    set_source_files_properties(${cpp_files} ${hdr_files}
       PROPERTIES
         SKIP_AUTOGEN ON)
 
     source_group("Generated Files" FILES ${all_gen_files})
     source_group("IDL Files" FILES ${idl_file})
+  else()
+    add_dependencies(${target} ${bridge_target})
   endif()
-
-  add_dependencies(${target} ${bridge_target})
 
   target_sources(${target} ${scope} ${all_idl_files} ${hdr_files})
   target_sources(${target} PRIVATE ${cpp_files})

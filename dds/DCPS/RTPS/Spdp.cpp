@@ -125,11 +125,6 @@ namespace {
     attr.ac_endpoint_properties.length(0);
   }
 
-  inline bool has_security_data(Security::DiscoveredParticipantDataKind kind)
-  {
-    return kind == Security::DPDK_ENHANCED || kind == Security::DPDK_SECURE;
-  }
-
 #endif
 
   inline bool prop_to_bool(const DDS::Property_t& prop)
@@ -709,8 +704,6 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
   // Make a (non-const) copy so we can tweak values below
   ParticipantData_t pdata(cpdata);
-  pdata.associated_endpoints =
-    DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR | DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER;
 
   const GUID_t guid = DCPS::make_part_guid(pdata.participantProxy.guidPrefix);
 
@@ -745,33 +738,39 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
     partBitData(pdata).key = repo_id_to_bit_key(guid);
 
+    TimeDuration effective_lease(pdata.leaseDuration.seconds);
+
     if (DCPS::DCPS_debug_level) {
       ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) Spdp::handle_participant_data - %C discovered %C lease %ds from %C (%B)\n"),
+        ACE_TEXT("(%P|%t) Spdp::handle_participant_data - %C discovered %C lease %C from %C (%B)\n"),
         DCPS::LogGuid(guid_).c_str(), DCPS::LogGuid(guid).c_str(),
-        pdata.leaseDuration.seconds, DCPS::LogAddr(from).c_str(), participants_.size()));
+        effective_lease.str(0).c_str(), DCPS::LogAddr(from).c_str(),
+        participants_.size()));
     }
 
     if (!from_sedp) {
 #ifdef OPENDDS_SECURITY
       if (is_security_enabled()) {
-        pdata.leaseDuration.seconds = config_->security_unsecure_lease_duration().to_dds_duration().sec;
+        effective_lease = config_->security_unsecure_lease_duration();
       } else {
 #endif
-        ::CORBA::Long maxLeaseDuration = config_->max_lease_duration().to_dds_duration().sec;
-        if (maxLeaseDuration && pdata.leaseDuration.seconds > maxLeaseDuration) {
+        const TimeDuration maxLeaseDuration = config_->max_lease_duration();
+        if (maxLeaseDuration && effective_lease > maxLeaseDuration) {
           if (DCPS::DCPS_debug_level >= 2) {
             ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) Spdp::handle_participant_data - overwriting %C lease %ds from %C with %ds\n"),
-              DCPS::LogGuid(guid).c_str(),
-              pdata.leaseDuration.seconds, DCPS::LogAddr(from).c_str(), maxLeaseDuration));
+              ACE_TEXT("(%P|%t) Spdp::handle_participant_data - overwriting %C lease %C from %C with %C\n"),
+              DCPS::LogGuid(guid).c_str(), effective_lease.str(0).c_str(),
+              DCPS::LogAddr(from).c_str(), maxLeaseDuration.str(0).c_str()));
           }
-          pdata.leaseDuration.seconds = maxLeaseDuration;
+          effective_lease = maxLeaseDuration;
         }
 #ifdef OPENDDS_SECURITY
       }
 #endif
     }
+
+    pdata.leaseDuration.seconds = static_cast<ACE_CDR::Long>(effective_lease.value().sec());
+
     if (tport_->directed_sender_) {
       if (tport_->directed_guids_.empty()) {
         tport_->directed_sender_->schedule(TimeDuration::zero_value);
@@ -780,11 +779,13 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     }
 
     // add a new participant
+    std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq,
 #ifdef OPENDDS_SECURITY
-    std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq, config_->auth_resend_period())));
+      config_->auth_resend_period()
 #else
-    std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq, TimeDuration())));
+      TimeDuration()
 #endif
+    )));
     iter = p.first;
     iter->second.discovered_at_ = now;
     update_lease_expiration_i(iter, now);
@@ -808,12 +809,11 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     }
 #endif
 
+    sedp_->associate(iter->second
 #ifdef OPENDDS_SECURITY
-    if (is_security_enabled()) {
-      // Associate the stateless reader / writer for handshakes & auth requests
-      sedp_->associate_preauth(iter->second.pdata_);
-    }
+                     , participant_sec_attr_
 #endif
+                     );
 
     // Since we've just seen a new participant, let's send out our
     // own announcement, so they don't have to wait.
@@ -834,6 +834,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
               ACE_TEXT("Incompatible security attributes in discovered participant: %C\n"),
               OPENDDS_STRING(DCPS::GuidConverter(guid)).c_str()));
           }
+          // FUTURE: This is probably not a good idea since it will just get rediscovered.
           participants_.erase(guid);
         } else { // allow_unauthenticated_participants == true
           iter->second.auth_state_ = AUTH_STATE_UNAUTHENTICATED;
@@ -966,10 +967,6 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         if (locators_changed(iter->second.pdata_.participantProxy, pdata.participantProxy)) {
           sedp_->update_locators(pdata);
         }
-        pdata.associated_endpoints = iter->second.pdata_.associated_endpoints;
-#ifdef OPENDDS_SECURITY
-        pdata.extended_associated_endpoints = iter->second.pdata_.extended_associated_endpoints;
-#endif
         const DCPS::MonotonicTime_t da = iter->second.pdata_.discoveredAt;
         iter->second.pdata_ = pdata;
         iter->second.pdata_.discoveredAt = da;
@@ -1044,11 +1041,7 @@ Spdp::data_received(const DataSubmessage& data,
   ParticipantData_t pdata;
 
   pdata.participantProxy.domainId = domain_;
-  pdata.associated_endpoints = 0;
   pdata.discoveredAt = MonotonicTimePoint::now().to_monotonic_time();
-#ifdef OPENDDS_SECURITY
-  pdata.extended_associated_endpoints = 0;
-#endif
 
   if (!ParameterListConverter::from_param_list(plist, pdata)) {
     if (DCPS::DCPS_debug_level > 0) {
@@ -1073,7 +1066,7 @@ Spdp::data_received(const DataSubmessage& data,
   const bool from_relay = from == config_->spdp_rtps_relay_address();
 #ifdef OPENDDS_SECURITY
   if (!from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList) && !ip_in_AgentInfo(from, plist)) {
-    if (DCPS::DCPS_debug_level) {
+    if (DCPS::DCPS_debug_level >= 8) {
       ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) Spdp::data_received - dropped IP: %C\n"), DCPS::LogAddr(from).c_str()));
     }
     return;
@@ -1083,7 +1076,7 @@ Spdp::data_received(const DataSubmessage& data,
   }
 #elif !defined OPENDDS_SAFETY_PROFILE
   if (!from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList)) {
-    if (DCPS::DCPS_debug_level) {
+    if (DCPS::DCPS_debug_level >= 8) {
       ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) Spdp::data_received - IP not in locator list: %C\n"), DCPS::LogAddr(from).c_str()));
     }
     return;
@@ -1121,10 +1114,6 @@ Spdp::match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter&
 #else
   ACE_UNUSED_ARG(guid);
 #endif /* DDS_HAS_MINIMUM_BIT */
-
-  // notify Sedp of association
-  // Sedp may call has_discovered_participant, which is why the participant must be added before this call to associate.
-  sedp_->associate(dp_iter->second.pdata_);
 
   dp_iter->second.bit_ih_ = bit_instance_handle;
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -1902,8 +1891,7 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
     return false;
   }
 
-  sedp_->associate(iter->second.pdata_);
-  sedp_->associate_secure_endpoints(iter->second.pdata_, participant_sec_attr_);
+  sedp_->process_association_records_i(iter->second);
 
   return true;
 }
@@ -1972,9 +1960,11 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
       return false;
     }
 
-    sedp_->disassociate_volatile(iter->second.pdata_);
+    sedp_->disassociate_volatile(iter->second);
     sedp_->cleanup_volatile_crypto(iter->first);
-    sedp_->associate_volatile(iter->second.pdata_);
+    sedp_->associate_volatile(iter->second);
+    sedp_->generate_remote_matched_crypto_handles(iter->second);
+    sedp_->process_association_records_i(iter->second);
 
     if (!auth->return_handshake_handle(iter->second.handshake_handle_, se)) {
       if (DCPS::security_debug.auth_warn) {
@@ -2087,17 +2077,10 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
     }
   }
 
-  // notify Sedp of association Sedp may call
-  // has_discovered_participant, which is the participant must be
-  // added before these calls to associate.
+  sedp_->generate_remote_matched_crypto_handles(iter->second);
 
-  if (iter->second.crypto_tokens_.length() == 0) {
-    sedp_->associate(iter->second.pdata_);
-    sedp_->associate_secure_endpoints(iter->second.pdata_, participant_sec_attr_);
-  }
-
-  sedp_->generate_remote_crypto_handles(iter->second.pdata_);
-  sedp_->associate_volatile(iter->second.pdata_);
+  // Auth is now complete.
+  sedp_->process_association_records_i(iter->second);
 
 #ifndef DDS_HAS_MINIMUM_BIT
   process_location_updates_i(iter);
@@ -2329,10 +2312,6 @@ ParticipantData_t Spdp::build_local_pdata(
       0 // we are not supporting fractional seconds in the lease duration
     },
     participant_discovered_at_
-    , 0 // associated_endpoints
-#ifdef OPENDDS_SECURITY
-    , 0 // extended_associated_endpoints
-#endif
   };
 
   return pdata;
@@ -2351,7 +2330,7 @@ bool Spdp::announce_domain_participant_qos()
   return true;
 }
 
-#if !defined _MSC_VER || _MSC_VER > 1700
+#if !defined _MSC_VER || _MSC_VER >= 1900
 const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_MULTICAST;
 const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_RELAY;
 const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_DIRECT;
@@ -3922,7 +3901,7 @@ void
 Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
 {
   const DCPS::RepoId peer = make_id(id, ENTITYID_PARTICIPANT);
-  const DiscoveredParticipantConstIter iter = participants_.find(peer);
+  const DiscoveredParticipantIter iter = participants_.find(peer);
   if (iter == participants_.end()) {
     if (DCPS::DCPS_debug_level > 0) {
       const DCPS::GuidConverter conv(peer);
@@ -3954,6 +3933,8 @@ Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
       }
     }
   }
+
+  iter->second.participant_tokens_sent_ = true;
 }
 
 DDS::Security::PermissionsHandle
@@ -4799,6 +4780,16 @@ void Spdp::ignore_domain_participant(const GUID_t& ignoreId)
   }
 }
 
+void Spdp::remove_domain_participant(const GUID_t& removeId)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+  DiscoveredParticipantIter iter = participants_.find(removeId);
+  if (iter != participants_.end()) {
+    remove_discovered_participant(iter);
+  }
+}
+
 bool Spdp::update_domain_participant_qos(const DDS::DomainParticipantQos& qos)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
@@ -4827,7 +4818,7 @@ void Spdp::remove_discovered_participant(DiscoveredParticipantIter& iter)
     return;
   }
   GUID_t part_id = iter->first;
-  bool removed = endpoint_manager().disassociate(iter->second.pdata_);
+  bool removed = endpoint_manager().disassociate(iter->second);
   iter = participants_.find(part_id); // refresh iter after disassociate, which can unlock
   if (iter == participants_.end()) {
     return;
