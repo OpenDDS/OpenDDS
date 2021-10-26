@@ -225,7 +225,7 @@ public:
   );
 
   DCPS::RcHandle<RtpsDiscoveryConfig> config() const { return config_; }
-  void send_to_relay();
+  void spdp_rtps_relay_address_change();
 
   void get_and_reset_relay_message_counts(DCPS::RelayMessageCounts& spdp,
                                           DCPS::RelayMessageCounts& sedp);
@@ -579,25 +579,27 @@ private:
     typedef DCPS::PmfSporadicTask<SpdpTransport> SpdpSporadic;
     typedef DCPS::PmfMultiTask<SpdpTransport> SpdpMulti;
     void send_local(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpMulti> local_sender_;
+    DCPS::RcHandle<SpdpMulti> local_send_task_;
     void send_directed(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpSporadic> directed_sender_;
+    DCPS::RcHandle<SpdpSporadic> directed_send_task_;
     OPENDDS_LIST(DCPS::RepoId) directed_guids_;
     void process_lease_expirations(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpSporadic> lease_expiration_processor_;
+    DCPS::RcHandle<SpdpSporadic> lease_expiration_task_;
     DCPS::ThreadStatusManager* global_thread_status_manager_;
     DCPS::ThreadStatusManager local_thread_status_manager_;
     void thread_status_task(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpPeriodic> thread_status_sender_;
+    DCPS::RcHandle<SpdpPeriodic> thread_status_task_;
 #ifdef OPENDDS_SECURITY
     void process_handshake_deadlines(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpSporadic> handshake_deadline_processor_;
+    DCPS::RcHandle<SpdpSporadic> handshake_deadline_task_;
     void process_handshake_resends(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpSporadic> handshake_resend_processor_;
+    DCPS::RcHandle<SpdpSporadic> handshake_resend_task_;
     void send_relay(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpPeriodic> relay_sender_;
+    DCPS::RcHandle<SpdpSporadic> relay_spdp_task_;
+    DCPS::FibonacciSequence<TimeDuration> relay_spdp_task_falloff_;
     void relay_stun_task(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpPeriodic> relay_stun_task_;
+    DCPS::RcHandle<SpdpSporadic> relay_stun_task_;
+    DCPS::FibonacciSequence<TimeDuration> relay_stun_task_falloff_;
     ICE::ServerReflexiveStateMachine relay_srsm_;
     void process_relay_sra(ICE::ServerReflexiveStateMachine::StateChange);
     void disable_relay_stun_task();

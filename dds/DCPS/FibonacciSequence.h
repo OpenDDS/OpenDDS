@@ -14,37 +14,35 @@ template <typename T>
 class FibonacciSequence
 {
 public:
-  FibonacciSequence(const T& f1) : f1_(f1), f_n_minus_1_(0), f_n_minus_2_(0)
-  {
-  }
+  FibonacciSequence(const T& f1, const T& f1_minus_1 = T(0))
+    : f_n_(f1)
+    , f_n_minus_1_(f1_minus_1)
+  {}
 
   T get() const
   {
-    if (f_n_minus_1_ == T(0)) {
-      return f1_;
-    } else {
-      T f_n = f_n_minus_1_ + f_n_minus_2_;
-      return f_n;
+    return f_n_;
+  }
+
+  void advance(const T& fmax = T(0))
+  {
+    const T f_n_plus_1 = f_n_minus_1_ + f_n_;
+    f_n_minus_1_ = f_n_;
+    f_n_ = f_n_plus_1;
+    if (fmax != T(0)) {
+      f_n_ = std::min(f_n_, fmax);
     }
   }
 
-  void advance()
+  void set(const T& f1, const T& f1_minus_1 = T(0))
   {
-    T f_n = f_n_minus_1_ == T(0) ? f1_ : f_n_minus_1_ + f_n_minus_2_;
-    f_n_minus_2_ = f_n_minus_1_;
-    f_n_minus_1_ = f_n;
-  }
-
-  void reset()
-  {
-    f_n_minus_1_ = T(0);
-    f_n_minus_2_ = T(0);
+    f_n_ = f1;
+    f_n_minus_1_ = f1_minus_1;
   }
 
 private:
-  const T f1_;
+  T f_n_;
   T f_n_minus_1_;
-  T f_n_minus_2_;
 };
 
 } // namespace DCPS

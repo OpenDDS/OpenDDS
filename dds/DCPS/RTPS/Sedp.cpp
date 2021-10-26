@@ -5950,8 +5950,11 @@ void
 Sedp::rtps_relay_address(const ACE_INET_Addr& address)
 {
   DCPS::RtpsUdpInst_rch rtps_inst = DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  ACE_GUARD(ACE_Thread_Mutex, g, rtps_inst->config_lock_);
-  rtps_inst->rtps_relay_address_ = address;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, rtps_inst->config_lock_);
+    rtps_inst->rtps_relay_address_ = address;
+  }
+  rtps_inst->rtps_relay_address_change();
 }
 
 void
