@@ -377,3 +377,67 @@ Like ``ACE_OS::gettimeofday()``, referencing ``ACE_Condition`` in :ghfile:`dds/D
 More information on using monotonic time with ACE can be found `here <http://www.dre.vanderbilt.edu/~schmidt/DOC_ROOT/ACE/docs/ACE-monotonic-timer.html>`_.
 
 ``SystemTimePoint`` should be used when dealing with the DDS API and timestamps on incoming and outgoing messages.
+
+*******
+Logging
+*******
+
+ACE Logging
+===========
+
+Logging is done via ACE's logging macro functions, ``ACE_DEBUG`` and ``ACE_ERROR``, defined in ``ace/Log_Msg.h``.
+The logging macros arguments to both are:
+
+  - A ``ACE_Log_Priority`` value
+
+    - This is an enum defined in ``ace/Log_Priority.h`` to say what the priority or severity of the message is.
+
+  - The format string
+
+    - This is similar to the format string for the standard ``printf``, where it substitutes sequences starting with ``%``, but the format of theses sequences is different.
+      For example ``char*`` values are substituted using ``%C`` instead of ``%s``.
+      See the documenting comment for ``ACE_Log_Msg::log`` in ``ace/Log_Msg.h`` for what the format of the string is.
+
+  - The variable number of arguments
+
+    - Like ``printf`` the variable arguments can't be whole objects, like a ``std::string`` value.
+      In the case of ``std::string``, the format and args would look like: ``"%C", a_string.c_str()``.
+
+Note that all the ``ACE_DEBUG`` and ``ACE_ERROR`` arguments must be surrounded by two sets of parentheses.
+
+.. code-block:: C++
+
+  ACE_DEBUG((LM_DEBUG, "Hello, %C!\n", "world"));
+
+ACE logs to ``stderr`` by default on conventional platforms, but can log to other places.
+
+Usage in OpenDDS
+================
+
+Logging Conditions and Priority
+-------------------------------
+
+In OpenDDS ``ACE_DEBUG`` and ``ACE_ERROR`` are used directly most of the time, but sometimes they are used indirectly, like with the transport framework's ``VDBG`` and ``VDBG_LVL``.
+They also should be conditional at times depending if the message few logging control systems OpenDDS has.
+See section 7.6 of the OpenDDS Developer's Guide for information on them from the user perspective.
+
+Message Content
+---------------
+
+- Log messages should take the form:
+  ::
+
+    (%P|%t) [ERROR:|WARNING:|NOTICE:] FUNCTION_NAME: MESSAGE\n
+
+  - Use ``ERROR:``, ``WARNING:``, and ``NOTICE:`` if using the correspoding log priorities.
+  - ``CLASS_NAME::METHOD_NAME`` should be used instead of just the function name if it's part of a class.
+    It's at the developer's discretion to come up with a meaningful name for members of overload sets, templates, and other more complex cases.
+  - If the message has multiple lines, then every line of a log message should start with ``(%P|%t)``.
+
+- Format strings should not be wrapped in ``ACE_TEXT``.
+  We shouldn't go out of our way to replace it in existing logging points, but it should be avoided it in new ones.
+
+  - ``ACE_TEXT``'s purpose is to wrap strings and characters in ``L`` on builds where ``uses_wchar=1``, so they become the wide versions.
+  - While not doing it might result in a performance hit for character set conversion at runtime, the builds where this happens are rare, so the it's outweighed by the added visual noise to the code and the possibility of bugs introduced by improper use of ``ACE_TEXT``.
+
+- Avoid new usage of ``ACE_ERROR_RETURN`` in order to not hide the return statement within a macro.
