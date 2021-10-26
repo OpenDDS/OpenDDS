@@ -440,7 +440,7 @@ my %all_checks = (
     line_matches => qr/(gettimeofday|ACE_Time_Value\(\)\.now\(\))/,
     message => [
       'ACE_OS::gettimeofday() and "ACE_Time_Value().now()" are forbidden in the core libraries.',
-      'See the "Time" section in docs/guidelines.md.',
+      'See https://opendds.readthedocs.io/en/master/internal/dev_guidelines.html#time for details.',
     ],
   },
 
@@ -449,7 +449,7 @@ my %all_checks = (
     line_matches => qr/(?:ACE_|ace\/)Condition(?:(?:_Recursive)?_Thread_Mutex)?/,
     message => [
       'Except for in ConditionVariable.h, ACE_Condition and related types are forbidden in the core libraries.',
-      'See the "Time" section in docs/guidelines.md.',
+      'See https://opendds.readthedocs.io/en/master/internal/dev_guidelines.html#time for details.',
     ],
   },
 

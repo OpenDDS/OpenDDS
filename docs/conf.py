@@ -102,6 +102,11 @@ numfig = True
 
 highlight_language = 'none'
 
+linkcheck_ignore = [
+    # Linkcheck fails to work with GitHub anchors
+    r'^https?://github\.com/.*#.+$',
+]
+
 
 # -- Options for HTML output -------------------------------------------------
 
