@@ -20,7 +20,8 @@ Automated Build Systems
 
 Pull requests will be tested automatically and full CI builds of the master branch can be found at `http://scoreboard.ociweb.com/oci-dds.html <http://scoreboard.ociweb.com/oci-dds.html>`_.
 
-All tests listed in :ghfile:`DDS_ROOT/tests/dcps_tests.lst` are part of the automated test suite.
+See :doc:`running_tests` for how tests are run in general.
+See :doc:`github_actions` for how building and testing is done with GitHub Actions.
 
 *******
 Doxygen
@@ -97,7 +98,7 @@ Preprocessor macro ``DDS_HAS_WCHAR`` can be used to detect those platforms.
 C++ Coding Style
 ****************
 
-* C++ code in OpenDDS must compile under the `compilers listed in the README.md file <https://github.com/objectcomputing/OpenDDS#compilers>`_.
+* C++ code in OpenDDS must compile under the :ghfile:`compilers listed in the \`\`README.md\`\` file <README.md#compilers>`.
 * Commit code in the proper style from the start, so follow-on commits to adjust style don't clutter history.
 * C++ source code is a plaintext file, so the guidelines in Text file formatting apply.
 * A modified Stroustrup style is used (see :ghfile:`tools/scripts/style`).
@@ -297,19 +298,24 @@ Order
 ^^^^^
 
 As a safeguard against headers being dependant on a particular order, includes should be ordered based on a hierarchy going from local headers to system headers, with spaces between groups of includes.
+Generated headers from the same directory should be placed last within these groups.
 This order can be generalized as the following:
 
-1. The corresponding header to the source file (``Foo.h`` if we were in ``Foo.cpp``).
-2. Headers from the local project.
-3. Headers from external OpenDDS-based libraries.
-4. Headers from :ghfile:`dds/DCPS`.
-5. ``dds/*C.h`` Headers
-6. Headers from external TAO-based libraries.
-7. Headers from TAO.
-8. Headers from external ACE-based libraries.
-9. Headers from ACE.
-10. Headers from external non-ACE-based libraries.
-11. Headers from system and C++ standard libraries.
+1. Pre-compiled header if it is required for a ``.cpp`` file by Visual Studio.
+2. The corresponding header to the source file (``Foo.h`` if we were in ``Foo.cpp``).
+3. Headers from the local project.
+4. Headers from external OpenDDS-based libraries.
+5. Headers from :ghfile:`dds/DCPS`.
+6. ``dds/*C.h`` Headers
+7. Headers from external TAO-based libraries.
+8. Headers from TAO.
+9. Headers from external ACE-based libraries.
+10. Headers from ACE.
+11. Headers from external non-ACE-based libraries.
+12. Headers from system and C++ standard libraries.
+
+There can be exceptions to this list.
+For example if a header from ACE or the system library was needed to decide if another header should be included.
 
 Path
 ^^^^
@@ -320,8 +326,38 @@ Otherwise system includes (``#include <foo/Foo.h>``) should be used to make it c
 In addition to this, includes for a file that will always be relative to the including file should have a relative include path.
 For example, a ``dds/DCPS/bar.cpp`` should include ``dds/DCPS/bar.h`` using ``#include "bar.h"``, not ``#include <dds/DCPS/bar.h>`` and especially not ``#include "dds/DCPS/bar.h"``.
 
+Example
+^^^^^^^
+
+For a ``Doodad.cpp`` file in :ghfile:`dds/DCPS`, the includes could look like:
+
+.. code-block:: C++
+
+  #include <DCPS/DdsDcps_pch.h>
+
+  #include "Doodad.h"
+
+  #include <ace/config-lite.h>
+  #ifndef ACE_CPP11
+  #  include "ConditionVariable.h"
+  #endif
+  #include "ReactorTask.h"
+  #include "transport/framework/DataLink.h"
+
+  #include <dds/DdsDcpsCoreC.h>
+
+  #include <tao/Version.h>
+
+  #include <ace/Version.h>
+
+  #include <openssl/opensslv.h>
+
+  #include <unistd.h>
+  #include <stdlib.h>
+
+****
 Time
-====
+****
 
 Measurements of time can be broken down into two basic classes: A specific point in time (Ex: 00:00 January 1, 1970) and a length or duration of time without context (Ex: 134 Seconds).
 In addition, a computer can change its clock while a program is running, which could mess up any time lapses being measured.
