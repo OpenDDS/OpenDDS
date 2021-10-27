@@ -22,6 +22,7 @@ DynamicData::DynamicData()
   : chain_(0)
   , encoding_(DCPS::Encoding::KIND_XCDR2)
   , strm_(0, encoding_)
+  , item_count_(ITEM_COUNT_INVALID)
 {}
 
 DynamicData::DynamicData(ACE_Message_Block* chain,
@@ -31,6 +32,7 @@ DynamicData::DynamicData(ACE_Message_Block* chain,
   , encoding_(encoding)
   , strm_(chain_, encoding_)
   , type_(get_base_type(type))
+  , item_count_(ITEM_COUNT_INVALID)
 {
   if (encoding.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
     throw std::runtime_error("DynamicData only supports XCDR2 at this time");
@@ -46,6 +48,7 @@ DynamicData& DynamicData::operator=(const DynamicData& other)
   strm_ = other.strm_;
   type_ = other.type_;
   descriptor_ = other.descriptor_;
+  item_count_ = other.item_count_;
   return *this;
 }
 
@@ -76,20 +79,113 @@ DDS::ReturnCode_t DynamicData::set_descriptor(MemberId id, const MemberDescripto
   return DDS::RETCODE_OK;
 }
 
-MemberId DynamicData::get_member_id_by_name(DCPS::String) const
+MemberId DynamicData::get_member_id_by_name(DCPS::String name) const
 {
-  // TODO:
-  return 0;
+  const TypeKind tk = type_->get_kind();
+  switch (tk) {
+  case TK_BOOLEAN:
+  case TK_BYTE:
+  case TK_INT16:
+  case TK_INT32:
+  case TK_INT64:
+  case TK_UINT16:
+  case TK_UINT32:
+  case TK_UINT64:
+  case TK_FLOAT32:
+  case TK_FLOAT64:
+  case TK_FLOAT128:
+  case TK_INT8:
+  case TK_UINT8:
+  case TK_CHAR8:
+  case TK_CHAR16:
+  case TK_ENUM:
+    return MEMBER_ID_INVALID;
+  case TK_STRING8:
+  case TK_STRING16:
+  case TK_SEQUENCE:
+  case TK_ARRAY:
+    // Elements of string, sequence, array must be accessed by index.
+    return MEMBER_ID_INVALID;
+  case TK_MAP:
+    // Values in map can be accessed by strings which is converted from map keys.
+    // But need to find out how this conversion works. In the meantime, only allow
+    // accessing map using index.
+    return MEMBER_ID_INVALID;
+  case TK_BITMASK:
+  case TK_STRUCTURE:
+  case TK_UNION:
+    {
+      DynamicTypeMember_rch member;
+      if (type_->get_member_by_name(member, name) != DDS::RETCODE_OK) {
+        return MEMBER_ID_INVALID;
+      }
+      if (tk == TK_BITMASK) {
+        // Bitmask's flags don't have ID, so use index instead.
+        return member->get_descriptor().index;
+      } else {
+        return member->get_descriptor().id;
+      }
+    }
+  }
+  // TODO: handle error case.
+  return MEMBER_ID_INVALID;
 }
 
-MemberId DynamicData::get_member_id_at_index(ACE_CDR::ULong index) const
+MemberId DynamicData::get_member_id_at_index(ACE_CDR::ULong index)
 {
-  // TODO:
-  return index;
+  const ACE_CDR::ULong count = get_item_count();
+  if (index >= count) {
+    return MEMBER_ID_INVALID;
+  }
+
+  switch (type_->get_kind()) {
+  case TK_BOOLEAN:
+  case TK_BYTE:
+  case TK_INT16:
+  case TK_INT32:
+  case TK_INT64:
+  case TK_UINT16:
+  case TK_UINT32:
+  case TK_UINT64:
+  case TK_FLOAT32:
+  case TK_FLOAT64:
+  case TK_FLOAT128:
+  case TK_INT8:
+  case TK_UINT8:
+  case TK_CHAR8:
+  case TK_CHAR16:
+  case TK_ENUM:
+    // Value of enum or primitive types can be indicated by MEMBER_ID_INVALID Id
+    // (Section 7.5.2.11.1)
+    return MEMBER_ID_INVALID;
+  case TK_STRING8:
+  case TK_STRING16:
+  case TK_BITMASK:
+  case TK_SEQUENCE:
+  case TK_ARRAY:
+  case TK_MAP:
+    return index;
+  case TK_STRUCTURE:
+  case TK_UNION:
+    {
+      DynamicTypeMember_rch member;
+      if (type_->get_member_by_index(member, index) != DDS::RETCODE_OK) {
+        return MEMBER_ID_INVALID;
+      }
+      return member->get_descriptor().id;
+    }
+  }
+
+  // TODO: handle error case.
+  return MEMBER_ID_INVALID;
 }
 
 ACE_CDR::ULong DynamicData::get_item_count()
 {
+  if (item_count_ != ITEM_COUNT_INVALID) {
+    return item_count_;
+  }
+
   DCPS::Message_Block_Ptr dup(chain_->duplicate());
   strm_ = DCPS::Serializer(dup.get(), encoding_);
 
@@ -206,9 +302,10 @@ ACE_CDR::ULong DynamicData::get_item_count()
       }
       return length;
     }
-  default:
-    return 0;
   }
+
+  // TODO: handle error case.
+  return 0;
 }
 
 DynamicData DynamicData::clone() const
@@ -1886,21 +1983,21 @@ bool DynamicData::is_primitive(TypeKind tk, ACE_CDR::ULong& size) const
 bool DynamicData::get_index_from_id(MemberId id, ACE_CDR::ULong& index, ACE_CDR::ULong bound) const
 {
   switch (type_->get_kind()) {
+  case TK_STRING8:
+  case TK_STRING16:
+  case TK_BITMASK:
   case TK_SEQUENCE:
   case TK_ARRAY:
   case TK_MAP:
-  case TK_STRING16:
-  case TK_BITMASK:
-    // XTypes spec (7.5.2.11.1) doesn't specify how IDs are mapped to indexes for these types.
-    // A possible way is mapping indexes directly from IDs as long as it doesn't go out of bound.
+    // The mapping from id to index must be consistent with get_member_id_at_index
+    // for these types. In particular, index and id are equal given that it doesn't
+    // go out of bound.
     if (id < bound) {
       index = id;
       return true;
     }
-    return false;
-  default:
-    return false;
   }
+  return false;
 }
 
 const char* DynamicData::typekind_to_string(TypeKind tk) const

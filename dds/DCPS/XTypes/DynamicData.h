@@ -52,7 +52,7 @@ public:
   DDS::ReturnCode_t set_descriptor(MemberId id, const MemberDescriptor& value);
 
   MemberId get_member_id_by_name(DCPS::String name) const;
-  MemberId get_member_id_at_index(ACE_CDR::ULong index) const;
+  MemberId get_member_id_at_index(ACE_CDR::ULong index);
   ACE_CDR::ULong get_item_count();
 
   DynamicData clone() const;
@@ -240,6 +240,9 @@ private:
   DCPS::Serializer strm_;
   DynamicType_rch type_;
   TypeDescriptor descriptor_;
+
+  const ACE_CDR::ULong ITEM_COUNT_INVALID = UINT32_MAX;
+  ACE_CDR::ULong item_count_;
 };
 
 } // namespace XTypes
