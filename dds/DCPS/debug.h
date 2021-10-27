@@ -19,10 +19,61 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+class OpenDDS_Dcps_Export LogLevel {
+public:
+  enum Value {
+    None,
+    Error,
+    Warning,
+    Notice,
+    Info,
+    Debug
+  };
+
+  LogLevel(Value value)
+  {
+    set(value);
+  }
+
+  void set(Value value);
+
+  Value get() const
+  {
+    return level_;
+  }
+
+private:
+  Value level_;
+};
+extern OpenDDS_Dcps_Export LogLevel log_level;
+
+inline bool operator>=(const LogLevel& ll, LogLevel::Value value)
+{
+  return ll.get() >= value;
+}
+
+/*
+if (log_level >= LogLevel::Error) {
+  ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: funky_function: error\n"));
+}
+
+if (log_level >= LogLevel::Warning) {
+  ACE_DEBUG((LM_WARN, "(%P|%t) WARNING: funky_function: warning\n"));
+}
+
+if (log_level >= LogLevel::Notice) {
+  ACE_DEBUG((LM_NOTICE, "(%P|%t) NOTICE: funky_function: notice\n"));
+}
+
+if (log_level >= LogLevel::Info) {
+  ACE_DEBUG((LM_INFO, "(%P|%t) INFO: funky_function: info\n"));
+}
+*/
+
 /// Logging verbosity level.
 /// set by Service_Participant
 /// value guidelines:
-/// 1 - logs that should happen once per process or are warnings
+/// 1 - logs that should happen once per process
 /// 2 - logs that should happen once per DDS entity
 /// 4 - logs that are related to administrative interfaces
 /// 6 - logs that should happen every Nth sample write/read

@@ -13,13 +13,33 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-OpenDDS_Dcps_Export unsigned int OpenDDS::DCPS::DCPS_debug_level = 0;
-#ifdef OPENDDS_SECURITY
-OpenDDS_Dcps_Export OpenDDS::DCPS::SecurityDebug OpenDDS::DCPS::security_debug;
-#endif
-
 namespace OpenDDS {
 namespace DCPS {
+
+OpenDDS_Dcps_Export LogLevel log_level(LogLevel::Warning);
+OpenDDS_Dcps_Export unsigned int DCPS_debug_level = 0;
+#ifdef OPENDDS_SECURITY
+OpenDDS_Dcps_Export SecurityDebug security_debug;
+#endif
+
+void LogLevel::set(LogLevel::Value value)
+{
+  level_ = value;
+#ifdef OPENDDS_SECURITY
+  if (level_ >= Notice) {
+    security_debug.set_debug_level(1);
+  } else {
+    security_debug.set_all_flags_to(false);
+  }
+#endif
+  if (level_ >= Debug) {
+    if (DCPS_debug_level == 0) {
+      DCPS_debug_level = 1;
+    }
+  } else {
+    DCPS_debug_level = 0;
+  }
+}
 
 OpenDDS_Dcps_Export void set_DCPS_debug_level(unsigned int lvl)
 {
