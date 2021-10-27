@@ -63,42 +63,42 @@ struct SingleValueStruct {
 // Reading single value from union.
 @mutable
 union SingleValueUnion switch (SomeEnum) {
- case INT32:
-   @id(1) long int_32;
- case UINT32:
-   @id(2) unsigned long uint_32;
- case INT8:
-   @id(3) int8 int_8;
- case UINT8:
-   @id(4) uint8 uint_8;
- case INT16:
-   @id(5) short int_16;
- case UINT16:
-   @id(6) unsigned short uint_16;
- case INT64:
-   @id(7) long long int_64;
- case UINT64:
-   @id(8) unsigned long long uint_64;
- case FLOAT32:
-   @id(9) float float_32;
- case FLOAT64:
-   @id(10) double float_64;
- case FLOAT128:
-   @id(11) long double float_128;
- case CHAR8:
-   @id(12) char char_8;
- case CHAR16:
-   @id(13) wchar char_16;
- case BYTE:
-   @id(14) octet byte_;
- case BOOL:
-   @id(15) boolean bool_;
- case STRING8:
-   @id(16) string str;
- case STRING16:
-   @id(17) wstring wstr;
- default:
-   @id(18) SomeEnum my_enum;
+case INT32:
+  @id(1) long int_32;
+case UINT32:
+  @id(2) unsigned long uint_32;
+case INT8:
+  @id(3) int8 int_8;
+case UINT8:
+  @id(4) uint8 uint_8;
+case INT16:
+  @id(5) short int_16;
+case UINT16:
+  @id(6) unsigned short uint_16;
+case INT64:
+  @id(7) long long int_64;
+case UINT64:
+  @id(8) unsigned long long uint_64;
+case FLOAT32:
+  @id(9) float float_32;
+case FLOAT64:
+  @id(10) double float_64;
+case FLOAT128:
+  @id(11) long double float_128;
+case CHAR8:
+  @id(12) char char_8;
+case CHAR16:
+  @id(13) wchar char_16;
+case BYTE:
+  @id(14) octet byte_;
+case BOOL:
+  @id(15) boolean bool_;
+case STRING8:
+  @id(16) string str;
+case STRING16:
+  @id(17) wstring wstr;
+default:
+  @id(18) SomeEnum my_enum;
 };
 
 // Reading single value from array.
@@ -149,40 +149,40 @@ struct SequenceStruct {
 // Reading sequence from union.
 @mutable
 union SequenceUnion switch (SomeEnum) {
- case INT32:
-   Int32Seq int_32s;
- case UINT32:
-   UInt32Seq uint_32s;
- case INT8:
-   Int8Seq int_8s;
- case UINT8:
-   UInt8Seq uint_8s;
- case INT16:
-   Int16Seq int_16s;
- case UINT16:
-   UInt16Seq uint_16s;
- case INT64:
-   Int64Seq int_64s;
- case UINT64:
-   UInt64Seq uint_64s;
- case FLOAT32:
-   Float32Seq float_32s;
- case FLOAT64:
-   Float64Seq float_64s;
- case FLOAT128:
-   Float128Seq float_128s;
- case CHAR8:
-   Char8Seq char_8s;
- case CHAR16:
-   Char16Seq char_16s;
- case BYTE:
-   ByteSeq byte_s;
- case BOOL:
-   BoolSeq bool_s;
- case STRING8:
-   StringSeq str_s;
- case STRING16:
-   WStringSeq wstr_s;
+case INT32:
+  Int32Seq int_32s;
+case UINT32:
+  UInt32Seq uint_32s;
+case INT8:
+  Int8Seq int_8s;
+case UINT8:
+  UInt8Seq uint_8s;
+case INT16:
+  Int16Seq int_16s;
+case UINT16:
+  UInt16Seq uint_16s;
+case INT64:
+  Int64Seq int_64s;
+case UINT64:
+  UInt64Seq uint_64s;
+case FLOAT32:
+  Float32Seq float_32s;
+case FLOAT64:
+  Float64Seq float_64s;
+case FLOAT128:
+  Float128Seq float_128s;
+case CHAR8:
+  Char8Seq char_8s;
+case CHAR16:
+  Char16Seq char_16s;
+case BYTE:
+  ByteSeq byte_s;
+case BOOL:
+  BoolSeq bool_s;
+case STRING8:
+  StringSeq str_s;
+case STRING16:
+  WStringSeq wstr_s;
 };
 
 // Reading nested sequence from another sequence.

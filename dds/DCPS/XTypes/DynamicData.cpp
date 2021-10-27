@@ -406,8 +406,10 @@ bool DynamicData::skip_to_sequence_element(MemberId id)
       get_index_from_id(id, index, length) &&
       strm_.skip(index, size);
   } else {
-    ACE_CDR::ULong dheader, length, index;
-    if (!(strm_ >> dheader) || !(strm_ >> length) || !get_index_from_id(id, index, length)) {
+    size_t dheader;
+    ACE_CDR::ULong length, index;
+    if (!strm_.read_delimiter(dheader) || !(strm_ >> length) ||
+        !get_index_from_id(id, index, length)) {
       return false;
     }
 
@@ -433,8 +435,9 @@ bool DynamicData::skip_to_array_element(MemberId id)
     ACE_CDR::ULong index;
     return get_index_from_id(id, index, length) && strm_.skip(index, size);
   } else {
-    ACE_CDR::ULong dheader, index;
-    if (!(strm_ >> dheader) || !get_index_from_id(id, index, length)) {
+    size_t dheader;
+    ACE_CDR::ULong index;
+    if (!strm_.read_delimiter(dheader) || !get_index_from_id(id, index, length)) {
       return false;
     }
 
@@ -467,8 +470,9 @@ bool DynamicData::skip_to_map_element(MemberId id)
     }
     return strm_.skip(1, key_size);
   } else {
-    ACE_CDR::ULong dheader, index;
-    if (!(strm_ >> dheader) || !get_index_from_id(id, index, ACE_UINT32_MAX)) {
+    size_t dheader;
+    ACE_CDR::ULong index;
+    if (!strm_.read_delimiter(dheader) || !get_index_from_id(id, index, ACE_UINT32_MAX)) {
       return false;
     }
     const size_t end_of_map = strm_.rpos() + dheader;
@@ -1611,8 +1615,8 @@ bool DynamicData::skip_collection_member(TypeKind kind)
   }
   const char* kind_str = typekind_to_string(kind);
 
-  ACE_CDR::ULong dheader;
-  if (!(strm_ >> dheader)) {
+  size_t dheader;
+  if (!strm_.read_delimiter(dheader)) {
     if (DCPS::DCPS_debug_level >= 1) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::skip_collection_member -")
                  ACE_TEXT(" Failed to deserialize DHEADER of a non-primitive %C member\n"),
@@ -1762,8 +1766,8 @@ bool DynamicData::skip_all()
 
   const ExtensibilityKind extensibility = descriptor_.extensibility_kind;
   if (extensibility == APPENDABLE || extensibility == MUTABLE) {
-    ACE_CDR::ULong dheader;
-    if (!(strm_ >> dheader)) {
+    size_t dheader;
+    if (!strm_.read_delimiter(dheader)) {
       if (DCPS::DCPS_debug_level >= 1) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::skip_all - Failed to read")
                    ACE_TEXT(" DHEADER of the DynamicData object\n")));
