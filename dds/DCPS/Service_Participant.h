@@ -16,6 +16,7 @@
 #include "ConfigUtils.h"
 #include "unique_ptr.h"
 #include "ReactorTask.h"
+#include "JobQueue.h"
 #include "NetworkConfigMonitor.h"
 #include "NetworkConfigModifier.h"
 #include "Recorder.h"
@@ -87,6 +88,8 @@ public:
   ACE_thread_t reactor_owner() const;
 
   ReactorInterceptor_rch interceptor() const;
+
+  JobQueue_rch job_queue() const;
 
   void set_shutdown_listener(ShutdownListener* listener);
 
@@ -512,6 +515,7 @@ private:
 #endif
 
   ReactorTask reactor_task_;
+  JobQueue_rch job_queue_;
 
   RcHandle<DomainParticipantFactoryImpl> dp_factory_servant_;
 

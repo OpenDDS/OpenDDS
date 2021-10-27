@@ -2061,33 +2061,33 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
 
     DDS::SubscriberListener_var sub_listener =
         sub->listener_for(DDS::DATA_ON_READERS_STATUS);
-    if (!CORBA::is_nil(sub_listener.in()) && !this->coherent_)
-      {
+    if (!CORBA::is_nil(sub_listener.in()) && !coherent_) {
+      if (!is_bit()) {
         ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-
         sub_listener->on_data_on_readers(sub.in());
         sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, false);
+      } else {
+        TheServiceParticipant->job_queue()->enqueue(make_rch<OnDataOnReaders>(sub, sub_listener, rchandle_from(static_cast<DataReaderImpl*>(this)), true, false));
       }
-    else
-      {
-        sub->notify_status_condition();
+    } else {
+      sub->notify_status_condition();
 
-        DDS::DataReaderListener_var listener =
-            listener_for (DDS::DATA_AVAILABLE_STATUS);
+      DDS::DataReaderListener_var listener =
+        listener_for (DDS::DATA_AVAILABLE_STATUS);
 
-        if (!CORBA::is_nil(listener.in()))
-          {
-            ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-
-            listener->on_data_available(this);
-            set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
-            sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, false);
-          }
-        else
-          {
-            notify_status_condition_no_sample_lock();
-          }
+      if (!CORBA::is_nil(listener.in())) {
+        if (!is_bit()) {
+          ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+          listener->on_data_available(this);
+          set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
+          sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, false);
+        } else {
+          TheServiceParticipant->job_queue()->enqueue(make_rch<OnDataAvailable>(sub, listener, rchandle_from(static_cast<DataReaderImpl*>(this)), true, true, true));
+        }
+      } else {
+        notify_status_condition_no_sample_lock();
       }
+    }
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   }
 #endif

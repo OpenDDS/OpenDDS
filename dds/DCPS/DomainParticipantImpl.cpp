@@ -2135,7 +2135,9 @@ DomainParticipantImpl::ownership_manager()
         new BitPubListenerImpl(this);
       bit_pub_dr->set_listener(bit_pub_listener, DDS::DATA_AVAILABLE_STATUS);
       // Must call on_data_available when attaching a listener late - samples may be waiting
-      bit_pub_listener->on_data_available(bit_pub_dr.in());
+      SubscriberImpl* sub = dynamic_cast<SubscriberImpl*>(bit_subscriber_.in());
+      DataReaderImpl* reader = dynamic_cast<DataReaderImpl*>(bit_pub_dr.in());
+      TheServiceParticipant->job_queue()->enqueue(make_rch<DataReaderImpl::OnDataAvailable>(rchandle_from(sub), bit_pub_listener, rchandle_from(reader), true, false, false));
     }
   }
 
