@@ -37,19 +37,23 @@ namespace XTypes {
 class OpenDDS_Dcps_Export DynamicData {
 public:
   DynamicData();
+
+  /// This creates a duplicated ACE_Message_Block chain from the provided chain.
+  /// The duplicated chain is released when the object is destroyed. Caller is
+  /// responsible for the release of the input message block chain.
   DynamicData(ACE_Message_Block* chain,
               const DCPS::Encoding& encoding,
               const DynamicType_rch& type);
+  DynamicData& operator=(const DynamicData& other);
 
-  ~DynamicData() {}
+  ~DynamicData();
 
   DDS::ReturnCode_t get_descriptor(MemberDescriptor& value, MemberId id) const;
   DDS::ReturnCode_t set_descriptor(MemberId id, const MemberDescriptor& value);
-  bool equals(const DynamicData& other) const;
 
   MemberId get_member_id_by_name(DCPS::String name) const;
   MemberId get_member_id_at_index(ACE_CDR::ULong index) const;
-  ACE_CDR::ULong get_item_count() const;
+  ACE_CDR::ULong get_item_count();
 
   DynamicData clone() const;
 
@@ -129,6 +133,9 @@ private:
                                      TypeKind enum_or_bitmask = TK_NONE,
                                      LBound lower = 0,
                                      LBound upper = 0);
+
+  template<TypeKind CharKind, TypeKind StringKind, typename ToCharT, typename CharT>
+  DDS::ReturnCode_t get_char_common(CharT& value, MemberId id);
 
   template<typename UIntType, TypeKind UIntTypeKind>
   bool get_boolean_from_bitmask(ACE_CDR::ULong index, ACE_CDR::Boolean& value);
