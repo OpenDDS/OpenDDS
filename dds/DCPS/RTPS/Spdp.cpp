@@ -2819,9 +2819,11 @@ Spdp::spdp_rtps_relay_address_change()
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
+  tport_->relay_spdp_task_->cancel();
   tport_->relay_spdp_task_falloff_.set(config_->sedp_heartbeat_period());
   tport_->relay_spdp_task_->schedule(TimeDuration::zero_value);
 
+  tport_->relay_stun_task_->cancel();
   tport_->relay_stun_task_falloff_.set(config_->sedp_heartbeat_period());
   tport_->relay_stun_task_->schedule(TimeDuration::zero_value);
 }

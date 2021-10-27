@@ -119,7 +119,8 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
   if (equal_guid_prefixes(local_prefix_, GUIDPREFIX_UNKNOWN)) {
     assign(local_prefix_, local_prefix);
 #ifdef OPENDDS_SECURITY
-    relay_stun_task(DCPS::MonotonicTimePoint::now());
+    relay_stun_task_falloff_.set(config().heartbeat_period_);
+    relay_stun_task_->schedule(TimeDuration::zero_value);
 #endif
   }
 
@@ -430,6 +431,7 @@ RtpsUdpTransport::update_locators(const RepoId& remote,
 void
 RtpsUdpTransport::rtps_relay_address_change()
 {
+  relay_stun_task_->cancel();
   relay_stun_task_falloff_.set(config().heartbeat_period_);
   relay_stun_task_->schedule(TimeDuration::zero_value);
 }
@@ -551,15 +553,17 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
   }
 
   relay_stun_task_= make_rch<Sporadic>(reactor_task()->interceptor(), ref(*this), &RtpsUdpTransport::relay_stun_task);
-
-  relay_stun_task_falloff_.set(config.heartbeat_period_);
-  relay_stun_task_->schedule(TimeDuration::zero_value);
 #endif
 
   if (config.opendds_discovery_default_listener_) {
     link_ = make_datalink(config.opendds_discovery_guid_.guidPrefix);
     link_->default_listener(*config.opendds_discovery_default_listener_);
   }
+
+#ifdef OPENDDS_SECURITY
+  relay_stun_task_falloff_.set(config.heartbeat_period_);
+  relay_stun_task_->schedule(TimeDuration::zero_value);
+#endif
 
   return true;
 }
@@ -839,11 +843,10 @@ RtpsUdpTransport::relay_stun_task(const DCPS::MonotonicTimePoint& /*now*/)
   const ACE_INET_Addr relay_address = config().rtps_relay_address();
 
   if ((config().use_rtps_relay() || config().rtps_relay_only()) &&
-      relay_address != ACE_INET_Addr()) {
+      relay_address != ACE_INET_Addr() &&
+      !equal_guid_prefixes(local_prefix_, GUIDPREFIX_UNKNOWN)) {
     process_relay_sra(relay_srsm_.send(relay_address, ICE::Configuration::instance()->server_reflexive_indication_count(), local_prefix_));
-    if (!equal_guid_prefixes(local_prefix_, GUIDPREFIX_UNKNOWN)) {
-      ice_endpoint_.send(relay_address, relay_srsm_.message());
-    }
+    ice_endpoint_.send(relay_address, relay_srsm_.message());
     relay_stun_task_falloff_.advance(ICE::Configuration::instance()->server_reflexive_address_period());
     relay_stun_task_->schedule(relay_stun_task_falloff_.get());
   }
