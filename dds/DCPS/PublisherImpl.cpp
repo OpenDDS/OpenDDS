@@ -773,7 +773,7 @@ PublisherImpl::wait_for_acknowledgments(
       if (writer->qos_.reliability.kind != DDS::RELIABLE_RELIABILITY_QOS)
         continue;
       if (writer->should_ack()) {
-        DataWriterImpl::AckToken token = writer->create_ack_token(max_wait);
+        DataWriterImpl::AckToken token(max_wait, writer->get_max_sn());
 
         std::pair<DataWriterAckMap::iterator, bool> pair =
             ack_writers.insert(DataWriterAckMap::value_type(writer.in(), token));

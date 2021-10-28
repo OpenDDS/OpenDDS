@@ -698,7 +698,7 @@ private:
   bool need_sequence_repair_i() const;
 
   DDS::ReturnCode_t send_end_historic_samples(const RepoId& readerId);
-  DDS::ReturnCode_t send_request_ack();
+  DDS::ReturnCode_t send_request_ack(SequenceNumber& sn);
 
   bool liveliness_asserted_;
 

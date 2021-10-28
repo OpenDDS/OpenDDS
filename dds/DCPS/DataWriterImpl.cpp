@@ -1000,28 +1000,13 @@ DataWriterImpl::should_ack() const
   return this->readers_.size() != 0;
 }
 
-DataWriterImpl::AckToken
-DataWriterImpl::create_ack_token(DDS::Duration_t max_wait) const
-{
-  if (DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) DataWriterImpl::create_ack_token() - ")
-               ACE_TEXT("for sequence %q\n"),
-               this->sequence_number_.getValue()));
-  }
-  return AckToken(max_wait, this->sequence_number_);
-}
-
-
-
 DDS::ReturnCode_t
-DataWriterImpl::send_request_ack()
+DataWriterImpl::send_request_ack(SequenceNumber& sn)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                    guard,
                    get_lock(),
                    DDS::RETCODE_ERROR);
-
 
   DataSampleElement* element = 0;
   DDS::ReturnCode_t ret = this->data_container_->obtain_buffer_for_control(element);
@@ -1035,6 +1020,7 @@ DataWriterImpl::send_request_ack()
                      ret);
   }
 
+  sn = sequence_number_;
   Message_Block_Ptr blk;
   // Add header with the registration sample data.
   Message_Block_Ptr sample(
@@ -1067,12 +1053,13 @@ DataWriterImpl::wait_for_acknowledgments(const DDS::Duration_t& max_wait)
   if (this->qos_.reliability.kind != DDS::RELIABLE_RELIABILITY_QOS)
     return DDS::RETCODE_OK;
 
-  DDS::ReturnCode_t ret = send_request_ack();
+  SequenceNumber sn;
+  DDS::ReturnCode_t ret = send_request_ack(sn);
 
   if (ret != DDS::RETCODE_OK)
     return ret;
 
-  DataWriterImpl::AckToken token = create_ack_token(max_wait);
+  const AckToken token(max_wait, sn);
   if (DCPS_debug_level) {
     ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_acknowledgments")
                           ACE_TEXT(" waiting for acknowledgment of sequence %q at %T\n"),

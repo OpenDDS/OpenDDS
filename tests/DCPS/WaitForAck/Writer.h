@@ -25,7 +25,7 @@ class Writer : public ACE_Task_Base {
 
     virtual int open(void*);
     virtual int svc();
-    virtual int close( u_long flags = 0);
+    virtual int close(u_long flags = 0);
 
 
     /// Thread control.
@@ -37,7 +37,7 @@ class Writer : public ACE_Task_Base {
     int status() const;
 
     /// DataWriter access.
-    ::DDS::ReturnCode_t wait_for_acks( const ::DDS::Duration_t& delay);
+    ::DDS::ReturnCode_t wait_for_acks(const ::DDS::Duration_t& delay);
 
   private:
     /// DataWriter to write with.
@@ -51,7 +51,7 @@ class Writer : public ACE_Task_Base {
     bool verbose_;
 
     /// Completion indicator.
-    bool done_;
+    ACE_Atomic_Op<ACE_Thread_Mutex, bool> done_;
 
     /// Count of messages sent by this publication.
     int messages_;
