@@ -2341,8 +2341,10 @@ Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
   , lease_duration_(outer->config_->lease_duration())
   , buff_(64 * 1024)
   , wbuff_(64 * 1024)
+#ifdef OPENDDS_SECURITY
   , relay_spdp_task_falloff_(outer->config()->sedp_heartbeat_period())
   , relay_stun_task_falloff_(outer->config()->sedp_heartbeat_period())
+#endif
   , network_is_unreachable_(false)
   , ice_endpoint_added_(false)
 {
@@ -2789,8 +2791,10 @@ Spdp::update_rtps_relay_application_participant_i(DiscoveredParticipantIter iter
     return;
   }
 
+#ifdef OPENDDS_SECURITY
   // Lengthen to full period.
   tport_->relay_spdp_task_falloff_.set(config_->spdp_rtps_relay_send_period());
+#endif
 
   if (DCPS::DCPS_debug_level) {
     ACE_DEBUG((LM_DEBUG,
@@ -2816,7 +2820,7 @@ Spdp::update_rtps_relay_application_participant_i(DiscoveredParticipantIter iter
 void
 Spdp::spdp_rtps_relay_address_change()
 {
-
+#ifdef OPENDDS_SECURITY
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
   tport_->relay_spdp_task_->cancel();
@@ -2826,6 +2830,7 @@ Spdp::spdp_rtps_relay_address_change()
   tport_->relay_stun_task_->cancel();
   tport_->relay_stun_task_falloff_.set(config_->sedp_heartbeat_period());
   tport_->relay_stun_task_->schedule(TimeDuration::zero_value);
+#endif
 }
 
 void

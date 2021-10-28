@@ -14,7 +14,7 @@ template <typename T>
 class FibonacciSequence
 {
 public:
-  FibonacciSequence(const T& f1, const T& f1_minus_1 = T(0))
+  explicit FibonacciSequence(const T& f1, const T& f1_minus_1 = T(0))
     : f_n_(f1)
     , f_n_minus_1_(f1_minus_1)
   {}
