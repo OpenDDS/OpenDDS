@@ -759,6 +759,14 @@ public:
 
   bool peek(ACE_CDR::ULong& t);
 
+  struct RdState {
+    unsigned char align_rshift;
+    size_t rpos;
+  };
+
+  RdState rdstate() const;
+  void rdstate(const RdState& state);
+
 private:
   ///@{
   /// Read an array of values from the chain.

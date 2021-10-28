@@ -21,6 +21,7 @@ namespace XTypes {
 DynamicData::DynamicData()
   : chain_(0)
   , encoding_(DCPS::Encoding::KIND_XCDR2)
+  , reset_align_state_(false)
   , strm_(0, encoding_)
   , item_count_(ITEM_COUNT_INVALID)
 {}
@@ -30,21 +31,38 @@ DynamicData::DynamicData(ACE_Message_Block* chain,
                          const DynamicType_rch& type)
   : chain_(chain->duplicate())
   , encoding_(encoding)
+  , reset_align_state_(false)
   , strm_(chain_, encoding_)
   , type_(get_base_type(type))
+  , descriptor_(type_->get_descriptor())
   , item_count_(ITEM_COUNT_INVALID)
 {
-  if (encoding.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
+  if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
     throw std::runtime_error("DynamicData only supports XCDR2 at this time");
   }
+}
 
-  descriptor_ = type_->get_descriptor();
+DynamicData::DynamicData(DCPS::Serializer& ser, const DynamicType_rch& type)
+  : chain_(ser.current()->duplicate())
+  , encoding_(ser.encoding())
+  , reset_align_state_(true)
+  , align_state_(ser.rdstate())
+  , strm_(chain_, encoding_)
+  , type_(get_base_type(type))
+  , descriptor_(type_->get_descriptor())
+  , item_count_(ITEM_COUNT_INVALID)
+{
+  if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
+    throw std::runtime_error("DynamicData only supports XCDR2 at this time");
+  }
 }
 
 DynamicData& DynamicData::operator=(const DynamicData& other)
 {
   chain_ = other.chain_->duplicate();
   encoding_ = other.encoding_;
+  reset_align_state_ = other.reset_align_state_;
+  align_state_ = other.align_state_;
   strm_ = other.strm_;
   type_ = other.type_;
   descriptor_ = other.descriptor_;
@@ -127,7 +145,11 @@ MemberId DynamicData::get_member_id_by_name(DCPS::String name) const
       }
     }
   }
-  // TODO: handle error case.
+
+  if (DCPS::DCPS_debug_level >= 1) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DynamicData::get_member_id_by_name -")
+               ACE_TEXT(" Calling on an unexpected type %C\n"), typekind_to_string(tk)));
+  }
   return MEMBER_ID_INVALID;
 }
 
@@ -138,7 +160,8 @@ MemberId DynamicData::get_member_id_at_index(ACE_CDR::ULong index)
     return MEMBER_ID_INVALID;
   }
 
-  switch (type_->get_kind()) {
+  const TypeKind tk = type_->get_kind();
+  switch (tk) {
   case TK_BOOLEAN:
   case TK_BYTE:
   case TK_INT16:
@@ -176,7 +199,10 @@ MemberId DynamicData::get_member_id_at_index(ACE_CDR::ULong index)
     }
   }
 
-  // TODO: handle error case.
+  if (DCPS::DCPS_debug_level >= 1) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DynamicData::get_member_id_at_index -")
+               ACE_TEXT(" Calling on an unexpected type %C\n"), typekind_to_string(tk)));
+  }
   return MEMBER_ID_INVALID;
 }
 
@@ -187,9 +213,10 @@ ACE_CDR::ULong DynamicData::get_item_count()
   }
 
   DCPS::Message_Block_Ptr dup(chain_->duplicate());
-  strm_ = DCPS::Serializer(dup.get(), encoding_);
+  setup_stream(dup.get());
 
-  switch (type_->get_kind()) {
+  const TypeKind tk = type_->get_kind();
+  switch (tk) {
   case TK_BOOLEAN:
   case TK_BYTE:
   case TK_INT16:
@@ -304,7 +331,10 @@ ACE_CDR::ULong DynamicData::get_item_count()
     }
   }
 
-  // TODO: handle error case.
+  if (DCPS::DCPS_debug_level >= 1) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DynamicData::get_item_count -")
+               ACE_TEXT(" Calling on an unexpected type %C\n"), typekind_to_string(tk)));
+  }
   return 0;
 }
 
@@ -348,9 +378,13 @@ bool DynamicData::read_value(ValueType& value, TypeKind tk)
   case TK_STRING8:
   case TK_STRING16:
     return strm_ >> value;
-  default:
-    return false;
   }
+
+  if (DCPS::DCPS_debug_level >= 1) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DynamicData::read_value -")
+               ACE_TEXT(" Calling on an unexpected type %C\n"), typekind_to_string(tk)));
+  }
+  return false;
 }
 
 template<TypeKind MemberTypeKind, typename MemberType>
@@ -644,6 +678,14 @@ bool DynamicData::get_value_from_collection(ElementType& value, MemberId id, Typ
   return read_value(value, ElementTypeKind);
 }
 
+void DynamicData::setup_stream(ACE_Message_Block* chain)
+{
+  strm_ = DCPS::Serializer(chain, encoding_);
+  if (reset_align_state_) {
+    strm_.rdstate(align_state_);
+  }
+}
+
 template<TypeKind ValueTypeKind, typename ValueType>
 DDS::ReturnCode_t DynamicData::get_single_value(ValueType& value, MemberId id,
                                                 TypeKind enum_or_bitmask, LBound lower, LBound upper)
@@ -653,7 +695,7 @@ DDS::ReturnCode_t DynamicData::get_single_value(ValueType& value, MemberId id,
   }
 
   DCPS::Message_Block_Ptr dup(chain_->duplicate());
-  strm_ = DCPS::Serializer(dup.get(), encoding_);
+  setup_stream(dup.get());
 
   const TypeKind tk = type_->get_kind();
   bool good = true;
@@ -758,7 +800,7 @@ template<TypeKind CharKind, TypeKind StringKind, typename ToCharT, typename Char
 DDS::ReturnCode_t DynamicData::get_char_common(CharT& value, MemberId id)
 {
   DCPS::Message_Block_Ptr dup(chain_->duplicate());
-  strm_ = DCPS::Serializer(dup.get(), encoding_);
+  setup_stream(dup.get());
 
   const TypeKind tk = type_->get_kind();
   bool good = true;
@@ -851,14 +893,14 @@ bool DynamicData::get_boolean_from_bitmask(ACE_CDR::ULong index, ACE_CDR::Boolea
     return false;
   }
 
-  value = ((1 << index) & bitmask) ? true : false;
+  value = ((1ULL << index) & bitmask) ? true : false;
   return true;
 }
 
 DDS::ReturnCode_t DynamicData::get_boolean_value(ACE_CDR::Boolean& value, MemberId id)
 {
   DCPS::Message_Block_Ptr dup(chain_->duplicate());
-  strm_ = DCPS::Serializer(dup.get(), encoding_);
+  setup_stream(dup.get());
 
   const TypeKind tk = type_->get_kind();
   bool good = true;
@@ -944,7 +986,7 @@ DDS::ReturnCode_t DynamicData::get_wstring_value(ACE_CDR::WChar*& value, MemberI
 DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id)
 {
   DCPS::Message_Block_Ptr dup(chain_->duplicate());
-  strm_ = DCPS::Serializer(dup.get(), encoding_);
+  setup_stream(dup.get());
 
   const TypeKind tk = type_->get_kind();
   bool good = true;
@@ -973,7 +1015,7 @@ DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id
           if (!member_type) {
             good = false;
           } else {
-            value = DynamicData(strm_.current(), strm_.encoding(), member_type);
+            value = DynamicData(strm_, member_type);
           }
         }
         break;
@@ -1011,7 +1053,7 @@ DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id
         if (!member_type) {
           good = false;
         } else {
-          value = DynamicData(strm_.current(), strm_.encoding(), member_type);
+          value = DynamicData(strm_, member_type);
         }
         break;
       }
@@ -1025,7 +1067,7 @@ DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id
           (tk == TK_MAP && !skip_to_map_element(id))) {
         good = false;
       } else {
-        value = DynamicData(strm_.current(), strm_.encoding(), descriptor_.element_type);
+        value = DynamicData(strm_, descriptor_.element_type);
       }
       break;
     }
@@ -1062,9 +1104,13 @@ bool DynamicData::read_values(SequenceType& value, TypeKind elem_tk)
   case TK_STRING8:
   case TK_STRING16:
     return strm_ >> value;
-  default:
-    return false;
   }
+
+  if (DCPS::DCPS_debug_level >= 1) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DynamicData::read_values -")
+               ACE_TEXT(" Calling on an unexpected element type %C\n"), typekind_to_string(elem_tk)));
+  }
+  return false;
 }
 
 template<TypeKind ElementTypeKind, typename SequenceType>
@@ -1251,7 +1297,7 @@ DDS::ReturnCode_t DynamicData::get_sequence_values(SequenceType& value, MemberId
   }
 
   DCPS::Message_Block_Ptr dup(chain_->duplicate());
-  strm_ = DCPS::Serializer(dup.get(), encoding_);
+  setup_stream(dup.get());
 
   const TypeKind tk = type_->get_kind();
   bool good = true;
