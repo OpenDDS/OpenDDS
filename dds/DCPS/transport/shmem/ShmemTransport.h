@@ -94,7 +94,7 @@ private:
   private:
     ShmemTransport* outer_;
     ACE_sema_t semaphore_;
-    bool stopped_;
+    ACE_Atomic_Op<ACE_Thread_Mutex, bool> stopped_;
   };
   unique_ptr<ReadTask> read_task_;
 };

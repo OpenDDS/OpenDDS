@@ -164,7 +164,7 @@ DDS::InstanceHandle_t
 DataWriterImpl::get_instance_handle()
 {
   const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
-  return get_entity_instance_handle(publication_id_, participant.get());
+  return get_entity_instance_handle(get_repo_id_copy(), participant.get());
 }
 
 DDS::InstanceHandle_t
@@ -204,12 +204,10 @@ DataWriterImpl::add_association(const RepoId& yourId,
   DBG_ENTRY_LVL("DataWriterImpl", "add_association", 6);
 
   if (DCPS_debug_level) {
-    GuidConverter writer_converter(yourId);
-    GuidConverter reader_converter(reader.readerId);
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterImpl::add_association - ")
                ACE_TEXT("bit %d local %C remote %C\n"), is_bit_,
-               OPENDDS_STRING(writer_converter).c_str(),
-               OPENDDS_STRING(reader_converter).c_str()));
+               LogGuid(yourId).c_str(),
+               LogGuid(reader.readerId).c_str()));
   }
 
   if (get_deleted()) {
@@ -220,8 +218,11 @@ DataWriterImpl::add_association(const RepoId& yourId,
     return;
   }
 
-  if (GUID_UNKNOWN == publication_id_) {
-    publication_id_ = yourId;
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(publication_id_lock_);
+    if (GUID_UNKNOWN == publication_id_) {
+      publication_id_ = yourId;
+    }
   }
 
   {
@@ -234,11 +235,10 @@ DataWriterImpl::add_association(const RepoId& yourId,
   }
 
   if (DCPS_debug_level > 4) {
-    GuidConverter converter(get_repo_id());
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::add_association(): ")
                ACE_TEXT("adding subscription to publication %C with priority %d.\n"),
-               OPENDDS_STRING(converter).c_str(),
+               LogGuid(get_repo_id_copy()).c_str(),
                qos_.transport_priority.value));
   }
 
@@ -274,23 +274,20 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
 
   if (!(flags & ASSOC_OK)) {
     if (DCPS_debug_level) {
-      const GuidConverter conv(remote_id);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) DataWriterImpl::transport_assoc_done: ")
                  ACE_TEXT("ERROR: transport layer failed to associate %C\n"),
-                 OPENDDS_STRING(conv).c_str()));
+                 LogGuid(remote_id).c_str()));
     }
 
     return;
   }
   if (DCPS_debug_level) {
-    const GuidConverter writer_conv(publication_id_);
-    const GuidConverter conv(remote_id);
     ACE_DEBUG((LM_INFO,
                ACE_TEXT("(%P|%t) DataWriterImpl::transport_assoc_done: ")
                ACE_TEXT("writer %C succeeded in associating with reader %C\n"),
-               OPENDDS_STRING(writer_conv).c_str(),
-               OPENDDS_STRING(conv).c_str()));
+               LogGuid(get_repo_id_copy()).c_str(),
+               LogGuid(remote_id).c_str()));
   }
   if (flags & ASSOC_ACTIVE) {
 
@@ -298,13 +295,11 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
 
     // Have we already received an association_complete() callback?
     if (DCPS_debug_level) {
-      const GuidConverter writer_conv(publication_id_);
-      const GuidConverter converter(remote_id);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataWriterImpl::transport_assoc_done: ")
                  ACE_TEXT("writer %C reader %C calling association_complete_i\n"),
-                 OPENDDS_STRING(writer_conv).c_str(),
-                 OPENDDS_STRING(converter).c_str()));
+                 LogGuid(get_repo_id_copy()).c_str(),
+                 LogGuid(remote_id).c_str()));
     }
     association_complete_i(remote_id);
 
@@ -312,11 +307,10 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
     // In the current implementation, DataWriter is always active, so this
     // code will not be applicable.
     if (DCPS_debug_level) {
-      const GuidConverter conv(publication_id_);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) DataWriterImpl::transport_assoc_done: ")
                  ACE_TEXT("ERROR: DataWriter (%C) should always be active in current implementation\n"),
-                 OPENDDS_STRING(conv).c_str()));
+                 LogGuid(get_repo_id_copy()).c_str()));
     }
   }
 }
@@ -368,14 +362,12 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
   DBG_ENTRY_LVL("DataWriterImpl", "association_complete_i", 6);
 
   if (DCPS_debug_level >= 1) {
-    GuidConverter writer_converter(this->publication_id_);
-    GuidConverter reader_converter(remote_id);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::association_complete_i - ")
                ACE_TEXT("bit %d local %C remote %C\n"),
                is_bit_,
-               OPENDDS_STRING(writer_converter).c_str(),
-               OPENDDS_STRING(reader_converter).c_str()));
+               LogGuid(get_repo_id_copy()).c_str(),
+               LogGuid(remote_id).c_str()));
   }
 
   bool reader_durable = false;
@@ -388,11 +380,10 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
     if (OpenDDS::DCPS::insert(readers_, remote_id) == -1) {
-      GuidConverter converter(remote_id);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::association_complete_i: ")
                  ACE_TEXT("insert %C from pending failed.\n"),
-                 OPENDDS_STRING(converter).c_str()));
+                 LogGuid(remote_id).c_str()));
     }
   }
   {
@@ -427,20 +418,18 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
       if (OpenDDS::DCPS::bind(id_to_handle_map_, remote_id, handle) != 0) {
-        GuidConverter converter(remote_id);
         ACE_DEBUG((LM_WARNING,
                    ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::association_complete_i: ")
                    ACE_TEXT("id_to_handle_map_%C = 0x%x failed.\n"),
-                   OPENDDS_STRING(converter).c_str(),
+                   LogGuid(remote_id).c_str(),
                    handle));
         return;
 
       } else if (DCPS_debug_level > 4) {
-        GuidConverter converter(remote_id);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataWriterImpl::association_complete_i: ")
                    ACE_TEXT("id_to_handle_map_%C = 0x%x.\n"),
-                   OPENDDS_STRING(converter).c_str(),
+                   LogGuid(remote_id).c_str(),
                    handle));
       }
 
@@ -560,14 +549,12 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
   }
 
   if (DCPS_debug_level >= 1) {
-    GuidConverter writer_converter(publication_id_);
-    GuidConverter reader_converter(readers[0]);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::remove_associations: ")
                ACE_TEXT("bit %d local %C remote %C num remotes %d\n"),
                is_bit_,
-               OPENDDS_STRING(writer_converter).c_str(),
-               OPENDDS_STRING(reader_converter).c_str(),
+               LogGuid(get_repo_id_copy()).c_str(),
+               LogGuid(readers[0]).c_str(),
                readers.length()));
   }
 
@@ -899,11 +886,10 @@ DataWriterImpl::update_subscription_params(const RepoId& readerId,
 
   } else if (DCPS_debug_level > 4 &&
              TheServiceParticipant->publisher_content_filter()) {
-    GuidConverter pubConv(this->publication_id_), subConv(readerId);
     ACE_DEBUG((LM_WARNING,
                ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::update_subscription_params()")
                ACE_TEXT(" - writer: %C has no info about reader: %C\n"),
-               OPENDDS_STRING(pubConv).c_str(), OPENDDS_STRING(subConv).c_str()));
+               LogGuid(get_repo_id_copy()).c_str(), LogGuid(readerId).c_str()));
   }
 
 #endif
@@ -936,7 +922,7 @@ DDS::ReturnCode_t DataWriterImpl::set_qos(const DDS::DataWriterQos& qos)
         status
           = disco->update_publication_qos(domain_id_,
                                           dp_id_,
-                                          this->publication_id_,
+                                          get_repo_id_copy(),
                                           qos,
                                           publisherQos);
       }
@@ -1492,7 +1478,7 @@ DataWriterImpl::enable()
   typesupport->add_types(type_lookup_service);
   typesupport->populate_dependencies(type_lookup_service);
 
-  this->publication_id_ =
+  PublicationId publication_id =
     disco->add_publication(this->domain_id_,
                            this->dp_id_,
                            this->topic_servant_->get_id(),
@@ -1501,7 +1487,8 @@ DataWriterImpl::enable()
                            trans_conf_info,
                            pub_qos,
                            type_info);
-  if (publication_id_ == GUID_UNKNOWN) {
+
+  if (publication_id == GUID_UNKNOWN) {
     if (DCPS_debug_level >= 1) {
       ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: DataWriterImpl::enable: "
         "add_publication failed\n"));
@@ -1513,11 +1500,15 @@ DataWriterImpl::enable()
   if (DCPS_debug_level >= 2) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriterImpl::enable: "
       "got GUID %C, publishing to topic name \"%C\" type \"%C\"\n",
-      LogGuid(publication_id_).c_str(),
+      LogGuid(publication_id).c_str(),
       topic_servant_->topic_name(), topic_servant_->type_name()));
   }
 
-  this->data_container_->publication_id_ = this->publication_id_;
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(publication_id_lock_);
+    publication_id_ = publication_id;
+    data_container_->publication_id_ = publication_id_;
+  }
 
   const DDS::ReturnCode_t writer_enabled_result =
     publisher->writer_enabled(topic_name_.in(), this);
@@ -2066,7 +2057,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
   header_data.sequence_repair_ = false; // set below
   header_data.source_timestamp_sec_ = source_timestamp.sec;
   header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
-  header_data.publication_id_ = publication_id_;
+  header_data.publication_id_ = get_repo_id_copy();
 
   RcHandle<PublisherImpl> publisher = this->publisher_servant_.lock();
   if (!publisher) {
@@ -2127,11 +2118,10 @@ DataWriterImpl::create_control_message(MessageId message_id,
     }
   }
   if (DCPS_debug_level >= 4) {
-    const GuidConverter converter(publication_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::create_control_message: ")
                ACE_TEXT("from publication %C sending control sample: %C .\n"),
-               OPENDDS_STRING(converter).c_str(),
+               LogGuid(get_repo_id_copy()).c_str(),
                to_string(header_data).c_str()));
   }
   return message;
@@ -2194,7 +2184,7 @@ DataWriterImpl::create_sample_data_message(Message_Block_Ptr data,
     header_data.lifespan_duration_nanosec_ = qos_.lifespan.duration.nanosec;
   }
 
-  header_data.publication_id_ = publication_id_;
+  header_data.publication_id_ = get_repo_id_copy();
   header_data.publisher_id_ = publisher->publisher_id_;
 
   ACE_Message_Block* tmp_message;
@@ -2216,11 +2206,10 @@ DataWriterImpl::create_sample_data_message(Message_Block_Ptr data,
   message.reset(tmp_message);
   *message << header_data;
   if (DCPS_debug_level >= 4) {
-    const GuidConverter converter(publication_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::create_sample_data_message: ")
                ACE_TEXT("from publication %C sending data sample: %C .\n"),
-               OPENDDS_STRING(converter).c_str(),
+               LogGuid(get_repo_id_copy()).c_str(),
                to_string(header_data).c_str()));
   }
   return DDS::RETCODE_OK;
@@ -2231,17 +2220,16 @@ DataWriterImpl::data_delivered(const DataSampleElement* sample)
 {
   DBG_ENTRY_LVL("DataWriterImpl","data_delivered",6);
 
-  if (!(sample->get_pub_id() == this->publication_id_)) {
-    GuidConverter sample_converter(sample->get_pub_id());
-    GuidConverter writer_converter(publication_id_);
+  if (!(sample->get_pub_id() == get_repo_id_copy())) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::data_delivered: ")
                ACE_TEXT("The publication id %C from delivered element ")
                ACE_TEXT("does not match the datawriter's id %C\n"),
-               OPENDDS_STRING(sample_converter).c_str(),
-               OPENDDS_STRING(writer_converter).c_str()));
+               LogGuid(sample->get_pub_id()).c_str(),
+               LogGuid(get_repo_id_copy()).c_str()));
     return;
   }
+
   //provided for statistics tracking in tests
   ++data_delivered_count_;
 
@@ -2797,11 +2785,10 @@ void DataWriterImpl::transport_discovery_change()
   populate_connection_info();
   const TransportLocatorSeq& trans_conf_info = connection_info();
   const RepoId dp_id_copy = dp_id_;
-  const RepoId publication_id_copy = publication_id_;
   Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
   disco->update_publication_locators(domain_id_,
                                      dp_id_copy,
-                                     publication_id_copy,
+                                     get_repo_id_copy(),
                                      trans_conf_info);
 }
 

@@ -399,8 +399,8 @@ public:
   void notify_publication_lost(const ReaderIdSeq& subids);
 
   /// Statistics counter.
-  int         data_dropped_count_;
-  int         data_delivered_count_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, int> data_dropped_count_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, int> data_delivered_count_;
 
   MessageTracker controlTracker;
 
@@ -461,7 +461,13 @@ public:
   virtual ICE::Endpoint* get_ice_endpoint();
 
   const RepoId& get_repo_id() const {
-    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(get_lock());
+    ACE_Guard<ACE_Thread_Mutex> guard(publication_id_lock_);
+    return publication_id_;
+  }
+
+  RepoId get_repo_id_copy() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(publication_id_lock_);
     return publication_id_;
   }
 
@@ -622,6 +628,7 @@ private:
   /// The lock to protect the activate subscriptions
   /// and status changes.
   mutable ACE_Recursive_Thread_Mutex lock_;
+  mutable ACE_Thread_Mutex publication_id_lock_;
 
   typedef OPENDDS_MAP_CMP(RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan) RepoIdToHandleMap;
 

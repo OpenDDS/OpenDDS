@@ -104,7 +104,10 @@ OpenDDS::DCPS::TcpDataLink::connect(
 {
   DBG_ENTRY_LVL("TcpDataLink","connect",6);
 
-  this->connection_ = connection;
+  {
+    GuardType guard(strategy_lock_);
+    this->connection_ = connection;
+  }
 
   if (connection->peer().enable(ACE_NONBLOCK) == -1) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -395,7 +398,7 @@ OpenDDS::DCPS::TcpDataLink::ack_received(const ReceivedDataSample& sample)
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TcpDataLink::ack_received() found matching element %@\n"),
         elem));
     }
-    this->send_strategy_->deliver_ack_request(elem);
+    send_strategy()->deliver_ack_request(elem);
   }
   else {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TcpDataLink::ack_received() received unknown sequence number %q\n"),
@@ -454,10 +457,6 @@ OpenDDS::DCPS::TcpDataLink::request_ack_received(const ReceivedDataSample& sampl
 void
 OpenDDS::DCPS::TcpDataLink::do_association_actions()
 {
-  if (!connection_ || !send_strategy_) {
-    return;
-  }
-
   // We have a connection.
   // Invoke callbacks for readers so we can receive messages and let writers know we are ready.
   typedef std::vector<std::pair<RepoId, RepoId> > PairVec;
@@ -465,6 +464,10 @@ OpenDDS::DCPS::TcpDataLink::do_association_actions()
 
   {
     GuardType guard(strategy_lock_);
+
+    if (!connection_ || !send_strategy_) {
+      return;
+    }
 
     for (OnStartCallbackMap::const_iterator it = on_start_callbacks_.begin(); it != on_start_callbacks_.end(); ++it) {
       for (RepoToClientMap::const_iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2) {

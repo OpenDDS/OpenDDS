@@ -117,6 +117,10 @@ TransportQueueElement::MatchOnDataPayload::~MatchOnDataPayload()
 {
 }
 
+TransportQueueElement::MatchOnElement::~MatchOnElement()
+{
+}
+
 }
 }
 

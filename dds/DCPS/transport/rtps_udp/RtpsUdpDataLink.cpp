@@ -194,6 +194,7 @@ RtpsUdpDataLink::RtpsWriter::remove_sample(const DataSampleElement* sample)
       ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(mutex_);
       ACE_Guard<ACE_Reverse_Lock<ACE_Thread_Mutex> > rg(rev_lock);
       result = link->send_strategy_->remove_sample(sample);
+      guard.release();
     }
   }
 
