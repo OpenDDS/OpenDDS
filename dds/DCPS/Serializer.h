@@ -450,6 +450,11 @@ public:
   /// Examine the logical writing position of the stream.
   size_t wpos() const { return wpos_; }
 
+  ACE_Message_Block* current() const
+  {
+    return current_;
+  }
+
   /**
    * Read basic IDL types arrays
    * The buffer @a x must be large enough to contain @a length
