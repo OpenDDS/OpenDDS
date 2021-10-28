@@ -1,0 +1,11 @@
+project(XTypes_Dynamic_PubSub): dcps_test, dcps_rtps_udp, msvc_bigobj {
+  dcps_ts_flags += -Gxtypes-complete
+  exename   = xtypes_dynamic_pubsub
+  Source_Files {
+    XTypesDynamicPubSub.cpp
+  }
+
+  TypeSupport_Files {
+    dynamic.idl
+  }
+}

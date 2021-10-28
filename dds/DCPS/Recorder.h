@@ -16,6 +16,7 @@
 
 #include "XTypes/TypeObject.h"
 #include "XTypes/DynamicType.h"
+#include "XTypes/DynamicData.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -104,6 +105,7 @@ public:
    */
   virtual RecorderListener_rch get_listener() = 0;
   DynamicTypeByPubId dt_map_;
+  OpenDDS::XTypes::DynamicData get_dynamic_data(const RawDataSample& sample);
 };
 
 }

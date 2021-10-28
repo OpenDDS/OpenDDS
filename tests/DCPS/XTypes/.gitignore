@@ -25,3 +25,17 @@ Sub/XTypesSubTypeSupportImpl.cpp
 Sub/XTypesSubTypeSupportImpl.h
 Sub/XTypesSubTypeSupportS.cpp
 Sub/XTypesSubTypeSupportS.h
+
+Pub/dynamicC.cpp
+Pub/dynamicC.h
+Pub/dynamicC.inl
+Pub/dynamicS.cpp
+Pub/dynamicS.h
+Pub/dynamicTypeSupport.idl
+Pub/dynamicTypeSupportC.cpp
+Pub/dynamicTypeSupportC.h
+Pub/dynamicTypeSupportC.inl
+Pub/dynamicTypeSupportImpl.cpp
+Pub/dynamicTypeSupportImpl.h
+Pub/dynamicTypeSupportS.cpp
+Pub/dynamicTypeSupportS.h

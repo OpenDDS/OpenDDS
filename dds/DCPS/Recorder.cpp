@@ -21,6 +21,20 @@ Recorder::~Recorder()
 {
 }
 
+XTypes::DynamicData Recorder::get_dynamic_data(const RawDataSample& sample) {
+  ACE_Message_Block* fuck_you = sample.sample_.get();
+  Encoding enc(Encoding::KIND_XCDR2, sample.header_.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
+  const DynamicTypeByPubId::const_iterator dt_found = dt_map_.find(sample.publication_id_);
+  if (dt_found == dt_map_.end()) {
+    ACE_ERROR((LM_ERROR, "on_sample_data_received: -"
+      "failed to find DynamicType in DynamicTypeByPubId."));
+  } else {
+    XTypes::DynamicType_rch dt = dt_found->second;
+    XTypes::DynamicData dd(sample.sample_.get(), enc, dt);
+    return dd;
+  }
+}
+
 Recorder_ptr Recorder::_duplicate(Recorder_ptr obj)
 {
   if (obj) obj->_add_ref();

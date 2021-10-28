@@ -228,6 +228,8 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
 
   // we only support SAMPLE_DATA messages
   if (sample.header_.message_id_ == SAMPLE_DATA && listener_.in()) {
+    // skip encapsulation header
+    sample.sample_->rd_ptr(4);
     RawDataSample rawSample(sample.header_,
                             static_cast<MessageId> (sample.header_.message_id_),
                             sample.header_.source_timestamp_sec_,
