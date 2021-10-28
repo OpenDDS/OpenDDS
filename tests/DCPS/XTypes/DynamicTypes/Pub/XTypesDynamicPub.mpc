@@ -1,8 +1,8 @@
-project(XTypes_Dynamic_PubSub): dcps_test, dcps_rtps_udp, msvc_bigobj {
+project(XTypes_Dynamic_Pub): dcps_test, dcps_rtps_udp, msvc_bigobj {
   dcps_ts_flags += -Gxtypes-complete
-  exename   = xtypes_dynamic_pubsub
+  exename   = xtypes_dynamic_pub
   Source_Files {
-    XTypesDynamicPubSub.cpp
+    XTypesDynamicPub.cpp
   }
 
   TypeSupport_Files {
