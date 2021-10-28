@@ -159,7 +159,10 @@ DataReaderImpl::cleanup()
   topic_servant_ = 0;
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-  content_filtered_topic_ = 0;
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(content_filtered_topic_mutex_);
+    content_filtered_topic_ = 0;
+  }
 #endif
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
@@ -982,8 +985,11 @@ DataReaderListener_ptr DataReaderImpl::get_ext_listener()
 DDS::TopicDescription_ptr DataReaderImpl::get_topicdescription()
 {
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-  if (content_filtered_topic_) {
-    return DDS::TopicDescription::_duplicate(content_filtered_topic_.get());
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(content_filtered_topic_mutex_);
+    if (content_filtered_topic_) {
+      return DDS::TopicDescription::_duplicate(content_filtered_topic_.get());
+    }
   }
 #endif
   return DDS::TopicDescription::_duplicate(topic_desc_.in());
@@ -1295,13 +1301,14 @@ DataReaderImpl::enable()
     CORBA::String_var filterExpression = "";
     DDS::StringSeq exprParams;
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-
-    if (content_filtered_topic_) {
-      filterClassName = content_filtered_topic_->get_filter_class_name();
-      filterExpression = content_filtered_topic_->get_filter_expression();
-      content_filtered_topic_->get_expression_parameters(exprParams);
+    {
+      ACE_Guard<ACE_Thread_Mutex> guard(content_filtered_topic_mutex_);
+      if (content_filtered_topic_) {
+        filterClassName = content_filtered_topic_->get_filter_class_name();
+        filterExpression = content_filtered_topic_->get_filter_expression();
+        content_filtered_topic_->get_expression_parameters(exprParams);
+      }
     }
-
 #endif
 
     DDS::SubscriberQos sub_qos;
@@ -3246,12 +3253,16 @@ void
 DataReaderImpl::enable_filtering(ContentFilteredTopicImpl* cft)
 {
   cft->add_reader(*this);
-  content_filtered_topic_ = cft;
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(content_filtered_topic_mutex_);
+    content_filtered_topic_ = cft;
+  }
 }
 
 DDS::ContentFilteredTopic_ptr
 DataReaderImpl::get_cf_topic() const
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(content_filtered_topic_mutex_);
   return DDS::ContentFilteredTopic::_duplicate(content_filtered_topic_.get());
 }
 #endif

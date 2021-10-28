@@ -703,6 +703,7 @@ protected:
 #endif
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+  mutable ACE_Thread_Mutex content_filtered_topic_mutex_;
   TopicDescriptionPtr<ContentFilteredTopicImpl> content_filtered_topic_;
 #endif
 
