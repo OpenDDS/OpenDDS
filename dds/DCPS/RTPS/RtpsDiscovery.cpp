@@ -89,7 +89,7 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , max_type_lookup_service_reply_period_(5, 0)
   , use_xtypes_(true)
   , sedp_heartbeat_period_(0, 200*1000 /*microseconds*/)
-  , sedp_nak_response_delay_(0, 100*1000 /*microseconds*/) // default from RTPS
+  , sedp_nak_response_delay_(0, 100*1000 /*microseconds*/)
   , sedp_send_delay_(0, 10 * 1000)
   , sedp_passive_connect_duration_(TimeDuration::from_msec(DCPS::TransportConfig::DEFAULT_PASSIVE_CONNECT_DURATION))
   , participant_flags_(PFLAGS_THIS_VERSION)

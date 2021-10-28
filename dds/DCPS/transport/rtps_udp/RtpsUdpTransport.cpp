@@ -35,8 +35,8 @@ RtpsUdpTransport::RtpsUdpTransport(RtpsUdpInst& inst)
 #endif
 #ifdef OPENDDS_SECURITY
   , ice_endpoint_(*this)
-#endif
   , relay_stun_task_falloff_(TimeDuration::zero_value)
+#endif
 {
   assign(local_prefix_, GUIDPREFIX_UNKNOWN);
   if (!(configure_i(inst) && open())) {
@@ -431,9 +431,11 @@ RtpsUdpTransport::update_locators(const RepoId& remote,
 void
 RtpsUdpTransport::rtps_relay_address_change()
 {
+#ifdef OPENDDS_SECURITY
   relay_stun_task_->cancel();
   relay_stun_task_falloff_.set(config().heartbeat_period_);
   relay_stun_task_->schedule(TimeDuration::zero_value);
+#endif
 }
 
 void
