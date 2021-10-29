@@ -4,7 +4,7 @@
 #include "ParticipantStatisticsReporter.h"
 #include "RelayStatisticsReporter.h"
 
-#include <tools/rtpsrelay/lib/Utility.h>
+#include "lib/Utility.h"
 
 #include <dds/DCPS/TimeTypes.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>

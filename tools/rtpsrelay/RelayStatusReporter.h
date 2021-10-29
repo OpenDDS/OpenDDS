@@ -4,7 +4,7 @@
 #include "Config.h"
 #include "GuidAddrSet.h"
 
-#include <tools/rtpsrelay/lib/RelayTypeSupportImpl.h>
+#include "lib/RelayTypeSupportImpl.h"
 
 namespace RtpsRelay {
 
