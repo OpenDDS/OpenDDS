@@ -12,6 +12,8 @@
 
 set -e
 
+start=$(date +'%s')
+
 args=($@)
 
 cd "${DDS_ROOT}"
@@ -39,6 +41,12 @@ function get-gcda {
     done
 }
 
+result=0
+
+echo '=============================================================================='
+echo 'auto_run_tests: tools/scripts/unit_test_coverage.sh'
+echo ''
+
 rm -f coverage-total.info
 
 for unit_name in $(get-units)
@@ -59,6 +67,7 @@ do
         if [[ ${output} == *"0 tests from 0 test cases ran"* ]]
         then
             echo "ERROR: No test cases for ${unit_name}"
+            result=1
         fi
     )
 
@@ -93,3 +102,17 @@ lcov --remove coverage-total.info --output-file coverage-total.info '*/tests/uni
 # Generate HTML
 rm -rf coverage-out
 genhtml coverage-total.info --output-directory coverage-out
+
+stop=$(date +'%s')
+
+if [[ ${result} == 0 ]]
+then
+    echo 'test PASSED.'
+else
+    echo 'test FAILED.'
+fi
+
+echo ''
+echo "auto_run_tests: tools/scripts/unit_test_coverage.sh Time:$(($stop - $start))s Result:${result}"
+
+exit $result
