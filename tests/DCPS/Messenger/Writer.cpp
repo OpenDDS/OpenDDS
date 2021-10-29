@@ -117,6 +117,9 @@ int Writer::svc()
       message.count++;
     }
 
+    DDS::Duration_t duration = {DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};
+    writer_->wait_for_acknowledgments(duration);
+
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in svc():");
   }
