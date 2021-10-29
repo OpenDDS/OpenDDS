@@ -383,6 +383,10 @@ Sedp::init(const RepoId& guid,
                        DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
                        OPENDDS_STRING("_SEDPTransportInst_") + key + domainStr,
                        "rtps_udp");
+
+  // Be careful to not call any function that causes the transport be
+  // to created before the configuration is complete.
+
   // Use a static cast to avoid dependency on the RtpsUdp library
   DCPS::RtpsUdpInst_rch rtps_inst =
       DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
@@ -416,15 +420,17 @@ Sedp::init(const RepoId& guid,
   rtps_inst->ipv6_advertised_address_ = disco.config()->ipv6_sedp_advertised_address();
 #endif
 
-  rtps_relay_address(disco.config()->sedp_rtps_relay_address());
-  rtps_inst->use_rtps_relay_ = disco.config()->use_rtps_relay();
-  rtps_inst->rtps_relay_only_ = disco.config()->rtps_relay_only();
-
-  stun_server_address(disco.config()->sedp_stun_server_address());
-  rtps_inst->use_ice_ = disco.config()->use_ice();
-
   if (!disco.config()->sedp_fragment_reassembly_timeout().is_zero()) {
     rtps_inst->fragment_reassembly_timeout_ = disco.config()->sedp_fragment_reassembly_timeout();
+  }
+
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, rtps_inst->config_lock_, DDS::RETCODE_PRECONDITION_NOT_MET);
+    rtps_inst->rtps_relay_address_ = disco.config()->sedp_rtps_relay_address();
+    rtps_inst->use_rtps_relay_ = disco.config()->use_rtps_relay();
+    rtps_inst->rtps_relay_only_ = disco.config()->rtps_relay_only();
+    rtps_inst->stun_server_address_ = disco.config()->sedp_stun_server_address();
+    rtps_inst->use_ice_ = disco.config()->use_ice();
   }
 
   // Create a config
@@ -5893,8 +5899,11 @@ void
 Sedp::rtps_relay_address(const ACE_INET_Addr& address)
 {
   DCPS::RtpsUdpInst_rch rtps_inst = DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  ACE_GUARD(ACE_Thread_Mutex, g, rtps_inst->config_lock_);
-  rtps_inst->rtps_relay_address_ = address;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, rtps_inst->config_lock_);
+    rtps_inst->rtps_relay_address_ = address;
+  }
+  rtps_inst->rtps_relay_address_change();
 }
 
 void
