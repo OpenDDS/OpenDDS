@@ -33,7 +33,6 @@
 #include "ReactorInterceptor.h"
 #include "Service_Participant.h"
 #include "PoolAllocator.h"
-#include "RemoveAssociationSweeper.h"
 #include "RcEventHandler.h"
 #include "TopicImpl.h"
 #include "DomainParticipantImpl.h"
@@ -608,7 +607,6 @@ protected:
   DataReaderListener_ptr get_ext_listener();
 
   virtual void remove_associations_i(const WriterIdSeq& writers, bool callback);
-  void remove_publication(const PublicationId& pub_id);
 
   void prepare_to_delete();
 
@@ -770,7 +768,6 @@ private:
 
   friend class InstanceState;
   friend class EndHistoricSamplesMissedSweeper;
-  friend class RemoveAssociationSweeper<DataReaderImpl>;
 
   friend class ::DDS_TEST; //allows tests to get at private data
 
@@ -785,7 +782,6 @@ private:
   // the subscriber_servant_ object.
   WeakRcHandle<SubscriberImpl>              subscriber_servant_;
   RcHandle<EndHistoricSamplesMissedSweeper> end_historic_sweeper_;
-  RcHandle<RemoveAssociationSweeper<DataReaderImpl> > remove_association_sweeper_;
 
   CORBA::Long                  depth_;
   size_t                       n_chunks_;
