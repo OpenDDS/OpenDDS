@@ -44,6 +44,7 @@ public:
   DynamicData(ACE_Message_Block* chain,
               const DCPS::Encoding& encoding,
               const DynamicType_rch& type);
+  DynamicData(DCPS::Serializer& ser, const DynamicType_rch& type);
   DynamicData& operator=(const DynamicData& other);
 
   ~DynamicData();
@@ -52,7 +53,7 @@ public:
   DDS::ReturnCode_t set_descriptor(MemberId id, const MemberDescriptor& value);
 
   MemberId get_member_id_by_name(DCPS::String name) const;
-  MemberId get_member_id_at_index(ACE_CDR::ULong index) const;
+  MemberId get_member_id_at_index(ACE_CDR::ULong index);
   ACE_CDR::ULong get_item_count();
 
   DynamicData clone() const;
@@ -103,6 +104,9 @@ private:
 
   /// Verify that a given type is primitive or string or wstring.
   bool is_type_supported(TypeKind tk, const char* func_name);
+
+  /// Setup the strm_ object so that it has the correct alignment state.
+  void setup_stream(ACE_Message_Block* chain);
 
   /// Overloads for reading a single value as a given type.
   template<typename ValueType>
@@ -235,11 +239,34 @@ private:
   bool get_index_from_id(MemberId id, ACE_CDR::ULong& index, ACE_CDR::ULong bound) const;
   const char* typekind_to_string(TypeKind tk) const;
 
+  /// A duplicate of the original message block chain passed from the constructor.
+  /// This is released in the destructor.
   ACE_Message_Block* chain_;
+
   DCPS::Encoding encoding_;
+
+  /// Indicate whether the alignment state of a Serializer object associated
+  /// with this DynamicData needs to be reset.
+  bool reset_align_state_;
+
+  /// The alignment state that a Serializer object associated with this DynamicData
+  /// object will be set to.
+  DCPS::Serializer::RdState align_state_;
+
+  /// Each public interface creates a new Serializer object with a message block
+  /// chain that is a duplicate from chain_.
   DCPS::Serializer strm_;
+
+  /// This DynamicData object holds data for this type.
   DynamicType_rch type_;
+
+  /// Cache the descriptor for the same type for convenience.
   TypeDescriptor descriptor_;
+
+  const ACE_CDR::ULong ITEM_COUNT_INVALID = UINT32_MAX;
+
+  /// Cache the number of items (i.e., members or elements) in the data it holds.
+  ACE_CDR::ULong item_count_;
 };
 
 } // namespace XTypes
