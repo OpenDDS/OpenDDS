@@ -164,7 +164,9 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
 void
 TcpTransport::async_connect_failed(const PriorityKey& key)
 {
-  ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Failed to make active connection.\n"));
+  if (DCPS_debug_level >= 2) {
+    ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: Failed to make active connection.\n"));
+  }
   GuardType guard(links_lock_);
   TcpDataLink_rch link;
   links_.find(key, link);
@@ -502,9 +504,8 @@ TcpTransport::release_datalink(DataLink* link)
 
     VDBG_LVL((LM_DEBUG,
               "(%P|%t) TcpTransport::release_datalink datalink_release_delay "
-              "is %: sec %d usec\n",
-              link->datalink_release_delay().value().sec(),
-              link->datalink_release_delay().value().usec()), 4);
+              "is %C\n",
+              link->datalink_release_delay().str().c_str()), 4);
 
     // Atomic value update, safe to perform here.
     released_link->set_release_pending(true);

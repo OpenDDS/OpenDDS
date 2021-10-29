@@ -581,11 +581,14 @@ SubscriberImpl::notify_datareaders()
   for (DataReaderMap::iterator it = localreadermap.begin(); it != localreadermap.end(); ++it) {
     if (it->second->have_sample_states(DDS::NOT_READ_SAMPLE_STATE)) {
       DDS::DataReaderListener_var listener = it->second->get_listener();
-      if (listener) {
-        listener->on_data_available(it->second.in());
+      if (!it->second->is_bit()) {
+        if (listener) {
+          listener->on_data_available(it->second.in());
+        }
+        it->second->set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
+      } else {
+        TheServiceParticipant->job_queue()->enqueue(make_rch<DataReaderImpl::OnDataAvailable>(rchandle_from(this), listener, it->second, listener, true, false));
       }
-
-      it->second->set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
     }
   }
 

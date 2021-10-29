@@ -235,183 +235,6 @@ void RelayHandler::enqueue_message(const ACE_INET_Addr& addr,
   }
 }
 
-
-ParticipantStatisticsReporter&
-GuidAddrSet::Proxy::record_activity(const AddrPort& remote_address,
-                                    const OpenDDS::DCPS::MonotonicTimePoint& now,
-                                    const OpenDDS::DCPS::GUID_t& src_guid,
-                                    const size_t& msg_len,
-                                    RelayHandler& handler)
-{
-  return gas_.record_activity(remote_address, now, src_guid, msg_len, handler);
-}
-
-ParticipantStatisticsReporter&
-GuidAddrSet::record_activity(const AddrPort& remote_address,
-                             const OpenDDS::DCPS::MonotonicTimePoint& now,
-                             const OpenDDS::DCPS::GUID_t& src_guid,
-                             const size_t& msg_len,
-                             RelayHandler& handler)
-{
-  const auto expiration = now + config_.lifespan();
-
-  {
-    const auto before = guid_addr_set_map_.size();
-    const auto res = guid_addr_set_map_[src_guid].select_addr_set(remote_address.port)->insert(std::make_pair(remote_address, expiration));
-    if (res.second) {
-      if (config_.log_activity()) {
-        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity %C %C is at %C total=%B pending=%B/%B\n"), handler.name().c_str(), guid_to_string(src_guid).c_str(), OpenDDS::DCPS::LogAddr(remote_address.addr).c_str(), guid_addr_set_map_.size(), pending_.size(), config_.max_pending()));
-      }
-      relay_stats_reporter_.new_address(now);
-      const auto after = guid_addr_set_map_.size();
-      if (before != after) {
-        relay_stats_reporter_.local_active_participants(after, now);
-        *guid_addr_set_map_[src_guid].select_stats_reporter(remote_address.port) = ParticipantStatisticsReporter(rtps_guid_to_relay_guid(src_guid), handler.name());
-      }
-
-      const GuidAddr ga(src_guid, remote_address);
-      expiration_guid_addr_queue_.push_back(std::make_pair(expiration, ga));
-    }
-    res.first->second = expiration;
-  }
-
-  ParticipantStatisticsReporter& stats_reporter = *guid_addr_set_map_[src_guid].select_stats_reporter(remote_address.port);
-  stats_reporter.message_from(msg_len, now);
-
-  return stats_reporter;
-}
-
-void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now)
-{
-  GuidAddrSet::Proxy proxy(*this);
-
-  while (!expiration_guid_addr_queue_.empty() && expiration_guid_addr_queue_.front().first <= now) {
-    const OpenDDS::DCPS::MonotonicTimePoint expiration = expiration_guid_addr_queue_.front().first;
-    const GuidAddr ga = expiration_guid_addr_queue_.front().second;
-
-    expiration_guid_addr_queue_.pop_front();
-
-    const auto pos = guid_addr_set_map_.find(ga.guid);
-    if (pos == guid_addr_set_map_.end()) {
-      continue;
-    }
-
-    AddrSetStats& addr_stats = pos->second;
-    AddrSet& addr_set = *addr_stats.select_addr_set(ga.address.port);
-    const auto p = addr_set.find(ga.address);
-    if (p == addr_set.end()) {
-      continue;
-    }
-
-    if (p->second <= now) {
-      addr_set.erase(p);
-    } else {
-      expiration_guid_addr_queue_.push_back(std::make_pair(p->second, ga));
-      continue;
-    }
-
-    // Address actually expired.
-    if (config_.log_activity()) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C %C expired at %:.%d now=%:.%d total=%B pending=%B/%B\n"), guid_to_string(ga.guid).c_str(), OpenDDS::DCPS::LogAddr(ga.address.addr).c_str(), expiration.value().sec(), expiration.value().usec(), now.value().sec(), now.value().usec(), guid_addr_set_map_.size(), pending_.size(), config_.max_pending()));
-    }
-    relay_stats_reporter_.expired_address(now);
-
-    if (addr_stats.empty()) {
-      addr_stats.spdp_stats_reporter.report(now, true);
-      addr_stats.sedp_stats_reporter.report(now, true);
-      addr_stats.data_stats_reporter.report(now, true);
-      guid_addr_set_map_.erase(ga.guid);
-      pending_.erase(ga.guid);
-      relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
-      if (config_.log_activity()) {
-        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C removed total=%B pending=%B/%B\n"), guid_to_string(ga.guid).c_str(), guid_addr_set_map_.size(), pending_.size(), config_.max_pending()));
-      }
-    }
-  }
-
-  while (!pending_expiration_queue_.empty() && pending_expiration_queue_.front().first <= now) {
-    const auto& expiration = pending_expiration_queue_.front().first;
-    const auto& guid = pending_expiration_queue_.front().second;
-    if (config_.log_activity()) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C pending expired at %d.%d now=%d.%d total=%B pending=%B/%B\n"), guid_to_string(guid).c_str(), expiration.value().sec(), expiration.value().usec(), now.value().sec(), now.value().usec(), guid_addr_set_map_.size(), pending_.size(), config_.max_pending()));
-    }
-    relay_stats_reporter_.expired_pending(now);
-    pending_.erase(guid);
-    pending_expiration_queue_.pop_front();
-  }
-}
-
-bool GuidAddrSet::ignore_rtps(bool from_application_participant,
-                              const OpenDDS::DCPS::GUID_t& guid,
-                              const OpenDDS::DCPS::MonotonicTimePoint& now,
-                              bool& admitted)
-{
-  const auto pos = guid_addr_set_map_.find(guid);
-  if (pos == guid_addr_set_map_.end()) {
-    return true;
-  }
-
-  if (pos->second.allow_rtps) {
-    // Client has already been admitted.
-    return false;
-  }
-
-  if (from_application_participant) {
-    pos->second.allow_rtps = true;
-    return false;
-  }
-
-  if (pos->second.spdp_addr_set.empty() || pos->second.sedp_addr_set.empty() || !pos->second.spdp_message) {
-    // Don't have the necessary addresses or message to complete discovery.
-    return true;
-  }
-
-  if (config_.max_pending() == 0) {
-    pos->second.allow_rtps = true;
-    admitted = true;
-    return false;
-  }
-
-  if (pending_.size() >= config_.max_pending()) {
-    // Too many new clients to admit another.
-    return true;
-  }
-
-  pending_.insert(guid);
-  pending_expiration_queue_.push_back(std::make_pair(now + config_.pending_timeout(), guid));
-  pos->second.allow_rtps = true;
-  admitted = true;
-
-  return false;
-}
-
-OpenDDS::DCPS::MonotonicTimePoint GuidAddrSet::get_first_spdp(const OpenDDS::DCPS::GUID_t& guid)
-{
-  GuidAddrSet::Proxy proxy(*this);
-  AddrSetStats& addr_stats = guid_addr_set_map_[guid];
-  return addr_stats.first_spdp;
-}
-
-void GuidAddrSet::remove(const OpenDDS::DCPS::GUID_t& guid)
-{
-  GuidAddrSet::Proxy proxy(*this);
-
-  const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
-
-  AddrSetStats& addr_stats = guid_addr_set_map_[guid];
-  addr_stats.spdp_stats_reporter.report(now, true);
-  addr_stats.sedp_stats_reporter.report(now, true);
-  addr_stats.data_stats_reporter.report(now, true);
-
-  guid_addr_set_map_.erase(guid);
-  pending_.erase(guid);
-  relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
-
-  if (config_.log_activity()) {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::remove %C removed total=%B pending=%B/%B\n"), guid_to_string(guid).c_str(), guid_addr_set_map_.size(), pending_.size(), config_.max_pending()));
-  }
-}
-
 VerticalHandler::VerticalHandler(const Config& config,
                                  const std::string& name,
                                  Port port,
@@ -454,7 +277,7 @@ void VerticalHandler::venqueue_message(const ACE_INET_Addr& addr,
                                        MessageType type)
 {
   enqueue_message(addr, msg, now, type);
-  to_psr.message_to(msg->length(), now);
+  to_psr.output_message(msg->length(), type);
 }
 
 CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
@@ -462,7 +285,11 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
                                               const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
                                               MessageType& type)
 {
-  guid_addr_set_.process_expirations(now);
+  {
+    GuidAddrSet::Proxy proxy(guid_addr_set_);
+    proxy.process_expirations(now);
+  }
+
   AddrPort addr_port(remote_address, port());
 
   const auto msg_len = msg->length();
@@ -480,7 +307,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
     }
 
     GuidAddrSet::Proxy proxy(guid_addr_set_);
-    record_activity(proxy, addr_port, now, src_guid, msg_len);
+    record_activity(proxy, addr_port, now, src_guid, type, msg_len);
 
     cache_message(proxy, src_guid, to, msg, now);
 
@@ -578,9 +405,10 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
 
     if (has_guid) {
       GuidAddrSet::Proxy proxy(guid_addr_set_);
-      ParticipantStatisticsReporter& from_psr = record_activity(proxy, addr_port, now, src_guid, msg_len);
+      ParticipantStatisticsReporter& from_psr =
+        record_activity(proxy, addr_port, now, src_guid, type, msg_len);
       if (bytes_sent) {
-        from_psr.message_to(bytes_sent, now);
+        from_psr.output_message(bytes_sent, type);
       }
 
       const bool from_application_participant =
@@ -603,9 +431,10 @@ VerticalHandler::record_activity(GuidAddrSet::Proxy& proxy,
                                  const AddrPort& remote_address,
                                  const OpenDDS::DCPS::MonotonicTimePoint& now,
                                  const OpenDDS::DCPS::GUID_t& src_guid,
+                                 MessageType msg_type,
                                  const size_t& msg_len)
 {
-  return proxy.record_activity(remote_address, now, src_guid, msg_len, *this);
+  return proxy.record_activity(remote_address, now, src_guid, msg_type, msg_len, *this);
 }
 
 bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser,
@@ -803,7 +632,7 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
 
   if (send_to_application_participant) {
     venqueue_message(application_participant_addr_,
-      proxy.participant_statistics_reporter(config_.application_participant_guid(), port()),
+      proxy.participant_statistics_reporter(config_.application_participant_guid(), now, port()),
       msg, now, type);
     ++sent;
   }
@@ -1047,7 +876,12 @@ void SpdpHandler::cache_message(GuidAddrSet::Proxy& proxy,
     const auto pos = proxy.find(src_guid);
     if (pos != proxy.end()) {
       if (!pos->second.spdp_message) {
-        pos->second.first_spdp = now;
+        if (config_.log_activity()) {
+          ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SpdpHandler::cache_message ")
+                     ACE_TEXT("%C got first SPDP %C into session\n"),
+                     guid_to_string(src_guid).c_str(),
+                     pos->second.get_session_time(now).sec_str().c_str()));
+        }
 #ifdef OPENDDS_SECURITY
         pos->second.common_name = extract_common_name(msg);
         if (config_.log_activity() && !pos->second.common_name.empty()) {

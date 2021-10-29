@@ -1,13 +1,16 @@
 #ifndef OPENDDS_DCPS_TIMEDURATION_H
 #define OPENDDS_DCPS_TIMEDURATION_H
 
+#include "PoolAllocator.h"
+#include "SafeBool_T.h"
+
+#include <dds/DdsDcpsCoreC.h>
+
 #include <ace/Time_Value.h>
 
-#include "dds/DdsDcpsCoreC.h"
-
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
+#ifndef ACE_LACKS_PRAGMA_ONCE
 #  pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -22,7 +25,7 @@ namespace DCPS {
  * See the "Time" section in docs/guidelines.md for background and reasoning
  * for this class.
  */
-class OpenDDS_Dcps_Export TimeDuration {
+class OpenDDS_Dcps_Export TimeDuration : public SafeBool_T<TimeDuration> {
 public:
   const static TimeDuration zero_value;
   const static TimeDuration max_value;
@@ -65,13 +68,35 @@ public:
   bool is_max() const;
   DDS::Duration_t to_dds_duration() const;
 
+  bool boolean_test() const
+  {
+    return value_ != zero_value.value();
+  }
+
+  /**
+   * Convert to a string in a humanized format:
+   *    SECONDS.FRACTIONAL s
+   * if the time is less than a minute or just_sec is true, else:
+   *    [[HOURS:]MINUTES:]SECONDS.FRACTIONAL
+   *
+   * decimal_places is the number of decimal places to round to in the
+   * fractional seconds.
+   */
+  String str(unsigned decimal_places = 3, bool just_sec = false) const;
+
+  String sec_str(unsigned decimal_places = 3) const
+  {
+    return str(decimal_places, true);
+  }
+
   TimeDuration& operator+=(const TimeDuration& other);
   TimeDuration& operator-=(const TimeDuration& other);
   TimeDuration& operator=(const TimeDuration& other);
   TimeDuration& operator=(const time_t& other);
   TimeDuration& operator*=(double other);
+  TimeDuration& operator/=(double other);
 
-private:
+protected:
   ACE_Time_Value value_;
 };
 
@@ -80,6 +105,7 @@ OpenDDS_Dcps_Export TimeDuration operator-(const TimeDuration& x, const TimeDura
 OpenDDS_Dcps_Export TimeDuration operator-(const TimeDuration& x);
 OpenDDS_Dcps_Export TimeDuration operator*(double x, const TimeDuration& y);
 OpenDDS_Dcps_Export TimeDuration operator*(const TimeDuration& x, double y);
+OpenDDS_Dcps_Export TimeDuration operator/(const TimeDuration& x, double y);
 OpenDDS_Dcps_Export bool operator<(const TimeDuration& x, const TimeDuration& y);
 OpenDDS_Dcps_Export bool operator>(const TimeDuration& x, const TimeDuration& y);
 OpenDDS_Dcps_Export bool operator<=(const TimeDuration& x, const TimeDuration& y);
@@ -92,8 +118,8 @@ OpenDDS_Dcps_Export bool operator!=(const TimeDuration& x, const TimeDuration& y
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#if defined (__ACE_INLINE__)
+#ifdef __ACE_INLINE__
 #  include "TimeDuration.inl"
-#endif /* __ACE_INLINE__ */
+#endif
 
 #endif

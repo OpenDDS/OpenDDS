@@ -11,6 +11,7 @@ use File::Temp qw/tempdir/;
 use File::Path qw/make_path/;
 use Getopt::Long;
 use JSON::PP;
+use Storable qw/dclone/;
 
 use LWP::UserAgent;
 use Net::FTP::File;
@@ -361,28 +362,35 @@ sub write_json_file {
   my $what = shift();
 
   open my $f, '>', $path or die("Can't open JSON file $path: $!");
-  print $f encode_json($what);
+  # Writes indented, space-separated JSON in a reproducible order
+  print $f JSON::PP->new->pretty->canonical->encode($what);
   close $f;
 }
 
-sub read_workspace_info {
-  my $settings = shift();
-
-  return read_json_file($settings->{workspace_info_file_path})
+sub expand_releases {
+  my $releases = shift();
+  for my $release (@{$releases}) {
+    $release->{version} = \parse_version($release->{version});
+  }
+  return $releases;
 }
 
-sub write_workspace_info {
-  my $settings = shift();
-  my $what = shift();
+sub compress_releases {
+  my $releases = shift();
 
-  write_json_file($settings->{workspace_info_file_path}, {
-    mock => $settings->{mock},
-    micro => $settings->{micro},
-    version => $settings->{version},
-    next_version => $settings->{next_version},
-    is_highest_version => $settings->{is_highest_version},
-    release_occurred => $settings->{release_occurred},
-  });
+  # Make a copy and replace the parsed version hashes with the version strings
+  my @copy = @{dclone($releases)};
+  for my $release (@copy) {
+    $release->{version} = $release->{version}->{string};
+  }
+  return \@copy;
+}
+
+sub write_releases {
+  my $path = shift();
+  my $releases_ref = shift();
+
+  write_json_file($path, compress_releases($releases_ref));
 }
 
 sub compare_workspace_info {
@@ -410,7 +418,7 @@ sub check_workspace {
   }
 
   if (-f $settings->{workspace_info_file_path}) {
-    my $info = read_workspace_info($settings);
+    my $info = read_json_file($settings->{workspace_info_file_path});
 
     my $invalid = 0;
     $invalid |= compare_workspace_info($settings, $info, 'mock');
@@ -421,18 +429,27 @@ sub check_workspace {
       die("Inconsistent with existing workspace, see above for details");
     }
 
+    $settings->{is_highest_version} = $info->{is_highest_version};
     if ($info->{release_occurred}) {
       print("Release occurred flag set, assuming $info->{version} was released!\n");
     }
-
-    $settings->{is_highest_version} = $info->{is_highest_version};
     $settings->{release_occurred} = $info->{release_occurred};
   }
   else {
-    my @releases = get_releases($settings);
-    $settings->{is_highest_version} = is_highest_release($settings, \@releases);
+    my $previous_releases = get_releases($settings);
+    $settings->{is_highest_version} = scalar(@{$previous_releases}) == 0 ||
+      version_greater_equal($settings->{parsed_version},
+        $previous_releases->[0]->{version});
     $settings->{release_occurred} = 0;
-    write_workspace_info($settings);
+
+    write_json_file($settings->{workspace_info_file_path}, {
+      mock => $settings->{mock},
+      micro => $settings->{micro},
+      version => $settings->{version},
+      next_version => $settings->{next_version},
+      is_highest_version => $settings->{is_highest_version},
+      release_occurred => $settings->{release_occurred},
+    });
   }
 }
 
@@ -674,6 +691,9 @@ sub parse_release_tag {
     %parsed = parse_version($1) if $1;
     $parsed{tag_name} = $tag if %parsed;
   }
+  if (!%parsed) {
+    die("Invalid release tag name: $tag");
+  }
   return %parsed;
 }
 
@@ -686,24 +706,28 @@ sub get_releases {
   }
 
   my @releases = ();
-  while (my $row = $release_list->next) {
-    my $tag = $row->{tag_name};
-    my %parsed = parse_release_tag($tag);
-    if (!%parsed) {
-      die("Invalid release tag name: $tag");
+  while (my $release = $release_list->next) {
+    next if $release->{prerelease};
+    my %parsed = parse_release_tag($release->{tag_name});
+    my @assets = ();
+    for my $asset (@{$release->{assets}}) {
+      push(@assets, {
+        name => $asset->{name},
+        browser_download_url => $asset->{browser_download_url},
+      });
     }
-    push(@releases, \%parsed);
+    # Sort by reverse name to put zip files first for the website
+    @assets = sort { $b->{name} cmp $a->{name} } @assets;
+    push(@releases, {
+      version => \%parsed,
+      published_at => $release->{published_at},
+      html_url => $release->{html_url},
+      assets => \@assets,
+    });
   }
 
-  return sort { version_cmp($a, $b) } @releases;
-}
-
-sub is_highest_release {
-  my $settings = shift();
-  my $releases_ref = shift();
-
-  return scalar(@{$releases_ref}) == 0 ? 1 :
-    version_greater_equal($settings->{parsed_version}, $releases_ref->[-1]);
+  my @sorted = sort { version_cmp($b->{version}, $a->{version}) } @releases;
+  return \@sorted;
 }
 
 ############################################################################
@@ -762,14 +786,15 @@ sub verify_git_status_clean {
 
 sub remedy_git_status_clean {
   my $settings = shift();
-  my $post_release = shift() || 0;
+  my $post_release = shift() // 0;
+  my $changelog = shift() // 1;
   my $version = $settings->{version};
 
   if (!run_command("git --no-pager diff HEAD")) {
     return 0;
   }
   return 0 if (!yes_no("Would you like to add and commit these changes?"));
-  if (!$post_release) {
+  if (!$post_release && $changelog) {
     system("git add docs/history/ChangeLog-$version") == 0
       or die "Could not execute: git add docs/history/ChangeLog-$version";
   }
@@ -1153,7 +1178,7 @@ sub verify_news_file_section {
   }
   close(NEWS);
 
-  return ($has_version);
+  return $has_version;
 }
 
 sub message_news_file_section {
@@ -1191,7 +1216,7 @@ sub verify_update_news_file {
   }
   close(NEWS);
 
-  return ($has_version && $corrected_features && $corrected_fixes);
+  return $has_version && $corrected_features && $corrected_fixes;
 }
 
 sub message_update_news_file {
@@ -2142,23 +2167,32 @@ sub remedy_github_upload {
 }
 
 ############################################################################
+
+my $website_releases_json = '_data/releases.json';
+
 sub verify_website_release {
   # verify there are no differences between website-next-release branch and gh-pages branch
   my $settings = shift();
   my $remote = $settings->{remote};
   my $status;
 
-  # fetch remote branches so we have up to date versions
-  if ($status && !run_command("git fetch $remote website-next-release")) {
-    print STDERR "Couldn't fetch website-next-release!\n";
-    return 0;
+  if ($status && !run_command("git add $website_releases_json")) {
+    print STDERR "Couldn't git add!\n";
+    $status = 0;
   }
-  if ($status && !run_command("git fetch $remote gh-pages")) {
-    print STDERR "Couldn't fetch gh-pages!\n";
-    return 0;
+  if ($status && !remedy_git_status_clean($settings, 0, 0)) {
+    print STDERR "Couldn't commit release list!\n";
+    $status = 0;
   }
 
-  $status = open(GITDIFF, 'git diff ' . $remote  . '/website-next-release ' . $remote . '/gh-pages|');
+  # fetch remote branches so we have up to date versions
+  run_command("git fetch $remote website-next-release") or
+    die("Couldn't fetch website-next-release!");
+  run_command("git fetch $remote gh-pages") or
+    die("Couldn't fetch gh-pages!");
+
+  open(GITDIFF, "git diff $remote/website-next-release $remote/gh-pages|") or
+    die("Couldn't run git diff");
   my $delta = "";
   while (<GITDIFF>) {
     if (/^...(.*)/) {
@@ -2166,15 +2200,28 @@ sub verify_website_release {
     }
   }
   close(GITDIFF);
-  # return 1 to pass
-  # return 0 to fail
-  return (length($delta) == 0) ? 1 : 0;
+  my $has_merged = length($delta) == 0;
+
+  # See if the release we're doing is on the website
+  open(my $git_show, "git show $remote/gh-pages:$website_releases_json|") or
+    die("Couldn't run git show $website_releases_json");
+  my $has_release = 0;
+  for my $r (@{decode_json(do { local $/; <$git_show> })}) {
+    if ($r->{version} eq $settings->{version}) {
+      $has_release = 1;
+      last;
+    }
+  }
+  close($git_show);
+
+  return $has_merged && $has_release;
 }
 
 sub message_website_release {
   my $settings = shift();
   my $remote = $settings->{remote};
-  return "$remote/website-next-release branch needs to merge into $remote/gh-pages branch";
+  return "$remote/website-next-release branch needs to merge into\n" .
+    "  $remote/gh-pages branch or release list needs to be updated";
 }
 
 sub remedy_website_release {
@@ -2185,7 +2232,7 @@ sub remedy_website_release {
   my $rm_worktree = 0;
   my $status = 1;
 
-  if (!run_command("git worktree add $worktree gh-pages")) {
+  if (!-d $worktree && !run_command("git worktree add $worktree gh-pages")) {
     print STDERR
       "Couldn't create temporary website worktree!\n";
     $status = 0;
@@ -2193,6 +2240,31 @@ sub remedy_website_release {
   $rm_worktree = 1;
   my $prev_dir = getcwd;
   chdir $worktree;
+
+  # Merge releases with the same major and minor versions, keeping one with the
+  # highest micro version.
+  my $releases = get_releases(shift);
+  my $latest_ver = $releases->[0]->{version};
+  my $major = $latest_ver->{major} + 1;
+  my $minor = $latest_ver->{minor};
+  for my $release (@{$releases}) {
+    my $v = $release->{version};
+    $release->{latest_in_series} =
+      ($v->{major} != $major || $v->{minor} != $minor) ? 1 : 0;
+    if ($release->{latest_in_series}) {
+      $major = $v->{major};
+      $minor = $v->{minor};
+    }
+  }
+  write_releases($website_releases_json, $releases);
+  if ($status && !run_command("git add $website_releases_json")) {
+    print STDERR "Couldn't git add!\n";
+    $status = 0;
+  }
+  if ($status && !remedy_git_status_clean($settings, 0, 0)) {
+    print STDERR "Couldn't commit release list!\n";
+    $status = 0;
+  }
 
   # Get the two branches merged with each other
   if ($status && !run_command("git pull")) {
@@ -2247,13 +2319,13 @@ sub remedy_website_release {
 sub verify_email_list {
   # Can't verify
   my $settings = shift;
-  print 'Email this text to dds-release-announce@ociweb.com' . "\n\n" .
+  print 'Email this text to announce the release' . "\n\n" .
     email_announce_contents($settings);
   return 1;
 }
 
 sub message_email_dds_release_announce {
-  return 'Email needs to be sent to dds-release-announce@ociweb.com';
+  return 'Emails are needed to announce the release';
 }
 
 sub remedy_email_dds_release_announce {
@@ -2275,7 +2347,7 @@ sub verify_news_template_file_section {
   }
   close(NEWS);
 
-  return ($has_news_template);
+  return $has_news_template;
 }
 
 sub message_news_template_file_section {

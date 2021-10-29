@@ -446,9 +446,6 @@ SingleSendBuffer::resend_fragments_i(SequenceNumber seq,
 
   BufferMap::const_iterator it = buffers.lower_bound(psr.front().first);
   BufferMap::const_iterator end = buffers.lower_bound(psr.back().second);
-  if (psr.back().second < end->first) {
-    return;
-  }
   if (end != buffers.end()) {
     ++end;
   }
