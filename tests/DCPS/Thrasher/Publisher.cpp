@@ -128,6 +128,10 @@ int Publisher::publish()
     return 1;
   }
   ACE_DEBUG((LM_INFO, (pfx_ + "  waiting for acks returned\n").c_str()));
+
+  ACE_DEBUG((LM_INFO, (pfx_ + "->wait_match() (unmatch)\n").c_str()));
+  Utils::wait_match(dw_, 0);
+  ACE_DEBUG((LM_INFO, (pfx_ + "<-match unmatched!\n").c_str()));
   return 0;
 }
 
