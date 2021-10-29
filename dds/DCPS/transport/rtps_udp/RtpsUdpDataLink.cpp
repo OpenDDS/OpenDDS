@@ -1475,7 +1475,7 @@ RtpsUdpDataLink::RtpsWriter::send_heartbeats(const MonotonicTimePoint& /*now*/)
     heartbeat_.schedule(fallback_.get());
     fallback_.advance();
   } else {
-    fallback_.reset();
+    fallback_.set(link->config().heartbeat_period_);
   }
 
   g.release();
@@ -2057,7 +2057,7 @@ RtpsUdpDataLink::RtpsWriter::add_reader(const ReaderInfo_rch& reader)
       return false;
     }
 
-    fallback_.reset();
+    fallback_.set(link->config().heartbeat_period_);
     heartbeat_.schedule(fallback_.get());
     if (link->config().responsive_mode_) {
       MetaSubmessageVec meta_submessages;
@@ -3129,7 +3129,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     }
   }
 
-  fallback_.reset();
+  fallback_.set(link->config().heartbeat_period_);
 
   const bool is_final = acknack.smHeader.flags & RTPS::FLAG_F;
   const bool is_postassociation = count_is_not_zero && (is_final || bitmapNonEmpty(acknack.readerSNState) || ack != 1);

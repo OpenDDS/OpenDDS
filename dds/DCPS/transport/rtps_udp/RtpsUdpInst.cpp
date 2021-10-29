@@ -317,6 +317,16 @@ RtpsUdpInst::update_locators(const RepoId& remote_id,
 }
 
 void
+RtpsUdpInst::rtps_relay_address_change()
+{
+  TransportImpl_rch imp = impl();
+  if (imp) {
+    RtpsUdpTransport_rch rtps_impl = static_rchandle_cast<RtpsUdpTransport>(imp);
+    rtps_impl->rtps_relay_address_change();
+  }
+}
+
+void
 RtpsUdpInst::get_and_reset_relay_message_counts(RelayMessageCounts& counts)
 {
   TransportImpl_rch imp = impl();
