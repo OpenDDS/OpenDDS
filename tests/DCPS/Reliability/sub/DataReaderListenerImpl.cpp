@@ -13,7 +13,9 @@
 using namespace examples::boilerplate;
 
 DataReaderListenerImpl::DataReaderListenerImpl()
-  : sample_count_(0)
+  : mutex_()
+  , condition_(mutex_)
+  , sample_count_(0)
   , expected_count_(0)
   , expected_seq_(0)
   , sleep_length_(0)
@@ -52,6 +54,7 @@ void DataReaderListenerImpl::on_requested_incompatible_qos (
 
 void DataReaderListenerImpl::on_sample(Reliability::Message& msg)
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   if (sample_count_ == 0) {
     expected_count_ = msg.expected;
   } else if (msg.expected != expected_count_) {
@@ -73,4 +76,14 @@ void DataReaderListenerImpl::on_sample(Reliability::Message& msg)
     ACE_OS::sleep(sleep_length_);
   }
 
+  if (sample_count_ >= expected_count_) {
+    condition_.notify_all();
+  }
+}
+
+void DataReaderListenerImpl::wait_expected() {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  while (expected_count_ == 0 && sample_count_ < expected_count_) {
+    condition_.wait();
+  }
 }

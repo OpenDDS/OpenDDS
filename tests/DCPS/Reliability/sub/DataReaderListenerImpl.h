@@ -44,12 +44,17 @@ public:
   void set_sleep_length(int sleep_length) { sleep_length_ = sleep_length;};
   void set_num_sleeps(int num_sleeps) { num_sleeps_ = num_sleeps;};
 
-  protected:
+  void wait_expected();
+
+protected:
   virtual void take_samples(
     Reliability::MessageDataReader_var reader_i
   ) = 0;
 
   void on_sample(Reliability::Message& msg);
+
+  mutable ACE_Thread_Mutex mutex_;
+  mutable OpenDDS::DCPS::ConditionVariable<ACE_Thread_Mutex> condition_;
 
   long sample_count_;
   long expected_count_;

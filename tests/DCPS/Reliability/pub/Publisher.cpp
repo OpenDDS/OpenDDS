@@ -7,7 +7,7 @@
 
 #include "Boilerplate.h"
 #include <dds/DCPS/Service_Participant.h>
-#include <model/Sync.h>
+#include <tests/Utils/StatusMatching.h>
 #include <stdexcept>
 #include <iostream>
 
@@ -55,8 +55,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     Reliability::MessageDataWriter_var msg_writer = narrow(writer);
 
     {
-      // Block until Subscriber is available
-      OpenDDS::Model::WriterSync ws(writer);
+      Utils::wait_match(writer, 1);
 
       // Initialize samples
       Reliability::Message message;
@@ -86,7 +85,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         }
       }
 
-      std::cout << "Waiting for acks from sub" << std::endl;
+      Utils::wait_match(writer, 0);
     }
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");

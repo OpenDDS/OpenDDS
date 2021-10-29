@@ -10,7 +10,7 @@
 #include "ZeroCopyReaderListenerImpl.h"
 #include "Boilerplate.h"
 #include <dds/DCPS/Service_Participant.h>
-#include <model/Sync.h>
+#include <tests/Utils/StatusMatching.h>
 #include <stdexcept>
 #include <ctime>
 #include <iostream>
@@ -114,11 +114,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::DataReader_var reader = createDataReader(subscriber, topic, listener);
 
     std::cout << "Waiting for connection" << std::endl;
-    {
-      // Block until reader has associated with a writer
-      // but is no longer associated with any writer
-      OpenDDS::Model::ReaderSync rs(reader);
-    }
+    Utils::wait_match(reader, 1);
+
+    listener_impl->wait_expected();
 
     if (listener_impl->sample_count() == listener_impl->expected_count()) {
       std::cout << "Got all " << listener_impl->sample_count()
