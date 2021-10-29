@@ -137,6 +137,27 @@ public:
     report(now);
   }
 
+  void relay_partitions_pub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    log_relay_statistics_.relay_partitions_pub_count() = count;
+    publish_relay_statistics_.relay_partitions_pub_count() = count;
+    report(now);
+  }
+
+  void relay_address_pub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    log_relay_statistics_.relay_address_pub_count() = count;
+    publish_relay_statistics_.relay_address_pub_count() = count;
+    report(now);
+  }
+
+  void spdp_replay_pub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    log_relay_statistics_.spdp_replay_pub_count() = count;
+    publish_relay_statistics_.spdp_replay_pub_count() = count;
+    report(now);
+  }
+
   void report()
   {
     report(OpenDDS::DCPS::MonotonicTimePoint::now(), true);
