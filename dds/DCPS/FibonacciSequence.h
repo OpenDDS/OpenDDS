@@ -30,7 +30,7 @@ public:
     f_n_minus_1_ = f_n_;
     f_n_ = f_n_plus_1;
     if (fmax != T(0)) {
-      f_n_ = std::min(f_n_, fmax);
+      f_n_ = (std::min)(f_n_, fmax);
     }
   }
 
