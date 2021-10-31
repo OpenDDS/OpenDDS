@@ -206,6 +206,7 @@ namespace
 DCPSInfo_var
 InfoRepoDiscovery::get_dcps_info()
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(lock_);
   if (CORBA::is_nil(this->info_.in())) {
 
     if (!orb_) {
@@ -254,6 +255,7 @@ InfoRepoDiscovery::get_dcps_info()
 std::string
 InfoRepoDiscovery::get_stringified_dcps_info_ior()
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(lock_);
   return this->ior_;
 }
 
@@ -319,6 +321,7 @@ InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
                                    DDS::SubscriberListener::_nil(),
                                    DEFAULT_STATUS_MASK);
   try {
+    ACE_Guard<ACE_Thread_Mutex> guard(lock_);
     TransportConfig_rch config = bit_config();
     TransportRegistry::instance()->bind_config(config, bit_subscriber);
 

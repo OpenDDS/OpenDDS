@@ -9,6 +9,8 @@
 #define OPENDDS_DCPS_TRANSIENT_KLUDGE_H
 
 #include "dcps_export.h"
+#include "ace/Atomic_Op.h"
+#include "ace/Thread_Mutex.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -47,7 +49,7 @@ public:
 
 private:
   /// The flag.
-  bool  enabled_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> enabled_;
 };
 
 #define TheTransientKludge OpenDDS::DCPS::Transient_Kludge::instance()

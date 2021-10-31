@@ -34,5 +34,5 @@ ACE_INLINE
 bool
 OpenDDS::DCPS::Transient_Kludge::is_enabled() const
 {
-  return enabled_;
+  return enabled_.value();
 }
