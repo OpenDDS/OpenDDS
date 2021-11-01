@@ -1141,8 +1141,8 @@ bool DynamicData::read_values(SequenceType& value, TypeKind elem_tk)
     size_t dheader = 0;
     if (!strm_.read_delimiter(dheader)) {
       if (DCPS::DCPS_debug_level >= 1) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::skip_to_struct_member -")
-                    ACE_TEXT(" Failed to read DHEADER for member ID\n")));
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::read_values -")
+                    ACE_TEXT(" Failed to read DHEADER for sequence element\n")));
       }
       return false;
     }
