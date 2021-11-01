@@ -263,6 +263,7 @@ TransportConfig_rch
 InfoRepoDiscovery::bit_config()
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
+  ACE_Guard<ACE_Thread_Mutex> guard(lock_);
   if (bit_config_.is_nil()) {
     const std::string cfg_name = TransportRegistry::DEFAULT_INST_PREFIX +
                                  std::string("_BITTransportConfig_") + key();
@@ -321,7 +322,6 @@ InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
                                    DDS::SubscriberListener::_nil(),
                                    DEFAULT_STATUS_MASK);
   try {
-    ACE_Guard<ACE_Thread_Mutex> guard(lock_);
     TransportConfig_rch config = bit_config();
     TransportRegistry::instance()->bind_config(config, bit_subscriber);
 
