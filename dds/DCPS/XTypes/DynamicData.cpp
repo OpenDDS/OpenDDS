@@ -9,8 +9,6 @@
 
 #include "DynamicTypeMember.h"
 
-#include <ace/OS_NS_string.h>
-
 #include <dds/CorbaSeq/LongSeqTypeSupportImpl.h>
 #include <dds/CorbaSeq/ULongSeqTypeSupportImpl.h>
 #include <dds/CorbaSeq/Int8SeqTypeSupportImpl.h>
@@ -28,6 +26,8 @@
 #include <dds/CorbaSeq/BooleanSeqTypeSupportImpl.h>
 #include <dds/CorbaSeq/StringSeqTypeSupportImpl.h>
 #include <dds/CorbaSeq/WStringSeqTypeSupportImpl.h>
+
+#include <ace/OS_NS_string.h>
 
 #include <stdexcept>
 

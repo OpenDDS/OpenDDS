@@ -13,8 +13,9 @@
 #include "RcHandle_T.h"
 #include "RawDataSample.h"
 #include "dds/DdsDcpsInfrastructureC.h"
+#include "GuidConverter.h"
 
-#include "XTypes/DynamicData.h"
+#include <XTypes/DynamicData.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

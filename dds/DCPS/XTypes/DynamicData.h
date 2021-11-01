@@ -6,7 +6,7 @@
 #ifndef OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_H
 #define OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_H
 
-#include "TypeObject.h"
+#include "TypeObject.h>
 #include "DynamicType.h"
 
 #include <dds/DCPS/Serializer.h>

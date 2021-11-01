@@ -4,8 +4,6 @@
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
-#include <iostream>
-#include <sstream>
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
@@ -27,10 +25,13 @@
 #include <dds/DCPS/transport/framework/TransportConfig.h>
 #include <dds/DCPS/transport/framework/TransportInst.h>
 
-#include "dds/DCPS/Recorder.h"
+#include <dds/DCPS/Recorder.h>
 
-#include "ace/Semaphore.h"
-#include "ace/Thread_Semaphore.h"
+#include <ace/Semaphore.h>
+#include <ace/Thread_Semaphore.h>
+
+#include <iostream>
+#include <sstream>
 
 int print_dynamic_data(OpenDDS::XTypes::DynamicData dd) {
   ACE_DEBUG((LM_DEBUG, "Type is: \n"));

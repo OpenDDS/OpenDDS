@@ -1,12 +1,9 @@
-// #include "common.h"
-// #include "Writer.h"
-// #include "DataReaderListener.h"
 #include "dynamicTypeSupportImpl.h"
 
-#include <dds/DCPS/DCPS_Utils.h>
 #include <tests/DCPS/common/TestException.h>
 #include <tests/Utils/StatusMatching.h>
 
+#include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Qos_Helper.h>
