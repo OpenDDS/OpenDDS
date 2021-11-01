@@ -60,9 +60,71 @@ struct SingleValueStruct {
   @id(17) wstring wstr;
 };
 
+@final
+struct SingleValueStructFinal {
+  @id(0) SomeEnum my_enum;
+  @id(1) long int_32;
+  @id(2) unsigned long uint_32;
+  @id(3) int8 int_8;
+  @id(4) uint8 uint_8;
+  @id(5) short int_16;
+  @id(6) unsigned short uint_16;
+  @id(7) long long int_64;
+  @id(8) unsigned long long uint_64;
+  @id(9) float float_32;
+  @id(10) double float_64;
+  @id(11) long double float_128;
+  @id(12) char char_8;
+  @id(13) wchar char_16;
+  @id(14) octet byte;
+  @id(15) boolean bool;
+  @id(16) string str;
+  @id(17) wstring wstr;
+};
+
 // Reading single value from union.
 @mutable
 union SingleValueUnion switch (SomeEnum) {
+case INT32:
+  @id(1) long int_32;
+case UINT32:
+  @id(2) unsigned long uint_32;
+case INT8:
+  @id(3) int8 int_8;
+case UINT8:
+  @id(4) uint8 uint_8;
+case INT16:
+  @id(5) short int_16;
+case UINT16:
+  @id(6) unsigned short uint_16;
+case INT64:
+  @id(7) long long int_64;
+case UINT64:
+  @id(8) unsigned long long uint_64;
+case FLOAT32:
+  @id(9) float float_32;
+case FLOAT64:
+  @id(10) double float_64;
+case FLOAT128:
+  @id(11) long double float_128;
+case CHAR8:
+  @id(12) char char_8;
+case CHAR16:
+  @id(13) wchar char_16;
+case BYTE:
+  @id(14) octet byte_;
+case BOOL:
+  @id(15) boolean bool_;
+case STRING8:
+  @id(16) string str;
+case STRING16:
+  @id(17) wstring wstr;
+default:
+  @id(18) SomeEnum my_enum;
+};
+
+@final
+union SingleValueUnionFinal switch (SomeEnum) {
 case INT32:
   @id(1) long int_32;
 case UINT32:
