@@ -168,12 +168,6 @@ void RecorderImpl::init(
   }
 
   CORBA::String_var topic_name = a_topic_desc->get_name();
-
-#if !defined (DDS_HAS_MINIMUM_BIT)
-  CORBA::String_var type_name = a_topic_desc->get_type_name();
-  is_bit_ = topicIsBIT(topic_name.in(), type_name);
-#endif   // !defined (DDS_HAS_MINIMUM_BIT)
-
   qos_ = qos;
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
@@ -220,31 +214,27 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
 {
   DBG_ENTRY_LVL("RecorderImpl","data_received",6);
 
-  // ensure some other thread is not changing the sample container
+  // Ensure some other thread is not changing the sample container
   // or statuses related to samples.
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
 
   if (DCPS_debug_level > 9) {
-    GuidConverter converter(subscription_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::data_received: ")
                ACE_TEXT("%C received sample: %C.\n"),
-               OPENDDS_STRING(converter).c_str(),
+               LogGuid(subscription_id_).c_str(),
                to_string(sample.header_).c_str()));
   }
 
   // we only support SAMPLE_DATA messages
-  if (sample.header_.message_id_ != SAMPLE_DATA)
-    return;
-
-  RawDataSample rawSample(static_cast<MessageId> (sample.header_.message_id_),
-                          sample.header_.source_timestamp_sec_,
-                          sample.header_.source_timestamp_nanosec_,
-                          sample.header_.publication_id_,
-                          sample.header_.byte_order_,
-                          sample.sample_.get());
-
-  if (listener_.in()) {
+  if (sample.header_.message_id_ == SAMPLE_DATA && listener_.in()) {
+    RawDataSample rawSample(sample.header_,
+                            static_cast<MessageId> (sample.header_.message_id_),
+                            sample.header_.source_timestamp_sec_,
+                            sample.header_.source_timestamp_nanosec_,
+                            sample.header_.publication_id_,
+                            sample.header_.byte_order_,
+                            sample.sample_.get());
     listener_->on_sample_data_received(this, rawSample);
   }
 }
@@ -276,14 +266,12 @@ RecorderImpl::add_association(const RepoId&            yourId,
   // The following block is for diagnostic purposes only.
   //
   if (DCPS_debug_level >= 1) {
-    GuidConverter reader_converter(yourId);
-    GuidConverter writer_converter(writer.writerId);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::add_association - ")
                ACE_TEXT("bit %d local %C remote %C\n"),
                is_bit_,
-               OPENDDS_STRING(reader_converter).c_str(),
-               OPENDDS_STRING(writer_converter).c_str()));
+               LogGuid(yourId).c_str(),
+               LogGuid(writer.writerId).c_str()));
   }
 
   //
@@ -436,6 +424,17 @@ RecorderImpl::add_association(const RepoId&            yourId,
   // We only do the following processing for readers that are *not*
   // readers of Builtin Topics.
   //
+  XTypes::TypeLookupService_rch tls = participant_servant_->get_type_lookup_service();
+  XTypes::TypeInformation type_info;
+  if (!XTypes::deserialize_type_info(type_info, writer.serializedTypeInfo)) {
+    ACE_ERROR((LM_ERROR,
+               "(%P|%t) RecorderImpl::add_association:"
+               " Failed to deserialize TypeInformation\n"));
+    return;
+  }
+  XTypes::TypeObject cto = tls->get_type_object(type_info.complete.typeid_with_size.type_id);
+  XTypes::DynamicType_rch dt = tls->complete_to_dynamic(cto.complete, writer.writerId);
+  dt_map_.insert(std::make_pair(writer.writerId, dt));
   if (!is_bit_) {
 
     const DDS::InstanceHandle_t handle = participant_servant_->assign_handle(writer.writerId);
@@ -514,14 +513,12 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
   }
 
   if (DCPS_debug_level >= 1) {
-    GuidConverter reader_converter(subscription_id_);
-    GuidConverter writer_converter(writers[0]);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::remove_associations: ")
                ACE_TEXT("bit %d local %C remote %C num remotes %d\n"),
                is_bit_,
-               OPENDDS_STRING(reader_converter).c_str(),
-               OPENDDS_STRING(writer_converter).c_str(),
+               LogGuid(subscription_id_).c_str(),
+               LogGuid(writers[0]).c_str(),
                writers.length()));
   }
   if (!get_deleted()) {
@@ -536,7 +533,7 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
       ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
 
       for (CORBA::ULong i = 0; i < wr_len; i++) {
-        PublicationId writer_id = writers[i];
+        const PublicationId writer_id = writers[i];
 
         WriterMapType::iterator it = this->writers_.find(writer_id);
         if (it != this->writers_.end() &&
@@ -562,7 +559,7 @@ RecorderImpl::remove_publication(const PublicationId& pub_id)
     WriterInfo& info = *where->second;
     WriterIdSeq writers;
     push_back(writers, pub_id);
-    bool notify = info.notify_lost_;
+    const bool notify = info.notify_lost_;
     write_guard.release();
     remove_associations_i(writers, notify);
   }
@@ -612,8 +609,14 @@ RecorderImpl::remove_associations_i(const WriterIdSeq& writers,
     for (CORBA::ULong i = 0; i < wr_len; i++) {
       PublicationId writer_id = writers[i];
 
-      WriterMapType::iterator it = this->writers_.find(writer_id);
+      if (dt_map_.erase(writer_id) == 0) {
+        if (DCPS_debug_level >= 4) {
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) RecorderImpl::remove_associations_i: -"
+            "failed to find writer_id in the DynamicTypeByPubId map.\n"));
+        }
+      }
 
+      WriterMapType::iterator it = this->writers_.find(writer_id);
       if (it != this->writers_.end()) {
         it->second->removed();
         remove_association_sweeper_->cancel_timer(it->second);
@@ -972,10 +975,6 @@ RecorderImpl::enable()
                ACE_TEXT("(%P|%t) RecorderImpl::add_subscription\n")));
 
     XTypes::TypeInformation type_info;
-    type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-    type_info.minimal.dependent_typeid_count = 0;
-    type_info.complete.typeid_with_size.typeobject_serialized_size = 0;
-    type_info.complete.dependent_typeid_count = 0;
 
     this->subscription_id_ =
       disco->add_subscription(this->domain_id_,

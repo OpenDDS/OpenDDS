@@ -916,6 +916,9 @@ public:
   bool ignore_domain_participant(DDS::DomainId_t domain, const GUID_t& myParticipantId,
     const GUID_t& ignoreId);
 
+  bool remove_domain_participant(DDS::DomainId_t domain, const GUID_t& myParticipantId,
+    const GUID_t& removeId);
+
   bool update_domain_participant_qos(DDS::DomainId_t domain, const GUID_t& participant,
     const DDS::DomainParticipantQos& qos);
 

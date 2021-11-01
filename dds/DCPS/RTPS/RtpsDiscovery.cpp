@@ -823,7 +823,6 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
 }
 
 // Participant operations:
-
 OpenDDS::DCPS::RepoId
 RtpsDiscovery::generate_participant_guid()
 {
@@ -834,8 +833,8 @@ RtpsDiscovery::generate_participant_guid()
     if (guid_gen_.interfaceName(guid_interface.c_str()) != 0) {
       if (DCPS::DCPS_debug_level) {
         ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsDiscovery::generate_participant_guid()"
-                   " - attempt to use specific network interface's MAC addr for"
-                   " GUID generation failed.\n"));
+                   " - attempt to use network interface %C MAC addr for"
+                   " GUID generation failed.\n", guid_interface.c_str()));
       }
     }
   }
@@ -856,8 +855,8 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
     if (guid_gen_.interfaceName(guid_interface.c_str()) != 0) {
       if (DCPS::DCPS_debug_level) {
         ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsDiscovery::add_domain_participant()"
-                   " - attempt to use specific network interface's MAC addr for"
-                   " GUID generation failed.\n"));
+                   " - attempt to use specific network interface %C MAC addr for"
+                   " GUID generation failed.\n", guid_interface.c_str()));
       }
     }
   }
@@ -1230,6 +1229,13 @@ bool RtpsDiscovery::ignore_domain_participant(
   DDS::DomainId_t domain, const GUID_t& myParticipantId, const GUID_t& ignoreId)
 {
   get_part(domain, myParticipantId)->ignore_domain_participant(ignoreId);
+  return true;
+}
+
+bool RtpsDiscovery::remove_domain_participant(
+  DDS::DomainId_t domain, const GUID_t& myParticipantId, const GUID_t& removeId)
+{
+  get_part(domain, myParticipantId)->remove_domain_participant(removeId);
   return true;
 }
 

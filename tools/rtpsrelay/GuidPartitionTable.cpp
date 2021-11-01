@@ -1,7 +1,14 @@
 #include "GuidPartitionTable.h"
+
+#include "RelayHandler.h"
+
+#include <dds/DCPS/JsonValueWriter.h>
+
 namespace RtpsRelay {
 
-GuidPartitionTable::Result GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_t& guid, const DDS::StringSeq& partitions)
+GuidPartitionTable::Result GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_t& guid,
+                                                      const DDS::StringSeq& partitions,
+                                                      const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
   Result result;
   std::vector<RelayPartitions> relay_partitions;
@@ -69,9 +76,19 @@ GuidPartitionTable::Result GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, write_mutex_, NO_CHANGE);
     write_relay_partitions(relay_partitions);
 
-    if (!spdp_replay.partitions().empty() && spdp_replay_writer_->write(spdp_replay, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to write Relay Partitions\n")));
+    if (!spdp_replay.partitions().empty()) {
+      spdp_replay.address(address_);
+      spdp_replay.guid(rtps_guid_to_relay_guid(OpenDDS::DCPS::make_id(guid, OpenDDS::DCPS::ENTITYID_PARTICIPANT)));
+      if (spdp_replay_writer_->write(spdp_replay, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to write Relay Partitions\n")));
+      }
     }
+  }
+
+  if (config_.log_activity()) {
+    const auto part_guid = make_id(guid, OpenDDS::DCPS::ENTITYID_PARTICIPANT);
+    GuidAddrSet::Proxy proxy(guid_addr_set_);
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidPartitionTable::insert %C add partitions %C %C into session\n"), guid_to_string(part_guid).c_str(), OpenDDS::DCPS::to_json(spdp_replay).c_str(), proxy.get_session_time(part_guid, now).sec_str().c_str()));
   }
 
   return result;

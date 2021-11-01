@@ -286,6 +286,10 @@ public:
 
   virtual ICE::Endpoint* get_ice_endpoint() const { return 0; }
 
+  virtual bool is_leading(const GUID_t& /*writer*/,
+                          const GUID_t& /*reader*/) const { return false; }
+
+
 protected:
 
   /// This is how the subclass "announces" to this DataLink base class

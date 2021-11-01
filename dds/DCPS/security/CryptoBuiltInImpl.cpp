@@ -827,6 +827,25 @@ bool CryptoBuiltInImpl::create_local_participant_crypto_tokens(
   return true;
 }
 
+bool CryptoBuiltInImpl::have_local_participant_crypto_tokens(
+  DDS::Security::ParticipantCryptoHandle local_participant_crypto,
+  DDS::Security::ParticipantCryptoHandle remote_participant_crypto)
+{
+  if (DDS::HANDLE_NIL == local_participant_crypto) {
+    return false;
+  }
+  if (DDS::HANDLE_NIL == remote_participant_crypto) {
+    return false;
+  }
+
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  const KeyTable_t::const_iterator iter = keys_.find(local_participant_crypto);
+  if (iter == keys_.end()) {
+    return false;
+  }
+  return iter->second.length();
+}
+
 bool CryptoBuiltInImpl::set_remote_participant_crypto_tokens(
   ParticipantCryptoHandle local_participant_crypto,
   ParticipantCryptoHandle remote_participant_crypto,
@@ -848,6 +867,25 @@ bool CryptoBuiltInImpl::set_remote_participant_crypto_tokens(
                keys_.size()));
   }
   return true;
+}
+
+bool CryptoBuiltInImpl::have_remote_participant_crypto_tokens(
+  DDS::Security::ParticipantCryptoHandle local_participant_crypto,
+  DDS::Security::ParticipantCryptoHandle remote_participant_crypto)
+{
+  if (DDS::HANDLE_NIL == local_participant_crypto) {
+    return false;
+  }
+  if (DDS::HANDLE_NIL == remote_participant_crypto) {
+    return false;
+  }
+
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  const KeyTable_t::const_iterator iter = keys_.find(remote_participant_crypto);
+  if (iter == keys_.end()) {
+    return false;
+  }
+  return iter->second.length();
 }
 
 bool CryptoBuiltInImpl::create_local_datawriter_crypto_tokens(
@@ -874,6 +912,25 @@ bool CryptoBuiltInImpl::create_local_datawriter_crypto_tokens(
   return true;
 }
 
+bool CryptoBuiltInImpl::have_local_datawriter_crypto_tokens(
+  DatawriterCryptoHandle local_datawriter_crypto,
+  DatareaderCryptoHandle remote_datareader_crypto)
+{
+  if (DDS::HANDLE_NIL == local_datawriter_crypto) {
+    return false;
+  }
+  if (DDS::HANDLE_NIL == remote_datareader_crypto) {
+    return false;
+  }
+
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  const KeyTable_t::const_iterator iter = keys_.find(local_datawriter_crypto);
+  if (iter == keys_.end()) {
+    return false;
+  }
+  return iter->second.length();
+}
+
 bool CryptoBuiltInImpl::set_remote_datawriter_crypto_tokens(
   DatareaderCryptoHandle local_datareader_crypto,
   DatawriterCryptoHandle remote_datawriter_crypto,
@@ -895,6 +952,25 @@ bool CryptoBuiltInImpl::set_remote_datawriter_crypto_tokens(
                keys_.size()));
   }
   return true;
+}
+
+bool CryptoBuiltInImpl::have_remote_datawriter_crypto_tokens(
+  DatareaderCryptoHandle local_datareader_crypto,
+  DatawriterCryptoHandle remote_datawriter_crypto)
+{
+  if (DDS::HANDLE_NIL == local_datareader_crypto) {
+    return false;
+  }
+  if (DDS::HANDLE_NIL == remote_datawriter_crypto) {
+    return false;
+  }
+
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  const KeyTable_t::const_iterator iter = keys_.find(remote_datawriter_crypto);
+  if (iter == keys_.end()) {
+    return false;
+  }
+  return iter->second.length();
 }
 
 bool CryptoBuiltInImpl::create_local_datareader_crypto_tokens(
@@ -921,6 +997,25 @@ bool CryptoBuiltInImpl::create_local_datareader_crypto_tokens(
   return true;
 }
 
+bool CryptoBuiltInImpl::have_local_datareader_crypto_tokens(
+  DatareaderCryptoHandle local_datareader_crypto,
+  DatawriterCryptoHandle remote_datawriter_crypto)
+{
+  if (DDS::HANDLE_NIL == local_datareader_crypto) {
+    return false;
+  }
+  if (DDS::HANDLE_NIL == remote_datawriter_crypto) {
+    return false;
+  }
+
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  const KeyTable_t::const_iterator iter = keys_.find(local_datareader_crypto);
+  if (iter == keys_.end()) {
+    return false;
+  }
+  return iter->second.length();
+}
+
 bool CryptoBuiltInImpl::set_remote_datareader_crypto_tokens(
   DatawriterCryptoHandle local_datawriter_crypto,
   DatareaderCryptoHandle remote_datareader_crypto,
@@ -942,6 +1037,25 @@ bool CryptoBuiltInImpl::set_remote_datareader_crypto_tokens(
                keys_.size()));
   }
   return true;
+}
+
+bool CryptoBuiltInImpl::have_remote_datareader_crypto_tokens(
+  DatawriterCryptoHandle local_datawriter_crypto,
+  DatareaderCryptoHandle remote_datareader_crypto)
+{
+  if (DDS::HANDLE_NIL == local_datawriter_crypto) {
+    return false;
+  }
+  if (DDS::HANDLE_NIL == remote_datareader_crypto) {
+    return false;
+  }
+
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  const KeyTable_t::const_iterator iter = keys_.find(remote_datareader_crypto);
+  if (iter == keys_.end()) {
+    return false;
+  }
+  return iter->second.length();
 }
 
 bool CryptoBuiltInImpl::return_crypto_tokens(const CryptoTokenSeq&, SecurityException&)

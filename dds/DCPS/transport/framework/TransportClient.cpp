@@ -126,7 +126,7 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
 {
   config_ = tc;
   swap_bytes_ = tc->swap_bytes_;
-  cdr_encapsulation_ = false;
+  cdr_encapsulation_ = tc->cdr_encapsulation_;
   reliable_ = reliable;
   durable_ = durable;
   unsigned long duration = tc->passive_connect_duration_;
@@ -1124,6 +1124,23 @@ bool TransportClient::pending_association_with(const GUID_t& remote) const
   }
   return pending_.count(remote);
 }
+
+void TransportClient::data_acked(const GUID_t& remote)
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(lock_);
+  if (!guard.locked()) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TransportClient::data_acked: "
+      "lock failed\n"));
+    return;
+  }
+  get_send_listener()->data_acked(remote);
+}
+
+bool TransportClient::is_leading(const GUID_t& reader_id) const
+{
+  return links_.is_leading(get_repo_id(), reader_id);
+}
+
 
 } // namepsace DCPS
 } // namepsace OpenDDS

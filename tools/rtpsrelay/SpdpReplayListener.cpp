@@ -31,8 +31,7 @@ void SpdpReplayListener::on_data_available(DDS::DataReader_ptr reader)
 
   for (CORBA::ULong idx = 0; idx != infos.length(); ++idx) {
     if (infos[idx].valid_data) {
-      const auto& d = data[idx];
-      spdp_handler_.replay(d.partitions());
+      spdp_handler_.replay(data[idx]);
     }
   }
 }
