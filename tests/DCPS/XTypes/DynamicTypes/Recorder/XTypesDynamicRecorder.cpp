@@ -150,18 +150,30 @@ int print_dynamic_data(OpenDDS::XTypes::DynamicData dd) {
           }
         }
       } else if (member_tk == OpenDDS::XTypes::TK_STRUCTURE) {
-        OpenDDS::XTypes::DynamicData inner_struct_dd;
-        if (dd.get_complex_value(inner_struct_dd, iter->first) != DDS::RETCODE_OK) {
+        OpenDDS::XTypes::DynamicData nested_dd;
+        if (dd.get_complex_value(nested_dd, iter->first) != DDS::RETCODE_OK) {
           ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_complex_value\n"), -1);
         }
-        ACE_CDR::Long my_long;     
-        if (inner_struct_dd.get_int32_value(my_long, 0) != DDS::RETCODE_OK) {
-          ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_int32_value\n"), -1);
+        OpenDDS::XTypes::DynamicTypeMembersById nested_dtmbi;
+        nested_dd.get_type()->get_all_members(nested_dtmbi);
+        std::cout << "  struct " << nested_dd.get_type()->get_name() << " {\n";
+        for (OpenDDS::XTypes::DynamicTypeMembersById::iterator nested_iter = nested_dtmbi.begin(); nested_iter != nested_dtmbi.end(); ++nested_iter)
+        {
+          OpenDDS::XTypes::TypeKind nested_member_tk = nested_iter->second->get_descriptor().get_type()->get_descriptor().kind;
+          OpenDDS::DCPS::String nested_member_name = nested_iter->second->get_descriptor().name;
+          OpenDDS::DCPS::String nested_type_name = nested_iter->second->get_descriptor().get_type()->get_descriptor().name;
+          if (nested_member_tk == OpenDDS::XTypes::TK_INT32) {
+            ACE_CDR::Long my_long;     
+            if (nested_dd.get_int32_value(my_long, 0) != DDS::RETCODE_OK) {
+              ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_int32_value\n"), -1);
+            }
+            if (my_long != 5) {
+              ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - inner_struct long: %d did not equal: 5\n", my_long), -1);
+            }
+            std::cout << "    " << nested_type_name << " " << nested_member_name << " = ";
+            std::cout << "[0]" << std::to_string(my_long) << "\n  }\n";
+          }
         }
-        if (my_long != 5) {
-          ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - inner_struct long: %d did not equal: 5\n", my_long), -1);
-        }
-        std::cout << "  [0]" << std::to_string(my_long) << "\n";
       }
     }
     std::cout << "}\n";
