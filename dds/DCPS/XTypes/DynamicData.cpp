@@ -1103,7 +1103,18 @@ bool DynamicData::read_values(SequenceType& value, TypeKind elem_tk)
   case TK_BOOLEAN:
   case TK_STRING8:
   case TK_STRING16:
-    return strm_ >> value;
+    {
+      return strm_ >> value;
+    }
+  case TK_ENUM:
+  case TK_BITMASK:
+    {
+      size_t dheader;
+      if (!strm_.read_delimiter(dheader)) {
+        return false;
+      }
+      return strm_ >> value;
+    }
   }
 
   if (DCPS::DCPS_debug_level >= 1) {
@@ -1182,11 +1193,11 @@ bool DynamicData::get_values_from_union(SequenceType& value, MemberId id,
   }
 
   if (elem_tk == ElementTypeKind) {
-    return read_values(value, elem_tk);
+    return read_values(value, ElementTypeKind);
   }
 
   const LBound bit_bound = elem_type->get_descriptor().bound[0];
-  return bit_bound >= lower && bit_bound <= upper && read_values(value, elem_tk);
+  return bit_bound >= lower && bit_bound <= upper && read_values(value, enum_or_bitmask);
 }
 
 template<TypeKind ElementTypeKind, typename SequenceType>
@@ -1197,22 +1208,22 @@ bool DynamicData::get_values_from_sequence(SequenceType& value, MemberId id,
   const TypeKind elem_tk = elem_type->get_kind();
 
   if (elem_tk == ElementTypeKind) {
-    return read_values(value, elem_tk);
+    return read_values(value, ElementTypeKind);
   } else if (elem_tk == enum_or_bitmask) {
     // Read from a sequence of enums or bitmasks.
     const LBound bit_bound = elem_type->get_descriptor().bound[0];
-    return bit_bound >= lower && bit_bound <= upper && read_values(value, elem_tk);
+    return bit_bound >= lower && bit_bound <= upper && read_values(value, enum_or_bitmask);
   } else if (elem_tk == TK_SEQUENCE) {
     const DynamicType_rch nested_elem_type = get_base_type(elem_type->get_descriptor().element_type);
     const TypeKind nested_elem_tk = nested_elem_type->get_kind();
     if (nested_elem_tk == ElementTypeKind) {
       // Read from a sequence of sequence of ElementTypeKind.
-      return skip_to_sequence_element(id) && read_values(value, nested_elem_tk);
+      return skip_to_sequence_element(id) && read_values(value, ElementTypeKind);
     } else if (nested_elem_tk == enum_or_bitmask) {
       // Read from a sequence of sequence of enums or bitmasks.
       const LBound bit_bound = nested_elem_type->get_descriptor().bound[0];
       return bit_bound >= lower && bit_bound <= upper &&
-        skip_to_sequence_element(id) && read_values(value, nested_elem_tk);
+        skip_to_sequence_element(id) && read_values(value, enum_or_bitmask);
     }
   }
 
@@ -1479,7 +1490,36 @@ bool DynamicData::skip_to_struct_member(const MemberDescriptor& member_desc, Mem
       if (member_id == id) {
         return true;
       }
-      if (!strm_.skip(member_size)) {
+
+      DynamicTypeMember_rch dtm;
+      if (type_->get_member(dtm, member_id) != DDS::RETCODE_OK) {
+        if (DCPS::DCPS_debug_level >= 1) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::skip_to_struct_member -")
+                     ACE_TEXT(" Failed to get DynamicTypeMember at ID %d\n"), member_id));
+        }
+        return false;
+      }
+      DynamicType_rch member = dtm->get_descriptor().type.lock();
+      if (!member) {
+        if (DCPS::DCPS_debug_level >= 1) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::skip_to_struct_member -")
+                     ACE_TEXT(" Failed to get DynamicType for member at ID %d\n"), member_id));
+        }
+        return false;
+      }
+      member = get_base_type(member);
+      if (member->get_kind() == TK_SEQUENCE) {
+        // Sequence is a special case where the NEXTINT header can also be used for
+        // the length of the sequence (when LC is 5, 6, or 7). And thus skipping such a
+        // sequence member using member_size can be incorrect.
+        if (!skip_sequence_member(member)) {
+          if (DCPS::DCPS_debug_level >= 1) {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::skip_to_struct_member -")
+                       ACE_TEXT(" Failed to skip a sequence member at ID %d\n"), member_id));
+          }
+          return false;
+        }
+      } else if (!strm_.skip(member_size)) {
         if (DCPS::DCPS_debug_level >= 1) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::skip_to_struct_member -")
                      ACE_TEXT(" Failed to skip a member with ID %d\n"), member_id));

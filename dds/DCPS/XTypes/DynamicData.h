@@ -44,7 +44,12 @@ public:
   DynamicData(ACE_Message_Block* chain,
               const DCPS::Encoding& encoding,
               const DynamicType_rch& type);
+
+  /// Use this when you want to pass the alignment state of a given Serializer object over.
+  /// A typical use case would be when a part of the data has already been consumed from
+  /// @a ser and you want to give the remaining to DynamicData.
   DynamicData(DCPS::Serializer& ser, const DynamicType_rch& type);
+
   DynamicData& operator=(const DynamicData& other);
 
   ~DynamicData();
