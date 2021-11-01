@@ -11,6 +11,24 @@
 
 #include <ace/OS_NS_string.h>
 
+#include <dds/CorbaSeq/LongSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/ULongSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/Int8SeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/UInt8SeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/ShortSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/UShortSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/LongLongSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/ULongLongSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/FloatSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/DoubleSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/LongDoubleSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/CharSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/WCharSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/OctetSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/BooleanSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/StringSeqTypeSupportImpl.h>
+#include <dds/CorbaSeq/WStringSeqTypeSupportImpl.h>
+
 #include <stdexcept>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -23,6 +41,17 @@ DynamicData::DynamicData()
   , encoding_(DCPS::Encoding::KIND_XCDR2)
   , reset_align_state_(false)
   , strm_(0, encoding_)
+  , item_count_(ITEM_COUNT_INVALID)
+{}
+
+DynamicData::DynamicData(const DynamicData& dd)
+  : chain_(dd.chain_->duplicate())
+  , encoding_(dd.encoding_)
+  , reset_align_state_(dd.reset_align_state_)
+  , align_state_(dd.align_state_)
+  , strm_(chain_, encoding_)
+  , type_(dd.type_)
+  , descriptor_(dd.type_->get_descriptor())
   , item_count_(ITEM_COUNT_INVALID)
 {}
 
@@ -72,6 +101,7 @@ DynamicData& DynamicData::operator=(const DynamicData& other)
 
 DynamicData::~DynamicData()
 {
+  ACE_DEBUG((LM_DEBUG, "DynamicData::~DynamicData() DynamicType\n"));
   ACE_Message_Block::release(chain_);
 }
 
@@ -1103,6 +1133,19 @@ bool DynamicData::read_values(SequenceType& value, TypeKind elem_tk)
   case TK_BOOLEAN:
   case TK_STRING8:
   case TK_STRING16:
+    return strm_ >> value;
+  }
+
+  //TODO CLAYTON: FIND WHAT HAS A DHEADER
+  if(elem_tk == TK_ENUM) {
+    size_t dheader = 0;
+    if (!strm_.read_delimiter(dheader)) {
+      if (DCPS::DCPS_debug_level >= 1) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::skip_to_struct_member -")
+                    ACE_TEXT(" Failed to read DHEADER for member ID\n")));
+      }
+      return false;
+    }
     return strm_ >> value;
   }
 

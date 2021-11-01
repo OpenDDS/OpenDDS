@@ -11,23 +11,26 @@
 
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/PoolAllocator.h>
-#include <dds/CorbaSeq/LongSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/ULongSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/Int8SeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/UInt8SeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/ShortSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/UShortSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/LongLongSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/ULongLongSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/FloatSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/DoubleSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/LongDoubleSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/CharSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/WCharSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/OctetSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/BooleanSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/StringSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/WStringSeqTypeSupportImpl.h>
+
+namespace CORBA {
+class LongSeq;
+class ULongSeq;
+class Int8Seq;
+class UInt8Seq;
+class ShortSeq;
+class UShortSeq;
+class LongLongSeq;
+class ULongLongSeq;
+class FloatSeq;
+class DoubleSeq;
+class LongDoubleSeq;
+class CharSeq;
+class WCharSeq;
+class OctetSeq;
+class BooleanSeq;
+class StringSeq;
+class WStringSeq;
+}
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -37,6 +40,7 @@ namespace XTypes {
 class OpenDDS_Dcps_Export DynamicData {
 public:
   DynamicData();
+  DynamicData(const DynamicData& dd);
 
   /// This creates a duplicated ACE_Message_Block chain from the provided chain.
   /// The duplicated chain is released when the object is destroyed. Caller is
@@ -99,6 +103,7 @@ public:
   /// This is called by a containing type when it wants to skip a member which
   /// is an object of this type.
   bool skip_all();
+  DynamicType_rch get_type() { return type_; }
 
 private:
 

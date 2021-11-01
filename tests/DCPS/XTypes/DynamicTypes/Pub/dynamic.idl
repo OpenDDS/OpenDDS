@@ -1,0 +1,27 @@
+module Dynamic {
+typedef sequence<boolean> bool_seq;
+typedef char char_arr[2];
+enum EnumType {V1, V2};
+@topic
+@mutable
+@::OpenDDS::data_representation(XCDR2)
+struct stru {
+  long l;
+  string str;
+  bool_seq bs;
+  char_arr ca;
+  sequence<EnumType, 2> enum_seq;
+  short short_arr[2];
+};
+
+struct inner_struct {
+  long l;
+};
+
+@topic
+@appendable
+@::OpenDDS::data_representation(XCDR2)
+struct outer_struct {
+  inner_struct is;
+};
+};

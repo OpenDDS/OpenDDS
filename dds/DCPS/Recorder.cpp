@@ -7,6 +7,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
 #include "Recorder.h"
+#include "GuidConverter.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -19,6 +20,21 @@ RecorderListener::~RecorderListener()
 
 Recorder::~Recorder()
 {
+}
+
+XTypes::DynamicData Recorder::get_dynamic_data(const RawDataSample& sample) {
+
+  Encoding enc(Encoding::KIND_XCDR2, sample.header_.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
+  const DynamicTypeByPubId::const_iterator dt_found = dt_map_.find(sample.publication_id_);
+  if (dt_found == dt_map_.end()) {
+    ACE_ERROR((LM_ERROR, "on_sample_data_received: -"
+      "failed to find DynamicType in DynamicTypeByPubId."));
+    return XTypes::DynamicData();
+  } else {
+    XTypes::DynamicType_rch dt = dt_found->second;
+    XTypes::DynamicData dd(sample.sample_.get(), enc, dt);
+    return dd;
+  }
 }
 
 Recorder_ptr Recorder::_duplicate(Recorder_ptr obj)

@@ -228,6 +228,8 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
 
   // we only support SAMPLE_DATA messages
   if (sample.header_.message_id_ == SAMPLE_DATA && listener_.in()) {
+    // Skip the encapsulation header
+    sample.sample_->rd_ptr(4);
     RawDataSample rawSample(sample.header_,
                             static_cast<MessageId> (sample.header_.message_id_),
                             sample.header_.source_timestamp_sec_,
@@ -434,6 +436,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
   }
   XTypes::TypeObject cto = tls->get_type_object(type_info.complete.typeid_with_size.type_id);
   XTypes::DynamicType_rch dt = tls->complete_to_dynamic(cto.complete, writer.writerId);
+  ACE_DEBUG((LM_DEBUG, "DynamicType added: %C\n", LogGuid(writer.writerId).c_str()));
   dt_map_.insert(std::make_pair(writer.writerId, dt));
   if (!is_bit_) {
 
