@@ -438,6 +438,8 @@ private:
   DiscoveredParticipantMap participants_;
   RtpsDiscovery* disco_;
   DCPS::RcHandle<RtpsDiscoveryConfig> config_;
+  DCPS::TimeDuration lease_duration_;
+  DCPS::TimeDuration lease_extension_;
 
   // Participant:
   const DDS::DomainId_t domain_;
@@ -559,7 +561,6 @@ private:
     Header hdr_;
     DataSubmessage data_;
     DCPS::SequenceNumber seq_;
-    DCPS::TimeDuration lease_duration_;
     u_short uni_port_;
     ACE_SOCK_Dgram unicast_socket_;
     OPENDDS_STRING multicast_interface_;

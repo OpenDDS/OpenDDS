@@ -236,6 +236,8 @@ Spdp::Spdp(DDS::DomainId_t domain,
   : qos_(qos)
   , disco_(disco)
   , config_(disco_->config())
+  , lease_duration_(disco_->config()->lease_duration())
+  , lease_extension_(disco_->config()->lease_extension())
   , domain_(domain)
   , guid_(guid)
   , participant_discovered_at_(MonotonicTimePoint::now().to_monotonic_time())
@@ -698,7 +700,9 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     return;
   }
 
-  const bool from_relay = from == config_->spdp_rtps_relay_address();
+  const bool relay_in_use = (config_->rtps_relay_only() || config_->use_rtps_relay());
+  const bool from_relay = relay_in_use && (from == config_->spdp_rtps_relay_address());
+
 #ifndef DDS_HAS_MINIMUM_BIT
   const DCPS::ParticipantLocation location_mask = compute_location_mask(from, from_relay);
 #endif
@@ -1041,7 +1045,9 @@ Spdp::data_received(const DataSubmessage& data,
     return;
   }
 
-  const bool from_relay = from == config_->spdp_rtps_relay_address();
+  const bool relay_in_use = (config_->rtps_relay_only() || config_->use_rtps_relay());
+  const bool from_relay = relay_in_use && (from == config_->spdp_rtps_relay_address());
+
 #ifdef OPENDDS_SECURITY
   if (!from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList) && !ip_in_AgentInfo(from, plist)) {
     if (DCPS::DCPS_debug_level >= 8) {
@@ -2272,7 +2278,7 @@ ParticipantData_t Spdp::build_local_pdata(
 #endif
     },
     { // Duration_t (leaseDuration)
-      static_cast<CORBA::Long>(config_->lease_duration().value().sec()),
+      static_cast<CORBA::Long>(lease_duration_.value().sec()),
       0 // we are not supporting fractional seconds in the lease duration
     },
     participant_discovered_at_
@@ -2302,7 +2308,6 @@ const Spdp::SpdpTransport::WriteFlags Spdp::SpdpTransport::SEND_DIRECT;
 
 Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
   : outer_(outer)
-  , lease_duration_(outer->config_->lease_duration())
   , buff_(64 * 1024)
   , wbuff_(64 * 1024)
 #ifdef OPENDDS_SECURITY
@@ -2910,13 +2915,14 @@ Spdp::SpdpTransport::send(WriteFlags flags, const ACE_INET_Addr& local_address)
     send(local_address);
   }
 
-  const ACE_INET_Addr relay_address = outer->config_->spdp_rtps_relay_address();
-  if (((flags & SEND_RELAY) || outer->config_->rtps_relay_only()) &&
-      relay_address != ACE_INET_Addr()) {
-    ssize_t res = send(relay_address);
-    ++relay_message_counts_.rtps_send;
-    if (res < 0) {
-      ++relay_message_counts_.rtps_send_fail;
+  if ((flags & SEND_RELAY) || outer->config_->rtps_relay_only()) {
+    const ACE_INET_Addr relay_address = outer->config_->spdp_rtps_relay_address();
+    if (relay_address != ACE_INET_Addr()) {
+      ssize_t res = send(relay_address);
+      ++relay_message_counts_.rtps_send;
+      if (res < 0) {
+        ++relay_message_counts_.rtps_send_fail;
+      }
     }
   }
 }
@@ -3043,12 +3049,15 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
 
   DCPS::RcHandle<Spdp> outer = outer_.lock();
 
-  const bool from_relay = remote == outer->config_->spdp_rtps_relay_address();
+  if (!outer) {
+    return 0;
+  }
+
+  const bool relay_in_use = (outer->config_->rtps_relay_only() || outer->config_->use_rtps_relay());
+  const bool from_relay = relay_in_use && (remote == outer->config_->spdp_rtps_relay_address());
 
   // Ignore messages from the relay when not using it.
-  if (outer &&
-      from_relay &&
-      !(outer->config_->rtps_relay_only() || outer->config_->use_rtps_relay())) {
+  if (!relay_in_use && from_relay) {
     return 0;
   }
 
@@ -3817,7 +3826,7 @@ Spdp::update_lease_expiration_i(DiscoveredParticipantIter iter,
                                    iter->second.pdata_.participantProxy.protocolVersion,
                                    iter->second.pdata_.participantProxy.vendorId);
 
-  iter->second.lease_expiration_ = now + d + config_->lease_extension();
+  iter->second.lease_expiration_ = now + d + lease_extension_;
 
   // Insert.
   const bool cancel = !lease_expirations_.empty() && iter->second.lease_expiration_ < lease_expirations_.begin()->first;
@@ -4262,13 +4271,14 @@ void Spdp::SpdpTransport::relay_stun_task(const MonotonicTimePoint& /*now*/)
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
-  const ACE_INET_Addr relay_address = outer->config_->spdp_rtps_relay_address();
-  if ((outer->config_->use_rtps_relay() || outer->config_->rtps_relay_only()) &&
-      relay_address != ACE_INET_Addr()) {
-    process_relay_sra(relay_srsm_.send(relay_address, ICE::Configuration::instance()->server_reflexive_indication_count(), outer->guid_.guidPrefix));
-    send(relay_address, relay_srsm_.message());
-    relay_stun_task_falloff_.advance(ICE::Configuration::instance()->server_reflexive_address_period());
-    relay_stun_task_->schedule(relay_stun_task_falloff_.get());
+  if (outer->config_->use_rtps_relay() || outer->config_->rtps_relay_only()) {
+    const ACE_INET_Addr relay_address = outer->config_->spdp_rtps_relay_address();
+    if (relay_address != ACE_INET_Addr()) {
+      process_relay_sra(relay_srsm_.send(relay_address, ICE::Configuration::instance()->server_reflexive_indication_count(), outer->guid_.guidPrefix));
+      send(relay_address, relay_srsm_.message());
+      relay_stun_task_falloff_.advance(ICE::Configuration::instance()->server_reflexive_address_period());
+      relay_stun_task_->schedule(relay_stun_task_falloff_.get());
+    }
   }
 }
 
@@ -4334,12 +4344,13 @@ void Spdp::SpdpTransport::send_relay(const DCPS::MonotonicTimePoint& /*now*/)
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
-  const ACE_INET_Addr relay_address = outer->config_->spdp_rtps_relay_address();
-  if ((outer->config_->use_rtps_relay() || outer->config_->rtps_relay_only()) &&
-      outer->config_->spdp_rtps_relay_address() != ACE_INET_Addr()) {
-    write(SEND_RELAY);
-    relay_spdp_task_falloff_.advance(outer->config_->spdp_rtps_relay_send_period());
-    relay_spdp_task_->schedule(relay_spdp_task_falloff_.get());
+  if (outer->config_->use_rtps_relay() || outer->config_->rtps_relay_only()) {
+    const ACE_INET_Addr relay_address = outer->config_->spdp_rtps_relay_address();
+    if (relay_address != ACE_INET_Addr()) {
+      write(SEND_RELAY);
+      relay_spdp_task_falloff_.advance(outer->config_->spdp_rtps_relay_send_period());
+      relay_spdp_task_->schedule(relay_spdp_task_falloff_.get());
+    }
   }
 }
 #endif
