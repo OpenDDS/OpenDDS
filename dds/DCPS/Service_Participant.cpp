@@ -1,11 +1,9 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> //Only the _pch include should start with DCPS/
 
 #include "Service_Participant.h"
 
@@ -21,9 +19,10 @@
 #include "LinuxNetworkConfigMonitor.h"
 #include "StaticDiscovery.h"
 #include "../Version.h"
-#if defined(OPENDDS_SECURITY)
-#include "security/framework/SecurityRegistry.h"
+#ifdef OPENDDS_SECURITY
+#  include "security/framework/SecurityRegistry.h"
 #endif
+#include "Util.h"
 
 #include <ace/config.h>
 #include <ace/Singleton.h>
@@ -40,11 +39,10 @@
 #include <ace/Version.h>
 
 #include <cstring>
-
 #ifdef OPENDDS_SAFETY_PROFILE
-#include <stdio.h> // <cstdio> after FaceCTS bug 623 is fixed
+#  include <stdio.h> // <cstdio> after FaceCTS bug 623 is fixed
 #else
-#include <fstream>
+#  include <fstream>
 #endif
 
 #if !defined (__ACE_INLINE__)
@@ -2912,7 +2910,7 @@ Service_Participant::type_object_encoding(const char* encoding)
     {"WriteOldFormat", Encoding_WriteOldFormat},
     {"ReadOldFormat", Encoding_ReadOldFormat},
   };
-  for (size_t i = 0; i < sizeof entries / sizeof entries[0]; ++i) {
+  for (size_t i = 0; i < array_count(entries); ++i) {
     if (0 == std::strcmp(entries[i].name, encoding)) {
       type_object_encoding(entries[i].value);
       return;
