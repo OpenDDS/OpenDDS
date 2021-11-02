@@ -48,7 +48,7 @@ http://download.objectcomputing.com/OpenDDS/
 http://download.opendds.org/doxygen/.
 
 - For developers wanting to contribute to OpenDDS, please take the time to read
-[the developer's guidelines](https://opendds.readthedocs.io/en/master/internal/dev_guidelines.html).
+[the development guidelines](https://opendds.readthedocs.io/en/master/internal/dev_guidelines.html).
 
 Other documentation can be found in [`docs` directory](docs).
 

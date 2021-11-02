@@ -1,7 +1,8 @@
 /**
  * \file
  * See https://opendds.readthedocs.io/en/master/internal/dev_guidelines.html#time
- * for background and reasoning for these types.
+ * (or docs/internal/dev_guidelines.rst) for background and reasoning for these
+ * types.
  */
 
 #ifndef OPENDDS_DCPS_TIMETYPES_H

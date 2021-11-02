@@ -25,7 +25,8 @@ namespace DCPS {
  * avoid careless implicit conversions.
  *
  * See https://opendds.readthedocs.io/en/master/internal/dev_guidelines.html#time
- * for background and reasoning for this class.
+ * (or docs/internal/dev_guidelines.rst) for background and reasoning for this
+ * class.
  */
 template<typename AceClock>
 class TimePoint_T {
