@@ -15,7 +15,7 @@
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
-#  include <dds/DCPS/security/BuiltInPluginLoader.h>
+#  include <dds/DCPS/security/BuiltInPlugins.h>
 #endif
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/transport/framework/TransportConfig.h>

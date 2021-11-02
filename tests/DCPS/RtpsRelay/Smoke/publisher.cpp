@@ -15,7 +15,7 @@
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #  ifdef OPENDDS_SECURITY
-#    include <dds/DCPS/security/BuiltInPluginLoader.h>
+#    include <dds/DCPS/security/BuiltInPlugins.h>
 #  endif
 #endif
 #ifdef OPENDDS_SECURITY
@@ -65,10 +65,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if ((status = parse_args(argc, argv)) != EXIT_SUCCESS) {
         return status;
       }
-
-#if defined OPENDDS_SECURITY && defined ACE_AS_STATIC_LIBS
-    OpenDDS::Security::BuiltInPluginLoader().init(0, 0);
-#endif
 
       DDS::DomainParticipantQos part_qos;
       dpf->get_default_participant_qos(part_qos);
