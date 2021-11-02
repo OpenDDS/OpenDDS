@@ -387,7 +387,7 @@ Logging is done via ACE's logging macro functions, ``ACE_DEBUG`` and ``ACE_ERROR
 The logging macros arguments to both are:
 
   - A ``ACE_Log_Priority`` value
-G
+
     - This is an enum defined in ``ace/Log_Priority.h`` to say what the priority or severity of the message is.
 
   - The format string
