@@ -7,6 +7,7 @@
 #define OPENDDS_DCPS_DEBUG_H
 
 #include "dcps_export.h"
+#include "transport/framework/TransportDebug.h"
 
 #include <ace/ace_wchar.h>
 
@@ -19,6 +20,11 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+/**
+ * General control for logging in OpenDDS.
+ *
+ * Access using the log_level global object.
+ */
 class OpenDDS_Dcps_Export LogLevel {
 public:
   enum Value {
@@ -36,6 +42,7 @@ public:
   }
 
   void set(Value value);
+  void set_from_string(const char* name);
 
   Value get() const
   {
@@ -51,24 +58,6 @@ inline bool operator>=(const LogLevel& ll, LogLevel::Value value)
 {
   return ll.get() >= value;
 }
-
-/*
-if (log_level >= LogLevel::Error) {
-  ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: funky_function: error\n"));
-}
-
-if (log_level >= LogLevel::Warning) {
-  ACE_DEBUG((LM_WARN, "(%P|%t) WARNING: funky_function: warning\n"));
-}
-
-if (log_level >= LogLevel::Notice) {
-  ACE_DEBUG((LM_NOTICE, "(%P|%t) NOTICE: funky_function: notice\n"));
-}
-
-if (log_level >= LogLevel::Info) {
-  ACE_DEBUG((LM_INFO, "(%P|%t) INFO: funky_function: info\n"));
-}
-*/
 
 /// Logging verbosity level.
 /// set by Service_Participant
@@ -158,26 +147,35 @@ public:
 extern OpenDDS_Dcps_Export SecurityDebug security_debug;
 #endif
 
-class DebugRestore {
+class LogRestore {
 public:
-  DebugRestore()
-    : orig_dcps_debug_level_(DCPS_debug_level)
+  LogRestore()
+    : orig_log_level_(log_level)
+    , orig_dcps_debug_level_(DCPS_debug_level)
+    , orig_transport_debug_level_(Transport_debug_level)
+    , orig_transport_debug_(transport_debug)
 #ifdef OPENDDS_SECURITY
     , orig_security_debug_(security_debug)
 #endif
   {
   }
 
-  ~DebugRestore()
+  ~LogRestore()
   {
+    log_level = orig_log_level_;
     DCPS_debug_level = orig_dcps_debug_level_;
+    Transport_debug_level = orig_transport_debug_level_;
+    transport_debug = orig_transport_debug_;
 #ifdef OPENDDS_SECURITY
     security_debug = orig_security_debug_;
 #endif
   }
 
 private:
+  LogLevel orig_log_level_;
   unsigned orig_dcps_debug_level_;
+  unsigned orig_transport_debug_level_;
+  TransportDebug orig_transport_debug_;
 #ifdef OPENDDS_SECURITY
   SecurityDebug orig_security_debug_;
 #endif
