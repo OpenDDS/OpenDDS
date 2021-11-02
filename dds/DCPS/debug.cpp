@@ -139,7 +139,7 @@ void SecurityDebug::parse_flags(const ACE_TCHAR* flags)
         showkeys = true;
       } else if (flag == "chlookup") {
         chlookup = true;
-      } else if (log_level >= LogLevel::WARNING) {
+      } else if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: SecurityDebug::parse_flags: "
           "Unknown Security Debug Category: \"%C\"\n", flag.c_str()));
       }
