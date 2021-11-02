@@ -101,26 +101,38 @@ public:
   DDS::ReturnCode_t get_string_values(CORBA::StringSeq& value, MemberId id);
   DDS::ReturnCode_t get_wstring_values(CORBA::WStringSeq& value, MemberId id);
 
+private:
+  void copy(const DynamicData& other);
+
   /// Skip the whole data corresponding to this type if it is a struct or union.
   /// This is called by a containing type when it wants to skip a member which
   /// is an object of this type.
   bool skip_all();
 
-private:
-  void copy(const DynamicData& other);
-
   /// Verify that a given type is primitive or string or wstring.
+  ///
   bool is_type_supported(TypeKind tk, const char* func_name);
 
   /// Setup the strm_ object so that it has the correct alignment state.
+  ///
   void setup_stream(ACE_Message_Block* chain);
 
-  /// Overloads for reading a single value as a given type.
+  /// Reading a single value as a given type. For instance, an enum with bit bound
+  /// of 32 is read as an 32-bit integer and thus TK_INT32 should be passed to @a tk.
   template<typename ValueType>
   bool read_value(ValueType& value, TypeKind tk);
 
-  /// Templates for reading a single value of type primitive or string or
-  /// wstring from a corresponding containing type.
+  ///@{
+  /** Reading a value of type primitive, string, or wstring as a member of a struct, union,
+   *  or a collection (sequence, array, map). TK_ENUM should be passed to @a enum_or_bitmask
+   *  if @value is a 8-bit, 16-bit, or 32-bit signed integer type. In that case, @lower and
+   *  @upper should be set to form the bit_bound range of the enum type that matches
+   *  the number of bits of @a value. For instance, if we are reading a 8-bit integer, then
+   *  @enum_or_bitmask is TK_ENUM, @a lower is 1 and @a upper is 8. This allows reading
+   *  an enum with a particular bit bound as an integer with the matching size.
+   *  Similarly, if we are reading an unsigned integer, set @a enum_or_bitmask to TK_BITMASK,
+   *  and @a lower and @a upper to form a corresponding range for the bitmask's bit bound.
+   */
   template<TypeKind MemberTypeKind, typename MemberType>
   bool get_value_from_struct(MemberType& value, MemberId id,
                              TypeKind enum_or_bitmask = TK_NONE,
@@ -138,13 +150,17 @@ private:
                                  TypeKind enum_or_bitmask = TK_NONE,
                                  LBound lower = 0,
                                  LBound upper = 0);
+  ///@}
 
+  /// Read a single value of type primitive (except char8, char16, and boolean), string,
+  /// or wstring.
   template<TypeKind ValueTypeKind, typename ValueType>
   DDS::ReturnCode_t get_single_value(ValueType& value, MemberId id,
                                      TypeKind enum_or_bitmask = TK_NONE,
                                      LBound lower = 0,
                                      LBound upper = 0);
 
+  /// Common method to read a single char8 or char16 value.
   template<TypeKind CharKind, TypeKind StringKind, typename ToCharT, typename CharT>
   DDS::ReturnCode_t get_char_common(CharT& value, MemberId id);
 
@@ -152,31 +168,40 @@ private:
   bool get_boolean_from_bitmask(ACE_CDR::ULong index, ACE_CDR::Boolean& value);
 
   /// Skip to a member with a given ID in a struct.
+  ///
   bool skip_to_struct_member(const MemberDescriptor& member_desc, MemberId id);
 
   bool get_from_struct_common_checks(MemberDescriptor& md, MemberId id,
                                      TypeKind kind, bool is_sequence = false);
 
   /// Find member descriptor for the selected member from a union data.
+  /// In case the union doesn't have a selected member, @a out_md has an invalid id field.
   bool get_union_selected_member(MemberDescriptor& out_md);
 
   bool get_from_union_common_checks(MemberId id, const char* func_name, MemberDescriptor& md);
 
-  /// Skip to an element with a given ID in a sequence or array.
+  ///@{
+  /** Skip to an element with a given ID in a sequence or array. */
   bool skip_to_sequence_element(MemberId id);
   bool skip_to_array_element(MemberId id);
+  ///@}
 
   /// Skip to an element with a given ID in a map. The key associated with that
   /// element is also skipped.
   bool skip_to_map_element(MemberId id);
 
-  /// Read a sequence with element type @a element_typekind and store in @a value,
-  /// which is a sequence of primitives or strings or wstrings.
+  /// Read a sequence with element type @a elem_tk and store the result in @a value,
+  /// which is a sequence of primitives or strings or wstrings. Sequence of enums or
+  /// bitmasks are read as a sequence of signed and unsigned integers, respectively.
+  /// In that case, @a elem_tk is set to TK_ENUM or TK_BITMASK.
   template<typename SequenceType>
-  bool read_values(SequenceType& value, TypeKind element_typekind);
+  bool read_values(SequenceType& value, TypeKind elem_tk);
 
-  // Templates for reading a sequence of primitives or strings or wstrings
-  // as a member (or an element) of a given containing type.
+  ///@{
+  /** Templates for reading a sequence of primitives, strings or wstrings
+   *  as a member (or an element) of a given containing type. See get_value_from_struct
+   *  and the similar methods for the use of @a enum_or_bitmask, @a lower, @a upper.
+   */
   template<TypeKind ElementTypeKind, typename SequenceType>
   bool get_values_from_struct(SequenceType& value, MemberId id,
                               TypeKind enum_or_bitmask, LBound lower, LBound upper);
@@ -196,47 +221,47 @@ private:
   template<TypeKind ElementTypeKind, typename SequenceType>
   bool get_values_from_map(SequenceType& value, MemberId id,
                            TypeKind enum_or_bitmask, LBound lower, LBound upper);
+  ///@}
 
-  /// Template that reads sequence of values from all valid containing types.
+  /// Common method to read a value sequence of any type (primitive, string, wstring).
   template<TypeKind ElementTypeKind, typename SequenceType>
   DDS::ReturnCode_t get_sequence_values(SequenceType& value, MemberId id,
                                         TypeKind enum_or_bitmask = TK_NONE,
                                         LBound lower = 0,
                                         LBound upper = 0);
 
-  /// Move the read pointer to the member with a given ID.
-  /// In case the member is not a sequence, @a kind is the type kind of the member.
-  /// If the requested member is a sequence, @a kind is the type kind of the
-  /// elements of the sequence.
-  bool find_struct_member(MemberId id, TypeKind kind, bool is_sequence = false);
-
   bool skip(const char* func_name, const char* description, size_t n, int size = 1);
 
   bool read_discriminator(const DynamicType_rch& disc_type, ExtensibilityKind union_ek, ACE_CDR::Long& label);
 
   /// Skip a member of a final or appendable struct at the given index.
+  ///
   bool skip_struct_member_by_index(ACE_CDR::ULong index);
 
-  /// Skip a member of the given type. The member can be a part of any containing type,
+  /// Skip a member with the given type. The member can be a part of any containing type,
   /// such as a member in a struct or union, an element in a sequence or array, etc.
   /// Note that this assumes any header preceding this type, e.g. EMHEADER if this is
   /// a member of a mutable struct, is already consumed, and the read pointer is pointing
   /// to the actual data of the member.
   bool skip_member(DynamicType_rch member_type);
 
-  /// Skip a member which is a sequence, array, or map.
+  ///@{
+  /** Skip a member which is a sequence, array, or map. */
   bool skip_sequence_member(DynamicType_rch type);
   bool skip_array_member(DynamicType_rch type);
   bool skip_map_member(DynamicType_rch type);
+  ///@}
 
   /// Skip a non-primitive collection member. That is, a sequence or an array of non-primitive
   /// elements, or a map with at least either key type or value type is non-primitive.
   bool skip_collection_member(TypeKind tk);
 
   /// Skip a member which is a structure.
+  ///
   bool skip_struct_member(const DynamicType_rch& type);
 
   /// Skip a member which is an union.
+  ///
   bool skip_union_member(const DynamicType_rch& type);
 
   // TODO: This method can be moved to DynamicType-related classes.
