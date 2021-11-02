@@ -140,11 +140,9 @@ Punctuation
 
 The punctuation placement rules can be summarized as:
 
-* Open brace appears as the first non-whitespace character on the line to start
-  function definitions.
+* Open brace appears as the first non-whitespace character on the line to start function definitions.
 * Otherwise the open brace shares the line with the preceding text.
-* Parentheses used for control-flow keywords (``if``, ``while``, ``for``, ``switch``)
-  are separated from the keyword by a single space.
+* Parentheses used for control-flow keywords (``if``, ``while``, ``for``, ``switch``) are separated from the keyword by a single space.
 * Otherwise parentheses and brackets are not preceded by spaces.
 
 Whitespace
@@ -389,7 +387,7 @@ Logging is done via ACE's logging macro functions, ``ACE_DEBUG`` and ``ACE_ERROR
 The logging macros arguments to both are:
 
   - A ``ACE_Log_Priority`` value
-
+G
     - This is an enum defined in ``ace/Log_Priority.h`` to say what the priority or severity of the message is.
 
   - The format string
@@ -401,7 +399,7 @@ The logging macros arguments to both are:
   - The variable number of arguments
 
     - Like ``printf`` the variable arguments can't be whole objects, like a ``std::string`` value.
-      In the case of ``std::string``, the format and args would look like: ``"%C", a_string.c_str()``.
+      In the case of ``std::string``, the format and arguments would look like: ``"%C", a_string.c_str()``.
 
 Note that all the ``ACE_DEBUG`` and ``ACE_ERROR`` arguments must be surrounded by two sets of parentheses.
 
@@ -418,8 +416,46 @@ Logging Conditions and Priority
 -------------------------------
 
 In OpenDDS ``ACE_DEBUG`` and ``ACE_ERROR`` are used directly most of the time, but sometimes they are used indirectly, like with the transport framework's ``VDBG`` and ``VDBG_LVL``.
-They also should be conditional at times depending if the message few logging control systems OpenDDS has.
-See section 7.6 of the OpenDDS Developer's Guide for information on them from the user perspective.
+They also should be conditional on one of the logging control systems in OpenDDS.
+See section 7.6 of the OpenDDS Developer's Guide for user perspective.
+
+The logging conditions are as follows:
+
++---------------------+---------------+----------------+------------------------------------+
+| Message Kind        | Macro         | Priority       | Condition                          |
++=====================+===============+================+====================================+
+| Unrecoverable error | ``ACE_ERROR`` | ``LM_ERROR``   | ``log_level >= LogLevel::Error``   |
++---------------------+---------------+----------------+------------------------------------+
+| Unreportable error  | ``ACE_ERROR`` | ``LM_WARNING`` | ``log_level >= LogLevel::Warning`` |
++---------------------+---------------+----------------+------------------------------------+
+| Reportable error    | ``ACE_ERROR`` | ``LM_NOTICE``  | ``log_level >= LogLevel::Notice``  |
++---------------------+---------------+----------------+------------------------------------+
+| Informational       | ``ACE_DEBUG`` | ``LM_INFO``    | ``log_level >= LogLevel::Info``    |
+| message             |               |                |                                    |
++---------------------+---------------+----------------+------------------------------------+
+| Debug message       | ``ACE_DEBUG`` | ``LM_DEBUG``   | ``DCPS_debug_level`` or one of the |
+|                     |               |                | other debug systems listed below.  |
++---------------------+---------------+----------------+------------------------------------+
+
+An `unrecoverable error` indicates that OpenDDS is in a state where it cannot function as intended.
+This may be the result of a defect, misconfiguration, or interference.
+
+A `recoverable error` indicates that OpenDDS could not perform a desired action but remains in a state where it can function as intended.
+
+A `informational message` gives very high level information mostly at startup, like the version of OpenDDS being used.
+
+A `debug message` give lower level information such as if a message is being sent.
+These are directly controlled by one of a few debug logging control systems.
+
+``DCPS_debug_level`` should be used for all debug logging that doesn't fall under the other systems.
+
+``Transport_debug_level`` should be used in the transport layer.
+
+``security_debug`` should be used for logging in related to DDS Security.
+This system predates ``log_level``, so some of its logging catagories are not strictly for debug purposes.
+
+For number-based conditions like ``DCPS_debug_level`` and ``Transport_debug_level``, the number used should be the log level the message starts to become active at.
+For example for ``DCPS_debug_level >= 6`` should be used instead of ``DCPS_debug_level > 5``.
 
 Message Content
 ---------------
@@ -432,12 +468,36 @@ Message Content
   - Use ``ERROR:``, ``WARNING:``, and ``NOTICE:`` if using the correspoding log priorities.
   - ``CLASS_NAME::METHOD_NAME`` should be used instead of just the function name if it's part of a class.
     It's at the developer's discretion to come up with a meaningful name for members of overload sets, templates, and other more complex cases.
-  - If the message has multiple lines, then every line of a log message should start with ``(%P|%t)``.
 
 - Format strings should not be wrapped in ``ACE_TEXT``.
   We shouldn't go out of our way to replace it in existing logging points, but it should be avoided it in new ones.
 
   - ``ACE_TEXT``'s purpose is to wrap strings and characters in ``L`` on builds where ``uses_wchar=1``, so they become the wide versions.
-  - While not doing it might result in a performance hit for character set conversion at runtime, the builds where this happens are rare, so the it's outweighed by the added visual noise to the code and the possibility of bugs introduced by improper use of ``ACE_TEXT``.
+  - While not doing it might result in a performance hit for character encoding conversion at runtime, the builds where this happens are rare, so the it's outweighed by the added visual noise to the code and the possibility of bugs introduced by improper use of ``ACE_TEXT``.
 
 - Avoid new usage of ``ACE_ERROR_RETURN`` in order to not hide the return statement within a macro.
+
+Examples
+--------
+
+.. code-block:: C++
+
+  if (log_level >= LogLevel::Error) {
+    ACE_ERROR((LM_DEBUG, "(%P|%t) ERROR: example_function: Hello, World!\n"));
+  }
+
+  if (log_level >= LogLevel::Warning) {
+    ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: example_function: Hello, World!\n"));
+  }
+
+  if (log_level >= LogLevel::Notice) {
+    ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: example_function: Hello, World!\n"));
+  }
+
+  if (log_level >= LogLevel::Info) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) example_function: Hello, World!\n"));
+  }
+
+  if (DCPS_debug_level >= 1) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) example_function: Hello, World!\n"));
+  }
