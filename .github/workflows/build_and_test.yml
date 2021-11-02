@@ -2484,7 +2484,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  ACE_TAO_u20_p1_asan:
+  ACE_TAO_u20_p1_stat_asan:
 
     runs-on: ubuntu-20.04
 
@@ -2562,11 +2562,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_u20_p1_asan_sec:
+  build_u20_p1_stat_asan_sec:
 
     runs-on: ubuntu-20.04
 
-    needs: ACE_TAO_u20_p1_asan
+    needs: ACE_TAO_u20_p1_stat_asan
 
     steps:
     - name: install clang-12
@@ -2587,13 +2587,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ACE_TAO_u20_p1_asan_artifact
+        name: ACE_TAO_u20_p1_stat_asan_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u20_p1_asan.tar.xz
+        tar xvfJ ACE_TAO_u20_p1_stat_asan.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v2
       with:
@@ -2632,11 +2632,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_u20_p1_asan_sec:
+  test_u20_p1_stat_asan_sec:
 
     runs-on: ubuntu-20.04
 
-    needs: build_u20_p1_asan_sec
+    needs: build_u20_p1_stat_asan_sec
     timeout-minutes: 150
 
     steps:
@@ -2661,13 +2661,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ACE_TAO_u20_p1_asan_artifact
+        name: ACE_TAO_u20_p1_stat_asan_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u20_p1_asan.tar.xz
+        tar xvfJ ACE_TAO_u20_p1_stat_asan.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v2
       with:
@@ -2676,13 +2676,13 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
-        name: build_u20_p1_asan_sec_artifact
+        name: build_u20_p1_stat_asan_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_u20_p1_asan_sec.tar.xz
+        tar xvfJ build_u20_p1_stat_asan_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
