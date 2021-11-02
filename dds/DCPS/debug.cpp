@@ -46,13 +46,12 @@ void LogLevel::set(LogLevel::Value value)
   }
 }
 
-void LogLevel::set_from_string(const char* name)
-{
-  struct NameValue {
+namespace {
+  struct LogLevelNameValue {
     const char* const name;
     const LogLevel::Value value;
   };
-  static const NameValue log_levels[] = {
+  static const LogLevelNameValue log_levels[] = {
     {"none", LogLevel::None},
     {"error", LogLevel::Error},
     {"warning", LogLevel::Warning},
@@ -60,6 +59,10 @@ void LogLevel::set_from_string(const char* name)
     {"info", LogLevel::Info},
     {"debug", LogLevel::Debug}
   };
+};
+
+void LogLevel::set_from_string(const char* name)
+{
   for (size_t i = 0; i < array_count(log_levels); ++i) {
     if (!std::strcmp(log_levels[i].name, name)) {
       set(log_levels[i].value);
@@ -70,6 +73,17 @@ void LogLevel::set_from_string(const char* name)
     ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: LogLevel::set_from_string: "
       "Invalid log level name: %C", name));
   }
+}
+
+const char* LogLevel::get_as_string() const
+{
+  const unsigned index = static_cast<unsigned>(get());
+  if (index >= array_count(log_levels)) {
+    ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: LogLevel::get_as_string: "
+      "Invalid log level value: %u", index));
+    return "invalid";
+  }
+  return log_levels[index].name;
 }
 
 OpenDDS_Dcps_Export void set_DCPS_debug_level(unsigned int lvl)

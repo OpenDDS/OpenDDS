@@ -48,6 +48,7 @@ public:
   {
     return level_;
   }
+  const char* get_as_string() const;
 
 private:
   Value level_;

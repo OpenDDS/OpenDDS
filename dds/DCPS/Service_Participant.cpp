@@ -435,6 +435,9 @@ Service_Participant::get_domain_participant_factory(int &argc,
       if (log_level >= LogLevel::Info) {
         ACE_DEBUG((LM_INFO, "(%P|%t) Service_Participant::get_domain_participant_factory: "
           "This is OpenDDS " OPENDDS_VERSION " using ACE " ACE_VERSION "\n"));
+
+        ACE_DEBUG((LM_INFO, "(%P|%t) Service_Participant::get_domain_participant_factory: "
+          "log_level: %C DCPS_debug_level: %u\n", log_level.get_as_string(), DCPS_debug_level));
       }
 
       // Establish the default scheduling mechanism and
