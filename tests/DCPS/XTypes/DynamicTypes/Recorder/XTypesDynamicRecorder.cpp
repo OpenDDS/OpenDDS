@@ -34,7 +34,7 @@
 #include <sstream>
 
 int print_dynamic_data(OpenDDS::XTypes::DynamicData dd) {
-  ACE_DEBUG((LM_DEBUG, "Type is: \n"));
+  ACE_DEBUG((LM_DEBUG, "Type is:\n"));
   OpenDDS::XTypes::TypeKind top_tk = dd.get_type()->get_kind();
   if (top_tk == OpenDDS::XTypes::TK_STRUCTURE) {
     std::cout << "struct " << dd.get_type()->get_name() << " {\n";
@@ -163,7 +163,7 @@ int print_dynamic_data(OpenDDS::XTypes::DynamicData dd) {
           OpenDDS::DCPS::String nested_member_name = nested_iter->second->get_descriptor().name;
           OpenDDS::DCPS::String nested_type_name = nested_iter->second->get_descriptor().get_type()->get_descriptor().name;
           if (nested_member_tk == OpenDDS::XTypes::TK_INT32) {
-            ACE_CDR::Long my_long;     
+            ACE_CDR::Long my_long;
             if (nested_dd.get_int32_value(my_long, 0) != DDS::RETCODE_OK) {
               ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_int32_value\n"), -1);
             }
