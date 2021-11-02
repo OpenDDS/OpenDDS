@@ -50,6 +50,7 @@ public:
   /// @a ser and you want to give the remaining to DynamicData.
   DynamicData(DCPS::Serializer& ser, const DynamicType_rch& type);
 
+  DynamicData(const DynamicData& other);
   DynamicData& operator=(const DynamicData& other);
 
   ~DynamicData();
@@ -106,6 +107,7 @@ public:
   bool skip_all();
 
 private:
+  void copy(const DynamicData& other);
 
   /// Verify that a given type is primitive or string or wstring.
   bool is_type_supported(TypeKind tk, const char* func_name);

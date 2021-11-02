@@ -57,7 +57,26 @@ DynamicData::DynamicData(DCPS::Serializer& ser, const DynamicType_rch& type)
   }
 }
 
+DynamicData::DynamicData(const DynamicData& other)
+  : strm_(0, other.encoding_)
+{
+  copy(other);
+}
+
 DynamicData& DynamicData::operator=(const DynamicData& other)
+{
+  if (this != &other) {
+    copy(other);
+  }
+  return *this;
+}
+
+DynamicData::~DynamicData()
+{
+  ACE_Message_Block::release(chain_);
+}
+
+void DynamicData::copy(const DynamicData& other)
 {
   chain_ = other.chain_->duplicate();
   encoding_ = other.encoding_;
@@ -67,12 +86,6 @@ DynamicData& DynamicData::operator=(const DynamicData& other)
   type_ = other.type_;
   descriptor_ = other.descriptor_;
   item_count_ = other.item_count_;
-  return *this;
-}
-
-DynamicData::~DynamicData()
-{
-  ACE_Message_Block::release(chain_);
 }
 
 DDS::ReturnCode_t DynamicData::get_descriptor(MemberDescriptor& value, MemberId id) const
@@ -155,8 +168,10 @@ MemberId DynamicData::get_member_id_by_name(DCPS::String name) const
 
 MemberId DynamicData::get_member_id_at_index(ACE_CDR::ULong index)
 {
-  const ACE_CDR::ULong count = get_item_count();
-  if (index >= count) {
+  if (item_count_ == ITEM_COUNT_INVALID) {
+    get_item_count();
+  }
+  if (index >= item_count_) {
     return MEMBER_ID_INVALID;
   }
 
@@ -825,7 +840,7 @@ DDS::ReturnCode_t DynamicData::get_char_common(CharT& value, MemberId id)
       }
       ACE_CDR::ULong index;
       const size_t str_len = ACE_OS::strlen(str);
-      if (!get_index_from_id(id, index, str_len)) {
+      if (!get_index_from_id(id, index, static_cast<ACE_CDR::ULong>(str_len))) {
         if (DCPS::DCPS_debug_level >= 1) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_char_common -")
                      ACE_TEXT(" ID %d is not valid in a string (or wstring) with length %d\n"),
