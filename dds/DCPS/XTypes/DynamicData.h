@@ -256,13 +256,10 @@ private:
   /// elements, or a map with at least either key type or value type is non-primitive.
   bool skip_collection_member(TypeKind tk);
 
-  /// Skip a member which is a structure.
-  ///
-  bool skip_struct_member(const DynamicType_rch& type);
+  /// Skip a member which is a structure or a union.
+  bool skip_aggregated_member(const DynamicType_rch& type);
 
-  /// Skip a member which is an union.
-  ///
-  bool skip_union_member(const DynamicType_rch& type);
+  void release_chains();
 
   // TODO: This method can be moved to DynamicType-related classes.
   DynamicType_rch get_base_type(const DynamicType_rch& alias_type) const;
@@ -288,6 +285,12 @@ private:
   /// Each public interface creates a new Serializer object with a message block
   /// chain that is a duplicate from chain_.
   DCPS::Serializer strm_;
+
+  /// Message block chains created during each get_*_value or get_*_values method's
+  /// execution that need to be released when the method ends. Those chains are created
+  /// when the method skips a nested aggregated type (i.e., struct and union) by
+  /// calling skip_aggregated_member().
+  DCPS::OPENDDS_VECTOR(ACE_Message_Block*) chains_to_release;
 
   /// This DynamicData object holds data for this type.
   DynamicType_rch type_;

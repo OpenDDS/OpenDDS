@@ -38,7 +38,7 @@ typedef sequence<string> StringSeq;
 typedef sequence<wstring> WStringSeq;
 
 @final
-struct NestedStruct {
+struct NestedFinalStruct {
   long l;
 };
 
@@ -61,7 +61,7 @@ struct SingleValueStruct {
   @id(13) wchar char_16;
   @id(14) octet byte;
   @id(15) boolean bool;
-  @id(16) NestedStruct nested_struct;
+  @id(16) NestedFinalStruct nested_struct;
   @id(17) string str;
   @id(18) wstring wstr;
 };
@@ -238,3 +238,13 @@ struct SequenceInArrayStruct {
   WStringSeq wstr_as[2];
 };
 */
+
+// Test skipping nested struct in a non-mutable type.
+@appendable
+struct AppendableStruct {
+  long l;
+  NestedFinalStruct nested_struct1;
+  short s;
+  NestedFinalStruct nested_struct2;
+  char c;
+};

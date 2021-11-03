@@ -745,6 +745,8 @@ DDS::ReturnCode_t DynamicData::get_single_value(ValueType& value, MemberId id,
     }
   }
 
+  release_chains();
+
   if (!good && DCPS::DCPS_debug_level >= 1) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_single_value -")
                ACE_TEXT(" Failed to read a value of %C from a DynamicData object of type %C\n"),
@@ -878,6 +880,8 @@ DDS::ReturnCode_t DynamicData::get_char_common(CharT& value, MemberId id)
     break;
   }
 
+  release_chains();
+
   if (!good && DCPS::DCPS_debug_level >= 1) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Dynamic::get_char_common -")
                ACE_TEXT(" Failed to read DynamicData object of type %C\n"), typekind_to_string(tk)));
@@ -981,6 +985,8 @@ DDS::ReturnCode_t DynamicData::get_boolean_value(ACE_CDR::Boolean& value, Member
     good = false;
     break;
   }
+
+  release_chains();
 
   if (!good && DCPS::DCPS_debug_level >= 1) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Dynamic::get_boolean_value -")
@@ -1095,6 +1101,8 @@ DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id
     good = false;
     break;
   }
+
+  release_chains();
   return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
 
@@ -1353,6 +1361,8 @@ DDS::ReturnCode_t DynamicData::get_sequence_values(SequenceType& value, MemberId
     }
     return DDS::RETCODE_ERROR;
   }
+
+  release_chains();
 
   if (!good && DCPS::DCPS_debug_level >= 1) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_sequence_values -")
@@ -1708,9 +1718,9 @@ bool DynamicData::skip_member(DynamicType_rch member_type)
       break;
     }
   case TK_STRUCTURE:
-    return skip_struct_member(member_type);
+    return skip_aggregated_member(member_type);
   case TK_UNION:
-    return skip_union_member(member_type);
+    return skip_aggregated_member(member_type);
   case TK_SEQUENCE:
     return skip_sequence_member(member_type);
   case TK_ARRAY:
@@ -1828,16 +1838,27 @@ bool DynamicData::skip_collection_member(TypeKind kind)
   return skip("skip_collection_member", err_msg.c_str(), dheader);
 }
 
-bool DynamicData::skip_struct_member(const DynamicType_rch& struct_type)
+bool DynamicData::skip_aggregated_member(const DynamicType_rch& member_type)
 {
-  DynamicData struct_data(strm_.current(), strm_.encoding(), struct_type);
-  return struct_data.skip_all();
+  DynamicData nested_data(strm_, member_type);
+  if (!nested_data.skip_all()) {
+    return false;
+  }
+
+  ACE_Message_Block* const result_chain = nested_data.chain_->duplicate();
+  strm_ = DCPS::Serializer(result_chain, encoding_);
+  const DCPS::Serializer::RdState curr_state = nested_data.strm_.rdstate();
+  strm_.rdstate(curr_state);
+  chains_to_release.push_back(result_chain);
+  return true;
 }
 
-bool DynamicData::skip_union_member(const DynamicType_rch& union_type)
+void DynamicData::release_chains()
 {
-  DynamicData union_data(strm_.current(), strm_.encoding(), union_type);
-  return union_data.skip_all();
+  for (ACE_CDR::ULong i = 0; i < chains_to_release.size(); ++i) {
+    ACE_Message_Block::release(chains_to_release[i]);
+  }
+  chains_to_release.clear();
 }
 
 bool DynamicData::read_discriminator(const DynamicType_rch& disc_type, ExtensibilityKind union_ek, ACE_CDR::Long& label)

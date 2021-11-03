@@ -854,6 +854,42 @@ TEST(Mutable, ReadValueFromSequence)
   EXPECT_STREQ(expected.wstr_s[1].in(), some_wstr);
 }
 
+TEST(Appendable, SkipNestedStruct)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::AppendableStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  unsigned char appendable_struct[] = {
+    0x00,0x00,0x00,0x11,// +4=4 dheader
+    0x00,0x00,0x00,0x0a, // +4=8 l
+    0x00,0x00,0x00,0x14, // +4=12 nested_struct1
+    0x00,0x0c,(0),(0), // +4=16 s
+    0x00,0x00,0x00,0x15, // +4=20 nested_struct2
+    'a' // +1=21 c
+  };
+  AppendableStruct expected = { 10, {20}, 12, {21}, 'a' };
+
+  ACE_Message_Block msg(128);
+  msg.copy((const char*)appendable_struct, sizeof(appendable_struct));
+  XTypes::DynamicData data(&msg, xcdr2, dt);
+
+  ACE_CDR::Int16 s;
+  DDS::ReturnCode_t ret = data.get_int16_value(s, 2);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.s, s);
+
+  ACE_CDR::Char c;
+  ret = data.get_char8_value(c, 4);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.c, c);
+}
+
 int main(int argc, char* argv[])
 {
   ::testing::InitGoogleTest(&argc, argv);
