@@ -19,7 +19,7 @@ void set_float128_value(ACE_CDR::LongDouble& a)
   ACE_UNUSED_ARG(value);
   a = 1.0L;
 #else
-  ACE_OS::memcpy((char*)a.ld, (char*)value), 16);
+  ACE_OS::memcpy((char*)a.ld, (char*)value, 16);
 #endif
 }
 
