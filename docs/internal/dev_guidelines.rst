@@ -100,7 +100,7 @@ C++ Coding Style
 
 * C++ code in OpenDDS must compile under the :ghfile:`compilers listed in the \`\`README.md\`\` file <README.md#compilers>`.
 * Commit code in the proper style from the start, so follow-on commits to adjust style don't clutter history.
-* C++ source code is a plaintext file, so the guidelines in Text file formatting apply.
+* C++ source code is a plaintext file, so the guidelines in "Text File Formatting" apply.
 * A modified Stroustrup style is used (see :ghfile:`tools/scripts/style`).
 
   * Warning: not everything in :ghfile:`tools/scripts/style` represents the current guidelines.
@@ -421,38 +421,45 @@ See section 7.6 of the OpenDDS Developer's Guide for user perspective.
 
 The logging conditions are as follows:
 
-+---------------------+---------------+----------------+------------------------------------+
-| Message Kind        | Macro         | Priority       | Condition                          |
-+=====================+===============+================+====================================+
-| Unrecoverable error | ``ACE_ERROR`` | ``LM_ERROR``   | ``log_level >= LogLevel::Error``   |
-+---------------------+---------------+----------------+------------------------------------+
-| Unreportable error  | ``ACE_ERROR`` | ``LM_WARNING`` | ``log_level >= LogLevel::Warning`` |
-+---------------------+---------------+----------------+------------------------------------+
-| Reportable error    | ``ACE_ERROR`` | ``LM_NOTICE``  | ``log_level >= LogLevel::Notice``  |
-+---------------------+---------------+----------------+------------------------------------+
-| Informational       | ``ACE_DEBUG`` | ``LM_INFO``    | ``log_level >= LogLevel::Info``    |
-| message             |               |                |                                    |
-+---------------------+---------------+----------------+------------------------------------+
-| Debug message       | ``ACE_DEBUG`` | ``LM_DEBUG``   | ``DCPS_debug_level`` or one of the |
-|                     |               |                | other debug systems listed below.  |
-+---------------------+---------------+----------------+------------------------------------+
++--------------------------------+---------------+----------------+------------------------------------+
+| Message Kind                   | Macro         | Priority       | Condition                          |
++================================+===============+================+====================================+
+| Unrecoverable error            | ``ACE_ERROR`` | ``LM_ERROR``   | ``log_level >= LogLevel::Error``   |
++--------------------------------+---------------+----------------+------------------------------------+
+| Unreportable recoverable error | ``ACE_ERROR`` | ``LM_WARNING`` | ``log_level >= LogLevel::Warning`` |
++--------------------------------+---------------+----------------+------------------------------------+
+| Reportable recoverable error   | ``ACE_ERROR`` | ``LM_NOTICE``  | ``log_level >= LogLevel::Notice``  |
++--------------------------------+---------------+----------------+------------------------------------+
+| Informational message          | ``ACE_DEBUG`` | ``LM_INFO``    | ``log_level >= LogLevel::Info``    |
++--------------------------------+---------------+----------------+------------------------------------+
+| Debug message                  | ``ACE_DEBUG`` | ``LM_DEBUG``   | Based on ``DCPS_debug_level`` or   |
+|                                |               |                | one of the other debug systems     |
+|                                |               |                | listed below.                      |
++--------------------------------+---------------+----------------+------------------------------------+
 
 An `unrecoverable error` indicates that OpenDDS is in a state where it cannot function as intended.
 This may be the result of a defect, misconfiguration, or interference.
 
 A `recoverable error` indicates that OpenDDS could not perform a desired action but remains in a state where it can function as intended.
 
-A `informational message` gives very high level information mostly at startup, like the version of OpenDDS being used.
+A `reportable error` indicates that OpenDDS can report the error via the API through something like an exception or return value.
+
+An `informational message` gives very high level information mostly at startup, like the version of OpenDDS being used.
 
 A `debug message` give lower level information such as if a message is being sent.
 These are directly controlled by one of a few debug logging control systems.
 
-``DCPS_debug_level`` should be used for all debug logging that doesn't fall under the other systems.
+- ``DCPS_debug_level`` should be used for all debug logging that doesn't fall under the other systems.
+  It is an unsigned integer value which ranges from 0 to 10.
+  See :ghfile:`dds/DCPS/debug.h` for details.
 
-``Transport_debug_level`` should be used in the transport layer.
+- ``Transport_debug_level`` should be used in the transport layer.
+  It is an unsigned integer value which ranges from 0 to 6.
+  See :ghfile:`dds/DCPS/transport/framework/TransportDebug.h` for details.
 
-``security_debug`` should be used for logging in related to DDS Security.
-This system predates ``log_level``, so some of its logging catagories are not strictly for debug purposes.
+- ``security_debug`` should be used for logging in related to DDS Security.
+  It is an object with ``bool`` members that make up categories of logging messages that allow fine control.
+  See :ghfile:`dds/DCPS/debug.h` for details.
 
 For number-based conditions like ``DCPS_debug_level`` and ``Transport_debug_level``, the number used should be the log level the message starts to become active at.
 For example for ``DCPS_debug_level >= 6`` should be used instead of ``DCPS_debug_level > 5``.
