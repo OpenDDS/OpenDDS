@@ -80,8 +80,8 @@ namespace {
         indent << "value_writer.end_array();\n";
     } else {
       const Classification c = classify(array->base_type());
-      const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
       if (c & CL_PRIMITIVE) {
+        const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
         AST_Type* const actual = resolveActualType(array->base_type());
         const AST_PredefinedType::PredefinedType pt =
           dynamic_cast<AST_PredefinedType*>(actual)->pt();
