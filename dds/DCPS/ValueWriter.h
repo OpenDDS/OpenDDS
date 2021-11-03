@@ -32,6 +32,7 @@ namespace DCPS {
 /// The vwrite function should invoke the appropriate methods of the
 /// ValueWriter and dispatch for other vwrite functions.
 class OpenDDS_Dcps_Export ValueWriter {
+public:
   ValueWriter()  {}
   virtual ~ValueWriter() {}
 
