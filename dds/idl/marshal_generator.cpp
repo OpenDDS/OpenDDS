@@ -1026,7 +1026,7 @@ namespace {
       //for a bounded sequence this is our maximum
       //we save the old length so we know how far we need to read until
       if ((elem_cls & CL_INTERFACE) == 0) {
-        be_global->impl_ << "  CORBA::ULong new_length = length;\n";
+        be_global->impl_ << "  const CORBA::ULong new_length = length;\n";
       }
 
       if (elem_cls & CL_PRIMITIVE) {
