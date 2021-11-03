@@ -146,7 +146,8 @@ public:
   bool is_leading(const GUID_t& reader_id) const;
 
 protected:
-  void cdr_encapsulation(bool encap) {
+  void cdr_encapsulation(bool encap)
+  {
     cdr_encapsulation_ = encap;
   }
 
