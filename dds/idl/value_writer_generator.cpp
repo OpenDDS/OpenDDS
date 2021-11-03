@@ -20,28 +20,6 @@ namespace {
 
   void generate_write(const std::string& expression, AST_Type* type, const std::string& idx, int level = 1);
 
-  void array_helper(const std::string& expression, AST_Array* array,
-                    size_t dim_idx, const std::string& idx, int level)
-  {
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    const std::string indent(level * 2, ' ');
-    if (dim_idx < array->n_dims()) {
-      const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
-      be_global->impl_ <<
-        indent << "value_writer.begin_array();\n" <<
-        indent << "for (" << (use_cxx11 ? "size_t " : "unsigned int ") << idx << " = 0; "
-        << idx << " != " << dim << "; ++" << idx << ") {\n" <<
-        indent << "  value_writer.begin_element(" << idx << ");\n";
-      array_helper(expression + "[" + idx + "]", array, dim_idx + 1, idx + "i", level + 1);
-      be_global->impl_ <<
-        indent << "  value_writer.end_element();\n" <<
-        indent << "}\n" <<
-        indent << "value_writer.end_array();\n";
-    } else {
-      generate_write(expression, array->base_type(), idx + "i", level);
-    }
-  }
-
   std::string primitive_type(AST_PredefinedType::PredefinedType pt)
   {
     switch (pt) {
@@ -82,6 +60,44 @@ namespace {
     }
   }
 
+  void array_helper(const std::string& expression, AST_Array* array,
+                    size_t dim_idx, const std::string& idx, int level)
+  {
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    const std::string indent(level * 2, ' ');
+    if (dim_idx < array->n_dims() - 1) {
+      const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
+      be_global->impl_ <<
+        indent << "value_writer.begin_array();\n";
+      be_global->impl_ <<
+        indent << "for (" << (use_cxx11 ? "size_t " : "unsigned int ") << idx << " = 0; "
+        << idx << " != " << dim << "; ++" << idx << ") {\n" <<
+        indent << "  value_writer.begin_element(" << idx << ");\n";
+      array_helper(expression + "[" + idx + "]", array, dim_idx + 1, idx + "i", level + 1);
+      be_global->impl_ <<
+        indent << "  value_writer.end_element();\n" <<
+        indent << "}\n" <<
+        indent << "value_writer.end_array();\n";
+    } else {
+      const Classification c = classify(array->base_type());
+      const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
+      if (c & CL_PRIMITIVE) {
+        AST_Type* const actual = resolveActualType(array->base_type());
+        const AST_PredefinedType::PredefinedType pt =
+          dynamic_cast<AST_PredefinedType*>(actual)->pt();
+        be_global->impl_ <<
+          indent << "value_writer.begin_array();\n";
+        be_global->impl_ << indent <<
+          "value_writer.write_" << primitive_type(pt) << "_array (" << expression << ", " << dim << ");\n";
+        be_global->impl_ <<
+          indent << "value_writer.end_array();\n";
+
+      } else {
+        generate_write(expression, array->base_type(), idx + "i", level);
+      }
+    }
+  }
+
   void sequence_helper(const std::string& expression, AST_Sequence* sequence,
                        const std::string& idx, int level)
   {
@@ -92,11 +108,12 @@ namespace {
       indent << "value_writer.begin_sequence();\n";
 
     const Classification c = classify(sequence->base_type());
+    AST_Type* const actual = resolveActualType(sequence->base_type());
     if (c & CL_PRIMITIVE) {
       const AST_PredefinedType::PredefinedType pt =
-        dynamic_cast<AST_PredefinedType*>(sequence->base_type())->pt();
-      be_global->impl_ <<
-        "value_writer.write_" << primitive_type(pt) << '_array (' << expression << ', ' expression << "." << length_func << "());\n";
+        dynamic_cast<AST_PredefinedType*>(actual)->pt();
+      be_global->impl_ << indent <<
+        "value_writer.write_" << primitive_type(pt) << "_array (" << expression << ".get_buffer(), " << expression << "." << length_func << "());\n";
     } else {
       be_global->impl_ <<
         indent << "for (" << (use_cxx11 ? "size_t " : "unsigned int ") << idx << " = 0; "
@@ -105,10 +122,10 @@ namespace {
       generate_write(expression + "[" + idx + "]", sequence->base_type(), idx + "i", level + 1);
       be_global->impl_ <<
         indent << "  value_writer.end_element();\n" <<
+        indent << "}\n";
     }
 
     be_global->impl_ <<
-      indent << "}\n" <<
       indent << "value_writer.end_sequence();\n";
   }
 
