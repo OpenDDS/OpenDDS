@@ -2002,12 +2002,15 @@ bool DynamicData::skip_all()
     const TypeKind tk = type_->get_kind();
     if (tk == TK_STRUCTURE) {
       const ACE_CDR::ULong member_count = type_->get_member_count();
+      bool good = true;
       for (ACE_CDR::ULong i = 0; i < member_count; ++i) {
         if (!skip_struct_member_by_index(i)) {
-          return false;
+          good = false;
+          break;
         }
       }
-      return true;
+      release_chains();
+      return good;
     } else { // Union
       const DynamicType_rch disc_type = get_base_type(descriptor_.discriminator_type);
       ACE_CDR::Long label;
@@ -2026,7 +2029,9 @@ bool DynamicData::skip_all()
         for (ACE_CDR::ULong i = 0; i < labels.length(); ++i) {
           if (label == labels[i]) {
             const DynamicType_rch selected_member = md.type.lock();
-            return selected_member && skip_member(selected_member);
+            bool good = selected_member && skip_member(selected_member);
+            release_chains();
+            return good;
           }
         }
 
@@ -2038,7 +2043,9 @@ bool DynamicData::skip_all()
 
       if (has_default) {
         const DynamicType_rch default_dt = default_member.type.lock();
-        return default_dt && skip_member(default_dt);
+        bool good = default_dt && skip_member(default_dt);
+        release_chains();
+        return good;
       }
       if (DCPS::DCPS_debug_level >= 1) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DynamicData::skip_all - Skip a union with no")
