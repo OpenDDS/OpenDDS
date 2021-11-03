@@ -1718,7 +1718,6 @@ bool DynamicData::skip_member(DynamicType_rch member_type)
       break;
     }
   case TK_STRUCTURE:
-    return skip_aggregated_member(member_type);
   case TK_UNION:
     return skip_aggregated_member(member_type);
   case TK_SEQUENCE:
@@ -1845,7 +1844,7 @@ bool DynamicData::skip_aggregated_member(const DynamicType_rch& member_type)
     return false;
   }
 
-  ACE_Message_Block* const result_chain = nested_data.chain_->duplicate();
+  ACE_Message_Block* const result_chain = nested_data.strm_.current()->duplicate();
   strm_ = DCPS::Serializer(result_chain, encoding_);
   const DCPS::Serializer::RdState curr_state = nested_data.strm_.rdstate();
   strm_.rdstate(curr_state);
@@ -1982,6 +1981,10 @@ bool DynamicData::skip_all()
   const TypeKind tk = type_->get_kind();
   if (tk != TK_STRUCTURE && tk != TK_UNION) {
     return false;
+  }
+
+  if (reset_align_state_) {
+    strm_.rdstate(align_state_);
   }
 
   const ExtensibilityKind extensibility = descriptor_.extensibility_kind;

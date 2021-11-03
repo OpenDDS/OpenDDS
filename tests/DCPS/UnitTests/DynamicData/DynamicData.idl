@@ -1,3 +1,21 @@
+#include <tao/LongSeq.pidl>
+#include <tao/ULongSeq.pidl>
+#include <tao/Int8Seq.pidl>
+#include <tao/UInt8Seq.pidl>
+#include <tao/ShortSeq.pidl>
+#include <tao/UShortSeq.pidl>
+#include <tao/LongLongSeq.pidl>
+#include <tao/ULongLongSeq.pidl>
+#include <tao/FloatSeq.pidl>
+#include <tao/DoubleSeq.pidl>
+#include <tao/LongDoubleSeq.pidl>
+#include <tao/CharSeq.pidl>
+#include <tao/WCharSeq.pidl>
+#include <tao/OctetSeq.pidl>
+#include <tao/BooleanSeq.pidl>
+#include <tao/StringSeq.pidl>
+#include <tao/WStringSeq.pidl>
+
 enum SomeEnum {
   E_INT32, // 0
   E_UINT32, // 1
@@ -157,11 +175,11 @@ struct SequenceStruct {
 // Test skipping nested struct in a non-mutable type.
 @appendable
 struct AppendableStruct {
-  long l;
+  char c;
   NestedFinalStruct nested_struct1;
   short s;
   NestedFinalStruct nested_struct2;
-  int8 c;
+  int8 i;
   long l2;
 };
 

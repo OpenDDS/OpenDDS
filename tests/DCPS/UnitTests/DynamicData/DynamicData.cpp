@@ -290,12 +290,15 @@ TEST(Mutable, ReadValueFromStruct)
   ret = data.get_wstring_value(wstr, 18);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_STREQ(expected.wstr.in(), wstr);
+  CORBA::wstring_free(wstr);
 
+  wstr = 0;
   ret = data.get_complex_value(nested_dd, 18);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd.get_wstring_value(wstr, random_id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_STREQ(expected.wstr.in(), wstr);
+  CORBA::wstring_free(wstr);
 }
 
 TEST(Mutable, ReadValueFromUnion)
@@ -586,6 +589,9 @@ TEST(Mutable, ReadValueFromUnion)
     DDS::ReturnCode_t ret = data.get_wstring_value(wstr, 17);
     EXPECT_EQ(ret, DDS::RETCODE_OK);
     EXPECT_STREQ(wstr, L"abc");
+    CORBA::wstring_free(wstr);
+
+    wstr = 0;
     ret = data.get_wstring_value(wstr, 10);
     EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   }
@@ -839,6 +845,7 @@ TEST(Mutable, ReadValueFromSequence)
   ret = complex.get_wstring_value(some_wstr, id);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   EXPECT_STREQ(expected.wstr_s[1].in(), some_wstr);
+  CORBA::wstring_free(some_wstr);
 }
 
 TEST(Appendable, SkipNestedStruct)
@@ -854,14 +861,14 @@ TEST(Appendable, SkipNestedStruct)
 
   unsigned char appendable_struct[] = {
     0x00,0x00,0x00,0x18,// +4=4 dheader
-    0x00,0x00,0x00,0x0a, // +4=8 l
+    'a',(0),(0),(0), // +4=8 c
     0x00,0x00,0x00,0x14, // +4=12 nested_struct1
     0x00,0x0c,(0),(0), // +4=16 s
     0x00,0x00,0x00,0x15, // +4=20 nested_struct2
-    0x0f,(0),(0),(0), // +4=24 c
+    0x0f,(0),(0),(0), // +4=24 i
     0x00,0x00,0x00,0x01 // +4=28 l2
   };
-  AppendableStruct expected = { 10, {20}, 12, {21}, 15, 1 };
+  AppendableStruct expected = { 'a', {20}, 12, {21}, 15, 1 };
 
   ACE_Message_Block msg(128);
   msg.copy((const char*)appendable_struct, sizeof(appendable_struct));
@@ -880,11 +887,15 @@ TEST(Appendable, SkipNestedStruct)
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   EXPECT_EQ(expected.nested_struct2.l, l);
 
-  // Issue(sonndinh): When skipping nested_struct2, it doesn't skip the 2 bytes padding ahead of it.
-  //  ACE_CDR::Int8 c;
-  //  ret = data.get_int8_value(c, 4);
-  //  EXPECT_EQ(DDS::RETCODE_OK, ret);
-  //  EXPECT_EQ(expected.c, c);
+  ACE_CDR::Int8 i;
+  ret = data.get_int8_value(i, 4);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.i, i);
+
+  ACE_CDR::Long l2;
+  ret = data.get_int32_value(l2, 5);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.l2, l2);
 }
 
 int main(int argc, char* argv[])
