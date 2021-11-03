@@ -154,6 +154,17 @@ struct SequenceStruct {
   @id(17) WStringSeq wstr_s;
 };
 
+// Test skipping nested struct in a non-mutable type.
+@appendable
+struct AppendableStruct {
+  long l;
+  NestedFinalStruct nested_struct1;
+  short s;
+  NestedFinalStruct nested_struct2;
+  int8 c;
+  long l2;
+};
+
 /*
 // TODO: Reading sequence from union.
 @mutable
@@ -238,14 +249,3 @@ struct SequenceInArrayStruct {
   WStringSeq wstr_as[2];
 };
 */
-
-// Test skipping nested struct in a non-mutable type.
-@appendable
-struct AppendableStruct {
-  long l;
-  NestedFinalStruct nested_struct1;
-  short s;
-  NestedFinalStruct nested_struct2;
-  int8 c;
-  long l2;
-};
