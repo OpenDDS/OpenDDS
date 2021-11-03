@@ -895,7 +895,7 @@ TEST(Appendable, SkipNestedStruct)
 
   // Issue(sonndinh): When skipping nested_struct2, it doesn't skip the 2 bytes padding ahead of it.
   ACE_CDR::Int8 c;
-  DDS::ReturnCode_t ret = data.get_int8_value(c, 4);
+  ret = data.get_int8_value(c, 4);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   EXPECT_EQ(expected.c, c);
 }
