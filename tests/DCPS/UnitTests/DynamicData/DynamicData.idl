@@ -246,5 +246,6 @@ struct AppendableStruct {
   NestedFinalStruct nested_struct1;
   short s;
   NestedFinalStruct nested_struct2;
-  char c;
+  int8 c;
+  long l2;
 };

@@ -866,14 +866,15 @@ TEST(Appendable, SkipNestedStruct)
   XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
 
   unsigned char appendable_struct[] = {
-    0x00,0x00,0x00,0x11,// +4=4 dheader
+    0x00,0x00,0x00,0x18,// +4=4 dheader
     0x00,0x00,0x00,0x0a, // +4=8 l
     0x00,0x00,0x00,0x14, // +4=12 nested_struct1
     0x00,0x0c,(0),(0), // +4=16 s
     0x00,0x00,0x00,0x15, // +4=20 nested_struct2
-    'a' // +1=21 c
+    0x0f,(0),(0),(0), // +4=24 c
+    0x00,0x00,0x00,0x01 // +4=28 l2
   };
-  AppendableStruct expected = { 10, {20}, 12, {21}, 'a' };
+  AppendableStruct expected = { 10, {20}, 12, {21}, 15, 1 };
 
   ACE_Message_Block msg(128);
   msg.copy((const char*)appendable_struct, sizeof(appendable_struct));
@@ -884,8 +885,17 @@ TEST(Appendable, SkipNestedStruct)
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   EXPECT_EQ(expected.s, s);
 
-  ACE_CDR::Char c;
-  ret = data.get_char8_value(c, 4);
+  XTypes::DynamicData complex;
+  ret = data.get_complex_value(complex, 3);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ACE_CDR::Long l;
+  ret = complex.get_int32_value(l, 0);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.nested_struct2.l, l);
+
+  // Issue(sonndinh): When skipping nested_struct2, it doesn't skip the 2 bytes padding ahead of it.
+  ACE_CDR::Int8 c;
+  DDS::ReturnCode_t ret = data.get_int8_value(c, 4);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   EXPECT_EQ(expected.c, c);
 }

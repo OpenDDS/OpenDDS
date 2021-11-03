@@ -290,7 +290,7 @@ private:
   /// execution that need to be released when the method ends. Those chains are created
   /// when the method skips a nested aggregated type (i.e., struct and union) by
   /// calling skip_aggregated_member().
-  DCPS::OPENDDS_VECTOR(ACE_Message_Block*) chains_to_release;
+  OPENDDS_VECTOR(ACE_Message_Block*) chains_to_release;
 
   /// This DynamicData object holds data for this type.
   DynamicType_rch type_;
