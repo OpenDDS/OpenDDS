@@ -70,7 +70,7 @@ namespace {
       be_global->impl_ <<
         indent << "value_writer.begin_array();\n";
       be_global->impl_ <<
-        indent << "for (" << (use_cxx11 ? "size_t " : "unsigned int ") << idx << " = 0; "
+        indent << "for (" << (use_cxx11 ? "size_t " : "::CORBA::ULong ") << idx << " = 0; "
         << idx << " != " << dim << "; ++" << idx << ") {\n" <<
         indent << "  value_writer.begin_element(" << idx << ");\n";
       array_helper(expression + "[" + idx + "]", array, dim_idx + 1, idx + "i", level + 1);
@@ -116,7 +116,7 @@ namespace {
         "value_writer.write_" << primitive_type(pt) << "_array (" << expression << ".get_buffer(), " << expression << "." << length_func << "());\n";
     } else {
       be_global->impl_ <<
-        indent << "for (" << (use_cxx11 ? "size_t " : "unsigned int ") << idx << " = 0; "
+        indent << "for (" << (use_cxx11 ? "size_t " : "::CORBA::ULong ") << idx << " = 0; "
         << idx << " != " << expression << "." << length_func << "(); ++" << idx << ") {\n" <<
         indent << "  value_writer.begin_element(" << idx << ");\n";
       generate_write(expression + "[" + idx + "]", sequence->base_type(), idx + "i", level + 1);
