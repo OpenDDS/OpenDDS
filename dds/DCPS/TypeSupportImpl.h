@@ -67,8 +67,8 @@ public:
   }
 
 private:
-  bool bounded_;
-  size_t bound_;
+  const bool bounded_;
+  const size_t bound_;
 };
 
 class OpenDDS_Dcps_Export TypeSupportImpl
