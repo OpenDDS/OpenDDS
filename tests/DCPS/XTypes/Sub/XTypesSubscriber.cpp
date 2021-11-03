@@ -332,6 +332,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
   dr_qos.type_consistency.ignore_member_names = ignore_member_names;
   dr_qos.type_consistency.force_type_validation = force_type_validation;
+  dr_qos.representation.value.length(1);
+  dr_qos.representation.value[0] = XCDR2_DATA_REPRESENTATION;
 
   DataReader_var dr = sub->create_datareader(topic, dr_qos, 0,
     DEFAULT_STATUS_MASK);

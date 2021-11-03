@@ -3389,6 +3389,14 @@ DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
   const DDS::DataRepresentationIdSeq repIds =
     get_effective_data_rep_qos(qos_.representation.value, true);
   bool xcdr1_mutable = false;
+  for (size_t i = 0; i < qos_.representation.value.length(); ++i) {
+    if (qos_.representation.value[i] == DDS::XCDR_DATA_REPRESENTATION ||
+        qos_.representation.value[i] == DDS::XCDR2_DATA_REPRESENTATION) {
+      // If the QoS explicitly sets XCDR or XCDR2, force encapsulation
+      cdr_encapsulation(true);
+      break;
+    }
+  }
   if (cdr_encapsulation()) {
     for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
       Encoding::Kind encoding_kind;

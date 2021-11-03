@@ -374,7 +374,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DataWriterQos control_dw_qos;
   control_pub->get_default_datawriter_qos(control_dw_qos);
   control_dw_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
-
+  
   DataWriter_var control_dw = control_pub->create_datawriter(echo_control_topic, control_dw_qos, 0,
                                                              DEFAULT_STATUS_MASK);
   if (!control_dw) {
@@ -395,6 +395,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DataWriterQos dw_qos;
   pub->get_default_datawriter_qos(dw_qos);
   dw_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
+  dw_qos.representation.value.length(1);
+  dw_qos.representation.value[0] = XCDR2_DATA_REPRESENTATION; 
 
   DataWriter_var dw = pub->create_datawriter(topic, dw_qos, 0,
     DEFAULT_STATUS_MASK);
