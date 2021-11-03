@@ -22,7 +22,6 @@
 #ifdef OPENDDS_SECURITY
 #  include "security/framework/SecurityRegistry.h"
 #endif
-#include "Util.h"
 
 #include <ace/config.h>
 #include <ace/Singleton.h>
@@ -2926,7 +2925,7 @@ Service_Participant::type_object_encoding(const char* encoding)
     {"WriteOldFormat", Encoding_WriteOldFormat},
     {"ReadOldFormat", Encoding_ReadOldFormat},
   };
-  for (size_t i = 0; i < array_count(entries); ++i) {
+  for (size_t i = 0; i < sizeof entries / sizeof entries[0]; ++i) {
     if (0 == std::strcmp(entries[i].name, encoding)) {
       type_object_encoding(entries[i].value);
       return;
