@@ -93,6 +93,133 @@ struct ValueWriter {
     write_enum(name, static_cast<ACE_CDR::Long>(value));
   }
 
+  /// Array write operations
+  /// Note: the portion written starts at x and ends
+  ///    at x + length.
+  ///@{
+  virtual void write_boolean_array(const ACE_CDR::Boolean* x, size_t length)
+  {
+    for (size_t i = 0; i != length; ++i) {
+      value_writer.begin_element(i);
+      value_writer.write_boolean(x[i]);
+      value_writer.end_element();
+    }
+  }
+  virtual void write_byte_array(const ACE_CDR::Octet* x, size_t length)
+  {
+    for (size_t i = 0; i != length; ++i) {
+      value_writer.begin_element(i);
+      value_writer.write_byte(x[i]);
+      value_writer.end_element();
+    }
+  }
+#if OPENDDS_HAS_EXPLICIT_INTS
+  virtual void write_int8_array(const ACE_CDR::Int8* x, size_t length)
+  {
+    for (size_t i = 0; i != length; ++i) {
+      value_writer.begin_element(i);
+      value_writer.write_int8(x[i]);
+      value_writer.end_element();
+    }
+  }
+  virtual void write_uint8_array(const ACE_CDR::UInt8* x, size_t length)
+  {
+    for (size_t i = 0; i != length; ++i) {
+      value_writer.begin_element(i);
+      value_writer.write_uint8(x[i]);
+      value_writer.end_element();
+    }
+  }
+#endif
+  virtual void write_int16_array(const ACE_CDR::Short* x, size_t length)
+  {
+    for (size_t i = 0; i != length; ++i) {
+      value_writer.begin_element(i);
+      value_writer.write_int16(x[i]);
+      value_writer.end_element();
+    }
+  }
+  virtual void write_uint16_array(const ACE_CDR::UShort* x, size_t length)
+  {
+    for (size_t i = 0; i != length; ++i) {
+      value_writer.begin_element(i);
+      value_writer.write_uint16(x[i]);
+      value_writer.end_element();
+    }
+  }
+  virtual void write_int32_array(const ACE_CDR::Long* x, size_t length)
+  {
+    for (size_t i = 0; i != length; ++i) {
+      value_writer.begin_element(i);
+      value_writer.write_int32(x[i]);
+      value_writer.end_element();
+    }
+  }
+  virtual void write_uint32_array(const ACE_CDR::ULong* x, size_t length)
+  {
+    for (size_t i = 0; i != length; ++i) {
+      value_writer.begin_element(i);
+      value_writer.write_uint32(x[i]);
+      value_writer.end_element();
+    }
+  }
+  virtual void write_int64_array(const ACE_CDR::LongLong* x, size_t length)
+  {
+    for (size_t i = 0; i != length; ++i) {
+      value_writer.begin_element(i);
+      value_writer.write_int64(x[i]);
+      value_writer.end_element();
+    }
+  }
+  virtual void write_uint64_array(const ACE_CDR::ULongLong* x, size_t length)
+  {
+    for (size_t i = 0; i != length; ++i) {
+      value_writer.begin_element(i);
+      value_writer.write_uint64(x[i]);
+      value_writer.end_element();
+    }
+  }
+  virtual void write_float32_array(const ACE_CDR::Float* x, size_t length)
+  {
+    for (size_t i = 0; i != length; ++i) {
+      value_writer.begin_element(i);
+      value_writer.write_float32(x[i]);
+      value_writer.end_element();
+    }
+  }
+  virtual void write_float64_array(const ACE_CDR::Double* x, size_t length)
+  {
+    for (size_t i = 0; i != length; ++i) {
+      value_writer.begin_element(i);
+      value_writer.write_float64(x[i]);
+      value_writer.end_element();
+    }
+  }
+  virtual void write_float128_array(const ACE_CDR::LongDouble* x, size_t length)
+  {
+    for (size_t i = 0; i != length; ++i) {
+      value_writer.begin_element(i);
+      value_writer.write_float128(x[i]);
+      value_writer.end_element();
+    }
+  }
+  virtual void write_char8_array(const ACE_CDR::Char* x, size_t length)
+  {
+    for (size_t i = 0; i != length; ++i) {
+      value_writer.begin_element(i);
+      value_writer.write_char8(x[i]);
+      value_writer.end_element();
+    }
+  }
+  virtual void write_char16_array(const ACE_CDR::WChar* x, size_t length)
+  {
+    for (size_t i = 0; i != length; ++i) {
+      value_writer.begin_element(i);
+      value_writer.write_char16(x[i]);
+      value_writer.end_element();
+    }
+  }
+  ///@}
 };
 
 template <typename T>

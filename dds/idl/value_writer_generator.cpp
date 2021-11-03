@@ -89,13 +89,25 @@ namespace {
     const char* const length_func = use_cxx11 ? "size" : "length";
     const std::string indent(level * 2, ' ');
     be_global->impl_ <<
-      indent << "value_writer.begin_sequence();\n" <<
-      indent << "for (" << (use_cxx11 ? "size_t " : "unsigned int ") << idx << " = 0; "
-      << idx << " != " << expression << "." << length_func << "(); ++" << idx << ") {\n" <<
-      indent << "  value_writer.begin_element(" << idx << ");\n";
-    generate_write(expression + "[" + idx + "]", sequence->base_type(), idx + "i", level + 1);
+      indent << "value_writer.begin_sequence();\n";
+
+    const Classification c = classify(sequence->base_type());
+    if (c & CL_PRIMITIVE) {
+      const AST_PredefinedType::PredefinedType pt =
+        dynamic_cast<AST_PredefinedType*>(sequence->base_type())->pt();
+      be_global->impl_ <<
+        "value_writer.write_" << primitive_type(pt) << '_array (' << expression << ', ' expression << "." << length_func << "());\n";
+    } else {
+      be_global->impl_ <<
+        indent << "for (" << (use_cxx11 ? "size_t " : "unsigned int ") << idx << " = 0; "
+        << idx << " != " << expression << "." << length_func << "(); ++" << idx << ") {\n" <<
+        indent << "  value_writer.begin_element(" << idx << ");\n";
+      generate_write(expression + "[" + idx + "]", sequence->base_type(), idx + "i", level + 1);
+      be_global->impl_ <<
+        indent << "  value_writer.end_element();\n" <<
+    }
+
     be_global->impl_ <<
-      indent << "  value_writer.end_element();\n" <<
       indent << "}\n" <<
       indent << "value_writer.end_sequence();\n";
   }
