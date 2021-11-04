@@ -166,8 +166,21 @@ TEST(dds_DCPS_JsonValueWriter, complete_sequence)
   jvw.begin_element(0);
   jvw.write_int16(5);
   jvw.end_element();
+  jvw.begin_element(1);
+  jvw.write_int16(6);
+  jvw.end_element();
   jvw.end_sequence();
-  EXPECT_STREQ(jvw.buffer().GetString(), "[5]");
+  EXPECT_STREQ(jvw.buffer().GetString(), "[5,6]");
+}
+
+TEST(dds_DCPS_JsonValueWriter, complete_sequence_write_array)
+{
+  ACE_CDR::Short const i[2] = {5, 6};
+  JsonValueWriter<> jvw;
+  jvw.begin_sequence();
+  jvw.write_int16_array(&i[0], 2);
+  jvw.end_sequence();
+  EXPECT_STREQ(jvw.buffer().GetString(), "[5,6]");
 }
 
 TEST(dds_DCPS_JsonValueWriter, complete_array)
