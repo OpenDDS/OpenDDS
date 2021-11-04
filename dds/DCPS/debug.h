@@ -21,7 +21,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 /**
- * General control for non-debug logging in OpenDDS.
+ * General control for logging in OpenDDS.
  *
  * Access using the log_level global object.
  */
@@ -32,7 +32,8 @@ public:
     Error,
     Warning,
     Notice,
-    Info
+    Info,
+    Debug
   };
 
   LogLevel(Value value)

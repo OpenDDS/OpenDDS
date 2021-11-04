@@ -434,7 +434,8 @@ The logging conditions are as follows:
 +--------------------------------+---------------+----------------+------------------------------------+
 | Debug message                  | ``ACE_DEBUG`` | ``LM_DEBUG``   | Based on ``DCPS_debug_level`` or   |
 |                                |               |                | one of the other debug systems     |
-|                                |               |                | listed below.                      |
+|                                |               |                | :ref:`listed below <dbg-lvl-sys>`  |
+|                                |               |                | [#lldbg]_                          |
 +--------------------------------+---------------+----------------+------------------------------------+
 
 An `unrecoverable error` indicates that OpenDDS is in a state where it cannot function as intended.
@@ -444,10 +445,12 @@ A `recoverable error` indicates that OpenDDS could not perform a desired action 
 
 A `reportable error` indicates that OpenDDS can report the error via the API through something like an exception or return value.
 
-An `informational message` gives very high level information mostly at startup, like the version of OpenDDS being used.
+An `informational message` gives high level information mostly at startup, like the version of OpenDDS being used.
 
-A `debug message` give lower level information such as if a message is being sent.
+A `debug message` gives lower level information, such as if a message is being sent.
 These are directly controlled by one of a few debug logging control systems.
+
+.. _dbg-lvl-sys:
 
 - ``DCPS_debug_level`` should be used for all debug logging that doesn't fall under the other systems.
   It is an unsigned integer value which ranges from 0 to 10.
@@ -463,6 +466,9 @@ These are directly controlled by one of a few debug logging control systems.
 
 For number-based conditions like ``DCPS_debug_level`` and ``Transport_debug_level``, the number used should be the log level the message starts to become active at.
 For example for ``DCPS_debug_level >= 6`` should be used instead of ``DCPS_debug_level > 5``.
+
+.. [#lldbg] The reason that debug conditions don't rely on both `LogLevel::Debug` and another debug control system is that it results in simpler check and the log level already loosly controls all the debug contol systems.
+  See the `LogLevel::set` function in :ghfile:`dds/DCPS/debug.cpp` for exactly what it does.
 
 Message Content
 ---------------

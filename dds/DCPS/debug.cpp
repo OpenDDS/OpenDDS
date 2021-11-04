@@ -28,6 +28,22 @@ OpenDDS_Dcps_Export SecurityDebug security_debug;
 void LogLevel::set(LogLevel::Value value)
 {
   level_ = value;
+#ifdef OPENDDS_SECURITY
+  if (level_ >= Notice) {
+    security_debug.set_debug_level(1);
+  } else {
+    security_debug.set_all_flags_to(false);
+  }
+#endif
+  if (level_ >= Debug) {
+    if (DCPS_debug_level == 0) {
+      DCPS_debug_level = 1;
+    }
+  } else {
+    DCPS_debug_level = 0;
+    Transport_debug_level = 0;
+    transport_debug = TransportDebug();
+  }
 }
 
 namespace {
@@ -40,7 +56,8 @@ namespace {
     {"error", LogLevel::Error},
     {"warning", LogLevel::Warning},
     {"notice", LogLevel::Notice},
-    {"info", LogLevel::Info}
+    {"info", LogLevel::Info},
+    {"debug", LogLevel::Debug}
   };
 };
 
@@ -71,7 +88,10 @@ const char* LogLevel::get_as_string() const
 
 OpenDDS_Dcps_Export void set_DCPS_debug_level(unsigned int lvl)
 {
-  if (log_level >= Info) {
+  if (log_level.get() < LogLevel::Debug) {
+    log_level.set(LogLevel::Debug);
+  }
+  if (log_level >= LogLevel::Info) {
     ACE_DEBUG((LM_INFO, "(%P|%t) INFO: set_DCPS_debug_level: set to %u\n", lvl));
   }
   DCPS_debug_level = lvl;
