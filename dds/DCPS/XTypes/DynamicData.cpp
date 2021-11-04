@@ -260,9 +260,7 @@ ACE_CDR::ULong DynamicData::get_item_count()
       return (type_->get_kind() == TK_STRING8) ? bytes : bytes/2;
     }
   case TK_BITMASK:
-    {
-      return descriptor_.bound[0];
-    }
+    return descriptor_.bound[0];
   case TK_STRUCTURE:
     // When optional members are supported, this needs to be updated to count
     // the number of members actually present in the DynamicData object.

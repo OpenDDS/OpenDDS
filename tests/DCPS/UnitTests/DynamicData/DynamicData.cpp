@@ -69,14 +69,25 @@ TEST(Mutable, ReadValueFromStruct)
   };
 
   SingleValueStruct expected;
-  expected.my_enum = E_UINT8; expected.int_32 = 10; expected.uint_32 = 11;
-  expected.int_8 = 5; expected.uint_8 = 6; expected.int_16 = 0x1111;
-  expected.uint_16 = 0x2222; expected.int_64 = 0x7fffffffffffffff;
-  expected.uint_64 = 0xffffffffffffffff; expected.float_32 = 1.0f;
-  expected.float_64 = 1.0; set_float128_value(expected.float_128);
-  expected.char_8 = 'a'; expected.char_16 = 0x0061; expected.byte = 0xff;
-  expected._cxx_bool = true; expected.nested_struct.l = 12;
-  expected.str = "abc"; expected.wstr = L"abc";
+  expected.my_enum = E_UINT8;
+  expected.int_32 = 10;
+  expected.uint_32 = 11;
+  expected.int_8 = 5;
+  expected.uint_8 = 6;
+  expected.int_16 = 0x1111;
+  expected.uint_16 = 0x2222;
+  expected.int_64 = 0x7fffffffffffffff;
+  expected.uint_64 = 0xffffffffffffffff;
+  expected.float_32 = 1.0f;
+  expected.float_64 = 1.0;
+  set_float128_value(expected.float_128);
+  expected.char_8 = 'a';
+  expected.char_16 = 0x0061;
+  expected.byte = 0xff;
+  expected._cxx_bool = true;
+  expected.nested_struct.l = 12;
+  expected.str = "abc";
+  expected.wstr = L"abc";
 
   ACE_Message_Block msg(1024);
   msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
@@ -279,12 +290,15 @@ TEST(Mutable, ReadValueFromStruct)
   ret = data.get_string_value(str, 17);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_STREQ(expected.str.in(), str);
+  CORBA::string_free(str);
 
+  str = 0;
   ret = data.get_complex_value(nested_dd, 17);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd.get_string_value(str, random_id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_STREQ(expected.str.in(), str);
+  CORBA::string_free(str);
 
   ACE_CDR::WChar* wstr = 0;
   ret = data.get_wstring_value(wstr, 18);
@@ -571,6 +585,9 @@ TEST(Mutable, ReadValueFromUnion)
     DDS::ReturnCode_t ret = data.get_string_value(str, 16);
     EXPECT_EQ(ret, DDS::RETCODE_OK);
     EXPECT_STREQ("abc", str);
+    CORBA::string_free(str);
+
+    str = 0;
     ret = data.get_string_value(str, 10);
     EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   }
