@@ -70,6 +70,9 @@ DataWriterImpl::DataWriterImpl()
     listener_mask_(DEFAULT_STATUS_MASK),
     domain_id_(0),
     publication_id_(GUID_UNKNOWN),
+    has_publication_id_(false),
+    publication_id_mutex_(),
+    publication_id_condition_(publication_id_mutex_),
     sequence_number_(SequenceNumber::SEQUENCENUMBER_UNKNOWN()),
     coherent_(false),
     coherent_samples_(0),
@@ -219,9 +222,11 @@ DataWriterImpl::add_association(const RepoId& yourId,
   }
 
   {
-    ACE_Guard<ACE_Thread_Mutex> guard(publication_id_lock_);
+    ACE_Guard<ACE_Thread_Mutex> guard(publication_id_mutex_);
     if (GUID_UNKNOWN == publication_id_) {
       publication_id_ = yourId;
+      has_publication_id_ = true;
+      publication_id_condition_.notify_all();
     }
   }
 
@@ -1492,8 +1497,10 @@ DataWriterImpl::enable()
   }
 
   {
-    ACE_Guard<ACE_Thread_Mutex> guard(publication_id_lock_);
+    ACE_Guard<ACE_Thread_Mutex> guard(publication_id_mutex_);
     publication_id_ = publication_id;
+    has_publication_id_ = true;
+    publication_id_condition_.notify_all();
     data_container_->publication_id_ = publication_id_;
   }
 

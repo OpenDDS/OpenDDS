@@ -460,14 +460,21 @@ public:
 
   virtual ICE::Endpoint* get_ice_endpoint();
 
-  const RepoId& get_repo_id() const {
-    ACE_Guard<ACE_Thread_Mutex> guard(publication_id_lock_);
+  const RepoId& get_repo_id() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(publication_id_mutex_);
+    while (!has_publication_id_ && !get_deleted()) {
+      publication_id_condition_.wait();
+    }
     return publication_id_;
   }
 
   RepoId get_repo_id_copy() const
   {
-    ACE_Guard<ACE_Thread_Mutex> guard(publication_id_lock_);
+    ACE_Guard<ACE_Thread_Mutex> guard(publication_id_mutex_);
+    while (!has_publication_id_ && !get_deleted()) {
+      publication_id_condition_.wait();
+    }
     return publication_id_;
   }
 
@@ -613,8 +620,13 @@ private:
   RepoId                          dp_id_;
   /// The publisher servant which creates this datawriter.
   WeakRcHandle<PublisherImpl>     publisher_servant_;
+
   /// The repository id of this datawriter/publication.
-  PublicationId                   publication_id_;
+  PublicationId publication_id_;
+  bool has_publication_id_;
+  mutable ACE_Thread_Mutex publication_id_mutex_;
+  mutable ConditionVariable<ACE_Thread_Mutex> publication_id_condition_;
+
   /// The sequence number unique in DataWriter scope.
   SequenceNumber                  sequence_number_;
   /// Flag indicating DataWriter current belongs to
@@ -628,7 +640,6 @@ private:
   /// The lock to protect the activate subscriptions
   /// and status changes.
   mutable ACE_Recursive_Thread_Mutex lock_;
-  mutable ACE_Thread_Mutex publication_id_lock_;
 
   typedef OPENDDS_MAP_CMP(RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan) RepoIdToHandleMap;
 
