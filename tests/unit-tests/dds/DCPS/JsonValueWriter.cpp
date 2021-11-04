@@ -173,6 +173,16 @@ TEST(dds_DCPS_JsonValueWriter, complete_array)
   EXPECT_STREQ(jvw.buffer().GetString(), "[5,6]");
 }
 
+TEST(dds_DCPS_JsonValueWriter, complete_array_write_array)
+{
+  ACE_CDR::Short const i[2] = {5, 6};
+  JsonValueWriter<> jvw;
+  jvw.begin_array();
+  jvw.write_int16_array(&i[0], 2);
+  jvw.end_array();
+  EXPECT_STREQ(jvw.buffer().GetString(), "[5,6]");
+}
+
 TEST(dds_DCPS_JsonValueWriter, write_boolean)
 {
   {
