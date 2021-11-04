@@ -313,6 +313,27 @@ TEST(Mutable, ReadValueFromStruct)
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_STREQ(expected.wstr.in(), wstr);
   CORBA::wstring_free(wstr);
+
+  // Reading members out-of-order.
+  ret = data.get_int32_value(int_32, 1);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.int_32, int_32);
+
+  ret = data.get_complex_value(nested_dd, 1);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = nested_dd.get_int32_value(int_32, random_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.int_32, int_32);
+
+  ret = data.get_int32_value(my_enum, 0);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.my_enum, my_enum);
+
+  ret = data.get_complex_value(nested_dd, 0);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = nested_dd.get_int32_value(my_enum, random_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.my_enum, my_enum);
 }
 
 TEST(Mutable, ReadValueFromUnion)
