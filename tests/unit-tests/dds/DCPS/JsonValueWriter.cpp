@@ -12,6 +12,18 @@
 using namespace rapidjson;
 using namespace OpenDDS::DCPS;
 
+class TestWriter : public JsonValueWriter<>
+{
+public:
+  TestWriter () : elements_ (0) {};
+  virtual void write_int16_array(const ACE_CDR::Short* x, size_t length)
+  {
+    elements_ += length;
+    JsonValueWriter<>::write_int16_array(x, length);
+  }
+  size_t elements_;
+};
+
 TEST(dds_DCPS_JsonValueWriter, begin_struct)
 {
   JsonValueWriter<> jvw;
@@ -176,16 +188,17 @@ TEST(dds_DCPS_JsonValueWriter, complete_sequence)
 TEST(dds_DCPS_JsonValueWriter, complete_sequence_write_array)
 {
   ACE_CDR::Short const i[2] = {5, 6};
-  JsonValueWriter<> jvw;
+  TestWriter jvw;
   jvw.begin_sequence();
   jvw.write_int16_array(&i[0], 2);
   jvw.end_sequence();
   EXPECT_STREQ(jvw.buffer().GetString(), "[5,6]");
+  EXPECT_EQ(jvw.elements_, 2u);
 }
 
 TEST(dds_DCPS_JsonValueWriter, complete_array)
 {
-  JsonValueWriter<> jvw;
+  TestWriter jvw;
   jvw.begin_array();
   jvw.begin_element(0);
   jvw.write_int16(5);
@@ -195,16 +208,18 @@ TEST(dds_DCPS_JsonValueWriter, complete_array)
   jvw.end_element();
   jvw.end_array();
   EXPECT_STREQ(jvw.buffer().GetString(), "[5,6]");
+  EXPECT_EQ(jvw.elements_, 0u);
 }
 
 TEST(dds_DCPS_JsonValueWriter, complete_array_write_array)
 {
   ACE_CDR::Short const i[2] = {5, 6};
-  JsonValueWriter<> jvw;
+  TestWriter jvw;
   jvw.begin_array();
   jvw.write_int16_array(&i[0], 2);
   jvw.end_array();
   EXPECT_STREQ(jvw.buffer().GetString(), "[5,6]");
+  EXPECT_EQ(jvw.elements_, 2u);
 }
 
 TEST(dds_DCPS_JsonValueWriter, write_boolean)
