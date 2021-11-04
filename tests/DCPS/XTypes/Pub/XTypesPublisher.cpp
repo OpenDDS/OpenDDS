@@ -396,7 +396,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   pub->get_default_datawriter_qos(dw_qos);
   dw_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
   dw_qos.representation.value.length(1);
-  dw_qos.representation.value[0] = XCDR2_DATA_REPRESENTATION; 
+  dw_qos.representation.value[0] = XCDR2_DATA_REPRESENTATION;
 
   DataWriter_var dw = pub->create_datawriter(topic, dw_qos, 0,
     DEFAULT_STATUS_MASK);
