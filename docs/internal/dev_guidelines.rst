@@ -467,7 +467,8 @@ These are directly controlled by one of a few debug logging control systems.
 For number-based conditions like ``DCPS_debug_level`` and ``Transport_debug_level``, the number used should be the log level the message starts to become active at.
 For example for ``DCPS_debug_level >= 6`` should be used instead of ``DCPS_debug_level > 5``.
 
-.. [#lldbg] The reason that debug conditions don't rely on both `LogLevel::Debug` and another debug control system is that it results in simpler check and the log level already loosly controls all the debug contol systems.
+.. [#lldbg] Debug messages don't rely on both `LogLevel::Debug` and a debug control system.
+  The reason is that it results in a simpler check and the log level already loosely controls all the debug control systems.
   See the `LogLevel::set` function in :ghfile:`dds/DCPS/debug.cpp` for exactly what it does.
 
 Message Content
