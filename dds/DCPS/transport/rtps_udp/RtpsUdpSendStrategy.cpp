@@ -301,6 +301,13 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
 
   const ACE_SOCK_Dgram& socket = choose_send_socket(addr);
 
+#ifdef OPENDDS_TESTING_FEATURES
+  ssize_t total_length;
+  if (link_->transport().config().should_drop(iov, n, total_length)) {
+    return total_length;
+  }
+#endif
+
 #ifdef ACE_LACKS_SENDMSG
   char buffer[UDP_MAX_MESSAGE_SIZE];
   char *iter = buffer;

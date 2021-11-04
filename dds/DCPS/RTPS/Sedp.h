@@ -655,6 +655,8 @@ public:
     type_lookup_service_ = type_lookup_service;
   }
 
+  bool should_drop(ssize_t length) const;
+
 private:
   bool remote_knows_about_local_i(const GUID_t& local, const GUID_t& remote) const;
 #ifdef OPENDDS_SECURITY

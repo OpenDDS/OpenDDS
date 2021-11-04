@@ -2912,6 +2912,15 @@ Spdp::SpdpTransport::choose_send_socket(const ACE_INET_Addr& addr) const
 ssize_t
 Spdp::SpdpTransport::send(const ACE_INET_Addr& addr)
 {
+#ifdef OPENDDS_TESTING_FEATURES
+  DCPS::RcHandle<Spdp> outer = outer_.lock();
+  if (!outer) return -1;
+
+  if (outer->sedp_->should_drop(wbuff_.length())) {
+    return wbuff_.length();
+  }
+#endif
+
   const ACE_SOCK_Dgram& socket = choose_send_socket(addr);
   const ssize_t res = socket.send(wbuff_.rd_ptr(), wbuff_.length(), addr);
   if (res < 0) {
@@ -3281,6 +3290,12 @@ Spdp::SendStun::execute()
   Serializer serializer(&tport->wbuff_, STUN::encoding);
   const_cast<STUN::Message&>(message_).block = &tport->wbuff_;
   serializer << message_;
+
+#ifdef OPENDDS_TESTING_FEATURES
+  if (outer->sedp_->should_drop(tport->wbuff_.length())) {
+    return;
+  }
+#endif
 
   const ACE_SOCK_Dgram& socket = tport->choose_send_socket(address_);
   const ssize_t res = socket.send(tport->wbuff_.rd_ptr(), tport->wbuff_.length(), address_);
