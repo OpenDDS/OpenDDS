@@ -159,6 +159,17 @@ TEST(dds_DCPS_JsonValueWriter, end_element)
   EXPECT_STREQ(jvw.buffer().GetString(), "[5");
 }
 
+TEST(dds_DCPS_JsonValueWriter, complete_sequence)
+{
+  JsonValueWriter<> jvw;
+  jvw.begin_sequence();
+  jvw.begin_element(0);
+  jvw.write_int16(5);
+  jvw.end_element();
+  jvw.end_sequence();
+  EXPECT_STREQ(jvw.buffer().GetString(), "[5]");
+}
+
 TEST(dds_DCPS_JsonValueWriter, complete_array)
 {
   JsonValueWriter<> jvw;
