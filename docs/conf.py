@@ -130,6 +130,8 @@ html_theme_options = {
         'GitHub Repo': 'https://github.com/' + github_links_repo,
     },
     'fixed_sidebar': True,
+    'page_width': '1000px',
+    'body_max_width': '1000px',
 }
 
 html_favicon = 'logo_32_32.ico'
