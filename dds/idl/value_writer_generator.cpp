@@ -88,7 +88,7 @@ namespace {
         be_global->impl_ <<
           indent << "value_writer.begin_array();\n";
         be_global->impl_ << indent <<
-          "value_writer.write_" << primitive_type(pt) << "_array (" << expression << ", " << dim << ");\n";
+          "value_writer.write_" << primitive_type(pt) << "_array (" << expression << (use_cxx11 ? ".data()" : "") << ", " << dim << ");\n";
         be_global->impl_ <<
           indent << "value_writer.end_array();\n";
 

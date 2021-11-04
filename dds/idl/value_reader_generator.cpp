@@ -89,7 +89,7 @@ namespace {
         be_global->impl_ <<
           indent << "if (!value_reader.begin_array()) return false;\n";
         be_global->impl_ << indent <<
-          "if (!value_reader.read_" << primitive_type(pt) << "_array (" << expression << ", " << dim << ")) return false;\n";
+          "if (!value_reader.read_" << primitive_type(pt) << "_array (" << expression << (use_cxx11 ? ".data()" : "") << ", " << dim << ")) return false;\n";
         be_global->impl_ <<
           indent << "if (!value_reader.end_array()) return false;\n";
 
