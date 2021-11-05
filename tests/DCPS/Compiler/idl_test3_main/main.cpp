@@ -39,7 +39,6 @@ public:
   {
     elements_ += length;
     JsonValueReader<>::read_int16_array(x, length);
-    ACE_DEBUG ((LM_DEBUG, "LL: %d %d\n", length, elements_));
     return true;
   }
   virtual bool read_string(OpenDDS::DCPS::String& x)
