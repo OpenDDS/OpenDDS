@@ -101,7 +101,6 @@ public:
 
   void to_type_info(XTypes::TypeInformation& type_info) const;
 
-  void add_types(const RcHandle<XTypes::TypeLookupService>& tls) const;
   void populate_dependencies(const RcHandle<XTypes::TypeLookupService>& tls) const;
 
 private:
@@ -109,6 +108,18 @@ private:
 
   OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(TypeSupportImpl)
 };
+
+template<typename Type>
+void set_default(Type&)
+{
+  OPENDDS_ASSERT(false);
+}
+
+template<typename Type, typename Tag>
+void set_default(IDL::DistinctType<Type, Tag>)
+{
+  OPENDDS_ASSERT(false);
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

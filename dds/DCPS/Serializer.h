@@ -162,16 +162,7 @@ public:
   ///@}
 
   ///@{
-  /**
-   * Should the XCDR2 sequence DHEADER be skipped?
-   * This is not spec compliant -- used for compatibility with earlier
-   * OpenDDS versions that had a bug.
-   * Only used for XTypes::TypeObject and related structs.
-   */
-  bool skip_sequence_dheader() const;
-  void skip_sequence_dheader(bool value);
   ///@}
-
   /// Return the maximum alignment dictated by the alignment policy.
   size_t max_align() const;
 
@@ -198,7 +189,6 @@ private:
   Endianness endianness_;
   Alignment alignment_;
   bool zero_init_padding_;
-  bool skip_sequence_dheader_;
   XcdrVersion xcdr_version_;
 };
 
@@ -877,18 +867,6 @@ namespace IDL {
     DistinctType(T& val) : val_(&val) {}
     operator T&() const { return *val_; }
   };
-}
-
-template<typename Type>
-void set_default(Type&)
-{
-  OPENDDS_ASSERT(false);
-}
-
-template<typename Type, typename Tag>
-void set_default(IDL::DistinctType<Type, Tag>)
-{
-  OPENDDS_ASSERT(false);
 }
 
 // predefined type methods

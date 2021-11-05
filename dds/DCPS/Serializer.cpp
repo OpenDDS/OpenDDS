@@ -75,21 +75,18 @@ String endianness_to_string(Endianness endianness)
 
 Encoding::Encoding()
   : endianness_(ENDIAN_NATIVE)
-  , skip_sequence_dheader_(false)
 {
   kind(KIND_XCDR1);
 }
 
 Encoding::Encoding(Kind k, Endianness endianness)
   : endianness_(endianness)
-  , skip_sequence_dheader_(false)
 {
   kind(k);
 }
 
 Encoding::Encoding(Kind k, bool swap_bytes)
   : endianness_(swap_bytes ? ENDIAN_NONNATIVE : ENDIAN_NATIVE)
-  , skip_sequence_dheader_(false)
 {
   kind(k);
 }
