@@ -44,17 +44,6 @@ DynamicData::DynamicData()
   , item_count_(ITEM_COUNT_INVALID)
 {}
 
-DynamicData::DynamicData(const DynamicData& dd)
-  : chain_(dd.chain_->duplicate())
-  , encoding_(dd.encoding_)
-  , reset_align_state_(dd.reset_align_state_)
-  , align_state_(dd.align_state_)
-  , strm_(chain_, encoding_)
-  , type_(dd.type_)
-  , descriptor_(dd.type_->get_descriptor())
-  , item_count_(ITEM_COUNT_INVALID)
-{}
-
 DynamicData::DynamicData(ACE_Message_Block* chain,
                          const DCPS::Encoding& encoding,
                          const DynamicType_rch& type)
@@ -1166,19 +1155,6 @@ bool DynamicData::read_values(SequenceType& value, TypeKind elem_tk)
       }
       return strm_ >> value;
     }
-  }
-
-  //TODO CLAYTON: FIND WHAT HAS A DHEADER
-  if(elem_tk == TK_ENUM) {
-    size_t dheader = 0;
-    if (!strm_.read_delimiter(dheader)) {
-      if (DCPS::DCPS_debug_level >= 1) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::read_values -")
-                    ACE_TEXT(" Failed to read DHEADER for sequence element\n")));
-      }
-      return false;
-    }
-    return strm_ >> value;
   }
 
   if (DCPS::DCPS_debug_level >= 1) {

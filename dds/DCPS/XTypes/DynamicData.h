@@ -40,7 +40,6 @@ namespace XTypes {
 class OpenDDS_Dcps_Export DynamicData {
 public:
   DynamicData();
-  DynamicData(const DynamicData& dd);
 
   /// This creates a duplicated ACE_Message_Block chain from the provided chain.
   /// The duplicated chain is released when the object is destroyed. Caller is
@@ -105,6 +104,8 @@ public:
   DDS::ReturnCode_t get_string_values(CORBA::StringSeq& value, MemberId id);
   DDS::ReturnCode_t get_wstring_values(CORBA::WStringSeq& value, MemberId id);
 
+  DynamicType_rch get_type() { return type_; }
+
 private:
   void copy(const DynamicData& other);
 
@@ -112,7 +113,6 @@ private:
   /// This is called by a containing type when it wants to skip a member which
   /// is an object of this type.
   bool skip_all();
-  DynamicType_rch get_type() { return type_; }
 
   /// Verify that a given type is primitive or string or wstring.
   ///
