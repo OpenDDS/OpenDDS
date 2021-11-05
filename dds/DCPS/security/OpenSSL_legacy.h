@@ -36,7 +36,7 @@ inline void DH_get0_key(const DH* dh, const BIGNUM** pub_key, const BIGNUM** pri
 
 #elseif OPENSSL_VERSION_NUMBER <   0x30000000L
 #define OPENSSL_V_1_1
-#else 
+#else
 #define OPENSSL_V_3_0
 #endif // OPENSSL_VERSION_NUMBER < 0x10100000L
 
