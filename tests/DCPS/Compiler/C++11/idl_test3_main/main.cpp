@@ -37,6 +37,22 @@ public:
   }
   size_t elements_;
 };
+// Helper class to test if the correct number of elements got read
+// by our ValueReader
+class TestReader : public ::OpenDDS::DCPS::JsonValueReader<>
+{
+public:
+  TestReader () : elements_ (0) {};
+  virtual void read_int16_array(ACE_CDR::Short*, size_t length)
+  {
+    elements_ += length;
+  }
+  virtual void read_string(const ACE_CDR::Char*)
+  {
+    ++elements_;
+  }
+  size_t elements_;
+};
 #endif
 
 template<typename FOO>
@@ -682,6 +698,34 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   OpenDDS::DCPS::vwrite (test_writer5, shortseq);
   if (test_writer5.elements_ != 2u) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("Number of elements written by vwrite not correct for ::Xyz::s_vwrite5\n")));
+    failed = true;
+  }
+  TestReader test_reader1;
+  ::Xyz::s_vread1 aos;
+  OpenDDS::DCPS::vread (test_reader1, aos);
+  if (test_reader1.elements_ != 5u) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Number of elements written by vread not correct for ::Xyz::s_vread1\n")));
+    failed = true;
+  }
+  TestReader test_reader2;
+  ::Xyz::s_vread2 taos;
+  OpenDDS::DCPS::vread (test_reader2, taos);
+  if (test_reader2.elements_ != (3u * 4u)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Number of elements written by vread not correct for ::Xyz::s_vread2\n")));
+    failed = true;
+  }
+  TestReader test_reader3;
+  ::Xyz::s_vread3 mdaofs;
+  OpenDDS::DCPS::vread (test_reader3, mdaofs);
+  if (test_reader3.elements_ != (2u * 3u * 4u)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Number of elements written by vread not correct for ::Xyz::s_vread3\n")));
+    failed = true;
+  }
+  TestReader test_reader4;
+  ::Xyz::s_vread4 stringarray;
+  OpenDDS::DCPS::vread (test_reader4, stringarray);
+  if (test_reader4.elements_ != (2u * 3u * 4u * 5u)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Number of elements written by vread not correct for ::Xyz::s_vread4\n")));
     failed = true;
   }
 #endif
