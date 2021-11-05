@@ -12,6 +12,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+#ifdef NONNATIVE_LONGDOUBLE
 bool
 ValueReader::read_float128(long double& value)
 {
@@ -22,6 +23,7 @@ ValueReader::read_float128(long double& value)
   value = ld;
   return true;
 }
+#endif
 
 bool
 ValueReader::read_boolean_array(ACE_CDR::Boolean* value, size_t length)
