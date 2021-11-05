@@ -65,7 +65,12 @@ namespace {
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const std::string indent(level * 2, ' ');
-    if (dim_idx < array->n_dims() - 1) {
+    const Classification c = classify(array->base_type());
+    const bool primitive = c & CL_PRIMITIVE;
+    // When we have a primitive type the last dimension is written using the write_*_array
+    // operation, when we have a not primitive type the last dimension is written element by element
+    // in a loop in the generated code
+    if ((primitive && (dim_idx < array->n_dims() - 1)) || (!primitive && (dim_idx < array->n_dims()))) {
       const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
       be_global->impl_ <<
         indent << "value_writer.begin_array();\n";
@@ -79,8 +84,7 @@ namespace {
         indent << "}\n" <<
         indent << "value_writer.end_array();\n";
     } else {
-      const Classification c = classify(array->base_type());
-      if (c & CL_PRIMITIVE) {
+      if (primitive) {
         const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
         AST_Type* const actual = resolveActualType(array->base_type());
         const AST_PredefinedType::PredefinedType pt =
@@ -104,16 +108,25 @@ namespace {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const char* const length_func = use_cxx11 ? "size" : "length";
     const std::string indent(level * 2, ' ');
-    be_global->impl_ <<
-      indent << "value_writer.begin_sequence();\n";
+    be_global->impl_ << indent << "value_writer.begin_sequence();\n";
 
     const Classification c = classify(sequence->base_type());
     AST_Type* const actual = resolveActualType(sequence->base_type());
+    bool use_optimized_write_ = false;
     if (c & CL_PRIMITIVE) {
+      if (use_cxx11) {
+        const AST_PredefinedType::PredefinedType pt = dynamic_cast<AST_PredefinedType*>(actual)->pt();
+        use_optimized_write_ = !(pt == AST_PredefinedType::PT_boolean);
+      } else {
+        use_optimized_write_ = true;
+      }
+    }
+
+    if (use_optimized_write_) {
       const AST_PredefinedType::PredefinedType pt =
         dynamic_cast<AST_PredefinedType*>(actual)->pt();
       be_global->impl_ << indent <<
-        "value_writer.write_" << primitive_type(pt) << "_array (" << expression << ".get_buffer(), " << expression << "." << length_func << "());\n";
+        "value_writer.write_" << primitive_type(pt) << "_array (" << expression << (use_cxx11 ? ".data()" : ".get_buffer()") << ", " << expression << "." << length_func << "());\n";
     } else {
       be_global->impl_ <<
         indent << "for (" << (use_cxx11 ? "size_t " : "::CORBA::ULong ") << idx << " = 0; "

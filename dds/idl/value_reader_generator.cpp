@@ -67,7 +67,12 @@ namespace {
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const std::string indent(level * 2, ' ');
-    if (dim_idx < array->n_dims() - 1) {
+    const Classification c = classify(array->base_type());
+    const bool primitive = c & CL_PRIMITIVE;
+    // When we have a primitive type the last dimension is read using the read_*_array
+    // operation, when we have a not primitive type the last dimension is read element by element
+    // in a loop in the generated code
+    if ((primitive && (dim_idx < array->n_dims() - 1)) || (!primitive && (dim_idx < array->n_dims()))) {
       const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
       be_global->impl_ <<
         indent << "if (!value_reader.begin_array()) return false;\n" <<
@@ -80,8 +85,7 @@ namespace {
         indent << "}\n" <<
         indent << "if (!value_reader.end_array()) return false;\n";
     } else {
-      const Classification c = classify(array->base_type());
-      if (c & CL_PRIMITIVE) {
+      if (primitive) {
         const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
         AST_Type* const actual = resolveActualType(array->base_type());
         const AST_PredefinedType::PredefinedType pt =
