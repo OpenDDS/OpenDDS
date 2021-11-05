@@ -187,7 +187,7 @@ TEST(dds_DCPS_JsonValueWriter, complete_sequence)
 
 TEST(dds_DCPS_JsonValueWriter, complete_sequence_write_array)
 {
-  ACE_CDR::Short const i[2] = {5, 6};
+  const ACE_CDR::Short i[]= {5, 6};
   TestWriter jvw;
   jvw.begin_sequence();
   jvw.write_int16_array(&i[0], 2);
