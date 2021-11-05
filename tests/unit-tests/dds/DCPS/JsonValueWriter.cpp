@@ -222,6 +222,25 @@ TEST(dds_DCPS_JsonValueWriter, complete_array_write_array)
   EXPECT_EQ(jvw.elements_, 2u);
 }
 
+TEST(dds_DCPS_JsonValueWriter, complete_struct_with_complete_array)
+{
+  TestWriter jvw;
+  jvw.begin_struct();
+  jvw.begin_struct_member("a");
+  jvw.begin_array();
+  jvw.begin_element(0);
+  jvw.write_int16(5);
+  jvw.end_element();
+  jvw.begin_element(1);
+  jvw.write_int16(6);
+  jvw.end_element();
+  jvw.end_array();
+  jvw.end_struct_member();
+  jvw.end_struct();
+  EXPECT_STREQ(jvw.buffer().GetString(), "{\"a\":[5,6]}");
+  EXPECT_EQ(jvw.elements_, 0u);
+}
+
 TEST(dds_DCPS_JsonValueWriter, write_boolean)
 {
   {

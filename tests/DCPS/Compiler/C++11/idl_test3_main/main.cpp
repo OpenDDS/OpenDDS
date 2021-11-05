@@ -2,6 +2,7 @@
 #include "../idl_test3_lib/FooDef2TypeSupportImpl.h"
 #include "../idl_test3_lib/FooDef3TypeSupportImpl.h"
 #include <dds/DCPS/JsonValueWriter.h>
+#include <dds/DCPS/JsonValueReader.h>
 
 #include <tao/CDR.h>
 
@@ -27,13 +28,15 @@ class TestWriter : public ::OpenDDS::DCPS::JsonValueWriter<>
 {
 public:
   TestWriter () : elements_ (0) {};
-  virtual void write_int16_array(const ACE_CDR::Short*, size_t length)
+  virtual void write_int16_array(const ACE_CDR::Short* x, size_t length)
   {
     elements_ += length;
+    JsonValueWriter<>::write_int16_array(x, length);
   }
-  virtual void write_string(const ACE_CDR::Char*)
+  virtual void write_string(const ACE_CDR::Char* x)
   {
     ++elements_;
+    JsonValueWriter<>::write_string(x);
   }
   size_t elements_;
 };
@@ -42,14 +45,19 @@ public:
 class TestReader : public ::OpenDDS::DCPS::JsonValueReader<>
 {
 public:
-  TestReader () : elements_ (0) {};
-  virtual void read_int16_array(ACE_CDR::Short*, size_t length)
+  TestReader (rapidjson::StringStream& input_stream) : ::OpenDDS::DCPS::JsonValueReader<>(input_stream), elements_ (0) {};
+  virtual bool read_int16_array(ACE_CDR::Short* x, size_t length)
   {
     elements_ += length;
+    JsonValueReader<>::read_int16_array(x, length);
+    ACE_DEBUG ((LM_DEBUG, "LL: %d %d\n", length, elements_));
+    return true;
   }
-  virtual void read_string(const ACE_CDR::Char*)
+  virtual bool read_string(OpenDDS::DCPS::String& x)
   {
     ++elements_;
+    JsonValueReader<>::read_string(x);
+    return true;
   }
   size_t elements_;
 };
@@ -700,32 +708,40 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     ACE_ERROR((LM_ERROR, ACE_TEXT("Number of elements written by vwrite not correct for ::Xyz::s_vwrite5\n")));
     failed = true;
   }
-  TestReader test_reader1;
-  ::Xyz::s_vread1 aos;
-  OpenDDS::DCPS::vread (test_reader1, aos);
+  const char json1[] = "{\"a\":[0,1,2,3,4]}";
+  rapidjson::StringStream ss1(json1);
+  TestReader test_reader1(ss1);
+  ::Xyz::s_vwrite1 aos2;
+  OpenDDS::DCPS::vread (test_reader1, aos2);
   if (test_reader1.elements_ != 5u) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("Number of elements written by vread not correct for ::Xyz::s_vread1\n")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Number of elements read by vread not correct for ::Xyz::s_vwrite1\n")));
     failed = true;
   }
-  TestReader test_reader2;
-  ::Xyz::s_vread2 taos;
-  OpenDDS::DCPS::vread (test_reader2, taos);
+  const char json2[] = "{\"a\":[[1,2,0,0],[0,4,0,0],[0,0,0,0]]}";
+  rapidjson::StringStream ss2(json2);
+  TestReader test_reader2(ss2);
+  ::Xyz::s_vwrite2 taos2;
+  OpenDDS::DCPS::vread (test_reader2, taos2);
   if (test_reader2.elements_ != (3u * 4u)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("Number of elements written by vread not correct for ::Xyz::s_vread2\n")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Number of elements read by vread not correct for ::Xyz::s_vwrite2\n")));
     failed = true;
   }
-  TestReader test_reader3;
-  ::Xyz::s_vread3 mdaofs;
-  OpenDDS::DCPS::vread (test_reader3, mdaofs);
+  const char json3[] = "{\"a\":[[[0,0,0,0],[0,0,0,0],[0,0,0,0]],[[0,0,0,0],[0,0,0,0],[0,0,0,0]]]}";
+  rapidjson::StringStream ss3(json3);
+  TestReader test_reader3(ss3);
+  ::Xyz::s_vwrite3 mdaofs2;
+  OpenDDS::DCPS::vread (test_reader3, mdaofs2);
   if (test_reader3.elements_ != (2u * 3u * 4u)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("Number of elements written by vread not correct for ::Xyz::s_vread3\n")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Number of elements read by vread not correct for ::Xyz::s_vwrite3\n")));
     failed = true;
   }
-  TestReader test_reader4;
-  ::Xyz::s_vread4 stringarray;
-  OpenDDS::DCPS::vread (test_reader4, stringarray);
+  const char json4[] = "{\"a\":[[[[\"\",\"\",\"\",\"\",\"\"],[\"\",\"\",\"\",\"\",\"\"],[\"\",\"\",\"\",\"\",\"\"],[\"\",\"\",\"\",\"\",\"\"]],[[\"\",\"\",\"\",\"\",\"\"],[\"\",\"\",\"\",\"\",\"\"],[\"\",\"\",\"\",\"\",\"\"],[\"\",\"\",\"\",\"\",\"\"]],[[\"\",\"\",\"\",\"\",\"\"],[\"\",\"\",\"\",\"\",\"\"],[\"\",\"\",\"\",\"\",\"\"],[\"\",\"\",\"\",\"\",\"\"]]],[[[\"\",\"\",\"\",\"\",\"\"],[\"\",\"\",\"\",\"\",\"\"],[\"\",\"\",\"\",\"\",\"\"],[\"\",\"\",\"\",\"\",\"\"]],[[\"\",\"\",\"\",\"\",\"\"],[\"\",\"\",\"\",\"\",\"\"],[\"\",\"\",\"\",\"\",\"\"],[\"\",\"\",\"\",\"\",\"\"]],[[\"\",\"\",\"\",\"\",\"\"],[\"\",\"\",\"\",\"\",\"\"],[\"\",\"\",\"\",\"\",\"\"],[\"\",\"\",\"\",\"\",\"\"]]]]}";
+  rapidjson::StringStream ss4(json4);
+  TestReader test_reader4(ss4);
+  ::Xyz::s_vwrite4 stringarray2;
+  OpenDDS::DCPS::vread (test_reader4, stringarray2);
   if (test_reader4.elements_ != (2u * 3u * 4u * 5u)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("Number of elements written by vread not correct for ::Xyz::s_vread4\n")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Number of elements read by vread not correct for ::Xyz::s_vwrite4\n")));
     failed = true;
   }
 #endif
