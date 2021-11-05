@@ -3,11 +3,15 @@
 #include <dds/rtpsrelaylib/RelayTypeSupportImpl.h>
 
 #include <dds/DCPS/DCPS_Utils.h>
+#include <dds/DCPS/TimeTypes.h>
 
 namespace RtpsRelay {
 
-RelayPartitionsListener::RelayPartitionsListener(RelayPartitionTable& relay_partition_table)
+RelayPartitionsListener::RelayPartitionsListener(
+  RelayPartitionTable& relay_partition_table,
+  RelayStatisticsReporter& relay_statistics_reporter)
   : relay_partition_table_(relay_partition_table)
+  , relay_statistics_reporter_(relay_statistics_reporter)
 {}
 
 void RelayPartitionsListener::on_data_available(DDS::DataReader_ptr reader)
@@ -38,17 +42,24 @@ void RelayPartitionsListener::on_data_available(DDS::DataReader_ptr reader)
     switch (info.instance_state) {
     case DDS::ALIVE_INSTANCE_STATE:
       if (info.valid_data) {
-        relay_partition_table_.complete_insert(std::make_pair(relay_guid_to_rtps_guid(data.application_participant_guid()), data.slot()),
+        relay_partition_table_.complete_insert(std::make_pair(data.relay_id(), data.slot()),
                                                data.partitions());
       }
       break;
     case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
     case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
-      relay_partition_table_.complete_insert(std::make_pair(relay_guid_to_rtps_guid(data.application_participant_guid()), data.slot()),
+      relay_partition_table_.complete_insert(std::make_pair(data.relay_id(), data.slot()),
                                              RtpsRelay::StringSequence());
       break;
     }
   }
+}
+
+void RelayPartitionsListener::on_subscription_matched(
+  DDS::DataReader_ptr /*reader*/, const DDS::SubscriptionMatchedStatus& status)
+{
+  relay_statistics_reporter_.relay_partitions_pub_count(
+    static_cast<uint32_t>(status.total_count), OpenDDS::DCPS::MonotonicTimePoint::now());
 }
 
 }

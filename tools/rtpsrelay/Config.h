@@ -25,7 +25,18 @@ public:
     , log_entries_(false)
     , log_discovery_(false)
     , log_activity_(false)
+    , restart_detection_(false)
   {}
+
+  void relay_id(const std::string& value)
+  {
+    relay_id_ = value;
+  }
+
+  const std::string& relay_id() const
+  {
+    return relay_id_;
+  }
 
   void application_participant_guid(const OpenDDS::DCPS::GUID_t& value)
   {
@@ -157,12 +168,12 @@ public:
     return log_handler_statistics_;
   }
 
-  void log_participant_statistics(OpenDDS::DCPS::TimeDuration value)
+  void log_participant_statistics(bool value)
   {
     log_participant_statistics_ = value;
   }
 
-  OpenDDS::DCPS::TimeDuration log_participant_statistics() const
+  bool log_participant_statistics() const
   {
     return log_participant_statistics_;
   }
@@ -187,17 +198,48 @@ public:
     return publish_handler_statistics_;
   }
 
-  void publish_participant_statistics(OpenDDS::DCPS::TimeDuration value)
+  void publish_participant_statistics(bool value)
   {
     publish_participant_statistics_ = value;
   }
 
-  OpenDDS::DCPS::TimeDuration publish_participant_statistics() const
+  bool publish_participant_statistics() const
   {
     return publish_participant_statistics_;
   }
 
+  void publish_relay_status(OpenDDS::DCPS::TimeDuration value)
+  {
+    publish_relay_status_ = value;
+  }
+
+  OpenDDS::DCPS::TimeDuration publish_relay_status() const
+  {
+    return publish_relay_status_;
+  }
+
+  void publish_relay_status_liveliness(OpenDDS::DCPS::TimeDuration value)
+  {
+    publish_relay_status_liveliness_ = value;
+  }
+
+  OpenDDS::DCPS::TimeDuration publish_relay_status_liveliness() const
+  {
+    return publish_relay_status_liveliness_;
+  }
+
+  void restart_detection(bool flag)
+  {
+    restart_detection_ = flag;
+  }
+
+  bool restart_detection() const
+  {
+    return restart_detection_;
+  }
+
 private:
+  std::string relay_id_;
   OpenDDS::DCPS::GUID_t application_participant_guid_;
   OpenDDS::DCPS::TimeDuration lifespan_;
   size_t max_pending_;
@@ -211,10 +253,13 @@ private:
   bool log_activity_;
   OpenDDS::DCPS::TimeDuration log_relay_statistics_;
   OpenDDS::DCPS::TimeDuration log_handler_statistics_;
-  OpenDDS::DCPS::TimeDuration log_participant_statistics_;
+  bool log_participant_statistics_;
   OpenDDS::DCPS::TimeDuration publish_relay_statistics_;
   OpenDDS::DCPS::TimeDuration publish_handler_statistics_;
-  OpenDDS::DCPS::TimeDuration publish_participant_statistics_;
+  bool publish_participant_statistics_;
+  OpenDDS::DCPS::TimeDuration publish_relay_status_;
+  OpenDDS::DCPS::TimeDuration publish_relay_status_liveliness_;
+  bool restart_detection_;
 };
 
 }

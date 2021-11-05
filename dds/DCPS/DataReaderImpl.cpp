@@ -2363,8 +2363,7 @@ void DataReaderImpl::dispose_unregister(const ReceivedDataSample&,
 
 void DataReaderImpl::process_latency(const ReceivedDataSample& sample)
 {
-  StatsMapType::iterator location
-  = this->statistics_.find(sample.header_.publication_id_);
+  StatsMapType::iterator location = this->statistics_.find(sample.header_.publication_id_);
 
   if (location != this->statistics_.end()) {
     const DDS::Duration_t zero = { DDS::DURATION_ZERO_SEC, DDS::DURATION_ZERO_NSEC };
@@ -2386,9 +2385,8 @@ void DataReaderImpl::process_latency(const ReceivedDataSample& sample)
       if (DCPS_debug_level > 9) {
         ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) DataReaderImpl::process_latency() - ")
-            ACE_TEXT("measured latency of %dS, %dmS for current sample.\n"),
-            latency.value().sec(),
-            latency.value().msec()));
+            ACE_TEXT("measured latency of %C for current sample.\n"),
+            latency.str().c_str()));
       }
 
       if (this->qos_.latency_budget.duration > zero) {
@@ -3130,14 +3128,18 @@ DataReaderImpl::coherent_changes_completed (DataReaderImpl* reader)
       subscriber->listener_for(::DDS::DATA_ON_READERS_STATUS);
   if (!CORBA::is_nil(sub_listener.in()))
   {
-    if (reader == this) {
-      // Release the sample_lock before listener callback.
-      ACE_GUARD (Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-      sub_listener->on_data_on_readers(subscriber.in());
-    }
+    if (!is_bit()) {
+      if (reader == this) {
+        // Release the sample_lock before listener callback.
+        ACE_GUARD (Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+        sub_listener->on_data_on_readers(subscriber.in());
+      }
 
-    this->set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
-    subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
+      this->set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
+      subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
+    } else {
+      TheServiceParticipant->job_queue()->enqueue(make_rch<OnDataOnReaders>(subscriber, sub_listener, rchandle_from(this), reader == this, true));
+    }
   }
   else
   {
@@ -3148,16 +3150,19 @@ DataReaderImpl::coherent_changes_completed (DataReaderImpl* reader)
 
     if (!CORBA::is_nil(listener.in()))
     {
-      if (reader == this) {
-        // Release the sample_lock before listener callback.
-        ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-        listener->on_data_available(this);
+      if (!is_bit()) {
+        if (reader == this) {
+          // Release the sample_lock before listener callback.
+          ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+          listener->on_data_available(this);
+        } else {
+          listener->on_data_available(this);
+        }
+        set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
+        subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
       } else {
-        listener->on_data_available(this);
+        TheServiceParticipant->job_queue()->enqueue(make_rch<OnDataAvailable>(subscriber, listener, rchandle_from(this), reader == this, true, true));
       }
-
-      set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
-      subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
     }
     else
     {
@@ -3592,6 +3597,44 @@ void DataReaderImpl::transport_discovery_change()
                                       dp_id_copy,
                                       subscription_id_copy,
                                       trans_conf_info);
+}
+
+void DataReaderImpl::OnDataOnReaders::execute()
+{
+  RcHandle<SubscriberImpl> subscriber = subscriber_.lock();
+  RcHandle<DataReaderImpl> data_reader = data_reader_.lock();
+  if (!subscriber || !data_reader) {
+    return;
+  }
+
+  if (call_) {
+    sub_listener_->on_data_on_readers(subscriber.in());
+  }
+
+  if (set_reader_status_) {
+    data_reader->set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
+  }
+  subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
+}
+
+void DataReaderImpl::OnDataAvailable::execute()
+{
+  RcHandle<SubscriberImpl> subscriber = subscriber_.lock();
+  RcHandle<DataReaderImpl> data_reader = data_reader_.lock();
+  if (!subscriber || !data_reader) {
+    return;
+  }
+
+  if (call_ && (data_reader->get_status_changes() & ::DDS::DATA_AVAILABLE_STATUS)) {
+    listener_->on_data_available(data_reader.in());
+  }
+
+  if (set_reader_status_) {
+    data_reader->set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
+  }
+  if (set_subscriber_status_) {
+    subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
+  }
 }
 
 } // namespace DCPS

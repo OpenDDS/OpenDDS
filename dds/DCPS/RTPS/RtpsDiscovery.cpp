@@ -90,8 +90,8 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , secure_participant_user_data_(false)
   , max_type_lookup_service_reply_period_(5, 0)
   , use_xtypes_(true)
-  , sedp_heartbeat_period_(1)
-  , sedp_nak_response_delay_(0, 200*1000 /*microseconds*/) // default from RTPS
+  , sedp_heartbeat_period_(0, 200*1000 /*microseconds*/)
+  , sedp_nak_response_delay_(0, 100*1000 /*microseconds*/)
   , sedp_send_delay_(0, 10 * 1000)
   , sedp_passive_connect_duration_(TimeDuration::from_msec(DCPS::TransportConfig::DEFAULT_PASSIVE_CONNECT_DURATION))
   , participant_flags_(PFLAGS_THIS_VERSION)
@@ -832,7 +832,6 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
 }
 
 // Participant operations:
-
 OpenDDS::DCPS::RepoId
 RtpsDiscovery::generate_participant_guid()
 {
@@ -843,8 +842,8 @@ RtpsDiscovery::generate_participant_guid()
     if (guid_gen_.interfaceName(guid_interface.c_str()) != 0) {
       if (DCPS::DCPS_debug_level) {
         ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsDiscovery::generate_participant_guid()"
-                   " - attempt to use specific network interface's MAC addr for"
-                   " GUID generation failed.\n"));
+                   " - attempt to use network interface %C MAC addr for"
+                   " GUID generation failed.\n", guid_interface.c_str()));
       }
     }
   }
@@ -865,8 +864,8 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
     if (guid_gen_.interfaceName(guid_interface.c_str()) != 0) {
       if (DCPS::DCPS_debug_level) {
         ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsDiscovery::add_domain_participant()"
-                   " - attempt to use specific network interface's MAC addr for"
-                   " GUID generation failed.\n"));
+                   " - attempt to use specific network interface %C MAC addr for"
+                   " GUID generation failed.\n", guid_interface.c_str()));
       }
     }
   }
@@ -1065,7 +1064,7 @@ RtpsDiscovery::spdp_rtps_relay_address(const ACE_INET_Addr& address)
   for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
        dom_pos != dom_limit; ++dom_pos) {
     for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
-      part_pos->second->send_to_relay();
+      part_pos->second->spdp_rtps_relay_address_change();
     }
   }
 }
@@ -1239,6 +1238,13 @@ bool RtpsDiscovery::ignore_domain_participant(
   DDS::DomainId_t domain, const GUID_t& myParticipantId, const GUID_t& ignoreId)
 {
   get_part(domain, myParticipantId)->ignore_domain_participant(ignoreId);
+  return true;
+}
+
+bool RtpsDiscovery::remove_domain_participant(
+  DDS::DomainId_t domain, const GUID_t& myParticipantId, const GUID_t& removeId)
+{
+  get_part(domain, myParticipantId)->remove_domain_participant(removeId);
   return true;
 }
 

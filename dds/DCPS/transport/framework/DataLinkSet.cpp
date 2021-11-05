@@ -103,3 +103,16 @@ void OpenDDS::DCPS::DataLinkSet::terminate_send_if_suspended()
         itr->second->terminate_send_if_suspended();
   }
 }
+
+bool OpenDDS::DCPS::DataLinkSet::is_leading(const GUID_t& writer_id,
+                                            const GUID_t& reader_id) const
+{
+  GuardType guard(this->lock_);
+  for (MapType::const_iterator pos = map_.begin(), limit = map_.end(); pos != limit; ++pos) {
+    if (pos->second->is_leading(writer_id, reader_id)) {
+      return true;
+    }
+  }
+
+  return false;
+}

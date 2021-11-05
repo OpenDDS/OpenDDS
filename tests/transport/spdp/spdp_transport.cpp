@@ -367,9 +367,10 @@ bool run_test()
     return false;
   }
 
-  OpenDDS::DCPS::LocatorSeq unicastLocators(addr_count);
-  unicastLocators.length(addr_count);
-  for (size_t i = 0; i < addr_count; ++i) {
+  const ACE_CDR::ULong addr_count_ulong = static_cast<ACE_CDR::ULong>(addr_count);
+  OpenDDS::DCPS::LocatorSeq unicastLocators(addr_count_ulong);
+  unicastLocators.length(addr_count_ulong);
+  for (ACE_CDR::ULong i = 0; i < addr_count_ulong; ++i) {
     if (DCPS_debug_level) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) spdp_transport.cpp:run_test() addr_array[%d]: %C\n"), i, LogAddr(addr_array[i]).c_str()));
     }
@@ -403,8 +404,7 @@ bool run_test()
       static_cast<CORBA::Long>((rd.resend_period() * 10).value().sec()),
       0 // we are not supporting fractional seconds in the lease duration
     },
-    {0, 0},
-    0
+    {0, 0}
   };
 
   if (!OpenDDS::RTPS::ParameterListConverter::to_param_list(pdata, plist)) {

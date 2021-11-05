@@ -39,7 +39,6 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , nak_depth_(0)
   , nak_response_delay_(0, 200*1000 /*microseconds*/) // default from RTPS
   , heartbeat_period_(1) // no default in RTPS spec
-  , heartbeat_response_delay_(0, 500*1000 /*microseconds*/) // default from RTPS
   , receive_address_duration_(5)
   , responsive_mode_(false)
   , send_delay_(0, 10 * 1000)
@@ -134,8 +133,6 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
                         nak_response_delay_);
   GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("heartbeat_period"),
                         heartbeat_period_);
-  GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("heartbeat_response_delay"),
-                        heartbeat_response_delay_);
   GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("send_delay"),
                         send_delay_);
 
@@ -183,7 +180,6 @@ RtpsUdpInst::dump_to_str() const
   ret += formatNameForDump("max_message_size") + to_dds_string(unsigned(max_message_size_)) + '\n';
   ret += formatNameForDump("nak_response_delay") + to_dds_string(nak_response_delay_.value().msec()) + '\n';
   ret += formatNameForDump("heartbeat_period") + to_dds_string(heartbeat_period_.value().msec()) + '\n';
-  ret += formatNameForDump("heartbeat_response_delay") + to_dds_string(heartbeat_response_delay_.value().msec()) + '\n';
   ret += formatNameForDump("send_buffer_size") + to_dds_string(send_buffer_size_) + '\n';
   ret += formatNameForDump("rcv_buffer_size") + to_dds_string(rcv_buffer_size_) + '\n';
   ret += formatNameForDump("ttl") + to_dds_string(ttl_) + '\n';
@@ -318,6 +314,16 @@ RtpsUdpInst::update_locators(const RepoId& remote_id,
   if (imp) {
     RtpsUdpTransport_rch rtps_impl = static_rchandle_cast<RtpsUdpTransport>(imp);
     rtps_impl->update_locators(remote_id, locators);
+  }
+}
+
+void
+RtpsUdpInst::rtps_relay_address_change()
+{
+  TransportImpl_rch imp = impl();
+  if (imp) {
+    RtpsUdpTransport_rch rtps_impl = static_rchandle_cast<RtpsUdpTransport>(imp);
+    rtps_impl->rtps_relay_address_change();
   }
 }
 

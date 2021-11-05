@@ -41,7 +41,6 @@ public:
   size_t nak_depth_;
   TimeDuration nak_response_delay_;
   TimeDuration heartbeat_period_;
-  TimeDuration heartbeat_response_delay_;
   TimeDuration receive_address_duration_;
   bool responsive_mode_;
   TimeDuration send_delay_;
@@ -137,6 +136,7 @@ public:
   void update_locators(const RepoId& remote_id,
                        const TransportLocatorSeq& locators);
 
+  void rtps_relay_address_change();
   void get_and_reset_relay_message_counts(RelayMessageCounts& counts);
 
 private:
