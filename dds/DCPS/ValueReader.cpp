@@ -20,7 +20,8 @@ ValueReader::read_float128(long double& value)
     return false;
   }
   value = ld;
-  return true; }
+  return true;
+}
 
 bool
 ValueReader::read_boolean_array(ACE_CDR::Boolean* value, size_t length)
