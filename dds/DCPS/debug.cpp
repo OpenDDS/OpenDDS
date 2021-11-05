@@ -8,22 +8,93 @@
 #include "debug.h"
 
 #include "PoolAllocator.h"
+#include "Util.h"
 
 #include <ace/Log_Msg.h>
 
-OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+#include <cstring>
 
-OpenDDS_Dcps_Export unsigned int OpenDDS::DCPS::DCPS_debug_level = 0;
-#ifdef OPENDDS_SECURITY
-OpenDDS_Dcps_Export OpenDDS::DCPS::SecurityDebug OpenDDS::DCPS::security_debug;
-#endif
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
 
+OpenDDS_Dcps_Export LogLevel log_level(LogLevel::Warning);
+OpenDDS_Dcps_Export unsigned int DCPS_debug_level = 0;
+#ifdef OPENDDS_SECURITY
+OpenDDS_Dcps_Export SecurityDebug security_debug;
+#endif
+
+void LogLevel::set(LogLevel::Value value)
+{
+  level_ = value;
+#ifdef OPENDDS_SECURITY
+  if (level_ >= Notice) {
+    security_debug.set_debug_level(1);
+  } else {
+    security_debug.set_all_flags_to(false);
+  }
+#endif
+  if (level_ >= Debug) {
+    if (DCPS_debug_level == 0) {
+      DCPS_debug_level = 1;
+    }
+  } else {
+    DCPS_debug_level = 0;
+    Transport_debug_level = 0;
+    transport_debug = TransportDebug();
+  }
+}
+
+namespace {
+  struct LogLevelNameValue {
+    const char* const name;
+    const LogLevel::Value value;
+  };
+  static const LogLevelNameValue log_levels[] = {
+    {"none", LogLevel::None},
+    {"error", LogLevel::Error},
+    {"warning", LogLevel::Warning},
+    {"notice", LogLevel::Notice},
+    {"info", LogLevel::Info},
+    {"debug", LogLevel::Debug}
+  };
+};
+
+void LogLevel::set_from_string(const char* name)
+{
+  for (size_t i = 0; i < array_count(log_levels); ++i) {
+    if (!std::strcmp(log_levels[i].name, name)) {
+      set(log_levels[i].value);
+      return;
+    }
+  }
+  if (log_level >= Warning) {
+    ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: LogLevel::set_from_string: "
+      "Invalid log level name: %C\n", name));
+  }
+}
+
+const char* LogLevel::get_as_string() const
+{
+  const unsigned index = static_cast<unsigned>(get());
+  if (index >= array_count(log_levels)) {
+    ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: LogLevel::get_as_string: "
+      "Invalid log level value: %u\n", index));
+    return "invalid";
+  }
+  return log_levels[index].name;
+}
+
 OpenDDS_Dcps_Export void set_DCPS_debug_level(unsigned int lvl)
 {
-  OpenDDS::DCPS::DCPS_debug_level = lvl;
+  if (log_level.get() < LogLevel::Debug) {
+    log_level.set(LogLevel::Debug);
+  }
+  if (log_level >= LogLevel::Info) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) INFO: set_DCPS_debug_level: set to %u\n", lvl));
+  }
+  DCPS_debug_level = lvl;
 }
 
 #ifdef OPENDDS_SECURITY
@@ -34,8 +105,7 @@ SecurityDebug::SecurityDebug()
   set_all_flags_to(false);
 }
 
-void
-SecurityDebug::set_all_flags_to(bool value)
+void SecurityDebug::set_all_flags_to(bool value)
 {
   encdec_error = value;
   encdec_warn = value;
@@ -52,8 +122,7 @@ SecurityDebug::set_all_flags_to(bool value)
   chlookup = value;
 }
 
-void
-SecurityDebug::parse_flags(const ACE_TCHAR* flags)
+void SecurityDebug::parse_flags(const ACE_TCHAR* flags)
 {
   String s(ACE_TEXT_ALWAYS_CHAR(flags));
   const String delim(",");
@@ -89,9 +158,9 @@ SecurityDebug::parse_flags(const ACE_TCHAR* flags)
         showkeys = true;
       } else if (flag == "chlookup") {
         chlookup = true;
-      } else {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SecurityDebug::parse_flags: ")
-          ACE_TEXT("Unknown Security Debug Category: \"%C\"\n"), flag.c_str()));
+      } else if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: SecurityDebug::parse_flags: "
+          "Unknown Security Debug Category: \"%C\"\n", flag.c_str()));
       }
     }
     if (pos == String::npos) {
@@ -101,8 +170,7 @@ SecurityDebug::parse_flags(const ACE_TCHAR* flags)
   }
 }
 
-void
-SecurityDebug::set_debug_level(unsigned level)
+void SecurityDebug::set_debug_level(unsigned level)
 {
   access_error = new_entity_error = cleanup_error = level >= 1;
   access_warn = level >= 2;
