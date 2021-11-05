@@ -437,11 +437,6 @@ public:
   DDS::Duration_t bit_autopurge_disposed_samples_delay() const;
   void bit_autopurge_disposed_samples_delay(const DDS::Duration_t& duration);
 
-  enum TypeObjectEncoding { Encoding_Normal, Encoding_WriteOldFormat, Encoding_ReadOldFormat };
-  TypeObjectEncoding type_object_encoding() const;
-  void type_object_encoding(TypeObjectEncoding encoding);
-  void type_object_encoding(const char* encoding);
-
 private:
 
   /// Initialize default qos.
@@ -759,8 +754,6 @@ private:
 
   DDS::Duration_t bit_autopurge_nowriter_samples_delay_;
   DDS::Duration_t bit_autopurge_disposed_samples_delay_;
-
-  TypeObjectEncoding type_object_encoding_;
 };
 
 #define TheServiceParticipant OpenDDS::DCPS::Service_Participant::instance()

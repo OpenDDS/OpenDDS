@@ -222,11 +222,11 @@ TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const StronglyConnectedComponen
   sc_component_id() = id;
 }
 
-TypeIdentifier makeTypeIdentifier(const TypeObject& type_object, const DCPS::Encoding* encoding_option)
+TypeIdentifier makeTypeIdentifier(const TypeObject& type_object)
 {
   OPENDDS_ASSERT(type_object.kind == EK_MINIMAL || type_object.kind == EK_COMPLETE);
 
-  const Encoding& encoding = encoding_option ? *encoding_option : get_typeobject_encoding();
+  const Encoding& encoding = get_typeobject_encoding();
   size_t size = serialized_size(encoding, type_object);
   ACE_Message_Block buff(size);
   DCPS::Serializer ser(&buff, encoding);
