@@ -110,11 +110,19 @@ private:
     DDS::Security::ParticipantCryptoHandle remote_participant_crypto,
     DDS::Security::SecurityException& ex);
 
+  virtual bool have_local_participant_crypto_tokens(
+    DDS::Security::ParticipantCryptoHandle local_participant_crypto,
+    DDS::Security::ParticipantCryptoHandle remote_participant_crypto);
+
   virtual bool set_remote_participant_crypto_tokens(
     DDS::Security::ParticipantCryptoHandle local_participant_crypto,
     DDS::Security::ParticipantCryptoHandle remote_participant_crypto,
     const DDS::Security::ParticipantCryptoTokenSeq& remote_participant_tokens,
     DDS::Security::SecurityException& ex);
+
+  virtual bool have_remote_participant_crypto_tokens(
+    DDS::Security::ParticipantCryptoHandle local_participant_crypto,
+    DDS::Security::ParticipantCryptoHandle remote_participant_crypto);
 
   virtual bool create_local_datawriter_crypto_tokens(
     DDS::Security::DatawriterCryptoTokenSeq& local_datawriter_crypto_tokens,
@@ -122,11 +130,19 @@ private:
     DDS::Security::DatareaderCryptoHandle remote_datareader_crypto,
     DDS::Security::SecurityException& ex);
 
+  virtual bool have_local_datawriter_crypto_tokens(
+    DDS::Security::DatawriterCryptoHandle local_datawriter_crypto,
+    DDS::Security::DatareaderCryptoHandle remote_datareader_crypto);
+
   virtual bool set_remote_datawriter_crypto_tokens(
     DDS::Security::DatareaderCryptoHandle local_datareader_crypto,
     DDS::Security::DatawriterCryptoHandle remote_datawriter_crypto,
     const DDS::Security::DatawriterCryptoTokenSeq& remote_datawriter_tokens,
     DDS::Security::SecurityException& ex);
+
+  virtual bool have_remote_datawriter_crypto_tokens(
+    DDS::Security::DatareaderCryptoHandle local_datareader_crypto,
+    DDS::Security::DatawriterCryptoHandle remote_datawriter_crypto);
 
   virtual bool create_local_datareader_crypto_tokens(
     DDS::Security::DatareaderCryptoTokenSeq& local_datareader_crypto_tokens,
@@ -134,11 +150,19 @@ private:
     DDS::Security::DatawriterCryptoHandle remote_datawriter_crypto,
     DDS::Security::SecurityException& ex);
 
+  virtual bool have_local_datareader_crypto_tokens(
+    DDS::Security::DatareaderCryptoHandle local_datareader_crypto,
+    DDS::Security::DatawriterCryptoHandle remote_datawriter_crypto);
+
   virtual bool set_remote_datareader_crypto_tokens(
     DDS::Security::DatawriterCryptoHandle local_datawriter_crypto,
     DDS::Security::DatareaderCryptoHandle remote_datareader_crypto,
     const DDS::Security::DatareaderCryptoTokenSeq& remote_datareader_tokens,
     DDS::Security::SecurityException& ex);
+
+  virtual bool have_remote_datareader_crypto_tokens(
+    DDS::Security::DatawriterCryptoHandle local_datawriter_crypto,
+    DDS::Security::DatareaderCryptoHandle remote_datareader_crypto);
 
   virtual bool return_crypto_tokens(
     const DDS::Security::CryptoTokenSeq& crypto_tokens,

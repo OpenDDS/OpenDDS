@@ -57,8 +57,28 @@ DynamicData::DynamicData(DCPS::Serializer& ser, const DynamicType_rch& type)
   }
 }
 
+DynamicData::DynamicData(const DynamicData& other)
+  : strm_(0, other.encoding_)
+{
+  copy(other);
+}
+
 DynamicData& DynamicData::operator=(const DynamicData& other)
 {
+  if (this != &other) {
+    copy(other);
+  }
+  return *this;
+}
+
+DynamicData::~DynamicData()
+{
+  ACE_Message_Block::release(chain_);
+}
+
+void DynamicData::copy(const DynamicData& other)
+{
+  ACE_Message_Block::release(chain_);
   chain_ = other.chain_->duplicate();
   encoding_ = other.encoding_;
   reset_align_state_ = other.reset_align_state_;
@@ -67,12 +87,6 @@ DynamicData& DynamicData::operator=(const DynamicData& other)
   type_ = other.type_;
   descriptor_ = other.descriptor_;
   item_count_ = other.item_count_;
-  return *this;
-}
-
-DynamicData::~DynamicData()
-{
-  ACE_Message_Block::release(chain_);
 }
 
 DDS::ReturnCode_t DynamicData::get_descriptor(MemberDescriptor& value, MemberId id) const
@@ -155,8 +169,10 @@ MemberId DynamicData::get_member_id_by_name(DCPS::String name) const
 
 MemberId DynamicData::get_member_id_at_index(ACE_CDR::ULong index)
 {
-  const ACE_CDR::ULong count = get_item_count();
-  if (index >= count) {
+  if (item_count_ == ITEM_COUNT_INVALID) {
+    get_item_count();
+  }
+  if (index >= item_count_) {
     return MEMBER_ID_INVALID;
   }
 
@@ -244,9 +260,7 @@ ACE_CDR::ULong DynamicData::get_item_count()
       return (type_->get_kind() == TK_STRING8) ? bytes : bytes/2;
     }
   case TK_BITMASK:
-    {
-      return descriptor_.bound[0];
-    }
+    return descriptor_.bound[0];
   case TK_STRUCTURE:
     // When optional members are supported, this needs to be updated to count
     // the number of members actually present in the DynamicData object.
@@ -729,6 +743,8 @@ DDS::ReturnCode_t DynamicData::get_single_value(ValueType& value, MemberId id,
     }
   }
 
+  release_chains();
+
   if (!good && DCPS::DCPS_debug_level >= 1) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_single_value -")
                ACE_TEXT(" Failed to read a value of %C from a DynamicData object of type %C\n"),
@@ -825,7 +841,7 @@ DDS::ReturnCode_t DynamicData::get_char_common(CharT& value, MemberId id)
       }
       ACE_CDR::ULong index;
       const size_t str_len = ACE_OS::strlen(str);
-      if (!get_index_from_id(id, index, str_len)) {
+      if (!get_index_from_id(id, index, static_cast<ACE_CDR::ULong>(str_len))) {
         if (DCPS::DCPS_debug_level >= 1) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_char_common -")
                      ACE_TEXT(" ID %d is not valid in a string (or wstring) with length %d\n"),
@@ -861,6 +877,8 @@ DDS::ReturnCode_t DynamicData::get_char_common(CharT& value, MemberId id)
     good = false;
     break;
   }
+
+  release_chains();
 
   if (!good && DCPS::DCPS_debug_level >= 1) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Dynamic::get_char_common -")
@@ -965,6 +983,8 @@ DDS::ReturnCode_t DynamicData::get_boolean_value(ACE_CDR::Boolean& value, Member
     good = false;
     break;
   }
+
+  release_chains();
 
   if (!good && DCPS::DCPS_debug_level >= 1) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Dynamic::get_boolean_value -")
@@ -1079,6 +1099,8 @@ DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id
     good = false;
     break;
   }
+
+  release_chains();
   return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
 
@@ -1103,7 +1125,18 @@ bool DynamicData::read_values(SequenceType& value, TypeKind elem_tk)
   case TK_BOOLEAN:
   case TK_STRING8:
   case TK_STRING16:
-    return strm_ >> value;
+    {
+      return strm_ >> value;
+    }
+  case TK_ENUM:
+  case TK_BITMASK:
+    {
+      size_t dheader;
+      if (!strm_.read_delimiter(dheader)) {
+        return false;
+      }
+      return strm_ >> value;
+    }
   }
 
   if (DCPS::DCPS_debug_level >= 1) {
@@ -1182,11 +1215,11 @@ bool DynamicData::get_values_from_union(SequenceType& value, MemberId id,
   }
 
   if (elem_tk == ElementTypeKind) {
-    return read_values(value, elem_tk);
+    return read_values(value, ElementTypeKind);
   }
 
   const LBound bit_bound = elem_type->get_descriptor().bound[0];
-  return bit_bound >= lower && bit_bound <= upper && read_values(value, elem_tk);
+  return bit_bound >= lower && bit_bound <= upper && read_values(value, enum_or_bitmask);
 }
 
 template<TypeKind ElementTypeKind, typename SequenceType>
@@ -1197,22 +1230,22 @@ bool DynamicData::get_values_from_sequence(SequenceType& value, MemberId id,
   const TypeKind elem_tk = elem_type->get_kind();
 
   if (elem_tk == ElementTypeKind) {
-    return read_values(value, elem_tk);
+    return read_values(value, ElementTypeKind);
   } else if (elem_tk == enum_or_bitmask) {
     // Read from a sequence of enums or bitmasks.
     const LBound bit_bound = elem_type->get_descriptor().bound[0];
-    return bit_bound >= lower && bit_bound <= upper && read_values(value, elem_tk);
+    return bit_bound >= lower && bit_bound <= upper && read_values(value, enum_or_bitmask);
   } else if (elem_tk == TK_SEQUENCE) {
     const DynamicType_rch nested_elem_type = get_base_type(elem_type->get_descriptor().element_type);
     const TypeKind nested_elem_tk = nested_elem_type->get_kind();
     if (nested_elem_tk == ElementTypeKind) {
       // Read from a sequence of sequence of ElementTypeKind.
-      return skip_to_sequence_element(id) && read_values(value, nested_elem_tk);
+      return skip_to_sequence_element(id) && read_values(value, ElementTypeKind);
     } else if (nested_elem_tk == enum_or_bitmask) {
       // Read from a sequence of sequence of enums or bitmasks.
       const LBound bit_bound = nested_elem_type->get_descriptor().bound[0];
       return bit_bound >= lower && bit_bound <= upper &&
-        skip_to_sequence_element(id) && read_values(value, nested_elem_tk);
+        skip_to_sequence_element(id) && read_values(value, enum_or_bitmask);
     }
   }
 
@@ -1326,6 +1359,8 @@ DDS::ReturnCode_t DynamicData::get_sequence_values(SequenceType& value, MemberId
     }
     return DDS::RETCODE_ERROR;
   }
+
+  release_chains();
 
   if (!good && DCPS::DCPS_debug_level >= 1) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_sequence_values -")
@@ -1479,7 +1514,36 @@ bool DynamicData::skip_to_struct_member(const MemberDescriptor& member_desc, Mem
       if (member_id == id) {
         return true;
       }
-      if (!strm_.skip(member_size)) {
+
+      DynamicTypeMember_rch dtm;
+      if (type_->get_member(dtm, member_id) != DDS::RETCODE_OK) {
+        if (DCPS::DCPS_debug_level >= 1) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::skip_to_struct_member -")
+                     ACE_TEXT(" Failed to get DynamicTypeMember at ID %d\n"), member_id));
+        }
+        return false;
+      }
+      DynamicType_rch member = dtm->get_descriptor().type.lock();
+      if (!member) {
+        if (DCPS::DCPS_debug_level >= 1) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::skip_to_struct_member -")
+                     ACE_TEXT(" Failed to get DynamicType for member at ID %d\n"), member_id));
+        }
+        return false;
+      }
+      member = get_base_type(member);
+      if (member->get_kind() == TK_SEQUENCE) {
+        // Sequence is a special case where the NEXTINT header can also be used for
+        // the length of the sequence (when LC is 5, 6, or 7). And thus skipping such a
+        // sequence member using member_size can be incorrect.
+        if (!skip_sequence_member(member)) {
+          if (DCPS::DCPS_debug_level >= 1) {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::skip_to_struct_member -")
+                       ACE_TEXT(" Failed to skip a sequence member at ID %d\n"), member_id));
+          }
+          return false;
+        }
+      } else if (!strm_.skip(member_size)) {
         if (DCPS::DCPS_debug_level >= 1) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::skip_to_struct_member -")
                      ACE_TEXT(" Failed to skip a member with ID %d\n"), member_id));
@@ -1652,9 +1716,8 @@ bool DynamicData::skip_member(DynamicType_rch member_type)
       break;
     }
   case TK_STRUCTURE:
-    return skip_struct_member(member_type);
   case TK_UNION:
-    return skip_union_member(member_type);
+    return skip_aggregated_member(member_type);
   case TK_SEQUENCE:
     return skip_sequence_member(member_type);
   case TK_ARRAY:
@@ -1772,16 +1835,27 @@ bool DynamicData::skip_collection_member(TypeKind kind)
   return skip("skip_collection_member", err_msg.c_str(), dheader);
 }
 
-bool DynamicData::skip_struct_member(const DynamicType_rch& struct_type)
+bool DynamicData::skip_aggregated_member(const DynamicType_rch& member_type)
 {
-  DynamicData struct_data(strm_.current(), strm_.encoding(), struct_type);
-  return struct_data.skip_all();
+  DynamicData nested_data(strm_, member_type);
+  if (!nested_data.skip_all()) {
+    return false;
+  }
+
+  ACE_Message_Block* const result_chain = nested_data.strm_.current()->duplicate();
+  strm_ = DCPS::Serializer(result_chain, encoding_);
+  const DCPS::Serializer::RdState curr_state = nested_data.strm_.rdstate();
+  strm_.rdstate(curr_state);
+  chains_to_release.push_back(result_chain);
+  return true;
 }
 
-bool DynamicData::skip_union_member(const DynamicType_rch& union_type)
+void DynamicData::release_chains()
 {
-  DynamicData union_data(strm_.current(), strm_.encoding(), union_type);
-  return union_data.skip_all();
+  for (ACE_CDR::ULong i = 0; i < chains_to_release.size(); ++i) {
+    ACE_Message_Block::release(chains_to_release[i]);
+  }
+  chains_to_release.clear();
 }
 
 bool DynamicData::read_discriminator(const DynamicType_rch& disc_type, ExtensibilityKind union_ek, ACE_CDR::Long& label)
@@ -1907,6 +1981,10 @@ bool DynamicData::skip_all()
     return false;
   }
 
+  if (reset_align_state_) {
+    strm_.rdstate(align_state_);
+  }
+
   const ExtensibilityKind extensibility = descriptor_.extensibility_kind;
   if (extensibility == APPENDABLE || extensibility == MUTABLE) {
     size_t dheader;
@@ -1922,12 +2000,15 @@ bool DynamicData::skip_all()
     const TypeKind tk = type_->get_kind();
     if (tk == TK_STRUCTURE) {
       const ACE_CDR::ULong member_count = type_->get_member_count();
+      bool good = true;
       for (ACE_CDR::ULong i = 0; i < member_count; ++i) {
         if (!skip_struct_member_by_index(i)) {
-          return false;
+          good = false;
+          break;
         }
       }
-      return true;
+      release_chains();
+      return good;
     } else { // Union
       const DynamicType_rch disc_type = get_base_type(descriptor_.discriminator_type);
       ACE_CDR::Long label;
@@ -1946,7 +2027,9 @@ bool DynamicData::skip_all()
         for (ACE_CDR::ULong i = 0; i < labels.length(); ++i) {
           if (label == labels[i]) {
             const DynamicType_rch selected_member = md.type.lock();
-            return selected_member && skip_member(selected_member);
+            bool good = selected_member && skip_member(selected_member);
+            release_chains();
+            return good;
           }
         }
 
@@ -1958,7 +2041,9 @@ bool DynamicData::skip_all()
 
       if (has_default) {
         const DynamicType_rch default_dt = default_member.type.lock();
-        return default_dt && skip_member(default_dt);
+        bool good = default_dt && skip_member(default_dt);
+        release_chains();
+        return good;
       }
       if (DCPS::DCPS_debug_level >= 1) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DynamicData::skip_all - Skip a union with no")

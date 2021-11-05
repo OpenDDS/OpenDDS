@@ -1,9 +1,10 @@
 #ifndef OPENDDS_DCPS_TIMEPOINT_T_H
 #define OPENDDS_DCPS_TIMEPOINT_T_H
 
-#include <ace/Time_Value_T.h>
-
 #include "TimeDuration.h"
+#include "SafeBool_T.h"
+
+#include <ace/Time_Value_T.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #  pragma once
@@ -28,7 +29,7 @@ namespace DCPS {
  * for this class.
  */
 template<typename AceClock>
-class TimePoint_T {
+class TimePoint_T : public SafeBool_T<TimePoint_T<AceClock> > {
 public:
   typedef AceClock ClockType;
   typedef ACE_Time_Value_T<AceClock> ValueType;
@@ -75,6 +76,11 @@ public:
    * Is the object equal to zero_value?
    */
   bool is_zero() const;
+
+  bool boolean_test() const
+  {
+    return *this != zero_value;
+  }
 
   /**
    * Is the object equal to the maximum possible value, max_value?

@@ -6,6 +6,7 @@
 #include "RelayHandler.h"
 
 #include <dds/DCPS/DomainParticipantImpl.h>
+#include <dds/DCPS/TimeTypes.h>
 
 namespace RtpsRelay {
 

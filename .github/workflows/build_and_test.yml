@@ -310,7 +310,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   build_u18_o1d0v1_xer0_j12:
 
@@ -480,184 +480,184 @@ jobs:
         git clean -nd -e ext | tee ../output.txt
         if [ -s ../output.txt ]; then exit 1; fi
 
-  u18_esafe_js0:
+#  u18_esafe_js0:
 
-    runs-on: ubuntu-18.04
+#    runs-on: ubuntu-18.04
 
-    steps:
-    - name: checkout OpenDDS
-      uses: actions/checkout@v2
-      with:
-        path: OpenDDS
-        submodules: true
-    - name: checkout autobuild
-      uses: actions/checkout@v2
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: setup gtest
-      run: |
-        cd OpenDDS/tests/googletest
-        git submodule init
-        git submodule update
-        mkdir build
-        cd build
-        mkdir install
-        cmake -DCMAKE_INSTALL_PREFIX=./install ..
-        cmake --build . --target install
-    - name: configure OpenDDS
-      run: |
-        cd OpenDDS
-        ./configure \
-          --ace-github-latest \
-          --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install \
-          --no-rapidjson \
-          --safety-profile \
-          --tests
-    - name: check build configuration
-      shell: bash
-      run: |
-        cd OpenDDS/build/target
-        . setenv.sh
-        tools/scripts/show_build_config.pl
-    - name: build everything
-      run: |
-        cd OpenDDS
-        make -j4
-    - name: run OpenDDS tests
-      shell: bash
-      run: |
-        cd OpenDDS/build/target
-        . setenv.sh
-        mkdir ${{ github.job }}_autobuild_workspace
-        cd ${{ github.job }}_autobuild_workspace
-        echo using commit $TRIGGERING_COMMIT for SHA
-        echo $TRIGGERING_COMMIT >> ./SHA
-        cat > config.xml <<EOF
-        <autobuild>
-        <configuration>
-        <variable name="log_file" value="output.log"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-        <variable name="project_root" value="$DDS_ROOT"/>
-        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-        <variable name="junit_xml_output" value="Tests"/>
-        </configuration>
-        <command name="log" options="on"/>
-        <command name="print_os_version"/>
-        <command name="print_env_vars"/>
-        <command name="print_ace_config"/>
-        <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
-        <command name="print_perl_version"/>
-        <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_EXTENDED -Config RTPS -Config LINUX -Config OPENDDS_SAFETY_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GH_ACTIONS_OPENDDS_SAFETY_PROFILE -Config GH_ACTIONS -Config NO_UNIT_TESTS"/>
-        <command name="log" options="off"/>
-        <command name="process_logs" options="prettify"/>
-        </autobuild>
-        EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/config.xml"
-    - name: upload autobuild output
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ github.job }}_autobuild_output
-        path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace
-    - name: check results
-      shell: bash
-      run: |
-        cat "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+#    steps:
+#    - name: checkout OpenDDS
+#      uses: actions/checkout@v2
+#      with:
+#        path: OpenDDS
+#        submodules: true
+#    - name: checkout autobuild
+#      uses: actions/checkout@v2
+#      with:
+#        repository: DOCGroup/autobuild
+#        path: autobuild
+#    - name: install xerces
+#      run: sudo apt-get -y install libxerces-c-dev
+#    - name: setup gtest
+#      run: |
+#        cd OpenDDS/tests/googletest
+#        git submodule init
+#        git submodule update
+#        mkdir build
+#        cd build
+#        mkdir install
+#        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+#       cmake --build . --target install
+#    - name: configure OpenDDS
+#      run: |
+#        cd OpenDDS
+#        ./configure \
+#          --ace-github-latest \
+#          --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install \
+#          --no-rapidjson \
+#          --safety-profile \
+#          --tests
+#    - name: check build configuration
+#      shell: bash
+#      run: |
+#        cd OpenDDS/build/target
+#        . setenv.sh
+#        tools/scripts/show_build_config.pl
+#    - name: build everything
+#      run: |
+#        cd OpenDDS
+#        make -j4
+#    - name: run OpenDDS tests
+#      shell: bash
+#      run: |
+#        cd OpenDDS/build/target
+#        . setenv.sh
+#        mkdir ${{ github.job }}_autobuild_workspace
+#        cd ${{ github.job }}_autobuild_workspace
+#        echo using commit $TRIGGERING_COMMIT for SHA
+#        echo $TRIGGERING_COMMIT >> ./SHA
+#        cat > config.xml <<EOF
+#        <autobuild>
+#        <configuration>
+#        <variable name="log_file" value="output.log"/>
+#        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+#        <variable name="project_root" value="$DDS_ROOT"/>
+#        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+#        <variable name="junit_xml_output" value="Tests"/>
+#        </configuration>
+#        <command name="log" options="on"/>
+#        <command name="print_os_version"/>
+#        <command name="print_env_vars"/>
+#        <command name="print_ace_config"/>
+#        <command name="print_make_version"/>
+#        <command name="check_compiler" options="gcc"/>
+#        <command name="print_perl_version"/>
+#        <command name="print_autobuild_config"/>
+#        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_EXTENDED -Config RTPS -Config LINUX -Config OPENDDS_SAFETY_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GH_ACTIONS_OPENDDS_SAFETY_PROFILE -Config GH_ACTIONS -Config NO_UNIT_TESTS"/>
+#        <command name="log" options="off"/>
+#        <command name="process_logs" options="prettify"/>
+#        </autobuild>
+#        EOF
+#        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/config.xml"
+#    - name: upload autobuild output
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: ${{ github.job }}_autobuild_output
+#        path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace
+#    - name: check results
+#      shell: bash
+#      run: |
+#        cat "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
+#        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  u18_bsafe_js0_FM-1f:
+#  u18_bsafe_js0_FM-1f:
 
-    runs-on: ubuntu-18.04
+#    runs-on: ubuntu-18.04
 
-    steps:
-    - name: checkout OpenDDS
-      uses: actions/checkout@v2
-      with:
-        path: OpenDDS
-        submodules: true
-    - name: checkout autobuild
-      uses: actions/checkout@v2
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: setup gtest
-      run: |
-        cd OpenDDS/tests/googletest
-        git submodule init
-        git submodule update
-        mkdir build
-        cd build
-        mkdir install
-        cmake -DCMAKE_INSTALL_PREFIX=./install ..
-        cmake --build . --target install
-    - name: configure OpenDDS
-      run: |
-        cd OpenDDS
-        ./configure \
-          --ace-github-latest \
-          --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install \
-          --no-rapidjson \
-          --safety-profile=base \
-          --no-built-in-topics \
-          --tests
-    - name: check build configuration
-      shell: bash
-      run: |
-        cd OpenDDS/build/target
-        . setenv.sh
-        tools/scripts/show_build_config.pl
-    - name: build everything
-      run: |
-        cd OpenDDS
-        make -j4
-    - name: run OpenDDS tests
-      shell: bash
-      run: |
-        cd OpenDDS/build/target
-        . setenv.sh
-        mkdir ${{ github.job }}_autobuild_workspace
-        cd ${{ github.job }}_autobuild_workspace
-        echo using commit $TRIGGERING_COMMIT for SHA
-        echo $TRIGGERING_COMMIT >> ./SHA
-        cat > config.xml <<EOF
-        <autobuild>
-        <configuration>
-        <variable name="log_file" value="output.log"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-        <variable name="project_root" value="$DDS_ROOT"/>
-        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-        <variable name="junit_xml_output" value="Tests"/>
-        </configuration>
-        <command name="log" options="on"/>
-        <command name="print_os_version"/>
-        <command name="print_env_vars"/>
-        <command name="print_ace_config"/>
-        <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
-        <command name="print_perl_version"/>
-        <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_BASE -Config RTPS -Config LINUX -Config OPENDDS_SAFETY_PROFILE -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GH_ACTIONS_OPENDDS_SAFETY_PROFILE -Config GH_ACTIONS -Config NO_UNIT_TESTS"/>
-        <command name="log" options="off"/>
-        <command name="process_logs" options="prettify"/>
-        </autobuild>
-        EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/config.xml"
-    - name: upload autobuild output
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ github.job }}_autobuild_output
-        path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace
-    - name: check results
-      shell: bash
-      run: |
-        cat "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+#    steps:
+#    - name: checkout OpenDDS
+#      uses: actions/checkout@v2
+#      with:
+#        path: OpenDDS
+#        submodules: true
+#    - name: checkout autobuild
+#      uses: actions/checkout@v2
+#      with:
+#        repository: DOCGroup/autobuild
+#        path: autobuild
+#    - name: install xerces
+#      run: sudo apt-get -y install libxerces-c-dev
+#    - name: setup gtest
+#      run: |
+#        cd OpenDDS/tests/googletest
+#        git submodule init
+#        git submodule update
+#        mkdir build
+#        cd build
+#        mkdir install
+#        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+#        cmake --build . --target install
+#    - name: configure OpenDDS
+#      run: |
+#        cd OpenDDS
+#        ./configure \
+#          --ace-github-latest \
+#          --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install \
+#          --no-rapidjson \
+#          --safety-profile=base \
+#          --no-built-in-topics \
+#          --tests
+#    - name: check build configuration
+#      shell: bash
+#      run: |
+#        cd OpenDDS/build/target
+#        . setenv.sh
+#        tools/scripts/show_build_config.pl
+#    - name: build everything
+#      run: |
+#        cd OpenDDS
+#        make -j4
+#    - name: run OpenDDS tests
+#      shell: bash
+#      run: |
+#        cd OpenDDS/build/target
+#        . setenv.sh
+#        mkdir ${{ github.job }}_autobuild_workspace
+#        cd ${{ github.job }}_autobuild_workspace
+#        echo using commit $TRIGGERING_COMMIT for SHA
+#        echo $TRIGGERING_COMMIT >> ./SHA
+#        cat > config.xml <<EOF
+#        <autobuild>
+#        <configuration>
+#        <variable name="log_file" value="output.log"/>
+#        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+#        <variable name="project_root" value="$DDS_ROOT"/>
+#        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+#        <variable name="junit_xml_output" value="Tests"/>
+#        </configuration>
+#        <command name="log" options="on"/>
+#        <command name="print_os_version"/>
+#        <command name="print_env_vars"/>
+#        <command name="print_ace_config"/>
+#        <command name="print_make_version"/>
+#        <command name="check_compiler" options="gcc"/>
+#        <command name="print_perl_version"/>
+#        <command name="print_autobuild_config"/>
+#        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_BASE -Config RTPS -Config LINUX -Config OPENDDS_SAFETY_PROFILE -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GH_ACTIONS_OPENDDS_SAFETY_PROFILE -Config GH_ACTIONS -Config NO_UNIT_TESTS"/>
+#        <command name="log" options="off"/>
+#        <command name="process_logs" options="prettify"/>
+#        </autobuild>
+#        EOF
+#        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/config.xml"
+#    - name: upload autobuild output
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: ${{ github.job }}_autobuild_output
+#        path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace
+#    - name: check results
+#      shell: bash
+#      run: |
+#        cat "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
+#        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_u18_d0i0v1_sec_js0_FM-08:
 
@@ -904,7 +904,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_u18_clang5_i0w1_sec:
 
@@ -1157,7 +1157,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_u18_clang10_sec_js0:
 
@@ -1410,7 +1410,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_u18_gcc6_d0w1_cpp03:
 
@@ -1661,7 +1661,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_u18_gcc8_i0_js0_j:
 
@@ -1912,7 +1912,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_u18_gcc10_i0w1_xer0:
 
@@ -2158,50 +2158,50 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  u20_gcc10_bsafe_js0_FM-2c:
+#  u20_gcc10_bsafe_js0_FM-2c:
 
-    runs-on: ubuntu-20.04
+#    runs-on: ubuntu-20.04
 
-    steps:
-    - name: install gcc and g++
-      run: |
-        sudo apt-get install g++-10
-    - name: checkout OpenDDS
-      uses: actions/checkout@v2
-      with:
-        path: OpenDDS
-        submodules: true
-    - name: checkout autobuild
-      uses: actions/checkout@v2
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: configure OpenDDS
-      run: |
-        cd OpenDDS
-        ./configure \
-          --compiler=g++-10 \
-          --ace-github-latest \
-          --no-rapidjson \
-          --safety-profile=base \
-          --no-content-subscription \
-          --no-object-model-profile \
-          --no-persistence-profile \
-          --tests
-    - name: check build configuration
-      shell: bash
-      run: |
-        cd OpenDDS/build/target
-        . setenv.sh
-        tools/scripts/show_build_config.pl
-    - name: build everything
-      run: |
-        cd OpenDDS
-        make -j4
+#    steps:
+#    - name: install gcc and g++
+#      run: |
+#        sudo apt-get install g++-10
+#    - name: checkout OpenDDS
+#      uses: actions/checkout@v2
+#      with:
+#        path: OpenDDS
+#        submodules: true
+#    - name: checkout autobuild
+#      uses: actions/checkout@v2
+#      with:
+#        repository: DOCGroup/autobuild
+#        path: autobuild
+#    - name: install xerces
+#      run: sudo apt-get -y install libxerces-c-dev
+#    - name: configure OpenDDS
+#      run: |
+#        cd OpenDDS
+#        ./configure \
+#          --compiler=g++-10 \
+#          --ace-github-latest \
+#          --no-rapidjson \
+#          --safety-profile=base \
+#          --no-content-subscription \
+#          --no-object-model-profile \
+#          --no-persistence-profile \
+#          --tests
+#    - name: check build configuration
+#      shell: bash
+#      run: |
+#        cd OpenDDS/build/target
+#        . setenv.sh
+#        tools/scripts/show_build_config.pl
+#    - name: build everything
+#      run: |
+#        cd OpenDDS
+#        make -j4
 
   ACE_TAO_u20_ace7_j_qt_ws_sec:
 
@@ -2484,7 +2484,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_u20_p1_asan:
 
@@ -2518,7 +2518,10 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+    - name: install clang-12
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      run: sudo apt-get -y install clang-12
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -2532,7 +2535,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --std=c++11 --ipv6 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=clang++-12 --ipv6 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
         echo "CPPFLAGS += -ggdb -O1 -fsanitize=address -fno-omit-frame-pointer" >> ACE_TAO/ACE/include/makeinclude/platform_macros.GNU
         echo "LDFLAGS += -ggdb -fsanitize=address" >> ACE_TAO/ACE/include/makeinclude/platform_macros.GNU
     - name: build ACE and TAO
@@ -2540,6 +2543,7 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
+        export ASAN_OPTIONS=detect_leaks=0
         cd ACE_TAO/ACE
         make -j4
         cd ../TAO
@@ -2567,6 +2571,8 @@ jobs:
     needs: ACE_TAO_u20_p1_asan
 
     steps:
+    - name: install clang-12
+      run: sudo apt-get -y install clang-12
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -2598,7 +2604,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --std=c++11 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=clang++-12 --std=c++11 --ipv6 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -2611,6 +2617,7 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
+        export ASAN_OPTIONS=detect_leaks=0
         make -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
@@ -2729,7 +2736,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_u20_p1_tsan:
 
@@ -2763,7 +2770,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install clang-12
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install clang-12
@@ -2815,6 +2822,8 @@ jobs:
     needs: ACE_TAO_u20_p1_tsan
 
     steps:
+    - name: install clang-12
+      run: sudo apt-get -y install clang-12
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -2846,7 +2855,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --compiler=clang++-12 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=clang++-12 --ipv6 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -2985,7 +2994,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_u20_p1:
 
@@ -3097,7 +3106,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --ipv6 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -3232,7 +3241,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   build_u20_p1_j8_FM-1f:
 
@@ -3434,9 +3443,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
-
-  # Ubuntu 18.04 - WChar
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_u18_w1:
 
@@ -3683,7 +3690,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   build_u18_w1_j_FM-2f:
 
@@ -3885,7 +3892,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_u18_stat_qt_ws_sec:
 
@@ -4148,8 +4155,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
-
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   messenger_u18_stat_qt_ws_sec:
 
@@ -4291,7 +4297,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   compiler_u18_stat_qt_ws_sec:
 
@@ -4419,7 +4425,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   unit_u18_stat_qt_ws_sec:
 
@@ -4547,7 +4553,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_u18_j_cft0_FM-37:
 
@@ -4821,7 +4827,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_w19_p1_stat_js0:
 
@@ -5113,7 +5119,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   messenger_w19_p1_stat_js0:
 
@@ -5267,7 +5273,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   compiler_w19_p1_stat_js0:
 
@@ -5402,7 +5408,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   unit_w19_p1_stat_js0:
 
@@ -5542,7 +5548,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_w19_re_p1_stat_FM-08:
 
@@ -5834,7 +5840,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   messenger_w19_re_p1_stat_FM-08:
 
@@ -5988,7 +5994,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   compiler_w19_re_p1_stat_FM-08:
 
@@ -6122,7 +6128,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   unit_w19_re_p1_stat_FM-08:
 
@@ -6262,7 +6268,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_w19_re_o1p1_sec:
 
@@ -6566,7 +6572,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   messenger_w19_re_o1p1_sec:
 
@@ -6720,7 +6726,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   compiler_w19_re_o1p1_sec:
 
@@ -6860,7 +6866,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   unit_w19_re_o1p1_sec:
 
@@ -7000,8 +7006,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
-
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   wireshark_w19-release:
 
@@ -7374,7 +7379,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   messenger_w19_re_j_ws_FM-1f:
 
@@ -7528,7 +7533,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   compiler_w19_re_j_ws_FM-1f:
 
@@ -7668,7 +7673,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   unit_w19_re_j_ws_FM-1f:
 
@@ -7815,7 +7820,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_w16_x86_i0:
 
@@ -8139,7 +8144,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   build_w16_x86_i0_j_FM-1f:
 
@@ -8353,7 +8358,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   # macOS 11.0
 
@@ -8591,7 +8596,7 @@ jobs:
 #      shell: bash
 #      run: |
 #        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-#        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+#        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
 #  macos-11_0_defaults_java_no-bit_build:
 
@@ -8786,7 +8791,7 @@ jobs:
 #      shell: bash
 #      run: |
 #        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-#        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+#        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   # macOS 10.15
 
@@ -9043,7 +9048,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_m10_i0_j_FM-1f:
 
@@ -9326,4 +9331,4 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"

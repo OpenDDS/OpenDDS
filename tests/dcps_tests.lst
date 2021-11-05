@@ -231,6 +231,9 @@ tests/DCPS/UnionTopic/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWN
 tests/DCPS/RecorderReplayer/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/RecorderReplayer/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS
 
+tests/DCPS/RecorderLogging/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
+tests/DCPS/RecorderLogging/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS
+
 ##tests/DCPS/BidirMessenger/run_test.pl: !DCPS_MIN
 ##tests/DCPS/BidirMessenger/run_test.pl udp: !DCPS_MIN
 ##tests/DCPS/BidirMessenger/run_test.pl multicast: !DCPS_MIN !NO_MCAST
@@ -248,6 +251,7 @@ tests/DCPS/LivelinessTimeout/run_test.pl: !DCPS_MIN
 tests/DCPS/LivelinessTimeout/run_test.pl rtps_disc: !DCPS_MIN RTPS
 tests/DCPS/UnitTests/CompleteToMinimalTypeObject/run_test.pl: !DCPS_MIN
 tests/DCPS/UnitTests/CompleteToDynamicType/run_test.pl: !DCPS_MIN
+tests/DCPS/UnitTests/DynamicData/run_test.pl: !DCPS_MIN
 tests/DCPS/BitDataReader/run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS
 
 tests/unit-tests/run_test.pl: !DCPS_MIN !NO_UNIT_TESTS
@@ -445,6 +449,7 @@ tests/FACE/Compiler/idl_test3_main/run_test.pl: !DCPS_MIN !WCHAR !NO_BUILT_IN_TO
 tests/FACE/Compiler/idl_test_fixed/run_test.pl: !DCPS_MIN !WCHAR !NO_BUILT_IN_TOPICS
 
 tests/DCPS/XTypes/run_test.pl: !DCPS_MIN
+tests/DCPS/XTypes/run_test.pl --tcp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 
 # Test for unregister_type method added as a type support extension (assuming no requirement when performing minimal test)
 tests/DCPS/UnregisterType/run_test.pl: !DCPS_MIN

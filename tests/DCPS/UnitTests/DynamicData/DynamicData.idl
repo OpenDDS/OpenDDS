@@ -1,21 +1,39 @@
+#include <tao/LongSeq.pidl>
+#include <tao/ULongSeq.pidl>
+#include <tao/Int8Seq.pidl>
+#include <tao/UInt8Seq.pidl>
+#include <tao/ShortSeq.pidl>
+#include <tao/UShortSeq.pidl>
+#include <tao/LongLongSeq.pidl>
+#include <tao/ULongLongSeq.pidl>
+#include <tao/FloatSeq.pidl>
+#include <tao/DoubleSeq.pidl>
+#include <tao/LongDoubleSeq.pidl>
+#include <tao/CharSeq.pidl>
+#include <tao/WCharSeq.pidl>
+#include <tao/OctetSeq.pidl>
+#include <tao/BooleanSeq.pidl>
+#include <tao/StringSeq.pidl>
+#include <tao/WStringSeq.pidl>
+
 enum SomeEnum {
-  INT32,
-  UINT32,
-  INT8,
-  UINT8,
-  INT16,
-  UINT16,
-  INT64,
-  UINT64,
-  FLOAT32,
-  FLOAT64,
-  FLOAT128,
-  CHAR8,
-  CHAR16,
-  BYTE,
-  BOOL,
-  STRING8,
-  STRING16
+  E_INT32, // 0
+  E_UINT32, // 1
+  E_INT8, // 2
+  E_UINT8, // 3
+  E_INT16, // 4
+  E_UINT16, // 5
+  E_INT64, // 6
+  E_UINT64, // 7
+  E_FLOAT32, // 8
+  E_FLOAT64, // 9
+  E_FLOAT128, // 10
+  E_CHAR8, // 11
+  E_CHAR16, // 12
+  E_BYTE, // 13
+  E_BOOL, // 14
+  E_STRING8, // 15
+  E_STRING16 // 16
 };
 
 typedef sequence<SomeEnum> SomeEnumSeq;
@@ -37,6 +55,11 @@ typedef sequence<boolean> BoolSeq;
 typedef sequence<string> StringSeq;
 typedef sequence<wstring> WStringSeq;
 
+@final
+struct NestedFinalStruct {
+  long l;
+};
+
 // Reading single value from struct.
 @mutable
 struct SingleValueStruct {
@@ -56,8 +79,9 @@ struct SingleValueStruct {
   @id(13) wchar char_16;
   @id(14) octet byte;
   @id(15) boolean bool;
-  @id(16) string str;
-  @id(17) wstring wstr;
+  @id(16) NestedFinalStruct nested_struct;
+  @id(17) string str;
+  @id(18) wstring wstr;
 };
 
 @final
@@ -85,39 +109,39 @@ struct SingleValueStructFinal {
 // Reading single value from union.
 @mutable
 union SingleValueUnion switch (SomeEnum) {
-case INT32:
+case E_INT32:
   @id(1) long int_32;
-case UINT32:
+case E_UINT32:
   @id(2) unsigned long uint_32;
-case INT8:
+case E_INT8:
   @id(3) int8 int_8;
-case UINT8:
+case E_UINT8:
   @id(4) uint8 uint_8;
-case INT16:
+case E_INT16:
   @id(5) short int_16;
-case UINT16:
+case E_UINT16:
   @id(6) unsigned short uint_16;
-case INT64:
+case E_INT64:
   @id(7) long long int_64;
-case UINT64:
+case E_UINT64:
   @id(8) unsigned long long uint_64;
-case FLOAT32:
+case E_FLOAT32:
   @id(9) float float_32;
-case FLOAT64:
+case E_FLOAT64:
   @id(10) double float_64;
-case FLOAT128:
+case E_FLOAT128:
   @id(11) long double float_128;
-case CHAR8:
+case E_CHAR8:
   @id(12) char char_8;
-case CHAR16:
+case E_CHAR16:
   @id(13) wchar char_16;
-case BYTE:
+case E_BYTE:
   @id(14) octet byte_;
-case BOOL:
+case E_BOOL:
   @id(15) boolean bool_;
-case STRING8:
+case E_STRING8:
   @id(16) string str;
-case STRING16:
+case E_STRING16:
   @id(17) wstring wstr;
 default:
   @id(18) SomeEnum my_enum;
@@ -163,7 +187,8 @@ default:
   @id(18) SomeEnum my_enum;
 };
 
-// Reading single value from array.
+/*
+// TODO: Reading single value from array.
 @mutable
 struct ArrayStruct {
   long int_32a[2];
@@ -184,70 +209,83 @@ struct ArrayStruct {
   string str_a[2];
   wstring wstr_a[2];
 };
+*/
 
 // Reading single value from sequence and reading sequence from struct.
 @mutable
 struct SequenceStruct {
-  SomeEnumSeq my_enums;
-  Int32Seq int_32s;
-  UInt32Seq uint_32s;
-  Int8Seq int_8s;
-  UInt8Seq uint_8s;
-  Int16Seq int_16s;
-  UInt16Seq uint_16s;
-  Int64Seq int_64s;
-  UInt64Seq uint_64s;
-  Float32Seq float_32s;
-  Float64Seq float_64s;
-  Float128Seq float_128s;
-  Char8Seq char_8s;
-  Char16Seq char_16s;
-  ByteSeq byte_s;
-  BoolSeq bool_s;
-  StringSeq str_s;
-  WStringSeq wstr_s;
+  @id(0) SomeEnumSeq my_enums;
+  @id(1) Int32Seq int_32s;
+  @id(2) UInt32Seq uint_32s;
+  @id(3) Int8Seq int_8s;
+  @id(4) UInt8Seq uint_8s;
+  @id(5) Int16Seq int_16s;
+  @id(6) UInt16Seq uint_16s;
+  @id(7) Int64Seq int_64s;
+  @id(8) UInt64Seq uint_64s;
+  @id(9) Float32Seq float_32s;
+  @id(10) Float64Seq float_64s;
+  @id(11) Float128Seq float_128s;
+  @id(12) Char8Seq char_8s;
+  @id(13) Char16Seq char_16s;
+  @id(14) ByteSeq byte_s;
+  @id(15) BoolSeq bool_s;
+  @id(16) StringSeq str_s;
+  @id(17) WStringSeq wstr_s;
 };
 
-// Reading sequence from union.
+// Test skipping nested struct in a non-mutable type.
+@appendable
+struct AppendableStruct {
+  char c;
+  NestedFinalStruct nested_struct1;
+  short s;
+  NestedFinalStruct nested_struct2;
+  int8 i;
+  long l2;
+};
+
+/*
+// TODO: Reading sequence from union.
 @mutable
 union SequenceUnion switch (SomeEnum) {
-case INT32:
+case E_INT32:
   Int32Seq int_32s;
-case UINT32:
+case E_UINT32:
   UInt32Seq uint_32s;
-case INT8:
+case E_INT8:
   Int8Seq int_8s;
-case UINT8:
+case E_UINT8:
   UInt8Seq uint_8s;
-case INT16:
+case E_INT16:
   Int16Seq int_16s;
-case UINT16:
+case E_UINT16:
   UInt16Seq uint_16s;
-case INT64:
+case E_INT64:
   Int64Seq int_64s;
-case UINT64:
+case E_UINT64:
   UInt64Seq uint_64s;
-case FLOAT32:
+case E_FLOAT32:
   Float32Seq float_32s;
-case FLOAT64:
+case E_FLOAT64:
   Float64Seq float_64s;
-case FLOAT128:
+case E_FLOAT128:
   Float128Seq float_128s;
-case CHAR8:
+case E_CHAR8:
   Char8Seq char_8s;
-case CHAR16:
+case E_CHAR16:
   Char16Seq char_16s;
-case BYTE:
+case E_BYTE:
   ByteSeq byte_s;
-case BOOL:
+case E_BOOL:
   BoolSeq bool_s;
-case STRING8:
+case E_STRING8:
   StringSeq str_s;
-case STRING16:
+case E_STRING16:
   WStringSeq wstr_s;
 };
 
-// Reading nested sequence from another sequence.
+// TODO: Reading nested sequence from another sequence.
 @mutable
 struct SequenceInSequenceStruct {
   sequence<Int32Seq> int_32ss;
@@ -290,3 +328,4 @@ struct SequenceInArrayStruct {
   StringSeq str_as[2];
   WStringSeq wstr_as[2];
 };
+*/

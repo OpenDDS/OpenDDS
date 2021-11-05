@@ -364,9 +364,9 @@ OpenDDS::DCPS::TcpDataLink::handle_send_request_ack(TransportQueueElement* eleme
 void
 OpenDDS::DCPS::TcpDataLink::ack_received(const ReceivedDataSample& sample)
 {
-  SequenceNumber sequence = sample.header_.sequence_;
+  const SequenceNumber sequence = sample.header_.sequence_;
 
-  if (sample.header_.sequence_ == -1) {
+  if (sequence == -1) {
     return;
   }
 
@@ -531,12 +531,14 @@ OpenDDS::DCPS::TcpDataLink::drop_pending_request_acks()
 OpenDDS::DCPS::TcpSendStrategy_rch
 OpenDDS::DCPS::TcpDataLink::send_strategy()
 {
+  GuardType guard(strategy_lock_);
   return static_rchandle_cast<OpenDDS::DCPS::TcpSendStrategy>(send_strategy_);
 }
 
 OpenDDS::DCPS::TcpReceiveStrategy_rch
 OpenDDS::DCPS::TcpDataLink::receive_strategy()
 {
+  GuardType guard(strategy_lock_);
   return static_rchandle_cast<OpenDDS::DCPS::TcpReceiveStrategy>(receive_strategy_);
 }
 int

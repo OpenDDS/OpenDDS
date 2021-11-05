@@ -23,10 +23,10 @@ $test->{dcps_transport_debug_level} = 1;
 $test->{add_transport_config} = 0;
 
 if ($test->flag('ipv6')) {
-    $test->process("server", "$DDS_ROOT/bin/RtpsRelay", "-DCPSConfigFile relay_ipv6.ini -ApplicationDomain 42 -VerticalAddress [::1]:4444 -HorizontalAddress [::1]:11444");
+    $test->process("server", "$DDS_ROOT/bin/RtpsRelay", "-Id relay -DCPSConfigFile relay_ipv6.ini -ApplicationDomain 42 -VerticalAddress [::1]:4444 -HorizontalAddress [::1]:11444");
     $test->process("client", "StunClient", "-ipv6 1");
 } else {
-    $test->process("server", "$DDS_ROOT/bin/RtpsRelay", "-DCPSConfigFile relay.ini -ApplicationDomain 42 -VerticalAddress 127.0.0.1:4444 -HorizontalAddress 127.0.0.1:11444");
+    $test->process("server", "$DDS_ROOT/bin/RtpsRelay", "-Id relay -DCPSConfigFile relay.ini -ApplicationDomain 42 -VerticalAddress 127.0.0.1:4444 -HorizontalAddress 127.0.0.1:11444");
     $test->process("client", "StunClient");
 }
 

@@ -777,7 +777,7 @@ TransportSendStrategy::clear(SendMode new_mode, SendMode old_mode)
     if (old_mode != MODE_NOT_SET && mode_ != old_mode)
       return;
 
-    if (header_.length_ > 0) {
+    if (header_.length_ > 0 && pkt_chain_) {
       // Clear the messages in the pkt_chain_ that is partially sent.
       // We just reuse these functions for normal partial send except actual sending.
       int num_bytes_left = static_cast<int>(pkt_chain_->total_length());

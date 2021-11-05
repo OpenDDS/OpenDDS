@@ -14,10 +14,15 @@
 #include "RawDataSample.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 
+#include "XTypes/TypeObject.h"
+#include "XTypes/DynamicType.h"
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
+
+typedef OPENDDS_MAP(PublicationId, XTypes::DynamicType_rch) DynamicTypeByPubId;
 
 class Recorder;
 
@@ -39,14 +44,14 @@ public:
    *
    */
   virtual void on_sample_data_received(Recorder*            recorder,
-                                       const RawDataSample& sample)=0;
+                                       const RawDataSample& sample) = 0;
 
   /**
    *  Callback for when the Recorder is associated with a DataWriter.
    *  @param recorder Recorder that received the association
    */
   virtual void on_recorder_matched(Recorder*                              recorder,
-                                   const DDS::SubscriptionMatchedStatus & status)=0;
+                                   const DDS::SubscriptionMatchedStatus & status) = 0;
 };
 
 typedef RcHandle<RecorderListener> RecorderListener_rch;
@@ -98,6 +103,7 @@ public:
    *
    */
   virtual RecorderListener_rch get_listener() = 0;
+  DynamicTypeByPubId dt_map_;
 };
 
 }

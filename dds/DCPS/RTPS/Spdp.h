@@ -21,7 +21,6 @@
 #include <dds/DCPS/MultiTask.h>
 #include <dds/DCPS/JobQueue.h>
 #include <dds/DCPS/NetworkConfigMonitor.h>
-#include <dds/DCPS/FibonacciSequence.h>
 #include <dds/DCPS/BuiltInTopicDataReaderImpls.h>
 #include <dds/DCPS/security/framework/SecurityConfig_rch.h>
 #ifdef OPENDDS_SECURITY
@@ -72,145 +71,6 @@ class OpenDDS_Rtps_Export Spdp
 #endif
 {
 public:
-  struct DiscoveredParticipant {
-
-    DiscoveredParticipant()
-    : location_ih_(DDS::HANDLE_NIL)
-    , bit_ih_(DDS::HANDLE_NIL)
-    , seq_reset_count_(0)
-#ifdef OPENDDS_SECURITY
-    , have_spdp_info_(false)
-    , have_sedp_info_(false)
-    , have_auth_req_msg_(false)
-    , have_handshake_msg_(false)
-    , handshake_resend_falloff_(TimeDuration::zero_value)
-    , auth_state_(AUTH_STATE_HANDSHAKE)
-    , handshake_state_(HANDSHAKE_STATE_BEGIN_HANDSHAKE_REQUEST)
-    , is_requester_(false)
-    , auth_req_sequence_number_(0)
-    , handshake_sequence_number_(0)
-    , identity_handle_(DDS::HANDLE_NIL)
-    , handshake_handle_(DDS::HANDLE_NIL)
-    , permissions_handle_(DDS::HANDLE_NIL)
-    , extended_builtin_endpoints_(0)
-#endif
-    {
-#ifdef OPENDDS_SECURITY
-      security_info_.participant_security_attributes = 0;
-      security_info_.plugin_participant_security_attributes = 0;
-#endif
-    }
-
-    DiscoveredParticipant(
-      const ParticipantData_t& p,
-      const SequenceNumber& seq,
-      const TimeDuration& resend_period)
-    : pdata_(p)
-    , location_ih_(DDS::HANDLE_NIL)
-    , bit_ih_(DDS::HANDLE_NIL)
-    , last_seq_(seq)
-    , seq_reset_count_(0)
-#ifdef OPENDDS_SECURITY
-    , have_spdp_info_(false)
-    , have_sedp_info_(false)
-    , have_auth_req_msg_(false)
-    , have_handshake_msg_(false)
-    , handshake_resend_falloff_(resend_period)
-    , auth_state_(AUTH_STATE_HANDSHAKE)
-    , handshake_state_(HANDSHAKE_STATE_BEGIN_HANDSHAKE_REQUEST)
-    , is_requester_(false)
-    , auth_req_sequence_number_(0)
-    , handshake_sequence_number_(0)
-    , identity_handle_(DDS::HANDLE_NIL)
-    , handshake_handle_(DDS::HANDLE_NIL)
-    , permissions_handle_(DDS::HANDLE_NIL)
-    , extended_builtin_endpoints_(0)
-#endif
-    {
-      const GUID_t guid = DCPS::make_part_guid(p.participantProxy.guidPrefix);
-      assign(location_data_.guid, guid);
-      location_data_.location = 0;
-      location_data_.change_mask = 0;
-      location_data_.local_timestamp.sec = 0;
-      location_data_.local_timestamp.nanosec = 0;
-      location_data_.ice_timestamp.sec = 0;
-      location_data_.ice_timestamp.nanosec = 0;
-      location_data_.relay_timestamp.sec = 0;
-      location_data_.relay_timestamp.nanosec = 0;
-      location_data_.local6_timestamp.sec = 0;
-      location_data_.local6_timestamp.nanosec = 0;
-      location_data_.ice6_timestamp.sec = 0;
-      location_data_.ice6_timestamp.nanosec = 0;
-      location_data_.relay6_timestamp.sec = 0;
-      location_data_.relay6_timestamp.nanosec = 0;
-
-#ifdef OPENDDS_SECURITY
-      security_info_.participant_security_attributes = 0;
-      security_info_.plugin_participant_security_attributes = 0;
-#else
-      ACE_UNUSED_ARG(resend_period);
-#endif
-    }
-
-    ParticipantData_t pdata_;
-
-    struct LocationUpdate {
-      DCPS::ParticipantLocation mask_;
-      ACE_INET_Addr from_;
-      SystemTimePoint timestamp_;
-      LocationUpdate() {}
-      LocationUpdate(DCPS::ParticipantLocation mask,
-                     const ACE_INET_Addr& from,
-                     const SystemTimePoint& timestamp)
-        : mask_(mask), from_(from), timestamp_(timestamp) {}
-    };
-    typedef OPENDDS_VECTOR(LocationUpdate) LocationUpdateList;
-    LocationUpdateList location_updates_;
-    DCPS::ParticipantLocationBuiltinTopicData location_data_;
-    DDS::InstanceHandle_t location_ih_;
-
-    ACE_INET_Addr local_address_;
-    MonotonicTimePoint discovered_at_;
-    MonotonicTimePoint lease_expiration_;
-    DDS::InstanceHandle_t bit_ih_;
-    SequenceNumber last_seq_;
-    ACE_UINT16 seq_reset_count_;
-#ifdef OPENDDS_SECURITY
-    bool have_spdp_info_;
-    ICE::AgentInfo spdp_info_;
-    bool have_sedp_info_;
-    ICE::AgentInfo sedp_info_;
-    bool have_auth_req_msg_;
-    DDS::Security::ParticipantStatelessMessage auth_req_msg_;
-    bool have_handshake_msg_;
-    DDS::Security::ParticipantStatelessMessage handshake_msg_;
-    DCPS::FibonacciSequence<TimeDuration> handshake_resend_falloff_;
-    MonotonicTimePoint stateless_msg_deadline_;
-
-    MonotonicTimePoint handshake_deadline_;
-    AuthState auth_state_;
-    HandshakeState handshake_state_;
-    bool is_requester_;
-    CORBA::LongLong auth_req_sequence_number_;
-    CORBA::LongLong handshake_sequence_number_;
-
-    DDS::Security::IdentityToken identity_token_;
-    DDS::Security::PermissionsToken permissions_token_;
-    DDS::Security::PropertyQosPolicy property_qos_;
-    DDS::Security::ParticipantSecurityInfo security_info_;
-    DDS::Security::IdentityStatusToken identity_status_token_;
-    DDS::Security::IdentityHandle identity_handle_;
-    DDS::Security::HandshakeHandle handshake_handle_;
-    DDS::Security::AuthRequestMessageToken local_auth_request_token_;
-    DDS::Security::AuthRequestMessageToken remote_auth_request_token_;
-    DDS::Security::AuthenticatedPeerCredentialToken authenticated_peer_credential_token_;
-    DDS::Security::SharedSecretHandle_var shared_secret_handle_;
-    DDS::Security::PermissionsHandle permissions_handle_;
-    DDS::Security::ParticipantCryptoTokenSeq crypto_tokens_;
-    DDS::Security::ExtendedBuiltinEndpointSet_t extended_builtin_endpoints_;
-#endif
-  };
-
   typedef OPENDDS_MAP_CMP(GUID_t, DiscoveredParticipant,
                           GUID_tKeyLessThan) DiscoveredParticipantMap;
   typedef DiscoveredParticipantMap::iterator DiscoveredParticipantIter;
@@ -372,6 +232,8 @@ public:
 
   void ignore_domain_participant(const GUID_t& ignoreId);
 
+  void remove_domain_participant(const GUID_t& removeId);
+
   bool update_domain_participant_qos(const DDS::DomainParticipantQos& qos);
 
   DCPS::TopicStatus assert_topic(GUID_t& topicId, const char* topicName,
@@ -492,14 +354,14 @@ public:
 protected:
   Sedp& endpoint_manager() { return *sedp_; }
 
-  void remove_discovered_participant(DiscoveredParticipantIter& iter);
+  void remove_discovered_participant(const DiscoveredParticipantIter& iter);
 
-  void remove_discovered_participant_i(DiscoveredParticipantIter& iter);
+  void remove_discovered_participant_i(const DiscoveredParticipantIter& iter);
 
 #ifndef DDS_HAS_MINIMUM_BIT
   void enqueue_location_update_i(DiscoveredParticipantIter iter, DCPS::ParticipantLocation mask, const ACE_INET_Addr& from);
-  void process_location_updates_i(DiscoveredParticipantIter& iter, bool force_publish = false);
-  void publish_location_update_i(DiscoveredParticipantIter& iter);
+  void process_location_updates_i(const DiscoveredParticipantIter& iter, bool force_publish = false);
+  void publish_location_update_i(const DiscoveredParticipantIter& iter);
 #endif
 
   bool announce_domain_participant_qos();
@@ -570,6 +432,7 @@ private:
   mutable ACE_Thread_Mutex lock_;
   DDS::Subscriber_var bit_subscriber_;
   DDS::DomainParticipantQos qos_;
+  friend class Sedp;
   DiscoveredParticipantMap participants_;
   RtpsDiscovery* disco_;
   DCPS::RcHandle<RtpsDiscoveryConfig> config_;
@@ -582,7 +445,7 @@ private:
 
   void data_received(const DataSubmessage& data, const ParameterList& plist, const ACE_INET_Addr& from);
 
-  void match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& dp_iter);
+  void match_unauthenticated(const DiscoveredParticipantIter& dp_iter);
 
   /// Get this participant's BIT data. user_data may be omitting depending on
   /// security settings.
@@ -831,8 +694,6 @@ private:
 #else
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> shutdown_flag_; // Spdp shutting down
 #endif
-
-  void get_discovered_participant_ids(DCPS::RepoIdSet& results) const;
 
   BuiltinEndpointSet_t available_builtin_endpoints_;
   DCPS::RcHandle<Sedp> sedp_;
