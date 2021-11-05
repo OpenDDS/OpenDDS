@@ -18,7 +18,7 @@
 class TestWriter : public ::OpenDDS::DCPS::JsonValueWriter<>
 {
 public:
-  TestWriter () : elements_ (0) {};
+  TestWriter () : elements_ (0) {}
   virtual void write_int16_array(const ACE_CDR::Short*, size_t length)
   {
     elements_ += length;
@@ -34,7 +34,8 @@ public:
 class TestReader : public ::OpenDDS::DCPS::JsonValueReader<>
 {
 public:
-  TestReader (rapidjson::StringStream& input_stream) : ::OpenDDS::DCPS::JsonValueReader<>(input_stream), elements_ (0) {};
+  TestReader (rapidjson::StringStream& input_stream) : ::OpenDDS::DCPS::JsonValueReader<>(input_stream), elements_ (0) {}
+  
   virtual bool read_int16_array(ACE_CDR::Short* x, size_t length)
   {
     elements_ += length;
