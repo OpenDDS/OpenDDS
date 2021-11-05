@@ -38,6 +38,7 @@ namespace RtpsRelay {
     void stop(void);
 
   protected:
+    ACE_UINT64 to_usec(const struct timespec &ts);
     bool running_;
     ACE_Thread_Adapter *thr_func_;
 
@@ -50,7 +51,7 @@ namespace RtpsRelay {
     };
 
     struct Load_Summary {
-      ACE_Time_Value accum_[2];
+      ACE_UINT64 accum_[2];
       int last_state_;
       ACE_Time_Value recorded_;
     };
@@ -59,7 +60,7 @@ namespace RtpsRelay {
       ACE_Thread_Mutex *queue_lock_;
       std::string alias_;
       std::deque<struct Sample> samples_;
-      ACE_Time_Value last_[2];
+      struct timespec last_;
       std::deque<struct Load_Summary> summaries_;
     } *Thr_Desc;
 

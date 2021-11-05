@@ -271,10 +271,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   TheServiceParticipant->bit_autopurge_nowriter_samples_delay(one_minute);
   TheServiceParticipant->bit_autopurge_disposed_samples_delay(one_minute);
 
-  // Set up the relay participant.
   RtpsRelay::Thread_Monitor thread_mon(config.thread_monitor_period());
-  OpenDDS::DCPS::Thread_Monitor::installed_monitor_ = &thread_mon;
 
+  // Set up the relay participant.
   DDS::DomainParticipantQos participant_qos;
   factory->get_default_participant_qos(participant_qos);
   DDS::PropertySeq& relay_properties = participant_qos.property.value;
