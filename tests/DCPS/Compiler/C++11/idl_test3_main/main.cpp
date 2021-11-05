@@ -45,7 +45,7 @@ public:
 class TestReader : public ::OpenDDS::DCPS::JsonValueReader<>
 {
 public:
-  TestReader (rapidjson::StringStream& input_stream) : ::OpenDDS::DCPS::JsonValueReader<>(input_stream), elements_ (0) {};
+  TestReader (rapidjson::StringStream& input_stream) : ::OpenDDS::DCPS::JsonValueReader<>(input_stream), elements_ (0) {}
   virtual bool read_int16_array(ACE_CDR::Short* x, size_t length)
   {
     elements_ += length;
