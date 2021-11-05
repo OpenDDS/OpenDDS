@@ -767,6 +767,8 @@ public:
 
   bool peek(ACE_CDR::ULong& t);
 
+  // This is used by DynamicData and must have all reading-related members of
+  // of Serializer for DynamicData to work correctly.
   struct RdState {
     unsigned char align_rshift;
     size_t rpos;
