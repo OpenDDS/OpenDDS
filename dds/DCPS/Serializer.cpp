@@ -758,6 +758,10 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
 
 bool Serializer::write_parameter_id(const unsigned id, const size_t size, const bool must_understand)
 {
+  if (static_cast<ACE_CDR::ULong>(id) > MEMBER_ID_MAX) {
+    return false;
+  }
+
   const Encoding::XcdrVersion xcdr = encoding().xcdr_version();
   if (xcdr == Encoding::XCDR_VERSION_1) {
     if (!align_w(xcdr1_pid_alignment)) {
