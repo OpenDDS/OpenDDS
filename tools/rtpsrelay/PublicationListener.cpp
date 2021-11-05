@@ -1,6 +1,6 @@
 #include "PublicationListener.h"
 
-#include "lib/Utility.h"
+#include <dds/rtpsrelaylib/Utility.h>
 
 #include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/JsonValueWriter.h>

@@ -1,57 +1,54 @@
-/*
- */
-
 #ifndef DCPS_THRASHER_DATAREADERLISTENERIMPL_H
 #define DCPS_THRASHER_DATAREADERLISTENERIMPL_H
+
+#include "ProgressIndicator.h"
 
 #include <dds/DdsDcpsSubscriptionC.h>
 #include <dds/DCPS/LocalObject.h>
 #include <dds/DCPS/PoolAllocator.h>
-#include <dds/DCPS/TimeDuration.h>
 
-#include "ProgressIndicator.h"
-
+#ifdef ACE_HAS_CPP11
+#include <condition_variable>
+#include <mutex>
+#else
+#include <dds/DCPS/ConditionVariable.h>
+#endif
 #include <cstdlib>
 
-class DataReaderListenerImpl
-  : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
+class DataReaderListenerImpl : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
 {
 public:
-  DataReaderListenerImpl(size_t& received_samples,
-                         const ProgressIndicator& progress);
-
+  DataReaderListenerImpl(const std::size_t expected_samples, const char* progress_fmt);
   virtual ~DataReaderListenerImpl();
 
+  void wait_received() const;
+  int check_received(const size_t n_publishers) const;
   virtual void on_data_available(DDS::DataReader_ptr reader);
 
-  virtual void on_requested_deadline_missed(DDS::DataReader_ptr reader,
-    const DDS::RequestedDeadlineMissedStatus& status);
-
-  virtual void on_requested_incompatible_qos(DDS::DataReader_ptr reader,
-    const DDS::RequestedIncompatibleQosStatus& status);
-
-  virtual void on_liveliness_changed(DDS::DataReader_ptr reader,
-    const DDS::LivelinessChangedStatus& status);
-
-  virtual void on_subscription_matched(DDS::DataReader_ptr reader,
-    const DDS::SubscriptionMatchedStatus& status);
-
-  virtual void on_sample_rejected(DDS::DataReader_ptr reader,
-    const DDS::SampleRejectedStatus& status);
-
-  virtual void on_sample_lost(DDS::DataReader_ptr reader,
-    const DDS::SampleLostStatus& status);
-
-  bool wait_received(const OpenDDS::DCPS::TimeDuration& duration, size_t target);
-
-  OPENDDS_MAP(size_t, OPENDDS_SET(size_t)) task_sample_set_map;
+  virtual void on_requested_deadline_missed(DDS::DataReader_ptr, const DDS::RequestedDeadlineMissedStatus&){}
+  virtual void on_requested_incompatible_qos(DDS::DataReader_ptr, const DDS::RequestedIncompatibleQosStatus&){}
+  virtual void on_liveliness_changed(DDS::DataReader_ptr, const DDS::LivelinessChangedStatus&){}
+  virtual void on_subscription_matched(DDS::DataReader_ptr, const DDS::SubscriptionMatchedStatus&){}
+  virtual void on_sample_rejected(DDS::DataReader_ptr, const DDS::SampleRejectedStatus&){}
+  virtual void on_sample_lost(DDS::DataReader_ptr, const DDS::SampleLostStatus&){}
 
 private:
-
-  mutable ACE_Thread_Mutex mutex_;
-  ACE_Condition<ACE_Thread_Mutex> condition_;
-
-  size_t& received_samples_;
+  typedef OPENDDS_MAP(size_t, OPENDDS_SET(size_t)) TaskSamplesMap;
+  bool received_all(const size_t x, const size_t y);
+#ifdef ACE_HAS_CPP11
+  typedef std::mutex Mutex;
+  typedef std::condition_variable Condition;
+  typedef std::unique_lock<Mutex> Lock;
+#else
+  typedef ACE_Thread_Mutex Mutex;
+  typedef OpenDDS::DCPS::ConditionVariable<Mutex> Condition;
+  typedef ACE_Guard<Mutex> Lock;
+#endif
+  mutable Mutex mutex_;
+  mutable Condition condition_;
+  const size_t expected_samples_;
+  size_t received_samples_;
+  TaskSamplesMap task_samples_map_;
   ProgressIndicator progress_;
 };
 

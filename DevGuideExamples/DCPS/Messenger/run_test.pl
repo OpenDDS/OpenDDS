@@ -20,11 +20,17 @@ my $rtps = 0;
 my $help = 0;
 
 my $help_message = "usage: run_test.pl [-h|--help] [--rtps]\n";
-if (not GetOptions(
+my $invalid_args = not GetOptions(
   "rtps" => \$rtps,
-  "help|h" => \$help
-)) {
-  print STDERR ("Invalid Command Line Argument(s)\n$help_message");
+  "help|h" => \$help,
+);
+if (scalar(grep {length($_)} @ARGV)) {
+  print STDERR ("ERROR: Invalid positional argument(s) passed: ", join(' ', @ARGV), "\n");
+  $invalid_args = 1;
+}
+if ($invalid_args) {
+  print STDERR ("ERROR: Invalid Command Line Argument(s)\n$help_message");
+  exit 1;
 }
 if ($help) {
   print $help_message;
@@ -34,15 +40,14 @@ if ($help) {
 unlink "subscriber.log";
 unlink "publisher.log";
 
-my $common_opts = "-ORBDebugLevel 10 -DCPSDebugLevel 10";
+my $common_opts = "-ORBDebugLevel 10 -DCPSDebugLevel 10 -ORBVerboseLogging 1 -DCPSTransportDebugLevel 6 ";
 
 if ($rtps) {
   $common_opts .= " -DCPSConfigFile rtps.ini";
 }
 
 my $pub_opts = "$common_opts -ORBLogFile publisher.log";
-my $sub_opts = "$common_opts -DCPSTransportDebugLevel 6 " .
-               "-ORBLogFile subscriber.log";
+my $sub_opts = "$common_opts -ORBLogFile subscriber.log";
 
 my $DCPSREPO;
 my $dcpsrepo_ior = "repo.ior";

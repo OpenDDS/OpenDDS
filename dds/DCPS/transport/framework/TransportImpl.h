@@ -301,7 +301,7 @@ public:
 protected:
   /// Id of the last link established.
   std::size_t last_link_;
-  bool is_shut_down_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> is_shut_down_;
 };
 
 } // namespace DCPS

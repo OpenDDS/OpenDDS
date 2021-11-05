@@ -36,11 +36,11 @@ public:
   unsigned char ttl_;
   OPENDDS_STRING multicast_interface_;
 
+  size_t anticipated_fragments_;
   size_t max_message_size_;
   size_t nak_depth_;
   TimeDuration nak_response_delay_;
   TimeDuration heartbeat_period_;
-  TimeDuration heartbeat_response_delay_;
   TimeDuration receive_address_duration_;
   bool responsive_mode_;
   TimeDuration send_delay_;

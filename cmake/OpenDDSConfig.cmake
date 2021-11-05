@@ -77,8 +77,8 @@ endif()
 include(${CMAKE_CURRENT_LIST_DIR}/init.cmake)
 
 set(_dds_bin_hints ${OPENDDS_BIN_DIR})
-set(_tao_bin_hints ${ACE_BIN_DIR})
-set(_ace_bin_hints ${TAO_BIN_DIR})
+set(_ace_bin_hints ${ACE_BIN_DIR})
+set(_tao_bin_hints ${TAO_BIN_DIR})
 
 find_program(PERL perl)
 
@@ -103,11 +103,7 @@ find_program(ACE_GPERF
     ${_ace_bin_hints}
 )
 
-# CMake 3.3 tries to compile a C file to check for pthread.h, but can't do it
-# if C isn't enabled.
-if(${CMAKE_VERSION} VERSION_LESS "3.4.0")
-  enable_language(C)
-endif()
+enable_language(C)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 

@@ -3,8 +3,8 @@
 
 #include "Config.h"
 
-#include "lib/RelayTypeSupportImpl.h"
-#include "lib/Utility.h"
+#include <dds/rtpsrelaylib/RelayTypeSupportImpl.h>
+#include <dds/rtpsrelaylib/Utility.h>
 
 // after RelayTypeSupportImpl.h so that set_default is available
 #include "CommonIoStatsReportHelper.h"

@@ -403,7 +403,9 @@ namespace XTypes {
     SBound bound;
     External<TypeIdentifier> element_identifier;
 
-    PlainSequenceSElemDefn() {}
+    PlainSequenceSElemDefn()
+      : bound(INVALID_SBOUND)
+    {}
 
     PlainSequenceSElemDefn(const PlainCollectionHeader& a_header,
                            const SBound& a_bound,
@@ -421,7 +423,9 @@ namespace XTypes {
     LBound bound;
     External<TypeIdentifier> element_identifier;
 
-    PlainSequenceLElemDefn() {}
+    PlainSequenceLElemDefn()
+      : bound(INVALID_LBOUND)
+    {}
 
     PlainSequenceLElemDefn(const PlainCollectionHeader& a_header,
                            const LBound& a_bound,
@@ -478,7 +482,8 @@ namespace XTypes {
     External<TypeIdentifier> key_identifier;
 
     PlainMapSTypeDefn()
-      : key_flags(0)
+      : bound(INVALID_SBOUND)
+      , key_flags(0)
     {}
 
     PlainMapSTypeDefn(const PlainCollectionHeader& a_header,
@@ -503,7 +508,10 @@ namespace XTypes {
     CollectionElementFlag key_flags;
     External<TypeIdentifier> key_identifier;
 
-    PlainMapLTypeDefn() {}
+    PlainMapLTypeDefn()
+      : bound(INVALID_LBOUND)
+      , key_flags(0)
+    {}
 
     PlainMapLTypeDefn(const PlainCollectionHeader& a_header,
                       const LBound& a_bound,
@@ -526,7 +534,10 @@ namespace XTypes {
     ACE_CDR::Long scc_length; // StronglyConnectedComponent.length
     ACE_CDR::Long scc_index; // identify type in Strongly Connected Comp.
 
-    StronglyConnectedComponentId() {}
+    StronglyConnectedComponentId()
+      : scc_length(0)
+      , scc_index(0)
+    {}
 
     StronglyConnectedComponentId(const TypeObjectHashId& a_sc_component_id,
                                  const ACE_CDR::Long& a_scc_length,
@@ -921,7 +932,8 @@ namespace XTypes {
     TypeIdentifier member_type_id;
 
     CommonStructMember()
-      : member_flags(0)
+      : member_id(0)
+      , member_flags(0)
     {}
     CommonStructMember (const MemberId& a_member_id,
                         const StructMemberFlag& a_member_flags,
@@ -1027,7 +1039,9 @@ namespace XTypes {
     MinimalStructHeader header;
     MinimalStructMemberSeq member_seq;
 
-    MinimalStructType() {}
+    MinimalStructType()
+      : struct_flags(0)
+    {}
 
     MinimalStructType(const StructTypeFlag& a_struct_flags,
                       const MinimalStructHeader& a_header,
@@ -1050,7 +1064,10 @@ namespace XTypes {
     TypeIdentifier type_id;
     UnionCaseLabelSeq label_seq;
 
-    CommonUnionMember() {}
+    CommonUnionMember()
+      : member_id(0)
+      , member_flags(0)
+    {}
 
     CommonUnionMember(const MemberId& a_member_id,
                       const UnionMemberFlag& a_member_flags,
@@ -1284,7 +1301,10 @@ namespace XTypes {
     CollectionElementFlag element_flags;
     TypeIdentifier type;
 
-    CommonCollectionElement() {}
+    CommonCollectionElement()
+      : element_flags(0)
+    {}
+
     CommonCollectionElement(CollectionElementFlag a_element_flags,
                             const TypeIdentifier& a_type)
       : element_flags(a_element_flags)
@@ -1307,7 +1327,10 @@ namespace XTypes {
   struct CommonCollectionHeader {
     LBound bound;
 
-    CommonCollectionHeader() {}
+    CommonCollectionHeader()
+      : bound(0)
+    {}
+
     explicit CommonCollectionHeader(LBound a_bound) : bound(a_bound) {}
   };
 
@@ -1328,6 +1351,12 @@ namespace XTypes {
     CollectionTypeFlag collection_flag;
     CompleteCollectionHeader header;
     CompleteCollectionElement element;
+
+    CompleteSequenceType()
+      : collection_flag(0)
+      , header()
+      , element()
+    {}
   };
 
   struct MinimalSequenceType {
@@ -1335,7 +1364,12 @@ namespace XTypes {
     MinimalCollectionHeader header;
     MinimalCollectionElement element;
 
-    MinimalSequenceType() {}
+    MinimalSequenceType()
+      : collection_flag(0)
+      , header()
+      , element()
+    {}
+
     MinimalSequenceType(CollectionTypeFlag a_collection_flag,
                         const MinimalCollectionHeader& a_header,
                         const MinimalCollectionElement& a_element)
@@ -1362,6 +1396,7 @@ namespace XTypes {
     CommonArrayHeader common;
 
     MinimalArrayHeader() {}
+
     MinimalArrayHeader(const CommonArrayHeader& a_common)
       : common(a_common)
     {}
@@ -1371,6 +1406,13 @@ namespace XTypes {
     CollectionTypeFlag collection_flag;
     CompleteArrayHeader header;
     CompleteCollectionElement element;
+
+    CompleteArrayType()
+      : collection_flag(0)
+      , header()
+      , element()
+    {}
+
   };
 
   struct MinimalArrayType  {
@@ -1378,7 +1420,12 @@ namespace XTypes {
     MinimalArrayHeader header;
     MinimalCollectionElement element;
 
-    MinimalArrayType() {}
+    MinimalArrayType()
+      : collection_flag(0)
+      , header()
+      , element()
+    {}
+
     MinimalArrayType(CollectionTypeFlag a_collection_flag,
                      const MinimalArrayHeader& a_header,
                      const MinimalCollectionElement& a_element)
@@ -1412,7 +1459,8 @@ namespace XTypes {
     EnumeratedLiteralFlag flags;
 
     CommonEnumeratedLiteral()
-      : flags(0)
+      : value(0)
+      , flags(0)
     {}
 
     CommonEnumeratedLiteral(const ACE_CDR::Long& a_value,
@@ -1453,7 +1501,9 @@ namespace XTypes {
   struct CommonEnumeratedHeader {
     BitBound bit_bound;
 
-    CommonEnumeratedHeader() {}
+    CommonEnumeratedHeader()
+      : bit_bound(0)
+    {}
 
     explicit CommonEnumeratedHeader(const BitBound& a_bit_bound)
       : bit_bound(a_bit_bound)
@@ -1685,7 +1735,9 @@ namespace XTypes {
     // ===================  Future extensibility  ============
     MinimalExtendedType extended_type;
 
-    MinimalTypeObject() {}
+    MinimalTypeObject()
+      : kind(TK_NONE)
+    {}
 
     explicit MinimalTypeObject(const MinimalAliasType& alias)
       : kind(TK_ALIAS)
@@ -1751,7 +1803,9 @@ namespace XTypes {
     CompleteTypeObject complete;
     MinimalTypeObject minimal;
 
-    TypeObject() {}
+    TypeObject()
+      : kind(0)
+    {}
 
     explicit TypeObject(const CompleteTypeObject& a_complete)
       : kind(EK_COMPLETE)
@@ -1820,18 +1874,20 @@ namespace XTypes {
     TypeIdentifierWithDependencies minimal;
     TypeIdentifierWithDependencies complete;
   };
-  typedef Sequence<TypeInformation> TypeInformationSeq;
 
   OpenDDS_Dcps_Export
-  TypeIdentifier makeTypeIdentifier(const TypeObject& type_object);
+  TypeIdentifier makeTypeIdentifier(const TypeObject& type_object,
+                                    const DCPS::Encoding* encoding_option = 0);
 
   template <typename T>
-  void serialize_type_info(const TypeInformation& type_info, T& seq)
+  void serialize_type_info(const TypeInformation& type_info, T& seq,
+                           const DCPS::Encoding* encoding_option = 0)
   {
-    const size_t sz = DCPS::serialized_size(XTypes::get_typeobject_encoding(), type_info);
+    const DCPS::Encoding& encoding = encoding_option ? *encoding_option : get_typeobject_encoding();
+    const size_t sz = DCPS::serialized_size(encoding, type_info);
     seq.length(static_cast<unsigned>(sz));
     DCPS::MessageBlockHelper<T> helper(seq);
-    DCPS::Serializer serializer(helper, XTypes::get_typeobject_encoding());
+    DCPS::Serializer serializer(helper, encoding);
     if (!(serializer << type_info)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: serialize_type_info ")
                  ACE_TEXT("serialization of type information failed.\n")));
@@ -1839,14 +1895,16 @@ namespace XTypes {
   }
 
   template <typename T>
-  void deserialize_type_info(TypeInformation& type_info, const T& seq)
+  bool deserialize_type_info(TypeInformation& type_info, const T& seq)
   {
     DCPS::MessageBlockHelper<T> helper(seq);
     DCPS::Serializer serializer(helper, XTypes::get_typeobject_encoding());
     if (!(serializer >> type_info)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: deserialize_type_info ")
                  ACE_TEXT("deserialization of type information failed.\n")));
+      return false;
     }
+    return true;
   }
 
   OpenDDS_Dcps_Export
@@ -1921,10 +1979,15 @@ bool operator>>(Serializer& strm, XTypes::Optional<T>& opt)
 }
 
 
+// XCDR2 encoding rule 12 - Sequences not "of primitive element type"
+
 template<typename T>
 void serialized_size(const Encoding& encoding, size_t& size,
                      const XTypes::Sequence<T>& seq)
 {
+  if (!encoding.skip_sequence_dheader()) {
+    serialized_size_delimiter(encoding, size);
+  }
   primitive_serialized_size_ulong(encoding, size);
   for (ACE_CDR::ULong i = 0; i < seq.length(); ++i) {
     serialized_size(encoding, size, seq[i]);
@@ -1934,6 +1997,13 @@ void serialized_size(const Encoding& encoding, size_t& size,
 template<typename T>
 bool operator<<(Serializer& strm, const XTypes::Sequence<T>& seq)
 {
+  if (!strm.encoding().skip_sequence_dheader()) {
+    size_t total_size = 0;
+    serialized_size(strm.encoding(), total_size, seq);
+    if (!strm.write_delimiter(total_size)) {
+      return false;
+    }
+  }
   const ACE_CDR::ULong length = seq.length();
   if (!(strm << length)) {
     return false;
@@ -1949,35 +2019,71 @@ bool operator<<(Serializer& strm, const XTypes::Sequence<T>& seq)
 template<typename T>
 bool operator>>(Serializer& strm, XTypes::Sequence<T>& seq)
 {
+  size_t total_size = 0;
+  if (!strm.read_delimiter(total_size)) {
+    return false;
+  }
+
+  // special cases for compatibility with older versions that encoded this
+  // sequence incorrectly - if the DHeader was read as a 0, it's an empty
+  // sequence although it should have been encoded as DHeader (4) + Length (0)
+  if (total_size == 0) {
+    seq.length(0);
+    return true;
+  }
+
+  if (total_size < 4) {
+    return false;
+  }
+
+  const size_t end_of_seq = strm.rpos() + total_size;
   ACE_CDR::ULong length;
   if (!(strm >> length)) {
     return false;
   }
+
+  if (length > strm.length()) {
+    // if encoded incorrectly, the first 4 bytes of the elements were read
+    // as if they were the length - this may end up being larger than the
+    // number of bytes remaining in the Serializer
+    return false;
+  }
+
   seq.length(length);
   for (ACE_CDR::ULong i = 0; i < length; ++i) {
     if (!(strm >> seq[i])) {
       return false;
     }
   }
-  return true;
+  return strm.skip(end_of_seq - strm.rpos());
 }
 
 
 // non-template overloads for sequences of basic types:
+// XCDR2 encoding rule 11 - Sequences of primitive element type
 
+OpenDDS_Dcps_Export
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::LBoundSeq& seq);
+OpenDDS_Dcps_Export
 bool operator<<(Serializer& strm, const XTypes::LBoundSeq& seq);
+OpenDDS_Dcps_Export
 bool operator>>(Serializer& strm, XTypes::LBoundSeq& seq);
 
+OpenDDS_Dcps_Export
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::SBoundSeq& seq);
+OpenDDS_Dcps_Export
 bool operator<<(Serializer& strm, const XTypes::SBoundSeq& seq);
+OpenDDS_Dcps_Export
 bool operator>>(Serializer& strm, XTypes::SBoundSeq& seq);
 
+OpenDDS_Dcps_Export
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::UnionCaseLabelSeq& seq);
+OpenDDS_Dcps_Export
 bool operator<<(Serializer& strm, const XTypes::UnionCaseLabelSeq& seq);
+OpenDDS_Dcps_Export
 bool operator>>(Serializer& strm, XTypes::UnionCaseLabelSeq& seq);
 
 

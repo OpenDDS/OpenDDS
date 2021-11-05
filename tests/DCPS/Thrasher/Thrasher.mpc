@@ -1,8 +1,5 @@
-//
-//
-
-project(*publisher): dcpsexe, dcps_test, dcps_transports_for_test {
-  exename   = publisher
+project(*): dcpsexe, dcps_test, dcps_transports_for_test {
+  exename   = Thrasher
 
   after    += DcpsFooType
   libs     += DcpsFooType
@@ -10,25 +7,16 @@ project(*publisher): dcpsexe, dcps_test, dcps_transports_for_test {
   includes += ../FooType
   libpaths += ../FooType
 
-  Source_Files {
-    Publisher.cpp
-    ParticipantTask.cpp
-    ProgressIndicator.cpp
+  Idl_Files {
   }
-}
-
-project(*subscriber): dcpsexe, dcps_test, dcps_transports_for_test {
-  exename   = subscriber
-
-  after    += DcpsFooType
-  libs     += DcpsFooType
-
-  includes += ../FooType
-  libpaths += ../FooType
 
   Source_Files {
-    Subscriber.cpp
-    DataReaderListenerImpl.cpp
     ProgressIndicator.cpp
+    DataReaderListenerImpl.cpp
+    Publisher.cpp
+    Subscriber.cpp
+    PublisherService.cpp
+    Thrasher.cpp
+    main.cpp
   }
 }

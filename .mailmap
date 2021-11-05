@@ -1,7 +1,7 @@
 # This is used by gitrelease.pl to correct commit individual author info for
 # the generation of the AUTHORS file
 #
-# See https://git-scm.com/docs/git-check-mailmap for how this works
+# See https://git-scm.com/docs/gitmailmap for how this works
 #
 # To fix GitHub noreply email addresses, match the real name and email to
 # what's printed by:
@@ -47,3 +47,6 @@ Clayton Calabrese <calabresec@objectcomputing.com> <calabreseclayton@gmail.com>
 Mark Pollack <pollackm@objectcomputing.com> <mpollack360@gmail.com>
 
 Tim Pollock <pollockt@objectcomputing.com> pollocktoci <70289169+pollocktoci@users.noreply.github.com>
+
+<mesnierp@objectcomputing.com> <mesnier_p@ociweb.com>
+Phil Mesnier <mesnierp@objectcomputing.com> Phil <mesnierp@objectcomputing.com>

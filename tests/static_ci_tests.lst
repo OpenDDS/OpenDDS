@@ -35,6 +35,4 @@ tests/DCPS/Compiler/TryConstruct/C++11/run_test.pl: !DCPS_MIN CXX11 !OPENDDS_SAF
 tests/DCPS/Compiler/xcdr/run_test.pl: !DCPS_MIN STATIC_COMPILER
 tests/DCPS/Compiler/XtypesExtensibility/run_test.pl: !DCPS_MIN STATIC_COMPILER
 
-tests/DCPS/UnitTests/run_test.pl: !DCPS_MIN !GH_ACTIONS STATIC_UNIT
-tests/unit-tests/dds/DCPS/run_test_unit.pl: !DCPS_MIN !GH_ACTIONS STATIC_UNIT
-tests/unit-tests/dds/DCPS/run_test_safety.pl safetyprofilepool: !DCPS_MIN !WCHAR !NO_BUILT_IN_TOPICS OPENDDS_SAFETY_PROFILE STATIC_UNIT
+tests/unit-tests/run_test.pl: !DCPS_MIN !NO_UNIT_TESTS

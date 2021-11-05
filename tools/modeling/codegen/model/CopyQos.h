@@ -1,5 +1,5 @@
-#ifndef COPYQOS_H
-#define COPYQOS_H
+#ifndef OPENDDS_MODEL_COPYQOS_H
+#define OPENDDS_MODEL_COPYQOS_H
 
 // Needed here to avoid the pragma below when necessary.
 #include /**/ "ace/pre.h"

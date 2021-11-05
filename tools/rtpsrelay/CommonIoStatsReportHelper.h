@@ -1,7 +1,7 @@
 #ifndef RTPSRELAY_RELAY_COMMON_IO_STATS_REPORT_HELPER_H_
 #define RTPSRELAY_RELAY_COMMON_IO_STATS_REPORT_HELPER_H_
 
-#include "lib/Utility.h"
+#include <dds/rtpsrelaylib/Utility.h>
 
 #include <dds/DCPS/TimeTypes.h>
 

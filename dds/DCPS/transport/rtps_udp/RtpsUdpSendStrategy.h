@@ -79,6 +79,10 @@ public:
   static const size_t MaxSecureFullMessageAdditionalSize =
     MaxSecureFullMessageLeadingSize + MaxSubmessagePadding + MaxSecureFullMessageFollowingSize;
 
+#ifdef OPENDDS_SECURITY
+  virtual Security::SecurityConfig_rch security_config() const;
+#endif
+
 protected:
   virtual ssize_t send_bytes_i(const iovec iov[], int n);
   ssize_t send_bytes_i_helper(const iovec iov[], int n);
@@ -140,7 +144,7 @@ private:
   ACE_Data_Block rtps_header_db_;
   ACE_Message_Block rtps_header_mb_;
   ACE_Thread_Mutex rtps_header_mb_lock_;
-  bool network_is_unreachable_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> network_is_unreachable_;
 };
 
 } // namespace DCPS

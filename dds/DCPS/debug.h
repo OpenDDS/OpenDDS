@@ -7,6 +7,7 @@
 #define OPENDDS_DCPS_DEBUG_H
 
 #include "dcps_export.h"
+#include "transport/framework/TransportDebug.h"
 
 #include <ace/ace_wchar.h>
 
@@ -19,10 +20,50 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+/**
+ * General control for logging in OpenDDS.
+ *
+ * Access using the log_level global object.
+ */
+class OpenDDS_Dcps_Export LogLevel {
+public:
+  enum Value {
+    None,
+    Error,
+    Warning,
+    Notice,
+    Info,
+    Debug
+  };
+
+  LogLevel(Value value)
+  {
+    set(value);
+  }
+
+  void set(Value value);
+  void set_from_string(const char* name);
+
+  Value get() const
+  {
+    return level_;
+  }
+  const char* get_as_string() const;
+
+private:
+  Value level_;
+};
+extern OpenDDS_Dcps_Export LogLevel log_level;
+
+inline bool operator>=(const LogLevel& ll, LogLevel::Value value)
+{
+  return ll.get() >= value;
+}
+
 /// Logging verbosity level.
 /// set by Service_Participant
 /// value guidelines:
-/// 1 - logs that should happen once per process or are warnings
+/// 1 - logs that should happen once per process
 /// 2 - logs that should happen once per DDS entity
 /// 4 - logs that are related to administrative interfaces
 /// 6 - logs that should happen every Nth sample write/read
@@ -107,26 +148,35 @@ public:
 extern OpenDDS_Dcps_Export SecurityDebug security_debug;
 #endif
 
-class DebugRestore {
+class LogRestore {
 public:
-  DebugRestore()
-    : orig_dcps_debug_level_(DCPS_debug_level)
+  LogRestore()
+    : orig_log_level_(log_level)
+    , orig_dcps_debug_level_(DCPS_debug_level)
+    , orig_transport_debug_level_(Transport_debug_level)
+    , orig_transport_debug_(transport_debug)
 #ifdef OPENDDS_SECURITY
     , orig_security_debug_(security_debug)
 #endif
   {
   }
 
-  ~DebugRestore()
+  ~LogRestore()
   {
+    log_level = orig_log_level_;
     DCPS_debug_level = orig_dcps_debug_level_;
+    Transport_debug_level = orig_transport_debug_level_;
+    transport_debug = orig_transport_debug_;
 #ifdef OPENDDS_SECURITY
     security_debug = orig_security_debug_;
 #endif
   }
 
 private:
+  LogLevel orig_log_level_;
   unsigned orig_dcps_debug_level_;
+  unsigned orig_transport_debug_level_;
+  TransportDebug orig_transport_debug_;
 #ifdef OPENDDS_SECURITY
   SecurityDebug orig_security_debug_;
 #endif

@@ -31,7 +31,7 @@ class Monitor;
 *
 * @brief Implements the DDS::Topic interface.
 *
-* See the DDS specification, OMG formal/04-12-02, for a description of
+* See the DDS specification, OMG formal/2015-04-10, for a description of
 * the interface this class is implementing.
 */
 class OpenDDS_Dcps_Export TopicImpl
@@ -40,7 +40,6 @@ class OpenDDS_Dcps_Export TopicImpl
     public virtual TopicCallbacks,
     public virtual TopicDescriptionImpl {
 public:
-
   TopicImpl(const char*                    topic_name,
             const char*                    type_name,
             OpenDDS::DCPS::TypeSupport_ptr type_support,

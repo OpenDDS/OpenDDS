@@ -10,12 +10,13 @@
 
 #include "dcps_export.h"
 
-class MemoryPoolTest;
-class FreeIndexTest;
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
+namespace Test {
+  class MemoryPoolTest;
+  class FreeIndexTest;
+}
 namespace DCPS {
 
 /// Header of all allocations - found at beginning of allocation inside pool.
@@ -115,8 +116,8 @@ private:
 /// Index of free nodes in memory pool.
 /// Allows for a faster search of free nodes
 class OpenDDS_Dcps_Export FreeIndex {
-  friend class ::MemoryPoolTest;
-  friend class ::FreeIndexTest;
+  friend class Test::MemoryPoolTest;
+  friend class Test::FreeIndexTest;
 public:
   explicit FreeIndex(FreeHeader*& largest_free);
   /** Initialize index with initial free block */
@@ -159,7 +160,7 @@ private:
 // Allocations can be done by checking the index for the needed size, and going
 // to the first free block.
 class OpenDDS_Dcps_Export MemoryPool {
-  friend class ::MemoryPoolTest;
+  friend class Test::MemoryPoolTest;
 public:
   explicit MemoryPool(unsigned int pool_size, size_t granularity = 8);
   ~MemoryPool();

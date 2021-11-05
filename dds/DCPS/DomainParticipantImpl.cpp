@@ -20,10 +20,12 @@
 #include "Transient_Kludge.h"
 #include "DomainParticipantFactoryImpl.h"
 #include "Util.h"
+#include "DCPS_Utils.h"
 #include "MonitorFactory.h"
 #include "BitPubListenerImpl.h"
 #include "ContentFilteredTopicImpl.h"
 #include "MultiTopicImpl.h"
+#include "Service_Participant.h"
 #include "transport/framework/TransportRegistry.h"
 #include "transport/framework/TransportExceptions.h"
 
@@ -108,6 +110,7 @@ DomainParticipantImpl::DomainParticipantImpl(
     domain_id_(domain_id),
     dp_id_(GUID_UNKNOWN),
     federated_(false),
+    handle_waiters_(handle_protector_),
     shutdown_condition_(shutdown_mutex_),
     shutdown_complete_(false),
     participant_handles_(handle_generator),
@@ -623,12 +626,18 @@ DomainParticipantImpl::delete_topic_i(
       CORBA::String_var topic_name = the_topic_servant->get_name();
       TopicMap::mapped_type* entry = 0;
 
-      if (Util::find(topics_, topic_name.in(), entry) == -1) {
+      TopicMapIteratorPair iters = topics_.equal_range(topic_name.in());
+      TopicMapIterator iter;
+      for (iter = iters.first; iter != iters.second; ++iter) {
+        if (iter->second.pair_.svt_ == the_topic_servant) {
+          entry = &iter->second;
+          break;
+        }
+      }
+      if (entry == 0) {
         if (DCPS_debug_level > 0) {
           ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
-                     ACE_TEXT("%p\n"),
-                     ACE_TEXT("find")));
+                     ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, not found\n")));
         }
         return DDS::RETCODE_ERROR;
       }
@@ -636,35 +645,25 @@ DomainParticipantImpl::delete_topic_i(
       const CORBA::ULong client_refs = --entry->client_refs_;
 
       if (remove_objref || 0 == client_refs) {
-        //TBD - mark the TopicImpl as deleted and make it
-        //      reject calls to the TopicImpl.
+        const GUID_t topicId = the_topic_servant->get_id();
+        topics_.erase(iter);
+
         Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
         TopicStatus status = disco->remove_topic(
-          the_dp_servant->get_domain_id(), the_dp_servant->get_id(), the_topic_servant->get_id());
+          the_dp_servant->get_domain_id(), the_dp_servant->get_id(), topicId);
 
         if (status != REMOVED) {
           if (DCPS_debug_level > 0) {
             ACE_ERROR((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
-                       ACE_TEXT("remove_topic failed with return value %d\n"), status));
+                       ACE_TEXT("remove_topic failed with return value <%C>\n"),
+                       topicstatus_to_string(status)));
            }
           return DDS::RETCODE_ERROR;
         }
 
-        // note: this will destroy the TopicImpl if there are no
-        // client object reference to it.
-        if (topics_.erase(topic_name.in()) == 0) {
-          if (DCPS_debug_level > 0) {
-            ACE_ERROR((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
-                       ACE_TEXT("%p\n"),
-                       ACE_TEXT("erase")));
-          }
-          return DDS::RETCODE_ERROR;
+        return DDS::RETCODE_OK;
 
-        } else {
-          return DDS::RETCODE_OK;
-        }
       } else {
         if (DCPS_debug_level > 4) {
           ACE_DEBUG((LM_DEBUG,
@@ -687,8 +686,6 @@ DomainParticipantImpl::delete_topic_i(
   return ret;
 }
 
-//Note: caller should NOT assign to Topic_var (without _duplicate'ing)
-//      because it will steal the framework's reference.
 DDS::Topic_ptr
 DomainParticipantImpl::find_topic(
   const char* topic_name,
@@ -700,19 +697,6 @@ DomainParticipantImpl::find_topic(
   while (first_time || MonotonicTimePoint::now() < timeout_at) {
     if (first_time) {
       first_time = false;
-    }
-
-    TopicMap::mapped_type* entry = 0;
-    {
-      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                       tao_mon,
-                       this->topics_protector_,
-                       DDS::Topic::_nil());
-
-      if (Util::find(topics_, topic_name, entry) == 0) {
-        ++entry->client_refs_;
-        return DDS::Topic::_duplicate(entry->pair_.obj_.in());
-      }
     }
 
     RepoId topic_id;
@@ -1915,6 +1899,7 @@ DDS::InstanceHandle_t DomainParticipantImpl::assign_handle(const GUID_t& id)
     }
     handles_[id] = std::make_pair(handle, 1);
     repoIds_[handle] = id;
+    handle_waiters_.notify_all();
     return handle;
   }
 
@@ -1926,6 +1911,20 @@ DDS::InstanceHandle_t DomainParticipantImpl::assign_handle(const GUID_t& id)
                mapped.first, mapped.second));
   }
   return mapped.first;
+}
+
+DDS::InstanceHandle_t DomainParticipantImpl::await_handle(const GUID_t& id,
+                                                          TimeDuration max_wait) const
+{
+  MonotonicTimePoint expire_at = MonotonicTimePoint::now() + max_wait;
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, DDS::HANDLE_NIL);
+  CountedHandleMap::const_iterator iter = handles_.find(id);
+  CvStatus res = CvStatus_NoTimeout;
+  while (res == CvStatus_NoTimeout && iter == handles_.end()) {
+    res = max_wait.is_zero() ? handle_waiters_.wait() : handle_waiters_.wait_until(expire_at);
+    iter = handles_.find(id);
+  }
+  return iter == handles_.end() ? DDS::HANDLE_NIL : iter->second.first;
 }
 
 DDS::InstanceHandle_t DomainParticipantImpl::lookup_handle(const GUID_t& id) const
@@ -2049,16 +2048,7 @@ DomainParticipantImpl::create_new_topic(
 
   // this object will also act as a guard against leaking the new TopicImpl
   RefCounted_Topic refCounted_topic(Topic_Pair(topic_servant, obj, false));
-
-  if (OpenDDS::DCPS::bind(topics_, topic_name, refCounted_topic) == -1) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::create_new_topic, ")
-                 ACE_TEXT("%p\n"),
-                 ACE_TEXT("bind")));
-    }
-    return DDS::Topic::_nil();
-  }
+  topics_.insert(std::make_pair(topic_name, refCounted_topic));
 
   if (this->monitor_) {
     this->monitor_->report();

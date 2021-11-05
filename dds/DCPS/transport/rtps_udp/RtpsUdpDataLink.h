@@ -13,6 +13,8 @@
 #include "RtpsUdpReceiveStrategy.h"
 #include "RtpsUdpReceiveStrategy_rch.h"
 #include "RtpsCustomizedElement.h"
+#include "LocatorCacheKey.h"
+#include "BundlingCacheKey.h"
 
 #include <dds/DCPS/transport/framework/DataLink.h>
 #include <dds/DCPS/ReactorTask.h>
@@ -30,6 +32,7 @@
 #include <dds/DCPS/RcEventHandler.h>
 #include <dds/DCPS/JobQueue.h>
 #include <dds/DCPS/SequenceNumber.h>
+#include <dds/DCPS/AddressCache.h>
 #include <dds/DCPS/Hash.h>
 #include <dds/DCPS/FibonacciSequence.h>
 
@@ -75,6 +78,9 @@ struct SeqReaders {
   RepoIdSet readers;
   SeqReaders(const RepoId& id) : seq(0) { readers.insert(id); }
 };
+
+typedef AddressCache<LocatorCacheKey> LocatorCache;
+typedef AddressCache<BundlingCacheKey> BundlingCache;
 
 typedef OPENDDS_MAP_CMP(RepoId, SeqReaders, GUID_tKeyLessThan) WriterToSeqReadersMap;
 
@@ -140,11 +146,11 @@ public:
 
   const GuidPrefix_t& local_prefix() const { return local_prefix_; }
 
-  typedef OPENDDS_SET(ACE_INET_Addr) AddrSet;
+  void remove_locator_and_bundling_cache(const RepoId& remote_id);
 
   void update_locators(const RepoId& remote_id,
-                       const AddrSet& unicast_addresses,
-                       const AddrSet& multicast_addresses,
+                       AddrSet& unicast_addresses,
+                       AddrSet& multicast_addresses,
                        bool requires_inline_qos,
                        bool add_ref);
 
@@ -168,8 +174,8 @@ public:
                   ACE_CDR::ULong participant_flags,
                   SequenceNumber max_sn,
                   const TransportClient_rch& client,
-                  const AddrSet& unicast_addresses,
-                  const AddrSet& multicast_addresses,
+                  AddrSet& unicast_addresses,
+                  AddrSet& multicast_addresses,
                   bool requires_inline_qos);
 
   void disassociated(const RepoId& local, const RepoId& remote);
@@ -201,10 +207,16 @@ public:
 
 #ifdef OPENDDS_SECURITY
   Security::SecurityConfig_rch security_config() const
-  { return security_config_; }
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(security_mutex_);
+    return security_config_;
+  }
 
   Security::HandleRegistry_rch handle_registry() const
-  { return handle_registry_; }
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(security_mutex_);
+    return handle_registry_;
+  }
 
   DDS::Security::ParticipantCryptoHandle local_crypto_handle() const;
   void local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch);
@@ -243,13 +255,11 @@ private:
   static bool force_inline_qos_;
   bool requires_inline_qos(const GUIDSeq_var & peers);
 
-  typedef OPENDDS_MAP_CMP(RepoId, OPENDDS_VECTOR(RepoId),GUID_tKeyLessThan) DestToEntityMap;
-
   ReactorTask_rch reactor_task_;
   RcHandle<JobQueue> job_queue_;
 
-  RtpsUdpSendStrategy* send_strategy();
-  RtpsUdpReceiveStrategy* receive_strategy();
+  RtpsUdpSendStrategy_rch send_strategy();
+  RtpsUdpReceiveStrategy_rch receive_strategy();
 
   GuidPrefix_t local_prefix_;
 
@@ -265,10 +275,17 @@ private:
     size_t ref_count_;
   };
 
+#ifdef ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP(RepoId, RemoteInfo) RemoteInfoMap;
+#else
   typedef OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan) RemoteInfoMap;
+#endif
   RemoteInfoMap locators_;
 
   void update_last_recv_addr(const RepoId& src, const ACE_INET_Addr& addr);
+
+  mutable LocatorCache locator_cache_;
+  mutable BundlingCache bundling_cache_;
 
   ACE_SOCK_Dgram unicast_socket_;
   ACE_SOCK_Dgram_Mcast multicast_socket_;
@@ -278,6 +295,14 @@ private:
   ACE_SOCK_Dgram_Mcast ipv6_multicast_socket_;
   OPENDDS_SET(OPENDDS_STRING) ipv6_joined_interfaces_;
 #endif
+
+  MessageBlockAllocator mb_allocator_;
+  DataBlockAllocator db_allocator_;
+  Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex> custom_allocator_;
+  Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex> bundle_allocator_;
+
+  ACE_Message_Block* alloc_msgblock(size_t size, ACE_Allocator* data_allocator);
+  ACE_Message_Block* submsgs_to_msgblock(const RTPS::SubmessageSeq& subm);
 
   RcHandle<SingleSendBuffer> get_writer_send_buffer(const RepoId& pub_id);
 
@@ -362,7 +387,11 @@ private:
   };
 
   typedef RcHandle<ReaderInfo> ReaderInfo_rch;
+#ifdef ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP(RepoId, ReaderInfo_rch) ReaderInfoMap;
+#else
   typedef OPENDDS_MAP_CMP(RepoId, ReaderInfo_rch, GUID_tKeyLessThan) ReaderInfoMap;
+#endif
   typedef OPENDDS_SET(ReaderInfo_rch) ReaderInfoSet;
   struct ReaderInfoSetHolder : RcObject {
     ReaderInfoSet readers;
@@ -432,8 +461,8 @@ private:
 
     typedef PmfSporadicTask<RtpsWriter> Sporadic;
 
-    Sporadic heartbeat_;
-    Sporadic nack_response_;
+    RcHandle<Sporadic> heartbeat_;
+    RcHandle<Sporadic> nack_response_;
 
     FibonacciSequence<TimeDuration> fallback_;
 
@@ -534,13 +563,16 @@ private:
     void gather_heartbeats_i(MetaSubmessageVec& meta_submessages);
     void gather_heartbeats(const RepoIdSet& additional_guids,
                            MetaSubmessageVec& meta_submessages);
-    typedef OPENDDS_MAP_CMP(RepoId, SequenceNumber, GUID_tKeyLessThan) ExpectedMap;
 
     RcHandle<SingleSendBuffer> get_send_buff() { return send_buff_; }
   };
   typedef RcHandle<RtpsWriter> RtpsWriter_rch;
 
+#ifdef ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP(RepoId, RtpsWriter_rch) RtpsWriterMap;
+#else
   typedef OPENDDS_MAP_CMP(RepoId, RtpsWriter_rch, GUID_tKeyLessThan) RtpsWriterMap;
+#endif
   RtpsWriterMap writers_;
 
 
@@ -572,7 +604,11 @@ private:
     bool sends_directed_hb() const;
   };
   typedef RcHandle<WriterInfo> WriterInfo_rch;
+#ifdef ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP(RepoId, WriterInfo_rch) WriterInfoMap;
+#else
   typedef OPENDDS_MAP_CMP(RepoId, WriterInfo_rch, GUID_tKeyLessThan) WriterInfoMap;
+#endif
   typedef OPENDDS_SET(WriterInfo_rch) WriterInfoSet;
 
   class RtpsReader : public RcObject {
@@ -582,7 +618,7 @@ private:
       , id_(id)
       , stopping_(false)
       , nackfrag_count_(0)
-      , preassociation_task_(link->reactor_task_->interceptor(), *this, &RtpsReader::send_preassociation_acknacks)
+      , preassociation_task_(make_rch<RtpsReader::Sporadic>(link->reactor_task_->interceptor(), *this, &RtpsReader::send_preassociation_acknacks))
     {}
 
     ~RtpsReader();
@@ -626,7 +662,6 @@ private:
                             bool heartbeat_was_non_final,
                             MetaSubmessageVec& meta_submessages);
     void generate_nack_frags_i(MetaSubmessageVec& meta_submessages,
-                               MetaSubmessage& meta_submessage,
                                const WriterInfo_rch& wi,
                                EntityId_t reader_id,
                                EntityId_t writer_id);
@@ -639,13 +674,17 @@ private:
     bool stopping_;
     CORBA::Long nackfrag_count_;
     typedef PmfSporadicTask<RtpsReader> Sporadic;
-    Sporadic preassociation_task_;
+    RcHandle<Sporadic> preassociation_task_;
   };
   typedef RcHandle<RtpsReader> RtpsReader_rch;
 
   typedef OPENDDS_VECTOR(MetaSubmessageVec::iterator) MetaSubmessageIterVec;
+#ifdef ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP(RepoId, MetaSubmessageIterVec) DestMetaSubmessageMap;
+#else
   typedef OPENDDS_MAP_CMP(RepoId, MetaSubmessageIterVec, GUID_tKeyLessThan) DestMetaSubmessageMap;
-  typedef OPENDDS_MAP(AddrSet, DestMetaSubmessageMap) AddrDestMetaSubmessageMap;
+#endif
+  typedef OPENDDS_MAP(AddressCacheEntryProxy, DestMetaSubmessageMap) AddrDestMetaSubmessageMap;
   typedef OPENDDS_VECTOR(MetaSubmessageIterVec) MetaSubmessageIterVecVec;
   typedef OPENDDS_SET(CORBA::Long) CountSet;
   typedef OPENDDS_MAP_CMP(EntityId_t, CountSet, EntityId_tKeyLessThan) IdCountSet;
@@ -662,7 +701,7 @@ private:
     const Encoding& encoding,
     AddrDestMetaSubmessageMap& adr_map,
     MetaSubmessageIterVecVec& meta_submessage_bundles,
-    OPENDDS_VECTOR(AddrSet)& meta_submessage_bundle_addrs,
+    OPENDDS_VECTOR(AddressCacheEntryProxy)& meta_submessage_bundle_addrs,
                                OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes,
                                CountKeeper& counts);
 
@@ -673,12 +712,16 @@ private:
   ThreadSendQueueMap thread_send_queues_;
   MetaSubmessageVecVecVec send_queue_;
   typedef PmfSporadicTask<RtpsUdpDataLink> Sporadic;
-  Sporadic flush_send_queue_task_;
+  RcHandle<Sporadic> flush_send_queue_task_;
   void flush_send_queue(const MonotonicTimePoint& now);
 
   RepoIdSet pending_reliable_readers_;
 
+#ifdef ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP(RepoId, RtpsReader_rch) RtpsReaderMap;
+#else
   typedef OPENDDS_MAP_CMP(RepoId, RtpsReader_rch, GUID_tKeyLessThan) RtpsReaderMap;
+#endif
   RtpsReaderMap readers_;
 
   typedef OPENDDS_MULTIMAP_CMP(RepoId, RtpsReader_rch, GUID_tKeyLessThan) RtpsReaderMultiMap;
@@ -857,6 +900,7 @@ private:
   };
 
 #ifdef OPENDDS_SECURITY
+  mutable ACE_Thread_Mutex security_mutex_;
   Security::SecurityConfig_rch security_config_;
   Security::HandleRegistry_rch handle_registry_;
   DDS::Security::ParticipantCryptoHandle local_crypto_handle_;

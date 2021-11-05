@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -9,9 +7,10 @@
 #define OPENDDS_DCPS_DEFINITIONS_H
 
 #include "Cached_Allocator_With_Overflow_T.h"
-#include "ace/Message_Block.h"
-#include "ace/Global_Macros.h"
-#include "ace/Null_Mutex.h"
+
+#include <ace/Message_Block.h>
+#include <ace/Global_Macros.h>
+#include <ace/Null_Mutex.h>
 
 #include <functional>
 #include <utility>
@@ -67,6 +66,14 @@
 #  define OPENDDS_ASSERT(C) assert(C)
 #endif
 
+#include <tao/orbconf.h>
+#if defined TAO_HAS_IDL_FEATURES && TAO_HAS_IDL_FEATURES
+#  include <tao/idl_features.h>
+#  define OPENDDS_HAS_EXPLICIT_INTS TAO_IDL_HAS_EXPLICIT_INTS
+#else
+#  define OPENDDS_HAS_EXPLICIT_INTS 0
+#endif
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -113,7 +120,11 @@ struct Objref_Servant_Pair {
 /// Use a Foo_var in a std::set or std::map with this comparison function,
 /// for example std::set<Foo_var, VarLess<Foo> >
 template <class T, class V = typename T::_var_type>
-struct VarLess : public std::binary_function<V, V, bool> {
+struct VarLess {
+  typedef V first_argument_type;
+  typedef V second_argument_type;
+  typedef bool result_type;
+
   bool operator()(const V& x, const V& y) const {
     return x.in() < y.in();
   }

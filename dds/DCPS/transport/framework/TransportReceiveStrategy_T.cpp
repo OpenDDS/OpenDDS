@@ -24,7 +24,7 @@ TransportReceiveStrategy<TH, DSH>::TransportReceiveStrategy()
     receive_sample_remaining_(0),
     mb_allocator_(MESSAGE_BLOCKS),
     db_allocator_(DATA_BLOCKS),
-    data_allocator_(DATA_BLOCKS),
+    data_allocator_(RECEIVE_BUFFERS * 2),
     buffer_index_(0),
     payload_(0),
     good_pdu_(true),
@@ -226,9 +226,18 @@ TransportReceiveStrategy<TH, DSH>::handle_simple_dds_input(ACE_HANDLE fd)
 
   finish_message();
 
-  if (cur_rb->data_block()->reference_count() > 1) {
+  // Attempt to quickly switch to unreferenced buffer for next read
+  size_t index_count = 0;
+  size_t new_buffer_index = buffer_index_;
+  while (receive_buffers_[new_buffer_index]->data_block()->reference_count() > 1 && index_count++ <= RECEIVE_BUFFERS) {
+    new_buffer_index = (new_buffer_index + 1) % RECEIVE_BUFFERS;
+  }
+  buffer_index_ = new_buffer_index;
+
+  // If newly selected buffer index still has a reference count, we'll need to allocate a new one for the read
+  if (receive_buffers_[buffer_index_]->data_block()->reference_count() > 1) {
     ACE_DES_FREE(
-      cur_rb,
+      receive_buffers_[buffer_index_],
       mb_allocator_.free,
       ACE_Message_Block);
 

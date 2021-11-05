@@ -1,17 +1,20 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
 
 #include "GuidConverter.h"
-#include "dds/DdsDcpsGuidTypeSupportImpl.h"
 
-#include "ace/ACE.h"
-#include "ace/OS_NS_stdio.h"
+#include <dds/DdsDcpsGuidTypeSupportImpl.h>
+
+#include <ace/ACE.h>
+#include <ace/OS_NS_stdio.h>
+
+#ifdef DDS_HAS_WCHAR
+#  include <sstream>
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

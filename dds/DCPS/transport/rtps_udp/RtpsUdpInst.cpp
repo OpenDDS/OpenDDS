@@ -34,11 +34,11 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
 #endif
   , use_multicast_(true)
   , ttl_(1)
+  , anticipated_fragments_(RtpsUdpSendStrategy::UDP_MAX_MESSAGE_SIZE / RtpsSampleHeader::FRAG_SIZE)
   , max_message_size_(RtpsUdpSendStrategy::UDP_MAX_MESSAGE_SIZE)
   , nak_depth_(0)
   , nak_response_delay_(0, 200*1000 /*microseconds*/) // default from RTPS
   , heartbeat_period_(1) // no default in RTPS spec
-  , heartbeat_response_delay_(0, 500*1000 /*microseconds*/) // default from RTPS
   , receive_address_duration_(5)
   , responsive_mode_(false)
   , send_delay_(0, 10 * 1000)
@@ -121,6 +121,8 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("multicast_interface"),
                           multicast_interface_);
 
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("anticipated_fragments"), anticipated_fragments_, size_t);
+
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("max_message_size"), max_message_size_, size_t);
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("nak_depth"), nak_depth_, size_t);
@@ -131,8 +133,6 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
                         nak_response_delay_);
   GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("heartbeat_period"),
                         heartbeat_period_);
-  GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("heartbeat_response_delay"),
-                        heartbeat_response_delay_);
   GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("send_delay"),
                         send_delay_);
 
@@ -176,13 +176,14 @@ RtpsUdpInst::dump_to_str() const
   ret += formatNameForDump("multicast_group_address") + LogAddr(multicast_group_address_).str() + '\n';
   ret += formatNameForDump("multicast_interface") + multicast_interface_ + '\n';
   ret += formatNameForDump("nak_depth") + to_dds_string(unsigned(nak_depth_)) + '\n';
+  ret += formatNameForDump("anticipated_fragments") + to_dds_string(unsigned(anticipated_fragments_)) + '\n';
   ret += formatNameForDump("max_message_size") + to_dds_string(unsigned(max_message_size_)) + '\n';
   ret += formatNameForDump("nak_response_delay") + to_dds_string(nak_response_delay_.value().msec()) + '\n';
   ret += formatNameForDump("heartbeat_period") + to_dds_string(heartbeat_period_.value().msec()) + '\n';
-  ret += formatNameForDump("heartbeat_response_delay") + to_dds_string(heartbeat_response_delay_.value().msec()) + '\n';
   ret += formatNameForDump("send_buffer_size") + to_dds_string(send_buffer_size_) + '\n';
   ret += formatNameForDump("rcv_buffer_size") + to_dds_string(rcv_buffer_size_) + '\n';
   ret += formatNameForDump("ttl") + to_dds_string(ttl_) + '\n';
+  ret += formatNameForDump("responsive_mode") + (responsive_mode_ ? "true" : "false") + '\n';
   return ret;
 }
 

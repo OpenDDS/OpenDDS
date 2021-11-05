@@ -7,12 +7,14 @@
 #include <ace/INET_Addr.h>
 #include <ace/OS_NS_stdio.h>
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#ifdef OPENDDS_SAFETY_PROFILE
+#  include <cstdlib> // For strto*
+#else
 #  include <fstream>
 #  include <iostream>
 #  include <iomanip>
 #  include <sstream>
-#endif //OPENDDS_SAFETY_PROFILE
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -26,7 +28,6 @@ OpenDDS_Dcps_Export String to_dds_string(long to_convert);
 OpenDDS_Dcps_Export String to_dds_string(long long to_convert);
 OpenDDS_Dcps_Export String to_dds_string(unsigned long long to_convert, bool as_hex = false);
 OpenDDS_Dcps_Export String to_dds_string(unsigned long to_convert, bool as_hex = false);
-OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(const ACE_INET_Addr& addr);
 
 //@{
 /**

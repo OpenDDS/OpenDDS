@@ -132,13 +132,6 @@ String to_hex_dds_string(
   return rv;
 }
 
-OPENDDS_STRING to_dds_string(const ACE_INET_Addr& addr)
-{
-  ACE_TCHAR buffer[AddrToStringSize];
-  addr.addr_to_string(buffer, AddrToStringSize);
-  return ACE_TEXT_ALWAYS_CHAR(buffer);
-}
-
 } // namespace DCPS
 } // namespace OpenDDS
 

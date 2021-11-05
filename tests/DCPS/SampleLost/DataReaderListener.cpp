@@ -10,7 +10,7 @@
 using namespace Messenger;
 
 DataReaderListenerImpl::DataReaderListenerImpl()
-  : num_reads_(0),
+  : num_data_available_(0),
     num_samples_lost_ (0),
     num_samples_rejected_ (0),
     num_budget_exceeded_ (0)
@@ -22,39 +22,9 @@ DataReaderListenerImpl::~DataReaderListenerImpl ()
 }
 
 void
-DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
+DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr /*reader*/)
 {
-  ++this->num_reads_;
-
-  try {
-    MessageDataReader_var message_dr = MessageDataReader::_narrow(reader);
-    if (CORBA::is_nil (message_dr.in ())) {
-      cerr << "read: _narrow failed." << endl;
-      exit(1);
-    }
-
-    Messenger::Message message;
-    DDS::SampleInfo si ;
-    DDS::ReturnCode_t status = message_dr->take_next_sample(message, si) ;
-
-    if (status == DDS::RETCODE_OK) {
-      if (si.valid_data) {
-        cout << "Message: subject    = " << message.subject.in() << endl
-            << "         subject_id = " << message.subject_id   << endl
-            << "         from       = " << message.from.in()    << endl
-            << "         count      = " << message.count        << endl
-            << "         text       = " << message.text.in()    << endl;
-      }
-      cout << "SampleInfo.sample_rank = " << si.sample_rank << endl;
-    } else if (status == DDS::RETCODE_NO_DATA) {
-      cerr << "ERROR: reader received DDS::RETCODE_NO_DATA!" << endl;
-    } else {
-      cerr << "ERROR: read Message: Error: " <<  status << endl;
-    }
-  } catch (CORBA::Exception& e) {
-    cerr << "Exception caught in read:" << endl << e << endl;
-    exit(1);
-  }
+  ++num_data_available_;
 }
 
 void

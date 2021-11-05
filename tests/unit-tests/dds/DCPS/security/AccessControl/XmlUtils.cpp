@@ -122,7 +122,7 @@ TEST(dds_DCPS_security_AccessControl_XmlUtils, parse_time)
   parse_time_checker(parser, ACE_TEXT("invalid3"), false);
   parse_time_checker(parser, ACE_TEXT("leftover"), false);
 
-  OpenDDS::DCPS::DebugRestore debug_restore;
+  OpenDDS::DCPS::LogRestore log_restore;
   security_debug.access_warn = true;
   security_debug.access_error = true;
 
@@ -255,7 +255,7 @@ TEST(dds_DCPS_security_AccessControl_XmlUtils, parse_domain_id_set)
   parse_domain_id_set_checker(parser, ACE_TEXT("invalid_tag_in_range"));
   parse_domain_id_set_checker(parser, ACE_TEXT("invalid_range"));
 
-  OpenDDS::DCPS::DebugRestore debug_restore;
+  OpenDDS::DCPS::LogRestore log_restore;
   security_debug.access_warn = true;
   security_debug.access_error = true;
 

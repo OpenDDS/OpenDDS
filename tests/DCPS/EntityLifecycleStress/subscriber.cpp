@@ -7,27 +7,26 @@
 #include <dds/DCPS/StaticIncludes.h>
 #include <dds/DCPS/unique_ptr.h>
 #ifndef ACE_HAS_CPP11
-#include <dds/DCPS/ConditionVariable.h>
+#  include <dds/DCPS/ConditionVariable.h>
 #endif
-
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
-#include "tests/Utils/ExceptionStreams.h"
-#include "tests/Utils/StatusMatching.h"
+#include <tests/Utils/ExceptionStreams.h>
+#include <tests/Utils/StatusMatching.h>
 
 #include <ace/streams.h>
 #include <ace/Get_Opt.h>
 #include <ace/OS_NS_unistd.h>
 
 #include <memory>
-
+#include <sstream>
 #ifdef ACE_HAS_CPP11
-#include <condition_variable>
-#include <mutex>
-#include <thread>
+#  include <condition_variable>
+#  include <mutex>
+#  include <thread>
 #endif
 
 using namespace Messenger;
@@ -42,7 +41,7 @@ struct DataReaderListenerImpl : public virtual OpenDDS::DCPS::LocalObject<DDS::D
 #else
    , cv_(mutex_)
 #endif
-   , valid_data_seen(false) {}
+   , valid_data_seen_(false) {}
 
   virtual ~DataReaderListenerImpl() {}
 
@@ -83,7 +82,12 @@ struct DataReaderListenerImpl : public virtual OpenDDS::DCPS::LocalObject<DDS::D
         ss << " - From  : " << message.from << endl;
         ss << " - Count : " << message.count << endl;
         cout << ss.str() << flush;
-        valid_data_seen = true;
+#ifdef ACE_HAS_CPP11
+        std::unique_lock<std::mutex> lock(mutex_);
+#else
+        ACE_Guard<ACE_Thread_Mutex> g(mutex_);
+#endif
+        valid_data_seen_ = true;
         cv_.notify_all();
       }
     }
@@ -97,9 +101,9 @@ struct DataReaderListenerImpl : public virtual OpenDDS::DCPS::LocalObject<DDS::D
     ACE_Guard<ACE_Thread_Mutex> g(mutex_);
 #endif
 #ifdef ACE_HAS_CPP11
-    while (!valid_data_seen && cv_.wait_for(lock, ms) != cv_status::timeout) {
+    while (!valid_data_seen_ && cv_.wait_for(lock, ms) != cv_status::timeout) {
 #else
-    while (!valid_data_seen && !(cv_.wait_until(deadline) == OpenDDS::DCPS::CvStatus_NoTimeout)) {
+    while (!valid_data_seen_ && !(cv_.wait_until(deadline) == OpenDDS::DCPS::CvStatus_NoTimeout)) {
 #endif
     }
   }
@@ -111,7 +115,7 @@ struct DataReaderListenerImpl : public virtual OpenDDS::DCPS::LocalObject<DDS::D
   ACE_Thread_Mutex mutex_;
   OpenDDS::DCPS::ConditionVariable<ACE_Thread_Mutex> cv_;
 #endif
-  bool valid_data_seen;
+  bool valid_data_seen_;
 };
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
@@ -207,7 +211,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
 #ifdef ACE_HAS_CPP11
-    bool still_cleaning = true;
+    std::atomic<bool> still_cleaning(true);
     thread t([&](){
       this_thread::sleep_for(chrono::seconds(3));
       while (still_cleaning) {

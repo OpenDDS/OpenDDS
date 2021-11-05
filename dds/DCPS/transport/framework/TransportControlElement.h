@@ -43,6 +43,8 @@ protected:
 
   virtual RepoId publication_id() const;
 
+  virtual ACE_Message_Block* duplicate_msg() const;
+
   virtual const ACE_Message_Block* msg() const;
 
   virtual const ACE_Message_Block* msg_payload() const;

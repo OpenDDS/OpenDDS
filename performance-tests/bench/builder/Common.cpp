@@ -87,6 +87,11 @@ bool operator==(const TimeStamp& lhs, const TimeStamp& rhs)
   return lhs.sec == rhs.sec && lhs.nsec == rhs.nsec;
 }
 
+bool operator!=(const TimeStamp& lhs, const TimeStamp& rhs)
+{
+  return lhs.sec != rhs.sec || lhs.nsec != rhs.nsec;
+}
+
 std::ostream&
 operator<<(std::ostream& out, const TimeStamp& ts)
 {
@@ -141,7 +146,7 @@ get_or_create_property(
   const std::string& name, Builder::PropertyValueKind kind)
 {
   for (uint32_t i = 0; i < seq.length(); ++i) {
-    if (std::string(seq[i].name.in()) == name) {
+    if (name == seq[i].name.in()) {
       if (seq[i].value._d() == kind) {
         return PropertyIndex(seq, i);
       } else {
@@ -153,6 +158,9 @@ get_or_create_property(
   }
 
   uint32_t idx = seq.length();
+  if (idx && !(idx & (idx - 1))) {
+    seq.length(2 * idx);
+  }
   seq.length(idx + 1);
   seq[idx].name = name.c_str();
   seq[idx].value._d(kind);

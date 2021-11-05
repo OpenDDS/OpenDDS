@@ -15,6 +15,7 @@
 #include "dds/DCPS/RTPS/MessageTypes.h"
 #include "dds/DCPS/RTPS/Logging.h"
 #include "dds/DCPS/GuidUtils.h"
+#include <dds/DCPS/LogAddr.h>
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/transport/framework/TransportDebug.h"
 
@@ -74,6 +75,11 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
 
   if (ret == -1) {
     return ret;
+  }
+
+  if (remote_address.get_size() > remote_address.get_addr_size()) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpReceiveStrategy::receive_bytes_helper - invalid address size\n"));
+    return 0;
   }
 
   if (n > 0 && ret > 0 && iov[0].iov_len >= 4 && std::memcmp(iov[0].iov_base, "RTPS", 4) == 0) {
@@ -141,11 +147,10 @@ namespace {
   ssize_t recv_err(const char* msg, const ACE_INET_Addr& remote, const DCPS::RepoId& peer, bool& stop)
   {
     if (security_debug.encdec_warn) {
-      ACE_TCHAR addr_buff[DCPS::AddrToStringSize] = {};
-      remote.addr_to_string(addr_buff, DCPS::AddrToStringSize);
       GuidConverter gc(peer);
       ACE_ERROR((LM_WARNING, "(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy::receive_bytes - "
-                 "from %s %C secure RTPS processing failed: %C\n", addr_buff, OPENDDS_STRING(gc).c_str(), msg));
+                 "from %C %C secure RTPS processing failed: %C\n",
+                 DCPS::LogAddr(remote).c_str(), OPENDDS_STRING(gc).c_str(), msg));
     }
     stop = true;
     return 0;

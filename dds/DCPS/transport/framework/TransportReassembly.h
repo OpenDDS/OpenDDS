@@ -92,6 +92,10 @@ private:
     SequenceNumber data_sample_seq_;
   };
 
+#if defined ACE_HAS_CPP11
+  OPENDDS_OOAT_CUSTOM_HASH(FragKey, OpenDDS_Dcps_Export, FragKeyHash);
+#endif
+
   // A FragRange represents a chunk of a partially-reassembled message.
   // The transport_seq_ range is the range of transport sequence numbers
   // that were used to send the given chunk of data.
@@ -108,22 +112,53 @@ private:
   // least one value in it.  If a FragRange in the list has a sample_ with
   // a null ACE_Message_Block*, it's one that was data_unavailable().
   typedef OPENDDS_LIST(FragRange) FragRangeList;
+  typedef OPENDDS_MAP(SequenceNumber::Value, FragRangeList::iterator) FragRangeIterMap;
 
   struct FragInfo {
     FragInfo()
       : have_first_(false), range_list_(), total_frags_(0) {}
     FragInfo(bool hf, const FragRangeList& rl, ACE_UINT32 tf, const MonotonicTimePoint& expiration)
-      : have_first_(hf), range_list_(rl), total_frags_(tf), expiration_(expiration) {}
+      : have_first_(hf), range_list_(rl), total_frags_(tf), expiration_(expiration)
+    {
+      for (FragRangeList::iterator it = range_list_.begin(); it != range_list_.end(); ++it) {
+        range_finder_[it->transport_seq_.second.getValue()] = it;
+      }
+    }
+
+    FragInfo(const FragInfo& val)
+    {
+      *this = val;
+    }
+
+    FragInfo& operator=(const FragInfo& rhs)
+    {
+      if (this != &rhs) {
+        have_first_ = rhs.have_first_;
+        range_list_ = rhs.range_list_;
+        total_frags_ = rhs.total_frags_;
+        expiration_ = rhs.expiration_;
+        range_finder_.clear();
+        for (FragRangeList::iterator it = range_list_.begin(); it != range_list_.end(); ++it) {
+          range_finder_[it->transport_seq_.second.getValue()] = it;
+        }
+      }
+      return *this;
+    }
 
     bool have_first_;
     FragRangeList range_list_;
+    FragRangeIterMap range_finder_;
     ACE_UINT32 total_frags_;
     MonotonicTimePoint expiration_;
   };
 
   mutable ACE_Thread_Mutex mutex_;
 
+#ifdef ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP_CHASH(FragKey, FragInfo, FragKeyHash) FragInfoMap;
+#else
   typedef OPENDDS_MAP(FragKey, FragInfo) FragInfoMap;
+#endif
   FragInfoMap fragments_;
 
   typedef std::pair<MonotonicTimePoint, FragKey> ElementType;
@@ -137,7 +172,8 @@ private:
 
   void check_expirations(const MonotonicTimePoint& now);
 
-  static bool insert(OPENDDS_LIST(FragRange)& flist,
+  static bool insert(FragRangeList& flist,
+                     FragRangeIterMap& fri_map,
                      const SequenceRange& seqRange,
                      ReceivedDataSample& data);
 };

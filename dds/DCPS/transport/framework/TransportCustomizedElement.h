@@ -36,6 +36,8 @@ public:
   SequenceNumber sequence() const;
   void set_sequence(const SequenceNumber& value);
 
+  virtual ACE_Message_Block* duplicate_msg() const;
+
   virtual const ACE_Message_Block* msg() const;
   void set_msg(Message_Block_Ptr m);
 
@@ -55,8 +57,11 @@ protected:
 
   virtual ~TransportCustomizedElement();
 
+  static const TransportSendElement* find_original_send_element(TransportQueueElement* orig);
+
 private:
   TransportQueueElement* orig_;
+  const TransportSendElement* original_send_element_;
   Message_Block_Ptr msg_;
   RepoId publication_id_;
   RepoId subscription_id_;

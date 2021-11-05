@@ -4,12 +4,10 @@
 #include "ParticipantStatisticsReporter.h"
 #include "RelayStatisticsReporter.h"
 
-#include "lib/Utility.h"
+#include <dds/rtpsrelaylib/Utility.h>
 
 #include <dds/DCPS/TimeTypes.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
-
-#include <unordered_map>
 
 namespace RtpsRelay {
 

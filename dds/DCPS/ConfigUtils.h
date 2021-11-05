@@ -12,8 +12,7 @@
 
 #include <ace/Configuration.h>
 
-#include <sstream>
-#include <cstdlib>
+#include <ace/Configuration.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

@@ -1060,7 +1060,7 @@ DDS::ReturnCode_t
 ReplayerImpl::write_to_reader (DDS::InstanceHandle_t    subscription,
                                const RawDataSampleList& samples )
 {
-  if (samples.size())
+  if (!samples.empty())
     return write(&samples[0], static_cast<int>(samples.size()), &subscription);
   return DDS::RETCODE_ERROR;
 }

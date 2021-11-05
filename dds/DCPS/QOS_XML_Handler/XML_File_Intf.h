@@ -4,6 +4,7 @@
  *
  *
  *  @author Marcel Smit (msmit@remedy.nl)
+ *  @author Danilo C. Zanella (dczanella@gmail.com)
  */
 //================================================================
 
@@ -16,12 +17,17 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "dds_qos.hpp"
+#include "XML_Intf.h"
 #include "dds/DdsDcpsInfrastructureC.h"
+#include "ace/XML_Utils/XML_Helper.h"
 #include "OpenDDS_XML_QOS_Handler_Export.h"
 
 namespace XML
 {
-  class XML_Typedef;
+  struct Environment_Resolver;
+  template <typename Resolver>
+  class XML_Schema_Resolver;
+  class XML_Error_Handler;
 }
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -29,88 +35,45 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-  class OpenDDS_XML_QOS_Handler_Export QOS_XML_File_Handler
+  class OpenDDS_XML_QOS_Handler_Export QOS_XML_File_Handler :
+    public QOS_XML_Handler
   {
   public:
-    QOS_XML_File_Handler(void);
+    /// Pass an optional @error_handler which is called back when
+    /// there are any errors parsing the input XML. The QOS_XML_File_Handler
+    /// will assume ownership when a pointer is passed
+    explicit QOS_XML_File_Handler(XML::XML_Error_Handler* error_handler = 0);
 
-    ~QOS_XML_File_Handler(void);
+    ~QOS_XML_File_Handler();
 
     /**
-     *
-     * init
-     *
      * The init method will open the file and will validate
      * it against the schema. It returns RETCODE_ERROR
      * when any error occurs during parsing
-     *
      */
-    DDS::ReturnCode_t
-    init(const ACE_TCHAR * file);
-
-
-    //@{
-    /**
-     *
-     * These methods will search for the profileQos in
-     * profiles_, using the given profile_name.
-     * If found, these methods will invoke
-     * the corresponding method on the corresponding Handler
-     * class.
-     * These classes are available in the
-     * xxxQos_Handler.h files.
-     *
-     */
-    DDS::ReturnCode_t
-    get_datawriter_qos(::DDS::DataWriterQos& dw_qos,
-                        const ACE_TCHAR * profile_name,
-                        const ACE_TCHAR * topic_name);
-
-    DDS::ReturnCode_t
-    get_datareader_qos(::DDS::DataReaderQos& dr_qos,
-                        const ACE_TCHAR * profile_name,
-                        const ACE_TCHAR * topic_name);
-
-    DDS::ReturnCode_t
-    get_topic_qos(::DDS::TopicQos& tp_qos,
-                    const ACE_TCHAR * profile_name,
-                    const ACE_TCHAR * topic_name);
-
-    DDS::ReturnCode_t
-    get_publisher_qos(::DDS::PublisherQos& pub_qos,
-                        const ACE_TCHAR * profile_name);
-
-    DDS::ReturnCode_t
-    get_subscriber_qos(::DDS::SubscriberQos& sub_qos,
-                        const ACE_TCHAR * profile_name);
-
-    DDS::ReturnCode_t
-    get_participant_qos(::DDS::DomainParticipantQos& sub_qos,
-                          const ACE_TCHAR * profile_name);
-    //@}
+    DDS::ReturnCode_t init(const ACE_TCHAR * file);
 
     /**
-     *
      * add_search_path will add a relative path to the XML
      * parsing library. The XML parsing library will use
      * this path to search for the schema
-     *
      */
     void
     add_search_path(const ACE_TCHAR *environment,
-                      const ACE_TCHAR *relpath);
+                    const ACE_TCHAR *relpath);
 
   private:
-    ::dds::qosProfile_seq profiles_;
-    typedef XML::XML_Typedef XML_Helper_type;
+    typedef XML::XML_Schema_Resolver<XML::Environment_Resolver> XML_RESOLVER;
+    typedef XML::XML_Helper<XML_RESOLVER, XML::XML_Error_Handler> XML_HELPER;
 
-    /**
-     *
-     * Searches for the profile in the XML file, using the given
-     * profile name.
-     *
-     */
-    ::dds::qosProfile * get_profile(const ACE_TCHAR * profile_name);
+    /// Schema resolver
+    XML_RESOLVER *res_;
+
+    /// Error handler
+    XML::XML_Error_Handler *eh_;
+
+    /// XML Helper
+    XML_HELPER helper_;
   };
 }
 }

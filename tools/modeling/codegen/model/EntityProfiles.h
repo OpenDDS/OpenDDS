@@ -1,7 +1,7 @@
 // -*- C++ -*-
 //
-#ifndef ENTITYPROFILES_H
-#define ENTITYPROFILES_H
+#ifndef OPENDDS_MODEL_ENTITYPROFILES_H
+#define OPENDDS_MODEL_ENTITYPROFILES_H
 
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/PoolAllocator.h"

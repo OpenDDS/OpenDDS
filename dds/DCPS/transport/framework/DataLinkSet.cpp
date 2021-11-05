@@ -93,9 +93,13 @@ OpenDDS::DCPS::DataLinkSet::empty()
 
 void OpenDDS::DCPS::DataLinkSet::terminate_send_if_suspended()
 {
-  GuardType guard(this->lock_);
-  for (MapType::iterator itr = map_.begin();
-      itr != map_.end(); ++itr) {
+  MapType map_copy;
+  {
+    GuardType guard(lock_);
+    map_copy = map_;
+  }
+  for (MapType::iterator itr = map_copy.begin();
+      itr != map_copy.end(); ++itr) {
         itr->second->terminate_send_if_suspended();
   }
 }

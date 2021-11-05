@@ -119,6 +119,10 @@ sub do_cached_parse {
   my %mparams;
   my @include;
   if (defined $flags) {
+    if (-e "$ENV{TAO_ROOT}/tao/idl_features.h") {
+      $macros{"__TAO_IDL_FEATURES"} = "\"tao/idl_features.h\"";
+      $macros{"TAO_IDL_HAS_EXPLICIT_INTS"} = 1;
+    }
     foreach my $arg (split /\s+/, $flags) {
       if ($arg =~ /^\-D(\w+)(?:=(.+))?/) {
         $macros{$1} = $2 || 1;
@@ -731,17 +735,23 @@ sub preprocess {
           elsif (!$$skip[scalar(@$skip) - 1]) {
             ## If we're not skipping text, see if the preprocessor
             ## directive was an include.
-            if ($pline =~ /^include\s+(["<])(.*)([>"])$/) {
-              my $s     = $1;
-              my $file  = $2;
-              my $e     = $3;
-
-              ## Make sure that we have matching include file delimiters
-              if (!(($s eq '<' && $e eq '>') || $s eq $e)) {
-                ## Unmatched character
+            if ($pline =~ /^include\s+(.*)$/) {
+              my $expr = $1;
+              if (defined $macros->{$expr}) {
+                $expr = $macros->{$expr};
               }
-              else {
-                $self->include_file($file, $includes, $macros, $mparams);
+              if ($expr =~ /^(["<])(.*)([>"])$/) {
+                my $s     = $1;
+                my $file  = $2;
+                my $e     = $3;
+
+                ## Make sure that we have matching include file delimiters
+                if (!(($s eq '<' && $e eq '>') || $s eq $e)) {
+                  ## Unmatched character
+                }
+                else {
+                  $self->include_file($file, $includes, $macros, $mparams);
+                }
               }
             }
             elsif ($pline =~ /^define\s+(([a-z_]\w+)(\(([^\)]+)\))?)(\s+(.*))?$/i) {
@@ -869,6 +879,11 @@ sub evaluate_if {
       $status = (defined $macros->{$macro} &&
                  $macros->{$macro} eq $val ? 1 : 0);
       $status = !$status if ($not);
+    }
+    elsif ($value =~ /^([_a-z]\w*)$/i) {
+      my $macro = $1;
+      $status = (defined $macros->{$macro} &&
+                 $self->evaluate_if($macros, $macros->{$macro}));
     }
     elsif ($value =~ /^\d+$/) {
       $status = ($value ? 1 : 0);

@@ -48,7 +48,6 @@
 #include <dds/DdsDcpsCoreTypeSupportImpl.h>
 #ifdef OPENDDS_SECURITY
 #  include <dds/DdsSecurityCoreC.h>
-#  include <dds/DCPS/security/framework/HandleRegistry.h>
 #endif
 
 #ifndef ACE_HAS_CPP11
@@ -1285,6 +1284,11 @@ private:
                      const DiscoveredSubscription_SecurityWrapper& wrapper);
 #endif
 
+  /// This is a function to unify the notification of liveliness within RTPS
+  /// The local participant map is checked for associated entities and then they are notified
+  /// of liveliness if their QoS is compatible
+  void notify_liveliness(const ParticipantMessageData& pmd);
+
   void data_received(DCPS::MessageId message_id,
                      const ParticipantMessageData& data);
 
@@ -1499,7 +1503,7 @@ protected:
 
     if (topic_counter_ == 0x1000000) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: EndpointManager::assign_topic_key: ")
+                 ACE_TEXT("(%P|%t) ERROR: Sedp::assign_topic_key: ")
                  ACE_TEXT("Exceeded Maximum number of topic entity keys!")
                  ACE_TEXT("Next key will be a duplicate!\n")));
       topic_counter_ = 0;

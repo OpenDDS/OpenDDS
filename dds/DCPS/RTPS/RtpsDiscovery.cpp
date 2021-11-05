@@ -5,6 +5,7 @@
 
 #include "RtpsDiscovery.h"
 
+#include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/ConfigUtils.h>
 #include <dds/DCPS/DomainParticipantImpl.h>
@@ -45,6 +46,10 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , quick_resend_ratio_(0.1)
   , min_resend_delay_(TimeDuration::from_msec(100))
   , lease_duration_(300)
+  , max_lease_duration_(300)
+#ifdef OPENDDS_SECURITY
+  , security_unsecure_lease_duration_(30)
+#endif
   , lease_extension_(0)
   , pb_(7400) // see RTPS v2.1 9.6.1.3 for PB, DG, PG, D0, D1 defaults
   , dg_(250)
@@ -142,10 +147,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       // spdpaddr defaults to DCPSDefaultAddress if set
       if (TheServiceParticipant->default_address() != ACE_INET_Addr()) {
         config->spdp_local_address(TheServiceParticipant->default_address());
-        ACE_TCHAR buff[ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 1];
-        TheServiceParticipant->default_address().addr_to_string(static_cast<ACE_TCHAR*>(buff), ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 1);
-        OPENDDS_STRING addr_str(ACE_TEXT_ALWAYS_CHAR(static_cast<const ACE_TCHAR*>(buff)));
-        config->multicast_interface(addr_str.substr(0, addr_str.find_first_of(':')));
+        config->multicast_interface(DCPS::LogAddr::ip(TheServiceParticipant->default_address()));
       }
 
       DCPS::ValueMap values;
@@ -197,6 +199,30 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
               value.c_str(), rtps_name.c_str()), -1);
           }
           config->lease_duration(TimeDuration(duration));
+        } else if (name == "MaxLeaseDuration") {
+          const OPENDDS_STRING& value = it->second;
+          int duration;
+          if (!DCPS::convertToInteger(value, duration)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+              ACE_TEXT("Invalid entry (%C) for MaxLeaseDuration in ")
+              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->max_lease_duration(TimeDuration(duration));
+#ifdef OPENDDS_SECURITY
+        } else if (name == "SecurityUnsecureLeaseDuration") {
+          const OPENDDS_STRING& value = it->second;
+          int duration;
+          if (!DCPS::convertToInteger(value, duration)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+              ACE_TEXT("Invalid entry (%C) for SecurityUnsecureLeaseDuration in ")
+              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->security_unsecure_lease_duration(TimeDuration(duration));
+#endif
         } else if (name == "LeaseExtension") {
           const OPENDDS_STRING& value = it->second;
           int extension;
@@ -793,7 +819,6 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
 }
 
 // Participant operations:
-
 OpenDDS::DCPS::RepoId
 RtpsDiscovery::generate_participant_guid()
 {
@@ -804,8 +829,8 @@ RtpsDiscovery::generate_participant_guid()
     if (guid_gen_.interfaceName(guid_interface.c_str()) != 0) {
       if (DCPS::DCPS_debug_level) {
         ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsDiscovery::generate_participant_guid()"
-                   " - attempt to use specific network interface's MAC addr for"
-                   " GUID generation failed.\n"));
+                   " - attempt to use network interface %C MAC addr for"
+                   " GUID generation failed.\n", guid_interface.c_str()));
       }
     }
   }
@@ -826,8 +851,8 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
     if (guid_gen_.interfaceName(guid_interface.c_str()) != 0) {
       if (DCPS::DCPS_debug_level) {
         ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsDiscovery::add_domain_participant()"
-                   " - attempt to use specific network interface's MAC addr for"
-                   " GUID generation failed.\n"));
+                   " - attempt to use specific network interface %C MAC addr for"
+                   " GUID generation failed.\n", guid_interface.c_str()));
       }
     }
   }

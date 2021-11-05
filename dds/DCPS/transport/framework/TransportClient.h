@@ -145,7 +145,7 @@ public:
 
   bool is_leading(const GUID_t& reader_id) const;
 
-private:
+ private:
 
   // Implemented by derived classes (DataReaderImpl/DataWriterImpl)
   virtual bool check_transport_qos(const TransportInst& inst) = 0;
