@@ -912,12 +912,14 @@ RtpsUdpReceiveStrategy::check_header(const RtpsSampleHeader& header)
 }
 
 void
-RtpsUdpReceiveStrategy::begin_transport_header_processing() {
+RtpsUdpReceiveStrategy::begin_transport_header_processing()
+{
   link_->enable_response_queue();
 }
 
 void
-RtpsUdpReceiveStrategy::end_transport_header_processing() {
+RtpsUdpReceiveStrategy::end_transport_header_processing()
+{
   link_->disable_response_queue();
 }
 
