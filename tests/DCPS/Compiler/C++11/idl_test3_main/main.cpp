@@ -1,6 +1,7 @@
 #include "../idl_test3_lib/FooDefTypeSupportImpl.h"
 #include "../idl_test3_lib/FooDef2TypeSupportImpl.h"
 #include "../idl_test3_lib/FooDef3TypeSupportImpl.h"
+#include <dds/DCPS/JsonValueWriter.h>
 
 #include <tao/CDR.h>
 
@@ -18,6 +19,25 @@ using OpenDDS::DCPS::SerializedSizeBound;
 using OpenDDS::DCPS::Encoding;
 const Encoding unaligned_encoding(Encoding::KIND_UNALIGNED_CDR);
 const Encoding aligned_encoding(Encoding::KIND_XCDR1);
+
+#if OPENDDS_HAS_JSON_VALUE_WRITER
+// Helper class to test if the correct number of elements got written
+// by our ValueWriter
+class TestWriter : public ::OpenDDS::DCPS::JsonValueWriter<>
+{
+public:
+  TestWriter () : elements_ (0) {};
+  virtual void write_int16_array(const ACE_CDR::Short*, size_t length)
+  {
+    elements_ += length;
+  }
+  virtual void write_string(const ACE_CDR::Char*)
+  {
+    ++elements_;
+  }
+  size_t elements_;
+};
+#endif
 
 template<typename FOO>
 bool try_marshaling(const FOO& in_foo, FOO& out_foo,
@@ -624,6 +644,47 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   } else {
     ACE_DEBUG((LM_DEBUG, "NOTE: gen_has_key(foo) returned false\n"));
   }
+
+#if OPENDDS_HAS_JSON_VALUE_WRITER
+  TestWriter test_writer1;
+  ::Xyz::s_vwrite1 aos;
+  OpenDDS::DCPS::vwrite (test_writer1, aos);
+  if (test_writer1.elements_ != 5u) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Number of elements written by vwrite not correct for ::Xyz::s_vwrite1\n")));
+    failed = true;
+  }
+  TestWriter test_writer2;
+  ::Xyz::s_vwrite2 taos;
+  OpenDDS::DCPS::vwrite (test_writer2, taos);
+  if (test_writer2.elements_ != (3u * 4u)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Number of elements written by vwrite not correct for ::Xyz::s_vwrite2\n")));
+    failed = true;
+  }
+  TestWriter test_writer3;
+  ::Xyz::s_vwrite3 mdaofs;
+  OpenDDS::DCPS::vwrite (test_writer3, mdaofs);
+  if (test_writer3.elements_ != (2u * 3u * 4u)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Number of elements written by vwrite not correct for ::Xyz::s_vwrite3\n")));
+    failed = true;
+  }
+  TestWriter test_writer4;
+  ::Xyz::s_vwrite4 stringarray;
+  OpenDDS::DCPS::vwrite (test_writer4, stringarray);
+  if (test_writer4.elements_ != (2u * 3u * 4u * 5u)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Number of elements written by vwrite not correct for ::Xyz::s_vwrite4\n")));
+    failed = true;
+  }
+  TestWriter test_writer5;
+  ::Xyz::s_vwrite5 shortseq;
+  shortseq.a().resize(2);
+  shortseq.a()[0] = 77;
+  shortseq.a()[1] = 88;
+  OpenDDS::DCPS::vwrite (test_writer5, shortseq);
+  if (test_writer5.elements_ != 2u) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("Number of elements written by vwrite not correct for ::Xyz::s_vwrite5\n")));
+    failed = true;
+  }
+#endif
 
   Xyz::Foo ss_foo;
 
