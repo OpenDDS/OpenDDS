@@ -50,7 +50,7 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , max_lease_duration_(300)
 #ifdef OPENDDS_SECURITY
   , security_unsecure_lease_duration_(30)
-  , max_participants_in_authentication_(std::numeric_limits<unsigned int>::max())
+  , max_participants_in_authentication_(0)
 #endif
   , lease_extension_(0)
   , pb_(7400) // see RTPS v2.1 9.6.1.3 for PB, DG, PG, D0, D1 defaults
@@ -1246,6 +1246,11 @@ bool RtpsDiscovery::update_domain_participant_qos(
   DDS::DomainId_t domain, const GUID_t& participant, const DDS::DomainParticipantQos& qos)
 {
   return get_part(domain, participant)->update_domain_participant_qos(qos);
+}
+
+bool RtpsDiscovery::has_domain_participant(DDS::DomainId_t domain, const GUID_t& local, const GUID_t& remote) const
+{
+  return get_part(domain, local)->has_domain_participant(remote);
 }
 
 DCPS::TopicStatus RtpsDiscovery::assert_topic(

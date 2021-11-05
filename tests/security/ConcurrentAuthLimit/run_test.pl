@@ -8,12 +8,14 @@ use PerlDDS::Run_Test;
 use strict;
 
 my $test = new PerlDDS::TestFramework();
-$test->{dcps_debug_level} = 8;
+$test->{dcps_security_debug} = 'auth_debug';
 
-my $opts .= "-ORBDebugLevel 8 -DCPSConfigFile rtps_disc.ini";
-$test->process('max_in_authentication', 'max_in_authentication', $opts);
-$test->start_process('max_in_authentication');
-my $result = $test->finish(60);
+$test->process('ConcurrentAuthLimit', 'ConcurrentAuthLimit', "");
+if ($test->{flags}->{"no_limit"}) {
+    $ENV{'no_limit'} = 'true';
+}
+$test->start_process('ConcurrentAuthLimit');
+my $result = $test->finish(10);
 if ($result != 0) {
   print STDERR "ERROR: test returned $result\n";
   exit 1;
