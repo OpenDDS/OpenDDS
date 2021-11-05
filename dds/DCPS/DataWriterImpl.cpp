@@ -2517,6 +2517,7 @@ DataWriterImpl::prepare_to_delete()
   this->set_deleted(true);
   this->stop_associating();
   this->terminate_send_if_suspended();
+  publication_id_condition_.notify_all();
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   // Trigger data to be persisted, i.e. made durable, if so

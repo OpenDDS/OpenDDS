@@ -2517,6 +2517,7 @@ DataReaderImpl::prepare_to_delete()
   this->set_deleted(true);
   this->stop_associating();
   this->send_final_acks();
+  subscription_id_condition_.notify_all();
 }
 
 SubscriptionInstance_rch
