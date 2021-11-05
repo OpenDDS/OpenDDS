@@ -1610,7 +1610,7 @@ if ($opts{'openssl'} && $opts{'openssl'} ne 'skip_version_check') {
       print "OpenSSL version detected: \"$ver\"\n" if $opts{'verbose'};
       if ($ver =~ /OpenSSL[\W]+1\.1/ || $ver =~ /OpenSSL[\W]+3\./) {
         print "OpenSSL 1.1+ MPC feature enabled\n" if $opts{'verbose'};
-        push(@features, 'openssl11=1') if $1;
+        push(@features, 'openssl11=1');
       }
       last;
     }
