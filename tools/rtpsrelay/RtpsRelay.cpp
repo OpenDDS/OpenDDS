@@ -202,6 +202,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-Id"))) {
       config.relay_id(arg);
       args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-ThreadMonitorPeriod"))) {
+      config.thread_monitor_period(ACE_OS::atoi(arg));
+      args.consume_arg();
     } else {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Invalid option: %C\n", args.get_current()));
       return 1;
@@ -269,6 +272,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   TheServiceParticipant->bit_autopurge_disposed_samples_delay(one_minute);
 
   // Set up the relay participant.
+  RtpsRelay::Thread_Monitor thread_mon(config.thread_monitor_period());
+  OpenDDS::DCPS::Thread_Monitor::installed_monitor_ = &thread_mon;
+
   DDS::DomainParticipantQos participant_qos;
   factory->get_default_participant_qos(participant_qos);
   DDS::PropertySeq& relay_properties = participant_qos.property.value;
@@ -809,8 +815,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   RelayStatusReporter relay_status_reporter(config, guid_addr_set, relay_status_writer, reactor);
-
+  thread_mon.start();
   reactor->run_reactor_event_loop();
+  thread_mon.stop();
 
   spdp_vertical_handler.stop();
   sedp_vertical_handler.stop();
