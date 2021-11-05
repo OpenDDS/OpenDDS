@@ -25,7 +25,6 @@ Running
 .. note:: Make sure :envvar:`ACE_ROOT` and :envvar:`DDS_ROOT` are set, which can be done by running ``source setenv.sh`` on Linux and macOS or ``call setenv.cmd`` on Windows.
 
 OpenDDS' main suite of tests is ran by the :ghfile:`tests/auto_run_tests.pl` Perl script that reads lists of tests from files and selectively runs based on how the script has been configured.
-By default it configures itself, but it can be configured manually.
 
 For Unixes (Linux, macOS, BSDs, etc)
 ------------------------------------

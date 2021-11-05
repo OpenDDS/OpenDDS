@@ -16,6 +16,7 @@ project: acelib, dds_macros, install {
     debug.h
     XTypes/External.h
     XTypes/TypeObject.h
+    transport/framework/TransportDebug.h
   }
 
   specific {
@@ -29,6 +30,7 @@ project: acelib, dds_macros, install {
     Serializer.cpp
     debug.cpp
     XTypes/TypeObject.cpp
+    transport/framework/TransportDebug.cpp
   }
 
   verbatim(gnuace, local, 1) {

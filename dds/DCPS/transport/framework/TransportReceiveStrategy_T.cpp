@@ -178,7 +178,7 @@ TransportReceiveStrategy<TH, DSH>::handle_simple_dds_input(ACE_HANDLE fd)
   }
 
   {
-    ScopedHeaderProcessing(*this);
+    const ScopedHeaderProcessing shp(*this);
     while (bytes_remaining > 0) {
       data_sample_header_.pdu_remaining(bytes_remaining);
       data_sample_header_ = *cur_rb;

@@ -29,6 +29,7 @@
 #include <dds/DCPS/Logging.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
 #include <dds/DCPS/DcpsUpcalls.h>
+#include <dds/DCPS/Util.h>
 #include <dds/DCPS/transport/framework/NetworkAddress.h>
 #include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdpInst.h>
@@ -1553,7 +1554,7 @@ Sedp::disassociate(DiscoveredParticipant& participant)
       ENTITYID_TL_SVC_REPLY_WRITER_SECURE,
       ENTITYID_TL_SVC_REPLY_READER_SECURE
     };
-    for (size_t i = 0; i < sizeof secure_entities / sizeof secure_entities[0]; ++i) {
+    for (size_t i = 0; i < DCPS::array_count(secure_entities); ++i) {
       remove_remote_crypto_handle(part, secure_entities[i]);
     }
 
