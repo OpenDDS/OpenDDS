@@ -27,7 +27,7 @@ const Encoding aligned_encoding(Encoding::KIND_XCDR1);
 class TestWriter : public ::OpenDDS::DCPS::JsonValueWriter<>
 {
 public:
-  TestWriter () : elements_ (0) {};
+  TestWriter () : elements_ (0) {}
   virtual void write_int16_array(const ACE_CDR::Short* x, size_t length)
   {
     elements_ += length;
