@@ -8,6 +8,7 @@
 #include "ParticipantStatisticsReporter.h"
 #include "RelayPartitionTable.h"
 #include "RelayStatisticsReporter.h"
+#include "ThreadMonitor.h"
 
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 
@@ -62,6 +63,7 @@ protected:
 
 private:
   ACE_SOCK_Dgram socket_;
+
   struct Element {
     ACE_INET_Addr address;
     OpenDDS::DCPS::Message_Block_Shared_Ptr message_block;
