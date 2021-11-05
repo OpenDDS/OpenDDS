@@ -12,6 +12,8 @@
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/PoolAllocator.h>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
 namespace CORBA {
 class LongSeq;
 class ULongSeq;
@@ -31,8 +33,6 @@ class BooleanSeq;
 class StringSeq;
 class WStringSeq;
 }
-
-OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace XTypes {

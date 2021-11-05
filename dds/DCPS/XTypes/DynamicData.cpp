@@ -96,7 +96,6 @@ DynamicData::~DynamicData()
 
 void DynamicData::copy(const DynamicData& other)
 {
-  ACE_Message_Block::release(chain_);
   chain_ = other.chain_->duplicate();
   encoding_ = other.encoding_;
   reset_align_state_ = other.reset_align_state_;
