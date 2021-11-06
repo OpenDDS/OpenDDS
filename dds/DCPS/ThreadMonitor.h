@@ -22,6 +22,10 @@ namespace DCPS {
   class Thread_Monitor
   {
   public:
+    virtual ~Thread_Monitor()
+    {
+    }
+
     enum UpdateMode {
       EXPLICIT_IDLE,
       EXPLICIT_BUSY,
