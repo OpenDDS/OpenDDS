@@ -31,17 +31,31 @@ public:
   class Command
   : public RcObject {
   public:
-    Command() : executed_(false), condition_(mutex_), reactor_(0) {}
+    Command() : executed_(false), on_queue_(false), condition_(mutex_), reactor_(0) {}
     virtual ~Command() { }
-    virtual bool should_execute() const { return true; }
-    virtual void will_execute() {}
-    virtual void execute() = 0;
-    virtual void queue_flushed() {}
 
-    void reset()
+    bool reset()
+    {
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, false);
+      executed_ = false;
+      bool retval = on_queue_;
+      on_queue_ = true;
+      return retval;
+    }
+
+    virtual void execute() = 0;
+
+    void dequeue()
     {
       ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
-      executed_ = false;
+      on_queue_ = false;
+    }
+
+    void executed()
+    {
+      ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
+      executed_ = true;
+      condition_.notify_all();
     }
 
     void wait() const
@@ -50,13 +64,6 @@ public:
       while (!executed_) {
         condition_.wait();
       }
-    }
-
-    void executed()
-    {
-      ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
-      executed_ = true;
-      condition_.notify_all();
     }
 
   protected:
@@ -68,6 +75,7 @@ public:
     void set_reactor(ACE_Reactor* reactor) { reactor_ = reactor; }
 
     bool executed_;
+    bool on_queue_;
     mutable ACE_Thread_Mutex mutex_;
     mutable ConditionVariable<ACE_Thread_Mutex> condition_;
     ACE_Reactor* reactor_;
@@ -89,7 +97,7 @@ public:
 
   bool should_execute_immediately();
 
-  CommandPtr execute_or_enqueue(Command* c)
+  CommandPtr execute_or_enqueue(CommandPtr c)
   {
     OPENDDS_ASSERT(c);
     const bool immediate = should_execute_immediately();
@@ -110,19 +118,18 @@ protected:
     PROCESSING
   };
 
-  CommandPtr enqueue_i(Command* c, bool immediate)
+  CommandPtr enqueue_i(CommandPtr command, bool immediate)
   {
-    c->reset();
-    c->set_reactor(reactor());
+    if (command->reset()) {
+      return command;
+    }
+
+    command->set_reactor(reactor());
+
     bool do_notify = false;
-    const CommandPtr command(c, keep_count());
     {
       ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-      if (!command->should_execute()) {
-        return CommandPtr();
-      }
       command_queue_.push_back(command);
-      command->will_execute();
       if (state_ == NONE) {
         state_ = NOTIFIED;
         do_notify = true;

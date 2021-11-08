@@ -20,9 +20,10 @@ class SporadicTask : public RcEventHandler {
 public:
   explicit SporadicTask(RcHandle<ReactorInterceptor> interceptor)
     : interceptor_(interceptor)
-    , scheduled_(false)
-    , last_command_(SPORADIC_TASK_NONE)
+    , desired_scheduled_(false)
+    , actual_scheduled_(false)
   {
+    sporadic_command_ = make_rch<SporadicCommand>(this);
     reactor(interceptor->reactor());
   }
 
@@ -30,17 +31,21 @@ public:
 
   void schedule(const TimeDuration& delay)
   {
-    bool worth_passing_along = false;
+    const MonotonicTimePoint next_time = MonotonicTimePoint::now() + delay;
     {
       ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-      worth_passing_along = (!scheduled_) || ((MonotonicTimePoint::now() + delay) < next_time_);
+      if (!desired_scheduled_ || next_time < desired_next_time_) {
+        desired_scheduled_ = true;
+        desired_next_time_ = next_time;
+        desired_delay_ = delay;
+      } else {
+        return;
+      }
     }
-    if (!worth_passing_along) {
-      return;
-    }
+
     RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
     if (interceptor) {
-      interceptor->execute_or_enqueue(new ScheduleCommand(this, delay));
+      interceptor->execute_or_enqueue(sporadic_command_);
     } else if (DCPS_debug_level >= 1) {
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: SporadicTask::schedule")
@@ -52,7 +57,7 @@ public:
   {
     RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
     if (interceptor) {
-      interceptor->execute_or_enqueue(new CancelCommand(this));
+      interceptor->execute_or_enqueue(sporadic_command_);
     } else if (DCPS_debug_level >= 1) {
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: SporadicTask::cancel")
@@ -64,7 +69,7 @@ public:
   {
     RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
     if (interceptor) {
-      ReactorInterceptor::CommandPtr command = interceptor->execute_or_enqueue(new CancelCommand(this));
+      ReactorInterceptor::CommandPtr command = interceptor->execute_or_enqueue(sporadic_command_);
       if (command) {
         command->wait();
       }
@@ -78,113 +83,72 @@ public:
   virtual void execute(const MonotonicTimePoint& now) = 0;
 
 private:
-  WeakRcHandle<ReactorInterceptor> interceptor_;
-  bool scheduled_;
-  enum {
-    SPORADIC_TASK_NONE,
-    SPORADIC_TASK_SCHEDULE,
-    SPORADIC_TASK_CANCEL
-  } last_command_;
-  MonotonicTimePoint next_time_;
-  mutable ACE_Thread_Mutex mutex_;
-
-  struct ScheduleCommand : public ReactorInterceptor::Command {
-    ScheduleCommand(SporadicTask* hb, const TimeDuration& delay)
-      : sporadic_task_(hb), delay_(delay)
-    { }
-
-    virtual bool should_execute() const
-    {
-      return sporadic_task_->last_command_ != SPORADIC_TASK_SCHEDULE;
-    }
-
-    virtual void will_execute()
-    {
-      sporadic_task_->last_command_ = SPORADIC_TASK_SCHEDULE;
-    }
-
-    virtual void execute()
-    {
-      sporadic_task_->schedule_i(delay_);
-    }
-
-    virtual void queue_flushed()
-    {
-      sporadic_task_->last_command_ = SPORADIC_TASK_NONE;
-    }
-
-    SporadicTask* const sporadic_task_;
-    const TimeDuration delay_;
-  };
-
-  struct CancelCommand : public ReactorInterceptor::Command {
-    CancelCommand(SporadicTask* hb)
+  struct SporadicCommand : public ReactorInterceptor::Command {
+    SporadicCommand(SporadicTask* hb)
       : sporadic_task_(hb)
     { }
 
-    virtual bool should_execute() const
-    {
-      return sporadic_task_->last_command_ != SPORADIC_TASK_CANCEL;
-    }
-
-    virtual void will_execute()
-    {
-      sporadic_task_->last_command_ = SPORADIC_TASK_CANCEL;
-    }
-
     virtual void execute()
     {
-      sporadic_task_->cancel_i();
-    }
-
-    virtual void queue_flushed()
-    {
-      sporadic_task_->last_command_ = SPORADIC_TASK_NONE;
+      sporadic_task_->execute_i();
     }
 
     SporadicTask* const sporadic_task_;
   };
+
+  WeakRcHandle<ReactorInterceptor> interceptor_;
+  bool desired_scheduled_;
+  MonotonicTimePoint desired_next_time_;
+  TimeDuration desired_delay_;
+  bool actual_scheduled_;
+  MonotonicTimePoint actual_next_time_;
+  RcHandle<SporadicCommand> sporadic_command_;
+  mutable ACE_Thread_Mutex mutex_;
 
   int handle_timeout(const ACE_Time_Value& tv, const void*)
   {
     const MonotonicTimePoint now(tv);
     {
       ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-      scheduled_ = false;
+      desired_scheduled_ = false;
+      actual_scheduled_ = false;
     }
     execute(now);
     return 0;
   }
 
-  void schedule_i(const TimeDuration& delay)
+  void execute_i()
   {
-    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    const MonotonicTimePoint now = MonotonicTimePoint::now();
-    if (!scheduled_) {
-      const long timer = reactor()->schedule_timer(this, 0, delay.value());
+    // Bump up our refcount so the Reactor doesn't delete us.
+    RcHandle<SporadicTask> x = rchandle_from(this);
 
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+
+    if (!desired_scheduled_ && actual_scheduled_) {
+      reactor()->cancel_timer(this);
+      actual_scheduled_ = false;
+    } else if (desired_scheduled_ && !actual_scheduled_) {
+      const long timer = reactor()->schedule_timer(this, 0, desired_delay_.value());
       if (timer == -1) {
         ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: SporadicTask::schedule")
+                   ACE_TEXT("(%P|%t) ERROR: SporadicTask::execute_i")
                    ACE_TEXT(" failed to schedule timer %p\n"),
                    ACE_TEXT("")));
       } else {
-        next_time_ = now + delay;
-        scheduled_ = true;
+        actual_scheduled_ = true;
+        actual_next_time_ = desired_next_time_;
       }
-    }
-  }
-
-  void
-  cancel_i()
-  {
-    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    if (scheduled_) {
-      scheduled_ = false;
+    } else if (desired_scheduled_ && actual_scheduled_ && desired_next_time_ != actual_next_time_) {
       reactor()->cancel_timer(this);
-      // Don't touch any members anymore, at this moment we could
-      // be deleted when the cancel_timer results in a drop of
-      // our refcount to 0
+      const long timer = reactor()->schedule_timer(this, 0, desired_delay_.value());
+      if (timer == -1) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: SporadicTask::execute_i")
+                   ACE_TEXT(" failed to schedule timer %p\n"),
+                   ACE_TEXT("")));
+      } else {
+        actual_next_time_ = desired_next_time_;
+      }
     }
   }
 };

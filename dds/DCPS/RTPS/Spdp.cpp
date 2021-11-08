@@ -2151,7 +2151,7 @@ Spdp::fini_bit()
     reactor_task = sedp_->reactor_task();
   }
   if (!reactor_task->is_shut_down()) {
-    DCPS::ReactorInterceptor::CommandPtr command = reactor_task->interceptor()->execute_or_enqueue(new Noop());
+    DCPS::ReactorInterceptor::CommandPtr command = reactor_task->interceptor()->execute_or_enqueue(DCPS::make_rch<Noop>());
     command->wait();
   }
 }
@@ -2395,8 +2395,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
   }
 #endif
 
-  reactor_task->interceptor()->execute_or_enqueue(
-    new RegisterHandlers(rchandle_from(this), reactor_task));
+  reactor_task->interceptor()->execute_or_enqueue(DCPS::make_rch<RegisterHandlers>(rchandle_from(this), reactor_task));
 
 #ifdef OPENDDS_SECURITY
   // Now that the endpoint is added, SEDP can write the SPDP info.
