@@ -16,9 +16,8 @@ Thread_Monitor::Thread_Monitor (int perd, size_t depth)
   }
 
 void Thread_Monitor::update(OpenDDS::DCPS::Thread_Monitor::UpdateMode mode, const char *alias) {
-  struct timespec tnow;
-  timespec_get(&tnow, TIME_UTC);
-
+  ACE_Time_Value tnow;
+  tnow = tnow.now();
   struct Sample s({mode, tnow});
   ACE_thread_t key = ACE_OS::thr_self();
   try {
@@ -36,15 +35,10 @@ void Thread_Monitor::update(OpenDDS::DCPS::Thread_Monitor::UpdateMode mode, cons
   }
 }
 
-ACE_UINT64 Thread_Monitor::to_usec (const struct timespec &ts) {
-  ACE_UINT64 ret = static_cast<ACE_UINT64>(ts.tv_sec) * 1000000;
-  ret += (ts.tv_nsec / 1000);
-  return ret;
-}
 void Thread_Monitor::summarize(void)
 {
-  struct timespec tnow;
-  timespec_get(&tnow, TIME_UTC);
+  ACE_Time_Value tnow;
+  tnow = tnow.now();
   for (auto d = this->descs_.begin(); d != this->descs_.end(); d++ ) {
     std::deque <Sample> local;
     auto &td = d->second;
@@ -54,7 +48,7 @@ void Thread_Monitor::summarize(void)
     }
     struct Load_Summary ls;
     ls.accum_[0] = ls.accum_[1] = 0;
-    ls.recorded_.set(tnow);
+    ls.recorded_ = tnow.now();
     ls.last_state_ = -1;
     if (local.empty()) {
       ACE_DEBUG ((LM_DEBUG,"TLM: sample queue for 0x%x is empty\n", d->first));
@@ -63,12 +57,15 @@ void Thread_Monitor::summarize(void)
 
     while (!local.empty()) {
       auto &s = local.front();
-      ACE_UINT64 diff = to_usec(s.at_);
+      ACE_UINT64 diff;
+      s.at_.to_usec(diff);
       int ndx = (s.mode_ == IMPLICIT_IDLE || s.mode_ == EXPLICIT_IDLE)  ? 1 : 0;
       if (s.mode_ == ls.last_state_) {
         // emit warning of consecutive samples in the same state
       }
-      diff -= to_usec(td->last_);
+      ACE_UINT64 last;
+      td->last_.to_usec (last);
+      diff -= last;
       ls.accum_[ndx] += diff;
 
       ls.last_state_ = s.mode_;

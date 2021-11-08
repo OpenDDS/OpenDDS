@@ -9,8 +9,9 @@
 #include <ace/Log_Msg.h>
 #include <ace/Thread_Adapter.h>
 
-#include <ctime>
 #include <map>
+#include <deque>
+#include <string>
 
 using namespace std;
 
@@ -38,7 +39,6 @@ namespace RtpsRelay {
     void stop(void);
 
   protected:
-    ACE_UINT64 to_usec(const struct timespec &ts);
     bool running_;
     ACE_Thread_Adapter *thr_func_;
 
@@ -47,7 +47,7 @@ namespace RtpsRelay {
 
     struct Sample {
       UpdateMode mode_;
-      struct timespec at_;
+      ACE_Time_Value at_;
     };
 
     struct Load_Summary {
@@ -60,7 +60,7 @@ namespace RtpsRelay {
       ACE_Thread_Mutex *queue_lock_;
       std::string alias_;
       std::deque<struct Sample> samples_;
-      struct timespec last_;
+      ACE_Time_Value last_;
       std::deque<struct Load_Summary> summaries_;
     } *Thr_Desc;
 
