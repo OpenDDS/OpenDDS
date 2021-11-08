@@ -281,6 +281,8 @@ Spdp::Spdp(DDS::DomainId_t domain,
   : qos_(qos)
   , disco_(disco)
   , config_(disco_->config())
+  , lease_duration_(disco_->config()->lease_duration())
+  , lease_extension_(disco_->config()->lease_extension())
   , domain_(domain)
   , guid_(guid)
   , participant_discovered_at_(MonotonicTimePoint::now().to_monotonic_time())
