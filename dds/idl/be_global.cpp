@@ -1010,7 +1010,7 @@ OpenDDS::XTypes::MemberId BE_GlobalData::compute_id(AST_Field* field, AutoidKind
   }
 
   if (mid > OpenDDS::DCPS::Serializer::MEMBER_ID_MAX) {
-    be_util::misc_error_and_abort("Member id exceeds the maximum allowed value");
+    be_util::misc_error_and_abort("Member id exceeds the maximum allowed value", field);
   }
   member_id_map_[field] = mid;
   return mid;
