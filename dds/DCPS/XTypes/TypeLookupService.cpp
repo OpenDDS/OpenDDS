@@ -459,11 +459,15 @@ bool TypeLookupService::complete_to_minimal_type_object(const TypeObject& cto, T
   }
 }
 
-MemberDescriptor TypeLookupService::complete_struct_member_to_member_descriptor(
-  const CompleteStructMember& cm, const DCPS::GUID_t& guid)
+bool TypeLookupService::complete_struct_member_to_member_descriptor(
+  MemberDescriptor& md, const CompleteStructMember& cm, const DCPS::GUID_t& guid)
 {
-  MemberDescriptor md;
   md.name = cm.detail.name;
+  if (cm.common.member_id > DCPS::Serializer::MEMBER_ID_MAX) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TypeLookupService::complete_struct_member_to_member_descriptor -")
+               ACE_TEXT(" Member id exceeds maximum allowed value\n")));
+    return false;
+  }
   md.id = cm.common.member_id;
   md.type = type_identifier_to_dynamic(cm.common.member_type_id, guid);
   md.default_value = "";
@@ -474,14 +478,18 @@ MemberDescriptor TypeLookupService::complete_struct_member_to_member_descriptor(
   md.is_must_understand = cm.common.member_flags & IS_MUST_UNDERSTAND;
   md.is_shared = cm.common.member_flags & IS_EXTERNAL;
   md.is_default_label = false;
-  return md;
+  return true;
 }
 
-MemberDescriptor TypeLookupService::complete_union_member_to_member_descriptor(
-  const CompleteUnionMember& cm, const DCPS::GUID_t& guid)
+bool TypeLookupService::complete_union_member_to_member_descriptor(
+  MemberDescriptor& md, const CompleteUnionMember& cm, const DCPS::GUID_t& guid)
 {
-  MemberDescriptor md;
   md.name = cm.detail.name;
+  if (cm.common.member_id > DCPS::Serializer::MEMBER_ID_MAX) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TypeLookupService::complete_union_member_to_member_descriptor -")
+               ACE_TEXT(" Member id exceeds maximum allowed value\n")));
+    return false;
+  }
   md.id = cm.common.member_id;
   md.type = type_identifier_to_dynamic(cm.common.type_id, guid);
   md.default_value = "";
@@ -492,7 +500,7 @@ MemberDescriptor TypeLookupService::complete_union_member_to_member_descriptor(
   md.is_must_understand = false;
   md.is_shared = cm.common.member_flags & IS_EXTERNAL;
   md.is_default_label = cm.common.member_flags & IS_DEFAULT;
-  return md;
+  return true;
 }
 
 MemberDescriptor TypeLookupService::complete_annotation_member_to_member_descriptor(
@@ -512,16 +520,18 @@ MemberDescriptor TypeLookupService::complete_annotation_member_to_member_descrip
   return md;
 }
 
+/*
 DynamicType_rch TypeLookupService::complete_to_dynamic(const CompleteTypeObject& cto, const DCPS::GUID_t& guid)
 {
   DynamicType_rch dt = DCPS::make_rch<DynamicType>();
   complete_to_dynamic_i(dt, cto, guid);
   return dt;
 }
-
-void TypeLookupService::complete_to_dynamic_i(DynamicType_rch& dt,
+*/
+bool TypeLookupService::complete_to_dynamic(DynamicType_rch& dt,
   const CompleteTypeObject& cto, const DCPS::GUID_t& guid)
 {
+  dt = DCPS::make_rch<DynamicType>();
   TypeDescriptor td;
   switch (cto.kind) {
   case TK_ALIAS:
@@ -591,14 +601,18 @@ void TypeLookupService::complete_to_dynamic_i(DynamicType_rch& dt,
     } else if (cto.struct_type.struct_flags & IS_MUTABLE) {
       td.extensibility_kind = MUTABLE;
     } else {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TypeLookupService::complete_to_dynamic_i -")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TypeLookupService::complete_to_dynamic -")
                  ACE_TEXT(" Invalid extensibility kind in TK_STRUCTURE\n")));
+      return false;
     }
     td.is_nested = cto.struct_type.struct_flags & IS_NESTED;
     for (ACE_CDR::ULong i = 0; i < cto.struct_type.member_seq.length(); ++i) {
-      DynamicTypeMember_rch dtm = DCPS::make_rch<DynamicTypeMember>();
-      MemberDescriptor md = complete_struct_member_to_member_descriptor(cto.struct_type.member_seq[i], guid);
+      MemberDescriptor md;
+      if (!complete_struct_member_to_member_descriptor(md, cto.struct_type.member_seq[i], guid)) {
+        return false;
+      }
       md.index = i;
+      DynamicTypeMember_rch dtm = DCPS::make_rch<DynamicTypeMember>();
       dtm->set_descriptor(md);
       dtm->set_parent(dt);
       dt->insert_dynamic_member(dtm);
@@ -616,12 +630,16 @@ void TypeLookupService::complete_to_dynamic_i(DynamicType_rch& dt,
     } else if (cto.union_type.union_flags & IS_MUTABLE) {
       td.extensibility_kind = MUTABLE;
     } else {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TypeLookupService::complete_to_dynamic_i -")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TypeLookupService::complete_to_dynamic -")
                  ACE_TEXT(" Invalid extensibility kind in TK_UNION\n")));
+      return false;
     }
     td.is_nested = cto.union_type.union_flags & IS_NESTED;
     for (ACE_CDR::ULong i = 0; i < cto.union_type.member_seq.length(); ++i) {
-      MemberDescriptor md = complete_union_member_to_member_descriptor(cto.union_type.member_seq[i], guid);
+      MemberDescriptor md;
+      if (!complete_union_member_to_member_descriptor(md, cto.union_type.member_seq[i], guid)) {
+        return false;
+      }
       md.index = i;
       DynamicTypeMember_rch dtm = DCPS::make_rch<DynamicTypeMember>();
       dtm->set_descriptor(md);
@@ -665,6 +683,7 @@ void TypeLookupService::complete_to_dynamic_i(DynamicType_rch& dt,
     break;
   }
   dt->set_descriptor(td);
+  return true;
 }
 
 DynamicType_rch TypeLookupService::type_identifier_to_dynamic(const TypeIdentifier& ti,
