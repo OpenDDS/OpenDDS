@@ -438,7 +438,11 @@ RecorderImpl::add_association(const RepoId&            yourId,
   }
   XTypes::TypeObject cto = tls->get_type_object(type_info.complete.typeid_with_size.type_id);
   XTypes::DynamicType_rch dt = tls->complete_to_dynamic(cto.complete, writer.writerId);
-  ACE_DEBUG((LM_DEBUG, "DynamicType added: %C\n", LogGuid(writer.writerId).c_str()));
+  if (DCPS_debug_level >= 4) {
+    ACE_DEBUG((LM_DEBUG,
+               "(%P|%t) RecorderImpl::add_association:"
+               "DynamicType added to map with guid: %C\n", LogGuid(writer.writerId).c_str()));
+  }
   dt_map_.insert(std::make_pair(writer.writerId, dt));
   if (!is_bit_) {
 
