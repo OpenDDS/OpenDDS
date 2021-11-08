@@ -51,7 +51,8 @@ Manual configuration is done by passing ``-Config``, ``-Exclude``, and test list
 
 To manually configure what tests to run:
 
-* See the ``--list-configs`` or ``--show-configs`` options to see the existing configurations used by the tests.
+* See the ``--list-all-configs`` or ``--show-all-configs`` options to see the existing configurations used by all test list files.
+* See the ``--list-configs`` or ``--show-configs`` options to see the existing configurations used by specific test list files.
 * See the test list files for the tests themselves:
 
   * :ghfile:`tests/dcps_tests.lst`
