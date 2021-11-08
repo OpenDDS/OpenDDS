@@ -6300,7 +6300,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v7
@@ -6322,7 +6322,8 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --optimize --ipv6 --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
+        call configure -v --optimize --ipv6 --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
+        perl tools\scripts\show_build_config.pl
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -7852,7 +7853,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v7
@@ -7876,7 +7877,8 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --no-inline --tests --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x86-windows --openssl=%VCPKG_ROOT%/installed/x86-windows --mpcopts=-hierarchy
+        call configure -v --no-inline --tests --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x86-windows --openssl=%VCPKG_ROOT%/installed/x86-windows --mpcopts=-hierarchy
+        perl tools\scripts\show_build_config.pl
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
