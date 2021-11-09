@@ -25,6 +25,8 @@ public:
     , log_entries_(false)
     , log_discovery_(false)
     , log_activity_(false)
+    , log_participant_statistics_(false)
+    , publish_participant_statistics_(false)
     , restart_detection_(false)
   {}
 
