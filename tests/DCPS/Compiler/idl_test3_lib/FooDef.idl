@@ -1,3 +1,6 @@
+#include "tao/ShortSeq.pidl"
+#include "tao/StringSeq.pidl"
+
 // note the following predefined types often have special cases:
 //    char, octet, boolean, string
 // where as all of the integer and float types are just one case.
