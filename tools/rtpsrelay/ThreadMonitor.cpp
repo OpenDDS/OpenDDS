@@ -24,7 +24,7 @@ void Thread_Monitor::update(OpenDDS::DCPS::Thread_Monitor::UpdateMode mode, cons
     Thr_Desc td = descs_.at(key);
     ACE_Guard <ACE_Thread_Mutex> g(*td->queue_lock_);
     td->samples_.emplace_back(std::move(s));
-  } catch (const std::out_of_range & ) {
+  } catch (const out_of_range & ) {
     Thr_Desc td = new struct Thread_Descriptor;
     td->queue_lock_ = new ACE_Thread_Mutex;
     td->last_ = tnow;
@@ -97,8 +97,7 @@ void Thread_Monitor::report_thread(ACE_thread_t key)
       double pidle = 100.0 * uidle/uspan;
       ACE_DEBUG((LM_DEBUG,"%T TLM thread: 0x%x \"%s\" busy:  %F%% idle: %F%%  measured interval: %F sec\n",
       key, td->alias_.c_str(), pbusy, pidle, uspan/1000000.0));
-    }
-    else {
+    } else {
       ACE_DEBUG((LM_DEBUG,"%T TLM thread: 0x%x \"%s\" busy:  N/A idle: N/A  measured interval: N/A\n",
       key, td->alias_.c_str()));
     }

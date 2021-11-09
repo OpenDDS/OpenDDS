@@ -20,7 +20,6 @@
 #include "Replayer.h"
 #include "ConditionVariable.h"
 #include "TimeTypes.h"
-#include "ThreadMonitor.h"
 #include "XTypes/TypeLookupService.h"
 #include "transport/framework/TransportImpl_rch.h"
 #include "security/framework/SecurityConfig_rch.h"

@@ -26,6 +26,7 @@
 #include "ContentFilteredTopicImpl.h"
 #include "MultiTopicImpl.h"
 #include "Service_Participant.h"
+#include "ThreadMonitor.h"
 #include "transport/framework/TransportRegistry.h"
 #include "transport/framework/TransportExceptions.h"
 
@@ -2399,7 +2400,7 @@ DomainParticipantImpl::LivelinessTimer::handle_timeout(
   const ACE_Time_Value& tv,
   const void* /* arg */)
 {
-  OpenDDS::DCPS::Thread_Monitor::Green_Light gl("DomainParticipant");
+  Thread_Monitor::Green_Light gl("DomainParticipant");
   const MonotonicTimePoint now(tv);
 
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, this->lock_, 0);
@@ -2497,7 +2498,7 @@ DomainParticipantImpl::set_security_config(const Security::SecurityConfig_rch& c
 int
 DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
 {
-  OpenDDS::DCPS::Thread_Monitor::Green_Light gl("DomainParticipant");
+  Thread_Monitor::Green_Light gl("DomainParticipant");
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
 
   // delete publishers
