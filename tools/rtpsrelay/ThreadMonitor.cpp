@@ -1,4 +1,5 @@
 #include "ThreadMonitor.h"
+#include <stdexcept>
 
 using namespace RtpsRelay;
 using namespace std;
