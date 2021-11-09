@@ -15,8 +15,9 @@ Thread_Monitor::Thread_Monitor (int perd, size_t depth)
     OpenDDS::DCPS::Thread_Monitor::installed_monitor_ = this;
   }
 
-void Thread_Monitor::update(OpenDDS::DCPS::Thread_Monitor::UpdateMode mode, const char *alias) {
-  ACE_Time_Value tnow;
+void Thread_Monitor::update(OpenDDS::DCPS::Thread_Monitor::UpdateMode mode, const char *alias)
+{
+  OpenDDS::DCPS::MonotonicTimePoint tnow;
   tnow = tnow.now();
   struct Sample s({mode, tnow});
   ACE_thread_t key = ACE_OS::thr_self();
@@ -37,7 +38,7 @@ void Thread_Monitor::update(OpenDDS::DCPS::Thread_Monitor::UpdateMode mode, cons
 
 void Thread_Monitor::summarize(void)
 {
-  ACE_Time_Value tnow;
+  OpenDDS::DCPS::MonotonicTimePoint tnow;
   tnow = tnow.now();
   for (auto d = this->descs_.begin(); d != this->descs_.end(); d++ ) {
     std::deque <Sample> local;
@@ -57,16 +58,12 @@ void Thread_Monitor::summarize(void)
 
     while (!local.empty()) {
       auto &s = local.front();
-      ACE_UINT64 diff;
-      s.at_.to_usec(diff);
       int ndx = (s.mode_ == IMPLICIT_IDLE || s.mode_ == EXPLICIT_IDLE)  ? 1 : 0;
       if (s.mode_ == ls.last_state_) {
         // emit warning of consecutive samples in the same state
       }
-      ACE_UINT64 last;
-      td->last_.to_usec (last);
-      diff -= last;
-      ls.accum_[ndx] += diff;
+      OpenDDS::DCPS::TimeDuration durr = s.at_ - td->last_;
+      ls.accum_[ndx] += durr;
 
       ls.last_state_ = s.mode_;
       td->last_ = s.at_;
@@ -89,8 +86,8 @@ void Thread_Monitor::report_thread(ACE_thread_t key)
     }
     const struct Load_Summary &ls = td->summaries_.back();
     ACE_UINT64 uspan, uidle, ubusy;
-    uidle = ls.accum_[0];
-    ubusy = ls.accum_[1];
+    ls.accum_[0].value().to_usec(uidle);
+    ls.accum_[1].value().to_usec(ubusy);
     uspan = uidle + ubusy;
     if (uspan > 0) {
       double pbusy = 100.0 * ubusy/uspan;
@@ -117,8 +114,9 @@ void Thread_Monitor::report(void)
 void Thread_Monitor::active_monitor(void)
 {
   while (this->running_) {
-    ACE_Time_Value expire(time(0)+this->period_);
-    this->moderator_.wait (&expire);
+    OpenDDS::DCPS::MonotonicTimePoint expire;
+    expire = expire.now() + this->period_;
+    this->moderator_.wait (&expire.value());
     if (this->running_) {
       this->summarize();
       this->report();
@@ -126,7 +124,8 @@ void Thread_Monitor::active_monitor(void)
   }
 }
 
-ACE_THR_FUNC_RETURN loadmonfunction (void *arg) {
+ACE_THR_FUNC_RETURN loadmonfunction (void *arg)
+{
   Thread_Monitor *tmon = reinterpret_cast<Thread_Monitor *>(arg);
   tmon->active_monitor();
   return 0;

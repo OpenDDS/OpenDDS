@@ -2,12 +2,12 @@
 #define RTPSRELAY_THREAD_MONITOR_H_
 
 #include <dds/DCPS/ThreadMonitor.h>
-
+#include <dds/DCPS/TimeTypes.h>
 #include <ace/Guard_T.h>
 #include <ace/Condition_Thread_Mutex.h>
-#include <ace/Time_Value.h>
 #include <ace/Log_Msg.h>
 #include <ace/Thread_Adapter.h>
+
 
 #include <map>
 #include <deque>
@@ -47,25 +47,25 @@ namespace RtpsRelay {
 
     struct Sample {
       UpdateMode mode_;
-      ACE_Time_Value at_;
+      OpenDDS::DCPS::MonotonicTimePoint at_;
     };
 
     struct Load_Summary {
-      ACE_UINT64 accum_[2];
+      OpenDDS::DCPS::TimeDuration accum_[2];
       int last_state_;
-      ACE_Time_Value recorded_;
+      OpenDDS::DCPS::MonotonicTimePoint recorded_;
     };
 
     typedef struct Thread_Descriptor {
       ACE_Thread_Mutex *queue_lock_;
       std::string alias_;
       std::deque<struct Sample> samples_;
-      ACE_Time_Value last_;
+      OpenDDS::DCPS::MonotonicTimePoint last_;
       std::deque<struct Load_Summary> summaries_;
     } *Thr_Desc;
 
     std::map<ACE_thread_t, Thr_Desc> descs_;
-    time_t period_;
+    OpenDDS::DCPS::TimeDuration period_;
     size_t history_depth_;
 
   };
