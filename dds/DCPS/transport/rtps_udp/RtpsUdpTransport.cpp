@@ -35,6 +35,7 @@ RtpsUdpTransport::RtpsUdpTransport(RtpsUdpInst& inst)
 #endif
 #ifdef OPENDDS_SECURITY
   , ice_endpoint_(*this)
+  , relay_stun_task_falloff_(TimeDuration::zero_value)
 #endif
 {
   assign(local_prefix_, GUIDPREFIX_UNKNOWN);
@@ -66,7 +67,8 @@ RtpsUdpTransport::rtps_relay_only_now(bool flag)
 
 #ifdef OPENDDS_SECURITY
   if (flag) {
-    relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
+    relay_stun_task_falloff_.set(config().heartbeat_period_);
+    relay_stun_task_->schedule(TimeDuration::zero_value);
   } else {
     if (!config().use_rtps_relay()) {
       disable_relay_stun_task();
@@ -82,7 +84,8 @@ RtpsUdpTransport::use_rtps_relay_now(bool flag)
 
 #ifdef OPENDDS_SECURITY
   if (flag) {
-    relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
+    relay_stun_task_falloff_.set(config().heartbeat_period_);
+    relay_stun_task_->schedule(TimeDuration::zero_value);
   } else {
     if (!config().rtps_relay_only()) {
       disable_relay_stun_task();
@@ -116,7 +119,8 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
   if (equal_guid_prefixes(local_prefix_, GUIDPREFIX_UNKNOWN)) {
     assign(local_prefix_, local_prefix);
 #ifdef OPENDDS_SECURITY
-    relay_stun_task(DCPS::MonotonicTimePoint::now());
+    relay_stun_task_falloff_.set(config().heartbeat_period_);
+    relay_stun_task_->schedule(TimeDuration::zero_value);
 #endif
   }
 
@@ -425,6 +429,16 @@ RtpsUdpTransport::update_locators(const RepoId& remote,
 }
 
 void
+RtpsUdpTransport::rtps_relay_address_change()
+{
+#ifdef OPENDDS_SECURITY
+  relay_stun_task_->cancel();
+  relay_stun_task_falloff_.set(config().heartbeat_period_);
+  relay_stun_task_->schedule(TimeDuration::zero_value);
+#endif
+}
+
+void
 RtpsUdpTransport::get_and_reset_relay_message_counts(RelayMessageCounts& counts)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, relay_message_counts_mutex_);
@@ -540,17 +554,18 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
     start_ice();
   }
 
-  relay_stun_task_= make_rch<Periodic>(reactor_task()->interceptor(), ref(*this), &RtpsUdpTransport::relay_stun_task);
-
-  if (config.use_rtps_relay() || config.rtps_relay_only()) {
-    relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
-  }
+  relay_stun_task_= make_rch<Sporadic>(reactor_task()->interceptor(), ref(*this), &RtpsUdpTransport::relay_stun_task);
 #endif
 
   if (config.opendds_discovery_default_listener_) {
     link_ = make_datalink(config.opendds_discovery_guid_.guidPrefix);
     link_->default_listener(*config.opendds_discovery_default_listener_);
   }
+
+#ifdef OPENDDS_SECURITY
+  relay_stun_task_falloff_.set(config.heartbeat_period_);
+  relay_stun_task_->schedule(TimeDuration::zero_value);
+#endif
 
   return true;
 }
@@ -573,7 +588,7 @@ RtpsUdpTransport::shutdown_i()
     stop_ice();
   }
 
-  relay_stun_task_->disable_and_wait();
+  relay_stun_task_->cancel_and_wait();
 #endif
 
   job_queue_.reset();
@@ -827,17 +842,15 @@ RtpsUdpTransport::relay_stun_task(const DCPS::MonotonicTimePoint& /*now*/)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, relay_stun_mutex_);
 
-  if (!(config().use_rtps_relay() ||
-        config().rtps_relay_only())) {
-    return;
-  }
+  const ACE_INET_Addr relay_address = config().rtps_relay_address();
 
-  const ACE_INET_Addr stun_server_address = config().rtps_relay_address();
-
-  process_relay_sra(relay_srsm_.send(stun_server_address, ICE::Configuration::instance()->server_reflexive_indication_count(), local_prefix_));
-
-  if (!equal_guid_prefixes(local_prefix_, GUIDPREFIX_UNKNOWN) && stun_server_address != ACE_INET_Addr()) {
-    ice_endpoint_.send(stun_server_address, relay_srsm_.message());
+  if ((config().use_rtps_relay() || config().rtps_relay_only()) &&
+      relay_address != ACE_INET_Addr() &&
+      !equal_guid_prefixes(local_prefix_, GUIDPREFIX_UNKNOWN)) {
+    process_relay_sra(relay_srsm_.send(relay_address, ICE::Configuration::instance()->server_reflexive_indication_count(), local_prefix_));
+    ice_endpoint_.send(relay_address, relay_srsm_.message());
+    relay_stun_task_falloff_.advance(ICE::Configuration::instance()->server_reflexive_address_period());
+    relay_stun_task_->schedule(relay_stun_task_falloff_.get());
   }
 }
 
@@ -854,6 +867,8 @@ RtpsUdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::StateChang
     break;
   case ICE::ServerReflexiveStateMachine::SRSM_Set:
   case ICE::ServerReflexiveStateMachine::SRSM_Change:
+    // Lengthen to normal period.
+    relay_stun_task_falloff_.set(ICE::Configuration::instance()->server_reflexive_address_period());
     connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();
     deferred_connection_records_.push_back(std::make_pair(true, connection_record));
     break;
@@ -881,7 +896,7 @@ void
 RtpsUdpTransport::disable_relay_stun_task()
 {
 #ifndef DDS_HAS_MINIMUM_BIT
-  relay_stun_task_->disable();
+  relay_stun_task_->cancel();
 
   DCPS::ConnectionRecord connection_record;
   std::memset(connection_record.guid, 0, sizeof(connection_record.guid));

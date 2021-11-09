@@ -1,3 +1,6 @@
+#include "tao/ShortSeq.pidl"
+#include "tao/StringSeq.pidl"
+
 // note the following predefined types often have special cases:
 //    char, octet, boolean, string
 // where as all of the integer and float types are just one case.
@@ -5,6 +8,18 @@
 #include "SharedTypes.idl"
 
 module Xyz {
+  // typedefs and structs for testing ValueWriter
+  typedef short ArrayOfShorts[5];
+  typedef short TwoDimArrayOfShorts2[3][4];
+  typedef short MultiDimArrayOfShorts[2][3][4];
+  typedef string MultiDimArray[2][3][4][5];
+  typedef sequence<short> s1;
+  typedef sequence<string> s2;
+  struct s_vwrite1 { ArrayOfShorts a; };
+  struct s_vwrite2 { TwoDimArrayOfShorts2 a; };
+  struct s_vwrite3 { MultiDimArrayOfShorts a; };
+  struct s_vwrite4 { MultiDimArray a; };
+  struct s_vwrite5 { s1 a; };
 
   // sequences of arrays
   typedef sequence<ArrayOfBoolean,8> SeqOfArrayOfBoolean;

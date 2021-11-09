@@ -1,12 +1,12 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #ifndef OPENDDS_DCPS_UTIL_H
 #define OPENDDS_DCPS_UTIL_H
+
+#include <tao/Basic_Types.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -195,6 +195,12 @@ bool set_intersect(SetA& sA, const SortedB& sB, LessThan lessThan)
     }
   }
   return !sA.empty();
+}
+
+template <typename Type, size_t count>
+size_t array_count(Type(&)[count])
+{
+  return count;
 }
 
 } // namespace DCPS

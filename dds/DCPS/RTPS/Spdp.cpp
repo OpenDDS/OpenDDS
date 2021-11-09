@@ -753,9 +753,9 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
     pdata.leaseDuration.seconds = static_cast<ACE_CDR::Long>(effective_lease.value().sec());
 
-    if (tport_->directed_sender_) {
+    if (tport_->directed_send_task_) {
       if (tport_->directed_guids_.empty()) {
-        tport_->directed_sender_->schedule(TimeDuration::zero_value);
+        tport_->directed_send_task_->schedule(TimeDuration::zero_value);
       }
       tport_->directed_guids_.push_back(guid);
     }
@@ -1281,7 +1281,7 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
   purge_handshake_deadlines(iter);
   dp.handshake_deadline_ = DCPS::MonotonicTimePoint::now() + config_->max_auth_time();
   handshake_deadlines_.insert(std::make_pair(dp.handshake_deadline_, guid));
-  tport_->handshake_deadline_processor_->schedule(config_->max_auth_time());
+  tport_->handshake_deadline_task_->schedule(config_->max_auth_time());
 
   DDS::Security::Authentication_var auth = security_config_->get_authentication();
   DDS::Security::SecurityException se = {"", 0, 0};
@@ -1712,7 +1712,7 @@ Spdp::process_handshake_deadlines(const DCPS::MonotonicTimePoint& now)
   }
 
   if (!handshake_deadlines_.empty()) {
-    tport_->handshake_deadline_processor_->schedule(handshake_deadlines_.begin()->first - now);
+    tport_->handshake_deadline_task_->schedule(handshake_deadlines_.begin()->first - now);
   }
 }
 
@@ -1775,9 +1775,9 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
 
   if (!handshake_resends_.empty()) {
     if (processor_needs_cancel) {
-      tport_->handshake_resend_processor_->cancel();
+      tport_->handshake_resend_task_->cancel();
     }
-    tport_->handshake_resend_processor_->schedule(handshake_resends_.begin()->first - now);
+    tport_->handshake_resend_task_->schedule(handshake_resends_.begin()->first - now);
   }
 }
 
@@ -1861,9 +1861,9 @@ MonotonicTimePoint Spdp::schedule_handshake_resend(const TimeDuration& time, con
   const MonotonicTimePoint deadline = MonotonicTimePoint::now() + time;
   handshake_resends_.insert(std::make_pair(deadline, guid));
   if (deadline < handshake_resends_.begin()->first) {
-    tport_->handshake_resend_processor_->cancel();
+    tport_->handshake_resend_task_->cancel();
   }
-  tport_->handshake_resend_processor_->schedule(time);
+  tport_->handshake_resend_task_->schedule(time);
   return deadline;
 }
 
@@ -2286,6 +2286,10 @@ Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
   , lease_duration_(outer->config_->lease_duration())
   , buff_(64 * 1024)
   , wbuff_(64 * 1024)
+#ifdef OPENDDS_SECURITY
+  , relay_spdp_task_falloff_(outer->config()->sedp_heartbeat_period())
+  , relay_stun_task_falloff_(outer->config()->sedp_heartbeat_period())
+#endif
   , network_is_unreachable_(false)
   , ice_endpoint_added_(false)
 {
@@ -2401,20 +2405,20 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
   }
 #endif
 
-  local_sender_ = DCPS::make_rch<SpdpMulti>(reactor_task->interceptor(), outer->config_->resend_period(), ref(*this), &SpdpTransport::send_local);
+  local_send_task_ = DCPS::make_rch<SpdpMulti>(reactor_task->interceptor(), outer->config_->resend_period(), ref(*this), &SpdpTransport::send_local);
 
   if (outer->config_->periodic_directed_spdp()) {
-    directed_sender_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::send_directed);
+    directed_send_task_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::send_directed);
   }
 
-  lease_expiration_processor_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::process_lease_expirations);
+  lease_expiration_task_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::process_lease_expirations);
 
 #ifdef OPENDDS_SECURITY
-  handshake_deadline_processor_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::process_handshake_deadlines);
-  handshake_resend_processor_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::process_handshake_resends);
+  handshake_deadline_task_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::process_handshake_deadlines);
+  handshake_resend_task_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::process_handshake_resends);
 
-  relay_sender_ = DCPS::make_rch<SpdpPeriodic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::send_relay);
-  relay_stun_task_ = DCPS::make_rch<SpdpPeriodic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::relay_stun_task);
+  relay_spdp_task_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::send_relay);
+  relay_stun_task_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::relay_stun_task);
 #endif
 
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -2428,7 +2432,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
     }
 
     global_thread_status_manager_ = TheServiceParticipant->get_thread_status_manager();
-    thread_status_sender_ = DCPS::make_rch<SpdpPeriodic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::thread_status_task);
+    thread_status_task_ = DCPS::make_rch<SpdpPeriodic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::thread_status_task);
   }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
@@ -2507,25 +2511,25 @@ void Spdp::SpdpTransport::register_handlers(const DCPS::ReactorTask_rch& reactor
 void
 Spdp::SpdpTransport::enable_periodic_tasks()
 {
-  if (local_sender_) {
-    local_sender_->enable(TimeDuration::zero_value);
+  if (local_send_task_) {
+    local_send_task_->enable(TimeDuration::zero_value);
   }
 
 #ifdef OPENDDS_SECURITY
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
-  if (outer->config_->use_rtps_relay() ||
-      outer->config_->rtps_relay_only()) {
-    relay_sender_->enable(false, outer->config_->spdp_rtps_relay_send_period());
-    relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
-  }
+  relay_spdp_task_falloff_.set(outer->config_->sedp_heartbeat_period());
+  relay_spdp_task_->schedule(TimeDuration::zero_value);
+
+  relay_stun_task_falloff_.set(outer->config_->sedp_heartbeat_period());
+  relay_stun_task_->schedule(TimeDuration::zero_value);
 #endif
 
 #ifndef DDS_HAS_MINIMUM_BIT
   TimeDuration thread_status_interval = TheServiceParticipant->get_thread_status_interval();
   if (!thread_status_interval.is_zero()) {
-    thread_status_sender_->enable(false, thread_status_interval);
+    thread_status_task_->enable(false, thread_status_interval);
   }
 #endif /* DDS_HAS_MINIMUM_BIT */
 }
@@ -2589,30 +2593,30 @@ Spdp::SpdpTransport::close(const DCPS::ReactorTask_rch& reactor_task)
     ice_endpoint_added_ = false;
   }
 
-  if (handshake_deadline_processor_) {
-    handshake_deadline_processor_->cancel_and_wait();
+  if (handshake_deadline_task_) {
+    handshake_deadline_task_->cancel_and_wait();
   }
-  if (handshake_resend_processor_) {
-    handshake_resend_processor_->cancel_and_wait();
+  if (handshake_resend_task_) {
+    handshake_resend_task_->cancel_and_wait();
   }
-  if (relay_sender_) {
-    relay_sender_->disable_and_wait();
+  if (relay_spdp_task_) {
+    relay_spdp_task_->cancel_and_wait();
   }
   if (relay_stun_task_) {
-    relay_stun_task_->disable_and_wait();
+    relay_stun_task_->cancel_and_wait();
   }
 #endif
-  if (local_sender_) {
-    local_sender_->disable_and_wait();
+  if (local_send_task_) {
+    local_send_task_->disable_and_wait();
   }
-  if (directed_sender_) {
-    directed_sender_->cancel_and_wait();
+  if (directed_send_task_) {
+    directed_send_task_->cancel_and_wait();
   }
-  if (lease_expiration_processor_) {
-    lease_expiration_processor_->cancel_and_wait();
+  if (lease_expiration_task_) {
+    lease_expiration_task_->cancel_and_wait();
   }
-  if (thread_status_sender_) {
-    thread_status_sender_->disable_and_wait();
+  if (thread_status_task_) {
+    thread_status_task_->disable_and_wait();
   }
 
   ACE_Reactor* reactor = reactor_task->get_reactor();
@@ -2632,10 +2636,10 @@ Spdp::SpdpTransport::shorten_local_sender_delay_i()
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
-  if (local_sender_) {
+  if (local_send_task_) {
     const TimeDuration quick_resend = outer->config_->resend_period() * outer->config_->quick_resend_ratio();
     const TimeDuration min_resend = outer->config_->min_resend_delay();
-    local_sender_->enable(std::max(quick_resend, min_resend));
+    local_send_task_->enable(std::max(quick_resend, min_resend));
   }
 }
 
@@ -2732,6 +2736,11 @@ Spdp::update_rtps_relay_application_participant_i(DiscoveredParticipantIter iter
     return;
   }
 
+#ifdef OPENDDS_SECURITY
+  // Lengthen to full period.
+  tport_->relay_spdp_task_falloff_.set(config_->spdp_rtps_relay_send_period());
+#endif
+
   if (DCPS::DCPS_debug_level) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Spdp::update_rtps_relay_application_participant - %C is an RtpsRelay application participant\n"),
@@ -2754,10 +2763,19 @@ Spdp::update_rtps_relay_application_participant_i(DiscoveredParticipantIter iter
 }
 
 void
-Spdp::send_to_relay()
+Spdp::spdp_rtps_relay_address_change()
 {
+#ifdef OPENDDS_SECURITY
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  tport_->write_i(SpdpTransport::SEND_RELAY);
+
+  tport_->relay_spdp_task_->cancel();
+  tport_->relay_spdp_task_falloff_.set(config_->sedp_heartbeat_period());
+  tport_->relay_spdp_task_->schedule(TimeDuration::zero_value);
+
+  tport_->relay_stun_task_->cancel();
+  tport_->relay_stun_task_falloff_.set(config_->sedp_heartbeat_period());
+  tport_->relay_stun_task_->schedule(TimeDuration::zero_value);
+#endif
 }
 
 void
@@ -3769,10 +3787,10 @@ Spdp::update_lease_expiration_i(DiscoveredParticipantIter iter,
   lease_expirations_.insert(std::make_pair(iter->second.lease_expiration_, iter->first));
 
   if (cancel) {
-    tport_->lease_expiration_processor_->cancel();
+    tport_->lease_expiration_task_->cancel();
   }
   if (schedule) {
-    tport_->lease_expiration_processor_->schedule(d);
+    tport_->lease_expiration_task_->schedule(d);
   }
 }
 
@@ -3814,7 +3832,7 @@ Spdp::process_lease_expirations(const DCPS::MonotonicTimePoint& now)
   }
 
   if (!lease_expirations_.empty()) {
-    tport_->lease_expiration_processor_->schedule(lease_expirations_.begin()->first - now);
+    tport_->lease_expiration_task_->schedule(lease_expirations_.begin()->first - now);
   }
 }
 
@@ -4199,23 +4217,19 @@ Spdp::remote_crypto_handle(const DCPS::RepoId& remote_participant) const
   return sedp_->get_handle_registry()->get_remote_participant_crypto_handle(remote_participant);
 }
 
+// Request and maintain a server-reflexive address.
 void Spdp::SpdpTransport::relay_stun_task(const MonotonicTimePoint& /*now*/)
 {
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
-  // Request and maintain a server-reflexive address.
-  if (!(outer->config_->use_rtps_relay() ||
-        outer->config_->rtps_relay_only())) {
-    return;
-  }
-
-  const ACE_INET_Addr stun_server_address = outer->config_->spdp_rtps_relay_address();
-
-  process_relay_sra(relay_srsm_.send(stun_server_address, ICE::Configuration::instance()->server_reflexive_indication_count(), outer->guid_.guidPrefix));
-
-  if (stun_server_address != ACE_INET_Addr()) {
-    send(stun_server_address, relay_srsm_.message());
+  const ACE_INET_Addr relay_address = outer->config_->spdp_rtps_relay_address();
+  if ((outer->config_->use_rtps_relay() || outer->config_->rtps_relay_only()) &&
+      relay_address != ACE_INET_Addr()) {
+    process_relay_sra(relay_srsm_.send(relay_address, ICE::Configuration::instance()->server_reflexive_indication_count(), outer->guid_.guidPrefix));
+    send(relay_address, relay_srsm_.message());
+    relay_stun_task_falloff_.advance(ICE::Configuration::instance()->server_reflexive_address_period());
+    relay_stun_task_->schedule(relay_stun_task_falloff_.get());
   }
 }
 
@@ -4224,10 +4238,6 @@ void Spdp::SpdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::St
 #ifndef DDS_HAS_MINIMUM_BIT
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
-
-  if (!relay_stun_task_->enabled()) {
-    return;
-  }
 
   DCPS::ConnectionRecord connection_record;
   std::memset(connection_record.guid, 0, sizeof(connection_record.guid));
@@ -4243,6 +4253,8 @@ void Spdp::SpdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::St
     break;
   case ICE::ServerReflexiveStateMachine::SRSM_Set:
   case ICE::ServerReflexiveStateMachine::SRSM_Change:
+    // Lengthen to normal period.
+    relay_stun_task_falloff_.set(ICE::Configuration::instance()->server_reflexive_address_period());
     connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();
     outer->sedp_->job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer->bit_subscriber(), true, connection_record));
     break;
@@ -4262,7 +4274,7 @@ void Spdp::SpdpTransport::disable_relay_stun_task()
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
-  relay_stun_task_->disable();
+  relay_stun_task_->cancel();
 
   DCPS::ConnectionRecord connection_record;
   std::memset(connection_record.guid, 0, sizeof(connection_record.guid));
@@ -4283,8 +4295,12 @@ void Spdp::SpdpTransport::send_relay(const DCPS::MonotonicTimePoint& /*now*/)
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
-  if ((outer->config_->use_rtps_relay() || outer->config_->rtps_relay_only()) && outer->config_->spdp_rtps_relay_address() != ACE_INET_Addr()) {
+  const ACE_INET_Addr relay_address = outer->config_->spdp_rtps_relay_address();
+  if ((outer->config_->use_rtps_relay() || outer->config_->rtps_relay_only()) &&
+      outer->config_->spdp_rtps_relay_address() != ACE_INET_Addr()) {
     write(SEND_RELAY);
+    relay_spdp_task_falloff_.advance(outer->config_->spdp_rtps_relay_send_period());
+    relay_spdp_task_->schedule(relay_spdp_task_falloff_.get());
   }
 }
 #endif
@@ -4312,7 +4328,7 @@ void Spdp::SpdpTransport::send_directed(const DCPS::MonotonicTimePoint& /*now*/)
 
     write_i(id, pos->second.local_address_, SEND_DIRECT | SEND_RELAY);
     directed_guids_.push_back(id);
-    directed_sender_->schedule(outer->config_->resend_period() * (1.0 / directed_guids_.size()));
+    directed_send_task_->schedule(outer->config_->resend_period() * (1.0 / directed_guids_.size()));
     break;
   }
 }
@@ -4419,7 +4435,7 @@ void Spdp::purge_handshake_resends(DiscoveredParticipantIter iter)
 
   iter->second.have_auth_req_msg_ = false;
   iter->second.have_handshake_msg_ = false;
-  iter->second.handshake_resend_falloff_.reset();
+  iter->second.handshake_resend_falloff_.set(config_->auth_resend_period());
 
   std::pair<TimeQueue::iterator, TimeQueue::iterator> range = handshake_resends_.equal_range(iter->second.stateless_msg_deadline_);
   for (; range.first != range.second; ++range.first) {
@@ -4530,8 +4546,11 @@ Spdp::rtps_relay_only_now(bool flag)
   if (flag) {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-    tport_->relay_sender_->enable(false, config_->spdp_rtps_relay_send_period());
-    tport_->relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
+    tport_->relay_spdp_task_falloff_.set(config_->sedp_heartbeat_period());
+    tport_->relay_spdp_task_->schedule(TimeDuration::zero_value);
+
+    tport_->relay_stun_task_falloff_.set(config_->sedp_heartbeat_period());
+    tport_->relay_stun_task_->schedule(TimeDuration::zero_value);
 
 #ifndef DDS_HAS_MINIMUM_BIT
     const DCPS::ParticipantLocation mask =
@@ -4549,8 +4568,8 @@ Spdp::rtps_relay_only_now(bool flag)
 #endif
   } else {
     if (!config_->use_rtps_relay()) {
-      if (tport_->relay_sender_) {
-        tport_->relay_sender_->disable();
+      if (tport_->relay_spdp_task_) {
+        tport_->relay_spdp_task_->cancel();
       }
       if (tport_->relay_stun_task_) {
         tport_->disable_relay_stun_task();
@@ -4570,15 +4589,17 @@ Spdp::use_rtps_relay_now(bool f)
 
   if (f) {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-    tport_->relay_sender_->enable(false, config_->spdp_rtps_relay_send_period());
-    tport_->relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
+    tport_->relay_spdp_task_falloff_.set(config_->sedp_heartbeat_period());
+    tport_->relay_spdp_task_->schedule(TimeDuration::zero_value);
 
+    tport_->relay_stun_task_falloff_.set(config_->sedp_heartbeat_period());
+    tport_->relay_stun_task_->schedule(TimeDuration::zero_value);
   } else {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
     if (!config_->rtps_relay_only()) {
-      if (tport_->relay_sender_) {
-        tport_->relay_sender_->disable();
+      if (tport_->relay_spdp_task_) {
+        tport_->relay_spdp_task_->cancel();
       }
       if (tport_->relay_stun_task_) {
         tport_->disable_relay_stun_task();

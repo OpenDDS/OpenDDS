@@ -51,12 +51,12 @@ TEST(RtpsCoreTypeSupportImpl, PropertyQosPolicy)
     ASSERT_TRUE(ser_out >> out_param);
     ASSERT_EQ(out_param._d(), PID_PROPERTY_LIST);
     const DDS::PropertyQosPolicy& out_qos = out_param.property();
-    ASSERT_EQ(out_qos.value.length(), 1);
+    ASSERT_EQ(out_qos.value.length(), 1u);
     ASSERT_STREQ(out_qos.value[0].name, "test");
     ASSERT_STREQ(out_qos.value[0].value, "test");
-    ASSERT_EQ(out_qos.binary_value.length(), 1);
+    ASSERT_EQ(out_qos.binary_value.length(), 1u);
     ASSERT_STREQ(out_qos.binary_value[0].name, "test");
-    ASSERT_EQ(out_qos.binary_value[0].value.length(), 1);
+    ASSERT_EQ(out_qos.binary_value[0].value.length(), 1u);
     ASSERT_EQ(out_qos.binary_value[0].value[0], 99);
   }
 
@@ -82,10 +82,10 @@ TEST(RtpsCoreTypeSupportImpl, PropertyQosPolicy)
     ASSERT_TRUE(ser_out >> out_param);
     ASSERT_EQ(out_param._d(), PID_PROPERTY_LIST);
     const DDS::PropertyQosPolicy& out_qos = out_param.property();
-    ASSERT_EQ(out_qos.value.length(), 1);
+    ASSERT_EQ(out_qos.value.length(), 1u);
     ASSERT_STREQ(out_qos.value[0].name, "test");
     ASSERT_STREQ(out_qos.value[0].value, "test");
-    ASSERT_EQ(out_qos.binary_value.length(), 0);
+    ASSERT_EQ(out_qos.binary_value.length(), 0u);
   }
 }
 

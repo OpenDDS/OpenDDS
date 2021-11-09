@@ -121,6 +121,9 @@ public:
     : config_(config)
     , rtps_discovery_(rtps_discovery)
     , relay_stats_reporter_(relay_stats_reporter)
+    , spdp_vertical_handler_(0)
+    , sedp_vertical_handler_(0)
+    , data_vertical_handler_(0)
   {}
 
   void spdp_vertical_handler(RelayHandler* spdp_vertical_handler)

@@ -87,6 +87,34 @@ TEST(dds_DCPS_JsonValueReader, array_empty)
   EXPECT_TRUE(jvr.end_array());
 }
 
+TEST(dds_DCPS_JsonValueReader, array_read)
+{
+  const char json[] = "[5,6]";
+  ACE_CDR::Short i[2] = {0, 0};
+  StringStream ss(json);
+  JsonValueReader<> jvr(ss);
+  EXPECT_TRUE(jvr.begin_array());
+  EXPECT_TRUE(jvr.read_int16_array(&i[0], 2));
+  EXPECT_TRUE(jvr.end_array());
+  EXPECT_EQ(i[0], 5);
+  EXPECT_EQ(i[1], 6);
+}
+
+TEST(dds_DCPS_JsonValueReader, sequence_read)
+{
+  const char json[] = "[5,6]";
+  ACE_CDR::Short i[2] = {0, 0};
+  StringStream ss(json);
+  JsonValueReader<> jvr(ss);
+  EXPECT_TRUE(jvr.begin_sequence());
+  EXPECT_TRUE(jvr.elements_remaining());
+  EXPECT_TRUE(jvr.read_int16_array(&i[0], 2));
+  EXPECT_FALSE(jvr.elements_remaining());
+  EXPECT_TRUE(jvr.end_sequence());
+  EXPECT_EQ(i[0], 5);
+  EXPECT_EQ(i[1], 6);
+}
+
 TEST(dds_DCPS_JsonValueReader, sequence_empty)
 {
   const char json[] = "[]";

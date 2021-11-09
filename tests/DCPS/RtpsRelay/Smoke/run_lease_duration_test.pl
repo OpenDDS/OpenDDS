@@ -52,7 +52,7 @@ if ($test->flag('reverse')) {
   $test->start_process("subscriber");
   sleep 10;
   $test->kill_process(1, "relay1a");
-  sleep 6;
+  sleep 8;
   $test->start_process("relay1b");
 } else {
   $test->start_process("relay1a");
@@ -61,7 +61,7 @@ if ($test->flag('reverse')) {
   $test->start_process("subscriber");
   sleep 10;
   $test->kill_process(1, "relay1a");
-  sleep 6;
+  sleep 8;
   $test->start_process("relay1b");
 }
 

@@ -25,8 +25,9 @@ namespace DCPS {
  * sense. Following this theme, all the constructors are to be explicit to
  * avoid careless implicit conversions.
  *
- * See the "Time" section in docs/guidelines.md for background and reasoning
- * for this class.
+ * See https://opendds.readthedocs.io/en/master/internal/dev_guidelines.html#time
+ * (or docs/internal/dev_guidelines.rst) for background and reasoning for this
+ * class.
  */
 template<typename AceClock>
 class TimePoint_T : public SafeBool_T<TimePoint_T<AceClock> > {

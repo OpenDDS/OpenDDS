@@ -102,6 +102,11 @@ numfig = True
 
 highlight_language = 'none'
 
+linkcheck_ignore = [
+    # Linkcheck fails to work with GitHub anchors
+    r'^https?://github\.com/.*#.+$',
+]
+
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -118,13 +123,15 @@ html_theme = 'alabaster'
 html_static_path = ['.']
 
 html_theme_options = {
-    'logo': 'logo.svg',
-    'logo_name': True,
+    'logo': 'logo_with_name.svg',
+    'logo_name': False,
     'extra_nav_links': {
         'Main Website': 'https://opendds.org',
         'GitHub Repo': 'https://github.com/' + github_links_repo,
     },
     'fixed_sidebar': True,
+    'page_width': '1000px',
+    'body_max_width': '1000px',
 }
 
 html_favicon = 'logo_32_32.ico'

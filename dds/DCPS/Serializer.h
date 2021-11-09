@@ -360,6 +360,10 @@ public:
   // EMHEADER must understand flag
   static const ACE_CDR::ULong emheader_must_understand = 1U << 31U;
 
+  /// Maximum value for member id.
+  static const ACE_CDR::ULong MEMBER_ID_MAX = 0x0FFFFFFF;
+  static const ACE_CDR::ULong MEMBER_ID_MASK = MEMBER_ID_MAX;
+
   /**
    * Constructor with a message block chain.  This installs the
    * message block chain and sets the current block to the first in
