@@ -285,15 +285,19 @@ TEST(dds_DCPS_DisjointSequence, maintest)
     // See RTPS v2.1 section 9.4.2.6 for the definition the X:Y/ZZZZ notation
     ACE_CDR::Long bitmap; // 4:3/011 = (5,6)
     ACE_CDR::ULong num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(&bitmap, 1, num_bits));
-    EXPECT_TRUE(num_bits == 3);
-    EXPECT_TRUE((bitmap & 0xE0000000) == 0x60000000);
+    ACE_CDR::ULong cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(&bitmap, 1, num_bits, cumulative_bits_added));
+    EXPECT_EQ(num_bits, 3U);
+    EXPECT_EQ(cumulative_bits_added, 2U);
+    EXPECT_EQ((bitmap & 0xE0000000), 0x60000000U);
 
     ACE_CDR::Long anti_bitmap; // 4:1/1 = (4,4)
     ACE_CDR::ULong anti_num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(&anti_bitmap, 1, anti_num_bits, true));
-    EXPECT_TRUE(anti_num_bits == 1);
-    EXPECT_TRUE((anti_bitmap & 0x80000000) == 0x80000000);
+    ACE_CDR::ULong anti_cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(&anti_bitmap, 1, anti_num_bits, anti_cumulative_bits_added, true));
+    EXPECT_EQ(anti_num_bits, 1U);
+    EXPECT_EQ(anti_cumulative_bits_added, 1U);
+    EXPECT_EQ((anti_bitmap & 0x80000000), 0x80000000U);
   }
   {
     DisjointSequence sequence;
@@ -338,9 +342,11 @@ TEST(dds_DCPS_DisjointSequence, maintest)
 
     ACE_CDR::Long bitmap; // 9:2/01 = (10,10)
     ACE_CDR::ULong num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(&bitmap, 1, num_bits));
-    EXPECT_TRUE(num_bits == 2);
-    EXPECT_TRUE((bitmap & 0xC0000000) == 0x40000000);
+    ACE_CDR::ULong cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(&bitmap, 1, num_bits, cumulative_bits_added));
+    EXPECT_EQ(num_bits, 2U);
+    EXPECT_EQ(cumulative_bits_added, 1U);
+    EXPECT_EQ((bitmap & 0xC0000000), 0x40000000U);
   }
   {
     DisjointSequence sequence;
@@ -369,9 +375,11 @@ TEST(dds_DCPS_DisjointSequence, maintest)
 
     ACE_CDR::Long bitmap; // 3:10/0111111111 = (4,12)
     ACE_CDR::ULong num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(&bitmap, 1, num_bits));
-    EXPECT_TRUE(num_bits == 10);
-    EXPECT_TRUE((bitmap & 0xFFC00000) == 0x7FC00000);
+    ACE_CDR::ULong cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(&bitmap, 1, num_bits, cumulative_bits_added));
+    EXPECT_EQ(num_bits, 10U);
+    EXPECT_EQ(cumulative_bits_added, 9U);
+    EXPECT_EQ((bitmap & 0xFFC00000), 0x7FC00000U);
   }
   {
     DisjointSequence sequence;
@@ -404,9 +412,11 @@ TEST(dds_DCPS_DisjointSequence, maintest)
 
     ACE_CDR::Long bitmap; // 4:2/01 = (5,5)
     ACE_CDR::ULong num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(&bitmap, 1, num_bits));
-    EXPECT_TRUE(num_bits == 2);
-    EXPECT_TRUE((bitmap & 0xC0000000) == 0x40000000);
+    ACE_CDR::ULong cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(&bitmap, 1, num_bits, cumulative_bits_added));
+    EXPECT_EQ(num_bits, 2U);
+    EXPECT_EQ(cumulative_bits_added, 1U);
+    EXPECT_EQ((bitmap & 0xC0000000), 0x40000000U);
   }
   {
     DisjointSequence sequence;
@@ -420,15 +430,19 @@ TEST(dds_DCPS_DisjointSequence, maintest)
 
     ACE_CDR::Long bitmap; // 4:4/0101 = (5,5),(7,7)
     ACE_CDR::ULong num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(&bitmap, 1, num_bits));
-    EXPECT_TRUE(num_bits == 4);
-    EXPECT_TRUE((bitmap & 0xF0000000) == 0x50000000);
+    ACE_CDR::ULong cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(&bitmap, 1, num_bits, cumulative_bits_added));
+    EXPECT_EQ(num_bits, 4U);
+    EXPECT_EQ(cumulative_bits_added, 2U);
+    EXPECT_EQ((bitmap & 0xF0000000), 0x50000000U);
 
     ACE_CDR::Long anti_bitmap; // 4:3/101 = (4,4),(6,6)
     ACE_CDR::ULong anti_num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(&anti_bitmap, 1, anti_num_bits, true));
-    EXPECT_TRUE(anti_num_bits == 3);
-    EXPECT_TRUE((anti_bitmap & 0xE0000000) == 0xA0000000);
+    ACE_CDR::ULong anti_cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(&anti_bitmap, 1, anti_num_bits, anti_cumulative_bits_added, true));
+    EXPECT_EQ(anti_num_bits, 3U);
+    EXPECT_EQ(anti_cumulative_bits_added, 2U);
+    EXPECT_EQ((anti_bitmap & 0xE0000000), 0xA0000000U);
   }
   {
     DisjointSequence sequence;
@@ -471,15 +485,19 @@ TEST(dds_DCPS_DisjointSequence, maintest)
 
     ACE_CDR::Long bitmap; // 4:7/0110001 = (5,6),(10,10)
     ACE_CDR::ULong num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(&bitmap, 1, num_bits));
-    EXPECT_TRUE(num_bits == 7);
-    EXPECT_TRUE((bitmap & 0xFE000000) == 0x62000000);
+    ACE_CDR::ULong cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(&bitmap, 1, num_bits, cumulative_bits_added));
+    EXPECT_EQ(num_bits, 7U);
+    EXPECT_EQ(cumulative_bits_added, 3U);
+    EXPECT_EQ((bitmap & 0xFE000000), 0x62000000U);
 
     ACE_CDR::Long anti_bitmap; // 4:6/100111 = (4,4),(7,9)
     ACE_CDR::ULong anti_num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(&anti_bitmap, 1, anti_num_bits, true));
-    EXPECT_TRUE(anti_num_bits == 6);
-    EXPECT_TRUE((anti_bitmap & 0xFC000000) == 0x9C000000);
+    ACE_CDR::ULong anti_cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(&anti_bitmap, 1, anti_num_bits, anti_cumulative_bits_added, true));
+    EXPECT_EQ(anti_num_bits, 6U);
+    EXPECT_EQ(anti_cumulative_bits_added, 4U);
+    EXPECT_EQ((anti_bitmap & 0xFC000000), 0x9C000000U);
   }
   {
     DisjointSequence sequence;
@@ -513,15 +531,19 @@ TEST(dds_DCPS_DisjointSequence, maintest)
 
     ACE_CDR::Long bitmap[2]; // 4:37/{32x0}11111 = (36,40)
     ACE_CDR::ULong num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(bitmap, 2, num_bits));
-    EXPECT_TRUE(num_bits == 37);
+    ACE_CDR::ULong cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(bitmap, 2, num_bits, cumulative_bits_added));
+    EXPECT_EQ(num_bits, 37U);
+    EXPECT_EQ(cumulative_bits_added, 5U);
     EXPECT_FALSE(bitmap[0] && ((bitmap[1] & 0xF8000000) == 0xF8000000));
 
     ACE_CDR::Long anti_bitmap; // 4:32/{32x1} = (4,35)
     ACE_CDR::ULong anti_num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(&anti_bitmap, 1, anti_num_bits, true));
-    EXPECT_TRUE(anti_num_bits == 32);
-    EXPECT_TRUE(static_cast<unsigned int>(anti_bitmap) == 0xFFFFFFFF);
+    ACE_CDR::ULong anti_cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(&anti_bitmap, 1, anti_num_bits, anti_cumulative_bits_added, true));
+    EXPECT_EQ(anti_num_bits, 32U);
+    EXPECT_EQ(anti_cumulative_bits_added, 32U);
+    EXPECT_EQ(static_cast<unsigned int>(anti_bitmap), 0xFFFFFFFFU);
   }
   {
     DisjointSequence sequence;
@@ -536,9 +558,11 @@ TEST(dds_DCPS_DisjointSequence, maintest)
 
     ACE_CDR::Long bitmap; // 38:3/001 = (40,40)
     ACE_CDR::ULong num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(&bitmap, 1, num_bits));
-    EXPECT_TRUE(num_bits == 3);
-    EXPECT_TRUE((bitmap & 0xE0000000) == 0x20000000);
+    ACE_CDR::ULong cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(&bitmap, 1, num_bits, cumulative_bits_added));
+    EXPECT_EQ(num_bits, 3U);
+    EXPECT_EQ(cumulative_bits_added, 1U);
+    EXPECT_EQ((bitmap & 0xE0000000), 0x20000000U);
   }
   {
     DisjointSequence sequence;
@@ -547,19 +571,23 @@ TEST(dds_DCPS_DisjointSequence, maintest)
     ACE_CDR::Long bitmap[] = { ACE_CDR::Long(0xAAAAAAAA), ACE_CDR::Long(0xAAAAAAAA) };
     // 2:62/010101...
     ACE_CDR::ULong num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(bitmap, 2, num_bits));
-    EXPECT_TRUE(num_bits == 62);
-    EXPECT_TRUE(bitmap[0] == 0x55555555);
-    EXPECT_TRUE((bitmap[1] & 0xFFFFFFFC) == 0x55555554);
+    ACE_CDR::ULong cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(bitmap, 2, num_bits, cumulative_bits_added));
+    EXPECT_EQ(num_bits, 62U);
+    EXPECT_EQ(cumulative_bits_added, 31U);
+    EXPECT_EQ(bitmap[0], 0x55555555);
+    EXPECT_EQ((bitmap[1] & 0xFFFFFFFC), 0x55555554U);
 
     ACE_CDR::Long anti_bitmap[] = { 0x55555555, 0x55555555 }; // 2:61/101010...
     ACE_CDR::ULong anti_num_bits;
+    ACE_CDR::ULong anti_cumulative_bits_added = 0;
     // doesn't fit in 1 Long, verify that it returns false
-    EXPECT_FALSE(sequence.to_bitmap(anti_bitmap, 1, anti_num_bits, true));
-    EXPECT_TRUE(sequence.to_bitmap(anti_bitmap, 2, anti_num_bits, true));
-    EXPECT_TRUE(anti_num_bits == 61);
-    EXPECT_TRUE(static_cast<unsigned int>(anti_bitmap[0]) == 0xAAAAAAAA);
-    EXPECT_TRUE((anti_bitmap[1] & 0xFFFFFFF8) == 0xAAAAAAA8);
+    EXPECT_FALSE(sequence.to_bitmap(anti_bitmap, 1, anti_num_bits, anti_cumulative_bits_added, true));
+    EXPECT_TRUE(sequence.to_bitmap(anti_bitmap, 2, anti_num_bits, anti_cumulative_bits_added, true));
+    EXPECT_EQ(anti_num_bits, 61U);
+    EXPECT_EQ(anti_cumulative_bits_added, 47U);
+    EXPECT_EQ(static_cast<unsigned int>(anti_bitmap[0]), 0xAAAAAAAA);
+    EXPECT_EQ((anti_bitmap[1] & 0xFFFFFFF8), 0xAAAAAAA8);
   }
   {
     DisjointSequence sequence;
@@ -568,17 +596,21 @@ TEST(dds_DCPS_DisjointSequence, maintest)
     sequence.insert(64 + 3);  //  3rd bit from msb of bitmap[1]
     ACE_CDR::Long bitmap[2];
     ACE_CDR::ULong num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(bitmap, 2, num_bits));
-    EXPECT_TRUE(num_bits == 36);
-    EXPECT_TRUE(bitmap[0] == 0x00004000);
-    EXPECT_TRUE((bitmap[1] & 0xF0000000) == 0x10000000);
+    ACE_CDR::ULong cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(bitmap, 2, num_bits, cumulative_bits_added));
+    EXPECT_EQ(num_bits, 36U);
+    EXPECT_EQ(cumulative_bits_added, 2U);
+    EXPECT_EQ(bitmap[0], 0x00004000);
+    EXPECT_EQ((bitmap[1] & 0xF0000000), 0x10000000U);
 
     ACE_CDR::Long anti_bitmap[2];// 32:35/11111111 11111111 10111111 11111111 111
     ACE_CDR::ULong anti_num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(anti_bitmap, 2, anti_num_bits, true));
-    EXPECT_TRUE(anti_num_bits == 35);
-    EXPECT_TRUE(static_cast<unsigned int>(anti_bitmap[0]) == 0xFFFFBFFF);
-    EXPECT_TRUE((anti_bitmap[1] & 0xE0000000) == 0xE0000000);
+    ACE_CDR::ULong anti_cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(anti_bitmap, 2, anti_num_bits, anti_cumulative_bits_added, true));
+    EXPECT_EQ(anti_num_bits, 35U);
+    EXPECT_EQ(anti_cumulative_bits_added, 34U);
+    EXPECT_EQ(static_cast<unsigned int>(anti_bitmap[0]), 0xFFFFBFFF);
+    EXPECT_EQ((anti_bitmap[1] & 0xE0000000), 0xE0000000);
   }
   {
     DisjointSequence sequence;
@@ -586,16 +618,20 @@ TEST(dds_DCPS_DisjointSequence, maintest)
     sequence.insert(SequenceRange(32 + 10, 64 + 23));
     ACE_CDR::Long bitmap[2];
     ACE_CDR::ULong num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(bitmap, 2, num_bits));
-    EXPECT_TRUE(num_bits == 56);
-    EXPECT_TRUE(bitmap[0] == 0x003FFFFF);
-    EXPECT_TRUE((bitmap[1] & 0xFFFFFF00) == 0xFFFFFF00);
+    ACE_CDR::ULong cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(bitmap, 2, num_bits, cumulative_bits_added));
+    EXPECT_EQ(num_bits, 56U);
+    EXPECT_EQ(cumulative_bits_added, 46U);
+    EXPECT_EQ(bitmap[0], 0x003FFFFF);
+    EXPECT_EQ((bitmap[1] & 0xFFFFFF00), 0xFFFFFF00);
 
     ACE_CDR::Long anti_bitmap; // 32:10/1111111111
     ACE_CDR::ULong anti_num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(&anti_bitmap, 1, anti_num_bits, true));
-    EXPECT_TRUE(anti_num_bits == 10);
-    EXPECT_TRUE((anti_bitmap & 0xFFC00000) == 0xFFC00000);
+    ACE_CDR::ULong anti_cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(&anti_bitmap, 1, anti_num_bits, anti_cumulative_bits_added, true));
+    EXPECT_EQ(anti_num_bits, 10U);
+    EXPECT_EQ(anti_cumulative_bits_added, 10U);
+    EXPECT_EQ((anti_bitmap & 0xFFC00000), 0xFFC00000);
   }
   {
     DisjointSequence sequence;
@@ -604,19 +640,23 @@ TEST(dds_DCPS_DisjointSequence, maintest)
     sequence.insert(100);
     ACE_CDR::Long bitmap[3];
     ACE_CDR::ULong num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(bitmap, 3, num_bits));
-    EXPECT_TRUE(num_bits == 69);
-    EXPECT_TRUE(bitmap[0] == 0x003FF000);
-    EXPECT_TRUE(bitmap[1] == 0);
-    EXPECT_TRUE((bitmap[2] & 0xF8000000) == 0x08000000);
+    ACE_CDR::ULong cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(bitmap, 3, num_bits, cumulative_bits_added));
+    EXPECT_EQ(num_bits, 69U);
+    EXPECT_EQ(cumulative_bits_added, 11U);
+    EXPECT_EQ(bitmap[0], 0x003FF000);
+    EXPECT_EQ(bitmap[1], 0);
+    EXPECT_EQ((bitmap[2] & 0xF8000000), 0x08000000U);
 
     ACE_CDR::Long anti_bitmap[3]; // 32:68/11111111 11000000 00001...
     ACE_CDR::ULong anti_num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(anti_bitmap, 3, anti_num_bits, true));
-    EXPECT_TRUE(anti_num_bits == 68);
-    EXPECT_TRUE(static_cast<unsigned int>(anti_bitmap[0]) == 0xFFC00FFF);
-    EXPECT_TRUE(static_cast<unsigned int>(anti_bitmap[1]) == 0xFFFFFFFF);
-    EXPECT_TRUE((anti_bitmap[2] & 0xF0000000) == 0xF0000000);
+    ACE_CDR::ULong anti_cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(anti_bitmap, 3, anti_num_bits, anti_cumulative_bits_added, true));
+    EXPECT_EQ(anti_num_bits, 68U);
+    EXPECT_EQ(anti_cumulative_bits_added, 58U);
+    EXPECT_EQ(static_cast<unsigned int>(anti_bitmap[0]), 0xFFC00FFF);
+    EXPECT_EQ(static_cast<unsigned int>(anti_bitmap[1]), 0xFFFFFFFF);
+    EXPECT_EQ((anti_bitmap[2] & 0xF0000000), 0xF0000000);
   }
   {
     DisjointSequence sequence;
@@ -624,15 +664,19 @@ TEST(dds_DCPS_DisjointSequence, maintest)
     sequence.insert(SequenceRange(3, 3));
     ACE_CDR::Long bitmap[1];
     ACE_CDR::ULong num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(bitmap, 1, num_bits));
-    EXPECT_TRUE(num_bits == 3);
-    EXPECT_TRUE((bitmap[0] & 0xE0000000) == 0x20000000);
+    ACE_CDR::ULong cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(bitmap, 1, num_bits, cumulative_bits_added));
+    EXPECT_EQ(num_bits, 3U);
+    EXPECT_EQ(cumulative_bits_added, 1U);
+    EXPECT_EQ((bitmap[0] & 0xE0000000), 0x20000000U);
 
     ACE_CDR::Long anti_bitmap[1];
     ACE_CDR::ULong anti_num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(anti_bitmap, 1, anti_num_bits, true));
-    EXPECT_TRUE(anti_num_bits == 2);
-    EXPECT_TRUE((anti_bitmap[0] & 0xE0000000) == 0xC0000000);
+    ACE_CDR::ULong anti_cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(anti_bitmap, 1, anti_num_bits, anti_cumulative_bits_added, true));
+    EXPECT_EQ(anti_num_bits, 2U);
+    EXPECT_EQ(anti_cumulative_bits_added, 2U);
+    EXPECT_EQ((anti_bitmap[0] & 0xE0000000), 0xC0000000);
   }
   {
     DisjointSequence sequence;
@@ -641,16 +685,20 @@ TEST(dds_DCPS_DisjointSequence, maintest)
     sequence.insert(SequenceRange(32, 38));
     ACE_CDR::Long bitmap[2];
     ACE_CDR::ULong num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(bitmap, 2, num_bits));
-    EXPECT_TRUE(num_bits == 38);
-    EXPECT_TRUE(bitmap[0] == 0x00010001);
-    EXPECT_TRUE((bitmap[1] & 0xFC000000) == 0xFC000000);
+    ACE_CDR::ULong cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(bitmap, 2, num_bits, cumulative_bits_added));
+    EXPECT_EQ(num_bits, 38U);
+    EXPECT_EQ(cumulative_bits_added, 8U);
+    EXPECT_EQ(bitmap[0], 0x00010001);
+    EXPECT_EQ((bitmap[1] & 0xFC000000), 0xFC000000);
 
     ACE_CDR::Long anti_bitmap[1];
     ACE_CDR::ULong anti_num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(anti_bitmap, 1, anti_num_bits, true));
-    EXPECT_TRUE(anti_num_bits == 31);
-    EXPECT_TRUE((anti_bitmap[0] & 0xFFFFFFFE) == 0xFFFEFFFE);
+    ACE_CDR::ULong anti_cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(anti_bitmap, 1, anti_num_bits, anti_cumulative_bits_added, true));
+    EXPECT_EQ(anti_num_bits, 31U);
+    EXPECT_EQ(anti_cumulative_bits_added, 30U);
+    EXPECT_EQ((anti_bitmap[0] & 0xFFFFFFFE), 0xFFFEFFFE);
   }
   {
     DisjointSequence sequence;
@@ -659,20 +707,24 @@ TEST(dds_DCPS_DisjointSequence, maintest)
     sequence.insert(SequenceRange(96, 100));
     ACE_CDR::Long bitmap[4];
     ACE_CDR::ULong num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(bitmap, 4, num_bits));
-    EXPECT_TRUE(num_bits == 100);
-    EXPECT_TRUE(bitmap[0] == 0x00000000);
-    EXPECT_TRUE(bitmap[1] == 0x000003FF);
-    EXPECT_TRUE(static_cast<unsigned int>(bitmap[2]) == 0xFFFFF001);
-    EXPECT_TRUE((bitmap[3] & 0xF0000000) == 0xF0000000);
+    ACE_CDR::ULong cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(bitmap, 4, num_bits, cumulative_bits_added));
+    EXPECT_EQ(num_bits, 100U);
+    EXPECT_EQ(cumulative_bits_added, 35U);
+    EXPECT_EQ(bitmap[0], 0x00000000);
+    EXPECT_EQ(bitmap[1], 0x000003FF);
+    EXPECT_EQ(static_cast<unsigned int>(bitmap[2]), 0xFFFFF001);
+    EXPECT_EQ((bitmap[3] & 0xF0000000), 0xF0000000);
 
     ACE_CDR::Long anti_bitmap[3];
     ACE_CDR::ULong anti_num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(anti_bitmap, 3, anti_num_bits, true));
-    EXPECT_TRUE(anti_num_bits == 95);
-    EXPECT_TRUE(static_cast<unsigned int>(anti_bitmap[0]) == 0xFFFFFFFF);
-    EXPECT_TRUE(static_cast<unsigned int>(anti_bitmap[1]) == 0xFFFFFC00);
-    EXPECT_TRUE((anti_bitmap[2] & 0x00000FFE) == 0x00000FFE);
+    ACE_CDR::ULong anti_cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(anti_bitmap, 3, anti_num_bits, anti_cumulative_bits_added, true));
+    EXPECT_EQ(anti_num_bits, 95U);
+    EXPECT_EQ(anti_cumulative_bits_added, 65U);
+    EXPECT_EQ(static_cast<unsigned int>(anti_bitmap[0]), 0xFFFFFFFF);
+    EXPECT_EQ(static_cast<unsigned int>(anti_bitmap[1]), 0xFFFFFC00);
+    EXPECT_EQ((anti_bitmap[2] & 0x00000FFE), 0x00000FFE);
   }
   {
     DisjointSequence sequence;
@@ -685,29 +737,35 @@ TEST(dds_DCPS_DisjointSequence, maintest)
     sequence.insert(SequenceRange(95, 96));
     ACE_CDR::Long bitmap[3];
     ACE_CDR::ULong num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(bitmap, 3, num_bits));
-    EXPECT_TRUE(num_bits == 74);
-    EXPECT_TRUE(bitmap[0] == 0x0FCF1FFE);
-    EXPECT_TRUE(static_cast<unsigned int>(bitmap[1]) == 0xFFFFFC3F);
-    EXPECT_TRUE((bitmap[2] & 0xFFC00000) == 0x80C00000);
+    ACE_CDR::ULong cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(bitmap, 3, num_bits, cumulative_bits_added));
+    EXPECT_EQ(num_bits, 74U);
+    EXPECT_EQ(cumulative_bits_added, 53U);
+    EXPECT_EQ(bitmap[0], 0x0FCF1FFE);
+    EXPECT_EQ(static_cast<unsigned int>(bitmap[1]), 0xFFFFFC3F);
+    EXPECT_EQ((bitmap[2] & 0xFFC00000), 0x80C00000);
 
     ACE_CDR::Long anti_bitmap[3];
     ACE_CDR::ULong anti_num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(anti_bitmap, 3, anti_num_bits, true));
-    EXPECT_TRUE(anti_num_bits == 72);
-    EXPECT_TRUE(static_cast<unsigned int>(anti_bitmap[0]) == 0xF030E001);
-    EXPECT_TRUE(anti_bitmap[1] == 0x000003C0);
-    EXPECT_TRUE((anti_bitmap[2] & 0xFF000000) == 0x7F000000);
+    ACE_CDR::ULong anti_cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(anti_bitmap, 3, anti_num_bits, anti_cumulative_bits_added, true));
+    EXPECT_EQ(anti_num_bits, 72U);
+    EXPECT_EQ(anti_cumulative_bits_added, 21U);
+    EXPECT_EQ(static_cast<unsigned int>(anti_bitmap[0]), 0xF030E001);
+    EXPECT_EQ(anti_bitmap[1], 0x000003C0);
+    EXPECT_EQ((anti_bitmap[2] & 0xFF000000), 0x7F000000U);
   }
   {
     DisjointSequence sequence;
     sequence.insert(31); // set base to 32
     ACE_CDR::Long bitmap[2] = { 0, 0 };
     ACE_CDR::ULong num_bits;
-    EXPECT_TRUE(sequence.to_bitmap(bitmap, 2, num_bits));
-    EXPECT_TRUE(num_bits == 0);
-    EXPECT_TRUE(bitmap[0] == 0);
-    EXPECT_TRUE(bitmap[1] == 0);
+    ACE_CDR::ULong cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(bitmap, 2, num_bits, cumulative_bits_added));
+    EXPECT_EQ(num_bits, 0U);
+    EXPECT_EQ(cumulative_bits_added, 0U);
+    EXPECT_EQ(bitmap[0], 0);
+    EXPECT_EQ(bitmap[1], 0);
   }
   {
     DisjointSequence sequence;
@@ -716,10 +774,12 @@ TEST(dds_DCPS_DisjointSequence, maintest)
     sequence.insert(SequenceRange(32 + 63, 32 + 66));
     ACE_CDR::Long bitmap[2];
     ACE_CDR::ULong num_bits;
-    EXPECT_FALSE(sequence.to_bitmap(bitmap, 2, num_bits));
-    EXPECT_TRUE(num_bits == 64);
-    EXPECT_TRUE(bitmap[0] == 0x003FF000);
-    EXPECT_TRUE(bitmap[1] == 0x00000001);
+    ACE_CDR::ULong cumulative_bits_added = 0;
+    EXPECT_FALSE(sequence.to_bitmap(bitmap, 2, num_bits, cumulative_bits_added));
+    EXPECT_EQ(num_bits, 64U);
+    EXPECT_EQ(cumulative_bits_added, 11U);
+    EXPECT_EQ(bitmap[0], 0x003FF000);
+    EXPECT_EQ(bitmap[1], 0x00000001);
   }
   {
     DisjointSequence sequence;
@@ -850,16 +910,18 @@ TEST(dds_DCPS_DisjointSequence, maintest)
     sequence.insert(255);
     ACE_CDR::Long bitmap[8];
     ACE_CDR::ULong num_bits = 0;
-    EXPECT_TRUE(sequence.to_bitmap(bitmap, 8, num_bits));
-    EXPECT_TRUE(num_bits == 252);
-    EXPECT_TRUE(bitmap[0] == 0x55555555);
-    EXPECT_TRUE(bitmap[1] == 0x55555555);
-    EXPECT_TRUE(bitmap[2] == 0x55555555);
-    EXPECT_TRUE(bitmap[3] == 0x75555555);
-    EXPECT_TRUE(bitmap[4] == 0x55555555);
-    EXPECT_TRUE(bitmap[5] == 0x55555555);
-    EXPECT_TRUE(bitmap[6] == 0x57555555);
-    EXPECT_TRUE((bitmap[7] & 0xFFFFFFF0) == 0x55555550);
+    ACE_CDR::ULong cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(bitmap, 8, num_bits, cumulative_bits_added));
+    EXPECT_EQ(num_bits, 252U);
+    EXPECT_EQ(cumulative_bits_added, 128U);
+    EXPECT_EQ(bitmap[0], 0x55555555);
+    EXPECT_EQ(bitmap[1], 0x55555555);
+    EXPECT_EQ(bitmap[2], 0x55555555);
+    EXPECT_EQ(bitmap[3], 0x75555555);
+    EXPECT_EQ(bitmap[4], 0x55555555);
+    EXPECT_EQ(bitmap[5], 0x55555555);
+    EXPECT_EQ(bitmap[6], 0x57555555);
+    EXPECT_EQ((bitmap[7] & 0xFFFFFFF0), 0x55555550U);
   }
   {
     DisjointSequence sequence;
@@ -877,16 +939,18 @@ TEST(dds_DCPS_DisjointSequence, maintest)
     sequence.insert(SequenceRange(2001, 2580));
     ACE_CDR::Long bitmap[8];
     ACE_CDR::ULong num_bits = 0;
-    EXPECT_FALSE(sequence.to_bitmap(bitmap, 8, num_bits));
-    EXPECT_TRUE(num_bits == 256);
-    EXPECT_TRUE(bitmap[0] == 0x555557FF);
-    EXPECT_TRUE(bitmap[1] == (int) 0xFFFFFFFF);
-    EXPECT_TRUE(bitmap[2] == (int) 0xFFFFFFFF);
-    EXPECT_TRUE(bitmap[3] == (int) 0xFFFFFFFF);
-    EXPECT_TRUE(bitmap[4] == (int) 0xFFFFFFFF);
-    EXPECT_TRUE(bitmap[5] == (int) 0xFFFFFFFF);
-    EXPECT_TRUE(bitmap[6] == (int) 0xFFFFFFFF);
-    EXPECT_TRUE(bitmap[7] == (int) 0xFFFFFFFF);
+    ACE_CDR::ULong cumulative_bits_added = 0;
+    EXPECT_FALSE(sequence.to_bitmap(bitmap, 8, num_bits, cumulative_bits_added));
+    EXPECT_EQ(num_bits, 256U);
+    EXPECT_EQ(cumulative_bits_added, 245U);
+    EXPECT_EQ(bitmap[0], 0x555557FF);
+    EXPECT_EQ(bitmap[1], (int) 0xFFFFFFFF);
+    EXPECT_EQ(bitmap[2], (int) 0xFFFFFFFF);
+    EXPECT_EQ(bitmap[3], (int) 0xFFFFFFFF);
+    EXPECT_EQ(bitmap[4], (int) 0xFFFFFFFF);
+    EXPECT_EQ(bitmap[5], (int) 0xFFFFFFFF);
+    EXPECT_EQ(bitmap[6], (int) 0xFFFFFFFF);
+    EXPECT_EQ(bitmap[7], (int) 0xFFFFFFFF);
   }
   {
     DisjointSequence sequence;
@@ -896,10 +960,12 @@ TEST(dds_DCPS_DisjointSequence, maintest)
     sequence.insert(SequenceRange(27,65));
     ACE_CDR::Long bitmap[8];
     ACE_CDR::ULong num_bits = 0;
-    EXPECT_TRUE(sequence.to_bitmap(bitmap, 3, num_bits));
-    EXPECT_TRUE(num_bits == 64);
-    EXPECT_TRUE(bitmap[0] == 0x0402007F);
-    EXPECT_TRUE(bitmap[1] == (int) 0xFFFFFFFF);
+    ACE_CDR::ULong cumulative_bits_added = 0;
+    EXPECT_TRUE(sequence.to_bitmap(bitmap, 3, num_bits, cumulative_bits_added));
+    EXPECT_EQ(num_bits, 64U);
+    EXPECT_EQ(cumulative_bits_added, 41U);
+    EXPECT_EQ(bitmap[0], 0x0402007F);
+    EXPECT_EQ(bitmap[1], (int) 0xFFFFFFFF);
   }
 
   {

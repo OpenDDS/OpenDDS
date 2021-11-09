@@ -26,6 +26,8 @@
 #include "dds/DCPS/SendStateDataSampleList.h"
 #include "dds/DCPS/DataSampleElement.h"
 
+#include <dds/OpenddsDcpsExtTypeSupportImpl.h>
+
 #include <tao/Exception.h>
 
 #include <ace/OS_main.h>
@@ -718,13 +720,7 @@ void make_blob(const ACE_INET_Addr& part1_addr, ACE_Message_Block& mb_locator)
 {
   LocatorSeq part1_locators;
   part1_locators.length(1);
-  part1_locators[0].kind =
-#ifdef ACE_HAS_IPV6
-    (part1_addr.get_type() == AF_INET6) ? LOCATOR_KIND_UDPv6 :
-#endif
-      LOCATOR_KIND_UDPv4;
-  part1_locators[0].port = part1_addr.get_port_number();
-  address_to_bytes(part1_locators[0].address, part1_addr);
+  address_to_locator(part1_locators[0], part1_addr);
   size_t size = 0;
   serialized_size(blob_encoding, size, part1_locators);
   mb_locator.init(size + 1);
@@ -747,12 +743,12 @@ bool blob_to_addr(const TransportBLOB& blob, ACE_INET_Addr& addr)
                "ERROR: couldn't deserialize Locators from participant 2\n"));
     return false;
   }
-  if (locators[0].kind == LOCATOR_KIND_UDPv6) {
+  if (locators[0].kind == OpenDDS::RTPS::LOCATOR_KIND_UDPv6) {
 #ifdef ACE_HAS_IPV6
     addr.set_type(AF_INET6);
 #endif
     addr.set_address(reinterpret_cast<const char*>(locators[0].address), 16, 0 /*encode*/);
-  } else if (locators[0].kind == LOCATOR_KIND_UDPv4) {
+  } else if (locators[0].kind == OpenDDS::RTPS::LOCATOR_KIND_UDPv4) {
     addr.set_type(AF_INET);
     addr.set_address(reinterpret_cast<const char*>(locators[0].address) + 12,
                      4, 0 /*network order*/);

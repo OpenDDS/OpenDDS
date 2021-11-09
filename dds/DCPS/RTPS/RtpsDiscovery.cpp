@@ -1104,14 +1104,13 @@ RtpsDiscovery::sedp_stun_server_address(const ACE_INET_Addr& address)
 }
 
 void
-RtpsDiscovery::get_and_reset_relay_message_counts(DDS::DomainId_t domain,
-                                                  const DCPS::RepoId& local_participant,
-                                                  DCPS::RelayMessageCounts& spdp,
-                                                  DCPS::RelayMessageCounts& sedp)
+RtpsDiscovery::append_transport_statistics(DDS::DomainId_t domain,
+                                           const DCPS::RepoId& local_participant,
+                                           DCPS::TransportStatisticsSequence& seq)
 {
   ParticipantHandle p = get_part(domain, local_participant);
   if (p) {
-    p->get_and_reset_relay_message_counts(spdp, sedp);
+    p->append_transport_statistics(seq);
   }
 }
 
@@ -1412,6 +1411,12 @@ void RtpsDiscovery::update_subscription_locators(
   const DCPS::TransportLocatorSeq& transInfo)
 {
   get_part(domainId, partId)->update_subscription_locators(subId, transInfo);
+}
+
+RcHandle<DCPS::TransportInst> RtpsDiscovery::sedp_transport_inst(DDS::DomainId_t domainId,
+                                                                 const GUID_t& partId) const
+{
+  return get_part(domainId, partId)->sedp_transport_inst();
 }
 
 ParticipantHandle RtpsDiscovery::get_part(const DDS::DomainId_t domain_id, const GUID_t& part_id) const

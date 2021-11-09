@@ -808,6 +808,74 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
   return choose_single_coherent_address(addresses, prefer_loopback, host_name);
 }
 
+int locator_to_address(ACE_INET_Addr& dest,
+                       const DCPS::Locator_t& locator,
+                       bool map /*map IPV4 to IPV6 addr*/)
+{
+  switch (locator.kind) {
+#ifdef ACE_HAS_IPV6
+  case LOCATOR_KIND_UDPv6:
+    dest.set_type(AF_INET6);
+    if (dest.set_address(reinterpret_cast<const char*>(locator.address),
+                         16, 0 /*encode*/) == -1) {
+      return -1;
+    }
+    dest.set_port_number(locator.port);
+    return 0;
+#endif
+  case LOCATOR_KIND_UDPv4:
+#if !defined (ACE_HAS_IPV6) || !defined (IPV6_V6ONLY)
+    ACE_UNUSED_ARG(map);
+#endif
+    dest.set_type(AF_INET);
+    if (dest.set_address(reinterpret_cast<const char*>(locator.address)
+                         + 12, 4, 0 /*network order*/
+#if defined (ACE_HAS_IPV6) && defined (IPV6_V6ONLY)
+                         , map ? 1 : 0 /*map IPV4 to IPV6 addr*/
+#endif
+    ) == -1) {
+      return -1;
+    }
+    dest.set_port_number(locator.port);
+    return 0;
+  default:
+    return -1;  // Unknown kind
+  }
+
+  return -1;
+}
+
+OpenDDS_Dcps_Export
+void address_to_locator(Locator_t& locator,
+                        const ACE_INET_Addr& addr)
+{
+  const void* raw = addr.get_addr();
+  switch (addr.get_type()) {
+  case AF_INET:
+    {
+      locator.kind = LOCATOR_KIND_UDPv4;
+      const sockaddr_in* in = static_cast<const sockaddr_in*>(raw);
+      std::memset(&locator.address[0], 0, 12);
+      std::memcpy(&locator.address[12], &in->sin_addr, 4);
+    }
+    break;
+#ifdef ACE_HAS_IPV6
+  case AF_INET6:
+    {
+      locator.kind = RTPS::LOCATOR_KIND_UDPv6;
+      const sockaddr_in6* in = static_cast<const sockaddr_in6*>(raw);
+      std::memcpy(&locator.address[0], &in->sin6_addr, 16);
+    }
+    break;
+#endif
+  default:
+    locator.kind = LOCATOR_KIND_INVALID;
+    std::memset(&locator.address[0], 0, 16);
+    break;
+  }
+  locator.port = addr.get_port_number();
+}
+
 }
 }
 

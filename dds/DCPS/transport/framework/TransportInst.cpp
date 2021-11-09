@@ -217,7 +217,7 @@ bool
 OpenDDS::DCPS::TransportInst::should_drop(ssize_t length) const
 {
 #ifdef OPENDDS_TESTING_FEATURES
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, config_lock_, false);
   return drop_messages_ && (OPENDDS_DRAND48() < (length * drop_messages_m_ + drop_messages_b_));
 #else
   ACE_UNUSED_ARG(length);
