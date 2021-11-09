@@ -1,4 +1,3 @@
-
 #include "ThreadMonitor.h"
 
 using namespace RtpsRelay;
@@ -124,7 +123,7 @@ void Thread_Monitor::active_monitor(void)
   }
 }
 
-ACE_THR_FUNC_RETURN loadmonfunction (void *arg)
+ACE_THR_FUNC_RETURN loadmonfunction (void* arg)
 {
   Thread_Monitor *tmon = reinterpret_cast<Thread_Monitor *>(arg);
   tmon->active_monitor();
@@ -141,8 +140,9 @@ void Thread_Monitor::start()
   thr_func_->invoke();
 }
 
-void Thread_Monitor::stop () {
-  if (!this->running_) {
+void Thread_Monitor::stop ()
+{
+  if (this->running_) {
     this->running_ = false;
     this->moderator_.broadcast();
   }
