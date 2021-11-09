@@ -38,7 +38,7 @@ public:
     {
       ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, false);
       executed_ = false;
-      bool retval = on_queue_;
+      const bool retval = on_queue_;
       on_queue_ = true;
       return retval;
     }

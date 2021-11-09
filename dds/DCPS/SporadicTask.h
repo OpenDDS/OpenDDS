@@ -22,8 +22,8 @@ public:
     : interceptor_(interceptor)
     , desired_scheduled_(false)
     , actual_scheduled_(false)
+    , sporadic_command_(make_rch<SporadicCommand>(rchandle_from(this)))
   {
-    sporadic_command_ = make_rch<SporadicCommand>(this);
     reactor(interceptor->reactor());
   }
 
@@ -84,16 +84,19 @@ public:
 
 private:
   struct SporadicCommand : public ReactorInterceptor::Command {
-    SporadicCommand(SporadicTask* hb)
-      : sporadic_task_(hb)
+    explicit SporadicCommand(WeakRcHandle<SporadicTask> sporadic_task)
+      : sporadic_task_(sporadic_task)
     { }
 
     virtual void execute()
     {
-      sporadic_task_->execute_i();
+      RcHandle<SporadicTask> st = sporadic_task_.lock();
+      if (st) {
+        st->execute_i();
+      }
     }
 
-    SporadicTask* const sporadic_task_;
+    WeakRcHandle<SporadicTask> sporadic_task_;
   };
 
   WeakRcHandle<ReactorInterceptor> interceptor_;
@@ -119,7 +122,7 @@ private:
 
   void execute_i()
   {
-    // Bump up our refcount so the Reactor doesn't delete us.
+    // Bump up our refcount so the Reactor doesn't delete us when canceling the timer.
     RcHandle<SporadicTask> x = rchandle_from(this);
 
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
