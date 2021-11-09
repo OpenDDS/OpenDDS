@@ -5,7 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS\DdsDcps_pch.h"
+#include <DCPS/DdsDcps_pch.h>
 #include "ThreadMonitor.h"
 
 
