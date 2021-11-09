@@ -49,10 +49,10 @@ public:
     RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
     if (interceptor) {
       interceptor->execute_or_enqueue(sporadic_command_);
-    } else if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: SporadicTask::schedule")
-                 ACE_TEXT(" failed to receive ReactorInterceptor handle\n")));
+    } else if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: SporadicTask::schedule: "
+                 "failed to receive ReactorInterceptor handle\n"));
     }
   }
 
@@ -70,10 +70,10 @@ public:
     RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
     if (interceptor) {
       interceptor->execute_or_enqueue(sporadic_command_);
-    } else if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: SporadicTask::cancel")
-                 ACE_TEXT(" failed to receive ReactorInterceptor handle\n")));
+    } else if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: SporadicTask::cancel: "
+                 "failed to receive ReactorInterceptor handle\n"));
     }
   }
 
@@ -94,10 +94,10 @@ public:
       if (command) {
         command->wait();
       }
-    } else if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: SporadicTask::cancel_and_wait")
-                 ACE_TEXT(" failed to receive ReactorInterceptor handle\n")));
+    } else if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: SporadicTask::cancel_and_wait: "
+                 "failed to receive ReactorInterceptor handle\n"));
     }
   }
 
@@ -132,9 +132,6 @@ private:
 
   void execute_i()
   {
-    // Bump up our refcount so the Reactor doesn't delete us when canceling the timer.
-    RcHandle<SporadicTask> x = rchandle_from(this);
-
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
 
     if ((!desired_scheduled_ && actual_scheduled_) ||
@@ -146,10 +143,11 @@ private:
     if (desired_scheduled_ && !actual_scheduled_) {
       const long timer = reactor()->schedule_timer(this, 0, desired_delay_.value());
       if (timer == -1) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: SporadicTask::execute_i")
-                   ACE_TEXT(" failed to schedule timer %p\n"),
-                   ACE_TEXT("")));
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: SporadicTask::execute_i: "
+                     "failed to schedule timer %p\n", ""));
+        }
       } else {
         actual_scheduled_ = true;
         actual_next_time_ = desired_next_time_;
