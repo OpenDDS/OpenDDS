@@ -264,7 +264,7 @@ ACE_CDR::ULong hash_member_name_to_id(const OPENDDS_STRING& name)
   DCPS::MD5Hash(result, name.c_str(), name.size());
 
   std::memcpy(&name_hash, result, sizeof name_hash);
-  return name_hash & 0x0FFFFFFF;
+  return name_hash & DCPS::Serializer::MEMBER_ID_MASK;
 }
 
 void hash_member_name(NameHash& name_hash, const OPENDDS_STRING& name)

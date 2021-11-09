@@ -3,11 +3,15 @@
 #include <dds/rtpsrelaylib/RelayTypeSupportImpl.h>
 
 #include <dds/DCPS/DCPS_Utils.h>
+#include <dds/DCPS/TimeTypes.h>
 
 namespace RtpsRelay {
 
-RelayPartitionsListener::RelayPartitionsListener(RelayPartitionTable& relay_partition_table)
+RelayPartitionsListener::RelayPartitionsListener(
+  RelayPartitionTable& relay_partition_table,
+  RelayStatisticsReporter& relay_statistics_reporter)
   : relay_partition_table_(relay_partition_table)
+  , relay_statistics_reporter_(relay_statistics_reporter)
 {}
 
 void RelayPartitionsListener::on_data_available(DDS::DataReader_ptr reader)
@@ -49,6 +53,13 @@ void RelayPartitionsListener::on_data_available(DDS::DataReader_ptr reader)
       break;
     }
   }
+}
+
+void RelayPartitionsListener::on_subscription_matched(
+  DDS::DataReader_ptr /*reader*/, const DDS::SubscriptionMatchedStatus& status)
+{
+  relay_statistics_reporter_.relay_partitions_pub_count(
+    static_cast<uint32_t>(status.total_count), OpenDDS::DCPS::MonotonicTimePoint::now());
 }
 
 }

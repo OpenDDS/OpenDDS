@@ -2,6 +2,7 @@
 
 #include <dds/DCPS/FilterEvaluator.h>
 #include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/Util.h>
 
 #include <tao/SystemException.h>
 
@@ -186,17 +187,11 @@ Encoding::Kind encodings[] = {
   Encoding::KIND_XCDR2,
 };
 
-template <typename Type, size_t length>
-size_t array_length(Type(&)[length])
-{
-  return length;
-}
-
 template<typename Type>
 bool run_test()
 {
   bool success = true;
-  for (size_t i = 0; i < array_length(encodings); i++) {
+  for (size_t i = 0; i < array_count(encodings); i++) {
     const Encoding::Kind e = encodings[i];
     std::cout << "run_test_i<" << DDSTraits<Type>::type_name()
       << ">(" << Encoding::kind_to_string(e) << ")" << std::endl;

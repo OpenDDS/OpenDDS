@@ -40,7 +40,6 @@ class OpenDDS_Dcps_Export TopicImpl
     public virtual TopicCallbacks,
     public virtual TopicDescriptionImpl {
 public:
-
   TopicImpl(const char*                    topic_name,
             const char*                    type_name,
             OpenDDS::DCPS::TypeSupport_ptr type_support,

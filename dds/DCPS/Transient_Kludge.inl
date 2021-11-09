@@ -32,7 +32,7 @@ OpenDDS::DCPS::Transient_Kludge::disable()
 
 ACE_INLINE
 bool
-OpenDDS::DCPS::Transient_Kludge::is_enabled()
+OpenDDS::DCPS::Transient_Kludge::is_enabled() const
 {
   return enabled_;
 }

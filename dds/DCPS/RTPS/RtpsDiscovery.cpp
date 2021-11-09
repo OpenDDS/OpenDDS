@@ -1055,7 +1055,7 @@ RtpsDiscovery::spdp_rtps_relay_address(const ACE_INET_Addr& address)
   for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
        dom_pos != dom_limit; ++dom_pos) {
     for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
-      part_pos->second->send_to_relay();
+      part_pos->second->spdp_rtps_relay_address_change();
     }
   }
 }

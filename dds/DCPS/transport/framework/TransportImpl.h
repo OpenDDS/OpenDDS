@@ -105,6 +105,7 @@ public:
   virtual void update_locators(const RepoId& /*remote*/,
                                const TransportLocatorSeq& /*locators*/) { }
 
+  virtual void rtps_relay_address_change() {}
   virtual void get_and_reset_relay_message_counts(RelayMessageCounts& /*counts*/) {}
 
   /// Interface to the transport's reactor for scheduling timers.

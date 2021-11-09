@@ -42,6 +42,7 @@ public:
   virtual void update_locators(const RepoId& /*remote*/,
                                const TransportLocatorSeq& /*locators*/);
 
+  void rtps_relay_address_change();
   void get_and_reset_relay_message_counts(RelayMessageCounts& counts);
 
 private:
@@ -174,11 +175,14 @@ private:
     bool network_is_unreachable_;
   };
   IceEndpoint ice_endpoint_;
-  ICE::ServerReflexiveStateMachine relay_srsm_;
-  typedef PmfPeriodicTask<RtpsUdpTransport> Periodic;
-  RcHandle<Periodic> relay_stun_task_;
-  mutable ACE_Thread_Mutex relay_stun_mutex_;
+
+  typedef PmfSporadicTask<RtpsUdpTransport> Sporadic;
   void relay_stun_task(const MonotonicTimePoint& now);
+  RcHandle<Sporadic> relay_stun_task_;
+  DCPS::FibonacciSequence<TimeDuration> relay_stun_task_falloff_;
+  ICE::ServerReflexiveStateMachine relay_srsm_;
+
+  mutable ACE_Thread_Mutex relay_stun_mutex_;
 
   void start_ice();
   void stop_ice();
