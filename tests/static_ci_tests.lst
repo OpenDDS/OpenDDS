@@ -42,4 +42,6 @@ tests/DCPS/Compiler/explicit_ints/run_test.pl cpp11: !DCPS_MIN CXX11 !OPENDDS_SA
 tests/DCPS/Compiler/char_literals/run_test.pl classic: !DCPS_MIN STATIC_COMPILER
 tests/DCPS/Compiler/char_literals/run_test.pl cpp11: !DCPS_MIN CXX11 !OPENDDS_SAFETY_PROFILE STATIC_COMPILER
 
-tests/unit-tests/run_test.pl: !DCPS_MIN !NO_UNIT_TESTS
+tests/unit-tests/run_test.pl: !DCPS_MIN !NO_UNIT_TESTS STATIC_UNIT_TESTS
+
+tests/security/attributes/run_test.pl FullMsgEncrypt: STATIC_SECURITY
