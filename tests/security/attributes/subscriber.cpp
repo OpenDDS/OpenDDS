@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -14,15 +12,10 @@
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/BuiltInTopicUtils.h>
-#include <dds/DCPS/StaticIncludes.h>
 #ifdef ACE_AS_STATIC_LIBS
-#  ifndef OPENDDS_SAFETY_PROFILE
-#    include <dds/DCPS/transport/udp/Udp.h>
-#    include <dds/DCPS/transport/multicast/Multicast.h>
-#    include <dds/DCPS/RTPS/RtpsDiscovery.h>
-#    include <dds/DCPS/transport/shmem/Shmem.h>
-#  endif
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  include <dds/DCPS/security/BuiltInPlugins.h>
 #endif
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/transport/framework/TransportConfig.h>
