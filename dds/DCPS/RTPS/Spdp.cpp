@@ -2407,17 +2407,29 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
   local_send_task_ = DCPS::make_rch<SpdpMulti>(reactor_task->interceptor(), outer->config_->resend_period(), ref(*this), &SpdpTransport::send_local);
 
   if (outer->config_->periodic_directed_spdp()) {
-    directed_send_task_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::send_directed);
+    directed_send_task_ =
+      DCPS::make_rch<SpdpSporadic>(TheServiceParticipant->time_source(), reactor_task->interceptor(),
+                                   ref(*this), &SpdpTransport::send_directed);
   }
 
-  lease_expiration_task_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::process_lease_expirations);
+  lease_expiration_task_ =
+    DCPS::make_rch<SpdpSporadic>(TheServiceParticipant->time_source(), reactor_task->interceptor(),
+                                 ref(*this), &SpdpTransport::process_lease_expirations);
 
 #ifdef OPENDDS_SECURITY
-  handshake_deadline_task_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::process_handshake_deadlines);
-  handshake_resend_task_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::process_handshake_resends);
+  handshake_deadline_task_ =
+    DCPS::make_rch<SpdpSporadic>(TheServiceParticipant->time_source(), reactor_task->interceptor(),
+                                 ref(*this), &SpdpTransport::process_handshake_deadlines);
+  handshake_resend_task_ =
+    DCPS::make_rch<SpdpSporadic>(TheServiceParticipant->time_source(), reactor_task->interceptor(),
+                                 ref(*this), &SpdpTransport::process_handshake_resends);
 
-  relay_spdp_task_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::send_relay);
-  relay_stun_task_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::relay_stun_task);
+  relay_spdp_task_ =
+    DCPS::make_rch<SpdpSporadic>(TheServiceParticipant->time_source(), reactor_task->interceptor(),
+                                 ref(*this), &SpdpTransport::send_relay);
+  relay_stun_task_ =
+    DCPS::make_rch<SpdpSporadic>(TheServiceParticipant->time_source(), reactor_task->interceptor(),
+                                 ref(*this), &SpdpTransport::relay_stun_task);
 #endif
 
 #ifndef DDS_HAS_MINIMUM_BIT

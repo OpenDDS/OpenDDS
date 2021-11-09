@@ -259,7 +259,8 @@ private:
 
   class RevokePermissionsTask : public DCPS::SporadicTask {
   public:
-    RevokePermissionsTask(DCPS::ReactorInterceptor_rch interceptor,
+    RevokePermissionsTask(const DCPS::TimeSource& time_source,
+                          DCPS::ReactorInterceptor_rch interceptor,
                           AccessControlBuiltInImpl& impl);
     virtual ~RevokePermissionsTask();
     void insert(DDS::Security::PermissionsHandle pm_handle, const time_t& expiration);

@@ -670,8 +670,8 @@ private:
   {
     if (!type_lookup_reply_deadline_processor_) {
       type_lookup_reply_deadline_processor_ =
-        DCPS::make_rch<EndpointManagerSporadic>(reactor_interceptor, ref(*this),
-          &Sedp::remove_expired_endpoints);
+        DCPS::make_rch<EndpointManagerSporadic>(TheServiceParticipant->time_source(), reactor_interceptor,
+                                                ref(*this), &Sedp::remove_expired_endpoints);
     }
   }
 

@@ -618,7 +618,7 @@ private:
       , id_(id)
       , stopping_(false)
       , nackfrag_count_(0)
-      , preassociation_task_(make_rch<RtpsReader::Sporadic>(link->reactor_task_->interceptor(), *this, &RtpsReader::send_preassociation_acknacks))
+      , preassociation_task_(make_rch<RtpsReader::Sporadic>(TheServiceParticipant->time_source(), link->reactor_task_->interceptor(), *this, &RtpsReader::send_preassociation_acknacks))
     {}
 
     ~RtpsReader();
