@@ -696,7 +696,7 @@ TEST(serializer_test, Serializer_test_trim)
   ASSERT_TRUE(ser.read_octet_array(x, 3));
   OpenDDS::DCPS::Message_Block_Ptr subset(ser.trim(3));
   ASSERT_EQ(subset->total_length(), 3u);
-  ASSERT_EQ(subset->length(), 1);
+  ASSERT_EQ(subset->length(), 1u);
   ASSERT_EQ(subset->rd_ptr()[0], 3);
   ASSERT_TRUE(subset->cont());
   ASSERT_TRUE(subset->cont()->cont());

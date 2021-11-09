@@ -12,6 +12,7 @@
 
 #include <dds/DCPS/SafetyProfileStreams.h>
 #include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/Util.h>
 
 #include <utl_identifier.h>
 
@@ -25,14 +26,9 @@
 
 using std::string;
 using namespace AstTypeClassification;
+using OpenDDS::DCPS::array_count;
 
 namespace {
-  template <typename Type, size_t length>
-  size_t array_length(Type(&)[length])
-  {
-    return length;
-  }
-
   const string RtpsNamespace = " ::OpenDDS::RTPS::", DdsNamespace = " ::DDS::";
 
   typedef bool (*is_special_case)(const string& cxx);
@@ -128,7 +124,7 @@ namespace {
 
   const special_struct* get_special_struct(const std::string& name)
   {
-    for (size_t i = 0; i < array_length(special_structs); ++i) {
+    for (size_t i = 0; i < array_count(special_structs); ++i) {
       if (special_structs[i].check(name)) {
         return &special_structs[i];
       }
@@ -797,7 +793,7 @@ namespace {
     NamespaceGuard ng(!anonymous);
 
     if (!anonymous) {
-      for (size_t i = 0; i < array_length(special_sequences); ++i) {
+      for (size_t i = 0; i < array_count(special_sequences); ++i) {
         if (special_sequences[i].check(base_wrapper.type_name_)) {
           special_sequences[i].gen(base_wrapper.type_name_);
           return;
@@ -3944,7 +3940,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     }
   }
 
-  for (size_t i = 0; i < array_length(special_unions); ++i) {
+  for (size_t i = 0; i < array_count(special_unions); ++i) {
     if (special_unions[i].check(cxx)) {
       return special_unions[i].gen(cxx, node, discriminator, branches);
     }

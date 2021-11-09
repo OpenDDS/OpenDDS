@@ -1,6 +1,9 @@
 from docutils import nodes
+from docutils.parsers.rst.states import Struct
+from docutils.utils import unescape
 import subprocess
 from pathlib import Path
+import re
 
 url_base = 'https://github.com'
 
@@ -19,28 +22,70 @@ def get_commitish(app):
     return app.config.github_links_commitish
 
 
-# Turns :ghfile:`README.md` into the equivalent of ``README.md`` that is a link
-# to that file on GitHub. It will try to point to the most specific version of
-# the file:
-# - If the OpenDDS is a release it will calculate the release tag and use that.
-# - Else if the OpenDDS is in a git repository it will use the commit hash.
-# - Else it will use `master`.
+def rst_error(rawtext, text, lineno, inliner, message, *fmtargs, **fmtkwargs):
+    error = inliner.reporter.error(message.format(*fmtargs, **fmtkwargs), line=lineno)
+    return [inliner.problematic(text, rawtext, error)], [error]
+
+
+title_target_re = re.compile(r'^(.+?)\s*<(.*?)>$')
+
+
+def process_title_target(text, implied_title=None):
+    m = title_target_re.match(text)
+    if m:
+        return True, m[1], m[2]
+    return False, text if implied_title is None else implied_title, text
+
+
+def parse_rst(parent, text, lineno, inliner):
+    context = Struct(
+        document=inliner.document,
+        reporter=inliner.reporter,
+        language=inliner.language)
+    processed, messages = inliner.parse(unescape(text), lineno, context, parent)
+    parent += processed
+    return messages
+
+
+def link_node(rawtext, lineno, inliner, title, parse_title, url, options):
+    node = nodes.reference(rawtext, '' if parse_title else title, refuri=url, **options)
+    messages = []
+    if parse_title:
+        messages = parse_rst(node, title, lineno, inliner)
+    return ([node], messages)
+
+
+ghfile_arg_re = re.compile(r'^([^#]+)(#[^#]+)?$')
+
+
 def ghfile_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     app = inliner.document.settings.env.app
     repo = app.config.github_links_repo
-    local_path = Path(app.config.github_links_root_path) / text
+
+    explicit_title, title, target = process_title_target(text)
+
+    # Seperate path and possible URL fragment
+    m = ghfile_arg_re.match(target)
+    if not m:
+        return rst_error(rawtext, text, lineno, inliner,
+            '{} is an invalid target', repr(target))
+    path = m.group(1)
+    fragment = m.group(2) if m.group(2) is not None else ''
+
+    # Check if the path exists locally
+    local_path = Path(app.config.github_links_root_path) / path
     if not local_path.exists():
-        msg = inliner.reporter.error(
-            '"{}" doesn\'t exist. Checked for existence of "{}".'.format(
-                text, str(local_path)),
-            line=lineno)
-        prb = inliner.problematic(rawtext, rawtext, msg)
-        return [prb], [msg]
+        return rst_error(rawtext, text, lineno, inliner,
+            '"{}" doesn\'t exist. Checked for existence of "{}"',
+                path, str(local_path)),
+
     kind = 'tree' if local_path.is_dir() else 'blob'
-    url = '/'.join([url_base, repo, kind, get_commitish(app), text])
-    options['classes'] = ['custom_literal']
-    node = nodes.reference(rawtext, text, refuri=url, **options)
-    return ([node], [])
+    url = '/'.join([url_base, repo, kind, get_commitish(app), path]) + fragment
+    if explicit_title:
+        options['classes'] = [c for c in options['classes'] if c != 'custom_literal']
+    else:
+        options['classes'] = ['custom_literal']
+    return link_node(rawtext, lineno, inliner, title, explicit_title, url, options)
 
 
 # Turns :ghissue:`213` into the equivalent of:
@@ -48,10 +93,12 @@ def ghfile_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
 def ghissue_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     app = inliner.document.settings.env.app
     repo = app.config.github_links_repo
-    url = '{}/{}/issues/{}'.format(url_base, repo, text)
-    text = 'Issue #{} on GitHub'.format(text)
-    node = nodes.reference(rawtext, text, refuri=url, **options)
-    return ([node], [])
+    explicit_title, title, target = process_title_target(
+        text, 'Issue #{} on GitHub'.format(text))
+    return link_node(rawtext, lineno, inliner,
+        title, explicit_title,
+        '{}/{}/issues/{}'.format(url_base, repo, target),
+        options)
 
 
 # Turns :ghpr:`1` into the equivalent of:
@@ -59,10 +106,12 @@ def ghissue_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
 def ghpr_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     app = inliner.document.settings.env.app
     repo = app.config.github_links_repo
-    url = '{}/{}/pull/{}'.format(url_base, repo, text)
-    text = 'Pull Request #{} on GitHub'.format(text)
-    node = nodes.reference(rawtext, text, refuri=url, **options)
-    return ([node], [])
+    explicit_title, title, target = process_title_target(
+        text, 'Pull Request #{} on GitHub'.format(text))
+    return link_node(rawtext, lineno, inliner,
+        title, explicit_title,
+        '{}/{}/pull/{}'.format(url_base, repo, target),
+        options)
 
 
 # If this is a release, turns :ghrelease:`Release Text` into "Release Text"

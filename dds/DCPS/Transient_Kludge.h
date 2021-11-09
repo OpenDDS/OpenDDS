@@ -30,7 +30,6 @@ namespace DCPS {
 */
 class OpenDDS_Dcps_Export Transient_Kludge {
 public:
-
   Transient_Kludge();
   ~Transient_Kludge();
 
@@ -44,7 +43,7 @@ public:
   void disable();
 
   /// Accessor of enable flag.
-  bool is_enabled();
+  bool is_enabled() const;
 
 private:
   /// The flag.
