@@ -336,6 +336,307 @@ TEST(Mutable, ReadValueFromStruct)
   EXPECT_EQ(expected.my_enum, my_enum);
 }
 
+TEST(Final, ReadValueFromStruct)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::SingleValueStructFinal_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::SingleValueStructFinal_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  unsigned char single_value_struct[] = {
+    0x00,0x00,0x00,0x03, // +4=8 my_enum
+    0x00,0x00,0x00,0x0a, // +4=12 int_32
+    0x00,0x00,0x00,0x0b, // +4=16 uint_32
+    0x05, // +1=17 int_8
+    0x06, // +1=18 uint_8
+    0x11,0x11, // +2 =20 int_16
+    0x22,0x22, // +2 =22 uint_16
+    (0),(0),0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +(2)+8=32 int_64
+    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +8=40 uint_64
+    0x3f,0x80,0x00,0x00, // +4=44 float_32
+    0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00, // +8=52 float_64
+    0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0,    // +16=68 float_128
+    'a',  // +1=69 char_8
+    (0),0x00,0x61, // +(1)+2=72 char_16
+    0xff, // +1=73 byte
+    0x01, // +1=74 bool
+    (0), (0), 0x00,0x00,0x00,0x0c, // +(2)+4=80 nested_struct
+    0x00,0x00,0x00,0x04, 'a','b','c','\0', // +8=88 str
+    0x00,0x00,0x00,0x08, 0,0x61,0,0x62,0,0x63,0,0, // +12=100 swtr
+  };
+
+  SingleValueStructFinal expected;
+  expected.my_enum = E_UINT8;
+  expected.int_32 = 10;
+  expected.uint_32 = 11;
+  expected.int_8 = 5;
+  expected.uint_8 = 6;
+  expected.int_16 = 0x1111;
+  expected.uint_16 = 0x2222;
+  expected.int_64 = 0x7fffffffffffffff;
+  expected.uint_64 = 0xffffffffffffffff;
+  expected.float_32 = 1.0f;
+  expected.float_64 = 1.0;
+  set_float128_value(expected.float_128);
+  expected.char_8 = 'a';
+  expected.char_16 = 0x0061;
+  expected.byte = 0xff;
+  expected._cxx_bool = true;
+  expected.nested_struct.l = 12;
+  expected.str = "abc";
+  expected.wstr = L"abc";
+
+  ACE_Message_Block msg(1024);
+  msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
+  XTypes::DynamicData data(&msg, xcdr2, dt);
+
+  // For reading value indirectly through a nested DynamicData object.
+  XTypes::MemberId random_id = 111;
+  XTypes::DynamicData nested_dd;
+
+  ACE_CDR::Long my_enum;
+  DDS::ReturnCode_t ret = data.get_int32_value(my_enum, 0);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.my_enum, my_enum);
+
+  ret = data.get_complex_value(nested_dd, 0);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = nested_dd.get_int32_value(my_enum, random_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.my_enum, my_enum);
+
+  ACE_CDR::Long int_32;
+  ret = data.get_int32_value(int_32, 1);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.int_32, int_32);
+
+  ret = data.get_complex_value(nested_dd, 1);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = nested_dd.get_int32_value(int_32, random_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.int_32, int_32);
+
+  ACE_CDR::ULong uint_32;
+  ret = data.get_uint32_value(uint_32, 2);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.uint_32, uint_32);
+
+  ret = data.get_complex_value(nested_dd, 2);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = nested_dd.get_uint32_value(uint_32, random_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.uint_32, uint_32);
+
+  ACE_CDR::Int8 int_8;
+  ret = data.get_int8_value(int_8, 3);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.int_8, int_8);
+
+  ret = data.get_complex_value(nested_dd, 3);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = nested_dd.get_int8_value(int_8, random_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.int_8, int_8);
+
+  ACE_CDR::UInt8 uint_8;
+  ret = data.get_uint8_value(uint_8, 4);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.uint_8, uint_8);
+
+  ret = data.get_complex_value(nested_dd, 4);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = nested_dd.get_uint8_value(uint_8, random_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.uint_8, uint_8);
+
+  ACE_CDR::Int16 int_16;
+  ret = data.get_int16_value(int_16, 5);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.int_16, int_16);
+
+  ret = data.get_complex_value(nested_dd, 5);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = nested_dd.get_int16_value(int_16, random_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.int_16, int_16);
+
+  ACE_CDR::UInt16 uint_16;
+  ret = data.get_uint16_value(uint_16, 6);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.uint_16, uint_16);
+
+  ret = data.get_complex_value(nested_dd, 6);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = nested_dd.get_uint16_value(uint_16, random_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.uint_16, uint_16);
+
+  ACE_CDR::Int64 int_64;
+  ret = data.get_int64_value(int_64, 7);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.int_64, int_64);
+
+  ret = data.get_complex_value(nested_dd, 7);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = nested_dd.get_int64_value(int_64, random_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.int_64, int_64);
+
+  ACE_CDR::UInt64 uint_64;
+  ret = data.get_uint64_value(uint_64, 8);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.uint_64, uint_64);
+
+  ret = data.get_complex_value(nested_dd, 8);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = nested_dd.get_uint64_value(uint_64, random_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.uint_64, uint_64);
+
+  ACE_CDR::Float float_32;
+  ret = data.get_float32_value(float_32, 9);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.float_32, float_32);
+
+  ret = data.get_complex_value(nested_dd, 9);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = nested_dd.get_float32_value(float_32, random_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.float_32, float_32);
+
+  ACE_CDR::Double float_64;
+  ret = data.get_float64_value(float_64, 10);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.float_64, float_64);
+
+  ret = data.get_complex_value(nested_dd, 10);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = nested_dd.get_float64_value(float_64, random_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.float_64, float_64);
+
+  ACE_CDR::LongDouble float_128;
+  ret = data.get_float128_value(float_128, 11);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  check_float128(expected.float_128, float_128);
+  ret = data.get_complex_value(nested_dd, 11);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = nested_dd.get_float128_value(float_128, random_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  check_float128(expected.float_128, float_128);
+
+  ACE_CDR::Char char_8;
+  ret = data.get_char8_value(char_8, 12);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.char_8, char_8);
+
+  ret = data.get_complex_value(nested_dd, 12);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = nested_dd.get_char8_value(char_8, random_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.char_8, char_8);
+
+  ACE_CDR::WChar char_16;
+  ret = data.get_char16_value(char_16, 13);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.char_16, char_16);
+
+  ret = data.get_complex_value(nested_dd, 13);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = nested_dd.get_char16_value(char_16, random_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.char_16, char_16);
+
+  ACE_CDR::Octet byte;
+  ret = data.get_byte_value(byte, 14);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.byte, byte);
+
+  ret = data.get_complex_value(nested_dd, 14);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = nested_dd.get_byte_value(byte, random_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.byte, byte);
+
+  ACE_CDR::Boolean bool_;
+  ret = data.get_boolean_value(bool_, 15);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected._cxx_bool, bool_);
+
+  ret = data.get_complex_value(nested_dd, 15);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = nested_dd.get_boolean_value(bool_, random_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected._cxx_bool, bool_);
+
+  ACE_CDR::Long l;
+  ret = data.get_complex_value(nested_dd, 16);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = nested_dd.get_int32_value(l, 0);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.nested_struct.l, l);
+
+  XTypes::DynamicData nested_dd2;
+  ret = nested_dd.get_complex_value(nested_dd2, 0);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ret = nested_dd2.get_int32_value(l, random_id);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.nested_struct.l, l);
+
+  ACE_CDR::Char* str = 0;
+  ret = data.get_string_value(str, 17);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_STREQ(expected.str.in(), str);
+  CORBA::string_free(str);
+
+  str = 0;
+  ret = data.get_complex_value(nested_dd, 17);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = nested_dd.get_string_value(str, random_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_STREQ(expected.str.in(), str);
+  CORBA::string_free(str);
+
+  ACE_CDR::WChar* wstr = 0;
+  ret = data.get_wstring_value(wstr, 18);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_STREQ(expected.wstr.in(), wstr);
+  CORBA::wstring_free(wstr);
+
+  wstr = 0;
+  ret = data.get_complex_value(nested_dd, 18);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = nested_dd.get_wstring_value(wstr, random_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_STREQ(expected.wstr.in(), wstr);
+  CORBA::wstring_free(wstr);
+
+  // Reading members out-of-order.
+  ret = data.get_int32_value(int_32, 1);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.int_32, int_32);
+
+  ret = data.get_complex_value(nested_dd, 1);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = nested_dd.get_int32_value(int_32, random_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.int_32, int_32);
+
+  ret = data.get_int32_value(my_enum, 0);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.my_enum, my_enum);
+
+  ret = data.get_complex_value(nested_dd, 0);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = nested_dd.get_int32_value(my_enum, random_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(expected.my_enum, my_enum);
+}
+
 TEST(Mutable, ReadValueFromUnion)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::SingleValueUnion_xtag>();
@@ -653,6 +954,217 @@ TEST(Mutable, ReadValueFromUnion)
   }
 }
 
+TEST(Final, ReadValueFromUnion)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::SingleValueUnionFinal_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::SingleValueUnionFinal_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  ACE_Message_Block msg(256);
+  {
+    unsigned char int32_union[] = {
+      0x00,0x00,0x00,0x00, // +4=4 discriminator
+      0x00,0x00,0x00,0x0a  // +4=8 int_32
+    };
+
+    msg.copy((const char*)int32_union, sizeof(int32_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+
+    ACE_CDR::Long int_32;
+    DDS::ReturnCode_t ret = data.get_int32_value(int_32, 1);
+    EXPECT_EQ(ret, DDS::RETCODE_OK);
+    EXPECT_EQ(ACE_CDR::Long(10), int_32);
+  }
+  {
+    unsigned char uint32_union[] = {
+      0x00,0x00,0x00,0x01, // +4=4 discriminator
+      0x00,0x00,0x00,0x0b // +4=8 uint_32
+    };
+
+    msg.reset();
+    msg.copy((const char*)uint32_union, sizeof(uint32_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+
+    ACE_CDR::ULong uint_32;
+    DDS::ReturnCode_t ret = data.get_uint32_value(uint_32, 2);
+    EXPECT_EQ(ret, DDS::RETCODE_OK);
+    EXPECT_EQ(ACE_CDR::ULong(11), uint_32);
+  }
+  {
+    unsigned char int8_union[] = {
+      0x00,0x00,0x00,0x02, // +4=4 discriminator
+      0x7f // +1=5 int_8
+    };
+
+    msg.reset();
+    msg.copy((const char*)int8_union, sizeof(int8_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+
+    ACE_CDR::Int8 int_8;
+    DDS::ReturnCode_t ret = data.get_int8_value(int_8, 3);
+    EXPECT_EQ(ret, DDS::RETCODE_OK);
+    EXPECT_EQ(ACE_CDR::Int8(127), int_8);
+  }
+  {
+    unsigned char uint8_union[] = {
+      0x00,0x00,0x00,0x03, // +4=4 discriminator
+      0xff // +1=5 uint_8
+    };
+
+    msg.reset();
+    msg.copy((const char*)uint8_union, sizeof(uint8_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+
+    ACE_CDR::UInt8 uint_8;
+    DDS::ReturnCode_t ret = data.get_uint8_value(uint_8, 4);
+    EXPECT_EQ(ret, DDS::RETCODE_OK);
+    EXPECT_EQ(ACE_CDR::UInt8(255), uint_8);
+  }
+  {
+    unsigned char int16_union[] = {
+      0x00,0x00,0x00,0x04, // +4=4 discriminator
+      0x00,0x09 // +2=6 int_16
+    };
+
+    msg.reset();
+    msg.copy((const char*)int16_union, sizeof(int16_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+
+    ACE_CDR::Short int_16;
+    DDS::ReturnCode_t ret = data.get_int16_value(int_16, 5);
+    EXPECT_EQ(ret, DDS::RETCODE_OK);
+    EXPECT_EQ(ACE_CDR::Short(9), int_16);
+  }
+  {
+    unsigned char uint16_union[] = {
+      0x00,0x00,0x00,0x05, // +4=4 discriminator
+      0x00,0x05 // +2=6 uint_16
+    };
+
+    msg.reset();
+    msg.copy((const char*)uint16_union, sizeof(uint16_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+
+    ACE_CDR::UShort uint_16;
+    DDS::ReturnCode_t ret = data.get_uint16_value(uint_16, 6);
+    EXPECT_EQ(ret, DDS::RETCODE_OK);
+    EXPECT_EQ(ACE_CDR::UShort(5), uint_16);
+  }
+  {
+    unsigned char int64_union[] = {
+      0x00,0x00,0x00,0x06, // +4=4 discriminator
+      0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xfe// +8=12 int_64
+    };
+
+    msg.reset();
+    msg.copy((const char*)int64_union, sizeof(int64_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+
+    ACE_CDR::LongLong int_64;
+    DDS::ReturnCode_t ret = data.get_int64_value(int_64, 7);
+    EXPECT_EQ(ret, DDS::RETCODE_OK);
+    EXPECT_EQ(ACE_CDR::LongLong(254), int_64);
+  }
+  {
+    unsigned char uint64_union[] = {
+      0x00,0x00,0x00,0x07, // +4=4 discriminator
+      0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff// +8=12 uint_64
+    };
+
+    msg.reset();
+    msg.copy((const char*)uint64_union, sizeof(uint64_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+
+    ACE_CDR::ULongLong uint_64;
+    DDS::ReturnCode_t ret = data.get_uint64_value(uint_64, 8);
+    EXPECT_EQ(ret, DDS::RETCODE_OK);
+    EXPECT_EQ(ACE_CDR::ULongLong(255), uint_64);
+  }
+  {
+    unsigned char float32_union[] = {
+      0x00,0x00,0x00,0x08, // +4=4 discriminator
+      0x3f,0x80,0x00,0x00 // +4=8 float_32
+    };
+
+    msg.reset();
+    msg.copy((const char*)float32_union, sizeof(float32_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+
+    ACE_CDR::Float float_32;
+    DDS::ReturnCode_t ret = data.get_float32_value(float_32, 9);
+    EXPECT_EQ(ret, DDS::RETCODE_OK);
+    EXPECT_EQ(ACE_CDR::Float(1.0f), float_32);
+  }
+  {
+    unsigned char float64_union[] = {
+      0x00,0x00,0x00,0x09, // +4=4 discriminator
+      0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00 // +8=12 float_64
+    };
+
+    msg.reset();
+    msg.copy((const char*)float64_union, sizeof(float64_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+
+    ACE_CDR::Double float_64;
+    DDS::ReturnCode_t ret = data.get_float64_value(float_64, 10);
+    EXPECT_EQ(ret, DDS::RETCODE_OK);
+    EXPECT_EQ(ACE_CDR::Double(1.0), float_64);
+  }
+  {
+    unsigned char float128_union[] = {
+      0x00,0x00,0x00,0x0a, // +4=4 discriminator
+      0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0     // 16=20 float_128
+    };
+
+    msg.reset();
+    msg.copy((const char*)float128_union, sizeof(float128_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+
+    ACE_CDR::LongDouble float_128;
+    DDS::ReturnCode_t ret = data.get_float128_value(float_128, 11);
+    EXPECT_EQ(ret, DDS::RETCODE_OK);
+    ACE_CDR::LongDouble expected;
+    set_float128_value(expected);
+    check_float128(expected, float_128);
+  }
+  {
+    unsigned char char8_union[] = {
+      0x00,0x00,0x00,0x0b, // +4=4 discriminator
+      'a'     // +1=5 char_8
+    };
+
+    msg.reset();
+    msg.copy((const char*)char8_union, sizeof(char8_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+
+    ACE_CDR::Char char_8;
+    DDS::ReturnCode_t ret = data.get_char8_value(char_8, 12);
+    EXPECT_EQ(ret, DDS::RETCODE_OK);
+    EXPECT_EQ(ACE_CDR::Char('a'), char_8);
+  }
+  {
+    unsigned char char16_union[] = {
+      0x00,0x00,0x00,0x0c, // +4=4 discriminator
+      0x00,0x61 // +2=6 char_16
+    };
+
+    msg.reset();
+    msg.copy((const char*)char16_union, sizeof(char16_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+
+    ACE_CDR::WChar char_16;
+    DDS::ReturnCode_t ret = data.get_char16_value(char_16, 13);
+    EXPECT_EQ(ret, DDS::RETCODE_OK);
+    EXPECT_EQ(ACE_CDR::WChar(L'a'), char_16);
+  }
+}
+
+
 template<typename SequenceTypeA, typename SequenceTypeB>
 void check_primitive_sequences(const SequenceTypeA& a, const SequenceTypeB& b)
 {
@@ -715,6 +1227,212 @@ TEST(Mutable, ReadValueFromSequence)
   };
 
   SequenceStruct expected;
+  expected.my_enums.length(2);
+  expected.my_enums[0] = E_UINT32; expected.my_enums[1] = E_INT8;
+  expected.int_32s.length(3);
+  expected.int_32s[0] = 3; expected.int_32s[1] = 4; expected.int_32s[2] = 5;
+  expected.uint_32s.length(2);
+  expected.uint_32s[0] = 10; expected.uint_32s[1] = 11;
+  expected.int_8s.length(3);
+  expected.int_8s[0] = 12; expected.int_8s[1] = 13; expected.int_8s[2] = 14;
+  expected.uint_8s.length(2);
+  expected.uint_8s[0] = 15; expected.uint_8s[1] = 16;
+  expected.int_16s.length(2);
+  expected.int_16s[0] = 1; expected.int_16s[1] = 2;
+  expected.uint_16s.length(3);
+  expected.uint_16s[0] = 3; expected.uint_16s[1] = 4; expected.uint_16s[2] = 5;
+  expected.int_64s.length(2);
+  expected.int_64s[0] = 0x7ffffffffffffffe; expected.int_64s[1] = 0x7fffffffffffffff;
+  expected.uint_64s.length(1);
+  expected.uint_64s[0] = 0xffffffffffffffff;
+  expected.float_32s.length(1);
+  expected.float_32s[0] = 1.0f;
+  expected.float_64s.length(1);
+  expected.float_64s[0] = 1.0;
+  expected.float_128s.length(1);
+  set_float128_value(expected.float_128s[0]);
+  expected.char_8s.length(2);
+  expected.char_8s[0] = 'a'; expected.char_8s[1] = 'b';
+  expected.char_16s.length(3);
+  expected.char_16s[0] = 'c'; expected.char_16s[1] = 'd'; expected.char_16s[2] = 'e';
+  expected.byte_s.length(2);
+  expected.byte_s[0] = 0xee; expected.byte_s[1] = 0xff;
+  expected.bool_s.length(1);
+  expected.bool_s[0] = 1;
+  expected.str_s.length(1);
+  expected.str_s[0] = "abc";
+  expected.wstr_s.length(2);
+  expected.wstr_s[0] = L"def"; expected.wstr_s[1] = L"ghi";
+
+  ACE_Message_Block msg(1024);
+  msg.copy((const char*)sequence_struct, sizeof(sequence_struct));
+  XTypes::DynamicData data(&msg, xcdr2, dt);
+
+  CORBA::LongSeq my_enums;
+  DDS::ReturnCode_t ret = data.get_int32_values(my_enums, 0);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  check_primitive_sequences(expected.my_enums, my_enums);
+
+  XTypes::DynamicData complex;
+  ret = data.get_complex_value(complex, 0);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  my_enums.length(0);
+  ret = data.get_int32_values(my_enums, 0);
+  check_primitive_sequences(expected.my_enums, my_enums);
+
+  ACE_CDR::ULong count = complex.get_item_count();
+  EXPECT_EQ(ACE_CDR::ULong(2), count);
+  XTypes::MemberId id = complex.get_member_id_at_index(0);
+  EXPECT_EQ(XTypes::MemberId(0), id);
+  ACE_CDR::Long some_enum;
+  ret = complex.get_int32_value(some_enum, id);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.my_enums[0], some_enum);
+
+  CORBA::LongSeq int_32s;
+  ret = data.get_int32_values(int_32s, 1);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  check_primitive_sequences(expected.int_32s, int_32s);
+
+  ret = data.get_complex_value(complex, 1);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  count = complex.get_item_count();
+  EXPECT_EQ(ACE_CDR::ULong(3), count);
+  id = complex.get_member_id_at_index(1);
+  ACE_CDR::Long some_int32;
+  ret = complex.get_int32_value(some_int32, id);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.int_32s[1], some_int32);
+
+  CORBA::ULongSeq uint_32s;
+  ret = data.get_uint32_values(uint_32s, 2);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  check_primitive_sequences(expected.uint_32s, uint_32s);
+  ret = data.get_uint32_values(uint_32s, 3);
+  EXPECT_EQ(DDS::RETCODE_ERROR, ret);
+
+  CORBA::Int8Seq int_8s;
+  ret = data.get_int8_values(int_8s, 3);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  check_primitive_sequences(expected.int_8s, int_8s);
+
+  CORBA::UInt8Seq uint_8s;
+  ret = data.get_uint8_values(uint_8s, 4);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  check_primitive_sequences(expected.uint_8s, uint_8s);
+
+  CORBA::ShortSeq int_16s;
+  ret = data.get_int16_values(int_16s, 5);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  check_primitive_sequences(expected.int_16s, int_16s);
+
+  CORBA::UShortSeq uint_16s;
+  ret = data.get_uint16_values(uint_16s, 6);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  check_primitive_sequences(expected.uint_16s, uint_16s);
+
+  CORBA::LongLongSeq int_64s;
+  ret = data.get_int64_values(int_64s, 7);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  check_primitive_sequences(expected.int_64s, int_64s);
+
+  CORBA::ULongLongSeq uint_64s;
+  ret = data.get_uint64_values(uint_64s, 8);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  check_primitive_sequences(expected.uint_64s, uint_64s);
+
+  CORBA::FloatSeq float_32s;
+  ret = data.get_float32_values(float_32s, 9);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  check_primitive_sequences(expected.float_32s, float_32s);
+
+  CORBA::DoubleSeq float_64s;
+  ret = data.get_float64_values(float_64s, 10);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  check_primitive_sequences(expected.float_64s, float_64s);
+
+  CORBA::LongDoubleSeq float_128s;
+  ret = data.get_float128_values(float_128s, 11);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  check_float128_sequences(expected.float_128s, float_128s);
+
+  CORBA::CharSeq char_8s;
+  ret = data.get_char8_values(char_8s, 12);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  check_primitive_sequences(expected.char_8s, char_8s);
+
+  CORBA::WCharSeq char_16s;
+  ret = data.get_char16_values(char_16s, 13);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  check_primitive_sequences(expected.char_16s, char_16s);
+
+  CORBA::OctetSeq byte_s;
+  ret = data.get_byte_values(byte_s, 14);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  check_primitive_sequences(expected.byte_s, byte_s);
+
+  CORBA::BooleanSeq bool_s;
+  ret = data.get_boolean_values(bool_s, 15);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  check_primitive_sequences(expected.bool_s, bool_s);
+
+  CORBA::StringSeq str_s;
+  ret = data.get_string_values(str_s, 16);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  check_string_sequences(expected.str_s, str_s);
+
+  CORBA::WStringSeq wstr_s;
+  ret = data.get_wstring_values(wstr_s, 17);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  check_string_sequences(expected.wstr_s, wstr_s);
+
+  ret = data.get_complex_value(complex, 17);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  count = complex.get_item_count();
+  EXPECT_EQ(ACE_CDR::ULong(2), count);
+  id = complex.get_member_id_at_index(1);
+  ACE_CDR::WChar* some_wstr = 0;
+  ret = complex.get_wstring_value(some_wstr, id);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_STREQ(expected.wstr_s[1].in(), some_wstr);
+  CORBA::wstring_free(some_wstr);
+}
+
+TEST(Final, ReadValueFromSequence)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::SequenceStructFinal_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::SequenceStructFinal_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  unsigned char sequence_struct[] = {
+    0,0,0,12, 0,0,0,2, 0,0,0,1, 0,0,0,2, // +16=16 my_enums
+    0,0,0,3, 0,0,0,3, 0,0,0,4, 0,0,0,5, // +16=32 int_32s
+    0,0,0,2, 0,0,0,10, 0,0,0,11, // +12=44 uint_32s
+    0,0,0,3, 12,13,14, // +7=51 int_8s
+    (0), 0,0,0,2, 15,16, // +(1)+6=58 uint_8s
+    (0),(0), 0,0,0,2, 0,1,0,2, // +(2)+8=68 int_16s
+    0,0,0,3, 0,3,0,4 ,0,5, // +10=78 uint_16s
+    (0),(0), 0,0,0,2, 0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xfe,
+    0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +(2)+20=100 int_64s
+    0,0,0,1, 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +12=112 uint_64s
+    0,0,0,1, 0x3f,0x80,0x00,0x00, // +8=120 float_32s
+    0,0,0,1, 0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00, // +12=132 float_64s
+    0,0,0,1, 0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0, // +20=152 float_128s
+    0,0,0,2, 'a','b', // +6=158 char_8s
+    (0),(0), 0,0,0,3, 0,0x63,0,0x64,0,0x65, // +(2)+10=170 char_16s
+    (0),(0), 0,0,0,2, 0xee,0xff, // +(2)+6=178 byte_s
+    (0),(0), 0,0,0,1, 1, // +(2)+5=185 bool_s
+    (0),(0),(0), 0,0,0,12, 0,0,0,1, 0,0,0,4, 'a','b','c','\0', // +(3)+16=204 str_s
+    0,0,0,26, 0,0,0,2, 0,0,0,6, 0,0x64,0,0x65,0,0x66,(0),(0),
+    0,0,0,6, 0,0x67,0,0x68,0,0x69 // +16+(2)+10=232 wstr_s
+  };
+
+  SequenceStructFinal expected;
   expected.my_enums.length(2);
   expected.my_enums[0] = E_UINT32; expected.my_enums[1] = E_INT8;
   expected.int_32s.length(3);
