@@ -1128,12 +1128,9 @@ TEST(Final, ReadValueFromUnion)
     ACE_CDR::LongDouble float_128;
     DDS::ReturnCode_t ret = data.get_float128_value(float_128, 11);
     EXPECT_EQ(ret, DDS::RETCODE_OK);
-    ACE_CDR::LongDouble expected = 1.0L;
-#if ACE_SIZEOF_LONG_DOUBLE == 16
-    EXPECT_STREQ((const char*)&expected, (const char*)&float_128);
-#else
-    EXPECT_STREQ((const char*)expected.ld, (const char*)float_128.ld);
-#endif
+    ACE_CDR::LongDouble expected;
+    set_float128_value(expected);
+    check_float128(expected, float_128);
   }
   {
     unsigned char char8_union[] = {
