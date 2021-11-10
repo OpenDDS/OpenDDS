@@ -82,7 +82,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
   , custom_allocator_(TheServiceParticipant->association_chunk_multiplier() * config.anticipated_fragments_, RtpsSampleHeader::FRAG_SIZE)
   , bundle_allocator_(TheServiceParticipant->association_chunk_multiplier(), config.max_message_size_)
   , multi_buff_(this, config.nak_depth_)
-  , flush_send_queue_task_(make_rch<Sporadic>(TheServiceParticipant->time_source(), reactor_task->interceptor(), *this, &RtpsUdpDataLink::flush_send_queue))
+  , flush_send_queue_task_(make_rch<Sporadic>(TheServiceParticipant->time_source(), reactor_task->interceptor(), rchandle_from(this), &RtpsUdpDataLink::flush_send_queue))
   , best_effort_heartbeat_count_(0)
   , heartbeat_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::send_heartbeats)
   , heartbeatchecker_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::check_heartbeats)
@@ -4368,8 +4368,8 @@ RtpsUdpDataLink::RtpsWriter::RtpsWriter(TransportClient_rch client, RcHandle<Rtp
  , is_pvs_writer_(id_.entityId == RTPS::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER)
  , is_ps_writer_(id_.entityId == RTPS::ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER)
 #endif
- , heartbeat_(make_rch<RtpsWriter::Sporadic>(TheServiceParticipant->time_source(), link->reactor_task_->interceptor(), *this, &RtpsWriter::send_heartbeats))
- , nack_response_(make_rch<RtpsWriter::Sporadic>(TheServiceParticipant->time_source(), link->reactor_task_->interceptor(), *this, &RtpsWriter::send_nack_responses))
+ , heartbeat_(make_rch<RtpsWriter::Sporadic>(TheServiceParticipant->time_source(), link->reactor_task_->interceptor(), rchandle_from(this), &RtpsWriter::send_heartbeats))
+ , nack_response_(make_rch<RtpsWriter::Sporadic>(TheServiceParticipant->time_source(), link->reactor_task_->interceptor(), rchandle_from(this), &RtpsWriter::send_nack_responses))
  , fallback_(link->config().heartbeat_period_)
 {
   send_buff_->bind(link->send_strategy().in());

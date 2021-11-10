@@ -601,7 +601,7 @@ void StaticEndpointManager::type_lookup_init(ReactorInterceptor_rch reactor_inte
   if (!type_lookup_reply_deadline_processor_) {
     type_lookup_reply_deadline_processor_ =
       DCPS::make_rch<StaticEndpointManagerSporadic>(TheServiceParticipant->time_source(), reactor_interceptor,
-                                                    ref(*this), &StaticEndpointManager::remove_expired_endpoints);
+                                                    rchandle_from(this), &StaticEndpointManager::remove_expired_endpoints);
   }
 }
 

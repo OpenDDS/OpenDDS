@@ -175,7 +175,8 @@ public:
 
   PmfSporadicTask(const TimeSource& time_source,
                   RcHandle<ReactorInterceptor> interceptor,
-                  const Delegate& delegate, PMF function)
+                  RcHandle<Delegate> delegate,
+                  PMF function)
     : SporadicTask(time_source, interceptor)
     , delegate_(delegate)
     , function_(function)
