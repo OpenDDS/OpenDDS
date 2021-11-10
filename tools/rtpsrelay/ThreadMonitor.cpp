@@ -2,7 +2,6 @@
 #include <stdexcept>
 
 using namespace RtpsRelay;
-using namespace std;
 
 Thread_Monitor::Thread_Monitor (int perd, size_t depth)
 : running_ (false),
@@ -25,7 +24,7 @@ void Thread_Monitor::update(OpenDDS::DCPS::Thread_Monitor::UpdateMode mode, cons
     Thr_Desc td = descs_.at(key);
     ACE_Guard <ACE_Thread_Mutex> g(*td->queue_lock_);
     td->samples_.emplace_back(std::move(s));
-  } catch (const out_of_range & ) {
+  } catch (const std::out_of_range&) {
     Thr_Desc td = new struct Thread_Descriptor;
     td->queue_lock_ = new ACE_Thread_Mutex;
     td->last_ = tnow;
@@ -41,7 +40,7 @@ void Thread_Monitor::summarize(void)
   OpenDDS::DCPS::MonotonicTimePoint tnow;
   tnow = tnow.now();
   for (auto d = this->descs_.begin(); d != this->descs_.end(); d++ ) {
-    std::deque <Sample> local;
+    std::deque<Sample> local;
     auto &td = d->second;
     {
       ACE_Guard<ACE_Thread_Mutex> g(*td->queue_lock_);
@@ -98,8 +97,7 @@ void Thread_Monitor::report_thread(ACE_thread_t key)
       ACE_DEBUG((LM_DEBUG,"%T TLM thread: 0x%x \"%s\" busy:  N/A idle: N/A  measured interval: N/A\n",
       key, td->alias_.c_str()));
     }
-  }
-  catch (const out_of_range& ) {
+  } catch (const std::out_of_range& ) {
     ACE_DEBUG ((LM_DEBUG, "%T TLM: No entry available for thread id 0x%x\n", key));
   }
 }

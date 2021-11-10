@@ -14,8 +14,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
   namespace DCPS {
 
-Thread_Monitor Thread_Monitor::noop_monitor_;
-Thread_Monitor *Thread_Monitor::installed_monitor_ = &Thread_Monitor::noop_monitor_;
+Thread_Monitor *Thread_Monitor::installed_monitor_ = 0;
 
   } // namespace DCPS
 } // namespace OpenDDS
