@@ -37,30 +37,7 @@ bool receive(const OpenDDS::DCPS::GUID_t& participant_guid,
   ACE_INET_Addr remote;
   buff.reset();
 
-#ifdef ACE_LACKS_SENDMSG
   const ssize_t bytes = multicast_socket.recv(buff.wr_ptr(), buff.space(), remote);
-#else
-  ACE_INET_Addr local;
-
-  iovec iov[1];
-  iov[0].iov_base = buff.wr_ptr();
-#ifdef _MSC_VER
-#pragma warning(push)
-  // iov_len is 32-bit on 64-bit VC++, but we don't want a cast here
-  // since on other platforms iov_len is 64-bit
-#pragma warning(disable : 4267)
-#endif
-  iov[0].iov_len = buff.space();
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
-  const ssize_t bytes = multicast_socket.recv(iov, 1, remote, 0
-#if defined(ACE_RECVPKTINFO) || defined(ACE_RECVPKTINFO6)
-                                    , &local
-#endif
-                                    );
-#endif
-
   buff.wr_ptr(bytes);
 
   const Encoding encoding_plain_native(Encoding::KIND_XCDR1);
@@ -80,18 +57,18 @@ void to_locator(const ACE_INET_Addr& addr, Locator_t& locator)
     locator.kind = LOCATOR_KIND_UDPv6;
     struct sockaddr_in6* in6 = static_cast<struct sockaddr_in6*>(addr.get_addr());
     ACE_OS::memcpy(reinterpret_cast<unsigned char*>(locator.address), &in6->sin6_addr, 16);
-  } else
-#endif
-  {
-    locator.kind = LOCATOR_KIND_UDPv4;
-    struct sockaddr_in* sa = static_cast<struct sockaddr_in*>(addr.get_addr());
-    std::memset(locator.address, 0, 12);
-    ACE_OS::memcpy(reinterpret_cast<unsigned char*>(locator.address) + 12, &sa->sin_addr, 4);
+    return;
   }
+#endif
+
+  locator.kind = LOCATOR_KIND_UDPv4;
+  struct sockaddr_in* sa = static_cast<struct sockaddr_in*>(addr.get_addr());
+  std::memset(locator.address, 0, 12);
+  ACE_OS::memcpy(reinterpret_cast<unsigned char*>(locator.address) + 12, &sa->sin_addr, 4);
 }
 
 OpenDDS::Security::SPDPdiscoveredParticipantData
-participant_data(const DDS::DomainId_t& domain,
+participant_data(DDS::DomainId_t domain,
                  const GuidPrefix_t& gp,
                  const DDS::DomainParticipantQos& qos)
 {
@@ -165,7 +142,9 @@ participant_data(const DDS::DomainId_t& domain,
 
   DDS::Security::Token permissions_token;
   DDS::Security::PropertyQosPolicy property;
-  DDS::Security::ParticipantSecurityInfo  security_info = { 0x80000000, 0x80000000 };
+  DDS::Security::ParticipantSecurityInfo  security_info =
+    { DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID,
+      DDS::Security::PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_VALID };
   DDS::Security::IdentityToken identity_status_token;
 
   const OpenDDS::Security::SPDPdiscoveredParticipantData pdata =
@@ -206,8 +185,6 @@ participant_data(const DDS::DomainId_t& domain,
       },
       {300, 0}, // leaseDuration
       {0, 0}, // discoveredAt
-      0, // associate_endpoints
-      0 // extended_associated_endpoints
     };
   return pdata;
 }
@@ -230,7 +207,7 @@ void send(ACE_SOCK_Dgram socket,
   const DataSubmessage ds = {
     {DATA, FLAG_E | FLAG_D, 0}, 0, DATA_OCTETS_TO_IQOS, ENTITYID_UNKNOWN, from.entityId, to_rtps_seqnum(seq), ParameterList()
   };
-  seq++;
+  ++seq;
   const Encoding encoding(Encoding::KIND_XCDR1, OpenDDS::DCPS::ENDIAN_LITTLE);
   size_t size = 0;
   serialized_size(encoding, size, hdr);
