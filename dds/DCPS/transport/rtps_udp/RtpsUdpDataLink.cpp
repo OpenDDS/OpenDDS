@@ -693,10 +693,13 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
       }
       RtpsWriter_rch writer = rw->second;
       g.release();
+      add_on_start_callback(client, remote_id);
       const SequenceNumber writer_max_sn = writer->update_max_sn(remote_id, max_sn);
       writer->add_reader(make_rch<ReaderInfo>(remote_id, remote_durable, participant_discovered_at, participant_flags, writer_max_sn + 1));
+      associated = false;
+    } else {
+      invoke_on_start_callbacks(local_id, remote_id, true);
     }
-    invoke_on_start_callbacks(local_id, remote_id, true);
   } else if (conv.isReader()) {
     if (transport_debug.log_progress) {
       DCPS::log_progress("RTPS reader/writer association", local_id, remote_id, participant_discovered_at);
@@ -3225,9 +3228,12 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   const bool is_final = acknack.smHeader.flags & RTPS::FLAG_F;
   const bool is_postassociation = count_is_not_zero && (is_final || bitmapNonEmpty(acknack.readerSNState) || ack != 1);
 
+  bool invoke_on_start_callbacks = false;
+
   if (preassociation_readers_.count(reader)) {
     if (is_postassociation) {
       remove_preassociation_reader(reader);
+      invoke_on_start_callbacks = true;
       if (transport_debug.log_progress) {
         DCPS::log_progress("RTPS writer/reader association complete", id_, reader->id_, reader->participant_discovered_at_);
       }
@@ -3398,6 +3404,10 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   TransportClient_rch client = client_.lock();
 
   g.release();
+
+  if (invoke_on_start_callbacks) {
+    link->invoke_on_start_callbacks(id_, src, true);
+  }
 
   if (inform_send_listener && client) {
     client->data_acked(src);
