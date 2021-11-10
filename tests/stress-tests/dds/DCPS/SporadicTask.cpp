@@ -43,7 +43,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   reactor_task.open(0);
   TestObj obj;
   {
-    PmfSporadicTask<TestObj> sporadic(reactor_task.interceptor(), obj, &TestObj::execute);
+    TimeSource time_source;
+    PmfSporadicTask<TestObj> sporadic(time_source, reactor_task.interceptor(), obj, &TestObj::execute);
     obj.sporadic_ = &sporadic;
     sporadic.schedule(TimeDuration::from_msec(2000));
     ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
