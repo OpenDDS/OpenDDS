@@ -70,7 +70,8 @@ void to_locator(const ACE_INET_Addr& addr, Locator_t& locator)
 OpenDDS::Security::SPDPdiscoveredParticipantData
 participant_data(DDS::DomainId_t domain,
                  const GuidPrefix_t& gp,
-                 const DDS::DomainParticipantQos& qos)
+                 const DDS::DomainParticipantQos& qos,
+                 const ACE_INET_Addr& addr)
 {
   const BuiltinEndpointSet_t availableBuiltinEndpoints =
     DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER |
@@ -130,6 +131,8 @@ participant_data(DDS::DomainId_t domain,
   OpenDDS::DCPS::LocatorSeq unicastLocators(addr_count);
   unicastLocators.length(addr_count);
   for (size_t i = 0; i < addr_count; ++i) {
+    // Set a port number to avoid send errors.
+    addr_array[i].set_port_number(addr.get_port_number());
     if (DCPS_debug_level) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) addr_array[%d]: %C\n"), i, LogAddr(addr_array[i]).c_str()));
     }
@@ -328,10 +331,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   while (!receive(participant_guid, multicast_socket)) {}
 
   // Send an SPDP message from writer1.
-  send(writer1_socket, writer1_guid, writer1_sequence, multicast_address, participant_data(domain, writer1_guid.guidPrefix, DDS::DomainParticipantQos()));
+  send(writer1_socket, writer1_guid, writer1_sequence, multicast_address, participant_data(domain, writer1_guid.guidPrefix, DDS::DomainParticipantQos(), writer1_addr));
 
   // Send an SPDP message from writer2.
-  send(writer2_socket, writer2_guid, writer2_sequence, multicast_address, participant_data(domain, writer2_guid.guidPrefix, DDS::DomainParticipantQos()));
+  send(writer2_socket, writer2_guid, writer2_sequence, multicast_address, participant_data(domain, writer2_guid.guidPrefix, DDS::DomainParticipantQos(), writer2_addr));
 
   // Sleep to let SPDP process.
   ACE_OS::sleep(1);
