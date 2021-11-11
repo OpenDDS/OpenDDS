@@ -14,21 +14,25 @@ const DCPS::Encoding xcdr2(DCPS::Encoding::KIND_XCDR2, DCPS::ENDIAN_BIG);
 
 void set_float128_value(ACE_CDR::LongDouble& a)
 {
+#if ACE_BIG_ENDIAN
   unsigned char value[] = { 0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
-#if ACE_SIZEOF_LONG_DOUBLE == 16
-  ACE_UNUSED_ARG(value);
-  a = 1.0L;
 #else
-  ACE_OS::memcpy((char*)a.ld, (char*)value, 16);
+  unsigned char value[] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0xff,0x3f };
+#endif
+
+#if ACE_SIZEOF_LONG_DOUBLE == 16
+  ACE_OS::memcpy((unsigned char*)&a, (unsigned char*)value, 16);
+#else
+  ACE_OS::memcpy((unsigned char*)a.ld, (unsigned char*)value, 16);
 #endif
 }
 
 void check_float128(const ACE_CDR::LongDouble& a, const ACE_CDR::LongDouble& b)
 {
 #if ACE_SIZEOF_LONG_DOUBLE == 16
-  EXPECT_STREQ((const char*)&a, (const char*)&b);
+  EXPECT_EQ(0, ACE_OS::memcmp((const void*)&a, (const void*)&b, 16));
 #else
-  EXPECT_STREQ((const char*)a.ld, (const char*)b.ld);
+  EXPECT_EQ(0, ACE_OS::memcmp((const void*)a.ld, (const void*)b.ld, 16));
 #endif
 }
 
