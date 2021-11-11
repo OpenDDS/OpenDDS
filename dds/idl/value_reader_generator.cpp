@@ -22,28 +22,6 @@ namespace {
   void generate_read(const std::string& expression, const std::string& accessor,
                      AST_Type* type, const std::string& idx, int level = 1);
 
-  void array_helper(const std::string& expression, AST_Array* array,
-                    size_t dim_idx, const std::string& idx, int level)
-  {
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    const std::string indent(level * 2, ' ');
-    if (dim_idx < array->n_dims()) {
-      const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
-      be_global->impl_ <<
-        indent << "if (!value_reader.begin_array()) return false;\n" <<
-        indent << "for (" << (use_cxx11 ? "size_t " : "unsigned int ") << idx << " = 0; "
-          << idx << " != " << dim << "; ++" << idx << ") {\n" <<
-        indent << "  if (!value_reader.begin_element()) return false;\n";
-      array_helper(expression + "[" + idx + "]", array, dim_idx + 1, idx + "i", level + 1);
-      be_global->impl_ <<
-        indent << "  if (!value_reader.end_element()) return false;\n" <<
-        indent << "}\n" <<
-        indent << "if (!value_reader.end_array()) return false;\n";
-    } else {
-      generate_read(expression, "", array->base_type(), idx + "i", level);
-    }
-  }
-
   std::string primitive_type(AST_PredefinedType::PredefinedType pt)
   {
     switch (pt) {
@@ -81,6 +59,47 @@ namespace {
       return "byte";
     default:
       return "";
+    }
+  }
+
+  void array_helper(const std::string& expression, AST_Array* array,
+                    size_t dim_idx, const std::string& idx, int level)
+  {
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    const std::string indent(level * 2, ' ');
+    const Classification c = classify(array->base_type());
+    const bool primitive = c & CL_PRIMITIVE;
+    // When we have a primitive type the last dimension is read using the read_*_array
+    // operation, when we have a not primitive type the last dimension is read element by element
+    // in a loop in the generated code
+    if ((primitive && (dim_idx < array->n_dims() - 1)) || (!primitive && (dim_idx < array->n_dims()))) {
+      const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
+      be_global->impl_ <<
+        indent << "if (!value_reader.begin_array()) return false;\n" <<
+        indent << "for (" << (use_cxx11 ? "size_t " : "unsigned int ") << idx << " = 0; "
+          << idx << " != " << dim << "; ++" << idx << ") {\n" <<
+        indent << "  if (!value_reader.begin_element()) return false;\n";
+      array_helper(expression + "[" + idx + "]", array, dim_idx + 1, idx + "i", level + 1);
+      be_global->impl_ <<
+        indent << "  if (!value_reader.end_element()) return false;\n" <<
+        indent << "}\n" <<
+        indent << "if (!value_reader.end_array()) return false;\n";
+    } else {
+      if (primitive) {
+        const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
+        AST_Type* const actual = resolveActualType(array->base_type());
+        const AST_PredefinedType::PredefinedType pt =
+          dynamic_cast<AST_PredefinedType*>(actual)->pt();
+        be_global->impl_ <<
+          indent << "if (!value_reader.begin_array()) return false;\n";
+        be_global->impl_ << indent <<
+          "if (!value_reader.read_" << primitive_type(pt) << "_array (" << expression << (use_cxx11 ? ".data()" : "") << ", " << dim << ")) return false;\n";
+        be_global->impl_ <<
+          indent << "if (!value_reader.end_array()) return false;\n";
+
+      } else {
+        generate_read(expression, "", array->base_type(), idx + "i", level);
+      }
     }
   }
 
