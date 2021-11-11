@@ -21,7 +21,6 @@ void set_float128_value(ACE_CDR::LongDouble& a)
 #endif
 
 #if ACE_SIZEOF_LONG_DOUBLE == 16
-  ACE_UNUSED_ARG(value);
   ACE_OS::memcpy((unsigned char*)&a, (unsigned char*)value, 16);
 #else
   ACE_OS::memcpy((unsigned char*)a.ld, (unsigned char*)value, 16);
