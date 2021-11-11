@@ -227,13 +227,6 @@ TEST(Mutable, ReadValueFromStruct)
   ret = data.get_float128_value(float_128, 11);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   check_float128(expected.float_128, float_128);
-  // Debug
-  ACE_DEBUG((LM_DEBUG, "===== expected.float_128: %C\n",
-             OpenDDS::DCPS::to_hex_dds_string((const unsigned char*)&expected.float_128, 16, ' ').c_str()));
-  ACE_DEBUG((LM_DEBUG, "===== float_128: %C\n",
-             OpenDDS::DCPS::to_hex_dds_string((const unsigned char*)&float_128, 16, ' ').c_str()));
-  EXPECT_EQ(0, ACE_OS::memcmp((const void*)&expected.float_128, (const void*)&float_128, 16));
-  // Debug
   ret = data.get_complex_value(nested_dd, 11);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd.get_float128_value(float_128, random_id);
