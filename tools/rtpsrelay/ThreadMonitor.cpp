@@ -1,11 +1,11 @@
 #include "ThreadMonitor.h"
+#include <ace/Thread.h>
 #include <stdexcept>
 
 using namespace RtpsRelay;
 
 Thread_Monitor::Thread_Monitor (int perd, size_t depth)
 : running_ (false),
-  thr_func_ (0),
   modlock_(),
   moderator_(modlock_),
   period_(static_cast<time_t>(perd)),
@@ -31,7 +31,7 @@ void Thread_Monitor::update(OpenDDS::DCPS::Thread_Monitor::UpdateMode mode, cons
     td->alias_ = alias;
     td->samples_.emplace_back(std::move(s));
 
-    descs_.emplace(key,td);
+  descs_.emplace(key,std::move(td));
   }
 }
 
@@ -135,8 +135,7 @@ void Thread_Monitor::start()
     return;
   }
   this->running_ = true;
-  this->thr_func_ = new ACE_Thread_Adapter(&loadmonfunction, this);
-  thr_func_->invoke();
+  ACE_Thread::spawn(&loadmonfunction, this);
 }
 
 void Thread_Monitor::stop ()

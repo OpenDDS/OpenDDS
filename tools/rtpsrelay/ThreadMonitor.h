@@ -6,8 +6,6 @@
 #include <ace/Guard_T.h>
 #include <ace/Condition_Thread_Mutex.h>
 #include <ace/Log_Msg.h>
-#include <ace/Thread_Adapter.h>
-
 
 #include <map>
 #include <deque>
@@ -40,7 +38,6 @@ namespace RtpsRelay {
 
   protected:
     bool running_;
-    ACE_Thread_Adapter *thr_func_;
 
     ACE_Thread_Mutex modlock_;
     ACE_Condition_Thread_Mutex moderator_;
