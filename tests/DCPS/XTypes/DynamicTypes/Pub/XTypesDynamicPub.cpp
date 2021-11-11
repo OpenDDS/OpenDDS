@@ -60,6 +60,15 @@ void nested_stru_narrow_write(DataWriter_var dw) {
   narrow_dw->write(os, handle);
 }
 
+void union_narrow_write(DataWriter_var dw) {
+  Dynamic::my_union foo;
+  foo._d(1);
+  foo.ld(10);
+  Dynamic::my_unionDataWriter_var narrow_dw = Dynamic::my_unionDataWriter::_narrow(dw);
+  InstanceHandle_t handle = narrow_dw->register_instance(foo);
+  narrow_dw->write(foo, handle);
+}
+
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   int status = 0;
@@ -83,6 +92,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     ts_var = new Dynamic::struTypeSupportImpl;
   } else if (type_name == "nested") {
     ts_var = new Dynamic::outer_structTypeSupportImpl;
+  } else if (type_name == "union") {
+    ts_var = new Dynamic::my_unionTypeSupportImpl;
   }
   ts_var->register_type(dp, type_name.c_str());
 
@@ -114,6 +125,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     stru_narrow_write(dw);
   } else if (type_name == "nested") {
     nested_stru_narrow_write(dw);
+  } else if (type_name == "union") {
+    union_narrow_write(dw);
   }
   sleep(7);
   pub->delete_contained_entities();

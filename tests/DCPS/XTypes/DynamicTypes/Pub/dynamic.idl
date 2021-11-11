@@ -24,4 +24,11 @@ struct inner_struct {
 struct outer_struct {
   inner_struct is;
 };
+
+@topic
+@extensibility(MUTABLE)
+union my_union switch (long) {
+  case 1: long double ld;
+  case 2: string s;
+};
 };

@@ -284,6 +284,13 @@ ACE_CDR::ULong DynamicData::get_item_count()
     return type_->get_member_count();
   case TK_UNION:
     {
+      const ExtensibilityKind ek = descriptor_.extensibility_kind;
+      if (ek == APPENDABLE || ek == MUTABLE) {
+        size_t size;
+        if (!strm_.read_delimiter(size)) {
+          return 0;
+        }
+      }
       const DynamicType_rch disc_type = get_base_type(descriptor_.discriminator_type);
       const ExtensibilityKind extend = descriptor_.extensibility_kind;
       ACE_CDR::Long label;
@@ -1032,6 +1039,27 @@ DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id
   case TK_STRUCTURE:
   case TK_UNION:
     {
+      if (tk == TK_UNION && id == MEMBER_ID_INVALID) {
+        if (descriptor_.extensibility_kind == APPENDABLE || descriptor_.extensibility_kind == MUTABLE) {
+          size_t size;
+          if (!strm_.read_delimiter(size)) {
+            good = false;
+            break;
+          }
+        }
+        const DynamicType_rch disc_type = get_base_type(descriptor_.discriminator_type);
+        if (descriptor_.extensibility_kind == MUTABLE) {
+          unsigned id;
+          size_t size;
+          bool must_understand;
+          if (!strm_.read_parameter_id(id, size, must_understand)) {
+            good = false;
+            break;
+          }
+        }
+        value = DynamicData(strm_, disc_type);
+        break;
+      }
       DynamicTypeMember_rch member;
       const DDS::ReturnCode_t retcode = type_->get_member(member, id);
       if (retcode != DDS::RETCODE_OK) {
