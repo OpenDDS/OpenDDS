@@ -1881,7 +1881,9 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     } else {
       String str;
       GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("DCPSLogLevel"), str);
-      log_level.set_from_string(str.c_str());
+      if (!str.empty()) {
+        log_level.set_from_string(str.c_str());
+      }
     }
 
     // These are not handled on the command line.
