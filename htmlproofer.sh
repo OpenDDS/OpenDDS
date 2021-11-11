@@ -32,6 +32,9 @@ file_ignore_arg="${file_ignore_arg:1}"
 url_ignore_list=(
   '/zoom\.us\//'
   '/brighttalk\.com\//'
+  # New pages will have invalid "Edit this page on GitHub" links until they are
+  # merged into the main repo's gh-pages.
+  '/github\.com\/objectcomputing\/OpenDDS\/blob\/gh-pages\//'
 )
 url_ignore_arg="$(printf ",%s" "${url_ignore_list[@]}")"
 url_ignore_arg="${url_ignore_arg:1}"
