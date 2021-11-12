@@ -254,6 +254,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , identity_handle_(DDS::HANDLE_NIL)
   , permissions_handle_(DDS::HANDLE_NIL)
   , crypto_handle_(DDS::HANDLE_NIL)
+  , n_participants_in_authentication_(0)
 #endif
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
@@ -296,6 +297,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , identity_handle_(identity_handle)
   , permissions_handle_(perm_handle)
   , crypto_handle_(crypto_handle)
+  , n_participants_in_authentication_(0)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
@@ -718,6 +720,18 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       return;
     }
 
+#ifdef OPENDDS_SECURITY
+    if (config_->max_participants_in_authentication() &&
+        n_participants_in_authentication_ >= config_->max_participants_in_authentication()) {
+      if (DCPS::security_debug.auth_debug) {
+        ACE_DEBUG((LM_DEBUG,
+                   "(%P|%t) {auth_debug} DEBUG: Spdp::handle_participant_data - participants_in_authentication: %B >= max: %B\n",
+                   n_participants_in_authentication_, config_->max_participants_in_authentication()));
+      }
+      return;
+    }
+#endif
+
     partBitData(pdata).key = repo_id_to_bit_key(guid);
 
     TimeDuration effective_lease(pdata.leaseDuration.seconds);
@@ -761,13 +775,18 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     }
 
     // add a new participant
-    std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq,
+
 #ifdef OPENDDS_SECURITY
-      config_->auth_resend_period()
+    std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq, config_->auth_resend_period())));
+    ++n_participants_in_authentication_;
+    if (DCPS::security_debug.auth_debug) {
+      ACE_DEBUG((LM_DEBUG,
+                 "(%P|%t) {auth_debug} DEBUG: Spdp::handle_participant_data() %B participants in authentication\n",
+                 n_participants_in_authentication_));
+    }
 #else
-      TimeDuration()
+    std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq, TimeDuration())));
 #endif
-    )));
     iter = p.first;
     iter->second.discovered_at_ = now;
     update_lease_expiration_i(iter, now);
@@ -813,9 +832,9 @@ Spdp::handle_participant_data(DCPS::MessageId id,
               OPENDDS_STRING(DCPS::GuidConverter(guid)).c_str()));
           }
           // FUTURE: This is probably not a good idea since it will just get rediscovered.
-          participants_.erase(guid);
+          erase_participant(iter);
         } else { // allow_unauthenticated_participants == true
-          iter->second.auth_state_ = AUTH_STATE_UNAUTHENTICATED;
+          set_auth_state(iter->second, AUTH_STATE_UNAUTHENTICATED);
           match_unauthenticated(iter);
         }
       } else {
@@ -837,20 +856,20 @@ Spdp::handle_participant_data(DCPS::MessageId id,
                 ACE_TEXT("Incompatible security attributes in discovered participant: %C\n"),
                 OPENDDS_STRING(DCPS::GuidConverter(guid)).c_str()));
             }
-            participants_.erase(guid);
+            erase_participant(iter);
           } else { // allow_unauthenticated_participants == true
-            iter->second.auth_state_ = AUTH_STATE_UNAUTHENTICATED;
+            set_auth_state(iter->second, AUTH_STATE_UNAUTHENTICATED);
             match_unauthenticated(iter);
           }
         } else if (iter->second.auth_state_ == AUTH_STATE_AUTHENTICATED) {
           if (match_authenticated(guid, iter) == false) {
-            participants_.erase(guid);
+            erase_participant(iter);
           }
         }
         // otherwise just return, since we're waiting for input to finish authentication
       }
     } else {
-      iter->second.auth_state_ = AUTH_STATE_UNAUTHENTICATED;
+      set_auth_state(iter->second, AUTH_STATE_UNAUTHENTICATED);
       match_unauthenticated(iter);
     }
 #else
@@ -1321,7 +1340,7 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
 
   switch (vr) {
   case DDS::Security::VALIDATION_OK: {
-    dp.auth_state_ = AUTH_STATE_AUTHENTICATED;
+    set_auth_state(dp, AUTH_STATE_AUTHENTICATED);
     dp.handshake_state_ = HANDSHAKE_STATE_DONE;
     purge_handshake_deadlines(iter);
     return;
@@ -1352,7 +1371,7 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
                  ACE_TEXT("Remote participant identity is invalid. Security Exception[%d.%d]: %C\n"),
                  se.code, se.minor_code, se.message.in()));
     }
-    dp.auth_state_ = AUTH_STATE_UNAUTHENTICATED;
+    set_auth_state(dp, AUTH_STATE_UNAUTHENTICATED);
     dp.handshake_state_ = HANDSHAKE_STATE_DONE;
     purge_handshake_deadlines(iter);
     return;
@@ -1363,7 +1382,7 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
                  ACE_TEXT("Unexpected return value while validating remote identity. Security Exception[%d.%d]: %C\n"),
                  se.code, se.minor_code, se.message.in()));
     }
-    dp.auth_state_ = AUTH_STATE_UNAUTHENTICATED;
+    set_auth_state(dp, AUTH_STATE_UNAUTHENTICATED);
     dp.handshake_state_ = HANDSHAKE_STATE_DONE;
     purge_handshake_deadlines(iter);
     return;
@@ -1505,7 +1524,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
     switch (vr) {
     case DDS::Security::VALIDATION_OK: {
       // Theoretically, this shouldn't happen unless handshakes can involve fewer than 3 messages
-      dp.auth_state_ = AUTH_STATE_AUTHENTICATED;
+      set_auth_state(dp, AUTH_STATE_AUTHENTICATED);
       dp.handshake_state_ = HANDSHAKE_STATE_DONE;
       purge_handshake_deadlines(iter);
       match_authenticated(src_participant, iter);
@@ -1565,7 +1584,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
                      OPENDDS_STRING(DCPS::GuidConverter(src_participant)).c_str()));
         }
       }
-      dp.auth_state_ = AUTH_STATE_AUTHENTICATED;
+      set_auth_state(dp, AUTH_STATE_AUTHENTICATED);
       dp.handshake_state_ = HANDSHAKE_STATE_PROCESS_HANDSHAKE;
       purge_handshake_deadlines(iter);
       match_authenticated(src_participant, iter);
@@ -1632,7 +1651,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
       return;
     }
     case DDS::Security::VALIDATION_OK_FINAL_MESSAGE: {
-      dp.auth_state_ = AUTH_STATE_AUTHENTICATED;
+      set_auth_state(dp, AUTH_STATE_AUTHENTICATED);
       dp.handshake_state_ = HANDSHAKE_STATE_DONE;
       // Install the shared secret before sending the final so that
       // we are prepared to receive the crypto tokens from the
@@ -1658,7 +1677,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
       return;
     }
     case DDS::Security::VALIDATION_OK: {
-      dp.auth_state_ = AUTH_STATE_AUTHENTICATED;
+      set_auth_state(dp, AUTH_STATE_AUTHENTICATED);
       dp.handshake_state_ = HANDSHAKE_STATE_DONE;
       purge_handshake_deadlines(iter);
       match_authenticated(src_participant, iter);
@@ -1699,7 +1718,7 @@ Spdp::process_handshake_deadlines(const DCPS::MonotonicTimePoint& now)
         remove_discovered_participant(pit);
       } else {
         purge_handshake_resends(pit);
-        pit->second.auth_state_ = AUTH_STATE_UNAUTHENTICATED;
+        set_auth_state(pit->second, AUTH_STATE_UNAUTHENTICATED);
         pit->second.handshake_state_ = HANDSHAKE_STATE_DONE;
         handshake_deadlines_.erase(pos);
         match_unauthenticated(pit);
@@ -2321,17 +2340,11 @@ Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
 
   multicast_interface_ = outer->disco_->multicast_interface();
 
-  // Ports are set by the formulas in RTPS v2.1 Table 9.8
-  const u_short port_common = outer->config_->pb() +
-    (outer->config_->dg() * outer->domain_);
-  mc_port_ = port_common + outer->config_->d0();
-
-  multicast_address_ = outer->config_->default_multicast_group();
-  multicast_address_.set_port_number(mc_port_);
+  const u_short port_common = outer->config_->port_common(outer->domain_);
+  multicast_address_ = outer->config_->multicast_address(port_common);
 
 #ifdef ACE_HAS_IPV6
-  multicast_ipv6_address_ = outer->config_->ipv6_default_multicast_group();
-  multicast_ipv6_address_.set_port_number(mc_port_);
+  multicast_ipv6_address_ = outer->config_->ipv6_multicast_address(port_common);
 #endif
 
   send_addrs_.insert(multicast_address_);
@@ -4734,6 +4747,12 @@ bool Spdp::update_domain_participant_qos(const DDS::DomainParticipantQos& qos)
   return announce_domain_participant_qos();
 }
 
+bool Spdp::has_domain_participant(const GUID_t& remote) const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
+  return has_discovered_participant(remote);
+}
+
 DCPS::TopicStatus Spdp::assert_topic(GUID_t& topicId, const char* topicName,
   const char* dataTypeName, const DDS::TopicQos& qos,
   bool hasDcpsKey, DCPS::TopicCallbacks* topic_callbacks)
@@ -4785,8 +4804,29 @@ void Spdp::remove_discovered_participant(const DiscoveredParticipantIter& iter)
 
     remove_discovered_participant_i(iter);
 
-    participants_.erase(iter);
+    erase_participant(iter);
   }
+}
+
+#ifdef OPENDDS_SECURITY
+void Spdp::set_auth_state(DiscoveredParticipant& dp, AuthState new_state)
+{
+  if (dp.auth_state_ == AUTH_STATE_HANDSHAKE &&
+      new_state != AUTH_STATE_HANDSHAKE) {
+    --n_participants_in_authentication_;
+  }
+  dp.auth_state_ = new_state;
+}
+#endif
+
+void Spdp::erase_participant(DiscoveredParticipantIter iter)
+{
+#ifdef OPENDDS_SECURITY
+  if (iter->second.auth_state_ == AUTH_STATE_HANDSHAKE) {
+    --n_participants_in_authentication_;
+  }
+#endif
+  participants_.erase(iter);
 }
 
 } // namespace RTPS
