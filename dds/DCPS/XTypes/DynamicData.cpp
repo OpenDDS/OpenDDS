@@ -523,7 +523,7 @@ bool DynamicData::get_value_from_union(MemberType& value, MemberId id,
                                        TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   // Reads the discriminator
-  if (id == MEMBER_ID_INVALID) {
+  if (id == DISCRIMINATOR_ID) {
     if (descriptor_.extensibility_kind == APPENDABLE || descriptor_.extensibility_kind == MUTABLE) {
       size_t size;
       if (!strm_.read_delimiter(size)) {

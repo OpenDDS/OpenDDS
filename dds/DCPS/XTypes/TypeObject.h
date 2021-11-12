@@ -828,6 +828,7 @@ namespace XTypes {
   // ID of a type member
   typedef ACE_CDR::ULong MemberId;
   const ACE_CDR::ULong MEMBER_ID_INVALID = UINT32_MAX;
+  const ACE_CDR::ULong DISCRIMINATOR_ID = 4294967294U;
   const ACE_CDR::ULong ANNOTATION_STR_VALUE_MAX_LEN = 128;
   const ACE_CDR::ULong ANNOTATION_OCTETSEC_VALUE_MAX_LEN = 128;
 
