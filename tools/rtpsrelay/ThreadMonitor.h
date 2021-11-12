@@ -21,8 +21,7 @@ namespace RtpsRelay {
  * @brief Defines the means of tracking thread utilization by measuring
  * time spent in event handling vs idle
  */
-  class Thread_Monitor : public OpenDDS::DCPS::Thread_Monitor
-  {
+  class Thread_Monitor : public OpenDDS::DCPS::Thread_Monitor {
   public:
     Thread_Monitor (int perd = 5, size_t depth = 1);
 
@@ -53,13 +52,20 @@ namespace RtpsRelay {
       OpenDDS::DCPS::MonotonicTimePoint recorded_;
     };
 
+    typedef std::deque<struct Sample> Load_Samples;
+    typedef std::deque<struct Load_Summary> Load_History;
+
     typedef struct Thread_Descriptor {
+      ~Thread_Descriptor()
+      {
+        delete queue_lock_;
+      }
       ACE_Thread_Mutex *queue_lock_;
       std::string alias_;
-      std::deque<struct Sample> samples_;
+      Load_Samples samples_;
       OpenDDS::DCPS::MonotonicTimePoint last_;
-      std::deque<struct Load_Summary> summaries_;
-    } *Thr_Desc;
+      Load_History summaries_;
+    } Thr_Desc;
 
     std::map<ACE_thread_t, Thr_Desc> descs_;
     OpenDDS::DCPS::TimeDuration period_;

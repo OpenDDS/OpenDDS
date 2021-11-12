@@ -18,20 +18,18 @@ void Thread_Monitor::update(OpenDDS::DCPS::Thread_Monitor::UpdateMode mode, cons
 {
   OpenDDS::DCPS::MonotonicTimePoint tnow;
   tnow = tnow.now();
-  struct Sample s({mode, tnow});
+  struct Sample s = {mode, tnow};
   ACE_thread_t key = ACE_OS::thr_self();
   try {
-    Thr_Desc td = descs_.at(key);
-    ACE_Guard <ACE_Thread_Mutex> g(*td->queue_lock_);
-    td->samples_.emplace_back(std::move(s));
+    Thr_Desc &td = descs_.at(key);
+    ACE_Guard <ACE_Thread_Mutex> g(*td.queue_lock_);
+    td.samples_.emplace_back(std::move(s));
   } catch (const std::out_of_range&) {
-    Thr_Desc td = new struct Thread_Descriptor;
-    td->queue_lock_ = new ACE_Thread_Mutex;
-    td->last_ = tnow;
-    td->alias_ = alias;
-    td->samples_.emplace_back(std::move(s));
-
-  descs_.emplace(key,std::move(td));
+    Load_Samples samps;
+    Load_History hist;
+    Thr_Desc td = {new ACE_Thread_Mutex, alias, std::move(samps), tnow, std::move(hist)};
+    td.samples_.emplace_back(std::move(s));
+    descs_.emplace(key,std::move(td));
   }
 }
 
@@ -43,8 +41,8 @@ void Thread_Monitor::summarize(void)
     std::deque<Sample> local;
     auto &td = d->second;
     {
-      ACE_Guard<ACE_Thread_Mutex> g(*td->queue_lock_);
-      local.swap(td->samples_);
+      ACE_Guard<ACE_Thread_Mutex> g(*td.queue_lock_);
+      local.swap(td.samples_);
     }
     struct Load_Summary ls;
     ls.accum_[0] = ls.accum_[1] = 0;
@@ -61,29 +59,29 @@ void Thread_Monitor::summarize(void)
       if (s.mode_ == ls.last_state_) {
         // emit warning of consecutive samples in the same state
       }
-      OpenDDS::DCPS::TimeDuration durr = s.at_ - td->last_;
+      OpenDDS::DCPS::TimeDuration durr = s.at_ - td.last_;
       ls.accum_[ndx] += durr;
 
       ls.last_state_ = s.mode_;
-      td->last_ = s.at_;
+      td.last_ = s.at_;
       local.pop_front();
     }
-    if (td->summaries_.size() >= this->history_depth_) {
-      td->summaries_.pop_front();
+    if (td.summaries_.size() >= this->history_depth_) {
+      td.summaries_.pop_front();
     }
-    td->summaries_.emplace_back(std::move(ls));
+    td.summaries_.emplace_back(std::move(ls));
   }
 }
 
 void Thread_Monitor::report_thread(ACE_thread_t key)
 {
   try {
-    Thr_Desc td = this->descs_.at(key);
-    if (td->summaries_.empty()) {
-      ACE_DEBUG((LM_DEBUG,"%T TLM thread: 0x%x \"%s\" busy:  n/a    idle: n/a", key, td->alias_.c_str()));
+    Thr_Desc &td = this->descs_.at(key);
+    if (td.summaries_.empty()) {
+      ACE_DEBUG((LM_DEBUG,"%T TLM thread: 0x%x \"%s\" busy:  n/a    idle: n/a", key, td.alias_.c_str()));
       return;
     }
-    const struct Load_Summary &ls = td->summaries_.back();
+    const struct Load_Summary &ls = td.summaries_.back();
     ACE_UINT64 uspan, uidle, ubusy;
     ls.accum_[0].value().to_usec(uidle);
     ls.accum_[1].value().to_usec(ubusy);
@@ -92,10 +90,10 @@ void Thread_Monitor::report_thread(ACE_thread_t key)
       double pbusy = 100.0 * ubusy/uspan;
       double pidle = 100.0 * uidle/uspan;
       ACE_DEBUG((LM_DEBUG,"%T TLM thread: 0x%x \"%s\" busy:  %F%% idle: %F%%  measured interval: %F sec\n",
-      key, td->alias_.c_str(), pbusy, pidle, uspan/1000000.0));
+      key, td.alias_.c_str(), pbusy, pidle, uspan/1000000.0));
     } else {
       ACE_DEBUG((LM_DEBUG,"%T TLM thread: 0x%x \"%s\" busy:  N/A idle: N/A  measured interval: N/A\n",
-      key, td->alias_.c_str()));
+      key, td.alias_.c_str()));
     }
   } catch (const std::out_of_range& ) {
     ACE_DEBUG ((LM_DEBUG, "%T TLM: No entry available for thread id 0x%x\n", key));

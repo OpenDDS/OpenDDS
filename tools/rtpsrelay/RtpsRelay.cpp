@@ -202,8 +202,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-Id"))) {
       config.relay_id(arg);
       args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-ThreadMonitorPeriod"))) {
-      config.thread_monitor_period(ACE_OS::atoi(arg));
+    } else if ((arg = args.get_the_parameter("-ThreadMonitorPeriodSeconds"))) {
+      config.thread_monitor_period_seconds(ACE_OS::atoi(arg));
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-ThreadMonitorHistoryDepth"))) {
+      config.thread_monitor_history_depth(ACE_OS::atoi(arg));
       args.consume_arg();
     } else {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Invalid option: %C\n", args.get_current()));
@@ -271,7 +274,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   TheServiceParticipant->bit_autopurge_nowriter_samples_delay(one_minute);
   TheServiceParticipant->bit_autopurge_disposed_samples_delay(one_minute);
 
-  RtpsRelay::Thread_Monitor thread_mon(config.thread_monitor_period());
+  RtpsRelay::Thread_Monitor thread_mon(config.thread_monitor_period_seconds(),
+                                       config.thread_monitor_history_depth());
 
   // Set up the relay participant.
   DDS::DomainParticipantQos participant_qos;
