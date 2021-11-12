@@ -251,7 +251,45 @@ bool print_dynamic_data(OpenDDS::XTypes::DynamicData dd, OpenDDS::XTypes::Dynami
     ACE_CDR::ULong item_count = dd.get_item_count();
     member_name = dt->get_descriptor().discriminator_type->get_descriptor().name;
     type_string += indent + member_name + " discriminator";
-    switch (dt->get_descriptor().discriminator_type->get_kind()) {
+
+    OpenDDS::XTypes::TypeKind discrim_tk = dt->get_descriptor().discriminator_type->get_kind();
+    // TODO CLAYTON: How will this work with multiple aliases?
+    if (discrim_tk == OpenDDS::XTypes::TK_ALIAS) {
+      discrim_tk = dt->get_descriptor().discriminator_type->get_descriptor().base_type->get_kind();
+    }
+    switch (discrim_tk) {
+    case OpenDDS::XTypes::TK_INT8: {
+      ACE_CDR::Int8 my_int8;
+      if (dd.get_int8_value(my_int8, OpenDDS::XTypes::MEMBER_ID_INVALID) != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_int8_value\n"), false);
+      }
+      type_string += " = " + std::to_string(my_int8) + "\n";
+      break;
+    }
+    case OpenDDS::XTypes::TK_UINT8: {
+      ACE_CDR::UInt8 my_uint8;
+      if (dd.get_uint8_value(my_uint8, OpenDDS::XTypes::MEMBER_ID_INVALID) != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_uint8_value\n"), false);
+      }
+      type_string += " = " + std::to_string(my_uint8) + "\n";
+      break;
+    }
+    case OpenDDS::XTypes::TK_INT16: {
+      ACE_CDR::Short my_short;
+      if (dd.get_int16_value(my_short, OpenDDS::XTypes::MEMBER_ID_INVALID) != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_int16_value\n"), false);
+      }
+      type_string += " = " + std::to_string(my_short) + "\n";
+      break;
+    }
+    case OpenDDS::XTypes::TK_UINT16: {
+      ACE_CDR::UShort my_ushort;
+      if (dd.get_uint16_value(my_ushort, OpenDDS::XTypes::MEMBER_ID_INVALID) != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_uint16_value\n"), false);
+      }
+      type_string += " = " + std::to_string(my_ushort) + "\n";
+      break;
+    }
     case OpenDDS::XTypes::TK_ENUM:
     case OpenDDS::XTypes::TK_INT32: {
       ACE_CDR::Long my_long;
@@ -261,13 +299,63 @@ bool print_dynamic_data(OpenDDS::XTypes::DynamicData dd, OpenDDS::XTypes::Dynami
       type_string += " = " + std::to_string(my_long) + "\n";
       break;
     }
+    case OpenDDS::XTypes::TK_UINT32: {
+      ACE_CDR::ULong my_ulong;
+      if (dd.get_uint32_value(my_ulong, OpenDDS::XTypes::MEMBER_ID_INVALID) != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_uint32_value\n"), false);
+      }
+      type_string += " = " + std::to_string(my_ulong) + "\n";
+      break;
     }
-    // if (dd.get_complex_value(temp_dd, OpenDDS::XTypes::MEMBER_ID_INVALID) != DDS::RETCODE_OK) {
-    //   ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_discriminator_value\n"), -1);
-    // }
-    // if (!print_dynamic_data(temp_dd, dt->get_descriptor().discriminator_type, type_string, indent)) {
-    //   ACE_ERROR((LM_ERROR, "(%P|%t) print_dynamic_data: failed to read union discriminator\n"));
-    // }
+    case OpenDDS::XTypes::TK_INT64: {
+      ACE_CDR::LongLong my_longlong;
+      if (dd.get_int64_value(my_longlong, OpenDDS::XTypes::MEMBER_ID_INVALID) != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_int64_value\n"), false);
+      }
+      type_string += " = " + std::to_string(my_longlong) + "\n";
+      break;
+    }
+    case OpenDDS::XTypes::TK_UINT64: {
+      ACE_CDR::ULongLong my_ulonglong;
+      if (dd.get_uint64_value(my_ulonglong, OpenDDS::XTypes::MEMBER_ID_INVALID) != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_uint64_value\n"), false);
+      }
+      type_string += " = " + std::to_string(my_ulonglong) + "\n";
+      break;
+    }
+    case OpenDDS::XTypes::TK_BOOLEAN: {
+      ACE_CDR::Boolean my_bool;
+      if (dd.get_boolean_value(my_bool, OpenDDS::XTypes::MEMBER_ID_INVALID) != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_boolean_value\n"), false);
+      }
+      type_string += " = " + std::to_string(my_bool) + "\n";
+      break;
+    }
+    case OpenDDS::XTypes::TK_BYTE: {
+      ACE_CDR::Octet my_byte;
+      if (dd.get_byte_value(my_byte, OpenDDS::XTypes::MEMBER_ID_INVALID) != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_byte_value\n"), false);
+      }
+      type_string += " = " + std::to_string(my_byte) + "\n";
+      break;
+    }
+    case OpenDDS::XTypes::TK_CHAR8: {
+      ACE_CDR::Char my_char;
+      if (dd.get_char8_value(my_char, OpenDDS::XTypes::MEMBER_ID_INVALID) != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_char8_value\n"), false);
+      }
+      type_string += OpenDDS::DCPS::String(" = \'") + my_char + "\'\n";
+      break;
+    }
+    case OpenDDS::XTypes::TK_CHAR16: {
+      ACE_CDR::WChar my_wchar;
+      if (dd.get_char16_value(my_wchar, OpenDDS::XTypes::MEMBER_ID_INVALID) != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_char16_value\n"), false);
+      }
+      type_string += " = \'" + std::to_string(my_wchar) + "\'\n";
+      break;
+    }
+    }
     if (item_count == 2) {
       OpenDDS::XTypes::DynamicTypeMember_rch temp_dtm;
       OpenDDS::XTypes::DynamicTypeMembersById dtmbi;
