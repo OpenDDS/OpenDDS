@@ -96,7 +96,7 @@ public:
       return ACE_Allocator::instance()->malloc(sizeof(T));
     }
 
-    if (this->available() % 500 == 0 && DCPS_debug_level >= 6) {
+    if (DCPS_debug_level >= 6 && this->available() % 512 == 0) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) Cached_Allocator_With_Overflow::malloc %@"
                  " %Lu available from pool\n", this, this->available()));
     }
@@ -131,7 +131,7 @@ public:
     } else if (ptr != 0) {
       this->free_list_.add((ACE_Cached_Mem_Pool_Node<T> *) ptr) ;
 
-      if (this->available() % 500 == 0 && DCPS_debug_level >= 6) {
+      if (DCPS_debug_level >= 6 && this->available() % 512 == 0) {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) Cached_Allocator_With_Overflow::free %@"
                    " %Lu available from pool\n", this, this->available()));
       }
