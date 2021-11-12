@@ -232,6 +232,12 @@ Service_Participant::instance()
   return ACE_Singleton<Service_Participant, ACE_SYNCH_MUTEX>::instance();
 }
 
+const TimeSource&
+Service_Participant::time_source() const
+{
+  return time_source_;
+}
+
 ACE_Reactor_Timer_Interface*
 Service_Participant::timer()
 {

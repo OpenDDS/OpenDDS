@@ -2151,7 +2151,7 @@ Spdp::fini_bit()
     reactor_task = sedp_->reactor_task();
   }
   if (!reactor_task->is_shut_down()) {
-    DCPS::ReactorInterceptor::CommandPtr command = reactor_task->interceptor()->execute_or_enqueue(new Noop());
+    DCPS::ReactorInterceptor::CommandPtr command = reactor_task->interceptor()->execute_or_enqueue(DCPS::make_rch<Noop>());
     command->wait();
   }
 }
@@ -2395,8 +2395,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
   }
 #endif
 
-  reactor_task->interceptor()->execute_or_enqueue(
-    new RegisterHandlers(rchandle_from(this), reactor_task));
+  reactor_task->interceptor()->execute_or_enqueue(DCPS::make_rch<RegisterHandlers>(rchandle_from(this), reactor_task));
 
 #ifdef OPENDDS_SECURITY
   // Now that the endpoint is added, SEDP can write the SPDP info.
@@ -2408,17 +2407,29 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
   local_send_task_ = DCPS::make_rch<SpdpMulti>(reactor_task->interceptor(), outer->config_->resend_period(), ref(*this), &SpdpTransport::send_local);
 
   if (outer->config_->periodic_directed_spdp()) {
-    directed_send_task_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::send_directed);
+    directed_send_task_ =
+      DCPS::make_rch<SpdpSporadic>(TheServiceParticipant->time_source(), reactor_task->interceptor(),
+                                   rchandle_from(this), &SpdpTransport::send_directed);
   }
 
-  lease_expiration_task_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::process_lease_expirations);
+  lease_expiration_task_ =
+    DCPS::make_rch<SpdpSporadic>(TheServiceParticipant->time_source(), reactor_task->interceptor(),
+                                 rchandle_from(this), &SpdpTransport::process_lease_expirations);
 
 #ifdef OPENDDS_SECURITY
-  handshake_deadline_task_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::process_handshake_deadlines);
-  handshake_resend_task_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::process_handshake_resends);
+  handshake_deadline_task_ =
+    DCPS::make_rch<SpdpSporadic>(TheServiceParticipant->time_source(), reactor_task->interceptor(),
+                                 rchandle_from(this), &SpdpTransport::process_handshake_deadlines);
+  handshake_resend_task_ =
+    DCPS::make_rch<SpdpSporadic>(TheServiceParticipant->time_source(), reactor_task->interceptor(),
+                                 rchandle_from(this), &SpdpTransport::process_handshake_resends);
 
-  relay_spdp_task_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::send_relay);
-  relay_stun_task_ = DCPS::make_rch<SpdpSporadic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::relay_stun_task);
+  relay_spdp_task_ =
+    DCPS::make_rch<SpdpSporadic>(TheServiceParticipant->time_source(), reactor_task->interceptor(),
+                                 rchandle_from(this), &SpdpTransport::send_relay);
+  relay_stun_task_ =
+    DCPS::make_rch<SpdpSporadic>(TheServiceParticipant->time_source(), reactor_task->interceptor(),
+                                 rchandle_from(this), &SpdpTransport::relay_stun_task);
 #endif
 
 #ifndef DDS_HAS_MINIMUM_BIT
