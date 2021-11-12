@@ -1928,7 +1928,7 @@ CORBA::Long DataReaderImpl::total_samples() const
 void
 DataReaderImpl::LivelinessTimer::check_liveliness()
 {
-  execute_or_enqueue(new CheckLivelinessCommand(this));
+  execute_or_enqueue(make_rch<CheckLivelinessCommand>(this));
 }
 
 int
@@ -3520,13 +3520,13 @@ EndHistoricSamplesMissedSweeper::~EndHistoricSamplesMissedSweeper()
 void EndHistoricSamplesMissedSweeper::schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
 {
   info->waiting_for_end_historic_samples_ = true;
-  execute_or_enqueue(new ScheduleCommand(this, info));
+  execute_or_enqueue(make_rch<ScheduleCommand>(this, ref(info)));
 }
 
 void EndHistoricSamplesMissedSweeper::cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
 {
   info->waiting_for_end_historic_samples_ = false;
-  execute_or_enqueue(new CancelCommand(this, info));
+  execute_or_enqueue(make_rch<CancelCommand>(this, ref(info)));
 }
 
 int EndHistoricSamplesMissedSweeper::handle_timeout(

@@ -554,7 +554,7 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
     start_ice();
   }
 
-  relay_stun_task_= make_rch<Sporadic>(reactor_task()->interceptor(), ref(*this), &RtpsUdpTransport::relay_stun_task);
+  relay_stun_task_= make_rch<Sporadic>(TheServiceParticipant->time_source(), reactor_task()->interceptor(), rchandle_from(this), &RtpsUdpTransport::relay_stun_task);
 #endif
 
   if (config.opendds_discovery_default_listener_) {

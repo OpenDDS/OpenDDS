@@ -215,7 +215,7 @@ void InstanceState::schedule_release()
   if (delay.sec != DDS::DURATION_INFINITE_SEC &&
       delay.nanosec != DDS::DURATION_INFINITE_NSEC) {
 
-    execute_or_enqueue(new ScheduleCommand(this, TimeDuration(delay)));
+    execute_or_enqueue(make_rch<ScheduleCommand>(this, TimeDuration(delay)));
 
   } else {
     // N.B. instance transitions are always followed by a non-valid
@@ -229,7 +229,7 @@ void InstanceState::schedule_release()
 void InstanceState::cancel_release()
 {
   release_pending_ = false;
-  execute_or_enqueue(new CancelCommand(this));
+  execute_or_enqueue(make_rch<CancelCommand>(this));
 }
 
 bool InstanceState::release_if_empty()

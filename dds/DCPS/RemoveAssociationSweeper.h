@@ -126,7 +126,7 @@ void RemoveAssociationSweeper<T>::schedule_timer(RcHandle<WriterInfo>& info, boo
   info->notify_lost_ = callback;
   info->removal_deadline_ = MonotonicTimePoint(MonotonicTimePoint::now() +
     std::min(info->activity_wait_period(), TimeDuration(10)));
-  execute_or_enqueue(new ScheduleCommand(rchandle_from(this), info));
+  execute_or_enqueue(make_rch<ScheduleCommand>(rchandle_from(this), info));
 }
 
 template <typename T>
@@ -135,7 +135,7 @@ RemoveAssociationSweeper<T>::cancel_timer(RcHandle<WriterInfo>& info)
 {
   info->scheduled_for_removal_ = false;
   info->removal_deadline_ = MonotonicTimePoint::zero_value;
-  return execute_or_enqueue(new CancelCommand(rchandle_from(this), info));
+  return execute_or_enqueue(make_rch<CancelCommand>(rchandle_from(this), info));
 }
 
 template <typename T>
