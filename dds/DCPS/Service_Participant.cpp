@@ -218,11 +218,31 @@ Service_Participant::Service_Participant()
 
 Service_Participant::~Service_Participant()
 {
-  shutdown();
+  if (DCPS_debug_level >= 1) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Service_Participant::~Service_Participant\n"));
+  }
 
-  if (DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_DEBUG,
-               "(%P|%t) Service_Participant::~Service_Participant()\n"));
+  {
+    ACE_GUARD(ACE_Thread_Mutex, guard, factory_lock_);
+    if (dp_factory_servant_) {
+      const DDS::ReturnCode_t cleanup_status = dp_factory_servant_->delete_all_participants();
+      if (cleanup_status) {
+        if (log_level >= LogLevel::Warning) {
+          ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Service_Participant::~Service_Participant: "
+            "delete_all_participants returned %C\n",
+            retcode_to_string(cleanup_status)));
+        }
+      }
+    }
+  }
+
+  const DDS::ReturnCode_t shutdown_status = shutdown();
+  if (shutdown_status != DDS::RETCODE_OK && shutdown_status != DDS::RETCODE_ALREADY_DELETED) {
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Service_Participant::~Service_Participant: "
+        "shutdown returned %C\n",
+        retcode_to_string(shutdown_status)));
+    }
   }
 }
 
@@ -265,32 +285,41 @@ Service_Participant::job_queue() const
   return job_queue_;
 }
 
-void
-Service_Participant::shutdown()
+DDS::ReturnCode_t Service_Participant::shutdown()
 {
-  // When we are already shutdown just let the shutdown be a noop
   if (shut_down_) {
-    return;
+    return DDS::RETCODE_ALREADY_DELETED;
+  }
+
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, DDS::RETCODE_OUT_OF_RESOURCES);
+    if (dp_factory_servant_ && dp_factory_servant_->participant_count()) {
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: Service_Participant::shutdown: "
+          "all domain participants must be deleted before shutdown can occur\n"));
+      }
+      return DDS::RETCODE_PRECONDITION_NOT_MET;
+    }
   }
 
   if (shutdown_listener_) {
     shutdown_listener_->notify_shutdown();
   }
 
+  DDS::ReturnCode_t rc = DDS::RETCODE_OK;
   shut_down_ = true;
   try {
     TransportRegistry::instance()->release();
     {
-      ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, DDS::RETCODE_OUT_OF_RESOURCES);
 
-      if (dp_factory_servant_)
-        dp_factory_servant_->cleanup();
       dp_factory_servant_.reset();
 
       domainRepoMap_.clear();
 
       {
-        ACE_GUARD(ACE_Thread_Mutex, guard, network_config_monitor_lock_);
+        ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, network_config_monitor_lock_,
+          DDS::RETCODE_OUT_OF_RESOURCES);
         if (network_config_monitor_) {
           network_config_monitor_->close();
           network_config_monitor_.reset();
@@ -303,21 +332,26 @@ Service_Participant::shutdown()
 
       discoveryMap_.clear();
 
-  #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
       transient_data_cache_.reset();
       persistent_data_cache_.reset();
-  #endif
+#endif
 
       discovery_types_.clear();
       monitor_factory_ = 0;
     }
     TransportRegistry::close();
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
     OpenDDS::Security::SecurityRegistry::close();
 #endif
   } catch (const CORBA::Exception& ex) {
-    ex._tao_print_exception("ERROR: Service_Participant::shutdown");
+    if (log_level >= LogLevel::Error) {
+      ex._tao_print_exception("ERROR: Service_Participant::shutdown");
+    }
+    rc = DDS::RETCODE_ERROR;
   }
+
+  return rc;
 }
 
 #ifdef ACE_USES_WCHAR
@@ -336,10 +370,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
                                                     ACE_TCHAR *argv[])
 {
   if (!dp_factory_servant_) {
-    ACE_GUARD_RETURN(TAO_SYNCH_MUTEX,
-                     guard,
-                     this->factory_lock_,
-                     DDS::DomainParticipantFactory::_nil());
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, 0);
 
     shut_down_ = false;
     if (!dp_factory_servant_) {
@@ -2679,10 +2710,7 @@ Service_Participant::get_data_durability_cache(
 
   if (kind == DDS::TRANSIENT_DURABILITY_QOS) {
     {
-      ACE_GUARD_RETURN(TAO_SYNCH_MUTEX,
-                       guard,
-                       this->factory_lock_,
-                       0);
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, 0);
 
       if (!this->transient_data_cache_) {
         this->transient_data_cache_.reset(new DataDurabilityCache(kind));
@@ -2693,10 +2721,7 @@ Service_Participant::get_data_durability_cache(
 
   } else if (kind == DDS::PERSISTENT_DURABILITY_QOS) {
     {
-      ACE_GUARD_RETURN(TAO_SYNCH_MUTEX,
-                       guard,
-                       this->factory_lock_,
-                       0);
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, 0);
 
       try {
         if (!this->persistent_data_cache_) {
