@@ -101,9 +101,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     ts_var = new Dynamic::struTypeSupportImpl;
   } else if (type_name == "nested") {
     ts_var = new Dynamic::outer_structTypeSupportImpl;
-  } else if (type_name == "union") {
-    ts_var = new Dynamic::my_unionTypeSupportImpl;
-  } else if (type_name == "union_default") {
+  } else if (type_name == "union" || type_name == "union_default") {
     ts_var = new Dynamic::my_unionTypeSupportImpl;
   }
   ts_var->register_type(dp, type_name.c_str());
@@ -141,7 +139,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   } else if (type_name == "union_default") {
     union_default_narrow_write(dw);
   }
-  sleep(7);
   pub->delete_contained_entities();
   dp->delete_publisher(pub);
 
