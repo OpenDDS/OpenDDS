@@ -302,11 +302,42 @@ public:
     if (!print_dynamic_data(dd, dd.get_type(), my_type, "")){
       ACE_ERROR((LM_ERROR, " FAILED TEST\n"));
     }
-    OpenDDS::DCPS::String default_union_string = "union ::Dynamic::my_union {\n  Int32 discriminator = -2147483647\n  Boolean b = 1\n};\n";
-    OpenDDS::DCPS::String union_string = "union ::Dynamic::my_union {\n  Int32 discriminator = 1\n  Float128 ld = 10.000000\n};\n";
-    OpenDDS::DCPS::String nested_struct_string = "struct ::Dynamic::outer_struct {\n  ::Dynamic::inner_struct isstruct ::Dynamic::inner_struct {\n    Int32 l = 5\n  };\n};\n";
-    OpenDDS::DCPS::String struct_string = "struct ::Dynamic::stru {\n  Int32 l = 5\n  String8Small str = \"HelloWorld\"\n  ::Dynamic::bool_seq bs  Boolean[2] SequenceLarge =\n    [0] = 1\n    [1] = 0\n  ::Dynamic::char_arr ca  Char8[2] ArraySmall =\n    [0] = 'a'\n    [1] = 'b'\n  SequenceSmall enum_seq  ::Dynamic::EnumType[2] SequenceSmall =\n    [0] = 1\n    [1] = 0\n  ArraySmall short_arr  Int16[2] ArraySmall =\n    [0] = 5\n    [1] = 6\n};\n";
-    if (my_type != default_union_string && my_type != union_string && my_type != nested_struct_string && my_type != struct_string) {
+    OpenDDS::DCPS::String struct_string =
+      "struct ::Dynamic::stru {\n"
+      "  Int32 l = 5\n  String8Small str = \"HelloWorld\"\n"
+      "  ::Dynamic::bool_seq bs  Boolean[2] SequenceLarge =\n"
+      "    [0] = 1\n"
+      "    [1] = 0\n"
+      "  ::Dynamic::char_arr ca  Char8[2] ArraySmall =\n"
+      "    [0] = 'a'\n"
+      "    [1] = 'b'\n"
+      "  SequenceSmall enum_seq  ::Dynamic::EnumType[2] SequenceSmall =\n"
+      "    [0] = 1\n"
+      "    [1] = 0\n"
+      "  ArraySmall short_arr  Int16[2] ArraySmall =\n"
+      "    [0] = 5\n"
+      "    [1] = 6\n"
+      "};\n";
+    OpenDDS::DCPS::String nested_struct_string =
+      "struct ::Dynamic::outer_struct {\n"
+      "  ::Dynamic::inner_struct isstruct ::Dynamic::inner_struct {\n"
+      "    Int32 l = 5\n"
+      "  };\n"
+      "};\n";
+    OpenDDS::DCPS::String union_string =
+      "union ::Dynamic::my_union {\n"
+      "  Int32 discriminator = 1\n"
+      "  Float128 ld = 10.000000\n"
+      "};\n";
+    OpenDDS::DCPS::String default_union_string =
+      "union ::Dynamic::my_union {\n"
+      "  Int32 discriminator = -2147483647\n"
+      "  Boolean b = 1\n"
+      "};\n";
+    if (my_type != struct_string &&
+        my_type != nested_struct_string &&
+        my_type != union_string &&
+        my_type != default_union_string) {
       ACE_ERROR((LM_ERROR, "Error: Type did not match\n"));
     }
     std::cout << my_type;
