@@ -84,7 +84,6 @@ public:
   DDS::ReturnCode_t get_boolean_value(ACE_CDR::Boolean& value, MemberId id);
   DDS::ReturnCode_t get_string_value(ACE_CDR::Char*& value, MemberId id);
   DDS::ReturnCode_t get_wstring_value(ACE_CDR::WChar*& value, MemberId id);
-  DDS::ReturnCode_t get_discriminator_value(DynamicData& value);
   DDS::ReturnCode_t get_complex_value(DynamicData& value, MemberId id);
 
   DDS::ReturnCode_t get_int32_values(CORBA::LongSeq& value, MemberId id);

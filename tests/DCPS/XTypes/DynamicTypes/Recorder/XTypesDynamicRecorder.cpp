@@ -251,7 +251,7 @@ bool print_dynamic_data(OpenDDS::XTypes::DynamicData dd, OpenDDS::XTypes::Dynami
     ACE_CDR::ULong item_count = dd.get_item_count();
     member_name = dt->get_descriptor().discriminator_type->get_descriptor().name;
     type_string += indent + member_name + " discriminator";
-    if (dd.get_discriminator_value(temp_dd) != DDS::RETCODE_OK) {
+    if (dd.get_complex_value(temp_dd, OpenDDS::XTypes::MEMBER_ID_INVALID) != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_discriminator_value\n"), -1);
     }
     if (!print_dynamic_data(temp_dd, dt->get_descriptor().discriminator_type, type_string, indent)) {
