@@ -251,12 +251,23 @@ bool print_dynamic_data(OpenDDS::XTypes::DynamicData dd, OpenDDS::XTypes::Dynami
     ACE_CDR::ULong item_count = dd.get_item_count();
     member_name = dt->get_descriptor().discriminator_type->get_descriptor().name;
     type_string += indent + member_name + " discriminator";
-    if (dd.get_complex_value(temp_dd, OpenDDS::XTypes::MEMBER_ID_INVALID) != DDS::RETCODE_OK) {
-      ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_discriminator_value\n"), -1);
+    switch (dt->get_descriptor().discriminator_type->get_kind()) {
+    case OpenDDS::XTypes::TK_ENUM:
+    case OpenDDS::XTypes::TK_INT32: {
+      ACE_CDR::Long my_long;
+      if (dd.get_int32_value(my_long, OpenDDS::XTypes::MEMBER_ID_INVALID) != DDS::RETCODE_OK) {
+        ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_int32_value\n"), false);
+      }
+      type_string += " = " + std::to_string(my_long) + "\n";
+      break;
     }
-    if (!print_dynamic_data(temp_dd, dt->get_descriptor().discriminator_type, type_string, indent)) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) print_dynamic_data: failed to read union discriminator\n"));
     }
+    // if (dd.get_complex_value(temp_dd, OpenDDS::XTypes::MEMBER_ID_INVALID) != DDS::RETCODE_OK) {
+    //   ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_discriminator_value\n"), -1);
+    // }
+    // if (!print_dynamic_data(temp_dd, dt->get_descriptor().discriminator_type, type_string, indent)) {
+    //   ACE_ERROR((LM_ERROR, "(%P|%t) print_dynamic_data: failed to read union discriminator\n"));
+    // }
     if (item_count == 2) {
       OpenDDS::XTypes::DynamicTypeMember_rch temp_dtm;
       OpenDDS::XTypes::DynamicTypeMembersById dtmbi;
@@ -264,12 +275,12 @@ bool print_dynamic_data(OpenDDS::XTypes::DynamicData dd, OpenDDS::XTypes::Dynami
       dd.get_type()->get_all_members(dtmbi);
       for (OpenDDS::XTypes::DynamicTypeMembersById::iterator iter = dtmbi.begin(); iter != dtmbi.end(); ++iter) {
         dt->get_member(temp_dtm, iter->first);
-        if (dd.get_complex_value(temp_dd, iter->first) == DDS::RETCODE_OK) {
-          if (print_dynamic_data(temp_dd, temp_dtm->get_descriptor().get_type(), decoy_string, indent)) {
+        if (dd.get_complex_value(dd, iter->first) == DDS::RETCODE_OK) {
+          if (print_dynamic_data(dd, temp_dtm->get_descriptor().get_type(), decoy_string, indent)) {
             member_name = temp_dtm->get_descriptor().name;
             type_name = temp_dtm->get_descriptor().get_type()->get_descriptor().name;
             type_string += indent + type_name + " " + member_name;
-            print_dynamic_data(temp_dd, temp_dtm->get_descriptor().get_type(), type_string, indent);
+            print_dynamic_data(dd, temp_dtm->get_descriptor().get_type(), type_string, indent);
             break;
           }
         }
