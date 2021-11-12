@@ -252,8 +252,7 @@ bool print_dynamic_data(OpenDDS::XTypes::DynamicData dd, OpenDDS::XTypes::Dynami
     member_name = dt->get_descriptor().discriminator_type->get_descriptor().name;
     type_string += indent + member_name + " discriminator";
 
-    OpenDDS::XTypes::TypeKind discrim_tk = dt->get_descriptor().discriminator_type->get_kind();
-    switch (discrim_tk) {
+    switch (dt->get_descriptor().discriminator_type->get_kind()) {
     case OpenDDS::XTypes::TK_INT8: {
       ACE_CDR::Int8 my_int8;
       if (dd.get_int8_value(my_int8, OpenDDS::XTypes::MEMBER_ID_INVALID) != DDS::RETCODE_OK) {
