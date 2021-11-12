@@ -30,5 +30,6 @@ struct outer_struct {
 union my_union switch (long) {
   case 1: long double ld;
   case 2: string s;
+  default: boolean b;
 };
 };

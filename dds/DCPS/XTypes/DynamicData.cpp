@@ -1027,6 +1027,29 @@ DDS::ReturnCode_t DynamicData::get_wstring_value(ACE_CDR::WChar*& value, MemberI
   return get_single_value<TK_STRING16>(value, id);
 }
 
+DDS::ReturnCode_t DynamicData::get_discriminator_value(DynamicData& value) {
+  DCPS::Message_Block_Ptr dup(chain_->duplicate());
+  setup_stream(dup.get());
+
+  if (descriptor_.extensibility_kind == APPENDABLE || descriptor_.extensibility_kind == MUTABLE) {
+    size_t size;
+    if (!strm_.read_delimiter(size)) {
+      return DDS::RETCODE_ERROR;
+    }
+  }
+  const DynamicType_rch disc_type = get_base_type(descriptor_.discriminator_type);
+  if (descriptor_.extensibility_kind == MUTABLE) {
+    unsigned id;
+    size_t size;
+    bool must_understand;
+    if (!strm_.read_parameter_id(id, size, must_understand)) {
+      return DDS::RETCODE_ERROR;
+    }
+  }
+  value = DynamicData(strm_, disc_type);
+  return DDS::RETCODE_OK;
+}
+
 DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id)
 {
   DCPS::Message_Block_Ptr dup(chain_->duplicate());
@@ -1039,27 +1062,6 @@ DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id
   case TK_STRUCTURE:
   case TK_UNION:
     {
-      if (tk == TK_UNION && id == MEMBER_ID_INVALID) {
-        if (descriptor_.extensibility_kind == APPENDABLE || descriptor_.extensibility_kind == MUTABLE) {
-          size_t size;
-          if (!strm_.read_delimiter(size)) {
-            good = false;
-            break;
-          }
-        }
-        const DynamicType_rch disc_type = get_base_type(descriptor_.discriminator_type);
-        if (descriptor_.extensibility_kind == MUTABLE) {
-          unsigned id;
-          size_t size;
-          bool must_understand;
-          if (!strm_.read_parameter_id(id, size, must_understand)) {
-            good = false;
-            break;
-          }
-        }
-        value = DynamicData(strm_, disc_type);
-        break;
-      }
       DynamicTypeMember_rch member;
       const DDS::ReturnCode_t retcode = type_->get_member(member, id);
       if (retcode != DDS::RETCODE_OK) {
