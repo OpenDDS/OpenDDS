@@ -283,155 +283,6 @@ bool print_dynamic_data(OpenDDS::XTypes::DynamicData dd, OpenDDS::XTypes::Dynami
   return true;
 }
 
-int print_dynamic_data(OpenDDS::XTypes::DynamicData dd) {
-  ACE_DEBUG((LM_DEBUG, "Type is:\n"));
-  OpenDDS::XTypes::TypeKind top_tk = dd.get_type()->get_kind();
-  if (top_tk == OpenDDS::XTypes::TK_STRUCTURE) {
-    std::cout << "struct " << dd.get_type()->get_name() << " {\n";
-    OpenDDS::XTypes::DynamicTypeMembersById dtmbi;
-    dd.get_type()->get_all_members(dtmbi);
-    for (OpenDDS::XTypes::DynamicTypeMembersById::iterator iter = dtmbi.begin(); iter != dtmbi.end(); ++iter)
-    {
-      OpenDDS::XTypes::TypeKind member_tk = iter->second->get_descriptor().get_type()->get_descriptor().kind;
-      OpenDDS::DCPS::String member_name = iter->second->get_descriptor().name;
-      OpenDDS::DCPS::String type_name = iter->second->get_descriptor().get_type()->get_descriptor().name;
-      // switch on member kind
-      // create type of member
-      // get value of member into type
-      // print type, name, and value
-      if (member_tk == OpenDDS::XTypes::TK_INT32) {
-        ACE_CDR::Long my_long;
-        if (dd.get_int32_value(my_long, iter->first) != DDS::RETCODE_OK) {
-          ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_int32_value\n"), -1);
-        }
-        if (my_long != 5) {
-          ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - str: %d does not match expected value: 5\n", my_long), -1);
-        }
-        std::cout << "  " << type_name << " " << member_name << " = " << std::to_string(my_long) << "\n";
-      } else if (member_tk == OpenDDS::XTypes::TK_STRING8) {
-        ACE_CDR::Char* my_string = 0;
-        if (dd.get_string_value(my_string, iter->first) != DDS::RETCODE_OK) {
-          ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_string_value\n"), -1);
-        }
-        if (my_string != OpenDDS::DCPS::String("HelloWorld")) {
-          ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - str: %C does not match expected value: HelloWorld\n", my_string), -1);
-        }
-        std::cout << "  " << type_name << " " <<  member_name << " = " << my_string << "\n";
-      } else if (member_tk == OpenDDS::XTypes::TK_SEQUENCE) {
-        type_name = iter->second->get_descriptor().get_type()->get_descriptor().element_type->get_descriptor().name;
-        OpenDDS::XTypes::TypeKind ele_type = iter->second->get_descriptor().get_type()->get_descriptor().element_type->get_kind();
-        if (ele_type == OpenDDS::XTypes::TK_ENUM) {
-          CORBA::LongSeq my_int_seq;
-          if (dd.get_int32_values(my_int_seq, iter->first) != DDS::RETCODE_OK) {
-            ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_int32_values\n"), -1);
-          }
-          OpenDDS::XTypes::LBound bound = iter->second->get_descriptor().get_type()->get_descriptor().bound[0];
-          OpenDDS::DCPS::String bound_str = bound != 0 ? (", " + std::to_string(bound)) : "";
-          if (my_int_seq[0] != 1 || my_int_seq[1] != 0) {
-            ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - enum_seq: <%d,%d> does not match expected values: <1,0>\n", my_int_seq[0], my_int_seq[1]), -1);
-          }
-          std::cout << "  sequence<" << type_name << bound_str << "> " <<  member_name << " = ";
-          std::cout << " < " << std::to_string(my_int_seq[0]) << ", ";
-          std::cout << std::to_string(my_int_seq[1]) << ">\n";
-        }
-      } else if (member_tk == OpenDDS::XTypes::TK_ARRAY) {
-        type_name = iter->second->get_descriptor().get_type()->get_descriptor().element_type->get_descriptor().name;
-        OpenDDS::XTypes::TypeKind ele_type = iter->second->get_descriptor().get_type()->get_descriptor().element_type->get_kind();
-        if (ele_type == OpenDDS::XTypes::TK_INT16) {
-          OpenDDS::XTypes::DynamicData my_arr_dd;
-          if (dd.get_complex_value(my_arr_dd, iter->first) != DDS::RETCODE_OK) {
-            ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_complex_value\n"), -1);
-          }
-          OpenDDS::XTypes::LBound bound = iter->second->get_descriptor().get_type()->get_descriptor().bound[0];
-          std::cout << "  " << type_name << "[" << bound << "] " <<  member_name << " = ";
-          short my_short;
-          for (ACE_CDR::ULong i = 0; i < bound; ++i) {
-            if (my_arr_dd.get_int16_value(my_short, i) != DDS::RETCODE_OK) {
-              ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_int16_value\n"), -1);
-            }
-            if (i == 0 && my_short != 5) {
-              ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - short_arr[0]: %d does not match expected value: 5\n", my_short), -1);
-            } else if (i == 1 && my_short != 6) {
-              ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - short_arr[1]: %d does not match expected value: 6\n", my_short), -1);
-            }
-            std::cout << " [" << i << "]" << std::to_string(my_short) << ",";
-          }
-          std::cout << "\n";
-        }
-      } else if (member_tk == OpenDDS::XTypes::TK_ALIAS) {
-        type_name = iter->second->get_descriptor().get_type()->get_descriptor().name;
-        OpenDDS::XTypes::TypeKind aliased_type = iter->second->get_descriptor().get_type()->get_descriptor().base_type->get_descriptor().kind;
-        OpenDDS::XTypes::TypeKind ele_type = iter->second->get_descriptor().get_type()->get_descriptor().base_type->get_descriptor().element_type->get_kind();
-        if (aliased_type == OpenDDS::XTypes::TK_ARRAY) {
-          if (ele_type == OpenDDS::XTypes::TK_CHAR8) {
-            OpenDDS::XTypes::DynamicData my_arr_dd;
-            if (dd.get_complex_value(my_arr_dd, iter->first) != DDS::RETCODE_OK) {
-              ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_complex_value\n"), -1);
-            }
-            OpenDDS::XTypes::LBound bound = iter->second->get_descriptor().get_type()->get_descriptor().base_type->get_descriptor().bound[0];
-            std::cout << "  " << type_name << " " <<  member_name << " = ";
-            ACE_CDR::Char my_char;
-            for (ACE_CDR::ULong i = 0; i < bound; ++i) {
-              if (my_arr_dd.get_char8_value(my_char, i) != DDS::RETCODE_OK) {
-                ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_char8_value\n"), -1);
-              }
-              if (i == 0 && my_char != 'a') {
-                ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - char_arr[0]: %c does not match expected value: a\n", my_char), -1);
-              } else if (i == 1 && my_char != 'b') {
-                ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - char_arr[1]: %c does not match expected value: b\n", my_char), -1);
-              }
-              std::cout << " [" << i << "]" << my_char << ",";
-            }
-            std::cout << "\n";
-          }
-        } else if (aliased_type == OpenDDS::XTypes::TK_SEQUENCE) {
-          if (ele_type == OpenDDS::XTypes::TK_BOOLEAN) {
-            CORBA::BooleanSeq my_bool_seq;
-            if (dd.get_boolean_values(my_bool_seq, iter->first) != DDS::RETCODE_OK) {
-              ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_boolean_values\n"), -1);
-            }
-            if (my_bool_seq[0] != true || my_bool_seq[1] != false) {
-              ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - bool_seq: <%d,%d> does not match expected values: <1,0>\n",
-                                my_bool_seq[0], my_bool_seq[1]), -1);
-            }
-            std::cout << "  " << type_name << " " <<  member_name << " = ";
-            std::cout << " < " << std::to_string(my_bool_seq[0]) << ", ";
-            std::cout << std::to_string(my_bool_seq[1]) << ">\n";
-          }
-        }
-      } else if (member_tk == OpenDDS::XTypes::TK_STRUCTURE) {
-        OpenDDS::XTypes::DynamicData nested_dd;
-        if (dd.get_complex_value(nested_dd, iter->first) != DDS::RETCODE_OK) {
-          ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_complex_value\n"), -1);
-        }
-        OpenDDS::XTypes::DynamicTypeMembersById nested_dtmbi;
-        nested_dd.get_type()->get_all_members(nested_dtmbi);
-        std::cout << "  struct " << nested_dd.get_type()->get_name() << " {\n";
-        for (OpenDDS::XTypes::DynamicTypeMembersById::iterator nested_iter = nested_dtmbi.begin(); nested_iter != nested_dtmbi.end(); ++nested_iter)
-        {
-          OpenDDS::XTypes::TypeKind nested_member_tk = nested_iter->second->get_descriptor().get_type()->get_descriptor().kind;
-          OpenDDS::DCPS::String nested_member_name = nested_iter->second->get_descriptor().name;
-          OpenDDS::DCPS::String nested_type_name = nested_iter->second->get_descriptor().get_type()->get_descriptor().name;
-          if (nested_member_tk == OpenDDS::XTypes::TK_INT32) {
-            ACE_CDR::Long my_long;
-            if (nested_dd.get_int32_value(my_long, 0) != DDS::RETCODE_OK) {
-              ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - failed to get_int32_value\n"), -1);
-            }
-            if (my_long != 5) {
-              ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Error: print_dynamic_data - inner_struct long: %d did not equal: 5\n", my_long), -1);
-            }
-            std::cout << "    " << nested_type_name << " " << nested_member_name << " = ";
-            std::cout << "[0]" << std::to_string(my_long) << "\n  }\n";
-          }
-        }
-      }
-    }
-    std::cout << "}\n";
-  }
-  return 0;
-}
-
-
 class TestRecorderListener : public OpenDDS::DCPS::RecorderListener
 {
 public:
@@ -447,10 +298,16 @@ public:
     using namespace OpenDDS::DCPS;
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("TestRecorderListener::on_sample_data_received\n")));
     OpenDDS::XTypes::DynamicData dd = rec->get_dynamic_data(sample);
-    //ret_val_ = print_dynamic_data(dd);
     OpenDDS::DCPS::String my_type = "";
     if (!print_dynamic_data(dd, dd.get_type(), my_type, "")){
       ACE_ERROR((LM_ERROR, " FAILED TEST\n"));
+    }
+    OpenDDS::DCPS::String default_union_string = "union ::Dynamic::my_union {\n  Int32 discriminator = -2147483647\n  Boolean b = 1\n};\n";
+    OpenDDS::DCPS::String union_string = "union ::Dynamic::my_union {\n  Int32 discriminator = 1\n  Float128 ld = 10.000000\n};\n";
+    OpenDDS::DCPS::String nested_struct_string = "struct ::Dynamic::outer_struct {\n  ::Dynamic::inner_struct isstruct ::Dynamic::inner_struct {\n    Int32 l = 5\n  };\n};\n";
+    OpenDDS::DCPS::String struct_string = "struct ::Dynamic::stru {\n  Int32 l = 5\n  String8Small str = \"HelloWorld\"\n  ::Dynamic::bool_seq bs  Boolean[2] SequenceLarge =\n    [0] = 1\n    [1] = 0\n  ::Dynamic::char_arr ca  Char8[2] ArraySmall =\n    [0] = 'a'\n    [1] = 'b'\n  SequenceSmall enum_seq  ::Dynamic::EnumType[2] SequenceSmall =\n    [0] = 1\n    [1] = 0\n  ArraySmall short_arr  Int16[2] ArraySmall =\n    [0] = 5\n    [1] = 6\n};\n";
+    if (my_type != default_union_string && my_type != union_string && my_type != nested_struct_string && my_type != struct_string) {
+      ACE_ERROR((LM_ERROR, "Error: Type did not match\n"));
     }
     std::cout << my_type;
   }
