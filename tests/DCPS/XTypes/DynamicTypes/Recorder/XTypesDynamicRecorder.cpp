@@ -253,10 +253,6 @@ bool print_dynamic_data(OpenDDS::XTypes::DynamicData dd, OpenDDS::XTypes::Dynami
     type_string += indent + member_name + " discriminator";
 
     OpenDDS::XTypes::TypeKind discrim_tk = dt->get_descriptor().discriminator_type->get_kind();
-    // TODO CLAYTON: How will this work with multiple aliases?
-    if (discrim_tk == OpenDDS::XTypes::TK_ALIAS) {
-      discrim_tk = dt->get_descriptor().discriminator_type->get_descriptor().base_type->get_kind();
-    }
     switch (discrim_tk) {
     case OpenDDS::XTypes::TK_INT8: {
       ACE_CDR::Int8 my_int8;
