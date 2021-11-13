@@ -1414,6 +1414,12 @@ void RtpsDiscovery::update_subscription_locators(
   get_part(domainId, partId)->update_subscription_locators(subId, transInfo);
 }
 
+RcHandle<DCPS::TransportInst> RtpsDiscovery::sedp_transport_inst(DDS::DomainId_t domainId,
+                                                                 const GUID_t& partId) const
+{
+  return get_part(domainId, partId)->sedp_transport_inst();
+}
+
 ParticipantHandle RtpsDiscovery::get_part(const DDS::DomainId_t domain_id, const GUID_t& part_id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ParticipantHandle());

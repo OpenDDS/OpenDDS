@@ -657,6 +657,8 @@ public:
 
   bool should_drop(ssize_t length) const;
 
+  RcHandle<DCPS::TransportInst> transport_inst() const { return transport_inst_; }
+
 private:
   bool remote_knows_about_local_i(const GUID_t& local, const GUID_t& remote) const;
 #ifdef OPENDDS_SECURITY

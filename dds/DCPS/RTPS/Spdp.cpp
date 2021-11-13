@@ -630,11 +630,11 @@ void print_locator(const CORBA::ULong i, const DCPS::Locator_t& o){
 
 bool ip_in_locator_list(const ACE_INET_Addr& from, const DCPS::LocatorSeq& locators)
 {
-  if (DCPS::DCPS_debug_level) {
+  if (DCPS::DCPS_debug_level >= 8) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ip_in_locator_list - from (type %d): %C\n"), from.get_type(), DCPS::LogAddr(from).c_str()));
   }
   for (CORBA::ULong i = 0; i < locators.length(); ++i) {
-    if (DCPS::DCPS_debug_level) {
+    if (DCPS::DCPS_debug_level >= 8) {
       print_locator(i, locators[i]);
     }
     if (is_ip_equal(from, locators[i])) {

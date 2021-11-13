@@ -353,6 +353,11 @@ public:
     return bit_subscriber_;
   }
 
+  RcHandle<DCPS::TransportInst> sedp_transport_inst() const
+  {
+    return sedp_->transport_inst();
+  }
+
 protected:
   Sedp& endpoint_manager() { return *sedp_; }
 

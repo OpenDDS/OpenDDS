@@ -7,6 +7,7 @@
 #include <dds/DCPS/PoolAllocator.h>
 
 #include <ace/Condition_Thread_Mutex.h>
+#include <ace/OS.h>
 
 #include <set>
 #include <utility>
@@ -71,7 +72,8 @@ public:
 
   void post(const OPENDDS_STRING& actor, const OPENDDS_STRING& condition)
   {
-    ACE_DEBUG((LM_INFO, "(%P|%t) %C posting %C\n", actor.c_str(), condition.c_str()));
+    ACE_DEBUG((LM_INFO, "(%P|%t) InMemoryDistributedConditionSet %C posting %C\n",
+               actor.c_str(), condition.c_str()));
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
     set_.insert(PairType(actor, condition));
     condition_.broadcast();
@@ -81,7 +83,7 @@ public:
                 const OPENDDS_STRING& posting_actor,
                 const OPENDDS_STRING& condition) const
   {
-    ACE_DEBUG((LM_INFO, "(%P|%t) %C waiting_for %C %C\n",
+    ACE_DEBUG((LM_INFO, "(%P|%t) InMemoryDistributedConditionSet %C waiting_for %C %C\n",
                waiting_actor.c_str(), posting_actor.c_str(), condition.c_str()));
 
     const PairType key(posting_actor, condition);
@@ -94,6 +96,9 @@ public:
       }
       condition_.wait();
     }
+
+    ACE_DEBUG((LM_INFO, "(%P|%t) InMemoryDistributedConditionSet %C waiting_for %C %C done\n",
+               waiting_actor.c_str(), posting_actor.c_str(), condition.c_str()));
   }
 
 private:
@@ -102,6 +107,39 @@ private:
   SetType set_;
   mutable ACE_Thread_Mutex mutex_;
   mutable ACE_Condition_Thread_Mutex condition_;
+};
+
+class FileBasedDistributedConditionSet : public DistributedConditionSet {
+public:
+  void post(const OPENDDS_STRING& actor, const OPENDDS_STRING& condition)
+  {
+    ACE_DEBUG((LM_INFO, "(%P|%t) FileBasedDistributedConditionSet %C posting %C\n",
+               actor.c_str(), condition.c_str()));
+
+    ACE_OS::mkdir("./DCS");
+    ACE_OS::mkdir((OPENDDS_STRING("./DCS/") + actor).c_str());
+    ACE_HANDLE fd = ACE_OS::open((OPENDDS_STRING("./DCS/") + actor + "/" + condition).c_str(), O_WRONLY|O_CREAT);
+    ACE_OS::close(fd);
+  }
+
+  void wait_for(const OPENDDS_STRING& waiting_actor,
+                const OPENDDS_STRING& posting_actor,
+                const OPENDDS_STRING& condition) const
+  {
+    ACE_DEBUG((LM_INFO, "(%P|%t) FileBasedDistributedConditionSet %C waiting_for %C %C\n",
+               waiting_actor.c_str(), posting_actor.c_str(), condition.c_str()));
+
+    const OPENDDS_STRING path = OPENDDS_STRING("./DCS/") + posting_actor + "/" + condition;
+    ACE_HANDLE fd;
+    for (fd = ACE_INVALID_HANDLE; fd == ACE_INVALID_HANDLE; fd = ACE_OS::open(path.c_str(), O_RDONLY)) {
+      ACE_OS::sleep(1);
+    }
+    ACE_OS::close(fd);
+
+    ACE_DEBUG((LM_INFO, "(%P|%t) FileBasedDistributedConditionSet %C waiting_for %C %C done\n",
+               waiting_actor.c_str(), posting_actor.c_str(), condition.c_str()));
+  }
+
 };
 
 #endif // TESTUTILS_DISTRIBUTED_CONDITION_SET_H
