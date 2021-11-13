@@ -55,6 +55,7 @@ void to_locator(const ACE_INET_Addr& addr, Locator_t& locator)
 #ifdef ACE_HAS_IPV6
   if (addr.get_type() == AF_INET6) {
     locator.kind = LOCATOR_KIND_UDPv6;
+    locator.port = addr.get_port_number();
     struct sockaddr_in6* in6 = static_cast<struct sockaddr_in6*>(addr.get_addr());
     ACE_OS::memcpy(reinterpret_cast<unsigned char*>(locator.address), &in6->sin6_addr, 16);
     return;
@@ -62,6 +63,7 @@ void to_locator(const ACE_INET_Addr& addr, Locator_t& locator)
 #endif
 
   locator.kind = LOCATOR_KIND_UDPv4;
+  locator.port = addr.get_port_number();
   struct sockaddr_in* sa = static_cast<struct sockaddr_in*>(addr.get_addr());
   std::memset(locator.address, 0, 12);
   ACE_OS::memcpy(reinterpret_cast<unsigned char*>(locator.address) + 12, &sa->sin_addr, 4);
