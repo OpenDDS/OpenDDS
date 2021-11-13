@@ -172,6 +172,7 @@ Service_Participant::Service_Participant()
 #ifndef OPENDDS_SAFETY_PROFILE
     ORB_argv_(false /*substitute_env_args*/),
 #endif
+    time_source_(),
     reactor_task_(false),
     defaultDiscovery_(DDS_DEFAULT_DISCOVERY_METHOD),
     n_chunks_(DEFAULT_NUM_CHUNKS),
