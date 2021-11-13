@@ -36,8 +36,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
-
-
 DynamicData::DynamicData()
   : chain_(0)
   , encoding_(DCPS::Encoding::KIND_XCDR2)
@@ -2238,7 +2236,6 @@ const char* DynamicData::typekind_to_string(TypeKind tk) const
     return "unknown";
   }
 }
-
 
 bool print_dynamic_data(OpenDDS::XTypes::DynamicData dd, OpenDDS::XTypes::DynamicType_rch dt, OpenDDS::DCPS::String& type_string, OpenDDS::DCPS::String indent)
 {
