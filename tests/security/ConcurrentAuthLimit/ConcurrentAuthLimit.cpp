@@ -17,6 +17,8 @@
 #include <ace/SOCK_Dgram.h>
 #include <ace/SOCK_Dgram_Mcast.h>
 
+#include <stdexcept>
+
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
 
@@ -253,7 +255,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   ACE_DEBUG((LM_DEBUG, "no_limit = %d\n", no_limit));
 
   const DDS::DomainId_t domain = 4;
-  const auto disc = make_rch<RtpsDiscovery>("RtpsDiscovery");
+  const RcHandle<RtpsDiscovery> disc = make_rch<RtpsDiscovery>("RtpsDiscovery");
 
   if (!no_limit) {
     disc->config()->max_participants_in_authentication(1);
@@ -305,10 +307,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   TheServiceParticipant->set_security(true);
   TheServiceParticipant->add_discovery(disc);
   TheServiceParticipant->set_default_discovery(disc->key());
-
-  const auto tr = TheTransportRegistry;
-  const auto tc = tr->create_config("RtpsTransport");
-  const auto ti = tr->create_inst("RtpsTransport", "rtps_udp");
 
   DDS::DomainParticipantQos participant_qos;
   dpf->get_default_participant_qos(participant_qos);
