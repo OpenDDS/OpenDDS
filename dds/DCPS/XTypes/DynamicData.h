@@ -309,7 +309,9 @@ private:
   ACE_CDR::ULong item_count_;
 };
 
-bool OpenDDS_Dcps_Export print_dynamic_data(OpenDDS::XTypes::DynamicData dd, OpenDDS::XTypes::DynamicType_rch dt, OpenDDS::DCPS::String& type_string, OpenDDS::DCPS::String indent);
+bool OpenDDS_Dcps_Export print_dynamic_data(
+  OpenDDS::XTypes::DynamicData dd, OpenDDS::XTypes::DynamicType_rch dt,
+  OpenDDS::DCPS::String& type_string, OpenDDS::DCPS::String indent);
 
 } // namespace XTypes
 } // namespace OpenDDS
