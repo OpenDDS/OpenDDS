@@ -30,7 +30,8 @@ int parse_args (int argc, ACE_TCHAR *argv[])
   ACE_Arg_Shifter arg_shifter (argc, argv);
   return 0;
 }
-void stru_narrow_write(DataWriter_var dw) {
+void stru_narrow_write(DataWriter_var dw)
+{
   Dynamic::stru foo;
   foo.my_int8 = 1;
   foo.my_uint8 = 2;
@@ -65,7 +66,8 @@ void stru_narrow_write(DataWriter_var dw) {
   ACE_DEBUG((LM_DEBUG, "WRITE\n"));
 }
 
-void nested_stru_narrow_write(DataWriter_var dw) {
+void nested_stru_narrow_write(DataWriter_var dw)
+{
   Dynamic::inner_struct is;
   Dynamic::outer_struct os;
   is.l = 5;
@@ -75,7 +77,8 @@ void nested_stru_narrow_write(DataWriter_var dw) {
   narrow_dw->write(os, handle);
 }
 
-void union_narrow_write(DataWriter_var dw) {
+void union_narrow_write(DataWriter_var dw)
+{
   Dynamic::my_union foo;
   foo._d(1);
   foo.ld(10);
@@ -84,7 +87,8 @@ void union_narrow_write(DataWriter_var dw) {
   narrow_dw->write(foo, handle);
 }
 
-void union_default_narrow_write(DataWriter_var dw) {
+void union_default_narrow_write(DataWriter_var dw)
+{
   Dynamic::my_union foo;
   foo._d(3);
   foo.b(true);

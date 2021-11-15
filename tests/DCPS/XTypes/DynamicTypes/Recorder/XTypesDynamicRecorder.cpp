@@ -151,7 +151,7 @@ int run_test(int argc, ACE_TCHAR *argv[]){
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" create_participant failed!\n")),
-                       -1);
+                        1);
     }
     using namespace OpenDDS::DCPS;
 
@@ -169,7 +169,7 @@ int run_test(int argc, ACE_TCHAR *argv[]){
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("ERROR: %N:%l: main() -")
                           ACE_TEXT(" create_topic failed!\n")),
-                         -1);
+                          1);
       }
 
       ACE_Time_Value wait_time(60, 0);
@@ -194,7 +194,7 @@ int run_test(int argc, ACE_TCHAR *argv[]){
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("ERROR: %N:%l: main() -")
                           ACE_TEXT(" create_recorder failed!\n")),
-                         -1);
+                          1);
       }
 
 
@@ -203,7 +203,7 @@ int run_test(int argc, ACE_TCHAR *argv[]){
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("ERROR: %N:%l: main() -")
                           ACE_TEXT(" recorder timeout!\n")),
-                         -1);
+                          1);
       }
       ret_val = recorder_listener->ret_val_;
       service->delete_recorder(recorder);
@@ -213,13 +213,13 @@ int run_test(int argc, ACE_TCHAR *argv[]){
     TheServiceParticipant->shutdown();
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
-    return -1;
+    return 1;
   }
-  if (ret_val == -1) {
+  if (ret_val == 1) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("ERROR: %N:%l: main() -")
                       ACE_TEXT(" failed to properly analyze sample!\n")),
-                     -1);
+                      1);
   }
   return ret_val;
 }
