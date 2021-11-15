@@ -56,9 +56,11 @@ void Name::parse(Name& name, const std::string& buffer, size_t& idx)
 
   char c = buffer[idx];
   if (c == '?') {
-    name.push_back(Atom(parse_pattern(name, buffer, idx, '?', Atom::WILDCARD)));
+    name.push_back(Atom(Atom::WILDCARD));
+    ++idx;
   } else if (c == '*') {
-    name.push_back(Atom(parse_pattern(name, buffer, idx, '*', Atom::GLOB)));
+    name.push_back(Atom(Atom::GLOB));
+    ++idx;
   } else if (c == '[') {
     name.push_back(parse_character_class(name, buffer, idx));
   } else {
@@ -68,29 +70,8 @@ void Name::parse(Name& name, const std::string& buffer, size_t& idx)
   parse(name, buffer, idx);
 }
 
-Atom::Kind Name::parse_pattern(Name& name, const std::string& buffer, size_t& idx, char expected, Atom::Kind kind)
-{
-  if (idx == buffer.size()) {
-    name.is_valid_ = false;
-    return kind;
-  }
-
-  char c = buffer[idx++];
-  if (c == expected) {
-    name.is_pattern_ = true;
-    return kind;
-  }
-
-  return kind;
-}
-
 char Name::parse_character(Name& name, const std::string& buffer, size_t& idx)
 {
-  if (idx == buffer.size()) {
-    name.is_valid_ = false;
-    return 0;
-  }
-
   char c = buffer[idx++];
   if (c == '\\') {
     if (idx == buffer.size()) {
@@ -105,16 +86,10 @@ char Name::parse_character(Name& name, const std::string& buffer, size_t& idx)
 
 Atom Name::parse_character_class(Name& name, const std::string& buffer, size_t& idx)
 {
-  if (idx == buffer.size()) {
-    name.is_valid_ = false;
-    return Atom(0);
-  }
-
   name.is_pattern_ = true;
 
-  if (buffer[idx++] != '[') {
-    name.is_valid_ = false;
-  }
+  // Skip '[']
+  idx++;
 
   bool negated = false;
 
@@ -128,9 +103,13 @@ Atom Name::parse_character_class(Name& name, const std::string& buffer, size_t& 
     ++idx;
   }
 
-  std::unordered_set<char> characters;
-
   // One character is required.
+  if (idx == buffer.size()) {
+    name.is_valid_ = false;
+    return Atom(0);
+  }
+
+  std::unordered_set<char> characters;
   parse_character_or_range(name, buffer, idx, characters);
   parse_character_class_tail(name, buffer, idx, characters);
 
@@ -156,11 +135,6 @@ void Name::parse_character_class_tail(Name& name, const std::string& buffer, siz
 
 void Name::parse_character_or_range(Name& name, const std::string& buffer, size_t& idx, std::unordered_set<char>& characters)
 {
-  if (idx == buffer.size()) {
-    name.is_valid_ = false;
-    return;
-  }
-
   char first = parse_character(name, buffer, idx);
 
   if (idx == buffer.size()) {
@@ -174,6 +148,12 @@ void Name::parse_character_or_range(Name& name, const std::string& buffer, size_
   }
 
   ++idx;
+
+  if (idx == buffer.size()) {
+    name.is_valid_ = false;
+    return;
+  }
+
   char last = parse_character(name, buffer, idx);
   if (first > last) {
     name.is_valid_ = false;

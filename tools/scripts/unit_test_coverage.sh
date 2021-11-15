@@ -25,7 +25,17 @@ function get-units {
             sed -E -e '/[CS]\.(h|cpp|inl)$/ d' -e '/TypeSupportImpl\.(h|cpp)$/ d' -e '/[Ee]xport.h$/ d' -e 's/\.[^.]*$//' |
             sort -u
     else
-        echo "${args[@]}"
+        for arg in "${args[@]}"
+        do
+            if [[ -d "${arg}" ]]
+            then
+                find "${arg}" -path tools/rapidjson -prune -false -o -path tools/modeling/tests -prune -false -o -name "*.h" -o -name "*.cpp" -o -name "*.inl" |
+            sed -E -e '/[CS]\.(h|cpp|inl)$/ d' -e '/TypeSupportImpl\.(h|cpp)$/ d' -e '/[Ee]xport.h$/ d' -e 's/\.[^.]*$//' |
+            sort -u
+            else
+                echo "${arg}"
+            fi
+        done
     fi
 }
 

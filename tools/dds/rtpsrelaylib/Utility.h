@@ -40,7 +40,7 @@ struct AddrPort {
   ACE_INET_Addr addr;
   Port port;
 
-  AddrPort() {}
+  AddrPort() : port(SPDP) {}
   AddrPort(const ACE_INET_Addr& a, Port p) : addr(a), port(p) {}
 
   bool operator==(const AddrPort& other) const
@@ -82,17 +82,37 @@ struct GuidAddr {
   bool operator<(const GuidAddr& other) const
   {
     if (guid != other.guid) {
-      OpenDDS::DCPS::GUID_tKeyLessThan gc;
+      static const OpenDDS::DCPS::GUID_tKeyLessThan gc;
       return gc(guid, other.guid);
     }
     return address < other.address;
   }
 };
 
+inline bool operator==(const EntityId_t& x, const EntityId_t& y)
+{
+  return std::memcmp(&x, &y, sizeof(x)) == 0;
+}
+
+inline bool operator!=(const EntityId_t& x, const EntityId_t& y)
+{
+  return std::memcmp(&x, &y, sizeof(x)) != 0;
+}
+
 inline void assign(EntityId_t& eid, const OpenDDS::DCPS::EntityId_t& a_eid)
 {
   std::memcpy(&eid._entityKey[0], a_eid.entityKey, sizeof(a_eid.entityKey));
   eid.entityKind(a_eid.entityKind);
+}
+
+inline bool operator==(const GUID_t& x, const GUID_t& y)
+{
+  return std::memcmp(&x, &y, sizeof(x)) == 0;
+}
+
+inline bool operator!=(const GUID_t& x, const GUID_t& y)
+{
+  return std::memcmp(&x, &y, sizeof(x)) != 0;
 }
 
 inline void assign(GUID_t& guid, const OpenDDS::DCPS::GUID_t& a_guid)
@@ -108,6 +128,16 @@ inline Duration_t time_diff_to_duration(const OpenDDS::DCPS::TimeDuration& d)
   duration.sec(x.sec);
   duration.nanosec(x.nanosec);
   return duration;
+}
+
+inline bool operator==(const Duration_t& x, const Duration_t& y)
+{
+  return x.sec() == y.sec() && x.nanosec() == y.nanosec();
+}
+
+inline bool operator!=(const Duration_t& x, const Duration_t& y)
+{
+  return x.sec() != y.sec() || x.nanosec() != y.nanosec();
 }
 
 inline bool operator<(const Duration_t& x, const Duration_t& y)
