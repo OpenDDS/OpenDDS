@@ -21,7 +21,8 @@ Recorder::~Recorder()
 {
 }
 
-XTypes::DynamicData Recorder::get_dynamic_data(const RawDataSample& sample) {
+XTypes::DynamicData Recorder::get_dynamic_data(const RawDataSample& sample)
+{
 
   Encoding enc(Encoding::KIND_XCDR2, sample.header_.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
   const DynamicTypeByPubId::const_iterator dt_found = dt_map_.find(sample.publication_id_);

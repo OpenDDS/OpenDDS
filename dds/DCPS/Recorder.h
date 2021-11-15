@@ -12,10 +12,11 @@
 #include "LocalObject.h"
 #include "RcHandle_T.h"
 #include "RawDataSample.h"
-#include "dds/DdsDcpsInfrastructureC.h"
 #include "GuidConverter.h"
 
 #include "XTypes/DynamicData.h"
+
+#include <dds/DdsDcpsInfrastructureC.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
