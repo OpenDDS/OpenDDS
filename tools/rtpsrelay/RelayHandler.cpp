@@ -1,5 +1,4 @@
 #include "RelayHandler.h"
-#include "ThreadMonitor.h"
 
 #include <dds/rtpsrelaylib/RelayTypeSupportImpl.h>
 
@@ -8,6 +7,7 @@
 #include <dds/DCPS/RTPS/BaseMessageTypes.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
+#include <dds/DCPS/ThreadMonitor.h>
 #include <dds/DCPS/TimeTypes.h>
 #include <dds/DdsDcpsCoreTypeSupportImpl.h>
 #include <dds/DdsDcpsGuidTypeSupportImpl.h>
@@ -116,7 +116,7 @@ int RelayHandler::open(const ACE_INET_Addr& address)
 
 int RelayHandler::handle_input(ACE_HANDLE handle)
 {
-  OpenDDS::DCPS::Thread_Monitor::Green_Light load_mon(this->name_.c_str());
+  OpenDDS::DCPS::Thread_Monitor::Green_Light load_mon(name_.c_str());
   const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
   ACE_INET_Addr remote;
@@ -170,7 +170,7 @@ int RelayHandler::handle_input(ACE_HANDLE handle)
 
 int RelayHandler::handle_output(ACE_HANDLE)
 {
-  OpenDDS::DCPS::Thread_Monitor::Green_Light load_mon(this->name_.c_str());
+  OpenDDS::DCPS::Thread_Monitor::Green_Light load_mon(name_.c_str());
   const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, outgoing_mutex_, 0);
@@ -974,7 +974,7 @@ CORBA::ULong SpdpHandler::send_to_application_participant(GuidAddrSet::Proxy& pr
 
 int SpdpHandler::handle_exception(ACE_HANDLE /*fd*/)
 {
-  OpenDDS::DCPS::Thread_Monitor::Green_Light load_mon(this->name_.c_str());
+  OpenDDS::DCPS::Thread_Monitor::Green_Light load_mon(name_.c_str());
   ReplayQueue q;
 
   {

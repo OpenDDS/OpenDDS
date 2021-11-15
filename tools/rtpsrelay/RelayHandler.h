@@ -8,7 +8,6 @@
 #include "ParticipantStatisticsReporter.h"
 #include "RelayPartitionTable.h"
 #include "RelayStatisticsReporter.h"
-#include "ThreadMonitor.h"
 
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 

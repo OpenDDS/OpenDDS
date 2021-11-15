@@ -15,6 +15,7 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/ConditionVariable.h>
 #include <dds/DCPS/TimeTypes.h>
+#include <dds/DCPS/ThreadMonitor.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
@@ -108,6 +109,7 @@ public:
   /// The "mainline" executed by the worker thread.
   virtual int svc() {
     DBG_ENTRY("QueueTaskBase","svc");
+    Thread_Monitor::Green_Light gl("QueueTaskBase");
 
     thr_id_ = ACE_OS::thr_self();
 
@@ -121,6 +123,8 @@ public:
     while (!this->shutdown_initiated_) {
       T req;
       {
+        Thread_Monitor::Red_Light gl("QueueTaskBase");
+
         GuardType guard(this->lock_);
 
         if (this->queue_.is_empty() && !shutdown_initiated_) {

@@ -15,6 +15,7 @@
 #include "RelayPartitionsListener.h"
 #include "RelayStatisticsReporter.h"
 #include "RelayStatusReporter.h"
+#include "RelayThreadMonitor.h"
 #include "SpdpReplayListener.h"
 #include "SubscriptionListener.h"
 
@@ -274,8 +275,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   TheServiceParticipant->bit_autopurge_nowriter_samples_delay(one_minute);
   TheServiceParticipant->bit_autopurge_disposed_samples_delay(one_minute);
 
-  RtpsRelay::Thread_Monitor thread_mon(config.thread_monitor_period_seconds(),
-                                       config.thread_monitor_history_depth());
+  Relay_Thread_Monitor thread_mon(config.thread_monitor_period_seconds(),
+                                  config.thread_monitor_history_depth());
 
   // Set up the relay participant.
   DDS::DomainParticipantQos participant_qos;

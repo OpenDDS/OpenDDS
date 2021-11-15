@@ -32,12 +32,10 @@ namespace DCPS {
     {
     }
 
-    enum UpdateMode {
-      EXPLICIT_IDLE,
-      EXPLICIT_BUSY,
-      IMPLICIT_IDLE,
-      IMPLICIT_BUSY
-    };
+    typedef struct UpdateMode_st {
+      bool implicit_;
+      bool idle_;
+     } UpdateMode;
 
     virtual void update(UpdateMode, const char* = "")
     {
@@ -55,19 +53,8 @@ namespace DCPS {
     class Green_Light
     {
     public:
-      Green_Light(const char* alias = "")
-      {
-        if (installed_monitor_) {
-          installed_monitor_->update(EXPLICIT_BUSY, alias);
-        }
-      }
-
-      ~Green_Light(void)
-      {
-        if (installed_monitor_) {
-          installed_monitor_->update(IMPLICIT_IDLE);
-        }
-      }
+      Green_Light(const char* alias = "");
+      ~Green_Light(void);
     };
 
     /**
@@ -79,19 +66,8 @@ namespace DCPS {
     class Red_Light
     {
     public:
-      Red_Light(const char* alias = "")
-      {
-        if (installed_monitor_) {
-          installed_monitor_->update(EXPLICIT_IDLE, alias);
-        }
-      }
-
-      ~Red_Light(void)
-      {
-        if (installed_monitor_) {
-          installed_monitor_->update(IMPLICIT_BUSY);
-        }
-      }
+      Red_Light(const char* alias = "");
+      ~Red_Light(void);
     };
   };
 
