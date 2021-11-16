@@ -1,41 +1,39 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #include "DcpsInfo_pch.h"
-#include "tao/ORB_Core.h"
-#include "DCPSInfo_i.h"
+
 #include "DCPSInfoRepoServ.h"
+
+#include "DCPSInfo_i.h"
 #include "FederatorConfig.h"
 #include "FederatorManagerImpl.h"
 #include "ShutdownInterface.h"
 #include "PersistenceUpdater.h"
 #include "UpdateManager.h"
 
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h"
-
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/DCPS_Utils.h>
+#include <dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h>
 //If we need BIT support, pull in TCP so that static builds will have it.
-#if !defined(DDS_HAS_MINIMUM_BIT)
-#include "dds/DCPS/transport/tcp/Tcp.h"
+#ifndef DDS_HAS_MINIMUM_BIT
+#  include <dds/DCPS/transport/tcp/Tcp.h>
 #endif
 
-#include "tao/IORTable/IORTable.h"
-#include "tao/BiDir_GIOP/BiDirGIOP.h"
-
+#include <tao/ORB_Core.h>
+#include <tao/IORTable/IORTable.h>
+#include <tao/BiDir_GIOP/BiDirGIOP.h>
 #include <orbsvcs/Shutdown_Utilities.h>
-
 #ifdef ACE_AS_STATIC_LIBS
-#include "tao/ImR_Client/ImR_Client.h"
+#  include <tao/ImR_Client/ImR_Client.h>
 #endif
 
-#include "ace/Get_Opt.h"
-#include "ace/Arg_Shifter.h"
-#include "ace/Service_Config.h"
-#include "ace/Argv_Type_Converter.h"
+#include <ace/Get_Opt.h>
+#include <ace/Arg_Shifter.h>
+#include <ace/Service_Config.h>
+#include <ace/Argv_Type_Converter.h>
 
 #include <string>
 #include <sstream>
@@ -95,7 +93,12 @@ InfoRepo::finalize()
     // which bypasses InfoRepo::handle_exception()
     this->info_servant_->finalize();
     this->federator_.finalize();
-    TheServiceParticipant->shutdown();
+    const DDS::ReturnCode_t shutdown_error = TheServiceParticipant->shutdown();
+    if (shutdown_error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: InfoRepo::finalize: "
+        "TheServiceParticipant->shutdown returned: %C\n",
+        OpenDDS::DCPS::retcode_to_string(shutdown_error)));
+    }
     this->servant_finalized_ = true;
   }
 
@@ -123,7 +126,12 @@ InfoRepo::handle_exception(ACE_HANDLE /* fd */)
   // these should occur before ORB::shutdown() since they use the ORB/reactor
   this->info_servant_->finalize();
   this->federator_.finalize();
-  TheServiceParticipant->shutdown();
+  const DDS::ReturnCode_t shutdown_error = TheServiceParticipant->shutdown();
+  if (shutdown_error) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: InfoRepo::handle_exception: "
+      "TheServiceParticipant->shutdown returned: %C\n",
+      OpenDDS::DCPS::retcode_to_string(shutdown_error)));
+  }
   this->servant_finalized_ = true;
 
   this->orb_->shutdown(true);
