@@ -41,9 +41,9 @@ void stru_narrow_write(DataWriter_var dw)
   foo.my_ulong = 6;
   foo.my_longlong = 7;
   foo.my_ulonglong = 8;
-  foo.my_float = 9;
-  foo.my_double = 10;
-  foo.my_longdouble = 11;
+  foo.my_float = 9.25;
+  foo.my_double = 10.5;
+  foo.my_longdouble = 11.075;
   foo.my_boolean = true;
   foo.my_byte = 12;
   foo.my_char = 'd';

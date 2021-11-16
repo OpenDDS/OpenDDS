@@ -61,9 +61,9 @@ public:
       "  UInt32 my_ulong = 6\n"
       "  Int64 my_longlong = 7\n"
       "  UInt64 my_ulonglong = 8\n"
-      "  Float32 my_float = 9.000000\n"
-      "  Float64 my_double = 10.000000\n"
-      "  Float128 my_longdouble = 11.000000\n"
+      "  Float32 my_float = 9.25\n"
+      "  Float64 my_double = 10.5\n"
+      "  Float128 my_longdouble = 11.075\n"
       "  Boolean my_boolean = 1\n"
       "  Byte my_byte = 12\n"
       "  Char8 my_char = 'd'\n"
@@ -92,7 +92,7 @@ public:
     OpenDDS::DCPS::String union_string =
       "union ::Dynamic::my_union {\n"
       "  Int32 discriminator = 1\n"
-      "  Float128 ld = 10.000000\n"
+      "  Float128 ld = 10\n"
       "};\n";
     OpenDDS::DCPS::String default_union_string =
       "union ::Dynamic::my_union {\n"
