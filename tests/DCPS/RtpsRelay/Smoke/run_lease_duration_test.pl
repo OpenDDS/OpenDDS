@@ -40,8 +40,8 @@ if ($test->flag('reverse')) {
   $sub_ini = " rtps_ld_60_sec.ini -e";
 }
 
-$test->process("relay1a", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay1.ini -ApplicationDomain 42 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444 -UserData relay1a -StatisticsInterval 3" . $relay_security_opts);
-$test->process("relay1b", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-DCPSConfigFile relay1.ini -ApplicationDomain 42 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444 -UserData relay1b -StatisticsInterval 3" . $relay_security_opts);
+$test->process("relay1a", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-Id relay1a -LogDiscovery 1 -LogActivity 1 -LogRelayStatistics 3 -DCPSConfigFile relay1.ini -ApplicationDomain 42 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444 -UserData relay1a" . $relay_security_opts);
+$test->process("relay1b", "$ENV{DDS_ROOT}/bin/RtpsRelay", "-Id relay1b -LogDiscovery 1 -LogActivity 1 -LogRelayStatistics 3 -DCPSConfigFile relay1.ini -ApplicationDomain 42 -VerticalAddress 4444 -HorizontalAddress 127.0.0.1:11444 -UserData relay1b" . $relay_security_opts);
 $test->process("publisher", "publisher", "-l -ORBDebugLevel 1 -DCPSConfigFile". $pub_ini . $pub_sub_security_opts);
 $test->process("subscriber", "subscriber", "-l -ORBDebugLevel 1 -DCPSConfigFile" . $sub_ini . $pub_sub_security_opts);
 
@@ -52,7 +52,7 @@ if ($test->flag('reverse')) {
   $test->start_process("subscriber");
   sleep 10;
   $test->kill_process(1, "relay1a");
-  sleep 6;
+  sleep 8;
   $test->start_process("relay1b");
 } else {
   $test->start_process("relay1a");
@@ -61,7 +61,7 @@ if ($test->flag('reverse')) {
   $test->start_process("subscriber");
   sleep 10;
   $test->kill_process(1, "relay1a");
-  sleep 6;
+  sleep 8;
   $test->start_process("relay1b");
 }
 

@@ -11,7 +11,7 @@ namespace RtpsRelay {
 ParticipantListener::ParticipantListener(const Config& config,
                                          GuidAddrSet& guid_addr_set,
                                          OpenDDS::DCPS::DomainParticipantImpl* participant,
-                                         DomainStatisticsReporter& stats_reporter)
+                                         RelayStatisticsReporter& stats_reporter)
   : config_(config)
   , guid_addr_set_(guid_addr_set)
   , participant_(participant)
@@ -20,6 +20,8 @@ ParticipantListener::ParticipantListener(const Config& config,
 
 void ParticipantListener::on_data_available(DDS::DataReader_ptr reader)
 {
+  const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
+
   DDS::ParticipantBuiltinTopicDataDataReader_var dr = DDS::ParticipantBuiltinTopicDataDataReader::_narrow(reader);
   if (!dr) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ParticipantListener::on_data_available failed to narrow PublicationBuiltinTopicDataDataReader\n")));
@@ -48,15 +50,20 @@ void ParticipantListener::on_data_available(DDS::DataReader_ptr reader)
       if (info.valid_data) {
         const auto repoid = participant_->get_repoid(info.instance_handle);
 
-        guid_addr_set_.remove_pending(repoid);
-
         const auto p = guids_.insert(repoid);
+
+        GuidAddrSet::Proxy proxy(guid_addr_set_);
+        proxy.remove_pending(repoid);
+
         if (p.second) {
           if (config_.log_discovery()) {
-            ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: ParticipantListener::on_data_available add local participant %C %C\n"), guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str()));
+            ACE_DEBUG((LM_INFO, "(%P|%t) INFO: ParticipantListener::on_data_available "
+              "add local participant %C %C %C into session\n",
+              guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str(),
+              proxy.get_session_time(repoid, now).sec_str().c_str()));
           }
 
-          stats_reporter_.add_local_participant(OpenDDS::DCPS::MonotonicTimePoint::now());
+          stats_reporter_.local_participants(guids_.size(), now);
         }
       }
       break;
@@ -65,14 +72,19 @@ void ParticipantListener::on_data_available(DDS::DataReader_ptr reader)
       {
         const auto repoid = participant_->get_repoid(info.instance_handle);
 
-        guid_addr_set_.remove(repoid);
+        {
+          GuidAddrSet::Proxy proxy(guid_addr_set_);
+          if (config_.log_discovery()) {
+            ACE_DEBUG((LM_INFO, "(%P|%t) INFO: ParticipantListener::on_data_available "
+                       "remove local participant %C %C into session\n",
+                       guid_to_string(repoid).c_str(),
+                       proxy.get_session_time(repoid, now).sec_str().c_str()));
+          }
 
-        if (config_.log_discovery()) {
-          ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: ParticipantListener::on_data_available remove local participant %C\n"), guid_to_string(repoid).c_str()));
+          proxy.remove(repoid, now);
         }
-
-        stats_reporter_.remove_local_participant(OpenDDS::DCPS::MonotonicTimePoint::now());
         guids_.erase(repoid);
+        stats_reporter_.local_participants(guids_.size(), now);
       }
       break;
     }

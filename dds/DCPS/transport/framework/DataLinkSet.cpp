@@ -93,9 +93,26 @@ OpenDDS::DCPS::DataLinkSet::empty()
 
 void OpenDDS::DCPS::DataLinkSet::terminate_send_if_suspended()
 {
-  GuardType guard(this->lock_);
-  for (MapType::iterator itr = map_.begin();
-      itr != map_.end(); ++itr) {
+  MapType map_copy;
+  {
+    GuardType guard(lock_);
+    map_copy = map_;
+  }
+  for (MapType::iterator itr = map_copy.begin();
+      itr != map_copy.end(); ++itr) {
         itr->second->terminate_send_if_suspended();
   }
+}
+
+bool OpenDDS::DCPS::DataLinkSet::is_leading(const GUID_t& writer_id,
+                                            const GUID_t& reader_id) const
+{
+  GuardType guard(this->lock_);
+  for (MapType::const_iterator pos = map_.begin(), limit = map_.end(); pos != limit; ++pos) {
+    if (pos->second->is_leading(writer_id, reader_id)) {
+      return true;
+    }
+  }
+
+  return false;
 }

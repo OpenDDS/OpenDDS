@@ -5,6 +5,7 @@
 
 #include "AccessControlBuiltInImpl.h"
 
+#include "AuthenticationBuiltInImpl.h"
 #include "CommonUtilities.h"
 #include "TokenWriter.h"
 #include "SSL/SubjectName.h"
@@ -128,7 +129,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   }
 
   TokenReader tr(id_token);
-  const char* id_sn = tr.get_property_value("dds.cert.sn");
+  const char* id_sn = tr.get_property_value(dds_cert_sn);
 
   OpenDDS::Security::SSL::SubjectName sn_id;
 
@@ -1314,7 +1315,7 @@ AccessControlBuiltInImpl::RevokePermissionsTask_rch&
 AccessControlBuiltInImpl::make_task(RevokePermissionsTask_rch& task)
 {
   if (!task) {
-    task = DCPS::make_rch<RevokePermissionsTask>(TheServiceParticipant->interceptor(), DCPS::ref(*this));
+    task = DCPS::make_rch<RevokePermissionsTask>(TheServiceParticipant->time_source(), TheServiceParticipant->interceptor(), DCPS::ref(*this));
   }
   return task;
 }
@@ -1563,9 +1564,10 @@ void AccessControlBuiltInImpl::parse_class_id(
 
 }
 
-AccessControlBuiltInImpl::RevokePermissionsTask::RevokePermissionsTask(DCPS::ReactorInterceptor_rch interceptor,
+AccessControlBuiltInImpl::RevokePermissionsTask::RevokePermissionsTask(const DCPS::TimeSource& time_source,
+                                                                       DCPS::ReactorInterceptor_rch interceptor,
                                                                        AccessControlBuiltInImpl& impl)
-  : SporadicTask(interceptor)
+  : SporadicTask(time_source, interceptor)
   , impl_(impl)
 { }
 

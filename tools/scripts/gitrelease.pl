@@ -3,19 +3,23 @@
 use strict;
 use warnings;
 
-use Time::Piece;
 use POSIX;
 use Cwd;
-use LWP::Simple;
 use File::Basename;
 use File::stat;
+use File::Temp qw/tempdir/;
+use File::Path qw/make_path/;
+use Getopt::Long;
+use JSON::PP;
+use Storable qw/dclone/;
+
+use LWP::UserAgent;
+use Net::FTP::File;
+use Time::Piece;
+use Pithub;
+
 use lib dirname (__FILE__) . "/modules";
 use ConvertFiles;
-use Pithub::Repos::Releases;
-use Net::FTP::File;
-use File::Temp qw/ tempdir /;
-use File::Path qw(make_path);
-use Getopt::Long;
 
 my $base_name_prefix = "OpenDDS-";
 my $default_github_user = "objectcomputing";
@@ -23,13 +27,13 @@ my $default_remote = "origin";
 my $default_branch = "master";
 my $release_branch_prefix = "branch-";
 my $repo_name = "OpenDDS";
-my $default_download_url = "http://download.ociweb.com/OpenDDS";
+my $default_download_url = "https://download.ociweb.com/OpenDDS";
 my $ace_tao_filename = "ACE+TAO-2.2a_with_latest_patches_NO_makefiles.tar.gz";
-my $ace_tao_url = "http://download.ociweb.com/TAO-2.2a/$ace_tao_filename";
+my $ace_tao_url = "https://download.ociweb.com/TAO-2.2a/$ace_tao_filename";
 my $ace_root = "ACE_wrappers";
 my $git_name_prefix = "DDS-";
 my $default_post_release_metadata = "dev";
-my $release_flag_filename = "release_occurred";
+my $workspace_info_filename = "info.json";
 
 $ENV{TZ} = "UTC";
 Time::Piece::_tzset;
@@ -56,7 +60,7 @@ ENDOUT
 
 sub get_news_post_release_msg {
   my $settings = shift();
-  my $ver = $settings->{parsed_next_version}->{string};
+  my $ver = $settings->{parsed_next_version}->{release_string};
   return "OpenDDS $ver is currently in development, so this list might change.";
 }
 my $news_post_release_msg_re =
@@ -73,7 +77,7 @@ sub insert_news_template($$) {
   my $post_release = shift();
 
   my $version = ($post_release ?
-    $settings->{parsed_next_version} : $settings->{parsed_version})->{string};
+    $settings->{parsed_next_version} : $settings->{parsed_version})->{release_string};
   my $release_msg = $post_release ?
     get_news_post_release_msg($settings) : get_news_release_msg($settings);
 
@@ -113,6 +117,19 @@ sub usage {
   return
     "gitrelease.pl WORKSPACE VERSION [options]\n" .
     "gitrelease.pl --help | -h\n" .
+    "gitrelease.pl --list-all\n";
+}
+
+sub arg_error {
+  print STDERR "ERROR: " . shift() . "\n" .
+    "Usage:\n" .
+    usage() .
+    "See --help for more information\n";
+  exit(1);
+}
+
+sub help {
+  return usage() .
     "\n" .
     "Positional Arguments:\n" .
     "    WORKSPACE:           Path of intermediate files directory. If it doesn't\n" .
@@ -136,6 +153,9 @@ sub usage {
     "                         (default: ${default_github_user})\n" .
     "  --download-url=URL     URL to verify FTP uploads\n" .
     "                         (default: ${default_download_url})\n" .
+    "  --mock                 Enable mock release-specific checks and fake the\n" .
+    "                         Doxygen and Devguide steps if they're not being\n" .
+    "                         skipped.\n" .
     "  --micro                Do a patch/micro level release. Requires --branch.\n" .
     "                         (default is no)\n" .
     "                         The difference from a regular release is that anything\n" .
@@ -248,8 +268,6 @@ sub email_announce_contents {
 
   $result .=
     "Updates in this version:\n" .
-    "(This is an excerpt of the NEWS, for full change information " .
-      "see ChangeLog within the source distribution)\n" .
     news_contents_excerpt($settings->{version});
 
   return $result;
@@ -299,6 +317,12 @@ sub yes_no {
 
 sub touch_file {
   my $path = shift();
+
+  my $dir = dirname($path);
+  if (not -d $dir) {
+    make_path($dir) or die "Couldn't make directory $dir for touch_file: $!\n";
+  }
+
   if (not -f $path) {
     open(my $fh, '>', $path) or die "Couldn't open file $path: $!\nStopped";
   }
@@ -306,6 +330,168 @@ sub touch_file {
     my $t = time();
     utime($t, $t, ($path,)) || die "Couldn't touch file $path: $!\nStopped";
   }
+}
+
+sub new_pithub {
+  my $settings = shift();
+
+  if (!defined($settings->{github_token})) {
+    die("GITHUB_TOKEN must be defined");
+  }
+
+  return Pithub->new(
+      user => $settings->{github_user},
+      repo => $settings->{github_repo},
+      token => $settings->{github_token},
+  );
+}
+
+sub read_json_file {
+  my $path = shift();
+
+  open my $f, '<', $path or die("Can't open JSON file $path: $!");
+  local $/;
+  my $text = <$f>;
+  close $f;
+
+  return decode_json($text);
+}
+
+sub write_json_file {
+  my $path = shift();
+  my $what = shift();
+
+  open my $f, '>', $path or die("Can't open JSON file $path: $!");
+  # Writes indented, space-separated JSON in a reproducible order
+  print $f JSON::PP->new->pretty->canonical->encode($what);
+  close $f;
+}
+
+sub expand_releases {
+  my $releases = shift();
+  for my $release (@{$releases}) {
+    $release->{version} = \parse_version($release->{version});
+  }
+  return $releases;
+}
+
+sub compress_releases {
+  my $releases = shift();
+
+  # Make a copy and replace the parsed version hashes with the version strings
+  my @copy = @{dclone($releases)};
+  for my $release (@copy) {
+    $release->{version} = $release->{version}->{string};
+  }
+  return \@copy;
+}
+
+sub write_releases {
+  my $path = shift();
+  my $releases_ref = shift();
+
+  write_json_file($path, compress_releases($releases_ref));
+}
+
+sub compare_workspace_info {
+  my $settings = shift();
+  my $info = shift();
+  my $key = shift();
+
+  if ($settings->{$key} ne $info->{$key}) {
+    print STDERR "Workspace has \"$info->{$key}\" for $key, but we expected \"$settings->{$key}\"\n";
+    return 1;
+  }
+  return 0;
+}
+
+sub check_workspace {
+  my $settings = shift();
+
+  return if $settings->{list};
+
+  if (!-d $settings->{workspace}) {
+    print("Creating workspace directory \"$settings->{workspace}\"\n");
+    if (!make_path($settings->{workspace})) {
+      die("Failed to create workspace: \"$settings->{workspace}\"");
+    }
+  }
+
+  if (-f $settings->{workspace_info_file_path}) {
+    my $info = read_json_file($settings->{workspace_info_file_path});
+
+    my $invalid = 0;
+    $invalid |= compare_workspace_info($settings, $info, 'mock');
+    $invalid |= compare_workspace_info($settings, $info, 'micro');
+    $invalid |= compare_workspace_info($settings, $info, 'version');
+    $invalid |= compare_workspace_info($settings, $info, 'next_version');
+    if ($invalid) {
+      die("Inconsistent with existing workspace, see above for details");
+    }
+
+    $settings->{is_highest_version} = $info->{is_highest_version};
+    if ($info->{release_occurred}) {
+      print("Release occurred flag set, assuming $info->{version} was released!\n");
+    }
+    $settings->{release_occurred} = $info->{release_occurred};
+  }
+  else {
+    my $previous_releases = get_releases($settings);
+    $settings->{is_highest_version} = scalar(@{$previous_releases}) == 0 ||
+      version_greater_equal($settings->{parsed_version},
+        $previous_releases->[0]->{version});
+    $settings->{release_occurred} = 0;
+
+    write_json_file($settings->{workspace_info_file_path}, {
+      mock => $settings->{mock},
+      micro => $settings->{micro},
+      version => $settings->{version},
+      next_version => $settings->{next_version},
+      is_highest_version => $settings->{is_highest_version},
+      release_occurred => $settings->{release_occurred},
+    });
+  }
+}
+
+sub download {
+  my $url = shift();
+  my %args = @_;
+
+  my $agent = LWP::UserAgent->new();
+
+  my %get_args = ();
+  my $to = "";
+  if (exists($args{save_path})) {
+    $get_args{':content_file'} = $args{save_path};
+    $to = " to \"$args{save_path}\"";
+  }
+
+  print("Downloading $url$to...\n");
+  my $response = $agent->get($url, %get_args);
+  if (!$response->is_success()) {
+    print STDERR "ERROR: ", $response->status_line(), "\n";
+    return 0;
+  }
+
+  if (exists($args{content_ref})) {
+    ${$args{content_ref}} = $response->decoded_content();
+  }
+
+  return 1;
+}
+
+sub get_current_branch {
+  open(my $fh, "git rev-parse --abbrev-ref HEAD|") or die "git: $!";
+  my $branch_name;
+  for my $line (<$fh>) {
+    chomp($line);
+    if ($line =~ /^\S+$/) {
+      $branch_name = $line;
+    }
+  }
+  close($fh);
+  die("Couldn't get branch name") if (!$branch_name);
+  return $branch_name;
 }
 
 ############################################################################
@@ -411,6 +597,8 @@ sub parse_version {
   return %result;
 }
 
+my %zero_version = parse_version("0.0.0");
+
 # Compare Versions According To Semver
 sub version_greater_equal {
   my $left = shift();
@@ -487,6 +675,61 @@ sub version_lesser {
   return !version_greater_equal($left, $right);
 }
 
+sub version_cmp {
+  my $left = shift();
+  my $right = shift();
+
+  return 0 if $left->{string} eq $right->{string};
+  return version_lesser($left, $right) ? -1 : 1;
+}
+
+sub parse_release_tag {
+  my $tag = shift();
+
+  my %parsed = ();
+  if ($tag =~ /^DDS-(.*)$/) {
+    %parsed = parse_version($1) if $1;
+    $parsed{tag_name} = $tag if %parsed;
+  }
+  if (!%parsed) {
+    die("Invalid release tag name: $tag");
+  }
+  return %parsed;
+}
+
+sub get_releases {
+  my $settings = shift();
+
+  my $release_list = $settings->{pithub}->repos->releases->list();
+  unless ($release_list->success) {
+    die("error accessing github: $release_list->response->status_line");
+  }
+
+  my @releases = ();
+  while (my $release = $release_list->next) {
+    next if $release->{prerelease};
+    my %parsed = parse_release_tag($release->{tag_name});
+    my @assets = ();
+    for my $asset (@{$release->{assets}}) {
+      push(@assets, {
+        name => $asset->{name},
+        browser_download_url => $asset->{browser_download_url},
+      });
+    }
+    # Sort by reverse name to put zip files first for the website
+    @assets = sort { $b->{name} cmp $a->{name} } @assets;
+    push(@releases, {
+      version => \%parsed,
+      published_at => $release->{published_at},
+      html_url => $release->{html_url},
+      assets => \@assets,
+    });
+  }
+
+  my @sorted = sort { version_cmp($b->{version}, $a->{version}) } @releases;
+  return \@sorted;
+}
+
 ############################################################################
 sub verify_git_remote {
   my $result = 0;
@@ -511,19 +754,11 @@ sub verify_git_remote {
 
 sub message_git_remote {
   my $settings = shift;
-  my $remote = $settings->{remote};
-  my $alt_url = $settings->{alt_url};
-  my $start = "Remote $remote has url $alt_url,\n" .
-         "which does not match expected URL $settings->{git_url}";
-}
-
-sub override_git_remote {
-  my $settings = shift;
-  my $remote = $settings->{remote};
-  $settings->{git_url} = $settings->{alt_url};
-  print "  Overriding remote $remote, url $settings->{alt_url}\n";
-  # Reverify
-  verify_git_remote($settings);
+  return "Remote $settings->{remote} in git repo has url $settings->{alt_url}\n" .
+    "  this is different from what the script is expecting: $settings->{git_url}\n" .
+    "  This must be resolved by either making sure the local git repo has the\n" .
+    "  correct remote, or by changing what the script is expecting by using the\n" .
+    "  --remote and --github-user options.";
 }
 
 ############################################################################
@@ -551,14 +786,15 @@ sub verify_git_status_clean {
 
 sub remedy_git_status_clean {
   my $settings = shift();
-  my $post_release = shift() || 0;
+  my $post_release = shift() // 0;
+  my $changelog = shift() // 1;
   my $version = $settings->{version};
 
   if (!run_command("git --no-pager diff HEAD")) {
     return 0;
   }
   return 0 if (!yes_no("Would you like to add and commit these changes?"));
-  if (!$post_release) {
+  if (!$post_release && $changelog) {
     system("git add docs/history/ChangeLog-$version") == 0
       or die "Could not execute: git add docs/history/ChangeLog-$version";
   }
@@ -631,7 +867,7 @@ sub find_previous_tag {
   my $remote = $settings->{remote};
   my $release_version = $settings->{parsed_version};
   my $prev_version_tag = "";
-  my %prev_version = parse_version("0.0.0");
+  my %prev_version = %zero_version;
 
   open(GITTAG, "git tag --list |") or die "Opening $!";
   while (<GITTAG>) {
@@ -942,7 +1178,7 @@ sub verify_news_file_section {
   }
   close(NEWS);
 
-  return ($has_version);
+  return $has_version;
 }
 
 sub message_news_file_section {
@@ -980,7 +1216,7 @@ sub verify_update_news_file {
   }
   close(NEWS);
 
-  return ($has_version && $corrected_features && $corrected_fixes);
+  return $has_version && $corrected_features && $corrected_fixes;
 }
 
 sub message_update_news_file {
@@ -1249,7 +1485,7 @@ sub message_git_changes_pushed {
 
 sub remedy_git_changes_pushed {
   my $settings = shift();
-  my $push_latest_release = shift();
+  my $push_latest_release = shift() // $settings->{is_highest_version};
   my $remote = $settings->{remote};
   print "pushing code\n";
   my $result = system("git push $remote $settings->{branch}");
@@ -1549,21 +1785,30 @@ sub message_download_ace_tao {
 
 sub remedy_download_ace_tao {
   my $settings = shift();
+
   my $archive = "$settings->{workspace}/$ace_tao_filename";
-  print "Downloading $ace_tao_url...\n";
-  my $code = getstore($ace_tao_url, $archive);
-  if ($code != 200) {
-    die "Download failed, response code was $code.\n";
+
+  if ($settings->{mock}) {
+    print "Touch $archive because of mock release\n";
+    touch_file($archive);
+    return 1;
   }
-  print "Download Finished!\n";
-  return 1;
+
+  return download($ace_tao_url, save_path => $archive);
 }
 
 ############################################################################
 
+sub ace_tao_sanity_file {
+  my $settings = shift();
+
+  return "$settings->{ace_root}/ace/ACE.h";
+}
+
 sub verify_extract_ace_tao {
   my $settings = shift();
-  return -f "$settings->{ace_root}/ace/ACE.h";
+
+  return -f ace_tao_sanity_file($settings);
 }
 
 sub message_extract_ace_tao {
@@ -1572,15 +1817,29 @@ sub message_extract_ace_tao {
 
 sub remedy_extract_ace_tao {
   my $settings = shift();
+
+  if ($settings->{mock}) {
+    my $file = ace_tao_sanity_file($settings);
+    print "Touch $file because of mock release\n";
+    touch_file($file);
+    return 1;
+  }
+
   my $archive = "$settings->{workspace}/$ace_tao_filename";
   print "Extracting $archive...\n";
   return run_command("tar xzf $archive -C $settings->{workspace}");
 }
 
 ############################################################################
+
+sub doxygen_sanity_file {
+  my $settings = shift();
+  return "$settings->{clone_dir}/html/dds/index.html";
+}
+
 sub verify_gen_doxygen {
   my $settings = shift();
-  return (-f "$settings->{clone_dir}/html/dds/index.html");
+  return -f doxygen_sanity_file($settings);
 }
 
 sub message_gen_doxygen {
@@ -1590,6 +1849,14 @@ sub message_gen_doxygen {
 
 sub remedy_gen_doxygen {
   my $settings = shift();
+
+  if ($settings->{mock}) {
+    my $file = doxygen_sanity_file($settings);
+    print "Touch $file because of mock release\n";
+    touch_file($file);
+    return 1;
+  }
+
   my $curdir = getcwd;
   $ENV{DDS_ROOT} = $settings->{clone_dir};
   $ENV{ACE_ROOT} = $settings->{ace_root};
@@ -1598,7 +1865,9 @@ sub remedy_gen_doxygen {
   chdir($curdir);
   return $result;
 }
+
 ############################################################################
+
 sub verify_tgz_doxygen {
   my $settings = shift();
   my $file = join("/", $settings->{workspace}, $settings->{tgz_dox});
@@ -1637,7 +1906,9 @@ sub remedy_tgz_doxygen {
   chdir($curdir);
   return !$result;
 }
+
 ############################################################################
+
 sub verify_zip_doxygen {
   my $settings = shift();
   my $file = join("/", $settings->{workspace}, $settings->{zip_dox});
@@ -1668,7 +1939,9 @@ sub remedy_zip_doxygen {
   chdir($curdir);
   return !$result;
 }
+
 ############################################################################
+
 sub verify_devguide {
   my $settings = shift();
   return (-f "$settings->{workspace}/$settings->{devguide_ver}" &&
@@ -1682,14 +1955,27 @@ sub message_devguide {
 
 sub remedy_devguide {
   my $settings = shift();
+
+  my $ver = "$settings->{workspace}/$settings->{devguide_ver}";
+  my $lat = "$settings->{workspace}/$settings->{devguide_lat}";
+
+  if ($settings->{mock}) {
+    print "Touch $ver because of mock release\n";
+    touch_file($ver);
+    print "Touch $lat because of mock release\n";
+    touch_file($lat);
+    return 1;
+  }
+
   my $devguide_url = "svn+ssh://svn.ociweb.com/devguide/opendds/trunk/$settings->{devguide_ver}";
   print "Downloading devguide\n$devguide_url\n";
-  my $result = system("svn cat $devguide_url > $settings->{workspace}/$settings->{devguide_ver}");
-  $result = $result || system("svn cat $devguide_url > $settings->{workspace}/$settings->{devguide_lat}");
+  my $result = system("svn cat $devguide_url > $ver");
+  $result = $result || system("svn cat $devguide_url > $lat");
   return !$result;
 }
 
 ############################################################################
+
 sub get_release_files {
   my $settings = shift();
   my @files = (
@@ -1698,28 +1984,32 @@ sub get_release_files {
       $settings->{md5_src},
   );
   if (!$settings->{skip_devguide}) {
-    push(@files , $settings->{devguide_ver});
-    push(@files , $settings->{devguide_lat});
+    push(@files, $settings->{devguide_ver});
+    push(@files, $settings->{devguide_lat}) if ($settings->{is_highest_version});
   }
   if (!$settings->{skip_doxygen}) {
-    push(@files , $settings->{tgz_dox});
-    push(@files , $settings->{zip_dox});
+    push(@files, $settings->{tgz_dox});
+    push(@files, $settings->{zip_dox});
   }
   return @files;
 }
 
+my $PRIOR_RELEASE_PATH = 'previous-releases/';
+
 sub verify_ftp_upload {
   my $settings = shift();
-  my $content = get("$settings->{download_url}/");
 
-  if (not defined $content) {
-    print "Error getting current release files from $settings->{download_url}/\n";
+  my $url = "$settings->{download_url}/";
+  $url .= $PRIOR_RELEASE_PATH if (!$settings->{is_highest_version});
+  my $content;
+  if (!download($url, content_ref => \$content)) {
+    print "Could not get current release files from $url";
     return 0;
   }
 
   foreach my $file (get_release_files($settings)) {
     if ($content !~ /$file/) {
-      print "$file not found at $settings->{download_url}/\n";
+      print "$file not found in $url\n";
       return 0;
     }
   }
@@ -1733,7 +2023,6 @@ sub message_ftp_upload {
 sub remedy_ftp_upload {
   my $settings = shift();
   my $FTP_DIR = "downloads/OpenDDS";
-  my $PRIOR_RELEASE_PATH = 'previous-releases/';
 
   # login to ftp server and setup binary file transfers
   my $ftp = Net::FTP->new(
@@ -1743,49 +2032,58 @@ sub remedy_ftp_upload {
     Passive => !$settings->{ftp_active},
   ) or die "Cannot connect to $settings->{ftp_host}: $@";
   $ftp->login($settings->{ftp_user}, $settings->{ftp_password})
-      or die "Cannot login ", $ftp->message;
+    or die "Cannot login ", $ftp->message();
   $ftp->cwd($FTP_DIR)
-      or die "Cannot change dir to $FTP_DIR ", $ftp->message;
+    or die "Cannot change dir to $FTP_DIR ", $ftp->message();
   my @current_release_files = $ftp->ls()
-      or die "Cannot ls() $FTP_DIR ", $ftp->message;
-  $ftp->binary;
+    or die "Cannot ls() $FTP_DIR ", $ftp->message();
+  $ftp->binary();
 
   my @new_release_files = get_release_files($settings);
-  my %release_file_map = map { $_ => 1 } @new_release_files;
 
-  # Identify Old Versioned Release Files Using the New Ones
-  my @release_file_re = ();
-  my $quoted_base_name_prefix = quotemeta($base_name_prefix);
-  my $version_re = qr/\d+\.\d+(.\d+)?/;
-  foreach my $file (@new_release_files) {
-    my $re;
-    my $versioned;
-    if ($file =~ m/^${quoted_base_name_prefix}${version_re}(.*)$/) {
-      my $suffix = ${2} || "";
-      $re = qr/^${quoted_base_name_prefix}${version_re}${suffix}$/;
-      $versioned = 1;
-    } else {
-      $re = qr/^$file$/;
-      $versioned = 0;
+  if ($settings->{is_highest_version}) {
+    # Identify Old Versioned Release Files Using the New Ones
+    my @release_file_re = ();
+    my $quoted_base_name_prefix = quotemeta($base_name_prefix);
+    my $version_re = qr/\d+\.\d+(.\d+)?/;
+    foreach my $file (@new_release_files) {
+      my $re;
+      my $versioned;
+      if ($file =~ m/^${quoted_base_name_prefix}${version_re}(.*)$/) {
+        my $suffix = ${2} || "";
+        $re = qr/^${quoted_base_name_prefix}${version_re}${suffix}$/;
+        $versioned = 1;
+      }
+      else {
+        $re = qr/^$file$/;
+        $versioned = 0;
+      }
+      push(@release_file_re, {re => $re, versioned => $versioned});
     }
-    push(@release_file_re, {re => $re, versioned => $versioned});
-  }
 
-  # And Move or Delete Them
-  foreach my $file (@current_release_files) {
-    foreach my $file_info (@release_file_re) {
-      if ($file =~ $file_info->{re}) {
-        if ($file_info->{versioned}) {
-          my $new_path = $PRIOR_RELEASE_PATH . $file;
-          print "moving $file to $new_path\n";
-          $ftp->rename($file, $new_path) or die "Could not rename $file to $new_path: " . $ftp->message;
-        } else {
-          print "deleting $file\n";
-          $ftp->delete($file) or die "Could not delete $file: " . $ftp->message;
+    # And Move or Delete Them
+    foreach my $file (@current_release_files) {
+      foreach my $file_info (@release_file_re) {
+        if ($file =~ $file_info->{re}) {
+          if ($file_info->{versioned}) {
+            my $new_path = $PRIOR_RELEASE_PATH . $file;
+            print "moving $file to $new_path\n";
+            $ftp->rename($file, $new_path)
+              or die "Could not rename $file to $new_path: " . $ftp->message();
+          }
+          else {
+            print "deleting $file\n";
+            $ftp->delete($file) or die "Could not delete $file: " . $ftp->message();
+          }
+          last;
         }
-        last;
       }
     }
+  }
+  else {
+    print "Not highest version release, cd-ing to $PRIOR_RELEASE_PATH\n";
+    $ftp->cwd($PRIOR_RELEASE_PATH)
+      or die "Cannot change dir to $PRIOR_RELEASE_PATH ", $ftp->message();
   }
 
   # upload new release files
@@ -1795,7 +2093,7 @@ sub remedy_ftp_upload {
     $ftp->put($local_file, $file) or die "Failed to upload $file: " . $ftp->message();
   }
 
-  $ftp->quit;
+  $ftp->quit();
   return 1;
 }
 
@@ -1804,11 +2102,7 @@ sub verify_github_upload {
   my $settings = shift();
   my $verified = 0;
 
-  my $r = Pithub::Repos::Releases->new;
-  my $release_list = $r->list(
-      user => $settings->{github_user},
-      repo => $settings->{github_repo},
-  );
+  my $release_list = $settings->{pithub}->repos->releases->list();
   unless ( $release_list->success ) {
     printf "error accessing github: %s\n", $release_list->response->status_line;
   } else {
@@ -1832,16 +2126,12 @@ sub remedy_github_upload {
 
   my $rc = 1;
 
-  my $ph = Pithub::Repos::Releases->new(
-      user => $settings->{github_user},
-      repo => $settings->{github_repo},
-      token => $settings->{github_token}
-  );
+  my $releases = $settings->{pithub}->repos->releases;
   my $text =
     "**Download $settings->{zip_src} (Windows) or $settings->{tgz_src} (Linux/macOS) " .
       "instead of \"Source code (zip)\" or \"Source code (tar.gz)\".**\n\n" .
     news_contents_excerpt($settings->{version});
-  my $release = $ph->create(
+  my $release = $releases->create(
       data => {
           name => 'OpenDDS ' . $settings->{version},
           tag_name => $settings->{git_tag},
@@ -1861,7 +2151,7 @@ sub remedy_github_upload {
       my $data;
       read $fh, $data, $size or die "Can't read";
       my $mime = ($f =~ /\.gz$/) ? 'application/gzip' : 'application/x-zip-compressed';
-      my $asset = $ph->assets->create(
+      my $asset = $releases->assets->create(
           release_id => $release->content->{id},
           name => $f,
           content_type => $mime,
@@ -1877,23 +2167,32 @@ sub remedy_github_upload {
 }
 
 ############################################################################
+
+my $website_releases_json = '_data/releases.json';
+
 sub verify_website_release {
   # verify there are no differences between website-next-release branch and gh-pages branch
   my $settings = shift();
   my $remote = $settings->{remote};
   my $status;
 
-  # fetch remote branches so we have up to date versions
-  if ($status && !run_command("git fetch $remote website-next-release")) {
-    print STDERR "Couldn't fetch website-next-release!\n";
-    return 0;
+  if ($status && !run_command("git add $website_releases_json")) {
+    print STDERR "Couldn't git add!\n";
+    $status = 0;
   }
-  if ($status && !run_command("git fetch $remote gh-pages")) {
-    print STDERR "Couldn't fetch gh-pages!\n";
-    return 0;
+  if ($status && !remedy_git_status_clean($settings, 0, 0)) {
+    print STDERR "Couldn't commit release list!\n";
+    $status = 0;
   }
 
-  $status = open(GITDIFF, 'git diff ' . $remote  . '/website-next-release ' . $remote . '/gh-pages|');
+  # fetch remote branches so we have up to date versions
+  run_command("git fetch $remote website-next-release") or
+    die("Couldn't fetch website-next-release!");
+  run_command("git fetch $remote gh-pages") or
+    die("Couldn't fetch gh-pages!");
+
+  open(GITDIFF, "git diff $remote/website-next-release $remote/gh-pages|") or
+    die("Couldn't run git diff");
   my $delta = "";
   while (<GITDIFF>) {
     if (/^...(.*)/) {
@@ -1901,15 +2200,28 @@ sub verify_website_release {
     }
   }
   close(GITDIFF);
-  # return 1 to pass
-  # return 0 to fail
-  return (length($delta) == 0) ? 1 : 0;
+  my $has_merged = length($delta) == 0;
+
+  # See if the release we're doing is on the website
+  open(my $git_show, "git show $remote/gh-pages:$website_releases_json|") or
+    die("Couldn't run git show $website_releases_json");
+  my $has_release = 0;
+  for my $r (@{decode_json(do { local $/; <$git_show> })}) {
+    if ($r->{version} eq $settings->{version}) {
+      $has_release = 1;
+      last;
+    }
+  }
+  close($git_show);
+
+  return $has_merged && $has_release;
 }
 
 sub message_website_release {
   my $settings = shift();
   my $remote = $settings->{remote};
-  return "$remote/website-next-release branch needs to merge into $remote/gh-pages branch";
+  return "$remote/website-next-release branch needs to merge into\n" .
+    "  $remote/gh-pages branch or release list needs to be updated";
 }
 
 sub remedy_website_release {
@@ -1920,7 +2232,7 @@ sub remedy_website_release {
   my $rm_worktree = 0;
   my $status = 1;
 
-  if (!run_command("git worktree add $worktree gh-pages")) {
+  if (!-d $worktree && !run_command("git worktree add $worktree gh-pages")) {
     print STDERR
       "Couldn't create temporary website worktree!\n";
     $status = 0;
@@ -1928,6 +2240,31 @@ sub remedy_website_release {
   $rm_worktree = 1;
   my $prev_dir = getcwd;
   chdir $worktree;
+
+  # Merge releases with the same major and minor versions, keeping one with the
+  # highest micro version.
+  my $releases = get_releases(shift);
+  my $latest_ver = $releases->[0]->{version};
+  my $major = $latest_ver->{major} + 1;
+  my $minor = $latest_ver->{minor};
+  for my $release (@{$releases}) {
+    my $v = $release->{version};
+    $release->{latest_in_series} =
+      ($v->{major} != $major || $v->{minor} != $minor) ? 1 : 0;
+    if ($release->{latest_in_series}) {
+      $major = $v->{major};
+      $minor = $v->{minor};
+    }
+  }
+  write_releases($website_releases_json, $releases);
+  if ($status && !run_command("git add $website_releases_json")) {
+    print STDERR "Couldn't git add!\n";
+    $status = 0;
+  }
+  if ($status && !remedy_git_status_clean($settings, 0, 0)) {
+    print STDERR "Couldn't commit release list!\n";
+    $status = 0;
+  }
 
   # Get the two branches merged with each other
   if ($status && !run_command("git pull")) {
@@ -1982,13 +2319,13 @@ sub remedy_website_release {
 sub verify_email_list {
   # Can't verify
   my $settings = shift;
-  print 'Email this text to dds-release-announce@ociweb.com' . "\n\n" .
+  print 'Email this text to announce the release' . "\n\n" .
     email_announce_contents($settings);
   return 1;
 }
 
 sub message_email_dds_release_announce {
-  return 'Email needs to be sent to dds-release-announce@ociweb.com';
+  return 'Emails are needed to announce the release';
 }
 
 sub remedy_email_dds_release_announce {
@@ -1998,7 +2335,7 @@ sub remedy_email_dds_release_announce {
 ############################################################################
 sub verify_news_template_file_section {
   my $settings = shift();
-  my $next_version = quotemeta($settings->{parsed_next_version}->{string});
+  my $next_version = quotemeta($settings->{parsed_next_version}->{release_string});
 
   my $status = open(NEWS, 'NEWS.md');
   my $has_news_template = 0;
@@ -2010,7 +2347,7 @@ sub verify_news_template_file_section {
   }
   close(NEWS);
 
-  return ($has_news_template);
+  return $has_news_template;
 }
 
 sub message_news_template_file_section {
@@ -2025,13 +2362,25 @@ sub remedy_news_template_file_section {
 
 ############################################################################
 
-sub verify_release_flag_file {
-  return -f $_[0]->{release_flag_file_path};
+sub verify_release_occurred_flag {
+  my $settings = shift();
+
+  return $settings->{release_occurred};
+}
+
+sub remedy_release_occurred_flag {
+  my $settings = shift();
+
+  $settings->{release_occurred} = 1;
+  write_workspace_info($settings);
+
+  return 1;
 }
 
 ############################################################################
 
 my $status = 0;
+my $ignore_args = 0;
 
 # Process Optional Arguments
 my $print_help = 0;
@@ -2044,6 +2393,7 @@ my $remote = $default_remote;
 my $branch = $default_branch;
 my $github_user = $default_github_user;
 my $download_url = $default_download_url;
+my $mock = 0;
 my $micro = 0;
 my $next_version = "";
 my $metadata = $default_post_release_metadata;
@@ -2065,6 +2415,7 @@ GetOptions(
   'branch=s' => \$branch,
   'github-user=s' => \$github_user,
   'download-url=s' => \$download_url,
+  'mock' => \$mock,
   'micro' => \$micro,
   'next-version=s' => \$next_version,
   'metadata=s' => \$metadata,
@@ -2074,75 +2425,90 @@ GetOptions(
   'skip-ftp' => \$skip_ftp,
   'ftp-active' => \$ftp_active,
   'ftp-port=s' => \$ftp_port,
-) or die "See --help for options.\nStopped";
+) or arg_error("Invalid option");
 
-if (!(scalar(@ARGV) == 0 || scalar(@ARGV) == 2)) {
-  die "Expecting 0 or 2 positional arguments. See --help.\nStopped";
+if ($print_help) {
+  print help();
+  exit(0);
 }
 
 if ($print_list_all) {
   $print_list = 1;
+  $ignore_args = 1;
 }
 
-if ($micro) {
-  if (!$print_list && $branch eq $default_branch) {
-    die "For micro releases, you must define the branch you want to use with --branch.\nStopped";
-  }
-  $skip_devguide = 1;
-  $skip_doxygen = 1;
-  $skip_website = 1;
-}
-
-$download_url = remove_end_slash($download_url);
-
-# Process WORKSPACE Argument
-my $workspace = $ARGV[0] || "";
-if ($workspace) {
-  $workspace = normalizePath($workspace);
-}
-
-# Process VERSION Argument
-my %parsed_version = parse_version($ARGV[1] || "");
+my $workspace = "";
+my %parsed_version = ();
 my %parsed_next_version = ();
 my $version = "";
 my $base_name = "";
 my $release_branch = "";
-if (%parsed_version) {
-  $version = $parsed_version{string};
-  print("Version to release is $version\n");
-  $base_name = "${base_name_prefix}$parsed_version{tag_string}";
-  if (!$micro) {
-    $release_branch =
-      "${release_branch_prefix}${git_name_prefix}$parsed_version{series_string}";
-    if ($parsed_version{micro} != 0) {
-      exit(0) if (!yes_no(
-        "Version looks like a micro release, but --micro wasn't passed! Continue?"));
-    }
-  }
-  elsif ($parsed_version{micro} == 0) {
-    exit(0) if (!yes_no(
-      "Version looks like a major or minor release, but --micro was passed! Continue?"));
-  }
-  if (!$next_version) {
-    my $next_minor = int($parsed_version{minor}) + ($micro ? 0 : 1);
-    my $next_micro = $micro ? (int($parsed_version{micro}) + 1) : 0;
-    $next_version = sprintf("%s.%d.%d", $parsed_version{major}, $next_minor, $next_micro);
-  }
-  $next_version .= "-${metadata}";
-  %parsed_next_version = parse_version($next_version);
-  if (!%parsed_next_version) {
-    die "Invalid next version: $next_version\nStopped";
-  }
-  $next_version = $parsed_next_version{string};
-  print("Next after this version is going to be $next_version\n");
-}
-elsif (!$print_help) {
-  die "Invalid version: $version\nStopped";
-}
 
-if (!$skip_ftp && !$print_help) {
-  die("FTP_USERNAME, FTP_PASSWD, FTP_HOST need to be defined")
-    if (!(defined($ENV{FTP_USERNAME}) && defined($ENV{FTP_PASSWD}) && defined($ENV{FTP_HOST})));
+if ($ignore_args) {
+  %parsed_version = %zero_version;
+  %parsed_next_version = %zero_version;
+}
+else {
+  if (scalar(@ARGV) != 2) {
+    arg_error("Expecting 2 positional arguments");
+  }
+
+  if ($micro) {
+    if ($branch eq $default_branch) {
+      arg_error("For micro releases, you must define the branch you want to use with --branch");
+    }
+    $skip_devguide = 1;
+    $skip_doxygen = 1;
+    $skip_website = 1;
+  }
+
+  $download_url = remove_end_slash($download_url);
+
+  # Process WORKSPACE Argument
+  $workspace = $ARGV[0] || "";
+  if ($workspace) {
+    $workspace = normalizePath($workspace);
+  }
+
+  # Process VERSION Argument
+  %parsed_version = parse_version($ARGV[1] || "");
+  if (%parsed_version) {
+    $version = $parsed_version{string};
+    print("Version to release is $version\n");
+    $base_name = "${base_name_prefix}$parsed_version{tag_string}";
+    if (!$micro) {
+      $release_branch =
+        "${release_branch_prefix}${git_name_prefix}$parsed_version{series_string}";
+      if ($parsed_version{micro} != 0) {
+        exit(0) if (!yes_no(
+          "Version looks like a micro release, but --micro wasn't passed! Continue?"));
+      }
+    }
+    elsif ($parsed_version{micro} == 0) {
+      exit(0) if (!yes_no(
+        "Version looks like a major or minor release, but --micro was passed! Continue?"));
+    }
+    if (!$next_version) {
+      my $next_minor = int($parsed_version{minor}) + ($micro ? 0 : 1);
+      my $next_micro = $micro ? (int($parsed_version{micro}) + 1) : 0;
+      $next_version = sprintf("%s.%d.%d", $parsed_version{major}, $next_minor, $next_micro);
+    }
+    $next_version .= "-${metadata}";
+    %parsed_next_version = parse_version($next_version);
+    if (!%parsed_next_version) {
+      arg_error("Invalid next version: $next_version");
+    }
+    $next_version = $parsed_next_version{string};
+    print("Next after this version is going to be $next_version\n");
+  }
+  else {
+    arg_error("Invalid version: $version");
+  }
+
+  if (!$skip_ftp) {
+    die("FTP_USERNAME, FTP_PASSWD, FTP_HOST need to be defined")
+      if (!(defined($ENV{FTP_USERNAME}) && defined($ENV{FTP_PASSWD}) && defined($ENV{FTP_HOST})));
+  }
 }
 
 my $release_timestamp = POSIX::strftime($release_timestamp_fmt, gmtime);
@@ -2188,35 +2554,43 @@ my %global_settings = (
         "VERSION.txt" => 1,
         "dds/Version.h" => 1,
         "docs/history/ChangeLog-$version" => 1,
-        "tools/scripts/gitrelease.pl" => 1,
     },
-    skip_ftp     => $skip_ftp,
-    skip_devguide=> $skip_devguide,
+    skip_ftp => $skip_ftp,
+    skip_devguide => $skip_devguide,
     skip_doxygen => $skip_doxygen,
     skip_website => $skip_website,
-    workspace    => $workspace,
+    workspace => $workspace,
+    workspace_info_file_path => "$workspace/$workspace_info_filename",
     download_url => $download_url,
-    ace_root     => "$workspace/$ace_root",
-    release_flag_file_path => "$workspace/$release_flag_filename",
-    release_flag_file_exists => 0,
+    ace_root => "$workspace/$ace_root",
     ftp_active => $ftp_active,
     ftp_port => $ftp_port,
+    mock => $mock,
 );
 
-if (verify_release_flag_file(\%global_settings)) {
-  $global_settings{release_flag_file_exists} = 1;
-  print
-    "Release flag file found, assuming release is done! Remove the\n" .
-    "\"$release_flag_filename\" file in the workspace if that is not the case.\n";
+if (!$ignore_args) {
+  $global_settings{pithub} = new_pithub(\%global_settings);
+
+  check_workspace(\%global_settings);
+
+  if ($mock) {
+    if ($github_user eq $default_github_user) {
+      die("--github-user can't be left to default when using --mock!");
+    }
+
+    if (!$skip_ftp && $download_url eq $default_download_url) {
+      die("--download-url can't be left to default when using --mock!");
+    }
+  }
+
+  my $current_branch = get_current_branch();
+  if ($current_branch ne $branch){
+    exit(0) if (!yes_no("git is on the $current_branch branch, but the script " .
+      "is going to assume it's on the $branch branch, continue?"));
+  }
 }
 
-my @release_steps  = (
-  {
-    name => 'Create Workspace Directory',
-    verify => sub{return -d $_[0]->{workspace};},
-    message => sub{return "Workspace directory needs to be created."},
-    remedy => sub{return make_path($_[0]->{workspace});},
-  },
+my @release_steps = (
   {
     name    => 'Update VERSION.txt File',
     verify  => sub{verify_update_version_file(@_)},
@@ -2242,7 +2616,6 @@ my @release_steps  = (
     name    => 'Verify Remote',
     verify  => sub{verify_git_remote(@_)},
     message => sub{message_git_remote(@_)},
-    remedy  => sub{override_git_remote(@_)},
   },
   {
     name    => 'Create ChangeLog File',
@@ -2253,7 +2626,6 @@ my @release_steps  = (
   },
   {
     name    => 'Update AUTHORS File',
-    prereqs => ['Create Workspace Directory'],
     verify  => sub{verify_authors(@_)},
     message => sub{message_authors(@_)},
     remedy  => sub{remedy_authors(@_)},
@@ -2296,7 +2668,7 @@ my @release_steps  = (
     prereqs => ['Verify Remote'],
     verify  => sub{verify_git_changes_pushed(@_, 1)},
     message => sub{message_git_changes_pushed(@_)},
-    remedy  => sub{remedy_git_changes_pushed(@_, 1)}
+    remedy  => sub{remedy_git_changes_pushed(@_)}
   },
   {
     name    => 'Create Release Branch',
@@ -2328,14 +2700,12 @@ my @release_steps  = (
   },
   {
     name    => 'Create Unix Release Archive',
-    prereqs => ['Create Workspace Directory'],
     verify  => sub{verify_tgz_source(@_)},
     message => sub{message_tgz_source(@_)},
     remedy  => sub{remedy_tgz_source(@_)}
   },
   {
     name    => 'Create Windows Release Archive',
-    prereqs => ['Create Workspace Directory'],
     verify  => sub{verify_zip_source(@_)},
     message => sub{message_zip_source(@_)},
     remedy  => sub{remedy_zip_source(@_)}
@@ -2352,7 +2722,6 @@ my @release_steps  = (
   },
   {
     name    => 'Download OCI ACE/TAO',
-    prereqs => ['Create Workspace Directory'],
     verify  => sub{verify_download_ace_tao(@_)},
     message => sub{message_download_ace_tao(@_)},
     remedy  => sub{remedy_download_ace_tao(@_)},
@@ -2392,7 +2761,6 @@ my @release_steps  = (
   },
   {
     name    => 'Download Devguide',
-    prereqs => ['Create Workspace Directory'],
     verify  => sub{verify_devguide(@_)},
     message => sub{message_devguide(@_)},
     remedy  => sub{remedy_devguide(@_)},
@@ -2419,11 +2787,10 @@ my @release_steps  = (
     skip    => $global_settings{skip_website},
   },
   {
-    name => 'Create Release Flag File',
-    verify => sub{verify_release_flag_file(@_)},
-    message => sub{return "Release flag file needs to be created."},
-    remedy => sub{touch_file("$_[0]->{release_flag_file_path}"); return 0;},
-    post_release => 1,
+    name => 'Record that the Release Occurred',
+    verify => sub{verify_release_occurred_flag(@_)},
+    message => sub{return "Release ouccured flag needs to be set"},
+    remedy => sub{remedy_release_occurred_flag(@_)},
   },
   {
     name    => 'Update NEWS for Post-Release',
@@ -2522,15 +2889,26 @@ my $half_divider = '-' x 40;
 my $divider = $half_divider x 2;
 
 sub run_step {
-  my ($settings, $release_steps, $step_count) = @_;
-  my $step = $release_steps->[$step_count-1];
+  my $settings = shift();
+  my $release_steps = shift();
+  my $step_number = shift();
+  my $run_count_ref = shift();
+  my $skip_count_ref = shift();
+  my $fail_count_ref = shift();
+
+  my $step = $release_steps->[$step_number-1];
   my $title = $step->{name};
 
-  return if (
-    !$settings->{list_all} && ($step->{skip} || $step->{verified} ||
-    ($settings->{release_flag_file_exists} && !$step->{post_release})));
-  print "$step_count: $title\n";
+  if (!$settings->{list_all} && ($step->{skip} || $step->{verified} ||
+      ($settings->{release_occurred} && !$step->{post_release}))) {
+    ++${$skip_count_ref};
+    return;
+  }
+
+  print "$step_number: $title\n";
   return if $settings->{list};
+
+  ++${$run_count_ref};
 
   # Check Prerequisite Steps
   if ($step->{prereqs}) {
@@ -2546,7 +2924,7 @@ sub run_step {
     print "  " . $step->{message}($settings) . "\n";
 
     my $remedied = 0;
-    my $forced  = 0;
+    my $forced = 0;
     # If a remedy is available and --remedy specified
     if ($step->{remedy} && $settings->{remedy}) {
       # Try remediation
@@ -2561,18 +2939,32 @@ sub run_step {
       }
     }
 
-    # If not remedied, try forcing
-    if (!$remedied && $step->{can_force} && $settings->{force}) {
-      $forced = 1;
-      print "Forcing Past This Step!\n";
+    if (!$remedied) {
+      ++${$fail_count_ref};
+
+      # If not remedied, try forcing
+      if ($step->{can_force} && $settings->{force}) {
+        $forced = 1;
+        print "Forcing Past This Step!\n";
+      }
     }
 
     if (!($remedied || $forced)) {
-      if ($step->{remedy} && !$settings->{remedy}) {
-        print "  Use --remedy to attempt a fix\n";
+      if ($step->{remedy}) {
+        if (!$settings->{remedy}) {
+          print "  Use --remedy to attempt a fix\n";
+        }
       }
-      if ($step->{force} && !$settings->{force}) {
-        print "  Use --force to force past this step\n";
+      else {
+        print "  Step can NOT be automatically resolved using --remedy\n";
+      }
+      if ($step->{can_force}) {
+        if (!$settings->{force}) {
+          print "  Use --force to force past this step\n";
+        }
+      }
+      else {
+        print "  Step can NOT be forced using --force\n";
       }
     }
 
@@ -2580,15 +2972,12 @@ sub run_step {
     print "$divider\n";
   }
 
-  print "  Step $step_count \"$title\" is OK!\n";
+  print "  Step $step_number \"$title\" is OK!\n";
 
   $step->{verified} = 1;
 }
 
-if ($print_help) {
-  print usage();
-}
-elsif ($global_settings{list} || ($workspace && %parsed_version)) {
+if ($ignore_args || ($workspace && %parsed_version)) {
   my @steps_to_do;
   my $no_steps = scalar(@release_steps);
   if ($step_expr) {
@@ -2598,9 +2987,17 @@ elsif ($global_settings{list} || ($workspace && %parsed_version)) {
     @steps_to_do = 1..$no_steps;
   }
 
-  foreach my $step_count (@steps_to_do) {
-    run_step(\%global_settings, \@release_steps, $step_count);
+  my $run_count = 0;
+  my $skip_count = 0;
+  my $fail_count = 0;
+  foreach my $step_number (@steps_to_do) {
+    run_step(\%global_settings, \@release_steps, $step_number,
+      \$run_count, \$skip_count, \$fail_count);
   }
+
+  print("Ran: $run_count\n") if ($run_count);
+  print("Skipped: $skip_count\n") if ($skip_count);
+  print("Failed: $fail_count\n") if ($fail_count);
 }
 else {
   $status = 1;

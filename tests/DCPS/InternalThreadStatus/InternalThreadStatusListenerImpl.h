@@ -13,18 +13,21 @@
 
 #include <dds/DdsDcpsSubscriptionC.h>
 
+#include <tests/Utils/DistributedConditionSet.h>
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-typedef void (*callback_t)();
+const char DISPOSE_RECEIVED[] = "DISPOSED_RECEIVED";
 
 class InternalThreadStatusListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
 {
 public:
   //Constructor
-  explicit InternalThreadStatusListenerImpl(const OpenDDS::DCPS::String& id);
+  InternalThreadStatusListenerImpl(const OpenDDS::DCPS::String& id,
+                                   DistributedConditionSet_rch dcs);
 
   //Destructor
   virtual ~InternalThreadStatusListenerImpl();
@@ -49,11 +52,13 @@ public:
   virtual void on_sample_lost(DDS::DataReader_ptr reader,
                               const DDS::SampleLostStatus& status);
 
+  const OpenDDS::DCPS::String& id() const { return id_; }
   int get_count() const;
   size_t disposes() const;
 
 private:
-  OpenDDS::DCPS::String id_;
+  const OpenDDS::DCPS::String id_;
+  DistributedConditionSet_rch dcs_;
   int count_;
   size_t disposes_;
 };

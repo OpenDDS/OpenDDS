@@ -15,7 +15,7 @@
 
 using namespace OpenDDS::DCPS;
 
-unsigned int total_count = 0;
+ACE_Atomic_Op<ACE_Thread_Mutex, unsigned int> total_count = 0;
 
 struct TestObj : RcObject
 {
@@ -24,7 +24,7 @@ struct TestObj : RcObject
   void execute(const MonotonicTimePoint&) {
     ACE_DEBUG((LM_DEBUG, "TestObj::execute() called at %T\n"));
     ++total_count;
-    if (do_enable_) {
+    if (do_enable_.value()) {
       multi_->enable(TimeDuration::from_msec(100));
     }
   }
@@ -32,7 +32,7 @@ struct TestObj : RcObject
   void set_do_enable(bool do_enable) { do_enable_ = do_enable; }
 
   PmfMultiTask<TestObj>* multi_;
-  bool do_enable_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> do_enable_;
 };
 
 int
@@ -46,10 +46,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     PmfMultiTask<TestObj> multi(reactor_task.interceptor(), TimeDuration::from_msec(2000), obj, &TestObj::execute);
     obj.multi_ = &multi;
     multi.enable(TimeDuration::from_msec(2000));
-    ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count));
+    ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
     TEST_CHECK(total_count == 0);
     ACE_OS::sleep(5);
-    ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count));
+    ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
     TEST_CHECK(total_count == 2);
     obj.set_do_enable(true);
     const MonotonicTimePoint deadline = MonotonicTimePoint::now() + TimeDuration::from_msec(2000);
@@ -61,13 +61,13 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
     obj.set_do_enable(false);
     ACE_DEBUG((LM_DEBUG, "enable_calls = %d\n", enable_calls));
-    ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count));
+    ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
     TEST_CHECK(total_count >= 19);
     TEST_CHECK(total_count <= 21);
-    const unsigned int prev_total_count = total_count;
+    const unsigned int prev_total_count = total_count.value();
     ACE_OS::sleep(5);
-    ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count));
-    TEST_CHECK(total_count = prev_total_count + 3);
+    ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
+    TEST_CHECK(total_count == prev_total_count + 3);
     multi.disable_and_wait();
   }
   reactor_task.stop();

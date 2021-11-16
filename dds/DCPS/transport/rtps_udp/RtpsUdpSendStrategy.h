@@ -144,7 +144,7 @@ private:
   ACE_Data_Block rtps_header_db_;
   ACE_Message_Block rtps_header_mb_;
   ACE_Thread_Mutex rtps_header_mb_lock_;
-  bool network_is_unreachable_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> network_is_unreachable_;
 };
 
 } // namespace DCPS

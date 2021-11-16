@@ -120,7 +120,11 @@ struct Objref_Servant_Pair {
 /// Use a Foo_var in a std::set or std::map with this comparison function,
 /// for example std::set<Foo_var, VarLess<Foo> >
 template <class T, class V = typename T::_var_type>
-struct VarLess : public std::binary_function<V, V, bool> {
+struct VarLess {
+  typedef V first_argument_type;
+  typedef V second_argument_type;
+  typedef bool result_type;
+
   bool operator()(const V& x, const V& y) const {
     return x.in() < y.in();
   }

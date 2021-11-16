@@ -100,7 +100,9 @@ private:
   const Pair* pairs_;
 };
 
-struct ValueReader {
+class OpenDDS_Dcps_Export ValueReader {
+public:
+  ValueReader() {}
   virtual ~ValueReader() {}
 
   virtual bool begin_struct() = 0;
@@ -140,15 +142,7 @@ struct ValueReader {
   virtual bool read_float128(ACE_CDR::LongDouble& value) = 0;
 
 #ifdef NONNATIVE_LONGDOUBLE
-  bool read_float128(long double& value)
-  {
-    ACE_CDR::LongDouble ld;
-    if (!read_float128(ld)) {
-      return false;
-    }
-    value = ld;
-    return true;
-  }
+  bool read_float128(long double& value);
 #endif
 
   virtual bool read_fixed(OpenDDS::FaceTypes::Fixed& value) = 0;
@@ -169,6 +163,26 @@ struct ValueReader {
     return true;
   }
 
+  /// Array read operations
+  ///@{
+  virtual bool read_boolean_array(ACE_CDR::Boolean* value, size_t length);
+  virtual bool read_byte_array(ACE_CDR::Octet* value, size_t length);
+#if OPENDDS_HAS_EXPLICIT_INTS
+  virtual bool read_int8_array(ACE_CDR::Int8* value, size_t length);
+  virtual bool read_uint8_array(ACE_CDR::UInt8* value, size_t length);
+#endif
+  virtual bool read_int16_array(ACE_CDR::Short* value, size_t length);
+  virtual bool read_uint16_array(ACE_CDR::UShort* value, size_t length);
+  virtual bool read_int32_array(ACE_CDR::Long* value, size_t length);
+  virtual bool read_uint32_array(ACE_CDR::ULong* value, size_t length);
+  virtual bool read_int64_array(ACE_CDR::LongLong* value, size_t length);
+  virtual bool read_uint64_array(ACE_CDR::ULongLong* value, size_t length);
+  virtual bool read_float32_array(ACE_CDR::Float* value, size_t length);
+  virtual bool read_float64_array(ACE_CDR::Double* value, size_t length);
+  virtual bool read_float128_array(ACE_CDR::LongDouble* value, size_t length);
+  virtual bool read_char8_array(ACE_CDR::Char* value, size_t length);
+  virtual bool read_char16_array(ACE_CDR::WChar* value, size_t length);
+  ///@}
 };
 
 template <typename T>

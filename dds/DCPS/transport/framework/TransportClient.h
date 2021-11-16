@@ -141,7 +141,11 @@ public:
     return repo_id_;
   }
 
-private:
+  void data_acked(const GUID_t& remote);
+
+  bool is_leading(const GUID_t& reader_id) const;
+
+ private:
 
   // Implemented by derived classes (DataReaderImpl/DataWriterImpl)
   virtual bool check_transport_qos(const TransportInst& inst) = 0;
@@ -223,12 +227,12 @@ private:
 
     void schedule_timer(TransportClient_rch transport_client, const PendingAssoc_rch& pend)
     {
-      execute_or_enqueue(new ScheduleCommand(this, transport_client, pend));
+      execute_or_enqueue(make_rch<ScheduleCommand>(this, transport_client, pend));
     }
 
     ReactorInterceptor::CommandPtr cancel_timer(const PendingAssoc_rch& pend)
     {
-      return execute_or_enqueue(new CancelCommand(this, pend));
+      return execute_or_enqueue(make_rch<CancelCommand>(this, pend));
     }
 
     virtual bool reactor_is_shut_down() const

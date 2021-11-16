@@ -31,7 +31,9 @@ namespace DCPS {
 ///
 /// The vwrite function should invoke the appropriate methods of the
 /// ValueWriter and dispatch for other vwrite functions.
-struct ValueWriter {
+class OpenDDS_Dcps_Export ValueWriter {
+public:
+  ValueWriter()  {}
   virtual ~ValueWriter() {}
 
   virtual void begin_struct() {}
@@ -70,12 +72,7 @@ struct ValueWriter {
   virtual void write_float128(ACE_CDR::LongDouble /*value*/) = 0;
 
 #ifdef NONNATIVE_LONGDOUBLE
-  void write_float128(long double value)
-  {
-    ACE_CDR::LongDouble ld;
-    ACE_CDR_LONG_DOUBLE_ASSIGNMENT(ld, value);
-    write_float128(ld);
-  }
+  void write_float128(long double value);
 #endif
 
   virtual void write_fixed(const OpenDDS::FaceTypes::Fixed& /*value*/) = 0;
@@ -93,6 +90,28 @@ struct ValueWriter {
     write_enum(name, static_cast<ACE_CDR::Long>(value));
   }
 
+  /// Array write operations
+  /// Note: the portion written starts at x and ends
+  ///    at x + length.
+  ///@{
+  virtual void write_boolean_array(const ACE_CDR::Boolean* x, size_t length);
+  virtual void write_byte_array(const ACE_CDR::Octet* x, size_t length);
+#if OPENDDS_HAS_EXPLICIT_INTS
+  virtual void write_int8_array(const ACE_CDR::Int8* x, size_t length);
+  virtual void write_uint8_array(const ACE_CDR::UInt8* x, size_t length);
+#endif
+  virtual void write_int16_array(const ACE_CDR::Short* x, size_t length);
+  virtual void write_uint16_array(const ACE_CDR::UShort* x, size_t length);
+  virtual void write_int32_array(const ACE_CDR::Long* x, size_t length);
+  virtual void write_uint32_array(const ACE_CDR::ULong* x, size_t length);
+  virtual void write_int64_array(const ACE_CDR::LongLong* x, size_t length);
+  virtual void write_uint64_array(const ACE_CDR::ULongLong* x, size_t length);
+  virtual void write_float32_array(const ACE_CDR::Float* x, size_t length);
+  virtual void write_float64_array(const ACE_CDR::Double* x, size_t length);
+  virtual void write_float128_array(const ACE_CDR::LongDouble* x, size_t length);
+  virtual void write_char8_array(const ACE_CDR::Char* x, size_t length);
+  virtual void write_char16_array(const ACE_CDR::WChar* x, size_t length);
+  ///@}
 };
 
 template <typename T>

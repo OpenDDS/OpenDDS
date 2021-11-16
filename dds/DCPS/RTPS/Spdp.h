@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -23,6 +21,7 @@
 #include <dds/DCPS/MultiTask.h>
 #include <dds/DCPS/JobQueue.h>
 #include <dds/DCPS/NetworkConfigMonitor.h>
+#include <dds/DCPS/BuiltInTopicDataReaderImpls.h>
 #include <dds/DCPS/security/framework/SecurityConfig_rch.h>
 #ifdef OPENDDS_SECURITY
 #  include <dds/DCPS/security/framework/SecurityConfig.h>
@@ -35,18 +34,22 @@
 #include <dds/DdsDcpsInfoUtilsC.h>
 #include <dds/DdsDcpsCoreTypeSupportImpl.h>
 
-#ifdef ACE_HAS_CPP11
-#  include <atomic>
-#else
+#ifndef ACE_HAS_CPP11
 #  include <ace/Atomic_Op.h>
 #endif
 #include <ace/SOCK_Dgram.h>
 #include <ace/SOCK_Dgram_Mcast.h>
 #include <ace/Thread_Mutex.h>
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#ifdef ACE_HAS_CPP11
+#  include <atomic>
+#endif
+
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
+
+/* ParticipantData_t */
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -62,23 +65,30 @@ const char SEDP_AGENT_INFO_KEY[] = "SEDP";
 /// Each instance of class Spdp represents the implementation of the RTPS
 /// Simple Participant Discovery Protocol for a single local DomainParticipant.
 class OpenDDS_Rtps_Export Spdp
-  : public DCPS::LocalParticipant<Sedp>
+  : public DCPS::RcObject
 #ifdef OPENDDS_SECURITY
   , public ICE::AgentInfoListener
 #endif
 {
 public:
+  typedef OPENDDS_MAP_CMP(GUID_t, DiscoveredParticipant,
+                          GUID_tKeyLessThan) DiscoveredParticipantMap;
+  typedef DiscoveredParticipantMap::iterator DiscoveredParticipantIter;
+  typedef DiscoveredParticipantMap::const_iterator DiscoveredParticipantConstIter;
+
 
   Spdp(DDS::DomainId_t domain,
        DCPS::RepoId& guid,
        const DDS::DomainParticipantQos& qos,
-       RtpsDiscovery* disco);
+       RtpsDiscovery* disco,
+       XTypes::TypeLookupService_rch tls);
 
 #ifdef OPENDDS_SECURITY
   Spdp(DDS::DomainId_t domain,
        const DCPS::RepoId& guid,
        const DDS::DomainParticipantQos& qos,
        RtpsDiscovery* disco,
+       XTypes::TypeLookupService_rch tls,
        DDS::Security::IdentityHandle id_handle,
        DDS::Security::PermissionsHandle perm_handle,
        DDS::Security::ParticipantCryptoHandle crypto_handle);
@@ -168,7 +178,7 @@ public:
   DDS::DomainId_t get_domain_id() const { return domain_; }
   DDS::Security::PermissionsHandle lookup_participant_permissions(const DCPS::RepoId& id) const;
 
-  DCPS::AuthState lookup_participant_auth_state(const DCPS::RepoId& id) const;
+  AuthState lookup_participant_auth_state(const GUID_t& id) const;
 
   void process_participant_ice(const ParameterList& plist,
                                const ParticipantData_t& pdata,
@@ -215,27 +225,217 @@ public:
   );
 
   DCPS::RcHandle<RtpsDiscoveryConfig> config() const { return config_; }
-  void send_to_relay();
+  void spdp_rtps_relay_address_change();
+
+  void get_and_reset_relay_message_counts(DCPS::RelayMessageCounts& spdp,
+                                          DCPS::RelayMessageCounts& sedp);
+
+  void ignore_domain_participant(const GUID_t& ignoreId);
+
+  void remove_domain_participant(const GUID_t& removeId);
+
+  bool update_domain_participant_qos(const DDS::DomainParticipantQos& qos);
+
+  bool has_domain_participant(const GUID_t& ignoreId) const;
+
+  DCPS::TopicStatus assert_topic(GUID_t& topicId, const char* topicName,
+    const char* dataTypeName, const DDS::TopicQos& qos,
+    bool hasDcpsKey, DCPS::TopicCallbacks* topic_callbacks);
+
+  DCPS::TopicStatus find_topic(
+    const char* topicName,
+    CORBA::String_out dataTypeName,
+    DDS::TopicQos_out qos,
+    GUID_t& topicId)
+  {
+    return endpoint_manager().find_topic(topicName, dataTypeName, qos, topicId);
+  }
+
+  DCPS::TopicStatus remove_topic(const GUID_t& topicId)
+  {
+    return endpoint_manager().remove_topic(topicId);
+  }
+
+  void ignore_topic(const GUID_t& ignoreId)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    endpoint_manager().ignore(ignoreId);
+  }
+
+  bool update_topic_qos(const GUID_t& topicId, const DDS::TopicQos& qos)
+  {
+    return endpoint_manager().update_topic_qos(topicId, qos);
+  }
+
+  GUID_t add_publication(
+    const GUID_t& topicId,
+    DCPS::DataWriterCallbacks_rch publication,
+    const DDS::DataWriterQos& qos,
+    const DCPS::TransportLocatorSeq& transInfo,
+    const DDS::PublisherQos& publisherQos,
+    const XTypes::TypeInformation& type_info)
+  {
+    return endpoint_manager().add_publication(topicId, publication, qos,
+                                              transInfo, publisherQos, type_info);
+  }
+
+  void remove_publication(const GUID_t& publicationId)
+  {
+    endpoint_manager().remove_publication(publicationId);
+  }
+
+  void ignore_publication(const GUID_t& ignoreId)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    return endpoint_manager().ignore(ignoreId);
+  }
+
+  bool update_publication_qos(
+    const GUID_t& publicationId,
+    const DDS::DataWriterQos& qos,
+    const DDS::PublisherQos& publisherQos)
+  {
+    return endpoint_manager().update_publication_qos(publicationId, qos, publisherQos);
+  }
+
+  void update_publication_locators(const GUID_t& publicationId,
+                                   const DCPS::TransportLocatorSeq& transInfo)
+  {
+    endpoint_manager().update_publication_locators(publicationId, transInfo);
+  }
+
+  GUID_t add_subscription(
+    const GUID_t& topicId,
+    DCPS::DataReaderCallbacks_rch subscription,
+    const DDS::DataReaderQos& qos,
+    const DCPS::TransportLocatorSeq& transInfo,
+    const DDS::SubscriberQos& subscriberQos,
+    const char* filterClassName,
+    const char* filterExpr,
+    const DDS::StringSeq& params,
+    const XTypes::TypeInformation& type_info)
+  {
+    return endpoint_manager().add_subscription(topicId, subscription, qos, transInfo,
+      subscriberQos, filterClassName, filterExpr, params, type_info);
+  }
+
+  void remove_subscription(const GUID_t& subscriptionId)
+  {
+    endpoint_manager().remove_subscription(subscriptionId);
+  }
+
+  void ignore_subscription(const GUID_t& ignoreId)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    return endpoint_manager().ignore(ignoreId);
+  }
+
+  bool update_subscription_qos(
+    const GUID_t& subscriptionId,
+    const DDS::DataReaderQos& qos,
+    const DDS::SubscriberQos& subscriberQos)
+  {
+    return endpoint_manager().update_subscription_qos(subscriptionId, qos, subscriberQos);
+  }
+
+  bool update_subscription_params(const GUID_t& subId, const DDS::StringSeq& params)
+  {
+    return endpoint_manager().update_subscription_params(subId, params);
+  }
+
+  void update_subscription_locators(const GUID_t& subId, const DCPS::TransportLocatorSeq& transInfo)
+  {
+    endpoint_manager().update_subscription_locators(subId, transInfo);
+  }
+
+  DDS::Subscriber_var bit_subscriber() const
+  {
+    return bit_subscriber_;
+  }
 
 protected:
   Sedp& endpoint_manager() { return *sedp_; }
-  void remove_discovered_participant_i(DiscoveredParticipantIter& iter);
+
+  void remove_discovered_participant(const DiscoveredParticipantIter& iter);
+
+  void remove_discovered_participant_i(const DiscoveredParticipantIter& iter);
 
 #ifndef DDS_HAS_MINIMUM_BIT
   void enqueue_location_update_i(DiscoveredParticipantIter iter, DCPS::ParticipantLocation mask, const ACE_INET_Addr& from);
-  void process_location_updates_i(DiscoveredParticipantIter& iter, bool force_publish = false);
-  void publish_location_update_i(DiscoveredParticipantIter& iter);
+  void process_location_updates_i(const DiscoveredParticipantIter& iter, bool force_publish = false);
+  void publish_location_update_i(const DiscoveredParticipantIter& iter);
 #endif
 
   bool announce_domain_participant_qos();
 
+  void type_lookup_service(const XTypes::TypeLookupService_rch type_lookup_service)
+  {
+    endpoint_manager().type_lookup_service(type_lookup_service);
+  }
+
 private:
+#ifndef DDS_HAS_MINIMUM_BIT
+  DCPS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit()
+  {
+    DDS::Subscriber_var bit_sub(bit_subscriber());
+    if (!bit_sub.in())
+      return 0;
+
+    DDS::DataReader_var d =
+      bit_sub->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_TOPIC);
+    return dynamic_cast<DCPS::ParticipantBuiltinTopicDataDataReaderImpl*>(d.in());
+  }
+
+  DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* part_loc_bit()
+  {
+    DDS::Subscriber_var bit_sub(bit_subscriber());
+    if (!bit_sub.in())
+      return 0;
+
+    DDS::DataReader_var d =
+      bit_sub->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
+    return dynamic_cast<DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl*>(d.in());
+  }
+
+  DCPS::ConnectionRecordDataReaderImpl* connection_record_bit()
+  {
+    DDS::Subscriber_var bit_sub(bit_subscriber());
+    if (!bit_sub.in())
+      return 0;
+
+    DDS::DataReader_var d =
+      bit_sub->lookup_datareader(DCPS::BUILT_IN_CONNECTION_RECORD_TOPIC);
+    return dynamic_cast<DCPS::ConnectionRecordDataReaderImpl*>(d.in());
+  }
+
+  DCPS::InternalThreadBuiltinTopicDataDataReaderImpl* internal_thread_bit()
+  {
+    DDS::Subscriber_var bit_sub(bit_subscriber());
+    if (!bit_sub.in())
+      return 0;
+
+    DDS::DataReader_var d =
+      bit_sub->lookup_datareader(DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC);
+    return dynamic_cast<DCPS::InternalThreadBuiltinTopicDataDataReaderImpl*>(d.in());
+  }
+#endif /* DDS_HAS_MINIMUM_BIT */
+
+#ifdef OPENDDS_SECURITY
+  typedef OPENDDS_MAP_CMP(GUID_t, DDS::Security::AuthRequestMessageToken, GUID_tKeyLessThan)
+    PendingRemoteAuthTokenMap;
+#endif
 
   void init(DDS::DomainId_t domain,
             DCPS::RepoId& guid,
             const DDS::DomainParticipantQos& qos,
-            RtpsDiscovery* disco);
+            RtpsDiscovery* disco,
+            XTypes::TypeLookupService_rch tls);
 
+  mutable ACE_Thread_Mutex lock_;
+  DDS::Subscriber_var bit_subscriber_;
+  DDS::DomainParticipantQos qos_;
+  friend class Sedp;
+  DiscoveredParticipantMap participants_;
   RtpsDiscovery* disco_;
   DCPS::RcHandle<RtpsDiscoveryConfig> config_;
 
@@ -247,7 +447,7 @@ private:
 
   void data_received(const DataSubmessage& data, const ParameterList& plist, const ACE_INET_Addr& from);
 
-  void match_unauthenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& dp_iter);
+  void match_unauthenticated(const DiscoveredParticipantIter& dp_iter);
 
   /// Get this participant's BIT data. user_data may be omitting depending on
   /// security settings.
@@ -327,7 +527,7 @@ private:
     void write_i(const DCPS::RepoId& guid, const ACE_INET_Addr& local_address, WriteFlags flags);
     void send(WriteFlags flags, const ACE_INET_Addr& local_address = ACE_INET_Addr());
     const ACE_SOCK_Dgram& choose_send_socket(const ACE_INET_Addr& addr) const;
-    void send(const ACE_INET_Addr& addr);
+    ssize_t send(const ACE_INET_Addr& addr);
     void close(const DCPS::ReactorTask_rch& reactor_task);
     void dispose_unregister();
     bool open_unicast_socket(u_short port_common, u_short participant_id);
@@ -361,7 +561,6 @@ private:
     DCPS::SequenceNumber seq_;
     DCPS::TimeDuration lease_duration_;
     u_short uni_port_;
-    u_short mc_port_;
     ACE_SOCK_Dgram unicast_socket_;
     OPENDDS_STRING multicast_interface_;
     ACE_INET_Addr multicast_address_;
@@ -381,31 +580,35 @@ private:
     typedef DCPS::PmfSporadicTask<SpdpTransport> SpdpSporadic;
     typedef DCPS::PmfMultiTask<SpdpTransport> SpdpMulti;
     void send_local(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpMulti> local_sender_;
+    DCPS::RcHandle<SpdpMulti> local_send_task_;
     void send_directed(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpSporadic> directed_sender_;
+    DCPS::RcHandle<SpdpSporadic> directed_send_task_;
     OPENDDS_LIST(DCPS::RepoId) directed_guids_;
     void process_lease_expirations(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpSporadic> lease_expiration_processor_;
+    DCPS::RcHandle<SpdpSporadic> lease_expiration_task_;
     DCPS::ThreadStatusManager* global_thread_status_manager_;
     DCPS::ThreadStatusManager local_thread_status_manager_;
     void thread_status_task(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpPeriodic> thread_status_sender_;
+    DCPS::RcHandle<SpdpPeriodic> thread_status_task_;
 #ifdef OPENDDS_SECURITY
     void process_handshake_deadlines(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpSporadic> handshake_deadline_processor_;
+    DCPS::RcHandle<SpdpSporadic> handshake_deadline_task_;
     void process_handshake_resends(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpSporadic> handshake_resend_processor_;
+    DCPS::RcHandle<SpdpSporadic> handshake_resend_task_;
     void send_relay(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpPeriodic> relay_sender_;
+    DCPS::RcHandle<SpdpSporadic> relay_spdp_task_;
+    DCPS::FibonacciSequence<TimeDuration> relay_spdp_task_falloff_;
     void relay_stun_task(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpPeriodic> relay_stun_task_;
+    DCPS::RcHandle<SpdpSporadic> relay_stun_task_;
+    DCPS::FibonacciSequence<TimeDuration> relay_stun_task_falloff_;
     ICE::ServerReflexiveStateMachine relay_srsm_;
     void process_relay_sra(ICE::ServerReflexiveStateMachine::StateChange);
     void disable_relay_stun_task();
 #endif
     bool network_is_unreachable_;
     bool ice_endpoint_added_;
+
+    DCPS::RelayMessageCounts relay_message_counts_;
   };
 
   DCPS::RcHandle<SpdpTransport> tport_;
@@ -495,8 +698,6 @@ private:
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> shutdown_flag_; // Spdp shutting down
 #endif
 
-  void get_discovered_participant_ids(DCPS::RepoIdSet& results) const;
-
   BuiltinEndpointSet_t available_builtin_endpoints_;
   DCPS::RcHandle<Sedp> sedp_;
 
@@ -537,13 +738,18 @@ private:
 
   void purge_handshake_resends(DiscoveredParticipantIter iter);
   TimeQueue handshake_resends_;
+
+  size_t n_participants_in_authentication_;
+  void set_auth_state(DiscoveredParticipant& dp, AuthState state);
 #endif
+
+  void erase_participant(DiscoveredParticipantIter iter);
 
   friend class ::DDS_TEST;
 };
 
-}
-}
+} // namespace RTPS
+} // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 

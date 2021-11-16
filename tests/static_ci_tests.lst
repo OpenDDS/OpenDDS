@@ -27,12 +27,21 @@ tests/DCPS/Compiler/idl_test1_main/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFIL
 tests/DCPS/Compiler/idl_test3_main/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE STATIC_COMPILER
 tests/DCPS/Compiler/C++11/idl_test1_main/run_test.pl: !DCPS_MIN CXX11 STATIC_COMPILER
 tests/DCPS/Compiler/C++11/idl_test3_main/run_test.pl: !DCPS_MIN CXX11 STATIC_COMPILER
-tests/DCPS/Compiler/key_annotation/run_test.pl: !DCPS_MIN STATIC_COMPILER
+tests/DCPS/Compiler/key_annotation/run_test.pl: !DCPS_MIN STATIC_COMPILER2
 tests/DCPS/Compiler/is_topic_type/run_test.pl: !DCPS_MIN STATIC_COMPILER
-tests/DCPS/Compiler/rapidjson_generator/run_test.pl: !DCPS_MIN RAPIDJSON CXX11 STATIC_COMPILER
-tests/DCPS/Compiler/TryConstruct/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE STATIC_COMPILER
-tests/DCPS/Compiler/TryConstruct/C++11/run_test.pl: !DCPS_MIN CXX11 !OPENDDS_SAFETY_PROFILE STATIC_COMPILER
-tests/DCPS/Compiler/xcdr/run_test.pl: !DCPS_MIN STATIC_COMPILER
-tests/DCPS/Compiler/XtypesExtensibility/run_test.pl: !DCPS_MIN STATIC_COMPILER
+tests/DCPS/Compiler/rapidjson_generator/run_test.pl: !DCPS_MIN RAPIDJSON CXX11 STATIC_COMPILER2
+tests/DCPS/Compiler/TryConstruct/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE STATIC_COMPILER2
+tests/DCPS/Compiler/TryConstruct/C++11/run_test.pl: !DCPS_MIN CXX11 !OPENDDS_SAFETY_PROFILE STATIC_COMPILER2
+tests/DCPS/Compiler/typeobject_hash_consistency/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE STATIC_COMPILER2
+tests/DCPS/Compiler/xcdr/run_test.pl: !DCPS_MIN STATIC_COMPILER2
+tests/DCPS/Compiler/XtypesExtensibility/run_test.pl: !DCPS_MIN STATIC_COMPILER2
+tests/DCPS/Compiler/keywords/run_test.pl classic: !DCPS_MIN STATIC_COMPILER2
+tests/DCPS/Compiler/keywords/run_test.pl cpp11: !DCPS_MIN CXX11 !OPENDDS_SAFETY_PROFILE STATIC_COMPILER2
+tests/DCPS/Compiler/explicit_ints/run_test.pl classic: !DCPS_MIN STATIC_COMPILER
+tests/DCPS/Compiler/explicit_ints/run_test.pl cpp11: !DCPS_MIN CXX11 !OPENDDS_SAFETY_PROFILE STATIC_COMPILER
+tests/DCPS/Compiler/char_literals/run_test.pl classic: !DCPS_MIN STATIC_COMPILER
+tests/DCPS/Compiler/char_literals/run_test.pl cpp11: !DCPS_MIN CXX11 !OPENDDS_SAFETY_PROFILE STATIC_COMPILER
 
-tests/unit-tests/run_test.pl: !DCPS_MIN !NO_UNIT_TESTS
+tests/unit-tests/run_test.pl: !DCPS_MIN !NO_UNIT_TESTS STATIC_UNIT_TESTS
+
+tests/security/attributes/run_test.pl FullMsgEncrypt: STATIC_SECURITY

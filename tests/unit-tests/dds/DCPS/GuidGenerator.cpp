@@ -31,7 +31,7 @@ bool not_null (GUID_t &g1)
   return false;
 }
 
-TEST(GuidGenerator, maintest)
+TEST(dds_DCPS_GuidGenerator, maintest)
 {
 
   // Test GUID uniqueness

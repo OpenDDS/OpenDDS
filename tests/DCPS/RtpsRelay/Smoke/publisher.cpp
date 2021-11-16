@@ -1,44 +1,35 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
-
-#include <ace/Get_Opt.h>
-#include <ace/Log_Msg.h>
-#include <ace/OS_NS_stdlib.h>
-#include <ace/OS_NS_unistd.h>
-
-#include <dds/DCPS/Marked_Default_Qos.h>
-#include <dds/DCPS/PublisherImpl.h>
-#include <dds/DCPS/Service_Participant.h>
-
-#include "dds/DCPS/StaticIncludes.h"
-
-#ifdef ACE_AS_STATIC_LIBS
-# ifndef OPENDDS_SAFETY_PROFILE
-#include <dds/DCPS/transport/udp/Udp.h>
-#include <dds/DCPS/transport/multicast/Multicast.h>
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
-#include <dds/DCPS/transport/shmem/Shmem.h>
-#  ifdef OPENDDS_SECURITY
-#  include "dds/DCPS/security/BuiltInPlugins.h"
-#  endif
-# endif
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
-#endif
 
 #include "Args.h"
 #include "MessengerTypeSupportImpl.h"
 #include "Writer.h"
 #include "../../common/ConnectionRecordLogger.h"
 
+#include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/PublisherImpl.h>
+#include <dds/DCPS/Service_Participant.h>
+#ifdef ACE_AS_STATIC_LIBS
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  ifdef OPENDDS_SECURITY
+#    include <dds/DCPS/security/BuiltInPlugins.h>
+#  endif
+#endif
+#ifdef OPENDDS_SECURITY
+#  include <dds/DCPS/security/framework/Properties.h>
+#endif
+
+#include <ace/Get_Opt.h>
+#include <ace/Log_Msg.h>
+#include <ace/OS_NS_stdlib.h>
+#include <ace/OS_NS_unistd.h>
+
 #include <iostream>
 
 #ifdef OPENDDS_SECURITY
-#include <dds/DCPS/security/framework/Properties.h>
-
 const char auth_ca_file[] = "file:../../../security/certs/identity/identity_ca_cert.pem";
 const char perm_ca_file[] = "file:../../../security/certs/permissions/permissions_ca_cert.pem";
 const char id_cert_file[] = "file:../../../security/certs/identity/test_participant_02_cert.pem";
@@ -53,7 +44,6 @@ void append(DDS::PropertySeq& props, const char* name, const char* value, bool p
   props.length(len + 1);
   props[len] = prop;
 }
-
 #endif
 
 bool check_lease_recovery = false;
@@ -101,7 +91,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: create_participant failed!\n")),
-                         -1);
+                         1);
       }
 
       OpenDDS::Test::install_connection_record_logger(participant);
@@ -114,7 +104,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: register_type failed!\n")),
-                         -1);
+                         1);
       }
 
       // Create Topic
@@ -130,7 +120,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: create_topic failed!\n")),
-                         -1);
+                         1);
       }
 
       // Create Publisher
@@ -148,7 +138,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: create_publisher failed!\n")),
-                         -1);
+                         1);
       }
 
       DDS::DataWriterQos qos;
@@ -168,7 +158,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: create_datawriter failed!\n")),
-                         -1);
+                         1);
       }
 
       // Start writing threads
@@ -204,7 +194,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
-    ACE_OS::exit(-1);
+    ACE_OS::exit(1);
   }
 
   return 0;

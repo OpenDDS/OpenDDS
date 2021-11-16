@@ -306,26 +306,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     return 1;
   }
 
-  int expected_manual_liveliness_changes = 3 + (2 * (num_unlively_periods));
   int expected_no_writers_generation_count = (use_take ? 0 : num_unlively_periods - 1);
   // Determine the test status at this point.
 
   ACE_OS::fprintf(stderr, "**********\n");
-  ACE_OS::fprintf(stderr, "automatic_drl_servant->liveliness_changed_count() = %d\n",
-                  automatic_drl_servant->liveliness_changed_count());
   ACE_OS::fprintf(stderr, "automatic_drl_servant->no_writers_generation_count() = %d\n",
                   automatic_drl_servant->no_writers_generation_count());
   ACE_OS::fprintf(stderr, "********** use_take=%d\n", use_take);
 
   //automatic should stay alive due to reactor,
   //going up at start then coming down at end
-  if (automatic_drl_servant->liveliness_changed_count() != 3) {
-    status = 1;
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: automatic_drl_servant->liveliness_changed_count is %d - ")
-               ACE_TEXT("expected 3\n"), automatic_drl_servant->liveliness_changed_count()
-               ));
-  } else if (automatic_drl_servant->verify_last_liveliness_status() == false) {
+  if (automatic_drl_servant->verify_last_liveliness_status() == false) {
     status = 1;
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: automatic_drl_servant - ")
@@ -339,19 +330,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                ));
   }
   ACE_OS::fprintf(stderr, "**********\n");
-  ACE_OS::fprintf(stderr, "remote_manual_drl_servant->liveliness_changed_count() = %d\n",
-                  remote_manual_drl_servant->liveliness_changed_count());
   ACE_OS::fprintf(stderr, "remote_manual_drl_servant->no_writers_generation_count() = %d\n",
                   remote_manual_drl_servant->no_writers_generation_count());
   ACE_OS::fprintf(stderr, "********** use_take=%d\n", use_take);
 
-  if (remote_manual_drl_servant->liveliness_changed_count() != expected_manual_liveliness_changes) {
-    status = 1;
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: remote_manual_drl_servant->liveliness_changed_count is %d - ")
-               ACE_TEXT("expected %d\n"), remote_manual_drl_servant->liveliness_changed_count(), expected_manual_liveliness_changes
-               ));
-  } else if (remote_manual_drl_servant->verify_last_liveliness_status() == false) {
+  if (remote_manual_drl_servant->verify_last_liveliness_status() == false) {
     status = 1;
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: remote_manual_drl_servant - ")
@@ -365,19 +348,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                ));
   }
   ACE_OS::fprintf(stderr, "**********\n");
-  ACE_OS::fprintf(stderr, "local_manual_drl_servant->liveliness_changed_count() = %d\n",
-                  local_manual_drl_servant->liveliness_changed_count());
   ACE_OS::fprintf(stderr, "local_manual_drl_servant->no_writers_generation_count() = %d\n",
                   local_manual_drl_servant->no_writers_generation_count());
   ACE_OS::fprintf(stderr, "********** use_take=%d\n", use_take);
 
-  if (local_manual_drl_servant->liveliness_changed_count() < expected_manual_liveliness_changes) {
-    status = 1;
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: local_manual_drl_servant->liveliness_changed_count is %d - ")
-               ACE_TEXT("expected %d\n"), local_manual_drl_servant->liveliness_changed_count(), expected_manual_liveliness_changes
-               ));
-  } else if (local_manual_drl_servant->verify_last_liveliness_status() == false) {
+  if (local_manual_drl_servant->verify_last_liveliness_status() == false) {
     status = 1;
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: local_manual_drl_servant - ")

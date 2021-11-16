@@ -43,7 +43,7 @@ module RtpsRelay {
   const string RELAY_PARTITIONS_TOPIC_NAME = "Relay Partitions";
   @topic
   struct RelayPartitions {
-    @key GUID_t application_participant_guid;
+    @key string relay_id;
     @key unsigned long slot;
     StringSequence partitions;
   };
@@ -51,22 +51,24 @@ module RtpsRelay {
   const string RELAY_ADDRESSES_TOPIC_NAME = "Relay Addresses";
   @topic
   struct RelayAddress {
-    @key GUID_t application_participant_guid;
+    @key string relay_id;
     @key string name;
     string address;
   };
 
-  const string RELAY_INSTANCES_TOPIC_NAME = "Relay Instances";
+  const string RELAY_STATUS_TOPIC_NAME = "Relay Status";
   @topic
-  struct RelayInstance {
-    @key GUID_t application_participant_guid;
-    DDS::UserDataQosPolicy application_participant_user_data;
+  struct RelayStatus {
+    @key string relay_id;
+    boolean admitting;
   };
 
   const string SPDP_REPLAY_TOPIC_NAME = "SPDP Replay";
   @topic
   struct SpdpReplay {
     StringSequence partitions;
+    string address;
+    GUID_t guid;
   };
 
   struct RelayHeader {
@@ -79,26 +81,9 @@ module RtpsRelay {
     unsigned long nanosec;
   };
 
-  const string PARTICIPANT_STATISTICS_TOPIC_NAME = "Participant Statistics";
-
-  @topic
-  struct ParticipantStatistics {
-    @key GUID_t guid;
-    @key string name;
-    Duration_t interval;
-    unsigned long messages_from;
-    unsigned long long bytes_from;
-    unsigned long messages_to;
-    unsigned long long bytes_to;
-  };
-
-  const string HANDLER_STATISTICS_TOPIC_NAME = "Handler Statistics";
-
-  @topic
-  struct HandlerStatistics {
-    @key GUID_t application_participant_guid;
-    @key string name;
-    Duration_t interval;
+  @mutable
+  @autoid(HASH)
+  struct ProtocolStatistics {
     unsigned long messages_in;
     unsigned long long bytes_in;
     unsigned long messages_ignored;
@@ -109,6 +94,32 @@ module RtpsRelay {
     unsigned long messages_dropped;
     unsigned long long bytes_dropped;
     Duration_t output_processing_time;
+  };
+
+  const string PARTICIPANT_STATISTICS_TOPIC_NAME = "Participant Statistics";
+
+  @topic
+  @mutable
+  @autoid(HASH)
+  struct ParticipantStatistics {
+    @key GUID_t guid;
+    @key string name;
+    Duration_t session_time;
+    ProtocolStatistics rtps;
+    ProtocolStatistics stun;
+  };
+
+  const string HANDLER_STATISTICS_TOPIC_NAME = "Handler Statistics";
+
+  @topic
+  @mutable
+  @autoid(HASH)
+  struct HandlerStatistics {
+    @key string relay_id;
+    @key string name;
+    Duration_t interval;
+    ProtocolStatistics rtps;
+    ProtocolStatistics stun;
     unsigned long max_gain;
     unsigned long error_count;
     unsigned long max_queue_size;
@@ -118,19 +129,13 @@ module RtpsRelay {
   const string RELAY_STATISTICS_TOPIC_NAME = "Relay Statistics";
 
   @topic
+  @mutable
+  @autoid(HASH)
   struct RelayStatistics {
-    @key GUID_t application_participant_guid;
+    @key string relay_id;
     Duration_t interval;
-    unsigned long messages_in;
-    unsigned long long bytes_in;
-    unsigned long messages_ignored;
-    unsigned long long bytes_ignored;
-    Duration_t input_processing_time;
-    unsigned long messages_out;
-    unsigned long long bytes_out;
-    unsigned long messages_dropped;
-    unsigned long long bytes_dropped;
-    Duration_t output_processing_time;
+    ProtocolStatistics rtps;
+    ProtocolStatistics stun;
     unsigned long max_gain;
     unsigned long error_count;
     unsigned long local_active_participants;
@@ -139,19 +144,13 @@ module RtpsRelay {
     unsigned long expired_pending_count;
     unsigned long max_queue_size;
     Duration_t max_queue_latency;
-  };
-
-  const string DOMAIN_STATISTICS_TOPIC_NAME = "Domain Statistics";
-
-  @topic
-  struct DomainStatistics {
-    @key GUID_t application_participant_guid;
-    Duration_t interval;
     unsigned long local_participants;
     unsigned long local_writers;
     unsigned long local_readers;
+    unsigned long relay_partitions_pub_count;
+    unsigned long relay_address_pub_count;
+    unsigned long spdp_replay_pub_count;
   };
-
 };
 
 #endif

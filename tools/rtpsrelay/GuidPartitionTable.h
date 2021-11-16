@@ -8,6 +8,7 @@
 #include <dds/rtpsrelaylib/Utility.h>
 
 #include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/LogAddr.h>
 
 #include <ace/Thread_Mutex.h>
 
@@ -15,6 +16,8 @@ namespace RtpsRelay {
 
 // FUTURE: Make this configurable, adaptive, etc.
 const size_t MAX_SLOT_SIZE = 64;
+
+class GuidAddrSet;
 
 class GuidPartitionTable {
 public:
@@ -25,40 +28,54 @@ public:
   };
 
   GuidPartitionTable(const Config& config,
+                     GuidAddrSet& guid_addr_set,
+                     const ACE_INET_Addr& address,
                      RelayPartitionsDataWriter_var relay_partitions_writer,
                      SpdpReplayDataWriter_var spdp_replay_writer)
     : config_(config)
+    , guid_addr_set_(guid_addr_set)
+    , address_(OpenDDS::DCPS::LogAddr(address).c_str())
     , relay_partitions_writer_(relay_partitions_writer)
     , spdp_replay_writer_(spdp_replay_writer)
   {}
 
   // Insert a reader/writer guid and its partitions.
-  Result insert(const OpenDDS::DCPS::GUID_t& guid, const DDS::StringSeq& partitions);
+  Result insert(const OpenDDS::DCPS::GUID_t& guid,
+                const DDS::StringSeq& partitions,
+                const OpenDDS::DCPS::MonotonicTimePoint& now);
 
   void remove(const OpenDDS::DCPS::GUID_t& guid)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+    std::vector<RelayPartitions> relay_partitions;
+    {
+      ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
-    StringSet defunct;
+      StringSet defunct;
 
-    const auto pos = guid_to_partitions_.find(guid);
-    if (pos != guid_to_partitions_.end()) {
-      for (const auto& partition : pos->second) {
-        partition_index_.remove(partition, guid);
-        const auto pos2 = partition_to_guid_.find(partition);
-        if (pos2 != partition_to_guid_.end()) {
-          pos2->second.erase(guid);
-          if (pos2->second.empty()) {
-            defunct.insert(pos2->first);
-            partition_to_guid_.erase(pos2);
+      const auto pos = guid_to_partitions_.find(guid);
+      if (pos != guid_to_partitions_.end()) {
+        for (const auto& partition : pos->second) {
+          partition_index_.remove(partition, guid);
+          const auto pos2 = partition_to_guid_.find(partition);
+          if (pos2 != partition_to_guid_.end()) {
+            pos2->second.erase(guid);
+            if (pos2->second.empty()) {
+              defunct.insert(pos2->first);
+              partition_to_guid_.erase(pos2);
+            }
           }
         }
+        guid_to_partitions_.erase(pos);
+        remove_from_cache(guid);
       }
-      guid_to_partitions_.erase(pos);
-      remove_from_cache(guid);
+
+      remove_defunct(relay_partitions, defunct);
     }
 
-    remove_defunct(defunct);
+    {
+      ACE_GUARD(ACE_Thread_Mutex, g, write_mutex_);
+      write_relay_partitions(relay_partitions);
+    }
   }
 
   // Look up the partitions for the participant from.
@@ -138,7 +155,7 @@ private:
     }
   }
 
-  void add_new(const StringSet& partitions)
+  void add_new(std::vector<RelayPartitions>& relay_partitions, const StringSet& partitions)
   {
     std::unordered_set<size_t> slots_to_write;
     for (const auto& partition : partitions) {
@@ -147,10 +164,10 @@ private:
       slots_to_write.insert(slot);
     }
 
-    write_slots(slots_to_write);
+    prepare_relay_partitions(relay_partitions, slots_to_write);
   }
 
-  void remove_defunct(const StringSet& partitions)
+  void remove_defunct(std::vector<RelayPartitions>& relay_partitions, const StringSet& partitions)
   {
     std::unordered_set<size_t> slots_to_write;
     for (const auto& partition : partitions) {
@@ -159,17 +176,25 @@ private:
       slots_to_write.insert(slot);
     }
 
-    write_slots(slots_to_write);
+    prepare_relay_partitions(relay_partitions, slots_to_write);
   }
 
-  void write_slots(const std::unordered_set<size_t>& slots_to_write)
+  void prepare_relay_partitions(std::vector<RelayPartitions>& relay_partitions,
+                                const std::unordered_set<size_t>& slots_to_write)
   {
-    RelayPartitions relay_partitions;
-    relay_partitions.application_participant_guid(rtps_guid_to_relay_guid(config_.application_participant_guid()));
+    size_t idx = 0;
+    relay_partitions.resize(slots_to_write.size());
     for (const auto slot : slots_to_write) {
-      relay_partitions.slot(static_cast<CORBA::ULong>(slot));
-      relay_partitions.partitions().assign(slots_[slot].begin(), slots_[slot].end());
-      if (relay_partitions_writer_->write(relay_partitions, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
+      relay_partitions[idx].relay_id(config_.relay_id());
+      relay_partitions[idx].slot(static_cast<CORBA::ULong>(slot));
+      relay_partitions[idx].partitions().assign(slots_[slot].begin(), slots_[slot].end());
+    }
+  }
+
+  void write_relay_partitions(const std::vector<RelayPartitions>& relay_partitions)
+  {
+    for (const auto& relay_partition : relay_partitions) {
+      if (relay_partitions_writer_->write(relay_partition, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to write Relay Partitions\n")));
       }
     }
@@ -216,6 +241,8 @@ private:
   }
 
   const Config& config_;
+  GuidAddrSet& guid_addr_set_;
+  const std::string address_;
   RelayPartitionsDataWriter_var relay_partitions_writer_;
 
   typedef std::vector<StringSet> Slots;
@@ -235,9 +262,10 @@ private:
   typedef std::set<OpenDDS::DCPS::GUID_t, OpenDDS::DCPS::GUID_tKeyLessThan> OrderedGuidSet;
   typedef std::unordered_map<std::string, OrderedGuidSet> PartitionToGuid;
   PartitionToGuid partition_to_guid_;
-  PartitionIndex partition_index_;
+  PartitionIndex<GuidSet, GuidToParticipantGuid> partition_index_;
 
   mutable ACE_Thread_Mutex mutex_;
+  mutable ACE_Thread_Mutex write_mutex_;
 };
 
 }

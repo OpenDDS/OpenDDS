@@ -34,15 +34,15 @@ function(opendds_target_generated_dependencies target idl_file scope)
       PROPERTIES
         HEADER_FILE_ONLY ON)
 
-    set_source_files_properties(${cpp_files}
+    set_source_files_properties(${cpp_files} ${hdr_files}
       PROPERTIES
         SKIP_AUTOGEN ON)
 
     source_group("Generated Files" FILES ${all_gen_files})
     source_group("IDL Files" FILES ${idl_file})
+  else()
+    add_dependencies(${target} ${bridge_target})
   endif()
-
-  add_dependencies(${target} ${bridge_target})
 
   target_sources(${target} ${scope} ${all_idl_files} ${hdr_files})
   target_sources(${target} PRIVATE ${cpp_files})
@@ -211,7 +211,7 @@ function(opendds_target_idl_sources target)
 
     set(_cur_idl_outputs ${_cur_idl_headers} ${_cur_idl_cpp_files})
 
-    _tao_append_lib_dir_to_path(_tao_extra_lib_dirs)
+    _tao_append_runtime_lib_dir_to_path(_tao_extra_lib_dirs)
 
     add_custom_command(
       OUTPUT ${_cur_idl_outputs} ${_cur_type_support_idl} ${_cur_java_list}

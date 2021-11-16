@@ -9,6 +9,11 @@
 
 using namespace OpenDDS::DCPS;
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
+namespace OpenDDS {
+namespace Test {
+
 class MemoryPoolTest {
 public:
   // Allocate a block
@@ -1114,7 +1119,6 @@ FreeIndexTest()
 
 }
 
-
 void test_setup() {
   FreeIndex index(largest_free_);
   setup(index, 1024*5);
@@ -1390,11 +1394,18 @@ private:
 unsigned char
 FreeIndexTest::pool_ptr_[1024*1024];
 
-TEST(MemoryPool, maintest)
+}
+
+}
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
+TEST(dds_DCPS_MemoryPool, maintest)
 {
   {
-    MemoryPoolTest test;
+    OpenDDS::Test::MemoryPoolTest test;
 
+    // FUTURE:  Each of these should be a TEST or TEST_F.
     test.test_pool_alloc();
     test.test_pool_allocs();
     test.test_pool_alloc_odd_size();
@@ -1446,10 +1457,11 @@ TEST(MemoryPool, maintest)
   }
 
   {
-    FreeIndexTest test;
+    OpenDDS::Test::FreeIndexTest test;
 
     test.test_setup();
 
+    // FUTURE:  Each of these should be a TEST or TEST_F.
     test.test_index_lookup();
 
     test.test_add();

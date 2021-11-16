@@ -69,7 +69,7 @@ static const ListEnumHelper::Pair enum_pairs[] = {
 
 static const ListEnumHelper enum_helper(enum_pairs);
 
-TEST(JsonValueReader, struct_empty)
+TEST(dds_DCPS_JsonValueReader, struct_empty)
 {
   const char json[] = "{}";
   StringStream ss(json);
@@ -78,7 +78,7 @@ TEST(JsonValueReader, struct_empty)
   EXPECT_TRUE(jvr.end_struct());
 }
 
-TEST(JsonValueReader, array_empty)
+TEST(dds_DCPS_JsonValueReader, array_empty)
 {
   const char json[] = "[]";
   StringStream ss(json);
@@ -87,7 +87,35 @@ TEST(JsonValueReader, array_empty)
   EXPECT_TRUE(jvr.end_array());
 }
 
-TEST(JsonValueReader, sequence_empty)
+TEST(dds_DCPS_JsonValueReader, array_read)
+{
+  const char json[] = "[5,6]";
+  ACE_CDR::Short i[2] = {0, 0};
+  StringStream ss(json);
+  JsonValueReader<> jvr(ss);
+  EXPECT_TRUE(jvr.begin_array());
+  EXPECT_TRUE(jvr.read_int16_array(&i[0], 2));
+  EXPECT_TRUE(jvr.end_array());
+  EXPECT_EQ(i[0], 5);
+  EXPECT_EQ(i[1], 6);
+}
+
+TEST(dds_DCPS_JsonValueReader, sequence_read)
+{
+  const char json[] = "[5,6]";
+  ACE_CDR::Short i[2] = {0, 0};
+  StringStream ss(json);
+  JsonValueReader<> jvr(ss);
+  EXPECT_TRUE(jvr.begin_sequence());
+  EXPECT_TRUE(jvr.elements_remaining());
+  EXPECT_TRUE(jvr.read_int16_array(&i[0], 2));
+  EXPECT_FALSE(jvr.elements_remaining());
+  EXPECT_TRUE(jvr.end_sequence());
+  EXPECT_EQ(i[0], 5);
+  EXPECT_EQ(i[1], 6);
+}
+
+TEST(dds_DCPS_JsonValueReader, sequence_empty)
 {
   const char json[] = "[]";
   StringStream ss(json);
@@ -97,7 +125,7 @@ TEST(JsonValueReader, sequence_empty)
   EXPECT_TRUE(jvr.end_sequence());
 }
 
-TEST(JsonValueReader, struct_max)
+TEST(dds_DCPS_JsonValueReader, struct_max)
 {
   const char json[] =
     "{"
@@ -253,7 +281,7 @@ TEST(JsonValueReader, struct_max)
   EXPECT_TRUE(jvr.end_struct());
 }
 
-TEST(JsonValueReader, a_union)
+TEST(dds_DCPS_JsonValueReader, a_union)
 {
   const char json[] = "{\"$discriminator\":5,\"5\":true}";
   StringStream ss(json);
@@ -273,7 +301,7 @@ TEST(JsonValueReader, a_union)
   EXPECT_TRUE(jvr.end_union());
 }
 
-TEST(JsonValueReader, array_min)
+TEST(dds_DCPS_JsonValueReader, array_min)
 {
   const char json[] = "[false,0,"
 #if OPENDDS_HAS_EXPLICIT_INTS
@@ -394,7 +422,7 @@ TEST(JsonValueReader, array_min)
   EXPECT_TRUE(jvr.end_array());
 }
 
-TEST(JsonValueReader, sequence_zero)
+TEST(dds_DCPS_JsonValueReader, sequence_zero)
 {
   const char json[] = "[false,0,"
 #if OPENDDS_HAS_EXPLICIT_INTS
@@ -564,7 +592,7 @@ void set_default(MyStruct& value)
 }
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-TEST(JsonValueReader, from_json)
+TEST(dds_DCPS_JsonValueReader, from_json)
 {
   const char json[] = "{\"bool\":true}";
   StringStream ss(json);

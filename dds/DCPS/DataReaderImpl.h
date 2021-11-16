@@ -199,7 +199,7 @@ private:
 *
 * @brief Implements the DDS::DataReader interface.
 *
-* See the DDS specification, OMG formal/04-12-02, for a description of
+* See the DDS specification, OMG formal/2015-04-10, for a description of
 * the interface this class is implementing.
 *
 * This class must be inherited by the type-specific datareader which
@@ -219,7 +219,8 @@ public:
   friend class SubscriberImpl;
 
   typedef OPENDDS_MAP(DDS::InstanceHandle_t, SubscriptionInstance_rch) SubscriptionInstanceMapType;
-
+  typedef OPENDDS_SET(DDS::InstanceHandle_t) InstanceSet;
+  typedef OPENDDS_SET(SubscriptionInstance_rch) SubscriptionInstanceSet;
   /// Type of collection of statistics for writers to this reader.
   typedef OPENDDS_MAP_CMP(PublicationId, WriterStats, GUID_tKeyLessThan) StatsMapType;
 
@@ -581,7 +582,14 @@ public:
 
   virtual ICE::Endpoint* get_ice_endpoint();
 
-  const RepoId& get_repo_id() const { return this->subscription_id_; }
+  const RepoId& get_repo_id() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(subscription_id_mutex_);
+    while (!has_subscription_id_ && !get_deleted()) {
+      subscription_id_condition_.wait();
+    }
+    return this->subscription_id_;
+  }
 
   void return_handle(DDS::InstanceHandle_t handle);
 
@@ -659,6 +667,10 @@ protected:
 
   /// Data has arrived into the cache, unblock waiting ReadConditions
   void notify_read_conditions();
+
+  bool has_subscription_id_;
+  mutable ACE_Thread_Mutex subscription_id_mutex_;
+  mutable ConditionVariable<ACE_Thread_Mutex> subscription_id_condition_;
 
   unique_ptr<ReceivedDataAllocator> rd_allocator_;
   DDS::DataReaderQos qos_;
@@ -813,7 +825,7 @@ private:
 
     void cancel_timer()
     {
-      execute_or_enqueue(new CancelCommand(this));
+      execute_or_enqueue(make_rch<CancelCommand>(this));
     }
 
     virtual bool reactor_is_shut_down() const
@@ -915,6 +927,58 @@ private:
 protected:
   typedef OPENDDS_SET(Encoding::Kind) EncodingKinds;
   EncodingKinds decoding_modes_;
+
+public:
+  class OpenDDS_Dcps_Export OnDataOnReaders : public JobQueue::Job {
+  public:
+    OnDataOnReaders(WeakRcHandle<SubscriberImpl> subscriber,
+                    DDS::SubscriberListener_var sub_listener,
+                    WeakRcHandle<DataReaderImpl> data_reader,
+                    bool call,
+                    bool set_reader_status)
+      : subscriber_(subscriber)
+      , sub_listener_(sub_listener)
+      , data_reader_(data_reader)
+      , call_(call)
+      , set_reader_status_(set_reader_status)
+    {}
+
+  private:
+    virtual void execute();
+
+    WeakRcHandle<SubscriberImpl> subscriber_;
+    DDS::SubscriberListener_var sub_listener_;
+    WeakRcHandle<DataReaderImpl> data_reader_;
+    const bool call_;
+    const bool set_reader_status_;
+  };
+
+  class OpenDDS_Dcps_Export OnDataAvailable : public JobQueue::Job {
+  public:
+    OnDataAvailable(WeakRcHandle<SubscriberImpl> subscriber,
+                    DDS::DataReaderListener_var listener,
+                    WeakRcHandle<DataReaderImpl> data_reader,
+                    bool call,
+                    bool set_reader_status,
+                    bool set_subscriber_status)
+      : subscriber_(subscriber)
+      , listener_(listener)
+      , data_reader_(data_reader)
+      , call_(call)
+      , set_reader_status_(set_reader_status)
+      , set_subscriber_status_(set_subscriber_status)
+    {}
+
+  private:
+    virtual void execute();
+
+    WeakRcHandle<SubscriberImpl> subscriber_;
+    DDS::DataReaderListener_var listener_;
+    WeakRcHandle<DataReaderImpl> data_reader_;
+    const bool call_;
+    const bool set_reader_status_;
+    const bool set_subscriber_status_;
+  };
 };
 
 typedef RcHandle<DataReaderImpl> DataReaderImpl_rch;

@@ -70,7 +70,6 @@ RecorderImpl::RecorderImpl()
                                          this)),
   is_bit_(false)
 {
-
   requested_incompatible_qos_status_.total_count = 0;
   requested_incompatible_qos_status_.total_count_change = 0;
   requested_incompatible_qos_status_.last_policy_id = 0;
@@ -80,9 +79,7 @@ RecorderImpl::RecorderImpl()
   subscription_match_status_.total_count_change = 0;
   subscription_match_status_.current_count = 0;
   subscription_match_status_.current_count_change = 0;
-  subscription_match_status_.last_publication_handle =
-    DDS::HANDLE_NIL;
-
+  subscription_match_status_.last_publication_handle = DDS::HANDLE_NIL;
 }
 
 // This method is called when there are no longer any reference to the
@@ -223,34 +220,29 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
 {
   DBG_ENTRY_LVL("RecorderImpl","data_received",6);
 
-  // ensure some other thread is not changing the sample container
+  // Ensure some other thread is not changing the sample container
   // or statuses related to samples.
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
 
   if (DCPS_debug_level > 9) {
-    GuidConverter converter(subscription_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::data_received: ")
                ACE_TEXT("%C received sample: %C.\n"),
-               OPENDDS_STRING(converter).c_str(),
+               LogGuid(subscription_id_).c_str(),
                to_string(sample.header_).c_str()));
   }
 
   // we only support SAMPLE_DATA messages
-  if (sample.header_.message_id_ != SAMPLE_DATA)
-    return;
-
-  RawDataSample rawSample(static_cast<MessageId> (sample.header_.message_id_),
-                          sample.header_.source_timestamp_sec_,
-                          sample.header_.source_timestamp_nanosec_,
-                          sample.header_.publication_id_,
-                          sample.header_.byte_order_,
-                          sample.sample_.get());
-
-  if (listener_.in()) {
+  if (sample.header_.message_id_ == SAMPLE_DATA && listener_.in()) {
+    RawDataSample rawSample(sample.header_,
+                            static_cast<MessageId> (sample.header_.message_id_),
+                            sample.header_.source_timestamp_sec_,
+                            sample.header_.source_timestamp_nanosec_,
+                            sample.header_.publication_id_,
+                            sample.header_.byte_order_,
+                            sample.sample_.get());
     listener_->on_sample_data_received(this, rawSample);
   }
-
 }
 
 void RecorderImpl::notify_subscription_disconnected(const WriterIdSeq&)
@@ -259,7 +251,6 @@ void RecorderImpl::notify_subscription_disconnected(const WriterIdSeq&)
 
 void RecorderImpl::notify_subscription_reconnected(const WriterIdSeq&)
 {
-
 }
 
 void
@@ -269,9 +260,7 @@ RecorderImpl::notify_subscription_lost(const DDS::InstanceHandleSeq&)
 
 void RecorderImpl::notify_subscription_lost(const WriterIdSeq&)
 {
-
 }
-
 
 void
 RecorderImpl::add_association(const RepoId&            yourId,
@@ -283,14 +272,12 @@ RecorderImpl::add_association(const RepoId&            yourId,
   // The following block is for diagnostic purposes only.
   //
   if (DCPS_debug_level >= 1) {
-    GuidConverter reader_converter(yourId);
-    GuidConverter writer_converter(writer.writerId);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::add_association - ")
                ACE_TEXT("bit %d local %C remote %C\n"),
                is_bit_,
-               OPENDDS_STRING(reader_converter).c_str(),
-               OPENDDS_STRING(writer_converter).c_str()));
+               LogGuid(yourId).c_str(),
+               LogGuid(writer.writerId).c_str()));
   }
 
   //
@@ -521,14 +508,12 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
   }
 
   if (DCPS_debug_level >= 1) {
-    GuidConverter reader_converter(subscription_id_);
-    GuidConverter writer_converter(writers[0]);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::remove_associations: ")
                ACE_TEXT("bit %d local %C remote %C num remotes %d\n"),
                is_bit_,
-               OPENDDS_STRING(reader_converter).c_str(),
-               OPENDDS_STRING(writer_converter).c_str(),
+               LogGuid(subscription_id_).c_str(),
+               LogGuid(writers[0]).c_str(),
                writers.length()));
   }
   if (!get_deleted()) {
@@ -543,7 +528,7 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
       ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
 
       for (CORBA::ULong i = 0; i < wr_len; i++) {
-        PublicationId writer_id = writers[i];
+        const PublicationId writer_id = writers[i];
 
         WriterMapType::iterator it = this->writers_.find(writer_id);
         if (it != this->writers_.end() &&
@@ -569,7 +554,7 @@ RecorderImpl::remove_publication(const PublicationId& pub_id)
     WriterInfo& info = *where->second;
     WriterIdSeq writers;
     push_back(writers, pub_id);
-    bool notify = info.notify_lost_;
+    const bool notify = info.notify_lost_;
     write_guard.release();
     remove_associations_i(writers, notify);
   }
@@ -755,8 +740,6 @@ RecorderImpl::remove_all_associations()
 void
 RecorderImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
 {
-
-
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
             guard,
             this->publication_handle_lock_);
@@ -826,7 +809,6 @@ DDS::ReturnCode_t RecorderImpl::set_qos(
   const DDS::SubscriberQos & subscriber_qos,
   const DDS::DataReaderQos & qos)
 {
-
   OPENDDS_NO_OBJECT_MODEL_PROFILE_COMPATIBILITY_CHECK(subscriber_qos, DDS::RETCODE_UNSUPPORTED);
 
   if (Qos_Helper::valid(subscriber_qos) && Qos_Helper::consistent(subscriber_qos)) {
@@ -939,7 +921,6 @@ DDS::ReturnCode_t
 RecorderImpl::enable()
 {
   if (DCPS_debug_level >= 1) {
-
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::enable\n")));
   }
@@ -957,7 +938,6 @@ RecorderImpl::enable()
 
   // if (topic_servant_ && !transport_disabled_) {
   if (topic_servant_) {
-
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::enable_transport\n")));
 

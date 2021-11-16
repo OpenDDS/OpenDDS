@@ -12,6 +12,7 @@
 
 #include <dds/DCPS/SafetyProfileStreams.h>
 #include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/Util.h>
 
 #include <utl_identifier.h>
 
@@ -25,14 +26,9 @@
 
 using std::string;
 using namespace AstTypeClassification;
+using OpenDDS::DCPS::array_count;
 
 namespace {
-  template <typename Type, size_t length>
-  size_t array_length(Type(&)[length])
-  {
-    return length;
-  }
-
   const string RtpsNamespace = " ::OpenDDS::RTPS::", DdsNamespace = " ::DDS::";
 
   typedef bool (*is_special_case)(const string& cxx);
@@ -128,7 +124,7 @@ namespace {
 
   const special_struct* get_special_struct(const std::string& name)
   {
-    for (size_t i = 0; i < array_length(special_structs); ++i) {
+    for (size_t i = 0; i < array_count(special_structs); ++i) {
       if (special_structs[i].check(name)) {
         return &special_structs[i];
       }
@@ -797,7 +793,7 @@ namespace {
     NamespaceGuard ng(!anonymous);
 
     if (!anonymous) {
-      for (size_t i = 0; i < array_length(special_sequences); ++i) {
+      for (size_t i = 0; i < array_count(special_sequences); ++i) {
         if (special_sequences[i].check(base_wrapper.type_name_)) {
           special_sequences[i].gen(base_wrapper.type_name_);
           return;
@@ -1006,6 +1002,14 @@ namespace {
         be_global->impl_ <<
           "  CORBA::ULong length;\n"
           << streamAndCheck(">> length");
+        // The check here is to prevent very large sequences from being allocated.
+        be_global->impl_ <<
+          "  if (length > strm.length()) {\n"
+          "    if (DCPS_debug_level >= 8) {\n"
+          "      ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) Invalid sequence length (%u)\\n\"), length));\n"
+          "    }\n"
+          "    return false;\n"
+          "  }\n";
       }
 
       AST_PredefinedType* predef = dynamic_cast<AST_PredefinedType*>(elem);
@@ -1339,8 +1343,11 @@ namespace {
       extraction.addArg("strm", "Serializer&");
       extraction.addArg("arr", wrapper.wrapped_type_name());
       extraction.endArgs();
+
+      if (!primitive) {
+        be_global->impl_ << "  bool discard_flag = false;\n";
+      }
       be_global->impl_ <<
-        "  bool discard_flag = false;\n"
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
       marshal_generator::generate_dheader_code(
@@ -1353,7 +1360,7 @@ namespace {
       }
 
       const std::string accessor = wrapper.value_access() + (use_cxx11 ? ".data()" : ".out()");
-      if (elem_cls & CL_PRIMITIVE) {
+      if (primitive) {
         string suffix;
         for (unsigned int i = 1; i < arr->n_dims(); ++i)
           suffix += use_cxx11 ? "->data()" : "[0]";
@@ -1361,79 +1368,81 @@ namespace {
           "  return strm.read_" << getSerializerName(elem)
           << "_array(" << accessor << suffix << ", " << n_elems << ");\n";
       } else { // Enum, String, Struct, Array, Sequence, Union
-        string indent = "  ";
-        NestedForLoops nfl("CORBA::ULong", "i", arr, indent);
-        const std::string elem_access = wrapper.value_access() + nfl.index_;
+        {
+          string indent = "  ";
+          NestedForLoops nfl("CORBA::ULong", "i", arr, indent);
+          const std::string elem_access = wrapper.value_access() + nfl.index_;
 
-        Intro intro;
-        std::string stream;
-        std::string classic_array_copy;
-        if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
-          Wrapper classic_array_wrapper(
-            arr->base_type(), scoped(arr->base_type()->name()), wrapper.value_access() + nfl.index_);
-          classic_array_wrapper.classic_array_copy_ = true;
-          classic_array_wrapper.done(&intro);
-          classic_array_copy = classic_array_wrapper.classic_array_copy();
-          stream = "(strm >> " + classic_array_wrapper.ref() + ")";
-        } else {
-          stream = streamCommon(
-            indent, "", arr->base_type(), ">> " + elem_access, nested_key_only, intro);
-        }
-        intro.join(be_global->impl_, indent);
-        be_global->impl_ <<
-          indent << "if (!" << stream << ") {\n";
-
-        indent += "  ";
-        if (try_construct == tryconstructfailaction_use_default) {
+          Intro intro;
+          std::string stream;
+          std::string classic_array_copy;
+          if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
+            Wrapper classic_array_wrapper(
+              arr->base_type(), scoped(arr->base_type()->name()), wrapper.value_access() + nfl.index_);
+            classic_array_wrapper.classic_array_copy_ = true;
+            classic_array_wrapper.done(&intro);
+            classic_array_copy = classic_array_wrapper.classic_array_copy();
+            stream = "(strm >> " + classic_array_wrapper.ref() + ")";
+          } else {
+            stream = streamCommon(
+              indent, "", arr->base_type(), ">> " + elem_access, nested_key_only, intro);
+          }
+          intro.join(be_global->impl_, indent);
           be_global->impl_ <<
-            type_to_default(indent, elem, elem_access) <<
-            indent << "strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
-        } else if ((try_construct == tryconstructfailaction_trim) && (elem_cls & CL_BOUNDED) &&
-                   (elem_cls & (CL_STRING | CL_SEQUENCE))) {
-          if (elem_cls & CL_STRING) {
-            const std::string check_not_empty =
-              use_cxx11 ? "!" + elem_access + ".empty()" : elem_access + ".in()";
-            const std::string get_length =
-              use_cxx11 ? elem_access + ".length()" : "ACE_OS::strlen(" + elem_access + ".in())";
-            const string inout = use_cxx11 ? "" : ".inout()";
+            indent << "if (!" << stream << ") {\n";
+
+          indent += "  ";
+          if (try_construct == tryconstructfailaction_use_default) {
             be_global->impl_ <<
-              indent << "if (" << construct_bound_fail << " && " <<
-                check_not_empty << " && (" << bounded_arg(elem) << " < " << get_length << ")) {\n" <<
-              indent << "  " << wrapper.value_access() + nfl.index_ << inout <<
-                (use_cxx11 ? (".resize(" + bounded_arg(elem) +  ")") : ("[" + bounded_arg(elem) + "] = 0")) << ";\n" <<
-              indent << "  strm.set_construction_status(Serializer::ConstructionSuccessful);\n" <<
-              indent << "} else {\n";
+              type_to_default(indent, elem, elem_access) <<
+              indent << "strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
+          } else if ((try_construct == tryconstructfailaction_trim) && (elem_cls & CL_BOUNDED) &&
+                     (elem_cls & (CL_STRING | CL_SEQUENCE))) {
+            if (elem_cls & CL_STRING) {
+              const std::string check_not_empty =
+                use_cxx11 ? "!" + elem_access + ".empty()" : elem_access + ".in()";
+              const std::string get_length =
+                use_cxx11 ? elem_access + ".length()" : "ACE_OS::strlen(" + elem_access + ".in())";
+              const string inout = use_cxx11 ? "" : ".inout()";
+              be_global->impl_ <<
+                indent << "if (" << construct_bound_fail << " && " <<
+                  check_not_empty << " && (" << bounded_arg(elem) << " < " << get_length << ")) {\n" <<
+                indent << "  " << wrapper.value_access() + nfl.index_ << inout <<
+                  (use_cxx11 ? (".resize(" + bounded_arg(elem) +  ")") : ("[" + bounded_arg(elem) + "] = 0")) << ";\n" <<
+                indent << "  strm.set_construction_status(Serializer::ConstructionSuccessful);\n" <<
+                indent << "} else {\n";
+              skip_to_end_array(indent);
+              be_global->impl_ <<
+                indent << "}\n";
+            } else if (elem_cls & CL_SEQUENCE) {
+              be_global->impl_ <<
+                indent << "if (" + construct_elem_fail + ") {\n";
+              skip_to_end_array(indent);
+              be_global->impl_ <<
+                indent << "} else {\n" <<
+                indent << "  strm.set_construction_status(Serializer::ConstructionSuccessful);\n" <<
+                indent << "}\n";
+            }
+          } else {
+            //discard/default
             skip_to_end_array(indent);
-            be_global->impl_ <<
-              indent << "}\n";
-          } else if (elem_cls & CL_SEQUENCE) {
-            be_global->impl_ <<
-              indent << "if (" + construct_elem_fail + ") {\n";
-            skip_to_end_array(indent);
+          }
+          if (classic_array_copy.size()) {
             be_global->impl_ <<
               indent << "} else {\n" <<
-              indent << "  strm.set_construction_status(Serializer::ConstructionSuccessful);\n" <<
-              indent << "}\n";
+              indent << "  " << classic_array_copy << "\n";
           }
-        } else {
-          //discard/default
-          skip_to_end_array(indent);
-        }
-        if (classic_array_copy.size()) {
+          indent.erase(0, 2);
           be_global->impl_ <<
-            indent << "} else {\n" <<
-            indent << "  " << classic_array_copy << "\n";
+            indent << "}\n";
         }
-        indent.erase(0, 2);
         be_global->impl_ <<
-          indent << "}\n";
+          "  if (discard_flag) {\n"
+          "    strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
+          "    return false;\n"
+          "  }\n"
+          "  return true;\n";
       }
-      be_global->impl_ <<
-        "  if (discard_flag) {\n"
-        "    strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
-        "    return false;\n"
-        "  }\n"
-        "  return true;\n";
     }
   }
 
@@ -3644,6 +3653,23 @@ namespace {
         "    uni._d(OpenDDS::RTPS::PID_SENTINEL);\n"
         "    return true;\n"
         "  }\n"
+        "  if (size == 0) {\n"
+        "    uni._d(disc);\n"
+        "    return true;\n"
+        "  }\n"
+        "  if (disc == RTPS::PID_PROPERTY_LIST) {\n"
+        "    // support special case deserialization of DDS::PropertyQosPolicy\n"
+        "    Message_Block_Ptr param(strm.trim(size));\n"
+        "    strm.skip(size);\n"
+        "    Serializer strm2(param.get(), Encoding(Encoding::KIND_XCDR1, strm.swap_bytes()));\n"
+        "    ::DDS::PropertyQosPolicy tmp;\n"
+        "    if (strm2 >> tmp) {\n"
+        "      uni.property(tmp);\n"
+        "      return true;\n"
+        "    } else {\n"
+        "      return false;\n"
+        "    }\n"
+        "  }\n"
         "  const Serializer::ScopedAlignmentContext sac(strm, size);\n"
         "  if (disc == RTPS::PID_XTYPES_TYPE_INFORMATION) {\n"
         "    DDS::OctetSeq type_info(size);\n"
@@ -3914,7 +3940,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     }
   }
 
-  for (size_t i = 0; i < array_length(special_unions); ++i) {
+  for (size_t i = 0; i < array_count(special_unions); ++i) {
     if (special_unions[i].check(cxx)) {
       return special_unions[i].gen(cxx, node, discriminator, branches);
     }

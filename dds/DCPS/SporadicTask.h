@@ -10,6 +10,7 @@
 
 #include "RcEventHandler.h"
 #include "ReactorInterceptor.h"
+#include "TimeSource.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -18,10 +19,13 @@ namespace DCPS {
 
 class SporadicTask : public RcEventHandler {
 public:
-  explicit SporadicTask(RcHandle<ReactorInterceptor> interceptor)
-    : interceptor_(interceptor)
-    , scheduled_(false)
-    , last_command_(SPORADIC_TASK_NONE)
+  SporadicTask(const TimeSource& time_source,
+               RcHandle<ReactorInterceptor> interceptor)
+    : time_source_(time_source)
+    , interceptor_(interceptor)
+    , desired_scheduled_(false)
+    , actual_scheduled_(false)
+    , sporadic_command_(make_rch<SporadicCommand>(rchandle_from(this)))
   {
     reactor(interceptor->reactor());
   }
@@ -30,145 +34,137 @@ public:
 
   void schedule(const TimeDuration& delay)
   {
+    const MonotonicTimePoint next_time = time_source_.monotonic_time_point_now() + delay;
+    {
+      ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+      if (!desired_scheduled_ || next_time < desired_next_time_) {
+        desired_scheduled_ = true;
+        desired_next_time_ = next_time;
+        desired_delay_ = delay;
+      } else {
+        return;
+      }
+    }
+
     RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
     if (interceptor) {
-      interceptor->execute_or_enqueue(new ScheduleCommand(this, delay));
-    } else if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: SporadicTask::schedule")
-                 ACE_TEXT(" failed to receive ReactorInterceptor handle\n")));
+      interceptor->execute_or_enqueue(sporadic_command_);
+    } else if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: SporadicTask::schedule: "
+                 "failed to receive ReactorInterceptor handle\n"));
     }
   }
 
   void cancel()
   {
+    {
+      ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+      if (!desired_scheduled_) {
+        return;
+      }
+
+      desired_scheduled_ = false;
+    }
+
     RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
     if (interceptor) {
-      interceptor->execute_or_enqueue(new CancelCommand(this));
-    } else if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: SporadicTask::cancel")
-                 ACE_TEXT(" failed to receive ReactorInterceptor handle\n")));
+      interceptor->execute_or_enqueue(sporadic_command_);
+    } else if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: SporadicTask::cancel: "
+                 "failed to receive ReactorInterceptor handle\n"));
     }
   }
 
   void cancel_and_wait()
   {
+    {
+      ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+      if (!desired_scheduled_) {
+        return;
+      }
+
+      desired_scheduled_ = false;
+    }
+
     RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
     if (interceptor) {
-      ReactorInterceptor::CommandPtr command = interceptor->execute_or_enqueue(new CancelCommand(this));
+      ReactorInterceptor::CommandPtr command = interceptor->execute_or_enqueue(sporadic_command_);
       if (command) {
         command->wait();
       }
-    } else if (DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: SporadicTask::cancel_and_wait")
-                 ACE_TEXT(" failed to receive ReactorInterceptor handle\n")));
+    } else if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: SporadicTask::cancel_and_wait: "
+                 "failed to receive ReactorInterceptor handle\n"));
     }
   }
 
   virtual void execute(const MonotonicTimePoint& now) = 0;
 
 private:
+  struct SporadicCommand : public ReactorInterceptor::Command {
+    explicit SporadicCommand(WeakRcHandle<SporadicTask> sporadic_task)
+      : sporadic_task_(sporadic_task)
+    { }
+
+    virtual void execute()
+    {
+      RcHandle<SporadicTask> st = sporadic_task_.lock();
+      if (st) {
+        st->execute_i();
+      }
+    }
+
+    WeakRcHandle<SporadicTask> sporadic_task_;
+  };
+
+  const TimeSource& time_source_;
   WeakRcHandle<ReactorInterceptor> interceptor_;
-  bool scheduled_;
-  enum {
-    SPORADIC_TASK_NONE,
-    SPORADIC_TASK_SCHEDULE,
-    SPORADIC_TASK_CANCEL
-  } last_command_;
+  bool desired_scheduled_;
+  MonotonicTimePoint desired_next_time_;
+  TimeDuration desired_delay_;
+  bool actual_scheduled_;
+  MonotonicTimePoint actual_next_time_;
+  RcHandle<SporadicCommand> sporadic_command_;
+  mutable ACE_Thread_Mutex mutex_;
 
-  struct ScheduleCommand : public ReactorInterceptor::Command {
-    ScheduleCommand(SporadicTask* hb, const TimeDuration& delay)
-      : sporadic_task_(hb), delay_(delay)
-    { }
-
-    virtual bool should_execute() const
-    {
-      return sporadic_task_->last_command_ != SPORADIC_TASK_SCHEDULE;
-    }
-
-    virtual void will_execute()
-    {
-      sporadic_task_->last_command_ = SPORADIC_TASK_SCHEDULE;
-    }
-
-    virtual void execute()
-    {
-      sporadic_task_->schedule_i(delay_);
-    }
-
-    virtual void queue_flushed()
-    {
-      sporadic_task_->last_command_ = SPORADIC_TASK_NONE;
-    }
-
-    SporadicTask* const sporadic_task_;
-    const TimeDuration delay_;
-  };
-
-  struct CancelCommand : public ReactorInterceptor::Command {
-    CancelCommand(SporadicTask* hb)
-      : sporadic_task_(hb)
-    { }
-
-    virtual bool should_execute() const
-    {
-      return sporadic_task_->last_command_ != SPORADIC_TASK_CANCEL;
-    }
-
-    virtual void will_execute()
-    {
-      sporadic_task_->last_command_ = SPORADIC_TASK_CANCEL;
-    }
-
-    virtual void execute()
-    {
-      sporadic_task_->cancel_i();
-    }
-
-    virtual void queue_flushed()
-    {
-      sporadic_task_->last_command_ = SPORADIC_TASK_NONE;
-    }
-
-    SporadicTask* const sporadic_task_;
-  };
-
-  int handle_timeout(const ACE_Time_Value& tv, const void*)
+  void execute_i()
   {
-    const MonotonicTimePoint now(tv);
-    scheduled_ = false;
-    execute(now);
-    return 0;
-  }
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
 
-  void schedule_i(const TimeDuration& delay)
-  {
-    if (!scheduled_) {
-      const long timer = reactor()->schedule_timer(this, 0, delay.value());
+    if ((!desired_scheduled_ && actual_scheduled_) ||
+        (desired_scheduled_ && actual_scheduled_ && desired_next_time_ != actual_next_time_)) {
+      reactor()->cancel_timer(this);
+      actual_scheduled_ = false;
+    }
 
+    if (desired_scheduled_ && !actual_scheduled_) {
+      const long timer = reactor()->schedule_timer(this, 0, desired_delay_.value());
       if (timer == -1) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: SporadicTask::enable")
-                   ACE_TEXT(" failed to schedule timer %p\n"),
-                   ACE_TEXT("")));
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: SporadicTask::execute_i: "
+                     "failed to schedule timer %p\n", ""));
+        }
       } else {
-        scheduled_ = true;
+        actual_scheduled_ = true;
+        actual_next_time_ = desired_next_time_;
       }
     }
   }
 
-  void
-  cancel_i()
+  int handle_timeout(const ACE_Time_Value& tv, const void*)
   {
-    if (scheduled_) {
-      scheduled_ = false;
-      reactor()->cancel_timer(this);
-      // Don't touch any members anymore, at this moment we could
-      // be deleted when the cancel_timer results in a drop of
-      // our refcount to 0
+    const MonotonicTimePoint now(tv);
+    {
+      ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+      desired_scheduled_ = false;
+      actual_scheduled_ = false;
     }
+    execute(now);
+    return 0;
   }
 };
 
@@ -177,8 +173,11 @@ class PmfSporadicTask : public SporadicTask {
 public:
   typedef void (Delegate::*PMF)(const MonotonicTimePoint&);
 
-  PmfSporadicTask(RcHandle<ReactorInterceptor> interceptor, const Delegate& delegate, PMF function)
-    : SporadicTask(interceptor)
+  PmfSporadicTask(const TimeSource& time_source,
+                  RcHandle<ReactorInterceptor> interceptor,
+                  RcHandle<Delegate> delegate,
+                  PMF function)
+    : SporadicTask(time_source, interceptor)
     , delegate_(delegate)
     , function_(function)
   {}

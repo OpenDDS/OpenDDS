@@ -667,6 +667,25 @@ Serializer::free_string(ACE_CDR::WChar* str,
   str_free(str);
 }
 
+ACE_Message_Block* Serializer::trim(size_t n) const
+{
+  if (!good_bit() || !current_ || n > length()) {
+    return 0;
+  }
+  Message_Block_Ptr dup(current_->duplicate());
+  ACE_Message_Block* i = dup.get();
+  for (size_t remain = n; i && remain; i = i->cont()) {
+    if (i->length() >= remain) {
+      i->wr_ptr(i->rd_ptr() + remain);
+      ACE_Message_Block::release(i->cont());
+      i->cont(0);
+      break;
+    }
+    remain -= i->length();
+  }
+  return dup.release();
+}
+
 bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_understand)
 {
   const Encoding::XcdrVersion xcdr = encoding().xcdr_version();
@@ -739,6 +758,10 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
 
 bool Serializer::write_parameter_id(const unsigned id, const size_t size, const bool must_understand)
 {
+  if (static_cast<ACE_CDR::ULong>(id) > MEMBER_ID_MAX) {
+    return false;
+  }
+
   const Encoding::XcdrVersion xcdr = encoding().xcdr_version();
   if (xcdr == Encoding::XCDR_VERSION_1) {
     if (!align_w(xcdr1_pid_alignment)) {

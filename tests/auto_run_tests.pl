@@ -205,9 +205,12 @@ sub print_help {
         "    --dry-run | -z           Do everything except run the tests\n" .
         "    --show-configs           Print possible values for -Config and -Excludes\n" .
         "                             broken down by list file\n" .
+        "    --show-all-configs       Same as --show-configs, but for all list files\n" .
         "    --list-configs           Print combined set of the configs from the list\n" .
         "                             files\n" .
+        "    --list-all-configs       Same as --list-configs, but for all list files\n" .
         "    --list-tests             List all the tests that would run\n" .
+        "    --list-all-tests         Same as --list-tests, but for all list files\n" .
         "    --stop-on-fail | -x      Stop on any failure\n";
 
     exit(0);
@@ -220,8 +223,11 @@ my $help = 0;
 my $sandbox = '';
 my $dry_run = 0;
 my $show_configs = 0;
+my $show_all_configs = 0;
 my $list_configs = 0;
+my $list_all_configs = 0;
 my $list_tests = 0;
+my $list_all_tests = 0;
 my $cmake = 0;
 my $cmake_build_dir = "$cmake_tests/build";
 my $cmake_build_cfg = windows ? 'Debug' : undef;
@@ -235,8 +241,11 @@ my %opts = (
     'sandbox|s=s' => \$sandbox,
     'dry-run|z' => \$dry_run,
     'show-configs' => \$show_configs,
+    'show-all-configs' => \$show_all_configs,
     'list-configs' => \$list_configs,
+    'list-all-configs' => \$list_all_configs,
     'list-tests' => \$list_tests,
+    'list-all-tests' => \$list_all_tests,
     'stop-on-fail|x' => \$stop_on_fail,
     'cmake' => \$cmake,
     'cmake-build-dir=s' => \$cmake_build_dir,
@@ -267,12 +276,16 @@ for my $list (@builtin_test_lists) {
             $files_passed ? 0 : $list->{default};
     }
 }
+my $query_all = $show_all_configs || $list_all_configs || $list_all_tests;
+$show_configs |= $show_all_configs;
+$list_configs |= $list_all_configs;
+$list_tests |= $list_all_tests;
 my $query = $show_configs || $list_configs || $list_tests;
 
 # Determine what test list files to use
 my @file_list = ();
 foreach my $list (@builtin_test_lists) {
-    push(@file_list, "$DDS_ROOT/$list->{file}") if ($query || $list->{enabled});
+    push(@file_list, "$DDS_ROOT/$list->{file}") if ($query_all || $list->{enabled});
 }
 push(@file_list, @ARGV);
 

@@ -39,18 +39,18 @@ public:
       worth_passing_along = (timer_ == -1) || ((MonotonicTimePoint::now() + delay + cancel_estimate_) < next_time_);
     }
     if (worth_passing_along) {
-      interceptor_->execute_or_enqueue(new ScheduleEnableCommand(this, delay));
+      interceptor_->execute_or_enqueue(make_rch<ScheduleEnableCommand>(this, delay));
     }
   }
 
   void disable()
   {
-    interceptor_->execute_or_enqueue(new ScheduleDisableCommand(this));
+    interceptor_->execute_or_enqueue(make_rch<ScheduleDisableCommand>(this));
   }
 
   void disable_and_wait()
   {
-    ReactorInterceptor::CommandPtr command = interceptor_->execute_or_enqueue(new ScheduleDisableCommand(this));
+    ReactorInterceptor::CommandPtr command = interceptor_->execute_or_enqueue(make_rch<ScheduleDisableCommand>(this));
     command->wait();
   }
 

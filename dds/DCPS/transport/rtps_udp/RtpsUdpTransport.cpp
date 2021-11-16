@@ -1,30 +1,27 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #include "RtpsUdpTransport.h"
+
 #include "RtpsUdpInst.h"
 #include "RtpsUdpInst_rch.h"
 #include "RtpsUdpSendStrategy.h"
 #include "RtpsUdpReceiveStrategy.h"
 
-#include "dds/DCPS/AssociationData.h"
-#include "dds/DCPS/BuiltInTopicUtils.h"
-#include "dds/DCPS/DiscoveryBase.h"
+#include <dds/DCPS/AssociationData.h>
+#include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/LogAddr.h>
+#include <dds/DCPS/transport/framework/TransportClient.h>
+#include <dds/DCPS/transport/framework/TransportExceptions.h>
+#include <dds/DCPS/RTPS/BaseMessageUtils.h>
 
-#include "dds/DCPS/transport/framework/TransportClient.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
+#include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 
-#include "dds/DCPS/RTPS/BaseMessageUtils.h"
-#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
-
-#include "ace/CDR_Base.h"
-#include "ace/Log_Msg.h"
-#include "ace/Sock_Connect.h"
+#include <ace/CDR_Base.h>
+#include <ace/Log_Msg.h>
+#include <ace/Sock_Connect.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -38,10 +35,11 @@ RtpsUdpTransport::RtpsUdpTransport(RtpsUdpInst& inst)
 #endif
 #ifdef OPENDDS_SECURITY
   , ice_endpoint_(*this)
+  , relay_stun_task_falloff_(TimeDuration::zero_value)
 #endif
 {
   assign(local_prefix_, GUIDPREFIX_UNKNOWN);
-  if (! (configure_i(inst) && open())) {
+  if (!(configure_i(inst) && open())) {
     throw Transport::UnableToCreate();
   }
 }
@@ -69,7 +67,8 @@ RtpsUdpTransport::rtps_relay_only_now(bool flag)
 
 #ifdef OPENDDS_SECURITY
   if (flag) {
-    relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
+    relay_stun_task_falloff_.set(config().heartbeat_period_);
+    relay_stun_task_->schedule(TimeDuration::zero_value);
   } else {
     if (!config().use_rtps_relay()) {
       disable_relay_stun_task();
@@ -85,7 +84,8 @@ RtpsUdpTransport::use_rtps_relay_now(bool flag)
 
 #ifdef OPENDDS_SECURITY
   if (flag) {
-    relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
+    relay_stun_task_falloff_.set(config().heartbeat_period_);
+    relay_stun_task_->schedule(TimeDuration::zero_value);
   } else {
     if (!config().rtps_relay_only()) {
       disable_relay_stun_task();
@@ -119,7 +119,8 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
   if (equal_guid_prefixes(local_prefix_, GUIDPREFIX_UNKNOWN)) {
     assign(local_prefix_, local_prefix);
 #ifdef OPENDDS_SECURITY
-    relay_stun_task(DCPS::MonotonicTimePoint::now());
+    relay_stun_task_falloff_.set(config().heartbeat_period_);
+    relay_stun_task_->schedule(TimeDuration::zero_value);
 #endif
   }
 
@@ -189,7 +190,7 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
 
   GuardThreadType guard_links(links_lock_);
 
-  if (is_shut_down_) {
+  if (is_shut_down()) {
     return AcceptConnectResult();
   }
 
@@ -224,7 +225,7 @@ RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
 
   GuardThreadType guard_links(links_lock_);
 
-  if (is_shut_down_) {
+  if (is_shut_down()) {
     return AcceptConnectResult();
   }
 
@@ -349,7 +350,7 @@ RtpsUdpTransport::register_for_reader(const RepoId& participant,
                                       OpenDDS::DCPS::DiscoveryListener* listener)
 {
   const TransportBLOB* blob = config().get_blob(locators);
-  if (!blob || is_shut_down_) {
+  if (!blob || is_shut_down()) {
     return;
   }
 
@@ -382,7 +383,7 @@ RtpsUdpTransport::register_for_writer(const RepoId& participant,
                                       DiscoveryListener* listener)
 {
   const TransportBLOB* blob = config().get_blob(locators);
-  if (!blob || is_shut_down_) {
+  if (!blob || is_shut_down()) {
     return;
   }
 
@@ -412,7 +413,7 @@ RtpsUdpTransport::update_locators(const RepoId& remote,
                                   const TransportLocatorSeq& locators)
 {
   const TransportBLOB* blob = config().get_blob(locators);
-  if (!blob || is_shut_down_) {
+  if (!blob || is_shut_down()) {
     return;
   }
 
@@ -425,6 +426,24 @@ RtpsUdpTransport::update_locators(const RepoId& remote,
     get_connection_addrs(*blob, &uc_addrs, &mc_addrs, &requires_inline_qos, &blob_bytes_read);
     link_->update_locators(remote, uc_addrs, mc_addrs, requires_inline_qos, false);
   }
+}
+
+void
+RtpsUdpTransport::rtps_relay_address_change()
+{
+#ifdef OPENDDS_SECURITY
+  relay_stun_task_->cancel();
+  relay_stun_task_falloff_.set(config().heartbeat_period_);
+  relay_stun_task_->schedule(TimeDuration::zero_value);
+#endif
+}
+
+void
+RtpsUdpTransport::get_and_reset_relay_message_counts(RelayMessageCounts& counts)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, relay_message_counts_mutex_);
+  counts = relay_message_counts_;
+  relay_message_counts_.reset();
 }
 
 bool
@@ -535,17 +554,18 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
     start_ice();
   }
 
-  relay_stun_task_= make_rch<Periodic>(reactor_task()->interceptor(), ref(*this), &RtpsUdpTransport::relay_stun_task);
-
-  if (config.use_rtps_relay() || config.rtps_relay_only()) {
-    relay_stun_task_->enable(false, ICE::Configuration::instance()->server_reflexive_address_period());
-  }
+  relay_stun_task_= make_rch<Sporadic>(TheServiceParticipant->time_source(), reactor_task()->interceptor(), rchandle_from(this), &RtpsUdpTransport::relay_stun_task);
 #endif
 
   if (config.opendds_discovery_default_listener_) {
     link_ = make_datalink(config.opendds_discovery_guid_.guidPrefix);
     link_->default_listener(*config.opendds_discovery_default_listener_);
   }
+
+#ifdef OPENDDS_SECURITY
+  relay_stun_task_falloff_.set(config.heartbeat_period_);
+  relay_stun_task_->schedule(TimeDuration::zero_value);
+#endif
 
   return true;
 }
@@ -568,7 +588,7 @@ RtpsUdpTransport::shutdown_i()
     stop_ice();
   }
 
-  relay_stun_task_->disable_and_wait();
+  relay_stun_task_->cancel_and_wait();
 #endif
 
   job_queue_.reset();
@@ -624,9 +644,19 @@ namespace {
   }
 
   ssize_t
-  send_single_i(ACE_SOCK_Dgram& socket, const iovec iov[], int n, const ACE_INET_Addr& addr, bool& network_is_unreachable)
+  send_single_i(RtpsUdpInst& config, ACE_SOCK_Dgram& socket, const iovec iov[], int n, const ACE_INET_Addr& addr, bool& network_is_unreachable)
   {
     OPENDDS_ASSERT(addr != ACE_INET_Addr());
+
+#ifdef OPENDDS_TESTING_FEATURES
+    ssize_t total_length;
+    if (config.should_drop(iov, n, total_length)) {
+      return total_length;
+    }
+#else
+    ACE_UNUSED_ARG(config);
+#endif
+
 #ifdef ACE_LACKS_SENDMSG
     char buffer[UDP_MAX_MESSAGE_SIZE];
     char *iter = buffer;
@@ -720,6 +750,11 @@ RtpsUdpTransport::IceEndpoint::choose_send_socket(const ACE_INET_Addr& destinati
 void
 RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN::Message& message)
 {
+  if (destination == transport.config().rtps_relay_address()) {
+    ACE_GUARD(ACE_Thread_Mutex, g, transport.relay_message_counts_mutex_);
+    ++transport.relay_message_counts_.stun_send;
+  }
+
   ACE_SOCK_Dgram& socket = choose_send_socket(destination);
 
   ACE_Message_Block block(20 + message.length());
@@ -729,11 +764,17 @@ RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN
 
   iovec iov[MAX_SEND_BLOCKS];
   const int num_blocks = RtpsUdpSendStrategy::mb_to_iov(block, iov);
-  const ssize_t result = send_single_i(socket, iov, num_blocks, destination, network_is_unreachable_);
-  if (result < 0 && !network_is_unreachable_) {
-    const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
-    ACE_ERROR((prio, "(%P|%t) RtpsUdpTransport::send() - "
-               "failed to send STUN message\n"));
+  const ssize_t result = send_single_i(transport.config(), socket, iov, num_blocks, destination, network_is_unreachable_);
+  if (result < 0) {
+    if (destination == transport.config().rtps_relay_address()) {
+      ACE_GUARD(ACE_Thread_Mutex, g, transport.relay_message_counts_mutex_);
+      ++transport.relay_message_counts_.stun_send_fail;
+    }
+    if (!network_is_unreachable_) {
+      const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
+      ACE_ERROR((prio, "(%P|%t) RtpsUdpTransport::send() - "
+                 "failed to send STUN message\n"));
+    }
   }
 }
 
@@ -811,17 +852,15 @@ RtpsUdpTransport::relay_stun_task(const DCPS::MonotonicTimePoint& /*now*/)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, relay_stun_mutex_);
 
-  if (!(config().use_rtps_relay() ||
-        config().rtps_relay_only())) {
-    return;
-  }
+  const ACE_INET_Addr relay_address = config().rtps_relay_address();
 
-  const ACE_INET_Addr stun_server_address = config().rtps_relay_address();
-
-  process_relay_sra(relay_srsm_.send(stun_server_address, ICE::Configuration::instance()->server_reflexive_indication_count(), local_prefix_));
-
-  if (!equal_guid_prefixes(local_prefix_, GUIDPREFIX_UNKNOWN) && stun_server_address != ACE_INET_Addr()) {
-    ice_endpoint_.send(stun_server_address, relay_srsm_.message());
+  if ((config().use_rtps_relay() || config().rtps_relay_only()) &&
+      relay_address != ACE_INET_Addr() &&
+      !equal_guid_prefixes(local_prefix_, GUIDPREFIX_UNKNOWN)) {
+    process_relay_sra(relay_srsm_.send(relay_address, ICE::Configuration::instance()->server_reflexive_indication_count(), local_prefix_));
+    ice_endpoint_.send(relay_address, relay_srsm_.message());
+    relay_stun_task_falloff_.advance(ICE::Configuration::instance()->server_reflexive_address_period());
+    relay_stun_task_->schedule(relay_stun_task_falloff_.get());
   }
 }
 
@@ -838,6 +877,8 @@ RtpsUdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::StateChang
     break;
   case ICE::ServerReflexiveStateMachine::SRSM_Set:
   case ICE::ServerReflexiveStateMachine::SRSM_Change:
+    // Lengthen to normal period.
+    relay_stun_task_falloff_.set(ICE::Configuration::instance()->server_reflexive_address_period());
     connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();
     deferred_connection_records_.push_back(std::make_pair(true, connection_record));
     break;
@@ -865,7 +906,7 @@ void
 RtpsUdpTransport::disable_relay_stun_task()
 {
 #ifndef DDS_HAS_MINIMUM_BIT
-  relay_stun_task_->disable();
+  relay_stun_task_->cancel();
 
   DCPS::ConnectionRecord connection_record;
   std::memset(connection_record.guid, 0, sizeof(connection_record.guid));

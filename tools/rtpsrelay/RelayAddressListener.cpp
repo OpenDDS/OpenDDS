@@ -3,11 +3,15 @@
 #include <dds/rtpsrelaylib/RelayTypeSupportImpl.h>
 
 #include <dds/DCPS/DCPS_Utils.h>
+#include <dds/DCPS/TimeTypes.h>
 
 namespace RtpsRelay {
 
-RelayAddressListener::RelayAddressListener(RelayPartitionTable& relay_partition_table)
+RelayAddressListener::RelayAddressListener(
+  RelayPartitionTable& relay_partition_table,
+  RelayStatisticsReporter& relay_statistics_reporter)
   : relay_partition_table_(relay_partition_table)
+  , relay_statistics_reporter_(relay_statistics_reporter)
 {}
 
 void RelayAddressListener::on_data_available(DDS::DataReader_ptr reader)
@@ -38,18 +42,26 @@ void RelayAddressListener::on_data_available(DDS::DataReader_ptr reader)
     switch (info.instance_state) {
     case DDS::ALIVE_INSTANCE_STATE:
       if (info.valid_data) {
-        relay_partition_table_.insert(relay_guid_to_rtps_guid(data.application_participant_guid()),
+        relay_partition_table_.insert(data.relay_id(),
                                       data.name(),
                                       ACE_INET_Addr(data.address().c_str()));
       }
       break;
     case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
     case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
-      relay_partition_table_.remove(relay_guid_to_rtps_guid(data.application_participant_guid()),
+      relay_partition_table_.remove(data.relay_id(),
                                     data.name());
       break;
     }
   }
 }
+
+void RelayAddressListener::on_subscription_matched(
+  DDS::DataReader_ptr /*reader*/, const DDS::SubscriptionMatchedStatus& status)
+{
+  relay_statistics_reporter_.relay_address_pub_count(
+    static_cast<uint32_t>(status.total_count), OpenDDS::DCPS::MonotonicTimePoint::now());
+}
+
 
 }

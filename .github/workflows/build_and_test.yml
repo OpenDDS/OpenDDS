@@ -216,7 +216,6 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_i0_xer0_js0_j12
-    timeout-minutes: 150
 
     steps:
     - name: checkout MPC
@@ -308,7 +307,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   build_u18_o1d0v1_xer0_j12:
 
@@ -416,7 +415,6 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_o1d0v1_xer0_j12
-    timeout-minutes: 40
 
     steps:
     - name: checkout MPC
@@ -550,7 +548,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_EXTENDED -Config RTPS -Config LINUX -Config OPENDDS_SAFETY_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GHA_OPENDDS_SAFETY_PROFILE -Config GH_ACTIONS -Config NO_UNIT_TESTS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_EXTENDED -Config RTPS -Config LINUX -Config OPENDDS_SAFETY_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GH_ACTIONS_OPENDDS_SAFETY_PROFILE -Config GH_ACTIONS -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -565,7 +563,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
 
   u18_bsafe_js0_FM-1f:
 
@@ -640,7 +638,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_BASE -Config RTPS -Config LINUX -Config OPENDDS_SAFETY_PROFILE -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GHA_OPENDDS_SAFETY_PROFILE -Config GH_ACTIONS -Config NO_UNIT_TESTS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_BASE -Config RTPS -Config LINUX -Config OPENDDS_SAFETY_PROFILE -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GH_ACTIONS_OPENDDS_SAFETY_PROFILE -Config GH_ACTIONS -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -655,7 +653,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_u18_d0i0v1_sec_js0_FM-08:
 
@@ -808,7 +806,6 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_d0i0v1_sec_js0_FM-08
-    timeout-minutes: 150
 
     steps:
     - name: install xerces
@@ -902,7 +899,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_u18_clang5_i0w1_sec:
 
@@ -1061,7 +1058,6 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_clang5_i0w1_sec
-    timeout-minutes: 30
 
     steps:
     - name: install xerces
@@ -1155,7 +1151,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_u18_clang10_sec_js0:
 
@@ -1273,7 +1269,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --compiler=clang++-10 --std=c++11 --tests --security --no-rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=clang++-10 --std=c++11 --tests --security --no-rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --mpcopts="-features no_opendds_testing_features=0"
     - name: check build configuration
       shell: bash
       run: |
@@ -1314,7 +1310,6 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_clang10_sec_js0
-    timeout-minutes: 30
 
     steps:
     - name: install xerces
@@ -1408,7 +1403,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_u18_gcc6_d0w1_cpp03:
 
@@ -1567,7 +1562,6 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_gcc6_d0w1_cpp03
-    timeout-minutes: 30
 
     steps:
     - name: checkout MPC
@@ -1659,7 +1653,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_u18_gcc8_i0_js0_j:
 
@@ -1818,7 +1812,6 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_gcc8_i0_js0_j
-    timeout-minutes: 30
 
     steps:
     - name: checkout MPC
@@ -1910,7 +1903,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_u18_gcc10_i0w1_xer0:
 
@@ -2064,7 +2057,6 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_gcc10_i0w1_xer0
-    timeout-minutes: 30
 
     steps:
     - name: checkout MPC
@@ -2156,7 +2148,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   u20_gcc10_bsafe_js0_FM-2c:
 
@@ -2383,7 +2375,6 @@ jobs:
     runs-on: ubuntu-20.04
 
     needs: build_u20_ace7_j_qt_ws_sec
-    timeout-minutes: 150
 
     steps:
     - name: install xerces
@@ -2482,7 +2473,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_u20_p1_asan:
 
@@ -2516,7 +2507,10 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+    - name: install clang-12
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      run: sudo apt-get -y install clang-12
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -2530,7 +2524,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --std=c++11 --ipv6 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=clang++-12 --ipv6 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
         echo "CPPFLAGS += -ggdb -O1 -fsanitize=address -fno-omit-frame-pointer" >> ACE_TAO/ACE/include/makeinclude/platform_macros.GNU
         echo "LDFLAGS += -ggdb -fsanitize=address" >> ACE_TAO/ACE/include/makeinclude/platform_macros.GNU
     - name: build ACE and TAO
@@ -2566,6 +2560,8 @@ jobs:
     needs: ACE_TAO_u20_p1_asan
 
     steps:
+    - name: install clang-12
+      run: sudo apt-get -y install clang-12
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -2597,7 +2593,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --std=c++11 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=clang++-12 --std=c++11 --ipv6 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -2632,7 +2628,6 @@ jobs:
     runs-on: ubuntu-20.04
 
     needs: build_u20_p1_asan_sec
-    timeout-minutes: 150
 
     steps:
     - name: install xerces
@@ -2711,7 +2706,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS --security -Config ASAN"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS --security -Config GH_ACTIONS_ASAN"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -2729,7 +2724,264 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+
+  ACE_TAO_u20_p1_tsan:
+
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v2
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: OpenDDS/ACE_TAO
+    - name: get ACE_TAO commit
+      shell: bash
+      run: |
+        cd OpenDDS/ACE_TAO
+        export ACE_COMMIT=$(git rev-parse HEAD)
+        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
+    - name: get compiler version
+      shell: bash
+      run: |
+        export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
+        echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
+    - name: Cache Artifact
+      id: cache-artifact
+      uses: actions/cache@v2
+      with:
+        path: ${{ github.job }}.tar.xz
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+    - name: install clang-12
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      run: sudo apt-get -y install clang-12
+    - name: install xerces
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      run: sudo apt-get -y install libxerces-c-dev
+    - name: checkout MPC
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: configure OpenDDS
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      run: |
+        cd OpenDDS
+        ./configure --compiler=clang++-12 --ipv6 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        echo "CPPFLAGS += -ggdb -O1 -fsanitize=thread -fno-omit-frame-pointer" >> ACE_TAO/ACE/include/makeinclude/platform_macros.GNU
+        echo "LDFLAGS += -ggdb -fsanitize=thread" >> ACE_TAO/ACE/include/makeinclude/platform_macros.GNU
+    - name: build ACE and TAO
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd ACE_TAO/ACE
+        make -j4
+        cd ../TAO
+        make -j4
+    - name: create ACE_TAO tar.xz artifact
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        cd OpenDDS/ACE_TAO
+        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
+        find . -iname "*\.o" | xargs rm
+        tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
+        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
+        xz -3 ../../${{ github.job }}.tar
+    - name: upload ACE_TAO artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_artifact
+        path: ${{ github.job }}.tar.xz
+
+  build_u20_p1_tsan_sec:
+
+    runs-on: ubuntu-20.04
+
+    needs: ACE_TAO_u20_p1_tsan
+
+    steps:
+    - name: install clang-12
+      run: sudo apt-get -y install clang-12
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - name: checkout MPC
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: ACE_TAO
+    - name: download ACE_TAO artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: ACE_TAO_u20_p1_tsan_artifact
+        path: ACE_TAO
+    - name: extract ACE_TAO artifact
+      shell: bash
+      run: |
+        cd ACE_TAO
+        tar xvfJ ACE_TAO_u20_p1_tsan.tar.xz
+    - name: checkout OpenDDS
+      uses: actions/checkout@v2
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: configure OpenDDS
+      run: |
+        cd OpenDDS
+        ./configure --compiler=clang++-12 --ipv6 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+    - name: check build configuration
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        tools/scripts/show_build_config.pl
+    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - name: build OpenDDS
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        make -j4
+    - name: create OpenDDS tar.xz artifact
+      shell: bash
+      run: |
+        cd OpenDDS
+        rm -rf ACE_TAO
+        find . -iname "*\.o" | xargs rm
+        tar cvf ../${{ github.job }}.tar setenv.sh
+        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
+        xz -3 ../${{ github.job }}.tar
+    - name: upload OpenDDS artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_artifact
+        path: ${{ github.job }}.tar.xz
+
+  test_u20_p1_tsan_sec:
+
+    runs-on: ubuntu-20.04
+
+    needs: build_u20_p1_tsan_sec
+
+    steps:
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - name: checkout MPC
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: checkout autobuild
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/autobuild
+        path: autobuild
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: ACE_TAO
+    - name: download ACE_TAO artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: ACE_TAO_u20_p1_tsan_artifact
+        path: ACE_TAO
+    - name: extract ACE_TAO artifact
+      shell: bash
+      run: |
+        cd ACE_TAO
+        tar xvfJ ACE_TAO_u20_p1_tsan.tar.xz
+    - name: checkout OpenDDS
+      uses: actions/checkout@v2
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: download OpenDDS artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: build_u20_p1_tsan_sec_artifact
+        path: OpenDDS
+    - name: extract OpenDDS artifact
+      shell: bash
+      run: |
+        cd OpenDDS
+        tar xvfJ build_u20_p1_tsan_sec.tar.xz
+    - name: check build configuration
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        tools/scripts/show_build_config.pl
+    - name: run OpenDDS tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        mkdir ${{ github.job }}_autobuild_workspace
+        cd ${{ github.job }}_autobuild_workspace
+        echo using commit $TRIGGERING_COMMIT for SHA
+        echo $TRIGGERING_COMMIT >> ./SHA
+        cat > config.xml <<EOF
+        <autobuild>
+        <configuration>
+        <variable name="log_file" value="output.log"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="project_root" value="$DDS_ROOT"/>
+        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="junit_xml_output" value="Tests"/>
+        </configuration>
+        <command name="log" options="on"/>
+        <command name="print_os_version"/>
+        <command name="print_env_vars"/>
+        <command name="print_ace_config"/>
+        <command name="print_cmake_version"/>
+        <command name="print_make_version"/>
+        <command name="check_compiler" options="gcc"/>
+        <command name="print_perl_version"/>
+        <command name="print_autobuild_config"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config RTPS -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS --no-dcps tests/tsan_tests.lst"/>
+        <command name="log" options="off"/>
+        <command name="process_logs" options="prettify"/>
+        </autobuild>
+        EOF
+        echo "deadlock:ACE_Data_Block::release_no_delete" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        echo "deadlock:CORBA::ORB_init" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        echo "deadlock:TAO_IIOP_Connection_Handler" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        echo "race:ACE_Dynamic::instance" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        echo "race:ACE_Event_Handler::reactor" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        echo "race:ACE_Thread_Exit::instance" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        echo "race:TAO::Invocation_Adapter::invoke" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        echo "race:TAO_IIOP_Connection_Handler" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        echo "race:TAO_Leader_Follower" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        echo "race:TAO_ORB_Core" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        export TSAN_OPTIONS=suppressions=$GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
+    - name: upload autobuild output
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_autobuild_output
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: check results
+      shell: bash
+      run: |
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_u20_p1:
 
@@ -2841,7 +3093,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --ipv6 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -2882,7 +3134,6 @@ jobs:
     runs-on: ubuntu-20.04
 
     needs: build_u20_p1_sec
-    timeout-minutes: 150
 
     steps:
     - name: install xerces
@@ -2976,7 +3227,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   build_u20_p1_j8_FM-1f:
 
@@ -3084,7 +3335,6 @@ jobs:
     runs-on: ubuntu-20.04
 
     needs: build_u20_p1_j8_FM-1f
-    timeout-minutes: 150
 
     steps:
     - name: install xerces
@@ -3178,9 +3428,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
-
-  # Ubuntu 18.04 - WChar
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_u18_w1:
 
@@ -3333,7 +3581,6 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_w1_sec
-    timeout-minutes: 150
 
     steps:
     - name: install xerces
@@ -3427,7 +3674,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   build_u18_w1_j_FM-2f:
 
@@ -3535,7 +3782,6 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_w1_j_FM-2f
-    timeout-minutes: 150
 
     steps:
     - name: install xerces
@@ -3629,7 +3875,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_u18_stat_qt_ws_sec:
 
@@ -3798,7 +4044,6 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_stat_qt_ws_sec
-    timeout-minutes: 30
 
     steps:
     - name: install xerces
@@ -3892,15 +4137,13 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
-
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   messenger_u18_stat_qt_ws_sec:
 
     runs-on: ubuntu-18.04
 
     needs: build_u18_stat_qt_ws_sec
-    timeout-minutes: 40
 
     steps:
     - name: install xerces
@@ -4035,14 +4278,13 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   compiler_u18_stat_qt_ws_sec:
 
     runs-on: ubuntu-18.04
 
     needs: build_u18_stat_qt_ws_sec
-    timeout-minutes: 45
 
     steps:
     - name: install xerces
@@ -4114,6 +4356,17 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/DCPS/Compiler
+        rm -rf key_annotation
+        rm -rf keywords
+        rm -rf namespace_conflict
+        rm -rf rapidjson_generator
+        rm -rf sequence_conflict
+        rm -rf TryConstruct
+        rm -rf typecode
+        rm -rf typeobject_hash_consistency
+        rm -rf underscore_fields
+        rm -rf xcdr
+        rm -rf XTypesExtensibility
         perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0
     - name: make compiler tests
       shell: bash
@@ -4163,14 +4416,153 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+
+  compiler2_u18_stat_qt_ws_sec:
+
+    runs-on: ubuntu-18.04
+
+    needs: build_u18_stat_qt_ws_sec
+
+    steps:
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - name: update apt
+      run: sudo apt-get update
+    - name: install qt
+      run: sudo apt-get -y install qtbase5-dev
+    - name: checkout MPC
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: checkout autobuild
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/autobuild
+        path: autobuild
+    - name: checkout OpenDDS
+      uses: actions/checkout@v2
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: ACE_TAO
+    - name: download ACE_TAO artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: ACE_TAO_u18_stat_qt_ws_sec_artifact
+        path: ACE_TAO
+    - name: extract ACE_TAO artifact
+      shell: bash
+      run: |
+        cd ACE_TAO
+        tar xvfJ ACE_TAO_u18_stat_qt_ws_sec.tar.xz
+    - name: download OpenDDS artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: build_u18_stat_qt_ws_sec_artifact
+        path: OpenDDS
+    - name: extract OpenDDS artifact
+      shell: bash
+      run: |
+        cd OpenDDS
+        tar xvfJ build_u18_stat_qt_ws_sec.tar.xz
+    - name: setup gtest
+      run: |
+        cd OpenDDS/tests/googletest
+        git submodule init
+        git submodule update
+        mkdir build
+        cd build
+        mkdir install
+        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+        cmake --build . --target install
+    - name: check build configuration
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        tools/scripts/show_build_config.pl
+    - name: build compiler tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/DCPS/Compiler
+        rm -rf anonymous_types
+        rm -rf C++11
+        rm -rf char_literals
+        rm -rf explicit_ints
+        rm -rf idl_test1_lib
+        rm -rf idl_test1_main
+        rm -rf idl_test2_lib
+        rm -rf idl_test2_main
+        rm -rf idl_test3_lib
+        rm -rf idl_test3_main
+        rm -rf idl_test_nested_types_lib
+        rm -rf isolated_types
+        rm -rf is_topic_type
+        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0
+    - name: make compiler tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/DCPS/Compiler
+        make
+    - name: run OpenDDS tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        mkdir ${{ github.job }}_autobuild_workspace
+        cd ${{ github.job }}_autobuild_workspace
+        echo using commit $TRIGGERING_COMMIT for SHA
+        echo $TRIGGERING_COMMIT >> ./SHA
+        cat > config.xml <<EOF
+        <autobuild>
+        <configuration>
+        <variable name="log_file" value="output.log"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="project_root" value="$DDS_ROOT"/>
+        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="junit_xml_output" value="Tests"/>
+        </configuration>
+        <command name="log" options="on"/>
+        <command name="print_os_version"/>
+        <command name="print_env_vars"/>
+        <command name="print_ace_config"/>
+        <command name="print_make_version"/>
+        <command name="check_compiler" options="gcc"/>
+        <command name="print_perl_version"/>
+        <command name="print_autobuild_config"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS tests/static_ci_tests.lst -Config STATIC_COMPILER2 -Config RTPS -Config STATIC -Config LINUX -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config GH_ACTIONS -Config NO_UNIT_TESTS"/>
+        <command name="log" options="off"/>
+        <command name="process_logs" options="prettify"/>
+        </autobuild>
+        EOF
+        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
+    - name: upload autobuild output
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_autobuild_output
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: check results
+      shell: bash
+      run: |
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   unit_u18_stat_qt_ws_sec:
 
     runs-on: ubuntu-18.04
 
     needs: build_u18_stat_qt_ws_sec
-    timeout-minutes: 150
 
     steps:
     - name: install xerces
@@ -4291,7 +4683,125 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+
+  security_u18_stat_qt_ws_sec:
+
+    runs-on: ubuntu-18.04
+
+    needs: build_u18_stat_qt_ws_sec
+    timeout-minutes: 150
+
+    steps:
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - name: update apt
+      run: sudo apt-get update
+    - name: install qt
+      run: sudo apt-get -y install qtbase5-dev
+    - name: checkout MPC
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: checkout autobuild
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/autobuild
+        path: autobuild
+    - name: checkout OpenDDS
+      uses: actions/checkout@v2
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: ACE_TAO
+    - name: download ACE_TAO artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: ACE_TAO_u18_stat_qt_ws_sec_artifact
+        path: ACE_TAO
+    - name: extract ACE_TAO artifact
+      shell: bash
+      run: |
+        cd ACE_TAO
+        tar xvfJ ACE_TAO_u18_stat_qt_ws_sec.tar.xz
+    - name: download OpenDDS artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: build_u18_stat_qt_ws_sec_artifact
+        path: OpenDDS
+    - name: extract OpenDDS artifact
+      shell: bash
+      run: |
+        cd OpenDDS
+        tar xvfJ build_u18_stat_qt_ws_sec.tar.xz
+    - name: check build configuration
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        tools/scripts/show_build_config.pl
+    - name: configure security tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/security/attributes
+        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0
+    - name: build security tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/security/attributes
+        make -j $(getconf _NPROCESSORS_ONLN)
+    - name: run security tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        mkdir ${{ github.job }}_autobuild_workspace
+        cd ${{ github.job }}_autobuild_workspace
+        echo using commit $TRIGGERING_COMMIT for SHA
+        echo $TRIGGERING_COMMIT >> ./SHA
+        cat > config.xml <<EOF
+        <autobuild>
+        <configuration>
+        <variable name="log_file" value="output.log"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="project_root" value="$DDS_ROOT"/>
+        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="junit_xml_output" value="Tests"/>
+        </configuration>
+        <command name="log" options="on"/>
+        <command name="print_os_version"/>
+        <command name="print_env_vars"/>
+        <command name="print_ace_config"/>
+        <command name="print_make_version"/>
+        <command name="check_compiler" options="gcc"/>
+        <command name="print_perl_version"/>
+        <command name="print_autobuild_config"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS tests/static_ci_tests.lst -Config STATIC_SECURITY"/>
+        <command name="log" options="off"/>
+        <command name="process_logs" options="prettify"/>
+        </autobuild>
+        EOF
+        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
+    - name: upload autobuild output
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_autobuild_output
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: check results
+      shell: bash
+      run: |
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_u18_j_cft0_FM-37:
 
@@ -4471,7 +4981,6 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_j_cft0_FM-37
-    timeout-minutes: 150
 
     steps:
     - name: install xerces
@@ -4565,7 +5074,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_w19_p1_stat_js0:
 
@@ -4604,7 +5113,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
+        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -4658,7 +5167,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
+        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -4739,13 +5248,12 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_p1_stat_js0
-    timeout-minutes: 30
 
     steps:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
+        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -4857,20 +5365,19 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   messenger_w19_p1_stat_js0:
 
     runs-on: windows-2019
 
     needs: build_w19_p1_stat_js0
-    timeout-minutes: 40
 
     steps:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
+        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -5011,14 +5518,13 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   compiler_w19_p1_stat_js0:
 
     runs-on: windows-2019
 
     needs: build_w19_p1_stat_js0
-    timeout-minutes: 45
 
     steps:
     - name: checkout MPC
@@ -5089,6 +5595,17 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Compiler
+        rm -rf key_annotation
+        rm -rf keywords
+        rm -rf namespace_conflict
+        rm -rf rapidjson_generator
+        rm -rf sequence_conflict
+        rm -rf TryConstruct
+        rm -rf typecode
+        rm -rf typeobject_hash_consistency
+        rm -rf underscore_fields
+        rm -rf xcdr
+        rm -rf XTypesExtensibility
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features no_cxx11=0
     - name: make compiler tests
       shell: cmd
@@ -5146,20 +5663,166 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+
+  compiler2_w19_p1_stat_js0:
+
+    runs-on: windows-2019
+
+    needs: build_w19_p1_stat_js0
+
+    steps:
+    - name: checkout MPC
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: checkout autobuild
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/autobuild
+        path: autobuild
+    - name: checkout OpenDDS
+      uses: actions/checkout@v2
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: OpenDDS/ACE_TAO
+    - name: download ACE_TAO artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: ACE_TAO_w19_p1_stat_js0_artifact
+        path: OpenDDS/ACE_TAO
+    - name: extract ACE_TAO artifact
+      shell: bash
+      run: |
+        cd OpenDDS/ACE_TAO
+        tar xvfJ ACE_TAO_w19_p1_stat_js0.tar.xz
+        rm -f ACE_TAO_w19_p1_stat_js0.tar.xz
+    - name: download OpenDDS artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: build_w19_p1_stat_js0_artifact
+        path: OpenDDS
+    - name: extract OpenDDS artifact
+      shell: bash
+      run: |
+        cd OpenDDS
+        tar xvfJ build_w19_p1_stat_js0.tar.xz
+        rm -f build_w19_p1_stat_js0.tar.xz
+    - name: set up msvc env
+      uses: ilammy/msvc-dev-cmd@v1
+    - name: setup gtest
+      shell: cmd
+      run: |
+        cd OpenDDS/tests/googletest
+        git submodule init
+        git submodule update
+        mkdir build
+        cd build
+        mkdir install
+        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+        cmake --build . --target install
+    - name: check build configuration
+      shell: cmd
+      run: |
+        cd OpenDDS
+        call setenv.cmd
+        perl tools\scripts\show_build_config.pl
+    - name: build compiler tests
+      shell: cmd
+      run: |
+        cd OpenDDS
+        call setenv.cmd
+        cd tests\DCPS\Compiler
+        rm -rf anonymous_types
+        rm -rf C++11
+        rm -rf char_literals
+        rm -rf explicit_ints
+        rm -rf idl_test1_lib
+        rm -rf idl_test1_main
+        rm -rf idl_test2_lib
+        rm -rf idl_test2_main
+        rm -rf idl_test3_lib
+        rm -rf idl_test3_main
+        rm -rf idl_test_nested_types_lib
+        rm -rf isolated_types
+        rm -rf is_topic_type
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features no_cxx11=0
+    - name: make compiler tests
+      shell: cmd
+      run: |
+        cd OpenDDS
+        call setenv.cmd
+        cd tests\DCPS\Compiler
+        dir
+        msbuild -p:Configuration=Debug,Platform=x64 -m Compiler.sln
+    - name: create autobuild config
+      shell: bash
+      run: |
+        cd OpenDDS
+        mkdir ${{ github.job }}_autobuild_workspace
+        cd ${{ github.job }}_autobuild_workspace
+        export FS_GHW=$(echo $GITHUB_WORKSPACE | sed 's/\\/\//g')
+        echo using commit $TRIGGERING_COMMIT for SHA
+        echo $TRIGGERING_COMMIT >> ./SHA
+        cat > config.xml <<EOF
+        <autobuild>
+        <configuration>
+        <variable name="log_file" value="output.log"/>
+        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="project_root" value="$FS_GHW/OpenDDS"/>
+        <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="junit_xml_output" value="Tests"/>
+        </configuration>
+        <command name="log" options="on"/>
+        <command name="print_os_version"/>
+        <command name="print_env_vars"/>
+        <command name="print_ace_config"/>
+        <command name="print_make_version"/>
+        <command name="check_compiler" options="msvc"/>
+        <command name="print_perl_version"/>
+        <command name="print_autobuild_config"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_COMPILER2 -Config RTPS -Config WIN64 -Config IPV6 -Config XERCES3 -Config CXX11 -Config GH_ACTIONS -Config NO_UNIT_TESTS"/>
+        <command name="log" options="off"/>
+        <command name="process_logs" options="prettify"/>
+        </autobuild>
+        EOF
+        cat config.xml
+    - name: run OpenDDS tests
+      shell: cmd
+      run: |
+        cd OpenDDS
+        call setenv.cmd
+        cd ${{ github.job }}_autobuild_workspace
+        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+    - name: upload autobuild output
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_autobuild_output
+        path: OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: check results
+      shell: bash
+      run: |
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   unit_w19_p1_stat_js0:
 
     runs-on: windows-2019
 
     needs: build_w19_p1_stat_js0
-    timeout-minutes: 150
 
     steps:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
+        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -5286,7 +5949,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_w19_re_p1_stat_FM-08:
 
@@ -5325,7 +5988,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
+        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -5379,7 +6042,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
+        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -5460,13 +6123,12 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_p1_stat_FM-08
-    timeout-minutes: 30
 
     steps:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
+        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -5578,20 +6240,19 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   messenger_w19_re_p1_stat_FM-08:
 
     runs-on: windows-2019
 
     needs: build_w19_re_p1_stat_FM-08
-    timeout-minutes: 40
 
     steps:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
+        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -5732,14 +6393,13 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   compiler_w19_re_p1_stat_FM-08:
 
     runs-on: windows-2019
 
     needs: build_w19_re_p1_stat_FM-08
-    timeout-minutes: 45
 
     steps:
     - name: checkout MPC
@@ -5810,6 +6470,17 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Compiler
+        rm -rf key_annotation
+        rm -rf keywords
+        rm -rf namespace_conflict
+        rm -rf rapidjson_generator
+        rm -rf sequence_conflict
+        rm -rf TryConstruct
+        rm -rf typecode
+        rm -rf typeobject_hash_consistency
+        rm -rf underscore_fields
+        rm -rf xcdr
+        rm -rf XTypesExtensibility
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
     - name: make compiler tests
       shell: cmd
@@ -5866,20 +6537,165 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+
+  compiler2_w19_re_p1_stat_FM-08:
+
+    runs-on: windows-2019
+
+    needs: build_w19_re_p1_stat_FM-08
+
+    steps:
+    - name: checkout MPC
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: checkout autobuild
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/autobuild
+        path: autobuild
+    - name: checkout OpenDDS
+      uses: actions/checkout@v2
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: OpenDDS/ACE_TAO
+    - name: download ACE_TAO artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: ACE_TAO_w19_re_p1_stat_FM-08_artifact
+        path: OpenDDS/ACE_TAO
+    - name: extract ACE_TAO artifact
+      shell: bash
+      run: |
+        cd OpenDDS/ACE_TAO
+        tar xvfJ ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
+        rm -f ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
+    - name: download OpenDDS artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: build_w19_re_p1_stat_FM-08_artifact
+        path: OpenDDS
+    - name: extract OpenDDS artifact
+      shell: bash
+      run: |
+        cd OpenDDS
+        tar xvfJ build_w19_re_p1_stat_FM-08.tar.xz
+        rm -f build_w19_re_p1_stat_FM-08.tar.xz
+    - name: set up msvc env
+      uses: ilammy/msvc-dev-cmd@v1
+    - name: setup gtest
+      shell: cmd
+      run: |
+        cd OpenDDS/tests/googletest
+        git submodule init
+        git submodule update
+        mkdir build
+        cd build
+        mkdir install
+        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+        cmake --build . --target install --config Release
+    - name: check build configuration
+      shell: cmd
+      run: |
+        cd OpenDDS
+        call setenv.cmd
+        perl tools\scripts\show_build_config.pl
+    - name: build compiler tests
+      shell: cmd
+      run: |
+        cd OpenDDS
+        call setenv.cmd
+        cd tests\DCPS\Compiler
+        rm -rf anonymous_types
+        rm -rf C++11
+        rm -rf char_literals
+        rm -rf explicit_ints
+        rm -rf idl_test1_lib
+        rm -rf idl_test1_main
+        rm -rf idl_test2_lib
+        rm -rf idl_test2_main
+        rm -rf idl_test3_lib
+        rm -rf idl_test3_main
+        rm -rf idl_test_nested_types_lib
+        rm -rf isolated_types
+        rm -rf is_topic_type
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
+    - name: make compiler tests
+      shell: cmd
+      run: |
+        cd OpenDDS
+        call setenv.cmd
+        cd tests\DCPS\Compiler
+        msbuild -p:Configuration=Release,Platform=x64 -m Compiler.sln
+    - name: create autobuild config
+      shell: bash
+      run: |
+        cd OpenDDS
+        mkdir ${{ github.job }}_autobuild_workspace
+        cd ${{ github.job }}_autobuild_workspace
+        export FS_GHW=$(echo $GITHUB_WORKSPACE | sed 's/\\/\//g')
+        echo using commit $TRIGGERING_COMMIT for SHA
+        echo $TRIGGERING_COMMIT >> ./SHA
+        cat > config.xml <<EOF
+        <autobuild>
+        <configuration>
+        <variable name="log_file" value="output.log"/>
+        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="project_root" value="$FS_GHW/OpenDDS"/>
+        <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="junit_xml_output" value="Tests"/>
+        </configuration>
+        <command name="log" options="on"/>
+        <command name="print_os_version"/>
+        <command name="print_env_vars"/>
+        <command name="print_ace_config"/>
+        <command name="print_make_version"/>
+        <command name="check_compiler" options="msvc"/>
+        <command name="print_perl_version"/>
+        <command name="print_autobuild_config"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Static_Release -Config STATIC_COMPILER2 -Config STATIC -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config RTPS -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config GH_ACTIONS -Config NO_UNIT_TESTS"/>
+        <command name="log" options="off"/>
+        <command name="process_logs" options="prettify"/>
+        </autobuild>
+        EOF
+        cat config.xml
+    - name: run OpenDDS tests
+      shell: cmd
+      run: |
+        cd OpenDDS
+        call setenv.cmd
+        cd ${{ github.job }}_autobuild_workspace
+        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+    - name: upload autobuild output
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_autobuild_output
+        path: OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: check results
+      shell: bash
+      run: |
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   unit_w19_re_p1_stat_FM-08:
 
     runs-on: windows-2019
 
     needs: build_w19_re_p1_stat_FM-08
-    timeout-minutes: 150
 
     steps:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
+        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -6006,7 +6822,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_w19_re_o1p1_sec:
 
@@ -6040,12 +6856,12 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
+        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -6062,7 +6878,8 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --optimize --ipv6 --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
+        call configure -v --optimize --ipv6 --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
+        perl tools\scripts\show_build_config.pl
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -6099,7 +6916,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
+        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -6196,7 +7013,6 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_o1p1_sec
-    timeout-minutes: 30
 
     steps:
     - name: checkout MPC
@@ -6310,20 +7126,19 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   messenger_w19_re_o1p1_sec:
 
     runs-on: windows-2019
 
     needs: build_w19_re_o1p1_sec
-    timeout-minutes: 40
 
     steps:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
+        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -6464,20 +7279,19 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   compiler_w19_re_o1p1_sec:
 
     runs-on: windows-2019
 
     needs: build_w19_re_o1p1_sec
-    timeout-minutes: 45
 
     steps:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
+        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -6604,20 +7418,19 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   unit_w19_re_o1p1_sec:
 
     runs-on: windows-2019
 
     needs: build_w19_re_o1p1_sec
-    timeout-minutes: 150
 
     steps:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
+        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -6744,8 +7557,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
-
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   wireshark_w19-release:
 
@@ -6775,7 +7587,7 @@ jobs:
       uses: lukka/run-vcpkg@v7
       with:
         vcpkgDirectory: '${{ github.workspace }}/vcpkg-qt'
-        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
+        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse qt5-winextras qt5-tools qt5-svg qt5-multimedia qt5-declarative
         vcpkgTriplet: x64-windows
     - name: checkout WinFlexBison
@@ -6858,7 +7670,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
+        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -6922,7 +7734,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
+        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -7015,7 +7827,6 @@ jobs:
     runs-on: windows-2019
 
     needs: build_w19_re_j_ws_FM-1f
-    timeout-minutes: 30
 
     steps:
     - name: checkout MPC
@@ -7118,20 +7929,19 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   messenger_w19_re_j_ws_FM-1f:
 
     runs-on: windows-2019
 
     needs: build_w19_re_j_ws_FM-1f
-    timeout-minutes: 40
 
     steps:
     - name: install xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
+        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -7272,20 +8082,19 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   compiler_w19_re_j_ws_FM-1f:
 
     runs-on: windows-2019
 
     needs: build_w19_re_j_ws_FM-1f
-    timeout-minutes: 45
 
     steps:
     - name: install xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
+        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -7412,20 +8221,19 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   unit_w19_re_j_ws_FM-1f:
 
     runs-on: windows-2019
 
     needs: build_w19_re_j_ws_FM-1f
-    timeout-minutes: 150
 
     steps:
     - name: install xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
+        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -7559,7 +8367,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_w16_x86_i0:
 
@@ -7593,12 +8401,12 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
+        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x86-windows
     - name: checkout MPC
@@ -7617,7 +8425,8 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --no-inline --tests --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x86-windows --openssl=%VCPKG_ROOT%/installed/x86-windows --mpcopts=-hierarchy
+        call configure -v --no-inline --tests --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x86-windows --openssl=%VCPKG_ROOT%/installed/x86-windows --mpcopts=-hierarchy
+        perl tools\scripts\show_build_config.pl
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -7654,7 +8463,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
+        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x86-windows
     - name: ls
@@ -7757,13 +8566,12 @@ jobs:
     runs-on: windows-2016
 
     needs: build_w16_x86_i0_sec
-    timeout-minutes: 150
 
     steps:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
+        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x86-windows
     - name: checkout MPC
@@ -7861,7 +8669,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -Config RTPS -Config WIN32 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS --security --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -Config RTPS -Config WIN32 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS -Config GH_ACTIONS_W16 --security --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -7883,7 +8691,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   build_w16_x86_i0_j_FM-1f:
 
@@ -7895,7 +8703,7 @@ jobs:
     - name: install xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
+        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x86-windows
     - name: checkout MPC
@@ -7940,7 +8748,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --tests --java --no-built-in-topics --rapidjson --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="%VCPKG_ROOT%\installed\x86-windows"
+        configure --tests --java --no-built-in-topics --rapidjson --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="%VCPKG_ROOT%\installed\x86-windows" --mpcopts="-features no_opendds_testing_features=0"
     - name: check build configuration
       shell: cmd
       run: |
@@ -7982,13 +8790,12 @@ jobs:
     runs-on: windows-2016
 
     needs: build_w16_x86_i0_j_FM-1f
-    timeout-minutes: 30
 
     steps:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: d417ae59d6e9aa20d9f812b5deb966645c54687d
+        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x86-windows
     - name: checkout MPC
@@ -8097,7 +8904,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   # macOS 11.0
 
@@ -8143,7 +8950,7 @@ jobs:
 #      if: steps.cache-artifact.outputs.cache-hit != 'true'
 #      run: |
 #        cd OpenDDS
-#        ./configure --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl/
+#        ./configure --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl@1.1
 #    - name: build ACE and TAO
 #      if: steps.cache-artifact.outputs.cache-hit != 'true'
 #      run: |
@@ -8208,7 +9015,7 @@ jobs:
 #    - name: configure OpenDDS
 #      run: |
 #        cd OpenDDS
-#        ./configure --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl/
+#        ./configure --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl@1.1
 #    - name: check build configuration
 #      shell: bash
 #      run: |
@@ -8335,7 +9142,7 @@ jobs:
 #      shell: bash
 #      run: |
 #        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-#        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+#        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
 #  macos-11_0_defaults_java_no-bit_build:
 
@@ -8530,7 +9337,7 @@ jobs:
 #      shell: bash
 #      run: |
 #        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-#        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+#        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   # macOS 10.15
 
@@ -8581,7 +9388,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --optimize --no-debug --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl/
+        ./configure --optimize --no-debug --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl@1.1
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -8646,7 +9453,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --optimize --no-debug --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl/
+        ./configure --optimize --no-debug --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl@1.1
     - name: check build configuration
       shell: bash
       run: |
@@ -8687,7 +9494,6 @@ jobs:
     runs-on: macos-10.15
 
     needs: build_m10_o1d0_sec
-    timeout-minutes: 150
 
     steps:
     - name: install xerces-c
@@ -8772,7 +9578,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config OSX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config GH_ACTIONS --security --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config OSX -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config GH_ACTIONS -Config GH_ACTIONS_M10 --security --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -8787,7 +9593,7 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_m10_i0_j_FM-1f:
 
@@ -8836,7 +9642,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure  --no-inline --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl/
+        ./configure  --no-inline --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl@1.1
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -8970,7 +9776,6 @@ jobs:
     runs-on: macos-10.15
 
     needs: build_m10_i0_j_FM-1f
-    timeout-minutes: 150
 
     steps:
     - name: install xerces-c
@@ -9055,7 +9860,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS -Config NO_UNIT_TESTS --java --modeling --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config GH_ACTIONS -Config NO_UNIT_TESTS -Config GH_ACTIONS_M10 --java --modeling --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -9070,4 +9875,4 @@ jobs:
       shell: bash
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        if ! grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"; then echo "::error file=tests/auto_run_tests.pl,line=0,col=0::Test Failures: see 'Test Results: ${{ github.job }}'"; fi
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"

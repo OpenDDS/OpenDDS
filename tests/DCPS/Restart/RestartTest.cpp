@@ -10,9 +10,6 @@
 #ifdef OPENDDS_SECURITY
 #  include <dds/DCPS/security/BuiltInPlugins.h>
 #  include <dds/DCPS/security/framework/Properties.h>
-#  ifdef ACE_AS_STATIC_LIBS
-#    include <dds/DCPS/security/BuiltInPluginLoader.h>
-#  endif
 #endif
 
 #include <ace/Init_ACE.h>
@@ -60,10 +57,6 @@ struct Application {
     OpenDDS::DCPS::TransportInst_rch ti = TheTransportRegistry->create_inst(transport_instance_name, "rtps_udp");
     OpenDDS::DCPS::TransportConfig_rch cfg = TheTransportRegistry->create_config(transport_config_name_);
     cfg->instances_.push_back(ti);
-
-#if defined OPENDDS_SECURITY && defined ACE_AS_STATIC_LIBS
-    OpenDDS::Security::BuiltInPluginLoader().init(0, 0);
-#endif
 
     DDS::DomainParticipantFactory_var dpf = TheServiceParticipant->get_domain_participant_factory();
     if (!dpf) {

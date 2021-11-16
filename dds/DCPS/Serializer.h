@@ -345,7 +345,6 @@ private:
  */
 class OpenDDS_Dcps_Export Serializer {
 public:
-
   /// Flags and reserved ids used in parameter list ids.
   ///@{
   static const ACE_CDR::UShort pid_extended = 0x3f01;
@@ -360,6 +359,10 @@ public:
 
   // EMHEADER must understand flag
   static const ACE_CDR::ULong emheader_must_understand = 1U << 31U;
+
+  /// Maximum value for member id.
+  static const ACE_CDR::ULong MEMBER_ID_MAX = 0x0FFFFFFF;
+  static const ACE_CDR::ULong MEMBER_ID_MASK = MEMBER_ID_MAX;
 
   /**
    * Constructor with a message block chain.  This installs the
@@ -433,6 +436,14 @@ public:
   /// This is used by the RTPS protocol to allow reading messages from
   /// future versions of the spec which may have additional optional fields.
   bool skip(size_t n, int size = 1);
+
+  /// Return a duplicated Message Block (chain) which starts at the current
+  /// read position (rpos) and extends for n bytes.
+  /// This can be used to treat a subset of the original message as if it
+  /// was itself a full message, for example the SerializedPayload or the
+  /// Parameter value inside a ParameterList.
+  /// The returned object should be release()'d (use Message_Block_Ptr)
+  ACE_Message_Block* trim(size_t n) const;
 
   const char* pos_rd() const { return current_ ? current_->rd_ptr() : 0; }
   const char* pos_wr() const { return current_ ? current_->wr_ptr() : 0; }
@@ -553,7 +564,7 @@ public:
     FromBoundedString(const string_t& str, ACE_CDR::ULong bound)
       : str_(str), bound_(bound) {}
     const string_t& str_;
-    ACE_CDR::ULong bound_;
+    const ACE_CDR::ULong bound_;
   };
 
   friend OpenDDS_Dcps_Export
@@ -628,7 +639,7 @@ public:
     ToBoundedString(string_t& str, ACE_CDR::ULong bound)
       : str_(str), bound_(bound) {}
     string_t& str_;
-    ACE_CDR::ULong bound_;
+    const ACE_CDR::ULong bound_;
   };
 
   friend OpenDDS_Dcps_Export

@@ -1,33 +1,37 @@
 // Test for the mini-transport in SPDP (sequence number handling)
 
-#include "dds/DCPS/transport/rtps_udp/RtpsUdpInst.h"
+#include <dds/DCPS/transport/rtps_udp/RtpsUdpInst.h>
 #ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
+#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
-#include "dds/DCPS/transport/framework/NetworkAddress.h"
+#include <dds/DCPS/transport/framework/NetworkAddress.h>
 
-#include "dds/DCPS/RTPS/BaseMessageTypes.h"
-#include "dds/DCPS/RTPS/GuidGenerator.h"
-#include "dds/DCPS/RTPS/MessageTypes.h"
-#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
-#include "dds/DCPS/RTPS/RtpsDiscovery.h"
-#include "dds/DCPS/RTPS/ParameterListConverter.h"
-#include "dds/DCPS/RTPS/Spdp.h"
+#include <dds/DCPS/RTPS/BaseMessageTypes.h>
+#include <dds/DCPS/RTPS/GuidGenerator.h>
+#include <dds/DCPS/RTPS/MessageTypes.h>
+#include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#include <dds/DCPS/RTPS/ParameterListConverter.h>
+#include <dds/DCPS/RTPS/Spdp.h>
 
-#include "dds/DCPS/Service_Participant.h"
+#include <dds/DCPS/LogAddr.h>
+#include <dds/DCPS/Service_Participant.h>
 
-#include "ace/Configuration.h"
-#include "ace/Reactor.h"
-#include "ace/Select_Reactor.h"
+#include <ace/Configuration.h>
+#include <ace/Reactor.h>
+#include <ace/Select_Reactor.h>
 
 #include <ace/OS_main.h>
 #include <ace/Thread_Manager.h>
 #include <ace/Reactor.h>
 #include <ace/SOCK_Dgram.h>
+#include <ace/OS_NS_arpa_inet.h>
+#include <ace/OS_NS_unistd.h>
 
 #include <exception>
 #include <iostream>
+#include <string>
 
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
@@ -135,9 +139,7 @@ struct TestParticipant: ACE_Event_Handler {
     ACE_Message_Block mb(size);
     Serializer ser(&mb, encoding);
 
-    // TODO(iguessthislldo) Use common encapsulation code, NOTE that 3 is "PL_CDR_LE", not "CDR_LE"
-    const ACE_CDR::ULong encap = 0x00000300; // {CDR_LE, options} in BE format
-
+    const EncapsulationHeader encap (encoding, MUTABLE);
     if (!(ser << hdr_ && ser << ds && ser << encap)) {
       ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize headers\n"));
       return false;
@@ -251,17 +253,34 @@ struct ReactorTask : ACE_Task_Base {
   }
 };
 
+void to_locator(const ACE_INET_Addr& addr, Locator_t& locator)
+{
+#ifdef ACE_HAS_IPV6
+  if (addr.get_type() == AF_INET6) {
+    locator.kind = LOCATOR_KIND_UDPv6;
+    struct sockaddr_in6* in6 = static_cast<struct sockaddr_in6*>(addr.get_addr());
+    ACE_OS::memcpy(reinterpret_cast<unsigned char*>(locator.address), &in6->sin6_addr, 16);
+  } else
+#endif
+  {
+    locator.kind = LOCATOR_KIND_UDPv4;
+    struct sockaddr_in* sa = static_cast<struct sockaddr_in*>(addr.get_addr());
+    std::memset(locator.address, 0, 12);
+    ACE_OS::memcpy(reinterpret_cast<unsigned char*>(locator.address) + 12, &sa->sin_addr, 4);
+  }
+}
+
 bool run_test()
 {
   // Create and initialize RtpsDiscovery
   RtpsDiscovery rd("test");
   rd.config()->use_ncm(false);
-  ACE_INET_Addr local_addr(u_short(7575), "0.0.0.0");
+  const ACE_INET_Addr local_addr(u_short(7575), "0.0.0.0");
   rd.config()->spdp_local_address(local_addr);
   const DDS::DomainId_t domain = 0;
   const DDS::DomainParticipantQos qos = TheServiceParticipant->initial_DomainParticipantQos();
   RepoId id = rd.generate_participant_guid();
-  const RcHandle<Spdp> spdp(make_rch<Spdp>(domain, ref(id), qos, &rd));
+  const RcHandle<Spdp> spdp(make_rch<Spdp>(domain, ref(id), qos, &rd, OpenDDS::XTypes::TypeLookupService_rch()));
 
   const DDS::Subscriber_var sVar;
   spdp->init_bit(sVar);
@@ -303,7 +322,6 @@ bool run_test()
 
   // Create a Parameter List
   OpenDDS::RTPS::ParameterList plist;
-
   const BuiltinEndpointSet_t availableBuiltinEndpoints =
     DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER |
     DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR |
@@ -316,8 +334,7 @@ bool run_test()
     BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER |
     BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER |
     BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER |
-    BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER
-  ;
+    BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER;
 
 #ifdef OPENDDS_SECURITY
   const DDS::Security::ExtendedBuiltinEndpointSet_t availableExtendedBuiltinEndpoints =
@@ -330,7 +347,6 @@ bool run_test()
   OpenDDS::DCPS::LocatorSeq nonEmptyList(1);
   nonEmptyList.length(1);
   nonEmptyList[0].port = 12345;
-
   nonEmptyList[0].kind = LOCATOR_KIND_UDPv4;
   std::memset(nonEmptyList[0].address, 0, 12);
   nonEmptyList[0].address[12] = 127;
@@ -338,26 +354,45 @@ bool run_test()
   nonEmptyList[0].address[14] = 0;
   nonEmptyList[0].address[15] = 1;
 
+  size_t addr_count;
+  ACE_INET_Addr* addr_array = 0;
+  const int ret = ACE::get_ip_interfaces(addr_count, addr_array);
+  struct Addr_Deleter {
+    Addr_Deleter(ACE_INET_Addr* ptr) : ptr_(ptr) {}
+    ~Addr_Deleter() { delete [] ptr_; }
+    ACE_INET_Addr* const ptr_;
+  } addr_deleter(addr_array);
+  if (ret != 0 || addr_count < 1) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ACE::get_ip_interfaces failed.\n")));
+    return false;
+  }
+
+  const ACE_CDR::ULong addr_count_ulong = static_cast<ACE_CDR::ULong>(addr_count);
+  OpenDDS::DCPS::LocatorSeq unicastLocators(addr_count_ulong);
+  unicastLocators.length(addr_count_ulong);
+  for (ACE_CDR::ULong i = 0; i < addr_count_ulong; ++i) {
+    if (DCPS_debug_level) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) spdp_transport.cpp:run_test() addr_array[%d]: %C\n"), i, LogAddr(addr_array[i]).c_str()));
+    }
+    to_locator(addr_array[i], unicastLocators[i]);
+  }
+
   const OpenDDS::RTPS::SPDPdiscoveredParticipantData pdata = {
-    {
-      DDS::BuiltinTopicKey_t(),
-      qos.user_data
-    },
+    {DDS::BuiltinTopicKey_t(), qos.user_data},
     {
       domain
       , ""
       , PROTOCOLVERSION
-      , {gp[0], gp[1], gp[2], gp[3], gp[4], gp[5],
-       gp[6], gp[7], gp[8], gp[9], gp[10], gp[11]}
+      , {gp[0], gp[1], gp[2], gp[3], gp[4], gp[5], gp[6], gp[7], gp[8], gp[9], gp[10], gp[11]}
       , VENDORID_OPENDDS
-      , false /*expectsIQoS*/
+      , false // expectsIQoS
       , availableBuiltinEndpoints
       , 0
-      , nonEmptyList /* sedp_multicast */
-      , nonEmptyList /* sedp_unicast */
-      , nonEmptyList /*defaultMulticastLocatorList*/
-      , nonEmptyList /*defaultUnicastLocatorList*/
-      , { 0 /*manualLivelinessCount*/ }
+      , unicastLocators // metatrafficUnicastLocatorList
+      , nonEmptyList    // metatrafficMulticastLocatorList
+      , nonEmptyList    // defaultMulticastLocatorList
+      , nonEmptyList    // defaultUnicastLocatorList
+      , {0} // manualLivelinessCount
       , qos.property
       , {PFLAGS_THIS_VERSION} // opendds_participant_flags
       , false // opendds_rtps_relay_application_participant
@@ -369,8 +404,7 @@ bool run_test()
       static_cast<CORBA::Long>((rd.resend_period() * 10).value().sec()),
       0 // we are not supporting fractional seconds in the lease duration
     },
-    { 0, 0},
-    0
+    {0, 0}
   };
 
   if (!OpenDDS::RTPS::ParameterListConverter::to_param_list(pdata, plist)) {
@@ -418,8 +452,7 @@ bool run_test()
     }
   }
 
-  // Sequence number starts at 8 and reverts to 6 to verify default reset
-  // limits.
+  // Sequence number starts at 8 and reverts to 6 to verify default reset limits.
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("Reset Within Limits Test\n")));
   bfirst = true;
   expect_participant = true;
@@ -487,7 +520,6 @@ bool run_test()
 
     if (seq.low == ACE_UINT32_MAX) {
       ++seq.high;
-
       if (seq.high < 0) {
         seq.high = 0;
       }
@@ -502,8 +534,9 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   try {
     ::DDS::DomainParticipantFactory_var dpf =
         TheServiceParticipant->get_domain_participant_factory();
+    set_DCPS_debug_level(1);
   } catch (const CORBA::BAD_PARAM& ex) {
-    ex._tao_print_exception("Exception caught in rtps_reliability.cpp:");
+    ex._tao_print_exception("Exception caught in spdp_transport.cpp:");
     return 1;
   }
 

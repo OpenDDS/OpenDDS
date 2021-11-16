@@ -16,10 +16,12 @@
 #include "ConfigUtils.h"
 #include "unique_ptr.h"
 #include "ReactorTask.h"
+#include "JobQueue.h"
 #include "NetworkConfigMonitor.h"
 #include "NetworkConfigModifier.h"
 #include "Recorder.h"
 #include "Replayer.h"
+#include "TimeSource.h"
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsDomainC.h>
@@ -78,6 +80,8 @@ public:
   /// Return a singleton instance of this class.
   static Service_Participant* instance();
 
+  const TimeSource& time_source() const;
+
   /// Get the common timer interface.
   /// Intended for use by OpenDDS internals only.
   ACE_Reactor_Timer_Interface* timer();
@@ -87,6 +91,8 @@ public:
   ACE_thread_t reactor_owner() const;
 
   ReactorInterceptor_rch interceptor() const;
+
+  JobQueue_rch job_queue() const;
 
   void set_shutdown_listener(ShutdownListener* listener);
 
@@ -516,7 +522,9 @@ private:
   ACE_ARGV ORB_argv_;
 #endif
 
+  const TimeSource time_source_;
   ReactorTask reactor_task_;
+  JobQueue_rch job_queue_;
 
   RcHandle<DomainParticipantFactoryImpl> dp_factory_servant_;
 
@@ -558,7 +566,7 @@ private:
   DDS::WriterDataLifecycleQosPolicy   initial_WriterDataLifecycleQosPolicy_;
   DDS::ReaderDataLifecycleQosPolicy   initial_ReaderDataLifecycleQosPolicy_;
   DDS::PropertyQosPolicy              initial_PropertyQosPolicy_;
-  DDS::DataRepresentationQosPolicy initial_DataRepresentationQosPolicy_;
+  DDS::DataRepresentationQosPolicy    initial_DataRepresentationQosPolicy_;
 
   DDS::DomainParticipantQos           initial_DomainParticipantQos_;
   DDS::TopicQos                       initial_TopicQos_;

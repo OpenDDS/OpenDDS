@@ -1,7 +1,7 @@
 #ifndef OPENDDS_DCPS_DATAREADERIMPL_T_H
 #define OPENDDS_DCPS_DATAREADERIMPL_T_H
 
-#include "ace/config-lite.h"
+#include <ace/config-lite.h>
 
 #ifdef ACE_HAS_CPP11
 #  define OPENDDS_HAS_STD_SHARED_PTR
@@ -17,12 +17,14 @@
 #include "dcps_export.h"
 #include "GuidConverter.h"
 
-#ifdef OPENDDS_HAS_STD_SHARED_PTR
-#include <memory>
-#else
-#include <ace/Bound_Ptr.h>
+#ifndef OPENDDS_HAS_STD_SHARED_PTR
+#  include <ace/Bound_Ptr.h>
 #endif
 #include <ace/Time_Value.h>
+
+#ifndef OPENDDS_HAS_STD_SHARED_PTR
+#  include <memory>
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -31,7 +33,7 @@ namespace OpenDDS {
 
   /** Servant for DataReader interface of Traits::MessageType data type.
    *
-   * See the DDS specification, OMG formal/04-12-02, for a description of
+   * See the DDS specification, OMG formal/2015-04-10, for a description of
    * this interface.
    *
    */
@@ -253,9 +255,10 @@ namespace OpenDDS {
 
     const Observer_rch observer = get_observer(Observer::e_SAMPLE_READ);
 
-    const typename InstanceMap::iterator the_end = instance_map_.end();
-    for (typename InstanceMap::iterator it = instance_map_.begin(); it != the_end; ++it) {
-      const SubscriptionInstance_rch ptr = get_handle_instance(it->second);
+    for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
+        iter != instances_.end();
+        ++iter) {
+      const SubscriptionInstance_rch ptr = iter->second;
 
       bool most_recent_generation = false;
 
@@ -311,10 +314,10 @@ namespace OpenDDS {
 
     const Observer_rch observer = get_observer(Observer::e_SAMPLE_TAKEN);
 
-    const typename InstanceMap::iterator the_end = instance_map_.end();
-    for (typename InstanceMap::iterator it = instance_map_.begin(); it != the_end; ++it) {
-      DDS::InstanceHandle_t handle = it->second;
-      OpenDDS::DCPS::SubscriptionInstance_rch ptr = get_handle_instance(handle);
+    for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
+         iter != instances_.end();
+         ++iter) {
+      SubscriptionInstance_rch ptr = iter->second;
 
       bool most_recent_generation = false;
 
@@ -964,10 +967,12 @@ namespace OpenDDS {
     if (encapsulated) {
       EncapsulationHeader encap;
       if (!(ser >> encap)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
-          ACE_TEXT("%CDataReaderImpl::lookup_instance: ")
-          ACE_TEXT("deserialization of encapsulation header failed.\n"),
-          TraitsType::type_name()));
+        if (DCPS_debug_level > 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
+            ACE_TEXT("%CDataReaderImpl::lookup_instance: ")
+            ACE_TEXT("deserialization of encapsulation header failed.\n"),
+            TraitsType::type_name()));
+        }
         return;
       }
       Encoding encoding;
@@ -1012,9 +1017,11 @@ namespace OpenDDS {
                      TraitsType::type_name()));
         }
       } else {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %CDataReaderImpl::lookup_instance ")
-                   ACE_TEXT("deserialization failed.\n"),
-                   TraitsType::type_name()));
+        if (DCPS_debug_level > 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) %CDataReaderImpl::lookup_instance ")
+                    ACE_TEXT("deserialization failed.\n"),
+                    TraitsType::type_name()));
+        }
       }
       return;
     }
@@ -1091,8 +1098,10 @@ protected:
 
     if (marshal_skip_serialize_) {
       if (!MarshalTraitsType::from_message_block(*data, *sample.sample_)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::dds_demarshal: ")
-                   ACE_TEXT("attempting to skip serialize but bad from_message_block. Returning from demarshal.\n")));
+        if (DCPS_debug_level > 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::dds_demarshal: ")
+                    ACE_TEXT("attempting to skip serialize but bad from_message_block. Returning from demarshal.\n")));
+        }
         return message_holder;
       }
       store_instance_data(move(data), sample.header_, instance, just_registered, filtered);
@@ -1108,10 +1117,12 @@ protected:
     if (encapsulated) {
       EncapsulationHeader encap;
       if (!(ser >> encap)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
-          ACE_TEXT("%CDataReaderImpl::dds_demarshal: ")
-          ACE_TEXT("deserialization of encapsulation header failed.\n"),
-          TraitsType::type_name()));
+        if (DCPS_debug_level > 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
+            ACE_TEXT("%CDataReaderImpl::dds_demarshal: ")
+            ACE_TEXT("deserialization of encapsulation header failed.\n"),
+            TraitsType::type_name()));
+        }
         return message_holder;
       }
       Encoding encoding;
@@ -1161,9 +1172,11 @@ protected:
                      TraitsType::type_name()));
         }
       } else {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR %CDataReaderImpl::dds_demarshal ")
-                   ACE_TEXT("deserialization failed, dropping sample.\n"),
-                   TraitsType::type_name()));
+        if (DCPS_debug_level > 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR %CDataReaderImpl::dds_demarshal ")
+                    ACE_TEXT("deserialization failed, dropping sample.\n"),
+                    TraitsType::type_name()));
+        }
       }
       return message_holder;
     }
@@ -1176,12 +1189,14 @@ protected:
     if (!sample.header_.content_filter_ && content_filtered_topic_) {
       const bool sample_only_has_key_fields = !sample.header_.valid_data();
       if (key_only_marshaling != sample_only_has_key_fields) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
-          ACE_TEXT("%CDataReaderImpl::dds_demarshal: ")
-          ACE_TEXT("Mismatch between the key only and valid data properties ")
-          ACE_TEXT("of a %C message of a content filtered topic!\n"),
-          TraitsType::type_name(),
-          to_string(static_cast<MessageId>(sample.header_.message_id_))));
+        if (DCPS_debug_level > 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
+            ACE_TEXT("%CDataReaderImpl::dds_demarshal: ")
+            ACE_TEXT("Mismatch between the key only and valid data properties ")
+            ACE_TEXT("of a %C message of a content filtered topic!\n"),
+            TraitsType::type_name(),
+            to_string(static_cast<MessageId>(sample.header_.message_id_))));
+        }
         filtered = true;
         message_holder.reset();
         return message_holder;
@@ -1386,10 +1401,11 @@ DDS::ReturnCode_t take_i(MessageSequenceType& received_data,
   if (!group_coherent_ordered) {
 #endif
 
-    for (typename InstanceMap::iterator it = instance_map_.begin(), the_end = instance_map_.end(); it != the_end; ++it) {
-
-      const DDS::InstanceHandle_t handle = it->second;
-      const SubscriptionInstance_rch inst = get_handle_instance(handle);
+    for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
+         iter != instances_.end();
+         ++iter) {
+      const DDS::InstanceHandle_t handle = iter->first;
+      const SubscriptionInstance_rch inst = iter->second;
 
       if (inst->instance_state_->match(view_states, instance_states)) {
         size_t i(0);
@@ -1730,11 +1746,13 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
       OwnershipManagerPtr owner_manager = ownership_manager();
 
       if (!owner_manager || owner_manager->instance_lock_acquire () != 0) {
-        ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t) ")
-                    ACE_TEXT("%CDataReaderImpl::")
-                    ACE_TEXT("store_instance_data, ")
-                    ACE_TEXT("acquire instance_lock failed.\n"), TraitsType::type_name()));
+        if (DCPS_debug_level > 0) {
+          ACE_ERROR ((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ")
+                      ACE_TEXT("%CDataReaderImpl::")
+                      ACE_TEXT("store_instance_data, ")
+                      ACE_TEXT("acquire instance_lock failed.\n"), TraitsType::type_name()));
+        }
         return;
       }
 
@@ -1765,15 +1783,17 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
         handle, owns_handle);
     {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
-      int ret = OpenDDS::DCPS::bind(instances_, handle, instance);
+      const int ret = OpenDDS::DCPS::bind(instances_, handle, instance);
 
       if (ret != 0)
       {
-        ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t) ")
-                    ACE_TEXT("%CDataReaderImpl::")
-                    ACE_TEXT("store_instance_data, ")
-                    ACE_TEXT("insert handle failed, ret = %d.\n"), TraitsType::type_name(), ret));
+        if (DCPS_debug_level > 0) {
+          ACE_ERROR ((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ")
+                      ACE_TEXT("%CDataReaderImpl::")
+                      ACE_TEXT("store_instance_data, ")
+                      ACE_TEXT("insert handle failed, ret = %d.\n"), TraitsType::type_name(), ret));
+        }
         return;
       }
     }
@@ -1796,21 +1816,25 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
             handle));
         if (bpair.second == false)
         {
-          ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ")
-                      ACE_TEXT("%CDataReaderImpl::")
-                      ACE_TEXT("store_instance_data, ")
-                      ACE_TEXT("insert to participant scope %C failed.\n"), TraitsType::type_name(), TraitsType::type_name()));
+          if (DCPS_debug_level > 0) {
+            ACE_ERROR ((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ")
+                        ACE_TEXT("%CDataReaderImpl::")
+                        ACE_TEXT("store_instance_data, ")
+                        ACE_TEXT("insert to participant scope %C failed.\n"), TraitsType::type_name(), TraitsType::type_name()));
+          }
           return;
         }
       }
 
       if (owner_manager->instance_lock_release () != 0) {
-        ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t) ")
-                    ACE_TEXT("%CDataReaderImpl::")
-                    ACE_TEXT("store_instance_data, ")
-                    ACE_TEXT("release instance_lock failed.\n"), TraitsType::type_name()));
+        if (DCPS_debug_level > 0) {
+          ACE_ERROR ((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ")
+                      ACE_TEXT("%CDataReaderImpl::")
+                      ACE_TEXT("store_instance_data, ")
+                      ACE_TEXT("release instance_lock failed.\n"), TraitsType::type_name()));
+        }
         return;
       }
     }
@@ -1821,11 +1845,13 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
         handle));
     if (bpair.second == false)
     {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ")
-                  ACE_TEXT("%CDataReaderImpl::")
-                  ACE_TEXT("store_instance_data, ")
-                  ACE_TEXT("insert %C failed.\n"), TraitsType::type_name(), TraitsType::type_name()));
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) ")
+                    ACE_TEXT("%CDataReaderImpl::")
+                    ACE_TEXT("store_instance_data, ")
+                    ACE_TEXT("insert %C failed.\n"), TraitsType::type_name(), TraitsType::type_name()));
+      }
       return;
     }
   }
@@ -2062,33 +2088,33 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
 
     DDS::SubscriberListener_var sub_listener =
         sub->listener_for(DDS::DATA_ON_READERS_STATUS);
-    if (!CORBA::is_nil(sub_listener.in()) && !coherent_)
-      {
+    if (!CORBA::is_nil(sub_listener.in()) && !coherent_) {
+      if (!is_bit()) {
         ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-
         sub_listener->on_data_on_readers(sub.in());
         sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, false);
+      } else {
+        TheServiceParticipant->job_queue()->enqueue(make_rch<OnDataOnReaders>(sub, sub_listener, rchandle_from(static_cast<DataReaderImpl*>(this)), true, false));
       }
-    else
-      {
-        sub->notify_status_condition();
+    } else {
+      sub->notify_status_condition();
 
-        DDS::DataReaderListener_var listener =
-            listener_for (DDS::DATA_AVAILABLE_STATUS);
+      DDS::DataReaderListener_var listener =
+        listener_for (DDS::DATA_AVAILABLE_STATUS);
 
-        if (!CORBA::is_nil(listener.in()))
-          {
-            ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-
-            listener->on_data_available(this);
-            set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
-            sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, false);
-          }
-        else
-          {
-            notify_status_condition_no_sample_lock();
-          }
+      if (!CORBA::is_nil(listener.in())) {
+        if (!is_bit()) {
+          ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+          listener->on_data_available(this);
+          set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
+          sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, false);
+        } else {
+          TheServiceParticipant->job_queue()->enqueue(make_rch<OnDataAvailable>(sub, listener, rchandle_from(static_cast<DataReaderImpl*>(this)), true, true, true));
+        }
+      } else {
+        notify_status_condition_no_sample_lock();
       }
+    }
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   }
 #endif

@@ -6,122 +6,122 @@
 
 using namespace OpenDDS::DCPS;
 
-TEST(serializer_test, Encoding_Encoding)
+TEST(dds_DCPS_Serializer, Encoding_Encoding)
 {
   Encoding enc;
   EXPECT_EQ(0, enc.to_string().compare(0, 24, "CDR/XCDR1, little-endian"));
 }
 
-TEST(serializer_test, Encoding_Encoding_XCDR1_ENDIAN_BIG)
+TEST(dds_DCPS_Serializer, Encoding_Encoding_XCDR1_ENDIAN_BIG)
 {
   Encoding enc(Encoding::KIND_XCDR1, ENDIAN_BIG);
   EXPECT_EQ(0, enc.to_string().compare(0, 21, "CDR/XCDR1, big-endian"));
 }
 
-TEST(serializer_test, Encoding_Encoding_UNALIGNED_CDR_ENDIAN_BIG)
+TEST(dds_DCPS_Serializer, Encoding_Encoding_UNALIGNED_CDR_ENDIAN_BIG)
 {
   Encoding enc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_BIG);
   EXPECT_EQ(0, enc.to_string().compare(0, 25, "Unaligned CDR, big-endian"));
 }
 
-TEST(serializer_test, Encoding_Encoding_XCDR2_ENDIAN_BIG)
+TEST(dds_DCPS_Serializer, Encoding_Encoding_XCDR2_ENDIAN_BIG)
 {
   Encoding enc(Encoding::KIND_XCDR2, ENDIAN_BIG);
   EXPECT_EQ(0, enc.to_string().compare(0, 17, "XCDR2, big-endian"));
 }
 
-TEST(serializer_test, Encoding_Encoding_XCDR1_ENDIAN_LITTLE)
+TEST(dds_DCPS_Serializer, Encoding_Encoding_XCDR1_ENDIAN_LITTLE)
 {
   Encoding enc(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
 }
 
-TEST(serializer_test, Encoding_Encoding_UNALIGNED_CDR_ENDIAN_LITTLE)
+TEST(dds_DCPS_Serializer, Encoding_Encoding_UNALIGNED_CDR_ENDIAN_LITTLE)
 {
   Encoding enc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_LITTLE);
   EXPECT_EQ(0, enc.to_string().compare(0, 28, "Unaligned CDR, little-endian"));
 }
 
-TEST(serializer_test, Encoding_Encoding_XCDR2_ENDIAN_LITTLE)
+TEST(dds_DCPS_Serializer, Encoding_Encoding_XCDR2_ENDIAN_LITTLE)
 {
   Encoding enc(Encoding::KIND_XCDR2, ENDIAN_LITTLE);
   EXPECT_EQ(0, enc.to_string().compare(0, 20, "XCDR2, little-endian"));
 }
 
-TEST(serializer_test, Encoding_Encoding_XCDR2_Swap)
+TEST(dds_DCPS_Serializer, Encoding_Encoding_XCDR2_Swap)
 {
   Encoding enc(Encoding::KIND_XCDR2, true);
   EXPECT_EQ(0, enc.to_string().compare(0, 17, "XCDR2, big-endian"));
 }
 
-TEST(serializer_test, Encoding_Encoding_XCDR2_No_Swap)
+TEST(dds_DCPS_Serializer, Encoding_Encoding_XCDR2_No_Swap)
 {
   Encoding enc(Encoding::KIND_XCDR2, false);
   EXPECT_EQ(0, enc.to_string().compare(0, 20, "XCDR2, little-endian"));
 }
 
-TEST(serializer_test, Encoding_Encoding_XCDR1_max_align)
+TEST(dds_DCPS_Serializer, Encoding_Encoding_XCDR1_max_align)
 {
   Encoding enc(Encoding::KIND_XCDR1, ENDIAN_BIG);
   EXPECT_EQ(size_t(8), enc.max_align());
 }
 
-TEST(serializer_test, Encoding_Encoding_UNALIGNED_CDR_max_align)
+TEST(dds_DCPS_Serializer, Encoding_Encoding_UNALIGNED_CDR_max_align)
 {
   Encoding enc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_BIG);
   EXPECT_EQ(size_t(0), enc.max_align());
 }
 
-TEST(serializer_test, Encoding_Encoding_XCDR2_max_align)
+TEST(dds_DCPS_Serializer, Encoding_Encoding_XCDR2_max_align)
 {
   Encoding enc(Encoding::KIND_XCDR2, ENDIAN_BIG);
   EXPECT_EQ(size_t(4), enc.max_align());
 }
 
-TEST(serializer_test, align_value_no_offset)
+TEST(dds_DCPS_Serializer, align_value_no_offset)
 {
   size_t value = 8;
   align(value, 4);
   EXPECT_EQ(size_t(8), value);
 }
 
-TEST(serializer_test, align_value_add_offset)
+TEST(dds_DCPS_Serializer, align_value_add_offset)
 {
   size_t value = 9;
   align(value, 4);
   EXPECT_EQ(size_t(12), value);
 }
 
-TEST(serializer_test, align_value_smaller_than_by)
+TEST(dds_DCPS_Serializer, align_value_smaller_than_by)
 {
   size_t value = 4;
   align(value, 8);
   EXPECT_EQ(size_t(8), value);
 }
 
-TEST(serializer_test, Encoding_is_encapsulated_this_XCDR1)
+TEST(dds_DCPS_Serializer, Encoding_is_encapsulated_this_XCDR1)
 {
   Encoding enc(Encoding::KIND_XCDR1, ENDIAN_BIG);
   EXPECT_TRUE(enc.is_encapsulated());
 }
 
-TEST(serializer_test, Encoding_is_encapsulated_this_UNALIGNED_CDR)
+TEST(dds_DCPS_Serializer, Encoding_is_encapsulated_this_UNALIGNED_CDR)
 {
   Encoding enc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_LITTLE);
   EXPECT_FALSE(enc.is_encapsulated());
 }
 
-TEST(serializer_test, Encoding_Encoding_static_is_encacapsulatd_XCDR2)
+TEST(dds_DCPS_Serializer, Encoding_Encoding_static_is_encacapsulatd_XCDR2)
 {
   EXPECT_TRUE(Encoding::is_encapsulated(Encoding::KIND_XCDR2));
 }
 
-TEST(serializer_test, EncapsulationHeader_EncapsulationHeader)
+TEST(dds_DCPS_Serializer, EncapsulationHeader_EncapsulationHeader)
 {
   EncapsulationHeader eh;
   EXPECT_STREQ("CDR/XCDR1 Big Endian Plain", eh.to_string().c_str());
 }
 
-TEST(serializer_test, EncapsulationHeader_EncapsulationHeader_Encoding_Valid)
+TEST(dds_DCPS_Serializer, EncapsulationHeader_EncapsulationHeader_Encoding_Valid)
 {
   Encoding initenc;
   EncapsulationHeader eh(initenc, FINAL);
@@ -129,7 +129,7 @@ TEST(serializer_test, EncapsulationHeader_EncapsulationHeader_Encoding_Valid)
   EXPECT_STREQ("CDR/XCDR1 Little Endian Plain", eh.to_string().c_str());
 }
 
-TEST(serializer_test, EncapsulationHeader_EncapsulationHeader_Encoding_Invalid)
+TEST(dds_DCPS_Serializer, EncapsulationHeader_EncapsulationHeader_Encoding_Invalid)
 {
   Encoding initenc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_LITTLE);
   EncapsulationHeader eh(initenc, FINAL);
@@ -137,7 +137,7 @@ TEST(serializer_test, EncapsulationHeader_EncapsulationHeader_Encoding_Invalid)
   EXPECT_STREQ("Invalid", eh.to_string().c_str());
 }
 
-TEST(serializer_test, EncapsulationHeader_from_encoding_XCDR1_BIG_FINAL)
+TEST(dds_DCPS_Serializer, EncapsulationHeader_from_encoding_XCDR1_BIG_FINAL)
 {
   EncapsulationHeader eh;
   Encoding enc(Encoding::KIND_XCDR1, ENDIAN_BIG);
@@ -145,7 +145,7 @@ TEST(serializer_test, EncapsulationHeader_from_encoding_XCDR1_BIG_FINAL)
   EXPECT_STREQ("CDR/XCDR1 Big Endian Plain", eh.to_string().c_str());
 }
 
-TEST(serializer_test, EncapsulationHeader_from_encoding_XCDR1_LITTLE_FINAL)
+TEST(dds_DCPS_Serializer, EncapsulationHeader_from_encoding_XCDR1_LITTLE_FINAL)
 {
   EncapsulationHeader eh;
   Encoding enc(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
@@ -153,7 +153,7 @@ TEST(serializer_test, EncapsulationHeader_from_encoding_XCDR1_LITTLE_FINAL)
   EXPECT_STREQ("CDR/XCDR1 Little Endian Plain", eh.to_string().c_str());
 }
 
-TEST(serializer_test, EncapsulationHeader_from_encoding_XCDR1_LITTLE_MUTABLE)
+TEST(dds_DCPS_Serializer, EncapsulationHeader_from_encoding_XCDR1_LITTLE_MUTABLE)
 {
   EncapsulationHeader eh;
   Encoding enc(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
@@ -161,7 +161,7 @@ TEST(serializer_test, EncapsulationHeader_from_encoding_XCDR1_LITTLE_MUTABLE)
   EXPECT_STREQ("CDR/XCDR1 Little Endian Parameter List", eh.to_string().c_str());
 }
 
-TEST(serializer_test, EncapsulationHeader_from_encoding_XCDR2_LITTLE_FINAL)
+TEST(dds_DCPS_Serializer, EncapsulationHeader_from_encoding_XCDR2_LITTLE_FINAL)
 {
   EncapsulationHeader eh;
   Encoding enc(Encoding::KIND_XCDR2, ENDIAN_LITTLE);
@@ -169,7 +169,7 @@ TEST(serializer_test, EncapsulationHeader_from_encoding_XCDR2_LITTLE_FINAL)
   EXPECT_STREQ("XCDR2 Little Endian Plain", eh.to_string().c_str());
 }
 
-TEST(serializer_test, EncapsulationHeader_from_encoding_XCDR2_LITTLE_APPENDABLE)
+TEST(dds_DCPS_Serializer, EncapsulationHeader_from_encoding_XCDR2_LITTLE_APPENDABLE)
 {
   EncapsulationHeader eh;
   Encoding enc(Encoding::KIND_XCDR2, ENDIAN_LITTLE);
@@ -177,7 +177,7 @@ TEST(serializer_test, EncapsulationHeader_from_encoding_XCDR2_LITTLE_APPENDABLE)
   EXPECT_STREQ("XCDR2 Little Endian Delimited", eh.to_string().c_str());
 }
 
-TEST(serializer_test, EncapsulationHeader_from_encoding_XCDR2_LITTLE_MUTABLE)
+TEST(dds_DCPS_Serializer, EncapsulationHeader_from_encoding_XCDR2_LITTLE_MUTABLE)
 {
   EncapsulationHeader eh;
   Encoding enc(Encoding::KIND_XCDR2, ENDIAN_LITTLE);
@@ -185,7 +185,7 @@ TEST(serializer_test, EncapsulationHeader_from_encoding_XCDR2_LITTLE_MUTABLE)
   EXPECT_STREQ("XCDR2 Little Endian Parameter List", eh.to_string().c_str());
 }
 
-TEST(serializer_test, EncapsulationHeader_from_encoding_UNALIGNED_CDR_LITTLE_MUTABLE)
+TEST(dds_DCPS_Serializer, EncapsulationHeader_from_encoding_UNALIGNED_CDR_LITTLE_MUTABLE)
 {
   EncapsulationHeader eh;
   Encoding enc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_LITTLE);
@@ -193,7 +193,7 @@ TEST(serializer_test, EncapsulationHeader_from_encoding_UNALIGNED_CDR_LITTLE_MUT
   EXPECT_STREQ("CDR/XCDR1 Big Endian Plain", eh.to_string().c_str());
 }
 
-TEST(serializer_test, EncapsulationHeader_to_encoding_MUTABLE)
+TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_MUTABLE)
 {
   EncapsulationHeader eh;
   Encoding enc;
@@ -201,7 +201,7 @@ TEST(serializer_test, EncapsulationHeader_to_encoding_MUTABLE)
   EXPECT_STREQ("CDR/XCDR1 Big Endian Plain", eh.to_string().c_str());
 }
 
-TEST(serializer_test, EncapsulationHeader_to_encoding_NOT_MUTABLE)
+TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_NOT_MUTABLE)
 {
   EncapsulationHeader eh;
   Encoding enc;
@@ -209,7 +209,7 @@ TEST(serializer_test, EncapsulationHeader_to_encoding_NOT_MUTABLE)
   EXPECT_STREQ("CDR/XCDR1 Big Endian Plain", eh.to_string().c_str());
 }
 
-TEST(serializer_test, EncapsulationHeader_to_encoding_CDR_LE_MUTABLE)
+TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_CDR_LE_MUTABLE)
 {
   EncapsulationHeader eh;
   eh.kind(EncapsulationHeader::KIND_CDR_LE);
@@ -218,7 +218,7 @@ TEST(serializer_test, EncapsulationHeader_to_encoding_CDR_LE_MUTABLE)
   EXPECT_STREQ("CDR/XCDR1 Little Endian Plain", eh.to_string().c_str());
 }
 
-TEST(serializer_test, EncapsulationHeader_to_encoding_CDR_LE_NOT_MUTABLE)
+TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_CDR_LE_NOT_MUTABLE)
 {
   EncapsulationHeader eh;
   eh.kind(EncapsulationHeader::KIND_CDR_LE);
@@ -227,7 +227,7 @@ TEST(serializer_test, EncapsulationHeader_to_encoding_CDR_LE_NOT_MUTABLE)
   EXPECT_STREQ("CDR/XCDR1 Little Endian Plain", eh.to_string().c_str());
 }
 
-TEST(serializer_test, EncapsulationHeader_to_encoding_PL_CDR_BE_MUTABLE)
+TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_PL_CDR_BE_MUTABLE)
 {
   EncapsulationHeader eh;
   eh.kind(EncapsulationHeader::KIND_PL_CDR_BE);
@@ -236,7 +236,7 @@ TEST(serializer_test, EncapsulationHeader_to_encoding_PL_CDR_BE_MUTABLE)
   EXPECT_STREQ("CDR/XCDR1 Big Endian Parameter List", eh.to_string().c_str());
 }
 
-TEST(serializer_test, EncapsulationHeader_to_encoding_PL_CDR_LE_MUTABLE)
+TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_PL_CDR_LE_MUTABLE)
 {
   EncapsulationHeader eh;
   eh.kind(EncapsulationHeader::KIND_PL_CDR_LE);
@@ -245,7 +245,7 @@ TEST(serializer_test, EncapsulationHeader_to_encoding_PL_CDR_LE_MUTABLE)
   EXPECT_STREQ("CDR/XCDR1 Little Endian Parameter List", eh.to_string().c_str());
 }
 
-TEST(serializer_test, EncapsulationHeader_to_encoding_CDR2_BE_FINAL)
+TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_CDR2_BE_FINAL)
 {
   EncapsulationHeader eh;
   eh.kind(EncapsulationHeader::KIND_CDR2_BE);
@@ -254,7 +254,7 @@ TEST(serializer_test, EncapsulationHeader_to_encoding_CDR2_BE_FINAL)
   EXPECT_STREQ("XCDR2 Big Endian Plain", eh.to_string().c_str());
 }
 
-TEST(serializer_test, EncapsulationHeader_to_encoding_CDR2_LE_FINAL)
+TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_CDR2_LE_FINAL)
 {
   EncapsulationHeader eh;
   eh.kind(EncapsulationHeader::KIND_CDR2_LE);
@@ -263,7 +263,7 @@ TEST(serializer_test, EncapsulationHeader_to_encoding_CDR2_LE_FINAL)
   EXPECT_STREQ("XCDR2 Little Endian Plain", eh.to_string().c_str());
 }
 
-TEST(serializer_test, EncapsulationHeader_to_encoding_D_CDR2_BE_APPENDABLE)
+TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_D_CDR2_BE_APPENDABLE)
 {
   EncapsulationHeader eh;
   eh.kind(EncapsulationHeader::KIND_D_CDR2_BE);
@@ -272,7 +272,7 @@ TEST(serializer_test, EncapsulationHeader_to_encoding_D_CDR2_BE_APPENDABLE)
   EXPECT_STREQ("XCDR2 Big Endian Delimited", eh.to_string().c_str());
 }
 
-TEST(serializer_test, EncapsulationHeader_to_encoding_D_CDR2_LE_APPENDABLE)
+TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_D_CDR2_LE_APPENDABLE)
 {
   EncapsulationHeader eh;
   eh.kind(EncapsulationHeader::KIND_D_CDR2_LE);
@@ -281,7 +281,7 @@ TEST(serializer_test, EncapsulationHeader_to_encoding_D_CDR2_LE_APPENDABLE)
   EXPECT_STREQ("XCDR2 Little Endian Delimited", eh.to_string().c_str());
 }
 
-TEST(serializer_test, EncapsulationHeader_to_encoding_PL_CDR2_BE_MUTABLE)
+TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_PL_CDR2_BE_MUTABLE)
 {
   EncapsulationHeader eh;
   eh.kind(EncapsulationHeader::KIND_PL_CDR2_BE);
@@ -290,7 +290,7 @@ TEST(serializer_test, EncapsulationHeader_to_encoding_PL_CDR2_BE_MUTABLE)
   EXPECT_STREQ("XCDR2 Big Endian Parameter List", eh.to_string().c_str());
 }
 
-TEST(serializer_test, EncapsulationHeader_to_encoding_PL_CDR2_LE_MUTABLE)
+TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_PL_CDR2_LE_MUTABLE)
 {
   EncapsulationHeader eh;
   eh.kind(EncapsulationHeader::KIND_PL_CDR2_LE);
@@ -299,7 +299,7 @@ TEST(serializer_test, EncapsulationHeader_to_encoding_PL_CDR2_LE_MUTABLE)
   EXPECT_STREQ("XCDR2 Little Endian Parameter List", eh.to_string().c_str());
 }
 
-TEST(serializer_test, EncapsulationHeader_to_encoding_XML)
+TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_XML)
 {
   EncapsulationHeader eh;
   eh.kind(EncapsulationHeader::KIND_XML);
@@ -308,7 +308,7 @@ TEST(serializer_test, EncapsulationHeader_to_encoding_XML)
   EXPECT_STREQ("XML", eh.to_string().c_str());
 }
 
-TEST(serializer_test, EncapsulationHeader_to_encoding_INVALID)
+TEST(dds_DCPS_Serializer, EncapsulationHeader_to_encoding_INVALID)
 {
   Encoding initenc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_LITTLE);
   EncapsulationHeader eh(initenc, FINAL);
@@ -327,7 +327,7 @@ TEST(serializer_test, Serializer_Serializer_ACE_Message_Block_Encoding)
   EXPECT_EQ(0, ser.encoding().to_string().compare(0, 28, "Unaligned CDR, little-endian"));
 }
 
-TEST(serializer_test, Serializer_Serializer_ACE_Message_Block_Kind)
+TEST(dds_DCPS_Serializer, Serializer_Serializer_ACE_Message_Block_Kind)
 {
   ACE_Message_Block amb;
   Serializer ser(&amb, Encoding::KIND_XCDR1);
@@ -336,7 +336,7 @@ TEST(serializer_test, Serializer_Serializer_ACE_Message_Block_Kind)
   EXPECT_EQ(0, ser.encoding().to_string().compare(0, 24, "CDR/XCDR1, little-endian"));
 }
 
-TEST(serializer_test, Serializer_Serializer_ACE_Message_Block_Kind_bool)
+TEST(dds_DCPS_Serializer, Serializer_Serializer_ACE_Message_Block_Kind_bool)
 {
   ACE_Message_Block amb;
   Serializer ser(&amb, Encoding::KIND_XCDR2);
@@ -345,7 +345,7 @@ TEST(serializer_test, Serializer_Serializer_ACE_Message_Block_Kind_bool)
   EXPECT_EQ(0, ser.encoding().to_string().compare(0, 20, "XCDR2, little-endian"));
 }
 
-TEST(serializer_test, Serializer_set_endianness)
+TEST(dds_DCPS_Serializer, Serializer_set_endianness)
 {
   ACE_Message_Block amb;
   Encoding enc(Encoding::KIND_UNALIGNED_CDR, ENDIAN_LITTLE);
@@ -358,7 +358,7 @@ TEST(serializer_test, Serializer_set_endianness)
   EXPECT_EQ(0, ser.encoding().to_string().compare(0, 25, "Unaligned CDR, big-endian"));
 }
 
-TEST(serializer_test, Serializer_swap_bytes_endianness)
+TEST(dds_DCPS_Serializer, Serializer_swap_bytes_endianness)
 {
   ACE_Message_Block amb;
   Encoding enc;
@@ -676,3 +676,29 @@ TEST(serializer_test, Serializer_test_peek_depth)
   ASSERT_TRUE(res == c);
 }
 
+TEST(serializer_test, Serializer_test_trim)
+{
+  OpenDDS::DCPS::Message_Block_Ptr amb(new ACE_Message_Block(1));
+  ACE_Message_Block* cont = amb.get();
+  for (size_t i = 0; i < 9; ++i) {
+    cont->cont(new ACE_Message_Block(1));
+    cont = cont->cont();
+  }
+
+  const Encoding enc;
+  Serializer ser_w(amb.get(), enc);
+  ACE_CDR::Octet x[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+  ASSERT_TRUE(ser_w.write_octet_array(x, sizeof x));
+
+  Serializer ser(amb.get(), enc);
+  ASSERT_FALSE(ser.trim(11));
+
+  ASSERT_TRUE(ser.read_octet_array(x, 3));
+  OpenDDS::DCPS::Message_Block_Ptr subset(ser.trim(3));
+  ASSERT_EQ(subset->total_length(), 3u);
+  ASSERT_EQ(subset->length(), 1u);
+  ASSERT_EQ(subset->rd_ptr()[0], 3);
+  ASSERT_TRUE(subset->cont());
+  ASSERT_TRUE(subset->cont()->cont());
+  ASSERT_FALSE(subset->cont()->cont()->cont());
+}

@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -10,15 +8,15 @@
 
 #ifndef DDS_HAS_MINIMUM_BIT
 
-#include "dcps_export.h"
 #include "JobQueue.h"
-#include "dds/DdsDcpsCoreTypeSupportImpl.h"
+#include "dcps_export.h"
+
+#include <dds/DdsDcpsCoreTypeSupportImpl.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
-
 
 typedef std::pair<bool, ConnectionRecord> ActionConnectionRecord;
 typedef OPENDDS_VECTOR(ActionConnectionRecord) ConnectionRecords;

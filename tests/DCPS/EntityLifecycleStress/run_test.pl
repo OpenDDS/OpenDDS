@@ -28,6 +28,9 @@ foreach $a(@ARGV) {
   if ($a eq "rtps_disc") {
     $rtps_disc = 1;
   }
+  if ($a eq "rtps_disc_tcp") {
+    $rtps_disc = 1;
+  }
   if ($a eq "publishers") {
     $pub_count = @ARGV[$ai + 1];
   }
