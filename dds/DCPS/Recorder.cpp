@@ -26,8 +26,10 @@ XTypes::DynamicData Recorder::get_dynamic_data(const RawDataSample& sample)
   Encoding enc(sample.encoding_kind_, sample.header_.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
   const DynamicTypeByPubId::const_iterator dt_found = dt_map_.find(sample.publication_id_);
   if (dt_found == dt_map_.end()) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) on_sample_data_received: -"
-      "failed to find GUID: %C in DynamicTypeByPubId.\n", LogGuid(sample.publication_id_).c_str()));
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: on_sample_data_received: "
+        "failed to find GUID: %C in DynamicTypeByPubId.\n", LogGuid(sample.publication_id_).c_str()));
+    }
     return XTypes::DynamicData();
   } else {
     XTypes::DynamicType_rch dt = dt_found->second;

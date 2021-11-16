@@ -49,7 +49,10 @@ public:
     OpenDDS::XTypes::DynamicData dd = rec->get_dynamic_data(sample);
     OpenDDS::DCPS::String my_type = "";
     if (!OpenDDS::XTypes::print_dynamic_data(dd, dd.get_type(), my_type, "")){
-      ACE_ERROR((LM_ERROR, "(%P|%t) Error: on_sample_data_received - Failed to read DynamicData \n"));
+      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) Error: TestRecorderListener::on_sample_data_received:"
+          " Failed to read DynamicData\n"));
+      }
     }
     OpenDDS::DCPS::String struct_string =
       "struct ::Dynamic::stru {\n"
@@ -102,8 +105,10 @@ public:
     if (my_type != struct_string &&
         my_type != nested_struct_string &&
         my_type != union_string &&
-        my_type != default_union_string) {
-      ACE_ERROR((LM_ERROR, "Error: Type did not match\n"));
+        my_type != default_union_string &&
+        log_level >= LogLevel::Error) {
+       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TestRecorderListener::on_sample_data_received:"
+         " Type did not match\n"));
     }
     std::cout << my_type;
   }
@@ -111,11 +116,15 @@ public:
   virtual void on_recorder_matched(OpenDDS::DCPS::Recorder*,
                                    const ::DDS::SubscriptionMatchedStatus& status )
   {
-    if (status.current_count == 1) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("TestRecorderListener -- a writer connect to recorder\n")));
+    if (status.current_count == 1 && OpenDDS::DCPS::DCPS_debug_level >= 4) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TestRecorderListener::on_recorder_matched:"
+          " a writer connected to recorder\n")));
     }
     else if (status.current_count == 0 && status.total_count > 0) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("TestRecorderListener -- writer disconnect with recorder\n")));
+      if (OpenDDS::DCPS::DCPS_debug_level >= 4) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TestRecorderListener::on_recorder_matched:"
+          " a writer disconnected with recorder\n")));
+      }
       sem_.release();
     }
   }
@@ -148,10 +157,10 @@ int run_test(int argc, ACE_TCHAR *argv[]){
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (!participant) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("ERROR: %N:%l: main() -")
-                        ACE_TEXT(" create_participant failed!\n")),
-                        1);
+      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_participant failed!\n"));
+      }
+      return 1;
     }
     using namespace OpenDDS::DCPS;
 
@@ -166,10 +175,10 @@ int run_test(int argc, ACE_TCHAR *argv[]){
                                        OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       if (!topic) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" create_topic failed!\n")),
-                          1);
+        if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_topic failed!\n"));
+        }
+        return 1;
       }
 
       ACE_Time_Value wait_time(60, 0);
@@ -191,19 +200,19 @@ int run_test(int argc, ACE_TCHAR *argv[]){
                                  recorder_listener);
 
       if (!recorder.in()) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" create_recorder failed!\n")),
-                          1);
+        if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_recorder failed!\n"));
+        }
+        return 1;
       }
 
 
       // wait until the writer disconnnects
       if (recorder_listener->wait(wait_time) == -1) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" recorder timeout!\n")),
-                          1);
+        if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): recorder timeout!\n"));
+        }
+        return 1;
       }
       ret_val = recorder_listener->ret_val_;
       service->delete_recorder(recorder);
@@ -215,11 +224,8 @@ int run_test(int argc, ACE_TCHAR *argv[]){
     e._tao_print_exception("Exception caught in main():");
     return 1;
   }
-  if (ret_val == 1) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("ERROR: %N:%l: main() -")
-                      ACE_TEXT(" failed to properly analyze sample!\n")),
-                      1);
+  if (ret_val == 1 && OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): failed to properly analyze sample!\n"));
   }
   return ret_val;
 }

@@ -63,7 +63,6 @@ void stru_narrow_write(DataWriter_var dw)
   Dynamic::struDataWriter_var narrow_dw = Dynamic::struDataWriter::_narrow(dw);
   InstanceHandle_t handle = narrow_dw->register_instance(foo);
   narrow_dw->write(foo, handle);
-  ACE_DEBUG((LM_DEBUG, "WRITE\n"));
 }
 
 void nested_stru_narrow_write(DataWriter_var dw)
@@ -143,7 +142,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       pub->create_datawriter(topic, dw_qos,
                              DataWriterListener::_nil(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (Utils::wait_match(dw, 1, Utils::EQ)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("Error waiting for match for dw\n")));
+    if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("Error waiting for match for dw\n")));
+    }
     return 1;
   }
   // TODO CLAYTON: There is currently a race between get_dynamic_data and the creation of the
