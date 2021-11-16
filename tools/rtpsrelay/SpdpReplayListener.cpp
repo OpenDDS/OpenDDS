@@ -1,11 +1,14 @@
 #include "SpdpReplayListener.h"
 
 #include <dds/DCPS/DCPS_Utils.h>
+#include <dds/DCPS/TimeTypes.h>
 
 namespace RtpsRelay {
 
-SpdpReplayListener::SpdpReplayListener(SpdpHandler& spdp_handler)
+SpdpReplayListener::SpdpReplayListener(SpdpHandler& spdp_handler,
+  RelayStatisticsReporter& relay_statistics_reporter)
   : spdp_handler_(spdp_handler)
+  , relay_statistics_reporter_(relay_statistics_reporter)
 {}
 
 void SpdpReplayListener::on_data_available(DDS::DataReader_ptr reader)
@@ -34,6 +37,13 @@ void SpdpReplayListener::on_data_available(DDS::DataReader_ptr reader)
       spdp_handler_.replay(data[idx]);
     }
   }
+}
+
+void SpdpReplayListener::on_subscription_matched(
+  DDS::DataReader_ptr /*reader*/, const DDS::SubscriptionMatchedStatus& status)
+{
+  relay_statistics_reporter_.spdp_replay_pub_count(
+    static_cast<uint32_t>(status.total_count), OpenDDS::DCPS::MonotonicTimePoint::now());
 }
 
 }

@@ -784,7 +784,10 @@ namespace {
   std::string extract_common_name(const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg)
   {
     OpenDDS::RTPS::MessageParser message_parser(*msg);
-    message_parser.parseHeader();
+    if (!message_parser.parseHeader()) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: extract_common_name() could not parse header\n")));
+      return "";
+    }
 
     while (message_parser.parseSubmessageHeader()) {
       const auto submessage_header = message_parser.submessageHeader();

@@ -656,22 +656,24 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DDS::DataReader_var participant_reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC);
 
-  DDS::DataReaderListener_var relay_partition_listener = new RelayPartitionsListener(relay_partition_table);
+  DDS::DataReaderListener_var relay_partition_listener =
+    new RelayPartitionsListener(relay_partition_table, relay_statistics_reporter);
   DDS::DataReader_var relay_partition_reader_var =
     relay_subscriber->create_datareader(relay_partitions_topic, reader_qos,
                                         relay_partition_listener,
-                                        DDS::DATA_AVAILABLE_STATUS);
+                                        DDS::DATA_AVAILABLE_STATUS | DDS::SUBSCRIPTION_MATCHED_STATUS);
 
   if (!relay_partition_reader_var) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Partition data reader\n")));
     return EXIT_FAILURE;
   }
 
-  DDS::DataReaderListener_var relay_address_listener = new RelayAddressListener(relay_partition_table);
+  DDS::DataReaderListener_var relay_address_listener =
+    new RelayAddressListener(relay_partition_table, relay_statistics_reporter);
   DDS::DataReader_var relay_address_reader_var =
     relay_subscriber->create_datareader(relay_addresses_topic, reader_qos,
                                         relay_address_listener,
-                                        DDS::DATA_AVAILABLE_STATUS);
+                                        DDS::DATA_AVAILABLE_STATUS | DDS::SUBSCRIPTION_MATCHED_STATUS);
 
   if (!relay_address_reader_var) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Address data reader\n")));
@@ -687,11 +689,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   replay_reader_qos.reader_data_lifecycle.autopurge_nowriter_samples_delay = one_minute;
   replay_reader_qos.reader_data_lifecycle.autopurge_disposed_samples_delay = one_minute;
 
-  DDS::DataReaderListener_var spdp_replay_listener = new SpdpReplayListener(spdp_vertical_handler);
+  DDS::DataReaderListener_var spdp_replay_listener =
+    new SpdpReplayListener(spdp_vertical_handler, relay_statistics_reporter);
   DDS::DataReader_var spdp_replay_reader_var =
     relay_subscriber->create_datareader(spdp_replay_topic, replay_reader_qos,
                                         spdp_replay_listener,
-                                        DDS::DATA_AVAILABLE_STATUS);
+                                        DDS::DATA_AVAILABLE_STATUS | DDS::SUBSCRIPTION_MATCHED_STATUS);
 
   if (!spdp_replay_reader_var) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Address data reader\n")));

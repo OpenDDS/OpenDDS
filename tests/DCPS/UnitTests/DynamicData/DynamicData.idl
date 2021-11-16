@@ -84,9 +84,73 @@ struct SingleValueStruct {
   @id(18) wstring wstr;
 };
 
+@final
+struct SingleValueStructFinal {
+  @id(0) SomeEnum my_enum;
+  @id(1) long int_32;
+  @id(2) unsigned long uint_32;
+  @id(3) int8 int_8;
+  @id(4) uint8 uint_8;
+  @id(5) short int_16;
+  @id(6) unsigned short uint_16;
+  @id(7) long long int_64;
+  @id(8) unsigned long long uint_64;
+  @id(9) float float_32;
+  @id(10) double float_64;
+  @id(11) long double float_128;
+  @id(12) char char_8;
+  @id(13) wchar char_16;
+  @id(14) octet byte;
+  @id(15) boolean bool;
+  @id(16) NestedFinalStruct nested_struct;
+  @id(17) string str;
+  @id(18) wstring wstr;
+};
+
 // Reading single value from union.
 @mutable
 union SingleValueUnion switch (SomeEnum) {
+case E_INT32:
+  @id(1) long int_32;
+case E_UINT32:
+  @id(2) unsigned long uint_32;
+case E_INT8:
+  @id(3) int8 int_8;
+case E_UINT8:
+  @id(4) uint8 uint_8;
+case E_INT16:
+  @id(5) short int_16;
+case E_UINT16:
+  @id(6) unsigned short uint_16;
+case E_INT64:
+  @id(7) long long int_64;
+case E_UINT64:
+  @id(8) unsigned long long uint_64;
+case E_FLOAT32:
+  @id(9) float float_32;
+case E_FLOAT64:
+  @id(10) double float_64;
+case E_FLOAT128:
+  @id(11) long double float_128;
+case E_CHAR8:
+  @id(12) char char_8;
+case E_CHAR16:
+  @id(13) wchar char_16;
+case E_BYTE:
+  @id(14) octet byte_;
+case E_BOOL:
+  @id(15) boolean bool_;
+case E_STRING8:
+  @id(16) string str;
+case E_STRING16:
+  @id(17) wstring wstr;
+default:
+  @id(18) SomeEnum my_enum;
+};
+
+// Reading single value from union.
+@final
+union SingleValueUnionFinal switch (SomeEnum) {
 case E_INT32:
   @id(1) long int_32;
 case E_UINT32:
@@ -152,6 +216,28 @@ struct ArrayStruct {
 // Reading single value from sequence and reading sequence from struct.
 @mutable
 struct SequenceStruct {
+  @id(0) SomeEnumSeq my_enums;
+  @id(1) Int32Seq int_32s;
+  @id(2) UInt32Seq uint_32s;
+  @id(3) Int8Seq int_8s;
+  @id(4) UInt8Seq uint_8s;
+  @id(5) Int16Seq int_16s;
+  @id(6) UInt16Seq uint_16s;
+  @id(7) Int64Seq int_64s;
+  @id(8) UInt64Seq uint_64s;
+  @id(9) Float32Seq float_32s;
+  @id(10) Float64Seq float_64s;
+  @id(11) Float128Seq float_128s;
+  @id(12) Char8Seq char_8s;
+  @id(13) Char16Seq char_16s;
+  @id(14) ByteSeq byte_s;
+  @id(15) BoolSeq bool_s;
+  @id(16) StringSeq str_s;
+  @id(17) WStringSeq wstr_s;
+};
+
+@final
+struct SequenceStructFinal {
   @id(0) SomeEnumSeq my_enums;
   @id(1) Int32Seq int_32s;
   @id(2) UInt32Seq uint_32s;

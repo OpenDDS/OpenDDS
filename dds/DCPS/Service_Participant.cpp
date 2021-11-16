@@ -1,11 +1,9 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> //Only the _pch include should start with DCPS/
 
 #include "Service_Participant.h"
 
@@ -21,8 +19,8 @@
 #include "LinuxNetworkConfigMonitor.h"
 #include "StaticDiscovery.h"
 #include "../Version.h"
-#if defined(OPENDDS_SECURITY)
-#include "security/framework/SecurityRegistry.h"
+#ifdef OPENDDS_SECURITY
+#  include "security/framework/SecurityRegistry.h"
 #endif
 
 #include <ace/config.h>
@@ -40,11 +38,10 @@
 #include <ace/Version.h>
 
 #include <cstring>
-
 #ifdef OPENDDS_SAFETY_PROFILE
-#include <stdio.h> // <cstdio> after FaceCTS bug 623 is fixed
+#  include <stdio.h> // <cstdio> after FaceCTS bug 623 is fixed
 #else
-#include <fstream>
+#  include <fstream>
 #endif
 
 #if !defined (__ACE_INLINE__)
@@ -168,6 +165,7 @@ static bool got_bidir_giop = false;
 static bool got_thread_status_interval = false;
 static bool got_monitor = false;
 static bool got_type_object_encoding = false;
+static bool got_log_level = false;
 
 Service_Participant::Service_Participant()
   :
@@ -439,10 +437,12 @@ Service_Participant::get_domain_participant_factory(int &argc,
       configure_pool();
 #endif
 
-      if (DCPS_debug_level > 0) {
-        ACE_DEBUG((LM_NOTICE,
-                   "(%P|%t) NOTICE: Service_Participant::get_domain_participant_factory - "
-                   "This is OpenDDS " OPENDDS_VERSION " using ACE " ACE_VERSION "\n"));
+      if (log_level >= LogLevel::Info) {
+        ACE_DEBUG((LM_INFO, "(%P|%t) Service_Participant::get_domain_participant_factory: "
+          "This is OpenDDS " OPENDDS_VERSION " using ACE " ACE_VERSION "\n"));
+
+        ACE_DEBUG((LM_INFO, "(%P|%t) Service_Participant::get_domain_participant_factory: "
+          "log_level: %C DCPS_debug_level: %u\n", log_level.get_as_string(), DCPS_debug_level));
       }
 
       // Establish the default scheduling mechanism and
@@ -677,6 +677,11 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       type_object_encoding(ACE_TEXT_ALWAYS_CHAR(currentArg));
       arg_shifter.consume_arg();
       got_type_object_encoding = true;
+
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSLogLevel"))) != 0) {
+      log_level.set_from_string(ACE_TEXT_ALWAYS_CHAR(currentArg));
+      arg_shifter.consume_arg();
+      got_log_level = true;
 
     } else {
       arg_shifter.ignore_arg();
@@ -1877,6 +1882,14 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
       if (!str.empty()) {
         type_object_encoding(str.c_str());
       }
+    }
+
+    if (got_log_level) {
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSLogLevel")));
+    } else {
+      String str;
+      GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("DCPSLogLevel"), str);
+      log_level.set_from_string(str.c_str());
     }
 
     // These are not handled on the command line.
