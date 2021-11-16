@@ -970,11 +970,10 @@ TEST(Mutable, ReadValueFromSequence)
   verify_sequence_value_struct<MutableSequenceStruct>(data);
 }
 
-/////////////////////////////// Appendable tests ////////////////////////////
-TEST(Appendable, SkipNestedStruct)
+TEST(Mutable, SkipNestedMembers)
 {
-  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableStruct_xtag>();
-  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::AppendableStruct_xtag>();
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::MutableStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::MutableStruct_xtag>();
   const XTypes::TypeMap::const_iterator it = type_map.find(ti);
   EXPECT_TRUE(it != type_map.end());
 
@@ -982,45 +981,72 @@ TEST(Appendable, SkipNestedStruct)
   tls.add(type_map.begin(), type_map.end());
   XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
 
-  unsigned char appendable_struct[] = {
-    0x00,0x00,0x00,0x18,// +4=4 dheader
-    'a',(0),(0),(0), // +4=8 c
-    0x00,0x00,0x00,0x14, // +4=12 nested_struct1
-    0x00,0x0c,(0),(0), // +4=16 s
-    0x00,0x00,0x00,0x15, // +4=20 nested_struct2
-    0x0f,(0),(0),(0), // +4=24 i
-    0x00,0x00,0x00,0x01 // +4=28 l2
+  unsigned char mutable_struct[] = {
+    0x00,0x00,0x00,0x39, // +4=4 dheader
+    0x00,0x00,0x00,0x00, 'a',(0),(0),(0), // +5+(3)=12 c
+    /////////// outer (FinalNestedStructOuter) ///////////
+    0x40,0x00,0x00,0x01, 0x00,0x00,0x00,0x0e, // +8=20 Emheader & nextint
+    0x12,0x34,0x56,0x78, // +4=24 l
+    0x00,0x00,0x00,0x04, 0x7f,0xff,0xff,0xff, // +8=32 inner.l
+    0x9a,0xbc,(0),(0), // +2+(2)=36 s
+    ////////////////////////////////////////////////////////
+    0x10,0x00,0x00,0x02, 0x00,0x0a,(0),(0), // +6+(2)=44 s
+    /////////// inner (FinalNestedUnionInner) ////////////
+    0x30,0x00,0x00,0x03, // +4=48 Emheader
+    0x00,0x00,0x00,0x01, // +4=52 discriminator
+    0xff,0xff,0xff,0xff, // +4=56 ul
+    ////////////////////////////////////////////////////////
+    0x00,0x00,0x00,0x04, 0x11 // +5=61 i
   };
-  AppendableStruct expected = { 'a', {20}, 12, {21}, 15, 1 };
+  MutableStruct expected;
+  expected.c = 'a';
+  expected.outer.l = 0x12345678;
+  expected.outer.inner.l = 0x7fffffff;
+  expected.outer.s = 0x9abc;
+  expected.s = 0x000a;
+  expected.inner.ul(ACE_CDR::ULong(0xffffffff));
+  expected.i = 0x11;
 
   ACE_Message_Block msg(128);
-  msg.copy((const char*)appendable_struct, sizeof(appendable_struct));
+  msg.copy((const char*)mutable_struct, sizeof(mutable_struct));
   XTypes::DynamicData data(&msg, xcdr2, dt);
 
-  ACE_CDR::Int16 s;
-  DDS::ReturnCode_t ret = data.get_int16_value(s, 2);
+  XTypes::DynamicData nested_level1;
+  DDS::ReturnCode_t ret = data.get_complex_value(nested_level1, 1);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ACE_CDR::Long l;
+  ret = nested_level1.get_int32_value(l, 0);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.outer.l, l);
+  ACE_CDR::Short s;
+  ret = nested_level1.get_int16_value(s, 2);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.outer.s, s);
+  XTypes::DynamicData nested_level2;
+  ret = nested_level1.get_complex_value(nested_level2, 1);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ret = nested_level2.get_int32_value(l, 0);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.outer.inner.l, l);
+
+  ret = data.get_int16_value(s, 2);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   EXPECT_EQ(expected.s, s);
 
-  XTypes::DynamicData complex;
-  ret = data.get_complex_value(complex, 3);
+  ret = data.get_complex_value(nested_level1, 3);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
-  ACE_CDR::Long l;
-  ret = complex.get_int32_value(l, 0);
+  ACE_CDR::ULong ul;
+  ret = nested_level1.get_uint32_value(ul, 1);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
-  EXPECT_EQ(expected.nested_struct2.l, l);
+  EXPECT_EQ(expected.inner.ul(), ul);
 
   ACE_CDR::Int8 i;
   ret = data.get_int8_value(i, 4);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   EXPECT_EQ(expected.i, i);
-
-  ACE_CDR::Long l2;
-  ret = data.get_int32_value(l2, 5);
-  EXPECT_EQ(DDS::RETCODE_OK, ret);
-  EXPECT_EQ(expected.l2, l2);
 }
 
+/////////////////////////////// Appendable tests ////////////////////////////
 TEST(Appendable, ReadValueFromStruct)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableSingleValueStruct_xtag>();
@@ -1274,7 +1300,6 @@ TEST(Appendable, ReadValueFromUnion)
 
 TEST(Appendable, ReadValueFromSequence)
 {
-  // TODO: Update this
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableSequenceStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::AppendableSequenceStruct_xtag>();
   const XTypes::TypeMap::const_iterator it = type_map.find(ti);
@@ -1312,6 +1337,84 @@ TEST(Appendable, ReadValueFromSequence)
   XTypes::DynamicData data(&msg, xcdr2, dt);
 
   verify_sequence_value_struct<AppendableSequenceStruct>(data);
+}
+
+TEST(Appendable, SkipNestedMembers)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::AppendableStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  unsigned char appendable_struct[] = {
+    0x00,0x00,0x00,0x35,// +4=4 dheader
+    'a',(0),(0),(0), // +1+(3)=8 c
+    /////////// outer (MutableNestedStructOuter) ///////////
+    0x00,0x00,0x00,0x15, // +4=12 deadher
+    0x00,0x00,0x00,0x00, 0xff,(0),(0),(0), // +5+(3)=20 o
+    0x20,0x00,0x00,0x01, 0x7f,0xff,0xff,0xff, // +8=28 inner.l
+    0x00,0x00,0x00,0x02, 0x01, // +5=33 b
+    ////////////////////////////////////////////////////////
+    (0),0x00,0x0a, // +3=36 s
+    /////////// inner (MutableNestedUnionInner) ////////////
+    0x00,0x00,0x00,0x10, // +4=40 dheader
+    0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x01, // +8=48 discriminator
+    0x20,0x00,0x00,0x01, 0xff,0xff,0xff,0xff, // +8=56 ul
+    ////////////////////////////////////////////////////////
+    0x11 // +1=57 i
+  };
+  AppendableStruct expected;
+  expected.c = 'a';
+  expected.outer.o = 0xff;
+  expected.outer.inner.l = 0x7fffffff;
+  expected.outer.b = true;
+  expected.s = 0x000a;
+  expected.inner.ul(ACE_CDR::ULong(0xffffffff));
+  expected.i = 0x11;
+
+  ACE_Message_Block msg(128);
+  msg.copy((const char*)appendable_struct, sizeof(appendable_struct));
+  XTypes::DynamicData data(&msg, xcdr2, dt);
+
+  XTypes::DynamicData nested_level1;
+  DDS::ReturnCode_t ret = data.get_complex_value(nested_level1, 1);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ACE_CDR::Octet o;
+  ret = nested_level1.get_byte_value(o, 0);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.outer.o, o);
+  ACE_CDR::Boolean b;
+  ret = nested_level1.get_boolean_value(b, 2);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.outer.b, b);
+  XTypes::DynamicData nested_level2;
+  ret = nested_level1.get_complex_value(nested_level2, 1);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ACE_CDR::Long l;
+  ret = nested_level2.get_int32_value(l, 0);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.outer.inner.l, l);
+
+  ACE_CDR::Int16 s;
+  ret = data.get_int16_value(s, 2);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.s, s);
+
+  ret = data.get_complex_value(nested_level1, 3);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ACE_CDR::ULong ul;
+  ret = nested_level1.get_uint32_value(ul, 1);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.inner.ul(), ul);
+
+  ACE_CDR::Int8 i;
+  ret = data.get_int8_value(i, 4);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.i, i);
 }
 
 /////////////////////////////// Final tests /////////////////////////////
@@ -1587,6 +1690,81 @@ TEST(Final, ReadValueFromSequence)
   verify_sequence_value_struct<FinalSequenceStruct>(data);
 }
 
+TEST(Final, SkipNestedMembers)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::FinalStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::FinalStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  unsigned char final_struct[] = {
+    'a',(0),(0),(0), // +4=4 c
+    /////////// outer (AppendableNestedStructOuter) ///////////
+    0x00,0x00,0x00,0x12, // +4=8 dheader
+    0x12,0x34,0x56,0x78, // +4=12 ul
+    0x00,0x00,0x00,0x08, 0x20,0x00,0x00,0x00, 0x7f,0xff,0xff,0xff, // +12=24 inner.l
+    0x9a,0xbc, // +2=26 us
+    ////////////////////////////////////////////////////////
+    0x00,0x0a, // +2=28 s
+    /////////// inner (AppendableNestedUnionInner) ////////////
+    0x00,0x00,0x00,0x08, // +4=32 dheader
+    0x00,0x00,0x00,0x01, // +4=36 discriminator
+    0xff,0xff,0xff,0xff, // +4=40 ul
+    ////////////////////////////////////////////////////////
+    0x11 // +1=41 i
+  };
+  FinalStruct expected;
+  expected.c = 'a';
+  expected.outer.ul = 0x12345678;
+  expected.outer.inner.l = 0x7fffffff;
+  expected.outer.us = 0x9abc;
+  expected.s = 0x000a;
+  expected.inner.ul(ACE_CDR::ULong(0xffffffff));
+  expected.i = 0x11;
+
+  ACE_Message_Block msg(128);
+  msg.copy((const char*)final_struct, sizeof(final_struct));
+  XTypes::DynamicData data(&msg, xcdr2, dt);
+
+  XTypes::DynamicData nested_level1;
+  DDS::ReturnCode_t ret = data.get_complex_value(nested_level1, 1);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ACE_CDR::ULong ul;
+  ret = nested_level1.get_uint32_value(ul, 0);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.outer.ul, ul);
+  ACE_CDR::UShort us;
+  ret = nested_level1.get_uint16_value(us, 2);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.outer.us, us);
+  XTypes::DynamicData nested_level2;
+  ret = nested_level1.get_complex_value(nested_level2, 1);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ACE_CDR::Long l;
+  ret = nested_level2.get_int32_value(l, 0);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.outer.inner.l, l);
+
+  ACE_CDR::Short s;
+  ret = data.get_int16_value(s, 2);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.s, s);
+
+  ret = data.get_complex_value(nested_level1, 3);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ret = nested_level1.get_uint32_value(ul, 1);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.inner.ul(), ul);
+
+  ACE_CDR::Int8 i;
+  ret = data.get_int8_value(i, 4);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.i, i);
+}
 int main(int argc, char* argv[])
 {
   ::testing::InitGoogleTest(&argc, argv);

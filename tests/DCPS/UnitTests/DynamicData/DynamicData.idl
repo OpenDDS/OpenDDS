@@ -72,7 +72,7 @@ typedef sequence<wstring> WStringSeq;
   @id(13) wchar char_16; \
   @id(14) octet byte; \
   @id(15) boolean bool; \
-  @id(16) NestedFinalStruct nested_struct; \
+  @id(16) FinalNestedStructInner nested_struct; \
   @id(17) string str; \
   @id(18) wstring wstr;
 
@@ -134,9 +134,10 @@ typedef sequence<wstring> WStringSeq;
   @id(16) StringSeq str_s; \
   @id(17) WStringSeq wstr_s;
 
+
 @final
-struct NestedFinalStruct {
-  long l;
+struct FinalNestedStructInner {
+  @id(0) long l;
 };
 
 // Reading single value from struct.
@@ -187,17 +188,87 @@ struct FinalSequenceStruct {
   SEQUENCE_VALUE_MEMBERS
 };
 
-// Test skipping nested struct in a non-mutable type.
+// Test skipping nested aggregated members.
 @appendable
-struct AppendableStruct {
-  char c;
-  NestedFinalStruct nested_struct1;
-  short s;
-  NestedFinalStruct nested_struct2;
-  int8 i;
-  long l2;
+struct AppendableNestedStructInner {
+  @id(0) long l;
 };
 
+@mutable
+struct MutableNestedStructInner {
+  @id(0) long l;
+};
+
+@final
+struct FinalNestedStructOuter {
+  @id(0) long l;
+  @id(1) AppendableNestedStructInner inner;
+  @id(2) short s;
+};
+
+@appendable
+struct AppendableNestedStructOuter {
+  @id(0) unsigned long ul;
+  @id(1) MutableNestedStructInner inner;
+  @id(2) unsigned short us;
+};
+
+@mutable
+struct MutableNestedStructOuter {
+  @id(0) octet o;
+  @id(1) FinalNestedStructInner inner;
+  @id(2) boolean b;
+};
+
+#define NESTED_UNION_BRANCHES \
+  case E_INT32: \
+    @id(0) long l; \
+  case E_UINT32: \
+    @id(1) unsigned long ul; \
+  case E_CHAR8: \
+    @id(2) char c;
+
+@final
+union FinalNestedUnionInner switch (SomeEnum) {
+  NESTED_UNION_BRANCHES
+};
+
+@appendable
+union AppendableNestedUnionInner switch (SomeEnum) {
+  NESTED_UNION_BRANCHES
+};
+
+@mutable
+union MutableNestedUnionInner switch (SomeEnum) {
+  NESTED_UNION_BRANCHES
+};
+
+@final
+struct FinalStruct {
+  @id(0) char c;
+  @id(1) AppendableNestedStructOuter outer;
+  @id(2) short s;
+  @id(3) AppendableNestedUnionInner inner;
+  @id(4) int8 i;
+};
+
+@appendable
+struct AppendableStruct {
+  @id(0) char c;
+  @id(1) MutableNestedStructOuter outer;
+  @id(2) short s;
+  @id(3) MutableNestedUnionInner inner;
+  @id(4) int8 i;
+};
+
+@mutable
+struct MutableStruct {
+  @id(0) char c;
+  @id(1) FinalNestedStructOuter outer;
+  @id(2) short s;
+  @id(3) FinalNestedUnionInner inner;
+  @id(4) int8 i;
+};
 
 /*
 // TODO: Reading single value from array.
