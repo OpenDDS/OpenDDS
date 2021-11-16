@@ -137,7 +137,7 @@ void test_valid(const std::string& s, const Name& expected, bool pattern)
 {
   Name actual(s);
   EXPECT_TRUE(actual.is_valid());
-  EXPECT_TRUE(actual == expected);
+  EXPECT_EQ(actual, expected);
   if (pattern) {
     EXPECT_FALSE(actual.is_literal());
     EXPECT_TRUE(actual.is_pattern());

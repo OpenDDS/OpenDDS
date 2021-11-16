@@ -8,6 +8,7 @@
 
 #include <ace/INET_Addr.h>
 
+#include <cstring>
 #include <set>
 #include <sstream>
 #include <string>

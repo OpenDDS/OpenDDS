@@ -86,7 +86,7 @@ TEST(tools_dds_rtpsrelaylib_Utility, GuidAddr_equal)
 
 TEST(tools_dds_rtpsrelaylib_Utility, GuidAddr_not_equal)
 {
-  OpenDDS::DCPS::GUID_t guid1;
+  OpenDDS::DCPS::GUID_t guid1 = OpenDDS::DCPS::GUID_UNKNOWN;
   OpenDDS::DCPS::GUID_t guid2 = guid1;
   ++guid2.guidPrefix[0];
   ACE_INET_Addr addr("192.168.1.1:1234");
@@ -107,7 +107,7 @@ TEST(tools_dds_rtpsrelaylib_Utility, GuidAddr_not_equal)
 
 TEST(tools_dds_rtpsrelaylib_Utility, GuidAddr_less_than)
 {
-  OpenDDS::DCPS::GUID_t guid1;
+  OpenDDS::DCPS::GUID_t guid1 = OpenDDS::DCPS::GUID_UNKNOWN;
   OpenDDS::DCPS::GUID_t guid2 = guid1;
   ++guid2.guidPrefix[0];
   ACE_INET_Addr addr("192.168.1.1:1234");

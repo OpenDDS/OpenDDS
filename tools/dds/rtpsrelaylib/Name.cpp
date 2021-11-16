@@ -89,7 +89,7 @@ Atom Name::parse_character_class(Name& name, const std::string& buffer, size_t& 
   name.is_pattern_ = true;
 
   // Skip '[']
-  idx++;
+  ++idx;
 
   bool negated = false;
 
