@@ -23,11 +23,10 @@ Recorder::~Recorder()
 
 XTypes::DynamicData Recorder::get_dynamic_data(const RawDataSample& sample)
 {
-
-  Encoding enc(Encoding::KIND_XCDR2, sample.header_.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
+  Encoding enc(sample.encoding_kind_, sample.header_.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
   const DynamicTypeByPubId::const_iterator dt_found = dt_map_.find(sample.publication_id_);
   if (dt_found == dt_map_.end()) {
-    ACE_ERROR((LM_ERROR, "on_sample_data_received: -"
+    ACE_ERROR((LM_ERROR, "(%P|%t) on_sample_data_received: -"
       "failed to find GUID: %C in DynamicTypeByPubId.\n", LogGuid(sample.publication_id_).c_str()));
     return XTypes::DynamicData();
   } else {

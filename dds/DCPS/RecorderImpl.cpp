@@ -228,9 +228,30 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
 
   // we only support SAMPLE_DATA messages
   if (sample.header_.message_id_ == SAMPLE_DATA && listener_.in()) {
+    Encoding::Kind kind = Encoding::Kind::KIND_UNALIGNED_CDR;
     if (sample.header_.cdr_encapsulation_) {
-      // Skip the encapsulation header
-      sample.sample_->rd_ptr(4);
+      Encoding enc(Encoding::Kind::KIND_XCDR2, sample.header_.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
+      Serializer ser(sample.sample_.get(), enc);
+      EncapsulationHeader encap;
+      if (ser >> encap) {
+        switch (encap.kind()) {
+        case EncapsulationHeader::Kind::KIND_CDR_BE:
+        case EncapsulationHeader::Kind::KIND_CDR_LE:
+        case EncapsulationHeader::Kind::KIND_PL_CDR_BE:
+        case EncapsulationHeader::Kind::KIND_PL_CDR_LE:
+          kind = Encoding::KIND_XCDR1;
+          break;
+
+        case EncapsulationHeader::Kind::KIND_CDR2_BE:
+        case EncapsulationHeader::Kind::KIND_CDR2_LE:
+        case EncapsulationHeader::Kind::KIND_D_CDR2_BE:
+        case EncapsulationHeader::Kind::KIND_D_CDR2_LE:
+        case EncapsulationHeader::Kind::KIND_PL_CDR2_BE:
+        case EncapsulationHeader::Kind::KIND_PL_CDR2_LE:
+          kind = Encoding::KIND_XCDR2;
+          break;
+        }
+      }
     }
     RawDataSample rawSample(sample.header_,
                             static_cast<MessageId> (sample.header_.message_id_),
@@ -238,7 +259,9 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
                             sample.header_.source_timestamp_nanosec_,
                             sample.header_.publication_id_,
                             sample.header_.byte_order_,
-                            sample.sample_.get());
+                            sample.sample_.get(),
+                            kind
+                            );
     listener_->on_sample_data_received(this, rawSample);
   }
 }
