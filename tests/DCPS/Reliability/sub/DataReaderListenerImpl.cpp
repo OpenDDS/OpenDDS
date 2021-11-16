@@ -83,7 +83,7 @@ void DataReaderListenerImpl::on_sample(Reliability::Message& msg)
 
 void DataReaderListenerImpl::wait_expected() {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  while (expected_count_ == 0 && sample_count_ < expected_count_) {
+  while (expected_count_ == 0 || sample_count_ < expected_count_) {
     condition_.wait();
   }
 }
