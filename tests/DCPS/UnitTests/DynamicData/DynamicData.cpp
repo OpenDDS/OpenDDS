@@ -510,6 +510,168 @@ void verify_sequence_value_struct(XTypes::DynamicData& data)
   CORBA::wstring_free(some_wstr);
 }
 
+void verify_int32_union(XTypes::DynamicData& data)
+{
+  ACE_CDR::Long int_32;
+  DDS::ReturnCode_t ret = data.get_int32_value(int_32, 1);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ACE_CDR::Long(10), int_32);
+}
+
+void verify_uint32_union(XTypes::DynamicData& data)
+{
+  ACE_CDR::ULong uint_32;
+  DDS::ReturnCode_t ret = data.get_uint32_value(uint_32, 2);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ACE_CDR::ULong(11), uint_32);
+}
+
+void verify_int8_union(XTypes::DynamicData& data)
+{
+  ACE_CDR::Int8 int_8;
+  DDS::ReturnCode_t ret = data.get_int8_value(int_8, 3);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ACE_CDR::Int8(127), int_8);
+}
+
+void verify_uint8_union(XTypes::DynamicData& data)
+{
+  ACE_CDR::UInt8 uint_8;
+  DDS::ReturnCode_t ret = data.get_uint8_value(uint_8, 4);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ACE_CDR::UInt8(255), uint_8);
+}
+
+void verify_int16_union(XTypes::DynamicData& data)
+{
+  ACE_CDR::Short int_16;
+  DDS::ReturnCode_t ret = data.get_int16_value(int_16, 5);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ACE_CDR::Short(9), int_16);
+}
+
+void verify_uint16_union(XTypes::DynamicData& data)
+{
+  ACE_CDR::UShort uint_16;
+  DDS::ReturnCode_t ret = data.get_uint16_value(uint_16, 6);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ACE_CDR::UShort(5), uint_16);
+}
+
+void verify_int64_union(XTypes::DynamicData& data)
+{
+  ACE_CDR::LongLong int_64;
+  DDS::ReturnCode_t ret = data.get_int64_value(int_64, 7);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ACE_CDR::LongLong(254), int_64);
+}
+
+void verify_uint64_union(XTypes::DynamicData& data)
+{
+  ACE_CDR::ULongLong uint_64;
+  DDS::ReturnCode_t ret = data.get_uint64_value(uint_64, 8);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ACE_CDR::ULongLong(255), uint_64);
+}
+
+void verify_float32_union(XTypes::DynamicData& data)
+{
+  ACE_CDR::Float float_32;
+  DDS::ReturnCode_t ret = data.get_float32_value(float_32, 9);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ACE_CDR::Float(1.0f), float_32);
+}
+
+void verify_float64_union(XTypes::DynamicData& data)
+{
+  ACE_CDR::Double float_64;
+  DDS::ReturnCode_t ret = data.get_float64_value(float_64, 10);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ACE_CDR::Double(1.0), float_64);
+}
+
+void verify_float128_union(XTypes::DynamicData& data)
+{
+  ACE_CDR::LongDouble float_128;
+  DDS::ReturnCode_t ret = data.get_float128_value(float_128, 11);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ACE_CDR::LongDouble expected;
+  set_float128_value(expected);
+  check_float128(expected, float_128);
+}
+
+void verify_char8_union(XTypes::DynamicData& data)
+{
+  ACE_CDR::Char char_8;
+  DDS::ReturnCode_t ret = data.get_char8_value(char_8, 12);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ACE_CDR::Char('a'), char_8);
+}
+
+void verify_char16_union(XTypes::DynamicData& data)
+{
+  ACE_CDR::WChar char_16;
+  DDS::ReturnCode_t ret = data.get_char16_value(char_16, 13);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ACE_CDR::WChar(L'a'), char_16);
+}
+
+void verify_byte_union(XTypes::DynamicData& data)
+{
+  ACE_CDR::Octet byte;
+  DDS::ReturnCode_t ret = data.get_byte_value(byte, 14);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ACE_CDR::Octet(255), byte);
+  ret = data.get_byte_value(byte, 10);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
+}
+
+void verify_bool_union(XTypes::DynamicData& data)
+{
+  ACE_CDR::Boolean bool_;
+  DDS::ReturnCode_t ret = data.get_boolean_value(bool_, 15);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(true, bool_);
+  ret = data.get_boolean_value(bool_, 10);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
+}
+
+void verify_string_union(XTypes::DynamicData& data)
+{
+  ACE_CDR::Char* str = 0;
+  DDS::ReturnCode_t ret = data.get_string_value(str, 16);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_STREQ("abc", str);
+  CORBA::string_free(str);
+
+  str = 0;
+  ret = data.get_string_value(str, 10);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
+}
+
+void verify_wstring_union(XTypes::DynamicData& data)
+{
+  ACE_CDR::WChar* wstr = 0;
+  DDS::ReturnCode_t ret = data.get_wstring_value(wstr, 17);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_STREQ(wstr, L"abc");
+  CORBA::wstring_free(wstr);
+
+  wstr = 0;
+  ret = data.get_wstring_value(wstr, 10);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
+}
+
+void verify_enum_union(XTypes::DynamicData& data)
+{
+  ACE_CDR::Long my_enum;
+  DDS::ReturnCode_t ret = data.get_int32_value(my_enum, 18);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ACE_CDR::Long(9), my_enum);
+  ret = data.get_int32_value(my_enum, 11);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
+}
+
 /////////////////////////// Mutable tests ///////////////////////////
 TEST(Mutable, ReadValueFromStruct)
 {
@@ -571,14 +733,9 @@ TEST(Mutable, ReadValueFromUnion)
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x00, // +8=12 discriminator
       0x20,0x00,0x00,0x01, 0x00,0x00,0x00,0x0a // +8=20 int_32
     };
-
     msg.copy((const char*)int32_union, sizeof(int32_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::Long int_32;
-    DDS::ReturnCode_t ret = data.get_int32_value(int_32, 1);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_EQ(ACE_CDR::Long(10), int_32);
+    verify_int32_union(data);
   }
   {
     unsigned char uint32_union[] = {
@@ -586,15 +743,10 @@ TEST(Mutable, ReadValueFromUnion)
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x01, // +8=12 discriminator
       0x20,0x00,0x00,0x02, 0x00,0x00,0x00,0x0b // +8=20 uint_32
     };
-
     msg.reset();
     msg.copy((const char*)uint32_union, sizeof(uint32_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::ULong uint_32;
-    DDS::ReturnCode_t ret = data.get_uint32_value(uint_32, 2);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_EQ(ACE_CDR::ULong(11), uint_32);
+    verify_uint32_union(data);
   }
   {
     unsigned char int8_union[] = {
@@ -602,15 +754,10 @@ TEST(Mutable, ReadValueFromUnion)
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x02, // +8=12 discriminator
       0x00,0x00,0x00,0x03, 0x7f // +5=17 int_8
     };
-
     msg.reset();
     msg.copy((const char*)int8_union, sizeof(int8_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::Int8 int_8;
-    DDS::ReturnCode_t ret = data.get_int8_value(int_8, 3);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_EQ(ACE_CDR::Int8(127), int_8);
+    verify_int8_union(data);
   }
   {
     unsigned char uint8_union[] = {
@@ -618,15 +765,10 @@ TEST(Mutable, ReadValueFromUnion)
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x03, // +8=12 discriminator
       0x00,0x00,0x00,0x04, 0xff // +5=17 uint_8
     };
-
     msg.reset();
     msg.copy((const char*)uint8_union, sizeof(uint8_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::UInt8 uint_8;
-    DDS::ReturnCode_t ret = data.get_uint8_value(uint_8, 4);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_EQ(ACE_CDR::UInt8(255), uint_8);
+    verify_uint8_union(data);
   }
   {
     unsigned char int16_union[] = {
@@ -634,15 +776,10 @@ TEST(Mutable, ReadValueFromUnion)
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x04, // +8=12 discriminator
       0x10,0x00,0x00,0x05, 0x00,0x09 // +6=18 int_16
     };
-
     msg.reset();
     msg.copy((const char*)int16_union, sizeof(int16_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::Short int_16;
-    DDS::ReturnCode_t ret = data.get_int16_value(int_16, 5);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_EQ(ACE_CDR::Short(9), int_16);
+    verify_int16_union(data);
   }
   {
     unsigned char uint16_union[] = {
@@ -650,15 +787,10 @@ TEST(Mutable, ReadValueFromUnion)
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x05, // +8=12 discriminator
       0x10,0x00,0x00,0x06, 0x00,0x05 // +6=18 uint_16
     };
-
     msg.reset();
     msg.copy((const char*)uint16_union, sizeof(uint16_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::UShort uint_16;
-    DDS::ReturnCode_t ret = data.get_uint16_value(uint_16, 6);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_EQ(ACE_CDR::UShort(5), uint_16);
+    verify_uint16_union(data);
   }
   {
     unsigned char int64_union[] = {
@@ -666,15 +798,10 @@ TEST(Mutable, ReadValueFromUnion)
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x06, // +8=12 discriminator
       0x30,0x00,0x00,0x07, 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xfe// +12=24 int_64
     };
-
     msg.reset();
     msg.copy((const char*)int64_union, sizeof(int64_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::LongLong int_64;
-    DDS::ReturnCode_t ret = data.get_int64_value(int_64, 7);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_EQ(ACE_CDR::LongLong(254), int_64);
+    verify_int64_union(data);
   }
   {
     unsigned char uint64_union[] = {
@@ -682,15 +809,10 @@ TEST(Mutable, ReadValueFromUnion)
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x07, // +8=12 discriminator
       0x30,0x00,0x00,0x08, 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff// +12=24 uint_64
     };
-
     msg.reset();
     msg.copy((const char*)uint64_union, sizeof(uint64_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::ULongLong uint_64;
-    DDS::ReturnCode_t ret = data.get_uint64_value(uint_64, 8);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_EQ(ACE_CDR::ULongLong(255), uint_64);
+    verify_uint64_union(data);
   }
   {
     unsigned char float32_union[] = {
@@ -698,15 +820,10 @@ TEST(Mutable, ReadValueFromUnion)
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x08, // +8=12 discriminator
       0x20,0x00,0x00,0x09, 0x3f,0x80,0x00,0x00 // +8=20 float_32
     };
-
     msg.reset();
     msg.copy((const char*)float32_union, sizeof(float32_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::Float float_32;
-    DDS::ReturnCode_t ret = data.get_float32_value(float_32, 9);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_EQ(ACE_CDR::Float(1.0f), float_32);
+    verify_float32_union(data);
   }
   {
     unsigned char float64_union[] = {
@@ -714,15 +831,10 @@ TEST(Mutable, ReadValueFromUnion)
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x09, // +8=12 discriminator
       0x30,0x00,0x00,0x0a, 0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00 // +12=24 float_64
     };
-
     msg.reset();
     msg.copy((const char*)float64_union, sizeof(float64_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::Double float_64;
-    DDS::ReturnCode_t ret = data.get_float64_value(float_64, 10);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_EQ(ACE_CDR::Double(1.0), float_64);
+    verify_float64_union(data);
   }
   {
     unsigned char float128_union[] = {
@@ -731,17 +843,10 @@ TEST(Mutable, ReadValueFromUnion)
       0x40,0x00,0x00,0x0b, 0x00,0x00,0x00,0x10,
       0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0     // +4+4+16=36 float_128
     };
-
     msg.reset();
     msg.copy((const char*)float128_union, sizeof(float128_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::LongDouble float_128;
-    DDS::ReturnCode_t ret = data.get_float128_value(float_128, 11);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    ACE_CDR::LongDouble expected;
-    set_float128_value(expected);
-    check_float128(expected, float_128);
+    verify_float128_union(data);
   }
   {
     unsigned char char8_union[] = {
@@ -749,15 +854,10 @@ TEST(Mutable, ReadValueFromUnion)
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x0b, // +8=12 discriminator
       0x00,0x00,0x00,0x0c, 'a' // +5=17 char_8
     };
-
     msg.reset();
     msg.copy((const char*)char8_union, sizeof(char8_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::Char char_8;
-    DDS::ReturnCode_t ret = data.get_char8_value(char_8, 12);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_EQ(ACE_CDR::Char('a'), char_8);
+    verify_char8_union(data);
   }
   {
     unsigned char char16_union[] = {
@@ -765,15 +865,10 @@ TEST(Mutable, ReadValueFromUnion)
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x0c, // +8=12 discriminator
       0x10,0x00,0x00,0x0d, 0x00,0x61 // +6=18 char_16
     };
-
     msg.reset();
     msg.copy((const char*)char16_union, sizeof(char16_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::WChar char_16;
-    DDS::ReturnCode_t ret = data.get_char16_value(char_16, 13);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_EQ(ACE_CDR::WChar(L'a'), char_16);
+    verify_char16_union(data);
   }
   {
     unsigned char byte_union[] = {
@@ -784,13 +879,7 @@ TEST(Mutable, ReadValueFromUnion)
     msg.reset();
     msg.copy((const char*)byte_union, sizeof(byte_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::Octet byte;
-    DDS::ReturnCode_t ret = data.get_byte_value(byte, 14);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_EQ(ACE_CDR::Octet(255), byte);
-    ret = data.get_byte_value(byte, 10);
-    EXPECT_EQ(ret, DDS::RETCODE_ERROR);
+    verify_byte_union(data);
   }
   {
     unsigned char bool_union[] = {
@@ -801,13 +890,7 @@ TEST(Mutable, ReadValueFromUnion)
     msg.reset();
     msg.copy((const char*)bool_union, sizeof(bool_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::Boolean bool_;
-    DDS::ReturnCode_t ret = data.get_boolean_value(bool_, 15);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_EQ(true, bool_);
-    ret = data.get_boolean_value(bool_, 10);
-    EXPECT_EQ(ret, DDS::RETCODE_ERROR);
+    verify_bool_union(data);
   }
   {
     unsigned char str_union[] = {
@@ -818,16 +901,7 @@ TEST(Mutable, ReadValueFromUnion)
     msg.reset();
     msg.copy((const char*)str_union, sizeof(str_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::Char* str = 0;
-    DDS::ReturnCode_t ret = data.get_string_value(str, 16);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_STREQ("abc", str);
-    CORBA::string_free(str);
-
-    str = 0;
-    ret = data.get_string_value(str, 10);
-    EXPECT_EQ(ret, DDS::RETCODE_ERROR);
+    verify_string_union(data);
   }
   {
     unsigned char wstr_union[] = {
@@ -839,16 +913,7 @@ TEST(Mutable, ReadValueFromUnion)
     msg.reset();
     msg.copy((const char*)wstr_union, sizeof(wstr_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::WChar* wstr = 0;
-    DDS::ReturnCode_t ret = data.get_wstring_value(wstr, 17);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_STREQ(wstr, L"abc");
-    CORBA::wstring_free(wstr);
-
-    wstr = 0;
-    ret = data.get_wstring_value(wstr, 10);
-    EXPECT_EQ(ret, DDS::RETCODE_ERROR);
+    verify_wstring_union(data);
   }
   {
     // Read default member
@@ -860,13 +925,7 @@ TEST(Mutable, ReadValueFromUnion)
     msg.reset();
     msg.copy((const char*)enum_union, sizeof(enum_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::Long my_enum;
-    DDS::ReturnCode_t ret = data.get_int32_value(my_enum, 18);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_EQ(ACE_CDR::Long(9), my_enum);
-    ret = data.get_int32_value(my_enum, 11);
-    EXPECT_EQ(ret, DDS::RETCODE_ERROR);
+    verify_enum_union(data);
   }
 }
 
@@ -962,6 +1021,299 @@ TEST(Appendable, SkipNestedStruct)
   EXPECT_EQ(expected.l2, l2);
 }
 
+TEST(Appendable, ReadValueFromStruct)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableSingleValueStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::AppendableSingleValueStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  unsigned char single_value_struct[] = {
+    0x00,0x00,0x00,0x60,  // +4=4 dheader
+    0x00,0x00,0x00,0x03, // +4=8 my_enum
+    0x00,0x00,0x00,0x0a, // +4=12 int_32
+    0x00,0x00,0x00,0x0b, // +4=16 uint_32
+    0x05, // +1=17 int_8
+    0x06, // +1=18 uint_8
+    0x11,0x11, // +2=20 int_16
+    0x22,0x22, // +2=22 uint_16
+    (0),(0),0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +(2)+8=32 int_64
+    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +8=40 uint_64
+    0x3f,0x80,0x00,0x00, // +4=44 float_32
+    0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00, // +8=52 float_64
+    0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0,    // +16=68 float_128
+    'a',  // +1=69 char_8
+    (0),0x00,0x61, // +(1)+2=72 char_16
+    0xff, // +1=73 byte
+    0x01, // +1=74 bool
+    (0), (0), 0x00,0x00,0x00,0x0c, // +(2)+4=80 nested_struct
+    0x00,0x00,0x00,0x04, 'a','b','c','\0', // +8=88 str
+    0x00,0x00,0x00,0x08, 0,0x61,0,0x62,0,0x63,0,0, // +12=100 swtr
+  };
+  ACE_Message_Block msg(1024);
+  msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
+  XTypes::DynamicData data(&msg, xcdr2, dt);
+
+  verify_single_value_struct<AppendableSingleValueStruct>(data);
+}
+
+TEST(Appendable, ReadValueFromUnion)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableSingleValueUnion_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::AppendableSingleValueUnion_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  ACE_Message_Block msg(256);
+  {
+    unsigned char int32_union[] = {
+      0x00,0x00,0x00,0x08, // dheader
+      0x00,0x00,0x00,0x00, // discriminator
+      0x00,0x00,0x00,0x0a // int_32
+    };
+    msg.copy((const char*)int32_union, sizeof(int32_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+    verify_int32_union(data);
+  }
+  {
+    unsigned char uint32_union[] = {
+      0x00,0x00,0x00,0x08, // dheader
+      0x00,0x00,0x00,0x01, // discriminator
+      0x00,0x00,0x00,0x0b // uint_32
+    };
+    msg.reset();
+    msg.copy((const char*)uint32_union, sizeof(uint32_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+    verify_uint32_union(data);
+  }
+  {
+    unsigned char int8_union[] = {
+      0x00,0x00,0x00,0x05, // dheader
+      0x00,0x00,0x00,0x02, // discriminator
+      0x7f // int_8
+    };
+    msg.reset();
+    msg.copy((const char*)int8_union, sizeof(int8_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+    verify_int8_union(data);
+  }
+  {
+    unsigned char uint8_union[] = {
+      0x00,0x00,0x00,0x05, // dheader
+      0x00,0x00,0x00,0x03, // discriminator
+      0xff // uint_8
+    };
+    msg.reset();
+    msg.copy((const char*)uint8_union, sizeof(uint8_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+    verify_uint8_union(data);
+  }
+  {
+    unsigned char int16_union[] = {
+      0x00,0x00,0x00,0x06, // dheader
+      0x00,0x00,0x00,0x04, // discriminator
+      0x00,0x09 // int_16
+    };
+    msg.reset();
+    msg.copy((const char*)int16_union, sizeof(int16_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+    verify_int16_union(data);
+  }
+  {
+    unsigned char uint16_union[] = {
+      0x00,0x00,0x00,0x06, // dheader
+      0x00,0x00,0x00,0x05, // discriminator
+      0x00,0x05 // uint_16
+    };
+    msg.reset();
+    msg.copy((const char*)uint16_union, sizeof(uint16_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+    verify_uint16_union(data);
+  }
+  {
+    unsigned char int64_union[] = {
+      0x00,0x00,0x00,0x0c, // dheader
+      0x00,0x00,0x00,0x06, // discriminator
+      0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xfe// int_64
+    };
+    msg.reset();
+    msg.copy((const char*)int64_union, sizeof(int64_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+    verify_int64_union(data);
+  }
+  {
+    unsigned char uint64_union[] = {
+      0x00,0x00,0x00,0x0c, // dheader
+      0x00,0x00,0x00,0x07, // discriminator
+      0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff// uint_64
+    };
+    msg.reset();
+    msg.copy((const char*)uint64_union, sizeof(uint64_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+    verify_uint64_union(data);
+  }
+  {
+    unsigned char float32_union[] = {
+      0x00,0x00,0x00,0x08, // dheader
+      0x00,0x00,0x00,0x08, // discriminator
+      0x3f,0x80,0x00,0x00 // float_32
+    };
+    msg.reset();
+    msg.copy((const char*)float32_union, sizeof(float32_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+    verify_float32_union(data);
+  }
+  {
+    unsigned char float64_union[] = {
+      0x00,0x00,0x00,0x0c, // dheader
+      0x00,0x00,0x00,0x09, // discriminator
+      0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00 // float_64
+    };
+    msg.reset();
+    msg.copy((const char*)float64_union, sizeof(float64_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+    verify_float64_union(data);
+  }
+  {
+    unsigned char float128_union[] = {
+      0x00,0x00,0x00,0x14, // dheader
+      0x00,0x00,0x00,0x0a, // discriminator
+      0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0 // float_128
+    };
+    msg.reset();
+    msg.copy((const char*)float128_union, sizeof(float128_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+    verify_float128_union(data);
+  }
+  {
+    unsigned char char8_union[] = {
+      0x00,0x00,0x00,0x05, // dheader
+      0x00,0x00,0x00,0x0b, // discriminator
+      'a'     // char_8
+    };
+    msg.reset();
+    msg.copy((const char*)char8_union, sizeof(char8_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+    verify_char8_union(data);
+  }
+  {
+    unsigned char char16_union[] = {
+      0x00,0x00,0x00,0x06, // dheader
+      0x00,0x00,0x00,0x0c, // discriminator
+      0x00,0x61 // char_16
+    };
+    msg.reset();
+    msg.copy((const char*)char16_union, sizeof(char16_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+    verify_char16_union(data);
+  }
+  {
+    unsigned char byte_union[] = {
+      0x00,0x00,0x00,0x05, // dheader
+      0x00,0x00,0x00,0x0d, // discriminator
+      0xff // byte_
+    };
+    msg.reset();
+    msg.copy((const char*)byte_union, sizeof(byte_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+    verify_byte_union(data);
+  }
+  {
+    unsigned char bool_union[] = {
+      0x00,0x00,0x00,0x05, // dheader
+      0x00,0x00,0x00,0x0e, // discriminator
+      0x01 // bool_
+    };
+    msg.reset();
+    msg.copy((const char*)bool_union, sizeof(bool_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+    verify_bool_union(data);
+  }
+  {
+    unsigned char str_union[] = {
+      0x00,0x00,0x00,0x0c, // dheader
+      0x00,0x00,0x00,0x0f, // discriminator
+      0x00,0x00,0x00,0x04,'a','b','c','\0' // str
+    };
+    msg.reset();
+    msg.copy((const char*)str_union, sizeof(str_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+    verify_string_union(data);
+  }
+  {
+    unsigned char wstr_union[] = {
+      0x00,0x00,0x00,0x10, // dheader
+      0x00,0x00,0x00,0x10, // discriminator
+      0x00,0x00,0x00,0x08, 0x00,0x61,0x00,0x62,0x00,0x63,0x00,0x00 // wstr
+    };
+    msg.reset();
+    msg.copy((const char*)wstr_union, sizeof(wstr_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+    verify_wstring_union(data);
+  }
+  {
+    unsigned char enum_union[] = {
+      0x00,0x00,0x00,0x08, // dheader
+      0x00,0x00,0x00,0x11, // discriminator
+      0x00,0x00,0x00,0x09 // my_enum
+    };
+    msg.reset();
+    msg.copy((const char*)enum_union, sizeof(enum_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+    verify_enum_union(data);
+  }
+}
+
+TEST(Appendable, ReadValueFromSequence)
+{
+  // TODO: Update this
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableSequenceStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::AppendableSequenceStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  unsigned char sequence_struct[] = {
+    0x00,0x00,0x00,0xe8, // dheader
+    0,0,0,12, 0,0,0,2, 0,0,0,1, 0,0,0,2, // +16=16 my_enums
+    0,0,0,3, 0,0,0,3, 0,0,0,4, 0,0,0,5, // +16=32 int_32s
+    0,0,0,2, 0,0,0,10, 0,0,0,11, // +12=44 uint_32s
+    0,0,0,3, 12,13,14, // +7=51 int_8s
+    (0), 0,0,0,2, 15,16, // +(1)+6=58 uint_8s
+    (0),(0), 0,0,0,2, 0,1,0,2, // +(2)+8=68 int_16s
+    0,0,0,3, 0,3,0,4,0,5, // +10=78 uint_16s
+    (0),(0), 0,0,0,2, 0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xfe,
+    0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +(2)+20=100 int_64s
+    0,0,0,1, 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +12=112 uint_64s
+    0,0,0,1, 0x3f,0x80,0x00,0x00, // +8=120 float_32s
+    0,0,0,1, 0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00, // +12=132 float_64s
+    0,0,0,1, 0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0, // +20=152 float_128s
+    0,0,0,2, 'a','b', // +6=158 char_8s
+    (0),(0), 0,0,0,3, 0,0x63,0,0x64,0,0x65, // +(2)+10=170 char_16s
+    (0),(0), 0,0,0,2, 0xee,0xff, // +(2)+6=178 byte_s
+    (0),(0), 0,0,0,1, 1, // +(2)+5=185 bool_s
+    (0),(0),(0), 0,0,0,12, 0,0,0,1, 0,0,0,4, 'a','b','c','\0', // +(3)+16=204 str_s
+    0,0,0,26, 0,0,0,2, 0,0,0,6, 0,0x64,0,0x65,0,0x66,(0),(0),
+    0,0,0,6, 0,0x67,0,0x68,0,0x69 // +16+(2)+10=232 wstr_s
+  };
+  ACE_Message_Block msg(1024);
+  msg.copy((const char*)sequence_struct, sizeof(sequence_struct));
+  XTypes::DynamicData data(&msg, xcdr2, dt);
+
+  verify_sequence_value_struct<AppendableSequenceStruct>(data);
+}
+
 /////////////////////////////// Final tests /////////////////////////////
 TEST(Final, ReadValueFromStruct)
 {
@@ -1019,196 +1371,179 @@ TEST(Final, ReadValueFromUnion)
       0x00,0x00,0x00,0x00, // +4=4 discriminator
       0x00,0x00,0x00,0x0a  // +4=8 int_32
     };
-
     msg.copy((const char*)int32_union, sizeof(int32_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::Long int_32;
-    DDS::ReturnCode_t ret = data.get_int32_value(int_32, 1);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_EQ(ACE_CDR::Long(10), int_32);
+    verify_int32_union(data);
   }
   {
     unsigned char uint32_union[] = {
       0x00,0x00,0x00,0x01, // +4=4 discriminator
       0x00,0x00,0x00,0x0b // +4=8 uint_32
     };
-
     msg.reset();
     msg.copy((const char*)uint32_union, sizeof(uint32_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::ULong uint_32;
-    DDS::ReturnCode_t ret = data.get_uint32_value(uint_32, 2);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_EQ(ACE_CDR::ULong(11), uint_32);
+    verify_uint32_union(data);
   }
   {
     unsigned char int8_union[] = {
       0x00,0x00,0x00,0x02, // +4=4 discriminator
       0x7f // +1=5 int_8
     };
-
     msg.reset();
     msg.copy((const char*)int8_union, sizeof(int8_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::Int8 int_8;
-    DDS::ReturnCode_t ret = data.get_int8_value(int_8, 3);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_EQ(ACE_CDR::Int8(127), int_8);
+    verify_int8_union(data);
   }
   {
     unsigned char uint8_union[] = {
       0x00,0x00,0x00,0x03, // +4=4 discriminator
       0xff // +1=5 uint_8
     };
-
     msg.reset();
     msg.copy((const char*)uint8_union, sizeof(uint8_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::UInt8 uint_8;
-    DDS::ReturnCode_t ret = data.get_uint8_value(uint_8, 4);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_EQ(ACE_CDR::UInt8(255), uint_8);
+    verify_uint8_union(data);
   }
   {
     unsigned char int16_union[] = {
       0x00,0x00,0x00,0x04, // +4=4 discriminator
       0x00,0x09 // +2=6 int_16
     };
-
     msg.reset();
     msg.copy((const char*)int16_union, sizeof(int16_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::Short int_16;
-    DDS::ReturnCode_t ret = data.get_int16_value(int_16, 5);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_EQ(ACE_CDR::Short(9), int_16);
+    verify_int16_union(data);
   }
   {
     unsigned char uint16_union[] = {
       0x00,0x00,0x00,0x05, // +4=4 discriminator
       0x00,0x05 // +2=6 uint_16
     };
-
     msg.reset();
     msg.copy((const char*)uint16_union, sizeof(uint16_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::UShort uint_16;
-    DDS::ReturnCode_t ret = data.get_uint16_value(uint_16, 6);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_EQ(ACE_CDR::UShort(5), uint_16);
+    verify_uint16_union(data);
   }
   {
     unsigned char int64_union[] = {
       0x00,0x00,0x00,0x06, // +4=4 discriminator
       0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xfe// +8=12 int_64
     };
-
     msg.reset();
     msg.copy((const char*)int64_union, sizeof(int64_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::LongLong int_64;
-    DDS::ReturnCode_t ret = data.get_int64_value(int_64, 7);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_EQ(ACE_CDR::LongLong(254), int_64);
+    verify_int64_union(data);
   }
   {
     unsigned char uint64_union[] = {
       0x00,0x00,0x00,0x07, // +4=4 discriminator
       0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff// +8=12 uint_64
     };
-
     msg.reset();
     msg.copy((const char*)uint64_union, sizeof(uint64_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::ULongLong uint_64;
-    DDS::ReturnCode_t ret = data.get_uint64_value(uint_64, 8);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_EQ(ACE_CDR::ULongLong(255), uint_64);
+    verify_uint64_union(data);
   }
   {
     unsigned char float32_union[] = {
       0x00,0x00,0x00,0x08, // +4=4 discriminator
       0x3f,0x80,0x00,0x00 // +4=8 float_32
     };
-
     msg.reset();
     msg.copy((const char*)float32_union, sizeof(float32_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::Float float_32;
-    DDS::ReturnCode_t ret = data.get_float32_value(float_32, 9);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_EQ(ACE_CDR::Float(1.0f), float_32);
+    verify_float32_union(data);
   }
   {
     unsigned char float64_union[] = {
       0x00,0x00,0x00,0x09, // +4=4 discriminator
       0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00 // +8=12 float_64
     };
-
     msg.reset();
     msg.copy((const char*)float64_union, sizeof(float64_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::Double float_64;
-    DDS::ReturnCode_t ret = data.get_float64_value(float_64, 10);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_EQ(ACE_CDR::Double(1.0), float_64);
+    verify_float64_union(data);
   }
   {
     unsigned char float128_union[] = {
       0x00,0x00,0x00,0x0a, // +4=4 discriminator
       0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0     // 16=20 float_128
     };
-
     msg.reset();
     msg.copy((const char*)float128_union, sizeof(float128_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::LongDouble float_128;
-    DDS::ReturnCode_t ret = data.get_float128_value(float_128, 11);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    ACE_CDR::LongDouble expected;
-    set_float128_value(expected);
-    check_float128(expected, float_128);
+    verify_float128_union(data);
   }
   {
     unsigned char char8_union[] = {
       0x00,0x00,0x00,0x0b, // +4=4 discriminator
       'a'     // +1=5 char_8
     };
-
     msg.reset();
     msg.copy((const char*)char8_union, sizeof(char8_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::Char char_8;
-    DDS::ReturnCode_t ret = data.get_char8_value(char_8, 12);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_EQ(ACE_CDR::Char('a'), char_8);
+    verify_char8_union(data);
   }
   {
     unsigned char char16_union[] = {
       0x00,0x00,0x00,0x0c, // +4=4 discriminator
       0x00,0x61 // +2=6 char_16
     };
-
     msg.reset();
     msg.copy((const char*)char16_union, sizeof(char16_union));
     XTypes::DynamicData data(&msg, xcdr2, dt);
-
-    ACE_CDR::WChar char_16;
-    DDS::ReturnCode_t ret = data.get_char16_value(char_16, 13);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    EXPECT_EQ(ACE_CDR::WChar(L'a'), char_16);
+    verify_char16_union(data);
+  }
+  {
+    unsigned char byte_union[] = {
+      0x00,0x00,0x00,0x0d, // discriminator
+      0xff // byte_
+    };
+    msg.reset();
+    msg.copy((const char*)byte_union, sizeof(byte_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+    verify_byte_union(data);
+  }
+  {
+    unsigned char bool_union[] = {
+      0x00,0x00,0x00,0x0e, // discriminator
+      0x01 // bool_
+    };
+    msg.reset();
+    msg.copy((const char*)bool_union, sizeof(bool_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+    verify_bool_union(data);
+  }
+  {
+    unsigned char str_union[] = {
+      0x00,0x00,0x00,0x0f, // discriminator
+      0x00,0x00,0x00,0x04,'a','b','c','\0' // str
+    };
+    msg.reset();
+    msg.copy((const char*)str_union, sizeof(str_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+    verify_string_union(data);
+  }
+  {
+    unsigned char wstr_union[] = {
+      0x00,0x00,0x00,0x10, // discriminator
+      0x00,0x00,0x00,0x08, 0x00,0x61,0x00,0x62,0x00,0x63,0x00,0x00 // wstr
+    };
+    msg.reset();
+    msg.copy((const char*)wstr_union, sizeof(wstr_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+    verify_wstring_union(data);
+  }
+  {
+    unsigned char enum_union[] = {
+      0x00,0x00,0x00,0x11, // discriminator
+      0x00,0x00,0x00,0x09 // my_enum
+    };
+    msg.reset();
+    msg.copy((const char*)enum_union, sizeof(enum_union));
+    XTypes::DynamicData data(&msg, xcdr2, dt);
+    verify_enum_union(data);
   }
 }
 
@@ -1230,7 +1565,7 @@ TEST(Final, ReadValueFromSequence)
     0,0,0,3, 12,13,14, // +7=51 int_8s
     (0), 0,0,0,2, 15,16, // +(1)+6=58 uint_8s
     (0),(0), 0,0,0,2, 0,1,0,2, // +(2)+8=68 int_16s
-    0,0,0,3, 0,3,0,4 ,0,5, // +10=78 uint_16s
+    0,0,0,3, 0,3,0,4,0,5, // +10=78 uint_16s
     (0),(0), 0,0,0,2, 0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xfe,
     0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +(2)+20=100 int_64s
     0,0,0,1, 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +12=112 uint_64s
