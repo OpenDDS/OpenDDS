@@ -4,6 +4,7 @@
  */
 
 #include "sample_manager.h"
+
 #include "ws_common.h"
 
 #ifndef NO_ITL

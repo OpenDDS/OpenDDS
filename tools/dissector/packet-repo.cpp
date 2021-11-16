@@ -7,6 +7,8 @@
 
 #include "ws-wrapper-headers/packet-giop.h"
 
+#include <dds/DCPS/GuidUtils.h>
+
 #include <dds/DdsDcpsInfoUtilsC.h>
 
 #include <ace/Basic_Types.h>
@@ -226,6 +228,24 @@ namespace OpenDDS
     const char *
     InfoRepo_Dissector::topic_for_pub (const RepoId *pub)
     {
+      if (pub->entityId.entityKind == 0xc2) {
+        // These are place holders, I don't actually know if the format of these
+        // samples match these IDL structs.
+        static const EntityId_t part_bit = {{0, 0, 1}, 0xc2};
+        static const EntityId_t topic_bit = {{0, 0, 2}, 0xc2};
+        static const EntityId_t sub_bit = {{0, 0, 3}, 0xc2};
+        static const EntityId_t pub_bit = {{0, 0, 4}, 0xc2};
+        if (pub->entityId == part_bit) {
+          return "DDS::ParticipantBuiltinTopicData";
+        } else if (pub->entityId == topic_bit) {
+          return "DDS::PublicationBuiltinTopicData";
+        } else if (pub->entityId == sub_bit) {
+          return "DDS::SubscriptionBuiltinTopicData";
+        } else if (pub->entityId == pub_bit) {
+          return "DDS::TopicBuiltinTopicData";
+        }
+      }
+
       gulong key = ACE::hash_pjw(reinterpret_cast<const char *>(pub),
                                  sizeof (RepoId));
       const RepoId *topicId = 0;
