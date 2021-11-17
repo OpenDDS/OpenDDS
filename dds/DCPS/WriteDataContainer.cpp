@@ -911,8 +911,8 @@ WriteDataContainer::remove_oldest_sample(
     if (this->writer_->remove_sample(stale)) {
       if (this->sent_data_.dequeue(stale)) {
         release_buffer(stale);
-        result = true;
       }
+      result = true;
 
     } else {
       if (this->sending_data_.dequeue(stale)) {
