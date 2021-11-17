@@ -2244,7 +2244,6 @@ bool print_dynamic_data(DynamicData dd, DCPS::String& type_string, DCPS::String 
   OpenDDS::DCPS::String member_name;
   OpenDDS::DCPS::String type_name;
   OpenDDS::XTypes::DynamicData temp_dd;
-  OpenDDS::XTypes::DynamicType_rch temp_dt;
   switch (dd.type()->get_kind()) {
   case OpenDDS::XTypes::TK_INT8: {
     ACE_CDR::Int8 my_int8;
@@ -2512,7 +2511,6 @@ bool print_dynamic_data(DynamicData dd, DCPS::String& type_string, DCPS::String 
       member_name = iter->second->get_descriptor().name;
       type_name = iter->second->get_descriptor().get_type()->get_descriptor().name;
       type_string += indent + type_name + " " + member_name;
-      temp_dt = iter->second->get_descriptor().get_type();
       if (!print_dynamic_data(temp_dd, type_string, indent)) {
         if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
           ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to read struct member\n"));
