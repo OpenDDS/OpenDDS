@@ -24,7 +24,7 @@
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/ConnectionRecords.h>
 #include <dds/DCPS/transport/framework/TransportDebug.h>
-#include "dds/DCPS/ThreadMonitor.h"
+#include <dds/DCPS/ThreadMonitor.h>
 #ifdef OPENDDS_SECURITY
 #  include <dds/DCPS/security/framework/SecurityRegistry.h>
 #endif

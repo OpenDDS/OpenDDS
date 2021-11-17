@@ -204,7 +204,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       config.relay_id(arg);
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-ThreadMonitorPeriodSeconds"))) {
-      config.thread_monitor_period_seconds(ACE_OS::atoi(arg));
+      config.thread_monitor_period_seconds(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-ThreadMonitorHistoryDepth"))) {
       config.thread_monitor_history_depth(ACE_OS::atoi(arg));
@@ -276,7 +276,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   TheServiceParticipant->bit_autopurge_disposed_samples_delay(one_minute);
 
   RelayThreadMonitor thread_mon(config.thread_monitor_period_seconds(),
-                                  config.thread_monitor_history_depth());
+                                config.thread_monitor_history_depth());
 
   // Set up the relay participant.
   DDS::DomainParticipantQos participant_qos;

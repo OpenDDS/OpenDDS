@@ -8,11 +8,11 @@
 using namespace OpenDDS::DCPS;
 namespace RtpsRelay {
 
-RelayThreadMonitor::RelayThreadMonitor(int perd, size_t depth)
+RelayThreadMonitor::RelayThreadMonitor(TimeDuration perd, size_t depth)
 : running_(false)
 , modlock_()
 , moderator_(modlock_)
-, period_(static_cast<time_t>(perd))
+, period_(perd)
 , history_depth_(depth)
 {
   ThreadMonitor::installed_monitor_ = this;
@@ -49,8 +49,8 @@ double RelayThreadMonitor::get_busy_pct(const char* key) const
   try {
     return busy_map_.at(key);
   } catch (const std::out_of_range&) {
+    return 0.0;
   }
-  return 0.0;
 }
 
 RelayThreadMonitor::ThreadDescriptor::ThreadDescriptor(const char* alias,

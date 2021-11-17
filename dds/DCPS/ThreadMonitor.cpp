@@ -1,18 +1,17 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #include <DCPS/DdsDcps_pch.h>
+
 #include "ThreadMonitor.h"
 #include "ReactorTask.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
-  namespace DCPS {
+namespace DCPS {
 
 ThreadMonitor::UpdateMode IMPLICIT_IDLE = {true, true, true};
 ThreadMonitor::UpdateMode EXPLICIT_IDLE = {false, true, true};
@@ -70,7 +69,7 @@ ThreadMonitor::RedLight::~RedLight(void)
   }
 }
 
-  } // namespace DCPS
+} // namespace DCPS
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

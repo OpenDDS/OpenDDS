@@ -240,12 +240,12 @@ public:
     return restart_detection_;
   }
 
-  void thread_monitor_period_seconds(int tmp)
+  void thread_monitor_period_seconds(OpenDDS::DCPS::TimeDuration tmp)
   {
     thread_monitor_period_seconds_ = tmp;
   }
 
-  int thread_monitor_period_seconds() const
+  OpenDDS::DCPS::TimeDuration thread_monitor_period_seconds() const
   {
     return thread_monitor_period_seconds_;
   }
@@ -281,7 +281,7 @@ private:
   OpenDDS::DCPS::TimeDuration publish_relay_status_;
   OpenDDS::DCPS::TimeDuration publish_relay_status_liveliness_;
   bool restart_detection_;
-  int thread_monitor_period_seconds_;
+  OpenDDS::DCPS::TimeDuration thread_monitor_period_seconds_;
   int thread_monitor_history_depth_;
 };
 
