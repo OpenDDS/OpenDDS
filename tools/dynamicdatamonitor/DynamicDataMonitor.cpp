@@ -27,17 +27,50 @@
 #include <dds/DCPS/transport/shmem/Shmem.h>
 #endif
 
+#include <ace/Arg_Shifter.h>
 #include <ace/Semaphore.h>
 #include <ace/Thread_Semaphore.h>
 
 #include <iostream>
 #include <sstream>
 
+long num_samples = 0;
+long num_seconds = 0;
+// parse the command line arguments
+int parse_args (int& argc, ACE_TCHAR *argv[])
+{
+  u_long mask =  ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS);
+  ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS);
+  ACE_Arg_Shifter arg_shifter (argc, argv);
+
+  while (arg_shifter.is_anything_left())
+  {
+    // options:
+    //  -samples num_samples       defaults to infinite
+    //  -time num_seconds          defaults to infinite
+
+    const ACE_TCHAR *currentArg = 0;
+
+    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-samples"))) != 0) {
+      num_samples = ACE_OS::atoi (currentArg);
+      arg_shifter.consume_arg();
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-time"))) != 0) {
+      num_seconds = ACE_OS::atoi (currentArg);
+      arg_shifter.consume_arg();
+    } else {
+      arg_shifter.ignore_arg();
+    }
+  }
+  // Indicates successful parsing of the command line
+  return 0;
+}
+
 class TestRecorderListener : public OpenDDS::DCPS::RecorderListener
 {
 public:
   explicit TestRecorderListener()
     : sem_(0)
+    , sample_count_(0)
   {
   }
 
@@ -52,6 +85,7 @@ public:
         "Failed to read dynamic data\n"));
     }
     std::cout << my_type;
+    ++sample_count_;
   }
 
   virtual void on_recorder_matched(OpenDDS::DCPS::Recorder*,
@@ -60,8 +94,7 @@ public:
     if (status.current_count == 1 && OpenDDS::DCPS::DCPS_debug_level >= 4) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TestRecorderListener::on_recorder_matched:"
           " a writer connected to recorder\n")));
-    }
-    else if (status.current_count == 0 && status.total_count > 0) {
+    } else if (status.current_count == 0 && status.total_count > 0) {
       if (OpenDDS::DCPS::DCPS_debug_level >= 4) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TestRecorderListener::on_recorder_matched:"
           " a writer disconnected with recorder\n")));
@@ -70,12 +103,19 @@ public:
     }
   }
 
-  int wait(const ACE_Time_Value & tv) {
+  int wait(const ACE_Time_Value & tv)
+  {
     ACE_Time_Value timeout = ACE_OS::gettimeofday() + tv;
     return sem_.acquire(timeout);
   }
+
+  long sample_count() const
+  {
+    return sample_count_;
+  }
 private:
   ACE_Thread_Semaphore sem_;
+  long sample_count_;
 };
 
 
@@ -84,6 +124,7 @@ int run_test(int argc, ACE_TCHAR *argv[]){
   try {
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
+    parse_args(argc, argv);
     if (argc != 4) {
       if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
         ACE_ERROR((LM_ERROR,
@@ -94,8 +135,8 @@ int run_test(int argc, ACE_TCHAR *argv[]){
       }
       return 1;
     }
-    OpenDDS::DCPS::String topic_name = argv[1];
-    OpenDDS::DCPS::String type_name = argv[2];
+    const ACE_TCHAR* topic_name = argv[1];
+    const ACE_TCHAR* type_name = argv[2];
     DDS::DomainId_t domainid = ACE_OS::atoi(argv[3]);
     OpenDDS::DCPS::Service_Participant* service = TheServiceParticipant;
 
@@ -117,8 +158,8 @@ int run_test(int argc, ACE_TCHAR *argv[]){
     {
       DDS::Topic_var topic =
         service->create_typeless_topic(participant,
-                                       topic_name.c_str(),
-                                       type_name.c_str(),
+                                       ACE_TEXT_ALWAYS_CHAR(topic_name),
+                                       ACE_TEXT_ALWAYS_CHAR(type_name),
                                        true,
                                        TOPIC_QOS_DEFAULT,
                                        0,
@@ -130,8 +171,6 @@ int run_test(int argc, ACE_TCHAR *argv[]){
         }
         return 1;
       }
-
-      // ACE_Time_Value wait_time(60, 0);
 
       RcHandle<TestRecorderListener> recorder_listener = make_rch<TestRecorderListener> ();
 
@@ -156,23 +195,24 @@ int run_test(int argc, ACE_TCHAR *argv[]){
         return 1;
       }
 
-      int i;
+      ACE_Time_Value tv;
+      ACE_Time_Value start_tv = tv.now();
+
       while (1) {
-        ++i;
+        // TODO CLAYTON: Find a better waiting pattern
+        sleep(1);
+        if (num_seconds != 0 && (tv.now() - start_tv).sec() >= num_seconds) {
+          break;
+        }
+        if (num_samples != 0 && recorder_listener->sample_count() >= num_samples) {
+          break;
+        }
       }
-      // wait until the writer disconnnects
-      // if (recorder_listener->wait(wait_time) == -1) {
-      //   ACE_ERROR_RETURN((LM_ERROR,
-      //                     ACE_TEXT("ERROR: %N:%l: main() -")
-      //                     ACE_TEXT(" recorder timeout!\n")),
-      //                     1);
-      // }
-      // ret_val = recorder_listener->ret_val_;
-      // service->delete_recorder(recorder);
+      service->delete_recorder(recorder);
     }
-    // participant->delete_contained_entities();
-    // dpf->delete_participant(participant);
-    // TheServiceParticipant->shutdown();
+    participant->delete_contained_entities();
+    dpf->delete_participant(participant);
+    TheServiceParticipant->shutdown();
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
     return 1;

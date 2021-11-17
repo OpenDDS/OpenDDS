@@ -119,8 +119,7 @@ public:
     if (status.current_count == 1 && OpenDDS::DCPS::DCPS_debug_level >= 4) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TestRecorderListener::on_recorder_matched:"
           " a writer connected to recorder\n")));
-    }
-    else if (status.current_count == 0 && status.total_count > 0) {
+    } else if (status.current_count == 0 && status.total_count > 0) {
       if (OpenDDS::DCPS::DCPS_debug_level >= 4) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TestRecorderListener::on_recorder_matched:"
           " a writer disconnected with recorder\n")));
@@ -129,7 +128,8 @@ public:
     }
   }
 
-  int wait(const ACE_Time_Value & tv) {
+  int wait(const ACE_Time_Value & tv)
+  {
     ACE_Time_Value timeout = ACE_OS::gettimeofday() + tv;
     return sem_.acquire(timeout);
   }
@@ -142,7 +142,7 @@ private:
 int run_test(int argc, ACE_TCHAR *argv[]){
   int ret_val = 0;
   try {
-    OpenDDS::DCPS::String type_name = argv[1];
+    const ACE_TCHAR* type_name = argv[1];
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
@@ -168,7 +168,7 @@ int run_test(int argc, ACE_TCHAR *argv[]){
       DDS::Topic_var topic =
         service->create_typeless_topic(participant,
                                        "recorder_topic",
-                                       type_name.c_str(),
+                                       ACE_TEXT_ALWAYS_CHAR(type_name),
                                        true,
                                        TOPIC_QOS_DEFAULT,
                                        0,

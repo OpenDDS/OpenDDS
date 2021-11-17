@@ -22,14 +22,7 @@
 #include <ace/OS_NS_unistd.h>
 
 using namespace DDS;
-/// parse the command line arguments
-int parse_args (int argc, ACE_TCHAR *argv[])
-{
-  u_long mask =  ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS);
-  ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS);
-  ACE_Arg_Shifter arg_shifter (argc, argv);
-  return 0;
-}
+
 void stru_narrow_write(DataWriter_var dw)
 {
   Dynamic::stru foo;
@@ -99,9 +92,8 @@ void union_default_narrow_write(DataWriter_var dw)
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   int status = 0;
-  OpenDDS::DCPS::String type_name = argv[1];
+  const ACE_TCHAR* type_name = argv[1];
   DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
-  parse_args (argc, argv);
   DomainParticipant_var dp =
     dpf->create_participant(153,
                             PARTICIPANT_QOS_DEFAULT,
@@ -115,17 +107,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   //this needs modularization
   OpenDDS::DCPS::TypeSupport_var ts_var;
-  if (type_name == "stru") {
+  if (!ACE_OS::strcmp(type_name, ACE_TEXT("stru"))) {
     ts_var = new Dynamic::struTypeSupportImpl;
-  } else if (type_name == "nested") {
+  } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("nested"))) {
     ts_var = new Dynamic::outer_structTypeSupportImpl;
-  } else if (type_name == "union" || type_name == "union_default") {
+  } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("union")) ||
+             !ACE_OS::strcmp(type_name, ACE_TEXT("union_default"))) {
     ts_var = new Dynamic::my_unionTypeSupportImpl;
   }
-  ts_var->register_type(dp, type_name.c_str());
+  ts_var->register_type(dp, ACE_TEXT_ALWAYS_CHAR(type_name));
 
   Topic_var topic =
-      dp->create_topic ("recorder_topic", type_name.c_str(), TOPIC_QOS_DEFAULT,
+      dp->create_topic ("recorder_topic", ACE_TEXT_ALWAYS_CHAR(type_name), TOPIC_QOS_DEFAULT,
                         0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   // Create the publisher
@@ -150,13 +143,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   // TODO CLAYTON: There is currently a race between get_dynamic_data and the creation of the
   // dynamic type used by it.  A more elegant solution than a delaying sleep is needed.
   sleep(3);
-  if (type_name == "stru") {
+  if (!ACE_OS::strcmp(type_name, ACE_TEXT("stru"))) {
     stru_narrow_write(dw);
-  } else if (type_name == "nested") {
+  } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("nested"))) {
     nested_stru_narrow_write(dw);
-  } else if (type_name == "union") {
+  } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("union"))) {
     union_narrow_write(dw);
-  } else if (type_name == "union_default") {
+  } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("union_default"))) {
     union_default_narrow_write(dw);
   }
   pub->delete_contained_entities();
