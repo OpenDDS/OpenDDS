@@ -17,8 +17,8 @@ ThreadMonitor::UpdateMode IMPLICIT_IDLE = {true, true, true};
 ThreadMonitor::UpdateMode EXPLICIT_IDLE = {false, true, true};
 ThreadMonitor::UpdateMode IMPLICIT_BUSY = {true, false, true};
 ThreadMonitor::UpdateMode EXPLICIT_BUSY = {false, false, true};
-ThreadMonitor::UpdateMode INITIAL = {true, false, false};
-ThreadMonitor::UpdateMode FINAL = {false, false, false};
+ThreadMonitor::UpdateMode INITIAL_MODE = {true, false, false};
+ThreadMonitor::UpdateMode FINAL_MODE = {false, false, false};
 ThreadMonitor *ThreadMonitor::installed_monitor_ = 0;
 
 ThreadMonitor::~ThreadMonitor()
@@ -42,7 +42,7 @@ ThreadMonitor::GreenLight::GreenLight(const char* alias, bool initial)
 : is_initial_(initial)
 {
   if (installed_monitor_) {
-    installed_monitor_->update(is_initial_ ? INITIAL : EXPLICIT_BUSY, alias);
+    installed_monitor_->update(is_initial_ ? INITIAL_MODE : EXPLICIT_BUSY, alias);
   }
 }
 
@@ -58,7 +58,7 @@ ThreadMonitor::RedLight::RedLight(const char* alias, bool final)
 : is_final_(final)
 {
   if (installed_monitor_) {
-    installed_monitor_->update(is_final_ ? FINAL : EXPLICIT_IDLE, alias);
+    installed_monitor_->update(is_final_ ? FINAL_MODE : EXPLICIT_IDLE, alias);
   }
 }
 
