@@ -105,7 +105,7 @@ public:
    */
   virtual RecorderListener_rch get_listener() = 0;
   DynamicTypeByPubId dt_map_;
-  OpenDDS::XTypes::DynamicData get_dynamic_data(const RawDataSample& sample);
+  XTypes::DynamicData get_dynamic_data(const RawDataSample& sample);
 };
 
 }

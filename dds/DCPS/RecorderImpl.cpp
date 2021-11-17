@@ -230,7 +230,7 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
   if (sample.header_.message_id_ == SAMPLE_DATA && listener_.in()) {
     Encoding::Kind kind = Encoding::KIND_UNALIGNED_CDR;
     if (sample.header_.cdr_encapsulation_) {
-      Encoding enc(Encoding::KIND_XCDR2, sample.header_.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
+      const Encoding enc(Encoding::KIND_XCDR2, sample.header_.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
       Serializer ser(sample.sample_.get(), enc);
       EncapsulationHeader encap;
       if (ser >> encap) {
@@ -265,8 +265,7 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
                             sample.header_.publication_id_,
                             sample.header_.byte_order_,
                             sample.sample_.get(),
-                            kind
-                            );
+                            kind);
     listener_->on_sample_data_received(this, rawSample);
   }
 }

@@ -104,7 +104,7 @@ public:
   DDS::ReturnCode_t get_string_values(CORBA::StringSeq& value, MemberId id);
   DDS::ReturnCode_t get_wstring_values(CORBA::WStringSeq& value, MemberId id);
 
-  DynamicType_rch get_type() { return type_; }
+  DynamicType_rch type() { return type_; }
 
 private:
   void copy(const DynamicData& other);
@@ -310,8 +310,8 @@ private:
 };
 
 bool OpenDDS_Dcps_Export print_dynamic_data(
-  OpenDDS::XTypes::DynamicData dd, OpenDDS::XTypes::DynamicType_rch dt,
-  OpenDDS::DCPS::String& type_string, OpenDDS::DCPS::String indent);
+  DynamicData dd, XTypes::DynamicType_rch dt,
+    DCPS::String& type_string, DCPS::String indent);
 
 } // namespace XTypes
 } // namespace OpenDDS
