@@ -1,5 +1,4 @@
 project(Dynamic_Data_Monitor): dcps_test, dcps_rtps_udp, msvc_bigobj {
-  dcps_ts_flags += -Gxtypes-complete
   exename   = dynamic-data-monitor
 
   Source_Files {

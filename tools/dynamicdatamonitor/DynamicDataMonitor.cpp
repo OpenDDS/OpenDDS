@@ -33,7 +33,8 @@
 
 #include <iostream>
 #include <sstream>
-
+namespace OpenDDS {
+namespace DCPS {
 long num_samples = 0;
 long num_seconds = 0;
 // parse the command line arguments
@@ -65,7 +66,7 @@ int parse_args (int& argc, ACE_TCHAR *argv[])
   return 0;
 }
 
-class TestRecorderListener : public OpenDDS::DCPS::RecorderListener
+class TestRecorderListener : public RecorderListener
 {
 public:
   explicit TestRecorderListener()
@@ -74,12 +75,12 @@ public:
   {
   }
 
-  virtual void on_sample_data_received(OpenDDS::DCPS::Recorder* rec,
-                                       const OpenDDS::DCPS::RawDataSample& sample)
+  virtual void on_sample_data_received(Recorder* rec,
+                                       const RawDataSample& sample)
   {
-    using namespace OpenDDS::DCPS;
-    OpenDDS::XTypes::DynamicData dd = rec->get_dynamic_data(sample);
-    OpenDDS::DCPS::String my_type = "";
+    using namespace DCPS;
+    XTypes::DynamicData dd = rec->get_dynamic_data(sample);
+    String my_type = "";
     if (!print_dynamic_data(dd, my_type, "")){
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TestRecorderListener::on_sample_data_received: "
         "Failed to read dynamic data\n"));
@@ -88,14 +89,14 @@ public:
     ++sample_count_;
   }
 
-  virtual void on_recorder_matched(OpenDDS::DCPS::Recorder*,
+  virtual void on_recorder_matched(Recorder*,
                                    const ::DDS::SubscriptionMatchedStatus& status )
   {
-    if (status.current_count == 1 && OpenDDS::DCPS::DCPS_debug_level >= 4) {
+    if (status.current_count == 1 && DCPS_debug_level >= 4) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TestRecorderListener::on_recorder_matched:"
           " a writer connected to recorder\n")));
     } else if (status.current_count == 0 && status.total_count > 0) {
-      if (OpenDDS::DCPS::DCPS_debug_level >= 4) {
+      if (DCPS_debug_level >= 4) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TestRecorderListener::on_recorder_matched:"
           " a writer disconnected with recorder\n")));
       }
@@ -126,7 +127,7 @@ int run_test(int argc, ACE_TCHAR *argv[]){
       TheParticipantFactoryWithArgs(argc, argv);
     parse_args(argc, argv);
     if (argc != 4) {
-      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+      if (log_level >= LogLevel::Error) {
         ACE_ERROR((LM_ERROR,
                    "(%P|%t) ERROR: main():"
                    " dynamic-data-monitor was passed an incorrect number of arguments:"
@@ -138,22 +139,22 @@ int run_test(int argc, ACE_TCHAR *argv[]){
     const ACE_TCHAR* topic_name = argv[1];
     const ACE_TCHAR* type_name = argv[2];
     DDS::DomainId_t domainid = ACE_OS::atoi(argv[3]);
-    OpenDDS::DCPS::Service_Participant* service = TheServiceParticipant;
+    Service_Participant* service = TheServiceParticipant;
 
     // Create DomainParticipant
     DDS::DomainParticipant_var participant =
       dpf->create_participant(domainid,
                               PARTICIPANT_QOS_DEFAULT,
                               0,
-                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                              DEFAULT_STATUS_MASK);
 
     if (!participant) {
-      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+      if (log_level >= LogLevel::Error) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_participant failed!\n"));
       }
       return 1;
     }
-    using namespace OpenDDS::DCPS;
+    using namespace DCPS;
 
     {
       DDS::Topic_var topic =
@@ -163,10 +164,10 @@ int run_test(int argc, ACE_TCHAR *argv[]){
                                        true,
                                        TOPIC_QOS_DEFAULT,
                                        0,
-                                       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                       DEFAULT_STATUS_MASK);
 
       if (!topic) {
-        if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+        if (log_level >= LogLevel::Error) {
           ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_topic failed!\n"));
         }
         return 1;
@@ -181,7 +182,7 @@ int run_test(int argc, ACE_TCHAR *argv[]){
       dr_qos.representation.value.length(1);
       dr_qos.representation.value[0] = DDS::XCDR2_DATA_REPRESENTATION;
       // Create Recorder
-      OpenDDS::DCPS::Recorder_var recorder =
+      Recorder_var recorder =
         service->create_recorder(participant,
                                  topic.in(),
                                  sub_qos,
@@ -189,7 +190,7 @@ int run_test(int argc, ACE_TCHAR *argv[]){
                                  recorder_listener);
 
       if (!recorder.in()) {
-        if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+        if (log_level >= LogLevel::Error) {
           ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_recorder failed!\n"));
         }
         return 1;
@@ -218,7 +219,7 @@ int run_test(int argc, ACE_TCHAR *argv[]){
     return 1;
   }
   if (ret_val == 1) {
-    if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+    if (log_level >= LogLevel::Error) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): failed to properly analyze sample!\n"));
     }
     return 1;
@@ -226,10 +227,13 @@ int run_test(int argc, ACE_TCHAR *argv[]){
   return ret_val;
 }
 
+} // namespace DCPS
+} // namespace OpenDDS
+
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-  int ret = run_test(argc, argv);
+  int ret = OpenDDS::DCPS::run_test(argc, argv);
   ACE_Thread_Manager::instance()->wait();
   return ret;
 }
