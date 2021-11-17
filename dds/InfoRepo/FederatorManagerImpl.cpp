@@ -95,14 +95,12 @@ ManagerImpl::initialize()
 
   // Add participant for Federation domain
   DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
-  this->federationParticipant_
-  = dpf->create_participant(
+  federationParticipant_ = dpf->create_participant(
       this->config_.federationDomain(),
       PARTICIPANT_QOS_DEFAULT,
       DDS::DomainParticipantListener::_nil(),
       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-  if (CORBA::is_nil(this->federationParticipant_.in())) {
+  if (!federationParticipant_) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: create_participant failed for ")
                ACE_TEXT("repository %d in federation domain %d.\n"),
@@ -110,6 +108,7 @@ ManagerImpl::initialize()
                this->config_.federationDomain()));
     throw Incomplete();
   }
+
   //
   // Add type support for update topics
   //
@@ -1098,8 +1097,7 @@ ManagerImpl::leave_federation(
   }
 
   // Remove all the internal Entities owned by the leaving repository.
-  if (false
-      == this->info_->remove_by_owner(this->config_.federationDomain(), id)) {
+  if (!info_->remove_by_owner(config_.federationDomain(), id)) {
     throw Incomplete();
   }
 

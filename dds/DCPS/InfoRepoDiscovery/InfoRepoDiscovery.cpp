@@ -815,10 +815,11 @@ InfoRepoDiscovery::removeDataReaderRemote(const RepoId& subscriptionId)
       remote_reference_to_servant<DataReaderRemoteImpl>(drr->second.in(), orb_);
     impl->detach_parent();
     deactivate_remote_object(drr->second.in(), orb_);
-  }
-  catch (::CORBA::BAD_INV_ORDER&){
+  } catch (const CORBA::BAD_INV_ORDER&) {
     // The orb may throw ::CORBA::BAD_INV_ORDER when is has been shutdown.
     // Ignore it anyway.
+  } catch (const CORBA::OBJECT_NOT_EXIST&) {
+    // Same for CORBA::OBJECT_NOT_EXIST
   }
 
   dataReaderMap_.erase(drr);
@@ -840,10 +841,11 @@ InfoRepoDiscovery::removeDataWriterRemote(const RepoId& publicationId)
       remote_reference_to_servant<DataWriterRemoteImpl>(dwr->second.in(), orb_);
     impl->detach_parent();
     deactivate_remote_object(dwr->second.in(), orb_);
-  }
-  catch (::CORBA::BAD_INV_ORDER&){
+  } catch (const CORBA::BAD_INV_ORDER&) {
     // The orb may throw ::CORBA::BAD_INV_ORDER when is has been shutdown.
     // Ignore it anyway.
+  } catch (const CORBA::OBJECT_NOT_EXIST&) {
+    // Same for CORBA::OBJECT_NOT_EXIST
   }
 
   dataWriterMap_.erase(dwr);
