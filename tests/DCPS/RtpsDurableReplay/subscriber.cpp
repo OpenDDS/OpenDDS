@@ -105,7 +105,7 @@ private:
   bool all_instances_received_after_;
 };
 
-int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   DistributedConditionSet_rch dcs = OpenDDS::DCPS::make_rch<FileBasedDistributedConditionSet>();
 
@@ -184,7 +184,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   participant->delete_contained_entities();
   dpf->delete_participant(participant);
 
-  TheServiceParticipant->shutdown ();
+  TheServiceParticipant->shutdown();
 
-  return elapsed < TimeDuration(6) ? 0 : 1;
+  const TimeDuration limit(6);
+
+  ACE_DEBUG((LM_DEBUG, "elapsed: %C limit: %C\n", elapsed.sec_str().c_str(), limit.sec_str().c_str()));
+
+  return elapsed < limit ? 0 : 1;
 }

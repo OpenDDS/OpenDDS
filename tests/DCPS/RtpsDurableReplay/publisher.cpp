@@ -31,7 +31,7 @@ using namespace OpenDDS::RTPS;
 const TimeDuration LEASE_DURATION(5, 0); // 5 seconds
 const TimeDuration RESEND_PERIOD(1, 0); // 1 second
 
-int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   DistributedConditionSet_rch dcs = OpenDDS::DCPS::make_rch<FileBasedDistributedConditionSet>();
 
@@ -126,7 +126,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   participant->delete_contained_entities();
   dpf->delete_participant(participant);
 
-  TheServiceParticipant->shutdown ();
+  TheServiceParticipant->shutdown();
 
   return 0;
 }

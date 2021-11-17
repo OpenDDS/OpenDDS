@@ -7,7 +7,8 @@
 #include <dds/DCPS/PoolAllocator.h>
 
 #include <ace/Condition_Thread_Mutex.h>
-#include <ace/OS.h>
+#include <ace/OS_NS_sys_stat.h>
+#include <ace/OS_NS_fcntl.h>
 
 #include <set>
 #include <utility>
@@ -54,11 +55,11 @@ class DistributedConditionSet : public OpenDDS::DCPS::RcObject
 {
 public:
   /// Establish a condition.
-  virtual void post(const OPENDDS_STRING& actor, const OPENDDS_STRING& condition) = 0;
+  virtual void post(const OpenDDS::DCPS::String& actor, const OpenDDS::DCPS::String& condition) = 0;
   /// Block until a condition is established.  (waiting_actor is only used for logging.)
-  virtual void wait_for(const OPENDDS_STRING& waiting_actor,
-                        const OPENDDS_STRING& posting_actor,
-                        const OPENDDS_STRING& condition) const = 0;
+  virtual void wait_for(const OpenDDS::DCPS::String& waiting_actor,
+                        const OpenDDS::DCPS::String& posting_actor,
+                        const OpenDDS::DCPS::String& condition) const = 0;
 };
 
 typedef OpenDDS::DCPS::RcHandle<DistributedConditionSet> DistributedConditionSet_rch;
@@ -70,7 +71,7 @@ public:
     : condition_(mutex_)
   {}
 
-  void post(const OPENDDS_STRING& actor, const OPENDDS_STRING& condition)
+  void post(const OpenDDS::DCPS::String& actor, const OpenDDS::DCPS::String& condition)
   {
     ACE_DEBUG((LM_INFO, "(%P|%t) InMemoryDistributedConditionSet %C posting %C\n",
                actor.c_str(), condition.c_str()));
@@ -79,9 +80,9 @@ public:
     condition_.broadcast();
   }
 
-  void wait_for(const OPENDDS_STRING& waiting_actor,
-                const OPENDDS_STRING& posting_actor,
-                const OPENDDS_STRING& condition) const
+  void wait_for(const OpenDDS::DCPS::String& waiting_actor,
+                const OpenDDS::DCPS::String& posting_actor,
+                const OpenDDS::DCPS::String& condition) const
   {
     ACE_DEBUG((LM_INFO, "(%P|%t) InMemoryDistributedConditionSet %C waiting_for %C %C\n",
                waiting_actor.c_str(), posting_actor.c_str(), condition.c_str()));
@@ -102,7 +103,7 @@ public:
   }
 
 private:
-  typedef std::pair<OPENDDS_STRING, OPENDDS_STRING> PairType;
+  typedef std::pair<OpenDDS::DCPS::String, OpenDDS::DCPS::String> PairType;
   typedef std::set<PairType> SetType;
   SetType set_;
   mutable ACE_Thread_Mutex mutex_;
@@ -111,25 +112,40 @@ private:
 
 class FileBasedDistributedConditionSet : public DistributedConditionSet {
 public:
-  void post(const OPENDDS_STRING& actor, const OPENDDS_STRING& condition)
+  const OpenDDS::DCPS::String DCS_DIR = "DCS";
+
+  void post(const OpenDDS::DCPS::String& actor, const OpenDDS::DCPS::String& condition)
   {
     ACE_DEBUG((LM_INFO, "(%P|%t) FileBasedDistributedConditionSet %C posting %C\n",
                actor.c_str(), condition.c_str()));
 
-    ACE_OS::mkdir("./DCS");
-    ACE_OS::mkdir((OPENDDS_STRING("./DCS/") + actor).c_str());
-    ACE_HANDLE fd = ACE_OS::open((OPENDDS_STRING("./DCS/") + actor + "/" + condition).c_str(), O_WRONLY|O_CREAT);
+    if (ACE_OS::mkdir(DCS_DIR.c_str()) && errno != EEXIST) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) FileBasedDistributedConditionSet could not mkdir %C: %p\n",
+                 DCS_DIR.c_str(), ""));
+
+    }
+    const OpenDDS::DCPS::String actor_path = DCS_DIR + "/" + actor;
+    if (ACE_OS::mkdir(actor_path.c_str()) && errno != EEXIST) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) FileBasedDistributedConditionSet could not mkdir %C: %p\n",
+                 actor_path.c_str(), ""));
+    }
+    const OpenDDS::DCPS::String condition_path = actor_path + "/" + condition;
+    ACE_HANDLE fd = ACE_OS::open(condition_path.c_str(), O_WRONLY|O_CREAT);
+    if (fd == ACE_INVALID_HANDLE) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) FileBasedDistributedConditionSet could not create %C: %p\n",
+                 condition_path.c_str(), ""));
+    }
     ACE_OS::close(fd);
   }
 
-  void wait_for(const OPENDDS_STRING& waiting_actor,
-                const OPENDDS_STRING& posting_actor,
-                const OPENDDS_STRING& condition) const
+  void wait_for(const OpenDDS::DCPS::String& waiting_actor,
+                const OpenDDS::DCPS::String& posting_actor,
+                const OpenDDS::DCPS::String& condition) const
   {
     ACE_DEBUG((LM_INFO, "(%P|%t) FileBasedDistributedConditionSet %C waiting_for %C %C\n",
                waiting_actor.c_str(), posting_actor.c_str(), condition.c_str()));
 
-    const OPENDDS_STRING path = OPENDDS_STRING("./DCS/") + posting_actor + "/" + condition;
+    const OpenDDS::DCPS::String path = DCS_DIR + "/" + posting_actor + "/" + condition;
     ACE_HANDLE fd;
     for (fd = ACE_INVALID_HANDLE; fd == ACE_INVALID_HANDLE; fd = ACE_OS::open(path.c_str(), O_RDONLY)) {
       ACE_OS::sleep(1);

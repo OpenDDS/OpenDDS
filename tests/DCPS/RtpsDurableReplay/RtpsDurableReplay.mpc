@@ -1,4 +1,4 @@
-project(publisher) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
+project(*Publisher) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
   exename = publisher
 
   Idl_Files {
@@ -9,7 +9,7 @@ project(publisher) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
   }
 }
 
-project(subscriber) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
+project(*Subscriber) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
   exename = subscriber
 
   Idl_Files {
