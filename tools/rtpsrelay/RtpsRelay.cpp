@@ -275,7 +275,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   TheServiceParticipant->bit_autopurge_nowriter_samples_delay(one_minute);
   TheServiceParticipant->bit_autopurge_disposed_samples_delay(one_minute);
 
-  Relay_Thread_Monitor thread_mon(config.thread_monitor_period_seconds(),
+  RelayThreadMonitor thread_mon(config.thread_monitor_period_seconds(),
                                   config.thread_monitor_history_depth());
 
   // Set up the relay participant.

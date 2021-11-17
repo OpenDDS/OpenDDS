@@ -109,7 +109,6 @@ public:
   /// The "mainline" executed by the worker thread.
   virtual int svc() {
     DBG_ENTRY("QueueTaskBase","svc");
-    Thread_Monitor::Green_Light gl("QueueTaskBase");
 
     thr_id_ = ACE_OS::thr_self();
 
@@ -118,12 +117,13 @@ public:
       TheServiceParticipant->get_thread_status_manager();
     const bool update_thread_status = thread_status_manager && !interval.is_zero();
     const String thread_key = ThreadStatusManager::get_key("QueueTaskBase", name_);
+    ThreadMonitor::GreenLight gl(thread_key.c_str());
 
     // Start the "GetWork-And-PerformWork" loop for the current worker thread.
     while (!this->shutdown_initiated_) {
       T req;
       {
-        Thread_Monitor::Red_Light gl("QueueTaskBase");
+        ThreadMonitor::RedLight gl(thread_key.c_str());
 
         GuardType guard(this->lock_);
 

@@ -1,5 +1,5 @@
-#ifndef RELAY_THREAD_MONITOR_H_
-#define RELAY_THREAD_MONITOR_H_
+#ifndef RelayThreadMonitor_H_
+#define RelayThreadMonitor_H_
 
 #include <dds/DCPS/ThreadMonitor.h>
 #include <dds/DCPS/TimeTypes.h>
@@ -13,21 +13,21 @@
 #include <string>
 #include <stack>
 
-using namespace OpenDDS::DCPS;
-
 namespace RtpsRelay {
 
 /**
- * @class Relay_Thread_Monitor
+ * @class RelayThreadMonitor
  *
  * @brief Defines the means of tracking thread utilization by measuring
  * time spent in event handling vs idle
  */
-class Relay_Thread_Monitor : public Thread_Monitor {
+class RelayThreadMonitor : public OpenDDS::DCPS::ThreadMonitor {
 public:
-  Relay_Thread_Monitor (int perd = 5, size_t depth = 1);
-
+  RelayThreadMonitor (int perd = 5, size_t depth = 1);
+  virtual void preset(OpenDDS::DCPS::ThreadStatusManager *, const char *);
   virtual void update(UpdateMode, const char* = "");
+  virtual double get_busy_pct(const char* key) const;
+
   void summarize(void);
   void report_thread(ACE_thread_t key);
 
@@ -39,44 +39,48 @@ public:
 
 protected:
   bool running_;
+  typedef std::map<std::string, OpenDDS::DCPS::ThreadStatusManager *> registrants;
+  registrants pending_reg_;
 
   ACE_Thread_Mutex modlock_;
   ACE_Condition_Thread_Mutex moderator_;
 
   struct Sample {
     UpdateMode mode_;
-    MonotonicTimePoint at_;
+    OpenDDS::DCPS::MonotonicTimePoint at_;
   };
 
-  struct Load_Summary {
+  struct LoadSummary {
     ACE_UINT64 accum_busy_;
     ACE_UINT64 accum_idle_;
     size_t samples_;
-    MonotonicTimePoint recorded_;
+    OpenDDS::DCPS::MonotonicTimePoint recorded_;
   };
 
-  typedef std::deque<struct Sample> Load_Samples;
-  typedef std::deque<struct Load_Summary> Load_History;
+  typedef std::deque<struct Sample> LoadSamples;
+  typedef std::deque<struct LoadSummary> LoadHistory;
+  typedef std::map<const char*, double> BusyMap;
 
-  class Thread_Descriptor : public OpenDDS::DCPS::RcObject
+  class ThreadDescriptor : public OpenDDS::DCPS::RcObject
   {
   public:
-    Thread_Descriptor(const char *alias, OpenDDS::DCPS::MonotonicTimePoint tnow);
+    ThreadDescriptor(const char *alias, OpenDDS::DCPS::MonotonicTimePoint tnow);
     mutable ACE_Thread_Mutex queue_lock_;
     std::string alias_;
-    Load_Samples samples_;
+    OpenDDS::DCPS::ThreadStatusManager *tsm_;
+    LoadSamples samples_;
     std::stack<UpdateMode> nested_;
-    MonotonicTimePoint last_;
-    Load_History summaries_;
+    OpenDDS::DCPS::MonotonicTimePoint last_;
+    LoadHistory summaries_;
   };
 
-  typedef OpenDDS::DCPS::RcHandle<Thread_Descriptor> Thread_Descriptor_rch;
-  std::map<ACE_thread_t, Thread_Descriptor_rch> descs_;
-  TimeDuration period_;
+  typedef OpenDDS::DCPS::RcHandle<ThreadDescriptor> ThreadDescriptor_rch;
+  std::map<ACE_thread_t, ThreadDescriptor_rch> descs_;
+  OpenDDS::DCPS::TimeDuration period_;
   size_t history_depth_;
-
+  BusyMap busy_map_;
 };
 
 }
 
-#endif // RELAY_THREAD_MONITOR_H_
+#endif // RelayThreadMonitor_H_

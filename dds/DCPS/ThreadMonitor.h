@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_THREAD_MONITOR_H
-#define OPENDDS_DCPS_THREAD_MONITOR_H
+#ifndef OPENDDS_DCPS_ThreadMonitor_H
+#define OPENDDS_DCPS_ThreadMonitor_H
 
 #include "dcps_export.h"
 
@@ -19,55 +19,70 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+struct ThreadStatusManager;
+
 /**
- * @class Thread_Monitor
+ * @class ThreadMonitor
  *
  * @brief Defines the means of tracking thread utilization by measuring
  * time spent in event handling vs idle
  */
-  class OpenDDS_Dcps_Export Thread_Monitor
+  class OpenDDS_Dcps_Export ThreadMonitor
   {
   public:
-    virtual ~Thread_Monitor()
-    {
-    }
+    virtual ~ThreadMonitor();
 
-    typedef struct UpdateMode_st {
+    struct UpdateMode {
       bool implicit_;
       bool idle_;
-     } UpdateMode;
+      bool stacked_;
+     };
 
-    virtual void update(UpdateMode, const char* = "")
-    {
-    }
 
-    static Thread_Monitor* installed_monitor_;
+    virtual void preset(ThreadStatusManager*, const char*);
+
+  /**
+   * identify a thread as being busy or idle at a specific time.
+   */
+    virtual void update(UpdateMode, const char* = "");
 
     /**
-     * @class Thread_Monitor::Green_Light
+     * retrieve the most recently measured thread business as a percentage
+     * of the measured time span. Range is 0.0 to 100.0
+     */
+    virtual double get_busy_pct(const char* alias) const;
+
+    static ThreadMonitor* installed_monitor_;
+
+    /**
+     * @class ThreadMonitor::GreenLight
      *
      * @brief Create an instance of a Green Light to indicate that the owning
      * thread is busy. The thread will then be timestamped as idle upon
      * destruction of the green light object.
      */
-    class Green_Light
+    class GreenLight
     {
     public:
-      Green_Light(const char* alias = "");
-      ~Green_Light(void);
+      GreenLight(const char* alias, bool initial = false);
+      ~GreenLight(void);
+    private:
+      bool is_initial_;
     };
 
     /**
-     * @class Thread_Monitor::Red_Light
+     * @class ThreadMonitor::RedLight
      *
-     * @brief For finer thread load monitoring, use a Red_Light object in
+     * @brief For finer thread load monitoring, use a RedLight object in
      * places where a greenlit thread is about to block.
      */
-    class Red_Light
+    class RedLight
     {
     public:
-      Red_Light(const char* alias = "");
-      ~Red_Light(void);
+      RedLight(const char* alias, bool final = false);
+      ~RedLight(void);
+    private:
+      bool is_final_;
     };
   };
 
@@ -76,4 +91,4 @@ namespace DCPS {
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_DCPS_THREAD_MONITOR_H_
+#endif // OPENDDS_DCPS_ThreadMonitor_H_

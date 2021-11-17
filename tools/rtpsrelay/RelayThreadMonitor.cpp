@@ -1,58 +1,77 @@
 #include "RelayThreadMonitor.h"
+
+#include <dds/DCPS/ReactorTask.h>
 #include <ace/Thread.h>
+
 #include <stdexcept>
 
 using namespace OpenDDS::DCPS;
 namespace RtpsRelay {
 
-Relay_Thread_Monitor::Relay_Thread_Monitor(int perd, size_t depth) : running_(false),
-                                                         modlock_(),
-                                                         moderator_(
-                                                         modlock_), period_(
-static_cast<time_t>(perd)), history_depth_(depth)
+RelayThreadMonitor::RelayThreadMonitor(int perd, size_t depth)
+: running_(false)
+, modlock_()
+, moderator_(modlock_)
+, period_(static_cast<time_t>(perd))
+, history_depth_(depth)
 {
-  Thread_Monitor::installed_monitor_ = this;
+  ThreadMonitor::installed_monitor_ = this;
 }
 
-void Relay_Thread_Monitor::update(Thread_Monitor::UpdateMode mode,
-                            const char* alias)
+void RelayThreadMonitor::preset(ThreadStatusManager *tsm, const char *alias)
+{
+  pending_reg_[alias] = tsm;
+}
+
+void RelayThreadMonitor::update(ThreadMonitor::UpdateMode mode,
+                                const char* alias)
 {
   MonotonicTimePoint tnow = MonotonicTimePoint::now();
   struct Sample s = { mode, tnow };
   ACE_thread_t key = ACE_OS::thr_self();
-  if (mode.implicit_ && !mode.idle_) {
-    ACE_DEBUG((LM_DEBUG, "TLM Got an implicit busy on thread %x\n", key));
-  }
   try {
-    Thread_Descriptor_rch& td = descs_.at(key);
-    ACE_Guard <ACE_Thread_Mutex> g(td->queue_lock_);
+    ThreadDescriptor_rch& td = descs_.at(key);
+    ACE_Guard<ACE_Thread_Mutex> g(td->queue_lock_);
     td->samples_.emplace_back(std::move(s));
   } catch (const std::out_of_range&) {
-    Load_Samples samps;
-    Load_History hist;
-    Thread_Descriptor_rch td = make_rch<Thread_Descriptor>(alias, tnow);
+    LoadSamples samps;
+    LoadHistory hist;
+    ThreadDescriptor_rch td = make_rch<ThreadDescriptor>(alias, tnow);
+    td->tsm_ = pending_reg_[alias];
+    pending_reg_.erase(alias);
     td->samples_.emplace_back(std::move(s));
     descs_.emplace(key, std::move(td));
   }
 }
 
-Relay_Thread_Monitor::Thread_Descriptor::Thread_Descriptor(const char* alias,
+double RelayThreadMonitor::get_busy_pct(const char* key) const
+{
+  try {
+    return busy_map_.at(key);
+  } catch (const std::out_of_range&) {
+  }
+  return 0.0;
+}
+
+RelayThreadMonitor::ThreadDescriptor::ThreadDescriptor(const char* alias,
                                                      MonotonicTimePoint tnow)
-: alias_(alias), last_(tnow)
+: alias_(alias)
+, tsm_(nullptr)
+, last_(tnow)
 {
 }
 
-void Relay_Thread_Monitor::summarize(void)
+void RelayThreadMonitor::summarize(void)
 {
   MonotonicTimePoint tnow = MonotonicTimePoint::now();
   for (auto d = descs_.begin(); d != descs_.end(); d++) {
-    std::deque <Sample> local;
+    std::deque<Sample> local;
     auto& td = d->second;
     {
-      ACE_Guard <ACE_Thread_Mutex> g(td->queue_lock_);
+      ACE_Guard<ACE_Thread_Mutex> g(td->queue_lock_);
       local.swap(td->samples_);
     }
-    struct Load_Summary ls;
+    LoadSummary ls;
     ls.accum_idle_ = ls.accum_busy_ = 0;
     ls.recorded_ = tnow;
     ls.samples_ = local.size();
@@ -84,7 +103,7 @@ void Relay_Thread_Monitor::summarize(void)
       local.pop_front();
     }
     {
-      UpdateMode mode = {true, true};
+      UpdateMode mode = {true, true, true};
       if (td->nested_.size()) {
         mode = td->nested_.top();
       }
@@ -103,18 +122,19 @@ void Relay_Thread_Monitor::summarize(void)
   }
 }
 
-void Relay_Thread_Monitor::report_thread(ACE_thread_t key)
+void RelayThreadMonitor::report_thread(ACE_thread_t key)
 {
   try {
-    Thread_Descriptor_rch& td = descs_.at(key);
+    ThreadDescriptor_rch& td = descs_.at(key);
     if (td->summaries_.empty()) {
       ACE_DEBUG((LM_INFO, "     TLM thread: 0x%x \"%s\" busy:  n/a    idle: n/a", key, td->alias_.c_str()));
       return;
     }
-    const struct Load_Summary& ls = td->summaries_.back();
+    const LoadSummary& ls = td->summaries_.back();
+    double pbusy = 0.0;
     ACE_UINT64 uspan = ls.accum_idle_ + ls.accum_busy_;
     if (uspan > 0) {
-      double pbusy = 100.0 * ls.accum_busy_ / uspan;
+      pbusy = 100.0 * ls.accum_busy_ / uspan;
       double pidle = 100.0 * ls.accum_idle_ / uspan;
       ACE_DEBUG((LM_INFO, "     TLM thread: 0x%x \"%s\" busy:%6.4F%% (%d usec) idle: %6.4F%% measured interval: %F sec and %d samples\n",
                  key, td->alias_.c_str(), pbusy, ls.accum_busy_, pidle, uspan / 1000000.0, ls.samples_));
@@ -125,12 +145,17 @@ void Relay_Thread_Monitor::report_thread(ACE_thread_t key)
     if (td->nested_.size()) {
       ACE_DEBUG((LM_INFO, "     TLM thread: 0x%x nesting level is %d\n", key, td->nested_.size()));
     }
+    if (td->tsm_) {
+      td->tsm_->update_busy(td->alias_.c_str(), pbusy);
+    } else {
+      busy_map_[td->alias_.c_str()] = pbusy;
+    }
   } catch (const std::out_of_range&) {
     ACE_DEBUG((LM_INFO, "     TLM: No entry available for thread id 0x%x\n", key));
   }
 }
 
-void Relay_Thread_Monitor::report(void)
+void RelayThreadMonitor::report(void)
 {
   ACE_DEBUG((LM_INFO, "%T TLM: Reporting on %d threads\n", descs_.size()));
   for (auto d = descs_.begin(); d != descs_.end(); d++) {
@@ -138,7 +163,7 @@ void Relay_Thread_Monitor::report(void)
   }
 }
 
-void Relay_Thread_Monitor::active_monitor(void)
+void RelayThreadMonitor::active_monitor(void)
 {
   while (running_) {
     MonotonicTimePoint expire = MonotonicTimePoint::now() + period_;
@@ -152,12 +177,12 @@ void Relay_Thread_Monitor::active_monitor(void)
 
 ACE_THR_FUNC_RETURN loadmonfunction(void* arg)
 {
-  Relay_Thread_Monitor* tmon = reinterpret_cast<Relay_Thread_Monitor*>(arg);
+  RelayThreadMonitor* tmon = reinterpret_cast<RelayThreadMonitor*>(arg);
   tmon->active_monitor();
   return 0;
 }
 
-void Relay_Thread_Monitor::start()
+void RelayThreadMonitor::start()
 {
   if (running_) {
     return;
@@ -166,7 +191,7 @@ void Relay_Thread_Monitor::start()
   ACE_Thread::spawn(&loadmonfunction, this);
 }
 
-void Relay_Thread_Monitor::stop()
+void RelayThreadMonitor::stop()
 {
   if (running_) {
     running_ = false;

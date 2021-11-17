@@ -265,6 +265,13 @@ const char* ThreadStatusManager::status_to_string(ThreadStatus status)
   }
 }
 
+bool ThreadStatusManager::update_busy(const String& thread_key, double pbusy)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
+  load_map_[thread_key] = pbusy;
+  return true;
+}
+
 bool ThreadStatusManager::update(const String& thread_key, ThreadStatus status)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);

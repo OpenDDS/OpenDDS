@@ -42,7 +42,7 @@ if ($test->flag('single')) {
 sub get_relay_args {
   my $n = shift;
   my $port_digit = 3 + $n;
-    my $ps = 1 + ($n - 1) * 4;
+  my $ps = 1 + ($n - 1) * 4;
   return join(' ',
     "-Id relay${n}",
     "-UserData relay${n}",

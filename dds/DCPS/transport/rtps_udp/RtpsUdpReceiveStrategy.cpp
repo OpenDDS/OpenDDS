@@ -55,7 +55,7 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const Guid
 int
 RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
 {
-  Thread_Monitor::Green_Light tmgl ("RtpsUdpReceiveStrategy");
+  ThreadMonitor::GreenLight tmgl ("RtpsUdpReceiveStrategy");
   return handle_simple_dds_input(fd);
 }
 
