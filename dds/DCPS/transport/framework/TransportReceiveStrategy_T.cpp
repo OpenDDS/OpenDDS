@@ -19,12 +19,12 @@ namespace OpenDDS {
 namespace DCPS {
 
 template<typename TH, typename DSH>
-TransportReceiveStrategy<TH, DSH>::TransportReceiveStrategy()
+TransportReceiveStrategy<TH, DSH>::TransportReceiveStrategy(const TransportInst& config)
   : gracefully_disconnected_(false),
     receive_sample_remaining_(0),
-    mb_allocator_(MESSAGE_BLOCKS),
-    db_allocator_(DATA_BLOCKS),
-    data_allocator_(RECEIVE_BUFFERS * 2),
+    mb_allocator_(config.receive_preallocated_message_blocks_ ? config.receive_preallocated_message_blocks_ : MESSAGE_BLOCKS),
+    db_allocator_(config.receive_preallocated_data_blocks_ ? config.receive_preallocated_data_blocks_ : DATA_BLOCKS),
+    data_allocator_(config.receive_preallocated_data_blocks_ ? config.receive_preallocated_data_blocks_ : RECEIVE_BUFFERS * 2),
     buffer_index_(0),
     payload_(0),
     good_pdu_(true),
@@ -34,14 +34,14 @@ TransportReceiveStrategy<TH, DSH>::TransportReceiveStrategy()
 
   if (Transport_debug_level >= 2) {
     ACE_DEBUG((LM_DEBUG,"(%P|%t) TransportReceiveStrategy-mb"
-               " Cached_Allocator_With_Overflow %x with %d chunks\n",
-               &mb_allocator_, MESSAGE_BLOCKS));
+               " Cached_Allocator_With_Overflow %@ with %B chunks\n",
+               &mb_allocator_, mb_allocator_.n_chunks()));
     ACE_DEBUG((LM_DEBUG,"(%P|%t) TransportReceiveStrategy-db"
-               " Cached_Allocator_With_Overflow %x with %d chunks\n",
-               &db_allocator_, DATA_BLOCKS));
+               " Cached_Allocator_With_Overflow %@ with %B chunks\n",
+               &db_allocator_, db_allocator_.n_chunks()));
     ACE_DEBUG((LM_DEBUG,"(%P|%t) TransportReceiveStrategy-data"
-               " Cached_Allocator_With_Overflow %x with %d chunks\n",
-               &data_allocator_, DATA_BLOCKS));
+               " Cached_Allocator_With_Overflow %@ with %B chunks\n",
+               &data_allocator_, data_allocator_.n_chunks()));
   }
 
   ACE_OS::memset(this->receive_buffers_, 0, sizeof(this->receive_buffers_));

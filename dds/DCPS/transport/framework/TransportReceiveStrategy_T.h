@@ -23,6 +23,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+class TransportInst;
+
 /**
  * This class provides buffer for data received by transports, de-assemble
  * the data to individual samples and deliver them.
@@ -37,7 +39,7 @@ public:
   int start();
   void stop();
 
-  /// Useful as a simpler altnernative to handle_dds_input
+  /// Useful as a simpler alternative to handle_dds_input
   /// when dealing with UDP protocols with maximum packet size.
   /// Behaves the same as handle_dds_input, but only makes use
   /// of a single receive buffer and doesn't require message block
@@ -62,7 +64,7 @@ public:
   DSH& received_sample_header();
 
 protected:
-  TransportReceiveStrategy();
+  explicit TransportReceiveStrategy(const TransportInst& config);
 
   /// Only our subclass knows how to do this.
   virtual ssize_t receive_bytes(iovec          iov[],

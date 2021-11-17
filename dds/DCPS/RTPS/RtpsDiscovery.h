@@ -697,6 +697,28 @@ public:
     sedp_responsive_mode_ = sedp_responsive_mode;
   }
 
+  size_t sedp_receive_preallocated_message_blocks() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, 0);
+    return sedp_receive_preallocated_message_blocks_;
+  }
+  void sedp_receive_preallocated_message_blocks(size_t n)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    sedp_receive_preallocated_message_blocks_ = n;
+  }
+
+  size_t sedp_receive_preallocated_data_blocks() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, 0);
+    return sedp_receive_preallocated_data_blocks_;
+  }
+  void sedp_receive_preallocated_data_blocks(size_t n)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    sedp_receive_preallocated_data_blocks_ = n;
+  }
+
 private:
   mutable ACE_Thread_Mutex lock_;
   DCPS::TimeDuration resend_period_;
@@ -749,6 +771,7 @@ private:
   DCPS::TimeDuration sedp_fragment_reassembly_timeout_;
   CORBA::ULong participant_flags_;
   bool sedp_responsive_mode_;
+  size_t sedp_receive_preallocated_message_blocks_, sedp_receive_preallocated_data_blocks_;
 };
 
 typedef OpenDDS::DCPS::RcHandle<RtpsDiscoveryConfig> RtpsDiscoveryConfig_rch;
