@@ -321,71 +321,22 @@ union MutableSequenceUnion switch (SomeEnum) {
   SEQUENCE_VALUE_BRANCHES
 };
 
+#define ARRAY_MEMBERS \
+  @id(0) long int_32a[2]; \
+  @id(1) unsigned long uint_32a[2]; \
+  @id(2) int8 int_8a[2];
 
-/*
-// TODO: Reading single value from array.
-@mutable
-struct ArrayStruct {
-  long int_32a[2];
-  unsigned long uint_32a[2];
-  int8 int_8a[2];
-  uint8 uint_8a[2];
-  short int_16a[2];
-  unsigned short uint_16a[2];
-  long long int_64a[2];
-  unsigned long long uint_64a[2];
-  float float_32a[2];
-  double float_64a[2];
-  long double float_128a[2];
-  char char_8a[2];
-  wchar char_16a[2];
-  octet byte_a[2];
-  boolean bool_a[2];
-  string str_a[2];
-  wstring wstr_a[2];
+@final
+struct FinalArrayStruct {
+  ARRAY_MEMBERS
 };
 
-// TODO: Reading nested sequence from another sequence.
-@mutable
-struct SequenceInSequenceStruct {
-  sequence<Int32Seq> int_32ss;
-  sequence<UInt32Seq> uint_32ss;
-  sequence<Int8Seq> int_8ss;
-  sequence<UInt8Seq> uint_8ss;
-  sequence<Int16Seq> int_16ss;
-  sequence<UInt16Seq> uint_16ss;
-  sequence<Int64Seq> int_64ss;
-  sequence<UInt64Seq> uint_64ss;
-  sequence<Float32Seq> float_32ss;
-  sequence<Float64Seq> float_64ss;
-  sequence<Float128Seq> float_128ss;
-  sequence<Char8Seq> char_8ss;
-  sequence<Char16Seq> char_16ss;
-  sequence<ByteSeq> byte_ss;
-  sequence<BoolSeq> bool_ss;
-  sequence<StringSeq> str_ss;
-  sequence<WStringSeq> wstr_ss;
+@appendable
+struct AppendableArrayStruct {
+  ARRAY_MEMBERS
 };
 
-// Reading nested sequence from an array.
 @mutable
-struct SequenceInArrayStruct {
-  Int32Seq int_32as[2];
-  UInt32Seq uint_32as[2];
-  Int8Seq int_8as[2];
-  UInt8Seq uint_8as[2];
-  Int16Seq int_16as[2];
-  UInt16Seq uint_16as[2];
-  Int64Seq int_64as[2];
-  UInt64Seq uint_64as[2];
-  Float32Seq float_32as[2];
-  Float64Seq float_64as[2];
-  Float128Seq float_128as[2];
-  Char8Seq char_8as[2];
-  Char16Seq char_16as[2];
-  ByteSeq byte_as[2];
-  BoolSeq bool_as[2];
-  StringSeq str_as[2];
-  WStringSeq wstr_as[2];
+struct MutableArrayStruct {
+  ARRAY_MEMBERS
 };
-*/

@@ -692,6 +692,46 @@ void verify_uint32s_union(XTypes::DynamicData& data)
   EXPECT_EQ(ACE_CDR::ULong(0xffff), uint_32s[1]);
 }
 
+void verify_array_struct(XTypes::DynamicData& data)
+{
+  XTypes::DynamicData array;
+  DDS::ReturnCode_t ret = data.get_complex_value(array, 0);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ACE_CDR::Long l;
+  XTypes::MemberId id = array.get_member_id_at_index(0);
+  ret = array.get_int32_value(l, id);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(ACE_CDR::Long(0x12), l);
+  id = array.get_member_id_at_index(1);
+  ret = array.get_int32_value(l, id);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(ACE_CDR::Long(0x34), l);
+
+  ret = data.get_complex_value(array, 1);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ACE_CDR::ULong ul;
+  id = array.get_member_id_at_index(0);
+  ret = array.get_uint32_value(ul, id);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(ACE_CDR::ULong(0xff), ul);
+  id = array.get_member_id_at_index(1);
+  ret = array.get_uint32_value(ul, id);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(ACE_CDR::ULong(0xff), ul);
+
+  ret = data.get_complex_value(array, 2);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ACE_CDR::Int8 i;
+  id = array.get_member_id_at_index(0);
+  ret = array.get_int8_value(i, id);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(ACE_CDR::Int8(0x01), i);
+  id = array.get_member_id_at_index(1);
+  ret = array.get_int8_value(i, id);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(ACE_CDR::Int8(0x02), i);
+}
+
 /////////////////////////// Mutable tests ///////////////////////////
 TEST(Mutable, ReadValueFromStruct)
 {
@@ -1025,6 +1065,29 @@ TEST(Mutable, ReadSequenceFromUnion)
     XTypes::DynamicData data(&msg, xcdr2, dt);
     verify_uint32s_union(data);
   }
+}
+
+TEST(Mutable, ReadValueFromArray)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::MutableArrayStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::MutableArrayStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  unsigned char array_struct[] = {
+    0x00,0x00,0x00,0x1e, // +4=4 dheader
+    0x30,0x00,0x00,0x00, 0x00,0x00,0x00,0x12, 0x00,0x00,0x00,0x34, // +12=16 int_32a
+    0x30,0x00,0x00,0x01, 0x00,0x00,0x00,0xff, 0x00,0x00,0x00,0xff,  // +12=28 uint_32a
+    0x10,0x00,0x00,0x02, 0x01, 0x02 // +6=34 int_8a
+  };
+  ACE_Message_Block msg(256);
+  msg.copy((const char*)array_struct, sizeof(array_struct));
+  XTypes::DynamicData data(&msg, xcdr2, dt);
+  verify_array_struct(data);
 }
 
 TEST(Mutable, SkipNestedMembers)
@@ -1431,6 +1494,29 @@ TEST(Appendable, ReadSequenceFromUnion)
   }
 }
 
+TEST(Appendable, ReadValueFromArray)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableArrayStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::AppendableArrayStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  unsigned char array_struct[] = {
+    0x00,0x00,0x00,0x12, // +4=4 dheader
+    0x00,0x00,0x00,0x12, 0x00,0x00,0x00,0x34, // +8=12 int_32a
+    0x00,0x00,0x00,0xff, 0x00,0x00,0x00,0xff,  // +8=20 uint_32a
+    0x01, 0x02 // +2=22 int_8a
+  };
+  ACE_Message_Block msg(256);
+  msg.copy((const char*)array_struct, sizeof(array_struct));
+  XTypes::DynamicData data(&msg, xcdr2, dt);
+  verify_array_struct(data);
+}
+
 TEST(Appendable, SkipNestedMembers)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableStruct_xtag>();
@@ -1813,6 +1899,28 @@ TEST(Final, ReadSequenceFromUnion)
     XTypes::DynamicData data(&msg, xcdr2, dt);
     verify_uint32s_union(data);
   }
+}
+
+TEST(Final, ReadValueFromArray)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::FinalArrayStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::FinalArrayStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  unsigned char array_struct[] = {
+    0x00,0x00,0x00,0x12, 0x00,0x00,0x00,0x34, // +8=8 int_32a
+    0x00,0x00,0x00,0xff, 0x00,0x00,0x00,0xff,  // +8=16 uint_32a
+    0x01, 0x02 // +2=18 int_8a
+  };
+  ACE_Message_Block msg(256);
+  msg.copy((const char*)array_struct, sizeof(array_struct));
+  XTypes::DynamicData data(&msg, xcdr2, dt);
+  verify_array_struct(data);
 }
 
 TEST(Final, SkipNestedMembers)
