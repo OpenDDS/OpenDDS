@@ -2239,13 +2239,13 @@ const char* DynamicData::typekind_to_string(TypeKind tk) const
   }
 }
 
-bool print_dynamic_data(OpenDDS::XTypes::DynamicData dd, OpenDDS::XTypes::DynamicType_rch dt, OpenDDS::DCPS::String& type_string, OpenDDS::DCPS::String indent)
+bool print_dynamic_data(OpenDDS::XTypes::DynamicData dd, OpenDDS::DCPS::String& type_string, OpenDDS::DCPS::String indent)
 {
   OpenDDS::DCPS::String member_name;
   OpenDDS::DCPS::String type_name;
   OpenDDS::XTypes::DynamicData temp_dd;
   OpenDDS::XTypes::DynamicType_rch temp_dt;
-  switch (dt->get_kind()) {
+  switch (dd.type()->get_kind()) {
   case OpenDDS::XTypes::TK_INT8: {
     ACE_CDR::Int8 my_int8;
     if (dd.get_int8_value(my_int8, 0) != DDS::RETCODE_OK) {
@@ -2443,7 +2443,7 @@ bool print_dynamic_data(OpenDDS::XTypes::DynamicData dd, OpenDDS::XTypes::Dynami
   // case OpenDDS::XTypes::TK_BITMASK:
   // case OpenDDS::XTypes::TK_BITSET:
   case OpenDDS::XTypes::TK_ALIAS: {
-    if (!print_dynamic_data(dd, dt->get_descriptor().base_type, type_string, indent)) {
+    if (!print_dynamic_data(dd, type_string, indent)) {
       if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to read alias\n"));
       }
@@ -2454,8 +2454,8 @@ bool print_dynamic_data(OpenDDS::XTypes::DynamicData dd, OpenDDS::XTypes::Dynami
   case OpenDDS::XTypes::TK_SEQUENCE: {
     OpenDDS::DCPS::String temp_indent = indent;
     indent += "  ";
-    type_name = dt->get_descriptor().element_type->get_descriptor().name;
-    member_name = dt->get_descriptor().name;
+    type_name = dd.type()->get_descriptor().element_type->get_descriptor().name;
+    member_name = dd.type()->get_descriptor().name;
     ACE_CDR::ULong seq_length = dd.get_item_count();
     type_string += "  " + type_name + "[" + OpenDDS::DCPS::to_dds_string(seq_length) + "] " +  member_name + " =\n";
     for (ACE_CDR::ULong i = 0; i < seq_length; ++i) {
@@ -2466,7 +2466,7 @@ bool print_dynamic_data(OpenDDS::XTypes::DynamicData dd, OpenDDS::XTypes::Dynami
         }
         return false;
       }
-      if (!print_dynamic_data(temp_dd, dt->get_descriptor().element_type, type_string, indent)) {
+      if (!print_dynamic_data(temp_dd, type_string, indent)) {
         if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
           ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to read struct member\n"));
         }
@@ -2479,9 +2479,9 @@ bool print_dynamic_data(OpenDDS::XTypes::DynamicData dd, OpenDDS::XTypes::Dynami
   case OpenDDS::XTypes::TK_ARRAY: {
     OpenDDS::DCPS::String temp_indent = indent;
     indent += "  ";
-    type_name = dt->get_descriptor().element_type->get_descriptor().name;
-    member_name = dt->get_descriptor().name;
-    OpenDDS::XTypes::LBound bound = dt->get_descriptor().bound[0];
+    type_name = dd.type()->get_descriptor().element_type->get_descriptor().name;
+    member_name = dd.type()->get_descriptor().name;
+    OpenDDS::XTypes::LBound bound = dd.type()->get_descriptor().bound[0];
     type_string += "  " + type_name + "[" + OpenDDS::DCPS::to_dds_string(bound) + "] " +  member_name + " =\n";
     for (ACE_CDR::ULong i = 0; i < bound; ++i) {
       type_string += indent + "[" + OpenDDS::DCPS::to_dds_string(i) + "]";
@@ -2491,7 +2491,7 @@ bool print_dynamic_data(OpenDDS::XTypes::DynamicData dd, OpenDDS::XTypes::Dynami
         }
         return false;
       }
-      if (!print_dynamic_data(temp_dd, dt->get_descriptor().element_type, type_string, indent)) {
+      if (!print_dynamic_data(temp_dd, type_string, indent)) {
         if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
           ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to read struct member\n"));
         }
@@ -2504,16 +2504,16 @@ bool print_dynamic_data(OpenDDS::XTypes::DynamicData dd, OpenDDS::XTypes::Dynami
   case OpenDDS::XTypes::TK_STRUCTURE: {
     OpenDDS::DCPS::String temp_indent = indent;
     indent += "  ";
-    type_string += "struct " + dd.get_type()->get_name() + " {\n";
+    type_string += "struct " + dd.type()->get_name() + " {\n";
     OpenDDS::XTypes::DynamicTypeMembersById dtmbi;
-    dd.get_type()->get_all_members(dtmbi);
+    dd.type()->get_all_members(dtmbi);
     for (OpenDDS::XTypes::DynamicTypeMembersById::iterator iter = dtmbi.begin(); iter != dtmbi.end(); ++iter) {
       dd.get_complex_value(temp_dd, iter->first);
       member_name = iter->second->get_descriptor().name;
       type_name = iter->second->get_descriptor().get_type()->get_descriptor().name;
       type_string += indent + type_name + " " + member_name;
       temp_dt = iter->second->get_descriptor().get_type();
-      if (!print_dynamic_data(temp_dd, temp_dt, type_string, indent)) {
+      if (!print_dynamic_data(temp_dd, type_string, indent)) {
         if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
           ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to read struct member\n"));
         }
@@ -2527,12 +2527,12 @@ bool print_dynamic_data(OpenDDS::XTypes::DynamicData dd, OpenDDS::XTypes::Dynami
   case OpenDDS::XTypes::TK_UNION: {
     OpenDDS::DCPS::String temp_indent = indent;
     indent += "  ";
-    type_string += "union " + dd.get_type()->get_name() + " {\n";
+    type_string += "union " + dd.type()->get_name() + " {\n";
     ACE_CDR::ULong item_count = dd.get_item_count();
-    member_name = dt->get_descriptor().discriminator_type->get_descriptor().name;
+    member_name = dd.type()->get_descriptor().discriminator_type->get_descriptor().name;
     type_string += indent + member_name + " discriminator";
 
-    switch (dt->get_descriptor().discriminator_type->get_kind()) {
+    switch (dd.type()->get_descriptor().discriminator_type->get_kind()) {
     case OpenDDS::XTypes::TK_INT8: {
       ACE_CDR::Int8 my_int8;
       if (dd.get_int8_value(my_int8, OpenDDS::XTypes::DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
@@ -2671,15 +2671,15 @@ bool print_dynamic_data(OpenDDS::XTypes::DynamicData dd, OpenDDS::XTypes::Dynami
       OpenDDS::XTypes::DynamicTypeMember_rch temp_dtm;
       OpenDDS::XTypes::DynamicTypeMembersById dtmbi;
       OpenDDS::DCPS::String decoy_string;
-      dd.get_type()->get_all_members(dtmbi);
+      dd.type()->get_all_members(dtmbi);
       for (OpenDDS::XTypes::DynamicTypeMembersById::iterator iter = dtmbi.begin(); iter != dtmbi.end(); ++iter) {
-        dt->get_member(temp_dtm, iter->first);
+        dd.type()->get_member(temp_dtm, iter->first);
         if (dd.get_complex_value(dd, iter->first) == DDS::RETCODE_OK) {
-          if (print_dynamic_data(dd, temp_dtm->get_descriptor().get_type(), decoy_string, indent)) {
+          if (print_dynamic_data(dd, decoy_string, indent)) {
             member_name = temp_dtm->get_descriptor().name;
             type_name = temp_dtm->get_descriptor().get_type()->get_descriptor().name;
             type_string += indent + type_name + " " + member_name;
-            print_dynamic_data(dd, temp_dtm->get_descriptor().get_type(), type_string, indent);
+            print_dynamic_data(dd, type_string, indent);
             break;
           }
         }

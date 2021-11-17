@@ -310,8 +310,7 @@ private:
 };
 
 bool OpenDDS_Dcps_Export print_dynamic_data(
-  DynamicData dd, XTypes::DynamicType_rch dt,
-    DCPS::String& type_string, DCPS::String indent);
+  DynamicData dd, DCPS::String& type_string, DCPS::String indent);
 
 } // namespace XTypes
 } // namespace OpenDDS

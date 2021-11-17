@@ -80,7 +80,7 @@ public:
     using namespace OpenDDS::DCPS;
     OpenDDS::XTypes::DynamicData dd = rec->get_dynamic_data(sample);
     OpenDDS::DCPS::String my_type = "";
-    if (!print_dynamic_data(dd, dd.type(), my_type, "")){
+    if (!print_dynamic_data(dd, my_type, "")){
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TestRecorderListener::on_sample_data_received: "
         "Failed to read dynamic data\n"));
     }
