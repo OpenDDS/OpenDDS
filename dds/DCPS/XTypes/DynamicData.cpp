@@ -2239,7 +2239,7 @@ const char* DynamicData::typekind_to_string(TypeKind tk) const
   }
 }
 
-bool print_dynamic_data(OpenDDS::XTypes::DynamicData dd, OpenDDS::DCPS::String& type_string, OpenDDS::DCPS::String indent)
+bool print_dynamic_data(DynamicData dd, DCPS::String& type_string, DCPS::String indent)
 {
   OpenDDS::DCPS::String member_name;
   OpenDDS::DCPS::String type_name;
