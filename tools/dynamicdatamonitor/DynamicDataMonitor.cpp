@@ -89,8 +89,8 @@ int run_test(int argc, ACE_TCHAR *argv[]){
         ACE_ERROR((LM_ERROR,
                    "(%P|%t) ERROR: main():"
                    " dynamic-data-monitor was passed an incorrect number of arguments:"
-                   " expected 4, received %d\n"
-                   "Format should be ./dynamic-data-monitor [topic name] [type name] [domain id] [-DCPSConfigFile *.ini]\n", argc));
+                   " expected 3, received %d\n"
+                   "Format should be ./dynamic-data-monitor [topic name] [type name] [domain id]\n", argc-1));
       }
       return 1;
     }
