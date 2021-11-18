@@ -461,4 +461,4 @@ performance-tests/bench/run_test.pl sm10: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNER
 tests/DCPS/DataRepresentation/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/DataRepresentation/run_test.pl rtps_disc: !DCPS_MIN RTPS
 
-tests/integration-tests/RtpsDurableReplay/run_test.pl: RTPS !NO_OPENDDS_TESTING_FEATURES
+tests/DCPS/RtpsDurableReplay/run_test.pl: RTPS !NO_OPENDDS_TESTING_FEATURES
