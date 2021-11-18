@@ -828,9 +828,7 @@ bool run_test()
     //need to map address to IPV6
     LocatorSeq locators;
     locators.length(1);
-    locators[0].kind = address_to_kind(part2_addr);
-    locators[0].port = part2_addr.get_port_number();
-    address_to_bytes(locators[0].address, part2_addr);
+    address_to_locator(locators[0], part2_addr);
     locator_to_address(part2_addr, locators[0], tmp.get_type() != AF_INET);
   }
 #endif

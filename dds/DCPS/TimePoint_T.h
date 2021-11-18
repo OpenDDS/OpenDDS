@@ -4,7 +4,7 @@
 #include "TimeDuration.h"
 #include "SafeBool_T.h"
 
-#include <dds/OpenddsDcpsExtC.h>
+#include <dds/DdsDcpsInfoUtilsC.h>
 
 #include <ace/Time_Value_T.h>
 
