@@ -862,7 +862,7 @@ void address_to_locator(Locator_t& locator,
 #ifdef ACE_HAS_IPV6
   case AF_INET6:
     {
-      locator.kind = RTPS::LOCATOR_KIND_UDPv6;
+      locator.kind = LOCATOR_KIND_UDPv6;
       const sockaddr_in6* in = static_cast<const sockaddr_in6*>(raw);
       std::memcpy(&locator.address[0], &in->sin6_addr, 16);
     }

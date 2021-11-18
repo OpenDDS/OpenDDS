@@ -71,7 +71,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
                                  const GuidPrefix_t& local_prefix,
                                  const RtpsUdpInst& config,
                                  const ReactorTask_rch& reactor_task,
-                                 DCPS::InternalTransportStatistics& transport_statistics,
+                                 InternalTransportStatistics& transport_statistics,
                                  ACE_Thread_Mutex& transport_statistics_mutex)
   : DataLink(transport, // 3 data link "attributes", below, are unused
              0,         // priority

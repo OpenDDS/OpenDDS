@@ -91,7 +91,7 @@ struct InternalTransportStatistics {
   GuidCountMap writer_resend_count;
   GuidCountMap reader_nack_count;
 
-  InternalTransportStatistics(const OPENDDS_STRING& a_transport)
+  explicit InternalTransportStatistics(const OPENDDS_STRING& a_transport)
     : transport(a_transport)
   {}
 
@@ -105,7 +105,7 @@ struct InternalTransportStatistics {
 
 inline void append(TransportStatisticsSequence& seq, const InternalTransportStatistics& istats)
 {
-  size_t idx = seq.length();
+  const ACE_CDR::ULong idx = seq.length();
   seq.length(idx + 1);
   TransportStatistics& stats = seq[idx];
   stats.transport = istats.transport.c_str();

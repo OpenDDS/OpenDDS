@@ -92,7 +92,7 @@ public:
                   const GuidPrefix_t& local_prefix,
                   const RtpsUdpInst& config,
                   const ReactorTask_rch& reactor_task,
-                  DCPS::InternalTransportStatistics& transport_statistics,
+                  InternalTransportStatistics& transport_statistics,
                   ACE_Thread_Mutex& transport_statistics_mutex);
 
   ~RtpsUdpDataLink();
@@ -885,7 +885,7 @@ private:
   CountMapType heartbeat_counts_;
 
   const size_t max_bundle_size_;
-  DCPS::InternalTransportStatistics& transport_statistics_;
+  InternalTransportStatistics& transport_statistics_;
   ACE_Thread_Mutex& transport_statistics_mutex_;
 
   class DeliverHeldData {
