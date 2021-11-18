@@ -100,7 +100,7 @@ std::ostream& char_helper(std::ostream& o, CharType value)
     return o << static_cast<char>(value);
   }
   return hex_value(o << "\\x", cvalue, sizeof(CharType) == 1 ? 1 : 2);
-}  
+} 
 }
 
 namespace OpenDDS {
