@@ -452,17 +452,19 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
       set_status_changed_flag(DDS::PUBLICATION_MATCHED_STATUS, true);
     }
 
-    DDS::DataWriterListener_var listener =
-      listener_for(DDS::PUBLICATION_MATCHED_STATUS);
+    {
+      DataWriterListenerProxy lp;
+      listener_for(lp, DDS::PUBLICATION_MATCHED_STATUS);
 
-    if (!CORBA::is_nil(listener.in())) {
+      if (!lp.is_nil()) {
 
-      listener->on_publication_matched(this, publication_match_status_);
+        lp.on_publication_matched(this, publication_match_status_);
 
-      // TBD - why does the spec say to change this but not
-      // change the ChangeFlagStatus after a listener call?
-      publication_match_status_.total_count_change = 0;
-      publication_match_status_.current_count_change = 0;
+        // TBD - why does the spec say to change this but not
+        // change the ChangeFlagStatus after a listener call?
+        publication_match_status_.total_count_change = 0;
+        publication_match_status_.current_count_change = 0;
+      }
     }
 
     notify_status_condition();
@@ -643,15 +645,17 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
 
         set_status_changed_flag(DDS::PUBLICATION_MATCHED_STATUS, true);
 
-        DDS::DataWriterListener_var listener =
-          this->listener_for(DDS::PUBLICATION_MATCHED_STATUS);
+        {
+          DataWriterListenerProxy lp;
+          this->listener_for(lp, DDS::PUBLICATION_MATCHED_STATUS);
 
-        if (!CORBA::is_nil(listener.in())) {
-          listener->on_publication_matched(this, this->publication_match_status_);
+          if (!lp.is_nil()) {
+            lp.on_publication_matched(this, this->publication_match_status_);
 
-          // Listener consumes the change.
-          this->publication_match_status_.total_count_change = 0;
-          this->publication_match_status_.current_count_change = 0;
+            // Listener consumes the change.
+            this->publication_match_status_.total_count_change = 0;
+            this->publication_match_status_.current_count_change = 0;
+          }
         }
 
         this->notify_status_condition();
@@ -848,35 +852,37 @@ DataWriterImpl::update_locators(const RepoId& readerId,
 void
 DataWriterImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
 {
-  DDS::DataWriterListener_var listener =
-    listener_for(DDS::OFFERED_INCOMPATIBLE_QOS_STATUS);
-
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
+
+  {
+    DataWriterListenerProxy lp;
+    listener_for(lp, DDS::OFFERED_INCOMPATIBLE_QOS_STATUS);
 
 #if 0
 
-  if (this->offered_incompatible_qos_status_.total_count == status.total_count) {
-    // This test should make the method idempotent.
-    return;
-  }
+    if (this->offered_incompatible_qos_status_.total_count == status.total_count) {
+      // This test should make the method idempotent.
+      return;
+    }
 
 #endif
 
-  set_status_changed_flag(DDS::OFFERED_INCOMPATIBLE_QOS_STATUS, true);
+    set_status_changed_flag(DDS::OFFERED_INCOMPATIBLE_QOS_STATUS, true);
 
-  // copy status and increment change
-  offered_incompatible_qos_status_.total_count = status.total_count;
-  offered_incompatible_qos_status_.total_count_change +=
-    status.count_since_last_send;
-  offered_incompatible_qos_status_.last_policy_id = status.last_policy_id;
-  offered_incompatible_qos_status_.policies = status.policies;
+    // copy status and increment change
+    offered_incompatible_qos_status_.total_count = status.total_count;
+    offered_incompatible_qos_status_.total_count_change +=
+      status.count_since_last_send;
+    offered_incompatible_qos_status_.last_policy_id = status.last_policy_id;
+    offered_incompatible_qos_status_.policies = status.policies;
 
-  if (!CORBA::is_nil(listener.in())) {
-    listener->on_offered_incompatible_qos(this, offered_incompatible_qos_status_);
+    if (!lp.is_nil()) {
+      lp.on_offered_incompatible_qos(this, offered_incompatible_qos_status_);
 
-    // TBD - Why does the spec say to change this but not change the
-    //       ChangeFlagStatus after a listener call?
-    offered_incompatible_qos_status_.total_count_change = 0;
+      // TBD - Why does the spec say to change this but not change the
+      //       ChangeFlagStatus after a listener call?
+      offered_incompatible_qos_status_.total_count_change = 0;
+    }
   }
 
   notify_status_condition();
@@ -978,7 +984,7 @@ DDS::ReturnCode_t
 DataWriterImpl::set_listener(DDS::DataWriterListener_ptr a_listener,
                              DDS::StatusMask mask)
 {
-  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
+  ACE_Guard<ACE_Recursive_Thread_Mutex> g(listener_mutex_);
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
   listener_ = DDS::DataWriterListener::_duplicate(a_listener);
@@ -988,14 +994,14 @@ DataWriterImpl::set_listener(DDS::DataWriterListener_ptr a_listener,
 DDS::DataWriterListener_ptr
 DataWriterImpl::get_listener()
 {
-  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
+  ACE_Guard<ACE_Recursive_Thread_Mutex> g(listener_mutex_);
   return DDS::DataWriterListener::_duplicate(listener_.in());
 }
 
 DataWriterListener_ptr
 DataWriterImpl::get_ext_listener()
 {
-  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
+  ACE_Guard<ACE_Recursive_Thread_Mutex> g(listener_mutex_);
   return DataWriterListener::_narrow(listener_.in());
 }
 
@@ -2407,24 +2413,23 @@ DataWriterImpl::control_dropped(const Message_Block_Ptr&,
   controlTracker.message_dropped();
 }
 
-DDS::DataWriterListener_ptr
-DataWriterImpl::listener_for(DDS::StatusKind kind)
+void DataWriterImpl::listener_for(DataWriterListenerProxy& lp, DDS::StatusKind kind)
 {
   // per 2.1.4.3.1 Listener Access to Plain Communication Status
   // use this entities factory if listener is mask not enabled
   // for this kind.
   RcHandle<PublisherImpl> publisher = publisher_servant_.lock();
-  if (!publisher)
-    return 0;
-
-  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
-  if (CORBA::is_nil(listener_.in()) || (listener_mask_ & kind) == 0) {
-    g.release();
-    return publisher->listener_for(kind);
-
-  } else {
-    return DDS::DataWriterListener::_duplicate(listener_.in());
+  if (!publisher) {
+    return;
   }
+
+  lp.acquire(listener_mutex_, listener_);
+  if (!lp.is_nil() && (listener_mask_ & kind) != 0) {
+    return;
+  }
+  lp.release();
+
+  publisher->listener_for(lp, kind);
 }
 
 int
@@ -2488,12 +2493,14 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value& tv,
     ++ this->liveliness_lost_status_.total_count;
     ++ this->liveliness_lost_status_.total_count_change;
 
-    DDS::DataWriterListener_var listener =
-      listener_for(DDS::LIVELINESS_LOST_STATUS);
+    {
+      DataWriterListenerProxy lp;
+      listener_for(lp, DDS::LIVELINESS_LOST_STATUS);
 
-    if (!CORBA::is_nil(listener.in())) {
-      listener->on_liveliness_lost(this, this->liveliness_lost_status_);
-      this->liveliness_lost_status_.total_count_change = 0;
+      if (!lp.is_nil()) {
+        lp.on_liveliness_lost(this, this->liveliness_lost_status_);
+        this->liveliness_lost_status_.total_count_change = 0;
+      }
     }
   }
 
@@ -2561,24 +2568,51 @@ DataWriterImpl::get_handle_instance(DDS::InstanceHandle_t handle)
   return PublicationInstance_rch();
 }
 
+namespace {
+  class DataWriterExtListenerProxy : public TypedListenerProxy<DataWriterListener> {
+  public:
+    DataWriterExtListenerProxy(ACE_Recursive_Thread_Mutex& mutex,
+                               DDS::DataWriterListener_var& listener)
+      : TypedListenerProxy<DataWriterListener>(mutex, listener)
+    {}
+
+    void on_publication_disconnected(::DDS::DataWriter_ptr writer,
+                                      const ::OpenDDS::DCPS::PublicationDisconnectedStatus& status)
+    {
+      listener_->on_publication_disconnected(writer, status);
+    }
+
+    void on_publication_reconnected(::DDS::DataWriter_ptr writer,
+                                     const ::OpenDDS::DCPS::PublicationReconnectedStatus& status)
+    {
+      listener_->on_publication_reconnected(writer, status);
+    }
+
+    void on_publication_lost(::DDS::DataWriter_ptr writer,
+                              const ::OpenDDS::DCPS::PublicationLostStatus& status)
+    {
+      listener_->on_publication_lost(writer, status);
+    }
+  };
+
+}
+
 void
 DataWriterImpl::notify_publication_disconnected(const ReaderIdSeq& subids)
 {
   DBG_ENTRY_LVL("DataWriterImpl","notify_publication_disconnected",6);
 
   if (!is_bit_) {
-    // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
-    // is given to this DataWriter then narrow() fails.
-    DataWriterListener_var the_listener = get_ext_listener();
+    DataWriterExtListenerProxy lp(listener_mutex_, listener_);
 
-    if (!CORBA::is_nil(the_listener.in())) {
+    if (!lp.is_nil()) {
       PublicationDisconnectedStatus status;
       // Since this callback may come after remove_association which
       // removes the reader from id_to_handle map, we can ignore this
       // error.
       this->lookup_instance_handles(subids,
                                     status.subscription_handles);
-      the_listener->on_publication_disconnected(this, status);
+      lp.on_publication_disconnected(this, status);
     }
   }
 }
@@ -2589,18 +2623,15 @@ DataWriterImpl::notify_publication_reconnected(const ReaderIdSeq& subids)
   DBG_ENTRY_LVL("DataWriterImpl","notify_publication_reconnected",6);
 
   if (!is_bit_) {
-    // Narrow to DDS::DCPS::DataWriterListener. If a
-    // DDS::DataWriterListener is given to this DataWriter then
-    // narrow() fails.
-    DataWriterListener_var the_listener = get_ext_listener();
+    DataWriterExtListenerProxy lp(listener_mutex_, listener_);
 
-    if (!CORBA::is_nil(the_listener.in())) {
+    if (!lp.is_nil()) {
       PublicationDisconnectedStatus status;
 
       // If it's reconnected then the reader should be in id_to_handle
       this->lookup_instance_handles(subids, status.subscription_handles);
 
-      the_listener->on_publication_reconnected(this, status);
+      lp.on_publication_reconnected(this, status);
     }
   }
 }
@@ -2611,19 +2642,16 @@ DataWriterImpl::notify_publication_lost(const ReaderIdSeq& subids)
   DBG_ENTRY_LVL("DataWriterImpl","notify_publication_lost",6);
 
   if (!is_bit_) {
-    // Narrow to DDS::DCPS::DataWriterListener. If a
-    // DDS::DataWriterListener is given to this DataWriter then
-    // narrow() fails.
-    DataWriterListener_var the_listener = get_ext_listener();
+    DataWriterExtListenerProxy lp(listener_mutex_, listener_);
 
-    if (!CORBA::is_nil(the_listener.in())) {
+    if (!lp.is_nil()) {
       PublicationLostStatus status;
 
       // Since this callback may come after remove_association which removes
       // the reader from id_to_handle map, we can ignore this error.
       this->lookup_instance_handles(subids,
                                     status.subscription_handles);
-      the_listener->on_publication_lost(this, status);
+      lp.on_publication_lost(this, status);
     }
   }
 }
@@ -2634,12 +2662,9 @@ DataWriterImpl::notify_publication_lost(const DDS::InstanceHandleSeq& handles)
   DBG_ENTRY_LVL("DataWriterImpl","notify_publication_lost",6);
 
   if (!is_bit_) {
-    // Narrow to DDS::DCPS::DataWriterListener. If a
-    // DDS::DataWriterListener is given to this DataWriter then
-    // narrow() fails.
-    DataWriterListener_var the_listener = get_ext_listener();
+    DataWriterExtListenerProxy lp(listener_mutex_, listener_);
 
-    if (!CORBA::is_nil(the_listener.in())) {
+    if (!lp.is_nil()) {
       PublicationLostStatus status;
 
       CORBA::ULong len = handles.length();
@@ -2649,7 +2674,7 @@ DataWriterImpl::notify_publication_lost(const DDS::InstanceHandleSeq& handles)
         status.subscription_handles[i] = handles[i];
       }
 
-      the_listener->on_publication_lost(this, status);
+      lp.on_publication_lost(this, status);
     }
   }
 }

@@ -15,6 +15,7 @@
 #include "MultiTopicImpl.h"
 #include "PoolAllocator.h"
 #include "unique_ptr.h"
+#include "ListenerProxy.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -121,6 +122,9 @@ public:
   CORBA::Boolean statistics_enabled();
 
   void statistics_enabled(CORBA::Boolean statistics_enabled);
+
+  void listener_for(ListenerProxy& lp,
+                    DDS::StatusMask mask);
 
 private:
   virtual void init_typed(DataReaderEx* dr) = 0;

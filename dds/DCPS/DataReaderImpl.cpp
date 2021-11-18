@@ -423,18 +423,20 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
 
       set_status_changed_flag(DDS::SUBSCRIPTION_MATCHED_STATUS, true);
 
-      DDS::DataReaderListener_var listener =
-          listener_for(DDS::SUBSCRIPTION_MATCHED_STATUS);
+      {
+        DataReaderListenerProxy lp;
+        listener_for(lp, DDS::SUBSCRIPTION_MATCHED_STATUS);
 
-      if (!CORBA::is_nil(listener)) {
-        listener->on_subscription_matched(this, subscription_match_status_);
+        if (!lp.is_nil()) {
+          lp.on_subscription_matched(this, subscription_match_status_);
 
-        // TBD - why does the spec say to change this but not change
-        //       the ChangeFlagStatus after a listener call?
+          // TBD - why does the spec say to change this but not change
+          //       the ChangeFlagStatus after a listener call?
 
-        // Client will look at it so next time it looks the change should be 0
-        subscription_match_status_.total_count_change = 0;
-        subscription_match_status_.current_count_change = 0;
+          // Client will look at it so next time it looks the change should be 0
+          subscription_match_status_.total_count_change = 0;
+          subscription_match_status_.current_count_change = 0;
+        }
       }
 
       notify_status_condition();
@@ -643,15 +645,17 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
 
       set_status_changed_flag(DDS::SUBSCRIPTION_MATCHED_STATUS, true);
 
-      DDS::DataReaderListener_var listener
-      = listener_for(DDS::SUBSCRIPTION_MATCHED_STATUS);
+      {
+        DataReaderListenerProxy lp;
+        listener_for(lp, DDS::SUBSCRIPTION_MATCHED_STATUS);
 
-      if (!CORBA::is_nil(listener.in())) {
-        listener->on_subscription_matched(this, this->subscription_match_status_);
+        if (!lp.is_nil()) {
+          lp.on_subscription_matched(this, this->subscription_match_status_);
 
-        // Client will look at it so next time it looks the change should be 0
-        this->subscription_match_status_.total_count_change = 0;
-        this->subscription_match_status_.current_count_change = 0;
+          // Client will look at it so next time it looks the change should be 0
+          this->subscription_match_status_.total_count_change = 0;
+          this->subscription_match_status_.current_count_change = 0;
+        }
       }
       notify_status_condition();
     }
@@ -713,39 +717,41 @@ DataReaderImpl::remove_all_associations()
 void
 DataReaderImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
 {
-  DDS::DataReaderListener_var listener =
-      listener_for(DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS);
+  {
+    DataReaderListenerProxy lp;
+    listener_for(lp, DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS);
 
-  ACE_GUARD(ACE_Recursive_Thread_Mutex,
-      guard,
-      this->publication_handle_lock_);
+    ACE_GUARD(ACE_Recursive_Thread_Mutex,
+              guard,
+              this->publication_handle_lock_);
 
 
-  if (this->requested_incompatible_qos_status_.total_count == status.total_count) {
-    // This test should make the method idempotent.
-    return;
-  }
+    if (this->requested_incompatible_qos_status_.total_count == status.total_count) {
+      // This test should make the method idempotent.
+      return;
+    }
 
-  set_status_changed_flag(DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS,
-      true);
+    set_status_changed_flag(DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS,
+                            true);
 
-  // copy status and increment change
-  requested_incompatible_qos_status_.total_count = status.total_count;
-  requested_incompatible_qos_status_.total_count_change +=
+    // copy status and increment change
+    requested_incompatible_qos_status_.total_count = status.total_count;
+    requested_incompatible_qos_status_.total_count_change +=
       status.count_since_last_send;
-  requested_incompatible_qos_status_.last_policy_id =
+    requested_incompatible_qos_status_.last_policy_id =
       status.last_policy_id;
-  requested_incompatible_qos_status_.policies = status.policies;
+    requested_incompatible_qos_status_.policies = status.policies;
 
-  if (!CORBA::is_nil(listener.in())) {
-    listener->on_requested_incompatible_qos(this, requested_incompatible_qos_status_);
+    if (!lp.is_nil()) {
+      lp.on_requested_incompatible_qos(this, requested_incompatible_qos_status_);
 
-    // TBD - why does the spec say to change total_count_change but not
-    // change the ChangeFlagStatus after a listener call?
+      // TBD - why does the spec say to change total_count_change but not
+      // change the ChangeFlagStatus after a listener call?
 
-    // client just looked at it so next time it looks the
-    // change should be 0
-    requested_incompatible_qos_status_.total_count_change = 0;
+      // client just looked at it so next time it looks the
+      // change should be 0
+      requested_incompatible_qos_status_.total_count_change = 0;
+    }
   }
 
   notify_status_condition();
@@ -954,7 +960,7 @@ DDS::ReturnCode_t DataReaderImpl::set_listener(
     DDS::DataReaderListener_ptr a_listener,
     DDS::StatusMask mask)
 {
-  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
+  ACE_Guard<ACE_Recursive_Thread_Mutex> g(listener_mutex_);
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
   listener_ = DDS::DataReaderListener::_duplicate(a_listener);
@@ -963,14 +969,8 @@ DDS::ReturnCode_t DataReaderImpl::set_listener(
 
 DDS::DataReaderListener_ptr DataReaderImpl::get_listener()
 {
-  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
+  ACE_Guard<ACE_Recursive_Thread_Mutex> g(listener_mutex_);
   return DDS::DataReaderListener::_duplicate(listener_.in());
-}
-
-DataReaderListener_ptr DataReaderImpl::get_ext_listener()
-{
-  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
-  return DataReaderListener::_narrow(listener_.in());
 }
 
 DDS::TopicDescription_ptr DataReaderImpl::get_topicdescription()
@@ -1859,21 +1859,23 @@ bool DataReaderImpl::contains_sample(DDS::SampleStateMask sample_states,
   return false;
 }
 
-DDS::DataReaderListener_ptr
-DataReaderImpl::listener_for(DDS::StatusKind kind)
+void DataReaderImpl::listener_for(ListenerProxy& lp, DDS::StatusKind kind)
 {
   // per 2.1.4.3.1 Listener Access to Plain Communication Status
   // use this entities factory if listener is mask not enabled
   // for this kind.
   RcHandle<SubscriberImpl> subscriber = get_subscriber_servant();
-  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
-  if (subscriber && (CORBA::is_nil(listener_.in()) || (listener_mask_ & kind) == 0)) {
-    g.release();
-    return subscriber->listener_for(kind);
-
-  } else {
-    return DDS::DataReaderListener::_duplicate(listener_.in());
+  if (!subscriber) {
+    return;
   }
+
+  lp.acquire(listener_mutex_, listener_);
+  if (!lp.is_nil() && (listener_mask_ & kind) != 0) {
+    return;
+  }
+  lp.release();
+
+  subscriber->listener_for(lp, kind);
 }
 
 void DataReaderImpl::sample_info(DDS::SampleInfo & sample_info,
@@ -2415,13 +2417,45 @@ void DataReaderImpl::process_latency(const ReceivedDataSample& sample)
   }
 }
 
+namespace {
+  class DataReaderExtListenerProxy : public TypedListenerProxy<DataReaderListener> {
+  public:
+    DataReaderExtListenerProxy(ACE_Recursive_Thread_Mutex& mutex,
+                               DDS::DataReaderListener_var& listener)
+      : TypedListenerProxy<DataReaderListener>(mutex, listener)
+    {}
+
+    void on_subscription_disconnected(::DDS::DataReader_ptr reader,
+                                      const ::OpenDDS::DCPS::SubscriptionDisconnectedStatus& status)
+    {
+      listener_->on_subscription_disconnected(reader, status);
+    }
+
+    void on_subscription_reconnected(::DDS::DataReader_ptr reader,
+                                     const ::OpenDDS::DCPS::SubscriptionReconnectedStatus& status)
+    {
+      listener_->on_subscription_reconnected(reader, status);
+    }
+
+    void on_subscription_lost(::DDS::DataReader_ptr reader,
+                              const ::OpenDDS::DCPS::SubscriptionLostStatus& status)
+    {
+      listener_->on_subscription_lost(reader, status);
+    }
+
+    void on_budget_exceeded(::DDS::DataReader_ptr reader,
+                            const ::OpenDDS::DCPS::BudgetExceededStatus& status)
+    {
+      listener_->on_budget_exceeded(reader, status);
+    }
+  };
+}
+
 void DataReaderImpl::notify_latency(PublicationId writer)
 {
-  // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
-  // is given to this DataReader then narrow() fails.
-  DataReaderListener_var listener = get_ext_listener();
+  DataReaderExtListenerProxy lp(listener_mutex_, listener_);
 
-  if (!CORBA::is_nil(listener.in())) {
+  if (!lp.is_nil()) {
     WriterIdSeq writerIds;
     writerIds.length(1);
     writerIds[ 0] = writer;
@@ -2439,7 +2473,7 @@ void DataReaderImpl::notify_latency(PublicationId writer)
     ++this->budget_exceeded_status_.total_count;
     ++this->budget_exceeded_status_.total_count_change;
 
-    listener->on_budget_exceeded(this, this->budget_exceeded_status_);
+    lp.on_budget_exceeded(this, this->budget_exceeded_status_);
 
     this->budget_exceeded_status_.total_count_change = 0;
   }
@@ -2547,15 +2581,15 @@ DataReaderImpl::notify_subscription_disconnected(const WriterIdSeq& pubids)
 
   // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
   // is given to this DataReader then narrow() fails.
-  DataReaderListener_var the_listener = get_ext_listener();
+  DataReaderExtListenerProxy lp(listener_mutex_, listener_);
 
-  if (!CORBA::is_nil(the_listener.in())) {
+  if (!lp.is_nil()) {
     SubscriptionLostStatus status;
 
     // Since this callback may come after remove_association which removes
     // the writer from id_to_handle map, we can ignore this error.
     this->lookup_instance_handles(pubids, status.publication_handles);
-    the_listener->on_subscription_disconnected(this, status);
+    lp.on_subscription_disconnected(this, status);
   }
 }
 
@@ -2567,15 +2601,15 @@ DataReaderImpl::notify_subscription_reconnected(const WriterIdSeq& pubids)
   if (!this->is_bit_) {
     // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
     // is given to this DataReader then narrow() fails.
-    DataReaderListener_var the_listener = get_ext_listener();
+    DataReaderExtListenerProxy lp(listener_mutex_, listener_);
 
-    if (!CORBA::is_nil(the_listener.in())) {
+    if (!lp.is_nil()) {
       SubscriptionLostStatus status;
 
       // If it's reconnected then the reader should be in id_to_handle
       this->lookup_instance_handles(pubids, status.publication_handles);
 
-      the_listener->on_subscription_reconnected(this,  status);
+      lp.on_subscription_reconnected(this,  status);
     }
   }
 }
@@ -2588,9 +2622,9 @@ DataReaderImpl::notify_subscription_lost(const DDS::InstanceHandleSeq& handles)
   if (!this->is_bit_) {
     // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
     // is given to this DataReader then narrow() fails.
-    DataReaderListener_var the_listener = get_ext_listener();
+    DataReaderExtListenerProxy lp(listener_mutex_, listener_);
 
-    if (!CORBA::is_nil(the_listener.in())) {
+    if (!lp.is_nil()) {
       SubscriptionLostStatus status;
 
       CORBA::ULong len = handles.length();
@@ -2600,7 +2634,7 @@ DataReaderImpl::notify_subscription_lost(const DDS::InstanceHandleSeq& handles)
         status.publication_handles[i] = handles[i];
       }
 
-      the_listener->on_subscription_lost(this, status);
+      lp.on_subscription_lost(this, status);
     }
   }
 }
@@ -2612,15 +2646,15 @@ DataReaderImpl::notify_subscription_lost(const WriterIdSeq& pubids)
 
   // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
   // is given to this DataReader then narrow() fails.
-  DataReaderListener_var the_listener = get_ext_listener();
+  DataReaderExtListenerProxy lp(listener_mutex_, listener_);
 
-  if (!CORBA::is_nil(the_listener.in())) {
+  if (!lp.is_nil()) {
     SubscriptionLostStatus status;
 
     // Since this callback may come after remove_association which removes
     // the writer from id_to_handle map, we can ignore this error.
     this->lookup_instance_handles(pubids, status.publication_handles);
-    the_listener->on_subscription_lost(this, status);
+    lp.on_subscription_lost(this, status);
   }
 }
 
@@ -2836,44 +2870,18 @@ void DataReaderImpl::notify_liveliness_change()
 {
   // N.B. writers_lock_ should already be acquired when
   //      this method is called.
+  {
+    DataReaderListenerProxy lp;
+    listener_for(lp, DDS::LIVELINESS_CHANGED_STATUS);
 
-  DDS::DataReaderListener_var listener
-  = listener_for(DDS::LIVELINESS_CHANGED_STATUS);
+    if (!lp.is_nil()) {
+      lp.on_liveliness_changed(this, liveliness_changed_status_);
 
-  if (!CORBA::is_nil(listener.in())) {
-    listener->on_liveliness_changed(this, liveliness_changed_status_);
-
-    liveliness_changed_status_.alive_count_change = 0;
-    liveliness_changed_status_.not_alive_count_change = 0;
+      liveliness_changed_status_.alive_count_change = 0;
+      liveliness_changed_status_.not_alive_count_change = 0;
+    }
   }
   notify_status_condition();
-
-  if (DCPS_debug_level > 9) {
-    ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
-    OPENDDS_STRING output_str;
-    output_str += "subscription ";
-    output_str += OPENDDS_STRING(GuidConverter(get_repo_id()));
-    output_str += ", listener at: 0x";
-    output_str += to_dds_string(this->listener_.in ());
-
-    for (WriterMapType::iterator current = this->writers_.begin();
-        current != this->writers_.end();
-        ++current) {
-      RepoId id = current->first;
-      output_str += "\n\tNOTIFY: writer[ ";
-      output_str += OPENDDS_STRING(GuidConverter(id));
-      output_str += "] == ";
-      output_str += current->second->get_state_str();
-    }
-
-    ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) DataReaderImpl::notify_liveliness_change: ")
-        ACE_TEXT("listener at 0x%x, mask 0x%x.\n")
-        ACE_TEXT("\tNOTIFY: %C\n"),
-        listener.in (),
-        listener_mask_,
-        output_str.c_str()));
-  }
 }
 
 void DataReaderImpl::post_read_or_take()
@@ -3124,48 +3132,48 @@ DataReaderImpl::coherent_changes_completed (DataReaderImpl* reader)
   subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, true);
   this->set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, true);
 
-  ::DDS::SubscriberListener_var sub_listener =
-      subscriber->listener_for(::DDS::DATA_ON_READERS_STATUS);
-  if (!CORBA::is_nil(sub_listener.in()))
   {
-    if (!is_bit()) {
-      if (reader == this) {
-        // Release the sample_lock before listener callback.
-        ACE_GUARD (Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-        sub_listener->on_data_on_readers(subscriber.in());
+    SubscriberListenerProxy lp;
+    subscriber->listener_for(lp, ::DDS::DATA_ON_READERS_STATUS);
+    if (!lp.is_nil()) {
+      if (!is_bit()) {
+        if (reader == this) {
+          // Release the sample_lock before listener callback.
+          ACE_GUARD (Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+          lp.on_data_on_readers(subscriber.in());
+        }
+
+        this->set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
+        subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
+      } else {
+        TheServiceParticipant->job_queue()->enqueue(make_rch<OnDataOnReaders>(subscriber, rchandle_from(this), reader == this, true));
       }
 
-      this->set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
-      subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
-    } else {
-      TheServiceParticipant->job_queue()->enqueue(make_rch<OnDataOnReaders>(subscriber, sub_listener, rchandle_from(this), reader == this, true));
+      return;
     }
   }
-  else
+
+  subscriber->notify_status_condition();
+
   {
-    subscriber->notify_status_condition();
+    DataReaderListenerProxy lp;
+    this->listener_for(lp, ::DDS::DATA_AVAILABLE_STATUS);
 
-    ::DDS::DataReaderListener_var listener =
-        this->listener_for (::DDS::DATA_AVAILABLE_STATUS);
-
-    if (!CORBA::is_nil(listener.in()))
-    {
+    if (!lp.is_nil()) {
       if (!is_bit()) {
         if (reader == this) {
           // Release the sample_lock before listener callback.
           ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-          listener->on_data_available(this);
+          lp.on_data_available(this);
         } else {
-          listener->on_data_available(this);
+          lp.on_data_available(this);
         }
         set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
         subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
       } else {
-        TheServiceParticipant->job_queue()->enqueue(make_rch<OnDataAvailable>(subscriber, listener, rchandle_from(this), reader == this, true, true));
+        TheServiceParticipant->job_queue()->enqueue(make_rch<OnDataAvailable>(subscriber, rchandle_from(this), false, reader == this, true, true));
       }
-    }
-    else
-    {
+    } else {
       this->notify_status_condition();
     }
   }
@@ -3608,7 +3616,9 @@ void DataReaderImpl::OnDataOnReaders::execute()
   }
 
   if (call_) {
-    sub_listener_->on_data_on_readers(subscriber.in());
+    SubscriberListenerProxy lp;
+    subscriber->listener_for(lp, DDS::DATA_ON_READERS_STATUS);
+    lp.on_data_on_readers(subscriber.in());
   }
 
   if (set_reader_status_) {
@@ -3626,7 +3636,15 @@ void DataReaderImpl::OnDataAvailable::execute()
   }
 
   if (call_ && (data_reader->get_status_changes() & ::DDS::DATA_AVAILABLE_STATUS)) {
-    listener_->on_data_available(data_reader.in());
+    DataReaderListenerProxy lp;
+    if (use_subscriber_) {
+      subscriber->listener_for(lp, ::DDS::DATA_AVAILABLE_STATUS);
+    } else {
+      data_reader->listener_for(lp, ::DDS::DATA_AVAILABLE_STATUS);
+    }
+    if (!lp.is_nil()) {
+      lp.on_data_available(data_reader.in());
+    }
   }
 
   if (set_reader_status_) {

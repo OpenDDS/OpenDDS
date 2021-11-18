@@ -735,28 +735,34 @@ PubDriver::listener_test ()
   TEST_CHECK (pl_got.in () == pl.in ());
 
   // Test set_listener/get_listener for DataWriter.
-
-  ::DDS::DataWriterListener_var dwl_got
-    = foo_datawriter_->get_listener ();
-
-  TEST_CHECK (CORBA::is_nil (dwl_got.in ()));
+  {
+    ::DDS::DataWriterListener_var dwl_got = foo_datawriter_->get_listener();
+    TEST_CHECK(CORBA::is_nil(dwl_got.in()));
+  }
 
   // Since datawriter has nil listener with
-  dwl_got = datawriter_servant_->listener_for (::DDS::PUBLICATION_MATCHED_STATUS);
-  TEST_CHECK (dwl_got.in() == dpl.in ());
+  {
+    DataWriterListenerProxy lp;
+    datawriter_servant_->listener_for(lp, ::DDS::PUBLICATION_MATCHED_STATUS);
+    TEST_CHECK(lp.in() == dpl.in());
+  }
 
-  foo_datawriter_->set_listener (dwl.in (), ::OpenDDS::DCPS::ALL_STATUS_MASK);
-  dwl_got = datawriter_servant_->listener_for (::DDS::PUBLICATION_MATCHED_STATUS);
-  TEST_CHECK (dwl_got.in() == dwl.in ());
+  {
+    foo_datawriter_->set_listener(dwl.in(), ::OpenDDS::DCPS::ALL_STATUS_MASK);
+    DataWriterListenerProxy lp;
+    datawriter_servant_->listener_for(lp, ::DDS::PUBLICATION_MATCHED_STATUS);
+    TEST_CHECK(lp.in() == dwl.in());
+  }
 
+  {
+    foo_datawriter_->set_listener(dwl.in(), ::OpenDDS::DCPS::NO_STATUS_MASK);
+    DataWriterListenerProxy lp;
+    datawriter_servant_->listener_for(lp, ::DDS::PUBLICATION_MATCHED_STATUS);
+    TEST_CHECK(lp.in() == dpl.in());
+  }
 
-  foo_datawriter_->set_listener (dwl.in (), ::OpenDDS::DCPS::NO_STATUS_MASK);
-  dwl_got = datawriter_servant_->listener_for (::DDS::PUBLICATION_MATCHED_STATUS);
-  TEST_CHECK (dwl_got.in() == dpl.in ());
-
-  dwl_got = foo_datawriter_->get_listener ();
-
-  TEST_CHECK (dwl_got.in () == dwl.in ());
+  ::DDS::DataWriterListener_var dwl_got = foo_datawriter_->get_listener();
+  TEST_CHECK (dwl_got.in() == dwl.in());
 
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) PubDriver::listener_test: ")

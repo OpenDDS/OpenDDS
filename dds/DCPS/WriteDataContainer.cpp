@@ -20,6 +20,8 @@
 #include "Util.h"
 #include "Time_Helper.h"
 #include "GuidConverter.h"
+#include "ListenerProxy.h"
+
 #include "transport/framework/TransportSendElement.h"
 #include "transport/framework/TransportCustomizedElement.h"
 #include "transport/framework/TransportRegistry.h"
@@ -1574,23 +1576,26 @@ WriteDataContainer::process_deadlines(const MonotonicTimePoint& now)
     writer_->set_status_changed_flag(DDS::OFFERED_DEADLINE_MISSED_STATUS, true);
     notify = true;
 
-    DDS::DataWriterListener_var listener = writer_->listener_for(DDS::OFFERED_DEADLINE_MISSED_STATUS);
+    {
+      DataWriterListenerProxy lp;
+      writer_->listener_for(lp, DDS::OFFERED_DEADLINE_MISSED_STATUS);
 
-    if (listener) {
-      // Copy before releasing the lock.
-      const DDS::OfferedDeadlineMissedStatus status = deadline_status_;
+      if (!lp.is_nil()) {
+        // Copy before releasing the lock.
+        const DDS::OfferedDeadlineMissedStatus status = deadline_status_;
 
-      // Release the lock during the upcall.
-      ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> deadline_reverse_status_lock(deadline_status_lock_);
-      ACE_GUARD(ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex>, rev_dwi_guard, deadline_reverse_status_lock);
+        // Release the lock during the upcall.
+        ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> deadline_reverse_status_lock(deadline_status_lock_);
+        ACE_GUARD(ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex>, rev_dwi_guard, deadline_reverse_status_lock);
 
-      // @todo Will this operation ever throw?  If so we may want to
-      //       catch all exceptions, and act accordingly.
-      listener->on_offered_deadline_missed(writer_, status);
+        // @todo Will this operation ever throw?  If so we may want to
+        //       catch all exceptions, and act accordingly.
+        lp.on_offered_deadline_missed(writer_, status);
 
-      // We need to update the last total count value to our current total
-      // so that the next time we will calculate the correct total_count_change;
-      deadline_last_total_count_ = deadline_status_.total_count;
+        // We need to update the last total count value to our current total
+        // so that the next time we will calculate the correct total_count_change;
+        deadline_last_total_count_ = deadline_status_.total_count;
+      }
     }
 
     instance->deadline_ += deadline_period_;

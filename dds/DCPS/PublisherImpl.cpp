@@ -523,7 +523,7 @@ DDS::ReturnCode_t
 PublisherImpl::set_listener(DDS::PublisherListener_ptr a_listener,
     DDS::StatusMask            mask)
 {
-  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
+  ACE_Guard<ACE_Recursive_Thread_Mutex> g(listener_mutex_);
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
   listener_ = DDS::PublisherListener::_duplicate(a_listener);
@@ -533,7 +533,7 @@ PublisherImpl::set_listener(DDS::PublisherListener_ptr a_listener,
 DDS::PublisherListener_ptr
 PublisherImpl::get_listener()
 {
-  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
+  ACE_Guard<ACE_Recursive_Thread_Mutex> g(listener_mutex_);
   return DDS::PublisherListener::_duplicate(listener_.in());
 }
 
@@ -931,25 +931,24 @@ PublisherImpl::writer_enabled(const char*     topic_name,
 }
 
 
-DDS::PublisherListener_ptr
-PublisherImpl::listener_for(DDS::StatusKind kind)
+void PublisherImpl::listener_for(ListenerProxy& lp, DDS::StatusKind kind)
 {
   // per 2.1.4.3.1 Listener Access to Plain Communication Status
   // use this entities factory if listener is mask not enabled
   // for this kind.
   RcHandle<DomainParticipantImpl> participant = this->participant_.lock();
 
-  if (!participant)
-    return 0;
-
-  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
-  if (CORBA::is_nil(listener_.in()) || (listener_mask_ & kind) == 0) {
-    g.release();
-    return participant->listener_for(kind);
-
-  } else {
-    return DDS::PublisherListener::_duplicate(listener_.in());
+  if (!participant) {
+    return;
   }
+
+  lp.acquire(listener_mutex_, listener_);
+  if (!lp.is_nil() && (listener_mask_ & kind) != 0) {
+    return;
+  }
+  lp.release();
+
+  participant->listener_for(lp, kind);
 }
 
 DDS::ReturnCode_t

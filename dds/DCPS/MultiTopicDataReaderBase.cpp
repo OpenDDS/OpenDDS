@@ -404,6 +404,14 @@ DDS::DataReaderListener_ptr MultiTopicDataReaderBase::get_listener()
   return resulting_reader_->get_listener();
 }
 
+void MultiTopicDataReaderBase::listener_for(ListenerProxy& lp,
+                                            DDS::StatusMask mask)
+{
+  DataReaderImpl* resulting_impl =
+    dynamic_cast<DataReaderImpl*>(resulting_reader_.in());
+  return resulting_impl->listener_for(lp, mask);
+}
+
 DDS::TopicDescription_ptr MultiTopicDataReaderBase::get_topicdescription()
 {
   return resulting_reader_->get_topicdescription();

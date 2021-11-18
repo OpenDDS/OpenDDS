@@ -580,14 +580,15 @@ SubscriberImpl::notify_datareaders()
   }
   for (DataReaderMap::iterator it = localreadermap.begin(); it != localreadermap.end(); ++it) {
     if (it->second->have_sample_states(DDS::NOT_READ_SAMPLE_STATE)) {
-      DDS::DataReaderListener_var listener = it->second->get_listener();
+      DataReaderListenerProxy lp;
+      it->second->listener_for(lp, ::DDS::DATA_AVAILABLE_STATUS);
       if (!it->second->is_bit()) {
-        if (listener) {
-          listener->on_data_available(it->second.in());
+        if (!lp.is_nil()) {
+          lp.on_data_available(it->second.in());
         }
         it->second->set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
       } else {
-        TheServiceParticipant->job_queue()->enqueue(make_rch<DataReaderImpl::OnDataAvailable>(rchandle_from(this), listener, it->second, listener, true, false));
+        TheServiceParticipant->job_queue()->enqueue(make_rch<DataReaderImpl::OnDataAvailable>(rchandle_from(this), it->second, false, true, true, false));
       }
     }
   }
@@ -617,9 +618,10 @@ SubscriberImpl::notify_datareaders()
     }
 
     if (dri->have_sample_states(DDS::NOT_READ_SAMPLE_STATE)) {
-      DDS::DataReaderListener_var listener = dri->get_listener();
-      if (!CORBA::is_nil(listener)) {
-        listener->on_data_available(dri);
+      DataReaderListenerProxy lp;
+      dri->listener_for(lp, ::DDS::DATA_AVAILABLE_STATUS);
+      if (!lp.is_nil()) {
+        lp.on_data_available(dri);
       }
       dri->set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
     }
@@ -723,7 +725,7 @@ SubscriberImpl::set_listener(
   DDS::SubscriberListener_ptr a_listener,
   DDS::StatusMask             mask)
 {
-  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
+  ACE_Guard<ACE_Recursive_Thread_Mutex> g(listener_mutex_);
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
   listener_ = DDS::SubscriberListener::_duplicate(a_listener);
@@ -733,7 +735,7 @@ SubscriberImpl::set_listener(
 DDS::SubscriberListener_ptr
 SubscriberImpl::get_listener()
 {
-  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
+  ACE_Guard<ACE_Recursive_Thread_Mutex> g(listener_mutex_);
   return DDS::SubscriberListener::_duplicate(listener_.in());
 }
 
@@ -964,24 +966,24 @@ SubscriberImpl::remove_from_datareader_set(DataReaderImpl* reader)
 }
 #endif
 
-DDS::SubscriberListener_ptr
-SubscriberImpl::listener_for(::DDS::StatusKind kind)
+void SubscriberImpl::listener_for(ListenerProxy& lp, ::DDS::StatusKind kind)
 {
   // per 2.1.4.3.1 Listener Access to Plain Communication Status
   // use this entities factory if listener is mask not enabled
   // for this kind.
   RcHandle<DomainParticipantImpl> participant = this->participant_.lock();
-  if (! participant)
-    return 0;
-
-  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
-  if (CORBA::is_nil(listener_.in()) || (listener_mask_ & kind) == 0) {
-    g.release();
-    return participant->listener_for(kind);
-
-  } else {
-    return DDS::SubscriberListener::_duplicate(listener_.in());
+  if (! participant) {
+    return;
   }
+
+  lp.acquire(listener_mutex_, listener_);
+  if (!lp.is_nil() && (listener_mask_ & kind) != 0) {
+    return;
+  }
+  lp.release();
+
+  participant->listener_for(lp, kind);
+
 }
 
 unsigned int&

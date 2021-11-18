@@ -38,6 +38,7 @@
 #include "TopicImpl.h"
 #include "DomainParticipantImpl.h"
 #include "TimeTypes.h"
+#include "ListenerProxy.h"
 
 #include <dds/DdsDcpsTopicC.h>
 #include <dds/DdsDcpsSubscriptionExtC.h>
@@ -194,6 +195,50 @@ private:
   T v_;
 };
 
+class DataReaderListenerProxy : public TypedListenerProxy<DDS::DataReaderListener> {
+public:
+  void on_requested_deadline_missed(::DDS::DataReader_ptr reader,
+                                    const ::DDS::RequestedDeadlineMissedStatus& status)
+  {
+    listener_->on_requested_deadline_missed(reader, status);
+  }
+
+  void on_requested_incompatible_qos(::DDS::DataReader_ptr reader,
+                                     const ::DDS::RequestedIncompatibleQosStatus& status)
+  {
+    listener_->on_requested_incompatible_qos(reader, status);
+  }
+
+  void on_sample_rejected(::DDS::DataReader_ptr reader,
+                          const ::DDS::SampleRejectedStatus& status)
+  {
+    listener_->on_sample_rejected(reader, status);
+  }
+
+  void on_liveliness_changed(::DDS::DataReader_ptr reader,
+                             const ::DDS::LivelinessChangedStatus& status)
+  {
+    listener_->on_liveliness_changed(reader, status);
+  }
+
+  void on_data_available(::DDS::DataReader_ptr reader)
+  {
+    listener_->on_data_available(reader);
+  }
+
+  void on_subscription_matched(::DDS::DataReader_ptr reader,
+                               const ::DDS::SubscriptionMatchedStatus& status)
+  {
+    listener_->on_subscription_matched(reader, status);
+  }
+
+  void on_sample_lost(::DDS::DataReader_ptr reader,
+                      const ::DDS::SampleLostStatus& status)
+  {
+    listener_->on_sample_lost(reader, status);
+  }
+};
+
 /**
 * @class DataReaderImpl
 *
@@ -249,7 +294,7 @@ public:
   * Otherwise, the query for the listener is propagated up to the
   * factory/subscriber.
   */
-  DDS::DataReaderListener_ptr listener_for(DDS::StatusKind kind);
+  void listener_for(ListenerProxy& lp, DDS::StatusKind kind);
 
   /// tell instances when a DataWriter transitions to being alive
   /// The writer state is inout parameter, it has to be set ALIVE before
@@ -595,9 +640,6 @@ public:
 
 protected:
 
-  // Perform cast to get extended version of listener (otherwise nil)
-  DataReaderListener_ptr get_ext_listener();
-
   virtual void remove_associations_i(const WriterIdSeq& writers, bool callback);
   void remove_publication(const PublicationId& pub_id);
 
@@ -764,7 +806,7 @@ private:
   friend class ::DDS_TEST; //allows tests to get at private data
 
   DDS::TopicDescription_var    topic_desc_;
-  ACE_Thread_Mutex             listener_mutex_;
+  ACE_Recursive_Thread_Mutex   listener_mutex_;
   DDS::StatusMask              listener_mask_;
   DDS::DataReaderListener_var  listener_;
   DDS::DomainId_t              domain_id_;
@@ -932,12 +974,10 @@ public:
   class OpenDDS_Dcps_Export OnDataOnReaders : public JobQueue::Job {
   public:
     OnDataOnReaders(WeakRcHandle<SubscriberImpl> subscriber,
-                    DDS::SubscriberListener_var sub_listener,
                     WeakRcHandle<DataReaderImpl> data_reader,
                     bool call,
                     bool set_reader_status)
       : subscriber_(subscriber)
-      , sub_listener_(sub_listener)
       , data_reader_(data_reader)
       , call_(call)
       , set_reader_status_(set_reader_status)
@@ -947,7 +987,6 @@ public:
     virtual void execute();
 
     WeakRcHandle<SubscriberImpl> subscriber_;
-    DDS::SubscriberListener_var sub_listener_;
     WeakRcHandle<DataReaderImpl> data_reader_;
     const bool call_;
     const bool set_reader_status_;
@@ -956,14 +995,14 @@ public:
   class OpenDDS_Dcps_Export OnDataAvailable : public JobQueue::Job {
   public:
     OnDataAvailable(WeakRcHandle<SubscriberImpl> subscriber,
-                    DDS::DataReaderListener_var listener,
                     WeakRcHandle<DataReaderImpl> data_reader,
+                    bool use_subscriber,
                     bool call,
                     bool set_reader_status,
                     bool set_subscriber_status)
       : subscriber_(subscriber)
-      , listener_(listener)
       , data_reader_(data_reader)
+      , use_subscriber_(use_subscriber)
       , call_(call)
       , set_reader_status_(set_reader_status)
       , set_subscriber_status_(set_subscriber_status)
@@ -973,8 +1012,8 @@ public:
     virtual void execute();
 
     WeakRcHandle<SubscriberImpl> subscriber_;
-    DDS::DataReaderListener_var listener_;
     WeakRcHandle<DataReaderImpl> data_reader_;
+    const bool use_subscriber_;
     const bool call_;
     const bool set_reader_status_;
     const bool set_subscriber_status_;

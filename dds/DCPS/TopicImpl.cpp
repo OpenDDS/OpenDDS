@@ -99,7 +99,7 @@ TopicImpl::get_qos(DDS::TopicQos& qos)
 DDS::ReturnCode_t
 TopicImpl::set_listener(DDS::TopicListener_ptr a_listener, DDS::StatusMask mask)
 {
-  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
+  ACE_Guard<ACE_Recursive_Thread_Mutex> g(listener_mutex_);
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
   listener_ = DDS::TopicListener::_duplicate(a_listener);
@@ -109,7 +109,7 @@ TopicImpl::set_listener(DDS::TopicListener_ptr a_listener, DDS::StatusMask mask)
 DDS::TopicListener_ptr
 TopicImpl::get_listener()
 {
-  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
+  ACE_Guard<ACE_Recursive_Thread_Mutex> g(listener_mutex_);
   return DDS::TopicListener::_duplicate(listener_.in());
 }
 
@@ -198,6 +198,15 @@ TopicImpl::transport_config(const TransportConfig_rch&)
   throw Transport::MiscProblem();
 }
 
+class TopicListenerProxy : public TypedListenerProxy<DDS::TopicListener> {
+public:
+  void on_inconsistent_topic(::DDS::Topic_ptr the_topic,
+                             const ::DDS::InconsistentTopicStatus& status)
+  {
+    listener_->on_inconsistent_topic(the_topic, status);
+  }
+};
+
 void
 TopicImpl::inconsistent_topic(int count)
 {
@@ -206,17 +215,9 @@ TopicImpl::inconsistent_topic(int count)
 
   set_status_changed_flag(DDS::INCONSISTENT_TOPIC_STATUS, true);
 
-  DDS::TopicListener_var listener;
-  {
-    ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
-    listener = listener_;
-    if (!listener || !(listener_mask_ & DDS::INCONSISTENT_TOPIC_STATUS)) {
-      g.release();
-      listener = participant_->listener_for(DDS::INCONSISTENT_TOPIC_STATUS);
-    }
-  }
-  if (listener) {
-    listener->on_inconsistent_topic(this, inconsistent_topic_status_);
+  TopicListenerProxy lp;
+  if (!lp.is_nil()) {
+    lp.on_inconsistent_topic(this, inconsistent_topic_status_);
     inconsistent_topic_status_.total_count_change = 0;
   }
 
@@ -255,6 +256,17 @@ bool TopicImpl::check_data_representation(const DDS::DataRepresentationIdSeq& qo
     }
   }
   return false;
+}
+
+void TopicImpl::listener_for(ListenerProxy& lp, DDS::StatusKind kind)
+{
+  lp.acquire(listener_mutex_, listener_);
+  if (!lp.is_nil() && (listener_mask_ & kind) != 0) {
+    return;
+  }
+  lp.release();
+
+  participant_->listener_for(lp, kind);
 }
 
 } // namespace DCPS

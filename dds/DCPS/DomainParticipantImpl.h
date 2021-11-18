@@ -8,29 +8,30 @@
 #ifndef OPENDDS_DCPS_DOMAIN_PARTICIPANT_IMPL_H
 #define OPENDDS_DCPS_DOMAIN_PARTICIPANT_IMPL_H
 
-#include "EntityImpl.h"
+#include "ConditionVariable.h"
 #include "Definitions.h"
 #include "DisjointSequence.h"
-#include "TopicImpl.h"
-#include "InstanceHandle.h"
-#include "OwnershipManager.h"
+#include "EntityImpl.h"
 #include "GuidBuilder.h"
+#include "GuidUtils.h"
+#include "InstanceHandle.h"
+#include "ListenerProxy.h"
+#include "OwnershipManager.h"
 #include "PoolAllocator.h"
 #include "Recorder.h"
 #include "Replayer.h"
-#include "ConditionVariable.h"
 #include "TimeTypes.h"
+#include "TopicImpl.h"
 #include "XTypes/TypeLookupService.h"
-#include "transport/framework/TransportImpl_rch.h"
 #include "security/framework/SecurityConfig_rch.h"
+#include "transport/framework/TransportImpl_rch.h"
 
+#include <dds/DdsDcpsDomainC.h>
+#include <dds/DdsDcpsInfoUtilsC.h>
+#include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsPublicationC.h>
 #include <dds/DdsDcpsSubscriptionExtC.h>
 #include <dds/DdsDcpsTopicC.h>
-#include <dds/DdsDcpsDomainC.h>
-#include <dds/DdsDcpsInfoUtilsC.h>
-#include "GuidUtils.h"
-#include <dds/DdsDcpsInfrastructureC.h>
 #ifndef DDS_HAS_MINIMUM_BIT
 #  include <dds/DdsDcpsCoreTypeSupportC.h>
 #endif
@@ -340,7 +341,7 @@ public:
    * kind is in the listener mask then the listener is returned.
    * Otherwise, return nil.
    */
-  DDS::DomainParticipantListener_ptr listener_for(DDS::StatusKind kind);
+  void listener_for(ListenerProxy& lp, DDS::StatusKind kind);
 
   typedef OPENDDS_VECTOR(RepoId) TopicIdVec;
   /**
@@ -457,7 +458,7 @@ private:
   /// The qos of this DomainParticipant.
   DDS::DomainParticipantQos qos_;
   /// Mutex to protect listener info
-  ACE_Thread_Mutex listener_mutex_;
+  ACE_Recursive_Thread_Mutex listener_mutex_;
   /// Used to notify the entity for relevant events.
   DDS::DomainParticipantListener_var listener_;
   /// The StatusKind bit mask indicates which status condition change

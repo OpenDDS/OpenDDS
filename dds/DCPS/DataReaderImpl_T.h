@@ -1717,9 +1717,6 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
     if ((qos_.resource_limits.max_instances != DDS::LENGTH_UNLIMITED) &&
       ((::CORBA::Long) instances_size >= qos_.resource_limits.max_instances))
     {
-      DDS::DataReaderListener_var listener
-        = listener_for (DDS::SAMPLE_REJECTED_STATUS);
-
       set_status_changed_flag (DDS::SAMPLE_REJECTED_STATUS, true);
 
       sample_rejected_status_.last_reason = DDS::REJECTED_BY_INSTANCES_LIMIT;
@@ -1727,13 +1724,17 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
       ++sample_rejected_status_.total_count_change;
       sample_rejected_status_.last_instance_handle = handle;
 
-      if (!CORBA::is_nil(listener.in()))
       {
-        ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+        DataReaderListenerProxy lp;
+        listener_for(lp, DDS::SAMPLE_REJECTED_STATUS);
 
-        listener->on_sample_rejected(this, sample_rejected_status_);
-        sample_rejected_status_.total_count_change = 0;
-      }  // do we want to do something if listener is nil???
+        if (!lp.is_nil()) {
+          ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+
+          lp.on_sample_rejected(this, sample_rejected_status_);
+          sample_rejected_status_.total_count_change = 0;
+        }  // do we want to do something if listener is nil???
+      }
       notify_status_condition_no_sample_lock();
 
       return;
@@ -1917,24 +1918,25 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
       // is NOT_READ then none are read.
       // TBD - in future we will reads may not read in order so
       //       just looking at the head will not be enough.
-      DDS::DataReaderListener_var listener
-        = listener_for(DDS::SAMPLE_REJECTED_STATUS);
-
-      set_status_changed_flag(DDS::SAMPLE_REJECTED_STATUS, true);
-
-      sample_rejected_status_.last_reason =
-        DDS::REJECTED_BY_SAMPLES_PER_INSTANCE_LIMIT;
-      ++sample_rejected_status_.total_count;
-      ++sample_rejected_status_.total_count_change;
-      sample_rejected_status_.last_instance_handle = instance_ptr->instance_handle_;
-
-      if (!CORBA::is_nil(listener.in()))
       {
-        ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+        DataReaderListenerProxy lp;
+        listener_for(lp, DDS::SAMPLE_REJECTED_STATUS);
 
-        listener->on_sample_rejected(this, sample_rejected_status_);
-        sample_rejected_status_.total_count_change = 0;
-      }  // do we want to do something if listener is nil???
+        set_status_changed_flag(DDS::SAMPLE_REJECTED_STATUS, true);
+
+        sample_rejected_status_.last_reason =
+          DDS::REJECTED_BY_SAMPLES_PER_INSTANCE_LIMIT;
+        ++sample_rejected_status_.total_count;
+        ++sample_rejected_status_.total_count_change;
+        sample_rejected_status_.last_instance_handle = instance_ptr->instance_handle_;
+
+        if (!lp.is_nil()) {
+          ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+
+          lp.on_sample_rejected(this, sample_rejected_status_);
+          sample_rejected_status_.total_count_change = 0;
+        }  // do we want to do something if listener is nil???
+      }
       notify_status_condition_no_sample_lock();
       return;
     }
@@ -1976,23 +1978,24 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
         // is NOT_READ then none are read.
         // TBD - in future we will reads may not read in order so
         //       just looking at the head will not be enough.
-        DDS::DataReaderListener_var listener
-          = listener_for(DDS::SAMPLE_REJECTED_STATUS);
-
-        set_status_changed_flag(DDS::SAMPLE_REJECTED_STATUS, true);
-
-        sample_rejected_status_.last_reason =
-          DDS::REJECTED_BY_SAMPLES_LIMIT;
-        ++sample_rejected_status_.total_count;
-        ++sample_rejected_status_.total_count_change;
-        sample_rejected_status_.last_instance_handle = instance_ptr->instance_handle_;
-        if (!CORBA::is_nil(listener.in()))
         {
-          ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+          DataReaderListenerProxy lp;
+          listener_for(lp, DDS::SAMPLE_REJECTED_STATUS);
 
-          listener->on_sample_rejected(this, sample_rejected_status_);
-          sample_rejected_status_.total_count_change = 0;
-        }  // do we want to do something if listener is nil???
+          set_status_changed_flag(DDS::SAMPLE_REJECTED_STATUS, true);
+
+          sample_rejected_status_.last_reason =
+            DDS::REJECTED_BY_SAMPLES_LIMIT;
+          ++sample_rejected_status_.total_count;
+          ++sample_rejected_status_.total_count_change;
+          sample_rejected_status_.last_instance_handle = instance_ptr->instance_handle_;
+          if (!lp.is_nil()) {
+            ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+
+            lp.on_sample_rejected(this, sample_rejected_status_);
+            sample_rejected_status_.total_count_change = 0;
+          }  // do we want to do something if listener is nil???
+        }
         notify_status_condition_no_sample_lock();
 
         return;
@@ -2052,22 +2055,23 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
 
       if (head_ptr->sample_state_ == DDS::NOT_READ_SAMPLE_STATE)
         {
-          DDS::DataReaderListener_var listener
-            = listener_for (DDS::SAMPLE_LOST_STATUS);
+          {
+            DataReaderListenerProxy lp;
+            listener_for(lp, DDS::SAMPLE_LOST_STATUS);
 
-          ++sample_lost_status_.total_count;
-          ++sample_lost_status_.total_count_change;
+            ++sample_lost_status_.total_count;
+            ++sample_lost_status_.total_count_change;
 
-          set_status_changed_flag(DDS::SAMPLE_LOST_STATUS, true);
+            set_status_changed_flag(DDS::SAMPLE_LOST_STATUS, true);
 
-          if (!CORBA::is_nil(listener.in()))
-            {
+            if (!lp.is_nil()) {
               ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
-              listener->on_sample_lost(this, sample_lost_status_);
+              lp.on_sample_lost(this, sample_lost_status_);
 
               sample_lost_status_.total_count_change = 0;
             }
+          }
 
           notify_status_condition_no_sample_lock();
         }
@@ -2086,35 +2090,44 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
 
     set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, true);
 
-    DDS::SubscriberListener_var sub_listener =
-        sub->listener_for(DDS::DATA_ON_READERS_STATUS);
-    if (!CORBA::is_nil(sub_listener.in()) && !coherent_) {
-      if (!is_bit()) {
-        ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-        sub_listener->on_data_on_readers(sub.in());
-        sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, false);
-      } else {
-        TheServiceParticipant->job_queue()->enqueue(make_rch<OnDataOnReaders>(sub, sub_listener, rchandle_from(static_cast<DataReaderImpl*>(this)), true, false));
-      }
-    } else {
-      sub->notify_status_condition();
+    {
+      SubscriberListenerProxy lp;
+      sub->listener_for(lp, DDS::DATA_ON_READERS_STATUS);
 
-      DDS::DataReaderListener_var listener =
-        listener_for (DDS::DATA_AVAILABLE_STATUS);
-
-      if (!CORBA::is_nil(listener.in())) {
+      if (!lp.is_nil() && !coherent_) {
         if (!is_bit()) {
           ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-          listener->on_data_available(this);
+          lp.on_data_on_readers(sub.in());
+          sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, false);
+        } else {
+          TheServiceParticipant->job_queue()->enqueue(make_rch<OnDataOnReaders>(sub, rchandle_from(static_cast<DataReaderImpl*>(this)), true, false));
+        }
+
+        return;
+      }
+    }
+
+    sub->notify_status_condition();
+
+    {
+      DataReaderListenerProxy lp;
+      listener_for(lp, DDS::DATA_AVAILABLE_STATUS);
+
+      if (!lp.is_nil()) {
+        if (!is_bit()) {
+          ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+          lp.on_data_available(this);
           set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
           sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, false);
         } else {
-          TheServiceParticipant->job_queue()->enqueue(make_rch<OnDataAvailable>(sub, listener, rchandle_from(static_cast<DataReaderImpl*>(this)), true, true, true));
+          TheServiceParticipant->job_queue()->enqueue(make_rch<OnDataAvailable>(sub, rchandle_from(static_cast<DataReaderImpl*>(this)), false, true, true, true));
         }
-      } else {
-        notify_status_condition_no_sample_lock();
+        return;
       }
     }
+
+    notify_status_condition_no_sample_lock();
+
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   }
 #endif

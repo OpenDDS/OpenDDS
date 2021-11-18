@@ -35,6 +35,15 @@ class Monitor;
 class MultiTopicImpl;
 #endif
 
+class SubscriberListenerProxy : public TypedListenerProxy<DDS::SubscriberListener>
+{
+public:
+  void on_data_on_readers(::DDS::Subscriber_ptr subs)
+  {
+    listener_->on_data_on_readers(subs);
+  }
+};
+
 class OpenDDS_Dcps_Export SubscriberImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::Subscriber>
   , public virtual EntityImpl {
@@ -125,7 +134,7 @@ public:
   void remove_from_datareader_set(DataReaderImpl* reader);
 #endif
 
-  DDS::SubscriberListener_ptr listener_for(DDS::StatusKind kind);
+  void listener_for(ListenerProxy& lp, DDS::StatusKind kind);
 
   /// @name Raw Latency Statistics Configuration Interfaces
   /// @{
@@ -181,7 +190,7 @@ private:
   DDS::SubscriberQos           qos_;
   DDS::DataReaderQos           default_datareader_qos_;
 
-  ACE_Thread_Mutex             listener_mutex_;
+  ACE_Recursive_Thread_Mutex   listener_mutex_;
   DDS::StatusMask              listener_mask_;
   DDS::SubscriberListener_var  listener_;
 

@@ -13,6 +13,7 @@
 #include "EntityImpl.h"
 #include "TopicDescriptionImpl.h"
 #include "TopicCallbacks.h"
+#include "ListenerProxy.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -91,11 +92,13 @@ public:
   bool check_data_representation(const DDS::DataRepresentationIdSeq& qos_ids, bool is_data_writer);
 
 private:
+  void listener_for(ListenerProxy& lp, DDS::StatusKind kind);
+
   /// The topic qos
   DDS::TopicQos                qos_;
 
   /// Mutex to protect listener info
-  ACE_Thread_Mutex             listener_mutex_;
+  ACE_Recursive_Thread_Mutex   listener_mutex_;
   /// The mask for which kind of events the listener
   ///  will be notified about.
   DDS::StatusMask              listener_mask_;

@@ -27,6 +27,7 @@
 #include "unique_ptr.h"
 #include "Message_Block_Ptr.h"
 #include "TimeTypes.h"
+#include "ListenerProxy.h"
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 #include "FilterEvaluator.h"
@@ -55,6 +56,33 @@ class DataSampleElement;
 class SendStateDataSampleList;
 struct AssociationData;
 class LivenessTimer;
+
+class DataWriterListenerProxy : public TypedListenerProxy<DDS::DataWriterListener> {
+public:
+  void on_offered_deadline_missed(::DDS::DataWriter_ptr writer,
+                                  const ::DDS::OfferedDeadlineMissedStatus& status)
+  {
+    listener_->on_offered_deadline_missed(writer, status);
+  }
+
+  void on_offered_incompatible_qos(::DDS::DataWriter_ptr writer,
+                                   const ::DDS::OfferedIncompatibleQosStatus& status)
+  {
+    listener_->on_offered_incompatible_qos(writer, status);
+  }
+
+  void on_liveliness_lost(::DDS::DataWriter_ptr writer,
+                          const ::DDS::LivelinessLostStatus& status)
+  {
+    listener_->on_liveliness_lost(writer, status);
+  }
+
+  void on_publication_matched(::DDS::DataWriter_ptr writer,
+                              const ::DDS::PublicationMatchedStatus& status)
+  {
+    listener_->on_publication_matched(writer, status);
+  }
+};
 
 /**
 * @class DataWriterImpl
@@ -369,7 +397,8 @@ public:
    * Otherwise, the query for the listener is propagated up to the
    * factory/publisher.
    */
-  DDS::DataWriterListener_ptr listener_for(DDS::StatusKind kind);
+  void listener_for(DataWriterListenerProxy& lp,
+                    DDS::StatusKind kind);
 
   /// Handle the assert liveliness timeout.
   virtual int handle_timeout(const ACE_Time_Value &tv,
@@ -596,7 +625,7 @@ private:
   TopicDescriptionPtr<TopicImpl>                 topic_servant_;
 
   /// Mutex to protect listener info
-  ACE_Thread_Mutex                listener_mutex_;
+  ACE_Recursive_Thread_Mutex      listener_mutex_;
   /// The StatusKind bit mask indicates which status condition change
   /// can be notified by the listener of this entity.
   DDS::StatusMask                 listener_mask_;

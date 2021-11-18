@@ -115,32 +115,33 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::execute(SubscriptionInstance_rch insta
         reader->set_status_changed_flag(
           DDS::REQUESTED_DEADLINE_MISSED_STATUS, true);
 
-        DDS::DataReaderListener_var listener =
-          reader->listener_for(
-            DDS::REQUESTED_DEADLINE_MISSED_STATUS);
+        {
+          DataReaderListenerProxy lp;
+          reader->listener_for(lp, DDS::REQUESTED_DEADLINE_MISSED_STATUS);
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-        if (instance->instance_state_->is_exclusive()) {
-          DataReaderImpl::OwnershipManagerPtr owner_manager = reader->ownership_manager();
-          if (owner_manager)
-            owner_manager->remove_writers (instance->instance_handle_);
-        }
+          if (instance->instance_state_->is_exclusive()) {
+            DataReaderImpl::OwnershipManagerPtr owner_manager = reader->ownership_manager();
+            if (owner_manager)
+              owner_manager->remove_writers (instance->instance_handle_);
+          }
 #endif
 
-        if (!CORBA::is_nil(listener.in())) {
-          // Copy before releasing the lock.
-          DDS::RequestedDeadlineMissedStatus const status = this->status_;
+          if (!lp.is_nil()) {
+            // Copy before releasing the lock.
+            DDS::RequestedDeadlineMissedStatus const status = this->status_;
 
-          // Release the lock during the upcall.
-          ACE_GUARD(reverse_lock_type, reverse_monitor, this->reverse_status_lock_);
-          // @todo Will this operation ever throw?  If so we may want to
-          //       catch all exceptions, and act accordingly.
-          listener->on_requested_deadline_missed(reader.in(),
-                                                status);
+            // Release the lock during the upcall.
+            ACE_GUARD(reverse_lock_type, reverse_monitor, this->reverse_status_lock_);
+            // @todo Will this operation ever throw?  If so we may want to
+            //       catch all exceptions, and act accordingly.
+            lp.on_requested_deadline_missed(reader.in(),
+                                                   status);
 
-          // We need to update the last total count value to our current total
-          // so that the next time we will calculate the correct total_count_change;
-          this->last_total_count_ = this->status_.total_count;
+            // We need to update the last total count value to our current total
+            // so that the next time we will calculate the correct total_count_change;
+            this->last_total_count_ = this->status_.total_count;
+          }
         }
 
         reader->notify_status_condition();

@@ -1187,7 +1187,7 @@ DomainParticipantImpl::set_listener(
   DDS::DomainParticipantListener_ptr a_listener,
   DDS::StatusMask mask)
 {
-  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
+  ACE_Guard<ACE_Recursive_Thread_Mutex> g(listener_mutex_);
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
   listener_ = DDS::DomainParticipantListener::_duplicate(a_listener);
@@ -1197,7 +1197,7 @@ DomainParticipantImpl::set_listener(
 DDS::DomainParticipantListener_ptr
 DomainParticipantImpl::get_listener()
 {
-  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
+  ACE_Guard<ACE_Recursive_Thread_Mutex> g(listener_mutex_);
   return DDS::DomainParticipantListener::_duplicate(listener_.in());
 }
 
@@ -2081,15 +2081,14 @@ DomainParticipantImpl::is_clean() const
           && topics_is_clean);
 }
 
-DDS::DomainParticipantListener_ptr
-DomainParticipantImpl::listener_for(DDS::StatusKind kind)
+void DomainParticipantImpl::listener_for(ListenerProxy& lp, DDS::StatusKind kind)
 {
-  ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
-  if (CORBA::is_nil(listener_.in()) || (listener_mask_ & kind) == 0) {
-    return DDS::DomainParticipantListener::_nil ();
-  } else {
-    return DDS::DomainParticipantListener::_duplicate(listener_.in());
+  lp.acquire(listener_mutex_, listener_);
+
+  if (!lp.is_nil() && (listener_mask_ & kind) != 0) {
+    return;
   }
+  lp.release();
 }
 
 void
@@ -2127,7 +2126,7 @@ DomainParticipantImpl::ownership_manager()
       // Must call on_data_available when attaching a listener late - samples may be waiting
       SubscriberImpl* sub = dynamic_cast<SubscriberImpl*>(bit_subscriber_.in());
       DataReaderImpl* reader = dynamic_cast<DataReaderImpl*>(bit_pub_dr.in());
-      TheServiceParticipant->job_queue()->enqueue(make_rch<DataReaderImpl::OnDataAvailable>(rchandle_from(sub), bit_pub_listener, rchandle_from(reader), true, false, false));
+      TheServiceParticipant->job_queue()->enqueue(make_rch<DataReaderImpl::OnDataAvailable>(rchandle_from(sub), rchandle_from(reader), false, true, false, false));
     }
   }
 
