@@ -169,22 +169,22 @@ struct GuidHash {
   std::size_t operator() (const OpenDDS::DCPS::GUID_t& guid) const
   {
     return
-      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[0]) << 15) ^
-      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[1]) << 14) ^
-      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[2]) << 13) ^
-      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[3]) << 12) ^
-      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[4]) << 11) ^
-      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[5]) << 10) ^
-      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[6]) << 9) ^
-      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[7]) << 8) ^
-      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[8]) << 7) ^
-      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[9]) << 6) ^
-      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[10]) << 5) ^
-      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[11]) << 4) ^
-      (std::hash<::CORBA::Octet>{}(guid.entityId.entityKey[0]) << 3) ^
-      (std::hash<::CORBA::Octet>{}(guid.entityId.entityKey[1]) << 2) ^
-      (std::hash<::CORBA::Octet>{}(guid.entityId.entityKey[2]) << 1) ^
-      (std::hash<::CORBA::Octet>{}(guid.entityId.entityKind) << 0);
+      (static_cast<std::size_t>(guid.guidPrefix[0]) << 15) ^
+      (static_cast<std::size_t>(guid.guidPrefix[1]) << 14) ^
+      (static_cast<std::size_t>(guid.guidPrefix[2]) << 13) ^
+      (static_cast<std::size_t>(guid.guidPrefix[3]) << 12) ^
+      (static_cast<std::size_t>(guid.guidPrefix[4]) << 11) ^
+      (static_cast<std::size_t>(guid.guidPrefix[5]) << 10) ^
+      (static_cast<std::size_t>(guid.guidPrefix[6]) << 9) ^
+      (static_cast<std::size_t>(guid.guidPrefix[7]) << 8) ^
+      (static_cast<std::size_t>(guid.guidPrefix[8]) << 7) ^
+      (static_cast<std::size_t>(guid.guidPrefix[9]) << 6) ^
+      (static_cast<std::size_t>(guid.guidPrefix[10]) << 5) ^
+      (static_cast<std::size_t>(guid.guidPrefix[11]) << 4) ^
+      (static_cast<std::size_t>(guid.entityId.entityKey[0]) << 3) ^
+      (static_cast<std::size_t>(guid.entityId.entityKey[1]) << 2) ^
+      (static_cast<std::size_t>(guid.entityId.entityKey[2]) << 1) ^
+      (static_cast<std::size_t>(guid.entityId.entityKind) << 0);
   }
 };
 typedef std::unordered_set<OpenDDS::DCPS::GUID_t, GuidHash> GuidSet;
