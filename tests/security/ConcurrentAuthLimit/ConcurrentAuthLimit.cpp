@@ -132,9 +132,10 @@ participant_data(DDS::DomainId_t domain,
     throw std::runtime_error("ACE::get_ip_interfaces failed");
   }
 
-  OpenDDS::DCPS::LocatorSeq unicastLocators(addr_count);
-  unicastLocators.length(addr_count);
-  for (size_t i = 0; i < addr_count; ++i) {
+  const ACE_CDR::ULong addr_count_ulong = static_cast<ACE_CDR::ULong>(addr_count);
+  OpenDDS::DCPS::LocatorSeq unicastLocators(addr_count_ulong);
+  unicastLocators.length(addr_count_ulong);
+  for (ACE_CDR::ULong i = 0; i < addr_count_ulong; ++i) {
     // Set a port number to avoid send errors.
     addr_array[i].set_port_number(addr.get_port_number());
     if (DCPS_debug_level) {
