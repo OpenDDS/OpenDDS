@@ -26,7 +26,7 @@ public:
     , log_discovery_(false)
     , log_activity_(false)
     , restart_detection_(false)
-    , thread_monitor_period_seconds_(5)
+    , thread_monitor_period_(5)
     , thread_monitor_history_depth_(1)
   {}
 
@@ -240,14 +240,14 @@ public:
     return restart_detection_;
   }
 
-  void thread_monitor_period_seconds(OpenDDS::DCPS::TimeDuration tmp)
+  void thread_monitor_period(OpenDDS::DCPS::TimeDuration tmp)
   {
-    thread_monitor_period_seconds_ = tmp;
+    thread_monitor_period_ = tmp;
   }
 
-  OpenDDS::DCPS::TimeDuration thread_monitor_period_seconds() const
+  OpenDDS::DCPS::TimeDuration thread_monitor_period() const
   {
-    return thread_monitor_period_seconds_;
+    return thread_monitor_period_;
   }
 
   void thread_monitor_history_depth(int tmp)
@@ -281,7 +281,7 @@ private:
   OpenDDS::DCPS::TimeDuration publish_relay_status_;
   OpenDDS::DCPS::TimeDuration publish_relay_status_liveliness_;
   bool restart_detection_;
-  OpenDDS::DCPS::TimeDuration thread_monitor_period_seconds_;
+  OpenDDS::DCPS::TimeDuration thread_monitor_period_;
   int thread_monitor_history_depth_;
 };
 

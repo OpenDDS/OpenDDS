@@ -2962,7 +2962,7 @@ int
 Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
 {
   const ACE_SOCK_Dgram& socket = choose_recv_socket(h);
-  OpenDDS::DCPS::ThreadMonitor::GreenLight gl("SpdpTransport");
+  DCPS::ThreadMonitor::GreenLight gl("SpdpTransport");
   ACE_INET_Addr remote;
   buff_.reset();
 

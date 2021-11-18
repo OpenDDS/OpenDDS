@@ -1,12 +1,14 @@
 #ifndef RelayThreadMonitor_H_
 #define RelayThreadMonitor_H_
 
+#include <dds/DCPS/ConditionVariable.h>
+#include <dds/DCPS/RcObject.h>
 #include <dds/DCPS/ThreadMonitor.h>
 #include <dds/DCPS/TimeTypes.h>
-#include <ace/Guard_T.h>
-#include <ace/Condition_Thread_Mutex.h>
+
+#include <ace/Task.h>
+#include <ace/Synch_Traits.h>
 #include <ace/Log_Msg.h>
-#include <dds/DCPS/RcObject.h>
 
 #include <map>
 #include <deque>
@@ -23,27 +25,44 @@ namespace RtpsRelay {
  */
 class RelayThreadMonitor : public OpenDDS::DCPS::ThreadMonitor {
 public:
-  RelayThreadMonitor (OpenDDS::DCPS::TimeDuration perd, size_t depth = 1);
+  explicit RelayThreadMonitor (OpenDDS::DCPS::TimeDuration perd, size_t depth = 1);
   virtual void preset(OpenDDS::DCPS::ThreadStatusManager *, const char *);
   virtual void update(UpdateMode, const char* = "");
   virtual double get_busy_pct(const char* key) const;
 
-  void summarize(void);
+  void summarize();
   void report_thread(ACE_thread_t key);
 
-  void report(void);
+  void report();
 
-  void active_monitor(void);
-  void start(void);
-  void stop(void);
+  int start();
+  void stop();
 
 protected:
-  bool running_;
+  class Summarizer : public virtual ACE_Task_Base {
+  public:
+    explicit Summarizer(RelayThreadMonitor& owner, OpenDDS::DCPS::TimeDuration perd);
+    virtual ~Summarizer();
+    virtual int svc();
+    int start();
+    void stop();
+  private:
+    bool running_;
+    OpenDDS::DCPS::TimeDuration period_;
+
+    typedef ACE_SYNCH_MUTEX LockType;
+    typedef ACE_Guard<LockType> GuardType;
+    typedef OpenDDS::DCPS::ConditionVariable<LockType> ConditionVariableType;
+
+    LockType lock_;
+    ConditionVariableType condition_;
+    RelayThreadMonitor& owner_;
+  };
+
+  Summarizer summarizer_;
+
   typedef std::map<std::string, OpenDDS::DCPS::ThreadStatusManager *> registrants;
   registrants pending_reg_;
-
-  ACE_Thread_Mutex modlock_;
-  ACE_Condition_Thread_Mutex moderator_;
 
   struct Sample {
     UpdateMode mode_;
@@ -76,7 +95,6 @@ protected:
 
   typedef OpenDDS::DCPS::RcHandle<ThreadDescriptor> ThreadDescriptor_rch;
   std::map<ACE_thread_t, ThreadDescriptor_rch> descs_;
-  OpenDDS::DCPS::TimeDuration period_;
   size_t history_depth_;
   BusyMap busy_map_;
 };

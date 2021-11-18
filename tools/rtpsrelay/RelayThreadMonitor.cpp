@@ -9,10 +9,7 @@ using namespace OpenDDS::DCPS;
 namespace RtpsRelay {
 
 RelayThreadMonitor::RelayThreadMonitor(TimeDuration perd, size_t depth)
-: running_(false)
-, modlock_()
-, moderator_(modlock_)
-, period_(perd)
+: summarizer_(*this, perd)
 , history_depth_(depth)
 {
   ThreadMonitor::installed_monitor_ = this;
@@ -61,7 +58,7 @@ RelayThreadMonitor::ThreadDescriptor::ThreadDescriptor(const char* alias,
 {
 }
 
-void RelayThreadMonitor::summarize(void)
+void RelayThreadMonitor::summarize()
 {
   MonotonicTimePoint tnow = MonotonicTimePoint::now();
   for (auto d = descs_.begin(); d != descs_.end(); d++) {
@@ -155,7 +152,7 @@ void RelayThreadMonitor::report_thread(ACE_thread_t key)
   }
 }
 
-void RelayThreadMonitor::report(void)
+void RelayThreadMonitor::report()
 {
   ACE_DEBUG((LM_INFO, "%T TLM: Reporting on %d threads\n", descs_.size()));
   for (auto d = descs_.begin(); d != descs_.end(); d++) {
@@ -163,39 +160,71 @@ void RelayThreadMonitor::report(void)
   }
 }
 
-void RelayThreadMonitor::active_monitor(void)
+int RelayThreadMonitor::start()
 {
-  while (running_) {
-    MonotonicTimePoint expire = MonotonicTimePoint::now() + period_;
-    moderator_.wait(&expire.value());
-    if (running_) {
-      summarize();
-      report();
-    }
-  }
-}
-
-ACE_THR_FUNC_RETURN loadmonfunction(void* arg)
-{
-  RelayThreadMonitor* tmon = reinterpret_cast<RelayThreadMonitor*>(arg);
-  tmon->active_monitor();
-  return 0;
-}
-
-void RelayThreadMonitor::start()
-{
-  if (running_) {
-    return;
-  }
-  running_ = true;
-  ACE_Thread::spawn(&loadmonfunction, this);
+  return summarizer_.start();
 }
 
 void RelayThreadMonitor::stop()
 {
-  if (running_) {
-    running_ = false;
-    moderator_.broadcast();
+  summarizer_.stop();
+}
+
+RelayThreadMonitor::Summarizer::Summarizer(RelayThreadMonitor& owner, TimeDuration perd)
+: running_(false)
+, period_(perd)
+, lock_()
+, condition_(lock_)
+, owner_(owner)
+{
+}
+
+RelayThreadMonitor::Summarizer::~Summarizer()
+{
+}
+
+
+int RelayThreadMonitor::Summarizer::svc()
+{
+  GuardType  guard(lock_);
+  running_ = true;
+  condition_.notify_all();
+  while (running_) {
+    MonotonicTimePoint expire = MonotonicTimePoint::now() + period_;
+    condition_.wait_until(expire);
+    if (running_) {
+      owner_.summarize();
+      owner_.report();
+    }
   }
+  return 0;
+}
+
+int RelayThreadMonitor::Summarizer::start()
+{
+  GuardType guard(lock_);
+  if (running_) {
+    return 0;
+  }
+  if (activate(THR_NEW_LWP | THR_JOINABLE, 1) != 0) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                     "(%P|%t) ERROR: RelayThreadMonitor::Summarizer Failed to activate "
+                     "itself.\n"),
+                     -1);
+  }
+  while (!running_) {
+    condition_.wait();
+  }
+  return 0;
+}
+
+void RelayThreadMonitor::Summarizer::stop()
+{
+  if (running_) {
+    GuardType guard(lock_);
+    running_ = false;
+    condition_.notify_all();
+  }
+  wait();
 }
 }

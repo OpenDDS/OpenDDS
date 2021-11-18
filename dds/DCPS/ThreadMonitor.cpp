@@ -25,15 +25,15 @@ ThreadMonitor::~ThreadMonitor()
 {
 }
 
-void ThreadMonitor::preset(ThreadStatusManager *, const char *)
+void ThreadMonitor::preset(ThreadStatusManager*, const char*)
 {
 }
 
-void ThreadMonitor::update(UpdateMode, const char *)
+void ThreadMonitor::update(UpdateMode, const char*)
 {
 }
 
-double ThreadMonitor::get_busy_pct(const char* ) const
+double ThreadMonitor::get_busy_pct(const char*) const
 {
   return 0.0;
 }
@@ -46,7 +46,7 @@ ThreadMonitor::GreenLight::GreenLight(const char* alias, bool initial)
   }
 }
 
-ThreadMonitor::GreenLight::~GreenLight(void)
+ThreadMonitor::GreenLight::~GreenLight()
 {
   if (installed_monitor_ && !is_initial_) {
     installed_monitor_->update(IMPLICIT_IDLE);
@@ -62,7 +62,7 @@ ThreadMonitor::RedLight::RedLight(const char* alias, bool final)
   }
 }
 
-ThreadMonitor::RedLight::~RedLight(void)
+ThreadMonitor::RedLight::~RedLight()
 {
   if (installed_monitor_ && !is_final_) {
     installed_monitor_->update(IMPLICIT_BUSY);

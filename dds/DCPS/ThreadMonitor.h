@@ -62,8 +62,8 @@ public:
   class OpenDDS_Dcps_Export GreenLight
   {
   public:
-    GreenLight(const char* alias, bool initial = false);
-    ~GreenLight(void);
+    explicit GreenLight(const char* alias, bool initial = false);
+    ~GreenLight();
   private:
     bool is_initial_;
   };
@@ -77,8 +77,8 @@ public:
   class OpenDDS_Dcps_Export RedLight
   {
   public:
-    RedLight(const char* alias, bool final = false);
-    ~RedLight(void);
+    explicit RedLight(const char* alias, bool final = false);
+    ~RedLight();
   private:
     bool is_final_;
   };

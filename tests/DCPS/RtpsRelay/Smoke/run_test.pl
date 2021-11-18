@@ -49,7 +49,7 @@ sub get_relay_args {
     "-DCPSDebugLevel 1",
     "-LogDiscovery 1",
     "-LogActivity 1",
-    "-ThreadMonitorPeriodSeconds ${ps}",
+    "-ThreadMonitorPeriod ${ps}",
     "-LogRelayStatistics 3",
     "-LogParticipantStatistics 1",
     "-DCPSConfigFile relay${n}.ini",
