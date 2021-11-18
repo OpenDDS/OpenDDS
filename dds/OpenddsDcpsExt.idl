@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_OPENDDSDCPSEXT_IDL
-#define OPENDDS_OPENDDSDCPSEXT_IDL
+#ifndef OPENDDS_DCPS_EXT_IDL
+#define OPENDDS_DCPS_EXT_IDL
 
 #include <dds/DdsDcpsCore.idl>
 #include <dds/DdsDcpsGuid.idl>
@@ -129,4 +129,4 @@ module OpenDDS
 #undef BUILT_IN_TOPIC_TYPE
 #undef BUILT_IN_TOPIC_KEY
 
-#endif /* OPENDDS_OPENDDSDCPSEXT_IDL */
+#endif /* OPENDDS_DCPS_EXT_IDL */

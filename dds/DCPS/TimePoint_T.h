@@ -4,6 +4,8 @@
 #include "TimeDuration.h"
 #include "SafeBool_T.h"
 
+#include <dds/OpenddsDcpsExtC.h>
+
 #include <ace/Time_Value_T.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

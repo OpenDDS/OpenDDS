@@ -19,6 +19,8 @@
 #include "ace/SString.h"
 #include "ace/SOCK_Dgram.h"
 
+#include <cstring>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
