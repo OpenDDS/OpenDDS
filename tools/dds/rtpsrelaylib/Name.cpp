@@ -109,14 +109,14 @@ Atom Name::parse_character_class(Name& name, const std::string& buffer, size_t& 
     return Atom(0);
   }
 
-  std::unordered_set<char> characters;
+  std::set<char> characters;
   parse_character_or_range(name, buffer, idx, characters);
   parse_character_class_tail(name, buffer, idx, characters);
 
   return Atom(negated, characters);
 }
 
-void Name::parse_character_class_tail(Name& name, const std::string& buffer, size_t& idx, std::unordered_set<char>& characters)
+void Name::parse_character_class_tail(Name& name, const std::string& buffer, size_t& idx, std::set<char>& characters)
 {
   if (idx == buffer.size()) {
     name.is_valid_ = false;
@@ -133,7 +133,7 @@ void Name::parse_character_class_tail(Name& name, const std::string& buffer, siz
   parse_character_class_tail(name, buffer, idx, characters);
 }
 
-void Name::parse_character_or_range(Name& name, const std::string& buffer, size_t& idx, std::unordered_set<char>& characters)
+void Name::parse_character_or_range(Name& name, const std::string& buffer, size_t& idx, std::set<char>& characters)
 {
   char first = parse_character(name, buffer, idx);
 

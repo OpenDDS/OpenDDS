@@ -16,7 +16,7 @@ TEST(tools_dds_rtpsrelaylib_Name, Atom_ctor_character)
 
 TEST(tools_dds_rtpsrelaylib_Name, Atom_ctor_character_class)
 {
-  std::unordered_set<char> abc;
+  std::set<char> abc;
   for (char c = 'a'; c <= 'c'; ++c) {
     abc.insert(c);
   }
@@ -29,7 +29,7 @@ TEST(tools_dds_rtpsrelaylib_Name, Atom_ctor_character_class)
 
 TEST(tools_dds_rtpsrelaylib_Name, Atom_ctor_negated_character_class)
 {
-  std::unordered_set<char> abc;
+  std::set<char> abc;
   for (char c = 'a'; c <= 'c'; ++c) {
     abc.insert(c);
   }
@@ -56,7 +56,7 @@ TEST(tools_dds_rtpsrelaylib_Name, Atom_ctor_glob)
 
 TEST(tools_dds_rtpsrelaylib_Name, Atom_equal)
 {
-  std::unordered_set<char> abc;
+  std::set<char> abc;
   for (char c = 'a'; c <= 'c'; ++c) {
     abc.insert(c);
   }
@@ -76,7 +76,7 @@ TEST(tools_dds_rtpsrelaylib_Name, Atom_equal)
 
 TEST(tools_dds_rtpsrelaylib_Name, Atom_not_equal)
 {
-  std::unordered_set<char> abc;
+  std::set<char> abc;
   for (char c = 'a'; c <= 'c'; ++c) {
     abc.insert(c);
   }
@@ -103,7 +103,7 @@ std::string stringify(const Atom& atom)
 
 TEST(tools_dds_rtpsrelaylib_Name, Atom_stringify)
 {
-  std::unordered_set<char> abc;
+  std::set<char> abc;
   for (char c = 'a'; c <= 'c'; ++c) {
     abc.insert(c);
   }
@@ -123,7 +123,7 @@ TEST(tools_dds_rtpsrelaylib_Name, Atom_stringify)
 
 TEST(tools_dds_rtpsrelaylib_Name, AtomHash)
 {
-  std::unordered_set<char> abc;
+  std::set<char> abc;
   for (char c = 'a'; c <= 'c'; ++c) {
     abc.insert(c);
   }
@@ -149,12 +149,12 @@ void test_valid(const std::string& s, const Name& expected, bool pattern)
 
 TEST(tools_dds_rtpsrelaylib_Name, valid)
 {
-  std::unordered_set<char> digits;
+  std::set<char> digits;
   for (char c = '0'; c <= '9'; ++c) {
     digits.insert(c);
   }
 
-  std::unordered_set<char> abc;
+  std::set<char> abc;
   for (char c = 'a'; c <= 'c'; ++c) {
     abc.insert(c);
   }
@@ -308,7 +308,7 @@ std::string stringify(const Name& name)
 
 TEST(tools_dds_rtpsrelaylib_Name, Name_stringify)
 {
-  EXPECT_EQ(stringify(Name("a[bc][d-e][!fg][!h-i]*?")), "a[cb][ed][!gf][!ih]*?");
+  EXPECT_EQ(stringify(Name("a[bc][d-e][!fg][!h-i]*?")), "a[bc][de][!fg][!hi]*?");
 }
 
 #endif
