@@ -2568,7 +2568,11 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
       }
       return false;
     }
-    //type_string += " = \"" + my_wstring + "\"\n"; TODO CLAYTON: Find how to cast WChar* to a string
+    std::stringstream os;
+    for (size_t i = 0; my_wstring[i] != 0; ++i) {
+      char_helper<ACE_CDR::WChar>(os, my_wstring[i]);
+    }
+    type_string += " = L\"" + os.str() + "\"\n";
     break;
   }
   case TK_BITMASK:
