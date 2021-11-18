@@ -11,8 +11,7 @@
 #if !defined (__ACE_INLINE__)
 #include "ReactorTask.inl"
 #endif /* __ACE_INLINE__ */
-
-#include <dds/DCPS/ThreadMonitor.h>
+#include "ThreadMonitor.h"
 
 #include <ace/Select_Reactor.h>
 #include <ace/WFMO_Reactor.h>
