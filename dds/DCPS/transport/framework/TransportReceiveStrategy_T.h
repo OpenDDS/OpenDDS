@@ -137,15 +137,15 @@ private:
   // a max sized message.  The max message is about 64K and the low water for
   // a buffer is 4096.  Therefore, 16 receive buffers is appropriate.
   //
-  enum { RECEIVE_BUFFERS  =   16 };
-  enum { BUFFER_LOW_WATER = 4096 };
+  static const size_t RECEIVE_BUFFERS = 16;
+  static const size_t BUFFER_LOW_WATER = 4096;
 
   //
   // Message Block Allocators are more plentiful since they hold samples
   // as well as data read from the handle(s).
   //
-  enum { MESSAGE_BLOCKS   = 1000 };
-  enum { DATA_BLOCKS      =  100 };
+  static const size_t MESSAGE_BLOCKS = 1000;
+  static const size_t DATA_BLOCKS = 100;
 
 //MJM: We should probably bring the allocator typedefs down into this
 //MJM: class since they are limited to this scope.
