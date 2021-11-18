@@ -1,19 +1,18 @@
+/*
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #include "dynamicTypeSupportImpl.h"
 
 #include <tests/DCPS/common/TestException.h>
 #include <tests/Utils/StatusMatching.h>
 
-#include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
-#include <dds/DCPS/Qos_Helper.h>
-#include <dds/DCPS/TopicDescriptionImpl.h>
-#include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/transport/framework/TransportSendStrategy.h>
 #include <dds/DCPS/StaticIncludes.h>
-#include <dds/DCPS/WaitSet.h>
-#include <dds/DCPS/BuiltInTopicUtils.h>
 #if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
 #include <dds/DCPS/transport/udp/Udp.h>
 #endif
@@ -21,6 +20,7 @@
 #include <ace/Arg_Shifter.h>
 #include <ace/OS_NS_unistd.h>
 
+using namespace OpenDDS::DCPS;
 using namespace DDS;
 
 void stru_narrow_write(DataWriter_var dw)
@@ -98,15 +98,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     dpf->create_participant(153,
                             PARTICIPANT_QOS_DEFAULT,
                             DomainParticipantListener::_nil(),
-                            OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                            DEFAULT_STATUS_MASK);
 
-  OpenDDS::DCPS::TransportConfig_rch cfg = TheTransportRegistry->get_config("rtps");
+  TransportConfig_rch cfg = TheTransportRegistry->get_config("rtps");
   if (!cfg.is_nil()) {
     TheTransportRegistry->bind_config(cfg, dp);
   }
 
   //this needs modularization
-  OpenDDS::DCPS::TypeSupport_var ts_var;
+  DDS::TypeSupport_var ts_var;
   if (!ACE_OS::strcmp(type_name, ACE_TEXT("stru"))) {
     ts_var = new Dynamic::struTypeSupportImpl;
   } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("nested"))) {
@@ -118,13 +118,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   ts_var->register_type(dp, ACE_TEXT_ALWAYS_CHAR(type_name));
 
   Topic_var topic =
-      dp->create_topic ("recorder_topic", ACE_TEXT_ALWAYS_CHAR(type_name), TOPIC_QOS_DEFAULT,
-                        0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      dp->create_topic("recorder_topic", ACE_TEXT_ALWAYS_CHAR(type_name), TOPIC_QOS_DEFAULT,
+                       0, DEFAULT_STATUS_MASK);
 
   // Create the publisher
   Publisher_var pub =
       dp->create_publisher(PUBLISHER_QOS_DEFAULT,
-                           PublisherListener::_nil(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                           PublisherListener::_nil(), DEFAULT_STATUS_MASK);
 
   // Create the datawriters
   DataWriterQos dw_qos;
@@ -133,9 +133,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   dw_qos.representation.value[0] = DDS::XCDR2_DATA_REPRESENTATION;
   DataWriter_var dw =
       pub->create_datawriter(topic, dw_qos,
-                             DataWriterListener::_nil(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                             DDS::DataWriterListener::_nil(), DEFAULT_STATUS_MASK);
   if (Utils::wait_match(dw, 1, Utils::EQ)) {
-    if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+    if (log_level >= LogLevel::Error) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("Error waiting for match for dw\n")));
     }
     return 1;

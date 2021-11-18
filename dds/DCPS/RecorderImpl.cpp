@@ -230,32 +230,12 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
   if (sample.header_.message_id_ == SAMPLE_DATA && listener_.in()) {
     Encoding::Kind kind = Encoding::KIND_UNALIGNED_CDR;
     if (sample.header_.cdr_encapsulation_) {
-      const Encoding enc(Encoding::KIND_XCDR2, sample.header_.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
+      Encoding enc;
       Serializer ser(sample.sample_.get(), enc);
       EncapsulationHeader encap;
       if (ser >> encap) {
-        switch (encap.kind()) {
-        case EncapsulationHeader::KIND_CDR_BE:
-        case EncapsulationHeader::KIND_CDR_LE:
-        case EncapsulationHeader::KIND_PL_CDR_BE:
-        case EncapsulationHeader::KIND_PL_CDR_LE:
-          kind = Encoding::KIND_XCDR1;
-          break;
-        case EncapsulationHeader::KIND_CDR2_BE:
-        case EncapsulationHeader::KIND_CDR2_LE:
-        case EncapsulationHeader::KIND_D_CDR2_BE:
-        case EncapsulationHeader::KIND_D_CDR2_LE:
-        case EncapsulationHeader::KIND_PL_CDR2_BE:
-        case EncapsulationHeader::KIND_PL_CDR2_LE:
-          kind = Encoding::KIND_XCDR2;
-          break;
-        default:
-          if (log_level >= LogLevel::Notice) {
-            ACE_ERROR((LM_NOTICE, ACE_TEXT("(%P|%t) NOTICE: RecorderImpl::data_received: ")
-              ACE_TEXT("Unsupported Encoding\n")));
-            }
-          break;
-        }
+        encap.to_encoding(enc, FINAL, false);
+        kind = enc.kind();
       }
     }
     RawDataSample rawSample(sample.header_,

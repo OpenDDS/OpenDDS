@@ -12,11 +12,7 @@
 #include "LocalObject.h"
 #include "RcHandle_T.h"
 #include "RawDataSample.h"
-#include "GuidConverter.h"
-
 #include "XTypes/DynamicData.h"
-
-#include <dds/DdsDcpsInfrastructureC.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -122,7 +118,7 @@ struct OpenDDS_Dcps_Export Objref_Traits< ::OpenDDS::DCPS::Recorder> {
   static ::OpenDDS::DCPS::Recorder_ptr duplicate( ::OpenDDS::DCPS::Recorder_ptr p);
   static void release(::OpenDDS::DCPS::Recorder_ptr p);
   static ::OpenDDS::DCPS::Recorder_ptr nil();
-  static ::CORBA::Boolean marshal(const ::OpenDDS::DCPS::Recorder_ptr p,
+  static bool marshal(const ::OpenDDS::DCPS::Recorder_ptr p,
                                 TAO_OutputCDR& cdr);
 };
 

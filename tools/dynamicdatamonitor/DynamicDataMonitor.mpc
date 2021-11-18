@@ -1,4 +1,4 @@
-project(Dynamic_Data_Monitor): dcps_test, dcps_rtps_udp, msvc_bigobj {
+project(Dynamic_Data_Monitor): dcps_rtps_udp {
   exename   = dynamic-data-monitor
 
   Source_Files {

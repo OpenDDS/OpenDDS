@@ -26,14 +26,82 @@
 #include <dds/CorbaSeq/BooleanSeqTypeSupportImpl.h>
 #include <dds/CorbaSeq/StringSeqTypeSupportImpl.h>
 #include <dds/CorbaSeq/WStringSeqTypeSupportImpl.h>
-
 #include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/RestoreOutputStreamState.h>
 
 #include <ace/OS_NS_string.h>
 
 #include <stdexcept>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
+namespace {
+#if ACE_SIZEOF_LONG_DOUBLE != 16
+inline ostream& operator<<(ostream& os, const ACE_CDR::LongDouble& val)
+{
+  os << ACE_CDR::LongDouble::NativeImpl(val);
+  return os;
+}
+#endif
+
+inline
+std::ostream& hex_value(std::ostream& o, unsigned value, size_t bytes)
+{
+  OpenDDS::DCPS::RestoreOutputStreamState ross(o);
+  o << std::hex << std::setw(bytes * 2) << std::setfill('0') << value;
+  return o;
+}
+
+template <typename CharType>
+unsigned char_value(CharType value)
+{
+  return value;
+}
+
+#if CHAR_MIN < 0
+/*
+ * If char is signed, then it needs to be reinterpreted as unsigned char or
+ * else static casting '\xff' to a 32-bit unsigned int would result in
+ * 0xffffffff because those are both the signed 2's complement forms of -1.
+ */
+template <>
+inline unsigned char_value<char>(char value)
+{
+  return reinterpret_cast<unsigned char&>(value);
+}
+#endif
+
+template <typename CharType>
+std::ostream& char_helper(std::ostream& o, CharType value)
+{
+  switch (value) {
+  case '\'':
+  case '\"':
+  case '\\':
+  case '\?':
+    return o << '\\' << static_cast<char>(value);
+  case '\n':
+    return o << "\\n";
+  case '\t':
+    return o << "\\t";
+  case '\v':
+    return o << "\\v";
+  case '\b':
+    return o << "\\b";
+  case '\r':
+    return o << "\\r";
+  case '\f':
+    return o << "\\f";
+  case '\a':
+    return o << "\\a";
+  }
+  const unsigned cvalue = char_value(value);
+  if (cvalue <= UCHAR_MAX && isprint(cvalue)) {
+    return o << static_cast<char>(value);
+  }
+  return hex_value(o << "\\x", cvalue, sizeof(CharType) == 1 ? 1 : 2);
+}  
+}
 
 namespace OpenDDS {
 namespace XTypes {
@@ -2239,106 +2307,214 @@ const char* DynamicData::typekind_to_string(TypeKind tk) const
   }
 }
 
-bool print_dynamic_data(DynamicData dd, DCPS::String& type_string, DCPS::String indent)
-{
-  DCPS::String member_name;
-  DCPS::String type_name;
-  XTypes::DynamicData temp_dd;
-  switch (dd.type()->get_kind()) {
-  case XTypes::TK_INT8: {
+bool print_integral_value(DynamicData& dd, DCPS::String& type_string, TypeKind tk) {
+  switch (tk) {
+  case TK_ENUM: {
+    ACE_CDR::Long val;
+    LBound bit_bound = dd.type()->get_descriptor().bound[0];
+    if (bit_bound <= 8) {
+      ACE_CDR::Int8 my_int8;
+      if (dd.get_int8_value(my_int8, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
+        if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_integral_value: failed to get_int8_value\n"));
+        }
+        return false;
+      }
+      val = my_int8;
+    } else if (bit_bound <= 16) {
+      ACE_CDR::Short my_short;
+      if (dd.get_int16_value(my_short, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
+        if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_integral_value: failed to get_int16_value\n"));
+        }
+        return false;
+      }
+      val = my_short;
+    } else {
+      ACE_CDR::Long my_long;
+      if (dd.get_int32_value(my_long, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
+        if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_integral_value: failed to get_int32_value\n"));
+        }
+        return false;
+      }
+      val = my_long;
+    }
+    DynamicTypeMember_rch temp_dtm;
+    dd.type()->get_member_by_index(temp_dtm, val);
+    type_string += " = " + temp_dtm->get_descriptor().name + "\n";
+    break;
+  }
+  case TK_INT8: {
     ACE_CDR::Int8 my_int8;
-    if (dd.get_int8_value(my_int8, 0) != DDS::RETCODE_OK) {
-      if (DCPS::log_level >= DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_int8_value\n"));
+    if (dd.get_int8_value(my_int8, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_integral_value: failed to get_int8_value\n"));
       }
       return false;
     }
     type_string += " = " + DCPS::to_dds_string(my_int8) + "\n";
     break;
   }
-  case XTypes::TK_UINT8: {
+  case TK_UINT8: {
     ACE_CDR::UInt8 my_uint8;
-    if (dd.get_uint8_value(my_uint8, 0) != DDS::RETCODE_OK) {
-      if (DCPS::log_level >= DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_uint8_value\n"));
+    if (dd.get_uint8_value(my_uint8, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_integral_value: failed to get_uint8_value\n"));
       }
       return false;
     }
     type_string += " = " + DCPS::to_dds_string(my_uint8) + "\n";
     break;
   }
-  case XTypes::TK_INT16: {
+  case TK_INT16: {
     ACE_CDR::Short my_short;
-    if (dd.get_int16_value(my_short, 0) != DDS::RETCODE_OK) {
-      if (DCPS::log_level >= DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_int16_value\n"));
+    if (dd.get_int16_value(my_short, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_integral_value: failed to get_int16_value\n"));
       }
       return false;
     }
     type_string += " = " + DCPS::to_dds_string(my_short) + "\n";
     break;
   }
-  case XTypes::TK_UINT16: {
+  case TK_UINT16: {
     ACE_CDR::UShort my_ushort;
-    if (dd.get_uint16_value(my_ushort, 0) != DDS::RETCODE_OK) {
-      if (DCPS::log_level >= DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_uint16_value\n"));
+    if (dd.get_uint16_value(my_ushort, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_integral_value: failed to get_uint16_value\n"));
       }
       return false;
     }
     type_string += " = " + DCPS::to_dds_string(my_ushort) + "\n";
     break;
   }
-  case XTypes::TK_ENUM:
-  case XTypes::TK_INT32: {
+  case TK_INT32: {
     ACE_CDR::Long my_long;
-    if (dd.get_int32_value(my_long, 0) != DDS::RETCODE_OK) {
-      if (DCPS::log_level >= DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_int32_value\n"));
+    if (dd.get_int32_value(my_long, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_integral_value: failed to get_int32_value\n"));
       }
       return false;
     }
     type_string += " = " + DCPS::to_dds_string(my_long) + "\n";
     break;
   }
-  case XTypes::TK_UINT32: {
+  case TK_UINT32: {
     ACE_CDR::ULong my_ulong;
-    if (dd.get_uint32_value(my_ulong, 0) != DDS::RETCODE_OK) {
-      if (DCPS::log_level >= DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_uint32_value\n"));
+    if (dd.get_uint32_value(my_ulong, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_integral_value: failed to get_uint32_value\n"));
       }
       return false;
     }
     type_string += " = " + DCPS::to_dds_string(my_ulong) + "\n";
     break;
   }
-  case XTypes::TK_INT64: {
+  case TK_INT64: {
     ACE_CDR::LongLong my_longlong;
-    if (dd.get_int64_value(my_longlong, 0) != DDS::RETCODE_OK) {
-      if (DCPS::log_level >= DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_int64_value\n"));
+    if (dd.get_int64_value(my_longlong, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_integral_value: failed to get_int64_value\n"));
       }
       return false;
     }
     type_string += " = " + DCPS::to_dds_string(my_longlong) + "\n";
     break;
   }
-  case XTypes::TK_UINT64: {
+  case TK_UINT64: {
     ACE_CDR::ULongLong my_ulonglong;
-    if (dd.get_uint64_value(my_ulonglong, 0) != DDS::RETCODE_OK) {
-      if (DCPS::log_level >= DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_uint64_value\n"));
+    if (dd.get_uint64_value(my_ulonglong, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_integral_value: failed to get_uint64_value\n"));
       }
       return false;
     }
     type_string += " = " + DCPS::to_dds_string(my_ulonglong) + "\n";
     break;
   }
-  case XTypes::TK_FLOAT32: {
+  case TK_BOOLEAN: {
+    ACE_CDR::Boolean my_bool;
+    if (dd.get_boolean_value(my_bool, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_integral_value: failed to get_boolean_value\n"));
+      }
+      return false;
+    }
+    type_string += " = " + DCPS::to_dds_string(my_bool) + "\n";
+    break;
+  }
+  case TK_BYTE: {
+    ACE_CDR::Octet my_byte;
+    if (dd.get_byte_value(my_byte, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_integral_value: failed to get_byte_value\n"));
+      }
+      return false;
+    }
+    std::stringstream os;
+    os << std::hex << int(my_byte);
+    type_string += " = " + os.str() + "\n";
+    break;
+  }
+  case TK_CHAR8: {
+    ACE_CDR::Char my_char;
+    if (dd.get_char8_value(my_char, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_integral_value: failed to get_char8_value\n"));
+      }
+      return false;
+    }
+    std::stringstream os;
+    char_helper<ACE_CDR::Char>(os, my_char);
+    type_string += " = '" + os.str() + "'\n";
+    break;
+  }
+  case TK_CHAR16: {
+    ACE_CDR::WChar my_wchar;
+    if (dd.get_char16_value(my_wchar, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_integral_value: failed to get_char16_value\n"));
+      }
+      return false;
+    }
+    std::stringstream os;
+    char_helper<ACE_CDR::WChar>(os, my_wchar);
+    type_string += " = L'" + os.str() + "'\n";
+    break;
+  }
+  }
+  return true;
+}
+
+bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String& indent)
+{
+  DCPS::String member_name;
+  DCPS::String type_name;
+  DynamicData temp_dd;
+  switch (dd.type()->get_kind()) {
+  case TK_INT8:
+  case TK_UINT8:
+  case TK_INT16:
+  case TK_UINT16:
+  case TK_ENUM:
+  case TK_INT32:
+  case TK_UINT32:
+  case TK_INT64:
+  case TK_UINT64:
+  case TK_BOOLEAN:
+  case TK_BYTE:
+  case TK_CHAR8:
+  case TK_CHAR16:
+    if (!print_integral_value(dd, type_string, dd.type()->get_kind())) {
+      return false;
+    }
+    break;
+  case TK_FLOAT32: {
     ACE_CDR::Float my_float;
     if (dd.get_float32_value(my_float, 0) != DDS::RETCODE_OK) {
-      if (DCPS::log_level >= DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_float32_value\n"));
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_dynamic_data: failed to get_float32_value\n"));
       }
       return false;
     }
@@ -2347,11 +2523,11 @@ bool print_dynamic_data(DynamicData dd, DCPS::String& type_string, DCPS::String 
     type_string += " = " + os.str() + "\n";
     break;
   }
-  case XTypes::TK_FLOAT64: {
+  case TK_FLOAT64: {
     ACE_CDR::Double my_double;
     if (dd.get_float64_value(my_double, 0) != DDS::RETCODE_OK) {
-      if (DCPS::log_level >= DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_float64_value\n"));
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_dynamic_data: failed to get_float64_value\n"));
       }
       return false;
     }
@@ -2360,11 +2536,11 @@ bool print_dynamic_data(DynamicData dd, DCPS::String& type_string, DCPS::String 
     type_string += " = " + os.str() + "\n";
     break;
   }
-  case XTypes::TK_FLOAT128: {
+  case TK_FLOAT128: {
     ACE_CDR::LongDouble my_longdouble;
     if (dd.get_float128_value(my_longdouble, 0) != DDS::RETCODE_OK) {
-      if (DCPS::log_level >= DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_float128_value\n"));
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_dynamic_data: failed to get_float128_value\n"));
       }
       return false;
     }
@@ -2373,84 +2549,39 @@ bool print_dynamic_data(DynamicData dd, DCPS::String& type_string, DCPS::String 
     type_string += " = " + os.str() + "\n";
     break;
   }
-  case XTypes::TK_BOOLEAN: {
-    ACE_CDR::Boolean my_bool;
-    if (dd.get_boolean_value(my_bool, 0) != DDS::RETCODE_OK) {
-      if (DCPS::log_level >= DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_boolean_value\n"));
-      }
-      return false;
-    }
-    type_string += " = " + DCPS::to_dds_string(my_bool) + "\n";
-    break;
-  }
-  case XTypes::TK_BYTE: {
-    ACE_CDR::Octet my_byte;
-    if (dd.get_byte_value(my_byte, 0) != DDS::RETCODE_OK) {
-      if (DCPS::log_level >= DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_byte_value\n"));
-      }
-      return false;
-    }
-    type_string += " = " + DCPS::to_dds_string(my_byte) + "\n";
-    break;
-  }
-  case XTypes::TK_CHAR8: {
-    ACE_CDR::Char my_char;
-    if (dd.get_char8_value(my_char, 0) != DDS::RETCODE_OK) {
-      if (DCPS::log_level >= DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_char8_value\n"));
-      }
-      return false;
-    }
-    type_string += DCPS::String(" = \'") + my_char + "\'\n";
-    break;
-  }
-  case XTypes::TK_CHAR16: {
-    ACE_CDR::WChar my_wchar;
-    if (dd.get_char16_value(my_wchar, 0) != DDS::RETCODE_OK) {
-      if (DCPS::log_level >= DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_char16_value\n"));
-      }
-      return false;
-    }
-    type_string += " = \'" + DCPS::to_dds_string(my_wchar) + "\'\n";
-    break;
-  }
-  case XTypes::TK_STRING8: {
+  case TK_STRING8: {
     ACE_CDR::Char* my_string = 0;
     if (dd.get_string_value(my_string, 0) != DDS::RETCODE_OK) {
-      if (DCPS::log_level >= DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_string_value\n"));
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_dynamic_data: failed to get_string_value\n"));
       }
       return false;
     }
     type_string += DCPS::String(" = \"") + my_string + "\"\n";
     break;
   }
-  case XTypes::TK_STRING16: {
+  case TK_STRING16: {
     ACE_CDR::WChar* my_wstring = 0;
     if (dd.get_wstring_value(my_wstring, 0) != DDS::RETCODE_OK) {
-      if (DCPS::log_level >= DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_wstring_value\n"));
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_dynamic_data: failed to get_wstring_value\n"));
       }
       return false;
     }
     //type_string += " = \"" + my_wstring + "\"\n"; TODO CLAYTON: Find how to cast WChar* to a string
     break;
   }
-  // case XTypes::TK_BITMASK:
-  // case XTypes::TK_BITSET:
-  case XTypes::TK_ALIAS: {
-    if (!print_dynamic_data(dd, type_string, indent)) {
-      if (DCPS::log_level >= DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to read alias\n"));
-      }
-      return false;
+  case TK_BITMASK:
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_dynamic_data: Bitmask is an unsupported type in OpenDDS\n"));
     }
     break;
-  }
-  case XTypes::TK_SEQUENCE: {
+  case TK_BITSET:
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_dynamic_data: Bitset is an unsupported type in OpenDDS\n"));
+    }
+    break;
+  case TK_SEQUENCE: {
     DCPS::String temp_indent = indent;
     indent += "  ";
     type_name = dd.type()->get_descriptor().element_type->get_descriptor().name;
@@ -2460,14 +2591,14 @@ bool print_dynamic_data(DynamicData dd, DCPS::String& type_string, DCPS::String 
     for (ACE_CDR::ULong i = 0; i < seq_length; ++i) {
       type_string += indent + "[" + DCPS::to_dds_string(i) + "]";
       if (dd.get_complex_value(temp_dd, i) != DDS::RETCODE_OK) {
-        if (DCPS::log_level >= DCPS::LogLevel::Error) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_complex_value\n"));
+        if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_dynamic_data: failed to get_complex_value\n"));
         }
         return false;
       }
       if (!print_dynamic_data(temp_dd, type_string, indent)) {
-        if (DCPS::log_level >= DCPS::LogLevel::Error) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to read struct member\n"));
+        if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_dynamic_data: failed to read struct member\n"));
         }
         return false;
       }
@@ -2475,24 +2606,24 @@ bool print_dynamic_data(DynamicData dd, DCPS::String& type_string, DCPS::String 
     indent = temp_indent;
     break;
   }
-  case XTypes::TK_ARRAY: {
+  case TK_ARRAY: {
     DCPS::String temp_indent = indent;
     indent += "  ";
     type_name = dd.type()->get_descriptor().element_type->get_descriptor().name;
     member_name = dd.type()->get_descriptor().name;
-    XTypes::LBound bound = dd.type()->get_descriptor().bound[0];
+    LBound bound = dd.type()->get_descriptor().bound[0];
     type_string += "  " + type_name + "[" + DCPS::to_dds_string(bound) + "] " +  member_name + " =\n";
     for (ACE_CDR::ULong i = 0; i < bound; ++i) {
       type_string += indent + "[" + DCPS::to_dds_string(i) + "]";
       if (dd.get_complex_value(temp_dd, i) != DDS::RETCODE_OK) {
-        if (DCPS::log_level >= DCPS::LogLevel::Error) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_complex_value\n"));
+        if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_dynamic_data: failed to get_complex_value\n"));
         }
         return false;
       }
       if (!print_dynamic_data(temp_dd, type_string, indent)) {
-        if (DCPS::log_level >= DCPS::LogLevel::Error) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to read struct member\n"));
+        if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_dynamic_data: failed to read struct member\n"));
         }
         return false;
       }
@@ -2500,20 +2631,20 @@ bool print_dynamic_data(DynamicData dd, DCPS::String& type_string, DCPS::String 
     indent = temp_indent;
     break;
   }
-  case XTypes::TK_STRUCTURE: {
+  case TK_STRUCTURE: {
     DCPS::String temp_indent = indent;
     indent += "  ";
     type_string += "struct " + dd.type()->get_name() + " {\n";
-    XTypes::DynamicTypeMembersById dtmbi;
+    DynamicTypeMembersById dtmbi;
     dd.type()->get_all_members(dtmbi);
-    for (XTypes::DynamicTypeMembersById::iterator iter = dtmbi.begin(); iter != dtmbi.end(); ++iter) {
+    for (DynamicTypeMembersById::iterator iter = dtmbi.begin(); iter != dtmbi.end(); ++iter) {
       dd.get_complex_value(temp_dd, iter->first);
       member_name = iter->second->get_descriptor().name;
       type_name = iter->second->get_descriptor().get_type()->get_descriptor().name;
       type_string += indent + type_name + " " + member_name;
       if (!print_dynamic_data(temp_dd, type_string, indent)) {
-        if (DCPS::log_level >= DCPS::LogLevel::Error) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to read struct member\n"));
+        if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_dynamic_data: failed to read struct member\n"));
         }
         return false;
       }
@@ -2522,155 +2653,23 @@ bool print_dynamic_data(DynamicData dd, DCPS::String& type_string, DCPS::String 
     type_string += indent + "};\n";
     break;
   }
-  case XTypes::TK_UNION: {
+  case TK_UNION: {
     DCPS::String temp_indent = indent;
     indent += "  ";
     type_string += "union " + dd.type()->get_name() + " {\n";
     ACE_CDR::ULong item_count = dd.get_item_count();
     member_name = dd.type()->get_descriptor().discriminator_type->get_descriptor().name;
     type_string += indent + member_name + " discriminator";
+    if (!print_integral_value(dd, type_string, dd.type()->get_descriptor().discriminator_type->get_kind())) {
+      return false;
+    }
 
-    switch (dd.type()->get_descriptor().discriminator_type->get_kind()) {
-    case XTypes::TK_INT8: {
-      ACE_CDR::Int8 my_int8;
-      if (dd.get_int8_value(my_int8, XTypes::DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
-        if (DCPS::log_level >= DCPS::LogLevel::Error) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_int8_value\n"));
-        }
-        return false;
-      }
-      type_string += " = " + DCPS::to_dds_string(my_int8) + "\n";
-      break;
-    }
-    case XTypes::TK_UINT8: {
-      ACE_CDR::UInt8 my_uint8;
-      if (dd.get_uint8_value(my_uint8, XTypes::DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
-        if (DCPS::log_level >= DCPS::LogLevel::Error) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_uint8_value\n"));
-        }
-        return false;
-      }
-      type_string += " = " + DCPS::to_dds_string(my_uint8) + "\n";
-      break;
-    }
-    case XTypes::TK_INT16: {
-      ACE_CDR::Short my_short;
-      if (dd.get_int16_value(my_short, XTypes::DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
-        if (DCPS::log_level >= DCPS::LogLevel::Error) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_int16_value\n"));
-        }
-        return false;
-      }
-      type_string += " = " + DCPS::to_dds_string(my_short) + "\n";
-      break;
-    }
-    case XTypes::TK_UINT16: {
-      ACE_CDR::UShort my_ushort;
-      if (dd.get_uint16_value(my_ushort, XTypes::DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
-        if (DCPS::log_level >= DCPS::LogLevel::Error) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_uint16_value\n"));
-        }
-        return false;
-      }
-      type_string += " = " + DCPS::to_dds_string(my_ushort) + "\n";
-      break;
-    }
-    case XTypes::TK_ENUM:
-    case XTypes::TK_INT32: {
-      ACE_CDR::Long my_long;
-      if (dd.get_int32_value(my_long, XTypes::DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
-        if (DCPS::log_level >= DCPS::LogLevel::Error) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_int32_value\n"));
-        }
-        return false;
-      }
-      type_string += " = " + DCPS::to_dds_string(my_long) + "\n";
-      break;
-    }
-    case XTypes::TK_UINT32: {
-      ACE_CDR::ULong my_ulong;
-      if (dd.get_uint32_value(my_ulong, XTypes::DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
-        if (DCPS::log_level >= DCPS::LogLevel::Error) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_uint32_value\n"));
-        }
-        return false;
-      }
-      type_string += " = " + DCPS::to_dds_string(my_ulong) + "\n";
-      break;
-    }
-    case XTypes::TK_INT64: {
-      ACE_CDR::LongLong my_longlong;
-      if (dd.get_int64_value(my_longlong, XTypes::DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
-        if (DCPS::log_level >= DCPS::LogLevel::Error) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_int64_value\n"));
-        }
-        return false;
-      }
-      type_string += " = " + DCPS::to_dds_string(my_longlong) + "\n";
-      break;
-    }
-    case XTypes::TK_UINT64: {
-      ACE_CDR::ULongLong my_ulonglong;
-      if (dd.get_uint64_value(my_ulonglong, XTypes::DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
-        if (DCPS::log_level >= DCPS::LogLevel::Error) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_uint64_value\n"));
-        }
-        return false;
-      }
-      type_string += " = " + DCPS::to_dds_string(my_ulonglong) + "\n";
-      break;
-    }
-    case XTypes::TK_BOOLEAN: {
-      ACE_CDR::Boolean my_bool;
-      if (dd.get_boolean_value(my_bool, XTypes::DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
-        if (DCPS::log_level >= DCPS::LogLevel::Error) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_boolean_value\n"));
-        }
-        return false;
-      }
-      type_string += " = " + DCPS::to_dds_string(my_bool) + "\n";
-      break;
-    }
-    case XTypes::TK_BYTE: {
-      ACE_CDR::Octet my_byte;
-      if (dd.get_byte_value(my_byte, XTypes::DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
-        if (DCPS::log_level >= DCPS::LogLevel::Error) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_byte_value\n"));
-        }
-        return false;
-      }
-      type_string += " = " + DCPS::to_dds_string(my_byte) + "\n";
-      break;
-    }
-    case XTypes::TK_CHAR8: {
-      ACE_CDR::Char my_char;
-      if (dd.get_char8_value(my_char, XTypes::DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
-        if (DCPS::log_level >= DCPS::LogLevel::Error) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_char8_value\n"));
-        }
-        return false;
-      }
-      type_string += DCPS::String(" = \'") + my_char + "\'\n";
-      break;
-    }
-    case XTypes::TK_CHAR16: {
-      ACE_CDR::WChar my_wchar;
-      if (dd.get_char16_value(my_wchar, XTypes::DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
-        if (DCPS::log_level >= DCPS::LogLevel::Error) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: print_dynamic_data: failed to get_char16_value\n"));
-        }
-        return false;
-      }
-      type_string += " = \'" + DCPS::to_dds_string(my_wchar) + "\'\n";
-      break;
-    }
-    }
     if (item_count == 2) {
-      XTypes::DynamicTypeMember_rch temp_dtm;
-      XTypes::DynamicTypeMembersById dtmbi;
+      DynamicTypeMember_rch temp_dtm;
+      DynamicTypeMembersById dtmbi;
       DCPS::String decoy_string;
       dd.type()->get_all_members(dtmbi);
-      for (XTypes::DynamicTypeMembersById::iterator iter = dtmbi.begin(); iter != dtmbi.end(); ++iter) {
+      for (DynamicTypeMembersById::iterator iter = dtmbi.begin(); iter != dtmbi.end(); ++iter) {
         dd.type()->get_member(temp_dtm, iter->first);
         if (dd.get_complex_value(dd, iter->first) == DDS::RETCODE_OK) {
           if (print_dynamic_data(dd, decoy_string, indent)) {
@@ -2678,8 +2677,8 @@ bool print_dynamic_data(DynamicData dd, DCPS::String& type_string, DCPS::String 
             type_name = temp_dtm->get_descriptor().get_type()->get_descriptor().name;
             type_string += indent + type_name + " " + member_name;
             print_dynamic_data(dd, type_string, indent);
-            break;
           }
+          break;
         }
       }
     }

@@ -12,27 +12,25 @@
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/PoolAllocator.h>
 
-OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+#include <tao/LongSeqC.h>
+#include <tao/ULongSeqC.h>
+#include <tao/Int8SeqC.h>
+#include <tao/UInt8SeqC.h>
+#include <tao/ShortSeqC.h>
+#include <tao/UShortSeqC.h>
+#include <tao/LongLongSeqC.h>
+#include <tao/ULongLongSeqC.h>
+#include <tao/FloatSeqC.h>
+#include <tao/DoubleSeqC.h>
+#include <tao/LongDoubleSeqC.h>
+#include <tao/CharSeqC.h>
+#include <tao/WCharSeqC.h>
+#include <tao/OctetSeqC.h>
+#include <tao/BooleanSeqC.h>
+#include <tao/StringSeqC.h>
+#include <tao/WStringSeqC.h>
 
-namespace CORBA {
-class LongSeq;
-class ULongSeq;
-class Int8Seq;
-class UInt8Seq;
-class ShortSeq;
-class UShortSeq;
-class LongLongSeq;
-class ULongLongSeq;
-class FloatSeq;
-class DoubleSeq;
-class LongDoubleSeq;
-class CharSeq;
-class WCharSeq;
-class OctetSeq;
-class BooleanSeq;
-class StringSeq;
-class WStringSeq;
-}
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace XTypes {
@@ -104,7 +102,7 @@ public:
   DDS::ReturnCode_t get_string_values(CORBA::StringSeq& value, MemberId id);
   DDS::ReturnCode_t get_wstring_values(CORBA::WStringSeq& value, MemberId id);
 
-  DynamicType_rch type() { return type_; }
+  DynamicType_rch type() const { return type_; }
 
 private:
   void copy(const DynamicData& other);
@@ -309,8 +307,8 @@ private:
   ACE_CDR::ULong item_count_;
 };
 
-bool OpenDDS_Dcps_Export print_dynamic_data(
-  DynamicData dd, DCPS::String& type_string, DCPS::String indent);
+OpenDDS_Dcps_Export bool print_dynamic_data(
+  DynamicData& dd, DCPS::String& type_string, DCPS::String& indent);
 
 } // namespace XTypes
 } // namespace OpenDDS

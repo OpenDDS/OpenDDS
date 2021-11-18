@@ -1,22 +1,11 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-#include <dds/DCPS/transport/framework/TransportRegistry.h>
-#include <dds/DCPS/transport/framework/TransportConfig.h>
-#include <dds/DCPS/transport/framework/TransportInst.h>
-
 #include <dds/DCPS/Recorder.h>
-#include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/SubscriberImpl.h>
-#include <dds/DCPS/WaitSet.h>
-#include <dds/DCPS/Serializer.h>
-#include <dds/DCPS/XTypes/TypeObject.h>
 #include <dds/DCPS/XTypes/DynamicData.h>
 #include "dds/DCPS/StaticIncludes.h"
 #if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
@@ -33,8 +22,9 @@
 
 #include <iostream>
 #include <sstream>
-namespace OpenDDS {
-namespace DCPS {
+
+using namespace OpenDDS::DCPS;
+
 long num_samples = 0;
 long num_seconds = 0;
 // parse the command line arguments
@@ -52,11 +42,11 @@ int parse_args (int& argc, ACE_TCHAR *argv[])
 
     const ACE_TCHAR *currentArg = 0;
 
-    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-samples"))) != 0) {
-      num_samples = ACE_OS::atoi (currentArg);
+    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("--samples"))) != 0) {
+      num_samples = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
-    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-time"))) != 0) {
-      num_seconds = ACE_OS::atoi (currentArg);
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("--time"))) != 0) {
+      num_seconds = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
     } else {
       arg_shifter.ignore_arg();
@@ -78,10 +68,10 @@ public:
   virtual void on_sample_data_received(Recorder* rec,
                                        const RawDataSample& sample)
   {
-    using namespace DCPS;
-    XTypes::DynamicData dd = rec->get_dynamic_data(sample);
+    OpenDDS::XTypes::DynamicData dd = rec->get_dynamic_data(sample);
     String my_type = "";
-    if (!print_dynamic_data(dd, my_type, "")){
+    String indent = "";
+    if (!OpenDDS::XTypes::print_dynamic_data(dd, my_type, indent)) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TestRecorderListener::on_sample_data_received: "
         "Failed to read dynamic data\n"));
     }
@@ -120,7 +110,8 @@ private:
 };
 
 
-int run_test(int argc, ACE_TCHAR *argv[]){
+int run_test(int argc, ACE_TCHAR* argv[])
+{
   int ret_val = 0;
   try {
     DDS::DomainParticipantFactory_var dpf =
@@ -154,7 +145,6 @@ int run_test(int argc, ACE_TCHAR *argv[]){
       }
       return 1;
     }
-    using namespace DCPS;
 
     {
       DDS::Topic_var topic =
@@ -195,14 +185,12 @@ int run_test(int argc, ACE_TCHAR *argv[]){
         }
         return 1;
       }
-
-      ACE_Time_Value tv;
-      ACE_Time_Value start_tv = tv.now();
+      SystemTimePoint start = SystemTimePoint::now();
 
       while (1) {
         // TODO CLAYTON: Find a better waiting pattern
         sleep(1);
-        if (num_seconds != 0 && (tv.now() - start_tv).sec() >= num_seconds) {
+        if (num_seconds != 0 && (SystemTimePoint::now() - start).value().sec() >= num_seconds) {
           break;
         }
         if (num_samples != 0 && recorder_listener->sample_count() >= num_samples) {
@@ -227,13 +215,9 @@ int run_test(int argc, ACE_TCHAR *argv[]){
   return ret_val;
 }
 
-} // namespace DCPS
-} // namespace OpenDDS
-
-int
-ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-  int ret = OpenDDS::DCPS::run_test(argc, argv);
+  int ret = run_test(argc, argv);
   ACE_Thread_Manager::instance()->wait();
   return ret;
 }

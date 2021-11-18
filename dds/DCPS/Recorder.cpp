@@ -8,6 +8,8 @@
 
 #include "Recorder.h"
 
+#include "GuidConverter.h"
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -33,8 +35,7 @@ XTypes::DynamicData Recorder::get_dynamic_data(const RawDataSample& sample)
     return XTypes::DynamicData();
   } else {
     XTypes::DynamicType_rch dt = dt_found->second;
-    XTypes::DynamicData dd(sample.sample_.get(), enc, dt);
-    return dd;
+    return XTypes::DynamicData(sample.sample_.get(), enc, dt);
   }
 }
 

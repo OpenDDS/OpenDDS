@@ -1,16 +1,11 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
-#include <dds/DdsDcpsInfrastructureC.h>
+
+#include <dds/DCPS/Recorder.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/SubscriberImpl.h>
-#include <dds/DCPS/WaitSet.h>
-#include <dds/DCPS/Serializer.h>
-#include <dds/DCPS/XTypes/TypeObject.h>
 #include <dds/DCPS/XTypes/DynamicData.h>
 #include "dds/DCPS/StaticIncludes.h"
 #if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
@@ -21,19 +16,13 @@
 #include <dds/DCPS/transport/shmem/Shmem.h>
 #endif
 
-#include <dds/DCPS/transport/framework/TransportRegistry.h>
-#include <dds/DCPS/transport/framework/TransportConfig.h>
-#include <dds/DCPS/transport/framework/TransportInst.h>
-#include <dds/DCPS/Recorder.h>
-
 #include <ace/Semaphore.h>
 #include <ace/Thread_Semaphore.h>
 
 #include <iostream>
 #include <sstream>
 
-namespace OpenDDS {
-namespace DCPS {
+using namespace OpenDDS::DCPS;
 
 class TestRecorderListener : public RecorderListener
 {
@@ -47,10 +36,10 @@ public:
   virtual void on_sample_data_received(Recorder* rec,
                                        const RawDataSample& sample)
   {
-    using namespace DCPS;
-    XTypes::DynamicData dd = rec->get_dynamic_data(sample);
+    OpenDDS::XTypes::DynamicData dd = rec->get_dynamic_data(sample);
     String my_type = "";
-    if (!XTypes::print_dynamic_data(dd, my_type, "")){
+    String indent = "";
+    if (!OpenDDS::XTypes::print_dynamic_data(dd, my_type, indent)) {
       if (log_level >= LogLevel::Error) {
         ACE_ERROR((LM_ERROR, "(%P|%t) Error: TestRecorderListener::on_sample_data_received:"
           " Failed to read DynamicData\n"));
@@ -70,9 +59,9 @@ public:
       "  Float64 my_double = 10.5\n"
       "  Float128 my_longdouble = 11.075\n"
       "  Boolean my_boolean = 1\n"
-      "  Byte my_byte = 12\n"
+      "  Byte my_byte = c\n"
       "  Char8 my_char = 'd'\n"
-      "  Char16 my_wchar = '101'\n"
+      "  Char16 my_wchar = L'e'\n"
       "  String8Small my_string = \"Hello\"\n"
       "  WString16Small my_wstring  ::Dynamic::bool_seq my_alias_seq  Boolean[2] SequenceLarge =\n"
       "    [0] = 1\n"
@@ -81,8 +70,8 @@ public:
       "    [0] = 'a'\n"
       "    [1] = 'b'\n"
       "  SequenceSmall my_anon_seq  ::Dynamic::EnumType[2] SequenceSmall =\n"
-      "    [0] = 1\n"
-      "    [1] = 0\n"
+      "    [0] = V2\n"
+      "    [1] = V1\n"
       "  ArraySmall my_anon_arr  Int16[2] ArraySmall =\n"
       "    [0] = 5\n"
       "    [1] = 6\n"
@@ -141,7 +130,8 @@ private:
 };
 
 
-int run_test(int argc, ACE_TCHAR *argv[]){
+int run_test(int argc, ACE_TCHAR* argv[])
+{
   int ret_val = 0;
   try {
     const ACE_TCHAR* type_name = argv[1];
@@ -164,7 +154,6 @@ int run_test(int argc, ACE_TCHAR *argv[]){
       }
       return 1;
     }
-    using namespace DCPS;
 
     {
       DDS::Topic_var topic =
@@ -232,13 +221,9 @@ int run_test(int argc, ACE_TCHAR *argv[]){
   return ret_val;
 }
 
-} // namespace DCPS
-} // namespace OpenDDS
-
-int
-ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-  int ret = OpenDDS::DCPS::run_test(argc, argv);
+  int ret = run_test(argc, argv);
   ACE_Thread_Manager::instance()->wait();
   return ret;
 }

@@ -263,7 +263,7 @@ public:
   /**
    * Translate to an encoding, returns false if it failed.
    */
-  bool to_encoding(Encoding& encoding, Extensibility expected_extensibility);
+  bool to_encoding(Encoding& encoding, Extensibility expected_extensibility, bool check_extensibility = true);
 
   String to_string() const;
 
