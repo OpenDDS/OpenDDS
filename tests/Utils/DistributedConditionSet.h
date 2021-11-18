@@ -9,6 +9,7 @@
 #include <ace/Condition_Thread_Mutex.h>
 #include <ace/OS_NS_sys_stat.h>
 #include <ace/OS_NS_fcntl.h>
+#include <ace/OS_NS_unistd.h>
 
 #include <set>
 #include <utility>
