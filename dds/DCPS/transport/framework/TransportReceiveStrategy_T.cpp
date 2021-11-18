@@ -6,6 +6,9 @@
  */
 
 #include "TransportReceiveStrategy_T.h"
+
+#include "TransportInst.h"
+
 #include "ace/INET_Addr.h"
 #include "ace/Min_Max.h"
 
