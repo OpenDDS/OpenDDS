@@ -257,7 +257,7 @@ void to_locator(const ACE_INET_Addr& addr, Locator_t& locator)
 {
 #ifdef ACE_HAS_IPV6
   if (addr.get_type() == AF_INET6) {
-    locator.kind = LOCATOR_KIND_UDPv6;
+    locator.kind = OpenDDS::RTPS::LOCATOR_KIND_UDPv6;
     struct sockaddr_in6* in6 = static_cast<struct sockaddr_in6*>(addr.get_addr());
     ACE_OS::memcpy(reinterpret_cast<unsigned char*>(locator.address), &in6->sin6_addr, 16);
   } else
