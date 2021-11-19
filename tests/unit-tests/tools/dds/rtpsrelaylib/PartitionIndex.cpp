@@ -2,11 +2,7 @@
 
 #include <dds/rtpsrelaylib/PartitionIndex.h>
 
-#include <dds/DCPS/Service_Participant.h>
-
 #include <gtest/gtest.h>
-
-#include <iostream>
 
 using namespace RtpsRelay;
 
@@ -15,7 +11,7 @@ void test_equal(const char*, const GuidSet& actual, const GuidSet& expected)
   EXPECT_TRUE(actual == expected);
 }
 
-TEST(tools_rtpsrelay_lib_PartitionIndex, maintest)
+TEST(tools_dds_rtpsrelaylib_PartitionIndex, maintest)
 {
   // Literal test.
   OpenDDS::DCPS::GUID_t guid1 = make_part_guid(OpenDDS::DCPS::GUID_UNKNOWN);
@@ -138,6 +134,7 @@ TEST(tools_rtpsrelay_lib_PartitionIndex, maintest)
     // Test multiple literals and patterns.
     PartitionIndex<GuidSet, GuidToParticipantGuid> pi;
     pi.insert("apple", guid1);
+    pi.insert("avocado", guid1);
     pi.insert("orange", guid2);
     pi.insert("*a*e*", guid3);
     pi.insert("?pp[lmnop][!i]", guid4);
@@ -151,6 +148,10 @@ TEST(tools_rtpsrelay_lib_PartitionIndex, maintest)
     expected.insert(guid4);
     actual.clear();
 
+    pi.lookup("apple", actual);
+    test_equal("general find 'apple'", actual, expected);
+
+    // Again to hit chache.
     pi.lookup("apple", actual);
     test_equal("general find 'apple'", actual, expected);
 
@@ -177,6 +178,12 @@ TEST(tools_rtpsrelay_lib_PartitionIndex, maintest)
     pi.lookup("?pp[lmnop][!i]", actual);
     test_equal("general find '?pp[lmnop][!i]'", actual, expected);
   }
+}
+
+TEST(tools_dds_rtpsrelaylib_PartitionIndex, Identity)
+{
+  Identity id;
+  EXPECT_EQ(id("x"), "x");
 }
 
 #endif
