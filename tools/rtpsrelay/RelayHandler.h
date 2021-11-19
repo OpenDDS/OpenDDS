@@ -62,6 +62,7 @@ protected:
 
 private:
   ACE_SOCK_Dgram socket_;
+
   struct Element {
     ACE_INET_Addr address;
     OpenDDS::DCPS::Message_Block_Shared_Ptr message_block;

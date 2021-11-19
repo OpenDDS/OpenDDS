@@ -24,6 +24,7 @@
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/ConnectionRecords.h>
 #include <dds/DCPS/transport/framework/TransportDebug.h>
+#include <dds/DCPS/ThreadMonitor.h>
 #ifdef OPENDDS_SECURITY
 #  include <dds/DCPS/security/framework/SecurityRegistry.h>
 #endif
@@ -2994,7 +2995,7 @@ int
 Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
 {
   const ACE_SOCK_Dgram& socket = choose_recv_socket(h);
-
+  DCPS::ThreadMonitor::GreenLight gl("SpdpTransport");
   ACE_INET_Addr remote;
   buff_.reset();
 
