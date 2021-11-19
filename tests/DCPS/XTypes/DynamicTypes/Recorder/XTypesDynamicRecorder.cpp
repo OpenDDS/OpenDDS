@@ -3,6 +3,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include <dds/DCPS/GuardCondition.h>
+#include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/Recorder.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
@@ -23,13 +25,14 @@
 #include <sstream>
 
 using namespace OpenDDS::DCPS;
-
+bool sample_read = false;
 class TestRecorderListener : public RecorderListener
 {
 public:
-  explicit TestRecorderListener()
+  explicit TestRecorderListener(DDS::GuardCondition_var gc)
     : ret_val_(0),
-      sem_(0)
+      sem_(0),
+      gc_(gc)
   {
   }
 
@@ -103,6 +106,7 @@ public:
          " Type did not match\n"));
     }
     std::cout << my_type;
+    gc_->set_trigger_value(true);
   }
 
   virtual void on_recorder_matched(Recorder*,
@@ -128,6 +132,7 @@ public:
   int ret_val_;
 private:
   ACE_Thread_Semaphore sem_;
+  DDS::GuardCondition_var gc_;
 };
 
 
@@ -155,7 +160,9 @@ int run_test(int argc, ACE_TCHAR* argv[])
       }
       return 1;
     }
-
+    DDS::GuardCondition_var gc = new DDS::GuardCondition;
+    DDS::WaitSet_var ws = new DDS::WaitSet;
+    DDS::ReturnCode_t ret = ws->attach_condition(gc);
     {
       DDS::Topic_var topic =
         service->create_typeless_topic(participant,
@@ -175,7 +182,7 @@ int run_test(int argc, ACE_TCHAR* argv[])
 
       ACE_Time_Value wait_time(60, 0);
 
-      RcHandle<TestRecorderListener> recorder_listener = make_rch<TestRecorderListener> ();
+      RcHandle<TestRecorderListener> recorder_listener = make_rch<TestRecorderListener> (gc);
 
       DDS::SubscriberQos sub_qos;
       participant->get_default_subscriber_qos(sub_qos);
@@ -183,6 +190,7 @@ int run_test(int argc, ACE_TCHAR* argv[])
       DDS::DataReaderQos dr_qos = service->initial_DataReaderQos();
       dr_qos.representation.value.length(1);
       dr_qos.representation.value[0] = DDS::XCDR2_DATA_REPRESENTATION;
+      dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
       // Create Recorder
       Recorder_var recorder =
         service->create_recorder(participant,
@@ -197,16 +205,18 @@ int run_test(int argc, ACE_TCHAR* argv[])
         }
         return 1;
       }
+      DDS::Duration_t timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+      DDS::ConditionSeq conditions;
+      ret = ws->wait(conditions, timeout);
 
-
-      // wait until the writer disconnnects
-      if (recorder_listener->wait(wait_time) == -1) {
+      ret_val = recorder_listener->ret_val_;
+      if (ret != DDS::RETCODE_OK) {
         if (log_level >= LogLevel::Error) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): recorder timeout!\n"));
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): wait failed!\n"));
         }
         return 1;
       }
-      ret_val = recorder_listener->ret_val_;
+
       service->delete_recorder(recorder);
     }
     participant->delete_contained_entities();

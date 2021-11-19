@@ -100,7 +100,7 @@ std::ostream& char_helper(std::ostream& o, CharType value)
     return o << static_cast<char>(value);
   }
   return hex_value(o << "\\x", cvalue, sizeof(CharType) == 1 ? 1 : 2);
-} 
+}
 }
 
 namespace OpenDDS {
@@ -2676,11 +2676,14 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
       for (DynamicTypeMembersById::iterator iter = dtmbi.begin(); iter != dtmbi.end(); ++iter) {
         dd.type()->get_member(temp_dtm, iter->first);
         if (dd.get_complex_value(dd, iter->first) == DDS::RETCODE_OK) {
-          if (print_dynamic_data(dd, decoy_string, indent)) {
-            member_name = temp_dtm->get_descriptor().name;
-            type_name = temp_dtm->get_descriptor().get_type()->get_descriptor().name;
-            type_string += indent + type_name + " " + member_name;
-            print_dynamic_data(dd, type_string, indent);
+          member_name = temp_dtm->get_descriptor().name;
+          type_name = temp_dtm->get_descriptor().get_type()->get_descriptor().name;
+          type_string += indent + type_name + " " + member_name;
+          if (!print_dynamic_data(dd, type_string, indent)) {
+            if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+              ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_dynamic_data: failed to read union branch\n"));
+            }
+            return false;
           }
           break;
         }

@@ -140,9 +140,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
     return 1;
   }
-  // TODO CLAYTON: There is currently a race between get_dynamic_data and the creation of the
-  // dynamic type used by it.  A more elegant solution than a delaying sleep is needed.
-  sleep(3);
   if (!ACE_OS::strcmp(type_name, ACE_TEXT("stru"))) {
     stru_narrow_write(dw);
   } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("nested"))) {
@@ -151,6 +148,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     union_narrow_write(dw);
   } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("union_default"))) {
     union_default_narrow_write(dw);
+  }
+  if (Utils::wait_match(dw, 0, Utils::EQ)) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("Error waiting for unmatch for dw\n")));
+    }
+    return 1;
   }
   pub->delete_contained_entities();
   dp->delete_publisher(pub);

@@ -3,7 +3,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "dds/DCPS/GuardCondition.h"
+#include <dds/DCPS/GuardCondition.h>
 #include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/Recorder.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
@@ -62,9 +62,9 @@ class TestRecorderListener : public RecorderListener
 {
 public:
   explicit TestRecorderListener(DDS::GuardCondition_var gc)
-    : sem_(0)
-    , sample_count_(0)
-    , gc_(gc)
+    : sem_(0),
+      sample_count_(0),
+      gc_(gc)
   {
   }
 
@@ -172,7 +172,7 @@ int run_test(int argc, ACE_TCHAR* argv[])
         }
         return 1;
       }
-      
+
       RcHandle<TestRecorderListener> recorder_listener = make_rch<TestRecorderListener> (gc);
 
       DDS::SubscriberQos sub_qos;
@@ -181,6 +181,7 @@ int run_test(int argc, ACE_TCHAR* argv[])
       DDS::DataReaderQos dr_qos = service->initial_DataReaderQos();
       dr_qos.representation.value.length(1);
       dr_qos.representation.value[0] = DDS::XCDR2_DATA_REPRESENTATION;
+      dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
       // Create Recorder
       Recorder_var recorder =
         service->create_recorder(participant,
@@ -203,8 +204,10 @@ int run_test(int argc, ACE_TCHAR* argv[])
       DDS::ConditionSeq conditions;
       ret = ws->wait(conditions, timeout);
       if (ret != DDS::RETCODE_OK && ret != DDS::RETCODE_TIMEOUT) {
-        ACE_ERROR((LM_ERROR,
-          "(%P|%t) ERROR: main(): wait failed!\n"));
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): wait failed!\n"));
+        }
+        return 1;
       }
       ws->detach_condition(gc);
       service->delete_recorder(recorder);
