@@ -1067,7 +1067,7 @@ namespace XTypes {
 
 
   // --- Aggregate types: ------------------------------------------------
-  struct AppliedBuiltinMemberAnnotations {
+  struct OpenDDS_Dcps_Export AppliedBuiltinMemberAnnotations {
     Optional<DCPS::String> unit; // @unit("<unit>")
     Optional<AnnotationParameterValue> min; // @min , @range
     Optional<AnnotationParameterValue> max; // @max , @range
