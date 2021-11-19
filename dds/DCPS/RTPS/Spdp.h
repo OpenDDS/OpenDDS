@@ -236,6 +236,8 @@ public:
 
   bool update_domain_participant_qos(const DDS::DomainParticipantQos& qos);
 
+  bool has_domain_participant(const GUID_t& ignoreId) const;
+
   DCPS::TopicStatus assert_topic(GUID_t& topicId, const char* topicName,
     const char* dataTypeName, const DDS::TopicQos& qos,
     bool hasDcpsKey, DCPS::TopicCallbacks* topic_callbacks);
@@ -349,6 +351,11 @@ public:
   DDS::Subscriber_var bit_subscriber() const
   {
     return bit_subscriber_;
+  }
+
+  RcHandle<DCPS::TransportInst> sedp_transport_inst() const
+  {
+    return sedp_->transport_inst();
   }
 
 protected:
@@ -559,7 +566,6 @@ private:
     DCPS::SequenceNumber seq_;
     DCPS::TimeDuration lease_duration_;
     u_short uni_port_;
-    u_short mc_port_;
     ACE_SOCK_Dgram unicast_socket_;
     OPENDDS_STRING multicast_interface_;
     ACE_INET_Addr multicast_address_;
@@ -737,7 +743,12 @@ private:
 
   void purge_handshake_resends(DiscoveredParticipantIter iter);
   TimeQueue handshake_resends_;
+
+  size_t n_participants_in_authentication_;
+  void set_auth_state(DiscoveredParticipant& dp, AuthState state);
 #endif
+
+  void erase_participant(DiscoveredParticipantIter iter);
 
   friend class ::DDS_TEST;
 };

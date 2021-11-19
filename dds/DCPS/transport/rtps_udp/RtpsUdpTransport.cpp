@@ -554,7 +554,7 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
     start_ice();
   }
 
-  relay_stun_task_= make_rch<Sporadic>(reactor_task()->interceptor(), ref(*this), &RtpsUdpTransport::relay_stun_task);
+  relay_stun_task_= make_rch<Sporadic>(TheServiceParticipant->time_source(), reactor_task()->interceptor(), rchandle_from(this), &RtpsUdpTransport::relay_stun_task);
 #endif
 
   if (config.opendds_discovery_default_listener_) {
@@ -644,9 +644,19 @@ namespace {
   }
 
   ssize_t
-  send_single_i(ACE_SOCK_Dgram& socket, const iovec iov[], int n, const ACE_INET_Addr& addr, bool& network_is_unreachable)
+  send_single_i(RtpsUdpInst& config, ACE_SOCK_Dgram& socket, const iovec iov[], int n, const ACE_INET_Addr& addr, bool& network_is_unreachable)
   {
     OPENDDS_ASSERT(addr != ACE_INET_Addr());
+
+#ifdef OPENDDS_TESTING_FEATURES
+    ssize_t total_length;
+    if (config.should_drop(iov, n, total_length)) {
+      return total_length;
+    }
+#else
+    ACE_UNUSED_ARG(config);
+#endif
+
 #ifdef ACE_LACKS_SENDMSG
     char buffer[UDP_MAX_MESSAGE_SIZE];
     char *iter = buffer;
@@ -754,7 +764,7 @@ RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN
 
   iovec iov[MAX_SEND_BLOCKS];
   const int num_blocks = RtpsUdpSendStrategy::mb_to_iov(block, iov);
-  const ssize_t result = send_single_i(socket, iov, num_blocks, destination, network_is_unreachable_);
+  const ssize_t result = send_single_i(transport.config(), socket, iov, num_blocks, destination, network_is_unreachable_);
   if (result < 0) {
     if (destination == transport.config().rtps_relay_address()) {
       ACE_GUARD(ACE_Thread_Mutex, g, transport.relay_message_counts_mutex_);

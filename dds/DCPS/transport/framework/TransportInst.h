@@ -130,6 +130,60 @@ public:
 
   ReactorTask_rch reactor_task();
 
+  /**
+   * @{
+   * The RtpsUdpSendStrategy can be configured to simulate a lossy
+   * connection by probabilistically not sending RTPS messages.  This
+   * capability is enabled by setting the flag to true.
+   *
+   * The coefficients m and b correspond to a linear model whose
+   * argument is the length of the RTPS message.  The probablility of
+   * dropping the message is p = m * message_length + b.  When sending
+   * a message, a random number is selected from [0.0, 1.0].  If the
+   * random number is less than the drop probability, the message is
+   * dropped.
+   *
+   * The flag and coefficient can be changed dynamically.
+   *
+   * Examples
+   *
+   * m = 0 and b = .5 - the probability of dropping a message is .5
+   * regardless of message length.
+   *
+   * m = .001 and b = .2 - the probability of dropping a 200-byte
+   * message is .4.  In this example, all messages longer than 800
+   * bytes will be dropped.
+   */
+  void drop_messages(bool flag)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, config_lock_);
+    drop_messages_ = flag;
+  }
+
+  void drop_messages_m(double m)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, config_lock_);
+    drop_messages_m_ = m;
+  }
+
+  void drop_messages_b(double b)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, config_lock_);
+    drop_messages_b_ = b;
+  }
+
+  bool should_drop(ssize_t length) const;
+
+  bool should_drop(const iovec iov[], int n, ssize_t& length) const
+  {
+    length = 0;
+    for (int i = 0; i < n; ++i) {
+      length += iov[i].iov_len;
+    }
+    return should_drop(length);
+  }
+  /**@}*/
+
 protected:
 
   TransportInst(const char* type,
@@ -160,6 +214,12 @@ private:
   const OPENDDS_STRING name_;
 
   TransportImpl_rch impl_;
+
+  bool drop_messages_;
+  double drop_messages_m_;
+  double drop_messages_b_;
+
+  mutable ACE_Thread_Mutex config_lock_;
 };
 
 } // namespace DCPS

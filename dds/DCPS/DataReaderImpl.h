@@ -825,7 +825,7 @@ private:
 
     void cancel_timer()
     {
-      execute_or_enqueue(new CancelCommand(this));
+      execute_or_enqueue(make_rch<CancelCommand>(this));
     }
 
     virtual bool reactor_is_shut_down() const

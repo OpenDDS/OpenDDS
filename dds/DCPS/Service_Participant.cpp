@@ -172,7 +172,8 @@ Service_Participant::Service_Participant()
 #ifndef OPENDDS_SAFETY_PROFILE
   ORB_argv_(false /*substitute_env_args*/),
 #endif
-  reactor_task_(false)
+  time_source_()
+  , reactor_task_(false)
   , defaultDiscovery_(DDS_DEFAULT_DISCOVERY_METHOD)
   , n_chunks_(DEFAULT_NUM_CHUNKS)
   , association_chunk_multiplier_(DEFAULT_CHUNK_MULTIPLIER)
@@ -255,6 +256,12 @@ Service_Participant::instance()
   // from being created.
 
   return ACE_Singleton<Service_Participant, ACE_SYNCH_MUTEX>::instance();
+}
+
+const TimeSource&
+Service_Participant::time_source() const
+{
+  return time_source_;
 }
 
 ACE_Reactor_Timer_Interface*
@@ -1924,7 +1931,9 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     } else {
       String str;
       GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("DCPSLogLevel"), str);
-      log_level.set_from_string(str.c_str());
+      if (!str.empty()) {
+        log_level.set_from_string(str.c_str());
+      }
     }
 
     // These are not handled on the command line.

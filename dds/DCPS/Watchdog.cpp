@@ -115,7 +115,7 @@ long Watchdog::schedule_timer(const void* act, const TimeDuration& interval)
 long Watchdog::schedule_timer(const void* act, const TimeDuration& delay, const TimeDuration& interval)
 {
   long timer_id = -1;
-  ReactorInterceptor::CommandPtr command = execute_or_enqueue(new ScheduleCommand(this, act, delay, interval, &timer_id));
+  ReactorInterceptor::CommandPtr command = execute_or_enqueue(make_rch<ScheduleCommand>(this, act, delay, interval, &timer_id));
   command->wait();
   return timer_id;
 }
@@ -123,18 +123,18 @@ long Watchdog::schedule_timer(const void* act, const TimeDuration& delay, const 
 int Watchdog::cancel_timer(long timer_id)
 {
 
-  execute_or_enqueue(new CancelCommand(this, timer_id));
+  execute_or_enqueue(make_rch<CancelCommand>(this, timer_id));
   return 1;
 }
 
 void Watchdog::cancel_all()
 {
-  execute_or_enqueue(new CancelCommand(this, -1));
+  execute_or_enqueue(make_rch<CancelCommand>(this, -1));
 }
 
 int Watchdog::reset_timer_interval(long timer_id)
 {
-  execute_or_enqueue(new ResetCommand(this, timer_id, interval_));
+  execute_or_enqueue(make_rch<ResetCommand>(this, timer_id, interval_));
   return 0;
 }
 

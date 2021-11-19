@@ -90,7 +90,7 @@ bool LinuxNetworkConfigMonitor::open()
 
   ReactorInterceptor_rch interceptor = interceptor_.lock();
   if (interceptor) {
-    interceptor->execute_or_enqueue(new RegisterHandler(this));
+    interceptor->execute_or_enqueue(make_rch<RegisterHandler>(this));
   }
 
   return true;
@@ -102,7 +102,7 @@ bool LinuxNetworkConfigMonitor::close()
 
   ReactorInterceptor_rch interceptor = interceptor_.lock();
   if (interceptor) {
-    ReactorInterceptor::CommandPtr command = interceptor->execute_or_enqueue(new RemoveHandler(this));
+    ReactorInterceptor::CommandPtr command = interceptor->execute_or_enqueue(make_rch<RemoveHandler>(this));
     command->wait();
   }
 

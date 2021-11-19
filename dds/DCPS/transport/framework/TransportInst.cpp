@@ -17,6 +17,15 @@
 #include <cstring>
 #include <algorithm>
 
+#ifdef OPENDDS_TESTING_FEATURES
+#include <cstdlib>
+#ifdef _MSC_VER
+#define OPENDDS_DRAND48() (rand()*(1./RAND_MAX))
+#else
+#define OPENDDS_DRAND48 drand48
+#endif
+#endif
+
 #if !defined (__ACE_INLINE__)
 # include "TransportInst.inl"
 #endif /* !__ACE_INLINE__ */
@@ -202,6 +211,21 @@ OpenDDS::DCPS::TransportInst::reactor_task()
 {
   const OpenDDS::DCPS::TransportImpl_rch temp = impl();
   return temp ? temp->reactor_task() : OpenDDS::DCPS::ReactorTask_rch();
+}
+
+bool
+OpenDDS::DCPS::TransportInst::should_drop(ssize_t length) const
+{
+#ifdef OPENDDS_TESTING_FEATURES
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, config_lock_, false);
+  return drop_messages_ && (OPENDDS_DRAND48() < (length * drop_messages_m_ + drop_messages_b_));
+#else
+  ACE_UNUSED_ARG(length);
+  ACE_ERROR((LM_ERROR,
+             "(%P|%t) ERROR: TransportInst::should_drop: "
+             "caller not conditioned on OPENDDS_TESTING_FEATURES\n"));
+  return false;
+#endif
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

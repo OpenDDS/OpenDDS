@@ -18,14 +18,30 @@ args=($@)
 
 cd "${DDS_ROOT}"
 
+function get-all-files {
+    git ls-files |
+        sed -n -E \
+            -e '/^(FACE|dds|tools)/! d' \
+            -e '/^tools\/modeling\/tests/ d' \
+            -e '/\.(h|cpp|inl)$/! d' \
+            -e '/[Ex]port\.h$/ d' \
+            -e 'p'
+}
+
 function get-units {
     if [[ ${#args[@]} == 0 ]]
     then
-        find FACE dds tools -path tools/rapidjson -prune -false -o -path tools/modeling/tests -prune -false -o -name "*.h" -o -name "*.cpp" -o -name "*.inl" |
-            sed -E -e '/[CS]\.(h|cpp|inl)$/ d' -e '/TypeSupportImpl\.(h|cpp)$/ d' -e '/[Ee]xport.h$/ d' -e 's/\.[^.]*$//' |
-            sort -u
+        get-all-files | sed -E -e 's/\.[^.]*$//' | sort -u
     else
-        echo "${args[@]}"
+        for arg in "${args[@]}"
+        do
+            if [[ -d "${arg}" ]]
+            then
+                get-all-files | grep "${args}" | sed -E -e 's/\.[^.]*$//' | sort -u
+            else
+                echo "${arg}"
+            fi
+        done
     fi
 }
 

@@ -28,17 +28,17 @@ class DataLinkWatchdog : public ReactorInterceptor {
 public:
 
   bool schedule(const void* arg = 0) {
-    execute_or_enqueue(new ScheduleCommand (this, arg, false));
+    execute_or_enqueue(make_rch<ScheduleCommand>(this, arg, false));
     return true;
   }
 
   bool schedule_now(const void* arg = 0) {
-    execute_or_enqueue(new ScheduleCommand(this, arg, true));
+    execute_or_enqueue(make_rch<ScheduleCommand>(this, arg, true));
     return true;
   }
 
   ReactorInterceptor::CommandPtr cancel() {
-    return execute_or_enqueue(new CancelCommand(this));
+    return execute_or_enqueue(make_rch<CancelCommand>(this));
   }
 
   int handle_timeout(const ACE_Time_Value& now_time_value, const void* arg) {

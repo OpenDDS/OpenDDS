@@ -58,6 +58,9 @@ TestCase::init_datareader(
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: TestCase::init_datareader\n")));
 
+  if (ACE_OS::getenv("OPENDDS_TEST_BEST_EFFORT") == 0) {
+    qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  }
   qos.liveliness.lease_duration.sec = 1;
   qos.liveliness.lease_duration.nanosec = 0;
   return DDS::RETCODE_OK;
