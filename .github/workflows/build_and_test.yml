@@ -478,184 +478,184 @@ jobs:
         git clean -nd -e ext | tee ../output.txt
         if [ -s ../output.txt ]; then exit 1; fi
 
-#  u18_esafe_js0:
+  u18_esafe_js0:
 
-#    runs-on: ubuntu-18.04
+    runs-on: ubuntu-18.04
 
-#    steps:
-#    - name: checkout OpenDDS
-#      uses: actions/checkout@v2
-#      with:
-#        path: OpenDDS
-#        submodules: true
-#    - name: checkout autobuild
-#      uses: actions/checkout@v2
-#      with:
-#        repository: DOCGroup/autobuild
-#        path: autobuild
-#    - name: install xerces
-#      run: sudo apt-get -y install libxerces-c-dev
-#    - name: setup gtest
-#      run: |
-#        cd OpenDDS/tests/googletest
-#        git submodule init
-#        git submodule update
-#        mkdir build
-#        cd build
-#        mkdir install
-#        cmake -DCMAKE_INSTALL_PREFIX=./install ..
-#       cmake --build . --target install
-#    - name: configure OpenDDS
-#      run: |
-#        cd OpenDDS
-#        ./configure \
-#          --ace-github-latest \
-#          --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install \
-#          --no-rapidjson \
-#          --safety-profile \
-#          --tests
-#    - name: check build configuration
-#      shell: bash
-#      run: |
-#        cd OpenDDS/build/target
-#        . setenv.sh
-#        tools/scripts/show_build_config.pl
-#    - name: build everything
-#      run: |
-#        cd OpenDDS
-#        make -j4
-#    - name: run OpenDDS tests
-#      shell: bash
-#      run: |
-#        cd OpenDDS/build/target
-#        . setenv.sh
-#        mkdir ${{ github.job }}_autobuild_workspace
-#        cd ${{ github.job }}_autobuild_workspace
-#        echo using commit $TRIGGERING_COMMIT for SHA
-#        echo $TRIGGERING_COMMIT >> ./SHA
-#        cat > config.xml <<EOF
-#        <autobuild>
-#        <configuration>
-#        <variable name="log_file" value="output.log"/>
-#        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-#        <variable name="project_root" value="$DDS_ROOT"/>
-#        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-#        <variable name="junit_xml_output" value="Tests"/>
-#        </configuration>
-#        <command name="log" options="on"/>
-#        <command name="print_os_version"/>
-#        <command name="print_env_vars"/>
-#        <command name="print_ace_config"/>
-#        <command name="print_make_version"/>
-#        <command name="check_compiler" options="gcc"/>
-#        <command name="print_perl_version"/>
-#        <command name="print_autobuild_config"/>
-#        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_EXTENDED -Config RTPS -Config LINUX -Config OPENDDS_SAFETY_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GH_ACTIONS_OPENDDS_SAFETY_PROFILE -Config GH_ACTIONS -Config NO_UNIT_TESTS"/>
-#        <command name="log" options="off"/>
-#        <command name="process_logs" options="prettify"/>
-#        </autobuild>
-#        EOF
-#        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/config.xml"
-#    - name: upload autobuild output
-#      uses: actions/upload-artifact@v2
-#      with:
-#        name: ${{ github.job }}_autobuild_output
-#        path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace
-#    - name: check results
-#      shell: bash
-#      run: |
-#        cat "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
-#        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
+    steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v2
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: checkout autobuild
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/autobuild
+        path: autobuild
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - name: setup gtest
+      run: |
+        cd OpenDDS/tests/googletest
+        git submodule init
+        git submodule update
+        mkdir build
+        cd build
+        mkdir install
+        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+        cmake --build . --target install
+    - name: configure OpenDDS
+      run: |
+        cd OpenDDS
+        ./configure \
+          --ace-github-latest \
+          --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install \
+          --no-rapidjson \
+          --safety-profile \
+          --tests
+    - name: check build configuration
+      shell: bash
+      run: |
+        cd OpenDDS/build/target
+        . setenv.sh
+        tools/scripts/show_build_config.pl
+    - name: build everything
+      run: |
+        cd OpenDDS
+        make -j4
+    - name: run OpenDDS tests
+      shell: bash
+      run: |
+        cd OpenDDS/build/target
+        . setenv.sh
+        mkdir ${{ github.job }}_autobuild_workspace
+        cd ${{ github.job }}_autobuild_workspace
+        echo using commit $TRIGGERING_COMMIT for SHA
+        echo $TRIGGERING_COMMIT >> ./SHA
+        cat > config.xml <<EOF
+        <autobuild>
+        <configuration>
+        <variable name="log_file" value="output.log"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="project_root" value="$DDS_ROOT"/>
+        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="junit_xml_output" value="Tests"/>
+        </configuration>
+        <command name="log" options="on"/>
+        <command name="print_os_version"/>
+        <command name="print_env_vars"/>
+        <command name="print_ace_config"/>
+        <command name="print_make_version"/>
+        <command name="check_compiler" options="gcc"/>
+        <command name="print_perl_version"/>
+        <command name="print_autobuild_config"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_EXTENDED -Config RTPS -Config LINUX -Config OPENDDS_SAFETY_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GH_ACTIONS_OPENDDS_SAFETY_PROFILE -Config GH_ACTIONS -Config NO_UNIT_TESTS"/>
+        <command name="log" options="off"/>
+        <command name="process_logs" options="prettify"/>
+        </autobuild>
+        EOF
+        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/config.xml"
+    - name: upload autobuild output
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_autobuild_output
+        path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace
+    - name: check results
+      shell: bash
+      run: |
+        cat "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
 
-#  u18_bsafe_js0_FM-1f:
+  u18_bsafe_js0_FM-1f:
 
-#    runs-on: ubuntu-18.04
+    runs-on: ubuntu-18.04
 
-#    steps:
-#    - name: checkout OpenDDS
-#      uses: actions/checkout@v2
-#      with:
-#        path: OpenDDS
-#        submodules: true
-#    - name: checkout autobuild
-#      uses: actions/checkout@v2
-#      with:
-#        repository: DOCGroup/autobuild
-#        path: autobuild
-#    - name: install xerces
-#      run: sudo apt-get -y install libxerces-c-dev
-#    - name: setup gtest
-#      run: |
-#        cd OpenDDS/tests/googletest
-#        git submodule init
-#        git submodule update
-#        mkdir build
-#        cd build
-#        mkdir install
-#        cmake -DCMAKE_INSTALL_PREFIX=./install ..
-#        cmake --build . --target install
-#    - name: configure OpenDDS
-#      run: |
-#        cd OpenDDS
-#        ./configure \
-#          --ace-github-latest \
-#          --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install \
-#          --no-rapidjson \
-#          --safety-profile=base \
-#          --no-built-in-topics \
-#          --tests
-#    - name: check build configuration
-#      shell: bash
-#      run: |
-#        cd OpenDDS/build/target
-#        . setenv.sh
-#        tools/scripts/show_build_config.pl
-#    - name: build everything
-#      run: |
-#        cd OpenDDS
-#        make -j4
-#    - name: run OpenDDS tests
-#      shell: bash
-#      run: |
-#        cd OpenDDS/build/target
-#        . setenv.sh
-#        mkdir ${{ github.job }}_autobuild_workspace
-#        cd ${{ github.job }}_autobuild_workspace
-#        echo using commit $TRIGGERING_COMMIT for SHA
-#        echo $TRIGGERING_COMMIT >> ./SHA
-#        cat > config.xml <<EOF
-#        <autobuild>
-#        <configuration>
-#        <variable name="log_file" value="output.log"/>
-#        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-#        <variable name="project_root" value="$DDS_ROOT"/>
-#        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-#        <variable name="junit_xml_output" value="Tests"/>
-#        </configuration>
-#        <command name="log" options="on"/>
-#        <command name="print_os_version"/>
-#        <command name="print_env_vars"/>
-#        <command name="print_ace_config"/>
-#        <command name="print_make_version"/>
-#        <command name="check_compiler" options="gcc"/>
-#        <command name="print_perl_version"/>
-#        <command name="print_autobuild_config"/>
-#        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_BASE -Config RTPS -Config LINUX -Config OPENDDS_SAFETY_PROFILE -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GH_ACTIONS_OPENDDS_SAFETY_PROFILE -Config GH_ACTIONS -Config NO_UNIT_TESTS"/>
-#        <command name="log" options="off"/>
-#        <command name="process_logs" options="prettify"/>
-#        </autobuild>
-#        EOF
-#        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/config.xml"
-#    - name: upload autobuild output
-#      uses: actions/upload-artifact@v2
-#      with:
-#        name: ${{ github.job }}_autobuild_output
-#        path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace
-#    - name: check results
-#      shell: bash
-#      run: |
-#        cat "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
-#        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
+    steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v2
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: checkout autobuild
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/autobuild
+        path: autobuild
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - name: setup gtest
+      run: |
+        cd OpenDDS/tests/googletest
+        git submodule init
+        git submodule update
+        mkdir build
+        cd build
+        mkdir install
+        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+        cmake --build . --target install
+    - name: configure OpenDDS
+      run: |
+        cd OpenDDS
+        ./configure \
+          --ace-github-latest \
+          --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install \
+          --no-rapidjson \
+          --safety-profile=base \
+          --no-built-in-topics \
+          --tests
+    - name: check build configuration
+      shell: bash
+      run: |
+        cd OpenDDS/build/target
+        . setenv.sh
+        tools/scripts/show_build_config.pl
+    - name: build everything
+      run: |
+        cd OpenDDS
+        make -j4
+    - name: run OpenDDS tests
+      shell: bash
+      run: |
+        cd OpenDDS/build/target
+        . setenv.sh
+        mkdir ${{ github.job }}_autobuild_workspace
+        cd ${{ github.job }}_autobuild_workspace
+        echo using commit $TRIGGERING_COMMIT for SHA
+        echo $TRIGGERING_COMMIT >> ./SHA
+        cat > config.xml <<EOF
+        <autobuild>
+        <configuration>
+        <variable name="log_file" value="output.log"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="project_root" value="$DDS_ROOT"/>
+        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="junit_xml_output" value="Tests"/>
+        </configuration>
+        <command name="log" options="on"/>
+        <command name="print_os_version"/>
+        <command name="print_env_vars"/>
+        <command name="print_ace_config"/>
+        <command name="print_make_version"/>
+        <command name="check_compiler" options="gcc"/>
+        <command name="print_perl_version"/>
+        <command name="print_autobuild_config"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_BASE -Config RTPS -Config LINUX -Config OPENDDS_SAFETY_PROFILE -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GH_ACTIONS_OPENDDS_SAFETY_PROFILE -Config GH_ACTIONS -Config NO_UNIT_TESTS"/>
+        <command name="log" options="off"/>
+        <command name="process_logs" options="prettify"/>
+        </autobuild>
+        EOF
+        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/config.xml"
+    - name: upload autobuild output
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_autobuild_output
+        path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace
+    - name: check results
+      shell: bash
+      run: |
+        cat "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_u18_d0i0v1_sec_js0_FM-08:
 
@@ -2152,48 +2152,48 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-#  u20_gcc10_bsafe_js0_FM-2c:
+  u20_gcc10_bsafe_js0_FM-2c:
 
-#    runs-on: ubuntu-20.04
+    runs-on: ubuntu-20.04
 
-#    steps:
-#    - name: install gcc and g++
-#      run: |
-#        sudo apt-get install g++-10
-#    - name: checkout OpenDDS
-#      uses: actions/checkout@v2
-#      with:
-#        path: OpenDDS
-#        submodules: true
-#    - name: checkout autobuild
-#      uses: actions/checkout@v2
-#      with:
-#        repository: DOCGroup/autobuild
-#        path: autobuild
-#    - name: install xerces
-#      run: sudo apt-get -y install libxerces-c-dev
-#    - name: configure OpenDDS
-#      run: |
-#        cd OpenDDS
-#        ./configure \
-#          --compiler=g++-10 \
-#          --ace-github-latest \
-#          --no-rapidjson \
-#          --safety-profile=base \
-#          --no-content-subscription \
-#          --no-object-model-profile \
-#          --no-persistence-profile \
-#          --tests
-#    - name: check build configuration
-#      shell: bash
-#      run: |
-#        cd OpenDDS/build/target
-#        . setenv.sh
-#        tools/scripts/show_build_config.pl
-#    - name: build everything
-#      run: |
-#        cd OpenDDS
-#        make -j4
+    steps:
+    - name: install gcc and g++
+      run: |
+        sudo apt-get install g++-10
+    - name: checkout OpenDDS
+      uses: actions/checkout@v2
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: checkout autobuild
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/autobuild
+        path: autobuild
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - name: configure OpenDDS
+      run: |
+        cd OpenDDS
+        ./configure \
+          --compiler=g++-10 \
+          --ace-github-latest \
+          --no-rapidjson \
+          --safety-profile=base \
+          --no-content-subscription \
+          --no-object-model-profile \
+          --no-persistence-profile \
+          --tests
+    - name: check build configuration
+      shell: bash
+      run: |
+        cd OpenDDS/build/target
+        . setenv.sh
+        tools/scripts/show_build_config.pl
+    - name: build everything
+      run: |
+        cd OpenDDS
+        make -j4
 
   ACE_TAO_u20_ace7_j_qt_ws_sec:
 
