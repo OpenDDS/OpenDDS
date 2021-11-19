@@ -199,9 +199,11 @@ TransportClient::populate_connection_info()
 bool
 TransportClient::associate(const AssociationData& data, bool active)
 {
+  RepoId repo_id = get_repo_id();
+
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, false);
 
-  repo_id_ = get_repo_id();
+  repo_id_ = repo_id;
 
   if (impls_.empty()) {
     if (DCPS_debug_level) {
@@ -1127,13 +1129,17 @@ bool TransportClient::pending_association_with(const GUID_t& remote) const
 
 void TransportClient::data_acked(const GUID_t& remote)
 {
-  ACE_Guard<ACE_Thread_Mutex> guard(lock_);
-  if (!guard.locked()) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TransportClient::data_acked: "
-      "lock failed\n"));
-    return;
+  TransportSendListener_rch send_listener;
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(lock_);
+    if (!guard.locked()) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TransportClient::data_acked: "
+        "lock failed\n"));
+      return;
+    }
+    send_listener = get_send_listener();
   }
-  get_send_listener()->data_acked(remote);
+  send_listener->data_acked(remote);
 }
 
 bool TransportClient::is_leading(const GUID_t& reader_id) const
