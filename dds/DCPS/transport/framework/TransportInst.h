@@ -19,6 +19,8 @@
 #include "dds/DCPS/ReactorTask_rch.h"
 #include "dds/DCPS/TimeDuration.h"
 
+#include <dds/DdsDcpsInfoUtilsC.h>
+
 #include "TransportDefs.h"
 #include "TransportImpl_rch.h"
 #include "TransportImpl.h"
