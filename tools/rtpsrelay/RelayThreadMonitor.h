@@ -26,7 +26,7 @@ namespace RtpsRelay {
 class RelayThreadMonitor : public OpenDDS::DCPS::ThreadMonitor {
 public:
   explicit RelayThreadMonitor (OpenDDS::DCPS::TimeDuration perd, size_t depth = 1);
-  virtual void preset(OpenDDS::DCPS::ThreadStatusManager *, const char *);
+  virtual void preset(OpenDDS::DCPS::ThreadStatusManager*, const char*);
   virtual void update(UpdateMode, const char* = "");
   virtual double get_busy_pct(const char* key) const;
 
