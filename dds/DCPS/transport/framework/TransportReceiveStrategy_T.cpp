@@ -66,7 +66,7 @@ TransportReceiveStrategy<TH, DSH>::~TransportReceiveStrategy()
     }
   }
 
-  for (int index = 0; index < RECEIVE_BUFFERS; ++index) {
+  for (size_t index = 0; index < RECEIVE_BUFFERS; ++index) {
     if (receive_buffers_[index] != 0) {
       ACE_DES_FREE(
                    receive_buffers_[index],
@@ -96,7 +96,7 @@ TransportReceiveStrategy<TH, DSH>::handle_simple_dds_input(ACE_HANDLE fd)
 {
   DBG_ENTRY_LVL("TransportReceiveStrategy", "handle_simple_dds_input", 6);
 
-  for (int index = 0; index < RECEIVE_BUFFERS; ++index) {
+  for (size_t index = 0; index < RECEIVE_BUFFERS; ++index) {
     if (receive_buffers_[index] == 0) {
       ACE_NEW_MALLOC_RETURN(
         receive_buffers_[index],
@@ -1073,7 +1073,7 @@ TransportReceiveStrategy<TH, DSH>::reset()
   this->payload_ = 0;
   this->good_pdu_ = true;
   this->pdu_remaining_ = 0;
-  for (int i = 0; i < RECEIVE_BUFFERS; ++i) {
+  for (size_t i = 0; i < RECEIVE_BUFFERS; ++i) {
     ACE_Message_Block& rb = *this->receive_buffers_[i];
     rb.rd_ptr(rb.wr_ptr());
   }
