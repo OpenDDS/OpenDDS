@@ -1078,12 +1078,7 @@ namespace XTypes {
     AppliedBuiltinMemberAnnotations(const Optional<DCPS::String>& a_unit,
                                     const Optional<AnnotationParameterValue>& a_min,
                                     const Optional<AnnotationParameterValue>& a_max,
-                                    const Optional<DCPS::String>& a_hash_id)
-      : unit(a_unit)
-      , min(a_min)
-      , max(a_max)
-      , hash_id(a_hash_id)
-    {}
+                                    const Optional<DCPS::String>& a_hash_id);
   };
 
   struct CommonStructMember {
