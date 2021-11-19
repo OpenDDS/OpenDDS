@@ -655,8 +655,6 @@ public:
     type_lookup_service_ = type_lookup_service;
   }
 
-  bool should_drop(ssize_t length) const;
-
   RcHandle<DCPS::TransportInst> transport_inst() const { return transport_inst_; }
 
 private:
