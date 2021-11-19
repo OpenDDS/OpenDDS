@@ -78,7 +78,7 @@ public:
   /// Make a copy of the participants map for reading.
   DPMap participants() const;
 
-  DDS::ReturnCode_t delete_all_participants();
+  DDS::ReturnCode_t delete_all_participants(bool is_info_repo = false);
 
   size_t participant_count() const;
 

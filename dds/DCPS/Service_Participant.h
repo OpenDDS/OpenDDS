@@ -444,6 +444,8 @@ public:
   void type_object_encoding(TypeObjectEncoding encoding);
   void type_object_encoding(const char* encoding);
 
+  void is_info_repo();
+
 private:
 
   /// Initialize default qos.
@@ -763,6 +765,8 @@ private:
   DDS::Duration_t bit_autopurge_disposed_samples_delay_;
 
   TypeObjectEncoding type_object_encoding_;
+
+  bool is_info_repo_;
 };
 
 #define TheServiceParticipant OpenDDS::DCPS::Service_Participant::instance()

@@ -356,6 +356,7 @@ InfoRepo::init()
   // to ourselves in the service here.
   OpenDDS::DCPS::Service_Participant* serv_part = TheServiceParticipant;
   serv_part->set_repo_ior(objref_str, OpenDDS::DCPS::Discovery::DEFAULT_REPO);
+  serv_part->is_info_repo();
 
   OpenDDS::DCPS::Discovery_rch disc = serv_part->get_discovery(0 /*domainId*/);
   OpenDDS::DCPS::InfoRepoDiscovery_rch ird =

@@ -2435,12 +2435,6 @@ TAO_DDS_DCPSInfo_i::init_dispatchChecking(const ACE_Time_Value& delay)
 void
 TAO_DDS_DCPSInfo_i::finalize()
 {
-#ifndef DDS_HAS_MINIMUM_BIT
-  for (DCPS_IR_Domain_Map::iterator it = domains_.begin(); it != domains_.end(); ++it) {
-    it->second->cleanup_built_in_topics();
-  }
-#endif
-
   if (reassociate_timer_id_ != -1) {
     ACE_Reactor* reactor = this->orb_->orb_core()->reactor();
 

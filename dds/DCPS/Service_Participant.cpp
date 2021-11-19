@@ -170,48 +170,49 @@ static bool got_log_level = false;
 Service_Participant::Service_Participant()
   :
 #ifndef OPENDDS_SAFETY_PROFILE
-    ORB_argv_(false /*substitute_env_args*/),
+  ORB_argv_(false /*substitute_env_args*/),
 #endif
-    reactor_task_(false),
-    defaultDiscovery_(DDS_DEFAULT_DISCOVERY_METHOD),
-    n_chunks_(DEFAULT_NUM_CHUNKS),
-    association_chunk_multiplier_(DEFAULT_CHUNK_MULTIPLIER),
-    liveliness_factor_(80),
-    bit_transport_port_(0),
-    bit_enabled_(
+  reactor_task_(false)
+  , defaultDiscovery_(DDS_DEFAULT_DISCOVERY_METHOD)
+  , n_chunks_(DEFAULT_NUM_CHUNKS)
+  , association_chunk_multiplier_(DEFAULT_CHUNK_MULTIPLIER)
+  , liveliness_factor_(80)
+  , bit_transport_port_(0)
+  , bit_enabled_(
 #ifdef DDS_HAS_MINIMUM_BIT
       false
 #else
       true
 #endif
-    ),
-#if defined(OPENDDS_SECURITY)
-    security_enabled_(false),
+    )
+#ifdef OPENDDS_SECURITY
+  , security_enabled_(false)
 #endif
-    bit_lookup_duration_msec_(BIT_LOOKUP_DURATION_MSEC),
-    global_transport_config_(ACE_TEXT("")),
-    monitor_factory_(0),
-    federation_recovery_duration_(DEFAULT_FEDERATION_RECOVERY_DURATION),
-    federation_initial_backoff_seconds_(DEFAULT_FEDERATION_INITIAL_BACKOFF_SECONDS),
-    federation_backoff_multiplier_(DEFAULT_FEDERATION_BACKOFF_MULTIPLIER),
-    federation_liveliness_(DEFAULT_FEDERATION_LIVELINESS),
+  , bit_lookup_duration_msec_(BIT_LOOKUP_DURATION_MSEC)
+  , global_transport_config_(ACE_TEXT(""))
+  , monitor_factory_(0)
+  , federation_recovery_duration_(DEFAULT_FEDERATION_RECOVERY_DURATION)
+  , federation_initial_backoff_seconds_(DEFAULT_FEDERATION_INITIAL_BACKOFF_SECONDS)
+  , federation_backoff_multiplier_(DEFAULT_FEDERATION_BACKOFF_MULTIPLIER)
+  , federation_liveliness_(DEFAULT_FEDERATION_LIVELINESS)
 #if OPENDDS_POOL_ALLOCATOR
-    pool_size_(1024*1024*16),
-    pool_granularity_(8),
+  , pool_size_(1024 * 1024 * 16)
+  , pool_granularity_(8)
 #endif
-    scheduler_(-1),
-    priority_min_(0),
-    priority_max_(0),
-    publisher_content_filter_(true),
+  , scheduler_(-1)
+  , priority_min_(0)
+  , priority_max_(0)
+  , publisher_content_filter_(true)
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-    persistent_data_dir_(DEFAULT_PERSISTENT_DATA_DIR),
+  , persistent_data_dir_(DEFAULT_PERSISTENT_DATA_DIR)
 #endif
-    bidir_giop_(true),
-    monitor_enabled_(false),
-    shut_down_(false),
-    shutdown_listener_(0),
-    default_configuration_file_(ACE_TEXT("")),
-    type_object_encoding_(Encoding_Normal)
+  , bidir_giop_(true)
+  , monitor_enabled_(false)
+  , shut_down_(false)
+  , shutdown_listener_(0)
+  , default_configuration_file_(ACE_TEXT(""))
+  , type_object_encoding_(Encoding_Normal)
+  , is_info_repo_(false)
 {
   initialize();
 }
@@ -225,7 +226,8 @@ Service_Participant::~Service_Participant()
   {
     ACE_GUARD(ACE_Thread_Mutex, guard, factory_lock_);
     if (dp_factory_servant_) {
-      const DDS::ReturnCode_t cleanup_status = dp_factory_servant_->delete_all_participants();
+      const DDS::ReturnCode_t cleanup_status =
+        dp_factory_servant_->delete_all_participants(is_info_repo_);
       if (cleanup_status) {
         if (log_level >= LogLevel::Warning) {
           ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Service_Participant::~Service_Participant: "
@@ -287,18 +289,20 @@ Service_Participant::job_queue() const
 
 DDS::ReturnCode_t Service_Participant::shutdown()
 {
-  if (shut_down_) {
-    return DDS::RETCODE_ALREADY_DELETED;
-  }
+  if (!is_info_repo_) {
+    if (shut_down_) {
+      return DDS::RETCODE_ALREADY_DELETED;
+    }
 
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, DDS::RETCODE_OUT_OF_RESOURCES);
-    if (dp_factory_servant_ && dp_factory_servant_->participant_count()) {
-      if (log_level >= LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: Service_Participant::shutdown: "
-          "all domain participants must be deleted before shutdown can occur\n"));
+    {
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, DDS::RETCODE_OUT_OF_RESOURCES);
+      if (dp_factory_servant_ && dp_factory_servant_->participant_count()) {
+        if (log_level >= LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: Service_Participant::shutdown: "
+            "all domain participants must be deleted before shutdown can occur\n"));
+        }
+        return DDS::RETCODE_PRECONDITION_NOT_MET;
       }
-      return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
   }
 
@@ -2966,6 +2970,11 @@ Service_Participant::type_object_encoding(const char* encoding)
   }
   ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Service_Participant::type_object_encoding: "
              "invalid encoding %C\n", encoding));
+}
+
+void Service_Participant::is_info_repo()
+{
+  is_info_repo_ = true;
 }
 
 } // namespace DCPS
