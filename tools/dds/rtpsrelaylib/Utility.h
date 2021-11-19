@@ -8,6 +8,7 @@
 
 #include <ace/INET_Addr.h>
 
+#include <cstring>
 #include <set>
 #include <sstream>
 #include <string>
@@ -40,7 +41,7 @@ struct AddrPort {
   ACE_INET_Addr addr;
   Port port;
 
-  AddrPort() {}
+  AddrPort() : port(SPDP) {}
   AddrPort(const ACE_INET_Addr& a, Port p) : addr(a), port(p) {}
 
   bool operator==(const AddrPort& other) const
@@ -82,17 +83,37 @@ struct GuidAddr {
   bool operator<(const GuidAddr& other) const
   {
     if (guid != other.guid) {
-      OpenDDS::DCPS::GUID_tKeyLessThan gc;
+      static const OpenDDS::DCPS::GUID_tKeyLessThan gc;
       return gc(guid, other.guid);
     }
     return address < other.address;
   }
 };
 
+inline bool operator==(const EntityId_t& x, const EntityId_t& y)
+{
+  return std::memcmp(&x, &y, sizeof(x)) == 0;
+}
+
+inline bool operator!=(const EntityId_t& x, const EntityId_t& y)
+{
+  return std::memcmp(&x, &y, sizeof(x)) != 0;
+}
+
 inline void assign(EntityId_t& eid, const OpenDDS::DCPS::EntityId_t& a_eid)
 {
   std::memcpy(&eid._entityKey[0], a_eid.entityKey, sizeof(a_eid.entityKey));
   eid.entityKind(a_eid.entityKind);
+}
+
+inline bool operator==(const GUID_t& x, const GUID_t& y)
+{
+  return std::memcmp(&x, &y, sizeof(x)) == 0;
+}
+
+inline bool operator!=(const GUID_t& x, const GUID_t& y)
+{
+  return std::memcmp(&x, &y, sizeof(x)) != 0;
 }
 
 inline void assign(GUID_t& guid, const OpenDDS::DCPS::GUID_t& a_guid)
@@ -108,6 +129,16 @@ inline Duration_t time_diff_to_duration(const OpenDDS::DCPS::TimeDuration& d)
   duration.sec(x.sec);
   duration.nanosec(x.nanosec);
   return duration;
+}
+
+inline bool operator==(const Duration_t& x, const Duration_t& y)
+{
+  return x.sec() == y.sec() && x.nanosec() == y.nanosec();
+}
+
+inline bool operator!=(const Duration_t& x, const Duration_t& y)
+{
+  return x.sec() != y.sec() || x.nanosec() != y.nanosec();
 }
 
 inline bool operator<(const Duration_t& x, const Duration_t& y)
@@ -138,22 +169,22 @@ struct GuidHash {
   std::size_t operator() (const OpenDDS::DCPS::GUID_t& guid) const
   {
     return
-      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[0]) << 15) ^
-      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[1]) << 14) ^
-      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[2]) << 13) ^
-      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[3]) << 12) ^
-      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[4]) << 11) ^
-      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[5]) << 10) ^
-      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[6]) << 9) ^
-      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[7]) << 8) ^
-      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[8]) << 7) ^
-      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[9]) << 6) ^
-      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[10]) << 5) ^
-      (std::hash<::CORBA::Octet>{}(guid.guidPrefix[11]) << 4) ^
-      (std::hash<::CORBA::Octet>{}(guid.entityId.entityKey[0]) << 3) ^
-      (std::hash<::CORBA::Octet>{}(guid.entityId.entityKey[1]) << 2) ^
-      (std::hash<::CORBA::Octet>{}(guid.entityId.entityKey[2]) << 1) ^
-      (std::hash<::CORBA::Octet>{}(guid.entityId.entityKind) << 0);
+      (static_cast<std::size_t>(guid.guidPrefix[0]) << 15) ^
+      (static_cast<std::size_t>(guid.guidPrefix[1]) << 14) ^
+      (static_cast<std::size_t>(guid.guidPrefix[2]) << 13) ^
+      (static_cast<std::size_t>(guid.guidPrefix[3]) << 12) ^
+      (static_cast<std::size_t>(guid.guidPrefix[4]) << 11) ^
+      (static_cast<std::size_t>(guid.guidPrefix[5]) << 10) ^
+      (static_cast<std::size_t>(guid.guidPrefix[6]) << 9) ^
+      (static_cast<std::size_t>(guid.guidPrefix[7]) << 8) ^
+      (static_cast<std::size_t>(guid.guidPrefix[8]) << 7) ^
+      (static_cast<std::size_t>(guid.guidPrefix[9]) << 6) ^
+      (static_cast<std::size_t>(guid.guidPrefix[10]) << 5) ^
+      (static_cast<std::size_t>(guid.guidPrefix[11]) << 4) ^
+      (static_cast<std::size_t>(guid.entityId.entityKey[0]) << 3) ^
+      (static_cast<std::size_t>(guid.entityId.entityKey[1]) << 2) ^
+      (static_cast<std::size_t>(guid.entityId.entityKey[2]) << 1) ^
+      (static_cast<std::size_t>(guid.entityId.entityKind) << 0);
   }
 };
 typedef std::unordered_set<OpenDDS::DCPS::GUID_t, GuidHash> GuidSet;

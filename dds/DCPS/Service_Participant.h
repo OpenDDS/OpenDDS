@@ -21,6 +21,7 @@
 #include "NetworkConfigModifier.h"
 #include "Recorder.h"
 #include "Replayer.h"
+#include "TimeSource.h"
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsDomainC.h>
@@ -78,6 +79,8 @@ public:
 
   /// Return a singleton instance of this class.
   static Service_Participant* instance();
+
+  const TimeSource& time_source() const;
 
   /// Get the common timer interface.
   /// Intended for use by OpenDDS internals only.
@@ -531,6 +534,7 @@ private:
   ACE_ARGV ORB_argv_;
 #endif
 
+  const TimeSource time_source_;
   ReactorTask reactor_task_;
   JobQueue_rch job_queue_;
 

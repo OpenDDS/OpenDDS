@@ -111,6 +111,17 @@ public:
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     security_unsecure_lease_duration_ = period;
   }
+
+  size_t max_participants_in_authentication() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> g(lock_);
+    return max_participants_in_authentication_;
+  }
+  void max_participants_in_authentication(size_t m)
+  {
+    ACE_Guard<ACE_Thread_Mutex> g(lock_);
+    max_participants_in_authentication_ = m;
+  }
 #endif
 
   DCPS::TimeDuration lease_extension() const
@@ -305,6 +316,23 @@ public:
     }
   }
 
+  u_short port_common(DDS::DomainId_t domain) const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, 0);
+    // Ports are set by the formulas in RTPS v2.1 Table 9.8
+    return  pb_ + (dg_ * domain);
+  }
+
+  ACE_INET_Addr multicast_address(u_short port_common) const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
+
+    ACE_INET_Addr addr = default_multicast_group_;
+    // Ports are set by the formulas in RTPS v2.1 Table 9.8
+    addr.set_port_number(port_common + d0_);
+    return addr;
+  }
+
 #ifdef ACE_HAS_IPV6
   ACE_INET_Addr ipv6_spdp_local_address() const
   {
@@ -365,6 +393,17 @@ public:
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsDiscoveryConfig::ipv6_default_multicast_group set failed because address family is not AF_INET6\n")));
     }
   }
+
+  ACE_INET_Addr ipv6_multicast_address(u_short port_common) const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
+
+    ACE_INET_Addr addr = ipv6_default_multicast_group_;
+    // Ports are set by the formulas in RTPS v2.1 Table 9.8
+    addr.set_port_number(port_common + d0_);
+    return addr;
+  }
+
 #endif
 
   AddrVec spdp_send_addrs() const
@@ -700,6 +739,7 @@ private:
   DCPS::TimeDuration max_lease_duration_;
 #ifdef OPENDDS_SECURITY
   DCPS::TimeDuration security_unsecure_lease_duration_;
+  size_t max_participants_in_authentication_;
 #endif
   DCPS::TimeDuration lease_extension_;
   u_short pb_, dg_, pg_, d0_, d1_, dx_;
@@ -922,6 +962,8 @@ public:
   bool update_domain_participant_qos(DDS::DomainId_t domain, const GUID_t& participant,
     const DDS::DomainParticipantQos& qos);
 
+  bool has_domain_participant(DDS::DomainId_t domain, const GUID_t& local, const GUID_t& remote) const;
+
   DCPS::TopicStatus assert_topic(
     GUID_t& topicId,
     DDS::DomainId_t domainId,
@@ -1017,6 +1059,9 @@ public:
     const GUID_t& partId,
     const GUID_t& subId,
     const DCPS::TransportLocatorSeq& transInfo);
+
+  RcHandle<DCPS::TransportInst> sedp_transport_inst(DDS::DomainId_t domainId,
+                                                    const GUID_t& partId) const;
 
 private:
   ParticipantHandle get_part(const DDS::DomainId_t domain_id, const GUID_t& part_id) const;

@@ -45,6 +45,24 @@ MinimalMemberDetail::MinimalMemberDetail(const OPENDDS_STRING& name)
   std::memcpy(name_hash, result, sizeof name_hash);
 }
 
+#ifdef min
+#undef min
+#endif
+
+#ifdef max
+#undef max
+#endif
+
+AppliedBuiltinMemberAnnotations::AppliedBuiltinMemberAnnotations(const Optional<DCPS::String>& a_unit,
+                                                                 const Optional<AnnotationParameterValue>& a_min,
+                                                                 const Optional<AnnotationParameterValue>& a_max,
+                                                                 const Optional<DCPS::String>& a_hash_id)
+  : unit(a_unit)
+  , min(a_min)
+  , max(a_max)
+  , hash_id(a_hash_id)
+{}
+
 TypeIdentifier::TypeIdentifier(ACE_CDR::Octet kind)
   : kind_(kind)
   , active_(0)

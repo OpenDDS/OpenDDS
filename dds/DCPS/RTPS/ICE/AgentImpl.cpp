@@ -7,10 +7,11 @@
 
 #include "AgentImpl.h"
 
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/TimeTypes.h"
 #include "Task.h"
 #include "EndpointManager.h"
+
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/TimeTypes.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -42,7 +43,7 @@ void AgentImpl::enqueue(const DCPS::MonotonicTimePoint& a_release_time,
 {
   if (tasks_.empty() || a_release_time < tasks_.top().release_time_) {
     const MonotonicTimePoint release = std::max(last_execute_ + ICE::Configuration::instance()->T_a(), a_release_time);
-    execute_or_enqueue(new ScheduleTimerCommand(reactor(), this, release - MonotonicTimePoint::now()));
+    execute_or_enqueue(DCPS::make_rch<ScheduleTimerCommand>(reactor(), this, release - MonotonicTimePoint::now()));
   }
   tasks_.push(Item(a_release_time, wtask));
 }
@@ -77,7 +78,7 @@ int AgentImpl::handle_timeout(const ACE_Time_Value& a_now, const void* /*act*/)
 
   if (!tasks_.empty()) {
     const MonotonicTimePoint release = std::max(last_execute_ + ICE::Configuration::instance()->T_a(), tasks_.top().release_time_);
-    execute_or_enqueue(new ScheduleTimerCommand(reactor(), this, release - now));
+    execute_or_enqueue(DCPS::make_rch<ScheduleTimerCommand>(reactor(), this, release - now));
   }
 
   return 0;

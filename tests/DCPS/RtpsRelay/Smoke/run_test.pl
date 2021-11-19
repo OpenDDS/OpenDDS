@@ -46,6 +46,7 @@ sub get_relay_args {
     "-Id relay${n}",
     "-UserData relay${n}",
     "-DCPSDebugLevel 1",
+    "-DCPSSecurityDebugLevel 2",
     "-LogDiscovery 1",
     "-LogActivity 1",
     "-LogRelayStatistics 3",

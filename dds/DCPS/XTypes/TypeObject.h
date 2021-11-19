@@ -1067,7 +1067,7 @@ namespace XTypes {
 
 
   // --- Aggregate types: ------------------------------------------------
-  struct AppliedBuiltinMemberAnnotations {
+  struct OpenDDS_Dcps_Export AppliedBuiltinMemberAnnotations {
     Optional<DCPS::String> unit; // @unit("<unit>")
     Optional<AnnotationParameterValue> min; // @min , @range
     Optional<AnnotationParameterValue> max; // @max , @range
@@ -1078,12 +1078,7 @@ namespace XTypes {
     AppliedBuiltinMemberAnnotations(const Optional<DCPS::String>& a_unit,
                                     const Optional<AnnotationParameterValue>& a_min,
                                     const Optional<AnnotationParameterValue>& a_max,
-                                    const Optional<DCPS::String>& a_hash_id)
-      : unit(a_unit)
-      , min(a_min)
-      , max(a_max)
-      , hash_id(a_hash_id)
-    {}
+                                    const Optional<DCPS::String>& a_hash_id);
   };
 
   struct CommonStructMember {
