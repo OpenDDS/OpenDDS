@@ -912,7 +912,7 @@ private:
     typedef OPENDDS_MAP(GUID_t, PerReaderDeferredSamples) DeferredSamples;
     DeferredSamples deferred_samples_;
 
-    void send_sample(const ACE_Message_Block& data,
+    void send_sample(DCPS::Message_Block_Ptr payload,
                      size_t size,
                      const DCPS::RepoId& reader,
                      DCPS::SequenceNumber& sequence,
