@@ -657,6 +657,8 @@ public:
 
   RcHandle<DCPS::TransportInst> transport_inst() const { return transport_inst_; }
 
+  RcHandle<DCPS::TransportInst> transport_inst() const { return transport_inst_; }
+
 private:
   bool remote_knows_about_local_i(const GUID_t& local, const GUID_t& remote) const;
 #ifdef OPENDDS_SECURITY
