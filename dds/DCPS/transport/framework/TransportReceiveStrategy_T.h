@@ -23,6 +23,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+class TransportInst;
+
 /**
  * This class provides buffer for data received by transports, de-assemble
  * the data to individual samples and deliver them.
@@ -37,7 +39,7 @@ public:
   int start();
   void stop();
 
-  /// Useful as a simpler altnernative to handle_dds_input
+  /// Useful as a simpler alternative to handle_dds_input
   /// when dealing with UDP protocols with maximum packet size.
   /// Behaves the same as handle_dds_input, but only makes use
   /// of a single receive buffer and doesn't require message block
@@ -62,7 +64,7 @@ public:
   DSH& received_sample_header();
 
 protected:
-  TransportReceiveStrategy();
+  explicit TransportReceiveStrategy(const TransportInst& config);
 
   /// Only our subclass knows how to do this.
   virtual ssize_t receive_bytes(iovec          iov[],
@@ -135,15 +137,15 @@ private:
   // a max sized message.  The max message is about 64K and the low water for
   // a buffer is 4096.  Therefore, 16 receive buffers is appropriate.
   //
-  enum { RECEIVE_BUFFERS  =   16 };
-  enum { BUFFER_LOW_WATER = 4096 };
+  static const size_t RECEIVE_BUFFERS = 16;
+  static const size_t BUFFER_LOW_WATER = 4096;
 
   //
   // Message Block Allocators are more plentiful since they hold samples
   // as well as data read from the handle(s).
   //
-  enum { MESSAGE_BLOCKS   = 1000 };
-  enum { DATA_BLOCKS      =  100 };
+  static const size_t MESSAGE_BLOCKS = 1000;
+  static const size_t DATA_BLOCKS = 100;
 
 //MJM: We should probably bring the allocator typedefs down into this
 //MJM: class since they are limited to this scope.

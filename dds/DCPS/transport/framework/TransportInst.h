@@ -108,6 +108,14 @@ public:
   /// The expiration time is relative to the last received fragment.
   TimeDuration fragment_reassembly_timeout_;
 
+  /// Preallocated chunks in allocator for message blocks.
+  /// Default (0) is to use built-in constants in TransportReceiveStrategy
+  size_t receive_preallocated_message_blocks_;
+
+  /// Preallocated chunks in allocator for data blocks and data buffers.
+  /// Default (0) is to use built-in constants in TransportReceiveStrategy
+  size_t receive_preallocated_data_blocks_;
+
   /// Does the transport as configured support RELIABLE_RELIABILITY_QOS?
   virtual bool is_reliable() const = 0;
 
