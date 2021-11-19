@@ -1,0 +1,3 @@
+project: dcpsexe, dcps_rtps_udp, opendds_security {
+  avoids   += no_opendds_security
+}

@@ -51,11 +51,9 @@ void ReactorInterceptor::process_command_queue_i()
   state_ = PROCESSING;
   if (!command_queue_.empty()) {
     cq.swap(command_queue_);
-    for (Queue::const_iterator pos = cq.begin(), limit = cq.end(); pos != limit; ++pos) {
-      (*pos)->queue_flushed();
-    }
     ACE_Guard<ACE_Reverse_Lock<ACE_Thread_Mutex> > rev_guard(rev_lock);
     for (Queue::const_iterator pos = cq.begin(), limit = cq.end(); pos != limit; ++pos) {
+      (*pos)->dequeue();
       (*pos)->execute();
       (*pos)->executed();
     }

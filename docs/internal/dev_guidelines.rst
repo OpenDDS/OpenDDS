@@ -479,9 +479,16 @@ Message Content
 
     (%P|%t) [ERROR:|WARNING:|NOTICE:] FUNCTION_NAME: MESSAGE\n
 
-  - Use ``ERROR:``, ``WARNING:``, and ``NOTICE:`` if using the correspoding log priorities.
+  - Use ``ERROR:``, ``WARNING:``, and ``NOTICE:`` if using the corresponding log priorities.
   - ``CLASS_NAME::METHOD_NAME`` should be used instead of just the function name if it's part of a class.
     It's at the developer's discretion to come up with a meaningful name for members of overload sets, templates, and other more complex cases.
+  - ``security_debug`` and ``transport_debug`` log messages should indicate the category name, for example:
+
+    .. code-block:: C++
+
+      if (security_debug.access_error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} example_function: Hello, World!\n"));
+      }
 
 - Format strings should not be wrapped in ``ACE_TEXT``.
   We shouldn't go out of our way to replace it in existing logging points, but it should be avoided it in new ones.

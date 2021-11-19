@@ -1,4 +1,4 @@
-project(RtpsRelayPublisher): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dcps_rtps, opendds_cxx11 {
+project(RtpsRelayPublisher): dcps_test, dcps_cm, opendds_optional_security, dcps_rtps_udp, opendds_cxx11 {
   exename   = publisher
   libpaths += ../../common
   libs     +=  common
@@ -13,7 +13,7 @@ project(RtpsRelayPublisher): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_te
   }
 }
 
-project(RtpsRelaySubscriber): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dcps_rtps, opendds_cxx11 {
+project(RtpsRelaySubscriber): dcps_test, dcps_cm, opendds_optional_security, dcps_rtps_udp, opendds_cxx11 {
   exename   = subscriber
   libpaths += ../../common
   libs     +=  common

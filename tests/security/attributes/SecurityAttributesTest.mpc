@@ -10,12 +10,11 @@ project(DDS*idl): dcps_test_idl_only_lib {
   }
 }
 
-project(DDS*Publisher): dcpsexe, dcps_test, dcps_rtps_udp {
+project(DDS*Publisher): dcps_test, opendds_security, dcps_rtps_udp {
 
   exename   = publisher
   after    += DDS*idl
   libs     += DDS*idl
-  avoids   += no_opendds_security
 
   Idl_Files {
   }
@@ -27,12 +26,11 @@ project(DDS*Publisher): dcpsexe, dcps_test, dcps_rtps_udp {
   }
 }
 
-project(DDS*Subscriber): dcpsexe, dcps_test, dcps_rtps_udp {
+project(DDS*Subscriber): dcps_test, opendds_security, dcps_rtps_udp {
 
   exename   = subscriber
   after    += DDS*idl
   libs     += DDS*idl
-  avoids   += no_opendds_security
 
   Idl_Files {
   }

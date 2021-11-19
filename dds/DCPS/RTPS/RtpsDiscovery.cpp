@@ -20,6 +20,7 @@
 #include <dds/DdsDcpsInfoUtilsC.h>
 
 #include <cstdlib>
+#include <limits>
 
 namespace {
   u_short get_default_d0(u_short fallback)
@@ -49,6 +50,7 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , max_lease_duration_(300)
 #ifdef OPENDDS_SECURITY
   , security_unsecure_lease_duration_(30)
+  , max_participants_in_authentication_(0)
 #endif
   , lease_extension_(0)
   , pb_(7400) // see RTPS v2.1 9.6.1.3 for PB, DG, PG, D0, D1 defaults
@@ -222,6 +224,17 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
               value.c_str(), rtps_name.c_str()), -1);
           }
           config->security_unsecure_lease_duration(TimeDuration(duration));
+        } else if (name == "MaxParticipantsInAuthentication") {
+          const OPENDDS_STRING& value = it->second;
+          unsigned int max_participants;
+          if (!DCPS::convertToInteger(value, max_participants)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+              ACE_TEXT("Invalid entry (%C) for MaxParticipantsInAuthentication in ")
+              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->max_participants_in_authentication(max_participants);
 #endif
         } else if (name == "LeaseExtension") {
           const OPENDDS_STRING& value = it->second;
@@ -1245,6 +1258,11 @@ bool RtpsDiscovery::update_domain_participant_qos(
   return get_part(domain, participant)->update_domain_participant_qos(qos);
 }
 
+bool RtpsDiscovery::has_domain_participant(DDS::DomainId_t domain, const GUID_t& local, const GUID_t& remote) const
+{
+  return get_part(domain, local)->has_domain_participant(remote);
+}
+
 DCPS::TopicStatus RtpsDiscovery::assert_topic(
   GUID_t& topicId,
   DDS::DomainId_t domainId,
@@ -1398,6 +1416,12 @@ void RtpsDiscovery::update_subscription_locators(
   const DCPS::TransportLocatorSeq& transInfo)
 {
   get_part(domainId, partId)->update_subscription_locators(subId, transInfo);
+}
+
+RcHandle<DCPS::TransportInst> RtpsDiscovery::sedp_transport_inst(DDS::DomainId_t domainId,
+                                                                 const GUID_t& partId) const
+{
+  return get_part(domainId, partId)->sedp_transport_inst();
 }
 
 ParticipantHandle RtpsDiscovery::get_part(const DDS::DomainId_t domain_id, const GUID_t& part_id) const

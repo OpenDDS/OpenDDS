@@ -656,6 +656,10 @@ public:
     type_lookup_service_ = type_lookup_service;
   }
 
+  bool should_drop(ssize_t length) const;
+
+  RcHandle<DCPS::TransportInst> transport_inst() const { return transport_inst_; }
+
 private:
   bool remote_knows_about_local_i(const GUID_t& local, const GUID_t& remote) const;
 #ifdef OPENDDS_SECURITY
@@ -671,8 +675,8 @@ private:
   {
     if (!type_lookup_reply_deadline_processor_) {
       type_lookup_reply_deadline_processor_ =
-        DCPS::make_rch<EndpointManagerSporadic>(reactor_interceptor, ref(*this),
-          &Sedp::remove_expired_endpoints);
+        DCPS::make_rch<EndpointManagerSporadic>(TheServiceParticipant->time_source(), reactor_interceptor,
+                                                rchandle_from(this), &Sedp::remove_expired_endpoints);
     }
   }
 

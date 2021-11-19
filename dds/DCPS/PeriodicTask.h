@@ -34,7 +34,7 @@ public:
       ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
       user_enabled_ = true;
     }
-    interceptor_->execute_or_enqueue(new ScheduleEnableCommand(this, reenable, period));
+    interceptor_->execute_or_enqueue(make_rch<ScheduleEnableCommand>(this, reenable, period));
   }
 
   void disable()
@@ -43,7 +43,7 @@ public:
       ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
       user_enabled_ = false;
     }
-    interceptor_->execute_or_enqueue(new ScheduleDisableCommand(this));
+    interceptor_->execute_or_enqueue(make_rch<ScheduleDisableCommand>(this));
   }
 
   void disable_and_wait()
@@ -52,7 +52,7 @@ public:
       ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
       user_enabled_ = false;
     }
-    ReactorInterceptor::CommandPtr command = interceptor_->execute_or_enqueue(new ScheduleDisableCommand(this));
+    ReactorInterceptor::CommandPtr command = interceptor_->execute_or_enqueue(make_rch<ScheduleDisableCommand>(this));
     command->wait();
   }
 

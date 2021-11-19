@@ -4,6 +4,7 @@
  */
 
 #include "BuiltInPlugins.h"
+
 #include "BuiltInPluginLoader.h"
 
 #include <ace/Service_Config.h>
@@ -20,6 +21,8 @@ BuiltinPluginsInitializer::BuiltinPluginsInitializer()
 #if (OPENDDS_SECURITY_HAS_DLL == 0)
   ACE_Service_Config::process_directive(ACE_TEXT("static OpenDDS_Security"));
 #endif
+
+  OpenDDS::Security::BuiltInPluginLoader().init(0, 0);
 }
 
 }

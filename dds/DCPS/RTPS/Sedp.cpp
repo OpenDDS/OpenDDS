@@ -6436,6 +6436,11 @@ void Sedp::update_subscription_locators(
   }
 }
 
+bool Sedp::should_drop(ssize_t length) const
+{
+  return transport_inst_->should_drop(length);
+}
+
 bool Sedp::remote_knows_about_local_i(const GUID_t& local, const GUID_t& remote) const
 {
   if (DCPS_debug_level > 6) {
