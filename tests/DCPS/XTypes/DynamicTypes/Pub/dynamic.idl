@@ -44,7 +44,7 @@ struct outer_struct {
 @extensibility(MUTABLE)
 union my_union switch (long) {
   case 1: long double ld;
-  case 2: string s;
+  case 2: bool_seq my_alias_seq;
   default: boolean b;
 };
 };

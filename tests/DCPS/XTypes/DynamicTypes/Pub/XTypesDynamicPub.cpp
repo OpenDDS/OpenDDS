@@ -72,8 +72,12 @@ void nested_stru_narrow_write(DataWriter_var dw)
 void union_narrow_write(DataWriter_var dw)
 {
   Dynamic::my_union foo;
-  foo._d(1);
-  foo.ld(10);
+  foo._d(2);
+  Dynamic::bool_seq bs;
+  bs.length(2);
+  bs[0] = false;
+  bs[1] = true;
+  foo.my_alias_seq(bs);
   Dynamic::my_unionDataWriter_var narrow_dw = Dynamic::my_unionDataWriter::_narrow(dw);
   InstanceHandle_t handle = narrow_dw->register_instance(foo);
   narrow_dw->write(foo, handle);

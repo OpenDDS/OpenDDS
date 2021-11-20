@@ -57,22 +57,22 @@ public:
       "  Float32 my_float = 9.25\n"
       "  Float64 my_double = 10.5\n"
       "  Float128 my_longdouble = 11.075\n"
-      "  Boolean my_boolean = 1\n"
-      "  Byte my_byte = c\n"
+      "  Boolean my_boolean = true\n"
+      "  Byte my_byte = 0x0c\n"
       "  Char8 my_char = 'd'\n"
       "  Char16 my_wchar = L'e'\n"
-      "  String8Small my_string = \"Hello\"\n"
-      "  WString16Small my_wstring = L\"World\"\n"
-      "  ::Dynamic::bool_seq my_alias_seq  Boolean[2] SequenceLarge =\n"
-      "    [0] = 1\n"
-      "    [1] = 0\n"
-      "  ::Dynamic::char_arr my_alias_array  Char8[2] ArraySmall =\n"
+      "  String8 my_string = \"Hello\"\n"
+      "  WString16 my_wstring = L\"World\"\n"
+      "  Sequence my_alias_seq Boolean[2] =\n"
+      "    [0] = true\n"
+      "    [1] = false\n"
+      "  Array my_alias_array Char8[2] =\n"
       "    [0] = 'a'\n"
       "    [1] = 'b'\n"
-      "  SequenceSmall my_anon_seq  ::Dynamic::EnumType[2] SequenceSmall =\n"
+      "  Sequence my_anon_seq ::Dynamic::EnumType[2] =\n"
       "    [0] = V2\n"
       "    [1] = V1\n"
-      "  ArraySmall my_anon_arr  Int16[2] ArraySmall =\n"
+      "  Array my_anon_arr Int16[2] =\n"
       "    [0] = 5\n"
       "    [1] = 6\n"
       "};\n";
@@ -85,13 +85,15 @@ public:
       "};\n";
     String union_string =
       "union ::Dynamic::my_union {\n"
-      "  Int32 discriminator = 1\n"
-      "  Float128 ld = 10\n"
+      "  Int32 discriminator = 2\n"
+      "  ::Dynamic::bool_seq my_alias_seq Boolean[2] =\n"
+      "    [0] = false\n"
+      "    [1] = true\n"
       "};\n";
     String default_union_string =
       "union ::Dynamic::my_union {\n"
       "  Int32 discriminator = -2147483647\n"
-      "  Boolean b = 1\n"
+      "  Boolean b = true\n"
       "};\n";
     if (my_type != struct_string &&
         my_type != nested_struct_string &&
@@ -101,7 +103,7 @@ public:
        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TestRecorderListener::on_sample_data_received:"
          " Type did not match\n"));
     }
-    std::cout << my_type;
+    std::cout << my_type << "\n";
     gc_->set_trigger_value(true);
   }
 

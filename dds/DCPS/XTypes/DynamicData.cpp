@@ -2181,12 +2181,7 @@ bool DynamicData::skip(const char* func_name, const char* description, size_t n,
 
 DynamicType_rch DynamicData::get_base_type(const DynamicType_rch& type) const
 {
-  if (type->get_kind() != TK_ALIAS) {
-    return type;
-  }
-
-  const TypeDescriptor descriptor = type->get_descriptor();
-  return get_base_type(descriptor.base_type);
+  return type->get_base_type();
 }
 
 bool DynamicData::is_primitive(TypeKind tk, ACE_CDR::ULong& size) const
@@ -2441,7 +2436,8 @@ bool print_integral_value(DynamicData& dd, DCPS::String& type_string, TypeKind t
       }
       return false;
     }
-    type_string += " = " + DCPS::to_dds_string(my_bool) + "\n";
+    DCPS::String bool_string = my_bool ? "true" : "false";
+    type_string += " = " + bool_string + "\n";
     break;
   }
   case TK_BYTE: {
@@ -2453,8 +2449,8 @@ bool print_integral_value(DynamicData& dd, DCPS::String& type_string, TypeKind t
       return false;
     }
     std::stringstream os;
-    os << std::hex << int(my_byte);
-    type_string += " = " + os.str() + "\n";
+    os << std::hex << std::setfill('0') << std::setw(2) << int(my_byte);
+    type_string += " = 0x" + os.str() + "\n";
     break;
   }
   case TK_CHAR8: {
@@ -2588,10 +2584,8 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
   case TK_SEQUENCE: {
     DCPS::String temp_indent = indent;
     indent += "  ";
-    type_name = dd.type()->get_descriptor().element_type->get_descriptor().name;
-    member_name = dd.type()->get_descriptor().name;
     ACE_CDR::ULong seq_length = dd.get_item_count();
-    type_string += "  " + type_name + "[" + DCPS::to_dds_string(seq_length) + "] " +  member_name + " =\n";
+    type_string += "[" + DCPS::to_dds_string(seq_length) + "] =\n";
     for (ACE_CDR::ULong i = 0; i < seq_length; ++i) {
       type_string += indent + "[" + DCPS::to_dds_string(i) + "]";
       if (dd.get_complex_value(temp_dd, i) != DDS::RETCODE_OK) {
@@ -2613,10 +2607,8 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
   case TK_ARRAY: {
     DCPS::String temp_indent = indent;
     indent += "  ";
-    type_name = dd.type()->get_descriptor().element_type->get_descriptor().name;
-    member_name = dd.type()->get_descriptor().name;
     LBound bound = dd.type()->get_descriptor().bound[0];
-    type_string += "  " + type_name + "[" + DCPS::to_dds_string(bound) + "] " +  member_name + " =\n";
+    type_string += "[" + DCPS::to_dds_string(bound) + "] =\n";
     for (ACE_CDR::ULong i = 0; i < bound; ++i) {
       type_string += indent + "[" + DCPS::to_dds_string(i) + "]";
       if (dd.get_complex_value(temp_dd, i) != DDS::RETCODE_OK) {
@@ -2644,8 +2636,14 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
     for (DynamicTypeMembersById::iterator iter = dtmbi.begin(); iter != dtmbi.end(); ++iter) {
       dd.get_complex_value(temp_dd, iter->first);
       member_name = iter->second->get_descriptor().name;
-      type_name = iter->second->get_descriptor().get_type()->get_descriptor().name;
+      DynamicType_rch base_dt = iter->second->get_descriptor().get_type()->get_base_type();
+      type_name = base_dt->get_descriptor().name;
       type_string += indent + type_name + " " + member_name;
+      if (base_dt->get_descriptor().kind == TK_SEQUENCE ||
+          base_dt->get_descriptor().kind == TK_ARRAY) {
+        DCPS::String ele_type_name = base_dt->get_descriptor().element_type->get_descriptor().name;
+        type_string += " " + ele_type_name;
+      }
       if (!print_dynamic_data(temp_dd, type_string, indent)) {
         if (DCPS::log_level >= DCPS::LogLevel::Notice) {
           ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_dynamic_data: failed to read struct member\n"));
@@ -2662,7 +2660,7 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
     indent += "  ";
     type_string += "union " + dd.type()->get_name() + " {\n";
     ACE_CDR::ULong item_count = dd.get_item_count();
-    member_name = dd.type()->get_descriptor().discriminator_type->get_descriptor().name;
+    member_name = dd.type()->get_descriptor().discriminator_type->get_base_type()->get_descriptor().name;
     type_string += indent + member_name + " discriminator";
     if (!print_integral_value(dd, type_string, dd.type()->get_descriptor().discriminator_type->get_kind())) {
       return false;
@@ -2671,14 +2669,19 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
     if (item_count == 2) {
       DynamicTypeMember_rch temp_dtm;
       DynamicTypeMembersById dtmbi;
-      DCPS::String decoy_string;
       dd.type()->get_all_members(dtmbi);
       for (DynamicTypeMembersById::iterator iter = dtmbi.begin(); iter != dtmbi.end(); ++iter) {
         dd.type()->get_member(temp_dtm, iter->first);
         if (dd.get_complex_value(dd, iter->first) == DDS::RETCODE_OK) {
-          member_name = temp_dtm->get_descriptor().name;
+          DynamicType_rch base_dt = iter->second->get_descriptor().get_type()->get_base_type();
           type_name = temp_dtm->get_descriptor().get_type()->get_descriptor().name;
+          member_name = temp_dtm->get_descriptor().name;
           type_string += indent + type_name + " " + member_name;
+          if (base_dt->get_descriptor().kind == TK_SEQUENCE ||
+              base_dt->get_descriptor().kind == TK_ARRAY) {
+            DCPS::String ele_type_name = base_dt->get_descriptor().element_type->get_descriptor().name;
+            type_string += " " + ele_type_name;
+          }
           if (!print_dynamic_data(dd, type_string, indent)) {
             if (DCPS::log_level >= DCPS::LogLevel::Notice) {
               ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_dynamic_data: failed to read union branch\n"));
