@@ -14,7 +14,8 @@ class AllocationHelper {
 private:
   // Internal meta data used to compute allocation of nodes
   struct NcMetaData {
-    NcMetaData() : max_prob{0.0},
+    NcMetaData() : id{},
+                   max_prob{0.0},
                    overlap_count{0},
                    exclusive_occupied{false} {}
 

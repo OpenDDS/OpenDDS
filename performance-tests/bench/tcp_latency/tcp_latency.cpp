@@ -209,37 +209,41 @@ int parse_args(int argc, ACE_TCHAR ** argv)
 
 int ACE_TMAIN (int argc, ACE_TCHAR ** argv)
 {
+  try {
 
-  if (parse_args(argc, argv) == 0) {
+    if (parse_args(argc, argv) == 0) {
 
-    if (server_port) {
-      echo_server(server_port);
-    }
-    else {
-
-      ACE_SOCK_Stream cli_stream;
-      ACE_SOCK_Connector con;
-
-      if (con.connect (cli_stream, server_addr, 0) == -1) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) %p\n"),
-                   ACE_TEXT("con.connect")));
+      if (server_port) {
+        echo_server(server_port);
       }
+      else {
 
-        if (ACE_Thread_Manager::instance ()->spawn
-            (ACE_THR_FUNC (sender),
-            (void *) &cli_stream,
-            THR_NEW_LWP | THR_DETACHED) == -1) {
-          ACE_ERROR_RETURN ((LM_ERROR,
-                             ACE_TEXT("(%P|%t) %p\n"),
-                             ACE_TEXT("thread create failed")),
-                             1);
+        ACE_SOCK_Stream cli_stream;
+        ACE_SOCK_Connector con;
+
+        if (con.connect (cli_stream, server_addr, 0) == -1) {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("(%P|%t) %p\n"),
+                     ACE_TEXT("con.connect")));
         }
 
-      receiver(cli_stream);
-      cli_stream.close();
+          if (ACE_Thread_Manager::instance ()->spawn
+              (ACE_THR_FUNC (sender),
+              (void *) &cli_stream,
+              THR_NEW_LWP | THR_DETACHED) == -1) {
+            ACE_ERROR_RETURN ((LM_ERROR,
+                               ACE_TEXT("(%P|%t) %p\n"),
+                               ACE_TEXT("thread create failed")),
+                               1);
+          }
+
+        receiver(cli_stream);
+        cli_stream.close();
+      }
+      return 0;
     }
-    return 0;
+  } catch (...) {
+    ACE_ERROR((LM_ERROR, "Unknown Exception Caught"));
   }
 
   return 1;

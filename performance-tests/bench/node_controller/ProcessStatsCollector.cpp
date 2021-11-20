@@ -46,7 +46,13 @@ bool read_total_cpu_usage(size_t& time)
 
   statfile.close();
 
-  time = user_time + nice_time + system_time + idle_time;
+  const size_t new_time = user_time + nice_time + system_time + idle_time;
+
+  if (!new_time) {
+    return false;
+  }
+
+  time = new_time;
   return true;
 }
 
@@ -202,17 +208,19 @@ double ProcessStatsCollector::get_cpu_usage() noexcept
     last_user_time_ = user;
   }
 #elif defined ACE_LINUX
-  size_t time, sys_time, user_time;
+  size_t time{}, sys_time{}, user_time{};
   if (read_total_cpu_usage(time) &&
       time > last_time_ &&
       read_process_cpu_usage(process_id_, user_time, sys_time)) {
 
-    percent = 100.0 * static_cast<double>((sys_time - last_sys_time_) + (user_time - last_user_time_));
-    percent /= time - last_time_; // total cpu time is across all processorss (ignore num_processors_)
+    if (time > last_time_) {
+      percent = 100.0 * static_cast<double>((sys_time - last_sys_time_) + (user_time - last_user_time_));
+      percent /= time - last_time_; // total cpu time is across all processorss (ignore num_processors_)
 
-    last_time_ = time;
-    last_sys_time_ = sys_time;
-    last_user_time_ = user_time;
+      last_time_ = time;
+      last_sys_time_ = sys_time;
+      last_user_time_ = user_time;
+    }
   }
 #endif
   return percent;
