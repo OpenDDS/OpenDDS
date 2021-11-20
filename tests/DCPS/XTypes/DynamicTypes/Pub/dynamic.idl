@@ -5,7 +5,7 @@ enum EnumType {V1, V2};
 @topic
 @mutable
 @::OpenDDS::data_representation(XCDR2)
-struct stru {
+struct my_struct {
   int8 my_int8;
   uint8 my_uint8;
   short my_short;

@@ -23,9 +23,9 @@
 using namespace OpenDDS::DCPS;
 using namespace DDS;
 
-void stru_narrow_write(DataWriter_var dw)
+void struct_narrow_write(DataWriter_var dw)
 {
-  Dynamic::stru foo;
+  Dynamic::my_struct foo;
   foo.my_int8 = 1;
   foo.my_uint8 = 2;
   foo.my_short = 3;
@@ -53,12 +53,12 @@ void stru_narrow_write(DataWriter_var dw)
   foo.my_anon_seq[1] = Dynamic::V1;
   foo.my_anon_arr[0] = 5;
   foo.my_anon_arr[1] = 6;
-  Dynamic::struDataWriter_var narrow_dw = Dynamic::struDataWriter::_narrow(dw);
+  Dynamic::my_structDataWriter_var narrow_dw = Dynamic::my_structDataWriter::_narrow(dw);
   InstanceHandle_t handle = narrow_dw->register_instance(foo);
   narrow_dw->write(foo, handle);
 }
 
-void nested_stru_narrow_write(DataWriter_var dw)
+void nested_struct_narrow_write(DataWriter_var dw)
 {
   Dynamic::inner_struct is;
   Dynamic::outer_struct os;
@@ -111,8 +111,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   //this needs modularization
   DDS::TypeSupport_var ts_var;
-  if (!ACE_OS::strcmp(type_name, ACE_TEXT("stru"))) {
-    ts_var = new Dynamic::struTypeSupportImpl;
+  if (!ACE_OS::strcmp(type_name, ACE_TEXT("struct"))) {
+    ts_var = new Dynamic::my_structTypeSupportImpl;
   } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("nested"))) {
     ts_var = new Dynamic::outer_structTypeSupportImpl;
   } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("union")) ||
@@ -144,10 +144,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
     return 1;
   }
-  if (!ACE_OS::strcmp(type_name, ACE_TEXT("stru"))) {
-    stru_narrow_write(dw);
+  if (!ACE_OS::strcmp(type_name, ACE_TEXT("struct"))) {
+    struct_narrow_write(dw);
   } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("nested"))) {
-    nested_stru_narrow_write(dw);
+    nested_struct_narrow_write(dw);
   } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("union"))) {
     union_narrow_write(dw);
   } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("union_default"))) {

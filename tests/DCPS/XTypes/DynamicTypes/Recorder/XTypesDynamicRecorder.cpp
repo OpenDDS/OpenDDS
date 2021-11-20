@@ -45,7 +45,7 @@ public:
       }
     }
     String struct_string =
-      "struct ::Dynamic::stru {\n"
+      "struct ::Dynamic::my_struct {\n"
       "  Int8 my_int8 = 1\n"
       "  UInt8 my_uint8 = 2\n"
       "  Int16 my_short = 3\n"

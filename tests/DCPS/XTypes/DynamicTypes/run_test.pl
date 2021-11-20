@@ -14,7 +14,7 @@ $test->enable_console_logging();
 my $status = 0;
 
 sub run_test {
-  my $test_name_param = "stru";
+  my $test_name_param = "struct";
   my @reader_args = ("$test_name_param -DCPSConfigFile rtps_disc.ini -ORBLogFile recorder_$test_name_param.log -ORBDebugLevel 10 -DCPSDebugLevel 10");
   my @writer_args = ("$test_name_param -DCPSConfigFile rtps_disc.ini -ORBLogFile publisher_$test_name_param.log -ORBDebugLevel 10 -DCPSDebugLevel 10");
 
