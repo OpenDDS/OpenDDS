@@ -409,6 +409,8 @@ public:
   /// Cleanup state for shutdown.
   void finalize();
 
+  void cleanup_built_in_topics();
+
 private:
   DCPS_IR_Domain_Map domains_;
   CORBA::ORB_var orb_;

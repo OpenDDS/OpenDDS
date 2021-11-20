@@ -2475,4 +2475,13 @@ TAO_DDS_DCPSInfo_i::dump_to_string()
 
 }
 
+void TAO_DDS_DCPSInfo_i::cleanup_built_in_topics()
+{
+#ifndef DDS_HAS_MINIMUM_BIT
+  for (DCPS_IR_Domain_Map::iterator it = domains_.begin(); it != domains_.end(); ++it) {
+    it->second->cleanup_built_in_topics();
+  }
+#endif
+}
+
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

@@ -93,6 +93,7 @@ InfoRepo::finalize()
     // which bypasses InfoRepo::handle_exception()
     this->info_servant_->finalize();
     this->federator_.finalize();
+    info_servant_->cleanup_built_in_topics();
     const DDS::ReturnCode_t shutdown_error = TheServiceParticipant->shutdown();
     if (shutdown_error) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: InfoRepo::finalize: "
@@ -126,6 +127,7 @@ InfoRepo::handle_exception(ACE_HANDLE /* fd */)
   // these should occur before ORB::shutdown() since they use the ORB/reactor
   this->info_servant_->finalize();
   this->federator_.finalize();
+  info_servant_->cleanup_built_in_topics();
   const DDS::ReturnCode_t shutdown_error = TheServiceParticipant->shutdown();
   if (shutdown_error) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: InfoRepo::handle_exception: "
