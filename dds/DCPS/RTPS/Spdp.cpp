@@ -1048,10 +1048,10 @@ Spdp::data_received(const DataSubmessage& data,
     return;
   }
 
+#ifdef OPENDDS_SECURITY
   const bool relay_in_use = (config_->rtps_relay_only() || config_->use_rtps_relay());
   const bool from_relay = relay_in_use && (from == config_->spdp_rtps_relay_address());
 
-#ifdef OPENDDS_SECURITY
   if (!from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList) && !ip_in_AgentInfo(from, plist)) {
     if (DCPS::DCPS_debug_level >= 8) {
       ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) Spdp::data_received - dropped IP: %C\n"), DCPS::LogAddr(from).c_str()));
@@ -1062,6 +1062,9 @@ Spdp::data_received(const DataSubmessage& data,
     process_participant_ice(plist, pdata, guid);
   }
 #elif !defined OPENDDS_SAFETY_PROFILE
+  const bool relay_in_use = (config_->rtps_relay_only() || config_->use_rtps_relay());
+  const bool from_relay = relay_in_use && (from == config_->spdp_rtps_relay_address());
+
   if (!from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList)) {
     if (DCPS::DCPS_debug_level >= 8) {
       ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) Spdp::data_received - IP not in locator list: %C\n"), DCPS::LogAddr(from).c_str()));
@@ -2930,7 +2933,7 @@ Spdp::SpdpTransport::send(WriteFlags flags, const ACE_INET_Addr& local_address)
   if ((flags & SEND_RELAY) || outer->config_->rtps_relay_only()) {
     const ACE_INET_Addr relay_address = outer->config_->spdp_rtps_relay_address();
     if (relay_address != ACE_INET_Addr()) {
-      send(relay_address);
+      send(relay_address, true);
     }
   }
 }
