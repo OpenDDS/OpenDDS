@@ -156,19 +156,19 @@ public:
    */
   void drop_messages(bool flag)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    ACE_GUARD(ACE_Thread_Mutex, g, config_lock_);
     drop_messages_ = flag;
   }
 
   void drop_messages_m(double m)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    ACE_GUARD(ACE_Thread_Mutex, g, config_lock_);
     drop_messages_m_ = m;
   }
 
   void drop_messages_b(double b)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    ACE_GUARD(ACE_Thread_Mutex, g, config_lock_);
     drop_messages_b_ = b;
   }
 
@@ -218,6 +218,8 @@ private:
   bool drop_messages_;
   double drop_messages_m_;
   double drop_messages_b_;
+
+  mutable ACE_Thread_Mutex config_lock_;
 };
 
 } // namespace DCPS

@@ -984,6 +984,9 @@ public:
     const GUID_t& subId,
     const DCPS::TransportLocatorSeq& transInfo);
 
+  RcHandle<DCPS::TransportInst> sedp_transport_inst(DDS::DomainId_t domainId,
+                                                    const GUID_t& partId) const;
+
 private:
   ParticipantHandle get_part(const DDS::DomainId_t domain_id, const GUID_t& part_id) const;
 
