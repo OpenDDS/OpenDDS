@@ -11,12 +11,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   Bench::ParseParameters parse_parameters;
   Bench::ArgumentParser argument_parser;
 
-  if (!argument_parser.parse(argc, argv, output_type, output_format, report, output_stream, parse_parameters)) {
+  int result = EXIT_FAILURE;
+  try {
+    if (!argument_parser.parse(argc, argv, output_type, output_format, report, output_stream, parse_parameters)) {
+      std::cerr << "Failed to parse arguments. Exiting." << std::endl;
       return EXIT_FAILURE;
+    }
+
+    std::ostream& out = output_stream ? *output_stream : std::cout;
+
+    Bench::ReportParser report_parser;
+    result = report_parser.parse(output_type, output_format, report, out, parse_parameters);
+  } catch (...) {
+    std::cerr << "Caught Unhandled Exception. Exiting." << std::endl;
   }
 
-  std::ostream& out = output_stream ? *output_stream : std::cout;
-
-  Bench::ReportParser report_parser;
-  return report_parser.parse(output_type, output_format, report, out, parse_parameters);
+  return result;
 }
