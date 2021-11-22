@@ -215,7 +215,7 @@ double ProcessStatsCollector::get_cpu_usage() noexcept
 
     if (time > last_time_) {
       percent = 100.0 * static_cast<double>((sys_time - last_sys_time_) + (user_time - last_user_time_));
-      percent /= time - last_time_; // total cpu time is across all processorss (ignore num_processors_)
+      percent /= time - last_time_; // total cpu time is across all processors (ignore num_processors_)
 
       last_time_ = time;
       last_sys_time_ = sys_time;
