@@ -76,29 +76,37 @@ public:
       "    [0] = 5\n"
       "    [1] = 6\n"
       "};\n";
-
     String nested_struct_string =
       "struct ::Dynamic::outer_struct {\n"
-      "  ::Dynamic::inner_struct isstruct ::Dynamic::inner_struct {\n"
-      "    Int32 l = 5\n"
+      "  struct ::Dynamic::inner_struct {\n"
+      "    union ::Dynamic::inner_union {\n"
+      "      Int32 discriminator = 2\n"
+      "      ::Dynamic::bool_seq my_alias_seq Boolean[2] =\n"
+      "        [0] = false\n"
+      "        [1] = true\n"
+      "    };\n"
       "  };\n"
       "};\n";
-    String union_string =
-      "union ::Dynamic::my_union {\n"
-      "  Int32 discriminator = 2\n"
-      "  ::Dynamic::bool_seq my_alias_seq Boolean[2] =\n"
-      "    [0] = false\n"
-      "    [1] = true\n"
-      "};\n";
     String default_union_string =
-      "union ::Dynamic::my_union {\n"
+      "union ::Dynamic::inner_union {\n"
       "  Int32 discriminator = -2147483647\n"
       "  Boolean b = true\n"
       "};\n";
+    String nested_union_string =
+      "union ::Dynamic::outer_union {\n"
+      "  ::Dynamic::EnumType discriminator = V1\n"
+      "  struct ::Dynamic::inner_struct {\n"
+      "    union ::Dynamic::inner_union {\n"
+      "      Int32 discriminator = 1\n"
+      "      Int32 l = 5\n"
+      "    };\n"
+      "  };\n"
+      "};\n";
+
     if (my_type != struct_string &&
         my_type != nested_struct_string &&
-        my_type != union_string &&
         my_type != default_union_string &&
+        my_type != nested_union_string &&
         log_level >= LogLevel::Error) {
        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TestRecorderListener::on_sample_data_received:"
          " Type did not match\n"));

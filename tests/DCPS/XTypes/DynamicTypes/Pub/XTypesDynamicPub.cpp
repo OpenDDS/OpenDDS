@@ -60,37 +60,45 @@ void struct_narrow_write(DataWriter_var dw)
 
 void nested_struct_narrow_write(DataWriter_var dw)
 {
-  Dynamic::inner_struct is;
   Dynamic::outer_struct os;
-  is.l = 5;
-  os.is = is;
-  Dynamic::outer_structDataWriter_var narrow_dw = Dynamic::outer_structDataWriter::_narrow(dw);
-  InstanceHandle_t handle = narrow_dw->register_instance(os);
-  narrow_dw->write(os, handle);
-}
-
-void union_narrow_write(DataWriter_var dw)
-{
-  Dynamic::my_union foo;
+  Dynamic::inner_struct is;
+  Dynamic::inner_union foo;
   foo._d(2);
   Dynamic::bool_seq bs;
   bs.length(2);
   bs[0] = false;
   bs[1] = true;
   foo.my_alias_seq(bs);
-  Dynamic::my_unionDataWriter_var narrow_dw = Dynamic::my_unionDataWriter::_narrow(dw);
-  InstanceHandle_t handle = narrow_dw->register_instance(foo);
-  narrow_dw->write(foo, handle);
+  is.iu = foo;
+  os.is = is;
+  Dynamic::outer_structDataWriter_var narrow_dw = Dynamic::outer_structDataWriter::_narrow(dw);
+  InstanceHandle_t handle = narrow_dw->register_instance(os);
+  narrow_dw->write(os, handle);
 }
 
 void union_default_narrow_write(DataWriter_var dw)
 {
-  Dynamic::my_union foo;
+  Dynamic::inner_union foo;
   foo._d(3);
   foo.b(true);
-  Dynamic::my_unionDataWriter_var narrow_dw = Dynamic::my_unionDataWriter::_narrow(dw);
+  Dynamic::inner_unionDataWriter_var narrow_dw = Dynamic::inner_unionDataWriter::_narrow(dw);
   InstanceHandle_t handle = narrow_dw->register_instance(foo);
   narrow_dw->write(foo, handle);
+}
+
+void nested_union_narrow_write(DataWriter_var dw)
+{
+  Dynamic::outer_union ou;
+  Dynamic::inner_struct is;
+  Dynamic::inner_union iu;
+  iu._d(1);
+  iu.l(5);
+  is.iu = iu;
+  ou._d(Dynamic::V1);
+  ou.is(is);
+  Dynamic::outer_unionDataWriter_var narrow_dw = Dynamic::outer_unionDataWriter::_narrow(dw);
+  InstanceHandle_t handle = narrow_dw->register_instance(ou);
+  narrow_dw->write(ou, handle);
 }
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
@@ -115,9 +123,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     ts_var = new Dynamic::my_structTypeSupportImpl;
   } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("nested"))) {
     ts_var = new Dynamic::outer_structTypeSupportImpl;
-  } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("union")) ||
-             !ACE_OS::strcmp(type_name, ACE_TEXT("union_default"))) {
-    ts_var = new Dynamic::my_unionTypeSupportImpl;
+  } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("union_default"))) {
+    ts_var = new Dynamic::inner_unionTypeSupportImpl;
+  } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("nested_union"))) {
+    ts_var = new Dynamic::outer_unionTypeSupportImpl;
   }
   ts_var->register_type(dp, ACE_TEXT_ALWAYS_CHAR(type_name));
 
@@ -148,10 +157,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     struct_narrow_write(dw);
   } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("nested"))) {
     nested_struct_narrow_write(dw);
-  } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("union"))) {
-    union_narrow_write(dw);
   } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("union_default"))) {
     union_default_narrow_write(dw);
+  } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("nested_union"))) {
+    nested_union_narrow_write(dw);
   }
   if (Utils::wait_match(dw, 0, Utils::EQ)) {
     if (log_level >= LogLevel::Error) {
