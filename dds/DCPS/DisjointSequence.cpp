@@ -202,7 +202,7 @@ DisjointSequence::insert_bitmap_range(RangeSet::Container::iterator& iter,
 
 bool
 DisjointSequence::to_bitmap(ACE_CDR::Long bitmap[], ACE_CDR::ULong length,
-                            ACE_CDR::ULong& num_bits, bool invert) const
+                            ACE_CDR::ULong& num_bits, ACE_CDR::ULong& cumulative_bits_added, bool invert) const
 {
   // num_bits will be 1 more than the index of the last bit we wrote
   num_bits = 0;
@@ -226,7 +226,7 @@ DisjointSequence::to_bitmap(ACE_CDR::Long bitmap[], ACE_CDR::ULong length,
       high = ACE_CDR::ULong(iter->second.getValue() - base.getValue());
     }
 
-    if (!fill_bitmap_range(low, high, bitmap, length, num_bits)) {
+    if (!fill_bitmap_range(low, high, bitmap, length, num_bits, cumulative_bits_added)) {
       return false;
     }
   }
@@ -237,7 +237,7 @@ DisjointSequence::to_bitmap(ACE_CDR::Long bitmap[], ACE_CDR::ULong length,
 bool
 DisjointSequence::fill_bitmap_range(ACE_CDR::ULong low, ACE_CDR::ULong high,
                                     ACE_CDR::Long bitmap[], ACE_CDR::ULong length,
-                                    ACE_CDR::ULong& num_bits)
+                                    ACE_CDR::ULong& num_bits, ACE_CDR::ULong& cumulative_bits_added)
 {
   bool clamped = false;
   if ((low / 32) >= length) {
@@ -288,6 +288,7 @@ DisjointSequence::fill_bitmap_range(ACE_CDR::ULong low, ACE_CDR::ULong high,
   }
 
   num_bits = high + 1;
+  cumulative_bits_added += high - low + 1;
   return !clamped;
 }
 

@@ -52,7 +52,7 @@ public:
   /// Returns true if the bitmap was changed.
   bool remove_frags_from_bitmap(CORBA::Long bitmap[], CORBA::ULong num_bits,
                                 const SequenceNumber& base,
-                                const RepoId& pub_id);
+                                const RepoId& pub_id, ACE_CDR::ULong& samples_requested);
 
   /// Remove any saved fragments.  We do not expect to receive any more
   /// fragments with sequence numbers in "range" from publication "pub_id".

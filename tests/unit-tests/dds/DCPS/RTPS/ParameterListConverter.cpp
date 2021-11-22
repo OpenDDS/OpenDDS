@@ -957,10 +957,10 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   { // Should encode participant meta unicast locators properly
     Locator_t locators[2];
     Locator_t locator_out;
-    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+    locators[0] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv4,
                                    1234,
                                    127, 0, 0, 1);
-    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+    locators[1] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv6,
                                    7734,
                                    107, 9, 8, 21);
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
@@ -985,10 +985,10 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should decode participant meta unicast locators properly
     Locator_t locators[2];
-    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+    locators[0] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv4,
                                    1234,
                                    127, 0, 0, 1);
-    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+    locators[1] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv6,
                                    7734,
                                    107, 9, 8, 21);
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
@@ -1016,10 +1016,10 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should encode participant meta multicast locators properly
     Locator_t locators[2];
-    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+    locators[0] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv4,
                                    1234,
                                    127, 0, 0, 1);
-    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+    locators[1] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv6,
                                    7734,
                                    107, 9, 8, 21);
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
@@ -1047,10 +1047,10 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should decode participant meta multicast locators properly
     Locator_t locators[2];
-    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+    locators[0] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv4,
                                    1234,
                                    127, 0, 0, 1);
-    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+    locators[1] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv6,
                                    7734,
                                    107, 9, 8, 21);
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
@@ -1079,10 +1079,10 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   { // Should encode participant default unicast locators properly
     Locator_t locators[2];
     Locator_t locator_out;
-    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+    locators[0] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv4,
                                    1234,
                                    127, 0, 0, 1);
-    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+    locators[1] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv6,
                                    7734,
                                    107, 9, 8, 21);
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
@@ -1107,10 +1107,10 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should decode participant default unicast locators properly
     Locator_t locators[2];
-    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+    locators[0] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv4,
                                    1234,
                                    127, 0, 0, 1);
-    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+    locators[1] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv6,
                                    7734,
                                    107, 9, 8, 21);
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
@@ -1139,10 +1139,10 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   { // Should encode participant default multicast locators properly
     Locator_t locators[2];
     Locator_t locator_out;
-    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+    locators[0] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv4,
                                    1234,
                                    127, 0, 0, 1);
-    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+    locators[1] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv6,
                                    7734,
                                    107, 9, 8, 21);
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
@@ -1168,10 +1168,10 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should decode participant default multicast locators properly
     Locator_t locators[2];
-    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+    locators[0] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv4,
                                    1234,
                                    127, 0, 0, 1);
-    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+    locators[1] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv6,
                                    7734,
                                    107, 9, 8, 21);
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
@@ -2449,10 +2449,10 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should encode writer unicast locators
     Locator_t locators[2];
-    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+    locators[0] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv4,
                                    1234,
                                    127, 0, 0, 1);
-    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+    locators[1] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv6,
                                    7734,
                                    107, 9, 8, 21);
     DiscoveredWriterData writer_data = Factory::writer_data(
@@ -2478,10 +2478,10 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   }
   { // Should decode writer unicast locators into allLocators
     Locator_t locators[2];
-    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+    locators[0] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv4,
                                    1234,
                                    127, 0, 0, 1);
-    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+    locators[1] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv6,
                                    7734,
                                    107, 9, 8, 21);
     DiscoveredWriterData writer_data = Factory::writer_data(
@@ -2508,10 +2508,10 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should encode writer multicast locators
     Locator_t locators[2];
-    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+    locators[0] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv4,
                                    1234,
                                    227, 200, 0, 1);
-    locators[1] = Factory::locator(LOCATOR_KIND_UDPv4,
+    locators[1] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv4,
                                    7734,
                                    237, 9, 8, 21);
     DiscoveredWriterData writer_data = Factory::writer_data(
@@ -2536,10 +2536,10 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   }
   { // Should decode writer multicast locators
     Locator_t locators[2];
-    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+    locators[0] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv4,
                                    1234,
                                    127, 0, 0, 1);
-    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+    locators[1] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv6,
                                    7734,
                                    107, 9, 8, 21);
     DiscoveredWriterData writer_data = Factory::writer_data(
@@ -3164,10 +3164,10 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should encode reader unicast locators
     Locator_t locators[2];
-    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+    locators[0] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv4,
                                    1234,
                                    127, 0, 0, 1);
-    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+    locators[1] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv6,
                                    7734,
                                    107, 9, 8, 21);
     DiscoveredReaderData reader_data = Factory::reader_data(
@@ -3192,10 +3192,10 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   }
   { // Should decode reader unicast locators
     Locator_t locators[2];
-    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+    locators[0] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv4,
                                    1234,
                                    127, 0, 0, 1);
-    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+    locators[1] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv6,
                                    7734,
                                    107, 9, 8, 21);
     DiscoveredReaderData reader_data = Factory::reader_data(
@@ -3220,10 +3220,10 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should encode reader multicast locators
     Locator_t locators[2];
-    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+    locators[0] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv4,
                                    1234,
                                    227, 0, 0, 1);
-    locators[1] = Factory::locator(LOCATOR_KIND_UDPv4,
+    locators[1] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv4,
                                    7734,
                                    237, 9, 8, 21);
     DiscoveredReaderData reader_data = Factory::reader_data(
@@ -3251,10 +3251,10 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   }
   { // Should decode reader multicast locators
     Locator_t locators[2];
-    locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+    locators[0] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv4,
                                    1234,
                                    227, 0, 0, 1);
-    locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+    locators[1] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv6,
                                    7734,
                                    237, 9, 8, 21);
     DiscoveredReaderData reader_data = Factory::reader_data(
@@ -3400,16 +3400,16 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   { // Should set reader defaults
     Locator_t uc_locators[2];
     Locator_t mc_locators[2];
-    uc_locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+    uc_locators[0] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv4,
                                       1234,
                                       127, 0, 0, 1);
-    uc_locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+    uc_locators[1] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv6,
                                       7734,
                                       107, 9, 8, 21);
-    mc_locators[0] = Factory::locator(LOCATOR_KIND_UDPv4,
+    mc_locators[0] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv4,
                                       1234,
                                       127, 0, 0, 1);
-    mc_locators[1] = Factory::locator(LOCATOR_KIND_UDPv6,
+    mc_locators[1] = Factory::locator(OpenDDS::RTPS::LOCATOR_KIND_UDPv6,
                                       7734,
                                       107, 9, 8, 21);
     const char* ud = "USERDATA TEST";

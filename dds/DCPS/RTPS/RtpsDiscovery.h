@@ -929,10 +929,9 @@ public:
   void spdp_stun_server_address(const ACE_INET_Addr& address);
   void sedp_stun_server_address(const ACE_INET_Addr& address);
 
-  void get_and_reset_relay_message_counts(DDS::DomainId_t domain,
-                                          const DCPS::RepoId& local_participant,
-                                          DCPS::RelayMessageCounts& spdp,
-                                          DCPS::RelayMessageCounts& sedp);
+  void append_transport_statistics(DDS::DomainId_t domain,
+                                   const DCPS::RepoId& local_participant,
+                                   DCPS::TransportStatisticsSequence& seq);
 
   DDS::Subscriber_ptr init_bit(DCPS::DomainParticipantImpl* participant);
 

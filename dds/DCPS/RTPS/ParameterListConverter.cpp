@@ -17,6 +17,7 @@
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/transport/framework/NetworkAddress.h>
 
 #include <cstring>
 
@@ -1651,9 +1652,7 @@ bool to_param_list(const ICE::AgentInfoMap& ai_map,
            limit = agent_info.candidates.end(); pos != limit; ++pos) {
       IceCandidate_t ice_candidate;
       ice_candidate.key = map_pos->first.c_str();
-      ice_candidate.locator.kind = address_to_kind(pos->address);
-      address_to_bytes(ice_candidate.locator.address, pos->address);
-      ice_candidate.locator.port = pos->address.get_port_number();
+      address_to_locator(ice_candidate.locator, pos->address);
       ice_candidate.foundation = pos->foundation.c_str();
       ice_candidate.priority = pos->priority;
       ice_candidate.type = pos->type;

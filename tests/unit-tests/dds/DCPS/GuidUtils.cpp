@@ -11,5 +11,5 @@ using namespace OpenDDS::DCPS;
  */
 TEST(dds_DCPS_GuidUtils, guid_t_vs_octet_array16_size_test)
 {
-  ASSERT_EQ(sizeof(OctetArray16), sizeof(GUID_t));
+  ASSERT_EQ(sizeof(DDS::OctetArray16), sizeof(GUID_t));
 }

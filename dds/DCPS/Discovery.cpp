@@ -11,12 +11,14 @@
 #include "BuiltInTopicUtils.h"
 #include "Registered_Data_Types.h"
 #include "DdsDcpsCoreC.h"
+#include "OpenddsDcpsExtC.h"
 #include "Marked_Default_Qos.h"
 #include "SafetyProfileStreams.h"
 #include "DCPS_Utils.h"
 
 #ifndef DDS_HAS_MINIMUM_BIT
 #include "DdsDcpsCoreTypeSupportImpl.h"
+#include "OpenddsDcpsExtTypeSupportImpl.h"
 #endif /* DDS_HAS_MINIMUM_BIT */
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

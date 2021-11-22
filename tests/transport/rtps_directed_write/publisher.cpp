@@ -35,9 +35,7 @@ public:
 
     ACE_INET_Addr remoteAddr = config.getHostAddress();
     locators.length(1);
-    locators[0].kind = OpenDDS::RTPS::address_to_kind(remoteAddr);
-    locators[0].port = remoteAddr.get_port_number();
-    OpenDDS::RTPS::address_to_bytes(locators[0].address, remoteAddr);
+    address_to_locator(locators[0], remoteAddr);
   }
 
   int run() {
