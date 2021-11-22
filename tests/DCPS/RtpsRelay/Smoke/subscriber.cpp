@@ -67,7 +67,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::TransportInst> transport_inst = TheTransportRegistry->get_inst("sub_rtps");
-    transport_inst->count_messages(true);
+    if (transport_inst) {
+      transport_inst->count_messages(true);
+    }
 
     DDS::DomainParticipantQos part_qos;
     dpf->get_default_participant_qos(part_qos);
@@ -216,7 +218,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     std::cout << "Subscriber Guid: " << OpenDDS::DCPS::LogGuid(guid).c_str() << std::endl;
     OpenDDS::DCPS::TransportStatisticsSequence stats;
     disc->append_transport_statistics(42, guid, stats);
-    transport_inst->append_transport_statistics(stats);
+    if (transport_inst) {
+      transport_inst->append_transport_statistics(stats);
+    }
 
     for (unsigned int i = 0; i != stats.length(); ++i) {
       std::cout << "Subscriber Transport Statistics: " << OpenDDS::DCPS::to_json(stats[i]) << std::endl;
