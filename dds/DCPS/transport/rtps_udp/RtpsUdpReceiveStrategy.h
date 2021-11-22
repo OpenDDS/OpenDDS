@@ -124,6 +124,8 @@ private:
 
   bool check_encoded(const EntityId_t& sender);
 
+  typedef TransportReceiveStrategy<RtpsTransportHeader, RtpsSampleHeader> BaseReceiveStrategy;
+
   RtpsUdpDataLink* link_;
   SequenceNumber last_received_;
 

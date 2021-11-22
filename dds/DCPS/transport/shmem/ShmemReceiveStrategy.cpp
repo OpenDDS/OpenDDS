@@ -21,7 +21,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 ShmemReceiveStrategy::ShmemReceiveStrategy(ShmemDataLink* link)
-  : TransportReceiveStrategy(link->impl().config())
+  : TransportReceiveStrategy<>(link->impl().config())
   , link_(link)
   , current_data_(0)
   , partial_recv_remaining_(0)
