@@ -2235,12 +2235,11 @@ const char* DynamicData::typekind_to_string(TypeKind tk) const
   }
 }
 
-bool print_integral_value(DynamicData& dd, DCPS::String& type_string, TypeKind tk)
-{
-  switch (tk) {
+bool print_integral_value(DynamicData& dd, DCPS::String& type_string, DynamicType_rch dt) {
+  switch (dt->get_descriptor().kind) {
   case TK_ENUM: {
     ACE_CDR::Long val;
-    LBound bit_bound = dd.type()->get_descriptor().bound[0];
+    LBound bit_bound = dt->get_descriptor().bound[0];
     if (bit_bound <= 8) {
       ACE_CDR::Int8 my_int8;
       if (dd.get_int8_value(my_int8, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
@@ -2270,7 +2269,7 @@ bool print_integral_value(DynamicData& dd, DCPS::String& type_string, TypeKind t
       val = my_long;
     }
     DynamicTypeMember_rch temp_dtm;
-    dd.type()->get_member_by_index(temp_dtm, val);
+    dt->get_member_by_index(temp_dtm, val);
     type_string += " = " + temp_dtm->get_descriptor().name + "\n";
     break;
   }
@@ -2436,7 +2435,7 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
   case TK_BYTE:
   case TK_CHAR8:
   case TK_CHAR16:
-    if (!print_integral_value(dd, type_string, dd.type()->get_kind())) {
+    if (!print_integral_value(dd, type_string, dd.type())) {
       return false;
     }
     break;
@@ -2572,7 +2571,13 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
       member_name = iter->second->get_descriptor().name;
       DynamicType_rch base_dt = iter->second->get_descriptor().get_type()->get_base_type();
       type_name = base_dt->get_descriptor().name;
-      type_string += indent + type_name + " " + member_name;
+      if ((iter->second->get_descriptor().get_type()->get_kind() == TK_STRUCTURE ||
+           iter->second->get_descriptor().get_type()->get_kind() == TK_UNION) &&
+          iter->second->get_parent()->get_descriptor().kind == TK_STRUCTURE) {
+        type_string += indent;
+      } else {
+        type_string += indent + type_name + " " + member_name;
+      }
       if (base_dt->get_descriptor().kind == TK_SEQUENCE ||
           base_dt->get_descriptor().kind == TK_ARRAY) {
         DCPS::String ele_type_name = base_dt->get_descriptor().element_type->get_descriptor().name;
@@ -2596,7 +2601,7 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
     ACE_CDR::ULong item_count = dd.get_item_count();
     member_name = dd.type()->get_descriptor().discriminator_type->get_base_type()->get_descriptor().name;
     type_string += indent + member_name + " discriminator";
-    if (!print_integral_value(dd, type_string, dd.type()->get_descriptor().discriminator_type->get_kind())) {
+    if (!print_integral_value(dd, type_string, dd.type()->get_descriptor().discriminator_type)) {
       return false;
     }
 
@@ -2610,7 +2615,13 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
           DynamicType_rch base_dt = iter->second->get_descriptor().get_type()->get_base_type();
           type_name = temp_dtm->get_descriptor().get_type()->get_descriptor().name;
           member_name = temp_dtm->get_descriptor().name;
-          type_string += indent + type_name + " " + member_name;
+          if ((iter->second->get_descriptor().get_type()->get_kind() == TK_STRUCTURE ||
+               iter->second->get_descriptor().get_type()->get_kind() == TK_UNION) &&
+              iter->second->get_parent()->get_descriptor().kind == TK_UNION) {
+            type_string += indent;
+          } else {
+            type_string += indent + type_name + " " + member_name;
+          }
           if (base_dt->get_descriptor().kind == TK_SEQUENCE ||
               base_dt->get_descriptor().kind == TK_ARRAY) {
             DCPS::String ele_type_name = base_dt->get_descriptor().element_type->get_descriptor().name;

@@ -40,19 +40,6 @@ sub run_test {
   $status |= $test->wait_kill("reader_$test_name_param", 15);
   $status |= $test->wait_kill("writer_$test_name_param", 15);
 
-  my $test_name_param = "union";
-  my @reader_args = ("$test_name_param -DCPSConfigFile rtps_disc.ini -ORBLogFile recorder_$test_name_param.log -ORBDebugLevel 10 -DCPSDebugLevel 10");
-  my @writer_args = ("$test_name_param -DCPSConfigFile rtps_disc.ini -ORBLogFile publisher_$test_name_param.log -ORBDebugLevel 10 -DCPSDebugLevel 10");
-
-  $test->process("reader_$test_name_param", './Recorder/xtypes_dynamic_recorder', join(' ', @reader_args));
-  $test->start_process("reader_$test_name_param");
-
-  $test->process("writer_$test_name_param", './Pub/xtypes_dynamic_pub', join(' ', @writer_args));
-  $test->start_process("writer_$test_name_param");
-
-  $status |= $test->wait_kill("reader_$test_name_param", 15);
-  $status |= $test->wait_kill("writer_$test_name_param", 15);
-
   my $test_name_param = "union_default";
   my @reader_args = ("$test_name_param -DCPSConfigFile rtps_disc.ini -ORBLogFile recorder_$test_name_param.log -ORBDebugLevel 10 -DCPSDebugLevel 10");
   my @writer_args = ("$test_name_param -DCPSConfigFile rtps_disc.ini -ORBLogFile publisher_$test_name_param.log -ORBDebugLevel 10 -DCPSDebugLevel 10");
@@ -65,6 +52,20 @@ sub run_test {
 
   $status |= $test->wait_kill("reader_$test_name_param", 15);
   $status |= $test->wait_kill("writer_$test_name_param", 15);
+
+  my $test_name_param = "nested_union";
+  my @reader_args = ("$test_name_param -DCPSConfigFile rtps_disc.ini -ORBLogFile recorder_$test_name_param.log -ORBDebugLevel 10 -DCPSDebugLevel 10");
+  my @writer_args = ("$test_name_param -DCPSConfigFile rtps_disc.ini -ORBLogFile publisher_$test_name_param.log -ORBDebugLevel 10 -DCPSDebugLevel 10");
+
+  $test->process("reader_$test_name_param", './Recorder/xtypes_dynamic_recorder', join(' ', @reader_args));
+  $test->start_process("reader_$test_name_param");
+
+  $test->process("writer_$test_name_param", './Pub/xtypes_dynamic_pub', join(' ', @writer_args));
+  $test->start_process("writer_$test_name_param");
+
+  $status |= $test->wait_kill("reader_$test_name_param", 15);
+  $status |= $test->wait_kill("writer_$test_name_param", 15);
+
 }
 run_test();
 if ($status) {

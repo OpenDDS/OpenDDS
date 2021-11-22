@@ -31,8 +31,28 @@ struct my_struct {
   short my_anon_arr[2];
 };
 
+@topic
+@mutable
+@::OpenDDS::data_representation(XCDR2)
+union inner_union switch (long) {
+  case 1: long l;
+  case 2: bool_seq my_alias_seq;
+  default: boolean b;
+};
+
+@final
+@::OpenDDS::data_representation(XCDR2)
 struct inner_struct {
-  long l;
+  inner_union iu;
+};
+
+@topic
+@mutable
+@::OpenDDS::data_representation(XCDR2)
+union outer_union switch (EnumType) {
+  case V1: inner_struct is;
+  case V2: inner_union mu;
+  default: boolean b;
 };
 
 @topic
@@ -40,13 +60,5 @@ struct inner_struct {
 @::OpenDDS::data_representation(XCDR2)
 struct outer_struct {
   inner_struct is;
-};
-
-@topic
-@mutable
-union my_union switch (long) {
-  case 1: long double ld;
-  case 2: bool_seq my_alias_seq;
-  default: boolean b;
 };
 };
