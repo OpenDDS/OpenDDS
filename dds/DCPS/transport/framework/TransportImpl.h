@@ -10,7 +10,7 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
+#include "dds/OpenddsDcpsExtC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DCPS/PoolAllocator.h"
@@ -106,7 +106,7 @@ public:
                                const TransportLocatorSeq& /*locators*/) { }
 
   virtual void rtps_relay_address_change() {}
-  virtual void get_and_reset_relay_message_counts(RelayMessageCounts& /*counts*/) {}
+  virtual void append_transport_statistics(TransportStatisticsSequence& /*seq*/) {}
 
   /// Interface to the transport's reactor for scheduling timers.
   ACE_Reactor_Timer_Interface* timer() const;

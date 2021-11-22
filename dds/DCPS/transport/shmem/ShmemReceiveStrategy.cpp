@@ -6,7 +6,10 @@
  */
 
 #include "ShmemReceiveStrategy.h"
+
 #include "ShmemDataLink.h"
+#include "ShmemInst.h"
+#include "ShmemTransport.h"
 
 #include "dds/DCPS/transport/framework/TransportHeader.h"
 
@@ -18,7 +21,8 @@ namespace OpenDDS {
 namespace DCPS {
 
 ShmemReceiveStrategy::ShmemReceiveStrategy(ShmemDataLink* link)
-  : link_(link)
+  : TransportReceiveStrategy<>(link->impl().config())
+  , link_(link)
   , current_data_(0)
   , partial_recv_remaining_(0)
   , partial_recv_ptr_(0)

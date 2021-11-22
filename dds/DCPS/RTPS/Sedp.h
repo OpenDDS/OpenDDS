@@ -588,7 +588,7 @@ public:
 
   DCPS::JobQueue_rch job_queue() const { return job_queue_; }
 
-  void get_and_reset_relay_message_counts(DCPS::RelayMessageCounts& counts);
+  void append_transport_statistics(DCPS::TransportStatisticsSequence& seq);
 
   void ignore(const GUID_t& to_ignore);
 
@@ -655,7 +655,7 @@ public:
     type_lookup_service_ = type_lookup_service;
   }
 
-  bool should_drop(ssize_t length) const;
+  RcHandle<DCPS::TransportInst> transport_inst() const { return transport_inst_; }
 
 private:
   bool remote_knows_about_local_i(const GUID_t& local, const GUID_t& remote) const;

@@ -294,11 +294,6 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
 {
   OPENDDS_ASSERT(addr != ACE_INET_Addr());
 
-  if (addr == link_->transport().config().rtps_relay_address()) {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, link_->transport().relay_message_counts_mutex_, -1);
-    ++link_->transport().relay_message_counts_.rtps_send;
-  }
-
   const ACE_SOCK_Dgram& socket = choose_send_socket(addr);
 
 #ifdef OPENDDS_TESTING_FEATURES
@@ -325,9 +320,10 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
   const ssize_t result = socket.send(iov, n, addr);
 #endif
   if (result < 0) {
-    if (addr == link_->transport().config().rtps_relay_address()) {
-      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, link_->transport().relay_message_counts_mutex_, -1);
-      ++link_->transport().relay_message_counts_.rtps_send_fail;
+    if (link_->transport().config().count_messages()) {
+      const InternalMessageCountKey key(addr, MCK_RTPS, addr == link_->transport().config().rtps_relay_address());
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, link_->transport().transport_statistics_mutex_, -1);
+      link_->transport().transport_statistics_.message_count[key].send_fail(result);
     }
     const int err = errno;
     if (err != ENETUNREACH || !network_is_unreachable_.value()) {
@@ -348,6 +344,11 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
     // Reset errno since the rest of framework expects it.
     errno = err;
   } else {
+    if (link_->transport().config().count_messages()) {
+      const InternalMessageCountKey key(addr, MCK_RTPS, addr == link_->transport().config().rtps_relay_address());
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, link_->transport().transport_statistics_mutex_, -1);
+      link_->transport().transport_statistics_.message_count[key].send(result);
+    }
     network_is_unreachable_ = false;
   }
   return result;

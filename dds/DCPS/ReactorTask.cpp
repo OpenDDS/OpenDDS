@@ -8,10 +8,10 @@
 #include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
 
 #include "ReactorTask.h"
-
 #if !defined (__ACE_INLINE__)
 #include "ReactorTask.inl"
 #endif /* __ACE_INLINE__ */
+#include "ThreadMonitor.h"
 
 #include <ace/Select_Reactor.h>
 #include <ace/WFMO_Reactor.h>
@@ -265,6 +265,13 @@ const char* ThreadStatusManager::status_to_string(ThreadStatus status)
   }
 }
 
+bool ThreadStatusManager::update_busy(const String& thread_key, double pbusy)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
+  load_map_[thread_key] = pbusy;
+  return true;
+}
+
 bool ThreadStatusManager::update(const String& thread_key, ThreadStatus status)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
@@ -291,6 +298,9 @@ bool ThreadStatusManager::update(const String& thread_key, ThreadStatus status)
     break;
 
   default:
+    if (map_.find(thread_key) == map_.end() && ThreadMonitor::installed_monitor_) {
+      ThreadMonitor::installed_monitor_->preset(this, thread_key.c_str());
+    }
     map_[thread_key] = Thread(now, status);
   }
 

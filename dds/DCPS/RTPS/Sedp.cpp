@@ -374,9 +374,7 @@ Sedp::init(const RepoId& guid,
 {
   type_lookup_service_ = tls;
 
-  char domainStr[16];
-  ACE_OS::snprintf(domainStr, 16, "%d", domainId);
-
+  const OPENDDS_STRING domainStr = DCPS::to_dds_string(domainId);
   const OPENDDS_STRING key = DCPS::GuidConverter(guid).uniqueParticipantId();
 
   // configure one transport
@@ -398,6 +396,8 @@ Sedp::init(const RepoId& guid,
   rtps_inst->send_delay_ = disco.config()->sedp_send_delay();
   rtps_inst->send_buffer_size_ = disco.config()->send_buffer_size();
   rtps_inst->rcv_buffer_size_ = disco.config()->recv_buffer_size();
+  rtps_inst->receive_preallocated_message_blocks_ = disco.config()->sedp_receive_preallocated_message_blocks();
+  rtps_inst->receive_preallocated_data_blocks_ = disco.config()->sedp_receive_preallocated_data_blocks();
 
   if (disco.sedp_multicast()) {
     // Bind to a specific multicast group
@@ -5927,9 +5927,9 @@ Sedp::stun_server_address(const ACE_INET_Addr& address)
 }
 
 void
-Sedp::get_and_reset_relay_message_counts(DCPS::RelayMessageCounts& counts)
+Sedp::append_transport_statistics(DCPS::TransportStatisticsSequence& seq)
 {
-  transport_inst_->get_and_reset_relay_message_counts(counts);
+  transport_inst_->append_transport_statistics(seq);
 }
 
 bool locators_changed(const ParticipantProxy_t& x,
@@ -6356,11 +6356,6 @@ void Sedp::update_subscription_locators(
     iter->second.trans_info_ = transInfo;
     write_subscription_data(subscriptionId, iter->second);
   }
-}
-
-bool Sedp::should_drop(ssize_t length) const
-{
-  return transport_inst_->should_drop(length);
 }
 
 bool Sedp::remote_knows_about_local_i(const GUID_t& local, const GUID_t& remote) const

@@ -22,6 +22,7 @@
 #include <dds/DCPS/PeriodicTask.h>
 #include <dds/DCPS/SporadicTask.h>
 #include <dds/DCPS/transport/framework/TransportSendBuffer.h>
+#include <dds/DCPS/transport/framework/TransportStatistics.h>
 #include <dds/DCPS/NetworkConfigMonitor.h>
 #include <dds/DCPS/DataSampleElement.h>
 #include <dds/DCPS/DisjointSequence.h>
@@ -90,7 +91,9 @@ public:
   RtpsUdpDataLink(RtpsUdpTransport& transport,
                   const GuidPrefix_t& local_prefix,
                   const RtpsUdpInst& config,
-                  const ReactorTask_rch& reactor_task);
+                  const ReactorTask_rch& reactor_task,
+                  InternalTransportStatistics& transport_statistics,
+                  ACE_Thread_Mutex& transport_statistics_mutex);
 
   ~RtpsUdpDataLink();
 
@@ -660,11 +663,13 @@ private:
     void gather_ack_nacks_i(const WriterInfo_rch& writer,
                             const RtpsUdpDataLink_rch& link,
                             bool heartbeat_was_non_final,
-                            MetaSubmessageVec& meta_submessages);
+                            MetaSubmessageVec& meta_submessages,
+                            ACE_CDR::ULong& cumulative_bits_added);
     void generate_nack_frags_i(MetaSubmessageVec& meta_submessages,
                                const WriterInfo_rch& wi,
                                EntityId_t reader_id,
-                               EntityId_t writer_id);
+                               EntityId_t writer_id,
+                               ACE_CDR::ULong& cumulative_bits_added);
 
     mutable ACE_Thread_Mutex mutex_;
     WeakRcHandle<RtpsUdpDataLink> link_;
@@ -749,10 +754,11 @@ private:
   /// @param extent is the highest fragment sequence number for this
   /// FragmentNumberSet
   static void extend_bitmap_range(RTPS::FragmentNumberSet& fnSet,
-                                  CORBA::ULong extent);
+                                  CORBA::ULong extent,
+                                  ACE_CDR::ULong& cumulative_bits_added);
 
-  void durability_resend(TransportQueueElement* element);
-  void durability_resend(TransportQueueElement* element, const RTPS::FragmentNumberSet& fragmentSet);
+  void durability_resend(TransportQueueElement* element, size_t& cumulative_send_count);
+  void durability_resend(TransportQueueElement* element, const RTPS::FragmentNumberSet& fragmentSet, size_t& cumulative_send_count);
 
   static bool include_fragment(const TransportQueueElement& element,
                                const DisjointSequence& fragments,
@@ -879,6 +885,8 @@ private:
   CountMapType heartbeat_counts_;
 
   const size_t max_bundle_size_;
+  InternalTransportStatistics& transport_statistics_;
+  ACE_Thread_Mutex& transport_statistics_mutex_;
 
   class DeliverHeldData {
   public:

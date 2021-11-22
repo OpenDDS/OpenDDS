@@ -6,6 +6,9 @@
  */
 
 #include "TransportReceiveStrategy_T.h"
+
+#include "TransportInst.h"
+
 #include "ace/INET_Addr.h"
 #include "ace/Min_Max.h"
 
@@ -19,12 +22,12 @@ namespace OpenDDS {
 namespace DCPS {
 
 template<typename TH, typename DSH>
-TransportReceiveStrategy<TH, DSH>::TransportReceiveStrategy()
+TransportReceiveStrategy<TH, DSH>::TransportReceiveStrategy(const TransportInst& config)
   : gracefully_disconnected_(false),
     receive_sample_remaining_(0),
-    mb_allocator_(MESSAGE_BLOCKS),
-    db_allocator_(DATA_BLOCKS),
-    data_allocator_(RECEIVE_BUFFERS * 2),
+    mb_allocator_(config.receive_preallocated_message_blocks_ ? config.receive_preallocated_message_blocks_ : MESSAGE_BLOCKS),
+    db_allocator_(config.receive_preallocated_data_blocks_ ? config.receive_preallocated_data_blocks_ : DATA_BLOCKS),
+    data_allocator_(config.receive_preallocated_data_blocks_ ? config.receive_preallocated_data_blocks_ : RECEIVE_BUFFERS * 2),
     buffer_index_(0),
     payload_(0),
     good_pdu_(true),
@@ -34,14 +37,14 @@ TransportReceiveStrategy<TH, DSH>::TransportReceiveStrategy()
 
   if (Transport_debug_level >= 2) {
     ACE_DEBUG((LM_DEBUG,"(%P|%t) TransportReceiveStrategy-mb"
-               " Cached_Allocator_With_Overflow %x with %d chunks\n",
-               &mb_allocator_, MESSAGE_BLOCKS));
+               " Cached_Allocator_With_Overflow %@ with %B chunks\n",
+               &mb_allocator_, mb_allocator_.n_chunks()));
     ACE_DEBUG((LM_DEBUG,"(%P|%t) TransportReceiveStrategy-db"
-               " Cached_Allocator_With_Overflow %x with %d chunks\n",
-               &db_allocator_, DATA_BLOCKS));
+               " Cached_Allocator_With_Overflow %@ with %B chunks\n",
+               &db_allocator_, db_allocator_.n_chunks()));
     ACE_DEBUG((LM_DEBUG,"(%P|%t) TransportReceiveStrategy-data"
-               " Cached_Allocator_With_Overflow %x with %d chunks\n",
-               &data_allocator_, DATA_BLOCKS));
+               " Cached_Allocator_With_Overflow %@ with %B chunks\n",
+               &data_allocator_, data_allocator_.n_chunks()));
   }
 
   ACE_OS::memset(this->receive_buffers_, 0, sizeof(this->receive_buffers_));
@@ -63,7 +66,7 @@ TransportReceiveStrategy<TH, DSH>::~TransportReceiveStrategy()
     }
   }
 
-  for (int index = 0; index < RECEIVE_BUFFERS; ++index) {
+  for (size_t index = 0; index < RECEIVE_BUFFERS; ++index) {
     if (receive_buffers_[index] != 0) {
       ACE_DES_FREE(
                    receive_buffers_[index],
@@ -93,7 +96,7 @@ TransportReceiveStrategy<TH, DSH>::handle_simple_dds_input(ACE_HANDLE fd)
 {
   DBG_ENTRY_LVL("TransportReceiveStrategy", "handle_simple_dds_input", 6);
 
-  for (int index = 0; index < RECEIVE_BUFFERS; ++index) {
+  for (size_t index = 0; index < RECEIVE_BUFFERS; ++index) {
     if (receive_buffers_[index] == 0) {
       ACE_NEW_MALLOC_RETURN(
         receive_buffers_[index],
@@ -1070,7 +1073,7 @@ TransportReceiveStrategy<TH, DSH>::reset()
   this->payload_ = 0;
   this->good_pdu_ = true;
   this->pdu_remaining_ = 0;
-  for (int i = 0; i < RECEIVE_BUFFERS; ++i) {
+  for (size_t i = 0; i < RECEIVE_BUFFERS; ++i) {
     ACE_Message_Block& rb = *this->receive_buffers_[i];
     rb.rd_ptr(rb.wr_ptr());
   }

@@ -70,7 +70,9 @@ const size_t ONE_SAMPLE_PER_PACKET = 1;
 RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
                                  const GuidPrefix_t& local_prefix,
                                  const RtpsUdpInst& config,
-                                 const ReactorTask_rch& reactor_task)
+                                 const ReactorTask_rch& reactor_task,
+                                 InternalTransportStatistics& transport_statistics,
+                                 ACE_Thread_Mutex& transport_statistics_mutex)
   : DataLink(transport, // 3 data link "attributes", below, are unused
              0,         // priority
              false,     // is_loopback
@@ -87,6 +89,8 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
   , heartbeat_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::send_heartbeats)
   , heartbeatchecker_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::check_heartbeats)
   , max_bundle_size_(config.max_message_size_ - RTPS::RTPSHDR_SZ) // default maximum bundled message size is max udp message size (see TransportStrategy) minus RTPS header
+  , transport_statistics_(transport_statistics)
+  , transport_statistics_mutex_(transport_statistics_mutex)
 #ifdef OPENDDS_SECURITY
   , security_config_(Security::SecurityRegistry::instance()->default_config())
   , local_crypto_handle_(DDS::HANDLE_NIL)
@@ -2072,11 +2076,17 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
       first_ever_hb = true;
     }
 
+    ACE_CDR::ULong cumulative_bits_added = 0;
     if (!writer->recvd_.empty()) {
       writer->hb_last_ = std::max(writer->hb_last_, hb_last);
-      gather_ack_nacks_i(writer, link, !(heartbeat.smHeader.flags & RTPS::FLAG_F), meta_submessages);
+      gather_ack_nacks_i(writer, link, !(heartbeat.smHeader.flags & RTPS::FLAG_F), meta_submessages, cumulative_bits_added);
     } else if (link->config().responsive_mode_) {
       gather_preassociation_acknack_i(meta_submessages, writer);
+      ++cumulative_bits_added;
+    }
+    if (cumulative_bits_added && link->config().count_messages()) {
+      ACE_GUARD(ACE_Thread_Mutex, g, link->transport_statistics_mutex_);
+      link->transport_statistics_.reader_nack_count[id_] += cumulative_bits_added;
     }
   } else {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpDataLink::RtpsReader::process_heartbeat_i - %C -> %C invalid heartbeat first=%q last=%q count=%d\n", LogGuid(writer->id_).c_str(), LogGuid(id_).c_str(), hb_first.getValue(), hb_last.getValue(), heartbeat.count.value));
@@ -2368,7 +2378,8 @@ void
 RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(const WriterInfo_rch& writer,
                                                 const RtpsUdpDataLink_rch& link,
                                                 bool heartbeat_was_non_final,
-                                                MetaSubmessageVec& meta_submessages)
+                                                MetaSubmessageVec& meta_submessages,
+                                                ACE_CDR::ULong& cumulative_bits_added)
 {
   const bool should_nack_frags = should_nack_fragments(link, writer);
   if (writer->should_nack() ||
@@ -2389,7 +2400,7 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(const WriterInfo_rch& writer,
       bitmap.length(DisjointSequence::bitmap_num_longs(ack, recvd.last_ack().previous()));
       if (bitmap.length() > 0) {
         (void)recvd.to_bitmap(bitmap.get_buffer(), bitmap.length(),
-                              num_bits, true);
+                              num_bits, cumulative_bits_added, true);
       }
     }
 
@@ -2411,7 +2422,7 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(const WriterInfo_rch& writer,
         CORBA::ULong(recvd.high().getValue() - ack_val) : 0;
       DisjointSequence::fill_bitmap_range(idx_recv_high, idx_hb_high,
                                           bitmap.get_buffer(), new_len,
-                                          num_bits);
+                                          num_bits, cumulative_bits_added);
     }
 
     bool non_empty_bitmap = true;
@@ -2421,7 +2432,7 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(const WriterInfo_rch& writer,
     // in the NACK_FRAG(s) instead.
     const bool frags_modified =
       link->receive_strategy()->remove_frags_from_bitmap(bitmap.get_buffer(),
-                                                         num_bits, ack, writer->id_);
+                                                         num_bits, ack, writer->id_, cumulative_bits_added);
     if (frags_modified) {
       non_empty_bitmap = false;
       for (CORBA::ULong i = 0; i < bitmap.length(); ++i) {
@@ -2455,7 +2466,7 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(const WriterInfo_rch& writer,
     meta_submessages.push_back(meta_submessage);
 
     if (should_nack_frags) {
-      generate_nack_frags_i(meta_submessages, writer, reader_id, writer_id);
+      generate_nack_frags_i(meta_submessages, writer, reader_id, writer_id, cumulative_bits_added);
     }
   } else if (heartbeat_was_non_final) {
     using namespace OpenDDS::RTPS;
@@ -2896,7 +2907,8 @@ void
 RtpsUdpDataLink::RtpsReader::generate_nack_frags_i(MetaSubmessageVec& meta_submessages,
                                                    const WriterInfo_rch& wi,
                                                    EntityId_t reader_id,
-                                                   EntityId_t writer_id)
+                                                   EntityId_t writer_id,
+                                                   ACE_CDR::ULong& cumulative_bits_added)
 {
   typedef OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumber_t)::iterator iter_t;
   typedef RtpsUdpReceiveStrategy::FragmentInfo::value_type Frag_t;
@@ -2921,7 +2933,7 @@ RtpsUdpDataLink::RtpsReader::generate_nack_frags_i(MetaSubmessageVec& meta_subme
     // If we've received a HeartbeatFrag, we know the last (available) frag #
     const iter_t heartbeat_frag = wi->frags_.find(frag_info[i].first);
     if (heartbeat_frag != wi->frags_.end()) {
-      extend_bitmap_range(frag_info[i].second, heartbeat_frag->second.value);
+      extend_bitmap_range(frag_info[i].second, heartbeat_frag->second.value, cumulative_bits_added);
     }
   }
 
@@ -2979,7 +2991,8 @@ RtpsUdpDataLink::RtpsReader::generate_nack_frags_i(MetaSubmessageVec& meta_subme
 
 void
 RtpsUdpDataLink::extend_bitmap_range(RTPS::FragmentNumberSet& fnSet,
-                                     CORBA::ULong extent)
+                                     CORBA::ULong extent,
+                                     ACE_CDR::ULong& samples_requested)
 {
   if (extent < fnSet.bitmapBase.value) {
     return; // can't extend to some number under the base
@@ -2995,7 +3008,7 @@ RtpsUdpDataLink::extend_bitmap_range(RTPS::FragmentNumberSet& fnSet,
   // We are missing from one past old bitmap end to the new end
   DisjointSequence::fill_bitmap_range(fnSet.numBits, new_num_bits,
                                       fnSet.bitmap.get_buffer(), len,
-                                      fnSet.numBits);
+                                      fnSet.numBits, samples_requested);
 }
 
 void
@@ -3054,7 +3067,13 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_frag_i(const RTPS::HeartBeatFragS
   const SequenceNumber seq = to_opendds_seqnum(hb_frag.writerSN);
   if (seq > writer->hb_last_ || !writer->recvd_.contains(seq)) {
     writer->frags_[seq] = hb_frag.lastFragmentNum;
-    gather_ack_nacks_i(writer, link, !(hb_frag.smHeader.flags & RTPS::FLAG_F), meta_submessages);
+    ACE_CDR::ULong cumulative_bits_added = 0;
+    gather_ack_nacks_i(writer, link, !(hb_frag.smHeader.flags & RTPS::FLAG_F), meta_submessages, cumulative_bits_added);
+    if (cumulative_bits_added && link->config().count_messages()) {
+      ACE_GUARD(ACE_Thread_Mutex, g, link->transport_statistics_mutex_);
+      link->transport_statistics_.reader_nack_count[id_] += cumulative_bits_added;
+    }
+
   }
 }
 
@@ -3125,7 +3144,8 @@ RtpsUdpDataLink::RtpsWriter::gather_gaps_i(const ReaderInfo_rch& reader,
   if (gaps.disjoint()) {
     bitmap.length(DisjointSequence::bitmap_num_longs(base, gaps.high()));
     if (bitmap.length() > 0) {
-      (void)gaps.to_bitmap(bitmap.get_buffer(), bitmap.length(), num_bits);
+      ACE_CDR::ULong cumulative_bits_added = 0;
+      (void)gaps.to_bitmap(bitmap.get_buffer(), bitmap.length(), num_bits, cumulative_bits_added);
     }
   }
 
@@ -3511,6 +3531,8 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
   ACE_GUARD(TransportSendBuffer::LockType, guard, send_buff_->strategy_lock());
   SingleSendBuffer::Proxy proxy(*send_buff_);
 
+  size_t cumulative_send_count = 0;
+
   for (ReaderInfoSet::const_iterator pos = readers_expecting_data_.begin(), limit = readers_expecting_data_.end();
        pos != limit; ++pos) {
 
@@ -3536,7 +3558,7 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
               if (s <= dd_last) {
                 const OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator dd_iter = reader->durable_data_.find(s);
                 if (dd_iter != reader->durable_data_.end()) {
-                  link->durability_resend(dd_iter->second);
+                  link->durability_resend(dd_iter->second, cumulative_send_count);
                 } else {
                   gaps.insert(s);
                 }
@@ -3552,7 +3574,7 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
 
         const OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator dd_iter = reader->durable_data_.find(rf->first);
         if (dd_iter != reader->durable_data_.end()) {
-          link->durability_resend(dd_iter->second, rf->second);
+          link->durability_resend(dd_iter->second, rf->second, cumulative_send_count);
         } else if ((!reader->durable_data_.empty() && rf->first < reader->durable_data_.begin()->first)) {
           gaps.insert(rf->first);
         }
@@ -3600,6 +3622,7 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
             const RtpsUdpSendStrategy::OverrideToken ot =
               link->send_strategy()->override_destinations(addrs);
             proxy.resend_i(SequenceRange(seq, seq), 0, reader->id_);
+            ++cumulative_send_count;
             continue;
           }
         } else if (proxy.pre_contains(seq)) {
@@ -3644,7 +3667,7 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
                    rf->second.bitmap.get_buffer());
           const RtpsUdpSendStrategy::OverrideToken ot =
             link->send_strategy()->override_destinations(addrs);
-          proxy.resend_fragments_i(seq, x);
+          proxy.resend_fragments_i(seq, x, cumulative_send_count);
           continue;
         }
       } else if (proxy.pre_contains(seq)) {
@@ -3685,6 +3708,7 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
           link->send_strategy()->override_destinations(readers.size() * 2 > remote_readers_.size() ? multi : uni);
 
           proxy.resend_i(SequenceRange(seq, seq));
+          ++cumulative_send_count;
       }
     }
 
@@ -3696,8 +3720,13 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
       const RtpsUdpSendStrategy::OverrideToken ot =
         link->send_strategy()->override_destinations(readers.size() * 2 > remote_readers_.size() ? multi : uni);
 
-      proxy.resend_fragments_i(pos->first, pos->second);
+      proxy.resend_fragments_i(pos->first, pos->second, cumulative_send_count);
     }
+  }
+
+  if (cumulative_send_count && link->config().count_messages()) {
+    ACE_GUARD(ACE_Thread_Mutex, g, link->transport_statistics_mutex_);
+    link->transport_statistics_.writer_resend_count[id_] += static_cast<ACE_CDR::ULong>(cumulative_send_count);
   }
 
   // Gather the consolidated gaps.
@@ -3985,15 +4014,17 @@ RtpsUdpDataLink::RtpsWriter::acked_by_all_helper_i(TqeSet& to_deliver)
   }
 }
 
-void RtpsUdpDataLink::durability_resend(TransportQueueElement* element)
+void RtpsUdpDataLink::durability_resend(TransportQueueElement* element,
+                                        size_t& cumulative_send_count)
 {
   static CORBA::Long buffer[8];
   static const RTPS::FragmentNumberSet none = { {0}, 0, RTPS::LongSeq8(0, buffer) };
-  durability_resend(element, none);
+  durability_resend(element, none, cumulative_send_count);
 }
 
 void RtpsUdpDataLink::durability_resend(TransportQueueElement* element,
-                                        const RTPS::FragmentNumberSet& fragmentSet)
+                                        const RTPS::FragmentNumberSet& fragmentSet,
+                                        size_t& cumulative_send_count)
 {
   if (Transport_debug_level > 5) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) TRACK RtpsUdpDataLink::durability_resend %q\n", element->sequence().getValue()));
@@ -4022,6 +4053,7 @@ void RtpsUdpDataLink::durability_resend(TransportQueueElement* element,
     if (fragments.empty() || include_fragment(**i, fragments, lastFragment)) {
       RTPS::Message message;
       send_strategy()->send_rtps_control(message, *const_cast<ACE_Message_Block*>((*i)->msg()), addrs);
+      ++cumulative_send_count;
       if (transport_debug.log_messages) {
         parse_submessages(message, *const_cast<ACE_Message_Block*>((*i)->msg()));
         RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", message.hdr.guidPrefix, true, message);

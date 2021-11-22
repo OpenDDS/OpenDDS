@@ -2,6 +2,7 @@
 
 #include <dds/DCPS/AssociationData.h>
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
+#include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
@@ -27,16 +28,12 @@ public:
       throw std::string("Failed to create Subscriber.");
     }
 
-    using OpenDDS::RTPS::address_to_kind;
-    using OpenDDS::RTPS::address_to_bytes;
     using OpenDDS::RTPS::message_block_to_sequence;
 
     ACE_INET_Addr remote_addr("127.0.0.1:12345");
     OpenDDS::DCPS::LocatorSeq locators;
     locators.length(1);
-    locators[0].kind = address_to_kind(remote_addr);
-    locators[0].port = remote_addr.get_port_number();
-    address_to_bytes(locators[0].address, remote_addr);
+    address_to_locator(locators[0], remote_addr);
 
     const OpenDDS::DCPS::Encoding& locators_encoding = OpenDDS::RTPS::get_locators_encoding();
     size_t size_locator = 0;

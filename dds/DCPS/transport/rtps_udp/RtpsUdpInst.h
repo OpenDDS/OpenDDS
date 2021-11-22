@@ -137,7 +137,7 @@ public:
                        const TransportLocatorSeq& locators);
 
   void rtps_relay_address_change();
-  void get_and_reset_relay_message_counts(RelayMessageCounts& counts);
+  void append_transport_statistics(TransportStatisticsSequence& seq);
 
 private:
   friend class RtpsUdpType;

@@ -47,6 +47,7 @@ struct OpenDDS_Dcps_Export ThreadStatusManager {
     // TODO(iguessthislldo): Add Participant GUID
   };
   typedef OPENDDS_MAP(String, Thread) Map;
+  typedef OPENDDS_MAP(String, double) LoadMap;
 
   static const char* status_to_string(ThreadStatus status);
 
@@ -54,6 +55,9 @@ struct OpenDDS_Dcps_Export ThreadStatusManager {
   /// safety_profile_tid is the thread id under safety profile, otherwise unused.
   /// name is for a more human-friendly name that will be appended to the key.
   static String get_key(const char* safety_profile_tid = "", const String& name = "");
+
+  /// Update the busy percent for the identified thread
+  bool update_busy(const String& key, double pbusy);
 
   /// Update the status of a thread to indicate it was able to check in at the
   /// given time. Returns false if failed.
@@ -74,6 +78,7 @@ struct OpenDDS_Dcps_Export ThreadStatusManager {
 private:
   ACE_Thread_Mutex lock_;
   Map map_;
+  LoadMap load_map_;
 };
 
 class OpenDDS_Dcps_Export ReactorTask : public virtual ACE_Task_Base,
