@@ -243,7 +243,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR ** argv)
       return 0;
     }
   } catch (...) {
-    ACE_ERROR((LM_ERROR, "Unknown Exception Caught"));
+    ACE_ERROR((LM_ERROR, "Unknown Exception Caught\n"));
   }
 
   return 1;
