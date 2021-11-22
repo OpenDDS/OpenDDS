@@ -1,3 +1,5 @@
+#include <tao/BooleanSeq.pidl>
+
 module Dynamic {
 typedef sequence<boolean> bool_seq;
 typedef char char_arr[2];
