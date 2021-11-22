@@ -3725,7 +3725,7 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
 
   if (cumulative_send_count && link->config().count_messages()) {
     ACE_GUARD(ACE_Thread_Mutex, g, link->transport_statistics_mutex_);
-    link->transport_statistics_.writer_resend_count[id_] += cumulative_send_count;
+    link->transport_statistics_.writer_resend_count[id_] += static_cast<ACE_CDR::ULong>(cumulative_send_count);
   }
 
   // Gather the consolidated gaps.

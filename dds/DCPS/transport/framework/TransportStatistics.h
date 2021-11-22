@@ -115,12 +115,12 @@ inline void append(TransportStatisticsSequence& seq, const InternalTransportStat
     address_to_locator(mc.locator, pos->first.address);
     mc.kind = pos->first.kind;
     mc.relay = pos->first.relay;
-    mc.send_count = pos->second.send_count();
-    mc.send_bytes = pos->second.send_bytes();
-    mc.send_fail_count = pos->second.send_fail_count();
-    mc.send_fail_bytes = pos->second.send_fail_bytes();
-    mc.recv_count = pos->second.recv_count();
-    mc.recv_bytes = pos->second.recv_bytes();
+    mc.send_count = static_cast<ACE_CDR::ULong>(pos->second.send_count());
+    mc.send_bytes = static_cast<ACE_CDR::ULong>(pos->second.send_bytes());
+    mc.send_fail_count = static_cast<ACE_CDR::ULong>(pos->second.send_fail_count());
+    mc.send_fail_bytes = static_cast<ACE_CDR::ULong>(pos->second.send_fail_bytes());
+    mc.recv_count = static_cast<ACE_CDR::ULong>(pos->second.recv_count());
+    mc.recv_bytes = static_cast<ACE_CDR::ULong>(pos->second.recv_bytes());
     push_back(stats.message_count, mc);
   }
   for (InternalTransportStatistics::GuidCountMap::const_iterator pos = istats.writer_resend_count.begin(),
