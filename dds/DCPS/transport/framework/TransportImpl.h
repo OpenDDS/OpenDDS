@@ -300,7 +300,7 @@ public:
 
 protected:
   /// Id of the last link established.
-  std::size_t last_link_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, size_t> last_link_;
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> is_shut_down_;
 };
 

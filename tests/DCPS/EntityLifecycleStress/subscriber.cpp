@@ -108,6 +108,7 @@ struct DataReaderListenerImpl : public virtual OpenDDS::DCPS::LocalObject<DDS::D
     }
   }
 
+private:
 #ifdef ACE_HAS_CPP11
   std::mutex mutex_;
   std::condition_variable cv_;

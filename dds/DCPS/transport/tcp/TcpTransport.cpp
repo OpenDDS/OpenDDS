@@ -655,13 +655,13 @@ TcpTransport::connect_tcp_datalink(TcpDataLink& link,
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) TcpTransport::connect_tcp_datalink() [%d] - ")
                ACE_TEXT("creating send strategy with priority %d.\n"),
-               last_link_, link.transport_priority()));
+               last_link_.value(), link.transport_priority()));
   }
 
-  connection->id() = last_link_;
+  connection->id() = last_link_.value();
 
   TcpSendStrategy_rch send_strategy (
-    make_rch<TcpSendStrategy>(last_link_, ref(link),
+    make_rch<TcpSendStrategy>(last_link_.value(), ref(link),
                              new TcpSynchResource(link,
                                                   this->config().max_output_pause_period_),
                              this->reactor_task(), link.transport_priority()));

@@ -41,19 +41,11 @@ foreach $a(@ARGV) {
 }
 
 if ($pub_count == 0) {
-  if ($rtps_disc == 0) {
-    $pub_count = 5;
-  } else {
-    $pub_count = 10;
-  }
+  $pub_count = 10;
 }
 
 if ($sub_count == 0) {
-  if ($rtps_disc == 0) {
-    $sub_count = 5;
-  } else {
-    $sub_count = 10;
-  }
+  $sub_count = 10;
 }
 
 my $total_count = $pub_count + $sub_count;

@@ -275,12 +275,10 @@ public:
 
   bool sedp_multicast() const
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
-    return sedp_multicast_;
+    return sedp_multicast_.value();
   }
   void sedp_multicast(bool sm)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     sedp_multicast_ = sm;
   }
 
@@ -490,23 +488,19 @@ public:
 
   bool use_rtps_relay() const
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
-    return use_rtps_relay_;
+    return use_rtps_relay_.value();
   }
   void use_rtps_relay(bool f)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     use_rtps_relay_ = f;
   }
 
   bool rtps_relay_only() const
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
-    return rtps_relay_only_;
+    return rtps_relay_only_.value();
   }
   void rtps_relay_only(bool f)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     rtps_relay_only_ = f;
   }
 
@@ -534,23 +528,19 @@ public:
 
   bool use_ice() const
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
-    return use_ice_;
+    return use_ice_.value();
   }
   void use_ice(bool ui)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     use_ice_ = ui;
   }
 
   bool use_ncm() const
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
-    return use_ncm_;
+    return use_ncm_.value();
   }
   void use_ncm(bool ui)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     use_ncm_ = ui;
   }
 
@@ -567,34 +557,28 @@ public:
 
   bool undirected_spdp() const
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
-    return undirected_spdp_;
+    return undirected_spdp_.value();
   }
   void undirected_spdp(bool value)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     undirected_spdp_ = value;
   }
 
   bool periodic_directed_spdp() const
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
-    return periodic_directed_spdp_;
+    return periodic_directed_spdp_.value();
   }
   void periodic_directed_spdp(bool value)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     periodic_directed_spdp_ = value;
   }
 
   bool secure_participant_user_data() const
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
-    return secure_participant_user_data_;
+    return secure_participant_user_data_.value();
   }
   void secure_participant_user_data(bool value)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     secure_participant_user_data_ = value;
   }
 
@@ -611,12 +595,10 @@ public:
 
   bool use_xtypes() const
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
-    return use_xtypes_;
+    return use_xtypes_.value();
   }
   void use_xtypes(bool use_xtypes)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     use_xtypes_ = use_xtypes;
   }
 
@@ -688,12 +670,10 @@ public:
 
   bool sedp_responsive_mode() const
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-    return sedp_responsive_mode_;
+    return sedp_responsive_mode_.value();
   }
   void sedp_responsive_mode(bool sedp_responsive_mode)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     sedp_responsive_mode_ = sedp_responsive_mode;
   }
 
@@ -735,7 +715,7 @@ private:
   unsigned char ttl_;
   ACE_INT32 send_buffer_size_;
   ACE_INT32 recv_buffer_size_;
-  bool sedp_multicast_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> sedp_multicast_;
   OPENDDS_STRING multicast_interface_;
   ACE_INET_Addr sedp_local_address_, sedp_advertised_address_, spdp_local_address_;
   ACE_INET_Addr default_multicast_group_;  /// FUTURE: handle > 1 group.
@@ -751,26 +731,26 @@ private:
   ACE_INET_Addr spdp_rtps_relay_address_;
   DCPS::TimeDuration spdp_rtps_relay_send_period_;
   ACE_INET_Addr sedp_rtps_relay_address_;
-  bool use_rtps_relay_;
-  bool rtps_relay_only_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> use_rtps_relay_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> rtps_relay_only_;
   ACE_INET_Addr spdp_stun_server_address_;
   ACE_INET_Addr sedp_stun_server_address_;
-  bool use_ice_;
-  bool use_ncm_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> use_ice_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> use_ncm_;
   size_t sedp_max_message_size_;
-  bool undirected_spdp_;
-  bool periodic_directed_spdp_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> undirected_spdp_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> periodic_directed_spdp_;
   /// Should participant user data QoS only be sent when the message is secure?
-  bool secure_participant_user_data_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> secure_participant_user_data_;
   DCPS::TimeDuration max_type_lookup_service_reply_period_;
-  bool use_xtypes_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> use_xtypes_;
   DCPS::TimeDuration sedp_heartbeat_period_;
   DCPS::TimeDuration sedp_nak_response_delay_;
   DCPS::TimeDuration sedp_send_delay_;
   DCPS::TimeDuration sedp_passive_connect_duration_;
   DCPS::TimeDuration sedp_fragment_reassembly_timeout_;
   CORBA::ULong participant_flags_;
-  bool sedp_responsive_mode_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> sedp_responsive_mode_;
   size_t sedp_receive_preallocated_message_blocks_, sedp_receive_preallocated_data_blocks_;
 };
 
