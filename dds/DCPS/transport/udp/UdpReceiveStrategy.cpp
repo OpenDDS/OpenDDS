@@ -19,7 +19,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 UdpReceiveStrategy::UdpReceiveStrategy(UdpDataLink* link)
-  : TransportReceiveStrategy(link->impl().config())
+  : TransportReceiveStrategy<>(link->impl().config())
   , link_(link)
   , expected_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
 {
