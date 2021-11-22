@@ -46,12 +46,10 @@ class Cached_Allocator_With_Overflow : public ACE_New_Allocator, public PoolAllo
 public:
   /// Create a cached memory pool with @a n_chunks chunks
   /// each with sizeof (TYPE) size.
-  Cached_Allocator_With_Overflow(size_t n_chunks)
-    : allocs_from_heap_(0),
-      allocs_from_pool_(0),
-      frees_to_heap_(0),
-      frees_to_pool_(0),
-      free_list_(ACE_PURE_FREE_LIST) {
+  explicit Cached_Allocator_With_Overflow(size_t n_chunks)
+    : free_list_(ACE_PURE_FREE_LIST)
+    , n_chunks_(n_chunks)
+  {
     // To maintain alignment requirements, make sure that each element
     // inserted into the free list is aligned properly for the platform.
     // Since the memory is allocated as a char[], the compiler won't help.
@@ -79,7 +77,8 @@ public:
   }
 
   /// Clear things up.
-  ~Cached_Allocator_With_Overflow() {
+  ~Cached_Allocator_With_Overflow()
+  {
     ACE_Allocator::instance()->free(begin_);
   }
   /**
@@ -88,7 +87,8 @@ public:
   * otherwise ignored since @c malloc() always returns a pointer to an
   * item of sizeof (T).
   */
-  void *malloc(size_t nbytes = sizeof(T)) {
+  void* malloc(size_t nbytes = sizeof(T))
+  {
     // Check if size requested fits within pre-determined size.
     if (nbytes > sizeof(T))
       return 0;
@@ -140,7 +140,8 @@ public:
   * calloc() always returns a pointer to an item of sizeof (T).
   */
   virtual void *calloc(size_t /* nbytes */,
-                       char /* initial_value */ = '\0') {
+                       char /* initial_value */ = '\0')
+  {
     ACE_NOTSUP_RETURN(0);
   }
 
@@ -148,12 +149,14 @@ public:
   /// only works with fixed sized entities.
   virtual void *calloc(size_t /* n_elem */,
                        size_t /* elem_size */,
-                       char /* initial_value */ = '\0') {
+                       char /* initial_value */ = '\0')
+  {
     ACE_NOTSUP_RETURN(0);
   }
 
   /// Return a chunk of memory back to free list cache.
-  void free(void * ptr) {
+  void free(void* ptr)
+  {
     unsigned char* tmp = static_cast<unsigned char*>(ptr);
     if (tmp < begin_ ||
         tmp >= end_) {
@@ -208,9 +211,9 @@ public:
 
   /** How many chunks are available at this time.
   */
-  size_t available() {
-    return free_list_.size();
-  };
+  size_t available() { return free_list_.size(); }
+
+  size_t n_chunks() const { return n_chunks_; }
 
   ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> allocs_from_heap_;
   ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> allocs_from_pool_;
@@ -226,6 +229,8 @@ private:
 
   /// Maintain a cached memory free list.
   ACE_Locked_Free_List<ACE_Cached_Mem_Pool_Node<T>, ACE_LOCK> free_list_;
+
+  const size_t n_chunks_;
 };
 
 } // namespace DCPS

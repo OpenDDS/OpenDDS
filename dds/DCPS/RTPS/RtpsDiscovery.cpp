@@ -94,6 +94,8 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , sedp_passive_connect_duration_(TimeDuration::from_msec(DCPS::TransportConfig::DEFAULT_PASSIVE_CONNECT_DURATION))
   , participant_flags_(PFLAGS_THIS_VERSION)
   , sedp_responsive_mode_(false)
+  , sedp_receive_preallocated_message_blocks_(0)
+  , sedp_receive_preallocated_data_blocks_(0)
 {}
 
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
@@ -796,6 +798,30 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                               value.c_str(), rtps_name.c_str()), -1);
           }
           config->sedp_responsive_mode(bool(smInt));
+        } else if (name == "SedpReceivePreallocatedMessageBlocks") {
+          const String& string_value = it->second;
+          size_t value;
+          if (DCPS::convertToInteger(string_value, value)) {
+            config->sedp_receive_preallocated_message_blocks(value);
+          } else {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              "(%P|%t) RtpsDiscovery::Config::discovery_config(): "
+                              "Invalid entry (%C) for SedpReceivePreallocatedMessageBlocks in "
+                              "[rtps_discovery/%C] section.\n",
+                              string_value.c_str(), rtps_name.c_str()), -1);
+          }
+        } else if (name == "SedpReceivePreallocatedDataBlocks") {
+          const String& string_value = it->second;
+          size_t value;
+          if (DCPS::convertToInteger(string_value, value)) {
+            config->sedp_receive_preallocated_data_blocks(value);
+          } else {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              "(%P|%t) RtpsDiscovery::Config::discovery_config(): "
+                              "Invalid entry (%C) for SedpReceivePreallocatedDataBlocks in "
+                              "[rtps_discovery/%C] section.\n",
+                              string_value.c_str(), rtps_name.c_str()), -1);
+          }
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")

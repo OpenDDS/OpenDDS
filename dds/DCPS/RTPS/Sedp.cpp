@@ -397,6 +397,8 @@ Sedp::init(const RepoId& guid,
   rtps_inst->send_delay_ = disco.config()->sedp_send_delay();
   rtps_inst->send_buffer_size_ = disco.config()->send_buffer_size();
   rtps_inst->rcv_buffer_size_ = disco.config()->recv_buffer_size();
+  rtps_inst->receive_preallocated_message_blocks_ = disco.config()->sedp_receive_preallocated_message_blocks();
+  rtps_inst->receive_preallocated_data_blocks_ = disco.config()->sedp_receive_preallocated_data_blocks();
 
   if (disco.sedp_multicast()) {
     // Bind to a specific multicast group
