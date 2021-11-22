@@ -10,8 +10,8 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/XTypes/DynamicData.h>
 #if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
 #include <ace/Semaphore.h>
@@ -108,7 +108,7 @@ public:
   }
 
   virtual void on_recorder_matched(Recorder*,
-                                   const ::DDS::SubscriptionMatchedStatus& status )
+                                   const ::DDS::SubscriptionMatchedStatus& status)
   {
     if (status.current_count == 1 && DCPS_debug_level >= 4) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TestRecorderListener::on_recorder_matched:"
@@ -122,7 +122,7 @@ public:
     }
   }
 
-  int wait(const ACE_Time_Value & tv)
+  int wait(const ACE_Time_Value& tv)
   {
     ACE_Time_Value timeout = ACE_OS::gettimeofday() + tv;
     return sem_.acquire(timeout);
@@ -230,7 +230,7 @@ int run_test(int argc, ACE_TCHAR* argv[])
   return ret_val;
 }
 
-int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   int ret = run_test(argc, argv);
   ACE_Thread_Manager::instance()->wait();

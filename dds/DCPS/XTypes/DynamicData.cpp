@@ -9,6 +9,7 @@
 
 #include "DynamicTypeMember.h"
 
+#include <dds/idl/value_helper.h>
 #include <dds/CorbaSeq/LongSeqTypeSupportImpl.h>
 #include <dds/CorbaSeq/ULongSeqTypeSupportImpl.h>
 #include <dds/CorbaSeq/Int8SeqTypeSupportImpl.h>
@@ -34,74 +35,6 @@
 #include <stdexcept>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
-
-namespace {
-#if ACE_SIZEOF_LONG_DOUBLE != 16
-inline ostream& operator<<(ostream& os, const ACE_CDR::LongDouble& val)
-{
-  os << ACE_CDR::LongDouble::NativeImpl(val);
-  return os;
-}
-#endif
-
-inline
-std::ostream& hex_value(std::ostream& o, unsigned value, size_t bytes)
-{
-  OpenDDS::DCPS::RestoreOutputStreamState ross(o);
-  o << std::hex << std::setw(bytes * 2) << std::setfill('0') << value;
-  return o;
-}
-
-template <typename CharType>
-unsigned char_value(CharType value)
-{
-  return value;
-}
-
-#if CHAR_MIN < 0
-/*
- * If char is signed, then it needs to be reinterpreted as unsigned char or
- * else static casting '\xff' to a 32-bit unsigned int would result in
- * 0xffffffff because those are both the signed 2's complement forms of -1.
- */
-template <>
-inline unsigned char_value<char>(char value)
-{
-  return reinterpret_cast<unsigned char&>(value);
-}
-#endif
-
-template <typename CharType>
-std::ostream& char_helper(std::ostream& o, CharType value)
-{
-  switch (value) {
-  case '\'':
-  case '\"':
-  case '\\':
-  case '\?':
-    return o << '\\' << static_cast<char>(value);
-  case '\n':
-    return o << "\\n";
-  case '\t':
-    return o << "\\t";
-  case '\v':
-    return o << "\\v";
-  case '\b':
-    return o << "\\b";
-  case '\r':
-    return o << "\\r";
-  case '\f':
-    return o << "\\f";
-  case '\a':
-    return o << "\\a";
-  }
-  const unsigned cvalue = char_value(value);
-  if (cvalue <= UCHAR_MAX && isprint(cvalue)) {
-    return o << static_cast<char>(value);
-  }
-  return hex_value(o << "\\x", cvalue, sizeof(CharType) == 1 ? 1 : 2);
-}
-}
 
 namespace OpenDDS {
 namespace XTypes {
@@ -2302,7 +2235,8 @@ const char* DynamicData::typekind_to_string(TypeKind tk) const
   }
 }
 
-bool print_integral_value(DynamicData& dd, DCPS::String& type_string, TypeKind tk) {
+bool print_integral_value(DynamicData& dd, DCPS::String& type_string, TypeKind tk)
+{
   switch (tk) {
   case TK_ENUM: {
     ACE_CDR::Long val;
@@ -2553,7 +2487,9 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
       }
       return false;
     }
-    type_string += DCPS::String(" = \"") + my_string + "\"\n";
+    std::stringstream os;
+    string_helper(os, my_string);
+    type_string += DCPS::String(" = \"") + os.str() + "\"\n";
     break;
   }
   case TK_STRING16: {
@@ -2565,9 +2501,7 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
       return false;
     }
     std::stringstream os;
-    for (size_t i = 0; my_wstring[i] != 0; ++i) {
-      char_helper<ACE_CDR::WChar>(os, my_wstring[i]);
-    }
+    string_helper(os, my_wstring);
     type_string += " = L\"" + os.str() + "\"\n";
     break;
   }

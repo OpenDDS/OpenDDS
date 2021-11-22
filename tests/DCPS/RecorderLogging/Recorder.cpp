@@ -50,8 +50,6 @@ public:
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("MessengerRecorderListener::on_sample_data_received\n")));
 
-    // Inspect the received raw data sample
-    const bool encapsulated = sample.header_.cdr_encapsulation_;
     OpenDDS::DCPS::Serializer ser(
       sample.sample_.get(),
       sample.encoding_kind_,

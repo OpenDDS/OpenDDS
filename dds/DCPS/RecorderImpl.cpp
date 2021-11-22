@@ -229,12 +229,12 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
   // we only support SAMPLE_DATA messages
   if (sample.header_.message_id_ == SAMPLE_DATA && listener_.in()) {
     Encoding::Kind kind = Encoding::KIND_UNALIGNED_CDR;
-    if (sample.header_.cdr_encapsulation_) {
+    if (sample.header_.cdr_encapsulation_ && check_encap_) {
       Encoding enc;
       Serializer ser(sample.sample_.get(), enc);
       EncapsulationHeader encap;
       if (ser >> encap) {
-        encap.to_encoding(enc, FINAL, false);
+        encap.to_encoding(enc, ANY_EXTENSIBILITY);
         kind = enc.kind();
       }
     }

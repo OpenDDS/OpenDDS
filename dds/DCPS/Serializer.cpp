@@ -151,7 +151,7 @@ bool EncapsulationHeader::from_encoding(
 }
 
 bool EncapsulationHeader::to_encoding(
-  Encoding& encoding, Extensibility expected_extensibility, bool check_extensibility)
+  Encoding& encoding, Extensibility expected_extensibility)
 {
   bool wrong_extensibility = true;
   switch (kind_) {
@@ -223,7 +223,7 @@ bool EncapsulationHeader::to_encoding(
     return false;
   }
 
-  if (wrong_extensibility && check_extensibility) {
+  if (wrong_extensibility && expected_extensibility != ANY_EXTENSIBILITY) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR EncapsulationHeader::to_encoding: ")
         ACE_TEXT("Unexpected Extensibility Encoding: %C\n"),

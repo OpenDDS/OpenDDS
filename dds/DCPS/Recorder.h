@@ -62,6 +62,7 @@ public:
   typedef Recorder_ptr _ptr_type;
   typedef Recorder_var _var_type;
 
+  Recorder() : check_encap_(true) {}
   virtual ~Recorder();
 
   static Recorder_ptr _duplicate(Recorder_ptr obj);
@@ -101,6 +102,7 @@ public:
    */
   virtual RecorderListener_rch get_listener() = 0;
   DynamicTypeByPubId dt_map_;
+  bool check_encap_;
   XTypes::DynamicData get_dynamic_data(const RawDataSample& sample);
 };
 
@@ -118,8 +120,7 @@ struct OpenDDS_Dcps_Export Objref_Traits< ::OpenDDS::DCPS::Recorder> {
   static ::OpenDDS::DCPS::Recorder_ptr duplicate( ::OpenDDS::DCPS::Recorder_ptr p);
   static void release(::OpenDDS::DCPS::Recorder_ptr p);
   static ::OpenDDS::DCPS::Recorder_ptr nil();
-  static bool marshal(const ::OpenDDS::DCPS::Recorder_ptr p,
-                                TAO_OutputCDR& cdr);
+  static bool marshal(const ::OpenDDS::DCPS::Recorder_ptr p, TAO_OutputCDR& cdr);
 };
 
 } // namespace TAO

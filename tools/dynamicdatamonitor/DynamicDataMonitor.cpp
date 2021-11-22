@@ -10,8 +10,8 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/XTypes/DynamicData.h>
 #if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
 #include <ace/Arg_Shifter.h>
@@ -26,19 +26,18 @@ using namespace OpenDDS::DCPS;
 long num_samples = 0;
 long num_seconds = 0;
 // parse the command line arguments
-int parse_args (int& argc, ACE_TCHAR *argv[])
+int parse_args (int& argc, ACE_TCHAR* argv[])
 {
   u_long mask =  ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS);
   ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS);
-  ACE_Arg_Shifter arg_shifter (argc, argv);
+  ACE_Arg_Shifter arg_shifter(argc, argv);
 
-  while (arg_shifter.is_anything_left())
-  {
+  while (arg_shifter.is_anything_left()) {
     // options:
     //  -samples num_samples       defaults to infinite
     //  -time num_seconds          defaults to infinite
 
-    const ACE_TCHAR *currentArg = 0;
+    const ACE_TCHAR* currentArg = 0;
 
     if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("--samples"))) != 0) {
       num_samples = ACE_OS::atoi(currentArg);
@@ -82,7 +81,7 @@ public:
   }
 
   virtual void on_recorder_matched(Recorder*,
-                                   const ::DDS::SubscriptionMatchedStatus& status )
+                                   const ::DDS::SubscriptionMatchedStatus& status)
   {
     if (status.current_count == 1 && DCPS_debug_level >= 4) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TestRecorderListener::on_recorder_matched:"
@@ -96,7 +95,7 @@ public:
     }
   }
 
-  int wait(const ACE_Time_Value & tv)
+  int wait(const ACE_Time_Value& tv)
   {
     ACE_Time_Value timeout = ACE_OS::gettimeofday() + tv;
     return sem_.acquire(timeout);
@@ -224,7 +223,7 @@ int run_test(int argc, ACE_TCHAR* argv[])
   return ret_val;
 }
 
-int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   int ret = run_test(argc, argv);
   ACE_Thread_Manager::instance()->wait();
