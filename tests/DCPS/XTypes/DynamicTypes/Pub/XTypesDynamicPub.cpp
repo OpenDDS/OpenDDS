@@ -23,7 +23,7 @@
 using namespace OpenDDS::DCPS;
 using namespace DDS;
 
-void struct_narrow_write(DataWriter_var dw)
+void my_struct_narrow_write(DataWriter_var dw)
 {
   Dynamic::my_struct foo;
   foo.my_int8 = 1;
@@ -58,7 +58,7 @@ void struct_narrow_write(DataWriter_var dw)
   narrow_dw->write(foo, handle);
 }
 
-void nested_struct_narrow_write(DataWriter_var dw)
+void outer_struct_narrow_write(DataWriter_var dw)
 {
   Dynamic::outer_struct os;
   Dynamic::inner_struct is;
@@ -76,7 +76,7 @@ void nested_struct_narrow_write(DataWriter_var dw)
   narrow_dw->write(os, handle);
 }
 
-void union_default_narrow_write(DataWriter_var dw)
+void inner_union_narrow_write(DataWriter_var dw)
 {
   Dynamic::inner_union foo;
   foo._d(3);
@@ -86,7 +86,7 @@ void union_default_narrow_write(DataWriter_var dw)
   narrow_dw->write(foo, handle);
 }
 
-void nested_union_narrow_write(DataWriter_var dw)
+void outer_union_narrow_write(DataWriter_var dw)
 {
   Dynamic::outer_union ou;
   Dynamic::inner_struct is;
@@ -112,54 +112,54 @@ int ACE_TMAIN(int argc, ACE_TCHAR * argv[])
                             DEFAULT_STATUS_MASK);
 
   TransportConfig_rch cfg = TheTransportRegistry->get_config("rtps");
-  if (!cfg.is_nil()) {
+  if (cfg) {
     TheTransportRegistry->bind_config(cfg, dp);
   }
 
   //this needs modularization
   DDS::TypeSupport_var ts_var;
-  if (!ACE_OS::strcmp(type_name, ACE_TEXT("struct"))) {
+  if (!ACE_OS::strcmp(type_name, ACE_TEXT("my_struct"))) {
     ts_var = new Dynamic::my_structTypeSupportImpl;
-  } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("nested"))) {
+  } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("outer_struct"))) {
     ts_var = new Dynamic::outer_structTypeSupportImpl;
-  } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("union_default"))) {
+  } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("inner_union"))) {
     ts_var = new Dynamic::inner_unionTypeSupportImpl;
-  } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("nested_union"))) {
+  } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("outer_union"))) {
     ts_var = new Dynamic::outer_unionTypeSupportImpl;
   }
   ts_var->register_type(dp, ACE_TEXT_ALWAYS_CHAR(type_name));
 
   Topic_var topic =
-      dp->create_topic("recorder_topic", ACE_TEXT_ALWAYS_CHAR(type_name), TOPIC_QOS_DEFAULT,
-                       0, DEFAULT_STATUS_MASK);
+    dp->create_topic("recorder_topic", ACE_TEXT_ALWAYS_CHAR(type_name), TOPIC_QOS_DEFAULT,
+                     0, DEFAULT_STATUS_MASK);
 
   // Create the publisher
   Publisher_var pub =
-      dp->create_publisher(PUBLISHER_QOS_DEFAULT,
-                           PublisherListener::_nil(), DEFAULT_STATUS_MASK);
+    dp->create_publisher(PUBLISHER_QOS_DEFAULT,
+                         PublisherListener::_nil(), DEFAULT_STATUS_MASK);
 
   // Create the datawriters
   DataWriterQos dw_qos;
-  pub->get_default_datawriter_qos (dw_qos);
+  pub->get_default_datawriter_qos(dw_qos);
   dw_qos.representation.value.length(1);
   dw_qos.representation.value[0] = DDS::XCDR2_DATA_REPRESENTATION;
   DataWriter_var dw =
-      pub->create_datawriter(topic, dw_qos,
-                             DDS::DataWriterListener::_nil(), DEFAULT_STATUS_MASK);
+    pub->create_datawriter(topic, dw_qos,
+                           DDS::DataWriterListener::_nil(), DEFAULT_STATUS_MASK);
   if (Utils::wait_match(dw, 1, Utils::EQ)) {
     if (log_level >= LogLevel::Error) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("Error waiting for match for dw\n")));
     }
     return 1;
   }
-  if (!ACE_OS::strcmp(type_name, ACE_TEXT("struct"))) {
-    struct_narrow_write(dw);
-  } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("nested"))) {
-    nested_struct_narrow_write(dw);
-  } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("union_default"))) {
-    union_default_narrow_write(dw);
-  } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("nested_union"))) {
-    nested_union_narrow_write(dw);
+  if (!ACE_OS::strcmp(type_name, ACE_TEXT("my_struct"))) {
+    my_struct_narrow_write(dw);
+  } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("outer_struct"))) {
+    outer_struct_narrow_write(dw);
+  } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("inner_union"))) {
+    inner_union_narrow_write(dw);
+  } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("outer_union"))) {
+    outer_union_narrow_write(dw);
   }
   if (Utils::wait_match(dw, 0, Utils::EQ)) {
     if (log_level >= LogLevel::Error) {

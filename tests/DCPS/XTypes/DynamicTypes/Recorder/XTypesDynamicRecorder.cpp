@@ -26,9 +26,9 @@ class TestRecorderListener : public RecorderListener
 {
 public:
   explicit TestRecorderListener(DDS::GuardCondition_var gc)
-    : ret_val_(0),
-      sem_(0),
-      gc_(gc)
+    : ret_val_(0)
+    , sem_(0)
+    , gc_(gc)
   {
   }
 
@@ -44,6 +44,7 @@ public:
           " Failed to read DynamicData\n"));
       }
     }
+
     String struct_string =
       "struct ::Dynamic::my_struct {\n"
       "  Int8 my_int8 = 1\n"
@@ -76,6 +77,7 @@ public:
       "    [0] = 5\n"
       "    [1] = 6\n"
       "};\n";
+
     String nested_struct_string =
       "struct ::Dynamic::outer_struct {\n"
       "  struct ::Dynamic::inner_struct {\n"
@@ -87,11 +89,13 @@ public:
       "    };\n"
       "  };\n"
       "};\n";
+
     String default_union_string =
       "union ::Dynamic::inner_union {\n"
       "  Int32 discriminator = -2147483647\n"
       "  Boolean b = true\n"
       "};\n";
+
     String nested_union_string =
       "union ::Dynamic::outer_union {\n"
       "  ::Dynamic::EnumType discriminator = V1\n"
@@ -135,7 +139,9 @@ public:
     ACE_Time_Value timeout = ACE_OS::gettimeofday() + tv;
     return sem_.acquire(timeout);
   }
+
   int ret_val_;
+
 private:
   ACE_Thread_Semaphore sem_;
   DDS::GuardCondition_var gc_;
@@ -188,7 +194,7 @@ int run_test(int argc, ACE_TCHAR* argv[])
 
       ACE_Time_Value wait_time(60, 0);
 
-      RcHandle<TestRecorderListener> recorder_listener = make_rch<TestRecorderListener> (gc);
+      RcHandle<TestRecorderListener> recorder_listener = make_rch<TestRecorderListener>(gc);
 
       DDS::SubscriberQos sub_qos;
       participant->get_default_subscriber_qos(sub_qos);

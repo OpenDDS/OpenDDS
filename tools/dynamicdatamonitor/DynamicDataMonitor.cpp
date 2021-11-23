@@ -57,9 +57,9 @@ class TestRecorderListener : public RecorderListener
 {
 public:
   explicit TestRecorderListener(DDS::GuardCondition_var gc)
-    : sem_(0),
-      sample_count_(0),
-      gc_(gc)
+    : sem_(0)
+    , sample_count_(0)
+    , gc_(gc)
   {
   }
 
@@ -168,7 +168,7 @@ int run_test(int argc, ACE_TCHAR* argv[])
         return 1;
       }
 
-      RcHandle<TestRecorderListener> recorder_listener = make_rch<TestRecorderListener> (gc);
+      RcHandle<TestRecorderListener> recorder_listener = make_rch<TestRecorderListener>(gc);
 
       DDS::SubscriberQos sub_qos;
       participant->get_default_subscriber_qos(sub_qos);
