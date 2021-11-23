@@ -53,8 +53,7 @@ int parse_args (int& argc, ACE_TCHAR* argv[])
   return 0;
 }
 
-class TestRecorderListener : public RecorderListener
-{
+class TestRecorderListener : public RecorderListener {
 public:
   explicit TestRecorderListener(DDS::GuardCondition_var gc)
     : sem_(0)

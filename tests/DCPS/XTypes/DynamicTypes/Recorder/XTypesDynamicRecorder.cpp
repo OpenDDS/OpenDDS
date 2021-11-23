@@ -22,8 +22,7 @@
 
 using namespace OpenDDS::DCPS;
 bool sample_read = false;
-class TestRecorderListener : public RecorderListener
-{
+class TestRecorderListener : public RecorderListener {
 public:
   explicit TestRecorderListener(DDS::GuardCondition_var gc)
     : ret_val_(0)
