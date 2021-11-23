@@ -8,7 +8,8 @@
 
 #include "be_extern.h"
 #include "be_util.h"
-#include "value_helper.h"
+
+#include <dds/DCPS/ValueHelper.h>
 
 #include <utl_scoped_name.h>
 #include <utl_identifier.h>

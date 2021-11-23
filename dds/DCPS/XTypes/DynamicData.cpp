@@ -9,7 +9,6 @@
 
 #include "DynamicTypeMember.h"
 
-#include <dds/idl/value_helper.h>
 #include <dds/CorbaSeq/LongSeqTypeSupportImpl.h>
 #include <dds/CorbaSeq/ULongSeqTypeSupportImpl.h>
 #include <dds/CorbaSeq/Int8SeqTypeSupportImpl.h>
@@ -29,6 +28,7 @@
 #include <dds/CorbaSeq/WStringSeqTypeSupportImpl.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
 #include <dds/DCPS/RestoreOutputStreamState.h>
+#include <dds/DCPS/ValueHelper.h>
 
 #include <ace/OS_NS_string.h>
 
@@ -2563,7 +2563,7 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
   case TK_STRUCTURE: {
     DCPS::String temp_indent = indent;
     indent += "  ";
-    type_string += "struct " + dd.type()->get_name() + " {\n";
+    type_string += "struct " + dd.type()->get_name() + "\n";
     DynamicTypeMembersById dtmbi;
     dd.type()->get_all_members(dtmbi);
     for (DynamicTypeMembersById::iterator iter = dtmbi.begin(); iter != dtmbi.end(); ++iter) {
@@ -2591,13 +2591,12 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
       }
     }
     indent = temp_indent;
-    type_string += indent + "};\n";
     break;
   }
   case TK_UNION: {
     DCPS::String temp_indent = indent;
     indent += "  ";
-    type_string += "union " + dd.type()->get_name() + " {\n";
+    type_string += "union " + dd.type()->get_name() + "\n";
     ACE_CDR::ULong item_count = dd.get_item_count();
     member_name = dd.type()->get_descriptor().discriminator_type->get_base_type()->get_descriptor().name;
     type_string += indent + member_name + " discriminator";
@@ -2638,7 +2637,6 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
       }
     }
     indent = temp_indent;
-    type_string += indent + "};\n";
     break;
   }
   }

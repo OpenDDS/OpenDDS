@@ -35,8 +35,8 @@ public:
                                        const RawDataSample& sample)
   {
     OpenDDS::XTypes::DynamicData dd = rec->get_dynamic_data(sample);
-    String my_type = "";
-    String indent = "";
+    String my_type;
+    String indent;
     if (!OpenDDS::XTypes::print_dynamic_data(dd, my_type, indent)) {
       if (log_level >= LogLevel::Error) {
         ACE_ERROR((LM_ERROR, "(%P|%t) Error: TestRecorderListener::on_sample_data_received:"
@@ -45,7 +45,7 @@ public:
     }
 
     String struct_string =
-      "struct ::Dynamic::my_struct {\n"
+      "struct ::Dynamic::my_struct\n"
       "  Int8 my_int8 = 1\n"
       "  UInt8 my_uint8 = 2\n"
       "  Int16 my_short = 3\n"
@@ -74,37 +74,29 @@ public:
       "    [1] = V1\n"
       "  Array my_anon_arr Int16[2] =\n"
       "    [0] = 5\n"
-      "    [1] = 6\n"
-      "};\n";
+      "    [1] = 6\n";
 
     String nested_struct_string =
-      "struct ::Dynamic::outer_struct {\n"
-      "  struct ::Dynamic::inner_struct {\n"
-      "    union ::Dynamic::inner_union {\n"
+      "struct ::Dynamic::outer_struct\n"
+      "  struct ::Dynamic::inner_struct\n"
+      "    union ::Dynamic::inner_union\n"
       "      Int32 discriminator = 2\n"
       "      ::Dynamic::bool_seq my_alias_seq Boolean[2] =\n"
       "        [0] = false\n"
-      "        [1] = true\n"
-      "    };\n"
-      "  };\n"
-      "};\n";
+      "        [1] = true\n";
 
     String default_union_string =
-      "union ::Dynamic::inner_union {\n"
+      "union ::Dynamic::inner_union\n"
       "  Int32 discriminator = -2147483647\n"
-      "  Boolean b = true\n"
-      "};\n";
+      "  Boolean b = true\n";
 
     String nested_union_string =
-      "union ::Dynamic::outer_union {\n"
+      "union ::Dynamic::outer_union\n"
       "  ::Dynamic::EnumType discriminator = V1\n"
-      "  struct ::Dynamic::inner_struct {\n"
-      "    union ::Dynamic::inner_union {\n"
+      "  struct ::Dynamic::inner_struct\n"
+      "    union ::Dynamic::inner_union\n"
       "      Int32 discriminator = 1\n"
-      "      Int32 l = 5\n"
-      "    };\n"
-      "  };\n"
-      "};\n";
+      "      Int32 l = 5\n";
 
     if (my_type != struct_string &&
         my_type != nested_struct_string &&

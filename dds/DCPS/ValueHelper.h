@@ -3,15 +3,15 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef value_helper_H
-#define value_helper_H
+#ifndef OPENDDS_DCPS_VALUE_HELPER_H
+#define OPENDDS_DCPS_VALUE_HELPER_H
+
+#include <dds/DCPS/RestoreOutputStreamState.h>
+#include <dds/DCPS/Definitions.h>
 
 #include <ostream>
 #include <iostream>
 #include <iomanip>
-
-#include <dds/DCPS/RestoreOutputStreamState.h>
-#include <dds/DCPS/Definitions.h>
 
 template <typename IntType>
 std::ostream& signed_int_helper(std::ostream& o, IntType value, IntType min)
@@ -108,4 +108,4 @@ std::ostream& string_helper(std::ostream& o, CharType* value)
   return o;
 }
 
-#endif /* value_helper_H */
+#endif /* OPENDDS_DCPS_VALUE_HELPER_H */

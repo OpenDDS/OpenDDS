@@ -66,8 +66,8 @@ public:
                                        const RawDataSample& sample)
   {
     OpenDDS::XTypes::DynamicData dd = rec->get_dynamic_data(sample);
-    String my_type = "";
-    String indent = "";
+    String my_type;
+    String indent;
     if (!OpenDDS::XTypes::print_dynamic_data(dd, my_type, indent)) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TestRecorderListener::on_sample_data_received: "
         "Failed to read dynamic data\n"));
