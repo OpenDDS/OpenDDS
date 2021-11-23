@@ -10,6 +10,7 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/OpenddsDcpsExtC.h"
 
 #include "tao/Basic_Types.h"
 
@@ -17,6 +18,8 @@
 #include "ace/CDR_Stream.h"
 #include "ace/SString.h"
 #include "ace/SOCK_Dgram.h"
+
+#include <cstring>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -94,6 +97,44 @@ ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& addr, bool pre
 
 extern OpenDDS_Dcps_Export
 ACE_INET_Addr choose_single_coherent_address(const String& hostname, bool prefer_loopback = true, bool allow_ipv4_fallback = true);
+
+inline void assign(DDS::OctetArray16& dest,
+                   ACE_CDR::ULong ipv4addr_be)
+{
+  std::memset(&dest[0], 0, 12);
+  dest[12] = ipv4addr_be >> 24;
+  dest[13] = ipv4addr_be >> 16;
+  dest[14] = ipv4addr_be >> 8;
+  dest[15] = ipv4addr_be;
+}
+
+inline void
+address_to_bytes(DDS::OctetArray16& dest, const ACE_INET_Addr& addr)
+{
+  const void* raw = addr.get_addr();
+#ifdef ACE_HAS_IPV6
+  if (addr.get_type() == AF_INET6) {
+    const sockaddr_in6* in = static_cast<const sockaddr_in6*>(raw);
+    std::memcpy(&dest[0], &in->sin6_addr, 16);
+  } else {
+#else
+  {
+#endif
+    const sockaddr_in* in = static_cast<const sockaddr_in*>(raw);
+    std::memset(&dest[0], 0, 12);
+    std::memcpy(&dest[12], &in->sin_addr, 4);
+  }
+}
+
+// FUTURE: Remove the map parameter.  Caller can deal with IPV6.
+OpenDDS_Dcps_Export
+int locator_to_address(ACE_INET_Addr& dest,
+                       const Locator_t& locator,
+                       bool map /*map IPV4 to IPV6 addr*/);
+
+OpenDDS_Dcps_Export
+void address_to_locator(Locator_t& locator,
+                        const ACE_INET_Addr& dest);
 
 } // namespace DCPS
 } // namespace OpenDDS

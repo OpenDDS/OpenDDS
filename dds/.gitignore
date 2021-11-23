@@ -11,7 +11,6 @@
 /CharSeqS.h
 /CharSeqS.inl
 /DdsDcps.mpc.orig
-/DdsDcps_lem_stub_export.h
 /DdsDcpsC.cpp
 /DdsDcpsC.h
 /DdsDcpsC.inl
@@ -197,6 +196,7 @@
 /DdsDcpsTypeSupportExtS.cpp
 /DdsDcpsTypeSupportExtS.h
 /DdsDcpsTypeSupportExtS.inl
+/DdsDcps_lem_stub_export.h
 /DdsSecurityCoreC.cpp
 /DdsSecurityCoreC.h
 /DdsSecurityCoreC.inl
@@ -253,6 +253,18 @@
 /OctetSeqS.cpp
 /OctetSeqS.h
 /OctetSeqS.inl
+/OpenddsDcpsExtC.cpp
+/OpenddsDcpsExtC.h
+/OpenddsDcpsExtC.inl
+/OpenddsDcpsExtS.h
+/OpenddsDcpsExtTypeSupport.idl
+/OpenddsDcpsExtTypeSupportC.cpp
+/OpenddsDcpsExtTypeSupportC.h
+/OpenddsDcpsExtTypeSupportC.inl
+/OpenddsDcpsExtTypeSupportImpl.cpp
+/OpenddsDcpsExtTypeSupportImpl.h
+/OpenddsDcpsExtTypeSupportS.cpp
+/OpenddsDcpsExtTypeSupportS.h
 /ShortSeqC.cpp
 /ShortSeqC.h
 /ShortSeqC.inl

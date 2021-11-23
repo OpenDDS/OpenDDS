@@ -12,7 +12,7 @@
 #include "dds/DCPS/security/framework/SecurityRegistry.h"
 #include "dds/DCPS/security/framework/SecurityConfig.h"
 #include "dds/DCPS/RTPS/RtpsCoreC.h"
-#include "dds/DCPS/RTPS/BaseMessageUtils.h"
+#include "dds/DCPS/transport/framework/NetworkAddress.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -476,8 +476,8 @@ bool operator<<(DCPS::Serializer& serializer, ConstAttributeHolder& holder)
     } else {
       serializer << static_cast<ACE_CDR::Char>(IPv6);
       serializer << static_cast<ACE_UINT16>(holder.attribute.mapped_address.get_port_number());
-      DCPS::OctetArray16 a;
-      RTPS::address_to_bytes(a, holder.attribute.mapped_address);
+      DDS::OctetArray16 a;
+      DCPS::address_to_bytes(a, holder.attribute.mapped_address);
       serializer.write_octet_array(a, 16);
     }
   }
@@ -524,8 +524,8 @@ bool operator<<(DCPS::Serializer& serializer, ConstAttributeHolder& holder)
       serializer << static_cast<ACE_CDR::Char>(IPv6);
       serializer << static_cast<ACE_UINT16>(holder.attribute.mapped_address.get_port_number() ^ (MAGIC_COOKIE >> 16));
 
-      DCPS::OctetArray16 a;
-      RTPS::address_to_bytes(a, holder.attribute.mapped_address);
+      DDS::OctetArray16 a;
+      DCPS::address_to_bytes(a, holder.attribute.mapped_address);
 
       a[0] ^= ((MAGIC_COOKIE & 0xFF000000) >> 24);
       a[1] ^= ((MAGIC_COOKIE & 0x00FF0000) >> 16);

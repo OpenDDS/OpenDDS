@@ -19,6 +19,8 @@
 #include "dds/DCPS/ReactorTask_rch.h"
 #include "dds/DCPS/TimeDuration.h"
 
+#include <dds/DdsDcpsInfoUtilsC.h>
+
 #include "TransportDefs.h"
 #include "TransportImpl_rch.h"
 #include "TransportImpl.h"
@@ -134,7 +136,6 @@ public:
                                const TransportLocatorSeq& /*locators*/) {}
 
   virtual void rtps_relay_address_change() {}
-  virtual void get_and_reset_relay_message_counts(RelayMessageCounts& /*counts*/) {}
 
   ReactorTask_rch reactor_task();
 
@@ -192,6 +193,20 @@ public:
   }
   /**@}*/
 
+  void count_messages(bool flag)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, config_lock_);
+    count_messages_ = flag;
+  }
+
+  bool count_messages() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, config_lock_, false);
+    return count_messages_;
+  }
+
+  virtual void append_transport_statistics(TransportStatisticsSequence& /*seq*/) {}
+
 protected:
 
   TransportInst(const char* type,
@@ -226,6 +241,8 @@ private:
   bool drop_messages_;
   double drop_messages_m_;
   double drop_messages_b_;
+
+  bool count_messages_;
 
   mutable ACE_Thread_Mutex config_lock_;
 };
