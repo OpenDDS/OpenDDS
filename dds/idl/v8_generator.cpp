@@ -67,7 +67,7 @@ namespace {
   bool builtInSeq(AST_Type* type)
   {
     const std::string name = scoped(type->name());
-    static const char PRE[] = "CORBA::";
+    static const char PRE[] = " ::CORBA::";
     if (std::strncmp(name.c_str(), PRE, sizeof(PRE) - 1)) return false;
     return name.rfind("Seq") == name.size() - 3;
   }
