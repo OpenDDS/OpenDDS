@@ -45,7 +45,7 @@ void check_primitive_sequences(const SequenceTypeA& a, const SequenceTypeB& b)
   }
 }
 
-void check_float128_sequences(const Float128Seq& a, const CORBA::LongDoubleSeq& b)
+void check_float128_sequences(const Float128Seq& a, const XTypes::LongDoubleSeq& b)
 {
   EXPECT_EQ(a.length(), b.length());
   for (unsigned i = 0; i < a.length(); ++i) {
@@ -78,12 +78,14 @@ void set_single_value_struct(StructType& a)
   a.float_64 = 1.0;
   set_float128_value(a.float_128);
   a.char_8 = 'a';
-  a.char_16 = 0x0061;
   a.byte = 0xff;
   a._cxx_bool = true;
   a.nested_struct.l = 12;
   a.str = "abc";
+#ifdef DDS_HAS_WCHAR
+  a.char_16 = 0x0061;
   a.wstr = L"abc";
+#endif
 }
 
 template<typename StructType>
@@ -236,6 +238,7 @@ void verify_single_value_struct(XTypes::DynamicData& data)
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.char_8, char_8);
 
+#ifdef DDS_HAS_WCHAR
   ACE_CDR::WChar char_16;
   ret = data.get_char16_value(char_16, 13);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
@@ -246,6 +249,7 @@ void verify_single_value_struct(XTypes::DynamicData& data)
   ret = nested_dd.get_char16_value(char_16, random_id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.char_16, char_16);
+#endif
 
   ACE_CDR::Octet byte;
   ret = data.get_byte_value(byte, 14);
@@ -297,6 +301,7 @@ void verify_single_value_struct(XTypes::DynamicData& data)
   EXPECT_STREQ(expected.str.in(), str);
   CORBA::string_free(str);
 
+#ifdef DDS_HAS_WCHAR
   ACE_CDR::WChar* wstr = 0;
   ret = data.get_wstring_value(wstr, 18);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
@@ -310,6 +315,7 @@ void verify_single_value_struct(XTypes::DynamicData& data)
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_STREQ(expected.wstr.in(), wstr);
   CORBA::wstring_free(wstr);
+#endif
 
   // Reading members out-of-order.
   ret = data.get_int32_value(int_32, 1);
@@ -362,16 +368,18 @@ void set_sequence_value_struct(StructType& a)
   set_float128_value(a.float_128s[0]);
   a.char_8s.length(2);
   a.char_8s[0] = 'a'; a.char_8s[1] = 'b';
-  a.char_16s.length(3);
-  a.char_16s[0] = 'c'; a.char_16s[1] = 'd'; a.char_16s[2] = 'e';
   a.byte_s.length(2);
   a.byte_s[0] = 0xee; a.byte_s[1] = 0xff;
   a.bool_s.length(1);
   a.bool_s[0] = 1;
   a.str_s.length(1);
   a.str_s[0] = "abc";
+#ifdef DDS_HAS_WCHAR
+  a.char_16s.length(3);
+  a.char_16s[0] = 'c'; a.char_16s[1] = 'd'; a.char_16s[2] = 'e';
   a.wstr_s.length(2);
   a.wstr_s[0] = L"def"; a.wstr_s[1] = L"ghi";
+#endif
 }
 
 template<typename StructType>
@@ -380,7 +388,7 @@ void verify_sequence_value_struct(XTypes::DynamicData& data)
   StructType expected;
   set_sequence_value_struct(expected);
 
-  CORBA::LongSeq my_enums;
+  XTypes::LongSeq my_enums;
   DDS::ReturnCode_t ret = data.get_int32_values(my_enums, 0);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   check_primitive_sequences(expected.my_enums, my_enums);
@@ -401,7 +409,7 @@ void verify_sequence_value_struct(XTypes::DynamicData& data)
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   EXPECT_EQ(expected.my_enums[0], some_enum);
 
-  CORBA::LongSeq int_32s;
+  XTypes::LongSeq int_32s;
   ret = data.get_int32_values(int_32s, 1);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   check_primitive_sequences(expected.int_32s, int_32s);
@@ -416,84 +424,87 @@ void verify_sequence_value_struct(XTypes::DynamicData& data)
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   EXPECT_EQ(expected.int_32s[1], some_int32);
 
-  CORBA::ULongSeq uint_32s;
+  XTypes::ULongSeq uint_32s;
   ret = data.get_uint32_values(uint_32s, 2);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   check_primitive_sequences(expected.uint_32s, uint_32s);
   ret = data.get_uint32_values(uint_32s, 3);
   EXPECT_EQ(DDS::RETCODE_ERROR, ret);
 
-  CORBA::Int8Seq int_8s;
+  XTypes::Int8Seq int_8s;
   ret = data.get_int8_values(int_8s, 3);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   check_primitive_sequences(expected.int_8s, int_8s);
 
-  CORBA::UInt8Seq uint_8s;
+  XTypes::UInt8Seq uint_8s;
   ret = data.get_uint8_values(uint_8s, 4);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   check_primitive_sequences(expected.uint_8s, uint_8s);
 
-  CORBA::ShortSeq int_16s;
+  XTypes::ShortSeq int_16s;
   ret = data.get_int16_values(int_16s, 5);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   check_primitive_sequences(expected.int_16s, int_16s);
 
-  CORBA::UShortSeq uint_16s;
+  XTypes::UShortSeq uint_16s;
   ret = data.get_uint16_values(uint_16s, 6);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   check_primitive_sequences(expected.uint_16s, uint_16s);
 
-  CORBA::LongLongSeq int_64s;
+  XTypes::LongLongSeq int_64s;
   ret = data.get_int64_values(int_64s, 7);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   check_primitive_sequences(expected.int_64s, int_64s);
 
-  CORBA::ULongLongSeq uint_64s;
+  XTypes::ULongLongSeq uint_64s;
   ret = data.get_uint64_values(uint_64s, 8);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   check_primitive_sequences(expected.uint_64s, uint_64s);
 
-  CORBA::FloatSeq float_32s;
+  XTypes::FloatSeq float_32s;
   ret = data.get_float32_values(float_32s, 9);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   check_primitive_sequences(expected.float_32s, float_32s);
 
-  CORBA::DoubleSeq float_64s;
+  XTypes::DoubleSeq float_64s;
   ret = data.get_float64_values(float_64s, 10);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   check_primitive_sequences(expected.float_64s, float_64s);
 
-  CORBA::LongDoubleSeq float_128s;
+  XTypes::LongDoubleSeq float_128s;
   ret = data.get_float128_values(float_128s, 11);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   check_float128_sequences(expected.float_128s, float_128s);
 
-  CORBA::CharSeq char_8s;
+  XTypes::CharSeq char_8s;
   ret = data.get_char8_values(char_8s, 12);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   check_primitive_sequences(expected.char_8s, char_8s);
 
-  CORBA::WCharSeq char_16s;
+#ifdef DDS_HAS_WCHAR
+  XTypes::WCharSeq char_16s;
   ret = data.get_char16_values(char_16s, 13);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   check_primitive_sequences(expected.char_16s, char_16s);
+#endif
 
-  CORBA::OctetSeq byte_s;
+  XTypes::OctetSeq byte_s;
   ret = data.get_byte_values(byte_s, 14);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   check_primitive_sequences(expected.byte_s, byte_s);
 
-  CORBA::BooleanSeq bool_s;
+  XTypes::BooleanSeq bool_s;
   ret = data.get_boolean_values(bool_s, 15);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   check_primitive_sequences(expected.bool_s, bool_s);
 
-  CORBA::StringSeq str_s;
+  XTypes::StringSeq str_s;
   ret = data.get_string_values(str_s, 16);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   check_string_sequences(expected.str_s, str_s);
 
-  CORBA::WStringSeq wstr_s;
+#ifdef DDS_HAS_WCHAR
+  XTypes::WStringSeq wstr_s;
   ret = data.get_wstring_values(wstr_s, 17);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   check_string_sequences(expected.wstr_s, wstr_s);
@@ -508,6 +519,7 @@ void verify_sequence_value_struct(XTypes::DynamicData& data)
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   EXPECT_STREQ(expected.wstr_s[1].in(), some_wstr);
   CORBA::wstring_free(some_wstr);
+#endif
 }
 
 void verify_int32_union(XTypes::DynamicData& data)
@@ -608,6 +620,7 @@ void verify_char8_union(XTypes::DynamicData& data)
   EXPECT_EQ(ACE_CDR::Char('a'), char_8);
 }
 
+#ifdef DDS_HAS_WCHAR
 void verify_char16_union(XTypes::DynamicData& data)
 {
   ACE_CDR::WChar char_16;
@@ -615,6 +628,7 @@ void verify_char16_union(XTypes::DynamicData& data)
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(ACE_CDR::WChar(L'a'), char_16);
 }
+#endif
 
 void verify_byte_union(XTypes::DynamicData& data)
 {
@@ -649,6 +663,7 @@ void verify_string_union(XTypes::DynamicData& data)
   EXPECT_EQ(ret, DDS::RETCODE_ERROR);
 }
 
+#ifdef DDS_HAS_WCHAR
 void verify_wstring_union(XTypes::DynamicData& data)
 {
   ACE_CDR::WChar* wstr = 0;
@@ -661,6 +676,7 @@ void verify_wstring_union(XTypes::DynamicData& data)
   ret = data.get_wstring_value(wstr, 10);
   EXPECT_EQ(ret, DDS::RETCODE_ERROR);
 }
+#endif
 
 void verify_enum_union(XTypes::DynamicData& data)
 {
@@ -674,7 +690,7 @@ void verify_enum_union(XTypes::DynamicData& data)
 
 void verify_int32s_union(XTypes::DynamicData& data)
 {
-  CORBA::LongSeq int_32s;
+  XTypes::LongSeq int_32s;
   DDS::ReturnCode_t ret = data.get_int32_values(int_32s, 1);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   EXPECT_EQ(ACE_CDR::ULong(2), int_32s.length());
@@ -684,7 +700,7 @@ void verify_int32s_union(XTypes::DynamicData& data)
 
 void verify_uint32s_union(XTypes::DynamicData& data)
 {
-  CORBA::ULongSeq uint_32s;
+  XTypes::ULongSeq uint_32s;
   DDS::ReturnCode_t ret = data.get_uint32_values(uint_32s, 2);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   EXPECT_EQ(ACE_CDR::ULong(2), uint_32s.length());
@@ -919,6 +935,7 @@ TEST(Mutable, ReadValueFromUnion)
     XTypes::DynamicData data(&msg, xcdr2, dt);
     verify_char8_union(data);
   }
+#ifdef DDS_HAS_WCHAR
   {
     unsigned char char16_union[] = {
       0x00,0x00,0x00,0x0e, // +4=4 dheader
@@ -930,6 +947,7 @@ TEST(Mutable, ReadValueFromUnion)
     XTypes::DynamicData data(&msg, xcdr2, dt);
     verify_char16_union(data);
   }
+#endif
   {
     unsigned char byte_union[] = {
       0x00,0x00,0x00,0x0d, // +4=4 dheader
@@ -963,6 +981,7 @@ TEST(Mutable, ReadValueFromUnion)
     XTypes::DynamicData data(&msg, xcdr2, dt);
     verify_string_union(data);
   }
+#ifdef DDS_HAS_WCHAR
   {
     unsigned char wstr_union[] = {
       0x00,0x00,0x00,0x1c, // +4=4 dheader
@@ -975,6 +994,7 @@ TEST(Mutable, ReadValueFromUnion)
     XTypes::DynamicData data(&msg, xcdr2, dt);
     verify_wstring_union(data);
   }
+#endif
   {
     // Read default member
     unsigned char enum_union[] = {
@@ -1350,6 +1370,7 @@ TEST(Appendable, ReadValueFromUnion)
     XTypes::DynamicData data(&msg, xcdr2, dt);
     verify_char8_union(data);
   }
+#ifdef DDS_HAS_WCHAR
   {
     unsigned char char16_union[] = {
       0x00,0x00,0x00,0x06, // dheader
@@ -1361,6 +1382,7 @@ TEST(Appendable, ReadValueFromUnion)
     XTypes::DynamicData data(&msg, xcdr2, dt);
     verify_char16_union(data);
   }
+#endif
   {
     unsigned char byte_union[] = {
       0x00,0x00,0x00,0x05, // dheader
@@ -1394,6 +1416,7 @@ TEST(Appendable, ReadValueFromUnion)
     XTypes::DynamicData data(&msg, xcdr2, dt);
     verify_string_union(data);
   }
+#ifdef DDS_HAS_WCHAR
   {
     unsigned char wstr_union[] = {
       0x00,0x00,0x00,0x10, // dheader
@@ -1405,6 +1428,7 @@ TEST(Appendable, ReadValueFromUnion)
     XTypes::DynamicData data(&msg, xcdr2, dt);
     verify_wstring_union(data);
   }
+#endif
   {
     unsigned char enum_union[] = {
       0x00,0x00,0x00,0x08, // dheader
@@ -1766,6 +1790,7 @@ TEST(Final, ReadValueFromUnion)
     XTypes::DynamicData data(&msg, xcdr2, dt);
     verify_char8_union(data);
   }
+#ifdef DDS_HAS_WCHAR
   {
     unsigned char char16_union[] = {
       0x00,0x00,0x00,0x0c, // +4=4 discriminator
@@ -1776,6 +1801,7 @@ TEST(Final, ReadValueFromUnion)
     XTypes::DynamicData data(&msg, xcdr2, dt);
     verify_char16_union(data);
   }
+#endif
   {
     unsigned char byte_union[] = {
       0x00,0x00,0x00,0x0d, // discriminator
@@ -1806,6 +1832,7 @@ TEST(Final, ReadValueFromUnion)
     XTypes::DynamicData data(&msg, xcdr2, dt);
     verify_string_union(data);
   }
+#ifdef DDS_HAS_WCHAR
   {
     unsigned char wstr_union[] = {
       0x00,0x00,0x00,0x10, // discriminator
@@ -1816,6 +1843,7 @@ TEST(Final, ReadValueFromUnion)
     XTypes::DynamicData data(&msg, xcdr2, dt);
     verify_wstring_union(data);
   }
+#endif
   {
     unsigned char enum_union[] = {
       0x00,0x00,0x00,0x11, // discriminator
