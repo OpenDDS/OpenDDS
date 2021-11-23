@@ -83,7 +83,7 @@ void read_file(std::ifstream& ifs, ::TAO::String_Manager& str)
 
   std::vector<char> temp(file_length + 1);
   ifs.read(temp.data(), file_length);
-  temp[file_length] = '\0';
+  temp[static_cast<std::vector<char>::size_type>(file_length)] = '\0';
 
   const char* ptr = temp.data();
   str = ptr;
