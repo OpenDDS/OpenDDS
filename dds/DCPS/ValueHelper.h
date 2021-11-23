@@ -6,8 +6,8 @@
 #ifndef OPENDDS_DCPS_VALUE_HELPER_H
 #define OPENDDS_DCPS_VALUE_HELPER_H
 
-#include <dds/DCPS/RestoreOutputStreamState.h>
-#include <dds/DCPS/Definitions.h>
+#include "RestoreOutputStreamState.h"
+#include "Definitions.h"
 
 #include <ostream>
 #include <iostream>

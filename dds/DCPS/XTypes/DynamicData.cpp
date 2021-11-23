@@ -2235,7 +2235,8 @@ const char* DynamicData::typekind_to_string(TypeKind tk) const
   }
 }
 
-bool print_integral_value(DynamicData& dd, DCPS::String& type_string, DynamicType_rch dt) {
+bool print_integral_value(DynamicData& dd, DCPS::String& type_string, DynamicType_rch dt)
+{
   switch (dt->get_descriptor().kind) {
   case TK_ENUM: {
     ACE_CDR::Long val;
