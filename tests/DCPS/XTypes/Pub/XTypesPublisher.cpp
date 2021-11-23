@@ -127,6 +127,22 @@ void write_modified_mutable_struct(const DataWriter_var& dw)
   }
 }
 
+void write_mutable_base_struct(const DataWriter_var& dw)
+{
+  MutableBaseStructDataWriter_var typed_dw = MutableBaseStructDataWriter::_narrow(dw);
+
+  MutableBaseStruct mbs;
+  mbs.key = key_value;
+  const ReturnCode_t ret = typed_dw->write(mbs, HANDLE_NIL);
+  if (ret != RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: write_mutable_base_struct returned %C\n",
+               OpenDDS::DCPS::retcode_to_string(ret)));
+  }
+  if (verbose) {
+    ACE_DEBUG((LM_DEBUG, "writer: MutableBaseStruct\n"));
+  }
+}
+
 void write_modified_mutable_union(const DataWriter_var& dw)
 {
   ModifiedMutableUnionDataWriter_var typed_dw = ModifiedMutableUnionDataWriter::_narrow(dw);
@@ -326,6 +342,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   } else if (type == "AppendableStructWithDependency") {
     AppendableStructWithDependencyTypeSupport_var ts = new AppendableStructWithDependencyTypeSupportImpl;
     failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+  } else if (type == "MutableBaseStruct") {
+    MutableBaseStructTypeSupport_var ts = new MutableBaseStructTypeSupportImpl;
+    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type.empty()) {
     ACE_ERROR((LM_ERROR, "ERROR: Must specify a type name\n"));
     return 1;
@@ -453,6 +472,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       write_modified_name_mutable_struct(dw);
     } else if (type == "ModifiedNameMutableUnion") {
       write_modified_name_mutable_union(dw);
+    } else if (type == "MutableBaseStruct") {
+      write_mutable_base_struct(dw);
     }
   }
 

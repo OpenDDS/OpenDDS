@@ -603,8 +603,6 @@ protected:
 
   void prepare_to_delete();
 
-  /// Setup deserialization options
-  DDS::ReturnCode_t setup_deserialization();
   virtual Extensibility get_max_extensibility() = 0;
 
   RcHandle<SubscriberImpl> get_subscriber_servant();
@@ -923,10 +921,6 @@ private:
   unique_ptr<Monitor>  periodic_monitor_;
 
   bool transport_disabled_;
-
-protected:
-  typedef OPENDDS_SET(Encoding::Kind) EncodingKinds;
-  EncodingKinds decoding_modes_;
 
 public:
   class OpenDDS_Dcps_Export OnDataOnReaders : public JobQueue::Job {

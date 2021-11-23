@@ -130,14 +130,14 @@ ReturnCode_t read_appendable_struct_no_xtypes(const DataReader_var& dr)
   return read_struct(dr, pdr, data);
 }
 
-ReturnCode_t read_mutable_struct(const DataReader_var& dr)
+ReturnCode_t read_mutable_struct(const DataReader_var& dr, const AdditionalFieldValue& afv)
 {
   MutableStructDataReader_var pdr = MutableStructDataReader::_narrow(dr);
   ::MutableStructSeq data;
   ReturnCode_t ret;
   ret = read_struct(dr, pdr, data);
   if (ret == RETCODE_OK) {
-    ret = check_additional_field_value(data, MUTABLE_STRUCT_AF);
+    ret = check_additional_field_value(data, afv);
   }
   return ret;
 }
@@ -332,8 +332,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
   dr_qos.type_consistency.ignore_member_names = ignore_member_names;
   dr_qos.type_consistency.force_type_validation = force_type_validation;
-  dr_qos.representation.value.length(1);
-  dr_qos.representation.value[0] = XCDR2_DATA_REPRESENTATION;
 
   DataReader_var dr = sub->create_datareader(topic, dr_qos, 0,
     DEFAULT_STATUS_MASK);
@@ -374,7 +372,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if (type == "FinalStructSub") {
       failed = (read_final_struct(dr) != RETCODE_OK);
     } else if (type == "MutableStruct") {
-      failed = (read_mutable_struct(dr) != RETCODE_OK);
+      AdditionalFieldValue afv = MUTABLE_STRUCT_AF;
+      if (topic_name == "MutableBaseStructT") {
+        afv = FINAL_STRUCT_AF;
+      }
+      failed = (read_mutable_struct(dr, afv) != RETCODE_OK);
     } else if (type == "MutableUnion") {
       failed = (read_mutable_union(dr) != RETCODE_OK);
     } else if (type == "Trim20Struct") {
