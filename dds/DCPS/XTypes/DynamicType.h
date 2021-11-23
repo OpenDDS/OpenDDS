@@ -8,6 +8,10 @@
 #include <dds/DCPS/RcObject.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+namespace DDS {
+  typedef ACE_CDR::Long ReturnCode_t;
+}
+
 namespace OpenDDS {
 namespace XTypes {
 
