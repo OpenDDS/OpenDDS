@@ -143,3 +143,14 @@ feature(!no_opendds_safety_profile, !built_in_topics) : dds_suppress_any_support
     DdsDcpsDataReaderSeq.idl
   }
 }
+
+feature(no_opendds_safety_profile) {
+  TypeSupport_Files {
+    dcps_ts_flags += -o CorbaSeq -SI -Wb,tao_include_prefix=tao/
+    gendir = CorbaSeq
+    CorbaSeq/*.idl
+  }
+  verbatim(gnuace, bottom, 1) {
+    idl_stubs: $(foreach f,$(wildcard CorbaSeq/*.idl),$(f:.idl=TypeSupportImpl.h))
+  }
+}

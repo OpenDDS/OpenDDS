@@ -70,15 +70,6 @@ project(OpenDDS_Dcps): core, coverage_optional, \
     DCPS/XTypes
   }
 
-  TypeSupport_Files {
-    dcps_ts_flags += -o CorbaSeq -SI -Wb,tao_include_prefix=tao/
-    gendir = CorbaSeq
-    CorbaSeq/*.idl
-  }
-  verbatim(gnuace, bottom, 1) {
-    idl_stubs: $(foreach f,$(wildcard CorbaSeq/*.idl),$(f:.idl=TypeSupportImpl.h))
-  }
-
   InstallData_Files {
     gendir = .
     ../MPC
@@ -163,7 +154,7 @@ project(OpenDDS_Dcps): core, coverage_optional, \
 // 3. Safety profile (with builtin topics)
 
 //    The main driver here is control of the language mapping.  In this
-//    configuration, opendds_idl is used with -I (prevent
+//    configuration, opendds_idl is used with -SI (prevent
 //    fileTypeSupport.idl) and -Lspcpp (to generate language mappings and
 //    serialization code).  Message types for builtin topics are in
 //    DdsDcpsCore.idl which means that opendds_idl generates
