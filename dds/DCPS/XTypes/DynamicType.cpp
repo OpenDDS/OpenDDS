@@ -120,6 +120,14 @@ bool DynamicType::test_equality_i(const DynamicType& rhs, DynamicTypePtrPairSeen
   return true;
 }
 
+DynamicType_rch DynamicType::get_base_type()
+{
+  if (get_kind() != TK_ALIAS) {
+    return DynamicType_rch(this, OpenDDS::DCPS::inc_count());
+  }
+  return get_descriptor().base_type->get_base_type();
+}
+
 bool operator==(const DynamicType& lhs, const DynamicType& rhs)
 {
   DynamicTypePtrPairSeen dt_ptr_pair;

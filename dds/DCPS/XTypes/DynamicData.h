@@ -11,23 +11,24 @@
 
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/PoolAllocator.h>
-#include <dds/CorbaSeq/LongSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/ULongSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/Int8SeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/UInt8SeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/ShortSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/UShortSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/LongLongSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/ULongLongSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/FloatSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/DoubleSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/LongDoubleSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/CharSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/WCharSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/OctetSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/BooleanSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/StringSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/WStringSeqTypeSupportImpl.h>
+
+#include <tao/LongSeqC.h>
+#include <tao/ULongSeqC.h>
+#include <tao/Int8SeqC.h>
+#include <tao/UInt8SeqC.h>
+#include <tao/ShortSeqC.h>
+#include <tao/UShortSeqC.h>
+#include <tao/LongLongSeqC.h>
+#include <tao/ULongLongSeqC.h>
+#include <tao/FloatSeqC.h>
+#include <tao/DoubleSeqC.h>
+#include <tao/LongDoubleSeqC.h>
+#include <tao/CharSeqC.h>
+#include <tao/WCharSeqC.h>
+#include <tao/OctetSeqC.h>
+#include <tao/BooleanSeqC.h>
+#include <tao/StringSeqC.h>
+#include <tao/WStringSeqC.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -100,6 +101,8 @@ public:
   DDS::ReturnCode_t get_boolean_values(CORBA::BooleanSeq& value, MemberId id);
   DDS::ReturnCode_t get_string_values(CORBA::StringSeq& value, MemberId id);
   DDS::ReturnCode_t get_wstring_values(CORBA::WStringSeq& value, MemberId id);
+
+  DynamicType_rch type() const { return type_; }
 
 private:
   void copy(const DynamicData& other);
@@ -303,6 +306,9 @@ private:
   /// Cache the number of items (i.e., members or elements) in the data it holds.
   ACE_CDR::ULong item_count_;
 };
+
+OpenDDS_Dcps_Export bool print_dynamic_data(
+  DynamicData& dd, DCPS::String& type_string, DCPS::String& indent);
 
 } // namespace XTypes
 } // namespace OpenDDS

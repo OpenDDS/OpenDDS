@@ -319,7 +319,7 @@ TEST(CompleteToDynamicType, MyInnerArray)
   XTypes::DynamicType_rch inner_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor inner_td;
   inner_td.kind = XTypes::TK_ARRAY;
-  inner_td.name = "ArraySmall";
+  inner_td.name = "Array";
   inner_td.bound.length(1);
   inner_td.bound[0] = 2;
   inner_td.extensibility_kind = XTypes::FINAL;
@@ -348,7 +348,7 @@ TEST(CompleteToDynamicType, MyOuterArray)
   XTypes::DynamicType_rch outer_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor outer_td;
   outer_td.kind = XTypes::TK_ARRAY;
-  outer_td.name = "ArraySmall";
+  outer_td.name = "Array";
   outer_td.bound.length(2);
   outer_td.bound[0] = 3;
   outer_td.bound[1] = 2;
@@ -362,7 +362,7 @@ TEST(CompleteToDynamicType, MyOuterArray)
   XTypes::DynamicType_rch inner_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor inner_td;
   inner_td.kind = XTypes::TK_ARRAY;
-  inner_td.name = "ArraySmall";
+  inner_td.name = "Array";
   inner_td.bound.length(1);
   inner_td.bound[0] = 2;
   inner_td.extensibility_kind = XTypes::FINAL;
@@ -395,7 +395,7 @@ TEST(CompleteToDynamicType, MySeq)
   XTypes::DynamicType_rch expected_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor td;
   td.kind = XTypes::TK_SEQUENCE;
-  td.name = "SequenceLarge";
+  td.name = "Sequence";
   td.bound.length(1);
   td.bound[0] = UINT32_MAX;
   td.extensibility_kind = XTypes::FINAL;
@@ -439,14 +439,14 @@ TEST(CompleteToDynamicType, MyAnonStruct)
   XTypes::DynamicType_rch sequence_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor sequence_td;
   sequence_td.kind = XTypes::TK_SEQUENCE;
-  sequence_td.name = "SequenceSmall";
+  sequence_td.name = "Sequence";
   sequence_td.bound.length(1);
   sequence_td.bound[0] = 5;
   sequence_td.extensibility_kind = XTypes::FINAL;
   XTypes::DynamicType_rch array_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor array_td;
   array_td.kind = XTypes::TK_ARRAY;
-  array_td.name = "ArraySmall";
+  array_td.name = "Array";
   array_td.bound.length(1);
   array_td.bound[0] = 3;
   array_td.extensibility_kind = XTypes::FINAL;

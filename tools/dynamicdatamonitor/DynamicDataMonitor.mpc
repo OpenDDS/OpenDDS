@@ -1,0 +1,7 @@
+project(Dynamic_Data_Monitor): dcps_rtps_udp {
+  exename   = dynamic-data-monitor
+
+  Source_Files {
+    DynamicDataMonitor.cpp
+  }
+}
