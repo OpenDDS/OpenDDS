@@ -29,6 +29,7 @@ OpenDDS::DCPS::TransportInst::TransportInst(const char* type,
   , drop_messages_(false)
   , drop_messages_m_(0)
   , drop_messages_b_(0)
+  , count_messages_(false)
 {
   DBG_ENTRY_LVL("TransportInst", "TransportInst", 6);
   adjust_config_value();
