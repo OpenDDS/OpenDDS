@@ -3076,10 +3076,11 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
   }
 
   const bool relay_in_use = (outer->config_->rtps_relay_only() || outer->config_->use_rtps_relay());
-  const bool from_relay = relay_in_use && (remote == outer->config_->spdp_rtps_relay_address());
+  const bool remote_matches_relay_addr = (remote == outer->config_->spdp_rtps_relay_address());
+  const bool from_relay = relay_in_use && remote_matches_relay_addr;
 
   // Ignore messages from the relay when not using it.
-  if (!relay_in_use && from_relay) {
+  if (!relay_in_use && remote_matches_relay_addr) {
     return 0;
   }
 
