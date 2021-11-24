@@ -215,7 +215,7 @@ namespace {
           ip << "  v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n";
         if (cls & CL_WIDE) {
           strm <<
-            ip << "  std::vector<uint16_t> vwc(ls->Length(), 0);\n" <<
+            ip << "  std::vector<uint16_t> vwc(ls->Length() + 1, 0);\n" <<
             ip << "  ls->Write(&vwc[0]);\n" <<
             ip << "  std::wstring ws(ls->Length(), ' ');\n" <<
             ip << "  for (size_t i = 0; i < vwc.size(); ++i) {\n" <<
