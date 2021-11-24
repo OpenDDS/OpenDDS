@@ -100,7 +100,7 @@ void verify_single_value_struct(XTypes::DynamicData& data)
   XTypes::DynamicData nested_dd;
   ret = data.get_complex_value(nested_dd, 0);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  XTypes::MemberId random_id = 111;
+  const XTypes::MemberId random_id = 111;
   ret = nested_dd.get_int32_value(my_enum, random_id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.my_enum, my_enum);
@@ -516,6 +516,21 @@ void verify_int32_union(XTypes::DynamicData& data)
   DDS::ReturnCode_t ret = data.get_int32_value(int_32, 1);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(ACE_CDR::Long(10), int_32);
+
+  const XTypes::MemberId disc_id = data.get_member_id_by_name("discriminator");
+  EXPECT_EQ(XTypes::DISCRIMINATOR_ID, disc_id);
+  ACE_CDR::Long disc_val;
+  ret = data.get_int32_value(disc_val, disc_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(disc_val, E_INT32);
+
+  XTypes::DynamicData disc_data;
+  ret = data.get_complex_value(disc_data, disc_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  const XTypes::MemberId any_id = 100;
+  ret = disc_data.get_int32_value(disc_val, any_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(disc_val, E_INT32);
 }
 
 void verify_uint32_union(XTypes::DynamicData& data)
@@ -524,6 +539,21 @@ void verify_uint32_union(XTypes::DynamicData& data)
   DDS::ReturnCode_t ret = data.get_uint32_value(uint_32, 2);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(ACE_CDR::ULong(11), uint_32);
+
+  const XTypes::MemberId disc_id = data.get_member_id_by_name("discriminator");
+  EXPECT_EQ(XTypes::DISCRIMINATOR_ID, disc_id);
+  ACE_CDR::Long disc_val;
+  ret = data.get_int32_value(disc_val, disc_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(disc_val, E_UINT32);
+
+  XTypes::DynamicData disc_data;
+  ret = data.get_complex_value(disc_data, disc_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  const XTypes::MemberId any_id = 100;
+  ret = disc_data.get_int32_value(disc_val, any_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(disc_val, E_UINT32);
 }
 
 void verify_int8_union(XTypes::DynamicData& data)

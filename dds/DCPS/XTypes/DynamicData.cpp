@@ -1013,7 +1013,6 @@ DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id
 
   switch (tk) {
   case TK_STRUCTURE:
-  case TK_UNION:
     {
       DynamicTypeMember_rch member;
       const DDS::ReturnCode_t retcode = type_->get_member(member, id);
@@ -1026,40 +1025,31 @@ DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id
         break;
       }
 
-      if (tk == TK_STRUCTURE) {
-        const MemberDescriptor md = member->get_descriptor();
-        if (!skip_to_struct_member(md, id)) {
+      const MemberDescriptor md = member->get_descriptor();
+      if (!skip_to_struct_member(md, id)) {
+        good = false;
+      } else {
+        const DynamicType_rch member_type = md.type.lock();
+        if (!member_type) {
           good = false;
         } else {
-          const DynamicType_rch member_type = md.type.lock();
-          if (!member_type) {
+          value = DynamicData(strm_, member_type);
+        }
+      }
+      break;
+    }
+  case TK_UNION:
+    {
+      if (id == DISCRIMINATOR_ID) {
+        if (descriptor_.extensibility_kind == APPENDABLE || descriptor_.extensibility_kind == MUTABLE) {
+          size_t size;
+          if (!strm_.read_delimiter(size)) {
             good = false;
-          } else {
-            value = DynamicData(strm_, member_type);
+            break;
           }
-        }
-        break;
-      } else {
-        MemberDescriptor md;
-        if (!get_union_selected_member(md)) {
-          if (DCPS::DCPS_debug_level >= 1) {
-            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_complex_value -")
-                       ACE_TEXT(" Could not find MemberDescriptor for the selected union member\n")));
-          }
-          good = false;
-          break;
         }
 
-        if (md.id != id) {
-          if (DCPS::DCPS_debug_level >= 1) {
-            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_complex_value -")
-                       ACE_TEXT(" ID of the selected member (%d) is not the requested ID (%d)"),
-                       md.id, id));
-          }
-          good = false;
-          break;
-        }
-
+        const DynamicType_rch disc_type = get_base_type(descriptor_.discriminator_type);
         if (descriptor_.extensibility_kind == MUTABLE) {
           unsigned id;
           size_t size;
@@ -1069,14 +1059,32 @@ DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id
             break;
           }
         }
-        const DynamicType_rch member_type = md.type.lock();
-        if (!member_type) {
-          good = false;
-        } else {
-          value = DynamicData(strm_, member_type);
-        }
+        value = DynamicData(strm_, disc_type);
         break;
       }
+
+      MemberDescriptor md;
+      if (!get_from_union_common_checks(id, "get_complex_value", md)) {
+        good = false;
+        break;
+      }
+
+      if (descriptor_.extensibility_kind == MUTABLE) {
+        unsigned id;
+        size_t size;
+        bool must_understand;
+        if (!strm_.read_parameter_id(id, size, must_understand)) {
+          good = false;
+          break;
+        }
+      }
+      const DynamicType_rch member_type = md.type.lock();
+      if (!member_type) {
+        good = false;
+      } else {
+        value = DynamicData(strm_, member_type);
+      }
+      break;
     }
   case TK_SEQUENCE:
   case TK_ARRAY:
