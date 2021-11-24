@@ -159,7 +159,10 @@ DataReaderImpl::cleanup()
   topic_servant_ = 0;
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-  content_filtered_topic_ = 0;
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(content_filtered_topic_mutex_);
+    content_filtered_topic_ = 0;
+  }
 #endif
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
@@ -279,10 +282,13 @@ DataReaderImpl::add_association(const RepoId& yourId,
 
     remove_association_sweeper_->cancel_timer(writer_id);
 
-    this->statistics_.insert(
+    {
+      ACE_Guard<ACE_Recursive_Thread_Mutex> guard(statistics_lock_);
+      statistics_.insert(
         StatsMapType::value_type(
-            writer_id,
-            WriterStats(raw_latency_buffer_size_, raw_latency_buffer_type_)));
+          writer_id,
+          WriterStats(raw_latency_buffer_size_, raw_latency_buffer_type_)));
+    }
 
     // If this is a durable reader
     if (this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
@@ -497,7 +503,10 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
 
       for (CORBA::ULong i = 0; i < wr_len; i++) {
         PublicationId writer_id = writers[i];
-        statistics_.erase(writer_id);
+        {
+          ACE_Guard<ACE_Recursive_Thread_Mutex> guard(statistics_lock_);
+          statistics_.erase(writer_id);
+        }
 
         WriterMapType::iterator it = this->writers_.find(writer_id);
         if (it != this->writers_.end()) {
@@ -976,8 +985,11 @@ DataReaderListener_ptr DataReaderImpl::get_ext_listener()
 DDS::TopicDescription_ptr DataReaderImpl::get_topicdescription()
 {
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-  if (content_filtered_topic_) {
-    return DDS::TopicDescription::_duplicate(content_filtered_topic_.get());
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(content_filtered_topic_mutex_);
+    if (content_filtered_topic_) {
+      return DDS::TopicDescription::_duplicate(content_filtered_topic_.get());
+    }
   }
 #endif
   return DDS::TopicDescription::_duplicate(topic_desc_.in());
@@ -1289,13 +1301,14 @@ DataReaderImpl::enable()
     CORBA::String_var filterExpression = "";
     DDS::StringSeq exprParams;
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-
-    if (content_filtered_topic_) {
-      filterClassName = content_filtered_topic_->get_filter_class_name();
-      filterExpression = content_filtered_topic_->get_filter_expression();
-      content_filtered_topic_->get_expression_parameters(exprParams);
+    {
+      ACE_Guard<ACE_Thread_Mutex> guard(content_filtered_topic_mutex_);
+      if (content_filtered_topic_) {
+        filterClassName = content_filtered_topic_->get_filter_class_name();
+        filterExpression = content_filtered_topic_->get_filter_expression();
+        content_filtered_topic_->get_expression_parameters(exprParams);
+      }
     }
-
 #endif
 
     DDS::SubscriberQos sub_qos;
@@ -1688,7 +1701,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
             ACE_TEXT("deserialization reader failed.\n")));
         return;
       }
-      if (readerId != GUID_UNKNOWN && readerId != get_repo_id()) {
+      const RepoId repo_id(get_repo_id_copy());
+      if (readerId != GUID_UNKNOWN && readerId != repo_id) {
         break; // not our message
       }
     }
@@ -2146,20 +2160,24 @@ DataReaderImpl::writer_removed(WriterInfo& info)
 
   bool liveliness_changed = false;
 
-  if (info.state_ == WriterInfo::ALIVE) {
-    -- liveliness_changed_status_.alive_count;
-    -- liveliness_changed_status_.alive_count_change;
-    liveliness_changed = true;
-  }
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
 
-  if (info.state_ == WriterInfo::DEAD) {
-    -- liveliness_changed_status_.not_alive_count;
-    -- liveliness_changed_status_.not_alive_count_change;
-    liveliness_changed = true;
-  }
+    if (info.state_ == WriterInfo::ALIVE) {
+      --liveliness_changed_status_.alive_count;
+      --liveliness_changed_status_.alive_count_change;
+      liveliness_changed = true;
+    }
 
-  liveliness_changed_status_.last_publication_handle = info.handle_;
-  instances_liveliness_update(info.writer_id_);
+    if (info.state_ == WriterInfo::DEAD) {
+      --liveliness_changed_status_.not_alive_count;
+      --liveliness_changed_status_.not_alive_count_change;
+      liveliness_changed = true;
+    }
+
+    liveliness_changed_status_.last_publication_handle = info.handle_;
+    instances_liveliness_update(info.writer_id_);
+  }
 
   if (liveliness_changed) {
     set_status_changed_flag(DDS::LIVELINESS_CHANGED_STATUS, true);
@@ -2182,7 +2200,7 @@ DataReaderImpl::writer_became_alive(WriterInfo& info,
         info.get_state_str()));
   }
 
-  // caller should already have the samples_lock_ !!!
+  // caller should already have the sample_lock_ !!!
 
   // NOTE: each instance will change to ALIVE_STATE when they receive a sample
 
@@ -2263,7 +2281,7 @@ DataReaderImpl::writer_became_dead(WriterInfo& info)
   }
 #endif
 
-  // caller should already have the samples_lock_ !!!
+  // caller should already have the sample_lock_ !!!
   bool liveliness_changed = false;
 
   if (info.state_ == OpenDDS::DCPS::WriterInfo::NOT_SET) {
@@ -2364,6 +2382,7 @@ void DataReaderImpl::dispose_unregister(const ReceivedDataSample&,
 
 void DataReaderImpl::process_latency(const ReceivedDataSample& sample)
 {
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(statistics_lock_);
   StatsMapType::iterator location = this->statistics_.find(sample.header_.publication_id_);
 
   if (location != this->statistics_.end()) {
@@ -2451,6 +2470,7 @@ void
 DataReaderImpl::get_latency_stats(
     OpenDDS::DCPS::LatencyStatisticsSeq & stats)
 {
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(statistics_lock_);
   stats.length(static_cast<CORBA::ULong>(this->statistics_.size()));
   int index = 0;
 
@@ -2466,6 +2486,7 @@ DataReaderImpl::get_latency_stats(
 void
 DataReaderImpl::reset_latency_stats()
 {
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(statistics_lock_);
   for (StatsMapType::iterator current = this->statistics_.begin();
       current != this->statistics_.end();
       ++current) {
@@ -2476,14 +2497,14 @@ DataReaderImpl::reset_latency_stats()
 CORBA::Boolean
 DataReaderImpl::statistics_enabled()
 {
-  return this->statistics_enabled_;
+  return statistics_enabled_.value();
 }
 
 void
 DataReaderImpl::statistics_enabled(
     CORBA::Boolean statistics_enabled)
 {
-  this->statistics_enabled_ = statistics_enabled;
+  statistics_enabled_ = statistics_enabled;
 }
 
 void
@@ -2497,6 +2518,7 @@ DataReaderImpl::prepare_to_delete()
   this->set_deleted(true);
   this->stop_associating();
   this->send_final_acks();
+  subscription_id_condition_.notify_all();
 }
 
 SubscriptionInstance_rch
@@ -2843,6 +2865,8 @@ void DataReaderImpl::notify_liveliness_change()
 
   if (!CORBA::is_nil(listener.in())) {
     listener->on_liveliness_changed(this, liveliness_changed_status_);
+
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
 
     liveliness_changed_status_.alive_count_change = 0;
     liveliness_changed_status_.not_alive_count_change = 0;
@@ -3231,12 +3255,16 @@ void
 DataReaderImpl::enable_filtering(ContentFilteredTopicImpl* cft)
 {
   cft->add_reader(*this);
-  content_filtered_topic_ = cft;
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(content_filtered_topic_mutex_);
+    content_filtered_topic_ = cft;
+  }
 }
 
 DDS::ContentFilteredTopic_ptr
 DataReaderImpl::get_cf_topic() const
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(content_filtered_topic_mutex_);
   return DDS::ContentFilteredTopic::_duplicate(content_filtered_topic_.get());
 }
 #endif
@@ -3592,11 +3620,10 @@ void DataReaderImpl::transport_discovery_change()
   populate_connection_info();
   const TransportLocatorSeq& trans_conf_info = connection_info();
   const RepoId dp_id_copy = dp_id_;
-  const RepoId subscription_id_copy = subscription_id_;
   Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
   disco->update_subscription_locators(domain_id_,
                                       dp_id_copy,
-                                      subscription_id_copy,
+                                      get_repo_id_copy(),
                                       trans_conf_info);
 }
 
