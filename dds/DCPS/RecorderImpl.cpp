@@ -234,7 +234,7 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
       Serializer ser(sample.sample_.get(), enc);
       EncapsulationHeader encap;
       if (ser >> encap) {
-        encap.to_encoding(enc, ANY_EXTENSIBILITY);
+        encap.to_encoding(enc, EXTENSIBILITY_ANY);
         kind = enc.kind();
       }
     }

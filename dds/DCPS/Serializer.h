@@ -70,7 +70,7 @@ enum Extensibility {
   FINAL,
   APPENDABLE,
   MUTABLE,
-  ANY_EXTENSIBILITY
+  EXTENSIBILITY_ANY
 };
 
 const size_t boolean_cdr_size = 1;
