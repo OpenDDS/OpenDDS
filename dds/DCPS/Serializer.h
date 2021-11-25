@@ -69,7 +69,8 @@ String endianness_to_string(Endianness endianness);
 enum Extensibility {
   FINAL,
   APPENDABLE,
-  MUTABLE
+  MUTABLE,
+  EXTENSIBILITY_ANY
 };
 
 const size_t boolean_cdr_size = 1;

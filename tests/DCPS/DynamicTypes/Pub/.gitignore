@@ -1,0 +1,15 @@
+/xtypes_dynamic_pub
+
+dynamicC.cpp
+dynamicC.h
+dynamicC.inl
+dynamicS.cpp
+dynamicS.h
+dynamicTypeSupport.idl
+dynamicTypeSupportC.cpp
+dynamicTypeSupportC.h
+dynamicTypeSupportC.inl
+dynamicTypeSupportImpl.cpp
+dynamicTypeSupportImpl.h
+dynamicTypeSupportS.cpp
+dynamicTypeSupportS.h

@@ -228,13 +228,24 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
 
   // we only support SAMPLE_DATA messages
   if (sample.header_.message_id_ == SAMPLE_DATA && listener_.in()) {
+    Encoding::Kind kind = Encoding::KIND_UNALIGNED_CDR;
+    if (sample.header_.cdr_encapsulation_ && check_encap_) {
+      Encoding enc;
+      Serializer ser(sample.sample_.get(), enc);
+      EncapsulationHeader encap;
+      if (ser >> encap) {
+        encap.to_encoding(enc, EXTENSIBILITY_ANY);
+        kind = enc.kind();
+      }
+    }
     RawDataSample rawSample(sample.header_,
                             static_cast<MessageId> (sample.header_.message_id_),
                             sample.header_.source_timestamp_sec_,
                             sample.header_.source_timestamp_nanosec_,
                             sample.header_.publication_id_,
                             sample.header_.byte_order_,
-                            sample.sample_.get());
+                            sample.sample_.get(),
+                            kind);
     listener_->on_sample_data_received(this, rawSample);
   }
 }
@@ -434,6 +445,11 @@ RecorderImpl::add_association(const RepoId&            yourId,
   }
   XTypes::TypeObject cto = tls->get_type_object(type_info.complete.typeid_with_size.type_id);
   XTypes::DynamicType_rch dt = tls->complete_to_dynamic(cto.complete, writer.writerId);
+  if (DCPS_debug_level >= 4) {
+    ACE_DEBUG((LM_DEBUG,
+               "(%P|%t) RecorderImpl::add_association:"
+               "DynamicType added to map with guid: %C\n", LogGuid(writer.writerId).c_str()));
+  }
   dt_map_.insert(std::make_pair(writer.writerId, dt));
   if (!is_bit_) {
 
