@@ -517,7 +517,7 @@ void verify_int32_union(XTypes::DynamicData& data)
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(ACE_CDR::Long(10), int_32);
 
-  const XTypes::MemberId disc_id = data.get_member_id_by_name("discriminator");
+  const XTypes::MemberId disc_id = data.get_member_id_at_index(0);
   EXPECT_EQ(XTypes::DISCRIMINATOR_ID, disc_id);
   ACE_CDR::Long disc_val;
   ret = data.get_int32_value(disc_val, disc_id);
@@ -540,7 +540,7 @@ void verify_uint32_union(XTypes::DynamicData& data)
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(ACE_CDR::ULong(11), uint_32);
 
-  const XTypes::MemberId disc_id = data.get_member_id_by_name("discriminator");
+  const XTypes::MemberId disc_id = data.get_member_id_at_index(0);
   EXPECT_EQ(XTypes::DISCRIMINATOR_ID, disc_id);
   ACE_CDR::Long disc_val;
   ret = data.get_int32_value(disc_val, disc_id);

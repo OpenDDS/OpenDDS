@@ -205,7 +205,18 @@ MemberId DynamicData::get_member_id_at_index(ACE_CDR::ULong index)
   case TK_MAP:
     return index;
   case TK_STRUCTURE:
+    {
+    }
   case TK_UNION:
+    {
+      if (index == 0) {
+        return DISCRIMINATOR_ID;
+      }
+      // Find the Id of the selected member.
+      MemberDescriptor selected_md;
+      
+    }
+    /*
     {
       DynamicTypeMember_rch member;
       if (type_->get_member_by_index(member, index) != DDS::RETCODE_OK) {
@@ -213,6 +224,7 @@ MemberId DynamicData::get_member_id_at_index(ACE_CDR::ULong index)
       }
       return member->get_descriptor().id;
     }
+    */
   }
 
   if (DCPS::DCPS_debug_level >= 1) {
@@ -262,9 +274,84 @@ ACE_CDR::ULong DynamicData::get_item_count()
   case TK_BITMASK:
     return descriptor_.bound[0];
   case TK_STRUCTURE:
-    // When optional members are supported, this needs to be updated to count
-    // the number of members actually present in the DynamicData object.
-    return type_->get_member_count();
+    {
+      bool has_optional_member = false;
+      ACE_CDR::ULong count_in_dt = type_->get_member_count();
+      for (unsigned i = 0; i < count_in_dt; ++i) {
+        DynamicTypeMember_rch member;
+        if (type_->get_member_by_index(member, i) != DDS::RETCODE_OK) {
+          return 0;
+        }
+        if (member->get_descriptor().is_optional) {
+          has_optional_member = true;
+          break;
+        }
+      }
+
+      if (!has_optional_member) {
+        return count_in_dt;
+      }
+
+      // Optional members can be omitted, so we need to count members one by one.
+      ACE_CDR::ULong actual_count = 0;
+      const Extensibility ek = descriptor_.extensibility_kind;
+      if (ek == FINAL || ek == APPENDABLE) {
+        if (ek == APPENDABLE) {
+          size_t dheader = 0;
+          if (!strm_.read_delimiter(dheader)) {
+            return 0;
+          }
+        }
+        for (ACE_CDR::ULong i = 0; i < count_in_dt; ++i) {
+          ACE_CDR::ULong num_skipped;
+          if (!skip_struct_member_at_index(i, num_skipped)) {
+            actual_count = 0;
+            break;
+          }
+          actual_count += num_skipped;
+        }
+      } else { // Mutable
+        size_t dheader = 0;
+        if (!strm_.read_delimiter(dheader)) {
+          return 0;
+        }
+
+        const size_t end_of_sample = strm_.rpos() + dheader;
+        while (strm_.rpos() < end_of_sample) {
+          ACE_CDR::ULong member_id;
+          size_t member_size;
+          bool must_understand;
+          if (!strm_.read_parameter_id(member_id, member_size, must_understand)) {
+            actual_count = 0;
+            break;
+          }
+
+          DynamicTypeMember_rch dtm;
+          if (type_->get_member(dtm, member_id) != DDS::RETCODE_OK) {
+            actual_count = 0;
+            break;
+          }
+          DynamicType_rch member = dtm->get_descriptor().type.lock();
+          if (!member) {
+            actual_count = 0;
+            break;
+          }
+          member = get_base_type(member);
+          if (member->get_kind() == TK_SEQUENCE) {
+            if (!skip_sequence_member(member)) {
+              actual_count = 0;
+              break;
+            }
+          } else if (!strm_.skip(member_size)) {
+            actual_count = 0;
+            break;
+          }
+          ++actual_count;
+        }
+      }
+      release_chains();
+      return actual_count;
+    }
   case TK_UNION:
     {
       const DynamicType_rch disc_type = get_base_type(descriptor_.discriminator_type);
@@ -337,10 +424,12 @@ ACE_CDR::ULong DynamicData::get_item_count()
       ACE_CDR::ULong length = 0;
       while (strm_.rpos() < end_of_map) {
         if (!skip_member(key_type) || !skip_member(elem_type)) {
-          return 0;
+          length = 0;
+          break;
         }
         ++length;
       }
+      release_chains();
       return length;
     }
   }
@@ -1479,7 +1568,8 @@ bool DynamicData::skip_to_struct_member(const MemberDescriptor& member_desc, Mem
     }
 
     for (ACE_CDR::ULong i = 0; i < member_desc.index; ++i) {
-      if (!skip_struct_member_by_index(i)) {
+      ACE_CDR::ULong num_skipped;
+      if (!skip_struct_member_at_index(i, num_skipped)) {
         if (DCPS::DCPS_debug_level >= 1) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::skip_to_struct_member -")
                      ACE_TEXT(" Failed to skip member at index %d\n"), i));
@@ -1499,8 +1589,6 @@ bool DynamicData::skip_to_struct_member(const MemberDescriptor& member_desc, Mem
     }
 
     const size_t end_of_sample = strm_.rpos() + dheader;
-    ACE_CDR::ULong member_id;
-    size_t member_size;
     while (true) {
       if (strm_.rpos() >= end_of_sample) {
         if (DCPS::DCPS_debug_level >= 1) {
@@ -1510,7 +1598,9 @@ bool DynamicData::skip_to_struct_member(const MemberDescriptor& member_desc, Mem
         return false;
       }
 
-      bool must_understand = false;
+      ACE_CDR::ULong member_id;
+      size_t member_size;
+      bool must_understand;
       if (!strm_.read_parameter_id(member_id, member_size, must_understand)) {
         if (DCPS::DCPS_debug_level >= 1) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::skip_to_struct_member -")
@@ -1613,18 +1703,31 @@ bool DynamicData::get_from_struct_common_checks(MemberDescriptor& md, MemberId i
   return true;
 }
 
-bool DynamicData::skip_struct_member_by_index(ACE_CDR::ULong index)
+bool DynamicData::skip_struct_member_at_index(ACE_CDR::ULong index, ACE_CDR::ULong& num_skipped)
 {
   DynamicTypeMember_rch member;
   if (type_->get_member_by_index(member, index) != DDS::RETCODE_OK) {
     if (DCPS::DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::skip_struct_member_by_index -")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::skip_struct_member_at_index -")
                  ACE_TEXT(" Failed to get DynamicTypeMember for member index %d\n"), index));
     }
-    return DDS::RETCODE_ERROR;
+    return false;
   }
 
   const MemberDescriptor md = member->get_descriptor();
+  if (md.is_optional) {
+    ACE_CDR::Boolean present;
+    if (!(strm_ >> ACE_InputCDR::to_boolean(present))) {
+      return false;
+    }
+    // Optional member that is omitted is not counted as a skipped member.
+    if (!present) {
+      num_skipped = 0;
+      return true;
+    }
+  }
+
+  num_skipped = 1;
   const DynamicType_rch member_type = md.type.lock();
   return member_type && skip_member(member_type);
 }
@@ -2010,7 +2113,8 @@ bool DynamicData::skip_all()
       const ACE_CDR::ULong member_count = type_->get_member_count();
       bool good = true;
       for (ACE_CDR::ULong i = 0; i < member_count; ++i) {
-        if (!skip_struct_member_by_index(i)) {
+        ACE_CDR::ULong num_skipped;
+        if (!skip_struct_member_at_index(i, num_skipped)) {
           good = false;
           break;
         }

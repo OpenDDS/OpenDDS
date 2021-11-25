@@ -236,7 +236,7 @@ private:
 
   /// Skip a member of a final or appendable struct at the given index.
   ///
-  bool skip_struct_member_by_index(ACE_CDR::ULong index);
+  bool skip_struct_member_at_index(ACE_CDR::ULong index, ACE_CDR::ULong& num_skipped);
 
   /// Skip a member with the given type. The member can be a part of any containing type,
   /// such as a member in a struct or union, an element in a sequence or array, etc.
