@@ -272,27 +272,24 @@ MemberId DynamicData::get_member_id_at_index(ACE_CDR::ULong index)
           }
           return member->get_id();
         } else {
-          // TODO:
-          ACE_CDR::ULong count = 0;
+          MemberId id = MEMBER_ID_INVALID;
+          ACE_CDR::ULong total_skipped = 0;
           for (ACE_CDR::ULong i = 0; i < type_->get_member_count(); ++i) {
             ACE_CDR::ULong num_skipped;
             if (!skip_struct_member_at_index(i, num_skipped)) {
-              release_chains();
-              return MEMBER_ID_INVALID;
+              break;
             }
-            count += num_skipped;
-            if (count == index + 1) {
+            total_skipped += num_skipped;
+            if (total_skipped == index + 1) {
               DynamicTypeMember_rch member;
-              if (type_->get_member_by_index(member, i) != DDS::RETCODE_OK) {
-                release_chains();
-                return MEMBER_ID_INVALID;
+              if (type_->get_member_by_index(member, i) == DDS::RETCODE_OK) {
+                id = member->get_id();
               }
-              release_chains();
-              return member->get_id();
+              break;
             }
           }
           release_chains();
-          return MEMBER_ID_INVALID;
+          return id;
         }
       } else { // Mutable
         ACE_CDR::ULong member_id;
@@ -408,7 +405,7 @@ ACE_CDR::ULong DynamicData::get_item_count()
 
       // Optional members can be omitted, so we need to count members one by one.
       ACE_CDR::ULong actual_count = 0;
-      const Extensibility ek = descriptor_.extensibility_kind;
+      const ExtensibilityKind ek = descriptor_.extensibility_kind;
       if (ek == FINAL || ek == APPENDABLE) {
         if (ek == APPENDABLE) {
           size_t dheader = 0;
