@@ -377,6 +377,23 @@ void verify_single_value_struct(XTypes::DynamicData& data)
   EXPECT_EQ(expected.my_enum, my_enum);
 }
 
+void verify_index_mapping(XTypes::DynamicData& data)
+{
+  ACE_CDR::ULong count = data.get_item_count();
+  EXPECT_EQ(count, ACE_CDR::ULong(17));
+
+  XTypes::MemberId id = data.get_member_id_at_index(1);
+  EXPECT_EQ(id, ACE_CDR::ULong(1));
+  id = data.get_member_id_at_index(2);
+  EXPECT_EQ(id, ACE_CDR::ULong(3));
+  id = data.get_member_id_at_index(3);
+  EXPECT_EQ(id, ACE_CDR::ULong(4));
+  id = data.get_member_id_at_index(4);
+  EXPECT_EQ(id, ACE_CDR::ULong(6));
+  id = data.get_member_id_at_index(5);
+  EXPECT_EQ(id, ACE_CDR::ULong(7));
+}
+
 template<typename StructType>
 void set_sequence_value_struct(StructType& a)
 {
@@ -855,6 +872,53 @@ TEST(Mutable, ReadValueFromStruct)
   verify_single_value_struct<MutableSingleValueStruct>(data);
 }
 
+TEST(Mutable, StructWithOptionalMembers)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::MutableSingleValueStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::MutableSingleValueStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::CompleteTypeObject cto = it->second.complete;
+  // IDL compiler hasn't supported @optional yet,
+  // so these 2 members are set to be optional manually.
+  cto.struct_type.member_seq[2].common.member_flags |= XTypes::IS_OPTIONAL;
+  cto.struct_type.member_seq[5].common.member_flags |= XTypes::IS_OPTIONAL;
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(cto, DCPS::GUID_t());
+
+  unsigned char single_value_struct[] = {
+    0x00,0x00,0x00,0xb2, // +4=4 dheader
+    0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x03, // +4+4=12 my_enum
+    0x20,0x00,0x00,0x01, 0x00,0x00,0x00,0x0a, // +4+4=20 int_32
+    // Omitting uint_32
+    0x00,0x00,0x00,0x03, 0x05, (0), (0), (0), // +4+1+(3)=28 int_8
+    0x00,0x00,0x00,0x04, 0x06, (0), (0), (0), // +4+1+(3)=36 uint_8
+    // Omitting int_16
+    0x10,0x00,0x00,0x06, 0x22,0x22, (0), (0), // +4+2+(2)=44 uint_16
+    0x30,0x00,0x00,0x07, 0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +4+8=56 int_64
+    0x30,0x00,0x00,0x08, 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +4+8=68 uint_64
+    0x20,0x00,0x00,0x09, 0x3f,0x80,0x00,0x00, // +4+4=76 float_32
+    0x30,0x00,0x00,0x0a, 0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00, // +4+8=88 float_64
+    0x40,0x00,0x00,0x0b, 0x00,0x00,0x00,0x10,
+    0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0,    // +4+4+16=112 float_128
+    0x00,0x00,0x00,0x0c, 'a', (0), (0), (0),  // +4+1+(3)=120 char_8
+    0x10,0x00,0x00,0x0d, 0x00,0x61, (0), (0), // +4+2+(2)=128 char_16
+    0x00,0x00,0x00,0x0e, 0xff, (0), (0), (0), // +4+1+(3)=136 byte
+    0x00,0x00,0x00,0x0f, 0x01, (0), (0), (0), // +4+1+(3)=144 bool
+    0x20,0x00,0x00,0x10, 0x00,0x00,0x00,0x0c, // +4+4=152 nested_struct
+    0x30,0x00,0x00,0x11, 0x00,0x00,0x00,0x04, 'a','b','c','\0', // +4+8=164 str
+    0x40,0x00,0x00,0x12, 0x00,0x00,0x00,0x0a,
+    0x00,0x00,0x00,0x06, 0,0x61,0,0x62,0,0x63 // +4+4+10=182 swtr
+  };
+  ACE_Message_Block msg(1024);
+  msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
+  XTypes::DynamicData data(&msg, xcdr2, dt);
+
+  verify_index_mapping(data);
+}
+
 TEST(Mutable, ReadValueFromUnion)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::MutableSingleValueUnion_xtag>();
@@ -1287,6 +1351,49 @@ TEST(Appendable, ReadValueFromStruct)
   verify_single_value_struct<AppendableSingleValueStruct>(data);
 }
 
+TEST(Appendable, StructWithOptionalMembers)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableSingleValueStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::AppendableSingleValueStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::CompleteTypeObject cto = it->second.complete;
+  cto.struct_type.member_seq[2].common.member_flags |= XTypes::IS_OPTIONAL;
+  cto.struct_type.member_seq[5].common.member_flags |= XTypes::IS_OPTIONAL;
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(cto, DCPS::GUID_t());
+
+  unsigned char single_value_struct[] = {
+    0x00,0x00,0x00,0x5c,  // +4=4 dheader
+    0x00,0x00,0x00,0x03, // +4=8 my_enum
+    0x00,0x00,0x00,0x0a, // +4=12 int_32
+    0x00, // +1=13 Omitting uint_32
+    0x05, // +1=14 int_8
+    0x06, // +1=15 uint_8
+    0x00, // +1=16 Omitting int_16
+    0x22,0x22, // +2=18 uint_16
+    (0),(0),0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +(2)+8=28 int_64
+    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +8=36 uint_64
+    0x3f,0x80,0x00,0x00, // +4=40 float_32
+    0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00, // +8=48 float_64
+    0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0,    // +16=664 float_128
+    'a',  // +1=65 char_8
+    (0),0x00,0x61, // +(1)+2=68 char_16
+    0xff, // +1=69 byte
+    0x01, // +1=70 bool
+    (0), (0), 0x00,0x00,0x00,0x0c, // +(2)+4=76 nested_struct
+    0x00,0x00,0x00,0x04, 'a','b','c','\0', // +8=84 str
+    0x00,0x00,0x00,0x08, 0,0x61,0,0x62,0,0x63,0,0, // +12=96 swtr
+  };
+  ACE_Message_Block msg(1024);
+  msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
+  XTypes::DynamicData data(&msg, xcdr2, dt);
+
+  verify_index_mapping(data);
+}
+
 TEST(Appendable, ReadValueFromUnion)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableSingleValueUnion_xtag>();
@@ -1688,31 +1795,73 @@ TEST(Final, ReadValueFromStruct)
   XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
 
   unsigned char single_value_struct[] = {
-    0x00,0x00,0x00,0x03, // +4=8 my_enum
-    0x00,0x00,0x00,0x0a, // +4=12 int_32
-    0x00,0x00,0x00,0x0b, // +4=16 uint_32
-    0x05, // +1=17 int_8
-    0x06, // +1=18 uint_8
-    0x11,0x11, // +2 =20 int_16
-    0x22,0x22, // +2 =22 uint_16
-    (0),(0),0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +(2)+8=32 int_64
-    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +8=40 uint_64
-    0x3f,0x80,0x00,0x00, // +4=44 float_32
-    0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00, // +8=52 float_64
-    0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0,    // +16=68 float_128
-    'a',  // +1=69 char_8
-    (0),0x00,0x61, // +(1)+2=72 char_16
-    0xff, // +1=73 byte
-    0x01, // +1=74 bool
-    (0), (0), 0x00,0x00,0x00,0x0c, // +(2)+4=80 nested_struct
-    0x00,0x00,0x00,0x04, 'a','b','c','\0', // +8=88 str
-    0x00,0x00,0x00,0x08, 0,0x61,0,0x62,0,0x63,0,0, // +12=100 swtr
+    0x00,0x00,0x00,0x03, // +4=4 my_enum
+    0x00,0x00,0x00,0x0a, // +4=8 int_32
+    0x00,0x00,0x00,0x0b, // +4=12 uint_32
+    0x05, // +1=13 int_8
+    0x06, // +1=14 uint_8
+    0x11,0x11, // +2 =16 int_16
+    0x22,0x22, // +2 =18 uint_16
+    (0),(0),0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +(2)+8=28 int_64
+    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +8=36 uint_64
+    0x3f,0x80,0x00,0x00, // +4=40 float_32
+    0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00, // +8=48 float_64
+    0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0,    // +16=64 float_128
+    'a',  // +1=65 char_8
+    (0),0x00,0x61, // +(1)+2=68 char_16
+    0xff, // +1=69 byte
+    0x01, // +1=70 bool
+    (0), (0), 0x00,0x00,0x00,0x0c, // +(2)+4=76 nested_struct
+    0x00,0x00,0x00,0x04, 'a','b','c','\0', // +8=84 str
+    0x00,0x00,0x00,0x08, 0,0x61,0,0x62,0,0x63,0,0, // +12=96 swtr
   };
   ACE_Message_Block msg(1024);
   msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
   XTypes::DynamicData data(&msg, xcdr2, dt);
 
   verify_single_value_struct<FinalSingleValueStruct>(data);
+}
+
+TEST(Final, StructWithOptionalMembers)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::FinalSingleValueStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::FinalSingleValueStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::CompleteTypeObject cto = it->second.complete;
+  cto.struct_type.member_seq[2].common.member_flags |= XTypes::IS_OPTIONAL;
+  cto.struct_type.member_seq[5].common.member_flags |= XTypes::IS_OPTIONAL;
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(cto, DCPS::GUID_t());
+
+  unsigned char single_value_struct[] = {
+    0x00,0x00,0x00,0x03, // my_enum
+    0x00,0x00,0x00,0x0a, // int_32
+    0x00, // Omitting uint_32
+    0x05, // int_8
+    0x06, // uint_8
+    0x00, // Omitting int_16
+    0x22,0x22, // uint_16
+    (0),(0),0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // int_64
+    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // uint_64
+    0x3f,0x80,0x00,0x00, // float_32
+    0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00, // float_64
+    0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0,    // float_128
+    'a',  // char_8
+    (0),0x00,0x61, // char_16
+    0xff, // byte
+    0x01, // bool
+    (0), (0), 0x00,0x00,0x00,0x0c, // nested_struct
+    0x00,0x00,0x00,0x04, 'a','b','c','\0', // str
+    0x00,0x00,0x00,0x08, 0,0x61,0,0x62,0,0x63,0,0, // swtr
+  };
+  ACE_Message_Block msg(1024);
+  msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
+  XTypes::DynamicData data(&msg, xcdr2, dt);
+
+  verify_index_mapping(data);
 }
 
 TEST(Final, ReadValueFromUnion)
