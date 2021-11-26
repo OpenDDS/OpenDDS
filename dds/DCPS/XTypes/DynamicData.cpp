@@ -705,47 +705,39 @@ template<TypeKind MemberTypeKind, typename MemberType>
 bool DynamicData::get_value_from_union(MemberType& value, MemberId id,
                                        TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
-  // Reads the discriminator
+  DynamicType_rch member_type;
   if (id == DISCRIMINATOR_ID) {
-    if (descriptor_.extensibility_kind == APPENDABLE || descriptor_.extensibility_kind == MUTABLE) {
+    const ExtensibilityKind ek = descriptor_.extensibility_kind;
+    if (ek == APPENDABLE || ek == MUTABLE) {
       size_t size;
       if (!strm_.read_delimiter(size)) {
         return false;
       }
     }
-    const DynamicType_rch disc_type = get_base_type(descriptor_.discriminator_type);
-    if (descriptor_.extensibility_kind == MUTABLE) {
-      unsigned id;
-      size_t size;
-      bool must_understand;
-      if (!strm_.read_parameter_id(id, size, must_understand)) {
-        return false;
+    member_type = get_base_type(descriptor_.discriminator_type);
+  } else {
+    MemberDescriptor md;
+    if (!get_from_union_common_checks(id, "get_value_from_union", md)) {
+      return false;
+    }
+
+    member_type = md.type.lock();
+    if (!member_type) {
+      if (DCPS::DCPS_debug_level >= 1) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DynamicData::get_value_from_union -")
+                   ACE_TEXT(" Could not get DynamicType of the selected member\n")));
       }
+      return false;
     }
-    return read_value(value, MemberTypeKind);
+    member_type = get_base_type(member_type);
   }
 
-  MemberDescriptor md;
-  if (!get_from_union_common_checks(id, "get_value_from_union", md)) {
-    return false;
-  }
-
-  const DynamicType_rch member_type = md.type.lock();
-  if (!member_type) {
-    if (DCPS::DCPS_debug_level >= 1) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DynamicData::get_value_from_union -")
-                 ACE_TEXT(" Could not get DynamicType of the selected member\n")));
-    }
-    return false;
-  }
-
-  const DynamicType_rch selected_type = get_base_type(member_type);
-  const TypeKind selected_tk = selected_type->get_kind();
-  if (selected_tk != MemberTypeKind && selected_tk != enum_or_bitmask) {
+  const TypeKind member_tk = member_type->get_kind();
+  if (member_tk != MemberTypeKind && member_tk != enum_or_bitmask) {
     if (DCPS::DCPS_debug_level >= 1) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_value_from_union -")
                  ACE_TEXT(" Could not read a value of type %C from type %C\n"),
-                 typekind_to_string(MemberTypeKind), typekind_to_string(selected_tk)));
+                 typekind_to_string(MemberTypeKind), typekind_to_string(member_tk)));
     }
     return false;
   }
@@ -759,11 +751,11 @@ bool DynamicData::get_value_from_union(MemberType& value, MemberId id,
     }
   }
 
-  if (selected_tk == MemberTypeKind) {
+  if (member_tk == MemberTypeKind) {
     return read_value(value, MemberTypeKind);
   }
 
-  const LBound bit_bound = selected_type->get_descriptor().bound[0];
+  const LBound bit_bound = member_type->get_descriptor().bound[0];
   return bit_bound >= lower && bit_bound <= upper &&
     read_value(value, MemberTypeKind);
 }
