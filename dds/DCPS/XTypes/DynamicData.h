@@ -267,6 +267,7 @@ private:
   // TODO: This method can be moved to DynamicType-related classes.
   DynamicType_rch get_base_type(const DynamicType_rch& alias_type) const;
   bool is_primitive(TypeKind tk, ACE_CDR::ULong& size) const;
+  bool has_optional_member(bool& has_optional) const;
 
   bool get_index_from_id(MemberId id, ACE_CDR::ULong& index, ACE_CDR::ULong bound) const;
   const char* typekind_to_string(TypeKind tk) const;

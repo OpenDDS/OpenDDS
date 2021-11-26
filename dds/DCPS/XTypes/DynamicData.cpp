@@ -188,6 +188,27 @@ MemberId DynamicData::get_member_id_by_name(DCPS::String name) const
   return MEMBER_ID_INVALID;
 }
 
+bool DynamicData::has_optional_member(bool& has_optional) const
+{
+  if (type_->get_kind() != TK_STRUCTURE) {
+    return false;
+  }
+
+  const ACE_CDR::ULong count = type_->get_member_count();
+  for (unsigned i = 0; i < count; ++i) {
+    DynamicTypeMember_rch member;
+    if (type_->get_member_by_index(member, i) != DDS::RETCODE_OK) {
+      return false;
+    }
+    if (member->get_descriptor().is_optional) {
+      has_optional = true;
+      return true;
+    }
+  }
+  has_optional = false;
+  return true;
+}
+
 MemberId DynamicData::get_member_id_at_index(ACE_CDR::ULong index)
 {
   if (item_count_ == ITEM_COUNT_INVALID) {
@@ -196,6 +217,9 @@ MemberId DynamicData::get_member_id_at_index(ACE_CDR::ULong index)
   if (index >= item_count_) {
     return MEMBER_ID_INVALID;
   }
+
+  DCPS::Message_Block_Ptr dup(chain_->duplicate());
+  setup_stream(dup.get());
 
   const TypeKind tk = type_->get_kind();
   switch (tk) {
@@ -227,25 +251,102 @@ MemberId DynamicData::get_member_id_at_index(ACE_CDR::ULong index)
     return index;
   case TK_STRUCTURE:
     {
+      const ExtensibilityKind ek = descriptor_.extensibility_kind;
+      if (ek == APPENDABLE || ek == MUTABLE) {
+        size_t dheader;
+        if (!strm_.read_delimiter(dheader)) {
+          return MEMBER_ID_INVALID;
+        }
+      }
+
+      if (ek == FINAL || ek == APPENDABLE) {
+        bool has_optional;
+        if (!has_optional_member(has_optional)) {
+          return MEMBER_ID_INVALID;
+        }
+
+        if (!has_optional) {
+          DynamicTypeMember_rch member;
+          if (type_->get_member_by_index(member, index) != DDS::RETCODE_OK) {
+            return MEMBER_ID_INVALID;
+          }
+          return member->get_id();
+        } else {
+          // TODO:
+          ACE_CDR::ULong count = 0;
+          for (ACE_CDR::ULong i = 0; i < type_->get_member_count(); ++i) {
+            ACE_CDR::ULong num_skipped;
+            if (!skip_struct_member_at_index(i, num_skipped)) {
+              release_chains();
+              return MEMBER_ID_INVALID;
+            }
+            count += num_skipped;
+            if (count == index + 1) {
+              DynamicTypeMember_rch member;
+              if (type_->get_member_by_index(member, i) != DDS::RETCODE_OK) {
+                release_chains();
+                return MEMBER_ID_INVALID;
+              }
+              release_chains();
+              return member->get_id();
+            }
+          }
+          release_chains();
+          return MEMBER_ID_INVALID;
+        }
+      } else { // Mutable
+        ACE_CDR::ULong member_id;
+        size_t member_size;
+        bool must_understand;
+        bool good = true;
+        for (unsigned i = 0; i < index; ++i) {
+          if (!strm_.read_parameter_id(member_id, member_size, must_understand)) {
+            good = false;
+            break;
+          }
+
+          DynamicTypeMember_rch dtm;
+          if (type_->get_member(dtm, member_id) != DDS::RETCODE_OK) {
+            good = false;
+            break;
+          }
+          DynamicType_rch member = dtm->get_descriptor().type.lock();
+          if (!member) {
+            good = false;
+            break;
+          }
+          member = get_base_type(member);
+          if (member->get_kind() == TK_SEQUENCE) {
+            if (!skip_sequence_member(member)) {
+              good = false;
+              break;
+            }
+          } else if (!strm_.skip(member_size)) {
+            good = false;
+            break;
+          }
+        }
+
+        if (!good || !strm_.read_parameter_id(member_id, member_size, must_understand)) {
+          member_id = MEMBER_ID_INVALID;
+        }
+        release_chains();
+        return member_id;
+      }
     }
   case TK_UNION:
     {
       if (index == 0) {
         return DISCRIMINATOR_ID;
       }
-      // Find the Id of the selected member.
+
+      // Get the Id of the selected member.
       MemberDescriptor selected_md;
-      
-    }
-    /*
-    {
-      DynamicTypeMember_rch member;
-      if (type_->get_member_by_index(member, index) != DDS::RETCODE_OK) {
+      if (!get_union_selected_member(selected_md)) {
         return MEMBER_ID_INVALID;
       }
-      return member->get_descriptor().id;
+      return selected_md.id;
     }
-    */
   }
 
   if (DCPS::DCPS_debug_level >= 1) {
@@ -296,21 +397,13 @@ ACE_CDR::ULong DynamicData::get_item_count()
     return descriptor_.bound[0];
   case TK_STRUCTURE:
     {
-      bool has_optional_member = false;
-      ACE_CDR::ULong count_in_dt = type_->get_member_count();
-      for (unsigned i = 0; i < count_in_dt; ++i) {
-        DynamicTypeMember_rch member;
-        if (type_->get_member_by_index(member, i) != DDS::RETCODE_OK) {
-          return 0;
-        }
-        if (member->get_descriptor().is_optional) {
-          has_optional_member = true;
-          break;
-        }
+      bool has_optional;
+      if (!has_optional_member(has_optional)) {
+        return 0;
       }
 
-      if (!has_optional_member) {
-        return count_in_dt;
+      if (!has_optional) {
+        return type_->get_member_count();
       }
 
       // Optional members can be omitted, so we need to count members one by one.
@@ -323,7 +416,7 @@ ACE_CDR::ULong DynamicData::get_item_count()
             return 0;
           }
         }
-        for (ACE_CDR::ULong i = 0; i < count_in_dt; ++i) {
+        for (ACE_CDR::ULong i = 0; i < type_->get_member_count(); ++i) {
           ACE_CDR::ULong num_skipped;
           if (!skip_struct_member_at_index(i, num_skipped)) {
             actual_count = 0;
