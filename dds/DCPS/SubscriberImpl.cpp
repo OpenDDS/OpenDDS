@@ -1,11 +1,9 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-#include <DCPS/DdsDcps_pch.h> //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
 
 #include "debug.h"
 #include "SubscriberImpl.h"
@@ -70,13 +68,11 @@ SubscriberImpl::~SubscriberImpl()
 
   // The datareaders should be deleted already before calling delete
   // subscriber.
-  if (!is_clean()) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: ")
-                ACE_TEXT("SubscriberImpl::~SubscriberImpl, ")
-                ACE_TEXT("%B datareaders still exist.\n"),
-                datareader_map_.size ()));
+  String leftover_entities;
+  if (!is_clean(&leftover_entities)) {
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: SubscriberImpl::~SubscriberImpl: "
+                 "%C still exist\n", leftover_entities.c_str()));
     }
   }
 }
@@ -900,17 +896,22 @@ SubscriberImpl::enable()
   return DDS::RETCODE_OK;
 }
 
-bool
-SubscriberImpl::is_clean() const
+bool SubscriberImpl::is_clean(String* leftover_entities) const
 {
-  const bool sub_is_clean = datareader_map_.empty();
-
-  if (!sub_is_clean && !TheTransientKludge->is_enabled()) {
-    // BIT datareaders.
-    return datareader_map_.size() == NUMBER_OF_BUILT_IN_TOPICS;
+  if (leftover_entities) {
+    leftover_entities->clear();
   }
 
-  return sub_is_clean;
+  size_t reader_count = datareader_map_.size();
+  if (reader_count && !TheTransientKludge->is_enabled()) {
+    // BIT datareaders.
+    reader_count = reader_count == NUMBER_OF_BUILT_IN_TOPICS ? 0 : reader_count;
+  }
+  if (leftover_entities && reader_count) {
+    *leftover_entities += to_dds_string(reader_count) + " reader(s)";
+  }
+
+  return reader_count == 0;
 }
 
 void

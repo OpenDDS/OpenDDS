@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -20,6 +18,7 @@
 #include "Replayer.h"
 #include "ConditionVariable.h"
 #include "TimeTypes.h"
+#include "GuidUtils.h"
 #include "XTypes/TypeLookupService.h"
 #include "transport/framework/TransportImpl_rch.h"
 #include "security/framework/SecurityConfig_rch.h"
@@ -29,7 +28,6 @@
 #include <dds/DdsDcpsTopicC.h>
 #include <dds/DdsDcpsDomainC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
-#include "GuidUtils.h"
 #include <dds/DdsDcpsInfrastructureC.h>
 #ifndef DDS_HAS_MINIMUM_BIT
 #  include <dds/DdsDcpsCoreTypeSupportC.h>
@@ -39,9 +37,9 @@
 #include <ace/Thread_Mutex.h>
 #include <ace/Recursive_Thread_Mutex.h>
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -330,9 +328,10 @@ public:
   GUID_t get_repoid(DDS::InstanceHandle_t id) const;
 
   /**
-   *  Check if the topic is used by any datareader or datawriter.
+   * Check to see if the Participant has any entities left in it.
+   * leftover_entities will be set with a description of what is left.
    */
-  bool is_clean() const;
+  bool is_clean(String* leftover_entities = 0) const;
 
   /**
    * This is used to retrieve the listener for a certain status change.

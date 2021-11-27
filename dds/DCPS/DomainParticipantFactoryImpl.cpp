@@ -156,15 +156,13 @@ DomainParticipantFactoryImpl::delete_participant(
   }
 
   //xxx servant rc = 4 (servant::DP::Entity::ServantBase::ref_count_
-  if (!the_servant->is_clean()) {
-    const RepoId id = the_servant->get_id();
-    GuidConverter converter(id);
-    if (DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG, // not an ERROR, tests may be doing this on purpose
-                ACE_TEXT("(%P|%t) WARNING: ")
-                ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
-                ACE_TEXT("the participant %C is not empty.\n"),
-                OPENDDS_STRING(converter).c_str()));
+  String leftover_entities;
+  if (!the_servant->is_clean(&leftover_entities)) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: "
+                "DomainParticipantFactoryImpl::delete_participant: "
+                "the participant %C is not empty. %C leftover\n",
+                LogGuid(the_servant->get_id()).c_str(), leftover_entities.c_str()));
     }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }

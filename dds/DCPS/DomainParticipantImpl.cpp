@@ -1,13 +1,12 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
+
 #include "DomainParticipantImpl.h"
-#include "dds/DdsDcpsGuidC.h"
+
 #include "FeatureDisabledQosCheck.h"
 #include "Service_Participant.h"
 #include "Qos_Helper.h"
@@ -26,26 +25,24 @@
 #include "ContentFilteredTopicImpl.h"
 #include "MultiTopicImpl.h"
 #include "Service_Participant.h"
-#include "transport/framework/TransportRegistry.h"
-#include "transport/framework/TransportExceptions.h"
-
-#ifdef OPENDDS_SECURITY
-#include "security/framework/SecurityRegistry.h"
-#include "security/framework/SecurityConfig.h"
-#include "security/framework/Properties.h"
-#endif
-
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
-
 #include "BuiltInTopicUtils.h"
-#if !defined (DDS_HAS_MINIMUM_BIT)
-#include "dds/DdsDcpsCoreTypeSupportImpl.h"
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#include "transport/framework/TransportRegistry.h"
+#include "transport/framework/TransportExceptions.h"
+#ifdef OPENDDS_SECURITY
+#  include "security/framework/SecurityRegistry.h"
+#  include "security/framework/SecurityConfig.h"
+#  include "security/framework/Properties.h"
+#endif
 
-#include "tao/debug.h"
-#include "ace/Reactor.h"
-#include "ace/OS_NS_unistd.h"
+#include <dds/DdsDcpsGuidC.h>
+#ifndef DDS_HAS_MINIMUM_BIT
+#  include <dds/DdsDcpsCoreTypeSupportImpl.h>
+#endif
+
+#include <ace/Reactor.h>
+#include <ace/OS_NS_unistd.h>
 
 namespace Util {
 
@@ -200,49 +197,63 @@ DomainParticipantImpl::delete_publisher(
   DDS::Publisher_ptr p)
 {
   // The servant's ref count should be 2 at this point,
-  // one referenced by poa, one referenced by the subscriber
+  // one referenced by poa, one referenced by the publisher
   // set.
   PublisherImpl* the_servant = dynamic_cast<PublisherImpl*>(p);
-
   if (!the_servant) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("DomainParticipantImpl::delete_publisher, ")
-                 ACE_TEXT("Failed to obtain PublisherImpl.\n")));
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::delete_publisher: "
+                 "Failed to obtain PublisherImpl\n"));
     }
     return DDS::RETCODE_ERROR;
   }
 
-  if (!the_servant->is_clean()) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("DomainParticipantImpl::delete_publisher, ")
-                 ACE_TEXT("The publisher is not empty.\n")));
+  const Publisher_Pair pub_pair(the_servant, p, true);
+
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g,
+      publishers_protector_, DDS::RETCODE_ERROR);
+    if (publishers_.count(pub_pair) == 0) {
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::delete_publisher: "
+                   "This publisher doesn't belong to this participant\n"));
+      }
+      return DDS::RETCODE_PRECONDITION_NOT_MET;
+    }
+  }
+
+  String leftover_entities;
+  if (!the_servant->is_clean(&leftover_entities)) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::delete_publisher: "
+                 "The publisher is not empty. %C leftover\n",
+                 leftover_entities.c_str()));
     }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   tao_mon,
-                   this->publishers_protector_,
-                   DDS::RETCODE_ERROR);
-
-  Publisher_Pair pair(the_servant, p, true);
-
-  if (OpenDDS::DCPS::remove(publishers_, pair) == -1) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_publisher, ")
-                 ACE_TEXT("%p\n"),
-                 ACE_TEXT("remove")));
+  const DDS::ReturnCode_t ret = the_servant->delete_contained_entities();
+  if (ret != DDS::RETCODE_OK) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::delete_publisher: "
+                 "Failed to delete contained entities: %C\n", retcode_to_string(ret)));
     }
-    return DDS::RETCODE_ERROR;
-
-  } else {
-    return DDS::RETCODE_OK;
+    return ret;
   }
+
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g,
+      publishers_protector_, DDS::RETCODE_ERROR);
+    if (remove(publishers_, pub_pair) == -1) {
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::delete_publisher: "
+          "publisher not found\n"));
+      }
+      return DDS::RETCODE_ERROR;
+    }
+  }
+
+  return DDS::RETCODE_OK;
 }
 
 DDS::Subscriber_ptr
@@ -301,58 +312,61 @@ DomainParticipantImpl::delete_subscriber(
   // The servant's ref count should be 2 at this point,
   // one referenced by poa, one referenced by the subscriber
   // set.
-  SubscriberImpl* the_servant = dynamic_cast<SubscriberImpl*>(s);
-
+  SubscriberImpl* const the_servant = dynamic_cast<SubscriberImpl*>(s);
   if (!the_servant) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("DomainParticipantImpl::delete_subscriber, ")
-                 ACE_TEXT("Failed to obtain SubscriberImpl.\n")));
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::delete_subscriber: "
+                 "Failed to obtain SubscriberImpl\n"));
     }
     return DDS::RETCODE_ERROR;
   }
 
-  if (!the_servant->is_clean()) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("DomainParticipantImpl::delete_subscriber, ")
-                 ACE_TEXT("The subscriber is not empty.\n")));
+  const Subscriber_Pair sub_pair(the_servant, s, true);
+
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g,
+      subscribers_protector_, DDS::RETCODE_ERROR);
+    if (subscribers_.count(sub_pair) == 0) {
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::delete_subscriber: "
+                   "This subscriber doesn't belong to this participant\n"));
+      }
+      return DDS::RETCODE_PRECONDITION_NOT_MET;
+    }
+  }
+
+  String leftover_entities;
+  if (!the_servant->is_clean(&leftover_entities)) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::delete_subscriber: "
+                 "The subscriber is not empty. %C leftover\n",
+                 leftover_entities.c_str()));
     }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
-  DDS::ReturnCode_t ret = the_servant->delete_contained_entities();
+  const DDS::ReturnCode_t ret = the_servant->delete_contained_entities();
   if (ret != DDS::RETCODE_OK) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("DomainParticipantImpl::delete_subscriber, ")
-                 ACE_TEXT("Failed to delete contained entities.\n")));
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::delete_subscriber: "
+                 "Failed to delete contained entities: %C\n", retcode_to_string(ret)));
     }
-    return DDS::RETCODE_ERROR;
+    return ret;
   }
 
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   tao_mon,
-                   this->subscribers_protector_,
-                   DDS::RETCODE_ERROR);
-
-  Subscriber_Pair pair(the_servant, s, true);
-
-  if (OpenDDS::DCPS::remove(subscribers_, pair) == -1) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_subscriber, ")
-                 ACE_TEXT("%p\n"),
-                 ACE_TEXT("remove")));
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g,
+      subscribers_protector_, DDS::RETCODE_ERROR);
+    if (remove(subscribers_, sub_pair) == -1) {
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::delete_subscriber: "
+          "subscriber not found\n"));
+      }
+      return DDS::RETCODE_ERROR;
     }
-    return DDS::RETCODE_ERROR;
-
-  } else {
-    return DDS::RETCODE_OK;
   }
+
+  return DDS::RETCODE_OK;
 }
 
 DDS::Subscriber_ptr
@@ -568,10 +582,9 @@ DomainParticipantImpl::delete_topic(
   return delete_topic_i(a_topic, false);
 }
 
-DDS::ReturnCode_t
-DomainParticipantImpl::delete_topic_i(
+DDS::ReturnCode_t DomainParticipantImpl::delete_topic_i(
   DDS::Topic_ptr a_topic,
-  bool             remove_objref)
+  bool remove_objref)
 {
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
 
@@ -2059,26 +2072,44 @@ DomainParticipantImpl::create_new_topic(
   return DDS::Topic::_duplicate(refCounted_topic.pair_.obj_.in());
 }
 
-bool
-DomainParticipantImpl::is_clean() const
+bool DomainParticipantImpl::is_clean(String* leftover_entities) const
 {
-  bool sub_is_clean = subscribers_.empty();
-  bool topics_is_clean = true;
+  if (leftover_entities) {
+    leftover_entities->clear();
+  }
 
   // check that the only remaining topics are built-in topics
+  size_t topic_count = 0;
   for (TopicMap::const_iterator it = topics_.begin(); it != topics_.end(); ++it) {
     if (!topicIsBIT(it->second.pair_.svt_->topic_name(), it->second.pair_.svt_->type_name())) {
-      topics_is_clean = false;
+      ++topic_count;
     }
   }
+  if (topic_count) {
+    *leftover_entities += to_dds_string(topic_count) + " topic(s)";
+  }
 
+  size_t sub_count = subscribers_.size();
   if (!TheTransientKludge->is_enabled()) {
     // There are built-in topics and built-in topic subscribers left.
-    sub_is_clean = !sub_is_clean ? subscribers_.size() == 1 : true;
+    sub_count = sub_count <= 1 ? 0 : sub_count;
   }
-  return (publishers_.empty()
-          && sub_is_clean
-          && topics_is_clean);
+  if (leftover_entities && sub_count) {
+    if (leftover_entities->size()) {
+      *leftover_entities += ", ";
+    }
+    *leftover_entities += to_dds_string(sub_count) + " subscriber(s)";
+  }
+
+  const size_t pub_count = publishers_.size();
+  if (leftover_entities && pub_count) {
+    if (leftover_entities->size()) {
+      *leftover_entities += ", ";
+    }
+    *leftover_entities += to_dds_string(pub_count) + " topic(s)";
+  }
+
+  return topic_count == 0 && sub_count == 0 && pub_count == 0;
 }
 
 DDS::DomainParticipantListener_ptr
