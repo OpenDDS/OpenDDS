@@ -9,6 +9,7 @@
 #define OPENDDS_DCPS_TIME_HELPER_H
 
 #include <dds/DdsDcpsCoreC.h>
+#include <dds/DdsDcpsInfoUtilsC.h>
 
 #include <ace/OS_NS_sys_time.h>
 

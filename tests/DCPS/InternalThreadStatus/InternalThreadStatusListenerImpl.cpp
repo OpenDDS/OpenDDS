@@ -9,7 +9,7 @@
 
 #include <dds/DCPS/ReactorTask.h>
 
-#include <dds/DdsDcpsCoreTypeSupportImpl.h>
+#include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 
 #include <ace/streams.h>
 

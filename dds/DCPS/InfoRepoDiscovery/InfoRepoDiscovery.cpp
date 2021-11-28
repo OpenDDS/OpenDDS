@@ -206,6 +206,7 @@ namespace
 DCPSInfo_var
 InfoRepoDiscovery::get_dcps_info()
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(lock_);
   if (CORBA::is_nil(this->info_.in())) {
 
     if (!orb_) {
@@ -254,6 +255,7 @@ InfoRepoDiscovery::get_dcps_info()
 std::string
 InfoRepoDiscovery::get_stringified_dcps_info_ior()
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(lock_);
   return this->ior_;
 }
 
@@ -261,6 +263,7 @@ TransportConfig_rch
 InfoRepoDiscovery::bit_config()
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
+  ACE_Guard<ACE_Thread_Mutex> guard(lock_);
   if (bit_config_.is_nil()) {
     const std::string cfg_name = TransportRegistry::DEFAULT_INST_PREFIX +
                                  std::string("_BITTransportConfig_") + key();

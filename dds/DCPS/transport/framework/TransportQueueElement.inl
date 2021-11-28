@@ -114,6 +114,14 @@ TransportQueueElement::MatchOnDataPayload::matches(
   return data_ == payload->rd_ptr();
 }
 
+ACE_INLINE
+bool
+TransportQueueElement::MatchOnElement::matches(
+  const TransportQueueElement& candidate) const
+{
+  return element_ == &candidate;
+}
+
 }
 }
 

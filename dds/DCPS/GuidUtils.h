@@ -203,7 +203,7 @@ inline void assign(GUID_t& dest, const GUID_t& src)
   std::memcpy(&dest, &src, sizeof(GUID_t));
 }
 
-inline void assign(OctetArray16& dest, const GUID_t& src)
+inline void assign(DDS::OctetArray16& dest, const GUID_t& src)
 {
   std::memcpy(&dest[0], &src, sizeof(src));
 }

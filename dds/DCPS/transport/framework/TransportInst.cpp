@@ -55,6 +55,9 @@ OpenDDS::DCPS::TransportInst::load(ACE_Configuration_Heap& cf,
   // for control messages.
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("datalink_control_chunks"), datalink_control_chunks_, size_t)
 
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("receive_preallocated_message_blocks"), receive_preallocated_message_blocks_, size_t)
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("receive_preallocated_data_blocks"), receive_preallocated_data_blocks_, size_t)
+
   ACE_TString stringvalue;
   if (cf.get_string_value (sect, ACE_TEXT("passive_connect_duration"), stringvalue) == 0) {
     ACE_DEBUG ((LM_WARNING,
@@ -109,6 +112,8 @@ OpenDDS::DCPS::TransportInst::dump_to_str() const
   ret += formatNameForDump("datalink_release_delay")  + to_dds_string(datalink_release_delay_) + '\n';
   ret += formatNameForDump("datalink_control_chunks") + to_dds_string(unsigned(datalink_control_chunks_)) + '\n';
   ret += formatNameForDump("fragment_reassembly_timeout") + to_dds_string(fragment_reassembly_timeout_.value().msec()) + '\n';
+  ret += formatNameForDump("receive_preallocated_message_blocks") + to_dds_string(unsigned(receive_preallocated_message_blocks_)) + '\n';
+  ret += formatNameForDump("receive_preallocated_data_blocks") + to_dds_string(unsigned(receive_preallocated_data_blocks_)) + '\n';
   return ret;
 }
 

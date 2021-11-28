@@ -235,8 +235,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   ScenarioPrototype scenario_prototype{};
   std::ifstream scenario_file(scenario_path);
   if (scenario_file.is_open()) {
-    if (!json_2_idl(scenario_file, scenario_prototype)) {
-      std::cerr << "Could not parse " << scenario_path << std::endl;
+    try {
+      if (!json_2_idl(scenario_file, scenario_prototype)) {
+        std::cerr << "Could not parse " << scenario_path << std::endl;
+        return 1;
+      }
+    } catch (...) {
+      std::cerr << "Unknown exception caught while trying to parse " << scenario_path << std::endl;
       return 1;
     }
   } else {

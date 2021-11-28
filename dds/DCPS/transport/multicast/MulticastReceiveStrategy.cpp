@@ -16,7 +16,8 @@ namespace OpenDDS {
 namespace DCPS {
 
 MulticastReceiveStrategy::MulticastReceiveStrategy(MulticastDataLink* link)
-  : link_(link)
+  : TransportReceiveStrategy<>(link->config())
+  , link_(link)
 {
 }
 

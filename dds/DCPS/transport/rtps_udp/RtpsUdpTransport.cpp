@@ -37,6 +37,7 @@ RtpsUdpTransport::RtpsUdpTransport(RtpsUdpInst& inst)
   , ice_endpoint_(*this)
   , relay_stun_task_falloff_(TimeDuration::zero_value)
 #endif
+  , transport_statistics_(inst.name())
 {
   assign(local_prefix_, GUIDPREFIX_UNKNOWN);
   if (!(configure_i(inst) && open())) {
@@ -124,7 +125,7 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 #endif
   }
 
-  RtpsUdpDataLink_rch link = make_rch<RtpsUdpDataLink>(ref(*this), local_prefix, config(), reactor_task());
+  RtpsUdpDataLink_rch link = make_rch<RtpsUdpDataLink>(ref(*this), local_prefix, config(), reactor_task(), ref(transport_statistics_), ref(transport_statistics_mutex_));
 
 #if defined(OPENDDS_SECURITY)
   link->local_crypto_handle(local_crypto_handle_);
@@ -439,11 +440,11 @@ RtpsUdpTransport::rtps_relay_address_change()
 }
 
 void
-RtpsUdpTransport::get_and_reset_relay_message_counts(RelayMessageCounts& counts)
+RtpsUdpTransport::append_transport_statistics(TransportStatisticsSequence& seq)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, relay_message_counts_mutex_);
-  counts = relay_message_counts_;
-  relay_message_counts_.reset();
+  ACE_GUARD(ACE_Thread_Mutex, g, transport_statistics_mutex_);
+  append(seq, transport_statistics_);
+  transport_statistics_.clear();
 }
 
 bool
@@ -750,11 +751,6 @@ RtpsUdpTransport::IceEndpoint::choose_send_socket(const ACE_INET_Addr& destinati
 void
 RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN::Message& message)
 {
-  if (destination == transport.config().rtps_relay_address()) {
-    ACE_GUARD(ACE_Thread_Mutex, g, transport.relay_message_counts_mutex_);
-    ++transport.relay_message_counts_.stun_send;
-  }
-
   ACE_SOCK_Dgram& socket = choose_send_socket(destination);
 
   ACE_Message_Block block(20 + message.length());
@@ -766,15 +762,24 @@ RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN
   const int num_blocks = RtpsUdpSendStrategy::mb_to_iov(block, iov);
   const ssize_t result = send_single_i(transport.config(), socket, iov, num_blocks, destination, network_is_unreachable_);
   if (result < 0) {
-    if (destination == transport.config().rtps_relay_address()) {
-      ACE_GUARD(ACE_Thread_Mutex, g, transport.relay_message_counts_mutex_);
-      ++transport.relay_message_counts_.stun_send_fail;
+    if (transport.config().count_messages()) {
+      ssize_t bytes = 0;
+      for (int i = 0; i < num_blocks; ++i) {
+        bytes += iov[i].iov_len;
+      }
+      const InternalMessageCountKey key(destination, MCK_STUN, destination == transport.config().rtps_relay_address());
+      ACE_GUARD(ACE_Thread_Mutex, g, transport.transport_statistics_mutex_);
+      transport.transport_statistics_.message_count[key].send_fail(bytes);
     }
     if (!network_is_unreachable_) {
       const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
       ACE_ERROR((prio, "(%P|%t) RtpsUdpTransport::send() - "
                  "failed to send STUN message\n"));
     }
+  } else if (transport.config().count_messages()) {
+    const InternalMessageCountKey key(destination, MCK_STUN, destination == transport.config().rtps_relay_address());
+    ACE_GUARD(ACE_Thread_Mutex, g, transport.transport_statistics_mutex_);
+    transport.transport_statistics_.message_count[key].send(result);
   }
 }
 

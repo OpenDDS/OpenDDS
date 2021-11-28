@@ -102,9 +102,9 @@ Bench_Builder_Export
 void register_subscriber_listener(const std::string& name, const std::function<DDS::SubscriberListener::_var_type(const Builder::PropertySeq&)>& factory);
 
 Bench_Builder_Export
-void register_data_writer_listener(const std::string& name, const std::function<DDS::DataWriterListener::_var_type(const Builder::PropertySeq&)>& factory);
+void register_datawriter_listener(const std::string& name, const std::function<DDS::DataWriterListener::_var_type(const Builder::PropertySeq&)>& factory);
 
 Bench_Builder_Export
-void register_data_reader_listener(const std::string& name, const std::function<DDS::DataReaderListener::_var_type(const Builder::PropertySeq&)>& factory);
+void register_datareader_listener(const std::string& name, const std::function<DDS::DataReaderListener::_var_type(const Builder::PropertySeq&)>& factory);
 
 }

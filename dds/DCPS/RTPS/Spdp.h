@@ -29,6 +29,7 @@
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/PoolAllocationBase.h>
 #include <dds/DCPS/TimeTypes.h>
+#include <dds/DCPS/transport/framework/TransportStatistics.h>
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
@@ -227,8 +228,7 @@ public:
   DCPS::RcHandle<RtpsDiscoveryConfig> config() const { return config_; }
   void spdp_rtps_relay_address_change();
 
-  void get_and_reset_relay_message_counts(DCPS::RelayMessageCounts& spdp,
-                                          DCPS::RelayMessageCounts& sedp);
+  void append_transport_statistics(DCPS::TransportStatisticsSequence& seq);
 
   void ignore_domain_participant(const GUID_t& ignoreId);
 
@@ -443,6 +443,8 @@ private:
   DiscoveredParticipantMap participants_;
   RtpsDiscovery* disco_;
   DCPS::RcHandle<RtpsDiscoveryConfig> config_;
+  DCPS::TimeDuration lease_duration_;
+  DCPS::TimeDuration lease_extension_;
 
   // Participant:
   const DDS::DomainId_t domain_;
@@ -532,7 +534,7 @@ private:
     void write_i(const DCPS::RepoId& guid, const ACE_INET_Addr& local_address, WriteFlags flags);
     void send(WriteFlags flags, const ACE_INET_Addr& local_address = ACE_INET_Addr());
     const ACE_SOCK_Dgram& choose_send_socket(const ACE_INET_Addr& addr) const;
-    ssize_t send(const ACE_INET_Addr& addr);
+    ssize_t send(const ACE_INET_Addr& addr, bool relay);
     void close(const DCPS::ReactorTask_rch& reactor_task);
     void dispose_unregister();
     bool open_unicast_socket(u_short port_common, u_short participant_id);
@@ -564,7 +566,6 @@ private:
     Header hdr_;
     DataSubmessage data_;
     DCPS::SequenceNumber seq_;
-    DCPS::TimeDuration lease_duration_;
     u_short uni_port_;
     ACE_SOCK_Dgram unicast_socket_;
     OPENDDS_STRING multicast_interface_;
@@ -613,7 +614,7 @@ private:
     bool network_is_unreachable_;
     bool ice_endpoint_added_;
 
-    DCPS::RelayMessageCounts relay_message_counts_;
+    DCPS::InternalTransportStatistics transport_statistics_;
   };
 
   DCPS::RcHandle<SpdpTransport> tport_;

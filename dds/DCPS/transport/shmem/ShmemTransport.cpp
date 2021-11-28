@@ -250,9 +250,9 @@ ShmemTransport::ReadTask::ReadTask(ShmemTransport* outer, ACE_sema_t semaphore)
 int
 ShmemTransport::ReadTask::svc()
 {
-  while (!stopped_) {
+  while (!stopped_.value()) {
     ACE_OS::sema_wait(&semaphore_);
-    if (stopped_) {
+    if (stopped_.value()) {
       return 0;
     }
     outer_->read_from_links();
@@ -263,7 +263,7 @@ ShmemTransport::ReadTask::svc()
 void
 ShmemTransport::ReadTask::stop()
 {
-  if (stopped_) {
+  if (stopped_.value()) {
     return;
   }
   stopped_ = true;
@@ -274,7 +274,7 @@ ShmemTransport::ReadTask::stop()
 void
 ShmemTransport::ReadTask::signal_semaphore()
 {
-  if (stopped_) {
+  if (stopped_.value()) {
     return;
   }
   ACE_OS::sema_post(&semaphore_);
