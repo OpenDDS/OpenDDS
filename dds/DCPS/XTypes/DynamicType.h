@@ -35,6 +35,7 @@ public:
   bool equals(const DynamicType& other) const;
   bool test_equality_i(const DynamicType& rhs, DynamicTypePtrPairSeen& dt_ptr_pair) const;
   void insert_dynamic_member(const DynamicTypeMember_rch& dtm);
+  DynamicType_rch get_base_type();
 private:
   DynamicTypeMembersByName member_by_name;
   DynamicTypeMembersById member_by_id;

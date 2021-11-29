@@ -788,7 +788,7 @@ DynamicType_rch TypeLookupService::type_identifier_to_dynamic(const TypeIdentifi
     break;
   case TI_STRING8_SMALL:
     td.kind = TK_STRING8;
-    td.name = "String8Small";
+    td.name = "String8";
     td.bound.length(1);
     td.bound[0] = ti.string_sdefn().bound;
     td.element_type = type_identifier_to_dynamic(TypeIdentifier(TK_CHAR8), guid);
@@ -796,7 +796,7 @@ DynamicType_rch TypeLookupService::type_identifier_to_dynamic(const TypeIdentifi
     break;
   case TI_STRING8_LARGE:
     td.kind = TK_STRING8;
-    td.name = "String8Large";
+    td.name = "String8";
     td.bound.length(1);
     td.bound[0] = ti.string_ldefn().bound;
     td.element_type = type_identifier_to_dynamic(TypeIdentifier(TK_CHAR8), guid);
@@ -804,7 +804,7 @@ DynamicType_rch TypeLookupService::type_identifier_to_dynamic(const TypeIdentifi
     break;
   case TI_STRING16_SMALL:
     td.kind = TK_STRING16;
-    td.name = "WString16Small";
+    td.name = "WString16";
     td.bound.length(1);
     td.bound[0] = ti.string_sdefn().bound;
     td.element_type = type_identifier_to_dynamic(TypeIdentifier(TK_CHAR16), guid);
@@ -812,7 +812,7 @@ DynamicType_rch TypeLookupService::type_identifier_to_dynamic(const TypeIdentifi
     break;
   case TI_STRING16_LARGE:
     td.kind = TK_STRING16;
-    td.name = "WString16Large";
+    td.name = "WString16";
     td.bound.length(1);
     td.bound[0] = ti.string_ldefn().bound;
     td.element_type = type_identifier_to_dynamic(TypeIdentifier(TK_CHAR16), guid);
@@ -820,7 +820,7 @@ DynamicType_rch TypeLookupService::type_identifier_to_dynamic(const TypeIdentifi
     break;
   case TI_PLAIN_SEQUENCE_SMALL:
     td.kind = TK_SEQUENCE;
-    td.name = "SequenceSmall";
+    td.name = "Sequence";
     td.bound.length(1);
     td.bound[0] = ti.seq_sdefn().bound;
     td.element_type = type_identifier_to_dynamic(*ti.seq_sdefn().element_identifier, guid);
@@ -828,7 +828,7 @@ DynamicType_rch TypeLookupService::type_identifier_to_dynamic(const TypeIdentifi
     break;
   case TI_PLAIN_SEQUENCE_LARGE:
     td.kind = TK_SEQUENCE;
-    td.name = "SequenceLarge";
+    td.name = "Sequence";
     td.bound.length(1);
     td.bound[0] = ti.seq_ldefn().bound;
     td.element_type = type_identifier_to_dynamic(*ti.seq_ldefn().element_identifier, guid);
@@ -836,7 +836,7 @@ DynamicType_rch TypeLookupService::type_identifier_to_dynamic(const TypeIdentifi
     break;
   case TI_PLAIN_ARRAY_SMALL:
     td.kind = TK_ARRAY;
-    td.name = "ArraySmall";
+    td.name = "Array";
     td.bound.length(ti.array_sdefn().array_bound_seq.length());
     for (ACE_CDR::ULong i = 0; i< td.bound.length(); ++i) {
       td.bound[i] = ti.array_sdefn().array_bound_seq[i];
@@ -846,14 +846,14 @@ DynamicType_rch TypeLookupService::type_identifier_to_dynamic(const TypeIdentifi
     break;
   case TI_PLAIN_ARRAY_LARGE:
     td.kind = TK_ARRAY;
-    td.name = "ArrayLarge";
+    td.name = "Array";
     td.bound = ti.array_ldefn().array_bound_seq;
     td.element_type = type_identifier_to_dynamic(*ti.array_ldefn().element_identifier, guid);
     dt->set_descriptor(td);
     break;
   case TI_PLAIN_MAP_SMALL:
     td.kind = TK_MAP;
-    td.name = "MapSmall";
+    td.name = "Map";
     td.bound.length(1);
     td.bound[0] = ti.map_sdefn().bound;
     td.element_type = type_identifier_to_dynamic(*ti.map_sdefn().element_identifier, guid);
@@ -862,7 +862,7 @@ DynamicType_rch TypeLookupService::type_identifier_to_dynamic(const TypeIdentifi
     break;
   case TI_PLAIN_MAP_LARGE:
     td.kind = TK_MAP;
-    td.name = "MapLarge";
+    td.name = "Map";
     td.bound.length(1);
     td.bound[0] = ti.map_ldefn().bound;
     td.element_type = type_identifier_to_dynamic(*ti.map_ldefn().element_identifier, guid);

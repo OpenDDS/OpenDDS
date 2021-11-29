@@ -150,6 +150,8 @@ public:
   DDS::ReturnCode_t get_wstring_values(WStringSeq& value, MemberId id);
 #endif
 
+  DynamicType_rch type() const { return type_; }
+
 private:
   void copy(const DynamicData& other);
 
@@ -352,6 +354,9 @@ private:
   /// Cache the number of items (i.e., members or elements) in the data it holds.
   ACE_CDR::ULong item_count_;
 };
+
+OpenDDS_Dcps_Export bool print_dynamic_data(
+  DynamicData& dd, DCPS::String& type_string, DCPS::String& indent);
 
 } // namespace XTypes
 } // namespace OpenDDS

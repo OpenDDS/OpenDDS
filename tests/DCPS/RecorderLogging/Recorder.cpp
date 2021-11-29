@@ -50,31 +50,10 @@ public:
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("MessengerRecorderListener::on_sample_data_received\n")));
 
-    // Inspect the received raw data sample
-    const bool encapsulated = sample.header_.cdr_encapsulation_;
     OpenDDS::DCPS::Serializer ser(
       sample.sample_.get(),
-      encapsulated ? OpenDDS::DCPS::Encoding::KIND_XCDR1 : OpenDDS::DCPS::Encoding::KIND_UNALIGNED_CDR,
+      sample.encoding_kind_,
       static_cast<OpenDDS::DCPS::Endianness>(sample.header_.byte_order_));
-
-    if (encapsulated) {
-      OpenDDS::DCPS::EncapsulationHeader encap;
-      if (!(ser >> encap)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
-          ACE_TEXT("deserialization of encapsulation header failed.\n")));
-        return;
-      }
-      OpenDDS::DCPS::Encoding encoding;
-      if (!encap.to_encoding(encoding, OpenDDS::DCPS::MarshalTraits<Messenger::Message>::extensibility())) {
-        return;
-      }
-
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
-         ACE_TEXT("Deserializing with encoding kind %C.\n"),
-         OpenDDS::DCPS::Encoding::kind_to_string(encoding.kind()).c_str()));
-
-      ser.encoding(encoding);
-    }
 
     Messenger::Message data;
     bool ser_ret = (ser >> data);

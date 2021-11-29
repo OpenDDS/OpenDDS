@@ -25,12 +25,14 @@ RawDataSample::RawDataSample(const DataSampleHeader& header,
                              ACE_UINT32 nano_sec,
                              PublicationId pid,
                              bool byte_order,
-                             ACE_Message_Block* blk)
+                             ACE_Message_Block* blk,
+                             Encoding::Kind encoding_kind)
   : header_(header)
   , message_id_(mid)
   , publication_id_(pid)
   , sample_byte_order_(byte_order)
   , sample_(blk->duplicate())
+  , encoding_kind_(encoding_kind)
 {
   source_timestamp_.sec = sec;
   source_timestamp_.nanosec = nano_sec;
@@ -47,6 +49,7 @@ RawDataSample::RawDataSample(const RawDataSample& other)
   , publication_id_(other.publication_id_)
   , sample_byte_order_(other.sample_byte_order_)
   , sample_(other.sample_->duplicate())
+  , encoding_kind_(other.encoding_kind_)
 {
 }
 
@@ -67,6 +70,7 @@ void swap(RawDataSample& lhs, RawDataSample& rhs)
   swap(lhs.publication_id_, rhs.publication_id_);
   swap(lhs.sample_byte_order_, rhs.sample_byte_order_);
   swap(lhs.sample_, rhs.sample_);
+  swap(lhs.encoding_kind_, rhs.encoding_kind_);
 }
 
 } // namespace DCPS
