@@ -43,7 +43,7 @@ public:
                                const TransportLocatorSeq& /*locators*/);
 
   void rtps_relay_address_change();
-  void get_and_reset_relay_message_counts(RelayMessageCounts& counts);
+  void append_transport_statistics(TransportStatisticsSequence& seq);
 
 private:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
@@ -189,8 +189,8 @@ private:
 
 #endif
 
-  RelayMessageCounts relay_message_counts_;
-  ACE_Thread_Mutex relay_message_counts_mutex_;
+  InternalTransportStatistics transport_statistics_;
+  ACE_Thread_Mutex transport_statistics_mutex_;
 
   friend class RtpsUdpSendStrategy;
   friend class RtpsUdpReceiveStrategy;

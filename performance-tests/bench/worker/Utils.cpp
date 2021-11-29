@@ -67,7 +67,23 @@ protected:
   Builder::DomainParticipantQosMask default_participant_qos_mask_;
 };
 
-QosProfile::QosProfile() {
+QosProfile::QosProfile()
+: default_datareader_qos_()
+, default_datareader_qos_mask_()
+, datareader_qos_vec_()
+, default_datawriter_qos_()
+, default_datawriter_qos_mask_()
+, datawriter_qos_vec_()
+, default_topic_qos_()
+, default_topic_qos_mask_()
+, topic_qos_vec_()
+, default_subscriber_qos_()
+, default_subscriber_qos_mask_()
+, default_publisher_qos_()
+, default_publisher_qos_mask_()
+, default_participant_qos_()
+, default_participant_qos_mask_()
+{
 }
 
 void QosProfile::set_datareader_qos(const QosProfile::DataReaderQosInfo& info, const std::string& topic_filter) {

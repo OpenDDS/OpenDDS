@@ -1186,26 +1186,29 @@ protected:
      * If sample.header_.content_filter_ is true, the writer has already
      * filtered.
      */
-    if (!sample.header_.content_filter_ && content_filtered_topic_) {
-      const bool sample_only_has_key_fields = !sample.header_.valid_data();
-      if (key_only_marshaling != sample_only_has_key_fields) {
-        if (DCPS_debug_level > 0) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
-            ACE_TEXT("%CDataReaderImpl::dds_demarshal: ")
-            ACE_TEXT("Mismatch between the key only and valid data properties ")
-            ACE_TEXT("of a %C message of a content filtered topic!\n"),
-            TraitsType::type_name(),
-            to_string(static_cast<MessageId>(sample.header_.message_id_))));
+    if (!sample.header_.content_filter_) {
+      ACE_Guard<ACE_Thread_Mutex> guard(content_filtered_topic_mutex_);
+      if (content_filtered_topic_) {
+        const bool sample_only_has_key_fields = !sample.header_.valid_data();
+        if (key_only_marshaling != sample_only_has_key_fields) {
+          if (DCPS_debug_level > 0) {
+            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
+              ACE_TEXT("%CDataReaderImpl::dds_demarshal: ")
+              ACE_TEXT("Mismatch between the key only and valid data properties ")
+              ACE_TEXT("of a %C message of a content filtered topic!\n"),
+              TraitsType::type_name(),
+              to_string(static_cast<MessageId>(sample.header_.message_id_))));
+          }
+          filtered = true;
+          message_holder.reset();
+          return message_holder;
         }
-        filtered = true;
-        message_holder.reset();
-        return message_holder;
-      }
-      const MessageType& type = static_cast<MessageType&>(*data);
-      if (!content_filtered_topic_->filter(type, sample_only_has_key_fields)) {
-        filtered = true;
-        message_holder.reset();
-        return message_holder;
+        const MessageType& type = static_cast<MessageType&>(*data);
+        if (!content_filtered_topic_->filter(type, sample_only_has_key_fields)) {
+          filtered = true;
+          message_holder.reset();
+          return message_holder;
+        }
       }
     }
 #endif

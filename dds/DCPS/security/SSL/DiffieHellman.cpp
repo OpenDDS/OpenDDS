@@ -7,6 +7,7 @@
 #include "Utils.h"
 #include "Err.h"
 
+#include <openssl/evp.h>
 #include <openssl/dh.h>
 #include "../OpenSSL_legacy.h"  // Must come after all other OpenSSL includes
 
@@ -28,7 +29,7 @@ namespace {
 struct DH_Handle {
   DH* dh_;
   explicit DH_Handle(EVP_PKEY* key)
-#ifdef OPENSSL_V_1_0
+#if defined OPENSSL_V_1_0 || defined OPENSSL_V_3_0
     : dh_(EVP_PKEY_get1_DH(key))
 #else
     : dh_(EVP_PKEY_get0_DH(key))
@@ -37,7 +38,7 @@ struct DH_Handle {
   operator DH*() { return dh_; }
   ~DH_Handle()
   {
-#ifdef OPENSSL_V_1_0
+#if defined OPENSSL_V_1_0 || defined OPENSSL_V_3_0
     DH_free(dh_);
 #endif
   }
@@ -222,7 +223,7 @@ int DH_2048_MODP_256_PRIME::compute_shared_secret(const DDS::OctetSeq& pub_key)
 struct EC_Handle {
   EC_KEY* ec_;
   explicit EC_Handle(EVP_PKEY* key)
-#ifdef OPENSSL_V_1_0
+#if defined OPENSSL_V_1_0 || defined OPENSSL_V_3_0
     : ec_(EVP_PKEY_get1_EC_KEY(key))
 #else
     : ec_(EVP_PKEY_get0_EC_KEY(key))
@@ -231,7 +232,7 @@ struct EC_Handle {
   operator EC_KEY*() { return ec_; }
   ~EC_Handle()
   {
-#ifdef OPENSSL_V_1_0
+#if defined OPENSSL_V_1_0 || defined OPENSSL_V_3_0
     EC_KEY_free(ec_);
 #endif
   }

@@ -8,11 +8,12 @@
 namespace Bench {
 
 ReadAction::ReadAction(ACE_Proactor& proactor)
- : proactor_(proactor)
- , started_(false)
- , stopped_(false)
- , stop_condition_(new DDS::GuardCondition())
- , read_period_(1, 0)
+: proactor_(proactor)
+, started_(false)
+, stopped_(false)
+, stop_condition_(new DDS::GuardCondition())
+, dr_listener_(0)
+, read_period_(1, 0)
 {
 }
 

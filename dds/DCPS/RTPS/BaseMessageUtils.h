@@ -82,58 +82,8 @@ void marshal_key_hash(const T& msg, KeyHash_t& hash)
   }
 }
 
-inline void assign(DCPS::OctetArray16& dest,
-                   const DCPS::OctetArray16& src)
-{
-  std::memcpy(&dest[0], &src[0], sizeof(DCPS::OctetArray16));
-}
-
-inline void assign(DCPS::OctetArray16& dest,
-                   const ACE_CDR::ULong& ipv4addr_be)
-{
-  std::memset(&dest[0], 0, 12);
-  dest[12] = ipv4addr_be >> 24;
-  dest[13] = ipv4addr_be >> 16;
-  dest[14] = ipv4addr_be >> 8;
-  dest[15] = ipv4addr_be;
-}
-
-inline void
-address_to_bytes(DCPS::OctetArray16& dest, const ACE_INET_Addr& addr)
-{
-  const void* raw = addr.get_addr();
-#ifdef ACE_HAS_IPV6
-  if (addr.get_type() == AF_INET6) {
-    const sockaddr_in6* in = static_cast<const sockaddr_in6*>(raw);
-    std::memcpy(&dest[0], &in->sin6_addr, 16);
-  } else {
-#else
-  {
-#endif
-    const sockaddr_in* in = static_cast<const sockaddr_in*>(raw);
-    std::memset(&dest[0], 0, 12);
-    std::memcpy(&dest[12], &in->sin_addr, 4);
-  }
-}
-
-inline int
-address_to_kind(const ACE_INET_Addr& addr)
-{
-#ifdef ACE_HAS_IPV6
-  return addr.get_type() == AF_INET6 ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
-#else
-  ACE_UNUSED_ARG(addr);
-  return LOCATOR_KIND_UDPv4;
-#endif
-}
-
 OpenDDS_Rtps_Export
 const DCPS::Encoding& get_locators_encoding();
-
-OpenDDS_Rtps_Export
-int locator_to_address(ACE_INET_Addr& dest,
-                       const DCPS::Locator_t& locator,
-                       bool map /*map IPV4 to IPV6 addr*/);
 
 OpenDDS_Rtps_Export
 DDS::ReturnCode_t blob_to_locators(const DCPS::TransportBLOB& blob,

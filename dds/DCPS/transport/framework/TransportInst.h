@@ -19,6 +19,8 @@
 #include "dds/DCPS/ReactorTask_rch.h"
 #include "dds/DCPS/TimeDuration.h"
 
+#include <dds/DdsDcpsInfoUtilsC.h>
+
 #include "TransportDefs.h"
 #include "TransportImpl_rch.h"
 #include "TransportImpl.h"
@@ -108,6 +110,14 @@ public:
   /// The expiration time is relative to the last received fragment.
   TimeDuration fragment_reassembly_timeout_;
 
+  /// Preallocated chunks in allocator for message blocks.
+  /// Default (0) is to use built-in constants in TransportReceiveStrategy
+  size_t receive_preallocated_message_blocks_;
+
+  /// Preallocated chunks in allocator for data blocks and data buffers.
+  /// Default (0) is to use built-in constants in TransportReceiveStrategy
+  size_t receive_preallocated_data_blocks_;
+
   /// Does the transport as configured support RELIABLE_RELIABILITY_QOS?
   virtual bool is_reliable() const = 0;
 
@@ -126,7 +136,6 @@ public:
                                const TransportLocatorSeq& /*locators*/) {}
 
   virtual void rtps_relay_address_change() {}
-  virtual void get_and_reset_relay_message_counts(RelayMessageCounts& /*counts*/) {}
 
   ReactorTask_rch reactor_task();
 
@@ -156,19 +165,19 @@ public:
    */
   void drop_messages(bool flag)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    ACE_GUARD(ACE_Thread_Mutex, g, config_lock_);
     drop_messages_ = flag;
   }
 
   void drop_messages_m(double m)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    ACE_GUARD(ACE_Thread_Mutex, g, config_lock_);
     drop_messages_m_ = m;
   }
 
   void drop_messages_b(double b)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    ACE_GUARD(ACE_Thread_Mutex, g, config_lock_);
     drop_messages_b_ = b;
   }
 
@@ -183,6 +192,20 @@ public:
     return should_drop(length);
   }
   /**@}*/
+
+  void count_messages(bool flag)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, config_lock_);
+    count_messages_ = flag;
+  }
+
+  bool count_messages() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, config_lock_, false);
+    return count_messages_;
+  }
+
+  virtual void append_transport_statistics(TransportStatisticsSequence& /*seq*/) {}
 
 protected:
 
@@ -218,6 +241,10 @@ private:
   bool drop_messages_;
   double drop_messages_m_;
   double drop_messages_b_;
+
+  bool count_messages_;
+
+  mutable ACE_Thread_Mutex config_lock_;
 };
 
 } // namespace DCPS

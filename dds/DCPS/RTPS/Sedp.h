@@ -588,7 +588,7 @@ public:
 
   DCPS::JobQueue_rch job_queue() const { return job_queue_; }
 
-  void get_and_reset_relay_message_counts(DCPS::RelayMessageCounts& counts);
+  void append_transport_statistics(DCPS::TransportStatisticsSequence& seq);
 
   void ignore(const GUID_t& to_ignore);
 
@@ -655,7 +655,7 @@ public:
     type_lookup_service_ = type_lookup_service;
   }
 
-  bool should_drop(ssize_t length) const;
+  RcHandle<DCPS::TransportInst> transport_inst() const { return transport_inst_; }
 
 private:
   bool remote_knows_about_local_i(const GUID_t& local, const GUID_t& remote) const;
@@ -912,7 +912,7 @@ private:
     typedef OPENDDS_MAP(GUID_t, PerReaderDeferredSamples) DeferredSamples;
     DeferredSamples deferred_samples_;
 
-    void send_sample(const ACE_Message_Block& data,
+    void send_sample(DCPS::Message_Block_Ptr payload,
                      size_t size,
                      const DCPS::RepoId& reader,
                      DCPS::SequenceNumber& sequence,

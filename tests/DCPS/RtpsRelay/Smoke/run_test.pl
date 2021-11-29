@@ -42,6 +42,7 @@ if ($test->flag('single')) {
 sub get_relay_args {
   my $n = shift;
   my $port_digit = 3 + $n;
+  my $ps = 1 + ($n - 1) * 4;
   return join(' ',
     "-Id relay${n}",
     "-UserData relay${n}",
@@ -49,6 +50,7 @@ sub get_relay_args {
     "-DCPSSecurityDebugLevel 2",
     "-LogDiscovery 1",
     "-LogActivity 1",
+    "-ThreadMonitorPeriod ${ps}",
     "-LogRelayStatistics 3",
     "-LogParticipantStatistics 1",
     "-DCPSConfigFile relay${n}.ini",

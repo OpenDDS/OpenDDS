@@ -22,6 +22,8 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Message_Block_Ptr.h>
 
+#include <dds/OpenddsDcpsExtTypeSupportImpl.h>
+
 #include <tao/CORBA_String.h>
 
 #include <ace/OS_main.h>
@@ -248,9 +250,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
 
   LocatorSeq locators;
   locators.length(1);
-  locators[0].kind = address_to_kind(remote_addr);
-  locators[0].port = remote_addr.get_port_number();
-  address_to_bytes(locators[0].address, remote_addr);
+  address_to_locator(locators[0], remote_addr);
 
   size_t size_locator = 0;
   serialized_size(locators_encoding, size_locator, locators);

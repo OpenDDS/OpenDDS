@@ -1,0 +1,21 @@
+project(*Publisher) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
+  exename = publisher
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    publisher.cpp
+  }
+}
+
+project(*Subscriber) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
+  exename = subscriber
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    subscriber.cpp
+  }
+}

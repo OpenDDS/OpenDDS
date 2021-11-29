@@ -178,9 +178,10 @@ public:
     }
 
     void resend_fragments_i(SequenceNumber sequence,
-                            const DisjointSequence& fragments)
+                            const DisjointSequence& fragments,
+                            size_t& cumulative_send_count)
     {
-      ssb_.resend_fragments_i(sequence, fragments);
+      ssb_.resend_fragments_i(sequence, fragments, cumulative_send_count);
     }
 
   private:
@@ -208,7 +209,8 @@ private:
   bool resend_i(const SequenceRange& range, DisjointSequence* gaps,
                 const RepoId& destination);
   void resend_fragments_i(SequenceNumber sequence,
-                          const DisjointSequence& fragments);
+                          const DisjointSequence& fragments,
+                          size_t& cumulative_send_count);
 
   size_t n_chunks_;
 
