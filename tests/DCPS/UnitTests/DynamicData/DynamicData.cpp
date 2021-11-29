@@ -92,186 +92,226 @@ void verify_single_value_struct(XTypes::DynamicData& data)
   StructType expected;
   set_single_value_struct(expected);
 
+  ACE_CDR::ULong count = data.get_item_count();
+  EXPECT_EQ(count, ACE_CDR::ULong(19));
+
   ACE_CDR::Long my_enum;
-  DDS::ReturnCode_t ret = data.get_int32_value(my_enum, 0);
+  XTypes::MemberId id = data.get_member_id_at_index(0);
+  EXPECT_EQ(id, ACE_CDR::ULong(0));
+  DDS::ReturnCode_t ret = data.get_int32_value(my_enum, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.my_enum, my_enum);
 
   XTypes::DynamicData nested_dd;
-  ret = data.get_complex_value(nested_dd, 0);
+  ret = data.get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  XTypes::MemberId random_id = 111;
+  const XTypes::MemberId random_id = 111;
   ret = nested_dd.get_int32_value(my_enum, random_id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.my_enum, my_enum);
 
   ACE_CDR::Long int_32;
-  ret = data.get_int32_value(int_32, 1);
+  id = data.get_member_id_at_index(1);
+  EXPECT_EQ(id, ACE_CDR::ULong(1));
+  ret = data.get_int32_value(int_32, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.int_32, int_32);
 
-  ret = data.get_complex_value(nested_dd, 1);
+  ret = data.get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd.get_int32_value(int_32, random_id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.int_32, int_32);
 
   ACE_CDR::ULong uint_32;
-  ret = data.get_uint32_value(uint_32, 2);
+  id = data.get_member_id_at_index(2);
+  EXPECT_EQ(id, ACE_CDR::ULong(2));
+  ret = data.get_uint32_value(uint_32, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.uint_32, uint_32);
 
-  ret = data.get_complex_value(nested_dd, 2);
+  ret = data.get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd.get_uint32_value(uint_32, random_id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.uint_32, uint_32);
 
   ACE_CDR::Int8 int_8;
-  ret = data.get_int8_value(int_8, 3);
+  id = data.get_member_id_at_index(3);
+  EXPECT_EQ(id, ACE_CDR::ULong(3));
+  ret = data.get_int8_value(int_8, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.int_8, int_8);
 
-  ret = data.get_complex_value(nested_dd, 3);
+  ret = data.get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd.get_int8_value(int_8, random_id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.int_8, int_8);
 
   ACE_CDR::UInt8 uint_8;
-  ret = data.get_uint8_value(uint_8, 4);
+  id = data.get_member_id_at_index(4);
+  EXPECT_EQ(id, ACE_CDR::ULong(4));
+  ret = data.get_uint8_value(uint_8, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.uint_8, uint_8);
 
-  ret = data.get_complex_value(nested_dd, 4);
+  ret = data.get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd.get_uint8_value(uint_8, random_id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.uint_8, uint_8);
 
   ACE_CDR::Int16 int_16;
-  ret = data.get_int16_value(int_16, 5);
+  id = data.get_member_id_at_index(5);
+  EXPECT_EQ(id, ACE_CDR::ULong(5));
+  ret = data.get_int16_value(int_16, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.int_16, int_16);
 
-  ret = data.get_complex_value(nested_dd, 5);
+  ret = data.get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd.get_int16_value(int_16, random_id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.int_16, int_16);
 
   ACE_CDR::UInt16 uint_16;
-  ret = data.get_uint16_value(uint_16, 6);
+  id = data.get_member_id_at_index(6);
+  EXPECT_EQ(id, ACE_CDR::ULong(6));
+  ret = data.get_uint16_value(uint_16, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.uint_16, uint_16);
 
-  ret = data.get_complex_value(nested_dd, 6);
+  ret = data.get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd.get_uint16_value(uint_16, random_id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.uint_16, uint_16);
 
   ACE_CDR::Int64 int_64;
-  ret = data.get_int64_value(int_64, 7);
+  id = data.get_member_id_at_index(7);
+  EXPECT_EQ(id, ACE_CDR::ULong(7));
+  ret = data.get_int64_value(int_64, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.int_64, int_64);
 
-  ret = data.get_complex_value(nested_dd, 7);
+  ret = data.get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd.get_int64_value(int_64, random_id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.int_64, int_64);
 
   ACE_CDR::UInt64 uint_64;
-  ret = data.get_uint64_value(uint_64, 8);
+  id = data.get_member_id_at_index(8);
+  EXPECT_EQ(id, ACE_CDR::ULong(8));
+  ret = data.get_uint64_value(uint_64, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.uint_64, uint_64);
 
-  ret = data.get_complex_value(nested_dd, 8);
+  ret = data.get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd.get_uint64_value(uint_64, random_id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.uint_64, uint_64);
 
   ACE_CDR::Float float_32;
-  ret = data.get_float32_value(float_32, 9);
+  id = data.get_member_id_at_index(9);
+  EXPECT_EQ(id, ACE_CDR::ULong(9));
+  ret = data.get_float32_value(float_32, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.float_32, float_32);
 
-  ret = data.get_complex_value(nested_dd, 9);
+  ret = data.get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd.get_float32_value(float_32, random_id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.float_32, float_32);
 
   ACE_CDR::Double float_64;
-  ret = data.get_float64_value(float_64, 10);
+  id = data.get_member_id_at_index(10);
+  EXPECT_EQ(id, ACE_CDR::ULong(10));
+  ret = data.get_float64_value(float_64, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.float_64, float_64);
 
-  ret = data.get_complex_value(nested_dd, 10);
+  ret = data.get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd.get_float64_value(float_64, random_id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.float_64, float_64);
 
   ACE_CDR::LongDouble float_128;
-  ret = data.get_float128_value(float_128, 11);
+  id = data.get_member_id_at_index(11);
+  EXPECT_EQ(id, ACE_CDR::ULong(11));
+  ret = data.get_float128_value(float_128, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   check_float128(expected.float_128, float_128);
-  ret = data.get_complex_value(nested_dd, 11);
+
+  ret = data.get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd.get_float128_value(float_128, random_id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   check_float128(expected.float_128, float_128);
 
   ACE_CDR::Char char_8;
-  ret = data.get_char8_value(char_8, 12);
+  id = data.get_member_id_at_index(12);
+  EXPECT_EQ(id, ACE_CDR::ULong(12));
+  ret = data.get_char8_value(char_8, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.char_8, char_8);
 
-  ret = data.get_complex_value(nested_dd, 12);
+  ret = data.get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd.get_char8_value(char_8, random_id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.char_8, char_8);
 
   ACE_CDR::WChar char_16;
-  ret = data.get_char16_value(char_16, 13);
+  id = data.get_member_id_at_index(13);
+  EXPECT_EQ(id, ACE_CDR::ULong(13));
+  ret = data.get_char16_value(char_16, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.char_16, char_16);
 
-  ret = data.get_complex_value(nested_dd, 13);
+  ret = data.get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd.get_char16_value(char_16, random_id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.char_16, char_16);
 
   ACE_CDR::Octet byte;
-  ret = data.get_byte_value(byte, 14);
+  id = data.get_member_id_at_index(14);
+  EXPECT_EQ(id, ACE_CDR::ULong(14));
+  ret = data.get_byte_value(byte, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.byte, byte);
 
-  ret = data.get_complex_value(nested_dd, 14);
+  ret = data.get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd.get_byte_value(byte, random_id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.byte, byte);
 
   ACE_CDR::Boolean bool_;
-  ret = data.get_boolean_value(bool_, 15);
+  id = data.get_member_id_at_index(15);
+  EXPECT_EQ(id, ACE_CDR::ULong(15));
+  ret = data.get_boolean_value(bool_, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected._cxx_bool, bool_);
 
-  ret = data.get_complex_value(nested_dd, 15);
+  ret = data.get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd.get_boolean_value(bool_, random_id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected._cxx_bool, bool_);
 
   ACE_CDR::Long l;
-  ret = data.get_complex_value(nested_dd, 16);
+  id = data.get_member_id_at_index(16);
+  EXPECT_EQ(id, ACE_CDR::ULong(16));
+  ret = data.get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
+  count = nested_dd.get_item_count();
+  EXPECT_EQ(count, ACE_CDR::ULong(1));
   ret = nested_dd.get_int32_value(l, 0);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.nested_struct.l, l);
@@ -284,13 +324,15 @@ void verify_single_value_struct(XTypes::DynamicData& data)
   EXPECT_EQ(expected.nested_struct.l, l);
 
   ACE_CDR::Char* str = 0;
-  ret = data.get_string_value(str, 17);
+  id = data.get_member_id_at_index(17);
+  EXPECT_EQ(id, ACE_CDR::ULong(17));
+  ret = data.get_string_value(str, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_STREQ(expected.str.in(), str);
   CORBA::string_free(str);
 
   str = 0;
-  ret = data.get_complex_value(nested_dd, 17);
+  ret = data.get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd.get_string_value(str, random_id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
@@ -298,13 +340,15 @@ void verify_single_value_struct(XTypes::DynamicData& data)
   CORBA::string_free(str);
 
   ACE_CDR::WChar* wstr = 0;
-  ret = data.get_wstring_value(wstr, 18);
+  id = data.get_member_id_at_index(18);
+  EXPECT_EQ(id, ACE_CDR::ULong(18));
+  ret = data.get_wstring_value(wstr, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_STREQ(expected.wstr.in(), wstr);
   CORBA::wstring_free(wstr);
 
   wstr = 0;
-  ret = data.get_complex_value(nested_dd, 18);
+  ret = data.get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd.get_wstring_value(wstr, random_id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
@@ -331,6 +375,23 @@ void verify_single_value_struct(XTypes::DynamicData& data)
   ret = nested_dd.get_int32_value(my_enum, random_id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.my_enum, my_enum);
+}
+
+void verify_index_mapping(XTypes::DynamicData& data)
+{
+  ACE_CDR::ULong count = data.get_item_count();
+  EXPECT_EQ(count, ACE_CDR::ULong(17));
+
+  XTypes::MemberId id = data.get_member_id_at_index(1);
+  EXPECT_EQ(id, ACE_CDR::ULong(1));
+  id = data.get_member_id_at_index(2);
+  EXPECT_EQ(id, ACE_CDR::ULong(3));
+  id = data.get_member_id_at_index(3);
+  EXPECT_EQ(id, ACE_CDR::ULong(4));
+  id = data.get_member_id_at_index(4);
+  EXPECT_EQ(id, ACE_CDR::ULong(6));
+  id = data.get_member_id_at_index(5);
+  EXPECT_EQ(id, ACE_CDR::ULong(7));
 }
 
 template<typename StructType>
@@ -516,6 +577,24 @@ void verify_int32_union(XTypes::DynamicData& data)
   DDS::ReturnCode_t ret = data.get_int32_value(int_32, 1);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(ACE_CDR::Long(10), int_32);
+
+  const XTypes::MemberId disc_id = data.get_member_id_at_index(0);
+  EXPECT_EQ(XTypes::DISCRIMINATOR_ID, disc_id);
+  ACE_CDR::Long disc_val;
+  ret = data.get_int32_value(disc_val, disc_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(disc_val, E_INT32);
+  ACE_CDR::LongLong wrong_disc_val;
+  ret = data.get_int64_value(wrong_disc_val, disc_id);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
+
+  XTypes::DynamicData disc_data;
+  ret = data.get_complex_value(disc_data, disc_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  const XTypes::MemberId any_id = 100;
+  ret = disc_data.get_int32_value(disc_val, any_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(disc_val, E_INT32);
 }
 
 void verify_uint32_union(XTypes::DynamicData& data)
@@ -524,6 +603,24 @@ void verify_uint32_union(XTypes::DynamicData& data)
   DDS::ReturnCode_t ret = data.get_uint32_value(uint_32, 2);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(ACE_CDR::ULong(11), uint_32);
+
+  const XTypes::MemberId disc_id = data.get_member_id_at_index(0);
+  EXPECT_EQ(XTypes::DISCRIMINATOR_ID, disc_id);
+  ACE_CDR::Long disc_val;
+  ret = data.get_int32_value(disc_val, disc_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(disc_val, E_UINT32);
+  ACE_CDR::Short wrong_disc_val;
+  ret = data.get_int16_value(wrong_disc_val, disc_id);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
+
+  XTypes::DynamicData disc_data;
+  ret = data.get_complex_value(disc_data, disc_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  const XTypes::MemberId any_id = 100;
+  ret = disc_data.get_int32_value(disc_val, any_id);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(disc_val, E_UINT32);
 }
 
 void verify_int8_union(XTypes::DynamicData& data)
@@ -773,6 +870,53 @@ TEST(Mutable, ReadValueFromStruct)
   XTypes::DynamicData data(&msg, xcdr2, dt);
 
   verify_single_value_struct<MutableSingleValueStruct>(data);
+}
+
+TEST(Mutable, StructWithOptionalMembers)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::MutableSingleValueStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::MutableSingleValueStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::CompleteTypeObject cto = it->second.complete;
+  // IDL compiler hasn't supported @optional yet,
+  // so these 2 members are set to be optional manually.
+  cto.struct_type.member_seq[2].common.member_flags |= XTypes::IS_OPTIONAL;
+  cto.struct_type.member_seq[5].common.member_flags |= XTypes::IS_OPTIONAL;
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(cto, DCPS::GUID_t());
+
+  unsigned char single_value_struct[] = {
+    0x00,0x00,0x00,0xb2, // +4=4 dheader
+    0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x03, // +4+4=12 my_enum
+    0x20,0x00,0x00,0x01, 0x00,0x00,0x00,0x0a, // +4+4=20 int_32
+    // Omitting uint_32
+    0x00,0x00,0x00,0x03, 0x05, (0), (0), (0), // +4+1+(3)=28 int_8
+    0x00,0x00,0x00,0x04, 0x06, (0), (0), (0), // +4+1+(3)=36 uint_8
+    // Omitting int_16
+    0x10,0x00,0x00,0x06, 0x22,0x22, (0), (0), // +4+2+(2)=44 uint_16
+    0x30,0x00,0x00,0x07, 0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +4+8=56 int_64
+    0x30,0x00,0x00,0x08, 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +4+8=68 uint_64
+    0x20,0x00,0x00,0x09, 0x3f,0x80,0x00,0x00, // +4+4=76 float_32
+    0x30,0x00,0x00,0x0a, 0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00, // +4+8=88 float_64
+    0x40,0x00,0x00,0x0b, 0x00,0x00,0x00,0x10,
+    0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0,    // +4+4+16=112 float_128
+    0x00,0x00,0x00,0x0c, 'a', (0), (0), (0),  // +4+1+(3)=120 char_8
+    0x10,0x00,0x00,0x0d, 0x00,0x61, (0), (0), // +4+2+(2)=128 char_16
+    0x00,0x00,0x00,0x0e, 0xff, (0), (0), (0), // +4+1+(3)=136 byte
+    0x00,0x00,0x00,0x0f, 0x01, (0), (0), (0), // +4+1+(3)=144 bool
+    0x20,0x00,0x00,0x10, 0x00,0x00,0x00,0x0c, // +4+4=152 nested_struct
+    0x30,0x00,0x00,0x11, 0x00,0x00,0x00,0x04, 'a','b','c','\0', // +4+8=164 str
+    0x40,0x00,0x00,0x12, 0x00,0x00,0x00,0x0a,
+    0x00,0x00,0x00,0x06, 0,0x61,0,0x62,0,0x63 // +4+4+10=182 swtr
+  };
+  ACE_Message_Block msg(1024);
+  msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
+  XTypes::DynamicData data(&msg, xcdr2, dt);
+
+  verify_index_mapping(data);
 }
 
 TEST(Mutable, ReadValueFromUnion)
@@ -1207,6 +1351,49 @@ TEST(Appendable, ReadValueFromStruct)
   verify_single_value_struct<AppendableSingleValueStruct>(data);
 }
 
+TEST(Appendable, StructWithOptionalMembers)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableSingleValueStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::AppendableSingleValueStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::CompleteTypeObject cto = it->second.complete;
+  cto.struct_type.member_seq[2].common.member_flags |= XTypes::IS_OPTIONAL;
+  cto.struct_type.member_seq[5].common.member_flags |= XTypes::IS_OPTIONAL;
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(cto, DCPS::GUID_t());
+
+  unsigned char single_value_struct[] = {
+    0x00,0x00,0x00,0x5c,  // +4=4 dheader
+    0x00,0x00,0x00,0x03, // +4=8 my_enum
+    0x00,0x00,0x00,0x0a, // +4=12 int_32
+    0x00, // +1=13 Omitting uint_32
+    0x05, // +1=14 int_8
+    0x06, // +1=15 uint_8
+    0x00, // +1=16 Omitting int_16
+    0x22,0x22, // +2=18 uint_16
+    (0),(0),0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +(2)+8=28 int_64
+    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +8=36 uint_64
+    0x3f,0x80,0x00,0x00, // +4=40 float_32
+    0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00, // +8=48 float_64
+    0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0,    // +16=664 float_128
+    'a',  // +1=65 char_8
+    (0),0x00,0x61, // +(1)+2=68 char_16
+    0xff, // +1=69 byte
+    0x01, // +1=70 bool
+    (0), (0), 0x00,0x00,0x00,0x0c, // +(2)+4=76 nested_struct
+    0x00,0x00,0x00,0x04, 'a','b','c','\0', // +8=84 str
+    0x00,0x00,0x00,0x08, 0,0x61,0,0x62,0,0x63,0,0, // +12=96 swtr
+  };
+  ACE_Message_Block msg(1024);
+  msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
+  XTypes::DynamicData data(&msg, xcdr2, dt);
+
+  verify_index_mapping(data);
+}
+
 TEST(Appendable, ReadValueFromUnion)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableSingleValueUnion_xtag>();
@@ -1608,31 +1795,73 @@ TEST(Final, ReadValueFromStruct)
   XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
 
   unsigned char single_value_struct[] = {
-    0x00,0x00,0x00,0x03, // +4=8 my_enum
-    0x00,0x00,0x00,0x0a, // +4=12 int_32
-    0x00,0x00,0x00,0x0b, // +4=16 uint_32
-    0x05, // +1=17 int_8
-    0x06, // +1=18 uint_8
-    0x11,0x11, // +2 =20 int_16
-    0x22,0x22, // +2 =22 uint_16
-    (0),(0),0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +(2)+8=32 int_64
-    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +8=40 uint_64
-    0x3f,0x80,0x00,0x00, // +4=44 float_32
-    0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00, // +8=52 float_64
-    0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0,    // +16=68 float_128
-    'a',  // +1=69 char_8
-    (0),0x00,0x61, // +(1)+2=72 char_16
-    0xff, // +1=73 byte
-    0x01, // +1=74 bool
-    (0), (0), 0x00,0x00,0x00,0x0c, // +(2)+4=80 nested_struct
-    0x00,0x00,0x00,0x04, 'a','b','c','\0', // +8=88 str
-    0x00,0x00,0x00,0x08, 0,0x61,0,0x62,0,0x63,0,0, // +12=100 swtr
+    0x00,0x00,0x00,0x03, // +4=4 my_enum
+    0x00,0x00,0x00,0x0a, // +4=8 int_32
+    0x00,0x00,0x00,0x0b, // +4=12 uint_32
+    0x05, // +1=13 int_8
+    0x06, // +1=14 uint_8
+    0x11,0x11, // +2 =16 int_16
+    0x22,0x22, // +2 =18 uint_16
+    (0),(0),0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +(2)+8=28 int_64
+    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +8=36 uint_64
+    0x3f,0x80,0x00,0x00, // +4=40 float_32
+    0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00, // +8=48 float_64
+    0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0,    // +16=64 float_128
+    'a',  // +1=65 char_8
+    (0),0x00,0x61, // +(1)+2=68 char_16
+    0xff, // +1=69 byte
+    0x01, // +1=70 bool
+    (0), (0), 0x00,0x00,0x00,0x0c, // +(2)+4=76 nested_struct
+    0x00,0x00,0x00,0x04, 'a','b','c','\0', // +8=84 str
+    0x00,0x00,0x00,0x08, 0,0x61,0,0x62,0,0x63,0,0, // +12=96 swtr
   };
   ACE_Message_Block msg(1024);
   msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
   XTypes::DynamicData data(&msg, xcdr2, dt);
 
   verify_single_value_struct<FinalSingleValueStruct>(data);
+}
+
+TEST(Final, StructWithOptionalMembers)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::FinalSingleValueStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::FinalSingleValueStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::CompleteTypeObject cto = it->second.complete;
+  cto.struct_type.member_seq[2].common.member_flags |= XTypes::IS_OPTIONAL;
+  cto.struct_type.member_seq[5].common.member_flags |= XTypes::IS_OPTIONAL;
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(cto, DCPS::GUID_t());
+
+  unsigned char single_value_struct[] = {
+    0x00,0x00,0x00,0x03, // my_enum
+    0x00,0x00,0x00,0x0a, // int_32
+    0x00, // Omitting uint_32
+    0x05, // int_8
+    0x06, // uint_8
+    0x00, // Omitting int_16
+    0x22,0x22, // uint_16
+    (0),(0),0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // int_64
+    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // uint_64
+    0x3f,0x80,0x00,0x00, // float_32
+    0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00, // float_64
+    0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0,    // float_128
+    'a',  // char_8
+    (0),0x00,0x61, // char_16
+    0xff, // byte
+    0x01, // bool
+    (0), (0), 0x00,0x00,0x00,0x0c, // nested_struct
+    0x00,0x00,0x00,0x04, 'a','b','c','\0', // str
+    0x00,0x00,0x00,0x08, 0,0x61,0,0x62,0,0x63,0,0, // swtr
+  };
+  ACE_Message_Block msg(1024);
+  msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
+  XTypes::DynamicData data(&msg, xcdr2, dt);
+
+  verify_index_mapping(data);
 }
 
 TEST(Final, ReadValueFromUnion)
