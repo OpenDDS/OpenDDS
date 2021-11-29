@@ -9,6 +9,7 @@
 
 #include "DynamicTypeMember.h"
 
+#ifndef OPENDDS_SAFETY_PROFILE
 #include <dds/CorbaSeq/LongSeqTypeSupportImpl.h>
 #include <dds/CorbaSeq/ULongSeqTypeSupportImpl.h>
 #include <dds/CorbaSeq/Int8SeqTypeSupportImpl.h>
@@ -26,8 +27,12 @@
 #include <dds/CorbaSeq/BooleanSeqTypeSupportImpl.h>
 #include <dds/CorbaSeq/StringSeqTypeSupportImpl.h>
 #include <dds/CorbaSeq/WStringSeqTypeSupportImpl.h>
-#include <dds/DCPS/SafetyProfileStreams.h>
+#endif
+
+#include <dds/DdsDcpsInfrastructureC.h>
+
 #include <dds/DCPS/RestoreOutputStreamState.h>
+#include <dds/DCPS/SafetyProfileStreams.h>
 #include <dds/DCPS/ValueHelper.h>
 
 #include <ace/OS_NS_string.h>
@@ -35,7 +40,6 @@
 #include <stdexcept>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
-
 namespace OpenDDS {
 namespace XTypes {
 
@@ -1111,10 +1115,12 @@ DDS::ReturnCode_t DynamicData::get_char8_value(ACE_CDR::Char& value, MemberId id
   return get_char_common<TK_CHAR8, TK_STRING8, ACE_InputCDR::to_char>(value, id);
 }
 
+#ifdef DDS_HAS_WCHAR
 DDS::ReturnCode_t DynamicData::get_char16_value(ACE_CDR::WChar& value, MemberId id)
 {
   return get_char_common<TK_CHAR16, TK_STRING16, ACE_InputCDR::to_wchar>(value, id);
 }
+#endif
 
 DDS::ReturnCode_t DynamicData::get_byte_value(ACE_CDR::Octet& value, MemberId id)
 {
@@ -1217,10 +1223,12 @@ DDS::ReturnCode_t DynamicData::get_string_value(ACE_CDR::Char*& value, MemberId 
   return get_single_value<TK_STRING8>(value, id);
 }
 
+#ifdef DDS_HAS_WCHAR
 DDS::ReturnCode_t DynamicData::get_wstring_value(ACE_CDR::WChar*& value, MemberId id)
 {
   return get_single_value<TK_STRING16>(value, id);
 }
+#endif
 
 DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id)
 {
@@ -1597,90 +1605,94 @@ DDS::ReturnCode_t DynamicData::get_sequence_values(SequenceType& value, MemberId
   return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
 
-DDS::ReturnCode_t DynamicData::get_int32_values(CORBA::LongSeq& value, MemberId id)
+DDS::ReturnCode_t DynamicData::get_int32_values(LongSeq& value, MemberId id)
 {
   return get_sequence_values<TK_INT32>(value, id, TK_ENUM, 17, 32);
 }
 
-DDS::ReturnCode_t DynamicData::get_uint32_values(CORBA::ULongSeq& value, MemberId id)
+DDS::ReturnCode_t DynamicData::get_uint32_values(ULongSeq& value, MemberId id)
 {
   return get_sequence_values<TK_UINT32>(value, id, TK_BITMASK, 17, 32);
 }
 
-DDS::ReturnCode_t DynamicData::get_int8_values(CORBA::Int8Seq& value, MemberId id)
+DDS::ReturnCode_t DynamicData::get_int8_values(Int8Seq& value, MemberId id)
 {
   return get_sequence_values<TK_INT8>(value, id, TK_ENUM, 1, 8);
 }
 
-DDS::ReturnCode_t DynamicData::get_uint8_values(CORBA::UInt8Seq& value, MemberId id)
+DDS::ReturnCode_t DynamicData::get_uint8_values(UInt8Seq& value, MemberId id)
 {
   return get_sequence_values<TK_UINT8>(value, id, TK_BITMASK, 1, 8);
 }
 
-DDS::ReturnCode_t DynamicData::get_int16_values(CORBA::ShortSeq& value, MemberId id)
+DDS::ReturnCode_t DynamicData::get_int16_values(ShortSeq& value, MemberId id)
 {
   return get_sequence_values<TK_INT16>(value, id, TK_ENUM, 9, 16);
 }
 
-DDS::ReturnCode_t DynamicData::get_uint16_values(CORBA::UShortSeq& value, MemberId id)
+DDS::ReturnCode_t DynamicData::get_uint16_values(UShortSeq& value, MemberId id)
 {
   return get_sequence_values<TK_UINT16>(value, id, TK_BITMASK, 9, 16);
 }
 
-DDS::ReturnCode_t DynamicData::get_int64_values(CORBA::LongLongSeq& value, MemberId id)
+DDS::ReturnCode_t DynamicData::get_int64_values(LongLongSeq& value, MemberId id)
 {
   return get_sequence_values<TK_INT64>(value, id);
 }
 
-DDS::ReturnCode_t DynamicData::get_uint64_values(CORBA::ULongLongSeq& value, MemberId id)
+DDS::ReturnCode_t DynamicData::get_uint64_values(ULongLongSeq& value, MemberId id)
 {
   return get_sequence_values<TK_UINT64>(value, id, TK_BITMASK, 33, 64);
 }
 
-DDS::ReturnCode_t DynamicData::get_float32_values(CORBA::FloatSeq& value, MemberId id)
+DDS::ReturnCode_t DynamicData::get_float32_values(FloatSeq& value, MemberId id)
 {
   return get_sequence_values<TK_FLOAT32>(value, id);
 }
 
-DDS::ReturnCode_t DynamicData::get_float64_values(CORBA::DoubleSeq& value, MemberId id)
+DDS::ReturnCode_t DynamicData::get_float64_values(DoubleSeq& value, MemberId id)
 {
   return get_sequence_values<TK_FLOAT64>(value, id);
 }
 
-DDS::ReturnCode_t DynamicData::get_float128_values(CORBA::LongDoubleSeq& value, MemberId id)
+DDS::ReturnCode_t DynamicData::get_float128_values(LongDoubleSeq& value, MemberId id)
 {
   return get_sequence_values<TK_FLOAT128>(value, id);
 }
 
-DDS::ReturnCode_t DynamicData::get_char8_values(CORBA::CharSeq& value, MemberId id)
+DDS::ReturnCode_t DynamicData::get_char8_values(CharSeq& value, MemberId id)
 {
   return get_sequence_values<TK_CHAR8>(value, id);
 }
 
-DDS::ReturnCode_t DynamicData::get_char16_values(CORBA::WCharSeq& value, MemberId id)
+#ifdef DDS_HAS_WCHAR
+DDS::ReturnCode_t DynamicData::get_char16_values(WCharSeq& value, MemberId id)
 {
   return get_sequence_values<TK_CHAR16>(value, id);
 }
+#endif
 
-DDS::ReturnCode_t DynamicData::get_byte_values(CORBA::OctetSeq& value, MemberId id)
+DDS::ReturnCode_t DynamicData::get_byte_values(OctetSeq& value, MemberId id)
 {
   return get_sequence_values<TK_BYTE>(value, id);
 }
 
-DDS::ReturnCode_t DynamicData::get_boolean_values(CORBA::BooleanSeq& value, MemberId id)
+DDS::ReturnCode_t DynamicData::get_boolean_values(BooleanSeq& value, MemberId id)
 {
   return get_sequence_values<TK_BOOLEAN>(value, id);
 }
 
-DDS::ReturnCode_t DynamicData::get_string_values(CORBA::StringSeq& value, MemberId id)
+DDS::ReturnCode_t DynamicData::get_string_values(StringSeq& value, MemberId id)
 {
   return get_sequence_values<TK_STRING8>(value, id);
 }
 
-DDS::ReturnCode_t DynamicData::get_wstring_values(CORBA::WStringSeq& value, MemberId id)
+#ifdef DDS_HAS_WCHAR
+DDS::ReturnCode_t DynamicData::get_wstring_values(WStringSeq& value, MemberId id)
 {
   return get_sequence_values<TK_STRING16>(value, id);
 }
+#endif
 
 bool DynamicData::skip_to_struct_member(const MemberDescriptor& member_desc, MemberId id)
 {
@@ -2430,6 +2442,7 @@ const char* DynamicData::typekind_to_string(TypeKind tk) const
   }
 }
 
+#ifndef OPENDDS_SAFETY_PROFILE
 bool print_integral_value(DynamicData& dd, DCPS::String& type_string, DynamicType_rch dt)
 {
   switch (dt->get_descriptor().kind) {
@@ -2595,6 +2608,7 @@ bool print_integral_value(DynamicData& dd, DCPS::String& type_string, DynamicTyp
     type_string += " = '" + os.str() + "'\n";
     break;
   }
+#ifdef DDS_HAS_WCHAR
   case TK_CHAR16: {
     ACE_CDR::WChar my_wchar;
     if (dd.get_char16_value(my_wchar, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
@@ -2608,6 +2622,7 @@ bool print_integral_value(DynamicData& dd, DCPS::String& type_string, DynamicTyp
     type_string += " = L'" + os.str() + "'\n";
     break;
   }
+#endif
   }
   return true;
 }
@@ -2687,6 +2702,7 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
     type_string += DCPS::String(" = \"") + os.str() + "\"\n";
     break;
   }
+#ifdef DDS_HAS_WCHAR
   case TK_STRING16: {
     ACE_CDR::WChar* my_wstring = 0;
     if (dd.get_wstring_value(my_wstring, 0) != DDS::RETCODE_OK) {
@@ -2700,6 +2716,7 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
     type_string += " = L\"" + os.str() + "\"\n";
     break;
   }
+#endif
   case TK_BITMASK:
     if (DCPS::log_level >= DCPS::LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_dynamic_data: Bitmask is an unsupported type in OpenDDS\n"));
@@ -2838,6 +2855,7 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
   }
   return true;
 }
+#endif
 
 } // namespace XTypes
 } // namespace OpenDDS

@@ -52,6 +52,7 @@ BE_GlobalData::BE_GlobalData()
   , generate_itl_(false)
   , generate_v8_(false)
   , generate_rapidjson_(false)
+  , generate_value_reader_writer_(true)
   , generate_xtypes_complete_(false)
   , face_ts_(false)
   , printer_(false)
@@ -152,12 +153,12 @@ ACE_CString BE_GlobalData::pch_include() const
   return this->pch_include_;
 }
 
-void BE_GlobalData::add_cpp_include(const std::string& str)
+void BE_GlobalData::add_cpp_include(const string& str)
 {
-  this->cpp_includes_.insert(str);
+  this->cpp_includes_.insert(make_pair(str, ""));
 }
 
-const std::set<std::string>& BE_GlobalData::cpp_includes() const
+const set<pair<string, string> >& BE_GlobalData::cpp_includes() const
 {
   return this->cpp_includes_;
 }
@@ -253,6 +254,16 @@ bool BE_GlobalData::rapidjson() const
   return this->generate_rapidjson_;
 }
 
+void BE_GlobalData::value_reader_writer(bool b)
+{
+  this->generate_value_reader_writer_ = b;
+}
+
+bool BE_GlobalData::value_reader_writer() const
+{
+  return this->generate_value_reader_writer_;
+}
+
 void BE_GlobalData::face_ts(bool b)
 {
   this->face_ts_ = b;
@@ -321,7 +332,7 @@ BE_Comment_Guard::BE_Comment_Guard(const char* type, const char* name)
   : type_(type), name_(name)
 {
   if (idl_global->compile_flags() & IDL_CF_INFORMATIVE)
-    std::cout << type << ": " << name << std::endl;
+    cout << type << ": " << name << endl;
 
   be_global->multicast("\n\n/* Begin ");
   be_global->multicast(type);
@@ -434,6 +445,9 @@ BE_GlobalData::parse_args(long& i, char** av)
     case 't':
       suppress_typecode_ = true;
       break;
+    case 'v':
+      generate_value_reader_writer_ = false;
+      break;
     case 'x':
       suppress_xtypes_ = true;
       break;
@@ -456,43 +470,43 @@ BE_GlobalData::parse_args(long& i, char** av)
       warn_about_dcps_data_type_ = false;
     } else if (!ACE_OS::strncasecmp(av[i], FILENAME_ONLY_INCLUDES_FLAG, FILENAME_ONLY_INCLUDES_FLAG_SIZE)) {
       filename_only_includes_ = true;
-    } else if (!std::strcmp(av[i], "--default-extensibility")) {
+    } else if (!strcmp(av[i], "--default-extensibility")) {
       if (av[++i] == 0) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("No argument for --default-extensibility\n")));
         idl_global->parse_args_exit(1);
-      } else if (!std::strcmp(av[i], "final")) {
+      } else if (!strcmp(av[i], "final")) {
         default_extensibility_ = extensibilitykind_final;
-      } else if (!std::strcmp(av[i], "appendable")) {
+      } else if (!strcmp(av[i], "appendable")) {
         default_extensibility_ = extensibilitykind_appendable;
-      } else if (!std::strcmp(av[i], "mutable")) {
+      } else if (!strcmp(av[i], "mutable")) {
         default_extensibility_ = extensibilitykind_mutable;
       } else {
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("Invalid argument to --default-extensibility: %C\n"), av[i]));
         idl_global->parse_args_exit(1);
       }
-    } else if (!std::strcmp(av[i], "--default-autoid")) {
+    } else if (!strcmp(av[i], "--default-autoid")) {
       if (av[++i] == 0) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("No argument for --default-autoid\n")));
         idl_global->parse_args_exit(1);
-      } else if (!std::strcmp(av[i], "sequential")) {
+      } else if (!strcmp(av[i], "sequential")) {
         root_default_autoid_ = autoidkind_sequential;
-      } else if (!std::strcmp(av[i], "hash")) {
+      } else if (!strcmp(av[i], "hash")) {
         root_default_autoid_ = autoidkind_hash;
       } else {
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("Invalid argument to --default-autoid: %C\n"), av[i]));
         idl_global->parse_args_exit(1);
       }
-    } else if (!std::strcmp(av[i], "--default-try-construct")) {
+    } else if (!strcmp(av[i], "--default-try-construct")) {
       if (av[++i] == 0) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("No argument for --default-try-construct\n")));
         idl_global->parse_args_exit(1);
-      } else if (!std::strcmp(av[i], "discard")) {
+      } else if (!strcmp(av[i], "discard")) {
         default_try_construct_ = tryconstructfailaction_discard;
-      } else if (!std::strcmp(av[i], "use-default")) {
+      } else if (!strcmp(av[i], "use-default")) {
         default_try_construct_ = tryconstructfailaction_use_default;
-      } else if (!std::strcmp(av[i], "trim")) {
+      } else if (!strcmp(av[i], "trim")) {
         default_try_construct_ = tryconstructfailaction_trim;
       } else {
         ACE_ERROR((LM_ERROR,
@@ -529,9 +543,9 @@ BE_GlobalData::writeFile(const char* fileName, const string& content)
 //include file management (assumes a singleton BE_GlobalData object)
 
 namespace {
-  typedef set<string> Includes_t;
-  Includes_t inc_h_, inc_c_, inc_idl_, referenced_idl_, inc_path_, inc_facets_h_,
-    inc_lang_h_;
+  typedef set<pair<string, string> > Includes_t;
+  Includes_t inc_h_, inc_c_, inc_idl_, inc_facets_h_, inc_lang_h_;
+  set<string> referenced_idl_, inc_path_;
 }
 
 void
@@ -556,7 +570,7 @@ BE_GlobalData::set_inc_paths(const char* cmdline)
 {
   ACE_ARGV argv(ACE_TEXT_CHAR_TO_TCHAR(cmdline), false);
   for (int i = 0; i < argv.argc(); ++i) {
-    std::string arg = ACE_TEXT_ALWAYS_CHAR(argv[i]);
+    string arg = ACE_TEXT_ALWAYS_CHAR(argv[i]);
     if (arg == "-I" && i + 1 < argv.argc()) {
       inc_path_.insert(ACE_TEXT_ALWAYS_CHAR(argv[++i]));
     } else if (arg.substr(0, 2) == "-I") {
@@ -566,8 +580,15 @@ BE_GlobalData::set_inc_paths(const char* cmdline)
 }
 
 void
-BE_GlobalData::add_include(const char* file,
-                           BE_GlobalData::stream_enum_t which)
+BE_GlobalData::add_include(const char* file, stream_enum_t which)
+{
+  conditional_include(file, which, "");
+}
+
+void
+BE_GlobalData::conditional_include(const char* file,
+                                   stream_enum_t which,
+                                   const char* condition)
 {
   Includes_t* inc = 0;
 
@@ -591,7 +612,7 @@ BE_GlobalData::add_include(const char* file,
     return;
   }
 
-  inc->insert(file);
+  inc->insert(make_pair(file, condition));
 }
 
 void
@@ -601,7 +622,7 @@ BE_GlobalData::add_referenced(const char* file)
 }
 
 namespace {
-  std::string transform_referenced(const std::string& idl, const char* suffix)
+  pair<string, string> transform_referenced(const string& idl, const char* suffix)
   {
     const size_t len = idl.size();
     string base_name;
@@ -612,19 +633,19 @@ namespace {
         0 == ACE_OS::strcasecmp(idl.c_str() + len - 5, ".pidl")) {
       base_name.assign(idl.c_str(), len - 5);
       const size_t slash = base_name.find_last_of("/\\");
-      if (slash != std::string::npos && slash >= 3 && base_name.size() > 3
+      if (slash != string::npos && slash >= 3 && base_name.size() > 3
           && base_name.substr(slash - 3, 3) == "tao"
           && base_name.substr(base_name.size() - 3) == "Seq") {
         base_name = "dds/CorbaSeq/" + base_name.substr(slash + 1);
       }
     }
 
-    return base_name + suffix;
+    return make_pair(base_name + suffix, "");
   }
 
-  std::string make_relative(const std::string& absolute, const bool filename_only_includes)
+  string make_relative(const string& absolute, const bool filename_only_includes)
   {
-    for (Includes_t::const_iterator iter = inc_path_.begin(),
+    for (set<string>::const_iterator iter = inc_path_.begin(),
         end = inc_path_.upper_bound(absolute); iter != end; ++iter) {
       if (absolute.find(*iter) == 0) {
         string rel = absolute.substr(iter->size());
@@ -657,13 +678,20 @@ namespace {
   }
 
   struct InsertIncludes {
-    std::ostream& ret_;
-    explicit InsertIncludes(std::ostream& ret) : ret_(ret) {}
+    ostream& ret_;
+    explicit InsertIncludes(ostream& ret) : ret_(ret) {}
 
-    void operator()(const std::string& str) const
+    void operator()(const pair<string, string>& inc) const
     {
-       const char* const quote = (!str.empty() && str[0] != '<') ? "\"" : "";
-       ret_ << "#include " << quote << str << quote << '\n';
+      const string& str = inc.first;
+      const char* const quote = (!str.empty() && str[0] != '<') ? "\"" : "";
+      if (inc.second.size()) {
+        ret_ << inc.second << "\n  ";
+      }
+      ret_ << "#include " << quote << str << quote << '\n';
+      if (inc.second.size()) {
+        ret_ << "#endif\n";
+      }
     }
   };
 
@@ -671,20 +699,20 @@ namespace {
     const char* const suffix_;
     bool filename_only_includes_;
 
-    InsertRefIncludes(std::ostream& ret, const char* suffix, const bool filename_only_includes)
+    InsertRefIncludes(ostream& ret, const char* suffix, const bool filename_only_includes)
       : InsertIncludes(ret)
       , suffix_(suffix)
       , filename_only_includes_(filename_only_includes)
     {}
 
-    void operator()(const std::string& str) const
+    void operator()(const string& str) const
     {
       InsertIncludes::operator()(transform_referenced(make_relative(str, filename_only_includes_), suffix_));
     }
   };
 }
 
-std::string
+string
 BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
 {
   const Includes_t* inc = 0;
@@ -709,23 +737,23 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
     return "";
   }
 
-  std::ostringstream ret;
+  ostringstream ret;
 
-  std::for_each(inc->begin(), inc->end(), InsertIncludes(ret));
+  for_each(inc->begin(), inc->end(), InsertIncludes(ret));
 
   switch (which) {
   case STREAM_LANG_H:
-    std::for_each(referenced_idl_.begin(), referenced_idl_.end(),
-                  InsertRefIncludes(ret, "C.h", filename_only_includes_));
+    for_each(referenced_idl_.begin(), referenced_idl_.end(),
+             InsertRefIncludes(ret, "C.h", filename_only_includes_));
     // fall through
   case STREAM_H:
     if (!export_include().empty())
       ret << "#include \"" << export_include() << "\"\n";
     break;
   case STREAM_CPP:
-    std::for_each(cpp_includes().begin(), cpp_includes().end(), InsertIncludes(ret));
-    std::for_each(referenced_idl_.begin(), referenced_idl_.end(),
-                  InsertRefIncludes(ret, "TypeSupportImpl.h", filename_only_includes_));
+    for_each(cpp_includes().begin(), cpp_includes().end(), InsertIncludes(ret));
+    for_each(referenced_idl_.begin(), referenced_idl_.end(),
+             InsertRefIncludes(ret, "TypeSupportImpl.h", filename_only_includes_));
     break;
   default:
     break;
@@ -885,7 +913,7 @@ bool BE_GlobalData::id(AST_Decl* node, ACE_CDR::ULong& value) const
   return id_annotation->node_value_exists(node, value);
 }
 
-bool BE_GlobalData::hashid(AST_Decl* node, std::string& value) const
+bool BE_GlobalData::hashid(AST_Decl* node, string& value) const
 {
   HashidAnnotation* hashid_annotation =
     dynamic_cast<HashidAnnotation*>(builtin_annotations_["::@hashid"]);
@@ -1006,8 +1034,8 @@ OpenDDS::XTypes::MemberId BE_GlobalData::compute_id(AST_Field* field, AutoidKind
   }
 
   using OpenDDS::XTypes::hash_member_name_to_id;
-  const std::string field_name = field->local_name()->get_string();
-  std::string hash_id;
+  const string field_name = field->local_name()->get_string();
+  string hash_id;
   OpenDDS::XTypes::MemberId mid;
   if (id(field, member_id)) {
     // @id

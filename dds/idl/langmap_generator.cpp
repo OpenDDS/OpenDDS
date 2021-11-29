@@ -1120,7 +1120,7 @@ struct SafetyProfileGenerator : GeneratorBase
     primtype_[AST_PredefinedType::PT_long] = "CORBA::Long";
     primtype_[AST_PredefinedType::PT_ulong] = "CORBA::ULong";
     primtype_[AST_PredefinedType::PT_longlong] = "CORBA::LongLong";
-    primtype_[AST_PredefinedType::PT_ulonglong] = "CORBA::UnsignedLongLong";
+    primtype_[AST_PredefinedType::PT_ulonglong] = "CORBA::ULongLong";
     primtype_[AST_PredefinedType::PT_short] = "CORBA::Short";
     primtype_[AST_PredefinedType::PT_ushort] = "CORBA::UShort";
 #if OPENDDS_HAS_EXPLICIT_INTS

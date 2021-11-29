@@ -12,6 +12,9 @@
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/PoolAllocator.h>
 
+#ifdef OPENDDS_SAFETY_PROFILE
+#include <dds/DCPS/SafetyProfileSequences.h>
+#else
 #include <tao/LongSeqC.h>
 #include <tao/ULongSeqC.h>
 #include <tao/Int8SeqC.h>
@@ -29,11 +32,53 @@
 #include <tao/BooleanSeqC.h>
 #include <tao/StringSeqC.h>
 #include <tao/WStringSeqC.h>
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace XTypes {
+
+// To align with XTypes v1.3 Annex C, names for sequences of built-in types are
+// provided in the same namespace as the DynamicData class.  If Safety Profile
+// is enabled, these sequences are defined in OpenDDS.  Otherwise they come from
+// TAO since they are part of the IDL-to-C++ mapping spec.
+
+#ifdef OPENDDS_SAFETY_PROFILE
+using CORBASeq::BooleanSeq;
+using CORBASeq::CharSeq;
+using CORBASeq::DoubleSeq;
+using CORBASeq::FloatSeq;
+using CORBASeq::Int8Seq;
+using CORBASeq::LongDoubleSeq;
+using CORBASeq::LongLongSeq;
+using CORBASeq::LongSeq;
+using CORBASeq::OctetSeq;
+using CORBASeq::ShortSeq;
+using CORBASeq::StringSeq;
+using CORBASeq::UInt8Seq;
+using CORBASeq::ULongLongSeq;
+using CORBASeq::ULongSeq;
+using CORBASeq::UShortSeq;
+#else
+using ::CORBA::BooleanSeq;
+using ::CORBA::CharSeq;
+using ::CORBA::DoubleSeq;
+using ::CORBA::FloatSeq;
+using ::CORBA::Int8Seq;
+using ::CORBA::LongDoubleSeq;
+using ::CORBA::LongLongSeq;
+using ::CORBA::LongSeq;
+using ::CORBA::OctetSeq;
+using ::CORBA::ShortSeq;
+using ::CORBA::StringSeq;
+using ::CORBA::UInt8Seq;
+using ::CORBA::ULongLongSeq;
+using ::CORBA::ULongSeq;
+using ::CORBA::UShortSeq;
+using ::CORBA::WCharSeq;
+using ::CORBA::WStringSeq;
+#endif
 
 class OpenDDS_Dcps_Export DynamicData {
 public:
@@ -77,30 +122,33 @@ public:
   DDS::ReturnCode_t get_float64_value(ACE_CDR::Double& value, MemberId id);
   DDS::ReturnCode_t get_float128_value(ACE_CDR::LongDouble& value, MemberId id);
   DDS::ReturnCode_t get_char8_value(ACE_CDR::Char& value, MemberId id);
-  DDS::ReturnCode_t get_char16_value(ACE_CDR::WChar& value, MemberId id);
   DDS::ReturnCode_t get_byte_value(ACE_CDR::Octet& value, MemberId id);
   DDS::ReturnCode_t get_boolean_value(ACE_CDR::Boolean& value, MemberId id);
   DDS::ReturnCode_t get_string_value(ACE_CDR::Char*& value, MemberId id);
-  DDS::ReturnCode_t get_wstring_value(ACE_CDR::WChar*& value, MemberId id);
   DDS::ReturnCode_t get_complex_value(DynamicData& value, MemberId id);
 
-  DDS::ReturnCode_t get_int32_values(CORBA::LongSeq& value, MemberId id);
-  DDS::ReturnCode_t get_uint32_values(CORBA::ULongSeq& value, MemberId id);
-  DDS::ReturnCode_t get_int8_values(CORBA::Int8Seq& value, MemberId id);
-  DDS::ReturnCode_t get_uint8_values(CORBA::UInt8Seq& value, MemberId id);
-  DDS::ReturnCode_t get_int16_values(CORBA::ShortSeq& value, MemberId id);
-  DDS::ReturnCode_t get_uint16_values(CORBA::UShortSeq& value, MemberId id);
-  DDS::ReturnCode_t get_int64_values(CORBA::LongLongSeq& value, MemberId id);
-  DDS::ReturnCode_t get_uint64_values(CORBA::ULongLongSeq& value, MemberId id);
-  DDS::ReturnCode_t get_float32_values(CORBA::FloatSeq& value, MemberId id);
-  DDS::ReturnCode_t get_float64_values(CORBA::DoubleSeq& value, MemberId id);
-  DDS::ReturnCode_t get_float128_values(CORBA::LongDoubleSeq& value, MemberId id);
-  DDS::ReturnCode_t get_char8_values(CORBA::CharSeq& value, MemberId id);
-  DDS::ReturnCode_t get_char16_values(CORBA::WCharSeq& value, MemberId id);
-  DDS::ReturnCode_t get_byte_values(CORBA::OctetSeq& value, MemberId id);
-  DDS::ReturnCode_t get_boolean_values(CORBA::BooleanSeq& value, MemberId id);
-  DDS::ReturnCode_t get_string_values(CORBA::StringSeq& value, MemberId id);
-  DDS::ReturnCode_t get_wstring_values(CORBA::WStringSeq& value, MemberId id);
+  DDS::ReturnCode_t get_int32_values(LongSeq& value, MemberId id);
+  DDS::ReturnCode_t get_uint32_values(ULongSeq& value, MemberId id);
+  DDS::ReturnCode_t get_int8_values(Int8Seq& value, MemberId id);
+  DDS::ReturnCode_t get_uint8_values(UInt8Seq& value, MemberId id);
+  DDS::ReturnCode_t get_int16_values(ShortSeq& value, MemberId id);
+  DDS::ReturnCode_t get_uint16_values(UShortSeq& value, MemberId id);
+  DDS::ReturnCode_t get_int64_values(LongLongSeq& value, MemberId id);
+  DDS::ReturnCode_t get_uint64_values(ULongLongSeq& value, MemberId id);
+  DDS::ReturnCode_t get_float32_values(FloatSeq& value, MemberId id);
+  DDS::ReturnCode_t get_float64_values(DoubleSeq& value, MemberId id);
+  DDS::ReturnCode_t get_float128_values(LongDoubleSeq& value, MemberId id);
+  DDS::ReturnCode_t get_char8_values(CharSeq& value, MemberId id);
+  DDS::ReturnCode_t get_byte_values(OctetSeq& value, MemberId id);
+  DDS::ReturnCode_t get_boolean_values(BooleanSeq& value, MemberId id);
+  DDS::ReturnCode_t get_string_values(StringSeq& value, MemberId id);
+
+#ifdef DDS_HAS_WCHAR
+  DDS::ReturnCode_t get_char16_value(ACE_CDR::WChar& value, MemberId id);
+  DDS::ReturnCode_t get_wstring_value(ACE_CDR::WChar*& value, MemberId id);
+  DDS::ReturnCode_t get_char16_values(WCharSeq& value, MemberId id);
+  DDS::ReturnCode_t get_wstring_values(WStringSeq& value, MemberId id);
+#endif
 
   DynamicType_rch type() const { return type_; }
 
@@ -308,8 +356,10 @@ private:
   ACE_CDR::ULong item_count_;
 };
 
+#ifndef OPENDDS_SAFETY_PROFILE
 OpenDDS_Dcps_Export bool print_dynamic_data(
   DynamicData& dd, DCPS::String& type_string, DCPS::String& indent);
+#endif
 
 } // namespace XTypes
 } // namespace OpenDDS

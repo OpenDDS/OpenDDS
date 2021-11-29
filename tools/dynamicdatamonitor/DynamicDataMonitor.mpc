@@ -1,5 +1,6 @@
 project(Dynamic_Data_Monitor): dcps_rtps_udp {
-  exename   = dynamic-data-monitor
+  requires += no_opendds_safety_profile
+  exename = dynamic-data-monitor
 
   Source_Files {
     DynamicDataMonitor.cpp

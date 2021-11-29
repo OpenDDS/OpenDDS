@@ -4,6 +4,8 @@
 
 #include "DynamicTypeMember.h"
 
+#include <dds/DdsDcpsInfrastructureC.h>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {

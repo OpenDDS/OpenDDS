@@ -10,8 +10,12 @@
 #define OPENDDS_DCPS_RECORDER_H
 
 #include "LocalObject.h"
-#include "RcHandle_T.h"
+#include "PoolAllocator.h"
 #include "RawDataSample.h"
+#include "RcHandle_T.h"
+
+#include <dds/DdsDcpsInfrastructureC.h>
+
 #include "XTypes/DynamicData.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

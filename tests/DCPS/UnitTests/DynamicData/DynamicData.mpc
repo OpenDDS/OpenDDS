@@ -1,5 +1,5 @@
 project: dcps_test, googletest {
-  dcps_ts_flags += -Gxtypes-complete
+  dcps_ts_flags += -Gxtypes-complete -SI -Sv
 
   TypeSupport_Files {
     DynamicData.idl
