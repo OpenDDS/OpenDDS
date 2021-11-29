@@ -296,20 +296,18 @@ Service_Participant::job_queue() const
 
 DDS::ReturnCode_t Service_Participant::shutdown()
 {
-  if (!is_info_repo_) {
-    if (shut_down_) {
-      return DDS::RETCODE_ALREADY_DELETED;
-    }
+  if (shut_down_) {
+    return DDS::RETCODE_ALREADY_DELETED;
+  }
 
-    {
-      ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, DDS::RETCODE_OUT_OF_RESOURCES);
-      if (dp_factory_servant_ && dp_factory_servant_->participant_count()) {
-        if (log_level >= LogLevel::Notice) {
-          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: Service_Participant::shutdown: "
-            "all domain participants must be deleted before shutdown can occur\n"));
-        }
-        return DDS::RETCODE_PRECONDITION_NOT_MET;
+  if (!is_info_repo_) {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, DDS::RETCODE_OUT_OF_RESOURCES);
+    if (dp_factory_servant_ && dp_factory_servant_->participant_count()) {
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: Service_Participant::shutdown: "
+          "all domain participants must be deleted before shutdown can occur\n"));
       }
+      return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
   }
 
