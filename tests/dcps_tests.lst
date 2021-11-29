@@ -241,7 +241,8 @@ tests/DCPS/RecorderLogging/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS
 
 examples/DCPS/Messenger_Imr/run_test.pl: !DCPS_MIN !MIN_CORBA !CORBA_E_COMPACT !CORBA_E_MICRO !DDS_NO_ORBSVCS !OPENDDS_SAFETY_PROFILE
 
-tests/DCPS/EntityLifecycleStress/run_test.pl publishers 5 subscribers 5: !OPENDDS_SAFETY_PROFILE
+tests/DCPS/EntityLifecycleStress/run_test.pl publishers 10 subscribers 10: !OPENDDS_SAFETY_PROFILE
+tests/DCPS/EntityLifecycleStress/run_test.pl rtps publishers 10 subscribers 10: RTPS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/EntityLifecycleStress/run_test.pl rtps_disc publishers 10 subscribers 10: RTPS
 tests/DCPS/EntityLifecycleStress/run_test.pl rtps_disc_tcp publishers 10 subscribers 10: RTPS !OPENDDS_SAFETY_PROFILE
 
