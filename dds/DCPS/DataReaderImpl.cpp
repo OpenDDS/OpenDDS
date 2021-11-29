@@ -1278,6 +1278,11 @@ DataReaderImpl::enable()
       return DDS::RETCODE_ERROR;
     }
 
+    const DDS::ReturnCode_t setup_deserialization_result = setup_deserialization();
+    if (setup_deserialization_result != DDS::RETCODE_OK) {
+      return setup_deserialization_result;
+    }
+
     const TransportLocatorSeq& trans_conf_info = connection_info();
 
     CORBA::String_var filterClassName = "";
@@ -3377,6 +3382,57 @@ ICE::Endpoint*
 DataReaderImpl::get_ice_endpoint()
 {
   return TransportClient::get_ice_endpoint();
+}
+
+DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
+{
+  const DDS::DataRepresentationIdSeq repIds =
+    get_effective_data_rep_qos(qos_.representation.value, true);
+  bool xcdr1_mutable = false;
+  if (cdr_encapsulation() || qos_.representation.value.length() > 0) {
+    for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
+      Encoding::Kind encoding_kind;
+      if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
+        if (encoding_kind == Encoding::KIND_XCDR1 && get_max_extensibility() == MUTABLE) {
+          xcdr1_mutable = true;
+        } else {
+          decoding_modes_.insert(encoding_kind);
+        }
+      } else if (DCPS_debug_level) {
+        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
+                   ACE_TEXT("DataReaderImpl::setup_deserialization: ")
+                   ACE_TEXT("Encountered unsupported or unknown data representation: %u\n"),
+                   repIds[i]));
+      }
+    }
+  } else {
+    decoding_modes_.insert(Encoding::KIND_UNALIGNED_CDR);
+  }
+  if (decoding_modes_.empty()) {
+    if (DCPS_debug_level) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("DataReaderImpl::setup_deserialization: ")
+                 ACE_TEXT("Could not find a valid data representation.%C\n"),
+                 xcdr1_mutable ? " Unsupported combination of XCDR1 and mutable" : ""));
+    }
+    return DDS::RETCODE_ERROR;
+  }
+  if (DCPS_debug_level >= 2) {
+    OPENDDS_STRING encodings;
+    EncodingKinds::iterator it = decoding_modes_.begin();
+    for (; it != decoding_modes_.end(); ++it) {
+      if (!encodings.empty()) {
+        encodings += ", ";
+      }
+      encodings += Encoding::kind_to_string(*it);
+    }
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReaderImpl::setup_deserialization: "
+               "Setup successfully with the following data representation%C: %C\n",
+               encodings.size() != 1 ? "s" : "",
+               encodings.c_str()));
+  }
+
+  return DDS::RETCODE_OK;
 }
 
 void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& instance,
