@@ -2248,6 +2248,7 @@ const char* DynamicData::typekind_to_string(TypeKind tk) const
   }
 }
 
+#ifndef OPENDDS_SAFETY_PROFILE
 bool print_integral_value(DynamicData& dd, DCPS::String& type_string, DynamicType_rch dt)
 {
   switch (dt->get_descriptor().kind) {
@@ -2413,6 +2414,7 @@ bool print_integral_value(DynamicData& dd, DCPS::String& type_string, DynamicTyp
     type_string += " = '" + os.str() + "'\n";
     break;
   }
+#ifdef DDS_HAS_WCHAR
   case TK_CHAR16: {
     ACE_CDR::WChar my_wchar;
     if (dd.get_char16_value(my_wchar, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
@@ -2426,6 +2428,7 @@ bool print_integral_value(DynamicData& dd, DCPS::String& type_string, DynamicTyp
     type_string += " = L'" + os.str() + "'\n";
     break;
   }
+#endif
   }
   return true;
 }
@@ -2505,6 +2508,7 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
     type_string += DCPS::String(" = \"") + os.str() + "\"\n";
     break;
   }
+#ifdef DDS_HAS_WCHAR
   case TK_STRING16: {
     ACE_CDR::WChar* my_wstring = 0;
     if (dd.get_wstring_value(my_wstring, 0) != DDS::RETCODE_OK) {
@@ -2518,6 +2522,7 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
     type_string += " = L\"" + os.str() + "\"\n";
     break;
   }
+#endif
   case TK_BITMASK:
     if (DCPS::log_level >= DCPS::LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_dynamic_data: Bitmask is an unsupported type in OpenDDS\n"));
@@ -2656,6 +2661,7 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
   }
   return true;
 }
+#endif
 
 } // namespace XTypes
 } // namespace OpenDDS

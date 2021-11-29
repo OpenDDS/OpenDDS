@@ -355,8 +355,10 @@ private:
   ACE_CDR::ULong item_count_;
 };
 
+#ifndef OPENDDS_SAFETY_PROFILE
 OpenDDS_Dcps_Export bool print_dynamic_data(
   DynamicData& dd, DCPS::String& type_string, DCPS::String& indent);
+#endif
 
 } // namespace XTypes
 } // namespace OpenDDS
