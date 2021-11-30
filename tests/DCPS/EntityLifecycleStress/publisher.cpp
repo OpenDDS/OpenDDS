@@ -28,9 +28,9 @@ using namespace std;
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   sigset_t mask, prev;
-  sigemptyset(&mask);
-  sigaddset(&mask, SIGPIPE);
-  sigprocmask(SIG_BLOCK, &mask, &prev);
+  ACE_OS::sigemptyset(&mask);
+  ACE_OS::sigaddset(&mask, SIGPIPE);
+  ACE_OS::sigprocmask(SIG_BLOCK, &mask, &prev);
 
   try
   {
