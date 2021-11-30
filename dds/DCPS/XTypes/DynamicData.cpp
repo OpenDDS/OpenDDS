@@ -9,31 +9,30 @@
 
 #include "DynamicTypeMember.h"
 
-#ifndef OPENDDS_SAFETY_PROFILE
-#include <dds/CorbaSeq/LongSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/ULongSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/Int8SeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/UInt8SeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/ShortSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/UShortSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/LongLongSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/ULongLongSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/FloatSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/DoubleSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/LongDoubleSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/CharSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/WCharSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/OctetSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/BooleanSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/StringSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/WStringSeqTypeSupportImpl.h>
-#endif
-
-#include <dds/DdsDcpsInfrastructureC.h>
-
 #include <dds/DCPS/RestoreOutputStreamState.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
 #include <dds/DCPS/ValueHelper.h>
+
+#ifndef OPENDDS_SAFETY_PROFILE
+#  include <dds/CorbaSeq/LongSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/ULongSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/Int8SeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/UInt8SeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/ShortSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/UShortSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/LongLongSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/ULongLongSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/FloatSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/DoubleSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/LongDoubleSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/CharSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/WCharSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/OctetSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/BooleanSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/StringSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/WStringSeqTypeSupportImpl.h>
+#endif
+#include <dds/DdsDcpsInfrastructureC.h>
 
 #include <ace/OS_NS_string.h>
 

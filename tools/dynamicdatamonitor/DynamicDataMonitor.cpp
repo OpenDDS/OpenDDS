@@ -19,7 +19,9 @@
 #endif
 
 #include <iostream>
-#include <sstream>
+#include <vector>
+#include <string>
+#include <utility>
 
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
@@ -68,14 +70,13 @@ std::string get_option_argument(Args& args, AfterOpt& after_opt, const std::stri
   return value;
 }
 
-unsigned get_option_argument_uint(Args& args, AfterOpt& after_opt, const std::string& opt)
+template <typename UintType>
+UintType get_option_argument_uint(Args& args, AfterOpt& after_opt, const std::string& opt)
 {
-  unsigned value;
-  try {
-    value = static_cast<unsigned>(std::stoul(get_option_argument(args, after_opt, opt)));
-  } catch (const std::exception&) {
+  UintType value;
+  if (!convertToInteger(get_option_argument(args, after_opt, opt), value)) {
     std::cerr << "ERROR: Option " << opt
-      << " requires an argument that's a valid positive number" << std::endl;
+      << " requires an argument that's a valid non-negative number" << std::endl;
     throw 1;
   }
   return value;
@@ -95,14 +96,13 @@ void check_for_unknown_options(Args& args)
   }
 }
 
-unsigned get_pos_argument_uint(Args& args, size_t pos, const std::string& what)
+template <typename IntType>
+IntType get_pos_argument_int(Args& args, size_t pos, const std::string& what)
 {
-  unsigned value;
-  try {
-    value = static_cast<unsigned>(std::stoul(args[pos]));
-  } catch (const std::exception&) {
+  IntType value;
+  if (!convertToInteger(args[pos], value)) {
     std::cerr << "ERROR: positional argument " << what
-      << " should be a valid positive number" << std::endl;
+      << " should be a valid number" << std::endl;
     throw 1;
   }
   return value;
@@ -161,7 +161,7 @@ int parse_args(int argc, ACE_TCHAR* argv[])
   ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS);
 
   prog_name = ACE_TEXT_ALWAYS_CHAR(argv[0]);
-  std::vector<std::string> args;
+  Args args;
   for (int i = 1; i < argc; ++i) {
     args.push_back(ACE_TEXT_ALWAYS_CHAR(argv[i]));
   }
@@ -177,14 +177,14 @@ int parse_args(int argc, ACE_TCHAR* argv[])
       const std::string opt = "--samples";
       AfterOpt after_opt = get_option(args, opt);
       if (after_opt.first) {
-        num_samples = get_option_argument_uint(args, after_opt, opt);
+        num_samples = get_option_argument_uint<unsigned>(args, after_opt, opt);
       }
     }
     {
       const std::string opt = "--time";
       AfterOpt after_opt = get_option(args, opt);
       if (after_opt.first) {
-        num_seconds = get_option_argument_uint(args, after_opt, opt);
+        num_seconds = get_option_argument_uint<unsigned>(args, after_opt, opt);
       }
     }
     check_for_unknown_options(args);
@@ -196,7 +196,7 @@ int parse_args(int argc, ACE_TCHAR* argv[])
     }
     topic_name = args[0];
     type_name = args[1];
-    domainid = get_pos_argument_uint(args, 2, "DOMAIN_ID");
+    domainid = get_pos_argument_int<DDS::DomainId_t>(args, 2, "DOMAIN_ID");
   } catch(int value) {
     print_usage(true);
     return value;
