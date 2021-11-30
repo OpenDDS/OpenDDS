@@ -2604,7 +2604,7 @@ bool print_integral_value(DynamicData& dd, DCPS::String& type_string, DynamicTyp
       return false;
     }
     std::stringstream os;
-    char_helper<ACE_CDR::Char>(os, my_char);
+    DCPS::char_helper<ACE_CDR::Char>(os, my_char);
     type_string += " = '" + os.str() + "'\n";
     break;
   }
@@ -2618,7 +2618,7 @@ bool print_integral_value(DynamicData& dd, DCPS::String& type_string, DynamicTyp
       return false;
     }
     std::stringstream os;
-    char_helper<ACE_CDR::WChar>(os, my_wchar);
+    DCPS::char_helper<ACE_CDR::WChar>(os, my_wchar);
     type_string += " = L'" + os.str() + "'\n";
     break;
   }
@@ -2698,7 +2698,7 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
       return false;
     }
     std::stringstream os;
-    string_helper(os, my_string.inout());
+    DCPS::string_helper(os, my_string.inout());
     type_string += DCPS::String(" = \"") + os.str() + "\"\n";
     break;
   }
@@ -2712,7 +2712,7 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
       return false;
     }
     std::stringstream os;
-    string_helper(os, my_wstring.inout());
+    DCPS::string_helper(os, my_wstring.inout());
     type_string += " = L\"" + os.str() + "\"\n";
     break;
   }

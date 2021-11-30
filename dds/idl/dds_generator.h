@@ -597,7 +597,8 @@ inline
 std::ostream& operator<<(std::ostream& o,
                          const AST_Expression::AST_ExprValue& ev)
 {
-  OpenDDS::DCPS::RestoreOutputStreamState ross(o);
+  using namespace OpenDDS::DCPS;
+  RestoreOutputStreamState ross(o);
   switch (ev.et) {
   case AST_Expression::EV_octet:
     return hex_value(o << "0x", static_cast<int>(ev.u.oval), 1);

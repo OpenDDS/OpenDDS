@@ -13,6 +13,11 @@
 #include <iostream>
 #include <iomanip>
 
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
+namespace OpenDDS {
+namespace DCPS {
+
 template <typename IntType>
 std::ostream& signed_int_helper(std::ostream& o, IntType value, IntType min)
 {
@@ -39,8 +44,8 @@ inline ostream& operator<<(ostream& os, const ACE_CDR::LongDouble& val)
   os << ACE_CDR::LongDouble::NativeImpl(val);
   return os;
 }
-
 #endif
+
 inline
 std::ostream& hex_value(std::ostream& o, unsigned value, size_t bytes)
 {
@@ -100,12 +105,17 @@ std::ostream& char_helper(std::ostream& o, CharType value)
 }
 
 template <typename CharType>
-std::ostream& string_helper(std::ostream& o, CharType* value)
+std::ostream& string_helper(std::ostream& o, const CharType* value)
 {
   for (size_t i = 0; value[i] != 0; ++i) {
     char_helper<CharType>(o, value[i]);
   }
   return o;
 }
+
+} // namespace DCPS
+} // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_DCPS_VALUE_HELPER_H */

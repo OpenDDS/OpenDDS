@@ -513,7 +513,6 @@ private:
   RcHandle<StaticEndpointManagerSporadic> type_lookup_reply_deadline_processor_;
   TimeDuration max_type_lookup_service_reply_period_;
   SequenceNumber type_lookup_service_sequence_number_;
-  const bool use_xtypes_;
   bool use_xtypes_complete_;
 
   struct TypeIdOrigSeqNumber {

@@ -87,7 +87,6 @@ StaticEndpointManager::StaticEndpointManager(const RepoId& participant_id,
 #endif
   , max_type_lookup_service_reply_period_(0)
   , type_lookup_service_sequence_number_(0)
-  , use_xtypes_(true)
   , use_xtypes_complete_(false)
 {
 #ifdef DDS_HAS_MINIMUM_BIT
