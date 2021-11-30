@@ -103,8 +103,16 @@ void outer_union_narrow_write(DataWriter_var dw)
 
 int ACE_TMAIN(int argc, ACE_TCHAR * argv[])
 {
-  const ACE_TCHAR* type_name = argv[1];
   DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
+  const ACE_TCHAR* type_name = argv[1];
+  if (argc < 2) {
+    ACE_ERROR((LM_ERROR, "ERROR: Must pass type name\n"));
+    return 1;
+  } else if (argc > 3) {
+    ACE_ERROR((LM_ERROR, "ERROR: Too many arguments\n"));
+    return 1;
+  }
+
   DomainParticipant_var dp =
     dpf->create_participant(153,
                             PARTICIPANT_QOS_DEFAULT,
@@ -126,6 +134,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR * argv[])
     ts_var = new Dynamic::inner_unionTypeSupportImpl;
   } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("outer_union"))) {
     ts_var = new Dynamic::outer_unionTypeSupportImpl;
+  } else {
+    ACE_ERROR((LM_ERROR, "ERROR: Invalid type name: \"%s\"\n", type_name));
+    return 1;
   }
   ts_var->register_type(dp, ACE_TEXT_ALWAYS_CHAR(type_name));
 
