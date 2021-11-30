@@ -2690,7 +2690,7 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
     break;
   }
   case TK_STRING8: {
-    ACE_CDR::Char* my_string = 0;
+    CORBA::String_var my_string;
     if (dd.get_string_value(my_string, 0) != DDS::RETCODE_OK) {
       if (DCPS::log_level >= DCPS::LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_dynamic_data: failed to get_string_value\n"));
@@ -2698,13 +2698,13 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
       return false;
     }
     std::stringstream os;
-    string_helper(os, my_string);
+    string_helper(os, my_string.inout());
     type_string += DCPS::String(" = \"") + os.str() + "\"\n";
     break;
   }
 #ifdef DDS_HAS_WCHAR
   case TK_STRING16: {
-    ACE_CDR::WChar* my_wstring = 0;
+    CORBA::WString_var my_wstring;
     if (dd.get_wstring_value(my_wstring, 0) != DDS::RETCODE_OK) {
       if (DCPS::log_level >= DCPS::LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_dynamic_data: failed to get_wstring_value\n"));
@@ -2712,7 +2712,7 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
       return false;
     }
     std::stringstream os;
-    string_helper(os, my_wstring);
+    string_helper(os, my_wstring.inout());
     type_string += " = L\"" + os.str() + "\"\n";
     break;
   }
