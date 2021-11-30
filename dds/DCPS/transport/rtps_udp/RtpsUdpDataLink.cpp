@@ -1164,6 +1164,8 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
 
   RtpsUdpDataLink_rch link = link_.lock();
   if (stopping_ || !link) {
+    g.release();
+    element->data_dropped(true);
     return 0;
   }
 
