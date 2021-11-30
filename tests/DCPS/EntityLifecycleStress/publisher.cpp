@@ -27,6 +27,11 @@ using namespace std;
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
+  sigset_t mask, prev;
+  sigemptyset(&mask);
+  sigaddset(&mask, SIGPIPE);
+  sigprocmask(SIG_BLOCK, &mask, &prev);
+
   try
   {
     DDS::DomainParticipantFactory_var dpf =
