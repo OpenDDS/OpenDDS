@@ -40,6 +40,7 @@ feature (built_in_topics): dcps_ts_defaults, idl2jni {
                     -Wb,stub_export_include=dcps_java_export.h \
                     -Wb,stub_export_macro=dcps_java_Export
     $(DDS_ROOT)/dds/DdsDcpsCoreTypeSupport.idl << DdsDcpsTypeSupportExtJC.h
+    $(DDS_ROOT)/dds/OpenddsDcpsExtTypeSupport.idl << DdsDcpsTypeSupportExtJC.h
   }
 
   Define_Custom(TypeSupportJavaOnly) {
@@ -59,11 +60,19 @@ feature (built_in_topics): dcps_ts_defaults, idl2jni {
     $(DDS_ROOT)/dds/DdsDcpsCore.idl >> BitsJC.cpp DDS/ParticipantBuiltinTopicDataTypeSupportImpl.java DDS/TopicBuiltinTopicDataTypeSupportImpl.java DDS/PublicationBuiltinTopicDataTypeSupportImpl.java DDS/SubscriptionBuiltinTopicDataTypeSupportImpl.java
   }
 
+  TypeSupportJavaOnly_Files {
+    dcps_ts_java_flags += -Wb,java=BitsExtJC.cpp
+    $(DDS_ROOT)/dds/OpenddsDcpsExt.idl >> BitsExtJC.cpp OpenDDS/DCPS/ParticipantLocationBuiltinTopicDataTypeSupportImpl.java OpenDDS/DCPS/ConnectionRecordTypeSupportImpl.java OpenDDS/DCPS/InternalThreadBuiltinTopicDataTypeSupportImpl.java
+  }
+
   Java_Files {
     DDS/ParticipantBuiltinTopicDataTypeSupportImpl.java << DDS/ParticipantBuiltinTopicDataTypeSupport.java
     DDS/TopicBuiltinTopicDataTypeSupportImpl.java << DDS/TopicBuiltinTopicDataTypeSupport.java
     DDS/PublicationBuiltinTopicDataTypeSupportImpl.java << DDS/PublicationBuiltinTopicDataTypeSupport.java
     DDS/SubscriptionBuiltinTopicDataTypeSupportImpl.java << DDS/SubscriptionBuiltinTopicDataTypeSupport.java
+    OpenDDS/DCPS/ParticipantLocationBuiltinTopicDataTypeSupportImpl.java << OpenDDS/DCPS/ParticipantLocationBuiltinTopicDataTypeSupport.java
+    OpenDDS/DCPS/ConnectionRecordTypeSupportImpl.java << OpenDDS/DCPS/ConnectionRecordTypeSupport.java
+    OpenDDS/DCPS/InternalThreadBuiltinTopicDataTypeSupportImpl.java << OpenDDS/DCPS/InternalThreadBuiltinTopicDataTypeSupport.java
     OpenDDS/DCPS/BuiltinTopicUtils.java
   }
 }

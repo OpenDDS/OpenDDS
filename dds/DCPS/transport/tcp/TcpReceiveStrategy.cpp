@@ -22,9 +22,9 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 OpenDDS::DCPS::TcpReceiveStrategy::TcpReceiveStrategy(
-  TcpDataLink& link,
-  const ReactorTask_rch& task)
-  : link_(link)
+  TcpDataLink& link, const ReactorTask_rch& task)
+  : TransportReceiveStrategy<>(link.impl().config())
+  , link_(link)
   , reactor_task_(task)
 {
   DBG_ENTRY_LVL("TcpReceiveStrategy","TcpReceiveStrategy",6);

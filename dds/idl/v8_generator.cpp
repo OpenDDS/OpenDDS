@@ -67,7 +67,7 @@ namespace {
   bool builtInSeq(AST_Type* type)
   {
     const std::string name = scoped(type->name());
-    static const char PRE[] = "CORBA::";
+    static const char PRE[] = " ::CORBA::";
     if (std::strncmp(name.c_str(), PRE, sizeof(PRE) - 1)) return false;
     return name.rfind("Seq") == name.size() - 3;
   }
@@ -215,7 +215,7 @@ namespace {
           ip << "  v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n";
         if (cls & CL_WIDE) {
           strm <<
-            ip << "  std::vector<uint16_t> vwc(ls->Length(), 0);\n" <<
+            ip << "  std::vector<uint16_t> vwc(ls->Length() + 1, 0);\n" <<
             ip << "  ls->Write(&vwc[0]);\n" <<
             ip << "  std::wstring ws(ls->Length(), ' ');\n" <<
             ip << "  for (size_t i = 0; i < vwc.size(); ++i) {\n" <<

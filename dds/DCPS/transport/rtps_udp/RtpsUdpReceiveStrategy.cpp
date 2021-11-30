@@ -18,6 +18,7 @@
 #include <dds/DCPS/LogAddr.h>
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/transport/framework/TransportDebug.h"
+#include "dds/DCPS/ThreadMonitor.h"
 
 #include "ace/Reactor.h"
 
@@ -34,7 +35,8 @@ namespace OpenDDS {
 namespace DCPS {
 
 RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const GuidPrefix_t& local_prefix)
-  : link_(link)
+  : BaseReceiveStrategy(link->config())
+  , link_(link)
   , last_received_()
   , recvd_sample_(0)
   , total_frags_(0)
@@ -54,6 +56,7 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const Guid
 int
 RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
 {
+  ThreadMonitor::GreenLight tmgl("RtpsUdpReceiveStrategy");
   return handle_simple_dds_input(fd);
 }
 
@@ -83,9 +86,10 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
   }
 
   if (n > 0 && ret > 0 && iov[0].iov_len >= 4 && std::memcmp(iov[0].iov_base, "RTPS", 4) == 0) {
-    if (remote_address == tport.config().rtps_relay_address()) {
-      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, tport.relay_message_counts_mutex_, -1);
-      ++tport.relay_message_counts_.rtps_recv;
+    if (tport.config().count_messages()) {
+      const InternalMessageCountKey key(remote_address, MCK_RTPS, remote_address == tport.config().rtps_relay_address());
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, tport.transport_statistics_mutex_, -1);
+      tport.transport_statistics_.message_count[key].recv(ret);
     }
     return ret;
   }
@@ -121,9 +125,10 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
   STUN::Message message;
   message.block = head;
   if (serializer >> message) {
-    if (remote_address == tport.config().rtps_relay_address()) {
-      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, tport.relay_message_counts_mutex_, -1);
-      ++tport.relay_message_counts_.stun_recv;
+    if (tport.config().count_messages()) {
+      const InternalMessageCountKey key(remote_address, MCK_STUN, remote_address == tport.config().rtps_relay_address());
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, tport.transport_statistics_mutex_, -1);
+      tport.transport_statistics_.message_count[key].recv(ret);
     }
 
     if (tport.relay_srsm().is_response(message)) {
@@ -990,7 +995,8 @@ bool
 RtpsUdpReceiveStrategy::remove_frags_from_bitmap(CORBA::Long bitmap[],
                                                  CORBA::ULong num_bits,
                                                  const SequenceNumber& base,
-                                                 const RepoId& pub_id)
+                                                 const RepoId& pub_id,
+                                                 ACE_CDR::ULong& cumulative_bits_added)
 {
   bool modified = false;
   for (CORBA::ULong i = 0, x = 0, bit = 0; i < num_bits; ++i, ++bit) {
@@ -1014,6 +1020,7 @@ RtpsUdpReceiveStrategy::remove_frags_from_bitmap(CORBA::Long bitmap[],
       x &= ~mask;
       bitmap[i / 32] = x;
       modified = true;
+      --cumulative_bits_added;
     }
   }
   return modified;
@@ -1093,14 +1100,12 @@ RtpsUdpReceiveStrategy::MessageReceiver::reset(const ACE_INET_Addr& addr,
   directed_ = false;
 
   unicast_reply_locator_list_.length(1);
-  unicast_reply_locator_list_[0].kind = address_to_kind(addr);
+  address_to_locator(unicast_reply_locator_list_[0], addr);
   unicast_reply_locator_list_[0].port = LOCATOR_PORT_INVALID;
-  RTPS::address_to_bytes(unicast_reply_locator_list_[0].address, addr);
 
   multicast_reply_locator_list_.length(1);
-  multicast_reply_locator_list_[0].kind = address_to_kind(addr);
+  address_to_locator(multicast_reply_locator_list_[0], addr);
   multicast_reply_locator_list_[0].port = LOCATOR_PORT_INVALID;
-  RTPS::assign(multicast_reply_locator_list_[0].address, LOCATOR_ADDRESS_INVALID);
 
   have_timestamp_ = false;
   timestamp_ = TIME_INVALID;

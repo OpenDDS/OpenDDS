@@ -28,6 +28,8 @@ public:
     , log_participant_statistics_(false)
     , publish_participant_statistics_(false)
     , restart_detection_(false)
+    , thread_monitor_period_(5)
+    , thread_monitor_history_depth_(1)
   {}
 
   void relay_id(const std::string& value)
@@ -240,6 +242,25 @@ public:
     return restart_detection_;
   }
 
+  void thread_monitor_period(OpenDDS::DCPS::TimeDuration tmp)
+  {
+    thread_monitor_period_ = tmp;
+  }
+
+  OpenDDS::DCPS::TimeDuration thread_monitor_period() const
+  {
+    return thread_monitor_period_;
+  }
+
+  void thread_monitor_history_depth(int tmp)
+  {
+    thread_monitor_history_depth_ = tmp;
+  }
+
+  int thread_monitor_history_depth() const
+  {
+    return thread_monitor_history_depth_;
+  }
 private:
   std::string relay_id_;
   OpenDDS::DCPS::GUID_t application_participant_guid_;
@@ -262,6 +283,8 @@ private:
   OpenDDS::DCPS::TimeDuration publish_relay_status_;
   OpenDDS::DCPS::TimeDuration publish_relay_status_liveliness_;
   bool restart_detection_;
+  OpenDDS::DCPS::TimeDuration thread_monitor_period_;
+  int thread_monitor_history_depth_;
 };
 
 }

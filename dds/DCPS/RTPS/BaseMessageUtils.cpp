@@ -6,6 +6,7 @@
 #include "BaseMessageUtils.h"
 
 #include <dds/DCPS/Time_Helper.h>
+#include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -16,43 +17,6 @@ using DCPS::Encoding;
 
 namespace {
   const Encoding encoding_plain_native(Encoding::KIND_XCDR1);
-}
-
-int locator_to_address(ACE_INET_Addr& dest,
-                       const DCPS::Locator_t& locator,
-                       bool map /*map IPV4 to IPV6 addr*/)
-{
-  switch (locator.kind) {
-#ifdef ACE_HAS_IPV6
-  case LOCATOR_KIND_UDPv6:
-    dest.set_type(AF_INET6);
-    if (dest.set_address(reinterpret_cast<const char*>(locator.address),
-                         16, 0 /*encode*/) == -1) {
-      return -1;
-    }
-    dest.set_port_number(locator.port);
-    return 0;
-#endif
-  case LOCATOR_KIND_UDPv4:
-#if !defined (ACE_HAS_IPV6) || !defined (IPV6_V6ONLY)
-    ACE_UNUSED_ARG(map);
-#endif
-    dest.set_type(AF_INET);
-    if (dest.set_address(reinterpret_cast<const char*>(locator.address)
-                         + 12, 4, 0 /*network order*/
-#if defined (ACE_HAS_IPV6) && defined (IPV6_V6ONLY)
-                         , map ? 1 : 0 /*map IPV4 to IPV6 addr*/
-#endif
-    ) == -1) {
-      return -1;
-    }
-    dest.set_port_number(locator.port);
-    return 0;
-  default:
-    return -1;  // Unknown kind
-  }
-
-  return -1;
 }
 
 const DCPS::Encoding& get_locators_encoding()

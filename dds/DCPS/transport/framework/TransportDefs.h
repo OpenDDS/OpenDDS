@@ -8,13 +8,21 @@
 #ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTDEFS_H
 #define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTDEFS_H
 
-#include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/Cached_Allocator_With_Overflow_T.h"
-#include "dds/DCPS/debug.h"
-#include "ace/Basic_Types.h"
-#include "ace/CDR_Base.h"
-#include "ace/Synch_Traits.h"
 #include "TransportDebug.h"
+
+#include "dds/DCPS/Cached_Allocator_With_Overflow_T.h"
+#include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/debug.h"
+#include "dds/DCPS/Util.h"
+
+#include <dds/DdsDcpsGuidC.h>
+#include <dds/DdsDcpsInfrastructureC.h>
+
+#include <ace/INET_Addr.h>
+#include <ace/Basic_Types.h>
+#include <ace/CDR_Base.h>
+#include <ace/Synch_Traits.h>
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;
@@ -248,30 +256,6 @@ typedef size_t ConnectionInfoFlags;
 static const ConnectionInfoFlags CONNINFO_UNICAST = (1 << 0);
 static const ConnectionInfoFlags CONNINFO_MULTICAST = (1 << 1);
 static const ConnectionInfoFlags CONNINFO_ALL = static_cast<ConnectionInfoFlags>(-1);
-
-struct RelayMessageCounts {
-  unsigned long rtps_send;
-  unsigned long rtps_send_fail;
-  unsigned long rtps_recv;
-  unsigned long stun_send;
-  unsigned long stun_send_fail;
-  unsigned long stun_recv;
-
-  RelayMessageCounts()
-  {
-    reset();
-  }
-
-  void reset()
-  {
-    rtps_send = 0;
-    rtps_send_fail = 0;
-    rtps_recv = 0;
-    stun_send = 0;
-    stun_send_fail = 0;
-    stun_recv = 0;
-  }
-};
 
 } // namespace DCPS
 } // namespace OpenDDS

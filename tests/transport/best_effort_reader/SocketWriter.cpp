@@ -151,9 +151,7 @@ bool SocketWriter::send(const ACE_Message_Block& mb) const
 {
   for (std::set<ACE_INET_Addr>::const_iterator i = dest_addr_.begin(); i != dest_addr_.end(); ++i) {
     Locator_t locator;
-    locator.kind = address_to_kind(*i);
-    locator.port = i->get_port_number();
-    address_to_bytes(locator.address, *i);
+    address_to_locator(locator, *i);
     ACE_INET_Addr dest;
     locator_to_address(dest, locator, local_addr_.get_type() != AF_INET);
 

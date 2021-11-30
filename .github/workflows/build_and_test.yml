@@ -2965,14 +2965,19 @@ jobs:
         echo "deadlock:ACE_Data_Block::release_no_delete" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
         echo "deadlock:CORBA::ORB_init" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
         echo "deadlock:TAO_IIOP_Connection_Handler" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        echo "race:ACE_Singleton<*>::instance" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        echo "race:ACE_Log_Msg" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        echo "race:ACE_Locked_Free_List<ACE_Cached_Mem_Pool_Node<*>, ACE_Thread_Mutex>" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        echo "race:ACE_Data_Block::release_i" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
         echo "race:ACE_Dynamic::instance" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
         echo "race:ACE_Event_Handler::reactor" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
         echo "race:ACE_Thread_Exit::instance" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        echo "race:ACE_Thread_Manager::wait_task" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
         echo "race:TAO::Invocation_Adapter::invoke" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
         echo "race:TAO_IIOP_Connection_Handler" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
         echo "race:TAO_Leader_Follower" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
         echo "race:TAO_ORB_Core" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
-        export TSAN_OPTIONS=suppressions=$GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        export TSAN_OPTIONS="history_size=7 suppressions=$GITHUB_WORKSPACE/OpenDDS/suppr.txt"
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v2
