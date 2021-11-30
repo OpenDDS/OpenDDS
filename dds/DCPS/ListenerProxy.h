@@ -8,6 +8,8 @@
 #ifndef OPENDDS_DCPS_LISTENERPROXY_H
 #define OPENDDS_DCPS_LISTENERPROXY_H
 
+#include "debug.h"
+
 #include "ace/Recursive_Thread_Mutex.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -25,14 +27,6 @@ public:
     : mutex_(0)
   {}
 
-  template <typename T>
-  ListenerProxy(ACE_Recursive_Thread_Mutex& mutex,
-                T& listener)
-    : mutex_(0)
-  {
-    acquire(mutex, listener);
-  }
-
   ~ListenerProxy() {
     if (mutex_) {
       mutex_->release();
@@ -44,8 +38,8 @@ public:
   void acquire(ACE_Recursive_Thread_Mutex& mutex,
                T& listener)
   {
-    if (mutex_) {
-      ACE_ERROR((LM_ERROR, "Attempting to double lock\n"));
+    if (mutex_ && log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ListenerProxy::acquire: deadlock detected\n"));
       return;
     }
 
@@ -85,8 +79,9 @@ public:
   template<typename T>
   TypedListenerProxy(ACE_Recursive_Thread_Mutex& mutex,
                      T& listener)
-    : ListenerProxy(mutex, listener)
-  {}
+  {
+    acquire(mutex, listener);
+  }
 
   bool is_nil() const
   {
