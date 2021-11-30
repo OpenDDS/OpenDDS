@@ -3417,7 +3417,7 @@ DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
   const DDS::DataRepresentationIdSeq repIds =
     get_effective_data_rep_qos(qos_.representation.value, true);
   bool xcdr1_mutable = false;
-  if (cdr_encapsulation()) {
+  if (cdr_encapsulation() || qos_.representation.value.length() > 0) {
     for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
       Encoding::Kind encoding_kind;
       if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
