@@ -87,7 +87,6 @@ StaticEndpointManager::StaticEndpointManager(const RepoId& participant_id,
 #endif
   , max_type_lookup_service_reply_period_(0)
   , type_lookup_service_sequence_number_(0)
-  , use_xtypes_complete_(false)
 {
 #ifdef DDS_HAS_MINIMUM_BIT
   ACE_UNUSED_ARG(participant);
@@ -1046,99 +1045,7 @@ void StaticEndpointManager::match(const GUID_t& writer, const GUID_t& reader)
       LogGuid(writer).c_str(), LogGuid(reader).c_str()));
   }
 
-  // 1. collect type info about the writer, which may be local or discovered
-  XTypes::TypeInformation* writer_type_info = 0;
-
-  const LocalPublicationIter lpi = local_publications_.find(writer);
-  DiscoveredPublicationIter dpi;
-  bool writer_local = false;
-  if (lpi != local_publications_.end()) {
-    writer_local = true;
-    writer_type_info = &lpi->second.type_info_;
-  } else if ((dpi = discovered_publications_.find(writer))
-             != discovered_publications_.end()) {
-    writer_type_info = &dpi->second.type_info_;
-  } else {
-    if (DCPS_debug_level >= 4) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) StaticEndpointManager::match: Undiscovered Writer\n"));
-    }
-    return; // Possible and ok, since lock is released
-  }
-
-  // 2. collect type info about the reader, which may be local or discovered
-  XTypes::TypeInformation* reader_type_info = 0;
-
-  const LocalSubscriptionIter lsi = local_subscriptions_.find(reader);
-  DiscoveredSubscriptionIter dsi;
-  bool reader_local = false;
-  if (lsi != local_subscriptions_.end()) {
-    reader_local = true;
-    reader_type_info = &lsi->second.type_info_;
-  } else if ((dsi = discovered_subscriptions_.find(reader))
-             != discovered_subscriptions_.end()) {
-    reader_type_info = &dsi->second.type_info_;
-  } else {
-    if (DCPS_debug_level >= 4) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) StaticEndpointManager::match: Undiscovered Reader\n"));
-    }
-    return; // Possible and ok, since lock is released
-  }
-
-  MatchingData md;
-
-  // if the type object is not in cache, send RPC request
-  md.time_added_to_map = MonotonicTimePoint::now();
-
-  // NOTE(sonndinh): Is it possible for a discovered endpoint to include only the "complete"
-  // part in its TypeInformation? If it's possible, then we may need to handle that case, i.e.,
-  // request only the remote complete TypeObject (if it's not already in the cache).
-  // The following code assumes when the "minimal" part is not included in the discovered
-  // endpoint's TypeInformation, then the "complete" part also is not included.
-  if ((writer_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE) &&
-      (reader_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE)) {
-    bool need_minimal_tobjs, need_complete_tobjs;
-    if (!writer_local && reader_local) {
-      need_minimal_and_or_complete_types(writer_type_info, need_minimal_tobjs, need_complete_tobjs);
-      if (need_minimal_tobjs || need_complete_tobjs) {
-        if (DCPS_debug_level >= 4) {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) EndpointManager::match: Remote Writer\n"));
-        }
-        bool is_discovery_protected = false;
-        save_matching_data_and_get_typeobjects(writer_type_info, md,
-                                                MatchingPair(writer, reader),
-                                                writer, is_discovery_protected,
-                                                need_minimal_tobjs, need_complete_tobjs);
-        return;
-      }
-    } else if (!reader_local && writer_local) {
-      need_minimal_and_or_complete_types(reader_type_info, need_minimal_tobjs, need_complete_tobjs);
-      if (need_minimal_tobjs || need_complete_tobjs) {
-        if (DCPS_debug_level >= 4) {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) EndpointManager::match: Remote Reader\n"));
-        }
-        bool is_discovery_protected = false;
-        save_matching_data_and_get_typeobjects(reader_type_info, md,
-                                                MatchingPair(writer, reader),
-                                                reader, is_discovery_protected,
-                                                need_minimal_tobjs, need_complete_tobjs);
-        return;
-      }
-    }
-  }
-
   match_continue(writer, reader);
-}
-
-void StaticEndpointManager::need_minimal_and_or_complete_types(const XTypes::TypeInformation* type_info,
-                                                               bool& need_minimal,
-                                                               bool& need_complete) const
-{
-  need_minimal = type_lookup_service_ &&
-    !type_lookup_service_->type_object_in_cache(type_info->minimal.typeid_with_size.type_id);
-
-  need_complete = use_xtypes_complete_ && type_lookup_service_ &&
-    type_info->complete.typeid_with_size.type_id.kind() != XTypes::TK_NONE &&
-    !type_lookup_service_->type_object_in_cache(type_info->complete.typeid_with_size.type_id);
 }
 
 void StaticEndpointManager::remove_expired_endpoints(
@@ -1585,89 +1492,6 @@ void StaticEndpointManager::match_continue(const GUID_t& writer, const GUID_t& r
       }
     }
   }
-}
-
-void StaticEndpointManager::save_matching_data_and_get_typeobjects(
-  const XTypes::TypeInformation* type_info,
-  MatchingData& md, const MatchingPair& mp,
-  const RepoId& remote_id,
-  bool is_discovery_protected,
-  bool get_minimal, bool get_complete)
-{
-  if (get_minimal) {
-    md.rpc_seqnum_minimal = ++type_lookup_service_sequence_number_;
-    md.got_minimal = false;
-  } else {
-    md.rpc_seqnum_minimal = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
-    md.got_minimal = true;
-  }
-
-  if (get_complete) {
-    md.rpc_seqnum_complete = ++type_lookup_service_sequence_number_;
-    md.got_complete = false;
-  } else {
-    md.rpc_seqnum_complete = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
-    md.got_complete = true;
-  }
-
-  matching_data_buffer_[mp] = md;
-
-  // Send a sequence of requests for minimal remote TypeObjects
-  if (get_minimal) {
-    if (DCPS_debug_level >= 4) {
-      ACE_DEBUG((LM_DEBUG,
-                  "(%P|%t) EndpointManager::save_matching_data_and_get_typeobjects: "
-                  "remote: %C seq: %q\n",
-                  LogGuid(remote_id).c_str(), md.rpc_seqnum_minimal.getValue()));
-    }
-    get_remote_type_objects(type_info->minimal, md, true, remote_id, is_discovery_protected);
-  }
-
-  // Send another sequence of requests for complete remote TypeObjects
-  if (get_complete) {
-    if (DCPS_debug_level >= 4) {
-      ACE_DEBUG((LM_DEBUG,
-                  "(%P|%t) EndpointManager::save_matching_data_and_get_typeobjects: "
-                  "remote: %C seq: %q\n",
-                  LogGuid(remote_id).c_str(), md.rpc_seqnum_complete.getValue()));
-    }
-    get_remote_type_objects(type_info->complete, md, false, remote_id, is_discovery_protected);
-  }
-}
-
-void StaticEndpointManager::get_remote_type_objects(const XTypes::TypeIdentifierWithDependencies& tid_with_deps,
-                                                    MatchingData& md, bool get_minimal, const RepoId& remote_id,
-                                                    bool is_discovery_protected)
-{
-  // Store an entry for the first request in the sequence.
-  TypeIdOrigSeqNumber orig_req_data;
-  std::memcpy(orig_req_data.participant, remote_id.guidPrefix, sizeof(GuidPrefix_t));
-  orig_req_data.type_id = tid_with_deps.typeid_with_size.type_id;
-  const SequenceNumber& orig_seqnum = get_minimal ? md.rpc_seqnum_minimal : md.rpc_seqnum_complete;
-  orig_req_data.seq_number = orig_seqnum;
-  orig_req_data.secure = false;
-  orig_req_data.time_started = md.time_added_to_map;
-  orig_seq_numbers_.insert(std::make_pair(orig_seqnum, orig_req_data));
-
-  XTypes::TypeIdentifierSeq type_ids;
-  if (tid_with_deps.dependent_typeid_count == -1 ||
-      tid_with_deps.dependent_typeids.length() < (CORBA::ULong)tid_with_deps.dependent_typeid_count) {
-    type_ids.append(tid_with_deps.typeid_with_size.type_id);
-
-    // Get dependencies of the topic type. TypeObjects of both topic type and
-    // its dependencies are obtained in subsequent type lookup requests.
-    send_type_lookup_request(type_ids, remote_id, is_discovery_protected, false);
-  } else {
-    type_ids.length(tid_with_deps.dependent_typeid_count + 1);
-    type_ids[0] = tid_with_deps.typeid_with_size.type_id;
-    for (unsigned i = 1; i <= (unsigned)tid_with_deps.dependent_typeid_count; ++i) {
-      type_ids[i] = tid_with_deps.dependent_typeids[i - 1].type_id;
-    }
-
-    // Get TypeObjects of topic type and all of its dependencies.
-    send_type_lookup_request(type_ids, remote_id, is_discovery_protected, true);
-  }
-  type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
 }
 
 GUID_t StaticEndpointManager::make_topic_guid()
