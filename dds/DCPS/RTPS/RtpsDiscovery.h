@@ -778,7 +778,7 @@ private:
   /// Should participant user data QoS only be sent when the message is secure?
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> secure_participant_user_data_;
   DCPS::TimeDuration max_type_lookup_service_reply_period_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> use_xtypes_;
+  UseXTypes use_xtypes_;
   DCPS::TimeDuration sedp_heartbeat_period_;
   DCPS::TimeDuration sedp_nak_response_delay_;
   DCPS::TimeDuration sedp_send_delay_;
