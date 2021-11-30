@@ -18,6 +18,7 @@ void v8_generator::gen_includes()
   be_global->add_include("<v8.h>", BE_GlobalData::STREAM_H);
   be_global->add_include("<nan.h>", BE_GlobalData::STREAM_CPP);
   be_global->add_include("<sstream>", BE_GlobalData::STREAM_CPP);
+  be_global->add_include("<codecvt>", BE_GlobalData::STREAM_CPP);
 }
 
 bool v8_generator::gen_enum(AST_Enum*, UTL_ScopedName*,
@@ -78,7 +79,7 @@ namespace {
     const Classification cls = classify(type);
     AST_PredefinedType::PredefinedType pt = AST_PredefinedType::PT_void;
     const std::string v8Type = getV8Type(type, &pt),
-      propName = std::string(tgt) + "->Set(" + prop + ", ";
+      propName = std::string("Nan::Set(") + tgt + ", " + prop + ", ";
 
     if (cls & CL_SCALAR) {
       std::string prefix, suffix, postNew;
@@ -178,14 +179,14 @@ namespace {
       if (prop_index) {
         strm <<
           "  {\n"
-          "    v8::Local<v8::Value> lv = " << src << "->Get(" << prop << ");\n";
+          "    v8::Local<v8::Value> lv = Nan::Get(" << src << ", " << prop << ").ToLocalChecked();\n";
         ip = std::string(6, ' ');
       } else {
         strm <<
           "  {\n"
           "    v8::Local<v8::String> field_str = Nan::New(\"" << prop << "\").ToLocalChecked();\n"
-          "    if (" << src << "->Has(field_str)) {\n"
-          "      v8::Local<v8::Value> lv = " << src << "->Get(field_str);\n";
+          "    if (Nan::Has(" << src << ", field_str).ToChecked()) {\n"
+          "      v8::Local<v8::Value> lv = Nan::Get(" << src << ", field_str).ToLocalChecked();\n";
         ip = std::string(8, ' ');
       }
 
@@ -200,8 +201,7 @@ namespace {
           ip << "}\n" <<
           ip << "if (lv->IsString()) {\n" <<
           ip << "  v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n" <<
-          ip << "  std::string ss(ls->Utf8Length(), ' ');\n" <<
-          ip << "  ls->WriteUtf8(&ss[0]);\n" <<
+          ip << "  std::string ss(*Nan::Utf8String(ls))\n;" <<
           ip << "  for (uint32_t i = 0; i < " << array << "_size; ++i) {\n" <<
           ip << "    if (ss == " << array << "[i]) {\n" <<
           ip << "      " << propName << assign_prefix << "static_cast<" << scoped(type->name()) << ">(i)" << assign_suffix << ";\n" <<
@@ -215,17 +215,13 @@ namespace {
           ip << "  v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n";
         if (cls & CL_WIDE) {
           strm <<
-            ip << "  std::vector<uint16_t> vwc(ls->Length() + 1, 0);\n" <<
-            ip << "  ls->Write(&vwc[0]);\n" <<
-            ip << "  std::wstring ws(ls->Length(), ' ');\n" <<
-            ip << "  for (size_t i = 0; i < vwc.size(); ++i) {\n" <<
-            ip << "    ws[i] = vwc[i];\n" <<
-            ip << "  }\n" <<
+            ip << "  std::string ss(*Nan::Utf8String(ls))\n;" <<
+            ip << "  std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> wconv;\n" <<
+            ip << "  std::wstring ws = wconv.from_bytes(ss);\n" <<
             ip << "  " << propName << assign_prefix << "ws.c_str()" << assign_suffix << ";\n";
         } else {
           strm <<
-            ip << "  std::string ss(ls->Utf8Length(), ' ');\n" <<
-            ip << "  ls->WriteUtf8(&ss[0]);\n" <<
+            ip << "  std::string ss(*Nan::Utf8String(ls))\n;" <<
             ip << "  " << propName << assign_prefix << "ss.c_str()" << assign_suffix << ";\n";
         }
         strm <<
@@ -234,16 +230,18 @@ namespace {
         strm <<
           ip << "if (lv->IsString()) {\n" <<
           ip << "  v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n" <<
-          ip << "  char temp_c;\n" <<
-          ip << "  ls->WriteUtf8(&temp_c, 1);\n" <<
+          ip << "  std::string ss(*Nan::Utf8String(ls))\n;" <<
+          ip << "  const char temp_c = ss[0];\n" <<
           ip << "  " << propName << assign_prefix << "temp_c" << assign_suffix << ";\n" <<
           ip << "}\n";
       } else if (pt == AST_PredefinedType::PT_wchar) {
         strm <<
           ip << "if (lv->IsString()) {\n" <<
           ip << "  v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n" <<
-          ip << "  wchar temp_wc;\n" <<
-          ip << "  ls->Write(&temp_wc, 1);\n" <<
+          ip << "  std::string ss(*Nan::Utf8String(ls))\n;" <<
+          ip << "  std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> wconv;\n" <<
+          ip << "  std::wstring ws = wconv.from_bytes(ss);\n" <<
+          ip << "  const wchar temp_wc = ws[0];\n" <<
           ip << "  " << propName << assign_prefix << "temp_wc" << assign_suffix << ";\n" <<
           ip << "}\n";
       } else if (pt == AST_PredefinedType::PT_longlong
@@ -260,8 +258,7 @@ namespace {
         strm <<
           ip << "if (lv->IsString()) {\n" <<
           ip << "  v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n" <<
-          ip << "  std::string ss(ls->Utf8Length(), ' ');\n" <<
-          ip << "  ls->WriteUtf8(&ss[0]);\n" <<
+          ip << "  std::string ss(*Nan::Utf8String(ls))\n;" <<
           ip << "  std::istringstream iss(ss);\n" <<
           ip << "  " << (pt == AST_PredefinedType::PT_octet ? "uint16_t" : temp_type.c_str()) << " " << temp_name << ";\n" <<
           ip << "  if (ss.find(\"0x\") != std::string::npos) {\n" <<
@@ -271,9 +268,9 @@ namespace {
           ip << "  }\n" <<
           ip << "  " << propName << assign_prefix << temp_name << assign_suffix << ";\n" <<
           ip << "}\n" <<
-          ip << "if (lv->IsNumber()) {\n" <<
-          ip << "  v8::Local<v8::Number> ln = Nan::To<v8::Number>(lv).ToLocalChecked();\n" <<
-          ip << "  " << propName << assign_prefix << "ln->IntegerValue()" << assign_suffix << ";\n" <<
+          ip << "Nan::Maybe<int64_t> miv = Nan::To<int64_t>(lv);\n" <<
+          ip << "if (miv.IsJust()) {\n" <<
+          ip << "  " << propName << assign_prefix << "miv.FromJust()" << assign_suffix << ";\n" <<
           ip << "}\n";
       } else if (pt == AST_PredefinedType::PT_float
               || pt == AST_PredefinedType::PT_double
@@ -307,11 +304,11 @@ namespace {
       if (prop_index) {
         strm <<
           "  {\n"
-          "      v8::Local<v8::Value> lv = " << src << "->Get(" << prop << ");\n"
+          "      v8::Local<v8::Value> lv = Nan::Get(" << src << ", " << prop << ").ToLocalChecked();\n"
           "      if (lv->IsArray()) {\n"
           "        uint32_t length = 0;\n"
           "        v8::Local<v8::Object> lo = Nan::To<v8::Object>(lv).ToLocalChecked();\n"
-          "        length = lo->Get(Nan::New(\"length\").ToLocalChecked())->ToObject()->Uint32Value();\n"
+          "        length = Nan::To<uint32_t>(Nan::Get(lo, Nan::New(\"length\").ToLocalChecked()).ToLocalChecked()).FromJust();\n"
           "        " << scoped(type->name()) << "& temp = " << propName <<  ";\n"
           "        temp.length(length);\n"
           "        for (uint32_t i = 0; i < length; ++i) {\n"
@@ -325,12 +322,12 @@ namespace {
         strm <<
           "  {\n"
           "    v8::Local<v8::String> field_str = Nan::New(\"" << prop << "\").ToLocalChecked();\n"
-          "    if (" << src << "->Has(field_str)) {\n"
-          "      v8::Local<v8::Value> lv = " << src << "->Get(field_str);\n"
+          "    if (Nan::Has(" << src << ", field_str).ToChecked()) {\n"
+          "      v8::Local<v8::Value> lv = Nan::Get(" << src << ", field_str).ToLocalChecked();\n"
           "      if (lv->IsArray()) {\n"
           "        uint32_t length = 0;\n"
           "        v8::Local<v8::Object> lo = Nan::To<v8::Object>(lv).ToLocalChecked();\n"
-          "        length = lo->Get(Nan::New(\"length\").ToLocalChecked())->ToObject()->Uint32Value();\n"
+          "        length = Nan::To<uint32_t>(Nan::Get(lo, Nan::New(\"length\").ToLocalChecked()).ToLocalChecked()).FromJust();\n"
           "        " << scoped(type->name()) << "& temp = " << propName <<  ";\n"
           "        temp.length(length);\n"
           "        for (uint32_t i = 0; i < length; ++i) {\n"
@@ -346,7 +343,7 @@ namespace {
       if (prop_index) {
         strm <<
           "  {\n"
-          "    v8::Local<v8::Value> lv = " << src << "->Get(" << prop << ");\n"
+          "    v8::Local<v8::Value> lv = Nan::Get(" << src << ", " << prop << ").ToLocalChecked();\n"
           "    v8::Local<v8::Object> lo = Nan::To<v8::Object>(lv).ToLocalChecked();\n"
           "    copyFromV8(lo, " << propName << (fun_assign ? "())" : ")") << ";\n"
           "  }\n";
@@ -354,8 +351,8 @@ namespace {
         strm <<
           "  {\n"
           "    v8::Local<v8::String> field_str = Nan::New(\"" << prop << "\").ToLocalChecked();\n"
-          "    if (" << src << "->Has(field_str)) {\n"
-          "      v8::Local<v8::Value> lv = " << src << "->Get(field_str);\n"
+          "    if (Nan::Has(" << src << ", field_str).ToChecked()) {\n"
+          "      v8::Local<v8::Value> lv = Nan::Get(" << src << ", field_str).ToLocalChecked();\n"
           "      v8::Local<v8::Object> lo = Nan::To<v8::Object>(lv).ToLocalChecked();\n"
           "      copyFromV8(lo, " << propName << (fun_assign ? "())" : ")") << ";\n"
           "    }\n"
@@ -517,7 +514,7 @@ bool v8_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
       be_global->impl_ <<
         "  CORBA::ULong length = 0;\n"
         "  if (src->IsArray()) {\n"
-        "    length = src->Get(Nan::New(\"length\").ToLocalChecked())->ToObject()->Uint32Value();\n"
+        "    length = Nan::To<uint32_t>(Nan::Get(src, Nan::New(\"length\").ToLocalChecked()).ToLocalChecked()).FromJust();\n"
         "  }\n"
         "  out.length(length);\n"
         "  for (CORBA::ULong i = 0; i < length; ++i) {\n"
@@ -555,7 +552,7 @@ bool v8_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
       be_global->impl_ <<
         "  CORBA::ULong length = 0;\n"
         "  if (src->IsArray()) {\n"
-        "    CORBA::ULong src_length = src->Get(Nan::New(\"length\").ToLocalChecked())->ToObject()->Uint32Value();\n"
+        "    CORBA::ULong src_length = Nan::To<uint32_t>(Nan::Get(src, Nan::New(\"length\").ToLocalChecked()).ToLocalChecked()).FromJust();\n"
         "    CORBA::ULong out_length = (sizeof(out) / sizeof(out[0]));\n"
         "    length = (src_length <= out_length) ? src_length : out_length;\n"
         "  }\n"
