@@ -34,7 +34,10 @@ public:
   }
 
   ~ListenerProxy() {
-    release();
+    if (mutex_) {
+      mutex_->release();
+      mutex_ = 0;
+    }
   }
 
   template <typename T>
