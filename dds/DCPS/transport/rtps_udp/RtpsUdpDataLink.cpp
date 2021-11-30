@@ -1262,6 +1262,8 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
 #endif
 
   if (stopping_) {
+    g.release();
+    element->data_dropped(true);
     return 0;
   }
 
