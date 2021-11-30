@@ -112,8 +112,8 @@ RecorderImpl::cleanup()
   if (!disco->remove_subscription(this->domain_id_,
                                   participant_servant_->get_id(),
                                   this->subscription_id_)) {
-    if (log_level >= LogLevel::Error) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RecorderImpl::cleanup: "
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: RecorderImpl::cleanup: "
         "could not remove subscription from discovery\n"));
     }
     return DDS::RETCODE_ERROR;
@@ -367,8 +367,8 @@ RecorderImpl::add_association(const RepoId&            yourId,
       (writer.writerQos.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
 
     if (!this->associate(data, active)) {
-      if (log) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RecorderImpl::add_association: ")
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: RecorderImpl::add_association: "
                    "transport layer failed to associate\n"));
       }
       return;
@@ -426,9 +426,9 @@ RecorderImpl::add_association(const RepoId&            yourId,
   XTypes::TypeLookupService_rch tls = participant_servant_->get_type_lookup_service();
   XTypes::TypeInformation type_info;
   if (!XTypes::deserialize_type_info(type_info, writer.serializedTypeInfo)) {
-    if (log_level >= LogLevel::Error) {
-      ACE_ERROR((LM_ERROR,
-                 "(%P|%t) ERROR: RecorderImpl::add_association: "
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING,
+                 "(%P|%t) WARNING: RecorderImpl::add_association: "
                  "Failed to deserialize TypeInformation\n"));
     }
     return;
@@ -863,8 +863,8 @@ DDS::ReturnCode_t RecorderImpl::set_qos(
           qos,
           subscriber_qos);
       if (!status) {
-        if (log_level >= LogLevel::Error) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) RecorderImpl::set_qos: qos not updated\n",
+        if (log_level >= LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: RecorderImpl::set_qos: qos not updated\n"));
         }
         return DDS::RETCODE_ERROR;
       }
@@ -963,8 +963,8 @@ RecorderImpl::enable()
       this->enable_transport(this->qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS,
                              this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
     } catch (const Transport::Exception&) {
-      if (log_level >= LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RecorderImpl::enable: Transport Exception\n"));
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: RecorderImpl::enable: Transport Exception\n"));
       }
       return DDS::RETCODE_ERROR;
     }
@@ -998,8 +998,8 @@ RecorderImpl::enable()
                               type_info);
 
     if (this->subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN) {
-      if (log_level >= LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RecorderImpl::enable: "
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: RecorderImpl::enable: "
           "add_subscription returned invalid id\n"));
       }
       return DDS::RETCODE_ERROR;
