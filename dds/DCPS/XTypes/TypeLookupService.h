@@ -49,7 +49,7 @@ public:
   typedef OPENDDS_MAP(TypeIdentifier, DynamicType_rch) DynamicTypeMap;
   typedef OPENDDS_MAP(DCPS::GUID_t, DynamicTypeMap) GuidTypeMap;
   DynamicType_rch complete_to_dynamic(const CompleteTypeObject& cto, const DCPS::GUID_t& guid);
-  void remove_guid_from_dynamic_map(const DCPS::GUID_t guid);
+  void remove_guid_from_dynamic_map(const DCPS::GUID_t& guid);
 
   /// For TypeLookup_getTypeDependencies
   bool get_type_dependencies(const TypeIdentifier& type_id,
