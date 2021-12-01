@@ -467,14 +467,6 @@ private:
                                           bool& need_complete) const;
   void remove_expired_endpoints(const MonotonicTimePoint& /*now*/);
   void match_continue(const GUID_t& writer, const GUID_t& reader);
-  void save_matching_data_and_get_typeobjects(const XTypes::TypeInformation* type_info,
-                                              MatchingData& md, const MatchingPair& mp,
-                                              const RepoId& remote_id,
-                                              bool is_discovery_protected,
-                                              bool get_minimal, bool get_complete);
-  void get_remote_type_objects(const XTypes::TypeIdentifierWithDependencies& tid_with_deps,
-                               MatchingData& md, bool get_minimal, const RepoId& remote_id,
-                               bool is_discovery_protected);
 
   void remove_from_bit(const DiscoveredPublication& pub)
   {
@@ -513,8 +505,6 @@ private:
   RcHandle<StaticEndpointManagerSporadic> type_lookup_reply_deadline_processor_;
   TimeDuration max_type_lookup_service_reply_period_;
   SequenceNumber type_lookup_service_sequence_number_;
-  const bool use_xtypes_;
-  bool use_xtypes_complete_;
 
   struct TypeIdOrigSeqNumber {
     GuidPrefix_t participant; // Prefix of remote participant

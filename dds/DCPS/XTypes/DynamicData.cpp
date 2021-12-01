@@ -9,31 +9,30 @@
 
 #include "DynamicTypeMember.h"
 
-#ifndef OPENDDS_SAFETY_PROFILE
-#include <dds/CorbaSeq/LongSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/ULongSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/Int8SeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/UInt8SeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/ShortSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/UShortSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/LongLongSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/ULongLongSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/FloatSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/DoubleSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/LongDoubleSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/CharSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/WCharSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/OctetSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/BooleanSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/StringSeqTypeSupportImpl.h>
-#include <dds/CorbaSeq/WStringSeqTypeSupportImpl.h>
-#endif
-
-#include <dds/DdsDcpsInfrastructureC.h>
-
 #include <dds/DCPS/RestoreOutputStreamState.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
 #include <dds/DCPS/ValueHelper.h>
+
+#ifndef OPENDDS_SAFETY_PROFILE
+#  include <dds/CorbaSeq/LongSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/ULongSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/Int8SeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/UInt8SeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/ShortSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/UShortSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/LongLongSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/ULongLongSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/FloatSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/DoubleSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/LongDoubleSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/CharSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/WCharSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/OctetSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/BooleanSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/StringSeqTypeSupportImpl.h>
+#  include <dds/CorbaSeq/WStringSeqTypeSupportImpl.h>
+#endif
+#include <dds/DdsDcpsInfrastructureC.h>
 
 #include <ace/OS_NS_string.h>
 
@@ -2604,7 +2603,7 @@ bool print_integral_value(DynamicData& dd, DCPS::String& type_string, DynamicTyp
       return false;
     }
     std::stringstream os;
-    char_helper<ACE_CDR::Char>(os, my_char);
+    DCPS::char_helper<ACE_CDR::Char>(os, my_char);
     type_string += " = '" + os.str() + "'\n";
     break;
   }
@@ -2618,7 +2617,7 @@ bool print_integral_value(DynamicData& dd, DCPS::String& type_string, DynamicTyp
       return false;
     }
     std::stringstream os;
-    char_helper<ACE_CDR::WChar>(os, my_wchar);
+    DCPS::char_helper<ACE_CDR::WChar>(os, my_wchar);
     type_string += " = L'" + os.str() + "'\n";
     break;
   }
@@ -2698,7 +2697,7 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
       return false;
     }
     std::stringstream os;
-    string_helper(os, my_string.inout());
+    DCPS::string_helper(os, my_string.inout());
     type_string += DCPS::String(" = \"") + os.str() + "\"\n";
     break;
   }
@@ -2712,7 +2711,7 @@ bool print_dynamic_data(DynamicData& dd, DCPS::String& type_string, DCPS::String
       return false;
     }
     std::stringstream os;
-    string_helper(os, my_wstring.inout());
+    DCPS::string_helper(os, my_wstring.inout());
     type_string += " = L\"" + os.str() + "\"\n";
     break;
   }

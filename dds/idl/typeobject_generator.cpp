@@ -632,6 +632,7 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::NameHash& name_hash)
 std::ostream&
 operator<<(std::ostream& out, const OpenDDS::XTypes::AnnotationParameterValue& param_value)
 {
+  using namespace OpenDDS::DCPS;
   out << "XTypes::AnnotationParameterValue(";
   switch (param_value.kind) {
   case OpenDDS::XTypes::TK_BOOLEAN:

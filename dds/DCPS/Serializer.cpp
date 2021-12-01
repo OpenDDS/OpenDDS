@@ -153,6 +153,19 @@ bool EncapsulationHeader::from_encoding(
 bool EncapsulationHeader::to_encoding(
   Encoding& encoding, Extensibility expected_extensibility)
 {
+  return to_encoding_i(encoding, &expected_extensibility);
+}
+
+bool EncapsulationHeader::to_any_encoding(Encoding& encoding)
+{
+  return to_encoding_i(encoding, 0);
+}
+
+bool EncapsulationHeader::to_encoding_i(
+  Encoding& encoding, Extensibility* expected_extensibility_ptr)
+{
+  Extensibility expected_extensibility = expected_extensibility_ptr ?
+    *expected_extensibility_ptr : FINAL; // Placeholder, doesn't matter
   bool wrong_extensibility = true;
   switch (kind_) {
   case KIND_CDR_BE:
@@ -223,7 +236,7 @@ bool EncapsulationHeader::to_encoding(
     return false;
   }
 
-  if (wrong_extensibility && expected_extensibility != EXTENSIBILITY_ANY) {
+  if (expected_extensibility_ptr && wrong_extensibility) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR EncapsulationHeader::to_encoding: ")
         ACE_TEXT("Unexpected Extensibility Encoding: %C\n"),

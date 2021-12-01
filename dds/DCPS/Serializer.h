@@ -69,8 +69,7 @@ String endianness_to_string(Endianness endianness);
 enum Extensibility {
   FINAL,
   APPENDABLE,
-  MUTABLE,
-  EXTENSIBILITY_ANY
+  MUTABLE
 };
 
 const size_t boolean_cdr_size = 1;
@@ -266,6 +265,11 @@ public:
    */
   bool to_encoding(Encoding& encoding, Extensibility expected_extensibility);
 
+  /**
+   * Like to_encoding, but without an expected extensibility.
+   */
+  bool to_any_encoding(Encoding& encoding);
+
   String to_string() const;
 
   static bool set_encapsulation_options(Message_Block_Ptr& mb);
@@ -275,6 +279,8 @@ private:
   Kind kind_;
   /// The last two bytes as a big endian integer
   ACE_CDR::UShort options_;
+
+  bool to_encoding_i(Encoding& encoding, Extensibility* expected_extensibility_ptr);
 };
 
 class Serializer;
