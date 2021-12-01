@@ -699,6 +699,15 @@ public:
     sedp_receive_preallocated_data_blocks_ = n;
   }
 
+  bool check_source_ip() const
+  {
+    return check_source_ip_;
+  }
+  void check_source_ip(bool flag)
+  {
+    check_source_ip_ = flag;
+  }
+
 private:
   mutable ACE_Thread_Mutex lock_;
   DCPS::TimeDuration resend_period_;
@@ -752,6 +761,7 @@ private:
   CORBA::ULong participant_flags_;
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> sedp_responsive_mode_;
   size_t sedp_receive_preallocated_message_blocks_, sedp_receive_preallocated_data_blocks_;
+  bool check_source_ip_;
 };
 
 typedef OpenDDS::DCPS::RcHandle<RtpsDiscoveryConfig> RtpsDiscoveryConfig_rch;
