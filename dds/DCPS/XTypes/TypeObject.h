@@ -217,7 +217,7 @@ namespace XTypes {
   struct EquivalenceHash_tag {};
   typedef ACE_CDR::Octet EquivalenceHash_slice;
   typedef Fake_TAO_Array_Forany_T<EquivalenceHash, EquivalenceHash_slice, EquivalenceHash_tag> EquivalenceHash_forany;
-  OpenDDS_Dcps_Export const DCPS::String equivalence_hash_to_string(const EquivalenceHash& hash);
+  OpenDDS_Dcps_Export DCPS::String equivalence_hash_to_string(const EquivalenceHash& hash);
 
   // First 4 bytes of MD5 of of a member name converted to bytes
   // using UTF-8 encoding and without a 'nul' terminator.
@@ -901,7 +901,7 @@ namespace XTypes {
     struct WCharValue {
       ACE_CDR::WChar value;
 
-      WCharValue() {}
+      WCharValue() : value() {}
 
       WCharValue(ACE_CDR::WChar a_value)
         : value(a_value) {}
@@ -910,13 +910,13 @@ namespace XTypes {
     struct EnumValue {
       ACE_CDR::Long value;
 
-      EnumValue() {}
+      EnumValue() : value() {}
 
       EnumValue(ACE_CDR::Long a_value)
         : value(a_value) {}
     };
 
-    AnnotationParameterValue() {}
+    AnnotationParameterValue() : kind(TK_NONE) {}
 
     explicit AnnotationParameterValue(ACE_CDR::Boolean value)
       : kind(TK_BOOLEAN)
@@ -1004,7 +1004,10 @@ namespace XTypes {
     NameHash paramname_hash;
     AnnotationParameterValue value;
 
-    AppliedAnnotationParameter() {}
+    AppliedAnnotationParameter()
+    {
+      paramname_hash[0] = paramname_hash[1] = paramname_hash[2] = paramname_hash[3] = 0;
+    }
 
     AppliedAnnotationParameter(ACE_CDR::Octet a, ACE_CDR::Octet b, ACE_CDR::Octet c, ACE_CDR::Octet d, const AnnotationParameterValue& a_value)
       : value(a_value)
