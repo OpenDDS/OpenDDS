@@ -2893,13 +2893,14 @@ void DataReaderImpl::notify_liveliness_change()
   // N.B. writers_lock_ should already be acquired when
   //      this method is called.
   {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+
     DataReaderListenerProxy lp;
     listener_for(lp, DDS::LIVELINESS_CHANGED_STATUS);
 
     if (!lp.is_nil()) {
       lp.on_liveliness_changed(this, liveliness_changed_status_);
 
-      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
       liveliness_changed_status_.alive_count_change = 0;
       liveliness_changed_status_.not_alive_count_change = 0;
     }
