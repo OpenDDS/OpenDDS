@@ -4593,11 +4593,28 @@ RtpsUdpDataLink::get_addresses_i(const RepoId& local) const {
   return retval;
 }
 
+bool RtpsUdpDataLink::RemoteInfo::insert_recv_addr(AddrSet& aset) const
+{
+  if (last_recv_addr_ == ACE_INET_Addr()) {
+    return false;
+  }
+  ACE_INET_Addr recv_no_port(last_recv_addr_);
+  recv_no_port.set_port_number(0);
+  const AddrSet::iterator it = unicast_addrs_.lower_bound(recv_no_port);
+  if (it != unicast_addrs_.end() &&
+      it->get_type() == last_recv_addr_.get_type() &&
+      it->get_addr_size() == last_recv_addr_.get_addr_size() &&
+      std::memcmp(it->get_addr(), last_recv_addr_.get_addr(), it->get_addr_size()) == 0) {
+    aset.insert(last_recv_addr_);
+    return true;
+  }
+  return false;
+}
+
 void
 RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
                                       AddrSet& addresses, bool prefer_unicast) const
 {
-  ACE_UNUSED_ARG(local);
   OPENDDS_ASSERT(local != GUID_UNKNOWN);
   OPENDDS_ASSERT(remote != GUID_UNKNOWN);
 
@@ -4624,8 +4641,7 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
 
   const RemoteInfoMap::const_iterator pos = locators_.find(remote);
   if (pos != locators_.end()) {
-    if (prefer_unicast && pos->second.last_recv_addr_ != NO_ADDR) {
-      normal_addrs.insert(pos->second.last_recv_addr_);
+    if (prefer_unicast && pos->second.insert_recv_addr(normal_addrs)) {
       normal_addrs_expires = pos->second.last_recv_time_ + config().receive_address_duration_;
       valid_last_recv_addr = (MonotonicTimePoint::now() - pos->second.last_recv_time_) <= config().receive_address_duration_;
     } else if (prefer_unicast && !pos->second.unicast_addrs_.empty()) {
@@ -4645,8 +4661,7 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
 #else
       normal_addrs = pos->second.multicast_addrs_;
 #endif
-    } else if (pos->second.last_recv_addr_ != NO_ADDR) {
-      normal_addrs.insert(pos->second.last_recv_addr_);
+    } else if (pos->second.insert_recv_addr(normal_addrs)) {
       normal_addrs_expires = pos->second.last_recv_time_ + config().receive_address_duration_;
       valid_last_recv_addr = (MonotonicTimePoint::now() - pos->second.last_recv_time_) <= config().receive_address_duration_;
     } else {

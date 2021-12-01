@@ -276,6 +276,7 @@ private:
     ACE_INET_Addr last_recv_addr_;
     MonotonicTimePoint last_recv_time_;
     size_t ref_count_;
+    bool insert_recv_addr(AddrSet& aset) const;
   };
 
 #ifdef ACE_HAS_CPP11
