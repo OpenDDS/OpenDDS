@@ -961,7 +961,7 @@ void TypeLookupService::remove_guid_from_dynamic_map(const DCPS::GUID_t& guid)
   const GuidTypeMap::iterator g_found = gt_map_.find(guid);
   if (g_found != gt_map_.end()) {
     gt_map_.erase(g_found);
-    if(DCPS::DCPS_debug_level >= 4) {
+    if (DCPS::DCPS_debug_level >= 4) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) TypeLookupService::remove_guid_from_dynamic_map: ",
         "Alerted to removal of %s, removing GUID from GuidTypeMap.\n", DCPS::to_string(guid).c_str()));
     }
