@@ -66,7 +66,8 @@ RecorderImpl::RecorderImpl()
     make_rch<RemoveAssociationSweeper<RecorderImpl> >(TheServiceParticipant->reactor(),
                                          TheServiceParticipant->reactor_owner(),
                                          this)),
-  is_bit_(false)
+  is_bit_(false),
+  check_encap_(true)
 {
   requested_incompatible_qos_status_.total_count = 0;
   requested_incompatible_qos_status_.total_count_change = 0;
@@ -1060,6 +1061,22 @@ RecorderImpl::repoid_to_bit_key(const GUID_t& id,
   return ret;
 }
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
+
+XTypes::DynamicData RecorderImpl::get_dynamic_data(const RawDataSample& sample)
+{
+  const Encoding enc(sample.encoding_kind_, sample.header_.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
+  const DynamicTypeByPubId::const_iterator dt_found = dt_map_.find(sample.publication_id_);
+  if (dt_found == dt_map_.end()) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RecorderImpl::get_dynamic_data: "
+        "failed to find GUID: %C in DynamicTypeByPubId.\n", LogGuid(sample.publication_id_).c_str()));
+    }
+    return XTypes::DynamicData();
+  }
+
+  const XTypes::DynamicType_rch dt = dt_found->second;
+  return XTypes::DynamicData(sample.sample_.get(), enc, dt);
+}
 
 } // namespace DCPS
 } // namespace

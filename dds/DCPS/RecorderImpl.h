@@ -151,6 +151,10 @@ private:
   void lookup_instance_handles(const WriterIdSeq&      ids,
                                DDS::InstanceHandleSeq& hdls);
 
+  XTypes::DynamicData get_dynamic_data(const RawDataSample& sample);
+  void check_encap(bool b) { check_encap_ = b; }
+  bool check_encap() const { return check_encap_; }
+
   DDS::DataReaderQos qos_;
 
   /// lock protecting sample container as well as statuses.
@@ -196,6 +200,10 @@ private:
 
   /// RW lock for reading/writing publications.
   ACE_RW_Thread_Mutex writers_lock_;
+
+  typedef OPENDDS_MAP(PublicationId, XTypes::DynamicType_rch) DynamicTypeByPubId;
+  DynamicTypeByPubId dt_map_;
+  bool check_encap_;
 };
 
 

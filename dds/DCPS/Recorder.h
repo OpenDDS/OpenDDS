@@ -23,8 +23,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-typedef OPENDDS_MAP(PublicationId, XTypes::DynamicType_rch) DynamicTypeByPubId;
-
 class Recorder;
 
 /**
@@ -66,7 +64,6 @@ public:
   typedef Recorder_ptr _ptr_type;
   typedef Recorder_var _var_type;
 
-  Recorder() : check_encap_(true) {}
   virtual ~Recorder();
 
   static Recorder_ptr _duplicate(Recorder_ptr obj);
@@ -105,9 +102,10 @@ public:
    *
    */
   virtual RecorderListener_rch get_listener() = 0;
-  DynamicTypeByPubId dt_map_;
-  bool check_encap_;
-  XTypes::DynamicData get_dynamic_data(const RawDataSample& sample);
+
+  virtual XTypes::DynamicData get_dynamic_data(const RawDataSample& sample) = 0;
+  virtual void check_encap(bool b) = 0;
+  virtual bool check_encap() const = 0;
 };
 
 }
