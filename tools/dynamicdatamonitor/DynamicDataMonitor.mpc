@@ -1,9 +1,0 @@
-project(Dynamic_Data_Monitor): dcps_rtps_udp, install {
-  exename = dynamic-data-monitor
-  exeout = $(DDS_ROOT)/bin
-  requires += no_opendds_safety_profile
-
-  Source_Files {
-    DynamicDataMonitor.cpp
-  }
-}
