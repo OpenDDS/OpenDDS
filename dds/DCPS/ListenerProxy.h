@@ -27,7 +27,7 @@ public:
     : mutex_(0)
   {}
 
-  ~ListenerProxy() {
+  virtual ~ListenerProxy() {
     if (mutex_) {
       mutex_->release();
       mutex_ = 0;
