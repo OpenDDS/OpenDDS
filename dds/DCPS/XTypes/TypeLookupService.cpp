@@ -955,7 +955,7 @@ bool TypeLookupService::extensibility(TypeFlag extensibility_mask, const TypeIde
   return false;
 }
 
-void TypeLookupService::remove_guid_from_dynamic_map(DCPS::GUID_t& guid)
+void TypeLookupService::remove_guid_from_dynamic_map(const DCPS::GUID_t& guid)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   const GuidTypeMap::iterator g_found = gt_map_.find(guid);
