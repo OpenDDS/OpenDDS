@@ -435,6 +435,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
   // We only do the following processing for readers that are *not*
   // readers of Builtin Topics.
   //
+  /*
   XTypes::TypeLookupService_rch tls = participant_servant_->get_type_lookup_service();
   XTypes::TypeInformation type_info;
   if (!XTypes::deserialize_type_info(type_info, writer.serializedTypeInfo)) {
@@ -451,6 +452,8 @@ RecorderImpl::add_association(const RepoId&            yourId,
                "DynamicType added to map with guid: %C\n", LogGuid(writer.writerId).c_str()));
   }
   dt_map_.insert(std::make_pair(writer.writerId, dt));
+  */
+
   if (!is_bit_) {
 
     const DDS::InstanceHandle_t handle = participant_servant_->assign_handle(writer.writerId);

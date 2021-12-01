@@ -7232,6 +7232,14 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
           reader_type_name = dsi->second.get_type_name();
         }
         consistent = reader_type_name.empty() || writer_type_name == reader_type_name;
+
+        // Identify a recorder and add the type to its map.
+        if (reader_type_name.empty() && reader_local && !writer_local) {
+          XTypes::TypeObject cto = type_lookup_service_->get_type_object(writer_type_info->complete.typeid_with_size.type_id);
+          XTypes::DynamicType_rch dt = type_lookup_service_->complete_to_dynamic(cto.complete, writer);
+          // Add to a map in the recorder or some place that the recorder can access.
+          //          dt_map_.insert(std::make_pair(writer.writerId, dt));
+        }
       }
     }
 
