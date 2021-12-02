@@ -1,4 +1,4 @@
-project(XTypes_Publisher): dcps_test, dcps_rtps_udp, msvc_bigobj, dcps_transports_for_test {
+project(XTypes_Publisher): dcps_test, dcps_rtps_udp, msvc_bigobj, dcps_transports_for_test, opendds_optional_security {
 
   exename   = xtypes_publisher
 

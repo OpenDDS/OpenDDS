@@ -17,6 +17,9 @@
 #  include <dds/DCPS/transport/shmem/Shmem.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#  ifdef OPENDDS_SECURITY
+#    include <dds/DCPS/security/BuiltInPlugins.h>
+#  endif
 #endif
 
 #include <ace/Get_Opt.h>

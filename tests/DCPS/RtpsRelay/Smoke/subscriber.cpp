@@ -18,6 +18,7 @@
 #include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 
 #ifdef ACE_AS_STATIC_LIBS
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #  ifdef OPENDDS_SECURITY
 #    include <dds/DCPS/security/BuiltInPlugins.h>
