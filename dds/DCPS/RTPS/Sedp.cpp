@@ -27,6 +27,7 @@
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/Logging.h>
+#include <dds/DCPS/RecorderImpl.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
 #include <dds/DCPS/DcpsUpcalls.h>
 #include <dds/DCPS/Util.h>
@@ -7339,6 +7340,17 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
       job_queue_->enqueue(DCPS::make_rch<WriterAddAssociation>(WriterAssociationRecord(dwr, writer, ra)));
     } else if (call_reader) {
       ReaderAssociationRecord rac(drr, reader, wa);
+      if (use_xtypes_complete_ && reader_type_info->complete.typeid_with_size.type_id.kind() == XTypes::TK_NONE) {
+        // Reader is a local recorder using complete types
+        DCPS::DataReaderCallbacks_rch lock = rac.callbacks_.lock();
+        OpenDDS::DCPS::RecorderImpl* ri = dynamic_cast<OpenDDS::DCPS::RecorderImpl*>(lock.in());
+        if (ri) {
+          XTypes::TypeInformation type_info;
+          if (XTypes::deserialize_type_info(type_info, rac.writer_association_.serializedTypeInfo)) {
+            ri->add_to_dt_map(rac.writer_id(), type_info.complete.typeid_with_size.type_id);
+          }
+        }
+      }
       Spdp::DiscoveredParticipantIter iter = spdp_.participants_.find(make_id(writer, ENTITYID_PARTICIPANT));
       if (iter != spdp_.participants_.end()) {
         iter->second.reader_pending_records_.push_back(rac);
