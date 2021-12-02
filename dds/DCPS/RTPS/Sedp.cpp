@@ -7347,7 +7347,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
         if (ri) {
           XTypes::TypeInformation type_info;
           if (XTypes::deserialize_type_info(type_info, rac.writer_association_.serializedTypeInfo)) {
-            ri->add_to_dt_map(rac.writer_id(), type_info.complete.typeid_with_size.type_id);
+            ri->add_to_dynamic_type_map(rac.writer_id(), type_info.complete.typeid_with_size.type_id);
           }
         }
       }

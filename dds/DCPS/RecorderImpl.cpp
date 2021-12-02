@@ -263,7 +263,7 @@ void RecorderImpl::notify_subscription_lost(const WriterIdSeq&)
 }
 
 void
-RecorderImpl::add_to_dt_map(PublicationId pub_id, const XTypes::TypeIdentifier& ti)
+RecorderImpl::add_to_dynamic_type_map(PublicationId pub_id, const XTypes::TypeIdentifier& ti)
 {
   XTypes::TypeLookupService_rch tls = participant_servant_->get_type_lookup_service();
   XTypes::TypeObject cto = tls->get_type_object(ti);
