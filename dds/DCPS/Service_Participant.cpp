@@ -213,7 +213,6 @@ Service_Participant::Service_Participant()
   , shutdown_listener_(0)
   , default_configuration_file_(ACE_TEXT(""))
   , type_object_encoding_(Encoding_Normal)
-  , is_info_repo_(false)
 {
   initialize();
 }
@@ -227,8 +226,7 @@ Service_Participant::~Service_Participant()
   {
     ACE_GUARD(ACE_Thread_Mutex, guard, factory_lock_);
     if (dp_factory_servant_) {
-      const DDS::ReturnCode_t cleanup_status =
-        dp_factory_servant_->delete_all_participants(is_info_repo_);
+      const DDS::ReturnCode_t cleanup_status = dp_factory_servant_->delete_all_participants();
       if (cleanup_status) {
         if (log_level >= LogLevel::Warning) {
           ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Service_Participant::~Service_Participant: "
@@ -300,7 +298,7 @@ DDS::ReturnCode_t Service_Participant::shutdown()
     return DDS::RETCODE_ALREADY_DELETED;
   }
 
-  if (!is_info_repo_) {
+  {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, DDS::RETCODE_OUT_OF_RESOURCES);
     if (dp_factory_servant_ && dp_factory_servant_->participant_count()) {
       if (log_level >= LogLevel::Notice) {
@@ -2977,11 +2975,6 @@ Service_Participant::type_object_encoding(const char* encoding)
   }
   ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Service_Participant::type_object_encoding: "
              "invalid encoding %C\n", encoding));
-}
-
-void Service_Participant::is_info_repo()
-{
-  is_info_repo_ = true;
 }
 
 } // namespace DCPS
