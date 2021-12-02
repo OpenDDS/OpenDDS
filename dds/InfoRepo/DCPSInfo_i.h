@@ -445,6 +445,8 @@ private:
     PortableServer::Servant_var<TAO_DDS_DCPSInfo_i> parent_;
     DDS::DomainId_t domain_;
   };
+
+  bool in_cleanup_built_in_topics_;
 #endif
 };
 

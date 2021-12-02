@@ -51,6 +51,9 @@ TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i(CORBA::ORB_ptr orb
   , shutdown_(shutdown)
   , reassociate_timer_id_(-1)
   , dispatch_check_timer_id_(-1)
+#ifndef DDS_HAS_MINIMUM_BIT
+  , in_cleanup_built_in_topics_(false)
+#endif
 {
   if (!TheServiceParticipant->use_bidir_giop()) {
     int argc = 0;
@@ -1465,8 +1468,7 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant(
 
   // Determine if we should propagate this event;  we need to cache this
   // result as the participant will be gone by the time we use the result.
-  bool sendUpdate = (participant->isOwner() == true)
-                    && (participant->isBitPublisher() == false);
+  bool sendUpdate = participant->isOwner() && !participant->isBitPublisher();
 
   CORBA::Boolean dont_notify_lost = 0;
   int status = where->second->remove_participant(participantId, dont_notify_lost);
@@ -1494,7 +1496,10 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant(
     }
   }
 
-  if (where->second->participants().empty()) {
+  const bool bit_part_in_cleanup_bit =
+    participant->isOwner() && participant->isBitPublisher() && in_cleanup_built_in_topics_;
+    // Otherwise we're invalidating the iterator we're using further down in the stack
+  if (where->second->participants().empty() && !bit_part_in_cleanup_bit) {
     domains_.erase(where);
   }
 
@@ -2478,9 +2483,11 @@ TAO_DDS_DCPSInfo_i::dump_to_string()
 void TAO_DDS_DCPSInfo_i::cleanup_built_in_topics()
 {
 #ifndef DDS_HAS_MINIMUM_BIT
+  in_cleanup_built_in_topics_ = true;
   for (DCPS_IR_Domain_Map::iterator it = domains_.begin(); it != domains_.end(); ++it) {
     it->second->cleanup_built_in_topics();
   }
+  in_cleanup_built_in_topics_ = false;
 #endif
 }
 
