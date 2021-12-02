@@ -324,7 +324,7 @@ DomainParticipantFactoryImpl::participants() const
   return participants_;
 }
 
-DDS::ReturnCode_t DomainParticipantFactoryImpl::delete_all_participants(bool is_info_repo)
+DDS::ReturnCode_t DomainParticipantFactoryImpl::delete_all_participants()
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, participants_protector_,
     DDS::RETCODE_OUT_OF_RESOURCES);
@@ -354,17 +354,15 @@ DDS::ReturnCode_t DomainParticipantFactoryImpl::delete_all_participants(bool is_
         rv = DDS::RETCODE_ERROR;
       }
 
-      if (!is_info_repo) {
-        tmp = delete_participant(dp);
-        if (tmp) {
-          if (log_level >= LogLevel::Notice) {
-            ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: "
-              "DomainParticipantFactoryImpl::delete_all_participants: "
-              "delete_participant returned %C\n",
-              retcode_to_string(tmp)));
-          }
-          rv = DDS::RETCODE_ERROR;
+      tmp = delete_participant(dp);
+      if (tmp) {
+        if (log_level >= LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: "
+            "DomainParticipantFactoryImpl::delete_all_participants: "
+            "delete_participant returned %C\n",
+            retcode_to_string(tmp)));
         }
+        rv = DDS::RETCODE_ERROR;
       }
     }
   }
