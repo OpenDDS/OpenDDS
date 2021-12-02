@@ -8,11 +8,13 @@
 #include <dds/DCPS/security/framework/Properties.h>
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/DCPS_Utils.h>
-
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #  include <dds/DCPS/transport/tcp/Tcp.h>
+#  ifdef OPENDDS_SECURITY
+#    include <dds/DCPS/security/BuiltInPlugins.h>
+#  endif
 #endif
 
 using namespace DDS;

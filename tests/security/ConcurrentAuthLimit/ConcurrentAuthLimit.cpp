@@ -1,18 +1,16 @@
+#include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/RTPS/BaseMessageTypes.h>
 #include <dds/DCPS/RTPS/GuidGenerator.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/ParameterListConverter.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
-
 #include <dds/DCPS/security/framework/Properties.h>
 #include <dds/DCPS/security/AuthenticationBuiltInImpl.h>
-
 #include <dds/DCPS/transport/rtps_udp/RtpsUdpInst.h>
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  include <dds/DCPS/security/BuiltInPlugins.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
-
-#include <dds/DCPS/LogAddr.h>
 
 #include <ace/SOCK_Dgram.h>
 #include <ace/SOCK_Dgram_Mcast.h>

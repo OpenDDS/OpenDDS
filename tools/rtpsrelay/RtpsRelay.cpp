@@ -23,11 +23,17 @@
 #include <dds/DCPS/DomainParticipantImpl.h>
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
-
 #include <dds/DCPS/transport/framework/NetworkAddress.h>
-
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  ifdef OPENDDS_SECURITY
+#    include <dds/DCPS/security/BuiltInPlugins.h>
+#  endif
+#endif
+#ifdef OPENDDS_SECURITY
+#  include <dds/DCPS/security/framework/Properties.h>
+#  include <dds/DCPS/security/framework/SecurityRegistry.h>
 #endif
 
 #include <ace/Arg_Shifter.h>
@@ -37,11 +43,6 @@
 
 #include <cstdlib>
 #include <algorithm>
-
-#ifdef OPENDDS_SECURITY
-#include <dds/DCPS/security/framework/Properties.h>
-#include <dds/DCPS/security/framework/SecurityRegistry.h>
-#endif
 
 using namespace RtpsRelay;
 
