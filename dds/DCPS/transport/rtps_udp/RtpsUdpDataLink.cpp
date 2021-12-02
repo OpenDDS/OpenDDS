@@ -4600,7 +4600,7 @@ bool RtpsUdpDataLink::RemoteInfo::insert_recv_addr(AddrSet& aset) const
   }
   ACE_INET_Addr recv_no_port(last_recv_addr_);
   recv_no_port.set_port_number(0);
-  const AddrSet::iterator it = unicast_addrs_.lower_bound(recv_no_port);
+  const AddrSet::const_iterator it = unicast_addrs_.lower_bound(recv_no_port);
   if (it != unicast_addrs_.end() &&
       it->get_type() == last_recv_addr_.get_type() &&
       it->get_addr_size() == last_recv_addr_.get_addr_size() &&
