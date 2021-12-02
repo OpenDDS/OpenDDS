@@ -6,7 +6,7 @@ Bitmask
 Bitset
 */
 
-#include "CompleteToDynamicTypeTypeSupportImpl.h"
+#include "../../../CompleteToDynamicTypeTypeSupportImpl.h"
 
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/XTypes/TypeLookupService.h>
