@@ -117,7 +117,7 @@ public:
      * This is the classic encoding of OpenDDS used when there is no RTPS
      * transport being used. It has no padding bytes and no XCDR behavior.
      */
-    KIND_UNALIGNED_CDR,
+    KIND_UNALIGNED_CDR
   };
 
   enum Alignment {
