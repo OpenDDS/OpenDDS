@@ -1496,13 +1496,17 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant(
     }
   }
 
-  const bool bit_part_in_cleanup_bit =
-    participant->isOwner() && participant->isBitPublisher() && in_cleanup_built_in_topics_;
-    // Otherwise we're invalidating the iterator we're using further down in the stack
-  if (where->second->participants().empty() && !bit_part_in_cleanup_bit) {
+  if (where->second->participants().empty()
+#ifndef DDS_HAS_MINIMUM_BIT
+    && !(participant->isOwner() && participant->isBitPublisher() && in_cleanup_built_in_topics_)
+    // If this is false, we're running as part of cleanup_built_in_topics and
+    // we can't remove the domain because we would invalid the iterator we're
+    // using in cleanup_built_in_topics. cleanup_built_in_topics will clear the
+    // domains once it's done.
+#endif
+    ) {
     domains_.erase(where);
   }
-
 #ifndef DDS_HAS_MINIMUM_BIT
   else if (where->second->useBIT() &&
            where->second->participants().size() == 1) {
@@ -2488,6 +2492,7 @@ void TAO_DDS_DCPSInfo_i::cleanup_built_in_topics()
     it->second->cleanup_built_in_topics();
   }
   in_cleanup_built_in_topics_ = false;
+  domains_.clear();
 #endif
 }
 
