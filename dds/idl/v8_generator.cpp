@@ -27,7 +27,14 @@ bool v8_generator::gen_enum(AST_Enum*, UTL_ScopedName*,
   return true;
 }
 
+
 namespace {
+
+  std::string ltrim(const std::string& s)
+  {
+    size_t start = s.find_first_not_of("\n\r\t\f\v ");
+    return (start == std::string::npos) ? "" : s.substr(start);
+  }
 
   std::string getV8Type(AST_Type* type,
                         AST_PredefinedType::PredefinedType* pt = 0)
@@ -182,14 +189,14 @@ namespace {
         strm <<
           "  {\n"
           "    v8::Local<v8::Value> lv = Nan::Get(" << src << ", " << prop << ").ToLocalChecked();\n";
-        ip = std::string(6, ' ');
+        ip = std::string(4, ' ');
       } else {
         strm <<
           "  {\n"
           "    v8::Local<v8::String> field_str = Nan::New(\"" << prop << "\").ToLocalChecked();\n"
           "    if (Nan::Has(" << src << ", field_str).ToChecked()) {\n"
           "      v8::Local<v8::Value> lv = Nan::Get(" << src << ", field_str).ToLocalChecked();\n";
-        ip = std::string(8, ' ');
+        ip = std::string(6, ' ');
       }
 
       if (cls & CL_ENUM) {
@@ -255,12 +262,12 @@ namespace {
               || pt == AST_PredefinedType::PT_long) {
         const std::string underscores =
           dds_generator::scoped_helper(type->name(), "_"),
-          temp_type = scoped(type->name()),
+          temp_type = ltrim(scoped(type->name())),
           temp_name = "temp_" + underscores;
         strm <<
           ip << "if (lv->IsString()) {\n" <<
           ip << "  v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n" <<
-          ip << "  std::string ss(*Nan::Utf8String(ls))\n;" <<
+          ip << "  std::string ss(*Nan::Utf8String(ls));\n" <<
           ip << "  std::istringstream iss(ss);\n" <<
           ip << "  " << (pt == AST_PredefinedType::PT_octet ? "uint16_t" : temp_type.c_str()) << " " << temp_name << ";\n" <<
           ip << "  if (ss.find(\"0x\") != std::string::npos) {\n" <<
@@ -269,10 +276,11 @@ namespace {
           ip << "    iss >> " << temp_name << ";\n" <<
           ip << "  }\n" <<
           ip << "  " << propName << assign_prefix << temp_name << assign_suffix << ";\n" <<
-          ip << "}\n" <<
-          ip << "Nan::Maybe<int64_t> miv = Nan::To<int64_t>(lv);\n" <<
-          ip << "if (miv.IsJust()) {\n" <<
-          ip << "  " << propName << assign_prefix << "miv.FromJust()" << assign_suffix << ";\n" <<
+          ip << "} else {\n" <<
+          ip << "  Nan::Maybe<int64_t> miv = Nan::To<int64_t>(lv);\n" <<
+          ip << "  if (miv.IsJust()) {\n" <<
+          ip << "    " << propName << assign_prefix << "miv.FromJust()" << assign_suffix << ";\n" <<
+          ip << "  }\n" <<
           ip << "}\n";
       } else if (pt == AST_PredefinedType::PT_float
               || pt == AST_PredefinedType::PT_double
