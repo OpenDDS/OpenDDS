@@ -66,6 +66,40 @@ OpenDDS::DCPS::TcpDataLink::stop_i()
 }
 
 void
+OpenDDS::DCPS::TcpDataLink::send_i(TransportQueueElement* element, bool relink)
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(stopped_clients_mutex_);
+  if (stopped_clients_.count(element->publication_id())) {
+    element->data_dropped(true);
+  } else {
+    DCPS::DataLink::send_i(element, relink);
+  }
+}
+
+void
+OpenDDS::DCPS::TcpDataLink::send_stop_i(RepoId repoId)
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(stopped_clients_mutex_);
+  if (!stopped_clients_.count(repoId)) {
+    DCPS::DataLink::send_stop_i(repoId);
+  }
+}
+
+bool
+OpenDDS::DCPS::TcpDataLink::check_active_client(const RepoId& local_id)
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(stopped_clients_mutex_);
+  return stopped_clients_.count(local_id) == 0;
+}
+
+void
+OpenDDS::DCPS::TcpDataLink::client_stop(const RepoId& local_id)
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(stopped_clients_mutex_);
+  stopped_clients_.insert(local_id);
+}
+
+void
 OpenDDS::DCPS::TcpDataLink::pre_stop_i()
 {
   DBG_ENTRY_LVL("TcpDataLink","pre_stop_i",6);
@@ -550,6 +584,10 @@ OpenDDS::DCPS::TcpDataLink::make_reservation(const RepoId& remote_subscription_i
                                              const TransportSendListener_wrch& send_listener,
                                              bool reliable)
 {
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(stopped_clients_mutex_);
+    stopped_clients_.erase(local_publication_id);
+  }
   const int result = DataLink::make_reservation(remote_subscription_id, local_publication_id, send_listener, reliable);
   send_association_msg(local_publication_id, remote_subscription_id);
   return result;
@@ -561,6 +599,10 @@ OpenDDS::DCPS::TcpDataLink::make_reservation(const RepoId& remote_publication_id
                                              const TransportReceiveListener_wrch& receive_listener,
                                              bool reliable)
 {
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(stopped_clients_mutex_);
+    stopped_clients_.erase(local_subscription_id);
+  }
   const int result = DataLink::make_reservation(remote_publication_id, local_subscription_id, receive_listener, reliable);
   send_association_msg(local_subscription_id, remote_publication_id);
 

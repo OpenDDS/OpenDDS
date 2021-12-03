@@ -73,6 +73,8 @@ private:
 
   virtual bool configure_i(TcpInst& config);
 
+  virtual void client_stop(const RepoId& local_id);
+
   virtual void shutdown_i();
 
   virtual bool connection_info_i(TransportLocator& local_info, ConnectionInfoFlags flags) const;
