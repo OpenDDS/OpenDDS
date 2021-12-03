@@ -249,9 +249,6 @@ tests/DCPS/EntityLifecycleStress/run_test.pl rtps_disc_tcp publishers 10 subscri
 tests/DCPS/LivelinessKeepAliveTest/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/LivelinessTimeout/run_test.pl: !DCPS_MIN
 tests/DCPS/LivelinessTimeout/run_test.pl rtps_disc: !DCPS_MIN RTPS
-tests/DCPS/UnitTests/CompleteToMinimalTypeObject/run_test.pl: !DCPS_MIN
-tests/DCPS/UnitTests/CompleteToDynamicType/run_test.pl: !DCPS_MIN
-tests/DCPS/UnitTests/DynamicData/run_test.pl: !DCPS_MIN
 tests/DCPS/BitDataReader/run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS
 
 tests/unit-tests/run_test.pl: !DCPS_MIN !NO_UNIT_TESTS

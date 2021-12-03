@@ -1,6 +1,6 @@
 #include <tao/LongSeq.pidl>
 
-module MyMod {
+module MyModCompleteToMinimal {
 
   @topic
   @mutable

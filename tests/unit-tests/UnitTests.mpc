@@ -7,11 +7,13 @@ project(UnitTests): dcps, dcps_rtps_udp, dcps_rtpsexe, dcps_test, dcps_transport
 
   Idl_Files {
     dds/DCPS/XTypes/CompleteToDynamicType.idl
+    dds/DCPS/XTypes/CompleteToMinimalTypeObject.idl
     dds/DCPS/XTypes/DynamicData.idl
   }
 
   TypeSupport_Files {
     dds/DCPS/XTypes/CompleteToDynamicType.idl
+    dds/DCPS/XTypes/CompleteToMinimalTypeObject.idl
   }
 
   TypeSupport_Files {

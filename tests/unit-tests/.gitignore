@@ -1,3 +1,16 @@
+/CompleteToMinimalTypeObjectC.cpp
+/CompleteToMinimalTypeObjectC.h
+/CompleteToMinimalTypeObjectC.inl
+/CompleteToMinimalTypeObjectS.cpp
+/CompleteToMinimalTypeObjectS.h
+/CompleteToMinimalTypeObjectTypeSupport.idl
+/CompleteToMinimalTypeObjectTypeSupportC.cpp
+/CompleteToMinimalTypeObjectTypeSupportC.h
+/CompleteToMinimalTypeObjectTypeSupportC.inl
+/CompleteToMinimalTypeObjectTypeSupportImpl.cpp
+/CompleteToMinimalTypeObjectTypeSupportImpl.h
+/CompleteToMinimalTypeObjectTypeSupportS.cpp
+/CompleteToMinimalTypeObjectTypeSupportS.h
 CompleteToDynamicTypeC.cpp
 CompleteToDynamicTypeC.h
 CompleteToDynamicTypeC.inl
