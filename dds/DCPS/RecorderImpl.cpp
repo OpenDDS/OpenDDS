@@ -263,6 +263,20 @@ void RecorderImpl::notify_subscription_lost(const WriterIdSeq&)
 }
 
 void
+RecorderImpl::add_to_dynamic_type_map(const PublicationId& pub_id, const XTypes::TypeIdentifier& ti)
+{
+  XTypes::TypeLookupService_rch tls = participant_servant_->get_type_lookup_service();
+  XTypes::TypeObject cto = tls->get_type_object(ti);
+  XTypes::DynamicType_rch dt = tls->complete_to_dynamic(cto.complete, pub_id);
+  if (DCPS_debug_level >= 4) {
+    ACE_DEBUG((LM_DEBUG,
+               "(%P|%t) RecorderImpl::add_association: "
+               "DynamicType added to map with guid: %C\n", LogGuid(pub_id).c_str()));
+  }
+  dt_map_.insert(std::make_pair(pub_id, dt));
+}
+
+void
 RecorderImpl::add_association(const RepoId&            yourId,
                               const WriterAssociation& writer,
                               bool                     active)
@@ -424,24 +438,6 @@ RecorderImpl::add_association(const RepoId&            yourId,
   // We only do the following processing for readers that are *not*
   // readers of Builtin Topics.
   //
-  XTypes::TypeLookupService_rch tls = participant_servant_->get_type_lookup_service();
-  XTypes::TypeInformation type_info;
-  if (!XTypes::deserialize_type_info(type_info, writer.serializedTypeInfo)) {
-    if (log_level >= LogLevel::Warning) {
-      ACE_ERROR((LM_WARNING,
-                 "(%P|%t) WARNING: RecorderImpl::add_association: "
-                 "Failed to deserialize TypeInformation\n"));
-    }
-    return;
-  }
-  XTypes::TypeObject cto = tls->get_type_object(type_info.complete.typeid_with_size.type_id);
-  XTypes::DynamicType_rch dt = tls->complete_to_dynamic(cto.complete, writer.writerId);
-  if (DCPS_debug_level >= 4) {
-    ACE_DEBUG((LM_DEBUG,
-               "(%P|%t) RecorderImpl::add_association: "
-               "DynamicType added to map with guid: %C\n", LogGuid(writer.writerId).c_str()));
-  }
-  dt_map_.insert(std::make_pair(writer.writerId, dt));
   if (!is_bit_) {
 
     const DDS::InstanceHandle_t handle = participant_servant_->assign_handle(writer.writerId);
