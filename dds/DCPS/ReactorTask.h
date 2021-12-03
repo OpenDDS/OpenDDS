@@ -38,16 +38,17 @@ enum ThreadStatus {
 struct OpenDDS_Dcps_Export ThreadStatusManager {
   struct Thread {
     Thread() {}
-    Thread(const SystemTimePoint& time, ThreadStatus status)
+    Thread(const SystemTimePoint& time, ThreadStatus status, double util)
       : timestamp(time)
       , status(status)
+      , utilization(util)
     {}
     SystemTimePoint timestamp;
     ThreadStatus status;
+    double utilization;
     // TODO(iguessthislldo): Add Participant GUID
   };
   typedef OPENDDS_MAP(String, Thread) Map;
-  typedef OPENDDS_MAP(String, double) LoadMap;
 
   static const char* status_to_string(ThreadStatus status);
 
@@ -78,7 +79,6 @@ struct OpenDDS_Dcps_Export ThreadStatusManager {
 private:
   ACE_Thread_Mutex lock_;
   Map map_;
-  LoadMap load_map_;
 };
 
 class OpenDDS_Dcps_Export ReactorTask : public virtual ACE_Task_Base,
