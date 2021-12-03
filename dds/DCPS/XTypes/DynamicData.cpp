@@ -2102,9 +2102,9 @@ bool DynamicData::skip_collection_member(DynamicType_rch coll_type)
     const DCPS::String err_msg = DCPS::String("Failed to skip a non-primitive ") + kind_str + " member";
     return skip("skip_collection_member", err_msg.c_str(), dheader);
   } else if (kind == TK_SEQUENCE) {
-    skip_to_sequence_element(0, coll_type, true);
+    return skip_to_sequence_element(0, coll_type, true);
   } else if (kind == TK_ARRAY) {
-    skip_to_array_element(0, coll_type, true);
+    return skip_to_array_element(0, coll_type, true);
   } else if (kind == TK_MAP) {
     if (DCPS::log_level >= DCPS::LogLevel::Error) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicData::skip_collection_member: "
