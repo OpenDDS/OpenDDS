@@ -20,23 +20,35 @@ Bitset
 
 using namespace OpenDDS;
 
-XTypes::TypeLookupService_rch tls = DCPS::make_rch<XTypes::TypeLookupService>();
+class dds_DCPS_XTypes_DynamicType : public ::testing::Test {
+  void SetUp()
+  {
+    tls_ = DCPS::make_rch<XTypes::TypeLookupService>();
+    MoreSetup();
+  }
 
-template<typename T>
-void test_conversion(const XTypes::DynamicType_rch& expected_dynamic_type)
-{
-  const XTypes::TypeIdentifier& com_ti = DCPS::getCompleteTypeIdentifier<T>();
-  const XTypes::TypeMap& com_map = DCPS::getCompleteTypeMap<T>();
-  XTypes::TypeMap::const_iterator pos = com_map.find(com_ti);
-  EXPECT_TRUE(pos != com_map.end());
-  const XTypes::TypeObject& com_to = pos->second;
-  XTypes::DynamicType_rch converted_dt = DCPS::make_rch<XTypes::DynamicType>();
-  DCPS::GUID_t fake_guid;
-  converted_dt = tls->complete_to_dynamic(com_to.complete, fake_guid);
-  EXPECT_EQ(*expected_dynamic_type, *converted_dt);
-}
+  void MoreSetup();
 
-TEST(CompleteToDynamicType, MyInnerStruct)
+  XTypes::TypeLookupService_rch tls_;
+
+public:
+
+  template<typename T>
+  void test_conversion(const XTypes::DynamicType_rch& expected_dynamic_type)
+  {
+    const XTypes::TypeIdentifier& com_ti = DCPS::getCompleteTypeIdentifier<T>();
+    const XTypes::TypeMap& com_map = DCPS::getCompleteTypeMap<T>();
+    XTypes::TypeMap::const_iterator pos = com_map.find(com_ti);
+    EXPECT_TRUE(pos != com_map.end());
+    const XTypes::TypeObject& com_to = pos->second;
+    XTypes::DynamicType_rch converted_dt = DCPS::make_rch<XTypes::DynamicType>();
+    DCPS::GUID_t fake_guid;
+    converted_dt = tls_->complete_to_dynamic(com_to.complete, fake_guid);
+    EXPECT_EQ(*expected_dynamic_type, *converted_dt);
+  }
+};
+
+TEST_F(dds_DCPS_XTypes_DynamicType, CompleteToDynamicType_MyInnerStruct)
 {
   XTypes::DynamicType_rch expected_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor expected_td;
@@ -65,7 +77,7 @@ TEST(CompleteToDynamicType, MyInnerStruct)
   test_conversion<DCPS::MyMod_MyInnerStruct_xtag>(expected_dt);
 }
 
-TEST(CompleteToDynamicType, MyOuterStruct)
+TEST_F(dds_DCPS_XTypes_DynamicType, CompleteToDynamicType_MyOuterStruct)
 {
   XTypes::DynamicType_rch expected_outer_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor outer_td;
@@ -112,7 +124,7 @@ TEST(CompleteToDynamicType, MyOuterStruct)
   test_conversion<DCPS::MyMod_MyOuterStruct_xtag>(expected_outer_dt);
 }
 
-TEST(CompleteToDynamicType, MyAliasStruct)
+TEST_F(dds_DCPS_XTypes_DynamicType, CompleteToDynamicType_MyAliasStruct)
 {
   XTypes::DynamicType_rch expected_alias_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor alias_td;
@@ -168,7 +180,7 @@ TEST(CompleteToDynamicType, MyAliasStruct)
   test_conversion<DCPS::MyMod_MyAliasStruct_xtag>(expected_alias_dt);
 }
 
-TEST(CompleteToDynamicType, PrimitiveKind)
+TEST_F(dds_DCPS_XTypes_DynamicType, CompleteToDynamicType_PrimitiveKind)
 {
   XTypes::DynamicType_rch expected_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor td;
@@ -203,7 +215,7 @@ TEST(CompleteToDynamicType, PrimitiveKind)
   test_conversion<DCPS::MyMod_PrimitiveKind_xtag>(expected_dt);
 }
 
-TEST(CompleteToDynamicType, MyUnion)
+TEST_F(dds_DCPS_XTypes_DynamicType, CompleteToDynamicType_MyUnion)
 {
   XTypes::DynamicType_rch expected_union_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor td;
@@ -308,7 +320,7 @@ TEST(CompleteToDynamicType, MyUnion)
   test_conversion<DCPS::MyMod_MyUnion_xtag>(expected_union_dt);
 }
 
-TEST(CompleteToDynamicType, MyInnerArray)
+TEST_F(dds_DCPS_XTypes_DynamicType, CompleteToDynamicType_MyInnerArray)
 {
   XTypes::DynamicType_rch alias_inner_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor alias_inner_td;
@@ -337,7 +349,7 @@ TEST(CompleteToDynamicType, MyInnerArray)
   test_conversion<DCPS::MyMod_MyInnerArray_xtag>(alias_inner_expected_dt);
 }
 
-TEST(CompleteToDynamicType, MyOuterArray)
+TEST_F(dds_DCPS_XTypes_DynamicType, CompleteToDynamicType_MyOuterArray)
 {
   XTypes::DynamicType_rch alias_outer_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor alias_outer_td;
@@ -384,7 +396,7 @@ TEST(CompleteToDynamicType, MyOuterArray)
   test_conversion<DCPS::MyMod_MyOuterArray_xtag>(alias_outer_expected_dt);
 }
 
-TEST(CompleteToDynamicType, MySeq)
+TEST_F(dds_DCPS_XTypes_DynamicType, CompleteToDynamicType_MySeq)
 {
   XTypes::DynamicType_rch alias_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor alias_td;
@@ -413,7 +425,7 @@ TEST(CompleteToDynamicType, MySeq)
   test_conversion<DCPS::MyMod_MySeq_xtag>(alias_expected_dt);
 }
 
-TEST(CompleteToDynamicType, MyAnonStruct)
+TEST_F(dds_DCPS_XTypes_DynamicType, CompleteToDynamicType_MyAnonStruct)
 {
   XTypes::DynamicType_rch expected_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor td;
@@ -471,7 +483,7 @@ TEST(CompleteToDynamicType, MyAnonStruct)
   test_conversion<DCPS::MyMod_MyAnonStruct_xtag>(expected_dt);
 }
 
-TEST(CompleteToDynamicType, CircularStruct)
+TEST_F(dds_DCPS_XTypes_DynamicType, CompleteToDynamicType_CircularStruct)
 {
   XTypes::DynamicType_rch struct_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor struct_td;
@@ -530,9 +542,8 @@ TEST(CompleteToDynamicType, CircularStruct)
   test_conversion<DCPS::MyMod_CircularStruct_xtag>(struct_expected_dt);
 }
 
-int main(int argc, char* argv[])
+void dds_DCPS_XTypes_DynamicType::MoreSetup()
 {
-  ::testing::InitGoogleTest(&argc, argv);
   XTypes::TypeIdentifierPairSeq tid_pairs;
 
   XTypes::TypeIdentifierPair my_inner_struct_tids;
@@ -580,16 +591,14 @@ int main(int argc, char* argv[])
   anon_struct_tids.type_identifier2 = DCPS::getMinimalTypeIdentifier<DCPS::MyMod_MyAnonStruct_xtag>();
   tid_pairs.append(anon_struct_tids);
 
-  tls->update_type_identifier_map(tid_pairs);
+  tls_->update_type_identifier_map(tid_pairs);
 
   MyMod::MyInnerStructTypeSupportImpl inner_typesupport;
   MyMod::MyOuterStructTypeSupportImpl outer_typesupport;
   MyMod::MyUnionTypeSupportImpl union_typesupport;
   MyMod::MyAnonStructTypeSupportImpl anon_typesupport;
-  inner_typesupport.add_types(tls);
-  outer_typesupport.add_types(tls);
-  union_typesupport.add_types(tls);
-  anon_typesupport.add_types(tls);
-
-  return RUN_ALL_TESTS();
+  inner_typesupport.add_types(tls_);
+  outer_typesupport.add_types(tls_);
+  union_typesupport.add_types(tls_);
+  anon_typesupport.add_types(tls_);
 }
