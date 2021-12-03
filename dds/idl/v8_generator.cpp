@@ -32,7 +32,7 @@ namespace {
 
   std::string ltrim(const std::string& s)
   {
-    size_t start = s.find_first_not_of(" \n\r\t\f\v");
+    size_t start = s.find_first_not_of("\n\r\t\f\v ");
     return (start == std::string::npos) ? "" : s.substr(start);
   }
 
