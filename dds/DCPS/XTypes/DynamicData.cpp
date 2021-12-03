@@ -2106,8 +2106,11 @@ bool DynamicData::skip_collection_member(DynamicType_rch coll_type)
   } else if (kind == TK_ARRAY) {
     skip_to_array_element(0, coll_type, true);
   } else if (kind == TK_MAP) {
-    // Maps are not currently supported in OpenDDS
-    // skip_to_map_element(0, coll_type->get_descriptor().element_type, true);
+    if (DCPS::log_level >= DCPS::LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicData::skip_collection_member: "
+                 "Maps are not currently supported in OpenDDS\n"));
+    }
+    return false;
   }
   return true;
 }
