@@ -61,8 +61,8 @@ DynamicData::DynamicData(ACE_Message_Block* chain,
   , descriptor_(type_->get_descriptor())
   , item_count_(ITEM_COUNT_INVALID)
 {
-  if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
-    throw std::runtime_error("DynamicData only supports XCDR2 at this time");
+  if (encoding_.xcdr_version() == DCPS::Encoding::XCDR_VERSION_NONE) {
+    throw std::runtime_error("DynamicData only supports XCDR1 and XCDR2 at this time");
   }
 }
 
@@ -76,8 +76,8 @@ DynamicData::DynamicData(DCPS::Serializer& ser, const DynamicType_rch& type)
   , descriptor_(type_->get_descriptor())
   , item_count_(ITEM_COUNT_INVALID)
 {
-  if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
-    throw std::runtime_error("DynamicData only supports XCDR2 at this time");
+  if (encoding_.xcdr_version() == DCPS::Encoding::XCDR_VERSION_NONE) {
+    throw std::runtime_error("DynamicData only supports XCDR1 and XCDR2 at this time");
   }
 }
 
@@ -501,8 +501,7 @@ ACE_CDR::ULong DynamicData::get_item_count()
   case TK_SEQUENCE:
     {
       const DynamicType_rch elem_type = get_base_type(descriptor_.element_type);
-      ACE_CDR::ULong size;
-      if (!is_primitive(elem_type->get_kind(), size)) {
+      if (!is_primitive(elem_type->get_kind())) {
         size_t dheader;
         if (!strm_.read_delimiter(dheader)) {
           return 0;
@@ -526,9 +525,8 @@ ACE_CDR::ULong DynamicData::get_item_count()
     {
       const DynamicType_rch key_type = get_base_type(descriptor_.key_element_type);
       const DynamicType_rch elem_type = get_base_type(descriptor_.element_type);
-      ACE_CDR::ULong key_size, elem_size;
-      if (is_primitive(key_type->get_kind(), key_size) &&
-          is_primitive(elem_type->get_kind(), elem_size)) {
+      if (is_primitive(key_type->get_kind()) &&
+          is_primitive(elem_type->get_kind())) {
         ACE_CDR::ULong length;
         if (!(strm_ >> length)) {
           return 0;
@@ -569,8 +567,7 @@ DynamicData DynamicData::clone() const
 
 bool DynamicData::is_type_supported(TypeKind tk, const char* func_name)
 {
-  ACE_CDR::ULong size;
-  if (!is_primitive(tk, size) && tk != TK_STRING8 && tk != TK_STRING16) {
+  if (!is_primitive(tk) && tk != TK_STRING8 && tk != TK_STRING16) {
     if (DCPS::DCPS_debug_level >= 1) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DynamicData::%C -")
                  ACE_TEXT(" Called on an unsupported type (%C)\n"), func_name, typekind_to_string(tk)));
@@ -763,11 +760,16 @@ bool DynamicData::get_value_from_union(MemberType& value, MemberId id,
     read_value(value, MemberTypeKind);
 }
 
-bool DynamicData::skip_to_sequence_element(MemberId id)
+bool DynamicData::skip_to_sequence_element(MemberId id, DynamicType_rch coll_type, bool skip_all)
 {
-  const DynamicType_rch elem_type = get_base_type(descriptor_.element_type);
+  DynamicType_rch elem_type;
+  if (coll_type.is_nil()) {
+    elem_type = get_base_type(descriptor_.element_type);
+  } else {
+    elem_type = get_base_type(coll_type->get_descriptor().element_type);
+  }
   ACE_CDR::ULong size;
-  if (is_primitive(elem_type->get_kind(), size)) {
+  if (get_primitive_size(elem_type, size)) {
     ACE_CDR::ULong length, index;
     return (strm_ >> length) &&
       get_index_from_id(id, index, length) &&
@@ -775,11 +777,14 @@ bool DynamicData::skip_to_sequence_element(MemberId id)
   } else {
     size_t dheader;
     ACE_CDR::ULong length, index;
-    if (!strm_.read_delimiter(dheader) || !(strm_ >> length) ||
-        !get_index_from_id(id, index, length)) {
+    if (!strm_.read_delimiter(dheader) || !(strm_ >> length)) {
       return false;
     }
-
+    if (skip_all) {
+      index = length;
+    } else if (!get_index_from_id(id, index, length)) {
+      return false;
+    }
     for (ACE_CDR::ULong i = 0; i < index; ++i) {
       if (!skip_member(elem_type)) {
         return false;
@@ -789,25 +794,36 @@ bool DynamicData::skip_to_sequence_element(MemberId id)
   }
 }
 
-bool DynamicData::skip_to_array_element(MemberId id)
+bool DynamicData::skip_to_array_element(MemberId id, DynamicType_rch coll_type, bool skip_all)
 {
-  const DynamicType_rch elem_type = get_base_type(descriptor_.element_type);
+  DynamicType_rch elem_type;
+  if (coll_type.is_nil()) {
+    elem_type = get_base_type(descriptor_.element_type);
+    coll_type = type_;
+  } else {
+    elem_type = get_base_type(coll_type->get_descriptor().element_type);
+  }
+
   ACE_CDR::ULong length = 1;
-  for (ACE_CDR::ULong i = 0; i < descriptor_.bound.length(); ++i) {
-    length *= descriptor_.bound[i];
+  for (ACE_CDR::ULong i = 0; i < coll_type->get_descriptor().bound.length(); ++i) {
+    length *= coll_type->get_descriptor().bound[i];
   }
 
   ACE_CDR::ULong size;
-  if (is_primitive(elem_type->get_kind(), size)) {
+  if (get_primitive_size(elem_type, size)) {
     ACE_CDR::ULong index;
     return get_index_from_id(id, index, length) && strm_.skip(index, size);
   } else {
     size_t dheader;
     ACE_CDR::ULong index;
-    if (!strm_.read_delimiter(dheader) || !get_index_from_id(id, index, length)) {
+    if (!strm_.read_delimiter(dheader)) {
       return false;
     }
-
+    if (skip_all) {
+      index = length;
+    } else if (!get_index_from_id(id, index, length)) {
+      return false;
+    }
     for (ACE_CDR::ULong i = 0; i < index; ++i) {
       if (!skip_member(elem_type)) {
         return false;
@@ -823,8 +839,8 @@ bool DynamicData::skip_to_map_element(MemberId id)
   const DynamicType_rch elem_type = get_base_type(descriptor_.element_type);
   ACE_CDR::ULong key_size, elem_size;
 
-  if (is_primitive(key_type->get_kind(), key_size) &&
-      is_primitive(elem_type->get_kind(), elem_size)) {
+  if (get_primitive_size(key_type, key_size) &&
+      get_primitive_size(elem_type, elem_size)) {
     ACE_CDR::ULong length, index;
     if (!(strm_ >> length) || !get_index_from_id(id, index, length)) {
       return false;
@@ -1995,7 +2011,7 @@ bool DynamicData::skip_sequence_member(DynamicType_rch seq_type)
   const DynamicType_rch elem_type = get_base_type(descriptor.element_type);
 
   ACE_CDR::ULong primitive_size = 0;
-  if (is_primitive(elem_type->get_kind(), primitive_size)) {
+  if (get_primitive_size(elem_type, primitive_size)) {
     ACE_CDR::ULong length;
     if (!(strm_ >> length)) {
       if (DCPS::DCPS_debug_level >= 1) {
@@ -2008,7 +2024,7 @@ bool DynamicData::skip_sequence_member(DynamicType_rch seq_type)
     return skip("skip_sequence_member", "Failed to skip a primitive sequence member",
                 length, primitive_size);
   } else {
-    return skip_collection_member(TK_SEQUENCE);
+    return skip_collection_member(seq_type);
   }
 }
 
@@ -2018,7 +2034,7 @@ bool DynamicData::skip_array_member(DynamicType_rch array_type)
   const DynamicType_rch elem_type = get_base_type(descriptor.element_type);
 
   ACE_CDR::ULong primitive_size = 0;
-  if (is_primitive(elem_type->get_kind(), primitive_size)) {
+  if (get_primitive_size(elem_type, primitive_size)) {
     const LBoundSeq& bounds = descriptor.bound;
     ACE_CDR::ULong num_elems = 1;
     for (unsigned i = 0; i < bounds.length(); ++i) {
@@ -2028,7 +2044,7 @@ bool DynamicData::skip_array_member(DynamicType_rch array_type)
     return skip("skip_array_member", "Failed to skip a primitive array member",
                 num_elems, primitive_size);
   } else {
-    return skip_collection_member(TK_ARRAY);
+    return skip_collection_member(array_type);
   }
 }
 
@@ -2039,8 +2055,8 @@ bool DynamicData::skip_map_member(DynamicType_rch map_type)
   const DynamicType_rch key_type = get_base_type(descriptor.key_element_type);
 
   ACE_CDR::ULong key_primitive_size = 0, elem_primitive_size = 0;
-  if (is_primitive(key_type->get_kind(), key_primitive_size) &&
-      is_primitive(elem_type->get_kind(), elem_primitive_size)) {
+  if (get_primitive_size(key_type, key_primitive_size) &&
+      get_primitive_size(elem_type, elem_primitive_size)) {
     ACE_CDR::ULong length;
     if (!(strm_ >> length)) {
       if (DCPS::DCPS_debug_level >= 1) {
@@ -2062,17 +2078,17 @@ bool DynamicData::skip_map_member(DynamicType_rch map_type)
     }
     return true;
   } else {
-    return skip_collection_member(TK_MAP);
+    return skip_collection_member(map_type);
   }
 }
 
-bool DynamicData::skip_collection_member(TypeKind kind)
+bool DynamicData::skip_collection_member(DynamicType_rch coll_type)
 {
+  TypeKind kind = coll_type->get_kind();
   if (kind != TK_SEQUENCE && kind != TK_ARRAY && kind != TK_MAP) {
     return false;
   }
   const char* kind_str = typekind_to_string(kind);
-
   size_t dheader;
   if (!strm_.read_delimiter(dheader)) {
     if (DCPS::DCPS_debug_level >= 1) {
@@ -2082,9 +2098,18 @@ bool DynamicData::skip_collection_member(TypeKind kind)
     }
     return false;
   }
-
-  const DCPS::String err_msg = DCPS::String("Failed to skip a non-primitive ") + kind_str + " member";
-  return skip("skip_collection_member", err_msg.c_str(), dheader);
+  if (strm_.encoding().kind() == DCPS::Encoding::KIND_XCDR2) {
+    const DCPS::String err_msg = DCPS::String("Failed to skip a non-primitive ") + kind_str + " member";
+    return skip("skip_collection_member", err_msg.c_str(), dheader);
+  } else if (kind == TK_SEQUENCE) {
+    skip_to_sequence_element(0, coll_type, true);
+  } else if (kind == TK_ARRAY) {
+    skip_to_array_element(0, coll_type, true);
+  } else if (kind == TK_MAP) {
+    // Maps are not currently supported in OpenDDS
+    // skip_to_map_element(0, coll_type->get_descriptor().element_type, true);
+  }
+  return true;
 }
 
 bool DynamicData::skip_aggregated_member(const DynamicType_rch& member_type)
@@ -2238,7 +2263,7 @@ bool DynamicData::skip_all()
   }
 
   const ExtensibilityKind extensibility = descriptor_.extensibility_kind;
-  if (extensibility == APPENDABLE || extensibility == MUTABLE) {
+  if (strm_.encoding().kind() == DCPS::Encoding::KIND_XCDR2 && (extensibility == APPENDABLE || extensibility == MUTABLE)) {
     size_t dheader;
     if (!strm_.read_delimiter(dheader)) {
       if (DCPS::DCPS_debug_level >= 1) {
@@ -2323,11 +2348,37 @@ DynamicType_rch DynamicData::get_base_type(const DynamicType_rch& type) const
   return type->get_base_type();
 }
 
-bool DynamicData::is_primitive(TypeKind tk, ACE_CDR::ULong& size) const
+bool DynamicData::is_primitive(TypeKind tk) const
+{
+  switch (tk) {
+  case TK_BOOLEAN:
+  case TK_BYTE:
+  case TK_INT8:
+  case TK_UINT8:
+  case TK_CHAR8:
+  case TK_INT16:
+  case TK_UINT16:
+  case TK_CHAR16:
+  case TK_INT32:
+  case TK_UINT32:
+  case TK_FLOAT32:
+  case TK_INT64:
+  case TK_UINT64:
+  case TK_FLOAT64:
+  case TK_FLOAT128:
+    return true;
+    break;
+  default:
+    return false;
+  }
+  return true;
+}
+
+bool DynamicData::get_primitive_size(const DynamicType_rch& dt, ACE_CDR::ULong& size) const
 {
   size = 0;
 
-  switch (tk) {
+  switch (dt->get_kind()) {
   case TK_BOOLEAN:
   case TK_BYTE:
   case TK_INT8:

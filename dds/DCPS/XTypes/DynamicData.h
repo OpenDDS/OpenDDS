@@ -233,8 +233,8 @@ private:
 
   ///@{
   /** Skip to an element with a given ID in a sequence or array. */
-  bool skip_to_sequence_element(MemberId id);
-  bool skip_to_array_element(MemberId id);
+  bool skip_to_sequence_element(MemberId id, DynamicType_rch coll_type = DynamicType_rch(), bool skip_all = false);
+  bool skip_to_array_element(MemberId id, DynamicType_rch coll_type = DynamicType_rch(), bool skip_all = false);
   ///@}
 
   /// Skip to an element with a given ID in a map. The key associated with that
@@ -305,7 +305,7 @@ private:
 
   /// Skip a non-primitive collection member. That is, a sequence or an array of non-primitive
   /// elements, or a map with at least either key type or value type is non-primitive.
-  bool skip_collection_member(TypeKind tk);
+  bool skip_collection_member(DynamicType_rch coll_type);
 
   /// Skip a member which is a structure or a union.
   bool skip_aggregated_member(const DynamicType_rch& type);
@@ -314,7 +314,9 @@ private:
 
   // TODO: This method can be moved to DynamicType-related classes.
   DynamicType_rch get_base_type(const DynamicType_rch& alias_type) const;
-  bool is_primitive(TypeKind tk, ACE_CDR::ULong& size) const;
+  bool is_primitive(TypeKind tk) const;
+  bool get_primitive_size(const DynamicType_rch& dt, ACE_CDR::ULong& size) const;
+
   bool has_optional_member(bool& has_optional) const;
 
   bool get_index_from_id(MemberId id, ACE_CDR::ULong& index, ACE_CDR::ULong bound) const;
