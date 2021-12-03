@@ -97,7 +97,7 @@ std::ostream& operator<<(std::ostream& os, const TypeIdentifier& ti)
   return os << '\n';
 }
 
-TEST(dds_DCPS_XTypes_TypeObject, main)
+TEST(dds_DCPS_XTypes_TypeObject, maintest)
 {
   Sequence<ACE_CDR::ULong> sequ;
   const unsigned char length_only[] = {0, 0, 0, 0};
