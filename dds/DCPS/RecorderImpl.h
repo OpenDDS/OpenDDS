@@ -96,7 +96,7 @@ public:
 
   void remove_all_associations();
 
-  void add_to_dynamic_type_map(PublicationId pub_id, const XTypes::TypeIdentifier& ti);
+  void add_to_dynamic_type_map(const PublicationId& pub_id, const XTypes::TypeIdentifier& ti);
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
   // implement Recoder
