@@ -1395,15 +1395,15 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::TypeObject& to)
 }
 
 void
-typeobject_generator::gen_prologue()
+typeobject_generator::declare_get_type_map()
 {
-  if (!produce_output_) {
+  if (!produce_output_ || get_type_map_declared_) {
     return;
   }
+  get_type_map_declared_ = true;
 
   be_global->add_include("dds/DCPS/XTypes/TypeObject.h", BE_GlobalData::STREAM_H);
 
-  NamespaceGuard ng;
   be_global->impl_ << "static const XTypes::TypeMap& get_minimal_type_map();\n";
 
   if (produce_xtypes_complete_) {
@@ -1416,7 +1416,7 @@ typeobject_generator::gen_epilogue()
 {
   be_global->add_include("dds/DCPS/Service_Participant.h");
 
-  if (!produce_output_) {
+  if (!produce_output_ || !get_type_map_declared_) {
     return;
   }
 
@@ -2531,6 +2531,7 @@ typeobject_generator::generate(AST_Type* node, UTL_ScopedName* name)
       "  return ti;\n";
   }
 
+  declare_get_type_map();
   {
     const string decl = "getMinimalTypeMap<" + clazz + ">";
     Function gti(decl.c_str(), "const XTypes::TypeMap&", "");
