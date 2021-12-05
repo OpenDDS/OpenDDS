@@ -1,0 +1,64 @@
+#include <tao/BooleanSeq.pidl>
+
+module Dynamic {
+typedef sequence<boolean> bool_seq;
+typedef char char_arr[2];
+enum EnumType {V1, V2};
+@topic
+@mutable
+@::OpenDDS::data_representation(XCDR2)
+struct my_struct {
+  int8 my_int8;
+  uint8 my_uint8;
+  short my_short;
+  unsigned short my_ushort;
+  long my_long;
+  unsigned long my_ulong;
+  long long my_longlong;
+  unsigned long long my_ulonglong;
+  float my_float;
+  double my_double;
+  long double my_longdouble;
+  boolean my_boolean;
+  octet my_byte;
+  char my_char;
+  wchar my_wchar;
+  string my_string;
+  wstring my_wstring;
+  bool_seq my_alias_seq;
+  char_arr my_alias_array;
+  sequence<EnumType, 2> my_anon_seq;
+  short my_anon_arr[2];
+};
+
+@topic
+@mutable
+@::OpenDDS::data_representation(XCDR2)
+union inner_union switch (long) {
+  case 1: long l;
+  case 2: bool_seq my_alias_seq;
+  default: boolean b;
+};
+
+@final
+@::OpenDDS::data_representation(XCDR2)
+struct inner_struct {
+  inner_union iu;
+};
+
+@topic
+@mutable
+@::OpenDDS::data_representation(XCDR2)
+union outer_union switch (EnumType) {
+  case V1: inner_struct is;
+  case V2: inner_union mu;
+  default: boolean b;
+};
+
+@topic
+@appendable
+@::OpenDDS::data_representation(XCDR2)
+struct outer_struct {
+  inner_struct is;
+};
+};

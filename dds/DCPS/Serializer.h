@@ -13,11 +13,11 @@
  *       const Encoding& encoding, size_t& size, const Type& value);
  *     Get the byte size of the representation of value.
  *
- *   bool operator<<(Serializer& serializer, Type& value);
+ *   bool operator<<(Serializer& serializer, const Type& value);
  *     Tries to encode value into the stream of the serializer. Returns true if
  *     successful, else false.
  *
- *   bool operator>>(Serializer& serializer, const Type& value);
+ *   bool operator>>(Serializer& serializer, Type& value);
  *     Tries to decodes a representation of Type located at the current
  *     position of the stream and use that to set value. Returns true if
  *     successful, else false.
@@ -265,6 +265,11 @@ public:
    */
   bool to_encoding(Encoding& encoding, Extensibility expected_extensibility);
 
+  /**
+   * Like to_encoding, but without an expected extensibility.
+   */
+  bool to_any_encoding(Encoding& encoding);
+
   String to_string() const;
 
   static bool set_encapsulation_options(Message_Block_Ptr& mb);
@@ -274,6 +279,8 @@ private:
   Kind kind_;
   /// The last two bytes as a big endian integer
   ACE_CDR::UShort options_;
+
+  bool to_encoding_i(Encoding& encoding, Extensibility* expected_extensibility_ptr);
 };
 
 class Serializer;
@@ -453,6 +460,11 @@ public:
 
   /// Examine the logical writing position of the stream.
   size_t wpos() const { return wpos_; }
+
+  ACE_Message_Block* current() const
+  {
+    return current_;
+  }
 
   /**
    * Read basic IDL types arrays
@@ -765,6 +777,16 @@ public:
   }
 
   bool peek(ACE_CDR::ULong& t);
+
+  // This is used by DynamicData and must have all reading-related members of
+  // of Serializer for DynamicData to work correctly.
+  struct RdState {
+    unsigned char align_rshift;
+    size_t rpos;
+  };
+
+  RdState rdstate() const;
+  void rdstate(const RdState& state);
 
 private:
   ///@{

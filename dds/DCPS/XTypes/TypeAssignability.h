@@ -141,7 +141,7 @@ private:
 
   const MinimalTypeObject& lookup_minimal(const TypeIdentifier& ti) const
   {
-    return tl_service_->get_type_objects(ti).minimal;
+    return tl_service_->get_type_object(ti).minimal;
   }
 
   XTypes::TypeLookupService_rch tl_service_;

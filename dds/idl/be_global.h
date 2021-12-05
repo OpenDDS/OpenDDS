@@ -87,6 +87,7 @@ public:
   void reset_includes();
 
   void add_include(const char* file, stream_enum_t which = STREAM_H);
+  void conditional_include(const char* file, stream_enum_t which, const char* condition);
 
   /// Called to indicate that OpenDDS marshaling (serialization) code for the
   /// current file will depend on marshaling code generated for the indicated
@@ -118,7 +119,7 @@ public:
   ACE_CString pch_include() const;
   void pch_include(const ACE_CString& str);
 
-  const std::set<std::string>& cpp_includes() const;
+  const std::set<std::pair<std::string, std::string> >& cpp_includes() const;
   void add_cpp_include(const std::string& str);
 
   bool java() const;
@@ -139,11 +140,17 @@ public:
   bool rapidjson() const;
   void rapidjson(bool b);
 
+  bool value_reader_writer() const;
+  void value_reader_writer(bool b);
+
   bool face_ts() const;
   void face_ts(bool b);
 
   bool printer() const;
   void printer(bool b);
+
+  bool xtypes_complete() const;
+  void xtypes_complete(bool b);
 
   ACE_CString java_arg() const;
   void java_arg(const ACE_CString& str);
@@ -240,15 +247,16 @@ private:
   const char* filename_;
 
   bool java_, suppress_idl_, suppress_typecode_, suppress_xtypes_,
-    no_default_gen_, generate_itl_, generate_v8_,
-    generate_rapidjson_, face_ts_, printer_;
+    no_default_gen_, generate_itl_, generate_v8_, generate_rapidjson_,
+    generate_value_reader_writer_,
+    generate_xtypes_complete_, face_ts_, printer_;
 
   bool filename_only_includes_;
 
   ACE_CString export_macro_, export_include_,
     versioning_name_, versioning_begin_, versioning_end_,
     pch_include_, java_arg_, sequence_suffix_;
-  std::set<std::string> cpp_includes_;
+  std::set<std::pair<std::string, std::string> > cpp_includes_;
 
   LanguageMapping language_mapping_;
 
