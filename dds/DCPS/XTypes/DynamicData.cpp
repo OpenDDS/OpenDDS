@@ -1709,6 +1709,12 @@ DDS::ReturnCode_t DynamicData::get_wstring_values(WStringSeq& value, MemberId id
 }
 #endif
 
+bool DynamicData::check_xcdr1_mutable(const DynamicType_rch& dt)
+{
+  DynamicTypeNameSet dtns;
+  return check_xcdr1_mutable_i(dt, dtns);
+}
+
 bool DynamicData::skip_to_struct_member(const MemberDescriptor& member_desc, MemberId id)
 {
   const ExtensibilityKind ek = descriptor_.extensibility_kind;
@@ -2493,6 +2499,36 @@ const char* DynamicData::typekind_to_string(TypeKind tk) const
   default:
     return "unknown";
   }
+}
+
+bool DynamicData::check_xcdr1_mutable_i(const DynamicType_rch& dt, DynamicTypeNameSet& dtns)
+{
+  if (dtns.find(dt->get_descriptor().name) != dtns.end()) {
+    return true;
+  }
+  if (dt->get_descriptor().extensibility_kind == MUTABLE &&
+      encoding_.kind() == DCPS::Encoding::KIND_XCDR1) {
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicData::check_xcdr1_mutable: "
+                 "XCDR1 mutable is not currently supported in OpenDDS\n"));
+    }
+    return false;
+  }
+  dtns.insert(dt->get_descriptor().name);
+  DynamicTypeMember_rch dtm;
+  for (ACE_CDR::ULong i = 0; i < dt->get_member_count(); ++i) {
+    if (dt->get_member_by_index(dtm, i) != DDS::RETCODE_OK) {
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicData::check_xcdr1_mutable: "
+                  "Failed to get member from DynamicType\n"));
+      }
+      return false;
+    }
+    if (!check_xcdr1_mutable_i(dtm->get_descriptor().get_type(), dtns)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 #ifndef OPENDDS_SAFETY_PROFILE

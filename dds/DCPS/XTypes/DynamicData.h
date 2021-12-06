@@ -152,6 +152,8 @@ public:
 
   DynamicType_rch type() const { return type_; }
 
+  bool check_xcdr1_mutable(const DynamicType_rch& dt);
+
 private:
   void copy(const DynamicData& other);
 
@@ -312,7 +314,6 @@ private:
 
   void release_chains();
 
-  // TODO: This method can be moved to DynamicType-related classes.
   DynamicType_rch get_base_type(const DynamicType_rch& alias_type) const;
   bool is_primitive(TypeKind tk) const;
   bool get_primitive_size(const DynamicType_rch& dt, ACE_CDR::ULong& size) const;
@@ -321,6 +322,10 @@ private:
 
   bool get_index_from_id(MemberId id, ACE_CDR::ULong& index, ACE_CDR::ULong bound) const;
   const char* typekind_to_string(TypeKind tk) const;
+
+  /// A set of strings used to prevent infinite recursion when checking for XCDR1 Mutable
+  typedef OPENDDS_SET(DCPS::String) DynamicTypeNameSet;
+  bool check_xcdr1_mutable_i(const DynamicType_rch& dt, DynamicTypeNameSet& dtns);
 
   /// A duplicate of the original message block chain passed from the constructor.
   /// This is released in the destructor.
