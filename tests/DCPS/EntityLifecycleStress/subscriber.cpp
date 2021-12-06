@@ -192,7 +192,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       exit(1);
     }
 
-    const OpenDDS::DCPS::MonotonicTimePoint deadline = OpenDDS::DCPS::MonotonicTimePoint::now() + OpenDDS::DCPS::TimeDuration(2, 500000);
+    const OpenDDS::DCPS::MonotonicTimePoint deadline = OpenDDS::DCPS::MonotonicTimePoint::now() + OpenDDS::DCPS::TimeDuration(7, 500000);
 
     drli->wait_valid_data(deadline);
 

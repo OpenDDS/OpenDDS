@@ -885,6 +885,7 @@ TransportSendStrategy::stop()
                    ACE_TEXT("terminating with %d unsent bytes.\n"),
                    size));
       }
+      pkt_chain_ = 0;
     }
 
     if (elems_.size()) {
