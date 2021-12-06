@@ -15,11 +15,12 @@ my $status = 0;
 
 sub run_test {
   my @test_name_params = ("my_struct", "outer_struct", "inner_union", "outer_union");
-  my @test_extensibilities = ("_final", "_appendable");
+  my @test_extensibilities = ("_final", "_appendable", "_mutable");
   my @xcdr_version_params = ("1", "2");
   foreach my $test_name_param(@test_name_params) {
     foreach my $test_extensibility(@test_extensibilities) {
       foreach my $xcdr_version_param(@xcdr_version_params) {
+        if ($xcdr_version_param != "1" || $test_extensibility != "_mutable") {
         my $reader_name = "reader_$test_name_param" . $test_extensibility . "_XCDR$xcdr_version_param";
         my $writer_name = "writer_$test_name_param" . $test_extensibility . "_XCDR$xcdr_version_param";
         my @reader_args = ($test_name_param . "$test_extensibility $xcdr_version_param -DCPSConfigFile rtps_disc.ini -ORBLogFile recorder_$reader_name.log -ORBDebugLevel 10 -DCPSDebugLevel 10");
@@ -32,6 +33,7 @@ sub run_test {
 
         $status |= $test->wait_kill("reader_$test_name_param" . "$test_extensibility" . "_XCDR$xcdr_version_param", 15);
         $status |= $test->wait_kill("writer_$test_name_param" . "$test_extensibility" . "_XCDR$xcdr_version_param", 15);
+       }
       }
     }
   }
