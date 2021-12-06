@@ -99,7 +99,7 @@ OpenDDS::DCPS::TcpDataLink::client_stop(const RepoId& local_id)
   stopped_clients_.insert(local_id);
 
   TcpSendStrategy_rch strategy = send_strategy();
-  if (strategy) { 
+  if (strategy) {
     strategy->remove_all_msgs(local_id);
   }
 }
