@@ -46,7 +46,7 @@ public:
 
   /// override the MAC address to use a specific network interface
   /// instead of just the first (non-loopback) interface
-  int interfaceName(const char* interface);
+  int interfaceName(const char* nic);
 
   /// populate a GUID container with a unique ID. This will increment
   /// the counter, and use a lock (if compiled with MT ACE) while
