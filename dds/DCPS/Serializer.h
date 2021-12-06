@@ -781,6 +781,8 @@ public:
   // This is used by DynamicData and must have all reading-related members of
   // of Serializer for DynamicData to work correctly.
   struct RdState {
+    explicit RdState(unsigned char shift = 0, size_t pos = 0)
+      : align_rshift(shift), rpos(pos) {}
     unsigned char align_rshift;
     size_t rpos;
   };

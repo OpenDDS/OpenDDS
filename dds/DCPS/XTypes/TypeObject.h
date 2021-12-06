@@ -1244,7 +1244,9 @@ namespace XTypes {
     CompleteStructHeader header;
     CompleteStructMemberSeq member_seq;
 
-    CompleteStructType() {}
+    CompleteStructType()
+      : struct_flags(0)
+    {}
 
     CompleteStructType(const StructTypeFlag& a_struct_flags,
                        const CompleteStructHeader& a_header,
@@ -2065,7 +2067,9 @@ namespace XTypes {
     // ===================  Future extensibility  ============
     CompleteExtendedType extended_type;
 
-    CompleteTypeObject() {}
+    CompleteTypeObject()
+      : kind(TK_NONE)
+    {}
 
     explicit CompleteTypeObject(const CompleteAliasType& alias)
       : kind(TK_ALIAS)

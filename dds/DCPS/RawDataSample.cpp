@@ -14,6 +14,7 @@ RawDataSample::RawDataSample()
   : message_id_(SAMPLE_DATA)
   , publication_id_(GUID_UNKNOWN)
   , sample_byte_order_(false)
+  , encoding_kind_(Encoding::KIND_UNALIGNED_CDR)
 {
   source_timestamp_.sec = 0;
   source_timestamp_.nanosec = 0;
