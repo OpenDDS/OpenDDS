@@ -97,6 +97,11 @@ OpenDDS::DCPS::TcpDataLink::client_stop(const RepoId& local_id)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(stopped_clients_mutex_);
   stopped_clients_.insert(local_id);
+
+  TcpSendStrategy_rch strategy = send_strategy();
+  if (strategy) { 
+    strategy->remove_all_msgs(local_id);
+  }
 }
 
 void
