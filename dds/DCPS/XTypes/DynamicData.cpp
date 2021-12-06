@@ -82,7 +82,8 @@ DynamicData::DynamicData(DCPS::Serializer& ser, const DynamicType_rch& type)
 }
 
 DynamicData::DynamicData(const DynamicData& other)
-  : strm_(0, other.encoding_)
+  : chain_(0)
+  , strm_(0, other.encoding_)
 {
   copy(other);
 }

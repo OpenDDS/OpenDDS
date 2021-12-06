@@ -1737,7 +1737,7 @@ void Serializer::set_construction_status(ConstructionStatus cs)
 ACE_INLINE
 Serializer::RdState Serializer::rdstate() const
 {
-  RdState state = {align_rshift_, rpos_};
+  RdState state(align_rshift_, rpos_);
   return state;
 }
 
