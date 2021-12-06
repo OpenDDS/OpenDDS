@@ -234,9 +234,9 @@ private:
   bool get_from_union_common_checks(MemberId id, const char* func_name, MemberDescriptor& md);
 
   ///@{
-  /** Skip to an element with a given ID in a sequence or array. */
-  bool skip_to_sequence_element(MemberId id, DynamicType_rch coll_type = DynamicType_rch(), bool skip_all = false);
-  bool skip_to_array_element(MemberId id, DynamicType_rch coll_type = DynamicType_rch(), bool skip_all = false);
+  /** Skip to an element with a given ID in a sequence or array, or skip the entire collection. */
+  bool skip_to_sequence_element(MemberId id, DynamicType_rch coll_type = DynamicType_rch());
+  bool skip_to_array_element(MemberId id, DynamicType_rch coll_type = DynamicType_rch());
   ///@}
 
   /// Skip to an element with a given ID in a map. The key associated with that

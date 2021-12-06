@@ -61,7 +61,8 @@ DynamicData::DynamicData(ACE_Message_Block* chain,
   , descriptor_(type_->get_descriptor())
   , item_count_(ITEM_COUNT_INVALID)
 {
-  if (encoding_.xcdr_version() == DCPS::Encoding::XCDR_VERSION_NONE) {
+  if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_1 &&
+      encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
     throw std::runtime_error("DynamicData only supports XCDR1 and XCDR2 at this time");
   }
 }
@@ -76,7 +77,8 @@ DynamicData::DynamicData(DCPS::Serializer& ser, const DynamicType_rch& type)
   , descriptor_(type_->get_descriptor())
   , item_count_(ITEM_COUNT_INVALID)
 {
-  if (encoding_.xcdr_version() == DCPS::Encoding::XCDR_VERSION_NONE) {
+  if (encoding_.xcdr_version() == DCPS::Encoding::XCDR_VERSION_1 &&
+      encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
     throw std::runtime_error("DynamicData only supports XCDR1 and XCDR2 at this time");
   }
 }
@@ -760,13 +762,15 @@ bool DynamicData::get_value_from_union(MemberType& value, MemberId id,
     read_value(value, MemberTypeKind);
 }
 
-bool DynamicData::skip_to_sequence_element(MemberId id, DynamicType_rch coll_type, bool skip_all)
+bool DynamicData::skip_to_sequence_element(MemberId id, DynamicType_rch coll_type)
 {
   DynamicType_rch elem_type;
+  bool skip_all = false;
   if (coll_type.is_nil()) {
     elem_type = get_base_type(descriptor_.element_type);
   } else {
     elem_type = get_base_type(coll_type->get_descriptor().element_type);
+    skip_all = true;
   }
   ACE_CDR::ULong size;
   if (get_primitive_size(elem_type, size)) {
@@ -794,14 +798,16 @@ bool DynamicData::skip_to_sequence_element(MemberId id, DynamicType_rch coll_typ
   }
 }
 
-bool DynamicData::skip_to_array_element(MemberId id, DynamicType_rch coll_type, bool skip_all)
+bool DynamicData::skip_to_array_element(MemberId id, DynamicType_rch coll_type)
 {
   DynamicType_rch elem_type;
+  bool skip_all = false;
   if (coll_type.is_nil()) {
     elem_type = get_base_type(descriptor_.element_type);
     coll_type = type_;
   } else {
     elem_type = get_base_type(coll_type->get_descriptor().element_type);
+    skip_all = true;
   }
 
   ACE_CDR::ULong length = 1;
@@ -2090,7 +2096,7 @@ bool DynamicData::skip_map_member(DynamicType_rch map_type)
 
 bool DynamicData::skip_collection_member(DynamicType_rch coll_type)
 {
-  TypeKind kind = coll_type->get_kind();
+  const TypeKind kind = coll_type->get_kind();
   if (kind != TK_SEQUENCE && kind != TK_ARRAY && kind != TK_MAP) {
     return false;
   }
@@ -2108,13 +2114,13 @@ bool DynamicData::skip_collection_member(DynamicType_rch coll_type)
     const DCPS::String err_msg = DCPS::String("Failed to skip a non-primitive ") + kind_str + " member";
     return skip("skip_collection_member", err_msg.c_str(), dheader);
   } else if (kind == TK_SEQUENCE) {
-    return skip_to_sequence_element(0, coll_type, true);
+    return skip_to_sequence_element(0, coll_type);
   } else if (kind == TK_ARRAY) {
-    return skip_to_array_element(0, coll_type, true);
+    return skip_to_array_element(0, coll_type);
   } else if (kind == TK_MAP) {
     if (DCPS::log_level >= DCPS::LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicData::skip_collection_member: "
-                 "Maps are not currently supported in OpenDDS\n"));
+                 "DynamicData does not currently support XCDR1 maps\n"));
     }
     return false;
   }
@@ -2376,7 +2382,6 @@ bool DynamicData::is_primitive(TypeKind tk) const
   case TK_FLOAT64:
   case TK_FLOAT128:
     return true;
-    break;
   default:
     return false;
   }
