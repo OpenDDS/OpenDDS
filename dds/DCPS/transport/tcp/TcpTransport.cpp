@@ -389,6 +389,10 @@ TcpTransport::client_stop(const RepoId& local_id)
   for (AddrLinkMap::ITERATOR itr(links_); itr.next(entry); itr.advance()) {
     entry->int_id_->client_stop(local_id);
   }
+
+  for (AddrLinkMap::ITERATOR itr(pending_release_links_); itr.next(entry); itr.advance()) {
+    entry->int_id_->client_stop(local_id);
+  }
 }
 
 void
