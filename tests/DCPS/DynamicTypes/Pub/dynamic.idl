@@ -138,7 +138,6 @@ struct my_struct_appendable {
   short my_anon_arr[2];
 };
 
-
 // Mutable
 
 @mutable
