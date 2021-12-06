@@ -105,21 +105,21 @@ struct NetworkInterfaceName {
 
 class OpenDDS_Dcps_Export NetworkConfigListener : public virtual RcObject {
 public:
-  virtual void add_interface(const NetworkInterface& interface)
+  virtual void add_interface(const NetworkInterface& nic)
   {
-    NetworkInterface::AddressSet addresses = interface.get_addresses();
+    NetworkInterface::AddressSet addresses = nic.get_addresses();
     for (NetworkInterface::AddressSet::const_iterator pos = addresses.begin(), limit = addresses.end();
          pos != limit; ++pos) {
-      add_address(interface, *pos);
+      add_address(nic, *pos);
     }
   }
 
-  virtual void remove_interface(const NetworkInterface& interface)
+  virtual void remove_interface(const NetworkInterface& nic)
   {
-    NetworkInterface::AddressSet addresses = interface.get_addresses();
+    NetworkInterface::AddressSet addresses = nic.get_addresses();
     for (NetworkInterface::AddressSet::const_iterator pos = addresses.begin(), limit = addresses.end();
          pos != limit; ++pos) {
-      remove_address(interface, *pos);
+      remove_address(nic, *pos);
     }
   }
 
