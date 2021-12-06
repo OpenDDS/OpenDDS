@@ -1,2 +1,2 @@
-feature(built_in_topics, !uses_wchar): opendds_face {
+feature(built_in_topics, !uses_wchar): opendds_uses_face {
 }

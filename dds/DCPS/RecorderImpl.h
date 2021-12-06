@@ -96,6 +96,8 @@ public:
 
   void remove_all_associations();
 
+  void add_to_dynamic_type_map(const PublicationId& pub_id, const XTypes::TypeIdentifier& ti);
+
 #if !defined (DDS_HAS_MINIMUM_BIT)
   // implement Recoder
   virtual DDS::ReturnCode_t repoid_to_bit_key(const DCPS::RepoId&     id,

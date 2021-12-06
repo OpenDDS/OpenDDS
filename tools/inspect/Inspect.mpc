@@ -1,5 +1,5 @@
 project: dcps_rtps_udp, install {
-  exename = opendds_inspect
+  exename = inspect
   exeout = $(DDS_ROOT)/bin
   requires += no_opendds_safety_profile
 
