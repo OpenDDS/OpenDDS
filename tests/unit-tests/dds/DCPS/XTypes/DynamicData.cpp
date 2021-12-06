@@ -1273,7 +1273,7 @@ TEST(DDS_DCPS_XTypes_DynamicData, Mutable_SkipNestedMembers)
     0x40,0x00,0x00,0x01, 0x00,0x00,0x00,0x0e, // +8=20 Emheader & nextint
     0x12,0x34,0x56,0x78, // +4=24 l
     0x00,0x00,0x00,0x04, 0x7f,0xff,0xff,0xff, // +8=32 inner.l
-    0x9a,0xbc,(0),(0), // +2+(2)=36 s
+    0x43,0x21,(0),(0), // +2+(2)=36 s
     ////////////////////////////////////////////////////////
     0x10,0x00,0x00,0x02, 0x00,0x0a,(0),(0), // +6+(2)=44 s
     /////////// inner (FinalNestedUnionInner) ////////////
@@ -1287,7 +1287,7 @@ TEST(DDS_DCPS_XTypes_DynamicData, Mutable_SkipNestedMembers)
   expected.c = 'a';
   expected.outer.l = 0x12345678;
   expected.outer.inner.l = 0x7fffffff;
-  expected.outer.s = 0x9abc;
+  expected.outer.s = 0x4321;
   expected.s = 0x000a;
   expected.inner.ul(ACE_CDR::ULong(0xffffffff));
   expected.i = 0x11;
@@ -2945,7 +2945,7 @@ TEST(DDS_DCPS_XTypes_DynamicData, Final_SkipNestedMembers)
     0x00,0x00,0x00,0x12, // +4=8 dheader
     0x12,0x34,0x56,0x78, // +4=12 ul
     0x00,0x00,0x00,0x08, 0x20,0x00,0x00,0x00, 0x7f,0xff,0xff,0xff, // +12=24 inner.l
-    0x9a,0xbc, // +2=26 us
+    0x43,0x21, // +2=26 us
     ////////////////////////////////////////////////////////
     0x00,0x0a, // +2=28 s
     /////////// inner (AppendableNestedUnionInner) ////////////
@@ -2959,7 +2959,7 @@ TEST(DDS_DCPS_XTypes_DynamicData, Final_SkipNestedMembers)
   expected.c = 'a';
   expected.outer.ul = 0x12345678;
   expected.outer.inner.l = 0x7fffffff;
-  expected.outer.us = 0x9abc;
+  expected.outer.us = 0x4321;
   expected.s = 0x000a;
   expected.inner.ul(ACE_CDR::ULong(0xffffffff));
   expected.i = 0x11;
