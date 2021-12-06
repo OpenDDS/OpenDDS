@@ -27,6 +27,11 @@ using namespace std;
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
+  sigset_t mask, prev;
+  ACE_OS::sigemptyset(&mask);
+  ACE_OS::sigaddset(&mask, SIGPIPE);
+  ACE_OS::sigprocmask(SIG_BLOCK, &mask, &prev);
+
   try
   {
     DDS::DomainParticipantFactory_var dpf =
@@ -112,7 +117,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     const ACE_Time_Value delay(0, 10000);
 
-    const size_t count = 250u;
+    const size_t count = 750u;
     for (size_t i = 0; i < count; ++i) {
       ACE_OS::sleep(delay);
       ++message.count;
