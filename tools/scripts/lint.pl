@@ -2,10 +2,6 @@
 
 # Linter for style and usage checks
 
-# "   \n"
-# 
-#	Hello Tab
-
 use strict;
 use warnings;
 
