@@ -1,10 +1,6 @@
-project(ParticipantLocationTopic): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dcps_rtps, opendds_cxx11, opendds_optional_security {
-
-  exename   = ParticipantLocationTest
+project(ParticipantLocationTopic): dcps_test, dcps_cm, opendds_security, dcps_rtps_udp {
+  exename = ParticipantLocationTest
   requires += built_in_topics
-
-  Idl_Files {
-  }
 
   Source_Files {
     ParticipantLocationTest.cpp

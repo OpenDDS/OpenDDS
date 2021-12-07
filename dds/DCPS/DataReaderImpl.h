@@ -614,6 +614,7 @@ protected:
 
   /// Setup deserialization options
   DDS::ReturnCode_t setup_deserialization();
+
   virtual Extensibility get_max_extensibility() = 0;
 
   RcHandle<SubscriberImpl> get_subscriber_servant();

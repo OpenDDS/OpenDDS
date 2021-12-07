@@ -357,7 +357,7 @@ private:
   /// Cache the descriptor for the same type for convenience.
   TypeDescriptor descriptor_;
 
-  const ACE_CDR::ULong ITEM_COUNT_INVALID = UINT32_MAX;
+  static const ACE_CDR::ULong ITEM_COUNT_INVALID = ACE_UINT32_MAX;
 
   /// Cache the number of items (i.e., members or elements) in the data it holds.
   ACE_CDR::ULong item_count_;

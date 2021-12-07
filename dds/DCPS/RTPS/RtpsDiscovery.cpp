@@ -98,6 +98,7 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , sedp_responsive_mode_(false)
   , sedp_receive_preallocated_message_blocks_(0)
   , sedp_receive_preallocated_data_blocks_(0)
+  , check_source_ip_(true)
 {}
 
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
@@ -839,6 +840,17 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                               "[rtps_discovery/%C] section.\n",
                               string_value.c_str(), rtps_name.c_str()), -1);
           }
+        } else if (name == "CheckSourceIp") {
+          const OPENDDS_STRING& value = it->second;
+          int smInt;
+          if (!DCPS::convertToInteger(value, smInt)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
+                              ACE_TEXT("Invalid entry (%C) for CheckSourceIp in ")
+                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->check_source_ip(bool(smInt));
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")

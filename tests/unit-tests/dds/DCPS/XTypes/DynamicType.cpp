@@ -195,7 +195,7 @@ TEST_F(dds_DCPS_XTypes_DynamicType, CompleteToDynamicType_PrimitiveKind)
   XTypes::MemberDescriptor first_expected_md;
   first_expected_dtm->set_parent(expected_dt);
   first_expected_md.name = "TK_INT32";
-  first_expected_md.id = UINT32_MAX;
+  first_expected_md.id = ACE_UINT32_MAX;
   first_expected_md.index = 0;
   first_expected_md.is_default_label = 1;
   first_expected_md.try_construct_kind = XTypes::DISCARD;
@@ -203,7 +203,7 @@ TEST_F(dds_DCPS_XTypes_DynamicType, CompleteToDynamicType_PrimitiveKind)
   XTypes::MemberDescriptor second_expected_md;
   second_expected_dtm->set_parent(expected_dt);
   second_expected_md.name = "TK_CHAR8";
-  second_expected_md.id = UINT32_MAX;
+  second_expected_md.id = ACE_UINT32_MAX;
   second_expected_md.index = 1;
   second_expected_md.try_construct_kind = XTypes::DISCARD;
   first_expected_md.type = expected_dt;
@@ -286,7 +286,7 @@ TEST_F(dds_DCPS_XTypes_DynamicType, CompleteToDynamicType_MyUnion)
   XTypes::MemberDescriptor first_expected_md;
   first_expected_dtm->set_parent(expected_enum_dt);
   first_expected_md.name = "TK_INT32";
-  first_expected_md.id = UINT32_MAX;
+  first_expected_md.id = ACE_UINT32_MAX;
   first_expected_md.index = 0;
   first_expected_md.is_default_label = 1;
   first_expected_md.try_construct_kind = XTypes::DISCARD;
@@ -294,7 +294,7 @@ TEST_F(dds_DCPS_XTypes_DynamicType, CompleteToDynamicType_MyUnion)
   XTypes::MemberDescriptor second_expected_md;
   second_expected_dtm->set_parent(expected_enum_dt);
   second_expected_md.name = "TK_CHAR8";
-  second_expected_md.id = UINT32_MAX;
+  second_expected_md.id = ACE_UINT32_MAX;
   second_expected_md.index = 1;
   second_expected_md.try_construct_kind = XTypes::DISCARD;
   first_expected_md.type = expected_enum_dt;
@@ -410,7 +410,7 @@ TEST_F(dds_DCPS_XTypes_DynamicType, CompleteToDynamicType_MySeq)
   td.kind = XTypes::TK_SEQUENCE;
   td.name = "Sequence";
   td.bound.length(1);
-  td.bound[0] = UINT32_MAX;
+  td.bound[0] = ACE_UINT32_MAX;
   td.extensibility_kind = XTypes::FINAL;
   XTypes::DynamicType_rch long_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor long_td;
@@ -504,7 +504,7 @@ TEST_F(dds_DCPS_XTypes_DynamicType, CompleteToDynamicType_CircularStruct)
   XTypes::TypeDescriptor struct_seq_td;
   struct_seq_td.kind = XTypes::TK_SEQUENCE;
   struct_seq_td.bound.length(1);
-  struct_seq_td.bound[0] = UINT32_MAX;
+  struct_seq_td.bound[0] = ACE_UINT32_MAX;
   struct_seq_td.name = "";
   XTypes::DynamicType_rch struct2_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor struct2_td;
@@ -524,7 +524,7 @@ TEST_F(dds_DCPS_XTypes_DynamicType, CompleteToDynamicType_CircularStruct)
   XTypes::TypeDescriptor struct2_seq_td;
   struct2_seq_td.kind = XTypes::TK_SEQUENCE;
   struct2_seq_td.bound.length(1);
-  struct2_seq_td.bound[0] = UINT32_MAX;
+  struct2_seq_td.bound[0] = ACE_UINT32_MAX;
   struct2_seq_td.name = "";
 
   struct2_seq_md.type = struct2_seq_dt;

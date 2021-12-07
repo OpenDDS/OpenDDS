@@ -327,6 +327,10 @@ public:
   {
     const DDS::DataRepresentationIdSeq repIds =
       get_effective_data_rep_qos(qos_.representation.value, false);
+    if (qos_.representation.value.length() > 0) {
+      // If the QoS explicitly sets XCDR, XCDR2, or XML, force encapsulation
+      cdr_encapsulation(true);
+    }
     if (cdr_encapsulation()) {
       Encoding::Kind encoding_kind;
       // There should only be one data representation in a DataWriter, so

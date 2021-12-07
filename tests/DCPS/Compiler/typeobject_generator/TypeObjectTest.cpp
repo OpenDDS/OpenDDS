@@ -530,7 +530,7 @@ void check_struct_b(const TypeMap& scc15, const TypeMap& other,
       if (tk == TI_STRONGLY_CONNECTED_COMPONENT) {
         const ACE_CDR::Long idx = member_seq[i].common.member_type_id.sc_component_id().scc_index;
         const IndexMap::const_iterator pos = indexes.find(idx);
-        EXPECT_TRUE(pos != indexes.end() && (pos->second == C_SEQ_ALIAS || pos->second == E_SEQ_ALIAS));
+        ASSERT_TRUE(pos != indexes.end() && (pos->second == C_SEQ_ALIAS || pos->second == E_SEQ_ALIAS));
         NameHash nh;
         if (pos->second == C_SEQ_ALIAS) {
           check_struct_b_cseq_member(member_seq[i].common, scc15);
@@ -624,7 +624,7 @@ void check_struct_c(const TypeMap& scc15, const TypeObject& to, const IndexMap& 
       EXPECT_TRUE(tk == TI_STRONGLY_CONNECTED_COMPONENT);
       const ACE_CDR::Long idx = member_seq[i].common.member_type_id.sc_component_id().scc_index;
       const IndexMap::const_iterator pos = indexes.find(idx);
-      EXPECT_TRUE(pos != indexes.end() && (pos->second == D_SEQ_ALIAS || pos->second == A_SEQ_ALIAS));
+      ASSERT_TRUE(pos != indexes.end() && (pos->second == D_SEQ_ALIAS || pos->second == A_SEQ_ALIAS));
       if (pos->second == D_SEQ_ALIAS) {
         check_struct_c_dseq_member(member_seq[i].common, scc15);
         EXPECT_EQ(member_seq[i].detail.name, "a_dseq");

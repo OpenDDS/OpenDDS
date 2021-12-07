@@ -827,9 +827,9 @@ namespace XTypes {
 
   // ID of a type member
   typedef ACE_CDR::ULong MemberId;
-  const ACE_CDR::ULong MEMBER_ID_INVALID = UINT32_MAX;
+  const ACE_CDR::ULong MEMBER_ID_INVALID = ACE_UINT32_MAX;
   /// Implementation specific sentinel for a union discriminator used in DynamicData
-  const ACE_CDR::ULong DISCRIMINATOR_ID = UINT32_MAX - 1;
+  const ACE_CDR::ULong DISCRIMINATOR_ID = MEMBER_ID_INVALID - 1;
   const ACE_CDR::ULong ANNOTATION_STR_VALUE_MAX_LEN = 128;
   const ACE_CDR::ULong ANNOTATION_OCTETSEC_VALUE_MAX_LEN = 128;
 
@@ -1244,7 +1244,9 @@ namespace XTypes {
     CompleteStructHeader header;
     CompleteStructMemberSeq member_seq;
 
-    CompleteStructType() {}
+    CompleteStructType()
+      : struct_flags(0)
+    {}
 
     CompleteStructType(const StructTypeFlag& a_struct_flags,
                        const CompleteStructHeader& a_header,
@@ -2065,7 +2067,9 @@ namespace XTypes {
     // ===================  Future extensibility  ============
     CompleteExtendedType extended_type;
 
-    CompleteTypeObject() {}
+    CompleteTypeObject()
+      : kind(TK_NONE)
+    {}
 
     explicit CompleteTypeObject(const CompleteAliasType& alias)
       : kind(TK_ALIAS)

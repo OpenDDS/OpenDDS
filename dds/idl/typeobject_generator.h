@@ -17,9 +17,10 @@ public:
     : produce_output_(false)
     , produce_xtypes_complete_(false)
     , index_(0)
+    , get_type_map_declared_(false)
   {}
 
-  void gen_prologue();
+  void gen_prologue() {}
 
   void gen_epilogue();
 
@@ -84,6 +85,7 @@ private:
   OpenDDS::XTypes::TypeIdentifier get_minimal_type_identifier(AST_Type* type);
   OpenDDS::XTypes::TypeIdentifier get_complete_type_identifier(AST_Type* type);
   bool generate(AST_Type* node, UTL_ScopedName* name);
+  void declare_get_type_map();
 
   // Both fields must be constructed when an object is created.
   struct TypeObjectPair {
@@ -115,6 +117,7 @@ private:
   typedef std::vector<AST_Type*> Stack;
   Stack stack_;
   std::map<AST_Type*, Element> element_;
+  bool get_type_map_declared_;
 };
 
 #endif

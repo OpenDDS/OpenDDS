@@ -69,6 +69,11 @@ if ($secure) {
       expect_to_fail => 0, topic => "MutableStructT", key_val => 6,
       r_ini => "tcp.ini", w_ini => "tcp.ini",
     },
+    "Tcp_MutableBaseStruct" => {
+      reader_type => "MutableStruct", writer_type => "MutableBaseStruct",
+      expect_to_fail => 0, topic => "MutableBaseStructT", key_val => 7,
+      r_ini => "tcp.ini", w_ini => "tcp.ini",
+    },
     "Tcp_MutableStructNoMatchName" => {
       reader_type => "MutableStruct", writer_type => "ModifiedNameMutableStruct",
       expect_to_fail => 1, topic => "MutableStructT_NoMatchName", key_val => 9,
