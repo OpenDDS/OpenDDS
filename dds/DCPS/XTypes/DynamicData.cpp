@@ -9,9 +9,7 @@
 
 #include "DynamicTypeMember.h"
 
-#include <dds/DCPS/RestoreOutputStreamState.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
-#include <dds/DCPS/ValueHelper.h>
 
 #ifndef OPENDDS_SAFETY_PROFILE
 #  include <dds/CorbaSeq/LongSeqTypeSupportImpl.h>
@@ -31,6 +29,7 @@
 #  include <dds/CorbaSeq/BooleanSeqTypeSupportImpl.h>
 #  include <dds/CorbaSeq/StringSeqTypeSupportImpl.h>
 #  include <dds/CorbaSeq/WStringSeqTypeSupportImpl.h>
+#  include <dds/DCPS/ValueHelper.h>
 #endif
 #include <dds/DdsDcpsInfrastructureC.h>
 
