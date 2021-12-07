@@ -101,6 +101,7 @@ String to_dds_string(const unsigned char* array, size_t length)
   static const size_t bytes_per_elt = 5; // largest byte as decimal plus comma and space
   String ret(length * bytes_per_elt, '\0');
   char* buf = &ret[0];
+  size_t total_used = 0;
   for (size_t i = 0; i < length; ++i) {
     const int used = ACE_OS::snprintf(buf, bytes_per_elt + 1,
                                       i < length - 1 ? "%d, " : "%d", array[i]);
@@ -108,9 +109,10 @@ String to_dds_string(const unsigned char* array, size_t length)
       return "";
     }
     buf += used;
+    total_used += static_cast<size_t>(used);
   }
 
-  ret.resize(ret.find('\0'));
+  ret.resize(total_used);
   return ret;
 }
 
