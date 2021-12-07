@@ -312,8 +312,6 @@ private:
   /// Skip a member which is a structure or a union.
   bool skip_aggregated_member(const DynamicType_rch& type);
 
-  void release_chains();
-
   DynamicType_rch get_base_type(const DynamicType_rch& alias_type) const;
   bool is_primitive(TypeKind tk) const;
   bool get_primitive_size(const DynamicType_rch& dt, ACE_CDR::ULong& size) const;

@@ -1454,49 +1454,6 @@ TEST(DDS_DCPS_XTypes_DynamicData, Appendable_StructWithOptionalMembers)
   verify_index_mapping(data);
 }
 
-TEST(DDS_DCPS_XTypes_DynamicData, Appendable_StructWithOptionalMembersXCDR1)
-{
-  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableSingleValueStruct_xtag>();
-  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::AppendableSingleValueStruct_xtag>();
-  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
-  EXPECT_TRUE(it != type_map.end());
-
-  XTypes::TypeLookupService tls;
-  tls.add(type_map.begin(), type_map.end());
-  XTypes::CompleteTypeObject cto = it->second.complete;
-  cto.struct_type.member_seq[2].common.member_flags |= XTypes::IS_OPTIONAL;
-  cto.struct_type.member_seq[5].common.member_flags |= XTypes::IS_OPTIONAL;
-  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(cto, DCPS::GUID_t());
-
-  unsigned char single_value_struct[] = {
-    0x00,0x00,0x00,0x03, // +4=4 my_enum
-    0x00,0x00,0x00,0x0a, // +4=8 int_32
-    0x00, // +1=9 Omitting uint_32
-    0x05, // +1=10 int_8
-    0x06, // +1=11 uint_8
-    0x00, // +1=12 Omitting int_16
-    0x22,0x22, // +2=14 uint_16
-    (0),(0),0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +(2)+8=24 int_64
-    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +8=32 uint_64
-    0x3f,0x80,0x00,0x00, // +4=36 float_32
-    (0),(0),(0),(0),0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00, // +(4)+8=48 float_64
-    0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0,    // +16=64 float_128
-    'a',  // +1=65 char_8
-    (0),0x00,0x61, // +(1)+2=68 char_16
-    0xff, // +1=69 byte
-    0x01, // +1=70 bool
-    (0), (0), 0x00,0x00,0x00,0x0c, // +(2)+4=76 nested_struct
-    0x00,0x00,0x00,0x04, 'a','b','c','\0', // +8=84 str
-    0x00,0x00,0x00,0x08, 0,0x61,0,0x62,0,0x63,0,0, // +12=96 swtr
-  };
-
-  ACE_Message_Block msg(1024);
-  msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
-  XTypes::DynamicData data(&msg, xcdr1, dt);
-
-  verify_index_mapping(data);
-}
-
 TEST(DDS_DCPS_XTypes_DynamicData, Appendable_ReadValueFromUnion)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableSingleValueUnion_xtag>();
@@ -2373,48 +2330,6 @@ TEST(DDS_DCPS_XTypes_DynamicData, Final_StructWithOptionalMembers)
   ACE_Message_Block msg(1024);
   msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
   XTypes::DynamicData data(&msg, xcdr2, dt);
-
-  verify_index_mapping(data);
-}
-
-TEST(DDS_DCPS_XTypes_DynamicData, Final_StructWithOptionalMembersXCDR1)
-{
-  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::FinalSingleValueStruct_xtag>();
-  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::FinalSingleValueStruct_xtag>();
-  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
-  EXPECT_TRUE(it != type_map.end());
-
-  XTypes::TypeLookupService tls;
-  tls.add(type_map.begin(), type_map.end());
-  XTypes::CompleteTypeObject cto = it->second.complete;
-  cto.struct_type.member_seq[2].common.member_flags |= XTypes::IS_OPTIONAL;
-  cto.struct_type.member_seq[5].common.member_flags |= XTypes::IS_OPTIONAL;
-  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(cto, DCPS::GUID_t());
-
-  unsigned char single_value_struct[] = {
-    0x00,0x00,0x00,0x03, // +4=4 my_enum
-    0x00,0x00,0x00,0x0a, // +4=8 int_32
-    0x00, // +1=9 Omitting uint_32
-    0x05, // +1=10 int_8
-    0x06, // +1=11 uint_8
-    0x00, // +1=12 Omitting int_16
-    0x22,0x22, // +2=14 uint_16
-    (0),(0),0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +(2)+8=24 int_64
-    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +8=32 uint_64
-    0x3f,0x80,0x00,0x00, // +4=36 float_32
-    (0),(0),(0),(0),0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00, // +(4)+8=48 float_64
-    0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0,    // +16=64 float_128
-    'a',  // +1=65 char_8
-    (0),0x00,0x61, // +(1)+2=68 char_16
-    0xff, // +1=69 byte
-    0x01, // +1=70 bool
-    (0), (0), 0x00,0x00,0x00,0x0c, // +(2)+4=76 nested_struct
-    0x00,0x00,0x00,0x04, 'a','b','c','\0', // +8=84 str
-    0x00,0x00,0x00,0x08, 0,0x61,0,0x62,0,0x63,0,0, // +12=96 swtr
-  };
-  ACE_Message_Block msg(1024);
-  msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
-  XTypes::DynamicData data(&msg, xcdr1, dt);
 
   verify_index_mapping(data);
 }

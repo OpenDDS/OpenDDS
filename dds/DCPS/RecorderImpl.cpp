@@ -1079,7 +1079,7 @@ XTypes::DynamicData RecorderImpl::get_dynamic_data(const RawDataSample& sample)
     }
     return XTypes::DynamicData();
   }
-  return XTypes::DynamicData(sample.sample_.get(), enc, dt);
+  return dd;
 }
 
 } // namespace DCPS
