@@ -2783,8 +2783,6 @@ Spdp::update_rtps_relay_application_participant_i(DiscoveredParticipantIter iter
 
   if (new_participant) {
 #ifdef OPENDDS_SECURITY
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-
     tport_->relay_spdp_task_->cancel();
     tport_->relay_spdp_task_falloff_.set(config_->sedp_heartbeat_period());
     tport_->relay_spdp_task_->schedule(TimeDuration::zero_value);
