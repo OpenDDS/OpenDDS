@@ -6,10 +6,11 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "TypeObject.h"
 
-#include "dds/DCPS/Message_Block_Ptr.h"
 #include "dds/DCPS/Hash.h"
+#include "dds/DCPS/Message_Block_Ptr.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 
-#include <sstream>
+#include <cstring>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -27,14 +28,7 @@ const Encoding& get_typeobject_encoding()
 
 DCPS::String equivalence_hash_to_string(const EquivalenceHash& equivalence_hash)
 {
-  std::ostringstream out;
-  for (size_t i = 0; i < sizeof equivalence_hash; ++i) {
-    out << int(equivalence_hash[i]);
-    if (i < sizeof equivalence_hash - 1) {
-      out << ", ";
-    }
-  }
-  return out.str().c_str();
+  return DCPS::to_dds_string(&equivalence_hash[0], sizeof equivalence_hash);
 }
 
 MinimalMemberDetail::MinimalMemberDetail(const OPENDDS_STRING& name)

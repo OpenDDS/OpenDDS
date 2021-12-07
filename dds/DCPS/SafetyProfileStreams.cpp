@@ -96,6 +96,24 @@ String to_dds_string(unsigned long to_convert, bool as_hex)
   return String(buf);
 }
 
+String to_dds_string(const unsigned char* array, size_t length)
+{
+  static const size_t bytes_per_elt = 5; // largest byte as decimal plus comma and space
+  String ret(length * bytes_per_elt, '\0');
+  char* buf = &ret[0];
+  for (size_t i = 0; i < length; ++i) {
+    const int used = ACE_OS::snprintf(buf, bytes_per_elt + 1,
+                                      i < length - 1 ? "%d, " : "%d", array[i]);
+    if (used < 1) {
+      return "";
+    }
+    buf += used;
+  }
+
+  ret.resize(ret.find('\0'));
+  return ret;
+}
+
 String to_hex_dds_string(
   const unsigned char* data, const size_t size, const char delim, const size_t delim_every)
 {
