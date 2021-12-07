@@ -2081,7 +2081,7 @@ TEST(DDS_DCPS_XTypes_DynamicData, Appendable_ReadValueFromArray)
   verify_array_struct(data);
 }
 
-TEST(DDS_DCPS_XTypes_DynamicData, ReadValueFromArrayXCDR1)
+TEST(DDS_DCPS_XTypes_DynamicData, Appendable_ReadValueFromArrayXCDR1)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableArrayStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::AppendableArrayStruct_xtag>();
@@ -2171,6 +2171,81 @@ TEST(DDS_DCPS_XTypes_DynamicData, Appendable_SkipNestedMembers)
   ret = data.get_complex_value(nested_level1, 3);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   ACE_CDR::ULong ul;
+  ret = nested_level1.get_uint32_value(ul, 1);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.inner.ul(), ul);
+
+  ACE_CDR::Int8 i;
+  ret = data.get_int8_value(i, 4);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.i, i);
+}
+
+TEST(DDS_DCPS_XTypes_DynamicData, Appendable_SkipNestedMembersXCDR1)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableStructXCDR1_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::AppendableStructXCDR1_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  unsigned char appendable_struct[] = {
+    'a',(0),(0),(0), // +4=4 c
+    /////////// outer (AppendableNestedStructOuterXCDR1) ///////////
+    0x12,0x34,0x56,0x78, // +4=8 ul
+    0x7f,0xff,0xff,0xff, // +4=12 inner.l
+    0x43,0x21, // +2=14 us
+    ////////////////////////////////////////////////////////
+    0x00,0x0a, // +2=16 s
+    /////////// inner (AppendableNestedUnionInner) ////////////
+    0x00,0x00,0x00,0x01, // +4=20 discriminator
+    0xff,0xff,0xff,0xff, // +4=24 ul
+    ////////////////////////////////////////////////////////
+    0x11 // +1=25 i
+  };
+
+  AppendableStructXCDR1 expected;
+  expected.c = 'a';
+  expected.outer.ul = 0x12345678;
+  expected.outer.inner.l = 0x7fffffff;
+  expected.outer.us = 0x4321;
+  expected.s = 0x000a;
+  expected.inner.ul(ACE_CDR::ULong(0xffffffff));
+  expected.i = 0x11;
+
+  ACE_Message_Block msg(128);
+  msg.copy((const char*)appendable_struct, sizeof(appendable_struct));
+  XTypes::DynamicData data(&msg, xcdr1, dt);
+
+  XTypes::DynamicData nested_level1;
+  DDS::ReturnCode_t ret = data.get_complex_value(nested_level1, 1);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ACE_CDR::ULong ul;
+  ret = nested_level1.get_uint32_value(ul, 0);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.outer.ul, ul);
+  ACE_CDR::UShort us;
+  ret = nested_level1.get_uint16_value(us, 2);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.outer.us, us);
+  XTypes::DynamicData nested_level2;
+  ret = nested_level1.get_complex_value(nested_level2, 1);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ACE_CDR::Long l;
+  ret = nested_level2.get_int32_value(l, 0);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.outer.inner.l, l);
+
+  ACE_CDR::Short s;
+  ret = data.get_int16_value(s, 2);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.s, s);
+
+  ret = data.get_complex_value(nested_level1, 3);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
   ret = nested_level1.get_uint32_value(ul, 1);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   EXPECT_EQ(expected.inner.ul(), ul);
@@ -2967,6 +3042,81 @@ TEST(DDS_DCPS_XTypes_DynamicData, Final_SkipNestedMembers)
   ACE_Message_Block msg(128);
   msg.copy((const char*)final_struct, sizeof(final_struct));
   XTypes::DynamicData data(&msg, xcdr2, dt);
+
+  XTypes::DynamicData nested_level1;
+  DDS::ReturnCode_t ret = data.get_complex_value(nested_level1, 1);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ACE_CDR::ULong ul;
+  ret = nested_level1.get_uint32_value(ul, 0);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.outer.ul, ul);
+  ACE_CDR::UShort us;
+  ret = nested_level1.get_uint16_value(us, 2);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.outer.us, us);
+  XTypes::DynamicData nested_level2;
+  ret = nested_level1.get_complex_value(nested_level2, 1);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ACE_CDR::Long l;
+  ret = nested_level2.get_int32_value(l, 0);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.outer.inner.l, l);
+
+  ACE_CDR::Short s;
+  ret = data.get_int16_value(s, 2);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.s, s);
+
+  ret = data.get_complex_value(nested_level1, 3);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ret = nested_level1.get_uint32_value(ul, 1);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.inner.ul(), ul);
+
+  ACE_CDR::Int8 i;
+  ret = data.get_int8_value(i, 4);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.i, i);
+}
+
+TEST(DDS_DCPS_XTypes_DynamicData, Final_SkipNestedMembersXCDR1)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::FinalStructXCDR1_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::FinalStructXCDR1_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  unsigned char final_struct[] = {
+    'a',(0),(0),(0), // +4=4 c
+    /////////// outer (FinalNestedStructOuterXCDR1) ///////////
+    0x12,0x34,0x56,0x78, // +4=8 ul
+    0x7f,0xff,0xff,0xff, // +4=12 inner.l
+    0x43,0x21, // +2=14 us
+    ////////////////////////////////////////////////////////
+    0x00,0x0a, // +2=16 s
+    /////////// inner (FinalNestedUnionInner) ////////////
+    0x00,0x00,0x00,0x01, // +4=20 discriminator
+    0xff,0xff,0xff,0xff, // +4=24 ul
+    ////////////////////////////////////////////////////////
+    0x11 // +1=25 i
+  };
+
+  FinalStructXCDR1 expected;
+  expected.c = 'a';
+  expected.outer.ul = 0x12345678;
+  expected.outer.inner.l = 0x7fffffff;
+  expected.outer.us = 0x4321;
+  expected.s = 0x000a;
+  expected.inner.ul(ACE_CDR::ULong(0xffffffff));
+  expected.i = 0x11;
+
+  ACE_Message_Block msg(128);
+  msg.copy((const char*)final_struct, sizeof(final_struct));
+  XTypes::DynamicData data(&msg, xcdr1, dt);
 
   XTypes::DynamicData nested_level1;
   DDS::ReturnCode_t ret = data.get_complex_value(nested_level1, 1);

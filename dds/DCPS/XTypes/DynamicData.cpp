@@ -77,7 +77,7 @@ DynamicData::DynamicData(DCPS::Serializer& ser, const DynamicType_rch& type)
   , descriptor_(type_->get_descriptor())
   , item_count_(ITEM_COUNT_INVALID)
 {
-  if (encoding_.xcdr_version() == DCPS::Encoding::XCDR_VERSION_1 &&
+  if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_1 &&
       encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
     throw std::runtime_error("DynamicData only supports XCDR1 and XCDR2 at this time");
   }
@@ -293,7 +293,6 @@ MemberId DynamicData::get_member_id_at_index(ACE_CDR::ULong index)
               break;
             }
           }
-          release_chains();
           return id;
         }
       } else { // Mutable
@@ -2300,7 +2299,6 @@ bool DynamicData::skip_all()
           break;
         }
       }
-      release_chains();
       return good;
     } else { // Union
       const DynamicType_rch disc_type = get_base_type(descriptor_.discriminator_type);
@@ -2321,7 +2319,6 @@ bool DynamicData::skip_all()
           if (label == labels[i]) {
             const DynamicType_rch selected_member = md.type.lock();
             bool good = selected_member && skip_member(selected_member);
-            release_chains();
             return good;
           }
         }
@@ -2335,7 +2332,6 @@ bool DynamicData::skip_all()
       if (has_default) {
         const DynamicType_rch default_dt = default_member.type.lock();
         bool good = default_dt && skip_member(default_dt);
-        release_chains();
         return good;
       }
       if (DCPS::DCPS_debug_level >= 1) {
@@ -2385,7 +2381,6 @@ bool DynamicData::is_primitive(TypeKind tk) const
   default:
     return false;
   }
-  return true;
 }
 
 bool DynamicData::get_primitive_size(const DynamicType_rch& dt, ACE_CDR::ULong& size) const

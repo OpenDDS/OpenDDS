@@ -1075,7 +1075,7 @@ XTypes::DynamicData RecorderImpl::get_dynamic_data(const RawDataSample& sample)
   if (!dd.check_xcdr1_mutable(dt)) {
     if (log_level >= LogLevel::Error) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RecorderImpl::get_dynamic_data: "
-          "Encountered unsupported combination of XCDR1 encoding and mutable extensibility.\n"));
+        "Encountered unsupported combination of XCDR1 encoding and mutable extensibility.\n"));
     }
     return XTypes::DynamicData();
   }

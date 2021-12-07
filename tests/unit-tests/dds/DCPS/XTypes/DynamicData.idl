@@ -244,6 +244,38 @@ union MutableNestedUnionInner switch (SomeEnum) {
 };
 
 @final
+struct FinalNestedStructOuterXCDR1 {
+  @id(0) unsigned long ul;
+  @id(1) FinalNestedStructInner inner;
+  @id(2) unsigned short us;
+};
+
+@final
+struct FinalStructXCDR1 {
+  @id(0) char c;
+  @id(1) FinalNestedStructOuterXCDR1 outer;
+  @id(2) short s;
+  @id(3) FinalNestedUnionInner inner;
+  @id(4) int8 i;
+};
+
+@appendable
+struct AppendableNestedStructOuterXCDR1 {
+  @id(0) unsigned long ul;
+  @id(1) AppendableNestedStructInner inner;
+  @id(2) unsigned short us;
+};
+
+@appendable
+struct AppendableStructXCDR1 {
+  @id(0) char c;
+  @id(1) AppendableNestedStructOuterXCDR1 outer;
+  @id(2) short s;
+  @id(3) AppendableNestedUnionInner inner;
+  @id(4) int8 i;
+};
+
+@final
 struct FinalStruct {
   @id(0) char c;
   @id(1) AppendableNestedStructOuter outer;
