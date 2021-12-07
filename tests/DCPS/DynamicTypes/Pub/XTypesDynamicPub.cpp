@@ -327,8 +327,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR * argv[])
   DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
   const ACE_TCHAR* type_name = argv[1];
   const ACE_TCHAR* xcdr_version = argv[2];
-  if (argc < 2) {
-    ACE_ERROR((LM_ERROR, "ERROR: Must pass type name\n"));
+  if (argc < 3) {
+    ACE_ERROR((LM_ERROR, "ERROR: Must pass type name and xcdr version\n"));
     return 1;
   } else if (argc > 3) {
     ACE_ERROR((LM_ERROR, "ERROR: Too many arguments\n"));
