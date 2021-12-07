@@ -2164,7 +2164,10 @@ typeobject_generator::generate_sequence_type_identifier(AST_Type* type, bool for
 {
   AST_Sequence* const n = dynamic_cast<AST_Sequence*>(type);
 
-  const ACE_CDR::ULong bound = n->unbounded() ? ACE_UINT32_MAX : n->max_size()->ev()->u.ulval;
+  ACE_CDR::ULong bound = 0;
+  if (!n->unbounded()) {
+    bound = n->max_size()->ev()->u.ulval;
+  }
 
   const TryConstructFailAction trycon = be_global->try_construct(n->base_type());
   OpenDDS::XTypes::CollectionElementFlag cef = try_construct_to_member_flag(trycon);
