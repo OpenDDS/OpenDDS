@@ -11,13 +11,14 @@
 
 using namespace OpenDDS::DCPS;
 
-struct TestKey {
+struct TestKey : public RcObject {
   TestKey(const RepoId& from, const RepoId& to) : from_(from), to_(to) {}
+  TestKey(const TestKey& val) : RcObject(), from_(val.from_), to_(val.to_) {}
   bool operator<(const TestKey& rhs) const {
-    return std::memcmp(this, &rhs, sizeof (TestKey)) < 0;
+    return std::memcmp(&from_, &rhs.from_, 2 * sizeof (RepoId)) < 0;
   }
   bool operator==(const TestKey& rhs) const {
-    return std::memcmp(this, &rhs, sizeof (TestKey)) == 0;
+    return std::memcmp(&from_, &rhs.from_, 2 * sizeof (RepoId)) == 0;
   }
   void get_contained_guids(RepoIdSet& set) const {
     set.clear();
@@ -31,7 +32,19 @@ struct TestKey {
 #define NOOP
 
 #ifdef ACE_HAS_CPP11
-OPENDDS_OOAT_STD_HASH(TestKey, NOOP);
+namespace std
+{
+
+template<> struct hash<TestKey>
+{
+  std::size_t operator()(const TestKey& val) const noexcept
+  {
+    uint32_t hash = OpenDDS::DCPS::one_at_a_time_hash(reinterpret_cast<const uint8_t*>(&val.from_), 2 * sizeof (OpenDDS::DCPS::GUID_t));
+    return static_cast<size_t>(hash);
+  }
+};
+
+}
 #endif
 
 TEST(address_cache_test, load_fail)
