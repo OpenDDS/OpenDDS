@@ -287,7 +287,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       const CORBA::ULong expected_part_count = num_parts - !ownEntitiesAreInBIT;
 
       while (partdata.length() != expected_part_count) {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for participant sample\n"));
+        // Do not constantly poll.
+        const ACE_Time_Value delay(0, 100000); // 100ms
+        ACE_OS::sleep(delay);
+
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for participant sample expected %u have %u\n", expected_part_count, partdata.length()));
         Utils::waitForSample(part_rdr);
         ::DDS::SampleInfoSeq pinfos(10);
         ::DDS::ParticipantBuiltinTopicDataSeq pdata(10);
@@ -656,9 +660,14 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (CUR_PART_USER_DATA == PART_USER_DATA)
       {
         // Create synch file.
-        FILE* fp = ACE_OS::fopen ((synch_dir + synch_fname).c_str (), ACE_TEXT("w"));
+        ACE_TString path = synch_dir + synch_fname;
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor1 creating %C\n", path.c_str()));
+        FILE* fp = ACE_OS::fopen (path.c_str (), ACE_TEXT("w"));
         if (fp != 0)
         {
+          // Write one byte so that PerlACE::waitforfile_timed works.
+          const char c = 'c';
+          ACE_OS::fwrite(&c, 1, 1, fp);
           ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) monitor1 is done\n")));
           ACE_OS::fclose (fp);
         }
