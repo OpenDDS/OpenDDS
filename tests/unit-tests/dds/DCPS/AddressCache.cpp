@@ -18,7 +18,7 @@ struct TestKey : public RcObject {
     return std::memcmp(this, &rhs, sizeof (TestKey)) < 0;
   }
   bool operator==(const TestKey& rhs) const {
-    return std::memcmp(this, &rhs, sizeof (TestKey)) == 0;
+    return std::memcmp(&(from_), &(rhs.from_), 2 * sizeof (RepoId)) == 0;
   }
   void get_contained_guids(RepoIdSet& set) const {
     set.clear();
