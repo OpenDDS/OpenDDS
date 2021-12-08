@@ -465,7 +465,7 @@ private:
    */
   bool secure_part_user_data() const;
 
-  void update_rtps_relay_application_participant_i(DiscoveredParticipantIter iter);
+  void update_rtps_relay_application_participant_i(DiscoveredParticipantIter iter, bool new_participant);
 
 #ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t send_handshake_message(const DCPS::RepoId& guid,

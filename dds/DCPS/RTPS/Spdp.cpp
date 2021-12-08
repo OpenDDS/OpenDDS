@@ -778,7 +778,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     iter = p.first;
     iter->second.discovered_at_ = now;
     update_lease_expiration_i(iter, now);
-    update_rtps_relay_application_participant_i(iter);
+    update_rtps_relay_application_participant_i(iter, p.second);
 
     if (!from_relay && from != ACE_INET_Addr()) {
       iter->second.local_address_ = from;
@@ -942,7 +942,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       iter->second.pdata_ = pdata;
       iter->second.pdata_.discoveredAt = da;
       update_lease_expiration_i(iter, now);
-      update_rtps_relay_application_participant_i(iter);
+      update_rtps_relay_application_participant_i(iter, false);
       if (!from_relay && from != ACE_INET_Addr()) {
         iter->second.local_address_ = from;
       }
@@ -2762,16 +2762,19 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
 }
 
 void
-Spdp::update_rtps_relay_application_participant_i(DiscoveredParticipantIter iter)
+Spdp::update_rtps_relay_application_participant_i(DiscoveredParticipantIter iter, bool new_participant)
 {
   if (!iter->second.pdata_.participantProxy.opendds_rtps_relay_application_participant) {
     return;
   }
 
+  if (new_participant) {
 #ifdef OPENDDS_SECURITY
-  // Lengthen to full period.
-  tport_->relay_spdp_task_falloff_.set(config_->spdp_rtps_relay_send_period());
+    tport_->relay_spdp_task_->cancel();
+    tport_->relay_spdp_task_falloff_.set(config_->sedp_heartbeat_period());
+    tport_->relay_spdp_task_->schedule(TimeDuration::zero_value);
 #endif
+  }
 
   if (DCPS::DCPS_debug_level) {
     ACE_DEBUG((LM_DEBUG,
