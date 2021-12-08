@@ -236,9 +236,9 @@ private:
   void join_multicast_group(const NetworkInterface& nic,
                             bool all_interfaces = false);
   void leave_multicast_group(const NetworkInterface& nic);
-  void add_address(const NetworkInterface& interface,
+  void add_address(const NetworkInterface& nic,
                    const ACE_INET_Addr& address);
-  void remove_address(const NetworkInterface& interface,
+  void remove_address(const NetworkInterface& nic,
                       const ACE_INET_Addr& address);
 
   // Internal non-locking versions of the above
