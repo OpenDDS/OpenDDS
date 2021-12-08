@@ -212,9 +212,11 @@ DataLink::invoke_on_start_callbacks(bool success)
     }
 
     guard.release();
-    TransportClient_rch client_lock = client.lock();
-    if (client_lock) {
-      client_lock->use_datalink(remote, link);
+    if (success) {
+      TransportClient_rch client_lock = client.lock();
+      if (client_lock) {
+        client_lock->use_datalink(remote, link);
+      }
     }
   }
 }
@@ -246,9 +248,11 @@ DataLink::invoke_on_start_callbacks(const RepoId& local, const RepoId& remote, b
     }
   }
 
-  TransportClient_rch client_lock = client.lock();
-  if (client_lock) {
-    client_lock->use_datalink(remote, link);
+  if (success) {
+    TransportClient_rch client_lock = client.lock();
+    if (client_lock) {
+      client_lock->use_datalink(remote, link);
+    }
   }
 }
 
