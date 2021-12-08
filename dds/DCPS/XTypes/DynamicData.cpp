@@ -61,8 +61,9 @@ DynamicData::DynamicData(ACE_Message_Block* chain,
   , descriptor_(type_->get_descriptor())
   , item_count_(ITEM_COUNT_INVALID)
 {
-  if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
-    throw std::runtime_error("DynamicData only supports XCDR2 at this time");
+  if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_1 &&
+      encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
+    throw std::runtime_error("DynamicData only supports XCDR1 and XCDR2 at this time");
   }
 }
 
@@ -76,8 +77,9 @@ DynamicData::DynamicData(DCPS::Serializer& ser, const DynamicType_rch& type)
   , descriptor_(type_->get_descriptor())
   , item_count_(ITEM_COUNT_INVALID)
 {
-  if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
-    throw std::runtime_error("DynamicData only supports XCDR2 at this time");
+  if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_1 &&
+      encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
+    throw std::runtime_error("DynamicData only supports XCDR1 and XCDR2 at this time");
   }
 }
 
@@ -99,6 +101,10 @@ DynamicData& DynamicData::operator=(const DynamicData& other)
 DynamicData::~DynamicData()
 {
   ACE_Message_Block::release(chain_);
+  for (ACE_CDR::ULong i = 0; i < chains_to_release.size(); ++i) {
+    ACE_Message_Block::release(chains_to_release[i]);
+  }
+  chains_to_release.clear();
 }
 
 void DynamicData::copy(const DynamicData& other)
@@ -292,7 +298,6 @@ MemberId DynamicData::get_member_id_at_index(ACE_CDR::ULong index)
               break;
             }
           }
-          release_chains();
           return id;
         }
       } else { // Mutable
@@ -331,7 +336,6 @@ MemberId DynamicData::get_member_id_at_index(ACE_CDR::ULong index)
         if (!good || !strm_.read_parameter_id(member_id, member_size, must_understand)) {
           member_id = MEMBER_ID_INVALID;
         }
-        release_chains();
         return member_id;
       }
     }
@@ -464,7 +468,6 @@ ACE_CDR::ULong DynamicData::get_item_count()
           ++actual_count;
         }
       }
-      release_chains();
       return actual_count;
     }
   case TK_UNION:
@@ -502,8 +505,7 @@ ACE_CDR::ULong DynamicData::get_item_count()
   case TK_SEQUENCE:
     {
       const DynamicType_rch elem_type = get_base_type(descriptor_.element_type);
-      ACE_CDR::ULong size;
-      if (!is_primitive(elem_type->get_kind(), size)) {
+      if (!is_primitive(elem_type->get_kind())) {
         size_t dheader;
         if (!strm_.read_delimiter(dheader)) {
           return 0;
@@ -527,9 +529,8 @@ ACE_CDR::ULong DynamicData::get_item_count()
     {
       const DynamicType_rch key_type = get_base_type(descriptor_.key_element_type);
       const DynamicType_rch elem_type = get_base_type(descriptor_.element_type);
-      ACE_CDR::ULong key_size, elem_size;
-      if (is_primitive(key_type->get_kind(), key_size) &&
-          is_primitive(elem_type->get_kind(), elem_size)) {
+      if (is_primitive(key_type->get_kind()) &&
+          is_primitive(elem_type->get_kind())) {
         ACE_CDR::ULong length;
         if (!(strm_ >> length)) {
           return 0;
@@ -551,7 +552,6 @@ ACE_CDR::ULong DynamicData::get_item_count()
         }
         ++length;
       }
-      release_chains();
       return length;
     }
   }
@@ -570,8 +570,7 @@ DynamicData DynamicData::clone() const
 
 bool DynamicData::is_type_supported(TypeKind tk, const char* func_name)
 {
-  ACE_CDR::ULong size;
-  if (!is_primitive(tk, size) && tk != TK_STRING8 && tk != TK_STRING16) {
+  if (!is_primitive(tk) && tk != TK_STRING8 && tk != TK_STRING16) {
     if (DCPS::DCPS_debug_level >= 1) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DynamicData::%C -")
                  ACE_TEXT(" Called on an unsupported type (%C)\n"), func_name, typekind_to_string(tk)));
@@ -764,11 +763,18 @@ bool DynamicData::get_value_from_union(MemberType& value, MemberId id,
     read_value(value, MemberTypeKind);
 }
 
-bool DynamicData::skip_to_sequence_element(MemberId id)
+bool DynamicData::skip_to_sequence_element(MemberId id, DynamicType_rch coll_type)
 {
-  const DynamicType_rch elem_type = get_base_type(descriptor_.element_type);
+  DynamicType_rch elem_type;
+  bool skip_all = false;
+  if (coll_type.is_nil()) {
+    elem_type = get_base_type(descriptor_.element_type);
+  } else {
+    elem_type = get_base_type(coll_type->get_descriptor().element_type);
+    skip_all = true;
+  }
   ACE_CDR::ULong size;
-  if (is_primitive(elem_type->get_kind(), size)) {
+  if (get_primitive_size(elem_type, size)) {
     ACE_CDR::ULong length, index;
     return (strm_ >> length) &&
       get_index_from_id(id, index, length) &&
@@ -776,11 +782,14 @@ bool DynamicData::skip_to_sequence_element(MemberId id)
   } else {
     size_t dheader;
     ACE_CDR::ULong length, index;
-    if (!strm_.read_delimiter(dheader) || !(strm_ >> length) ||
-        !get_index_from_id(id, index, length)) {
+    if (!strm_.read_delimiter(dheader) || !(strm_ >> length)) {
       return false;
     }
-
+    if (skip_all) {
+      index = length;
+    } else if (!get_index_from_id(id, index, length)) {
+      return false;
+    }
     for (ACE_CDR::ULong i = 0; i < index; ++i) {
       if (!skip_member(elem_type)) {
         return false;
@@ -790,25 +799,38 @@ bool DynamicData::skip_to_sequence_element(MemberId id)
   }
 }
 
-bool DynamicData::skip_to_array_element(MemberId id)
+bool DynamicData::skip_to_array_element(MemberId id, DynamicType_rch coll_type)
 {
-  const DynamicType_rch elem_type = get_base_type(descriptor_.element_type);
+  DynamicType_rch elem_type;
+  bool skip_all = false;
+  if (coll_type.is_nil()) {
+    elem_type = get_base_type(descriptor_.element_type);
+    coll_type = type_;
+  } else {
+    elem_type = get_base_type(coll_type->get_descriptor().element_type);
+    skip_all = true;
+  }
+
   ACE_CDR::ULong length = 1;
-  for (ACE_CDR::ULong i = 0; i < descriptor_.bound.length(); ++i) {
-    length *= descriptor_.bound[i];
+  for (ACE_CDR::ULong i = 0; i < coll_type->get_descriptor().bound.length(); ++i) {
+    length *= coll_type->get_descriptor().bound[i];
   }
 
   ACE_CDR::ULong size;
-  if (is_primitive(elem_type->get_kind(), size)) {
+  if (get_primitive_size(elem_type, size)) {
     ACE_CDR::ULong index;
     return get_index_from_id(id, index, length) && strm_.skip(index, size);
   } else {
     size_t dheader;
     ACE_CDR::ULong index;
-    if (!strm_.read_delimiter(dheader) || !get_index_from_id(id, index, length)) {
+    if (!strm_.read_delimiter(dheader)) {
       return false;
     }
-
+    if (skip_all) {
+      index = length;
+    } else if (!get_index_from_id(id, index, length)) {
+      return false;
+    }
     for (ACE_CDR::ULong i = 0; i < index; ++i) {
       if (!skip_member(elem_type)) {
         return false;
@@ -824,8 +846,8 @@ bool DynamicData::skip_to_map_element(MemberId id)
   const DynamicType_rch elem_type = get_base_type(descriptor_.element_type);
   ACE_CDR::ULong key_size, elem_size;
 
-  if (is_primitive(key_type->get_kind(), key_size) &&
-      is_primitive(elem_type->get_kind(), elem_size)) {
+  if (get_primitive_size(key_type, key_size) &&
+      get_primitive_size(elem_type, elem_size)) {
     ACE_CDR::ULong length, index;
     if (!(strm_ >> length) || !get_index_from_id(id, index, length)) {
       return false;
@@ -966,8 +988,6 @@ DDS::ReturnCode_t DynamicData::get_single_value(ValueType& value, MemberId id,
     }
   }
 
-  release_chains();
-
   if (!good && DCPS::DCPS_debug_level >= 1) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_single_value -")
                ACE_TEXT(" Failed to read a value of %C from a DynamicData object of type %C\n"),
@@ -1101,8 +1121,6 @@ DDS::ReturnCode_t DynamicData::get_char_common(CharT& value, MemberId id)
     break;
   }
 
-  release_chains();
-
   if (!good && DCPS::DCPS_debug_level >= 1) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Dynamic::get_char_common -")
                ACE_TEXT(" Failed to read DynamicData object of type %C\n"), typekind_to_string(tk)));
@@ -1208,8 +1226,6 @@ DDS::ReturnCode_t DynamicData::get_boolean_value(ACE_CDR::Boolean& value, Member
     good = false;
     break;
   }
-
-  release_chains();
 
   if (!good && DCPS::DCPS_debug_level >= 1) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Dynamic::get_boolean_value -")
@@ -1335,7 +1351,6 @@ DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id
     break;
   }
 
-  release_chains();
   return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
 
@@ -1595,8 +1610,6 @@ DDS::ReturnCode_t DynamicData::get_sequence_values(SequenceType& value, MemberId
     return DDS::RETCODE_ERROR;
   }
 
-  release_chains();
-
   if (!good && DCPS::DCPS_debug_level >= 1) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_sequence_values -")
                ACE_TEXT(" Failed to read sequence<%C> from a DynamicData object of type %C\n"),
@@ -1693,6 +1706,12 @@ DDS::ReturnCode_t DynamicData::get_wstring_values(WStringSeq& value, MemberId id
   return get_sequence_values<TK_STRING16>(value, id);
 }
 #endif
+
+bool DynamicData::check_xcdr1_mutable(const DynamicType_rch& dt)
+{
+  DynamicTypeNameSet dtns;
+  return check_xcdr1_mutable_i(dt, dtns);
+}
 
 bool DynamicData::skip_to_struct_member(const MemberDescriptor& member_desc, MemberId id)
 {
@@ -1857,7 +1876,7 @@ bool DynamicData::skip_struct_member_at_index(ACE_CDR::ULong index, ACE_CDR::ULo
   }
 
   const MemberDescriptor md = member->get_descriptor();
-  if (md.is_optional) {
+  if (strm_.encoding().kind() == DCPS::Encoding::KIND_XCDR2 && md.is_optional) {
     ACE_CDR::Boolean present;
     if (!(strm_ >> ACE_InputCDR::to_boolean(present))) {
       return false;
@@ -1996,7 +2015,7 @@ bool DynamicData::skip_sequence_member(DynamicType_rch seq_type)
   const DynamicType_rch elem_type = get_base_type(descriptor.element_type);
 
   ACE_CDR::ULong primitive_size = 0;
-  if (is_primitive(elem_type->get_kind(), primitive_size)) {
+  if (get_primitive_size(elem_type, primitive_size)) {
     ACE_CDR::ULong length;
     if (!(strm_ >> length)) {
       if (DCPS::DCPS_debug_level >= 1) {
@@ -2009,7 +2028,7 @@ bool DynamicData::skip_sequence_member(DynamicType_rch seq_type)
     return skip("skip_sequence_member", "Failed to skip a primitive sequence member",
                 length, primitive_size);
   } else {
-    return skip_collection_member(TK_SEQUENCE);
+    return skip_collection_member(seq_type);
   }
 }
 
@@ -2019,7 +2038,7 @@ bool DynamicData::skip_array_member(DynamicType_rch array_type)
   const DynamicType_rch elem_type = get_base_type(descriptor.element_type);
 
   ACE_CDR::ULong primitive_size = 0;
-  if (is_primitive(elem_type->get_kind(), primitive_size)) {
+  if (get_primitive_size(elem_type, primitive_size)) {
     const LBoundSeq& bounds = descriptor.bound;
     ACE_CDR::ULong num_elems = 1;
     for (unsigned i = 0; i < bounds.length(); ++i) {
@@ -2029,7 +2048,7 @@ bool DynamicData::skip_array_member(DynamicType_rch array_type)
     return skip("skip_array_member", "Failed to skip a primitive array member",
                 num_elems, primitive_size);
   } else {
-    return skip_collection_member(TK_ARRAY);
+    return skip_collection_member(array_type);
   }
 }
 
@@ -2040,8 +2059,8 @@ bool DynamicData::skip_map_member(DynamicType_rch map_type)
   const DynamicType_rch key_type = get_base_type(descriptor.key_element_type);
 
   ACE_CDR::ULong key_primitive_size = 0, elem_primitive_size = 0;
-  if (is_primitive(key_type->get_kind(), key_primitive_size) &&
-      is_primitive(elem_type->get_kind(), elem_primitive_size)) {
+  if (get_primitive_size(key_type, key_primitive_size) &&
+      get_primitive_size(elem_type, elem_primitive_size)) {
     ACE_CDR::ULong length;
     if (!(strm_ >> length)) {
       if (DCPS::DCPS_debug_level >= 1) {
@@ -2063,17 +2082,17 @@ bool DynamicData::skip_map_member(DynamicType_rch map_type)
     }
     return true;
   } else {
-    return skip_collection_member(TK_MAP);
+    return skip_collection_member(map_type);
   }
 }
 
-bool DynamicData::skip_collection_member(TypeKind kind)
+bool DynamicData::skip_collection_member(DynamicType_rch coll_type)
 {
+  const TypeKind kind = coll_type->get_kind();
   if (kind != TK_SEQUENCE && kind != TK_ARRAY && kind != TK_MAP) {
     return false;
   }
   const char* kind_str = typekind_to_string(kind);
-
   size_t dheader;
   if (!strm_.read_delimiter(dheader)) {
     if (DCPS::DCPS_debug_level >= 1) {
@@ -2083,9 +2102,21 @@ bool DynamicData::skip_collection_member(TypeKind kind)
     }
     return false;
   }
-
-  const DCPS::String err_msg = DCPS::String("Failed to skip a non-primitive ") + kind_str + " member";
-  return skip("skip_collection_member", err_msg.c_str(), dheader);
+  if (strm_.encoding().kind() == DCPS::Encoding::KIND_XCDR2) {
+    const DCPS::String err_msg = DCPS::String("Failed to skip a non-primitive ") + kind_str + " member";
+    return skip("skip_collection_member", err_msg.c_str(), dheader);
+  } else if (kind == TK_SEQUENCE) {
+    return skip_to_sequence_element(0, coll_type);
+  } else if (kind == TK_ARRAY) {
+    return skip_to_array_element(0, coll_type);
+  } else if (kind == TK_MAP) {
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicData::skip_collection_member: "
+                 "DynamicData does not currently support XCDR1 maps\n"));
+    }
+    return false;
+  }
+  return true;
 }
 
 bool DynamicData::skip_aggregated_member(const DynamicType_rch& member_type)
@@ -2101,14 +2132,6 @@ bool DynamicData::skip_aggregated_member(const DynamicType_rch& member_type)
   strm_.rdstate(curr_state);
   chains_to_release.push_back(result_chain);
   return true;
-}
-
-void DynamicData::release_chains()
-{
-  for (ACE_CDR::ULong i = 0; i < chains_to_release.size(); ++i) {
-    ACE_Message_Block::release(chains_to_release[i]);
-  }
-  chains_to_release.clear();
 }
 
 bool DynamicData::read_discriminator(const DynamicType_rch& disc_type, ExtensibilityKind union_ek, ACE_CDR::Long& label)
@@ -2239,7 +2262,7 @@ bool DynamicData::skip_all()
   }
 
   const ExtensibilityKind extensibility = descriptor_.extensibility_kind;
-  if (extensibility == APPENDABLE || extensibility == MUTABLE) {
+  if (strm_.encoding().kind() == DCPS::Encoding::KIND_XCDR2 && (extensibility == APPENDABLE || extensibility == MUTABLE)) {
     size_t dheader;
     if (!strm_.read_delimiter(dheader)) {
       if (DCPS::DCPS_debug_level >= 1) {
@@ -2261,7 +2284,6 @@ bool DynamicData::skip_all()
           break;
         }
       }
-      release_chains();
       return good;
     } else { // Union
       const DynamicType_rch disc_type = get_base_type(descriptor_.discriminator_type);
@@ -2282,7 +2304,6 @@ bool DynamicData::skip_all()
           if (label == labels[i]) {
             const DynamicType_rch selected_member = md.type.lock();
             bool good = selected_member && skip_member(selected_member);
-            release_chains();
             return good;
           }
         }
@@ -2296,7 +2317,6 @@ bool DynamicData::skip_all()
       if (has_default) {
         const DynamicType_rch default_dt = default_member.type.lock();
         bool good = default_dt && skip_member(default_dt);
-        release_chains();
         return good;
       }
       if (DCPS::DCPS_debug_level >= 1) {
@@ -2324,11 +2344,35 @@ DynamicType_rch DynamicData::get_base_type(const DynamicType_rch& type) const
   return type->get_base_type();
 }
 
-bool DynamicData::is_primitive(TypeKind tk, ACE_CDR::ULong& size) const
+bool DynamicData::is_primitive(TypeKind tk) const
+{
+  switch (tk) {
+  case TK_BOOLEAN:
+  case TK_BYTE:
+  case TK_INT8:
+  case TK_UINT8:
+  case TK_CHAR8:
+  case TK_INT16:
+  case TK_UINT16:
+  case TK_CHAR16:
+  case TK_INT32:
+  case TK_UINT32:
+  case TK_FLOAT32:
+  case TK_INT64:
+  case TK_UINT64:
+  case TK_FLOAT64:
+  case TK_FLOAT128:
+    return true;
+  default:
+    return false;
+  }
+}
+
+bool DynamicData::get_primitive_size(const DynamicType_rch& dt, ACE_CDR::ULong& size) const
 {
   size = 0;
 
-  switch (tk) {
+  switch (dt->get_kind()) {
   case TK_BOOLEAN:
   case TK_BYTE:
   case TK_INT8:
@@ -2440,6 +2484,36 @@ const char* DynamicData::typekind_to_string(TypeKind tk) const
   default:
     return "unknown";
   }
+}
+
+bool DynamicData::check_xcdr1_mutable_i(const DynamicType_rch& dt, DynamicTypeNameSet& dtns)
+{
+  if (dtns.find(dt->get_descriptor().name) != dtns.end()) {
+    return true;
+  }
+  if (dt->get_descriptor().extensibility_kind == MUTABLE &&
+      encoding_.kind() == DCPS::Encoding::KIND_XCDR1) {
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicData::check_xcdr1_mutable: "
+                 "XCDR1 mutable is not currently supported in OpenDDS\n"));
+    }
+    return false;
+  }
+  dtns.insert(dt->get_descriptor().name);
+  DynamicTypeMember_rch dtm;
+  for (ACE_CDR::ULong i = 0; i < dt->get_member_count(); ++i) {
+    if (dt->get_member_by_index(dtm, i) != DDS::RETCODE_OK) {
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicData::check_xcdr1_mutable: "
+                  "Failed to get member from DynamicType\n"));
+      }
+      return false;
+    }
+    if (!check_xcdr1_mutable_i(dtm->get_descriptor().get_type(), dtns)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 #ifndef OPENDDS_SAFETY_PROFILE

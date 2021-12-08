@@ -44,8 +44,25 @@ public:
       }
     }
 
-    String struct_string =
-      "struct ::Dynamic::my_struct\n"
+    String struct_string_final =
+      "struct ::Dynamic::my_struct_final\n"
+      "  Array my_long_struct_arr ::Dynamic::long_struct_final[2] =\n"
+      "    [0]struct ::Dynamic::long_struct_final\n"
+      "      Int32 my_long = 1\n"
+      "    [1]struct ::Dynamic::long_struct_final\n"
+      "      Int32 my_long = 2\n"
+      "  Sequence my_inner_union_seq ::Dynamic::inner_union_final[2] =\n"
+      "    [0]union ::Dynamic::inner_union_final\n"
+      "      Int32 discriminator = -2147483647\n"
+      "      Boolean b = true\n"
+      "    [1]union ::Dynamic::inner_union_final\n"
+      "      Int32 discriminator = 2\n"
+      "      ::Dynamic::bool_seq my_alias_seq Boolean[2] =\n"
+      "        [0] = true\n"
+      "        [1] = false\n"
+      "  Array my_enum_arr ::Dynamic::EnumType[2] =\n"
+      "    [0] = V1\n"
+      "    [1] = V2\n"
       "  Int8 my_int8 = 1\n"
       "  UInt8 my_uint8 = 2\n"
       "  Int16 my_short = 3\n"
@@ -76,32 +93,182 @@ public:
       "    [0] = 5\n"
       "    [1] = 6\n";
 
-    String nested_struct_string =
-      "struct ::Dynamic::outer_struct\n"
-      "  struct ::Dynamic::inner_struct\n"
-      "    union ::Dynamic::inner_union\n"
+    String nested_struct_string_final =
+      "struct ::Dynamic::outer_struct_final\n"
+      "  struct ::Dynamic::inner_struct_final\n"
+      "    union ::Dynamic::inner_union_final\n"
       "      Int32 discriminator = 2\n"
       "      ::Dynamic::bool_seq my_alias_seq Boolean[2] =\n"
       "        [0] = false\n"
       "        [1] = true\n";
 
-    String default_union_string =
-      "union ::Dynamic::inner_union\n"
+    String default_union_string_final =
+      "union ::Dynamic::inner_union_final\n"
       "  Int32 discriminator = -2147483647\n"
       "  Boolean b = true\n";
 
-    String nested_union_string =
-      "union ::Dynamic::outer_union\n"
+    String nested_union_string_final =
+      "union ::Dynamic::outer_union_final\n"
       "  ::Dynamic::EnumType discriminator = V1\n"
-      "  struct ::Dynamic::inner_struct\n"
-      "    union ::Dynamic::inner_union\n"
+      "  struct ::Dynamic::inner_struct_final\n"
+      "    union ::Dynamic::inner_union_final\n"
       "      Int32 discriminator = 1\n"
       "      Int32 l = 5\n";
 
-    if (my_type != struct_string &&
-        my_type != nested_struct_string &&
-        my_type != default_union_string &&
-        my_type != nested_union_string &&
+    String struct_string_appendable =
+      "struct ::Dynamic::my_struct_appendable\n"
+      "  Array my_long_struct_arr ::Dynamic::long_struct_appendable[2] =\n"
+      "    [0]struct ::Dynamic::long_struct_appendable\n"
+      "      Int32 my_long = 1\n"
+      "    [1]struct ::Dynamic::long_struct_appendable\n"
+      "      Int32 my_long = 2\n"
+      "  Sequence my_inner_union_seq ::Dynamic::inner_union_appendable[2] =\n"
+      "    [0]union ::Dynamic::inner_union_appendable\n"
+      "      Int32 discriminator = -2147483647\n"
+      "      Boolean b = true\n"
+      "    [1]union ::Dynamic::inner_union_appendable\n"
+      "      Int32 discriminator = 2\n"
+      "      ::Dynamic::bool_seq my_alias_seq Boolean[2] =\n"
+      "        [0] = true\n"
+      "        [1] = false\n"
+      "  Array my_enum_arr ::Dynamic::EnumType[2] =\n"
+      "    [0] = V1\n"
+      "    [1] = V2\n"
+      "  Int8 my_int8 = 1\n"
+      "  UInt8 my_uint8 = 2\n"
+      "  Int16 my_short = 3\n"
+      "  UInt16 my_ushort = 4\n"
+      "  Int32 my_long = 5\n"
+      "  UInt32 my_ulong = 6\n"
+      "  Int64 my_longlong = 7\n"
+      "  UInt64 my_ulonglong = 8\n"
+      "  Float32 my_float = 9.25\n"
+      "  Float64 my_double = 10.5\n"
+      "  Float128 my_longdouble = 11.075\n"
+      "  Boolean my_boolean = true\n"
+      "  Byte my_byte = 0x0c\n"
+      "  Char8 my_char = 'd'\n"
+      "  Char16 my_wchar = L'e'\n"
+      "  String8 my_string = \"Hello\"\n"
+      "  WString16 my_wstring = L\"World\"\n"
+      "  Sequence my_alias_seq Boolean[2] =\n"
+      "    [0] = true\n"
+      "    [1] = false\n"
+      "  Array my_alias_array Char8[2] =\n"
+      "    [0] = 'a'\n"
+      "    [1] = 'b'\n"
+      "  Sequence my_anon_seq ::Dynamic::EnumType[2] =\n"
+      "    [0] = V2\n"
+      "    [1] = V1\n"
+      "  Array my_anon_arr Int16[2] =\n"
+      "    [0] = 5\n"
+      "    [1] = 6\n";
+
+    String nested_struct_string_appendable =
+      "struct ::Dynamic::outer_struct_appendable\n"
+      "  struct ::Dynamic::inner_struct_appendable\n"
+      "    union ::Dynamic::inner_union_appendable\n"
+      "      Int32 discriminator = 2\n"
+      "      ::Dynamic::bool_seq my_alias_seq Boolean[2] =\n"
+      "        [0] = false\n"
+      "        [1] = true\n";
+
+    String default_union_string_appendable =
+      "union ::Dynamic::inner_union_appendable\n"
+      "  Int32 discriminator = -2147483647\n"
+      "  Boolean b = true\n";
+
+    String nested_union_string_appendable =
+      "union ::Dynamic::outer_union_appendable\n"
+      "  ::Dynamic::EnumType discriminator = V1\n"
+      "  struct ::Dynamic::inner_struct_appendable\n"
+      "    union ::Dynamic::inner_union_appendable\n"
+      "      Int32 discriminator = 1\n"
+      "      Int32 l = 5\n";
+
+    String struct_string_mutable =
+      "struct ::Dynamic::my_struct_mutable\n"
+      "  Array my_long_struct_arr ::Dynamic::long_struct_mutable[2] =\n"
+      "    [0]struct ::Dynamic::long_struct_mutable\n"
+      "      Int32 my_long = 1\n"
+      "    [1]struct ::Dynamic::long_struct_mutable\n"
+      "      Int32 my_long = 2\n"
+      "  Sequence my_inner_union_seq ::Dynamic::inner_union_mutable[2] =\n"
+      "    [0]union ::Dynamic::inner_union_mutable\n"
+      "      Int32 discriminator = -2147483647\n"
+      "      Boolean b = true\n"
+      "    [1]union ::Dynamic::inner_union_mutable\n"
+      "      Int32 discriminator = 2\n"
+      "      ::Dynamic::bool_seq my_alias_seq Boolean[2] =\n"
+      "        [0] = true\n"
+      "        [1] = false\n"
+      "  Array my_enum_arr ::Dynamic::EnumType[2] =\n"
+      "    [0] = V1\n"
+      "    [1] = V2\n"
+      "  Int8 my_int8 = 1\n"
+      "  UInt8 my_uint8 = 2\n"
+      "  Int16 my_short = 3\n"
+      "  UInt16 my_ushort = 4\n"
+      "  Int32 my_long = 5\n"
+      "  UInt32 my_ulong = 6\n"
+      "  Int64 my_longlong = 7\n"
+      "  UInt64 my_ulonglong = 8\n"
+      "  Float32 my_float = 9.25\n"
+      "  Float64 my_double = 10.5\n"
+      "  Float128 my_longdouble = 11.075\n"
+      "  Boolean my_boolean = true\n"
+      "  Byte my_byte = 0x0c\n"
+      "  Char8 my_char = 'd'\n"
+      "  Char16 my_wchar = L'e'\n"
+      "  String8 my_string = \"Hello\"\n"
+      "  WString16 my_wstring = L\"World\"\n"
+      "  Sequence my_alias_seq Boolean[2] =\n"
+      "    [0] = true\n"
+      "    [1] = false\n"
+      "  Array my_alias_array Char8[2] =\n"
+      "    [0] = 'a'\n"
+      "    [1] = 'b'\n"
+      "  Sequence my_anon_seq ::Dynamic::EnumType[2] =\n"
+      "    [0] = V2\n"
+      "    [1] = V1\n"
+      "  Array my_anon_arr Int16[2] =\n"
+      "    [0] = 5\n"
+      "    [1] = 6\n";
+
+    String nested_struct_string_mutable =
+      "struct ::Dynamic::outer_struct_mutable\n"
+      "  struct ::Dynamic::inner_struct_mutable\n"
+      "    union ::Dynamic::inner_union_mutable\n"
+      "      Int32 discriminator = 2\n"
+      "      ::Dynamic::bool_seq my_alias_seq Boolean[2] =\n"
+      "        [0] = false\n"
+      "        [1] = true\n";
+
+    String default_union_string_mutable =
+      "union ::Dynamic::inner_union_mutable\n"
+      "  Int32 discriminator = -2147483647\n"
+      "  Boolean b = true\n";
+
+    String nested_union_string_mutable =
+      "union ::Dynamic::outer_union_mutable\n"
+      "  ::Dynamic::EnumType discriminator = V1\n"
+      "  struct ::Dynamic::inner_struct_mutable\n"
+      "    union ::Dynamic::inner_union_mutable\n"
+      "      Int32 discriminator = 1\n"
+      "      Int32 l = 5\n";
+
+    if (my_type != struct_string_final &&
+        my_type != nested_struct_string_final &&
+        my_type != default_union_string_final &&
+        my_type != nested_union_string_final &&
+        my_type != struct_string_appendable &&
+        my_type != nested_struct_string_appendable &&
+        my_type != default_union_string_appendable &&
+        my_type != nested_union_string_appendable &&
+        my_type != struct_string_mutable &&
+        my_type != nested_struct_string_mutable &&
+        my_type != default_union_string_mutable &&
+        my_type != nested_union_string_mutable &&
         log_level >= LogLevel::Error) {
        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TestRecorderListener::on_sample_data_received:"
          " Type did not match\n"));
@@ -143,11 +310,18 @@ int run_test(int argc, ACE_TCHAR* argv[])
 {
   int ret_val = 0;
   try {
-    const ACE_TCHAR* type_name = argv[1];
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
-
+    const ACE_TCHAR* type_name = argv[1];
+    const ACE_TCHAR* xcdr_version = argv[2];
+    if (argc < 3) {
+      ACE_ERROR((LM_ERROR, "ERROR: Must pass type name and xcdr version\n"));
+      return 1;
+    } else if (argc > 3) {
+      ACE_ERROR((LM_ERROR, "ERROR: Too many arguments\n"));
+      return 1;
+    }
     Service_Participant* service = TheServiceParticipant;
 
     // Create DomainParticipant
@@ -192,7 +366,11 @@ int run_test(int argc, ACE_TCHAR* argv[])
 
       DDS::DataReaderQos dr_qos = service->initial_DataReaderQos();
       dr_qos.representation.value.length(1);
-      dr_qos.representation.value[0] = DDS::XCDR2_DATA_REPRESENTATION;
+      if (!ACE_OS::strcmp(xcdr_version, ACE_TEXT("1"))) {
+        dr_qos.representation.value[0] = DDS::XCDR_DATA_REPRESENTATION;
+      } else {
+        dr_qos.representation.value[0] = DDS::XCDR2_DATA_REPRESENTATION;
+      }
       dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
       // Create Recorder
       Recorder_var recorder =

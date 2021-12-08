@@ -313,8 +313,9 @@ int run(int argc, ACE_TCHAR* argv[])
       participant->get_default_subscriber_qos(sub_qos);
 
       DDS::DataReaderQos dr_qos = service->initial_DataReaderQos();
-      dr_qos.representation.value.length(1);
-      dr_qos.representation.value[0] = DDS::XCDR2_DATA_REPRESENTATION;
+      dr_qos.representation.value.length(2);
+      dr_qos.representation.value[0] = DDS::XCDR_DATA_REPRESENTATION;
+      dr_qos.representation.value[1] = DDS::XCDR2_DATA_REPRESENTATION;
       dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
       // Create Recorder

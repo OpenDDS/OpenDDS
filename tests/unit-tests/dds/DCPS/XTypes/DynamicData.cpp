@@ -11,6 +11,7 @@
 using namespace OpenDDS;
 
 const DCPS::Encoding xcdr2(DCPS::Encoding::KIND_XCDR2, DCPS::ENDIAN_BIG);
+const DCPS::Encoding xcdr1(DCPS::Encoding::KIND_XCDR1, DCPS::ENDIAN_BIG);
 
 void set_float128_value(ACE_CDR::LongDouble& a)
 {
@@ -1272,7 +1273,7 @@ TEST(DDS_DCPS_XTypes_DynamicData, Mutable_SkipNestedMembers)
     0x40,0x00,0x00,0x01, 0x00,0x00,0x00,0x0e, // +8=20 Emheader & nextint
     0x12,0x34,0x56,0x78, // +4=24 l
     0x00,0x00,0x00,0x04, 0x7f,0xff,0xff,0xff, // +8=32 inner.l
-    0x9a,0xbc,(0),(0), // +2+(2)=36 s
+    0x43,0x21,(0),(0), // +2+(2)=36 s
     ////////////////////////////////////////////////////////
     0x10,0x00,0x00,0x02, 0x00,0x0a,(0),(0), // +6+(2)=44 s
     /////////// inner (FinalNestedUnionInner) ////////////
@@ -1286,7 +1287,7 @@ TEST(DDS_DCPS_XTypes_DynamicData, Mutable_SkipNestedMembers)
   expected.c = 'a';
   expected.outer.l = 0x12345678;
   expected.outer.inner.l = 0x7fffffff;
-  expected.outer.s = 0x9abc;
+  expected.outer.s = 0x4321;
   expected.s = 0x000a;
   expected.inner.ul(ACE_CDR::ULong(0xffffffff));
   expected.i = 0x11;
@@ -1367,6 +1368,45 @@ TEST(DDS_DCPS_XTypes_DynamicData, Appendable_ReadValueFromStruct)
   ACE_Message_Block msg(1024);
   msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
   XTypes::DynamicData data(&msg, xcdr2, dt);
+
+  verify_single_value_struct<AppendableSingleValueStruct>(data);
+}
+
+TEST(DDS_DCPS_XTypes_DynamicData, Appendable_ReadValueFromStructXCDR1)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableSingleValueStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::AppendableSingleValueStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  unsigned char single_value_struct[] = {
+    0x00,0x00,0x00,0x03, // +4=4 my_enum
+    0x00,0x00,0x00,0x0a, // +4=8 int_32
+    0x00,0x00,0x00,0x0b, // +4=12 uint_32
+    0x05, // +1=13 int_8
+    0x06, // +1=14 uint_8
+    0x11,0x11, // +2=16 int_16
+    0x22,0x22, // +2=18 uint_16
+    (0),(0),(0),(0),(0),(0),0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +(6)+8=32 int_64
+    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +8=40 uint_64
+    0x3f,0x80,0x00,0x00, // +4=44 float_32
+    (0),(0),(0),(0),0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00, // +(4)+8=56 float_64
+    0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0,    // +16=72 float_128
+    'a',  // +1=73 char_8
+    (0),0x00,0x61, // +(1)+2=76 char_16
+    0xff, // +1=77 byte
+    0x01, // +1=78 bool
+    (0),(0), 0x00,0x00,0x00,0x0c, // +(2)+4=84 nested_struct
+    0x00,0x00,0x00,0x04, 'a','b','c','\0', // +8=92 str
+    0x00,0x00,0x00,0x08, 0,0x61,0,0x62,0,0x63,0,0, // +12=100 swtr
+  };
+  ACE_Message_Block msg(1024);
+  msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
+  XTypes::DynamicData data(&msg, xcdr1, dt);
 
   verify_single_value_struct<AppendableSingleValueStruct>(data);
 }
@@ -1629,6 +1669,203 @@ TEST(DDS_DCPS_XTypes_DynamicData, Appendable_ReadValueFromUnion)
   }
 }
 
+TEST(DDS_DCPS_XTypes_DynamicData, Appendable_ReadValueFromUnionXCDR1)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableSingleValueUnion_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::AppendableSingleValueUnion_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  ACE_Message_Block msg(256);
+  {
+    unsigned char int32_union[] = {
+      0x00,0x00,0x00,0x00, // discriminator
+      0x00,0x00,0x00,0x0a // int_32
+    };
+    msg.copy((const char*)int32_union, sizeof(int32_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_int32_union(data);
+  }
+  {
+    unsigned char uint32_union[] = {
+      0x00,0x00,0x00,0x01, // discriminator
+      0x00,0x00,0x00,0x0b // uint_32
+    };
+    msg.reset();
+    msg.copy((const char*)uint32_union, sizeof(uint32_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_uint32_union(data);
+  }
+  {
+    unsigned char int8_union[] = {
+      0x00,0x00,0x00,0x02, // discriminator
+      0x7f // int_8
+    };
+    msg.reset();
+    msg.copy((const char*)int8_union, sizeof(int8_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_int8_union(data);
+  }
+  {
+    unsigned char uint8_union[] = {
+      0x00,0x00,0x00,0x03, // discriminator
+      0xff // uint_8
+    };
+    msg.reset();
+    msg.copy((const char*)uint8_union, sizeof(uint8_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_uint8_union(data);
+  }
+  {
+    unsigned char int16_union[] = {
+      0x00,0x00,0x00,0x04, // discriminator
+      0x00,0x09 // int_16
+    };
+    msg.reset();
+    msg.copy((const char*)int16_union, sizeof(int16_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_int16_union(data);
+  }
+  {
+    unsigned char uint16_union[] = {
+      0x00,0x00,0x00,0x05, // discriminator
+      0x00,0x05 // uint_16
+    };
+    msg.reset();
+    msg.copy((const char*)uint16_union, sizeof(uint16_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_uint16_union(data);
+  }
+  {
+    unsigned char int64_union[] = {
+      0x00,0x00,0x00,0x06, // discriminator
+      (0),(0),(0),(0), 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xfe// int_64
+    };
+    msg.reset();
+    msg.copy((const char*)int64_union, sizeof(int64_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_int64_union(data);
+  }
+  {
+    unsigned char uint64_union[] = {
+      0x00,0x00,0x00,0x07, // discriminator
+      (0),(0),(0),(0), 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff// uint_64
+    };
+    msg.reset();
+    msg.copy((const char*)uint64_union, sizeof(uint64_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_uint64_union(data);
+  }
+  {
+    unsigned char float32_union[] = {
+      0x00,0x00,0x00,0x08, // discriminator
+      0x3f,0x80,0x00,0x00 // float_32
+    };
+    msg.reset();
+    msg.copy((const char*)float32_union, sizeof(float32_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_float32_union(data);
+  }
+  {
+    unsigned char float64_union[] = {
+      0x00,0x00,0x00,0x09, // discriminator
+      (0),(0),(0),(0), 0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00 // float_64
+    };
+    msg.reset();
+    msg.copy((const char*)float64_union, sizeof(float64_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_float64_union(data);
+  }
+  {
+    unsigned char float128_union[] = {
+      0x00,0x00,0x00,0x0a, // discriminator
+      (0),(0),(0),(0), 0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0 // float_128
+    };
+    msg.reset();
+    msg.copy((const char*)float128_union, sizeof(float128_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_float128_union(data);
+  }
+  {
+    unsigned char char8_union[] = {
+      0x00,0x00,0x00,0x0b, // discriminator
+      'a'     // char_8
+    };
+    msg.reset();
+    msg.copy((const char*)char8_union, sizeof(char8_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_char8_union(data);
+  }
+#ifdef DDS_HAS_WCHAR
+  {
+    unsigned char char16_union[] = {
+      0x00,0x00,0x00,0x0c, // discriminator
+      0x00,0x61 // char_16
+    };
+    msg.reset();
+    msg.copy((const char*)char16_union, sizeof(char16_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_char16_union(data);
+  }
+#endif
+  {
+    unsigned char byte_union[] = {
+      0x00,0x00,0x00,0x0d, // discriminator
+      0xff // byte_
+    };
+    msg.reset();
+    msg.copy((const char*)byte_union, sizeof(byte_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_byte_union(data);
+  }
+  {
+    unsigned char bool_union[] = {
+      0x00,0x00,0x00,0x0e, // discriminator
+      0x01 // bool_
+    };
+    msg.reset();
+    msg.copy((const char*)bool_union, sizeof(bool_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_bool_union(data);
+  }
+  {
+    unsigned char str_union[] = {
+      0x00,0x00,0x00,0x0f, // discriminator
+      0x00,0x00,0x00,0x04,'a','b','c','\0' // str
+    };
+    msg.reset();
+    msg.copy((const char*)str_union, sizeof(str_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_string_union(data);
+  }
+#ifdef DDS_HAS_WCHAR
+  {
+    unsigned char wstr_union[] = {
+      0x00,0x00,0x00,0x10, // discriminator
+      0x00,0x00,0x00,0x08, 0x00,0x61,0x00,0x62,0x00,0x63,0x00,0x00 // wstr
+    };
+    msg.reset();
+    msg.copy((const char*)wstr_union, sizeof(wstr_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_wstring_union(data);
+  }
+#endif
+  {
+    unsigned char enum_union[] = {
+      0x00,0x00,0x00,0x11, // discriminator
+      0x00,0x00,0x00,0x09 // my_enum
+    };
+    msg.reset();
+    msg.copy((const char*)enum_union, sizeof(enum_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_enum_union(data);
+  }
+}
+
 TEST(DDS_DCPS_XTypes_DynamicData, Appendable_ReadSequenceFromStruct)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableSequenceStruct_xtag>();
@@ -1670,6 +1907,46 @@ TEST(DDS_DCPS_XTypes_DynamicData, Appendable_ReadSequenceFromStruct)
   verify_sequence_value_struct<AppendableSequenceStruct>(data);
 }
 
+TEST(DDS_DCPS_XTypes_DynamicData, Appendable_ReadSequenceFromStructXCDR1)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableSequenceStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::AppendableSequenceStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  unsigned char sequence_struct[] = {
+    0,0,0,2, 0,0,0,1, 0,0,0,2, // +12=12 my_enums
+    0,0,0,3, 0,0,0,3, 0,0,0,4, 0,0,0,5, // +16=28 int_32s
+    0,0,0,2, 0,0,0,10, 0,0,0,11, // +12=40 uint_32s
+    0,0,0,3, 12,13,14, // +7=47 int_8s
+    (0), 0,0,0,2, 15,16, // +(1)+6=54 uint_8s
+    (0),(0), 0,0,0,2, 0,1,0,2, // +(2)+8=64 int_16s
+    0,0,0,3, 0,3,0,4,0,5, // +10=74 uint_16s
+    (0),(0), 0,0,0,2, 0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xfe,
+    0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +(2)+20=96 int_64s
+    0,0,0,1, (0),(0),(0),(0), 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +4+(4)+8=112 uint_64s
+    0,0,0,1, 0x3f,0x80,0x00,0x00, // +8=120 float_32s
+    0,0,0,1, (0),(0),(0),(0), 0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00, // +4+(4)+8=136 float_64s
+    0,0,0,1, (0),(0),(0),(0), 0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0, // +4+(4)+16=160 float_128s
+    0,0,0,2, 'a','b', // +6=166 char_8s
+    (0),(0), 0,0,0,3, 0,0x63,0,0x64,0,0x65, // +(2)+10=178 char_16s
+    (0),(0), 0,0,0,2, 0xee,0xff, // +(2)+6=186 byte_s
+    (0),(0), 0,0,0,1, 1, // +(2)+5=193 bool_s
+    (0),(0),(0), 0,0,0,1, 0,0,0,4, 'a','b','c','\0', // +(3)+12=208 str_s
+    0,0,0,2, 0,0,0,6, 0,0x64,0,0x65,0,0x66,(0),(0),
+    0,0,0,6, 0,0x67,0,0x68,0,0x69 // +14+(2)+10=234 wstr_s
+  };
+  ACE_Message_Block msg(1024);
+  msg.copy((const char*)sequence_struct, sizeof(sequence_struct));
+  XTypes::DynamicData data(&msg, xcdr1, dt);
+
+  verify_sequence_value_struct<AppendableSequenceStruct>(data);
+}
+
 TEST(DDS_DCPS_XTypes_DynamicData, Appendable_ReadSequenceFromUnion)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableSequenceUnion_xtag>();
@@ -1705,6 +1982,39 @@ TEST(DDS_DCPS_XTypes_DynamicData, Appendable_ReadSequenceFromUnion)
   }
 }
 
+TEST(DDS_DCPS_XTypes_DynamicData, Appendable_ReadSequenceFromUnionXCDR1)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableSequenceUnion_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::AppendableSequenceUnion_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  ACE_Message_Block msg(256);
+  {
+    unsigned char int32s_union[] = {
+      0x00,0x00,0x00,0x00, // discriminator
+      0x00,0x00,0x00,0x02, 0x00,0x00,0x00,0x0a, 0x00,0x00,0x00,0x0b // int_32s
+    };
+    msg.copy((const char*)int32s_union, sizeof(int32s_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_int32s_union(data);
+  }
+  {
+    unsigned char uint32s_union[] = {
+      0x00,0x00,0x00,0x01, // discriminator
+      0x00,0x00,0x00,0x02, 0x00,0x00,0x00,0xff, 0x00,0x00,0xff,0xff // uint_32s
+    };
+    msg.reset();
+    msg.copy((const char*)uint32s_union, sizeof(uint32s_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_uint32s_union(data);
+  }
+}
+
 TEST(DDS_DCPS_XTypes_DynamicData, Appendable_ReadValueFromArray)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableArrayStruct_xtag>();
@@ -1725,6 +2035,28 @@ TEST(DDS_DCPS_XTypes_DynamicData, Appendable_ReadValueFromArray)
   ACE_Message_Block msg(256);
   msg.copy((const char*)array_struct, sizeof(array_struct));
   XTypes::DynamicData data(&msg, xcdr2, dt);
+  verify_array_struct(data);
+}
+
+TEST(DDS_DCPS_XTypes_DynamicData, Appendable_ReadValueFromArrayXCDR1)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableArrayStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::AppendableArrayStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  unsigned char array_struct[] = {
+    0x00,0x00,0x00,0x12, 0x00,0x00,0x00,0x34, // +8=8 int_32a
+    0x00,0x00,0x00,0xff, 0x00,0x00,0x00,0xff,  // +8=16 uint_32a
+    0x01, 0x02 // +2=18 int_8a
+  };
+  ACE_Message_Block msg(256);
+  msg.copy((const char*)array_struct, sizeof(array_struct));
+  XTypes::DynamicData data(&msg, xcdr1, dt);
   verify_array_struct(data);
 }
 
@@ -1806,6 +2138,81 @@ TEST(DDS_DCPS_XTypes_DynamicData, Appendable_SkipNestedMembers)
   EXPECT_EQ(expected.i, i);
 }
 
+TEST(DDS_DCPS_XTypes_DynamicData, Appendable_SkipNestedMembersXCDR1)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableStructXCDR1_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::AppendableStructXCDR1_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  unsigned char appendable_struct[] = {
+    'a',(0),(0),(0), // +4=4 c
+    /////////// outer (AppendableNestedStructOuterXCDR1) ///////////
+    0x12,0x34,0x56,0x78, // +4=8 ul
+    0x7f,0xff,0xff,0xff, // +4=12 inner.l
+    0x43,0x21, // +2=14 us
+    ////////////////////////////////////////////////////////
+    0x00,0x0a, // +2=16 s
+    /////////// inner (AppendableNestedUnionInner) ////////////
+    0x00,0x00,0x00,0x01, // +4=20 discriminator
+    0xff,0xff,0xff,0xff, // +4=24 ul
+    ////////////////////////////////////////////////////////
+    0x11 // +1=25 i
+  };
+
+  AppendableStructXCDR1 expected;
+  expected.c = 'a';
+  expected.outer.ul = 0x12345678;
+  expected.outer.inner.l = 0x7fffffff;
+  expected.outer.us = 0x4321;
+  expected.s = 0x000a;
+  expected.inner.ul(ACE_CDR::ULong(0xffffffff));
+  expected.i = 0x11;
+
+  ACE_Message_Block msg(128);
+  msg.copy((const char*)appendable_struct, sizeof(appendable_struct));
+  XTypes::DynamicData data(&msg, xcdr1, dt);
+
+  XTypes::DynamicData nested_level1;
+  DDS::ReturnCode_t ret = data.get_complex_value(nested_level1, 1);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ACE_CDR::ULong ul;
+  ret = nested_level1.get_uint32_value(ul, 0);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.outer.ul, ul);
+  ACE_CDR::UShort us;
+  ret = nested_level1.get_uint16_value(us, 2);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.outer.us, us);
+  XTypes::DynamicData nested_level2;
+  ret = nested_level1.get_complex_value(nested_level2, 1);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ACE_CDR::Long l;
+  ret = nested_level2.get_int32_value(l, 0);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.outer.inner.l, l);
+
+  ACE_CDR::Short s;
+  ret = data.get_int16_value(s, 2);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.s, s);
+
+  ret = data.get_complex_value(nested_level1, 3);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ret = nested_level1.get_uint32_value(ul, 1);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.inner.ul(), ul);
+
+  ACE_CDR::Int8 i;
+  ret = data.get_int8_value(i, 4);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.i, i);
+}
+
 /////////////////////////////// Final tests /////////////////////////////
 TEST(DDS_DCPS_XTypes_DynamicData, Final_ReadValueFromStruct)
 {
@@ -1842,6 +2249,45 @@ TEST(DDS_DCPS_XTypes_DynamicData, Final_ReadValueFromStruct)
   ACE_Message_Block msg(1024);
   msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
   XTypes::DynamicData data(&msg, xcdr2, dt);
+
+  verify_single_value_struct<FinalSingleValueStruct>(data);
+}
+
+TEST(DDS_DCPS_XTypes_DynamicData, Final_ReadValueFromStructXCDR1)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::FinalSingleValueStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::FinalSingleValueStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  unsigned char single_value_struct[] = {
+    0x00,0x00,0x00,0x03, // +4=4 my_enum
+    0x00,0x00,0x00,0x0a, // +4=8 int_32
+    0x00,0x00,0x00,0x0b, // +4=12 uint_32
+    0x05, // +1=13 int_8
+    0x06, // +1=14 uint_8
+    0x11,0x11, // +2 =16 int_16
+    0x22,0x22, // +2 =18 uint_16
+    (0),(0),(0),(0),(0),(0),0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +(6)+8=32 int_64
+    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +8=40 uint_64
+    0x3f,0x80,0x00,0x00, // +4=44 float_32
+    (0),(0),(0),(0),0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00, // +(4)+8=56 float_64
+    0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0,    // +16=72 float_128
+    'a',  // +1=73 char_8
+    (0),0x00,0x61, // +(1)+2=76 char_16
+    0xff, // +1=77 byte
+    0x01, // +1=78 bool
+    (0), (0), 0x00,0x00,0x00,0x0c, // +(2)+4=84 nested_struct
+    0x00,0x00,0x00,0x04, 'a','b','c','\0', // +8=92 str
+    0x00,0x00,0x00,0x08, 0,0x61,0,0x62,0,0x63,0,0, // +12=104 swtr
+  };
+  ACE_Message_Block msg(1024);
+  msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
+  XTypes::DynamicData data(&msg, xcdr1, dt);
 
   verify_single_value_struct<FinalSingleValueStruct>(data);
 }
@@ -2085,6 +2531,203 @@ TEST(DDS_DCPS_XTypes_DynamicData, Final_ReadValueFromUnion)
   }
 }
 
+TEST(DDS_DCPS_XTypes_DynamicData, Final_ReadValueFromUnionXCDR1)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::FinalSingleValueUnion_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::FinalSingleValueUnion_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  ACE_Message_Block msg(256);
+  {
+    unsigned char int32_union[] = {
+      0x00,0x00,0x00,0x00, // +4=4 discriminator
+      0x00,0x00,0x00,0x0a  // +4=8 int_32
+    };
+    msg.copy((const char*)int32_union, sizeof(int32_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_int32_union(data);
+  }
+  {
+    unsigned char uint32_union[] = {
+      0x00,0x00,0x00,0x01, // +4=4 discriminator
+      0x00,0x00,0x00,0x0b // +4=8 uint_32
+    };
+    msg.reset();
+    msg.copy((const char*)uint32_union, sizeof(uint32_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_uint32_union(data);
+  }
+  {
+    unsigned char int8_union[] = {
+      0x00,0x00,0x00,0x02, // +4=4 discriminator
+      0x7f // +1=5 int_8
+    };
+    msg.reset();
+    msg.copy((const char*)int8_union, sizeof(int8_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_int8_union(data);
+  }
+  {
+    unsigned char uint8_union[] = {
+      0x00,0x00,0x00,0x03, // +4=4 discriminator
+      0xff // +1=5 uint_8
+    };
+    msg.reset();
+    msg.copy((const char*)uint8_union, sizeof(uint8_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_uint8_union(data);
+  }
+  {
+    unsigned char int16_union[] = {
+      0x00,0x00,0x00,0x04, // +4=4 discriminator
+      0x00,0x09 // +2=6 int_16
+    };
+    msg.reset();
+    msg.copy((const char*)int16_union, sizeof(int16_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_int16_union(data);
+  }
+  {
+    unsigned char uint16_union[] = {
+      0x00,0x00,0x00,0x05, // +4=4 discriminator
+      0x00,0x05 // +2=6 uint_16
+    };
+    msg.reset();
+    msg.copy((const char*)uint16_union, sizeof(uint16_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_uint16_union(data);
+  }
+  {
+    unsigned char int64_union[] = {
+      0x00,0x00,0x00,0x06, // +4=4 discriminator
+      (0),(0),(0),(0),0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xfe// +(4)+8=16 int_64
+    };
+    msg.reset();
+    msg.copy((const char*)int64_union, sizeof(int64_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_int64_union(data);
+  }
+  {
+    unsigned char uint64_union[] = {
+      0x00,0x00,0x00,0x07, // +4=4 discriminator
+      (0),(0),(0),(0),0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff// +(4)+8=16 uint_64
+    };
+    msg.reset();
+    msg.copy((const char*)uint64_union, sizeof(uint64_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_uint64_union(data);
+  }
+  {
+    unsigned char float32_union[] = {
+      0x00,0x00,0x00,0x08, // +4=4 discriminator
+      0x3f,0x80,0x00,0x00 // +4=8 float_32
+    };
+    msg.reset();
+    msg.copy((const char*)float32_union, sizeof(float32_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_float32_union(data);
+  }
+  {
+    unsigned char float64_union[] = {
+      0x00,0x00,0x00,0x09, // +4=4 discriminator
+      (0),(0),(0),(0),0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00 // +(4)+8=16 float_64
+    };
+    msg.reset();
+    msg.copy((const char*)float64_union, sizeof(float64_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_float64_union(data);
+  }
+  {
+    unsigned char float128_union[] = {
+      0x00,0x00,0x00,0x0a, // +4=4 discriminator
+      (0),(0),(0),(0),0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0     // +(4)+16=24 float_128
+    };
+    msg.reset();
+    msg.copy((const char*)float128_union, sizeof(float128_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_float128_union(data);
+  }
+  {
+    unsigned char char8_union[] = {
+      0x00,0x00,0x00,0x0b, // +4=4 discriminator
+      'a'     // +1=5 char_8
+    };
+    msg.reset();
+    msg.copy((const char*)char8_union, sizeof(char8_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_char8_union(data);
+  }
+#ifdef DDS_HAS_WCHAR
+  {
+    unsigned char char16_union[] = {
+      0x00,0x00,0x00,0x0c, // +4=4 discriminator
+      0x00,0x61 // +2=6 char_16
+    };
+    msg.reset();
+    msg.copy((const char*)char16_union, sizeof(char16_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_char16_union(data);
+  }
+#endif
+  {
+    unsigned char byte_union[] = {
+      0x00,0x00,0x00,0x0d, // discriminator
+      0xff // byte_
+    };
+    msg.reset();
+    msg.copy((const char*)byte_union, sizeof(byte_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_byte_union(data);
+  }
+  {
+    unsigned char bool_union[] = {
+      0x00,0x00,0x00,0x0e, // discriminator
+      0x01 // bool_
+    };
+    msg.reset();
+    msg.copy((const char*)bool_union, sizeof(bool_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_bool_union(data);
+  }
+  {
+    unsigned char str_union[] = {
+      0x00,0x00,0x00,0x0f, // discriminator
+      0x00,0x00,0x00,0x04,'a','b','c','\0' // str
+    };
+    msg.reset();
+    msg.copy((const char*)str_union, sizeof(str_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_string_union(data);
+  }
+#ifdef DDS_HAS_WCHAR
+  {
+    unsigned char wstr_union[] = {
+      0x00,0x00,0x00,0x10, // discriminator
+      0x00,0x00,0x00,0x08, 0x00,0x61,0x00,0x62,0x00,0x63,0x00,0x00 // wstr
+    };
+    msg.reset();
+    msg.copy((const char*)wstr_union, sizeof(wstr_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_wstring_union(data);
+  }
+#endif
+  {
+    unsigned char enum_union[] = {
+      0x00,0x00,0x00,0x11, // discriminator
+      0x00,0x00,0x00,0x09 // my_enum
+    };
+    msg.reset();
+    msg.copy((const char*)enum_union, sizeof(enum_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_enum_union(data);
+  }
+}
+
 TEST(DDS_DCPS_XTypes_DynamicData, Final_ReadSequenceFromStruct)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::FinalSequenceStruct_xtag>();
@@ -2125,6 +2768,46 @@ TEST(DDS_DCPS_XTypes_DynamicData, Final_ReadSequenceFromStruct)
   verify_sequence_value_struct<FinalSequenceStruct>(data);
 }
 
+TEST(DDS_DCPS_XTypes_DynamicData, Final_ReadSequenceFromStructXCDR1)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::FinalSequenceStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::FinalSequenceStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  unsigned char sequence_struct[] = {
+    0,0,0,2, 0,0,0,1, 0,0,0,2, // +12=12 my_enums
+    0,0,0,3, 0,0,0,3, 0,0,0,4, 0,0,0,5, // +16=28 int_32s
+    0,0,0,2, 0,0,0,10, 0,0,0,11, // +12=40 uint_32s
+    0,0,0,3, 12,13,14, // +7=47 int_8s
+    (0), 0,0,0,2, 15,16, // +(1)+6=54 uint_8s
+    (0),(0), 0,0,0,2, 0,1,0,2, // +(2)+8=64 int_16s
+    0,0,0,3, 0,3,0,4,0,5, // +10=74 uint_16s
+    (0),(0), 0,0,0,2, 0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xfe,
+    0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +(2)+20=96 int_64s
+    0,0,0,1, (0),(0),(0),(0), 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +4+(4)+8=112 uint_64s
+    0,0,0,1, 0x3f,0x80,0x00,0x00, // +8=120 float_32s
+    0,0,0,1, (0),(0),(0),(0), 0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00, // +4+(4)+8=136 float_64s
+    0,0,0,1, (0),(0),(0),(0), 0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0, // +4+(4)+16=160 float_128s
+    0,0,0,2, 'a','b', // +6=166 char_8s
+    (0),(0), 0,0,0,3, 0,0x63,0,0x64,0,0x65, // +(2)+10=178 char_16s
+    (0),(0), 0,0,0,2, 0xee,0xff, // +(2)+6=186 byte_s
+    (0),(0), 0,0,0,1, 1, // +(2)+5=193 bool_s
+    (0),(0),(0), 0,0,0,1, 0,0,0,4, 'a','b','c','\0', // +(3)+12=208 str_s
+    0,0,0,2, 0,0,0,6, 0,0x64,0,0x65,0,0x66,(0),(0),
+    0,0,0,6, 0,0x67,0,0x68,0,0x69 // +14+(2)+10=234 wstr_s
+  };
+  ACE_Message_Block msg(1024);
+  msg.copy((const char*)sequence_struct, sizeof(sequence_struct));
+  XTypes::DynamicData data(&msg, xcdr1, dt);
+
+  verify_sequence_value_struct<FinalSequenceStruct>(data);
+}
+
 TEST(DDS_DCPS_XTypes_DynamicData, Final_ReadSequenceFromUnion)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::FinalSequenceUnion_xtag>();
@@ -2158,6 +2841,39 @@ TEST(DDS_DCPS_XTypes_DynamicData, Final_ReadSequenceFromUnion)
   }
 }
 
+TEST(DDS_DCPS_XTypes_DynamicData, Final_ReadSequenceFromUnionXCDR1)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::FinalSequenceUnion_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::FinalSequenceUnion_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  ACE_Message_Block msg(256);
+  {
+    unsigned char int32s_union[] = {
+      0x00,0x00,0x00,0x00, // discriminator
+      0x00,0x00,0x00,0x02, 0x00,0x00,0x00,0x0a, 0x00,0x00,0x00,0x0b // int_32s
+    };
+    msg.copy((const char*)int32s_union, sizeof(int32s_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_int32s_union(data);
+  }
+  {
+    unsigned char uint32s_union[] = {
+      0x00,0x00,0x00,0x01, // discriminator
+      0x00,0x00,0x00,0x02, 0x00,0x00,0x00,0xff, 0x00,0x00,0xff,0xff // uint_32s
+    };
+    msg.reset();
+    msg.copy((const char*)uint32s_union, sizeof(uint32s_union));
+    XTypes::DynamicData data(&msg, xcdr1, dt);
+    verify_uint32s_union(data);
+  }
+}
+
 TEST(DDS_DCPS_XTypes_DynamicData, Final_ReadValueFromArray)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::FinalArrayStruct_xtag>();
@@ -2180,6 +2896,28 @@ TEST(DDS_DCPS_XTypes_DynamicData, Final_ReadValueFromArray)
   verify_array_struct(data);
 }
 
+TEST(DDS_DCPS_XTypes_DynamicData, Final_ReadValueFromArrayXCDR1)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::FinalArrayStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::FinalArrayStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  unsigned char array_struct[] = {
+    0x00,0x00,0x00,0x12, 0x00,0x00,0x00,0x34, // +8=8 int_32a
+    0x00,0x00,0x00,0xff, 0x00,0x00,0x00,0xff,  // +8=16 uint_32a
+    0x01, 0x02 // +2=18 int_8a
+  };
+  ACE_Message_Block msg(256);
+  msg.copy((const char*)array_struct, sizeof(array_struct));
+  XTypes::DynamicData data(&msg, xcdr1, dt);
+  verify_array_struct(data);
+}
+
 TEST(DDS_DCPS_XTypes_DynamicData, Final_SkipNestedMembers)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::FinalStruct_xtag>();
@@ -2197,7 +2935,7 @@ TEST(DDS_DCPS_XTypes_DynamicData, Final_SkipNestedMembers)
     0x00,0x00,0x00,0x12, // +4=8 dheader
     0x12,0x34,0x56,0x78, // +4=12 ul
     0x00,0x00,0x00,0x08, 0x20,0x00,0x00,0x00, 0x7f,0xff,0xff,0xff, // +12=24 inner.l
-    0x9a,0xbc, // +2=26 us
+    0x43,0x21, // +2=26 us
     ////////////////////////////////////////////////////////
     0x00,0x0a, // +2=28 s
     /////////// inner (AppendableNestedUnionInner) ////////////
@@ -2211,7 +2949,7 @@ TEST(DDS_DCPS_XTypes_DynamicData, Final_SkipNestedMembers)
   expected.c = 'a';
   expected.outer.ul = 0x12345678;
   expected.outer.inner.l = 0x7fffffff;
-  expected.outer.us = 0x9abc;
+  expected.outer.us = 0x4321;
   expected.s = 0x000a;
   expected.inner.ul(ACE_CDR::ULong(0xffffffff));
   expected.i = 0x11;
@@ -2219,6 +2957,81 @@ TEST(DDS_DCPS_XTypes_DynamicData, Final_SkipNestedMembers)
   ACE_Message_Block msg(128);
   msg.copy((const char*)final_struct, sizeof(final_struct));
   XTypes::DynamicData data(&msg, xcdr2, dt);
+
+  XTypes::DynamicData nested_level1;
+  DDS::ReturnCode_t ret = data.get_complex_value(nested_level1, 1);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ACE_CDR::ULong ul;
+  ret = nested_level1.get_uint32_value(ul, 0);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.outer.ul, ul);
+  ACE_CDR::UShort us;
+  ret = nested_level1.get_uint16_value(us, 2);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.outer.us, us);
+  XTypes::DynamicData nested_level2;
+  ret = nested_level1.get_complex_value(nested_level2, 1);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ACE_CDR::Long l;
+  ret = nested_level2.get_int32_value(l, 0);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.outer.inner.l, l);
+
+  ACE_CDR::Short s;
+  ret = data.get_int16_value(s, 2);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.s, s);
+
+  ret = data.get_complex_value(nested_level1, 3);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  ret = nested_level1.get_uint32_value(ul, 1);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.inner.ul(), ul);
+
+  ACE_CDR::Int8 i;
+  ret = data.get_int8_value(i, 4);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.i, i);
+}
+
+TEST(DDS_DCPS_XTypes_DynamicData, Final_SkipNestedMembersXCDR1)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::FinalStructXCDR1_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::FinalStructXCDR1_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  XTypes::DynamicType_rch dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  unsigned char final_struct[] = {
+    'a',(0),(0),(0), // +4=4 c
+    /////////// outer (FinalNestedStructOuterXCDR1) ///////////
+    0x12,0x34,0x56,0x78, // +4=8 ul
+    0x7f,0xff,0xff,0xff, // +4=12 inner.l
+    0x43,0x21, // +2=14 us
+    ////////////////////////////////////////////////////////
+    0x00,0x0a, // +2=16 s
+    /////////// inner (FinalNestedUnionInner) ////////////
+    0x00,0x00,0x00,0x01, // +4=20 discriminator
+    0xff,0xff,0xff,0xff, // +4=24 ul
+    ////////////////////////////////////////////////////////
+    0x11 // +1=25 i
+  };
+
+  FinalStructXCDR1 expected;
+  expected.c = 'a';
+  expected.outer.ul = 0x12345678;
+  expected.outer.inner.l = 0x7fffffff;
+  expected.outer.us = 0x4321;
+  expected.s = 0x000a;
+  expected.inner.ul(ACE_CDR::ULong(0xffffffff));
+  expected.i = 0x11;
+
+  ACE_Message_Block msg(128);
+  msg.copy((const char*)final_struct, sizeof(final_struct));
+  XTypes::DynamicData data(&msg, xcdr1, dt);
 
   XTypes::DynamicData nested_level1;
   DDS::ReturnCode_t ret = data.get_complex_value(nested_level1, 1);

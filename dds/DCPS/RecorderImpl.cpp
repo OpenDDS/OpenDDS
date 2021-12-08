@@ -1071,7 +1071,15 @@ XTypes::DynamicData RecorderImpl::get_dynamic_data(const RawDataSample& sample)
   }
 
   const XTypes::DynamicType_rch dt = dt_found->second;
-  return XTypes::DynamicData(sample.sample_.get(), enc, dt);
+  XTypes::DynamicData dd(sample.sample_.get(), enc, dt);
+  if (!dd.check_xcdr1_mutable(dt)) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: RecorderImpl::get_dynamic_data: "
+        "Encountered unsupported combination of XCDR1 encoding and mutable extensibility.\n"));
+    }
+    return XTypes::DynamicData();
+  }
+  return dd;
 }
 
 } // namespace DCPS
