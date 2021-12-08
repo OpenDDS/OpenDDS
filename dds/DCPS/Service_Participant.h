@@ -442,6 +442,18 @@ public:
   DDS::Duration_t bit_autopurge_disposed_samples_delay() const;
   void bit_autopurge_disposed_samples_delay(const DDS::Duration_t& duration);
 
+  /**
+   * Get TypeInformation of a remote entity given the corresponding BuiltinTopicKey_t.
+   */
+  XTypes::TypeInformation get_type_information(DDS::DomainParticipant_ptr participant,
+                                               const DDS::BuiltinTopicKey_t& key) const;
+
+  /**
+   * Get TypeObject for a given TypeIdentifier.
+   */
+  XTypes::TypeObject get_type_object(DDS::DomainParticipant_ptr participant,
+                                     const XTypes::TypeIdentifier& ti) const;
+
   enum TypeObjectEncoding { Encoding_Normal, Encoding_WriteOldFormat, Encoding_ReadOldFormat };
   TypeObjectEncoding type_object_encoding() const;
   void type_object_encoding(TypeObjectEncoding encoding);

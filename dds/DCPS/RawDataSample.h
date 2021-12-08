@@ -31,7 +31,8 @@ public:
                 ACE_UINT32         nano_sec,
                 PublicationId      pid,
                 bool               byte_order,
-                ACE_Message_Block* blk);
+                ACE_Message_Block* blk,
+                Encoding::Kind     encoding_kind);
 
   RawDataSample(const RawDataSample&);
   ~RawDataSample();
@@ -50,6 +51,8 @@ public:
   bool sample_byte_order_;
   /// The data in unspecified format
   Message_Block_Ptr sample_;
+  /// Holds information on which type of encoding was read from the encapsulation header
+  Encoding::Kind encoding_kind_;
 };
 
 void swap(RawDataSample& lhs, RawDataSample& rhs);

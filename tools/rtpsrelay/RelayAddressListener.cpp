@@ -60,7 +60,7 @@ void RelayAddressListener::on_subscription_matched(
   DDS::DataReader_ptr /*reader*/, const DDS::SubscriptionMatchedStatus& status)
 {
   relay_statistics_reporter_.relay_address_pub_count(
-    static_cast<uint32_t>(status.total_count), OpenDDS::DCPS::MonotonicTimePoint::now());
+    static_cast<uint32_t>(status.current_count), OpenDDS::DCPS::MonotonicTimePoint::now());
 }
 
 

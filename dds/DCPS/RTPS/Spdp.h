@@ -467,7 +467,7 @@ private:
    */
   bool secure_part_user_data() const;
 
-  void update_rtps_relay_application_participant_i(DiscoveredParticipantIter iter);
+  void update_rtps_relay_application_participant_i(DiscoveredParticipantIter iter, bool new_participant);
 
 #ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t send_handshake_message(const DCPS::RepoId& guid,
@@ -545,9 +545,9 @@ private:
     void join_multicast_group(const DCPS::NetworkInterface& nic,
                               bool all_interfaces = false);
     void leave_multicast_group(const DCPS::NetworkInterface& nic);
-    void add_address(const DCPS::NetworkInterface& interface,
+    void add_address(const DCPS::NetworkInterface& nic,
                      const ACE_INET_Addr& address);
-    void remove_address(const DCPS::NetworkInterface& interface,
+    void remove_address(const DCPS::NetworkInterface& nic,
                         const ACE_INET_Addr& address);
 
     ICE::Endpoint* get_ice_endpoint();

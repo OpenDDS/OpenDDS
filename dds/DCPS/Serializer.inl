@@ -1734,6 +1734,20 @@ void Serializer::set_construction_status(ConstructionStatus cs)
   construction_status_ = cs;
 }
 
+ACE_INLINE
+Serializer::RdState Serializer::rdstate() const
+{
+  RdState state(align_rshift_, rpos_);
+  return state;
+}
+
+ACE_INLINE
+void Serializer::rdstate(const RdState& state)
+{
+  align_rshift_ = state.align_rshift;
+  rpos_ = state.rpos;
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

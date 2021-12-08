@@ -379,6 +379,21 @@ TcpTransport::configure_i(TcpInst& config)
   return true;
 }
 
+void
+TcpTransport::client_stop(const RepoId& local_id)
+{
+  GuardType guard(links_lock_);
+
+  AddrLinkMap::ENTRY* entry;
+
+  for (AddrLinkMap::ITERATOR itr(links_); itr.next(entry); itr.advance()) {
+    entry->int_id_->client_stop(local_id);
+  }
+
+  for (AddrLinkMap::ITERATOR itr(pending_release_links_); itr.next(entry); itr.advance()) {
+    entry->int_id_->client_stop(local_id);
+  }
+}
 
 void
 TcpTransport::shutdown_i()

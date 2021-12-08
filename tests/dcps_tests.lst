@@ -75,6 +75,7 @@ tests/DCPS/Compiler/TryConstruct/C++11/run_test.pl: !DCPS_MIN CXX11 !OPENDDS_SAF
 tests/DCPS/Compiler/typeobject_hash_consistency/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Compiler/xcdr/run_test.pl
 tests/DCPS/Compiler/XtypesExtensibility/run_test.pl: !DCPS_MIN
+tests/DCPS/Compiler/typeobject_generator/run_test.pl
 tests/DCPS/Compiler/keywords/run_test.pl classic: !DCPS_MIN
 tests/DCPS/Compiler/keywords/run_test.pl cpp11: !DCPS_MIN CXX11 !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Compiler/explicit_ints/run_test.pl classic: !DCPS_MIN
@@ -241,7 +242,8 @@ tests/DCPS/RecorderLogging/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS
 
 examples/DCPS/Messenger_Imr/run_test.pl: !DCPS_MIN !MIN_CORBA !CORBA_E_COMPACT !CORBA_E_MICRO !DDS_NO_ORBSVCS !OPENDDS_SAFETY_PROFILE
 
-tests/DCPS/EntityLifecycleStress/run_test.pl publishers 5 subscribers 5: !OPENDDS_SAFETY_PROFILE
+tests/DCPS/EntityLifecycleStress/run_test.pl publishers 10 subscribers 10: !OPENDDS_SAFETY_PROFILE
+tests/DCPS/EntityLifecycleStress/run_test.pl rtps publishers 10 subscribers 10: RTPS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/EntityLifecycleStress/run_test.pl rtps_disc publishers 10 subscribers 10: RTPS
 tests/DCPS/EntityLifecycleStress/run_test.pl rtps_disc_tcp publishers 10 subscribers 10: RTPS !OPENDDS_SAFETY_PROFILE
 
@@ -446,6 +448,7 @@ tests/FACE/Compiler/idl_test_fixed/run_test.pl: !DCPS_MIN !WCHAR !NO_BUILT_IN_TO
 
 tests/DCPS/XTypes/run_test.pl: !DCPS_MIN
 tests/DCPS/XTypes/run_test.pl --tcp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/DynamicTypes/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 
 # Test for unregister_type method added as a type support extension (assuming no requirement when performing minimal test)
 tests/DCPS/UnregisterType/run_test.pl: !DCPS_MIN

@@ -114,6 +114,14 @@ struct OpenDDS_Dcps_Export EntityId_tKeyLessThan {
   }
 };
 
+struct OpenDDS_Dcps_Export BuiltinTopicKey_tKeyLessThan {
+  bool operator()(const DDS::BuiltinTopicKey_t& v1,
+                  const DDS::BuiltinTopicKey_t& v2) const
+  {
+    return std::memcmp(&v1, &v2, sizeof(DDS::BuiltinTopicKey_t)) < 0;
+  }
+};
+
 typedef OPENDDS_SET_CMP(GUID_t, GUID_tKeyLessThan) GuidSet;
 typedef GuidSet RepoIdSet;
 

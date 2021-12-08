@@ -2,6 +2,7 @@
 
 #include <MessengerTypeSupportImpl.h>
 
+#include <dds/DCPS/debug.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
@@ -10,6 +11,9 @@
 #ifdef OPENDDS_SECURITY
 #  include <dds/DCPS/security/BuiltInPlugins.h>
 #  include <dds/DCPS/security/framework/Properties.h>
+#  ifdef ACE_AS_STATIC_LIBS
+#    include <dds/DCPS/security/BuiltInPluginLoader.h>
+#  endif
 #endif
 
 #include <ace/Init_ACE.h>
@@ -58,6 +62,10 @@ struct Application {
     OpenDDS::DCPS::TransportConfig_rch cfg = TheTransportRegistry->create_config(transport_config_name_);
     cfg->instances_.push_back(ti);
 
+#if defined OPENDDS_SECURITY && defined ACE_AS_STATIC_LIBS
+    OpenDDS::Security::BuiltInPluginLoader().init(0, 0);
+#endif
+
     DDS::DomainParticipantFactory_var dpf = TheServiceParticipant->get_domain_participant_factory();
     if (!dpf) {
       throw std::runtime_error("Failed to get participant factory");
@@ -86,7 +94,9 @@ struct Application {
       throw std::runtime_error("Failed to create participant");
     }
     TheTransportRegistry->bind_config(cfg, participant_);
-    participant_->enable();
+    if (participant_->enable()) {
+      throw std::runtime_error("Failed to enable participant");
+    }
 
     DDS::TypeSupport_var ts = new Messenger::MessageTypeSupportImpl;
     CORBA::String_var tn = ts->get_type_name();
@@ -151,6 +161,10 @@ int main(int argc, char* argv[])
 #endif
     }
   }
+
+#ifdef OPENDDS_SECURITY
+  OpenDDS::DCPS::security_debug.new_entity_error = true;
+#endif
 
   int status = EXIT_SUCCESS;
 
