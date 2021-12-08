@@ -1454,9 +1454,8 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant(
     throw OpenDDS::DCPS::Invalid_Domain();
   }
 
-  DCPS_IR_Participant* participant = where->second->participant(participantId);
-
-  if (participant == 0) {
+  DCPS_IR_Participant_rch participant = where->second->participant_rch(participantId);
+  if (!participant) {
     OpenDDS::DCPS::RepoIdConverter converter(participantId);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: (bool)TAO_DDS_DCPSInfo_i::remove_domain_participant: ")

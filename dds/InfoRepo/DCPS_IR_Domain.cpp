@@ -51,18 +51,23 @@ DCPS_IR_Domain::participants() const
   return this->participants_;
 }
 
-DCPS_IR_Participant*
-DCPS_IR_Domain::participant(const OpenDDS::DCPS::RepoId& id) const
+DCPS_IR_Participant_rch DCPS_IR_Domain::participant_rch(const OpenDDS::DCPS::RepoId& id) const
 {
-  DCPS_IR_Participant_Map::const_iterator where
-  = this->participants_.find(id);
+  DCPS_IR_Participant_Map::const_iterator where = participants_.find(id);
 
-  if (where != this->participants_.end()) {
-    return where->second.in();
+  if (where != participants_.end()) {
+    return where->second;
 
   } else {
-    return 0;
+    return DCPS_IR_Participant_rch();
   }
+}
+
+
+DCPS_IR_Participant* DCPS_IR_Domain::participant(const OpenDDS::DCPS::RepoId& id) const
+{
+  DCPS_IR_Participant_rch p = participant_rch(id);
+  return p ? p.in() : 0;
 }
 
 int DCPS_IR_Domain::add_participant(DCPS_IR_Participant_rch participant)
@@ -850,9 +855,9 @@ int DCPS_IR_Domain::init_built_in_topics_transport(bool persistent)
 int DCPS_IR_Domain::cleanup_built_in_topics()
 {
 #ifndef DDS_HAS_MINIMUM_BIT
-  using OpenDDS::DCPS::retcode_to_string;
+  if (useBIT_ && bitParticipant_) {
+    using OpenDDS::DCPS::retcode_to_string;
 
-  if (useBIT_) {
     // clean up the Built-in Topic objects
     const DDS::ReturnCode_t entities_error = bitParticipant_->delete_contained_entities();
     if (entities_error) {

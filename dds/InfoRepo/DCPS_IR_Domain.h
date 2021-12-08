@@ -81,6 +81,8 @@ public:
   int remove_participant(const OpenDDS::DCPS::RepoId& particpantId,
                          CORBA::Boolean    notify_lost);
 
+  DCPS_IR_Participant_rch participant_rch(const OpenDDS::DCPS::RepoId& id) const;
+
   /// Find the participant with the id.
   DCPS_IR_Participant* participant(const OpenDDS::DCPS::RepoId& id) const;
 
