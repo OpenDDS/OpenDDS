@@ -523,50 +523,57 @@ ACE_INET_Addr tie_breaker(const T& addrs, const String& name)
 
 }
 
-ACE_INET_Addr choose_single_coherent_address(const OPENDDS_VECTOR(ACE_INET_Addr)& addresses, bool prefer_loopback, const String& name)
+namespace {
+  void insert_into_addr_set(
+    const char* name, AddrSet& set, AddrSet* attempted, const ACE_INET_Addr& addr)
+  {
+    if (attempted && attempted->count(addr)) {
+      VDBG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(list): "
+        "Will NOT consider %C address %C because it was already attempted\n",
+        name LogAddr(addr).c_str()));
+    } else {
+      VDBG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(list): "
+        "Considering Address %C - ADDING TO %C LIST\n", LogAddr(addr).c_str(), name));
+      set.insert(addr);
+    }
+  }
+}
+
+ACE_INET_Addr choose_single_coherent_address(
+  const OPENDDS_VECTOR(ACE_INET_Addr)& addresses, bool prefer_loopback,
+  const String& name, AddrSet* attempted)
 {
 #ifdef ACE_HAS_IPV6
-  OPENDDS_SET(ACE_INET_Addr) set6_loopback;
-  OPENDDS_SET(ACE_INET_Addr) set6_linklocal;
-  OPENDDS_SET(ACE_INET_Addr) set6_mapped_v4;
-  OPENDDS_SET(ACE_INET_Addr) set6;
+  AddrSet set6_loopback;
+  AddrSet set6_linklocal;
+  AddrSet set6_mapped_v4;
+  AddrSet set6;
 #endif // ACE_HAS_IPV6
-  OPENDDS_SET(ACE_INET_Addr) set4_loopback;
-  OPENDDS_SET(ACE_INET_Addr) set4;
+  AddrSet set4_loopback;
+  AddrSet set4;
 
   for (OPENDDS_VECTOR(ACE_INET_Addr)::const_iterator it = addresses.begin(); it != addresses.end(); ++it) {
 #ifdef ACE_HAS_IPV6
     if (it->get_type() == AF_INET6 && !it->is_multicast()) {
       if (it->is_loopback()) {
-        VDBG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(list) - "
-          "Considering Address %C - ADDING TO IPv6 LOOPBACK LIST\n", LogAddr(*it).c_str()));
-        set6_loopback.insert(*it);
+        insert_into_addr_set("IPv6 LOOPBACK", set6_loopback, attempted, *it);
       } else if (it->is_ipv4_mapped_ipv6() || it->is_ipv4_compat_ipv6()) {
 #ifndef IPV6_V6ONLY
-        VDBG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(list) - "
-          "Considering Address %C - ADDING TO IPv6 MAPPED / COMPATIBLE IPv4 LIST\n", LogAddr(*it).c_str()));
+        insert_into_addr_set("IPv6 MAPPED / COMPATIBLE IPv4", set6_mapped_v4, attempted, *it);
         set6_mapped_v4.insert(*it);
 #endif  // ! IPV6_V6ONLY
       } else if (it->is_linklocal()) {
-        VDBG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(list) - "
-          "Considering Address %C - ADDING TO IPv6 LINK-LOCAL LIST\n", LogAddr(*it).c_str()));
-        set6_linklocal.insert(*it);
+        insert_into_addr_set("IPv6 LINK-LOCAL", set6_linklocal, attempted, *it);
       } else {
-        VDBG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(list) - "
-          "Considering Address %C - ADDING TO IPv6 NORMAL LIST\n", LogAddr(*it).c_str()));
-        set6.insert(*it);
+        insert_into_addr_set("IPv6 NORMAL", set6, attempted, *it);
       }
     }
 #endif // ACE_HAS_IPV6
     if (it->get_type() == AF_INET && !it->is_multicast()) {
       if (it->is_loopback()) {
-        VDBG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(list) - "
-          "Considering Address %C - ADDING TO IPv4 LOOPBACK LIST\n", LogAddr(*it).c_str()));
-        set4_loopback.insert(*it);
+        insert_into_addr_set("IPv4 LOOPBACK", set4_loopback, attempted, *it);
       } else {
-        VDBG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(list) - "
-          "Considering Address %C - ADDING TO IPv4 NORMAL LIST\n", LogAddr(*it).c_str()));
-        set4.insert(*it);
+        insert_into_addr_set("IPv4 NORMAL", set4, attempted, *it);
       }
     }
   }
@@ -617,7 +624,8 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_VECTOR(ACE_INET_Addr)
   return ACE_INET_Addr();
 }
 
-ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_loopback, bool allow_ipv4_fallback)
+ACE_INET_Addr choose_single_coherent_address(
+  const String& address, bool prefer_loopback, bool allow_ipv4_fallback, AddrSet* attempted)
 {
   ACE_INET_Addr result;
 
@@ -752,7 +760,7 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
 
 #ifdef ACE_WIN32
   static ACE_Thread_Mutex addr_cache_map_mutex_;
-  typedef std::pair<SystemTimePoint, OPENDDS_SET(ACE_INET_Addr)> AddrCachePair;
+  typedef std::pair<SystemTimePoint, AddrSet> AddrCachePair;
   typedef OPENDDS_MAP(String, AddrCachePair) AddrCacheMap;
   static AddrCacheMap addr_cache_map_;
   ACE_Guard<ACE_Thread_Mutex> g(addr_cache_map_mutex_);
@@ -805,7 +813,7 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
 
   ACE_OS::freeaddrinfo(res);
 
-  return choose_single_coherent_address(addresses, prefer_loopback, host_name);
+  return choose_single_coherent_address(addresses, prefer_loopback, host_name, attempted);
 }
 
 int locator_to_address(ACE_INET_Addr& dest,

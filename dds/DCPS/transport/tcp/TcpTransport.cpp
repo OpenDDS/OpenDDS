@@ -61,17 +61,18 @@ TcpTransport::config() const
 PriorityKey
 TcpTransport::blob_to_key(const TransportBLOB& remote,
                           Priority priority,
-                          bool active)
+                          bool active,
+                          AddrSet* attempted)
 {
-  const ACE_INET_Addr remote_address = AssociationData::get_remote_address(remote);
+  const ACE_INET_Addr remote_address = AssociationData::get_remote_address(remote, attempted);
   const bool is_loopback = remote_address == config().local_address();
   return PriorityKey(priority, remote_address, is_loopback, active);
 }
 
-TransportImpl::AcceptConnectResult
-TcpTransport::connect_datalink(const RemoteTransport& remote,
-                               const ConnectionAttribs& attribs,
-                               const TransportClient_rch& client)
+TransportImpl::AcceptConnectResult TcpTransport::connect_datalink(
+  const RemoteTransport& remote,
+  const ConnectionAttribs& attribs,
+  const TransportClient_rch& client)
 {
   DBG_ENTRY_LVL("TcpTransport", "connect_datalink", 6);
 
@@ -79,9 +80,25 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
     return AcceptConnectResult();
   }
 
-  const PriorityKey key =
-    blob_to_key(remote.blob_, attribs.priority_, true /*active*/);
+  TransportImpl::AcceptConnectResult res(AcceptConnectResult::ACR_CONNECT_FAILED);
+  AddrSet attempted;
+  while (res.status_ == AcceptConnectResult::ACR_CONNECT_FAILED) {
+    const PriorityKey key =
+      blob_to_key(remote.blob_, attribs.priority_, true /*active*/, &attempted);
+    res = connect_datalink_i(remote, attribs, client, key);
+    attempted.insert(key.address());
+  }
 
+  return res;
+}
+
+
+TransportImpl::AcceptConnectResult TcpTransport::connect_datalink_i(
+  const RemoteTransport& remote,
+  const ConnectionAttribs& attribs,
+  const TransportClient_rch& client,
+  const PriorityKey& key)
+{
   VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink PriorityKey "
             "prio=%d, addr=%C, is_loopback=%d, is_active=%d\n",
             key.priority(), LogAddr(key.address()).c_str(), key.is_loopback(),
@@ -100,7 +117,7 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
     }
 
     link = make_rch<TcpDataLink>(key.address(), ref(*this), attribs.priority_,
-                                key.is_loopback(), true /*active*/);
+                                 key.is_loopback(), true /*active*/);
     VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink create new link[%@]\n", link.in()), 0);
     if (links_.bind(key, link) != 0 /*OK*/) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TcpTransport::connect_datalink "
@@ -147,7 +164,7 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
     }
     link->invoke_on_start_callbacks(false);
 
-    return AcceptConnectResult();
+    return AcceptConnectResult(AcceptConnectResult::ACR_CONNECT_FAILED);
   }
 
   if (ret == 0) {

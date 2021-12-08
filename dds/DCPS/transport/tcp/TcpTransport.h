@@ -17,6 +17,7 @@
 #include <dds/DCPS/ReactorTask_rch.h>
 #include <dds/DCPS/transport/framework/PriorityKey.h>
 #include <dds/DCPS/transport/framework/TransportImpl.h>
+#include <dds/DCPS/transport/framework/NetworkAddress.h>
 #include <dds/DCPS/TimeTypes.h>
 
 #include <ace/INET_Addr.h>
@@ -61,6 +62,12 @@ private:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
                                                const ConnectionAttribs& attribs,
                                                const TransportClient_rch& client);
+
+  virtual AcceptConnectResult connect_datalink_i(
+    const RemoteTransport& remote,
+    const ConnectionAttribs& attribs,
+    const TransportClient_rch& client,
+    const PriorityKey& key);
 
   virtual AcceptConnectResult accept_datalink(const RemoteTransport& remote,
                                               const ConnectionAttribs& attribs,
@@ -109,7 +116,8 @@ private:
 
   PriorityKey blob_to_key(const TransportBLOB& remote,
                           Priority priority,
-                          bool active);
+                          bool active,
+                          AddrSet* attempted = 0);
 
   /// Map Type: (key) PriorityKey to (value) TcpDataLink_rch
   typedef ACE_Hash_Map_Manager_Ex

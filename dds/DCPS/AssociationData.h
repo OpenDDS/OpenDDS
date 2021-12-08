@@ -35,7 +35,7 @@ struct AssociationData {
     , remote_durable_(false)
   {}
 
-  static ACE_INET_Addr get_remote_address(const TransportBLOB& remote)
+  static ACE_INET_Addr get_remote_address(const TransportBLOB& remote, AddrSet* attempted = 0)
   {
     ACE_INET_Addr remote_address;
     NetworkAddress network_order_address;
@@ -49,7 +49,7 @@ struct AssociationData {
                  ACE_TEXT("(%P|%t) ERROR: AssociationData::get_remote_address")
                  ACE_TEXT(" failed to de-serialize the NetworkAddress\n")));
     } else {
-      network_order_address.to_addr(remote_address);
+      network_order_address.to_addr(remote_address, attempted);
     }
 
     return remote_address;

@@ -150,11 +150,23 @@ public:
   };
 
   struct AcceptConnectResult {
-    enum Status { ACR_SUCCESS, ACR_FAILED };
-    explicit AcceptConnectResult(Status ok = ACR_FAILED)
-      : success_(ok == ACR_SUCCESS), link_() {}
+    enum Status { ACR_SUCCESS, ACR_FAILED, ACR_CONNECT_FAILED };
+
+    explicit AcceptConnectResult(Status status = ACR_FAILED)
+      : status_(status)
+      , success_(status == ACR_SUCCESS)
+      , link_()
+    {
+    }
+
     AcceptConnectResult(const DataLink_rch& link)
-      : success_(link), link_(link) {}
+      : status_(link ? ACR_SUCCESS : ACR_FAILED)
+      , success_(status_ == ACR_SUCCESS)
+      , link_(link)
+    {
+    }
+
+    Status status_;
     /// If false, the accept or connect has failed and link_ is ignored.
     bool success_;
     /// If success_ is true, link_ may either be null or have a valid DataLink.

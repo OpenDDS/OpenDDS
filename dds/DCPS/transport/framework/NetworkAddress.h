@@ -33,6 +33,8 @@ struct HostnameInfo {
 
 typedef OPENDDS_VECTOR(HostnameInfo) HostnameInfoVector;
 
+typedef OPENDDS_SET(ACE_INET_Addr) AddrSet;
+
 /**
  * @struct NetworkAddress
  *
@@ -52,7 +54,7 @@ struct OpenDDS_Dcps_Export NetworkAddress {
 
   /// Accessor to populate the provided ACE_INET_Addr object from the
   /// address string received through transport.
-  void to_addr(ACE_INET_Addr& addr) const;
+  void to_addr(ACE_INET_Addr& addr, AddrSet* attempted = 0) const;
 
   /// Reserve byte for some feature supports in the future.
   /// e.g. version support.
@@ -90,13 +92,17 @@ extern OpenDDS_Dcps_Export
 bool open_appropriate_socket_type(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& local_address, int* proto_family = 0);
 
 extern OpenDDS_Dcps_Export
-ACE_INET_Addr choose_single_coherent_address(const OPENDDS_VECTOR(ACE_INET_Addr)& addrs, bool prefer_loopback = true, const String& name = String());
+ACE_INET_Addr choose_single_coherent_address(
+  const OPENDDS_VECTOR(ACE_INET_Addr)& addrs, bool prefer_loopback = true,
+  const String& name = String(), AddrSet* attempted = 0);
 
 extern OpenDDS_Dcps_Export
 ACE_INET_Addr choose_single_coherent_address(const ACE_INET_Addr& addr, bool prefer_loopback = true);
 
 extern OpenDDS_Dcps_Export
-ACE_INET_Addr choose_single_coherent_address(const String& hostname, bool prefer_loopback = true, bool allow_ipv4_fallback = true);
+ACE_INET_Addr choose_single_coherent_address(
+  const String& address, bool prefer_loopback = true,
+  bool allow_ipv4_fallback = true, AddrSet* attempted = 0);
 
 inline void assign(DDS::OctetArray16& dest,
                    ACE_CDR::ULong ipv4addr_be)
