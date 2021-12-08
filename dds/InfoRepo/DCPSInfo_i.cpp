@@ -74,8 +74,8 @@ TAO_DDS_DCPSInfo_i::handle_timeout(const ACE_Time_Value& /*now*/,
       if (this->dispatchingOrb_->work_pending())
       {
         // Ten microseconds
-        ACE_Time_Value small(0,10);
-        this->dispatchingOrb_->perform_work(small);
+        ACE_Time_Value smallval(0,10);
+        this->dispatchingOrb_->perform_work(smallval);
       }
     }
   }
