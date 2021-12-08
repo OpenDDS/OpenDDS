@@ -267,8 +267,16 @@ const char* ThreadStatusManager::status_to_string(ThreadStatus status)
 
 bool ThreadStatusManager::update_busy(const String& thread_key, double pbusy)
 {
+  const SystemTimePoint now = SystemTimePoint::now();
+  ThreadStatus status = ThreadStatus_Running;
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-  load_map_[thread_key] = pbusy;
+  Map::iterator it = map_.find(thread_key);
+  if (it != map_.end()) {
+    it->second.timestamp = now;
+    it->second.utilization = pbusy;
+  } else {
+    map_[thread_key] = Thread(now, status, pbusy);
+  }
   return true;
 }
 
@@ -301,7 +309,7 @@ bool ThreadStatusManager::update(const String& thread_key, ThreadStatus status)
     if (map_.find(thread_key) == map_.end() && ThreadMonitor::installed_monitor_) {
       ThreadMonitor::installed_monitor_->preset(this, thread_key.c_str());
     }
-    map_[thread_key] = Thread(now, status);
+    map_[thread_key] = Thread(now, status, 0.0);
   }
 
   return true;

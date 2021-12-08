@@ -5,6 +5,8 @@
 #include <dds/DCPS/GuidUtils.h>
 #include <dds/DdsDcpsInfrastructureC.h>
 
+#include <list>
+
 namespace RtpsRelay {
 
 class Config {
@@ -30,6 +32,7 @@ public:
     , restart_detection_(false)
     , thread_monitor_period_(5)
     , thread_monitor_history_depth_(1)
+    , thread_monitor_output_(0)
   {}
 
   void relay_id(const std::string& value)
@@ -261,6 +264,17 @@ public:
   {
     return thread_monitor_history_depth_;
   }
+
+  void thread_monitor_output(const char *name)
+  {
+    thread_monitor_output_.emplace_back(name);
+  }
+
+  const std::list<std::string>& thread_monitor_output()
+  {
+    return thread_monitor_output_;
+  }
+
 private:
   std::string relay_id_;
   OpenDDS::DCPS::GUID_t application_participant_guid_;
@@ -285,6 +299,7 @@ private:
   bool restart_detection_;
   OpenDDS::DCPS::TimeDuration thread_monitor_period_;
   int thread_monitor_history_depth_;
+  std::list<std::string> thread_monitor_output_;
 };
 
 }

@@ -29,11 +29,24 @@ void ThreadMonitor::preset(ThreadStatusManager*, const char*)
 {
 }
 
+size_t ThreadMonitor::thread_count()
+{
+  return 0;
+}
+
+void ThreadMonitor::summarize()
+{
+}
+
+void ThreadMonitor::report()
+{
+}
+
 void ThreadMonitor::update(UpdateMode, const char*)
 {
 }
 
-double ThreadMonitor::get_busy_pct(const char*) const
+double ThreadMonitor::get_utilization(const char*) const
 {
   return 0.0;
 }

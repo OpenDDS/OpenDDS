@@ -210,6 +210,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-ThreadMonitorHistoryDepth"))) {
       config.thread_monitor_history_depth(ACE_OS::atoi(arg));
       args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-ThreadMonitorOutput"))) {
+      config.thread_monitor_output(arg);
+      args.consume_arg();
     } else {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Invalid option: %C\n", args.get_current()));
       return 1;
@@ -278,7 +281,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   RelayThreadMonitor thread_mon(config.thread_monitor_period(),
                                 config.thread_monitor_history_depth());
-
+  for (auto o : config.thread_monitor_output()) {
+    thread_mon.add_reporter(o.c_str());
+  }
   // Set up the relay participant.
   DDS::DomainParticipantQos participant_qos;
   factory->get_default_participant_qos(participant_qos);
