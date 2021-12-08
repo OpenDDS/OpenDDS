@@ -435,11 +435,11 @@ void check_struct_a_sequence_member(const CommonStructMember& common)
 {
   EXPECT_EQ(common.member_id, static_cast<ACE_CDR::ULong>(1));
   EXPECT_EQ(common.member_flags, TRY_CONSTRUCT1);
-  const PlainSequenceLElemDefn& seq_ldefn = common.member_type_id.seq_ldefn();
-  EXPECT_EQ(seq_ldefn.header.equiv_kind, EK_BOTH);
-  EXPECT_EQ(seq_ldefn.header.element_flags, TRY_CONSTRUCT1);
-  EXPECT_EQ(seq_ldefn.bound, ACE_UINT32_MAX);
-  EXPECT_EQ(seq_ldefn.element_identifier->kind(), TK_BOOLEAN);
+  const PlainSequenceSElemDefn& seq_sdefn = common.member_type_id.seq_sdefn();
+  EXPECT_EQ(seq_sdefn.header.equiv_kind, EK_BOTH);
+  EXPECT_EQ(seq_sdefn.header.element_flags, TRY_CONSTRUCT1);
+  EXPECT_EQ(seq_sdefn.bound, ACE_CDR::Octet(0));
+  EXPECT_EQ(seq_sdefn.element_identifier->kind(), TK_BOOLEAN);
 }
 
 void check_struct_a(const TypeMap& scc15, const TypeObject& to, const IndexMap& indexes, EquivalenceKind ek)
@@ -456,7 +456,7 @@ void check_struct_a(const TypeMap& scc15, const TypeObject& to, const IndexMap& 
     for (ACE_CDR::ULong i = 0; i < member_seq.length(); ++i) {
       const TypeKind tk = member_seq[i].common.member_type_id.kind();
       EXPECT_TRUE(tk == TI_STRONGLY_CONNECTED_COMPONENT ||
-                  tk == TI_PLAIN_SEQUENCE_LARGE);
+                  tk == TI_PLAIN_SEQUENCE_SMALL);
       NameHash nh;
       if (tk == TI_STRONGLY_CONNECTED_COMPONENT) {
         check_struct_a_alias_member(member_seq[i].common, scc15, indexes);
@@ -476,7 +476,7 @@ void check_struct_a(const TypeMap& scc15, const TypeObject& to, const IndexMap& 
     for (ACE_CDR::ULong i = 0; i < member_seq.length(); ++i) {
       const TypeKind tk = member_seq[i].common.member_type_id.kind();
       EXPECT_TRUE(tk == TI_STRONGLY_CONNECTED_COMPONENT ||
-                  tk == TI_PLAIN_SEQUENCE_LARGE);
+                  tk == TI_PLAIN_SEQUENCE_SMALL);
       if (tk == TI_STRONGLY_CONNECTED_COMPONENT) {
         check_struct_a_alias_member(member_seq[i].common, scc15, indexes);
         EXPECT_EQ(member_seq[i].detail.name, "a_bseq");
@@ -650,11 +650,11 @@ void check_struct_d_sequence_member(const CommonStructMember& common)
 {
   EXPECT_EQ(common.member_id, static_cast<ACE_CDR::ULong>(1));
   EXPECT_EQ(common.member_flags, TRY_CONSTRUCT1);
-  const PlainSequenceLElemDefn& seq_ldefn = common.member_type_id.seq_ldefn();
-  EXPECT_EQ(seq_ldefn.header.equiv_kind, EK_BOTH);
-  EXPECT_EQ(seq_ldefn.header.element_flags, TRY_CONSTRUCT1);
-  EXPECT_EQ(seq_ldefn.bound, ACE_UINT32_MAX);
-  EXPECT_EQ(seq_ldefn.element_identifier->kind(), TK_BYTE);
+  const PlainSequenceSElemDefn& seq_sdefn = common.member_type_id.seq_sdefn();
+  EXPECT_EQ(seq_sdefn.header.equiv_kind, EK_BOTH);
+  EXPECT_EQ(seq_sdefn.header.element_flags, TRY_CONSTRUCT1);
+  EXPECT_EQ(seq_sdefn.bound, ACE_CDR::Octet(0));
+  EXPECT_EQ(seq_sdefn.element_identifier->kind(), TK_BYTE);
 }
 
 void check_struct_d(const TypeMap& scc15, const TypeObject& to, const IndexMap& indexes, EquivalenceKind ek)
@@ -670,7 +670,7 @@ void check_struct_d(const TypeMap& scc15, const TypeObject& to, const IndexMap& 
 
     for (ACE_CDR::ULong i = 0; i < member_seq.length(); ++i) {
       const TypeKind tk = member_seq[i].common.member_type_id.kind();
-      EXPECT_TRUE(tk == TI_STRONGLY_CONNECTED_COMPONENT || tk == TI_PLAIN_SEQUENCE_LARGE);
+      EXPECT_TRUE(tk == TI_STRONGLY_CONNECTED_COMPONENT || tk == TI_PLAIN_SEQUENCE_SMALL);
       NameHash nh;
       if (tk == TI_STRONGLY_CONNECTED_COMPONENT) {
         check_struct_d_eseq_member(member_seq[i].common, scc15, indexes);
@@ -689,7 +689,7 @@ void check_struct_d(const TypeMap& scc15, const TypeObject& to, const IndexMap& 
 
     for (ACE_CDR::ULong i = 0; i < member_seq.length(); ++i) {
       const TypeKind tk = member_seq[i].common.member_type_id.kind();
-      EXPECT_TRUE(tk == TI_STRONGLY_CONNECTED_COMPONENT || tk == TI_PLAIN_SEQUENCE_LARGE);
+      EXPECT_TRUE(tk == TI_STRONGLY_CONNECTED_COMPONENT || tk == TI_PLAIN_SEQUENCE_SMALL);
       if (tk == TI_STRONGLY_CONNECTED_COMPONENT) {
         check_struct_d_eseq_member(member_seq[i].common, scc15, indexes);
         EXPECT_EQ(member_seq[i].detail.name, "a_eseq");
@@ -779,7 +779,7 @@ void check_sequence(const TypeMap& scc15, const TypeObject& to, const IndexMap& 
   const TypeIdentifier& elem_type = ek == EK_MINIMAL ?
     to.minimal.sequence_type.element.common.type : to.complete.sequence_type.element.common.type;
 
-  EXPECT_EQ(bound, ACE_UINT32_MAX);
+  EXPECT_EQ(bound, ACE_CDR::ULong(0));
   EXPECT_GT(elem_flags | TRY_CONSTRUCT1, 0);
   EXPECT_EQ(elem_type.kind(), TI_STRONGLY_CONNECTED_COMPONENT);
   EXPECT_TRUE(scc15.find(elem_type) != scc15.end());
