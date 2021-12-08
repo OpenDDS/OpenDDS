@@ -530,7 +530,7 @@ namespace {
     if (attempted && attempted->count(addr)) {
       VDBG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(list): "
         "Will NOT consider %C address %C because it was already attempted\n",
-        name LogAddr(addr).c_str()));
+        name, LogAddr(addr).c_str()));
     } else {
       VDBG((LM_DEBUG, "(%P|%t) choose_single_coherent_address(list): "
         "Considering Address %C - ADDING TO %C LIST\n", LogAddr(addr).c_str(), name));
