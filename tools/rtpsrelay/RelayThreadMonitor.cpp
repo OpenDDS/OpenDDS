@@ -120,7 +120,7 @@ void RelayThreadMonitor::summarize()
     }
 
     double pbusy = 0.0;
-    double uspan = ls.accum_idle_ + ls.accum_busy_;
+    double uspan = static_cast<double>(ls.accum_idle_ + ls.accum_busy_);
     if (uspan != 0.0) {
       if (td->tsm_) {
         td->tsm_->update_busy(td->alias_.c_str(), pbusy);
@@ -169,7 +169,7 @@ void AceLogReporter::report_thread(ThreadDescriptor_rch td) const
   }
   const LoadSummary& ls = td->summaries_.back();
   double pbusy = 0.0;
-  double uspan = ls.accum_idle_ + ls.accum_busy_;
+  double uspan = static_cast<double>(ls.accum_idle_ + ls.accum_busy_);
   if (uspan != 0.0) {
     pbusy = ls.accum_busy_ / uspan;
     double pidle = ls.accum_idle_ / uspan;
