@@ -717,12 +717,15 @@ RtpsUdpDataLink::disassociated(const RepoId& local_id,
   ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
 
   RemoteInfoMap::iterator pos = locators_.find(remote_id);
-  OPENDDS_ASSERT(pos != locators_.end());
-  OPENDDS_ASSERT(pos->second.ref_count_ > 0);
+  if (pos != locators_.end()) {
+    OPENDDS_ASSERT(pos->second.ref_count_ > 0);
 
-  --pos->second.ref_count_;
-  if (pos->second.ref_count_ == 0) {
-    locators_.erase(pos);
+    --pos->second.ref_count_;
+    if (pos->second.ref_count_ == 0) {
+      locators_.erase(pos);
+    }
+  } else if (Transport_debug_level > 3) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::disassociated: local id %C does not have any locators\n", LogGuid(local_id).c_str()));
   }
 }
 
