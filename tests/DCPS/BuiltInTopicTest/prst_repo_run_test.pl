@@ -200,6 +200,15 @@ print "Spawning subscriber.\n";
 print $Subscriber1->CommandLine() . "\n";
 $Subscriber1->Spawn ();
 
+print "Waiting for ${synch_file}\n";
+if (PerlACE::waitforfile_timed ("${synch_file}", 30) == -1) {
+  print STDERR "ERROR: waiting for ${synch_file} file\n";
+  $Subscriber1->Kill();
+  $Publisher1->Kill();
+  $Monitor1->Kill();
+  early_fail();
+}
+
 sleep (15);
 
 print "Killing first DCPSInfoRepo.\n";
