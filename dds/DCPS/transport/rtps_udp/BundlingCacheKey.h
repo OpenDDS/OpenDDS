@@ -64,7 +64,7 @@ struct OpenDDS_Rtps_Udp_Export BundlingCacheKey : public RcObject {
 
   bool operator<(const BundlingCacheKey& rhs) const
   {
-    int r = std::memcmp(&dst_guid_, &(rhs.dst_guid_), 2 * sizeof (GUID_t));
+    int r = std::memcmp(&dst_guid_, &rhs.dst_guid_, 2 * sizeof (GUID_t));
     if (r < 0) {
       return true;
     } else if (r == 0) {
@@ -75,7 +75,7 @@ struct OpenDDS_Rtps_Udp_Export BundlingCacheKey : public RcObject {
 
   bool operator==(const BundlingCacheKey& rhs) const
   {
-    return std::memcmp(&dst_guid_, &(rhs.dst_guid_), 2 * sizeof (GUID_t)) == 0 && to_guids_ == rhs.to_guids_;
+    return std::memcmp(&dst_guid_, &rhs.dst_guid_, 2 * sizeof (GUID_t)) == 0 && to_guids_ == rhs.to_guids_;
   }
 
   BundlingCacheKey& operator=(const BundlingCacheKey& rhs)
