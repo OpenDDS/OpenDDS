@@ -20,7 +20,7 @@ OpenDDS 3.19.0 is currently in development, so this list might change.
 - DCPSLogLevel config option, see section 7.6 of the Developer's Guide for details (#3113, #3158)
 
 ### Fixes:
-- Source IP check overridde configuration (#3195)
+- Source IP check override configuration (#3195)
 - Update use of receive address in RtpsUdpDataLink::accumulate_addresses (#3191)
 - Updated Node.js/V8 support (#3188, #3177)
 - Better support for DDS Security static library builds (#3122)
