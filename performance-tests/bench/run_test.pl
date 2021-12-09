@@ -52,6 +52,10 @@ elsif ($test->flag('disco_relay')) {
   $tc_opts .= " ci_disco_relay";
   $is_rtps_disc = 1;
 }
+elsif ($test->flag('disco_relay_only')) {
+  $tc_opts .= " ci_disco_relay_only";
+  $is_rtps_disc = 1;
+}
 elsif ($test->flag('script')) {
   $tc_opts .= " script";
   $is_rtps_disc = 1;

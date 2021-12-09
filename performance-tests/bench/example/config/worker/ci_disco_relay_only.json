@@ -62,6 +62,12 @@
           },
           { "name": "use_multicast",
             "value": "0"
+          },
+          { "name": "RtpsRelayOnly",
+            "value": "1"
+          },
+          { "name": "DataRtpsRelayAddress",
+            "value": "127.0.0.1:4446"
           }
         ]
       }
