@@ -5,6 +5,9 @@ OpenDDS 3.19.0 is currently in development, so this list might change.
 
 ### Additions:
 - XTypes: Dynamic Language Binding (#2976)
+  - Read support only for the time being.
+  - New `inspect` tool that prints data being written to a topic in text form.
+  - See section 16.7 of the Developer's guide for details.
 - Enhanced RtpsRelay support (#3208, #3116, #3094)
 - RTPS transport-level statistics (#3166)
 - Made the allocators in TransportReceiveStrategy configurable (#3170)
@@ -12,7 +15,7 @@ OpenDDS 3.19.0 is currently in development, so this list might change.
 - Configurable maximum participants in discovery (#3145)
 - Extend ValueWriter/ValueReader with array based operations (#3140)
 - Extend RawDataSample with the header to support XCDR2 streams (#3028)
-- DCPSLogLevel config option, see section 7.6.1 of the Developer's Guide for details (#3113, #3158)
+- DCPSLogLevel config option, see section 7.6 of the Developer's Guide for details (#3113, #3158)
 
 ### Fixes:
 - Source IP check overridde configuration (#3195)
@@ -29,7 +32,7 @@ OpenDDS 3.19.0 is currently in development, so this list might change.
 ### Notes:
 - configure: Add vs2022 as a compiler option (#3169)
 - MSVC++ 12.0 updates (#3075)
-- Fix `OPENDDS_TARGET_SOURCES`/Qt MOC CMake Conflict - Fixed dependency cycle when `OPENDDS_TARGET_SOURCES` is used on a CMake target that also has Qt MOC source files (#3093)
+- Fixed dependency cycle when `OPENDDS_TARGET_SOURCES` is used on a CMake target that also has Qt MOC source files (#3093)
 - Fixed issue with `find_package(Threads)` on recent CMake releases when calling `find_package(OpenDDS)` before a C/C++ project has been declared (#3093)
 
 ## Version 3.18.1 of OpenDDS
