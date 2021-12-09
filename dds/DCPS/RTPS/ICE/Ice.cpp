@@ -111,9 +111,9 @@ Configuration* Configuration::instance()
   return ACE_Singleton<Configuration, ACE_Thread_Mutex>::instance();
 }
 
-Agent* Agent::instance()
+DCPS::WeakRcHandle<Agent> Agent::instance()
 {
-  return ACE_Singleton<AgentImpl, ACE_Thread_Mutex>::instance();
+  return DCPS::static_rchandle_cast<Agent>(rchandle_from(ACE_Singleton<AgentImpl, ACE_Thread_Mutex>::instance()));
 }
 
 ServerReflexiveStateMachine::StateChange

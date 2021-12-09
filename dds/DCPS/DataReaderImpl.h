@@ -580,7 +580,7 @@ public:
   virtual void update_locators(const RepoId& remote,
                                const TransportLocatorSeq& locators);
 
-  virtual ICE::Endpoint* get_ice_endpoint();
+  virtual DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
 
   const RepoId& get_repo_id() const
   {

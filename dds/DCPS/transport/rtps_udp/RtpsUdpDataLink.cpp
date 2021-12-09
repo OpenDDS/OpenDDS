@@ -4692,9 +4692,10 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
   }
 
 #ifdef OPENDDS_SECURITY
-  ICE::Endpoint* endpoint = get_ice_endpoint();
-  if (endpoint) {
-    ice_addr = ICE::Agent::instance()->get_address(endpoint, local, remote);
+  DCPS::WeakRcHandle<ICE::Endpoint> endpoint = get_ice_endpoint();
+  DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+  if (endpoint && agent) {
+    ice_addr = agent->get_address(endpoint, local, remote);
   }
 #endif
 
@@ -4721,7 +4722,7 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
   entry.value().expires_ = normal_addrs_expires;
 }
 
-ICE::Endpoint*
+DCPS::WeakRcHandle<ICE::Endpoint>
 RtpsUdpDataLink::get_ice_endpoint() const {
   return impl().get_ice_endpoint();
 }

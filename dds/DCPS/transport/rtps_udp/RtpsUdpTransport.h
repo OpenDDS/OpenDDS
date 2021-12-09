@@ -29,7 +29,7 @@ class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl {
 public:
   RtpsUdpTransport(RtpsUdpInst& inst);
   RtpsUdpInst& config() const;
-  virtual ICE::Endpoint* get_ice_endpoint();
+  virtual DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
   virtual void rtps_relay_only_now(bool flag);
   virtual void use_rtps_relay_now(bool flag);
   virtual void use_ice_now(bool flag);
@@ -157,7 +157,7 @@ private:
   ConnectionRecords deferred_connection_records_;
 #endif
 
-  struct IceEndpoint : public ACE_Event_Handler, public ICE::Endpoint {
+  struct IceEndpoint : public virtual ACE_Event_Handler, public virtual ICE::Endpoint {
     RtpsUdpTransport& transport;
 
     IceEndpoint(RtpsUdpTransport& a_transport)
@@ -174,7 +174,7 @@ private:
 
     bool network_is_unreachable_;
   };
-  IceEndpoint ice_endpoint_;
+  RcHandle<IceEndpoint> ice_endpoint_;
 
   typedef PmfSporadicTask<RtpsUdpTransport> Sporadic;
   void relay_stun_task(const MonotonicTimePoint& now);

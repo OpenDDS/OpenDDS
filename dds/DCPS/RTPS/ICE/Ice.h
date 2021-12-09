@@ -12,6 +12,7 @@
 #include "dds/DCPS/Ice.h"
 #include "Stun.h"
 #include "dds/DCPS/TimeTypes.h"
+#include "dds/DCPS/RcObject.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -56,7 +57,7 @@ struct OpenDDS_Rtps_Export GuidPair {
 
 typedef std::set<GuidPair> GuidSetType;
 
-class OpenDDS_Rtps_Export Endpoint {
+class OpenDDS_Rtps_Export Endpoint : public virtual DCPS::RcObject {
 public:
   virtual ~Endpoint() {}
   virtual AddressListType host_addresses() const = 0;
@@ -66,7 +67,7 @@ public:
   virtual void ice_disconnect(const GuidSetType&, const ACE_INET_Addr&) {}
 };
 
-class OpenDDS_Rtps_Export AgentInfoListener {
+class OpenDDS_Rtps_Export AgentInfoListener : public virtual DCPS::RcObject {
 public:
   virtual ~AgentInfoListener() {}
   virtual void update_agent_info(const DCPS::RepoId& a_local_guid,
@@ -193,37 +194,37 @@ private:
   DCPS::TimeDuration change_password_period_;
 };
 
-class OpenDDS_Rtps_Export Agent {
+class OpenDDS_Rtps_Export Agent : public virtual DCPS::RcObject {
 public:
   virtual ~Agent() {}
-  virtual void add_endpoint(Endpoint* a_endpoint) = 0;
-  virtual void remove_endpoint(Endpoint* a_endpoint) = 0;
-  virtual AgentInfo get_local_agent_info(Endpoint* a_endpoint) const = 0;
-  virtual void add_local_agent_info_listener(Endpoint* a_endpoint,
+  virtual void add_endpoint(DCPS::WeakRcHandle<Endpoint> a_endpoint) = 0;
+  virtual void remove_endpoint(DCPS::WeakRcHandle<Endpoint> a_endpoint) = 0;
+  virtual AgentInfo get_local_agent_info(DCPS::WeakRcHandle<Endpoint> a_endpoint) const = 0;
+  virtual void add_local_agent_info_listener(DCPS::WeakRcHandle<Endpoint> a_endpoint,
                                              const DCPS::RepoId& a_local_guid,
-                                             AgentInfoListener* a_agent_info_listener) = 0;
-  virtual void remove_local_agent_info_listener(Endpoint* a_endpoint,
+                                             DCPS::WeakRcHandle<AgentInfoListener> a_agent_info_listener) = 0;
+  virtual void remove_local_agent_info_listener(DCPS::WeakRcHandle<Endpoint> a_endpoint,
                                                 const DCPS::RepoId& a_local_guid) = 0;
-  virtual void start_ice(Endpoint* a_endpoint,
+  virtual void start_ice(DCPS::WeakRcHandle<Endpoint> a_endpoint,
                          const DCPS::RepoId& a_local_guid,
                          const DCPS::RepoId& a_remote_guid,
                          const AgentInfo& a_remote_agent_info) = 0;
-  virtual void stop_ice(Endpoint* a_endpoint,
+  virtual void stop_ice(DCPS::WeakRcHandle<Endpoint> a_endpoint,
                         const DCPS::RepoId& a_local_guid,
                         const DCPS::RepoId& a_remote_guid) = 0;
-  virtual ACE_INET_Addr get_address(Endpoint* a_endpoint,
+  virtual ACE_INET_Addr get_address(DCPS::WeakRcHandle<Endpoint> a_endpoint,
                                     const DCPS::RepoId& a_local_guid,
                                     const DCPS::RepoId& a_remote_guid) const = 0;
 
   // Receive a STUN message.
-  virtual void receive(Endpoint* a_endpoint,
+  virtual void receive(DCPS::WeakRcHandle<Endpoint> a_endpoint,
                        const ACE_INET_Addr& a_local_address,
                        const ACE_INET_Addr& a_remote_address,
                        const STUN::Message& a_message) = 0;
 
   virtual void shutdown() = 0;
 
-  static Agent* instance();
+  static DCPS::WeakRcHandle<Agent> instance();
 };
 
 class OpenDDS_Rtps_Export ServerReflexiveStateMachine {

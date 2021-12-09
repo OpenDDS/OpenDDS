@@ -220,10 +220,13 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
   tport_->open(sedp_->reactor_task());
 
 #ifdef OPENDDS_SECURITY
-  ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
+  DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
   if (sedp_endpoint) {
     const RepoId l = make_id(guid_, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER);
-    ICE::Agent::instance()->add_local_agent_info_listener(sedp_endpoint, l, this);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->add_local_agent_info_listener(sedp_endpoint, l, DCPS::static_rchandle_cast<AgentInfoListener>(rchandle_from(this)));
+    }
   }
 #endif
   initialized_flag_ = true;
@@ -390,14 +393,17 @@ Spdp::shutdown()
          /* Update in loop*/)
     {
 #ifdef OPENDDS_SECURITY
-      ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
+      DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
       if (sedp_endpoint) {
         stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints,
                  part->second.pdata_.participantProxy.availableExtendedBuiltinEndpoints);
       }
-      ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
+      DCPS::WeakRcHandle<ICE::Endpoint> spdp_endpoint = tport_->get_ice_endpoint();
       if (spdp_endpoint) {
-        ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, part->first);
+        DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+        if (agent) {
+          agent->stop_ice(spdp_endpoint, guid_, part->first);
+        }
       }
       purge_handshake_deadlines(part);
 #endif
@@ -406,10 +412,13 @@ Spdp::shutdown()
   }
 
 #ifdef OPENDDS_SECURITY
-  ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
+  DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
   if (sedp_endpoint) {
     const RepoId l = make_id(guid_, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER);
-    ICE::Agent::instance()->remove_local_agent_info_listener(sedp_endpoint, l);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->remove_local_agent_info_listener(sedp_endpoint, l);
+    }
   }
 #endif
 
@@ -584,10 +593,10 @@ Spdp::publish_location_update_i(const DiscoveredParticipantIter& iter)
 }
 #endif
 
-ICE::Endpoint*
+DCPS::WeakRcHandle<ICE::Endpoint>
 Spdp::get_ice_endpoint_if_added()
 {
-  return tport_->ice_endpoint_added_ ? tport_->get_ice_endpoint() : 0;
+  return tport_->ice_endpoint_added_ ? tport_->get_ice_endpoint() : DCPS::WeakRcHandle<ICE::Endpoint>();
 }
 
 bool cmp_ip4(const ACE_INET_Addr& a, const DCPS::Locator_t& locator)
@@ -910,14 +919,17 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
     if (id == DCPS::DISPOSE_INSTANCE || id == DCPS::DISPOSE_UNREGISTER_INSTANCE) {
 #ifdef OPENDDS_SECURITY
-      ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
+      DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
       if (sedp_endpoint) {
         stop_ice(sedp_endpoint, iter->first, iter->second.pdata_.participantProxy.availableBuiltinEndpoints,
                  iter->second.pdata_.participantProxy.availableExtendedBuiltinEndpoints);
       }
-      ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
+      DCPS::WeakRcHandle<ICE::Endpoint> spdp_endpoint = tport_->get_ice_endpoint();
       if (spdp_endpoint) {
-        ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, iter->first);
+        DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+        if (agent) {
+          agent->stop_ice(spdp_endpoint, guid_, iter->first);
+        }
       }
       purge_handshake_deadlines(iter);
 #endif
@@ -1717,14 +1729,17 @@ Spdp::process_handshake_deadlines(const DCPS::MonotonicTimePoint& now)
       }
       const DCPS::MonotonicTimePoint ptime = pos->first;
       if (participant_sec_attr_.allow_unauthenticated_participants == false) {
-        ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
+        DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
         if (sedp_endpoint) {
           stop_ice(sedp_endpoint, pit->first, pit->second.pdata_.participantProxy.availableBuiltinEndpoints,
                    pit->second.pdata_.participantProxy.availableExtendedBuiltinEndpoints);
         }
-        ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
+        DCPS::WeakRcHandle<ICE::Endpoint> spdp_endpoint = tport_->get_ice_endpoint();
         if (spdp_endpoint) {
-          ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, pit->first);
+          DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+          if (agent) {
+            agent->stop_ice(spdp_endpoint, guid_, pit->first);
+          }
         }
         handshake_deadlines_.erase(pos);
         remove_discovered_participant(pit);
@@ -2421,11 +2436,14 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
 
 #ifdef OPENDDS_SECURITY
   // Add the endpoint before any sending and receiving occurs.
-  ICE::Endpoint* endpoint = get_ice_endpoint();
+  DCPS::WeakRcHandle<ICE::Endpoint> endpoint = get_ice_endpoint();
   if (endpoint) {
-    ICE::Agent::instance()->add_endpoint(endpoint);
-    ice_endpoint_added_ = true;
-    ICE::Agent::instance()->add_local_agent_info_listener(endpoint, outer->guid_, outer.get());
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->add_endpoint(endpoint);
+      ice_endpoint_added_ = true;
+      agent->add_local_agent_info_listener(endpoint, outer->guid_, DCPS::static_rchandle_cast<ICE::AgentInfoListener>(outer));
+    }
   }
 #endif
 
@@ -2632,9 +2650,12 @@ Spdp::SpdpTransport::close(const DCPS::ReactorTask_rch& reactor_task)
   }
 
 #ifdef OPENDDS_SECURITY
-  ICE::Endpoint* endpoint = get_ice_endpoint();
+  DCPS::WeakRcHandle<ICE::Endpoint> endpoint = get_ice_endpoint();
   if (endpoint) {
-    ICE::Agent::instance()->remove_endpoint(endpoint);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->remove_endpoint(endpoint);
+    }
     ice_endpoint_added_ = false;
   }
 
@@ -2731,13 +2752,19 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
 #ifdef OPENDDS_SECURITY
   if (!outer->is_security_enabled()) {
     ICE::AgentInfoMap ai_map;
-    ICE::Endpoint* sedp_endpoint = outer->sedp_->get_ice_endpoint();
+    DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = outer->sedp_->get_ice_endpoint();
     if (sedp_endpoint) {
-      ai_map[SEDP_AGENT_INFO_KEY] = ICE::Agent::instance()->get_local_agent_info(sedp_endpoint);
+      DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+      if (agent) {
+        ai_map[SEDP_AGENT_INFO_KEY] = agent->get_local_agent_info(sedp_endpoint);
+      }
     }
-    ICE::Endpoint* spdp_endpoint = get_ice_endpoint();
+    DCPS::WeakRcHandle<ICE::Endpoint> spdp_endpoint = get_ice_endpoint();
     if (spdp_endpoint) {
-      ai_map[SPDP_AGENT_INFO_KEY] = ICE::Agent::instance()->get_local_agent_info(spdp_endpoint);
+      DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+      if (agent) {
+        ai_map[SPDP_AGENT_INFO_KEY] = agent->get_local_agent_info(spdp_endpoint);
+      }
     }
 
     if (!ParameterListConverter::to_param_list(ai_map, plist)) {
@@ -2866,13 +2893,19 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, const ACE_INET_Addr& loca
 #ifdef OPENDDS_SECURITY
   if (!outer->is_security_enabled()) {
     ICE::AgentInfoMap ai_map;
-    ICE::Endpoint* sedp_endpoint = outer->sedp_->get_ice_endpoint();
+    DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = outer->sedp_->get_ice_endpoint();
     if (sedp_endpoint) {
-      ai_map[SEDP_AGENT_INFO_KEY] = ICE::Agent::instance()->get_local_agent_info(sedp_endpoint);
+      DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+      if (agent) {
+        ai_map[SEDP_AGENT_INFO_KEY] = agent->get_local_agent_info(sedp_endpoint);
+      }
     }
-    ICE::Endpoint* spdp_endpoint = get_ice_endpoint();
+    DCPS::WeakRcHandle<ICE::Endpoint> spdp_endpoint = get_ice_endpoint();
     if (spdp_endpoint) {
-      ai_map[SPDP_AGENT_INFO_KEY] = ICE::Agent::instance()->get_local_agent_info(spdp_endpoint);
+      DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+      if (agent) {
+        ai_map[SPDP_AGENT_INFO_KEY] = agent->get_local_agent_info(spdp_endpoint);
+      }
     }
 
     if (!ParameterListConverter::to_param_list(ai_map, plist)) {
@@ -3258,9 +3291,12 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
     if (relay_srsm_.is_response(message)) {
       process_relay_sra(relay_srsm_.receive(message));
     } else {
-      ICE::Endpoint* endpoint = get_ice_endpoint();
+      DCPS::WeakRcHandle<ICE::Endpoint> endpoint = get_ice_endpoint();
       if (endpoint) {
-        ICE::Agent::instance()->receive(endpoint, local, remote, message);
+        DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+        if (agent) {
+          agent->receive(endpoint, local, remote, message);
+        }
       }
     }
   }
@@ -3270,14 +3306,14 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
   return 0;
 }
 
-ICE::Endpoint*
+DCPS::WeakRcHandle<ICE::Endpoint>
 Spdp::SpdpTransport::get_ice_endpoint()
 {
 #ifdef OPENDDS_SECURITY
   DCPS::RcHandle<Spdp> outer = outer_.lock();
-  return outer && outer->config_->use_ice() ? this : 0;
+  return outer && outer->config_->use_ice() ? DCPS::static_rchandle_cast<ICE::Endpoint>(rchandle_from(this)) : DCPS::WeakRcHandle<ICE::Endpoint>();
 #else
-  return 0;
+  return DCPS::WeakRcHandle<ICE::Endpoint>();
 #endif
 }
 
@@ -3897,14 +3933,17 @@ Spdp::process_lease_expirations(const DCPS::MonotonicTimePoint& now)
     }
 
 #ifdef OPENDDS_SECURITY
-    ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
+    DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
     if (sedp_endpoint) {
       stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints,
                part->second.pdata_.participantProxy.availableExtendedBuiltinEndpoints);
     }
-    ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
+    DCPS::WeakRcHandle<ICE::Endpoint> spdp_endpoint = tport_->get_ice_endpoint();
     if (spdp_endpoint) {
-      ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, part->first);
+      DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+      if (agent) {
+        agent->stop_ice(spdp_endpoint, guid_, part->first);
+      }
     }
     purge_handshake_deadlines(part);
 #endif
@@ -4009,7 +4048,7 @@ operator!=(const DCPS::Locator_t& x, const DCPS::Locator_t& y)
 #endif
 
 #ifdef OPENDDS_SECURITY
-void Spdp::start_ice(ICE::Endpoint* endpoint, RepoId r, BuiltinEndpointSet_t avail,
+void Spdp::start_ice(DCPS::WeakRcHandle<ICE::Endpoint> endpoint, RepoId r, BuiltinEndpointSet_t avail,
                      DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail,
                      const ICE::AgentInfo& agent_info)
 {
@@ -4019,52 +4058,82 @@ void Spdp::start_ice(ICE::Endpoint* endpoint, RepoId r, BuiltinEndpointSet_t ava
   if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
     l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER;
     r.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
-    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->start_ice(endpoint, l, r, agent_info);
+    }
   }
   if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) {
     l.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER;
     r.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
-    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->start_ice(endpoint, l, r, agent_info);
+    }
   }
   if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER) {
     l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
-    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->start_ice(endpoint, l, r, agent_info);
+    }
   }
   if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
     l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
     r.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER;
-    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->start_ice(endpoint, l, r, agent_info);
+    }
   }
   if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER) {
     l.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
     r.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER;
-    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->start_ice(endpoint, l, r, agent_info);
+    }
   }
   if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER) {
     l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER;
-    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->start_ice(endpoint, l, r, agent_info);
+    }
   }
   if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER) {
     l.entityId = ENTITYID_TL_SVC_REQ_READER;
     r.entityId = ENTITYID_TL_SVC_REQ_WRITER;
-    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->start_ice(endpoint, l, r, agent_info);
+    }
   }
   if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER) {
     l.entityId = ENTITYID_TL_SVC_REQ_WRITER;
     r.entityId = ENTITYID_TL_SVC_REQ_READER;
-    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->start_ice(endpoint, l, r, agent_info);
+    }
   }
   if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER) {
     l.entityId = ENTITYID_TL_SVC_REPLY_READER;
     r.entityId = ENTITYID_TL_SVC_REPLY_WRITER;
-    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->start_ice(endpoint, l, r, agent_info);
+    }
   }
   if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER) {
     l.entityId = ENTITYID_TL_SVC_REPLY_WRITER;
     r.entityId = ENTITYID_TL_SVC_REPLY_READER;
-    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->start_ice(endpoint, l, r, agent_info);
+    }
   }
 
   using namespace DDS::Security;
@@ -4072,86 +4141,134 @@ void Spdp::start_ice(ICE::Endpoint* endpoint, RepoId r, BuiltinEndpointSet_t ava
   if (avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
     l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER;
     r.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER;
-    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->start_ice(endpoint, l, r, agent_info);
+    }
   }
   if (avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_READER) {
     l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER;
     r.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER;
-    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->start_ice(endpoint, l, r, agent_info);
+    }
   }
   if (avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
     l.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER;
     r.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER;
-    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->start_ice(endpoint, l, r, agent_info);
+    }
   }
   if (avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER) {
     l.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER;
     r.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER;
-    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->start_ice(endpoint, l, r, agent_info);
+    }
   }
   if (avail & BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER) {
     l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER;
-    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->start_ice(endpoint, l, r, agent_info);
+    }
   }
   if (avail & BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER) {
     l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER;
-    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->start_ice(endpoint, l, r, agent_info);
+    }
   }
   if (avail & BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER) {
     l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
-    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->start_ice(endpoint, l, r, agent_info);
+    }
   }
   if (avail & BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER) {
     l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
-    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->start_ice(endpoint, l, r, agent_info);
+    }
   }
   if (avail & BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER) {
     l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
-    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->start_ice(endpoint, l, r, agent_info);
+    }
   }
   if (avail & BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER) {
     l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
-    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->start_ice(endpoint, l, r, agent_info);
+    }
   }
   if (avail & SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER) {
     l.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
     r.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER;
-    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->start_ice(endpoint, l, r, agent_info);
+    }
   }
   if (avail & SPDP_BUILTIN_PARTICIPANT_SECURE_READER) {
     l.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER;
     r.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
-    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->start_ice(endpoint, l, r, agent_info);
+    }
   }
   if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE) {
     l.entityId = ENTITYID_TL_SVC_REQ_READER_SECURE;
     r.entityId = ENTITYID_TL_SVC_REQ_WRITER_SECURE;
-    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->start_ice(endpoint, l, r, agent_info);
+    }
   }
   if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE) {
     l.entityId = ENTITYID_TL_SVC_REQ_WRITER_SECURE;
     r.entityId = ENTITYID_TL_SVC_REQ_READER_SECURE;
-    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->start_ice(endpoint, l, r, agent_info);
+    }
   }
   if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE) {
     l.entityId = ENTITYID_TL_SVC_REPLY_READER_SECURE;
     r.entityId = ENTITYID_TL_SVC_REPLY_WRITER_SECURE;
-    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->start_ice(endpoint, l, r, agent_info);
+    }
   }
   if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE) {
     l.entityId = ENTITYID_TL_SVC_REPLY_WRITER_SECURE;
     r.entityId = ENTITYID_TL_SVC_REPLY_READER_SECURE;
-    ICE::Agent::instance()->start_ice(endpoint, l, r, agent_info);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->start_ice(endpoint, l, r, agent_info);
+    }
   }
 }
 
-void Spdp::stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId r, BuiltinEndpointSet_t avail,
+void Spdp::stop_ice(DCPS::WeakRcHandle<ICE::Endpoint> endpoint, DCPS::RepoId r, BuiltinEndpointSet_t avail,
                     DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail) {
   RepoId l = guid_;
 
@@ -4159,52 +4276,82 @@ void Spdp::stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId r, BuiltinEndpointSet_
   if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
     l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER;
     r.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
-    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->stop_ice(endpoint, l, r);
+    }
   }
   if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) {
     l.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER;
     r.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
-    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->stop_ice(endpoint, l, r);
+    }
   }
   if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER) {
     l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
-    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->stop_ice(endpoint, l, r);
+    }
   }
   if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
     l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
     r.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER;
-    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->stop_ice(endpoint, l, r);
+    }
   }
   if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER) {
     l.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
     r.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER;
-    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->stop_ice(endpoint, l, r);
+    }
   }
   if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER) {
     l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER;
-    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->stop_ice(endpoint, l, r);
+    }
   }
   if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_WRITER) {
     l.entityId = ENTITYID_TL_SVC_REQ_READER;
     r.entityId = ENTITYID_TL_SVC_REQ_WRITER;
-    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->stop_ice(endpoint, l, r);
+    }
   }
   if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REQUEST_DATA_READER) {
     l.entityId = ENTITYID_TL_SVC_REQ_WRITER;
     r.entityId = ENTITYID_TL_SVC_REQ_READER;
-    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->stop_ice(endpoint, l, r);
+    }
   }
   if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_WRITER) {
     l.entityId = ENTITYID_TL_SVC_REPLY_READER;
     r.entityId = ENTITYID_TL_SVC_REPLY_WRITER;
-    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->stop_ice(endpoint, l, r);
+    }
   }
   if (avail & BUILTIN_ENDPOINT_TYPE_LOOKUP_REPLY_DATA_READER) {
     l.entityId = ENTITYID_TL_SVC_REPLY_WRITER;
     r.entityId = ENTITYID_TL_SVC_REPLY_READER;
-    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->stop_ice(endpoint, l, r);
+    }
   }
 
   using namespace DDS::Security;
@@ -4212,82 +4359,130 @@ void Spdp::stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId r, BuiltinEndpointSet_
   if (avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER) {
     l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER;
     r.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER;
-    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->stop_ice(endpoint, l, r);
+    }
   }
   if (avail & SEDP_BUILTIN_PUBLICATIONS_SECURE_READER) {
     l.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER;
     r.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER;
-    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->stop_ice(endpoint, l, r);
+    }
   }
   if (avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER) {
     l.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER;
     r.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER;
-    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->stop_ice(endpoint, l, r);
+    }
   }
   if (avail & SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER) {
     l.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER;
     r.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER;
-    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->stop_ice(endpoint, l, r);
+    }
   }
   if (avail & BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER) {
     l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER;
-    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->stop_ice(endpoint, l, r);
+    }
   }
   if (avail & BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER) {
     l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER;
-    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->stop_ice(endpoint, l, r);
+    }
   }
   if (avail & BUILTIN_PARTICIPANT_STATELESS_MESSAGE_WRITER) {
     l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
-    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->stop_ice(endpoint, l, r);
+    }
   }
   if (avail & BUILTIN_PARTICIPANT_STATELESS_MESSAGE_READER) {
     l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER;
-    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->stop_ice(endpoint, l, r);
+    }
   }
   if (avail & BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER) {
     l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
-    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->stop_ice(endpoint, l, r);
+    }
   }
   if (avail & BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER) {
     l.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER;
     r.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER;
-    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->stop_ice(endpoint, l, r);
+    }
   }
   if (avail & SPDP_BUILTIN_PARTICIPANT_SECURE_WRITER) {
     l.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
     r.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER;
-    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->stop_ice(endpoint, l, r);
+    }
   }
   if (avail & SPDP_BUILTIN_PARTICIPANT_SECURE_READER) {
     l.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER;
     r.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
-    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->stop_ice(endpoint, l, r);
+    }
   }
   if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE) {
     l.entityId = ENTITYID_TL_SVC_REQ_READER_SECURE;
     r.entityId = ENTITYID_TL_SVC_REQ_WRITER_SECURE;
-    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->stop_ice(endpoint, l, r);
+    }
   }
   if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE) {
     l.entityId = ENTITYID_TL_SVC_REQ_WRITER_SECURE;
     r.entityId = ENTITYID_TL_SVC_REQ_READER_SECURE;
-    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->stop_ice(endpoint, l, r);
+    }
   }
   if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE) {
     l.entityId = ENTITYID_TL_SVC_REPLY_READER_SECURE;
     r.entityId = ENTITYID_TL_SVC_REPLY_WRITER_SECURE;
-    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->stop_ice(endpoint, l, r);
+    }
   }
   if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE) {
     l.entityId = ENTITYID_TL_SVC_REPLY_WRITER_SECURE;
     r.entityId = ENTITYID_TL_SVC_REPLY_READER_SECURE;
-    ICE::Agent::instance()->stop_ice(endpoint, l, r);
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (agent) {
+      agent->stop_ice(endpoint, l, r);
+    }
   }
 }
 
@@ -4566,7 +4761,7 @@ void Spdp::process_participant_ice(const ParameterList& plist,
     }
   }
 
-  ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
+  DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
   if (sedp_endpoint) {
     if (sedp_pos != ai_map.end()) {
       start_ice(sedp_endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints,
@@ -4576,12 +4771,18 @@ void Spdp::process_participant_ice(const ParameterList& plist,
                pdata.participantProxy.availableExtendedBuiltinEndpoints);
     }
   }
-  ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
+  DCPS::WeakRcHandle<ICE::Endpoint> spdp_endpoint = tport_->get_ice_endpoint();
   if (spdp_endpoint) {
     if (spdp_pos != ai_map.end()) {
-      ICE::Agent::instance()->start_ice(spdp_endpoint, guid_, guid, spdp_pos->second);
+      DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+      if (agent) {
+        agent->start_ice(spdp_endpoint, guid_, guid, spdp_pos->second);
+      }
     } else {
-      ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, guid);
+      DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+      if (agent) {
+        agent->stop_ice(spdp_endpoint, guid_, guid);
+      }
 #ifndef DDS_HAS_MINIMUM_BIT
       ACE_GUARD(ACE_Thread_Mutex, g, lock_);
       DiscoveredParticipantIter iter = participants_.find(guid);
@@ -4715,24 +4916,35 @@ Spdp::use_ice_now(bool flag)
 #ifdef OPENDDS_SECURITY
   sedp_->use_ice_now(flag);
 
+  DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+
   if (flag) {
-    ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
-    ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
+    DCPS::WeakRcHandle<ICE::Endpoint> spdp_endpoint = tport_->get_ice_endpoint();
+    DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
 
     if (sedp_endpoint) {
       const RepoId l = make_id(guid_, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER);
-      ICE::Agent::instance()->add_local_agent_info_listener(sedp_endpoint, l, this);
+      if (agent) {
+        agent->add_local_agent_info_listener(sedp_endpoint, l, DCPS::static_rchandle_cast<ICE::AgentInfoListener>(DCPS::rchandle_from(this)));
+      }
     }
-    ICE::Agent::instance()->add_endpoint(tport_.get());
+
+    if (agent) {
+      agent->add_endpoint(DCPS::static_rchandle_cast<ICE::Endpoint>(tport_));
+    }
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     tport_->ice_endpoint_added_ = true;
     if (spdp_endpoint) {
-      ICE::Agent::instance()->add_local_agent_info_listener(spdp_endpoint, guid_, this);
+      if (agent) {
+        agent->add_local_agent_info_listener(spdp_endpoint, guid_, DCPS::static_rchandle_cast<ICE::AgentInfoListener>(DCPS::rchandle_from(this)));
+      }
     }
 
     for (DiscoveredParticipantConstIter pos = participants_.begin(), limit = participants_.end(); pos != limit; ++pos) {
       if (spdp_endpoint && pos->second.have_spdp_info_) {
-        ICE::Agent::instance()->start_ice(spdp_endpoint, guid_, pos->first, pos->second.spdp_info_);
+        if (agent) {
+          agent->start_ice(spdp_endpoint, guid_, pos->first, pos->second.spdp_info_);
+        }
       }
 
       if (sedp_endpoint && pos->second.have_sedp_info_) {
@@ -4741,7 +4953,9 @@ Spdp::use_ice_now(bool flag)
       }
     }
   } else {
-    ICE::Agent::instance()->remove_endpoint(tport_.get());
+    if (agent) {
+      agent->remove_endpoint(DCPS::static_rchandle_cast<ICE::Endpoint>(tport_));
+    }
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     tport_->ice_endpoint_added_ = false;
 

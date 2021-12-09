@@ -363,8 +363,8 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
       make_id(participant_id, ENTITYID_TL_SVC_REQ_READER_SECURE), ref(*this)))
   , type_lookup_reply_secure_reader_(make_rch<TypeLookupReplyReader>(
       make_id(participant_id, ENTITYID_TL_SVC_REPLY_READER_SECURE), ref(*this)))
-  , publication_agent_info_listener_(*this)
-  , subscription_agent_info_listener_(*this)
+  , publication_agent_info_listener_(DCPS::make_rch<PublicationAgentInfoListener>(ref(*this)))
+  , subscription_agent_info_listener_(DCPS::make_rch<SubscriptionAgentInfoListener>(ref(*this)))
 #endif // OPENDDS_SECURITY
 {}
 
@@ -1931,9 +1931,10 @@ Sedp::remove_publication_i(const RepoId& publicationId, LocalPublication& pub)
 #ifdef OPENDDS_SECURITY
   DCPS::DataWriterCallbacks_rch pl = pub.publication_.lock();
   if (pl) {
-    ICE::Endpoint* endpoint = pl->get_ice_endpoint();
-    if (endpoint) {
-      ICE::Agent::instance()->remove_local_agent_info_listener(endpoint, publicationId);
+    DCPS::WeakRcHandle<ICE::Endpoint> endpoint = pl->get_ice_endpoint();
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (endpoint && agent) {
+      agent->remove_local_agent_info_listener(endpoint, publicationId);
     }
   }
 
@@ -1981,9 +1982,10 @@ Sedp::remove_subscription_i(const RepoId& subscriptionId,
 #ifdef OPENDDS_SECURITY
   DCPS::DataReaderCallbacks_rch sl = sub.subscription_.lock();
   if (sl) {
-    ICE::Endpoint* endpoint = sl->get_ice_endpoint();
-    if (endpoint) {
-      ICE::Agent::instance()->remove_local_agent_info_listener(endpoint, subscriptionId);
+    DCPS::WeakRcHandle<ICE::Endpoint> endpoint = sl->get_ice_endpoint();
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (endpoint && agent) {
+      agent->remove_local_agent_info_listener(endpoint, subscriptionId);
     }
   }
 
@@ -3192,7 +3194,7 @@ Sedp::signal_liveliness_secure(DDS::LivelinessQosPolicyKind kind)
 }
 #endif
 
-ICE::Endpoint* Sedp::get_ice_endpoint() {
+DCPS::WeakRcHandle<ICE::Endpoint> Sedp::get_ice_endpoint() {
   return transport_inst_->get_ice_endpoint();
 }
 
@@ -3524,13 +3526,14 @@ Sedp::DiscoveryWriter::write_dcps_participant_secure(const Security::SPDPdiscove
   }
 
   ICE::AgentInfoMap ai_map;
-  ICE::Endpoint* sedp_endpoint = get_ice_endpoint();
-  if (sedp_endpoint) {
-    ai_map[SEDP_AGENT_INFO_KEY] = ICE::Agent::instance()->get_local_agent_info(sedp_endpoint);
+  DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+  DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = get_ice_endpoint();
+  if (sedp_endpoint && agent) {
+    ai_map[SEDP_AGENT_INFO_KEY] = agent->get_local_agent_info(sedp_endpoint);
   }
-  ICE::Endpoint* spdp_endpoint = sedp_.spdp_.get_ice_endpoint_if_added();
-  if (spdp_endpoint) {
-    ai_map[SPDP_AGENT_INFO_KEY] = ICE::Agent::instance()->get_local_agent_info(spdp_endpoint);
+  DCPS::WeakRcHandle<ICE::Endpoint> spdp_endpoint = sedp_.spdp_.get_ice_endpoint_if_added();
+  if (spdp_endpoint && agent) {
+    ai_map[SPDP_AGENT_INFO_KEY] = agent->get_local_agent_info(spdp_endpoint);
   }
   if (!ParameterListConverter::to_param_list(ai_map, plist)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
@@ -4854,11 +4857,14 @@ Sedp::add_publication_i(const DCPS::RepoId& rid,
 #ifdef OPENDDS_SECURITY
   DCPS::DataWriterCallbacks_rch pl = pub.publication_.lock();
   if (pl) {
-    ICE::Endpoint* endpoint = pl->get_ice_endpoint();
+    DCPS::WeakRcHandle<ICE::Endpoint> endpoint = pl->get_ice_endpoint();
     if (endpoint) {
       pub.have_ice_agent_info = true;
-      pub.ice_agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
-      ICE::Agent::instance()->add_local_agent_info_listener(endpoint, rid, &publication_agent_info_listener_);
+      DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+      if (agent) {
+        pub.ice_agent_info = agent->get_local_agent_info(endpoint);
+        agent->add_local_agent_info_listener(endpoint, rid, DCPS::static_rchandle_cast<ICE::AgentInfoListener>(publication_agent_info_listener_));
+      }
       start_ice(rid, pub);
     }
   }
@@ -5006,11 +5012,14 @@ Sedp::add_subscription_i(const DCPS::RepoId& rid,
 #ifdef OPENDDS_SECURITY
   DCPS::DataReaderCallbacks_rch sl = sub.subscription_.lock();
   if (sl) {
-    ICE::Endpoint* endpoint = sl->get_ice_endpoint();
+    DCPS::WeakRcHandle<ICE::Endpoint> endpoint = sl->get_ice_endpoint();
     if (endpoint) {
       sub.have_ice_agent_info = true;
-      sub.ice_agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
-      ICE::Agent::instance()->add_local_agent_info_listener(endpoint, rid, &subscription_agent_info_listener_);
+      DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+      if (agent) {
+        sub.ice_agent_info = agent->get_local_agent_info(endpoint);
+        agent->add_local_agent_info_listener(endpoint, rid, DCPS::static_rchandle_cast<ICE::AgentInfoListener>(subscription_agent_info_listener_));
+      }
       start_ice(rid, sub);
     }
   }
@@ -5661,9 +5670,10 @@ Sedp::add_assoc_i(const DCPS::RepoId& local_guid, const LocalPublication& lpub,
 #ifdef OPENDDS_SECURITY
   DCPS::DataWriterCallbacks_rch pl = lpub.publication_.lock();
   if (pl) {
-    ICE::Endpoint* endpoint = pl->get_ice_endpoint();
-    if (endpoint && dsub.have_ice_agent_info_) {
-      ICE::Agent::instance()->start_ice(endpoint, local_guid, remote_guid, dsub.ice_agent_info_);
+    DCPS::WeakRcHandle<ICE::Endpoint> endpoint = pl->get_ice_endpoint();
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (endpoint && dsub.have_ice_agent_info_ && agent) {
+      agent->start_ice(endpoint, local_guid, remote_guid, dsub.ice_agent_info_);
     }
   }
 #else
@@ -5680,9 +5690,10 @@ Sedp::remove_assoc_i(const DCPS::RepoId& local_guid, const LocalPublication& lpu
 #ifdef OPENDDS_SECURITY
   DCPS::DataWriterCallbacks_rch pl = lpub.publication_.lock();
   if (pl) {
-    ICE::Endpoint* endpoint = pl->get_ice_endpoint();
-    if (endpoint) {
-      ICE::Agent::instance()->stop_ice(endpoint, local_guid, remote_guid);
+    DCPS::WeakRcHandle<ICE::Endpoint> endpoint = pl->get_ice_endpoint();
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (endpoint && agent) {
+      agent->stop_ice(endpoint, local_guid, remote_guid);
     }
   }
 #else
@@ -5698,9 +5709,10 @@ Sedp::add_assoc_i(const DCPS::RepoId& local_guid, const LocalSubscription& lsub,
 #ifdef OPENDDS_SECURITY
   DCPS::DataReaderCallbacks_rch sl = lsub.subscription_.lock();
   if (sl) {
-    ICE::Endpoint* endpoint = sl->get_ice_endpoint();
-    if (endpoint && dpub.have_ice_agent_info_) {
-      ICE::Agent::instance()->start_ice(endpoint, local_guid, remote_guid, dpub.ice_agent_info_);
+    DCPS::WeakRcHandle<ICE::Endpoint> endpoint = sl->get_ice_endpoint();
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (endpoint && dpub.have_ice_agent_info_ && agent) {
+      agent->start_ice(endpoint, local_guid, remote_guid, dpub.ice_agent_info_);
     }
   }
 #else
@@ -5717,9 +5729,10 @@ Sedp::remove_assoc_i(const DCPS::RepoId& local_guid, const LocalSubscription& ls
 #ifdef OPENDDS_SECURITY
   DCPS::DataReaderCallbacks_rch sl = lsub.subscription_.lock();
   if (sl) {
-    ICE::Endpoint* endpoint = sl->get_ice_endpoint();
-    if (endpoint) {
-      ICE::Agent::instance()->stop_ice(endpoint, local_guid, remote_guid);
+    DCPS::WeakRcHandle<ICE::Endpoint> endpoint = sl->get_ice_endpoint();
+    DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+    if (endpoint && agent) {
+      agent->stop_ice(endpoint, local_guid, remote_guid);
     }
   }
 #else
@@ -5784,7 +5797,7 @@ Sedp::start_ice(const DCPS::RepoId& guid, const LocalPublication& lpub) {
 #ifdef OPENDDS_SECURITY
   DCPS::DataWriterCallbacks_rch pl = lpub.publication_.lock();
   if (pl) {
-    ICE::Endpoint* endpoint = pl->get_ice_endpoint();
+    DCPS::WeakRcHandle<ICE::Endpoint> endpoint = pl->get_ice_endpoint();
 
     if (!endpoint || !lpub.have_ice_agent_info) {
       return;
@@ -5795,7 +5808,10 @@ Sedp::start_ice(const DCPS::RepoId& guid, const LocalPublication& lpub) {
       DiscoveredSubscriptionIter dsi = discovered_subscriptions_.find(*it);
       if (dsi != discovered_subscriptions_.end()) {
         if (dsi->second.have_ice_agent_info_) {
-          ICE::Agent::instance()->start_ice(endpoint, guid, dsi->first, dsi->second.ice_agent_info_);
+          DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+          if (agent) {
+            agent->start_ice(endpoint, guid, dsi->first, dsi->second.ice_agent_info_);
+          }
         }
       }
     }
@@ -5811,7 +5827,7 @@ Sedp::start_ice(const DCPS::RepoId& guid, const LocalSubscription& lsub) {
 #ifdef OPENDDS_SECURITY
   DCPS::DataReaderCallbacks_rch sl = lsub.subscription_.lock();
   if (sl) {
-    ICE::Endpoint* endpoint = sl->get_ice_endpoint();
+    DCPS::WeakRcHandle<ICE::Endpoint> endpoint = sl->get_ice_endpoint();
 
     if (!endpoint || !lsub.have_ice_agent_info) {
       return;
@@ -5822,7 +5838,10 @@ Sedp::start_ice(const DCPS::RepoId& guid, const LocalSubscription& lsub) {
       DiscoveredPublicationIter dpi = discovered_publications_.find(*it);
       if (dpi != discovered_publications_.end()) {
         if (dpi->second.have_ice_agent_info_) {
-          ICE::Agent::instance()->start_ice(endpoint, guid, dpi->first, dpi->second.ice_agent_info_);
+          DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+          if (agent) {
+            agent->start_ice(endpoint, guid, dpi->first, dpi->second.ice_agent_info_);
+          }
         }
       }
     }
@@ -5847,9 +5866,10 @@ Sedp::start_ice(const DCPS::RepoId& guid, const DiscoveredPublication& dpub) {
         lsi->second.matched_endpoints_.count(guid)) {
       DCPS::DataReaderCallbacks_rch sl = lsi->second.subscription_.lock();
       if (sl) {
-        ICE::Endpoint* endpoint = sl->get_ice_endpoint();
-        if (endpoint) {
-          ICE::Agent::instance()->start_ice(endpoint, lsi->first, guid, dpub.ice_agent_info_);
+        DCPS::WeakRcHandle<ICE::Endpoint> endpoint = sl->get_ice_endpoint();
+        DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+        if (endpoint && agent) {
+          agent->start_ice(endpoint, lsi->first, guid, dpub.ice_agent_info_);
         }
       }
     }
@@ -5876,9 +5896,10 @@ Sedp::start_ice(const DCPS::RepoId& guid, const DiscoveredSubscription& dsub) {
           lpi->second.matched_endpoints_.count(guid)) {
         DCPS::DataWriterCallbacks_rch pl = lpi->second.publication_.lock();
         if (pl) {
-          ICE::Endpoint* endpoint = pl->get_ice_endpoint();
-          if (endpoint) {
-            ICE::Agent::instance()->start_ice(endpoint, lpi->first, guid, dsub.ice_agent_info_);
+          DCPS::WeakRcHandle<ICE::Endpoint> endpoint = pl->get_ice_endpoint();
+          DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+          if (endpoint && agent) {
+            agent->start_ice(endpoint, lpi->first, guid, dsub.ice_agent_info_);
           }
         }
       }
@@ -5903,9 +5924,10 @@ Sedp::stop_ice(const DCPS::RepoId& guid, const DiscoveredPublication& dpub)
           lsi->second.matched_endpoints_.count(guid)) {
         DCPS::DataReaderCallbacks_rch sl = lsi->second.subscription_.lock();
         if (sl) {
-          ICE::Endpoint* endpoint = sl->get_ice_endpoint();
-          if (endpoint) {
-            ICE::Agent::instance()->stop_ice(endpoint, lsi->first, guid);
+          DCPS::WeakRcHandle<ICE::Endpoint> endpoint = sl->get_ice_endpoint();
+          DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+          if (endpoint && agent) {
+            agent->stop_ice(endpoint, lsi->first, guid);
           }
         }
       }
@@ -5930,9 +5952,10 @@ Sedp::stop_ice(const DCPS::RepoId& guid, const DiscoveredSubscription& dsub)
           lpi->second.matched_endpoints_.count(guid)) {
         DCPS::DataWriterCallbacks_rch pl = lpi->second.publication_.lock();
         if (pl) {
-          ICE::Endpoint* endpoint = pl->get_ice_endpoint();
-          if (endpoint) {
-            ICE::Agent::instance()->stop_ice(endpoint, lpi->first, guid);
+          DCPS::WeakRcHandle<ICE::Endpoint> endpoint = pl->get_ice_endpoint();
+          DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+          if (endpoint && agent) {
+            agent->stop_ice(endpoint, lpi->first, guid);
           }
         }
       }
@@ -5972,11 +5995,14 @@ Sedp::use_ice_now(bool f)
     LocalPublication& pub = pos->second;
     DCPS::DataWriterCallbacks_rch pl = pub.publication_.lock();
     if (pl) {
-      ICE::Endpoint* endpoint = pl->get_ice_endpoint();
+      DCPS::WeakRcHandle<ICE::Endpoint> endpoint = pl->get_ice_endpoint();
       if (endpoint) {
         pub.have_ice_agent_info = true;
-        pub.ice_agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
-        ICE::Agent::instance()->add_local_agent_info_listener(endpoint, pos->first, &publication_agent_info_listener_);
+        DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+        if (agent) {
+          pub.ice_agent_info = agent->get_local_agent_info(endpoint);
+          agent->add_local_agent_info_listener(endpoint, pos->first, DCPS::static_rchandle_cast<ICE::AgentInfoListener>(publication_agent_info_listener_));
+        }
         start_ice(pos->first, pub);
       }
     }
@@ -5985,11 +6011,14 @@ Sedp::use_ice_now(bool f)
     LocalSubscription& sub = pos->second;
     DCPS::DataReaderCallbacks_rch sl = sub.subscription_.lock();
     if (sl) {
-      ICE::Endpoint* endpoint = sl->get_ice_endpoint();
+      DCPS::WeakRcHandle<ICE::Endpoint> endpoint = sl->get_ice_endpoint();
       if (endpoint) {
         sub.have_ice_agent_info = true;
-        sub.ice_agent_info = ICE::Agent::instance()->get_local_agent_info(endpoint);
-        ICE::Agent::instance()->add_local_agent_info_listener(endpoint, pos->first, &subscription_agent_info_listener_);
+        DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+        if (agent) {
+          sub.ice_agent_info = agent->get_local_agent_info(endpoint);
+          agent->add_local_agent_info_listener(endpoint, pos->first, DCPS::static_rchandle_cast<ICE::AgentInfoListener>(subscription_agent_info_listener_));
+        }
         start_ice(pos->first, sub);
       }
     }

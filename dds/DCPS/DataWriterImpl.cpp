@@ -2770,7 +2770,7 @@ DataWriterImpl::send_control(const DataSampleHeader& header,
   return status;
 }
 
-ICE::Endpoint*
+WeakRcHandle<ICE::Endpoint>
 DataWriterImpl::get_ice_endpoint()
 {
   return TransportClient::get_ice_endpoint();

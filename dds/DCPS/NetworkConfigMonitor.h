@@ -105,6 +105,8 @@ struct NetworkInterfaceName {
 
 class OpenDDS_Dcps_Export NetworkConfigListener : public virtual RcObject {
 public:
+  virtual ~NetworkConfigListener() {}
+
   virtual void add_interface(const NetworkInterface& nic)
   {
     NetworkInterface::AddressSet addresses = nic.get_addresses();

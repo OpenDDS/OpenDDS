@@ -65,7 +65,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
                                              int n,
                                              const ACE_SOCK_Dgram& socket,
                                              ACE_INET_Addr& remote_address,
-                                             ICE::Endpoint* endpoint,
+                                             DCPS::WeakRcHandle<ICE::Endpoint> endpoint,
                                              RtpsUdpTransport& tport,
                                              bool& stop)
 {
@@ -134,7 +134,10 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
     if (tport.relay_srsm().is_response(message)) {
       tport.process_relay_sra(tport.relay_srsm().receive(message));
     } else if (endpoint) {
-      ICE::Agent::instance()->receive(endpoint, local_address, remote_address, message);
+      DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+      if (agent) {
+        agent->receive(endpoint, local_address, remote_address, message);
+      }
     }
   }
   head->release();

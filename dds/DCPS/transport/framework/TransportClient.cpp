@@ -17,6 +17,7 @@
 #include <dds/DCPS/SendStateDataSampleList.h>
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/RTPS/ICE/Ice.h>
 
 #include <dds/DdsDcpsInfoUtilsC.h>
 
@@ -823,25 +824,25 @@ TransportClient::update_locators(const RepoId& remote,
   }
 }
 
-ICE::Endpoint*
+WeakRcHandle<ICE::Endpoint>
 TransportClient::get_ice_endpoint()
 {
   // The one-to-many relationship with impls implies that this should
   // return a set of endpoints instead of a single endpoint or null.
   // For now, we will assume a single impl.
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, 0);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, WeakRcHandle<ICE::Endpoint>());
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
     RcHandle<TransportImpl> impl = pos->lock();
     if (impl) {
-      ICE::Endpoint* endpoint = impl->get_ice_endpoint();
+      WeakRcHandle<ICE::Endpoint> endpoint = impl->get_ice_endpoint();
       if (endpoint) { return endpoint; }
     }
   }
 
-  return 0;
+  return WeakRcHandle<ICE::Endpoint>();
 }
 
 bool

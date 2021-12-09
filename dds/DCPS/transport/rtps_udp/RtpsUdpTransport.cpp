@@ -34,7 +34,7 @@ RtpsUdpTransport::RtpsUdpTransport(RtpsUdpInst& inst)
   , local_crypto_handle_(DDS::HANDLE_NIL)
 #endif
 #ifdef OPENDDS_SECURITY
-  , ice_endpoint_(*this)
+  , ice_endpoint_(make_rch<IceEndpoint>(ref(*this)))
   , relay_stun_task_falloff_(TimeDuration::zero_value)
 #endif
   , transport_statistics_(inst.name())
@@ -51,13 +51,13 @@ RtpsUdpTransport::config() const
   return static_cast<RtpsUdpInst&>(TransportImpl::config());
 }
 
-ICE::Endpoint*
+DCPS::WeakRcHandle<ICE::Endpoint>
 RtpsUdpTransport::get_ice_endpoint()
 {
 #ifdef OPENDDS_SECURITY
-  return (config().use_ice()) ? &ice_endpoint_ : 0;
+  return (config().use_ice()) ? static_rchandle_cast<ICE::Endpoint>(ice_endpoint_) : DCPS::WeakRcHandle<ICE::Endpoint>();
 #else
-  return 0;
+  return DCPS::WeakRcHandle<ICE::Endpoint>();
 #endif
 }
 
@@ -795,10 +795,13 @@ RtpsUdpTransport::start_ice()
     ACE_DEBUG((LM_INFO, "(%P|%t) RtpsUdpTransport::start_ice\n"));
   }
 
-  ICE::Agent::instance()->add_endpoint(&ice_endpoint_);
+  DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+  if (agent) {
+    agent->add_endpoint(static_rchandle_cast<ICE::Endpoint>(ice_endpoint_));
+  }
 
   if (!link_) {
-    if (reactor()->register_handler(unicast_socket_.get_handle(), &ice_endpoint_,
+    if (reactor()->register_handler(unicast_socket_.get_handle(), ice_endpoint_.get(),
                                     ACE_Event_Handler::READ_MASK) != 0) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ")
@@ -808,7 +811,7 @@ RtpsUdpTransport::start_ice()
                  unicast_socket_.get_handle()));
     }
 #ifdef ACE_HAS_IPV6
-    if (reactor()->register_handler(ipv6_unicast_socket_.get_handle(), &ice_endpoint_,
+    if (reactor()->register_handler(ipv6_unicast_socket_.get_handle(), ice_endpoint_.get(),
                                     ACE_Event_Handler::READ_MASK) != 0) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ")
@@ -849,7 +852,10 @@ RtpsUdpTransport::stop_ice()
 #endif
   }
 
-  ICE::Agent::instance()->remove_endpoint(&ice_endpoint_);
+  DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
+  if (agent) {
+    agent->remove_endpoint(static_rchandle_cast<ICE::Endpoint>(ice_endpoint_));
+  }
 }
 
 void
@@ -863,7 +869,7 @@ RtpsUdpTransport::relay_stun_task(const DCPS::MonotonicTimePoint& /*now*/)
       relay_address != ACE_INET_Addr() &&
       !equal_guid_prefixes(local_prefix_, GUIDPREFIX_UNKNOWN)) {
     process_relay_sra(relay_srsm_.send(relay_address, ICE::Configuration::instance()->server_reflexive_indication_count(), local_prefix_));
-    ice_endpoint_.send(relay_address, relay_srsm_.message());
+    ice_endpoint_->send(relay_address, relay_srsm_.message());
     relay_stun_task_falloff_.advance(ICE::Configuration::instance()->server_reflexive_address_period());
     relay_stun_task_->schedule(relay_stun_task_falloff_.get());
   }

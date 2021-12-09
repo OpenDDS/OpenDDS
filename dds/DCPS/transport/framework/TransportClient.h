@@ -101,7 +101,7 @@ public:
   void update_locators(const RepoId& remote,
                        const TransportLocatorSeq& locators);
 
-  ICE::Endpoint* get_ice_endpoint();
+  WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
 
   // Data transfer:
 

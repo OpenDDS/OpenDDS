@@ -577,7 +577,7 @@ public:
   void signal_liveliness_secure(DDS::LivelinessQosPolicyKind kind);
 #endif
 
-  ICE::Endpoint* get_ice_endpoint();
+  DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
 
   void rtps_relay_only_now(bool f);
   void use_rtps_relay_now(bool f);
@@ -1755,8 +1755,8 @@ protected:
 #endif
 
 #ifdef OPENDDS_SECURITY
-  PublicationAgentInfoListener publication_agent_info_listener_;
-  SubscriptionAgentInfoListener subscription_agent_info_listener_;
+  RcHandle<PublicationAgentInfoListener> publication_agent_info_listener_;
+  RcHandle<SubscriptionAgentInfoListener> subscription_agent_info_listener_;
 #endif
 
   void cleanup_writer_association(DCPS::DataWriterCallbacks_wrch callbacks,
