@@ -5,9 +5,11 @@ OpenDDS 3.19.0 is currently in development, so this list might change.
 
 ### Additions:
 - XTypes: Dynamic Language Binding (#2976)
-  - Read support only for the time being.
-  - New `inspect` tool that prints data being written to a topic in text form.
-  - See section 16.7 of the Developer's guide for details.
+  - Read support only in this version
+  - New `inspect` tool that prints data samples read from a topic in text form
+  - See section 16.7 of the Developer's Guide for details
+- CDR Encapsulation support for non-rtps_udp transports (#3135)
+  - When XCDR2 is enabled in DataRepresentationQosPolicy, these transports can use mutable and extensible extensibility
 - Enhanced RtpsRelay support (#3208, #3116, #3094)
 - RTPS transport-level statistics (#3166)
 - Made the allocators in TransportReceiveStrategy configurable (#3170)
@@ -20,7 +22,6 @@ OpenDDS 3.19.0 is currently in development, so this list might change.
 ### Fixes:
 - Source IP check overridde configuration (#3195)
 - Update use of receive address in RtpsUdpDataLink::accumulate_addresses (#3191)
-- CDR Encapsulation support for non-rtps_udp transports (#3135)
 - Updated Node.js/V8 support (#3188, #3177)
 - Better support for DDS Security static library builds (#3122)
 - TransportReceiveStrategy: fixed issue with response queue (#3136)
@@ -28,12 +29,12 @@ OpenDDS 3.19.0 is currently in development, so this list might change.
 - Added special-case handling for PID_PROPERTY_LIST interop (#3057)
 - SEDP sequencing (#3068, #3116)
 - MultiTopic robustness (#2988)
+- Fixed issue with `find_package(Threads)` on recent CMake releases when calling `find_package(OpenDDS)` before a C/C++ project has been declared (#3093)
 
 ### Notes:
 - configure: Add vs2022 as a compiler option (#3169)
 - MSVC++ 12.0 updates (#3075)
 - Fixed dependency cycle when `OPENDDS_TARGET_SOURCES` is used on a CMake target that also has Qt MOC source files (#3093)
-- Fixed issue with `find_package(Threads)` on recent CMake releases when calling `find_package(OpenDDS)` before a C/C++ project has been declared (#3093)
 
 ## Version 3.18.1 of OpenDDS
 OpenDDS 3.18.1 was released on Sep 24 2021.
