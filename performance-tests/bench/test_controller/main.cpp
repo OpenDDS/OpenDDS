@@ -422,6 +422,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
             std::cout << header.str();
             std::cout << report.node_reports[i].spawned_process_logs[j] << std::endl << std::endl;
           }
+          result_file << "=== End of Node Logs ===" << std::endl << std::endl;
+          std::cout << "=== End of Node Logs ===" << std::endl << std::endl;
         }
       }
 
