@@ -84,7 +84,6 @@ InfoRepo::run()
 void
 InfoRepo::finalize()
 {
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) FWH InfoRepo::finalize\n"));
   if (this->finalized_) {
     return;
   }
@@ -94,7 +93,7 @@ InfoRepo::finalize()
     // which bypasses InfoRepo::handle_exception()
     this->info_servant_->finalize();
     this->federator_.finalize();
-    info_servant_->cleanup_built_in_topics(); // Used by federator_->finalize
+    info_servant_->cleanup_all_built_in_topics(); // Used by federator_->finalize
     const DDS::ReturnCode_t shutdown_error = TheServiceParticipant->shutdown();
     if (shutdown_error) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: InfoRepo::finalize: "
@@ -119,7 +118,6 @@ InfoRepo::finalize()
 int
 InfoRepo::handle_exception(ACE_HANDLE /* fd */)
 {
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) FWH InfoRepo::handle_exception\n"));
   if (shutdown_signal_) {
     ACE_DEBUG((LM_DEBUG,
              "InfoRepo_Shutdown: shutting down on signal %d\n",
@@ -129,7 +127,7 @@ InfoRepo::handle_exception(ACE_HANDLE /* fd */)
   // these should occur before ORB::shutdown() since they use the ORB/reactor
   this->info_servant_->finalize();
   this->federator_.finalize();
-  info_servant_->cleanup_built_in_topics(); // Used by federator_->finalize
+  info_servant_->cleanup_all_built_in_topics(); // Used by federator_->finalize
   const DDS::ReturnCode_t shutdown_error = TheServiceParticipant->shutdown();
   if (shutdown_error) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: InfoRepo::handle_exception: "

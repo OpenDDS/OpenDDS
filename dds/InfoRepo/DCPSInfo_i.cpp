@@ -52,7 +52,7 @@ TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i(CORBA::ORB_ptr orb
   , reassociate_timer_id_(-1)
   , dispatch_check_timer_id_(-1)
 #ifndef DDS_HAS_MINIMUM_BIT
-  , in_cleanup_built_in_topics_(false)
+  , in_cleanup_all_built_in_topics_(false)
 #endif
 {
   if (!TheServiceParticipant->use_bidir_giop()) {
@@ -1497,11 +1497,11 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant(
 
   if (where->second->participants().empty()
 #ifndef DDS_HAS_MINIMUM_BIT
-    && !(participant->isOwner() && participant->isBitPublisher() && in_cleanup_built_in_topics_)
-    // If this is false, we're running as part of cleanup_built_in_topics and
-    // we can't remove the domain because we would invalid the iterator we're
-    // using in cleanup_built_in_topics. cleanup_built_in_topics will clear the
-    // domains once it's done.
+    && !(participant->isOwner() && participant->isBitPublisher() && in_cleanup_all_built_in_topics_)
+    // If this is false, we're running as part of cleanup_all_built_in_topics
+    // and we can't remove the domain because we would invalid the iterator
+    // we're using in cleanup_all_built_in_topics. cleanup_all_built_in_topics
+    // will clear the domains once it's done.
 #endif
     ) {
     domains_.erase(where);
@@ -1513,8 +1513,16 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant(
     // It can be removed now since no user participants exist in this domain,
     // but it has to be removed on the Service Participant's reactor thread
     // in order to make the locking work properly in delete_participant().
-    const ACE_Event_Handler_var eh = new BIT_Cleanup_Handler(this, domainId);
+    BIT_Cleanup_Handler* eh_impl = new BIT_Cleanup_Handler(this, domainId);
+    const ACE_Event_Handler_var eh = eh_impl;
     TheServiceParticipant->reactor()->notify(eh.handler());
+
+    // Wait for that to be finished
+    using OpenDDS::DCPS::CvStatus_NoTimeout;
+    OpenDDS::DCPS::CvStatus status = CvStatus_NoTimeout;
+    while (status == CvStatus_NoTimeout && !eh_impl->done_) {
+      status = eh_impl->cv_.wait();
+    }
   }
 #endif
 }
@@ -1526,13 +1534,12 @@ int TAO_DDS_DCPSInfo_i::BIT_Cleanup_Handler::handle_exception(ACE_HANDLE)
 
   const DCPS_IR_Domain_Map::iterator where = parent_->domains_.find(domain_);
 
-  if (where == parent_->domains_.end()) {
-    return 0;
-  }
-
-  if (where->second->participants().size() == 1) {
+  if (where != parent_->domains_.end() && where->second->participants().size() == 1) {
     where->second->cleanup_built_in_topics();
   }
+
+  done_ = true;
+  cv_.notify_all();
 
   return 0;
 }
@@ -2483,14 +2490,15 @@ TAO_DDS_DCPSInfo_i::dump_to_string()
 
 }
 
-void TAO_DDS_DCPSInfo_i::cleanup_built_in_topics()
+void TAO_DDS_DCPSInfo_i::cleanup_all_built_in_topics()
 {
 #ifndef DDS_HAS_MINIMUM_BIT
-  in_cleanup_built_in_topics_ = true;
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
+  in_cleanup_all_built_in_topics_ = true;
   for (DCPS_IR_Domain_Map::iterator it = domains_.begin(); it != domains_.end(); ++it) {
     it->second->cleanup_built_in_topics();
   }
-  in_cleanup_built_in_topics_ = false;
+  in_cleanup_all_built_in_topics_ = false;
   domains_.clear();
 #endif
 }
