@@ -111,9 +111,17 @@ Configuration* Configuration::instance()
   return ACE_Singleton<Configuration, ACE_Thread_Mutex>::instance();
 }
 
-DCPS::WeakRcHandle<Agent> Agent::instance()
+struct AgentHolder {
+  AgentHolder()
+    : agent_impl(DCPS::make_rch<AgentImpl>())
+  {}
+
+  DCPS::RcHandle<AgentImpl> agent_impl;
+};
+
+DCPS::RcHandle<Agent> Agent::instance()
 {
-  return DCPS::static_rchandle_cast<Agent>(rchandle_from(ACE_Singleton<AgentImpl, ACE_Thread_Mutex>::instance()));
+  return DCPS::static_rchandle_cast<Agent>(ACE_Singleton<AgentHolder, ACE_Thread_Mutex>::instance()->agent_impl);
 }
 
 ServerReflexiveStateMachine::StateChange

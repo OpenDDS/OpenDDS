@@ -84,14 +84,15 @@ int AgentImpl::handle_timeout(const ACE_Time_Value& a_now, const void* /*act*/)
   return 0;
 }
 
-AgentImpl::AgentImpl() :
-  ReactorInterceptor(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner()),
-  unfreeze_(false),
-  ncm_listener_added_(false),
-  remote_peer_reflexive_counter_(0)
-  {
-    TheServiceParticipant->set_shutdown_listener(this);
-  }
+AgentImpl::AgentImpl()
+  : ReactorInterceptor(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner())
+  , unfreeze_(false)
+  , ncm_listener_added_(false)
+  , remote_peer_reflexive_counter_(0)
+{
+  // Bind the lifetime of this to the service participant.
+  TheServiceParticipant->set_shutdown_listener(DCPS::static_rchandle_cast<ShutdownListener>(rchandle_from(this)));
+}
 
 void AgentImpl::add_endpoint(DCPS::WeakRcHandle<Endpoint> a_endpoint)
 {

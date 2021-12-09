@@ -210,7 +210,6 @@ Service_Participant::Service_Participant()
     bidir_giop_(true),
     monitor_enabled_(false),
     shut_down_(false),
-    shutdown_listener_(0),
     default_configuration_file_(ACE_TEXT("")),
     type_object_encoding_(Encoding_Normal)
 {
@@ -2742,7 +2741,7 @@ Service_Participant::add_discovery(Discovery_rch discovery)
 }
 
 void
-Service_Participant::set_shutdown_listener(ShutdownListener* listener)
+Service_Participant::set_shutdown_listener(RcHandle<ShutdownListener> listener)
 {
   shutdown_listener_ = listener;
 }

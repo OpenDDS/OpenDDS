@@ -134,10 +134,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
     if (tport.relay_srsm().is_response(message)) {
       tport.process_relay_sra(tport.relay_srsm().receive(message));
     } else if (endpoint) {
-      DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
-      if (agent) {
-        agent->receive(endpoint, local_address, remote_address, message);
-      }
+      ICE::Agent::instance()->receive(endpoint, local_address, remote_address, message);
     }
   }
   head->release();

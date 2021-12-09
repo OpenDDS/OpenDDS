@@ -795,10 +795,7 @@ RtpsUdpTransport::start_ice()
     ACE_DEBUG((LM_INFO, "(%P|%t) RtpsUdpTransport::start_ice\n"));
   }
 
-  DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
-  if (agent) {
-    agent->add_endpoint(static_rchandle_cast<ICE::Endpoint>(ice_endpoint_));
-  }
+  ICE::Agent::instance()->add_endpoint(static_rchandle_cast<ICE::Endpoint>(ice_endpoint_));
 
   if (!link_) {
     if (reactor()->register_handler(unicast_socket_.get_handle(), ice_endpoint_.get(),
@@ -852,10 +849,7 @@ RtpsUdpTransport::stop_ice()
 #endif
   }
 
-  DCPS::RcHandle<ICE::Agent> agent = ICE::Agent::instance().lock();
-  if (agent) {
-    agent->remove_endpoint(static_rchandle_cast<ICE::Endpoint>(ice_endpoint_));
-  }
+  ICE::Agent::instance()->remove_endpoint(static_rchandle_cast<ICE::Endpoint>(ice_endpoint_));
 }
 
 void

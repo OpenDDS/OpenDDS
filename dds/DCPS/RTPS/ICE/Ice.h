@@ -224,7 +224,7 @@ public:
 
   virtual void shutdown() = 0;
 
-  static DCPS::WeakRcHandle<Agent> instance();
+  static DCPS::RcHandle<Agent> instance();
 };
 
 class OpenDDS_Rtps_Export ServerReflexiveStateMachine {
