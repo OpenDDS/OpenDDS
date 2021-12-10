@@ -1,7 +1,7 @@
 # OpenDDS Releases
 
 ## Version 3.19.0 of OpenDDS
-OpenDDS 3.19.0 is currently in development, so this list might change.
+OpenDDS 3.19.0 was released on Dec 10 2021.
 
 ### Additions:
 - XTypes: Dynamic Language Binding (#2976)
