@@ -15,10 +15,10 @@ struct TestKey : public RcObject {
   TestKey(const RepoId& from, const RepoId& to) : from_(from), to_(to) {}
   TestKey(const TestKey& val) : RcObject(), from_(val.from_), to_(val.to_) {}
   bool operator<(const TestKey& rhs) const {
-    return std::memcmp(&from_, &rhs.from_, 2 * sizeof (RepoId)) < 0;
+    return std::memcmp(static_cast<const void*>(&from_), static_cast<const void*>(&rhs.from_), 2 * sizeof (RepoId)) < 0;
   }
   bool operator==(const TestKey& rhs) const {
-    return std::memcmp(&from_, &rhs.from_, 2 * sizeof (RepoId)) == 0;
+    return std::memcmp(static_cast<const void*>(&from_), static_cast<const void*>(&rhs.from_), 2 * sizeof (RepoId)) == 0;
   }
   void get_contained_guids(RepoIdSet& set) const {
     set.clear();
