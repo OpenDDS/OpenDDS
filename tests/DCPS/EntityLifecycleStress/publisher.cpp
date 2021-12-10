@@ -32,6 +32,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   ACE_OS::sigaddset(&mask, SIGPIPE);
   ACE_OS::sigprocmask(SIG_BLOCK, &mask, &prev);
 
+  bool large_samples = false;
+  for (int i = 0; i < argc; ++i) {
+    if (std::string(ACE_TEXT_ALWAYS_CHAR(argv[i])) == "-l") {
+      large_samples = true;
+    }
+  }
+
   try
   {
     DDS::DomainParticipantFactory_var dpf =
@@ -111,13 +118,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       message.from       = ss.str().c_str();
       message.subject    = CORBA::string_dup("Review");
-      message.text       = CORBA::string_dup("Worst. Movie. Ever.");
+      message.text       = large_samples ? std::string(4000, 'Z').c_str() : CORBA::string_dup("Wash. Rinse. Repeat.");
       message.count      = 0;
     }
 
-    const ACE_Time_Value delay(0, 10000);
+    const ACE_Time_Value delay(large_samples ? 2 : 0, large_samples ? 0 : 10000);
 
-    const size_t count = 750u;
+    const size_t count = large_samples ? 4u : 750u;
     for (size_t i = 0; i < count; ++i) {
       ACE_OS::sleep(delay);
       ++message.count;
