@@ -29,6 +29,7 @@ class MessengerListener
 public:
   MessengerListener(DDS::ReadCondition_ptr rd)
     : rc_(DDS::ReadCondition::_duplicate(rd))
+    , enabled_(true)
   {}
 
   virtual void on_requested_deadline_missed(
@@ -53,6 +54,11 @@ public:
 
   virtual void on_data_available(DDS::DataReader_ptr reader)
   {
+    ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
+    if (!enabled_) {
+      return;
+    }
+
     MessageDataReader_var mdr = MessageDataReader::_narrow(reader);
     MessageSeq data;
     SampleInfoSeq infoseq;
@@ -64,8 +70,17 @@ public:
 
   virtual void on_sample_lost(DDS::DataReader_ptr /*reader*/,
                               const DDS::SampleLostStatus& /*status*/) {}
+
+  void disable()
+  {
+    ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
+    enabled_ = false;
+  }
+
 private:
   DDS::ReadCondition_var rc_;
+  bool enabled_;
+  mutable ACE_Thread_Mutex mutex_;
 };
 
 bool test_setup(const DomainParticipant_var& dp,
@@ -354,8 +369,11 @@ bool run_complex_filtering_test(const DomainParticipant_var& dp,
     return false;
   }
 
-  DDS::DataReaderListener_var ml1 = new MessengerListener(dr_qc1);
-  DDS::DataReaderListener_var ml2 = new MessengerListener(dr_qc2);
+  MessengerListener* ml1p = new MessengerListener(dr_qc1);
+  DDS::DataReaderListener_var ml1 = ml1p;
+  MessengerListener* ml2p = new MessengerListener(dr_qc2);
+  DDS::DataReaderListener_var ml2 = ml2p;
+
   MessageDataReader_var mdr1 = MessageDataReader::_narrow(dr1);
   MessageDataReader_var mdr2 = MessageDataReader::_narrow(dr2);
   mdr1->set_listener(ml1, DDS::DATA_AVAILABLE_STATUS);
@@ -421,7 +439,9 @@ bool run_complex_filtering_test(const DomainParticipant_var& dp,
     }
   }
 
+  ml1p->disable();
   mdr1->set_listener(0, 0);
+  ml2p->disable();
   mdr2->set_listener(0, 0);
   mdr1 = 0;
   mdr2 = 0;
