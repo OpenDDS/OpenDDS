@@ -1048,11 +1048,13 @@ Spdp::data_received(const DataSubmessage& data,
     return;
   }
 
+  const DCPS::MessageId msg_id = (data.inlineQos.length() && disposed(data.inlineQos)) ? DCPS::DISPOSE_INSTANCE : DCPS::SAMPLE_DATA;
+
 #ifdef OPENDDS_SECURITY
   const bool relay_in_use = (config_->rtps_relay_only() || config_->use_rtps_relay());
   const bool from_relay = relay_in_use && (from == config_->spdp_rtps_relay_address());
 
-  if (config_->check_source_ip() && !from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList) && !ip_in_AgentInfo(from, plist)) {
+  if (config_->check_source_ip() && msg_id == DCPS::SAMPLE_DATA && !from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList) && !ip_in_AgentInfo(from, plist)) {
     if (DCPS::DCPS_debug_level >= 8) {
       ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) Spdp::data_received - dropped IP: %C\n"), DCPS::LogAddr(from).c_str()));
     }
@@ -1065,7 +1067,7 @@ Spdp::data_received(const DataSubmessage& data,
   const bool relay_in_use = (config_->rtps_relay_only() || config_->use_rtps_relay());
   const bool from_relay = relay_in_use && (from == config_->spdp_rtps_relay_address());
 
-  if (config_->check_source_ip() && !from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList)) {
+  if (config_->check_source_ip() && msg_id == DCPS::SAMPLE_DATA && !from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList)) {
     if (DCPS::DCPS_debug_level >= 8) {
       ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) Spdp::data_received - IP not in locator list: %C\n"), DCPS::LogAddr(from).c_str()));
     }
@@ -1073,10 +1075,7 @@ Spdp::data_received(const DataSubmessage& data,
   }
 #endif
 
-  handle_participant_data(
-    (data.inlineQos.length() && disposed(data.inlineQos)) ?
-      DCPS::DISPOSE_INSTANCE : DCPS::SAMPLE_DATA,
-    pdata, to_opendds_seqnum(data.writerSN), from, false);
+  handle_participant_data(msg_id, pdata, to_opendds_seqnum(data.writerSN), from, false);
 }
 
 void
