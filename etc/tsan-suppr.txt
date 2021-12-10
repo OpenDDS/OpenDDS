@@ -1,0 +1,22 @@
+# Thread sanitizer suppressions
+# See here for how this works:
+#   https://clang.llvm.org/docs/ThreadSanitizer.html
+
+deadlock:ACE_Data_Block::release_no_delete
+deadlock:CORBA::ORB_init
+deadlock:TAO_IIOP_Connection_Handler
+race:ACE_Singleton<*>::instance
+race:ACE_Log_Msg
+race:ACE_Locked_Free_List<ACE_Cached_Mem_Pool_Node<*>, ACE_Thread_Mutex>
+race:ACE_Data_Block::release_i
+race:ACE_Dynamic::instance
+race:ACE_Event_Handler::reactor
+race:ACE_Thread_Exit::instance
+race:ACE_Thread_Manager::wait_task
+race:TAO::Invocation_Adapter::invoke
+race:TAO_IIOP_Connection_Handler
+race:TAO_Leader_Follower
+race:TAO_ORB_Core
+mutex:TAO_log_category
+
+race:OpenDDS::DCPS::DCPS_debug_level
