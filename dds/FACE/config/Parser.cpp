@@ -74,7 +74,7 @@ Parser::parse(const char* filename)
   ACE_Configuration_Heap config;
   config.open();
   ACE_Ini_ImpExp import(config);
-  int status = import.import_config(filename);
+  int status = import.import_config(ACE_TEXT_CHAR_TO_TCHAR(filename));
   if (status) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Initialize() ")
@@ -94,7 +94,7 @@ Parser::parse(const char* filename)
     return status;
 
   status = TheServiceParticipant->load_configuration(config,
-                                                     filename);
+                                                     ACE_TEXT_CHAR_TO_TCHAR(filename));
 
   if (status)
     return status;
@@ -356,7 +356,7 @@ Parser::parse_topic(ACE_Configuration_Heap& config,
     if (value_type == ACE_Configuration::STRING) {
       status = config.get_string_value(key, value_name.c_str(), value);
       if (!status) {
-        status = status || topic.set(value_name.c_str(), value.c_str());
+        status = status || topic.set(ACE_TEXT_ALWAYS_CHAR(value_name.c_str()), ACE_TEXT_ALWAYS_CHAR(value.c_str()));
       }
     } else {
       ACE_ERROR((LM_ERROR, ACE_TEXT("unexpected value type %d\n"), value_type));
@@ -389,7 +389,7 @@ Parser::parse_connection(ACE_Configuration_Heap& config,
     if (value_type == ACE_Configuration::STRING) {
       status = config.get_string_value(key, value_name.c_str(), value);
       if (!status) {
-        status = status || connection.set(value_name.c_str(), value.c_str());
+        status = status || connection.set(ACE_TEXT_ALWAYS_CHAR(value_name.c_str()), ACE_TEXT_ALWAYS_CHAR(value.c_str()));
       }
     } else {
       ACE_ERROR((LM_ERROR, ACE_TEXT("unexpected value type %d\n"), value_type));
@@ -425,7 +425,7 @@ Parser::parse_qos(ACE_Configuration_Heap& config,
       status = config.get_string_value(key, value_name.c_str(), value);
       if (!status) {
         status = status ||
-                 qos.set_qos(level, value_name.c_str(), value.c_str());
+                 qos.set_qos(level, ACE_TEXT_ALWAYS_CHAR(value_name.c_str()), ACE_TEXT_ALWAYS_CHAR(value.c_str()));
       }
     } else {
       ACE_ERROR((LM_ERROR, ACE_TEXT("unexpected value type %d\n"), value_type));
@@ -445,7 +445,7 @@ Parser::parse_sections(ACE_Configuration_Heap& config,
   ACE_Configuration_Section_Key key;
   // If we can't open this section
   if (config.open_section(config.root_section(),
-                          section_type,
+                          ACE_TEXT_CHAR_TO_TCHAR(section_type),
                           0, // don't create if missing
                           key) != 0) {
     if (required) {
@@ -472,21 +472,21 @@ Parser::parse_sections(ACE_Configuration_Heap& config,
       }
 
       if (std::strcmp(section_type, CONNECTION_SECTION) == 0) {
-        status = parse_connection(config, subkey, section_name.c_str());
+        status = parse_connection(config, subkey, ACE_TEXT_ALWAYS_CHAR(section_name.c_str()));
       } else if (std::strcmp(section_type, TOPIC_SECTION) == 0) {
-        status = parse_topic(config, subkey, section_name.c_str());
+        status = parse_topic(config, subkey, ACE_TEXT_ALWAYS_CHAR(section_name.c_str()));
       } else if (std::strcmp(section_type, DATAWRITER_QOS_SECTION) == 0) {
         status = parse_qos(
-            config, subkey, section_name.c_str(), QosSettings::datawriter);
+            config, subkey, ACE_TEXT_ALWAYS_CHAR(section_name.c_str()), QosSettings::datawriter);
       } else if (std::strcmp(section_type, DATAREADER_QOS_SECTION) == 0) {
         status = parse_qos(
-            config, subkey, section_name.c_str(), QosSettings::datareader);
+            config, subkey, ACE_TEXT_ALWAYS_CHAR(section_name.c_str()), QosSettings::datareader);
       } else if (std::strcmp(section_type, PUBLISHER_QOS_SECTION) == 0) {
         status = parse_qos(
-            config, subkey, section_name.c_str(), QosSettings::publisher);
+            config, subkey, ACE_TEXT_ALWAYS_CHAR(section_name.c_str()), QosSettings::publisher);
       } else if (std::strcmp(section_type, SUBSCRIBER_QOS_SECTION) == 0) {
         status = parse_qos(
-            config, subkey, section_name.c_str(), QosSettings::subscriber);
+            config, subkey, ACE_TEXT_ALWAYS_CHAR(section_name.c_str()), QosSettings::subscriber);
       } else {
         ACE_ERROR((LM_ERROR, ACE_TEXT("unknown section %C\n"), section_type));
       }
