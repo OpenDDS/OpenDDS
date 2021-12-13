@@ -35,7 +35,11 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleElement* sample)
     GuardType guard(lock_);
     map_copy = map_;
   }
-  TransportSendElement* send_element = new TransportSendElement(static_cast<int>(map_copy.size()), sample);
+
+  TransportSendElement* send_element = 0;
+  if (map_copy.size()) {
+    send_element = new TransportSendElement(static_cast<int>(map_copy.size()), sample);
+  }
 
   for (MapType::iterator itr = map_copy.begin(); itr != map_copy.end(); ++itr) {
 
