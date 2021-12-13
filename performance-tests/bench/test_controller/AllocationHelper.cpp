@@ -206,6 +206,7 @@ void AllocationHelper::add_single_worker_to_node(const WorkerPrototype& protowor
   process.count = 1;
   process.spawned_process_id = spawned_process_id;
   process.expect_worker_report = !protoworker.no_report;
+  process.ignore_errors = protoworker.ignore_errors;
 }
 
 void AllocationHelper::add_protoworkers_to_node(const WorkerPrototypes& protoworkers,
@@ -229,6 +230,7 @@ void AllocationHelper::add_protoworkers_to_node(const WorkerPrototypes& protowor
     auto& process = node.spawned_processes[worker_i];
     process.executable = protoworker.executable.in();
     process.expect_worker_report = !protoworker.no_report;
+    process.ignore_errors = protoworker.ignore_errors;
     process.command = protoworker.command.in();
     auto config_iter = worker_configs.find(protoworker.config.in());
     if (config_iter != worker_configs.end()) {

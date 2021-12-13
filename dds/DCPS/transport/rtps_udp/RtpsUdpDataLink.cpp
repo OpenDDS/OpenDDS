@@ -4632,7 +4632,7 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
     return;
   }
 
-  if (config().rtps_relay_only()) {
+  if (config().rtps_relay_only() && std::memcmp(&local.guidPrefix, &remote.guidPrefix, sizeof(GuidPrefix_t)) != 0) {
     if (config().rtps_relay_address() != ACE_INET_Addr()) {
       addresses.insert(config().rtps_relay_address());
       entry.value().addrs_.insert(config().rtps_relay_address());
