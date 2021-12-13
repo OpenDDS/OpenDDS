@@ -117,8 +117,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ss << ACE_OS::getpid() << flush;
 
       message.from       = ss.str().c_str();
-      message.subject    = CORBA::string_dup("Review");
-      message.text       = large_samples ? std::string(4000, 'Z').c_str() : CORBA::string_dup("Wash. Rinse. Repeat.");
+      message.subject    = "Review";
+      message.text       = large_samples ? std::string(4000, 'Z').c_str() : "Wash. Rinse. Repeat.";
       message.count      = 0;
     }
 
