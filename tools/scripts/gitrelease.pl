@@ -393,6 +393,19 @@ sub write_releases {
   write_json_file($path, compress_releases($releases_ref));
 }
 
+sub write_workspace_info {
+  my $settings = shift();
+
+  write_json_file($settings->{workspace_info_file_path}, {
+    mock => $settings->{mock},
+    micro => $settings->{micro},
+    version => $settings->{version},
+    next_version => $settings->{next_version},
+    is_highest_version => $settings->{is_highest_version},
+    release_occurred => $settings->{release_occurred},
+  });
+}
+
 sub compare_workspace_info {
   my $settings = shift();
   my $info = shift();
@@ -441,15 +454,7 @@ sub check_workspace {
       version_greater_equal($settings->{parsed_version},
         $previous_releases->[0]->{version});
     $settings->{release_occurred} = 0;
-
-    write_json_file($settings->{workspace_info_file_path}, {
-      mock => $settings->{mock},
-      micro => $settings->{micro},
-      version => $settings->{version},
-      next_version => $settings->{next_version},
-      is_highest_version => $settings->{is_highest_version},
-      release_occurred => $settings->{release_occurred},
-    });
+    write_workspace_info($settings);
   }
 }
 
@@ -2243,7 +2248,7 @@ sub remedy_website_release {
 
   # Merge releases with the same major and minor versions, keeping one with the
   # highest micro version.
-  my $releases = get_releases(shift);
+  my $releases = get_releases($settings);
   my $latest_ver = $releases->[0]->{version};
   my $major = $latest_ver->{major} + 1;
   my $minor = $latest_ver->{minor};
