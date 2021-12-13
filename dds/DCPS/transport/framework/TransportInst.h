@@ -127,7 +127,7 @@ public:
   /// Populate a transport locator sequence.  Return the number of "locators."
   virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info, ConnectionInfoFlags flags) const = 0;
 
-  ICE::Endpoint* get_ice_endpoint();
+  DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
   void rtps_relay_only_now(bool flag);
   void use_rtps_relay_now(bool flag);
   void use_ice_now(bool flag);

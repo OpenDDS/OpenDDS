@@ -154,7 +154,7 @@ public:
                                      const RepoId& writerid,
                                      const RepoId& readerid);
 
-  virtual ICE::Endpoint* get_ice_endpoint() { return 0; }
+  virtual DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint() { return DCPS::WeakRcHandle<ICE::Endpoint>(); }
 
   DDS::ReturnCode_t enable();
 
