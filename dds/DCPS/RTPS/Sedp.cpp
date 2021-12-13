@@ -7346,9 +7346,8 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
         OpenDDS::DCPS::RecorderImpl* ri = dynamic_cast<OpenDDS::DCPS::RecorderImpl*>(lock.in());
         if (ri) {
           XTypes::TypeInformation type_info;
-          if (XTypes::deserialize_type_info(type_info, rac.writer_association_.serializedTypeInfo)) {
-            ri->add_to_dynamic_type_map(rac.writer_id(), type_info.complete.typeid_with_size.type_id);
-          }
+          XTypes::deserialize_type_info(type_info, rac.writer_association_.serializedTypeInfo);
+          ri->add_to_dynamic_type_map(rac.writer_id(), type_info.complete.typeid_with_size.type_id);
         }
       }
       Spdp::DiscoveredParticipantIter iter = spdp_.participants_.find(make_id(writer, ENTITYID_PARTICIPANT));

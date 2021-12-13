@@ -84,7 +84,7 @@ public:
 
   void insert_entry(const TypeIdentifier& ti, const TypeObject& tobj)
   {
-    tl_service_->add_type_objects_to_cache(ti, tobj);
+    tl_service_->add(ti, tobj);
   }
 
 private:

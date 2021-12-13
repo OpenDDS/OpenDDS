@@ -82,17 +82,15 @@ void TypeSupportImpl::to_type_info(XTypes::TypeInformation& type_info) const
   } else {
     type_info.complete = XTypes::TypeIdentifierWithDependencies();
   }
+}
+
+void TypeSupportImpl::add_types(const RcHandle<XTypes::TypeLookupService>& tls) const
+{
+  using namespace XTypes;
+  const TypeMap& minTypeMap = getMinimalTypeMap();
+  tls->add(minTypeMap.begin(), minTypeMap.end());
   const TypeMap& comTypeMap = getCompleteTypeMap();
   tls->add(comTypeMap.begin(), comTypeMap.end());
-
-
-    TypeMap altComMap;
-    for (TypeMap::const_iterator iter = comTypeMap.begin(); iter != comTypeMap.end(); ++iter) {
-      const TypeObject& comTypeObject = iter->second;
-      const TypeIdentifier typeId = makeTypeIdentifier(comTypeObject, &encoding);
-      altComMap[typeId] = comTypeObject;
-    }
-    tls->add(altComMap.begin(), altComMap.end());
 }
 
 void TypeSupportImpl::populate_dependencies_i(const RcHandle<XTypes::TypeLookupService>& tls,

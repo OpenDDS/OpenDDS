@@ -108,8 +108,8 @@ struct TypeLookup_Request {
 
   TypeLookup_Request()
   {
-    header.requestId.writer_guid = RTPS::GUID_UNKNOWN;
-    header.requestId.sequence_number = RTPS::SEQUENCENUMBER_UNKNOWN;
+    header.request_id.writer_guid = RTPS::GUID_UNKNOWN;
+    header.request_id.sequence_number = RTPS::SEQUENCENUMBER_UNKNOWN;
   }
 };
 
@@ -134,9 +134,9 @@ struct TypeLookup_Reply {
 
   TypeLookup_Reply()
   {
-    header.relatedRequestId.writer_guid = RTPS::GUID_UNKNOWN;
-    header.relatedRequestId.sequence_number = RTPS::SEQUENCENUMBER_UNKNOWN;
-    header.remoteEx = DDS::RPC::REMOTE_EX_OK;
+    header.related_request_id.writer_guid = RTPS::GUID_UNKNOWN;
+    header.related_request_id.sequence_number = RTPS::SEQUENCENUMBER_UNKNOWN;
+    header.remote_ex = DDS::RPC::REMOTE_EX_OK;
   }
 };
 

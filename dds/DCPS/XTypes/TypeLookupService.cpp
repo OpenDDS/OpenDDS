@@ -126,15 +126,13 @@ void TypeLookupService::add_type_objects_to_cache(const TypeIdentifierTypeObject
   }
 }
 
-void TypeLookupService::add_type_objects_to_cache(const DCPS::TypeSupportImpl& typesupport)
+void TypeLookupService::add(TypeMap::const_iterator begin, TypeMap::const_iterator end)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  // TODO: This populates the map N times instead of 1.
-  const XTypes::TypeMap& minimal_type_map = typesupport.getMinimalTypeMap();
-  minimal_type_map_.insert(minimal_type_map.begin(), minimal_type_map.end());
+  type_map_.insert(begin, end);
 }
 
-void TypeLookupService::add_type_objects_to_cache(const TypeIdentifier& ti, const TypeObject& tobj)
+void TypeLookupService::add(const TypeIdentifier& ti, const TypeObject& tobj)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   TypeMap::const_iterator pos = type_map_.find(ti);
